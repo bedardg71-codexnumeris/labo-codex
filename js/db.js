@@ -94,7 +94,7 @@
          */
         async _initIndexedDB() {
             return new Promise((resolve, reject) => {
-                const request = indexedDB.open('MonitoragePedagogique', 1);
+                const request = indexedDB.open('MonitoragePedagogique', 2);
 
                 request.onerror = () => {
                     reject(new Error('Erreur ouverture IndexedDB'));
@@ -114,22 +114,12 @@
                         kvStore.createIndex('key', 'key', { unique: true });
                     }
 
-                    // Stores relationnels (pour futur - Phase 2)
-                    /*
-                    if (!db.objectStoreNames.contains('groupes')) {
-                        const groupesStore = db.createObjectStore('groupes', { keyPath: 'id', autoIncrement: true });
-                        groupesStore.createIndex('code', 'code', { unique: true });
-                        groupesStore.createIndex('session', 'session', { unique: false });
+                    // Store fichiers blob (consolidé depuis MonitorageFichiers)
+                    if (!db.objectStoreNames.contains('fichiers')) {
+                        const fichiersStore = db.createObjectStore('fichiers', { keyPath: 'id' });
+                        fichiersStore.createIndex('etudiantDA', 'etudiantDA', { unique: false });
+                        fichiersStore.createIndex('productionId', 'productionId', { unique: false });
                     }
-
-                    if (!db.objectStoreNames.contains('etudiants')) {
-                        const etudiantsStore = db.createObjectStore('etudiants', { keyPath: 'id', autoIncrement: true });
-                        etudiantsStore.createIndex('da', 'da', { unique: true });
-                        etudiantsStore.createIndex('groupeId', 'groupeId', { unique: false });
-                    }
-
-                    // Autres stores: evaluations, presences, indices, etc.
-                    */
                 };
             });
         }
@@ -464,13 +454,14 @@
 
             if (this.useIndexedDB) {
                 await this._clearIndexedDB();
+                await this.clearBlobs();
             } else {
                 localStorage.clear();
             }
         }
 
         /**
-         * Vider IndexedDB
+         * Vider IndexedDB (store keyvalue)
          */
         async _clearIndexedDB() {
             return new Promise((resolve, reject) => {
@@ -479,7 +470,7 @@
                 const request = store.clear();
 
                 request.onsuccess = () => {
-                    console.log('🗑️ [DB] IndexedDB vidé');
+                    console.log('🗑️ [DB] IndexedDB keyvalue vidé');
                     resolve();
                 };
 
@@ -501,9 +492,23 @@
             const keys = await this.keys();
             const type = this.useIndexedDB ? 'IndexedDB' : 'localStorage';
 
+            let nbBlobs = 0;
+            if (this.useIndexedDB && this.db) {
+                try {
+                    nbBlobs = await new Promise((resolve) => {
+                        const tx = this.db.transaction(['fichiers'], 'readonly');
+                        const store = tx.objectStore('fichiers');
+                        const req = store.count();
+                        req.onsuccess = () => resolve(req.result);
+                        req.onerror = () => resolve(0);
+                    });
+                } catch (e) { /* ignore */ }
+            }
+
             return {
                 type: type,
                 nbCles: keys.length,
+                nbBlobs: nbBlobs,
                 ready: this.ready
             };
         }
@@ -573,6 +578,9 @@
                 let inMemory = 0;
 
                 for (const key of indexedDBKeys) {
+                    // Skip : FileSystemDirectoryHandle non sérialisable en JSON
+                    if (key === 'travaux_fsapi_handle') continue;
+
                     // Lire depuis IndexedDB
                     const value = await this.get(key);
 
@@ -621,6 +629,156 @@
                     detail: { error: error.message }
                 }));
             }
+        }
+
+        // ============================================
+        // MÉTHODES BLOB (Store fichiers)
+        // ============================================
+
+        /**
+         * Stocke un enregistrement blob dans le store fichiers
+         * @param {Object} record - {id, etudiantDA, productionId, blob, dateStored}
+         * @returns {Promise<void>}
+         */
+        async storeBlob(record) {
+            if (!this.ready) await this.init();
+            if (!this.useIndexedDB || !this.db) {
+                throw new Error('[DB] IndexedDB requis pour storeBlob');
+            }
+            return new Promise((resolve, reject) => {
+                const tx = this.db.transaction(['fichiers'], 'readwrite');
+                const store = tx.objectStore('fichiers');
+                const request = store.put(record);
+                request.onsuccess = () => resolve();
+                request.onerror = () => {
+                    console.error(`[DB] Erreur storeBlob "${record.id}":`, request.error);
+                    reject(request.error);
+                };
+            });
+        }
+
+        /**
+         * Récupère un enregistrement blob par son id
+         * @param {string} id
+         * @returns {Promise<Object|null>}
+         */
+        async getBlob(id) {
+            if (!this.ready) await this.init();
+            if (!this.useIndexedDB || !this.db) return null;
+            return new Promise((resolve, reject) => {
+                const tx = this.db.transaction(['fichiers'], 'readonly');
+                const store = tx.objectStore('fichiers');
+                const request = store.get(id);
+                request.onsuccess = () => resolve(request.result || null);
+                request.onerror = () => {
+                    console.error(`[DB] Erreur getBlob "${id}":`, request.error);
+                    reject(request.error);
+                };
+            });
+        }
+
+        /**
+         * Supprime un blob par son id
+         * @param {string} id
+         * @returns {Promise<void>}
+         */
+        async deleteBlob(id) {
+            if (!this.ready) await this.init();
+            if (!this.useIndexedDB || !this.db) return;
+            return new Promise((resolve, reject) => {
+                const tx = this.db.transaction(['fichiers'], 'readwrite');
+                const store = tx.objectStore('fichiers');
+                const request = store.delete(id);
+                request.onsuccess = () => resolve();
+                request.onerror = () => {
+                    console.error(`[DB] Erreur deleteBlob "${id}":`, request.error);
+                    reject(request.error);
+                };
+            });
+        }
+
+        /**
+         * Liste les blobs d'un étudiant via l'index etudiantDA
+         * @param {string} etudiantDA
+         * @returns {Promise<Array>}
+         */
+        async listBlobsByStudent(etudiantDA) {
+            if (!this.ready) await this.init();
+            if (!this.useIndexedDB || !this.db) return [];
+            return new Promise((resolve, reject) => {
+                const tx = this.db.transaction(['fichiers'], 'readonly');
+                const store = tx.objectStore('fichiers');
+                const index = store.index('etudiantDA');
+                const request = index.getAll(etudiantDA);
+                request.onsuccess = () => resolve(request.result || []);
+                request.onerror = () => {
+                    console.error(`[DB] Erreur listBlobsByStudent "${etudiantDA}":`, request.error);
+                    reject(request.error);
+                };
+            });
+        }
+
+        /**
+         * Persiste un FileSystemDirectoryHandle dans keyvalue
+         * @param {FileSystemDirectoryHandle} handle
+         * @returns {Promise<void>}
+         */
+        async storeFSAPIHandle(handle) {
+            if (!this.ready) await this.init();
+            if (!this.useIndexedDB || !this.db) return;
+            return new Promise((resolve, reject) => {
+                const tx = this.db.transaction(['keyvalue'], 'readwrite');
+                const store = tx.objectStore('keyvalue');
+                const request = store.put({
+                    key: 'travaux_fsapi_handle',
+                    value: handle
+                });
+                request.onsuccess = () => resolve();
+                request.onerror = () => {
+                    console.error('[DB] Erreur storeFSAPIHandle:', request.error);
+                    reject(request.error);
+                };
+            });
+        }
+
+        /**
+         * Récupère le FileSystemDirectoryHandle
+         * @returns {Promise<FileSystemDirectoryHandle|null>}
+         */
+        async getFSAPIHandle() {
+            if (!this.ready) await this.init();
+            if (!this.useIndexedDB || !this.db) return null;
+            return new Promise((resolve) => {
+                const tx = this.db.transaction(['keyvalue'], 'readonly');
+                const store = tx.objectStore('keyvalue');
+                const request = store.get('travaux_fsapi_handle');
+                request.onsuccess = () => {
+                    resolve(request.result ? request.result.value : null);
+                };
+                request.onerror = () => resolve(null);
+            });
+        }
+
+        /**
+         * Vide le store fichiers
+         * @returns {Promise<void>}
+         */
+        async clearBlobs() {
+            if (!this.ready) await this.init();
+            if (!this.useIndexedDB || !this.db) return;
+            return new Promise((resolve, reject) => {
+                const tx = this.db.transaction(['fichiers'], 'readwrite');
+                const store = tx.objectStore('fichiers');
+                const request = store.clear();
+                request.onsuccess = () => {
+                    console.log('[DB] Store fichiers vidé');
+                    resolve();
+                };
+                request.onerror = () => {
+                    console.error('[DB] Erreur clearBlobs:', request.error);
+                    reject(request.error);
+                };
+            });
         }
 
         // ============================================
@@ -768,6 +926,64 @@
     // Créer instance unique (singleton)
     const db = new Database();
 
+    /**
+     * Migration one-shot : MonitorageFichiers → MonitoragePedagogique.fichiers
+     * Idempotente : ne s'exécute qu'une fois grâce au flag _migration_fichiers_done
+     */
+    async function _migrerMonitorageFichiers() {
+        // Déjà migrée ?
+        if (db.getSync('_migration_fichiers_done', false)) return;
+
+        try {
+            // Tenter d'ouvrir l'ancienne base
+            const oldDB = await new Promise((resolve, reject) => {
+                const req = indexedDB.open('MonitorageFichiers');
+                req.onsuccess = (e) => resolve(e.target.result);
+                req.onerror = () => reject(req.error);
+            });
+
+            // Vérifier que le store fichiers existe dans l'ancienne base
+            if (!oldDB.objectStoreNames.contains('fichiers')) {
+                oldDB.close();
+                // Pas de store fichiers : supprimer la base vide et marquer fait
+                indexedDB.deleteDatabase('MonitorageFichiers');
+                db.setSync('_migration_fichiers_done', true);
+                console.log('[DB] Migration fichiers : ancienne base vide, supprimée');
+                return;
+            }
+
+            // Lire tous les enregistrements de l'ancien store
+            const records = await new Promise((resolve, reject) => {
+                const tx = oldDB.transaction(['fichiers'], 'readonly');
+                const store = tx.objectStore('fichiers');
+                const req = store.getAll();
+                req.onsuccess = () => resolve(req.result || []);
+                req.onerror = () => reject(req.error);
+            });
+
+            console.log(`[DB] Migration fichiers : ${records.length} enregistrements à migrer`);
+
+            // Copier vers le nouveau store
+            for (const record of records) {
+                await db.storeBlob(record);
+            }
+
+            // Fermer et supprimer l'ancienne base
+            oldDB.close();
+            indexedDB.deleteDatabase('MonitorageFichiers');
+
+            // Marquer la migration complète
+            db.setSync('_migration_fichiers_done', true);
+            console.log(`✅ [DB] Migration fichiers terminée : ${records.length} enregistrements migrés, MonitorageFichiers supprimée`);
+        } catch (e) {
+            // Si l'ancienne base n'existe pas, l'ouverture crée une base vide v1
+            // On la supprime simplement
+            try { indexedDB.deleteDatabase('MonitorageFichiers'); } catch (ex) { /* ignore */ }
+            db.setSync('_migration_fichiers_done', true);
+            console.log('[DB] Migration fichiers : ancienne base inexistante, marquée fait');
+        }
+    }
+
     // Initialiser automatiquement et synchroniser le cache
     db.init().then(async () => {
         console.log('✅ [DB] Base de données prête:', db.useIndexedDB ? 'IndexedDB' : 'localStorage');
@@ -775,6 +991,9 @@
         // Synchroniser IndexedDB → localStorage cache si IndexedDB est disponible
         if (db.useIndexedDB) {
             await db.syncToLocalStorageCache();
+
+            // Migration one-shot des blobs depuis l'ancienne base MonitorageFichiers
+            await _migrerMonitorageFichiers();
         }
     }).catch((error) => {
         console.error('❌ [DB] Erreur initialisation:', error);

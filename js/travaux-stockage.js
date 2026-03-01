@@ -17,8 +17,6 @@
        CONSTANTES
        =============================== */
 
-    const NOM_STORE = 'fichiers';
-    const DB_VERSION = 2;
     const SEUIL_ALERTE_QUOTA = 0.8; // 80%
     const MAX_THUMBNAIL_WIDTH = 200;
     const MAX_THUMBNAIL_HEIGHT = 280;
@@ -32,48 +30,6 @@
     let fsapiActif = false;
     let fsapiDirectoryHandle = null;
     const FSAPI_HANDLE_KEY = 'travaux_fsapi_handle';
-
-    /* ===============================
-       STORE FICHIERS (IndexedDB)
-       =============================== */
-
-    let fichiersDB = null;
-    let fichiersDBReady = false;
-
-    /**
-     * Initialise le store fichiers dans IndexedDB
-     * Ouvre ou met a jour la base MonitorageFichiers
-     */
-    async function initialiserStoreFichiers() {
-        if (fichiersDBReady) return fichiersDB;
-
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open('MonitorageFichiers', DB_VERSION);
-
-            request.onerror = () => {
-                console.error('[Travaux-Stockage] Erreur ouverture IndexedDB fichiers');
-                reject(request.error);
-            };
-
-            request.onsuccess = (event) => {
-                fichiersDB = event.target.result;
-                fichiersDBReady = true;
-                console.log('[Travaux-Stockage] Store fichiers pret');
-                resolve(fichiersDB);
-            };
-
-            request.onupgradeneeded = (event) => {
-                const db = event.target.result;
-
-                if (!db.objectStoreNames.contains(NOM_STORE)) {
-                    const store = db.createObjectStore(NOM_STORE, { keyPath: 'id' });
-                    store.createIndex('etudiantDA', 'etudiantDA', { unique: false });
-                    store.createIndex('productionId', 'productionId', { unique: false });
-                    console.log('[Travaux-Stockage] Store fichiers cree');
-                }
-            };
-        });
-    }
 
     /* ===============================
        FSAPI - File System Access API
@@ -127,14 +83,7 @@
      * Stocke le handle FSAPI dans IndexedDB pour persistance entre sessions
      */
     async function stockerHandleFSAPI(handle) {
-        await initialiserStoreFichiers();
-        return new Promise((resolve, reject) => {
-            const tx = fichiersDB.transaction([NOM_STORE], 'readwrite');
-            const store = tx.objectStore(NOM_STORE);
-            store.put({ id: FSAPI_HANDLE_KEY, handle: handle, dateStored: new Date().toISOString() });
-            tx.oncomplete = () => resolve();
-            tx.onerror = () => reject(tx.error);
-        });
+        return db.storeFSAPIHandle(handle);
     }
 
     /**
@@ -142,20 +91,7 @@
      * @returns {Promise<FileSystemDirectoryHandle|null>}
      */
     async function recupererHandleFSAPI() {
-        await initialiserStoreFichiers();
-        return new Promise((resolve) => {
-            const tx = fichiersDB.transaction([NOM_STORE], 'readonly');
-            const store = tx.objectStore(NOM_STORE);
-            const req = store.get(FSAPI_HANDLE_KEY);
-            req.onsuccess = () => {
-                if (req.result && req.result.handle) {
-                    resolve(req.result.handle);
-                } else {
-                    resolve(null);
-                }
-            };
-            req.onerror = () => resolve(null);
-        });
+        return db.getFSAPIHandle();
     }
 
     /**
@@ -273,39 +209,25 @@
             return;
         }
 
-        // Fallback: IndexedDB
-        await initialiserStoreFichiers();
-
-        return new Promise((resolve, reject) => {
-            const transaction = fichiersDB.transaction([NOM_STORE], 'readwrite');
-            const store = transaction.objectStore(NOM_STORE);
-
-            const enregistrement = {
+        // Délégation vers db.js (store fichiers unifié)
+        try {
+            await db.storeBlob({
                 id: id,
                 etudiantDA: etudiantDA,
                 productionId: productionId,
                 blob: blob,
                 dateStored: new Date().toISOString()
-            };
-
-            const request = store.put(enregistrement);
-
-            request.onsuccess = () => {
-                console.log(`[Travaux-Stockage] Blob stocke: ${id} (${(blob.size / 1024).toFixed(1)} KB)`);
-                resolve();
-            };
-
-            request.onerror = () => {
-                const err = request.error;
-                if (err?.name === 'QuotaExceededError') {
-                    if (typeof afficherNotificationErreur === 'function') {
-                        afficherNotificationErreur('Stockage plein', 'L\'espace de stockage est insuffisant. Supprimez des fichiers.');
-                    }
+            });
+            console.log(`[Travaux-Stockage] Blob stocke: ${id} (${(blob.size / 1024).toFixed(1)} KB)`);
+        } catch (err) {
+            if (err?.name === 'QuotaExceededError') {
+                if (typeof afficherNotificationErreur === 'function') {
+                    afficherNotificationErreur('Stockage plein', 'L\'espace de stockage est insuffisant. Supprimez des fichiers.');
                 }
-                console.error(`[Travaux-Stockage] Erreur stockage blob: ${id}`, err);
-                reject(err);
-            };
-        });
+            }
+            console.error(`[Travaux-Stockage] Erreur stockage blob: ${id}`, err);
+            throw err;
+        }
     }
 
     /**
@@ -319,27 +241,9 @@
             return await recupererBlobFSAPI(id);
         }
 
-        // Fallback: IndexedDB
-        await initialiserStoreFichiers();
-
-        return new Promise((resolve, reject) => {
-            const transaction = fichiersDB.transaction([NOM_STORE], 'readonly');
-            const store = transaction.objectStore(NOM_STORE);
-            const request = store.get(id);
-
-            request.onsuccess = () => {
-                if (request.result && request.result.blob) {
-                    resolve(request.result.blob);
-                } else {
-                    resolve(null);
-                }
-            };
-
-            request.onerror = () => {
-                console.error(`[Travaux-Stockage] Erreur lecture blob: ${id}`, request.error);
-                reject(request.error);
-            };
-        });
+        // Délégation vers db.js
+        const record = await db.getBlob(id);
+        return record && record.blob ? record.blob : null;
     }
 
     /**
@@ -354,24 +258,9 @@
             return;
         }
 
-        // Fallback: IndexedDB
-        await initialiserStoreFichiers();
-
-        return new Promise((resolve, reject) => {
-            const transaction = fichiersDB.transaction([NOM_STORE], 'readwrite');
-            const store = transaction.objectStore(NOM_STORE);
-            const request = store.delete(id);
-
-            request.onsuccess = () => {
-                console.log(`[Travaux-Stockage] Blob supprime: ${id}`);
-                resolve();
-            };
-
-            request.onerror = () => {
-                console.error(`[Travaux-Stockage] Erreur suppression blob: ${id}`, request.error);
-                reject(request.error);
-            };
-        });
+        // Délégation vers db.js
+        await db.deleteBlob(id);
+        console.log(`[Travaux-Stockage] Blob supprime: ${id}`);
     }
 
     /**
@@ -380,30 +269,16 @@
      * @returns {Promise<Array>} Liste des enregistrements (sans blob pour performance)
      */
     async function listerBlobsEtudiant(da) {
-        await initialiserStoreFichiers();
-
-        return new Promise((resolve, reject) => {
-            const transaction = fichiersDB.transaction([NOM_STORE], 'readonly');
-            const store = transaction.objectStore(NOM_STORE);
-            const index = store.index('etudiantDA');
-            const request = index.getAll(da);
-
-            request.onsuccess = () => {
-                // Retourner les metadonnees sans les blobs (performance)
-                const resultats = (request.result || []).map(r => ({
-                    id: r.id,
-                    etudiantDA: r.etudiantDA,
-                    productionId: r.productionId,
-                    dateStored: r.dateStored,
-                    taille: r.blob ? r.blob.size : 0
-                }));
-                resolve(resultats);
-            };
-
-            request.onerror = () => {
-                reject(request.error);
-            };
-        });
+        // Délégation vers db.js
+        const records = await db.listBlobsByStudent(da);
+        // Retourner les metadonnees sans les blobs (performance)
+        return records.map(r => ({
+            id: r.id,
+            etudiantDA: r.etudiantDA,
+            productionId: r.productionId,
+            dateStored: r.dateStored,
+            taille: r.blob ? r.blob.size : 0
+        }));
     }
 
     /* ===============================
@@ -972,7 +847,7 @@
 
     async function initialiserStockageTravaux() {
         try {
-            await initialiserStoreFichiers();
+            // Le store fichiers est désormais géré par db.js (MonitoragePedagogique v2)
 
             // Tenter de restaurer le FSAPI si disponible
             if (fsapiDisponible) {
