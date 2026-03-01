@@ -72,7 +72,7 @@
 
 #### Reste a faire — CSS
 
-- [ ] **#210** Consolider styles inline index.html : 1 119 → ~300 en exploitant les classes utilitaires existantes (`.u-flex`, `.u-texte-gras`, `.u-ml-*`, etc.)
+- [x] **#210** Consolider styles inline index.html : 1 137 → 861 (276 elimines, ~1 150 proprietes extraites en classes `u-*`). Page d'accueil unifiee (suppression ecran premier lancement). Fix lecture cle `cours` vs `listeCours`.
   - **Ref audit** : CSS-01
 
 #### Annule

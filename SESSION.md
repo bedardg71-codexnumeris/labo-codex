@@ -1,8 +1,20 @@
-# SESSION ACTIVE - BETA 98.3
+# SESSION ACTIVE - BETA 98.4
 
-**Date** : 28 février 2026
-**Version** : Beta 98.3
-**Statut** : Plan de vérification audit créé + documentation archivée
+**Date** : 1 mars 2026
+**Version** : Beta 98.4
+**Statut** : Consolidation CSS (#210) + fix page d'accueil
+
+## SESSION DU 1 MARS 2026
+
+### Travail accompli — Consolidation styles inline (#210) + fix accueil (1 mars 2026)
+
+181. **Consolidation styles inline** : Remplacement mecanique de 276 attributs `style="..."` par les classes utilitaires `u-*` existantes dans `index.html` (1 137 → 861). ~1 150 proprietes extraites sur 770+ lignes. Aucune nouvelle classe CSS creee, aucun fichier JS modifie. Les 53 elements toggles par `.style.display` en JS inline sont preserves intacts. Commit `eedbad4`.
+
+182. **Fix lecture cle cours dans accueil.js** : La migration dans `trimestre-v2.js` deplace `listeCours` → `cours` puis vide `listeCours` a chaque chargement. `accueil.js` lisait `listeCours` (toujours `[]`) et affichait l'ecran premier lancement. Corrige pour lire `cours` en priorite avec fallback sur `listeCours`. Commit `a95a536`.
+
+183. **Page d'accueil unifiee** : Suppression de l'ecran "Bienvenue dans le Monitorage" (premier lancement avec 2 cartes). Tous les utilisateurs voient la meme page avec les 3 accordeons Decouvrir, Parcourir et Piloter. Titre unifie "Que souhaites-tu faire ?". -66 lignes de code mort. Commit `41d6eb6`.
+
+---
 
 ## SESSION DU 28 FÉVRIER 2026
 
