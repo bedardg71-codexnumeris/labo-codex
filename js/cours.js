@@ -74,8 +74,6 @@ function migrerCoursVersPratiques() {
     if (nbMigres > 0) {
         db.setSync('listeCours', cours);
         console.log(`[Migration cours] ✅ ${nbMigres} cours migré(s) avec pratique par défaut`);
-    } else {
-        console.log(`[Migration cours] Tous les cours ont déjà une pratique définie`);
     }
 
     return nbMigres;
@@ -109,8 +107,6 @@ function migrerCoursDansBibliotheque() {
     if (nbMigres > 0) {
         db.setSync('listeCours', cours);
         console.log(`[Migration cours] ✅ ${nbMigres} cours migré(s) avec flag dansBibliotheque`);
-    } else {
-        console.log(`[Migration cours] Tous les cours ont déjà le flag dansBibliotheque`);
     }
 
     return nbMigres;

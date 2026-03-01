@@ -36,6 +36,18 @@ let pileUndo = [];
 let pileRedo = [];
 let _undoBatch = false;
 
+// === THROTTLE rAF POUR HANDLERS MOUSEMOVE ===
+function throttleRAF(fn) {
+    var rafId = null;
+    return function(e) {
+        if (rafId) return;
+        rafId = requestAnimationFrame(function() {
+            fn(e);
+            rafId = null;
+        });
+    };
+}
+
 // === CLÉ DE STOCKAGE SÉANCES ===
 var CLE_SEANCES = 'planification_seances';
 
@@ -2650,12 +2662,13 @@ function attacherEvenements(el, donnees) {
 
             function onUpGroupe() {
                 el.classList.remove('planif-dragging');
-                document.removeEventListener('mousemove', onMoveGroupe);
+                document.removeEventListener('mousemove', onMoveGroupeThrottled);
                 document.removeEventListener('mouseup', onUpGroupe);
                 sauvegarder();
             }
 
-            document.addEventListener('mousemove', onMoveGroupe);
+            var onMoveGroupeThrottled = throttleRAF(onMoveGroupe);
+            document.addEventListener('mousemove', onMoveGroupeThrottled);
             document.addEventListener('mouseup', onUpGroupe);
             return;
         }
@@ -2748,7 +2761,7 @@ function attacherEvenements(el, donnees) {
 
             function onUpA() {
                 if (racineEl) racineEl.classList.remove('planif-dragging');
-                document.removeEventListener('mousemove', onMoveA);
+                document.removeEventListener('mousemove', onMoveAThrottled);
                 document.removeEventListener('mouseup', onUpA);
                 document.querySelectorAll('.planif-conteneur-survol').forEach(function(c) { c.classList.remove('planif-conteneur-survol'); });
 
@@ -2763,7 +2776,8 @@ function attacherEvenements(el, donnees) {
                 sauvegarder();
             }
 
-            document.addEventListener('mousemove', onMoveA);
+            var onMoveAThrottled = throttleRAF(onMoveA);
+            document.addEventListener('mousemove', onMoveAThrottled);
             document.addEventListener('mouseup', onUpA);
             return;
         }
@@ -2821,7 +2835,7 @@ function attacherEvenements(el, donnees) {
 
             function onUpB() {
                 el.classList.remove('planif-dragging');
-                document.removeEventListener('mousemove', onMoveB);
+                document.removeEventListener('mousemove', onMoveBThrottled);
                 document.removeEventListener('mouseup', onUpB);
 
                 // Check if out of bounds → detach
@@ -2851,7 +2865,8 @@ function attacherEvenements(el, donnees) {
                 sauvegarder();
             }
 
-            document.addEventListener('mousemove', onMoveB);
+            var onMoveBThrottled = throttleRAF(onMoveB);
+            document.addEventListener('mousemove', onMoveBThrottled);
             document.addEventListener('mouseup', onUpB);
             return;
         }
@@ -2911,7 +2926,7 @@ function attacherEvenements(el, donnees) {
 
             function onUpC() {
                 el.classList.remove('planif-dragging');
-                document.removeEventListener('mousemove', onMoveC);
+                document.removeEventListener('mousemove', onMoveCThrottled);
                 document.removeEventListener('mouseup', onUpC);
 
                 document.querySelectorAll('.planif-noeud-zone.planif-survol').forEach(function(z) { z.classList.remove('planif-survol'); });
@@ -2928,7 +2943,8 @@ function attacherEvenements(el, donnees) {
                 sauvegarder();
             }
 
-            document.addEventListener('mousemove', onMoveC);
+            var onMoveCThrottled = throttleRAF(onMoveC);
+            document.addEventListener('mousemove', onMoveCThrottled);
             document.addEventListener('mouseup', onUpC);
             return;
         }
@@ -2964,7 +2980,7 @@ function attacherEvenements(el, donnees) {
 
         function onUpD() {
             el.classList.remove('planif-dragging');
-            document.removeEventListener('mousemove', onMoveD);
+            document.removeEventListener('mousemove', onMoveDThrottled);
             document.removeEventListener('mouseup', onUpD);
 
             document.querySelectorAll('.planif-noeud-zone.planif-survol').forEach(function(z) { z.classList.remove('planif-survol'); });
@@ -2979,7 +2995,8 @@ function attacherEvenements(el, donnees) {
             sauvegarder();
         }
 
-        document.addEventListener('mousemove', onMoveD);
+        var onMoveDThrottled = throttleRAF(onMoveD);
+        document.addEventListener('mousemove', onMoveDThrottled);
         document.addEventListener('mouseup', onUpD);
     });
 
@@ -4391,7 +4408,7 @@ function initialiser() {
         }
 
         function onUp(e2) {
-            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mousemove', onMoveThrottled);
             document.removeEventListener('mouseup', onUp);
             rectSelection.style.display = 'none';
 
@@ -4429,7 +4446,8 @@ function initialiser() {
             }
         }
 
-        document.addEventListener('mousemove', onMove);
+        var onMoveThrottled = throttleRAF(onMove);
+        document.addEventListener('mousemove', onMoveThrottled);
         document.addEventListener('mouseup', onUp);
     });
 
