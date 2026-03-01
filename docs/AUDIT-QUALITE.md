@@ -239,7 +239,7 @@
 
 ### 🔴 CRITIQUE
 
-**SUI-01 — Duplication des calculs de Performance (P)**
+**SUI-01 — Duplication des calculs de Performance (P)** ✅ CORRIGÉ Beta 98.3 (#206 — `js/indices.js`)
 - **Fichiers** : `profil-etudiant.js:2564-2604` vs `portfolio.js` (logique implicite)
 - profil-etudiant.js réimplémente manuellement `calculerPerformancePAN()` (sélections portfolio + tri + moyenne)
 - portfolio.js utilise l'abstraction `pratique.calculerPerformance(da)`
@@ -377,7 +377,7 @@
 | 2 | TRM-01 | 6 clés non namespacées par trimestre | Trimestre | Données mélangées entre trimestres |
 | 3 | SUI-03 | Présences modifiées → indices C-P-E obsolètes | Suivi | Indices faux affichés |
 | 4 | EVL-04 | Jetons bypassent le mode assisté/simulation | Évaluation | Jetons affectent les vraies données |
-| 5 | SUI-01 | Duplication calcul Performance (P) | Suivi | Deux versions divergentes possibles |
+| 5 | SUI-01 ✅ | Duplication calcul Performance (P) | Suivi | Corrigé Beta 98.3 (#206 indices.js) |
 | 6 | ARC-01 | IndexedDB parallèle (MonitorageFichiers) | Architecture | Isolement des fichiers hors db.js |
 | 7 | TRV-03 | Blobs stockés sans limite de taille | Travaux | Crash si quota dépassé |
 | 8 | TRM-03 | infoCours singleton jamais réinitialisé | Trimestre | Pointe vers cours fantôme |
