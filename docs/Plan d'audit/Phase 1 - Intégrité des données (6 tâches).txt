@@ -1,0 +1,197 @@
+Here is Claude's plan:
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+ Plan — Phase 1 : Intégrité des données (6 tâches)                                  
+
+ Contexte
+
+ L'audit qualité du code a identifié 24 problèmes critiques. La Phase 1 cible les 6
+ tâches d'intégrité des données (#196-#201) + le fix division/0 (#202). Aucun code ne
+  sera supprimé/refactoré — uniquement des correctifs ciblés.
+
+ ---
+ Tâche 1 — #199 : Fixer evaluation-jetons.js (6 écritures directes)
+
+ Fichier : js/evaluation-jetons.js
+
+ Changements : Remplacer 6 db.setSync(cle('evaluationsSauvegardees'), ...) par
+ sauvegarderDonneesSelonMode('evaluationsSauvegardees', ...) aux lignes :
+ - 171 (appliquerJetonDelai)
+ - 226 (retirerJetonDelai)
+ - 362 (appliquerJetonReprise)
+ - 466 (retirerJetonReprise)
+ - 758 (appliquerJetonRepriseCiblee)
+ - 797 (nettoyerEvaluationsRepriseCiblee)
+
+ Ne PAS changer les lectures (db.getSync) : les jetons font un pattern
+ read-modify-write qui nécessite TOUTES les évals (pas filtrées par coursId), sinon
+ les évals des autres cours seraient perdues à la sauvegarde.
+
+ Risque : Faible — sauvegarderDonneesSelonMode() fait exactement db.setSync(cle(key),
+  data) sauf qu'il bloque en mode anonymisation.
+
+ ---
+ Tâche 2 — #196 : Harmoniser evaluation.js (lectures read-only)
+
+ Fichier : js/evaluation.js
+
+ Changements : Remplacer 5 lectures read-only de
+ db.getSync(cle('evaluationsSauvegardees'), []) par
+ obtenirDonneesSelonMode('evaluationsSauvegardees') :
+ - ~3576 (calculerStatistiquesTableauBord) — stats du cours actif uniquement
+ - ~3859 (verifierEvaluationExistante) — vérifie existence pour le cours actif
+ - ~4181 (chargerIndicateursEvaluation) — indicateurs du cours actif
+ - ~5443 (filtrerBanqueEvaluations) — affichage banque du cours actif
+ - ~6376 (setTimeout cleanup) — vérification post-suppression
+
+ Ne PAS changer les ~10 lectures read-modify-write (lignes 2018, 5026, 5200, 5230,
+ 5309, 5699, 5752, 5800, 5838, 5890) : ces fonctions lisent TOUTES les évals,
+ modifient une, puis sauvegardent le tout. Les changer en filtré = perte de données
+ des autres cours.
+
+ Ne PAS changer la ligne 4416 (reparer_evaluations_criteres_manquants) : fonction de
+ repair qui doit voir toutes les évals.
+
+ Ajouter un commentaire bloc en haut du fichier documentant le pattern :
+ // PATTERN LECTURE ÉVALUATIONS :
+ // - obtenirDonneesSelonMode() → lectures read-only (affichage, stats) — filtré par
+ coursId
+ // - db.getSync(cle()) → lectures read-modify-write (modification, suppression) —
+ toutes les évals
+ // - sauvegarderDonneesSelonMode() → toutes les écritures
+
+ Risque : Faible — on change uniquement des lectures d'affichage.
+
+ ---
+ Tâche 3 — #198 : Chaîner recalcul indices après modification présences
+
+ Fichier : js/saisie-presences.js
+
+ Changement : Après la ligne 72 (sauvegarderDonneesSelonMode('indicesAssiduite',
+ indices)), ajouter :
+ if (typeof calculerEtStockerIndicesCP === 'function') {
+     calculerEtStockerIndicesCP();
+ }
+
+ calculerEtStockerIndicesCP() lit indicesAssiduite pour calculer E = (A×C×P)^(1/3).
+ Sans ce chaînage, E reste stale après modification de présences.
+
+ Risque : Très faible — la fonction est déjà appelée conditionnellement dans 19
+ fichiers avec le même pattern typeof ... === 'function'.
+
+ ---
+ Tâche 4 — #202 : Fix division par zéro dans calculerPerformancePAN
+
+ Fichier : js/profil-etudiant.js
+
+ Changement : Avant la ligne ~2602 (le reduce), ajouter :
+ if (meilleuresNotes.length === 0) return 0;
+
+ Risque : Nul.
+
+ ---
+ Tâche 5 — #201 : Réinitialiser infoCours et groupeCoursActif
+
+ Fichier 1 : js/trimestres.js — fonction changerTrimestreActif() (~ligne 307)
+
+ Ajouter après window.trimestreActif = id; :
+ db.setSync('infoCours', null);
+ db.setSync('groupeCoursActif', null);
+ chargerDropdownCoursV2() (appelé ensuite dans la cascade) re-sélectionnera
+ automatiquement le premier cours du nouveau trimestre.
+
+ Fichier 2 : js/trimestre-v2.js — fonction supprimerCoursV2() (~ligne 1523)
+
+ Après suppression du cours, vérifier si c'était le cours actif et nettoyer :
+ const coursActif = db.getSync('infoCours', null);
+ if (coursActif && coursActif.id === coursEnEditionV2) {
+     db.setSync('infoCours', null);
+ }
+
+ Fichier 3 : js/trimestre-v2.js — ligne ~5690
+
+ Remplacer await db.set('infoCours', null) par db.setSync('infoCours', null) pour
+ éviter race conditions.
+
+ Risque : Modéré — touche au changement de trimestre. Mais chargerDropdownCoursV2()
+ gère déjà le cas infoCours === null.
+
+ ---
+ Tâche 6 — #200 + #197 : Unifier cours et documenter namespacing
+
+ #200 — Unifier listeCours/cours
+
+ Décision : listeCours et cours restent globales (bibliothèque partagée). On unifie
+ en gardant cours comme clé canonique (nom plus court, convention Beta 95.2).
+
+ Fichier : js/trimestre-v2.js
+
+ Dans chargerDropdownCoursV2() (~ligne 1290) : supprimer la fusion manuelle et ne
+ lire que cours. Ajouter migration one-shot :
+ // Migration : fusionner listeCours → cours (one-shot)
+ const listeCours = db.getSync('listeCours', []);
+ if (listeCours.length > 0) {
+     const coursExistants = db.getSync('cours', []);
+     const coursMap = new Map(coursExistants.map(c => [c.id, c]));
+     listeCours.forEach(c => { if (c.id && !coursMap.has(c.id)) coursMap.set(c.id,
+ c); });
+     db.setSync('cours', Array.from(coursMap.values()));
+     db.setSync('listeCours', []); // Vider l'ancienne clé
+ }
+
+ Ensuite, dans tout trimestre-v2.js, remplacer les ~15 lectures
+ db.getSync('listeCours', []) et les fusions par db.getSync('cours', []).
+
+ #197 — Documenter CLES_GLOBALES
+
+ Fichier : js/trimestres.js
+
+ - Ajouter 'cours' et 'listeCours' à CLES_GLOBALES (explicitement documentés comme
+ bibliothèque partagée)
+ - infoCours et groupeCoursActif : ne PAS ajouter à CLES_NAMESPACEES pour l'instant
+ car tous les accès existants n'utilisent pas cle(). Le fix #201 (reset au changement
+  de trimestre) suffit pour la Phase 1. Le namespaceing complet avec migration de
+ tous les accès sera Phase 2.
+
+ ---
+ Ordre d'exécution
+
+ 1. #199 (jetons) — indépendant
+ 2. #196 (evaluation.js) — indépendant
+ 3. #198 (chaînage indices) — indépendant
+ 4. #202 (division/0) — indépendant
+ 5. #201 (reset infoCours) — indépendant
+ 6. #200 + #197 (unifier cours + documenter) — le plus complexe, en dernier
+
+ Les tâches 1-4 sont parallélisables. La tâche 5 est simple. La tâche 6 nécessite
+ plus de soin.
+
+ ---
+ Fichiers modifiés
+
+ ┌─────────────────────────┬──────────┬──────────────────────────────────────────┐
+ │         Fichier         │  Tâches  │                  Nature                  │
+ ├─────────────────────────┼──────────┼──────────────────────────────────────────┤
+ │ js/evaluation-jetons.js │ #199     │ 6 lignes : setSync →                     │
+ │                         │          │ sauvegarderDonneesSelonMode              │
+ ├─────────────────────────┼──────────┼──────────────────────────────────────────┤
+ │ js/evaluation.js        │ #196     │ 5 lignes + commentaire bloc              │
+ ├─────────────────────────┼──────────┼──────────────────────────────────────────┤
+ │ js/saisie-presences.js  │ #198     │ 3 lignes ajoutées                        │
+ ├─────────────────────────┼──────────┼──────────────────────────────────────────┤
+ │ js/profil-etudiant.js   │ #202     │ 1 ligne ajoutée                          │
+ ├─────────────────────────┼──────────┼──────────────────────────────────────────┤
+ │ js/trimestres.js        │ #201,    │ 2-4 lignes dans changerTrimestreActif +  │
+ │                         │ #197     │ CLES_GLOBALES                            │
+ ├─────────────────────────┼──────────┼──────────────────────────────────────────┤
+ │ js/trimestre-v2.js      │ #201,    │ Reset infoCours + migration cours +      │
+ │                         │ #200     │ nettoyage fusions                        │
+ └─────────────────────────┴──────────┴──────────────────────────────────────────┘
+
+ ---
+ Vérification
+
+ - Ouvrir l'app, vérifier que les évaluations s'affichent correctement
+ - Tester le changement de trimestre : infoCours doit se réinitialiser
+ - Tester la modification de présences : les indices E doivent se mettre à jour
+ - Vérifier qu'en mode anonymisation, les jetons ne modifient pas les données
+ - node --check sur chaque fichier modifié pour valider la syntaxe
