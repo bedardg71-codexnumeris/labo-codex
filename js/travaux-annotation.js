@@ -302,6 +302,9 @@
      * @returns {Object} Donnees de la page
      */
     function obtenirDonneesPage() {
+        if (!annotationCourante || !annotationCourante.pages) {
+            return { strokes: [], textAnnotations: [], shapes: [], stickers: [] };
+        }
         const page = travauxVisionneuse.getPageActuelle() - 1; // 0-indexed
         if (!annotationCourante.pages[page]) {
             annotationCourante.pages[page] = {

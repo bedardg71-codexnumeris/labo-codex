@@ -257,6 +257,16 @@
      * @returns {Promise<void>}
      */
     async function stockerBlob(id, blob, etudiantDA, productionId) {
+        // Limite de sécurité : 20 MB par blob (IndexedDB ~50 MB par origin)
+        const LIMITE_BLOB_MB = 20;
+        if (blob.size > LIMITE_BLOB_MB * 1024 * 1024) {
+            console.error(`[Travaux-Stockage] Blob trop volumineux: ${(blob.size / 1024 / 1024).toFixed(1)} MB (limite: ${LIMITE_BLOB_MB} MB)`);
+            if (typeof afficherNotificationErreur === 'function') {
+                afficherNotificationErreur('Fichier trop volumineux', `Le fichier dépasse la limite de ${LIMITE_BLOB_MB} MB.`);
+            }
+            return;
+        }
+
         // FSAPI: fichier sur disque
         if (fsapiActif) {
             await stockerBlobFSAPI(id, blob);
@@ -286,8 +296,14 @@
             };
 
             request.onerror = () => {
-                console.error(`[Travaux-Stockage] Erreur stockage blob: ${id}`, request.error);
-                reject(request.error);
+                const err = request.error;
+                if (err?.name === 'QuotaExceededError') {
+                    if (typeof afficherNotificationErreur === 'function') {
+                        afficherNotificationErreur('Stockage plein', 'L\'espace de stockage est insuffisant. Supprimez des fichiers.');
+                    }
+                }
+                console.error(`[Travaux-Stockage] Erreur stockage blob: ${id}`, err);
+                reject(err);
             };
         });
     }

@@ -1841,6 +1841,7 @@ async function executerImportConfigComplete() {
         }
 
     } catch (erreur) {
+        configCompleteEnAttente = null;
         console.error('Erreur lors de l\'import de la configuration:', erreur);
         alert('Erreur lors de l\'import de la configuration.\n\n' + erreur.message);
     }
@@ -1901,6 +1902,7 @@ async function executerImportLocalStorageBrut(config) {
         }
 
     } catch (erreur) {
+        configCompleteEnAttente = null;
         console.error('Erreur lors de l\'import localStorage brut:', erreur);
         alert('Erreur lors de l\'import.\n\n' + erreur.message);
     }
@@ -2202,6 +2204,7 @@ async function executerImportVersBibliotheques() {
         console.log('📊 Résumé import fusionné:', compteurs);
 
     } catch (erreur) {
+        configCompleteEnAttente = null;
         console.error('Erreur lors de l\'import vers bibliothèques:', erreur);
         alert('Erreur lors de la fusion.\n\n' + erreur.message);
     }
@@ -2626,6 +2629,7 @@ async function executerImportSelectif() {
         console.log('📊 Import sélectif terminé:', { compteurs, details });
 
     } catch (erreur) {
+        configCompleteEnAttente = null;
         console.error('Erreur lors de l\'import sélectif:', erreur);
         alert('Erreur lors de l\'import.\n\n' + erreur.message);
     }

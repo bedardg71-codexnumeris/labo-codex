@@ -320,9 +320,7 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
     console.log('Archivage:', archiverOriginale ? 'OUI' : 'NON (suppression)');
 
     // ✅ CORRECTIF (30 déc 2025): Deep copy pour éviter la modification de l'original
-    // Le spread operator fait une copie superficielle - les objets imbriqués (criteres)
-    // restent des références partagées. JSON.parse(JSON.stringify()) crée une vraie copie.
-    const copieOriginale = JSON.parse(JSON.stringify(evaluationOriginale));
+    const copieOriginale = structuredClone(evaluationOriginale);
 
     // Créer la nouvelle évaluation (duplicata) avec un nouvel ID unique
     const nouvelId = 'EVAL_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
@@ -711,7 +709,7 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
     console.log('Archivage:', archiverOriginale ? 'OUI' : 'NON (suppression)');
 
     // ✅ CORRECTIF (30 déc 2025): Deep copy pour éviter la modification de l'original
-    const copieOriginale = JSON.parse(JSON.stringify(evaluationOriginale));
+    const copieOriginale = structuredClone(evaluationOriginale);
 
     // Créer la nouvelle évaluation (duplicata) avec un nouvel ID unique
     const nouvelId = 'EVAL_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);

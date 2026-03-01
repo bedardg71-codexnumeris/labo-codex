@@ -204,7 +204,9 @@
             }));
 
             // Pre-rendre les pages adjacentes en arriere-plan
-            preRendreAdjacentes(numPage, zoomEffectif);
+            preRendreAdjacentes(numPage, zoomEffectif).catch(err => {
+                console.warn('[Travaux-Visionneuse] Erreur pré-rendu adjacentes:', err);
+            });
 
         } catch (e) {
             console.error('[Travaux-Visionneuse] Erreur rendu page:', e);
