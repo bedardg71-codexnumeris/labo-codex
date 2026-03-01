@@ -16,7 +16,8 @@
  * Vérifie si c'est le premier lancement (aucun cours réel créé)
  */
 function estPremierLancement() {
-    const listeCours = db.getSync('listeCours', []);
+    // Lire 'cours' (clé canonique après migration trimestre-v2) puis fallback sur 'listeCours'
+    const listeCours = db.getSync('cours', null) || db.getSync('listeCours', []);
     return listeCours.length === 0 || listeCours.every(c => c.isDemo || c.estDemo);
 }
 
@@ -82,7 +83,7 @@ function afficherAccueilPremierLancement(conteneur) {
 function afficherAccueilRetour(conteneur) {
     // Checkbox démo : activée si en mode démo, ou par défaut si aucun cours réel
     const enDemo = typeof estEnModeDemo === 'function' && estEnModeDemo();
-    const listeCours = db.getSync('listeCours', []);
+    const listeCours = db.getSync('cours', null) || db.getSync('listeCours', []);
     const aDesCoursReels = listeCours.some(c => !c.isDemo && !c.estDemo);
     const demoChecked = enDemo || !aDesCoursReels;
 
