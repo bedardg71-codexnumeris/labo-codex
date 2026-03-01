@@ -71,6 +71,11 @@ function calculerEtSauvegarderIndicesAssiduite() {
     // IMPORTANT : Utiliser sauvegarderDonneesSelonMode pour respecter le mode actuel
     sauvegarderDonneesSelonMode('indicesAssiduite', indices);
 
+    // Chaîner le recalcul des indices composites E = (A×C×P)^(1/3)
+    if (typeof calculerEtStockerIndicesCP === 'function') {
+        calculerEtStockerIndicesCP();
+    }
+
     console.log('📊 [Assiduité] ✅ Indices sauvegardés');
     console.log('📊 [Assiduité] Sommatif:', Object.keys(indices.sommatif).length, 'étudiants');
     console.log('📊 [Assiduité] Alternatif:', Object.keys(indices.alternatif).length, 'étudiants');
