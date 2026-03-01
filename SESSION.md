@@ -2,9 +2,13 @@
 
 **Date** : 28 février 2026
 **Version** : Beta 98.3
-**Statut** : Centralisation indices A-C-P-E + audit qualité (Phases 1-3 complétées)
+**Statut** : Plan de vérification audit créé + documentation archivée
 
 ## SESSION DU 28 FÉVRIER 2026
+
+### Travail accompli — Plan de vérification audit Beta 98.3 (28 février 2026)
+
+180. **Plan de vérification manuelle** : Création de `docs/Plan d'audit/PLAN-VERIFICATION-AUDIT-98.3.md` — guide de 11 tests manuels couvrant les 18 correctifs des Phases 1-3 + #206. Tests : console propre (EVL-06, TRM-07), cohérence indices 3 vues (SUI-01), guard NaN (SUI-02), isolation trimestres (TRM-01/02/03/04), modes assisté/simulation (EVL-01), import fichiers + limite 20 MB (TRV-01/03), annotations stables (TRV-02/04), import/export sans résidu (AUT-01), performance tableau de bord (SUI-06, PLN-03), corrélation Pearson et historique indices (#206). Archivage complet du dossier `docs/Plan d'audit/` avec les 8 plans d'exécution des 4 phases de correction. Commit `2e317ba`.
 
 ### Travail accompli — Audit qualité : centralisation indices (#206) (28 février 2026)
 

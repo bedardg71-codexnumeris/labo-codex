@@ -1,0 +1,97 @@
+Description
+
+Labo Codex — Description de l'application 28 fev 2026 21:07
+(mis à jour 28 fev 2026 — Beta 98.3, build 0228-2100)
+
+Qu'est-ce que c'est ?
+Monitorage Pédagogique est une application web mono-page (SPA) de suivi de l'apprentissage pour le réseau collégial québécois (cégeps). Développée par Grégoire Bédard, enseignant, elle permet de :
+	1.	Détecter précocement les étudiants à risque
+	2.	Intervenir de façon ciblée selon le modèle RaI (Réponse à l'Intervention, niveaux 1-2-3)
+	3.	Suivre l'efficacité des interventions
+	4.	S'adapter à différentes pratiques pédagogiques (PAN-Maîtrise, Sommative, PAN-Standards)
+Ce n'est PAS un système de notation traditionnel. C'est un système de détection et d'intervention préventive.
+
+Version et état
+	∙	Version : Beta 98.3 (build 0228-2100)
+	∙	Objectif : Présentation AQPC juin 2026, version 1.0 open-source (AGPL v3)
+	∙	Phase actuelle : Tests réseau janvier-mai 2026
+	∙	Priorité : Stabilité > Nouvelles fonctionnalités
+	∙	Audit qualité : 134 constats identifiés (28 fév), 18 correctifs appliqués en 4 phases
+
+Stack technique
+	∙	HTML5 / CSS3 / JavaScript ES6+ pur — aucun framework, aucune dépendance externe sauf Chart.js (graphiques)
+	∙	Fonctionnement 100% hors-ligne — pas de serveur, pas de backend
+	∙	Stockage hybride : IndexedDB (persistant, plusieurs GB) + localStorage (cache synchrone, accès 0ms), orchestré par db.js
+	∙	SPA monolithique : un seul index.html (18 359 lignes), un seul styles.css (21 146 lignes), 107 modules JavaScript (~169 000 lignes au total)
+
+Architecture fondamentale
+Hiérarchie conceptuelle (sacrée)
+
+—
+
+TRIMESTRE (conteneur temporel : A2025, H2026)
+    └── COURS (conteneur pédagogique : 601-101, 601-102)
+        └── GROUPE (cohorte : 01, 02, 9999-démo)
+            └── ÉTUDIANTS + PRODUCTIONS + ÉVALUATIONS
+—
+
+Principes architecturaux
+	1.	Single Source of Truth — Chaque donnée a UNE source qui la génère. Tous les autres modules lisent, ne recalculent jamais. Un étudiant ne peut pas avoir deux moyennes différentes.
+	2.	Namespacing par trimestre — Les données sont préfixées par trimestre (h2026_groupeEtudiants, a2025_presences) via le helper window.cle('nomCle'). Isolation absolue entre contextes.
+	3.	Communication indirecte — Les modules ne se parlent JAMAIS directement. Communication via localStorage/IndexedDB uniquement.
+	4.	Délégation aux pratiques — Le calcul des indices dépend de la pratique de notation configurée, via l'interface IPratique. L'application s'adapte à chaque enseignant.
+	5.	Pattern Bibliothèque + Assemblage — Entités réutilisables (non namespacées) assemblées pour un contexte spécifique.
+
+Flux de données
+
+—
+
+1. ENTRÉE      → Prof configure : trimestre + cours + groupe + productions
+2. SUIVI       → Prof saisit : présences (indice A), évalue productions (notes IDME)
+3. CALCUL AUTO → Système génère : indices C (complétion), P (performance)
+4. DIAGNOSTIC  → Système combine A-C-P → Engagement, détecte patterns de risque
+5. INTERVENTION→ Prof consulte diagnostics, agit selon niveau RaI identifié
+
+—
+
+Modules principaux
+
+Suivi des apprentissages (~20 000 lignes, le cœur)
+	∙	profil-etudiant.js (8 732 l.) — Profil individuel, portfolio, calcul de notes
+	∙	indices.js (380 l.) — Module centralisé de calcul des indices A-C-P-E (corrélation Pearson, engagement, performance PAN, historique) — nouveau Beta 98.3 (#206)
+	∙	graphiques-progression.js (4 619 l.) — Visualisations Chart.js : courbes A-C-P-E
+	∙	tableau-bord-apercu.js (3 039 l.) — Tableau de bord global, alertes engagement
+	∙	saisie-presences.js (2 455 l.) — Saisie de présences, indice d'assiduité (A)
+	∙	portfolio.js (1 121 l.) — Indices C-P, artefacts retenus
+
+Travaux / Annotation / Évaluation (~28 000 lignes)
+	∙	travaux-ui.js, travaux-annotation.js, travaux-outils.js — Visionneuse de productions, annotation sur canvas
+	∙	travaux-import.js, travaux-preparation.js — Pipeline d'import PDF/images, validation taille 20 MB
+	∙	evaluation.js (6 491 l.) — Évaluation critériée avec grilles et échelles
+	∙	export-pdf.js, travaux-export-pdf.js — Export PDF des évaluations et annotations
+
+Trimestre / Cours / Groupes
+	∙	trimestre-v2.js (6 262 l.) — Gestion temporelle, calendrier, namespacing
+	∙	cours.js, horaire.js, groupe.js — Configuration pédagogique
+
+Planification
+	∙	planification-carte.js (4 773 l.) — Carte mentale interactive (canvas SVG), drag throttlé rAF
+	∙	planification.js, organisateur.js — Planification pédagogique
+
+Pratiques de notation
+	∙	pratiques.js (5 500 l.) — Registre et orchestration des pratiques
+	∙	pratique-notation-v2.js — Configuration active par cours
+	∙	pratiques-materiel.js — Matériel pédagogique associé
+
+Modélisation
+	∙	modelisation.js — Boîte à outils de modélisation avec annotation partagée
+
+Infrastructure
+	∙	db.js — API unifiée IndexedDB + localStorage
+	∙	config.js — Configuration navigation (protégé)
+	∙	navigation.js — Logique SPA (protégé)
+	∙	main.js — Point d'entrée, bulles parallaxe
+
+Historique
+
+—
