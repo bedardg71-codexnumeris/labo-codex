@@ -399,55 +399,7 @@ function obtenirCouleurPerformance(performance) {
     return obtenirCouleurSelonSeuils(performance);
 }
 
-/**
- * Calcule le coefficient de corrélation de Pearson entre deux séries de données
- * @param {number[]} x - Première série de données
- * @param {number[]} y - Deuxième série de données
- * @returns {number|null} - Coefficient r (-1 à 1), ou null si calcul impossible
- *
- * INTERPRÉTATION:
- * - r proche de 1 : corrélation positive forte (quand x ↑, y ↑)
- * - r proche de 0 : aucune corrélation linéaire
- * - r proche de -1 : corrélation négative forte (quand x ↑, y ↓)
- *
- * SEUILS CONVENTIONNELS (valeur absolue):
- * - |r| < 0.3 : Très faible
- * - 0.3 ≤ |r| < 0.5 : Faible
- * - 0.5 ≤ |r| < 0.7 : Modérée
- * - 0.7 ≤ |r| < 0.9 : Forte
- * - |r| ≥ 0.9 : Très forte
- */
-function calculerCorrelationPearson(x, y) {
-    const n = x.length;
-    if (n === 0 || n !== y.length) {
-        return null;
-    }
-
-    // Calculer les moyennes
-    const moyX = x.reduce((a, b) => a + b, 0) / n;
-    const moyY = y.reduce((a, b) => a + b, 0) / n;
-
-    // Calculer numérateur et dénominateurs
-    let numerateur = 0;
-    let denomX = 0;
-    let denomY = 0;
-
-    for (let i = 0; i < n; i++) {
-        const diffX = x[i] - moyX;
-        const diffY = y[i] - moyY;
-        numerateur += diffX * diffY;
-        denomX += diffX * diffX;
-        denomY += diffY * diffY;
-    }
-
-    // Éviter division par zéro
-    if (denomX === 0 || denomY === 0) {
-        return null;
-    }
-
-    // Retourner le coefficient de Pearson
-    return numerateur / Math.sqrt(denomX * denomY);
-}
+// calculerCorrelationPearson → déplacé dans indices.js (#206)
 
 /**
  * Génère le contenu de la carte explicative sur le calcul des indices A-C-P
