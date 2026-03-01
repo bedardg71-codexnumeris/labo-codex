@@ -742,68 +742,7 @@ async function obtenirIndicesCPAsync(da) {
     return indicesCP[da]?.actuel || null;
 }
 
-/**
- * 🆕 BETA 95.5 : Récupère les indices C et P actuels pour un étudiant (synchrone)
- *
- * NOUVELLE STRUCTURE (Beta 95.5) :
- * { date, pratique, C, P, E, details }
- *
- * RÉTROCOMPATIBILITÉ : Si paramètre 'pratique' fourni (ancienne API),
- * retourne { C, P, E, details } directement.
- *
- * @param {string} da - Numéro DA de l'étudiant
- * @param {string} pratique - (Déprécié) Ignoré en Beta 95.5
- * @returns {Object} - Structure actuelle ou null
- */
-function obtenirIndicesCP(da, pratique = null) {
-    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
-    const indicesCP = obtenirDonneesSelonMode('indicesCP') || {};
-    const actuel = indicesCP[da]?.actuel;
-
-    if (!actuel) return null;
-
-    // 🆕 BETA 95.5 : Nouvelle structure directe (plus de branches SOM/PAN)
-    // Rétrocompatibilité : si pratique demandée, retourner le format attendu
-    if (pratique === 'SOM' || pratique === 'PAN') {
-        // Retourner la structure actuelle (équivalent à l'ancienne branche)
-        return {
-            C: actuel.C || 0,
-            P: actuel.P || 0,
-            E: actuel.E || 0,
-            details: actuel.details || {}
-        };
-    }
-
-    // Sinon retourner la structure complète
-    return actuel;
-}
-
-/**
- * 🆕 BETA 95.5 : Récupère l'historique des indices C et P pour un étudiant
- *
- * @param {string} da - Numéro DA de l'étudiant
- * @param {string} pratique - (Déprécié) Ignoré en Beta 95.5
- * @returns {Array} - [{ date, pratique, C, P, E, details }, ...]
- */
-function obtenirHistoriqueIndicesCP(da, pratique = null) {
-    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
-    const indicesCP = obtenirDonneesSelonMode('indicesCP') || {};
-    const historique = indicesCP[da]?.historique || [];
-
-    // 🆕 BETA 95.5 : Retourner l'historique directement (plus de filtrage SOM/PAN)
-    // Rétrocompatibilité : si pratique demandée, adapter le format
-    if (pratique === 'SOM' || pratique === 'PAN') {
-        return historique.map(entree => ({
-            date: entree.date,
-            C: entree.C || 0,
-            P: entree.P || 0,
-            E: entree.E || 0,
-            details: entree.details || {}
-        }));
-    }
-
-    return historique;
-}
+// obtenirIndicesCP, obtenirHistoriqueIndicesCP → déplacés dans indices.js (#206)
 
 /* ===============================
    🎯 CALCULS MULTI-OBJECTIFS
@@ -1174,9 +1113,8 @@ window.obtenirConfigCategories = obtenirConfigCategories;
 
 // 🆕 Beta 95.5 : Exporter les fonctions d'indices C/P
 window.calculerEtStockerIndicesCP = calculerEtStockerIndicesCP;
-window.obtenirIndicesCP = obtenirIndicesCP;
 window.obtenirIndicesCPAsync = obtenirIndicesCPAsync;
-window.obtenirHistoriqueIndicesCP = obtenirHistoriqueIndicesCP;
+// window.obtenirIndicesCP, window.obtenirHistoriqueIndicesCP → indices.js (#206)
 
 console.log('✅ Module portfolio.js chargé (Beta 95.5 - indices C/P optimisés)');
 

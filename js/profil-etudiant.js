@@ -375,95 +375,7 @@ function genererBadgePatternProfil(pattern) {
     return `<span class="${classe}">${pattern}</span>`;
 }
 
-/**
- * Calcule tous les indices pour un étudiant
- *
- * @param {string} da - Numéro de DA
- * @param {string} pratique - (Optionnel) 'SOM' ou 'PAN' pour forcer une pratique
- *                            Si non spécifié, détecte depuis modalitesEvaluation
- * @returns {Object} - Objet avec tous les indices
- *
- * STRUCTURE DE RETOUR :
- * {
- *   A: 85,              // % assiduité
- *   C: 67,              // % complétion (selon pratique)
- *   P: 72,              // % performance (selon pratique)
- *   M: 0.760,           // Mobilisation (composite)
- *   E: 0.781,           // Engagement (composite, racine cubique)
- *   pratique: 'SOM'     // Pratique utilisée pour le calcul
- * }
- */
-function calculerTousLesIndices(da, pratique = null) {
-    // ========================================
-    // INDICE A : SINGLE SOURCE OF TRUTH
-    // Lire depuis db.getSync('indicesAssiduite') (calculé par saisie-presences.js)
-    // ========================================
-    const indicesAssiduite = db.getSync(cle('indicesAssiduite'), {});
-    const assiduiteSommatif = indicesAssiduite.sommatif?.[da];
-
-    // Extraire l'indice (gérer ancien format nombre et nouveau format objet)
-    let A = 0;
-    if (typeof assiduiteSommatif === 'object' && assiduiteSommatif.indice !== undefined) {
-        A = assiduiteSommatif.indice; // Déjà en proportion 0-1
-    } else if (typeof assiduiteSommatif === 'number') {
-        A = assiduiteSommatif; // Ancien format, déjà en proportion 0-1
-    }
-
-    // 🔍 DÉTERMINER LA PRATIQUE À UTILISER
-    if (!pratique) {
-        // Détecter depuis la configuration
-        const config = db.getSync('modalitesEvaluation', {});
-        pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
-    }
-
-    // INDICES C, P, E : Lire depuis db.getSync('indicesCP') (Single Source of Truth)
-    let C = 0;
-    let P = 0;
-    let E = 0; // ✅ NOUVEAU (7 déc 2025): E lu depuis indicesCP au lieu d'être recalculé
-
-    if (typeof obtenirIndicesCP === 'function') {
-        const indicesCP = obtenirIndicesCP(da, pratique); // Lire la branche spécifique
-        if (indicesCP) {
-            C = indicesCP.C / 100; // Convertir en proportion 0-1
-            P = indicesCP.P / 100;
-            // ✅ NOUVEAU (7 déc 2025): Lire E depuis indicesCP (SST)
-            E = indicesCP.E !== undefined ? indicesCP.E : 0;
-        } else {
-            // Fallback : calculer à la volée si pas encore généré
-            console.warn(`⚠️ indicesCP non trouvé pour ${da} (${pratique}) - Calcul à la volée`);
-            C = calculerTauxCompletion(da) / 100;
-            P = calculerPerformancePAN(da);
-            // Fallback E: calculer si pas disponible
-            const E_brut = A * C * P;
-            E = Math.cbrt(E_brut);
-        }
-    } else {
-        // Fallback : fonctions anciennes si module portfolio.js pas chargé
-        console.warn('⚠️ obtenirIndicesCP non disponible - Calcul à la volée');
-        C = calculerTauxCompletion(da) / 100;
-        P = calculerPerformancePAN(da);
-        // Fallback E: calculer si pas disponible
-        const E_brut = A * C * P;
-        E = Math.pow(E_brut, 1/3);
-    }
-
-    // INDICES COMPOSITES
-    const M = (A + C) / 2;  // Mobilisation (conservé pour compatibilité, mais plus utilisé)
-
-    return {
-        // Indices primaires (en pourcentage pour compatibilité affichage)
-        A: Math.round(A * 100),
-        C: Math.round(C * 100),
-        P: Math.round(P * 100),
-
-        // Indices composites (valeurs normalisées 0-1 avec 3 décimales)
-        M: parseFloat(M.toFixed(3)),
-        E: parseFloat(E.toFixed(3)),
-
-        // Traçabilité de la pratique utilisée
-        pratique: pratique
-    };
-}
+// calculerTousLesIndices → déplacé dans indices.js (#206)
 
 /**
  * Interprète l'indice M (Mobilisation) selon la logique pédagogique avancée
@@ -2556,55 +2468,7 @@ function genererSectionRisque(da) {
     `;
 }
 
-/**
- * Calcule la performance PAN basée sur les artefacts SÉLECTIONNÉS dans le portfolio
- * @param {string} da - Numéro de DA
- * @returns {number} - Performance en proportion 0-1
- */
-function calculerPerformancePAN(da) {
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da && e.noteFinale);
-
-    if (evaluationsEleve.length === 0) {
-        return 0;
-    }
-
-    // 🆕 PRIORITÉ 1 : Utiliser les artefacts SÉLECTIONNÉS dans le portfolio
-    const selectionsPortfolios = obtenirDonneesSelonMode('portfoliosEleves') || {};
-    const productions = obtenirDonneesSelonMode('productions') || [];
-    const portfolio = productions.find(p => p.type === 'portfolio');
-
-    if (portfolio && selectionsPortfolios[da]?.[portfolio.id]) {
-        const selectionEleve = selectionsPortfolios[da][portfolio.id];
-        const artefactsRetenus = selectionEleve.artefactsRetenus;
-
-        if (artefactsRetenus.length > 0) {
-            // Filtrer les évaluations pour ne garder que les artefacts sélectionnés
-            const evaluationsRetenues = evaluationsEleve.filter(e =>
-                artefactsRetenus.includes(e.productionId)
-            );
-
-            if (evaluationsRetenues.length > 0) {
-                // Calculer la moyenne des artefacts sélectionnés
-                const moyenne = evaluationsRetenues.reduce((sum, e) => sum + e.noteFinale, 0) / evaluationsRetenues.length;
-                console.log(`Indice P calculé depuis ${evaluationsRetenues.length} artefact(s) sélectionné(s): ${moyenne.toFixed(1)}%`);
-                return moyenne / 100; // Retourner en proportion 0-1
-            }
-        }
-    }
-
-    // FALLBACK : Si pas de sélection, prendre les 3 meilleures notes (comportement par défaut)
-    const meilleuresNotes = evaluationsEleve
-        .map(e => e.noteFinale)
-        .sort((a, b) => b - a)
-        .slice(0, 3);
-
-    if (meilleuresNotes.length === 0) return 0;
-
-    const moyenne = meilleuresNotes.reduce((sum, note) => sum + note, 0) / meilleuresNotes.length;
-    console.log(`Indice P calculé depuis les ${meilleuresNotes.length} meilleure(s) note(s): ${moyenne.toFixed(1)}%`);
-    return moyenne / 100; // Retourner en proportion 0-1
-}
+// calculerPerformancePAN → déplacé dans indices.js (#206)
 
 /**
  * Obtient la couleur selon le taux (en pourcentage)
@@ -8852,7 +8716,7 @@ function genererSectionTravaux(da) {
 
 // 🆕 BETA 93: Exporter afficherProfilComplet pour accès depuis autres modules
 window.afficherProfilComplet = afficherProfilComplet;
-window.calculerTousLesIndices = calculerTousLesIndices; // Utilisé par etudiants.js pour cohérence pratique SOM/PAN
+// window.calculerTousLesIndices → indices.js (#206)
 window.obtenirPratiqueActuelle = obtenirPratiqueActuelle; // ✅ BETA 93.5 (10 déc): Utilisé par snapshots.js pour calcul historique P
 window.calculerDetailsNoteFinale = calculerDetailsNoteFinale; // 🆕 BETA 96 (FIX #37): Utilisé par portfolio.js pour cohérence P = Note finale
 
