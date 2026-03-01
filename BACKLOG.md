@@ -63,7 +63,7 @@
 
 #### Reste a faire — Architecture
 
-- [ ] **#206** Creer module `indices.js` centralise : regrouper les 7 fonctions de calcul d'indices A-C-P-E dupliquees entre profil-etudiant.js, portfolio.js, tableau-bord-apercu.js et saisie-presences.js
+- [x] **#206** Creer module `indices.js` centralise : regrouper les 7 fonctions de calcul d'indices A-C-P-E dupliquees entre profil-etudiant.js, portfolio.js, tableau-bord-apercu.js et saisie-presences.js
   - **Ref audit** : SUI-01, voir tableau de centralisation dans AUDIT-QUALITE.md
 
 - [ ] **#207** Integrer travaux-stockage.js dans db.js : creer une API blob dans db.js au lieu d'ouvrir une base IndexedDB parallele (`MonitorageFichiers`)

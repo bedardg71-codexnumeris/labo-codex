@@ -1,10 +1,20 @@
-# SESSION ACTIVE - BETA 98.2
+# SESSION ACTIVE - BETA 98.3
 
 **Date** : 28 février 2026
-**Version** : Beta 98.2
-**Statut** : Toolbar unifiée 1 rangée (Modélisation et Annoter/Évaluer)
+**Version** : Beta 98.3
+**Statut** : Centralisation indices A-C-P-E + audit qualité (Phases 1-3 complétées)
 
 ## SESSION DU 28 FÉVRIER 2026
+
+### Travail accompli — Audit qualité : centralisation indices (#206) (28 février 2026)
+
+178. **Nouveau module `js/indices.js`** : Extraction pure de 7 fonctions de calcul d'indices A-C-P-E dispersées dans 4 fichiers vers un module centralisé. Fonctions déplacées : `calculerCorrelationPearson` (doublon éliminé), `determinerNiveauEngagement`, `obtenirIndicesCP`, `obtenirHistoriqueIndicesCP`, `calculerPerformancePAN`, `calculerTousLesIndices`, `calculerIndicesEtudiant`. Les producteurs (`calculerEtStockerIndicesCP`, `calculerEtSauvegarderIndicesAssiduite`) restent dans leur module d'origine. Ref audit : SUI-01, backlog #206.
+
+### Travail accompli — Audit qualité du code (28 février 2026)
+
+179. **Audit qualité complet** : 134 constats (24 critiques, 63 modérés, 47 mineurs) documentés dans `docs/AUDIT-QUALITE.md`. Phase 1 (intégrité données, 7 correctifs), Phase 2 (robustesse, 8 correctifs), Phase 3 (performance, throttle rAF + cache) — toutes complétées. Reste : #207 (travaux-stockage → db.js), #210 (styles inline), #159/#160 (UX bibliothèques).
+
+---
 
 ### Travail accompli — Toolbar unifiée 1 rangée (28 février 2026)
 
