@@ -1553,9 +1553,6 @@ function calculerNote() {
     let ponderationTotal = 0;
     const notesCriteres = []; // Pour collecter les notes à copier-coller
 
-    // 🔍 DEBUG: Afficher les données algorithmiques disponibles
-    console.log('🔍 DEBUG calculerNote() - Données algorithmiques:', evaluationEnCours.donneesAlgorithmiques);
-
     grille.criteres.forEach(critere => {
         const niveau = evaluationEnCours.criteres[critere.id];
         if (niveau) {
@@ -1591,9 +1588,6 @@ function calculerNote() {
                 // Collecter le niveau IDME du critère pour l'export (ex: M, D, E, I)
                 notesCriteres.push(niveau);
 
-                // 🔍 DEBUG: Afficher le détail de chaque critère (convertir en nombre pour toFixed)
-                const valNum = typeof valeurCritere === 'number' ? valeurCritere : parseFloat(valeurCritere);
-                console.log(`  • ${critere.nom}: niveau=${niveau}, valeur=${valNum.toFixed(1)}%, source="${sourceValeur}", pond=${(ponderation * 100).toFixed(0)}%, contrib=${contribution.toFixed(2)}%`);
             }
         }
     });
@@ -1605,14 +1599,10 @@ function calculerNote() {
         // La moyenne pondérée est directement en pourcentage
         pourcentage = noteTotal / ponderationTotal;
 
-        // 🔍 DEBUG: Afficher le résultat final
-        console.log(`🔍 DEBUG calculerNote() - Résultat: noteTotal=${noteTotal.toFixed(2)}%, ponderationTotal=${(ponderationTotal * 100).toFixed(0)}%, pourcentageFinal=${pourcentage.toFixed(1)}%`);
-
         // APPLIQUER LE PLAFOND (CEILING) si c'est une reprise ciblée
         if (evaluationEnCours.plafondNoteCiblee) {
             const niveauPlafond = niveaux.find(n => n.code === evaluationEnCours.plafondNoteCiblee);
             if (niveauPlafond && pourcentage > niveauPlafond.max) {
-                console.log(`🔍 DEBUG calculerNote() - Application plafond "${evaluationEnCours.plafondNoteCiblee}": ${pourcentage.toFixed(1)}% → ${niveauPlafond.max}%`);
                 pourcentage = niveauPlafond.max;
             }
         }
@@ -1624,8 +1614,6 @@ function calculerNote() {
 
         niveauGlobal = niveauFinal ? niveauFinal.code : '--';
 
-        // 🔍 DEBUG: Afficher le niveau déterminé
-        console.log(`🔍 DEBUG calculerNote() - Niveau final: ${niveauGlobal} (${niveauFinal ? niveauFinal.nom : 'non trouvé'})`);
     }
 
     // Mettre à jour l'affichage
@@ -6253,8 +6241,6 @@ window.mettreAJourBoutonVoirTravail = mettreAJourBoutonVoirTravail;
 window.chargerProductionsDansSelect = chargerProductionsDansSelect; // Pour mise à jour après duplication/modification de productions
 window.rechargerFiltreProduction = rechargerFiltreProduction; // Pour mise à jour du filtre après ajout/modification de productions
 window.afficherNotificationSucces = afficherNotificationSucces; // Utilisé par trimestre-v2.js et autres modules
-// window.gererCheckboxJetonDelai = gererCheckboxJetonDelai; // FIXME: Fonctions non définies dans ce fichier
-// window.gererCheckboxJetonReprise = gererCheckboxJetonReprise; // FIXME: Fonctions non définies dans ce fichier
 
 // ============================================
 // FONCTIONS POUR JETONS PERSONNALISÉS

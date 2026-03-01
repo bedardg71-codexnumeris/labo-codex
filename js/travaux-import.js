@@ -334,7 +334,9 @@
                 fichiersEnAttente.push(prepare);
                 acceptes.push(prepare);
                 // Generer les thumbnails en fire-and-forget
-                genererThumbnailQueue(prepare);
+                genererThumbnailQueue(prepare).catch(err => {
+                    console.warn('[Travaux-Import] Erreur génération thumbnail:', err);
+                });
             } else {
                 console.warn(`[Travaux-Import] Type refuse: ${fichier.name} (${fichier.type})`);
             }
@@ -969,7 +971,9 @@
             fichiersEnAttente[index].fichier = fichier;
             fichiersEnAttente[index].fichierOriginal = fichier;
             if (!fichiersEnAttente[index].thumbnailDataUrl) {
-                genererThumbnailQueue(fichiersEnAttente[index]);
+                genererThumbnailQueue(fichiersEnAttente[index]).catch(err => {
+                    console.warn('[Travaux-Import] Erreur génération thumbnail:', err);
+                });
             }
             rattaches++;
         }
