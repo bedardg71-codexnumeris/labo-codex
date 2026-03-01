@@ -1,0 +1,243 @@
+Here is Claude's plan:
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+ Plan — Phase 2 : Robustesse (8 tâches)                                            
+
+ Contexte
+
+ Phase 1 (intégrité des données, #196-#202) est complétée. La Phase 2 cible les
+ problèmes de robustesse : crashes, erreurs silencieuses, code mort et nettoyage. 4
+ items de l'audit sont déjà résolus ou incorrects (EVL-03 déjà fixé, EVL-07 déjà
+ commenté avec FIXME, EVL-15 faux positif, EVL-16 n'existe pas). On traite les 8
+ tâches confirmées.
+
+ ---
+ Tâche 1 — #203 : Validation taille blobs avant stockage IndexedDB
+
+ Fichier : js/travaux-stockage.js
+ Ref audit : TRV-03
+
+ Changement : Dans stockerBlob() (ligne ~275), ajouter une validation de taille avant
+  store.put() :
+ // Limite de sécurité : 20 MB par blob (IndexedDB ~50 MB par origin)
+ const LIMITE_BLOB_MB = 20;
+ if (blob.size > LIMITE_BLOB_MB * 1024 * 1024) {
+     console.error(`[Travaux-Stockage] Blob trop volumineux: ${(blob.size / 1024 /
+ 1024).toFixed(1)} MB (limite: ${LIMITE_BLOB_MB} MB)`);
+     if (typeof afficherNotificationErreur === 'function') {
+         afficherNotificationErreur('Fichier trop volumineux', `Le fichier dépasse la
+  limite de ${LIMITE_BLOB_MB} MB.`);
+     }
+     return;
+ }
+
+ Ajouter aussi un .catch() sur les store.put() pour gérer QuotaExceededError :
+ request.onerror = () => {
+     const err = request.error;
+     if (err?.name === 'QuotaExceededError') {
+         if (typeof afficherNotificationErreur === 'function') {
+             afficherNotificationErreur('Stockage plein', 'L\'espace de stockage est
+ insuffisant. Supprimez des fichiers.');
+         }
+     }
+     console.error(`[Travaux-Stockage] Erreur stockage blob: ${id}`, err);
+     reject(err);
+ };
+
+ Risque : Faible — garde défensive, ne change pas le flux normal.
+
+ ---
+ Tâche 2 — #204 : Fix deadlock UI dans travaux-visionneuse.js
+
+ Fichier : js/travaux-visionneuse.js
+ Ref audit : TRV-01
+
+ Changement : Dans rendrePage() (ligne ~207), ajouter .catch() sur l'appel
+ fire-and-forget à preRendreAdjacentes() :
+ // Avant :
+ preRendreAdjacentes(numPage, zoomEffectif);
+
+ // Après :
+ preRendreAdjacentes(numPage, zoomEffectif).catch(err => {
+     console.warn('[Travaux-Visionneuse] Erreur pré-rendu adjacentes:', err);
+ });
+
+ Note : enRendu = false est déjà HORS du try/catch (ligne 213), donc pas de vrai
+ deadlock. Mais l'erreur async est silencieuse — c'est ça qu'on fixe.
+
+ Risque : Nul.
+
+ ---
+ Tâche 3 — #205 : Nettoyer configCompleteEnAttente après import
+
+ Fichier : js/import-export.js
+ Ref audit : AUT-01
+
+ Changement : Ajouter configCompleteEnAttente = null; dans les blocs catch des
+ fonctions d'import :
+
+ 1. executerImportConfigComplete() — dans le catch (~ligne 1844), ajouter
+ configCompleteEnAttente = null;
+ 2. executerImportLocalStorageBrut() — dans le catch, ajouter configCompleteEnAttente
+  = null;
+ 3. executerImportVersBibliotheques() — dans le catch, ajouter
+ configCompleteEnAttente = null;
+ 4. executerImportSelectif() — dans le catch, ajouter configCompleteEnAttente = null;
+
+ Le pattern est simple : chaque catch qui gère une erreur d'import doit nettoyer la
+ variable globale.
+
+ Risque : Nul.
+
+ ---
+ Tâche 4 — #209 : Supprimer console.log debug dans calculerNote()
+
+ Fichier : js/evaluation.js
+ Ref audit : EVL-06
+
+ Changement : Supprimer les 5 console.log debug dans calculerNote() :
+ - Ligne ~1557 : console.log('🔍 DEBUG calculerNote() - Données algorithmiques:',
+ ...)
+ - Ligne ~1596 : console.log(\  • ${critere.nom}: niveau=...` (dans le forEach
+ critères)
+ - Ligne ~1609 : console.log(\🔍 DEBUG calculerNote() - Résultat: ...`
+ - Ligne ~1615 : console.log(\🔍 DEBUG calculerNote() - Application plafond ...`
+ - Ligne ~1628 : console.log(\🔍 DEBUG calculerNote() - Niveau final: ...`
+
+ Supprimer aussi les commentaires // 🔍 DEBUG: au-dessus de chaque ligne.
+
+ Risque : Nul — logs de debug, pas de logique.
+
+ ---
+ Tâche 5 — EVL-05 : Remplacer JSON.parse/stringify par structuredClone
+
+ Fichier : js/evaluation-jetons.js
+ Ref audit : EVL-05
+
+ Changement : Remplacer 2 deep clones :
+ - Ligne ~325 : JSON.parse(JSON.stringify(evaluationOriginale)) →
+ structuredClone(evaluationOriginale)
+ - Ligne ~714 : même pattern → structuredClone(evaluationOriginale)
+
+ Risque : Nul — structuredClone est supporté dans tous les navigateurs modernes
+ (Chrome 98+, Firefox 94+, Safari 15.4+). Plus performant et gère correctement les
+ types spéciaux (Date, etc.).
+
+ ---
+ Tâche 6 — EVL-07 : Supprimer les exports FIXME commentés
+
+ Fichier : js/evaluation.js
+ Ref audit : EVL-07
+
+ Changement : Supprimer les 2 lignes FIXME mortes (~lignes 6256-6257) :
+ // window.gererCheckboxJetonDelai = gererCheckboxJetonDelai; // FIXME: Fonctions non
+  définies dans ce fichier
+ // window.gererCheckboxJetonReprise = gererCheckboxJetonReprise; // FIXME: Fonctions
+  non définies dans ce fichier
+
+ Les vraies fonctions existent déjà avec le bon nom
+ (gererChangementCheckboxJetonDelai/Reprise, lignes 6262-6263).
+
+ Risque : Nul — code déjà commenté.
+
+ ---
+ Tâche 7 — TRV-02 : Ajouter .catch() sur genererThumbnailQueue
+
+ Fichier : js/travaux-import.js
+ Ref audit : TRV-02
+
+ Changement : Ligne ~337, ajouter .catch() :
+ // Avant :
+ genererThumbnailQueue(prepare);
+
+ // Après :
+ genererThumbnailQueue(prepare).catch(err => {
+     console.warn('[Travaux-Import] Erreur génération thumbnail:', err);
+ });
+
+ Risque : Nul — capture une erreur actuellement silencieuse.
+
+ ---
+ Tâche 8 — TRV-04 : Guard null sur annotationCourante
+
+ Fichier : js/travaux-annotation.js
+ Ref audit : TRV-04
+
+ Changement : Dans obtenirDonneesPage() (ligne ~305), ajouter un guard null :
+ // Avant :
+ function obtenirDonneesPage() {
+     const page = travauxVisionneuse.getPageActuelle() - 1;
+     if (!annotationCourante.pages[page]) {
+
+ // Après :
+ function obtenirDonneesPage() {
+     const page = travauxVisionneuse.getPageActuelle() - 1;
+     if (!annotationCourante || !annotationCourante.pages ||
+ !annotationCourante.pages[page]) {
+
+ Risque : Nul — garde défensive.
+
+ ---
+ Items NON traités (audit incorrect ou déjà résolu)
+
+ ┌────────┬───────────────────────────────────────────────────────────────────────┐
+ │   ID   │                                Raison                                 │
+ ├────────┼───────────────────────────────────────────────────────────────────────┤
+ │ EVL-03 │ Déjà fixé le 9 jan 2026 — validation exists dans                      │
+ │        │ sauvegarderEvaluation()                                               │
+ ├────────┼───────────────────────────────────────────────────────────────────────┤
+ │ EVL-14 │ Fonction vide intentionnelle (appelée lignes 847 et 1034) — la        │
+ │        │ supprimer casserait les appels                                        │
+ ├────────┼───────────────────────────────────────────────────────────────────────┤
+ │ EVL-15 │ Faux positif — enChargementFormulaire EST lue à la ligne 1165         │
+ ├────────┼───────────────────────────────────────────────────────────────────────┤
+ │ EVL-16 │ repairerEvaluationsProblematiques() n'existe pas dans le codebase     │
+ └────────┴───────────────────────────────────────────────────────────────────────┘
+
+ ---
+ Ordre d'exécution
+
+ 1. #203 (blobs) — indépendant
+ 2. #204 (deadlock) — indépendant
+ 3. #205 (import cleanup) — indépendant
+ 4. #209 (console.log) — indépendant
+ 5. EVL-05 (structuredClone) — indépendant
+ 6. EVL-07 (FIXME) — indépendant
+ 7. TRV-02 (thumbnail catch) — indépendant
+ 8. TRV-04 (null guard) — indépendant
+
+ Toutes les tâches sont indépendantes et parallélisables.
+
+ ---
+ Fichiers modifiés
+
+ ┌───────────────────────────┬───────────┬───────────────────────────────────────┐
+ │          Fichier          │  Tâches   │                Nature                 │
+ ├───────────────────────────┼───────────┼───────────────────────────────────────┤
+ │ js/travaux-stockage.js    │ #203      │ Validation taille +                   │
+ │                           │           │ QuotaExceededError                    │
+ ├───────────────────────────┼───────────┼───────────────────────────────────────┤
+ │ js/travaux-visionneuse.js │ #204      │ .catch() sur preRendreAdjacentes      │
+ ├───────────────────────────┼───────────┼───────────────────────────────────────┤
+ │ js/import-export.js       │ #205      │ Cleanup configCompleteEnAttente dans  │
+ │                           │           │ 4 catch                               │
+ ├───────────────────────────┼───────────┼───────────────────────────────────────┤
+ │ js/evaluation.js          │ #209,     │ Supprimer 5 console.log debug + 2     │
+ │                           │ EVL-07    │ lignes FIXME                          │
+ ├───────────────────────────┼───────────┼───────────────────────────────────────┤
+ │ js/evaluation-jetons.js   │ EVL-05    │ 2× JSON.parse/stringify →             │
+ │                           │           │ structuredClone                       │
+ ├───────────────────────────┼───────────┼───────────────────────────────────────┤
+ │ js/travaux-import.js      │ TRV-02    │ .catch() sur genererThumbnailQueue    │
+ ├───────────────────────────┼───────────┼───────────────────────────────────────┤
+ │ js/travaux-annotation.js  │ TRV-04    │ Guard null annotationCourante         │
+ └───────────────────────────┴───────────┴───────────────────────────────────────┘
+
+ ---
+ Vérification
+
+ - node --check sur chaque fichier modifié
+ - Ouvrir l'app, importer un fichier > 20 MB → doit afficher erreur claire
+ - Tester l'import/export de configuration → pas de fuite configCompleteEnAttente
+ - Vérifier que la console n'est plus spammée par les logs DEBUG dans calculerNote()
+ - Tester les jetons de reprise (structuredClone fonctionne comme avant)
+ - Tester l'annotation sur un document → pas de crash si annotationCourante est null
