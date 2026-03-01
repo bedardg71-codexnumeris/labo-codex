@@ -2,9 +2,8 @@
    MODULE: PAGE D'ACCUEIL
    Chantier 3 — Page d'accueil permanente
 
-   Deux états :
-   - Premier lancement (aucun cours) : 2 cartes (créer cours + démo)
-   - Retour (cours existants) : 4 cartes par intention + infos cours
+   Page unique pour tous les utilisateurs :
+   3 accordéons (Découvrir, Parcourir, Piloter) + utilitaires
 
    Exports: afficherAccueil, initialiserAccueil, definirModeExpert
    =============================== */
@@ -13,74 +12,19 @@
 'use strict';
 
 /**
- * Vérifie si c'est le premier lancement (aucun cours réel créé)
- */
-function estPremierLancement() {
-    // Lire 'cours' (clé canonique après migration trimestre-v2) puis fallback sur 'listeCours'
-    const listeCours = db.getSync('cours', null) || db.getSync('listeCours', []);
-    return listeCours.length === 0 || listeCours.every(c => c.isDemo || c.estDemo);
-}
-
-/**
  * Génère et affiche le contenu de la page d'accueil
- * Adapte le contenu selon l'état (premier lancement vs retour)
  */
 function afficherAccueil() {
     const conteneur = document.getElementById('accueil-contenu');
     if (!conteneur) return;
 
-    if (estPremierLancement()) {
-        afficherAccueilPremierLancement(conteneur);
-    } else {
-        afficherAccueilRetour(conteneur);
-    }
+    afficherAccueilContenu(conteneur);
 }
 
 /**
- * Affichage premier lancement : bienvenue + 2 cartes
+ * Contenu de la page d'accueil : 3 accordéons + utilitaires
  */
-function afficherAccueilPremierLancement(conteneur) {
-    conteneur.innerHTML = `
-        <div class="accueil-hero">
-            <h1>Bienvenue dans le Monitorage</h1>
-            <p class="accueil-sous-titre">Explorer. R\u00e9fl\u00e9chir. Transformer.</p>
-            <p class="accueil-description">
-                Un outil de suivi p\u00e9dagogique pour observer la progression de tes \u00e9tudiants
-                et prioriser tes interventions.
-            </p>
-        </div>
-
-        <div class="accueil-cartes">
-            <div class="accueil-carte" onclick="if(typeof ouvrirModalConversationnel==='function') ouvrirModalConversationnel();">
-                <div class="accueil-carte-icone">&#x1F393;</div>
-                <div class="accueil-carte-titre">Cr\u00e9er mon premier cours</div>
-                <div class="accueil-carte-desc">
-                    Configure ton cours en quelques \u00e9tapes guid\u00e9es.
-                </div>
-            </div>
-            <div class="accueil-carte" onclick="if(typeof entrerEnDemo==='function') entrerEnDemo();">
-                <div class="accueil-carte-icone">&#x1F6B8;</div>
-                <div class="accueil-carte-titre">Explorer la d\u00e9mo</div>
-                <div class="accueil-carte-desc">
-                    D\u00e9couvrez l\u2019application avec des donn\u00e9es fictives de 20\u00a0\u00e9tudiants.
-                </div>
-            </div>
-        </div>
-
-        <div class="accueil-pied">
-            <a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer" class="accueil-pied-logo-link">
-                <img src="img/logo-codex-numeris.png" alt="Logo Labo Codex" class="accueil-pied-logo">
-            </a>
-            <a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer" style="font-size: 0.8rem; color: var(--gris-moyen); text-decoration: none;">codexnumeris.org</a>
-            <span style="font-size: 0.75rem; color: var(--gris-clair); font-style: italic;">R\u00e9fl\u00e9chir, exp\u00e9rimenter, partager.</span>
-        </div>
-    `;
-}
-
-/**
- * Affichage retour : info cours actif + 4 cartes par intention
- */
-function afficherAccueilRetour(conteneur) {
+function afficherAccueilContenu(conteneur) {
     // Checkbox démo : activée si en mode démo, ou par défaut si aucun cours réel
     const enDemo = typeof estEnModeDemo === 'function' && estEnModeDemo();
     const listeCours = db.getSync('cours', null) || db.getSync('listeCours', []);
@@ -160,11 +104,7 @@ function afficherAccueilRetour(conteneur) {
         ? window.parcours.genererPanneauParcours()
         : '';
 
-    // Hero adaptatif selon l'état du parcours
-    const parcoursInitialise = window.parcours && window.parcours.estInitialise && window.parcours.estInitialise();
-    const heroTitre = parcoursInitialise
-        ? 'Que souhaites-tu faire\u00a0?'
-        : 'Bienvenue\u00a0! Par o\u00f9 commencer\u00a0?';
+    const heroTitre = 'Que souhaites-tu faire\u00a0?';
 
     conteneur.innerHTML = `
         <div class="accueil-hero">
