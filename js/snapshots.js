@@ -1283,6 +1283,7 @@ window.obtenirSnapshotsHebdomadaires = obtenirSnapshotsHebdomadaires;
 window.obtenirSnapshotsEtudiant = obtenirSnapshotsEtudiant;
 window.obtenirSnapshotsInterventions = obtenirSnapshotsInterventions;
 window.calculerIndicesHistoriques = calculerIndicesHistoriques; // Export pour tests
+window.cleSnapshots = cleSnapshots;
 
 // Fonctions UI
 window.afficherStatutSnapshots = afficherStatutSnapshots;
