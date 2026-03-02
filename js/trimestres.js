@@ -1294,13 +1294,18 @@
                         session: cadreCalendrier.session || trimestre.session,
                         annee: cadreCalendrier.annee || trimestre.annee
                     },
-                    artefacts: productions.filter(p => p.type === 'artefact-portfolio').map(p => ({
-                        id: p.id,
-                        titre: p.titre || p.nom,
-                        type: p.type,
-                        date_echeance: p.dateEcheance,
-                        semaine: calculerSemaine(p.dateEcheance, cadreCalendrier.dateDebut)
-                    }))
+                    // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
+                    artefacts: productions.filter(p => p.type === 'artefact-portfolio').map(p => {
+                        const dateEchTrim = (typeof obtenirEcheanceEffective === 'function')
+                            ? obtenirEcheanceEffective(p, null).date : p.dateEcheance;
+                        return {
+                            id: p.id,
+                            titre: p.titre || p.nom,
+                            type: p.type,
+                            date_echeance: dateEchTrim,
+                            semaine: calculerSemaine(dateEchTrim, cadreCalendrier.dateDebut)
+                        };
+                    })
                 },
 
                 observations: {
@@ -1502,7 +1507,14 @@
      */
     function obtenirDateEcheance(productionId, productions) {
         const prod = productions.find(p => p.id === productionId);
-        return prod ? prod.dateEcheance : null;
+        if (!prod) return null;
+        // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
+        if (typeof obtenirEcheanceEffective === 'function') {
+            const infoC = db.getSync('infoCours', null);
+            const gcId = infoC ? (infoC._groupeCoursId || infoC.id || null) : null;
+            return obtenirEcheanceEffective(prod, gcId).date;
+        }
+        return prod.dateEcheance || null;
     }
 
     /**

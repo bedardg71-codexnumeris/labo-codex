@@ -183,14 +183,16 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
     const productions = obtenirDonneesSelonMode('productions') || [];
 
     // ✅ NOUVEAU (Beta 94 - 10 déc 2025): Utiliser dateEcheance de la production
-    // Les jetons servent uniquement à comptabiliser, pas à modifier l'échéance
+    // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
+    const groupeCoursId = obtenirCoursIdPourSnapshots();
     const obtenirDateEcheance = (evaluation) => {
         const production = productions.find(p => p.id === evaluation.productionId);
-        if (!production || !production.dateEcheance) {
-            // Fallback: utiliser dateEvaluation si pas de dateEcheance configurée
+        if (!production) {
             return evaluation.dateEvaluation;
         }
-        return production.dateEcheance;
+        const { date, assignee } = obtenirEcheanceEffective(production, groupeCoursId);
+        if (!assignee) return null;
+        return date || evaluation.dateEvaluation;
     };
 
     // Filtrer les évaluations complétées avant la date limite
@@ -209,16 +211,14 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
     });
 
     // ✅ CORRECTION (10 déc 2025): Identifier les productions DUES jusqu'à cette date (dateEcheance)
-    // Au lieu de "productions évaluées", on regarde les productions dont l'échéance est passée
+    // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe + assignee)
     const productionsDues = productions.filter(production => {
-        // Exclure les productions facultatives
         if (production.facultatif) return false;
-
-        // ✅ CORRECTIF (17 déc 2025): Exclure les portfolios (conteneurs, pas des productions individuelles)
         if (production.type === 'portfolio') return false;
 
-        // Vérifier que la production a une dateEcheance passée
-        return production.dateEcheance && production.dateEcheance <= dateLimite;
+        const { date, assignee } = obtenirEcheanceEffective(production, groupeCoursId);
+        if (!assignee) return false;
+        return date && date <= dateLimite;
     });
 
     if (productionsDues.length === 0) {
@@ -454,9 +454,21 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
         const productions = obtenirDonneesSelonMode('productions') || [];
 
         // ✅ NOUVEAU (11 déc 2025): C global = taux de remise du DERNIER artefact dû
-        // Identifier le dernier travail dont l'échéance est passée
-        const productionsDues = productions.filter(p => !p.facultatif && p.dateEcheance && p.dateEcheance <= dateSeance);
-        const dernierTravail = productionsDues.sort((a, b) => b.dateEcheance.localeCompare(a.dateEcheance))[0];
+        // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe + assignee)
+        const gcIdSnapshot = obtenirCoursIdPourSnapshots();
+        const productionsDues = productions.filter(p => {
+            if (p.facultatif || p.type === 'portfolio') return false;
+            const { date, assignee } = obtenirEcheanceEffective(p, gcIdSnapshot);
+            if (!assignee) return false;
+            return date && date <= dateSeance;
+        });
+        const dernierTravail = productionsDues.length > 0
+            ? productionsDues.sort((a, b) => {
+                const dateA = obtenirEcheanceEffective(a, gcIdSnapshot).date || '';
+                const dateB = obtenirEcheanceEffective(b, gcIdSnapshot).date || '';
+                return dateB.localeCompare(dateA);
+            })[0]
+            : undefined;
 
         // ⚡ Charger depuis IndexedDB par défaut (évite QuotaExceededError localStorage)
         let evaluationsCache = evaluationsCacheParam;

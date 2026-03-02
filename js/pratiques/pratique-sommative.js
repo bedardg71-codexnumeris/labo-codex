@@ -126,14 +126,20 @@ class PratiqueSommative {
         const productions = this._lireProductions();
 
         // ✅ NOUVEAU (Beta 94 - 10 déc 2025): Fonction helper pour obtenir dateEcheance
-        // Les jetons servent uniquement à comptabiliser, pas à modifier l'échéance
+        // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
+        const infoCoursSom = db.getSync('infoCours', null);
+        const gcIdSom = infoCoursSom ? (infoCoursSom._groupeCoursId || infoCoursSom.id || null) : null;
         const obtenirDateEcheance = (evaluation) => {
             const production = productions.find(p => p.id === evaluation.productionId);
-            if (!production || !production.dateEcheance) {
-                // Fallback: utiliser dateEvaluation si pas de dateEcheance configurée
+            if (!production) {
                 return evaluation.dateEvaluation;
             }
-            return production.dateEcheance;
+            if (typeof obtenirEcheanceEffective === 'function') {
+                const { date, assignee } = obtenirEcheanceEffective(production, gcIdSom);
+                if (!assignee) return null;
+                return date || evaluation.dateEvaluation;
+            }
+            return production.dateEcheance || evaluation.dateEvaluation;
         };
 
         // Filtrer évaluations de cet étudiant jusqu'à dateLimite

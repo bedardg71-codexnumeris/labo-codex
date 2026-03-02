@@ -3385,7 +3385,12 @@ function chargerProductions() {
     try {
         var productions = db.getSync(window.cle('productions'), []);
         return productions.filter(function(p) { return p.estActive; }).map(function(p) {
-            return { id: p.id, nom: p.nom, type: p.type || 'autre', ponderation: p.ponderation || 0, grilleId: p.grilleId, dateEcheance: p.dateEcheance };
+            // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
+            var infoC = db.getSync('infoCours', null);
+            var gcPlanif = infoC ? (infoC._groupeCoursId || infoC.id || null) : null;
+            var dateEch = (typeof obtenirEcheanceEffective === 'function')
+                ? obtenirEcheanceEffective(p, gcPlanif).date : p.dateEcheance;
+            return { id: p.id, nom: p.nom, type: p.type || 'autre', ponderation: p.ponderation || 0, grilleId: p.grilleId, dateEcheance: dateEch };
         });
     } catch(e) { return []; }
 }
@@ -3411,7 +3416,12 @@ function afficherDetailsProduction(productionId, productions) {
             }
         }
     } catch(e) {}
-    return { nomProduction: prod.nom, ponderation: prod.ponderation, nomGrille: nomGrille, nomEchelle: nomEchelle, dateEcheance: prod.dateEcheance || null };
+    // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
+    var infoCDet = db.getSync('infoCours', null);
+    var gcDetPlanif = infoCDet ? (infoCDet._groupeCoursId || infoCDet.id || null) : null;
+    var dateEchDet = (typeof obtenirEcheanceEffective === 'function')
+        ? obtenirEcheanceEffective(prod, gcDetPlanif).date : (prod.dateEcheance || null);
+    return { nomProduction: prod.nom, ponderation: prod.ponderation, nomGrille: nomGrille, nomEchelle: nomEchelle, dateEcheance: dateEchDet };
 }
 
 function sauvegarderChoixActivite(leconId, activiteId, retroaction, productionId) {
