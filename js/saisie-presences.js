@@ -313,7 +313,7 @@ function calculerAssiduiteJusquADate(da, dateLimite) {
             }
         } else {
             // Étudiant absent
-            const presencesDate = presencesFiltrees.filter(p => p.date === date);
+            const presencesDate = presences.filter(p => p.date === date);
             const estSeanceFacultative = presencesDate.length > 0 &&
                                          presencesDate.every(p => p.facultatif === true);
 
