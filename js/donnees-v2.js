@@ -82,7 +82,7 @@
     /**
      * Charge les statistiques des snapshots dans les cartes métriques
      */
-    function chargerStatistiquesSnapshots() {
+    async function chargerStatistiquesSnapshots() {
         // Éléments DOM
         const statHebdo = document.getElementById('v2-stat-snapshots-hebdo');
         const statInterventions = document.getElementById('v2-stat-snapshots-interventions');
@@ -93,10 +93,18 @@
             return;
         }
 
-        // ✅ CORRECTIF (13 fév 2026): Utiliser cleSnapshots() (clé par groupe-cours)
-        // au lieu des anciennes clés 'snapshotsHebdomadaires'/'snapshotsInterventions' qui n'existent pas
+        // ✅ CORRECTIF (2 mars 2026): Lire depuis IndexedDB (source de vérité)
+        // db.getSync() lit localStorage en premier, qui peut contenir des données périmées
         const cleSnap = typeof cleSnapshots === 'function' ? cleSnapshots() : cle('snapshots');
-        const snapshots = db.getSync(cleSnap, { hebdomadaires: [], interventions: [] });
+        let snapshots;
+        if (db.useIndexedDB && cleSnap) {
+            try {
+                snapshots = await db.get(cleSnap);
+            } catch (e) { /* fallback getSync */ }
+        }
+        if (!snapshots) {
+            snapshots = db.getSync(cleSnap, { hebdomadaires: [], interventions: [] });
+        }
 
         const snapshotsHebdo = snapshots.hebdomadaires || [];
         const snapshotsInterventions = snapshots.interventions || [];
