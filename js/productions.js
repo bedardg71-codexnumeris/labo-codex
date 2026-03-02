@@ -259,20 +259,9 @@ function peuplerEcheancesParGroupe(production) {
     // Lire les groupes-cours du trimestre actif
     const groupesCours = db.getSync(cle('groupesCours'), []);
 
-    // Trouver les groupes frères (même coursId dans listeCours)
-    // groupesCours.coursId pointe vers listeCours.id — il faut matcher le cours-entité
-    const listeCours = db.getSync('listeCours', []);
-    const coursActif = listeCours.find(c => c.id === coursIdProd);
-    const sigle = coursActif ? (coursActif.codeCours || coursActif.sigle || coursActif.code || '') : '';
-
-    // Trouver les IDs listeCours qui partagent le même sigle (= même cours-entité)
-    const coursFreres = sigle
-        ? listeCours.filter(c => (c.codeCours || c.sigle || c.code || '') === sigle)
-        : [coursActif].filter(Boolean);
-    const coursFreresIds = new Set(coursFreres.map(c => c.id));
-
-    // Groupes-cours frères = ceux dont le coursId est dans coursFreresIds
-    const groupesFreres = groupesCours.filter(gc => coursFreresIds.has(gc.coursId));
+    // Trouver les groupes frères : tous les GC dont le coursId correspond à celui de la production
+    // groupesCours.coursId pointe directement vers le cours-entité (clé 'cours' ou 'listeCours')
+    const groupesFreres = groupesCours.filter(gc => gc.coursId === coursIdProd);
 
     if (groupesFreres.length <= 1) {
         // Un seul groupe — mode simple
@@ -293,8 +282,7 @@ function peuplerEcheancesParGroupe(production) {
         const estAssigne = entree ? (entree.assignee !== false) : false;
         const dateVal = entree ? (entree.date || '') : '';
         // Extraire un label court (ex: "gr. 00002")
-        const coursLie = listeCours.find(c => c.id === gc.coursId);
-        const numGroupe = gc.groupeNum || (coursLie && coursLie.groupe) || '?';
+        const numGroupe = gc.groupeNum || '?';
         const labelGroupe = `gr. ${String(numGroupe).padStart(5, '0')}`;
 
         return `<div style="display: flex; align-items: center; gap: 10px;" data-gc-id="${gc.id}">
