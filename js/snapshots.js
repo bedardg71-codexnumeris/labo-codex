@@ -122,6 +122,35 @@ function initialiserModuleSnapshots() {
         console.log('✅ Structure snapshots créée');
     }
 
+    // ✅ CORRECTIF (2 mars 2026): Rafraîchir le cache depuis IndexedDB
+    // Le cache localStorage peut contenir une version périmée des snapshots
+    // (ex: 4 captures alors qu'IndexedDB en contient 11 après reconstruction).
+    // db.getSync() lit localStorage EN PREMIER, donc il faut forcer la mise à jour.
+    if (db.useIndexedDB) {
+        db.get(cleSnap).then(snapshotsFrais => {
+            if (!snapshotsFrais) return;
+            const nbLocal = snapshots?.hebdomadaires?.length || 0;
+            const nbIDB = snapshotsFrais.hebdomadaires?.length || 0;
+            if (nbIDB !== nbLocal) {
+                console.log(`🔄 Désynchronisation détectée: localStorage=${nbLocal}, IndexedDB=${nbIDB}. Mise à jour du cache...`);
+                try {
+                    localStorage.removeItem(cleSnap);
+                    localStorage.setItem(cleSnap, JSON.stringify(snapshotsFrais));
+                } catch (e) {
+                    // QuotaExceeded → memoryCache
+                    if (db.memoryCache) db.memoryCache.set(cleSnap, snapshotsFrais);
+                    try { localStorage.removeItem(cleSnap); } catch (ex) { /* ignore */ }
+                }
+                // Rafraîchir l'affichage si on est dans Réglages
+                if (typeof afficherStatutSnapshots === 'function') {
+                    afficherStatutSnapshots();
+                }
+            }
+        }).catch(e => {
+            console.warn('⚠️ Vérification cache snapshots échouée:', e.message);
+        });
+    }
+
     // Vérifier si nouveau snapshot hebdomadaire nécessaire
     verifierEtCapturerSnapshotHebdomadaire();
 
@@ -905,8 +934,37 @@ async function reconstruireSnapshotsHistoriques() {
 
         console.log(`✅ Reconstruction terminée : ${nbSnapshots} captures par séance créées, ${nbEchecs} échecs`);
 
-        // ✅ CORRECTIF CRITIQUE (10 déc 2025): Synchroniser IndexedDB → localStorage cache
-        // Les graphiques lisent via db.getSync() qui utilise le cache localStorage
+        // ✅ CORRECTIF CRITIQUE (2 mars 2026): Forcer la synchro du cache pour les snapshots
+        // Problème : après reconstruction, les snapshots sont dans IndexedDB (11 captures)
+        // mais le cache localStorage peut contenir une version périmée (4 captures).
+        // db.getSync() lit localStorage EN PREMIER → retourne les anciennes données.
+        // syncToLocalStorageCache() skip les clés déjà existantes dans localStorage.
+        // Solution : supprimer la clé périmée et forcer le memoryCache.
+        const cleSnap = cleSnapshots();
+        if (cleSnap) {
+            console.log('🔄 Forçage du cache snapshots...');
+            try {
+                // 1. Relire les données fraîches depuis IndexedDB
+                const snapshotsFrais = await db.get(cleSnap);
+                // 2. Supprimer la version périmée dans localStorage
+                try { localStorage.removeItem(cleSnap); } catch (ex) { /* ignore */ }
+                // 3. Essayer de mettre à jour localStorage, sinon memoryCache
+                try {
+                    localStorage.setItem(cleSnap, JSON.stringify(snapshotsFrais));
+                    console.log('✅ Cache localStorage mis à jour');
+                } catch (e) {
+                    // QuotaExceeded → memoryCache (db.getSync() le trouvera en fallback)
+                    if (db.memoryCache) {
+                        db.memoryCache.set(cleSnap, snapshotsFrais);
+                    }
+                    console.log('✅ Cache memoryCache mis à jour (trop grand pour localStorage)');
+                }
+            } catch (e) {
+                console.warn('⚠️ Impossible de forcer le cache snapshots:', e.message);
+            }
+        }
+
+        // Sync générale pour les autres clés
         console.log('🔄 Synchronisation du cache localStorage...');
         await db.syncToLocalStorageCache();
         console.log('✅ Cache synchronisé');
