@@ -38,6 +38,20 @@ const COULEURS_INDICES = {
 const EPAISSEUR_LIGNE_STANDARD = 2;
 
 /**
+ * ✅ CORRECTIF (2 mars 2026): Vérifie qu'un chart est encore valide
+ * avant d'appeler chart.update() dans un event handler.
+ * Chart.js crash (TypeError: null is not an object, t.addEventListener)
+ * quand le canvas est détaché du DOM (navigation SPA).
+ */
+function chartEstValide(chart) {
+    try {
+        return chart && chart.canvas && chart.canvas.parentNode && chart.ctx;
+    } catch (e) {
+        return false;
+    }
+}
+
+/**
  * Couleur de grille dynamique selon le thème clair/sombre
  * @param {number} [opacite=0.1] - Opacité de la grille
  * @returns {string} - Couleur rgba adaptée au thème
@@ -949,7 +963,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                         }
                     });
 
-                    chart.update('none');
+                    if (chartEstValide(chart)) chart.update('none');
                 }
             }
         };
@@ -999,7 +1013,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                     }
                 });
             }
-            chart.update('none');
+            if (chartEstValide(chart)) chart.update('none');
         }
 
         // Verrouillage au clic (sur nom ou point)
@@ -1068,7 +1082,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                     dataset.pointRadius = Array(nbPoints).fill(5);
                 });
             }
-            chart.update('none');
+            if (chartEstValide(chart)) chart.update('none');
         });
 
         // Changer le curseur au survol des noms ou des points
@@ -1299,7 +1313,7 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                             const indice = match ? match[1] : legendItem.text;
                             etatLegendeGraphiqueACPE[indice] = meta.hidden === null ? true : false;
 
-                            chart.update();
+                            if (chartEstValide(chart)) chart.update();
                         }
                     },
                     tooltip: {
@@ -1380,7 +1394,7 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                         }
                     });
 
-                    chart.update('none');
+                    if (chartEstValide(chart)) chart.update('none');
                 }
             }
         };
@@ -1397,7 +1411,7 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                 meta.hidden = true;
             }
         });
-        chart.update();
+        if (chartEstValide(chart)) chart.update();
 
         console.log('✅ Graphique groupe moyennes créé');
         return chart;
@@ -1603,10 +1617,17 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
         const genererOffset = () => (Math.random() - 0.5) * 0.03;
 
         // 🆕 Beta 98.3 : Pour C et P, déterminer à chaque date de snapshot si des productions
-        // sont dues. Si aucune production n'est due à cette date → C/P doivent être null.
-        // Cela corrige les anciens snapshots qui stockaient C=0 au lieu de null.
+        // sont dues. Si aucune production n'est due à la date de ce snapshot → C/P = null.
+        // Corrige les snapshots qui stockaient C=0 au lieu de null.
         let productionsFiltreesGraph = [];
         let gcIdGraph = null;
+        // Borne inférieure du semestre : les productions dont l'échéance est antérieure
+        // sont d'un trimestre précédent et ne comptent pas pour C/P du semestre courant.
+        let dateDebutSemestre = '';
+        try {
+            const cadre = db.getSync(cle('cadreCalendrier'), null);
+            if (cadre && cadre.dateDebut) dateDebutSemestre = cadre.dateDebut;
+        } catch (e) { /* silencieux */ }
         if (indice === 'C' || indice === 'P') {
             try {
                 const productions = obtenirDonneesSelonMode('productions') || [];
@@ -1616,9 +1637,9 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                     if (p.facultatif || p.type === 'portfolio') return false;
                     if (typeof obtenirEcheanceEffective === 'function') {
                         const { date, assignee } = obtenirEcheanceEffective(p, gcIdGraph);
-                        return assignee && !!date;
+                        return assignee && !!date && date >= dateDebutSemestre;
                     }
-                    return !!p.dateEcheance;
+                    return !!p.dateEcheance && p.dateEcheance >= dateDebutSemestre;
                 });
             } catch (e) { /* silencieux */ }
         }
@@ -1862,7 +1883,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                         }
                     });
 
-                    chart.update('none');
+                    if (chartEstValide(chart)) chart.update('none');
                 }
             }
         };
@@ -1910,7 +1931,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                     dataset.pointHoverRadius = 7;
                 });
             }
-            chart.update('none');
+            if (chartEstValide(chart)) chart.update('none');
         });
 
         // 🆕 BETA 96: Verrouillé = noir
@@ -1964,7 +1985,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                 // Synchroniser le dropdown avec la courbe verrouillée
                 if (selecteur) selecteur.value = indexDataset;
             }
-            chart.update('none');
+            if (chartEstValide(chart)) chart.update('none');
         }
 
         // Gestionnaire de clic
@@ -2115,7 +2136,7 @@ function selectionnerEtudiantACP() {
             dataset.pointHoverRadius = 3;
         }
     });
-    chart.update('none');
+    if (chartEstValide(chart)) chart.update('none');
     console.log(`🔒 Étudiant sélectionné (dropdown): ${chart.data.datasets[index]?.label}`);
 }
 
@@ -2639,7 +2660,7 @@ function gererSurvolSpaghetti(event, activeElements, chart) {
         }
     });
 
-    chart.update('none'); // Update sans animation pour fluidité
+    if (chartEstValide(chart)) chart.update('none'); // Update sans animation pour fluidité
 }
 
 /**
@@ -2661,7 +2682,7 @@ function reinitialiserStylesSpaghetti(chart) {
         dataset.pointBorderWidth = 2;
     });
 
-    chart.update('none');
+    if (chartEstValide(chart)) chart.update('none');
 }
 
 /**
@@ -3247,7 +3268,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                         }
                     });
 
-                    chart.update('none');
+                    if (chartEstValide(chart)) chart.update('none');
                 }
             }
         };
@@ -3299,7 +3320,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                     dataset.pointHoverRadius = 7;
                 });
             }
-            chart.update('none');
+            if (chartEstValide(chart)) chart.update('none');
         });
 
         // 🆕 BETA 96: Verrouillé = noir, déverrouillé = blanc
@@ -3353,7 +3374,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                 // Synchroniser le dropdown avec la courbe verrouillée
                 if (selecteur) selecteur.value = indexDataset;
             }
-            chart.update('none');
+            if (chartEstValide(chart)) chart.update('none');
         }
 
         // Gestionnaire de clic pour verrouiller/déverrouiller une courbe
@@ -3489,7 +3510,7 @@ function selectionnerEtudiantSpaghetti() {
             dataset.pointHoverRadius = 3;
         }
     });
-    chart.update('none');
+    if (chartEstValide(chart)) chart.update('none');
     console.log(`🔒 Étudiant sélectionné (dropdown): ${chart.data.datasets[index]?.label}`);
 }
 
@@ -3937,7 +3958,7 @@ function creerGraphiqueCriteres(canvasId, da) {
                         }
                     });
 
-                    chart.update('none');
+                    if (chartEstValide(chart)) chart.update('none');
                 }
             }
         };
@@ -3984,7 +4005,7 @@ function creerGraphiqueCriteres(canvasId, da) {
                     }
                 });
             }
-            chart.update('none');
+            if (chartEstValide(chart)) chart.update('none');
         }
 
         // Verrouillage au clic (sur nom ou point)
@@ -4053,7 +4074,7 @@ function creerGraphiqueCriteres(canvasId, da) {
                     dataset.pointRadius = Array(nbPoints).fill(5);
                 });
             }
-            chart.update('none');
+            if (chartEstValide(chart)) chart.update('none');
         });
 
         // Changer le curseur au survol des noms ou des points
@@ -4556,7 +4577,7 @@ function creerGraphiqueDistributionACPE(canvasId) {
                                 chart.setDatasetVisibility(pointsIndex, !isHidden);
                             }
 
-                            chart.update();
+                            if (chartEstValide(chart)) chart.update();
                         }
                     },
                     tooltip: {
@@ -4681,7 +4702,7 @@ function creerGraphiqueDistributionACPE(canvasId) {
                         }
                     });
 
-                    chart.update('none');
+                    if (chartEstValide(chart)) chart.update('none');
                 }
             }
         };

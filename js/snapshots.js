@@ -257,12 +257,21 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
 
     // ✅ CORRECTION (10 déc 2025): Identifier les productions DUES jusqu'à cette date (dateEcheance)
     // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe + assignee)
+    // ✅ CORRECTIF (2 mars 2026): Exclure les productions d'un trimestre précédent.
+    // Des productions avec des dates antérieures au semestre courant (ex: a2025 dans h2026)
+    // faussaient le calcul en rendant productionsDues non-vide dès la semaine 1.
+    let dateDebutTrimestreHist = '';
+    try {
+        const cadreHist = db.getSync(cle('cadreCalendrier'), null);
+        if (cadreHist && cadreHist.dateDebut) dateDebutTrimestreHist = cadreHist.dateDebut;
+    } catch (e) { /* silencieux */ }
     const productionsDues = productions.filter(production => {
         if (production.facultatif) return false;
         if (production.type === 'portfolio') return false;
 
         const { date, assignee } = obtenirEcheanceEffective(production, groupeCoursId);
         if (!assignee) return false;
+        if (dateDebutTrimestreHist && date < dateDebutTrimestreHist) return false;
         return date && date <= dateLimite;
     });
 
@@ -501,10 +510,17 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
         // ✅ NOUVEAU (11 déc 2025): C global = taux de remise du DERNIER artefact dû
         // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe + assignee)
         const gcIdSnapshot = obtenirCoursIdPourSnapshots();
+        // ✅ CORRECTIF (2 mars 2026): Exclure les productions d'un trimestre précédent
+        let dateDebutTrimestreSnap = '';
+        try {
+            const cadreSnap = db.getSync(cle('cadreCalendrier'), null);
+            if (cadreSnap && cadreSnap.dateDebut) dateDebutTrimestreSnap = cadreSnap.dateDebut;
+        } catch (e) { /* silencieux */ }
         const productionsDues = productions.filter(p => {
             if (p.facultatif || p.type === 'portfolio') return false;
             const { date, assignee } = obtenirEcheanceEffective(p, gcIdSnapshot);
             if (!assignee) return false;
+            if (dateDebutTrimestreSnap && date < dateDebutTrimestreSnap) return false;
             return date && date <= dateSeance;
         });
         const dernierTravail = productionsDues.length > 0
