@@ -564,19 +564,52 @@ function creerGraphiqueIndividuel(canvasId, da) {
 
         const labels = snapshots.map(s => `Sem. ${s.numSemaine}`);
 
+        // 🆕 Beta 98.3 : Déterminer la première échéance effective pour ce groupe
+        // Les snapshots antérieurs avec C=0 ou P=0 doivent être null (pas de données)
+        let premiereEcheanceIndiv = null;
+        try {
+            const productions = obtenirDonneesSelonMode('productions') || [];
+            const infoCoursIndiv = db.getSync('infoCours', null);
+            const gcIdIndiv = infoCoursIndiv ? (infoCoursIndiv._groupeCoursId || infoCoursIndiv.id || null) : null;
+            const datesEch = productions
+                .filter(p => !p.facultatif && p.type !== 'portfolio')
+                .map(p => {
+                    if (typeof obtenirEcheanceEffective === 'function') {
+                        const { date, assignee } = obtenirEcheanceEffective(p, gcIdIndiv);
+                        return assignee ? date : null;
+                    }
+                    return p.dateEcheance || null;
+                })
+                .filter(Boolean);
+            if (datesEch.length > 0) {
+                premiereEcheanceIndiv = datesEch.sort()[0];
+            }
+        } catch (e) { /* silencieux */ }
+
+        // Helper : traiter 0 comme null si avant la première échéance
+        const corrigerAvantEcheance = (s, valeur) => {
+            if (premiereEcheanceIndiv && valeur === 0) {
+                const dateFin = s.dateFin || s.dateDebut || '';
+                if (dateFin < premiereEcheanceIndiv) return null;
+            }
+            return valeur;
+        };
+
         // 🆕 Beta 98.3 : Ne plus filtrer les 0% — seul null signifie "pas de données"
         const donneesA = snapshots.map(s => {
             const valeur = s.A_cumulatif !== undefined ? s.A_cumulatif : s.A;
             return valeur !== null ? (valeur / 100) + OFFSET_VISUEL.A : null;
         });
 
-        const donneesC = snapshots.map(s =>
-            s.C !== null ? (s.C / 100) + OFFSET_VISUEL.C : null
-        );
+        const donneesC = snapshots.map(s => {
+            const valeur = corrigerAvantEcheance(s, s.C);
+            return valeur !== null ? (valeur / 100) + OFFSET_VISUEL.C : null;
+        });
 
-        const donneesP = snapshots.map(s =>
-            s.P !== null ? (s.P / 100) + OFFSET_VISUEL.P : null
-        );
+        const donneesP = snapshots.map(s => {
+            const valeur = corrigerAvantEcheance(s, s.P);
+            return valeur !== null ? (valeur / 100) + OFFSET_VISUEL.P : null;
+        });
 
         // Récupérer les événements pédagogiques pour marqueurs visuels
         const jetonsParDate = obtenirJetonsParDate(da, snapshots);
@@ -1555,6 +1588,30 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
         // Décalage visuel aléatoire pour séparer les courbes superposées (±1.5%)
         const genererOffset = () => (Math.random() - 0.5) * 0.03;
 
+        // 🆕 Beta 98.3 : Déterminer la date de la première échéance effective (pour C et P)
+        // Les snapshots antérieurs à cette date avec C=0 ou P=0 doivent être traités comme null
+        let premiereEcheance = null;
+        if (indice === 'C' || indice === 'P') {
+            try {
+                const productions = obtenirDonneesSelonMode('productions') || [];
+                const infoCoursGraph = db.getSync('infoCours', null);
+                const gcIdGraph = infoCoursGraph ? (infoCoursGraph._groupeCoursId || infoCoursGraph.id || null) : null;
+                const dates = productions
+                    .filter(p => !p.facultatif && p.type !== 'portfolio')
+                    .map(p => {
+                        if (typeof obtenirEcheanceEffective === 'function') {
+                            const { date, assignee } = obtenirEcheanceEffective(p, gcIdGraph);
+                            return assignee ? date : null;
+                        }
+                        return p.dateEcheance || null;
+                    })
+                    .filter(Boolean);
+                if (dates.length > 0) {
+                    premiereEcheance = dates.sort()[0];
+                }
+            } catch (e) { /* silencieux */ }
+        }
+
         // Créer un dataset par étudiant
         const datasets = etudiants.map(etudiant => {
             const offsetEtudiant = genererOffset();
@@ -1573,6 +1630,15 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                 } else if (indice === 'P') {
                     // P est déjà cumulatif
                     valeur = etudiantSnapshot.P;
+                }
+
+                // 🆕 Beta 98.3 : Traiter 0 comme null si le snapshot est antérieur à la première échéance
+                // (les anciens snapshots stockaient C=0 au lieu de null avant toute production due)
+                if (premiereEcheance && (indice === 'C' || indice === 'P') && valeur === 0) {
+                    const dateFin = snapshot.dateFin || snapshot.dateDebut || '';
+                    if (dateFin < premiereEcheance) {
+                        valeur = null;
+                    }
                 }
 
                 // Convertir en 0-1 si en pourcentage (valeurs > 1)
