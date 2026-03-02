@@ -3667,8 +3667,14 @@ function genererSectionProductions(da) {
         if (evaluation) {
             // Production évaluée
             // ✅ CORRECTIF (16 déc 2025) : Utiliser dateEcheance de la production, pas dateEvaluation
+            // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
+            const infoCoursProf = db.getSync('infoCours', null);
+            const gcIdProf = infoCoursProf ? (infoCoursProf._groupeCoursId || infoCoursProf.id || null) : null;
+            const echeanceProf = (typeof obtenirEcheanceEffective === 'function')
+                ? obtenirEcheanceEffective(production, gcIdProf).date
+                : production.dateEcheance;
             // Note: +T12:00:00 évite le décalage de fuseau horaire (UTC vs local)
-            const dateEcheance = production.dateEcheance || '';
+            const dateEcheance = echeanceProf || '';
             const dateFormatee = dateEcheance ? new Date(dateEcheance + 'T12:00:00').toLocaleDateString('fr-CA') : '—';
 
             // Détecter les jetons appliqués
@@ -3713,8 +3719,14 @@ function genererSectionProductions(da) {
         } else {
             // Production non remise
             // ✅ CORRECTIF (16 déc 2025) : Afficher dateEcheance même si non évaluée
+            // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
+            const infoCoursNonEval = db.getSync('infoCours', null);
+            const gcIdNonEval = infoCoursNonEval ? (infoCoursNonEval._groupeCoursId || infoCoursNonEval.id || null) : null;
+            const echeanceNonEval = (typeof obtenirEcheanceEffective === 'function')
+                ? obtenirEcheanceEffective(production, gcIdNonEval).date
+                : production.dateEcheance;
             // Note: +T12:00:00 évite le décalage de fuseau horaire (UTC vs local)
-            const dateEcheance = production.dateEcheance || '';
+            const dateEcheance = echeanceNonEval || '';
             const dateFormateeNonEval = dateEcheance ? new Date(dateEcheance + 'T12:00:00').toLocaleDateString('fr-CA') : '—';
             return {
                 production: production.titre,

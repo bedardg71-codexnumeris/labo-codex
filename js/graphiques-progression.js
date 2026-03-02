@@ -564,17 +564,18 @@ function creerGraphiqueIndividuel(canvasId, da) {
 
         const labels = snapshots.map(s => `Sem. ${s.numSemaine}`);
 
+        // 🆕 Beta 98.3 : Ne plus filtrer les 0% — seul null signifie "pas de données"
         const donneesA = snapshots.map(s => {
             const valeur = s.A_cumulatif !== undefined ? s.A_cumulatif : s.A;
-            return valeur !== null && valeur !== 0 ? (valeur / 100) + OFFSET_VISUEL.A : null;
+            return valeur !== null ? (valeur / 100) + OFFSET_VISUEL.A : null;
         });
 
         const donneesC = snapshots.map(s =>
-            s.C !== null && s.C !== 0 ? (s.C / 100) + OFFSET_VISUEL.C : null
+            s.C !== null ? (s.C / 100) + OFFSET_VISUEL.C : null
         );
 
         const donneesP = snapshots.map(s =>
-            s.P !== null && s.P !== 0 ? (s.P / 100) + OFFSET_VISUEL.P : null
+            s.P !== null ? (s.P / 100) + OFFSET_VISUEL.P : null
         );
 
         // Récupérer les événements pédagogiques pour marqueurs visuels

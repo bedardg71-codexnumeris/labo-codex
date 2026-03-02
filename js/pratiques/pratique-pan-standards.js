@@ -253,14 +253,20 @@ class PratiquePANStandards {
         const productions = this._lireProductions();
 
         // Fonction helper pour obtenir dateEcheance de la production
-        // Les jetons servent uniquement à comptabiliser, pas à modifier l'échéance
+        // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
+        const infoCoursPan = db.getSync('infoCours', null);
+        const gcIdPan = infoCoursPan ? (infoCoursPan._groupeCoursId || infoCoursPan.id || null) : null;
         const obtenirDateEcheance = (evaluation) => {
             const production = productions.find(p => p.id === evaluation.productionId);
-            if (!production || !production.dateEcheance) {
-                // Fallback: utiliser dateEvaluation si pas de dateEcheance configurée
+            if (!production) {
                 return evaluation.dateEvaluation;
             }
-            return production.dateEcheance;
+            if (typeof obtenirEcheanceEffective === 'function') {
+                const { date, assignee } = obtenirEcheanceEffective(production, gcIdPan);
+                if (!assignee) return null;
+                return date || evaluation.dateEvaluation;
+            }
+            return production.dateEcheance || evaluation.dateEvaluation;
         };
 
         // ✅ DEBUG TEMPORAIRE (10 déc 2025): Vérifier filtrage pour DA spécifique
@@ -377,7 +383,11 @@ class PratiquePANStandards {
         }
 
         // Vérifier si l'évaluation terminale était due avant dateLimite
-        const dateEcheanceTerminale = productionTerminale.dateEcheance;
+        // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
+        const echeanceTerminale = (typeof obtenirEcheanceEffective === 'function')
+            ? obtenirEcheanceEffective(productionTerminale, gcIdPan)
+            : { date: productionTerminale.dateEcheance, assignee: true };
+        const dateEcheanceTerminale = echeanceTerminale.date;
         if (!dateEcheanceTerminale || dateEcheanceTerminale > dateLimite) {
             // L'évaluation terminale n'était pas encore due, retourner seulement le portfolio
             const indiceP = moyennePortfolio / 100;
@@ -504,9 +514,16 @@ class PratiquePANStandards {
         const evaluations = this._lireEvaluations();
 
         // 1. Identifier les travaux ASSIGNÉS (ont une dateEcheance et ne sont pas facultatifs)
-        // ✅ CORRECTIF (17 déc 2025): Exclure les portfolios (conteneurs, pas des productions individuelles)
+        // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe + assignee)
+        const infoCoursC = db.getSync('infoCours', null);
+        const gcIdC = infoCoursC ? (infoCoursC._groupeCoursId || infoCoursC.id || null) : null;
         const travauxAssignes = productions.filter(p => {
-            return p.dateEcheance && !p.facultatif && p.type !== 'portfolio';
+            if (p.facultatif || p.type === 'portfolio') return false;
+            if (typeof obtenirEcheanceEffective === 'function') {
+                const { date, assignee } = obtenirEcheanceEffective(p, gcIdC);
+                return assignee && !!date;
+            }
+            return !!p.dateEcheance;
         });
 
         if (travauxAssignes.length === 0) {

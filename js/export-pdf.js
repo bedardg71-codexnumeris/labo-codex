@@ -544,7 +544,12 @@ function genererApercuProductions(productions) {
     `;
 
     productions.forEach(p => {
-        const dateFormatee = p.dateEcheance ? new Date(p.dateEcheance).toLocaleDateString('fr-CA') : '—';
+        // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
+        const infoCoursExp = db.getSync('infoCours', null);
+        const gcIdExp = infoCoursExp ? (infoCoursExp._groupeCoursId || infoCoursExp.id || null) : null;
+        const dateEcheanceExp = (typeof obtenirEcheanceEffective === 'function')
+            ? obtenirEcheanceEffective(p, gcIdExp).date : p.dateEcheance;
+        const dateFormatee = dateEcheanceExp ? new Date(dateEcheanceExp).toLocaleDateString('fr-CA') : '—';
         html += `
             <tr>
                 <td>${escapeHtml(p.titre || '—')}</td>
@@ -638,12 +643,19 @@ async function exporterProductionsPDF(productions, options = {}) {
     const largeurContenu = largeurPage - PDF_CONFIG.marges.gauche - PDF_CONFIG.marges.droite;
 
     // Tableau des productions
-    const donnees = productions.map(p => [
-        p.titre || '—',
-        p.type || '—',
-        p.ponderation ? `${p.ponderation}%` : '—',
-        formaterDate(p.dateEcheance)
-    ]);
+    // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
+    const infoCoursExpPdf = db.getSync('infoCours', null);
+    const gcIdExpPdf = infoCoursExpPdf ? (infoCoursExpPdf._groupeCoursId || infoCoursExpPdf.id || null) : null;
+    const donnees = productions.map(p => {
+        const dateEch = (typeof obtenirEcheanceEffective === 'function')
+            ? obtenirEcheanceEffective(p, gcIdExpPdf).date : p.dateEcheance;
+        return [
+            p.titre || '—',
+            p.type || '—',
+            p.ponderation ? `${p.ponderation}%` : '—',
+            formaterDate(dateEch)
+        ];
+    });
 
     doc.autoTable({
         startY: posY,
@@ -1090,12 +1102,19 @@ async function exporterReferentielCompletPDF(options = {}) {
         let posY = ajouterEntetePage(doc, '1. Productions');
 
         const largeurContenu = largeurPage - PDF_CONFIG.marges.gauche - PDF_CONFIG.marges.droite;
-        const donnees = productions.map(p => [
-            p.titre || '—',
-            p.type || '—',
-            p.ponderation ? `${p.ponderation}%` : '—',
-            formaterDate(p.dateEcheance)
-        ]);
+        // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
+        const infoCoursExpFull = db.getSync('infoCours', null);
+        const gcIdExpFull = infoCoursExpFull ? (infoCoursExpFull._groupeCoursId || infoCoursExpFull.id || null) : null;
+        const donnees = productions.map(p => {
+            const dateEch = (typeof obtenirEcheanceEffective === 'function')
+                ? obtenirEcheanceEffective(p, gcIdExpFull).date : p.dateEcheance;
+            return [
+                p.titre || '—',
+                p.type || '—',
+                p.ponderation ? `${p.ponderation}%` : '—',
+                formaterDate(dateEch)
+            ];
+        });
 
         doc.autoTable({
             startY: posY,

@@ -65,6 +65,24 @@ function getCleGrilles() {
 }
 
 /**
+ * 🆕 Beta 98.3 : Résoudre l'échéance effective d'une production pour un groupe-cours donné
+ * Supporte echeancesParGroupe (multi-groupe) avec fallback sur dateEcheance legacy
+ *
+ * @param {Object} production - La production avec dateEcheance et optionnellement echeancesParGroupe
+ * @param {string} [groupeCoursId] - L'identifiant du groupe-cours (ex: "GC_abc")
+ * @returns {{ date: string|null, assignee: boolean }} - Date effective et statut d'assignation
+ */
+function obtenirEcheanceEffective(production, groupeCoursId) {
+    if (production.echeancesParGroupe && groupeCoursId) {
+        const entree = production.echeancesParGroupe[groupeCoursId];
+        if (entree) {
+            return { date: entree.date || null, assignee: entree.assignee !== false };
+        }
+    }
+    return { date: production.dateEcheance || null, assignee: true };
+}
+
+/**
  * ✅ AJOUT (28 janvier 2026) : Détecter les doublons potentiels dans les productions
  * Retourne une liste des titres qui apparaissent plus d'une fois
  * @param {Array} productionsLocales - Productions de l'utilisateur
@@ -213,10 +231,126 @@ async function afficherTableauProductions() {
    =============================== */
 
 /**
+ * 🆕 Beta 98.3 : Peuple le conteneur d'échéances par groupe-cours
+ * Si plusieurs groupes partagent le même cours-entité, affiche une ligne par groupe
+ * avec checkbox d'assignation + champ date. Sinon, reste en mode simple (champ legacy).
+ *
+ * @param {Object|null} production - La production en cours d'édition (null = nouvelle)
+ */
+function peuplerEcheancesParGroupe(production) {
+    const containerMulti = document.getElementById('containerEcheancesGroupes');
+    const champSimple = document.getElementById('champDateEcheance');
+    const listeContainer = document.getElementById('listeEcheancesGroupes');
+
+    if (!containerMulti || !champSimple || !listeContainer) return;
+
+    // Identifier le coursId de la production (ou du cours actif pour une nouvelle)
+    const coursIdProd = (production && production.coursId)
+        ? production.coursId
+        : (typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null);
+
+    if (!coursIdProd) {
+        // Pas de cours identifié — mode simple
+        containerMulti.classList.add('u-hide');
+        champSimple.style.display = '';
+        return;
+    }
+
+    // Lire les groupes-cours du trimestre actif
+    const groupesCours = db.getSync(cle('groupesCours'), []);
+
+    // Trouver les groupes frères (même coursId dans listeCours)
+    // groupesCours.coursId pointe vers listeCours.id — il faut matcher le cours-entité
+    const listeCours = db.getSync('listeCours', []);
+    const coursActif = listeCours.find(c => c.id === coursIdProd);
+    const sigle = coursActif ? (coursActif.codeCours || coursActif.sigle || coursActif.code || '') : '';
+
+    // Trouver les IDs listeCours qui partagent le même sigle (= même cours-entité)
+    const coursFreres = sigle
+        ? listeCours.filter(c => (c.codeCours || c.sigle || c.code || '') === sigle)
+        : [coursActif].filter(Boolean);
+    const coursFreresIds = new Set(coursFreres.map(c => c.id));
+
+    // Groupes-cours frères = ceux dont le coursId est dans coursFreresIds
+    const groupesFreres = groupesCours.filter(gc => coursFreresIds.has(gc.coursId));
+
+    if (groupesFreres.length <= 1) {
+        // Un seul groupe — mode simple
+        containerMulti.classList.add('u-hide');
+        champSimple.style.display = '';
+        return;
+    }
+
+    // Mode multi-groupe : cacher le champ simple, afficher le conteneur multi
+    champSimple.style.display = 'none';
+    containerMulti.classList.remove('u-hide');
+
+    // Construire le HTML pour chaque groupe
+    const echeancesParGroupe = (production && production.echeancesParGroupe) || {};
+
+    listeContainer.innerHTML = groupesFreres.map(gc => {
+        const entree = echeancesParGroupe[gc.id];
+        const estAssigne = entree ? (entree.assignee !== false) : false;
+        const dateVal = entree ? (entree.date || '') : '';
+        // Extraire un label court (ex: "gr. 00002")
+        const coursLie = listeCours.find(c => c.id === gc.coursId);
+        const numGroupe = gc.groupeNum || (coursLie && coursLie.groupe) || '?';
+        const labelGroupe = `gr. ${String(numGroupe).padStart(5, '0')}`;
+
+        return `<div style="display: flex; align-items: center; gap: 10px;" data-gc-id="${gc.id}">
+            <label style="display: flex; align-items: center; gap: 6px; min-width: 140px; cursor: pointer;">
+                <input type="checkbox" class="echeance-gc-checkbox" data-gc-id="${gc.id}"
+                    ${estAssigne ? 'checked' : ''}>
+                <span>${labelGroupe}</span>
+            </label>
+            <input type="date" class="controle-form echeance-gc-date" data-gc-id="${gc.id}"
+                value="${dateVal}" style="width: 180px;"
+                ${estAssigne ? '' : 'disabled'}>
+        </div>`;
+    }).join('');
+
+    // Event listeners : activer/désactiver le champ date selon la checkbox
+    listeContainer.querySelectorAll('.echeance-gc-checkbox').forEach(cb => {
+        cb.addEventListener('change', () => {
+            const gcId = cb.dataset.gcId;
+            const dateInput = listeContainer.querySelector(`.echeance-gc-date[data-gc-id="${gcId}"]`);
+            if (dateInput) {
+                dateInput.disabled = !cb.checked;
+            }
+        });
+    });
+}
+
+/**
+ * 🆕 Beta 98.3 : Lire les échéances par groupe depuis le formulaire multi-groupe
+ * @returns {Object|null} echeancesParGroupe ou null si mode simple
+ */
+function lireEcheancesParGroupeDepuisFormulaire() {
+    const containerMulti = document.getElementById('containerEcheancesGroupes');
+    if (!containerMulti || containerMulti.classList.contains('u-hide')) return null;
+
+    const listeContainer = document.getElementById('listeEcheancesGroupes');
+    if (!listeContainer) return null;
+
+    const result = {};
+    const checkboxes = listeContainer.querySelectorAll('.echeance-gc-checkbox');
+    checkboxes.forEach(cb => {
+        const gcId = cb.dataset.gcId;
+        const dateInput = listeContainer.querySelector(`.echeance-gc-date[data-gc-id="${gcId}"]`);
+        result[gcId] = {
+            assignee: cb.checked,
+            date: (dateInput && dateInput.value) ? dateInput.value : null
+        };
+    });
+
+    return Object.keys(result).length > 0 ? result : null;
+}
+
+/**
  * Affiche et configure le formulaire de production
- * 
+ *
  * @param {string} id - ID de la production à modifier (null pour création)
- * 
+ *
  * UTILISÉ PAR:
  * - Bouton "Ajouter une production"
  * - modifierEvaluation(id) pour édition
@@ -344,6 +478,9 @@ async function afficherFormProduction(id) {
             // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Charger date d'échéance
             document.getElementById('productionDateEcheance').value = prod.dateEcheance || '';
 
+            // 🆕 Beta 98.3 : Échéances par groupe-cours (multi-groupe)
+            peuplerEcheancesParGroupe(prod);
+
             // 🆕 Beta 95.4 : Catégorie (Sélection/Obligatoire) déplacée vers Structure des évaluations
             // La catégorie est maintenant gérée via checkboxes dans Pratiques → Structure des évaluations
 
@@ -399,6 +536,9 @@ async function afficherFormProduction(id) {
         // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Réinitialiser date d'échéance
         document.getElementById('productionDateEcheance').value = '';
 
+        // 🆕 Beta 98.3 : Échéances par groupe-cours (multi-groupe)
+        peuplerEcheancesParGroupe(null);
+
         // Réinitialiser les checkboxes de pratiques compatibles
         const checkboxesContainer = document.getElementById('checkboxesPratiquesProduction');
         if (checkboxesContainer && typeof GabaritsUtils !== 'undefined') {
@@ -453,7 +593,23 @@ async function sauvegarderProduction() {
     const tache = document.getElementById('productionTache').value.trim();
 
     // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Date d'échéance
-    const dateEcheance = document.getElementById('productionDateEcheance').value || null;
+    // 🆕 Beta 98.3 : Lire les échéances multi-groupe si disponible
+    const echeancesParGroupe = lireEcheancesParGroupeDepuisFormulaire();
+    let dateEcheance;
+    if (echeancesParGroupe) {
+        // Synchroniser dateEcheance legacy avec la date du groupe actif
+        const infoCoursActif = db.getSync('infoCours', null);
+        const gcActifId = infoCoursActif ? (infoCoursActif._groupeCoursId || infoCoursActif.id || null) : null;
+        const entreeActive = gcActifId ? echeancesParGroupe[gcActifId] : null;
+        dateEcheance = (entreeActive && entreeActive.date) ? entreeActive.date : null;
+        // Si aucun groupe actif trouvé, prendre la première date assignée
+        if (!dateEcheance) {
+            const premiereAssignee = Object.values(echeancesParGroupe).find(e => e.assignee && e.date);
+            dateEcheance = premiereAssignee ? premiereAssignee.date : null;
+        }
+    } else {
+        dateEcheance = document.getElementById('productionDateEcheance').value || null;
+    }
 
     // Lire la grille depuis le select (même élément pour tous les types)
     const grille = document.getElementById('productionGrille');
@@ -472,7 +628,11 @@ async function sauvegarderProduction() {
     }
 
     // Les portfolios conteneurs n'ont pas d'échéance - seuls les artefacts individuels en ont
-    if (!dateEcheance && type !== 'portfolio') {
+    // 🆕 Beta 98.3 : En mode multi-groupe, au moins un groupe assigné doit avoir une date
+    const auMoinsUneDateAssignee = echeancesParGroupe
+        ? Object.values(echeancesParGroupe).some(e => e.assignee && e.date)
+        : !!dateEcheance;
+    if (!auMoinsUneDateAssignee && type !== 'portfolio') {
         alert('La date d\'échéance est obligatoire pour les productions (sauf portfolios conteneurs)');
         return;
     }
@@ -538,6 +698,7 @@ async function sauvegarderProduction() {
         echelleId,        // 🆕 Persistance échelle dans le gabarit
         cartoucheId,      // 🆕 Persistance cartouche dans le gabarit
         dateEcheance,     // ✨ NOUVEAU (Beta 94 - 10 déc 2025)
+        echeancesParGroupe: echeancesParGroupe || undefined,  // 🆕 Beta 98.3 : multi-groupe
         pratiquesCompatibles,  // Pratiques de notation compatibles
         verrouille: false,
         dansBibliotheque: true,  // ✅ AJOUT (8 décembre 2025) - Nouvelle production dans bibliothèque par défaut
@@ -2937,6 +3098,9 @@ window.dupliquerProductionBibliotheque = dupliquerProductionBibliotheque;
 
 // 🆕 Beta 95.4 : Assistant de migration des catégories
 window.verifierMigrationCategories = verifierMigrationCategories;
+
+// 🆕 Beta 98.3 : Échéances par groupe-cours
+window.obtenirEcheanceEffective = obtenirEcheanceEffective;
 window.afficherAssistantMigrationCategories = afficherAssistantMigrationCategories;
 window.assignerToutesMigration = assignerToutesMigration;
 window.fermerModalMigration = fermerModalMigration;
