@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 28 fevrier 2026 (Beta 98.2, build 0228-1130)
+> **Derniere mise a jour** : 3 mars 2026 (Beta 98.2.1, build 0203-1840)
 
 ---
 
@@ -1111,6 +1111,24 @@
 - `travaux.js` n'existe pas — la structure reelle est 9 fichiers `travaux-*.js`
 - `auto-perspective.md` n'existe pas — seul `auto-perspective-v5.md` est present
 - Le plan est globalement compatible avec l'etat actuel de l'application
+
+---
+
+## Complete (Beta 98.2.1 - 3 mars 2026)
+
+- [x] **#212** Validation des dates d'echeance hors trimestre (productions) ✅ FAIT (3 mars 2026)
+  - Contraintes `min`/`max` sur les date pickers (simple et multi-groupe) selon `cadreCalendrier`
+  - Avertissement orange en temps reel (`change`) si date hors bornes du trimestre
+  - `confirm()` a la sauvegarde listant les groupes concernes avec dates hors limites
+  - **Fichier** : `js/productions.js`
+
+- [x] **#213** Indicateur de seance a cote des dates d'echeance (productions) ✅ FAIT (3 mars 2026)
+  - Affiche "lundi 16 fev., 1re seance de la semaine 4" a cote de chaque date picker
+  - Rang calcule par groupe via `seancesCompletes` filtrees par `groupeNum`
+  - Permet a l'enseignant de verifier la synchronisation entre groupes
+  - Fallback sur toutes les seances du cours si le filtre par groupe ne donne rien
+  - Mode simple (1 groupe) et multi-groupe supportes
+  - **Fichier** : `js/productions.js`
 
 ---
 
