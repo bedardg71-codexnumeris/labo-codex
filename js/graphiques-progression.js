@@ -1985,6 +1985,9 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
 
         // Curseur pointer
         canvas.addEventListener('mousemove', function(event) {
+            // Garde : si le chart est détruit (navigation SPA), ne rien faire
+            if (!chart || !chart.canvas) return;
+
             const rect = canvas.getBoundingClientRect();
             const mouseX = event.clientX - rect.left;
             const mouseY = event.clientY - rect.top;
@@ -1999,8 +2002,13 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
             }
 
             if (!surElement) {
-                const elements = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
-                surElement = elements.length > 0;
+                try {
+                    const elements = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
+                    surElement = elements.length > 0;
+                } catch (e) {
+                    // Chart.js peut échouer si le canvas est détaché du DOM
+                    return;
+                }
             }
 
             canvas.style.cursor = surElement ? 'pointer' : 'default';
