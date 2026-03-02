@@ -775,8 +775,12 @@ function creerGraphiqueIndividuel(canvasId, da) {
 
         // Obtenir le canvas
         const canvas = document.getElementById(canvasId);
-        if (!canvas) {
-            console.error(`Canvas ${canvasId} introuvable`);
+        if (!canvas || !canvas.parentNode || !canvas.ownerDocument) {
+            console.error(`Canvas ${canvasId} introuvable ou détaché du DOM`);
+            return null;
+        }
+        if (!canvas.offsetParent && canvas.offsetWidth === 0 && canvas.offsetHeight === 0) {
+            console.warn(`Canvas ${canvasId} non visible (parent display:none) — graphique différé`);
             return null;
         }
         const ctx = canvas.getContext('2d');
@@ -1178,8 +1182,12 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
         const donneesP = snapshots.map(s => s.groupe.moyenneP !== null && s.groupe.moyenneP !== 0 ? (s.groupe.moyenneP / 100) + OFFSET_VISUEL.P : null);
 
         // Vérifier que le canvas existe toujours (déjà récupéré en haut de la fonction)
-        if (!canvas) {
-            console.error(`Canvas ${canvasId} introuvable`);
+        if (!canvas || !canvas.parentNode || !canvas.ownerDocument) {
+            console.error(`Canvas ${canvasId} introuvable ou détaché du DOM`);
+            return null;
+        }
+        if (!canvas.offsetParent && canvas.offsetWidth === 0 && canvas.offsetHeight === 0) {
+            console.warn(`Canvas ${canvasId} non visible (parent display:none) — graphique différé`);
             return null;
         }
         const ctx = canvas.getContext('2d');
@@ -1702,8 +1710,14 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
             return null;
         }
 
-        if (!canvas) {
-            console.error(`Canvas ${canvasId} introuvable`);
+        if (!canvas || !canvas.parentNode || !canvas.ownerDocument) {
+            console.error(`Canvas ${canvasId} introuvable ou détaché du DOM`);
+            return null;
+        }
+        // Vérifier que le canvas est visible (Chart.js échoue sur display:none)
+        // offsetParent === null quand un parent a display:none
+        if (!canvas.offsetParent && canvas.offsetWidth === 0 && canvas.offsetHeight === 0) {
+            console.warn(`Canvas ${canvasId} non visible (parent display:none) — graphique différé`);
             return null;
         }
         const ctx = canvas.getContext('2d');
@@ -2973,8 +2987,14 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         }
 
         // Obtenir le canvas
-        if (!canvas) {
-            console.error(`Canvas ${canvasId} introuvable`);
+        if (!canvas || !canvas.parentNode || !canvas.ownerDocument) {
+            console.error(`Canvas ${canvasId} introuvable ou détaché du DOM`);
+            return null;
+        }
+        // Vérifier que le canvas est visible (Chart.js échoue sur display:none)
+        // offsetParent === null quand un parent a display:none
+        if (!canvas.offsetParent && canvas.offsetWidth === 0 && canvas.offsetHeight === 0) {
+            console.warn(`Canvas ${canvasId} non visible (parent display:none) — graphique différé`);
             return null;
         }
         const ctx = canvas.getContext('2d');
@@ -3784,8 +3804,12 @@ function creerGraphiqueCriteres(canvasId, da) {
 
         // Obtenir le canvas
         const canvas = document.getElementById(canvasId);
-        if (!canvas) {
-            console.error(`Canvas ${canvasId} introuvable`);
+        if (!canvas || !canvas.parentNode || !canvas.ownerDocument) {
+            console.error(`Canvas ${canvasId} introuvable ou détaché du DOM`);
+            return null;
+        }
+        if (!canvas.offsetParent && canvas.offsetWidth === 0 && canvas.offsetHeight === 0) {
+            console.warn(`Canvas ${canvasId} non visible (parent display:none) — graphique différé`);
             return null;
         }
         const ctx = canvas.getContext('2d');
@@ -4202,8 +4226,12 @@ function creerGraphiqueDistributionACPE(canvasId) {
 
         // Détruire le graphique existant si présent
         const canvas = document.getElementById(canvasId);
-        if (!canvas) {
-            console.error(`Canvas ${canvasId} introuvable`);
+        if (!canvas || !canvas.parentNode || !canvas.ownerDocument) {
+            console.error(`Canvas ${canvasId} introuvable ou détaché du DOM`);
+            return null;
+        }
+        if (!canvas.offsetParent && canvas.offsetWidth === 0 && canvas.offsetHeight === 0) {
+            console.warn(`Canvas ${canvasId} non visible (parent display:none) — graphique différé`);
             return null;
         }
 
