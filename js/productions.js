@@ -279,6 +279,25 @@ function peuplerEcheancesParGroupe(production) {
         // Un seul groupe — mode simple
         containerMulti.classList.add('u-hide');
         champSimple.style.display = '';
+
+        // 🆕 Beta 98.4 : Indicateur de séance en mode simple
+        if (inputSimple) {
+            const groupeNum = groupesFreres.length === 1 ? (groupesFreres[0].groupe || groupesFreres[0].groupeNum || null) : null;
+            let spanSimple = inputSimple.parentElement.querySelector('.info-seance-echeance');
+            if (!spanSimple) {
+                spanSimple = document.createElement('span');
+                spanSimple.className = 'info-seance-echeance';
+                spanSimple.style.cssText = 'font-size: 0.85em; color: var(--texte-secondaire, #999); display: block; margin-top: 2px;';
+                inputSimple.parentElement.appendChild(spanSimple);
+            }
+            const spanRef = spanSimple; // capture pour le listener
+            inputSimple.addEventListener('change', () => {
+                afficherInfoSeanceEcheance(spanRef, inputSimple.value, coursIdProd, groupeNum);
+            });
+            if (inputSimple.value) {
+                afficherInfoSeanceEcheance(spanRef, inputSimple.value, coursIdProd, groupeNum);
+            }
+        }
         return;
     }
 
@@ -297,7 +316,7 @@ function peuplerEcheancesParGroupe(production) {
         const numGroupe = gc.groupeNum || '?';
         const labelGroupe = `gr. ${String(numGroupe).padStart(5, '0')}`;
 
-        return `<div style="display: flex; align-items: center; gap: 10px;" data-gc-id="${gc.id}">
+        return `<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;" data-gc-id="${gc.id}">
             <label style="display: flex; align-items: center; gap: 6px; min-width: 140px; cursor: pointer;">
                 <input type="checkbox" class="echeance-gc-checkbox" data-gc-id="${gc.id}"
                     ${estAssigne ? 'checked' : ''}>
@@ -308,6 +327,7 @@ function peuplerEcheancesParGroupe(production) {
                 ${dateMinTrimestre ? `min="${dateMinTrimestre}"` : ''}
                 ${dateMaxTrimestre ? `max="${dateMaxTrimestre}"` : ''}
                 ${estAssigne ? '' : 'disabled'}>
+            <span class="info-seance-echeance" data-gc-id="${gc.id}" style="font-size: 0.85em; color: var(--texte-secondaire, #999); white-space: nowrap;"></span>
         </div>`;
     }).join('');
 
@@ -320,6 +340,26 @@ function peuplerEcheancesParGroupe(production) {
                 dateInput.disabled = !cb.checked;
             }
         });
+    });
+
+    // 🆕 Beta 98.4 : Indicateur de séance à côté des dates
+    // Construire un map gcId → groupeNum pour les lookups
+    const mapGcGroupeNum = {};
+    groupesFreres.forEach(gc => { mapGcGroupeNum[gc.id] = gc.groupe || gc.groupeNum || null; });
+
+    // Multi-groupe : listener change + affichage initial
+    listeContainer.querySelectorAll('.echeance-gc-date').forEach(dateInput => {
+        const gcId = dateInput.dataset.gcId;
+        const groupeNum = mapGcGroupeNum[gcId] || null;
+        const spanInfo = listeContainer.querySelector(`.info-seance-echeance[data-gc-id="${gcId}"]`);
+
+        dateInput.addEventListener('change', () => {
+            afficherInfoSeanceEcheance(spanInfo, dateInput.value, coursIdProd, groupeNum);
+        });
+        // Affichage initial si une date est déjà renseignée
+        if (dateInput.value) {
+            afficherInfoSeanceEcheance(spanInfo, dateInput.value, coursIdProd, groupeNum);
+        }
     });
 
     // 🆕 Beta 98.4 : Avertissement en temps réel si date hors trimestre
@@ -363,6 +403,119 @@ function verifierDateHorsTrimestre(inputDate, dateMin, dateMax, labelDebut, labe
         span.style.cssText = 'color: var(--btn-annuler); font-size: 0.85em; display: block; margin-top: 2px;';
         span.textContent = `⚠ Hors trimestre (${labelDebut} – ${labelFin})`;
         inputDate.parentElement.appendChild(span);
+    }
+}
+
+/**
+ * 🆕 Beta 98.4 : Affiche l'info de séance correspondant à une date d'échéance
+ * Ex: "Sem. 4, lundi — 1re séance"
+ *
+ * @param {HTMLElement} spanInfo - Le <span> où afficher le texte
+ * @param {string} dateStr - Date au format YYYY-MM-DD
+ * @param {string|null} coursId - ID du cours
+ * @param {string|null} groupeNum - Numéro du groupe (ex: "00002") pour filtrer les séances
+ */
+function afficherInfoSeanceEcheance(spanInfo, dateStr, coursId, groupeNum) {
+    if (!spanInfo) return;
+    spanInfo.textContent = '';
+
+    if (!dateStr) return;
+
+    // Jour de la semaine en français
+    const dateObj = new Date(dateStr + 'T12:00:00');
+    const jourSemaine = dateObj.toLocaleDateString('fr-CA', { weekday: 'long' });
+    const jourMaj = jourSemaine.charAt(0).toUpperCase() + jourSemaine.slice(1);
+
+    // Numéro de semaine depuis le calendrier complet
+    const calendrier = db.getSync(cle('calendrierComplet'), {});
+    const infoJour = calendrier[dateStr];
+    let numSemaine = infoJour ? infoJour.numeroSemaine : null;
+
+    // Fallback : déduire la semaine du voisinage si jour absent du calendrier
+    if (!numSemaine) {
+        const jourDeSemaine = dateObj.getDay();
+        for (let delta = -6; delta <= 6; delta++) {
+            if (delta === 0) continue;
+            const voisin = new Date(dateObj);
+            voisin.setDate(voisin.getDate() + delta);
+            const voisinStr = voisin.toISOString().split('T')[0];
+            const infoV = calendrier[voisinStr];
+            if (infoV && infoV.numeroSemaine) {
+                // Vérifier même semaine calendaire (même lundi)
+                const lundiDate = new Date(dateObj);
+                lundiDate.setDate(lundiDate.getDate() - ((jourDeSemaine + 6) % 7));
+                const lundiVoisin = new Date(voisin);
+                lundiVoisin.setDate(lundiVoisin.getDate() - ((voisin.getDay() + 6) % 7));
+                if (lundiDate.toISOString().split('T')[0] === lundiVoisin.toISOString().split('T')[0]) {
+                    numSemaine = infoV.numeroSemaine;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!numSemaine) {
+        spanInfo.textContent = jourMaj;
+        return;
+    }
+
+    // Rang de la séance dans la semaine, filtré par groupe
+    let rang = 0;
+    let total = 0;
+
+    if (typeof obtenirSeancesCompletes === 'function') {
+        const seancesCompletes = obtenirSeancesCompletes(coursId);
+
+        // Filtrer par groupe si possible
+        let datesGroupeSemaine = [];
+        if (groupeNum) {
+            datesGroupeSemaine = Object.entries(seancesCompletes)
+                .filter(([date, seances]) => {
+                    const info = calendrier[date];
+                    if (!info || info.numeroSemaine !== numSemaine) return false;
+                    return Array.isArray(seances) && seances.some(s => s.groupe === groupeNum);
+                })
+                .map(([date]) => date)
+                .sort();
+        }
+
+        // Fallback : toutes les séances du cours si le filtre par groupe ne donne rien
+        if (datesGroupeSemaine.length === 0) {
+            datesGroupeSemaine = Object.entries(seancesCompletes)
+                .filter(([date, seances]) => {
+                    const info = calendrier[date];
+                    if (!info || info.numeroSemaine !== numSemaine) return false;
+                    return Array.isArray(seances) && seances.length > 0;
+                })
+                .map(([date]) => date)
+                .sort();
+        }
+
+        rang = datesGroupeSemaine.indexOf(dateStr) + 1;
+        total = datesGroupeSemaine.length;
+
+        // Si la date n'est pas pile un jour de séance, trouver la séance la plus proche suivante
+        if (rang === 0 && datesGroupeSemaine.length > 0) {
+            const prochaine = datesGroupeSemaine.find(d => d >= dateStr);
+            if (prochaine) {
+                rang = datesGroupeSemaine.indexOf(prochaine) + 1;
+            } else {
+                // Après la dernière séance de la semaine
+                rang = datesGroupeSemaine.length;
+            }
+        }
+    }
+
+    // Construire le label : "lundi 16 fév., 1re séance de la semaine 4"
+    const dateCourte = (typeof formaterDateCourte === 'function') ? formaterDateCourte(dateStr) : '';
+    const prefixe = `${jourMaj.toLowerCase()} ${dateCourte}`;
+
+    if (rang > 0) {
+        const ordinaux = ['', '1re', '2e', '3e', '4e', '5e'];
+        const ordinal = ordinaux[rang] || `${rang}e`;
+        spanInfo.textContent = `${prefixe}, ${ordinal} séance de la semaine ${numSemaine}`;
+    } else {
+        spanInfo.textContent = `${prefixe}, semaine ${numSemaine}`;
     }
 }
 
