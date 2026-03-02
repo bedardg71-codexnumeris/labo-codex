@@ -574,7 +574,6 @@
             try {
                 const indexedDBKeys = await this.keys();
                 let synced = 0;
-                let skipped = 0;
                 let inMemory = 0;
 
                 for (const key of indexedDBKeys) {
@@ -584,32 +583,28 @@
                     // Lire depuis IndexedDB
                     const value = await this.get(key);
 
-                    // Vérifier si la clé existe déjà dans localStorage
-                    const existsInCache = localStorage.getItem(key) !== null;
-
-                    if (!existsInCache) {
-                        // Clé manquante dans cache, essayer de synchroniser
-                        try {
-                            this._setLocalStorage(key, value);
-                            synced++;
-                        } catch (e) {
-                            // Quota dépassé - stocker dans le cache mémoire
-                            if (e.name === 'QuotaExceededError' || e.code === 22 ||
-                                (e.message && e.message.toLowerCase().includes('quota'))) {
-                                console.warn(`[DB] ⚠️ Clé "${key}" trop grande pour localStorage (${this._estimateSize(value)} bytes), utilisation cache mémoire`);
-                                this.memoryCache.set(key, value);
-                                inMemory++;
-                            } else {
-                                throw e;
-                            }
+                    // Toujours synchroniser depuis IndexedDB (source de vérité)
+                    try {
+                        this._setLocalStorage(key, value);
+                        // localStorage à jour, pas besoin du cache mémoire
+                        this.memoryCache.delete(key);
+                        synced++;
+                    } catch (e) {
+                        // Quota dépassé - stocker dans le cache mémoire
+                        if (e.name === 'QuotaExceededError' || e.code === 22 ||
+                            (e.message && e.message.toLowerCase().includes('quota'))) {
+                            console.warn(`[DB] ⚠️ Clé "${key}" trop grande pour localStorage (${this._estimateSize(value)} bytes), utilisation cache mémoire`);
+                            // Supprimer la version périmée de localStorage
+                            try { localStorage.removeItem(key); } catch (ex) { /* ignore */ }
+                            this.memoryCache.set(key, value);
+                            inMemory++;
+                        } else {
+                            throw e;
                         }
-                    } else {
-                        // Clé déjà présente, on garde la version localStorage (cache chaud)
-                        skipped++;
                     }
                 }
 
-                console.log(`✅ [DB] Synchronisation terminée: ${synced} clés localStorage, ${skipped} déjà en cache, ${inMemory} en mémoire`);
+                console.log(`✅ [DB] Synchronisation terminée: ${synced} clés localStorage, ${inMemory} en mémoire`);
 
                 // ✅ Définir flag global pour indiquer que la DB est prête
                 window.dbReady = true;
@@ -795,15 +790,19 @@
          * @returns {*} Valeur stockée ou valeur par défaut
          */
         getSync(key, defaultValue = null) {
-            // 1. Chercher dans localStorage (cache principal)
+            // 1. Chercher dans le cache mémoire EN PREMIER
+            // memoryCache contient la version fraîche quand les données sont trop
+            // volumineuses pour localStorage (QuotaExceeded). setSync() supprime
+            // memoryCache quand localStorage réussit, donc si memoryCache a la
+            // valeur, c'est la source de vérité.
+            if (this.memoryCache.has(key)) {
+                return this.memoryCache.get(key);
+            }
+
+            // 2. Chercher dans localStorage (cache persistant)
             const localValue = this._getLocalStorage(key, null);
             if (localValue !== null) {
                 return localValue;
-            }
-
-            // 2. Chercher dans le cache mémoire (pour les grosses clés)
-            if (this.memoryCache.has(key)) {
-                return this.memoryCache.get(key);
             }
 
             // 3. Non trouvé, retourner la valeur par défaut
