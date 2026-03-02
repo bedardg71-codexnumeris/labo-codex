@@ -244,6 +244,18 @@ function peuplerEcheancesParGroupe(production) {
 
     if (!containerMulti || !champSimple || !listeContainer) return;
 
+    // 🆕 Beta 98.4 : Lire les bornes du trimestre pour contraindre les date pickers
+    const cadreCalendrier = db.getSync(cle('cadreCalendrier'), null);
+    const dateMinTrimestre = cadreCalendrier ? cadreCalendrier.dateDebut : null;
+    const dateMaxTrimestre = cadreCalendrier ? cadreCalendrier.finCours : null;
+
+    // Appliquer min/max sur le champ date simple
+    const inputSimple = document.getElementById('productionDateEcheance');
+    if (inputSimple) {
+        if (dateMinTrimestre) inputSimple.setAttribute('min', dateMinTrimestre);
+        if (dateMaxTrimestre) inputSimple.setAttribute('max', dateMaxTrimestre);
+    }
+
     // Identifier le coursId de la production (ou du cours actif pour une nouvelle)
     const coursIdProd = (production && production.coursId)
         ? production.coursId
@@ -293,6 +305,8 @@ function peuplerEcheancesParGroupe(production) {
             </label>
             <input type="date" class="controle-form echeance-gc-date" data-gc-id="${gc.id}"
                 value="${dateVal}" style="width: 180px;"
+                ${dateMinTrimestre ? `min="${dateMinTrimestre}"` : ''}
+                ${dateMaxTrimestre ? `max="${dateMaxTrimestre}"` : ''}
                 ${estAssigne ? '' : 'disabled'}>
         </div>`;
     }).join('');
@@ -307,6 +321,49 @@ function peuplerEcheancesParGroupe(production) {
             }
         });
     });
+
+    // 🆕 Beta 98.4 : Avertissement en temps réel si date hors trimestre
+    if (dateMinTrimestre || dateMaxTrimestre) {
+        const labelDebut = dateMinTrimestre ? formaterDateCourte(dateMinTrimestre) : '?';
+        const labelFin = dateMaxTrimestre ? formaterDateCourte(dateMaxTrimestre) : '?';
+
+        // Multi-groupe
+        listeContainer.querySelectorAll('.echeance-gc-date').forEach(dateInput => {
+            dateInput.addEventListener('change', () => {
+                verifierDateHorsTrimestre(dateInput, dateMinTrimestre, dateMaxTrimestre, labelDebut, labelFin);
+            });
+        });
+
+        // Simple
+        if (inputSimple) {
+            inputSimple.addEventListener('change', () => {
+                verifierDateHorsTrimestre(inputSimple, dateMinTrimestre, dateMaxTrimestre, labelDebut, labelFin);
+            });
+        }
+    }
+}
+
+/**
+ * 🆕 Beta 98.4 : Vérifie si une date est hors bornes du trimestre et affiche/retire un avertissement
+ */
+function verifierDateHorsTrimestre(inputDate, dateMin, dateMax, labelDebut, labelFin) {
+    // Retirer un éventuel warning existant
+    const existant = inputDate.parentElement.querySelector('.warn-hors-trimestre');
+    if (existant) existant.remove();
+
+    const val = inputDate.value;
+    if (!val) return;
+
+    const horsMin = dateMin && val < dateMin;
+    const horsMax = dateMax && val > dateMax;
+
+    if (horsMin || horsMax) {
+        const span = document.createElement('span');
+        span.className = 'warn-hors-trimestre';
+        span.style.cssText = 'color: var(--btn-annuler); font-size: 0.85em; display: block; margin-top: 2px;';
+        span.textContent = `⚠ Hors trimestre (${labelDebut} – ${labelFin})`;
+        inputDate.parentElement.appendChild(span);
+    }
 }
 
 /**
@@ -623,6 +680,49 @@ async function sauvegarderProduction() {
     if (!auMoinsUneDateAssignee && type !== 'portfolio') {
         alert('La date d\'échéance est obligatoire pour les productions (sauf portfolios conteneurs)');
         return;
+    }
+
+    // 🆕 Beta 98.4 : Avertissement si dates hors bornes du trimestre
+    if (type !== 'portfolio') {
+        const cadreCalendrier = db.getSync(cle('cadreCalendrier'), null);
+        const dateMinTri = cadreCalendrier ? cadreCalendrier.dateDebut : null;
+        const dateMaxTri = cadreCalendrier ? cadreCalendrier.finCours : null;
+
+        if (dateMinTri || dateMaxTri) {
+            const horsLimites = [];
+
+            if (echeancesParGroupe) {
+                // Mode multi-groupe : vérifier chaque groupe assigné
+                const groupesCours = db.getSync(cle('groupesCours'), []);
+                for (const [gcId, entree] of Object.entries(echeancesParGroupe)) {
+                    if (!entree.assignee || !entree.date) continue;
+                    const horsMin = dateMinTri && entree.date < dateMinTri;
+                    const horsMax = dateMaxTri && entree.date > dateMaxTri;
+                    if (horsMin || horsMax) {
+                        const gc = groupesCours.find(g => g.id === gcId);
+                        const numGroupe = gc ? (gc.groupeNum || '?') : '?';
+                        const label = `gr. ${String(numGroupe).padStart(5, '0')}`;
+                        horsLimites.push(`${label} (${entree.date})`);
+                    }
+                }
+            } else if (dateEcheance) {
+                // Mode simple
+                const horsMin = dateMinTri && dateEcheance < dateMinTri;
+                const horsMax = dateMaxTri && dateEcheance > dateMaxTri;
+                if (horsMin || horsMax) {
+                    horsLimites.push(dateEcheance);
+                }
+            }
+
+            if (horsLimites.length > 0) {
+                const labelDebut = dateMinTri ? formaterDateCourte(dateMinTri) : '?';
+                const labelFin = dateMaxTri ? formaterDateCourte(dateMaxTri) : '?';
+                const msg = horsLimites.length === 1
+                    ? `L'échéance ${horsLimites[0]} est en dehors du trimestre (${labelDebut} – ${labelFin}). Sauvegarder quand même ?`
+                    : `Les échéances suivantes sont en dehors du trimestre (${labelDebut} – ${labelFin}) :\n- ${horsLimites.join('\n- ')}\n\nSauvegarder quand même ?`;
+                if (!confirm(msg)) return;
+            }
+        }
     }
 
     // 🆕 Beta 95.4 : Utiliser la clé namespacée pour le trimestre actif
