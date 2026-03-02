@@ -564,34 +564,40 @@ function creerGraphiqueIndividuel(canvasId, da) {
 
         const labels = snapshots.map(s => `Sem. ${s.numSemaine}`);
 
-        // 🆕 Beta 98.3 : Déterminer la première échéance effective pour ce groupe
-        // Les snapshots antérieurs avec C=0 ou P=0 doivent être null (pas de données)
-        let premiereEcheanceIndiv = null;
+        // 🆕 Beta 98.3 : Construire la liste des productions assignées pour vérifier
+        // à chaque date de snapshot si des productions sont dues.
+        // Si aucune n'est due → C et P doivent être null (pas 0%).
+        let productionsFiltreesIndiv = [];
+        let gcIdIndiv = null;
         try {
             const productions = obtenirDonneesSelonMode('productions') || [];
             const infoCoursIndiv = db.getSync('infoCours', null);
-            const gcIdIndiv = infoCoursIndiv ? (infoCoursIndiv._groupeCoursId || infoCoursIndiv.id || null) : null;
-            const datesEch = productions
-                .filter(p => !p.facultatif && p.type !== 'portfolio')
-                .map(p => {
-                    if (typeof obtenirEcheanceEffective === 'function') {
-                        const { date, assignee } = obtenirEcheanceEffective(p, gcIdIndiv);
-                        return assignee ? date : null;
-                    }
-                    return p.dateEcheance || null;
-                })
-                .filter(Boolean);
-            if (datesEch.length > 0) {
-                premiereEcheanceIndiv = datesEch.sort()[0];
-            }
+            gcIdIndiv = infoCoursIndiv ? (infoCoursIndiv._groupeCoursId || infoCoursIndiv.id || null) : null;
+            productionsFiltreesIndiv = productions.filter(p => {
+                if (p.facultatif || p.type === 'portfolio') return false;
+                if (typeof obtenirEcheanceEffective === 'function') {
+                    const { date, assignee } = obtenirEcheanceEffective(p, gcIdIndiv);
+                    return assignee && !!date;
+                }
+                return !!p.dateEcheance;
+            });
         } catch (e) { /* silencieux */ }
 
-        // Helper : traiter 0 comme null si avant la première échéance
+        // Helper : si aucune production n'est due à la date du snapshot, retourner null
         const corrigerAvantEcheance = (s, valeur) => {
-            if (premiereEcheanceIndiv && valeur === 0) {
-                const dateFin = s.dateFin || s.dateDebut || '';
-                if (dateFin < premiereEcheanceIndiv) return null;
+            if (valeur === null) return null;
+            if (productionsFiltreesIndiv.length === 0) {
+                // Aucune production assignée → C/P toujours null
+                return null;
             }
+            const dateSnapshot = s.dateFin || s.dateDebut || '';
+            const nbDues = productionsFiltreesIndiv.filter(p => {
+                if (typeof obtenirEcheanceEffective === 'function') {
+                    return obtenirEcheanceEffective(p, gcIdIndiv).date <= dateSnapshot;
+                }
+                return p.dateEcheance <= dateSnapshot;
+            }).length;
+            if (nbDues === 0) return null;
             return valeur;
         };
 
@@ -1588,27 +1594,24 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
         // Décalage visuel aléatoire pour séparer les courbes superposées (±1.5%)
         const genererOffset = () => (Math.random() - 0.5) * 0.03;
 
-        // 🆕 Beta 98.3 : Déterminer la date de la première échéance effective (pour C et P)
-        // Les snapshots antérieurs à cette date avec C=0 ou P=0 doivent être traités comme null
-        let premiereEcheance = null;
+        // 🆕 Beta 98.3 : Pour C et P, déterminer à chaque date de snapshot si des productions
+        // sont dues. Si aucune production n'est due à cette date → C/P doivent être null.
+        // Cela corrige les anciens snapshots qui stockaient C=0 au lieu de null.
+        let productionsFiltreesGraph = [];
+        let gcIdGraph = null;
         if (indice === 'C' || indice === 'P') {
             try {
                 const productions = obtenirDonneesSelonMode('productions') || [];
                 const infoCoursGraph = db.getSync('infoCours', null);
-                const gcIdGraph = infoCoursGraph ? (infoCoursGraph._groupeCoursId || infoCoursGraph.id || null) : null;
-                const dates = productions
-                    .filter(p => !p.facultatif && p.type !== 'portfolio')
-                    .map(p => {
-                        if (typeof obtenirEcheanceEffective === 'function') {
-                            const { date, assignee } = obtenirEcheanceEffective(p, gcIdGraph);
-                            return assignee ? date : null;
-                        }
-                        return p.dateEcheance || null;
-                    })
-                    .filter(Boolean);
-                if (dates.length > 0) {
-                    premiereEcheance = dates.sort()[0];
-                }
+                gcIdGraph = infoCoursGraph ? (infoCoursGraph._groupeCoursId || infoCoursGraph.id || null) : null;
+                productionsFiltreesGraph = productions.filter(p => {
+                    if (p.facultatif || p.type === 'portfolio') return false;
+                    if (typeof obtenirEcheanceEffective === 'function') {
+                        const { date, assignee } = obtenirEcheanceEffective(p, gcIdGraph);
+                        return assignee && !!date;
+                    }
+                    return !!p.dateEcheance;
+                });
             } catch (e) { /* silencieux */ }
         }
 
@@ -1632,12 +1635,24 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                     valeur = etudiantSnapshot.P;
                 }
 
-                // 🆕 Beta 98.3 : Traiter 0 comme null si le snapshot est antérieur à la première échéance
-                // (les anciens snapshots stockaient C=0 au lieu de null avant toute production due)
-                if (premiereEcheance && (indice === 'C' || indice === 'P') && valeur === 0) {
-                    const dateFin = snapshot.dateFin || snapshot.dateDebut || '';
-                    if (dateFin < premiereEcheance) {
+                // 🆕 Beta 98.3 : Si aucune production n'est due à la date de ce snapshot,
+                // C et P doivent être null (pas de données), pas 0%.
+                // Corrige les anciens snapshots qui stockaient C=0 au lieu de null.
+                if ((indice === 'C' || indice === 'P') && valeur !== null) {
+                    if (productionsFiltreesGraph.length === 0) {
+                        // Aucune production assignée → C/P toujours null
                         valeur = null;
+                    } else {
+                        const dateSnapshot = snapshot.dateFin || snapshot.dateDebut || '';
+                        const nbDues = productionsFiltreesGraph.filter(p => {
+                            if (typeof obtenirEcheanceEffective === 'function') {
+                                return obtenirEcheanceEffective(p, gcIdGraph).date <= dateSnapshot;
+                            }
+                            return p.dateEcheance <= dateSnapshot;
+                        }).length;
+                        if (nbDues === 0) {
+                            valeur = null;
+                        }
                     }
                 }
 
