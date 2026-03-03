@@ -783,7 +783,7 @@ function afficherFormulaireIntervention(daPreselectionne) {
                             </div>
 
                             <div class="champ-formulaire u-m-0">
-                                <label for="interventionDuree" class="label-formulaire">Dur\u00e9e (heures) :</label>
+                                <label for="interventionDuree" class="label-formulaire">Dur\u00e9e (p\u00e9riodes) :</label>
                                 <input type="number" id="interventionDuree" class="controle-form" min="0.5" max="4" step="0.5" value="2" required>
                             </div>
                         </div>
@@ -942,7 +942,7 @@ function afficherFormulaireModification(interventionId) {
                             </div>
 
                             <div class="champ-formulaire u-m-0">
-                                <label for="interventionDuree" class="label-formulaire">Durée (heures) :</label>
+                                <label for="interventionDuree" class="label-formulaire">Dur\u00e9e (p\u00e9riodes) :</label>
                                 <input type="number" id="interventionDuree" class="controle-form" min="0.5" max="4" step="0.5" value="${intervention.duree || 2}" required>
                             </div>
                         </div>
@@ -1170,7 +1170,7 @@ function ouvrirIntervention(interventionId) {
                         </div>
 
                         <div class="champ-formulaire u-m-0">
-                            <label for="interventionDuree" class="label-formulaire">Dur\u00e9e (heures) :</label>
+                            <label for="interventionDuree" class="label-formulaire">Dur\u00e9e (p\u00e9riodes) :</label>
                             <input type="number" id="interventionDuree" class="controle-form" min="0.5" max="4" step="0.5" value="${intervention.duree || 2}" required>
                         </div>
                     </div>
@@ -1627,7 +1627,7 @@ function transfererPresencesVersModule(interventionId) {
             heures = dureeIntervention;
             note = `Intervention RàI : ${intervention.titre}`;
             nbPresentsAjoutes++;
-            console.log(`   ✅ ${etudiant.prenom} ${etudiant.nom}: PRÉSENT (${heures}h)`);
+            console.log(`   ✅ ${etudiant.prenom} ${etudiant.nom}: PRÉSENT (${heures} pér.)`);
         } else {
             // Étudiant absent (niveau 2 seulement) : 0 heures + note d'absence motivée
             heures = 0;

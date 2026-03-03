@@ -1045,7 +1045,7 @@ function genererSectionMobilisationEngagement(da) {
                                     <span class="badge-intervention-vert" onclick="naviguerVersIntervention('${intervention.id}');">
                                         ${typeIcone} ${dateFormatee}
                                         <span class="badge-analyse-count">
-                                            ${duree}h
+                                            ${duree} pér.
                                         </span>
                                     </span>
                                 `;
@@ -3289,7 +3289,13 @@ function afficherProfilComplet(da) {
         return;
     }
 
-    // 🔄 Forcer le calcul/mise à jour des indices C et P avant affichage
+    // 🔄 FIX #220: Forcer le recalcul complet A + C + P avant affichage
+    if (typeof genererSeancesCompletes === 'function') {
+        genererSeancesCompletes(null);
+    }
+    if (typeof calculerEtSauvegarderIndicesAssiduite === 'function') {
+        calculerEtSauvegarderIndicesAssiduite();
+    }
     if (typeof calculerEtStockerIndicesCP === 'function') {
         calculerEtStockerIndicesCP();
     }
