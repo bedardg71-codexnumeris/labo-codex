@@ -2873,7 +2873,7 @@ async function initialiserNouveauCartoucheAvecEchelle(grilleId, echelleId) {
 
     // Créer ou mettre à jour la structure de cartouche
     cartoucheActuel = {
-        id: cartoucheActuel?.id || ('CART' + Date.now()),
+        id: cartoucheActuel?.id || genererIdUnique('CART_'),
         nom: nomActuel,
         grilleId: grilleId,
         echelleId: echelleId,
@@ -3152,7 +3152,7 @@ function importerCartoucheJSON(event) {
             const grilleId = grilles[0].id; // Utiliser la première grille par défaut
 
             // Générer nouvel ID
-            cartouche.id = `cartouche_${Date.now()}`;
+            cartouche.id = genererIdUnique('CART_');
             cartouche.grilleId = grilleId;
 
             // Sauvegarder
@@ -3397,7 +3397,7 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
                     return;
                 }
                 // Générer un nouvel ID pour éviter les conflits (pattern Productions)
-                const nouvelId = `cartouche_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const nouvelId = genererIdUnique('CART_');
                 cartouche = {
                     ...cartoucheSource,
                     id: nouvelId,
@@ -3540,7 +3540,7 @@ async function dupliquerCartoucheBibliotheque(id, grilleId) {
     // Créer une copie avec un nouvel ID
     const nouvelleCartouche = {
         ...cartouche,
-        id: `cartouche_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: genererIdUnique('CART_'),
         nom: `${cartouche.nom} (copie)`,
         dansBibliotheque: true,
         dateCreation: new Date().toISOString()
@@ -3610,7 +3610,7 @@ async function ajouterCartouchesABibliotheque() {
                 const cartouchesGrille = await db.get(`cartouches_${cartouche.grilleId}`) || [];
                 const nouvelleCartouche = {
                     ...cartouche,
-                    id: 'CART' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    id: genererIdUnique('CART_'),
                     dansBibliotheque: true
                 };
                 cartouchesGrille.push(nouvelleCartouche);

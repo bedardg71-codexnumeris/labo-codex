@@ -121,7 +121,7 @@ function mettreAJourStatsObjectifs() {
  * Crée un nouvel ensemble d'objectifs
  */
 function creerNouvelEnsembleObjectifs() {
-    const id = 'objectifs-' + Date.now();
+    const id = genererIdUnique('objectifs_');
 
     const nouvelEnsemble = {
         id: id,
@@ -673,7 +673,7 @@ function dupliquerEnsembleObjectifs(ensembleId) {
     const copie = JSON.parse(JSON.stringify(ensembleOriginal));
 
     // Générer un nouvel ID unique
-    copie.id = 'ensemble-' + Date.now() + '-' + Math.random().toString(36).substring(2, 9);
+    copie.id = genererIdUnique('objectifs_');
 
     // Modifier le nom pour indiquer que c'est une copie
     copie.nom = ensembleOriginal.nom + ' - Copie';
@@ -837,7 +837,7 @@ Tu peux utiliser, modifier et partager ce matériel selon les conditions de la l
             ensemblesAImporter.forEach(ensemble => {
                 // Vérifier que l'ID n'existe pas déjà
                 if (ensemblesExistants.find(e => e.id === ensemble.id)) {
-                    ensemble.id = ensemble.id + '-import-' + Date.now();
+                    ensemble.id = genererIdUnique('objectifs_');
                 }
 
                 // Préserver les métadonnées CC dans l'ensemble importé

@@ -993,7 +993,7 @@
         const mode = modalites.parObjectifs.modeCalcul || 'comptage';
 
         objectifs.push({
-            id: Date.now(),
+            id: genererIdUnique('PN_'),
             nom: `Objectif ${nouvelIndex}`,
             essentiel: true,
             ponderation: mode === 'moyenne-ponderee' ? 10 : 0,

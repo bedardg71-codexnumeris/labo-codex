@@ -76,7 +76,7 @@ async function creerHoraire(donnees) {
     const horaires = await db.get(CLE_HORAIRES) || [];
 
     const nouvelHoraire = {
-        id: 'HOR_' + Date.now(),
+        id: genererIdUnique('HOR_'),
         nom: donnees.nom || genererNomHoraireAuto(donnees.seances),
         periodesParSemaine: donnees.periodesParSemaine || calculerPeriodes(donnees.seances),
         formatHoraire: donnees.formatHoraire || 'autre',

@@ -723,7 +723,7 @@ function sauvegarderCours() {
     const pratiqueId = selectPratique ? selectPratique.value : db.getSync('pratiqueParDefaut', 'pan-standards');
 
     const nouveauCours = {
-        id: coursEnEdition || 'COURS' + Date.now(),
+        id: coursEnEdition || genererIdUnique('COURS_'),
         codeCours: document.getElementById('codeCours').value,
         nomCours: document.getElementById('nomCours').value,
         numeroCompetence: document.getElementById('numeroCompetence').value,
@@ -833,7 +833,7 @@ function dupliquerCours(id) {
     if (coursOriginal) {
         const nouveauCours = {
             ...coursOriginal,
-            id: 'COURS' + Date.now(),
+            id: genererIdUnique('COURS_'),
             codeCours: coursOriginal.codeCours + ' (copie)',
             dateEnregistrement: new Date().toISOString(),
             dansBibliotheque: true, // ✅ NOUVEAU : Copie visible par défaut
@@ -882,7 +882,7 @@ function dupliquerCoursPourTrimestreActif(id) {
     // Créer la copie avec les infos du nouveau trimestre
     const nouveauCours = {
         ...coursOriginal,
-        id: 'COURS' + Date.now(),
+        id: genererIdUnique('COURS_'),
         session: trimestreActif.session,
         annee: trimestreActif.annee,
         trimestreId: trimestreActif.id,
@@ -1505,7 +1505,7 @@ async function importerCoursSimple(event) {
                     // Ajouter avec nouvel ID et flag dansBibliotheque = false
                     const nouveauCours = {
                         ...coursImporte,
-                        id: 'COURS' + Date.now() + '_' + nbAjoutes,
+                        id: genererIdUnique('COURS_'),
                         dansBibliotheque: false, // Disponible à ajouter
                         actif: false, // Les cours importés ne sont jamais actifs par défaut
                         dateEnregistrement: new Date().toISOString()

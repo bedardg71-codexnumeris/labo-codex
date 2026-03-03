@@ -1060,7 +1060,7 @@ function ajouterCategorie() {
     }
 
     const nouvelleCategorie = {
-        id: 'cat-' + Date.now(),
+        id: genererIdUnique('cat_'),
         nom: nom
     };
 
@@ -1111,7 +1111,7 @@ function ajouterQuestion() {
     }
 
     const nouvelleQuestion = {
-        id: 'q-' + Date.now(),
+        id: genererIdUnique('q_'),
         texte: texte,
         categorieId: categorieEl?.value || null
     };

@@ -311,7 +311,7 @@
      */
     function creerGrilleSpecifications(nom, specifications) {
         return {
-            id: 'GRILLE_SPE_' + Date.now(),
+            id: genererIdUnique('GRILLE_SPE_'),
             nom: nom,
             type: 'specifications',
             description: 'Grille de spécifications pour PAN-SPE',
@@ -905,7 +905,7 @@ La structure est claire (intro, développement, conclusion)"></textarea>
 
         // Créer la grille
         const nouvelleGrille = {
-            id: 'GRILLE_SPE_' + Date.now(),
+            id: genererIdUnique('GRILLE_SPE_'),
             nom: nom,
             type: 'specifications',
             typeSPE: true,

@@ -291,7 +291,7 @@ async function partagerAlignement(carteId) {
     }
 
     var item = {
-        id: 'ALI_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+        id: genererIdUnique('ALI_'),
         nom: exportData.nom,
         dateCreation: exportData.dateCreation,
         dateModification: new Date().toISOString(),
@@ -423,7 +423,7 @@ function importerAlignementFichier(event) {
             // Si le fichier a metadata_cc → import dans la bibliothèque
             if (data.metadata_cc && data.donnees) {
                 var item = {
-                    id: 'ALI_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                    id: genererIdUnique('ALI_'),
                     nom: data.metadata_cc.nom || fichier.name.replace('.json', ''),
                     dateCreation: data.metadata_cc.date_creation || new Date().toISOString(),
                     dateModification: data.metadata_cc.date_modification || new Date().toISOString(),
@@ -522,7 +522,7 @@ async function importerCarteDepuisTrimestre(codeTrimestre, carteId) {
 
         var contenu = donnees.cartes[carteId];
         var item = {
-            id: 'ALI_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+            id: genererIdUnique('ALI_'),
             nom: infosCarte ? infosCarte.nom : 'Sans titre',
             dateCreation: infosCarte ? infosCarte.dateCreation : new Date().toISOString(),
             dateModification: new Date().toISOString(),

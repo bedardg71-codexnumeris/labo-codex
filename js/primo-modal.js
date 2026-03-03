@@ -1083,7 +1083,7 @@ async function creerProduction() {
 
         // Créer l'objet production
         const nouvelleProduction = {
-            id: 'PROD-PRIMO-' + Date.now(),
+            id: genererIdUnique('PROD_'),
             titre,
             description,
             type: 'quiz',
@@ -1147,7 +1147,7 @@ function creerEchelleDepuisParcours() {
 
     if (choix === 'idme') {
         echelle = {
-            id: 'echelle-idme-' + Date.now(),
+            id: genererIdUnique('ECH_'),
             nom: 'IDME',
             niveaux: [
                 { code: 'I', nom: 'Incomplet', couleur: '#ff9800', valeur: 50, min: 0, max: 64 },
@@ -1159,7 +1159,7 @@ function creerEchelleDepuisParcours() {
         };
     } else if (choix === 'abcd') {
         echelle = {
-            id: 'echelle-abcd-' + Date.now(),
+            id: genererIdUnique('ECH_'),
             nom: 'ABCD',
             niveaux: [
                 { code: 'D', nom: 'D', couleur: '#ff9800', valeur: 50, min: 0, max: 59 },
@@ -1195,7 +1195,7 @@ function creerEchelleDepuisParcours() {
         }
 
         echelle = {
-            id: 'echelle-perso-' + Date.now(),
+            id: genererIdUnique('ECH_'),
             nom: nom,
             niveaux: niveaux,
             dateCreation: new Date().toISOString()
@@ -1233,7 +1233,7 @@ function creerGrilleDepuisParcours() {
 
     if (choix === 'base') {
         grille = {
-            id: 'grille-base-' + Date.now(),
+            id: genererIdUnique('GRILLE_'),
             nom: 'Grille de base',
             description: 'Grille générique avec 4 critères à pondération égale.',
             criteres: [
@@ -1264,7 +1264,7 @@ function creerGrilleDepuisParcours() {
         }
 
         grille = {
-            id: 'grille-perso-' + Date.now(),
+            id: genererIdUnique('GRILLE_'),
             nom: 'Grille personnalisée',
             description: 'Grille avec ' + nbCriteres + ' critères à pondération égale.',
             criteres: criteres,
@@ -1304,7 +1304,7 @@ function creerProductionDepuisParcours() {
     var grilleId = reponsesPrimo['materiel-grille-id-cree'] || null;
 
     var production = {
-        id: 'PROD-' + Date.now(),
+        id: genererIdUnique('PROD_'),
         titre: titre,
         description: '',
         type: type,
@@ -1364,7 +1364,7 @@ function creerCartoucheDepuisParcours() {
     });
 
     var cartouche = {
-        id: 'cartouche-' + Date.now(),
+        id: genererIdUnique('CART_'),
         grilleId: grilleId,
         echelleId: echelleId,
         nom: 'Cartouche - ' + grille.nom,
@@ -1882,7 +1882,7 @@ function creerCoursInitial(reponses) {
     // Retirer le suffixe -MQ/-ML du code si présent
     const codeBase = code.replace(/-[A-Z]{2}$/, '');
     const groupeNumerique = groupe.replace(/^0+/, '') || '1';  // "00094" -> "94"
-    const coursId = codeBase ? `${codeBase}-${trimestreId}-${groupeNumerique}` : 'COURS' + Date.now();
+    const coursId = codeBase ? `${codeBase}-${trimestreId}-${groupeNumerique}` : genererIdUnique('COURS_');
 
     // Créer le nouveau cours
     const nouveauCours = {
@@ -1988,7 +1988,7 @@ function creerGroupeCoursDepuisPrimo(reponses) {
     const nomGC = genererNomGroupeCoursPrimo(trimestreId, codeCours, groupeNum, horaireId);
 
     const nouveauGC = {
-        id: 'GC_' + Date.now(),
+        id: genererIdUnique('GC_'),
         nom: nomGC,                    // Aligné sur Trimestre
         trimestreId: trimestreId,
         coursId: coursId,
@@ -2027,7 +2027,7 @@ function creerOuRecupererEnseignantPrimo(reponses) {
     // Créer nouvel enseignant
     const partiesNom = nom.split(' ');
     const nouvelEnseignant = {
-        id: 'ENS_' + Date.now(),
+        id: genererIdUnique('ENS_'),
         prenom: partiesNom[0] || '',
         nom: partiesNom.slice(1).join(' ') || nom,
         courriel: courriel,
@@ -2070,7 +2070,7 @@ function creerHoraireDansBanquePrimo(reponses, coursId) {
     }
 
     const nouvelHoraire = {
-        id: 'HOR_' + Date.now(),
+        id: genererIdUnique('HOR_'),
         coursId: coursId,
         seances: seances,
         dateCreation: new Date().toISOString().split('T')[0]

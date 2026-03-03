@@ -2271,7 +2271,7 @@
     function grouperSelection() {
         if (selections.size < 2) return;
 
-        const groupeId = 'GRP_' + Date.now();
+        const groupeId = genererIdUnique('GRP_');
         const indices = Array.from(selections).sort((a, b) => a - b);
 
         indices.forEach(i => {

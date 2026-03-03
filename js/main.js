@@ -24,9 +24,17 @@
  * @param {string} prefix - Préfixe (ex: 'EVAL_', 'PROD_', 'CR')
  * @returns {string} - ID unique (ex: 'EVAL_1707123456789_k7x2m')
  */
-window.genererIdUnique = function(prefix = '') {
-    return prefix + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-};
+window.genererIdUnique = (function() {
+    let compteur = 0;
+    return function(prefix) {
+        prefix = prefix || '';
+        compteur = (compteur + 1) % 0xFFFF;
+        const ts = Date.now();
+        const rnd = crypto.getRandomValues(new Uint8Array(6));
+        const hex = Array.from(rnd, b => b.toString(16).padStart(2, '0')).join('');
+        return prefix + ts + '_' + compteur.toString(16) + '_' + hex;
+    };
+})();
 
 /* ===============================
    FONCTION GLOBALE: Toggle visibilité (Beta 97.1)

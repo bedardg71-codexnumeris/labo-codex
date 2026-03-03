@@ -915,7 +915,7 @@ async function migrerVersEntiteEnseignants() {
         const cle = `${prenom.toLowerCase()}_${nom.toLowerCase()}_${courriel.toLowerCase()}`;
 
         if (!enseignantsMap.has(cle)) {
-            const id = 'ENS_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+            const id = genererIdUnique('ENS_');
             enseignantsMap.set(cle, {
                 id: id,
                 prenom: prenom,
@@ -988,7 +988,7 @@ async function migrerVersEntiteCours() {
 
         // Si ce code cours existe déjà, ne pas dupliquer
         if (!coursMap.has(codeCours)) {
-            const id = 'COURS_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+            const id = genererIdUnique('COURS_');
             coursMap.set(codeCours, {
                 id: id,
                 codeCours: codeCours,
@@ -1080,7 +1080,7 @@ async function migrerVersEntiteHoraires() {
 
         // Créer l'horaire si on a des séances
         if (seances.length > 0 || cours.periodesParSemaine || cours.formatHoraire) {
-            const id = 'HOR_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+            const id = genererIdUnique('HOR_');
 
             // Générer un nom basé sur les séances
             let nom = '';
@@ -1156,7 +1156,7 @@ async function migrerVersGroupeCours(mapEnseignants, mapCours, mapHoraires) {
         const groupesCours = [];
 
         coursTrimmestre.forEach(ancienCours => {
-            const gcId = 'GC_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+            const gcId = genererIdUnique('GC_');
 
             const groupeCours = {
                 id: gcId,

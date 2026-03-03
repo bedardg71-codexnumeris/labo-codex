@@ -703,7 +703,7 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
         const enseignantActif = typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : null;
 
         const nouvelleGrille = {
-            id: 'GRILLE' + Date.now(),
+            id: genererIdUnique('GRILLE_'),
             nom: nomGrille,
             criteres: window.tempCriteres || [],
             pratiquesCompatibles: pratiquesCompatibles,
@@ -990,11 +990,11 @@ async function dupliquerGrille(grilleId) {
 
     // Créer la nouvelle grille
     const nouvelleGrille = {
-        id: 'GRILLE' + Date.now(),
+        id: genererIdUnique('GRILLE_'),
         nom: nouveauNom.trim(),
         criteres: grilleOriginale.criteres.map(c => ({
             ...c,
-            id: 'CR' + Date.now() + Math.random()
+            id: genererIdUnique('CR_')
         })),
         dateCreation: new Date().toISOString(),
         dateModification: new Date().toISOString(),
@@ -1051,11 +1051,11 @@ async function dupliquerGrilleActuelle() {
 
     // Créer la nouvelle grille avec les mêmes critères
     const nouvelleGrille = {
-        id: 'GRILLE' + Date.now(),
+        id: genererIdUnique('GRILLE_'),
         nom: nouveauNom.trim(),
         criteres: grilleTemplateActuelle.criteres.map(c => ({
             ...c,
-            id: 'CR' + Date.now() + Math.random()
+            id: genererIdUnique('CR_')
         })),
         dateCreation: new Date().toISOString(),
         dateModification: new Date().toISOString(),
@@ -2305,7 +2305,7 @@ async function ajouterGrilleIndividuelle(id) {
 
             if (grilleSource) {
                 // Générer un nouvel ID pour éviter les conflits (pattern Productions)
-                const nouvelId = `grille_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const nouvelId = genererIdUnique('GRILLE_');
                 grille = {
                     ...grilleSource,
                     id: nouvelId,
@@ -2507,7 +2507,7 @@ async function dupliquerGrilleBibliotheque(id) {
     // Créer une copie avec un nouvel ID
     const nouvelleGrille = {
         ...grille,
-        id: `grille_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: genererIdUnique('GRILLE_'),
         nom: `${grille.nom} (copie)`,
         dansBibliotheque: true,
         dateCreation: new Date().toISOString()
@@ -2642,7 +2642,7 @@ function creerNouvelleGrille() {
 
     // Initialiser tempCriteres avec un premier critère vide
     window.tempCriteres = [{
-        id: 'TEMP_CR' + Date.now(),
+        id: genererIdUnique('TEMP_CR_'),
         nom: '',
         type: 'holistique',
         ponderation: 0,
@@ -2790,7 +2790,7 @@ function modifierCritereTemp(index, champ, valeur) {
 function ajouterCritereTemp() {
     if (!window.tempCriteres) window.tempCriteres = [];
     window.tempCriteres.push({
-        id: 'TEMP_CR' + Date.now(),
+        id: genererIdUnique('TEMP_CR_'),
         nom: '',
         type: 'holistique',
         ponderation: 0,
@@ -3318,7 +3318,7 @@ async function ajouterSousCritere(grilleId, critereIndex) {
     const nouveauCode = grille.criteres[critereIndex].sousCriteres.length;
 
     const nouveauSousCritere = {
-        id: `sc_${Date.now()}`,
+        id: genererIdUnique('SC_'),
         code: nouveauCode.toString(),
         nom: '',
         ponderation: 1.0,
@@ -3475,7 +3475,7 @@ async function dupliquerGrilleDepuisSidebar(id) {
 
     const copie = {
         ...grille,
-        id: Date.now().toString(),
+        id: genererIdUnique('GRILLE_'),
         nom: grille.nom + ' (copie)',
         verrouille: false
     };

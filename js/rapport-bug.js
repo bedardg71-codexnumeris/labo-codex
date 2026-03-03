@@ -335,7 +335,7 @@ function archiverRapportBug(rapport, description, prenom, type) {
         const archives = db.getSync(CLE_RAPPORTS_ARCHIVES, []);
 
         const nouveauRapport = {
-            id: Date.now(),
+            id: genererIdUnique('BUG_'),
             date: new Date().toISOString(),
             prenom: prenom || 'Anonyme',
             description: description || 'Aucune description',

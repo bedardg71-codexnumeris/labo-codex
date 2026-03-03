@@ -43,7 +43,7 @@ async function creerCours(donnees) {
     const cours = await db.get(CLE_COURS) || [];
 
     const nouveauCours = {
-        id: 'COURS_' + Date.now(),
+        id: genererIdUnique('COURS_'),
         codeCours: donnees.codeCours || '',
         nomCours: donnees.nomCours || '',
         discipline: donnees.discipline || '',
