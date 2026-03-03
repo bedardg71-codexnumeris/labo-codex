@@ -246,6 +246,14 @@ async function entrerEnDemo() {
             db.setSync('groupeCoursActif', gcDemo);
         }
 
+        // 6b. Générer le calendrierComplet pour la démo
+        // genererCalendrierComplet() lit cle('cadreCalendrier') et cle('horaireHebdo')
+        // qui pointent maintenant vers demo_* grâce à changerTrimestreActif('demo')
+        if (typeof genererCalendrierComplet === 'function') {
+            genererCalendrierComplet();
+            console.log('[Demo] ✅ calendrierComplet généré pour la démo');
+        }
+
         // 7. Forcer le mode normal (pas d'anonymisation pendant la démo par défaut)
         db.setSync('modeApplication', 'normal');
         if (typeof initialiserSystemeModes === 'function') {
@@ -653,24 +661,26 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
     const horaireDemo = horaires.find(h => h.id === 'HOR_DEMO');
 
     let horaireId = 'HOR_DEMO';
-    if (!horaireDemo) {
-        const nouvelHoraire = {
-            id: 'HOR_DEMO',
-            nom: 'Lun-AM / Mer-PM',
-            periodesParSeance: 2,
-            seances: [
-                { jour: 'lundi', periode: 'AM' },
-                { jour: 'mercredi', periode: 'PM' }
-            ],
-            isDemo: true,
-            dateCreation: new Date().toISOString()
-        };
-        horaires.push(nouvelHoraire);
-        db.setSync(cleHoraires, horaires);
-        console.log(`   ➜ Horaire demo créé: ${nouvelHoraire.nom}`);
+    const nouvelHoraire = {
+        id: 'HOR_DEMO',
+        nom: 'Lun-AM / Mer-PM',
+        periodesParSeance: 2,
+        seances: [
+            { id: 'SEANCE_DEMO_A', lettre: 'A', jour: 'Lundi', debut: '11:00', nombrePeriodes: 2, duree: 2, local: '2309' },
+            { id: 'SEANCE_DEMO_B', lettre: 'B', jour: 'Mercredi', debut: '13:00', nombrePeriodes: 2, duree: 2, local: '1709' }
+        ],
+        isDemo: true,
+        dateCreation: new Date().toISOString()
+    };
+    if (horaireDemo) {
+        // Remplacer l'horaire existant (corrige le format des jours si nécessaire)
+        const idx = horaires.indexOf(horaireDemo);
+        horaires[idx] = nouvelHoraire;
     } else {
-        console.log('   ➜ Horaire demo déjà existant');
+        horaires.push(nouvelHoraire);
     }
+    db.setSync(cleHoraires, horaires);
+    console.log(`   ➜ Horaire demo ${horaireDemo ? 'mis à jour' : 'créé'}: ${nouvelHoraire.nom}`);
 
     // 10. Créer un groupe-cours demo (s'il n'existe pas)
     const cleGC = cleDemo('groupesCours');
@@ -767,10 +777,13 @@ async function supprimerDonneesNamespaceesDemo() {
     }
     console.log(`   ➜ ${clesNamespacees.length} clés demo_* supprimées (localStorage + IndexedDB)`);
 
-    // Supprimer la clé snapshots avec suffixe groupe-cours démo (demo_snapshots_GC_DEMO)
-    db.removeSync('demo_snapshots_GC_DEMO');
-    await db.remove('demo_snapshots_GC_DEMO');
-    console.log('   ➜ demo_snapshots_GC_DEMO supprimée');
+    // Supprimer les clés avec suffixe groupe-cours démo (non-préfixées demo_)
+    const clesGroupeCoursDemo = ['demo_snapshots_GC_DEMO', 'seancesCompletes_gc_GC_DEMO'];
+    for (const cleGCDemo of clesGroupeCoursDemo) {
+        db.removeSync(cleGCDemo);
+        await db.remove(cleGCDemo);
+    }
+    console.log(`   ➜ ${clesGroupeCoursDemo.length} clés groupe-cours démo supprimées`);
 
     // Nettoyage générique : supprimer TOUTE clé commençant par demo_ dans IndexedDB
     try {

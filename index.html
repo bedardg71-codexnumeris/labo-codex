@@ -12181,6 +12181,26 @@
                     <h2>Notes de version</h2>
                     <p class="text-muted">Historique des changements majeurs</p>
 
+                    <!-- Beta 98.4 - Correction indices demo -->
+                    <div class="carte accordeon ouvert" id="accordeon-apropos-beta984">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">&#x25BC;</span> Beta 98.4 &mdash; Correction des indices en mode d&eacute;monstration
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu" style="display: block;">
+                        <p class="text-muted">3 mars 2026</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Indices Assiduit&eacute; (A) et Engagement (E)</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Barres r&eacute;tablies</strong> : Les indices A et E s&rsquo;affichent d&eacute;sormais correctement dans le tableau de bord en mode d&eacute;mo. Le calendrier complet est maintenant g&eacute;n&eacute;r&eacute; automatiquement &agrave; l&rsquo;entr&eacute;e en d&eacute;mo.</li>
+                            <li><strong>Horaire d&eacute;mo corrig&eacute;</strong> : Les s&eacute;ances de l&rsquo;horaire d&eacute;mo utilisent le format standard (jours capitalis&eacute;s, champs complets), align&eacute; sur les vraies entit&eacute;s horaire.</li>
+                            <li><strong>Nettoyage am&eacute;lior&eacute;</strong> : La cl&eacute; <code>seancesCompletes_gc_GC_DEMO</code> est maintenant nettoy&eacute;e en quittant la d&eacute;mo.</li>
+                        </ul>
+
+                        </div>
+                    </div>
+
                     <!-- Beta 98.2 - Toolbar compacte + accueil unifié + nettoyage CSS -->
                     <div class="carte accordeon ouvert" id="accordeon-apropos-beta982">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
@@ -17204,7 +17224,7 @@
         // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
         // Les valeurs ici servent de fallback si version.json n'est pas disponible
         let VERSION_MAJEURE = '98.4';
-        let BUILD_ID = '0303-0912';
+        let BUILD_ID = '0303-1310';
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
