@@ -106,7 +106,24 @@ function calculerAssiduiteSommative(da) {
         ? obtenirSeancesCompletes() : {};
 
     var aujourdhui = new Date().toISOString().split('T')[0];
-    var dates = Object.keys(seancesCompletes).filter(function(d) { return d <= aujourdhui; }).sort();
+
+    // FIX #220: Construire l'ensemble des dates effectivement saisies (au moins 1 record pour n'importe quel étudiant)
+    // Une date du calendrier sans AUCUN record = séance non encore saisie, pas une absence collective
+    var datesSaisies = new Set();
+    presences.forEach(function(p) {
+        if (p.date) datesSaisies.add(p.date);
+    });
+
+    var dates = Object.keys(seancesCompletes).filter(function(d) {
+        // Exclure les dates futures
+        if (d > aujourdhui) return false;
+        // Pour aujourd'hui : inclure seulement si une saisie existe pour cet étudiant
+        if (d === aujourdhui) {
+            return presencesEtudiant.some(function(p) { return p.date === d; });
+        }
+        // Pour les dates passées : inclure seulement si au moins 1 record existe (séance saisie)
+        return datesSaisies.has(d);
+    }).sort();
 
     if (dates.length === 0) {
         return {
@@ -128,22 +145,62 @@ function calculerAssiduiteSommative(da) {
         var nombrePeriodesSeance = typeof obtenirNombrePeriodesSeance === 'function'
             ? obtenirNombrePeriodesSeance(date) : 2;
 
-        totalPeriodesOffertes += nombrePeriodesSeance;
-        nombreSeances++;
-
-        // Chercher l'enregistrement de présence pour cette date
-        var presenceDate = presencesEtudiant.find(function(p) {
+        // Chercher l'enregistrement régulier (non-facultatif) pour cette date
+        var presenceReguliere = presencesEtudiant.find(function(p) {
             return p.date === date && !p.facultatif;
         });
 
-        if (presenceDate) {
-            if (presenceDate.periodesPresentes !== undefined && presenceDate.periodesPresentes !== null) {
-                totalPeriodesPresentes += presenceDate.periodesPresentes;
-            } else if (presenceDate.heures !== undefined && presenceDate.heures !== null) {
-                totalPeriodesPresentes += (presenceDate.heures * 60) / dureePeriode;
+        // Chercher les enregistrements facultatifs (interventions RàI) pour cette date
+        var presencesFacultatives = presencesEtudiant.filter(function(p) {
+            return p.date === date && p.facultatif === true;
+        });
+
+        // Calculer les périodes de la présence régulière
+        var periodesRegulieres = 0;
+        if (presenceReguliere) {
+            if (presenceReguliere.periodesPresentes !== undefined && presenceReguliere.periodesPresentes !== null) {
+                periodesRegulieres = presenceReguliere.periodesPresentes;
+            } else if (presenceReguliere.heures !== undefined && presenceReguliere.heures !== null) {
+                periodesRegulieres = (presenceReguliere.heures * 60) / dureePeriode;
             }
         }
-        // Pas de record = absent (0 période)
+
+        // Calculer les périodes des interventions RàI (présent uniquement)
+        // FIX #220: La durée d'intervention est saisie en PÉRIODES (pas en heures)
+        // Le champ `heures` contient le nombre de périodes directement
+        var periodesInterventions = 0;
+        presencesFacultatives.forEach(function(pf) {
+            var pPeriodes = 0;
+            if (pf.periodesPresentes !== undefined && pf.periodesPresentes !== null) {
+                pPeriodes = pf.periodesPresentes;
+            } else if (pf.heures !== undefined && pf.heures !== null) {
+                pPeriodes = pf.heures; // Valeur déjà en périodes
+            }
+            if (pPeriodes > 0) {
+                periodesInterventions += pPeriodes;
+            }
+        });
+
+        if (presenceReguliere) {
+            // Séance régulière : toujours compter au dénominateur
+            totalPeriodesOffertes += nombrePeriodesSeance;
+            nombreSeances++;
+            // Numérateur : périodes régulières + crédit d'intervention (plafonné aux périodes de la séance)
+            totalPeriodesPresentes += Math.min(periodesRegulieres + periodesInterventions, nombrePeriodesSeance);
+        } else if (presencesFacultatives.length > 0) {
+            // Date avec SEULEMENT des records facultatifs (pas de séance régulière enregistrée)
+            if (periodesInterventions > 0) {
+                // Étudiant PRÉSENT à l'intervention → compte au num ET dén
+                totalPeriodesOffertes += nombrePeriodesSeance;
+                totalPeriodesPresentes += Math.min(periodesInterventions, nombrePeriodesSeance);
+                nombreSeances++;
+            }
+            // Étudiant ABSENT de l'intervention → ne compte NI au num NI au dén
+        } else {
+            // Aucun record du tout → séance saisie mais étudiant absent
+            totalPeriodesOffertes += nombrePeriodesSeance;
+            nombreSeances++;
+        }
     });
 
     if (totalPeriodesOffertes === 0) {
@@ -1182,6 +1239,12 @@ function verifierConfigurationFormatHoraire() {
  * 🆕 BETA 95.7 (22 jan) : Persistance des paramètres (date, groupe, tri)
  */
 function initialiserSaisiePresences() {
+    // 🆕 FIX #220 (3 mars 2026) : Régénérer les séances complètes du groupe-cours actif
+    // pour s'assurer que le cache reflète l'horaire spécifique au groupe-cours.
+    if (typeof genererSeancesCompletes === 'function') {
+        genererSeancesCompletes(null);
+    }
+
     const dateInput = document.getElementById('date-cours');
     const selectGroupe = document.getElementById('selectGroupePresences');
     const selectTri = document.getElementById('selectTriPresences');
@@ -1850,32 +1913,70 @@ function calculerTotalPeriodesAvecCalendrier(da, dateActuelle) {
     var periodesPresentes = 0;
     var periodesOffertes = 0;
 
+    // FIX #220: Ne compter que les dates effectivement saisies (au moins 1 record)
+    var datesSaisies = new Set();
+    presences.forEach(function(p) {
+        if (p.date) datesSaisies.add(p.date);
+    });
+
+    // Filtrer les presences de cet étudiant
+    var presencesEtudiant = presences.filter(function(p) { return p.da === da; });
+
     // Parcourir toutes les dates du calendrier AVANT dateActuelle
     var dates = Object.keys(seancesCompletes).sort();
     for (var i = 0; i < dates.length; i++) {
         var dateSeance = dates[i];
         if (dateActuelle !== null && dateSeance >= dateActuelle) continue;
+        // Ignorer les dates sans aucune saisie (séance non encore enregistrée)
+        if (!datesSaisies.has(dateSeance)) continue;
 
         var nbPeriodes = obtenirNombrePeriodesSeance(dateSeance);
-        periodesOffertes += nbPeriodes;
 
-        // Chercher l'enregistrement de présence pour cet étudiant à cette date
-        var record = null;
-        for (var j = 0; j < presences.length; j++) {
-            if (presences[j].da === da && presences[j].date === dateSeance) {
-                record = presences[j];
-                break;
+        // FIX #220: Même logique facultatif que calculerAssiduiteSommative
+        var presenceReguliere = null;
+        var presencesFacultatives = [];
+        for (var j = 0; j < presencesEtudiant.length; j++) {
+            if (presencesEtudiant[j].date === dateSeance) {
+                if (presencesEtudiant[j].facultatif === true) {
+                    presencesFacultatives.push(presencesEtudiant[j]);
+                } else if (!presenceReguliere) {
+                    presenceReguliere = presencesEtudiant[j];
+                }
             }
         }
 
-        if (record) {
-            if (record.periodesPresentes !== undefined && record.periodesPresentes !== null) {
-                periodesPresentes += record.periodesPresentes;
-            } else if (record.heures !== undefined && record.heures !== null) {
-                periodesPresentes += (record.heures * 60) / dureePeriode;
+        // Périodes régulières
+        var periodesReg = 0;
+        if (presenceReguliere) {
+            if (presenceReguliere.periodesPresentes !== undefined && presenceReguliere.periodesPresentes !== null) {
+                periodesReg = presenceReguliere.periodesPresentes;
+            } else if (presenceReguliere.heures !== undefined && presenceReguliere.heures !== null) {
+                periodesReg = (presenceReguliere.heures * 60) / dureePeriode;
             }
         }
-        // Pas de record = absent (0 période ajoutée)
+
+        // Périodes d'interventions RàI (valeur déjà en périodes)
+        var periodesIntervention = 0;
+        for (var k = 0; k < presencesFacultatives.length; k++) {
+            var pf = presencesFacultatives[k];
+            var pfPer = 0;
+            if (pf.periodesPresentes !== undefined && pf.periodesPresentes !== null) {
+                pfPer = pf.periodesPresentes;
+            } else if (pf.heures !== undefined && pf.heures !== null) {
+                pfPer = pf.heures; // Valeur déjà en périodes
+            }
+            if (pfPer > 0) periodesIntervention += pfPer;
+        }
+
+        if (presenceReguliere) {
+            periodesOffertes += nbPeriodes;
+            periodesPresentes += Math.min(periodesReg + periodesIntervention, nbPeriodes);
+        } else if (presencesFacultatives.length > 0 && periodesIntervention > 0) {
+            periodesOffertes += nbPeriodes;
+            periodesPresentes += Math.min(periodesIntervention, nbPeriodes);
+        } else {
+            periodesOffertes += nbPeriodes;
+        }
     }
 
     return { periodesPresentes: periodesPresentes, periodesOffertes: periodesOffertes };

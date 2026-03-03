@@ -718,8 +718,14 @@ function initialiserModuleTableauBordApercu() {
 function chargerTableauBordApercu() {
     console.log('Chargement du tableau de bord - aperçu');
 
+    // 🆕 FIX #220 (3 mars 2026) : Régénérer les séances complètes du groupe-cours actif
+    // AVANT de calculer l'assiduité. Les seancesCompletes en cache peuvent être stale
+    // (générées avec un horaire partagé au lieu de l'horaire spécifique au groupe-cours).
+    if (typeof genererSeancesCompletes === 'function') {
+        genererSeancesCompletes(null);
+    }
+
     // 🔄 BETA 95.7: Calculer les indices A avant l'affichage
-    console.log('📊 [TDB] Appel calculerEtSauvegarderIndicesAssiduite, fonction existe:', typeof calculerEtSauvegarderIndicesAssiduite === 'function');
     if (typeof calculerEtSauvegarderIndicesAssiduite === 'function') {
         calculerEtSauvegarderIndicesAssiduite();
     }
@@ -812,8 +818,11 @@ function chargerTableauBordApercu() {
         }
 
         // 🆕 BETA 96: Afficher le graphique spaghetti ACP (évolution temporelle par étudiant)
+        // ✅ CORRECTIF (2 mars 2026): Lire la valeur actuelle du dropdown au lieu de hardcoder 'A'
         if (typeof creerGraphiqueGroupeSpaghettiACP === 'function') {
-            creerGraphiqueGroupeSpaghettiACP('graphique-groupe-moyennes', 'A');
+            const selecteurIndice = document.getElementById('selecteur-indice-acp');
+            const indiceActif = selecteurIndice ? selecteurIndice.value : 'A';
+            creerGraphiqueGroupeSpaghettiACP('graphique-groupe-moyennes', indiceActif);
         } else {
             console.warn('⚠️ creerGraphiqueGroupeSpaghettiACP non disponible - Module graphiques-progression.js non chargé ?');
         }

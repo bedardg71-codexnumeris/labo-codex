@@ -102,15 +102,32 @@ function obtenirSeancesHoraire(coursId) {
     // Chaque groupe-cours peut avoir son propre horaire (Lun-Jeu vs Mar-Ven)
     try {
         const groupeCoursActif = db.getSync('groupeCoursActif', null);
-        if (groupeCoursActif && groupeCoursActif.horaireId) {
-            // Lire l'horaire depuis l'entité
-            // 🆕 FIX (1er fév 2026) : Utiliser cle() pour namespacing (horaires est dans CLES_NAMESPACEES)
-            const cleHoraires = cle('horaires');
-            const horaires = db.getSync(cleHoraires, []);
-            const horaire = horaires.find(h => h.id === groupeCoursActif.horaireId);
-            if (horaire && horaire.seances && horaire.seances.length > 0) {
-                console.log('[Horaire] Séances depuis entité horaire:', horaire.nom, horaire.seances.map(s => s.jour));
-                return horaire.seances;
+
+        if (groupeCoursActif) {
+            // 1a. Utiliser horaireId direct
+            if (groupeCoursActif.horaireId) {
+                const cleHoraires = cle('horaires');
+                const horaires = db.getSync(cleHoraires, []);
+                const horaire = horaires.find(h => h.id === groupeCoursActif.horaireId);
+                if (horaire && horaire.seances && horaire.seances.length > 0) {
+                    console.log('[Horaire] Séances depuis entité horaire:', horaire.nom, horaire.seances.map(s => s.jour));
+                    return horaire.seances;
+                }
+            }
+
+            // 1b. 🆕 FIX #220 (3 mars 2026) : Si pas de horaireId direct, chercher
+            // dans la liste des groupes-cours pour récupérer le horaireId
+            const cleGC = cle('groupesCours');
+            const groupesCours = db.getSync(cleGC, []);
+            const gc = groupesCours.find(g => g.id === groupeCoursActif.id);
+            if (gc && gc.horaireId) {
+                const cleHoraires = cle('horaires');
+                const horaires = db.getSync(cleHoraires, []);
+                const horaire = horaires.find(h => h.id === gc.horaireId);
+                if (horaire && horaire.seances && horaire.seances.length > 0) {
+                    console.log('[Horaire] Séances depuis entité horaire (via GC):', horaire.nom, horaire.seances.map(s => s.jour));
+                    return horaire.seances;
+                }
             }
         }
     } catch (e) {
@@ -489,6 +506,10 @@ function genererSeancesCompletes(coursId = null) {
     // 🆕 BETA 95 : Lire les séances horaire du cours spécifique
     const seancesHoraire = obtenirSeancesHoraire(idCours);
 
+    // 🔍 FIX #220 : Log diagnostic pour vérifier le bon nombre de séances
+    const joursUniques = [...new Set(seancesHoraire.map(s => s.jour))];
+    console.log(`📚 Horaire retourné: ${seancesHoraire.length} séance(s) sur ${joursUniques.length} jour(s):`, joursUniques);
+
     // Clé de sortie spécifique au cours
     const cleOutput = cleSeancesCompletes(idCours);
 
@@ -592,12 +613,12 @@ function genererSeancesCompletes(coursId = null) {
         });
     });
 
-    // ÉTAPE 3 : Ajouter les jours de cours sans séances configurées
-    Object.entries(calendrierComplet).forEach(([dateStr, infosJour]) => {
-        if ((infosJour.statut === 'cours' || infosJour.statut === 'reprise') && !seancesCompletes[dateStr]) {
-            seancesCompletes[dateStr] = [];
-        }
-    });
+    // ÉTAPE 3 supprimée (FIX #220, 3 mars 2026).
+    // L'ancien code ajoutait des entrées vides ([]) pour TOUS les jours 'cours' du calendrier
+    // partagé, y compris ceux d'autres groupes-cours. Ces entrées parasites gonflaient
+    // le dénominateur d'assiduité (obtenirNombrePeriodesSeance retourne 2 par défaut
+    // pour un tableau vide). seancesCompletes ne doit contenir que les dates où le
+    // groupe-cours actif a effectivement une séance configurée dans son horaire.
 
     // 🆕 BETA 95 : Stocker dans clé spécifique au cours
     db.setSync(cleOutput, seancesCompletes);
@@ -700,17 +721,37 @@ function obtenirRangSeanceDansSemaine(dateStr, coursId = null) {
 
         if (!numSemaine) return null;
 
-        // Trouver tous les jours de cours de cette semaine selon le calendrier
-        const joursAvecSeances = Object.entries(calendrier)
-            .filter(([date, info]) =>
-                info.numeroSemaine === numSemaine &&
-                (info.statut === 'cours' || info.statut === 'reprise')
-            )
-            .map(([date]) => date)
+        // 🆕 FIX #220 (3 mars 2026) : Utiliser seancesCompletes du groupe-cours actif
+        // au lieu du calendrierComplet partagé. Le calendrier marque comme 'cours' les jours
+        // de TOUS les groupes-cours, ce qui gonflait le rang (ex: "3ème séance" au lieu de "2ème").
+        const seancesCompletesGC = typeof obtenirSeancesCompletes === 'function'
+            ? obtenirSeancesCompletes(coursId) : {};
+
+        // Filtrer les dates de seancesCompletes qui appartiennent à cette semaine
+        const joursAvecSeances = Object.keys(seancesCompletesGC)
+            .filter(date => {
+                const info = calendrier[date];
+                if (!info) return false;
+                // Vérifier le numéro de semaine (en tenant compte des jours-ouvrables sans numéro)
+                let numSemaineDate = info.numeroSemaine;
+                if (!numSemaineDate) {
+                    // Déduire du voisinage (même semaine calendaire)
+                    const dateObj2 = new Date(date + 'T00:00:00');
+                    const jour2 = dateObj2.getDay();
+                    const lundiDate2 = new Date(dateObj2);
+                    lundiDate2.setDate(lundiDate2.getDate() - ((jour2 + 6) % 7));
+                    // Comparer avec le lundi de dateStr
+                    const dateStrObj = new Date(dateStr + 'T00:00:00');
+                    const jourStr = dateStrObj.getDay();
+                    const lundiStr = new Date(dateStrObj);
+                    lundiStr.setDate(lundiStr.getDate() - ((jourStr + 6) % 7));
+                    return lundiDate2.toISOString().split('T')[0] === lundiStr.toISOString().split('T')[0];
+                }
+                return numSemaineDate === numSemaine;
+            })
             .sort();
 
-        // 🆕 FIX (16 fév 2026) : Si dateStr n'est pas dans la liste (jour-ouvrable),
-        // l'insérer à la bonne position pour calculer le rang
+        // Si dateStr n'est pas dans la liste (jour-ouvrable), l'insérer
         if (!joursAvecSeances.includes(dateStr)) {
             joursAvecSeances.push(dateStr);
             joursAvecSeances.sort();
