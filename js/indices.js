@@ -1,21 +1,25 @@
 /* ===============================
    MODULE: INDICES A-C-P-E (CENTRALISÉ)
-   Beta 98.02 - Extraction #206
+   Beta 98.4 - Refacto indice A (#224)
 
-   Regroupe les fonctions de LECTURE et d'UTILITAIRES
+   Regroupe les fonctions de LECTURE, CALCUL et UTILITAIRES
    des indices A-C-P-E, précédemment dispersées dans :
    - profil-etudiant.js (calculerTousLesIndices, calculerPerformancePAN)
    - tableau-bord-apercu.js (calculerIndicesEtudiant, calculerCorrelationPearson, determinerNiveauEngagement)
    - etudiants.js (calculerCorrelationPearson - doublon)
    - portfolio.js (obtenirIndicesCP, obtenirHistoriqueIndicesCP)
 
-   NOTE : Les PRODUCTEURS restent dans leur module d'origine :
-   - calculerEtSauvegarderIndicesAssiduite() → saisie-presences.js
+   PRODUCTEURS :
+   - calculerEtSauvegarderIndicesAssiduite() → ici (déplacé depuis saisie-presences.js)
+   - calculerAssiduite(da, dateLimite) → ici (fonction canonique unique)
+   - calculerAssiduitePourAffichage(da, dateStr, periodesSeanceActuelle) → ici
    - calculerEtStockerIndicesCP() → portfolio.js
 
    DÉPENDANCES (chargées avant) :
-   - db.js → db.getSync()
-   - modes.js → obtenirDonneesSelonMode(), cle()
+   - db.js → db.getSync(), db.setSync()
+   - modes.js → obtenirDonneesSelonMode(), sauvegarderDonneesSelonMode(), cle()
+   - trimestre.js → obtenirSeancesCompletes()
+   - saisie-presences.js → obtenirNombrePeriodesSeance(), obtenirDureePeriode()
 
    =============================== */
 (function() {
@@ -92,6 +96,268 @@ function determinerNiveauEngagement(engagement) {
     if (engagement >= 0.50) return 'modéré';
     if (engagement >= 0.30) return 'fragile';
     return 'insuffisant';
+}
+
+/* ===============================
+   PRODUCTEUR : INDICE A (ASSIDUITÉ)
+   Fonction canonique unique — #224
+   =============================== */
+
+/**
+ * Calcule l'assiduité sommative d'un étudiant.
+ * Source de vérité : seancesCompletes du groupe-cours × datesSaisies du groupe.
+ *
+ * Formule : A = Σ periodesPresentes / Σ periodesOffertes
+ * - Séances facultatives (RàI) : présent → compte aux deux ; absent → ni l'un ni l'autre
+ * - Chaque séance = obtenirNombrePeriodesSeance(date) périodes
+ *
+ * @param {string} da - Numéro DA de l'étudiant
+ * @param {string|null} dateLimite - Date max incluse (YYYY-MM-DD), null = aujourd'hui
+ * @returns {Object} { indice, periodesPresentes, periodesOffertes, nombreSeances }
+ */
+function calculerAssiduite(da, dateLimite) {
+    var presences = obtenirDonneesSelonMode('presences') || [];
+    if (!Array.isArray(presences)) presences = [];
+
+    var presencesEtudiant = presences.filter(function(p) { return p.da === da; });
+
+    var seancesCompletes = typeof obtenirSeancesCompletes === 'function'
+        ? obtenirSeancesCompletes() : {};
+
+    var aujourdhui = dateLimite || new Date().toISOString().split('T')[0];
+
+    // Construire datesSaisies depuis le GROUPE (pas juste l'étudiant) — FIX #220
+    var etudiantsGroupe = obtenirDonneesSelonMode('groupeEtudiants') || [];
+    var dasGroupe = new Set();
+    if (Array.isArray(etudiantsGroupe)) {
+        etudiantsGroupe.forEach(function(e) { if (e.da) dasGroupe.add(String(e.da)); });
+    }
+    var datesSaisies = new Set();
+    presences.forEach(function(p) {
+        if (p.date && dasGroupe.has(String(p.da))) datesSaisies.add(p.date);
+    });
+
+    var dates = Object.keys(seancesCompletes).filter(function(d) {
+        if (d > aujourdhui) return false;
+        // Pour aujourd'hui (ou dateLimite) : inclure seulement si saisie existe pour cet étudiant
+        if (d === aujourdhui && !dateLimite) {
+            return presencesEtudiant.some(function(p) { return p.date === d; });
+        }
+        return datesSaisies.has(d);
+    }).sort();
+
+    if (dates.length === 0) {
+        return { indice: 1, periodesPresentes: 0, periodesOffertes: 0, nombreSeances: 0 };
+    }
+
+    var totalPeriodesOffertes = 0;
+    var totalPeriodesPresentes = 0;
+    var nombreSeances = 0;
+    var dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+
+    dates.forEach(function(date) {
+        var nombrePeriodesSeance = typeof obtenirNombrePeriodesSeance === 'function'
+            ? obtenirNombrePeriodesSeance(date) : 2;
+
+        // Présence régulière (non-facultative)
+        var presenceReguliere = presencesEtudiant.find(function(p) {
+            return p.date === date && !p.facultatif;
+        });
+
+        // Présences facultatives (interventions RàI)
+        var presencesFacultatives = presencesEtudiant.filter(function(p) {
+            return p.date === date && p.facultatif === true;
+        });
+
+        // Périodes régulières
+        var periodesRegulieres = 0;
+        if (presenceReguliere) {
+            if (presenceReguliere.periodesPresentes !== undefined && presenceReguliere.periodesPresentes !== null) {
+                periodesRegulieres = presenceReguliere.periodesPresentes;
+            } else if (presenceReguliere.heures !== undefined && presenceReguliere.heures !== null) {
+                periodesRegulieres = (presenceReguliere.heures * 60) / dureePeriode;
+            }
+        }
+
+        // Périodes d'interventions RàI
+        var periodesInterventions = 0;
+        presencesFacultatives.forEach(function(pf) {
+            var pPeriodes = 0;
+            if (pf.periodesPresentes !== undefined && pf.periodesPresentes !== null) {
+                pPeriodes = pf.periodesPresentes;
+            } else if (pf.heures !== undefined && pf.heures !== null) {
+                pPeriodes = pf.heures;
+            }
+            if (pPeriodes > 0) periodesInterventions += pPeriodes;
+        });
+
+        if (presenceReguliere) {
+            totalPeriodesOffertes += nombrePeriodesSeance;
+            nombreSeances++;
+            totalPeriodesPresentes += Math.min(periodesRegulieres + periodesInterventions, nombrePeriodesSeance);
+        } else if (presencesFacultatives.length > 0) {
+            if (periodesInterventions > 0) {
+                totalPeriodesOffertes += nombrePeriodesSeance;
+                totalPeriodesPresentes += Math.min(periodesInterventions, nombrePeriodesSeance);
+                nombreSeances++;
+            }
+            // Absent de l'intervention → ne compte ni au num ni au dén
+        } else {
+            // Aucun record → séance saisie mais étudiant absent
+            totalPeriodesOffertes += nombrePeriodesSeance;
+            nombreSeances++;
+        }
+    });
+
+    if (totalPeriodesOffertes === 0) {
+        return { indice: 1, periodesPresentes: 0, periodesOffertes: 0, nombreSeances: 0 };
+    }
+
+    var indice = totalPeriodesPresentes / totalPeriodesOffertes;
+    return {
+        indice: Math.min(indice, 1),
+        periodesPresentes: totalPeriodesPresentes,
+        periodesOffertes: totalPeriodesOffertes,
+        nombreSeances: nombreSeances
+    };
+}
+
+/**
+ * Orchestre le calcul et la sauvegarde de l'indice A pour tous les étudiants actifs.
+ * Appelée après chaque enregistrement de présences.
+ * Chaîne calculerEtStockerIndicesCP() pour recalculer E.
+ *
+ * @returns {Object} Structure { sommatif: { da: {...} }, dateCalcul }
+ */
+function calculerEtSauvegarderIndicesAssiduite() {
+    console.log('📊 [Assiduité] Calcul des indices d\'assiduité...');
+
+    var etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+
+    var indices = {
+        sommatif: {},
+        dateCalcul: new Date().toISOString()
+    };
+
+    var etudiantsActifs = (etudiants || []).filter(function(e) {
+        return e.statut !== 'décrochage' && e.statut !== 'abandon';
+    });
+
+    etudiantsActifs.forEach(function(etudiant) {
+        indices.sommatif[etudiant.da] = calculerAssiduite(etudiant.da, null);
+    });
+
+    sauvegarderDonneesSelonMode('indicesAssiduite', indices);
+
+    if (typeof calculerEtStockerIndicesCP === 'function') {
+        calculerEtStockerIndicesCP();
+    }
+
+    console.log('📊 [Assiduité] ✅ Indices sauvegardés (' + Object.keys(indices.sommatif).length + ' étudiants)');
+    return indices;
+}
+
+/**
+ * Calcule l'assiduité en temps réel pour l'affichage dans le tableau de saisie.
+ * Inclut la séance en cours de saisie (pas encore enregistrée).
+ *
+ * @param {string} da - Numéro DA
+ * @param {string} dateStr - Date de la séance en cours (YYYY-MM-DD)
+ * @param {number} periodesSeanceActuelle - Périodes saisies pour la séance en cours
+ * @returns {Object} { taux, totalPeriodesPresentes }
+ */
+function calculerAssiduitePourAffichage(da, dateStr, periodesSeanceActuelle) {
+    var presences = obtenirDonneesSelonMode('presences') || [];
+    if (!Array.isArray(presences)) presences = [];
+
+    var seancesCompletes = typeof obtenirSeancesCompletes === 'function'
+        ? obtenirSeancesCompletes() : {};
+
+    var dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+
+    // Construire datesSaisies depuis le GROUPE — FIX #220
+    var etudiantsGroupe = obtenirDonneesSelonMode('groupeEtudiants') || [];
+    var dasGroupe = new Set();
+    if (Array.isArray(etudiantsGroupe)) {
+        etudiantsGroupe.forEach(function(e) { if (e.da) dasGroupe.add(String(e.da)); });
+    }
+    var datesSaisies = new Set();
+    presences.forEach(function(p) {
+        if (p.date && dasGroupe.has(String(p.da))) datesSaisies.add(p.date);
+    });
+
+    var presencesEtudiant = presences.filter(function(p) { return p.da === da; });
+
+    var periodesPresentes = 0;
+    var periodesOffertes = 0;
+
+    // Parcourir toutes les dates du calendrier AVANT dateStr
+    var dates = Object.keys(seancesCompletes).sort();
+    for (var i = 0; i < dates.length; i++) {
+        var dateSeance = dates[i];
+        if (dateSeance >= dateStr) continue;
+        if (!datesSaisies.has(dateSeance)) continue;
+
+        var nbPeriodes = typeof obtenirNombrePeriodesSeance === 'function'
+            ? obtenirNombrePeriodesSeance(dateSeance) : 2;
+
+        var presenceReguliere = null;
+        var presencesFacultatives = [];
+        for (var j = 0; j < presencesEtudiant.length; j++) {
+            if (presencesEtudiant[j].date === dateSeance) {
+                if (presencesEtudiant[j].facultatif === true) {
+                    presencesFacultatives.push(presencesEtudiant[j]);
+                } else if (!presenceReguliere) {
+                    presenceReguliere = presencesEtudiant[j];
+                }
+            }
+        }
+
+        var periodesReg = 0;
+        if (presenceReguliere) {
+            if (presenceReguliere.periodesPresentes !== undefined && presenceReguliere.periodesPresentes !== null) {
+                periodesReg = presenceReguliere.periodesPresentes;
+            } else if (presenceReguliere.heures !== undefined && presenceReguliere.heures !== null) {
+                periodesReg = (presenceReguliere.heures * 60) / dureePeriode;
+            }
+        }
+
+        var periodesIntervention = 0;
+        for (var k = 0; k < presencesFacultatives.length; k++) {
+            var pf = presencesFacultatives[k];
+            var pfPer = 0;
+            if (pf.periodesPresentes !== undefined && pf.periodesPresentes !== null) {
+                pfPer = pf.periodesPresentes;
+            } else if (pf.heures !== undefined && pf.heures !== null) {
+                pfPer = pf.heures;
+            }
+            if (pfPer > 0) periodesIntervention += pfPer;
+        }
+
+        if (presenceReguliere) {
+            periodesOffertes += nbPeriodes;
+            periodesPresentes += Math.min(periodesReg + periodesIntervention, nbPeriodes);
+        } else if (presencesFacultatives.length > 0 && periodesIntervention > 0) {
+            periodesOffertes += nbPeriodes;
+            periodesPresentes += Math.min(periodesIntervention, nbPeriodes);
+        } else {
+            periodesOffertes += nbPeriodes;
+        }
+    }
+
+    // Ajouter la séance actuelle
+    var nombrePeriodesSeanceActuelle = typeof obtenirNombrePeriodesSeance === 'function'
+        ? obtenirNombrePeriodesSeance(dateStr) : 2;
+
+    var periodesOffertesTotal = periodesOffertes + nombrePeriodesSeanceActuelle;
+    var periodesPresentesTotal = periodesPresentes + periodesSeanceActuelle;
+
+    var taux = periodesOffertesTotal === 0 ? 100 : Math.min(Math.round((periodesPresentesTotal / periodesOffertesTotal) * 100), 100);
+
+    return {
+        taux: taux,
+        totalPeriodesPresentes: Math.round(periodesPresentes + periodesSeanceActuelle)
+    };
 }
 
 /* ===============================
@@ -235,7 +501,7 @@ function calculerPerformancePAN(da) {
 function calculerTousLesIndices(da, pratique = null) {
     // ========================================
     // INDICE A : SINGLE SOURCE OF TRUTH
-    // Lire depuis db.getSync('indicesAssiduite') (calculé par saisie-presences.js)
+    // Lire depuis db.getSync('indicesAssiduite') (calculé par calculerEtSauvegarderIndicesAssiduite ci-dessus)
     // ========================================
     const indicesAssiduite = db.getSync(cle('indicesAssiduite'), {});
     const assiduiteSommatif = indicesAssiduite.sommatif?.[da];
@@ -301,7 +567,7 @@ function calculerTousLesIndices(da, pratique = null) {
 
 /**
  * Récupère les indices calculés pour un étudiant
- * Retourne TOUJOURS sommatif ET alternatif
+ * #224 : Plus de branche alternatif — sommatif uniquement
  *
  * @param {string} da - DA de l'étudiant
  * @param {Object} _cacheIndicesA - Cache optionnel indicesAssiduite
@@ -319,49 +585,29 @@ function calculerIndicesEtudiant(da, _cacheIndicesA, _cacheIndicesCP) {
     const estNouveauFormat = indicesCPEtudiant && !indicesCPEtudiant.SOM && indicesCPEtudiant.C !== undefined;
 
     let indicesSOM = null;
-    let indicesPAN = null;
 
     if (estNouveauFormat) {
         indicesSOM = { C: indicesCPEtudiant.C, P: indicesCPEtudiant.P, E: indicesCPEtudiant.E };
-        indicesPAN = { C: indicesCPEtudiant.C, P: indicesCPEtudiant.P, E: indicesCPEtudiant.E };
     } else if (indicesCPEtudiant) {
         indicesSOM = indicesCPEtudiant.SOM || null;
-        indicesPAN = indicesCPEtudiant.PAN || null;
     }
 
     const assiduiteSommatif = indicesA.sommatif?.[da];
-    const assiduiteAlternatif = indicesA.alternatif?.[da];
+    const nombreSeances = (typeof assiduiteSommatif === 'object') ? (assiduiteSommatif.nombreSeances || 0) : 0;
+    const nombreEvals = indicesSOM?.details?.nbArtefactsRemis || indicesSOM?.details?.nbProductionsRemises || 0;
 
-    const nombreSeancesSOM = (typeof assiduiteSommatif === 'object') ? (assiduiteSommatif.nombreSeances || 0) : 0;
-    const nombreSeancesPAN = (typeof assiduiteAlternatif === 'object') ? (assiduiteAlternatif.nombreSeances || 0) : 0;
-
-    const nombreEvalsSOM = indicesSOM?.details?.nbArtefactsRemis || indicesSOM?.details?.nbProductionsRemises || 0;
-    const nombreEvalsPAN = indicesPAN?.details?.nbArtefactsRemis || indicesPAN?.details?.nbProductionsRemises || 0;
-
-    const indices = {
-        sommatif: {
-            assiduite: (typeof assiduiteSommatif === 'object') ? assiduiteSommatif.indice : (assiduiteSommatif || 0),
-            completion: indicesSOM ? indicesSOM.C / 100 : 0,
-            performance: indicesSOM ? indicesSOM.P / 100 : 0,
-            engagement: indicesSOM && indicesSOM.E !== undefined ? indicesSOM.E : 0,
-            nombreSeances: nombreSeancesSOM,
-            nombreEvaluations: nombreEvalsSOM
-        },
-        alternatif: {
-            assiduite: (typeof assiduiteAlternatif === 'object') ? assiduiteAlternatif.indice : (assiduiteAlternatif || 0),
-            completion: indicesPAN ? indicesPAN.C / 100 : 0,
-            performance: indicesPAN ? indicesPAN.P / 100 : 0,
-            engagement: indicesPAN && indicesPAN.E !== undefined ? indicesPAN.E : 0,
-            nombreSeances: nombreSeancesPAN,
-            nombreEvaluations: nombreEvalsPAN
-        }
+    const sommatif = {
+        assiduite: (typeof assiduiteSommatif === 'object') ? assiduiteSommatif.indice : (assiduiteSommatif || 0),
+        completion: indicesSOM ? indicesSOM.C / 100 : 0,
+        performance: indicesSOM ? indicesSOM.P / 100 : 0,
+        engagement: indicesSOM && indicesSOM.E !== undefined ? indicesSOM.E : 0,
+        nombreSeances: nombreSeances,
+        nombreEvaluations: nombreEvals
     };
+    sommatif.niveauEngagement = determinerNiveauEngagement(sommatif.engagement);
 
-    // NIVEAU D'ENGAGEMENT (basé sur E lu depuis indicesCP)
-    indices.sommatif.niveauEngagement = determinerNiveauEngagement(indices.sommatif.engagement);
-    indices.alternatif.niveauEngagement = determinerNiveauEngagement(indices.alternatif.engagement);
-
-    return indices;
+    // Rétrocompat : alternatif pointe vers sommatif
+    return { sommatif: sommatif, alternatif: sommatif };
 }
 
 /* ===============================
@@ -374,7 +620,11 @@ window.obtenirHistoriqueIndicesCP = obtenirHistoriqueIndicesCP;
 window.calculerPerformancePAN = calculerPerformancePAN;
 window.calculerTousLesIndices = calculerTousLesIndices;
 window.calculerIndicesEtudiant = calculerIndicesEtudiant;
+// Producteurs indice A (#224)
+window.calculerAssiduite = calculerAssiduite;
+window.calculerEtSauvegarderIndicesAssiduite = calculerEtSauvegarderIndicesAssiduite;
+window.calculerAssiduitePourAffichage = calculerAssiduitePourAffichage;
 
-console.log('✅ Module indices.js chargé (Beta 98.02 - centralisation #206)');
+console.log('✅ Module indices.js chargé (Beta 98.4 - refacto indice A #224)');
 
 })();

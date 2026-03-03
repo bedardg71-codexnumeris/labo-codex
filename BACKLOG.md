@@ -40,10 +40,19 @@
   - Simplifier en un seul formulaire ou reorganiser le flux pour qu'il soit plus naturel
   - **Fichier** : `js/interventions.js`
 
-- [ ] **#220** Bug : Calcul de l'assiduite errone dans le profil etudiant
+- [x] **#220** Bug : Calcul de l'assiduite errone dans le profil etudiant ✅ CORRIGE (3 mars 2026, #224)
   - Le pourcentage d'assiduite affiche dans le profil etudiant est incorrect
-  - Investiguer la formule de calcul (presences vs periodes totales vs absences motivees)
+  - Cause : 6 fonctions de calcul concurrentes dont 3 utilisaient `heures` avec denominateur hardcode `heuresCours=2`
+  - Corrige par la refacto #224 (fonction canonique unique `calculerAssiduite` dans indices.js)
   - **Fichier** : `js/profil-etudiant.js`
+
+- [x] **#224** Refacto : Fonction canonique unique pour l'indice A (Assiduite) ✅ COMPLETE (3 mars 2026)
+  - 1 fonction canonique `calculerAssiduite(da, dateLimite)` dans `indices.js` remplace 6 fonctions dispersees
+  - Formule : `A = Σ periodesPresentes / Σ periodesOffertes` (purement sommatif, base periodes)
+  - Source de verite : `seancesCompletes` du groupe-cours × `datesSaisies` du groupe
+  - Suppression de l'indice alternatif (dernieres N seances)
+  - Correction detection d'absences dans le profil : `datesSaisies` construit depuis le GROUPE
+  - **Fichiers** : `js/indices.js` (+250L), `js/saisie-presences.js` (-530L), `js/snapshots.js`, `js/profil-etudiant.js`
 
 ### Qualite du code — Audit fevrier 2026
 
