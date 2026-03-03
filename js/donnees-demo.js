@@ -254,6 +254,18 @@ async function entrerEnDemo() {
             console.log('[Demo] ✅ calendrierComplet généré pour la démo');
         }
 
+        // 6c. Reconstruire les snapshots pour la démo
+        // Permet d'avoir les graphiques de progression A-C-P disponibles
+        if (typeof reconstruireSnapshotsHistoriques === 'function') {
+            console.log('[Demo] Reconstruction des snapshots...');
+            const resultat = await reconstruireSnapshotsHistoriques();
+            if (resultat && resultat.succes) {
+                console.log(`[Demo] ✅ ${resultat.nbSnapshots} snapshots reconstruits`);
+            } else {
+                console.warn('[Demo] ⚠️ Reconstruction snapshots échouée:', resultat?.message);
+            }
+        }
+
         // 7. Forcer le mode normal (pas d'anonymisation pendant la démo par défaut)
         db.setSync('modeApplication', 'normal');
         if (typeof initialiserSystemeModes === 'function') {
