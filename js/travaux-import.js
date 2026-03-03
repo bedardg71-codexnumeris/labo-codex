@@ -285,9 +285,17 @@
         const parseLea = parserNomFichierLea(fichier.name);
 
         // Cle de regroupement pour assemblage multi-pages
-        const groupeDocumentId = parseLea.da && parseLea.nomProduction
-            ? parseLea.da + '_' + parseLea.nomProduction.replace(/\s+/g, '-')
-            : '';
+        let groupeDocumentId = '';
+        if (parseLea.da && parseLea.nomProduction) {
+            // Format LEA complet : DA + nom production
+            groupeDocumentId = parseLea.da + '_' + parseLea.nomProduction.replace(/\s+/g, '-');
+        } else if (daDetecte && productionSelectionnee) {
+            // Fallback : DA detecte + production globale selectionnee
+            groupeDocumentId = daDetecte + '_' + productionSelectionnee;
+        } else if (daDetecte) {
+            // Fallback minimal : regrouper par DA seul
+            groupeDocumentId = daDetecte + '_auto';
+        }
 
         return {
             fichier: fichier,
