@@ -20523,6 +20523,85 @@ body.mode-clair .annot-toolbar {
     color: var(--texte-secondaire, #a0b0c0);
 }
 
+/* ===============================
+   PIPELINE — GROUPES VISUELS
+   =============================== */
+
+.pipeline-groupe-encadre {
+    border: 2px solid var(--accent, #4a90d9);
+    border-radius: var(--radius, 8px);
+    margin: 4px 0;
+    padding: 0;
+    background: var(--surface-elevee, rgba(74, 144, 217, 0.05));
+}
+
+.pipeline-groupe-entete {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px;
+    background: var(--accent, #4a90d9);
+    border-radius: var(--radius, 8px) var(--radius, 8px) 0 0;
+}
+
+.pipeline-groupe-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.pipeline-groupe-defaire {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+}
+
+.pipeline-groupe-defaire:hover {
+    color: #fff;
+}
+
+.pipeline-fichier-groupe {
+    border-left: 2px solid transparent;
+}
+
+/* ===============================
+   FUSION MULTI-FICHIERS
+   =============================== */
+
+.fusion-checkbox {
+    width: 16px;
+    height: 16px;
+    margin: 0 4px 0 0;
+    cursor: pointer;
+    flex-shrink: 0;
+    accent-color: var(--accent, #4a90d9);
+}
+
+.annot-badge-fusion-selectionne {
+    outline: 2px solid var(--accent, #4a90d9);
+    outline-offset: -1px;
+    background: var(--surface-elevee, rgba(74, 144, 217, 0.08));
+}
+
+.travaux-fusion-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.btn-fusion-fichiers {
+    white-space: nowrap;
+}
+
+.fusion-avertissement {
+    color: var(--orange, #ff9800);
+}
+
 
 /* ===============================
    LAYOUT FLEX MODE EVALUATION

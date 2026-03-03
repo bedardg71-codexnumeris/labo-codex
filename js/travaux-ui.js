@@ -26,6 +26,7 @@
     let fichierSelectionneIndex = -1; // -1 = aucune selection dans le pipeline
     let productionFiltreActive = sessionStorage.getItem('travaux-filtre-production') || '';
     let _htmlBadgesGrille = ''; // HTML badges pré-généré pour injection dans toolbar unique
+    let selectionFusion = new Set(); // IDs des fichiers selectionnes pour fusion
 
     function sauvegarderEtatSession() {
         const fichier = travauxVisionneuse.getFichierActuel();
@@ -1271,8 +1272,23 @@
             || '';
 
         // === Colonne gauche : Originaux (apercu pre-traitement) ===
+        // Index des groupes multi-fichiers pour affichage visuel
+        const groupesMulti = new Map(); // groupeDocumentId → [indices]
+        queue.forEach((f, index) => {
+            if (f.groupeDocumentId) {
+                if (!groupesMulti.has(f.groupeDocumentId)) groupesMulti.set(f.groupeDocumentId, []);
+                groupesMulti.get(f.groupeDocumentId).push(index);
+            }
+        });
+        // Ne garder que les groupes avec 2+ fichiers
+        for (const [cle, indices] of groupesMulti) {
+            if (indices.length < 2) groupesMulti.delete(cle);
+        }
+
         let colGauche = '<div class="pipeline-col-originaux">';
         colGauche += '<div class="pipeline-col-titre">Originaux</div>';
+        const groupesOuverts = new Set(); // pour tracker les debuts de groupe
+
         queue.forEach((f, index) => {
             const thumb = f.thumbnailDataUrl;
             const icone = f.estPDF ? '&#x1F4C4;' : '&#x1F5BC;';
@@ -1283,7 +1299,19 @@
             const poids = travauxStockage.formaterTaille(f.tailleFichier);
             const selectionne = (index === fichierSelectionneIndex);
 
-            colGauche += `<div class="pipeline-fichier-ligne${selectionne ? ' pipeline-fichier-selectionne' : ''}" onclick="travauxUI.selectionnerFichierPipeline(${index})">
+            // Debut d'un groupe multi-fichiers
+            const groupeId = f.groupeDocumentId;
+            const indicesGroupe = groupeId ? groupesMulti.get(groupeId) : null;
+            if (indicesGroupe && !groupesOuverts.has(groupeId)) {
+                groupesOuverts.add(groupeId);
+                colGauche += `<div class="pipeline-groupe-encadre" data-groupe-id="${echapperHtml(groupeId)}">
+                    <div class="pipeline-groupe-entete">
+                        <span class="pipeline-groupe-badge">${indicesGroupe.length} pages &rarr; 1 PDF</span>
+                        <button class="pipeline-groupe-defaire" onclick="event.stopPropagation(); travauxUI.defaireGroupePipeline('${echapperHtml(groupeId)}')" title="Défaire le regroupement">&times;</button>
+                    </div>`;
+            }
+
+            colGauche += `<div class="pipeline-fichier-ligne${selectionne ? ' pipeline-fichier-selectionne' : ''}${indicesGroupe ? ' pipeline-fichier-groupe' : ''}" onclick="travauxUI.selectionnerFichierPipeline(${index})">
                 <span class="pipeline-fichier-numero">${index + 1}</span>
                 <div class="pipeline-reorder-btns">
                     <button class="pipeline-btn-reorder" onclick="event.stopPropagation(); travauxUI.monterFichierPipeline(${index})" ${index === 0 ? 'disabled' : ''} title="Monter">&uarr;</button>
@@ -1299,6 +1327,11 @@
                 </div>
                 <button class="pipeline-btn-retirer" onclick="event.stopPropagation(); travauxUI.retirerFichierPipeline(${index});" title="Retirer ce fichier">&times;</button>
             </div>`;
+
+            // Fin d'un groupe multi-fichiers
+            if (indicesGroupe && index === indicesGroupe[indicesGroupe.length - 1]) {
+                colGauche += '</div>'; // fermer .pipeline-groupe-encadre
+            }
         });
         colGauche += '</div>';
 
@@ -1563,6 +1596,21 @@
      */
     function deselectionnerFichierPipeline() {
         fichierSelectionneIndex = -1;
+        rafraichirPipelineUI();
+    }
+
+    /**
+     * Defait le regroupement d'un groupe dans le pipeline
+     * Vide le groupeDocumentId de tous les fichiers du groupe
+     * @param {string} groupeId - L'identifiant du groupe
+     */
+    function defaireGroupePipeline(groupeId) {
+        const queue = travauxImport.obtenirFileDAttente();
+        queue.forEach(f => {
+            if (f.groupeDocumentId === groupeId) {
+                f.groupeDocumentId = '';
+            }
+        });
         rafraichirPipelineUI();
     }
 
@@ -1948,7 +1996,11 @@
             ? `travauxExportPDF.previsualiserPDF('${f.id}')`
             : `travauxUI.${action}('${f.id}')`;
 
-        return `<div class="annot-badge" data-fichier-id="${f.id}" draggable="true" ondragstart="event.dataTransfer.setData('text/fichier-id', '${f.id}')" onclick="${actionClic}" title="${echapperHtml(f.nomFichier)}">
+        const estSelFusion = selectionFusion.has(f.id);
+        const checkboxFusion = `<input type="checkbox" class="fusion-checkbox" ${estSelFusion ? 'checked' : ''} onclick="event.stopPropagation(); travauxUI.toggleSelectionFusion('${f.id}')" title="Sélectionner pour fusion">`;
+
+        return `<div class="annot-badge${estSelFusion ? ' annot-badge-fusion-selectionne' : ''}" data-fichier-id="${f.id}" data-etudiant-da="${f.etudiantDA || ''}" draggable="true" ondragstart="event.dataTransfer.setData('text/fichier-id', '${f.id}')" onclick="${actionClic}" title="${echapperHtml(f.nomFichier)}">
+        ${checkboxFusion}
         <span class="annot-badge-nom">${nomEtudiant}</span>
         <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>${evaluation ? `<button class="travaux-badge-retro" onclick="event.stopPropagation(); travauxUI.afficherRetroaction('${f.id}')" title="Aperçu rétroaction">\u{1F4AC}</button>` : ''}${verrou}
         <button class="annot-badge-supprimer" onclick="event.stopPropagation(); travauxUI.supprimerFichierImporte('${f.id}')" title="Supprimer">&times;</button>
@@ -2081,8 +2133,27 @@
             htmlDropdown += '</select>';
         }
 
+        // Bouton de fusion (visible quand 2+ fichiers du meme etudiant sont selectionnes)
+        let htmlFusion = '';
+        if (selectionFusion.size >= 2) {
+            // Verifier que tous les fichiers selectionnes sont du meme etudiant
+            const dasSelectionnes = new Set();
+            selectionFusion.forEach(function(id) {
+                const fSel = fichiers.find(function(fx) { return fx.id === id; });
+                if (fSel && fSel.etudiantDA) dasSelectionnes.add(fSel.etudiantDA);
+            });
+            if (dasSelectionnes.size === 1) {
+                htmlFusion = `<button class="btn btn-principal btn-fusion-fichiers" onclick="travauxUI.fusionnerFichiers()">Fusionner (${selectionFusion.size})</button>`;
+            } else if (dasSelectionnes.size > 1) {
+                htmlFusion = `<span class="texte-muted u-texte-petit fusion-avertissement">Les fichiers sélectionnés doivent appartenir au même étudiant</span>`;
+            }
+        }
+        if (selectionFusion.size > 0) {
+            htmlFusion += `<button class="btn btn-secondaire btn-petit" onclick="travauxUI.annulerSelectionFusion()">Annuler sélection</button>`;
+        }
+
         let html = '<div class="travaux-grille-fichiers">';
-        html += `<div class="travaux-badges-entete">${htmlDropdown}<div class="travaux-badges-liste">`;
+        html += `<div class="travaux-badges-entete">${htmlDropdown}${htmlFusion ? `<div class="travaux-fusion-actions">${htmlFusion}</div>` : ''}<div class="travaux-badges-liste">`;
 
         // Afficher chaque production
         productions.forEach(p => {
@@ -4456,6 +4527,8 @@
     let editionFichierId = null;
     let editionPages = [];
     let editionPageSelectionnee = 0;
+    let editionModeFusion = false;
+    let editionFichiersASupprimer = []; // IDs des fichiers a supprimer apres fusion
 
     /**
      * Initialise la zone de drop pour l'edition (zone droite)
@@ -4500,15 +4573,19 @@
             return;
         }
 
-        // Verifier que c'est un PDF
-        if (fichier.typeMIME !== 'application/pdf') {
-            alert('L\'éditeur de pages est disponible uniquement pour les fichiers PDF.');
+        // Accepter PDF et images
+        const estPDF = fichier.typeMIME === 'application/pdf';
+        const estImage = fichier.typeMIME && fichier.typeMIME.startsWith('image/');
+        if (!estPDF && !estImage) {
+            alert('L\'éditeur de pages accepte les fichiers PDF et images.');
             return;
         }
 
         editionFichierId = fichierId;
         editionPages = [];
         editionPageSelectionnee = 0;
+        editionModeFusion = false;
+        editionFichiersASupprimer = [];
 
         // Afficher le conteneur d'edition avec message de chargement
         const etudiant = travauxImport.trouverEtudiantParDA(fichier.etudiantDA);
@@ -4519,6 +4596,8 @@
         const conteneur = document.getElementById('evaluations-contenu-import');
         if (!conteneur) return;
 
+        const messageChargement = estPDF ? 'Décomposition du PDF en pages...' : 'Chargement de l\'image...';
+
         // Injecter l'editeur dans le conteneur principal
         conteneur.innerHTML = `
             <div class="editeur-pages-conteneur">
@@ -4527,27 +4606,53 @@
                     <button class="btn btn-secondaire" onclick="travauxUI.fermerEditeurPages()">Annuler</button>
                 </div>
                 <div class="editeur-pages-message-chargement" id="editeur-chargement">
-                    Décomposition du PDF en pages...
+                    ${messageChargement}
                 </div>
             </div>
         `;
 
         try {
-            // Decomposer le PDF en pages
-            editionPages = await travauxImport.decomposerPDF(fichierId);
+            if (estPDF) {
+                // Decomposer le PDF en pages
+                editionPages = await travauxImport.decomposerPDF(fichierId);
+            } else {
+                // Charger l'image comme page unique
+                const blob = await travauxStockage.recupererBlob(fichierId);
+                if (!blob) throw new Error('Blob introuvable pour ' + fichierId);
+
+                const dataUrl = await new Promise(function(resolve, reject) {
+                    const reader = new FileReader();
+                    reader.onload = function() { resolve(reader.result); };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+                const dims = await new Promise(function(resolve, reject) {
+                    const img = new Image();
+                    img.onload = function() { resolve({ width: img.width, height: img.height }); };
+                    img.onerror = reject;
+                    img.src = dataUrl;
+                });
+                editionPages = [{
+                    pageNum: 1,
+                    blob: blob,
+                    dataUrl: dataUrl,
+                    largeur: dims.width,
+                    hauteur: dims.height
+                }];
+            }
 
             if (editionPages.length === 0) {
-                document.getElementById('editeur-chargement').textContent = 'Aucune page trouvée dans ce PDF.';
+                document.getElementById('editeur-chargement').textContent = 'Aucune page trouvée.';
                 return;
             }
 
             // Rendre l'editeur complet
             renderEditeurPages(nomEtudiant);
         } catch (err) {
-            console.error('[Editeur Pages] Erreur decomposition:', err);
+            console.error('[Editeur Pages] Erreur chargement:', err);
             const chargement = document.getElementById('editeur-chargement');
             if (chargement) {
-                chargement.textContent = 'Erreur lors de la décomposition du PDF.';
+                chargement.textContent = 'Erreur lors du chargement du fichier.';
             }
         }
     }
@@ -4772,26 +4877,52 @@
                 console.warn('[Editeur Pages] Miniature non regeneree:', e);
             }
 
-            // Mettre a jour les metadonnees
+            // Mettre a jour les metadonnees — si c'etait une image, ca devient un PDF
             const modifications = {
                 nombrePages: editionPages.length,
                 tailleFichier: nouveauBlob.size,
+                typeMIME: 'application/pdf',
                 dateModification: new Date().toISOString()
             };
             if (thumbnailDataUrl) {
                 modifications.thumbnailDataUrl = thumbnailDataUrl;
             }
+            // Mettre a jour le nom de fichier si c'etait une image
+            if (fichier.typeMIME && fichier.typeMIME.startsWith('image/')) {
+                const nomSansExt = (fichier.nomFichier || 'document').replace(/\.[^.]+$/, '');
+                modifications.nomFichier = nomSansExt + '.pdf';
+            }
             travauxStockage.mettreAJourFichier(editionFichierId, modifications);
 
+            // Mode fusion : supprimer les fichiers excedentaires
+            if (editionModeFusion && editionFichiersASupprimer.length > 0) {
+                for (const idASupprimer of editionFichiersASupprimer) {
+                    try {
+                        await travauxStockage.supprimerFichierTravail(idASupprimer);
+                        console.log('[Editeur Pages] Fichier fusionne supprime:', idASupprimer);
+                    } catch (e) {
+                        console.warn('[Editeur Pages] Erreur suppression fichier fusionne:', idASupprimer, e);
+                    }
+                }
+            }
+
             // Fermer l'editeur et rafraichir
+            const nbPages = modifications.nombrePages;
+            const estFusion = editionModeFusion;
             editionFichierId = null;
             editionPages = [];
             editionPageSelectionnee = 0;
+            editionModeFusion = false;
+            editionFichiersASupprimer = [];
+            selectionFusion.clear();
             afficherImport();
 
             // Notification
             if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces('Document mis à jour (' + modifications.nombrePages + ' pages)');
+                const message = estFusion
+                    ? 'Fichiers fusionnés (' + nbPages + ' pages)'
+                    : 'Document mis à jour (' + nbPages + ' pages)';
+                afficherNotificationSucces(message);
             }
         } catch (err) {
             console.error('[Editeur Pages] Erreur sauvegarde:', err);
@@ -4806,7 +4937,134 @@
         editionFichierId = null;
         editionPages = [];
         editionPageSelectionnee = 0;
+        editionModeFusion = false;
+        editionFichiersASupprimer = [];
         afficherImport();
+    }
+
+    /* ===============================
+       FUSION MULTI-FICHIERS
+       =============================== */
+
+    /**
+     * Toggle la selection d'un fichier pour la fusion
+     * @param {string} fichierId - ID du fichier
+     */
+    function toggleSelectionFusion(fichierId) {
+        if (selectionFusion.has(fichierId)) {
+            selectionFusion.delete(fichierId);
+        } else {
+            selectionFusion.add(fichierId);
+        }
+        // Re-rendre la grille pour mettre a jour les visuels
+        afficherImport();
+    }
+
+    /**
+     * Annule toute la selection de fusion
+     */
+    function annulerSelectionFusion() {
+        selectionFusion.clear();
+        afficherImport();
+    }
+
+    /**
+     * Fusionne les fichiers selectionnes en un seul PDF
+     * Ouvre l'editeur de pages en mode fusion
+     */
+    async function fusionnerFichiers() {
+        if (selectionFusion.size < 2) return;
+
+        const fichiersIds = Array.from(selectionFusion);
+        const fichiers = fichiersIds
+            .map(function(id) { return travauxStockage.obtenirFichierParId(id); })
+            .filter(Boolean);
+
+        if (fichiers.length < 2) return;
+
+        // Verifier que tous sont du meme etudiant
+        const das = new Set(fichiers.map(function(f) { return f.etudiantDA; }));
+        if (das.size !== 1) {
+            alert('Les fichiers doivent appartenir au même étudiant pour être fusionnés.');
+            return;
+        }
+
+        // Le premier fichier devient le receptacle
+        const fichierPrincipal = fichiers[0];
+        editionFichierId = fichierPrincipal.id;
+        editionPages = [];
+        editionPageSelectionnee = 0;
+        editionModeFusion = true;
+        editionFichiersASupprimer = fichiersIds.slice(1); // tous sauf le premier
+
+        const etudiant = travauxImport.trouverEtudiantParDA(fichierPrincipal.etudiantDA);
+        const nomEtudiant = etudiant
+            ? (etudiant.nom ? `${echapperHtml(etudiant.nom)}, ${echapperHtml(etudiant.prenom)}` : echapperHtml(etudiant.prenom))
+            : (fichierPrincipal.etudiantDA || 'Document');
+
+        const conteneur = document.getElementById('evaluations-contenu-import');
+        if (!conteneur) return;
+
+        conteneur.innerHTML = `
+            <div class="editeur-pages-conteneur">
+                <div class="editeur-pages-entete">
+                    <h4>Fusion : ${nomEtudiant} (${fichiers.length} fichiers)</h4>
+                    <button class="btn btn-secondaire" onclick="travauxUI.fermerEditeurPages()">Annuler</button>
+                </div>
+                <div class="editeur-pages-message-chargement" id="editeur-chargement">
+                    Chargement des fichiers...
+                </div>
+            </div>
+        `;
+
+        try {
+            // Charger toutes les pages de tous les fichiers
+            for (const f of fichiers) {
+                const estPDF = f.typeMIME === 'application/pdf';
+
+                if (estPDF) {
+                    const pages = await travauxImport.decomposerPDF(f.id);
+                    editionPages = editionPages.concat(pages);
+                } else {
+                    // Image : charger comme page unique
+                    const blob = await travauxStockage.recupererBlob(f.id);
+                    if (!blob) continue;
+
+                    const dataUrl = await new Promise(function(resolve, reject) {
+                        const reader = new FileReader();
+                        reader.onload = function() { resolve(reader.result); };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob);
+                    });
+                    const dims = await new Promise(function(resolve, reject) {
+                        const img = new Image();
+                        img.onload = function() { resolve({ width: img.width, height: img.height }); };
+                        img.onerror = reject;
+                        img.src = dataUrl;
+                    });
+                    editionPages.push({
+                        pageNum: editionPages.length + 1,
+                        blob: blob,
+                        dataUrl: dataUrl,
+                        largeur: dims.width,
+                        hauteur: dims.height
+                    });
+                }
+            }
+
+            if (editionPages.length === 0) {
+                document.getElementById('editeur-chargement').textContent = 'Aucune page trouvée.';
+                return;
+            }
+
+            renderEditeurPages(nomEtudiant);
+        } catch (err) {
+            console.error('[Fusion] Erreur chargement:', err);
+            const chargement = document.getElementById('editeur-chargement');
+            if (chargement) {
+                chargement.textContent = 'Erreur lors du chargement des fichiers.';
+            }
+        }
     }
 
     /* ===============================
@@ -5238,6 +5496,7 @@
         ouvrirPreparationFichier: ouvrirPreparationFichier,
         selectionnerFichierPipeline: selectionnerFichierPipeline,
         deselectionnerFichierPipeline: deselectionnerFichierPipeline,
+        defaireGroupePipeline: defaireGroupePipeline,
         retirerFichierPipeline: retirerFichierPipeline,
         redeposerFichiers: redeposerFichiers,
         monterFichierPipeline: monterFichierPipeline,
@@ -5271,6 +5530,10 @@
         changerDateFichier: changerDateFichier,
         changerNomDocumentLibre: changerNomDocumentLibre,
         changerProductionPipeline: changerProductionPipeline,
+        // Fusion multi-fichiers
+        toggleSelectionFusion: toggleSelectionFusion,
+        annulerSelectionFusion: annulerSelectionFusion,
+        fusionnerFichiers: fusionnerFichiers,
         // Editeur de pages
         ouvrirEditeurPages: ouvrirEditeurPages,
         fermerEditeurPages: fermerEditeurPages,
