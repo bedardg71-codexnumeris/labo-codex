@@ -191,26 +191,16 @@ let _cacheEvaluations = null;
  * @param {string} da - Numéro DA de l'étudiant
  * @param {string} dateLimite - Date limite au format 'YYYY-MM-DD' (incluse)
  * @param {Array} evaluationsCache - Cache optionnel des évaluations (pour performance)
- * @param {boolean} usePonctualA - Si true, utilise assiduité ponctuelle de la séance au lieu de cumulative
+ * @param {boolean} usePonctualA - (Déprécié #224) Ignoré, toujours cumulatif
  * @returns {Object} - {A: number, C: number, P: number}
  */
 function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, usePonctualA = false) {
-    // 🐛 DEBUG - Désactivé pour performance (30 snapshots × 30 étudiants = 900 appels)
-    // console.log(`[calculerIndicesHistoriques] DA: ${da}, Date: ${dateLimite}, Cache: ${evaluationsCache ? evaluationsCache.length : 'null'}, Ponctuel: ${usePonctualA}`);
-
-    // Assiduité (A) : Ponctuelle (séance uniquement) OU cumulative (depuis le début)
+    // #224 : Utiliser la fonction canonique unique (toujours cumulatif)
     let indiceA = 100;
 
-    if (usePonctualA && typeof calculerAssiduiteSeance === 'function') {
-        // ✨ NOUVEAU (Beta 93) : Assiduité PONCTUELLE pour cette séance uniquement
-        const resultA = calculerAssiduiteSeance(da, dateLimite);
+    if (typeof calculerAssiduite === 'function') {
+        const resultA = calculerAssiduite(da, dateLimite);
         indiceA = Math.round(resultA.indice * 100);
-        // console.log(`[calculerIndicesHistoriques] A ponctuel (séance ${dateLimite}): ${indiceA}%`);
-    } else if (typeof calculerAssiduiteJusquADate === 'function') {
-        // Assiduité CUMULATIVE jusqu'à cette date
-        const resultA = calculerAssiduiteJusquADate(da, dateLimite);
-        indiceA = Math.round(resultA.indice * 100);
-        // console.log(`[calculerIndicesHistoriques] A cumulatif (jusqu'à ${dateLimite}): ${indiceA}%`);
     }
 
     // Complétion (C) et Performance (P) : Filtrer les évaluations jusqu'à dateLimite
@@ -550,12 +540,8 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
         etudiants.forEach(etudiant => {
             const da = etudiant.da;
 
-            // ✅ NOUVEAU (Beta 94 - 10 déc 2025) : Calculer A ponctuel ET cumulatif
-            // - A ponctuel : Pour le graphique de groupe (taux de présence à cette séance)
-            // - A cumulatif : Pour le graphique individuel (assiduité depuis le début)
-            // - C et P : Toujours cumulatifs
-            const indicesPonctuel = calculerIndicesHistoriques(da, dateSeance, evaluationsCache, true);
-            const indicesCumulatif = calculerIndicesHistoriques(da, dateSeance, evaluationsCache, false);
+            // #224 : Une seule passe cumulatif (plus de ponctuel)
+            const indicesCumulatif = calculerIndicesHistoriques(da, dateSeance, evaluationsCache);
 
             // ⚡ OPTIMISATION PERFORMANCE: Désactivé pendant reconstruction
             // Patterns et RàI génèrent beaucoup de logs console (× 900 étudiants = saturation Safari)
@@ -589,33 +575,33 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
             snapshotsEtudiants.push({
                 da: da,
                 nom: `${etudiant.prenom} ${etudiant.nom}`,
-                A: indicesPonctuel.A, // ✅ A ponctuel (pour graphique groupe)
-                A_cumulatif: indicesCumulatif.A, // ✅ A cumulatif (pour graphique individuel)
-                C: indicesPonctuel.C, // ✅ C cumulatif
-                P: indicesPonctuel.P, // ✅ P cumulatif
+                A: indicesCumulatif.A, // #224 : toujours cumulatif
+                A_cumulatif: indicesCumulatif.A,
+                C: indicesCumulatif.C,
+                P: indicesCumulatif.P,
                 pattern: pattern,
                 rai: rai
             });
 
             // Accumuler pour moyennes (gérer null)
-            sommeA_ponctuel += indicesPonctuel.A;
+            sommeA_ponctuel += indicesCumulatif.A;
 
             // C et P peuvent être null si aucune évaluation
-            if (indicesPonctuel.C !== null) {
-                sommeC_cumul += indicesPonctuel.C;
+            if (indicesCumulatif.C !== null) {
+                sommeC_cumul += indicesCumulatif.C;
                 nbAvecC++;
             }
-            if (indicesPonctuel.P !== null) {
-                sommeP_cumul += indicesPonctuel.P;
+            if (indicesCumulatif.P !== null) {
+                sommeP_cumul += indicesCumulatif.P;
                 nbAvecP++;
             }
 
-            valeursA.push(indicesPonctuel.A);
-            if (indicesPonctuel.C !== null) {
-                valeursC.push(indicesPonctuel.C);
+            valeursA.push(indicesCumulatif.A);
+            if (indicesCumulatif.C !== null) {
+                valeursC.push(indicesCumulatif.C);
             }
-            if (indicesPonctuel.P !== null) {
-                valeursP.push(indicesPonctuel.P);
+            if (indicesCumulatif.P !== null) {
+                valeursP.push(indicesCumulatif.P);
             }
 
         });

@@ -2528,37 +2528,35 @@ function obtenirDetailsAssiduite(da) {
     const periodesOffertes = Math.round(detailsSommatif.periodesOffertes || 0);
     const nombreSeances = detailsSommatif.nombreSeances || 0;
 
-    // Récupérer les présences pour calculer la liste des absences
+    // #224 : Récupérer les présences et construire datesSaisies depuis le GROUPE (pas juste l'étudiant)
     const presences = obtenirDonneesSelonMode('presences') || [];
-
-    // Obtenir toutes les dates uniques pour lesquelles une saisie a été faite (séances non facultatives)
+    const etudiantsGroupe = obtenirDonneesSelonMode('groupeEtudiants') || [];
+    const dasGroupe = new Set();
+    if (Array.isArray(etudiantsGroupe)) {
+        etudiantsGroupe.forEach(e => { if (e.da) dasGroupe.add(String(e.da)); });
+    }
     const datesSaisies = new Set();
     presences.forEach(p => {
-        if (p.da === da && p.heures !== null && p.heures !== undefined) {
-            // Ne compter que les séances NON facultatives
-            if (p.facultatif !== true) {
-                datesSaisies.add(p.date);
-            }
-        }
+        if (p.date && dasGroupe.has(String(p.da))) datesSaisies.add(p.date);
     });
 
-    // Récupérer les séances configurées
-    const seances = db.getSync('seancesHoraire', []);
+    // Source de vérité : calendrier des séances
+    const seancesCompletes = typeof obtenirSeancesCompletes === 'function'
+        ? obtenirSeancesCompletes() : {};
+    const aujourdhui = new Date().toISOString().split('T')[0];
 
-    // 🆕 BETA 96.1: Tout calculer en PÉRIODES (plus simple et plus précis)
+    const seances = db.getSync('seancesHoraire', []);
     const dureePeriodeMin = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
 
     // Détecter les absences (totales ET partielles)
     const absences = [];
 
-    // Pour chaque date avec saisie
-    datesSaisies.forEach(dateCours => {
-        const presenceEleve = presences.find(p => p.da === da && p.date === dateCours);
+    // Itérer les dates du calendrier filtrées par datesSaisies et <= aujourd'hui
+    const datesCalendrier = Object.keys(seancesCompletes).filter(d => d <= aujourdhui && datesSaisies.has(d)).sort();
 
-        // IMPORTANT : Ignorer les séances facultatives (interventions RàI)
-        if (presenceEleve && presenceEleve.facultatif === true) {
-            return;
-        }
+    datesCalendrier.forEach(dateCours => {
+        // Chercher le record NON-facultatif de l'étudiant
+        const presenceEleve = presences.find(p => p.da === da && p.date === dateCours && !p.facultatif);
 
         // Nombre de périodes de la séance
         const periodesSeance = typeof obtenirNombrePeriodesSeance === 'function'
@@ -2570,14 +2568,20 @@ function obtenirDetailsAssiduite(da) {
             if (presenceEleve.periodesPresentes !== undefined && presenceEleve.periodesPresentes !== null) {
                 periodesPresenceEleve = presenceEleve.periodesPresentes;
             } else if (presenceEleve.heures !== undefined && presenceEleve.heures !== null) {
-                // Conversion heures → périodes pour rétrocompatibilité
                 periodesPresenceEleve = Math.round(presenceEleve.heures * 60 / dureePeriodeMin);
+            }
+        } else {
+            // Pas de record régulier — vérifier si c'est une séance uniquement facultative
+            const presencesFacultatives = presences.filter(p => p.date === dateCours && p.facultatif === true);
+            const aRecordGroupe = presences.some(p => p.date === dateCours && !p.facultatif);
+            if (!aRecordGroupe && presencesFacultatives.length > 0) {
+                // Séance uniquement facultative → ignorer
+                return;
             }
         }
 
         // Détecter absence totale ou partielle
         if (periodesPresenceEleve === 0) {
-            // Absence totale
             const seance = seances.find(s => s.date === dateCours);
             absences.push({
                 date: dateCours,
@@ -2586,7 +2590,6 @@ function obtenirDetailsAssiduite(da) {
                 seance: seance
             });
         } else if (periodesPresenceEleve < periodesSeance) {
-            // Présence partielle (retard/départ anticipé)
             const seance = seances.find(s => s.date === dateCours);
             absences.push({
                 date: dateCours,
