@@ -67,7 +67,7 @@ async function creerGroupeCours(donnees) {
     }
 
     const nouveauGroupeCours = {
-        id: 'GC_' + Date.now(),
+        id: genererIdUnique('GC_'),
         trimestreId: trimestreId,
         coursId: donnees.coursId,
         enseignantId: donnees.enseignantId,

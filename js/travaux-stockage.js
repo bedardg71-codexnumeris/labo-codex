@@ -308,7 +308,7 @@
      */
     function ajouterFichierTravail(metadonnees) {
         const fichiers = obtenirFichiersTravaux();
-        const id = 'FT_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        const id = genererIdUnique('FT_');
 
         const fichier = {
             id: id,

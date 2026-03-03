@@ -101,7 +101,7 @@ function migrerEvenementsAvecIDs() {
         // Vérifier si l'ID est manquant ou invalide
         if (!evt.id || evt.id === 'undefined' || evt.id === 'null' || evt.id === '') {
             nbMigres++;
-            const nouvelId = 'evt_prevu_' + Date.now() + '_' + index;
+            const nouvelId = genererIdUnique('EVT_');
             console.log(`  → Ajout ID "${nouvelId}" pour: ${evt.description}`);
             return { ...evt, id: nouvelId };
         }
@@ -121,7 +121,7 @@ function migrerEvenementsAvecIDs() {
         // Vérifier si l'ID est manquant ou invalide
         if (!evt.id || evt.id === 'undefined' || evt.id === 'null' || evt.id === '') {
             nbMigres++;
-            const nouvelId = 'evt_imprevu_' + Date.now() + '_' + index;
+            const nouvelId = genererIdUnique('EVT_');
             console.log(`  → Ajout ID "${nouvelId}" pour: ${evt.description}`);
             return { ...evt, id: nouvelId };
         }
@@ -378,7 +378,7 @@ function confirmerAjoutEvenement() {
     } else {
         // MODE AJOUT : Créer un nouvel événement
         evenements.push({
-            id: Date.now().toString(),
+            id: genererIdUnique('EVT_'),
             dateEvenement,
             description,
             horaireReprise: horaireReprise || '',
@@ -652,7 +652,7 @@ function confirmerAjoutEvenementImprevu() {
     } else {
         // MODE AJOUT : Créer un nouvel événement
         evenements.push({
-            id: Date.now().toString(),
+            id: genererIdUnique('EVT_'),
             dateEvenement,
             description,
             horaireReprise: horaireReprise || '',

@@ -1633,7 +1633,7 @@ function ajouterTypeJetonPersonnalise() {
     }
 
     const nouveauJeton = {
-        id: 'jeton_' + Date.now(),
+        id: genererIdUnique('jeton_'),
         nom: nom.trim(),
         description: description.trim()
     };
@@ -2599,7 +2599,7 @@ async function dupliquerPratique(id) {
 
         // Créer une copie avec un nouvel ID
         const copie = {
-            id: 'pratique-' + Date.now(),
+            id: genererIdUnique('pratique_'),
             nom: nouveauNom,
             auteur: original.auteur + ' (copie)',
             description: original.description,
@@ -3734,7 +3734,7 @@ async function creerPratiqueDepuisWizard() {
 
         const pratiqueConfig = {
             // Étape 1: Informations de base
-            id: modeEdition ? idPratique : 'pratique-' + Date.now(),
+            id: modeEdition ? idPratique : genererIdUnique('pratique_'),
             nom: document.getElementById('wizard-nom').value.trim(),
             auteur: document.getElementById('wizard-auteur').value.trim() || 'Auteur',
             etablissement: document.getElementById('wizard-etablissement').value.trim(),

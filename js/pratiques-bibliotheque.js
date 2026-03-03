@@ -776,7 +776,7 @@ async function sauvegarderConfigurationActuelle(nom, description = '') {
     }
 
     const nouvelleConfig = {
-        id: `config_${Date.now()}`,
+        id: genererIdUnique('config_'),
         nom: nom,
         description: description,
         type: modalites.pratique || 'pan-specifications',

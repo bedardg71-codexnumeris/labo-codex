@@ -735,7 +735,7 @@ async function dupliquerPratiqueBibliotheque(pratiqueId) {
     // Créer une copie avec un nouvel ID
     const nouvellePratique = {
         ...pratique,
-        id: `pratique_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: genererIdUnique('pratique_'),
         nom: `${pratique.nom} (copie)`,
         dansBibliotheque: true,
         dateCreation: new Date().toISOString()
@@ -1633,7 +1633,7 @@ async function creerNouvellePratique() {
     console.log('[pratiques-materiel] Création d\'une nouvelle pratique');
 
     // Générer un ID unique
-    const nouvelId = `pratique_${Date.now()}`;
+    const nouvelId = genererIdUnique('pratique_');
 
     // 🆕 Beta 95.4 : Définir l'auteur original
     const enseignantActif = typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : null;
@@ -1774,7 +1774,7 @@ async function dupliquerPratiqueMateriel(pratiqueId) {
     }
 
     const copie = JSON.parse(JSON.stringify(original));
-    copie.id = `pratique_${Date.now()}`;
+    copie.id = genererIdUnique('pratique_');
     copie.nom = `${original.nom} (copie)`;
     copie.dateCreation = new Date().toISOString();
 
@@ -2051,7 +2051,7 @@ window.confirmerImportPratiques = async function(donnees) {
         for (const config of pratiquesImportees) {
             // Ajouter avec un nouvel ID si nécessaire
             if (!config.id) {
-                config.id = 'PRAT_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                config.id = genererIdUnique('PRAT_');
             }
 
             const indexBiblio = bibliotheque.findIndex(c => c.id === config.id);
@@ -2527,7 +2527,7 @@ async function ajouterObjectifMat() {
 
     const nbObjectifs = configurations[index].configuration.parObjectifs.objectifs.length;
     configurations[index].configuration.parObjectifs.objectifs.push({
-        id: `obj_${Date.now()}`,
+        id: genererIdUnique('obj_'),
         nom: `Objectif ${nbObjectifs + 1}`,
         type: 'complementaire',
         ponderation: 0

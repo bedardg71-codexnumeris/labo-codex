@@ -1092,7 +1092,7 @@ function confirmerSeances() {
 
         // Créer l'objet séance
         const seance = {
-            id: Date.now() + i, // ID unique basé sur timestamp + index
+            id: genererIdUnique('SEANCE_'),
             lettre: seancesEnCours[i].lettre,
             groupe: groupeSelect.value,
             jour: jourSelect.value,

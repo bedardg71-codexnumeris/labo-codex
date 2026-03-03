@@ -1581,7 +1581,7 @@ function genererSelectGrille(champ) {
  */
 function wizardV2CreerGrilleDemo() {
     const grilleDemo = {
-        id: 'grille-base-' + Date.now(),
+        id: genererIdUnique('GRILLE_'),
         nom: 'Grille de base',
         description: 'Grille générique créée par le wizard. Modifiable dans Matériel → Critères.',
         criteres: [
@@ -2149,7 +2149,7 @@ async function creerPratiqueV2() {
     const typeFinal = classification.type || r.typePratique;
 
     const pratique = {
-        id: wizardState.pratiqueId || `pratique-${Date.now()}`,
+        id: wizardState.pratiqueId || genererIdUnique('pratique_'),
         nom: r.nom,
         auteur: `${r.prenom || ''} ${r.nomAuteur || ''}`.trim(),
         etablissement: r.etablissement || '',

@@ -7,6 +7,34 @@
 'use strict';
 
 /**
+ * Vérifie l'unicité des IDs dans un tableau d'objets.
+ * Si des doublons sont détectés, ré-identifie les entrées dupliquées avec genererIdUnique().
+ * @param {Array} tableau - Tableau d'objets avec propriété .id
+ * @param {string} nomCollection - Nom pour le log console (ex: 'productions')
+ * @returns {Array} - Le même tableau, sans doublons d'ID
+ */
+function verifierUniciteIds(tableau, nomCollection) {
+    if (!Array.isArray(tableau)) return tableau;
+    const idsVus = new Set();
+    let nbDoublons = 0;
+    for (let i = 0; i < tableau.length; i++) {
+        const item = tableau[i];
+        if (!item || !item.id) continue;
+        if (idsVus.has(item.id)) {
+            const ancienId = item.id;
+            item.id = genererIdUnique(ancienId.replace(/[0-9_]+$/, '').replace(/-+$/, '_'));
+            console.warn(`⚠️ [${nomCollection}] ID dupliqué corrigé: ${ancienId} → ${item.id}`);
+            nbDoublons++;
+        }
+        idsVus.add(item.id);
+    }
+    if (nbDoublons > 0) {
+        console.warn(`⚠️ [${nomCollection}] ${nbDoublons} doublon(s) d'ID corrigé(s) sur ${tableau.length} éléments`);
+    }
+    return tableau;
+}
+
+/**
  * MODULE: import-export.js
  *
  * RÔLE:
@@ -1683,7 +1711,7 @@ async function executerImportConfigComplete() {
                 if (idsEchellesExistants.has(echelle.id)) {
                     // Conflit détecté: générer un nouvel ID
                     const ancienId = echelle.id;
-                    const nouvelId = 'ECH' + Date.now() + Math.floor(Math.random() * 1000);
+                    const nouvelId = genererIdUnique('ECH_');
 
                     // Enregistrer le remapping
                     remapEchelles[ancienId] = nouvelId;
@@ -1698,7 +1726,7 @@ async function executerImportConfigComplete() {
             });
 
             // Fusionner avec échelles existantes
-            const echellesFusionnees = [...echellesExistantes, ...echellesAImporter];
+            const echellesFusionnees = verifierUniciteIds([...echellesExistantes, ...echellesAImporter], 'échelles');
             db.setSync('echellesTemplates', echellesFusionnees);
             console.log(`✅ ${echellesAImporter.length} échelle(s) importée(s)`);
         }
@@ -1710,7 +1738,7 @@ async function executerImportConfigComplete() {
                 if (idsGrillesExistants.has(grille.id)) {
                     // Conflit détecté: générer un nouvel ID
                     const ancienId = grille.id;
-                    const nouvelId = 'GRILLE' + Date.now() + Math.floor(Math.random() * 1000);
+                    const nouvelId = genererIdUnique('GRILLE_');
 
                     // Enregistrer le remapping
                     remapGrilles[ancienId] = nouvelId;
@@ -1725,7 +1753,7 @@ async function executerImportConfigComplete() {
             });
 
             // Fusionner avec grilles existantes
-            const grillesFusionnees = [...grillesExistantes, ...grillesAImporter];
+            const grillesFusionnees = verifierUniciteIds([...grillesExistantes, ...grillesAImporter], 'grilles');
             db.setSync('grillesTemplates', grillesFusionnees);
             console.log(`✅ ${grillesAImporter.length} grille(s) importée(s)`);
         }
@@ -1745,7 +1773,7 @@ async function executerImportConfigComplete() {
                 // Générer un nouvel ID SEULEMENT si conflit d'ID
                 if (idsProdsExistants.has(prod.id)) {
                     const ancienId = prod.id;
-                    prod.id = 'PROD' + Date.now() + Math.floor(Math.random() * 1000);
+                    prod.id = genererIdUnique('PROD_');
                     console.log(`⚠️ Conflit d'ID production: ${ancienId} → ${prod.id}`);
                 }
                 // Sinon, garder l'ID original pour préserver les références
@@ -1756,11 +1784,17 @@ async function executerImportConfigComplete() {
                     prod.grilleId = remapGrilles[prod.grilleId];
                 }
 
+                // Mettre à jour la référence à l'échelle si elle a été remappée
+                if (prod.echelleId && remapEchelles[prod.echelleId]) {
+                    console.log(`🔗 Mise à jour référence échelle dans production: ${prod.echelleId} → ${remapEchelles[prod.echelleId]}`);
+                    prod.echelleId = remapEchelles[prod.echelleId];
+                }
+
                 return prod;
             });
 
             // Fusionner avec productions existantes
-            const productionsFusionnees = [...productionsExistantes, ...productionsAImporter];
+            const productionsFusionnees = verifierUniciteIds([...productionsExistantes, ...productionsAImporter], 'productions');
             db.setSync(cleProductions, productionsFusionnees);
             console.log(`✅ ${productionsAImporter.length} production(s) importée(s) (clé: ${cleProductions})`);
         }
@@ -1784,7 +1818,7 @@ async function executerImportConfigComplete() {
                 const cartouchesExistantes = db.getSync(`cartouches_${grilleIdFinal}`, []);
 
                 // Fusionner (ajouter les nouvelles cartouches)
-                const cartouchesFusionnees = [...cartouchesExistantes, ...cartouchesGrille];
+                const cartouchesFusionnees = verifierUniciteIds([...cartouchesExistantes, ...cartouchesGrille], 'cartouches');
                 db.setSync(`cartouches_${grilleIdFinal}`, cartouchesFusionnees);
 
                 nbCartouchesTotal += cartouchesGrille.length;
@@ -1955,7 +1989,7 @@ async function executerImportVersBibliotheques() {
                 }));
 
                 if (pratiquesNouvelles.length > 0) {
-                    const pratiquesFusionnees = [...pratiquesExistantes, ...pratiquesNouvelles];
+                    const pratiquesFusionnees = verifierUniciteIds([...pratiquesExistantes, ...pratiquesNouvelles], 'pratiques');
                     db.setSync('pratiquesConfigurables', pratiquesFusionnees);
                     compteurs.pratiques = pratiquesNouvelles.length;
                     console.log(`✅ ${pratiquesNouvelles.length} pratique(s) ajoutée(s)`);
@@ -2009,7 +2043,7 @@ async function executerImportVersBibliotheques() {
                         ...g,
                         nom: resultat.nouveauNom,
                         // Garder l'ID original sauf si conflit d'ID
-                        ...(existeParId ? { id: 'GRILLE_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
+                        ...(existeParId ? { id: genererIdUnique('GRILLE_') } : {}),
                         dateImport: new Date().toISOString()
                     });
                 } else if (resultat && resultat.action === 'ecraser') {
@@ -2018,7 +2052,7 @@ async function executerImportVersBibliotheques() {
                     grillesNouvelles.push({
                         ...g,
                         // Garder l'ID original sauf si conflit d'ID
-                        ...(existeParId ? { id: 'GRILLE_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
+                        ...(existeParId ? { id: genererIdUnique('GRILLE_') } : {}),
                         dateImport: new Date().toISOString()
                     });
                 }
@@ -2027,7 +2061,7 @@ async function executerImportVersBibliotheques() {
         }
 
         if (grillesNouvelles.length > 0 || grillesExistantes.length !== db.getSync('grillesTemplates', []).length) {
-            const grillesFusionnees = [...grillesExistantes, ...grillesNouvelles];
+            const grillesFusionnees = verifierUniciteIds([...grillesExistantes, ...grillesNouvelles], 'grilles');
             db.setSync('grillesTemplates', grillesFusionnees);
             compteurs.grilles = grillesNouvelles.length;
             console.log(`✅ ${grillesNouvelles.length} grille(s) ajoutée(s)`);
@@ -2060,7 +2094,7 @@ async function executerImportVersBibliotheques() {
                                 ...e,
                                 nom: resultat.nouveauNom,
                                 // Garder l'ID original sauf si conflit d'ID
-                                ...(existeParId ? { id: 'ECH_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
+                                ...(existeParId ? { id: genererIdUnique('ECH_') } : {}),
                                 dateImport: new Date().toISOString()
                             });
                         } else if (resultat && resultat.action === 'ecraser') {
@@ -2068,7 +2102,7 @@ async function executerImportVersBibliotheques() {
                             echellesNouvelles.push({
                                 ...e,
                                 // Garder l'ID original sauf si conflit d'ID
-                                ...(existeParId ? { id: 'ECH_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
+                                ...(existeParId ? { id: genererIdUnique('ECH_') } : {}),
                                 dateImport: new Date().toISOString()
                             });
                         }
@@ -2076,7 +2110,7 @@ async function executerImportVersBibliotheques() {
                 }
 
                 if (echellesNouvelles.length > 0 || echellesExistantes.length !== db.getSync('echellesTemplates', []).length) {
-                    const echellesFusionnees = [...echellesExistantes, ...echellesNouvelles];
+                    const echellesFusionnees = verifierUniciteIds([...echellesExistantes, ...echellesNouvelles], 'échelles');
                     db.setSync('echellesTemplates', echellesFusionnees);
                     compteurs.echelles = echellesNouvelles.length;
                     console.log(`✅ ${echellesNouvelles.length} échelle(s) ajoutée(s)`);
@@ -2150,7 +2184,7 @@ async function executerImportVersBibliotheques() {
                                 ...p,
                                 titre: resultat.nouveauNom,
                                 // Garder l'ID original sauf si conflit d'ID
-                                ...(existeParId ? { id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
+                                ...(existeParId ? { id: genererIdUnique('PROD_') } : {}),
                                 dateImport: new Date().toISOString()
                             });
                         } else if (resultat && resultat.action === 'ecraser') {
@@ -2158,7 +2192,7 @@ async function executerImportVersBibliotheques() {
                             prodsNouvelles.push({
                                 ...p,
                                 // Garder l'ID original sauf si conflit d'ID
-                                ...(existeParId ? { id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
+                                ...(existeParId ? { id: genererIdUnique('PROD_') } : {}),
                                 dateImport: new Date().toISOString()
                             });
                         }
@@ -2166,7 +2200,7 @@ async function executerImportVersBibliotheques() {
                 }
 
                 if (prodsNouvelles.length > 0 || prodsExistantes.length !== db.getSync(cleProductions, []).length) {
-                    const prodsFusionnees = [...prodsExistantes, ...prodsNouvelles];
+                    const prodsFusionnees = verifierUniciteIds([...prodsExistantes, ...prodsNouvelles], 'productions');
                     db.setSync(cleProductions, prodsFusionnees);
                     compteurs.productions = prodsNouvelles.length;
                     console.log(`✅ ${prodsNouvelles.length} production(s) ajoutée(s)`);
@@ -2280,7 +2314,7 @@ async function executerImportSelectif() {
                         auteurOriginal: assainirChaine(auteurSource || p.auteurOriginal || '', 100)
                     }));
                 if (pratiquesNouvelles.length > 0) {
-                    db.setSync('pratiquesConfigurables', [...pratiquesExistantes, ...pratiquesNouvelles]);
+                    db.setSync('pratiquesConfigurables', verifierUniciteIds([...pratiquesExistantes, ...pratiquesNouvelles], 'pratiques'));
                     compteurs.ressources += pratiquesNouvelles.length;
                     details.push(`${pratiquesNouvelles.length} pratique(s)`);
                 }
@@ -2308,7 +2342,7 @@ async function executerImportSelectif() {
                                 grillesNouvelles.push({
                                     ...assainirObjet(g, SCHEMAS_IMPORT.grille),
                                     // Garder l'ID original sauf si conflit d'ID
-                                    ...(idExiste ? { id: 'GRILLE_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
+                                    ...(idExiste ? { id: genererIdUnique('GRILLE_') } : {}),
                                     dateImport: new Date().toISOString(),
                                     auteurOriginal: assainirChaine(auteurSource || g.auteurOriginal || '', 100)
                                 });
@@ -2319,7 +2353,7 @@ async function executerImportSelectif() {
             });
 
             if (grillesNouvelles.length > 0) {
-                db.setSync('grillesTemplates', [...grillesExistantes, ...grillesNouvelles]);
+                db.setSync('grillesTemplates', verifierUniciteIds([...grillesExistantes, ...grillesNouvelles], 'grilles'));
                 compteurs.ressources += grillesNouvelles.length;
                 details.push(`${grillesNouvelles.length} grille(s)`);
             }
@@ -2341,13 +2375,13 @@ async function executerImportSelectif() {
                         return {
                             ...assainirObjet(e, SCHEMAS_IMPORT.echelle),
                             // Garder l'ID original sauf si conflit d'ID
-                            ...(idExiste ? { id: 'ECH_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
+                            ...(idExiste ? { id: genererIdUnique('ECH_') } : {}),
                             dateImport: new Date().toISOString(),
                             auteurOriginal: assainirChaine(auteurSource || e.auteurOriginal || '', 100)
                         };
                     });
                 if (echellesNouvelles.length > 0) {
-                    db.setSync('echellesTemplates', [...echellesExistantes, ...echellesNouvelles]);
+                    db.setSync('echellesTemplates', verifierUniciteIds([...echellesExistantes, ...echellesNouvelles], 'échelles'));
                     compteurs.ressources += echellesNouvelles.length;
                     details.push(`${echellesNouvelles.length} échelle(s)`);
                 }
@@ -2403,13 +2437,13 @@ async function executerImportSelectif() {
                     return {
                         ...assainirObjet(p, SCHEMAS_IMPORT.production),
                         // Garder l'ID original sauf si conflit d'ID
-                        ...(idExiste ? { id: 'PROD_' + Date.now() + '_' + Math.floor(Math.random() * 1000) } : {}),
+                        ...(idExiste ? { id: genererIdUnique('PROD_') } : {}),
                         dateImport: new Date().toISOString(),
                         auteurOriginal: assainirChaine(auteurSource || p.auteurOriginal || '', 100)
                     };
                 });
             if (prodsNouvelles.length > 0) {
-                db.setSync(cleProductions, [...prodsExistantes, ...prodsNouvelles]);
+                db.setSync(cleProductions, verifierUniciteIds([...prodsExistantes, ...prodsNouvelles], 'productions'));
                 compteurs.ressources += prodsNouvelles.length;
                 details.push(`${prodsNouvelles.length} production(s)`);
                 console.log(`✅ Productions importées depuis: ${clesProdsSource.join(', ')}`);
@@ -2441,7 +2475,7 @@ async function executerImportSelectif() {
                                 };
                             });
                         if (cartouchesSelectionnees.length > 0) {
-                            const cartouchesFusionnees = [...cartouchesExistantes, ...cartouchesSelectionnees];
+                            const cartouchesFusionnees = verifierUniciteIds([...cartouchesExistantes, ...cartouchesSelectionnees], 'cartouches');
                             db.setSync(cle, cartouchesFusionnees);
                             nbCartouches += cartouchesSelectionnees.length;
                         }

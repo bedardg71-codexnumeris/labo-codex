@@ -256,7 +256,7 @@
 
             try {
                 var blob = new Blob([await file.arrayBuffer()], { type: file.type });
-                var id = PREFIXE_ID + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+                var id = genererIdUnique(PREFIXE_ID);
 
                 var thumbnailDataUrl = '';
                 try {

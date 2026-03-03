@@ -323,7 +323,7 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
     const copieOriginale = structuredClone(evaluationOriginale);
 
     // Créer la nouvelle évaluation (duplicata) avec un nouvel ID unique
-    const nouvelId = 'EVAL_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+    const nouvelId = genererIdUnique('EVAL_');
     const nouvelleEvaluation = {
         ...copieOriginale,
         id: nouvelId,
@@ -712,7 +712,7 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
     const copieOriginale = structuredClone(evaluationOriginale);
 
     // Créer la nouvelle évaluation (duplicata) avec un nouvel ID unique
-    const nouvelId = 'EVAL_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+    const nouvelId = genererIdUnique('EVAL_');
     const nouvelleEvaluation = {
         ...copieOriginale,
         id: nouvelId,

@@ -55,7 +55,7 @@ async function creerEnseignant(donnees) {
     const enseignants = await db.get(CLE_ENSEIGNANTS) || [];
 
     const nouvelEnseignant = {
-        id: 'ENS_' + Date.now(),
+        id: genererIdUnique('ENS_'),
         prenom: donnees.prenom || '',
         nom: donnees.nom || '',
         courriel: donnees.courriel || '',

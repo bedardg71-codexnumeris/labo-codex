@@ -736,7 +736,7 @@ function confirmerEvenementPrevuV2() {
     } else {
         // Mode ajout
         evenements.push({
-            id: Date.now().toString(),
+            id: genererIdUnique('EVT_'),
             dateEvenement,
             description,
             horaireReprise: horaireReprise || '',
@@ -809,7 +809,7 @@ function confirmerEvenementImprevuV2() {
     } else {
         // Mode ajout
         evenements.push({
-            id: Date.now().toString(),
+            id: genererIdUnique('EVT_'),
             dateEvenement,
             description,
             horaireReprise: horaireReprise || '',
@@ -3685,7 +3685,7 @@ function sauvegarderHoraireV2() {
     } else {
         // Ajout
         const nouvelHoraire = {
-            id: 'HOR_' + Date.now(),
+            id: genererIdUnique('HOR_'),
             groupeAssocie,
             nom,
             periodesParSeance,
@@ -4482,7 +4482,7 @@ function sauvegarderGroupeCoursV2() {
     } else {
         // Ajout
         const nouveauGC = {
-            id: 'GC_' + Date.now(),
+            id: genererIdUnique('GC_'),
             nom,
             trimestreId,  // Beta 95.2
             coursId,
@@ -5232,7 +5232,7 @@ function chargerProfilEnseignantV2() {
         const existe = enseignants.some(e => e.courriel === profilAncien.courriel);
         if (!existe) {
             const nouveauProfil = {
-                id: 'ENS_' + Date.now(),
+                id: genererIdUnique('ENS_'),
                 ...profilAncien,
                 dateCreation: new Date().toISOString()
             };
@@ -5423,7 +5423,7 @@ async function sauvegarderEnseignantV2() {
     } else {
         // Nouveau profil
         const nouveauProfil = {
-            id: 'ENS_' + Date.now(),
+            id: genererIdUnique('ENS_'),
             ...profil,
             dateCreation: new Date().toISOString()
         };

@@ -2127,7 +2127,7 @@ async function ajouterProductionIndividuelle(id) {
 
             // Copier la production de la bibliothèque vers le cours actuel
             // Générer un nouvel ID pour éviter les conflits
-            const nouvelId = `prod_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            const nouvelId = genererIdUnique('PROD_');
             prod = {
                 ...prodBiblio,
                 id: nouvelId,
@@ -2513,7 +2513,7 @@ async function dupliquerProductionBibliotheque(id) {
     // Créer une copie avec un nouvel ID
     const nouvelleProduction = {
         ...production,
-        id: `prod_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: genererIdUnique('PROD_'),
         titre: `${production.titre} (copie)`,
         dansBibliotheque: true,
         dateCreation: new Date().toISOString()
@@ -3739,7 +3739,7 @@ async function dupliquerProduction(id) {
     // Créer une copie avec un nouvel ID
     const copie = {
         ...production,
-        id: Date.now().toString(),
+        id: genererIdUnique('PROD_'),
         description: `${production.description} (copie)`,
         verrouille: false
     };

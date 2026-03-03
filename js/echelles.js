@@ -389,7 +389,7 @@ async function dupliquerEchelle(echelleId) {
     if (!nouveauNom) return;
 
     const nouvelleEchelle = {
-        id: 'ECH' + Date.now(),
+        id: genererIdUnique('ECH_'),
         nom: nouveauNom,
         niveaux: JSON.parse(JSON.stringify(echelle.niveaux || [])), // Copie profonde
         config: JSON.parse(JSON.stringify(echelle.config || {})),
@@ -961,7 +961,7 @@ async function enregistrerCommeEchelle() {
         const config = await db.get('configEchelle') ||  {};
 
         const nouvelleEchelle = {
-            id: 'ECH' + Date.now(),
+            id: genererIdUnique('ECH_'),
             nom: nomEchelle,
             niveaux: niveaux.map(n => ({ ...n })),
             config: { ...config },
@@ -1014,7 +1014,7 @@ async function dupliquerEchelleActuelle() {
     if (!nouveauNom) return;
 
     const nouvelleEchelle = {
-        id: 'ECH' + Date.now(),
+        id: genererIdUnique('ECH_'),
         nom: nouveauNom,
         niveaux: echelleTemplateActuelle.niveaux.map(n => ({ ...n })),
         config: { ...echelleTemplateActuelle.config },
@@ -2568,7 +2568,7 @@ async function ajouterEchelleIndividuelle(id) {
             const echelleSource = toutesEchelles.find(e => e.id === id);
             if (echelleSource) {
                 // Générer un nouvel ID pour éviter les conflits (pattern Productions)
-                const nouvelId = `echelle_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const nouvelId = genererIdUnique('ECH_');
                 echelle = {
                     ...echelleSource,
                     id: nouvelId,
@@ -2746,7 +2746,7 @@ async function dupliquerEchelleBibliotheque(id) {
     // Créer une copie avec un nouvel ID
     const nouvelleEchelle = {
         ...echelle,
-        id: `echelle_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: genererIdUnique('ECH_'),
         nom: `${echelle.nom} (copie)`,
         dansBibliotheque: true,
         dateCreation: new Date().toISOString()
@@ -3717,7 +3717,7 @@ async function dupliquerEchelleDepuisSidebar(id) {
 
     const copie = {
         ...echelle,
-        id: Date.now().toString(),
+        id: genererIdUnique('ECH_'),
         nom: echelle.nom + ' (copie)',
         verrouille: false
     };
@@ -3943,7 +3943,7 @@ async function sauvegarderEchelleComplete() {
 
         // Créer la nouvelle échelle
         const nouvelleEchelle = {
-            id: 'echelle_' + Date.now(),
+            id: genererIdUnique('ECH_'),
             nom: nom,
             niveaux: niveaux,
             pratiquesCompatibles: pratiquesCompatibles,
