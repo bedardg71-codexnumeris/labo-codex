@@ -7,6 +7,44 @@
 
 ## A faire
 
+### Retours testeur — 3 mars 2026
+
+- [ ] **#214** Bug : Gestion avancee des ressources — suppression non persistante
+  - Des modeles supprimes via Reglages > Gestion avancee des ressources reapparaissent apres rechargement
+  - Verifier si certaines echelles/grilles/cartouches sont codees en dur ou re-injectees par les donnees demo
+  - Tester : supprimer une echelle « Non utilisee » → recharger → elle ne doit plus apparaitre
+  - **Section** : Reglages > Gestion avancee des ressources
+
+- [ ] **#215** Dates debut/fin de trimestre obligatoires dans le formulaire de reglages
+  - `cadreCalendrier.dateDebut` et `cadreCalendrier.finCours` doivent etre obligatoires
+  - Valider dans le formulaire manuel ET dans l'assistant de configuration
+  - Sans ces dates, les fonctions de semaine, echeances et snapshots ne fonctionnent pas
+  - **Fichiers** : `js/trimestres.js`, assistant de configuration
+
+- [ ] **#216** Tooltips sur la date d'echeance des productions
+  - S'assurer que des info-bulles expliquent le role de la date d'echeance
+  - Contexte : la date d'echeance conditionne les snapshots, le calcul de completion (C) et la gestion des travaux remis/non remis
+  - Couvrir le champ simple (`#productionDateEcheance`) et le mode multi-groupe
+  - **Fichier** : `js/tooltips-contenu.js`, `js/productions.js`
+
+- [ ] **#217** Gestion des jetons — a investiguer
+  - Verifier le fonctionnement complet du module de gestion des jetons d'evaluation
+  - **Fichier** : `js/evaluation-jetons.js`
+
+- [ ] **#218** Apercu des annotations texte et soulignements vagues
+  - Verifier que les annotations texte et les soulignements ondules s'affichent correctement dans l'apercu/synthese
+  - **Fichiers** : `js/travaux-annotation.js`, `js/travaux-export-pdf.js`
+
+- [ ] **#219** Revoir la preparation des interventions RaI — formulaire en deux etapes inutile
+  - Le formulaire de preparation d'intervention est actuellement en deux etapes, ce qui ne fait pas de sens sur le plan pratique
+  - Simplifier en un seul formulaire ou reorganiser le flux pour qu'il soit plus naturel
+  - **Fichier** : `js/interventions.js`
+
+- [ ] **#220** Bug : Calcul de l'assiduite errone dans le profil etudiant
+  - Le pourcentage d'assiduite affiche dans le profil etudiant est incorrect
+  - Investiguer la formule de calcul (presences vs periodes totales vs absences motivees)
+  - **Fichier** : `js/profil-etudiant.js`
+
 ### Qualite du code — Audit fevrier 2026
 
 > **Rapport complet** : `docs/AUDIT-QUALITE.md` (134 constats : 24 critiques, 63 moderes, 47 mineurs)
