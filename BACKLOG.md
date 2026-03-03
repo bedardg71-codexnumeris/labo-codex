@@ -841,9 +841,8 @@
   - nArtefactsPAN vs nbArtefactsSoumis vs nombreTotal
   - Creer reference dans docs/ pour coherence future
 
-- [ ] **#28** Ajouter mode edition a Wizard V2
-  - Permettre d'editer une pratique existante via wizard-pratique-v2
-  - Actuellement l'edition utilise le wizard legacy
+- [x] **#28** Ajouter mode edition a Wizard V2 ✅ FAIT
+  - `ouvrirWizardV2(modeEdition, pratiqueId)` complet dans `js/wizard-pratique-v2.js`
 
 - [ ] **#29** Retirer wizard legacy (post #28)
   - Supprimer modalWizardPratique (~600 lignes HTML)
@@ -1058,42 +1057,34 @@
 
 **Phase 2 — Annotation complete (mars-avril 2026)**
 
-- [ ] **#179** Panneau retractable en mode annotation (C1)
-  - Le panneau fichiers se replie automatiquement pour maximiser l'espace de travail iPad
-  - **Fichier** : `js/travaux-annotation.js`
+- [x] **#179** Panneau retractable en mode annotation (C1) ✅ FAIT
+  - `toggleSidebar()` dans `js/travaux-ui.js`, persistance session
 
-- [ ] **#180** Annotation texte (C3)
-  - Outil texte : clic sur le document → zone de saisie clavier
-  - Texte ancre, redimensionnable, couleur configurable (defaut rouge)
-  - **Fichier** : `js/travaux-annotation.js`
+- [x] **#180** Annotation texte (C3) ✅ FAIT
+  - Outil texte complet (10-32px, couleur configurable)
+  - **Fichiers** : `js/travaux-annotation.js`, `js/travaux-outils.js`
 
-- [ ] **#181** Palette d'autocollants (C2)
-  - 12 autocollants retroaction visuelle (qualite + diagnostic)
-  - Phase 1 : PNG existants. Phase 2 : SVG uniformes
-  - **Fichier** : `js/travaux-annotation.js`
+- [x] **#181** Palette d'autocollants (C2) ✅ FAIT
+  - 12 PNG (4 qualite + 8 diagnostic), prechargement et rendu
+  - **Fichiers** : `js/travaux-outils.js`, `autocollants/`
 
-- [ ] **#182** Navigation fluide annotation ↔ evaluation (D1)
-  - Bidirectionnel : depuis annotation → evaluation de l'eleve, et vice versa
-  - Split view possible (cote a cote)
-  - **Fichiers** : `js/travaux-annotation.js`, `js/evaluations.js`
+- [x] **#182** Navigation fluide annotation ↔ evaluation (D1) ✅ FAIT
+  - `basculerMode()` bidirectionnel, persistance session
+  - **Fichier** : `js/travaux-ui.js`
 
 **Phase 3 — Export PDF (avril-mai 2026)**
 
-- [ ] **#183** Generation du PDF annote + page synthese (E1)
-  - Pages du travail + annotations aplaties + grille criteres + cartouches + note
-  - Nom du fichier = nom original Lea (pour depot par lots)
-  - Bibliotheque : pdf-lib ou jsPDF (cote client)
+- [x] **#183** Generation du PDF annote + page synthese (E1) ✅ FAIT
+  - `genererDocPDF()`, annotations aplaties, page synthese avec grille
   - **Fichier** : `js/travaux-export-pdf.js`
 
-- [ ] **#184** Insertion de la grille evaluee dans le PDF (B2)
-  - Grille rendue comme image fixe (snapshot) avec resultats remplis
-  - Generee a l'export a partir des donnees du module Evaluations
-  - **Fichiers** : `js/travaux-export-pdf.js`, `js/evaluations.js`
-
-- [ ] **#185** Export par lots avec noms Lea (E3)
-  - Bouton "Exporter tout le groupe", barre de progression
-  - Chaque PDF garde son nom Lea original, ZIP si > 200 Mo
+- [x] **#184** Insertion de la grille evaluee dans le PDF (B2) ✅ FAIT
+  - Criteres + niveaux rendus dans la page synthese du PDF
   - **Fichier** : `js/travaux-export-pdf.js`
+
+- [x] **#185** Export par lots avec noms Lea (E3) ✅ FAIT
+  - `exporterPourLea()`, `exporterParEtudiant()`, `exporterSemestre()` avec JSZip
+  - **Fichier** : `js/travaux-archivage.js`
 
 **Phase 4 — Integration et polish (mai 2026)**
 
