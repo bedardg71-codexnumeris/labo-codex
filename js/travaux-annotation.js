@@ -1059,6 +1059,9 @@
         const canvasRect = canvasAnnotation.getBoundingClientRect();
         const posX = xNorm * canvasRect.width + canvasRect.left - conteneur.getBoundingClientRect().left;
         const posY = yNorm * canvasRect.height + canvasRect.top - conteneur.getBoundingClientRect().top;
+        // Taille de police CSS scalée comme sur le canvas
+        const resRef = _outils().RESOLUTION_REFERENCE || 1000;
+        const fontSizeCss = tailleCourante * canvasRect.width / resRef;
 
         // Creer le textarea inline
         const textarea = document.createElement('textarea');
@@ -1075,7 +1078,7 @@
             border-radius: 4px;
             color: ${couleur};
             font-family: sans-serif;
-            font-size: ${tailleCourante}px;
+            font-size: ${fontSizeCss}px;
             padding: 4px 6px;
             resize: both;
             outline: none;
@@ -1164,6 +1167,9 @@
         const fontSize = data.fontSize || 14;
         const couleur = data.color || '#FF0000';
         const largeurPx = data.width ? data.width * canvasRect.width : 200;
+        // Taille de police CSS scalée comme sur le canvas
+        const resRef = (_outils() && _outils().RESOLUTION_REFERENCE) || 1000;
+        const fontSizeCss = fontSize * canvasRect.width / resRef;
 
         // Masquer le texte sur le canvas pendant l'edition
         const texteOriginal = data.text;
@@ -1176,7 +1182,7 @@
         textarea.style.cssText = `
             position: absolute;
             left: ${posX}px;
-            top: ${posY - fontSize * 1.3}px;
+            top: ${posY - fontSizeCss * 1.3}px;
             min-width: 120px;
             min-height: 32px;
             width: ${largeurPx}px;
@@ -1186,7 +1192,7 @@
             border-radius: 4px;
             color: ${couleur};
             font-family: sans-serif;
-            font-size: ${fontSize}px;
+            font-size: ${fontSizeCss}px;
             padding: 4px 6px;
             resize: both;
             outline: none;
@@ -1337,9 +1343,11 @@
                 return { x1: sx1, y1: sy1, x2: sx2, y2: sy2 };
             }
             case 'text': {
-                const fontSize = data.fontSize || 14;
                 const w = canvasAnnotation?.width || 1000;
                 const h = canvasAnnotation?.height || 1000;
+                const outils = _outils();
+                const scaleT = w / (outils ? outils.RESOLUTION_REFERENCE : 1000);
+                const fontSize = (data.fontSize || 14) * scaleT;
                 const ctx = ctxAnnotation || document.createElement('canvas').getContext('2d');
                 ctx.font = `${fontSize}px sans-serif`;
                 const lignesBrutes = (data.text || '').split('\n');
@@ -2574,7 +2582,9 @@
     function dessinerTexte(texte) {
         const w = canvasAnnotation.width;
         const h = canvasAnnotation.height;
-        const fontSize = texte.fontSize || 14;
+        const outils = _outils();
+        const scale = w / (outils ? outils.RESOLUTION_REFERENCE : 1000);
+        const fontSize = (texte.fontSize || 14) * scale;
 
         ctxAnnotation.save();
         ctxAnnotation.font = `${fontSize}px sans-serif`;

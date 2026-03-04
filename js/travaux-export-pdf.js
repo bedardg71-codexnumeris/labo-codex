@@ -239,17 +239,30 @@
 
         // Attendre le chargement de tous les autocollants references
         await travauxOutils.attendreChargementAutocollants(donneesPage);
-        // Traits
+
+        // Surligneurs d'abord (en dessous des autres annotations)
         if (donneesPage.strokes) {
             for (const trait of donneesPage.strokes) {
-                dessinerTrait(ctx, w, h, trait, scale);
+                if (trait.tool === 'surligneur') dessinerTrait(ctx, w, h, trait, scale);
+            }
+        }
+        if (donneesPage.shapes) {
+            for (const forme of donneesPage.shapes) {
+                if (forme.type === 'surligneur') dessinerForme(ctx, w, h, forme, scale);
             }
         }
 
-        // Formes
+        // Traits (hors surligneurs)
+        if (donneesPage.strokes) {
+            for (const trait of donneesPage.strokes) {
+                if (trait.tool !== 'surligneur') dessinerTrait(ctx, w, h, trait, scale);
+            }
+        }
+
+        // Formes (hors surligneurs)
         if (donneesPage.shapes) {
             for (const forme of donneesPage.shapes) {
-                dessinerForme(ctx, w, h, forme, scale);
+                if (forme.type !== 'surligneur') dessinerForme(ctx, w, h, forme, scale);
             }
         }
 
@@ -312,8 +325,9 @@
         ctx.globalAlpha = trait.opacity || 1.0;
         ctx.globalCompositeOperation = outil.composite || 'source-over';
         ctx.strokeStyle = trait.color;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
+        const estSurl = (trait.tool === 'surligneur');
+        ctx.lineCap = estSurl ? 'butt' : 'round';
+        ctx.lineJoin = estSurl ? 'bevel' : 'round';
 
         ctx.beginPath();
         ctx.moveTo(trait.points[0].x * w, trait.points[0].y * h);
@@ -375,6 +389,15 @@
         const x2 = forme.x2 * w, y2 = forme.y2 * h;
 
         switch (forme.type) {
+            case 'surligneur':
+                ctx.lineCap = 'butt';
+                ctx.globalAlpha = forme.opacity || 0.5;
+                ctx.globalCompositeOperation = 'multiply';
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+                break;
             case 'rectangle':
                 ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
                 break;
