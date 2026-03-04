@@ -1117,9 +1117,10 @@ function associerProductionDepuisListe(fichierId, da) {
         if (fichier) productionActuelle = fichier.productionId;
     }
 
-    const optionsHTML = productions.map(p =>
-        `<option value="${p.id}" ${p.id === productionActuelle ? 'selected' : ''}>${echapperHtml(p.nom)}</option>`
-    ).join('');
+    const optionsHTML = productions.map(p => {
+        const label = p.description ? `${p.titre} - ${p.description}` : p.titre;
+        return `<option value="${p.id}" ${p.id === productionActuelle ? 'selected' : ''}>${echapperHtml(label)}</option>`;
+    }).join('');
 
     // Retirer une modale existante
     const existante = document.getElementById('associer-prod-modal-overlay');
