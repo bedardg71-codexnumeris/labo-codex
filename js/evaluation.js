@@ -639,16 +639,46 @@ function chargerGrilleSelectionnee() {
     const cartouches = db.getSync(`cartouches_${grilleId}`, []);
     const selectCartouche = document.getElementById('selectCartoucheEval');
 
-    if (!selectCartouche) return;
+    if (selectCartouche) {
+        selectCartouche.innerHTML = '<option value="">-- Choisir une cartouche --</option>';
+        cartouches.forEach(cartouche => {
+            const nomEchappe = echapperHtml(cartouche.nom);
+            const option = document.createElement('option');
+            option.value = cartouche.id;
+            option.textContent = nomEchappe;
+            selectCartouche.appendChild(option);
+        });
+    }
 
-    selectCartouche.innerHTML = '<option value="">-- Choisir une cartouche --</option>';
-    cartouches.forEach(cartouche => {
-        const nomEchappe = echapperHtml(cartouche.nom);
-        const option = document.createElement('option');
-        option.value = cartouche.id;
-        option.textContent = nomEchappe;
-        selectCartouche.appendChild(option);
-    });
+    // Régénérer les critères depuis la nouvelle grille et recalculer la note
+    const echelleId = evaluationEnCours.echelleId || document.getElementById('selectEchelle1')?.value;
+    if (echelleId) {
+        afficherCriteresDepuisGrille(grilleId, echelleId);
+
+        // Restaurer les niveaux déjà sélectionnés pour les critères communs
+        const grilles = db.getSync('grillesTemplates', []);
+        const grille = grilles.find(g => g.id === grilleId);
+        if (grille && evaluationEnCours.criteres) {
+            grille.criteres.forEach(critere => {
+                const niveauExistant = evaluationEnCours.criteres[critere.id];
+                if (niveauExistant) {
+                    const select = document.getElementById(`eval_${critere.id}`);
+                    if (select) {
+                        select.value = niveauExistant;
+                        // Colorer le select
+                        const couleur = typeof obtenirCouleurNiveau === 'function' ? obtenirCouleurNiveau(niveauExistant) : '';
+                        if (couleur && couleur !== 'transparent') {
+                            select.style.backgroundColor = couleur + '30';
+                            select.style.borderColor = couleur;
+                        }
+                    }
+                }
+            });
+        }
+
+        // Recalculer la note avec les nouvelles pondérations
+        setTimeout(() => calculerNote(), 50);
+    }
 }
 
 /**
