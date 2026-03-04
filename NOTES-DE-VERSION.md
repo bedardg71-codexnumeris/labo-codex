@@ -1,7 +1,25 @@
 # Notes de version — Monitorage pedagogique
 
 > Document de gestion locale. Historique complet avec dates.
-> Derniere mise a jour : 25 fevrier 2026
+> Derniere mise a jour : 4 mars 2026
+
+---
+
+## Beta 98.4 (4 mars 2026)
+
+**Corbeille fichiers, changement de grille et recalcul**
+
+*Corbeille persistante*
+- **Soft delete** : Les fichiers supprimes depuis la liste des evaluations sont deplaces a la corbeille au lieu d'etre supprimes definitivement. Le blob reste intact dans IndexedDB.
+- **Restauration 30 jours** : Les fichiers peuvent etre restaures pendant 30 jours. Purge automatique des fichiers expires a l'initialisation du module.
+- **Vue corbeille** : Bouton « Corbeille (N) » dans la zone de filtres, visible uniquement si N > 0. Vue dediee avec colonnes Nom, Fichier, Production, Date suppression, Jours restants, actions Restaurer/Supprimer.
+- **Vider la corbeille** : Suppression definitive de tous les fichiers avec confirmation modale.
+- **Cle namespacee** : `corbeilleFichiers` ajoutee dans CLES_NAMESPACEES pour isolation par trimestre.
+
+*Changement de grille*
+- **Cartouches** : Le dropdown grille n'est plus verrouille en mode edition. Confirmation avant changement (les commentaires des criteres communs sont preserves).
+- **Evaluations** : Changer la grille dans le panneau Parametres regenere les criteres et recalcule la note avec les nouvelles ponderations.
+- **Correspondance par nom** : Les niveaux des criteres communs entre l'ancienne et la nouvelle grille sont preserves automatiquement par correspondance de nom (insensible a la casse). Ex. : SRPNF → SRPN conserve Structure, Rigueur, Plausibilite, Nuance.
 
 ---
 
