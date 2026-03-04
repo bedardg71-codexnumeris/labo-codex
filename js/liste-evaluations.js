@@ -236,9 +236,6 @@ function initialiserListeEvaluations() {
         }
         console.log('   ✅ Bouton initialisé');
 
-        // Fermer les dropdowns d'actions au clic extérieur
-        document.addEventListener('click', fermerTousDropdownsEval);
-
         console.log('✅ Liste des évaluations initialisée');
     } catch (error) {
         console.error('❌ Erreur lors de l\'initialisation de la liste des évaluations:', error);
@@ -966,7 +963,7 @@ function genererLigneHTML(ligne) {
 }
 
 /**
- * Génère le dropdown d'actions contextuel selon le statut de la ligne
+ * Génère un <select> natif d'actions contextuel selon le statut de la ligne
  */
 function genererDropdownActions(ligne) {
     // Trouver le fichier importé associé
@@ -982,53 +979,89 @@ function genererDropdownActions(ligne) {
     const prodId = ligne.productionId;
     const evalId = ligne.evaluationId;
 
-    const items = [];
+    const options = [];
 
     // Évaluer — non évalué seulement
     if (ligne.statut === 'non-evalue') {
-        items.push(`<button class="eval-actions-dropdown-item" onclick="evaluerProduction('${da}', '${prodId}')">Évaluer</button>`);
+        options.push(`<option value="evaluer|${da}|${prodId}">Évaluer</option>`);
     }
 
     // Annoter — si fichier importé, sauf remplacée/non-recevable
     if (fichierId && ligne.statut !== 'remplacee' && ligne.statut !== 'non-recevable') {
-        items.push(`<button class="eval-actions-dropdown-item" onclick="ouvrirAnnotationDepuisListe('${fichierId}')">Annoter</button>`);
+        options.push(`<option value="annoter|${fichierId}">Annoter</option>`);
     }
 
     // Consulter — si évaluation existe
     if (evalId) {
-        items.push(`<button class="eval-actions-dropdown-item" onclick="consulterEvaluationDepuisListe('${evalId}')">Consulter</button>`);
+        options.push(`<option value="consulter|${evalId}">Consulter</option>`);
     }
 
     // Dossier PDF — évalué + export dispo
     if (ligne.statut === 'evalue' && typeof travauxExportPDF !== 'undefined') {
-        items.push(`<button class="eval-actions-dropdown-item" onclick="travauxExportPDF.exporterDossierComplet('${da}', '${prodId}')">Dossier PDF</button>`);
+        options.push(`<option value="dossier|${da}|${prodId}">Dossier PDF</option>`);
     }
 
     // Éditer — si fichier importé, sauf remplacée/non-recevable
     if (fichierId && ligne.statut !== 'remplacee' && ligne.statut !== 'non-recevable') {
-        items.push(`<button class="eval-actions-dropdown-item" onclick="ouvrirEditeurDepuisListe('${fichierId}')">Éditer</button>`);
+        options.push(`<option value="editer|${fichierId}">Éditer</option>`);
     }
 
     // Transférer — si fichier importé, sauf remplacée/non-recevable
     if (fichierId && ligne.statut !== 'remplacee' && ligne.statut !== 'non-recevable') {
-        items.push(`<button class="eval-actions-dropdown-item" onclick="travauxUI.ouvrirModalTransfert()">Transférer</button>`);
+        options.push(`<option value="transferer">Transférer</option>`);
     }
 
-    if (items.length === 0) {
+    if (options.length === 0) {
         return '<span class="texte-muted">-</span>';
     }
 
-    return `<div class="eval-actions-dropdown-wrap">
-        <button class="btn btn-secondaire btn-compact" onclick="toggleEvalActionsDropdown(event)">&#x22EE;</button>
-        <div class="eval-actions-dropdown">${items.join('')}</div>
-    </div>`;
+    return `<select class="eval-actions-select" onchange="executerActionEval(this)">
+        <option value="">Actions...</option>
+        ${options.join('')}
+    </select>`;
+}
+
+/**
+ * Exécute l'action sélectionnée dans le <select> natif
+ */
+function executerActionEval(select) {
+    const val = select.value;
+    select.value = ''; // Reset immédiat
+    if (!val) return;
+
+    const parts = val.split('|');
+    const action = parts[0];
+
+    switch (action) {
+        case 'evaluer':
+            evaluerProduction(parts[1], parts[2]);
+            break;
+        case 'annoter':
+            ouvrirAnnotationDepuisListe(parts[1]);
+            break;
+        case 'consulter':
+            consulterEvaluationDepuisListe(parts[1]);
+            break;
+        case 'dossier':
+            if (typeof travauxExportPDF !== 'undefined') {
+                travauxExportPDF.exporterDossierComplet(parts[1], parts[2]);
+            }
+            break;
+        case 'editer':
+            ouvrirEditeurDepuisListe(parts[1]);
+            break;
+        case 'transferer':
+            if (typeof travauxUI !== 'undefined') {
+                travauxUI.ouvrirModalTransfert();
+            }
+            break;
+    }
 }
 
 /**
  * Ouvre un fichier en mode annotation depuis la liste des évaluations
  */
 function ouvrirAnnotationDepuisListe(fichierId) {
-    fermerTousDropdownsEval();
     afficherSection('evaluations');
     if (typeof afficherSousSection === 'function') {
         afficherSousSection('evaluations-annoter');
@@ -1044,7 +1077,6 @@ function ouvrirAnnotationDepuisListe(fichierId) {
  * Ouvre l'éditeur de pages depuis la liste des évaluations
  */
 function ouvrirEditeurDepuisListe(fichierId) {
-    fermerTousDropdownsEval();
     afficherSection('evaluations');
     if (typeof afficherSousSection === 'function') {
         afficherSousSection('evaluations-importer');
@@ -1054,37 +1086,6 @@ function ouvrirEditeurDepuisListe(fichierId) {
             travauxUI.ouvrirEditeurPages(fichierId);
         }
     }, 200);
-}
-
-/**
- * Toggle un dropdown d'actions dans le tableau
- */
-function toggleEvalActionsDropdown(event) {
-    event.stopPropagation();
-    const btn = event.currentTarget;
-    const wrap = btn.closest('.eval-actions-dropdown-wrap');
-    const dropdown = wrap.querySelector('.eval-actions-dropdown');
-    const estOuvert = dropdown.classList.contains('ouvert');
-
-    // Fermer tous les autres
-    fermerTousDropdownsEval();
-
-    // Toggle celui-ci
-    if (!estOuvert) {
-        // Positionner en fixed par rapport au bouton
-        const rect = btn.getBoundingClientRect();
-        dropdown.style.top = (rect.bottom + 4) + 'px';
-        dropdown.style.right = (window.innerWidth - rect.right) + 'px';
-        dropdown.style.left = 'auto';
-        dropdown.classList.add('ouvert');
-    }
-}
-
-/**
- * Ferme tous les dropdowns d'actions ouverts
- */
-function fermerTousDropdownsEval() {
-    document.querySelectorAll('.eval-actions-dropdown.ouvert').forEach(d => d.classList.remove('ouvert'));
 }
 
 // ============================================
@@ -1720,8 +1721,8 @@ window.filtrerListeEvaluations = appliquerFiltres;
 window.reinitialiserFiltresEval = reinitialiserFiltres;
 window.rechercherEvaluations = rechercherEvaluations;
 
-// Dropdown d'actions et sélecteur de colonnes
-window.toggleEvalActionsDropdown = toggleEvalActionsDropdown;
+// Select d'actions et sélecteur de colonnes
+window.executerActionEval = executerActionEval;
 window.toggleColonneEval = toggleColonneEval;
 window.ouvrirAnnotationDepuisListe = ouvrirAnnotationDepuisListe;
 window.ouvrirEditeurDepuisListe = ouvrirEditeurDepuisListe;

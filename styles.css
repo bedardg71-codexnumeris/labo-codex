@@ -2037,7 +2037,6 @@ h1, h2, h3, h4 {
 #conteneur-tableau-evaluations .tableau th:nth-child(9),
 #conteneur-tableau-evaluations .tableau td:nth-child(9) {
     width: 10%; /* Actions */
-    overflow: visible;
 }
 
 /* Centrer les colonnes Jeton, Statut, Niveau, Note et Actions */
@@ -2071,42 +2070,16 @@ h1, h2, h3, h4 {
     white-space: nowrap;
 }
 
-/* Dropdown d'actions dans le tableau des évaluations */
-.eval-actions-dropdown-wrap {
-    position: relative;
-    display: inline-block;
-}
-
-.eval-actions-dropdown {
-    display: none;
-    position: fixed;
-    min-width: 180px;
-    background: var(--surface-carte);
+/* Select natif d'actions dans le tableau des évaluations */
+.eval-actions-select {
+    padding: 4px 6px;
+    font-size: 0.8rem;
     border: 1px solid var(--bleu-leger);
-    border-radius: var(--radius-moyen);
-    padding: 4px 0;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-    z-index: 1000;
-}
-
-.eval-actions-dropdown.ouvert {
-    display: block;
-}
-
-.eval-actions-dropdown-item {
-    display: block;
-    width: 100%;
-    padding: 8px 14px;
-    border: none;
-    background: none;
+    border-radius: var(--radius-petit, 4px);
+    background: var(--surface-carte);
     color: var(--texte-principal);
-    font-size: 0.85rem;
-    text-align: left;
     cursor: pointer;
-}
-
-.eval-actions-dropdown-item:hover {
-    background: rgba(106, 172, 184, 0.15);
+    max-width: 100%;
 }
 
 /* Coins arrondis sur l'en-tête */
