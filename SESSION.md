@@ -1,8 +1,20 @@
 # SESSION ACTIVE - BETA 98.4
 
-**Date** : 1 mars 2026
-**Version** : Beta 98.4
-**Statut** : Consolidation CSS (#210) + fix page d'accueil
+**Date** : 4 mars 2026
+**Version** : Beta 98.4 (build 0304-1635)
+**Statut** : Corbeille fichiers + changement de grille
+
+## SESSION DU 4 MARS 2026
+
+### Travail accompli — Corbeille fichiers + changement de grille (4 mars 2026)
+
+184. **Corbeille persistante pour fichiers supprimes** : Remplacement du hard-delete par un soft-delete avec restauration possible pendant 30 jours. Bouton « Corbeille (N) » dans la liste des evaluations, vue dediee avec restaurer/supprimer/vider. Cle namespacee `corbeilleFichiers`. Purge automatique > 30j dans `initialiserStockageTravaux()`. **Fichiers** : `js/trimestres.js`, `js/travaux-stockage.js` (+7 fonctions), `js/liste-evaluations.js` (+vue corbeille). Commit `b5562d1`.
+
+185. **Changement de grille sur cartouche et evaluation existantes** : Dropdown grille deverrouille en edition de cartouche (avec confirmation). `chargerGrilleSelectionnee()` regenere les criteres et recalcule la note quand on change de grille. Commit `a5bdd3e`.
+
+186. **Preservation des criteres communs lors du changement de grille** : Correspondance par nom de critere (insensible a la casse) quand les IDs different entre deux grilles. Ex: SRPNF → SRPN conserve S, R, P, N automatiquement. Commit `0db149e`.
+
+---
 
 ## SESSION DU 1 MARS 2026
 

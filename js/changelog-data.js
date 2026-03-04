@@ -10,6 +10,17 @@
 
     var CHANGELOG = [
         {
+            version: 'Beta 98.4',
+            date: '4 mars',
+            couleur: 'vert',
+            titre: 'Corbeille fichiers, changement de grille et recalcul',
+            items: [
+                '<strong>Corbeille persistante</strong> : Les fichiers supprim\u00e9s sont d\u00e9plac\u00e9s \u00e0 la corbeille au lieu d\u2019\u00eatre supprim\u00e9s d\u00e9finitivement. Restauration possible pendant 30\u00a0jours. Bouton \u00ab\u00a0Corbeille (N)\u00a0\u00bb dans la liste des \u00e9valuations avec vue d\u00e9di\u00e9e.',
+                '<strong>Changement de grille</strong> : Le dropdown grille n\u2019est plus verrouill\u00e9 sur les cartouches et \u00e9valuations existantes. Permet de passer d\u2019une grille \u00e0 une autre (ex.\u00a0: SRPNF \u2192 SRPN) sans recr\u00e9er la cartouche.',
+                '<strong>Pr\u00e9servation des crit\u00e8res</strong> : Lors du changement de grille sur une \u00e9valuation, les niveaux des crit\u00e8res communs sont conserv\u00e9s automatiquement (correspondance par nom). La note est recalcul\u00e9e avec les nouvelles pond\u00e9rations.'
+            ]
+        },
+        {
             version: 'Beta 98.2',
             date: '1 mars',
             couleur: 'bleu',
