@@ -621,6 +621,24 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
     const lignes = [];
     const pratiqueNotation = db.getSync('pratiqueNotation', {});
 
+    // 🔍 Diagnostic : lister tous les fichiers du groupe actif
+    if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersGroupeActif === 'function') {
+        const tousLesFichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
+        const tousSansFiltreGroupe = typeof travauxStockage.obtenirFichiersTravaux === 'function'
+            ? travauxStockage.obtenirFichiersTravaux() : [];
+        console.log(`🔍 [Diagnostic] Fichiers groupe actif: ${tousLesFichiers.length}, Total sans filtre: ${tousSansFiltreGroupe.length}`);
+        tousLesFichiers.forEach(f => {
+            console.log(`   📄 ${f.nomFichier} | DA="${f.etudiantDA}" | prodId="${f.productionId}" | gc="${f.groupeCoursId}" | id=${f.id}`);
+        });
+        if (tousSansFiltreGroupe.length !== tousLesFichiers.length) {
+            const exclus = tousSansFiltreGroupe.filter(f => !tousLesFichiers.some(g => g.id === f.id));
+            console.warn(`   ⚠️ ${exclus.length} fichier(s) exclus par le filtre groupe :`);
+            exclus.forEach(f => {
+                console.warn(`      ❌ ${f.nomFichier} | DA="${f.etudiantDA}" | gc="${f.groupeCoursId}" | id=${f.id}`);
+            });
+        }
+    }
+
     // Productions à évaluer (exclure le portfolio lui-même)
     const productionsAEvaluer = productions.filter(p => p.type !== 'portfolio');
 
