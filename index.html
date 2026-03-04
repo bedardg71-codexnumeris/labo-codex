@@ -4532,6 +4532,19 @@
                         </div>
                     </div>
 
+                    <!-- Sélecteur de colonnes visibles -->
+                    <div class="eval-colonnes-selecteur" id="eval-colonnes-selecteur">
+                        <span class="texte-muted" style="font-size: 0.8rem;">Colonnes :</span>
+                        <label><input type="checkbox" data-colonne="da" checked onchange="toggleColonneEval(this)"> DA</label>
+                        <label><input type="checkbox" data-colonne="nom" checked onchange="toggleColonneEval(this)"> Nom</label>
+                        <label><input type="checkbox" data-colonne="prenom" checked onchange="toggleColonneEval(this)"> Prénom</label>
+                        <label><input type="checkbox" data-colonne="production" checked onchange="toggleColonneEval(this)"> Production</label>
+                        <label><input type="checkbox" data-colonne="jeton" checked onchange="toggleColonneEval(this)"> Jeton</label>
+                        <label><input type="checkbox" data-colonne="statut" checked onchange="toggleColonneEval(this)"> Statut</label>
+                        <label><input type="checkbox" data-colonne="niveau" checked onchange="toggleColonneEval(this)"> Niveau</label>
+                        <label><input type="checkbox" data-colonne="note" checked onchange="toggleColonneEval(this)"> Note %</label>
+                    </div>
+
                     <!-- Zone de chargement -->
                     <div id="zone-chargement-evaluations" class="u-text-center" style="padding: 40px">
                         <p style="color: var(--gris-moyen);">Chargement des évaluations...</p>
@@ -4559,6 +4572,9 @@
                                     </th>
                                     <th class="td-center-clickable" data-tooltip="eval-col-niveau" onclick="trierTableauParColonne('niveau')">
                                         Statut <span id="tri-niveau" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
+                                    </th>
+                                    <th class="td-center-clickable" onclick="trierTableauParColonne('niveauIDME')" title="Niveau de performance IDME">
+                                        Niveau <span id="tri-niveauIDME" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
                                     <th class="td-center-clickable" onclick="trierTableauParColonne('note')" title="Cliquer pour trier">
                                         Note % <span id="tri-note" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>

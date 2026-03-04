@@ -568,8 +568,6 @@
         if (!conteneur) return;
 
         const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
-        const tailleGroupe = fichiersTravaux.reduce(function(acc, f) { return acc + (f.tailleFichier || 0); }, 0);
-        const tailleFormatee = travauxStockage.formaterTaille(tailleGroupe);
         const queue = travauxImport.obtenirFileDAttente();
         const groupes = travauxImport.regrouperParDocument();
 
@@ -577,10 +575,6 @@
         const fsapiActif = travauxStockage.estFSAPIActif();
 
         const nbImages = queue.filter(f => f.estImage).length;
-
-        // Compteurs de statuts pour le header principal
-        const evaluationsHeader = fichiersTravaux.length > 0 ? (obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || []) : [];
-        const resumeGlobal = fichiersTravaux.length > 0 ? genererResumeStatuts(fichiersTravaux, evaluationsHeader) : '';
 
         // Zero-state pour les novices
         const aideActive = typeof estAideContextuelleActive === 'function' && estAideContextuelleActive();
@@ -688,41 +682,6 @@
                     </div><!-- /pipeline-etapes-contenu -->
                 </div><!-- /pipeline-etapes-groupe -->
 
-                <!-- Section fichiers importes (toujours visible) -->
-                <div class="pipeline-section-importes">
-                    <div class="pipeline-section-importes-header">
-                        <h4>Fichiers importés (${fichiersTravaux.length})${fichiersTravaux.length > 0 ? ` <span class="texte-muted u-texte-petit">— ${tailleFormatee} · ${fsapiActif ? 'Disque local' : 'IndexedDB'}</span> <span class="travaux-compteurs-groupe">${resumeGlobal}</span>` : ''}</h4>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            ${fichiersTravaux.length > 0 ? `
-                                <div class="travaux-compteur-badge-nav" id="travaux-compteur-badge-header">
-                                    <button id="travaux-btn-badge-prec-header" class="travaux-btn-nav" onclick="travauxUI.badgePrecedent()" disabled title="Fichier précédent">&#x2190;</button>
-                                    <span id="travaux-compteur-badge-txt-header" class="travaux-compteur-badge">-- / ${fichiersTravaux.length}</span>
-                                    <button id="travaux-btn-badge-suiv-header" class="travaux-btn-nav" onclick="travauxUI.badgeSuivant()" disabled title="Fichier suivant">&#x2192;</button>
-                                </div>
-                            ` : ''}
-                            ${fichiersTravaux.length > 0 ? `
-                                <button class="btn btn-secondaire btn-petit"
-                                        onclick="travauxUI.ouvrirModalTransfert()"
-                                        title="Transférer des fichiers vers un autre groupe">
-                                    Transférer
-                                </button>
-                            ` : ''}
-                        </div>
-                    </div>
-                    ${fichiersTravaux.length > 0
-                        ? genererGrilleFichiers(fichiersTravaux)
-                        : '<p class="texte-muted">Aucun fichier importé pour le moment.</p>'}
-                </div>
-
-                ${fichiersTravaux.length > 0 ? `
-                <div id="travaux-drop-zone-edition" class="travaux-drop-zone travaux-drop-zone-edition">
-                    <div class="travaux-drop-zone-contenu">
-                        <div class="travaux-drop-zone-icone">&#x270F;</div>
-                        <p>Éditer un document</p>
-                        <p class="texte-muted">Glisse un badge importé ici pour réordonner, supprimer ou ajouter des pages</p>
-                    </div>
-                </div>
-                ` : ''}
 
             </div>
         `;
@@ -733,9 +692,6 @@
             identifierAutoPipeline();
             rafraichirPipelineUI();
         });
-
-        // Initialiser la zone d'edition (drop badge importe)
-        initialiserDropZoneEdition();
 
         // Lancer les previews apres le rendu si des fichiers sont en queue
         if (queue.length > 0) {
@@ -776,16 +732,44 @@
         // Stocker le HTML badges pour injection dans la toolbar (Phase A — 1 rangée)
         _htmlBadgesGrille = genererGrilleFichiers(fichiersTravaux, 'ouvrirFichier');
 
-        // Nettoyer le conteneur (détruit l'ancienne visionneuse pour la recréer
-        // avec les badges à jour et reconfigurer setConteneur/gestesZoom)
-        conteneur.innerHTML = '';
+        // Si la visionneuse est déjà ouverte, la recréer avec les badges à jour
+        if (document.getElementById('travaux-conteneur-document')) {
+            conteneur.innerHTML = '';
+            afficherVisionneuse();
+            if (productionFiltreActive) {
+                filtrerBadgesParProduction();
+            }
+            return;
+        }
 
-        // Rendre la visionneuse (toolbar unique intègre les badges)
-        afficherVisionneuse();
+        // État A — Afficher le tableau de fichiers (vue par défaut)
+        conteneur.innerHTML = genererTableauFichiers(fichiersTravaux);
 
-        // Restaurer le filtre de production persisté
+        // Post-render : initialiser les valeurs des <select> de production
+        fichiersTravaux.forEach(f => {
+            if (f.productionId) {
+                const sel = document.getElementById('travaux-tableau-prod-' + f.id);
+                if (sel) sel.value = f.productionId;
+            }
+        });
+
+        // Brancher le « tout sélectionner »
+        const cbTout = document.getElementById('travaux-tableau-tout-selectionner');
+        if (cbTout) {
+            cbTout.addEventListener('change', function() {
+                const cbs = document.querySelectorAll('#travaux-tableau-fichiers .travaux-tableau-checkbox');
+                cbs.forEach(cb => {
+                    // Ne cocher que les lignes visibles
+                    if (!cb.closest('tr').classList.contains('u-hide')) {
+                        cb.checked = cbTout.checked;
+                    }
+                });
+            });
+        }
+
+        // Appliquer le filtre production persisté
         if (productionFiltreActive) {
-            filtrerBadgesParProduction();
+            filtrerTableauFichiers();
         }
     }
 
@@ -2185,6 +2169,151 @@
     }
 
     /**
+     * Génère un tableau de fichiers pour l'onglet « Annoter et évaluer »
+     * Remplace l'affichage par badges dans l'état initial (avant ouverture visionneuse)
+     * @param {Array} fichiers - Liste des fichiers importés
+     * @returns {string} HTML du tableau complet avec filtres
+     */
+    function genererTableauFichiers(fichiers) {
+        if (fichiers.length === 0) return '';
+
+        const productions = obtenirDonneesSelonMode(cle('productions'));
+        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+
+        // Options pour le select de production
+        const optionsProductions = productions.map(p =>
+            `<option value="${p.id}">${echapperHtml(p.titre || p.nom || p.id)}</option>`
+        ).join('');
+
+        // Dropdown filtre production
+        let htmlFiltreProduction = '<option value="">Toutes les productions</option>';
+        productions.forEach(p => {
+            const sel = (productionFiltreActive === p.id) ? ' selected' : '';
+            htmlFiltreProduction += `<option value="${p.id}"${sel}>${echapperHtml(p.titre || p.nom || p.id)}</option>`;
+        });
+
+        // Générer les lignes
+        let htmlLignes = '';
+        fichiers.forEach(f => {
+            htmlLignes += genererLigneTableauFichier(f, productions, evaluations, optionsProductions);
+        });
+
+        return `
+            <div class="conteneur" id="travaux-tableau-fichiers-conteneur">
+                <h2>Annoter et évaluer <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle">📍</button></h2>
+                <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;">
+                    <select class="controle-form controle-form-compact" id="travaux-tableau-filtre-production" onchange="travauxUI.filtrerTableauFichiers()">
+                        ${htmlFiltreProduction}
+                    </select>
+                    <select class="controle-form controle-form-compact" id="travaux-tableau-filtre-statut" onchange="travauxUI.filtrerTableauFichiers()">
+                        <option value="">Tous les statuts</option>
+                        <option value="importe">Importé</option>
+                        <option value="annote">Annoté</option>
+                        <option value="evalue">Évalué</option>
+                    </select>
+                    <input type="text" class="controle-form controle-form-compact" id="travaux-tableau-filtre-recherche" placeholder="Rechercher\u2026" oninput="travauxUI.filtrerTableauFichiers()" style="max-width: 220px;">
+                </div>
+                <table class="tableau" id="travaux-tableau-fichiers">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px; text-align: center;"><input type="checkbox" id="travaux-tableau-tout-selectionner" title="Tout sélectionner"></th>
+                            <th>Nom</th>
+                            <th>DA</th>
+                            <th>Production</th>
+                            <th style="text-align: center;">Statut</th>
+                            <th style="text-align: center;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${htmlLignes}
+                    </tbody>
+                </table>
+                <p class="texte-muted" id="travaux-tableau-aucun-resultat" style="display: none; padding: 16px 0;">Aucun fichier ne correspond aux filtres.</p>
+            </div>`;
+    }
+
+    /**
+     * Génère une ligne <tr> pour un fichier dans le tableau
+     * @param {Object} f - Fichier
+     * @param {Array} productions - Liste des productions
+     * @param {Array} evaluations - Liste des évaluations
+     * @param {string} optionsProductions - HTML des <option> pour le select production
+     * @returns {string} HTML de la ligne
+     */
+    function genererLigneTableauFichier(f, productions, evaluations, optionsProductions) {
+        const etudiant = travauxImport.trouverEtudiantParDA(f.etudiantDA);
+        const nomComplet = etudiant
+            ? (etudiant.nom ? `${echapperHtml(etudiant.nom)}, ${echapperHtml(etudiant.prenom)}` : echapperHtml(etudiant.prenom))
+            : (f.etudiantDA ? 'Inconnu' : 'Non associé');
+        const da = f.etudiantDA || '—';
+
+        // Statut
+        const statut = determinerStatutFichier(f, evaluations);
+        const statutLabels = { importe: 'Importé', annote: 'Annoté', evalue: 'Évalué' };
+
+        // Select production avec valeur pré-sélectionnée
+        const selectId = `travaux-tableau-prod-${f.id}`;
+
+        return `<tr data-fichier-id="${f.id}" data-statut="${statut}" data-production-id="${f.productionId || ''}" data-etudiant-da="${f.etudiantDA || ''}">
+            <td style="text-align: center;"><input type="checkbox" class="travaux-tableau-checkbox" data-fichier-id="${f.id}"></td>
+            <td>${nomComplet}</td>
+            <td>${echapperHtml(da)}</td>
+            <td><select class="controle-form controle-form-compact travaux-tableau-select-prod" id="${selectId}" data-fichier-id="${f.id}" onchange="travauxUI.changerProductionFichier('${f.id}', this.value); this.closest('tr').dataset.productionId = this.value;">
+                <option value="">— Aucune —</option>
+                ${optionsProductions}
+            </select></td>
+            <td style="text-align: center;"><span class="travaux-badge-pill ${statut}">${statutLabels[statut]}</span></td>
+            <td style="text-align: center;"><button class="btn btn-petit btn-principal" onclick="travauxUI.ouvrirFichier('${f.id}')">Annoter</button></td>
+        </tr>`;
+    }
+
+    /**
+     * Filtre les lignes du tableau de fichiers par production, statut et recherche
+     */
+    function filtrerTableauFichiers() {
+        const tableau = document.getElementById('travaux-tableau-fichiers');
+        if (!tableau) return;
+
+        const filtreProduction = (document.getElementById('travaux-tableau-filtre-production') || {}).value || '';
+        const filtreStatut = (document.getElementById('travaux-tableau-filtre-statut') || {}).value || '';
+        const filtreRecherche = ((document.getElementById('travaux-tableau-filtre-recherche') || {}).value || '').toLowerCase().trim();
+
+        // Persister le filtre production (cohérence avec les badges toolbar)
+        productionFiltreActive = filtreProduction;
+        sessionStorage.setItem('travaux-filtre-production', filtreProduction);
+
+        let nbVisibles = 0;
+        const lignes = tableau.querySelectorAll('tbody tr');
+        lignes.forEach(tr => {
+            const prodId = tr.dataset.productionId || '';
+            const statut = tr.dataset.statut || '';
+            const texte = tr.textContent.toLowerCase();
+
+            const matchProd = !filtreProduction || prodId === filtreProduction;
+            const matchStatut = !filtreStatut || statut === filtreStatut;
+            const matchRecherche = !filtreRecherche || texte.includes(filtreRecherche);
+
+            if (matchProd && matchStatut && matchRecherche) {
+                tr.classList.remove('u-hide');
+                nbVisibles++;
+            } else {
+                tr.classList.add('u-hide');
+            }
+        });
+
+        // Message « aucun résultat »
+        const msgAucun = document.getElementById('travaux-tableau-aucun-resultat');
+        if (msgAucun) msgAucun.style.display = nbVisibles === 0 ? '' : 'none';
+    }
+
+    /**
+     * Rafraîchit le tableau de fichiers (re-rend afficherFichiers)
+     */
+    function rafraichirTableauFichiers() {
+        afficherFichiers();
+    }
+
+    /**
      * Filtre les badges affichés selon la production sélectionnée dans le dropdown
      */
     function filtrerBadgesParProduction(selectElement) {
@@ -2443,6 +2572,18 @@
                                        document.querySelector('#evaluations-annoter.sous-section[style*="display: block"]');
             if (!sousSectionActive || sousSectionActive.offsetParent === null) {
                 afficherSousSection('evaluations-annoter');
+            }
+        }
+
+        // Si le tableau est affiché (pas de visionneuse), créer la visionneuse d'abord
+        if (!document.getElementById('travaux-conteneur-document')) {
+            const conteneur = document.getElementById('evaluations-contenu-fichiers');
+            if (conteneur) {
+                conteneur.innerHTML = '';
+                afficherVisionneuse();
+                if (productionFiltreActive) {
+                    filtrerBadgesParProduction();
+                }
             }
         }
 
@@ -5560,6 +5701,9 @@
         peuplementPaletteJetons: peuplementPaletteJetons,
         // Filtres badges
         filtrerBadgesParProduction: filtrerBadgesParProduction,
+        // Tableau fichiers (vue par défaut Annoter et évaluer)
+        filtrerTableauFichiers: filtrerTableauFichiers,
+        rafraichirTableauFichiers: rafraichirTableauFichiers,
         // Utilitaires
         annotationContientDuContenu: annotationContientDuContenu,
         // Metadata pipeline (LEA / Autre)

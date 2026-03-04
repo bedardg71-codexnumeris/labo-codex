@@ -1996,45 +1996,50 @@ h1, h2, h3, h4 {
 
 #conteneur-tableau-evaluations .tableau th:nth-child(1),
 #conteneur-tableau-evaluations .tableau td:nth-child(1) {
-    width: 8%; /* DA */
+    width: 7%; /* DA */
 }
 
 #conteneur-tableau-evaluations .tableau th:nth-child(2),
 #conteneur-tableau-evaluations .tableau td:nth-child(2) {
-    width: 12%; /* Nom */
+    width: 11%; /* Nom */
 }
 
 #conteneur-tableau-evaluations .tableau th:nth-child(3),
 #conteneur-tableau-evaluations .tableau td:nth-child(3) {
-    width: 12%; /* Prénom */
+    width: 11%; /* Prénom */
 }
 
 #conteneur-tableau-evaluations .tableau th:nth-child(4),
 #conteneur-tableau-evaluations .tableau td:nth-child(4) {
-    width: 25%; /* Production - élargie pour le titre + description */
+    width: 22%; /* Production */
 }
 
 #conteneur-tableau-evaluations .tableau th:nth-child(5),
 #conteneur-tableau-evaluations .tableau td:nth-child(5) {
-    width: 15%; /* Jeton - élargie pour les badges */
+    width: 13%; /* Jeton */
 }
 
 #conteneur-tableau-evaluations .tableau th:nth-child(6),
 #conteneur-tableau-evaluations .tableau td:nth-child(6) {
-    width: 8%; /* Niveau */
+    width: 8%; /* Statut */
 }
 
 #conteneur-tableau-evaluations .tableau th:nth-child(7),
 #conteneur-tableau-evaluations .tableau td:nth-child(7) {
-    width: 10%; /* Note */
+    width: 5%; /* Niveau IDME */
 }
 
 #conteneur-tableau-evaluations .tableau th:nth-child(8),
 #conteneur-tableau-evaluations .tableau td:nth-child(8) {
-    width: 10%; /* Actions */
+    width: 8%; /* Note % */
 }
 
-/* Centrer les colonnes Jeton, Niveau, Note et Actions */
+#conteneur-tableau-evaluations .tableau th:nth-child(9),
+#conteneur-tableau-evaluations .tableau td:nth-child(9) {
+    width: 8%; /* Actions */
+}
+
+/* Centrer les colonnes Jeton, Statut, Niveau, Note et Actions */
 #conteneur-tableau-evaluations .tableau th:nth-child(5),
 #conteneur-tableau-evaluations .tableau td:nth-child(5),
 #conteneur-tableau-evaluations .tableau th:nth-child(6),
@@ -2042,8 +2047,67 @@ h1, h2, h3, h4 {
 #conteneur-tableau-evaluations .tableau th:nth-child(7),
 #conteneur-tableau-evaluations .tableau td:nth-child(7),
 #conteneur-tableau-evaluations .tableau th:nth-child(8),
-#conteneur-tableau-evaluations .tableau td:nth-child(8) {
+#conteneur-tableau-evaluations .tableau td:nth-child(8),
+#conteneur-tableau-evaluations .tableau th:nth-child(9),
+#conteneur-tableau-evaluations .tableau td:nth-child(9) {
     text-align: center;
+}
+
+/* Sélecteur de colonnes visibles */
+.eval-colonnes-selecteur {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 8px 0;
+    font-size: 0.85rem;
+}
+.eval-colonnes-selecteur label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* Dropdown d'actions dans le tableau des évaluations */
+.eval-actions-dropdown-wrap {
+    position: relative;
+    display: inline-block;
+}
+
+.eval-actions-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    min-width: 180px;
+    background: var(--surface-carte);
+    border: 1px solid var(--bleu-leger);
+    border-radius: var(--radius-moyen);
+    padding: 4px 0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    z-index: 1000;
+}
+
+.eval-actions-dropdown.ouvert {
+    display: block;
+}
+
+.eval-actions-dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 8px 14px;
+    border: none;
+    background: none;
+    color: var(--texte-principal);
+    font-size: 0.85rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.eval-actions-dropdown-item:hover {
+    background: rgba(106, 172, 184, 0.15);
 }
 
 /* Coins arrondis sur l'en-tête */
@@ -9565,7 +9629,8 @@ summary.summary-materiel:hover {
 /* Champs de formulaire compacts */
 .controle-form-compact {
     padding: 4px 8px;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    min-width: 140px;
 }
 
 /* Couleurs de titres spécifiques */

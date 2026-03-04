@@ -236,6 +236,9 @@ function initialiserListeEvaluations() {
         }
         console.log('   ✅ Bouton initialisé');
 
+        // Fermer les dropdowns d'actions au clic extérieur
+        document.addEventListener('click', fermerTousDropdownsEval);
+
         console.log('✅ Liste des évaluations initialisée');
     } catch (error) {
         console.error('❌ Erreur lors de l\'initialisation de la liste des évaluations:', error);
@@ -597,6 +600,9 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
         // Attacher les événements aux boutons d'action
         attacherEvenementsActions();
 
+        // Restaurer la visibilité des colonnes selon les préférences
+        restaurerPreferencesColonnes();
+
         const logMoyenne = moyenneAffichee !== null ? ` | Moyenne: ${moyenneAffichee.toFixed(1)}%` : '';
         console.log(`✅ ${lignesFiltrees.length} évaluation(s) affichée(s)${logMoyenne}`);
     }
@@ -939,17 +945,8 @@ function genererLigneHTML(ligne) {
         affichageNoteChiffree = '-';
     }
 
-    // Choisir les boutons appropriés
-    let boutons;
-    if (ligne.statut === 'non-recevable') {
-        boutons = genererBoutonsActionsNonRecevable(ligne);
-    } else if (ligne.statut === 'remplacee') {
-        boutons = genererBoutonsActionsRemplacee(ligne);
-    } else if (ligne.statut === 'evalue') {
-        boutons = genererBoutonsActionsEvalue(ligne);
-    } else {
-        boutons = genererBoutonsActionsNonEvalue(ligne);
-    }
+    // Générer le dropdown d'actions contextuel
+    const boutons = genererDropdownActions(ligne);
 
     const daAffiche = ligne.daAffichage || ligne.da;
 
@@ -961,6 +958,7 @@ function genererLigneHTML(ligne) {
             <td class="td-left">${echapperHtml(ligne.productionNom)}</td>
             <td class="td-center">${badgeJeton}</td>
             <td class="td-center">${affichageNiveau}</td>
+            <td class="td-center">${ligne.niveauFinal && ligne.niveauFinal !== '-' ? `<strong>${ligne.niveauFinal}</strong>` : '-'}</td>
             <td class="td-center">${affichageNoteChiffree}</td>
             <td class="td-center">${boutons}</td>
         </tr>
@@ -968,78 +966,119 @@ function genererLigneHTML(ligne) {
 }
 
 /**
- * Génère les boutons d'action pour une évaluation existante
+ * Génère le dropdown d'actions contextuel selon le statut de la ligne
  */
-function genererBoutonsActionsEvalue(ligne) {
-    const lectureSeule = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
+function genererDropdownActions(ligne) {
+    // Trouver le fichier importé associé
+    let fichierImporte = null;
+    if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersTravaux === 'function') {
+        const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
+        fichierImporte = fichiers.find(f =>
+            f.etudiantDA === ligne.da && (!f.productionId || f.productionId === ligne.productionId)
+        );
+    }
+    const fichierId = fichierImporte ? fichierImporte.id : null;
+    const da = ligne.da;
+    const prodId = ligne.productionId;
+    const evalId = ligne.evaluationId;
 
-    // Toujours afficher uniquement le bouton Consulter
-    // La suppression et le verrouillage se font depuis l'évaluation elle-même (plus sécuritaire)
-    const titreConsulter = lectureSeule
-        ? 'Consulter cette évaluation (lecture seule)'
-        : 'Consulter cette évaluation';
+    const items = [];
 
-    // Bouton "Dossier PDF" si un fichier de travail existe
-    const btnDossier = typeof travauxExportPDF !== 'undefined'
-        ? ` <button class="btn btn-secondaire btn-compact" onclick="travauxExportPDF.exporterDossierComplet('${ligne.da}', '${ligne.productionId}')" title="Exporter le dossier complet (annote + grille + retroaction)">Dossier PDF</button>`
-        : '';
+    // Évaluer — non évalué seulement
+    if (ligne.statut === 'non-evalue') {
+        items.push(`<button class="eval-actions-dropdown-item" onclick="evaluerProduction('${da}', '${prodId}')">Évaluer</button>`);
+    }
 
-    return `
-        <button class="btn btn-secondaire btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.evaluationId}')" title="${titreConsulter}">
-            Consulter
-        </button>${btnDossier}
-    `;
+    // Annoter — si fichier importé, sauf remplacée/non-recevable
+    if (fichierId && ligne.statut !== 'remplacee' && ligne.statut !== 'non-recevable') {
+        items.push(`<button class="eval-actions-dropdown-item" onclick="ouvrirAnnotationDepuisListe('${fichierId}')">Annoter</button>`);
+    }
+
+    // Consulter — si évaluation existe
+    if (evalId) {
+        items.push(`<button class="eval-actions-dropdown-item" onclick="consulterEvaluationDepuisListe('${evalId}')">Consulter</button>`);
+    }
+
+    // Dossier PDF — évalué + export dispo
+    if (ligne.statut === 'evalue' && typeof travauxExportPDF !== 'undefined') {
+        items.push(`<button class="eval-actions-dropdown-item" onclick="travauxExportPDF.exporterDossierComplet('${da}', '${prodId}')">Dossier PDF</button>`);
+    }
+
+    // Éditer — si fichier importé, sauf remplacée/non-recevable
+    if (fichierId && ligne.statut !== 'remplacee' && ligne.statut !== 'non-recevable') {
+        items.push(`<button class="eval-actions-dropdown-item" onclick="ouvrirEditeurDepuisListe('${fichierId}')">Éditer</button>`);
+    }
+
+    // Transférer — si fichier importé, sauf remplacée/non-recevable
+    if (fichierId && ligne.statut !== 'remplacee' && ligne.statut !== 'non-recevable') {
+        items.push(`<button class="eval-actions-dropdown-item" onclick="travauxUI.ouvrirModalTransfert()">Transférer</button>`);
+    }
+
+    if (items.length === 0) {
+        return '<span class="texte-muted">-</span>';
+    }
+
+    return `<div class="eval-actions-dropdown-wrap">
+        <button class="btn btn-secondaire btn-compact" onclick="toggleEvalActionsDropdown(event)">&#x22EE;</button>
+        <div class="eval-actions-dropdown">${items.join('')}</div>
+    </div>`;
 }
 
 /**
- * Génère les boutons d'action pour une évaluation remplacée par un jeton
- * (Consulter uniquement)
+ * Ouvre un fichier en mode annotation depuis la liste des évaluations
  */
-function genererBoutonsActionsRemplacee(ligne) {
-    const lectureSeule = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
-
-    // Toujours afficher uniquement le bouton Consulter
-    // La suppression et le verrouillage se font depuis l'évaluation elle-même (plus sécuritaire)
-    const titreConsulter = lectureSeule
-        ? 'Consulter cette évaluation remplacée (lecture seule)'
-        : 'Consulter cette évaluation remplacée';
-
-    return `
-        <button class="btn btn-secondaire btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.evaluationId}')" title="${titreConsulter}">
-            Consulter
-        </button>
-    `;
+function ouvrirAnnotationDepuisListe(fichierId) {
+    fermerTousDropdownsEval();
+    afficherSection('evaluations');
+    if (typeof afficherSousSection === 'function') {
+        afficherSousSection('evaluations-annoter');
+    }
+    setTimeout(() => {
+        if (typeof travauxUI !== 'undefined' && typeof travauxUI.ouvrirFichier === 'function') {
+            travauxUI.ouvrirFichier(fichierId);
+        }
+    }, 200);
 }
 
 /**
- * Génère les boutons d'action pour une évaluation non recevable (plagiat ou IA)
- * (Consulter uniquement)
+ * Ouvre l'éditeur de pages depuis la liste des évaluations
  */
-function genererBoutonsActionsNonRecevable(ligne) {
-    const lectureSeule = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
-
-    // Toujours afficher uniquement le bouton Consulter
-    // La suppression et le verrouillage se font depuis l'évaluation elle-même (plus sécuritaire)
-    const titreConsulter = lectureSeule
-        ? 'Consulter cette évaluation non recevable (lecture seule)'
-        : 'Consulter cette évaluation non recevable';
-
-    return `
-        <button class="btn btn-secondaire btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.evaluationId}')" title="${titreConsulter}">
-            Consulter
-        </button>
-    `;
+function ouvrirEditeurDepuisListe(fichierId) {
+    fermerTousDropdownsEval();
+    afficherSection('evaluations');
+    if (typeof afficherSousSection === 'function') {
+        afficherSousSection('evaluations-importer');
+    }
+    setTimeout(() => {
+        if (typeof travauxUI !== 'undefined' && typeof travauxUI.ouvrirEditeurPages === 'function') {
+            travauxUI.ouvrirEditeurPages(fichierId);
+        }
+    }, 200);
 }
 
 /**
- * Génère les boutons d'action pour une évaluation non faite
+ * Toggle un dropdown d'actions dans le tableau
  */
-function genererBoutonsActionsNonEvalue(ligne) {
-    return `
-        <button class="btn btn-confirmer btn-compact" onclick="evaluerProduction('${ligne.da}', '${ligne.productionId}')" title="Évaluer">
-            Évaluer
-        </button>
-    `;
+function toggleEvalActionsDropdown(event) {
+    event.stopPropagation();
+    const wrap = event.currentTarget.closest('.eval-actions-dropdown-wrap');
+    const dropdown = wrap.querySelector('.eval-actions-dropdown');
+    const estOuvert = dropdown.classList.contains('ouvert');
+
+    // Fermer tous les autres
+    fermerTousDropdownsEval();
+
+    // Toggle celui-ci
+    if (!estOuvert) {
+        dropdown.classList.add('ouvert');
+    }
+}
+
+/**
+ * Ferme tous les dropdowns d'actions ouverts
+ */
+function fermerTousDropdownsEval() {
+    document.querySelectorAll('.eval-actions-dropdown.ouvert').forEach(d => d.classList.remove('ouvert'));
 }
 
 // ============================================
@@ -1488,7 +1527,7 @@ function trierTableauParColonne(colonne) {
  */
 function mettreAJourIndicateursTri() {
     // Réinitialiser tous les indicateurs
-    ['da', 'nom', 'prenom', 'production', 'jetons', 'niveau', 'note'].forEach(col => {
+    ['da', 'nom', 'prenom', 'production', 'jetons', 'niveau', 'niveauIDME', 'note'].forEach(col => {
         const elem = document.getElementById(`tri-${col}`);
         if (elem) elem.textContent = '↕';
     });
@@ -1567,6 +1606,12 @@ function trierLignesParColonne(lignes) {
                 const numB = obtenirOrdreStatut(b.statutWorkflow);
                 return asc ? numA - numB : numB - numA;
 
+            case 'niveauIDME':
+                const ordreIDME = { 'I': 1, 'D': 2, 'M': 3, 'E': 4, '-': 5 };
+                const idmeA = ordreIDME[a.niveauFinal] ?? 5;
+                const idmeB = ordreIDME[b.niveauFinal] ?? 5;
+                return asc ? idmeA - idmeB : idmeB - idmeA;
+
             case 'note':
                 valeurA = a.noteChiffree ?? -1;
                 valeurB = b.noteChiffree ?? -1;
@@ -1578,6 +1623,71 @@ function trierLignesParColonne(lignes) {
     });
 
     return lignesTriees;
+}
+
+// ============================================
+// SÉLECTEUR DE COLONNES VISIBLES
+// ============================================
+
+const colonneIndexMap = {
+    'da': 1,
+    'nom': 2,
+    'prenom': 3,
+    'production': 4,
+    'jeton': 5,
+    'statut': 6,
+    'niveau': 7,
+    'note': 8
+};
+
+function toggleColonneEval(checkbox) {
+    const colonne = checkbox.getAttribute('data-colonne');
+    const index = colonneIndexMap[colonne];
+    if (!index) return;
+
+    const tableau = document.querySelector('#conteneur-tableau-evaluations .tableau');
+    if (!tableau) return;
+
+    const cellules = tableau.querySelectorAll(`th:nth-child(${index}), td:nth-child(${index})`);
+    cellules.forEach(cell => {
+        if (checkbox.checked) {
+            cell.classList.remove('u-hide');
+        } else {
+            cell.classList.add('u-hide');
+        }
+    });
+
+    // Persister les préférences
+    sauvegarderPreferencesColonnes();
+}
+
+function sauvegarderPreferencesColonnes() {
+    const selecteur = document.getElementById('eval-colonnes-selecteur');
+    if (!selecteur) return;
+    const prefs = {};
+    selecteur.querySelectorAll('input[data-colonne]').forEach(cb => {
+        prefs[cb.getAttribute('data-colonne')] = cb.checked;
+    });
+    sessionStorage.setItem('eval-colonnes-visibles', JSON.stringify(prefs));
+}
+
+function restaurerPreferencesColonnes() {
+    const raw = sessionStorage.getItem('eval-colonnes-visibles');
+    if (!raw) return;
+    try {
+        const prefs = JSON.parse(raw);
+        const selecteur = document.getElementById('eval-colonnes-selecteur');
+        if (!selecteur) return;
+        Object.keys(prefs).forEach(colonne => {
+            const cb = selecteur.querySelector(`input[data-colonne="${colonne}"]`);
+            if (cb) {
+                cb.checked = prefs[colonne];
+                if (!prefs[colonne]) {
+                    toggleColonneEval(cb);
+                }
+            }
+        });
+    } catch (e) { /* ignorer les données corrompues */ }
 }
 
 // ============================================
@@ -1603,6 +1713,12 @@ window.appliquerFiltres = appliquerFiltres;
 window.filtrerListeEvaluations = appliquerFiltres;
 window.reinitialiserFiltresEval = reinitialiserFiltres;
 window.rechercherEvaluations = rechercherEvaluations;
+
+// Dropdown d'actions et sélecteur de colonnes
+window.toggleEvalActionsDropdown = toggleEvalActionsDropdown;
+window.toggleColonneEval = toggleColonneEval;
+window.ouvrirAnnotationDepuisListe = ouvrirAnnotationDepuisListe;
+window.ouvrirEditeurDepuisListe = ouvrirEditeurDepuisListe;
 
 console.log('✅ Module liste-evaluations.js chargé - initialiserListeEvaluations disponible:', typeof window.initialiserListeEvaluations);
 
