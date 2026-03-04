@@ -27,11 +27,17 @@ function calculerStatutWorkflow(ligne) {
     // Vérifier si un fichier importé existe et s'il a des annotations
     if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersTravaux === 'function') {
         const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
-        // Match par DA + productionId, ou par DA seul si le fichier n'a pas de productionId
-        const fichier = fichiers.find(f =>
-            f.etudiantDA === ligne.da &&
-            (!f.productionId || f.productionId === ligne.productionId)
+        // Match strict par DA + productionId
+        let fichier = fichiers.find(f =>
+            f.etudiantDA === ligne.da && f.productionId && f.productionId === ligne.productionId
         );
+        // Match souple par DA seul (fichier sans productionId) — marquer l'association manquante
+        if (!fichier) {
+            fichier = fichiers.find(f =>
+                f.etudiantDA === ligne.da && !f.productionId
+            );
+            if (fichier) ligne.associationManquante = true;
+        }
 
         if (fichier) {
             const annotation = travauxStockage.obtenirAnnotationFichier(fichier.id);
@@ -993,7 +999,7 @@ function genererLigneHTML(ligne) {
             <td class="td-left">${echapperHtml(ligne.nom)}</td>
             <td class="td-left">${echapperHtml(ligne.prenom)}</td>
             <td class="td-left">${ligne.associationManquante
-                ? '<span style="color: var(--attention);">⚠ Production inconnue</span>'
+                ? `${echapperHtml(ligne.productionNom)} <span style="color: var(--attention); font-size: 0.85em;">⚠ Non associé</span>`
                 : echapperHtml(ligne.productionNom)}</td>
             <td class="td-center">${badgeJeton}</td>
             <td class="td-center">${affichageNiveau}</td>
