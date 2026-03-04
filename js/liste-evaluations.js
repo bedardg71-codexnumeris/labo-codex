@@ -1011,6 +1011,12 @@ function genererDropdownActions(ligne) {
         options.push(`<option value="transferer">Transférer</option>`);
     }
 
+    // Associer / Réassocier — si fichier importé
+    if (fichierId) {
+        const labelAssoc = ligne.productionId ? 'Réassocier' : 'Associer';
+        options.push(`<option value="associer|${fichierId}|${da}">${labelAssoc}</option>`);
+    }
+
     if (options.length === 0) {
         return '<span class="texte-muted">-</span>';
     }
@@ -1055,6 +1061,9 @@ function executerActionEval(select) {
                 travauxUI.ouvrirModalTransfert();
             }
             break;
+        case 'associer':
+            associerProductionDepuisListe(parts[1], parts[2]);
+            break;
     }
 }
 
@@ -1086,6 +1095,72 @@ function ouvrirEditeurDepuisListe(fichierId) {
             travauxUI.ouvrirEditeurPages(fichierId);
         }
     }, 200);
+}
+
+/**
+ * Ouvre une modale pour associer (ou réassocier) un fichier importé à une production
+ */
+function associerProductionDepuisListe(fichierId, da) {
+    const productions = db.getSync(cle('productions'), []);
+    if (productions.length === 0) {
+        if (typeof afficherNotificationErreur === 'function') {
+            afficherNotificationErreur('Aucune production', 'Crée d\'abord des productions dans « Construction de la note ».');
+        }
+        return;
+    }
+
+    // Trouver le fichier pour connaître la production actuelle
+    let productionActuelle = null;
+    if (typeof travauxStockage !== 'undefined') {
+        const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
+        const fichier = fichiers.find(f => f.id === fichierId);
+        if (fichier) productionActuelle = fichier.productionId;
+    }
+
+    const optionsHTML = productions.map(p =>
+        `<option value="${p.id}" ${p.id === productionActuelle ? 'selected' : ''}>${echapperHtml(p.nom)}</option>`
+    ).join('');
+
+    // Retirer une modale existante
+    const existante = document.getElementById('associer-prod-modal-overlay');
+    if (existante) existante.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'associer-prod-modal-overlay';
+    overlay.className = 'modal-overlay actif';
+    overlay.innerHTML = `
+        <div class="modal-contenu modal-compact" style="max-width: 440px;">
+            <button class="modal-fermer" id="associer-prod-modal-fermer">&times;</button>
+            <h3 class="modal-titre">${productionActuelle ? 'Réassocier' : 'Associer'} à une production</h3>
+            <label style="font-size: 0.85em; color: var(--texte-secondaire);">Production :</label>
+            <select id="associer-prod-select" class="controle-form" style="margin: 6px 0 16px 0; width: 100%;">
+                <option value="">— Choisir une production —</option>
+                ${optionsHTML}
+            </select>
+            <div class="modal-actions">
+                <button class="btn btn-principal" id="associer-prod-btn-confirmer">Confirmer</button>
+                <button class="btn btn-secondaire" id="associer-prod-btn-annuler">Annuler</button>
+            </div>
+        </div>`;
+
+    document.body.appendChild(overlay);
+
+    const fermer = () => overlay.remove();
+    document.getElementById('associer-prod-modal-fermer').onclick = fermer;
+    document.getElementById('associer-prod-btn-annuler').onclick = fermer;
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) fermer(); });
+
+    document.getElementById('associer-prod-btn-confirmer').onclick = () => {
+        const prodId = document.getElementById('associer-prod-select').value;
+        if (!prodId) return;
+
+        if (typeof travauxUI !== 'undefined' && typeof travauxUI.changerProductionFichier === 'function') {
+            travauxUI.changerProductionFichier(fichierId, prodId);
+        }
+        overlay.remove();
+        // Rafraîchir le tableau
+        appliquerFiltres();
+    };
 }
 
 // ============================================
@@ -1726,6 +1801,7 @@ window.executerActionEval = executerActionEval;
 window.toggleColonneEval = toggleColonneEval;
 window.ouvrirAnnotationDepuisListe = ouvrirAnnotationDepuisListe;
 window.ouvrirEditeurDepuisListe = ouvrirEditeurDepuisListe;
+window.associerProductionDepuisListe = associerProductionDepuisListe;
 
 console.log('✅ Module liste-evaluations.js chargé - initialiserListeEvaluations disponible:', typeof window.initialiserListeEvaluations);
 

@@ -682,6 +682,16 @@
                     </div><!-- /pipeline-etapes-contenu -->
                 </div><!-- /pipeline-etapes-groupe -->
 
+                ${(() => {
+                    const sansProduction = queue.filter(f => !f.productionId).length;
+                    if (sansProduction > 0) {
+                        return `<div class="info-box info-box--attention" style="margin-top: 12px;">
+                            ⚠️ ${sansProduction} fichier(s) ne sont associés à aucune production.
+                            Vérifie que les productions ont été créées dans « Construction de la note ».
+                        </div>`;
+                    }
+                    return '';
+                })()}
 
             </div>
         `;
