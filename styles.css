@@ -15765,6 +15765,8 @@ body.mode-clair .pipeline-autocomplete-item:hover {
     border: 1px solid var(--bordure-claire);
     border-radius: var(--radius-grand);
     background: var(--gris-tres-pale);
+    overflow: hidden;
+    min-width: 0;
 }
 
 /* --- Preview Quick Look (overlay style macOS) --- */
@@ -19982,6 +19984,11 @@ body.mode-clair .barre-etudiant.tracked-4 {
     flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 16px;
+    overflow: hidden;
+}
+.travaux-badges-groupe .annot-badge {
+    max-width: 100%;
+    overflow: hidden;
 }
 
 /* Badges compacts en ligne scrollable (visionneuse permanente) */
