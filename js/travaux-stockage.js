@@ -643,6 +643,175 @@
     }
 
     /* ===============================
+       CORBEILLE FICHIERS
+       =============================== */
+
+    const DUREE_CORBEILLE_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
+
+    /**
+     * Obtient le contenu complet de la corbeille
+     * @returns {Array} Tous les fichiers en corbeille
+     */
+    function obtenirCorbeilleComplete() {
+        return db.getSync(cle('corbeilleFichiers'), []);
+    }
+
+    /**
+     * Sauvegarde la corbeille
+     * @param {Array} corbeille
+     */
+    function sauvegarderCorbeille(corbeille) {
+        db.setSync(cle('corbeilleFichiers'), corbeille);
+    }
+
+    /**
+     * Obtient les fichiers en corbeille filtrés par le groupe-cours actif
+     * @returns {Array}
+     */
+    function obtenirCorbeille() {
+        const corbeille = obtenirCorbeilleComplete();
+        const gcActif = db.getSync('groupeCoursActif', null);
+        if (!gcActif || !gcActif.id) return corbeille;
+        return corbeille.filter(f => f.groupeCoursId === gcActif.id);
+    }
+
+    /**
+     * Déplace un fichier dans la corbeille (soft delete)
+     * @param {string} id - ID du fichier
+     * @returns {boolean} true si déplacé
+     */
+    function deplacerEnCorbeille(id) {
+        const fichiers = obtenirFichiersTravaux();
+        const index = fichiers.findIndex(f => f.id === id);
+        if (index === -1) return false;
+
+        // Copier les métadonnées + date de suppression
+        const fichier = Object.assign({}, fichiers[index], {
+            dateSuppression: new Date().toISOString()
+        });
+
+        // Ajouter à la corbeille
+        const corbeille = obtenirCorbeilleComplete();
+        corbeille.push(fichier);
+        sauvegarderCorbeille(corbeille);
+
+        // Retirer de la liste active (blob intact)
+        fichiers.splice(index, 1);
+        sauvegarderFichiersTravaux(fichiers);
+
+        console.log(`[Travaux-Stockage] Fichier déplacé en corbeille: ${id}`);
+        return true;
+    }
+
+    /**
+     * Restaure un fichier depuis la corbeille
+     * @param {string} id - ID du fichier
+     * @returns {boolean} true si restauré
+     */
+    function restaurerDeCorbeille(id) {
+        const corbeille = obtenirCorbeilleComplete();
+        const index = corbeille.findIndex(f => f.id === id);
+        if (index === -1) return false;
+
+        // Retirer de la corbeille et enlever dateSuppression
+        const fichier = Object.assign({}, corbeille[index]);
+        delete fichier.dateSuppression;
+
+        corbeille.splice(index, 1);
+        sauvegarderCorbeille(corbeille);
+
+        // Remettre dans la liste active
+        const fichiers = obtenirFichiersTravaux();
+        fichiers.push(fichier);
+        sauvegarderFichiersTravaux(fichiers);
+
+        console.log(`[Travaux-Stockage] Fichier restauré de la corbeille: ${id}`);
+        return true;
+    }
+
+    /**
+     * Supprime définitivement un fichier de la corbeille (blob + métadonnées)
+     * @param {string} id - ID du fichier
+     * @returns {Promise<boolean>}
+     */
+    async function supprimerDefinitivement(id) {
+        // Supprimer le blob
+        try {
+            await supprimerBlob(id);
+        } catch (e) {
+            console.warn(`[Travaux-Stockage] Blob introuvable pour ${id}`);
+        }
+
+        // Retirer de la corbeille
+        const corbeille = obtenirCorbeilleComplete();
+        const index = corbeille.findIndex(f => f.id === id);
+        if (index !== -1) {
+            corbeille.splice(index, 1);
+            sauvegarderCorbeille(corbeille);
+            console.log(`[Travaux-Stockage] Fichier supprimé définitivement: ${id}`);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Purge les fichiers expirés de la corbeille (> 30 jours)
+     * @returns {Promise<number>} Nombre de fichiers purgés
+     */
+    async function purgerCorbeilleExpiree() {
+        const corbeille = obtenirCorbeilleComplete();
+        const maintenant = Date.now();
+        const expirees = [];
+        const restantes = [];
+
+        for (const f of corbeille) {
+            const dateSup = new Date(f.dateSuppression).getTime();
+            if (maintenant - dateSup > DUREE_CORBEILLE_MS) {
+                expirees.push(f);
+            } else {
+                restantes.push(f);
+            }
+        }
+
+        if (expirees.length === 0) return 0;
+
+        // Supprimer les blobs expirés
+        for (const f of expirees) {
+            try {
+                await supprimerBlob(f.id);
+            } catch (e) {
+                console.warn(`[Travaux-Stockage] Blob introuvable pour ${f.id}`);
+            }
+        }
+
+        sauvegarderCorbeille(restantes);
+        console.log(`[Travaux-Stockage] Corbeille purgée: ${expirees.length} fichier(s) expiré(s)`);
+        return expirees.length;
+    }
+
+    /**
+     * Vide entièrement la corbeille (tous les blobs + métadonnées)
+     * @returns {Promise<number>} Nombre de fichiers supprimés
+     */
+    async function viderCorbeille() {
+        const corbeille = obtenirCorbeilleComplete();
+        if (corbeille.length === 0) return 0;
+
+        for (const f of corbeille) {
+            try {
+                await supprimerBlob(f.id);
+            } catch (e) {
+                console.warn(`[Travaux-Stockage] Blob introuvable pour ${f.id}`);
+            }
+        }
+
+        const nb = corbeille.length;
+        sauvegarderCorbeille([]);
+        console.log(`[Travaux-Stockage] Corbeille vidée: ${nb} fichier(s)`);
+        return nb;
+    }
+
+    /* ===============================
        CYCLE DE VIE DES BLOBS
        =============================== */
 
@@ -866,6 +1035,9 @@
             // Migration blobStatut pour fichiers existants
             migrerBlobStatut();
 
+            // Purger les fichiers expirés de la corbeille (> 30 jours)
+            purgerCorbeilleExpiree();
+
             console.log(`[Travaux-Stockage] Module initialise (mode: ${fsapiActif ? 'FSAPI' : 'IndexedDB'})`);
         } catch (error) {
             console.error('[Travaux-Stockage] Erreur initialisation:', error);
@@ -933,7 +1105,14 @@
         convertirEnFacsimile: convertirEnFacsimile,
         allegerFichiersExportes: allegerFichiersExportes,
         // Sauvegarde (expose pour reimport)
-        sauvegarderFichiersTravaux: sauvegarderFichiersTravaux
+        sauvegarderFichiersTravaux: sauvegarderFichiersTravaux,
+        // Corbeille
+        obtenirCorbeille: obtenirCorbeille,
+        deplacerEnCorbeille: deplacerEnCorbeille,
+        restaurerDeCorbeille: restaurerDeCorbeille,
+        supprimerDefinitivement: supprimerDefinitivement,
+        purgerCorbeilleExpiree: purgerCorbeilleExpiree,
+        viderCorbeille: viderCorbeille
     };
 
 })();

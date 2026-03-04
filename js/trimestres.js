@@ -52,7 +52,9 @@
         'horaireSelectionne',
         'seancesHoraire',
         // 🆕 FIX (17 fév 2026) : Carte mentale doit être namespacée pour le mode démo
-        'planification_mindmap'
+        'planification_mindmap',
+        // 🆕 Corbeille fichiers travaux (4 mars 2026)
+        'corbeilleFichiers'
     ];
 
     // Clés globales (partagées entre trimestres)
