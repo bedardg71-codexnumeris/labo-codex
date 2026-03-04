@@ -15492,9 +15492,11 @@ body.mode-clair .pipeline-fichier-selectionne {
     align-items: center;
     gap: 8px;
     padding: 4px 6px;
+    padding-right: 28px;
     border-radius: var(--radius-petit);
     cursor: pointer;
     transition: background 0.15s;
+    position: relative;
 }
 
 .pipeline-fichier-ligne:hover {
@@ -15511,7 +15513,9 @@ body.mode-clair .pipeline-fichier-selectionne {
 }
 
 .pipeline-btn-retirer {
-    flex-shrink: 0;
+    position: absolute;
+    top: 2px;
+    right: 2px;
     width: 22px;
     height: 22px;
     border: none;
@@ -15528,7 +15532,7 @@ body.mode-clair .pipeline-fichier-selectionne {
     justify-content: center;
 }
 
-.pipeline-fichier-colonne:hover .pipeline-btn-retirer {
+.pipeline-fichier-ligne:hover .pipeline-btn-retirer {
     opacity: 0.6;
 }
 
