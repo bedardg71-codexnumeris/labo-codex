@@ -1641,6 +1641,9 @@
      * @param {number} index - Index du fichier dans la queue
      */
     function retirerFichierPipeline(index) {
+        const queue = travauxImport.obtenirFileDAttente();
+        const nom = (queue[index] && queue[index].nomFichier) || 'ce fichier';
+        if (!confirm(`Retirer « ${nom} » de la liste ?`)) return;
         // Ajuster la selection si necessaire
         if (fichierSelectionneIndex === index) {
             fichierSelectionneIndex = -1;
