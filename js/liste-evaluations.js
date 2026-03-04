@@ -34,7 +34,7 @@ function calculerStatutWorkflow(ligne) {
         let fichier = fichiers.find(f =>
             f.etudiantDA === ligne.da && f.productionId && f.productionId === ligne.productionId
         );
-        // Match souple : fichier du même DA sans productionId ou avec un productionId inconnu (orphelin)
+        // Match souple : fichier du même DA sans productionId ou avec un productionId orphelin/inconnu
         if (!fichier) {
             fichier = fichiers.find(f =>
                 f.etudiantDA === ligne.da && (!f.productionId || !productionIdsConnus.has(f.productionId))
@@ -621,24 +621,6 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
     const lignes = [];
     const pratiqueNotation = db.getSync('pratiqueNotation', {});
 
-    // 🔍 Diagnostic : lister tous les fichiers du groupe actif
-    if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersGroupeActif === 'function') {
-        const tousLesFichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
-        const tousSansFiltreGroupe = typeof travauxStockage.obtenirFichiersTravaux === 'function'
-            ? travauxStockage.obtenirFichiersTravaux() : [];
-        console.log(`🔍 [Diagnostic] Fichiers groupe actif: ${tousLesFichiers.length}, Total sans filtre: ${tousSansFiltreGroupe.length}`);
-        tousLesFichiers.forEach(f => {
-            console.log(`   📄 ${f.nomFichier} | DA="${f.etudiantDA}" | prodId="${f.productionId}" | gc="${f.groupeCoursId}" | id=${f.id}`);
-        });
-        if (tousSansFiltreGroupe.length !== tousLesFichiers.length) {
-            const exclus = tousSansFiltreGroupe.filter(f => !tousLesFichiers.some(g => g.id === f.id));
-            console.warn(`   ⚠️ ${exclus.length} fichier(s) exclus par le filtre groupe :`);
-            exclus.forEach(f => {
-                console.warn(`      ❌ ${f.nomFichier} | DA="${f.etudiantDA}" | gc="${f.groupeCoursId}" | id=${f.id}`);
-            });
-        }
-    }
-
     // Productions à évaluer (exclure le portfolio lui-même)
     const productionsAEvaluer = productions.filter(p => p.type !== 'portfolio');
 
@@ -1081,10 +1063,19 @@ function genererDropdownActions(ligne) {
         options.push(`<option value="transferer">Transférer</option>`);
     }
 
-    // Associer / Réassocier — si fichier importé
+    // Associer / Réassocier — si fichier importé (strict ou souple)
     if (fichierId) {
         const labelAssoc = ligne.productionId ? 'Réassocier' : 'Associer';
         options.push(`<option value="associer|${fichierId}|${da}">${labelAssoc}</option>`);
+    } else if (typeof travauxStockage !== 'undefined') {
+        // Fichier mal associé : même DA mais sous une autre production
+        const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
+        const fichierMalAssocie = fichiers.find(f =>
+            f.etudiantDA === da && f.productionId && f.productionId !== prodId
+        );
+        if (fichierMalAssocie) {
+            options.push(`<option value="associer|${fichierMalAssocie.id}|${da}">Réassocier</option>`);
+        }
     }
 
     if (options.length === 0) {
