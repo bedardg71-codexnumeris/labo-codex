@@ -856,8 +856,13 @@
                 return;
             }
         }
-        // Double-clic sur un sticker non selectionne
+        // Double-clic sur un texte : editer en place
         const hit = trouverAnnotationAuPoint(xNorm, yNorm);
+        if (hit && hit.type === 'text') {
+            editerTexte(hit.data);
+            return;
+        }
+        // Double-clic sur un sticker non selectionne
         if (hit && hit.type === 'sticker') {
             selectionsMultiples = [hit];
             annotationSelectionnee = hit;
@@ -1139,6 +1144,119 @@
             }
         }
         document.addEventListener('pointerdown', onClickExterieur, true);
+    }
+
+    /**
+     * Edite un texte existant en place (double-clic)
+     * @param {Object} data - L'objet textAnnotation a modifier
+     */
+    function editerTexte(data) {
+        const ancien = document.getElementById('travaux-texte-inline');
+        if (ancien) ancien.remove();
+
+        const conteneur = document.getElementById('travaux-conteneur-document');
+        if (!conteneur || !canvasAnnotation) return;
+
+        const canvasRect = canvasAnnotation.getBoundingClientRect();
+        const conteneurRect = conteneur.getBoundingClientRect();
+        const posX = data.x * canvasRect.width + canvasRect.left - conteneurRect.left;
+        const posY = data.y * canvasRect.height + canvasRect.top - conteneurRect.top;
+        const fontSize = data.fontSize || 14;
+        const couleur = data.color || '#FF0000';
+        const largeurPx = data.width ? data.width * canvasRect.width : 200;
+
+        // Masquer le texte sur le canvas pendant l'edition
+        const texteOriginal = data.text;
+        data.text = '';
+        reRendreAnnotations();
+
+        const textarea = document.createElement('textarea');
+        textarea.id = 'travaux-texte-inline';
+        textarea.value = texteOriginal;
+        textarea.style.cssText = `
+            position: absolute;
+            left: ${posX}px;
+            top: ${posY - fontSize * 1.3}px;
+            min-width: 120px;
+            min-height: 32px;
+            width: ${largeurPx}px;
+            max-width: 400px;
+            background: transparent;
+            border: 2px dashed ${couleur};
+            border-radius: 4px;
+            color: ${couleur};
+            font-family: sans-serif;
+            font-size: ${fontSize}px;
+            padding: 4px 6px;
+            resize: both;
+            outline: none;
+            z-index: 1000;
+            overflow: hidden;
+        `;
+
+        conteneur.appendChild(textarea);
+
+        // Deselectionner pour ne pas voir les poignees
+        annotationSelectionnee = null;
+        selectionsMultiples = [];
+
+        let pret = false;
+        setTimeout(() => { pret = true; }, 100);
+
+        textarea.focus();
+        textarea.select();
+
+        function confirmer() {
+            const nouveauTexte = textarea.value.trim();
+            const canvasRect2 = canvasAnnotation.getBoundingClientRect();
+            const nouvelleLargeur = textarea.offsetWidth / canvasRect2.width;
+            textarea.remove();
+            document.removeEventListener('pointerdown', onClickExt, true);
+
+            if (!nouveauTexte) {
+                // Texte vide : restaurer l'original
+                data.text = texteOriginal;
+            } else if (nouveauTexte !== texteOriginal || nouvelleLargeur !== data.width) {
+                const avant = JSON.parse(JSON.stringify(data));
+                avant.text = texteOriginal;
+                data.text = nouveauTexte;
+                data.width = nouvelleLargeur;
+                const apres = JSON.parse(JSON.stringify(data));
+                empilerUndo('modification-annotation', { type: 'text', avant: avant, apres: apres });
+                planifierSauvegarde();
+            } else {
+                data.text = texteOriginal;
+            }
+            reRendreAnnotations();
+        }
+
+        function annuler() {
+            textarea.remove();
+            document.removeEventListener('pointerdown', onClickExt, true);
+            data.text = texteOriginal;
+            reRendreAnnotations();
+        }
+
+        textarea.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                e.stopPropagation();
+                confirmer();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                annuler();
+            }
+        });
+
+        function onClickExt(e) {
+            if (!pret) return;
+            if (!textarea.contains(e.target)) {
+                document.removeEventListener('pointerdown', onClickExt, true);
+                confirmer();
+            }
+        }
+        document.addEventListener('pointerdown', onClickExt, true);
     }
 
     /* ===============================
