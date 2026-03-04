@@ -812,6 +812,15 @@ function obtenirNoteAffichee(evaluation, pratiqueNotation) {
  * Applique les filtres et recharge le tableau
  */
 function appliquerFiltres() {
+    // Mettre à jour le bouton corbeille
+    mettreAJourBoutonCorbeille();
+
+    // Si la vue corbeille est active, afficher la corbeille au lieu du tableau normal
+    if (vueCorbeilleActive) {
+        afficherVueCorbeille();
+        return;
+    }
+
     // Charger les données selon le mode actif
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     const etudiants = (typeof obtenirEtudiantsCoursActif === 'function')
@@ -1078,6 +1087,11 @@ function genererDropdownActions(ligne) {
         }
     }
 
+    // Supprimer — si fichier importé
+    if (fichierId) {
+        options.push(`<option value="supprimer|${fichierId}|${da}">Supprimer</option>`);
+    }
+
     if (options.length === 0) {
         return '<span class="texte-muted">-</span>';
     }
@@ -1124,6 +1138,9 @@ function executerActionEval(select) {
             break;
         case 'associer':
             associerProductionDepuisListe(parts[1], parts[2]);
+            break;
+        case 'supprimer':
+            confirmerSuppressionFichier(parts[1], parts[2]);
             break;
     }
 }
@@ -1222,6 +1239,64 @@ function associerProductionDepuisListe(fichierId, da) {
         overlay.remove();
         // Rafraîchir le tableau
         appliquerFiltres();
+    };
+}
+
+/**
+ * Confirme et déplace un fichier à la corbeille (soft delete)
+ */
+function confirmerSuppressionFichier(fichierId, da) {
+    if (typeof travauxStockage === 'undefined') return;
+
+    // Trouver le fichier pour afficher son nom
+    const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
+    const fichier = fichiers.find(f => f.id === fichierId);
+    const nomFichier = fichier ? (fichier.nomFichier || fichier.id) : fichierId;
+
+    // Trouver le nom de l'étudiant
+    const etudiants = db.getSync(cle('groupeEtudiants'), []);
+    const etudiant = etudiants.find(e => e.da === da);
+    const nomEtudiant = etudiant ? `${etudiant.prenom} ${etudiant.nom}` : da;
+
+    // Retirer une modale existante
+    const existante = document.getElementById('supprimer-fichier-modal-overlay');
+    if (existante) existante.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'supprimer-fichier-modal-overlay';
+    overlay.className = 'modal-overlay actif';
+    overlay.innerHTML = `
+        <div class="modal-contenu modal-compact" style="max-width: 440px;">
+            <button class="modal-fermer" id="supprimer-fichier-modal-fermer">&times;</button>
+            <h3 class="modal-titre">Déplacer à la corbeille ?</h3>
+            <p style="margin: 8px 0 16px 0; font-size: 0.9em;">
+                Déplacer le fichier de <strong>${echapperHtml(nomEtudiant)}</strong> à la corbeille ?<br>
+                <span style="color: var(--texte-secondaire); font-size: 0.9em;">${echapperHtml(nomFichier)}</span>
+            </p>
+            <p style="margin: 0 0 16px 0; font-size: 0.85em; color: var(--texte-secondaire);">
+                Le fichier pourra être restauré pendant 30 jours.
+            </p>
+            <div class="modal-actions">
+                <button class="btn btn-danger" id="supprimer-fichier-btn-confirmer">Déplacer à la corbeille</button>
+                <button class="btn btn-secondaire" id="supprimer-fichier-btn-annuler">Annuler</button>
+            </div>
+        </div>`;
+
+    document.body.appendChild(overlay);
+
+    const fermer = () => overlay.remove();
+    document.getElementById('supprimer-fichier-modal-fermer').onclick = fermer;
+    document.getElementById('supprimer-fichier-btn-annuler').onclick = fermer;
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) fermer(); });
+
+    document.getElementById('supprimer-fichier-btn-confirmer').onclick = () => {
+        travauxStockage.deplacerEnCorbeille(fichierId);
+        overlay.remove();
+        if (typeof afficherNotificationSucces === 'function') {
+            afficherNotificationSucces(`Fichier de ${nomEtudiant} déplacé à la corbeille.`);
+        }
+        appliquerFiltres();
+        mettreAJourBoutonCorbeille();
     };
 }
 
@@ -1835,6 +1910,259 @@ function restaurerPreferencesColonnes() {
 }
 
 // ============================================
+// CORBEILLE FICHIERS
+// ============================================
+
+let vueCorbeilleActive = false;
+
+/**
+ * Met à jour le bouton corbeille dans la zone de filtres
+ */
+function mettreAJourBoutonCorbeille() {
+    if (typeof travauxStockage === 'undefined') return;
+
+    const corbeille = travauxStockage.obtenirCorbeille();
+    const nb = corbeille.length;
+    let btn = document.getElementById('btn-corbeille-eval');
+
+    if (nb === 0) {
+        if (btn) btn.classList.add('u-hide');
+        if (vueCorbeilleActive) {
+            vueCorbeilleActive = false;
+            appliquerFiltres();
+        }
+        return;
+    }
+
+    if (!btn) {
+        // Créer le bouton à côté du bouton Réinitialiser
+        const zoneFiltres = document.querySelector('#evaluations-liste .carte-grise-mb20 .grid-auto-180');
+        if (!zoneFiltres) return;
+        const div = document.createElement('div');
+        div.className = 'groupe-form';
+        div.style.cssText = 'display: flex; align-items: flex-end;';
+        div.innerHTML = `<button class="btn btn-secondaire" id="btn-corbeille-eval" onclick="basculerVueCorbeille()"></button>`;
+        zoneFiltres.appendChild(div);
+        btn = document.getElementById('btn-corbeille-eval');
+    }
+
+    btn.textContent = vueCorbeilleActive ? 'Retour à la liste' : `Corbeille (${nb})`;
+    btn.classList.remove('u-hide');
+}
+
+/**
+ * Bascule entre la vue normale et la vue corbeille
+ */
+function basculerVueCorbeille() {
+    vueCorbeilleActive = !vueCorbeilleActive;
+    mettreAJourBoutonCorbeille();
+
+    if (vueCorbeilleActive) {
+        afficherVueCorbeille();
+    } else {
+        appliquerFiltres();
+    }
+}
+
+/**
+ * Affiche le contenu de la corbeille dans le tableau principal
+ */
+function afficherVueCorbeille() {
+    if (typeof travauxStockage === 'undefined') return;
+
+    const corbeille = travauxStockage.obtenirCorbeille();
+    const corpsTableau = document.getElementById('corps-tableau-evaluations');
+    const conteneurTableau = document.getElementById('conteneur-tableau-evaluations');
+    const messageAucunResultat = document.getElementById('message-aucun-resultat');
+    const compteur = document.getElementById('compteur-evaluations');
+    const zoneChargement = document.getElementById('zone-chargement-evaluations');
+
+    if (!corpsTableau) return;
+
+    if (zoneChargement) zoneChargement.classList.add('u-hide');
+
+    const etudiants = db.getSync(cle('groupeEtudiants'), []);
+    const productions = db.getSync(cle('productions'), []);
+
+    if (corbeille.length === 0) {
+        conteneurTableau.classList.add('u-hide');
+        if (messageAucunResultat) {
+            messageAucunResultat.classList.remove('u-hide');
+            messageAucunResultat.textContent = 'La corbeille est vide.';
+        }
+        if (compteur) compteur.textContent = 'Corbeille vide';
+        return;
+    }
+
+    if (messageAucunResultat) messageAucunResultat.classList.add('u-hide');
+    conteneurTableau.classList.remove('u-hide');
+
+    if (compteur) compteur.textContent = `Corbeille — ${corbeille.length} fichier(s)`;
+
+    // Masquer la moyenne et les productions
+    const elemMoyenne = document.getElementById('moyenne-evaluations');
+    if (elemMoyenne) elemMoyenne.textContent = '';
+    const elemNbProductions = document.getElementById('nb-productions');
+    if (elemNbProductions) elemNbProductions.textContent = '';
+
+    // En-tête corbeille + bouton vider
+    let html = `<tr><td colspan="9" style="padding: 10px 12px; background: var(--surface-alt);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <span style="font-size: 0.85em; color: var(--texte-secondaire);">Les fichiers sont supprimés automatiquement après 30 jours.</span>
+            <button class="btn btn-danger btn-sm" onclick="viderTouteCorbeille()">Vider la corbeille</button>
+        </div>
+    </td></tr>`;
+
+    for (const fichier of corbeille) {
+        const etudiant = etudiants.find(e => e.da === fichier.etudiantDA);
+        const nomEtudiant = etudiant ? `${etudiant.prenom} ${etudiant.nom}` : fichier.etudiantDA;
+        const production = productions.find(p => p.id === fichier.productionId);
+        const nomProduction = production ? production.nom : (fichier.productionId || '—');
+        const nomFichier = fichier.nomFichier || fichier.id;
+
+        const dateSup = new Date(fichier.dateSuppression);
+        const dateAffichee = dateSup.toLocaleDateString('fr-CA', { day: 'numeric', month: 'short', year: 'numeric' });
+
+        // Calculer les jours restants avant expiration
+        const msRestants = (dateSup.getTime() + 30 * 24 * 60 * 60 * 1000) - Date.now();
+        const joursRestants = Math.max(0, Math.ceil(msRestants / (24 * 60 * 60 * 1000)));
+
+        html += `<tr>
+            <td class="td-left" colspan="2">${echapperHtml(nomEtudiant)}</td>
+            <td class="td-left">${echapperHtml(nomFichier)}</td>
+            <td class="td-left">${echapperHtml(nomProduction)}</td>
+            <td class="td-center">${dateAffichee}</td>
+            <td class="td-center">${joursRestants} jour(s)</td>
+            <td class="td-center" colspan="3">
+                <button class="btn btn-secondaire btn-sm" onclick="restaurerFichierCorbeille('${fichier.id}')">Restaurer</button>
+                <button class="btn btn-danger btn-sm" onclick="supprimerFichierDefinitivement('${fichier.id}')">Supprimer</button>
+            </td>
+        </tr>`;
+    }
+
+    corpsTableau.innerHTML = html;
+}
+
+/**
+ * Restaure un fichier depuis la corbeille
+ */
+function restaurerFichierCorbeille(id) {
+    if (typeof travauxStockage === 'undefined') return;
+
+    travauxStockage.restaurerDeCorbeille(id);
+
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces('Fichier restauré.');
+    }
+
+    mettreAJourBoutonCorbeille();
+    if (vueCorbeilleActive) {
+        afficherVueCorbeille();
+    } else {
+        appliquerFiltres();
+    }
+}
+
+/**
+ * Supprime définitivement un fichier de la corbeille avec confirmation
+ */
+function supprimerFichierDefinitivement(id) {
+    if (typeof travauxStockage === 'undefined') return;
+
+    const existante = document.getElementById('supprimer-definitif-modal-overlay');
+    if (existante) existante.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'supprimer-definitif-modal-overlay';
+    overlay.className = 'modal-overlay actif';
+    overlay.innerHTML = `
+        <div class="modal-contenu modal-compact" style="max-width: 440px;">
+            <button class="modal-fermer" id="supprimer-definitif-modal-fermer">&times;</button>
+            <h3 class="modal-titre">Supprimer définitivement ?</h3>
+            <p style="margin: 8px 0 16px 0; font-size: 0.9em;">
+                Le fichier sera supprimé de façon permanente.
+            </p>
+            <p style="margin: 0 0 16px 0; font-size: 0.85em; color: var(--attention);">
+                Cette action est irréversible.
+            </p>
+            <div class="modal-actions">
+                <button class="btn btn-danger" id="supprimer-definitif-btn-confirmer">Supprimer définitivement</button>
+                <button class="btn btn-secondaire" id="supprimer-definitif-btn-annuler">Annuler</button>
+            </div>
+        </div>`;
+
+    document.body.appendChild(overlay);
+
+    const fermer = () => overlay.remove();
+    document.getElementById('supprimer-definitif-modal-fermer').onclick = fermer;
+    document.getElementById('supprimer-definitif-btn-annuler').onclick = fermer;
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) fermer(); });
+
+    document.getElementById('supprimer-definitif-btn-confirmer').onclick = async () => {
+        await travauxStockage.supprimerDefinitivement(id);
+        overlay.remove();
+        if (typeof afficherNotificationSucces === 'function') {
+            afficherNotificationSucces('Fichier supprimé définitivement.');
+        }
+        mettreAJourBoutonCorbeille();
+        if (vueCorbeilleActive) {
+            afficherVueCorbeille();
+        }
+    };
+}
+
+/**
+ * Vide entièrement la corbeille avec confirmation
+ */
+function viderTouteCorbeille() {
+    if (typeof travauxStockage === 'undefined') return;
+
+    const corbeille = travauxStockage.obtenirCorbeille();
+    if (corbeille.length === 0) return;
+
+    const existante = document.getElementById('vider-corbeille-modal-overlay');
+    if (existante) existante.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'vider-corbeille-modal-overlay';
+    overlay.className = 'modal-overlay actif';
+    overlay.innerHTML = `
+        <div class="modal-contenu modal-compact" style="max-width: 440px;">
+            <button class="modal-fermer" id="vider-corbeille-modal-fermer">&times;</button>
+            <h3 class="modal-titre">Vider la corbeille ?</h3>
+            <p style="margin: 8px 0 16px 0; font-size: 0.9em;">
+                Supprimer définitivement les <strong>${corbeille.length}</strong> fichier(s) de la corbeille ?
+            </p>
+            <p style="margin: 0 0 16px 0; font-size: 0.85em; color: var(--attention);">
+                Cette action est irréversible.
+            </p>
+            <div class="modal-actions">
+                <button class="btn btn-danger" id="vider-corbeille-btn-confirmer">Tout supprimer</button>
+                <button class="btn btn-secondaire" id="vider-corbeille-btn-annuler">Annuler</button>
+            </div>
+        </div>`;
+
+    document.body.appendChild(overlay);
+
+    const fermer = () => overlay.remove();
+    document.getElementById('vider-corbeille-modal-fermer').onclick = fermer;
+    document.getElementById('vider-corbeille-btn-annuler').onclick = fermer;
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) fermer(); });
+
+    document.getElementById('vider-corbeille-btn-confirmer').onclick = async () => {
+        await travauxStockage.viderCorbeille();
+        overlay.remove();
+        if (typeof afficherNotificationSucces === 'function') {
+            afficherNotificationSucces('Corbeille vidée.');
+        }
+        mettreAJourBoutonCorbeille();
+        if (vueCorbeilleActive) {
+            afficherVueCorbeille();
+        }
+    };
+}
+
+// ============================================
 // EXPORT
 // ============================================
 
@@ -1864,6 +2192,13 @@ window.toggleColonneEval = toggleColonneEval;
 window.ouvrirAnnotationDepuisListe = ouvrirAnnotationDepuisListe;
 window.ouvrirEditeurDepuisListe = ouvrirEditeurDepuisListe;
 window.associerProductionDepuisListe = associerProductionDepuisListe;
+window.confirmerSuppressionFichier = confirmerSuppressionFichier;
+
+// Corbeille
+window.basculerVueCorbeille = basculerVueCorbeille;
+window.restaurerFichierCorbeille = restaurerFichierCorbeille;
+window.supprimerFichierDefinitivement = supprimerFichierDefinitivement;
+window.viderTouteCorbeille = viderTouteCorbeille;
 
 console.log('✅ Module liste-evaluations.js chargé - initialiserListeEvaluations disponible:', typeof window.initialiserListeEvaluations);
 
