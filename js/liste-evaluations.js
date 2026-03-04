@@ -27,14 +27,17 @@ function calculerStatutWorkflow(ligne) {
     // Vérifier si un fichier importé existe et s'il a des annotations
     if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersTravaux === 'function') {
         const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
+        const productions = db.getSync(cle('productions'), []);
+        const productionIdsConnus = new Set(productions.map(p => p.id));
+
         // Match strict par DA + productionId
         let fichier = fichiers.find(f =>
             f.etudiantDA === ligne.da && f.productionId && f.productionId === ligne.productionId
         );
-        // Match souple par DA seul (fichier sans productionId) — marquer l'association manquante
+        // Match souple : fichier du même DA sans productionId ou avec un productionId inconnu (orphelin)
         if (!fichier) {
             fichier = fichiers.find(f =>
-                f.etudiantDA === ligne.da && !f.productionId
+                f.etudiantDA === ligne.da && (!f.productionId || !productionIdsConnus.has(f.productionId))
             );
             if (fichier) ligne.associationManquante = true;
         }
@@ -742,32 +745,24 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
         });
     });
 
-    // Ajouter des lignes pour les fichiers importés dont le productionId ne matche aucune production connue
+    // Ajouter des lignes pour les fichiers importés sans étudiant identifié (etudiantDA vide)
+    // Les fichiers avec DA valide mais productionId invalide sont déjà couverts
+    // par le match souple dans calculerStatutWorkflow (tag « Non associé »)
     if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersGroupeActif === 'function') {
         const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
-        const productionIds = new Set(productions.map(p => p.id));
-        // Fichiers dont le productionId est vide ou ne matche aucune production connue
-        const dasAvecFichierValide = new Set();
-        fichiers.forEach(f => {
-            if (f.productionId && productionIds.has(f.productionId)) {
-                dasAvecFichierValide.add(f.etudiantDA + '|' + f.productionId);
-            }
-        });
-        const fichiersOrphelins = fichiers.filter(f =>
-            !f.productionId || !productionIds.has(f.productionId)
-        );
+        const fichiersSansEtudiant = fichiers.filter(f => !f.etudiantDA);
 
-        fichiersOrphelins.forEach(fichier => {
-            const etudiant = etudiants.find(e => e.da === fichier.etudiantDA);
+        fichiersSansEtudiant.forEach(fichier => {
             lignes.push({
-                da: fichier.etudiantDA,
-                daAffichage: etudiant ? (etudiant.daAffichage || etudiant.da) : fichier.etudiantDA,
-                nom: etudiant ? (etudiant.nom || '') : '',
-                prenom: etudiant ? (etudiant.prenom || '') : '',
-                groupe: etudiant ? etudiant.groupe : '',
-                productionId: fichier.productionId,
-                productionNom: `⚠ ${fichier.productionId}`,
+                da: '',
+                daAffichage: '',
+                nom: '?',
+                prenom: fichier.nomFichier || 'Fichier non identifié',
+                groupe: '',
+                productionId: fichier.productionId || '',
+                productionNom: '',
                 associationManquante: true,
+                etudiantManquant: true,
                 grilleNom: '-',
                 cartoucheId: null,
                 cartoucheNom: '-',
@@ -1018,9 +1013,18 @@ function genererDropdownActions(ligne) {
     let fichierImporte = null;
     if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersTravaux === 'function') {
         const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
+        const productions = db.getSync(cle('productions'), []);
+        const productionIdsConnus = new Set(productions.map(p => p.id));
+        // Match strict par DA + productionId
         fichierImporte = fichiers.find(f =>
-            f.etudiantDA === ligne.da && (!f.productionId || f.productionId === ligne.productionId)
+            f.etudiantDA === ligne.da && f.productionId && f.productionId === ligne.productionId
         );
+        // Match souple : fichier du même DA sans productionId ou avec productionId orphelin
+        if (!fichierImporte) {
+            fichierImporte = fichiers.find(f =>
+                f.etudiantDA === ligne.da && (!f.productionId || !productionIdsConnus.has(f.productionId))
+            );
+        }
     }
     const fichierId = fichierImporte ? fichierImporte.id : null;
     const da = ligne.da;
