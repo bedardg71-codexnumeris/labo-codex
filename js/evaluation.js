@@ -633,6 +633,8 @@ function chargerGrilleSelectionnee() {
         return;
     }
 
+    // Sauvegarder l'ancienne grille pour matcher les critères par nom
+    evaluationEnCours._ancienneGrilleId = evaluationEnCours.grilleId;
     evaluationEnCours.grilleId = grilleId;
 
     // Charger les cartouches pour cette grille
@@ -653,15 +655,34 @@ function chargerGrilleSelectionnee() {
     // Régénérer les critères depuis la nouvelle grille et recalculer la note
     const echelleId = evaluationEnCours.echelleId || document.getElementById('selectEchelle1')?.value;
     if (echelleId) {
+        // Construire un map nom→niveau depuis l'ancienne grille pour matcher par nom
+        const grilles = db.getSync('grillesTemplates', []);
+        const ancienneGrilleId = evaluationEnCours._ancienneGrilleId || '';
+        const ancienneGrille = ancienneGrilleId ? grilles.find(g => g.id === ancienneGrilleId) : null;
+        const mapNomNiveau = {};
+        if (ancienneGrille && evaluationEnCours.criteres) {
+            ancienneGrille.criteres.forEach(c => {
+                const niveau = evaluationEnCours.criteres[c.id];
+                if (niveau) {
+                    mapNomNiveau[c.nom.toLowerCase().trim()] = niveau;
+                }
+            });
+        }
+
         afficherCriteresDepuisGrille(grilleId, echelleId);
 
         // Restaurer les niveaux déjà sélectionnés pour les critères communs
-        const grilles = db.getSync('grillesTemplates', []);
         const grille = grilles.find(g => g.id === grilleId);
         if (grille && evaluationEnCours.criteres) {
             grille.criteres.forEach(critere => {
-                const niveauExistant = evaluationEnCours.criteres[critere.id];
+                // Match par ID d'abord, puis par nom de critère (grilles différentes, mêmes critères)
+                let niveauExistant = evaluationEnCours.criteres[critere.id];
+                if (!niveauExistant) {
+                    niveauExistant = mapNomNiveau[critere.nom.toLowerCase().trim()];
+                }
                 if (niveauExistant) {
+                    // Mettre à jour evaluationEnCours avec le nouvel ID
+                    evaluationEnCours.criteres[critere.id] = niveauExistant;
                     const select = document.getElementById(`eval_${critere.id}`);
                     if (select) {
                         select.value = niveauExistant;
