@@ -736,6 +736,46 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
         });
     });
 
+    // Ajouter des lignes pour les fichiers importés dont le productionId ne matche aucune production connue
+    if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersGroupeActif === 'function') {
+        const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
+        const productionIds = new Set(productions.map(p => p.id));
+        // Fichiers dont le productionId est vide ou ne matche aucune production connue
+        const dasAvecFichierValide = new Set();
+        fichiers.forEach(f => {
+            if (f.productionId && productionIds.has(f.productionId)) {
+                dasAvecFichierValide.add(f.etudiantDA + '|' + f.productionId);
+            }
+        });
+        const fichiersOrphelins = fichiers.filter(f =>
+            !f.productionId || !productionIds.has(f.productionId)
+        );
+
+        fichiersOrphelins.forEach(fichier => {
+            const etudiant = etudiants.find(e => e.da === fichier.etudiantDA);
+            lignes.push({
+                da: fichier.etudiantDA,
+                daAffichage: etudiant ? (etudiant.daAffichage || etudiant.da) : fichier.etudiantDA,
+                nom: etudiant ? (etudiant.nom || '') : '',
+                prenom: etudiant ? (etudiant.prenom || '') : '',
+                groupe: etudiant ? etudiant.groupe : '',
+                productionId: fichier.productionId,
+                productionNom: `⚠ ${fichier.productionId}`,
+                associationManquante: true,
+                grilleNom: '-',
+                cartoucheId: null,
+                cartoucheNom: '-',
+                note: '-',
+                noteChiffree: null,
+                niveauFinal: '-',
+                statut: 'non-evalue',
+                statutRemise: 'non-remis',
+                evaluationId: null,
+                verrouille: false
+            });
+        });
+    }
+
     // Calculer le statut workflow pour chaque ligne
     lignes.forEach(ligne => {
         ligne.statutWorkflow = calculerStatutWorkflow(ligne);
@@ -952,7 +992,9 @@ function genererLigneHTML(ligne) {
             <td class="td-left">${daAffiche}</td>
             <td class="td-left">${echapperHtml(ligne.nom)}</td>
             <td class="td-left">${echapperHtml(ligne.prenom)}</td>
-            <td class="td-left">${echapperHtml(ligne.productionNom)}</td>
+            <td class="td-left">${ligne.associationManquante
+                ? '<span style="color: var(--attention);">⚠ Production inconnue</span>'
+                : echapperHtml(ligne.productionNom)}</td>
             <td class="td-center">${badgeJeton}</td>
             <td class="td-center">${affichageNiveau}</td>
             <td class="td-center">${ligne.niveauFinal && ligne.niveauFinal !== '-' ? `<strong>${ligne.niveauFinal}</strong>` : '-'}</td>
