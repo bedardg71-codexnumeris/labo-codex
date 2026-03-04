@@ -2391,12 +2391,24 @@
      * Lance l'import des fichiers en attente (legacy — utilise production globale)
      */
     async function lancerImport() {
-        const productionId = document.getElementById('travaux-select-production')?.value || '';
+        const selectProd = document.getElementById('travaux-select-production');
+        const productionId = selectProd?.value || '';
+        const queue = travauxImport.obtenirFileDAttente();
 
-        if (travauxImport.obtenirFileDAttente().length === 0) {
+        if (queue.length === 0) {
             alert('Aucun fichier a importer');
             return;
         }
+
+        const nomProduction = selectProd?.selectedOptions[0]?.textContent?.trim() || '';
+        const msgProd = productionId && nomProduction
+            ? `associés à la production « ${nomProduction} »`
+            : 'sans production associée';
+        const selectGC = document.getElementById('selectGroupeCoursHeader');
+        const nomGroupe = selectGC?.selectedOptions[0]?.textContent?.trim() || '';
+        const msgGroupe = nomGroupe ? `dans le groupe « ${nomGroupe} » et ` : '';
+
+        if (!confirm(`${queue.length} fichier(s) seront importés ${msgGroupe}${msgProd}.\n\nConfirmer l\u2019importation ?`)) return;
 
         const progression = document.getElementById('travaux-progression-import');
         if (progression) progression.classList.remove('u-hide');
@@ -2880,6 +2892,31 @@
                 }}]);
             return;
         }
+
+        // Confirmation de la production et du groupe avant import
+        const selectProd = document.getElementById('pipeline-select-production');
+        const nomProduction = selectProd?.selectedOptions[0]?.textContent?.trim() || '';
+        const nbFichiers = queue.length;
+        const msgProduction = nomProduction && selectProd.value
+            ? `associés à la production <strong>${echapperHtml(nomProduction)}</strong>`
+            : `<strong>sans production associée</strong>`;
+        const selectGC = document.getElementById('selectGroupeCoursHeader');
+        const nomGroupe = selectGC?.selectedOptions[0]?.textContent?.trim() || '';
+        const msgGroupe = nomGroupe
+            ? `dans le groupe <strong>${echapperHtml(nomGroupe)}</strong>`
+            : '';
+
+        afficherModalePipeline('Confirmer l\u2019import',
+            `<p>${nbFichiers} fichier(s) seront importés ${msgGroupe} et ${msgProduction}.</p>
+            <p>Confirmer l\u2019importation ?</p>`,
+            [
+                { label: 'Oui, importer', classe: 'btn-principal', action: () => executerImportPipeline() },
+                { label: 'Revenir aux réglages', classe: 'btn-secondaire', action: () => {} }
+            ]);
+    }
+
+    async function executerImportPipeline() {
+        const queue = travauxImport.obtenirFileDAttente();
 
         const optDPI = document.getElementById('pipeline-opt-dpi')?.checked;
         const optBalance = document.getElementById('pipeline-opt-balance')?.checked;
