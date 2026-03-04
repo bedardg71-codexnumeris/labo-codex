@@ -2011,7 +2011,7 @@ h1, h2, h3, h4 {
 
 #conteneur-tableau-evaluations .tableau th:nth-child(4),
 #conteneur-tableau-evaluations .tableau td:nth-child(4) {
-    width: 22%; /* Production */
+    width: 20%; /* Production */
 }
 
 #conteneur-tableau-evaluations .tableau th:nth-child(5),
@@ -2036,7 +2036,8 @@ h1, h2, h3, h4 {
 
 #conteneur-tableau-evaluations .tableau th:nth-child(9),
 #conteneur-tableau-evaluations .tableau td:nth-child(9) {
-    width: 8%; /* Actions */
+    width: 10%; /* Actions */
+    overflow: visible;
 }
 
 /* Centrer les colonnes Jeton, Statut, Niveau, Note et Actions */
@@ -2078,9 +2079,7 @@ h1, h2, h3, h4 {
 
 .eval-actions-dropdown {
     display: none;
-    position: absolute;
-    top: calc(100% + 4px);
-    right: 0;
+    position: fixed;
     min-width: 180px;
     background: var(--surface-carte);
     border: 1px solid var(--bleu-leger);

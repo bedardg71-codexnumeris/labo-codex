@@ -1061,7 +1061,8 @@ function ouvrirEditeurDepuisListe(fichierId) {
  */
 function toggleEvalActionsDropdown(event) {
     event.stopPropagation();
-    const wrap = event.currentTarget.closest('.eval-actions-dropdown-wrap');
+    const btn = event.currentTarget;
+    const wrap = btn.closest('.eval-actions-dropdown-wrap');
     const dropdown = wrap.querySelector('.eval-actions-dropdown');
     const estOuvert = dropdown.classList.contains('ouvert');
 
@@ -1070,6 +1071,11 @@ function toggleEvalActionsDropdown(event) {
 
     // Toggle celui-ci
     if (!estOuvert) {
+        // Positionner en fixed par rapport au bouton
+        const rect = btn.getBoundingClientRect();
+        dropdown.style.top = (rect.bottom + 4) + 'px';
+        dropdown.style.right = (window.innerWidth - rect.right) + 'px';
+        dropdown.style.left = 'auto';
         dropdown.classList.add('ouvert');
     }
 }
