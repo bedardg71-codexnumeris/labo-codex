@@ -2785,7 +2785,8 @@ async function populerDropdownsCartouche(grilleId = '', echelleId = '', disabled
             optionsHtml += `<option value="${grille.id}" ${selected}>${echapperHtml(grille.nom)} (${nbCriteres} crit.)</option>`;
         });
         selectGrille.innerHTML = optionsHtml;
-        selectGrille.disabled = disabled;
+        // Grille toujours modifiable — les commentaires compatibles sont préservés
+        selectGrille.disabled = false;
     }
 
     // Peupler dropdown échelle
@@ -2827,6 +2828,16 @@ async function onChangeSelectionCartouche() {
     if (!grilleId || !echelleId) {
         if (matriceRetroaction) matriceRetroaction.classList.add('u-hide');
         return;
+    }
+
+    // En mode édition, avertir que la matrice va être reconfigurée
+    if (cartoucheActuel && cartoucheActuel.grilleId && cartoucheActuel.grilleId !== grilleId) {
+        const ok = confirm('Changer de grille va reconfigurer la matrice.\nLes commentaires des critères communs seront conservés.\n\nContinuer ?');
+        if (!ok) {
+            // Remettre l'ancienne valeur
+            selectGrille.value = cartoucheActuel.grilleId;
+            return;
+        }
     }
 
     // Les deux sont sélectionnés - initialiser la cartouche
