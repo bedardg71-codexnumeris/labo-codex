@@ -2105,17 +2105,17 @@
             groupes[pid].push(f);
         });
 
-        // Dropdown filtre de production
-        const productionsAvecFichiers = productions.filter(p => groupes[p.id] && groupes[p.id].length > 0);
+        // Dropdown filtre de production (toutes les productions, même sans fichier)
         let htmlDropdown = '';
-        if (productionsAvecFichiers.length >= 1) {
+        if (productions.length >= 1) {
             htmlDropdown += '<select class="controle-form travaux-filtre-production" onchange="travauxUI.filtrerBadgesParProduction(this)">';
-            if (productionsAvecFichiers.length > 1) {
+            if (productions.length > 1) {
                 htmlDropdown += '<option value="">Toutes les productions</option>';
             }
-            productionsAvecFichiers.forEach(p => {
+            productions.forEach(p => {
+                const nb = (groupes[p.id] && groupes[p.id].length) || 0;
                 const sel = (productionFiltreActive === p.id) ? ' selected' : '';
-                htmlDropdown += `<option value="${p.id}"${sel}>${echapperHtml(p.titre || p.nom || p.id)} (${groupes[p.id].length})</option>`;
+                htmlDropdown += `<option value="${p.id}"${sel}>${echapperHtml(p.titre || p.nom || p.id)} (${nb})</option>`;
             });
             htmlDropdown += '</select>';
         }
