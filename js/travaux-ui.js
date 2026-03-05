@@ -1883,6 +1883,16 @@
     }
 
     /**
+     * Match avec word boundary : "artefact 1" matche "artefact 1 portrait" mais PAS "artefact 10"
+     */
+    function correspondanceProductionPipeline(titreNorm, nomNorm) {
+        if (titreNorm === nomNorm) return true;
+        const escaped = nomNorm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const re = new RegExp('(^|\\s)' + escaped + '(\\s|$)');
+        return re.test(titreNorm);
+    }
+
+    /**
      * Tente d'identifier automatiquement les fichiers via parseLea
      */
     function identifierAutoPipeline() {
@@ -1905,7 +1915,7 @@
                 const nomProd = normaliserNomProductionPipeline(f.parseLea.nomProduction);
                 const prodTrouvee = productions.find(p => {
                     const titre = normaliserNomProductionPipeline(p.titre || p.nom || '');
-                    return nomProd && titre && (titre.includes(nomProd) || nomProd.includes(titre));
+                    return nomProd && titre && (correspondanceProductionPipeline(titre, nomProd) || correspondanceProductionPipeline(nomProd, titre));
                 });
                 if (prodTrouvee) f.productionId = prodTrouvee.id;
             }
@@ -2073,7 +2083,7 @@
                 const nomNorm = normaliserNomProductionPipeline(nomProdFichier);
                 if (nomNorm) {
                     const matchExact = productionsIndex.filter(p =>
-                        p.titreNorm === nomNorm || p.titreNorm.includes(nomNorm) || nomNorm.includes(p.titreNorm)
+                        correspondanceProductionPipeline(p.titreNorm, nomNorm) || correspondanceProductionPipeline(nomNorm, p.titreNorm)
                     );
                     // Ne corriger que si UNE SEULE production matche et que c'est différente de l'actuelle
                     if (matchExact.length === 1 && matchExact[0].id !== f.productionId) {

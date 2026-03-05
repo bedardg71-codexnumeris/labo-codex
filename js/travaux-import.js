@@ -335,7 +335,23 @@
             if (estTypeAccepte(fichier)) {
                 const prepare = preparerFichier(fichier);
                 detecterFormatEtRouter(prepare);
-                // Pre-remplir la production si une production globale est selectionnee
+                // Tenter le matching par nom LEA si parseLea a identifié une production
+                // (plus fiable que le sélecteur global qui applique aveuglément)
+                if (!prepare.productionId && prepare.parseLea && prepare.parseLea.nomProduction) {
+                    const productions = obtenirDonneesSelonMode(cle('productions'));
+                    const nomNorm = normaliserNomProduction(prepare.parseLea.nomProduction);
+                    if (nomNorm && productions.length) {
+                        const prodTrouvee = productions.find(p => {
+                            const titre = normaliserNomProduction(p.titre || p.nom || '');
+                            return titre && correspondanceProduction(titre, nomNorm);
+                        }) || productions.find(p => {
+                            const titre = normaliserNomProduction(p.titre || p.nom || '');
+                            return titre && correspondanceProduction(nomNorm, titre);
+                        });
+                        if (prodTrouvee) prepare.productionId = prodTrouvee.id;
+                    }
+                }
+                // Fallback final : production globale selectionnee
                 if (productionSelectionnee && !prepare.productionId) {
                     prepare.productionId = productionSelectionnee;
                 }
@@ -605,6 +621,16 @@
             .trim();
     }
 
+    /**
+     * Match avec word boundary : "artefact 1" matche "artefact 1 portrait" mais PAS "artefact 10"
+     */
+    function correspondanceProduction(titreNorm, nomNorm) {
+        if (titreNorm === nomNorm) return true;
+        const escaped = nomNorm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const re = new RegExp('(^|\\s)' + escaped + '(\\s|$)');
+        return re.test(titreNorm);
+    }
+
     function detecterFormatEtRouter(fichierPrepare) {
         if (fichierPrepare.estPDF) {
             // Les PDF sont prets directement
@@ -615,7 +641,7 @@
                 const prodTrouvee = productions.find(p => {
                     const titre = normaliserNomProduction(p.titre || p.nom || '');
                     const nomProd = normaliserNomProduction(fichierPrepare.parseLea.nomProduction);
-                    return nomProd && titre && (titre.includes(nomProd) || nomProd.includes(titre));
+                    return nomProd && titre && (correspondanceProduction(titre, nomProd) || correspondanceProduction(nomProd, titre));
                 });
                 if (prodTrouvee) {
                     fichierPrepare.productionId = prodTrouvee.id;
