@@ -2145,28 +2145,6 @@
             if (!f.etudiantDA) return;
             const modifs = {};
 
-            // 🔧 FIX (5 mars 2026) : Corriger les fichiers dont le productionId ne correspond
-            // pas au nom de production dans le filename LEA (ex: "Travail n1" dans LEA
-            // vs "Travail 1" dans l'app). Le parseLea est stocké sur le fichier.
-            const nomProdFichier = (f.parseLea && f.parseLea.nomProduction)
-                ? f.parseLea.nomProduction
-                : (f.leaParsed && f.leaParsed.nomProduction)
-                    ? f.leaParsed.nomProduction
-                    : '';
-            if (nomProdFichier && f.productionId) {
-                const nomNorm = normaliserNomProductionPipeline(nomProdFichier);
-                if (nomNorm) {
-                    const matchExact = productionsIndex.filter(p =>
-                        correspondanceProductionPipeline(p.titreNorm, nomNorm) || correspondanceProductionPipeline(nomNorm, p.titreNorm)
-                    );
-                    // Ne corriger que si UNE SEULE production matche et que c'est différente de l'actuelle
-                    if (matchExact.length === 1 && matchExact[0].id !== f.productionId) {
-                        console.warn(`[Travaux-UI] 🔧 Réparation association : fichier "${f.nomFichier}" → production "${matchExact[0].titreNorm}" (était: ${f.productionId})`);
-                        modifs.productionId = matchExact[0].id;
-                    }
-                }
-            }
-
             // productionId : depuis les évaluations (IDs uniques, fiable)
             // SÉCURITÉ : ne rétro-propager que s'il n'y a qu'UNE seule production dans le cours.
             // S'il y a plusieurs productions, l'association est ambiguë (le fichier pourrait
