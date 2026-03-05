@@ -1970,10 +1970,9 @@
         const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
         const evaluation = evaluations.find(e => {
             if (e.etudiantDA !== f.etudiantDA) return false;
-            // Si le fichier a un productionId, exiger la correspondance exacte
-            if (f.productionId) return e.productionId === f.productionId;
-            // Si le fichier n'a PAS de productionId, accepter toute évaluation pour cet étudiant
-            return true;
+            // Exiger la correspondance exacte de productionId
+            if (!f.productionId) return false;
+            return e.productionId === f.productionId;
         });
         if (evaluation) {
             statutTexte = 'Évalué';
@@ -2030,6 +2029,10 @@
             if (gc) daVersGcId[e.da] = gc.id;
         });
 
+        // Compter les productions du cours pour éviter l'association ambiguë
+        const productions = db.getSync(cle('productions'), []);
+        const nbProductions = productions.filter(p => p.type !== 'portfolio').length;
+
         const modifications = {};
 
         fichiers.forEach(f => {
@@ -2037,7 +2040,10 @@
             const modifs = {};
 
             // productionId : depuis les évaluations (IDs uniques, fiable)
-            if (!f.productionId && evaluations.length) {
+            // SÉCURITÉ : ne rétro-propager que s'il n'y a qu'UNE seule production dans le cours.
+            // S'il y a plusieurs productions, l'association est ambiguë (le fichier pourrait
+            // être destiné à n'importe laquelle). Laisser l'enseignant associer manuellement.
+            if (!f.productionId && evaluations.length && nbProductions <= 1) {
                 const evalsEtudiant = evaluations.filter(e =>
                     e.etudiantDA === f.etudiantDA && e.productionId && !e.remplaceeParId
                 );
@@ -2072,10 +2078,10 @@
     function determinerStatutFichier(f, evaluations) {
         const evaluation = evaluations.find(e => {
             if (e.etudiantDA !== f.etudiantDA) return false;
-            // Si le fichier a un productionId, exiger la correspondance exacte
-            if (f.productionId) return e.productionId === f.productionId;
-            // Si le fichier n'a PAS de productionId, accepter toute évaluation pour cet étudiant
-            return true;
+            // Exiger la correspondance exacte de productionId
+            // Un fichier sans productionId ne peut pas être considéré « Évalué »
+            if (!f.productionId) return false;
+            return e.productionId === f.productionId;
         });
         if (evaluation) return 'evalue';
         const annotation = travauxStockage.obtenirAnnotationFichier(f.id);
@@ -3688,21 +3694,23 @@
         // 🔧 FIX (24 fév 2026) : Si le fichier n'a pas de productionId, chercher dans les évaluations existantes
         // Depuis ce fix, sauvegarderEvaluation() propage le productionId sur le fichier.
         // Ce fallback ne sert que pour les fichiers évalués AVANT le fix.
-        // Sécurité : ne sélectionner automatiquement que s'il y a UNE SEULE production évaluée
-        // pour cet étudiant. Sinon, laisser l'utilisateur choisir (ambiguïté avec N productions).
+        // SÉCURITÉ (5 mars 2026) : ne deviner que s'il y a UNE seule production dans le cours.
+        // Avec plusieurs productions, l'association est ambiguë → laisser l'enseignant choisir.
         let productionIdEffective = fichier.productionId || '';
         if (!productionIdEffective && fichier.etudiantDA) {
-            const evalsSauvegardees = db.getSync(cle('evaluationsSauvegardees'), []);
-            const evalsEtudiant = evalsSauvegardees.filter(e =>
-                e.etudiantDA === fichier.etudiantDA && e.productionId && !e.remplaceeParId
-            );
-            // Compter les productions distinctes
-            const productionsDistinctes = [...new Set(evalsEtudiant.map(e => e.productionId))];
-            if (productionsDistinctes.length === 1) {
-                productionIdEffective = productionsDistinctes[0];
-                console.log(`[Travaux-UI] Production unique récupérée depuis évaluation: ${productionIdEffective} pour ${fichier.etudiantDA}`);
-            } else if (productionsDistinctes.length > 1) {
-                console.warn(`[Travaux-UI] ${productionsDistinctes.length} productions évaluées pour ${fichier.etudiantDA}, sélection manuelle requise`);
+            const productionsCours = db.getSync(cle('productions'), []).filter(p => p.type !== 'portfolio');
+            if (productionsCours.length <= 1) {
+                const evalsSauvegardees = db.getSync(cle('evaluationsSauvegardees'), []);
+                const evalsEtudiant = evalsSauvegardees.filter(e =>
+                    e.etudiantDA === fichier.etudiantDA && e.productionId && !e.remplaceeParId
+                );
+                const productionsDistinctes = [...new Set(evalsEtudiant.map(e => e.productionId))];
+                if (productionsDistinctes.length === 1) {
+                    productionIdEffective = productionsDistinctes[0];
+                    console.log(`[Travaux-UI] Production unique récupérée depuis évaluation: ${productionIdEffective} pour ${fichier.etudiantDA}`);
+                }
+            } else {
+                console.log(`[Travaux-UI] ${productionsCours.length} productions dans le cours, association manuelle requise pour ${fichier.etudiantDA}`);
             }
         }
 
