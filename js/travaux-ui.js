@@ -28,6 +28,76 @@
     let _htmlBadgesGrille = ''; // HTML badges pré-généré pour injection dans toolbar unique
     let selectionFusion = new Set(); // IDs des fichiers selectionnes pour fusion
 
+    /* ===============================
+       CHRONO ÉVALUATION
+       =============================== */
+
+    let _chronoDebut = null;       // Date.now() du début
+    let _chronoFichierId = null;   // fichier actif
+    let _chronoInterval = null;    // setInterval pour affichage live
+
+    function _formaterDuree(ms) {
+        const totalSec = Math.floor(ms / 1000);
+        const min = Math.floor(totalSec / 60);
+        const sec = totalSec % 60;
+        return min + ':' + String(sec).padStart(2, '0');
+    }
+
+    function _majAffichageChrono() {
+        const badge = document.getElementById('travaux-chrono-badge');
+        if (!badge) return;
+        if (!_chronoDebut) {
+            badge.textContent = '⏱️ --:--';
+            badge.classList.remove('actif');
+            return;
+        }
+        badge.textContent = '⏱️ ' + _formaterDuree(Date.now() - _chronoDebut);
+        badge.classList.add('actif');
+    }
+
+    function demarrerChrono() {
+        if (_chronoDebut) return; // déjà en cours
+        _chronoDebut = Date.now();
+        const fichier = travauxVisionneuse.getFichierActuel();
+        _chronoFichierId = fichier ? fichier.id : null;
+        _majAffichageChrono();
+        _chronoInterval = setInterval(_majAffichageChrono, 1000);
+    }
+
+    function arreterChrono() {
+        if (!_chronoDebut) return;
+        const dureeMs = Date.now() - _chronoDebut;
+        if (_chronoInterval) { clearInterval(_chronoInterval); _chronoInterval = null; }
+
+        // Stocker dans les 20 dernières entrées
+        const cleStock = cle('chronoEvaluations');
+        let historique = db.getSync(cleStock, []);
+        historique.push({ dureeMs: dureeMs, date: new Date().toISOString() });
+        if (historique.length > 20) historique = historique.slice(-20);
+        db.setSync(cleStock, historique);
+
+        // Calculer la moyenne des 5 dernières
+        const cinqDernieres = historique.slice(-5);
+        const moyenneMs = cinqDernieres.reduce((s, e) => s + e.dureeMs, 0) / cinqDernieres.length;
+
+        // Afficher résultat + moyenne
+        const badge = document.getElementById('travaux-chrono-badge');
+        if (badge) {
+            badge.textContent = '⏱️ ' + _formaterDuree(dureeMs) + ' (moy. ' + _formaterDuree(moyenneMs) + ')';
+            badge.classList.remove('actif');
+        }
+
+        _chronoDebut = null;
+        _chronoFichierId = null;
+    }
+
+    function resetChrono() {
+        if (_chronoInterval) { clearInterval(_chronoInterval); _chronoInterval = null; }
+        _chronoDebut = null;
+        _chronoFichierId = null;
+        _majAffichageChrono();
+    }
+
     function sauvegarderEtatSession() {
         const fichier = travauxVisionneuse.getFichierActuel();
         if (fichier) sessionStorage.setItem('travaux-dernier-fichier', fichier.id);
@@ -822,6 +892,8 @@
                             <button id="travaux-btn-evaluer" class="travaux-btn-action travaux-btn-action-vert u-hide" onclick="travauxUI.basculerMode('evaluer')" title="Évaluer cette production" data-tooltip="travaux-btn-evaluer">Évaluer</button>
                             <button id="travaux-btn-alleger" class="travaux-btn-action u-hide" onclick="travauxUI.allegerFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Alléger ce fichier" data-tooltip="travaux-btn-alleger">Alléger</button>
                             <button id="travaux-btn-reimporter" class="travaux-btn-action u-hide" onclick="travauxUI.reimporterFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Re-importer l'original" data-tooltip="travaux-btn-reimporter">Re-importer</button>
+                            <span class="travaux-separateur"></span>
+                            <span id="travaux-chrono-badge" class="travaux-chrono-badge" title="Durée annotation + évaluation">⏱️ --:--</span>
                         </div>
                     </div>
 
@@ -2633,6 +2705,9 @@
      * @param {string} fichierId - ID du fichier
      */
     async function ouvrirFichier(fichierId) {
+        // Reset du chrono au changement de fichier
+        resetChrono();
+
         // Mémoriser le mode courant AVANT fermeture (pour le restaurer après chargement)
         const modeAvantNavigation = modeCourant;
 
@@ -5788,6 +5863,10 @@
         // Cycle de vie
         allegerFichier: allegerFichier,
         reimporterFichier: reimporterFichier,
+        // Chrono évaluation
+        demarrerChrono: demarrerChrono,
+        arreterChrono: arreterChrono,
+        resetChrono: resetChrono,
         // Association production
         changerProductionFichier: changerProductionFichier,
         // Preview inline

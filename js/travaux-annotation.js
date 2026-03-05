@@ -424,6 +424,11 @@
 
         e.preventDefault();
 
+        // Démarrer le chrono évaluation à la première annotation
+        if (typeof travauxUI !== 'undefined' && travauxUI.demarrerChrono) {
+            travauxUI.demarrerChrono();
+        }
+
         // Auto-basculer en mode Annoter si en mode Evaluer
         if (typeof travauxUI !== 'undefined' && travauxUI.getModeCourant
             && travauxUI.getModeCourant() === 'evaluer') {
