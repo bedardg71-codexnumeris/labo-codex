@@ -34,12 +34,16 @@ function calculerStatutWorkflow(ligne) {
         let fichier = fichiers.find(f =>
             f.etudiantDA === ligne.da && f.productionId && f.productionId === ligne.productionId
         );
-        // Match souple : fichier du même DA sans productionId ou avec un productionId orphelin/inconnu
+        // 🔧 FIX (5 mars 2026) : Soft-match resserré — ne matcher que si l'étudiant a
+        // exactement 1 fichier non-associé (sinon ambigu entre plusieurs productions).
         if (!fichier) {
-            fichier = fichiers.find(f =>
+            const fichiersNonAssocies = fichiers.filter(f =>
                 f.etudiantDA === ligne.da && (!f.productionId || !productionIdsConnus.has(f.productionId))
             );
-            if (fichier) ligne.associationManquante = true;
+            if (fichiersNonAssocies.length === 1) {
+                fichier = fichiersNonAssocies[0];
+                ligne.associationManquante = true;
+            }
         }
 
         if (fichier) {
@@ -48,6 +52,15 @@ function calculerStatutWorkflow(ligne) {
                 return 'annote';
             }
             return 'importe';
+        }
+
+        // 🔧 FIX (5 mars 2026) : Signaler qu'un fichier existe sur une autre production
+        // (utile pour l'affichage « Réassocier » dans le dropdown)
+        const fichierAutreProduction = fichiers.find(f =>
+            f.etudiantDA === ligne.da && f.productionId && f.productionId !== ligne.productionId
+        );
+        if (fichierAutreProduction) {
+            ligne.fichierAutreProduction = true;
         }
     }
 
@@ -1004,7 +1017,9 @@ function genererLigneHTML(ligne) {
             <td class="td-left">${echapperHtml(ligne.prenom)}</td>
             <td class="td-left">${ligne.associationManquante
                 ? `${echapperHtml(ligne.productionNom)} <span style="color: var(--attention); font-size: 0.85em;">⚠ Non associé</span>`
-                : echapperHtml(ligne.productionNom)}</td>
+                : ligne.fichierAutreProduction
+                    ? `${echapperHtml(ligne.productionNom)} <span style="color: var(--attention); font-size: 0.85em;">⚠ Fichier sous autre production</span>`
+                    : echapperHtml(ligne.productionNom)}</td>
             <td class="td-center">${badgeJeton}</td>
             <td class="td-center">${affichageNiveau}</td>
             <td class="td-center">${ligne.niveauFinal && ligne.niveauFinal !== '-' ? `<strong>${ligne.niveauFinal}</strong>` : '-'}</td>
@@ -1082,13 +1097,15 @@ function genererDropdownActions(ligne) {
         const labelAssoc = ligne.productionId ? 'Réassocier' : 'Associer';
         options.push(`<option value="associer|${fichierId}|${da}">${labelAssoc}</option>`);
     } else if (typeof travauxStockage !== 'undefined') {
-        // Fichier mal associé : même DA mais sous une autre production
+        // Fichier mal associé OU non associé : même DA mais sous une autre production ou sans productionId
+        // 🔧 FIX (5 mars 2026) : Inclure aussi les fichiers sans productionId (besoin d'association)
         const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
-        const fichierMalAssocie = fichiers.find(f =>
-            f.etudiantDA === da && f.productionId && f.productionId !== prodId
+        const fichierAAssocier = fichiers.find(f =>
+            f.etudiantDA === da && (!f.productionId || f.productionId !== prodId)
         );
-        if (fichierMalAssocie) {
-            options.push(`<option value="associer|${fichierMalAssocie.id}|${da}">Réassocier</option>`);
+        if (fichierAAssocier) {
+            const label = fichierAAssocier.productionId ? 'Réassocier' : 'Associer';
+            options.push(`<option value="associer|${fichierAAssocier.id}|${da}">${label}</option>`);
         }
     }
 
