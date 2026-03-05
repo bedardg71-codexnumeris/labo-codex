@@ -1933,7 +1933,10 @@
     function associerProductionGlobale(productionId) {
         const queue = travauxImport.obtenirFileDAttente();
         queue.forEach(f => {
-            f.productionId = productionId;
+            // Ne pas écraser les fichiers déjà identifiés individuellement par le parseur LEA
+            if (!f.productionId) {
+                f.productionId = productionId;
+            }
         });
         travauxImport.setProductionGlobale(productionId);
         sessionStorage.setItem('travaux-pipeline-production', productionId || '');
