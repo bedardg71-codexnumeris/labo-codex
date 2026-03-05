@@ -1339,26 +1339,50 @@ function consulterEvaluationDepuisListe(evaluationId) {
         return;
     }
 
-    console.log(`✅ Évaluation trouvée:`, evaluation.id);
-    console.log('   - DA:', evaluation.etudiantDA);
-    console.log('   - Production:', evaluation.productionId);
-    console.log('   - repriseDeId:', evaluation.repriseDeId);
-    console.log('   - jetonDelaiApplique:', evaluation.jetonDelaiApplique);
-    console.log('   - remplaceeParId:', evaluation.remplaceeParId);
+    console.log(`✅ Évaluation trouvée:`, evaluation.id, '- DA:', evaluation.etudiantDA, '- Production:', evaluation.productionId);
 
-    // Naviguer vers la section Évaluations › Évaluer
+    // Chercher le fichier importé pour cet étudiant + production
+    let fichierId = null;
+    if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersEtudiant === 'function') {
+        let fichiers = travauxStockage.obtenirFichiersEtudiant(evaluation.etudiantDA);
+        if (evaluation.productionId) {
+            fichiers = fichiers.filter(f => f.productionId === evaluation.productionId);
+        }
+        if (fichiers.length > 0) {
+            fichierId = fichiers[0].id;
+        }
+    }
+
+    // Naviguer vers la section Évaluations
     afficherSection('evaluations');
 
-    // Attendre que la section soit chargée, puis appeler la fonction d'évaluation
-    setTimeout(() => {
-        // Appeler la fonction du module evaluation.js (qui attend un evaluationId)
-        if (typeof window.modifierEvaluationParId === 'function') {
-            window.modifierEvaluationParId(evaluation.id);
-        } else {
-            console.error('❌ Fonction modifierEvaluationParId non disponible');
-            alert('Erreur: Module d\'évaluation non chargé correctement');
-        }
-    }, 200);
+    if (fichierId && typeof travauxUI !== 'undefined' && typeof travauxUI.ouvrirFichier === 'function') {
+        // Workflow visionneuse : ouvrir le fichier, basculer en mode évaluer,
+        // puis charger l'évaluation sauvegardée
+        window._apresOuvertureFichier = function() {
+            if (typeof travauxUI.basculerMode === 'function') {
+                travauxUI.basculerMode('evaluer');
+            }
+            setTimeout(function() {
+                if (typeof window.modifierEvaluationParId === 'function') {
+                    window.modifierEvaluationParId(evaluation.id);
+                }
+            }, 200);
+        };
+        afficherSousSection('evaluations-annoter');
+        setTimeout(function() {
+            travauxUI.ouvrirFichier(fichierId);
+        }, 500);
+    } else {
+        // Fallback : pas de fichier importé, ouvrir le formulaire en standalone
+        setTimeout(function() {
+            if (typeof window.modifierEvaluationParId === 'function') {
+                window.modifierEvaluationParId(evaluation.id);
+            } else {
+                console.error('❌ Fonction modifierEvaluationParId non disponible');
+            }
+        }, 300);
+    }
 }
 
 /**

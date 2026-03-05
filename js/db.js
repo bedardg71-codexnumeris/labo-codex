@@ -611,7 +611,7 @@
 
                 // Émettre événement pour notifier que les données sont prêtes
                 window.dispatchEvent(new CustomEvent('db-ready', {
-                    detail: { synced, skipped, inMemory, total: indexedDBKeys.length }
+                    detail: { synced, inMemory, total: indexedDBKeys.length }
                 }));
             } catch (error) {
                 console.error('❌ [DB] Erreur synchronisation cache:', error);
