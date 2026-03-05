@@ -2060,6 +2060,21 @@ function sauvegarderEvaluation() {
 
     // Sauvegarder
     let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+
+    // Garde-fou : si une évaluation active existe déjà pour ce couple étudiant+production,
+    // basculer en modification plutôt que d'en créer une deuxième (double-clic, etc.)
+    const existanteActive = evaluations.find(e =>
+        e.etudiantDA === etudiantDA && e.productionId === productionId && !e.remplaceeParId
+    );
+    if (existanteActive) {
+        console.warn(`[Évaluation] Évaluation active existante détectée (${existanteActive.id}) — bascule en modification`);
+        if (window.evaluationEnCours) {
+            window.evaluationEnCours.idModification = existanteActive.id;
+        }
+        sauvegarderEvaluationModifiee();
+        return;
+    }
+
     evaluations.push(evaluation);
 
     // Protection : bloquer en mode anonymisation ou quota dépassé
@@ -2085,6 +2100,11 @@ function sauvegarderEvaluation() {
     }
 
     afficherNotificationSucces(`Évaluation sauvegardée : ${evaluation.etudiantNom} - ${evaluation.productionNom}`);
+
+    // Basculer en mode modification pour qu'un 2e clic ne crée pas de doublon
+    if (window.evaluationEnCours) {
+        window.evaluationEnCours.idModification = evaluation.id;
+    }
 
     // 🔧 FIX (24 fév 2026) : Propager les métadonnées manquantes sur le fichier importé
     // Si le fichier n'a pas de productionId/etudiantDA/groupeCoursId, les écrire
