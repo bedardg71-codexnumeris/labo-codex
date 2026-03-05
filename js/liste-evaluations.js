@@ -1029,10 +1029,15 @@ function genererDropdownActions(ligne) {
             f.etudiantDA === ligne.da && f.productionId && f.productionId === ligne.productionId
         );
         // Match souple : fichier du même DA sans productionId ou avec productionId orphelin
+        // 🔧 FIX (5 mars 2026) : Ne soft-matcher que si l'étudiant n'a qu'UN seul fichier
+        // non-associé. Sinon le match est ambigu (pourrait être pour une autre production).
         if (!fichierImporte) {
-            fichierImporte = fichiers.find(f =>
+            const fichiersNonAssocies = fichiers.filter(f =>
                 f.etudiantDA === ligne.da && (!f.productionId || !productionIdsConnus.has(f.productionId))
             );
+            if (fichiersNonAssocies.length === 1) {
+                fichierImporte = fichiersNonAssocies[0];
+            }
         }
     }
     const fichierId = fichierImporte ? fichierImporte.id : null;

@@ -3466,10 +3466,12 @@
             if (btnAnnoter) btnAnnoter.classList.remove('actif');
             if (btnEvaluer) btnEvaluer.classList.add('actif');
             // Pleine hauteur par défaut en mode évaluation
-            // Différer pour que le reflow (ajout panneaux eval) soit terminé
+            // 🔧 FIX (5 mars 2026) : double RAF pour attendre que le layout ait ses dimensions finales
             requestAnimationFrame(() => {
-                travauxVisionneuse.zoomPleineHauteur();
-                setTimeout(() => travauxVisionneuse.scrollerEnHaut(), 100);
+                requestAnimationFrame(() => {
+                    travauxVisionneuse.zoomPleineHauteur();
+                    setTimeout(() => travauxVisionneuse.scrollerEnHaut(), 100);
+                });
             });
             // Si productionId manquant, ouvrir le panneau correction d'identité
             if (!fichier.productionId) {
@@ -3487,10 +3489,12 @@
             if (btnAnnoter) btnAnnoter.classList.add('actif');
             if (btnEvaluer) btnEvaluer.classList.remove('actif');
             // Pleine hauteur par défaut en mode annotation
-            // Différer pour que le reflow (suppression panneaux eval) soit terminé
+            // 🔧 FIX (5 mars 2026) : double RAF pour attendre que le layout ait ses dimensions finales
             requestAnimationFrame(() => {
-                travauxVisionneuse.zoomPleineHauteur();
-                setTimeout(() => travauxVisionneuse.scrollerEnHaut(), 100);
+                requestAnimationFrame(() => {
+                    travauxVisionneuse.zoomPleineHauteur();
+                    setTimeout(() => travauxVisionneuse.scrollerEnHaut(), 100);
+                });
             });
         }
         sauvegarderEtatSession();
@@ -3696,7 +3700,8 @@
         // Ce fallback ne sert que pour les fichiers évalués AVANT le fix.
         // SÉCURITÉ (5 mars 2026) : ne deviner que s'il y a UNE seule production dans le cours.
         // Avec plusieurs productions, l'association est ambiguë → laisser l'enseignant choisir.
-        let productionIdEffective = fichier.productionId || '';
+        const productionIdDuFichier = fichier.productionId || '';
+        let productionIdEffective = productionIdDuFichier;
         if (!productionIdEffective && fichier.etudiantDA) {
             const productionsCours = db.getSync(cle('productions'), []).filter(p => p.type !== 'portfolio');
             if (productionsCours.length <= 1) {
@@ -3707,16 +3712,24 @@
                 const productionsDistinctes = [...new Set(evalsEtudiant.map(e => e.productionId))];
                 if (productionsDistinctes.length === 1) {
                     productionIdEffective = productionsDistinctes[0];
-                    console.log(`[Travaux-UI] Production unique récupérée depuis évaluation: ${productionIdEffective} pour ${fichier.etudiantDA}`);
+                    console.log(`[Travaux-UI] Production devinée depuis évaluation: ${productionIdEffective} pour ${fichier.etudiantDA}`);
                 }
             } else {
                 console.log(`[Travaux-UI] ${productionsCours.length} productions dans le cours, association manuelle requise pour ${fichier.etudiantDA}`);
             }
         }
 
+        // 🔧 FIX (5 mars 2026) : Ne pré-remplir le select que si le productionId vient du fichier.
+        // Le fallback (deviné depuis évaluations) ne doit PAS écraser le select — il peut deviner
+        // la mauvaise production si l'étudiant a été évalué sur plusieurs artefacts.
         const selProd = document.getElementById('selectProduction1');
-        if (selProd && productionIdEffective) {
+        if (selProd && productionIdDuFichier) {
+            selProd.value = productionIdDuFichier;
+            console.log(`[Travaux-UI] Select production rempli depuis fichier: ${productionIdDuFichier}`);
+        } else if (selProd && productionIdEffective) {
+            // Fallback : proposer la production devinée mais loguer l'avertissement
             selProd.value = productionIdEffective;
+            console.warn(`[Travaux-UI] ⚠️ Select production rempli par FALLBACK (pas depuis fichier): ${productionIdEffective}`);
         }
 
         // Initialiser evaluationEnCours si absent (requis par chargerGrilleSelectionnee)
@@ -3954,8 +3967,21 @@
      * Ferme le mode evaluation : remet les panneaux dans leur conteneur d'origine
      */
     function fermerModeEvaluation() {
-        const evalDiv = document.getElementById('evaluations-contenu-evaluation');
+        let evalDiv = document.getElementById('evaluations-contenu-evaluation');
         const conteneurDoc = document.getElementById('travaux-conteneur-document');
+
+        // 🔧 FIX (5 mars 2026) : Si le conteneur d'évaluation n'existe plus, le recréer
+        // pour pouvoir y remettre les panneaux (sinon palette.remove() les détruit)
+        if (!evalDiv) {
+            const annoterSection = document.getElementById('evaluations-annoter');
+            if (annoterSection) {
+                const div = document.createElement('div');
+                div.id = 'evaluations-contenu-evaluation';
+                div.className = 'u-hide';
+                annoterSection.appendChild(div);
+                evalDiv = div;
+            }
+        }
 
         // Remettre le canvas container : dans le layout annotation s'il existe, sinon dans le conteneur document
         const canvasContainer = document.getElementById('travaux-canvas-container');
