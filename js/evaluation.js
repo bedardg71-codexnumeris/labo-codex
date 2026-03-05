@@ -4713,57 +4713,75 @@ function modifierEvaluation(evaluationId) {
                 });
             }
 
-            // ÉTAPE 0: Charger les selects de base (groupes, grilles, échelles)
-            console.log('0️⃣ Initialisation des selects de base');
-            if (typeof chargerGroupesEval === 'function') {
-                chargerGroupesEval();
-                console.log('  ✓ Groupes chargés');
-            }
-            if (typeof chargerGrillesDansSelect === 'function') {
-                chargerGrillesDansSelect();
-                console.log('  ✓ Grilles chargées');
-            }
-            if (typeof chargerEchellePerformance === 'function') {
-                chargerEchellePerformance();
-                console.log('  ✓ Échelles chargées');
-            }
+            // 🔧 FIX (5 mars 2026) : En mode évaluer (visionneuse), les selects groupe/étudiant/production
+            // sont déjà peuplés par afficherPalettesEval(). Les reconfigurer provoque un timeout
+            // car le handler du change groupe vide puis re-remplit le select étudiant.
+            if (enModeEvaluer) {
+                console.log('⏭️ Mode évaluer détecté — étapes 0-3 sautées (selects déjà remplis par afficherPalettesEval)');
 
-            // ÉTAPE 1: Charger le groupe (CRITIQUE - manquait dans l'ancienne version!)
-            const numeroGroupe = trouverGroupeEtudiant(evaluation.etudiantDA);
-            if (!numeroGroupe) {
-                throw new Error(`Groupe introuvable pour étudiant DA ${evaluation.etudiantDA}`);
+                // Juste s'assurer que la grille est bien sélectionnée
+                if (typeof chargerGrillesDansSelect === 'function') chargerGrillesDansSelect();
+                if (typeof chargerEchellePerformance === 'function') chargerEchellePerformance();
+
+                const selectGrille = document.getElementById('selectGrille1');
+                if (selectGrille && evaluation.grilleId) {
+                    selectGrille.value = evaluation.grilleId;
+                    selectGrille.dispatchEvent(new Event('change', { bubbles: true }));
+                    console.log('✅ Grille chargée (mode évaluer)');
+                }
+            } else {
+                // ÉTAPE 0: Charger les selects de base (groupes, grilles, échelles)
+                console.log('0️⃣ Initialisation des selects de base');
+                if (typeof chargerGroupesEval === 'function') {
+                    chargerGroupesEval();
+                    console.log('  ✓ Groupes chargés');
+                }
+                if (typeof chargerGrillesDansSelect === 'function') {
+                    chargerGrillesDansSelect();
+                    console.log('  ✓ Grilles chargées');
+                }
+                if (typeof chargerEchellePerformance === 'function') {
+                    chargerEchellePerformance();
+                    console.log('  ✓ Échelles chargées');
+                }
+
+                // ÉTAPE 1: Charger le groupe (CRITIQUE - manquait dans l'ancienne version!)
+                const numeroGroupe = trouverGroupeEtudiant(evaluation.etudiantDA);
+                if (!numeroGroupe) {
+                    throw new Error(`Groupe introuvable pour étudiant DA ${evaluation.etudiantDA}`);
+                }
+
+                console.log(`1️⃣ Chargement groupe: ${numeroGroupe}`);
+                const selectGroupe = document.getElementById('selectGroupeEval');
+                if (selectGroupe) {
+                    selectGroupe.value = numeroGroupe;
+                    selectGroupe.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+
+                // ÉTAPE 2: Attendre et charger l'étudiant
+                console.log(`2️⃣ Attente option étudiant: ${evaluation.etudiantDA}`);
+                await attendreOption('selectEtudiantEval', evaluation.etudiantDA);
+                const selectEtudiant = document.getElementById('selectEtudiantEval');
+                selectEtudiant.value = evaluation.etudiantDA;
+                selectEtudiant.dispatchEvent(new Event('change', { bubbles: true }));
+                console.log('✅ Étudiant chargé');
+
+                // ÉTAPE 3: Attendre et charger la production
+                console.log(`3️⃣ Attente option production: ${evaluation.productionId}`);
+                await attendreOption('selectProduction1', evaluation.productionId);
+                const selectProduction = document.getElementById('selectProduction1');
+                selectProduction.value = evaluation.productionId;
+                selectProduction.dispatchEvent(new Event('change', { bubbles: true }));
+                console.log('✅ Production chargée');
+
+                // ÉTAPE 4: Attendre et charger la grille
+                console.log(`4️⃣ Attente option grille: ${evaluation.grilleId}`);
+                await attendreOption('selectGrille1', evaluation.grilleId);
+                const selectGrille = document.getElementById('selectGrille1');
+                selectGrille.value = evaluation.grilleId;
+                selectGrille.dispatchEvent(new Event('change', { bubbles: true }));
+                console.log('✅ Grille chargée');
             }
-
-            console.log(`1️⃣ Chargement groupe: ${numeroGroupe}`);
-            const selectGroupe = document.getElementById('selectGroupeEval');
-            if (selectGroupe) {
-                selectGroupe.value = numeroGroupe;
-                selectGroupe.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-
-            // ÉTAPE 2: Attendre et charger l'étudiant
-            console.log(`2️⃣ Attente option étudiant: ${evaluation.etudiantDA}`);
-            await attendreOption('selectEtudiantEval', evaluation.etudiantDA);
-            const selectEtudiant = document.getElementById('selectEtudiantEval');
-            selectEtudiant.value = evaluation.etudiantDA;
-            selectEtudiant.dispatchEvent(new Event('change', { bubbles: true }));
-            console.log('✅ Étudiant chargé');
-
-            // ÉTAPE 3: Attendre et charger la production
-            console.log(`3️⃣ Attente option production: ${evaluation.productionId}`);
-            await attendreOption('selectProduction1', evaluation.productionId);
-            const selectProduction = document.getElementById('selectProduction1');
-            selectProduction.value = evaluation.productionId;
-            selectProduction.dispatchEvent(new Event('change', { bubbles: true }));
-            console.log('✅ Production chargée');
-
-            // ÉTAPE 4: Attendre et charger la grille
-            console.log(`4️⃣ Attente option grille: ${evaluation.grilleId}`);
-            await attendreOption('selectGrille1', evaluation.grilleId);
-            const selectGrille = document.getElementById('selectGrille1');
-            selectGrille.value = evaluation.grilleId;
-            selectGrille.dispatchEvent(new Event('change', { bubbles: true }));
-            console.log('✅ Grille chargée');
 
             // ÉTAPE 5: Initialiser evaluationEnCours (AVANT cartouche/échelle)
             console.log('5️⃣ Initialisation evaluationEnCours');
