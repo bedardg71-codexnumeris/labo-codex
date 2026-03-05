@@ -482,8 +482,8 @@
             if (fichier.statut === 'importe') continue;
 
             try {
-                // En mode pipeline, lire la productionId de chaque fichier
-                const prodId = productionId || fichier.productionId || '';
+                // En mode pipeline, la productionId individuelle du fichier prime sur la globale
+                const prodId = fichier.productionId || productionId || '';
                 await importerFichier(fichier, prodId);
                 importes++;
             } catch (e) {
