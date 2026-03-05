@@ -1877,6 +1877,7 @@
         return nom.toLowerCase()
             .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // accents : é→e, è→e, etc.
             .replace(/[^a-z0-9\s]/g, '')                        // retirer °, /, (, ), #, etc.
+            .replace(/(^|\s)n\s*(\d)/g, '$1$2')                 // "n1" isolé → "1" (résidu de n°)
             .replace(/\s+/g, ' ')
             .trim();
     }
