@@ -3525,10 +3525,38 @@
      * @param {string} fichierId - ID du fichier
      * @param {string} productionId - Nouvel ID de production
      */
-    function changerProductionFichier(fichierId, productionId) {
-        const ok = travauxStockage.mettreAJourFichier(fichierId, { productionId: productionId });
+    function changerProductionFichier(fichierId, nouveauProductionId) {
+        // Récupérer l'ancien productionId avant la mise à jour
+        const fichier = travauxStockage.obtenirFichierParId(fichierId);
+        const ancienProductionId = fichier ? fichier.productionId : null;
+
+        const ok = travauxStockage.mettreAJourFichier(fichierId, { productionId: nouveauProductionId });
         if (ok) {
-            console.log('[Travaux-UI] Production mise a jour pour', fichierId, '→', productionId);
+            console.log('[Travaux-UI] Production mise a jour pour', fichierId, '→', nouveauProductionId);
+
+            // 🔧 FIX (5 mars 2026) : Réassocier les évaluations orphelines
+            // Si le fichier avait un ancien productionId différent, migrer les évaluations
+            // de (etudiantDA, ancienProductionId) vers (etudiantDA, nouveauProductionId)
+            if (fichier && fichier.etudiantDA && ancienProductionId && ancienProductionId !== nouveauProductionId) {
+                const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+                let nbMigrees = 0;
+                evaluations.forEach(e => {
+                    if (e.etudiantDA === fichier.etudiantDA &&
+                        e.productionId === ancienProductionId &&
+                        !e.remplaceeParId) {
+                        e.productionId = nouveauProductionId;
+                        // Mettre à jour le nom de production si disponible
+                        const productions = db.getSync(cle('productions'), []);
+                        const prod = productions.find(p => p.id === nouveauProductionId);
+                        if (prod) e.productionNom = prod.nom;
+                        nbMigrees++;
+                    }
+                });
+                if (nbMigrees > 0) {
+                    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+                    console.log(`[Travaux-UI] ${nbMigrees} évaluation(s) migrée(s) de ${ancienProductionId} → ${nouveauProductionId} pour ${fichier.etudiantDA}`);
+                }
+            }
         }
     }
 

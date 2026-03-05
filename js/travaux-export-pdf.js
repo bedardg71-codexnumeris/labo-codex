@@ -774,14 +774,32 @@
         const margeG = mm(cfg.marges.gauche);
         const margeD = mm(cfg.marges.droite);
 
-        // Chercher l'evaluation correspondante
-        // productionIdOverride permet de matcher quand fichier.productionId est vide
+        // 🔧 FIX (5 mars 2026) : Chercher l'évaluation la plus récente et non remplacée
+        // Priorité : productionIdOverride > fichier.productionId
+        // Si aucune évaluation trouvée avec le prodId du fichier, tenter un fallback
+        // par etudiantDA seul (cas où le productionId du fichier est encore désynchronisé)
         const prodId = productionIdOverride || fichier.productionId;
         const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
-        const evaluation = evaluations.find(e =>
-            e.etudiantDA === fichier.etudiantDA &&
-            e.productionId === prodId
+
+        // Filtrer les évaluations actives (non remplacées) pour cet étudiant
+        const evalsEtudiant = evaluations.filter(e =>
+            e.etudiantDA === fichier.etudiantDA && !e.remplaceeParId
         );
+
+        // Chercher d'abord par prodId exact
+        let evaluation = evalsEtudiant.find(e => e.productionId === prodId);
+
+        if (!evaluation && prodId) {
+            // Fallback : chercher la plus récente pour cet étudiant
+            // (cas rare de désynchronisation résiduelle)
+            const evalsTriees = evalsEtudiant
+                .filter(e => e.productionId)
+                .sort((a, b) => new Date(b.dateEvaluation || 0) - new Date(a.dateEvaluation || 0));
+            if (evalsTriees.length === 1) {
+                evaluation = evalsTriees[0];
+                console.warn(`[Travaux-Export] ⚠️ Évaluation trouvée par fallback (prodId fichier: ${prodId}, éval: ${evaluation.productionId})`);
+            }
+        }
 
         if (!evaluation) {
             console.log('[Travaux-Export] Pas d\'evaluation trouvee, page de synthese omise');
