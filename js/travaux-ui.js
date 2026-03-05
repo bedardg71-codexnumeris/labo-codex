@@ -1868,6 +1868,20 @@
     }
 
     /**
+     * Normalise un nom de production pour la comparaison.
+     * LEA transforme le nom original en retirant accents et caractères
+     * spéciaux (°, /, parenthèses, etc.). On reproduit la même chose
+     * pour que le titre dans l'app matche le nom extrait du fichier LEA.
+     */
+    function normaliserNomProductionPipeline(nom) {
+        return nom.toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // accents : é→e, è→e, etc.
+            .replace(/[^a-z0-9\s]/g, '')                        // retirer °, /, (, ), #, etc.
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    /**
      * Tente d'identifier automatiquement les fichiers via parseLea
      */
     function identifierAutoPipeline() {
@@ -1885,10 +1899,11 @@
             }
 
             // Essayer de trouver la production par nom
+            // Normalisation : LEA nomme "Artefact_n1" → "Artefact n1", mais le titre est "Artefact 1"
             if (!f.productionId && f.parseLea.nomProduction) {
-                const nomProd = f.parseLea.nomProduction.toLowerCase();
+                const nomProd = normaliserNomProductionPipeline(f.parseLea.nomProduction);
                 const prodTrouvee = productions.find(p => {
-                    const titre = (p.titre || p.nom || '').toLowerCase();
+                    const titre = normaliserNomProductionPipeline(p.titre || p.nom || '');
                     return nomProd && titre && (titre.includes(nomProd) || nomProd.includes(titre));
                 });
                 if (prodTrouvee) f.productionId = prodTrouvee.id;
@@ -2035,15 +2050,43 @@
 
         const modifications = {};
 
+        // Index normalisé des productions pour matching par nom de fichier
+        const productionsIndex = productions.map(p => ({
+            id: p.id,
+            titreNorm: normaliserNomProductionPipeline(p.titre || p.nom || '')
+        }));
+
         fichiers.forEach(f => {
             if (!f.etudiantDA) return;
             const modifs = {};
+
+            // 🔧 FIX (5 mars 2026) : Corriger les fichiers dont le productionId ne correspond
+            // pas au nom de production dans le filename LEA (ex: "Travail n1" dans LEA
+            // vs "Travail 1" dans l'app). Le parseLea est stocké sur le fichier.
+            const nomProdFichier = (f.parseLea && f.parseLea.nomProduction)
+                ? f.parseLea.nomProduction
+                : (f.leaParsed && f.leaParsed.nomProduction)
+                    ? f.leaParsed.nomProduction
+                    : '';
+            if (nomProdFichier && f.productionId) {
+                const nomNorm = normaliserNomProductionPipeline(nomProdFichier);
+                if (nomNorm) {
+                    const matchExact = productionsIndex.filter(p =>
+                        p.titreNorm === nomNorm || p.titreNorm.includes(nomNorm) || nomNorm.includes(p.titreNorm)
+                    );
+                    // Ne corriger que si UNE SEULE production matche et que c'est différente de l'actuelle
+                    if (matchExact.length === 1 && matchExact[0].id !== f.productionId) {
+                        console.warn(`[Travaux-UI] 🔧 Réparation association : fichier "${f.nomFichier}" → production "${matchExact[0].titreNorm}" (était: ${f.productionId})`);
+                        modifs.productionId = matchExact[0].id;
+                    }
+                }
+            }
 
             // productionId : depuis les évaluations (IDs uniques, fiable)
             // SÉCURITÉ : ne rétro-propager que s'il n'y a qu'UNE seule production dans le cours.
             // S'il y a plusieurs productions, l'association est ambiguë (le fichier pourrait
             // être destiné à n'importe laquelle). Laisser l'enseignant associer manuellement.
-            if (!f.productionId && evaluations.length && nbProductions <= 1) {
+            if (!f.productionId && !modifs.productionId && evaluations.length && nbProductions <= 1) {
                 const evalsEtudiant = evaluations.filter(e =>
                     e.etudiantDA === f.etudiantDA && e.productionId && !e.remplaceeParId
                 );
