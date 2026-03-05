@@ -590,6 +590,20 @@
      * Image → 'a-optimiser'
      * @param {Object} fichierPrepare - Le fichier prepare
      */
+    /**
+     * Normalise un nom de production pour la comparaison.
+     * LEA transforme le nom original en retirant accents et caractères
+     * spéciaux (°, /, parenthèses, etc.). On reproduit la même chose
+     * pour que "Artefact n°3" (titre) matche "Artefact n3" (fichier LEA).
+     */
+    function normaliserNomProduction(nom) {
+        return nom.toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // accents : é→e, è→e, etc.
+            .replace(/[^a-z0-9\s]/g, '')                        // retirer °, /, (, ), #, etc.
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
     function detecterFormatEtRouter(fichierPrepare) {
         if (fichierPrepare.estPDF) {
             // Les PDF sont prets directement
@@ -598,8 +612,8 @@
             if (fichierPrepare.parseLea.da && fichierPrepare.etudiantAssocie) {
                 const productions = obtenirDonneesSelonMode(cle('productions'));
                 const prodTrouvee = productions.find(p => {
-                    const titre = (p.titre || p.nom || '').toLowerCase();
-                    const nomProd = fichierPrepare.parseLea.nomProduction.toLowerCase();
+                    const titre = normaliserNomProduction(p.titre || p.nom || '');
+                    const nomProd = normaliserNomProduction(fichierPrepare.parseLea.nomProduction);
                     return nomProd && titre && (titre.includes(nomProd) || nomProd.includes(titre));
                 });
                 if (prodTrouvee) {
