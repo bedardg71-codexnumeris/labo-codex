@@ -15966,6 +15966,16 @@ body.mode-clair .pipeline-autocomplete-item:hover {
     background: var(--planif-couleur-bordure);
 }
 
+.travaux-chrono-badge {
+    font-size: 0.8em;
+    padding: 2px 8px;
+    color: var(--texte-secondaire);
+    white-space: nowrap;
+}
+.travaux-chrono-badge.actif {
+    color: var(--accent-principal);
+}
+
 .btn-icon {
     background: none;
     border: 1px solid var(--bordure-claire);

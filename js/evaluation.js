@@ -2101,6 +2101,11 @@ function sauvegarderEvaluation() {
 
     afficherNotificationSucces(`Évaluation sauvegardée : ${evaluation.etudiantNom} - ${evaluation.productionNom}`);
 
+    // Arrêter le chrono évaluation
+    if (typeof travauxUI !== 'undefined' && travauxUI.arreterChrono) {
+        travauxUI.arreterChrono();
+    }
+
     // Basculer en mode modification pour qu'un 2e clic ne crée pas de doublon
     if (window.evaluationEnCours) {
         window.evaluationEnCours.idModification = evaluation.id;
@@ -5233,6 +5238,11 @@ function sauvegarderEvaluationModifiee() {
     }
 
     afficherNotificationSucces(`Évaluation modifiée : ${evaluations[indexEval].etudiantNom} - ${evaluations[indexEval].productionNom}`);
+
+    // Arrêter le chrono évaluation
+    if (typeof travauxUI !== 'undefined' && travauxUI.arreterChrono) {
+        travauxUI.arreterChrono();
+    }
 
     // Mettre à jour les badges (pills) dans la barre de fichiers
     majBadgesApresEvaluation();
