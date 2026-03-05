@@ -1883,7 +1883,7 @@
     }
 
     /**
-     * Match avec word boundary : "artefact 1" matche "artefact 1 portrait" mais PAS "artefact 10"
+     * Match avec word boundary : "labo 1" matche "labo 1 portrait" mais PAS "labo 10"
      */
     function correspondanceProductionPipeline(titreNorm, nomNorm) {
         if (titreNorm === nomNorm) return true;
