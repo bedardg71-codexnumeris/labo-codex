@@ -3843,7 +3843,10 @@
     }
 
     function masquerPalettesEval() {
-        if (document.getElementById('travaux-palette-eval-gauche')) {
+        // 🔧 FIX (5 mars 2026) : Vérifier aussi eval-layout-flex directement.
+        // Si les panneaux ont été détruits, travaux-palette-eval-gauche n'existe plus
+        // mais eval-layout-flex peut persister → superposition annot + eval.
+        if (document.getElementById('travaux-palette-eval-gauche') || document.getElementById('eval-layout-flex')) {
             fermerModeEvaluation();
         }
     }
