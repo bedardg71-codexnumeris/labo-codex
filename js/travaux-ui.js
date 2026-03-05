@@ -2053,27 +2053,6 @@
                 }
             }
 
-            // RÉPARATION (5 mars 2026) : Dissocier les fichiers mal associés par la rétro-propagation.
-            // Si ce fichier a un productionId mais qu'un AUTRE fichier du même étudiant est
-            // aussi associé à la même production, l'un des deux est mal associé.
-            // Celui qui n'a PAS d'évaluation correspondante perd son productionId.
-            if (f.productionId && nbProductions > 1) {
-                const autresFichiersMemeDA = fichiers.filter(fx =>
-                    fx.id !== f.id && fx.etudiantDA === f.etudiantDA && fx.productionId === f.productionId
-                );
-                if (autresFichiersMemeDA.length > 0) {
-                    const evalPourCeFichier = evaluations.find(e =>
-                        e.etudiantDA === f.etudiantDA && e.productionId === f.productionId && !e.remplaceeParId
-                    );
-                    if (!evalPourCeFichier) {
-                        // Ce fichier n'a pas d'évaluation mais un autre fichier du même étudiant
-                        // est sur la même production → erreur de rétro-propagation. Dissocier.
-                        console.warn(`[Travaux-UI] 🔧 Réparation : fichier ${f.id} (${f.etudiantDA}) dissocié de ${f.productionId} (association en double)`);
-                        modifs.productionId = null;
-                    }
-                }
-            }
-
             // groupeCoursId : depuis l'appartenance réelle de l'étudiant
             // Corrige aussi les fichiers dont le groupeCoursId est erroné
             const gcReel = daVersGcId[f.etudiantDA];
