@@ -144,6 +144,12 @@
         // Appliquer immédiatement l'état de l'animation
         appliquerAnimationPoints(preferences.animationPoints !== false);
 
+        // Chrono évaluation
+        const chronoEval = document.getElementById('v2-pref-chrono-eval');
+        if (chronoEval) {
+            chronoEval.checked = preferences.chronoEvaluation === true;
+        }
+
         // 🆕 BETA 95.1 : Unité d'affichage de l'assiduité (périodes/heures)
         const uniteAffichage = document.getElementById('v2-pref-unite-affichage');
         if (uniteAffichage) {
@@ -283,6 +289,8 @@
         // 🆕 BETA 96.1 : Animation des points
         preferences.animationPoints = document.getElementById('v2-pref-animation-points')?.checked !== false;
         appliquerAnimationPoints(preferences.animationPoints);
+        // Chrono évaluation
+        preferences.chronoEvaluation = document.getElementById('v2-pref-chrono-eval')?.checked === true;
         // SIS par défaut
         preferences.sisDefaut = document.getElementById('v2-pref-sis')?.value || 'lea';
 
