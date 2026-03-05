@@ -2033,7 +2033,9 @@ function sauvegarderEvaluation() {
             affichageNote: document.querySelector('input[name="affichageNote1"]:checked')?.value || 'complet'
         },
         donneesAlgorithmiques: evaluationEnCours.donneesAlgorithmiques || {}, // Sauvegarder données du français écrit algorithmique
-        verrouillee: true // Verrouiller par défaut toutes les nouvelles évaluations
+        verrouillee: true, // Verrouiller par défaut toutes les nouvelles évaluations
+        fichierId: ((typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
+            ? travauxVisionneuse.getFichierActuel()?.id : '') || ''
     };
 
     // Lire l'état des checkboxes de jetons et appliquer si cochées
@@ -2063,8 +2065,13 @@ function sauvegarderEvaluation() {
 
     // Garde-fou : si une évaluation active existe déjà pour ce couple étudiant+production,
     // basculer en modification plutôt que d'en créer une deuxième (double-clic, etc.)
+    const fichierActuelGarde = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
+        ? travauxVisionneuse.getFichierActuel() : null;
     const existanteActive = evaluations.find(e =>
-        e.etudiantDA === etudiantDA && e.productionId === productionId && !e.remplaceeParId
+        !e.remplaceeParId && (
+            (fichierActuelGarde && e.fichierId && e.fichierId === fichierActuelGarde.id) ||
+            (e.etudiantDA === etudiantDA && e.productionId === productionId)
+        )
     );
     if (existanteActive) {
         console.warn(`[Évaluation] Évaluation active existante détectée (${existanteActive.id}) — bascule en modification`);
@@ -5066,15 +5073,13 @@ function modifierEvaluation(evaluationId) {
             // Seulement en standalone (pas quand le fichier est déjà dans la visionneuse en mode évaluer)
             if (!enModeEvaluer && typeof travauxStockage !== 'undefined' && typeof travauxUI !== 'undefined') {
                 try {
-                    let fichiers = travauxStockage.obtenirFichiersEtudiant(evaluation.etudiantDA);
-                    if (evaluation.productionId) {
-                        fichiers = fichiers.filter(f => f.productionId === evaluation.productionId);
-                    }
-                    if (fichiers.length > 0) {
+                    const fichierCote = (typeof travauxResolution !== 'undefined')
+                        ? travauxResolution.trouverFichierPourEvaluation(evaluation) : null;
+                    if (fichierCote) {
                         const conteneurGrille = document.getElementById('listeCriteresGrille1')?.closest('.form-group') || document.getElementById('listeCriteresGrille1');
                         if (conteneurGrille) {
-                            console.log('1️⃣7️⃣ Ouverture du travail en vue côte à côte:', fichiers[0].id);
-                            await travauxUI.ouvrirVueCoteACote(fichiers[0].id, conteneurGrille);
+                            console.log('1️⃣7️⃣ Ouverture du travail en vue côte à côte:', fichierCote.id);
+                            await travauxUI.ouvrirVueCoteACote(fichierCote.id, conteneurGrille);
                         }
                     }
                 } catch (e) {
@@ -5228,7 +5233,9 @@ function sauvegarderEvaluationModifiee() {
         },
         donneesAlgorithmiques: evaluationEnCours.donneesAlgorithmiques || {}, // Sauvegarder données du français écrit algorithmique
         ...proprietesJetons, // Préserver toutes les propriétés de jetons
-        verrouillee: true // Verrouiller automatiquement après la sauvegarde
+        verrouillee: true, // Verrouiller automatiquement après la sauvegarde
+        fichierId: ((typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
+            ? travauxVisionneuse.getFichierActuel()?.id : '') || evaluations[indexEval].fichierId || ''
     };
 
     // Sauvegarder
@@ -6279,19 +6286,26 @@ function ouvrirTravailDepuisEvaluation() {
         return;
     }
 
-    // Trouver le fichier associe
-    let fichiers = travauxStockage.obtenirFichiersEtudiant(etudiantDA);
-    if (productionId) {
-        fichiers = fichiers.filter(f => f.productionId === productionId);
+    // Trouver le fichier associé via résolution centralisée ou fallback
+    let fichierTrouve = null;
+    if (typeof travauxResolution !== 'undefined' && productionId) {
+        // Construire un pseudo-objet évaluation pour la recherche
+        fichierTrouve = travauxResolution.trouverFichierPourEvaluation({ etudiantDA, productionId });
+    }
+    if (!fichierTrouve) {
+        let fichiers = travauxStockage.obtenirFichiersEtudiant(etudiantDA);
+        if (productionId) {
+            fichiers = fichiers.filter(f => f.productionId === productionId);
+        }
+        if (fichiers.length > 0) fichierTrouve = fichiers[0];
     }
 
-    if (fichiers.length === 0) {
+    if (!fichierTrouve) {
         alert('Aucun travail trouvé pour cet·te étudiant·e');
         return;
     }
 
-    // Ouvrir le premier fichier en vue cote-a-cote
-    const fichierId = fichiers[0].id;
+    const fichierId = fichierTrouve.id;
     const conteneurGrille = document.getElementById('listeCriteresGrille1')?.closest('.form-group') || document.getElementById('listeCriteresGrille1');
 
     if (conteneurGrille && typeof travauxUI !== 'undefined') {

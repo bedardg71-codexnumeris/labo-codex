@@ -26,17 +26,16 @@ function calculerStatutWorkflow(ligne) {
 
     // Vérifier si un fichier importé existe et s'il a des annotations
     if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersTravaux === 'function') {
-        const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
-        const productions = db.getSync(cle('productions'), []);
-        const productionIdsConnus = new Set(productions.map(p => p.id));
+        // Résolution centralisée : évaluation → fichier via fichierId ou (DA, productionId)
+        let fichier = (typeof travauxResolution !== 'undefined')
+            ? travauxResolution.trouverFichierPourEvaluation({ etudiantDA: ligne.da, productionId: ligne.productionId, fichierId: ligne.fichierId })
+            : null;
 
-        // Match strict par DA + productionId
-        let fichier = fichiers.find(f =>
-            f.etudiantDA === ligne.da && f.productionId && f.productionId === ligne.productionId
-        );
-        // 🔧 FIX (5 mars 2026) : Soft-match resserré — ne matcher que si l'étudiant a
-        // exactement 1 fichier non-associé (sinon ambigu entre plusieurs productions).
+        // Soft-match : si pas de fichier trouvé, chercher un fichier non-associé unique
         if (!fichier) {
+            const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
+            const productions = db.getSync(cle('productions'), []);
+            const productionIdsConnus = new Set(productions.map(p => p.id));
             const fichiersNonAssocies = fichiers.filter(f =>
                 f.etudiantDA === ligne.da && (!f.productionId || !productionIdsConnus.has(f.productionId))
             );
@@ -54,8 +53,8 @@ function calculerStatutWorkflow(ligne) {
             return 'importe';
         }
 
-        // 🔧 FIX (5 mars 2026) : Signaler qu'un fichier existe sur une autre production
-        // (utile pour l'affichage « Réassocier » dans le dropdown)
+        // Signaler qu'un fichier existe sur une autre production
+        const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
         const fichierAutreProduction = fichiers.find(f =>
             f.etudiantDA === ligne.da && f.productionId && f.productionId !== ligne.productionId
         );
@@ -1363,16 +1362,11 @@ function consulterEvaluationDepuisListe(evaluationId) {
 
     console.log(`✅ Évaluation trouvée:`, evaluation.id, '- DA:', evaluation.etudiantDA, '- Production:', evaluation.productionId);
 
-    // Chercher le fichier importé pour cet étudiant + production
+    // Résolution centralisée évaluation → fichier
     let fichierId = null;
-    if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersEtudiant === 'function') {
-        let fichiers = travauxStockage.obtenirFichiersEtudiant(evaluation.etudiantDA);
-        if (evaluation.productionId) {
-            fichiers = fichiers.filter(f => f.productionId === evaluation.productionId);
-        }
-        if (fichiers.length > 0) {
-            fichierId = fichiers[0].id;
-        }
+    if (typeof travauxResolution !== 'undefined') {
+        const fichierTrouve = travauxResolution.trouverFichierPourEvaluation(evaluation);
+        if (fichierTrouve) fichierId = fichierTrouve.id;
     }
 
     // Naviguer vers la section Évaluations
@@ -1425,11 +1419,14 @@ function evaluerProduction(da, productionId) {
     let etapeNavigation = 'evaluations-annoter'; // défaut: évaluation
     let ouvrirAnnotation = false;
 
-    // Vérifier s'il y a un fichier importé pour cet étudiant + production
+    // Résolution centralisée : trouver le fichier pour cette évaluation
     let fichierImporte = null;
-    if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersTravaux === 'function') {
+    if (typeof travauxResolution !== 'undefined') {
+        fichierImporte = travauxResolution.trouverFichierPourEvaluation({ etudiantDA: da, productionId });
+    }
+    if (!fichierImporte && typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersGroupeActif === 'function') {
         const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
-        fichierImporte = fichiers.find(f => f.etudiantDA === da && (!f.productionId || f.productionId === productionId));
+        fichierImporte = fichiers.find(f => f.etudiantDA === da && !f.productionId);
     }
 
     if (!fichierImporte) {

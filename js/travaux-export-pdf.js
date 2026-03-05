@@ -774,32 +774,12 @@
         const margeG = mm(cfg.marges.gauche);
         const margeD = mm(cfg.marges.droite);
 
-        // 🔧 FIX (5 mars 2026) : Chercher l'évaluation la plus récente et non remplacée
-        // Priorité : productionIdOverride > fichier.productionId
-        // Si aucune évaluation trouvée avec le prodId du fichier, tenter un fallback
-        // par etudiantDA seul (cas où le productionId du fichier est encore désynchronisé)
-        const prodId = productionIdOverride || fichier.productionId;
-        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
-
-        // Filtrer les évaluations actives (non remplacées) pour cet étudiant
-        const evalsEtudiant = evaluations.filter(e =>
-            e.etudiantDA === fichier.etudiantDA && !e.remplaceeParId
-        );
-
-        // Chercher d'abord par prodId exact
-        let evaluation = evalsEtudiant.find(e => e.productionId === prodId);
-
-        if (!evaluation && prodId) {
-            // Fallback : chercher la plus récente pour cet étudiant
-            // (cas rare de désynchronisation résiduelle)
-            const evalsTriees = evalsEtudiant
-                .filter(e => e.productionId)
-                .sort((a, b) => new Date(b.dateEvaluation || 0) - new Date(a.dateEvaluation || 0));
-            if (evalsTriees.length === 1) {
-                evaluation = evalsTriees[0];
-                console.warn(`[Travaux-Export] ⚠️ Évaluation trouvée par fallback (prodId fichier: ${prodId}, éval: ${evaluation.productionId})`);
-            }
-        }
+        // Résolution centralisée fichier → évaluation
+        // Si un productionIdOverride est fourni, construire un pseudo-fichier pour la recherche
+        const fichierRecherche = productionIdOverride
+            ? { ...fichier, productionId: productionIdOverride }
+            : fichier;
+        const evaluation = travauxResolution.trouverEvaluationPourFichier(fichierRecherche);
 
         if (!evaluation) {
             console.log('[Travaux-Export] Pas d\'evaluation trouvee, page de synthese omise');
@@ -1341,9 +1321,8 @@
             return;
         }
 
-        // Trouver le fichier associe
-        const fichiers = travauxStockage.obtenirFichiersGroupeActif();
-        const fichier = fichiers.find(f => f.etudiantDA === da && f.productionId === productionId);
+        // Trouver le fichier associé (résolution centralisée)
+        const fichier = travauxResolution.trouverFichierPourEvaluation({ etudiantDA: da, productionId });
 
         if (!fichier) {
             alert('Aucun fichier trouve pour cet etudiant et cette production.');
@@ -1403,12 +1382,8 @@
         const annotation = travauxStockage.obtenirAnnotationFichier(fichierId);
         const stats = compterAnnotations(annotation);
 
-        // Chercher l'evaluation
-        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
-        const evaluation = evaluations.find(e =>
-            e.etudiantDA === fichier.etudiantDA &&
-            e.productionId === fichier.productionId
-        );
+        // Chercher l'évaluation (résolution centralisée)
+        const evaluation = travauxResolution.trouverEvaluationPourFichier(fichier);
 
         let html = `
             <div class="modal-overlay actif" id="travaux-modal-revision" onclick="if(event.target===this)travauxExportPDF.fermerRevision()">

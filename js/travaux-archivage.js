@@ -293,10 +293,13 @@
         const nomProd = (production?.titre || production?.nom || 'production')
             .replace(/[^a-zA-ZÀ-ÿ0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 
-        // Filtrer les fichiers qui ont une évaluation pour cette production
-        let fichiersAvecEval = fichiers.filter(f =>
-            evaluations.some(e => e.etudiantDA === f.etudiantDA && e.productionId === productionId)
-        );
+        // Filtrer les fichiers qui ont une évaluation (résolution centralisée)
+        let fichiersAvecEval = fichiers.filter(f => {
+            const evalF = travauxResolution.trouverEvaluationPourFichier(
+                f.productionId === productionId ? f : { ...f, productionId }
+            );
+            return !!evalF;
+        });
         if (da) {
             fichiersAvecEval = fichiersAvecEval.filter(f => f.etudiantDA === da);
         }
