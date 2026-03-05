@@ -610,8 +610,10 @@
         moduleInitialise = true;
         console.log('[Travaux-UI] Module Travaux initialise');
 
-        // Rétro-propager les métadonnées des évaluations vers les fichiers orphelins
-        retroPropagerMetadonnees();
+        // Corriger les groupeCoursId des fichiers orphelins
+        corrigerGroupeCoursIdFichiers();
+        // Migrer les fichierId sur les évaluations existantes (lien direct fichier↔évaluation)
+        travauxResolution.migrerFichierIds();
 
         const fichierRestaure = restaurerEtatSession();
         if (fichierRestaure) {
@@ -2070,20 +2072,10 @@
             statutClasse = 'annote';
         }
 
-        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
-        const evaluation = evaluations.find(e => {
-            if (e.etudiantDA !== f.etudiantDA) return false;
-            // Exiger la correspondance exacte de productionId
-            if (!f.productionId) return false;
-            return e.productionId === f.productionId;
-        });
+        const evaluation = travauxResolution.trouverEvaluationPourFichier(f);
         if (evaluation) {
             statutTexte = 'Évalué';
             statutClasse = 'evalue';
-        }
-
-        if (!evaluation && statutClasse === 'annote') {
-            console.warn(`[Badge] Pas d'évaluation trouvée pour ${f.etudiantDA}/${f.productionId}. Total évaluations lues: ${evaluations.length}`);
         }
 
         const verrou = (evaluation && evaluation.verrouillee)
@@ -2107,18 +2099,13 @@
     }
 
     /**
-     * Rétro-propage les métadonnées (productionId, etudiantDA, groupeCoursId)
-     * des évaluations existantes vers les fichiers qui en manquent.
-     * Corrige les fichiers importés/évalués avant le fix de propagation (9429666).
-     * S'exécute une fois à l'initialisation du module.
+     * Corrige le groupeCoursId des fichiers à partir de l'appartenance réelle
+     * des étudiants. S'exécute une fois à l'initialisation du module.
      */
-    function retroPropagerMetadonnees() {
-        const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+    function corrigerGroupeCoursIdFichiers() {
         const fichiers = travauxStockage.obtenirFichiersTravaux();
         if (!fichiers.length) return;
 
-        // Construire un index DA → groupeCoursId à partir de l'appartenance réelle
-        // des étudiants (groupeEtudiants + groupesCours), PAS des évaluations
         const tousEtudiants = db.getSync(cle('groupeEtudiants'), []);
         const tousGC = db.getSync(cle('groupesCours'), []);
         const normaliserGroupe = (g) => String(g || '').padStart(5, '0');
@@ -2132,52 +2119,19 @@
             if (gc) daVersGcId[e.da] = gc.id;
         });
 
-        // Compter les productions du cours pour éviter l'association ambiguë
-        const productions = db.getSync(cle('productions'), []);
-        const nbProductions = productions.filter(p => p.type !== 'portfolio').length;
-
         const modifications = {};
-
-        // Index normalisé des productions pour matching par nom de fichier
-        const productionsIndex = productions.map(p => ({
-            id: p.id,
-            titreNorm: normaliserNomProductionPipeline(p.titre || p.nom || '')
-        }));
-
         fichiers.forEach(f => {
             if (!f.etudiantDA) return;
-            const modifs = {};
-
-            // productionId : depuis les évaluations (IDs uniques, fiable)
-            // SÉCURITÉ : ne rétro-propager que s'il n'y a qu'UNE seule production dans le cours.
-            // S'il y a plusieurs productions, l'association est ambiguë (le fichier pourrait
-            // être destiné à n'importe laquelle). Laisser l'enseignant associer manuellement.
-            if (!f.productionId && !modifs.productionId && evaluations.length && nbProductions <= 1) {
-                const evalsEtudiant = evaluations.filter(e =>
-                    e.etudiantDA === f.etudiantDA && e.productionId && !e.remplaceeParId
-                );
-                const productionsDistinctes = [...new Set(evalsEtudiant.map(e => e.productionId))];
-                if (productionsDistinctes.length === 1) {
-                    modifs.productionId = productionsDistinctes[0];
-                }
-            }
-
-            // groupeCoursId : depuis l'appartenance réelle de l'étudiant
-            // Corrige aussi les fichiers dont le groupeCoursId est erroné
             const gcReel = daVersGcId[f.etudiantDA];
             if (gcReel && f.groupeCoursId !== gcReel) {
-                modifs.groupeCoursId = gcReel;
-            }
-
-            if (Object.keys(modifs).length > 0) {
-                modifications[f.id] = modifs;
+                modifications[f.id] = { groupeCoursId: gcReel };
             }
         });
 
         const nbMisAJour = Object.keys(modifications).length;
         if (nbMisAJour > 0) {
             travauxStockage.mettreAJourFichiersBatch(modifications);
-            console.log(`[Travaux-UI] Rétro-propagation métadonnées : ${nbMisAJour} fichier(s) mis à jour`);
+            console.log(`[Travaux-UI] Correction groupeCoursId : ${nbMisAJour} fichier(s) mis à jour`);
         }
     }
 
@@ -2185,13 +2139,7 @@
      * Determine le statut d'un fichier (importe, annote, evalue)
      */
     function determinerStatutFichier(f, evaluations) {
-        const evaluation = evaluations.find(e => {
-            if (e.etudiantDA !== f.etudiantDA) return false;
-            // Exiger la correspondance exacte de productionId
-            // Un fichier sans productionId ne peut pas être considéré « Évalué »
-            if (!f.productionId) return false;
-            return e.productionId === f.productionId;
-        });
+        const evaluation = travauxResolution.trouverEvaluationPourFichier(f);
         if (evaluation) return 'evalue';
         const annotation = travauxStockage.obtenirAnnotationFichier(f.id);
         if (annotation && annotationContientDuContenu(annotation)) return 'annote';
@@ -2474,10 +2422,13 @@
             }
         });
 
-        // Auto-naviguer vers le premier fichier visible si le fichier actuel est masqué
-        // Uniquement dans le contexte annotation (pas archivage)
+        // 🔧 FIX (5 mars 2026) : Auto-navigation UNIQUEMENT quand l'utilisateur change
+        // manuellement le dropdown (selectElement est un <select> HTML passé par onchange).
+        // Ne JAMAIS auto-naviguer lors d'un appel programmatique (filtrerBadgesParProduction()
+        // sans argument) — cela écrasait la sélection explicite de l'utilisateur.
+        const estChangementManuel = selectElement && selectElement.tagName === 'SELECT';
         const dansArchivage = select && select.closest('#evaluations-contenu-archivage');
-        if (selectElement && conteneur && !dansArchivage) {
+        if (estChangementManuel && conteneur && !dansArchivage) {
             const fichierActuel = travauxVisionneuse.getFichierActuel();
             const fichierMasque = fichierActuel && productionId && fichierActuel.productionId !== productionId;
             if (!fichierActuel || fichierMasque) {
@@ -3077,11 +3028,7 @@
         if (!fichier) return;
 
         // 2. Vérifier s'il existe une évaluation associée
-        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
-        const evalAssociee = evaluations.find(e =>
-            e.etudiantDA === fichier.etudiantDA &&
-            (!fichier.productionId || e.productionId === fichier.productionId)
-        );
+        const evalAssociee = travauxResolution.trouverEvaluationPourFichier(fichier);
 
         // 3. Adapter le message de confirmation
         if (evalAssociee) {
@@ -3093,6 +3040,7 @@
             if (!choix) return;
 
             // Supprimer l'évaluation
+            const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
             const evaluationsMaj = evaluations.filter(e => e.id !== evalAssociee.id);
             sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluationsMaj);
         } else {
@@ -3526,37 +3474,10 @@
      * @param {string} productionId - Nouvel ID de production
      */
     function changerProductionFichier(fichierId, nouveauProductionId) {
-        // Récupérer l'ancien productionId avant la mise à jour
-        const fichier = travauxStockage.obtenirFichierParId(fichierId);
-        const ancienProductionId = fichier ? fichier.productionId : null;
-
         const ok = travauxStockage.mettreAJourFichier(fichierId, { productionId: nouveauProductionId });
         if (ok) {
             console.log('[Travaux-UI] Production mise a jour pour', fichierId, '→', nouveauProductionId);
-
-            // 🔧 FIX (5 mars 2026) : Réassocier les évaluations orphelines
-            // Si le fichier avait un ancien productionId différent, migrer les évaluations
-            // de (etudiantDA, ancienProductionId) vers (etudiantDA, nouveauProductionId)
-            if (fichier && fichier.etudiantDA && ancienProductionId && ancienProductionId !== nouveauProductionId) {
-                const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
-                let nbMigrees = 0;
-                evaluations.forEach(e => {
-                    if (e.etudiantDA === fichier.etudiantDA &&
-                        e.productionId === ancienProductionId &&
-                        !e.remplaceeParId) {
-                        e.productionId = nouveauProductionId;
-                        // Mettre à jour le nom de production si disponible
-                        const productions = db.getSync(cle('productions'), []);
-                        const prod = productions.find(p => p.id === nouveauProductionId);
-                        if (prod) e.productionNom = prod.nom;
-                        nbMigrees++;
-                    }
-                });
-                if (nbMigrees > 0) {
-                    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
-                    console.log(`[Travaux-UI] ${nbMigrees} évaluation(s) migrée(s) de ${ancienProductionId} → ${nouveauProductionId} pour ${fichier.etudiantDA}`);
-                }
-            }
+            // Le fichierId sur l'évaluation assure le lien direct — pas besoin de migrer productionId
         }
     }
 
@@ -3835,41 +3756,19 @@
             selEtud.value = fichier.etudiantDA;
         }
 
-        // 🔧 FIX (24 fév 2026) : Si le fichier n'a pas de productionId, chercher dans les évaluations existantes
-        // Depuis ce fix, sauvegarderEvaluation() propage le productionId sur le fichier.
-        // Ce fallback ne sert que pour les fichiers évalués AVANT le fix.
-        // SÉCURITÉ (5 mars 2026) : ne deviner que s'il y a UNE seule production dans le cours.
-        // Avec plusieurs productions, l'association est ambiguë → laisser l'enseignant choisir.
+        // Pré-remplir la production depuis le fichier ou l'évaluation liée (via fichierId)
         const productionIdDuFichier = fichier.productionId || '';
         let productionIdEffective = productionIdDuFichier;
-        if (!productionIdEffective && fichier.etudiantDA) {
-            const productionsCours = db.getSync(cle('productions'), []).filter(p => p.type !== 'portfolio');
-            if (productionsCours.length <= 1) {
-                const evalsSauvegardees = db.getSync(cle('evaluationsSauvegardees'), []);
-                const evalsEtudiant = evalsSauvegardees.filter(e =>
-                    e.etudiantDA === fichier.etudiantDA && e.productionId && !e.remplaceeParId
-                );
-                const productionsDistinctes = [...new Set(evalsEtudiant.map(e => e.productionId))];
-                if (productionsDistinctes.length === 1) {
-                    productionIdEffective = productionsDistinctes[0];
-                    console.log(`[Travaux-UI] Production devinée depuis évaluation: ${productionIdEffective} pour ${fichier.etudiantDA}`);
-                }
-            } else {
-                console.log(`[Travaux-UI] ${productionsCours.length} productions dans le cours, association manuelle requise pour ${fichier.etudiantDA}`);
+        if (!productionIdEffective) {
+            const evalLiee = travauxResolution.trouverEvaluationPourFichier(fichier);
+            if (evalLiee?.productionId) {
+                productionIdEffective = evalLiee.productionId;
             }
         }
 
-        // 🔧 FIX (5 mars 2026) : Ne pré-remplir le select que si le productionId vient du fichier.
-        // Le fallback (deviné depuis évaluations) ne doit PAS écraser le select — il peut deviner
-        // la mauvaise production si l'étudiant a été évalué sur plusieurs artefacts.
         const selProd = document.getElementById('selectProduction1');
-        if (selProd && productionIdDuFichier) {
-            selProd.value = productionIdDuFichier;
-            console.log(`[Travaux-UI] Select production rempli depuis fichier: ${productionIdDuFichier}`);
-        } else if (selProd && productionIdEffective) {
-            // Fallback : proposer la production devinée mais loguer l'avertissement
+        if (selProd && productionIdEffective) {
             selProd.value = productionIdEffective;
-            console.warn(`[Travaux-UI] ⚠️ Select production rempli par FALLBACK (pas depuis fichier): ${productionIdEffective}`);
         }
 
         // Initialiser evaluationEnCours si absent (requis par chargerGrilleSelectionnee)
@@ -5448,10 +5347,7 @@
         const fichier = travauxStockage.obtenirFichierParId(fichierId);
         if (!fichier) return;
 
-        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
-        const evaluation = evaluations.find(e =>
-            e.etudiantDA === fichier.etudiantDA && e.productionId === fichier.productionId
-        );
+        const evaluation = travauxResolution.trouverEvaluationPourFichier(fichier);
         if (!evaluation) return;
 
         const etudiant = travauxImport.trouverEtudiantParDA(fichier.etudiantDA);
@@ -5536,11 +5432,10 @@
         const fichier = travauxStockage.obtenirFichierParId(fichierId);
         if (!fichier) return;
 
+        const evalTrouvee = travauxResolution.trouverEvaluationPourFichier(fichier);
+        if (!evalTrouvee) return;
         let evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
-        const index = evaluations.findIndex(e =>
-            e.etudiantDA === fichier.etudiantDA &&
-            e.productionId === fichier.productionId
-        );
+        const index = evaluations.findIndex(e => e.id === evalTrouvee.id);
 
         if (index === -1) return;
 

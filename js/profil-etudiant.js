@@ -7878,25 +7878,27 @@ function restaurerPreferencesRapport(da) {
  * Consulte une évaluation existante (ouvre le fichier dans la visionneuse en mode évaluer)
  */
 function consulterEvaluation(da, productionId) {
-    // Trouver l'évaluation
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const evaluation = evaluations.find(e => e.etudiantDA === da && e.productionId === productionId);
+    // Trouver l'évaluation (résolution centralisée si disponible)
+    let evaluation = null;
+    if (typeof travauxResolution !== 'undefined') {
+        // Construire un pseudo-fichier pour la recherche par (DA, productionId)
+        evaluation = travauxResolution.trouverEvaluationPourFichier({ id: null, etudiantDA: da, productionId });
+    }
+    if (!evaluation) {
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+        evaluation = evaluations.find(e => e.etudiantDA === da && e.productionId === productionId);
+    }
 
     if (!evaluation) {
         alert('Évaluation non trouvée');
         return;
     }
 
-    // Trouver le fichier importé pour cet étudiant/production
+    // Trouver le fichier importé (résolution centralisée)
     let fichierId = null;
-    if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersEtudiant === 'function') {
-        let fichiers = travauxStockage.obtenirFichiersEtudiant(da);
-        if (productionId) {
-            fichiers = fichiers.filter(f => f.productionId === productionId);
-        }
-        if (fichiers.length > 0) {
-            fichierId = fichiers[0].id;
-        }
+    if (typeof travauxResolution !== 'undefined') {
+        const fichierTrouve = travauxResolution.trouverFichierPourEvaluation(evaluation);
+        if (fichierTrouve) fichierId = fichierTrouve.id;
     }
 
     // Naviguer vers la section Évaluations d'abord (on vient du profil étudiant)
