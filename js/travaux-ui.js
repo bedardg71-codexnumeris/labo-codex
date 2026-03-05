@@ -56,6 +56,8 @@
     }
 
     function demarrerChrono() {
+        const prefs = db.getSync('preferencesAffichage', {});
+        if (!prefs.chronoEvaluation) return;
         if (_chronoDebut) return; // déjà en cours
         _chronoDebut = Date.now();
         const fichier = travauxVisionneuse.getFichierActuel();
@@ -892,8 +894,8 @@
                             <button id="travaux-btn-evaluer" class="travaux-btn-action travaux-btn-action-vert u-hide" onclick="travauxUI.basculerMode('evaluer')" title="Évaluer cette production" data-tooltip="travaux-btn-evaluer">Évaluer</button>
                             <button id="travaux-btn-alleger" class="travaux-btn-action u-hide" onclick="travauxUI.allegerFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Alléger ce fichier" data-tooltip="travaux-btn-alleger">Alléger</button>
                             <button id="travaux-btn-reimporter" class="travaux-btn-action u-hide" onclick="travauxUI.reimporterFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Re-importer l'original" data-tooltip="travaux-btn-reimporter">Re-importer</button>
-                            <span class="travaux-separateur"></span>
-                            <span id="travaux-chrono-badge" class="travaux-chrono-badge" title="Durée annotation + évaluation">⏱️ --:--</span>
+                            <span class="travaux-separateur travaux-chrono-sep${db.getSync('preferencesAffichage', {}).chronoEvaluation ? '' : ' u-hide'}"></span>
+                            <span id="travaux-chrono-badge" class="travaux-chrono-badge${db.getSync('preferencesAffichage', {}).chronoEvaluation ? '' : ' u-hide'}" title="Durée annotation + évaluation">⏱️ --:--</span>
                         </div>
                     </div>
 
