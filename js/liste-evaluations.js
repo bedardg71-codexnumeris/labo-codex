@@ -1397,6 +1397,13 @@ function consulterEvaluationDepuisListe(evaluationId) {
         }, 500);
     } else {
         // Fallback : pas de fichier importé, ouvrir le formulaire en standalone
+        // 🔧 FIX (5 mars 2026) : Naviguer vers la bonne sous-section et nettoyer
+        // tout état visionneuse/eval restant pour éviter une interface déconstruite.
+        afficherSousSection('evaluations-annoter');
+        // Nettoyer le mode eval si encore actif (restant d'un précédent affichage)
+        if (typeof travauxUI !== 'undefined' && typeof travauxUI.fermerModeEvaluation === 'function') {
+            travauxUI.fermerModeEvaluation();
+        }
         setTimeout(function() {
             if (typeof window.modifierEvaluationParId === 'function') {
                 window.modifierEvaluationParId(evaluation.id);
