@@ -86,6 +86,14 @@
             return false;
         }
 
+        // 🔧 FIX (5 mars 2026) : Nettoyer l'ancien document PDF et le cache de pages
+        // avant d'ouvrir le nouveau fichier, pour éviter un flash de contenu stale.
+        if (pdfDocument) {
+            try { pdfDocument.cleanup(); } catch (_) { /* ignore */ }
+            pdfDocument = null;
+        }
+        cachePages.clear();
+
         fichierActuel = fichier;
         pageActuelle = 1;
         modeZoom = ZOOM_FIT;

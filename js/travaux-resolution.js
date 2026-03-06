@@ -62,12 +62,16 @@
         if (typeof travauxStockage === 'undefined') return null;
 
         // Résolution par clé composite (etudiantDA, productionId)
-        if (!evaluation.etudiantDA) return null;
+        if (!evaluation.etudiantDA) {
+            return null;
+        }
         let fichiers = travauxStockage.obtenirFichiersEtudiant(evaluation.etudiantDA);
         if (evaluation.productionId) {
             fichiers = fichiers.filter(f => f.productionId === evaluation.productionId);
         }
-        if (fichiers.length === 0) return null;
+        if (fichiers.length === 0) {
+            return null;
+        }
         if (fichiers.length === 1) return fichiers[0];
 
         // 2+ résultats : retourner le plus récent + signaler l'ambiguïté
