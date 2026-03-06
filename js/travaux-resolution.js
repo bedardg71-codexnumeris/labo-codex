@@ -4,26 +4,27 @@
     /**
      * Module de résolution centralisé fichier ↔ évaluation.
      *
-     * Remplace les 26+ lookups inline dispersés dans le code.
-     * Priorité : fichierId direct > (etudiantDA, productionId) > null
+     * Résolution par clé composite (etudiantDA, productionId) uniquement.
+     * En cas d'ambiguïté (2+ résultats), retourne null + log warning.
+     *
+     * Phase 3b : fichierId supprimé — un seul chemin de résolution.
      */
+
+    // Dernier avertissement (ambiguïté/incohérence) pour affichage UI
+    var _dernierAvertissement = null;
 
     /**
      * Trouve l'évaluation active pour un fichier donné.
+     * Résolution par (etudiantDA, productionId). Retourne null si 0 ou 2+ résultats.
      * @param {Object} fichier - Le fichier importé
      * @returns {Object|null} L'évaluation active ou null
      */
     function trouverEvaluationPourFichier(fichier) {
+        _dernierAvertissement = null;
         if (!fichier) return null;
         const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
 
-        // Priorité 1 : lien direct par fichierId
-        const parId = evaluations.find(e =>
-            e.fichierId && e.fichierId === fichier.id && !e.remplaceeParId
-        );
-        if (parId) return parId;
-
-        // Priorité 2 : fallback (etudiantDA, productionId)
+        // Résolution par clé composite (etudiantDA, productionId)
         if (!fichier.etudiantDA || !fichier.productionId) return null;
         const candidats = evaluations.filter(e =>
             e.etudiantDA === fichier.etudiantDA &&
@@ -33,29 +34,29 @@
         if (candidats.length === 0) return null;
         if (candidats.length === 1) return candidats[0];
 
-        // Multiples résultats : prendre le plus récent
-        candidats.sort((a, b) =>
-            new Date(b.dateEvaluation || 0) - new Date(a.dateEvaluation || 0)
-        );
-        return candidats[0];
+        // 2+ résultats : signaler au lieu de deviner
+        console.warn(`[Résolution] AMBIGUÏTÉ: ${candidats.length} évaluations pour (${fichier.etudiantDA}, ${fichier.productionId})`);
+        _dernierAvertissement = {
+            type: 'ambiguite-evaluation',
+            da: fichier.etudiantDA,
+            productionId: fichier.productionId,
+            candidats: candidats.map(e => ({ id: e.id, date: e.dateEvaluation }))
+        };
+        return null;
     }
 
     /**
      * Trouve le fichier associé à une évaluation.
+     * Résolution par (etudiantDA, productionId). Retourne null si 0 ou 2+ résultats.
      * @param {Object} evaluation - L'évaluation sauvegardée
      * @returns {Object|null} Le fichier ou null
      */
     function trouverFichierPourEvaluation(evaluation) {
+        _dernierAvertissement = null;
         if (!evaluation) return null;
         if (typeof travauxStockage === 'undefined') return null;
 
-        // Priorité 1 : lien direct par fichierId
-        if (evaluation.fichierId) {
-            const fichier = travauxStockage.obtenirFichierParId(evaluation.fichierId);
-            if (fichier) return fichier;
-        }
-
-        // Priorité 2 : fallback (etudiantDA, productionId)
+        // Résolution par clé composite (etudiantDA, productionId)
         if (!evaluation.etudiantDA) return null;
         let fichiers = travauxStockage.obtenirFichiersEtudiant(evaluation.etudiantDA);
         if (evaluation.productionId) {
@@ -64,65 +65,24 @@
         if (fichiers.length === 0) return null;
         if (fichiers.length === 1) return fichiers[0];
 
-        // Multiples résultats : prendre le plus récent
-        fichiers.sort((a, b) =>
-            new Date(b.dateModification || 0) - new Date(a.dateModification || 0)
-        );
-        return fichiers[0];
+        // 2+ résultats : signaler au lieu de deviner
+        console.warn(`[Résolution] AMBIGUÏTÉ: ${fichiers.length} fichiers pour (${evaluation.etudiantDA}, ${evaluation.productionId})`);
+        _dernierAvertissement = {
+            type: 'ambiguite-fichier',
+            da: evaluation.etudiantDA,
+            productionId: evaluation.productionId,
+            candidats: fichiers.map(f => ({ id: f.id, nom: f.nomFichier, date: f.dateModification }))
+        };
+        return null;
     }
 
     /**
-     * Nettoyage one-time : efface les fichierId assignés par la migration
-     * automatique ou par des corrections manuelles erronées.
-     * Les nouvelles évaluations continueront à écrire fichierId normalement.
-     * Gardé par un flag pour ne s'exécuter qu'une seule fois.
+     * Retourne le dernier avertissement émis par la résolution (ambiguïté).
+     * Réinitialisé à chaque appel de résolution.
+     * @returns {Object|null}
      */
-    function nettoyerFichierIdsMigres() {
-        const FLAG = cle('fichierIds_nettoyes_v1');
-        if (db.getSync(FLAG)) return;
-
-        const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
-        if (!evaluations.length) {
-            db.setSync(FLAG, true);
-            return;
-        }
-
-        let nbNettoyes = 0;
-        evaluations.forEach(e => {
-            if (e.fichierId) {
-                e.fichierId = '';
-                nbNettoyes++;
-            }
-        });
-
-        if (nbNettoyes > 0) {
-            sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
-            console.log(`[Travaux-Resolution] Nettoyage fichierId : ${nbNettoyes} évaluation(s) nettoyée(s) — fallback (DA,prod) actif`);
-        } else {
-            console.log('[Travaux-Resolution] Nettoyage fichierId : aucun fichierId à nettoyer');
-        }
-
-        // Réverser les productionId modifiés par erreur sur les fichiers de Benjamin A. (DA 9000175)
-        if (typeof travauxStockage !== 'undefined') {
-            const corrections = {
-                'FT_1772022760702_biwu4': 'Artefact 1',
-                'FT_1771789103562_pk403': 'Artefact 3'
-            };
-            let nbFichiersCorr = 0;
-            for (const [fId, prodIdOriginal] of Object.entries(corrections)) {
-                const f = travauxStockage.obtenirFichierParId(fId);
-                if (f && f.productionId !== prodIdOriginal) {
-                    travauxStockage.mettreAJourFichier(fId, { productionId: prodIdOriginal });
-                    nbFichiersCorr++;
-                    console.log(`[Travaux-Resolution] Fichier ${fId} : productionId restauré → "${prodIdOriginal}"`);
-                }
-            }
-            if (nbFichiersCorr === 0) {
-                console.log('[Travaux-Resolution] Fichiers Benjamin : productionId déjà corrects');
-            }
-        }
-
-        db.setSync(FLAG, true);
+    function dernierAvertissement() {
+        return _dernierAvertissement;
     }
 
     /**
@@ -166,7 +126,7 @@
         console.log('\n%c=== FICHIERS ===', 'font-weight:bold; font-size:14px');
         fichiers.forEach(f => {
             console.log(
-                `  ${f.id}  prod=${f.productionId || '(aucun)'}  [${prodNom[f.productionId] || '?'}]  nom="${f.nomFichier}"  modif=${f.dateModification || '?'}`
+                `  ${f.id}  prod=${f.productionId || '(aucun)'}  [${prodNom[f.productionId] || '?'}]  nom="${f.nomFichier}"  statut=${f.statut || '?'}  modif=${f.dateModification || '?'}`
             );
         });
 
@@ -174,9 +134,8 @@
         console.log('\n%c=== ÉVALUATIONS (actives) ===', 'font-weight:bold; font-size:14px');
         evalsDA.forEach(e => {
             const fichierResolu = trouverFichierPourEvaluation(e);
-            const source = e.fichierId ? 'fichierId' : '(DA,prod)';
             console.log(
-                `  ${e.id}  prod=${e.productionId}  [${prodNom[e.productionId] || '?'}]  fichierId=${e.fichierId || '(vide)'}  → fichier résolu: ${fichierResolu ? fichierResolu.id + ' "' + fichierResolu.nomFichier + '"' : 'AUCUN'}  (via ${source})`
+                `  ${e.id}  prod=${e.productionId}  [${prodNom[e.productionId] || '?'}]  → fichier résolu: ${fichierResolu ? fichierResolu.id + ' "' + fichierResolu.nomFichier + '"' : 'AUCUN'}  (via clé composite)`
             );
         });
 
@@ -185,56 +144,18 @@
             const fichierResolu = trouverFichierPourEvaluation(e);
             if (fichierResolu && fichierResolu.productionId !== e.productionId) {
                 console.warn(
-                    `  ⚠️ INCOHÉRENCE : éval ${e.id} [${prodNom[e.productionId]}] → fichier ${fichierResolu.id} dont productionId=${fichierResolu.productionId} [${prodNom[fichierResolu.productionId] || '?'}]`
+                    `  INCOHÉRENCE : éval ${e.id} [${prodNom[e.productionId]}] → fichier ${fichierResolu.id} dont productionId=${fichierResolu.productionId} [${prodNom[fichierResolu.productionId] || '?'}]`
                 );
             }
         });
-
-        console.log('\n%cPour corriger : travauxResolution.lierManuellement("EVAL_xxx", "FT_yyy")', 'color: #888');
-    }
-
-    /**
-     * Correction manuelle : lie une évaluation à un fichier spécifique.
-     * Usage console : travauxResolution.lierManuellement('EVAL_xxx', 'FT_yyy')
-     * @param {string} evaluationId - ID de l'évaluation
-     * @param {string} fichierId - ID du fichier
-     */
-    function lierManuellement(evaluationId, fichierId) {
-        // Permettre de délier (fichierId vide)
-        if (fichierId) {
-            const fichier = travauxStockage.obtenirFichierParId(fichierId);
-            if (!fichier) {
-                console.error(`Fichier introuvable : ${fichierId}`);
-                return;
-            }
-        }
-
-        const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
-        const index = evaluations.findIndex(e => e.id === evaluationId);
-        if (index === -1) {
-            console.error(`Évaluation introuvable : ${evaluationId}`);
-            return;
-        }
-
-        const ancien = evaluations[index].fichierId;
-        evaluations[index].fichierId = fichierId || '';
-        sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
-
-        if (fichierId) {
-            const fichier = travauxStockage.obtenirFichierParId(fichierId);
-            console.log(`✅ ${evaluationId} → ${fichierId} ("${fichier.nomFichier}") — ancien: ${ancien || '(vide)'}`);
-        } else {
-            console.log(`✅ ${evaluationId} → (délié) — ancien: ${ancien || '(vide)'}`);
-        }
     }
 
     // API publique
     window.travauxResolution = {
         trouverEvaluationPourFichier,
         trouverFichierPourEvaluation,
-        nettoyerFichierIdsMigres,
-        diagnostiquer,
-        lierManuellement
+        dernierAvertissement,
+        diagnostiquer
     };
 
 })();

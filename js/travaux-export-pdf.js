@@ -781,6 +781,12 @@
             : fichier;
         const evaluation = travauxResolution.trouverEvaluationPourFichier(fichierRecherche);
 
+        // Log si ambiguïté détectée (Phase 2)
+        const avert = travauxResolution.dernierAvertissement && travauxResolution.dernierAvertissement();
+        if (avert) {
+            console.warn('[Travaux-Export] Ambiguïté lors de la résolution pour la page de synthèse:', avert);
+        }
+
         if (!evaluation) {
             console.log('[Travaux-Export] Pas d\'evaluation trouvee, page de synthese omise');
             return;
