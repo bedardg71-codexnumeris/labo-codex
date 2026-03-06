@@ -15,7 +15,8 @@
 
     /**
      * Trouve l'évaluation active pour un fichier donné.
-     * Résolution par (etudiantDA, productionId). Retourne null si 0 ou 2+ résultats.
+     * Résolution par (etudiantDA, productionId).
+     * En cas d'ambiguïté (2+ résultats), retourne le plus récent + warning.
      * @param {Object} fichier - Le fichier importé
      * @returns {Object|null} L'évaluation active ou null
      */
@@ -34,20 +35,24 @@
         if (candidats.length === 0) return null;
         if (candidats.length === 1) return candidats[0];
 
-        // 2+ résultats : signaler au lieu de deviner
-        console.warn(`[Résolution] AMBIGUÏTÉ: ${candidats.length} évaluations pour (${fichier.etudiantDA}, ${fichier.productionId})`);
+        // 2+ résultats : retourner le plus récent + signaler l'ambiguïté
+        candidats.sort((a, b) =>
+            new Date(b.dateEvaluation || 0) - new Date(a.dateEvaluation || 0)
+        );
+        console.warn(`[Résolution] AMBIGUÏTÉ: ${candidats.length} évaluations pour (${fichier.etudiantDA}, ${fichier.productionId}) — retourne la plus récente`);
         _dernierAvertissement = {
             type: 'ambiguite-evaluation',
             da: fichier.etudiantDA,
             productionId: fichier.productionId,
             candidats: candidats.map(e => ({ id: e.id, date: e.dateEvaluation }))
         };
-        return null;
+        return candidats[0];
     }
 
     /**
      * Trouve le fichier associé à une évaluation.
-     * Résolution par (etudiantDA, productionId). Retourne null si 0 ou 2+ résultats.
+     * Résolution par (etudiantDA, productionId).
+     * En cas d'ambiguïté (2+ résultats), retourne le plus récent + warning.
      * @param {Object} evaluation - L'évaluation sauvegardée
      * @returns {Object|null} Le fichier ou null
      */
@@ -65,15 +70,18 @@
         if (fichiers.length === 0) return null;
         if (fichiers.length === 1) return fichiers[0];
 
-        // 2+ résultats : signaler au lieu de deviner
-        console.warn(`[Résolution] AMBIGUÏTÉ: ${fichiers.length} fichiers pour (${evaluation.etudiantDA}, ${evaluation.productionId})`);
+        // 2+ résultats : retourner le plus récent + signaler l'ambiguïté
+        fichiers.sort((a, b) =>
+            new Date(b.dateModification || 0) - new Date(a.dateModification || 0)
+        );
+        console.warn(`[Résolution] AMBIGUÏTÉ: ${fichiers.length} fichiers pour (${evaluation.etudiantDA}, ${evaluation.productionId}) — retourne le plus récent`);
         _dernierAvertissement = {
             type: 'ambiguite-fichier',
             da: evaluation.etudiantDA,
             productionId: evaluation.productionId,
             candidats: fichiers.map(f => ({ id: f.id, nom: f.nomFichier, date: f.dateModification }))
         };
-        return null;
+        return fichiers[0];
     }
 
     /**

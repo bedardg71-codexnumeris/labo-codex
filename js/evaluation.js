@@ -6278,6 +6278,14 @@ function ouvrirTravailDepuisEvaluation() {
     if (typeof travauxResolution !== 'undefined' && productionId) {
         fichierTrouve = travauxResolution.trouverFichierPourEvaluation({ etudiantDA, productionId });
     }
+    // Fallback : recherche directe si la résolution centralisée échoue
+    if (!fichierTrouve) {
+        let fichiers = travauxStockage.obtenirFichiersEtudiant(etudiantDA);
+        if (productionId) {
+            fichiers = fichiers.filter(f => f.productionId === productionId);
+        }
+        if (fichiers.length > 0) fichierTrouve = fichiers[0];
+    }
 
     if (!fichierTrouve) {
         alert('Aucun travail trouvé pour cet·te étudiant·e');
