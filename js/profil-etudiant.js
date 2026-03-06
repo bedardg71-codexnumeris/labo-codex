@@ -7878,15 +7878,10 @@ function restaurerPreferencesRapport(da) {
  * Consulte une évaluation existante (ouvre le fichier dans la visionneuse en mode évaluer)
  */
 function consulterEvaluation(da, productionId) {
-    // Trouver l'évaluation (résolution centralisée si disponible)
+    // Trouver l'évaluation (résolution centralisée)
     let evaluation = null;
     if (typeof travauxResolution !== 'undefined') {
-        // Construire un pseudo-fichier pour la recherche par (DA, productionId)
         evaluation = travauxResolution.trouverEvaluationPourFichier({ id: null, etudiantDA: da, productionId });
-    }
-    if (!evaluation) {
-        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-        evaluation = evaluations.find(e => e.etudiantDA === da && e.productionId === productionId);
     }
 
     if (!evaluation) {
@@ -7930,11 +7925,14 @@ function consulterEvaluation(da, productionId) {
         // puis ouvrir le fichier dans la visionneuse
         setTimeout(function() {
             // Synchroniser le dropdown filtre avec la production cible
+            // 🔧 FIX (5 mars 2026) : Synchroniser le dropdown SANS passer le select
+            // en argument — passer le select déclenche l'auto-navigation (estChangementManuel)
+            // qui ouvre un fichier parasite AVANT ouvrirFichier(fichierId), créant une course.
             const selectFiltre = document.querySelector('#evaluations-contenu-fichiers .travaux-filtre-production');
             if (selectFiltre && productionId) {
                 selectFiltre.value = productionId;
                 if (typeof travauxUI.filtrerBadgesParProduction === 'function') {
-                    travauxUI.filtrerBadgesParProduction(selectFiltre);
+                    travauxUI.filtrerBadgesParProduction();
                 }
             }
             travauxUI.ouvrirFichier(fichierId);

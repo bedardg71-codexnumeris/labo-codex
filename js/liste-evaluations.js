@@ -26,9 +26,9 @@ function calculerStatutWorkflow(ligne) {
 
     // Vérifier si un fichier importé existe et s'il a des annotations
     if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersTravaux === 'function') {
-        // Résolution centralisée : évaluation → fichier via fichierId ou (DA, productionId)
+        // Résolution centralisée : évaluation → fichier par clé composite (DA, productionId)
         let fichier = (typeof travauxResolution !== 'undefined')
-            ? travauxResolution.trouverFichierPourEvaluation({ etudiantDA: ligne.da, productionId: ligne.productionId, fichierId: ligne.fichierId })
+            ? travauxResolution.trouverFichierPourEvaluation({ etudiantDA: ligne.da, productionId: ligne.productionId })
             : null;
 
         // Soft-match : si pas de fichier trouvé, chercher un fichier non-associé unique
@@ -1392,11 +1392,14 @@ function consulterEvaluationDepuisListe(evaluationId) {
         afficherSousSection('evaluations-annoter');
         setTimeout(function() {
             // Synchroniser le dropdown avec le filtre persisté
+            // 🔧 FIX (5 mars 2026) : Synchroniser le dropdown SANS passer le select
+            // en argument — passer le select déclenche l'auto-navigation (estChangementManuel)
+            // qui ouvre un fichier parasite AVANT ouvrirFichier(fichierId), créant une course.
             const selectFiltre = document.querySelector('#evaluations-contenu-fichiers .travaux-filtre-production');
             if (selectFiltre && evaluation.productionId) {
                 selectFiltre.value = evaluation.productionId;
                 if (typeof travauxUI.filtrerBadgesParProduction === 'function') {
-                    travauxUI.filtrerBadgesParProduction(selectFiltre);
+                    travauxUI.filtrerBadgesParProduction();
                 }
             }
             travauxUI.ouvrirFichier(fichierId);

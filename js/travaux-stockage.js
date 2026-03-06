@@ -327,6 +327,7 @@
             source: metadonnees.source || 'import-local',
             importePar: metadonnees.importePar || 'single',
             blobStatut: 'present',  // Cycle de vie: present → exporte → facsimile
+            statut: metadonnees.productionId ? 'actif' : 'orphelin',  // Phase 6 : cycle de vie métier
             // Pipeline metadata
             nomFichierLea: metadonnees.nomFichierLea || '',
             leaParsed: metadonnees.leaParsed || null,
@@ -407,10 +408,14 @@
         return fichiers.filter(f => f.groupeCoursId === gcActif.id);
     }
 
+    // Champs protégés — seul reassocierFichier() peut les modifier
+    const CHAMPS_PROTEGES = ['productionId', 'etudiantDA'];
+
     /**
-     * Met a jour les metadonnees d'un fichier travail existant
+     * Met a jour les metadonnees d'un fichier travail existant.
+     * REFUSE productionId et etudiantDA (utiliser reassocierFichier pour ceux-ci).
      * @param {string} id - ID du fichier
-     * @param {Object} modifications - Champs a modifier (ex: { productionId: '...', etudiantDA: '...' })
+     * @param {Object} modifications - Champs a modifier
      * @returns {boolean} true si mis a jour
      */
     function mettreAJourFichier(id, modifications) {
@@ -418,14 +423,27 @@
         const idx = fichiers.findIndex(f => f.id === id);
         if (idx === -1) return false;
 
-        Object.assign(fichiers[idx], modifications);
+        // Filtrer les champs protégés
+        const modifsSafe = {};
+        for (const [champ, valeur] of Object.entries(modifications)) {
+            if (CHAMPS_PROTEGES.includes(champ)) {
+                console.warn(`[Travaux-Stockage] mettreAJourFichier() refuse le champ protégé "${champ}" — utiliser reassocierFichier()`);
+            } else {
+                modifsSafe[champ] = valeur;
+            }
+        }
+
+        if (Object.keys(modifsSafe).length === 0) return false;
+
+        Object.assign(fichiers[idx], modifsSafe);
         fichiers[idx].dateModification = new Date().toISOString();
         sauvegarderFichiersTravaux(fichiers);
         return true;
     }
 
     /**
-     * Met a jour les metadonnees de plusieurs fichiers d'un coup
+     * Met a jour les metadonnees de plusieurs fichiers d'un coup.
+     * REFUSE productionId et etudiantDA (utiliser reassocierFichiersBatch).
      * @param {Object} modifications - Map { fichierId: { champs a modifier } }
      * @returns {number} Nombre de fichiers mis a jour
      */
@@ -435,8 +453,20 @@
 
         for (const [id, modifs] of Object.entries(modifications)) {
             const idx = fichiers.findIndex(f => f.id === id);
-            if (idx !== -1) {
-                Object.assign(fichiers[idx], modifs);
+            if (idx === -1) continue;
+
+            // Filtrer les champs protégés
+            const modifsSafe = {};
+            for (const [champ, valeur] of Object.entries(modifs)) {
+                if (CHAMPS_PROTEGES.includes(champ)) {
+                    console.warn(`[Travaux-Stockage] mettreAJourFichiersBatch() refuse "${champ}" pour ${id} — utiliser reassocierFichiersBatch()`);
+                } else {
+                    modifsSafe[champ] = valeur;
+                }
+            }
+
+            if (Object.keys(modifsSafe).length > 0) {
+                Object.assign(fichiers[idx], modifsSafe);
                 fichiers[idx].dateModification = new Date().toISOString();
                 compteur++;
             }
@@ -444,6 +474,108 @@
 
         if (compteur > 0) {
             sauvegarderFichiersTravaux(fichiers);
+        }
+        return compteur;
+    }
+
+    /**
+     * Réassocie un fichier à une nouvelle production et/ou un nouvel étudiant.
+     * Seule fonction autorisée à modifier productionId et etudiantDA.
+     * @param {string} id - ID du fichier
+     * @param {Object} association - { productionId?, etudiantDA? }
+     * @param {Object} [options] - { verificationSeule: false }
+     * @returns {Object|boolean} résultat ou false si introuvable
+     */
+    function reassocierFichier(id, association, options) {
+        const fichiers = obtenirFichiersTravaux();
+        const idx = fichiers.findIndex(f => f.id === id);
+        if (idx === -1) return false;
+
+        const fichier = fichiers[idx];
+        const nouveauDA = association.etudiantDA !== undefined ? association.etudiantDA : fichier.etudiantDA;
+        const nouveauProdId = association.productionId !== undefined ? association.productionId : fichier.productionId;
+
+        // Phase 5 : vérifications de conflit
+        if (options && options.verificationSeule) {
+            const resultat = { conflit: false, evaluationOrpheline: false };
+
+            // Vérifier conflit : un autre fichier actif existe-t-il pour (DA, prodId) ?
+            if (nouveauProdId) {
+                const existant = fichiers.find(f =>
+                    f.id !== id &&
+                    f.etudiantDA === nouveauDA &&
+                    f.productionId === nouveauProdId
+                );
+                if (existant) {
+                    resultat.conflit = true;
+                    resultat.fichierExistant = existant;
+                }
+            }
+
+            // Vérifier évaluation orpheline : une éval existe pour (DA, ancien prodId) ?
+            if (fichier.productionId && fichier.productionId !== nouveauProdId) {
+                const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+                const evalOrpheline = evaluations.find(e =>
+                    !e.remplaceeParId &&
+                    e.etudiantDA === fichier.etudiantDA &&
+                    e.productionId === fichier.productionId
+                );
+                if (evalOrpheline) {
+                    resultat.evaluationOrpheline = true;
+                    resultat.evaluation = evalOrpheline;
+                }
+            }
+
+            return resultat;
+        }
+
+        // Appliquer la réassociation
+        if (association.productionId !== undefined) fichiers[idx].productionId = association.productionId;
+        if (association.etudiantDA !== undefined) fichiers[idx].etudiantDA = association.etudiantDA;
+
+        // Phase 6 : synchroniser le statut
+        if (fichiers[idx].statut !== undefined) {
+            fichiers[idx].statut = fichiers[idx].productionId ? 'actif' : 'orphelin';
+        }
+
+        fichiers[idx].dateModification = new Date().toISOString();
+        sauvegarderFichiersTravaux(fichiers);
+
+        console.log(`[Travaux-Stockage] Réassociation: ${id} → productionId=${fichiers[idx].productionId}, etudiantDA=${fichiers[idx].etudiantDA}`);
+        return true;
+    }
+
+    /**
+     * Réassocie plusieurs fichiers en batch (ex: transfert entre groupes).
+     * @param {Object} associations - Map { fichierId: { productionId?, etudiantDA?, coursId?, groupeCoursId? } }
+     * @returns {number} Nombre de fichiers réassociés
+     */
+    function reassocierFichiersBatch(associations) {
+        const fichiers = obtenirFichiersTravaux();
+        let compteur = 0;
+
+        for (const [id, assoc] of Object.entries(associations)) {
+            const idx = fichiers.findIndex(f => f.id === id);
+            if (idx === -1) continue;
+
+            if (assoc.productionId !== undefined) fichiers[idx].productionId = assoc.productionId;
+            if (assoc.etudiantDA !== undefined) fichiers[idx].etudiantDA = assoc.etudiantDA;
+            // Permettre coursId et groupeCoursId dans le batch (transfert entre groupes)
+            if (assoc.coursId !== undefined) fichiers[idx].coursId = assoc.coursId;
+            if (assoc.groupeCoursId !== undefined) fichiers[idx].groupeCoursId = assoc.groupeCoursId;
+
+            // Phase 6 : synchroniser le statut
+            if (fichiers[idx].statut !== undefined) {
+                fichiers[idx].statut = fichiers[idx].productionId ? 'actif' : 'orphelin';
+            }
+
+            fichiers[idx].dateModification = new Date().toISOString();
+            compteur++;
+        }
+
+        if (compteur > 0) {
+            sauvegarderFichiersTravaux(fichiers);
+            console.log(`[Travaux-Stockage] Réassociation batch: ${compteur} fichier(s)`);
         }
         return compteur;
     }
@@ -1083,6 +1215,8 @@
         obtenirFichierParId: obtenirFichierParId,
         mettreAJourFichier: mettreAJourFichier,
         mettreAJourFichiersBatch: mettreAJourFichiersBatch,
+        reassocierFichier: reassocierFichier,
+        reassocierFichiersBatch: reassocierFichiersBatch,
         // Miniatures
         genererMiniatureImage: genererMiniatureImage,
         genererMiniaturePDF: genererMiniaturePDF,

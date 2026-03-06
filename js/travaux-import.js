@@ -409,6 +409,15 @@
             }
         }
 
+        // Phase 4 : vérifier s'il existe déjà un fichier actif avec (etudiantDA, productionId)
+        if (fichierPrepare.etudiantDA && productionId) {
+            const existants = travauxStockage.obtenirFichiersGroupeActif()
+                .filter(f => f.etudiantDA === fichierPrepare.etudiantDA && f.productionId === productionId);
+            if (existants.length > 0) {
+                return { doublon: true, fichierExistant: existants[0], fichierPrepare: fichierPrepare, productionId: productionId };
+            }
+        }
+
         // Identifier le cours actif pour taguer le fichier
         const coursActif = (typeof db !== 'undefined') ? db.getSync('infoCours', null) : null;
         const gcActif = (typeof db !== 'undefined') ? db.getSync('groupeCoursActif', null) : null;
@@ -475,6 +484,7 @@
         importEnCours = true;
         let importes = 0;
         let erreurs = 0;
+        const doublonsDetectes = [];
         const total = fichiersEnAttente.length;
 
         for (let i = 0; i < fichiersEnAttente.length; i++) {
@@ -484,8 +494,16 @@
             try {
                 // En mode pipeline, la productionId individuelle du fichier prime sur la globale
                 const prodId = fichier.productionId || productionId || '';
-                await importerFichier(fichier, prodId);
-                importes++;
+                const resultat = await importerFichier(fichier, prodId);
+
+                // Phase 4 : détection de doublons
+                if (resultat && resultat.doublon) {
+                    doublonsDetectes.push(resultat);
+                    fichier.statut = 'doublon';
+                    console.warn(`[Travaux-Import] Doublon détecté: ${fichier.nomFichier} (${fichier.etudiantDA}, ${prodId})`);
+                } else {
+                    importes++;
+                }
             } catch (e) {
                 console.error(`[Travaux-Import] Erreur import ${fichier.nomFichier}:`, e);
                 fichier.statut = 'erreur';
@@ -503,7 +521,7 @@
         // Nettoyer les fichiers importes avec succes
         fichiersEnAttente = fichiersEnAttente.filter(f => f.statut !== 'importe');
 
-        return { importes, erreurs, total };
+        return { importes, erreurs, doublons: doublonsDetectes, total };
     }
 
     /**

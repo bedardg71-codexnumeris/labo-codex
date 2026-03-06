@@ -2033,9 +2033,8 @@ function sauvegarderEvaluation() {
             affichageNote: document.querySelector('input[name="affichageNote1"]:checked')?.value || 'complet'
         },
         donneesAlgorithmiques: evaluationEnCours.donneesAlgorithmiques || {}, // Sauvegarder données du français écrit algorithmique
-        verrouillee: true, // Verrouiller par défaut toutes les nouvelles évaluations
-        fichierId: ((typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
-            ? travauxVisionneuse.getFichierActuel()?.id : '') || ''
+        verrouillee: true // Verrouiller par défaut toutes les nouvelles évaluations
+        // Phase 3 : fichierId supprimé — résolution par clé composite (DA, productionId) uniquement
     };
 
     // Lire l'état des checkboxes de jetons et appliquer si cochées
@@ -2065,13 +2064,9 @@ function sauvegarderEvaluation() {
 
     // Garde-fou : si une évaluation active existe déjà pour ce couple étudiant+production,
     // basculer en modification plutôt que d'en créer une deuxième (double-clic, etc.)
-    const fichierActuelGarde = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
-        ? travauxVisionneuse.getFichierActuel() : null;
     const existanteActive = evaluations.find(e =>
-        !e.remplaceeParId && (
-            (fichierActuelGarde && e.fichierId && e.fichierId === fichierActuelGarde.id) ||
-            (e.etudiantDA === etudiantDA && e.productionId === productionId)
-        )
+        !e.remplaceeParId &&
+        e.etudiantDA === etudiantDA && e.productionId === productionId
     );
     if (existanteActive) {
         console.warn(`[Évaluation] Évaluation active existante détectée (${existanteActive.id}) — bascule en modification`);
@@ -2118,21 +2113,14 @@ function sauvegarderEvaluation() {
         window.evaluationEnCours.idModification = evaluation.id;
     }
 
-    // 🔧 FIX (5 mars 2026) : Synchroniser les métadonnées du fichier avec l'évaluation
-    // Logique CORRECTIVE : toujours aligner le fichier sur la production sélectionnée,
-    // même si le fichier a déjà un productionId (corrige les mauvaises associations).
+    // 🔧 FIX (5 mars 2026) : Synchroniser UNIQUEMENT le groupeCoursId du fichier.
+    // NE PAS écraser productionId ni etudiantDA du fichier — cela corrompait les
+    // métadonnées quand le formulaire affichait une production différente du fichier
+    // réellement ouvert (le blob d'Artefact 2 recevait le productionId d'Artefact 1).
     const fichierActuel = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
         ? travauxVisionneuse.getFichierActuel() : null;
     if (fichierActuel && typeof travauxStockage !== 'undefined' && travauxStockage.mettreAJourFichier) {
         const modifications = {};
-        if (productionId && fichierActuel.productionId !== productionId) {
-            modifications.productionId = productionId;
-            fichierActuel.productionId = productionId;
-        }
-        if (etudiantDA && fichierActuel.etudiantDA !== etudiantDA) {
-            modifications.etudiantDA = etudiantDA;
-            fichierActuel.etudiantDA = etudiantDA;
-        }
         if (groupeCoursActif?.id && fichierActuel.groupeCoursId !== groupeCoursActif.id) {
             modifications.groupeCoursId = groupeCoursActif.id;
             fichierActuel.groupeCoursId = groupeCoursActif.id;
@@ -5233,9 +5221,8 @@ function sauvegarderEvaluationModifiee() {
         },
         donneesAlgorithmiques: evaluationEnCours.donneesAlgorithmiques || {}, // Sauvegarder données du français écrit algorithmique
         ...proprietesJetons, // Préserver toutes les propriétés de jetons
-        verrouillee: true, // Verrouiller automatiquement après la sauvegarde
-        fichierId: ((typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
-            ? travauxVisionneuse.getFichierActuel()?.id : '') || evaluations[indexEval].fichierId || ''
+        verrouillee: true // Verrouiller automatiquement après la sauvegarde
+        // Phase 3 : fichierId supprimé — résolution par clé composite (DA, productionId) uniquement
     };
 
     // Sauvegarder
@@ -6286,18 +6273,10 @@ function ouvrirTravailDepuisEvaluation() {
         return;
     }
 
-    // Trouver le fichier associé via résolution centralisée ou fallback
+    // Trouver le fichier associé via résolution centralisée
     let fichierTrouve = null;
     if (typeof travauxResolution !== 'undefined' && productionId) {
-        // Construire un pseudo-objet évaluation pour la recherche
         fichierTrouve = travauxResolution.trouverFichierPourEvaluation({ etudiantDA, productionId });
-    }
-    if (!fichierTrouve) {
-        let fichiers = travauxStockage.obtenirFichiersEtudiant(etudiantDA);
-        if (productionId) {
-            fichiers = fichiers.filter(f => f.productionId === productionId);
-        }
-        if (fichiers.length > 0) fichierTrouve = fichiers[0];
     }
 
     if (!fichierTrouve) {

@@ -612,8 +612,6 @@
 
         // Corriger les groupeCoursId des fichiers orphelins
         corrigerGroupeCoursIdFichiers();
-        // Nettoyer les fichierId migrés automatiquement (one-time, retombe sur fallback DA+prod)
-        travauxResolution.nettoyerFichierIdsMigres();
 
         const fichierRestaure = restaurerEtatSession();
         if (fichierRestaure) {
@@ -628,6 +626,36 @@
         }
 
         rafraichirUI();
+    }
+
+    /* ===============================
+       AVERTISSEMENT RÉSOLUTION (Phase 2)
+       =============================== */
+
+    /**
+     * Affiche une notification non-bloquante pour les ambiguïtés de résolution.
+     * @param {Object} avertissement - Objet retourné par travauxResolution.dernierAvertissement()
+     */
+    function afficherAvertissementResolution(avertissement) {
+        if (!avertissement) return;
+        // Supprimer un avertissement précédent
+        const ancien = document.getElementById('resolution-avertissement');
+        if (ancien) ancien.remove();
+
+        const msg = avertissement.type === 'ambiguite-evaluation'
+            ? `Ambiguïté : ${avertissement.candidats.length} évaluations trouvées pour (${avertissement.da}, ${avertissement.productionId})`
+            : `Ambiguïté : ${avertissement.candidats.length} fichiers trouvés pour (${avertissement.da}, ${avertissement.productionId})`;
+
+        const div = document.createElement('div');
+        div.id = 'resolution-avertissement';
+        div.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:10000;padding:10px 16px;background:var(--couleur-attention,#f0ad4e);color:var(--couleur-texte-sombre,#333);font-size:14px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2)';
+        div.textContent = msg;
+        div.title = 'Cliquez pour fermer';
+        div.addEventListener('click', () => div.remove());
+        document.body.appendChild(div);
+
+        // Auto-dismiss après 8 secondes
+        setTimeout(() => { if (div.parentNode) div.remove(); }, 8000);
     }
 
     /* ===============================
@@ -2725,6 +2753,16 @@
 
             await travauxVisionneuse.ouvrirFichier(fichierId);
 
+            // Vérifier la résolution fichier→évaluation pour détecter les ambiguïtés
+            const fichierOuvert = travauxVisionneuse.getFichierActuel && travauxVisionneuse.getFichierActuel();
+            if (fichierOuvert && typeof travauxResolution !== 'undefined') {
+                travauxResolution.trouverEvaluationPourFichier(fichierOuvert);
+                const avert = travauxResolution.dernierAvertissement && travauxResolution.dernierAvertissement();
+                if (avert) {
+                    afficherAvertissementResolution(avert);
+                }
+            }
+
             // Afficher le bouton evaluer
             const btnEvaluer = document.getElementById('travaux-btn-evaluer');
             if (btnEvaluer) btnEvaluer.classList.remove('u-hide');
@@ -2739,12 +2777,16 @@
             travauxAnnotation.activerAnnotation();
 
             // Restaurer le mode courant (Annoter ou Évaluer) sans flash
-            if (modeAvantNavigation === 'evaluer') {
+            // 🔧 FIX (5 mars 2026) : Ne PAS re-basculer en mode évaluer si un callback
+            // _apresOuvertureFichier est en attente — le callback fera lui-même le
+            // basculement avec modifierEvaluationParId, évitant un double setup
+            // (preRemplirEvaluation + modifierEvaluationParId en parallèle).
+            if (modeAvantNavigation === 'evaluer' && !window._apresOuvertureFichier) {
                 const fichierNav = travauxVisionneuse.getFichierActuel();
                 if (fichierNav && fichierNav.etudiantDA) {
                     basculerMode('evaluer');
                 }
-            } else {
+            } else if (modeAvantNavigation !== 'evaluer') {
                 // Mode annotation par défaut
                 travauxVisionneuse.zoomPleineHauteur();
                 const btnAnnoter = document.getElementById('travaux-btn-annoter');
@@ -3216,12 +3258,78 @@
             if (texte) texte.textContent = `${i}/${totalImport} fichier(s) importés...`;
         });
 
+        // Phase 4 : traiter les doublons détectés
+        if (resultat.doublons && resultat.doublons.length > 0) {
+            await traiterDoublonsImport(resultat.doublons);
+        }
+
         afficherImport();
 
         if (typeof afficherNotificationSucces === 'function') {
             const msg = `${resultat.importes} fichier(s) import\u00e9(s)`;
-            const det = resultat.erreurs > 0 ? `${resultat.erreurs} erreur(s)` : '';
+            const det = resultat.erreurs > 0 ? `${resultat.erreurs} erreur(s)` : (resultat.doublons && resultat.doublons.length > 0 ? `${resultat.doublons.length} doublon(s) traité(s)` : '');
             afficherNotificationSucces(msg, det);
+        }
+    }
+
+    /**
+     * Phase 4 : traite les doublons détectés pendant l'import.
+     * Affiche une modale pour chaque doublon avec 3 choix.
+     * @param {Array} doublons - Résultats de type { doublon: true, fichierExistant, fichierPrepare, productionId }
+     */
+    async function traiterDoublonsImport(doublons) {
+        for (const d of doublons) {
+            const etudiant = travauxImport.trouverEtudiantParDA(d.fichierExistant.etudiantDA);
+            const nomEtudiant = etudiant ? `${etudiant.prenom} ${etudiant.nom}` : d.fichierExistant.etudiantDA;
+            const productions = db.getSync(cle('productions'), []);
+            const prod = productions.find(p => p.id === d.productionId);
+            const nomProd = prod ? (prod.titre || prod.nom) : d.productionId;
+
+            const choix = await new Promise(resolve => {
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay actif';
+                overlay.style.zIndex = '10001';
+                overlay.innerHTML = `
+                    <div class="modal-contenu" style="max-width:480px;padding:24px">
+                        <h3 style="margin-top:0">Doublon détecté</h3>
+                        <p>Un fichier existe déjà pour <strong>${echapperHtml(nomEtudiant)}</strong> — <strong>${echapperHtml(nomProd)}</strong>.</p>
+                        <p style="font-size:13px;color:var(--couleur-texte-secondaire)">
+                            Existant : ${echapperHtml(d.fichierExistant.nomFichier)}<br>
+                            Nouveau : ${echapperHtml(d.fichierPrepare.nomFichier)}
+                        </p>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">
+                            <button class="btn-primaire" data-choix="remplacer">Remplacer l'existant</button>
+                            <button class="btn-secondaire" data-choix="garder">Garder l'existant</button>
+                            <button class="btn-secondaire" data-choix="orphelin">Importer sans association</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+                overlay.querySelectorAll('button').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        overlay.remove();
+                        resolve(btn.dataset.choix);
+                    });
+                });
+            });
+
+            if (choix === 'remplacer') {
+                // Ancien fichier en corbeille, importer le nouveau
+                travauxStockage.deplacerEnCorbeille(d.fichierExistant.id);
+                try {
+                    await travauxImport.importerFichier(d.fichierPrepare, d.productionId);
+                } catch (e) {
+                    console.error('[Travaux-UI] Erreur import remplacement:', e);
+                }
+            } else if (choix === 'orphelin') {
+                // Importer sans productionId
+                try {
+                    await travauxImport.importerFichier(d.fichierPrepare, '');
+                } catch (e) {
+                    console.error('[Travaux-UI] Erreur import orphelin:', e);
+                }
+            }
+            // 'garder' → ne rien faire
         }
     }
 
@@ -3473,11 +3581,27 @@
      * @param {string} fichierId - ID du fichier
      * @param {string} productionId - Nouvel ID de production
      */
-    function changerProductionFichier(fichierId, nouveauProductionId) {
-        const ok = travauxStockage.mettreAJourFichier(fichierId, { productionId: nouveauProductionId });
+    async function changerProductionFichier(fichierId, nouveauProductionId) {
+        // Phase 5 : vérifier les conflits et évaluations orphelines avant de réassocier
+        const verif = travauxStockage.reassocierFichier(fichierId, { productionId: nouveauProductionId }, { verificationSeule: true });
+
+        if (verif && verif.conflit) {
+            const productions = db.getSync(cle('productions'), []);
+            const prod = productions.find(p => p.id === nouveauProductionId);
+            const nomProd = prod ? (prod.titre || prod.nom) : nouveauProductionId;
+            const confirme = confirm(`Un fichier existe déjà pour cette production (${nomProd}). Remplacer l'existant ?`);
+            if (!confirme) return;
+            travauxStockage.deplacerEnCorbeille(verif.fichierExistant.id);
+        }
+
+        if (verif && verif.evaluationOrpheline) {
+            const confirme = confirm('L\'évaluation pour l\'ancienne production perdra son fichier associé. Continuer ?');
+            if (!confirme) return;
+        }
+
+        const ok = travauxStockage.reassocierFichier(fichierId, { productionId: nouveauProductionId });
         if (ok) {
             console.log('[Travaux-UI] Production mise a jour pour', fichierId, '→', nouveauProductionId);
-            // Le fichierId sur l'évaluation assure le lien direct — pas besoin de migrer productionId
         }
     }
 
@@ -3985,11 +4109,22 @@
             return;
         }
 
-        // Mettre a jour le fichier importe
-        const modifications = {};
-        if (nouveauDA) modifications.etudiantDA = nouveauDA;
-        if (nouveauProdId) modifications.productionId = nouveauProdId;
-        travauxStockage.mettreAJourFichier(fichier.id, modifications);
+        // Mettre a jour le fichier importe (champs d'identité via reassocierFichier)
+        const association = {};
+        if (nouveauDA) association.etudiantDA = nouveauDA;
+        if (nouveauProdId) association.productionId = nouveauProdId;
+
+        // Phase 5 : vérifier les conflits avant de réassocier
+        const verif = travauxStockage.reassocierFichier(fichier.id, association, { verificationSeule: true });
+        if (verif && verif.conflit) {
+            if (!confirm('Un fichier existe déjà pour cet étudiant et cette production. Remplacer ?')) return;
+            travauxStockage.deplacerEnCorbeille(verif.fichierExistant.id);
+        }
+        if (verif && verif.evaluationOrpheline) {
+            if (!confirm('L\'évaluation pour l\'ancienne production perdra son fichier associé. Continuer ?')) return;
+        }
+
+        travauxStockage.reassocierFichier(fichier.id, association);
 
         // Mettre a jour l'objet fichier en memoire
         if (nouveauDA) fichier.etudiantDA = nouveauDA;
@@ -5348,6 +5483,11 @@
         if (!fichier) return;
 
         const evaluation = travauxResolution.trouverEvaluationPourFichier(fichier);
+        // Indicateur visuel si ambiguïté détectée
+        const avert = travauxResolution.dernierAvertissement && travauxResolution.dernierAvertissement();
+        if (avert) {
+            afficherAvertissementResolution(avert);
+        }
         if (!evaluation) return;
 
         const etudiant = travauxImport.trouverEtudiantParDA(fichier.etudiantDA);
@@ -5628,16 +5768,16 @@
      * @param {string} coursCibleId - ID du cours cible
      */
     function executerTransfert(fichierIds, groupeCoursCibleId, coursCibleId) {
-        const modifications = {};
+        const associations = {};
         fichierIds.forEach(id => {
-            modifications[id] = {
+            associations[id] = {
                 coursId: coursCibleId,
                 groupeCoursId: groupeCoursCibleId,
                 productionId: ''
             };
         });
 
-        const nb = travauxStockage.mettreAJourFichiersBatch(modifications);
+        const nb = travauxStockage.reassocierFichiersBatch(associations);
 
         // Rafraichir l'affichage
         afficherImport();
