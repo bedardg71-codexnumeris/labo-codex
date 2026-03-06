@@ -7878,10 +7878,14 @@ function restaurerPreferencesRapport(da) {
  * Consulte une évaluation existante (ouvre le fichier dans la visionneuse en mode évaluer)
  */
 function consulterEvaluation(da, productionId) {
-    // Trouver l'évaluation (résolution centralisée)
+    // Trouver l'évaluation (résolution centralisée + fallback)
     let evaluation = null;
     if (typeof travauxResolution !== 'undefined') {
         evaluation = travauxResolution.trouverEvaluationPourFichier({ id: null, etudiantDA: da, productionId });
+    }
+    if (!evaluation) {
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+        evaluation = evaluations.find(e => e.etudiantDA === da && e.productionId === productionId && !e.remplaceeParId);
     }
 
     if (!evaluation) {
