@@ -612,8 +612,8 @@
 
         // Corriger les groupeCoursId des fichiers orphelins
         corrigerGroupeCoursIdFichiers();
-        // Migrer les fichierId sur les évaluations existantes (lien direct fichier↔évaluation)
-        travauxResolution.migrerFichierIds();
+        // Nettoyer les fichierId migrés automatiquement (one-time, retombe sur fallback DA+prod)
+        travauxResolution.nettoyerFichierIdsMigres();
 
         const fichierRestaure = restaurerEtatSession();
         if (fichierRestaure) {
