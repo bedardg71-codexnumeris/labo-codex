@@ -1373,6 +1373,10 @@ function consulterEvaluationDepuisListe(evaluationId) {
     afficherSection('evaluations');
 
     if (fichierId && typeof travauxUI !== 'undefined' && typeof travauxUI.ouvrirFichier === 'function') {
+        // Mettre le filtre production sur la bonne production AVANT d'ouvrir le fichier
+        if (evaluation.productionId) {
+            sessionStorage.setItem('travaux-filtre-production', evaluation.productionId);
+        }
         // Workflow visionneuse : ouvrir le fichier, basculer en mode évaluer,
         // puis charger l'évaluation sauvegardée
         window._apresOuvertureFichier = function() {
@@ -1387,6 +1391,14 @@ function consulterEvaluationDepuisListe(evaluationId) {
         };
         afficherSousSection('evaluations-annoter');
         setTimeout(function() {
+            // Synchroniser le dropdown avec le filtre persisté
+            const selectFiltre = document.querySelector('#evaluations-contenu-fichiers .travaux-filtre-production');
+            if (selectFiltre && evaluation.productionId) {
+                selectFiltre.value = evaluation.productionId;
+                if (typeof travauxUI.filtrerBadgesParProduction === 'function') {
+                    travauxUI.filtrerBadgesParProduction(selectFiltre);
+                }
+            }
             travauxUI.ouvrirFichier(fichierId);
         }, 500);
     } else {
@@ -1449,6 +1461,11 @@ function evaluerProduction(da, productionId) {
         }
     }
 
+    // Mettre le filtre production sur la bonne production AVANT de naviguer
+    if (productionId) {
+        sessionStorage.setItem('travaux-filtre-production', productionId);
+    }
+
     // Naviguer vers la section appropriée
     afficherSection('evaluations');
     if (typeof afficherSousSection === 'function') {
@@ -1459,6 +1476,17 @@ function evaluerProduction(da, productionId) {
     if (etapeNavigation === 'evaluations-importer') {
         return;
     }
+
+    // Synchroniser le dropdown filtre avec la production cible
+    setTimeout(() => {
+        const selectFiltre = document.querySelector('#evaluations-contenu-fichiers .travaux-filtre-production');
+        if (selectFiltre && productionId) {
+            selectFiltre.value = productionId;
+            if (typeof travauxUI !== 'undefined' && typeof travauxUI.filtrerBadgesParProduction === 'function') {
+                travauxUI.filtrerBadgesParProduction(selectFiltre);
+            }
+        }
+    }, 100);
 
     // Si on doit ouvrir le fichier en mode annotation
     if (ouvrirAnnotation && fichierImporte) {
