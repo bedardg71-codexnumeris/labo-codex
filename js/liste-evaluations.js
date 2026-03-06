@@ -1350,6 +1350,17 @@ function ouvrirCartouche(cartoucheId, productionId) {
 function consulterEvaluationDepuisListe(evaluationId) {
     console.log(`🔍 Consultation de l'évaluation ID:`, evaluationId);
 
+    // 🔧 FIX (6 mars 2026) : Annuler tout timer d'ouverture précédent pour éviter
+    // qu'un clic rapide sur plusieurs évaluations ouvre le fichier d'une évaluation
+    // précédente (le setTimeout(500ms) restant ouvre le mauvais fichier tandis que
+    // le callback _apresOuvertureFichier a été écrasé par le nouvel appel).
+    if (window._consulterEvalTimerId) {
+        clearTimeout(window._consulterEvalTimerId);
+        window._consulterEvalTimerId = null;
+    }
+    // Nettoyer aussi le callback obsolète
+    window._apresOuvertureFichier = null;
+
     // Charger directement l'évaluation par son ID exact
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const evaluation = evaluations.find(e => e.id === evaluationId);
@@ -1390,7 +1401,8 @@ function consulterEvaluationDepuisListe(evaluationId) {
             }, 200);
         };
         afficherSousSection('evaluations-annoter');
-        setTimeout(function() {
+        window._consulterEvalTimerId = setTimeout(function() {
+            window._consulterEvalTimerId = null;
             // Synchroniser le dropdown avec le filtre persisté
             // 🔧 FIX (5 mars 2026) : Synchroniser le dropdown SANS passer le select
             // en argument — passer le select déclenche l'auto-navigation (estChangementManuel)

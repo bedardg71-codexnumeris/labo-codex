@@ -570,6 +570,20 @@
      */
     async function initialiserModuleTravaux() {
         if (moduleInitialise) {
+            // 🔧 FIX (6 mars 2026) : Si un callback _apresOuvertureFichier est en attente
+            // (ex: consulterEvaluationDepuisListe va ouvrir un fichier spécifique),
+            // ne pas détruire/reconstruire le DOM — le ouvrirFichier() imminent s'en charge.
+            // Sinon rafraichirUI → afficherFichiers détruit la visionneuse et crée une course.
+            if (window._apresOuvertureFichier) {
+                modeCourant = 'annoter';
+                // S'assurer que le conteneur fichiers est visible (il peut être masqué
+                // si le formulaire standalone était affiché par un consulter sans fichier)
+                const conteneurFichiers = document.getElementById('evaluations-contenu-fichiers');
+                if (conteneurFichiers) conteneurFichiers.classList.remove('u-hide');
+                const evalDiv = document.getElementById('evaluations-contenu-evaluation');
+                if (evalDiv) evalDiv.classList.add('u-hide');
+                return;
+            }
             const etaitEnModeEvaluer = (modeCourant === 'evaluer');
             // Forcer la sauvegarde des annotations AVANT de reconstruire le DOM
             // (sinon les annotations non sauvegardées sont perdues lors de la navigation)
@@ -614,12 +628,17 @@
         corrigerGroupeCoursIdFichiers();
 
         const fichierRestaure = restaurerEtatSession();
-        if (fichierRestaure) {
+        // 🔧 FIX (6 mars 2026) : Ne pas auto-restaurer un fichier si un callback
+        // _apresOuvertureFichier est en attente — sinon l'auto-restauration consomme
+        // le callback avant que le fichier cible ne soit ouvert.
+        if (fichierRestaure && !window._apresOuvertureFichier) {
             const fichiers = travauxStockage.obtenirFichiersGroupeActif();
             if (fichiers.some(f => f.id === fichierRestaure)) {
                 // Ne restaurer que si on est sur l'onglet Annoter (pas Importer)
                 setTimeout(() => {
                     if (sousSectionActive !== 'evaluations-annoter') return;
+                    // Vérifier à nouveau — le callback peut avoir été défini entre-temps
+                    if (window._apresOuvertureFichier) return;
                     ouvrirFichier(fichierRestaure);
                 }, 200);
             }
@@ -2799,7 +2818,7 @@
             setTimeout(() => travauxVisionneuse.scrollerEnHaut(), 350);
 
             // Boutons et badge cycle de vie
-            const fichierOuvert = travauxVisionneuse.getFichierActuel();
+            // NB: fichierOuvert déjà déclaré plus haut (ligne résolution)
             const badgeStatut = document.getElementById('travaux-badge-statut');
             const btnAlleger = document.getElementById('travaux-btn-alleger');
             const btnReimporter = document.getElementById('travaux-btn-reimporter');
@@ -3641,8 +3660,15 @@
             const annotColDoc = document.getElementById('annot-col-document');
             const conteneurDoc = document.getElementById('travaux-conteneur-document');
             const canvasContainer = document.getElementById('travaux-canvas-container');
+
             if (annotColDoc && canvasContainer && conteneurDoc) {
                 conteneurDoc.appendChild(canvasContainer);
+            } else if (!annotColDoc && canvasContainer && conteneurDoc) {
+                // Canvas pas dans le layout annotation (layout non créé ou détruit)
+                // S'assurer que le canvas est bien sous conteneurDoc
+                if (canvasContainer.parentElement !== conteneurDoc) {
+                    conteneurDoc.appendChild(canvasContainer);
+                }
             }
             // Retirer mode-annot-actif pendant le mode évaluation
             if (conteneurDoc) conteneurDoc.classList.remove('mode-annot-actif');
@@ -3795,11 +3821,14 @@
 
         // --- Colonne centre : le canvas (reste en place, on met un wrapper) ---
         const canvasContainer = document.getElementById('travaux-canvas-container');
+
         const centreWrapper = document.createElement('div');
         centreWrapper.className = 'eval-col-document';
         centreWrapper.id = 'eval-col-document';
         if (canvasContainer) {
             centreWrapper.appendChild(canvasContainer);
+        } else {
+            console.warn('[afficherPalettesEval] canvas-container introuvable — layout eval incomplet');
         }
         evalFlex.appendChild(centreWrapper);
 
@@ -3857,6 +3886,7 @@
 
         // Marquer le conteneur en mode eval (pour CSS)
         conteneurDoc.classList.add('mode-eval-actif');
+
 
         // Bloquer la mémorisation pendant le setup pour ne pas écraser les bonnes valeurs
         window._bloquerMemorisation = true;

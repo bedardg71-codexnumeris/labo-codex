@@ -7878,6 +7878,14 @@ function restaurerPreferencesRapport(da) {
  * Consulte une évaluation existante (ouvre le fichier dans la visionneuse en mode évaluer)
  */
 function consulterEvaluation(da, productionId) {
+    // 🔧 FIX (6 mars 2026) : Annuler tout timer d'ouverture précédent (même protection
+    // que consulterEvaluationDepuisListe pour éviter les courses sur clics rapides)
+    if (window._consulterEvalTimerId) {
+        clearTimeout(window._consulterEvalTimerId);
+        window._consulterEvalTimerId = null;
+    }
+    window._apresOuvertureFichier = null;
+
     // Trouver l'évaluation (résolution centralisée + fallback)
     let evaluation = null;
     if (typeof travauxResolution !== 'undefined') {
@@ -7927,7 +7935,8 @@ function consulterEvaluation(da, productionId) {
         afficherSousSection('evaluations-annoter');
         // Attendre que initialiserModuleTravaux soit terminé (+300ms de marge),
         // puis ouvrir le fichier dans la visionneuse
-        setTimeout(function() {
+        window._consulterEvalTimerId = setTimeout(function() {
+            window._consulterEvalTimerId = null;
             // Synchroniser le dropdown filtre avec la production cible
             // 🔧 FIX (5 mars 2026) : Synchroniser le dropdown SANS passer le select
             // en argument — passer le select déclenche l'auto-navigation (estChangementManuel)
