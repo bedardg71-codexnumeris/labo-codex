@@ -7905,6 +7905,10 @@ function consulterEvaluation(da, productionId) {
     afficherSection('evaluations');
 
     if (fichierId && typeof travauxUI !== 'undefined' && typeof travauxUI.ouvrirFichier === 'function') {
+        // Mettre le filtre production sur la bonne production AVANT d'ouvrir le fichier
+        if (productionId) {
+            sessionStorage.setItem('travaux-filtre-production', productionId);
+        }
         // Workflow visionneuse : naviguer vers Annoter, attendre l'init du module,
         // puis ouvrir le fichier. Le callback _apresOuvertureFichier est appelé
         // par ouvrirFichier APRÈS que le fichier soit complètement chargé dans le canvas.
@@ -7925,6 +7929,14 @@ function consulterEvaluation(da, productionId) {
         // Attendre que initialiserModuleTravaux soit terminé (+300ms de marge),
         // puis ouvrir le fichier dans la visionneuse
         setTimeout(function() {
+            // Synchroniser le dropdown filtre avec la production cible
+            const selectFiltre = document.querySelector('#evaluations-contenu-fichiers .travaux-filtre-production');
+            if (selectFiltre && productionId) {
+                selectFiltre.value = productionId;
+                if (typeof travauxUI.filtrerBadgesParProduction === 'function') {
+                    travauxUI.filtrerBadgesParProduction(selectFiltre);
+                }
+            }
             travauxUI.ouvrirFichier(fichierId);
         }, 500);
     } else {
