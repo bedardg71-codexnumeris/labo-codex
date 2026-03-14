@@ -380,14 +380,56 @@ Pour chaque clé présente dans un ou les deux classeurs :
 - API publique : `Classeur.actionExporterSelection()`
 - **Note** : filtre par groupe-cours non implémenté (trop invasif — nécessiterait de filtrer le contenu des tableaux)
 
-## Phase 4 — Auto-save FSAPI (à venir)
+## Phase 4 — Auto-save FSAPI (COMPLÉTÉE — 14 mars 2026)
 
-- Connexion persistante à un dossier sur clé USB (Chrome/Edge)
-- Auto-save à intervalles configurables
-- Structure dossier au lieu de ZIP
-- Indicateur de connexion au classeur
+Objectif : Sauvegarder automatiquement le classeur vers la clé USB sans dialogue, sur Chrome/Edge.
+
+### Étape 4.1 — Handle FSAPI persistant (COMPLÉTÉE)
+
+- Variable `_fileHandle` (mémoire seulement, non sérialisable, perdu au rechargement)
+- `actionOuvrir()` utilise `showOpenFilePicker` (Chrome/Edge) pour obtenir un handle dès l'ouverture
+- `sauvegarderVersDestination(blob, nom, {forcerDialogue})` : si handle existe → ré-écriture directe sans dialogue
+- `actionEnregistrer()` réutilise le handle (zéro dialogue après 1re sauvegarde)
+- `actionEnregistrerSous()` force le dialogue (`forcerDialogue: true`), met à jour le handle
+- `fermerClasseur()` nettoie le handle
+- `etatClasseur()` expose `handleFSAPI: true/false`
+- Helper `_ecrireViaHandle(handle, blob)` factorisé pour réutilisation
+- Si le handle échoue (clé USB retirée), nettoie et redemande proprement
+
+### Étape 4.2 — Auto-save à intervalle (COMPLÉTÉE)
+
+- Constante `AUTO_SAVE_DELAI` : 5 minutes (300 000 ms)
+- `_demarrerAutoSave()` : `setInterval` déclenché quand un handle FSAPI est obtenu
+- `_arreterAutoSave()` : nettoyage quand handle perdu ou classeur fermé
+- `_executerAutoSave()` : gardes (handle? actif? modifs? pas en cours?) → `genererClasseur({silencieux: true})` → `_ecrireViaHandle()`
+- `genererClasseur({silencieux: true})` : nouveau paramètre qui désactive l'overlay de progression et la pause 500ms
+- Notification discrète `afficherNotificationSucces('Auto-save', ...)` après chaque auto-save
+- Si handle invalide (clé USB retirée) → arrête l'auto-save proprement
+- `etatClasseur()` expose `autoSaveActif` et `derniereAutoSave`
+
+### Étape 4.3 — Indicateur de connexion dans le menu (COMPLÉTÉE)
+
+- Sous-texte `#classeur-menu-enreg-info` sous "Enregistrer" : "Vers le même emplacement" (si handle FSAPI)
+- Ligne de statut `#classeur-menu-autosave` : "Auto-save actif — Toutes les 5 min — dernier : 11h45"
+- Tooltip du bouton Classeur : nom + état auto-save + modifications
+- `_actualiserMenu()` peuple dynamiquement ces éléments à chaque ouverture du menu
+- CSS : `.classeur-menu-contenu`, `.classeur-menu-sous-texte`, `.classeur-menu-statut`
+
+### Compatibilité
+
+| Navigateur | Handle FSAPI | Auto-save | Indicateur |
+|---|---|---|---|
+| Chrome/Edge Mac | Oui | Oui (5 min) | Oui |
+| Safari Mac | Non | Non | Non (fallback download) |
+| iPad Safari | Non | Non | Non (fallback share/download) |
+
+### À tester (prochaine session)
+
+- Chrome Mac : Ouvrir → Enregistrer (dialogue) → Enregistrer (sans dialogue) → attendre 5 min → auto-save
+- Chrome Mac : Retirer clé USB pendant auto-save → vérifier arrêt propre
+- Safari Mac : vérifier aucune erreur, fallback download fonctionne
 
 ---
 
 **Créé** : 14 mars 2026
-**Statut** : Phase 1 complétée, Phase 2 complétée, Phase 3 complétée (3.1-3.6)
+**Statut** : Phases 1-4 complétées

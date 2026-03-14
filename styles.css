@@ -5382,6 +5382,27 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     flex-shrink: 0;
 }
 
+.classeur-menu-contenu {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.classeur-menu-sous-texte {
+    font-size: 0.75rem;
+    color: var(--texte-secondaire, #8ba4b0);
+    font-weight: normal;
+}
+
+.classeur-menu-statut {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    color: var(--texte-secondaire, #8ba4b0);
+    font-size: 0.82rem;
+}
+
 .classeur-menu-sep {
     height: 1px;
     background: rgba(106, 172, 184, 0.15);

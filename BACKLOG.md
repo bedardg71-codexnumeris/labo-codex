@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 3 mars 2026 (Beta 98.2.1, build 0203-1840)
+> **Derniere mise a jour** : 14 mars 2026 (Beta 98.6)
 
 ---
 
@@ -18,9 +18,14 @@
   - [x] Comparaison visuelle : diff entre deux snapshots (cles ajoutees/supprimees/modifiees)
   - **Plan detaille** : `docs/plan-classeur.md`
 
-- [ ] **#227** Classeur Phase 3 : Multi-classeur + fusion
+- [x] **#227** Classeur Phase 3 : Multi-classeur + fusion *(Beta 98.5, 14 mars 2026)*
 
-- [ ] **#228** Classeur Phase 4 : Auto-save FSAPI vers cle USB
+- [x] **#228** Classeur Phase 4 : Auto-save FSAPI vers cle USB *(Beta 98.6, 14 mars 2026)*
+  - [x] 4.1 Handle FSAPI persistant — re-ecriture directe sans dialogue (Chrome/Edge)
+  - [x] 4.2 Auto-save a intervalle (5 min) quand handle disponible, silencieux
+  - [x] 4.3 Indicateur connexion dans le menu + sous-texte Enregistrer
+  - **A tester sur Chrome Mac** : ouvrir → enregistrer → enregistrer (sans dialogue) → auto-save 5 min
+  - **Plan detaille** : `docs/plan-classeur.md`
 
 - [ ] **#229** Design : Adopter l'overlay de progression du Classeur comme norme
 

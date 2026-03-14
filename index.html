@@ -3665,11 +3665,23 @@
                                     <span class="classeur-menu-icone">&#128194;</span> Ouvrir un classeur...
                                 </button>
                                 <button class="classeur-menu-item" onclick="Classeur.actionEnregistrer()">
-                                    <span class="classeur-menu-icone">&#128190;</span> Enregistrer le classeur
+                                    <span class="classeur-menu-icone">&#128190;</span>
+                                    <span class="classeur-menu-contenu">
+                                        Enregistrer le classeur
+                                        <span id="classeur-menu-enreg-info" class="classeur-menu-sous-texte u-hide"></span>
+                                    </span>
                                 </button>
                                 <button class="classeur-menu-item" onclick="Classeur.actionEnregistrerSous()">
                                     <span class="classeur-menu-icone">&#128229;</span> Enregistrer sous...
                                 </button>
+                                <div id="classeur-menu-autosave-sep" class="classeur-menu-sep u-hide"></div>
+                                <div id="classeur-menu-autosave" class="classeur-menu-statut u-hide">
+                                    <span class="classeur-menu-icone">&#9889;</span>
+                                    <span class="classeur-menu-contenu">
+                                        <span id="classeur-menu-autosave-texte">Auto-save actif</span>
+                                        <span id="classeur-menu-autosave-detail" class="classeur-menu-sous-texte"></span>
+                                    </span>
+                                </div>
                                 <div class="classeur-menu-sep"></div>
                                 <button class="classeur-menu-item" onclick="Classeur.actionNouveau()">
                                     <span class="classeur-menu-icone">&#10133;</span> Nouveau classeur
@@ -17297,8 +17309,8 @@
         // === CONFIGURATION ===
         // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
         // Les valeurs ici servent de fallback si version.json n'est pas disponible
-        let VERSION_MAJEURE = '98.5';
-        let BUILD_ID = '0314-1035';
+        let VERSION_MAJEURE = '98.6';
+        let BUILD_ID = '0314-1215';
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
