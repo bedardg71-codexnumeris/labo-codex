@@ -5272,6 +5272,65 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 /* ===============================
+   OVERLAY DE PROGRESSION — Utilitaire global (#229)
+   =============================== */
+
+.progression-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100000;
+    backdrop-filter: blur(4px);
+}
+
+.progression-boite {
+    background: var(--surface-carte, #1a3040);
+    border-radius: var(--radius-moyen, 12px);
+    padding: 32px 40px;
+    min-width: 340px;
+    max-width: 480px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.progression-titre {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.progression-detail {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 20px;
+}
+
+.progression-piste {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    height: 8px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.progression-barre {
+    height: 100%;
+    width: 0%;
+    background: var(--accent-principal, #6aacb8);
+    border-radius: 6px;
+    transition: width 0.3s ease;
+}
+
+.progression-stats {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* ===============================
    CLASSEUR — Bouton en-tête + menu
    =============================== */
 

@@ -31,15 +31,19 @@ Ouvrir | Enregistrer (+ sous-texte FSAPI) | Enregistrer sous | Nouveau | Détail
 ## PROCHAINES TÂCHES
 
 Consulter `BACKLOG.md` pour les priorités :
-- **#229** Overlay norme
 - **#230** UX docs
-- **#231** Auteur
 - **#214-#219** Retours testeur (3 mars 2026)
 - Test manuel des Phases 3-4 du Classeur sur Mac + iPad
 
 **IMPORTANT** : Lire `docs/plan-classeur.md` et `BACKLOG.md` en début de session.
 
 ## SESSION DU 14 MARS 2026
+
+### Travail accompli — #229 Overlay de progression normalisé + #231 Auteur classeur (14 mars 2026)
+
+200. **Overlay de progression normalisé (#229)** : Extraction de l'overlay plein écran du classeur en utilitaire global réutilisable. Nouveau fichier `js/progression.js` (70 lignes) avec 3 fonctions `window.afficherProgression(titre)`, `window.majProgression(pct, detail, stats)`, `window.masquerProgression()`. Styles inline remplacés par classes CSS `.progression-*` dans `styles.css`. `classeur.js` allégé de ~50 lignes, délègue aux globales via alias. **Fichiers** : `js/progression.js` (nouveau), `styles.css`, `js/classeur.js`, `index.html`.
+
+201. **Auteur classeur depuis profil enseignant (#231)** : Nouvelle fonction `_obtenirAuteur()` dans `classeur.js` avec cascade : `profilEnseignant` (prenom+nom) → `infoCours.enseignant` (string, fallback legacy) → chaîne vide. Remplace la lecture directe `infoCours.enseignant` qui était toujours vide. L'export sélectif hérite automatiquement via le manifeste. **Fichier** : `js/classeur.js`.
 
 ### Travail accompli — Classeur Phase 4 : Auto-save FSAPI (#228) (14 mars 2026)
 
