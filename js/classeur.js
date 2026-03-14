@@ -49,6 +49,17 @@ let _etat = {
     manifeste: null                // Manifeste complet du classeur chargé
 };
 
+// Handle FSAPI — non sérialisable, vit en mémoire seulement.
+// Permet de ré-écrire vers le même fichier sans dialogue.
+// Perdu au rechargement de la page (comportement normal).
+var _fileHandle = null;
+
+// Auto-save — sauvegarde silencieuse à intervalle quand un handle FSAPI existe.
+var AUTO_SAVE_DELAI = 5 * 60 * 1000;  // 5 minutes par défaut
+var _autoSaveTimerId = null;
+var _autoSaveEnCours = false;
+var _derniereAutoSave = null;          // Date ISO de la dernière auto-save réussie
+
 /* ===============================
    INITIALISATION
    =============================== */
@@ -88,6 +99,7 @@ function _sauvegarderEtat() {
  * Génère un Classeur ZIP depuis les données IndexedDB actuelles.
  * @param {Object} [options]
  * @param {string} [options.nom] - Nom du classeur
+ * @param {boolean} [options.silencieux=false] - Si true, pas d'overlay de progression (auto-save)
  * @returns {Promise<{blob: Blob, nomFichier: string, manifeste: Object}>}
  */
 async function genererClasseur(options = {}) {
@@ -95,10 +107,16 @@ async function genererClasseur(options = {}) {
         throw new Error('JSZip non disponible. Impossible de générer le classeur.');
     }
 
+    var silencieux = !!options.silencieux;
+
     const debut = performance.now();
+    // En mode silencieux (auto-save), pas d'overlay de progression
+    var _prog = silencieux ? function() {} : _majProgression;
+    var _progMasquer = silencieux ? function() {} : _masquerProgression;
+
     console.log('📂 Génération du classeur...');
-    _afficherProgression('Génération du classeur');
-    _majProgression(0, 'Lecture des données...');
+    if (!silencieux) _afficherProgression('Génération du classeur');
+    _prog(0, 'Lecture des données...');
     await _yield(); // laisser le navigateur peindre l'overlay
 
     try {
@@ -113,7 +131,7 @@ async function genererClasseur(options = {}) {
             donnees[clesFiltrees[i]] = valeur;
         }
         if (i % 10 === 0) {
-            _majProgression(
+            _prog(
                 Math.round((i / clesFiltrees.length) * 20),
                 'Lecture des données...',
                 (i + 1) + '/' + clesFiltrees.length + ' clés'
@@ -123,7 +141,7 @@ async function genererClasseur(options = {}) {
     }
 
     // 2. Construire le ZIP
-    _majProgression(20, 'Préparation du ZIP...');
+    _prog(20, 'Préparation du ZIP...');
     const zip = new JSZip();
 
     // 2a. Données JSON
@@ -152,7 +170,7 @@ async function genererClasseur(options = {}) {
                 console.warn('📂 Classeur : blob ignoré pour ' + f.id, e.message);
             }
             if (j % 5 === 0) {
-                _majProgression(
+                _prog(
                     20 + Math.round((j / fichiers.length) * 50),
                     'Ajout des fichiers travaux...',
                     nbBlobs + '/' + fichiers.length + ' fichiers (' + _formaterTaille(tailleTotale) + ')'
@@ -163,7 +181,7 @@ async function genererClasseur(options = {}) {
     }
 
     // 3. TimeMachine — archiver le snapshot précédent + inclure l'historique
-    _majProgression(62, 'Archivage de l\'historique...');
+    _prog(62, 'Archivage de l\'historique...');
     await _yield();
 
     var dossierHistorique = zip.folder(DOSSIER_HISTORIQUE);
@@ -244,11 +262,11 @@ async function genererClasseur(options = {}) {
     zip.file(NOM_MANIFESTE, JSON.stringify(manifeste, null, 2));
 
     // 5. Générer le blob ZIP
-    _majProgression(70, 'Compression du ZIP...', nbBlobs + ' fichier(s), ' + _formaterTaille(tailleTotale));
+    _prog(70, 'Compression du ZIP...', nbBlobs + ' fichier(s), ' + _formaterTaille(tailleTotale));
     const zipBlob = await zip.generateAsync(
         { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
         function(meta) {
-            _majProgression(
+            _prog(
                 70 + Math.round(meta.percent * 0.28),
                 'Compression du ZIP...',
                 Math.round(meta.percent) + '% compressé'
@@ -257,7 +275,7 @@ async function genererClasseur(options = {}) {
     );
 
     // 6. Mettre à jour l'état
-    _majProgression(98, 'Finalisation...');
+    _prog(98, 'Finalisation...');
     _etat.actif = true;
     _etat.nom = manifeste.nom;
     _etat.derniereSauvegarde = maintenant;
@@ -270,11 +288,13 @@ async function genererClasseur(options = {}) {
     var nbSnapshotsExport = historiqueManifeste.length;
     console.log('📂 Classeur généré en ' + duree + 'ms : ' + nbBlobs + ' fichier(s), ' + nbSnapshotsExport + ' snapshot(s), ' + _formaterTaille(zipBlob.size));
 
-    _majProgression(100, 'Classeur prêt !', _formaterTaille(zipBlob.size));
+    _prog(100, 'Classeur prêt !', _formaterTaille(zipBlob.size));
 
-    // Pause brève pour que l'utilisateur voie "100%"
-    await new Promise(function(r) { setTimeout(r, 500); });
-    _masquerProgression();
+    // Pause brève pour que l'utilisateur voie "100%" (sauf auto-save)
+    if (!silencieux) {
+        await new Promise(function(r) { setTimeout(r, 500); });
+    }
+    _progMasquer();
 
     // Nom de fichier avec horodatage
     const nomFichier = _genererNomFichier(manifeste.nom);
@@ -282,7 +302,7 @@ async function genererClasseur(options = {}) {
     return { blob: zipBlob, nomFichier, manifeste };
 
     } catch (erreur) {
-        _masquerProgression();
+        _progMasquer();
         throw erreur;
     }
 }
@@ -569,7 +589,10 @@ function etatClasseur() {
         derniereSauvegarde: _etat.derniereSauvegarde,
         modificationsNonSauvees: _etat.modificationsDepuis !== null,
         modificationsDepuis: _etat.modificationsDepuis,
-        manifeste: _etat.manifeste ? Object.assign({}, _etat.manifeste) : null
+        manifeste: _etat.manifeste ? Object.assign({}, _etat.manifeste) : null,
+        handleFSAPI: !!_fileHandle,     // true si ré-écriture directe possible (Chrome/Edge)
+        autoSaveActif: !!_autoSaveTimerId,
+        derniereAutoSave: _derniereAutoSave
     };
 }
 
@@ -590,11 +613,13 @@ function marquerModification() {
  * Désactive le classeur actif (retour au mode local seul).
  */
 function fermerClasseur() {
+    _arreterAutoSave();
     _etat.actif = false;
     _etat.nom = '';
     _etat.derniereSauvegarde = null;
     _etat.modificationsDepuis = null;
     _etat.manifeste = null;
+    _fileHandle = null;
     _sauvegarderEtat();
     _mettreAJourIndicateur();
     // Nettoyer l'historique TimeMachine de IndexedDB
@@ -607,6 +632,18 @@ function fermerClasseur() {
    =============================== */
 
 /**
+ * Écrit un blob via un FileSystemFileHandle FSAPI existant.
+ * @param {FileSystemFileHandle} handle
+ * @param {Blob} blob
+ * @returns {Promise<void>}
+ */
+async function _ecrireViaHandle(handle, blob) {
+    var writable = await handle.createWritable();
+    await writable.write(blob);
+    await writable.close();
+}
+
+/**
  * Sauvegarde le classeur vers un emplacement choisi par l'utilisateur.
  * Détecte la meilleure stratégie selon le navigateur :
  * 1. showSaveFilePicker (Chrome/Edge — choix de destination natif)
@@ -615,25 +652,44 @@ function fermerClasseur() {
  *
  * @param {Blob} blob - Le blob ZIP du classeur
  * @param {string} nomFichier - Le nom de fichier suggéré
+ * @param {Object} [options]
+ * @param {boolean} [options.forcerDialogue=false] - Force le dialogue même si un handle existe
  * @returns {Promise<{methode: string}>}
  */
-async function sauvegarderVersDestination(blob, nomFichier) {
-    // Stratégie 1 : File System Access API (Chrome/Edge sur Mac/PC)
+async function sauvegarderVersDestination(blob, nomFichier, options) {
+    var forcerDialogue = options && options.forcerDialogue;
+
+    // Stratégie 1a : Ré-écriture directe via handle FSAPI existant (pas de dialogue)
+    if (_fileHandle && !forcerDialogue) {
+        try {
+            await _ecrireViaHandle(_fileHandle, blob);
+            console.log('📂 Ré-écrit via handle FSAPI existant');
+            return { methode: 'fsapi' };
+        } catch (e) {
+            // Handle invalide (fichier déplacé, clé USB retirée, etc.)
+            console.warn('📂 Handle FSAPI invalide, on redemande...', e.message);
+            _fileHandle = null;
+            _arreterAutoSave();
+        }
+    }
+
+    // Stratégie 1b : File System Access API avec dialogue (Chrome/Edge sur Mac/PC)
     if (window.showSaveFilePicker) {
         try {
-            const handle = await window.showSaveFilePicker({
+            var handle = await window.showSaveFilePicker({
                 suggestedName: nomFichier,
                 types: [{
                     description: 'Classeur Labo Codex',
                     accept: { 'application/zip': ['.zip'] }
                 }]
             });
-            const writable = await handle.createWritable();
-            await writable.write(blob);
-            await writable.close();
+            await _ecrireViaHandle(handle, blob);
+            // Conserver le handle pour les sauvegardes suivantes
+            _fileHandle = handle;
+            _demarrerAutoSave();
+            console.log('📂 Sauvegardé via FSAPI, handle conservé');
             return { methode: 'fsapi' };
         } catch (e) {
-            // L'utilisateur a annulé le dialogue
             if (e.name === 'AbortError') {
                 return { methode: 'annule' };
             }
@@ -644,7 +700,7 @@ async function sauvegarderVersDestination(blob, nomFichier) {
     // Stratégie 2 : Web Share API (iPad Safari)
     if (_peutPartagerFichier(blob, nomFichier)) {
         try {
-            const fichier = new File([blob], nomFichier, { type: 'application/zip' });
+            var fichier = new File([blob], nomFichier, { type: 'application/zip' });
             await navigator.share({
                 files: [fichier],
                 title: 'Classeur Labo Codex'
@@ -659,8 +715,8 @@ async function sauvegarderVersDestination(blob, nomFichier) {
     }
 
     // Stratégie 3 : Téléchargement classique (fallback universel)
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
     a.href = url;
     a.download = nomFichier;
     document.body.appendChild(a);
@@ -1727,9 +1783,97 @@ function _formaterTaille(octets) {
     return (octets / (1024 * 1024 * 1024)).toFixed(2) + ' Go';
 }
 
+/* ===============================
+   AUTO-SAVE FSAPI
+   =============================== */
+
+/**
+ * Démarre le timer d'auto-save.
+ * Ne fait rien si pas de handle FSAPI ou si déjà démarré.
+ */
+function _demarrerAutoSave() {
+    if (!_fileHandle || _autoSaveTimerId) return;
+    _autoSaveTimerId = setInterval(_executerAutoSave, AUTO_SAVE_DELAI);
+    console.log('📂 Auto-save activé (intervalle : ' + (AUTO_SAVE_DELAI / 1000) + 's)');
+    _mettreAJourIndicateur();
+}
+
+/**
+ * Arrête le timer d'auto-save.
+ */
+function _arreterAutoSave() {
+    if (_autoSaveTimerId) {
+        clearInterval(_autoSaveTimerId);
+        _autoSaveTimerId = null;
+        console.log('📂 Auto-save désactivé');
+    }
+    _derniereAutoSave = null;
+    _autoSaveEnCours = false;
+    _mettreAJourIndicateur();
+}
+
+/**
+ * Exécute une sauvegarde automatique silencieuse.
+ * Ne se déclenche que si :
+ * - un handle FSAPI est disponible
+ * - il y a des modifications non sauvegardées
+ * - aucune auto-save n'est déjà en cours
+ */
+async function _executerAutoSave() {
+    // Gardes
+    if (!_fileHandle) { _arreterAutoSave(); return; }
+    if (!_etat.actif) return;
+    if (!_etat.modificationsDepuis) return;
+    if (_autoSaveEnCours) return;
+
+    _autoSaveEnCours = true;
+    console.log('📂 Auto-save en cours...');
+
+    try {
+        var resultat = await genererClasseur({ silencieux: true });
+        // Ré-écriture directe via le handle (pas de dialogue)
+        await _ecrireViaHandle(_fileHandle, resultat.blob);
+
+        _derniereAutoSave = new Date().toISOString();
+        console.log('📂 Auto-save terminé : ' + _formaterTaille(resultat.blob.size));
+
+        if (typeof window.afficherNotificationSucces === 'function') {
+            window.afficherNotificationSucces(
+                'Auto-save',
+                _formaterTaille(resultat.blob.size) + ' — ' + _formaterHeureLocale(_derniereAutoSave)
+            );
+        }
+    } catch (e) {
+        console.warn('📂 Auto-save échoué :', e.message);
+        // Handle devenu invalide — arrêter l'auto-save
+        if (e.name === 'NotAllowedError' || e.name === 'NotFoundError' || e.name === 'InvalidStateError') {
+            _fileHandle = null;
+            _arreterAutoSave();
+        }
+    } finally {
+        _autoSaveEnCours = false;
+    }
+}
+
+/**
+ * Formate une heure locale courte (ex: "11h45")
+ */
+function _formaterHeureLocale(dateISO) {
+    if (!dateISO) return '';
+    try {
+        var d = new Date(dateISO);
+        return d.getHours() + 'h' + String(d.getMinutes()).padStart(2, '0');
+    } catch (e) {
+        return '';
+    }
+}
+
+/* ===============================
+   INDICATEUR EN-TÊTE
+   =============================== */
+
 /**
  * Met à jour l'indicateur visuel dans l'en-tête.
- * Stub — sera implémenté à l'étape 1.3 (UI en-tête).
  */
 function _mettreAJourIndicateur() {
     // TODO Étape 1.3 : mettre à jour la pastille dans l'en-tête
@@ -1748,6 +1892,18 @@ function _mettreAJourIndicateur() {
     } else {
         indicateur.classList.remove('classeur-indicateur--modifie');
         indicateur.classList.add('classeur-indicateur--sauve');
+    }
+
+    // Tooltip du bouton : résumé de l'état
+    var btn = document.getElementById('btn-classeur');
+    if (btn) {
+        var titre = 'Classeur : ' + _etat.nom;
+        if (_autoSaveTimerId) {
+            titre += '\nAuto-save actif';
+            if (_derniereAutoSave) titre += ' — dernier : ' + _formaterHeureLocale(_derniereAutoSave);
+        }
+        if (_etat.modificationsDepuis) titre += '\nModifications non enregistrées';
+        btn.title = titre;
     }
 }
 
@@ -1823,6 +1979,39 @@ function _actualiserMenu() {
         if (_etat.actif) fusionnerItem.classList.remove('u-hide');
         else fusionnerItem.classList.add('u-hide');
     }
+
+    // Sous-texte "Enregistrer" : montre si handle FSAPI connecté
+    var enregInfo = document.getElementById('classeur-menu-enreg-info');
+    if (enregInfo) {
+        if (_fileHandle) {
+            enregInfo.textContent = 'Vers le même emplacement';
+            enregInfo.classList.remove('u-hide');
+        } else {
+            enregInfo.classList.add('u-hide');
+        }
+    }
+
+    // Indicateur auto-save dans le menu
+    var autoSaveItem = document.getElementById('classeur-menu-autosave');
+    var autoSaveSep = document.getElementById('classeur-menu-autosave-sep');
+    if (autoSaveItem) {
+        if (_autoSaveTimerId) {
+            autoSaveItem.classList.remove('u-hide');
+            if (autoSaveSep) autoSaveSep.classList.remove('u-hide');
+            var detail = document.getElementById('classeur-menu-autosave-detail');
+            if (detail) {
+                var intervMin = Math.round(AUTO_SAVE_DELAI / 60000);
+                var texte = 'Toutes les ' + intervMin + ' min';
+                if (_derniereAutoSave) {
+                    texte += ' — dernier : ' + _formaterHeureLocale(_derniereAutoSave);
+                }
+                detail.textContent = texte;
+            }
+        } else {
+            autoSaveItem.classList.add('u-hide');
+            if (autoSaveSep) autoSaveSep.classList.add('u-hide');
+        }
+    }
 }
 
 /* ===============================
@@ -1830,58 +2019,80 @@ function _actualiserMenu() {
    =============================== */
 
 /**
- * Ouvrir un classeur depuis un fichier
+ * Ouvrir un classeur depuis un fichier.
+ * Sur Chrome/Edge, utilise showOpenFilePicker pour obtenir un handle FSAPI
+ * réutilisable lors de la prochaine sauvegarde.
  */
 async function actionOuvrir() {
     _fermerMenu();
 
-    // Créer un input file déclenché par le geste utilisateur (le clic sur le menu)
-    var input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.zip';
-    input.style.display = 'none';
-    document.body.appendChild(input);
+    var fichier = null;
 
-    input.addEventListener('change', async function() {
-        var fichier = input.files[0];
-        document.body.removeChild(input);
-        if (!fichier) return;
-
+    // Chrome/Edge : showOpenFilePicker donne un handle réutilisable
+    if (window.showOpenFilePicker) {
         try {
-            var resultat = await chargerClasseur(fichier);
-            if (typeof window.afficherNotificationSucces === 'function') {
-                window.afficherNotificationSucces(
-                    'Classeur ouvert : ' + resultat.manifeste.nom,
-                    resultat.stats.nbCles + ' clés, ' + resultat.stats.nbBlobs + ' fichiers'
-                );
-            }
-            // Proposer de recharger pour appliquer les données
-            if (confirm('Classeur chargé avec succès !\n\nRecharger la page pour appliquer les données ?')) {
-                window.location.reload();
-            }
+            var handles = await window.showOpenFilePicker({
+                types: [{
+                    description: 'Classeur Labo Codex',
+                    accept: { 'application/zip': ['.zip'] }
+                }],
+                multiple: false
+            });
+            var handle = handles[0];
+            fichier = await handle.getFile();
+            // Conserver le handle pour les sauvegardes suivantes
+            _fileHandle = handle;
+            _demarrerAutoSave();
+            console.log('📂 Ouverture via FSAPI, handle conservé');
         } catch (e) {
-            console.error('📂 Erreur ouverture classeur:', e);
-            alert('Erreur : ' + e.message);
+            if (e.name === 'AbortError') return; // Annulé par l'utilisateur
+            console.warn('📂 showOpenFilePicker échoué, fallback input file', e.message);
         }
-    });
+    }
 
-    input.click();
+    // Fallback : input file classique (iPad, Firefox, etc.)
+    if (!fichier) {
+        fichier = await ouvrirDialogueFichier();
+        _fileHandle = null; // Pas de handle disponible
+    }
+
+    if (!fichier) return;
+
+    try {
+        var resultat = await chargerClasseur(fichier);
+        if (typeof window.afficherNotificationSucces === 'function') {
+            window.afficherNotificationSucces(
+                'Classeur ouvert : ' + resultat.manifeste.nom,
+                resultat.stats.nbCles + ' clés, ' + resultat.stats.nbBlobs + ' fichiers'
+            );
+        }
+        // Proposer de recharger pour appliquer les données
+        if (confirm('Classeur chargé avec succès !\n\nRecharger la page pour appliquer les données ?')) {
+            window.location.reload();
+        }
+    } catch (e) {
+        console.error('📂 Erreur ouverture classeur:', e);
+        alert('Erreur : ' + e.message);
+    }
 }
 
 /**
- * Enregistrer le classeur (génère + sauvegarde)
+ * Enregistrer le classeur (génère + sauvegarde).
+ * Si un handle FSAPI est disponible, ré-écrit directement sans dialogue.
  */
 async function actionEnregistrer() {
     _fermerMenu();
 
     try {
+        var avaitHandle = !!_fileHandle;
         var resultat = await genererClasseur();
         var sauvegarde = await sauvegarderVersDestination(resultat.blob, resultat.nomFichier);
 
         if (sauvegarde.methode === 'annule') return;
 
         if (typeof window.afficherNotificationSucces === 'function') {
-            var methodeLabel = sauvegarde.methode === 'fsapi' ? 'emplacement choisi' :
+            var methodeLabel = avaitHandle ? 'même emplacement' :
+                               sauvegarde.methode === 'fsapi' ? 'emplacement choisi' :
                                sauvegarde.methode === 'share' ? 'Fichiers' : 'Téléchargements';
             window.afficherNotificationSucces(
                 'Classeur enregistré',
@@ -1895,11 +2106,29 @@ async function actionEnregistrer() {
 }
 
 /**
- * Enregistrer sous... (force le dialogue de destination)
+ * Enregistrer sous... (force le dialogue de destination, même si un handle existe).
  */
 async function actionEnregistrerSous() {
-    // Identique à actionEnregistrer — le dialogue est toujours affiché
-    await actionEnregistrer();
+    _fermerMenu();
+
+    try {
+        var resultat = await genererClasseur();
+        var sauvegarde = await sauvegarderVersDestination(resultat.blob, resultat.nomFichier, { forcerDialogue: true });
+
+        if (sauvegarde.methode === 'annule') return;
+
+        if (typeof window.afficherNotificationSucces === 'function') {
+            var methodeLabel = sauvegarde.methode === 'fsapi' ? 'nouvel emplacement' :
+                               sauvegarde.methode === 'share' ? 'Fichiers' : 'Téléchargements';
+            window.afficherNotificationSucces(
+                'Classeur enregistré',
+                _formaterTaille(resultat.blob.size) + ' — ' + methodeLabel
+            );
+        }
+    } catch (e) {
+        console.error('📂 Erreur enregistrement classeur:', e);
+        alert('Erreur : ' + e.message);
+    }
 }
 
 /**

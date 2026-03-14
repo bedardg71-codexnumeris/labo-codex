@@ -1,37 +1,53 @@
-# SESSION ACTIVE - BETA 98.5
+# SESSION ACTIVE - BETA 98.6
 
 **Date** : 14 mars 2026
-**Version** : Beta 98.5
-**Statut** : Classeur Phase 3 COMPLÉTÉE — Prochaine étape : test + backlog
+**Version** : Beta 98.6
+**Statut** : Classeur Phases 1-4 COMPLÉTÉES — À tester sur Chrome Mac
 
-## PHASE 3 COMPLÉTÉE — Classeur Multi-classeur + fusion (#227)
+## PHASES 1-4 COMPLÉTÉES — Classeur (#225-#228)
 
-**Module** : `js/classeur.js` (~2657 lignes)
-**Phases 1-3 toutes complétées.** Plan détaillé : `docs/plan-classeur.md`
+**Module** : `js/classeur.js` (~2886 lignes)
+**Plan détaillé** : `docs/plan-classeur.md`
 
-### Fonctionnalités livrées (Phase 3, 14 mars 2026) :
-- **3.1** `Classeur.lireExterne()` — lecture ZIP en mémoire sans IDB
-- **3.2** `_analyserFusion()` — diff 3 parties (local/externe/ancêtre), 8 catégories
-- **3.3** `_resoudreConflits()` — auto-merge + 4 stratégies conflits interactives
-- **3.4** `_fusionnerTravaux()` — import blobs + fusion liste fichiersTravaux
-- **3.5** `Classeur.actionFusionner()` — flux complet 12 étapes, bouton menu
-- **3.6** `Classeur.actionExporterSelection()` — export par trimestre, ZIP partiel
+### Phase 4 livrée (14 mars 2026) — #228 Auto-save FSAPI :
+- **4.1** Handle FSAPI persistant — `_fileHandle` conservé après sauvegarde/ouverture (Chrome/Edge)
+- **4.2** Auto-save silencieux toutes les 5 min via handle (`genererClasseur({silencieux: true})`)
+- **4.3** Indicateur menu : sous-texte "Vers le même emplacement" + ligne statut auto-save
+
+### Comportement par navigateur :
+- **Chrome/Edge** : handle FSAPI → Enregistrer sans dialogue → auto-save 5 min
+- **Safari Mac/iPad** : fallback download/share inchangé, pas d'auto-save
 
 ### Menu classeur (en-tête) — boutons :
-Ouvrir | Enregistrer | Enregistrer sous | Nouveau | Détails | Historique | Comparer | **Fusionner** | **Exporter sélection** | Fermer
+Ouvrir | Enregistrer (+ sous-texte FSAPI) | Enregistrer sous | Nouveau | Détails | Historique | Comparer | Fusionner | Exporter sélection | Fermer | *(statut auto-save)*
+
+## À TESTER — Prochaine session
+
+1. **Chrome Mac** : Ouvrir classeur → Enregistrer (dialogue FSAPI) → Enregistrer à nouveau (SANS dialogue) → attendre 5 min → vérifier auto-save silencieux
+2. **Chrome Mac** : Retirer clé USB pendant auto-save → vérifier arrêt propre + message console
+3. **Safari Mac** : Vérifier aucune erreur JS, fallback download fonctionne
+4. **Menu** : Vérifier sous-texte "Vers le même emplacement" et ligne auto-save
 
 ## PROCHAINES TÂCHES
 
 Consulter `BACKLOG.md` pour les priorités :
-- **#228** Auto-save FSAPI (Phase 4 classeur)
 - **#229** Overlay norme
 - **#230** UX docs
 - **#231** Auteur
-- Ou : test manuel de la Phase 3 (fusion + export sélectif) sur Mac + iPad
+- **#214-#219** Retours testeur (3 mars 2026)
+- Test manuel des Phases 3-4 du Classeur sur Mac + iPad
 
 **IMPORTANT** : Lire `docs/plan-classeur.md` et `BACKLOG.md` en début de session.
 
 ## SESSION DU 14 MARS 2026
+
+### Travail accompli — Classeur Phase 4 : Auto-save FSAPI (#228) (14 mars 2026)
+
+197. **Handle FSAPI persistant (4.1)** : Variable `_fileHandle` conserve le `FileSystemFileHandle` obtenu via `showSaveFilePicker` ou `showOpenFilePicker`. `actionEnregistrer()` ré-écrit directement sans dialogue si handle disponible. `actionEnregistrerSous()` force le dialogue via `{forcerDialogue: true}`. `actionOuvrir()` utilise `showOpenFilePicker` (Chrome/Edge) pour obtenir un handle dès l'ouverture. Helper `_ecrireViaHandle()` factorisé. Handle nettoyé dans `fermerClasseur()` et quand le handle échoue (clé USB retirée). **Fichier** : `js/classeur.js`.
+
+198. **Auto-save silencieux (4.2)** : Timer `setInterval` de 5 min déclenché quand un handle FSAPI est obtenu. Gardes : handle? actif? modifs non sauvegardées? pas déjà en cours? `genererClasseur({silencieux: true})` désactive l'overlay de progression et la pause 500ms. Si handle invalide → arrêt propre de l'auto-save. Notification discrète via `afficherNotificationSucces`. **Fichier** : `js/classeur.js`.
+
+199. **Indicateur menu (4.3)** : Sous-texte "Vers le même emplacement" sous "Enregistrer" quand handle FSAPI connecté. Ligne de statut "Auto-save actif — Toutes les 5 min — dernier : HHhMM" dans le menu déroulant. Tooltip du bouton Classeur enrichi (nom + auto-save + modifs). CSS : `.classeur-menu-contenu`, `.classeur-menu-sous-texte`, `.classeur-menu-statut`. **Fichiers** : `js/classeur.js`, `index.html`, `styles.css`.
 
 ### Travail accompli — Classeur Phase 3 : Fusion, étapes 3.1-3.3 (14 mars 2026)
 
