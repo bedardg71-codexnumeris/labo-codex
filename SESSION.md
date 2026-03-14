@@ -14,6 +14,8 @@
 
 189. **TimeMachine restauration** : `actionRestaurer()` affiche un prompt() avec liste numerotee des snapshots (date, appareil, taille), confirm() de securite, archive automatiquement les donnees actuelles avant ecrasement, restaure le snapshot choisi dans IDB, sync cache localStorage, et propose le rechargement. Bouton "Historique des versions..." dans le menu en-tete (visible si classeur actif). **Fichiers** : `js/classeur.js`, `index.html`. Commit `bf11f3e`.
 
+190. **TimeMachine comparaison visuelle** : `actionComparer()` permet de comparer les donnees actuelles avec un snapshot historique. Diff par cle via JSON.stringify : cles ajoutees, supprimees, modifiees. Affichage regroupe par prefixe (ex: `h2026_* (12 cles)`) pour lisibilite. Helpers : `_comparerDonnees()`, `_formaterDiff()`, `_grouperParPrefixe()`. Bouton "Comparer avec une version..." dans le menu en-tete. **Fichiers** : `js/classeur.js`, `index.html`.
+
 ---
 
 ## SESSION DU 4 MARS 2026

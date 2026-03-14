@@ -276,11 +276,13 @@ MonClasseur.classeur.zip
 - Synchronisation cache localStorage après restauration
 - Bouton "Historique des versions..." dans le menu (visible si classeur actif)
 
-### Étape 2.4 — Comparaison visuelle (À FAIRE)
+### Étape 2.4 — Comparaison visuelle (COMPLÉTÉE — commit à venir)
 
-- Diff entre deux snapshots : clés ajoutées, supprimées, modifiées
-- Affichage résumé dans un alert() ou prompt()
-- Accessible depuis la liste d'historique
+- `_comparerDonnees(ancien, actuel)` : diff par clé (ajoutées, supprimées, modifiées via JSON.stringify)
+- `_formaterDiff(diff)` : affichage lisible avec regroupement par préfixe (ex: `h2026_*`)
+- `_grouperParPrefixe(cles)` : condense les clés similaires (>3 → "prefixe_* (N clés)")
+- `actionComparer()` : prompt() pour choisir un snapshot, compare vs données actuelles, alert() du résumé
+- Bouton "Comparer avec une version..." dans le menu (visible si classeur actif)
 
 ## Phase 3 — Multi-classeur + fusion (à venir)
 
