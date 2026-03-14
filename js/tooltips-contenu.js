@@ -46,7 +46,7 @@ const TOOLTIPS = {
     // =================================================================
 
     'entete-classeur':
-        'Le classeur est ton \u00ab cloud personnel \u00bb sur cl\u00e9 USB. Il regroupe toutes tes donn\u00e9es dans un seul fichier portable que tu peux transporter entre tes appareils (Mac \u2192 USB \u2192 iPad \u2192 USB \u2192 Mac). La pastille verte indique que tout est enregistr\u00e9\u00a0; la pastille orange signale des modifications non sauvegard\u00e9es.',
+        'Le classeur est ton \u00ab cloud personnel \u00bb sur cl\u00e9 USB. Il regroupe toutes tes donn\u00e9es dans un seul fichier portable que tu peux transporter entre tes appareils (ordinateur \u2192 USB \u2192 tablette \u2192 USB \u2192 ordinateur). La pastille verte indique que tout est enregistr\u00e9\u00a0; la pastille orange signale des modifications non sauvegard\u00e9es.',
 
     // =================================================================
     // EN-TETE — Zone 5 : Navigation
@@ -766,7 +766,7 @@ const TOOLTIPS = {
 
     // — Import pipeline —
     'travaux-fsapi-config':
-        'Stocke les fichiers import\u00e9s directement sur le disque local au lieu d\u2019IndexedDB. Recommand\u00e9 sur Mac pour \u00e9viter les limites de stockage du navigateur.',
+        'Stocke les fichiers import\u00e9s directement sur le disque local au lieu d\u2019IndexedDB. Recommand\u00e9 sur ordinateur pour \u00e9viter les limites de stockage du navigateur.',
     'travaux-pipeline-optimisation':
         'Les images sont optimis\u00e9es automatiquement (uniformisation 200 DPI, compression JPEG). Les PDF sont import\u00e9s tels quels.',
 
