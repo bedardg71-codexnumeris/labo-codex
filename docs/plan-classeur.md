@@ -365,10 +365,20 @@ Pour chaque clé présente dans un ou les deux classeurs :
 - API publique : `Classeur.actionFusionner()`
 - `_actualiserMenu()` mis à jour pour `classeur-menu-fusionner`
 
-#### Étape 3.6 — Export sélectif (optionnel, à valider)
+#### Étape 3.6 — Export sélectif par trimestre (COMPLÉTÉE — 14 mars 2026)
 
-- Filtrer les clés par préfixe de trimestre ou par groupe-cours
-- Générer un classeur partiel (sous-ensemble des données)
+- `_detecterTrimestresDisponibles(donnees)` : scan des préfixes de clés (regex `[ah]\d{4}|demo`)
+- `_filtrerDonneesPourExport(donnees, trimestres, inclureGlobales)` : filtre par préfixe, inclut globales
+- `_filtrerTravauxPourExport(donneesFiltrees, chemins)` : garde les blobs référencés uniquement
+- `_formaterNomTrimestre(prefixe)` : "h2026" → "Hiver 2026", "a2025" → "Automne 2025"
+- `actionExporterSelection()` : flux complet — collecte IDB → détection trimestres → prompt choix
+  (numéros séparés par virgules ou "tous") → filtrage → résumé/confirm → ZIP partiel → sauvegarde
+- ZIP partiel : donnees.json filtrées + blobs associés + manifeste (sans TimeMachine)
+- Manifeste enrichi : `exportSelectif: true`, `trimestresInclus: [...]`
+- Garde-fous : 0 trimestre → message, 1 seul trimestre → redirige vers export complet
+- Bouton "Exporter une sélection..." toujours visible dans le menu (pas besoin de classeur actif)
+- API publique : `Classeur.actionExporterSelection()`
+- **Note** : filtre par groupe-cours non implémenté (trop invasif — nécessiterait de filtrer le contenu des tableaux)
 
 ## Phase 4 — Auto-save FSAPI (à venir)
 
@@ -380,4 +390,4 @@ Pour chaque clé présente dans un ou les deux classeurs :
 ---
 
 **Créé** : 14 mars 2026
-**Statut** : Phase 1 complétée, Phase 2 complétée, Phase 3 étapes 3.1-3.5 complétées, 3.6 à faire
+**Statut** : Phase 1 complétée, Phase 2 complétée, Phase 3 complétée (3.1-3.6)
