@@ -5462,6 +5462,41 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-size: 0.82rem;
 }
 
+.classeur-menu-statut-haut {
+    padding: 10px 16px;
+    font-size: 0.82rem;
+    border-bottom: 1px solid rgba(106, 172, 184, 0.15);
+    margin-bottom: 2px;
+}
+
+.classeur-menu-statut-haut .classeur-statut-nom {
+    font-weight: 600;
+    color: var(--texte-principal, #e0e0e0);
+    margin-bottom: 4px;
+}
+
+.classeur-menu-statut-haut .classeur-statut-etat {
+    font-size: 0.75rem;
+    color: var(--texte-secondaire, #8ba4b0);
+}
+
+.classeur-statut-pastille {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+.classeur-statut-pastille--vert {
+    background: var(--vert-succes, #4caf50);
+}
+
+.classeur-statut-pastille--orange {
+    background: var(--orange-attention, #e8a838);
+}
+
 .classeur-menu-sep {
     height: 1px;
     background: rgba(106, 172, 184, 0.15);
