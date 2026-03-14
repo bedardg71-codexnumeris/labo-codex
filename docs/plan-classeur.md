@@ -284,12 +284,79 @@ MonClasseur.classeur.zip
 - `actionComparer()` : prompt() pour choisir un snapshot, compare vs données actuelles, alert() du résumé
 - Bouton "Comparer avec une version..." dans le menu (visible si classeur actif)
 
-## Phase 3 — Multi-classeur + fusion (à venir)
+## Phase 3 — Multi-classeur + fusion (À FAIRE — #227)
 
-- Ouvrir plusieurs classeurs
-- Fusion intelligente par ID + timestamp
-- Détection et résolution de conflits
-- Export sélectif (par groupe-cours, par étudiant)
+### Cas d'usage
+
+L'enseignant utilise Labo Codex sur Mac et iPad. Chaque appareil a son propre classeur ZIP sur clé USB.
+En fin de semaine, il veut fusionner les deux classeurs en un seul état cohérent.
+
+### Architecture proposée
+
+```
+Classeur A (Mac)          Classeur B (iPad)
+├── donnees.json          ├── donnees.json
+├── travaux/              ├── travaux/
+└── historique/           └── historique/
+         ↓                         ↓
+    ┌─────────────────────────────────┐
+    │     Fusion intelligente          │
+    │  1. Comparer les clés            │
+    │  2. Auto-merge (timestamp)       │
+    │  3. Conflits → choix utilisateur │
+    └─────────────────────────────────┘
+                  ↓
+         Classeur fusionné
+```
+
+### Stratégie de fusion
+
+Pour chaque clé présente dans un ou les deux classeurs :
+- **Clé uniquement dans A** → prendre A
+- **Clé uniquement dans B** → prendre B
+- **Clé dans A et B, valeurs identiques** → garder (pas de conflit)
+- **Clé dans A et B, valeurs différentes** → CONFLIT
+  - Auto-résolution par `dateDerniereModification` du manifeste ? Trop grossier (c'est global, pas par clé)
+  - Meilleure approche : comparer avec l'ancêtre commun (dernier snapshot partagé)
+  - Si un seul côté a changé vs ancêtre → prendre celui qui a changé
+  - Si les deux ont changé → conflit réel → choix utilisateur
+
+### Étapes d'implémentation
+
+#### Étape 3.1 — Lecture d'un classeur externe (sans import)
+
+- `lireClasseurExterne(fichierZip)` → extrait donnees.json + manifeste SANS écrire dans IndexedDB
+- Retourne `{manifeste, donnees, travaux: [liste des fichiers]}` en mémoire seulement
+- C'est la base pour comparer/fusionner sans polluer l'état actuel
+
+#### Étape 3.2 — Détection des différences entre deux jeux de données
+
+- Réutiliser `_comparerDonnees()` de Phase 2
+- Ajouter : `_detecterConflits(donneesA, donneesB, ancetreCommun)` si ancêtre disponible
+- Catégoriser chaque clé : ajoutée-A, ajoutée-B, modifiée-A, modifiée-B, conflit
+
+#### Étape 3.3 — Résolution des conflits
+
+- Interface simple : pour chaque conflit, prompt/confirm avec résumé
+- Options : garder local (A), garder externe (B), ignorer
+- Pour les tableaux (listes d'étudiants, présences, évaluations) : fusion par ID d'élément si possible
+
+#### Étape 3.4 — Fusion des blobs (travaux)
+
+- Les blobs sont identifiés par `id` unique (FT_xxx)
+- Un blob présent seulement dans B → l'importer
+- Un blob présent dans les deux → garder (même ID = même fichier)
+
+#### Étape 3.5 — Action menu "Fusionner avec un classeur..."
+
+- Bouton dans le menu classeur
+- Flux : ouvrir fichier → lecture externe → diff → résolution conflits → merge → notification
+- Pas de rechargement nécessaire si on écrit directement dans IDB
+
+#### Étape 3.6 — Export sélectif (optionnel, à valider)
+
+- Filtrer les clés par préfixe de trimestre ou par groupe-cours
+- Générer un classeur partiel (sous-ensemble des données)
 
 ## Phase 4 — Auto-save FSAPI (à venir)
 
@@ -301,4 +368,4 @@ MonClasseur.classeur.zip
 ---
 
 **Créé** : 14 mars 2026
-**Statut** : Phase 1 complétée, Phase 2 en cours (étapes 2.1-2.3 complétées)
+**Statut** : Phase 1 complétée, Phase 2 complétée, Phase 3 à faire
