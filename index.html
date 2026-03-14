@@ -767,48 +767,6 @@
             margin: 0 4px;
         }
 
-        /* Carte Dernières nouvelles */
-        .accueil-nouvelles {
-            background: var(--bleu-tres-pale);
-            border: 1px solid var(--bleu-pale);
-            border-radius: var(--radius-grand);
-            padding: 16px 20px;
-            margin-bottom: 20px;
-        }
-        .accueil-nouvelles-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-        .accueil-nouvelles-icone { font-size: 1.3rem; }
-        .accueil-nouvelles-titre {
-            font-weight: 600;
-            color: var(--accent-primaire);
-            font-size: 0.95rem;
-        }
-        .accueil-nouvelles-version {
-            margin-left: auto;
-            font-size: 0.8rem;
-            color: var(--gris-moyen);
-        }
-        .accueil-nouvelles-contenu {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-        .accueil-nouvelles-lien {
-            font-size: 0.85rem;
-            color: var(--accent-primaire);
-            cursor: pointer;
-        }
-        .accueil-nouvelles-lien:hover { text-decoration: underline; }
-        .accueil-nouvelles-separateur {
-            color: var(--bleu-pale);
-            margin: 0 4px;
-        }
-
         @media (max-width: 1300px) {
             .accueil-cartes--10 {
                 grid-template-columns: repeat(3, 1fr);
@@ -3785,33 +3743,7 @@
             </div>
         </div>
 
-        <!-- MODAL NOUVEAUTÉS BETA -->
-        <!-- ========== MODAL NEWS (✉️) ========== -->
-        <div id="modalNouveautes" class="modal-overlay">
-            <div class="modal-contenu modal-compact">
-
-                <!-- Bouton fermer -->
-                <button onclick="fermerModalNouveautes()" class="modal-fermer">✕</button>
-
-                <!-- Titre principal -->
-                <h2 class="modal-titre">Nouveautés</h2>
-
-                <!-- Contenu changelog généré dynamiquement par js/changelog-data.js -->
-                <div id="changelog-contenu"></div>
-
-                <!-- Lien vers notes de version complètes -->
-                <p class="u-text-center" style="margin: 1rem 0">
-                    <a href="#" onclick="fermerModalNouveautes(); allerVersNotesDeVersion(); return false;" class="u-texte-bleu">Voir toutes les notes de version →</a>
-                </p>
-
-                <!-- Bouton fermer en bas -->
-                <div class="modal-actions-centre">
-                    <button onclick="fermerModalNouveautes()" class="btn btn-principal">
-                        Fermer
-                    </button>
-                </div>
-            </div>
-        </div>
+        <!-- Modal nouveautés retiré de l'interface (Beta 98.6.1) — données conservées dans js/changelog-data.js pour référence dev -->
 
         <!-- ========== MODAL INTRODUCTION (🗺️) ========== -->
 
@@ -17282,8 +17214,7 @@
     <!-- Guidage contextuel démo (Chantier 4) -->
     <script src="js/guidage-demo.js?v=2026020601"></script>
 
-    <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=2026021401"></script>
+    <!-- changelog-data.js conservé dans le repo pour référence dev, mais plus chargé dans l'app -->
 
     <!-- Badges "En développement actif" sur sous-navigation -->
     <script src="js/badges-dev.js?v=2026021001"></script>
@@ -17315,108 +17246,6 @@
         let BUILD_ID = '0314-1331';
 
         // === CLÉS LOCALSTORAGE ===
-        const CLE_VERSION_VUE = 'monitorage-version-vue';
-        const CLE_BUILD_VU = 'monitorage-build-vu';
-
-        /**
-         * Vérifie s'il y a des nouveautés non vues
-         */
-        function verifierNouveautes() {
-            const versionVue = localStorage.getItem(CLE_VERSION_VUE);
-            const buildVu = localStorage.getItem(CLE_BUILD_VU);
-
-            const nouvelleVersionMajeure = versionVue !== VERSION_MAJEURE;
-            const nouveauBuild = buildVu !== BUILD_ID;
-
-            return {
-                nouvelleVersionMajeure,
-                nouveauBuild,
-                aDesNouveautes: nouvelleVersionMajeure || nouveauBuild
-            };
-        }
-
-        /**
-         * Met à jour l'affichage de la pastille selon l'état
-         */
-        function mettreAJourPastille() {
-            const pastille = document.querySelector('.pastille-nouveautes');
-            if (!pastille) return;
-
-            const { aDesNouveautes } = verifierNouveautes();
-            pastille.textContent = aDesNouveautes ? '\uD83D\uDD34' : '';
-            pastille.parentElement.title = aDesNouveautes ? 'Nouveautés disponibles' : 'Notes de version';
-        }
-
-        /**
-         * Gère le clic sur la pastille
-         * - Nouvelle version majeure → Modal Bienvenue
-         * - Nouveau build seulement → Aide > Notes de version
-         */
-        function afficherModalNouveautes() {
-            const { nouvelleVersionMajeure } = verifierNouveautes();
-
-            if (nouvelleVersionMajeure) {
-                // Nouvelle version majeure → ouvrir le modal Bienvenue
-                const modal = document.getElementById('modalNouveautes');
-                if (modal) {
-                    modal.classList.add('actif');
-                }
-                // Marquer version ET build comme vus
-                localStorage.setItem(CLE_VERSION_VUE, VERSION_MAJEURE);
-                localStorage.setItem(CLE_BUILD_VU, BUILD_ID);
-            } else {
-                // Juste un nouveau build → ouvrir aussi le modal (avec section testeurs)
-                const modal = document.getElementById('modalNouveautes');
-                if (modal) {
-                    modal.classList.add('actif');
-                }
-                // Marquer le build comme vu
-                localStorage.setItem(CLE_BUILD_VU, BUILD_ID);
-            }
-
-            mettreAJourPastille();
-        }
-
-        /**
-         * Navigue vers la section Aide > Notes de version
-         */
-        function allerVersNotesDeVersion() {
-            // Utiliser les fonctions de navigation existantes
-            if (typeof afficherSection === 'function') {
-                afficherSection('aide');
-                // Petit délai pour laisser la section se charger
-                setTimeout(() => {
-                    if (typeof afficherSousSection === 'function') {
-                        afficherSousSection('aide-versions');
-                        // Mettre à jour le bouton actif dans la sous-navigation
-                        const conteneurSousNav = document.getElementById('sous-navigation');
-                        if (conteneurSousNav) {
-                            conteneurSousNav.querySelectorAll('button').forEach(b => b.classList.remove('actif'));
-                            const btnVersions = conteneurSousNav.querySelector('[data-sous-onglet="aide-versions"]');
-                            if (btnVersions) btnVersions.classList.add('actif');
-                        }
-                    }
-                    // Ouvrir l'accordéon de la version actuelle
-                    const accordeon = document.getElementById('accordeon-aide-beta951');
-                    if (accordeon) {
-                        const contenu = accordeon.querySelector('.accordeon-contenu');
-                        const chevron = accordeon.querySelector('.accordeon-chevron');
-                        if (contenu) contenu.style.display = 'block';
-                        if (chevron) chevron.textContent = '▼';
-                    }
-                }, 100);
-            }
-        }
-
-        /**
-         * Ferme le modal des nouveautés
-         */
-        function fermerModalNouveautes() {
-            const modal = document.getElementById('modalNouveautes');
-            if (modal) {
-                modal.classList.remove('actif');
-            }
-        }
 
         /**
          * Affiche le numéro de build dans l'entête
@@ -17453,30 +17282,11 @@
 
         // Initialisation au chargement
         document.addEventListener('DOMContentLoaded', function() {
-            // Fermer le modal News si on clique sur l'overlay
-            const modalNews = document.getElementById('modalNouveautes');
-            if (modalNews) {
-                modalNews.addEventListener('click', function(e) {
-                    if (e.target === modalNews) {
-                        fermerModalNouveautes();
-                    }
-                });
-            }
-
-            // Générer le contenu du changelog dynamiquement
-            var conteneur = document.getElementById('changelog-contenu');
-            if (conteneur && typeof genererChangelogHTML === 'function') {
-                conteneur.innerHTML = genererChangelogHTML();
-            }
-
             // Afficher le numéro de build dans l'entête (fallback immédiat)
             afficherBuildNumero();
 
             // Puis synchroniser depuis version.json (source de vérité)
             chargerVersionJSON();
-
-            // Mettre à jour l'affichage de la pastille (no-op si accueil pas encore rendu)
-            mettreAJourPastille();
         });
 
         /**
@@ -17544,9 +17354,6 @@
         });
 
         // Export des fonctions pour usage global
-        window.afficherModalNouveautes = afficherModalNouveautes;
-        window.fermerModalNouveautes = fermerModalNouveautes;
-        window.allerVersNotesDeVersion = allerVersNotesDeVersion;
         window.fermerBandeauMiseAJour = fermerBandeauMiseAJour;
         window.BUILD_ID = BUILD_ID;
         window.VERSION_MAJEURE = VERSION_MAJEURE;

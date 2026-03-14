@@ -186,9 +186,6 @@ function afficherAccueilContenu(conteneur) {
             <button class="accueil-utilitaire" onclick="if(window.backupReminder) window.backupReminder.afficherModal();">
                 \uD83D\uDCBE Sauvegarder
             </button>
-            <button class="accueil-utilitaire" onclick="afficherModalNouveautes();">
-                \u2709\uFE0F<span class="pastille-nouveautes"></span> Nouvelles
-            </button>
         </div>
 
         <div class="accueil-pied">
@@ -200,8 +197,6 @@ function afficherAccueilContenu(conteneur) {
         </div>
     `;
 
-    // Mettre a jour la pastille des nouveautes (elle est maintenant dans le DOM)
-    if (typeof mettreAJourPastille === 'function') mettreAJourPastille();
 }
 
 /**
