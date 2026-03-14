@@ -1043,7 +1043,7 @@ const TOOLTIPS = {
         'Sauvegarde, restauration, snapshots A-C-P-E, export anonymis\u00e9, r\u00e9initialisation et maintenance.',
 
     'nav-reg-apropos':
-        'Notes de version du syst\u00e8me.'
+        'Informations sur l\u2019application et sa version.'
 };
 
 // Export global
