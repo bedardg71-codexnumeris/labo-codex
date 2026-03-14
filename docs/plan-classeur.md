@@ -27,7 +27,7 @@
 
 ---
 
-## Phase 1 — Le cœur (actuelle)
+## Phase 1 — Le cœur (COMPLÉTÉE — Beta 98.5, commit 8f1fc57)
 
 Objectif : Ouvrir et sauvegarder un Classeur ZIP depuis/vers n'importe quel emplacement (clé USB incluse), sur Mac ET iPad.
 
@@ -227,12 +227,60 @@ async function sauvegarderClasseur(blob, nomFichier) {
 
 ---
 
-## Phase 2 — TimeMachine (à venir)
+## Phase 2 — TimeMachine (EN COURS — 14 mars 2026)
 
-- Historique des versions dans le Classeur
-- Rotation automatique (10 dernières ou 30 jours)
-- Interface de restauration ("Revenir à...")
-- Comparaison entre versions (diff visuel)
+Objectif : Versionner automatiquement les données du classeur pour permettre de revenir à un état antérieur.
+
+### Architecture
+
+Le dossier `historique/` dans le ZIP contient des snapshots de `donnees.json` (pas les blobs — trop lourds et rarement modifiés).
+
+**Format ZIP enrichi** :
+```
+MonClasseur.classeur.zip
+├── classeur-manifeste.json    ← avec champ historique[]
+├── donnees.json               ← version courante
+├── travaux/                   ← blobs (inchangé)
+└── historique/                ← NOUVEAU
+    ├── 2026-03-14T10-00-00.json
+    ├── 2026-03-13T14-30-00.json
+    └── ...
+```
+
+**Stockage intermédiaire (IndexedDB)** :
+- `_classeur_hist_index` — index des snapshots [{date, appareil, taille}]
+- `_classeur_snapshot_avant` — données au moment du dernier chargement/sauvegarde
+- `_classeur_hist_<DATE>` — contenu de chaque snapshot
+
+**Rotation** : max 10 snapshots ET max 30 jours (le plus restrictif).
+
+### Étape 2.1 — Infrastructure (COMPLÉTÉE — commit 9eedefa)
+
+- Constantes : `DOSSIER_HISTORIQUE`, `MAX_SNAPSHOTS`, `MAX_JOURS_HISTORIQUE`
+- `_purgerHistorique()` : rotation max 10 / 30 jours, nettoyage IDB
+- `_ecrireHistoriqueDansZip()` : IDB → ZIP
+- `_chargerHistoriqueDepuisZip()` : ZIP → IDB
+- `_nettoyerHistoriqueIDB()` : nettoyage complet
+
+### Étape 2.2 — Branchement dans les flux (COMPLÉTÉE — commit 20442df)
+
+- `genererClasseur()` : archive le snapshot précédent, rotation, écrit historique dans ZIP
+- `chargerClasseur()` : capture snapshot + charge historique existant du ZIP
+- `fermerClasseur()` : nettoie l'historique IDB
+- Manifeste enrichi avec champ `historique[]`
+
+### Étape 2.3 — Restauration (COMPLÉTÉE — commit bf11f3e)
+
+- `actionRestaurer()` : prompt() avec liste numérotée, confirm() de sécurité
+- Archivage automatique des données actuelles avant écrasement
+- Synchronisation cache localStorage après restauration
+- Bouton "Historique des versions..." dans le menu (visible si classeur actif)
+
+### Étape 2.4 — Comparaison visuelle (À FAIRE)
+
+- Diff entre deux snapshots : clés ajoutées, supprimées, modifiées
+- Affichage résumé dans un alert() ou prompt()
+- Accessible depuis la liste d'historique
 
 ## Phase 3 — Multi-classeur + fusion (à venir)
 
@@ -251,4 +299,4 @@ async function sauvegarderClasseur(blob, nomFichier) {
 ---
 
 **Créé** : 14 mars 2026
-**Statut** : Plan approuvé, Phase 1 en cours
+**Statut** : Phase 1 complétée, Phase 2 en cours (étapes 2.1-2.3 complétées)

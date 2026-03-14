@@ -9,14 +9,14 @@
 
 ### Classeur — Flux USB multi-appareil (14 mars 2026)
 
-- [ ] **#225** Classeur Phase 1 : Ouvrir/sauvegarder un classeur ZIP portable (Mac + iPad)
-  - Module `js/classeur.js` cree (generer, charger, valider, sauvegarder multi-plateforme)
-  - Overlay de progression avec barre animee (yield + requestAnimationFrame)
-  - 3 strategies de sauvegarde : FSAPI (Chrome) → navigator.share (iPad) → download (fallback)
-  - **Etapes restantes** : bouton en-tete (1.3), limite taille relevee (1.4), test cycle complet
-  - **Plan detaille** : `docs/plan-classeur.md`
+- [x] **#225** Classeur Phase 1 : Ouvrir/sauvegarder un classeur ZIP portable (Mac + iPad) *(Beta 98.5, commit 8f1fc57)*
 
 - [ ] **#226** Classeur Phase 2 : TimeMachine (historique des versions dans le classeur)
+  - [x] Infrastructure : constantes, helpers rotation/archivage/chargement *(commit 9eedefa)*
+  - [x] Branchement : generer/charger/fermer integrent l'historique *(commit 20442df)*
+  - [x] Restauration : prompt() liste numerotee + confirm() securite *(commit bf11f3e)*
+  - [ ] Comparaison visuelle : diff entre deux snapshots (cles ajoutees/supprimees/modifiees)
+  - **Plan detaille** : `docs/plan-classeur.md`
 
 - [ ] **#227** Classeur Phase 3 : Multi-classeur + fusion
 
