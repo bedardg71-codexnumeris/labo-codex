@@ -1393,6 +1393,123 @@ function _resoudreConflits(analyse, donneesLocales, donneesExternes, analyseTrav
 }
 
 /* ===============================
+   EXPORT SÉLECTIF (Phase 3)
+   =============================== */
+
+/**
+ * Détecte les trimestres disponibles dans un jeu de données.
+ * Scanne les préfixes de clés pour trouver les trimestres (h2026_, a2025_, demo_, etc.).
+ *
+ * @param {Object} donnees - Objet clé/valeur (de IDB ou d'un classeur)
+ * @returns {string[]} Liste triée des préfixes de trimestre détectés (ex: ["a2025", "h2026"])
+ */
+function _detecterTrimestresDisponibles(donnees) {
+    var prefixes = new Set();
+    var cles = Object.keys(donnees);
+
+    // Pattern : un préfixe de trimestre est [a|h|demo]NNNN_ ou "demo_"
+    var regex = /^([ah]\d{4}|demo)_/;
+
+    for (var i = 0; i < cles.length; i++) {
+        var match = cles[i].match(regex);
+        if (match) {
+            prefixes.add(match[1]);
+        }
+    }
+
+    var liste = [];
+    prefixes.forEach(function(p) { liste.push(p); });
+    liste.sort();
+    return liste;
+}
+
+/**
+ * Filtre un jeu de données pour ne garder que les clés des trimestres sélectionnés
+ * + les clés globales (sans préfixe de trimestre).
+ *
+ * @param {Object} donnees - Objet clé/valeur complet
+ * @param {string[]} trimestresChoisis - Préfixes à inclure (ex: ["h2026"])
+ * @param {boolean} [inclureGlobales=true] - Inclure les clés sans préfixe de trimestre
+ * @returns {{donneesFiltrees: Object, stats: {total: number, gardees: number, exclues: number}}}
+ */
+function _filtrerDonneesPourExport(donnees, trimestresChoisis, inclureGlobales) {
+    if (inclureGlobales === undefined) inclureGlobales = true;
+
+    var regex = /^([ah]\d{4}|demo)_/;
+    var setTrimestres = new Set(trimestresChoisis);
+
+    var donneesFiltrees = {};
+    var gardees = 0;
+    var exclues = 0;
+
+    var cles = Object.keys(donnees);
+    for (var i = 0; i < cles.length; i++) {
+        var cle = cles[i];
+
+        // Ignorer les clés internes du classeur
+        if (cle.startsWith('_classeur_') || cle.startsWith('_')) {
+            continue;
+        }
+
+        var match = cle.match(regex);
+        if (match) {
+            // Clé namespacée — garder si le trimestre est sélectionné
+            if (setTrimestres.has(match[1])) {
+                donneesFiltrees[cle] = donnees[cle];
+                gardees++;
+            } else {
+                exclues++;
+            }
+        } else if (inclureGlobales) {
+            // Clé globale (pas de préfixe de trimestre)
+            donneesFiltrees[cle] = donnees[cle];
+            gardees++;
+        } else {
+            exclues++;
+        }
+    }
+
+    return {
+        donneesFiltrees: donneesFiltrees,
+        stats: { total: cles.length, gardees: gardees, exclues: exclues }
+    };
+}
+
+/**
+ * Filtre les chemins de fichiers travaux pour ne garder que ceux référencés
+ * dans les données filtrées (via la clé fichiersTravaux du trimestre).
+ *
+ * @param {Object} donneesFiltrees - Données après filtrage par trimestre
+ * @param {string[]} tousLesTravauxChemins - Liste complète des chemins travaux
+ * @returns {string[]} Chemins à inclure dans l'export
+ */
+function _filtrerTravauxPourExport(donneesFiltrees, tousLesTravauxChemins) {
+    // Collecter les IDs de fichiers référencés dans les données filtrées
+    var idsRefereces = new Set();
+    var cles = Object.keys(donneesFiltrees);
+    for (var i = 0; i < cles.length; i++) {
+        if (cles[i].includes('fichiersTravaux')) {
+            var liste = donneesFiltrees[cles[i]];
+            if (Array.isArray(liste)) {
+                for (var j = 0; j < liste.length; j++) {
+                    if (liste[j].id) idsRefereces.add(liste[j].id);
+                }
+            }
+        }
+    }
+
+    if (idsRefereces.size === 0) return [];
+
+    // Garder seulement les chemins dont l'ID est référencé
+    return tousLesTravauxChemins.filter(function(chemin) {
+        var nomFichier = chemin.replace(DOSSIER_TRAVAUX + '/', '');
+        var pointIndex = nomFichier.lastIndexOf('.');
+        var idFichier = pointIndex > 0 ? nomFichier.substring(0, pointIndex) : nomFichier;
+        return idsRefereces.has(idFichier);
+    });
+}
+
+/* ===============================
    FUSION DES TRAVAUX / BLOBS (Phase 3)
    =============================== */
 
@@ -2223,6 +2340,235 @@ async function actionFusionner() {
 }
 
 /**
+ * Exporter une sélection de données (par trimestre) dans un classeur partiel.
+ * Génère un ZIP contenant uniquement les trimestres choisis + clés globales + blobs associés.
+ */
+async function actionExporterSelection() {
+    _fermerMenu();
+
+    _afficherProgression('Export sélectif');
+    _majProgression(0, 'Lecture des données...');
+    await _yield();
+
+    try {
+
+    // 1. Collecter toutes les données depuis IndexedDB
+    var toutesLesCles = await db.keys();
+    var clesFiltrees = toutesLesCles.filter(function(c) {
+        return !c.startsWith('_classeur_') && !c.startsWith('_');
+    });
+    var donnees = {};
+    for (var i = 0; i < clesFiltrees.length; i++) {
+        var val = await db.get(clesFiltrees[i], null);
+        if (val !== null) donnees[clesFiltrees[i]] = val;
+        if (i % 20 === 0) {
+            _majProgression(Math.round((i / clesFiltrees.length) * 20),
+                'Lecture des données...', (i + 1) + '/' + clesFiltrees.length);
+            await _yield();
+        }
+    }
+
+    _masquerProgression();
+
+    // 2. Détecter les trimestres disponibles
+    var trimestres = _detecterTrimestresDisponibles(donnees);
+
+    if (trimestres.length === 0) {
+        alert('Aucun trimestre détecté dans les données.\n\nIl n\'y a rien à exporter.');
+        return;
+    }
+
+    if (trimestres.length === 1) {
+        alert('Un seul trimestre détecté (' + trimestres[0] + ').\n\nUtilise « Enregistrer le classeur » pour un export complet.');
+        return;
+    }
+
+    // 3. Proposer le choix des trimestres
+    var listeChoix = 'Quels trimestres exporter ?\n\n';
+    for (var t = 0; t < trimestres.length; t++) {
+        var nbCles = Object.keys(donnees).filter(function(c) {
+            return c.startsWith(trimestres[t] + '_');
+        }).length;
+        listeChoix += (t + 1) + '.  ' + _formaterNomTrimestre(trimestres[t]) + '  (' + nbCles + ' clés)\n';
+    }
+    listeChoix += '\nEntrer les numéros séparés par des virgules (ex: 1,3)\nou "tous" pour tout exporter :';
+
+    var choix = prompt(listeChoix);
+    if (!choix) return;
+
+    // 4. Parser la sélection
+    var trimestresChoisis = [];
+    var choixTrim = choix.trim().toLowerCase();
+
+    if (choixTrim === 'tous' || choixTrim === 'tout') {
+        trimestresChoisis = trimestres.slice();
+    } else {
+        var nums = choixTrim.split(/[,;\s]+/);
+        for (var n = 0; n < nums.length; n++) {
+            var idx = parseInt(nums[n].trim(), 10);
+            if (!isNaN(idx) && idx >= 1 && idx <= trimestres.length) {
+                var pref = trimestres[idx - 1];
+                if (trimestresChoisis.indexOf(pref) === -1) {
+                    trimestresChoisis.push(pref);
+                }
+            }
+        }
+    }
+
+    if (trimestresChoisis.length === 0) {
+        alert('Aucun trimestre sélectionné. Export annulé.');
+        return;
+    }
+
+    // 5. Filtrer les données
+    var resultat = _filtrerDonneesPourExport(donnees, trimestresChoisis, true);
+    var donneesFiltrees = resultat.donneesFiltrees;
+
+    // 6. Confirmer avec résumé
+    var nomsTrimestres = trimestresChoisis.map(function(p) { return _formaterNomTrimestre(p); }).join(', ');
+    var resume = 'Export sélectif : ' + nomsTrimestres + '\n\n' +
+        'Clés à exporter : ' + resultat.stats.gardees + '\n' +
+        'Clés exclues : ' + resultat.stats.exclues + '\n' +
+        '(Les données globales sont toujours incluses)\n\n' +
+        'Continuer ?';
+
+    if (!confirm(resume)) return;
+
+    // 7. Construire le ZIP partiel
+    _afficherProgression('Export sélectif');
+    _majProgression(25, 'Préparation du ZIP...');
+    await _yield();
+
+    if (typeof JSZip === 'undefined') {
+        _masquerProgression();
+        throw new Error('JSZip non disponible.');
+    }
+
+    var zip = new JSZip();
+
+    // 7a. Données JSON filtrées
+    var json = JSON.stringify(donneesFiltrees, null, 0);
+    zip.file(NOM_DONNEES, json);
+
+    // 7b. Blobs travaux associés aux trimestres sélectionnés
+    var nbBlobs = 0;
+    var tailleTotale = 0;
+    var dossier = zip.folder(DOSSIER_TRAVAUX);
+
+    // Collecter les IDs de fichiers référencés dans les données filtrées
+    var cleFT = Object.keys(donneesFiltrees).filter(function(c) {
+        return c.includes('fichiersTravaux');
+    });
+
+    if (cleFT.length > 0 && typeof travauxStockage !== 'undefined') {
+        var tousLesFichiers = [];
+        for (var ft = 0; ft < cleFT.length; ft++) {
+            var liste = donneesFiltrees[cleFT[ft]];
+            if (Array.isArray(liste)) {
+                tousLesFichiers = tousLesFichiers.concat(liste);
+            }
+        }
+
+        for (var j = 0; j < tousLesFichiers.length; j++) {
+            var f = tousLesFichiers[j];
+            try {
+                var blob = await travauxStockage.recupererBlob(f.id);
+                if (blob) {
+                    var ext = (f.nomFichier || 'bin').split('.').pop();
+                    dossier.file(f.id + '.' + ext, blob);
+                    nbBlobs++;
+                    tailleTotale += blob.size || 0;
+                }
+            } catch (e) {
+                console.warn('📂 Export sélectif : blob ignoré pour ' + f.id, e.message);
+            }
+            if (j % 5 === 0) {
+                _majProgression(25 + Math.round((j / tousLesFichiers.length) * 35),
+                    'Ajout des fichiers travaux...', nbBlobs + '/' + tousLesFichiers.length);
+                await _yield();
+            }
+        }
+    }
+
+    // 7c. Manifeste (partiel — pas de TimeMachine)
+    var maintenant = new Date().toISOString();
+    var manifeste = {
+        formatVersion: FORMAT_VERSION,
+        appVersion: _obtenirVersionApp(),
+        nom: (_etat.nom || _genererNomClasseur()) + ' (sélection)',
+        auteur: _etat.manifeste ? _etat.manifeste.auteur : '',
+        dateCreation: maintenant,
+        dateDerniereModification: maintenant,
+        appareil: _identifierAppareil(),
+        trimestre: trimestresChoisis.join(', '),
+        exportSelectif: true,
+        trimestresInclus: trimestresChoisis,
+        contenu: {
+            cles: Object.keys(donneesFiltrees),
+            nombreFichiersTravaux: nbBlobs,
+            tailleTotaleOctets: new Blob([json]).size + tailleTotale
+        },
+        historique: []
+    };
+
+    zip.file(NOM_MANIFESTE, JSON.stringify(manifeste, null, 2));
+
+    // 8. Générer le blob
+    _majProgression(65, 'Compression du ZIP...');
+    var zipBlob = await zip.generateAsync(
+        { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
+        function(meta) {
+            _majProgression(65 + Math.round(meta.percent * 0.30),
+                'Compression du ZIP...', Math.round(meta.percent) + '%');
+        }
+    );
+
+    _majProgression(98, 'Enregistrement...');
+    await _yield();
+
+    // 9. Sauvegarder
+    var nomFichier = _genererNomFichier(manifeste.nom);
+    var resultatSave = await sauvegarderVersDestination(zipBlob, nomFichier);
+
+    _majProgression(100, 'Export terminé !');
+    await new Promise(function(r) { setTimeout(r, 500); });
+    _masquerProgression();
+
+    if (resultatSave.methode !== 'annule') {
+        console.log('📂 Export sélectif : ' + nomsTrimestres + ' — ' +
+            resultat.stats.gardees + ' clés, ' + nbBlobs + ' blob(s), ' +
+            _formaterTaille(zipBlob.size));
+
+        if (typeof window.afficherNotificationSucces === 'function') {
+            window.afficherNotificationSucces(
+                'Export sélectif enregistré',
+                nomsTrimestres + ' — ' + _formaterTaille(zipBlob.size)
+            );
+        }
+    }
+
+    } catch (erreur) {
+        _masquerProgression();
+        alert('Erreur lors de l\'export sélectif :\n\n' + erreur.message);
+        console.error('📂 Export sélectif : erreur', erreur);
+    }
+}
+
+/**
+ * Formate un préfixe de trimestre en nom lisible.
+ * @param {string} prefixe - ex: "h2026", "a2025", "demo"
+ * @returns {string} - ex: "Hiver 2026", "Automne 2025", "Démo"
+ */
+function _formaterNomTrimestre(prefixe) {
+    if (prefixe === 'demo') return 'Démo';
+    var saison = prefixe.charAt(0);
+    var annee = prefixe.substring(1);
+    if (saison === 'h') return 'Hiver ' + annee;
+    if (saison === 'a') return 'Automne ' + annee;
+    return prefixe;
+}
+
+/**
  * Fermer le classeur actif
  */
 function actionFermer() {
@@ -2289,6 +2635,7 @@ window.Classeur = {
     actionRestaurer: actionRestaurer,
     actionComparer: actionComparer,
     actionFusionner: actionFusionner,
+    actionExporterSelection: actionExporterSelection,
     actionFermer: actionFermer,
 
     // État

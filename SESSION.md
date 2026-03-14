@@ -6,7 +6,7 @@
 
 ## PROCHAINE TÂCHE — #227 Classeur Phase 3 : Multi-classeur + fusion
 
-**Contexte** : Le Classeur (module `js/classeur.js`, ~2035 lignes) est un workspace portable ZIP.
+**Contexte** : Le Classeur (module `js/classeur.js`, ~2657 lignes) est un workspace portable ZIP.
 Phase 1 (COMPLÉTÉE) : generer/charger/valider/sauvegarder multi-plateforme.
 Phase 2 (COMPLÉTÉE) : TimeMachine — snapshots automatiques dans `historique/`, restauration, comparaison visuelle.
 
@@ -43,6 +43,8 @@ Phase 2 (COMPLÉTÉE) : TimeMachine — snapshots automatiques dans `historique/
 194. **Fusion des blobs travaux (3.4)** : `_fusionnerTravaux(zipExterne, donneesExternes, cheminsAImporter, onProgression)` — extrait et stocke les blobs manquants via `travauxStockage.stockerBlob()`, fusionne la liste `fichiersTravaux` locale sans doublon. Retourne `{importes, ignores, erreurs}`. **Fichier** : `js/classeur.js`.
 
 195. **Action menu Fusionner (3.5)** : `actionFusionner()` — flux complet en 12 étapes : file picker → lecture externe → collecte IDB → ancêtre commun → analyse diff → résolution conflits → application IDB → sync cache → import blobs → résumé. Bouton "Fusionner avec un classeur..." dans le menu en-tête (visible si classeur actif). **Fichiers** : `js/classeur.js`, `index.html`.
+
+196. **Export sélectif par trimestre (3.6)** : `actionExporterSelection()` — détecte les trimestres disponibles, propose un choix (numéros ou "tous"), filtre les données + blobs associés, génère un ZIP partiel (sans TimeMachine). Helpers : `_detecterTrimestresDisponibles()`, `_filtrerDonneesPourExport()`, `_filtrerTravauxPourExport()`, `_formaterNomTrimestre()`. Manifeste marqué `exportSelectif: true`. Bouton "Exporter une sélection..." toujours visible dans le menu. **Fichiers** : `js/classeur.js`, `index.html`.
 
 ### Travail accompli — Classeur TimeMachine Phase 2 (14 mars 2026)
 
