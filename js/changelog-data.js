@@ -17,7 +17,7 @@
                 'R\u00e9troactions personnalisables\u00a0: tampons, codes d\u2019erreur, ic\u00f4nes et couleurs modifiables par l\u2019enseignant.',
                 'Outils d\u2019annotation enrichis\u00a0: ligne, vague, duplication, s\u00e9lection et formes.',
                 'Corbeille pour les fichiers supprim\u00e9s (restauration possible pendant 30\u00a0jours).',
-                'Classeur USB pour transporter tes donn\u00e9es entre Mac et iPad.',
+                'Classeur USB pour transporter tes donn\u00e9es entre appareils.',
                 'Barre d\u2019outils compacte et visionneuse redessin\u00e9e.'
             ]
         },
