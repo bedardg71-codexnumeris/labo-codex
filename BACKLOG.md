@@ -27,13 +27,14 @@
   - **A tester sur Chrome Mac** : ouvrir → enregistrer → enregistrer (sans dialogue) → auto-save 5 min
   - **Plan detaille** : `docs/plan-classeur.md`
 
-- [ ] **#229** Design : Adopter l'overlay de progression du Classeur comme norme
+- [x] **#229** Design : Adopter l'overlay de progression du Classeur comme norme *(14 mars 2026)*
+  - Nouveau fichier `js/progression.js` : 3 fonctions globales (`afficherProgression`, `majProgression`, `masquerProgression`)
+  - Classes CSS `.progression-*` dans `styles.css` (remplacement des styles inline)
+  - `classeur.js` delegue aux fonctions globales via alias
 
-- [ ] **#231** Classeur : Auteur non defini dans les details
-  - Le champ `auteur` du manifeste est vide car `infoCours.enseignant` n'est pas renseigne
-  - Ajouter un champ "Auteur" editable dans les details du classeur (ou dans les reglages)
-  - L'auteur devrait se propager dans le manifeste a chaque sauvegarde
-  - Lier avec le champ enseignant existant dans infoCours si disponible
+- [x] **#231** Classeur : Auteur non defini dans les details *(14 mars 2026)*
+  - Nouvelle fonction `_obtenirAuteur()` avec cascade : `profilEnseignant` (prenom+nom) → `infoCours.enseignant` (fallback)
+  - L'auteur se propage automatiquement dans le manifeste a chaque sauvegarde
 
 - [ ] **#230** UX : Documentation utilisateur du concept Classeur
   - Tooltip sur le bouton Classeur dans l'en-tete (expliquer le concept clé USB = cloud personnel)

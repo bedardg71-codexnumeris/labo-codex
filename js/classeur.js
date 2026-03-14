@@ -210,7 +210,7 @@ async function genererClasseur(options = {}) {
             historiqueIndex.push({
                 date: dateSnapshot,
                 appareil: (_etat.manifeste ? _etat.manifeste.appareil : null) || _identifierAppareil(),
-                taille: jsonSnapshot.length
+                taille: new Blob([jsonSnapshot]).size
             });
 
             console.log('📂 TimeMachine : snapshot archivé (' + dateSnapshot + ')');
@@ -229,8 +229,7 @@ async function genererClasseur(options = {}) {
 
     // 4. Manifeste
     const maintenant = new Date().toISOString();
-    const infoCours = db.getSync('infoCours', {});
-    const auteur = (typeof infoCours?.enseignant === 'string') ? infoCours.enseignant : '';
+    const auteur = _obtenirAuteur();
     const trimestreActif = (typeof window.trimestreActif === 'string') ? window.trimestreActif : '';
 
     var historiqueManifeste = [];
@@ -768,65 +767,12 @@ function _yield() {
 }
 
 /* ===============================
-   OVERLAY DE PROGRESSION
+   OVERLAY DE PROGRESSION — délégué à window.afficherProgression (#229)
    =============================== */
 
-let _overlayEl = null;
-
-/**
- * Affiche un overlay de progression plein écran.
- * @param {string} titre - Ex: "Génération du classeur"
- */
-function _afficherProgression(titre) {
-    _masquerProgression(); // nettoyage si déjà visible
-
-    const overlay = document.createElement('div');
-    overlay.id = 'classeur-progression-overlay';
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:100000;backdrop-filter:blur(4px);';
-
-    const boite = document.createElement('div');
-    boite.style.cssText = 'background:var(--surface-carte,#1a3040);border-radius:var(--radius-moyen,12px);padding:32px 40px;min-width:340px;max-width:480px;text-align:center;color:white;box-shadow:0 8px 32px rgba(0,0,0,0.4);';
-
-    boite.innerHTML =
-        '<div style="font-size:1.2rem;font-weight:600;margin-bottom:8px;" id="classeur-prog-titre">' + titre + '</div>' +
-        '<div style="font-size:0.85rem;color:rgba(255,255,255,0.6);margin-bottom:20px;" id="classeur-prog-detail">Préparation...</div>' +
-        '<div style="background:rgba(255,255,255,0.1);border-radius:6px;height:8px;overflow:hidden;margin-bottom:12px;">' +
-            '<div id="classeur-prog-barre" style="height:100%;width:0%;background:var(--accent-principal,#6aacb8);border-radius:6px;transition:width 0.3s ease;"></div>' +
-        '</div>' +
-        '<div style="font-size:0.8rem;color:rgba(255,255,255,0.4);" id="classeur-prog-stats"></div>';
-
-    overlay.appendChild(boite);
-    document.body.appendChild(overlay);
-    _overlayEl = overlay;
-}
-
-/**
- * Met à jour la progression.
- * @param {number} pourcentage - 0 à 100
- * @param {string} detail - Message de détail
- * @param {string} [stats] - Stats supplémentaires (ex: "42/117 fichiers")
- */
-function _majProgression(pourcentage, detail, stats) {
-    var barre = document.getElementById('classeur-prog-barre');
-    var detailEl = document.getElementById('classeur-prog-detail');
-    var statsEl = document.getElementById('classeur-prog-stats');
-    if (barre) barre.style.width = Math.min(100, Math.max(0, pourcentage)) + '%';
-    if (detailEl) detailEl.textContent = detail;
-    if (statsEl && stats) statsEl.textContent = stats;
-}
-
-/**
- * Masque l'overlay de progression.
- */
-function _masquerProgression() {
-    if (_overlayEl) {
-        _overlayEl.remove();
-        _overlayEl = null;
-    }
-    // Nettoyage résiduel
-    var ancien = document.getElementById('classeur-progression-overlay');
-    if (ancien) ancien.remove();
-}
+var _afficherProgression = window.afficherProgression;
+var _majProgression = window.majProgression;
+var _masquerProgression = window.masquerProgression;
 
 /* ===============================
    HISTORIQUE / TIMEMACHINE
@@ -1771,6 +1717,22 @@ function _identifierAppareil() {
 function _obtenirVersionApp() {
     if (typeof window.VERSION_MAJEURE === 'string') return window.VERSION_MAJEURE;
     return 'inconnue';
+}
+
+/**
+ * Obtient le nom de l'auteur depuis le profil enseignant (#231).
+ * Cascade : profilEnseignant (prenom+nom) → infoCours.enseignant (string)
+ */
+function _obtenirAuteur() {
+    var profil = db.getSync('profilEnseignant', null);
+    if (profil && (profil.prenom || profil.nom)) {
+        return ((profil.prenom || '') + ' ' + (profil.nom || '')).trim();
+    }
+    var infoCours = db.getSync('infoCours', {});
+    if (typeof infoCours?.enseignant === 'string' && infoCours.enseignant.trim()) {
+        return infoCours.enseignant.trim();
+    }
+    return '';
 }
 
 /**
