@@ -6,7 +6,7 @@
 
 ## PROCHAINE TÂCHE — #227 Classeur Phase 3 : Multi-classeur + fusion
 
-**Contexte** : Le Classeur (module `js/classeur.js`, ~1400 lignes) est un workspace portable ZIP.
+**Contexte** : Le Classeur (module `js/classeur.js`, ~2035 lignes) est un workspace portable ZIP.
 Phase 1 (COMPLÉTÉE) : generer/charger/valider/sauvegarder multi-plateforme.
 Phase 2 (COMPLÉTÉE) : TimeMachine — snapshots automatiques dans `historique/`, restauration, comparaison visuelle.
 
@@ -31,6 +31,14 @@ Phase 2 (COMPLÉTÉE) : TimeMachine — snapshots automatiques dans `historique/
 **IMPORTANT** : Lire `docs/plan-classeur.md` et `js/classeur.js` en début de session.
 
 ## SESSION DU 14 MARS 2026
+
+### Travail accompli — Classeur Phase 3 : Fusion, étapes 3.1-3.3 (14 mars 2026)
+
+191. **Lecture classeur externe (3.1)** : `lireClasseurExterne(fichierZip)` lit un ZIP en mémoire SANS écrire dans IndexedDB. Retourne `{manifeste, donnees, travauxListe, _zip}`. API publique : `Classeur.lireExterne()`. Base pour toute opération de comparaison/fusion. **Fichier** : `js/classeur.js`.
+
+192. **Analyse de fusion diff 3 parties (3.2)** : `_analyserFusion(local, externe, ancetre)` — avec ancêtre commun, détecte les vrais conflits (modifié/supprimé des deux côtés). Sans ancêtre, mode dégradé (toute différence = conflit). 8 catégories : ajouteesLocal/Externe, modifieesLocal/Externe, supprimeesLocal/Externe, conflits, identiques. Helpers : `_analyserFusionTravaux()` (diff blobs par chemin), `_formaterAnalyseFusion()` (résumé lisible). **Fichier** : `js/classeur.js`.
+
+193. **Résolution interactive des conflits (3.3)** : `_resoudreConflits(analyse, donneesLocales, donneesExternes, analyseTravaux)` — auto-résolution des cas non-conflictuels + 4 stratégies pour conflits (tout local, tout externe, un par un, annuler). Helper `_resumerValeur()` pour résumé lisible des valeurs. Retourne `{resolutions, importerTravaux, annule}`. **Fichier** : `js/classeur.js`.
 
 ### Travail accompli — Classeur TimeMachine Phase 2 (14 mars 2026)
 
