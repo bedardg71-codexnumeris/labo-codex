@@ -893,17 +893,6 @@ h1, h2, h3, h4 {
     margin-left: 4px;
 }
 
-/* Pastille de notification nouveautés (point rouge) */
-.pastille-nouveautes {
-    display: inline-block;
-    font-size: 0.6rem;
-    vertical-align: super;
-    line-height: 1;
-}
-
-.pastille-nouveautes:hover {
-    transform: scale(1.2);
-}
 
 /* Bouton warning backup (rappel sauvegarde) */
 .btn-backup-warning {
@@ -3019,90 +3008,6 @@ textarea {
     align-items: flex-end;
 }
 
-/* Changelog entries — remplace inline style="background: linear-gradient(...); border-left: 3px solid ..." */
-.changelog-entry {
-    border-left: 3px solid;
-    border-radius: var(--radius-moyen);
-    padding: 12px 16px;
-    margin-bottom: 1rem;
-    color: var(--texte-principal, #d0e0e4);
-}
-.changelog-entry--bleu {
-    background: #1a3040;
-    border-color: #6aacb8;
-}
-.changelog-entry--vert {
-    background: #1a3040;
-    border-color: #66bb6a;
-}
-.changelog-entry--orange {
-    background: #1a3040;
-    border-color: var(--orange-accent, #c8a060);
-}
-.changelog-entry--rose {
-    background: #1a3040;
-    border-color: #f48fb1;
-}
-.changelog-entry--violet {
-    background: #1a3040;
-    border-color: #b39ddb;
-}
-.changelog-entry--sarcelle {
-    background: #1a3040;
-    border-color: #6aacb8;
-}
-.changelog-title {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 700;
-}
-.changelog-list {
-    margin: 0;
-    padding-left: 20px;
-    font-size: 0.9rem;
-    line-height: 1.6;
-}
-.changelog-entry--vert .changelog-title { color: #81c784; }
-.changelog-entry--orange .changelog-title { color: #c8a060; }
-.changelog-entry--bleu .changelog-title { color: #6aacb8; }
-.changelog-entry--rose .changelog-title { color: #f48fb1; }
-.changelog-entry--violet .changelog-title { color: #b39ddb; }
-.changelog-entry--sarcelle .changelog-title { color: #6aacb8; }
-
-/* Mode clair — changelog */
-body.mode-clair .changelog-entry {
-    color: var(--texte-principal);
-}
-body.mode-clair .changelog-entry--bleu {
-    background: #f0f8ff;
-    border-color: #065dbb;
-}
-body.mode-clair .changelog-entry--vert {
-    background: #f0fdf4;
-    border-color: #28a745;
-}
-body.mode-clair .changelog-entry--orange {
-    background: #fff8f0;
-    border-color: var(--orange-accent);
-}
-body.mode-clair .changelog-entry--rose {
-    background: #fdf0f5;
-    border-color: #d81b60;
-}
-body.mode-clair .changelog-entry--violet {
-    background: #f5f0ff;
-    border-color: #7c3aed;
-}
-body.mode-clair .changelog-entry--sarcelle {
-    background: #f0f8ff;
-    border-color: #065dbb;
-}
-body.mode-clair .changelog-entry--vert .changelog-title { color: #1e7e34; }
-body.mode-clair .changelog-entry--orange .changelog-title { color: #a07830; }
-body.mode-clair .changelog-entry--bleu .changelog-title { color: #065dbb; }
-body.mode-clair .changelog-entry--rose .changelog-title { color: #c2185b; }
-body.mode-clair .changelog-entry--violet .changelog-title { color: #5b21b6; }
-body.mode-clair .changelog-entry--sarcelle .changelog-title { color: #065dbb; }
 
 /* ===============================
    BOUTONS (padding unifié 10px 15px)
