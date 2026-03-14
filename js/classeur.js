@@ -1011,6 +1011,7 @@ function _fermerMenuExterne(e) {
 function _actualiserMenu() {
     var details = document.getElementById('classeur-menu-details');
     var fermerItem = document.getElementById('classeur-menu-fermer');
+    var historiqueItem = document.getElementById('classeur-menu-historique');
     if (details) {
         if (_etat.actif) details.classList.remove('u-hide');
         else details.classList.add('u-hide');
@@ -1018,6 +1019,10 @@ function _actualiserMenu() {
     if (fermerItem) {
         if (_etat.actif) fermerItem.classList.remove('u-hide');
         else fermerItem.classList.add('u-hide');
+    }
+    if (historiqueItem) {
+        if (_etat.actif) historiqueItem.classList.remove('u-hide');
+        else historiqueItem.classList.add('u-hide');
     }
 }
 
@@ -1149,6 +1154,132 @@ function actionDetails() {
 }
 
 /**
+ * Affiche l'historique des versions et permet de restaurer un snapshot.
+ * Utilise prompt() avec une liste numérotée.
+ */
+async function actionRestaurer() {
+    _fermerMenu();
+
+    // 1. Charger l'index historique depuis IDB
+    var index = await db.get(CLE_HIST_INDEX, []);
+    if (index.length === 0) {
+        alert('Aucun historique disponible.\n\nL\'historique se construit automatiquement à chaque enregistrement du classeur.');
+        return;
+    }
+
+    // 2. Trier par date décroissante
+    index.sort(function(a, b) {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+
+    // 3. Construire la liste numérotée
+    var liste = 'Historique des versions (' + index.length + ') :\n\n';
+    for (var i = 0; i < index.length; i++) {
+        var entree = index[i];
+        liste += (i + 1) + '.  ' + _formaterDateLocale(entree.date);
+        if (entree.appareil) liste += '  (' + entree.appareil + ')';
+        liste += '  — ' + _formaterTaille(entree.taille);
+        liste += '\n';
+    }
+    liste += '\nEntrer le numéro de la version à restaurer (ou Annuler) :';
+
+    // 4. Demander le choix
+    var choix = prompt(liste);
+    if (!choix) return;
+
+    var numero = parseInt(choix, 10);
+    if (isNaN(numero) || numero < 1 || numero > index.length) {
+        alert('Numéro invalide.');
+        return;
+    }
+
+    var entreeChoisie = index[numero - 1];
+
+    // 5. Confirmer
+    if (!confirm(
+        'Restaurer la version du ' + _formaterDateLocale(entreeChoisie.date) + ' ?\n\n' +
+        'Les données actuelles seront remplacées.\n' +
+        '(Un snapshot des données actuelles sera archivé automatiquement.)'
+    )) {
+        return;
+    }
+
+    // 6. Charger le snapshot depuis IDB
+    var cleSnapshot = PREFIXE_HIST + entreeChoisie.date.replace(/[:.]/g, '-');
+    var donneesSnapshot = await db.get(cleSnapshot, null);
+
+    if (!donneesSnapshot) {
+        alert('Erreur : snapshot introuvable dans le stockage local.\n\nEssaye de réouvrir le classeur depuis le fichier ZIP.');
+        return;
+    }
+
+    // 7. Archiver les données actuelles avant de les écraser
+    _afficherProgression('Restauration');
+    _majProgression(0, 'Archivage des données actuelles...');
+    await _yield();
+
+    var toutesLesCles = await db.keys();
+    var clesFiltrees = toutesLesCles.filter(function(c) { return !c.startsWith('_classeur_'); });
+    var donneesActuelles = {};
+    for (var j = 0; j < clesFiltrees.length; j++) {
+        var val = await db.get(clesFiltrees[j], null);
+        if (val !== null) donneesActuelles[clesFiltrees[j]] = val;
+    }
+
+    // Stocker les données actuelles comme nouveau snapshot
+    var maintenant = new Date().toISOString();
+    var cleActuel = PREFIXE_HIST + maintenant.replace(/[:.]/g, '-');
+    await db.set(cleActuel, donneesActuelles);
+    index.push({
+        date: maintenant,
+        appareil: _identifierAppareil(),
+        taille: JSON.stringify(donneesActuelles).length
+    });
+    index = _purgerHistorique(index);
+    await db.set(CLE_HIST_INDEX, index);
+
+    // 8. Restaurer le snapshot choisi dans IndexedDB
+    _majProgression(30, 'Restauration des données...');
+    await _yield();
+
+    var entreesSnapshot = Object.entries(donneesSnapshot);
+    for (var k = 0; k < entreesSnapshot.length; k++) {
+        await db.set(entreesSnapshot[k][0], entreesSnapshot[k][1]);
+        if (k % 10 === 0) {
+            _majProgression(
+                30 + Math.round((k / entreesSnapshot.length) * 50),
+                'Restauration des données...',
+                (k + 1) + '/' + entreesSnapshot.length + ' clés'
+            );
+            await _yield();
+        }
+    }
+
+    // 9. Synchroniser le cache localStorage
+    _majProgression(85, 'Synchronisation du cache...');
+    await db.syncToLocalStorageCache();
+
+    // 10. Mettre à jour le snapshot "avant" pour la prochaine sauvegarde
+    await db.set(CLE_SNAPSHOT_AVANT, donneesSnapshot);
+
+    _majProgression(95, 'Finalisation...');
+    _etat.modificationsDepuis = maintenant;
+    _sauvegarderEtat();
+    _mettreAJourIndicateur();
+
+    _majProgression(100, 'Version restaurée !');
+    await new Promise(function(r) { setTimeout(r, 800); });
+    _masquerProgression();
+
+    console.log('📂 TimeMachine : restauré vers ' + entreeChoisie.date);
+
+    // 11. Proposer de recharger
+    if (confirm('Version restaurée avec succès !\n\nRecharger la page pour appliquer les données ?')) {
+        window.location.reload();
+    }
+}
+
+/**
  * Fermer le classeur actif
  */
 function actionFermer() {
@@ -1211,6 +1342,7 @@ window.Classeur = {
     actionEnregistrerSous: actionEnregistrerSous,
     actionNouveau: actionNouveau,
     actionDetails: actionDetails,
+    actionRestaurer: actionRestaurer,
     actionFermer: actionFermer,
 
     // État
