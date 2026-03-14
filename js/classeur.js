@@ -825,6 +825,129 @@ async function _chargerHistoriqueDepuisZip(zip, manifeste) {
 }
 
 /**
+ * Compare deux ensembles de données et retourne les différences.
+ * @param {Object} ancien - Données du snapshot (clé → valeur)
+ * @param {Object} actuel - Données actuelles (clé → valeur)
+ * @returns {{ajoutees: string[], supprimees: string[], modifiees: string[]}}
+ */
+function _comparerDonnees(ancien, actuel) {
+    var clesAncien = Object.keys(ancien);
+    var clesActuel = Object.keys(actuel);
+    var setAncien = new Set(clesAncien);
+    var setActuel = new Set(clesActuel);
+
+    var ajoutees = [];
+    var supprimees = [];
+    var modifiees = [];
+
+    // Clés ajoutées (dans actuel mais pas dans ancien)
+    for (var i = 0; i < clesActuel.length; i++) {
+        if (!setAncien.has(clesActuel[i])) {
+            ajoutees.push(clesActuel[i]);
+        }
+    }
+
+    // Clés supprimées (dans ancien mais pas dans actuel)
+    for (var j = 0; j < clesAncien.length; j++) {
+        if (!setActuel.has(clesAncien[j])) {
+            supprimees.push(clesAncien[j]);
+        }
+    }
+
+    // Clés modifiées (présentes des deux côtés mais valeur différente)
+    for (var k = 0; k < clesAncien.length; k++) {
+        var cle = clesAncien[k];
+        if (setActuel.has(cle)) {
+            var jsonAncien = JSON.stringify(ancien[cle]);
+            var jsonActuel = JSON.stringify(actuel[cle]);
+            if (jsonAncien !== jsonActuel) {
+                modifiees.push(cle);
+            }
+        }
+    }
+
+    return { ajoutees: ajoutees, supprimees: supprimees, modifiees: modifiees };
+}
+
+/**
+ * Formate un résultat de diff pour affichage.
+ * Regroupe les clés par préfixe (trimestre) pour plus de lisibilité.
+ * @param {{ajoutees: string[], supprimees: string[], modifiees: string[]}} diff
+ * @returns {string}
+ */
+function _formaterDiff(diff) {
+    var total = diff.ajoutees.length + diff.supprimees.length + diff.modifiees.length;
+
+    if (total === 0) {
+        return 'Aucune différence détectée.';
+    }
+
+    var lignes = [];
+    lignes.push(total + ' différence(s) détectée(s) :\n');
+
+    if (diff.modifiees.length > 0) {
+        lignes.push('Modifiées (' + diff.modifiees.length + ') :');
+        var groupesM = _grouperParPrefixe(diff.modifiees);
+        for (var gm = 0; gm < groupesM.length; gm++) {
+            lignes.push('  ' + groupesM[gm]);
+        }
+        lignes.push('');
+    }
+
+    if (diff.ajoutees.length > 0) {
+        lignes.push('Ajoutées (' + diff.ajoutees.length + ') :');
+        var groupesA = _grouperParPrefixe(diff.ajoutees);
+        for (var ga = 0; ga < groupesA.length; ga++) {
+            lignes.push('  + ' + groupesA[ga]);
+        }
+        lignes.push('');
+    }
+
+    if (diff.supprimees.length > 0) {
+        lignes.push('Supprimées (' + diff.supprimees.length + ') :');
+        var groupesS = _grouperParPrefixe(diff.supprimees);
+        for (var gs = 0; gs < groupesS.length; gs++) {
+            lignes.push('  - ' + groupesS[gs]);
+        }
+    }
+
+    return lignes.join('\n');
+}
+
+/**
+ * Regroupe une liste de clés par préfixe commun (ex: h2026_).
+ * Si un préfixe a plus de 3 clés, les condense en "préfixe_* (N clés)".
+ * @param {string[]} cles
+ * @returns {string[]} Lignes formatées
+ */
+function _grouperParPrefixe(cles) {
+    var groupes = {};
+    for (var i = 0; i < cles.length; i++) {
+        var parts = cles[i].split('_');
+        var prefixe = parts.length > 1 ? parts[0] + '_' : '';
+        var reste = prefixe ? cles[i].substring(prefixe.length) : cles[i];
+        if (!groupes[prefixe]) groupes[prefixe] = [];
+        groupes[prefixe].push(reste);
+    }
+
+    var lignes = [];
+    var prefixes = Object.keys(groupes);
+    for (var j = 0; j < prefixes.length; j++) {
+        var p = prefixes[j];
+        var items = groupes[p];
+        if (items.length <= 3) {
+            for (var k = 0; k < items.length; k++) {
+                lignes.push(p + items[k]);
+            }
+        } else {
+            lignes.push(p + '* (' + items.length + ' clés)');
+        }
+    }
+
+    return lignes;
+}
+
+/**
  * Nettoie toutes les données historiques de IndexedDB.
  */
 async function _nettoyerHistoriqueIDB() {
@@ -1023,6 +1146,11 @@ function _actualiserMenu() {
     if (historiqueItem) {
         if (_etat.actif) historiqueItem.classList.remove('u-hide');
         else historiqueItem.classList.add('u-hide');
+    }
+    var comparerItem = document.getElementById('classeur-menu-comparer');
+    if (comparerItem) {
+        if (_etat.actif) comparerItem.classList.remove('u-hide');
+        else comparerItem.classList.add('u-hide');
     }
 }
 
@@ -1280,6 +1408,102 @@ async function actionRestaurer() {
 }
 
 /**
+ * Compare une version historique avec les données actuelles.
+ * Affiche un résumé des différences (clés ajoutées, supprimées, modifiées).
+ */
+async function actionComparer() {
+    _fermerMenu();
+
+    // 1. Charger l'index historique
+    var index = await db.get(CLE_HIST_INDEX, []);
+    if (index.length === 0) {
+        alert('Aucun historique disponible pour la comparaison.\n\nL\'historique se construit automatiquement à chaque enregistrement du classeur.');
+        return;
+    }
+
+    // 2. Trier par date décroissante
+    index.sort(function(a, b) {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+
+    // 3. Construire la liste numérotée
+    var liste = 'Comparer les données actuelles avec :\n\n';
+    for (var i = 0; i < index.length; i++) {
+        var entree = index[i];
+        liste += (i + 1) + '.  ' + _formaterDateLocale(entree.date);
+        if (entree.appareil) liste += '  (' + entree.appareil + ')';
+        liste += '\n';
+    }
+    liste += '\nEntrer le numéro de la version à comparer (ou Annuler) :';
+
+    // 4. Demander le choix
+    var choix = prompt(liste);
+    if (!choix) return;
+
+    var numero = parseInt(choix, 10);
+    if (isNaN(numero) || numero < 1 || numero > index.length) {
+        alert('Numéro invalide.');
+        return;
+    }
+
+    var entreeChoisie = index[numero - 1];
+
+    // 5. Charger le snapshot
+    var cleSnapshot = PREFIXE_HIST + entreeChoisie.date.replace(/[:.]/g, '-');
+    var donneesSnapshot = await db.get(cleSnapshot, null);
+
+    if (!donneesSnapshot) {
+        alert('Erreur : snapshot introuvable dans le stockage local.\n\nEssaye de réouvrir le classeur depuis le fichier ZIP.');
+        return;
+    }
+
+    // 6. Collecter les données actuelles depuis IndexedDB
+    _afficherProgression('Comparaison');
+    _majProgression(0, 'Lecture des données actuelles...');
+    await _yield();
+
+    var toutesLesCles = await db.keys();
+    var clesFiltrees = toutesLesCles.filter(function(c) { return !c.startsWith('_classeur_') && !c.startsWith('_'); });
+    var donneesActuelles = {};
+    for (var j = 0; j < clesFiltrees.length; j++) {
+        var val = await db.get(clesFiltrees[j], null);
+        if (val !== null) donneesActuelles[clesFiltrees[j]] = val;
+        if (j % 10 === 0) {
+            _majProgression(Math.round((j / clesFiltrees.length) * 60), 'Lecture des données actuelles...', (j + 1) + '/' + clesFiltrees.length);
+            await _yield();
+        }
+    }
+
+    // 7. Filtrer le snapshot aussi (exclure clés internes)
+    var snapshotFiltre = {};
+    var clesSnapshot = Object.keys(donneesSnapshot);
+    for (var k = 0; k < clesSnapshot.length; k++) {
+        if (!clesSnapshot[k].startsWith('_classeur_') && !clesSnapshot[k].startsWith('_')) {
+            snapshotFiltre[clesSnapshot[k]] = donneesSnapshot[clesSnapshot[k]];
+        }
+    }
+
+    // 8. Calculer le diff
+    _majProgression(70, 'Calcul des différences...');
+    await _yield();
+
+    var diff = _comparerDonnees(snapshotFiltre, donneesActuelles);
+
+    _majProgression(100, 'Terminé');
+    await new Promise(function(r) { setTimeout(r, 300); });
+    _masquerProgression();
+
+    // 9. Afficher le résultat
+    var titre = 'Comparaison : version du ' + _formaterDateLocale(entreeChoisie.date) + '\nvs données actuelles\n\n';
+    alert(titre + _formaterDiff(diff));
+
+    console.log('📂 TimeMachine : comparaison avec ' + entreeChoisie.date + ' — ' +
+        diff.ajoutees.length + ' ajoutée(s), ' +
+        diff.supprimees.length + ' supprimée(s), ' +
+        diff.modifiees.length + ' modifiée(s)');
+}
+
+/**
  * Fermer le classeur actif
  */
 function actionFermer() {
@@ -1343,6 +1567,7 @@ window.Classeur = {
     actionNouveau: actionNouveau,
     actionDetails: actionDetails,
     actionRestaurer: actionRestaurer,
+    actionComparer: actionComparer,
     actionFermer: actionFermer,
 
     // État

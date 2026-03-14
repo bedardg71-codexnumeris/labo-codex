@@ -15,7 +15,7 @@
   - [x] Infrastructure : constantes, helpers rotation/archivage/chargement *(commit 9eedefa)*
   - [x] Branchement : generer/charger/fermer integrent l'historique *(commit 20442df)*
   - [x] Restauration : prompt() liste numerotee + confirm() securite *(commit bf11f3e)*
-  - [ ] Comparaison visuelle : diff entre deux snapshots (cles ajoutees/supprimees/modifiees)
+  - [x] Comparaison visuelle : diff entre deux snapshots (cles ajoutees/supprimees/modifiees)
   - **Plan detaille** : `docs/plan-classeur.md`
 
 - [ ] **#227** Classeur Phase 3 : Multi-classeur + fusion
