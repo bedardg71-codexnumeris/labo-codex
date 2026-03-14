@@ -2,33 +2,34 @@
 
 **Date** : 14 mars 2026
 **Version** : Beta 98.5
-**Statut** : Classeur Phase 3 — Multi-classeur + fusion (#227)
+**Statut** : Classeur Phase 3 COMPLÉTÉE — Prochaine étape : test + backlog
 
-## PROCHAINE TÂCHE — #227 Classeur Phase 3 : Multi-classeur + fusion
+## PHASE 3 COMPLÉTÉE — Classeur Multi-classeur + fusion (#227)
 
-**Contexte** : Le Classeur (module `js/classeur.js`, ~2657 lignes) est un workspace portable ZIP.
-Phase 1 (COMPLÉTÉE) : generer/charger/valider/sauvegarder multi-plateforme.
-Phase 2 (COMPLÉTÉE) : TimeMachine — snapshots automatiques dans `historique/`, restauration, comparaison visuelle.
+**Module** : `js/classeur.js` (~2657 lignes)
+**Phases 1-3 toutes complétées.** Plan détaillé : `docs/plan-classeur.md`
 
-**Objectif Phase 3** : Permettre d'ouvrir plusieurs classeurs et de fusionner leurs données intelligemment.
+### Fonctionnalités livrées (Phase 3, 14 mars 2026) :
+- **3.1** `Classeur.lireExterne()` — lecture ZIP en mémoire sans IDB
+- **3.2** `_analyserFusion()` — diff 3 parties (local/externe/ancêtre), 8 catégories
+- **3.3** `_resoudreConflits()` — auto-merge + 4 stratégies conflits interactives
+- **3.4** `_fusionnerTravaux()` — import blobs + fusion liste fichiersTravaux
+- **3.5** `Classeur.actionFusionner()` — flux complet 12 étapes, bouton menu
+- **3.6** `Classeur.actionExporterSelection()` — export par trimestre, ZIP partiel
 
-**Cas d'usage principal** :
-- L'enseignant travaille sur Mac (classeur A) et iPad (classeur B) pendant la semaine
-- Vendredi, il veut fusionner les deux pour avoir un classeur complet
-- Le système doit détecter les conflits (même clé modifiée des deux côtés) et proposer une résolution
+### Menu classeur (en-tête) — boutons :
+Ouvrir | Enregistrer | Enregistrer sous | Nouveau | Détails | Historique | Comparer | **Fusionner** | **Exporter sélection** | Fermer
 
-**Sous-fonctionnalités prévues** :
-1. Ouvrir un 2e classeur ZIP sans écraser le 1er (lecture seule pour comparaison/fusion)
-2. Fusion intelligente par ID + timestamp (la donnée la plus récente gagne par défaut)
-3. Détection de conflits (même clé modifiée des deux côtés depuis le dernier ancêtre commun)
-4. Résolution de conflits (choix par l'utilisateur : garder A, garder B, ou les deux)
-5. Export sélectif (par groupe-cours, par étudiant — optionnel, à valider)
+## PROCHAINES TÂCHES
 
-**Fichiers à modifier** : `js/classeur.js`, `index.html` (menu), potentiellement `styles.css`
-**Plan détaillé** : `docs/plan-classeur.md` (section Phase 3)
-**Approche** : étape par étape, valider chaque sous-étape avant de continuer
+Consulter `BACKLOG.md` pour les priorités :
+- **#228** Auto-save FSAPI (Phase 4 classeur)
+- **#229** Overlay norme
+- **#230** UX docs
+- **#231** Auteur
+- Ou : test manuel de la Phase 3 (fusion + export sélectif) sur Mac + iPad
 
-**IMPORTANT** : Lire `docs/plan-classeur.md` et `js/classeur.js` en début de session.
+**IMPORTANT** : Lire `docs/plan-classeur.md` et `BACKLOG.md` en début de session.
 
 ## SESSION DU 14 MARS 2026
 
