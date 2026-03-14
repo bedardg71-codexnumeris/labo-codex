@@ -272,6 +272,26 @@ function afficherModalAccueil() {
                     </div>
                 </button>
 
+                <!-- MODULE 6: Utiliser le Classeur -->
+                <button onclick="demarrerClasseur()" style="
+                    width: 100%;
+                    padding: 15px 20px;
+                    margin-bottom: 8px;
+                    background: var(--surface-conteneur, #162c36);
+                    color: var(--accent-primaire);
+                    border: 2px solid var(--accent-primaire);
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    cursor: pointer;
+                    text-align: left;
+                    transition: all 0.2s;
+                " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='var(--surface-conteneur)'; this.style.transform='translateY(0)';">
+                    <strong>MODULE 6 : Utiliser le Classeur</strong>
+                    <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
+                        Sauvegarder tes données sur clé USB et les transporter entre tes appareils
+                    </div>
+                </button>
+
                 <!-- Consulter l'aide -->
                 <button onclick="consulterAide()" style="
                     width: 100%;
@@ -488,7 +508,38 @@ function demarrerCreationMateriel() {
 }
 
 /**
- * Option 6: Consulter l'aide
+ * Option 6: Utiliser le Classeur (#230)
+ * Affiche une explication du concept puis ouvre le menu
+ */
+function demarrerClasseur() {
+    fermerModalAccueil();
+
+    setTimeout(function() {
+        alert(
+            'Le Classeur — ton cloud personnel sur clé USB\n\n' +
+            'Le Classeur regroupe toutes tes données dans un seul fichier portable (.zip) ' +
+            'que tu peux transporter entre tes appareils.\n\n' +
+            'Flux typique :\n' +
+            '1. Mac → Enregistrer le classeur sur ta clé USB\n' +
+            '2. iPad → Ouvrir le classeur depuis la clé USB\n' +
+            '3. Travailler sur iPad (saisie de présences, évaluations...)\n' +
+            '4. iPad → Enregistrer le classeur sur la clé USB\n' +
+            '5. Mac → Ouvrir le classeur depuis la clé USB\n\n' +
+            'Indicateurs :\n' +
+            '• Pastille verte = tout est enregistré\n' +
+            '• Pastille orange = modifications non sauvegardées\n\n' +
+            'Clique sur le bouton « Classeur » dans l\'en-tête pour commencer.'
+        );
+
+        // Ouvrir le menu du classeur pour guider l'utilisateur
+        if (typeof Classeur !== 'undefined' && typeof Classeur.toggleMenu === 'function') {
+            Classeur.toggleMenu();
+        }
+    }, 300);
+}
+
+/**
+ * Option 7: Consulter l'aide
  * Navigue vers la section Aide
  */
 function consulterAide() {
@@ -564,6 +615,7 @@ window.naviguerVersImportDemo = naviguerVersImportDemo;
 window.demarrerConfigComplete = demarrerConfigComplete;
 window.demarrerWizard = demarrerWizard;
 window.demarrerCreationMateriel = demarrerCreationMateriel;
+window.demarrerClasseur = demarrerClasseur;
 window.explorerLibrement = explorerLibrement;
 window.consulterAide = consulterAide;
 

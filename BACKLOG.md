@@ -36,15 +36,13 @@
   - Nouvelle fonction `_obtenirAuteur()` avec cascade : `profilEnseignant` (prenom+nom) → `infoCours.enseignant` (fallback)
   - L'auteur se propage automatiquement dans le manifeste a chaque sauvegarde
 
-- [ ] **#230** UX : Documentation utilisateur du concept Classeur
-  - Tooltip sur le bouton Classeur dans l'en-tete (expliquer le concept clé USB = cloud personnel)
-  - Integrer dans le parcours guide (tour guide / primo-modal) : expliquer quand et pourquoi utiliser le Classeur
-  - Section Aide dediee : flux Mac → USB → iPad → USB → Mac
-  - Etats vides : guider l'utilisateur quand aucun classeur n'est actif
-  - Messages contextuels : rappel d'enregistrer avant de quitter, explication des indicateurs (pastille orange/verte)
-  - L'overlay plein ecran avec barre de progression (fond sombre, blur, barre animee) devrait remplacer les autres indicateurs de progression dans l'app
-  - Extraire en utilitaire reutilisable (actuellement dans `js/classeur.js`)
-  - Appliquer a : export backup, import backup, operations longues
+- [x] **#230** UX : Documentation utilisateur du concept Classeur *(14 mars 2026)*
+  - Tooltip `entete-classeur` dans `tooltips-contenu.js` (concept cle USB + pastilles)
+  - Bandeau de statut en haut du menu (nom + etat vert/orange ou message etat vide)
+  - `beforeunload` rappel d'enregistrer avant de quitter
+  - Etats vides ameliores : messages guidants avec actions possibles
+  - MODULE 6 « Utiliser le Classeur » dans le tour guide Primo (flux Mac/USB/iPad)
+  - Overlay de progression normalise : voir #229
 
 ### Retours testeur — 3 mars 2026
 

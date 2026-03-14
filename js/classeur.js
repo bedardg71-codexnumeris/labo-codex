@@ -76,6 +76,14 @@ function initialiserClasseur() {
         console.log('📂 Classeur : aucun classeur actif');
     }
     _mettreAJourIndicateur();
+
+    // #230 : Rappel d'enregistrer avant de quitter si modifications non sauvegardées
+    window.addEventListener('beforeunload', function(e) {
+        if (_etat.actif && _etat.modificationsDepuis) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
 }
 
 /**
@@ -1916,6 +1924,23 @@ function _fermerMenuExterne(e) {
  * Actualise la visibilité des items selon l'état du classeur
  */
 function _actualiserMenu() {
+    // Bandeau de statut en haut du menu (#230)
+    var statutHaut = document.getElementById('classeur-menu-statut-haut');
+    if (statutHaut) {
+        if (_etat.actif) {
+            var modifie = !!_etat.modificationsDepuis;
+            var classePastille = modifie ? 'classeur-statut-pastille--orange' : 'classeur-statut-pastille--vert';
+            var texteEtat = modifie ? 'Modifications non enregistrées' : 'Tout est enregistré';
+            statutHaut.innerHTML =
+                '<div class="classeur-statut-nom">' + (_etat.nom || 'Classeur') + '</div>' +
+                '<div class="classeur-statut-etat"><span class="classeur-statut-pastille ' + classePastille + '"></span> ' + texteEtat + '</div>';
+            statutHaut.classList.remove('u-hide');
+        } else {
+            statutHaut.innerHTML = '<div class="classeur-statut-etat">Aucun classeur actif — ouvre ou crée un classeur pour commencer.</div>';
+            statutHaut.classList.remove('u-hide');
+        }
+    }
+
     var details = document.getElementById('classeur-menu-details');
     var fermerItem = document.getElementById('classeur-menu-fermer');
     var historiqueItem = document.getElementById('classeur-menu-historique');
@@ -2123,7 +2148,7 @@ function actionDetails() {
     _fermerMenu();
 
     if (!_etat.manifeste) {
-        alert('Aucun détail disponible.\nEnregistre le classeur une première fois.');
+        alert('Aucun classeur actif.\n\nPour commencer :\n• « Ouvrir un classeur » pour charger un fichier existant\n• « Nouveau classeur » pour en créer un\n• « Enregistrer le classeur » pour sauvegarder tes données actuelles');
         return;
     }
 
@@ -2153,7 +2178,7 @@ async function actionRestaurer() {
     // 1. Charger l'index historique depuis IDB
     var index = await db.get(CLE_HIST_INDEX, []);
     if (index.length === 0) {
-        alert('Aucun historique disponible.\n\nL\'historique se construit automatiquement à chaque enregistrement du classeur.');
+        alert('Aucun historique disponible.\n\nL\'historique se construit automatiquement à chaque enregistrement.\nEnregistre le classeur au moins deux fois pour voir apparaitre des versions.');
         return;
     }
 
@@ -2279,7 +2304,7 @@ async function actionComparer() {
     // 1. Charger l'index historique
     var index = await db.get(CLE_HIST_INDEX, []);
     if (index.length === 0) {
-        alert('Aucun historique disponible pour la comparaison.\n\nL\'historique se construit automatiquement à chaque enregistrement du classeur.');
+        alert('Aucun historique disponible pour la comparaison.\n\nL\'historique se construit automatiquement à chaque enregistrement.\nEnregistre le classeur au moins deux fois pour pouvoir comparer des versions.');
         return;
     }
 
@@ -2373,7 +2398,7 @@ async function actionFusionner() {
     _fermerMenu();
 
     if (!_etat.actif) {
-        alert('Aucun classeur actif.\n\nOuvre d\'abord un classeur avant de fusionner.');
+        alert('Aucun classeur actif.\n\nOuvre d\'abord un classeur (ou enregistre tes données), puis utilise « Fusionner » pour combiner avec un autre classeur.');
         return;
     }
 
