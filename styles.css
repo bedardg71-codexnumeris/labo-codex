@@ -5272,6 +5272,130 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 /* ===============================
+   CLASSEUR — Bouton en-tête + menu
+   =============================== */
+
+.classeur-controle {
+    position: relative;
+}
+
+.btn-classeur-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 2px solid rgba(106, 172, 184, 0.25);
+    border-radius: var(--radius-moyen);
+    background: rgba(106, 172, 184, 0.12);
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+    white-space: nowrap;
+    position: relative;
+    min-height: 44px;
+    min-width: 44px;
+}
+
+.btn-classeur-header:hover {
+    background: rgba(106, 172, 184, 0.22);
+    border-color: rgba(106, 172, 184, 0.4);
+}
+
+.btn-classeur-header:focus {
+    outline: none;
+    border-color: rgba(106, 172, 184, 0.6);
+    box-shadow: 0 0 0 3px rgba(106, 172, 184, 0.1);
+}
+
+.classeur-icone-btn {
+    font-size: 1rem;
+}
+
+.classeur-indicateur {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    border: 2px solid rgba(10, 24, 32, 0.8);
+}
+
+.classeur-indicateur--modifie {
+    background: var(--orange-attention, #e8a838);
+}
+
+.classeur-indicateur--sauve {
+    background: var(--vert-succes, #4caf50);
+}
+
+/* Menu déroulant */
+
+.classeur-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 220px;
+    background: var(--surface-carte, #1a3040);
+    border: 1px solid rgba(106, 172, 184, 0.2);
+    border-radius: var(--radius-moyen, 12px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    padding: 6px 0;
+    z-index: 10000;
+}
+
+.classeur-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 16px;
+    border: none;
+    background: none;
+    color: var(--texte-principal, #e0e0e0);
+    font-size: 0.88rem;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s ease;
+    min-height: 44px;
+}
+
+.classeur-menu-item:hover {
+    background: rgba(106, 172, 184, 0.15);
+}
+
+.classeur-menu-item--danger {
+    color: var(--rouge-erreur, #e57373);
+}
+
+.classeur-menu-item--danger:hover {
+    background: rgba(229, 115, 115, 0.1);
+}
+
+.classeur-menu-icone {
+    font-size: 1rem;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.classeur-menu-sep {
+    height: 1px;
+    background: rgba(106, 172, 184, 0.15);
+    margin: 4px 12px;
+}
+
+/* Responsive tablette */
+@media (max-width: 768px) {
+    .classeur-label-btn {
+        display: none;
+    }
+}
+
+/* ===============================
    CALENDRIER - Vue mensuelle
    =============================== */
 

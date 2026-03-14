@@ -7,6 +7,39 @@
 
 ## A faire
 
+### Classeur — Flux USB multi-appareil (14 mars 2026)
+
+- [ ] **#225** Classeur Phase 1 : Ouvrir/sauvegarder un classeur ZIP portable (Mac + iPad)
+  - Module `js/classeur.js` cree (generer, charger, valider, sauvegarder multi-plateforme)
+  - Overlay de progression avec barre animee (yield + requestAnimationFrame)
+  - 3 strategies de sauvegarde : FSAPI (Chrome) → navigator.share (iPad) → download (fallback)
+  - **Etapes restantes** : bouton en-tete (1.3), limite taille relevee (1.4), test cycle complet
+  - **Plan detaille** : `docs/plan-classeur.md`
+
+- [ ] **#226** Classeur Phase 2 : TimeMachine (historique des versions dans le classeur)
+
+- [ ] **#227** Classeur Phase 3 : Multi-classeur + fusion
+
+- [ ] **#228** Classeur Phase 4 : Auto-save FSAPI vers cle USB
+
+- [ ] **#229** Design : Adopter l'overlay de progression du Classeur comme norme
+
+- [ ] **#231** Classeur : Auteur non defini dans les details
+  - Le champ `auteur` du manifeste est vide car `infoCours.enseignant` n'est pas renseigne
+  - Ajouter un champ "Auteur" editable dans les details du classeur (ou dans les reglages)
+  - L'auteur devrait se propager dans le manifeste a chaque sauvegarde
+  - Lier avec le champ enseignant existant dans infoCours si disponible
+
+- [ ] **#230** UX : Documentation utilisateur du concept Classeur
+  - Tooltip sur le bouton Classeur dans l'en-tete (expliquer le concept clé USB = cloud personnel)
+  - Integrer dans le parcours guide (tour guide / primo-modal) : expliquer quand et pourquoi utiliser le Classeur
+  - Section Aide dediee : flux Mac → USB → iPad → USB → Mac
+  - Etats vides : guider l'utilisateur quand aucun classeur n'est actif
+  - Messages contextuels : rappel d'enregistrer avant de quitter, explication des indicateurs (pastille orange/verte)
+  - L'overlay plein ecran avec barre de progression (fond sombre, blur, barre animee) devrait remplacer les autres indicateurs de progression dans l'app
+  - Extraire en utilitaire reutilisable (actuellement dans `js/classeur.js`)
+  - Appliquer a : export backup, import backup, operations longues
+
 ### Retours testeur — 3 mars 2026
 
 - [ ] **#214** Bug : Gestion avancee des ressources — suppression non persistante
