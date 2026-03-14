@@ -1,8 +1,20 @@
-# SESSION ACTIVE - BETA 98.4
+# SESSION ACTIVE - BETA 98.5
 
-**Date** : 4 mars 2026
-**Version** : Beta 98.4 (build 0304-1635)
-**Statut** : Corbeille fichiers + changement de grille
+**Date** : 14 mars 2026
+**Version** : Beta 98.5
+**Statut** : Classeur Phase 2 — TimeMachine
+
+## SESSION DU 14 MARS 2026
+
+### Travail accompli — Classeur TimeMachine Phase 2 (14 mars 2026)
+
+187. **TimeMachine infrastructure** : Ajout des constantes (`DOSSIER_HISTORIQUE`, `MAX_SNAPSHOTS=10`, `MAX_JOURS_HISTORIQUE=30`), cles IDB (`_classeur_hist_index`, `_classeur_snapshot_avant`, `_classeur_hist_*`), et 4 helpers : `_purgerHistorique()` (rotation), `_ecrireHistoriqueDansZip()` (IDB→ZIP), `_chargerHistoriqueDepuisZip()` (ZIP→IDB), `_nettoyerHistoriqueIDB()` (nettoyage). Aucun flux existant modifie. Commit `9eedefa`.
+
+188. **TimeMachine branchement** : `genererClasseur()` archive le snapshot precedent dans `historique/`, applique la rotation, ecrit tous les snapshots dans le ZIP, et enrichit le manifeste avec `historique[]`. `chargerClasseur()` capture `donnees.json` comme snapshot de reference et charge l'historique existant du ZIP vers IDB. `fermerClasseur()` nettoie l'historique IDB. Commit `20442df`.
+
+189. **TimeMachine restauration** : `actionRestaurer()` affiche un prompt() avec liste numerotee des snapshots (date, appareil, taille), confirm() de securite, archive automatiquement les donnees actuelles avant ecrasement, restaure le snapshot choisi dans IDB, sync cache localStorage, et propose le rechargement. Bouton "Historique des versions..." dans le menu en-tete (visible si classeur actif). **Fichiers** : `js/classeur.js`, `index.html`. Commit `bf11f3e`.
+
+---
 
 ## SESSION DU 4 MARS 2026
 
