@@ -25,9 +25,17 @@ const EXTENSION_CLASSEUR = '.classeur.zip';
 const NOM_MANIFESTE = 'classeur-manifeste.json';
 const NOM_DONNEES = 'donnees.json';
 const DOSSIER_TRAVAUX = 'travaux';
+const DOSSIER_HISTORIQUE = 'historique';
 
-// Clé de stockage pour l'état du classeur actif (non namespacée — globale)
+// Rotation TimeMachine
+const MAX_SNAPSHOTS = 10;
+const MAX_JOURS_HISTORIQUE = 30;
+
+// Clés de stockage (non namespacées — globales)
 const CLE_ETAT_CLASSEUR = '_classeur_etat';
+const CLE_HIST_INDEX = '_classeur_hist_index';
+const CLE_SNAPSHOT_AVANT = '_classeur_snapshot_avant';
+const PREFIXE_HIST = '_classeur_hist_';
 
 /* ===============================
    ÉTAT INTERNE
@@ -638,6 +646,122 @@ function _masquerProgression() {
     // Nettoyage résiduel
     var ancien = document.getElementById('classeur-progression-overlay');
     if (ancien) ancien.remove();
+}
+
+/* ===============================
+   HISTORIQUE / TIMEMACHINE
+   =============================== */
+
+/**
+ * Applique la rotation sur l'index historique :
+ * - Max 10 snapshots
+ * - Max 30 jours
+ * Supprime les clés IndexedDB des snapshots purgés.
+ * @param {Array} index - Entrées {date, appareil, taille}
+ * @returns {Array} Index purgé
+ */
+function _purgerHistorique(index) {
+    var limiteDate = Date.now() - (MAX_JOURS_HISTORIQUE * 24 * 60 * 60 * 1000);
+
+    // Trier par date décroissante (plus récent en premier)
+    index.sort(function(a, b) {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+
+    var gardes = [];
+    var supprimes = [];
+    for (var i = 0; i < index.length; i++) {
+        var dateEntry = new Date(index[i].date).getTime();
+        if (gardes.length < MAX_SNAPSHOTS && dateEntry >= limiteDate) {
+            gardes.push(index[i]);
+        } else {
+            supprimes.push(index[i]);
+        }
+    }
+
+    // Nettoyer les clés supprimées de IndexedDB (fire-and-forget)
+    for (var j = 0; j < supprimes.length; j++) {
+        var cle = PREFIXE_HIST + supprimes[j].date.replace(/[:.]/g, '-');
+        db.remove(cle);
+    }
+
+    if (supprimes.length > 0) {
+        console.log('📂 TimeMachine : ' + supprimes.length + ' snapshot(s) purgé(s)');
+    }
+
+    return gardes;
+}
+
+/**
+ * Charge les snapshots historiques depuis IndexedDB vers le ZIP.
+ * @param {JSZip} dossierHist - Le dossier historique/ du ZIP
+ * @param {Array} index - Index des entrées
+ * @param {Set} [dejaAjoutes] - Noms de fichiers déjà dans le dossier
+ * @returns {Promise<void>}
+ */
+async function _ecrireHistoriqueDansZip(dossierHist, index, dejaAjoutes) {
+    for (var i = 0; i < index.length; i++) {
+        var nomFichier = index[i].date.replace(/[:.]/g, '-') + '.json';
+        if (dejaAjoutes && dejaAjoutes.has(nomFichier)) continue;
+
+        var cle = PREFIXE_HIST + index[i].date.replace(/[:.]/g, '-');
+        var donnees = await db.get(cle, null);
+        if (donnees) {
+            dossierHist.file(nomFichier, JSON.stringify(donnees));
+        }
+    }
+}
+
+/**
+ * Charge l'historique depuis un ZIP vers IndexedDB.
+ * @param {JSZip} zip - Le ZIP chargé
+ * @param {Object} manifeste - Le manifeste du classeur
+ * @returns {Promise<Array>} L'index historique chargé
+ */
+async function _chargerHistoriqueDepuisZip(zip, manifeste) {
+    var index = [];
+    if (!manifeste.historique || !Array.isArray(manifeste.historique)) {
+        return index;
+    }
+
+    for (var i = 0; i < manifeste.historique.length; i++) {
+        var entree = manifeste.historique[i];
+        var nomFichier = entree.date.replace(/[:.]/g, '-') + '.json';
+        var fichier = zip.file(DOSSIER_HISTORIQUE + '/' + nomFichier);
+
+        if (fichier) {
+            try {
+                var contenu = await fichier.async('string');
+                var donnees = JSON.parse(contenu);
+                var cle = PREFIXE_HIST + entree.date.replace(/[:.]/g, '-');
+                await db.set(cle, donnees);
+                index.push({
+                    date: entree.date,
+                    appareil: entree.appareil || '',
+                    taille: entree.taille || contenu.length
+                });
+            } catch (e) {
+                console.warn('📂 TimeMachine : snapshot ignoré ' + nomFichier, e.message);
+            }
+        }
+    }
+
+    await db.set(CLE_HIST_INDEX, index);
+    console.log('📂 TimeMachine : ' + index.length + ' snapshot(s) chargé(s) depuis le ZIP');
+    return index;
+}
+
+/**
+ * Nettoie toutes les données historiques de IndexedDB.
+ */
+async function _nettoyerHistoriqueIDB() {
+    var index = await db.get(CLE_HIST_INDEX, []);
+    for (var i = 0; i < index.length; i++) {
+        var cle = PREFIXE_HIST + index[i].date.replace(/[:.]/g, '-');
+        await db.remove(cle);
+    }
+    await db.remove(CLE_HIST_INDEX);
+    await db.remove(CLE_SNAPSHOT_AVANT);
 }
 
 /* ===============================
