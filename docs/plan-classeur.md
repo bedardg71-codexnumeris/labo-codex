@@ -284,7 +284,7 @@ MonClasseur.classeur.zip
 - `actionComparer()` : prompt() pour choisir un snapshot, compare vs données actuelles, alert() du résumé
 - Bouton "Comparer avec une version..." dans le menu (visible si classeur actif)
 
-## Phase 3 — Multi-classeur + fusion (À FAIRE — #227)
+## Phase 3 — Multi-classeur + fusion (EN COURS — #227)
 
 ### Cas d'usage
 
@@ -323,23 +323,28 @@ Pour chaque clé présente dans un ou les deux classeurs :
 
 ### Étapes d'implémentation
 
-#### Étape 3.1 — Lecture d'un classeur externe (sans import)
+#### Étape 3.1 — Lecture d'un classeur externe (sans import) (COMPLÉTÉE — 14 mars 2026)
 
 - `lireClasseurExterne(fichierZip)` → extrait donnees.json + manifeste SANS écrire dans IndexedDB
-- Retourne `{manifeste, donnees, travaux: [liste des fichiers]}` en mémoire seulement
-- C'est la base pour comparer/fusionner sans polluer l'état actuel
+- Retourne `{manifeste, donnees, travauxListe, _zip}` en mémoire seulement
+- API publique : `Classeur.lireExterne(fichierZip)`
+- `_zip` conservé pour extraction ultérieure des blobs lors de la fusion
 
-#### Étape 3.2 — Détection des différences entre deux jeux de données
+#### Étape 3.2 — Analyse de fusion (diff 3 parties) (COMPLÉTÉE — 14 mars 2026)
 
-- Réutiliser `_comparerDonnees()` de Phase 2
-- Ajouter : `_detecterConflits(donneesA, donneesB, ancetreCommun)` si ancêtre disponible
-- Catégoriser chaque clé : ajoutée-A, ajoutée-B, modifiée-A, modifiée-B, conflit
+- `_analyserFusion(local, externe, ancetre)` : diff 3 parties avec ancêtre commun, 2 parties sans
+- 8 catégories : ajouteesLocal/Externe, modifieesLocal/Externe, supprimeesLocal/Externe, conflits, identiques
+- `_analyserFusionTravaux(travauxLocal, travauxExterne)` : diff blobs par chemin
+- `_formaterAnalyseFusion(analyse, analyseTravaux)` : résumé lisible avec regroupement par préfixe
+- Ignore les clés internes `_classeur_*`
 
-#### Étape 3.3 — Résolution des conflits
+#### Étape 3.3 — Résolution des conflits (COMPLÉTÉE — 14 mars 2026)
 
-- Interface simple : pour chaque conflit, prompt/confirm avec résumé
-- Options : garder local (A), garder externe (B), ignorer
-- Pour les tableaux (listes d'étudiants, présences, évaluations) : fusion par ID d'élément si possible
+- `_resoudreConflits(analyse, donneesLocales, donneesExternes, analyseTravaux)` : flux interactif
+- Auto-résolution des cas non-conflictuels (ajoutées, modifiées, supprimées d'un seul côté)
+- 4 stratégies pour les conflits : tout local, tout externe, un par un, annuler
+- Résolution un par un : prompt() avec `_resumerValeur()` (type + taille de chaque valeur)
+- Retourne `{resolutions: {clé→'local'|'externe'|'supprimer'}, importerTravaux, annule}`
 
 #### Étape 3.4 — Fusion des blobs (travaux)
 

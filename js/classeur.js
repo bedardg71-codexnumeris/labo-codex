@@ -504,6 +504,57 @@ async function lireManifeste(fichierZip) {
 }
 
 /* ===============================
+   LECTURE EXTERNE (FUSION — Phase 3)
+   =============================== */
+
+/**
+ * Lit un classeur ZIP en mémoire SANS écrire dans IndexedDB.
+ * Utilisé pour la comparaison et la fusion avec un autre classeur.
+ *
+ * @param {File|Blob} fichierZip - Le fichier ZIP à lire
+ * @returns {Promise<{manifeste: Object, donnees: Object, travauxListe: string[]}>}
+ *   - manifeste : le manifeste complet du classeur externe
+ *   - donnees : toutes les clés/valeurs de donnees.json (en mémoire)
+ *   - travauxListe : liste des chemins de fichiers dans travaux/ (ex: "travaux/FT_abc123.pdf")
+ */
+async function lireClasseurExterne(fichierZip) {
+    if (typeof JSZip === 'undefined') {
+        throw new Error('JSZip non disponible.');
+    }
+
+    // 1. Valider le ZIP
+    var validation = await validerClasseur(fichierZip);
+    if (!validation.valide) {
+        throw new Error('Classeur invalide : ' + validation.erreurs.join(', '));
+    }
+
+    var zip = validation._zip;
+    var manifeste = validation._manifeste;
+
+    // 2. Extraire les données JSON en mémoire
+    var jsonStr = await zip.file(NOM_DONNEES).async('string');
+    var donnees = JSON.parse(jsonStr);
+
+    // 3. Lister les fichiers travaux (sans les extraire)
+    var travauxListe = [];
+    zip.forEach(function(cheminRelatif) {
+        if (cheminRelatif.startsWith(DOSSIER_TRAVAUX + '/') && !cheminRelatif.endsWith('/')) {
+            travauxListe.push(cheminRelatif);
+        }
+    });
+
+    console.log('📂 Classeur externe lu : "' + manifeste.nom + '" — ' +
+        Object.keys(donnees).length + ' clés, ' + travauxListe.length + ' fichier(s) travaux');
+
+    return {
+        manifeste: manifeste,
+        donnees: donnees,
+        travauxListe: travauxListe,
+        _zip: zip  // conservé pour extraction ultérieure des blobs lors de la fusion
+    };
+}
+
+/* ===============================
    ÉTAT DU CLASSEUR
    =============================== */
 
@@ -945,6 +996,400 @@ function _grouperParPrefixe(cles) {
     }
 
     return lignes;
+}
+
+/* ===============================
+   ANALYSE DE FUSION (Phase 3)
+   =============================== */
+
+/**
+ * Analyse les différences entre deux classeurs pour préparer une fusion.
+ *
+ * Trois modes selon la disponibilité d'un ancêtre commun :
+ * - Avec ancêtre : diff 3 parties (détecte les vrais conflits)
+ * - Sans ancêtre : diff 2 parties (toute différence = conflit potentiel)
+ *
+ * @param {Object} local - Données du classeur local (actuellement dans IDB)
+ * @param {Object} externe - Données du classeur externe (lu en mémoire)
+ * @param {Object|null} [ancetre=null] - Dernier état commun connu (snapshot partagé)
+ * @returns {{
+ *   ajouteesLocal: string[],    - Clés nouvelles seulement dans local
+ *   ajouteesExterne: string[],  - Clés nouvelles seulement dans externe
+ *   modifieesLocal: string[],   - Clés modifiées seulement dans local (auto-merge: garder local)
+ *   modifieesExterne: string[], - Clés modifiées seulement dans externe (auto-merge: prendre externe)
+ *   supprimeesLocal: string[],  - Clés supprimées seulement dans local
+ *   supprimeesExterne: string[],- Clés supprimées seulement dans externe
+ *   conflits: string[],         - Clés modifiées/supprimées des DEUX côtés (choix utilisateur requis)
+ *   identiques: number          - Nombre de clés identiques (pas de stats, juste le compte)
+ * }}
+ */
+function _analyserFusion(local, externe, ancetre) {
+    var toutesLesCles = new Set(
+        Object.keys(local).concat(Object.keys(externe))
+    );
+    if (ancetre) {
+        Object.keys(ancetre).forEach(function(c) { toutesLesCles.add(c); });
+    }
+
+    var resultat = {
+        ajouteesLocal: [],
+        ajouteesExterne: [],
+        modifieesLocal: [],
+        modifieesExterne: [],
+        supprimeesLocal: [],
+        supprimeesExterne: [],
+        conflits: [],
+        identiques: 0
+    };
+
+    toutesLesCles.forEach(function(cle) {
+        // Ignorer les clés internes du classeur
+        if (cle.startsWith('_classeur_')) return;
+
+        var dansLocal = cle in local;
+        var dansExterne = cle in externe;
+        var dansAncetre = ancetre ? (cle in ancetre) : false;
+
+        var jsonLocal = dansLocal ? JSON.stringify(local[cle]) : undefined;
+        var jsonExterne = dansExterne ? JSON.stringify(externe[cle]) : undefined;
+        var jsonAncetre = (ancetre && dansAncetre) ? JSON.stringify(ancetre[cle]) : undefined;
+
+        // Cas trivial : valeurs identiques
+        if (dansLocal && dansExterne && jsonLocal === jsonExterne) {
+            resultat.identiques++;
+            return;
+        }
+
+        if (ancetre) {
+            // ── Diff 3 parties (avec ancêtre) ──
+            var localChange = jsonLocal !== jsonAncetre;
+            var externeChange = jsonExterne !== jsonAncetre;
+
+            if (!dansAncetre && dansLocal && !dansExterne) {
+                // Ajoutée dans local seulement
+                resultat.ajouteesLocal.push(cle);
+            } else if (!dansAncetre && !dansLocal && dansExterne) {
+                // Ajoutée dans externe seulement
+                resultat.ajouteesExterne.push(cle);
+            } else if (!dansAncetre && dansLocal && dansExterne) {
+                // Ajoutée des deux côtés avec valeurs différentes → conflit
+                resultat.conflits.push(cle);
+            } else if (dansAncetre && !dansLocal && dansExterne && !externeChange) {
+                // Supprimée dans local, inchangée dans externe → garder suppression
+                resultat.supprimeesLocal.push(cle);
+            } else if (dansAncetre && dansLocal && !dansExterne && !localChange) {
+                // Supprimée dans externe, inchangée dans local → garder suppression
+                resultat.supprimeesExterne.push(cle);
+            } else if (dansAncetre && !dansLocal && dansExterne && externeChange) {
+                // Supprimée dans local, modifiée dans externe → conflit
+                resultat.conflits.push(cle);
+            } else if (dansAncetre && dansLocal && !dansExterne && localChange) {
+                // Modifiée dans local, supprimée dans externe → conflit
+                resultat.conflits.push(cle);
+            } else if (dansAncetre && !dansLocal && !dansExterne) {
+                // Supprimée des deux côtés → rien à faire
+                resultat.identiques++;
+            } else if (localChange && !externeChange) {
+                // Modifiée seulement dans local
+                resultat.modifieesLocal.push(cle);
+            } else if (!localChange && externeChange) {
+                // Modifiée seulement dans externe
+                resultat.modifieesExterne.push(cle);
+            } else if (localChange && externeChange) {
+                // Modifiée des deux côtés → conflit
+                resultat.conflits.push(cle);
+            }
+        } else {
+            // ── Diff 2 parties (sans ancêtre) ──
+            // Sans ancêtre, on ne peut pas savoir qui a ajouté/modifié quoi.
+            // Seul dans local → garder ; seul dans externe → ajouter ; les deux différents → conflit.
+            if (dansLocal && !dansExterne) {
+                resultat.ajouteesLocal.push(cle);
+            } else if (!dansLocal && dansExterne) {
+                resultat.ajouteesExterne.push(cle);
+            } else {
+                // dansLocal && dansExterne && valeurs différentes (identiques déjà filtré)
+                resultat.conflits.push(cle);
+            }
+        }
+    });
+
+    return resultat;
+}
+
+/**
+ * Analyse les différences entre les fichiers travaux de deux classeurs.
+ *
+ * @param {string[]} travauxLocal - Chemins des fichiers travaux locaux (ex: "travaux/FT_abc.pdf")
+ * @param {string[]} travauxExterne - Chemins des fichiers travaux externes
+ * @returns {{uniquementLocal: string[], uniquementExterne: string[], communs: string[]}}
+ */
+function _analyserFusionTravaux(travauxLocal, travauxExterne) {
+    var setLocal = new Set(travauxLocal);
+    var setExterne = new Set(travauxExterne);
+
+    var uniquementLocal = [];
+    var uniquementExterne = [];
+    var communs = [];
+
+    travauxLocal.forEach(function(chemin) {
+        if (setExterne.has(chemin)) {
+            communs.push(chemin);
+        } else {
+            uniquementLocal.push(chemin);
+        }
+    });
+
+    travauxExterne.forEach(function(chemin) {
+        if (!setLocal.has(chemin)) {
+            uniquementExterne.push(chemin);
+        }
+    });
+
+    return {
+        uniquementLocal: uniquementLocal,
+        uniquementExterne: uniquementExterne,
+        communs: communs
+    };
+}
+
+/**
+ * Formate le résultat d'une analyse de fusion pour affichage utilisateur.
+ *
+ * @param {Object} analyse - Retour de _analyserFusion()
+ * @param {Object} [analyseTravaux] - Retour de _analyserFusionTravaux() (optionnel)
+ * @returns {string}
+ */
+function _formaterAnalyseFusion(analyse, analyseTravaux) {
+    var lignes = [];
+
+    // Résumé global
+    var totalAuto = analyse.ajouteesLocal.length + analyse.ajouteesExterne.length +
+        analyse.modifieesLocal.length + analyse.modifieesExterne.length +
+        analyse.supprimeesLocal.length + analyse.supprimeesExterne.length;
+    var nbConflits = analyse.conflits.length;
+
+    lignes.push('═══ Analyse de fusion ═══\n');
+    lignes.push('Clés identiques : ' + analyse.identiques);
+    lignes.push('Résolution automatique : ' + totalAuto + ' clé(s)');
+    lignes.push('Conflits à résoudre : ' + nbConflits + '\n');
+
+    // Détails auto-merge
+    if (analyse.ajouteesLocal.length > 0) {
+        lignes.push('Garder (nouvelles locales) : ' + analyse.ajouteesLocal.length);
+        var gl = _grouperParPrefixe(analyse.ajouteesLocal);
+        for (var a = 0; a < gl.length; a++) lignes.push('  + ' + gl[a]);
+        lignes.push('');
+    }
+
+    if (analyse.ajouteesExterne.length > 0) {
+        lignes.push('Importer (nouvelles externes) : ' + analyse.ajouteesExterne.length);
+        var ge = _grouperParPrefixe(analyse.ajouteesExterne);
+        for (var b = 0; b < ge.length; b++) lignes.push('  ← ' + ge[b]);
+        lignes.push('');
+    }
+
+    if (analyse.modifieesLocal.length > 0) {
+        lignes.push('Garder (modifiées localement) : ' + analyse.modifieesLocal.length);
+        var gml = _grouperParPrefixe(analyse.modifieesLocal);
+        for (var c = 0; c < gml.length; c++) lignes.push('  ✓ ' + gml[c]);
+        lignes.push('');
+    }
+
+    if (analyse.modifieesExterne.length > 0) {
+        lignes.push('Importer (modifiées dans externe) : ' + analyse.modifieesExterne.length);
+        var gme = _grouperParPrefixe(analyse.modifieesExterne);
+        for (var d = 0; d < gme.length; d++) lignes.push('  ← ' + gme[d]);
+        lignes.push('');
+    }
+
+    if (nbConflits > 0) {
+        lignes.push('⚠ CONFLITS (' + nbConflits + ') :');
+        var gc = _grouperParPrefixe(analyse.conflits);
+        for (var e = 0; e < gc.length; e++) lignes.push('  ⚠ ' + gc[e]);
+        lignes.push('');
+    }
+
+    // Travaux
+    if (analyseTravaux) {
+        if (analyseTravaux.uniquementExterne.length > 0) {
+            lignes.push('Fichiers travaux à importer : ' + analyseTravaux.uniquementExterne.length);
+        }
+        if (analyseTravaux.communs.length > 0) {
+            lignes.push('Fichiers travaux communs : ' + analyseTravaux.communs.length);
+        }
+    }
+
+    return lignes.join('\n');
+}
+
+/* ===============================
+   RÉSOLUTION DE CONFLITS (Phase 3)
+   =============================== */
+
+/**
+ * Produit un résumé lisible d'une valeur pour l'affichage dans les prompts de conflit.
+ * @param {*} val
+ * @returns {string}
+ */
+function _resumerValeur(val) {
+    if (val === null || val === undefined) return '(vide)';
+    if (typeof val === 'string') {
+        if (val.length <= 60) return '"' + val + '"';
+        return 'Texte (' + val.length + ' car.)';
+    }
+    if (typeof val === 'number' || typeof val === 'boolean') return String(val);
+    if (Array.isArray(val)) {
+        return 'Liste [' + val.length + ' élément' + (val.length > 1 ? 's' : '') + ']';
+    }
+    if (typeof val === 'object') {
+        var nb = Object.keys(val).length;
+        return 'Objet {' + nb + ' propriété' + (nb > 1 ? 's' : '') + '}';
+    }
+    return typeof val;
+}
+
+/**
+ * Pilote la résolution interactive des conflits de fusion.
+ *
+ * Flux :
+ * 1. Affiche le résumé global (auto-merge + conflits)
+ * 2. Si conflits > 0, propose une stratégie globale ou "un par un"
+ * 3. Retourne un plan de résolution complet
+ *
+ * @param {Object} analyse - Retour de _analyserFusion()
+ * @param {Object} donneesLocales - Données du classeur local
+ * @param {Object} donneesExternes - Données du classeur externe
+ * @param {Object} [analyseTravaux] - Retour de _analyserFusionTravaux() (optionnel)
+ * @returns {{
+ *   resolutions: Object.<string, 'local'|'externe'|'supprimer'>,
+ *   importerTravaux: string[],
+ *   annule: boolean
+ * }}
+ */
+function _resoudreConflits(analyse, donneesLocales, donneesExternes, analyseTravaux) {
+    // 1. Construire les résolutions automatiques
+    var resolutions = {};
+
+    // Clés ajoutées localement → garder (déjà dans IDB)
+    for (var i = 0; i < analyse.ajouteesLocal.length; i++) {
+        resolutions[analyse.ajouteesLocal[i]] = 'local';
+    }
+
+    // Clés ajoutées dans l'externe → importer
+    for (var j = 0; j < analyse.ajouteesExterne.length; j++) {
+        resolutions[analyse.ajouteesExterne[j]] = 'externe';
+    }
+
+    // Modifiées seulement localement → garder
+    for (var k = 0; k < analyse.modifieesLocal.length; k++) {
+        resolutions[analyse.modifieesLocal[k]] = 'local';
+    }
+
+    // Modifiées seulement dans l'externe → importer
+    for (var l = 0; l < analyse.modifieesExterne.length; l++) {
+        resolutions[analyse.modifieesExterne[l]] = 'externe';
+    }
+
+    // Supprimées localement (et inchangées dans externe) → supprimer
+    for (var m = 0; m < analyse.supprimeesLocal.length; m++) {
+        resolutions[analyse.supprimeesLocal[m]] = 'supprimer';
+    }
+
+    // Supprimées dans l'externe (et inchangées dans local) → supprimer
+    for (var n = 0; n < analyse.supprimeesExterne.length; n++) {
+        resolutions[analyse.supprimeesExterne[n]] = 'supprimer';
+    }
+
+    // Travaux à importer (fichiers présents seulement dans l'externe)
+    var importerTravaux = analyseTravaux ? analyseTravaux.uniquementExterne.slice() : [];
+
+    // 2. Afficher le résumé et demander confirmation
+    var resume = _formaterAnalyseFusion(analyse, analyseTravaux);
+
+    if (analyse.conflits.length === 0) {
+        // Pas de conflit — confirmer l'auto-merge
+        var totalActions = Object.keys(resolutions).length + importerTravaux.length;
+        if (totalActions === 0) {
+            alert('Les deux classeurs sont identiques. Rien à fusionner.');
+            return { resolutions: resolutions, importerTravaux: importerTravaux, annule: true };
+        }
+
+        if (!confirm(resume + '\n\nAucun conflit ! Procéder à la fusion automatique ?')) {
+            return { resolutions: resolutions, importerTravaux: importerTravaux, annule: true };
+        }
+
+        return { resolutions: resolutions, importerTravaux: importerTravaux, annule: false };
+    }
+
+    // 3. Conflits présents — proposer une stratégie
+    var nbConflits = analyse.conflits.length;
+    var strategieTexte = resume + '\n\n' +
+        'Comment résoudre les ' + nbConflits + ' conflit(s) ?\n\n' +
+        '1. Garder local pour tous les conflits\n' +
+        '2. Prendre externe pour tous les conflits\n' +
+        '3. Résoudre un par un\n' +
+        '4. Annuler la fusion\n\n' +
+        'Entrer 1, 2, 3 ou 4 :';
+
+    var choixStrategie = prompt(strategieTexte);
+    if (!choixStrategie || choixStrategie.trim() === '4') {
+        return { resolutions: resolutions, importerTravaux: importerTravaux, annule: true };
+    }
+
+    var strategie = parseInt(choixStrategie.trim(), 10);
+
+    if (strategie === 1) {
+        // Tout garder local
+        for (var p = 0; p < analyse.conflits.length; p++) {
+            resolutions[analyse.conflits[p]] = 'local';
+        }
+    } else if (strategie === 2) {
+        // Tout prendre externe
+        for (var q = 0; q < analyse.conflits.length; q++) {
+            resolutions[analyse.conflits[q]] = 'externe';
+        }
+    } else if (strategie === 3) {
+        // Résoudre un par un
+        for (var r = 0; r < analyse.conflits.length; r++) {
+            var cle = analyse.conflits[r];
+            var valLocal = donneesLocales[cle];
+            var valExterne = donneesExternes[cle];
+
+            var texteConflit = 'Conflit ' + (r + 1) + '/' + nbConflits + ' : ' + cle + '\n\n' +
+                'Local :  ' + _resumerValeur(valLocal) + '\n' +
+                'Externe : ' + _resumerValeur(valExterne) + '\n\n' +
+                '1. Garder local\n' +
+                '2. Prendre externe\n' +
+                '3. Ignorer (ne pas toucher)\n\n' +
+                'Entrer 1, 2 ou 3 :';
+
+            var choixConflit = prompt(texteConflit);
+            if (!choixConflit) {
+                // Annulation en cours de résolution — demander confirmation
+                if (confirm('Annuler toute la fusion ?\n\n(Les conflits déjà résolus seront perdus.)')) {
+                    return { resolutions: {}, importerTravaux: [], annule: true };
+                }
+                // Re-poser la question pour ce conflit
+                r--;
+                continue;
+            }
+
+            var choixNum = parseInt(choixConflit.trim(), 10);
+            if (choixNum === 1) {
+                resolutions[cle] = 'local';
+            } else if (choixNum === 2) {
+                resolutions[cle] = 'externe';
+            }
+            // choixNum === 3 ou autre → pas de résolution, on ne touche pas
+        }
+    } else {
+        // Choix invalide → annuler
+        alert('Choix invalide. Fusion annulée.');
+        return { resolutions: resolutions, importerTravaux: importerTravaux, annule: true };
+    }
+
+    return { resolutions: resolutions, importerTravaux: importerTravaux, annule: false };
 }
 
 /**
@@ -1551,9 +1996,10 @@ window.Classeur = {
     charger: chargerClasseur,
     fermer: fermerClasseur,
 
-    // Validation
+    // Validation / lecture
     valider: validerClasseur,
     lireManifeste: lireManifeste,
+    lireExterne: lireClasseurExterne,
 
     // Sauvegarde multi-plateforme
     sauvegarder: sauvegarderVersDestination,
