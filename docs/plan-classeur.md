@@ -346,17 +346,24 @@ Pour chaque clé présente dans un ou les deux classeurs :
 - Résolution un par un : prompt() avec `_resumerValeur()` (type + taille de chaque valeur)
 - Retourne `{resolutions: {clé→'local'|'externe'|'supprimer'}, importerTravaux, annule}`
 
-#### Étape 3.4 — Fusion des blobs (travaux)
+#### Étape 3.4 — Fusion des blobs (travaux) (COMPLÉTÉE — 14 mars 2026)
 
-- Les blobs sont identifiés par `id` unique (FT_xxx)
-- Un blob présent seulement dans B → l'importer
-- Un blob présent dans les deux → garder (même ID = même fichier)
+- `_fusionnerTravaux(zipExterne, donneesExternes, cheminsAImporter, onProgression)`
+- Extrait l'ID du chemin (`travaux/FT_abc.pdf` → `FT_abc`), récupère métadonnées depuis `fichiersTravaux`
+- Stocke via `travauxStockage.stockerBlob()`, callback progression + `_yield()`
+- Fusionne la liste `fichiersTravaux` locale (ajout sans doublon par ID)
+- Retourne `{importes, ignores, erreurs}`
 
-#### Étape 3.5 — Action menu "Fusionner avec un classeur..."
+#### Étape 3.5 — Action menu "Fusionner avec un classeur..." (COMPLÉTÉE — 14 mars 2026)
 
-- Bouton dans le menu classeur
-- Flux : ouvrir fichier → lecture externe → diff → résolution conflits → merge → notification
-- Pas de rechargement nécessaire si on écrit directement dans IDB
+- `actionFusionner()` : flux complet en 12 étapes avec overlay progression
+- File picker → `lireClasseurExterne()` → collecte IDB locale → ancêtre commun (snapshot)
+- `_analyserFusion()` + `_analyserFusionTravaux()` → `_resoudreConflits()` (interaction)
+- Application : `db.set()` (externes), `db.remove()` (supprimées) → `syncToLocalStorageCache()`
+- `_fusionnerTravaux()` pour blobs → `marquerModification()` → résumé final alert()
+- Bouton "Fusionner avec un classeur..." dans menu (`index.html`), visible si classeur actif
+- API publique : `Classeur.actionFusionner()`
+- `_actualiserMenu()` mis à jour pour `classeur-menu-fusionner`
 
 #### Étape 3.6 — Export sélectif (optionnel, à valider)
 
@@ -373,4 +380,4 @@ Pour chaque clé présente dans un ou les deux classeurs :
 ---
 
 **Créé** : 14 mars 2026
-**Statut** : Phase 1 complétée, Phase 2 complétée, Phase 3 à faire
+**Statut** : Phase 1 complétée, Phase 2 complétée, Phase 3 étapes 3.1-3.5 complétées, 3.6 à faire

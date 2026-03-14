@@ -40,6 +40,10 @@ Phase 2 (COMPLÉTÉE) : TimeMachine — snapshots automatiques dans `historique/
 
 193. **Résolution interactive des conflits (3.3)** : `_resoudreConflits(analyse, donneesLocales, donneesExternes, analyseTravaux)` — auto-résolution des cas non-conflictuels + 4 stratégies pour conflits (tout local, tout externe, un par un, annuler). Helper `_resumerValeur()` pour résumé lisible des valeurs. Retourne `{resolutions, importerTravaux, annule}`. **Fichier** : `js/classeur.js`.
 
+194. **Fusion des blobs travaux (3.4)** : `_fusionnerTravaux(zipExterne, donneesExternes, cheminsAImporter, onProgression)` — extrait et stocke les blobs manquants via `travauxStockage.stockerBlob()`, fusionne la liste `fichiersTravaux` locale sans doublon. Retourne `{importes, ignores, erreurs}`. **Fichier** : `js/classeur.js`.
+
+195. **Action menu Fusionner (3.5)** : `actionFusionner()` — flux complet en 12 étapes : file picker → lecture externe → collecte IDB → ancêtre commun → analyse diff → résolution conflits → application IDB → sync cache → import blobs → résumé. Bouton "Fusionner avec un classeur..." dans le menu en-tête (visible si classeur actif). **Fichiers** : `js/classeur.js`, `index.html`.
+
 ### Travail accompli — Classeur TimeMachine Phase 2 (14 mars 2026)
 
 187. **TimeMachine infrastructure** : Ajout des constantes (`DOSSIER_HISTORIQUE`, `MAX_SNAPSHOTS=10`, `MAX_JOURS_HISTORIQUE=30`), cles IDB (`_classeur_hist_index`, `_classeur_snapshot_avant`, `_classeur_hist_*`), et 4 helpers : `_purgerHistorique()` (rotation), `_ecrireHistoriqueDansZip()` (IDB→ZIP), `_chargerHistoriqueDepuisZip()` (ZIP→IDB), `_nettoyerHistoriqueIDB()` (nettoyage). Aucun flux existant modifie. Commit `9eedefa`.

@@ -1392,6 +1392,110 @@ function _resoudreConflits(analyse, donneesLocales, donneesExternes, analyseTrav
     return { resolutions: resolutions, importerTravaux: importerTravaux, annule: false };
 }
 
+/* ===============================
+   FUSION DES TRAVAUX / BLOBS (Phase 3)
+   =============================== */
+
+/**
+ * Importe les blobs travaux d'un classeur externe qui ne sont pas dans le classeur local.
+ *
+ * @param {JSZip} zipExterne - Instance JSZip du classeur externe (de lireClasseurExterne._zip)
+ * @param {Object} donneesExternes - donnees.json du classeur externe
+ * @param {string[]} cheminsAImporter - Chemins des fichiers à importer (ex: "travaux/FT_abc.pdf")
+ * @param {Function} [onProgression] - Callback optionnel (pourcentage, message)
+ * @returns {Promise<{importes: number, ignores: number, erreurs: string[]}>}
+ */
+async function _fusionnerTravaux(zipExterne, donneesExternes, cheminsAImporter, onProgression) {
+    if (!cheminsAImporter || cheminsAImporter.length === 0) {
+        return { importes: 0, ignores: 0, erreurs: [] };
+    }
+
+    if (typeof travauxStockage === 'undefined') {
+        console.warn('📂 Fusion : travauxStockage non disponible, blobs ignorés');
+        return { importes: 0, ignores: cheminsAImporter.length, erreurs: ['travauxStockage non disponible'] };
+    }
+
+    // Construire un index id → métadonnées depuis donneesExternes.fichiersTravaux
+    var cleFT = Object.keys(donneesExternes).find(function(c) { return c.includes('fichiersTravaux'); });
+    var indexFT = {};
+    if (cleFT && Array.isArray(donneesExternes[cleFT])) {
+        donneesExternes[cleFT].forEach(function(f) {
+            indexFT[f.id] = f;
+        });
+    }
+
+    var importes = 0;
+    var ignores = 0;
+    var erreurs = [];
+
+    for (var i = 0; i < cheminsAImporter.length; i++) {
+        var chemin = cheminsAImporter[i];
+
+        // Extraire l'ID du chemin (ex: "travaux/FT_abc123.pdf" → "FT_abc123")
+        var nomFichier = chemin.replace(DOSSIER_TRAVAUX + '/', '');
+        var pointIndex = nomFichier.lastIndexOf('.');
+        var idFichier = pointIndex > 0 ? nomFichier.substring(0, pointIndex) : nomFichier;
+
+        try {
+            var entree = zipExterne.file(chemin);
+            if (!entree) {
+                erreurs.push(chemin + ' : introuvable dans le ZIP');
+                ignores++;
+                continue;
+            }
+
+            var blobData = await entree.async('blob');
+            var meta = indexFT[idFichier];
+            var etudiantDA = meta ? meta.etudiantDA : '';
+            var productionId = meta ? meta.productionId : '';
+
+            await travauxStockage.stockerBlob(idFichier, blobData, etudiantDA, productionId);
+            importes++;
+        } catch (e) {
+            erreurs.push(chemin + ' : ' + e.message);
+            ignores++;
+        }
+
+        if (onProgression && i % 3 === 0) {
+            onProgression(
+                Math.round((i / cheminsAImporter.length) * 100),
+                importes + '/' + cheminsAImporter.length + ' fichiers'
+            );
+            await _yield();
+        }
+    }
+
+    // Fusionner la liste fichiersTravaux locale avec les nouvelles entrées
+    if (cleFT && importes > 0) {
+        var listeLocale = await db.get(cleFT, []);
+        var idsLocaux = new Set(listeLocale.map(function(f) { return f.id; }));
+
+        var ajoutees = 0;
+        donneesExternes[cleFT].forEach(function(f) {
+            if (!idsLocaux.has(f.id)) {
+                // Vérifier que ce fichier fait partie de ceux importés
+                var importé = cheminsAImporter.some(function(ch) {
+                    return ch.indexOf(f.id) !== -1;
+                });
+                if (importé) {
+                    listeLocale.push(f);
+                    ajoutees++;
+                }
+            }
+        });
+
+        if (ajoutees > 0) {
+            await db.set(cleFT, listeLocale);
+            console.log('📂 Fusion : ' + ajoutees + ' entrée(s) ajoutée(s) à ' + cleFT);
+        }
+    }
+
+    console.log('📂 Fusion travaux : ' + importes + ' importé(s), ' + ignores + ' ignoré(s)' +
+        (erreurs.length > 0 ? ', ' + erreurs.length + ' erreur(s)' : ''));
+
+    return { importes: importes, ignores: ignores, erreurs: erreurs };
+}
+
 /**
  * Nettoie toutes les données historiques de IndexedDB.
  */
@@ -1596,6 +1700,11 @@ function _actualiserMenu() {
     if (comparerItem) {
         if (_etat.actif) comparerItem.classList.remove('u-hide');
         else comparerItem.classList.add('u-hide');
+    }
+    var fusionnerItem = document.getElementById('classeur-menu-fusionner');
+    if (fusionnerItem) {
+        if (_etat.actif) fusionnerItem.classList.remove('u-hide');
+        else fusionnerItem.classList.add('u-hide');
     }
 }
 
@@ -1949,6 +2058,171 @@ async function actionComparer() {
 }
 
 /**
+ * Fusionner un classeur externe avec le classeur local.
+ * Flux complet : file picker → lecture externe → analyse → résolution → application → notification.
+ */
+async function actionFusionner() {
+    _fermerMenu();
+
+    if (!_etat.actif) {
+        alert('Aucun classeur actif.\n\nOuvre d\'abord un classeur avant de fusionner.');
+        return;
+    }
+
+    // 1. Choisir le fichier externe
+    var fichier = await ouvrirDialogueFichier();
+    if (!fichier) return;
+
+    _afficherProgression('Fusion de classeurs');
+    _majProgression(0, 'Lecture du classeur externe...');
+    await _yield();
+
+    try {
+
+    // 2. Lire le classeur externe en mémoire (sans toucher à IDB)
+    var externe = await lireClasseurExterne(fichier);
+
+    // 3. Collecter les données locales depuis IndexedDB
+    _majProgression(15, 'Lecture des données locales...');
+    await _yield();
+
+    var toutesLesCles = await db.keys();
+    var clesFiltrees = toutesLesCles.filter(function(c) {
+        return !c.startsWith('_classeur_') && !c.startsWith('_');
+    });
+    var donneesLocales = {};
+    for (var i = 0; i < clesFiltrees.length; i++) {
+        var val = await db.get(clesFiltrees[i], null);
+        if (val !== null) donneesLocales[clesFiltrees[i]] = val;
+        if (i % 20 === 0) {
+            _majProgression(15 + Math.round((i / clesFiltrees.length) * 15),
+                'Lecture des données locales...', (i + 1) + '/' + clesFiltrees.length);
+            await _yield();
+        }
+    }
+
+    // 4. Chercher un ancêtre commun (dernier snapshot partagé)
+    _majProgression(30, 'Recherche d\'un ancêtre commun...');
+    await _yield();
+    var ancetre = await db.get(CLE_SNAPSHOT_AVANT, null);
+
+    // 5. Analyser les différences (données)
+    _majProgression(35, 'Analyse des différences...');
+    await _yield();
+
+    var analyse = _analyserFusion(donneesLocales, externe.donnees, ancetre);
+
+    // 6. Analyser les différences (travaux/blobs)
+    // Construire la liste des chemins locaux
+    var travauxLocaux = [];
+    var cleFTLocale = toutesLesCles.find(function(c) { return c.includes('fichiersTravaux'); });
+    if (cleFTLocale && donneesLocales[cleFTLocale] && Array.isArray(donneesLocales[cleFTLocale])) {
+        donneesLocales[cleFTLocale].forEach(function(f) {
+            var ext = (f.nomFichier || 'bin').split('.').pop();
+            travauxLocaux.push(DOSSIER_TRAVAUX + '/' + f.id + '.' + ext);
+        });
+    }
+
+    var analyseTravaux = _analyserFusionTravaux(travauxLocaux, externe.travauxListe);
+
+    _masquerProgression();
+
+    // 7. Résolution des conflits (interaction utilisateur)
+    var plan = _resoudreConflits(analyse, donneesLocales, externe.donnees, analyseTravaux);
+
+    if (plan.annule) {
+        console.log('📂 Fusion annulée par l\'utilisateur');
+        return;
+    }
+
+    // 8. Appliquer les résolutions dans IndexedDB
+    _afficherProgression('Application de la fusion');
+    var clesResolution = Object.keys(plan.resolutions);
+    var nbAppliquees = 0;
+    var nbSupprimees = 0;
+
+    for (var j = 0; j < clesResolution.length; j++) {
+        var cle = clesResolution[j];
+        var action = plan.resolutions[cle];
+
+        if (action === 'externe') {
+            // Écrire la valeur externe dans IDB
+            await db.set(cle, externe.donnees[cle]);
+            nbAppliquees++;
+        } else if (action === 'supprimer') {
+            // Supprimer la clé de IDB
+            await db.remove(cle);
+            nbSupprimees++;
+        }
+        // 'local' → rien à faire, la valeur est déjà en IDB
+
+        if (j % 10 === 0) {
+            _majProgression(Math.round((j / clesResolution.length) * 60),
+                'Écriture des données...', (j + 1) + '/' + clesResolution.length);
+            await _yield();
+        }
+    }
+
+    // 9. Synchroniser le cache localStorage
+    _majProgression(60, 'Synchronisation du cache...');
+    await db.syncToLocalStorageCache();
+
+    // 10. Importer les blobs travaux externes
+    var statsTravaux = { importes: 0, ignores: 0, erreurs: [] };
+    if (plan.importerTravaux.length > 0) {
+        statsTravaux = await _fusionnerTravaux(
+            externe._zip, externe.donnees, plan.importerTravaux,
+            function(pct, msg) {
+                _majProgression(60 + Math.round(pct * 0.35), 'Import des fichiers travaux...', msg);
+            }
+        );
+    }
+
+    // 11. Marquer comme modifié (il faudra réenregistrer le classeur)
+    marquerModification();
+
+    // 12. Résumé final
+    _majProgression(100, 'Fusion terminée !');
+    await new Promise(function(r) { setTimeout(r, 800); });
+    _masquerProgression();
+
+    var nbExternes = 0;
+    var nbLocaux = 0;
+    for (var k = 0; k < clesResolution.length; k++) {
+        if (plan.resolutions[clesResolution[k]] === 'externe') nbExternes++;
+        else if (plan.resolutions[clesResolution[k]] === 'local') nbLocaux++;
+    }
+
+    var resume = 'Fusion terminée !\n\n' +
+        'Classeur externe : "' + externe.manifeste.nom + '"\n\n' +
+        'Clés identiques : ' + analyse.identiques + '\n' +
+        'Gardées (locales) : ' + nbLocaux + '\n' +
+        'Importées (externes) : ' + nbExternes + '\n' +
+        'Supprimées : ' + nbSupprimees + '\n';
+
+    if (statsTravaux.importes > 0) {
+        resume += 'Fichiers travaux importés : ' + statsTravaux.importes + '\n';
+    }
+    if (statsTravaux.erreurs.length > 0) {
+        resume += 'Erreurs fichiers : ' + statsTravaux.erreurs.length + '\n';
+    }
+
+    resume += '\nPense à enregistrer le classeur pour sauvegarder la fusion.';
+
+    alert(resume);
+
+    console.log('📂 Fusion terminée — ' + nbExternes + ' importée(s), ' +
+        nbLocaux + ' locale(s), ' + nbSupprimees + ' supprimée(s), ' +
+        statsTravaux.importes + ' blob(s)');
+
+    } catch (erreur) {
+        _masquerProgression();
+        alert('Erreur lors de la fusion :\n\n' + erreur.message);
+        console.error('📂 Fusion : erreur', erreur);
+    }
+}
+
+/**
  * Fermer le classeur actif
  */
 function actionFermer() {
@@ -2014,6 +2288,7 @@ window.Classeur = {
     actionDetails: actionDetails,
     actionRestaurer: actionRestaurer,
     actionComparer: actionComparer,
+    actionFusionner: actionFusionner,
     actionFermer: actionFermer,
 
     // État
