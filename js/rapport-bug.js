@@ -27,10 +27,11 @@
 // ===============================
 
 /**
- * Version actuelle de l'application
- * ⚠️ MODIFIER ICI lors de chaque nouvelle release
+ * Version actuelle de l'application (lue dynamiquement)
  */
-const VERSION_APP = `Beta ${window.VERSION_MAJEURE || '??'}`;
+function getVersionApp() {
+    return 'Beta ' + (window.VERSION_MAJEURE || '??');
+}
 
 // ===============================
 // ARCHIVAGE LOCAL DES RAPPORTS
@@ -726,7 +727,7 @@ function obtenirInfosSysteme() {
  */
 function obtenirEtatApplication() {
     const etat = {
-        version: VERSION_APP,
+        version: getVersionApp(),
         build: window.BUILD_ID || 'inconnu',
         dateHeure: new Date().toLocaleString('fr-CA'),
         sectionActive: typeof sectionActive !== 'undefined' ? sectionActive : 'inconnue',
@@ -1543,7 +1544,7 @@ function envoyerRapportParCourriel(btn) {
     try {
         // Construire le mailto
         const typeLabel = modeRapport === 'commentaire' ? 'Feedback' : 'Bug';
-        const sujet = encodeURIComponent(`[${typeLabel} Monitorage ${VERSION_APP}] ${description.substring(0, 50) || 'Rapport de bug'}...`);
+        const sujet = encodeURIComponent(`[${typeLabel} Monitorage ${getVersionApp()}] ${description.substring(0, 50) || 'Rapport de bug'}...`);
         const corpsNettoye = nettoyerUTF16(rapport + '\n\n--- JOINS TES CAPTURES D\'ÉCRAN À CE COURRIEL ---');
         const corps = encodeURIComponent(corpsNettoye);
 
