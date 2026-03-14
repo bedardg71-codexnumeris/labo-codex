@@ -1865,16 +1865,8 @@ function _mettreAJourIndicateur() {
     }
 
     // Tooltip du bouton : résumé de l'état
-    var btn = document.getElementById('btn-classeur');
-    if (btn) {
-        var titre = 'Classeur : ' + _etat.nom;
-        if (_autoSaveTimerId) {
-            titre += '\nAuto-save actif';
-            if (_derniereAutoSave) titre += ' — dernier : ' + _formaterHeureLocale(_derniereAutoSave);
-        }
-        if (_etat.modificationsDepuis) titre += '\nModifications non enregistrées';
-        btn.title = titre;
-    }
+    // Le statut du classeur est affiché dans le menu (classeur-menu-statut-haut),
+    // pas en title natif (conflit avec data-tooltip personnalisé).
 }
 
 /* ===============================
