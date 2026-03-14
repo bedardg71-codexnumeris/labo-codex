@@ -162,11 +162,67 @@ async function genererClasseur(options = {}) {
         }
     }
 
-    // 3. Manifeste
+    // 3. TimeMachine — archiver le snapshot précédent + inclure l'historique
+    _majProgression(62, 'Archivage de l\'historique...');
+    await _yield();
+
+    var dossierHistorique = zip.folder(DOSSIER_HISTORIQUE);
+    var historiqueIndex = await db.get(CLE_HIST_INDEX, []);
+    var snapshotPrecedent = await db.get(CLE_SNAPSHOT_AVANT, null);
+    var dejaAjoutes = new Set();
+
+    // 3a. Archiver le snapshot précédent comme nouvelle entrée historique
+    if (snapshotPrecedent) {
+        var dateSnapshot = _etat.derniereSauvegarde
+            || (_etat.manifeste ? _etat.manifeste.dateDerniereModification : null)
+            || new Date().toISOString();
+
+        // Éviter les doublons (même date = même sauvegarde)
+        var dejaPresent = historiqueIndex.some(function(e) { return e.date === dateSnapshot; });
+        if (!dejaPresent) {
+            var jsonSnapshot = JSON.stringify(snapshotPrecedent);
+            var nomSnapshot = dateSnapshot.replace(/[:.]/g, '-') + '.json';
+            dossierHistorique.file(nomSnapshot, jsonSnapshot);
+            dejaAjoutes.add(nomSnapshot);
+
+            // Stocker aussi dans IDB pour la prochaine session
+            var cleSnapshot = PREFIXE_HIST + dateSnapshot.replace(/[:.]/g, '-');
+            await db.set(cleSnapshot, snapshotPrecedent);
+
+            historiqueIndex.push({
+                date: dateSnapshot,
+                appareil: (_etat.manifeste ? _etat.manifeste.appareil : null) || _identifierAppareil(),
+                taille: jsonSnapshot.length
+            });
+
+            console.log('📂 TimeMachine : snapshot archivé (' + dateSnapshot + ')');
+        }
+    }
+
+    // 3b. Rotation (purger les snapshots trop anciens ou en surplus)
+    historiqueIndex = _purgerHistorique(historiqueIndex);
+
+    // 3c. Inclure les snapshots existants dans le ZIP
+    await _ecrireHistoriqueDansZip(dossierHistorique, historiqueIndex, dejaAjoutes);
+
+    // 3d. Mettre à jour IDB : le snapshot "avant" est désormais les données courantes
+    await db.set(CLE_SNAPSHOT_AVANT, donnees);
+    await db.set(CLE_HIST_INDEX, historiqueIndex);
+
+    // 4. Manifeste
     const maintenant = new Date().toISOString();
     const infoCours = db.getSync('infoCours', {});
     const auteur = (typeof infoCours?.enseignant === 'string') ? infoCours.enseignant : '';
     const trimestreActif = (typeof window.trimestreActif === 'string') ? window.trimestreActif : '';
+
+    var historiqueManifeste = [];
+    for (var hm = 0; hm < historiqueIndex.length; hm++) {
+        historiqueManifeste.push({
+            date: historiqueIndex[hm].date,
+            appareil: historiqueIndex[hm].appareil,
+            taille: historiqueIndex[hm].taille
+        });
+    }
 
     const manifeste = {
         formatVersion: FORMAT_VERSION,
@@ -181,12 +237,13 @@ async function genererClasseur(options = {}) {
             cles: toutesLesCles.filter(c => !c.startsWith('_classeur_')),
             nombreFichiersTravaux: nbBlobs,
             tailleTotaleOctets: new Blob([json]).size + tailleTotale
-        }
+        },
+        historique: historiqueManifeste
     };
 
     zip.file(NOM_MANIFESTE, JSON.stringify(manifeste, null, 2));
 
-    // 4. Générer le blob ZIP
+    // 5. Générer le blob ZIP
     _majProgression(70, 'Compression du ZIP...', nbBlobs + ' fichier(s), ' + _formaterTaille(tailleTotale));
     const zipBlob = await zip.generateAsync(
         { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
@@ -199,7 +256,7 @@ async function genererClasseur(options = {}) {
         }
     );
 
-    // 5. Mettre à jour l'état
+    // 6. Mettre à jour l'état
     _majProgression(98, 'Finalisation...');
     _etat.actif = true;
     _etat.nom = manifeste.nom;
@@ -210,7 +267,8 @@ async function genererClasseur(options = {}) {
     _mettreAJourIndicateur();
 
     const duree = Math.round(performance.now() - debut);
-    console.log('📂 Classeur généré en ' + duree + 'ms : ' + nbBlobs + ' fichier(s), ' + _formaterTaille(zipBlob.size));
+    var nbSnapshotsExport = historiqueManifeste.length;
+    console.log('📂 Classeur généré en ' + duree + 'ms : ' + nbBlobs + ' fichier(s), ' + nbSnapshotsExport + ' snapshot(s), ' + _formaterTaille(zipBlob.size));
 
     _majProgression(100, 'Classeur prêt !', _formaterTaille(zipBlob.size));
 
@@ -314,7 +372,20 @@ async function chargerClasseur(fichierZip) {
         }
     }
 
-    // 5. Mettre à jour l'état
+    // 5. TimeMachine — capturer le snapshot et charger l'historique
+    _majProgression(92, 'Chargement de l\'historique...');
+    await _yield();
+
+    // 5a. Stocker les données chargées comme snapshot de référence
+    // (servira de base pour le prochain archivage à la sauvegarde)
+    await db.set(CLE_SNAPSHOT_AVANT, donnees);
+
+    // 5b. Charger l'historique existant du ZIP vers IndexedDB
+    var nbSnapshots = 0;
+    var historiqueCharge = await _chargerHistoriqueDepuisZip(zip, manifeste);
+    nbSnapshots = historiqueCharge.length;
+
+    // 6. Mettre à jour l'état
     _majProgression(98, 'Finalisation...');
     const maintenant = new Date().toISOString();
     _etat.actif = true;
@@ -326,8 +397,8 @@ async function chargerClasseur(fichierZip) {
     _mettreAJourIndicateur();
 
     const duree = Math.round(performance.now() - debut);
-    const stats = { nbCles: nbCles, nbBlobs: nbBlobs, dureeMs: duree };
-    console.log('📂 Classeur chargé en ' + duree + 'ms : ' + nbCles + ' clé(s), ' + nbBlobs + ' blob(s)');
+    const stats = { nbCles: nbCles, nbBlobs: nbBlobs, nbSnapshots: nbSnapshots, dureeMs: duree };
+    console.log('📂 Classeur chargé en ' + duree + 'ms : ' + nbCles + ' clé(s), ' + nbBlobs + ' blob(s), ' + nbSnapshots + ' snapshot(s)');
 
     _majProgression(100, 'Classeur chargé !', nbCles + ' clés, ' + nbBlobs + ' fichiers');
     await new Promise(function(r) { setTimeout(r, 800); });
@@ -475,6 +546,8 @@ function fermerClasseur() {
     _etat.manifeste = null;
     _sauvegarderEtat();
     _mettreAJourIndicateur();
+    // Nettoyer l'historique TimeMachine de IndexedDB
+    _nettoyerHistoriqueIDB();
     console.log('📂 Classeur fermé');
 }
 
