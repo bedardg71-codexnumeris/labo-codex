@@ -56,6 +56,20 @@ Utiliser `window.cle('nomCle')` pour obtenir la cle namespacee.
 
 ---
 
+## Procedure de developpement
+
+1. Discussion sur la fonctionnalite (Cowork au besoin)
+2. Lire les fichiers concernes AVANT de planifier
+3. Planification detaillee, etape par etape (Cowork au besoin)
+4. Anticiper les erreurs utilisateur sur Mac et iPad separement
+5. Implementer UN fichier a la fois
+6. Valider fonctionnellement apres chaque fichier
+7. Debuguer avant de passer a l'etape suivante
+8. Documenter, committer et pusher seulement apres validation
+9. En fin de session : resume de ce qui est fait, ce qui reste, les risques
+
+---
+
 ## Avant de coder
 
 1. Lire `docs/00-START-HERE.md`
