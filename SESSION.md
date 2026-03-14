@@ -2,7 +2,33 @@
 
 **Date** : 14 mars 2026
 **Version** : Beta 98.5
-**Statut** : Classeur Phase 2 — TimeMachine
+**Statut** : Classeur Phase 3 — Multi-classeur + fusion (#227)
+
+## PROCHAINE TÂCHE — #227 Classeur Phase 3 : Multi-classeur + fusion
+
+**Contexte** : Le Classeur (module `js/classeur.js`, ~1400 lignes) est un workspace portable ZIP.
+Phase 1 (COMPLÉTÉE) : generer/charger/valider/sauvegarder multi-plateforme.
+Phase 2 (COMPLÉTÉE) : TimeMachine — snapshots automatiques dans `historique/`, restauration, comparaison visuelle.
+
+**Objectif Phase 3** : Permettre d'ouvrir plusieurs classeurs et de fusionner leurs données intelligemment.
+
+**Cas d'usage principal** :
+- L'enseignant travaille sur Mac (classeur A) et iPad (classeur B) pendant la semaine
+- Vendredi, il veut fusionner les deux pour avoir un classeur complet
+- Le système doit détecter les conflits (même clé modifiée des deux côtés) et proposer une résolution
+
+**Sous-fonctionnalités prévues** :
+1. Ouvrir un 2e classeur ZIP sans écraser le 1er (lecture seule pour comparaison/fusion)
+2. Fusion intelligente par ID + timestamp (la donnée la plus récente gagne par défaut)
+3. Détection de conflits (même clé modifiée des deux côtés depuis le dernier ancêtre commun)
+4. Résolution de conflits (choix par l'utilisateur : garder A, garder B, ou les deux)
+5. Export sélectif (par groupe-cours, par étudiant — optionnel, à valider)
+
+**Fichiers à modifier** : `js/classeur.js`, `index.html` (menu), potentiellement `styles.css`
+**Plan détaillé** : `docs/plan-classeur.md` (section Phase 3)
+**Approche** : étape par étape, valider chaque sous-étape avant de continuer
+
+**IMPORTANT** : Lire `docs/plan-classeur.md` et `js/classeur.js` en début de session.
 
 ## SESSION DU 14 MARS 2026
 
