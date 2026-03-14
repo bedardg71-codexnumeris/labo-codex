@@ -1,0 +1,254 @@
+# Plan de travail — Classeur (flux USB multi-appareil)
+
+> **Principe** : La clé USB est le cloud personnel. L'appareil n'est qu'un terminal.
+> **Nom UX** : "Classeur"
+> **Valeurs** : Sobre en carbone, sécuritaire, autonome, open source, gratuit.
+
+---
+
+## Vision architecturale
+
+```
+┌─────────────────────────────────────┐
+│         Interface utilisateur        │
+│  [Ouvrir]  [Enregistrer]  [Fusion]  │
+├─────────────────────────────────────┤
+│       Couche d'abstraction           │
+│    "Classeur" (workspace portable)   │
+├──────────┬──────────┬───────────────┤
+│ IndexedDB│  FSAPI   │  ZIP (fichier)│
+│ (cache)  │ (dossier)│  (universel)  │
+│ toujours │ Chrome   │  Safari/iPad  │
+│  actif   │ Mac/PC   │  + archivage  │
+└──────────┴──────────┴───────────────┘
+         ↕              ↕
+      Local          Clé USB
+```
+
+---
+
+## Phase 1 — Le cœur (actuelle)
+
+Objectif : Ouvrir et sauvegarder un Classeur ZIP depuis/vers n'importe quel emplacement (clé USB incluse), sur Mac ET iPad.
+
+### Étape 1.1 — Module `js/classeur.js` (fondations)
+
+**Fichier** : `js/classeur.js` (nouveau)
+
+**Responsabilités** :
+- Générer un Classeur ZIP (métadonnées + blobs)
+- Lire un Classeur ZIP et charger dans IndexedDB
+- Gérer le manifeste (`classeur-manifeste.json`)
+- Exposer l'API globale : `window.Classeur`
+
+**Format du Classeur ZIP** :
+```
+MonClasseur.classeur.zip
+├── classeur-manifeste.json    ← identité, version, timestamps
+├── donnees.json               ← toutes les métadonnées (clés namespacées)
+└── travaux/                   ← blobs PDF/images
+    ├── FT_abc123.pdf
+    ├── FT_def456.jpg
+    └── ...
+```
+
+**Manifeste** (`classeur-manifeste.json`) :
+```json
+{
+  "formatVersion": 1,
+  "appVersion": "98.4",
+  "nom": "Cours 601-101 — H2026",
+  "auteur": "Grégoire Lebeau",
+  "dateCreation": "2026-03-14T10:00:00",
+  "dateDerniereModification": "2026-03-14T14:30:00",
+  "appareilOrigine": "MacBook Pro — Chrome",
+  "trimestre": "h2026",
+  "contenu": {
+    "cles": ["h2026_groupeEtudiants", "h2026_presences", ...],
+    "nombreFichiersTravaux": 42,
+    "tailleTotaleOctets": 187000000
+  },
+  "historique": []
+}
+```
+
+**API publique** :
+```javascript
+window.Classeur = {
+  // Générer un ZIP Classeur depuis IndexedDB
+  genererClasseur(options) → Promise<Blob>
+
+  // Charger un ZIP Classeur dans IndexedDB
+  chargerClasseur(fichierZip) → Promise<{manifeste, stats}>
+
+  // Vérifier si un fichier est un Classeur valide
+  validerClasseur(fichierZip) → Promise<{valide, erreurs}>
+
+  // Obtenir le manifeste sans charger les données
+  lireManifeste(fichierZip) → Promise<manifeste>
+
+  // État courant
+  etatClasseur() → {derniereSauvegarde, modificationsNonSauvees, nom}
+};
+```
+
+**Sous-tâches** :
+- [ ] 1.1a — Créer le squelette du module (IIFE, 'use strict', API exposée)
+- [ ] 1.1b — Implémenter `genererClasseur()` : collecte clés + blobs → ZIP
+- [ ] 1.1c — Implémenter `chargerClasseur()` : ZIP → IndexedDB + blobs
+- [ ] 1.1d — Implémenter `validerClasseur()` et `lireManifeste()`
+- [ ] 1.1e — Tracking des modifications (flag `modificationsNonSauvees`)
+- [ ] 1.1f — Tests manuels : export → reimport → vérification intégrité
+
+---
+
+### Étape 1.2 — Sauvegarde multi-plateforme (`navigator.share` + fallback)
+
+**Fichier** : intégré dans `js/classeur.js`
+
+**Problème** : `<a download>` ne permet pas de choisir la destination sur iPad Safari.
+
+**Solution** : détection de capacités, 3 stratégies :
+
+```javascript
+async function sauvegarderClasseur(blob, nomFichier) {
+  // 1. FSAPI (Chrome/Edge — choix de destination natif)
+  if (window.showSaveFilePicker) {
+    const handle = await showSaveFilePicker({
+      suggestedName: nomFichier,
+      types: [{ description: 'Classeur', accept: { 'application/zip': ['.zip'] } }]
+    });
+    const writable = await handle.createWritable();
+    await writable.write(blob);
+    await writable.close();
+    return;
+  }
+
+  // 2. Web Share API (iPad Safari — "Enregistrer dans Fichiers")
+  if (navigator.canShare && navigator.canShare({ files: [new File([blob], nomFichier)] })) {
+    await navigator.share({
+      files: [new File([blob], nomFichier, { type: 'application/zip' })],
+      title: 'Classeur — ' + nomFichier
+    });
+    return;
+  }
+
+  // 3. Fallback (<a download> — téléchargements par défaut)
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = nomFichier;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+```
+
+**Sous-tâches** :
+- [ ] 1.2a — Implémenter `sauvegarderClasseur()` avec les 3 stratégies
+- [ ] 1.2b — Implémenter `ouvrirClasseur()` (file picker universel)
+- [ ] 1.2c — Tester sur Mac Chrome (FSAPI)
+- [ ] 1.2d — Tester sur iPad Safari (navigator.share)
+- [ ] 1.2e — Tester fallback (Firefox, etc.)
+
+---
+
+### Étape 1.3 — Bouton dans l'en-tête
+
+**Fichiers** : `index.html`, `styles.css`, `js/classeur.js`
+
+**Emplacement** : `.entete-controles-gauche`, à côté du sélecteur Normal/Anonymisé
+
+**HTML** :
+```html
+<div class="entete-controles-gauche">
+    <!-- Sélecteur mode existant -->
+    <div id="selecteur-mode" class="selecteur-mode-centre" data-tooltip="entete-mode-affichage"></div>
+
+    <!-- NOUVEAU : Bouton Classeur -->
+    <div id="classeur-controle" class="classeur-controle" data-tooltip="entete-classeur">
+        <button id="btn-classeur" class="btn-action-header btn-classeur" onclick="Classeur.ouvrirMenu()">
+            <span class="classeur-icone">📁</span>
+            <span class="classeur-label">Classeur</span>
+            <span id="classeur-indicateur" class="classeur-indicateur u-hide"></span>
+        </button>
+    </div>
+</div>
+```
+
+**Indicateur visuel** :
+- Pastille orange : modifications non sauvegardées
+- Pastille verte : tout est sauvegardé
+- Pas de pastille : aucun classeur actif (travail local seulement)
+
+**Menu déroulant** (au clic sur le bouton) :
+- "Ouvrir un classeur..." → file picker
+- "Enregistrer le classeur" → sauvegarde vers la dernière destination
+- "Enregistrer sous..." → choix de destination
+- Séparateur
+- "Nouveau classeur" → crée un classeur vide
+- "Détails du classeur" → affiche le manifeste (nom, date, taille, nb fichiers)
+
+**Sous-tâches** :
+- [ ] 1.3a — HTML du bouton + menu déroulant dans index.html
+- [ ] 1.3b — CSS cohérent avec le design system (styles.css)
+- [ ] 1.3c — JS du menu déroulant (ouvrirMenu, fermerMenu)
+- [ ] 1.3d — Branchement des actions (ouvrir, enregistrer, etc.)
+- [ ] 1.3e — Indicateur de modifications non sauvegardées
+- [ ] 1.3f — Tooltip d'aide contextuelle
+- [ ] 1.3g — Tests visuels mode sombre + clair
+- [ ] 1.3h — Tests iPad (cibles tactiles 44px, espacement)
+
+---
+
+### Étape 1.4 — Limite de taille relevée
+
+**Fichier** : `js/import-export.js`
+
+**Changement** : augmenter `TAILLE_MAX_IMPORT_OCTETS` pour les ZIP de 200 Mo à 1 Go.
+
+**Sous-tâches** :
+- [ ] 1.4a — Modifier la constante (ligne ~596-597)
+- [ ] 1.4b — Tester avec un fichier > 200 Mo
+
+---
+
+### Ordre d'exécution Phase 1
+
+```
+1.1a (squelette) → 1.1b (export) → TEST
+                 → 1.1c (import) → TEST
+                 → 1.1d (validation) → TEST
+                 → 1.1e (tracking modifs) → TEST
+→ 1.2a-b (save/open multi-plateforme) → TEST Mac → TEST iPad
+→ 1.3a-h (UI en-tête) → TEST visuel
+→ 1.4 (limite taille) → TEST
+→ 1.1f (test intégration complet : export Mac → USB → iPad → USB → Mac)
+```
+
+---
+
+## Phase 2 — TimeMachine (à venir)
+
+- Historique des versions dans le Classeur
+- Rotation automatique (10 dernières ou 30 jours)
+- Interface de restauration ("Revenir à...")
+- Comparaison entre versions (diff visuel)
+
+## Phase 3 — Multi-classeur + fusion (à venir)
+
+- Ouvrir plusieurs classeurs
+- Fusion intelligente par ID + timestamp
+- Détection et résolution de conflits
+- Export sélectif (par groupe-cours, par étudiant)
+
+## Phase 4 — Auto-save FSAPI (à venir)
+
+- Connexion persistante à un dossier sur clé USB (Chrome/Edge)
+- Auto-save à intervalles configurables
+- Structure dossier au lieu de ZIP
+- Indicateur de connexion au classeur
+
+---
+
+**Créé** : 14 mars 2026
+**Statut** : Plan approuvé, Phase 1 en cours

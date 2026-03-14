@@ -3647,10 +3647,40 @@
                         <p class="meta" data-tooltip="entete-version"><span id="version-entete"></span> <span id="build-numero"></span></p>
                     </div>
 
-                    <!-- Contrôle gauche : mode -->
+                    <!-- Contrôle gauche : mode + classeur -->
                     <div class="entete-controles-gauche">
                         <div id="selecteur-mode" class="selecteur-mode-centre" data-tooltip="entete-mode-affichage">
                             <!-- Sera généré dynamiquement par 17-modes.js -->
+                        </div>
+
+                        <!-- Bouton Classeur -->
+                        <div id="classeur-controle" class="classeur-controle">
+                            <button id="btn-classeur" class="btn-classeur-header" onclick="Classeur.toggleMenu()" data-tooltip="entete-classeur">
+                                <span class="classeur-icone-btn">&#128194;</span>
+                                <span class="classeur-label-btn">Classeur</span>
+                                <span id="classeur-indicateur" class="classeur-indicateur u-hide"></span>
+                            </button>
+                            <div id="classeur-menu" class="classeur-menu u-hide">
+                                <button class="classeur-menu-item" onclick="Classeur.actionOuvrir()">
+                                    <span class="classeur-menu-icone">&#128194;</span> Ouvrir un classeur...
+                                </button>
+                                <button class="classeur-menu-item" onclick="Classeur.actionEnregistrer()">
+                                    <span class="classeur-menu-icone">&#128190;</span> Enregistrer le classeur
+                                </button>
+                                <button class="classeur-menu-item" onclick="Classeur.actionEnregistrerSous()">
+                                    <span class="classeur-menu-icone">&#128229;</span> Enregistrer sous...
+                                </button>
+                                <div class="classeur-menu-sep"></div>
+                                <button class="classeur-menu-item" onclick="Classeur.actionNouveau()">
+                                    <span class="classeur-menu-icone">&#10133;</span> Nouveau classeur
+                                </button>
+                                <button id="classeur-menu-details" class="classeur-menu-item u-hide" onclick="Classeur.actionDetails()">
+                                    <span class="classeur-menu-icone">&#9432;</span> Details du classeur
+                                </button>
+                                <button id="classeur-menu-fermer" class="classeur-menu-item classeur-menu-item--danger u-hide" onclick="Classeur.actionFermer()">
+                                    <span class="classeur-menu-icone">&#10005;</span> Fermer le classeur
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -17180,6 +17210,7 @@
 
     <!-- PRIORITÉ 6: Modules avancés (Beta 91.5 - Import/Export) -->
     <script src="js/import-export.js?v=2026010601"></script>
+    <script src="js/classeur.js?v=2026031401"></script>
     <script src="js/statistiques.js?v=2025121001"></script>
     <script src="js/liste-evaluations.js?v=2026030602"></script>
     <script src="js/snapshots.js?v=2026030201"></script>
@@ -17252,8 +17283,8 @@
         // === CONFIGURATION ===
         // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
         // Les valeurs ici servent de fallback si version.json n'est pas disponible
-        let VERSION_MAJEURE = '98.4';
-        let BUILD_ID = '0306-1640';
+        let VERSION_MAJEURE = '98.5';
+        let BUILD_ID = '0314-1035';
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

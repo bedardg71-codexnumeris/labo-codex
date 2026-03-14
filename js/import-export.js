@@ -592,9 +592,9 @@ function previsualiserImport(event) {
     const fichier = event.target.files[0];
     if (!fichier) return;
 
-    // 🆕 Limite de taille augmentée pour les ZIP (200 Mo)
+    // Limite de taille : 1 Go pour ZIP, 50 Mo pour JSON
     const limiteOctets = (fichier.name.endsWith('.zip') || fichier.type === 'application/zip')
-        ? 200 * 1024 * 1024
+        ? 1024 * 1024 * 1024
         : TAILLE_MAX_IMPORT_OCTETS;
 
     if (fichier.size > limiteOctets) {
