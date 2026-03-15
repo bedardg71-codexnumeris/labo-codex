@@ -146,7 +146,7 @@
     // Migration one-time : supprimer les anciennes largeurs eval persistées
     // pour que les nouveaux défauts (plus étroits) prennent effet.
     (function migrerLargeursEval() {
-        const MIGRATION_KEY = 'travaux-migration-eval-widths-v1';
+        const MIGRATION_KEY = 'travaux-migration-eval-widths-v2';
         if (localStorage.getItem(MIGRATION_KEY)) return;
         try {
             const raw = localStorage.getItem(STORAGE_KEY_PANNEAUX);
