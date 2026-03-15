@@ -669,6 +669,59 @@ function afficherSousSection(idSousSection) {
 }
 
 /* ===============================
+   🔄 FONCTION: NAVIGUER VERS UNE SOUS-SECTION
+   Point d'entrée unique pour la navigation programmatique
+   Remplace le pattern afficherSection() + setTimeout + afficherSousSection()
+   =============================== */
+
+/**
+ * Navigue vers une sous-section en gérant section + sous-section en une seule opération.
+ *
+ * @param {string} section - Identifiant de la section (ex: 'tableau-bord', 'evaluations')
+ * @param {string} sousSection - Identifiant court de la sous-section (ex: 'profil', 'liste')
+ * @returns {boolean} true si la navigation a réussi, false sinon
+ *
+ * EXEMPLE:
+ * naviguerVers('tableau-bord', 'profil');
+ * // → afficherSection('tableau-bord') + afficherSousSection('tableau-bord-profil')
+ */
+function naviguerVers(section, sousSection) {
+    // Valider que la section existe
+    const config = configurationsOnglets[section];
+    if (!config) {
+        console.error(
+            '❌ naviguerVers() : section inconnue "' + section + '"' +
+            '\n   Sections valides: ' + Object.keys(configurationsOnglets).join(', ') +
+            '\n   Appelant:', new Error().stack.split('\n')[2]
+        );
+        return false;
+    }
+
+    // Valider que la sous-section existe dans cette section
+    const sousSecExiste = config.some(function(item) { return item.id === sousSection; });
+    if (!sousSecExiste) {
+        const idsDispo = config.map(function(item) { return item.id; });
+        console.error(
+            '❌ naviguerVers() : sous-section "' + sousSection + '" inconnue dans "' + section + '"' +
+            '\n   Sous-sections valides: ' + idsDispo.join(', ') +
+            '\n   Appelant:', new Error().stack.split('\n')[2]
+        );
+        return false;
+    }
+
+    // Construire l'ID complet
+    const idComplet = section + '-' + sousSection;
+
+    // Naviguer : afficherSection gère la sous-nav de manière synchrone
+    if (sectionActive !== section) {
+        afficherSection(section);
+    }
+    afficherSousSection(idComplet);
+
+    return true;
+}
+
+/* ===============================
    📌 NOTES D'UTILISATION
    =============================== */
 
