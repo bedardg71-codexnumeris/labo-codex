@@ -2056,7 +2056,7 @@ function _actualiserMenu() {
             var classePastille = modifie ? 'codex-statut-pastille--orange' : 'codex-statut-pastille--vert';
             var texteEtat = modifie ? 'Modifications non enregistrées' : 'Tout est enregistré';
             statutHaut.innerHTML =
-                '<div class="codex-statut-nom">' + (_etat.nom || 'Codex') + '</div>' +
+                '<div class="codex-statut-nom" onclick="Codex.actionRenommer()" title="Cliquer pour renommer">' + (_etat.nom || 'Codex') + '</div>' +
                 '<div class="codex-statut-etat"><span class="codex-statut-pastille ' + classePastille + '"></span> ' + texteEtat + '</div>';
             statutHaut.classList.remove('u-hide');
         } else {
@@ -2290,6 +2290,26 @@ function actionDetails() {
         '  ' + _formaterTaille(m.contenu.tailleTotaleOctets || 0);
 
     alert(details);
+}
+
+/**
+ * Renomme le codex actif via prompt().
+ */
+function actionRenommer() {
+    if (!_etat.actif) return;
+
+    var nouveauNom = prompt('Nouveau nom du codex :', _etat.nom || '');
+    if (nouveauNom === null) return; // annulé
+    nouveauNom = nouveauNom.trim();
+    if (!nouveauNom) return;
+    if (nouveauNom === _etat.nom) return;
+
+    _etat.nom = nouveauNom;
+    if (_etat.manifeste) _etat.manifeste.nom = nouveauNom;
+    _marquerModification();
+    _actualiserMenu();
+    _sauvegarderEtat();
+    console.log('Codex renommé : ' + nouveauNom);
 }
 
 /**
@@ -2972,6 +2992,7 @@ window.Codex = {
     actionEnregistrerSous: actionEnregistrerSous,
     actionNouveau: actionNouveau,
     actionDetails: actionDetails,
+    actionRenommer: actionRenommer,
     actionRestaurer: actionRestaurer,
     actionComparer: actionComparer,
     actionFusionner: actionFusionner,
