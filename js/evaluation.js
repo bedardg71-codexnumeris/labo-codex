@@ -2373,59 +2373,140 @@ function afficherBadgesJetons() {
 function afficherGestionJetons(afficher) {
     const sectionBadges = document.getElementById('gestionJetonsEvaluation');
     const sectionOptions = document.getElementById('optionsJetons');
-    const badgeDelai = document.getElementById('badgeJetonDelaiOption');
-    const badgeReprise = document.getElementById('badgeJetonRepriseOption');
-    const checkboxDelai = document.getElementById('checkboxJetonDelai');
-    const checkboxReprise = document.getElementById('checkboxJetonReprise');
 
-    if (afficher && window.evaluationEnCours?.idModification) {
-        // MODE MODIFICATION : Évaluation existante
-        // Récupérer l'évaluation pour vérifier si elle a déjà des jetons
-        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-        const evaluation = evaluations.find(e => e.id === window.evaluationEnCours.idModification);
-
-        // Masquer complètement la section des badges (on utilise les checkboxes à la place)
+    if (afficher) {
+        // Masquer la section des badges inline (on utilise les checkboxes)
         if (sectionBadges) sectionBadges.classList.add('u-hide');
 
-        // Afficher la section des options de jetons
+        // Peupler dynamiquement les jetons selon la config
+        peuplementOptJetons();
+
+        // Afficher la section
         if (sectionOptions) sectionOptions.classList.remove('u-hide');
-
-        if (evaluation) {
-            // Vérifier si l'évaluation a déjà des jetons
-            const aDejaJetonDelai = evaluation.jetonDelaiApplique || evaluation.delaiAccorde;
-            const aDejaJetonReprise = evaluation.jetonRepriseApplique || evaluation.repriseDeId || evaluation.id.startsWith('EVAL_REPRISE_');
-
-            // Toujours afficher les options
-            if (badgeDelai) badgeDelai.classList.remove('u-hide');
-            if (badgeReprise) badgeReprise.classList.remove('u-hide');
-
-            // Cocher les checkboxes si les jetons sont déjà appliqués
-            if (checkboxDelai) checkboxDelai.checked = aDejaJetonDelai;
-            if (checkboxReprise) checkboxReprise.checked = aDejaJetonReprise;
-        }
-
-        // Afficher les jetons personnalisés
-        afficherJetonsPersonnalisesEvaluation();
-    } else if (afficher) {
-        // MODE NOUVELLE ÉVALUATION : Afficher les options seulement (pas les badges)
-        if (sectionBadges) sectionBadges.classList.add('u-hide');
-        if (sectionOptions) sectionOptions.classList.remove('u-hide');
-
-        // Afficher tous les badges de jetons (aucun n'est encore appliqué)
-        if (badgeDelai) badgeDelai.classList.remove('u-hide');
-        if (badgeReprise) badgeReprise.classList.remove('u-hide');
-
-        // Décocher les checkboxes
-        if (checkboxDelai) checkboxDelai.checked = false;
-        if (checkboxReprise) checkboxReprise.checked = false;
-
-        // Afficher les jetons personnalisés
-        afficherJetonsPersonnalisesEvaluation();
     } else {
         // MODE MASQUÉ : Tout masquer
         if (sectionBadges) sectionBadges.classList.add('u-hide');
         if (sectionOptions) sectionOptions.classList.add('u-hide');
     }
+}
+
+/**
+ * Peuple dynamiquement le conteneur de jetons dans le formulaire d'évaluation.
+ * Source unique de vérité : obtenirTousTypesJetons() (basé sur la pratique de notation).
+ * Utilisé en mode standalone ET en mode visionneuse (plus de doublon).
+ */
+function peuplementOptJetons() {
+    var conteneur = document.getElementById('optionsJetonsContenu');
+    if (!conteneur) return;
+
+    // Vérifier si le système de jetons est actif
+    var config = typeof obtenirConfigJetons === 'function' ? obtenirConfigJetons() : null;
+    if (!config || !config.actif) {
+        conteneur.innerHTML = '<p class="texte-aide" style="font-size:0.8rem; color:var(--gris-moyen);">Système de jetons désactivé</p>';
+        return;
+    }
+
+    var types = typeof obtenirTousTypesJetons === 'function' ? obtenirTousTypesJetons() : [];
+    if (types.length === 0) {
+        conteneur.innerHTML = '<p class="texte-aide" style="font-size:0.8rem; color:var(--gris-moyen);">Aucun type de jeton configuré</p>';
+        return;
+    }
+
+    // Déterminer l'état coché depuis l'évaluation en cours
+    var evalId = window.evaluationEnCours ? window.evaluationEnCours.idModification : null;
+    var evaluations = typeof obtenirDonneesSelonMode === 'function'
+        ? obtenirDonneesSelonMode('evaluationsSauvegardees') || [] : [];
+    var evalCourante = evalId ? evaluations.find(function(e) { return e.id === evalId; }) : null;
+
+    // Obtenir le statut (restants/total) pour l'étudiant courant
+    var da = window.evaluationEnCours ? window.evaluationEnCours.etudiantDA : null;
+    var statut = (da && typeof obtenirStatutJetonsEtudiant === 'function')
+        ? obtenirStatutJetonsEtudiant(da) : {};
+
+    // Map des IDs de checkbox et handlers pour les jetons prédéfinis
+    var mapPredefinis = {
+        'delai': {
+            checkboxId: 'checkboxJetonDelai',
+            handler: 'gererChangementCheckboxJetonDelai()',
+            wrapperClass: 'badge-jeton-delai-wrapper',
+            tooltip: 'eval-jeton-delai',
+            estCoche: function() {
+                if (evalCourante) return !!(evalCourante.jetonDelaiApplique || evalCourante.delaiAccorde);
+                return false;
+            }
+        },
+        'reprise': {
+            checkboxId: 'checkboxJetonReprise',
+            handler: 'gererChangementCheckboxJetonReprise()',
+            wrapperClass: 'badge-jeton-reprise-wrapper',
+            tooltip: 'eval-jeton-reprise',
+            estCoche: function() {
+                if (evalCourante) return !!(evalCourante.jetonRepriseApplique || evalCourante.repriseDeId || (evalCourante.id && evalCourante.id.startsWith('EVAL_REPRISE_')));
+                return false;
+            }
+        },
+        'repriseCiblee': {
+            checkboxId: 'checkboxJetonRepriseCiblee',
+            handler: 'gererChangementCheckboxJetonRepriseCiblee()',
+            wrapperClass: 'badge-jeton-reprise-ciblee-wrapper',
+            tooltip: 'eval-jeton-reprise-ciblee',
+            estCoche: function() {
+                if (evalCourante) return !!evalCourante.jetonRepriseCibleeApplique;
+                return false;
+            }
+        }
+    };
+
+    // Construire le HTML
+    var htmlJetons = [];
+    var htmlPerso = [];
+
+    for (var i = 0; i < types.length; i++) {
+        var type = types[i];
+        var s = statut[type.id] || { restants: type.nombreTotal || 0, total: type.nombreTotal || 0 };
+        var compteur = s.restants + '/' + s.total;
+
+        if (type.predefini && mapPredefinis[type.id]) {
+            // Jeton prédéfini — badge avec style distinctif
+            var mp = mapPredefinis[type.id];
+            var coche = mp.estCoche() ? ' checked' : '';
+            htmlJetons.push(
+                '<div class="u-flex-gap-8 u-align-center">' +
+                    '<input type="checkbox" id="' + mp.checkboxId + '" onchange="' + mp.handler + '"' + coche + '>' +
+                    '<span class="' + mp.wrapperClass + '">' +
+                        '<span class="badge-jeton-titre" data-tooltip="' + mp.tooltip + '">' + echapperHtml(type.nom.replace(/^Jeton de /i, '').replace(/^./, function(c) { return c.toUpperCase(); })) + '</span>' +
+                    '</span>' +
+                    '<span class="u-texte-mini u-texte-gris">' + compteur + '</span>' +
+                '</div>'
+            );
+        } else if (!type.predefini) {
+            // Jeton personnalisé
+            htmlPerso.push(
+                '<div style="display: flex; align-items: flex-start; gap: 10px;">' +
+                    '<input type="checkbox" id="checkboxJetonPerso_' + type.id + '" class="u-mt-6">' +
+                    '<div class="u-flex-1">' +
+                        '<span class="badge-jeton-personnalise-wrapper">' +
+                            '<span class="badge-jeton-titre">' + echapperHtml(type.nom) + '</span>' +
+                        '</span>' +
+                        (type.description ? '<p class="text-085-muted-m5-0-0-0" style="margin: 4px 0 0 0; font-size: 0.75rem;">' + echapperHtml(type.description) + '</p>' : '') +
+                    '</div>' +
+                    '<span class="u-texte-mini u-texte-gris">' + compteur + '</span>' +
+                '</div>'
+            );
+        }
+    }
+
+    // Assembler : grille de prédéfinis + personnalisés en dessous
+    var cols = htmlJetons.length <= 3 ? htmlJetons.length : 3;
+    var html = '<div style="display: grid; grid-template-columns: repeat(' + cols + ', 1fr); gap: 10px;">' +
+               htmlJetons.join('') +
+               '</div>';
+
+    if (htmlPerso.length > 0) {
+        html += '<div class="u-flex-gap-10 u-flex-col" style="margin-top: 10px;">' + htmlPerso.join('') + '</div>';
+    }
+
+    conteneur.innerHTML = html;
 }
 
 /**
@@ -6443,7 +6524,7 @@ function appliquerJetonPersonnalise(jetonId) {
 
     // Rafraîchir l'affichage
     afficherBadgesJetons();
-    afficherJetonsPersonnalisesEvaluation();
+    peuplementOptJetons();
 
     afficherNotificationSucces('Succès', `Jeton «${jeton.nom}» appliqué avec succès`);
 }
@@ -6555,6 +6636,7 @@ async function copierCriteresSRPNF() {
 
 // Exporter les fonctions
 window.afficherJetonsPersonnalisesEvaluation = afficherJetonsPersonnalisesEvaluation;
+window.peuplementOptJetons = peuplementOptJetons;
 window.appliquerJetonPersonnalise = appliquerJetonPersonnalise;
 window.confirmerSuppressionEvaluationSidebar = confirmerSuppressionEvaluationSidebar;
 window.reinitialiserFormulaire = reinitialiserFormulaire;

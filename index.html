@@ -4794,42 +4794,11 @@
                                 <textarea id="notesIntegrite" class="controle-form" rows="3" placeholder="Détails du cas, preuves, références..."></textarea>
                             </div>
 
-                            <!-- OPTIONS DE JETONS -->
+                            <!-- OPTIONS DE JETONS (peuplé dynamiquement par peuplementOptJetons()) -->
                             <div id="optionsJetons" class="groupe-form u-hide">
                                 <label class="label-formulaire" data-tooltip="eval-jetons">Appliquer un jeton :</label>
-
-                                <div class="u-flex-gap-10 u-flex-col">
-                                    <!-- Jetons standards (Délai, Reprise, Reprise ciblée) -->
-                                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-                                        <!-- Jeton de délai -->
-                                        <div id="badgeJetonDelaiOption" class="u-flex-gap-8 u-align-center">
-                                            <input type="checkbox" id="checkboxJetonDelai" onchange="gererChangementCheckboxJetonDelai()">
-                                            <span class="badge-jeton-delai-wrapper">
-                                                <span class="badge-jeton-titre" data-tooltip="eval-jeton-delai">Délai</span>
-                                            </span>
-                                        </div>
-
-                                        <!-- Jeton de reprise -->
-                                        <div id="badgeJetonRepriseOption" class="u-flex-gap-8 u-align-center">
-                                            <input type="checkbox" id="checkboxJetonReprise" onchange="gererChangementCheckboxJetonReprise()">
-                                            <span class="badge-jeton-reprise-wrapper">
-                                                <span class="badge-jeton-titre" data-tooltip="eval-jeton-reprise">Reprise</span>
-                                            </span>
-                                        </div>
-
-                                        <!-- Jeton de reprise ciblée -->
-                                        <div id="badgeJetonRepriseCibleeOption" class="u-flex-gap-8 u-align-center">
-                                            <input type="checkbox" id="checkboxJetonRepriseCiblee" onchange="gererChangementCheckboxJetonRepriseCiblee()">
-                                            <span class="badge-jeton-reprise-ciblee-wrapper">
-                                                <span class="badge-jeton-titre" data-tooltip="eval-jeton-reprise-ciblee">Reprise ciblée</span>
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <!-- Jetons personnalisés (sera rempli dynamiquement) -->
-                                    <div id="jetonsPersonnalisesOptions" class="u-flex-gap-10 u-flex-col">
-                                        <!-- Rempli par afficherJetonsPersonnalisesEvaluation() -->
-                                    </div>
+                                <div id="optionsJetonsContenu">
+                                    <!-- Rendu dynamique basé sur obtenirTousTypesJetons() -->
                                 </div>
                             </div>
 
@@ -4905,15 +4874,7 @@
                     </div>
                 </div>
 
-                <!-- PANNEAU JETONS -->
-                <div id="travaux-eval-jetons" class="travaux-panneau-eval u-hide">
-                    <div class="travaux-panneau-header">Jetons</div>
-                    <div class="travaux-panneau-corps" id="travaux-jetons-corps">
-                        <div id="travaux-jetons-contenu">
-                            <p class="texte-aide">Aucun étudiant sélectionné</p>
-                        </div>
-                    </div>
-                </div>
+                <!-- PANNEAU JETONS supprimé — unifié dans optionsJetons (dynamique) -->
 
                     </div><!-- fin evaluations-contenu-evaluation -->
                 </div><!-- fin evaluations-annoter -->
