@@ -259,7 +259,72 @@ function afficherSousNavigation(nomOnglet) {
 
 
 function afficherSousSection(idSousSection) {
-    console.log('🔵 afficherSousSection appelée avec:', idSousSection);
+
+    // ============================================
+    // VALIDATION DES PARAMÈTRES
+    // ============================================
+
+    // Construire le registre des IDs valides à partir de configurationsOnglets
+    const _idsValides = new Set();
+    for (const [section, items] of Object.entries(configurationsOnglets)) {
+        for (const item of items) {
+            _idsValides.add(section + '-' + item.id);
+        }
+    }
+
+    // Détection d'appels à arguments multiples (ex: 'tableau-bord', 'profil')
+    if (arguments.length > 1) {
+        const idCorrige = Array.from(arguments).join('-');
+        console.warn(
+            '⚠️ afficherSousSection() appelée avec ' + arguments.length + ' arguments: ' +
+            JSON.stringify(Array.from(arguments)) +
+            ' → fusion automatique en "' + idCorrige + '"' +
+            '\n   Corrigez l\'appel pour passer un seul argument.',
+            '\n   Appelant:', new Error().stack.split('\n')[2]
+        );
+        idSousSection = idCorrige;
+    }
+
+    // Validation de type
+    if (typeof idSousSection !== 'string' || !idSousSection) {
+        console.error(
+            '❌ afficherSousSection() : paramètre invalide:', idSousSection,
+            '\n   Attendu: string (ex: "tableau-bord-profil")',
+            '\n   Appelant:', new Error().stack.split('\n')[2]
+        );
+        return;
+    }
+
+    // Validation contre le registre des IDs valides
+    if (!_idsValides.has(idSousSection)) {
+        // Chercher l'ID le plus proche (suggestion)
+        let suggestion = '';
+        const idLower = idSousSection.toLowerCase();
+        for (const idValide of _idsValides) {
+            if (idValide.includes(idLower) || idLower.includes(idValide)) {
+                suggestion = idValide;
+                break;
+            }
+        }
+        // Recherche par suffixe si pas de match par inclusion
+        if (!suggestion) {
+            const suffixe = idSousSection.split('-').pop();
+            for (const idValide of _idsValides) {
+                if (idValide.endsWith('-' + suffixe)) {
+                    suggestion = idValide;
+                    break;
+                }
+            }
+        }
+        console.error(
+            '❌ afficherSousSection() : ID inconnu "' + idSousSection + '"' +
+            (suggestion ? '\n   → Vouliez-vous dire "' + suggestion + '" ?' : '') +
+            '\n   IDs valides pour référence: ' + Array.from(_idsValides).join(', ') +
+            '\n   Appelant:', new Error().stack.split('\n')[2]
+        );
+    }
+
+    console.log('🔵 afficherSousSection:', idSousSection);
 
     // ============================================
     // NETTOYAGE DES MODULES EN QUITTANT
@@ -272,13 +337,16 @@ function afficherSousSection(idSousSection) {
         }
     }
 
-    // Extraire la section parente
-    const parties = idSousSection.split('-');
-    let section;
-    if (parties.length > 2 && parties[0] === 'tableau') {
-        section = parties[0] + '-' + parties[1];
-    } else {
-        section = parties[0];
+    // Extraire la section parente depuis configurationsOnglets
+    // (évite le parsing fragile par split qui ne gère pas les sections composées)
+    let section = null;
+    for (const sectionId of Object.keys(configurationsOnglets)) {
+        if (idSousSection.startsWith(sectionId + '-')) {
+            // Prendre le match le plus long (ex: 'boite-outils' > 'boite')
+            if (!section || sectionId.length > section.length) {
+                section = sectionId;
+            }
+        }
     }
 
     console.log('   Section:', section);
@@ -586,14 +654,6 @@ function afficherSousSection(idSousSection) {
                     window._profilAutoChargement = false;
                 }
             }, 100);
-        }
-    }
-
-        // Recharger le tableau de bord selon la sous-section
-    if (idSousSection === 'tableau-bord-apercu') {
-        console.log('🔄 Rechargement automatique de l\'aperçu...');
-        if (typeof chargerTableauBordApercu === 'function') {
-            setTimeout(() => chargerTableauBordApercu(), 150);
         }
     }
 
