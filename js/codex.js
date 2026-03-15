@@ -1,8 +1,8 @@
 /* ===============================
-   📂 MODULE: CLASSEUR
+   📂 MODULE: CODEX
    Flux de travail portable USB multi-appareil
 
-   Le Classeur est un espace de travail exportable en ZIP
+   Le Codex est un espace de travail exportable en ZIP
    qui permet de travailler sur n'importe quel appareil
    (Mac, iPad, etc.) via clé USB, sans cloud.
 
@@ -21,8 +21,10 @@
    =============================== */
 
 const FORMAT_VERSION = 1;
-const EXTENSION_CLASSEUR = '.classeur.zip';
-const NOM_MANIFESTE = 'classeur-manifeste.json';
+const EXTENSION_CODEX = '.codex.zip';
+const NOM_MANIFESTE = 'codex-manifeste.json';
+// Rétrocompatibilité : accepter aussi l'ancien nom de manifeste à l'import
+const NOM_MANIFESTE_ANCIEN = 'classeur-manifeste.json';
 const NOM_DONNEES = 'donnees.json';
 const DOSSIER_TRAVAUX = 'travaux';
 const DOSSIER_HISTORIQUE = 'historique';
@@ -32,21 +34,22 @@ const MAX_SNAPSHOTS = 10;
 const MAX_JOURS_HISTORIQUE = 30;
 
 // Clés de stockage (non namespacées — globales)
-const CLE_ETAT_CLASSEUR = '_classeur_etat';
-const CLE_HIST_INDEX = '_classeur_hist_index';
-const CLE_SNAPSHOT_AVANT = '_classeur_snapshot_avant';
-const PREFIXE_HIST = '_classeur_hist_';
+// Migré de _classeur_* vers _codex_* — voir _migrerClesClasseurVersCodex()
+const CLE_ETAT_CODEX = '_codex_etat';
+const CLE_HIST_INDEX = '_codex_hist_index';
+const CLE_SNAPSHOT_AVANT = '_codex_snapshot_avant';
+const PREFIXE_HIST = '_codex_hist_';
 
 /* ===============================
    ÉTAT INTERNE
    =============================== */
 
 let _etat = {
-    actif: false,                  // Un classeur est-il chargé ?
-    nom: '',                       // Nom du classeur
+    actif: false,                  // Un codex est-il chargé ?
+    nom: '',                       // Nom du codex
     derniereSauvegarde: null,      // Date ISO de la dernière sauvegarde
     modificationsDepuis: null,     // Date ISO de la première modif non sauvegardée
-    manifeste: null                // Manifeste complet du classeur chargé
+    manifeste: null                // Manifeste complet du codex chargé
 };
 
 // Handle FSAPI — non sérialisable, vit en mémoire seulement.
@@ -61,19 +64,148 @@ var _autoSaveEnCours = false;
 var _derniereAutoSave = null;          // Date ISO de la dernière auto-save réussie
 
 /* ===============================
+   MIGRATION CLASSEUR → CODEX
+   =============================== */
+
+// Anciennes clés (classeur) — pour la migration uniquement
+const CLE_ETAT_ANCIEN = '_classeur_etat';
+const CLE_HIST_INDEX_ANCIEN = '_classeur_hist_index';
+const CLE_SNAPSHOT_AVANT_ANCIEN = '_classeur_snapshot_avant';
+const PREFIXE_HIST_ANCIEN = '_classeur_hist_';
+
+// Drapeau pour ne migrer qu'une seule fois
+const CLE_MIGRATION_FAITE = '_codex_migration_classeur_done';
+
+/**
+ * Migre les clés _classeur_* vers _codex_*.
+ * - Lit chaque ancienne clé
+ * - Copie la valeur vers la nouvelle clé
+ * - Supprime l'ancienne SEULEMENT après confirmation de la copie
+ * - Gère les clés dynamiques _classeur_hist_<DATE> via db.keys()
+ *
+ * Idempotente : ne fait rien si déjà exécutée (drapeau _codex_migration_classeur_done).
+ * @returns {Promise<{migrees: number, ignorees: number}>}
+ */
+async function _migrerClesClasseurVersCodex() {
+    // Attendre que IndexedDB soit prêt (obligatoire pour lire les vraies données)
+    if (!db.ready) {
+        await db.init();
+    }
+
+    // Déjà fait ? Vérifier dans IDB (pas seulement localStorage)
+    var dejaMigre = await db.get(CLE_MIGRATION_FAITE, false);
+    if (dejaMigre) {
+        return { migrees: 0, ignorees: 0 };
+    }
+
+    console.log('📂 Migration classeur → codex : début...');
+
+    var migrees = 0;
+    var ignorees = 0;
+
+    // Table de correspondance pour les 3 clés fixes
+    var clesFixes = [
+        { ancien: CLE_ETAT_ANCIEN,           nouveau: CLE_ETAT_CODEX },
+        { ancien: CLE_HIST_INDEX_ANCIEN,     nouveau: CLE_HIST_INDEX },
+        { ancien: CLE_SNAPSHOT_AVANT_ANCIEN, nouveau: CLE_SNAPSHOT_AVANT }
+    ];
+
+    // 1. Migrer les clés fixes
+    for (var i = 0; i < clesFixes.length; i++) {
+        var paire = clesFixes[i];
+        var valeur = await db.get(paire.ancien, null);
+        if (valeur !== null) {
+            // Écriture async — attend la confirmation IDB
+            await db.set(paire.nouveau, valeur);
+            // Vérification : relire depuis IDB (pas le cache localStorage)
+            var verification = await db.get(paire.nouveau, null);
+            if (verification !== null) {
+                // Suppression async — attend la confirmation IDB
+                await db.remove(paire.ancien);
+                migrees++;
+                console.log('  ✓ ' + paire.ancien + ' → ' + paire.nouveau);
+            } else {
+                console.error('  ✗ Échec vérification pour ' + paire.nouveau + ', ancienne clé conservée');
+                ignorees++;
+            }
+        } else {
+            ignorees++;
+        }
+    }
+
+    // 2. Migrer les clés dynamiques _classeur_hist_<DATE>
+    //    (exclut _classeur_hist_index déjà traité ci-dessus)
+    var toutesLesCles = await db.keys();
+    for (var j = 0; j < toutesLesCles.length; j++) {
+        var cle = toutesLesCles[j];
+        if (cle.startsWith(PREFIXE_HIST_ANCIEN) && cle !== CLE_HIST_INDEX_ANCIEN) {
+            // Ex: _classeur_hist_2026-03-14 → _codex_hist_2026-03-14
+            var suffixe = cle.substring(PREFIXE_HIST_ANCIEN.length);
+            var nouvelleCle = PREFIXE_HIST + suffixe;
+            var valeurHist = await db.get(cle, null);
+            if (valeurHist !== null) {
+                await db.set(nouvelleCle, valeurHist);
+                var verifHist = await db.get(nouvelleCle, null);
+                if (verifHist !== null) {
+                    await db.remove(cle);
+                    migrees++;
+                    console.log('  ✓ ' + cle + ' → ' + nouvelleCle);
+                } else {
+                    console.error('  ✗ Échec vérification pour ' + nouvelleCle + ', ancienne clé conservée');
+                    ignorees++;
+                }
+            } else {
+                ignorees++;
+            }
+        }
+    }
+
+    // 3. Marquer la migration comme terminée SEULEMENT si au moins une clé a été migrée
+    //    ou si aucune ancienne clé n'existait (rien à migrer)
+    var clesRestantes = await db.keys();
+    var anciennesRestantes = clesRestantes.filter(function(c) { return c.startsWith('_classeur_'); });
+    if (anciennesRestantes.length === 0) {
+        await db.set(CLE_MIGRATION_FAITE, true);
+        console.log('📂 Migration classeur → codex terminée : ' + migrees + ' migrée(s), ' + ignorees + ' ignorée(s)');
+    } else {
+        console.error('📂 Migration INCOMPLÈTE — clés _classeur_* restantes : ' + anciennesRestantes.join(', '));
+        console.error('📂 Le drapeau de migration N\'A PAS été posé. La migration sera retentée au prochain chargement.');
+    }
+
+    return { migrees: migrees, ignorees: ignorees };
+}
+
+/* ===============================
    INITIALISATION
    =============================== */
 
 /**
- * Restaure l'état du classeur depuis le stockage (au démarrage de l'app)
+ * Restaure l'état du codex depuis le stockage (au démarrage de l'app)
  */
-function initialiserClasseur() {
-    const etatSauve = db.getSync(CLE_ETAT_CLASSEUR, null);
+function initialiserCodex() {
+    // Lancer la migration (async, non bloquante pour le premier rendu)
+    _migrerClesClasseurVersCodex().then(function(resultat) {
+        if (resultat.migrees > 0) {
+            // Relire l'état depuis la nouvelle clé après migration
+            var etatMigre = db.getSync(CLE_ETAT_CODEX, null);
+            if (etatMigre && etatMigre.actif) {
+                _etat = Object.assign({}, _etat, etatMigre);
+                _mettreAJourIndicateur();
+                console.log('📂 État codex rechargé après migration');
+            }
+        }
+    }).catch(function(e) {
+        console.error('📂 Erreur migration classeur → codex :', e);
+    });
+
+    // CLE_ETAT_CODEX pointe maintenant vers _codex_etat
+    // Fallback sur l'ancienne clé pour le premier chargement avant que la migration async ne termine
+    var etatSauve = db.getSync(CLE_ETAT_CODEX, null) || db.getSync(CLE_ETAT_ANCIEN, null);
     if (etatSauve && etatSauve.actif) {
         _etat = Object.assign({}, _etat, etatSauve);
-        console.log(`📂 Classeur restauré : "${_etat.nom}"`);
+        console.log(`📂 Codex restauré : "${_etat.nom}"`);
     } else {
-        console.log('📂 Classeur : aucun classeur actif');
+        console.log('📂 Codex : aucun codex actif');
     }
     _mettreAJourIndicateur();
 
@@ -87,10 +219,10 @@ function initialiserClasseur() {
 }
 
 /**
- * Persiste l'état courant du classeur
+ * Persiste l'état courant du codex
  */
 function _sauvegarderEtat() {
-    db.setSync(CLE_ETAT_CLASSEUR, {
+    db.setSync(CLE_ETAT_CODEX, {
         actif: _etat.actif,
         nom: _etat.nom,
         derniereSauvegarde: _etat.derniereSauvegarde,
@@ -104,15 +236,15 @@ function _sauvegarderEtat() {
    =============================== */
 
 /**
- * Génère un Classeur ZIP depuis les données IndexedDB actuelles.
+ * Génère un Codex ZIP depuis les données IndexedDB actuelles.
  * @param {Object} [options]
- * @param {string} [options.nom] - Nom du classeur
+ * @param {string} [options.nom] - Nom du codex
  * @param {boolean} [options.silencieux=false] - Si true, pas d'overlay de progression (auto-save)
  * @returns {Promise<{blob: Blob, nomFichier: string, manifeste: Object}>}
  */
-async function genererClasseur(options = {}) {
+async function genererCodex(options = {}) {
     if (typeof JSZip === 'undefined') {
-        throw new Error('JSZip non disponible. Impossible de générer le classeur.');
+        throw new Error('JSZip non disponible. Impossible de générer le codex.');
     }
 
     var silencieux = !!options.silencieux;
@@ -122,8 +254,8 @@ async function genererClasseur(options = {}) {
     var _prog = silencieux ? function() {} : _majProgression;
     var _progMasquer = silencieux ? function() {} : _masquerProgression;
 
-    console.log('📂 Génération du classeur...');
-    if (!silencieux) _afficherProgression('Génération du classeur');
+    console.log('📂 Génération du codex...');
+    if (!silencieux) _afficherProgression('Génération du codex');
     _prog(0, 'Lecture des données...');
     await _yield(); // laisser le navigateur peindre l'overlay
 
@@ -131,7 +263,7 @@ async function genererClasseur(options = {}) {
 
     // 1. Collecter toutes les clés depuis IndexedDB
     const toutesLesCles = await db.keys();
-    const clesFiltrees = toutesLesCles.filter(function(c) { return !c.startsWith('_classeur_'); });
+    const clesFiltrees = toutesLesCles.filter(function(c) { return !c.startsWith('_codex_'); });
     const donnees = {};
     for (var i = 0; i < clesFiltrees.length; i++) {
         var valeur = await db.get(clesFiltrees[i], null);
@@ -175,7 +307,7 @@ async function genererClasseur(options = {}) {
                     tailleTotale += blob.size || 0;
                 }
             } catch (e) {
-                console.warn('📂 Classeur : blob ignoré pour ' + f.id, e.message);
+                console.warn('📂 Codex : blob ignoré pour ' + f.id, e.message);
             }
             if (j % 5 === 0) {
                 _prog(
@@ -252,14 +384,14 @@ async function genererClasseur(options = {}) {
     const manifeste = {
         formatVersion: FORMAT_VERSION,
         appVersion: _obtenirVersionApp(),
-        nom: options.nom || _etat.nom || _genererNomClasseur(),
+        nom: options.nom || _etat.nom || _genererNomCodex(),
         auteur: auteur,
         dateCreation: _etat.manifeste?.dateCreation || maintenant,
         dateDerniereModification: maintenant,
         appareil: _identifierAppareil(),
         trimestre: trimestreActif,
         contenu: {
-            cles: toutesLesCles.filter(c => !c.startsWith('_classeur_')),
+            cles: toutesLesCles.filter(c => !c.startsWith('_codex_')),
             nombreFichiersTravaux: nbBlobs,
             tailleTotaleOctets: new Blob([json]).size + tailleTotale
         },
@@ -293,9 +425,9 @@ async function genererClasseur(options = {}) {
 
     const duree = Math.round(performance.now() - debut);
     var nbSnapshotsExport = historiqueManifeste.length;
-    console.log('📂 Classeur généré en ' + duree + 'ms : ' + nbBlobs + ' fichier(s), ' + nbSnapshotsExport + ' snapshot(s), ' + _formaterTaille(zipBlob.size));
+    console.log('📂 Codex généré en ' + duree + 'ms : ' + nbBlobs + ' fichier(s), ' + nbSnapshotsExport + ' snapshot(s), ' + _formaterTaille(zipBlob.size));
 
-    _prog(100, 'Classeur prêt !', _formaterTaille(zipBlob.size));
+    _prog(100, 'Codex prêt !', _formaterTaille(zipBlob.size));
 
     // Pause brève pour que l'utilisateur voie "100%" (sauf auto-save)
     if (!silencieux) {
@@ -319,28 +451,28 @@ async function genererClasseur(options = {}) {
    =============================== */
 
 /**
- * Charge un Classeur ZIP dans IndexedDB.
+ * Charge un Codex ZIP dans IndexedDB.
  * @param {File|Blob} fichierZip - Le fichier ZIP à charger
  * @returns {Promise<{manifeste: Object, stats: Object}>}
  */
-async function chargerClasseur(fichierZip) {
+async function chargerCodex(fichierZip) {
     if (typeof JSZip === 'undefined') {
-        throw new Error('JSZip non disponible. Impossible de charger le classeur.');
+        throw new Error('JSZip non disponible. Impossible de charger le codex.');
     }
 
     const debut = performance.now();
-    console.log('📂 Chargement du classeur (' + _formaterTaille(fichierZip.size) + ')...');
-    _afficherProgression('Ouverture du classeur');
+    console.log('📂 Chargement du codex (' + _formaterTaille(fichierZip.size) + ')...');
+    _afficherProgression('Ouverture du codex');
     _majProgression(0, 'Validation du fichier...', _formaterTaille(fichierZip.size));
     await _yield(); // laisser le navigateur peindre l'overlay
 
     try {
 
     // 1. Valider le ZIP
-    const validation = await validerClasseur(fichierZip);
+    const validation = await validerCodex(fichierZip);
     if (!validation.valide) {
         _masquerProgression();
-        throw new Error('Classeur invalide : ' + validation.erreurs.join(', '));
+        throw new Error('Codex invalide : ' + validation.erreurs.join(', '));
     }
 
     const zip = validation._zip;
@@ -386,7 +518,7 @@ async function chargerClasseur(fichierZip) {
                     nbBlobs++;
                 }
             } catch (e) {
-                console.warn('📂 Classeur : blob ignoré pour ' + f.id, e.message);
+                console.warn('📂 Codex : blob ignoré pour ' + f.id, e.message);
             }
             if (j % 5 === 0) {
                 _majProgression(
@@ -425,9 +557,9 @@ async function chargerClasseur(fichierZip) {
 
     const duree = Math.round(performance.now() - debut);
     const stats = { nbCles: nbCles, nbBlobs: nbBlobs, nbSnapshots: nbSnapshots, dureeMs: duree };
-    console.log('📂 Classeur chargé en ' + duree + 'ms : ' + nbCles + ' clé(s), ' + nbBlobs + ' blob(s), ' + nbSnapshots + ' snapshot(s)');
+    console.log('📂 Codex chargé en ' + duree + 'ms : ' + nbCles + ' clé(s), ' + nbBlobs + ' blob(s), ' + nbSnapshots + ' snapshot(s)');
 
-    _majProgression(100, 'Classeur chargé !', nbCles + ' clés, ' + nbBlobs + ' fichiers');
+    _majProgression(100, 'Codex chargé !', nbCles + ' clés, ' + nbBlobs + ' fichiers');
     await new Promise(function(r) { setTimeout(r, 800); });
     _masquerProgression();
 
@@ -444,11 +576,11 @@ async function chargerClasseur(fichierZip) {
    =============================== */
 
 /**
- * Vérifie si un fichier est un Classeur valide.
+ * Vérifie si un fichier est un Codex valide.
  * @param {File|Blob} fichierZip
  * @returns {Promise<{valide: boolean, erreurs: string[], _zip?: JSZip, _manifeste?: Object}>}
  */
-async function validerClasseur(fichierZip) {
+async function validerCodex(fichierZip) {
     const erreurs = [];
 
     // 1. Taille minimale
@@ -465,10 +597,10 @@ async function validerClasseur(fichierZip) {
         return { valide: false, erreurs: ['Fichier ZIP invalide : ' + e.message] };
     }
 
-    // 3. Vérifier la présence du manifeste
-    const entreeManifeste = zip.file(NOM_MANIFESTE);
+    // 3. Vérifier la présence du manifeste (accepte aussi l'ancien nom)
+    var entreeManifeste = zip.file(NOM_MANIFESTE) || zip.file(NOM_MANIFESTE_ANCIEN);
     if (!entreeManifeste) {
-        erreurs.push('Manifeste manquant (' + NOM_MANIFESTE + ')');
+        erreurs.push('Manifeste manquant (' + NOM_MANIFESTE + ' ou ' + NOM_MANIFESTE_ANCIEN + ')');
     }
 
     // 4. Vérifier la présence des données
@@ -515,16 +647,16 @@ async function validerClasseur(fichierZip) {
 }
 
 /**
- * Lit le manifeste d'un Classeur sans charger les données.
+ * Lit le manifeste d'un Codex sans charger les données.
  * @param {File|Blob} fichierZip
  * @returns {Promise<Object>} Le manifeste
  */
 async function lireManifeste(fichierZip) {
     const buffer = await _lireCommeArrayBuffer(fichierZip);
     const zip = await JSZip.loadAsync(buffer);
-    const entree = zip.file(NOM_MANIFESTE);
+    var entree = zip.file(NOM_MANIFESTE) || zip.file(NOM_MANIFESTE_ANCIEN);
     if (!entree) {
-        throw new Error('Ce fichier ne contient pas de manifeste de classeur.');
+        throw new Error('Ce fichier ne contient pas de manifeste de codex.');
     }
     const str = await entree.async('string');
     return JSON.parse(str);
@@ -535,24 +667,24 @@ async function lireManifeste(fichierZip) {
    =============================== */
 
 /**
- * Lit un classeur ZIP en mémoire SANS écrire dans IndexedDB.
- * Utilisé pour la comparaison et la fusion avec un autre classeur.
+ * Lit un codex ZIP en mémoire SANS écrire dans IndexedDB.
+ * Utilisé pour la comparaison et la fusion avec un autre codex.
  *
  * @param {File|Blob} fichierZip - Le fichier ZIP à lire
  * @returns {Promise<{manifeste: Object, donnees: Object, travauxListe: string[]}>}
- *   - manifeste : le manifeste complet du classeur externe
+ *   - manifeste : le manifeste complet du codex externe
  *   - donnees : toutes les clés/valeurs de donnees.json (en mémoire)
  *   - travauxListe : liste des chemins de fichiers dans travaux/ (ex: "travaux/FT_abc123.pdf")
  */
-async function lireClasseurExterne(fichierZip) {
+async function lireCodexExterne(fichierZip) {
     if (typeof JSZip === 'undefined') {
         throw new Error('JSZip non disponible.');
     }
 
     // 1. Valider le ZIP
-    var validation = await validerClasseur(fichierZip);
+    var validation = await validerCodex(fichierZip);
     if (!validation.valide) {
-        throw new Error('Classeur invalide : ' + validation.erreurs.join(', '));
+        throw new Error('Codex invalide : ' + validation.erreurs.join(', '));
     }
 
     var zip = validation._zip;
@@ -570,7 +702,7 @@ async function lireClasseurExterne(fichierZip) {
         }
     });
 
-    console.log('📂 Classeur externe lu : "' + manifeste.nom + '" — ' +
+    console.log('📂 Codex externe lu : "' + manifeste.nom + '" — ' +
         Object.keys(donnees).length + ' clés, ' + travauxListe.length + ' fichier(s) travaux');
 
     return {
@@ -586,10 +718,10 @@ async function lireClasseurExterne(fichierZip) {
    =============================== */
 
 /**
- * Retourne l'état courant du classeur.
+ * Retourne l'état courant du codex.
  * @returns {Object}
  */
-function etatClasseur() {
+function etatCodex() {
     return {
         actif: _etat.actif,
         nom: _etat.nom,
@@ -617,9 +749,9 @@ function marquerModification() {
 }
 
 /**
- * Désactive le classeur actif (retour au mode local seul).
+ * Désactive le codex actif (retour au mode local seul).
  */
-function fermerClasseur() {
+function fermerCodex() {
     _arreterAutoSave();
     _etat.actif = false;
     _etat.nom = '';
@@ -631,7 +763,7 @@ function fermerClasseur() {
     _mettreAJourIndicateur();
     // Nettoyer l'historique TimeMachine de IndexedDB
     _nettoyerHistoriqueIDB();
-    console.log('📂 Classeur fermé');
+    console.log('📂 Codex fermé');
 }
 
 /* ===============================
@@ -651,13 +783,13 @@ async function _ecrireViaHandle(handle, blob) {
 }
 
 /**
- * Sauvegarde le classeur vers un emplacement choisi par l'utilisateur.
+ * Sauvegarde le codex vers un emplacement choisi par l'utilisateur.
  * Détecte la meilleure stratégie selon le navigateur :
  * 1. showSaveFilePicker (Chrome/Edge — choix de destination natif)
  * 2. navigator.share (iPad Safari — "Enregistrer dans Fichiers")
  * 3. <a download> (fallback — dossier Téléchargements)
  *
- * @param {Blob} blob - Le blob ZIP du classeur
+ * @param {Blob} blob - Le blob ZIP du codex
  * @param {string} nomFichier - Le nom de fichier suggéré
  * @param {Object} [options]
  * @param {boolean} [options.forcerDialogue=false] - Force le dialogue même si un handle existe
@@ -686,7 +818,7 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
             var handle = await window.showSaveFilePicker({
                 suggestedName: nomFichier,
                 types: [{
-                    description: 'Classeur Labo Codex',
+                    description: 'Codex Labo Codex',
                     accept: { 'application/zip': ['.zip'] }
                 }]
             });
@@ -710,7 +842,7 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
             var fichier = new File([blob], nomFichier, { type: 'application/zip' });
             await navigator.share({
                 files: [fichier],
-                title: 'Classeur Labo Codex'
+                title: 'Codex Labo Codex'
             });
             return { methode: 'share' };
         } catch (e) {
@@ -734,7 +866,7 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
 }
 
 /**
- * Ouvre un dialogue de sélection de fichier pour choisir un classeur.
+ * Ouvre un dialogue de sélection de fichier pour choisir un codex.
  * @returns {Promise<File|null>} Le fichier sélectionné ou null si annulé
  */
 function ouvrirDialogueFichier() {
@@ -849,7 +981,7 @@ async function _ecrireHistoriqueDansZip(dossierHist, index, dejaAjoutes) {
 /**
  * Charge l'historique depuis un ZIP vers IndexedDB.
  * @param {JSZip} zip - Le ZIP chargé
- * @param {Object} manifeste - Le manifeste du classeur
+ * @param {Object} manifeste - Le manifeste du codex
  * @returns {Promise<Array>} L'index historique chargé
  */
 async function _chargerHistoriqueDepuisZip(zip, manifeste) {
@@ -1013,14 +1145,14 @@ function _grouperParPrefixe(cles) {
    =============================== */
 
 /**
- * Analyse les différences entre deux classeurs pour préparer une fusion.
+ * Analyse les différences entre deux codex pour préparer une fusion.
  *
  * Trois modes selon la disponibilité d'un ancêtre commun :
  * - Avec ancêtre : diff 3 parties (détecte les vrais conflits)
  * - Sans ancêtre : diff 2 parties (toute différence = conflit potentiel)
  *
- * @param {Object} local - Données du classeur local (actuellement dans IDB)
- * @param {Object} externe - Données du classeur externe (lu en mémoire)
+ * @param {Object} local - Données du codex local (actuellement dans IDB)
+ * @param {Object} externe - Données du codex externe (lu en mémoire)
  * @param {Object|null} [ancetre=null] - Dernier état commun connu (snapshot partagé)
  * @returns {{
  *   ajouteesLocal: string[],    - Clés nouvelles seulement dans local
@@ -1053,8 +1185,8 @@ function _analyserFusion(local, externe, ancetre) {
     };
 
     toutesLesCles.forEach(function(cle) {
-        // Ignorer les clés internes du classeur
-        if (cle.startsWith('_classeur_')) return;
+        // Ignorer les clés internes du codex
+        if (cle.startsWith('_codex_')) return;
 
         var dansLocal = cle in local;
         var dansExterne = cle in externe;
@@ -1128,7 +1260,7 @@ function _analyserFusion(local, externe, ancetre) {
 }
 
 /**
- * Analyse les différences entre les fichiers travaux de deux classeurs.
+ * Analyse les différences entre les fichiers travaux de deux codex.
  *
  * @param {string[]} travauxLocal - Chemins des fichiers travaux locaux (ex: "travaux/FT_abc.pdf")
  * @param {string[]} travauxExterne - Chemins des fichiers travaux externes
@@ -1268,8 +1400,8 @@ function _resumerValeur(val) {
  * 3. Retourne un plan de résolution complet
  *
  * @param {Object} analyse - Retour de _analyserFusion()
- * @param {Object} donneesLocales - Données du classeur local
- * @param {Object} donneesExternes - Données du classeur externe
+ * @param {Object} donneesLocales - Données du codex local
+ * @param {Object} donneesExternes - Données du codex externe
  * @param {Object} [analyseTravaux] - Retour de _analyserFusionTravaux() (optionnel)
  * @returns {{
  *   resolutions: Object.<string, 'local'|'externe'|'supprimer'>,
@@ -1321,7 +1453,7 @@ function _resoudreConflits(analyse, donneesLocales, donneesExternes, analyseTrav
         // Pas de conflit — confirmer l'auto-merge
         var totalActions = Object.keys(resolutions).length + importerTravaux.length;
         if (totalActions === 0) {
-            alert('Les deux classeurs sont identiques. Rien à fusionner.');
+            alert('Les deux codex sont identiques. Rien à fusionner.');
             return { resolutions: resolutions, importerTravaux: importerTravaux, annule: true };
         }
 
@@ -1410,7 +1542,7 @@ function _resoudreConflits(analyse, donneesLocales, donneesExternes, analyseTrav
  * Détecte les trimestres disponibles dans un jeu de données.
  * Scanne les préfixes de clés pour trouver les trimestres (h2026_, a2025_, demo_, etc.).
  *
- * @param {Object} donnees - Objet clé/valeur (de IDB ou d'un classeur)
+ * @param {Object} donnees - Objet clé/valeur (de IDB ou d'un codex)
  * @returns {string[]} Liste triée des préfixes de trimestre détectés (ex: ["a2025", "h2026"])
  */
 function _detecterTrimestresDisponibles(donnees) {
@@ -1456,8 +1588,8 @@ function _filtrerDonneesPourExport(donnees, trimestresChoisis, inclureGlobales) 
     for (var i = 0; i < cles.length; i++) {
         var cle = cles[i];
 
-        // Ignorer les clés internes du classeur
-        if (cle.startsWith('_classeur_') || cle.startsWith('_')) {
+        // Ignorer les clés internes du codex
+        if (cle.startsWith('_codex_') || cle.startsWith('_')) {
             continue;
         }
 
@@ -1524,10 +1656,10 @@ function _filtrerTravauxPourExport(donneesFiltrees, tousLesTravauxChemins) {
    =============================== */
 
 /**
- * Importe les blobs travaux d'un classeur externe qui ne sont pas dans le classeur local.
+ * Importe les blobs travaux d'un codex externe qui ne sont pas dans le codex local.
  *
- * @param {JSZip} zipExterne - Instance JSZip du classeur externe (de lireClasseurExterne._zip)
- * @param {Object} donneesExternes - donnees.json du classeur externe
+ * @param {JSZip} zipExterne - Instance JSZip du codex externe (de lireCodexExterne._zip)
+ * @param {Object} donneesExternes - donnees.json du codex externe
  * @param {string[]} cheminsAImporter - Chemins des fichiers à importer (ex: "travaux/FT_abc.pdf")
  * @param {Function} [onProgression] - Callback optionnel (pourcentage, message)
  * @returns {Promise<{importes: number, ignores: number, erreurs: string[]}>}
@@ -1673,27 +1805,27 @@ function _echapperRegex(str) {
 }
 
 /**
- * Génère un nom de classeur par défaut basé sur le contexte
+ * Génère un nom de codex par défaut basé sur le contexte
  */
-function _genererNomClasseur() {
+function _genererNomCodex() {
     const infoCours = db.getSync('infoCours', {});
     const trimestre = (typeof window.trimestreActif === 'string') ? window.trimestreActif : '';
     const parties = [];
     if (infoCours.nomCours) parties.push(infoCours.nomCours);
     if (trimestre) parties.push(trimestre.toUpperCase());
-    return parties.length > 0 ? parties.join(' — ') : 'Mon classeur';
+    return parties.length > 0 ? parties.join(' — ') : 'Mon codex';
 }
 
 /**
  * Génère un nom de fichier avec horodatage
  */
-function _genererNomFichier(nomClasseur) {
+function _genererNomFichier(nomCodex) {
     const now = new Date();
     const pad = (n) => String(n).padStart(2, '0');
     const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
     const heure = `${pad(now.getHours())}h${pad(now.getMinutes())}`;
-    const nomNettoye = nomClasseur.replace(/[^a-zA-Z0-9àâéèêëïîôùûüçÀÂÉÈÊËÏÎÔÙÛÜÇ _-]/g, '').trim().replace(/\s+/g, '-');
-    return `classeur-${nomNettoye}-${date}-${heure}${EXTENSION_CLASSEUR}`;
+    const nomNettoye = nomCodex.replace(/[^a-zA-Z0-9àâéèêëïîôùûüçÀÂÉÈÊËÏÎÔÙÛÜÇ _-]/g, '').trim().replace(/\s+/g, '-');
+    return `codex-${nomNettoye}-${date}-${heure}${EXTENSION_CODEX}`;
 }
 
 /**
@@ -1800,7 +1932,7 @@ async function _executerAutoSave() {
     console.log('📂 Auto-save en cours...');
 
     try {
-        var resultat = await genererClasseur({ silencieux: true });
+        var resultat = await genererCodex({ silencieux: true });
         // Ré-écriture directe via le handle (pas de dialogue)
         await _ecrireViaHandle(_fileHandle, resultat.blob);
 
@@ -1847,7 +1979,7 @@ function _formaterHeureLocale(dateISO) {
  */
 function _mettreAJourIndicateur() {
     // TODO Étape 1.3 : mettre à jour la pastille dans l'en-tête
-    const indicateur = document.getElementById('classeur-indicateur');
+    const indicateur = document.getElementById('codex-indicateur');
     if (!indicateur) return; // Le bouton n'existe pas encore
 
     if (!_etat.actif) {
@@ -1857,15 +1989,15 @@ function _mettreAJourIndicateur() {
 
     indicateur.classList.remove('u-hide');
     if (_etat.modificationsDepuis) {
-        indicateur.classList.add('classeur-indicateur--modifie');
-        indicateur.classList.remove('classeur-indicateur--sauve');
+        indicateur.classList.add('codex-indicateur--modifie');
+        indicateur.classList.remove('codex-indicateur--sauve');
     } else {
-        indicateur.classList.remove('classeur-indicateur--modifie');
-        indicateur.classList.add('classeur-indicateur--sauve');
+        indicateur.classList.remove('codex-indicateur--modifie');
+        indicateur.classList.add('codex-indicateur--sauve');
     }
 
     // Tooltip du bouton : résumé de l'état
-    // Le statut du classeur est affiché dans le menu (classeur-menu-statut-haut),
+    // Le statut du codex est affiché dans le menu (codex-menu-statut-haut),
     // pas en title natif (conflit avec data-tooltip personnalisé).
 }
 
@@ -1876,10 +2008,10 @@ function _mettreAJourIndicateur() {
 var _menuOuvert = false;
 
 /**
- * Ouvre/ferme le menu déroulant du classeur
+ * Ouvre/ferme le menu déroulant du codex
  */
 function toggleMenu() {
-    var menu = document.getElementById('classeur-menu');
+    var menu = document.getElementById('codex-menu');
     if (!menu) return;
 
     _menuOuvert = !_menuOuvert;
@@ -1899,43 +2031,43 @@ function toggleMenu() {
 }
 
 function _fermerMenu() {
-    var menu = document.getElementById('classeur-menu');
+    var menu = document.getElementById('codex-menu');
     if (menu) menu.classList.add('u-hide');
     _menuOuvert = false;
     document.removeEventListener('click', _fermerMenuExterne);
 }
 
 function _fermerMenuExterne(e) {
-    var controle = document.getElementById('classeur-controle');
+    var controle = document.getElementById('codex-controle');
     if (controle && !controle.contains(e.target)) {
         _fermerMenu();
     }
 }
 
 /**
- * Actualise la visibilité des items selon l'état du classeur
+ * Actualise la visibilité des items selon l'état du codex
  */
 function _actualiserMenu() {
     // Bandeau de statut en haut du menu (#230)
-    var statutHaut = document.getElementById('classeur-menu-statut-haut');
+    var statutHaut = document.getElementById('codex-menu-statut-haut');
     if (statutHaut) {
         if (_etat.actif) {
             var modifie = !!_etat.modificationsDepuis;
-            var classePastille = modifie ? 'classeur-statut-pastille--orange' : 'classeur-statut-pastille--vert';
+            var classePastille = modifie ? 'codex-statut-pastille--orange' : 'codex-statut-pastille--vert';
             var texteEtat = modifie ? 'Modifications non enregistrées' : 'Tout est enregistré';
             statutHaut.innerHTML =
-                '<div class="classeur-statut-nom">' + (_etat.nom || 'Classeur') + '</div>' +
-                '<div class="classeur-statut-etat"><span class="classeur-statut-pastille ' + classePastille + '"></span> ' + texteEtat + '</div>';
+                '<div class="codex-statut-nom">' + (_etat.nom || 'Codex') + '</div>' +
+                '<div class="codex-statut-etat"><span class="codex-statut-pastille ' + classePastille + '"></span> ' + texteEtat + '</div>';
             statutHaut.classList.remove('u-hide');
         } else {
-            statutHaut.innerHTML = '<div class="classeur-statut-etat">Aucun classeur actif — ouvre ou crée un classeur pour commencer.</div>';
+            statutHaut.innerHTML = '<div class="codex-statut-etat">Aucun codex actif — ouvre ou crée un codex pour commencer.</div>';
             statutHaut.classList.remove('u-hide');
         }
     }
 
-    var details = document.getElementById('classeur-menu-details');
-    var fermerItem = document.getElementById('classeur-menu-fermer');
-    var historiqueItem = document.getElementById('classeur-menu-historique');
+    var details = document.getElementById('codex-menu-details');
+    var fermerItem = document.getElementById('codex-menu-fermer');
+    var historiqueItem = document.getElementById('codex-menu-historique');
     if (details) {
         if (_etat.actif) details.classList.remove('u-hide');
         else details.classList.add('u-hide');
@@ -1948,19 +2080,19 @@ function _actualiserMenu() {
         if (_etat.actif) historiqueItem.classList.remove('u-hide');
         else historiqueItem.classList.add('u-hide');
     }
-    var comparerItem = document.getElementById('classeur-menu-comparer');
+    var comparerItem = document.getElementById('codex-menu-comparer');
     if (comparerItem) {
         if (_etat.actif) comparerItem.classList.remove('u-hide');
         else comparerItem.classList.add('u-hide');
     }
-    var fusionnerItem = document.getElementById('classeur-menu-fusionner');
+    var fusionnerItem = document.getElementById('codex-menu-fusionner');
     if (fusionnerItem) {
         if (_etat.actif) fusionnerItem.classList.remove('u-hide');
         else fusionnerItem.classList.add('u-hide');
     }
 
     // Sous-texte "Enregistrer" : montre si handle FSAPI connecté
-    var enregInfo = document.getElementById('classeur-menu-enreg-info');
+    var enregInfo = document.getElementById('codex-menu-enreg-info');
     if (enregInfo) {
         if (_fileHandle) {
             enregInfo.textContent = 'Vers le même emplacement';
@@ -1971,13 +2103,13 @@ function _actualiserMenu() {
     }
 
     // Indicateur auto-save dans le menu
-    var autoSaveItem = document.getElementById('classeur-menu-autosave');
-    var autoSaveSep = document.getElementById('classeur-menu-autosave-sep');
+    var autoSaveItem = document.getElementById('codex-menu-autosave');
+    var autoSaveSep = document.getElementById('codex-menu-autosave-sep');
     if (autoSaveItem) {
         if (_autoSaveTimerId) {
             autoSaveItem.classList.remove('u-hide');
             if (autoSaveSep) autoSaveSep.classList.remove('u-hide');
-            var detail = document.getElementById('classeur-menu-autosave-detail');
+            var detail = document.getElementById('codex-menu-autosave-detail');
             if (detail) {
                 var intervMin = Math.round(AUTO_SAVE_DELAI / 60000);
                 var texte = 'Toutes les ' + intervMin + ' min';
@@ -1998,7 +2130,7 @@ function _actualiserMenu() {
    =============================== */
 
 /**
- * Ouvrir un classeur depuis un fichier.
+ * Ouvrir un codex depuis un fichier.
  * Sur Chrome/Edge, utilise showOpenFilePicker pour obtenir un handle FSAPI
  * réutilisable lors de la prochaine sauvegarde.
  */
@@ -2012,7 +2144,7 @@ async function actionOuvrir() {
         try {
             var handles = await window.showOpenFilePicker({
                 types: [{
-                    description: 'Classeur Labo Codex',
+                    description: 'Codex Labo Codex',
                     accept: { 'application/zip': ['.zip'] }
                 }],
                 multiple: false
@@ -2038,25 +2170,25 @@ async function actionOuvrir() {
     if (!fichier) return;
 
     try {
-        var resultat = await chargerClasseur(fichier);
+        var resultat = await chargerCodex(fichier);
         if (typeof window.afficherNotificationSucces === 'function') {
             window.afficherNotificationSucces(
-                'Classeur ouvert : ' + resultat.manifeste.nom,
+                'Codex ouvert : ' + resultat.manifeste.nom,
                 resultat.stats.nbCles + ' clés, ' + resultat.stats.nbBlobs + ' fichiers'
             );
         }
         // Proposer de recharger pour appliquer les données
-        if (confirm('Classeur chargé avec succès !\n\nRecharger la page pour appliquer les données ?')) {
+        if (confirm('Codex chargé avec succès !\n\nRecharger la page pour appliquer les données ?')) {
             window.location.reload();
         }
     } catch (e) {
-        console.error('📂 Erreur ouverture classeur:', e);
+        console.error('📂 Erreur ouverture codex:', e);
         alert('Erreur : ' + e.message);
     }
 }
 
 /**
- * Enregistrer le classeur (génère + sauvegarde).
+ * Enregistrer le codex (génère + sauvegarde).
  * Si un handle FSAPI est disponible, ré-écrit directement sans dialogue.
  */
 async function actionEnregistrer() {
@@ -2064,7 +2196,7 @@ async function actionEnregistrer() {
 
     try {
         var avaitHandle = !!_fileHandle;
-        var resultat = await genererClasseur();
+        var resultat = await genererCodex();
         var sauvegarde = await sauvegarderVersDestination(resultat.blob, resultat.nomFichier);
 
         if (sauvegarde.methode === 'annule') return;
@@ -2074,12 +2206,12 @@ async function actionEnregistrer() {
                                sauvegarde.methode === 'fsapi' ? 'emplacement choisi' :
                                sauvegarde.methode === 'share' ? 'Fichiers' : 'Téléchargements';
             window.afficherNotificationSucces(
-                'Classeur enregistré',
+                'Codex enregistré',
                 _formaterTaille(resultat.blob.size) + ' — ' + methodeLabel
             );
         }
     } catch (e) {
-        console.error('📂 Erreur enregistrement classeur:', e);
+        console.error('📂 Erreur enregistrement codex:', e);
         alert('Erreur : ' + e.message);
     }
 }
@@ -2091,7 +2223,7 @@ async function actionEnregistrerSous() {
     _fermerMenu();
 
     try {
-        var resultat = await genererClasseur();
+        var resultat = await genererCodex();
         var sauvegarde = await sauvegarderVersDestination(resultat.blob, resultat.nomFichier, { forcerDialogue: true });
 
         if (sauvegarde.methode === 'annule') return;
@@ -2100,23 +2232,23 @@ async function actionEnregistrerSous() {
             var methodeLabel = sauvegarde.methode === 'fsapi' ? 'nouvel emplacement' :
                                sauvegarde.methode === 'share' ? 'Fichiers' : 'Téléchargements';
             window.afficherNotificationSucces(
-                'Classeur enregistré',
+                'Codex enregistré',
                 _formaterTaille(resultat.blob.size) + ' — ' + methodeLabel
             );
         }
     } catch (e) {
-        console.error('📂 Erreur enregistrement classeur:', e);
+        console.error('📂 Erreur enregistrement codex:', e);
         alert('Erreur : ' + e.message);
     }
 }
 
 /**
- * Créer un nouveau classeur (marque l'état actif sans exporter)
+ * Créer un nouveau codex (marque l'état actif sans exporter)
  */
 function actionNouveau() {
     _fermerMenu();
 
-    var nom = prompt('Nom du classeur :', _genererNomClasseur());
+    var nom = prompt('Nom du codex :', _genererNomCodex());
     if (!nom) return;
 
     _etat.actif = true;
@@ -2128,24 +2260,24 @@ function actionNouveau() {
     _mettreAJourIndicateur();
 
     if (typeof window.afficherNotificationSucces === 'function') {
-        window.afficherNotificationSucces('Nouveau classeur : ' + nom);
+        window.afficherNotificationSucces('Nouveau codex : ' + nom);
     }
-    console.log('📂 Nouveau classeur créé : ' + nom);
+    console.log('📂 Nouveau codex créé : ' + nom);
 }
 
 /**
- * Affiche les détails du classeur actif
+ * Affiche les détails du codex actif
  */
 function actionDetails() {
     _fermerMenu();
 
     if (!_etat.manifeste) {
-        alert('Aucun classeur actif.\n\nPour commencer :\n• « Ouvrir un classeur » pour charger un fichier existant\n• « Nouveau classeur » pour en créer un\n• « Enregistrer le classeur » pour sauvegarder tes données actuelles');
+        alert('Aucun codex actif.\n\nPour commencer :\n• « Ouvrir un codex » pour charger un fichier existant\n• « Nouveau codex » pour en créer un\n• « Enregistrer le codex » pour sauvegarder tes données actuelles');
         return;
     }
 
     var m = _etat.manifeste;
-    var details = 'Classeur : ' + m.nom + '\n' +
+    var details = 'Codex : ' + m.nom + '\n' +
         'Auteur : ' + (m.auteur || 'non défini') + '\n' +
         'Trimestre : ' + (m.trimestre || 'non défini') + '\n' +
         'Appareil : ' + (m.appareil || 'inconnu') + '\n' +
@@ -2170,7 +2302,7 @@ async function actionRestaurer() {
     // 1. Charger l'index historique depuis IDB
     var index = await db.get(CLE_HIST_INDEX, []);
     if (index.length === 0) {
-        alert('Aucun historique disponible.\n\nL\'historique se construit automatiquement à chaque enregistrement.\nEnregistre le classeur au moins deux fois pour voir apparaitre des versions.');
+        alert('Aucun historique disponible.\n\nL\'historique se construit automatiquement à chaque enregistrement.\nEnregistre le codex au moins deux fois pour voir apparaitre des versions.');
         return;
     }
 
@@ -2216,7 +2348,7 @@ async function actionRestaurer() {
     var donneesSnapshot = await db.get(cleSnapshot, null);
 
     if (!donneesSnapshot) {
-        alert('Erreur : snapshot introuvable dans le stockage local.\n\nEssaye de réouvrir le classeur depuis le fichier ZIP.');
+        alert('Erreur : snapshot introuvable dans le stockage local.\n\nEssaye de réouvrir le codex depuis le fichier ZIP.');
         return;
     }
 
@@ -2226,7 +2358,7 @@ async function actionRestaurer() {
     await _yield();
 
     var toutesLesCles = await db.keys();
-    var clesFiltrees = toutesLesCles.filter(function(c) { return !c.startsWith('_classeur_'); });
+    var clesFiltrees = toutesLesCles.filter(function(c) { return !c.startsWith('_codex_'); });
     var donneesActuelles = {};
     for (var j = 0; j < clesFiltrees.length; j++) {
         var val = await db.get(clesFiltrees[j], null);
@@ -2296,7 +2428,7 @@ async function actionComparer() {
     // 1. Charger l'index historique
     var index = await db.get(CLE_HIST_INDEX, []);
     if (index.length === 0) {
-        alert('Aucun historique disponible pour la comparaison.\n\nL\'historique se construit automatiquement à chaque enregistrement.\nEnregistre le classeur au moins deux fois pour pouvoir comparer des versions.');
+        alert('Aucun historique disponible pour la comparaison.\n\nL\'historique se construit automatiquement à chaque enregistrement.\nEnregistre le codex au moins deux fois pour pouvoir comparer des versions.');
         return;
     }
 
@@ -2332,7 +2464,7 @@ async function actionComparer() {
     var donneesSnapshot = await db.get(cleSnapshot, null);
 
     if (!donneesSnapshot) {
-        alert('Erreur : snapshot introuvable dans le stockage local.\n\nEssaye de réouvrir le classeur depuis le fichier ZIP.');
+        alert('Erreur : snapshot introuvable dans le stockage local.\n\nEssaye de réouvrir le codex depuis le fichier ZIP.');
         return;
     }
 
@@ -2342,7 +2474,7 @@ async function actionComparer() {
     await _yield();
 
     var toutesLesCles = await db.keys();
-    var clesFiltrees = toutesLesCles.filter(function(c) { return !c.startsWith('_classeur_') && !c.startsWith('_'); });
+    var clesFiltrees = toutesLesCles.filter(function(c) { return !c.startsWith('_codex_') && !c.startsWith('_'); });
     var donneesActuelles = {};
     for (var j = 0; j < clesFiltrees.length; j++) {
         var val = await db.get(clesFiltrees[j], null);
@@ -2357,7 +2489,7 @@ async function actionComparer() {
     var snapshotFiltre = {};
     var clesSnapshot = Object.keys(donneesSnapshot);
     for (var k = 0; k < clesSnapshot.length; k++) {
-        if (!clesSnapshot[k].startsWith('_classeur_') && !clesSnapshot[k].startsWith('_')) {
+        if (!clesSnapshot[k].startsWith('_codex_') && !clesSnapshot[k].startsWith('_')) {
             snapshotFiltre[clesSnapshot[k]] = donneesSnapshot[clesSnapshot[k]];
         }
     }
@@ -2383,14 +2515,14 @@ async function actionComparer() {
 }
 
 /**
- * Fusionner un classeur externe avec le classeur local.
+ * Fusionner un codex externe avec le codex local.
  * Flux complet : file picker → lecture externe → analyse → résolution → application → notification.
  */
 async function actionFusionner() {
     _fermerMenu();
 
     if (!_etat.actif) {
-        alert('Aucun classeur actif.\n\nOuvre d\'abord un classeur (ou enregistre tes données), puis utilise « Fusionner » pour combiner avec un autre classeur.');
+        alert('Aucun codex actif.\n\nOuvre d\'abord un codex (ou enregistre tes données), puis utilise « Fusionner » pour combiner avec un autre codex.');
         return;
     }
 
@@ -2398,14 +2530,14 @@ async function actionFusionner() {
     var fichier = await ouvrirDialogueFichier();
     if (!fichier) return;
 
-    _afficherProgression('Fusion de classeurs');
-    _majProgression(0, 'Lecture du classeur externe...');
+    _afficherProgression('Fusion de codex');
+    _majProgression(0, 'Lecture du codex externe...');
     await _yield();
 
     try {
 
-    // 2. Lire le classeur externe en mémoire (sans toucher à IDB)
-    var externe = await lireClasseurExterne(fichier);
+    // 2. Lire le codex externe en mémoire (sans toucher à IDB)
+    var externe = await lireCodexExterne(fichier);
 
     // 3. Collecter les données locales depuis IndexedDB
     _majProgression(15, 'Lecture des données locales...');
@@ -2413,7 +2545,7 @@ async function actionFusionner() {
 
     var toutesLesCles = await db.keys();
     var clesFiltrees = toutesLesCles.filter(function(c) {
-        return !c.startsWith('_classeur_') && !c.startsWith('_');
+        return !c.startsWith('_codex_') && !c.startsWith('_');
     });
     var donneesLocales = {};
     for (var i = 0; i < clesFiltrees.length; i++) {
@@ -2503,7 +2635,7 @@ async function actionFusionner() {
         );
     }
 
-    // 11. Marquer comme modifié (il faudra réenregistrer le classeur)
+    // 11. Marquer comme modifié (il faudra réenregistrer le codex)
     marquerModification();
 
     // 12. Résumé final
@@ -2519,7 +2651,7 @@ async function actionFusionner() {
     }
 
     var resume = 'Fusion terminée !\n\n' +
-        'Classeur externe : "' + externe.manifeste.nom + '"\n\n' +
+        'Codex externe : "' + externe.manifeste.nom + '"\n\n' +
         'Clés identiques : ' + analyse.identiques + '\n' +
         'Gardées (locales) : ' + nbLocaux + '\n' +
         'Importées (externes) : ' + nbExternes + '\n' +
@@ -2532,7 +2664,7 @@ async function actionFusionner() {
         resume += 'Erreurs fichiers : ' + statsTravaux.erreurs.length + '\n';
     }
 
-    resume += '\nPense à enregistrer le classeur pour sauvegarder la fusion.';
+    resume += '\nPense à enregistrer le codex pour sauvegarder la fusion.';
 
     alert(resume);
 
@@ -2548,7 +2680,7 @@ async function actionFusionner() {
 }
 
 /**
- * Exporter une sélection de données (par trimestre) dans un classeur partiel.
+ * Exporter une sélection de données (par trimestre) dans un codex partiel.
  * Génère un ZIP contenant uniquement les trimestres choisis + clés globales + blobs associés.
  */
 async function actionExporterSelection() {
@@ -2563,7 +2695,7 @@ async function actionExporterSelection() {
     // 1. Collecter toutes les données depuis IndexedDB
     var toutesLesCles = await db.keys();
     var clesFiltrees = toutesLesCles.filter(function(c) {
-        return !c.startsWith('_classeur_') && !c.startsWith('_');
+        return !c.startsWith('_codex_') && !c.startsWith('_');
     });
     var donnees = {};
     for (var i = 0; i < clesFiltrees.length; i++) {
@@ -2587,7 +2719,7 @@ async function actionExporterSelection() {
     }
 
     if (trimestres.length === 1) {
-        alert('Un seul trimestre détecté (' + trimestres[0] + ').\n\nUtilise « Enregistrer le classeur » pour un export complet.');
+        alert('Un seul trimestre détecté (' + trimestres[0] + ').\n\nUtilise « Enregistrer le codex » pour un export complet.');
         return;
     }
 
@@ -2703,7 +2835,7 @@ async function actionExporterSelection() {
     var manifeste = {
         formatVersion: FORMAT_VERSION,
         appVersion: _obtenirVersionApp(),
-        nom: (_etat.nom || _genererNomClasseur()) + ' (sélection)',
+        nom: (_etat.nom || _genererNomCodex()) + ' (sélection)',
         auteur: _etat.manifeste ? _etat.manifeste.auteur : '',
         dateCreation: maintenant,
         dateDerniereModification: maintenant,
@@ -2777,7 +2909,7 @@ function _formaterNomTrimestre(prefixe) {
 }
 
 /**
- * Fermer le classeur actif
+ * Fermer le codex actif
  */
 function actionFermer() {
     _fermerMenu();
@@ -2788,10 +2920,10 @@ function actionFermer() {
         }
     }
 
-    fermerClasseur();
+    fermerCodex();
 
     if (typeof window.afficherNotificationSucces === 'function') {
-        window.afficherNotificationSucces('Classeur fermé');
+        window.afficherNotificationSucces('Codex fermé');
     }
 }
 
@@ -2815,19 +2947,19 @@ function _formaterDateLocale(dateISO) {
    API PUBLIQUE
    =============================== */
 
-window.Classeur = {
+window.Codex = {
     // Initialisation
-    initialiser: initialiserClasseur,
+    initialiser: initialiserCodex,
 
     // Opérations principales
-    generer: genererClasseur,
-    charger: chargerClasseur,
-    fermer: fermerClasseur,
+    generer: genererCodex,
+    charger: chargerCodex,
+    fermer: fermerCodex,
 
     // Validation / lecture
-    valider: validerClasseur,
+    valider: validerCodex,
     lireManifeste: lireManifeste,
-    lireExterne: lireClasseurExterne,
+    lireExterne: lireCodexExterne,
 
     // Sauvegarde multi-plateforme
     sauvegarder: sauvegarderVersDestination,
@@ -2847,7 +2979,7 @@ window.Classeur = {
     actionFermer: actionFermer,
 
     // État
-    etat: etatClasseur,
+    etat: etatCodex,
     marquerModification: marquerModification
 };
 
@@ -2857,9 +2989,9 @@ window.Classeur = {
 
 // Initialiser quand le DOM est prêt
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initialiserClasseur);
+    document.addEventListener('DOMContentLoaded', initialiserCodex);
 } else {
-    initialiserClasseur();
+    initialiserCodex();
 }
 
 })();

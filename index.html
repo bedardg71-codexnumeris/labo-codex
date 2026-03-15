@@ -3647,65 +3647,65 @@
                         <p class="meta" data-tooltip="entete-version"><span id="version-entete"></span> <span id="build-numero"></span></p>
                     </div>
 
-                    <!-- Contrôle gauche : mode + classeur -->
+                    <!-- Contrôle gauche : mode + codex -->
                     <div class="entete-controles-gauche">
                         <div id="selecteur-mode" class="selecteur-mode-centre" data-tooltip="entete-mode-affichage">
                             <!-- Sera généré dynamiquement par 17-modes.js -->
                         </div>
 
-                        <!-- Bouton Classeur -->
-                        <div id="classeur-controle" class="classeur-controle">
-                            <button id="btn-classeur" class="btn-classeur-header" onclick="Classeur.toggleMenu()" data-tooltip="entete-classeur">
-                                <span class="classeur-icone-btn">&#128194;</span>
-                                <span class="classeur-label-btn">Classeur</span>
-                                <span id="classeur-indicateur" class="classeur-indicateur u-hide"></span>
+                        <!-- Bouton Codex -->
+                        <div id="codex-controle" class="codex-controle">
+                            <button id="btn-codex" class="btn-codex-header" onclick="Codex.toggleMenu()" data-tooltip="entete-codex">
+                                <span class="codex-icone-btn">&#128194;</span>
+                                <span class="codex-label-btn">Codex</span>
+                                <span id="codex-indicateur" class="codex-indicateur u-hide"></span>
                             </button>
-                            <div id="classeur-menu" class="classeur-menu u-hide">
-                                <div id="classeur-menu-statut-haut" class="classeur-menu-statut-haut u-hide"></div>
-                                <button class="classeur-menu-item" onclick="Classeur.actionOuvrir()">
-                                    <span class="classeur-menu-icone">&#128194;</span> Ouvrir un classeur...
+                            <div id="codex-menu" class="codex-menu u-hide">
+                                <div id="codex-menu-statut-haut" class="codex-menu-statut-haut u-hide"></div>
+                                <button class="codex-menu-item" onclick="Codex.actionOuvrir()">
+                                    <span class="codex-menu-icone">&#128194;</span> Ouvrir un codex...
                                 </button>
-                                <button class="classeur-menu-item" onclick="Classeur.actionEnregistrer()">
-                                    <span class="classeur-menu-icone">&#128190;</span>
-                                    <span class="classeur-menu-contenu">
-                                        Enregistrer le classeur
-                                        <span id="classeur-menu-enreg-info" class="classeur-menu-sous-texte u-hide"></span>
+                                <button class="codex-menu-item" onclick="Codex.actionEnregistrer()">
+                                    <span class="codex-menu-icone">&#128190;</span>
+                                    <span class="codex-menu-contenu">
+                                        Enregistrer le codex
+                                        <span id="codex-menu-enreg-info" class="codex-menu-sous-texte u-hide"></span>
                                     </span>
                                 </button>
-                                <button class="classeur-menu-item" onclick="Classeur.actionEnregistrerSous()">
-                                    <span class="classeur-menu-icone">&#128229;</span> Enregistrer sous...
+                                <button class="codex-menu-item" onclick="Codex.actionEnregistrerSous()">
+                                    <span class="codex-menu-icone">&#128229;</span> Enregistrer sous...
                                 </button>
-                                <div id="classeur-menu-autosave-sep" class="classeur-menu-sep u-hide"></div>
-                                <div id="classeur-menu-autosave" class="classeur-menu-statut u-hide">
-                                    <span class="classeur-menu-icone">&#9889;</span>
-                                    <span class="classeur-menu-contenu">
-                                        <span id="classeur-menu-autosave-texte">Auto-save actif</span>
-                                        <span id="classeur-menu-autosave-detail" class="classeur-menu-sous-texte"></span>
+                                <div id="codex-menu-autosave-sep" class="codex-menu-sep u-hide"></div>
+                                <div id="codex-menu-autosave" class="codex-menu-statut u-hide">
+                                    <span class="codex-menu-icone">&#9889;</span>
+                                    <span class="codex-menu-contenu">
+                                        <span id="codex-menu-autosave-texte">Auto-save actif</span>
+                                        <span id="codex-menu-autosave-detail" class="codex-menu-sous-texte"></span>
                                     </span>
                                 </div>
-                                <div class="classeur-menu-sep"></div>
-                                <button class="classeur-menu-item" onclick="Classeur.actionNouveau()">
-                                    <span class="classeur-menu-icone">&#10133;</span> Nouveau classeur
+                                <div class="codex-menu-sep"></div>
+                                <button class="codex-menu-item" onclick="Codex.actionNouveau()">
+                                    <span class="codex-menu-icone">&#10133;</span> Nouveau codex
                                 </button>
-                                <button id="classeur-menu-details" class="classeur-menu-item u-hide" onclick="Classeur.actionDetails()">
-                                    <span class="classeur-menu-icone">&#9432;</span> Details du classeur
+                                <button id="codex-menu-details" class="codex-menu-item u-hide" onclick="Codex.actionDetails()">
+                                    <span class="codex-menu-icone">&#9432;</span> Détails du codex
                                 </button>
-                                <button id="classeur-menu-historique" class="classeur-menu-item u-hide" onclick="Classeur.actionRestaurer()">
-                                    <span class="classeur-menu-icone">&#128336;</span> Historique des versions...
+                                <button id="codex-menu-historique" class="codex-menu-item u-hide" onclick="Codex.actionRestaurer()">
+                                    <span class="codex-menu-icone">&#128336;</span> Historique des versions...
                                 </button>
-                                <button id="classeur-menu-comparer" class="classeur-menu-item u-hide" onclick="Classeur.actionComparer()">
-                                    <span class="classeur-menu-icone">&#128269;</span> Comparer avec une version...
+                                <button id="codex-menu-comparer" class="codex-menu-item u-hide" onclick="Codex.actionComparer()">
+                                    <span class="codex-menu-icone">&#128269;</span> Comparer avec une version...
                                 </button>
-                                <div class="classeur-menu-sep"></div>
-                                <button id="classeur-menu-fusionner" class="classeur-menu-item u-hide" onclick="Classeur.actionFusionner()">
-                                    <span class="classeur-menu-icone">&#128260;</span> Fusionner avec un classeur...
+                                <div class="codex-menu-sep"></div>
+                                <button id="codex-menu-fusionner" class="codex-menu-item u-hide" onclick="Codex.actionFusionner()">
+                                    <span class="codex-menu-icone">&#128260;</span> Fusionner avec un codex...
                                 </button>
-                                <button id="classeur-menu-exporter" class="classeur-menu-item" onclick="Classeur.actionExporterSelection()">
-                                    <span class="classeur-menu-icone">&#128230;</span> Exporter une sélection...
+                                <button id="codex-menu-exporter" class="codex-menu-item" onclick="Codex.actionExporterSelection()">
+                                    <span class="codex-menu-icone">&#128230;</span> Exporter une sélection...
                                 </button>
-                                <div class="classeur-menu-sep"></div>
-                                <button id="classeur-menu-fermer" class="classeur-menu-item classeur-menu-item--danger u-hide" onclick="Classeur.actionFermer()">
-                                    <span class="classeur-menu-icone">&#10005;</span> Fermer le classeur
+                                <div class="codex-menu-sep"></div>
+                                <button id="codex-menu-fermer" class="codex-menu-item codex-menu-item--danger u-hide" onclick="Codex.actionFermer()">
+                                    <span class="codex-menu-icone">&#10005;</span> Fermer le codex
                                 </button>
                             </div>
                         </div>
@@ -16600,7 +16600,7 @@
     <!-- PRIORITÉ 6: Modules avancés (Beta 91.5 - Import/Export) -->
     <script src="js/progression.js?v=2026031401"></script>
     <script src="js/import-export.js?v=2026010601"></script>
-    <script src="js/classeur.js?v=2026031401"></script>
+    <script src="js/codex.js?v=2026031401"></script>
     <script src="js/statistiques.js?v=2025121001"></script>
     <script src="js/liste-evaluations.js?v=2026030602"></script>
     <script src="js/snapshots.js?v=2026030201"></script>

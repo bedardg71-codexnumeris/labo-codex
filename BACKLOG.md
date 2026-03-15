@@ -7,42 +7,50 @@
 
 ## A faire
 
-### Classeur — Flux USB multi-appareil (14 mars 2026)
+### Codex — Flux USB multi-appareil (14 mars 2026)
 
-- [x] **#225** Classeur Phase 1 : Ouvrir/sauvegarder un classeur ZIP portable (Mac + iPad) *(Beta 98.5, commit 8f1fc57)*
+- [x] **#225** Codex Phase 1 : Ouvrir/sauvegarder un codex ZIP portable (Mac + iPad) *(Beta 98.5, commit 8f1fc57)*
 
-- [ ] **#226** Classeur Phase 2 : TimeMachine (historique des versions dans le classeur)
+- [ ] **#226** Codex Phase 2 : TimeMachine (historique des versions dans le codex)
   - [x] Infrastructure : constantes, helpers rotation/archivage/chargement *(commit 9eedefa)*
   - [x] Branchement : generer/charger/fermer integrent l'historique *(commit 20442df)*
   - [x] Restauration : prompt() liste numerotee + confirm() securite *(commit bf11f3e)*
   - [x] Comparaison visuelle : diff entre deux snapshots (cles ajoutees/supprimees/modifiees)
-  - **Plan detaille** : `docs/plan-classeur.md`
+  - **Plan detaille** : `docs/plan-codex.md`
 
-- [x] **#227** Classeur Phase 3 : Multi-classeur + fusion *(Beta 98.5, 14 mars 2026)*
+- [x] **#227** Codex Phase 3 : Multi-codex + fusion *(Beta 98.5, 14 mars 2026)*
 
-- [x] **#228** Classeur Phase 4 : Auto-save FSAPI vers cle USB *(Beta 98.6, 14 mars 2026)*
+- [x] **#228** Codex Phase 4 : Auto-save FSAPI vers cle USB *(Beta 98.6, 14 mars 2026)*
   - [x] 4.1 Handle FSAPI persistant — re-ecriture directe sans dialogue (Chrome/Edge)
   - [x] 4.2 Auto-save a intervalle (5 min) quand handle disponible, silencieux
   - [x] 4.3 Indicateur connexion dans le menu + sous-texte Enregistrer
   - **A tester sur Chrome Mac** : ouvrir → enregistrer → enregistrer (sans dialogue) → auto-save 5 min
-  - **Plan detaille** : `docs/plan-classeur.md`
+  - **Plan detaille** : `docs/plan-codex.md`
 
-- [x] **#229** Design : Adopter l'overlay de progression du Classeur comme norme *(14 mars 2026)*
+- [x] **#229** Design : Adopter l'overlay de progression du Codex comme norme *(14 mars 2026)*
   - Nouveau fichier `js/progression.js` : 3 fonctions globales (`afficherProgression`, `majProgression`, `masquerProgression`)
   - Classes CSS `.progression-*` dans `styles.css` (remplacement des styles inline)
-  - `classeur.js` delegue aux fonctions globales via alias
+  - `codex.js` delegue aux fonctions globales via alias
 
-- [x] **#231** Classeur : Auteur non defini dans les details *(14 mars 2026)*
+- [x] **#231** Codex : Auteur non defini dans les details *(14 mars 2026)*
   - Nouvelle fonction `_obtenirAuteur()` avec cascade : `profilEnseignant` (prenom+nom) → `infoCours.enseignant` (fallback)
   - L'auteur se propage automatiquement dans le manifeste a chaque sauvegarde
 
-- [x] **#230** UX : Documentation utilisateur du concept Classeur *(14 mars 2026)*
-  - Tooltip `entete-classeur` dans `tooltips-contenu.js` (concept cle USB + pastilles)
+- [x] **#230** UX : Documentation utilisateur du concept Codex *(14 mars 2026)*
+  - Tooltip `entete-codex` dans `tooltips-contenu.js` (concept cle USB + pastilles)
   - Bandeau de statut en haut du menu (nom + etat vert/orange ou message etat vide)
   - `beforeunload` rappel d'enregistrer avant de quitter
   - Etats vides ameliores : messages guidants avec actions possibles
-  - MODULE 6 « Utiliser le Classeur » dans le tour guide Primo (flux Mac/USB/iPad)
+  - MODULE 6 « Utiliser le Codex » dans le tour guide Primo (flux Mac/USB/iPad)
   - Overlay de progression normalise : voir #229
+
+### Retours testeur — 14 mars 2026
+
+- [ ] **#232** UX : Comment activer les info-bulles sur tablette ?
+  - Commentaire de Gregoire (iPad, Safari 26.3, iPadOS)
+  - Les info-bulles se declenchent au survol (hover) — impossible sur ecran tactile
+  - Investiguer : activer au tap long ? Ou proposer un toggle explicite dans les preferences ?
+  - **Fichier** : `js/tooltips.js`, `js/tooltips-contenu.js`
 
 ### Retours testeur — 3 mars 2026
 

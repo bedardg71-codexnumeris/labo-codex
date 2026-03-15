@@ -42,11 +42,11 @@ const TOOLTIPS = {
         'S\u00e9lectionner le groupe-cours sur lequel travailler. Toutes les donn\u00e9es affich\u00e9es (pr\u00e9sences, \u00e9valuations, tableau de bord) s\u2019ajustent au groupe choisi.',
 
     // =================================================================
-    // EN-TETE — Zone 4 : Classeur
+    // EN-TETE — Zone 4 : Codex
     // =================================================================
 
-    'entete-classeur':
-        'Le classeur est ton \u00ab cloud personnel \u00bb sur cl\u00e9 USB. Il regroupe toutes tes donn\u00e9es dans un seul fichier portable que tu peux transporter entre tes appareils (ordinateur \u2192 USB \u2192 tablette \u2192 USB \u2192 ordinateur). La pastille verte indique que tout est enregistr\u00e9\u00a0; la pastille orange signale des modifications non sauvegard\u00e9es.',
+    'entete-codex':
+        'Le codex est ton \u00ab cloud personnel \u00bb sur cl\u00e9 USB. Il regroupe toutes tes donn\u00e9es dans un seul fichier portable que tu peux transporter entre tes appareils (ordinateur \u2192 USB \u2192 tablette \u2192 USB \u2192 ordinateur). La pastille verte indique que tout est enregistr\u00e9\u00a0; la pastille orange signale des modifications non sauvegard\u00e9es.',
 
     // =================================================================
     // EN-TETE — Zone 5 : Navigation

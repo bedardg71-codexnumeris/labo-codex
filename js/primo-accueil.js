@@ -272,8 +272,8 @@ function afficherModalAccueil() {
                     </div>
                 </button>
 
-                <!-- MODULE 6: Utiliser le Classeur -->
-                <button onclick="demarrerClasseur()" style="
+                <!-- MODULE 6: Utiliser le Codex -->
+                <button onclick="demarrerCodex()" style="
                     width: 100%;
                     padding: 15px 20px;
                     margin-bottom: 8px;
@@ -286,7 +286,7 @@ function afficherModalAccueil() {
                     text-align: left;
                     transition: all 0.2s;
                 " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='var(--surface-conteneur)'; this.style.transform='translateY(0)';">
-                    <strong>MODULE 6 : Utiliser le Classeur</strong>
+                    <strong>MODULE 6 : Utiliser le Codex</strong>
                     <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
                         Sauvegarder tes données sur clé USB et les transporter entre tes appareils
                     </div>
@@ -508,32 +508,32 @@ function demarrerCreationMateriel() {
 }
 
 /**
- * Option 6: Utiliser le Classeur (#230)
+ * Option 6: Utiliser le Codex (#230)
  * Affiche une explication du concept puis ouvre le menu
  */
-function demarrerClasseur() {
+function demarrerCodex() {
     fermerModalAccueil();
 
     setTimeout(function() {
         alert(
-            'Le Classeur — ton cloud personnel sur clé USB\n\n' +
-            'Le Classeur regroupe toutes tes données dans un seul fichier portable (.zip) ' +
+            'Le Codex — ton cloud personnel sur clé USB\n\n' +
+            'Le Codex regroupe toutes tes données dans un seul fichier portable (.zip) ' +
             'que tu peux transporter entre tes appareils.\n\n' +
             'Flux typique :\n' +
-            '1. Mac → Enregistrer le classeur sur ta clé USB\n' +
-            '2. iPad → Ouvrir le classeur depuis la clé USB\n' +
+            '1. Mac → Enregistrer le codex sur ta clé USB\n' +
+            '2. iPad → Ouvrir le codex depuis la clé USB\n' +
             '3. Travailler sur iPad (saisie de présences, évaluations...)\n' +
-            '4. iPad → Enregistrer le classeur sur la clé USB\n' +
-            '5. Mac → Ouvrir le classeur depuis la clé USB\n\n' +
+            '4. iPad → Enregistrer le codex sur la clé USB\n' +
+            '5. Mac → Ouvrir le codex depuis la clé USB\n\n' +
             'Indicateurs :\n' +
             '• Pastille verte = tout est enregistré\n' +
             '• Pastille orange = modifications non sauvegardées\n\n' +
-            'Clique sur le bouton « Classeur » dans l\'en-tête pour commencer.'
+            'Clique sur le bouton « Codex » dans l\'en-tête pour commencer.'
         );
 
-        // Ouvrir le menu du classeur pour guider l'utilisateur
-        if (typeof Classeur !== 'undefined' && typeof Classeur.toggleMenu === 'function') {
-            Classeur.toggleMenu();
+        // Ouvrir le menu du codex pour guider l'utilisateur
+        if (typeof Codex !== 'undefined' && typeof Codex.toggleMenu === 'function') {
+            Codex.toggleMenu();
         }
     }, 300);
 }
@@ -615,7 +615,7 @@ window.naviguerVersImportDemo = naviguerVersImportDemo;
 window.demarrerConfigComplete = demarrerConfigComplete;
 window.demarrerWizard = demarrerWizard;
 window.demarrerCreationMateriel = demarrerCreationMateriel;
-window.demarrerClasseur = demarrerClasseur;
+window.demarrerCodex = demarrerCodex;
 window.explorerLibrement = explorerLibrement;
 window.consulterAide = consulterAide;
 

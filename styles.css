@@ -5331,14 +5331,14 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 /* ===============================
-   CLASSEUR — Bouton en-tête + menu
+   CODEX — Bouton en-tête + menu
    =============================== */
 
-.classeur-controle {
+.codex-controle {
     position: relative;
 }
 
-.btn-classeur-header {
+.btn-codex-header {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -5358,22 +5358,22 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     min-width: 44px;
 }
 
-.btn-classeur-header:hover {
+.btn-codex-header:hover {
     background: rgba(106, 172, 184, 0.22);
     border-color: rgba(106, 172, 184, 0.4);
 }
 
-.btn-classeur-header:focus {
+.btn-codex-header:focus {
     outline: none;
     border-color: rgba(106, 172, 184, 0.6);
     box-shadow: 0 0 0 3px rgba(106, 172, 184, 0.1);
 }
 
-.classeur-icone-btn {
+.codex-icone-btn {
     font-size: 1rem;
 }
 
-.classeur-indicateur {
+.codex-indicateur {
     width: 9px;
     height: 9px;
     border-radius: 50%;
@@ -5383,17 +5383,17 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     border: 2px solid rgba(10, 24, 32, 0.8);
 }
 
-.classeur-indicateur--modifie {
+.codex-indicateur--modifie {
     background: var(--orange-attention, #e8a838);
 }
 
-.classeur-indicateur--sauve {
+.codex-indicateur--sauve {
     background: var(--vert-succes, #4caf50);
 }
 
 /* Menu déroulant */
 
-.classeur-menu {
+.codex-menu {
     position: absolute;
     top: calc(100% + 6px);
     left: 0;
@@ -5406,7 +5406,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     z-index: 10000;
 }
 
-.classeur-menu-item {
+.codex-menu-item {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -5422,38 +5422,38 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     min-height: 44px;
 }
 
-.classeur-menu-item:hover {
+.codex-menu-item:hover {
     background: rgba(106, 172, 184, 0.15);
 }
 
-.classeur-menu-item--danger {
+.codex-menu-item--danger {
     color: var(--rouge-erreur, #e57373);
 }
 
-.classeur-menu-item--danger:hover {
+.codex-menu-item--danger:hover {
     background: rgba(229, 115, 115, 0.1);
 }
 
-.classeur-menu-icone {
+.codex-menu-icone {
     font-size: 1rem;
     width: 20px;
     text-align: center;
     flex-shrink: 0;
 }
 
-.classeur-menu-contenu {
+.codex-menu-contenu {
     display: flex;
     flex-direction: column;
     gap: 2px;
 }
 
-.classeur-menu-sous-texte {
+.codex-menu-sous-texte {
     font-size: 0.75rem;
     color: var(--texte-secondaire, #8ba4b0);
     font-weight: normal;
 }
 
-.classeur-menu-statut {
+.codex-menu-statut {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -5462,25 +5462,25 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-size: 0.82rem;
 }
 
-.classeur-menu-statut-haut {
+.codex-menu-statut-haut {
     padding: 10px 16px;
     font-size: 0.82rem;
     border-bottom: 1px solid rgba(106, 172, 184, 0.15);
     margin-bottom: 2px;
 }
 
-.classeur-menu-statut-haut .classeur-statut-nom {
+.codex-menu-statut-haut .codex-statut-nom {
     font-weight: 600;
     color: var(--texte-principal, #e0e0e0);
     margin-bottom: 4px;
 }
 
-.classeur-menu-statut-haut .classeur-statut-etat {
+.codex-menu-statut-haut .codex-statut-etat {
     font-size: 0.75rem;
     color: var(--texte-secondaire, #8ba4b0);
 }
 
-.classeur-statut-pastille {
+.codex-statut-pastille {
     display: inline-block;
     width: 8px;
     height: 8px;
@@ -5489,15 +5489,15 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     vertical-align: middle;
 }
 
-.classeur-statut-pastille--vert {
+.codex-statut-pastille--vert {
     background: var(--vert-succes, #4caf50);
 }
 
-.classeur-statut-pastille--orange {
+.codex-statut-pastille--orange {
     background: var(--orange-attention, #e8a838);
 }
 
-.classeur-menu-sep {
+.codex-menu-sep {
     height: 1px;
     background: rgba(106, 172, 184, 0.15);
     margin: 4px 12px;
@@ -5505,7 +5505,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 /* Responsive tablette */
 @media (max-width: 768px) {
-    .classeur-label-btn {
+    .codex-label-btn {
         display: none;
     }
 }
