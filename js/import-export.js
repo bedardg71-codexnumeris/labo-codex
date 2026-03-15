@@ -610,6 +610,13 @@ function previsualiserImport(event) {
         lecteurZip.onload = async function(e) {
             try {
                 const zip = await JSZip.loadAsync(e.target.result);
+
+                // Bloquer les codex : ils doivent passer par le bouton Codex
+                if (zip.file('codex-manifeste.json') || zip.file('classeur-manifeste.json')) {
+                    alert('Ce fichier est un codex (donn\u00e9es portables USB).\n\nPour l\u2019ouvrir, utilise le bouton Codex dans l\u2019en-t\u00eate de l\u2019application, puis \u00ab\u00a0Ouvrir un codex...\u00a0\u00bb.');
+                    return;
+                }
+
                 const jsonEntry = zip.file('donnees.json');
                 if (!jsonEntry) {
                     alert('ZIP invalide : fichier donnees.json manquant.');
