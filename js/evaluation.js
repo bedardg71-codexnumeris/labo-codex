@@ -2496,9 +2496,8 @@ function peuplementOptJetons() {
         }
     }
 
-    // Assembler : grille de prédéfinis + personnalisés en dessous
-    var cols = htmlJetons.length <= 3 ? htmlJetons.length : 3;
-    var html = '<div style="display: grid; grid-template-columns: repeat(' + cols + ', 1fr); gap: 10px;">' +
+    // Assembler : liste verticale de prédéfinis + personnalisés en dessous
+    var html = '<div style="display: flex; flex-direction: column; gap: 8px;">' +
                htmlJetons.join('') +
                '</div>';
 

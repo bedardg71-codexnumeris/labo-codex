@@ -3792,7 +3792,7 @@
             // Splitter 1 : Paramètres | Document
             evalFlex.appendChild(creerSplitter({
                 id: 'eval-splitter-1', storageKey: 'eval-params',
-                side: 'left', minWidth: 160, maxWidth: 400
+                side: 'left', minWidth: 220, maxWidth: 400
             }));
         }
 
