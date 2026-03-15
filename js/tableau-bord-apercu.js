@@ -2386,7 +2386,7 @@ function afficherListeEtudiantsCritiques(etudiants, afficherSommatif) {
                     </div>
                 </div>
                 <button class="btn btn-principal"
-                        onclick="afficherSection('etudiants'); setTimeout(() => { afficherSousSection('profil-etudiant'); chargerProfilEtudiant('${e.da}'); }, 100);"
+                        onclick="afficherSousSection('tableau-bord-profil'); afficherProfilComplet('${e.da}');"
                         class="tb-padding-compact">
                     Voir profil
                 </button>
