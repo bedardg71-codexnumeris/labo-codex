@@ -20916,7 +20916,7 @@ body.mode-clair .annot-toolbar {
 
 /* Colonne Parametres */
 .eval-layout-flex .eval-col-params {
-    flex: 0 0 200px;
+    flex: 0 0 260px;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
