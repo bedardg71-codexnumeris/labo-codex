@@ -1277,6 +1277,22 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                 </div>
                 ` : ''}
 
+                <!-- SECTION: Fichiers travaux (PDF annotés) -->
+                ${analyse.fichiersTravaux.count > 0 ? `
+                <div style="margin-bottom: 20px;">
+                    <h3 style="font-size: 0.9rem; color: var(--btn-annuler); margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+                        <span style="background: var(--alerte-fond-attention); padding: 4px 8px; border-radius: 4px;">Fichiers travaux</span>
+                        <span style="font-size: 0.8rem; color: var(--gris-moyen); font-weight: normal;">PDF importés et annotés</span>
+                    </h3>
+                    <div style="background: var(--alerte-fond-attention); border-radius: 8px; padding: 12px;">
+                        ${genererLigneDonnee('fichiersTravaux', 'Fichiers travaux', analyse.fichiersTravaux.count + ' fichier(s) PDF' + (analyse.fichiersTravaux.nbBlobsZip > 0 ? ' + ' + analyse.fichiersTravaux.nbBlobsZip + ' blob(s) dans le ZIP' : ''))}
+                    </div>
+                    <p style="font-size: 0.75rem; color: var(--btn-annuler); margin: 8px 0 0 12px;">
+                        Indispensable pour consulter les travaux annotés dans la visionneuse
+                    </p>
+                </div>
+                ` : ''}
+
                 ${analyse.totalRessources === 0 && analyse.totalDonnees === 0 && !(analyse.entites?.groupesCours?.count > 0) ? `
                 <div style="background: var(--alerte-fond-attention); border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 20px;">
                     <p style="margin: 0; color: var(--gris-fonce);">Aucune ressource reconnue dans ce fichier.</p>
@@ -1338,6 +1354,8 @@ function analyserRessourcesDetaillees(config) {
             horaires: { count: 0, cles: [] },
             enseignants: { count: 0, present: false }
         },
+        // Fichiers travaux (PDF annotés)
+        fichiersTravaux: { count: 0, cles: [], nbBlobsZip: 0 },
         totalRessources: 0,
         totalDonnees: 0
     };
@@ -1534,6 +1552,28 @@ function analyserRessourcesDetaillees(config) {
             result.entites.enseignants.count = enseignants.length;
             result.entites.enseignants.present = true;
         }
+    }
+
+    // Fichiers travaux (clés: *fichiersTravaux)
+    Object.keys(config).forEach(cle => {
+        if (cle.includes('fichiersTravaux')) {
+            const fichiers = parseValeur(config[cle]);
+            if (Array.isArray(fichiers) && fichiers.length > 0) {
+                result.fichiersTravaux.cles.push(cle);
+                result.fichiersTravaux.count += fichiers.length;
+            }
+        }
+    });
+    // Compter les blobs dans le ZIP si présent
+    if (config._zipTravaux) {
+        try {
+            var travauxFolder = config._zipTravaux.folder('travaux');
+            if (travauxFolder) {
+                var nbBlobs = 0;
+                travauxFolder.forEach(function() { nbBlobs++; });
+                result.fichiersTravaux.nbBlobsZip = nbBlobs;
+            }
+        } catch (e) { /* ignore */ }
     }
 
     // Totaux
@@ -2643,6 +2683,43 @@ async function executerImportSelectif() {
             details.push(`${nbCalendrier} config(s) calendrier`);
         }
 
+        // Fichiers travaux (métadonnées + blobs ZIP)
+        if (isChecked('fichiersTravaux')) {
+            let nbFichiers = 0;
+            for (var cleFT of Object.keys(donnees)) {
+                if (cleFT.includes('fichiersTravaux')) {
+                    var fichiersTravaux = parseValeur(donnees[cleFT]);
+                    if (Array.isArray(fichiersTravaux) && fichiersTravaux.length > 0) {
+                        await db.set(cleFT, fichiersTravaux);
+                        nbFichiers += fichiersTravaux.length;
+                    }
+                }
+            }
+            // Restaurer les blobs depuis le ZIP si disponible
+            // _restaurerBlobsDepuisZip a besoin des clés fichiersTravaux + _zipTravaux
+            var zipTravaux = configCompleteEnAttente ? configCompleteEnAttente._zipTravaux : null;
+            if (zipTravaux && typeof travauxStockage !== 'undefined') {
+                var donneesBlobs = { _zipTravaux: zipTravaux };
+                for (var cleB of Object.keys(donnees)) {
+                    if (cleB.includes('fichiersTravaux')) donneesBlobs[cleB] = parseValeur(donnees[cleB]);
+                }
+                var nbBlobs = await _restaurerBlobsDepuisZip(donneesBlobs);
+                if (nbBlobs > 0) {
+                    details.push(nbFichiers + ' fichier(s) travaux + ' + nbBlobs + ' PDF restauré(s)');
+                } else {
+                    details.push(nbFichiers + ' fichier(s) travaux (métadonnées)');
+                }
+            } else if (nbFichiers > 0) {
+                details.push(nbFichiers + ' fichier(s) travaux (métadonnées, sans blobs)');
+            }
+            if (nbFichiers > 0) compteurs.donnees++;
+        }
+
+        // Synchroniser le cache après tous les imports
+        if (typeof db.syncToLocalStorageCache === 'function') {
+            await db.syncToLocalStorageCache();
+        }
+
         // ✅ CORRIGÉ (6 jan 2026) : Vérifier les checkboxes AVANT de fermer le modal
         // Pour les ressources, vérifier les checkboxes individuelles; pour les données, l'ancienne méthode
         const quelqueChoseCoche =
@@ -2651,7 +2728,8 @@ async function executerImportSelectif() {
             hasCheckedItems('cartouches') ||
             isChecked('etudiants') || isChecked('presences') ||
             isChecked('evaluations') || isChecked('configuration') ||
-            isChecked('groupesCours') || isChecked('horaires') || isChecked('enseignants');
+            isChecked('groupesCours') || isChecked('horaires') || isChecked('enseignants') ||
+            isChecked('fichiersTravaux');
 
         // Fermer le modal
         fermerModalPreviewConfigComplete();
