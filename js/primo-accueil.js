@@ -380,7 +380,7 @@ function naviguerVersImportDemo() {
     // Naviguer vers Import/Export et déclencher import
     setTimeout(() => {
         afficherSection('reglages');
-        afficherSousSection('reglages-import-export');
+        afficherSousSection('reglages-donnees');
     }, 300);
 }
 

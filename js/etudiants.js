@@ -1100,7 +1100,7 @@ function afficherListeEtudiantsConsultation() {
         tr.style.cursor = 'pointer';
         tr.onclick = function () {
             // Afficher le profil ET basculer vers la sous-section Profil
-            afficherSousSection('tableau-bord', 'profil');
+            afficherSousSection('tableau-bord-profil');
             afficherProfilComplet(etudiant.da);
         };
 

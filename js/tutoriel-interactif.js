@@ -74,7 +74,7 @@ const ETAPES_TUTORIEL = [
         cible: '[data-section="evaluations"]',
         action: () => {
             afficherSection('evaluations');
-            afficherSousSection('evaluations-liste-evaluations');
+            afficherSousSection('evaluations-liste');
         },
         position: 'bottom'
     },

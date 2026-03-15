@@ -1315,7 +1315,7 @@
             } else if (type === 'echelle') {
                 // Naviguer vers Construction de la note > Échelles de performance
                 if (typeof afficherSousSection === 'function') {
-                    afficherSousSection('construction-echelles');
+                    afficherSousSection('construction-echelle-performance');
                 }
                 console.log('[donnees-v2] Navigation vers échelle:', id);
             } else if (type === 'production') {
