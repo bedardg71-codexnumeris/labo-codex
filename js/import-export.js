@@ -1277,15 +1277,16 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                 </div>
                 ` : ''}
 
-                <!-- SECTION: Fichiers travaux (PDF annotés) -->
-                ${analyse.fichiersTravaux.count > 0 ? `
+                <!-- SECTION: Fichiers travaux (PDF annotés) + Annotations -->
+                ${analyse.fichiersTravaux.count > 0 || analyse.annotationsTravaux.count > 0 ? `
                 <div style="margin-bottom: 20px;">
                     <h3 style="font-size: 0.9rem; color: var(--btn-annuler); margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
                         <span style="background: var(--alerte-fond-attention); padding: 4px 8px; border-radius: 4px;">Fichiers travaux</span>
                         <span style="font-size: 0.8rem; color: var(--gris-moyen); font-weight: normal;">PDF importés et annotés</span>
                     </h3>
                     <div style="background: var(--alerte-fond-attention); border-radius: 8px; padding: 12px;">
-                        ${genererLigneDonnee('fichiersTravaux', 'Fichiers travaux', analyse.fichiersTravaux.count + ' fichier(s) PDF' + (analyse.fichiersTravaux.nbBlobsZip > 0 ? ' + ' + analyse.fichiersTravaux.nbBlobsZip + ' blob(s) dans le ZIP' : ''))}
+                        ${analyse.fichiersTravaux.count > 0 ? genererLigneDonnee('fichiersTravaux', 'Fichiers travaux', analyse.fichiersTravaux.count + ' fichier(s) PDF' + (analyse.fichiersTravaux.nbBlobsZip > 0 ? ' + ' + analyse.fichiersTravaux.nbBlobsZip + ' blob(s) dans le ZIP' : '')) : ''}
+                        ${analyse.annotationsTravaux.count > 0 ? genererLigneDonnee('annotationsTravaux', 'Annotations', analyse.annotationsTravaux.count + ' annotation(s) sur les travaux') : ''}
                     </div>
                     <p style="font-size: 0.75rem; color: var(--btn-annuler); margin: 8px 0 0 12px;">
                         Indispensable pour consulter les travaux annotés dans la visionneuse
@@ -1356,6 +1357,8 @@ function analyserRessourcesDetaillees(config) {
         },
         // Fichiers travaux (PDF annotés)
         fichiersTravaux: { count: 0, cles: [], nbBlobsZip: 0 },
+        // Annotations sur les travaux
+        annotationsTravaux: { count: 0, cles: [] },
         totalRessources: 0,
         totalDonnees: 0
     };
@@ -1564,6 +1567,17 @@ function analyserRessourcesDetaillees(config) {
             }
         }
     });
+    // Annotations travaux (clés: *annotationsTravaux)
+    Object.keys(config).forEach(cle => {
+        if (cle.includes('annotationsTravaux')) {
+            var annotations = parseValeur(config[cle]);
+            if (Array.isArray(annotations) && annotations.length > 0) {
+                result.annotationsTravaux.cles.push(cle);
+                result.annotationsTravaux.count += annotations.length;
+            }
+        }
+    });
+
     // Compter les blobs dans le ZIP si présent
     if (config._zipTravaux) {
         try {
@@ -2715,6 +2729,24 @@ async function executerImportSelectif() {
             if (nbFichiers > 0) compteurs.donnees++;
         }
 
+        // Annotations travaux
+        if (isChecked('annotationsTravaux')) {
+            var nbAnnotations = 0;
+            for (var cleAT of Object.keys(donnees)) {
+                if (cleAT.includes('annotationsTravaux')) {
+                    var annotations = parseValeur(donnees[cleAT]);
+                    if (Array.isArray(annotations) && annotations.length > 0) {
+                        await db.set(cleAT, annotations);
+                        nbAnnotations += annotations.length;
+                    }
+                }
+            }
+            if (nbAnnotations > 0) {
+                details.push(nbAnnotations + ' annotation(s) sur les travaux');
+                compteurs.donnees++;
+            }
+        }
+
         // Synchroniser le cache après tous les imports
         if (typeof db.syncToLocalStorageCache === 'function') {
             await db.syncToLocalStorageCache();
@@ -2729,7 +2761,7 @@ async function executerImportSelectif() {
             isChecked('etudiants') || isChecked('presences') ||
             isChecked('evaluations') || isChecked('configuration') ||
             isChecked('groupesCours') || isChecked('horaires') || isChecked('enseignants') ||
-            isChecked('fichiersTravaux');
+            isChecked('fichiersTravaux') || isChecked('annotationsTravaux');
 
         // Fermer le modal
         fermerModalPreviewConfigComplete();
