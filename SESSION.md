@@ -2,28 +2,28 @@
 
 **Date** : 14 mars 2026
 **Version** : Beta 98.6
-**Statut** : Classeur Phases 1-4 COMPLÉTÉES — À tester sur Chrome Mac
+**Statut** : Codex Phases 1-4 COMPLÉTÉES — À tester sur Chrome Mac
 
-## PHASES 1-4 COMPLÉTÉES — Classeur (#225-#228)
+## PHASES 1-4 COMPLÉTÉES — Codex (#225-#228)
 
-**Module** : `js/classeur.js` (~2886 lignes)
-**Plan détaillé** : `docs/plan-classeur.md`
+**Module** : `js/codex.js` (~2886 lignes)
+**Plan détaillé** : `docs/plan-codex.md`
 
 ### Phase 4 livrée (14 mars 2026) — #228 Auto-save FSAPI :
 - **4.1** Handle FSAPI persistant — `_fileHandle` conservé après sauvegarde/ouverture (Chrome/Edge)
-- **4.2** Auto-save silencieux toutes les 5 min via handle (`genererClasseur({silencieux: true})`)
+- **4.2** Auto-save silencieux toutes les 5 min via handle (`genererCodex({silencieux: true})`)
 - **4.3** Indicateur menu : sous-texte "Vers le même emplacement" + ligne statut auto-save
 
 ### Comportement par navigateur :
 - **Chrome/Edge** : handle FSAPI → Enregistrer sans dialogue → auto-save 5 min
 - **Safari Mac/iPad** : fallback download/share inchangé, pas d'auto-save
 
-### Menu classeur (en-tête) — boutons :
+### Menu codex (en-tête) — boutons :
 Ouvrir | Enregistrer (+ sous-texte FSAPI) | Enregistrer sous | Nouveau | Détails | Historique | Comparer | Fusionner | Exporter sélection | Fermer | *(statut auto-save)*
 
 ## À TESTER — Prochaine session
 
-1. **Chrome Mac** : Ouvrir classeur → Enregistrer (dialogue FSAPI) → Enregistrer à nouveau (SANS dialogue) → attendre 5 min → vérifier auto-save silencieux
+1. **Chrome Mac** : Ouvrir codex → Enregistrer (dialogue FSAPI) → Enregistrer à nouveau (SANS dialogue) → attendre 5 min → vérifier auto-save silencieux
 2. **Chrome Mac** : Retirer clé USB pendant auto-save → vérifier arrêt propre + message console
 3. **Safari Mac** : Vérifier aucune erreur JS, fallback download fonctionne
 4. **Menu** : Vérifier sous-texte "Vers le même emplacement" et ligne auto-save
@@ -33,51 +33,51 @@ Ouvrir | Enregistrer (+ sous-texte FSAPI) | Enregistrer sous | Nouveau | Détail
 Consulter `BACKLOG.md` pour les priorités :
 - **#230** UX docs
 - **#214-#219** Retours testeur (3 mars 2026)
-- Test manuel des Phases 3-4 du Classeur sur Mac + iPad
+- Test manuel des Phases 3-4 du Codex sur Mac + iPad
 
-**IMPORTANT** : Lire `docs/plan-classeur.md` et `BACKLOG.md` en début de session.
+**IMPORTANT** : Lire `docs/plan-codex.md` et `BACKLOG.md` en début de session.
 
 ## SESSION DU 14 MARS 2026
 
-### Travail accompli — #229 Overlay de progression normalisé + #231 Auteur classeur (14 mars 2026)
+### Travail accompli — #229 Overlay de progression normalisé + #231 Auteur codex (14 mars 2026)
 
-202. **UX documentation du Classeur (#230)** : (A) Tooltip `entete-classeur` défini dans `tooltips-contenu.js` — explique le concept clé USB et les pastilles vert/orange. (B) Bandeau de statut en haut du menu déroulant — affiche le nom du classeur + état (pastille vert/orange) ou message de guidage si aucun classeur actif. (C) Événement `beforeunload` dans `initialiserClasseur()` — rappel navigateur si modifications non enregistrées. (D) Messages d'états vides améliorés — `actionDetails`, `actionRestaurer`, `actionComparer`, `actionFusionner` guident vers les actions possibles. (E) MODULE 6 « Utiliser le Classeur » dans le tour guidé Primo — explication du flux Mac → USB → iPad + ouverture du menu. **Fichiers** : `js/tooltips-contenu.js`, `js/classeur.js`, `js/primo-accueil.js`, `index.html`, `styles.css`.
+202. **UX documentation du Codex (#230)** : (A) Tooltip `entete-codex` défini dans `tooltips-contenu.js` — explique le concept clé USB et les pastilles vert/orange. (B) Bandeau de statut en haut du menu déroulant — affiche le nom du codex + état (pastille vert/orange) ou message de guidage si aucun codex actif. (C) Événement `beforeunload` dans `initialiserCodex()` — rappel navigateur si modifications non enregistrées. (D) Messages d'états vides améliorés — `actionDetails`, `actionRestaurer`, `actionComparer`, `actionFusionner` guident vers les actions possibles. (E) MODULE 6 « Utiliser le Codex » dans le tour guidé Primo — explication du flux Mac → USB → iPad + ouverture du menu. **Fichiers** : `js/tooltips-contenu.js`, `js/codex.js`, `js/primo-accueil.js`, `index.html`, `styles.css`.
 
-200. **Overlay de progression normalisé (#229)** : Extraction de l'overlay plein écran du classeur en utilitaire global réutilisable. Nouveau fichier `js/progression.js` (70 lignes) avec 3 fonctions `window.afficherProgression(titre)`, `window.majProgression(pct, detail, stats)`, `window.masquerProgression()`. Styles inline remplacés par classes CSS `.progression-*` dans `styles.css`. `classeur.js` allégé de ~50 lignes, délègue aux globales via alias. **Fichiers** : `js/progression.js` (nouveau), `styles.css`, `js/classeur.js`, `index.html`.
+200. **Overlay de progression normalisé (#229)** : Extraction de l'overlay plein écran du codex en utilitaire global réutilisable. Nouveau fichier `js/progression.js` (70 lignes) avec 3 fonctions `window.afficherProgression(titre)`, `window.majProgression(pct, detail, stats)`, `window.masquerProgression()`. Styles inline remplacés par classes CSS `.progression-*` dans `styles.css`. `codex.js` allégé de ~50 lignes, délègue aux globales via alias. **Fichiers** : `js/progression.js` (nouveau), `styles.css`, `js/codex.js`, `index.html`.
 
-201. **Auteur classeur depuis profil enseignant (#231)** : Nouvelle fonction `_obtenirAuteur()` dans `classeur.js` avec cascade : `profilEnseignant` (prenom+nom) → `infoCours.enseignant` (string, fallback legacy) → chaîne vide. Remplace la lecture directe `infoCours.enseignant` qui était toujours vide. L'export sélectif hérite automatiquement via le manifeste. **Fichier** : `js/classeur.js`.
+201. **Auteur codex depuis profil enseignant (#231)** : Nouvelle fonction `_obtenirAuteur()` dans `codex.js` avec cascade : `profilEnseignant` (prenom+nom) → `infoCours.enseignant` (string, fallback legacy) → chaîne vide. Remplace la lecture directe `infoCours.enseignant` qui était toujours vide. L'export sélectif hérite automatiquement via le manifeste. **Fichier** : `js/codex.js`.
 
-### Travail accompli — Classeur Phase 4 : Auto-save FSAPI (#228) (14 mars 2026)
+### Travail accompli — Codex Phase 4 : Auto-save FSAPI (#228) (14 mars 2026)
 
-197. **Handle FSAPI persistant (4.1)** : Variable `_fileHandle` conserve le `FileSystemFileHandle` obtenu via `showSaveFilePicker` ou `showOpenFilePicker`. `actionEnregistrer()` ré-écrit directement sans dialogue si handle disponible. `actionEnregistrerSous()` force le dialogue via `{forcerDialogue: true}`. `actionOuvrir()` utilise `showOpenFilePicker` (Chrome/Edge) pour obtenir un handle dès l'ouverture. Helper `_ecrireViaHandle()` factorisé. Handle nettoyé dans `fermerClasseur()` et quand le handle échoue (clé USB retirée). **Fichier** : `js/classeur.js`.
+197. **Handle FSAPI persistant (4.1)** : Variable `_fileHandle` conserve le `FileSystemFileHandle` obtenu via `showSaveFilePicker` ou `showOpenFilePicker`. `actionEnregistrer()` ré-écrit directement sans dialogue si handle disponible. `actionEnregistrerSous()` force le dialogue via `{forcerDialogue: true}`. `actionOuvrir()` utilise `showOpenFilePicker` (Chrome/Edge) pour obtenir un handle dès l'ouverture. Helper `_ecrireViaHandle()` factorisé. Handle nettoyé dans `fermerCodex()` et quand le handle échoue (clé USB retirée). **Fichier** : `js/codex.js`.
 
-198. **Auto-save silencieux (4.2)** : Timer `setInterval` de 5 min déclenché quand un handle FSAPI est obtenu. Gardes : handle? actif? modifs non sauvegardées? pas déjà en cours? `genererClasseur({silencieux: true})` désactive l'overlay de progression et la pause 500ms. Si handle invalide → arrêt propre de l'auto-save. Notification discrète via `afficherNotificationSucces`. **Fichier** : `js/classeur.js`.
+198. **Auto-save silencieux (4.2)** : Timer `setInterval` de 5 min déclenché quand un handle FSAPI est obtenu. Gardes : handle? actif? modifs non sauvegardées? pas déjà en cours? `genererCodex({silencieux: true})` désactive l'overlay de progression et la pause 500ms. Si handle invalide → arrêt propre de l'auto-save. Notification discrète via `afficherNotificationSucces`. **Fichier** : `js/codex.js`.
 
-199. **Indicateur menu (4.3)** : Sous-texte "Vers le même emplacement" sous "Enregistrer" quand handle FSAPI connecté. Ligne de statut "Auto-save actif — Toutes les 5 min — dernier : HHhMM" dans le menu déroulant. Tooltip du bouton Classeur enrichi (nom + auto-save + modifs). CSS : `.classeur-menu-contenu`, `.classeur-menu-sous-texte`, `.classeur-menu-statut`. **Fichiers** : `js/classeur.js`, `index.html`, `styles.css`.
+199. **Indicateur menu (4.3)** : Sous-texte "Vers le même emplacement" sous "Enregistrer" quand handle FSAPI connecté. Ligne de statut "Auto-save actif — Toutes les 5 min — dernier : HHhMM" dans le menu déroulant. Tooltip du bouton Codex enrichi (nom + auto-save + modifs). CSS : `.codex-menu-contenu`, `.codex-menu-sous-texte`, `.codex-menu-statut`. **Fichiers** : `js/codex.js`, `index.html`, `styles.css`.
 
-### Travail accompli — Classeur Phase 3 : Fusion, étapes 3.1-3.3 (14 mars 2026)
+### Travail accompli — Codex Phase 3 : Fusion, étapes 3.1-3.3 (14 mars 2026)
 
-191. **Lecture classeur externe (3.1)** : `lireClasseurExterne(fichierZip)` lit un ZIP en mémoire SANS écrire dans IndexedDB. Retourne `{manifeste, donnees, travauxListe, _zip}`. API publique : `Classeur.lireExterne()`. Base pour toute opération de comparaison/fusion. **Fichier** : `js/classeur.js`.
+191. **Lecture codex externe (3.1)** : `lireCodexExterne(fichierZip)` lit un ZIP en mémoire SANS écrire dans IndexedDB. Retourne `{manifeste, donnees, travauxListe, _zip}`. API publique : `Codex.lireExterne()`. Base pour toute opération de comparaison/fusion. **Fichier** : `js/codex.js`.
 
-192. **Analyse de fusion diff 3 parties (3.2)** : `_analyserFusion(local, externe, ancetre)` — avec ancêtre commun, détecte les vrais conflits (modifié/supprimé des deux côtés). Sans ancêtre, mode dégradé (toute différence = conflit). 8 catégories : ajouteesLocal/Externe, modifieesLocal/Externe, supprimeesLocal/Externe, conflits, identiques. Helpers : `_analyserFusionTravaux()` (diff blobs par chemin), `_formaterAnalyseFusion()` (résumé lisible). **Fichier** : `js/classeur.js`.
+192. **Analyse de fusion diff 3 parties (3.2)** : `_analyserFusion(local, externe, ancetre)` — avec ancêtre commun, détecte les vrais conflits (modifié/supprimé des deux côtés). Sans ancêtre, mode dégradé (toute différence = conflit). 8 catégories : ajouteesLocal/Externe, modifieesLocal/Externe, supprimeesLocal/Externe, conflits, identiques. Helpers : `_analyserFusionTravaux()` (diff blobs par chemin), `_formaterAnalyseFusion()` (résumé lisible). **Fichier** : `js/codex.js`.
 
-193. **Résolution interactive des conflits (3.3)** : `_resoudreConflits(analyse, donneesLocales, donneesExternes, analyseTravaux)` — auto-résolution des cas non-conflictuels + 4 stratégies pour conflits (tout local, tout externe, un par un, annuler). Helper `_resumerValeur()` pour résumé lisible des valeurs. Retourne `{resolutions, importerTravaux, annule}`. **Fichier** : `js/classeur.js`.
+193. **Résolution interactive des conflits (3.3)** : `_resoudreConflits(analyse, donneesLocales, donneesExternes, analyseTravaux)` — auto-résolution des cas non-conflictuels + 4 stratégies pour conflits (tout local, tout externe, un par un, annuler). Helper `_resumerValeur()` pour résumé lisible des valeurs. Retourne `{resolutions, importerTravaux, annule}`. **Fichier** : `js/codex.js`.
 
-194. **Fusion des blobs travaux (3.4)** : `_fusionnerTravaux(zipExterne, donneesExternes, cheminsAImporter, onProgression)` — extrait et stocke les blobs manquants via `travauxStockage.stockerBlob()`, fusionne la liste `fichiersTravaux` locale sans doublon. Retourne `{importes, ignores, erreurs}`. **Fichier** : `js/classeur.js`.
+194. **Fusion des blobs travaux (3.4)** : `_fusionnerTravaux(zipExterne, donneesExternes, cheminsAImporter, onProgression)` — extrait et stocke les blobs manquants via `travauxStockage.stockerBlob()`, fusionne la liste `fichiersTravaux` locale sans doublon. Retourne `{importes, ignores, erreurs}`. **Fichier** : `js/codex.js`.
 
-195. **Action menu Fusionner (3.5)** : `actionFusionner()` — flux complet en 12 étapes : file picker → lecture externe → collecte IDB → ancêtre commun → analyse diff → résolution conflits → application IDB → sync cache → import blobs → résumé. Bouton "Fusionner avec un classeur..." dans le menu en-tête (visible si classeur actif). **Fichiers** : `js/classeur.js`, `index.html`.
+195. **Action menu Fusionner (3.5)** : `actionFusionner()` — flux complet en 12 étapes : file picker → lecture externe → collecte IDB → ancêtre commun → analyse diff → résolution conflits → application IDB → sync cache → import blobs → résumé. Bouton "Fusionner avec un codex..." dans le menu en-tête (visible si codex actif). **Fichiers** : `js/codex.js`, `index.html`.
 
-196. **Export sélectif par trimestre (3.6)** : `actionExporterSelection()` — détecte les trimestres disponibles, propose un choix (numéros ou "tous"), filtre les données + blobs associés, génère un ZIP partiel (sans TimeMachine). Helpers : `_detecterTrimestresDisponibles()`, `_filtrerDonneesPourExport()`, `_filtrerTravauxPourExport()`, `_formaterNomTrimestre()`. Manifeste marqué `exportSelectif: true`. Bouton "Exporter une sélection..." toujours visible dans le menu. **Fichiers** : `js/classeur.js`, `index.html`.
+196. **Export sélectif par trimestre (3.6)** : `actionExporterSelection()` — détecte les trimestres disponibles, propose un choix (numéros ou "tous"), filtre les données + blobs associés, génère un ZIP partiel (sans TimeMachine). Helpers : `_detecterTrimestresDisponibles()`, `_filtrerDonneesPourExport()`, `_filtrerTravauxPourExport()`, `_formaterNomTrimestre()`. Manifeste marqué `exportSelectif: true`. Bouton "Exporter une sélection..." toujours visible dans le menu. **Fichiers** : `js/codex.js`, `index.html`.
 
-### Travail accompli — Classeur TimeMachine Phase 2 (14 mars 2026)
+### Travail accompli — Codex TimeMachine Phase 2 (14 mars 2026)
 
-187. **TimeMachine infrastructure** : Ajout des constantes (`DOSSIER_HISTORIQUE`, `MAX_SNAPSHOTS=10`, `MAX_JOURS_HISTORIQUE=30`), cles IDB (`_classeur_hist_index`, `_classeur_snapshot_avant`, `_classeur_hist_*`), et 4 helpers : `_purgerHistorique()` (rotation), `_ecrireHistoriqueDansZip()` (IDB→ZIP), `_chargerHistoriqueDepuisZip()` (ZIP→IDB), `_nettoyerHistoriqueIDB()` (nettoyage). Aucun flux existant modifie. Commit `9eedefa`.
+187. **TimeMachine infrastructure** : Ajout des constantes (`DOSSIER_HISTORIQUE`, `MAX_SNAPSHOTS=10`, `MAX_JOURS_HISTORIQUE=30`), cles IDB (`_codex_hist_index`, `_codex_snapshot_avant`, `_codex_hist_*`), et 4 helpers : `_purgerHistorique()` (rotation), `_ecrireHistoriqueDansZip()` (IDB→ZIP), `_chargerHistoriqueDepuisZip()` (ZIP→IDB), `_nettoyerHistoriqueIDB()` (nettoyage). Aucun flux existant modifie. Commit `9eedefa`.
 
-188. **TimeMachine branchement** : `genererClasseur()` archive le snapshot precedent dans `historique/`, applique la rotation, ecrit tous les snapshots dans le ZIP, et enrichit le manifeste avec `historique[]`. `chargerClasseur()` capture `donnees.json` comme snapshot de reference et charge l'historique existant du ZIP vers IDB. `fermerClasseur()` nettoie l'historique IDB. Commit `20442df`.
+188. **TimeMachine branchement** : `genererCodex()` archive le snapshot precedent dans `historique/`, applique la rotation, ecrit tous les snapshots dans le ZIP, et enrichit le manifeste avec `historique[]`. `chargerCodex()` capture `donnees.json` comme snapshot de reference et charge l'historique existant du ZIP vers IDB. `fermerCodex()` nettoie l'historique IDB. Commit `20442df`.
 
-189. **TimeMachine restauration** : `actionRestaurer()` affiche un prompt() avec liste numerotee des snapshots (date, appareil, taille), confirm() de securite, archive automatiquement les donnees actuelles avant ecrasement, restaure le snapshot choisi dans IDB, sync cache localStorage, et propose le rechargement. Bouton "Historique des versions..." dans le menu en-tete (visible si classeur actif). **Fichiers** : `js/classeur.js`, `index.html`. Commit `bf11f3e`.
+189. **TimeMachine restauration** : `actionRestaurer()` affiche un prompt() avec liste numerotee des snapshots (date, appareil, taille), confirm() de securite, archive automatiquement les donnees actuelles avant ecrasement, restaure le snapshot choisi dans IDB, sync cache localStorage, et propose le rechargement. Bouton "Historique des versions..." dans le menu en-tete (visible si codex actif). **Fichiers** : `js/codex.js`, `index.html`. Commit `bf11f3e`.
 
-190. **TimeMachine comparaison visuelle** : `actionComparer()` permet de comparer les donnees actuelles avec un snapshot historique. Diff par cle via JSON.stringify : cles ajoutees, supprimees, modifiees. Affichage regroupe par prefixe (ex: `h2026_* (12 cles)`) pour lisibilite. Helpers : `_comparerDonnees()`, `_formaterDiff()`, `_grouperParPrefixe()`. Bouton "Comparer avec une version..." dans le menu en-tete. **Fichiers** : `js/classeur.js`, `index.html`.
+190. **TimeMachine comparaison visuelle** : `actionComparer()` permet de comparer les donnees actuelles avec un snapshot historique. Diff par cle via JSON.stringify : cles ajoutees, supprimees, modifiees. Affichage regroupe par prefixe (ex: `h2026_* (12 cles)`) pour lisibilite. Helpers : `_comparerDonnees()`, `_formaterDiff()`, `_grouperParPrefixe()`. Bouton "Comparer avec une version..." dans le menu en-tete. **Fichiers** : `js/codex.js`, `index.html`.
 
 ---
 

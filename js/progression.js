@@ -17,7 +17,7 @@ var _overlay = null;
 
 /**
  * Affiche un overlay de progression plein ecran.
- * @param {string} titre - Ex: "Generation du classeur", "Export backup"
+ * @param {string} titre - Ex: "Generation du codex", "Export backup"
  */
 window.afficherProgression = function(titre) {
     window.masquerProgression();
