@@ -28,7 +28,8 @@ function obtenirConfigJetons() {
     const jetonsDefaut = {
         actif: true,
         delai: { nombre: 2, dureeJours: 2 },  // 🆕 Beta 95.7 : défaut 2 jours
-        reprise: { nombre: 2, maxParProduction: 1, archiverOriginale: true }
+        reprise: { nombre: 2, maxParProduction: 1, archiverOriginale: true },
+        repriseCiblee: { actif: true, nombre: 2, plafondNote: null }
     };
 
     // Priorité: configPAN.jetons (format canonique), puis fallback vers configurationJetons (format v2 plat)
@@ -513,8 +514,8 @@ function obtenirTousTypesJetons() {
         predefini: true
     });
 
-    // Jeton de reprise ciblée (si activé)
-    if (config.repriseCiblee?.actif) {
+    // Jeton de reprise ciblée (si activé — actif par défaut si l'objet existe)
+    if (config.repriseCiblee && config.repriseCiblee.actif !== false) {
         typesJetons.push({
             id: 'repriseCiblee',
             nom: 'Jeton de reprise ciblée',
