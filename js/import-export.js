@@ -992,10 +992,16 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
     const cles = Object.keys(config);
     const nbCles = cles.length;
 
-    // Calculer la taille approximative
+    // Calculer la taille approximative (exclure _zipTravaux qui est un objet JSZip)
     let tailleTotale = 0;
-    Object.values(config).forEach(v => {
-        tailleTotale += (typeof v === 'string' ? v.length : JSON.stringify(v).length) * 2;
+    Object.entries(config).forEach(function(pair) {
+        if (pair[0] === '_zipTravaux' || pair[0] === '_format') return;
+        var v = pair[1];
+        try {
+            tailleTotale += (typeof v === 'string' ? v.length : JSON.stringify(v).length) * 2;
+        } catch (e) {
+            // Valeur non sérialisable — ignorer
+        }
     });
     const tailleKo = (tailleTotale / 1024).toFixed(1);
 
@@ -1476,9 +1482,10 @@ function analyserRessourcesDetaillees(config) {
         }
     });
 
-    // Évaluations/Notes (clés: evaluations, notesEtudiants, *_evaluations, *_notesEtudiants)
+    // Évaluations/Notes (clés: evaluations, evaluationsSauvegardees, notesEtudiants + namespacées)
     Object.keys(config).forEach(cle => {
         if (cle === 'evaluations' || cle.endsWith('_evaluations') ||
+            cle === 'evaluationsSauvegardees' || cle.endsWith('_evaluationsSauvegardees') ||
             cle === 'notesEtudiants' || cle.endsWith('_notesEtudiants')) {
             const data = parseValeur(config[cle]);
             if (data && (Array.isArray(data) ? data.length > 0 : Object.keys(data).length > 0)) {
@@ -2505,15 +2512,15 @@ async function executerImportSelectif() {
         // Étudiants
         if (isChecked('etudiants') && !bloquerDonneesPerso) {
             let nbEtudiants = 0;
-            Object.keys(donnees).forEach(cle => {
-                if (cle === 'groupeEtudiants' || cle.endsWith('_groupeEtudiants')) {
-                    const etudiants = parseValeur(donnees[cle]);
+            for (var cleEtu of Object.keys(donnees)) {
+                if (cleEtu === 'groupeEtudiants' || cleEtu.endsWith('_groupeEtudiants')) {
+                    var etudiants = parseValeur(donnees[cleEtu]);
                     if (Array.isArray(etudiants)) {
-                        db.setSync(cle, etudiants);
+                        await db.set(cleEtu, etudiants);
                         nbEtudiants += etudiants.length;
                     }
                 }
-            });
+            }
             if (nbEtudiants > 0) {
                 compteurs.donnees++;
                 details.push(`${nbEtudiants} étudiant(s)`);
@@ -2523,15 +2530,15 @@ async function executerImportSelectif() {
         // Présences
         if (isChecked('presences') && !bloquerDonneesPerso) {
             let nbDates = 0;
-            Object.keys(donnees).forEach(cle => {
-                if (cle === 'presences' || cle.endsWith('_presences')) {
-                    const presences = parseValeur(donnees[cle]);
+            for (var clePres of Object.keys(donnees)) {
+                if (clePres === 'presences' || clePres.endsWith('_presences')) {
+                    var presences = parseValeur(donnees[clePres]);
                     if (presences && typeof presences === 'object') {
-                        db.setSync(cle, presences);
+                        await db.set(clePres, presences);
                         nbDates += Object.keys(presences).length;
                     }
                 }
-            });
+            }
             if (nbDates > 0) {
                 compteurs.donnees++;
                 details.push(`${nbDates} date(s) de présences`);
@@ -2540,26 +2547,31 @@ async function executerImportSelectif() {
 
         // Évaluations
         if (isChecked('evaluations') && !bloquerDonneesPerso) {
-            Object.keys(donnees).forEach(cle => {
-                if (cle === 'evaluations' || cle.endsWith('_evaluations') ||
-                    cle === 'notesEtudiants' || cle.endsWith('_notesEtudiants')) {
-                    const data = parseValeur(donnees[cle]);
+            let nbEvals = 0;
+            for (var cleEval of Object.keys(donnees)) {
+                if (cleEval === 'evaluations' || cleEval.endsWith('_evaluations') ||
+                    cleEval === 'evaluationsSauvegardees' || cleEval.endsWith('_evaluationsSauvegardees') ||
+                    cleEval === 'notesEtudiants' || cleEval.endsWith('_notesEtudiants')) {
+                    var data = parseValeur(donnees[cleEval]);
                     if (data) {
-                        db.setSync(cle, data);
+                        await db.set(cleEval, data);
+                        nbEvals += Array.isArray(data) ? data.length : 1;
                     }
                 }
-            });
-            compteurs.donnees++;
-            details.push('Évaluations/Notes');
+            }
+            if (nbEvals > 0) {
+                compteurs.donnees++;
+                details.push('Évaluations/Notes');
+            }
         }
 
         // Configuration
         if (isChecked('configuration')) {
-            ['modalitesEvaluation', 'infoCours', 'listeCours', 'trimestres'].forEach(cle => {
-                if (donnees[cle]) {
-                    db.setSync(cle, parseValeur(donnees[cle]));
+            for (var cleConf of ['modalitesEvaluation', 'infoCours', 'listeCours', 'trimestres']) {
+                if (donnees[cleConf]) {
+                    await db.set(cleConf, parseValeur(donnees[cleConf]));
                 }
-            });
+            }
             compteurs.donnees++;
             details.push('Configuration du cours');
         }
@@ -2569,15 +2581,15 @@ async function executerImportSelectif() {
         // Groupe-cours (clés: *_groupesCours)
         if (isChecked('groupesCours')) {
             let nbGC = 0;
-            Object.keys(donnees).forEach(cle => {
-                if (cle.endsWith('_groupesCours')) {
-                    const groupesCours = parseValeur(donnees[cle]);
+            for (var cleGC of Object.keys(donnees)) {
+                if (cleGC.endsWith('_groupesCours')) {
+                    var groupesCours = parseValeur(donnees[cleGC]);
                     if (Array.isArray(groupesCours) && groupesCours.length > 0) {
-                        db.setSync(cle, groupesCours);
+                        await db.set(cleGC, groupesCours);
                         nbGC += groupesCours.length;
                     }
                 }
-            });
+            }
             if (nbGC > 0) {
                 compteurs.donnees++;
                 details.push(`${nbGC} groupe-cours`);
@@ -2587,15 +2599,15 @@ async function executerImportSelectif() {
         // Horaires (clés: *_horaires)
         if (isChecked('horaires')) {
             let nbHoraires = 0;
-            Object.keys(donnees).forEach(cle => {
-                if (cle.endsWith('_horaires')) {
-                    const horaires = parseValeur(donnees[cle]);
+            for (var cleHor of Object.keys(donnees)) {
+                if (cleHor.endsWith('_horaires')) {
+                    var horaires = parseValeur(donnees[cleHor]);
                     if (Array.isArray(horaires) && horaires.length > 0) {
-                        db.setSync(cle, horaires);
+                        await db.set(cleHor, horaires);
                         nbHoraires += horaires.length;
                     }
                 }
-            });
+            }
             if (nbHoraires > 0) {
                 compteurs.donnees++;
                 details.push(`${nbHoraires} horaire(s)`);
@@ -2605,9 +2617,9 @@ async function executerImportSelectif() {
         // Enseignants (clé globale)
         if (isChecked('enseignants')) {
             if (donnees.enseignants) {
-                const enseignants = parseValeur(donnees.enseignants);
+                var enseignants = parseValeur(donnees.enseignants);
                 if (Array.isArray(enseignants) && enseignants.length > 0) {
-                    db.setSync('enseignants', enseignants);
+                    await db.set('enseignants', enseignants);
                     compteurs.donnees++;
                     details.push(`${enseignants.length} enseignant(s)`);
                 }
@@ -2616,18 +2628,17 @@ async function executerImportSelectif() {
 
         // 🆕 FIX (31 jan 2026) : Importer les données calendrier (cadreCalendrier, calendrierComplet, etc.)
         // Ces clés sont namespacées et essentielles pour le fonctionnement du trimestre
-        const clesCalendrier = ['cadreCalendrier', 'calendrierComplet', 'evenementsPrevus', 'evenementsImprevus', 'seancesCompletes', 'horaireHebdo'];
+        var clesCalendrier = ['cadreCalendrier', 'calendrierComplet', 'evenementsPrevus', 'evenementsImprevus', 'seancesCompletes', 'horaireHebdo'];
         let nbCalendrier = 0;
-        Object.keys(donnees).forEach(cle => {
-            // Importer les clés globales et namespacées
-            if (clesCalendrier.includes(cle) || clesCalendrier.some(c => cle.endsWith('_' + c))) {
-                const data = parseValeur(donnees[cle]);
-                if (data && (Array.isArray(data) ? data.length > 0 : Object.keys(data).length > 0)) {
-                    db.setSync(cle, data);
+        for (var cleCal of Object.keys(donnees)) {
+            if (clesCalendrier.includes(cleCal) || clesCalendrier.some(function(c) { return cleCal.endsWith('_' + c); })) {
+                var dataCal = parseValeur(donnees[cleCal]);
+                if (dataCal && (Array.isArray(dataCal) ? dataCal.length > 0 : Object.keys(dataCal).length > 0)) {
+                    await db.set(cleCal, dataCal);
                     nbCalendrier++;
                 }
             }
-        });
+        }
         if (nbCalendrier > 0) {
             details.push(`${nbCalendrier} config(s) calendrier`);
         }

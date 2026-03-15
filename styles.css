@@ -5342,7 +5342,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 12px;
+    padding: 6px 14px;
     border: 2px solid rgba(106, 172, 184, 0.25);
     border-radius: var(--radius-moyen);
     background: rgba(106, 172, 184, 0.12);
@@ -5354,7 +5354,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     backdrop-filter: blur(5px);
     white-space: nowrap;
     position: relative;
-    min-height: 44px;
+    min-height: 36px;
     min-width: 44px;
 }
 
@@ -5369,18 +5369,11 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     box-shadow: 0 0 0 3px rgba(106, 172, 184, 0.1);
 }
 
-.codex-icone-btn {
-    font-size: 1rem;
-}
-
 .codex-indicateur {
-    width: 9px;
-    height: 9px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    border: 2px solid rgba(10, 24, 32, 0.8);
+    flex-shrink: 0;
 }
 
 .codex-indicateur--modifie {
@@ -5473,6 +5466,10 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-weight: 600;
     color: var(--texte-principal, #e0e0e0);
     margin-bottom: 4px;
+    cursor: pointer;
+}
+.codex-menu-statut-haut .codex-statut-nom:hover {
+    text-decoration: underline;
 }
 
 .codex-menu-statut-haut .codex-statut-etat {
