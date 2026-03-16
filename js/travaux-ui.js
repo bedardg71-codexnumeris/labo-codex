@@ -4958,6 +4958,7 @@
                     ${previewSrc ? `<img src="${previewSrc}" alt="Preview page ${editionPageSelectionnee + 1}">` : '<p class="texte-muted">Aucune page</p>'}
                     <div class="editeur-pages-boutons">
                         <button class="btn btn-secondaire" onclick="travauxUI.ajouterPagesEditeur()">+ Ajouter des pages</button>
+                        <button class="btn btn-secondaire" onclick="travauxUI.ouvrirModalFusionEditeur()">Fusionner</button>
                         <button class="btn btn-principal" onclick="travauxUI.sauvegarderEdition()">Sauvegarder</button>
                     </div>
                 </div>
@@ -5187,6 +5188,255 @@
         editionModeFusion = false;
         editionFichiersASupprimer = [];
         afficherImport();
+    }
+
+    /* ===============================
+       FUSION DEPUIS L'EDITEUR DE PAGES
+       =============================== */
+
+    /**
+     * Ouvre la modale de selection de documents internes a fusionner
+     * dans l'editeur de pages courant.
+     */
+    function ouvrirModalFusionEditeur() {
+        if (!editionFichierId) return;
+
+        // Obtenir tous les fichiers du groupe actif
+        var tousFichiers = travauxStockage.obtenirFichiersGroupeActif();
+
+        // Exclure le fichier en cours d'edition et ceux deja marques pour suppression
+        var exclus = new Set([editionFichierId].concat(editionFichiersASupprimer));
+        var fichiersDispo = tousFichiers.filter(function(f) {
+            if (exclus.has(f.id)) return false;
+            // Exclure les types non supportes
+            var estPDF = f.typeMIME === 'application/pdf';
+            var estImage = f.typeMIME && f.typeMIME.startsWith('image/');
+            if (!estPDF && !estImage) return false;
+            // Exclure les fichiers evalues
+            var evaluation = travauxResolution.trouverEvaluationPourFichier(f);
+            if (evaluation) return false;
+            return true;
+        });
+
+        if (fichiersDispo.length === 0) {
+            alert('Aucun document disponible pour la fusion.\n(Les documents évalués sont exclus.)');
+            return;
+        }
+
+        // Collecter les etudiants et productions pour les filtres
+        var etudiantsMap = {};
+        var productionsMap = {};
+        fichiersDispo.forEach(function(f) {
+            if (f.etudiantDA) {
+                var etu = travauxImport.trouverEtudiantParDA(f.etudiantDA);
+                if (etu && !etudiantsMap[f.etudiantDA]) {
+                    etudiantsMap[f.etudiantDA] = etu.nom
+                        ? (etu.nom + ', ' + etu.prenom)
+                        : etu.prenom;
+                }
+            }
+            if (f.productionId) {
+                if (!productionsMap[f.productionId]) {
+                    var prods = obtenirDonneesSelonMode(cle('productions')) || [];
+                    var prod = prods.find(function(p) { return p.id === f.productionId; });
+                    productionsMap[f.productionId] = prod ? prod.titre : f.productionId;
+                }
+            }
+        });
+
+        // Options etudiants
+        var optionsEtudiants = '<option value="">Tous les étudiants</option>';
+        Object.keys(etudiantsMap).sort(function(a, b) {
+            return etudiantsMap[a].localeCompare(etudiantsMap[b]);
+        }).forEach(function(da) {
+            optionsEtudiants += '<option value="' + da + '">' + echapperHtml(etudiantsMap[da]) + '</option>';
+        });
+
+        // Options productions
+        var optionsProductions = '<option value="">Toutes les productions</option>';
+        Object.keys(productionsMap).sort(function(a, b) {
+            return productionsMap[a].localeCompare(productionsMap[b]);
+        }).forEach(function(pid) {
+            optionsProductions += '<option value="' + pid + '">' + echapperHtml(productionsMap[pid]) + '</option>';
+        });
+
+        // Construire la liste des fichiers
+        var htmlFichiers = _genererListeFichiersFusion(fichiersDispo, etudiantsMap, productionsMap);
+
+        var html = `
+        <div class="modal-overlay actif" id="modal-fusion-editeur" onclick="if(event.target===this) travauxUI.fermerModalFusionEditeur()">
+            <div class="modal-contenu modal-fusion-editeur-contenu">
+                <button class="modal-fermer" onclick="travauxUI.fermerModalFusionEditeur()">&times;</button>
+                <h3 class="modal-titre">Fusionner des documents</h3>
+
+                <div class="fusion-editeur-filtres">
+                    <select id="fusion-filtre-etudiant" onchange="travauxUI.filtrerModalFusion()">
+                        ${optionsEtudiants}
+                    </select>
+                    <select id="fusion-filtre-production" onchange="travauxUI.filtrerModalFusion()">
+                        ${optionsProductions}
+                    </select>
+                    <span id="fusion-compteur-selection" class="fusion-compteur">0 sélectionné(s)</span>
+                </div>
+
+                <div class="fusion-editeur-liste" id="fusion-editeur-liste">
+                    ${htmlFichiers}
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn btn-secondaire" onclick="travauxUI.fermerModalFusionEditeur()">Annuler</button>
+                    <button class="btn btn-principal" id="btn-confirmer-fusion-editeur" onclick="travauxUI.confirmerFusionEditeur()" disabled>Fusionner la sélection</button>
+                </div>
+            </div>
+        </div>`;
+
+        document.body.insertAdjacentHTML('beforeend', html);
+    }
+
+    /**
+     * Genere le HTML de la liste des fichiers pour la modale fusion
+     */
+    function _genererListeFichiersFusion(fichiers, etudiantsMap, productionsMap) {
+        if (fichiers.length === 0) {
+            return '<p class="texte-muted" style="text-align:center;padding:24px;">Aucun document disponible.</p>';
+        }
+
+        var html = '';
+        fichiers.forEach(function(f) {
+            var nomEtudiant = f.etudiantDA && etudiantsMap[f.etudiantDA]
+                ? echapperHtml(etudiantsMap[f.etudiantDA])
+                : (f.etudiantDA || 'Non associé');
+            var nomProduction = f.productionId && productionsMap[f.productionId]
+                ? echapperHtml(productionsMap[f.productionId])
+                : 'Non associé';
+            var pages = f.nombrePages ? f.nombrePages + ' p.' : '1 p.';
+            var thumb = f.thumbnailDataUrl
+                ? '<img class="fusion-fichier-thumb" src="' + f.thumbnailDataUrl + '" alt="">'
+                : '<div class="fusion-fichier-thumb fusion-fichier-thumb-vide"></div>';
+
+            html += `
+                <label class="fusion-fichier-item" data-etudiant="${f.etudiantDA || ''}" data-production="${f.productionId || ''}">
+                    <input type="checkbox" class="fusion-fichier-check" value="${f.id}" onchange="travauxUI.majCompteurFusion()">
+                    ${thumb}
+                    <div class="fusion-fichier-info">
+                        <span class="fusion-fichier-nom">${echapperHtml(f.nomFichier || 'Document')}</span>
+                        <span class="fusion-fichier-meta">${nomEtudiant} — ${nomProduction} — ${pages}</span>
+                    </div>
+                </label>`;
+        });
+        return html;
+    }
+
+    /**
+     * Filtre la liste dans la modale selon les selects etudiant/production
+     */
+    function filtrerModalFusion() {
+        var filtreEtudiant = document.getElementById('fusion-filtre-etudiant').value;
+        var filtreProduction = document.getElementById('fusion-filtre-production').value;
+        var items = document.querySelectorAll('#fusion-editeur-liste .fusion-fichier-item');
+
+        items.forEach(function(item) {
+            var matchEtu = !filtreEtudiant || item.getAttribute('data-etudiant') === filtreEtudiant;
+            var matchProd = !filtreProduction || item.getAttribute('data-production') === filtreProduction;
+            item.style.display = (matchEtu && matchProd) ? '' : 'none';
+        });
+    }
+
+    /**
+     * Met a jour le compteur de selection et l'etat du bouton confirmer
+     */
+    function majCompteurFusion() {
+        var checks = document.querySelectorAll('#fusion-editeur-liste .fusion-fichier-check:checked');
+        var compteur = document.getElementById('fusion-compteur-selection');
+        var btnConfirmer = document.getElementById('btn-confirmer-fusion-editeur');
+        if (compteur) compteur.textContent = checks.length + ' sélectionné(s)';
+        if (btnConfirmer) btnConfirmer.disabled = checks.length === 0;
+    }
+
+    /**
+     * Confirme la fusion : charge les pages des fichiers selectionnes
+     * et les ajoute dans l'editeur courant.
+     */
+    async function confirmerFusionEditeur() {
+        var checks = document.querySelectorAll('#fusion-editeur-liste .fusion-fichier-check:checked');
+        if (checks.length === 0) return;
+
+        var idsSelectionnes = [];
+        checks.forEach(function(cb) { idsSelectionnes.push(cb.value); });
+
+        // Fermer la modale
+        fermerModalFusionEditeur();
+
+        // Afficher un message de chargement dans le preview
+        var preview = document.querySelector('.editeur-pages-preview img');
+        if (preview) {
+            preview.style.opacity = '0.4';
+        }
+
+        try {
+            for (var i = 0; i < idsSelectionnes.length; i++) {
+                var fId = idsSelectionnes[i];
+                var fichier = travauxStockage.obtenirFichierParId(fId);
+                if (!fichier) continue;
+
+                var estPDF = fichier.typeMIME === 'application/pdf';
+                if (estPDF) {
+                    var pages = await travauxImport.decomposerPDF(fId);
+                    editionPages = editionPages.concat(pages);
+                } else {
+                    // Image : charger comme page unique
+                    var blob = await travauxStockage.recupererBlob(fId);
+                    if (!blob) continue;
+
+                    var dataUrl = await new Promise(function(resolve, reject) {
+                        var reader = new FileReader();
+                        reader.onload = function() { resolve(reader.result); };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob);
+                    });
+                    var dims = await new Promise(function(resolve, reject) {
+                        var img = new Image();
+                        img.onload = function() { resolve({ width: img.width, height: img.height }); };
+                        img.onerror = reject;
+                        img.src = dataUrl;
+                    });
+                    editionPages.push({
+                        pageNum: editionPages.length + 1,
+                        blob: blob,
+                        dataUrl: dataUrl,
+                        largeur: dims.width,
+                        hauteur: dims.height
+                    });
+                }
+
+                // Marquer le fichier pour suppression apres sauvegarde
+                if (editionFichiersASupprimer.indexOf(fId) === -1) {
+                    editionFichiersASupprimer.push(fId);
+                }
+            }
+
+            // Activer le mode fusion
+            editionModeFusion = true;
+
+            // Re-rendre l'editeur
+            renderEditeurPages();
+
+            if (typeof afficherNotificationSucces === 'function') {
+                afficherNotificationSucces(idsSelectionnes.length + ' document(s) ajouté(s) à la fusion');
+            }
+        } catch (err) {
+            console.error('[Fusion Editeur] Erreur chargement:', err);
+            alert('Erreur lors du chargement des documents : ' + err.message);
+            renderEditeurPages();
+        }
+    }
+
+    /**
+     * Ferme la modale de fusion editeur
+     */
+    function fermerModalFusionEditeur() {
+        var modal = document.getElementById('modal-fusion-editeur');
+        if (modal) modal.remove();
     }
 
     /* ===============================
@@ -5796,6 +6046,12 @@
         supprimerPageEditeur: supprimerPageEditeur,
         ajouterPagesEditeur: ajouterPagesEditeur,
         sauvegarderEdition: sauvegarderEdition,
+        // Fusion depuis editeur
+        ouvrirModalFusionEditeur: ouvrirModalFusionEditeur,
+        confirmerFusionEditeur: confirmerFusionEditeur,
+        fermerModalFusionEditeur: fermerModalFusionEditeur,
+        filtrerModalFusion: filtrerModalFusion,
+        majCompteurFusion: majCompteurFusion,
         // Rétroaction (archivage)
         afficherRetroaction: afficherRetroaction,
         sauvegarderRetroactionDepuisModal: sauvegarderRetroactionDepuisModal,

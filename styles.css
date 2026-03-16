@@ -20872,6 +20872,95 @@ body.mode-clair .annot-toolbar {
     color: var(--texte-secondaire, #a0b0c0);
 }
 
+/* --- Modale Fusion depuis editeur --- */
+.modal-fusion-editeur-contenu {
+    max-width: 680px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+.fusion-editeur-filtres {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+.fusion-editeur-filtres select {
+    flex: 1;
+    min-width: 160px;
+    padding: 6px 8px;
+    border-radius: var(--radius-sm, 4px);
+    border: 1px solid var(--bordure, #2a3a4a);
+    background: var(--surface-1, #1a2332);
+    color: var(--texte, #e0e8f0);
+    font-size: 0.85rem;
+}
+.fusion-compteur {
+    font-size: 0.8rem;
+    color: var(--texte-secondaire, #a0b0c0);
+    white-space: nowrap;
+}
+.fusion-editeur-liste {
+    overflow-y: auto;
+    max-height: 45vh;
+    border: 1px solid var(--bordure, #2a3a4a);
+    border-radius: var(--radius-sm, 4px);
+    background: var(--surface-1, #1a2332);
+}
+.fusion-fichier-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--bordure, #2a3a4a);
+    transition: background 0.15s;
+}
+.fusion-fichier-item:last-child {
+    border-bottom: none;
+}
+.fusion-fichier-item:hover {
+    background: var(--surface-2, #243244);
+}
+.fusion-fichier-check {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent, #5ba0d0);
+}
+.fusion-fichier-thumb {
+    width: 40px;
+    height: 52px;
+    object-fit: contain;
+    border-radius: 3px;
+    background: var(--surface-0, #0f1923);
+    flex-shrink: 0;
+}
+.fusion-fichier-thumb-vide {
+    border: 1px dashed var(--bordure, #2a3a4a);
+}
+.fusion-fichier-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.fusion-fichier-nom {
+    font-size: 0.85rem;
+    color: var(--texte, #e0e8f0);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.fusion-fichier-meta {
+    font-size: 0.75rem;
+    color: var(--texte-secondaire, #a0b0c0);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /* ===============================
    PIPELINE — GROUPES VISUELS
    =============================== */
