@@ -5370,18 +5370,23 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .codex-indicateur {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
+    font-size: 10px;
+    line-height: 1;
     flex-shrink: 0;
 }
 
-.codex-indicateur--modifie {
-    background: var(--orange-attention, #e8a838);
+.codex-indicateur--sauve {
+    color: var(--vert-succes, #4caf50);
 }
 
-.codex-indicateur--sauve {
-    background: var(--vert-succes, #4caf50);
+.codex-indicateur--modifie {
+    color: var(--orange-attention, #e8a838);
+    animation: codex-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes codex-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
 }
 
 /* Menu déroulant */
@@ -5477,21 +5482,27 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     color: var(--texte-secondaire, #8ba4b0);
 }
 
+.codex-menu-statut-haut .codex-statut-fichier {
+    font-size: 0.7rem;
+    color: var(--gris-moyen, #6b7b8d);
+    margin-top: 4px;
+    word-break: break-all;
+}
+
 .codex-statut-pastille {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin-right: 4px;
+    display: inline;
+    font-size: 0.7rem;
+    margin-right: 2px;
     vertical-align: middle;
 }
 
 .codex-statut-pastille--vert {
-    background: var(--vert-succes, #4caf50);
+    color: var(--vert-succes, #4caf50);
 }
 
 .codex-statut-pastille--orange {
-    background: var(--orange-attention, #e8a838);
+    color: var(--orange-attention, #e8a838);
+    animation: codex-pulse 1.2s ease-in-out infinite;
 }
 
 .codex-menu-sep {

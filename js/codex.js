@@ -1989,9 +1989,11 @@ function _mettreAJourIndicateur() {
 
     indicateur.classList.remove('u-hide');
     if (_etat.modificationsDepuis) {
+        indicateur.textContent = '\u25C9'; // ◉
         indicateur.classList.add('codex-indicateur--modifie');
         indicateur.classList.remove('codex-indicateur--sauve');
     } else {
+        indicateur.textContent = '\u25C9'; // ◉
         indicateur.classList.remove('codex-indicateur--modifie');
         indicateur.classList.add('codex-indicateur--sauve');
     }
@@ -2055,9 +2057,21 @@ function _actualiserMenu() {
             var modifie = !!_etat.modificationsDepuis;
             var classePastille = modifie ? 'codex-statut-pastille--orange' : 'codex-statut-pastille--vert';
             var texteEtat = modifie ? 'Modifications non enregistrées' : 'Tout est enregistré';
+            // Ligne d'info : dernier fichier enregistré
+            var ligneInfo = '';
+            if (_etat.derniereSauvegarde) {
+                var d = new Date(_etat.derniereSauvegarde);
+                var pad = function(n) { return String(n).padStart(2, '0'); };
+                var dateStr = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+                var heureStr = pad(d.getHours()) + 'h' + pad(d.getMinutes());
+                var nomNettoye = (_etat.nom || 'codex').replace(/[^a-zA-Z0-9àâéèêëïîôùûüçÀÂÉÈÊËÏÎÔÙÛÜÇ _-]/g, '').trim().replace(/\s+/g, '-');
+                var nomFichierAffiche = 'codex-' + nomNettoye + '-' + dateStr + '-' + heureStr + EXTENSION_CODEX;
+                ligneInfo = '<div class="codex-statut-fichier">Dernier fichier\u00a0: ' + nomFichierAffiche + '</div>';
+            }
             statutHaut.innerHTML =
                 '<div class="codex-statut-nom" onclick="Codex.actionRenommer()" title="Cliquer pour renommer">' + (_etat.nom || 'Codex') + '</div>' +
-                '<div class="codex-statut-etat"><span class="codex-statut-pastille ' + classePastille + '"></span> ' + texteEtat + '</div>';
+                '<div class="codex-statut-etat"><span class="codex-statut-pastille ' + classePastille + '">\u25C9</span> ' + texteEtat + '</div>' +
+                ligneInfo;
             statutHaut.classList.remove('u-hide');
         } else {
             statutHaut.innerHTML = '<div class="codex-statut-etat">Aucun codex actif — ouvre ou crée un codex pour commencer.</div>';
