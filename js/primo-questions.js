@@ -460,7 +460,7 @@ const QUESTIONS_PRIMO = [
 
     // ========================================================================
     // BRANCHE PAN-SPÉCIFICATIONS (Beta 95)
-    // Basée sur François A.-H. et Linda B. Nilson
+    // Basée sur Linda B. Nilson (Specifications Grading)
     // ========================================================================
     {
         id: 'specifications-intro',
@@ -711,22 +711,22 @@ const QUESTIONS_PRIMO = [
         options: [
             {
                 value: 'comptage',
-                label: '🔢 Comptage d\'objectifs (Bruno V.)',
+                label: '🔢 Comptage d\'objectifs',
                 description: 'Note = nombre d\'objectifs maîtrisés. Objectifs « essentiels » vs « complémentaires ». Plafond si essentiels non maîtrisés.'
             },
             {
                 value: 'moyenne-ponderee',
-                label: '⚖️ Moyenne pondérée (Michel B.)',
+                label: '⚖️ Moyenne pondérée',
                 description: 'Note = moyenne des niveaux × pondération de chaque objectif. Chaque objectif a un poids différent.'
             },
             {
                 value: 'seuils-critiques',
-                label: '📊 Seuils critiques (Xavier C.-T.)',
+                label: '📊 Seuils critiques',
                 description: 'Tous les objectifs doivent atteindre niveau 3+. Bonus pour niveau 4. Règles non-linéaires.'
             },
             {
                 value: 'holistique',
-                label: '🎨 Holistique (Isabelle M.)',
+                label: '🎨 Holistique',
                 description: 'Suggestion statistique (mode, médiane, moyenne) + validation par ton jugement professionnel.'
             }
         ],
@@ -786,7 +786,7 @@ const QUESTIONS_PRIMO = [
     },
 
     // ========================================================================
-    // MODE MOYENNE PONDÉRÉE (Michel B.)
+    // MODE MOYENNE PONDÉRÉE
     // ========================================================================
     {
         id: 'objectifs-info-moyenne-ponderee',
@@ -801,7 +801,7 @@ const QUESTIONS_PRIMO = [
     },
 
     // ========================================================================
-    // MODE SEUILS CRITIQUES (Xavier C.-T.)
+    // MODE SEUILS CRITIQUES
     // ========================================================================
     {
         id: 'objectifs-niveau-minimum',
@@ -881,7 +881,7 @@ const QUESTIONS_PRIMO = [
     },
 
     // ========================================================================
-    // MODE HOLISTIQUE (Isabelle M.)
+    // MODE HOLISTIQUE
     // ========================================================================
     {
         id: 'objectifs-methode-suggestion',

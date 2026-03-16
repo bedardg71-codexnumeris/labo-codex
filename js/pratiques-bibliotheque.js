@@ -6,7 +6,7 @@
    - Indépendante du trimestre (clé non-namespacée)
    - Stockage dans IndexedDB/localStorage
    - Import/export avec collègues
-   - Inclut les modèles prédéfinis (François, Simple, Littérature)
+   - Inclut les modèles prédéfinis (Chimie, Simple, Littérature)
 
    Clé de stockage: 'bibliothequePratiques' (sans namespace)
    =============================== */
@@ -27,10 +27,10 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     // === PAN-SPÉCIFICATIONS ===
     'SPE-francois': {
         id: 'SPE-francois',
-        nom: 'Modèle François',
-        description: 'Basé sur la pratique de François A.-H. (Chimie)',
+        nom: 'Modèle Chimie',
+        description: 'Basé sur une pratique en chimie',
         type: 'pan-specifications',
-        auteur: 'François A.-H.',
+        auteur: 'Grégoire Bédard',
         discipline: 'Chimie',
         estGabarit: true,
         pratiques: ['SPE'],
@@ -138,9 +138,9 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     'STD-par-objectifs-comptage': {
         id: 'STD-par-objectifs-comptage',
         nom: 'Par objectifs (Comptage)',
-        description: 'Mode Bruno V. : comptage d\'objectifs essentiels et complémentaires',
+        description: 'Mode chimie : comptage d\'objectifs essentiels et complémentaires',
         type: 'pan-standards',
-        auteur: 'Bruno V.',
+        auteur: 'Grégoire Bédard',
         discipline: 'Chimie',
         estGabarit: true,
         pratiques: ['STD'],
@@ -171,9 +171,9 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     'STD-par-objectifs-pondere': {
         id: 'STD-par-objectifs-pondere',
         nom: 'Par objectifs (Pondéré)',
-        description: 'Mode Michel B. : moyenne pondérée des objectifs',
+        description: 'Mode mathématiques : moyenne pondérée des objectifs',
         type: 'pan-standards',
-        auteur: 'Michel B.',
+        auteur: 'Grégoire Bédard',
         discipline: 'Mathématiques',
         estGabarit: true,
         pratiques: ['STD'],
@@ -198,15 +198,15 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     },
 
     // ============================================================================
-    // PRATIQUE PERSONNALISÉE : Bruno V. (Chimie organique)
+    // PRATIQUE PERSONNALISÉE : Chimie organique
     // Standards avec critères par standard, meilleurs résultats (N=1)
     // ============================================================================
     'STD-Bruno-Chimie': {
         id: 'STD-Bruno-Chimie',
-        nom: 'STD Chimie organique (Bruno V.)',
+        nom: 'STD Chimie organique',
         description: 'Standards avec critères par standard, meilleurs résultats. Reprises illimitées au bureau.',
         type: 'pan-standards',
-        auteur: 'Bruno V.',
+        auteur: 'Grégoire Bédard',
         discipline: 'Chimie',
         estGabarit: true,
         pratiques: ['STD'],
@@ -245,15 +245,15 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     },
 
     // ============================================================================
-    // PRATIQUE PERSONNALISÉE : Xavier C.-T. (Informatique)
+    // PRATIQUE PERSONNALISÉE : Informatique
     // 6 objectifs, tous niveau 3+ requis, calcul conditionnel
     // ============================================================================
     'STD-Xavier-Info': {
         id: 'STD-Xavier-Info',
-        nom: 'STD Interfaces et BD (Xavier C.-T.)',
+        nom: 'STD Interfaces et BD',
         description: '6 objectifs requis niveau 3+. Base 80% + bonus 3.33% par niveau 4. Hybride STD/SPE.',
         type: 'pan-standards',
-        auteur: 'Xavier C.-T.',
+        auteur: 'Grégoire Bédard',
         discipline: 'Informatique',
         estGabarit: true,
         pratiques: ['STD'],
@@ -300,15 +300,15 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     // ============================================================================
 
     // ============================================================================
-    // PRATIQUE PERSONNALISÉE : Étienne L. (Administration)
+    // PRATIQUE PERSONNALISÉE : Administration
     // Sommative traditionnelle - Comptabilité et numérique
     // ============================================================================
     'SOM-Etienne-Admin': {
         id: 'SOM-Etienne-Admin',
-        nom: 'SOM Comptabilité (Étienne L.)',
+        nom: 'SOM Comptabilité',
         description: 'Sommative traditionnelle. Examens écrits et travaux pratiques. Moyenne pondérée.',
         type: 'sommative',
-        auteur: 'Étienne L.',
+        auteur: 'Grégoire Bédard',
         discipline: 'Administration',
         etablissement: 'Cégep de l\'Abitibi-Témiscamingue',
         estGabarit: true,
@@ -333,15 +333,15 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     },
 
     // ============================================================================
-    // PRATIQUE PERSONNALISÉE : Olivier L. (Géographie)
+    // PRATIQUE PERSONNALISÉE : Géographie
     // Sommative traditionnelle - Introduction en géographie
     // ============================================================================
     'SOM-Olivier-Geo': {
         id: 'SOM-Olivier-Geo',
-        nom: 'SOM Géographie (Olivier L.)',
+        nom: 'SOM Géographie',
         description: 'Sommative traditionnelle. Examens 55%, travaux pratiques 45%. Quiz formatifs non notés.',
         type: 'sommative',
-        auteur: 'Olivier L.',
+        auteur: 'Grégoire Bédard',
         discipline: 'Géographie',
         etablissement: 'Collège Montmorency',
         estGabarit: true,
@@ -366,15 +366,15 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     },
 
     // ============================================================================
-    // PRATIQUE PERSONNALISÉE : Hélène C. (Philosophie)
+    // PRATIQUE PERSONNALISÉE : Philosophie
     // Sommative hybride avec portfolio formatif
     // ============================================================================
     'SOM-Helene-Philo': {
         id: 'SOM-Helene-Philo',
-        nom: 'SOM Philo + Portfolio (Hélène C.)',
+        nom: 'SOM Philo + Portfolio',
         description: 'Hybride sommative/PAN. Portfolio 30% avec progression évaluée, erreurs non pénalisées.',
         type: 'sommative',
-        auteur: 'Hélène C.',
+        auteur: 'Grégoire Bédard',
         discipline: 'Philosophie',
         etablissement: 'Cégep Gérald-Godin',
         estGabarit: true,
@@ -410,15 +410,15 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     },
 
     // ============================================================================
-    // PRATIQUE PERSONNALISÉE : Marie-Hélène L. (Littérature)
+    // PRATIQUE PERSONNALISÉE : Littérature
     // Sommative avec critères fixes et double verrou
     // ============================================================================
     'SOM-MarieHelene-Litt': {
         id: 'SOM-MarieHelene-Litt',
-        nom: 'SOM Littérature (Marie-Hélène L.)',
+        nom: 'SOM Littérature',
         description: 'Sommative avec analyse finale 50% (double verrou). Portfolio 20%. Critères fixes.',
         type: 'sommative',
-        auteur: 'Marie-Hélène L.',
+        auteur: 'Grégoire Bédard',
         discipline: 'Littérature',
         etablissement: 'Cégep de Valleyfield',
         estGabarit: true,
@@ -455,15 +455,15 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     },
 
     // ============================================================================
-    // PRATIQUE PERSONNALISÉE : Isabelle M. (Biologie)
+    // PRATIQUE PERSONNALISÉE : Biologie
     // PAN-Standards avec jugement global (holistique)
     // ============================================================================
     'STD-Isabelle-Bio': {
         id: 'STD-Isabelle-Bio',
-        nom: 'STD Anatomie (Isabelle M.)',
+        nom: 'STD Anatomie',
         description: 'PAN-Standards avec jugement global. 11 évaluations. Progression qualitative sans calcul strict.',
         type: 'pan-standards',
-        auteur: 'Isabelle M.',
+        auteur: 'Grégoire Bédard',
         discipline: 'Biologie',
         etablissement: 'Cégep',
         estGabarit: true,
@@ -500,15 +500,15 @@ const MODELES_PRATIQUES_PREDEFINIS = {
     },
 
     // ============================================================================
-    // PRATIQUE PERSONNALISÉE : Jordan R. (Philosophie)
+    // PRATIQUE PERSONNALISÉE : Philosophie
     // Sommative avec mécanisme de remplacement
     // ============================================================================
     'SOM-Jordan-Philo': {
         id: 'SOM-Jordan-Philo',
-        nom: 'SOM Philo + Remplacement (Jordan R.)',
+        nom: 'SOM Philo + Remplacement',
         description: 'Sommative avec remplacement progressif. Note finale peut remplacer mi-session si supérieure.',
         type: 'sommative',
-        auteur: 'Jordan R.',
+        auteur: 'Grégoire Bédard',
         discipline: 'Philosophie',
         etablissement: 'Cégep',
         estGabarit: true,
@@ -674,7 +674,7 @@ async function obtenirConfigurationPratiqueParId(configId) {
     const dansBibliotheque = bibliotheque.find(p => p.id === configId);
     if (dansBibliotheque) return dansBibliotheque;
 
-    // 3. Vérifier les pratiques configurables de l'utilisateur (Beta 95.2 - Bug Bruno)
+    // 3. Vérifier les pratiques configurables de l'utilisateur (Beta 95.2 - Bug chimie)
     const configurables = await db.get('pratiquesConfigurables') || [];
     return configurables.find(p => p.id === configId) || null;
 }

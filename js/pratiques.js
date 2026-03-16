@@ -1756,9 +1756,6 @@ function migrerEtablissementsPratiques() {
 
     // Mapping des auteurs vers établissements
     const etablissements = {
-        'Bruno V.': 'Cégep Laurendeau',
-        'Marie-Hélène L.': 'Cégep Valleyfield',
-        'François A.-H.': 'Cégep Laurendeau',
         'Grégoire Bédard': 'Cégep Drummond'
     };
 
@@ -4070,7 +4067,7 @@ function construireSpecifications() {
     }
 
     if (typeEval === 'binaire') {
-        // Configuration binaire (François A.-H. style)
+        // Configuration binaire (spécifications)
         const typesTravaux = [];
         const typesTravauxListe = document.getElementById('wizard-spec-types-travaux-liste');
 
@@ -4136,7 +4133,7 @@ function construireSpecifications() {
         };
 
     } else if (typeEval === 'niveaux') {
-        // Configuration niveaux (Xavier C.-T. style)
+        // Configuration niveaux (seuils critiques par objectif)
         const nbObjectifs = parseInt(document.getElementById('wizard-spec-nb-objectifs')?.value) || 6;
         const objectifs = [];
 

@@ -16,13 +16,13 @@
 'use strict';
 
 // ============================================================================
-// PRATIQUE 1 : PAN-Standards 5 niveaux (Bruno V.)
+// PRATIQUE 1 : PAN-Standards 5 niveaux (Chimie)
 // ============================================================================
 
 const PRATIQUE_PAN_STANDARDS_BRUNO = {
     id: 'pan-standards-bruno',
     nom: 'PAN-Standards (5 niveaux)',
-    auteur: 'Bruno V.',
+    auteur: 'Grégoire Bédard',
     etablissement: 'Cégep Laurendeau',
     description: 'Système à 5 niveaux avec reprises multiples, niveau non rétrogradable',
     discipline: 'Chimie',
@@ -151,13 +151,13 @@ const PRATIQUE_PAN_STANDARDS_BRUNO = {
 };
 
 // ============================================================================
-// PRATIQUE 2 : Sommative traditionnelle (Marie-Hélène L.)
+// PRATIQUE 2 : Sommative traditionnelle (Littérature)
 // ============================================================================
 
 const PRATIQUE_SOMMATIVE_TRADITIONNELLE = {
     id: 'sommative-traditionnelle-mhl',
     nom: 'Sommative traditionnelle',
-    auteur: 'Marie-Hélène L.',
+    auteur: 'Grégoire Bédard',
     etablissement: 'Cégep Valleyfield',
     description: 'Moyenne pondérée traditionnelle avec critères fixes',
     discipline: 'Littérature',
@@ -257,13 +257,13 @@ const PRATIQUE_SOMMATIVE_TRADITIONNELLE = {
 };
 
 // ============================================================================
-// PRATIQUE 3 : PAN-Spécifications (François A.-H.)
+// PRATIQUE 3 : PAN-Spécifications (Chimie)
 // ============================================================================
 
 const PRATIQUE_PAN_SPECIFICATIONS = {
     id: 'pan-specifications-fah',
     nom: 'PAN-Spécifications (notes fixes)',
-    auteur: 'François A.-H.',
+    auteur: 'Grégoire Bédard',
     etablissement: 'Cégep Laurendeau',
     description: 'Notes fixes (50, 60, 80, 100%) selon critères atteints',
     discipline: 'Chimie',
@@ -468,13 +468,13 @@ const PRATIQUE_PAN_MAITRISE = {
 };
 
 // ============================================================================
-// PRATIQUE 5 : PAN-Objectifs pondérés (Michel B.)
+// PRATIQUE 5 : PAN-Objectifs pondérés
 // ============================================================================
 
 const PRATIQUE_PAN_OBJECTIFS_PONDERES_MICHEL = {
     id: 'pan-objectifs-ponderes-michel',
-    nom: 'PAN-Objectifs pondérés (Michel B.)',
-    auteur: 'Michel B.',
+    nom: 'PAN-Objectifs pondérés',
+    auteur: 'Grégoire Bédard',
     etablissement: 'Cégep (Mathématiques)',
     description: '13 objectifs évalués en mode PAN avec pondérations variables selon importance',
     discipline: 'Mathématiques - Calcul différentiel',
@@ -587,13 +587,13 @@ const PRATIQUE_PAN_OBJECTIFS_PONDERES_MICHEL = {
 };
 
 // ============================================================================
-// PRATIQUE 6 : Sommative avec remplacement (Jordan R.)
+// PRATIQUE 6 : Sommative avec remplacement (Philosophie)
 // ============================================================================
 
 const PRATIQUE_SOMMATIVE_REMPLACEMENT_JORDAN = {
     id: 'sommative-remplacement-jordan',
-    nom: 'Sommative avec remplacement (Jordan R.)',
-    auteur: 'Jordan R.',
+    nom: 'Sommative avec remplacement',
+    auteur: 'Grégoire Bédard',
     etablissement: 'Cégep (Philosophie)',
     description: 'Évaluation finale peut remplacer mi-session si note supérieure. Valorise la progression.',
     discipline: 'Philosophie 101',
@@ -695,13 +695,13 @@ const PRATIQUE_SOMMATIVE_REMPLACEMENT_JORDAN = {
 };
 
 // ============================================================================
-// PRATIQUE 7 : PAN-Jugement global (Isabelle M.)
+// PRATIQUE 7 : PAN-Jugement global (Biologie)
 // ============================================================================
 
 const PRATIQUE_PAN_JUGEMENT_GLOBAL_ISABELLE = {
     id: 'pan-jugement-global-isabelle',
-    nom: 'PAN-Jugement global (Isabelle M.)',
-    auteur: 'Isabelle M.',
+    nom: 'PAN-Jugement global',
+    auteur: 'Grégoire Bédard',
     etablissement: 'Cégep Champlain Lennoxville',
     description: 'Calcul mode statistique comme suggestion. Jugement professionnel de l\'enseignante requis.',
     discipline: 'Biologie - Anatomie et physiologie 3',
@@ -786,7 +786,7 @@ const PRATIQUE_PAN_JUGEMENT_GLOBAL_ISABELLE = {
     seuils: {
         type: 'contextuel',
         note: 'Pas de seuils chiffrés rigides - jugement contextuel',
-        description: 'Isabelle n\'utilise PAS de seuils chiffrés rigides. Le jugement est contextuel et qualitatif.'
+        description: 'Pas de seuils chiffrés rigides. Le jugement est contextuel et qualitatif.'
     },
 
     interface: {

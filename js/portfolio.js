@@ -747,7 +747,7 @@ async function obtenirIndicesCPAsync(da) {
 /* ===============================
    🎯 CALCULS MULTI-OBJECTIFS
 
-   Support pour le système d'évaluation multi-objectifs (ex: Michel B.)
+   Support pour le système d'évaluation multi-objectifs
    - Groupement des évaluations par objectif
    - Calcul de la performance par objectif (moyenne N meilleurs)
    - Calcul de la note finale pondérée

@@ -14,7 +14,7 @@
  * directement ici pour les utilisateurs experts.
  *
  * CHANGELOG :
- * - 26 déc 2025 : Modèles prédéfinis PAN-Spécifications (François, Simple, Littérature)
+ * - 26 déc 2025 : Modèles prédéfinis PAN-Spécifications (Chimie, Simple, Littérature)
  *                 Fonction appliquerModeleSpecifications() exportée
  * - 25 déc 2025 : Ajout configuration PAN-Spécifications (types travaux + forfaits)
  * - 24 déc 2025 : Variante par-objectifs unifiée avec 4 modes de calcul
@@ -299,10 +299,10 @@
      * traces comptent, pénalisant les erreurs initiales).
      *
      * ✅ NOUVEAU (Beta 95) : Ajout de la variante "par-objectifs" avec 4 modes de calcul :
-     * - Comptage (Bruno V., Chimie, André-Laurendeau)
-     * - Moyenne pondérée (Michel B., Mathématiques)
-     * - Seuils critiques (Xavier C.-T., Informatique)
-     * - Holistique (Isabelle M., Biologie)
+     * - Comptage (Chimie)
+     * - Moyenne pondérée (Mathématiques)
+     * - Seuils critiques (Informatique)
+     * - Holistique (Biologie)
      */
     const VARIANTES_PAN_STANDARDS = {
         'n-meilleurs': {
@@ -322,7 +322,7 @@
         },
         'par-objectifs': {
             nom: 'Par objectifs (4 modes de calcul)',
-            description: 'Évaluation par objectifs d\'apprentissage avec choix du mode de calcul : <strong>Comptage</strong> (Bruno V.), <strong>Moyenne pondérée</strong> (Michel B.), <strong>Seuils critiques</strong> (Xavier C.-T.), ou <strong>Holistique</strong> (Isabelle M.).',
+            description: 'Évaluation par objectifs d\'apprentissage avec choix du mode de calcul : <strong>Comptage</strong> (Chimie), <strong>Moyenne pondérée</strong> (Mathématiques), <strong>Seuils critiques</strong> (Informatique), ou <strong>Holistique</strong> (Biologie).',
             exemple: 'Objectifs essentiels/complémentaires | Pondérations variables | Seuils non-linéaires'
         },
         'autre': {
@@ -703,7 +703,7 @@
     }
 
     // =========================================================================
-    // GESTION PAR-OBJECTIFS (4 modes : Bruno, Michel, Xavier, Isabelle)
+    // GESTION PAR-OBJECTIFS (4 modes : Comptage, Moyenne pondérée, Seuils critiques, Holistique)
     // =========================================================================
 
     /**
@@ -711,19 +711,19 @@
      */
     const MODES_CALCUL_OBJECTIFS = {
         'comptage': {
-            nom: 'Comptage (Bruno V.)',
+            nom: 'Comptage (Chimie)',
             description: 'Note = nombre d\'objectifs maîtrisés. Plafond si essentiels non maîtrisés.'
         },
         'moyenne-ponderee': {
-            nom: 'Moyenne pondérée (Michel B.)',
+            nom: 'Moyenne pondérée (Mathématiques)',
             description: 'Note = moyenne des niveaux × pondération de chaque objectif.'
         },
         'seuils-critiques': {
-            nom: 'Seuils critiques (Xavier C.-T.)',
+            nom: 'Seuils critiques (Informatique)',
             description: 'Tous les objectifs doivent atteindre niveau 3+. Bonus pour niveau 4.'
         },
         'holistique': {
-            nom: 'Holistique (Isabelle M.)',
+            nom: 'Holistique (Biologie)',
             description: 'Suggestion statistique + validation par l\'enseignant.'
         }
     };
@@ -734,23 +734,23 @@
     const CONFIG_PAR_OBJECTIFS_DEFAUT = {
         modeCalcul: 'comptage',
         objectifs: [],
-        // Paramètres mode Comptage (Bruno)
+        // Paramètres mode Comptage
         comptage: {
             seuilMaitrise: 75,
             plafondSiEssentielNonMaitrise: 55,
             grilleConversion: {}
         },
-        // Paramètres mode Moyenne pondérée (Michel)
+        // Paramètres mode Moyenne pondérée
         moyennePonderee: {
             // Les pondérations sont dans les objectifs
         },
-        // Paramètres mode Seuils critiques (Xavier)
+        // Paramètres mode Seuils critiques
         seuilsCritiques: {
             seuilReussite: 3,
             noteBaseReussite: 80,
             bonusNiveau4: 3.33
         },
-        // Paramètres mode Holistique (Isabelle)
+        // Paramètres mode Holistique
         holistique: {
             methodeSuggestion: 'mode'
         }
@@ -1187,7 +1187,7 @@
 
     // =========================================================================
     // GESTION PAN-SPÉCIFICATIONS (Types de travaux + Forfaits)
-    // Basé sur François A.-H. et Linda B. Nilson (2015)
+    // Basé sur une pratique en Chimie et Linda B. Nilson (2015)
     // =========================================================================
 
     /**
@@ -1753,8 +1753,8 @@
      */
     const MODELES_SPECIFICATIONS = {
         'modele-francois': {
-            nom: 'Modèle François',
-            description: 'Basé sur la pratique de François A.-H. (Chimie)',
+            nom: 'Modèle Chimie',
+            description: 'Basé sur une pratique en Chimie',
             typesTravaux: [
                 { id: 1, nom: 'Prise de position', description: 'Travail écrit argumentatif' },
                 { id: 2, nom: 'Test', description: 'Évaluation des connaissances' },
