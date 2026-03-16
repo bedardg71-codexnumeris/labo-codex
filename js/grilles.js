@@ -3570,6 +3570,9 @@ async function supprimerGrilleActive() {
         grilles.splice(index, 1);
         await db.set('grillesTemplates', grilles);
 
+        // ✅ CORRIGÉ (16 mars 2026) : marquer comme supprimée pour empêcher assurerGrilleGenerique() de la réinjecter
+        window.marquerRessourceSupprimee(grilleTemplateActuelle.id);
+
         // Fermer le formulaire et retourner à l'accueil
         annulerFormGrille();
 
