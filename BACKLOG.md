@@ -52,13 +52,24 @@
   - Investiguer : activer au tap long ? Ou proposer un toggle explicite dans les preferences ?
   - **Fichier** : `js/tooltips.js`, `js/tooltips-contenu.js`
 
+### Simplification UX Codex
+
+- [ ] **#233** UX : Simplifier le flux Codex pour l'utilisateur lambda (Mac + iPad)
+  - Probleme : le concept de fichier ZIP transportable sur cle USB est complexe pour un non-technicien
+  - Safari Mac ne supporte pas FSAPI — chaque sauvegarde telecharge un nouveau fichier (pas d'ecriture directe)
+  - iPad : tous les navigateurs utilisent WebKit (regle Apple) — pas de FSAPI meme sur Chrome iOS
+  - Pistes a explorer :
+    - Assistant premier lancement Codex expliquant le flux en 3 etapes
+    - Detecter le navigateur et adapter les instructions (Chrome vs Safari, Mac vs iPad)
+    - Sur Safari : guider l'utilisateur pour remplacer le fichier sur la cle USB (ou automatiser via Raccourcis iOS ?)
+    - Messages contextuels clairs a chaque etape (sauvegarde, transfert, ouverture sur l'autre appareil)
+  - **Module** : `js/codex.js`
+
 ### Retours testeur — 3 mars 2026
 
-- [ ] **#214** Bug : Gestion avancee des ressources — suppression non persistante
-  - Des modeles supprimes via Reglages > Gestion avancee des ressources reapparaissent apres rechargement
-  - Verifier si certaines echelles/grilles/cartouches sont codees en dur ou re-injectees par les donnees demo
-  - Tester : supprimer une echelle « Non utilisee » → recharger → elle ne doit plus apparaitre
-  - **Section** : Reglages > Gestion avancee des ressources
+- [x] **#214** Bug : Gestion avancee des ressources — suppression non persistante ✅ CORRIGE (16 mars 2026, Bug #83)
+  - Les fonctions `assurer*()` re-injectaient les gabarits hardcodes a chaque init
+  - Corrige : cle IDB `ressourcesSupprimees` consultee avant reinjection (main.js, echelles.js, grilles.js, cartouches.js, donnees-v2.js)
 
 - [ ] **#215** Dates debut/fin de trimestre obligatoires dans le formulaire de reglages
   - `cadreCalendrier.dateDebut` et `cadreCalendrier.finCours` doivent etre obligatoires
