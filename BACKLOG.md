@@ -52,6 +52,21 @@
   - Investiguer : activer au tap long ? Ou proposer un toggle explicite dans les preferences ?
   - **Fichier** : `js/tooltips.js`, `js/tooltips-contenu.js`
 
+### Retours testeur — 16 mars 2026
+
+- [ ] **#234** Retroaction : Reintegrer l'import TXT pour les cartouches de retroaction
+  - Une fonction d'import de fichier `.txt` existait avant mais a ete perdue lors d'une refacto
+  - Permet d'importer plusieurs commentaires d'un coup (1 par ligne ou par bloc) au lieu de copier-coller un par un
+  - Cas d'usage : 16 commentaires a saisir manuellement = trop long
+  - Verifier dans l'historique git si l'ancienne implementation est recuperable
+  - **Fichier** : `js/cartouches.js`
+
+- [ ] **#235** UX : Uniformiser les appellations « Note chiffree » / « Code du niveau de performance »
+  - Incoherence entre les ecrans : « Note chiffree » vs « Code » (radio dans retroaction), « Code du niveau de performance » (reglages pratique)
+  - Les valeurs internes (`complet` / `lettre`) ne correspondent a aucun libelle visible
+  - Harmoniser les labels dans : retroaction evaluation, reglages pratique, export PDF
+  - **Fichiers** : `index.html` (radios retroaction + reglages), `js/evaluation.js`, `js/travaux-export-pdf.js`
+
 ### Simplification UX Codex
 
 - [ ] **#233** UX : Simplifier le flux Codex pour l'utilisateur lambda (Mac + iPad)

@@ -2700,7 +2700,12 @@ function cocherOptionsParDefaut() {
         const pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
             ? obtenirPratiqueActiveGroupeCours() : null;
         const configurations = db.getSync('pratiquesConfigurables', []);
-        const pratiqueActive = pratiqueId ? configurations.find(p => p.id === pratiqueId) : null;
+        // ✅ CORRIGÉ (16 mars 2026) : chercher par id, puis fallback par type
+        // (les anciens groupe-cours stockent le type 'pan-standards' au lieu de l'ID unique)
+        var pratiqueActive = pratiqueId ? configurations.find(function(p) { return p.id === pratiqueId; }) : null;
+        if (!pratiqueActive && pratiqueId) {
+            pratiqueActive = configurations.find(function(p) { return p.type === pratiqueId; });
+        }
         console.log('[cocherOptionsParDefaut] pratiqueId:', pratiqueId, 'affichageNote:', pratiqueActive?.affichageNote);
         if (pratiqueActive?.affichageNote === 'lettre') {
             document.getElementById('affichageNoteLettre1').checked = true;
