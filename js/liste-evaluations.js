@@ -257,6 +257,10 @@ function initialiserListeEvaluations() {
         }
         console.log('   ✅ Bouton initialisé');
 
+        // Revérifier le débordement au redimensionnement
+        window.removeEventListener('resize', verifierDebordementTableau);
+        window.addEventListener('resize', verifierDebordementTableau);
+
         console.log('✅ Liste des évaluations initialisée');
     } catch (error) {
         console.error('❌ Erreur lors de l\'initialisation de la liste des évaluations:', error);
@@ -620,6 +624,9 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
 
         // Restaurer la visibilité des colonnes selon les préférences
         restaurerPreferencesColonnes();
+
+        // Vérifier si le tableau déborde (après un court délai pour que le DOM soit peint)
+        setTimeout(verifierDebordementTableau, 50);
 
         const logMoyenne = moyenneAffichee !== null ? ` | Moyenne: ${moyenneAffichee.toFixed(1)}%` : '';
         console.log(`✅ ${lignesFiltrees.length} évaluation(s) affichée(s)${logMoyenne}`);
@@ -1993,6 +2000,9 @@ function toggleColonneEval(checkbox) {
 
     // Persister les préférences
     sauvegarderPreferencesColonnes();
+
+    // Revérifier le débordement
+    setTimeout(verifierDebordementTableau, 50);
 }
 
 function sauvegarderPreferencesColonnes() {
@@ -2022,6 +2032,35 @@ function restaurerPreferencesColonnes() {
             }
         });
     } catch (e) { /* ignorer les données corrompues */ }
+}
+
+/**
+ * Vérifie si le tableau déborde horizontalement et affiche un message le cas échéant.
+ * Appelée après chaque rendu du tableau et après chaque toggle de colonne.
+ */
+function verifierDebordementTableau() {
+    var conteneur = document.getElementById('conteneur-tableau-evaluations');
+    if (!conteneur) return;
+
+    // Chercher ou créer le message
+    var msgId = 'eval-msg-debordement';
+    var msg = document.getElementById(msgId);
+
+    var deborde = conteneur.scrollWidth > conteneur.clientWidth + 2; // marge 2px
+
+    if (deborde) {
+        if (!msg) {
+            msg = document.createElement('div');
+            msg.id = msgId;
+            msg.className = 'eval-msg-debordement';
+            msg.textContent = 'Le tableau dépasse l\u2019écran \u2014 décoche des colonnes ci-dessus pour ajuster la vue.';
+            // Insérer juste avant le conteneur tableau
+            conteneur.parentNode.insertBefore(msg, conteneur);
+        }
+        msg.classList.remove('u-hide');
+    } else if (msg) {
+        msg.classList.add('u-hide');
+    }
 }
 
 // ============================================
