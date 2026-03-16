@@ -240,7 +240,7 @@ function calculerEtSauvegarderIndicesAssiduite() {
     };
 
     var etudiantsActifs = (etudiants || []).filter(function(e) {
-        return e.statut !== 'décrochage' && e.statut !== 'abandon';
+        return !estEtudiantExclu(e);
     });
 
     etudiantsActifs.forEach(function(etudiant) {

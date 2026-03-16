@@ -4270,9 +4270,7 @@ function creerGraphiqueDistributionACPE(canvasId) {
                 ? obtenirDonneesSelonMode('groupeEtudiants')
                 : []) || [];
 
-        const etudiantsActifs = etudiants.filter(e =>
-            e.statut !== 'décrochage' && e.statut !== 'abandon'
-        );
+        const etudiantsActifs = etudiants.filter(e => !estEtudiantExclu(e));
 
         if (etudiantsActifs.length === 0) {
             console.warn('[Distribution ACPE] Aucun étudiant actif');

@@ -25,9 +25,7 @@ function chargerApercuEvaluations() {
         // Récupérer les étudiants actifs
         // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
         const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-        const etudiantsActifs = etudiants.filter(e =>
-            e.statut !== 'décrochage' && e.statut !== 'abandon'
-        );
+        const etudiantsActifs = etudiants.filter(e => !estEtudiantExclu(e));
 
         // Récupérer les évaluations
         const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');

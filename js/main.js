@@ -56,6 +56,18 @@ window.toggleDisplay = function(element, show) {
     }
 };
 
+/**
+ * Vérifie si un étudiant est exclu des calculs du groupe.
+ * Inactivité (registrariat) et décrochage (enseignant) : résultats affichés
+ * jusqu'à la dernière présence, mais exclus des moyennes et statistiques.
+ * @param {Object} etudiant - Objet étudiant avec propriété .statut
+ * @returns {boolean}
+ */
+window.estEtudiantExclu = function(etudiant) {
+    if (!etudiant || !etudiant.statut) return false;
+    return etudiant.statut === 'inactif' || etudiant.statut === 'décrochage' || etudiant.statut === 'abandon';
+};
+
 /* ===============================
    FONCTIONS GLOBALES: Ressources supprimées volontairement (Beta 98.7)
    Empêche les fonctions assurer*() de réinjecter des gabarits

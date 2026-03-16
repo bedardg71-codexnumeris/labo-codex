@@ -27,9 +27,7 @@ function chargerApercuPresences() {
         const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
             ? obtenirEtudiantsCoursActif()
             : obtenirDonneesSelonMode('groupeEtudiants');
-        const etudiantsActifs = etudiants.filter(e =>
-            e.statut !== 'décrochage' && e.statut !== 'abandon'
-        );
+        const etudiantsActifs = etudiants.filter(e => !estEtudiantExclu(e));
 
         // Récupérer les indices d'assiduité calculés
         const indicesAssiduite = obtenirDonneesSelonMode('indicesAssiduite');

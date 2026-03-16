@@ -2939,9 +2939,7 @@ function calculerEtSauvegarderIndicesEvaluation() {
     const indicesEvaluation = {};
 
     // Filtrer les étudiants actifs
-    const etudiantsActifs = etudiants.filter(e =>
-        e.statut !== 'décrochage' && e.statut !== 'abandon'
-    );
+    const etudiantsActifs = etudiants.filter(e => !estEtudiantExclu(e));
 
     etudiantsActifs.forEach(etudiant => {
         // === CALCUL DE LA COMPLÉTION (C) ===
@@ -4321,9 +4319,7 @@ function mettreAJourIndicateurProgression() {
 
     // Compter le nombre total d'étudiants actifs
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    const etudiantsActifs = etudiants.filter(e =>
-        e.statut !== 'décrochage' && e.statut !== 'abandon'
-    );
+    const etudiantsActifs = etudiants.filter(e => !estEtudiantExclu(e));
     const totalEtudiants = etudiantsActifs.length;
 
     // Compter les évaluations déjà réalisées pour cette production

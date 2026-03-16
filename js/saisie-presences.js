@@ -1000,6 +1000,9 @@ function chargerTableauPresences(dateStr, estVerrouille) {
         const tauxAssiduiteActuel = resultatAffichage.taux;
 
         const tr = document.createElement('tr');
+        if (typeof estEtudiantExclu === 'function' && estEtudiantExclu(etudiant)) {
+            tr.classList.add('etudiant-inactif');
+        }
 
         // 🆕 BETA 95.7 : Input numérique pour périodes (permet fractions comme 1.5)
         const inputPeriodesHTML = `
