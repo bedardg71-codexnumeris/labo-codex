@@ -1,5 +1,5 @@
 /**
- * PRATIQUE PAN-OBJECTIFS - Implémentation pour Xavier C.-T.
+ * PRATIQUE PAN-OBJECTIFS
  *
  * Pratique PAN basée sur 6 objectifs de compétence qui doivent TOUS être réussis.
  * Système de notation non-linéaire avec seuils critiques par objectif.
@@ -20,11 +20,8 @@
  *
  * VERSION : 1.0
  * DATE : 9 décembre 2025
- * AUTEUR : Xavier C.-T.
- * ÉTABLISSEMENT : Cégep de Jonquière
+ * AUTEUR : Grégoire Bédard
  * DISCIPLINE : Informatique
- * COURS : Interfaces et bases de données (3e session - Programmation)
- * EMAIL : xavierC.@cegepjonquiere.ca
  */
 
 (function() {
@@ -33,7 +30,7 @@
 class PratiquePANObjectifs {
 
     constructor() {
-        console.log('🎯 Initialisation de la pratique PAN-Objectifs (Xavier)');
+        console.log('🎯 Initialisation de la pratique PAN-Objectifs');
     }
 
     // ========================================================================
@@ -41,7 +38,7 @@ class PratiquePANObjectifs {
     // ========================================================================
 
     obtenirNom() {
-        return "PAN-Objectifs (Xavier)";
+        return "PAN-Objectifs";
     }
 
     obtenirId() {
@@ -49,7 +46,7 @@ class PratiquePANObjectifs {
     }
 
     obtenirDescription() {
-        return "Pratique PAN basée sur 6 objectifs de compétence (Xavier C.-T.). " +
+        return "Pratique PAN basée sur 6 objectifs de compétence. " +
                "Système de notation non-linéaire avec seuils critiques : tous les objectifs doivent " +
                "atteindre niveau 3+ pour réussir. Discipline : Informatique (Interfaces et BD).";
     }
@@ -225,7 +222,7 @@ class PratiquePANObjectifs {
         const nbNiveau3 = niveauxObjectifs.filter(obj => obj.niveau === 3).length;
         const nbNiveau4 = niveauxObjectifs.filter(obj => obj.niveau === 4).length;
 
-        // Patterns selon la logique de Xavier
+        // Patterns selon la logique seuils critiques
         if (nbNiveau1 > 0 || nbNiveau2 >= 2) {
             // Échec certain (niveau 1 présent OU 2+ objectifs niveau 2)
             return {
@@ -377,7 +374,7 @@ class PratiquePANObjectifs {
     _lireConfiguration() {
         const modalites = db.getSync('modalitesEvaluation', {});
 
-        // Configuration par défaut pour Xavier
+        // Configuration par défaut PAN-Objectifs
         const configDefaut = {
             objectifs: [
                 {
@@ -490,7 +487,7 @@ class PratiquePANObjectifs {
             // Pour chaque objectif, trouver le niveau MINIMUM de tous ses critères
             // (logique : l'objectif est au niveau de son critère le plus faible)
 
-            // Note : Dans la pratique de Xavier, les évaluations devraient contenir
+            // Note : Dans la pratique PAN-Objectifs, les évaluations devraient contenir
             // une note par critère OU une note globale par objectif
             // Pour l'instant, on utilise la note finale de l'évaluation comme proxy
 
@@ -527,7 +524,7 @@ class PratiquePANObjectifs {
     /**
      * Convertit une note (0-100) en niveau (1-4)
      *
-     * Échelle Xavier :
+     * Échelle PAN-Objectifs :
      * - Niveau 1 : < 40%
      * - Niveau 2 : 40-59%
      * - Niveau 3 : 60-89%
@@ -544,7 +541,7 @@ class PratiquePANObjectifs {
     }
 
     /**
-     * Calcule la note finale selon la logique non-linéaire de Xavier
+     * Calcule la note finale selon la logique non-linéaire PAN-Objectifs
      *
      * @param {Array} niveauxObjectifs - Niveaux de chaque objectif
      * @returns {number} Note finale (0-1)

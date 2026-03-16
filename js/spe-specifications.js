@@ -2,8 +2,7 @@
    MODULE PAN-SPÉCIFICATIONS (SPE)
    Créé le 2 janvier 2026
 
-   Basé sur le modèle de François A.-H.
-   et Linda B. Nilson (Specifications Grading)
+   Basé sur Linda B. Nilson (Specifications Grading)
 
    Fonctionnalités :
    - Échelle binaire (Acceptable / Non acceptable)
@@ -75,7 +74,7 @@
     };
 
     /**
-     * Spécifications exemple pour une prise de position (François)
+     * Spécifications exemple pour une prise de position
      * DOIT être défini AVANT GRILLE_SPE_GABARIT
      */
     const EXEMPLE_SPECIFICATIONS_PRISE_POSITION = [
@@ -87,7 +86,7 @@
     ];
 
     /**
-     * Gabarit de grille de spécifications (basé sur François)
+     * Gabarit de grille de spécifications
      */
     const GRILLE_SPE_GABARIT = {
         id: 'GRILLE_SPE_GABARIT_PRISE_POSITION',
@@ -97,7 +96,7 @@
         estGabarit: true,
         gabaritType: 'SPE',
         pratiques: ['SPE'],
-        description: 'Gabarit SPE : Grille de spécifications pour une prise de position écrite (basé sur le modèle de François A.-H.).',
+        description: 'Gabarit SPE : Grille de spécifications pour une prise de position écrite.',
         criteres: EXEMPLE_SPECIFICATIONS_PRISE_POSITION.map((spec, index) => ({
             id: 'crit_' + (index + 1),
             nom: spec,
@@ -106,7 +105,7 @@
             type: 'checkbox'
         })),
         dateCreation: '2026-01-02T00:00:00.000Z',
-        auteur: 'François A.-H. (adapté)',
+        auteur: 'Grégoire Bédard',
         dansBibliotheque: true
     };
 
@@ -124,12 +123,12 @@
         consignes: 'Prends position de façon éclairée par rapport à un enjeu scientifique ou technologique qui traverse un métier qui t\'intéresse.',
         ponderation: 0,
         dateCreation: '2026-01-02T00:00:00.000Z',
-        auteur: 'François A.-H. (adapté)',
+        auteur: 'Grégoire Bédard',
         dansBibliotheque: true
     };
 
     /**
-     * Gabarits supplémentaires basés sur le cours de François
+     * Gabarits supplémentaires SPE
      */
     const GABARITS_GRILLES_SPE = [
         // Grille pour Portfolio
@@ -149,7 +148,7 @@
                 { id: 'crit_4', nom: 'L\'étudiant peut expliquer ses choix lors de l\'entrevue', obligatoire: true, type: 'checkbox' }
             ],
             dateCreation: '2026-01-02T00:00:00.000Z',
-            auteur: 'François A.-H. (adapté)',
+            auteur: 'Grégoire Bédard',
             dansBibliotheque: true
         },
         // Grille pour Test/Quiz
@@ -187,17 +186,17 @@
                 { id: 'crit_4', nom: 'L\'étudiant peut répondre aux questions de base', obligatoire: true, type: 'checkbox' }
             ],
             dateCreation: '2026-01-02T00:00:00.000Z',
-            auteur: 'François A.-H. (adapté)',
+            auteur: 'Grégoire Bédard',
             dansBibliotheque: true
         }
     ];
 
     /**
-     * Table de correspondance forfaits par défaut (modèle François)
+     * Table de correspondance forfaits par défaut
      * Note finale basée sur le nombre de travaux acceptables
      */
     const TABLE_FORFAITS_DEFAUT = {
-        description: 'Table de correspondance travaux-note finale (modèle François)',
+        description: 'Table de correspondance travaux-note finale',
         noteEchec: 50,
         forfaits: [
             { lettre: 'A', note: 90, travaux: { prisePosition: 3, portfolio: 1, test: 2, oral: 1 } },
@@ -853,7 +852,7 @@ La structure est claire (intro, développement, conclusion)"></textarea>
     }
 
     /**
-     * Charge l'exemple de spécifications (Prise de position de François)
+     * Charge l'exemple de spécifications (Prise de position)
      */
     function chargerExempleSpecificationsSPE() {
         const textarea = document.getElementById('spe-grille-specs');

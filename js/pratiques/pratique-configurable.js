@@ -529,7 +529,7 @@ class PratiqueConfigurable {
     }
 
     /**
-     * Calcule note par remplacement progressif (ex: Jordan R.)
+     * Calcule note par remplacement progressif
      * Pour chaque paire d'évaluations, utilise max(initiale, finale) × poids.
      *
      * Référence : PRATIQUE_SOMMATIVE_REMPLACEMENT_JORDAN dans pratiques-predefines.js
@@ -615,7 +615,7 @@ class PratiqueConfigurable {
     }
 
     /**
-     * Calcule note par spécifications (ex: François A.-H.)
+     * Calcule note par spécifications
      * Vérifie quelles spécifications sont satisfaites et retourne
      * la note du forfait (bundle) le plus élevé satisfait.
      *
@@ -762,7 +762,7 @@ class PratiqueConfigurable {
     }
 
     /**
-     * Applique un double verrou (ex: Marie-Hélène L.)
+     * Applique un double verrou
      * Si l'évaluation verrouillée est sous le seuil, la note finale est plafonnée.
      *
      * Référence : PRATIQUE_SOMMATIVE_TRADITIONNELLE dans pratiques-predefines.js

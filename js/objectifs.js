@@ -872,14 +872,14 @@ Tu peux utiliser, modifier et partager ce matériel selon les conditions de la l
 // ============================================================================
 
 /**
- * Crée l'ensemble d'objectifs de Michel B. pour le calcul différentiel
+ * Crée l'ensemble d'objectifs pour le calcul différentiel
  * Exemple réaliste avec 13 objectifs pondérés
  */
 function creerEnsembleCalculDiff() {
     const ensemble = {
         id: 'objectifs-michel-calcul-diff',
         nom: 'Calcul différentiel (201-NYA)',
-        auteur: 'Michel B.',
+        auteur: 'Grégoire Bédard',
         etablissement: 'Cégep de Sainte-Foy',
         discipline: 'Mathématiques',
         description: 'Objectifs d\'apprentissage pour le cours de calcul différentiel 201-NYA-05. ' +

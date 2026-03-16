@@ -497,12 +497,12 @@ async function assurerEchellesPersonnalisees() {
     // Standards avec comptage, seuil maîtrise 75%
     // ============================================================================
     if (!echelles.some(e => e.id === 'ECHELLE_BRUNO_CHIMIE') && !supprimees.includes('ECHELLE_BRUNO_CHIMIE')) {
-        console.log('📊 Ajout échelle Bruno V. (Chimie)...');
+        console.log('📊 Ajout échelle Chimie organique...');
         echelles.push({
             id: 'ECHELLE_BRUNO_CHIMIE',
-            nom: 'Échelle Chimie organique (Bruno V.)',
+            nom: 'Échelle Chimie organique',
             description: 'Échelle 4 niveaux pour standards. Seuil maîtrise: 75%.',
-            auteur: 'Bruno V.',
+            auteur: 'Grégoire Bédard',
             discipline: 'Chimie',
             niveaux: [
                 { code: 'I', nom: 'Incomplet', min: 0, max: 54, valeur: 40, couleur: '#dc3545' },
@@ -522,12 +522,12 @@ async function assurerEchellesPersonnalisees() {
     // STD+SPE hybride, 4 niveaux numériques (1-4), seuil niveau 3
     // ============================================================================
     if (!echelles.some(e => e.id === 'ECHELLE_XAVIER_INFO') && !supprimees.includes('ECHELLE_XAVIER_INFO')) {
-        console.log('📊 Ajout échelle Xavier C.-T. (Informatique)...');
+        console.log('📊 Ajout échelle Interfaces/BD...');
         echelles.push({
             id: 'ECHELLE_XAVIER_INFO',
-            nom: 'Échelle Interfaces/BD (Xavier C.-T.)',
+            nom: 'Échelle Interfaces/BD',
             description: 'Échelle 4 niveaux numériques. Niveau 3 = seuil passage, niveau 4 = bonus.',
-            auteur: 'Xavier C.-T.',
+            auteur: 'Grégoire Bédard',
             discipline: 'Informatique',
             niveaux: [
                 { code: '1', nom: 'Non atteint', min: 0, max: 49, valeur: 40, couleur: '#dc3545' },
@@ -547,12 +547,12 @@ async function assurerEchellesPersonnalisees() {
     // PAN-Standards holistique, 4 niveaux IDME qualitatifs
     // ============================================================================
     if (!echelles.some(e => e.id === 'ECHELLE_ISABELLE_BIO') && !supprimees.includes('ECHELLE_ISABELLE_BIO')) {
-        console.log('📊 Ajout échelle Isabelle M. (Biologie)...');
+        console.log('📊 Ajout échelle Anatomie...');
         echelles.push({
             id: 'ECHELLE_ISABELLE_BIO',
-            nom: 'Échelle Anatomie (Isabelle M.)',
+            nom: 'Échelle Anatomie',
             description: 'Échelle IDME qualitative pour jugement global. Pas de seuils chiffrés stricts.',
-            auteur: 'Isabelle M.',
+            auteur: 'Grégoire Bédard',
             discipline: 'Biologie',
             niveaux: [
                 { code: 'I', nom: 'Incomplet', min: 0, max: 49, valeur: 40, couleur: '#dc3545' },
@@ -573,12 +573,12 @@ async function assurerEchellesPersonnalisees() {
     // Sommative avec portfolio, échelle pourcentages standard
     // ============================================================================
     if (!echelles.some(e => e.id === 'ECHELLE_HELENE_PHILO') && !supprimees.includes('ECHELLE_HELENE_PHILO')) {
-        console.log('📊 Ajout échelle Hélène C. (Philosophie)...');
+        console.log('📊 Ajout échelle Philosophie...');
         echelles.push({
             id: 'ECHELLE_HELENE_PHILO',
-            nom: 'Échelle Philosophie (Hélène C.)',
+            nom: 'Échelle Philosophie',
             description: 'Échelle 4 niveaux pour cours de philosophie. Seuils: 70/60/50.',
-            auteur: 'Hélène C.',
+            auteur: 'Grégoire Bédard',
             discipline: 'Philosophie',
             niveaux: [
                 { code: 'I', nom: 'Incomplet', min: 0, max: 49, valeur: 35, couleur: '#dc3545' },
@@ -598,12 +598,12 @@ async function assurerEchellesPersonnalisees() {
     // Sommative avec critères fixes, échelle pourcentages
     // ============================================================================
     if (!echelles.some(e => e.id === 'ECHELLE_MARIEHELENE_LITT') && !supprimees.includes('ECHELLE_MARIEHELENE_LITT')) {
-        console.log('📊 Ajout échelle Marie-Hélène L. (Littérature)...');
+        console.log('📊 Ajout échelle Littérature...');
         echelles.push({
             id: 'ECHELLE_MARIEHELENE_LITT',
-            nom: 'Échelle Littérature (Marie-Hélène L.)',
+            nom: 'Échelle Littérature',
             description: 'Échelle 4 niveaux pour cours de littérature. Seuils: 75/65/55.',
-            auteur: 'Marie-Hélène L.',
+            auteur: 'Grégoire Bédard',
             discipline: 'Littérature',
             niveaux: [
                 { code: 'I', nom: 'Incomplet', min: 0, max: 54, valeur: 40, couleur: '#dc3545' },
@@ -623,12 +623,12 @@ async function assurerEchellesPersonnalisees() {
     // Sommative traditionnelle, échelle pourcentages
     // ============================================================================
     if (!echelles.some(e => e.id === 'ECHELLE_ETIENNE_ADMIN') && !supprimees.includes('ECHELLE_ETIENNE_ADMIN')) {
-        console.log('📊 Ajout échelle Étienne L. (Administration)...');
+        console.log('📊 Ajout échelle Comptabilité...');
         echelles.push({
             id: 'ECHELLE_ETIENNE_ADMIN',
-            nom: 'Échelle Comptabilité (Étienne L.)',
+            nom: 'Échelle Comptabilité',
             description: 'Échelle 4 niveaux pour cours d\'administration. Seuils: 80/70/60.',
-            auteur: 'Étienne L.',
+            auteur: 'Grégoire Bédard',
             discipline: 'Administration',
             niveaux: [
                 { code: 'I', nom: 'Incomplet', min: 0, max: 59, valeur: 45, couleur: '#dc3545' },
@@ -648,12 +648,12 @@ async function assurerEchellesPersonnalisees() {
     // Sommative traditionnelle, échelle pourcentages
     // ============================================================================
     if (!echelles.some(e => e.id === 'ECHELLE_OLIVIER_GEO') && !supprimees.includes('ECHELLE_OLIVIER_GEO')) {
-        console.log('📊 Ajout échelle Olivier L. (Géographie)...');
+        console.log('📊 Ajout échelle Géographie...');
         echelles.push({
             id: 'ECHELLE_OLIVIER_GEO',
-            nom: 'Échelle Géographie (Olivier L.)',
+            nom: 'Échelle Géographie',
             description: 'Échelle 4 niveaux pour cours de géographie. Seuils: 70/65/55.',
-            auteur: 'Olivier L.',
+            auteur: 'Grégoire Bédard',
             discipline: 'Géographie',
             niveaux: [
                 { code: 'I', nom: 'Incomplet', min: 0, max: 54, valeur: 40, couleur: '#dc3545' },
@@ -673,12 +673,12 @@ async function assurerEchellesPersonnalisees() {
     // Sommative avec remplacement, échelle pourcentages
     // ============================================================================
     if (!echelles.some(e => e.id === 'ECHELLE_JORDAN_PHILO') && !supprimees.includes('ECHELLE_JORDAN_PHILO')) {
-        console.log('📊 Ajout échelle Jordan R. (Philosophie)...');
+        console.log('📊 Ajout échelle Philosophie 101...');
         echelles.push({
             id: 'ECHELLE_JORDAN_PHILO',
-            nom: 'Échelle Philosophie 101 (Jordan R.)',
+            nom: 'Échelle Philosophie 101',
             description: 'Échelle 4 niveaux pour cours de philosophie. Seuils: 80/60/50.',
-            auteur: 'Jordan R.',
+            auteur: 'Grégoire Bédard',
             discipline: 'Philosophie',
             niveaux: [
                 { code: 'I', nom: 'Incomplet', min: 0, max: 49, valeur: 35, couleur: '#dc3545' },

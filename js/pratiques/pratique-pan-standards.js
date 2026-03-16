@@ -1358,7 +1358,7 @@ class PratiquePANStandards {
     }
 
     // =========================================================================
-    // SYSTÈME DE COMPTAGE D'OBJECTIFS (Bruno V.) - Beta 95
+    // SYSTÈME DE COMPTAGE D'OBJECTIFS - Beta 95
     // =========================================================================
 
     /**
@@ -1403,7 +1403,7 @@ class PratiquePANStandards {
     }
 
     /**
-     * Mode Comptage (Bruno V.)
+     * Mode Comptage
      * Note = grille de conversion selon nombre d'objectifs maîtrisés
      * Plafond si objectifs essentiels non maîtrisés
      */
@@ -1439,7 +1439,7 @@ class PratiquePANStandards {
     }
 
     /**
-     * Mode Moyenne pondérée (Michel B.)
+     * Mode Moyenne pondérée
      * Note = moyenne des niveaux × pondération de chaque objectif
      */
     _calculerModeMoyennePonderee(da, objectifs, configMoyenne) {
@@ -1517,7 +1517,7 @@ class PratiquePANStandards {
     }
 
     /**
-     * Mode Holistique (Isabelle M.)
+     * Mode Holistique
      * Suggestion statistique (mode, médiane, moyenne) + validation enseignant
      */
     _calculerModeHolistique(da, objectifs, configHolistique) {

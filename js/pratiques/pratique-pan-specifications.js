@@ -2,7 +2,7 @@
  * PRATIQUE PAN PAR SPÉCIFICATIONS - Implémentation complète V2.0
  *
  * Pratique par spécifications (Specification Grading) basée sur les principes
- * de Linda B. Nilson (2014) et François A.-H. (2025).
+ * de Linda B. Nilson (2014) et un collègue en chimie (2025).
  *
  * PRINCIPES FONDAMENTAUX :
  * - Évaluation BINAIRE : Travail acceptable ou non acceptable (pas de niveaux)
@@ -17,7 +17,7 @@
  *
  * RÉFÉRENCES :
  * - Nilson, L. B. (2014). Specifications Grading: Restoring Rigor, Motivating Students, and Saving Faculty Time
- * - François A.-H. (2025). Exploration au pays des spécifications (article AQPC)
+ * - Collègue en chimie (2025). Exploration au pays des spécifications (article AQPC)
  *
  * VERSION : 2.0
  * DATE : 9 décembre 2025
@@ -38,7 +38,7 @@ class PratiquePanSpecifications {
         this.config = {
             // Types de travaux avec leurs spécifications
             typesTravaux: [
-                // EXEMPLE (cours François A.-H.) :
+                // EXEMPLE (cours de chimie) :
                 // {
                 //     id: 'prise-position',
                 //     nom: 'Prise de position',
