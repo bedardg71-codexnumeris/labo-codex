@@ -16,6 +16,7 @@
 
 | # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
 |---|---------|--------------|---------|-------|-------------|------------|
+| 84 | Grégoire | 16 mars | 16 mars | 0316-0825 | Grille générique revient après suppression via bouton édition | 2.5 État résiduel : `supprimerGrilleActive()` ne marquait pas l'ID dans `ressourcesSupprimees` — 4e chemin de suppression manqué par le fix #83 (grilles.js) |
 | 83 | Grégoire | 16 mars | 16 mars | 0316-0825 | Ressources supprimées (échelles, grilles, cartouches) réapparaissent au chargement | 2.5 État résiduel : `assurer*()` réinjectaient les gabarits hardcodés à chaque init. Ajout clé IDB `ressourcesSupprimees` consultée avant réinjection (main.js, echelles.js, grilles.js, cartouches.js, donnees-v2.js) |
 | 82 | Grégoire | 16 mars | 16 mars | 0316-0825 | Modal preview config bloqué — bouton Fermer inopérant (ReferenceError) | 2.4 Export window manquant : `fermerModalPreviewConfigComplete` non exposée sur `window` (import-export.js) |
 | 81 | Grégoire | 16 mars | 16 mars | 0316-0825 | Bouton « Dupliquer » ne fonctionne pas dans les grilles de critères | 2.7 Mismatch type : `dupliquerGrilleActive()` passait l'objet complet au lieu de `.id` à `dupliquerGrilleDepuisSidebar()` (grilles.js) |
@@ -95,7 +96,7 @@
 
 ### Pour ajouter un bug
 1. Créer une entrée dans la section "Ouverts"
-2. Assigner un numéro séquentiel (prochain : **#85**)
+2. Assigner un numéro séquentiel (prochain : **#86**)
 3. Documenter dans le sous-dossier du testeur si fichiers/screenshots fournis
 
 ### Pour marquer comme corrigé
