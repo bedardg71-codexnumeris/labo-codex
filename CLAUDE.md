@@ -18,7 +18,7 @@ Ce document te guidera vers :
 
 ## Etat actuel
 
-- **Version** : Beta 98.6.1
+- **Version** : Beta 98.7
 - **Objectif** : Codex USB multi-appareil + qualite UX
 - **Session en cours** : Voir `SESSION.md`
 - **Backlog** : Voir `BACKLOG.md` (taches a faire)

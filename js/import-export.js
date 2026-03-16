@@ -2963,6 +2963,7 @@ window.fermerModalImport = fermerModalImport;
 window.reinitialiserDonnees = reinitialiserDonnees;
 // window.importerConfigComplete = importerConfigComplete; // ❌ Fonction n'existe plus
 window.executerImportConfigComplete = executerImportConfigComplete;
+window.fermerModalPreviewConfigComplete = fermerModalPreviewConfigComplete;
 window.exporterConfigurationComplete = exporterConfigurationComplete;
 window.executerImportVersBibliotheques = executerImportVersBibliotheques; // 🆕 BETA 95.1
 window.executerImportSelectif = executerImportSelectif; // 🆕 BETA 95.1
