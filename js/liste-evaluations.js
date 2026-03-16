@@ -1591,13 +1591,27 @@ function supprimerEvaluation(evaluationId) {
     const evaluation = evaluations.find(ev => ev.id === evaluationId);
 
     // Vérifier si l'évaluation est verrouillée
+    // ✅ CORRIGÉ (16 mars 2026) : permettre la suppression d'une éval verrouillée
+    // si le fichier source n'existe plus (évaluation orpheline, pas de moyen de déverrouiller)
     if (evaluation && evaluation.verrouillee) {
-        if (typeof afficherNotificationErreur === 'function') {
-            afficherNotificationErreur('Suppression impossible', 'Cette évaluation est verrouillée. Déverrouillez-la d\'abord.');
-        } else {
-            alert('Suppression impossible : cette évaluation est verrouillée. Déverrouillez-la d\'abord.');
+        var fichierExiste = false;
+        if (typeof travauxResolution !== 'undefined') {
+            fichierExiste = !!travauxResolution.trouverFichierPourEvaluation(evaluation);
+        } else if (typeof travauxStockage !== 'undefined') {
+            var fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
+            fichierExiste = fichiers.some(function(f) {
+                return f.etudiantDA === evaluation.etudiantDA && f.productionId === evaluation.productionId;
+            });
         }
-        return;
+        if (fichierExiste) {
+            if (typeof afficherNotificationErreur === 'function') {
+                afficherNotificationErreur('Suppression impossible', 'Cette évaluation est verrouillée. Déverrouillez-la d\'abord.');
+            } else {
+                alert('Suppression impossible : cette évaluation est verrouillée. Déverrouillez-la d\'abord.');
+            }
+            return;
+        }
+        // Fichier absent → évaluation orpheline, on permet la suppression
     }
 
     if (!confirm('Veux-tu vraiment supprimer cette évaluation ? Cette action est irréversible.')) {
