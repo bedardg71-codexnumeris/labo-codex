@@ -20333,7 +20333,6 @@ body.mode-clair .barre-etudiant.tracked-4 {
     gap: 6px;
     flex: 1;
     min-width: 0;
-    overflow-x: auto;
 }
 .annot-toolbar-fichiers .travaux-badges-groupe {
     display: inline-flex;
@@ -20388,6 +20387,15 @@ body.mode-clair .barre-etudiant.tracked-4 {
     gap: 0;
 }
 
+.annot-toolbar-production {
+    flex-shrink: 0;
+    padding-right: 8px;
+}
+
+.annot-toolbar-production select {
+    max-width: 220px;
+}
+
 .annot-toolbar-fichiers {
     display: flex;
     align-items: center;
@@ -20396,6 +20404,11 @@ body.mode-clair .barre-etudiant.tracked-4 {
     min-width: 0;
     overflow-x: auto;
     padding-right: 8px;
+}
+
+/* Masquer les checkboxes fusion dans Annoter/Évaluer (visibles seulement dans Exporter/Archiver) */
+.annot-toolbar .fusion-checkbox {
+    display: none;
 }
 
 .annot-toolbar-separateur {

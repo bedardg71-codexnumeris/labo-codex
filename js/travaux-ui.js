@@ -26,6 +26,7 @@
     let fichierSelectionneIndex = -1; // -1 = aucune selection dans le pipeline
     let productionFiltreActive = sessionStorage.getItem('travaux-filtre-production') || '';
     let _htmlBadgesGrille = ''; // HTML badges pré-généré pour injection dans toolbar unique
+    let _htmlDropdownProduction = ''; // HTML dropdown production séparé (fixe, hors scroll)
     let selectionFusion = new Set(); // IDs des fichiers selectionnes pour fusion
 
     /* ===============================
@@ -921,6 +922,7 @@
 
                     <!-- Toolbar unique (badges + outils — Phase A) -->
                     <div class="annot-toolbar">
+                        ${_htmlDropdownProduction ? `<div class="annot-toolbar-production">${_htmlDropdownProduction}</div>` : ''}
                         <div class="annot-toolbar-fichiers travaux-fichiers-compact">
                             ${_htmlBadgesGrille}
                         </div>
@@ -2259,8 +2261,14 @@
             htmlFusion += `<button class="btn btn-secondaire btn-petit" onclick="travauxUI.annulerSelectionFusion()">Annuler sélection</button>`;
         }
 
+        // Stocker le dropdown séparément pour l'afficher hors du scroll dans la toolbar
+        _htmlDropdownProduction = htmlDropdown;
+
+        // En mode toolbar (ouvrirFichier), le dropdown est extrait hors du scroll
+        const inclureDropdownInline = (action !== 'ouvrirFichier');
+
         let html = '<div class="travaux-grille-fichiers">';
-        html += `<div class="travaux-badges-entete">${htmlDropdown}${htmlFusion ? `<div class="travaux-fusion-actions">${htmlFusion}</div>` : ''}<div class="travaux-badges-liste">`;
+        html += `<div class="travaux-badges-entete">${inclureDropdownInline ? htmlDropdown : ''}${htmlFusion ? `<div class="travaux-fusion-actions">${htmlFusion}</div>` : ''}<div class="travaux-badges-liste">`;
 
         // Afficher chaque production
         productions.forEach(p => {
@@ -2444,7 +2452,8 @@
         sessionStorage.setItem('travaux-filtre-production', productionId);
 
         // Scoper au conteneur parent du select pour éviter d'affecter les autres onglets
-        const conteneur = select ? select.closest('.travaux-grille-fichiers') : null;
+        // Le select peut être dans .travaux-grille-fichiers (archivage) ou .annot-toolbar (toolbar fixe)
+        const conteneur = select ? (select.closest('.travaux-grille-fichiers') || select.closest('.annot-toolbar')) : null;
         const groupes = conteneur
             ? conteneur.querySelectorAll('.travaux-badges-groupe')
             : document.querySelectorAll('.travaux-badges-groupe');
