@@ -12,6 +12,14 @@
 
 ---
 
+## Corrigés (16 mars 2026)
+
+| # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
+|---|---------|--------------|---------|-------|-------------|------------|
+| 83 | Grégoire | 16 mars | 16 mars | 0316-0825 | Ressources supprimées (échelles, grilles, cartouches) réapparaissent au chargement | 2.5 État résiduel : `assurer*()` réinjectaient les gabarits hardcodés à chaque init. Ajout clé IDB `ressourcesSupprimees` consultée avant réinjection (main.js, echelles.js, grilles.js, cartouches.js, donnees-v2.js) |
+| 82 | Grégoire | 16 mars | 16 mars | 0316-0825 | Modal preview config bloqué — bouton Fermer inopérant (ReferenceError) | 2.4 Export window manquant : `fermerModalPreviewConfigComplete` non exposée sur `window` (import-export.js) |
+| 81 | Grégoire | 16 mars | 16 mars | 0316-0825 | Bouton « Dupliquer » ne fonctionne pas dans les grilles de critères | 2.7 Mismatch type : `dupliquerGrilleActive()` passait l'objet complet au lieu de `.id` à `dupliquerGrilleDepuisSidebar()` (grilles.js) |
+
 ## Corrigés (24 février 2026)
 
 | # | Testeur | Date rapport | Corrigé | Description | Correction |

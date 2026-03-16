@@ -457,9 +457,9 @@ async function migrerEchellesVersBibliotheque() {
 async function assurerEchelleGenerique() {
     const echelles = await db.get('echellesTemplates') || [];
 
-    // Vérifier si l'échelle générique existe déjà
+    // Vérifier si l'échelle générique existe déjà ou a été supprimée volontairement
     const existe = echelles.some(e => e.id === 'ECHELLE_GENERIQUE');
-    if (existe) return;
+    if (existe || window.estRessourceSupprimee('ECHELLE_GENERIQUE')) return;
 
     console.log('📊 Ajout de l\'échelle générique à la bibliothèque...');
 
@@ -489,13 +489,14 @@ async function assurerEchelleGenerique() {
  */
 async function assurerEchellesPersonnalisees() {
     const echelles = await db.get('echellesTemplates') || [];
+    const supprimees = await db.get('ressourcesSupprimees') || [];
     let nbAjoutees = 0;
 
     // ============================================================================
     // ÉCHELLE BRUNO V. (Chimie organique)
     // Standards avec comptage, seuil maîtrise 75%
     // ============================================================================
-    if (!echelles.some(e => e.id === 'ECHELLE_BRUNO_CHIMIE')) {
+    if (!echelles.some(e => e.id === 'ECHELLE_BRUNO_CHIMIE') && !supprimees.includes('ECHELLE_BRUNO_CHIMIE')) {
         console.log('📊 Ajout échelle Bruno V. (Chimie)...');
         echelles.push({
             id: 'ECHELLE_BRUNO_CHIMIE',
@@ -520,7 +521,7 @@ async function assurerEchellesPersonnalisees() {
     // ÉCHELLE XAVIER C.-T. (Informatique)
     // STD+SPE hybride, 4 niveaux numériques (1-4), seuil niveau 3
     // ============================================================================
-    if (!echelles.some(e => e.id === 'ECHELLE_XAVIER_INFO')) {
+    if (!echelles.some(e => e.id === 'ECHELLE_XAVIER_INFO') && !supprimees.includes('ECHELLE_XAVIER_INFO')) {
         console.log('📊 Ajout échelle Xavier C.-T. (Informatique)...');
         echelles.push({
             id: 'ECHELLE_XAVIER_INFO',
@@ -545,7 +546,7 @@ async function assurerEchellesPersonnalisees() {
     // ÉCHELLE ISABELLE M. (Biologie)
     // PAN-Standards holistique, 4 niveaux IDME qualitatifs
     // ============================================================================
-    if (!echelles.some(e => e.id === 'ECHELLE_ISABELLE_BIO')) {
+    if (!echelles.some(e => e.id === 'ECHELLE_ISABELLE_BIO') && !supprimees.includes('ECHELLE_ISABELLE_BIO')) {
         console.log('📊 Ajout échelle Isabelle M. (Biologie)...');
         echelles.push({
             id: 'ECHELLE_ISABELLE_BIO',
@@ -571,7 +572,7 @@ async function assurerEchellesPersonnalisees() {
     // ÉCHELLE HÉLÈNE C. (Philosophie)
     // Sommative avec portfolio, échelle pourcentages standard
     // ============================================================================
-    if (!echelles.some(e => e.id === 'ECHELLE_HELENE_PHILO')) {
+    if (!echelles.some(e => e.id === 'ECHELLE_HELENE_PHILO') && !supprimees.includes('ECHELLE_HELENE_PHILO')) {
         console.log('📊 Ajout échelle Hélène C. (Philosophie)...');
         echelles.push({
             id: 'ECHELLE_HELENE_PHILO',
@@ -596,7 +597,7 @@ async function assurerEchellesPersonnalisees() {
     // ÉCHELLE MARIE-HÉLÈNE L. (Littérature)
     // Sommative avec critères fixes, échelle pourcentages
     // ============================================================================
-    if (!echelles.some(e => e.id === 'ECHELLE_MARIEHELENE_LITT')) {
+    if (!echelles.some(e => e.id === 'ECHELLE_MARIEHELENE_LITT') && !supprimees.includes('ECHELLE_MARIEHELENE_LITT')) {
         console.log('📊 Ajout échelle Marie-Hélène L. (Littérature)...');
         echelles.push({
             id: 'ECHELLE_MARIEHELENE_LITT',
@@ -621,7 +622,7 @@ async function assurerEchellesPersonnalisees() {
     // ÉCHELLE ÉTIENNE L. (Administration)
     // Sommative traditionnelle, échelle pourcentages
     // ============================================================================
-    if (!echelles.some(e => e.id === 'ECHELLE_ETIENNE_ADMIN')) {
+    if (!echelles.some(e => e.id === 'ECHELLE_ETIENNE_ADMIN') && !supprimees.includes('ECHELLE_ETIENNE_ADMIN')) {
         console.log('📊 Ajout échelle Étienne L. (Administration)...');
         echelles.push({
             id: 'ECHELLE_ETIENNE_ADMIN',
@@ -646,7 +647,7 @@ async function assurerEchellesPersonnalisees() {
     // ÉCHELLE OLIVIER L. (Géographie)
     // Sommative traditionnelle, échelle pourcentages
     // ============================================================================
-    if (!echelles.some(e => e.id === 'ECHELLE_OLIVIER_GEO')) {
+    if (!echelles.some(e => e.id === 'ECHELLE_OLIVIER_GEO') && !supprimees.includes('ECHELLE_OLIVIER_GEO')) {
         console.log('📊 Ajout échelle Olivier L. (Géographie)...');
         echelles.push({
             id: 'ECHELLE_OLIVIER_GEO',
@@ -671,7 +672,7 @@ async function assurerEchellesPersonnalisees() {
     // ÉCHELLE JORDAN R. (Philosophie)
     // Sommative avec remplacement, échelle pourcentages
     // ============================================================================
-    if (!echelles.some(e => e.id === 'ECHELLE_JORDAN_PHILO')) {
+    if (!echelles.some(e => e.id === 'ECHELLE_JORDAN_PHILO') && !supprimees.includes('ECHELLE_JORDAN_PHILO')) {
         console.log('📊 Ajout échelle Jordan R. (Philosophie)...');
         echelles.push({
             id: 'ECHELLE_JORDAN_PHILO',
@@ -1054,6 +1055,11 @@ async function dupliquerEchelleActuelle() {
  */
 async function supprimerEchelle(echelleId) {
     if (!confirm('Supprimer cette échelle ?')) return;
+
+    // Marquer comme supprimée si c'est un gabarit hardcodé
+    if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(echelleId)) {
+        window.marquerRessourceSupprimee(echelleId);
+    }
 
     let echelles = await db.get('echellesTemplates') ||  [];
     echelles = echelles.filter(e => e.id !== echelleId);
@@ -2663,6 +2669,11 @@ async function supprimerEchelleDefinitivement(id) {
         return;
     }
 
+    // Marquer comme supprimée si c'est un gabarit hardcodé
+    if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(id)) {
+        window.marquerRessourceSupprimee(id);
+    }
+
     // Suppression définitive du store local
     const nouvellesEchelles = echelles.filter(e => e.id !== id);
     await db.set('echellesTemplates', nouvellesEchelles);
@@ -3782,6 +3793,14 @@ async function migrerEvaluationsVersNouvelleEchelle(ancienneEchelleId, nouvelleE
 }
 
 async function supprimerEchelleDepuisSidebar(id) {
+    // Marquer comme supprimée si c'est un gabarit hardcodé
+    // (placé avant la logique pour couvrir tous les chemins de suppression)
+    const _marquerSiGabarit = () => {
+        if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(id)) {
+            window.marquerRessourceSupprimee(id);
+        }
+    };
+
     // Vérifier si l'échelle est utilisée
     const utilisation = await verifierUtilisationEchelle(id);
 
@@ -3821,6 +3840,7 @@ async function supprimerEchelleDepuisSidebar(id) {
                     // Maintenant supprimer l'échelle
                     const index = echelles.findIndex(e => e.id === id);
                     if (index !== -1) {
+                        _marquerSiGabarit();
                         echelles.splice(index, 1);
                         await db.set('echellesTemplates',  echelles);
                         await afficherListeEchelles();
@@ -3849,6 +3869,7 @@ async function supprimerEchelleDepuisSidebar(id) {
         const index = echelles.findIndex(e => e.id === id);
 
         if (index !== -1) {
+            _marquerSiGabarit();
             echelles.splice(index, 1);
             await db.set('echellesTemplates',  echelles);
             await afficherListeEchelles();

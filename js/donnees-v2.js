@@ -1567,6 +1567,10 @@
      * Supprime définitivement une grille et ses cartouches associées
      */
     async function supprimerGrilleDefinitivement(grilleId) {
+        // Marquer comme supprimée si c'est un gabarit hardcodé
+        if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(grilleId)) {
+            window.marquerRessourceSupprimee(grilleId);
+        }
         // Supprimer les cartouches associées à cette grille
         try {
             await db.remove(`cartouches_${grilleId}`);
@@ -1600,6 +1604,10 @@
      * Supprime définitivement une cartouche
      */
     async function supprimerCartoucheDefinitivement(cartoucheId) {
+        // Marquer comme supprimée si c'est un gabarit hardcodé
+        if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(cartoucheId)) {
+            window.marquerRessourceSupprimee(cartoucheId);
+        }
         // Retirer de la bibliothèque
         if (typeof retirerCartoucheDeLaBibliotheque === 'function') {
             await retirerCartoucheDeLaBibliotheque(cartoucheId);
@@ -1613,6 +1621,10 @@
      * Supprime définitivement une échelle de la bibliothèque
      */
     async function supprimerEchelleDefinitivement(echelleId) {
+        // Marquer comme supprimée si c'est un gabarit hardcodé
+        if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(echelleId)) {
+            window.marquerRessourceSupprimee(echelleId);
+        }
         // Retirer de la bibliothèque
         if (typeof retirerEchelleDeLaBibliotheque === 'function') {
             await retirerEchelleDeLaBibliotheque(echelleId);

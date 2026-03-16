@@ -184,10 +184,10 @@ async function assurerCartoucheGenerique() {
     const grilleGenerique = grilles.find(g => g.id === 'GRILLE_GENERIQUE');
     if (!grilleGenerique) return;
 
-    // Vérifier si la cartouche générique existe déjà
+    // Vérifier si la cartouche générique existe déjà ou a été supprimée volontairement
     const cartouches = await db.get('cartouches_GRILLE_GENERIQUE') || [];
     const existe = cartouches.some(c => c.id === 'CART_GENERIQUE');
-    if (existe) return;
+    if (existe || window.estRessourceSupprimee('CART_GENERIQUE')) return;
 
     console.log('💬 Ajout de la cartouche générique à la bibliothèque...');
 
@@ -1598,6 +1598,9 @@ async function supprimerCartoucheConfirm(cartoucheId, grilleId) {
     }
 
     if (confirm(`Es-tu sûr de vouloir supprimer la cartouche «${cartouche?.nom}» ?`)) {
+        if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(cartoucheId)) {
+            window.marquerRessourceSupprimee(cartoucheId);
+        }
         const nouveauxCartouches = cartouches.filter(c => c.id !== cartoucheId);
         await db.set(`cartouches_${grilleId}`, nouveauxCartouches);
 
@@ -3496,6 +3499,11 @@ async function supprimerCartoucheDefinitivement(id, grilleId) {
     // Confirmation
     if (!confirm(`Supprimer définitivement la cartouche «${cartouche.nom}» ?\n\nCette action est irréversible.`)) {
         return;
+    }
+
+    // Marquer comme supprimée si c'est un gabarit hardcodé
+    if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(id)) {
+        window.marquerRessourceSupprimee(id);
     }
 
     // Suppression définitive du store local

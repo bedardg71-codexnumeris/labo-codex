@@ -57,6 +57,32 @@ window.toggleDisplay = function(element, show) {
 };
 
 /* ===============================
+   FONCTIONS GLOBALES: Ressources supprimées volontairement (Beta 98.7)
+   Empêche les fonctions assurer*() de réinjecter des gabarits
+   que l'utilisateur a supprimés.
+   =============================== */
+window.estRessourceSupprimee = function(id) {
+    const supprimees = db.getSync('ressourcesSupprimees', []);
+    return supprimees.includes(id);
+};
+
+window.marquerRessourceSupprimee = function(id) {
+    const supprimees = db.getSync('ressourcesSupprimees', []);
+    if (!supprimees.includes(id)) {
+        supprimees.push(id);
+        db.setSync('ressourcesSupprimees', supprimees);
+    }
+};
+
+// IDs des gabarits hardcodés (réinjectés par assurer*() si absents)
+window.IDS_GABARITS_HARDCODES = [
+    'ECHELLE_GENERIQUE', 'ECHELLE_BRUNO_CHIMIE', 'ECHELLE_XAVIER_INFO',
+    'ECHELLE_ISABELLE_BIO', 'ECHELLE_HELENE_PHILO', 'ECHELLE_MARIEHELENE_LITT',
+    'ECHELLE_ETIENNE_ADMIN', 'ECHELLE_OLIVIER_GEO', 'ECHELLE_JORDAN_PHILO',
+    'GRILLE_GENERIQUE', 'CART_GENERIQUE'
+];
+
+/* ===============================
    FONCTIONS GLOBALES: Formatage de dates (Beta 97.1 - #68)
    3 formats canoniques, tous acceptent ISO string, tous avec TZ fix
    =============================== */

@@ -927,6 +927,11 @@ async function supprimerGrille(grilleId) {
         return;
     }
 
+    // Marquer comme supprimée si c'est un gabarit hardcodé
+    if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(grilleId)) {
+        window.marquerRessourceSupprimee(grilleId);
+    }
+
     let grilles = await db.get('grillesTemplates') || [];
     grilles = grilles.filter(g => g.id !== grilleId);
     await db.set('grillesTemplates', grilles);
@@ -1518,9 +1523,9 @@ async function migrerGrillesVersBibliotheque() {
 async function assurerGrilleGenerique() {
     const grilles = await db.get('grillesTemplates') || [];
 
-    // Vérifier si la grille générique existe déjà
+    // Vérifier si la grille générique existe déjà ou a été supprimée volontairement
     const existe = grilles.some(g => g.id === 'GRILLE_GENERIQUE');
-    if (existe) return;
+    if (existe || window.estRessourceSupprimee('GRILLE_GENERIQUE')) return;
 
     console.log('📋 Ajout de la grille générique à la bibliothèque...');
 
@@ -2422,6 +2427,11 @@ async function supprimerGrilleDefinitivement(id) {
     // Confirmation
     if (!confirm(`Supprimer définitivement la grille «${grille.nom}» ?\n\nCette action est irréversible.`)) {
         return;
+    }
+
+    // Marquer comme supprimée si c'est un gabarit hardcodé
+    if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(id)) {
+        window.marquerRessourceSupprimee(id);
     }
 
     // Suppression définitive du store local
@@ -3496,6 +3506,9 @@ async function supprimerGrilleDepuisSidebar(id) {
     const index = grilles.findIndex(g => g.id === id);
 
     if (index !== -1) {
+        if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(id)) {
+            window.marquerRessourceSupprimee(id);
+        }
         grilles.splice(index, 1);
         await db.set('grillesTemplates', grilles);
         await afficherListeGrilles();
@@ -3531,7 +3544,8 @@ function dupliquerGrilleActive() {
         alert('Aucune grille en cours d\'édition');
         return;
     }
-    dupliquerGrilleDepuisSidebar(grilleTemplateActuelle);
+    // ✅ CORRIGÉ (16 mars 2026) : grilleTemplateActuelle est un objet, pas un ID
+    dupliquerGrilleDepuisSidebar(grilleTemplateActuelle.id);
 }
 
 /**
