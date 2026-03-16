@@ -2070,6 +2070,17 @@ h1, h2, h3, h4 {
     white-space: nowrap;
 }
 
+/* Message de débordement horizontal du tableau */
+.eval-msg-debordement {
+    font-size: 0.8rem;
+    color: var(--orange-attention, #e8a838);
+    padding: 6px 12px;
+    margin-bottom: 4px;
+    border-left: 3px solid var(--orange-attention, #e8a838);
+    background: var(--surface-secondaire, rgba(232, 168, 56, 0.08));
+    border-radius: 0 4px 4px 0;
+}
+
 /* Select natif d'actions dans le tableau des évaluations */
 .eval-actions-select {
     padding: 4px 6px;
