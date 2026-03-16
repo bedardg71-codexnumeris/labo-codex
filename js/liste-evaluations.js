@@ -1113,6 +1113,11 @@ function genererDropdownActions(ligne) {
         options.push(`<option value="supprimer|${fichierId}|${da}">Supprimer</option>`);
     }
 
+    // ✅ AJOUT (16 mars 2026) : Supprimer évaluation orpheline (sans fichier)
+    if (!fichierId && evalId) {
+        options.push(`<option value="supprimer-eval|${evalId}">Supprimer l'évaluation</option>`);
+    }
+
     if (options.length === 0) {
         return '<span class="texte-muted">-</span>';
     }
@@ -1162,6 +1167,9 @@ function executerActionEval(select) {
             break;
         case 'supprimer':
             confirmerSuppressionFichier(parts[1], parts[2]);
+            break;
+        case 'supprimer-eval':
+            supprimerEvaluation(parts[1]);
             break;
     }
 }
