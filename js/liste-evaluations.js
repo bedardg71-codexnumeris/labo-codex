@@ -2192,14 +2192,37 @@ function supprimerFichierDefinitivement(id) {
     overlay.addEventListener('click', (e) => { if (e.target === overlay) fermer(); });
 
     document.getElementById('supprimer-definitif-btn-confirmer').onclick = async () => {
+        // ✅ CORRIGÉ (16 mars 2026) : supprimer aussi les évaluations liées au fichier
+        var corbeille = travauxStockage.obtenirCorbeille();
+        var fichier = corbeille.find(function(f) { return f.id === id; });
+
         await travauxStockage.supprimerDefinitivement(id);
+
+        // Nettoyer les évaluations liées (par etudiantDA + productionId)
+        if (fichier && fichier.etudiantDA && fichier.productionId) {
+            var evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+            var avant = evaluations.length;
+            evaluations = evaluations.filter(function(ev) {
+                return !(ev.etudiantDA === fichier.etudiantDA && ev.productionId === fichier.productionId);
+            });
+            if (evaluations.length < avant) {
+                db.setSync(cle('evaluationsSauvegardees'), evaluations);
+                console.log('[Corbeille] ' + (avant - evaluations.length) + ' évaluation(s) liée(s) supprimée(s) pour ' + fichier.etudiantDA + '/' + fichier.productionId);
+                if (typeof calculerEtStockerIndicesCP === 'function') {
+                    calculerEtStockerIndicesCP();
+                }
+            }
+        }
+
         overlay.remove();
         if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces('Fichier supprimé définitivement.');
+            afficherNotificationSucces('Fichier et évaluation supprimés définitivement.');
         }
         mettreAJourBoutonCorbeille();
         if (vueCorbeilleActive) {
             afficherVueCorbeille();
+        } else {
+            appliquerFiltres();
         }
     };
 }
@@ -2243,7 +2266,29 @@ function viderTouteCorbeille() {
     overlay.addEventListener('click', (e) => { if (e.target === overlay) fermer(); });
 
     document.getElementById('vider-corbeille-btn-confirmer').onclick = async () => {
+        // ✅ CORRIGÉ (16 mars 2026) : supprimer aussi les évaluations liées aux fichiers de la corbeille
+        var fichiersCorbeille = travauxStockage.obtenirCorbeille();
         await travauxStockage.viderCorbeille();
+
+        // Nettoyer les évaluations liées à chaque fichier supprimé
+        if (fichiersCorbeille.length > 0) {
+            var evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+            var avant = evaluations.length;
+            evaluations = evaluations.filter(function(ev) {
+                return !fichiersCorbeille.some(function(f) {
+                    return f.etudiantDA && f.productionId &&
+                           ev.etudiantDA === f.etudiantDA && ev.productionId === f.productionId;
+                });
+            });
+            if (evaluations.length < avant) {
+                db.setSync(cle('evaluationsSauvegardees'), evaluations);
+                console.log('[Corbeille] ' + (avant - evaluations.length) + ' évaluation(s) liée(s) supprimée(s) (vider corbeille)');
+                if (typeof calculerEtStockerIndicesCP === 'function') {
+                    calculerEtStockerIndicesCP();
+                }
+            }
+        }
+
         overlay.remove();
         if (typeof afficherNotificationSucces === 'function') {
             afficherNotificationSucces('Corbeille vidée.');
@@ -2251,6 +2296,8 @@ function viderTouteCorbeille() {
         mettreAJourBoutonCorbeille();
         if (vueCorbeilleActive) {
             afficherVueCorbeille();
+        } else {
+            appliquerFiltres();
         }
     };
 }
