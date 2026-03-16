@@ -2309,7 +2309,7 @@ function actionDetails() {
 /**
  * Renomme le codex actif via prompt().
  */
-function actionRenommer() {
+async function actionRenommer() {
     if (!_etat.actif) return;
 
     var nouveauNom = prompt('Nouveau nom du codex :', _etat.nom || '');
@@ -2323,6 +2323,15 @@ function actionRenommer() {
     _marquerModification();
     _actualiserMenu();
     _sauvegarderEtat();
+    // ✅ CORRIGÉ (16 mars 2026) : forcer l'écriture IDB pour que syncToLocalStorageCache
+    // au prochain chargement ne réécrase pas le nouveau nom avec l'ancien
+    await db.set(CLE_ETAT_CODEX, {
+        actif: _etat.actif,
+        nom: _etat.nom,
+        derniereSauvegarde: _etat.derniereSauvegarde,
+        modificationsDepuis: _etat.modificationsDepuis,
+        manifeste: _etat.manifeste
+    });
     console.log('Codex renommé : ' + nouveauNom);
 }
 
