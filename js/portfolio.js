@@ -618,9 +618,7 @@ function calculerEtStockerIndicesCP() {
     }
 
     // Filtrer les étudiants actifs
-    const etudiantsActifs = etudiants.filter(e =>
-        e.statut !== 'décrochage' && e.statut !== 'abandon'
-    );
+    const etudiantsActifs = etudiants.filter(e => !estEtudiantExclu(e));
 
     const dateCalcul = new Date().toISOString();
     const modalites = db.getSync('modalitesEvaluation', {});

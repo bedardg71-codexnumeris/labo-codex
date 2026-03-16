@@ -685,9 +685,7 @@
 
             // Statistiques globales - lire directement depuis le trimestre ciblé
             const etudiants = db.getSync(`${trimestreId}_groupeEtudiants`, []);
-            const etudiantsActifs = etudiants.filter(e =>
-                e.statut !== 'abandon' && e.statut !== 'décrochage'
-            );
+            const etudiantsActifs = etudiants.filter(e => !estEtudiantExclu(e));
 
             // Indices d'engagement - lire depuis le trimestre ciblé
             const indicesCP = db.getSync(`${trimestreId}_indicesCP`, {});
@@ -1177,9 +1175,7 @@
             const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
             // IMPORTANT: Inclure TOUS les étudiants pour l'anonymisation (du trimestre actif)
             const tousLesEtudiants = etudiants;
-            const etudiantsActifs = etudiants.filter(e =>
-                e.statut !== 'abandon' && e.statut !== 'décrochage'
-            );
+            const etudiantsActifs = etudiants.filter(e => !estEtudiantExclu(e));
             const productions = obtenirDonneesSelonMode('productions');
             const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
             const presences = obtenirDonneesSelonMode('presences');
@@ -1744,7 +1740,7 @@
             // ✅ NAMESPACING (Beta 95.5)
             const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
             const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-            const nbEtudiants = etudiants.filter(e => e.statut !== 'abandon').length;
+            const nbEtudiants = etudiants.filter(e => !estEtudiantExclu(e)).length;
             const nbEvaluations = evaluations.length;
 
             container.innerHTML = `

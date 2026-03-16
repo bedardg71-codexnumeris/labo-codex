@@ -483,9 +483,10 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
         // coursId ET par groupe (obtenirDonneesSelonMode ne filtre que par coursId, ce qui
         // retourne les étudiants de TOUS les groupes du même cours)
         // Fallback vers [] (pas obtenirDonneesSelonMode) pour éviter de mélanger les groupes
-        const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+        const tousEtudiants = typeof obtenirEtudiantsCoursActif === 'function'
             ? obtenirEtudiantsCoursActif()
             : [];
+        const etudiants = tousEtudiants.filter(e => !estEtudiantExclu(e));
         const snapshotsEtudiants = [];
 
         // ✅ Compteurs séparés pour gérer les valeurs null

@@ -12227,6 +12227,26 @@ body[data-mode="simulation"] table tr:hover {
     font-size: 0.8rem;
 }
 
+/* Liste étudiants — en-tête lisible en mode sombre */
+#v2-listeEtudiants thead {
+    background: var(--bleu-moyen, #1a5276);
+}
+#v2-listeEtudiants th {
+    padding: 10px 12px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: white;
+    border-bottom: 2px solid var(--bordure-claire, #334155);
+}
+
+/* Étudiant inactif ou en décrochage */
+tr.etudiant-inactif {
+    opacity: 0.5;
+}
+tr.etudiant-inactif td {
+    font-style: italic;
+}
+
 /* Compacter les grilles */
 #reglages-trimestre .grille-2col {
     gap: 10px;

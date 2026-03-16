@@ -3264,7 +3264,7 @@ function afficherProfilComplet(da) {
         : (typeof filtrerEtudiantsParMode === 'function'
             ? filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants'))
             : obtenirDonneesSelonMode('groupeEtudiants').filter(e => e.groupe !== '9999'));
-    const etudiants = tousEtudiants.filter(e => e.statut !== 'décrochage' && e.statut !== 'abandon');
+    const etudiants = tousEtudiants.filter(e => !estEtudiantExclu(e));
 
     // Trier par nom de famille (ordre alphabétique) pour navigation cohérente
     etudiants.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));

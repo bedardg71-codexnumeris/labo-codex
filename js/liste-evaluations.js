@@ -135,9 +135,7 @@ function calculerEtSauvegarderIndiceCompletion() {
     };
     
     // Filtrer les étudiants actifs
-    const etudiantsActifs = etudiants.filter(e =>
-        e.statut !== 'décrochage' && e.statut !== 'abandon'
-    );
+    const etudiantsActifs = etudiants.filter(e => !estEtudiantExclu(e));
     
     // Calculer pour chaque étudiant
     etudiantsActifs.forEach(etudiant => {

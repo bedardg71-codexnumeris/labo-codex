@@ -133,7 +133,7 @@ function initialiserTirage() {
 
     // Initialiser le pool avec les étudiants actifs
     etatTirage.pool = etudiants
-        .filter(e => e.statut !== 'inactif')
+        .filter(e => !estEtudiantExclu(e))
         .map(e => ({
             da: e.da,
             nom: e.nom,

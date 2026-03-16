@@ -2325,7 +2325,8 @@ async function chargerListeEtudiantsV2() {
                     <th>Nom</th>
                     <th>Prénom</th>
                     <th>SA</th>
-                    <th></th>
+                    <th>Action</th>
+                    <th>Remarque</th>
                 </tr>
             </thead>
             <tbody>
@@ -2335,16 +2336,28 @@ async function chargerListeEtudiantsV2() {
         const sa = e.sa === 'Oui' || e.sa === true ? '✓' : '';
         // Formater le groupe sur 5 chiffres (ex: 00001)
         const groupe = e.groupe ? String(e.groupe).padStart(5, '0') : '—';
+        const statut = e.statut || '';
+        const classeStatut = statut === 'inactif' || statut === 'décrochage' ? ' etudiant-inactif' : '';
         html += `
-            <tr>
+            <tr class="${classeStatut}">
                 <td>${e.da || '—'}</td>
                 <td style="text-align: center;">${groupe}</td>
                 <td>${e.nom || '—'}</td>
                 <td>${e.prenom || '—'}</td>
                 <td style="text-align: center;">${sa}</td>
-                <td style="text-align: center; white-space: nowrap;">
-                    <button class="btn-icon" onclick="editerEtudiantV2('${e.da}')" title="Modifier">✏️</button>
-                    <button class="btn-icon btn-icon-danger" onclick="supprimerEtudiantV2('${e.da}')" title="Supprimer">✕</button>
+                <td style="text-align: center;">
+                    <select class="controle-form controle-form-compact" onchange="actionEtudiantV2(this, '${e.da}')">
+                        <option value="">—</option>
+                        <option value="editer">Éditer</option>
+                        <option value="supprimer">Supprimer</option>
+                    </select>
+                </td>
+                <td style="text-align: center;">
+                    <select class="controle-form controle-form-compact" onchange="remarqueEtudiantV2(this, '${e.da}')">
+                        <option value=""${!statut ? ' selected' : ''}>—</option>
+                        <option value="inactif"${statut === 'inactif' ? ' selected' : ''}>Inactivité</option>
+                        <option value="décrochage"${statut === 'décrochage' ? ' selected' : ''}>Décrochage</option>
+                    </select>
                 </td>
             </tr>
         `;
@@ -2697,6 +2710,72 @@ async function supprimerEtudiantV2(da) {
 
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces('Étudiant supprimé');
+    }
+}
+
+/**
+ * Dispatch des actions du select étudiant (Éditer, Supprimer, Inactivité, Décrochage, Réactiver)
+ */
+function actionEtudiantV2(selectElement, da) {
+    var action = selectElement.value;
+    selectElement.value = ''; // Réinitialiser le select
+
+    if (!action) return;
+
+    switch (action) {
+        case 'editer':
+            editerEtudiantV2(da);
+            break;
+        case 'supprimer':
+            supprimerEtudiantV2(da);
+            break;
+    }
+}
+
+/**
+ * Gère le changement de remarque (Inactivité / Décrochage) via le select Remarque
+ */
+async function remarqueEtudiantV2(selectElement, da) {
+    var nouveauStatut = selectElement.value;
+    await changerStatutEtudiantV2(da, nouveauStatut);
+}
+
+/**
+ * Change le statut d'un étudiant (inactif, decrochage, ou '' pour réactiver)
+ * - Inactivité : signalée par le registrariat, l'étudiant est absent de plusieurs cours
+ * - Décrochage : constat de l'enseignant, officieux, peut-être seulement dans ce cours
+ * Dans les deux cas : résultats affichés jusqu'à la dernière présence,
+ * mais évaluations et absences exclues des calculs du groupe.
+ */
+async function changerStatutEtudiantV2(da, nouveauStatut) {
+    var cleEtud = cle('groupeEtudiants');
+    var etudiants = await db.get(cleEtud) || [];
+    var index = etudiants.findIndex(function(e) { return e.da === da; });
+
+    if (index === -1) return;
+
+    var etudiant = etudiants[index];
+    var nomComplet = (etudiant.prenom || '') + ' ' + (etudiant.nom || '');
+
+    if (nouveauStatut === 'inactif') {
+        if (!confirm('Marquer ' + nomComplet.trim() + ' comme inactif ?\n\nSes résultats seront affichés jusqu\'à sa dernière présence, mais ne seront plus comptés dans les calculs du groupe.')) return;
+    } else if (nouveauStatut === 'décrochage') {
+        if (!confirm('Marquer ' + nomComplet.trim() + ' en décrochage ?\n\nSes résultats seront affichés jusqu\'à sa dernière présence, mais ne seront plus comptés dans les calculs du groupe.')) return;
+    }
+
+    etudiants[index].statut = nouveauStatut;
+    await db.set(cleEtud, etudiants);
+
+    chargerListeEtudiantsV2();
+
+    if (typeof afficherNotificationSucces === 'function') {
+        if (nouveauStatut === 'inactif') {
+            afficherNotificationSucces(nomComplet.trim() + ' marqué inactif');
+        } else if (nouveauStatut === 'décrochage') {
+            afficherNotificationSucces(nomComplet.trim() + ' marqué en décrochage');
+        } else {
+            afficherNotificationSucces(nomComplet.trim() + ' réactivé');
+        }
     }
 }
 
@@ -5110,6 +5189,9 @@ window.chargerListeEtudiantsV2 = chargerListeEtudiantsV2;
 window.ajouterEtudiantV2 = ajouterEtudiantV2;
 window.supprimerEtudiantV2 = supprimerEtudiantV2;
 window.editerEtudiantV2 = editerEtudiantV2;
+window.actionEtudiantV2 = actionEtudiantV2;
+window.remarqueEtudiantV2 = remarqueEtudiantV2;
+window.changerStatutEtudiantV2 = changerStatutEtudiantV2;
 window.soumettreEtudiantV2 = soumettreEtudiantV2;
 window.annulerEditionEtudiantV2 = annulerEditionEtudiantV2;
 window.creerNouveauGroupeV2 = creerNouveauGroupeV2;
@@ -5734,7 +5816,7 @@ async function changerGroupeCoursActifV2(valeur) {
                 } else if (etudiantsNouveauGC.length > 0) {
                     // Trier et prendre le premier
                     etudiantsNouveauGC.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
-                    const premierActif = etudiantsNouveauGC.find(e => e.statut !== 'décrochage' && e.statut !== 'abandon');
+                    const premierActif = etudiantsNouveauGC.find(e => !estEtudiantExclu(e));
                     if (premierActif) {
                         afficherProfilComplet(premierActif.da);
                     }
@@ -5870,7 +5952,7 @@ async function changerGroupeCoursActifV2(valeur) {
             } else if (etudiantsNouveauGroupe.length > 0) {
                 // Trier et prendre le premier
                 etudiantsNouveauGroupe.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
-                const premierActifGC = etudiantsNouveauGroupe.find(e => e.statut !== 'décrochage' && e.statut !== 'abandon');
+                const premierActifGC = etudiantsNouveauGroupe.find(e => !estEtudiantExclu(e));
                 if (premierActifGC) {
                     afficherProfilComplet(premierActifGC.da);
                 }

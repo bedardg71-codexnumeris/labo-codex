@@ -644,7 +644,7 @@ function afficherSousSection(idSousSection) {
                             ? obtenirEtudiantsCoursActif()
                             : (typeof obtenirDonneesSelonMode === 'function'
                                 ? obtenirDonneesSelonMode('groupeEtudiants') : []);
-                        const actifs = etudiants.filter(e => e.statut !== 'décrochage' && e.statut !== 'abandon');
+                        const actifs = etudiants.filter(e => !estEtudiantExclu(e));
                         actifs.sort((a, b) => (a.nom || '').localeCompare(b.nom || '', 'fr'));
                         if (actifs.length > 0 && typeof afficherProfilComplet === 'function') {
                             afficherProfilComplet(actifs[0].da);

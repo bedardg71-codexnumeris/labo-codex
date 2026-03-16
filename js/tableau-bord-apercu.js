@@ -100,9 +100,7 @@ function genererPanneauSuiviEtudiants() {
     const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
         ? obtenirEtudiantsCoursActif()
         : [];
-    const etudiantsActifs = etudiants.filter(e =>
-        e.statut !== 'décrochage' && e.statut !== 'abandon'
-    );
+    const etudiantsActifs = etudiants.filter(e => !estEtudiantExclu(e));
     const suivis = nettoyerEtudiantsSuivis();
     const modeActif = db.getSync('modeApplication', 'normal');
 
@@ -760,9 +758,7 @@ function chargerTableauBordApercu() {
             ? obtenirEtudiantsCoursActif()
             : filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants') || []);
 
-        const etudiantsActifs = etudiants.filter(e =>
-            e.statut !== 'décrochage' && e.statut !== 'abandon'
-        );
+        const etudiantsActifs = etudiants.filter(e => !estEtudiantExclu(e));
 
         // 🆕 BETA 96 : Mettre à jour les lignes de contexte dans les 4 sections
         const nbEtudiants = etudiantsActifs.length;
