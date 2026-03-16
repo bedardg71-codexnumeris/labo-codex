@@ -16,6 +16,7 @@
 
 | # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
 |---|---------|--------------|---------|-------|-------------|------------|
+| 87 | Grégoire | 16 mars | 16 mars | 0316-0825 | Suppression définitive dans la corbeille ne supprime pas l'évaluation liée | 2.7 Fallback silencieux : `supprimerDefinitivement()` ne supprimait que le fichier (blob), pas l'évaluation dans `evaluationsSauvegardees`. Ajout nettoyage par (etudiantDA, productionId) dans suppression unitaire et vider corbeille (liste-evaluations.js) |
 | 86 | Grégoire | 16 mars | 16 mars | 0316-0825 | Renommage du codex perdu au rechargement — export utilise l'ancien nom | 2.6 Concurrence : `actionRenommer()` écrivait en IDB via fire-and-forget. `syncToLocalStorageCache` au démarrage écrasait avec l'ancien état IDB. Ajout `await db.set()` explicite (codex.js) |
 | 85 | Grégoire | 16 mars | 16 mars | 0316-0825 | Format rétroaction « Code » ignoré — toujours « Note chiffrée » par défaut | 2.7 Fallback silencieux : `cocherOptionsParDefaut()` cherchait par `p.id` uniquement, échouait quand `pratiqueId` est un type (`pan-standards`). Ajout fallback par `p.type` (evaluation.js) |
 | 84 | Grégoire | 16 mars | 16 mars | 0316-0825 | Grille générique revient après suppression via bouton édition | 2.5 État résiduel : `supprimerGrilleActive()` ne marquait pas l'ID dans `ressourcesSupprimees` — 4e chemin de suppression manqué par le fix #83 (grilles.js) |
@@ -98,7 +99,7 @@
 
 ### Pour ajouter un bug
 1. Créer une entrée dans la section "Ouverts"
-2. Assigner un numéro séquentiel (prochain : **#88**)
+2. Assigner un numéro séquentiel (prochain : **#89**)
 3. Documenter dans le sous-dossier du testeur si fichiers/screenshots fournis
 
 ### Pour marquer comme corrigé
