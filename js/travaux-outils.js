@@ -201,6 +201,24 @@
     // Sauvegarder les valeurs par defaut des autocollants avant toute personnalisation
     const _defautsAutocollants = AUTOCOLLANTS.map(a => ({ ...a }));
 
+    /**
+     * Charge les tampons personnalises depuis IDB et les ajoute a AUTOCOLLANTS
+     */
+    function chargerTamponsPersonnalises() {
+        var customs = db.getSync('tamponsPersonnalises', []);
+        if (!Array.isArray(customs)) return;
+        customs.forEach(function(c) {
+            if (!c.id || AUTOCOLLANTS.find(function(a) { return a.id === c.id; })) return;
+            AUTOCOLLANTS.push({
+                id: c.id,
+                nom: c.nom || 'Nouveau',
+                fichier: '',
+                categorie: c.categorie || 'diagnostic',
+                custom: true
+            });
+        });
+    }
+
     let imagesAutocollants = {};   // Cache { id: HTMLImageElement }
     let promessesAutocollants = {}; // Cache { id: Promise<HTMLImageElement> }
     let autocollantActif = null;   // ID de l'autocollant selectionne (ou null)
@@ -377,7 +395,8 @@
         if (palette) palette.remove();
     }
 
-    // Precharger au lancement
+    // Charger les tampons personnalises puis precharger
+    chargerTamponsPersonnalises();
     prechargerAutocollants();
 
     /* ===============================
@@ -396,6 +415,13 @@
         { id: 'errfr_9',  code: 9,  nom: 'Vocabulaire / anglicisme' },
         { id: 'errfr_10', code: 10, nom: 'Orthographe d\u2019usage / typographie' }
     ];
+
+    // Valeurs par defaut des symboles (crochet/croix/interrogation)
+    const _defautsSymboles = {
+        crochet:       { nom: 'Crochet',       couleur: '#2e7d32', icone: '\u2714\uFE0E' },
+        croix:         { nom: 'Croix',          couleur: '#c62828', icone: '\u2718' },
+        interrogation: { nom: 'Interrogation',  couleur: '#e65100', icone: '?' }
+    };
 
     // Sauvegarder les valeurs par defaut des erreurs FR avant toute personnalisation
     const _defautsNomsErrFr = {};
@@ -483,11 +509,74 @@
         db.setSync('nomsCategoriesTampons', obj);
     }
 
+    // Symboles Unicode personnalises (au-dela des 3 built-in)
+    function obtenirSymbolesPerso() {
+        return db.getSync('symbolesUnicodePerso', null) || [];
+    }
+
+    function sauvegarderSymbolesPerso(arr) {
+        db.setSync('symbolesUnicodePerso', arr);
+    }
+
+    // Categories personnalisees (au-dela des 3 built-in)
+    function obtenirCategoriesPerso() {
+        return db.getSync('categoriesPerso', null) || [];
+    }
+
+    function sauvegarderCategoriesPerso(arr) {
+        db.setSync('categoriesPerso', arr);
+    }
+
+    // Couleurs des categories
+    function obtenirCouleursCategories() {
+        return db.getSync('couleursCategories', null) || {};
+    }
+
+    function sauvegarderCouleursCategories(obj) {
+        db.setSync('couleursCategories', obj);
+    }
+
+    /**
+     * Retourne la couleur de categorie pour un autocollant donne.
+     * @param {string} autocollantId - ID de l'autocollant
+     * @returns {string|null} Couleur hex ou null
+     */
+    function obtenirCouleurCategorieAutocollant(autocollantId) {
+        var autocollant = AUTOCOLLANTS.find(function(a) { return a.id === autocollantId; });
+        if (!autocollant) return null;
+        var couleurs = obtenirCouleursCategories();
+        return couleurs[autocollant.categorie] || null;
+    }
+
+    var CATEGORIES_BUILTIN = ['symboles', 'qualite', 'diagnostic'];
+
+    function obtenirOrdreCategories() {
+        var ordre = db.getSync('ordreCategories', null);
+        // Construire la liste complete : built-in + perso
+        var tous = CATEGORIES_BUILTIN.slice();
+        obtenirCategoriesPerso().forEach(function(c) { tous.push(c.id); });
+        if (ordre && Array.isArray(ordre)) {
+            var result = ordre.filter(function(id) { return tous.indexOf(id) !== -1; });
+            tous.forEach(function(id) { if (result.indexOf(id) === -1) result.push(id); });
+            return result;
+        }
+        return tous;
+    }
+
+    function sauvegarderOrdreCategories(arr) {
+        db.setSync('ordreCategories', arr);
+    }
+
     function obtenirOrdreAutocollants(categorie) {
         const key = 'ordreAutocollants_' + categorie;
         const ordre = db.getSync(key, null);
         const ids = AUTOCOLLANTS.filter(a => a.categorie === categorie).map(a => a.id);
-        if (ordre && Array.isArray(ordre) && ordre.length === ids.length) return ordre;
+        if (ordre && Array.isArray(ordre)) {
+            // Garder les IDs valides dans l'ordre sauvegarde, ajouter les nouveaux a la fin
+            var result = ordre.filter(function(id) { return ids.indexOf(id) !== -1; });
+            ids.forEach(function(id) { if (result.indexOf(id) === -1) result.push(id); });
+            return result;
+        }
         return ids;
     }
 
@@ -536,10 +625,10 @@
         // --- Observations (autocollants) ---
         const persObs = obtenirPersonnalisationObservations();
         AUTOCOLLANTS.forEach((a, i) => {
-            const defaut = _defautsAutocollants[i];
+            const defaut = _defautsAutocollants[i]; // undefined pour les tampons custom
             const pers = persObs[a.id];
             // Restaurer le nom par défaut puis appliquer la personnalisation
-            a.nom = (pers && pers.nom) ? pers.nom : defaut.nom;
+            a.nom = (pers && pers.nom) ? pers.nom : (defaut ? defaut.nom : a.nom);
             // Image personnalisée en base64
             if (pers && pers.imageBase64) {
                 const img = new Image();
@@ -550,7 +639,7 @@
                 img.src = pers.imageBase64;
                 imagesAutocollants[a.id] = img;
                 promessesAutocollants[a.id] = promesse;
-            } else {
+            } else if (defaut && defaut.fichier) {
                 // Restaurer l'image par défaut depuis le fichier
                 const img = new Image();
                 const promesse = new Promise((resolve, reject) => {
@@ -561,7 +650,44 @@
                 imagesAutocollants[a.id] = img;
                 promessesAutocollants[a.id] = promesse;
             }
+            // Tampons custom sans image : pas d'entrée dans le cache (placeholder gere par le rendu)
         });
+
+        // --- Symboles built-in (crochet / croix / interrogation) ---
+        ['crochet', 'croix', 'interrogation'].forEach(function(id) {
+            var pers = persObs[id];
+            var def = _defautsSymboles[id];
+            OUTILS[id].nom = (pers && pers.nom) ? pers.nom : def.nom;
+            OUTILS[id].couleurBouton = (pers && pers.couleur) ? pers.couleur : def.couleur;
+            OUTILS[id].icone = (pers && pers.icone) ? pers.icone : def.icone;
+        });
+
+        // --- Symboles Unicode personnalisés ---
+        // Nettoyer les anciens symboles custom de OUTILS
+        Object.keys(OUTILS).forEach(function(k) { if (OUTILS[k].customSymbole) delete OUTILS[k]; });
+        obtenirSymbolesPerso().forEach(function(s) {
+            OUTILS[s.id] = {
+                id: s.id,
+                nom: s.nom || 'Symbole',
+                icone: s.icone || '?',
+                couleurBouton: s.couleur || '#888888',
+                curseur: 'crosshair',
+                type: 'symbole',
+                taille: 30,
+                customSymbole: true
+            };
+        });
+
+        // --- Couleur de categorie sur les symboles ---
+        var couleursCat = obtenirCouleursCategories();
+        if (couleursCat.symboles) {
+            ['crochet', 'croix', 'interrogation'].forEach(function(id) {
+                OUTILS[id].couleurBouton = couleursCat.symboles;
+            });
+            obtenirSymbolesPerso().forEach(function(s) {
+                if (OUTILS[s.id]) OUTILS[s.id].couleurBouton = couleursCat.symboles;
+            });
+        }
 
         // --- Erreurs de français ---
         const persErr = obtenirPersonnalisationErreursFr();
@@ -611,45 +737,63 @@
     function genererContenuTampons() {
         let html = '';
         const nomsCat = obtenirNomsCategories();
+        var catsMasquees = db.getSync('categoriesMasquees', null) || [];
+        var elemMasques = db.getSync('elementsMasques', null) || [];
 
-        // Symboles (crochet / croix / interrogation)
-        html += '<div class="travaux-autocollants-label">' + (nomsCat.symboles || 'Contenu et méthode') + '</div>';
-        html += '<div class="travaux-autocollants-grille travaux-autocollants-grille--symboles">';
-        const crochetActif = outilActif === 'crochet' ? ' actif' : '';
-        const croixActif = outilActif === 'croix' ? ' actif' : '';
-        const interroActif = outilActif === 'interrogation' ? ' actif' : '';
-        html += '<div class="travaux-autocollant-item' + crochetActif + '" onclick="travauxOutils.setOutilActif(\'crochet\')" title="Bien vu, exact, pertinent">';
-        html += '<span style="font-size:24px; color:#2e7d32; font-weight:bold;">\u2714\uFE0E</span>';
-        html += '<span>Exact</span></div>';
-        html += '<div class="travaux-autocollant-item' + croixActif + '" onclick="travauxOutils.setOutilActif(\'croix\')" title="Erroné, inexact, +/- pertinent">';
-        html += '<span style="font-size:24px; color:#c62828; font-weight:bold;">\u2718</span>';
-        html += '<span>Erroné</span></div>';
-        html += '<div class="travaux-autocollant-item' + interroActif + '" onclick="travauxOutils.setOutilActif(\'interrogation\')" title="Incertain, ambigu, pas clair">';
-        html += '<span style="font-size:24px; color:#e65100; font-weight:bold;">?</span>';
-        html += '<span>Incertain</span></div>';
-        html += '</div>';
+        // Helper: generer une grille de tampons image
+        function _htmlTamponsImage(categorie, coulCat) {
+            var r = '';
+            var borderStyle = '';
+            obtenirAutocollantsOrdonnes(categorie).forEach(function(a) {
+                if (elemMasques.indexOf(a.id) !== -1) return;
+                var imgSrc = imagesAutocollants[a.id] ? imagesAutocollants[a.id].src : (a.fichier ? DOSSIER_AUTOCOLLANTS + a.fichier : '');
+                var actif = (getAutocollantActif() === a.id) ? ' actif' : '';
+                r += '<div class="travaux-autocollant-item' + actif + '"' + (borderStyle ? ' style="' + borderStyle + '"' : '') + ' onclick="travauxOutils.setAutocollantActif(\'' + a.id + '\')" title="' + a.nom + '">';
+                if (imgSrc) {
+                    r += '<img src="' + imgSrc + '" alt="' + a.nom + '">';
+                } else {
+                    r += '<span style="font-size:24px; opacity:0.3;">?</span>';
+                }
+                r += '<span>' + a.nom + '</span></div>';
+            });
+            return r;
+        }
 
-        // Qualité (ordre personnalisé)
-        html += '<div class="travaux-autocollants-label">' + (nomsCat.qualite || 'Qualité') + '</div>';
-        html += '<div class="travaux-autocollants-grille">';
-        obtenirAutocollantsOrdonnes('qualite').forEach(function(a) {
-            var imgSrc = imagesAutocollants[a.id] ? imagesAutocollants[a.id].src : DOSSIER_AUTOCOLLANTS + a.fichier;
-            html += '<div class="travaux-autocollant-item" onclick="travauxOutils.setAutocollantActif(\'' + a.id + '\')" title="' + a.nom + '">';
-            html += '<img src="' + imgSrc + '" alt="' + a.nom + '">';
-            html += '<span>' + a.nom + '</span></div>';
+        // Generer les categories dans l'ordre personnalise
+        var couleursCat = obtenirCouleursCategories();
+        obtenirOrdreCategories().forEach(function(catId) {
+            if (catsMasquees.indexOf(catId) !== -1) return;
+            var nomCat = nomsCat[catId] || catId;
+            var coulCat = couleursCat[catId];
+            var styleCat = coulCat ? ' style="border-left:3px solid ' + coulCat + '; padding-left:6px;"' : '';
+            html += '<div class="travaux-autocollants-label"' + styleCat + '>' + nomCat + '</div>';
+
+            if (catId === 'symboles') {
+                html += '<div class="travaux-autocollants-grille travaux-autocollants-grille--symboles">';
+                ['crochet', 'croix', 'interrogation'].forEach(function(id) {
+                    if (elemMasques.indexOf(id) !== -1) return;
+                    var outil = OUTILS[id];
+                    var actif = outilActif === id ? ' actif' : '';
+                    html += '<div class="travaux-autocollant-item' + actif + '" onclick="travauxOutils.setOutilActif(\'' + id + '\')" title="' + outil.nom + '">';
+                    html += '<span style="font-size:24px; color:' + outil.couleurBouton + '; font-weight:bold;">' + outil.icone + '</span>';
+                    html += '<span>' + outil.nom + '</span></div>';
+                });
+                obtenirSymbolesPerso().forEach(function(s) {
+                    var outil = OUTILS[s.id];
+                    if (!outil) return;
+                    var actif = outilActif === s.id ? ' actif' : '';
+                    html += '<div class="travaux-autocollant-item' + actif + '" onclick="travauxOutils.setOutilActif(\'' + s.id + '\')" title="' + outil.nom + '">';
+                    html += '<span style="font-size:24px; color:' + outil.couleurBouton + '; font-weight:bold;">' + outil.icone + '</span>';
+                    html += '<span>' + outil.nom + '</span></div>';
+                });
+                html += _htmlTamponsImage('symboles', coulCat);
+                html += '</div>';
+            } else {
+                html += '<div class="travaux-autocollants-grille">';
+                html += _htmlTamponsImage(catId, coulCat);
+                html += '</div>';
+            }
         });
-        html += '</div>';
-
-        // Diagnostic (ordre personnalisé)
-        html += '<div class="travaux-autocollants-label">' + (nomsCat.diagnostic || 'Observations') + '</div>';
-        html += '<div class="travaux-autocollants-grille">';
-        obtenirAutocollantsOrdonnes('diagnostic').forEach(function(a) {
-            var imgSrc = imagesAutocollants[a.id] ? imagesAutocollants[a.id].src : DOSSIER_AUTOCOLLANTS + a.fichier;
-            html += '<div class="travaux-autocollant-item" onclick="travauxOutils.setAutocollantActif(\'' + a.id + '\')" title="' + a.nom + '">';
-            html += '<img src="' + imgSrc + '" alt="' + a.nom + '">';
-            html += '<span>' + a.nom + '</span></div>';
-        });
-        html += '</div>';
 
         return html;
     }
@@ -1267,60 +1411,121 @@
         html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces textes appara\u00eetront dans la r\u00e9troaction g\u00e9n\u00e9r\u00e9e pour l\'\u00e9l\u00e8ve lorsque le tampon correspondant est utilis\u00e9. Cliquez sur l\'image pour la remplacer. Glissez \u2630 pour r\u00e9ordonner.</p>';
 
         // Noms des categories editables
-        html += '<div style="margin-bottom:16px; display:flex; flex-direction:column; gap:6px;">';
-        html += '<div class="travaux-retro-row-haut" style="gap:8px; align-items:center;">';
-        html += '<span style="font-size:0.8rem; color:var(--texte-secondaire); min-width:120px;">\u2714 \u2718 ? :</span>';
-        html += '<input type="text" class="travaux-retro-nom-input" data-cat-id="symboles" value="' + (nomsCat.symboles || '') + '">';
-        html += '</div>';
-        html += '<div class="travaux-retro-row-haut" style="gap:8px; align-items:center;">';
-        html += '<span style="font-size:0.8rem; color:var(--texte-secondaire); min-width:120px;">Tampons 1-3 :</span>';
-        html += '<input type="text" class="travaux-retro-nom-input" data-cat-id="qualite" value="' + (nomsCat.qualite || '') + '">';
-        html += '</div>';
-        html += '<div class="travaux-retro-row-haut" style="gap:8px; align-items:center;">';
-        html += '<span style="font-size:0.8rem; color:var(--texte-secondaire); min-width:120px;">Tampons 4+ :</span>';
-        html += '<input type="text" class="travaux-retro-nom-input" data-cat-id="diagnostic" value="' + (nomsCat.diagnostic || '') + '">';
-        html += '</div>';
-        html += '</div>';
+        var catsPerso = obtenirCategoriesPerso();
+        // Determiner les categories masquees
+        var catsMasquees = db.getSync('categoriesMasquees', null) || [];
+        // Toutes les categories (built-in + perso), affichees sauf masquees
+        var catPersoMap = {};
+        catsPerso.forEach(function(c) { catPersoMap[c.id] = c; });
+        var ordreCategories = obtenirOrdreCategories();
+        var couleursCat = obtenirCouleursCategories();
 
-        // Categorie qualite
-        html += '<div class="travaux-retro-cat-label" style="font-weight:600; margin:12px 0 6px; color:var(--texte-principal);">' + (nomsCat.qualite || 'Qualit\u00e9') + '</div>';
-        html += '<div id="travaux-retro-obs-liste-qualite">';
-        obtenirAutocollantsOrdonnes('qualite').forEach(function(a) {
-            var texte = retroActuelles[a.id] || '';
-            var imgSrc = (persObs[a.id] && persObs[a.id].imageBase64) ? persObs[a.id].imageBase64 : DOSSIER_AUTOCOLLANTS + a.fichier;
-            html += '<div class="travaux-retro-row travaux-retro-draggable" data-obs-id="' + a.id + '" draggable="true">';
-            html += '<div class="travaux-retro-row-haut">';
-            html += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>';
-            html += '<div class="travaux-retro-img-upload" data-obs-id="' + a.id + '" title="Cliquer pour changer l\'image">';
-            html += '<img src="' + imgSrc + '" alt="' + a.nom + '" data-img-id="' + a.id + '">';
-            html += '<input type="file" accept="image/*" data-file-id="' + a.id + '" hidden>';
+        html += '<div id="travaux-retro-categories" style="margin-bottom:16px; display:flex; flex-direction:column; gap:6px;">';
+        ordreCategories.forEach(function(catId) {
+            if (catsMasquees.indexOf(catId) !== -1) return;
+            var estPerso = !!catPersoMap[catId];
+            var coulCat = couleursCat[catId] || '#888888';
+            html += '<div class="travaux-retro-cat-draggable" style="display:flex; gap:8px; align-items:center;" data-cat-row="' + catId + '"' + (estPerso ? ' data-cat-perso-id="' + catId + '"' : '') + ' draggable="true">';
+            html += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner" style="cursor:grab;">\u2630</span>';
+            html += '<button class="travaux-retro-btn-supprimer" onclick="travauxOutils.supprimerCategorieRetroObs(\'' + catId + '\')" title="Supprimer la cat\u00e9gorie" style="min-width:auto;">&times;</button>';
+            html += '<div class="travaux-retro-couleur" style="background:' + coulCat + ';" data-couleur-cat-id="' + catId + '" title="Couleur de la cat\u00e9gorie">';
+            html += '<input type="color" class="travaux-retro-couleur-input" data-color-cat-id="' + catId + '" value="' + coulCat + '">';
             html += '</div>';
-            html += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + a.id + '" value="' + a.nom + '">';
-            html += '</div>';
-            html += '<textarea class="travaux-retro-textarea" data-retro-id="' + a.id + '" rows="3">' + texte + '</textarea>';
+            html += '<input type="text" class="travaux-retro-nom-input" data-cat-id="' + catId + '"' + (estPerso ? ' data-cat-perso-id="' + catId + '"' : '') + ' value="' + (nomsCat[catId] || '') + '">';
             html += '</div>';
         });
+        html += '<button class="btn btn-secondaire" onclick="travauxOutils.ajouterCategorieRetroObs()" style="margin-top:4px;font-size:0.8rem;align-self:flex-start;">+ Ajouter une cat\u00e9gorie</button>';
         html += '</div>';
 
-        // Categorie diagnostic
-        html += '<div class="travaux-retro-cat-label" style="font-weight:600; margin:12px 0 6px; color:var(--texte-principal);">' + (nomsCat.diagnostic || 'Observations') + '</div>';
-        html += '<div id="travaux-retro-obs-liste-diagnostic">';
-        obtenirAutocollantsOrdonnes('diagnostic').forEach(function(a) {
-            var texte = retroActuelles[a.id] || '';
-            var imgSrc = (persObs[a.id] && persObs[a.id].imageBase64) ? persObs[a.id].imageBase64 : DOSSIER_AUTOCOLLANTS + a.fichier;
-            html += '<div class="travaux-retro-row travaux-retro-draggable" data-obs-id="' + a.id + '" draggable="true">';
-            html += '<div class="travaux-retro-row-haut">';
-            html += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>';
-            html += '<div class="travaux-retro-img-upload" data-obs-id="' + a.id + '" title="Cliquer pour changer l\'image">';
-            html += '<img src="' + imgSrc + '" alt="' + a.nom + '" data-img-id="' + a.id + '">';
-            html += '<input type="file" accept="image/*" data-file-id="' + a.id + '" hidden>';
-            html += '</div>';
-            html += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + a.id + '" value="' + a.nom + '">';
-            html += '</div>';
-            html += '<textarea class="travaux-retro-textarea" data-retro-id="' + a.id + '" rows="3">' + texte + '</textarea>';
-            html += '</div>';
+        // Helper pour generer une ligne de tampon
+        function _htmlRowTampon(a, texte, imgSrc) {
+            var estCustom = a.custom ? ' data-custom="true"' : '';
+            var btnSuppr = '<button class="travaux-retro-btn-supprimer" onclick="travauxOutils.supprimerTamponRetroObs(\'' + a.id + '\')" title="Supprimer">&times;</button>';
+            var r = '<div class="travaux-retro-row travaux-retro-draggable" data-obs-id="' + a.id + '"' + estCustom + ' draggable="true">';
+            r += '<div class="travaux-retro-row-haut">';
+            r += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>';
+            r += '<div class="travaux-retro-img-upload" data-obs-id="' + a.id + '" title="Cliquer pour changer l\'image">';
+            r += '<img src="' + imgSrc + '" alt="' + a.nom + '" data-img-id="' + a.id + '"' + (imgSrc ? '' : ' style="opacity:0.3"') + '>';
+            r += '<input type="file" accept="image/*" data-file-id="' + a.id + '" hidden>';
+            r += '</div>';
+            r += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + a.id + '" value="' + a.nom + '"' + (a.custom ? ' placeholder="Nom du tampon"' : '') + '>';
+            r += btnSuppr;
+            r += '</div>';
+            r += '<textarea class="travaux-retro-textarea" data-retro-id="' + a.id + '" rows="3">' + texte + '</textarea>';
+            r += '</div>';
+            return r;
+        }
+
+        // Helper pour generer une ligne de symbole Unicode
+        function _htmlRowSymbole(id, outil, texte, estCustom) {
+            var couleur = outil.couleurBouton;
+            var btnSuppr = '<button class="travaux-retro-btn-supprimer" onclick="travauxOutils.supprimerSymboleRetroObs(\'' + id + '\')" title="Supprimer">&times;</button>';
+            var r = '<div class="travaux-retro-row' + (estCustom ? ' travaux-retro-draggable' : '') + '" data-obs-id="' + id + '"' + (estCustom ? ' data-sym-custom="true" draggable="true"' : '') + '>';
+            r += '<div class="travaux-retro-row-haut">';
+            if (estCustom) r += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>';
+            r += '<div class="travaux-retro-couleur" style="background:' + couleur + ';" data-couleur-id="' + id + '" title="Changer la couleur">';
+            r += '<input type="color" class="travaux-retro-couleur-input" data-color-id="' + id + '" value="' + couleur + '">';
+            r += '</div>';
+            r += '<input type="text" class="travaux-retro-icone-input" data-icone-id="' + id + '" value="' + outil.icone + '" title="Caract\u00e8re Unicode" style="color:' + couleur + ';">';
+            r += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + id + '" value="' + outil.nom + '"' + (estCustom ? ' placeholder="Nom du symbole"' : '') + '>';
+            r += btnSuppr;
+            r += '</div>';
+            r += '<textarea class="travaux-retro-textarea" data-retro-id="' + id + '" rows="3">' + texte + '</textarea>';
+            r += '</div>';
+            return r;
+        }
+
+        // Determiner les elements masques
+        var elemMasques = db.getSync('elementsMasques', null) || [];
+
+        // Generer les sections de toutes les categories dans l'ordre
+        ordreCategories.forEach(function(catId) {
+            if (catsMasquees.indexOf(catId) !== -1) return;
+            var nomCat = nomsCat[catId] || catId;
+            html += '<div class="travaux-retro-cat-label" style="font-weight:600; margin:12px 0 6px; color:var(--texte-principal);" data-cat-section="' + catId + '">' + nomCat + '</div>';
+
+            if (catId === 'symboles') {
+                // Symboles built-in
+                html += '<div id="travaux-retro-obs-liste-symboles">';
+                ['crochet', 'croix', 'interrogation'].forEach(function(id) {
+                    if (elemMasques.indexOf(id) !== -1) return;
+                    html += _htmlRowSymbole(id, OUTILS[id], retroActuelles[id] || '', false);
+                });
+                html += '</div>';
+                // Symboles Unicode personnalises
+                html += '<div id="travaux-retro-obs-liste-symboles-unicode">';
+                var symPerso = obtenirSymbolesPerso();
+                symPerso.forEach(function(s) {
+                    var outil = OUTILS[s.id] || { nom: s.nom || 'Symbole', icone: s.icone || '?', couleurBouton: s.couleur || '#888888' };
+                    html += _htmlRowSymbole(s.id, outil, retroActuelles[s.id] || '', true);
+                });
+                html += '</div>';
+                // Tampons image de la categorie symboles
+                html += '<div id="travaux-retro-obs-liste-symboles-custom">';
+                obtenirAutocollantsOrdonnes('symboles').forEach(function(a) {
+                    if (elemMasques.indexOf(a.id) !== -1) return;
+                    var texte = retroActuelles[a.id] || '';
+                    var imgSrc = (persObs[a.id] && persObs[a.id].imageBase64) ? persObs[a.id].imageBase64 : (a.fichier ? DOSSIER_AUTOCOLLANTS + a.fichier : '');
+                    html += _htmlRowTampon(a, texte, imgSrc);
+                });
+                html += '</div>';
+                html += '<div style="display:flex; gap:8px; margin-top:8px;">';
+                html += '<button class="btn btn-secondaire" onclick="travauxOutils.ajouterSymboleRetroObs()" style="font-size:0.8rem;">+ Symbole</button>';
+                html += '<button class="btn btn-secondaire" onclick="travauxOutils.ajouterTamponRetroObs(\'symboles\')" style="font-size:0.8rem;">+ Tampon image</button>';
+                html += '</div>';
+            } else {
+                // Categorie tampons image (qualite, diagnostic, ou perso)
+                html += '<div id="travaux-retro-obs-liste-' + catId + '">';
+                obtenirAutocollantsOrdonnes(catId).forEach(function(a) {
+                    if (elemMasques.indexOf(a.id) !== -1) return;
+                    var texte = retroActuelles[a.id] || '';
+                    var imgSrc = (persObs[a.id] && persObs[a.id].imageBase64) ? persObs[a.id].imageBase64 : (a.fichier ? DOSSIER_AUTOCOLLANTS + a.fichier : '');
+                    html += _htmlRowTampon(a, texte, imgSrc);
+                });
+                html += '</div>';
+                html += '<button class="btn btn-secondaire" onclick="travauxOutils.ajouterTamponRetroObs(\'' + catId + '\')" style="margin-top:8px;font-size:0.8rem;">+ Ajouter</button>';
+            }
         });
-        html += '</div>';
 
         html += '<div class="travaux-retro-actions">';
         html += '<button class="btn-secondaire" onclick="travauxOutils.reinitialiserRetroObservations()">R\u00e9initialiser</button>';
@@ -1354,9 +1559,109 @@
             });
         });
 
-        // Wiring: drag-and-drop pour chaque categorie
-        configurerDragRetroObs(overlay.querySelector('#travaux-retro-obs-liste-qualite'));
-        configurerDragRetroObs(overlay.querySelector('#travaux-retro-obs-liste-diagnostic'));
+        // Wiring: clic sur pastille couleur → ouvre le color picker
+        overlay.querySelectorAll('.travaux-retro-couleur').forEach(function(pastille) {
+            var colorInput = pastille.querySelector('input[type="color"]');
+            pastille.addEventListener('click', function(e) {
+                if (e.target !== colorInput) colorInput.click();
+            });
+            colorInput.addEventListener('input', function() {
+                pastille.style.background = colorInput.value;
+                // Mettre a jour la couleur de l'input icone a cote
+                var row = pastille.closest('.travaux-retro-row');
+                if (row) {
+                    var iconeInput = row.querySelector('.travaux-retro-icone-input');
+                    if (iconeInput) iconeInput.style.color = colorInput.value;
+                }
+            });
+        });
+
+        // Wiring: drag-and-drop pour les elements de chaque categorie
+        ordreCategories.forEach(function(catId) {
+            if (catId === 'symboles') {
+                configurerDragRetroObs(overlay.querySelector('#travaux-retro-obs-liste-symboles-unicode'));
+                configurerDragRetroObs(overlay.querySelector('#travaux-retro-obs-liste-symboles-custom'));
+            } else {
+                configurerDragRetroObs(overlay.querySelector('#travaux-retro-obs-liste-' + catId));
+            }
+        });
+
+        // Wiring: drag-and-drop pour reordonner les categories
+        configurerDragCategories(overlay.querySelector('#travaux-retro-categories'));
+    }
+
+    function configurerDragCategories(conteneur) {
+        if (!conteneur) return;
+        var draggedRow = null;
+        var SELECTOR = '.travaux-retro-cat-draggable';
+
+        conteneur.addEventListener('dragstart', function(e) {
+            var row = e.target.closest(SELECTOR);
+            if (!row) return;
+            draggedRow = row;
+            row.classList.add('travaux-retro-dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', '');
+        });
+
+        conteneur.addEventListener('dragend', function() {
+            if (draggedRow) draggedRow.classList.remove('travaux-retro-dragging');
+            draggedRow = null;
+            conteneur.querySelectorAll('.travaux-retro-drag-over').forEach(function(el) { el.classList.remove('travaux-retro-drag-over'); });
+        });
+
+        conteneur.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            var cible = e.target.closest(SELECTOR);
+            if (!cible || cible === draggedRow) return;
+            conteneur.querySelectorAll('.travaux-retro-drag-over').forEach(function(el) { el.classList.remove('travaux-retro-drag-over'); });
+            cible.classList.add('travaux-retro-drag-over');
+        });
+
+        conteneur.addEventListener('dragleave', function(e) {
+            var cible = e.target.closest(SELECTOR);
+            if (cible) cible.classList.remove('travaux-retro-drag-over');
+        });
+
+        conteneur.addEventListener('drop', function(e) {
+            e.preventDefault();
+            var cible = e.target.closest(SELECTOR);
+            if (!cible || !draggedRow || cible === draggedRow) return;
+            cible.classList.remove('travaux-retro-drag-over');
+            var rows = Array.from(conteneur.querySelectorAll(SELECTOR));
+            var idxDrag = rows.indexOf(draggedRow);
+            var idxCible = rows.indexOf(cible);
+            if (idxDrag < idxCible) {
+                conteneur.insertBefore(draggedRow, cible.nextSibling);
+            } else {
+                conteneur.insertBefore(draggedRow, cible);
+            }
+            // Reordonner les sections du corps de la modale
+            var modal = conteneur.closest('.travaux-retro-modal');
+            if (!modal) return;
+            var actionsDiv = modal.querySelector('.travaux-retro-actions');
+            var nouvelOrdre = Array.from(conteneur.querySelectorAll(SELECTOR)).map(function(r) { return r.dataset.catRow; });
+            // Collecter les blocs de chaque section (label + contenu jusqu'au prochain label)
+            var blocs = {};
+            modal.querySelectorAll('[data-cat-section]').forEach(function(label) {
+                var catId = label.dataset.catSection;
+                var elements = [label];
+                var next = label.nextElementSibling;
+                while (next && !next.dataset.catSection && !next.classList.contains('travaux-retro-actions')) {
+                    elements.push(next);
+                    next = next.nextElementSibling;
+                }
+                blocs[catId] = elements;
+            });
+            // Re-inserer dans le nouvel ordre
+            nouvelOrdre.forEach(function(catId) {
+                if (!blocs[catId]) return;
+                blocs[catId].forEach(function(el) {
+                    actionsDiv.parentNode.insertBefore(el, actionsDiv);
+                });
+            });
+        });
     }
 
     function configurerDragRetroObs(conteneur) {
@@ -1431,21 +1736,118 @@
                 persObj[id].imageBase64 = img.dataset.base64;
             }
         });
+        // Couleurs des symboles
+        modal.querySelectorAll('input[data-color-id]').forEach(function(inp) {
+            const id = inp.dataset.colorId;
+            if (!persObj[id]) persObj[id] = {};
+            persObj[id].couleur = inp.value;
+        });
+        // Icones des symboles
+        modal.querySelectorAll('input[data-icone-id]').forEach(function(inp) {
+            const id = inp.dataset.iconeId;
+            if (!persObj[id]) persObj[id] = {};
+            persObj[id].icone = inp.value;
+        });
         sauvegarderPersonnalisationObservations(persObj);
-        // Noms des categories
+
+        // Symboles Unicode personnalises
+        var symbolesPerso = [];
+        var listeSymUnicode = modal.querySelector('#travaux-retro-obs-liste-symboles-unicode');
+        if (listeSymUnicode) {
+            listeSymUnicode.querySelectorAll('.travaux-retro-row[data-sym-custom="true"]').forEach(function(row) {
+                var id = row.dataset.obsId;
+                var iconeInput = row.querySelector('input[data-icone-id]');
+                var nomInput = row.querySelector('input[data-nom-id]');
+                var colorInput = row.querySelector('input[data-color-id]');
+                symbolesPerso.push({
+                    id: id,
+                    icone: iconeInput ? iconeInput.value : '?',
+                    nom: nomInput ? nomInput.value : 'Symbole',
+                    couleur: colorInput ? colorInput.value : '#888888'
+                });
+            });
+        }
+        sauvegarderSymbolesPerso(symbolesPerso);
+
+        // Categories personnalisees
+        var catsPerso = [];
+        modal.querySelectorAll('input[data-cat-perso-id]').forEach(function(inp) {
+            catsPerso.push({ id: inp.dataset.catPersoId, nom: inp.value });
+        });
+        sauvegarderCategoriesPerso(catsPerso);
+
+        // Detecter les categories masquees (built-in absentes du DOM)
+        var catsMasquees = db.getSync('categoriesMasquees', null) || [];
+        ['symboles', 'qualite', 'diagnostic'].forEach(function(catId) {
+            var present = !!modal.querySelector('[data-cat-row="' + catId + '"]');
+            var idx = catsMasquees.indexOf(catId);
+            if (!present && idx === -1) catsMasquees.push(catId);
+            else if (present && idx !== -1) catsMasquees.splice(idx, 1);
+        });
+        // Categories perso supprimees : deja gerees (absentes de catsPerso)
+        db.setSync('categoriesMasquees', catsMasquees.length > 0 ? catsMasquees : null);
+
+        // Detecter les elements masques (symboles/tampons built-in supprimes du DOM)
+        var elemMasques = [];
+        var idsBuiltinSymboles = ['crochet', 'croix', 'interrogation'];
+        var idsBuiltinAutocollants = _defautsAutocollants.map(function(a) { return a.id; });
+        idsBuiltinSymboles.concat(idsBuiltinAutocollants).forEach(function(id) {
+            if (!modal.querySelector('[data-obs-id="' + id + '"]')) {
+                elemMasques.push(id);
+            }
+        });
+        db.setSync('elementsMasques', elemMasques.length > 0 ? elemMasques : null);
+
+        // Noms des categories (built-in + perso)
         const nomsCat = obtenirNomsCategories();
         modal.querySelectorAll('input[data-cat-id]').forEach(function(inp) {
             nomsCat[inp.dataset.catId] = inp.value;
         });
         sauvegarderNomsCategories(nomsCat);
-        // Ordre personnalise par categorie
-        ['qualite', 'diagnostic'].forEach(function(cat) {
-            const liste = modal.querySelector('#travaux-retro-obs-liste-' + cat);
+
+        // Couleurs des categories
+        var couleursCat = {};
+        modal.querySelectorAll('input[data-color-cat-id]').forEach(function(inp) {
+            couleursCat[inp.dataset.colorCatId] = inp.value;
+        });
+        sauvegarderCouleursCategories(couleursCat);
+
+        // Sauvegarder l'ordre des categories
+        var catContainer = modal.querySelector('#travaux-retro-categories');
+        if (catContainer) {
+            var ordreAct = Array.from(catContainer.querySelectorAll('.travaux-retro-cat-draggable'))
+                .map(function(r) { return r.dataset.catRow; });
+            sauvegarderOrdreCategories(ordreAct);
+        }
+
+        // Collecter les tampons personnalises et l'ordre par categorie
+        var catIds = ['symboles', 'qualite', 'diagnostic'];
+        catsPerso.forEach(function(c) { catIds.push(c.id); });
+        var customs = [];
+        catIds.forEach(function(cat) {
+            const liste = modal.querySelector('#travaux-retro-obs-liste-' + cat + '-custom') || modal.querySelector('#travaux-retro-obs-liste-' + cat);
             if (liste) {
                 const ordre = Array.from(liste.querySelectorAll('.travaux-retro-draggable'))
                     .map(function(row) { return row.dataset.obsId; });
                 sauvegarderOrdreAutocollants(cat, ordre);
+                // Reperer les tampons custom
+                liste.querySelectorAll('.travaux-retro-draggable[data-custom="true"]').forEach(function(row) {
+                    var nomInput = row.querySelector('input[data-nom-id]');
+                    customs.push({
+                        id: row.dataset.obsId,
+                        nom: nomInput ? nomInput.value : 'Nouveau',
+                        categorie: cat
+                    });
+                });
             }
+        });
+        db.setSync('tamponsPersonnalises', customs);
+        // Synchroniser AUTOCOLLANTS avec les customs
+        for (var i = AUTOCOLLANTS.length - 1; i >= 0; i--) {
+            if (AUTOCOLLANTS[i].custom) AUTOCOLLANTS.splice(i, 1);
+        }
+        customs.forEach(function(c) {
+            AUTOCOLLANTS.push({ id: c.id, nom: c.nom, fichier: '', categorie: c.categorie, custom: true });
         });
         appliquerPersonnalisations();
         rafraichirPalettesApresPersonnalisation();
@@ -1453,14 +1855,244 @@
     }
 
     function reinitialiserRetroObservations() {
+        // Nettoyer les ordres des categories perso avant de les supprimer
+        obtenirCategoriesPerso().forEach(function(cat) {
+            db.setSync('ordreAutocollants_' + cat.id, null);
+        });
         db.setSync('retroactionsObservations', null);
         db.setSync('personnalisationObservations', null);
         db.setSync('nomsCategoriesTampons', null);
+        db.setSync('ordreAutocollants_symboles', null);
         db.setSync('ordreAutocollants_qualite', null);
         db.setSync('ordreAutocollants_diagnostic', null);
+        db.setSync('symbolesUnicodePerso', null);
+        db.setSync('categoriesPerso', null);
+        db.setSync('categoriesMasquees', null);
+        db.setSync('elementsMasques', null);
+        db.setSync('ordreCategories', null);
+        db.setSync('couleursCategories', null);
+        // Supprimer les tampons personnalises
+        db.setSync('tamponsPersonnalises', null);
+        for (var i = AUTOCOLLANTS.length - 1; i >= 0; i--) {
+            if (AUTOCOLLANTS[i].custom) AUTOCOLLANTS.splice(i, 1);
+        }
+        // Supprimer les symboles custom de OUTILS
+        Object.keys(OUTILS).forEach(function(k) { if (OUTILS[k].customSymbole) delete OUTILS[k]; });
+        // Restaurer les valeurs par defaut des symboles built-in
+        ['crochet', 'croix', 'interrogation'].forEach(function(id) {
+            OUTILS[id].nom = _defautsSymboles[id].nom;
+            OUTILS[id].couleurBouton = _defautsSymboles[id].couleur;
+            OUTILS[id].icone = _defautsSymboles[id].icone;
+        });
         appliquerPersonnalisations();
         // Rouvrir le modal pour refleter l'ordre et les valeurs par defaut
         ouvrirEditionRetroObservations();
+    }
+
+    /**
+     * Ajoute un nouveau tampon dans la modale (symboles, qualite ou diagnostic)
+     */
+    function ajouterTamponRetroObs(categorie) {
+        var liste = document.getElementById('travaux-retro-obs-liste-' + categorie + '-custom') || document.getElementById('travaux-retro-obs-liste-' + categorie);
+        if (!liste) return;
+
+        var id = 'custom-' + Date.now();
+        var div = document.createElement('div');
+        div.className = 'travaux-retro-row travaux-retro-draggable';
+        div.dataset.obsId = id;
+        div.dataset.custom = 'true';
+        div.setAttribute('draggable', 'true');
+
+        div.innerHTML =
+            '<div class="travaux-retro-row-haut">' +
+                '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>' +
+                '<div class="travaux-retro-img-upload" data-obs-id="' + id + '" title="Cliquer pour changer l\'image">' +
+                    '<img src="" alt="Nouveau" data-img-id="' + id + '" style="opacity:0.3">' +
+                    '<input type="file" accept="image/*" data-file-id="' + id + '" hidden>' +
+                '</div>' +
+                '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + id + '" value="" placeholder="Nom du tampon">' +
+                '<button class="travaux-retro-btn-supprimer" onclick="travauxOutils.supprimerTamponRetroObs(\'' + id + '\')" title="Supprimer">&times;</button>' +
+            '</div>' +
+            '<textarea class="travaux-retro-textarea" data-retro-id="' + id + '" rows="3"></textarea>';
+
+        liste.appendChild(div);
+
+        // Brancher le clic image → file input
+        var wrap = div.querySelector('.travaux-retro-img-upload');
+        var imgEl = wrap.querySelector('img');
+        var fileInput = wrap.querySelector('input[type="file"]');
+        wrap.addEventListener('click', function(e) {
+            if (e.target !== fileInput) fileInput.click();
+        });
+        fileInput.addEventListener('change', function() {
+            var file = fileInput.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(ev) {
+                imgEl.src = ev.target.result;
+                imgEl.dataset.base64 = ev.target.result;
+                imgEl.style.opacity = '1';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Re-configurer le drag pour la liste
+        configurerDragRetroObs(liste);
+
+        // Focus sur le champ nom
+        var nomInput = div.querySelector('input[data-nom-id]');
+        if (nomInput) nomInput.focus();
+    }
+
+    /**
+     * Supprime un tampon personnalise de la modale
+     */
+    function supprimerTamponRetroObs(id) {
+        var row = document.querySelector('.travaux-retro-draggable[data-obs-id="' + id + '"]');
+        if (row) row.remove();
+    }
+
+    /**
+     * Ajoute un nouveau symbole Unicode personnalise dans la modale
+     */
+    function ajouterSymboleRetroObs() {
+        var liste = document.getElementById('travaux-retro-obs-liste-symboles-unicode');
+        if (!liste) return;
+
+        var id = 'sym-' + Date.now();
+        var couleur = '#888888';
+        var div = document.createElement('div');
+        div.className = 'travaux-retro-row travaux-retro-draggable';
+        div.dataset.obsId = id;
+        div.dataset.symCustom = 'true';
+        div.setAttribute('draggable', 'true');
+
+        div.innerHTML =
+            '<div class="travaux-retro-row-haut">' +
+                '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>' +
+                '<div class="travaux-retro-couleur" style="background:' + couleur + ';" data-couleur-id="' + id + '" title="Changer la couleur">' +
+                    '<input type="color" class="travaux-retro-couleur-input" data-color-id="' + id + '" value="' + couleur + '">' +
+                '</div>' +
+                '<input type="text" class="travaux-retro-icone-input" data-icone-id="' + id + '" value="" placeholder="\u2605" title="Caract\u00e8re Unicode" style="color:' + couleur + ';">' +
+                '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + id + '" value="" placeholder="Nom du symbole">' +
+                '<button class="travaux-retro-btn-supprimer" onclick="travauxOutils.supprimerSymboleRetroObs(\'' + id + '\')" title="Supprimer">&times;</button>' +
+            '</div>' +
+            '<textarea class="travaux-retro-textarea" data-retro-id="' + id + '" rows="3"></textarea>';
+
+        liste.appendChild(div);
+
+        // Brancher le color picker
+        var pastille = div.querySelector('.travaux-retro-couleur');
+        var colorInput = pastille.querySelector('input[type="color"]');
+        pastille.addEventListener('click', function(e) {
+            if (e.target !== colorInput) colorInput.click();
+        });
+        colorInput.addEventListener('input', function() {
+            pastille.style.background = colorInput.value;
+            var iconeInput = div.querySelector('.travaux-retro-icone-input');
+            if (iconeInput) iconeInput.style.color = colorInput.value;
+        });
+
+        // Re-configurer le drag
+        configurerDragRetroObs(liste);
+
+        // Focus sur le champ icone
+        var iconeInput = div.querySelector('.travaux-retro-icone-input');
+        if (iconeInput) iconeInput.focus();
+    }
+
+    function supprimerSymboleRetroObs(id) {
+        var row = document.querySelector('.travaux-retro-row[data-obs-id="' + id + '"]');
+        if (row) row.remove();
+    }
+
+    /**
+     * Ajoute une nouvelle categorie personnalisee dans la modale
+     */
+    function ajouterCategorieRetroObs() {
+        var id = 'cat-' + Date.now();
+        var nom = 'Nouvelle cat\u00e9gorie';
+
+        // Ajouter la ligne dans la zone des noms de categories
+        var catContainer = document.getElementById('travaux-retro-categories');
+        if (!catContainer) return;
+        var btnAjouter = catContainer.querySelector('button');
+        var rowDiv = document.createElement('div');
+        rowDiv.className = 'travaux-retro-cat-draggable';
+        rowDiv.style.cssText = 'display:flex; gap:8px; align-items:center;';
+        rowDiv.dataset.catRow = id;
+        rowDiv.dataset.catPersoId = id;
+        rowDiv.setAttribute('draggable', 'true');
+        var coulDefaut = '#888888';
+        rowDiv.innerHTML =
+            '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner" style="cursor:grab;">\u2630</span>' +
+            '<button class="travaux-retro-btn-supprimer" onclick="travauxOutils.supprimerCategorieRetroObs(\'' + id + '\')" title="Supprimer la cat\u00e9gorie" style="min-width:auto;">&times;</button>' +
+            '<div class="travaux-retro-couleur" style="background:' + coulDefaut + ';" data-couleur-cat-id="' + id + '" title="Couleur de la cat\u00e9gorie">' +
+                '<input type="color" class="travaux-retro-couleur-input" data-color-cat-id="' + id + '" value="' + coulDefaut + '">' +
+            '</div>' +
+            '<input type="text" class="travaux-retro-nom-input" data-cat-id="' + id + '" data-cat-perso-id="' + id + '" value="' + nom + '">';
+        catContainer.insertBefore(rowDiv, btnAjouter);
+
+        // Brancher le color picker de la nouvelle categorie
+        var pastille = rowDiv.querySelector('.travaux-retro-couleur');
+        var colorInput = pastille.querySelector('input[type="color"]');
+        pastille.addEventListener('click', function(e) {
+            if (e.target !== colorInput) colorInput.click();
+        });
+        colorInput.addEventListener('input', function() {
+            pastille.style.background = colorInput.value;
+        });
+
+        // Ajouter la section de tampons dans le corps de la modale
+        var modalContenu = catContainer.closest('.travaux-retro-modal');
+        var actionsDiv = modalContenu.querySelector('.travaux-retro-actions');
+        var catLabel = document.createElement('div');
+        catLabel.className = 'travaux-retro-cat-label';
+        catLabel.style.cssText = 'font-weight:600; margin:12px 0 6px; color:var(--texte-principal);';
+        catLabel.textContent = nom;
+        catLabel.dataset.catSection = id;
+
+        var catListe = document.createElement('div');
+        catListe.id = 'travaux-retro-obs-liste-' + id;
+
+        var catBtn = document.createElement('button');
+        catBtn.className = 'btn btn-secondaire';
+        catBtn.style.cssText = 'margin-top:8px;font-size:0.8rem;';
+        catBtn.textContent = '+ Ajouter';
+        catBtn.onclick = function() { ajouterTamponRetroObs(id); };
+
+        actionsDiv.parentNode.insertBefore(catLabel, actionsDiv);
+        actionsDiv.parentNode.insertBefore(catListe, actionsDiv);
+        actionsDiv.parentNode.insertBefore(catBtn, actionsDiv);
+
+        // Synchroniser le nom quand on le modifie dans le champ en haut
+        var nomInput = rowDiv.querySelector('input[data-cat-id]');
+        nomInput.addEventListener('input', function() {
+            catLabel.textContent = nomInput.value;
+        });
+
+        configurerDragRetroObs(catListe);
+        nomInput.focus();
+        nomInput.select();
+    }
+
+    function supprimerCategorieRetroObs(catId) {
+        // Supprimer la ligne de nom en haut
+        var row = document.querySelector('[data-cat-row="' + catId + '"]');
+        if (row) row.remove();
+        // Supprimer la section dans le corps (label + listes + boutons)
+        var section = document.querySelector('[data-cat-section="' + catId + '"]');
+        if (section) {
+            // Collecter tous les elements de cette section (label, listes, boutons)
+            // jusqu'au prochain label de categorie ou la zone d'actions
+            var next = section.nextElementSibling;
+            section.remove();
+            while (next && !next.classList.contains('travaux-retro-cat-label') && !next.classList.contains('travaux-retro-actions')) {
+                var toRemove = next;
+                next = next.nextElementSibling;
+                toRemove.remove();
+            }
+        }
     }
 
     function ouvrirEditionRetroErreursFr() {
@@ -1746,9 +2378,16 @@
         enregistrerRetroObservations: enregistrerRetroObservations,
         enregistrerRetroErreursFr: enregistrerRetroErreursFr,
         reinitialiserRetroObservations: reinitialiserRetroObservations,
+        ajouterTamponRetroObs: ajouterTamponRetroObs,
+        supprimerTamponRetroObs: supprimerTamponRetroObs,
+        ajouterSymboleRetroObs: ajouterSymboleRetroObs,
+        supprimerSymboleRetroObs: supprimerSymboleRetroObs,
+        ajouterCategorieRetroObs: ajouterCategorieRetroObs,
+        supprimerCategorieRetroObs: supprimerCategorieRetroObs,
         reinitialiserRetroErreursFr: reinitialiserRetroErreursFr,
         // Personnalisations (noms, icônes, couleurs)
         appliquerPersonnalisations: appliquerPersonnalisations,
+        obtenirCouleurCategorieAutocollant: obtenirCouleurCategorieAutocollant,
         // Epaisseur increments
         incrementerEpaisseur: incrementerEpaisseur,
         decrementerEpaisseur: decrementerEpaisseur,
