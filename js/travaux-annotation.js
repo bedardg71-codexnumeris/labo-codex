@@ -957,6 +957,9 @@
             width: stickerW,
             height: stickerH
         };
+        // Stocker la couleur de categorie pour le rendu teinte
+        var coulCat = _outils().obtenirCouleurCategorieAutocollant(autocollantId);
+        if (coulCat) sticker.tint = coulCat;
 
         const donneesPage = obtenirDonneesPage();
         donneesPage.stickers.push(sticker);
@@ -992,7 +995,28 @@
         const sh = sticker.height * h;
 
         const estModeSombre = !document.body.classList.contains('mode-clair');
-        if (estModeSombre) {
+
+        // Teinte de categorie : dessiner l'image coloree
+        var tint = sticker.tint || (_outils().obtenirCouleurCategorieAutocollant ? _outils().obtenirCouleurCategorieAutocollant(sticker.autocollantId) : null);
+        if (tint) {
+            // Canvas temporaire pour coloriser l'image noire
+            var tmpCanvas = document.createElement('canvas');
+            tmpCanvas.width = Math.round(sw) || 1;
+            tmpCanvas.height = Math.round(sh) || 1;
+            var tmpCtx = tmpCanvas.getContext('2d');
+
+            // 1. Dessiner l'image (noir + alpha)
+            if (estModeSombre) tmpCtx.filter = 'invert(1)';
+            tmpCtx.drawImage(img, 0, 0, tmpCanvas.width, tmpCanvas.height);
+            tmpCtx.filter = 'none';
+
+            // 2. Remplacer la couleur des pixels par la teinte, en gardant l'alpha
+            tmpCtx.globalCompositeOperation = 'source-in';
+            tmpCtx.fillStyle = tint;
+            tmpCtx.fillRect(0, 0, tmpCanvas.width, tmpCanvas.height);
+
+            ctxAnnotation.drawImage(tmpCanvas, sx, sy, sw, sh);
+        } else if (estModeSombre) {
             ctxAnnotation.save();
             ctxAnnotation.filter = 'invert(1)';
             ctxAnnotation.drawImage(img, sx, sy, sw, sh);
@@ -1284,13 +1308,15 @@
         const outil = _outils().OUTILS[type];
         const taille = (outil.taille || 30) / _outils().RESOLUTION_REFERENCE;
 
-        // Couleur fixe selon le type de symbole
+        // Couleur selon le type de symbole (personnalisable via OUTILS)
         let couleurSymbole;
-        if (type === 'crochet') couleurSymbole = '#2e7d32';
-        else if (type === 'croix') couleurSymbole = '#c62828';
-        else if (type === 'interrogation') couleurSymbole = '#e65100';
-        else if (type.startsWith('errfr_')) couleurSymbole = outil.couleurBouton || '#888888';
-        else couleurSymbole = _outils().getCouleurActive();
+        if (type === 'crochet' || type === 'croix' || type === 'interrogation' || type.startsWith('sym-')) {
+            couleurSymbole = outil.couleurBouton;
+        } else if (type.startsWith('errfr_')) {
+            couleurSymbole = outil.couleurBouton || '#888888';
+        } else {
+            couleurSymbole = _outils().getCouleurActive();
+        }
 
         const forme = {
             id: 'SH_' + Date.now(),
@@ -1302,6 +1328,10 @@
             x2: xNorm + taille / 2,
             y2: yNorm + taille / 2
         };
+        // Stocker l'icone dans la forme pour les symboles Unicode
+        if (outil.icone && (type === 'crochet' || type === 'croix' || type === 'interrogation' || type.startsWith('sym-'))) {
+            forme.icone = outil.icone;
+        }
 
         const donneesPage = obtenirDonneesPage();
         donneesPage.shapes.push(forme);
@@ -2351,21 +2381,18 @@
                 break;
 
             case 'crochet':
-                dessinerCrochet(ctx, x1, y1, x2, y2, forme.color);
-                break;
-
             case 'croix':
-                dessinerCroix(ctx, x1, y1, x2, y2, forme.color);
-                break;
-
             case 'interrogation':
-                dessinerInterrogation(ctx, x1, y1, x2, y2, forme.color);
+                dessinerSymboleUnicode(ctx, x1, y1, x2, y2, forme.color, forme.icone || _outils().OUTILS[forme.type].icone);
                 break;
 
             default:
                 // Erreurs de français (errfr_1 a errfr_10)
                 if (forme.type.startsWith('errfr_')) {
                     dessinerErreurFrancais(ctx, x1, y1, x2, y2, forme.color, forme.type);
+                } else if (forme.type.startsWith('sym-') && _outils().OUTILS[forme.type]) {
+                    // Symboles Unicode personnalises
+                    dessinerSymboleUnicode(ctx, x1, y1, x2, y2, forme.color, forme.icone || _outils().OUTILS[forme.type].icone);
                 }
                 break;
         }
@@ -2492,46 +2519,19 @@
     /**
      * Dessine un crochet (caractere ✔︎)
      */
-    function dessinerCrochet(ctx, x1, y1, x2, y2, color) {
-        const mx = (x1 + x2) / 2;
-        const my = (y1 + y2) / 2;
-        const size = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1));
-
-        ctx.fillStyle = color || '#2e7d32';
-        ctx.font = size + 'px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('\u2714\uFE0E', mx, my);
-    }
-
     /**
-     * Dessine une croix (caractere ✘)
+     * Dessine un symbole Unicode generique (crochet, croix, interrogation, custom)
      */
-    function dessinerCroix(ctx, x1, y1, x2, y2, color) {
+    function dessinerSymboleUnicode(ctx, x1, y1, x2, y2, color, icone) {
         const mx = (x1 + x2) / 2;
         const my = (y1 + y2) / 2;
         const size = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1));
 
-        ctx.fillStyle = color || '#c62828';
-        ctx.font = size + 'px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('\u2718', mx, my);
-    }
-
-    /**
-     * Dessine un point d'interrogation (caractere ?)
-     */
-    function dessinerInterrogation(ctx, x1, y1, x2, y2, color) {
-        const mx = (x1 + x2) / 2;
-        const my = (y1 + y2) / 2;
-        const size = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1));
-
-        ctx.fillStyle = color || '#e65100';
+        ctx.fillStyle = color || '#888888';
         ctx.font = 'bold ' + size + 'px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('?', mx, my);
+        ctx.fillText(icone || '?', mx, my);
     }
 
     /**
