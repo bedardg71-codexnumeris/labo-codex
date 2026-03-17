@@ -184,18 +184,44 @@
     const DOSSIER_AUTOCOLLANTS = 'autocollants/';
 
     const AUTOCOLLANTS = [
-        { id: 'bien',           nom: 'Bien',             fichier: 'qualité 1 bien.png',                    categorie: 'qualite' },
-        { id: 'tres-bien',      nom: 'Très bien',        fichier: 'qualité 2 très bien.png',               categorie: 'qualite' },
-        { id: 'brillant',       nom: 'Original',         fichier: 'qualité 3 brillant.png',                categorie: 'qualite' },
-        { id: 'bon-lien',       nom: 'Bon lien',         fichier: 'bon lien logique.png',                  categorie: 'diagnostic' },
-        { id: 'manque-lien',    nom: 'Manque de lien',   fichier: 'manque de lien.png',                    categorie: 'diagnostic' },
-        { id: 'confusion',      nom: 'Confusion',        fichier: 'confusion2.png',                        categorie: 'diagnostic' },
-        { id: 'repetitif',      nom: 'Répétitif',        fichier: 'répétitif.png',                         categorie: 'diagnostic' },
-        { id: 'preuve-absente', nom: 'Preuve absente',   fichier: 'preuve absente.png',                    categorie: 'diagnostic' },
-        { id: 'citation',       nom: 'Citation',         fichier: 'intégration citation.png',              categorie: 'diagnostic' },
-        { id: 'approfondir',    nom: 'Approfondir',      fichier: 'approfondir.png',                       categorie: 'diagnostic' },
-        { id: 'procedes',       nom: 'Procédés',         fichier: 'identifier les outils (procédés).png',  categorie: 'diagnostic' },
-        { id: 'attention',      nom: 'Attention',        fichier: 'attention.png',                         categorie: 'diagnostic' }
+        // --- Contenu et méthode (6) ---
+        { id: 'contenu-exact',       nom: 'Exact',        fichier: 'contenu-exact.png',        categorie: 'contenu' },
+        { id: 'contenu-bien',        nom: 'Bien',         fichier: 'contenu-bien.png',         categorie: 'contenu' },
+        { id: 'contenu-tres-bien',   nom: 'Tr\u00e8s bien', fichier: 'contenu-tres-bien.png',  categorie: 'contenu' },
+        { id: 'contenu-incertain',   nom: 'Incertain',    fichier: 'contenu-incertain.png',    categorie: 'contenu' },
+        { id: 'contenu-incomplet',   nom: 'Incomplet',    fichier: 'contenu-incomplet.png',    categorie: 'contenu' },
+        { id: 'contenu-inexact',     nom: 'Inexact',      fichier: 'contenu-inexact.png',      categorie: 'contenu' },
+        // --- Compréhension (4) ---
+        { id: 'comp-uni',            nom: 'Uni',          fichier: 'comprehension-uni.png',         categorie: 'comprehension' },
+        { id: 'comp-multi',          nom: 'Multi',        fichier: 'comprehension-multi.png',       categorie: 'comprehension' },
+        { id: 'comp-relationnel',    nom: 'Relationnel',  fichier: 'comprehension-relationnel.png', categorie: 'comprehension' },
+        { id: 'comp-etendu',         nom: '\u00c9tendu',  fichier: 'comprehension-etendu.png',      categorie: 'comprehension' },
+        // --- Observations (12) ---
+        { id: 'obs-approfondir',     nom: 'Approfondir',      fichier: 'observations-approfondir.png',  categorie: 'observations' },
+        { id: 'obs-attention',       nom: 'Attention',         fichier: 'observations-attention.png',    categorie: 'observations' },
+        { id: 'obs-confusion',       nom: 'Confusion',         fichier: 'observations-confusion.png',   categorie: 'observations' },
+        { id: 'obs-hoc',             nom: 'HOC',               fichier: 'observations-hoc.png',         categorie: 'observations' },
+        { id: 'obs-integration',     nom: 'Int\u00e9gration',  fichier: 'observations-integration.png', categorie: 'observations' },
+        { id: 'obs-mecanisme',       nom: 'M\u00e9canisme',    fichier: 'observations-mecanisme.png',   categorie: 'observations' },
+        { id: 'obs-procede',         nom: 'Proc\u00e9d\u00e9', fichier: 'observations-procede.png',     categorie: 'observations' },
+        { id: 'obs-relation',        nom: 'Relation',          fichier: 'observations-relation.png',    categorie: 'observations' },
+        { id: 'obs-repetition',      nom: 'R\u00e9p\u00e9tition', fichier: 'observations-repetition.png', categorie: 'observations' },
+        { id: 'obs-rupture',         nom: 'Rupture',           fichier: 'observations-rupture.png',     categorie: 'observations' },
+        { id: 'obs-sans-preuve',     nom: 'Sans preuve',       fichier: 'observations-sans-preuve.png', categorie: 'observations' },
+        { id: 'obs-soupcon',         nom: 'Soup\u00e7on',      fichier: 'observations-soupcon.png',     categorie: 'observations' },
+        // --- Legacy (évaluations antérieures) ---
+        { id: 'bien',           nom: 'Bien',             fichier: 'qualit\u00e9 1 bien.png',                    categorie: 'qualite', legacy: true },
+        { id: 'tres-bien',      nom: 'Tr\u00e8s bien',   fichier: 'qualit\u00e9 2 tr\u00e8s bien.png',         categorie: 'qualite', legacy: true },
+        { id: 'brillant',       nom: 'Original',         fichier: 'qualit\u00e9 3 brillant.png',                categorie: 'qualite', legacy: true },
+        { id: 'bon-lien',       nom: 'Bon lien',         fichier: 'bon lien logique.png',                       categorie: 'diagnostic', legacy: true },
+        { id: 'manque-lien',    nom: 'Manque de lien',   fichier: 'manque de lien.png',                         categorie: 'diagnostic', legacy: true },
+        { id: 'confusion',      nom: 'Confusion',        fichier: 'confusion2.png',                             categorie: 'diagnostic', legacy: true },
+        { id: 'repetitif',      nom: 'R\u00e9p\u00e9titif', fichier: 'r\u00e9p\u00e9titif.png',                categorie: 'diagnostic', legacy: true },
+        { id: 'preuve-absente', nom: 'Preuve absente',   fichier: 'preuve absente.png',                         categorie: 'diagnostic', legacy: true },
+        { id: 'citation',       nom: 'Citation',         fichier: 'int\u00e9gration citation.png',              categorie: 'diagnostic', legacy: true },
+        { id: 'approfondir',    nom: 'Approfondir',      fichier: 'approfondir.png',                            categorie: 'diagnostic', legacy: true },
+        { id: 'procedes',       nom: 'Proc\u00e9d\u00e9s', fichier: 'identifier les outils (proc\u00e9d\u00e9s).png', categorie: 'diagnostic', legacy: true },
+        { id: 'attention',      nom: 'Attention',        fichier: 'attention.png',                              categorie: 'diagnostic', legacy: true }
     ];
 
     // Sauvegarder les valeurs par defaut des autocollants avant toute personnalisation
@@ -496,9 +522,9 @@
 
     // Noms des categories de tampons
     const NOMS_CATEGORIES_DEFAUT = {
-        symboles: 'Contenu et m\u00e9thode',
-        qualite: 'Inf\u00e9rences / interpr\u00e9tation',
-        diagnostic: 'Observations'
+        contenu: 'Contenu et m\u00e9thode',
+        comprehension: 'Compr\u00e9hension',
+        observations: 'Observations'
     };
 
     function obtenirNomsCategories() {
@@ -548,7 +574,7 @@
         return couleurs[autocollant.categorie] || null;
     }
 
-    var CATEGORIES_BUILTIN = ['symboles', 'qualite', 'diagnostic'];
+    var CATEGORIES_BUILTIN = ['contenu', 'comprehension', 'observations'];
 
     function obtenirOrdreCategories() {
         var ordre = db.getSync('ordreCategories', null);
@@ -567,10 +593,22 @@
         db.setSync('ordreCategories', arr);
     }
 
+    // Si l'utilisateur a des tampons custom, masquer les built-in non-legacy
+    // (les built-in sont les defauts pour nouveaux utilisateurs uniquement)
+    var _aDesCustoms = (function() {
+        var customs = db.getSync('tamponsPersonnalises', null);
+        return customs && Array.isArray(customs) && customs.length > 0;
+    })();
+
     function obtenirOrdreAutocollants(categorie) {
         const key = 'ordreAutocollants_' + categorie;
         const ordre = db.getSync(key, null);
-        const ids = AUTOCOLLANTS.filter(a => a.categorie === categorie).map(a => a.id);
+        const ids = AUTOCOLLANTS.filter(function(a) {
+            if (a.legacy) return false;
+            // Masquer les built-in si l'utilisateur a ses propres tampons
+            if (_aDesCustoms && !a.custom) return false;
+            return a.categorie === categorie;
+        }).map(a => a.id);
         if (ordre && Array.isArray(ordre)) {
             // Garder les IDs valides dans l'ordre sauvegarde, ajouter les nouveaux a la fin
             var result = ordre.filter(function(id) { return ids.indexOf(id) !== -1; });
@@ -1527,6 +1565,12 @@
             }
         });
 
+        html += '<div style="display:flex; gap:8px; margin:16px 0 8px; border-top:1px solid var(--bordure-claire); padding-top:12px;">';
+        html += '<button class="btn btn-secondaire" onclick="travauxOutils.exporterTampons()" style="font-size:0.8rem;">Exporter mes tampons</button>';
+        html += '<button class="btn btn-secondaire" onclick="document.getElementById(\'fichier-import-tampons\').click()" style="font-size:0.8rem;">Importer des tampons</button>';
+        html += '<input type="file" id="fichier-import-tampons" accept=".json" style="display:none;" onchange="travauxOutils.importerTampons(event)">';
+        html += '</div>';
+
         html += '<div class="travaux-retro-actions">';
         html += '<button class="btn-secondaire" onclick="travauxOutils.reinitialiserRetroObservations()">R\u00e9initialiser</button>';
         html += '<button class="btn-secondaire" onclick="document.getElementById(\'modal-retro-observations\').remove()">Annuler</button>';
@@ -1778,7 +1822,7 @@
 
         // Detecter les categories masquees (built-in absentes du DOM)
         var catsMasquees = db.getSync('categoriesMasquees', null) || [];
-        ['symboles', 'qualite', 'diagnostic'].forEach(function(catId) {
+        CATEGORIES_BUILTIN.forEach(function(catId) {
             var present = !!modal.querySelector('[data-cat-row="' + catId + '"]');
             var idx = catsMasquees.indexOf(catId);
             if (!present && idx === -1) catsMasquees.push(catId);
@@ -1821,7 +1865,7 @@
         }
 
         // Collecter les tampons personnalises et l'ordre par categorie
-        var catIds = ['symboles', 'qualite', 'diagnostic'];
+        var catIds = CATEGORIES_BUILTIN.slice();
         catsPerso.forEach(function(c) { catIds.push(c.id); });
         var customs = [];
         catIds.forEach(function(cat) {
@@ -1852,9 +1896,13 @@
         appliquerPersonnalisations();
         rafraichirPalettesApresPersonnalisation();
         modal.remove();
+        if (typeof afficherNotificationSucces === 'function') {
+            afficherNotificationSucces('Tampons et r\u00e9troactions enregistr\u00e9s');
+        }
     }
 
     function reinitialiserRetroObservations() {
+        if (!confirm('R\u00e9initialiser tous les tampons, cat\u00e9gories, couleurs et r\u00e9troactions ?\n\nCette action est irr\u00e9versible. Pense \u00e0 exporter tes tampons avant si tu veux les conserver.')) return;
         // Nettoyer les ordres des categories perso avant de les supprimer
         obtenirCategoriesPerso().forEach(function(cat) {
             db.setSync('ordreAutocollants_' + cat.id, null);
@@ -1863,6 +1911,9 @@
         db.setSync('personnalisationObservations', null);
         db.setSync('nomsCategoriesTampons', null);
         db.setSync('ordreAutocollants_symboles', null);
+        db.setSync('ordreAutocollants_contenu', null);
+        db.setSync('ordreAutocollants_comprehension', null);
+        db.setSync('ordreAutocollants_observations', null);
         db.setSync('ordreAutocollants_qualite', null);
         db.setSync('ordreAutocollants_diagnostic', null);
         db.setSync('symbolesUnicodePerso', null);
@@ -1873,6 +1924,7 @@
         db.setSync('couleursCategories', null);
         // Supprimer les tampons personnalises
         db.setSync('tamponsPersonnalises', null);
+        _aDesCustoms = false;
         for (var i = AUTOCOLLANTS.length - 1; i >= 0; i--) {
             if (AUTOCOLLANTS[i].custom) AUTOCOLLANTS.splice(i, 1);
         }
@@ -2095,6 +2147,281 @@
         }
     }
 
+    /* ===============================
+       EXPORT / IMPORT TAMPONS (Bibliothèque)
+       =============================== */
+
+    /**
+     * Convertit une Image preloadée en base64 PNG
+     */
+    function imageVersBase64(img) {
+        if (!img || !img.complete || !img.naturalWidth) return null;
+        var canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        try {
+            return canvas.toDataURL('image/png');
+        } catch (e) {
+            return null;
+        }
+    }
+
+    /**
+     * Exporte tous les tampons actuels (catégories, images, rétroactions, symboles)
+     */
+    async function exporterTampons() {
+        // Sauvegarder d'abord les modifications en cours si la modale est ouverte
+        var modal = document.getElementById('modal-retro-observations');
+        if (modal) enregistrerRetroObservations();
+
+        var persObs = obtenirPersonnalisationObservations();
+        var retroObs = obtenirRetroactionsObservations();
+        var couleursCat = obtenirCouleursCategories();
+        var nomsCat = obtenirNomsCategories();
+        var ordreCategories = obtenirOrdreCategories();
+        var catsPerso = obtenirCategoriesPerso();
+        var symPerso = obtenirSymbolesPerso();
+        var catsMasquees = db.getSync('categoriesMasquees', null) || [];
+        var elemMasques = db.getSync('elementsMasques', null) || [];
+
+        // Collecter les tampons image (non-legacy, non-masques)
+        var tampons = [];
+        AUTOCOLLANTS.forEach(function(a) {
+            if (a.legacy) return;
+            if (elemMasques.indexOf(a.id) !== -1) return;
+            var base64 = null;
+            // Image personnalisee en base64
+            if (persObs[a.id] && persObs[a.id].imageBase64) {
+                base64 = persObs[a.id].imageBase64;
+            } else if (imagesAutocollants[a.id]) {
+                base64 = imageVersBase64(imagesAutocollants[a.id]);
+            }
+            tampons.push({
+                id: a.id,
+                nom: (persObs[a.id] && persObs[a.id].nom) || a.nom,
+                categorie: a.categorie,
+                imageBase64: base64,
+                retroaction: retroObs[a.id] || '',
+                custom: a.custom || false
+            });
+        });
+
+        // Collecter les symboles Unicode built-in (non-masques)
+        var symbolesBuiltin = [];
+        ['crochet', 'croix', 'interrogation'].forEach(function(id) {
+            if (elemMasques.indexOf(id) !== -1) return;
+            var outil = OUTILS[id];
+            symbolesBuiltin.push({
+                id: id,
+                icone: outil.icone,
+                nom: outil.nom,
+                couleur: outil.couleurBouton,
+                retroaction: retroObs[id] || ''
+            });
+        });
+
+        // Construire les categories
+        var categories = [];
+        ordreCategories.forEach(function(catId) {
+            if (catsMasquees.indexOf(catId) !== -1) return;
+            categories.push({
+                id: catId,
+                nom: nomsCat[catId] || catId,
+                couleur: couleursCat[catId] || null,
+                builtin: CATEGORIES_BUILTIN.indexOf(catId) !== -1
+            });
+        });
+
+        var contenu = {
+            categories: categories,
+            tampons: tampons,
+            symbolesBuiltin: symbolesBuiltin,
+            symbolesPerso: symPerso
+        };
+
+        if (tampons.length === 0 && symPerso.length === 0 && symbolesBuiltin.length === 0) {
+            alert('Aucun tampon \u00e0 exporter.');
+            return;
+        }
+
+        // Demander metadonnees CC
+        var metaEnrichies = typeof demanderMetadonneesEnrichies === 'function'
+            ? await demanderMetadonneesEnrichies('Tampons d\u2019observation', tampons.length + ' tampon(s)')
+            : {};
+        if (!metaEnrichies) return; // Annule
+
+        var donnees = ajouterMetadonn\u00e9esCC(contenu, 'tampons', 'Tampons d\u2019observation', metaEnrichies);
+        var nomFichier = genererNomFichierCC('tampons', 'Tampons-observation', donnees.metadata.version);
+
+        var blob = new Blob([JSON.stringify(donnees, null, 2)], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = nomFichier;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        if (typeof afficherNotificationSucces === 'function') {
+            afficherNotificationSucces(tampons.length + ' tampon(s) export\u00e9(s)');
+        }
+    }
+
+    /**
+     * Importe des tampons depuis un fichier JSON
+     */
+    function importerTampons(event) {
+        var file = event.target.files[0];
+        if (!file) return;
+
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                var donnees = JSON.parse(e.target.result);
+                window._tamponsImportEnAttente = donnees;
+
+                var estCC = typeof verifierLicenceCC === 'function' && verifierLicenceCC(donnees);
+                var message = estCC
+                    ? '<div style="margin-bottom:12px;">' + genererBadgeCC(donnees.metadata) + '</div>'
+                    : '';
+
+                var contenu = donnees.contenu || donnees;
+                var nbTampons = (contenu.tampons || []).length;
+                var nbSymPerso = (contenu.symbolesPerso || []).length;
+                var nbCats = (contenu.categories || []).length;
+
+                message += '<p><strong>Importer cette biblioth\u00e8que de tampons ?</strong></p>';
+                message += '<p style="color:var(--texte-secondaire);font-size:0.85rem;">';
+                message += nbTampons + ' tampon(s), ' + nbCats + ' cat\u00e9gorie(s)';
+                if (nbSymPerso > 0) message += ', ' + nbSymPerso + ' symbole(s) Unicode';
+                message += '</p>';
+                message += '<p style="color:var(--texte-secondaire);font-size:0.85rem;">Les tampons actuels seront remplac\u00e9s.</p>';
+
+                var modal = document.createElement('div');
+                modal.innerHTML =
+                    '<div class="modal-js-overlay" style="z-index: 10001;">' +
+                        '<div class="modal-js-contenu" style="max-width: 500px;">' +
+                            message +
+                            '<div style="display:flex; gap:8px; margin-top:15px; justify-content:flex-end;">' +
+                                '<button class="btn btn-secondaire" onclick="this.closest(\'.modal-js-overlay\').parentElement.remove(); delete window._tamponsImportEnAttente;">Annuler</button>' +
+                                '<button class="btn btn-principal" onclick="travauxOutils.confirmerImportTampons(window._tamponsImportEnAttente); this.closest(\'.modal-js-overlay\').parentElement.remove(); delete window._tamponsImportEnAttente;">Importer</button>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>';
+                document.body.appendChild(modal);
+
+            } catch (err) {
+                console.error('[Tampons] Erreur import:', err);
+                alert('Erreur lors de la lecture du fichier.\n' + err.message);
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+
+    /**
+     * Confirme l'import et applique les tampons
+     */
+    function confirmerImportTampons(donnees) {
+        try {
+            var contenu = donnees.contenu || donnees;
+            var tamponsImport = contenu.tampons || [];
+            var categoriesImport = contenu.categories || [];
+            var symBuiltinImport = contenu.symbolesBuiltin || [];
+            var symPersoImport = contenu.symbolesPerso || [];
+
+            // 1. Restaurer les categories
+            var nomsCat = {};
+            var couleursCat = {};
+            var catsPerso = [];
+            var ordreCategories = [];
+            categoriesImport.forEach(function(cat) {
+                nomsCat[cat.id] = cat.nom;
+                if (cat.couleur) couleursCat[cat.id] = cat.couleur;
+                ordreCategories.push(cat.id);
+                if (!cat.builtin && CATEGORIES_BUILTIN.indexOf(cat.id) === -1) {
+                    catsPerso.push({ id: cat.id, nom: cat.nom });
+                }
+            });
+            sauvegarderNomsCategories(nomsCat);
+            sauvegarderCouleursCategories(couleursCat);
+            sauvegarderCategoriesPerso(catsPerso);
+            sauvegarderOrdreCategories(ordreCategories);
+
+            // 2. Restaurer les tampons image
+            var persObj = {};
+            var retroObj = {};
+            var customs = [];
+
+            // Supprimer les anciens tampons custom
+            for (var i = AUTOCOLLANTS.length - 1; i >= 0; i--) {
+                if (AUTOCOLLANTS[i].custom) AUTOCOLLANTS.splice(i, 1);
+            }
+
+            tamponsImport.forEach(function(t) {
+                // Stocker l'image en base64
+                if (t.imageBase64) {
+                    if (!persObj[t.id]) persObj[t.id] = {};
+                    persObj[t.id].imageBase64 = t.imageBase64;
+                    persObj[t.id].nom = t.nom;
+                }
+                if (t.retroaction) retroObj[t.id] = t.retroaction;
+
+                // Verifier si c'est un autocollant existant ou custom
+                var existant = AUTOCOLLANTS.find(function(a) { return a.id === t.id; });
+                if (!existant) {
+                    customs.push({ id: t.id, nom: t.nom, categorie: t.categorie });
+                    AUTOCOLLANTS.push({ id: t.id, nom: t.nom, fichier: '', categorie: t.categorie, custom: true });
+                }
+            });
+            db.setSync('tamponsPersonnalises', customs.length > 0 ? customs : null);
+            _aDesCustoms = customs.length > 0;
+            sauvegarderPersonnalisationObservations(persObj);
+            sauvegarderRetroactionsObservations(retroObj);
+
+            // 3. Restaurer les symboles Unicode
+            // Built-in : stocker les personnalisations
+            symBuiltinImport.forEach(function(s) {
+                if (!persObj[s.id]) persObj[s.id] = {};
+                persObj[s.id].nom = s.nom;
+                persObj[s.id].couleur = s.couleur;
+                persObj[s.id].icone = s.icone;
+                if (s.retroaction) retroObj[s.id] = s.retroaction;
+            });
+            // Perso
+            sauvegarderSymbolesPerso(symPersoImport);
+
+            // Re-sauvegarder avec les symboles
+            sauvegarderPersonnalisationObservations(persObj);
+            sauvegarderRetroactionsObservations(retroObj);
+
+            // 4. Nettoyer les masques
+            db.setSync('categoriesMasquees', null);
+            db.setSync('elementsMasques', null);
+
+            // 5. Appliquer et rafraichir
+            appliquerPersonnalisations();
+            rafraichirPalettesApresPersonnalisation();
+
+            // Rouvrir la modale si elle etait ouverte
+            var modalObs = document.getElementById('modal-retro-observations');
+            if (modalObs) {
+                modalObs.remove();
+                ouvrirEditionRetroObservations();
+            }
+
+            if (typeof afficherNotificationSucces === 'function') {
+                afficherNotificationSucces(tamponsImport.length + ' tampon(s) import\u00e9(s)');
+            }
+        } catch (err) {
+            console.error('[Tampons] Erreur confirmerImport:', err);
+            alert('Erreur lors de l\u2019import.\n' + err.message);
+        }
+    }
+
     function ouvrirEditionRetroErreursFr() {
         const existant = document.getElementById('modal-retro-erreurs-fr');
         if (existant) existant.remove();
@@ -2251,9 +2578,13 @@
         appliquerPersonnalisations();
         rafraichirPalettesApresPersonnalisation();
         modal.remove();
+        if (typeof afficherNotificationSucces === 'function') {
+            afficherNotificationSucces('Codes d\u2019erreurs et r\u00e9troactions enregistr\u00e9s');
+        }
     }
 
     function reinitialiserRetroErreursFr() {
+        if (!confirm('R\u00e9initialiser tous les codes d\u2019erreurs et r\u00e9troactions ?\n\nCette action est irr\u00e9versible.')) return;
         db.setSync('retroactionsErreursFr', null);
         db.setSync('personnalisationErreursFr', null);
         db.setSync('ordreErreursFr', null);
@@ -2384,6 +2715,9 @@
         supprimerSymboleRetroObs: supprimerSymboleRetroObs,
         ajouterCategorieRetroObs: ajouterCategorieRetroObs,
         supprimerCategorieRetroObs: supprimerCategorieRetroObs,
+        exporterTampons: exporterTampons,
+        importerTampons: importerTampons,
+        confirmerImportTampons: confirmerImportTampons,
         reinitialiserRetroErreursFr: reinitialiserRetroErreursFr,
         // Personnalisations (noms, icônes, couleurs)
         appliquerPersonnalisations: appliquerPersonnalisations,
