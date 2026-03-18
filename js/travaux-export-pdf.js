@@ -1101,16 +1101,12 @@
             });
         }
 
-        // =============== SUITE (pleine largeur) ===============
-        y = Math.max(yGauche, yDroite) + mm(10);
-
-        // --- SECTION BILAN USB (compact) ---
-        var NOMS_NIV = { 'E': 'Etendu', 'M': 'Maitrise', 'D': 'En developpement', 'I': 'Incomplet', '0': 'Non recevable' };
+        // --- BILAN (colonne droite, sous tampons/erreurs) ---
+        var NOMS_NIV = { 'E': 'etendu', 'M': 'maitrise', 'D': 'en developpement', 'I': 'incomplet' };
         var ORDRE_NIV = { 'E': 4, 'M': 3, 'D': 2, 'I': 1, '0': 0 };
-        var bilanLignes = [];
         var da = evaluation.etudiantDA;
 
-        // --- Charger l'historique de l'eleve ---
+        // Charger l'historique de l'eleve
         var historiqueEleve = [];
         try {
             var toutesEvals = db.getSync(cle('evaluationsSauvegardees'), []);
@@ -1121,7 +1117,14 @@
         } catch(e) { /* silencieux */ }
         var evalPrecedente = historiqueEleve.length > 0 ? historiqueEleve[0] : null;
 
-        // Preparer les noms des criteres recurrents (I/D sur 3 productions)
+        // Charger la grille pour les descriptions de criteres
+        var grilleBilan = null;
+        try {
+            var grillesBilan = db.getSync('grillesTemplates', []);
+            grilleBilan = grillesBilan.find(function(g) { return g.id === evaluation.grilleId; }) || null;
+        } catch(e) { /* silencieux */ }
+
+        // Detecter les patrons recurrents (I/D sur 3 productions)
         var nomsPatrons = [];
         if (historiqueEleve.length >= 2 && evaluation.criteres) {
             var cH1 = {}; var cH2 = {};
@@ -1136,8 +1139,12 @@
             });
         }
 
+        // Construire les lignes du bilan
+        var bilanLignes = [];
+        var wCol = colLargeur - mm(4);
+
         if (evaluation.criteres && evaluation.criteres.length > 0) {
-            // --- Ta force (meilleur critere M/E) ---
+            // Ta force (meilleur critere M/E)
             var meilleur = null; var meilleurOrdre = 0;
             evaluation.criteres.forEach(function(c) {
                 var o = ORDRE_NIV[c.niveauSelectionne] || 0;
@@ -1147,30 +1154,37 @@
                 bilanLignes.push({ type: 'force', texte: 'Ta force : ' + meilleur.critereNom + ' (' + (NOMS_NIV[meilleur.niveauSelectionne] || '') + ')' });
             }
 
-            // --- Priorites (2 plus faibles, une ligne) ---
+            // Priorites (2 plus faibles avec description de la grille)
             var defis = evaluation.criteres
                 .filter(function(c) { return c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D'; })
                 .sort(function(a, b) { return (ORDRE_NIV[a.niveauSelectionne] || 0) - (ORDRE_NIV[b.niveauSelectionne] || 0); });
             if (defis.length > 0) {
-                var top2 = defis.slice(0, 2);
-                var txtPrio = top2.map(function(d) { return d.critereNom + ' (' + (NOMS_NIV[d.niveauSelectionne] || '') + ')'; }).join(', ');
-                // Ajouter mention patron recurrent si applicable
-                var top2Noms = top2.map(function(d) { return d.critereNom; });
-                var patronsDansPrio = nomsPatrons.filter(function(n) { return top2Noms.indexOf(n) !== -1; });
-                if (patronsDansPrio.length > 0) {
-                    txtPrio += ' -- objectif' + (patronsDansPrio.length > 1 ? 's' : '') + ' prioritaire' + (patronsDansPrio.length > 1 ? 's' : '') + ' depuis 3 productions';
+                bilanLignes.push({ type: 'titre', texte: 'Presentement, il faut se concentrer sur :' });
+                for (var ip = 0; ip < Math.min(2, defis.length); ip++) {
+                    var d = defis[ip];
+                    var descCrit = '';
+                    if (grilleBilan && grilleBilan.criteres) {
+                        var critDef = grilleBilan.criteres.find(function(gc) { return gc.nom === d.critereNom || gc.id === d.critereId; });
+                        if (critDef && critDef.description) descCrit = critDef.description.toLowerCase();
+                    }
+                    var txtPrio = descCrit ? 'la capacite a ' + descCrit : d.critereNom;
+                    txtPrio += ' (' + d.critereNom + ' ' + (NOMS_NIV[d.niveauSelectionne] || '') + ')';
+                    if (nomsPatrons.indexOf(d.critereNom) !== -1) {
+                        txtPrio += '. Cet objectif est prioritaire depuis 3 productions';
+                    }
+                    bilanLignes.push({ type: 'priorite', texte: txtPrio });
                 }
-                bilanLignes.push({ type: 'priorite', texte: 'Priorites : ' + txtPrio });
             }
         }
 
-        // --- Tampons actionnables (top 2 + retroaction) ---
+        // Tampons actionnables (top 2 + retroaction)
         if (statsVisuelles.totalTampons > 0) {
             var retroObsBilan = travauxOutils.obtenirRetroactionsObservations();
             var autocollantsBilan = travauxOutils.AUTOCOLLANTS;
             var idsTries = Object.keys(statsVisuelles.tampons).sort(function(a, b) { return statsVisuelles.tampons[b] - statsVisuelles.tampons[a]; });
-            var tamponsAffiches = 0;
-            for (var it = 0; it < idsTries.length && tamponsAffiches < 2; it++) {
+            var tampAff = 0;
+            var lignesTamp = [];
+            for (var it = 0; it < idsTries.length && tampAff < 2; it++) {
                 var tid = idsTries[it];
                 var retroT = retroObsBilan[tid] || '';
                 if (!retroT) continue;
@@ -1178,11 +1192,16 @@
                 var tNom = tDef ? tDef.nom : tid;
                 var tNb = statsVisuelles.tampons[tid];
                 var retroTronq = retroT.length > 80 ? retroT.substring(0, 80) + '...' : retroT;
-                bilanLignes.push({ type: 'tampon', texte: tNom + ' (x' + tNb + ') -- ' + retroTronq });
+                lignesTamp.push({ type: 'tampon', texte: tNom + ' (' + tNb + ' occurrence' + (tNb > 1 ? 's' : '') + ') -- ' + retroTronq });
+                tampAff++;
+            }
+            if (lignesTamp.length > 0) {
+                bilanLignes.push({ type: 'titre', texte: 'Points recurrents :' });
+                for (var lt = 0; lt < lignesTamp.length; lt++) bilanLignes.push(lignesTamp[lt]);
             }
         }
 
-        // --- Francais (total + type principal, une ligne) ---
+        // Francais (total + type principal)
         if (statsVisuelles.totalErreursFr > 0) {
             var codesErrBilan = travauxOutils.CODES_ERREURS_FR;
             var typesPrinc = Object.keys(statsVisuelles.erreursFr).sort(function(a, b) { return statsVisuelles.erreursFr[b] - statsVisuelles.erreursFr[a]; });
@@ -1194,34 +1213,34 @@
             bilanLignes.push({ type: 'francais', texte: 'Francais : ' + statsVisuelles.totalErreursFr + ' erreur' + (statsVisuelles.totalErreursFr > 1 ? 's' : '') + (nomErrPrinc ? ' (principalement : ' + nomErrPrinc + ')' : '') });
         }
 
-        // --- Progression + tendance (une seule ligne) ---
+        // Progression (seulement si stable ou en hausse)
         if (evalPrecedente && evaluation.niveauFinal && evalPrecedente.niveauFinal) {
-            var nivActuel = evaluation.niveauFinal;
-            var nivPrec = evalPrecedente.niveauFinal;
-            var prodPrec = evalPrecedente.productionNom || 'la production precedente';
-            var txtProg = '';
-            if (nivActuel !== nivPrec) {
-                txtProg = 'Progression : ' + nivPrec + ' > ' + nivActuel + ' (depuis ' + prodPrec + ')';
+            var nivAct = evaluation.niveauFinal;
+            var nivPre = evalPrecedente.niveauFinal;
+            var ordreAct = ORDRE_NIV[nivAct] || 0;
+            var ordrePre = ORDRE_NIV[nivPre] || 0;
+            if (ordreAct >= ordrePre) {
+                var prodPrec = evalPrecedente.productionNom || 'la production precedente';
+                if (ordreAct > ordrePre) {
+                    bilanLignes.push({ type: 'progression', texte: 'Progression : ' + nivPre + ' > ' + nivAct + ' depuis ' + prodPrec });
+                }
+                // Tendance (seulement stable ou hausse)
+                if (historiqueEleve.length >= 2) {
+                    var niveaux = [ordreAct];
+                    for (var ih = 0; ih < historiqueEleve.length; ih++) niveaux.push(ORDRE_NIV[historiqueEleve[ih].niveauFinal] || 0);
+                    var moitie = Math.floor(niveaux.length / 2);
+                    var moyR = 0; var moyA = 0;
+                    for (var ir = 0; ir < moitie; ir++) moyR += niveaux[ir]; moyR /= moitie;
+                    for (var ia = moitie; ia < niveaux.length; ia++) moyA += niveaux[ia]; moyA /= (niveaux.length - moitie);
+                    if (moyR >= moyA - 0.3) {
+                        var tend = moyR > moyA + 0.3 ? 'en hausse' : 'stable';
+                        bilanLignes.push({ type: 'tendance', texte: 'Tendance sur ' + niveaux.length + ' productions : ' + tend });
+                    }
+                }
             }
-            // Tendance sur N productions
-            if (historiqueEleve.length >= 2) {
-                var niveaux = [ORDRE_NIV[nivActuel] || 0];
-                for (var ih = 0; ih < historiqueEleve.length; ih++) niveaux.push(ORDRE_NIV[historiqueEleve[ih].niveauFinal] || 0);
-                var moitie = Math.floor(niveaux.length / 2);
-                var moyR = 0; var moyA = 0;
-                for (var ir = 0; ir < moitie; ir++) moyR += niveaux[ir];
-                moyR /= moitie;
-                for (var ia = moitie; ia < niveaux.length; ia++) moyA += niveaux[ia];
-                moyA /= (niveaux.length - moitie);
-                var tendance = moyR > moyA + 0.3 ? 'en hausse' : (moyR < moyA - 0.3 ? 'en baisse' : 'stable');
-                var txtTend = 'Tendance sur ' + niveaux.length + ' productions : ' + tendance;
-                if (txtProg) txtProg += ' | ' + txtTend;
-                else txtProg = txtTend;
-            }
-            if (txtProg) bilanLignes.push({ type: 'progression', texte: txtProg });
         }
 
-        // --- Amelioration reconnue ---
+        // Amelioration reconnue
         if (evalPrecedente && evaluation.criteres) {
             var criteresPrec = {};
             if (evalPrecedente.criteres) evalPrecedente.criteres.forEach(function(c) { criteresPrec[c.critereNom] = c.niveauSelectionne; });
@@ -1237,24 +1256,7 @@
             }
         }
 
-        // --- Patrons recurrents NON deja dans les priorites ---
-        if (nomsPatrons.length > 0) {
-            var top2Prio = [];
-            if (evaluation.criteres) {
-                var defisPat = evaluation.criteres
-                    .filter(function(c) { return c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D'; })
-                    .sort(function(a, b) { return (ORDRE_NIV[a.niveauSelectionne] || 0) - (ORDRE_NIV[b.niveauSelectionne] || 0); })
-                    .slice(0, 2);
-                top2Prio = defisPat.map(function(d) { return d.critereNom; });
-            }
-            var patronsExtras = nomsPatrons.filter(function(n) { return top2Prio.indexOf(n) === -1; });
-            if (patronsExtras.length > 0) {
-                var txtPat = patronsExtras.slice(0, 2).join(' et ') + ' : objectif' + (patronsExtras.length > 1 ? 's' : '') + ' prioritaire' + (patronsExtras.length > 1 ? 's' : '');
-                bilanLignes.push({ type: 'patron', texte: txtPat });
-            }
-        }
-
-        // --- Jetons restants ---
+        // Jetons restants
         if (typeof obtenirConfigJetons === 'function' && typeof compterJetonsUtilises === 'function') {
             try {
                 var configJetons = obtenirConfigJetons();
@@ -1269,42 +1271,36 @@
             } catch(e) { /* silencieux */ }
         }
 
-        // --- Question metacognitive ---
+        // Question metacognitive
         bilanLignes.push({ type: 'question', texte: 'Selon toi, quel aspect de ta production meriterait le plus d\'attention ?' });
 
-        // --- RENDU COMPACT ---
+        // --- RENDU dans la colonne droite ---
         if (bilanLignes.length > 1) {
-            if (y > seuilPage) {
-                doc.addPage([612, 792], 'portrait');
-                y = mm(cfg.marges.haut);
-            }
-
-            // Calculer la hauteur du bloc (compact)
-            var bilanH = mm(8);
-            var wBilan = largeurContenu - mm(6);
+            // Calculer la hauteur
+            var bilanH = mm(7);
             for (var ib = 0; ib < bilanLignes.length; ib++) {
-                var nbL = doc.splitTextToSize(bilanLignes[ib].texte, wBilan).length;
+                var nbL = doc.splitTextToSize(bilanLignes[ib].texte, wCol).length;
                 bilanH += nbL * mm(3.5) + mm(0.5);
             }
-            bilanH += mm(3);
+            bilanH += mm(2);
 
-            if (y + bilanH > seuilPage) {
+            if (yDroite + bilanH > seuilPage) {
                 doc.addPage([612, 792], 'portrait');
-                y = mm(cfg.marges.haut);
+                yDroite = mm(cfg.marges.haut);
             }
 
             // Fond
             doc.setFillColor(245, 248, 255);
-            doc.roundedRect(margeG, y - mm(1), largeurContenu, bilanH, mm(1.5), mm(1.5), 'F');
+            doc.roundedRect(colDroiteX, yDroite - mm(1), colLargeur, bilanH, mm(1.5), mm(1.5), 'F');
 
             // Titre
-            doc.setFontSize(cfg.polices.texteNormal - 1);
+            doc.setFontSize(cfg.polices.textePetit);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(...cfg.couleurs.titreSection);
-            doc.text('Bilan', margeG + mm(2), y + mm(2));
-            y += mm(6);
+            doc.text('Bilan', colDroiteX + mm(2), yDroite + mm(2));
+            yDroite += mm(6);
 
-            var xB = margeG + mm(2);
+            var xB = colDroiteX + mm(2);
 
             for (var ibl = 0; ibl < bilanLignes.length; ibl++) {
                 var ligne = bilanLignes[ibl];
@@ -1312,12 +1308,12 @@
 
                 if (ligne.type === 'force') {
                     doc.setFont('helvetica', 'bold'); doc.setTextColor(46, 125, 50);
+                } else if (ligne.type === 'titre') {
+                    doc.setFont('helvetica', 'bold'); doc.setTextColor(...cfg.couleurs.textePrincipal); fs = cfg.polices.textePetit - 1;
                 } else if (ligne.type === 'priorite') {
-                    doc.setFont('helvetica', 'bold'); doc.setTextColor(...cfg.couleurs.textePrincipal);
+                    doc.setFont('helvetica', 'normal'); doc.setTextColor(...cfg.couleurs.textePrincipal);
                 } else if (ligne.type === 'amelioration') {
                     doc.setFont('helvetica', 'italic'); doc.setTextColor(46, 125, 50);
-                } else if (ligne.type === 'patron') {
-                    doc.setFont('helvetica', 'bolditalic'); doc.setTextColor(...cfg.couleurs.textePrincipal);
                 } else if (ligne.type === 'question') {
                     doc.setFont('helvetica', 'italic'); doc.setTextColor(...cfg.couleurs.texteSecondaire);
                 } else if (ligne.type === 'jetons') {
@@ -1327,16 +1323,21 @@
                 }
                 doc.setFontSize(fs);
 
-                var lignesRendu = doc.splitTextToSize(ligne.texte, wBilan);
+                var puce = (ligne.type === 'priorite' || ligne.type === 'tampon') ? '- ' : '';
+                var lignesRendu = doc.splitTextToSize(puce + ligne.texte, wCol);
                 for (var ilr = 0; ilr < lignesRendu.length; ilr++) {
-                    doc.text(lignesRendu[ilr], xB, y);
-                    y += mm(3.5);
+                    doc.text(lignesRendu[ilr], xB, yDroite);
+                    yDroite += mm(3.5);
                 }
-                y += mm(0.5);
+                yDroite += mm(0.5);
             }
 
-            y += mm(4);
+            yDroite += mm(2);
         }
+
+
+        // =============== SUITE (pleine largeur) ===============
+        y = Math.max(yGauche, yDroite) + mm(10);
 
         // --- PIEDS DE PAGE ---
         finaliserPagesSynthese(doc, premierePageSynthese);
