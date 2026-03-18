@@ -1289,18 +1289,14 @@
                 yDroite = mm(cfg.marges.haut);
             }
 
-            // Fond
-            doc.setFillColor(245, 248, 255);
-            doc.roundedRect(colDroiteX, yDroite - mm(1), colLargeur, bilanH, mm(1.5), mm(1.5), 'F');
-
-            // Titre
-            doc.setFontSize(cfg.polices.textePetit);
+            // Titre de section (meme style que Retroaction generale / specifique)
+            doc.setFontSize(cfg.polices.titreSection - 2);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(...cfg.couleurs.titreSection);
-            doc.text('Bilan', colDroiteX + mm(2), yDroite + mm(2));
-            yDroite += mm(6);
+            doc.text('Bilan', colDroiteX, yDroite);
+            yDroite += mm(5);
 
-            var xB = colDroiteX + mm(2);
+            var xB = colDroiteX;
 
             for (var ibl = 0; ibl < bilanLignes.length; ibl++) {
                 var ligne = bilanLignes[ibl];
