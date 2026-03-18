@@ -593,11 +593,18 @@
         db.setSync('ordreCategories', arr);
     }
 
-    // Si l'utilisateur a des tampons custom, masquer les built-in non-legacy
-    // (les built-in sont les defauts pour nouveaux utilisateurs uniquement)
-    var _aDesCustoms = (function() {
+    // Migration : l'ancien flag _aDesCustoms masquait tous les built-in dès qu'un
+    // custom existait, ce qui corrompait aussi elementsMasques. Nettoyer une fois.
+    (function() {
         var customs = db.getSync('tamponsPersonnalises', null);
-        return customs && Array.isArray(customs) && customs.length > 0;
+        if (customs && Array.isArray(customs) && customs.length > 0) {
+            var masques = db.getSync('elementsMasques', null);
+            if (masques && Array.isArray(masques) && masques.length > 10) {
+                // Corruption probable — réinitialiser
+                db.setSync('elementsMasques', null);
+                console.log('[Travaux-Outils] elementsMasques corrompus nettoyés (' + masques.length + ' entrées)');
+            }
+        }
     })();
 
     function obtenirOrdreAutocollants(categorie) {
@@ -605,8 +612,6 @@
         const ordre = db.getSync(key, null);
         const ids = AUTOCOLLANTS.filter(function(a) {
             if (a.legacy) return false;
-            // Masquer les built-in si l'utilisateur a ses propres tampons
-            if (_aDesCustoms && !a.custom) return false;
             return a.categorie === categorie;
         }).map(a => a.id);
         if (ordre && Array.isArray(ordre)) {
@@ -1572,9 +1577,9 @@
         html += '</div>';
 
         html += '<div class="travaux-retro-actions">';
-        html += '<button class="btn-secondaire" onclick="travauxOutils.reinitialiserRetroObservations()">R\u00e9initialiser</button>';
-        html += '<button class="btn-secondaire" onclick="document.getElementById(\'modal-retro-observations\').remove()">Annuler</button>';
-        html += '<button class="btn-principal" onclick="travauxOutils.enregistrerRetroObservations()">Enregistrer</button>';
+        html += '<button class="btn btn-annuler" onclick="travauxOutils.reinitialiserRetroObservations()">R\u00e9initialiser</button>';
+        html += '<button class="btn btn-secondaire" onclick="document.getElementById(\'modal-retro-observations\').remove()">Annuler</button>';
+        html += '<button class="btn btn-principal" onclick="travauxOutils.enregistrerRetroObservations()">Enregistrer</button>';
         html += '</div>';
         html += '</div>';
 
@@ -1924,7 +1929,6 @@
         db.setSync('couleursCategories', null);
         // Supprimer les tampons personnalises
         db.setSync('tamponsPersonnalises', null);
-        _aDesCustoms = false;
         for (var i = AUTOCOLLANTS.length - 1; i >= 0; i--) {
             if (AUTOCOLLANTS[i].custom) AUTOCOLLANTS.splice(i, 1);
         }
@@ -2378,7 +2382,6 @@
                 }
             });
             db.setSync('tamponsPersonnalises', customs.length > 0 ? customs : null);
-            _aDesCustoms = customs.length > 0;
             sauvegarderPersonnalisationObservations(persObj);
             sauvegarderRetroactionsObservations(retroObj);
 
