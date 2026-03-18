@@ -1004,11 +1004,6 @@
                 },
                 didParseCell: function(data) {
                     if (data.section === 'body') {
-                        // Fond vert leger pour forces (M/E), neutre pour defis (I/D)
-                        const niv = niveauxParLigne[data.row.index];
-                        if (niv === 'M' || niv === 'E') {
-                            data.cell.styles.fillColor = [232, 245, 233];
-                        }
                         if (data.column.index === 0) {
                             const texte = data.cell.text.join('\n');
                             if (!texte.includes('\n')) {
@@ -1315,7 +1310,7 @@
                     body: donnesCat,
                     theme: 'grid',
                     headStyles: {
-                        fillColor: couleurCat,
+                        fillColor: cfg.couleurs.titreSection,
                         textColor: [255, 255, 255],
                         fontStyle: 'bold',
                         fontSize: cfg.polices.textePetit - 1
