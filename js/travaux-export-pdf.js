@@ -923,6 +923,15 @@
         // =============== COLONNE GAUCHE : Critères + Note ===============
         let yGauche = yDebutColonnes;
 
+        // Charger la cartouche pour les textes de contexte
+        let cartouchePdf = null;
+        if (evaluation.cartoucheId && evaluation.grilleId) {
+            try {
+                const cartouches = db.getSync('cartouches_' + evaluation.grilleId, []);
+                cartouchePdf = cartouches.find(function(c) { return c.id === evaluation.cartoucheId; }) || null;
+            } catch(e) { /* silencieux */ }
+        }
+
         if (evaluation.criteres && evaluation.criteres.length > 0) {
             doc.setFontSize(cfg.polices.titreSection - 2);
             doc.setFont('helvetica', 'bold');
@@ -930,15 +939,18 @@
             doc.text('R\u00e9troactions par crit\u00e8res', margeG, yGauche);
             yGauche += mm(3);
 
-            doc.setFont('helvetica', 'italic');
-            doc.setFontSize(cfg.polices.textePetit - 1);
-            doc.setTextColor(...cfg.couleurs.texteSecondaire);
-            const noteGenerale = 'Le commentaire associ\u00e9 \u00e0 ton \u00e9valuation est g\u00e9n\u00e9ral. Contextualise-le en fonction de ta production. S\u2019il y a des impr\u00e9cisions, viens me voir.';
-            const lignesNoteGen = doc.splitTextToSize(noteGenerale, colLargeur);
-            doc.text(lignesNoteGen, margeG, yGauche);
-            yGauche += lignesNoteGen.length * mm(3.5) + mm(2);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(...cfg.couleurs.textePrincipal);
+            // Contexte de la retroaction generale (depuis la cartouche, ou rien)
+            var texteContexteGeneral = (cartouchePdf && cartouchePdf.contexte) ? cartouchePdf.contexte : '';
+            if (texteContexteGeneral) {
+                doc.setFont('helvetica', 'italic');
+                doc.setFontSize(cfg.polices.textePetit - 1);
+                doc.setTextColor(...cfg.couleurs.texteSecondaire);
+                const lignesNoteGen = doc.splitTextToSize(texteContexteGeneral, colLargeur);
+                doc.text(lignesNoteGen, margeG, yGauche);
+                yGauche += lignesNoteGen.length * mm(3.5) + mm(2);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...cfg.couleurs.textePrincipal);
+            }
 
             // Chercher la grille pour les descriptions de criteres
             let grilleDef = null;
@@ -1094,7 +1106,8 @@
             yDroite = ajouterSyntheseVisuelle(doc, yDebutColonnes, statsVisuelles, seuilPage, {
                 margeG: colDroiteX,
                 margeD: margeD,
-                largeur: colLargeur
+                largeur: colLargeur,
+                contexteSpecifique: (cartouchePdf && cartouchePdf.contexteSpecifique) ? cartouchePdf.contexteSpecifique : ''
             });
         }
 
@@ -1234,6 +1247,26 @@
         const margeD = zone ? zone.margeD : mm(cfg.marges.droite);
         const largeurContenu = zone ? zone.largeur : (pageW - mm(cfg.marges.gauche) - mm(cfg.marges.droite));
         let y = posY;
+
+        // --- Contexte retroaction specifique (depuis la cartouche) ---
+        if (stats.totalTampons > 0 || stats.totalErreursFr > 0) {
+            // Le texte de contexte specifique est passe via zone.contexteSpecifique
+            var texteContexteSpec = (zone && zone.contexteSpecifique) ? zone.contexteSpecifique : '';
+            if (texteContexteSpec) {
+                if (y > seuilPage) {
+                    doc.addPage([612, 792], 'portrait');
+                    y = mm(cfg.marges.haut);
+                }
+                doc.setFont('helvetica', 'italic');
+                doc.setFontSize(cfg.polices.textePetit - 1);
+                doc.setTextColor(...cfg.couleurs.texteSecondaire);
+                var lignesSpec = doc.splitTextToSize(texteContexteSpec, largeurContenu);
+                doc.text(lignesSpec, margeG, y);
+                y += lignesSpec.length * mm(3.5) + mm(2);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...cfg.couleurs.textePrincipal);
+            }
+        }
 
         // --- Tampons par categorie ---
         if (stats.totalTampons > 0) {
