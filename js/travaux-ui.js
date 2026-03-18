@@ -593,15 +593,28 @@
                 return;
             }
 
-            // Retour sur l'onglet Annoter avec un fichier deja ouvert :
-            // restaurer la vue sans reconstruire le DOM (preserve la session)
+            // Retour sur l'onglet Annoter : restaurer la session
             if (sousSectionActive === 'evaluations-annoter') {
+                // Cas 1 : fichier deja ouvert dans la visionneuse — juste reactiver
                 const fichierOuvert = travauxVisionneuse.getFichierActuel();
                 if (fichierOuvert) {
                     if (typeof travauxAnnotation !== 'undefined' && travauxAnnotation.activerAnnotation) {
                         travauxAnnotation.activerAnnotation();
                     }
                     return;
+                }
+                // Cas 2 : pas de fichier ouvert mais un dernier fichier en session
+                // (le module a ete initialise depuis un autre onglet, la restauration
+                // initiale a ete ignoree car sousSectionActive n'etait pas 'annoter')
+                const dernierFichier = sessionStorage.getItem('travaux-dernier-fichier');
+                if (dernierFichier) {
+                    const fichiers = travauxStockage.obtenirFichiersGroupeActif();
+                    if (fichiers.some(function(f) { return f.id === dernierFichier; })) {
+                        modeCourant = 'annoter';
+                        rafraichirUI();
+                        setTimeout(function() { ouvrirFichier(dernierFichier); }, 200);
+                        return;
+                    }
                 }
             }
 
