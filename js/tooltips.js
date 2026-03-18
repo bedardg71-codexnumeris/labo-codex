@@ -145,7 +145,7 @@ function masquer() {
     }
 }
 
-// --- Delegation d'evenements ---
+// --- Delegation d'evenements (souris) ---
 
 document.addEventListener('mouseenter', function(e) {
     if (!e.target || typeof e.target.closest !== 'function') return;
@@ -165,12 +165,91 @@ document.addEventListener('mouseleave', function(e) {
     timerDisparition = setTimeout(masquer, DELAI_DISPARITION);
 }, true);
 
+// --- Support tactile (tablettes) ---
+// Long-press (600ms) pour afficher le tooltip. Le doigt doit rester immobile.
+// Le tooltip reste visible jusqu'au prochain tap (gere par le listener click).
+
+const DELAI_LONG_PRESS = 600;
+let timerLongPress = null;
+let touchStartX = 0;
+let touchStartY = 0;
+let cibleLongPress = null;
+let tooltipJusteAffiche = false;
+
+document.addEventListener('touchstart', function(e) {
+    const cible = e.target.closest('[data-tooltip]');
+    if (!cible) return;
+
+    clearTimeout(timerLongPress);
+    const touch = e.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    cibleLongPress = cible;
+
+    timerLongPress = setTimeout(function() {
+        timerLongPress = null;
+        afficher(cible);
+        // Empecher le click qui suit le touchend de masquer immediatement
+        tooltipJusteAffiche = true;
+        setTimeout(function() { tooltipJusteAffiche = false; }, 300);
+    }, DELAI_LONG_PRESS);
+}, true);
+
+document.addEventListener('touchmove', function(e) {
+    if (!timerLongPress) return;
+    const touch = e.touches[0];
+    if (Math.abs(touch.clientX - touchStartX) > 10 || Math.abs(touch.clientY - touchStartY) > 10) {
+        clearTimeout(timerLongPress);
+        timerLongPress = null;
+        cibleLongPress = null;
+    }
+}, { passive: true, capture: true });
+
+document.addEventListener('touchend', function() {
+    if (timerLongPress) {
+        clearTimeout(timerLongPress);
+        timerLongPress = null;
+        cibleLongPress = null;
+    }
+}, true);
+
+// Empecher le menu contextuel natif pendant un long-press tooltip
+document.addEventListener('contextmenu', function(e) {
+    if (cibleLongPress && e.target.closest('[data-tooltip]') === cibleLongPress) {
+        e.preventDefault();
+    }
+});
+
+// --- Support clavier (accessibilite) ---
+// Tab vers un element [data-tooltip] affiche le tooltip au focus.
+
+document.addEventListener('focusin', function(e) {
+    if (!e.target || typeof e.target.closest !== 'function') return;
+    const cible = e.target.closest('[data-tooltip]');
+    if (!cible) return;
+
+    clearTimeout(timerDisparition);
+    timerAffichage = setTimeout(function() { afficher(cible); }, DELAI_AFFICHAGE);
+});
+
+document.addEventListener('focusout', function(e) {
+    if (!e.target || typeof e.target.closest !== 'function') return;
+    const cible = e.target.closest('[data-tooltip]');
+    if (!cible) return;
+
+    clearTimeout(timerAffichage);
+    timerDisparition = setTimeout(masquer, DELAI_DISPARITION);
+});
+
+// --- Masquage global ---
+
 // Masquer si scroll ou redimensionnement
 window.addEventListener('scroll', masquer, { passive: true });
 window.addEventListener('resize', masquer);
 
-// Masquage instantane au clic
+// Masquage instantane au clic (et au tap apres un long-press)
 document.addEventListener('click', function() {
+    if (tooltipJusteAffiche) return;
     clearTimeout(timerAffichage);
     masquer();
 }, true);
