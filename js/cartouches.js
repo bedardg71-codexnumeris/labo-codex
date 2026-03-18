@@ -436,7 +436,9 @@ async function initialiserNouveauCartouche(grilleId) {
     // Réinitialiser les champs
     document.getElementById('nomCartouche').value = '';
     document.getElementById('contexteCartouche').value = '';
-    
+    var specClear = document.getElementById('contexteSpecifiqueCartouche');
+    if (specClear) specClear.value = '';
+
     // Afficher la matrice et l'aperçu
     await afficherMatriceRetroaction();
     mettreAJourMetriques();
@@ -505,6 +507,8 @@ async function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam 
 
         if (inputNom) inputNom.value = cartoucheActuel.nom;
         if (inputContexte) inputContexte.value = cartoucheActuel.contexte || '';
+        const inputContexteSpec = document.getElementById('contexteSpecifiqueCartouche');
+        if (inputContexteSpec) inputContexteSpec.value = cartoucheActuel.contexteSpecifique || '';
 
         // Afficher les checkboxes pratiques compatibles
         const containerPratiques = document.getElementById('checkboxesPratiquesCartouche');
@@ -764,6 +768,7 @@ async function sauvegarderCartouche() {
     // Mettre à jour les champs
     cartoucheActuel.nom = nom;
     cartoucheActuel.contexte = document.getElementById('contexteCartouche').value.trim();
+    cartoucheActuel.contexteSpecifique = (document.getElementById('contexteSpecifiqueCartouche') || {}).value ? document.getElementById('contexteSpecifiqueCartouche').value.trim() : '';
     cartoucheActuel.pratiquesCompatibles = pratiquesCompatibles;
 
     // S'assurer que metadata_cc existe toujours (backfill pour cartouches anciennes)
@@ -2505,6 +2510,8 @@ function annulerFormCartouche() {
     // Réinitialiser les champs
     document.getElementById('nomCartouche').value = '';
     document.getElementById('contexteCartouche').value = '';
+    var specClear2 = document.getElementById('contexteSpecifiqueCartouche');
+    if (specClear2) specClear2.value = '';
 
     // NOUVEAU (Beta 95): Réinitialiser les dropdowns grille ET échelle
     const selectGrille = document.getElementById('selectGrilleCartouche');
@@ -2949,6 +2956,8 @@ async function creerNouvelleCartouche() {
     // Réinitialiser les champs
     document.getElementById('nomCartouche').value = '';
     document.getElementById('contexteCartouche').value = '';
+    var specClear3 = document.getElementById('contexteSpecifiqueCartouche');
+    if (specClear3) specClear3.value = '';
 
     // ✅ AJOUT (6 jan 2026) : Vider le panneau métadonnées (mode création)
     const panneauMeta = document.getElementById('panneauMetadonneesCartouche');
