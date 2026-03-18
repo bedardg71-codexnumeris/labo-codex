@@ -2733,6 +2733,9 @@
         setFlechePointes: setFlechePointes,
         // Contexte Modelisation
         setMasquerErreursFrancais: setMasquerErreursFrancais,
+        // Catégories tampons (noms, ordre)
+        obtenirNomsCategories: obtenirNomsCategories,
+        obtenirOrdreCategories: obtenirOrdreCategories,
         // Ordre personnalisé des erreurs FR
         obtenirOrdreErreursFr: obtenirOrdreErreursFr,
         // Mode synthèse erreurs FR (principale / toutes)

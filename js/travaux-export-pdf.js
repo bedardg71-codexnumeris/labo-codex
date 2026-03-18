@@ -894,21 +894,31 @@
             y += mm(6);
         }
 
-        // --- RÉTROACTION GÉNÉRALE PAR CRITÈRE (tableau autoTable) ---
+        // --- LAYOUT 2 COLONNES ---
+        const colGap = mm(3);
+        const colLargeur = (largeurContenu - colGap) / 2;
+        const colDroiteX = margeG + colLargeur + colGap;
+        const margeDroiteColG = pageW - margeG - colLargeur;
+        const yDebutColonnes = y;
+        const pageDebutColonnes = doc.internal.getCurrentPageInfo().pageNumber;
+
+        // =============== COLONNE GAUCHE : Critères + Note ===============
+        let yGauche = yDebutColonnes;
+
         if (evaluation.criteres && evaluation.criteres.length > 0) {
-            doc.setFontSize(cfg.polices.titreSection);
+            doc.setFontSize(cfg.polices.titreSection - 2);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(...cfg.couleurs.titreSection);
-            doc.text('R\u00e9troactions g\u00e9n\u00e9rales par crit\u00e8res et niveaux de performance', margeG, y);
-            y += mm(3);
+            doc.text('R\u00e9troactions par crit\u00e8res', margeG, yGauche);
+            yGauche += mm(3);
 
             doc.setFont('helvetica', 'italic');
-            doc.setFontSize(cfg.polices.textePetit);
+            doc.setFontSize(cfg.polices.textePetit - 1);
             doc.setTextColor(...cfg.couleurs.texteSecondaire);
-            const noteGenerale = 'Le commentaire associ\u00e9 \u00e0 ton \u00e9valuation est g\u00e9n\u00e9ral. Il faut le contextualiser en fonction de ta production personnelle. S\u2019il y a des impr\u00e9cisions ou des ambigu\u00eft\u00e9s, viens me voir.';
-            const lignesNoteGen = doc.splitTextToSize(noteGenerale, largeurContenu);
-            doc.text(lignesNoteGen, margeG, y);
-            y += lignesNoteGen.length * mm(3.5) + mm(2);
+            const noteGenerale = 'Le commentaire associ\u00e9 \u00e0 ton \u00e9valuation est g\u00e9n\u00e9ral. Contextualise-le en fonction de ta production. S\u2019il y a des impr\u00e9cisions, viens me voir.';
+            const lignesNoteGen = doc.splitTextToSize(noteGenerale, colLargeur);
+            doc.text(lignesNoteGen, margeG, yGauche);
+            yGauche += lignesNoteGen.length * mm(3.5) + mm(2);
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(...cfg.couleurs.textePrincipal);
 
@@ -919,9 +929,18 @@
                 grilleDef = grilles.find(g => g.id === evaluation.grilleId) || null;
             } catch(e) { /* silencieux */ }
 
-            const donneesCriteres = evaluation.criteres.map(c => {
+            // Trier : forces (M/E) en premier, defis (I/D) ensuite
+            const ordreNiveau = { 'E': 0, 'M': 1, 'D': 2, 'I': 3 };
+            const criteresTriees = [...evaluation.criteres].sort((a, b) => {
+                const nA = ordreNiveau[a.niveauSelectionne] ?? 4;
+                const nB = ordreNiveau[b.niveauSelectionne] ?? 4;
+                return nA - nB;
+            });
+
+            const niveauxParLigne = [];
+            const donneesCriteres = criteresTriees.map(c => {
+                niveauxParLigne.push(c.niveauSelectionne || '');
                 let cellCritere = c.critereNom || '';
-                // Ajouter la description du critere si disponible
                 if (grilleDef && grilleDef.criteres) {
                     const critDef = grilleDef.criteres.find(gc => gc.nom === c.critereNom || gc.id === c.critereId);
                     if (critDef && critDef.description) {
@@ -931,37 +950,33 @@
                 return [
                     cellCritere,
                     c.niveauSelectionne || '\u2014',
-                    c.ponderation ? c.ponderation + '%' : '\u2014',
                     c.retroaction || ''
                 ];
             });
 
             doc.autoTable({
-                startY: y,
-                head: [['Crit\u00e8re', 'Niv.', 'Pond.', 'R\u00e9troaction']],
+                startY: yGauche,
+                head: [['Crit\u00e8re', 'Niv.', 'R\u00e9troaction']],
                 body: donneesCriteres,
                 theme: 'grid',
                 headStyles: {
                     fillColor: cfg.couleurs.titreSection,
                     textColor: [255, 255, 255],
                     fontStyle: 'bold',
-                    fontSize: cfg.polices.textePetit
+                    fontSize: cfg.polices.textePetit - 1
                 },
                 bodyStyles: {
-                    fontSize: cfg.polices.textePetit,
+                    fontSize: cfg.polices.textePetit - 1,
                     textColor: cfg.couleurs.textePrincipal,
-                    cellPadding: mm(1.5)
+                    cellPadding: mm(1.2)
                 },
                 columnStyles: {
-                    0: { cellWidth: largeurContenu * 0.13 },
-                    1: { cellWidth: largeurContenu * 0.05, halign: 'center' },
-                    2: { cellWidth: largeurContenu * 0.05, halign: 'center' },
-                    3: { cellWidth: largeurContenu * 0.77 }
+                    0: { cellWidth: colLargeur * 0.22 },
+                    1: { cellWidth: colLargeur * 0.08, halign: 'center' },
+                    2: { cellWidth: colLargeur * 0.70 }
                 },
-                margin: { left: margeG, right: margeD },
+                margin: { left: margeG, right: margeDroiteColG },
                 willDrawCell: function(data) {
-                    // Colonne Critère multi-lignes : masquer le texte normal
-                    // (le rendu custom gras+italique est dans didDrawCell)
                     if (data.section === 'body' && data.column.index === 0) {
                         const raw = data.cell.raw || '';
                         if (raw.includes('\n')) {
@@ -970,16 +985,21 @@
                     }
                 },
                 didParseCell: function(data) {
-                    // Colonne Critère : si une seule ligne, juste mettre en gras
-                    if (data.section === 'body' && data.column.index === 0) {
-                        const texte = data.cell.text.join('\n');
-                        if (!texte.includes('\n')) {
-                            data.cell.styles.fontStyle = 'bold';
+                    if (data.section === 'body') {
+                        // Fond vert leger pour forces (M/E), neutre pour defis (I/D)
+                        const niv = niveauxParLigne[data.row.index];
+                        if (niv === 'M' || niv === 'E') {
+                            data.cell.styles.fillColor = [232, 245, 233];
+                        }
+                        if (data.column.index === 0) {
+                            const texte = data.cell.text.join('\n');
+                            if (!texte.includes('\n')) {
+                                data.cell.styles.fontStyle = 'bold';
+                            }
                         }
                     }
                 },
                 didDrawCell: function(data) {
-                    // Colonne Critère : dessiner nom en gras + description en italique
                     if (data.section === 'body' && data.column.index === 0) {
                         const raw = data.cell.raw || '';
                         const parties = raw.split('\n');
@@ -989,53 +1009,34 @@
                             const lineH = fontSize * 0.352 * 1.15;
                             let yCell = data.cell.y + data.cell.padding('top') + fontSize * 0.352;
                             const maxW = data.cell.width - data.cell.padding('left') - data.cell.padding('right');
-                            // Nom en gras
                             doc.setFont('helvetica', 'bold');
                             doc.setFontSize(fontSize);
                             doc.setTextColor(...data.cell.styles.textColor);
                             const lignesNom = doc.splitTextToSize(parties[0], maxW);
                             doc.text(lignesNom, x, yCell);
                             yCell += lignesNom.length * lineH + lineH * 0.5;
-                            // Description en italique (taille réduite)
                             const descFontSize = fontSize - 1;
                             doc.setFont('helvetica', 'italic');
                             doc.setFontSize(descFontSize);
-                            const descLineH = descFontSize * 0.352 * 1.15;
                             const lignesDesc = doc.splitTextToSize(parties.slice(1).join('\n'), maxW);
                             doc.text(lignesDesc, x, yCell, { lineHeightFactor: 1.15 });
                             doc.setFont('helvetica', 'normal');
                             doc.setFontSize(fontSize);
                         }
                     }
-                },
-                didDrawPage: function() {
-                    // autoTable gere les sauts de page automatiquement
                 }
             });
 
-            y = doc.lastAutoTable.finalY + mm(10);
+            yGauche = doc.lastAutoTable.finalY + mm(6);
         }
 
-        // --- NOTE FINALE + NIVEAU ---
-        if (y > seuilPage) {
-            doc.addPage([612, 792], 'portrait');
-            y = mm(cfg.marges.haut);
-        }
-
-        // Résoudre le mode d'affichage de la note (lettre vs complet)
-        // Priorité : 1) évaluation sauvegardée (choix explicite), 2) radio DOM, 3) pratique active (défaut), 4) défaut
+        // --- NOTE FINALE + NIVEAU (colonne gauche) ---
         let modeNote = null;
-
-        // 1. Valeur sauvegardée dans l'évaluation (choix de l'enseignant pour cet étudiant)
         if (opts.affichageNote) modeNote = opts.affichageNote;
-
-        // 2. Radio DOM (si page évaluation ouverte, preview en direct)
         if (!modeNote) {
             const radioUI = document.querySelector('input[name="affichageNote1"]:checked');
             if (radioUI) modeNote = radioUI.value;
         }
-
-        // 3. Préférence de la pratique active du groupe-cours (défaut initial)
         if (!modeNote) {
             try {
                 const pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
@@ -1045,39 +1046,126 @@
                 if (pratiqueActive && pratiqueActive.affichageNote) modeNote = pratiqueActive.affichageNote;
             } catch(e) { /* silencieux */ }
         }
-
-        // 4. Défaut
         if (!modeNote) modeNote = 'complet';
+
         if (evaluation.noteFinale != null || evaluation.niveauFinal) {
-            doc.setFontSize(cfg.polices.sousTitre);
+            if (yGauche > seuilPage) {
+                doc.addPage([612, 792], 'portrait');
+                yGauche = mm(cfg.marges.haut);
+            }
+            doc.setFontSize(cfg.polices.texteNormal);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(...cfg.couleurs.textePrincipal);
 
             let texteNote = '';
             if (modeNote === 'lettre') {
-                if (evaluation.niveauFinal) texteNote = 'Niveau de performance : ' + evaluation.niveauFinal;
+                if (evaluation.niveauFinal) texteNote = 'Niveau : ' + evaluation.niveauFinal;
             } else {
-                if (evaluation.noteFinale != null) texteNote += 'Note finale : ' + evaluation.noteFinale + '%';
-                if (evaluation.noteFinale != null && evaluation.niveauFinal) texteNote += '    ';
-                if (evaluation.niveauFinal) texteNote += 'Niveau : ' + evaluation.niveauFinal;
+                if (evaluation.noteFinale != null) texteNote += 'Note : ' + evaluation.noteFinale + '%';
+                if (evaluation.noteFinale != null && evaluation.niveauFinal) texteNote += '  ';
+                if (evaluation.niveauFinal) texteNote += evaluation.niveauFinal;
             }
             if (texteNote) {
-                doc.text(texteNote, margeG, y);
-                y += mm(5);
+                doc.text(texteNote, margeG, yGauche);
+                yGauche += mm(5);
             }
-
-            doc.setDrawColor(...cfg.couleurs.bordure);
-            doc.setLineWidth(0.5);
-            doc.line(margeG, y, pageW - margeD, y);
-            y += mm(8);
         }
 
-        // --- Rétroactions visuelles spécifiques ---
+        // =============== COLONNE DROITE : Tampons + Erreurs ===============
+        doc.setPage(pageDebutColonnes);
         const annotation = travauxStockage.obtenirAnnotationFichier(fichier.id);
         const statsVisuelles = compterAnnotationsDetailees(annotation);
 
+        let yDroite = yDebutColonnes;
         if (statsVisuelles.totalTampons > 0 || statsVisuelles.totalErreursFr > 0) {
-            y = ajouterSyntheseVisuelle(doc, y, statsVisuelles, seuilPage);
+            yDroite = ajouterSyntheseVisuelle(doc, yDebutColonnes, statsVisuelles, seuilPage, {
+                margeG: colDroiteX,
+                margeD: margeD,
+                largeur: colLargeur
+            });
+        }
+
+        // =============== SUITE (pleine largeur) ===============
+        y = Math.max(yGauche, yDroite) + mm(10);
+
+        // --- SECTION FOCUS : recommandations ---
+        const recommandations = [];
+
+        // 1. Criteres en defi (I ou D)
+        if (evaluation.criteres && evaluation.criteres.length > 0) {
+            const defis = evaluation.criteres
+                .filter(c => c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D')
+                .sort((a, b) => {
+                    if (a.niveauSelectionne === 'I' && b.niveauSelectionne !== 'I') return -1;
+                    if (b.niveauSelectionne === 'I' && a.niveauSelectionne !== 'I') return 1;
+                    return 0;
+                });
+            for (let i = 0; i < Math.min(2, defis.length); i++) {
+                const d = defis[i];
+                const nom = d.critereNom || 'Crit\u00e8re';
+                const detail = d.retroaction
+                    ? d.retroaction.substring(0, 120) + (d.retroaction.length > 120 ? '...' : '')
+                    : '';
+                recommandations.push({
+                    texte: nom + (detail ? ' \u2014 ' + detail : ''),
+                    type: 'critere'
+                });
+            }
+        }
+
+        // 2. Erreurs de francais les plus frequentes
+        if (statsVisuelles.totalErreursFr > 0) {
+            const codesErreurs = travauxOutils.CODES_ERREURS_FR;
+            const typesTriees = Object.keys(statsVisuelles.erreursFr).sort((a, b) =>
+                statsVisuelles.erreursFr[b] - statsVisuelles.erreursFr[a]
+            );
+            const nbErr = Math.min(2, typesTriees.length);
+            for (let i = 0; i < nbErr; i++) {
+                const type = typesTriees[i];
+                const codeDef = codesErreurs.find(c => c.id === type);
+                const nomErr = codeDef ? codeDef.nom : type;
+                const nb = statsVisuelles.erreursFr[type];
+                recommandations.push({
+                    texte: 'Fran\u00e7ais : ' + nomErr + ' (' + nb + ' occurrence' + (nb > 1 ? 's' : '') + ')',
+                    type: 'erreur'
+                });
+            }
+        }
+
+        // Afficher la section Focus si au moins une recommandation
+        if (recommandations.length > 0) {
+            if (y > seuilPage) {
+                doc.addPage([612, 792], 'portrait');
+                y = mm(cfg.marges.haut);
+            }
+
+            // Fond leger
+            const focusH = mm(8) + recommandations.length * mm(6) + mm(4);
+            doc.setFillColor(245, 248, 255);
+            doc.roundedRect(margeG, y - mm(2), largeurContenu, focusH, mm(1.5), mm(1.5), 'F');
+
+            // Titre
+            doc.setFontSize(cfg.polices.texteNormal);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(...cfg.couleurs.titreSection);
+            doc.text('Pour ton prochain artefact, concentre-toi sur :', margeG + mm(3), y + mm(2));
+            y += mm(8);
+
+            // Recommandations
+            doc.setFontSize(cfg.polices.textePetit - 1);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(...cfg.couleurs.textePrincipal);
+
+            for (const rec of recommandations) {
+                const lignes = doc.splitTextToSize('\u2022 ' + rec.texte, largeurContenu - mm(8));
+                for (const ligne of lignes) {
+                    doc.text(ligne, margeG + mm(3), y);
+                    y += mm(4);
+                }
+                y += mm(1);
+            }
+
+            y += mm(6);
         }
 
         // --- PIEDS DE PAGE ---
@@ -1109,158 +1197,127 @@
      * @param {number} posY - Position Y courante
      * @param {Object} stats - Resultat de compterAnnotationsDetailees
      * @param {number} seuilPage - Seuil Y pour saut de page
+     * @param {Object} [zone] - Zone de rendu (layout 2 colonnes) { margeG, margeD, largeur }
      * @returns {number} Nouvelle posY
      */
-    function ajouterSyntheseVisuelle(doc, posY, stats, seuilPage) {
+    function ajouterSyntheseVisuelle(doc, posY, stats, seuilPage, zone) {
         const cfg = getCfg();
-        const margeG = mm(cfg.marges.gauche);
-        const margeD = mm(cfg.marges.droite);
         const pageW = doc.internal.pageSize.getWidth();
-        const largeurContenu = pageW - margeG - margeD;
+        // Si zone fournie, utiliser ses dimensions (layout 2 colonnes)
+        const margeG = zone ? zone.margeG : mm(cfg.marges.gauche);
+        const margeD = zone ? zone.margeD : mm(cfg.marges.droite);
+        const largeurContenu = zone ? zone.largeur : (pageW - mm(cfg.marges.gauche) - mm(cfg.marges.droite));
         let y = posY;
 
-        // Titre de section
-        if (y > seuilPage) {
-            doc.addPage([612, 792], 'portrait');
-            y = mm(cfg.marges.haut);
-        }
-
-        doc.setFontSize(cfg.polices.titreSection);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(...cfg.couleurs.titreSection);
-        doc.text('R\u00e9troactions visuelles sp\u00e9cifiques', margeG, y);
-        y += mm(6);
-
-        // --- Tableau des tampons ---
+        // --- Tampons par categorie ---
         if (stats.totalTampons > 0) {
-            doc.setFontSize(cfg.polices.texteNormal);
+            if (y > seuilPage) {
+                doc.addPage([612, 792], 'portrait');
+                y = mm(cfg.marges.haut);
+            }
+
+            doc.setFontSize(cfg.polices.titreSection - 2);
             doc.setFont('helvetica', 'bold');
-            doc.setTextColor(...cfg.couleurs.textePrincipal);
-            doc.text('Tampons utilisés :', margeG, y);
-            y += mm(3);
+            doc.setTextColor(...cfg.couleurs.titreSection);
+            doc.text('Tampons utilis\u00e9s', margeG, y);
+            y += mm(5);
 
             const autocollantsDef = travauxOutils.AUTOCOLLANTS;
-            const donnesTampons = [];
-            const tamponsImages = {}; // index ligne → dataURL
-            const DIAG_IDS = ['bon-lien','manque-lien','confusion','repetitif','preuve-absente','citation','approfondir','procedes','attention'];
             const retroObs = travauxOutils.obtenirRetroactionsObservations();
-
-            // Trier par nom alphabetique
-            const ids = Object.keys(stats.tampons);
-            const tries = ids.sort((a, b) => {
-                const defA = autocollantsDef.find(x => x.id === a);
-                const defB = autocollantsDef.find(x => x.id === b);
-                return (defA?.nom || a).localeCompare(defB?.nom || b);
-            });
-
-            const isDiag = {};
-            for (let i = 0; i < tries.length; i++) {
-                const id = tries[i];
-                const def = autocollantsDef.find(x => x.id === id);
-                isDiag[i] = DIAG_IDS.includes(id);
-                const retroTexte = isDiag[i] ? (retroObs[id] || '') : '';
-                donnesTampons.push([
-                    '      ' + (def?.nom || id),
-                    String(stats.tampons[id]),
-                    retroTexte
-                ]);
-                const dataUrl = autocollantToDataURL(id);
-                if (dataUrl) {
-                    tamponsImages[i] = dataUrl;
-                }
-            }
-
-            if (y > seuilPage) {
-                doc.addPage([612, 792], 'portrait');
-                y = mm(cfg.marges.haut);
-            }
-
+            const nomsCat = travauxOutils.obtenirNomsCategories();
+            const ordreCategories = travauxOutils.obtenirOrdreCategories();
             const imgSize = mm(4);
 
-            doc.autoTable({
-                startY: y,
-                head: [['Tampon', 'Nb', 'Rétroaction']],
-                body: donnesTampons,
-                theme: 'grid',
-                headStyles: {
-                    fillColor: cfg.couleurs.fondEntete,
-                    textColor: cfg.couleurs.titreSection,
-                    fontStyle: 'bold',
-                    fontSize: cfg.polices.textePetit
-                },
-                bodyStyles: {
-                    fontSize: cfg.polices.textePetit,
-                    textColor: cfg.couleurs.textePrincipal,
-                    cellPadding: mm(1.2),
-                    minCellHeight: imgSize + mm(1)
-                },
-                columnStyles: {
-                    0: { cellWidth: largeurContenu * 0.15 },
-                    1: { cellWidth: largeurContenu * 0.07, halign: 'center' },
-                    2: { cellWidth: largeurContenu * 0.78, fontSize: cfg.polices.textePetit - 1 }
-                },
-                margin: { left: margeG, right: margeD },
-                didDrawCell: function(data) {
-                    if (data.section === 'body' && data.column.index === 0) {
-                        const dataUrl = tamponsImages[data.row.index];
-                        if (dataUrl) {
-                            const cellY = data.cell.y + (data.cell.height - imgSize) / 2;
-                            doc.addImage(dataUrl, 'PNG', data.cell.x + mm(1), cellY, imgSize, imgSize);
+            // Grouper les tampons utilises par categorie (exclure legacy)
+            for (const catId of ordreCategories) {
+                const tamponsCat = autocollantsDef.filter(a => !a.legacy && a.categorie === catId);
+                const tamponsUtilises = tamponsCat.filter(a => stats.tampons[a.id]);
+                if (tamponsUtilises.length === 0) continue;
+
+                // Nom de la categorie
+                doc.setFontSize(cfg.polices.textePetit);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(...cfg.couleurs.texteSecondaire);
+                doc.text(nomsCat[catId] || catId, margeG, y);
+                y += mm(3);
+
+                const donnesCat = [];
+                const imagesCat = {};
+
+                for (let i = 0; i < tamponsUtilises.length; i++) {
+                    const a = tamponsUtilises[i];
+                    const retroTexte = retroObs[a.id] || '';
+                    donnesCat.push([
+                        '      ' + a.nom,
+                        String(stats.tampons[a.id]),
+                        retroTexte
+                    ]);
+                    const dataUrl = autocollantToDataURL(a.id);
+                    if (dataUrl) imagesCat[i] = dataUrl;
+                }
+
+                if (y > seuilPage) {
+                    doc.addPage([612, 792], 'portrait');
+                    y = mm(cfg.marges.haut);
+                }
+
+                doc.autoTable({
+                    startY: y,
+                    body: donnesCat,
+                    theme: 'grid',
+                    showHead: 'never',
+                    bodyStyles: {
+                        fontSize: cfg.polices.textePetit - 1,
+                        textColor: cfg.couleurs.textePrincipal,
+                        cellPadding: mm(1),
+                        minCellHeight: imgSize + mm(0.5)
+                    },
+                    columnStyles: {
+                        0: { cellWidth: largeurContenu * 0.28 },
+                        1: { cellWidth: largeurContenu * 0.10, halign: 'center', fontStyle: 'bold' },
+                        2: { cellWidth: largeurContenu * 0.62, fontSize: cfg.polices.textePetit - 2 }
+                    },
+                    margin: { left: margeG, right: margeD },
+                    didDrawCell: function(data) {
+                        if (data.section === 'body' && data.column.index === 0) {
+                            const dataUrl = imagesCat[data.row.index];
+                            if (dataUrl) {
+                                const cellY = data.cell.y + (data.cell.height - imgSize) / 2;
+                                doc.addImage(dataUrl, 'PNG', data.cell.x + mm(0.5), cellY, imgSize, imgSize);
+                            }
                         }
                     }
-                }
-            });
+                });
 
-            y = doc.lastAutoTable.finalY + mm(10);
+                y = doc.lastAutoTable.finalY + mm(4);
+            }
+
+            y += mm(4);
         }
 
-        // --- Tableau des erreurs de francais ---
+        // --- Erreurs de francais (toutes, triees par frequence) ---
         if (stats.totalErreursFr > 0) {
-            doc.setFontSize(cfg.polices.texteNormal);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(...cfg.couleurs.textePrincipal);
-
             if (y > seuilPage) {
                 doc.addPage([612, 792], 'portrait');
                 y = mm(cfg.marges.haut);
             }
 
-            doc.text('Erreurs de français :', margeG, y);
-            y += mm(3);
+            doc.setFontSize(cfg.polices.textePetit);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(...cfg.couleurs.titreSection);
+            doc.text('Erreurs de fran\u00e7ais', margeG, y);
+            y += mm(4);
 
-            const modeSyntheseErrFr = travauxOutils.obtenirModeSyntheseErrFr();
-            if (modeSyntheseErrFr === 'principale') {
-                doc.setFont('helvetica', 'italic');
-                doc.setFontSize(cfg.polices.textePetit);
-                doc.setTextColor(...cfg.couleurs.texteSecondaire);
-                const noteExplicative = 'Seule l\u2019erreur la plus fr\u00e9quente est pr\u00e9sent\u00e9e ici. Concentre tes efforts sur ce type d\u2019erreur dans tes prochaines productions.';
-                const lignesNote = doc.splitTextToSize(noteExplicative, largeurContenu);
-                doc.text(lignesNote, margeG, y);
-                y += lignesNote.length * mm(3.5) + mm(2);
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(...cfg.couleurs.textePrincipal);
-            }
-
-            const codesErreurs = travauxOutils.CODES_ERREURS_FR;
-            const donnesErreurs = [];
             const retroFr = travauxOutils.obtenirRetroactionsErreursFr();
-
-            // Trier par position dans l'ordre personnalisé de la palette
-            const ordreRecap = (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirOrdreErreursFr)
+            const ordreRecap = travauxOutils.obtenirOrdreErreursFr
                 ? travauxOutils.obtenirOrdreErreursFr() : [];
-            let typesErreurs = Object.keys(stats.erreursFr).sort((a, b) => {
-                const idxA = ordreRecap.indexOf(a);
-                const idxB = ordreRecap.indexOf(b);
-                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-                return parseInt(a.replace('errfr_', ''), 10) - parseInt(b.replace('errfr_', ''), 10);
-            });
 
-            if (modeSyntheseErrFr === 'principale' && typesErreurs.length > 1) {
-                const typeMax = typesErreurs.reduce((max, t) =>
-                    stats.erreursFr[t] > (stats.erreursFr[max] || 0) ? t : max, typesErreurs[0]);
-                typesErreurs = [typeMax];
-            }
+            // Trier par frequence decroissante
+            const typesErreurs = Object.keys(stats.erreursFr).sort((a, b) =>
+                stats.erreursFr[b] - stats.erreursFr[a]
+            );
 
+            const donnesErreurs = [];
             for (const type of typesErreurs) {
                 const idxNum = ordreRecap.indexOf(type);
                 const num = idxNum !== -1 ? idxNum + 1 : type.replace('errfr_', '');
@@ -1271,40 +1328,57 @@
                 ]);
             }
 
-            // Ligne total en gras
-            donnesErreurs.push(['', String(stats.totalErreursFr), '']);
+            // Ligne total
+            donnesErreurs.push(['Total', String(stats.totalErreursFr), '']);
+
+            // Les 2-3 plus frequentes en gras (indices 0, 1, 2)
+            const nbGras = Math.min(3, typesErreurs.length);
 
             doc.autoTable({
                 startY: y,
-                head: [['Code', 'Nb', 'Rétroaction']],
+                head: [['Code', 'Nb', 'R\u00e9troaction']],
                 body: donnesErreurs,
                 theme: 'grid',
                 headStyles: {
                     fillColor: cfg.couleurs.fondEntete,
                     textColor: cfg.couleurs.titreSection,
                     fontStyle: 'bold',
-                    fontSize: cfg.polices.textePetit
+                    fontSize: cfg.polices.textePetit - 1
                 },
                 bodyStyles: {
-                    fontSize: cfg.polices.textePetit,
+                    fontSize: cfg.polices.textePetit - 1,
                     textColor: cfg.couleurs.textePrincipal,
-                    cellPadding: mm(1.2)
+                    cellPadding: mm(1)
                 },
                 columnStyles: {
-                    0: { cellWidth: largeurContenu * 0.06, halign: 'center' },
-                    1: { cellWidth: largeurContenu * 0.05, halign: 'center' },
-                    2: { cellWidth: largeurContenu * 0.89, fontSize: cfg.polices.textePetit - 1 }
+                    0: { cellWidth: largeurContenu * 0.10, halign: 'center' },
+                    1: { cellWidth: largeurContenu * 0.10, halign: 'center' },
+                    2: { cellWidth: largeurContenu * 0.80, fontSize: cfg.polices.textePetit - 2 }
                 },
                 margin: { left: margeG, right: margeD },
                 didParseCell: function(data) {
-                    // Derniere ligne (total) en gras
-                    if (data.section === 'body' && data.row.index === donnesErreurs.length - 1) {
-                        data.cell.styles.fontStyle = 'bold';
+                    if (data.section === 'body') {
+                        // Les plus frequentes en gras
+                        if (data.row.index < nbGras) {
+                            data.cell.styles.fontStyle = 'bold';
+                        }
+                        // Ligne total en gras
+                        if (data.row.index === donnesErreurs.length - 1) {
+                            data.cell.styles.fontStyle = 'bold';
+                            data.cell.styles.fillColor = cfg.couleurs.fondEntete;
+                        }
                     }
                 }
             });
 
-            y = doc.lastAutoTable.finalY + mm(10);
+            y = doc.lastAutoTable.finalY + mm(6);
+        } else if (stats.totalTampons > 0) {
+            // S'il y a des tampons mais aucune erreur, le mentionner
+            doc.setFontSize(cfg.polices.textePetit - 1);
+            doc.setFont('helvetica', 'italic');
+            doc.setTextColor(...cfg.couleurs.texteSecondaire);
+            doc.text('Aucune erreur de fran\u00e7ais annot\u00e9e.', margeG, y);
+            y += mm(5);
         }
 
         return y;
