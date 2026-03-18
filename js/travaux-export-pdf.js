@@ -1167,7 +1167,7 @@
                         var critDef = grilleBilan.criteres.find(function(gc) { return gc.nom === d.critereNom || gc.id === d.critereId; });
                         if (critDef && critDef.description) descCrit = critDef.description.toLowerCase();
                     }
-                    var txtPrio = descCrit ? 'la capacit\u00e9 \u00e0 ' + descCrit : d.critereNom;
+                    var txtPrio = descCrit ? descCrit : d.critereNom;
                     txtPrio += ' (' + d.critereNom + ' ' + (NOMS_NIV[d.niveauSelectionne] || '') + ')';
                     if (nomsPatrons.indexOf(d.critereNom) !== -1) {
                         txtPrio += '. Cet objectif est prioritaire depuis 3 productions';
