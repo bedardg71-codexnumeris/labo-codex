@@ -936,7 +936,7 @@
             doc.setFontSize(cfg.polices.titreSection - 2);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(...cfg.couleurs.titreSection);
-            doc.text('R\u00e9troactions par crit\u00e8res', margeG, yGauche);
+            doc.text('R\u00e9troaction g\u00e9n\u00e9rale', margeG, yGauche);
             yGauche += mm(3);
 
             // Contexte de la retroaction generale (depuis la cartouche, ou rien)
@@ -1248,26 +1248,6 @@
         const largeurContenu = zone ? zone.largeur : (pageW - mm(cfg.marges.gauche) - mm(cfg.marges.droite));
         let y = posY;
 
-        // --- Contexte retroaction specifique (depuis la cartouche) ---
-        if (stats.totalTampons > 0 || stats.totalErreursFr > 0) {
-            // Le texte de contexte specifique est passe via zone.contexteSpecifique
-            var texteContexteSpec = (zone && zone.contexteSpecifique) ? zone.contexteSpecifique : '';
-            if (texteContexteSpec) {
-                if (y > seuilPage) {
-                    doc.addPage([612, 792], 'portrait');
-                    y = mm(cfg.marges.haut);
-                }
-                doc.setFont('helvetica', 'italic');
-                doc.setFontSize(cfg.polices.textePetit - 1);
-                doc.setTextColor(...cfg.couleurs.texteSecondaire);
-                var lignesSpec = doc.splitTextToSize(texteContexteSpec, largeurContenu);
-                doc.text(lignesSpec, margeG, y);
-                y += lignesSpec.length * mm(3.5) + mm(2);
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(...cfg.couleurs.textePrincipal);
-            }
-        }
-
         // --- Tampons par categorie ---
         if (stats.totalTampons > 0) {
             if (y > seuilPage) {
@@ -1278,8 +1258,21 @@
             doc.setFontSize(cfg.polices.titreSection - 2);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(...cfg.couleurs.titreSection);
-            doc.text('Tampons utilis\u00e9s', margeG, y);
-            y += mm(5);
+            doc.text('R\u00e9troaction sp\u00e9cifique', margeG, y);
+            y += mm(3);
+
+            // Contexte retroaction specifique (depuis la cartouche)
+            var texteContexteSpec = (zone && zone.contexteSpecifique) ? zone.contexteSpecifique : '';
+            if (texteContexteSpec) {
+                doc.setFont('helvetica', 'italic');
+                doc.setFontSize(cfg.polices.textePetit - 1);
+                doc.setTextColor(...cfg.couleurs.texteSecondaire);
+                var lignesSpec = doc.splitTextToSize(texteContexteSpec, largeurContenu);
+                doc.text(lignesSpec, margeG, y);
+                y += lignesSpec.length * mm(3.5) + mm(2);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...cfg.couleurs.textePrincipal);
+            }
 
             const autocollantsDef = travauxOutils.AUTOCOLLANTS;
             const retroObs = travauxOutils.obtenirRetroactionsObservations();
