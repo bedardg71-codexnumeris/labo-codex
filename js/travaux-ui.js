@@ -585,6 +585,20 @@
                 if (evalDiv) evalDiv.classList.add('u-hide');
                 return;
             }
+
+            // Si un fichier est deja ouvert et qu'on revient sur l'onglet Annoter,
+            // restaurer la vue sans reconstruire le DOM (preserve la session)
+            if (sousSectionActive === 'evaluations-annoter') {
+                const fichierOuvert = travauxVisionneuse.getFichierActuel();
+                if (fichierOuvert) {
+                    // Reactiver l'annotation sur le fichier existant
+                    if (typeof travauxAnnotation !== 'undefined' && travauxAnnotation.activerAnnotation) {
+                        travauxAnnotation.activerAnnotation();
+                    }
+                    return;
+                }
+            }
+
             const etaitEnModeEvaluer = (modeCourant === 'evaluer');
             // Forcer la sauvegarde des annotations AVANT de reconstruire le DOM
             // (sinon les annotations non sauvegardées sont perdues lors de la navigation)
