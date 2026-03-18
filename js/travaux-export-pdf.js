@@ -1102,7 +1102,7 @@
         }
 
         // --- BILAN (colonne droite, sous tampons/erreurs) ---
-        var NOMS_NIV = { 'E': 'etendu', 'M': 'maitrise', 'D': 'en developpement', 'I': 'incomplet' };
+        var NOMS_NIV = { 'E': '\u00c9tendu', 'M': 'Ma\u00eetris\u00e9', 'D': 'En d\u00e9veloppement', 'I': 'Incomplet' };
         var ORDRE_NIV = { 'E': 4, 'M': 3, 'D': 2, 'I': 1, '0': 0 };
         var da = evaluation.etudiantDA;
 
@@ -1159,7 +1159,7 @@
                 .filter(function(c) { return c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D'; })
                 .sort(function(a, b) { return (ORDRE_NIV[a.niveauSelectionne] || 0) - (ORDRE_NIV[b.niveauSelectionne] || 0); });
             if (defis.length > 0) {
-                bilanLignes.push({ type: 'titre', texte: 'Presentement, il faut se concentrer sur :' });
+                bilanLignes.push({ type: 'titre', texte: 'Pr\u00e9sentement, il faut se concentrer sur :' });
                 for (var ip = 0; ip < Math.min(2, defis.length); ip++) {
                     var d = defis[ip];
                     var descCrit = '';
@@ -1167,7 +1167,7 @@
                         var critDef = grilleBilan.criteres.find(function(gc) { return gc.nom === d.critereNom || gc.id === d.critereId; });
                         if (critDef && critDef.description) descCrit = critDef.description.toLowerCase();
                     }
-                    var txtPrio = descCrit ? 'la capacite a ' + descCrit : d.critereNom;
+                    var txtPrio = descCrit ? 'la capacit\u00e9 \u00e0 ' + descCrit : d.critereNom;
                     txtPrio += ' (' + d.critereNom + ' ' + (NOMS_NIV[d.niveauSelectionne] || '') + ')';
                     if (nomsPatrons.indexOf(d.critereNom) !== -1) {
                         txtPrio += '. Cet objectif est prioritaire depuis 3 productions';
@@ -1196,7 +1196,7 @@
                 tampAff++;
             }
             if (lignesTamp.length > 0) {
-                bilanLignes.push({ type: 'titre', texte: 'Points recurrents :' });
+                bilanLignes.push({ type: 'titre', texte: 'Points r\u00e9currents :' });
                 for (var lt = 0; lt < lignesTamp.length; lt++) bilanLignes.push(lignesTamp[lt]);
             }
         }
@@ -1210,7 +1210,7 @@
                 var codePrinc = codesErrBilan.find(function(c) { return c.id === typesPrinc[0]; });
                 nomErrPrinc = codePrinc ? codePrinc.nom : '';
             }
-            bilanLignes.push({ type: 'francais', texte: 'Francais : ' + statsVisuelles.totalErreursFr + ' erreur' + (statsVisuelles.totalErreursFr > 1 ? 's' : '') + (nomErrPrinc ? ' (principalement : ' + nomErrPrinc + ')' : '') });
+            bilanLignes.push({ type: 'francais', texte: 'Fran\u00e7ais : ' + statsVisuelles.totalErreursFr + ' erreur' + (statsVisuelles.totalErreursFr > 1 ? 's' : '') + (nomErrPrinc ? ' (principalement : ' + nomErrPrinc + ')' : '') });
         }
 
         // Progression (seulement si stable ou en hausse)
@@ -1252,7 +1252,7 @@
                 }
             });
             if (ameliorations.length > 0) {
-                bilanLignes.push({ type: 'amelioration', texte: 'Tu as progresse en ' + ameliorations.join(' et ') + '.' });
+                bilanLignes.push({ type: 'amelioration', texte: 'Tu as progress\u00e9 en ' + ameliorations.join(' et ') + '.' });
             }
         }
 
@@ -1272,7 +1272,7 @@
         }
 
         // Question metacognitive
-        bilanLignes.push({ type: 'question', texte: 'Selon toi, quel aspect de ta production meriterait le plus d\'attention ?' });
+        bilanLignes.push({ type: 'question', texte: 'Selon toi, quel aspect de ta production m\u00e9riterait le plus d\u2019attention ?' });
 
         // --- RENDU dans la colonne droite ---
         if (bilanLignes.length > 1) {
