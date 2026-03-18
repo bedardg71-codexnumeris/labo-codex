@@ -1114,81 +1114,245 @@
         // =============== SUITE (pleine largeur) ===============
         y = Math.max(yGauche, yDroite) + mm(10);
 
-        // --- SECTION FOCUS : recommandations ---
-        const recommandations = [];
+        // --- SECTION BILAN USB ---
+        const NOMS_NIVEAUX = { 'E': 'Étendu', 'M': 'Maîtrisé', 'D': 'En développement', 'I': 'Incomplet', '0': 'Non recevable' };
+        const ORDRE_NIV = { 'E': 4, 'M': 3, 'D': 2, 'I': 1, '0': 0 };
+        const bilanLignes = [];
+        const da = evaluation.etudiantDA;
 
-        // 1. Criteres en defi (I ou D)
+        // --- Charger l'historique de l'eleve ---
+        let historiqueEleve = [];
+        try {
+            const toutesEvals = db.getSync(cle('evaluationsSauvegardees'), []);
+            historiqueEleve = toutesEvals
+                .filter(function(e) {
+                    return e.etudiantDA === da && !e.remplaceeParId && e.id !== evaluation.id;
+                })
+                .sort(function(a, b) {
+                    return new Date(b.dateEvaluation) - new Date(a.dateEvaluation);
+                })
+                .slice(0, 5);
+        } catch(e) { /* silencieux */ }
+        const evalPrecedente = historiqueEleve.length > 0 ? historiqueEleve[0] : null;
+
+        // --- 2a. Ta force (meilleur critere M/E) ---
         if (evaluation.criteres && evaluation.criteres.length > 0) {
-            const defis = evaluation.criteres
-                .filter(c => c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D')
-                .sort((a, b) => {
-                    if (a.niveauSelectionne === 'I' && b.niveauSelectionne !== 'I') return -1;
-                    if (b.niveauSelectionne === 'I' && a.niveauSelectionne !== 'I') return 1;
-                    return 0;
-                });
-            for (let i = 0; i < Math.min(2, defis.length); i++) {
-                const d = defis[i];
-                const nom = d.critereNom || 'Crit\u00e8re';
-                const detail = d.retroaction
-                    ? d.retroaction.substring(0, 120) + (d.retroaction.length > 120 ? '...' : '')
-                    : '';
-                recommandations.push({
-                    texte: nom + (detail ? ' \u2014 ' + detail : ''),
-                    type: 'critere'
-                });
+            var meilleur = null;
+            var meilleurOrdre = 0;
+            evaluation.criteres.forEach(function(c) {
+                var o = ORDRE_NIV[c.niveauSelectionne] || 0;
+                if (o > meilleurOrdre) { meilleurOrdre = o; meilleur = c; }
+            });
+            if (meilleur && (meilleur.niveauSelectionne === 'M' || meilleur.niveauSelectionne === 'E')) {
+                bilanLignes.push({ type: 'force', texte: 'Ta force : ' + (meilleur.critereNom || '') + ' \u2014 ' + (NOMS_NIVEAUX[meilleur.niveauSelectionne] || '') });
+            }
+
+            // --- 2b. Priorites (2 plus faibles I/D) ---
+            var defis = evaluation.criteres
+                .filter(function(c) { return c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D'; })
+                .sort(function(a, b) { return (ORDRE_NIV[a.niveauSelectionne] || 0) - (ORDRE_NIV[b.niveauSelectionne] || 0); });
+            if (defis.length > 0) {
+                bilanLignes.push({ type: 'titre', texte: 'Priorités :' });
+                for (var ip = 0; ip < Math.min(2, defis.length); ip++) {
+                    bilanLignes.push({ type: 'priorite', texte: '\u2022 ' + (defis[ip].critereNom || '') + ' \u2014 ' + (NOMS_NIVEAUX[defis[ip].niveauSelectionne] || '') });
+                }
             }
         }
 
-        // 2. Erreurs de francais les plus frequentes
+        // --- 2c. Tampons actionnables (top 2-3 + retroaction) ---
+        if (statsVisuelles.totalTampons > 0) {
+            var retroObsBilan = travauxOutils.obtenirRetroactionsObservations();
+            var autocollantsBilan = travauxOutils.AUTOCOLLANTS;
+            var idsTries = Object.keys(statsVisuelles.tampons).sort(function(a, b) {
+                return statsVisuelles.tampons[b] - statsVisuelles.tampons[a];
+            });
+            var tamponsAffiches = 0;
+            var lignesTampons = [];
+            for (var it = 0; it < idsTries.length && tamponsAffiches < 3; it++) {
+                var tid = idsTries[it];
+                var retroT = retroObsBilan[tid] || '';
+                if (!retroT) continue;
+                var tDef = autocollantsBilan.find(function(a) { return a.id === tid; });
+                var tNom = tDef ? tDef.nom : tid;
+                var tNb = statsVisuelles.tampons[tid];
+                var retroTronq = retroT.length > 100 ? retroT.substring(0, 100) + '...' : retroT;
+                lignesTampons.push({ type: 'tampon', texte: '\u2022 ' + tNom + ' (\u00d7' + tNb + ') \u2014 ' + retroTronq });
+                tamponsAffiches++;
+            }
+            if (lignesTampons.length > 0) {
+                bilanLignes.push({ type: 'titre', texte: 'Points récurrents dans ta production :' });
+                for (var lt = 0; lt < lignesTampons.length; lt++) bilanLignes.push(lignesTampons[lt]);
+            }
+        }
+
+        // --- 2d. Francais (total + type principal) ---
         if (statsVisuelles.totalErreursFr > 0) {
-            const codesErreurs = travauxOutils.CODES_ERREURS_FR;
-            const typesTriees = Object.keys(statsVisuelles.erreursFr).sort((a, b) =>
-                statsVisuelles.erreursFr[b] - statsVisuelles.erreursFr[a]
-            );
-            const nbErr = Math.min(2, typesTriees.length);
-            for (let i = 0; i < nbErr; i++) {
-                const type = typesTriees[i];
-                const codeDef = codesErreurs.find(c => c.id === type);
-                const nomErr = codeDef ? codeDef.nom : type;
-                const nb = statsVisuelles.erreursFr[type];
-                recommandations.push({
-                    texte: 'Fran\u00e7ais : ' + nomErr + ' (' + nb + ' occurrence' + (nb > 1 ? 's' : '') + ')',
-                    type: 'erreur'
-                });
+            var codesErrBilan = travauxOutils.CODES_ERREURS_FR;
+            var typesPrinc = Object.keys(statsVisuelles.erreursFr).sort(function(a, b) {
+                return statsVisuelles.erreursFr[b] - statsVisuelles.erreursFr[a];
+            });
+            var nomErrPrinc = '';
+            if (typesPrinc.length > 0) {
+                var codePrinc = codesErrBilan.find(function(c) { return c.id === typesPrinc[0]; });
+                nomErrPrinc = codePrinc ? codePrinc.nom : typesPrinc[0];
+            }
+            bilanLignes.push({ type: 'francais', texte: 'Français : ' + statsVisuelles.totalErreursFr + ' erreur' + (statsVisuelles.totalErreursFr > 1 ? 's' : '') + ' annotée' + (statsVisuelles.totalErreursFr > 1 ? 's' : '') + (nomErrPrinc ? ' (principalement : ' + nomErrPrinc + ')' : '') });
+        }
+
+        // --- 2e. Progression (niveaux, pas de note chiffree) ---
+        if (evalPrecedente && evaluation.niveauFinal && evalPrecedente.niveauFinal) {
+            var nivActuel = evaluation.niveauFinal;
+            var nivPrec = evalPrecedente.niveauFinal;
+            var prodPrec = evalPrecedente.productionNom || 'la production précédente';
+            if (nivActuel !== nivPrec) {
+                bilanLignes.push({ type: 'progression', texte: 'Progression : ' + nivPrec + ' \u2192 ' + nivActuel + ' (depuis ' + prodPrec + ')' });
+            }
+            // Tendance sur N productions
+            if (historiqueEleve.length >= 2) {
+                var niveaux = [ORDRE_NIV[nivActuel] || 0];
+                for (var ih = 0; ih < historiqueEleve.length; ih++) {
+                    niveaux.push(ORDRE_NIV[historiqueEleve[ih].niveauFinal] || 0);
+                }
+                var moitie = Math.floor(niveaux.length / 2);
+                var moyRecente = 0; var moyAncienne = 0;
+                for (var ir = 0; ir < moitie; ir++) moyRecente += niveaux[ir];
+                moyRecente /= moitie;
+                for (var ia = moitie; ia < niveaux.length; ia++) moyAncienne += niveaux[ia];
+                moyAncienne /= (niveaux.length - moitie);
+                var fleche = moyRecente > moyAncienne + 0.3 ? '\u2197' : (moyRecente < moyAncienne - 0.3 ? '\u2198' : '\u2192');
+                bilanLignes.push({ type: 'tendance', texte: 'Tendance sur ' + niveaux.length + ' productions : ' + fleche });
             }
         }
 
-        // Afficher la section Focus si au moins une recommandation
-        if (recommandations.length > 0) {
+        // --- 2f. Amelioration reconnue ---
+        if (evalPrecedente && evaluation.criteres) {
+            var criteresPrec = {};
+            if (evalPrecedente.criteres) {
+                evalPrecedente.criteres.forEach(function(c) { criteresPrec[c.critereNom] = c.niveauSelectionne; });
+            }
+            evaluation.criteres.forEach(function(c) {
+                var nivP = criteresPrec[c.critereNom];
+                if (nivP && (nivP === 'I' || nivP === 'D') && (c.niveauSelectionne === 'M' || c.niveauSelectionne === 'E')) {
+                    bilanLignes.push({ type: 'amelioration', texte: 'Tu as progressé en ' + c.critereNom + ' depuis la dernière production.' });
+                }
+            });
+        }
+
+        // --- 2g. Patron recurrent ---
+        if (historiqueEleve.length >= 2 && evaluation.criteres) {
+            var criteresHist1 = {}; var criteresHist2 = {};
+            if (historiqueEleve[0] && historiqueEleve[0].criteres) {
+                historiqueEleve[0].criteres.forEach(function(c) { criteresHist1[c.critereNom] = c.niveauSelectionne; });
+            }
+            if (historiqueEleve[1] && historiqueEleve[1].criteres) {
+                historiqueEleve[1].criteres.forEach(function(c) { criteresHist2[c.critereNom] = c.niveauSelectionne; });
+            }
+            evaluation.criteres.forEach(function(c) {
+                if ((c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D') &&
+                    (criteresHist1[c.critereNom] === 'I' || criteresHist1[c.critereNom] === 'D') &&
+                    (criteresHist2[c.critereNom] === 'I' || criteresHist2[c.critereNom] === 'D')) {
+                    bilanLignes.push({ type: 'patron', texte: c.critereNom + ' est un objectif prioritaire \u2014 concentre tes efforts ici.' });
+                }
+            });
+        }
+
+        // --- 2h. Jetons restants ---
+        if (typeof obtenirConfigJetons === 'function' && typeof compterJetonsUtilises === 'function') {
+            try {
+                var configJetons = obtenirConfigJetons();
+                if (configJetons && configJetons.actif && da) {
+                    var nbTotal = configJetons.reprise ? configJetons.reprise.nombre : 0;
+                    var nbUtilises = compterJetonsUtilises(da, 'reprise');
+                    var nbRestants = Math.max(0, nbTotal - nbUtilises);
+                    if (nbTotal > 0) {
+                        bilanLignes.push({ type: 'jetons', texte: 'Il te reste ' + nbRestants + ' jeton' + (nbRestants > 1 ? 's' : '') + ' de reprise sur ' + nbTotal + '.' });
+                    }
+                }
+            } catch(e) { /* silencieux */ }
+        }
+
+        // --- 2i. Question metacognitive ---
+        bilanLignes.push({ type: 'question', texte: 'Selon toi, quel aspect de ta production mériterait le plus d\u2019attention ?' });
+
+        // --- RENDU ---
+        if (bilanLignes.length > 1) {
             if (y > seuilPage) {
                 doc.addPage([612, 792], 'portrait');
                 y = mm(cfg.marges.haut);
             }
 
-            // Fond leger
-            const focusH = mm(8) + recommandations.length * mm(6) + mm(4);
+            // Calculer la hauteur du bloc
+            var bilanH = mm(10);
+            for (var ib = 0; ib < bilanLignes.length; ib++) {
+                var bl = bilanLignes[ib];
+                var texteLargeur = largeurContenu - mm(8);
+                var nbLignes = doc.splitTextToSize(bl.texte, texteLargeur).length;
+                bilanH += nbLignes * mm(4) + mm(1.5);
+            }
+            bilanH += mm(4);
+
+            // Verifier si on deborde
+            if (y + bilanH > seuilPage) {
+                doc.addPage([612, 792], 'portrait');
+                y = mm(cfg.marges.haut);
+            }
+
+            // Fond
             doc.setFillColor(245, 248, 255);
-            doc.roundedRect(margeG, y - mm(2), largeurContenu, focusH, mm(1.5), mm(1.5), 'F');
+            doc.roundedRect(margeG, y - mm(2), largeurContenu, bilanH, mm(1.5), mm(1.5), 'F');
 
             // Titre
             doc.setFontSize(cfg.polices.texteNormal);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(...cfg.couleurs.titreSection);
-            doc.text('Pour ton prochain artefact, concentre-toi sur :', margeG + mm(3), y + mm(2));
+            doc.text('Bilan', margeG + mm(3), y + mm(2));
             y += mm(8);
 
-            // Recommandations
-            doc.setFontSize(cfg.polices.textePetit - 1);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(...cfg.couleurs.textePrincipal);
+            var xBilan = margeG + mm(3);
+            var wBilan = largeurContenu - mm(8);
 
-            for (const rec of recommandations) {
-                const lignes = doc.splitTextToSize('\u2022 ' + rec.texte, largeurContenu - mm(8));
-                for (const ligne of lignes) {
-                    doc.text(ligne, margeG + mm(3), y);
+            for (var ibl = 0; ibl < bilanLignes.length; ibl++) {
+                var ligne = bilanLignes[ibl];
+
+                if (ligne.type === 'force') {
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(cfg.polices.textePetit);
+                    doc.setTextColor(46, 125, 50);
+                } else if (ligne.type === 'titre') {
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(cfg.polices.textePetit - 1);
+                    doc.setTextColor(...cfg.couleurs.textePrincipal);
+                    y += mm(1);
+                } else if (ligne.type === 'amelioration') {
+                    doc.setFont('helvetica', 'italic');
+                    doc.setFontSize(cfg.polices.textePetit - 1);
+                    doc.setTextColor(46, 125, 50);
+                } else if (ligne.type === 'patron') {
+                    doc.setFont('helvetica', 'bolditalic');
+                    doc.setFontSize(cfg.polices.textePetit - 1);
+                    doc.setTextColor(...cfg.couleurs.textePrincipal);
+                } else if (ligne.type === 'question') {
+                    doc.setFont('helvetica', 'italic');
+                    doc.setFontSize(cfg.polices.textePetit - 1);
+                    doc.setTextColor(...cfg.couleurs.texteSecondaire);
+                    y += mm(2);
+                } else if (ligne.type === 'jetons') {
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(cfg.polices.textePetit - 1);
+                    doc.setTextColor(...cfg.couleurs.texteSecondaire);
+                    y += mm(1);
+                } else {
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(cfg.polices.textePetit - 1);
+                    doc.setTextColor(...cfg.couleurs.textePrincipal);
+                }
+
+                var lignesRendu = doc.splitTextToSize(ligne.texte, wBilan);
+                for (var ilr = 0; ilr < lignesRendu.length; ilr++) {
+                    doc.text(lignesRendu[ilr], xBilan, y);
                     y += mm(4);
                 }
-                y += mm(1);
+                y += mm(0.5);
             }
 
             y += mm(6);
