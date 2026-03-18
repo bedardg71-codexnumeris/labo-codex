@@ -586,12 +586,18 @@
                 return;
             }
 
-            // Si un fichier est deja ouvert et qu'on revient sur l'onglet Annoter,
+            // Navigation vers l'onglet Exporter : ne pas detruire la session d'annotation,
+            // juste afficher la vue d'archivage
+            if (sousSectionActive === 'evaluations-exporter') {
+                afficherArchivage();
+                return;
+            }
+
+            // Retour sur l'onglet Annoter avec un fichier deja ouvert :
             // restaurer la vue sans reconstruire le DOM (preserve la session)
             if (sousSectionActive === 'evaluations-annoter') {
                 const fichierOuvert = travauxVisionneuse.getFichierActuel();
                 if (fichierOuvert) {
-                    // Reactiver l'annotation sur le fichier existant
                     if (typeof travauxAnnotation !== 'undefined' && travauxAnnotation.activerAnnotation) {
                         travauxAnnotation.activerAnnotation();
                     }
