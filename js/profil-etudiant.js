@@ -1732,6 +1732,21 @@ function genererSectionAccompagnement(da) {
 
                 <p class="profil-texte-detail">${niveauRai.description}</p>
                 ${niveauRai.defi !== 'Aucun' ? `<p class="u-texte-09 u-texte-gris" style="margin-top: 8px;"><strong>Défi principal :</strong> ${niveauRai.defi}</p>` : ''}
+
+                ${(() => {
+                    // Indicateur de mobilisation dans la carte RàI
+                    // Visible quand A ou C est sous le seuil de mobilisation favorable (75%)
+                    if (alerteContexte.niveau === 'attente') return '';
+                    const alertes = [];
+                    const aVal = parseFloat(alerteContexte.A);
+                    const cVal = parseFloat(alerteContexte.C);
+                    if (!isNaN(aVal) && aVal < 75) alertes.push('Assiduité ' + alerteContexte.A);
+                    if (!isNaN(cVal) && cVal < 75) alertes.push('Complétion ' + alerteContexte.C);
+                    if (alertes.length === 0) return '';
+                    return '<div style="margin-top: 12px; padding: 8px 12px; background: var(--alerte-fond-attention, rgba(232,168,56,0.08)); border-left: 3px solid var(--orange-attention, #e8a838); border-radius: 0 4px 4px 0; font-size: 0.85rem; color: var(--orange-attention, #e8a838);">' +
+                        '<strong>Mobilisation :</strong> ' + alertes.join(' · ') +
+                        '</div>';
+                })()}
             </div>
 
             <!-- Carte 2 : Contexte d'apprentissage -->
