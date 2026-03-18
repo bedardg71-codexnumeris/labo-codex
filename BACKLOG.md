@@ -46,22 +46,39 @@
 
 ### Retours testeur — 14 mars 2026
 
-- [ ] **#232** UX : Comment activer les info-bulles sur tablette ?
+- [x] **#232** UX : Comment activer les info-bulles sur tablette ?
   - Commentaire de Gregoire (iPad, Safari 26.3, iPadOS)
   - Les info-bulles se declenchent au survol (hover) — impossible sur ecran tactile
   - Investiguer : activer au tap long ? Ou proposer un toggle explicite dans les preferences ?
   - **Fichier** : `js/tooltips.js`, `js/tooltips-contenu.js`
 
+### Retours testeur — 18 mars 2026
+
+- [x] **#236** UX Aide : Retirer les emoji 🔶 clignotants dans la section Aide
+  - Ils servaient a indiquer que la section etait en developpement, cette information est obsolete
+
+- [x] **#237** UX Aide : Ameliorer le moteur de recherche dans la section Aide
+  - Le moteur n'indique pas dans quelles cartes se trouvent les mots cles recherches
+  - Ajouter des propositions de recherche similaire (ex. : « niveau 3 » → « reponse a l'intervention », « RaI », « interventions »)
+
+- [x] **#238** Indices : Audit et amelioration du calcul des blocages et niveaux RaI
+  - Documenter les conditions actuelles de calcul et les rendre explicites dans la section Aide
+  - Le niveau RaI devrait tenir compte de :
+    - Taux d'assiduite inferieur a 75%
+    - Taux de completion inferieur a 75%
+    - Performance des 4 meilleurs artefacts (selon reglages utilisateur dans le depistage) inferieure a 65%
+  - **Fichiers** : `js/indices.js`, section Aide
+
 ### Retours testeur — 16 mars 2026
 
-- [ ] **#234** Retroaction : Reintegrer l'import TXT pour les cartouches de retroaction
+- [x] **#234** Retroaction : Reintegrer l'import TXT pour les cartouches de retroaction
   - Une fonction d'import de fichier `.txt` existait avant mais a ete perdue lors d'une refacto
   - Permet d'importer plusieurs commentaires d'un coup (1 par ligne ou par bloc) au lieu de copier-coller un par un
   - Cas d'usage : 16 commentaires a saisir manuellement = trop long
   - Verifier dans l'historique git si l'ancienne implementation est recuperable
   - **Fichier** : `js/cartouches.js`
 
-- [ ] **#235** UX : Uniformiser les appellations « Note chiffree » / « Code du niveau de performance »
+- [x] **#235** UX : Uniformiser les appellations « Note chiffree » / « Code du niveau de performance »
   - Incoherence entre les ecrans : « Note chiffree » vs « Code » (radio dans retroaction), « Code du niveau de performance » (reglages pratique)
   - Les valeurs internes (`complet` / `lettre`) ne correspondent a aucun libelle visible
   - Harmoniser les labels dans : retroaction evaluation, reglages pratique, export PDF
