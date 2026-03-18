@@ -4142,6 +4142,23 @@
                             </div>
                         </div>
 
+                        <!-- Sélecteur de colonnes visibles -->
+                        <div class="liste-colonnes-selecteur" id="liste-colonnes-selecteur">
+                            <span class="texte-muted" style="font-size: 0.8rem;">Colonnes :</span>
+                            <label><input type="checkbox" data-colonne="da" checked onchange="toggleColonneListe(this)"> DA</label>
+                            <label><input type="checkbox" data-colonne="groupe" checked onchange="toggleColonneListe(this)"> Groupe</label>
+                            <label><input type="checkbox" data-colonne="nom" checked onchange="toggleColonneListe(this)"> Nom</label>
+                            <label><input type="checkbox" data-colonne="prenom" checked onchange="toggleColonneListe(this)"> Prénom</label>
+                            <label><input type="checkbox" data-colonne="sa" checked onchange="toggleColonneListe(this)"> SA</label>
+                            <label><input type="checkbox" data-colonne="assiduite" checked onchange="toggleColonneListe(this)"> A</label>
+                            <label><input type="checkbox" data-colonne="completion" checked onchange="toggleColonneListe(this)"> C</label>
+                            <label><input type="checkbox" data-colonne="performance" checked onchange="toggleColonneListe(this)"> P</label>
+                            <label><input type="checkbox" data-colonne="engagement" checked onchange="toggleColonneListe(this)"> E</label>
+                            <label><input type="checkbox" data-colonne="pattern" checked onchange="toggleColonneListe(this)"> Pattern</label>
+                            <label><input type="checkbox" data-colonne="rai" checked onchange="toggleColonneListe(this)"> RàI</label>
+                            <label><input type="checkbox" data-colonne="interv" checked onchange="toggleColonneListe(this)"> Interv.</label>
+                        </div>
+
                         <!-- TABLEAU DES ÉTUDIANTS -->
                         <div id="tableEtudiantsListe"
                             class="overflow-xy-600">
