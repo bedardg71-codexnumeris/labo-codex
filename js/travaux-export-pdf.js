@@ -1200,6 +1200,13 @@
      * @param {Object} [zone] - Zone de rendu (layout 2 colonnes) { margeG, margeD, largeur }
      * @returns {number} Nouvelle posY
      */
+    function _hexVersRgb(hex) {
+        if (!hex) return null;
+        hex = hex.replace('#', '');
+        if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+        return [parseInt(hex.substring(0,2),16), parseInt(hex.substring(2,4),16), parseInt(hex.substring(4,6),16)];
+    }
+
     function ajouterSyntheseVisuelle(doc, posY, stats, seuilPage, zone) {
         const cfg = getCfg();
         const pageW = doc.internal.pageSize.getWidth();
@@ -1229,15 +1236,25 @@
             const imgSize = mm(4);
 
             // Grouper les tampons utilises par categorie (exclure legacy)
+            const couleursCat = travauxOutils.obtenirCouleurCategorieAutocollant
+                ? null : null; // juste pour reference
+            const couleursParCat = {};
+            try {
+                var cc = db.getSync('couleursCategories', null) || {};
+                for (var k in cc) couleursParCat[k] = _hexVersRgb(cc[k]);
+            } catch(e) { /* silencieux */ }
+
             for (const catId of ordreCategories) {
                 const tamponsCat = autocollantsDef.filter(a => !a.legacy && a.categorie === catId);
                 const tamponsUtilises = tamponsCat.filter(a => stats.tampons[a.id]);
                 if (tamponsUtilises.length === 0) continue;
 
-                // Nom de la categorie
+                const couleurCat = couleursParCat[catId] || cfg.couleurs.texteSecondaire;
+
+                // Nom de la categorie avec couleur personnalisee
                 doc.setFontSize(cfg.polices.textePetit);
                 doc.setFont('helvetica', 'bold');
-                doc.setTextColor(...cfg.couleurs.texteSecondaire);
+                doc.setTextColor(...couleurCat);
                 doc.text(nomsCat[catId] || catId, margeG, y);
                 y += mm(3);
 
@@ -1261,6 +1278,12 @@
                     y = mm(cfg.marges.haut);
                 }
 
+                const fondCat = couleurCat ? [
+                    Math.min(255, couleurCat[0] + Math.round((255 - couleurCat[0]) * 0.88)),
+                    Math.min(255, couleurCat[1] + Math.round((255 - couleurCat[1]) * 0.88)),
+                    Math.min(255, couleurCat[2] + Math.round((255 - couleurCat[2]) * 0.88))
+                ] : null;
+
                 doc.autoTable({
                     startY: y,
                     body: donnesCat,
@@ -1270,7 +1293,8 @@
                         fontSize: cfg.polices.textePetit - 1,
                         textColor: cfg.couleurs.textePrincipal,
                         cellPadding: mm(1),
-                        minCellHeight: imgSize + mm(0.5)
+                        minCellHeight: imgSize + mm(0.5),
+                        fillColor: fondCat || [255, 255, 255]
                     },
                     columnStyles: {
                         0: { cellWidth: largeurContenu * 0.28 },
@@ -1312,10 +1336,10 @@
             const ordreRecap = travauxOutils.obtenirOrdreErreursFr
                 ? travauxOutils.obtenirOrdreErreursFr() : [];
 
-            // Trier par frequence decroissante
+            // Trier par frequence decroissante, garder les 3 plus frequentes
             const typesErreurs = Object.keys(stats.erreursFr).sort((a, b) =>
                 stats.erreursFr[b] - stats.erreursFr[a]
-            );
+            ).slice(0, 3);
 
             const donnesErreurs = [];
             for (const type of typesErreurs) {
