@@ -1195,14 +1195,20 @@
      * @param {string} id - ID de l'autocollant
      * @returns {string|null} dataURL ou null si indisponible
      */
-    function autocollantToDataURL(id) {
+    function autocollantToDataURL(id, tint) {
         const img = travauxOutils.getImageAutocollant(id);
         if (!img || !img.complete) return null;
         try {
             const c = document.createElement('canvas');
             c.width = img.naturalWidth;
             c.height = img.naturalHeight;
-            c.getContext('2d').drawImage(img, 0, 0);
+            const ctx = c.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            if (tint) {
+                ctx.globalCompositeOperation = 'source-in';
+                ctx.fillStyle = tint;
+                ctx.fillRect(0, 0, c.width, c.height);
+            }
             return c.toDataURL('image/png');
         } catch(e) {
             return null;
@@ -1279,6 +1285,13 @@
                 const donnesCat = [];
                 const imagesCat = {};
 
+                // Couleur hex pour teinte des images
+                var hexCat = null;
+                try {
+                    var ccRaw = db.getSync('couleursCategories', null) || {};
+                    hexCat = ccRaw[catId] || null;
+                } catch(e) { /* silencieux */ }
+
                 for (let i = 0; i < tamponsUtilises.length; i++) {
                     const a = tamponsUtilises[i];
                     const retroTexte = retroObs[a.id] || '';
@@ -1287,7 +1300,7 @@
                         String(stats.tampons[a.id]),
                         retroTexte
                     ]);
-                    const dataUrl = autocollantToDataURL(a.id);
+                    const dataUrl = autocollantToDataURL(a.id, hexCat);
                     if (dataUrl) imagesCat[i] = dataUrl;
                 }
 
@@ -1296,27 +1309,26 @@
                     y = mm(cfg.marges.haut);
                 }
 
-                const fondCat = couleurCat ? [
-                    Math.min(255, couleurCat[0] + Math.round((255 - couleurCat[0]) * 0.88)),
-                    Math.min(255, couleurCat[1] + Math.round((255 - couleurCat[1]) * 0.88)),
-                    Math.min(255, couleurCat[2] + Math.round((255 - couleurCat[2]) * 0.88))
-                ] : null;
-
                 doc.autoTable({
                     startY: y,
+                    head: [['Tampon', 'Nb', 'R\u00e9troaction']],
                     body: donnesCat,
                     theme: 'grid',
-                    showHead: 'never',
+                    headStyles: {
+                        fillColor: couleurCat,
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold',
+                        fontSize: cfg.polices.textePetit - 1
+                    },
                     bodyStyles: {
                         fontSize: cfg.polices.textePetit - 1,
                         textColor: cfg.couleurs.textePrincipal,
                         cellPadding: mm(1),
-                        minCellHeight: imgSize + mm(0.5),
-                        fillColor: fondCat || [255, 255, 255]
+                        minCellHeight: imgSize + mm(0.5)
                     },
                     columnStyles: {
                         0: { cellWidth: largeurContenu * 0.28 },
-                        1: { cellWidth: largeurContenu * 0.10, halign: 'center', fontStyle: 'bold' },
+                        1: { cellWidth: largeurContenu * 0.10, halign: 'center' },
                         2: { cellWidth: largeurContenu * 0.62, fontSize: cfg.polices.textePetit - 2 }
                     },
                     margin: { left: margeG, right: margeD },
@@ -1373,17 +1385,14 @@
             // Ligne total
             donnesErreurs.push(['Total', String(stats.totalErreursFr), '']);
 
-            // Les 2-3 plus frequentes en gras (indices 0, 1, 2)
-            const nbGras = Math.min(3, typesErreurs.length);
-
             doc.autoTable({
                 startY: y,
                 head: [['Code', 'Nb', 'R\u00e9troaction']],
                 body: donnesErreurs,
                 theme: 'grid',
                 headStyles: {
-                    fillColor: cfg.couleurs.fondEntete,
-                    textColor: cfg.couleurs.titreSection,
+                    fillColor: cfg.couleurs.titreSection,
+                    textColor: [255, 255, 255],
                     fontStyle: 'bold',
                     fontSize: cfg.polices.textePetit - 1
                 },
@@ -1399,16 +1408,10 @@
                 },
                 margin: { left: margeG, right: margeD },
                 didParseCell: function(data) {
-                    if (data.section === 'body') {
-                        // Les plus frequentes en gras
-                        if (data.row.index < nbGras) {
-                            data.cell.styles.fontStyle = 'bold';
-                        }
-                        // Ligne total en gras
-                        if (data.row.index === donnesErreurs.length - 1) {
-                            data.cell.styles.fontStyle = 'bold';
-                            data.cell.styles.fillColor = cfg.couleurs.fondEntete;
-                        }
+                    // Seule la ligne total est en gras avec fond
+                    if (data.section === 'body' && data.row.index === donnesErreurs.length - 1) {
+                        data.cell.styles.fontStyle = 'bold';
+                        data.cell.styles.fillColor = cfg.couleurs.fondEntete;
                     }
                 }
             });
