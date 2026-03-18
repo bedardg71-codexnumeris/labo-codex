@@ -1076,7 +1076,7 @@
                     <div class="travaux-barre-progression-container">
                         <div id="travaux-barre-progression-lea" class="travaux-barre-progression"></div>
                     </div>
-                    <button class="btn btn-principal" style="background: var(--vert-succes, #28a745);" onclick="travauxUI.lancerExportLea()">Exporter pour Lea</button>
+                    <button class="btn btn-confirmer" onclick="travauxUI.lancerExportLea()">Exporter pour Lea</button>
                 </div>
             </div>
 
@@ -3325,10 +3325,10 @@
                             Existant : ${echapperHtml(d.fichierExistant.nomFichier)}<br>
                             Nouveau : ${echapperHtml(d.fichierPrepare.nomFichier)}
                         </p>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">
-                            <button class="btn-primaire" data-choix="remplacer">Remplacer l'existant</button>
-                            <button class="btn-secondaire" data-choix="garder">Garder l'existant</button>
-                            <button class="btn-secondaire" data-choix="orphelin">Importer sans association</button>
+                        <div class="modal-actions" style="flex-wrap:wrap;margin-top:16px;justify-content:flex-start">
+                            <button class="btn btn-principal" data-choix="remplacer">Remplacer l'existant</button>
+                            <button class="btn btn-secondaire" data-choix="garder">Garder l'existant</button>
+                            <button class="btn btn-secondaire" data-choix="orphelin">Importer sans association</button>
                         </div>
                     </div>
                 `;

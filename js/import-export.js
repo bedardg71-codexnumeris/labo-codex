@@ -1301,19 +1301,12 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                 ` : ''}
 
                 <!-- Boutons -->
-                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;
-                     padding-top: 15px; border-top: 1px solid var(--bordure-claire);">
-                    <button onclick="fermerModalPreviewConfigComplete()"
-                            style="padding: 10px 20px; background: var(--surface-conteneur, #162c36); color: var(--gris-fonce);
-                                   border: 1px solid var(--gris-clair); border-radius: 4px;
-                                   cursor: pointer; font-size: 0.95rem;">
+                <div class="modal-actions">
+                    <button class="btn btn-secondaire" onclick="fermerModalPreviewConfigComplete()">
                         Annuler
                     </button>
-                    <button onclick="executerImportSelectif()"
-                            style="padding: 10px 24px; background: var(--vert-succes); color: white;
-                                   border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem;
-                                   font-weight: 500;"
-                            ${analyse.totalRessources === 0 && analyse.totalDonnees === 0 && !(analyse.entites?.groupesCours?.count > 0 || analyse.entites?.horaires?.count > 0 || analyse.entites?.enseignants?.present) ? 'disabled style="opacity:0.5"' : ''}>
+                    <button class="btn btn-principal" onclick="executerImportSelectif()"
+                            ${analyse.totalRessources === 0 && analyse.totalDonnees === 0 && !(analyse.entites?.groupesCours?.count > 0 || analyse.entites?.horaires?.count > 0 || analyse.entites?.enseignants?.present) ? 'disabled' : ''}>
                         Importer la sélection
                     </button>
                 </div>
@@ -1703,17 +1696,11 @@ function afficherModalPreviewConfigComplete(config) {
                 </div>
 
                 <!-- Boutons -->
-                <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                    <button onclick="fermerModalPreviewConfigComplete()"
-                            style="padding: 10px 20px; background: var(--surface-conteneur, #162c36); color: var(--gris-fonce);
-                                   border: 1px solid var(--gris-clair); border-radius: 4px;
-                                   cursor: pointer; font-size: 0.95rem;">
+                <div class="modal-actions">
+                    <button class="btn btn-secondaire" onclick="fermerModalPreviewConfigComplete()">
                         Annuler
                     </button>
-                    <button onclick="executerImportConfigComplete()"
-                            style="padding: 10px 20px; background: var(--vert-succes); color: white;
-                                   border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem;
-                                   font-weight: 500;">
+                    <button class="btn btn-principal" onclick="executerImportConfigComplete()">
                         Ajouter à mes bibliothèques
                     </button>
                 </div>
