@@ -939,7 +939,7 @@
      * @param {number} yNorm - Y normalise (0-1)
      */
     function poserAutocollant(autocollantId, xNorm, yNorm) {
-        const tailleBase = 0.06; // 6% de la largeur du document
+        const tailleBase = 0.04; // 4% de la largeur du document (~66% de l'ancien 6%)
         const img = _outils().getImageAutocollant(autocollantId);
         const ratio = (img && img.naturalWidth && img.naturalHeight)
             ? img.naturalHeight / img.naturalWidth
