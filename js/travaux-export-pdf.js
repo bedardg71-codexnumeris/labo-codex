@@ -1296,10 +1296,10 @@
 
                 const couleurCat = couleursParCat[catId] || cfg.couleurs.texteSecondaire;
 
-                // Nom de la categorie avec couleur personnalisee
+                // Nom de la categorie
                 doc.setFontSize(cfg.polices.textePetit);
                 doc.setFont('helvetica', 'bold');
-                doc.setTextColor(...couleurCat);
+                doc.setTextColor(...cfg.couleurs.textePrincipal);
                 doc.text(nomsCat[catId] || catId, margeG, y);
                 y += mm(3);
 
