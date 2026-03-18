@@ -301,12 +301,30 @@
             }
         }
 
-        // Autocollants
+        // Autocollants (avec teinte de categorie)
         if (donneesPage.stickers) {
             for (const stk of donneesPage.stickers) {
                 const img = travauxOutils.getImageAutocollant(stk.autocollantId);
                 if (img && img.complete) {
-                    ctx.drawImage(img, stk.x * w, stk.y * h, stk.width * w, stk.height * h);
+                    const tint = stk.tint || (travauxOutils.obtenirCouleurCategorieAutocollant
+                        ? travauxOutils.obtenirCouleurCategorieAutocollant(stk.autocollantId) : null);
+                    const sx = stk.x * w;
+                    const sy = stk.y * h;
+                    const sw = Math.round(stk.width * w) || 1;
+                    const sh = Math.round(stk.height * h) || 1;
+                    if (tint) {
+                        const tmpCanvas = document.createElement('canvas');
+                        tmpCanvas.width = sw;
+                        tmpCanvas.height = sh;
+                        const tmpCtx = tmpCanvas.getContext('2d');
+                        tmpCtx.drawImage(img, 0, 0, sw, sh);
+                        tmpCtx.globalCompositeOperation = 'source-in';
+                        tmpCtx.fillStyle = tint;
+                        tmpCtx.fillRect(0, 0, sw, sh);
+                        ctx.drawImage(tmpCanvas, sx, sy, sw, sh);
+                    } else {
+                        ctx.drawImage(img, sx, sy, sw, sh);
+                    }
                 }
             }
         }
