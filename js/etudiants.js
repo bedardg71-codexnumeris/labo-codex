@@ -796,11 +796,26 @@ function masquerColonnesRaiSiDesactive(activerRai) {
 
     headers.forEach(header => {
         if (activerRai) {
-            header.classList.remove('u-hide');  // Afficher
+            header.classList.remove('u-hide');
         } else {
-            header.classList.add('u-hide');  // Masquer
+            header.classList.add('u-hide');
         }
     });
+
+    // Masquer/afficher les checkboxes Pattern et RàI dans le sélecteur de colonnes
+    var selecteur = document.getElementById('liste-colonnes-selecteur');
+    if (selecteur) {
+        ['pattern', 'rai'].forEach(function(col) {
+            var cb = selecteur.querySelector('input[data-colonne="' + col + '"]');
+            if (cb && cb.parentElement) {
+                if (activerRai) {
+                    cb.parentElement.classList.remove('u-hide');
+                } else {
+                    cb.parentElement.classList.add('u-hide');
+                }
+            }
+        });
+    }
 }
 
 /**
@@ -1173,18 +1188,19 @@ function afficherListeEtudiantsConsultation() {
 
         // Colonnes Pattern et RàI (affichées uniquement si RàI activé)
         // 🆕 BETA 95.7 : Même logique que E - besoin de présences ET évaluations
+        // Toujours générer les cellules pour garder nth-child cohérent avec les checkboxes colonnes
         if (activerRai) {
             if (aPresencesSaisies && aEvaluations) {
-                // Colonne Pattern avec badge (centré)
                 html += '<td class="etud-text-center"><span class="' + badgePattern.classe + '">' + badgePattern.label + '</span></td>';
-
-                // Colonne RàI avec badge amélioré
                 html += '<td class="etud-text-center"><span class="' + badgeRai.classe + '">' + badgeRai.label + '</span></td>';
             } else {
-                // Afficher "-" si données insuffisantes (évite "Blocage critique" / "Niveau 3")
                 html += '<td class="etud-text-center">' + tiret + '</td>';
                 html += '<td class="etud-text-center">' + tiret + '</td>';
             }
+        } else {
+            // Cellules vides masquées — maintient le nombre de colonnes à 13
+            html += '<td class="etud-text-center u-hide">' + tiret + '</td>';
+            html += '<td class="etud-text-center u-hide">' + tiret + '</td>';
         }
 
         // NOUVEAU (Beta 85): Colonne Interventions
@@ -1203,6 +1219,102 @@ function afficherListeEtudiantsConsultation() {
     });
 
     console.log('✅ Liste des étudiants affichée avec ' + etudiantsFiltres.length + ' étudiant(s)');
+
+    // Restaurer les préférences de colonnes visibles et vérifier le débordement
+    restaurerPreferencesColonnesListe();
+    setTimeout(verifierDebordementTableauListe, 50);
+}
+
+// ============================================
+// SÉLECTEUR DE COLONNES VISIBLES (LISTE ÉTUDIANTS)
+// ============================================
+
+var listeColonneIndexMap = {
+    'da': 2,
+    'groupe': 3,
+    'nom': 4,
+    'prenom': 5,
+    'sa': 6,
+    'assiduite': 7,
+    'completion': 8,
+    'performance': 9,
+    'engagement': 10,
+    'pattern': 11,
+    'rai': 12,
+    'interv': 13
+};
+
+function toggleColonneListe(checkbox) {
+    var colonne = checkbox.getAttribute('data-colonne');
+    var index = listeColonneIndexMap[colonne];
+    if (!index) return;
+
+    var tableau = document.querySelector('#tableEtudiantsListe .tableau');
+    if (!tableau) return;
+
+    var cellules = tableau.querySelectorAll('th:nth-child(' + index + '), td:nth-child(' + index + ')');
+    cellules.forEach(function(cell) {
+        if (checkbox.checked) {
+            cell.classList.remove('u-hide');
+        } else {
+            cell.classList.add('u-hide');
+        }
+    });
+
+    sauvegarderPreferencesColonnesListe();
+    setTimeout(verifierDebordementTableauListe, 50);
+}
+
+function sauvegarderPreferencesColonnesListe() {
+    var selecteur = document.getElementById('liste-colonnes-selecteur');
+    if (!selecteur) return;
+    var prefs = {};
+    selecteur.querySelectorAll('input[data-colonne]').forEach(function(cb) {
+        prefs[cb.getAttribute('data-colonne')] = cb.checked;
+    });
+    sessionStorage.setItem('liste-colonnes-visibles', JSON.stringify(prefs));
+}
+
+function restaurerPreferencesColonnesListe() {
+    var raw = sessionStorage.getItem('liste-colonnes-visibles');
+    if (!raw) return;
+    try {
+        var prefs = JSON.parse(raw);
+        var selecteur = document.getElementById('liste-colonnes-selecteur');
+        if (!selecteur) return;
+        Object.keys(prefs).forEach(function(colonne) {
+            var cb = selecteur.querySelector('input[data-colonne="' + colonne + '"]');
+            if (cb) {
+                cb.checked = prefs[colonne];
+                if (!prefs[colonne]) {
+                    toggleColonneListe(cb);
+                }
+            }
+        });
+    } catch (e) { /* ignorer les données corrompues */ }
+}
+
+function verifierDebordementTableauListe() {
+    var conteneur = document.getElementById('tableEtudiantsListe');
+    if (!conteneur) return;
+
+    var msgId = 'liste-msg-debordement';
+    var msg = document.getElementById(msgId);
+
+    var deborde = conteneur.scrollWidth > conteneur.clientWidth + 2;
+
+    if (deborde) {
+        if (!msg) {
+            msg = document.createElement('div');
+            msg.id = msgId;
+            msg.className = 'eval-msg-debordement';
+            msg.textContent = 'Le tableau dépasse l\u2019écran \u2014 décoche des colonnes ci-dessus pour ajuster la vue.';
+            conteneur.parentNode.insertBefore(msg, conteneur);
+        }
+        msg.classList.remove('u-hide');
+    } else if (msg) {
+        msg.classList.add('u-hide');
+    }
 }
 
 /* ===============================
@@ -1504,5 +1616,6 @@ window.trierTableauPar = trierTableauPar;
 window.obtenirNomProgramme = obtenirNomProgramme;
 window.reinitialiserFiltresListeEtudiants = reinitialiserFiltresListeEtudiants;
 window.calculerTauxCompletion = calculerTauxCompletion;
+window.toggleColonneListe = toggleColonneListe;
 
 })();

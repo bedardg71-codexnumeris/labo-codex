@@ -2054,7 +2054,8 @@ h1, h2, h3, h4 {
 }
 
 /* Sélecteur de colonnes visibles */
-.eval-colonnes-selecteur {
+.eval-colonnes-selecteur,
+.liste-colonnes-selecteur {
     display: flex;
     gap: 12px;
     align-items: center;
@@ -2062,7 +2063,8 @@ h1, h2, h3, h4 {
     padding: 8px 0;
     font-size: 0.85rem;
 }
-.eval-colonnes-selecteur label {
+.eval-colonnes-selecteur label,
+.liste-colonnes-selecteur label {
     display: flex;
     align-items: center;
     gap: 4px;
