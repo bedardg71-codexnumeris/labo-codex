@@ -3219,6 +3219,21 @@ body.mode-clair .changelog-entry--sarcelle .changelog-title { color: #065dbb; }
     background: var(--btn-supprimer-hover);
 }
 
+/* Bouton × pour retirer un jeton dans un badge coloré */
+.btn-jeton-retirer {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    line-height: 1;
+    padding: 0;
+}
+.btn-jeton-retirer:hover {
+    opacity: 0.7;
+}
+
 .btn-groupe {
     display: flex;
     gap: 10px;

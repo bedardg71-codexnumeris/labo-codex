@@ -2335,8 +2335,7 @@ function afficherBadgesJetons() {
         badges.push(`
             <span class="statut-badge" style="background: var(--violet-jeton, #9c27b0); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
                 <span>⭐ Reprise</span>
-                <button onclick="retirerJetonDepuisSidebar('${evaluation.id}', 'reprise')"
-                        style="background: none; border: none; color: white; cursor: pointer; font-size: 1rem; padding: 0; font-weight: bold; line-height: 1;"
+                <button class="btn-jeton-retirer" onclick="retirerJetonDepuisSidebar('${evaluation.id}', 'reprise')"
                         title="Retirer le jeton de reprise">×</button>
             </span>
         `);
@@ -2348,8 +2347,7 @@ function afficherBadgesJetons() {
         badges.push(`
             <span class="statut-badge" style="background: var(--orange-accent); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
                 <span>⭐ Délai</span>
-                <button onclick="retirerJetonDepuisSidebar('${evaluation.id}', 'delai')"
-                        style="background: none; border: none; color: white; cursor: pointer; font-size: 1rem; padding: 0; font-weight: bold; line-height: 1;"
+                <button class="btn-jeton-retirer" onclick="retirerJetonDepuisSidebar('${evaluation.id}', 'delai')"
                         title="Retirer le jeton de délai">×</button>
             </span>
         `);
@@ -5715,16 +5713,14 @@ function afficherListeBanqueEvaluations(evaluations) {
                         ${estReprise ? `
                             <div style="margin-top: 10px; padding: 8px; background: var(--violet-pale, #f3e5f5); border-radius: 4px; font-size: 0.85rem; color: var(--violet-jeton, #7b1fa2); display: flex; justify-content: space-between; align-items: center;">
                                 <span>⭐ Jeton de reprise appliqué - Remplace l'évaluation précédente</span>
-                                <button onclick="retirerJeton('${evaluation.id}', 'reprise')"
-                                        style="background: none; border: none; color: var(--violet-jeton, #7b1fa2); cursor: pointer; font-size: 1.2rem; padding: 0 5px; font-weight: bold;"
+                                <button class="btn-jeton-retirer" style="font-size: 1.2rem;" onclick="retirerJeton('${evaluation.id}', 'reprise')"
                                         title="Retirer le jeton de reprise">×</button>
                             </div>
                         ` : ''}
                         ${estDelai ? `
                             <div style="margin-top: 10px; padding: 8px; background: var(--alerte-fond-attention); border-radius: 4px; font-size: 0.85rem; color: var(--orange-accent); display: flex; justify-content: space-between; align-items: center;">
                                 <span>⭐ Jeton de délai appliqué - Date limite étendue</span>
-                                <button onclick="retirerJeton('${evaluation.id}', 'delai')"
-                                        style="background: none; border: none; color: var(--orange-accent); cursor: pointer; font-size: 1.2rem; padding: 0 5px; font-weight: bold;"
+                                <button class="btn-jeton-retirer" style="font-size: 1.2rem;" onclick="retirerJeton('${evaluation.id}', 'delai')"
                                         title="Retirer le jeton de délai">×</button>
                             </div>
                         ` : ''}
@@ -5733,8 +5729,7 @@ function afficherListeBanqueEvaluations(evaluations) {
                         <button class="btn btn-modifier btn-compact" onclick="chargerEvaluationDepuisBanque('${evaluation.id}')">
                             Charger
                         </button>
-                        <button class="btn btn-special btn-compact" onclick="appliquerJetonRepriseDepuisBanque('${evaluation.id}')"
-                                style="background: var(--violet-jeton, #9c27b0); color: white;">
+                        <button class="btn btn-modifier btn-compact" onclick="appliquerJetonRepriseDepuisBanque('${evaluation.id}')">
                             Jeton de reprise
                         </button>
                         <span onclick="basculerVerrouillageEvaluation('${evaluation.id}')"
