@@ -17039,6 +17039,48 @@
      =============================== -->
     <script>
         /**
+         * Groupes de termes similaires pour suggestions de recherche.
+         * Chercher un terme d'un groupe propose les autres comme alternatives.
+         */
+        var SYNONYMES_AIDE = [
+            ['rai', 'réponse à l\'intervention', 'niveau 1', 'niveau 2', 'niveau 3', 'interventions', 'dépistage'],
+            ['blocage', 'blocage critique', 'risque', 'défi spécifique', 'indice de blocage', 'pattern'],
+            ['performance', 'indice p', 'note', 'artefact', 'portfolio', 'meilleurs artefacts'],
+            ['assiduité', 'indice a', 'présence', 'absence', 'taux de présence'],
+            ['complétion', 'indice c', 'remise', 'taux de remise'],
+            ['engagement', 'indice e', 'mobilisation', 'cube root'],
+            ['idme', 'insuffisant', 'en développement', 'maîtrise', 'étendu', 'échelle de performance'],
+            ['srpnf', 'structure', 'rigueur', 'plausibilité', 'nuance', 'français écrit', 'critères'],
+            ['cartouche', 'rétroaction', 'commentaire', 'feedback'],
+            ['production', 'artefact', 'travail', 'devoir', 'évaluation'],
+            ['pratique', 'notation', 'pan', 'sommative', 'standards', 'spécifications'],
+            ['codex', 'usb', 'clé', 'sauvegarde portable', 'zip'],
+            ['solo', 'unistructurel', 'multistructurel', 'relationnel', 'abstrait étendu', 'taxonomie']
+        ];
+
+        /**
+         * Trouve les termes similaires pour une recherche donnée.
+         * @param {string} recherche - Terme recherché (lowercase)
+         * @returns {Array} Termes similaires (sans le terme lui-même)
+         */
+        function trouverSynonymes(recherche) {
+            var resultats = [];
+            SYNONYMES_AIDE.forEach(function(groupe) {
+                var match = groupe.some(function(terme) {
+                    return terme.indexOf(recherche) !== -1 || recherche.indexOf(terme) !== -1;
+                });
+                if (match) {
+                    groupe.forEach(function(terme) {
+                        if (terme !== recherche && resultats.indexOf(terme) === -1) {
+                            resultats.push(terme);
+                        }
+                    });
+                }
+            });
+            return resultats;
+        }
+
+        /**
          * Recherche dans la section Aide en temps réel
          */
         function rechercherDansAide() {
@@ -17060,7 +17102,7 @@
             // Rechercher dans toutes les cartes
             const cartes = document.querySelectorAll('#section-aide .carte');
             let nbResultats = 0;
-            let nbCartesVisibles = 0;
+            let cartesAvecResultats = [];
 
             cartes.forEach(carte => {
                 // Retirer les surlignages précédents
@@ -17071,7 +17113,11 @@
 
                 if (texte.includes(recherche)) {
                     carte.style.display = 'block';
-                    nbCartesVisibles++;
+
+                    // Extraire le titre de la carte
+                    var titreCarte = carte.querySelector('.carte-titre-bleu');
+                    var titreTexte = titreCarte ? titreCarte.textContent.replace(/^[▶▼]\s*/, '').trim() : '';
+                    cartesAvecResultats.push({ element: carte, titre: titreTexte });
 
                     // Surligner les occurrences
                     nbResultats += surlignerTexte(carte, recherche);
@@ -17092,15 +17138,36 @@
                 }
             });
 
-            // Afficher les résultats
+            // Construire le HTML des résultats
             resultatsDiv.style.display = 'block';
-            if (nbCartesVisibles === 0) {
-                resultatsDiv.innerHTML = '❌ Aucun résultat trouvé pour « ' + recherche + ' »';
-                resultatsDiv.style.color = '#dc3545';
+            var html = '';
+
+            if (cartesAvecResultats.length === 0) {
+                html = '<span style="color:#dc3545;">❌ Aucun résultat trouvé pour « ' + recherche + ' »</span>';
             } else {
-                resultatsDiv.innerHTML = '' + nbResultats + ' occurrence(s) trouvée(s) dans ' + nbCartesVisibles + ' carte(s)';
-                resultatsDiv.style.color = '#28a745';
+                html = '<span style="color:#28a745;">' + nbResultats + ' occurrence(s) dans ' + cartesAvecResultats.length + ' carte(s) :</span>';
+                html += '<div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:6px; justify-content:center;">';
+                cartesAvecResultats.forEach(function(item) {
+                    var id = item.element.id || '';
+                    html += '<button class="btn btn-secondaire btn-mini" onclick="allerVersCarte(\'' + id + '\')">' + item.titre + '</button>';
+                });
+                html += '</div>';
             }
+
+            // Suggestions de synonymes
+            var synonymes = trouverSynonymes(recherche);
+            if (synonymes.length > 0) {
+                html += '<div style="margin-top:8px; font-size:0.8rem; color:var(--texte-secondaire, #8aa);">';
+                html += 'Recherches similaires : ';
+                html += synonymes.map(function(s) {
+                    var sEchappe = s.replace(/'/g, "\\'");
+                    return '<a href="#" onclick="event.preventDefault(); lancerRechercheSynonyme(\'' + sEchappe + '\')" style="color:var(--accent-primaire, #6aacb8); text-decoration:underline; cursor:pointer;">' + s + '</a>';
+                }).join(' · ');
+                html += '</div>';
+            }
+
+            resultatsDiv.innerHTML = html;
+            resultatsDiv.style.color = '';
         }
 
         /**
@@ -17207,6 +17274,39 @@
             reafficherToutesLesCartes();
 
             // Remettre le focus sur le champ
+            input.focus();
+        }
+
+        /**
+         * Scrolle vers une carte et l'ouvre si fermée
+         * @param {string} carteId - ID de la carte (accordeon)
+         */
+        function allerVersCarte(carteId) {
+            var carte = document.getElementById(carteId);
+            if (!carte) return;
+
+            // Ouvrir l'accordeon si ferme
+            var contenu = carte.querySelector('.accordeon-contenu');
+            if (contenu && contenu.style.display === 'none') {
+                var header = carte.querySelector('.accordeon-header');
+                if (header && typeof toggleAccordeonV2 === 'function') {
+                    toggleAccordeonV2(header);
+                }
+            }
+
+            // Scroller vers la carte
+            carte.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        /**
+         * Lance une recherche a partir d'un synonyme cliqué
+         * @param {string} terme - Terme a rechercher
+         */
+        function lancerRechercheSynonyme(terme) {
+            var input = document.getElementById('aide-recherche-input');
+            if (!input) return;
+            input.value = terme;
+            rechercherDansAide();
             input.focus();
         }
 
