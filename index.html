@@ -6737,6 +6737,13 @@
                             <div id="matriceContainer" class="overflow-x-auto">
                                 <!-- La matrice sera générée dynamiquement ici par afficherMatriceRetroaction() -->
                             </div>
+
+                            <div style="margin-top: 12px;">
+                                <button class="btn btn-secondaire btn-compact" onclick="document.getElementById('fichier-import-txt-cartouche').click()">
+                                    Importer depuis un fichier texte (.txt / .md)
+                                </button>
+                                <input type="file" id="fichier-import-txt-cartouche" accept=".txt,.md,.text" style="display: none;" onchange="importerCartoucheDepuisTxt(event)">
+                            </div>
                                 </div>
 
                                 <!-- APERÇU DE RÉTROACTION -->
