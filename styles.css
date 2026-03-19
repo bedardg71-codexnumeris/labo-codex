@@ -15074,6 +15074,47 @@ body.mode-clair .travaux-compteur-badge {
 }
 .travaux-palette-eval .zone-retroaction-header {
     margin-bottom: 6px;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.retro-vues-radios {
+    display: flex;
+    gap: 8px;
+    font-size: 0.75rem;
+}
+.retro-vues-radios label {
+    cursor: pointer;
+    white-space: nowrap;
+}
+.retro-vue-contenu {
+    max-height: 60vh;
+    overflow-y: auto;
+    border: 1px solid var(--bordure-claire);
+    border-radius: 5px;
+    background: var(--surface-carte, #1a3040);
+}
+.retro-vue-contenu h5 {
+    margin: 8px 0 4px;
+    font-size: 0.8rem;
+    color: var(--texte-principal);
+}
+.retro-vue-contenu p {
+    margin: 2px 0;
+}
+.retro-vue-contenu .retro-force {
+    color: #2e7d32;
+    font-weight: bold;
+}
+.retro-vue-contenu .retro-amelioration {
+    color: #2e7d32;
+    font-style: italic;
+}
+.retro-vue-contenu .retro-question {
+    color: var(--gris-moyen);
+    font-style: italic;
+}
+.retro-vue-contenu .retro-jetons {
+    color: var(--gris-moyen);
 }
 .travaux-palette-eval h4 {
     font-size: 0.85rem;
