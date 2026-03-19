@@ -15081,17 +15081,51 @@ body.mode-clair .travaux-compteur-badge {
     display: flex;
     gap: 8px;
     font-size: 0.75rem;
+    flex-wrap: wrap;
 }
 .retro-vues-radios label {
     cursor: pointer;
     white-space: nowrap;
 }
+.travaux-palette-eval .travaux-palette-barre {
+    flex-wrap: wrap;
+    gap: 2px 8px;
+}
 .retro-vue-contenu {
-    max-height: 60vh;
+    flex: 1;
     overflow-y: auto;
     border: 1px solid var(--bordure-claire);
     border-radius: 5px;
     background: var(--surface-carte, #1a3040);
+}
+/* Textarea et vues remplissent la hauteur disponible */
+.eval-col-retro .travaux-palette-contenu {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.eval-col-retro .zone-retroaction {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+.eval-col-retro #vueRetroGenerale,
+.eval-col-retro #vueRetroSpecifique,
+.eval-col-retro #vueRetroBilan {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+.eval-col-retro #vueRetroGenerale.u-hide,
+.eval-col-retro #vueRetroSpecifique.u-hide,
+.eval-col-retro #vueRetroBilan.u-hide {
+    display: none;
+}
+.eval-col-retro #retroactionFinale1 {
+    flex: 1;
+    resize: none;
 }
 .retro-vue-contenu h5 {
     margin: 8px 0 4px;

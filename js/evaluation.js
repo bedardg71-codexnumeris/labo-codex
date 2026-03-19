@@ -2984,16 +2984,32 @@ function evaluerProduction(da, productionId) {
  * Copie la rétroaction dans le presse-papier
  */
 function copierRetroaction(num) {
-    const texte = document.getElementById('retroactionFinale1').value;
+    var texte = '';
+    var vueGen = document.getElementById('vueRetroGenerale');
+    var vueSpec = document.getElementById('vueRetroSpecifique');
+    var vueBil = document.getElementById('vueRetroBilan');
+
+    // Copier la vue active
+    if (vueGen && !vueGen.classList.contains('u-hide')) {
+        texte = (document.getElementById('retroactionFinale1') || {}).value || '';
+    } else if (vueSpec && !vueSpec.classList.contains('u-hide')) {
+        genererRetroactionSpecifique();
+        texte = (document.getElementById('contenuRetroSpecifique') || {}).textContent || '';
+    } else if (vueBil && !vueBil.classList.contains('u-hide')) {
+        genererRetroactionBilan();
+        texte = (document.getElementById('contenuRetroBilan') || {}).textContent || '';
+    } else {
+        texte = (document.getElementById('retroactionFinale1') || {}).value || '';
+    }
 
     if (!texte || texte.trim() === '') {
         alert('Aucune rétroaction à copier');
         return;
     }
 
-    navigator.clipboard.writeText(texte).then(() => {
+    navigator.clipboard.writeText(texte.trim()).then(function() {
         afficherNotificationSucces('Rétroaction copiée dans le presse-papier !');
-    }).catch(err => {
+    }).catch(function(err) {
         console.error('Erreur de copie:', err);
         alert('Erreur lors de la copie. Utilise Cmd+A puis Cmd+C manuellement.');
     });
