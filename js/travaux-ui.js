@@ -3882,13 +3882,32 @@
             // Bouton Copier compact dans la barre de titre
             const barreRetro = paletteR.querySelector('.travaux-palette-barre');
             if (barreRetro) {
+                // Radio buttons pour basculer entre les 3 vues
+                const radiosDiv = document.createElement('div');
+                radiosDiv.className = 'retro-vues-radios';
+                ['Générale', 'Spécifique', 'Bilan'].forEach(function(label, idx) {
+                    var val = ['generale', 'specifique', 'bilan'][idx];
+                    var lbl = document.createElement('label');
+                    var radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = 'vueRetroaction';
+                    radio.value = val;
+                    if (idx === 0) radio.checked = true;
+                    radio.addEventListener('change', function() { basculerVueRetroaction(val); });
+                    lbl.appendChild(radio);
+                    lbl.appendChild(document.createTextNode(' ' + label));
+                    radiosDiv.appendChild(lbl);
+                });
+                const btnToggle = barreRetro.querySelector('.travaux-palette-toggle');
+                barreRetro.insertBefore(radiosDiv, btnToggle);
+
+                // Bouton Copier tout
                 const btnCopier = document.createElement('button');
                 btnCopier.className = 'btn btn-compact';
-                btnCopier.textContent = 'Copier';
-                btnCopier.title = 'Copier dans le presse-papier';
+                btnCopier.textContent = 'Copier tout';
+                btnCopier.title = 'Copier les 3 rétroactions dans le presse-papier';
                 btnCopier.style.cssText = 'font-size:10px; padding:2px 8px; margin-right:4px;';
-                btnCopier.addEventListener('click', function() { copierRetroaction(1); });
-                const btnToggle = barreRetro.querySelector('.travaux-palette-toggle');
+                btnCopier.addEventListener('click', function() { copierToutRetroaction(); });
                 barreRetro.insertBefore(btnCopier, btnToggle);
             }
             evalFlex.appendChild(paletteR);
