@@ -3687,7 +3687,14 @@
     }
 
     function basculerMode(mode) {
-        if (mode === modeCourant) return;
+        // Permettre la re-creation si le mode est 'evaluer' mais les palettes n'existent plus
+        if (mode === modeCourant) {
+            if (mode === 'evaluer' && !document.getElementById('travaux-palette-eval-gauche')) {
+                modeCourant = 'annoter';
+            } else {
+                return;
+            }
+        }
         const btnAnnoter = document.getElementById('travaux-btn-annoter');
         const btnEvaluer = document.getElementById('travaux-btn-evaluer');
 
