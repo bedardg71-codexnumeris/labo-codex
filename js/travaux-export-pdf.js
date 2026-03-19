@@ -1256,16 +1256,30 @@
             }
         }
 
-        // Jetons restants
+        // Jetons restants (tous les types actifs)
         if (typeof obtenirConfigJetons === 'function' && typeof compterJetonsUtilises === 'function') {
             try {
                 var configJetons = obtenirConfigJetons();
                 if (configJetons && configJetons.actif && da) {
-                    var nbTotal = configJetons.reprise ? configJetons.reprise.nombre : 0;
-                    var nbUtilises = compterJetonsUtilises(da, 'reprise');
-                    var nbRestants = Math.max(0, nbTotal - nbUtilises);
-                    if (nbTotal > 0) {
-                        bilanLignes.push({ type: 'jetons', texte: 'Il te reste ' + nbRestants + ' jeton' + (nbRestants > 1 ? 's' : '') + ' de reprise sur ' + nbTotal + '.' });
+                    var jetonsTextes = [];
+                    // Reprise
+                    if (configJetons.reprise && configJetons.reprise.nombre > 0) {
+                        var nbRep = configJetons.reprise.nombre - compterJetonsUtilises(da, 'reprise');
+                        jetonsTextes.push(Math.max(0, nbRep) + ' reprise' + (nbRep > 1 ? 's' : '') + ' sur ' + configJetons.reprise.nombre);
+                    }
+                    // Reprise ciblee
+                    if (configJetons.repriseCiblee && configJetons.repriseCiblee.actif) {
+                        var nbCib = (configJetons.repriseCiblee.nombre || configJetons.reprise.nombre) - compterJetonsUtilises(da, 'repriseCiblee');
+                        var totalCib = configJetons.repriseCiblee.nombre || configJetons.reprise.nombre;
+                        jetonsTextes.push(Math.max(0, nbCib) + ' reprise' + (nbCib > 1 ? 's' : '') + ' cibl\u00e9e' + (nbCib > 1 ? 's' : '') + ' sur ' + totalCib);
+                    }
+                    // Delai
+                    if (configJetons.delai && configJetons.delai.nombre > 0) {
+                        var nbDel = configJetons.delai.nombre - compterJetonsUtilises(da, 'delai');
+                        jetonsTextes.push(Math.max(0, nbDel) + ' d\u00e9lai' + (nbDel > 1 ? 's' : '') + ' sur ' + configJetons.delai.nombre);
+                    }
+                    if (jetonsTextes.length > 0) {
+                        bilanLignes.push({ type: 'jetons', texte: 'Jetons restants : ' + jetonsTextes.join(', ') + '.' });
                     }
                 }
             } catch(e) { /* silencieux */ }

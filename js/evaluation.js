@@ -3227,16 +3227,27 @@ function genererRetroactionBilan() {
         }
     }
 
-    // Jetons
+    // Jetons (tous les types actifs)
     if (typeof obtenirConfigJetons === 'function' && typeof compterJetonsUtilises === 'function') {
         try {
             var configJetons = obtenirConfigJetons();
             if (configJetons && configJetons.actif && da) {
-                var nbTotal = configJetons.reprise ? configJetons.reprise.nombre : 0;
-                var nbUtilises = compterJetonsUtilises(da, 'reprise');
-                var nbRestants = Math.max(0, nbTotal - nbUtilises);
-                if (nbTotal > 0) {
-                    html += '<p class="retro-jetons">Il te reste ' + nbRestants + ' jeton' + (nbRestants > 1 ? 's' : '') + ' de reprise sur ' + nbTotal + '.</p>';
+                var jetonsTextes = [];
+                if (configJetons.reprise && configJetons.reprise.nombre > 0) {
+                    var nbRep = configJetons.reprise.nombre - compterJetonsUtilises(da, 'reprise');
+                    jetonsTextes.push(Math.max(0, nbRep) + ' reprise' + (nbRep > 1 ? 's' : '') + ' sur ' + configJetons.reprise.nombre);
+                }
+                if (configJetons.repriseCiblee && configJetons.repriseCiblee.actif) {
+                    var totalCib = configJetons.repriseCiblee.nombre || configJetons.reprise.nombre;
+                    var nbCib = totalCib - compterJetonsUtilises(da, 'repriseCiblee');
+                    jetonsTextes.push(Math.max(0, nbCib) + ' reprise' + (nbCib > 1 ? 's' : '') + ' cibl\u00e9e' + (nbCib > 1 ? 's' : '') + ' sur ' + totalCib);
+                }
+                if (configJetons.delai && configJetons.delai.nombre > 0) {
+                    var nbDel = configJetons.delai.nombre - compterJetonsUtilises(da, 'delai');
+                    jetonsTextes.push(Math.max(0, nbDel) + ' d\u00e9lai' + (nbDel > 1 ? 's' : '') + ' sur ' + configJetons.delai.nombre);
+                }
+                if (jetonsTextes.length > 0) {
+                    html += '<p class="retro-jetons">Jetons restants : ' + jetonsTextes.join(', ') + '.</p>';
                 }
             }
         } catch(e) { /* silencieux */ }
