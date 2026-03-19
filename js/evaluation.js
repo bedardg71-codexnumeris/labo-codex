@@ -2999,6 +2999,274 @@ function copierRetroaction(num) {
     });
 }
 
+/* ===============================
+   VUES RÉTROACTION (Générale / Spécifique / Bilan)
+   =============================== */
+
+function basculerVueRetroaction(vue) {
+    var vueGen = document.getElementById('vueRetroGenerale');
+    var vueSpec = document.getElementById('vueRetroSpecifique');
+    var vueBil = document.getElementById('vueRetroBilan');
+    if (!vueGen || !vueSpec || !vueBil) return;
+
+    vueGen.classList.toggle('u-hide', vue !== 'generale');
+    vueSpec.classList.toggle('u-hide', vue !== 'specifique');
+    vueBil.classList.toggle('u-hide', vue !== 'bilan');
+
+    if (vue === 'specifique') genererRetroactionSpecifique();
+    if (vue === 'bilan') genererRetroactionBilan();
+}
+
+function genererRetroactionSpecifique() {
+    var conteneur = document.getElementById('contenuRetroSpecifique');
+    if (!conteneur) return;
+
+    var fichier = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
+        ? travauxVisionneuse.getFichierActuel() : null;
+    if (!fichier) {
+        conteneur.innerHTML = '<p style="color: var(--gris-moyen); font-style: italic;">Ouvre un fichier pour voir la rétroaction spécifique.</p>';
+        return;
+    }
+
+    var annotation = (typeof travauxStockage !== 'undefined')
+        ? travauxStockage.obtenirAnnotationFichier(fichier.id) : null;
+    if (!annotation || !annotation.pages) {
+        conteneur.innerHTML = '<p style="color: var(--gris-moyen); font-style: italic;">Aucune annotation sur ce fichier.</p>';
+        return;
+    }
+
+    // Compter tampons et erreurs
+    var tampons = {};
+    var erreurs = {};
+    var totalTampons = 0;
+    var totalErreurs = 0;
+    for (var pageId in annotation.pages) {
+        var pg = annotation.pages[pageId];
+        if (pg.stickers) {
+            pg.stickers.forEach(function(stk) {
+                tampons[stk.autocollantId] = (tampons[stk.autocollantId] || 0) + 1;
+                totalTampons++;
+            });
+        }
+        if (pg.shapes) {
+            pg.shapes.forEach(function(f) {
+                if (f.type && f.type.indexOf('errfr_') === 0) {
+                    erreurs[f.type] = (erreurs[f.type] || 0) + 1;
+                    totalErreurs++;
+                }
+            });
+        }
+    }
+
+    var html = '';
+
+    // Tampons par catégorie
+    if (totalTampons > 0) {
+        var autocollantsDef = travauxOutils.AUTOCOLLANTS;
+        var retroObs = travauxOutils.obtenirRetroactionsObservations();
+        var nomsCat = travauxOutils.obtenirNomsCategories();
+        var ordreCategories = travauxOutils.obtenirOrdreCategories();
+
+        ordreCategories.forEach(function(catId) {
+            var tamponsCat = autocollantsDef.filter(function(a) { return !a.legacy && a.categorie === catId; });
+            var utilises = tamponsCat.filter(function(a) { return tampons[a.id]; });
+            if (utilises.length === 0) return;
+
+            html += '<h5>' + (nomsCat[catId] || catId) + '</h5>';
+            utilises.forEach(function(a) {
+                var retro = retroObs[a.id] || '';
+                html += '<p><strong>' + a.nom + '</strong> (' + tampons[a.id] + ') — ' + retro + '</p>';
+            });
+        });
+    }
+
+    // Erreurs de français
+    if (totalErreurs > 0) {
+        var codesErreurs = travauxOutils.CODES_ERREURS_FR;
+        var retroFr = travauxOutils.obtenirRetroactionsErreursFr();
+        var typesTriees = Object.keys(erreurs).sort(function(a, b) { return erreurs[b] - erreurs[a]; }).slice(0, 3);
+
+        html += '<h5>Erreurs de français (' + totalErreurs + ')</h5>';
+        typesTriees.forEach(function(type) {
+            var codeDef = codesErreurs.find(function(c) { return c.id === type; });
+            var nom = codeDef ? codeDef.nom : type;
+            html += '<p><strong>' + nom + '</strong> (' + erreurs[type] + ') — ' + (retroFr[type] || '').substring(0, 120) + '</p>';
+        });
+    }
+
+    if (!html) {
+        html = '<p style="color: var(--gris-moyen); font-style: italic;">Aucun tampon ni erreur de français annotés.</p>';
+    }
+
+    conteneur.innerHTML = html;
+}
+
+function genererRetroactionBilan() {
+    var conteneur = document.getElementById('contenuRetroBilan');
+    if (!conteneur) return;
+
+    var ec = window.evaluationEnCours;
+    if (!ec || !ec.etudiantDA || !ec.grilleId) {
+        conteneur.innerHTML = '<p style="color: var(--gris-moyen); font-style: italic;">Sélectionne un étudiant et une grille pour voir le bilan.</p>';
+        return;
+    }
+
+    var NOMS_NIV = { 'E': '\u00c9tendu', 'M': 'Ma\u00eetris\u00e9', 'D': 'En d\u00e9veloppement', 'I': 'Incomplet' };
+    var ORDRE_NIV = { 'E': 4, 'M': 3, 'D': 2, 'I': 1 };
+    var da = ec.etudiantDA;
+    var html = '';
+
+    // Charger l'historique
+    var historiqueEleve = [];
+    try {
+        var toutesEvals = db.getSync(cle('evaluationsSauvegardees'), []);
+        historiqueEleve = toutesEvals
+            .filter(function(e) { return e.etudiantDA === da && !e.remplaceeParId; })
+            .sort(function(a, b) { return new Date(b.dateEvaluation) - new Date(a.dateEvaluation); })
+            .slice(0, 5);
+    } catch(e) { /* silencieux */ }
+    var evalPrecedente = historiqueEleve.length > 0 ? historiqueEleve[0] : null;
+
+    // Grille pour descriptions
+    var grilleDef = null;
+    try {
+        var grilles = db.getSync('grillesTemplates', []);
+        grilleDef = grilles.find(function(g) { return g.id === ec.grilleId; }) || null;
+    } catch(e) { /* silencieux */ }
+
+    // Critères actuels depuis evaluationEnCours
+    var criteres = [];
+    if (grilleDef && grilleDef.criteres && ec.criteres) {
+        grilleDef.criteres.forEach(function(gc) {
+            var niv = ec.criteres[gc.id];
+            if (niv) {
+                criteres.push({ critereNom: gc.nom, critereId: gc.id, niveauSelectionne: niv, description: gc.description || '' });
+            }
+        });
+    }
+
+    // Patrons récurrents
+    var nomsPatrons = [];
+    if (historiqueEleve.length >= 2) {
+        var cH1 = {}; var cH2 = {};
+        if (historiqueEleve[0] && historiqueEleve[0].criteres) historiqueEleve[0].criteres.forEach(function(c) { cH1[c.critereNom] = c.niveauSelectionne; });
+        if (historiqueEleve[1] && historiqueEleve[1].criteres) historiqueEleve[1].criteres.forEach(function(c) { cH2[c.critereNom] = c.niveauSelectionne; });
+        criteres.forEach(function(c) {
+            if ((c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D') &&
+                (cH1[c.critereNom] === 'I' || cH1[c.critereNom] === 'D') &&
+                (cH2[c.critereNom] === 'I' || cH2[c.critereNom] === 'D')) {
+                nomsPatrons.push(c.critereNom);
+            }
+        });
+    }
+
+    // Ta force
+    var meilleur = null; var meilleurOrdre = 0;
+    criteres.forEach(function(c) {
+        var o = ORDRE_NIV[c.niveauSelectionne] || 0;
+        if (o > meilleurOrdre) { meilleurOrdre = o; meilleur = c; }
+    });
+    if (meilleur && (meilleur.niveauSelectionne === 'M' || meilleur.niveauSelectionne === 'E')) {
+        html += '<p class="retro-force">Ta force : ' + meilleur.critereNom + ' (' + (NOMS_NIV[meilleur.niveauSelectionne] || '') + ')</p>';
+    }
+
+    // Priorités
+    var defis = criteres
+        .filter(function(c) { return c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D'; })
+        .sort(function(a, b) { return (ORDRE_NIV[a.niveauSelectionne] || 0) - (ORDRE_NIV[b.niveauSelectionne] || 0); });
+    if (defis.length > 0) {
+        html += '<h5>Pr\u00e9sentement, il faut se concentrer sur :</h5>';
+        for (var i = 0; i < Math.min(2, defis.length); i++) {
+            var d = defis[i];
+            var desc = d.description ? d.description.toLowerCase() : d.critereNom;
+            var patron = nomsPatrons.indexOf(d.critereNom) !== -1 ? '. Cet objectif est prioritaire depuis 3 productions' : '';
+            html += '<p>- ' + desc + ' (' + d.critereNom + ' ' + (NOMS_NIV[d.niveauSelectionne] || '') + ')' + patron + '</p>';
+        }
+    }
+
+    // Progression (seulement hausse ou stable)
+    if (evalPrecedente && evalPrecedente.niveauFinal) {
+        var nivAct = document.getElementById('niveauProduction1')?.textContent || '';
+        var nivPre = evalPrecedente.niveauFinal;
+        var ordreAct = ORDRE_NIV[nivAct] || 0;
+        var ordrePre = ORDRE_NIV[nivPre] || 0;
+        if (ordreAct > ordrePre) {
+            html += '<p>Progression : ' + nivPre + ' &gt; ' + nivAct + ' depuis ' + (evalPrecedente.productionNom || 'la production pr\u00e9c\u00e9dente') + '</p>';
+        }
+    }
+
+    // Amélioration reconnue
+    if (evalPrecedente && evalPrecedente.criteres) {
+        var criteresPrec = {};
+        evalPrecedente.criteres.forEach(function(c) { criteresPrec[c.critereNom] = c.niveauSelectionne; });
+        var ameliorations = [];
+        criteres.forEach(function(c) {
+            var nivP = criteresPrec[c.critereNom];
+            if (nivP && (nivP === 'I' || nivP === 'D') && (c.niveauSelectionne === 'M' || c.niveauSelectionne === 'E')) {
+                ameliorations.push(c.critereNom);
+            }
+        });
+        if (ameliorations.length > 0) {
+            html += '<p class="retro-amelioration">Tu as progress\u00e9 en ' + ameliorations.join(' et ') + '.</p>';
+        }
+    }
+
+    // Jetons
+    if (typeof obtenirConfigJetons === 'function' && typeof compterJetonsUtilises === 'function') {
+        try {
+            var configJetons = obtenirConfigJetons();
+            if (configJetons && configJetons.actif && da) {
+                var nbTotal = configJetons.reprise ? configJetons.reprise.nombre : 0;
+                var nbUtilises = compterJetonsUtilises(da, 'reprise');
+                var nbRestants = Math.max(0, nbTotal - nbUtilises);
+                if (nbTotal > 0) {
+                    html += '<p class="retro-jetons">Il te reste ' + nbRestants + ' jeton' + (nbRestants > 1 ? 's' : '') + ' de reprise sur ' + nbTotal + '.</p>';
+                }
+            }
+        } catch(e) { /* silencieux */ }
+    }
+
+    // Question métacognitive
+    html += '<p class="retro-question">Selon toi, quel aspect de ta production m\u00e9riterait le plus d\u2019attention ?</p>';
+
+    conteneur.innerHTML = html;
+}
+
+function copierToutRetroaction() {
+    var parties = [];
+
+    // Générale
+    var texteGen = (document.getElementById('retroactionFinale1') || {}).value || '';
+    if (texteGen.trim()) parties.push('=== R\u00c9TROACTION G\u00c9N\u00c9RALE ===\n' + texteGen.trim());
+
+    // Spécifique
+    genererRetroactionSpecifique();
+    var contenuSpec = document.getElementById('contenuRetroSpecifique');
+    if (contenuSpec && contenuSpec.textContent.trim()) {
+        parties.push('=== R\u00c9TROACTION SP\u00c9CIFIQUE ===\n' + contenuSpec.textContent.trim());
+    }
+
+    // Bilan
+    genererRetroactionBilan();
+    var contenuBilan = document.getElementById('contenuRetroBilan');
+    if (contenuBilan && contenuBilan.textContent.trim()) {
+        parties.push('=== BILAN ===\n' + contenuBilan.textContent.trim());
+    }
+
+    var texteComplet = parties.join('\n\n');
+    if (!texteComplet) {
+        alert('Aucune rétroaction à copier');
+        return;
+    }
+
+    navigator.clipboard.writeText(texteComplet).then(function() {
+        afficherNotificationSucces('Rétroaction complète copiée (générale + spécifique + bilan) !');
+    }).catch(function(err) {
+        console.error('Erreur de copie:', err);
+        alert('Erreur lors de la copie.');
+    });
+}
+
 /**
  * Sauvegarde la rétroaction finale modifiée
  */
@@ -6771,6 +7039,8 @@ window.changerEchelleEvaluation = changerEchelleEvaluation;
 window.changerStatutIntegrite = changerStatutIntegrite;
 window.genererRetroaction = genererRetroaction;
 window.copierRetroaction = copierRetroaction;
+window.basculerVueRetroaction = basculerVueRetroaction;
+window.copierToutRetroaction = copierToutRetroaction;
 window.basculerVerrouillageEvaluationCourante = basculerVerrouillageEvaluationCourante;
 window.nouvelleEvaluation = nouvelleEvaluation;
 window.gererChangementCheckboxJetonDelai = gererChangementCheckboxJetonDelai;

@@ -4860,34 +4860,51 @@
                 <div id="travaux-eval-retroaction" class="u-hide">
                     <div class="zone-retroaction">
                         <div class="zone-retroaction-header u-flex-between u-hide">
-                            <h4 data-tooltip="eval-retroaction">Rétroaction finale</h4>
-                            <button class="btn btn-confirmer btn-compact" onclick="copierRetroaction(1)">
-                                Copier dans le presse-papier
+                            <h4 data-tooltip="eval-retroaction">Rétroaction</h4>
+                            <div class="retro-vues-radios">
+                                <label><input type="radio" name="vueRetroaction" value="generale" checked onchange="basculerVueRetroaction(this.value)"> Générale</label>
+                                <label><input type="radio" name="vueRetroaction" value="specifique" onchange="basculerVueRetroaction(this.value)"> Spécifique</label>
+                                <label><input type="radio" name="vueRetroaction" value="bilan" onchange="basculerVueRetroaction(this.value)"> Bilan</label>
+                            </div>
+                            <button class="btn btn-confirmer btn-compact" onclick="copierToutRetroaction()">
+                                Copier tout
                             </button>
                         </div>
 
-                        <!-- Options à inclure + mode note -->
-                        <div class="eval-options-retroaction" data-tooltip="eval-retroaction-options">
-                            <div class="eval-options-checkboxes">
-                                <label data-tooltip="eval-retro-description"><input type="checkbox" id="afficherDescription1" onchange="genererRetroaction(1)" checked> Activité</label>
-                                <label data-tooltip="eval-retro-objectif"><input type="checkbox" id="afficherObjectif1" onchange="genererRetroaction(1)" checked> Objectif</label>
-                                <label data-tooltip="eval-retro-tache"><input type="checkbox" id="afficherTache1" onchange="genererRetroaction(1)" checked> Tâche</label>
-                                <label data-tooltip="eval-retro-adresse"><input type="checkbox" id="afficherAdresse1" onchange="genererRetroaction(1)" checked> Adresse</label>
-                                <label data-tooltip="eval-retro-contexte"><input type="checkbox" id="afficherContexte1" onchange="genererRetroaction(1)" checked> Contexte</label>
+                        <!-- VUE GÉNÉRALE -->
+                        <div id="vueRetroGenerale">
+                            <div class="eval-options-retroaction" data-tooltip="eval-retroaction-options">
+                                <div class="eval-options-checkboxes">
+                                    <label data-tooltip="eval-retro-description"><input type="checkbox" id="afficherDescription1" onchange="genererRetroaction(1)" checked> Activité</label>
+                                    <label data-tooltip="eval-retro-objectif"><input type="checkbox" id="afficherObjectif1" onchange="genererRetroaction(1)" checked> Objectif</label>
+                                    <label data-tooltip="eval-retro-tache"><input type="checkbox" id="afficherTache1" onchange="genererRetroaction(1)" checked> Tâche</label>
+                                    <label data-tooltip="eval-retro-adresse"><input type="checkbox" id="afficherAdresse1" onchange="genererRetroaction(1)" checked> Adresse</label>
+                                    <label data-tooltip="eval-retro-contexte"><input type="checkbox" id="afficherContexte1" onchange="genererRetroaction(1)" checked> Contexte</label>
+                                </div>
+                                <div class="eval-options-radios">
+                                    <label><input type="radio" name="affichageNote1" id="affichageNoteComplet1" value="complet" checked onchange="genererRetroaction(1)"> Note chiffrée</label>
+                                    <label><input type="radio" name="affichageNote1" id="affichageNoteLettre1" value="lettre" onchange="genererRetroaction(1)"> Niveau de performance</label>
+                                </div>
                             </div>
-                            <div class="eval-options-radios">
-                                <label><input type="radio" name="affichageNote1" id="affichageNoteComplet1" value="complet" checked onchange="genererRetroaction(1)"> Note chiffrée</label>
-                                <label><input type="radio" name="affichageNote1" id="affichageNoteLettre1" value="lettre" onchange="genererRetroaction(1)"> Niveau de performance</label>
-                            </div>
-                        </div>
-
-                        <!-- Zone de texte pour la rétroaction finale -->
-                        <textarea id="retroactionFinale1" class="controle-form" rows="6"
-                            placeholder="La rétroaction sera générée automatiquement ici selon tes évaluations et les options cochées."
-                            style="width: 100%; padding: 8px; border-radius: 5px;
+                            <textarea id="retroactionFinale1" class="controle-form" rows="6"
+                                placeholder="La rétroaction sera générée automatiquement ici selon tes évaluations et les options cochées."
+                                style="width: 100%; padding: 8px; border-radius: 5px;
         border: 1px solid var(--bordure-claire); font-family: inherit; resize: vertical;
         font-size: 0.8rem; line-height: 1.4; background: var(--surface-carte, #1a3040);">
 </textarea>
+                        </div>
+
+                        <!-- VUE SPÉCIFIQUE -->
+                        <div id="vueRetroSpecifique" class="u-hide">
+                            <div id="contenuRetroSpecifique" class="retro-vue-contenu"
+                                style="font-size: 0.8rem; line-height: 1.5; padding: 8px; color: var(--texte-principal);"></div>
+                        </div>
+
+                        <!-- VUE BILAN -->
+                        <div id="vueRetroBilan" class="u-hide">
+                            <div id="contenuRetroBilan" class="retro-vue-contenu"
+                                style="font-size: 0.8rem; line-height: 1.5; padding: 8px; color: var(--texte-principal);"></div>
+                        </div>
                     </div>
                 </div>
 
