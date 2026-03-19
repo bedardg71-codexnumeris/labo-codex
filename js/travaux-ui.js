@@ -5004,6 +5004,7 @@
                     <div class="editeur-page-actions">
                         <button class="editeur-page-btn" onclick="event.stopPropagation(); travauxUI.monterPageEditeur(${index})" ${index === 0 ? 'disabled' : ''} title="Monter">&#x25B2;</button>
                         <button class="editeur-page-btn" onclick="event.stopPropagation(); travauxUI.descendrePageEditeur(${index})" ${index === editionPages.length - 1 ? 'disabled' : ''} title="Descendre">&#x25BC;</button>
+                        <button class="editeur-page-btn" onclick="event.stopPropagation(); travauxUI.pivoterPageEditeur(${index})" title="Pivoter 90°">&#x21BB;</button>
                         <button class="editeur-page-btn editeur-page-btn-supprimer" onclick="event.stopPropagation(); travauxUI.supprimerPageEditeur(${index})" title="Supprimer" ${editionPages.length <= 1 ? 'disabled' : ''}>&times;</button>
                     </div>
                 </div>`;
@@ -5083,6 +5084,38 @@
             editionPageSelectionnee = editionPages.length - 1;
         }
         renderEditeurPages();
+    }
+
+    /**
+     * Pivote une page de 90 degres dans le sens horaire
+     */
+    function pivoterPageEditeur(index) {
+        var page = editionPages[index];
+        if (!page) return;
+
+        var img = new Image();
+        img.onload = function() {
+            var canvas = document.createElement('canvas');
+            // Inverser largeur/hauteur pour rotation 90°
+            canvas.width = img.height;
+            canvas.height = img.width;
+            var ctx = canvas.getContext('2d');
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate(Math.PI / 2);
+            ctx.drawImage(img, -img.width / 2, -img.height / 2);
+
+            page.dataUrl = canvas.toDataURL('image/png');
+            var ancienneLargeur = page.largeur;
+            page.largeur = page.hauteur;
+            page.hauteur = ancienneLargeur;
+
+            // Mettre a jour le blob
+            canvas.toBlob(function(blob) {
+                if (blob) page.blob = blob;
+                renderEditeurPages();
+            }, 'image/png');
+        };
+        img.src = page.dataUrl;
     }
 
     /**
@@ -6114,6 +6147,7 @@
         monterPageEditeur: monterPageEditeur,
         descendrePageEditeur: descendrePageEditeur,
         supprimerPageEditeur: supprimerPageEditeur,
+        pivoterPageEditeur: pivoterPageEditeur,
         ajouterPagesEditeur: ajouterPagesEditeur,
         sauvegarderEdition: sauvegarderEdition,
         // Fusion depuis editeur
