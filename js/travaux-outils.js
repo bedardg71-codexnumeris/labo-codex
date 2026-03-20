@@ -255,6 +255,7 @@
      */
     function prechargerAutocollants() {
         AUTOCOLLANTS.forEach(a => {
+            if (!a.fichier) return; // Tampons personnalisés sans fichier image
             const img = new Image();
             const promesse = new Promise((resolve, reject) => {
                 img.onload = () => resolve(img);

@@ -787,6 +787,7 @@ h1, h2, h3, h4 {
     color: white;
     padding: 36px 30px 20px;
     position: relative;
+    z-index: 200;
     /* Pas de border-radius pour continuité visuelle avec la navigation */
     box-shadow: var(--shadow-prononce);
     transition: box-shadow 0.3s ease, background 0.3s ease;
@@ -21801,4 +21802,146 @@ body.mode-clair .annot-badge.actif {
 
 .travaux-retro-couleur-wrap .travaux-retro-numero {
     margin-top: 0;
+}
+
+/* ===============================
+   JOURNAL DE BORD DES PRODUCTIONS
+   =============================== */
+
+/* Modale */
+.journal-modal {
+    background: var(--surface);
+    border-radius: var(--radius-lg, 12px);
+    max-width: 560px;
+    width: 90vw;
+    max-height: 80vh;
+    margin: 10vh auto;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--ombre-elevation-3, 0 8px 32px rgba(0,0,0,.3));
+}
+
+.journal-modal-entete {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--bordure);
+    position: relative;
+}
+
+.journal-modal-entete h3 {
+    margin: 0 0 .25rem 0;
+    font-size: 1.1rem;
+}
+
+.journal-modal-sous-titre {
+    display: block;
+    font-size: .85rem;
+    color: var(--texte-secondaire);
+}
+
+.journal-modal-fermer {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--texte-secondaire);
+    padding: .25rem .5rem;
+    border-radius: var(--radius-sm, 4px);
+}
+
+.journal-modal-fermer:hover {
+    background: var(--surface-hover, rgba(128,128,128,.1));
+}
+
+.journal-modal-corps {
+    padding: 1.25rem 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Timeline */
+.journal-timeline {
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.journal-timeline::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--bordure);
+}
+
+.journal-entree {
+    position: relative;
+    display: flex;
+    gap: .75rem;
+    padding-bottom: 1.25rem;
+}
+
+.journal-entree:last-child {
+    padding-bottom: 0;
+}
+
+.journal-entree-pastille {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 3px;
+    position: relative;
+    z-index: 1;
+    margin-left: -1.5rem;
+    margin-right: calc(1.5rem - 12px - .75rem);
+}
+
+.journal-entree-contenu {
+    flex: 1;
+    min-width: 0;
+}
+
+.journal-entree-date {
+    font-size: .75rem;
+    color: var(--texte-secondaire);
+}
+
+.journal-entree-action {
+    font-weight: 600;
+    font-size: .9rem;
+    margin-top: .1rem;
+}
+
+.journal-entree-details {
+    margin-top: .35rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+}
+
+.journal-detail {
+    display: inline-block;
+    font-size: .8rem;
+    padding: .15rem .5rem;
+    border-radius: var(--radius-sm, 4px);
+    background: var(--surface-secondaire, rgba(128,128,128,.08));
+    color: var(--texte-secondaire);
+}
+
+.journal-detail--modif {
+    background: var(--avertissement-fond, rgba(255,152,0,.12));
+    color: var(--avertissement);
+}
+
+/* État vide */
+.journal-vide {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--texte-secondaire);
+    font-size: .9rem;
+    line-height: 1.5;
 }

@@ -168,6 +168,13 @@ function appliquerJetonDelai(evaluationId) {
     evaluation.delaiAccorde = true;
     evaluation.dureeDelaiJours = dureeDelai; // Stocker la durée appliquée
 
+    // Journal de bord — jeton de délai
+    if (typeof Journal !== 'undefined') {
+        Journal.ajouterEntree(evaluation,
+            Journal.ACTIONS.JETON_APPLIQUE,
+            { type: 'delai', dureeJours: dureeDelai });
+    }
+
     // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation)
     sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
     console.log('✅ Évaluations sauvegardées avec jeton de délai');
@@ -340,6 +347,17 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
 
     console.log('📋 Nouvelle évaluation créée avec ID:', nouvelId);
     console.log('📋 Lien vers originale:', evaluationOriginaleId);
+
+    // Journal de bord — jeton de reprise (avant splice pour garder la bonne référence)
+    var refOriginale = evaluations[indexOriginal];
+    if (typeof Journal !== 'undefined') {
+        Journal.ajouterEntree(refOriginale,
+            Journal.ACTIONS.JETON_APPLIQUE,
+            { type: 'reprise', nouvelleId: nouvelleEvaluation.id });
+        Journal.ajouterEntree(nouvelleEvaluation,
+            Journal.ACTIONS.JETON_APPLIQUE,
+            { type: 'reprise', originaleId: evaluationOriginaleId });
+    }
 
     if (archiverOriginale) {
         // Option 1: Archiver l'originale
@@ -736,6 +754,17 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
 
     console.log('📋 Nouvelle évaluation ciblée créée avec ID:', nouvelId);
     console.log('📋 Lien vers originale:', evaluationOriginaleId);
+
+    // Journal de bord — jeton de reprise ciblée (avant splice pour garder la bonne référence)
+    var refOriginaleCiblee = evaluations[indexOriginal];
+    if (typeof Journal !== 'undefined') {
+        Journal.ajouterEntree(refOriginaleCiblee,
+            Journal.ACTIONS.JETON_APPLIQUE,
+            { type: 'reprise_ciblee', nouvelleId: nouvelleEvaluation.id, critereId: critereId });
+        Journal.ajouterEntree(nouvelleEvaluation,
+            Journal.ACTIONS.JETON_APPLIQUE,
+            { type: 'reprise_ciblee', originaleId: evaluationOriginaleId, critereId: critereId });
+    }
 
     if (archiverOriginale) {
         // Option 1: Archiver l'originale
