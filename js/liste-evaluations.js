@@ -1081,6 +1081,16 @@ function genererDropdownActions(ligne) {
         options.push(`<option value="consulter|${evalId}">Consulter</option>`);
     }
 
+    // Journal — si évaluation existe
+    if (evalId) {
+        options.push(`<option value="journal|${evalId}">Journal</option>`);
+    }
+
+    // Modifier une évaluation remplacée (verrouillée)
+    if (evalId && ligne.statut === 'remplacee') {
+        options.push(`<option value="modifier-remplacee|${evalId}">Modifier l'évaluation</option>`);
+    }
+
     // Dossier PDF — évalué + export dispo
     if (ligne.statut === 'evalue' && typeof travauxExportPDF !== 'undefined') {
         options.push(`<option value="dossier|${da}|${prodId}">Dossier PDF</option>`);
@@ -1175,6 +1185,14 @@ function executerActionEval(select) {
             break;
         case 'supprimer-eval':
             supprimerEvaluation(parts[1]);
+            break;
+        case 'journal':
+            if (typeof Journal !== 'undefined') {
+                Journal.afficherJournal(parts[1]);
+            }
+            break;
+        case 'modifier-remplacee':
+            modifierEvaluationRemplacee(parts[1]);
             break;
     }
 }
@@ -1647,6 +1665,65 @@ function supprimerEvaluation(evaluationId) {
 }
 
 /**
+ * Permet de modifier une évaluation "Remplacée" (verrouillée après jeton de reprise).
+ * Capture un snapshot avant, déverrouille temporairement, et navigue vers le formulaire.
+ * Le re-verrouillage et le journal sont gérés dans sauvegarderEvaluationModifiee().
+ *
+ * IMPORTANT : ouvre le formulaire en mode STANDALONE (sans visionneuse) pour éviter
+ * que preRemplirEvaluation charge la reprise active à la place de l'originale.
+ */
+function modifierEvaluationRemplacee(evaluationId) {
+    var evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+    var evaluation = evaluations.find(function(e) { return e.id === evaluationId; });
+
+    if (!evaluation) {
+        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        return;
+    }
+
+    // Capturer snapshot avant modification
+    var avant = {
+        statutIntegrite: evaluation.statutIntegrite,
+        noteFinale: evaluation.noteFinale,
+        niveauFinal: evaluation.niveauFinal,
+        criteres: (evaluation.criteres || []).map(function(c) {
+            return { critereId: c.critereId, niveau: c.niveauSelectionne };
+        })
+    };
+
+    window._snapshotAvantModifRemplacee = { evalId: evaluationId, avant: avant };
+
+    // Déverrouiller temporairement
+    evaluation.verrouillee = false;
+    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+
+    // Bloquer preRemplirEvaluation AVANT toute navigation
+    // (afficherSousSection → initialiserModuleTravaux → afficherPalettesEval → preRemplirEvaluation)
+    window._modifierEvaluationEnCours = true;
+    window._forceStandaloneEval = true;
+
+    // Fermer le mode évaluation visionneuse s'il est actif
+    if (typeof travauxUI !== 'undefined' && typeof travauxUI.fermerModeEvaluation === 'function') {
+        travauxUI.fermerModeEvaluation();
+    }
+
+    // Charger directement via modifierEvaluationParId (il gère la navigation)
+    setTimeout(function() {
+        if (typeof window.modifierEvaluationParId === 'function') {
+            window.modifierEvaluationParId(evaluationId);
+        } else {
+            window._modifierEvaluationEnCours = false;
+            window._forceStandaloneEval = false;
+        }
+        // Sécurité : nettoyer les flags après que modifierEvaluation ait eu le temps de finir
+        setTimeout(function() {
+            window._modifierEvaluationEnCours = false;
+            window._forceStandaloneEval = false;
+        }, 5000);
+    }, 300);
+}
+
+/**
  * Verrouille/Déverrouille une évaluation
  */
 function toggleVerrouillerEvaluation(evaluationId) {
@@ -1667,6 +1744,13 @@ function toggleVerrouillerEvaluation(evaluationId) {
         evaluation.dateVerrouillage = new Date().toISOString();
     } else {
         delete evaluation.dateVerrouillage;
+    }
+
+    // Journal de bord — verrouillage/déverrouillage
+    if (typeof Journal !== 'undefined') {
+        Journal.ajouterEntree(evaluation,
+            evaluation.verrouillee ? Journal.ACTIONS.VERROUILLAGE : Journal.ACTIONS.DEVERROUILLAGE,
+            {});
     }
 
     sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
@@ -2374,6 +2458,7 @@ window.consulterEvaluationDepuisListe = consulterEvaluationDepuisListe;
 window.dupliquerEvaluation = dupliquerEvaluation;
 window.supprimerEvaluation = supprimerEvaluation;
 window.toggleVerrouillerEvaluation = toggleVerrouillerEvaluation;
+window.modifierEvaluationRemplacee = modifierEvaluationRemplacee;
 window.calculerEtSauvegarderIndiceCompletion = calculerEtSauvegarderIndiceCompletion;
 window.trierListeEvaluations = trierListeEvaluations;
 window.trierTableauParColonne = trierTableauParColonne;

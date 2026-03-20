@@ -2190,6 +2190,16 @@ function sauvegarderEvaluation() {
         return;
     }
 
+    // Persister la durée d'évaluation
+    var dureeMs = (typeof travauxUI !== 'undefined' && travauxUI.getDureeMs)
+        ? travauxUI.getDureeMs() : null;
+    if (dureeMs) evaluation.dureeEvaluation = Math.round(dureeMs / 1000);
+
+    // Journal de bord — capturer fin d'évaluation
+    if (typeof Journal !== 'undefined') {
+        Journal.capturerFinEvaluation(evaluation, dureeMs);
+    }
+
     evaluations.push(evaluation);
 
     // Protection : bloquer en mode anonymisation ou quota dépassé
@@ -4400,8 +4410,23 @@ function restaurerSelectionsEvaluation() {
  * et charge les niveaux de maîtrise si elle existe
  */
 function verifierEtChargerEvaluationExistante() {
+    // 🔧 FIX (20 mars 2026) : Ne pas interférer quand modifierEvaluation charge une évaluation spécifique
+    if (window._modifierEvaluationEnCours) {
+        console.log('⏭️ verifierEtChargerEvaluationExistante ignorée — modifierEvaluation en cours');
+        return;
+    }
+
     const etudiantDA = document.getElementById('selectEtudiantEval')?.value;
     const productionId = document.getElementById('selectProduction1')?.value;
+
+    // Ne pas écraser si modifierEvaluation a déjà chargé une évaluation spécifique
+    // pour ce même étudiant+production (protège originale remplacée ET reprise)
+    if (window.evaluationEnCours?.idModification &&
+        window.evaluationEnCours?.etudiantDA === etudiantDA &&
+        window.evaluationEnCours?.productionId === productionId) {
+        console.log('⏭️ verifierEtChargerEvaluationExistante ignorée — évaluation déjà chargée par ID');
+        return;
+    }
 
     if (!etudiantDA || !productionId) {
         console.log('Pas d\'étudiant ou de production sélectionné, skip');
@@ -5203,7 +5228,15 @@ function modifierEvaluation(evaluationId) {
             // Si on est en mode évaluer (visionneuse avec fichier ouvert),
             // les panneaux sont déjà visibles via afficherPalettesEval — ne pas toucher au DOM.
             // Sinon (standalone, sans fichier), afficher le formulaire directement.
-            const enModeEvaluer = !!document.getElementById('eval-layout-flex');
+            // 🔧 FIX (20 mars 2026) : _forceStandaloneEval permet à modifierEvaluationRemplacee()
+            // de forcer le mode standalone pour éviter que preRemplirEvaluation charge la reprise
+            const enModeEvaluer = !window._forceStandaloneEval && !!document.getElementById('eval-layout-flex');
+            if (window._forceStandaloneEval) {
+                window._forceStandaloneEval = false;
+                // Retirer le layout flex s'il existe pour garantir le mode standalone
+                var layoutFlex = document.getElementById('eval-layout-flex');
+                if (layoutFlex) layoutFlex.remove();
+            }
             if (!enModeEvaluer) {
                 const evalDiv = document.getElementById('evaluations-contenu-evaluation');
                 const fichiersDiv = document.getElementById('evaluations-contenu-fichiers');
@@ -5599,7 +5632,8 @@ function sauvegarderEvaluationModifiee() {
     }
 
     // Vérifier que l'évaluation n'est pas verrouillée
-    if (evaluations[indexEval].verrouillee) {
+    // Exception : modification post-reprise autorisée via _snapshotAvantModifRemplacee
+    if (evaluations[indexEval].verrouillee && !window._snapshotAvantModifRemplacee) {
         afficherNotificationErreur('Évaluation verrouillée', 'Impossible de modifier une évaluation verrouillée');
         return;
     }
@@ -5712,10 +5746,53 @@ function sauvegarderEvaluationModifiee() {
         // Phase 3 : fichierId supprimé — résolution par clé composite (DA, productionId) uniquement
     };
 
+    // Persister la durée d'évaluation (modification)
+    var dureeMsModif = (typeof travauxUI !== 'undefined' && travauxUI.getDureeMs)
+        ? travauxUI.getDureeMs() : null;
+    if (dureeMsModif) evaluations[indexEval].dureeEvaluation = Math.round(dureeMsModif / 1000);
+
+    // Journal de bord — capturer fin d'évaluation (modification)
+    if (typeof Journal !== 'undefined') {
+        Journal.capturerFinEvaluation(evaluations[indexEval], dureeMsModif);
+        // Marquer comme modification
+        var jrnl = evaluations[indexEval].journal;
+        if (jrnl && jrnl.length > 0) {
+            var derniere = jrnl[jrnl.length - 1];
+            // Trouver la dernière entrée evaluation_fin et ajouter le flag
+            for (var ji = jrnl.length - 1; ji >= 0; ji--) {
+                if (jrnl[ji].action === Journal.ACTIONS.EVALUATION_FIN) {
+                    jrnl[ji].details.modification = true;
+                    break;
+                }
+            }
+        }
+    }
+
     // Sauvegarder
     if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
         afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
         return;
+    }
+
+    // Journal — modification post-reprise : logger et re-verrouiller
+    if (window._snapshotAvantModifRemplacee && window._snapshotAvantModifRemplacee.evalId === evaluationId) {
+        var snapshot = window._snapshotAvantModifRemplacee;
+        var apres = {
+            statutIntegrite: evaluations[indexEval].statutIntegrite,
+            noteFinale: evaluations[indexEval].noteFinale,
+            niveauFinal: evaluations[indexEval].niveauFinal,
+            criteres: (evaluations[indexEval].criteres || []).map(function(c) {
+                return { critereId: c.critereId, niveau: c.niveauSelectionne };
+            })
+        };
+        if (typeof Journal !== 'undefined') {
+            Journal.ajouterEntree(evaluations[indexEval],
+                Journal.ACTIONS.MODIFICATION_POST_REPRISE,
+                { avant: snapshot.avant, apres: apres });
+        }
+        evaluations[indexEval].verrouillee = true;
+        sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+        window._snapshotAvantModifRemplacee = null;
     }
 
     afficherNotificationSucces(`Évaluation modifiée : ${evaluations[indexEval].etudiantNom} - ${evaluations[indexEval].productionNom}`);

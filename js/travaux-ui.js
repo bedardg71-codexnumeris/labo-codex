@@ -94,6 +94,10 @@
         _chronoFichierId = null;
     }
 
+    function getDureeMs() {
+        return _chronoDebut ? Date.now() - _chronoDebut : null;
+    }
+
     function resetChrono() {
         if (_chronoInterval) { clearInterval(_chronoInterval); _chronoInterval = null; }
         _chronoDebut = null;
@@ -4370,6 +4374,12 @@
      * @param {string} productionId - ID de la production
      */
     function preRemplirEvaluation(da, productionId) {
+        // 🔧 FIX (20 mars 2026) : Ne pas pré-remplir si modifierEvaluation est en cours
+        // (sinon preRemplirEvaluation charge la reprise active et écrase l'originale remplacée)
+        if (window._modifierEvaluationEnCours) {
+            console.log('⏭️ preRemplirEvaluation ignorée — modifierEvaluation en cours');
+            return;
+        }
         let essais = 0;
         const MAX_ESSAIS = 10;
         const INTERVALLE = 150;
@@ -6117,6 +6127,7 @@
         // Chrono évaluation
         demarrerChrono: demarrerChrono,
         arreterChrono: arreterChrono,
+        getDureeMs: getDureeMs,
         resetChrono: resetChrono,
         // Association production
         changerProductionFichier: changerProductionFichier,
