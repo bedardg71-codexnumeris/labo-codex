@@ -16677,7 +16677,7 @@
         // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
         // Les valeurs ici servent de fallback si version.json n'est pas disponible
         let VERSION_MAJEURE = '98.8';
-        let BUILD_ID = '0319-1525';
+        let BUILD_ID = '0320-0645';
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -17138,7 +17138,7 @@
 
                     // Extraire le titre de la carte
                     var titreCarte = carte.querySelector('.carte-titre-bleu');
-                    var titreTexte = titreCarte ? titreCarte.textContent.replace(/^[▶▼]\s*/, '').trim() : '';
+                    var titreTexte = titreCarte ? titreCarte.textContent.trim().replace(/^[▶▼]\s*/, '').trim() : '';
                     cartesAvecResultats.push({ element: carte, titre: titreTexte });
 
                     // Surligner les occurrences
@@ -17148,15 +17148,16 @@
                 }
             });
 
-            // Afficher/masquer les sous-sections vides
+            // Afficher les sous-sections contenant des résultats, masquer les autres
             const sousSections = document.querySelectorAll('#section-aide .sous-section');
             sousSections.forEach(section => {
-                const cartesVisibles = section.querySelectorAll('.carte[style*="display: block"], .carte:not([style*="display: none"])').length;
-
-                // Masquer le titre de la sous-section s'il n'y a pas de cartes visibles
-                const titre = section.querySelector('h2');
-                if (titre) {
-                    titre.style.display = cartesVisibles > 0 ? 'block' : 'none';
+                var aDesResultats = section.querySelectorAll('.carte[style*="display: block"]').length > 0;
+                if (aDesResultats) {
+                    section.classList.add('active');
+                    var titre = section.querySelector('h2');
+                    if (titre) titre.style.display = '';
+                } else {
+                    section.classList.remove('active');
                 }
             });
 
@@ -17271,15 +17272,22 @@
             // Réafficher toutes les cartes
             const cartes = document.querySelectorAll('#section-aide .carte');
             cartes.forEach(carte => {
-                carte.style.display = 'block';
+                carte.style.display = '';
                 retirerSurlignage(carte);
             });
 
             // Réafficher tous les titres de sous-sections
             const titres = document.querySelectorAll('#section-aide .sous-section h2');
             titres.forEach(titre => {
-                titre.style.display = 'block';
+                titre.style.display = '';
             });
+
+            // Restaurer la sous-section active originale
+            const sousSections = document.querySelectorAll('#section-aide .sous-section');
+            sousSections.forEach(ss => ss.classList.remove('active'));
+            var idActive = (typeof sousSectionActive === 'string' && sousSectionActive.startsWith('aide-')) ? sousSectionActive : 'aide-introduction';
+            var ssActive = document.getElementById(idActive);
+            if (ssActive) ssActive.classList.add('active');
         }
 
         /**
@@ -17307,9 +17315,14 @@
             var carte = document.getElementById(carteId);
             if (!carte) return;
 
-            // Ouvrir l'accordeon si ferme
-            var contenu = carte.querySelector('.accordeon-contenu');
-            if (contenu && contenu.style.display === 'none') {
+            // Activer la sous-section parente si nécessaire
+            var sousSection = carte.closest('.sous-section');
+            if (sousSection && !sousSection.classList.contains('active')) {
+                sousSection.classList.add('active');
+            }
+
+            // Ouvrir l'accordeon si fermé
+            if (carte.classList.contains('ferme')) {
                 var header = carte.querySelector('.accordeon-header');
                 if (header && typeof toggleAccordeonV2 === 'function') {
                     toggleAccordeonV2(header);
