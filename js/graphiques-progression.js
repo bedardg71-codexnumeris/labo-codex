@@ -3408,6 +3408,8 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
 
         // Changer le curseur au survol des noms ou des points
         canvas.addEventListener('mousemove', function(event) {
+            if (!canvas.isConnected) return;
+
             const rect = canvas.getBoundingClientRect();
             const mouseX = event.clientX - rect.left;
             const mouseY = event.clientY - rect.top;
