@@ -15,6 +15,7 @@
             titre: 'Annotation avanc\u00e9e et codex USB',
             items: [
                 'R\u00e9troactions personnalisables\u00a0: tampons, codes d\u2019erreur, ic\u00f4nes et couleurs modifiables par l\u2019enseignant.',
+                'Biblioth\u00e8que de tampons\u00a0: partage, export et import de collections par cat\u00e9gorie.',
                 'Outils d\u2019annotation enrichis\u00a0: ligne, vague, duplication, s\u00e9lection et formes.',
                 'Corbeille pour les fichiers supprim\u00e9s (restauration possible pendant 30\u00a0jours).',
                 'Codex USB pour transporter tes donn\u00e9es entre appareils.',
