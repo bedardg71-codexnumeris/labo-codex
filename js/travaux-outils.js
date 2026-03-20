@@ -351,6 +351,7 @@
         html += '<span class="travaux-palette-titre">Tampons</span>';
         html += '<div style="display:flex; gap:2px;">';
         html += '<button class="travaux-palette-toggle" onclick="travauxOutils.ouvrirEditionRetroObservations()" title="Personnaliser les rétroactions">\u2699</button>';
+        html += '<button class="travaux-palette-toggle" onclick="tamponsBibliotheque.afficherBibliothequeTampons()" title="Bibliothèque de tampons">\uD83D\uDCDA</button>';
         html += '<button class="travaux-palette-toggle" onclick="travauxOutils.togglePaletteTamponsReplie()" title="Replier">−</button>';
         html += '<button class="travaux-palette-toggle" onclick="travauxOutils.fermerPaletteAutocollants()" title="Fermer">×</button>';
         html += '</div></div>';
@@ -2741,7 +2742,10 @@
         obtenirOrdreErreursFr: obtenirOrdreErreursFr,
         // Mode synthèse erreurs FR (principale / toutes)
         changerModeSyntheseErrFr: changerModeSyntheseErrFr,
-        obtenirModeSyntheseErrFr: obtenirModeSyntheseErrFr
+        obtenirModeSyntheseErrFr: obtenirModeSyntheseErrFr,
+        // Bibliothèque de tampons — accès aux données
+        obtenirAutocollants: function() { return AUTOCOLLANTS; },
+        obtenirImageAutocollant: function(id) { return imagesAutocollants[id] || null; }
     };
 
 })();

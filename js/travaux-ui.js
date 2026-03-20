@@ -489,6 +489,7 @@
                         '<span class="annot-section-titre">Tampons</span>' +
                         '<div style="display:flex; gap:2px;">' +
                             '<button class="travaux-palette-toggle" onclick="travauxOutils.ouvrirEditionRetroObservations()" title="Personnaliser">\u2699</button>' +
+                            '<button class="travaux-palette-toggle" onclick="tamponsBibliotheque.afficherBibliothequeTampons()" title="Bibliothèque de tampons">\uD83D\uDCDA</button>' +
                             '<button class="travaux-palette-toggle annot-section-toggle" data-section="tampons" title="Replier">\u2212</button>' +
                         '</div>' +
                     '</div>' +
