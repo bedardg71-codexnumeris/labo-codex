@@ -1617,7 +1617,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                 const nomAffiche = nomAnonyme
                     ? nomAnonyme
                     : (etudiant.prenom && etudiant.nom
-                        ? `${etudiant.prenom} ${etudiant.nom.charAt(0)}.`
+                        ? `${etudiant.prenom} ${etudiant.nom}`
                         : etudiant.nom || `DA ${da}`);
                 return { da, nomComplet: etudiant.nom || da, nomAffiche };
             });
@@ -2873,7 +2873,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             const nom = nomAnonyme
                 ? nomAnonyme
                 : (etudiant.prenom && etudiant.nom
-                    ? `${etudiant.prenom} ${etudiant.nom.charAt(0)}.`
+                    ? `${etudiant.prenom} ${etudiant.nom}`
                     : etudiant.nom || `DA ${da}`);
 
             // 🆕 BETA 98.9: Inclure les élèves sans données dans le dropdown
