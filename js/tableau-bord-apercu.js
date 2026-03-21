@@ -35,6 +35,9 @@ const COULEURS_SUIVI = ['#d08080', '#d4b878', '#5ec49a', '#7ec8d4', '#d8a070'];
 const MAX_ETUDIANTS_SUIVIS = 5;
 const CLE_SUIVI = 'etudiantsSuivis';
 
+let _etudiantsPrioritaires = [];
+let _triPrioritaire = 'P'; // 'alpha', 'P', 'E', 'M'
+
 function obtenirEtudiantsSuivis() {
     return db.getSync(CLE_SUIVI, []);
 }
@@ -90,6 +93,155 @@ function appliquerCouleursEtudiantsSuivis() {
             el.classList.add('tracked-' + s.couleurIndex);
         });
     });
+}
+
+/* ===============================
+   🚨 ÉTUDIANTS PRIORITAIRES (automatique)
+   =============================== */
+
+function calculerEtudiantsPrioritaires() {
+    _etudiantsPrioritaires = [];
+    if (typeof obtenirEtudiantsCoursActif !== 'function' || typeof determinerNiveauRaiPedagogique !== 'function') return _etudiantsPrioritaires;
+    if (typeof calculerTousLesIndices !== 'function') return _etudiantsPrioritaires;
+
+    var etudiants = obtenirEtudiantsCoursActif();
+    var actifs = etudiants.filter(function(e) { return !estEtudiantExclu(e); });
+
+    actifs.forEach(function(e) {
+        var rai = determinerNiveauRaiPedagogique(e.da);
+        if (rai.niveau === 3 || rai.pattern === 'Blocage émergent') {
+            var indices = calculerTousLesIndices(e.da);
+            // Identifier les dimensions problématiques (< 65%)
+            var problemes = [];
+            if (indices.A < 65) problemes.push('A');
+            if (indices.C < 65) problemes.push('C');
+            if (indices.P < 65) problemes.push('P');
+            var E = indices.E;
+            var M = parseFloat(((indices.A + indices.C) / 2).toFixed(1));
+            _etudiantsPrioritaires.push({
+                da: e.da,
+                nom: e.nom,
+                prenom: e.prenom,
+                pattern: rai.pattern,
+                description: rai.description,
+                niveau: rai.niveau,
+                A: indices.A,
+                C: indices.C,
+                P: indices.P,
+                E: Math.round(E * 100),
+                M: Math.round(M),
+                risque: Math.round((1 - E) * 100),
+                problemes: problemes
+            });
+        }
+    });
+
+    trierEtudiantsPrioritaires();
+
+    return _etudiantsPrioritaires;
+}
+
+function trierEtudiantsPrioritaires() {
+    _etudiantsPrioritaires.sort(function(a, b) {
+        // Niveau 3 toujours avant niveau 2
+        if (a.niveau !== b.niveau) return b.niveau - a.niveau;
+        switch (_triPrioritaire) {
+            case 'alpha':
+                return (a.nom || '').localeCompare(b.nom || '');
+            case 'E':
+                return a.E - b.E;
+            case 'M':
+                return a.M - b.M;
+            case 'P':
+            default:
+                return a.P - b.P;
+        }
+    });
+}
+
+function appliquerCouleursPrioritaires() {
+    // Retirer toutes les classes prioritaire existantes
+    document.querySelectorAll('.barre-etudiant.prioritaire').forEach(function(el) {
+        el.classList.remove('prioritaire');
+    });
+
+    var btn = document.getElementById('btn-toggle-panneau-prioritaire');
+    if (!btn || !btn.classList.contains('actif')) return;
+
+    _etudiantsPrioritaires.forEach(function(ep) {
+        document.querySelectorAll('.barre-etudiant[data-da="' + ep.da + '"]').forEach(function(el) {
+            el.classList.add('prioritaire');
+        });
+    });
+}
+
+function genererPanneauPrioritaire() {
+    var conteneur = document.getElementById('liste-etudiants-prioritaire');
+    var compteur = document.getElementById('compteur-prioritaire');
+    var zoneTri = document.getElementById('prioritaire-tri-boutons');
+    if (!conteneur) return;
+
+    if (compteur) compteur.textContent = '(' + _etudiantsPrioritaires.length + ')';
+
+    // Générer les boutons de tri
+    if (zoneTri) {
+        var tris = [
+            { id: 'alpha', label: 'A→Z' },
+            { id: 'P', label: 'P' },
+            { id: 'E', label: 'E' },
+            { id: 'M', label: 'A+C' }
+        ];
+        zoneTri.innerHTML = '<span class="u-texte-petit" style="color: var(--gris-moyen); margin-right: 4px;">Trier :</span>'
+            + tris.map(function(t) {
+                var cls = 'prioritaire-tri-btn' + (_triPrioritaire === t.id ? ' prioritaire-tri-actif' : '');
+                return '<button class="' + cls + '" data-tri="' + t.id + '">' + t.label + '</button>';
+            }).join('');
+    }
+
+    if (_etudiantsPrioritaires.length === 0) {
+        conteneur.innerHTML = '<div style="padding: 8px; opacity: 0.7; font-size: 0.8rem;">Aucun étudiant en situation prioritaire</div>';
+        return;
+    }
+
+    var modeActif = db.getSync('modeApplication', 'normal');
+
+    conteneur.innerHTML = _etudiantsPrioritaires.map(function(ep) {
+        var nomAffiche;
+        if (modeActif === 'anonymisation') {
+            if (ep.prenom && ep.prenom.startsWith('Élève')) {
+                nomAffiche = ep.prenom;
+            } else {
+                nomAffiche = (typeof anonymiserNom === 'function' && anonymiserNom(ep.da)) || 'Étudiant Anonyme';
+            }
+        } else {
+            nomAffiche = ep.nom + ', ' + ep.prenom;
+        }
+        var nomSafe = typeof echapperHtml === 'function' ? echapperHtml(nomAffiche) : nomAffiche;
+
+        // Badge avec couleur selon seuil
+        function badgeIndice(label, valeur) {
+            var cls = 'prioritaire-indice';
+            if (valeur < 65) cls += ' prioritaire-indice-critique';
+            else if (valeur < 75) cls += ' prioritaire-indice-attention';
+            return '<span class="' + cls + '">' + label + ' ' + valeur + '%</span>';
+        }
+
+        // Badges contextuels selon le tri actif
+        var badges = '';
+        if (_triPrioritaire === 'E') {
+            badges = badgeIndice('E', ep.E) + badgeIndice('P', ep.P);
+        } else if (_triPrioritaire === 'M') {
+            badges = badgeIndice('A', ep.A) + badgeIndice('C', ep.C) + '<span class="prioritaire-indice" style="font-style: italic;">= ' + ep.M + '%</span>';
+        } else {
+            badges = badgeIndice('A', ep.A) + badgeIndice('C', ep.C) + badgeIndice('P', ep.P);
+        }
+
+        return '<div class="etudiant-prioritaire-item" data-da="' + ep.da + '">'
+            + '<span class="pastille-prioritaire"></span>'
+            + '<span class="etudiant-prioritaire-nom">' + nomSafe + '</span>'
+            + '<span class="etudiant-prioritaire-indices">' + badges + '</span>'
+            + '</div>';
+    }).join('');
 }
 
 function genererPanneauSuiviEtudiants() {
@@ -653,6 +805,42 @@ function initialiserModuleTableauBordApercu() {
         }
     });
 
+    // Événements du panneau Prioritaire (délégation)
+    document.addEventListener('click', function(ev) {
+        // Toggle du panneau prioritaire
+        if (ev.target.closest('#btn-toggle-panneau-prioritaire')) {
+            var btn = document.getElementById('btn-toggle-panneau-prioritaire');
+            var panneau = document.getElementById('panneau-prioritaire');
+            if (btn) btn.classList.toggle('actif');
+            if (panneau) {
+                panneau.classList.toggle('ouvert');
+                if (panneau.classList.contains('ouvert')) {
+                    calculerEtudiantsPrioritaires();
+                    genererPanneauPrioritaire();
+                }
+            }
+            appliquerCouleursPrioritaires();
+            return;
+        }
+        // Clic sur un bouton de tri
+        var btnTri = ev.target.closest('.prioritaire-tri-btn');
+        if (btnTri) {
+            _triPrioritaire = btnTri.dataset.tri;
+            trierEtudiantsPrioritaires();
+            genererPanneauPrioritaire();
+            return;
+        }
+        // Clic sur un étudiant prioritaire → profil
+        var itemPrio = ev.target.closest('.etudiant-prioritaire-item');
+        if (itemPrio) {
+            var da = itemPrio.dataset.da;
+            if (!da) return;
+            if (typeof afficherSousSection === 'function') afficherSousSection('tableau-bord-profil');
+            if (typeof afficherProfilComplet === 'function') afficherProfilComplet(da);
+            return;
+        }
+    });
+
     // 🆕 BETA 96.1: Gestionnaire de clic sur les points (délégation d'événement)
     document.addEventListener('click', function(e) {
         const point = e.target.closest('.barre-etudiant');
@@ -833,6 +1021,11 @@ function chargerTableauBordApercu() {
             console.warn('⚠️ creerGraphiqueGroupeSpaghetti non disponible - Module graphiques-progression.js non chargé ?');
         }
 
+        // 🆕 Graphique corrélations longitudinales (dynamique des corrélations semaine par semaine)
+        if (typeof creerGraphiqueCorrelationsLongitudinales === 'function') {
+            creerGraphiqueCorrelationsLongitudinales('graphique-correlations-longitudinales');
+        }
+
         // 🆕 BETA 96: Distribution ACPE maintenant intégrée dans les barres de progression
         // (graphique séparé supprimé - mini-courbes Gauss dans chaque barre)
 
@@ -843,6 +1036,12 @@ function chargerTableauBordApercu() {
 
         // Appliquer les couleurs des étudiants suivis après génération du HTML
         appliquerCouleursEtudiantsSuivis();
+
+        // Calculer les étudiants prioritaires et mettre à jour le compteur
+        calculerEtudiantsPrioritaires();
+        appliquerCouleursPrioritaires();
+        var compteurPrio = document.getElementById('compteur-prioritaire');
+        if (compteurPrio) compteurPrio.textContent = '(' + _etudiantsPrioritaires.length + ')';
 
         // Horodatage discret en bas du tableau de bord
         const horodatage = document.getElementById('tdb-horodatage');
@@ -1296,23 +1495,30 @@ function afficherMetriquesGlobales(etudiants) {
 
     if (!carteIndicateurs) return;
 
-    // Conserver le header, le panneau suivi et la note toggle AVANT de vider
+    // Conserver le header, les panneaux et la note toggle AVANT de vider
     const noteToggle = carteIndicateurs.querySelector('.carte-info-toggle');
     const header = carteIndicateurs.querySelector('h3');
     const panneauSuivi = carteIndicateurs.querySelector('#panneau-suivi-etudiants');
+    const panneauPrioritaire = carteIndicateurs.querySelector('#panneau-prioritaire');
 
     // Sauvegarder le HTML des éléments à préserver
     const headerHTML = header ? header.outerHTML : '';
     const panneauSuiviHTML = panneauSuivi ? panneauSuivi.outerHTML : '';
+    const panneauPrioritaireHTML = panneauPrioritaire ? panneauPrioritaire.outerHTML : '';
     const noteToggleHTML = noteToggle ? noteToggle.outerHTML : '';
 
-    // Vider et reconstruire avec header, panneau suivi et note
+    // Vider et reconstruire avec header, panneaux et note
     const panneauEtaitOuvert = panneauSuivi && panneauSuivi.classList.contains('ouvert');
-    carteIndicateurs.innerHTML = headerHTML + panneauSuiviHTML + noteToggleHTML;
+    const prioEtaitOuvert = panneauPrioritaire && panneauPrioritaire.classList.contains('ouvert');
+    carteIndicateurs.innerHTML = headerHTML + panneauSuiviHTML + panneauPrioritaireHTML + noteToggleHTML;
 
-    // Regénérer le contenu du panneau si ouvert (pour refléter le mode anonymisation courant)
+    // Regénérer le contenu des panneaux si ouverts
     if (panneauEtaitOuvert) {
         genererPanneauSuiviEtudiants();
+    }
+    if (prioEtaitOuvert) {
+        calculerEtudiantsPrioritaires();
+        genererPanneauPrioritaire();
     }
 
     // Générer la légende unique en haut
@@ -3074,6 +3280,8 @@ function setBarre(id, pourcentage) {
 window.chargerTableauBordApercu = chargerTableauBordApercu;
 window.initialiserModuleTableauBordApercu = initialiserModuleTableauBordApercu;
 window.appliquerCouleursEtudiantsSuivis = appliquerCouleursEtudiantsSuivis;
+window.appliquerCouleursPrioritaires = appliquerCouleursPrioritaires;
+window.calculerEtudiantsPrioritaires = calculerEtudiantsPrioritaires;
 
 /* ===============================
    📌 NOTES D'UTILISATION

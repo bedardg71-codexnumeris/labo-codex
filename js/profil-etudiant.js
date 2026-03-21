@@ -166,6 +166,23 @@ function obtenirNombreProductionsPourPatterns() {
 }
 
 /**
+ * Retourne les IDs des productions évaluables selon la pratique active.
+ * PAN/Standards : artefacts de portfolio uniquement (type 'artefact-portfolio')
+ * Sommative : toutes les productions sauf le conteneur portfolio
+ * @param {Array} productions - Liste des productions
+ * @returns {Array<string>} - IDs des productions évaluables
+ */
+function obtenirIdsProductionsEvaluables(productions) {
+    var config = db.getSync('modalitesEvaluation', {});
+    var estPAN = config.pratique === 'alternative';
+    if (estPAN) {
+        return productions.filter(function(p) { return p.type === 'artefact-portfolio'; }).map(function(p) { return p.id; });
+    }
+    // Sommative : toutes les productions sauf le conteneur portfolio
+    return productions.filter(function(p) { return p.type !== 'portfolio'; }).map(function(p) { return p.id; });
+}
+
+/**
  * Obtient l'instance de la pratique actuelle configurée
  * @returns {Object} - Instance de la pratique (PratiquePANMaitrise ou PratiqueSommative)
  */
@@ -2964,14 +2981,12 @@ function calculerDirectionRisque(da) {
     // Obtenir le nombre de productions configuré pour l'analyse des patterns
     const N = obtenirNombreProductionsPourPatterns() || 3;
 
-    // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
-    const artefactsPortfolio = productions
-        .filter(p => p.type === 'artefact-portfolio')
-        .map(p => p.id);
+    // Filtrer les productions évaluables selon la pratique active
+    const productionsIds = obtenirIdsProductionsEvaluables(productions);
 
     const evaluationsEleve = evaluations.filter(e =>
         e.etudiantDA === da &&
-        artefactsPortfolio.includes(e.productionId) &&
+        productionsIds.includes(e.productionId) &&
         e.noteFinale !== null &&
         e.noteFinale !== undefined
     );
@@ -4931,14 +4946,12 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const productions = obtenirDonneesSelonMode('productions') || [];
 
-    // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
-    const artefactsPortfolio = productions
-        .filter(p => p.type === 'artefact-portfolio')
-        .map(p => p.id);
+    // Filtrer les productions évaluables selon la pratique active
+    const productionsIds = obtenirIdsProductionsEvaluables(productions);
 
     const evaluationsEleve = evaluations.filter(e =>
         e.etudiantDA === da &&
-        artefactsPortfolio.includes(e.productionId) &&
+        productionsIds.includes(e.productionId) &&
         e.retroactionFinale
     );
 
@@ -5265,14 +5278,12 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
     // pour respecter le namespace du trimestre archivé et le filtrage par coursId
     const productions = obtenirDonneesSelonMode('productions') || [];
 
-    // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
-    const artefactsPortfolio = productions
-        .filter(p => p.type === 'artefact-portfolio')
-        .map(p => p.id);
+    // Filtrer les productions évaluables selon la pratique active
+    const productionsIds = obtenirIdsProductionsEvaluables(productions);
 
     const evaluationsEleve = evaluations.filter(e =>
         e.etudiantDA === da &&
-        artefactsPortfolio.includes(e.productionId) &&
+        productionsIds.includes(e.productionId) &&
         e.noteFinale !== null &&
         e.noteFinale !== undefined
     );
@@ -5457,14 +5468,12 @@ function identifierDefiSpecifique(da) {
     // Obtenir le nombre de productions configuré pour l'analyse des patterns
     const N = obtenirNombreProductionsPourPatterns() || 3;
 
-    // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
-    const artefactsPortfolio = productions
-        .filter(p => p.type === 'artefact-portfolio')
-        .map(p => p.id);
+    // Filtrer les productions évaluables selon la pratique active
+    const productionsIds = obtenirIdsProductionsEvaluables(productions);
 
     const evaluationsEleve = evaluations.filter(e =>
         e.etudiantDA === da &&
-        artefactsPortfolio.includes(e.productionId) &&
+        productionsIds.includes(e.productionId) &&
         e.retroactionFinale
     );
 

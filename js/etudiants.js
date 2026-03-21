@@ -555,65 +555,66 @@ function mettreAJourTitreListeEtudiants() {
 }
 
 /**
- * Met à jour les en-têtes des colonnes A, C et E avec les statistiques calculées
- * @param {number|null} r_AP - Corrélation entre Assiduité et Performance
- * @param {number|null} r_CP - Corrélation entre Complétion et Performance
- * @param {number|null} moyenneA - Moyenne de l'assiduité du groupe (0-100)
- * @param {number|null} moyenneE - Moyenne de l'engagement du groupe (0-100)
- *
- * AFFICHAGE DANS L'EN-TÊTE:
- * - A : Moyenne du groupe (%) 🆕 BETA 95.7
- * - C : Corrélation r=0.XX avec couleur selon force
- * - E : Moyenne du groupe (%)
- * - Si données manquantes: affiche "—"
+ * Met à jour les lignes moyenne et corrélation dans le thead
  */
-function mettreAJourEntetesAvecCorrelations(r_AP, r_CP, moyenneA, moyenneE) {
-    // Chercher les en-têtes dans le HTML
-    const enteteLigneA = document.querySelector('th[onclick*="assiduite"]');
-    const enteteLigneC = document.querySelector('th[onclick*="completion"]');
-    const enteteLigneE = document.querySelector('th[onclick*="engagement"]');
-
-    if (!enteteLigneA || !enteteLigneC) {
-        console.warn('⚠️ En-têtes A ou C introuvables pour afficher les corrélations');
-        return;
+function mettreAJourEntetesAvecCorrelations(r_AP, r_CP, r_EP, r_PatternP, r_RaiP, r_IntervP, moyenneA, moyenneC, moyenneP, moyenneE) {
+    function fmtMoy(v) {
+        if (v === null || v === undefined || isNaN(v)) return '—';
+        return 'moy=' + Math.round(v) + '%';
+    }
+    function fmtCorr(r) {
+        if (r === null || r === undefined || isNaN(r)) return '—';
+        return 'r=' + r.toFixed(2);
     }
 
-    // Fonction helper pour formater la corrélation
-    function formaterCorrelation(r) {
-        if (r === null || isNaN(r)) {
-            return '<span class="etud-texte-gris-mini">—</span>';
-        }
+    // Ligne moyennes
+    var moyA = document.getElementById('moy-a');
+    var moyC = document.getElementById('moy-c');
+    var moyP = document.getElementById('moy-p');
+    var moyE = document.getElementById('moy-e');
+    if (moyA) moyA.textContent = fmtMoy(moyenneA);
+    if (moyC) moyC.textContent = fmtMoy(moyenneC);
+    if (moyP) moyP.textContent = fmtMoy(moyenneP);
+    if (moyE) moyE.textContent = fmtMoy(moyenneE);
 
-        // Texte blanc pour meilleur contraste sur fond bleu foncé
-        return `<span style="color: white; font-size: 0.75rem; font-weight: 600;">r=${r.toFixed(2)}</span>`;
-    }
+    // Ligne corrélations avec P
+    var corrA = document.getElementById('corr-a');
+    var corrC = document.getElementById('corr-c');
+    var corrE = document.getElementById('corr-e');
+    var corrPattern = document.getElementById('corr-pattern');
+    var corrRai = document.getElementById('corr-rai');
+    var corrInterv = document.getElementById('corr-interv');
+    if (corrA) corrA.textContent = fmtCorr(r_AP);
+    if (corrC) corrC.textContent = fmtCorr(r_CP);
+    if (corrE) corrE.textContent = fmtCorr(r_EP);
+    if (corrPattern) corrPattern.textContent = fmtCorr(r_PatternP);
+    if (corrRai) corrRai.textContent = fmtCorr(r_RaiP);
+    if (corrInterv) corrInterv.textContent = fmtCorr(r_IntervP);
 
-    // Fonction helper pour formater la moyenne
-    function formaterMoyenne(valeur) {
-        if (valeur === null || isNaN(valeur)) {
-            return '<span class="etud-texte-gris-mini">—</span>';
-        }
-
-        // Texte blanc pour meilleur contraste sur fond bleu foncé
-        return `<span style="color: white; font-size: 0.75rem; font-weight: 600;">moy=${Math.round(valeur)}%</span>`;
-    }
-
-    // 🆕 BETA 95.7 : Mettre à jour l'en-tête A (assiduité) avec la MOYENNE
-    const htmlA = `A<br><span class="text-xs-normal">(assiduité)</span><br>${formaterMoyenne(moyenneA)}<span id="tri-assiduite" class="ml-4">↕</span>`;
-    enteteLigneA.innerHTML = htmlA;
-
-    // Mettre à jour l'en-tête C (complétion) avec corrélation
-    const htmlC = `C<br><span class="text-xs-normal">(complétion)</span><br>${formaterCorrelation(r_CP)}<span id="tri-completion" class="ml-4">↕</span>`;
-    enteteLigneC.innerHTML = htmlC;
-
-    // Mettre à jour l'en-tête E (engagement) avec la moyenne
-    if (enteteLigneE) {
-        const htmlE = `E<br><span class="text-xs-normal">(engagement)</span><br>${formaterMoyenne(moyenneE)}<span id="tri-engagement" class="ml-4">↕</span>`;
-        enteteLigneE.innerHTML = htmlE;
-    }
-
-    console.log(`📊 Statistiques affichées: A moy=${moyenneA !== null ? moyenneA.toFixed(1) : 'N/A'}%, C↔P r=${r_CP !== null ? r_CP.toFixed(3) : 'N/A'}, E moy=${moyenneE !== null ? moyenneE.toFixed(1) : 'N/A'}%`);
+    console.log('📊 Corrélations avec P: A r=' + (r_AP !== null ? r_AP.toFixed(2) : '—')
+        + ', C r=' + (r_CP !== null ? r_CP.toFixed(2) : '—')
+        + ', E r=' + (r_EP !== null ? r_EP.toFixed(2) : '—')
+        + ', Pattern r=' + (r_PatternP !== null ? r_PatternP.toFixed(2) : '—')
+        + ', RàI r=' + (r_RaiP !== null ? r_RaiP.toFixed(2) : '—')
+        + ', Interv r=' + (r_IntervP !== null ? r_IntervP.toFixed(2) : '—'));
 }
+
+/**
+ * Toggle visibilité d'une ligne d'en-tête (moyenne ou corrélation)
+ * @param {string} type - 'moy' ou 'corr'
+ * @param {boolean} visible
+ */
+function toggleLigneEntete(type, visible) {
+    var tr = document.getElementById('tr-entete-' + type);
+    if (tr) {
+        if (visible) {
+            tr.classList.remove('u-hide');
+        } else {
+            tr.classList.add('u-hide');
+        }
+    }
+}
+window.toggleLigneEntete = toggleLigneEntete;
 
 /**
  * Calcule le niveau de risque à l'échec (RàI) pour un étudiant
@@ -1005,9 +1006,47 @@ function afficherListeEtudiantsConsultation() {
         return E * 100; // Retourner en pourcentage
     });
     const moyenneE = valeursE_tous.length > 0 ? valeursE_tous.reduce((sum, val) => sum + val, 0) / valeursE_tous.length : null;
+    const moyenneC = valeursC_tous.length > 0 ? valeursC_tous.reduce((sum, val) => sum + val, 0) / valeursC_tous.length : null;
+    const moyenneP = valeursP_tous.length > 0 ? valeursP_tous.reduce((sum, val) => sum + val, 0) / valeursP_tous.length : null;
+    const r_EP = calculerCorrelationPearson(valeursE_tous, valeursP_tous);
 
-    // Mettre à jour les en-têtes avec les moyennes
-    mettreAJourEntetesAvecCorrelations(r_AP, r_CP, moyenneA, moyenneE);
+    // Corrélations Pattern↔P, RàI↔P, Interventions↔P
+    var scorePattern = { 'Non-participation': 0, 'Données insuffisantes': null, 'Blocage critique': 1, 'Blocage émergent': 2, 'Défi spécifique': 3, 'Stable': 4 };
+    var valeursPattern = [];
+    var valeursRai = [];
+    var valeursInterv = [];
+    var valeursP_pattern = [];
+    var valeursP_rai = [];
+    var valeursP_interv = [];
+
+    etudiants.forEach(function(e, idx) {
+        var rai = typeof determinerNiveauRaiPedagogique === 'function' ? determinerNiveauRaiPedagogique(e.da) : null;
+        var pVal = valeursP_tous[idx];
+
+        // Pattern (exclure données insuffisantes)
+        if (rai && scorePattern[rai.pattern] !== undefined && scorePattern[rai.pattern] !== null) {
+            valeursPattern.push(scorePattern[rai.pattern]);
+            valeursP_pattern.push(pVal);
+        }
+
+        // RàI niveau (exclure niveau 0 = en attente)
+        if (rai && rai.niveau > 0) {
+            valeursRai.push(rai.niveau);
+            valeursP_rai.push(pVal);
+        }
+
+        // Interventions (nombre)
+        var nbInterv = typeof obtenirInterventionsEtudiant === 'function' ? obtenirInterventionsEtudiant(e.da).length : 0;
+        valeursInterv.push(nbInterv);
+        valeursP_interv.push(pVal);
+    });
+
+    var r_PatternP = calculerCorrelationPearson(valeursPattern, valeursP_pattern);
+    var r_RaiP = calculerCorrelationPearson(valeursRai, valeursP_rai);
+    var r_IntervP = calculerCorrelationPearson(valeursInterv, valeursP_interv);
+
+    // Mettre à jour les lignes moyenne et corrélation dans le thead
+    mettreAJourEntetesAvecCorrelations(r_AP, r_CP, r_EP, r_PatternP, r_RaiP, r_IntervP, moyenneA, moyenneC, moyenneP, moyenneE);
 
     // 🆕 BETA 91: Mettre à jour la carte explicative sur le calcul des indices
     mettreAJourExplicationCalculIndices();

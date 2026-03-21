@@ -3892,9 +3892,15 @@
                             <div id="contexte-indicateurs-acpe" class="carte-contexte-ligne u-align-center" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; gap: 0.75rem">
                                 <!-- Trimestre | Cours | Badge - rempli dynamiquement par JS -->
                             </div>
-                            <button id="btn-toggle-panneau-suivi" class="btn-toggle-suivi" title="Suivre jusqu'à 5 étudiants">
-                                Suivi
-                            </button>
+                            <div style="display: flex; gap: 6px; align-items: center;">
+                                <button id="btn-toggle-panneau-prioritaire" class="btn-toggle-suivi btn-toggle-prioritaire"
+                                        title="Étudiants en difficulté (automatique)">
+                                    Prioritaire
+                                </button>
+                                <button id="btn-toggle-panneau-suivi" class="btn-toggle-suivi" title="Suivre jusqu'à 5 étudiants">
+                                    Suivi
+                                </button>
+                            </div>
                         </h3>
 
                         <!-- Panneau suivi d'étudiants -->
@@ -3908,6 +3914,18 @@
                             <div id="liste-etudiants-suivi" class="liste-etudiants-suivi">
                                 <!-- Rempli dynamiquement -->
                             </div>
+                        </div>
+
+                        <!-- Panneau étudiants prioritaires -->
+                        <div id="panneau-prioritaire" class="panneau-prioritaire">
+                            <div class="u-flex-between u-mb-8">
+                                <span class="u-texte-petit u-texte-gras" style="color: var(--texte-secondaire)">
+                                    Étudiants prioritaires <span id="compteur-prioritaire" style="opacity: 0.6;">(0)</span>
+                                </span>
+                                <span id="prioritaire-tri-boutons" class="prioritaire-tri-zone"></span>
+                                <span class="u-texte-petit" style="color: var(--gris-moyen)">Cliquer → profil</span>
+                            </div>
+                            <div id="liste-etudiants-prioritaire" class="liste-etudiants-prioritaire"></div>
                         </div>
 
                         <!-- Carte Note -->
@@ -4056,6 +4074,19 @@
                         </p>
                     </div>
 
+                    <!-- SECTION 5: DYNAMIQUE DES CORRÉLATIONS -->
+                    <div class="carte" id="carte-correlations-longitudinales" style="margin-top: 2rem;">
+                        <h3 class="carte-titre-bleu">
+                            <span>Dynamique des corrélations</span>
+                        </h3>
+                        <div class="u-w-100" style="position: relative; height: 400px;">
+                            <canvas id="graphique-correlations-longitudinales"></canvas>
+                        </div>
+                        <p id="corr-long-description" class="u-texte-petit u-mt-8" style="color: var(--texte-muted);">
+                            Corrélation de Pearson (r) entre chaque indice et P, calculée par semaine sur les données cumulatives.
+                        </p>
+                    </div>
+
                     <p id="tdb-horodatage" class="text-muted u-text-right" style="font-size: 0.72rem; opacity: 0.6; margin-top: 1.5rem"></p>
 
                 </div>
@@ -4157,6 +4188,9 @@
                             <label><input type="checkbox" data-colonne="pattern" checked onchange="toggleColonneListe(this)"> Pattern</label>
                             <label><input type="checkbox" data-colonne="rai" checked onchange="toggleColonneListe(this)"> RàI</label>
                             <label><input type="checkbox" data-colonne="interv" checked onchange="toggleColonneListe(this)"> Interv.</label>
+                            <span class="texte-muted" style="font-size: 0.8rem; margin-left: 12px;">En-tête :</span>
+                            <label><input type="checkbox" id="chk-entete-moy" checked onchange="toggleLigneEntete('moy', this.checked)"> Moy.</label>
+                            <label><input type="checkbox" id="chk-entete-corr" checked onchange="toggleLigneEntete('corr', this.checked)"> r↔P</label>
                         </div>
 
                         <!-- TABLEAU DES ÉTUDIANTS -->
@@ -4202,6 +4236,24 @@
                                         <th class="td-center-80" data-tooltip="liste-col-interv">
                                             Interv.
                                         </th>
+                                    </tr>
+                                    <tr id="tr-entete-moy" class="entete-stats-ligne">
+                                        <th></th><th></th><th></th><th></th><th></th><th></th>
+                                        <th id="moy-a" class="td-center entete-stat-cell">—</th>
+                                        <th id="moy-c" class="td-center entete-stat-cell">—</th>
+                                        <th id="moy-p" class="td-center entete-stat-cell">—</th>
+                                        <th id="moy-e" class="td-center entete-stat-cell">—</th>
+                                        <th></th><th></th><th></th>
+                                    </tr>
+                                    <tr id="tr-entete-corr" class="entete-stats-ligne">
+                                        <th></th><th></th><th></th><th></th><th></th><th></th>
+                                        <th id="corr-a" class="td-center entete-stat-cell">—</th>
+                                        <th id="corr-c" class="td-center entete-stat-cell">—</th>
+                                        <th class="td-center entete-stat-cell" style="opacity: 0.4;">ref</th>
+                                        <th id="corr-e" class="td-center entete-stat-cell">—</th>
+                                        <th id="corr-pattern" class="td-center entete-stat-cell">—</th>
+                                        <th id="corr-rai" class="td-center entete-stat-cell">—</th>
+                                        <th id="corr-interv" class="td-center entete-stat-cell">—</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tbody-tableau-bord-liste">
@@ -16613,6 +16665,7 @@
     <script src="js/journal.js?v=2026032002"></script>
     <script src="js/snapshots.js?v=2026030201"></script>
     <script src="js/graphiques-progression.js?v=2026030201"></script>
+    <script src="js/correlations-longitudinales.js?v=2026032101"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=2026032002"></script>

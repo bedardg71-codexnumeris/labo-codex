@@ -2073,6 +2073,23 @@ h1, h2, h3, h4 {
     white-space: nowrap;
 }
 
+/* Lignes stats (moyenne / corrélation) dans le thead */
+.entete-stats-ligne th {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.entete-stat-cell {
+    color: rgba(255, 255, 255, 0.85);
+    letter-spacing: 0.02em;
+}
+
+body.mode-clair .entete-stat-cell {
+    color: rgba(255, 255, 255, 0.9);
+}
+
 /* Message de débordement horizontal du tableau */
 .eval-msg-debordement {
     font-size: 0.8rem;
@@ -10177,6 +10194,30 @@ label:has(+ textarea:disabled) {
     outline-offset: 2px;
 }
 
+/* ===== Prioritaire — point rouge automatique ===== */
+.barre-etudiant.prioritaire {
+    background: radial-gradient(circle at 30% 30%, #ff4040, #cc1010, #800808) !important;
+    box-shadow: 0 0 6px 2px rgba(220, 20, 20, 0.55), 0 0 12px 4px rgba(220, 20, 20, 0.25);
+    z-index: 19;
+}
+
+/* Prioritaire prend la préséance sur tracked */
+.barre-etudiant.prioritaire.tracked-0,
+.barre-etudiant.prioritaire.tracked-1,
+.barre-etudiant.prioritaire.tracked-2,
+.barre-etudiant.prioritaire.tracked-3,
+.barre-etudiant.prioritaire.tracked-4 {
+    background: radial-gradient(circle at 30% 30%, #ff4040, #cc1010, #800808) !important;
+    box-shadow: 0 0 6px 2px rgba(220, 20, 20, 0.55), 0 0 12px 4px rgba(220, 20, 20, 0.25);
+    z-index: 19;
+}
+
+/* Prioritaire + selected : anneau blanc */
+.barre-etudiant.prioritaire.selected {
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+
 /* Panneau de suivi d'étudiants */
 .panneau-suivi-etudiants {
     display: none;
@@ -10261,6 +10302,132 @@ label:has(+ textarea:disabled) {
 
 .btn-toggle-suivi:hover {
     background: #f0f4ff;
+}
+
+/* Bouton Prioritaire actif — fond rouge */
+.btn-toggle-prioritaire.actif {
+    background: var(--rouge-erreur, #dc3545);
+    color: white;
+    border-color: var(--rouge-erreur, #dc3545);
+}
+
+.btn-toggle-prioritaire.actif:hover {
+    background: #c82333;
+}
+
+/* Panneau Prioritaire */
+.panneau-prioritaire {
+    display: none;
+    background: rgba(220, 20, 20, 0.06);
+    border: 1px solid rgba(220, 20, 20, 0.15);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.panneau-prioritaire.ouvert {
+    display: block;
+}
+
+.liste-etudiants-prioritaire {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.etudiant-prioritaire-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: var(--texte-clair, #d0e0e4);
+    background: rgba(220, 20, 20, 0.08);
+    border: 1px solid rgba(220, 20, 20, 0.15);
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.etudiant-prioritaire-item:hover {
+    background: rgba(220, 20, 20, 0.18);
+    border-color: rgba(220, 20, 20, 0.35);
+}
+
+.pastille-prioritaire {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: radial-gradient(circle at 30% 30%, #ff4040, #cc1010);
+}
+
+.etudiant-prioritaire-nom {
+    font-weight: 600;
+}
+
+.etudiant-prioritaire-diagnostic {
+    font-style: italic;
+    color: var(--gris-moyen, #888);
+    margin-left: auto;
+    font-size: 0.75rem;
+}
+
+.prioritaire-tri-zone {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.prioritaire-tri-btn {
+    padding: 1px 7px;
+    font-size: 0.7rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--texte-clair, #b0b8bc);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.prioritaire-tri-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.prioritaire-tri-actif {
+    background: rgba(220, 20, 20, 0.25);
+    border-color: rgba(220, 20, 20, 0.5);
+    color: #ff8080;
+    font-weight: 600;
+}
+
+.etudiant-prioritaire-indices {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.prioritaire-indice {
+    font-size: 0.7rem;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--texte-clair, #c0c8cc);
+    white-space: nowrap;
+}
+
+.prioritaire-indice-critique {
+    background: rgba(220, 20, 20, 0.25);
+    color: #ff8080;
+}
+
+.prioritaire-indice-attention {
+    background: rgba(220, 160, 20, 0.2);
+    color: #f0c060;
 }
 
 /* BETA 96.1: Bulle de niveau dans les tableaux avec effet 3D
@@ -19957,6 +20124,74 @@ body.mode-clair .barre-etudiant.tracked-4 {
         2px 3px 6px rgba(3, 46, 92, 0.3),
         inset 0 -1px 2px rgba(0, 0, 0, 0.15),
         inset 1px 1px 2px rgba(255, 255, 255, 0.4);
+}
+
+/* 8. Points prioritaires en mode clair */
+body.mode-clair .barre-etudiant.prioritaire,
+body.mode-clair .barre-etudiant.prioritaire.tracked-0,
+body.mode-clair .barre-etudiant.prioritaire.tracked-1,
+body.mode-clair .barre-etudiant.prioritaire.tracked-2,
+body.mode-clair .barre-etudiant.prioritaire.tracked-3,
+body.mode-clair .barre-etudiant.prioritaire.tracked-4 {
+    box-shadow:
+        0 0 6px 2px rgba(200, 20, 20, 0.4),
+        2px 3px 6px rgba(200, 20, 20, 0.2);
+}
+
+body.mode-clair .panneau-prioritaire {
+    background: rgba(220, 53, 69, 0.06);
+    border-color: rgba(220, 53, 69, 0.2);
+}
+
+body.mode-clair .etudiant-prioritaire-item {
+    color: var(--texte-principal, #1a1a1a);
+    background: rgba(220, 53, 69, 0.06);
+    border-color: rgba(220, 53, 69, 0.18);
+}
+
+body.mode-clair .etudiant-prioritaire-item:hover {
+    background: rgba(220, 53, 69, 0.14);
+    border-color: rgba(220, 53, 69, 0.3);
+}
+
+body.mode-clair .btn-toggle-prioritaire.actif {
+    background: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+
+body.mode-clair .etudiant-prioritaire-diagnostic {
+    color: #666;
+}
+
+body.mode-clair .prioritaire-tri-btn {
+    border-color: rgba(0, 0, 0, 0.12);
+    color: #666;
+}
+
+body.mode-clair .prioritaire-tri-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+body.mode-clair .prioritaire-tri-actif {
+    background: rgba(220, 53, 69, 0.12);
+    border-color: rgba(220, 53, 69, 0.4);
+    color: #b01020;
+}
+
+body.mode-clair .prioritaire-indice {
+    background: rgba(0, 0, 0, 0.06);
+    color: #555;
+}
+
+body.mode-clair .prioritaire-indice-critique {
+    background: rgba(220, 20, 20, 0.12);
+    color: #b01020;
+}
+
+body.mode-clair .prioritaire-indice-attention {
+    background: rgba(200, 140, 0, 0.12);
+    color: #906000;
 }
 
 /* ===============================
