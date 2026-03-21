@@ -10064,6 +10064,39 @@ label:has(+ textarea:disabled) {
     transform: translate(-50%, -50%) scale(1.3);
 }
 
+/* 🆕 BETA 98.9: Point distinctif pour élèves sans évaluation (barre P) */
+.barre-etudiant-sans-eval {
+    background: radial-gradient(
+        circle at 30% 30%,
+        #ff6b6b 0%,
+        #e84057 40%,
+        #c0392b 100%
+    );
+    box-shadow:
+        2px 3px 6px rgba(0, 0, 0, 0.4),
+        0 0 0 2px rgba(232, 64, 87, 0.6),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.2);
+    animation-name: float-vertical, pulse-sans-eval;
+    animation-duration: var(--duration, 6s), 2s;
+    animation-timing-function: linear, ease-in-out;
+    animation-iteration-count: infinite, infinite;
+}
+
+@keyframes pulse-sans-eval {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.barre-etudiant-sans-eval:hover {
+    background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+    box-shadow:
+        0 6px 16px rgba(232, 64, 87, 0.4),
+        0 0 20px rgba(232, 64, 87, 0.3),
+        0 0 0 2px rgba(255, 255, 255, 0.85),
+        inset 0 -3px 6px rgba(0, 0, 0, 0.3);
+    animation: none;
+}
+
 /* Infobulle persistante pour point sélectionné */
 .barre-etudiant-info {
     position: fixed;

@@ -813,6 +813,9 @@ function chargerTableauBordApercu() {
             afficherNiveauxRaI(etudiantsAvecIndices);
         }
 
+        // 🆕 BETA 98.9: Alerte nommée pour élèves en non-participation
+        afficherAlerteNonParticipation(etudiantsAvecIndices);
+
         // 🆕 BETA 96: Afficher le graphique spaghetti ACP (évolution temporelle par étudiant)
         // ✅ CORRECTIF (2 mars 2026): Lire la valeur actuelle du dropdown au lieu de hardcoder 'A'
         if (typeof creerGraphiqueGroupeSpaghettiACP === 'function') {
@@ -1240,18 +1243,25 @@ function afficherMetriquesGlobales(etudiants) {
         valeur: e.alternatif.completion
     }));
 
-    const etudiantsSOM_P = etudiantsAvecEvalsSOM.map(e => ({
+    // 🆕 BETA 98.9: Pour P, inclure TOUS les étudiants (comme C) dès qu'il y a des évals
+    // Les élèves sans production apparaissent avec un traitement visuel distinct
+    const etudiantsPourP_SOM = ilYaDesEvalsSOM ? etudiants : [];
+    const etudiantsPourP_PAN = ilYaDesEvalsPAN ? etudiants : [];
+
+    const etudiantsSOM_P = etudiantsPourP_SOM.map(e => ({
         da: e.da,
         nom: e.nom,
         prenom: e.prenom,
-        valeur: e.sommatif.performance
+        valeur: e.sommatif.performance,
+        sansEvaluation: e.sommatif.completion === 0 && e.sommatif.performance === 0
     }));
 
-    const etudiantsPAN_P = etudiantsAvecEvalsPAN.map(e => ({
+    const etudiantsPAN_P = etudiantsPourP_PAN.map(e => ({
         da: e.da,
         nom: e.nom,
         prenom: e.prenom,
-        valeur: e.alternatif.performance
+        valeur: e.alternatif.performance,
+        sansEvaluation: e.alternatif.completion === 0 && e.alternatif.performance === 0
     }));
 
     const etudiantsSOM_E = etudiantsAvecDonneesSOM.map(e => ({
@@ -1399,17 +1409,24 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
         #2196F3 75%)`;
 
     // Calculer les moyennes pour affichage
+    // 🆕 BETA 98.9: Exclure les élèves sansEvaluation du calcul de moyenne P
     let moyenneSOM = null;
     let moyennePAN = null;
 
     if (afficherSom && etudiantsSOM.length > 0) {
-        const somme = etudiantsSOM.reduce((acc, e) => acc + e.valeur, 0);
-        moyenneSOM = Math.round((somme / etudiantsSOM.length) * 100);
+        const etudiantsAvecEvalSOM = etudiantsSOM.filter(e => !e.sansEvaluation);
+        if (etudiantsAvecEvalSOM.length > 0) {
+            const somme = etudiantsAvecEvalSOM.reduce((acc, e) => acc + e.valeur, 0);
+            moyenneSOM = Math.round((somme / etudiantsAvecEvalSOM.length) * 100);
+        }
     }
 
     if (afficherPan && etudiantsPAN.length > 0) {
-        const somme = etudiantsPAN.reduce((acc, e) => acc + e.valeur, 0);
-        moyennePAN = Math.round((somme / etudiantsPAN.length) * 100);
+        const etudiantsAvecEvalPAN = etudiantsPAN.filter(e => !e.sansEvaluation);
+        if (etudiantsAvecEvalPAN.length > 0) {
+            const somme = etudiantsAvecEvalPAN.reduce((acc, e) => acc + e.valeur, 0);
+            moyennePAN = Math.round((somme / etudiantsAvecEvalPAN.length) * 100);
+        }
     }
 
     // 🆕 BETA 91: Générer l'interprétation de la corrélation ou de la moyenne E ou distribution P
@@ -1606,12 +1623,15 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 const scaleUp = (1 + scaleVar).toFixed(2);
                 const scaleDown = (1 - scaleVar).toFixed(2);
                 const duration = (8 - (ampNum - 8) * 0.4).toFixed(1); // 8s à 4s selon amplitude
-                                lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
+                // 🆕 BETA 98.9: Traitement visuel distinct pour élèves sans évaluation
+                const classesSansEval = e.sansEvaluation ? ' barre-etudiant-sans-eval' : '';
+                const tooltipValeur = e.sansEvaluation ? 'aucune production évaluée' : `${Math.round(e.valeur * 100)}%`;
+                                lignesSOM += `<div class="barre-etudiant barre-etudiant-som${classesSansEval}"
                     style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
                     data-da="${e.da}"
                     data-nom="${echapperHtml(nomAffiche)}"
-                    data-valeur="${Math.round(e.valeur * 100)}%"
-                    title="${echapperHtml(nomAffiche)} : ${Math.round(e.valeur * 100)}%"></div>`;
+                    data-valeur="${e.sansEvaluation ? '' : Math.round(e.valeur * 100) + '%'}"
+                    title="${echapperHtml(nomAffiche)} : ${tooltipValeur}"></div>`;
             });
         });
     }
@@ -1662,12 +1682,15 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 const scaleUp = (1 + scaleVar).toFixed(2);
                 const scaleDown = (1 - scaleVar).toFixed(2);
                 const duration = (8 - (ampNum - 8) * 0.4).toFixed(1); // 8s à 4s selon amplitude
-                                lignesPAN += `<div class="barre-etudiant barre-etudiant-std"
+                // 🆕 BETA 98.9: Traitement visuel distinct pour élèves sans évaluation
+                const classesSansEval = e.sansEvaluation ? ' barre-etudiant-sans-eval' : '';
+                const tooltipValeur = e.sansEvaluation ? 'aucune production évaluée' : `${Math.round(e.valeur * 100)}%`;
+                                lignesPAN += `<div class="barre-etudiant barre-etudiant-std${classesSansEval}"
                     style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
                     data-da="${e.da}"
                     data-nom="${echapperHtml(nomAffiche)}"
-                    data-valeur="${Math.round(e.valeur * 100)}%"
-                    title="${echapperHtml(nomAffiche)} : ${Math.round(e.valeur * 100)}%"></div>`;
+                    data-valeur="${e.sansEvaluation ? '' : Math.round(e.valeur * 100) + '%'}"
+                    title="${echapperHtml(nomAffiche)} : ${tooltipValeur}"></div>`;
             });
         });
     }
@@ -1792,12 +1815,13 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
         'progression': 12.5,
         'defi-specifique': 37.5, // Centre de 25-50%
         'blocage-emergent': 62.5,// Centre de 50-75%
-        'blocage-critique': 87.5 // Centre de 75-100%
+        'blocage-critique': 87.5,// Centre de 75-100%
+        'non-participation': 87.5 // 🆕 BETA 98.9: Même zone que blocage critique
     };
 
     // Calculer les compteurs par pattern pour SOM et PAN
-    const compteursSOM = { 'stable': 0, 'progression': 0, 'defi-specifique': 0, 'blocage-emergent': 0, 'blocage-critique': 0 };
-    const compteursPAN = { 'stable': 0, 'progression': 0, 'defi-specifique': 0, 'blocage-emergent': 0, 'blocage-critique': 0 };
+    const compteursSOM = { 'stable': 0, 'progression': 0, 'defi-specifique': 0, 'blocage-emergent': 0, 'blocage-critique': 0, 'non-participation': 0 };
+    const compteursPAN = { 'stable': 0, 'progression': 0, 'defi-specifique': 0, 'blocage-emergent': 0, 'blocage-critique': 0, 'non-participation': 0 };
 
     // Générer les points pour SOM avec jitter (nuage de points)
     // SOM = GAUCHE de chaque zone (position - 2%)
@@ -1909,8 +1933,9 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
     const emergentPctSOM = Math.round((emergentSOM / totalSOM) * 100);
     const emergentPctPAN = Math.round((emergentPAN / totalPAN) * 100);
 
-    const critiqueSOM = compteursSOM['blocage-critique'] || 0;
-    const critiquePAN = compteursPAN['blocage-critique'] || 0;
+    // 🆕 BETA 98.9: Inclure les non-participants dans le compteur critique
+    const critiqueSOM = (compteursSOM['blocage-critique'] || 0) + (compteursSOM['non-participation'] || 0);
+    const critiquePAN = (compteursPAN['blocage-critique'] || 0) + (compteursPAN['non-participation'] || 0);
     const critiquePctSOM = Math.round((critiqueSOM / totalSOM) * 100);
     const critiquePctPAN = Math.round((critiquePAN / totalPAN) * 100);
 
@@ -2425,32 +2450,92 @@ function genererCartePattern(label, valeurSom, valeurPan, total, afficherSom, af
  *
  * @param {Array} etudiants - Étudiants avec indices calculés
  */
+
+/**
+ * 🆕 BETA 98.9: Affiche une alerte nommée pour les élèves en non-participation
+ * (présents en classe mais 0 production remise)
+ *
+ * @param {Array} etudiants - Étudiants avec indices calculés
+ */
+function afficherAlerteNonParticipation(etudiants) {
+    // Détecter les élèves présents mais sans aucune production
+    const nonParticipants = etudiants.filter(e => {
+        const aDesPresences = (e.sommatif && e.sommatif.nombreSeances > 0) || (e.alternatif && e.alternatif.nombreSeances > 0);
+        const aDesEvals = (e.sommatif && (e.sommatif.completion > 0 || e.sommatif.performance > 0)) ||
+                          (e.alternatif && (e.alternatif.completion > 0 || e.alternatif.performance > 0));
+        return aDesPresences && !aDesEvals;
+    });
+
+    // Retirer l'alerte existante si présente
+    const carteIndicateurs = document.getElementById('carte-indicateurs-acpe');
+    if (!carteIndicateurs) return;
+
+    const alerteExistante = carteIndicateurs.querySelector('.alerte-non-participation');
+    if (alerteExistante) alerteExistante.remove();
+
+    if (nonParticipants.length === 0) return;
+
+    // Construire la liste nommée
+    const modeActif = db.getSync('modeApplication', 'normal');
+    const lignes = nonParticipants.map(e => {
+        let nomAffiche;
+        if (modeActif === 'anonymisation') {
+            nomAffiche = (e.prenom && e.prenom.startsWith('Élève')) ? e.prenom :
+                (typeof anonymiserNom === 'function' && anonymiserNom(e.da)) || 'Étudiant Anonyme';
+        } else {
+            nomAffiche = `${e.nom}, ${e.prenom}`;
+        }
+        const assiduite = Math.round((e.sommatif ? e.sommatif.assiduite : e.alternatif.assiduite) * 100);
+        // Nombre de productions attendues (évaluations du groupe)
+        const nbProductions = e.sommatif ? e.sommatif.nbEvaluations || 0 : (e.alternatif ? e.alternatif.nbEvaluations || 0 : 0);
+        const detailProd = nbProductions > 0 ? ` — 0/${nbProductions} productions` : '';
+        return `<li>${echapperHtml(nomAffiche)} — A\u00a0: ${assiduite}%${detailProd}</li>`;
+    }).join('');
+
+    const nbEleves = nonParticipants.length;
+    const html = `
+        <div class="alerte-non-participation info-box info-box--attention" style="margin: 16px 20px 0;">
+            <strong>&#9888;&#65039; ${nbEleves} élève${nbEleves > 1 ? 's' : ''} présent${nbEleves > 1 ? 's' : ''} sans aucune production remise</strong>
+            <ul style="margin: 6px 0 0 16px; padding: 0; list-style: none;">
+                ${lignes}
+            </ul>
+        </div>
+    `;
+
+    // Insérer après les barres ACPE (avant le conteneur indicateurs apprentissage ou avant le fold)
+    const conteneurIndicateurs = carteIndicateurs.querySelector('#conteneur-indicateurs-apprentissage');
+    if (conteneurIndicateurs) {
+        conteneurIndicateurs.insertAdjacentHTML('beforebegin', html);
+    } else {
+        carteIndicateurs.insertAdjacentHTML('beforeend', html);
+    }
+}
+
 function afficherPatternsApprentissage(etudiants) {
     const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
     const afficherSom = affichage.afficherSommatif === true;
     const afficherPan = affichage.afficherAlternatif === true;
 
-    // 🆕 FIX (24 jan 2026) : Pour les patterns, seuls C et P comptent (pas A seul)
-    // Un étudiant avec A > 0 mais C = P = 0 ne doit pas générer de pattern "blocage critique"
-    // car les patterns sont basés sur la performance et la complétion, pas l'assiduité seule
-    const etudiantsAvecDonneesCP = etudiants.filter(e => {
-        const cpSOM = e.sommatif.completion > 0 || e.sommatif.performance > 0;
-        const cpPAN = e.alternatif.completion > 0 || e.alternatif.performance > 0;
-        return cpSOM || cpPAN;
-    });
-    const nbSansDonneesCP = etudiants.length - etudiantsAvecDonneesCP.length;
+    // 🆕 BETA 98.9: Inclure TOUS les étudiants — les non-participants sont classés
+    // 'Non-participation' par determinerCibleIntervention() et apparaissent dans la zone critique
+    const etudiantsAvecDonneesCP = etudiants;
+    const nbSansDonneesCP = 0;
     const nbTotal = etudiants.length;
 
     // Vérifier si au moins un étudiant a des données C ou P significatives
-    const aucuneDonneeCP = etudiantsAvecDonneesCP.length === 0;
+    const aucuneDonneeCP = etudiants.every(e => {
+        const cpSOM = e.sommatif.completion === 0 && e.sommatif.performance === 0;
+        const cpPAN = e.alternatif.completion === 0 && e.alternatif.performance === 0;
+        return cpSOM && cpPAN;
+    });
 
     // NOUVEAU Beta 90 : Récupérer les pratiques spécifiques
     // IMPORTANT : Utiliser determinerCibleIntervention() pour garantir la cohérence
     // avec le tableau de liste des étudiants. Les patterns doivent être identiques
     // partout car ils sont basés sur la même logique (N derniers artefacts).
 
-    // Préparer les données pour SOM et PAN (uniquement étudiants avec données CP)
+    // 🆕 BETA 98.9: Préparer les données pour SOM et PAN (tous les étudiants)
     // Note : determinerCibleIntervention() retourne le pattern basé sur les N derniers artefacts
     // ce qui garantit la cohérence méthodologique nécessaire pour détecter les patterns
     const etudiantsSOM = [];
@@ -2584,15 +2669,10 @@ function afficherNiveauxRaI(etudiants) {
     const afficherSom = affichage.afficherSommatif === true;
     const afficherPan = affichage.afficherAlternatif === true;
 
-    // 🆕 FIX (24 jan 2026) : Pour RàI, seuls C et P comptent (pas A seul)
-    // Un étudiant avec A > 0 mais C = P = 0 ne doit pas être classé "Niveau 3"
-    // car les niveaux RàI sont basés sur la performance, pas l'assiduité seule
-    const etudiantsAvecDonneesCP = etudiants.filter(e => {
-        const cpSOM = e.sommatif.completion > 0 || e.sommatif.performance > 0;
-        const cpPAN = e.alternatif.completion > 0 || e.alternatif.performance > 0;
-        return cpSOM || cpPAN;
-    });
-    const nbSansDonneesCP = etudiants.length - etudiantsAvecDonneesCP.length;
+    // 🆕 BETA 98.9: Inclure TOUS les étudiants — les non-participants sont classés
+    // Niveau 3 par determinerNiveauRaiPedagogique()
+    const etudiantsAvecDonneesCP = etudiants;
+    const nbSansDonneesCP = 0;
     const nbTotal = etudiants.length;
 
     console.log(`📊 [RàI] Total: ${nbTotal}, avec données CP: ${etudiantsAvecDonneesCP.length}, sans données CP: ${nbSansDonneesCP}`);
@@ -2609,7 +2689,7 @@ function afficherNiveauxRaI(etudiants) {
     const etudiantsPAN = [];
 
     // Utiliser la même fonction pour SOM et PAN (niveau RàI pédagogique identique)
-    // 🆕 FIX (24 jan 2026) : Uniquement pour les étudiants avec données CP
+    // 🆕 BETA 98.9: Inclut tous les étudiants — non-participants classés Niveau 3
     if (typeof determinerNiveauRaiPedagogique === 'function') {
         etudiantsAvecDonneesCP.forEach(e => {
             const niveauInfo = determinerNiveauRaiPedagogique(e.da);
