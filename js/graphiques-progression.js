@@ -909,7 +909,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                 responsive: true,
                 maintainAspectRatio: false,
                 layout: {
-                    padding: { right: 10 }
+                    padding: { right: 25 }
                 },
                 plugins: {
                     title: {
@@ -976,7 +976,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                             }
                         }
                     }
-                    // 🆕 BETA 96: Annotations remplacées par pluginGradientFond
+
                 },
                 scales: {
                     x: {
@@ -1321,6 +1321,9 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                layout: {
+                    padding: { right: 25 }
+                },
                 plugins: {
                     title: {
                         display: true,
@@ -2089,8 +2092,9 @@ function selectionnerEtudiantACP() {
 let graphiqueSpaghettiInstance = null;
 
 /**
- * Plugin pour afficher les étiquettes de zones sur le côté droit
- * 🆕 BETA 96: Blanc 80%, dessiné AVANT les courbes (en dessous)
+ * ✨ #240: Plugin unifié — lignes pointillées aux seuils IDME + étiquettes colorées
+ * Dessine des lignes horizontales aux frontières de zones et les noms dans la marge droite.
+ * Fonctionne avec l'échelle 0-1 (genererZonesDepuisEchelle).
  */
 const pluginEtiquettesZones = {
     id: 'etiquettesZones',
@@ -2101,98 +2105,70 @@ const pluginEtiquettesZones = {
 
         if (!chartArea || !yScale) return;
 
-        // Obtenir les zones depuis l'échelle utilisateur
         const zonesUtilisateur = genererZonesDepuisEchelle();
-
-        ctx.save();
-        ctx.font = 'bold 14px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        // 🆕 BETA 96: Blanc avec 80% opacité
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-
-        // Position horizontale centrée dans le graphique
-        const xCenter = (chartArea.left + chartArea.right) / 2;
-
-        // Obtenir les limites Y visibles
+        const estModeClair = document.body.classList.contains('mode-clair');
         const yMinVisible = yScale.min;
         const yMaxVisible = yScale.max;
 
-        zonesUtilisateur.forEach(zone => {
-            // Vérifier si la zone est au moins partiellement visible
-            if (zone.yMax <= yMinVisible || zone.yMin >= yMaxVisible) {
-                return; // Zone complètement hors de vue
-            }
-
-            // Calculer le centre visible de la zone (clampé aux limites)
-            const zoneMinVisible = Math.max(zone.yMin, yMinVisible);
-            const zoneMaxVisible = Math.min(zone.yMax, yMaxVisible);
-            const yCenterVisible = (zoneMinVisible + zoneMaxVisible) / 2;
-
-            const yPixel = yScale.getPixelForValue(yCenterVisible);
-
-            // Vérifier que la position est dans la zone du graphique
-            if (yPixel >= chartArea.top && yPixel <= chartArea.bottom) {
-                ctx.fillText(zone.label, xCenter, yPixel);
-            }
-        });
-
-        ctx.restore();
-    }
-};
-
-/**
- * Plugin pour le fond en dégradé (version 0-100%)
- * 🆕 BETA 96: Gradient vertical aligné sur les zones IDME
- */
-const pluginGradientFond100 = {
-    id: 'gradientFond100',
-    beforeDraw(chart) {
-        const ctx = chart.ctx;
-        const chartArea = chart.chartArea;
-        const yScale = chart.scales.y;
-
-        if (!chartArea || !yScale) return;
-
-        // Couleurs du gradient alignées sur les zones réelles (échelle 0-100)
-        const couleurs = [
-            { pos: 0, couleur: '#ff8c00' },    // Orange (Incomplet 0-64%)
-            { pos: 65, couleur: '#ffc107' },   // Jaune (En Développement 65-74%)
-            { pos: 75, couleur: '#22c55e' },   // Vert (Maîtrisé 75-84%)
-            { pos: 85, couleur: '#0ea5e9' },   // Bleu (Étendu 85-100%)
-            { pos: 100, couleur: '#0ea5e9' }   // Bleu (continue)
-        ];
-
-        const yMin = yScale.min;
-        const yMax = yScale.max;
-
-        const gradient = ctx.createLinearGradient(
-            chartArea.left, chartArea.bottom,
-            chartArea.left, chartArea.top
-        );
-
-        couleurs.forEach(({ pos, couleur }) => {
-            let gradientPos = (pos - yMin) / (yMax - yMin);
-            gradientPos = Math.max(0, Math.min(1, gradientPos));
-            gradient.addColorStop(gradientPos, couleur);
-        });
-
         ctx.save();
-        ctx.fillStyle = gradient;
-        ctx.fillRect(chartArea.left, chartArea.top,
-            chartArea.right - chartArea.left, chartArea.bottom - chartArea.top);
 
-        // Overlay sombre à 70% — dégradé IDME atténué, courbes lisibles
-        ctx.fillStyle = 'rgba(15, 30, 58, 0.7)';
-        ctx.fillRect(chartArea.left, chartArea.top,
-            chartArea.right - chartArea.left, chartArea.bottom - chartArea.top);
+        // 1. Lignes pointillées aux frontières entre zones
+        ctx.setLineDash([4, 6]);
+        ctx.lineWidth = 1;
+
+        zonesUtilisateur.forEach(zone => {
+            // Dessiner la ligne de la borne inférieure de chaque zone (sauf la première)
+            if (zone.yMin <= yMinVisible || zone.yMin >= yMaxVisible) return;
+            var yPx = yScale.getPixelForValue(zone.yMin);
+            if (yPx < chartArea.top || yPx > chartArea.bottom) return;
+
+            // Extraire la couleur hex depuis borderColor (format rgba ou hex)
+            var couleurLigne = zone.borderColor || (estModeClair ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)');
+            ctx.strokeStyle = couleurLigne;
+            ctx.beginPath();
+            ctx.moveTo(chartArea.left, yPx);
+            ctx.lineTo(chartArea.right, yPx);
+            ctx.stroke();
+        });
+
+        ctx.setLineDash([]);
+
+        // 2. Étiquettes colorées dans la marge droite
+        ctx.font = 'bold 11px Arial';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+
+        var xLabel = chartArea.right + 8;
+
+        zonesUtilisateur.forEach(zone => {
+            if (zone.yMax <= yMinVisible || zone.yMin >= yMaxVisible) return;
+
+            var zoneMinVis = Math.max(zone.yMin, yMinVisible);
+            var zoneMaxVis = Math.min(zone.yMax, yMaxVisible);
+            var yCenterVis = (zoneMinVis + zoneMaxVis) / 2;
+            var yPx = yScale.getPixelForValue(yCenterVis);
+
+            if (yPx < chartArea.top || yPx > chartArea.bottom) return;
+
+            // Utiliser la couleur de la zone (extraire du borderColor)
+            var couleurLabel = zone.borderColor || couleurTexte();
+            ctx.fillStyle = couleurLabel;
+            // Code court (I, D, M, E) ou label tronqué
+            var texte = zone.code || zone.label.charAt(0);
+            ctx.fillText(texte, xLabel, yPx);
+        });
+
         ctx.restore();
     }
 };
 
 /**
- * Plugin pour afficher les étiquettes des zones IDME (version 0-100%)
- * 🆕 BETA 96: Blanc 80%, dessiné AVANT les courbes (en dessous)
+ * Plugin gradient désactivé — fond neutre, les seuils sont indiqués par pluginEtiquettesZones
+ */
+const pluginGradientFond100 = { id: 'gradientFond100' };
+
+/**
+ * ✨ #240: Plugin — lignes IDME + étiquettes (version 0-100%)
  */
 const pluginEtiquettesZones100 = {
     id: 'etiquettesZones100',
@@ -2203,39 +2179,59 @@ const pluginEtiquettesZones100 = {
 
         if (!chartArea || !yScale) return;
 
-        // Zones en échelle 0-100 (alignées sur l'échelle de performance IDME)
-        const zones = [
-            { yMin: 0, yMax: 64, label: 'Incomplet' },
-            { yMin: 65, yMax: 74, label: 'en Développement' },
-            { yMin: 75, yMax: 84, label: 'Maîtrisé' },
-            { yMin: 85, yMax: 103, label: 'Étendu' }
-        ];
-
-        ctx.save();
-        ctx.font = 'bold 14px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        // 🆕 BETA 96: Blanc avec 80% opacité
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-
-        const xCenter = (chartArea.left + chartArea.right) / 2;
+        const estModeClair = document.body.classList.contains('mode-clair');
         const yMinVisible = yScale.min;
         const yMaxVisible = yScale.max;
 
+        // Zones IDME en échelle 0-100
+        const zones = [
+            { yMin: 0,  yMax: 64,  label: 'Insuffisant',       code: 'I', couleur: '#ff8c00' },
+            { yMin: 65, yMax: 74,  label: 'en Développement',  code: 'D', couleur: '#ffc107' },
+            { yMin: 75, yMax: 84,  label: 'Maîtrisé',          code: 'M', couleur: '#22c55e' },
+            { yMin: 85, yMax: 103, label: 'Étendu',            code: 'E', couleur: '#0ea5e9' }
+        ];
+
+        ctx.save();
+
+        // 1. Lignes pointillées
+        ctx.setLineDash([4, 6]);
+        ctx.lineWidth = 1;
+
         zones.forEach(zone => {
-            if (zone.yMax <= yMinVisible || zone.yMin >= yMaxVisible) {
-                return;
-            }
+            if (zone.yMin <= yMinVisible || zone.yMin >= yMaxVisible) return;
+            var yPx = yScale.getPixelForValue(zone.yMin);
+            if (yPx < chartArea.top || yPx > chartArea.bottom) return;
 
-            const zoneMinVisible = Math.max(zone.yMin, yMinVisible);
-            const zoneMaxVisible = Math.min(zone.yMax, yMaxVisible);
-            const yCenterVisible = (zoneMinVisible + zoneMaxVisible) / 2;
+            ctx.strokeStyle = estModeClair
+                ? hexVersRgba(zone.couleur, 0.4)
+                : hexVersRgba(zone.couleur, 0.5);
+            ctx.beginPath();
+            ctx.moveTo(chartArea.left, yPx);
+            ctx.lineTo(chartArea.right, yPx);
+            ctx.stroke();
+        });
 
-            const yPixel = yScale.getPixelForValue(yCenterVisible);
+        ctx.setLineDash([]);
 
-            if (yPixel >= chartArea.top && yPixel <= chartArea.bottom) {
-                ctx.fillText(zone.label, xCenter, yPixel);
-            }
+        // 2. Étiquettes colorées dans la marge droite
+        ctx.font = 'bold 11px Arial';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+
+        var xLabel = chartArea.right + 8;
+
+        zones.forEach(zone => {
+            if (zone.yMax <= yMinVisible || zone.yMin >= yMaxVisible) return;
+
+            var zoneMinVis = Math.max(zone.yMin, yMinVisible);
+            var zoneMaxVis = Math.min(zone.yMax, yMaxVisible);
+            var yCenterVis = (zoneMinVis + zoneMaxVis) / 2;
+            var yPx = yScale.getPixelForValue(yCenterVis);
+
+            if (yPx < chartArea.top || yPx > chartArea.bottom) return;
+
+            ctx.fillStyle = zone.couleur;
+            ctx.fillText(zone.code, xLabel, yPx);
         });
 
         ctx.restore();
@@ -3057,7 +3053,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                             }
                         }
                     }
-                    // 🆕 BETA 96: Annotations remplacées par pluginGradientFond
+
                 },
                 scales: {
                     x: {
@@ -3426,83 +3422,9 @@ function creerAnnotationsZonesIDME() {
 }
 
 /**
- * 🆕 BETA 96: Plugin pour dessiner un vrai dégradé vertical (comme les barres ACPE)
- * Remplace les zones colorées discrètes par un dégradé continu
- * Couleurs: Orange (bas/0%) → Jaune → Vert citron → Vert → Cyan → Bleu (haut/100%)
+ * Plugin gradient désactivé — fond neutre, les seuils sont indiqués par pluginEtiquettesZones
  */
-const pluginGradientFond = {
-    id: 'gradientFond',
-    beforeDraw(chart) {
-        const ctx = chart.ctx;
-        const chartArea = chart.chartArea;
-        const yScale = chart.scales.y;
-
-        if (!chartArea || !yScale) return;
-
-        // Couleurs du gradient (identiques à la barre ACPE)
-        // De bas (0%) à haut (100%) = orange → bleu
-        const couleurs = [
-            { pos: 0.00, couleur: '#ff8c00' },  // Orange (Incomplet 0-64%)
-            { pos: 0.65, couleur: '#ffc107' },  // Jaune (En Développement 65-74%)
-            { pos: 0.75, couleur: '#22c55e' },  // Vert (Maîtrisé 75-84%)
-            { pos: 0.85, couleur: '#0ea5e9' },  // Bleu (Étendu 85-100%)
-            { pos: 1.00, couleur: '#0ea5e9' }   // Bleu (continue)
-        ];
-
-        // Obtenir les limites Y visibles (en valeur 0-1)
-        const yMin = yScale.min;
-        const yMax = yScale.max;
-
-        // Créer le gradient vertical (de bas vers haut)
-        // Note: Canvas Y augmente vers le bas, donc bottom > top en pixels
-        const gradient = ctx.createLinearGradient(
-            chartArea.left,
-            chartArea.bottom,  // Bas du graphique (valeurs basses)
-            chartArea.left,
-            chartArea.top      // Haut du graphique (valeurs hautes)
-        );
-
-        // Ajouter les stops de couleur
-        // Mapper les positions (0-1) sur la plage visible (yMin-yMax)
-        couleurs.forEach(({ pos, couleur }) => {
-            // Position dans le gradient basée sur la plage visible
-            // pos représente la valeur Y (0-1), on doit la mapper sur la plage visible
-            let gradientPos;
-            if (yMax === yMin) {
-                gradientPos = pos;
-            } else {
-                // Calculer où cette valeur Y tombe dans la plage visible
-                gradientPos = (pos - yMin) / (yMax - yMin);
-            }
-
-            // Clamper entre 0 et 1
-            gradientPos = Math.max(0, Math.min(1, gradientPos));
-
-            // Couleur à 100% opacité (comme les barres ACPE)
-            gradient.addColorStop(gradientPos, couleur);
-        });
-
-        // Dessiner le rectangle de fond avec le gradient
-        ctx.save();
-        ctx.fillStyle = gradient;
-        ctx.fillRect(
-            chartArea.left,
-            chartArea.top,
-            chartArea.right - chartArea.left,
-            chartArea.bottom - chartArea.top
-        );
-
-        // Overlay sombre à 70% — dégradé IDME atténué, courbes lisibles
-        ctx.fillStyle = 'rgba(15, 30, 58, 0.7)';
-        ctx.fillRect(
-            chartArea.left,
-            chartArea.top,
-            chartArea.right - chartArea.left,
-            chartArea.bottom - chartArea.top
-        );
-        ctx.restore();
-    }
-};
+const pluginGradientFond = { id: 'gradientFond' };
 
 /* ===============================
    UTILITAIRES
@@ -3691,8 +3613,6 @@ function creerGraphiqueCriteres(canvasId, da) {
         // Calculer les bornes Y dynamiques (échelle 0-100)
         const bornesY = calculerBornesYDynamiques100(datasets);
 
-        // 🆕 BETA 96: Le fond coloré est maintenant géré par pluginGradientFond100
-
         // Configuration du graphique
         const config = {
             type: 'line',
@@ -3704,6 +3624,9 @@ function creerGraphiqueCriteres(canvasId, da) {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                layout: {
+                    padding: { right: 25 }
+                },
                 plugins: {
                     title: {
                         display: true,
