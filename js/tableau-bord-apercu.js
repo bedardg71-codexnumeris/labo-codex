@@ -1026,6 +1026,11 @@ function chargerTableauBordApercu() {
             creerGraphiqueCorrelationsLongitudinales('graphique-correlations-longitudinales');
         }
 
+        // 🆕 Graphique impact des jetons sur P
+        if (typeof creerGraphiqueImpactJetons === 'function') {
+            creerGraphiqueImpactJetons('graphique-impact-jetons');
+        }
+
         // 🆕 BETA 96: Distribution ACPE maintenant intégrée dans les barres de progression
         // (graphique séparé supprimé - mini-courbes Gauss dans chaque barre)
 

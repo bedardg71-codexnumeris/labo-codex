@@ -4139,6 +4139,41 @@
                         </p>
                     </div>
 
+                    <!-- SECTION 6 : Impact des jetons sur P -->
+                    <div class="carte" id="carte-impact-jetons" style="margin-top: 2rem; display: none;">
+                        <h3 class="carte-titre-bleu">
+                            <span data-tooltip="tdb-impact-jetons">Impact des jetons sur la performance</span>
+                            <span class="emoji-container">
+                                <span class="primo-aide" data-target="note-impact-jetons">📍</span>
+                            </span>
+                        </h3>
+                        <div id="note-impact-jetons" class="carte-info-toggle carte-info-note" style="display: none;">
+                            <strong>Lecture du graphique</strong>
+                            <ul style="margin: 8px 0; padding-left: 18px; font-size: 0.85rem; line-height: 1.6;">
+                                <li><strong>P avec jetons</strong> — moyenne de P des étudiants ayant utilisé au moins un jeton de reprise.</li>
+                                <li><strong>P sans jetons</strong> — moyenne de P des étudiants n'ayant jamais utilisé de jeton de reprise.</li>
+                                <li><strong>☐</strong> = séance sans jeton appliqué. <strong>◼</strong> = séance avec au moins un jeton de reprise appliqué.</li>
+                                <li><strong>Courbes individuelles</strong> — active les noms sous le graphique pour voir le parcours P de chaque utilisateur de jeton.</li>
+                            </ul>
+                            <em style="color: var(--gris-moyen); font-size: 0.8rem;">Pointe un ◼ pour voir le détail : production, note originale → note de reprise, delta.</em>
+                        </div>
+                        <div class="u-texte-petit u-mb-8" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                            <label style="display: inline-flex; align-items: center; gap: 4px; color: #FF9800; font-size: 0.78rem;">
+                                <svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="#FF9800" stroke-width="2.5"/></svg> P avec jetons
+                            </label>
+                            <label style="display: inline-flex; align-items: center; gap: 4px; color: #4FC3F7; font-size: 0.78rem;">
+                                <svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="#4FC3F7" stroke-width="2.5"/></svg> P sans jetons
+                            </label>
+                            <span style="color: var(--texte-muted); font-size: 0.72rem; margin-left: 8px;">☐ sans jeton · ◼ avec jeton</span>
+                        </div>
+                        <div class="u-w-100" style="position: relative; height: 400px;">
+                            <canvas id="graphique-impact-jetons"></canvas>
+                        </div>
+                        <p id="impact-jetons-description" class="u-texte-petit u-mt-8" style="color: var(--texte-muted);">
+                            Comparaison de la trajectoire P entre les étudiants utilisant des jetons de reprise et ceux n'en utilisant pas.
+                        </p>
+                    </div>
+
                     <p id="tdb-horodatage" class="text-muted u-text-right" style="font-size: 0.72rem; opacity: 0.6; margin-top: 1.5rem"></p>
 
                 </div>
@@ -15693,6 +15728,60 @@
 
                         <hr class="separateur-section">
 
+                        <h4 class="titre-section-haut">Graphiques du profil individuel</h4>
+
+                        <div class="carte-encadree">
+                            <h5 class="titre-sans-marge-haut">Progression temporelle (A-C-P)</h5>
+                            <p>Courbes d'évolution des indices Assiduité, Complétion et Performance semaine par semaine.</p>
+                            <p><strong>Marqueurs d'événements pédagogiques :</strong></p>
+                            <ul>
+                                <li><strong>◎ Double cercle vide</strong> — séance avec une production due (artefact). Visible sur les 3 courbes.</li>
+                                <li><strong>◉ Cercle plein contrasté</strong> — séance avec un jeton de reprise appliqué. Visible sur la courbe P.</li>
+                                <li><strong>▼ Triangle orange</strong> — intervention RàI de niveau 2 (préventif). Dessiné au-dessus des courbes.</li>
+                                <li><strong>▼ Triangle rouge</strong> — intervention RàI de niveau 3 (intensif). Dessiné au-dessus des courbes.</li>
+                            </ul>
+                            <p class="mt-10"><strong>Interaction :</strong> Survole un point pour voir la date, les valeurs A-C-P, les artefacts dus, les jetons et les interventions. Clique sur une courbe pour la verrouiller.</p>
+                        </div>
+
+                        <div class="carte-encadree">
+                            <h5 class="titre-sans-marge-haut">Développement des habiletés (critères)</h5>
+                            <p>Graphique d'évolution de chaque critère d'évaluation au fil des productions. Nécessite au moins 2 évaluations avec détails par critère.</p>
+                            <p><strong>Marqueurs :</strong></p>
+                            <ul>
+                                <li><strong>◉ Cercle plein</strong> — évaluation avec jeton de reprise (délai ou reprise).</li>
+                                <li><strong>▼ Triangle</strong> — intervention RàI proche de la date d'évaluation.</li>
+                            </ul>
+                            <p class="mt-10">Le graphique s'affiche même sans portfolio configuré, tant que des évaluations avec critères existent.</p>
+                        </div>
+
+                        <hr class="separateur-section">
+
+                        <h4 class="titre-section-haut">Graphiques du tableau de bord</h4>
+
+                        <div class="carte-encadree">
+                            <h5 class="titre-sans-marge-haut">Dynamique des corrélations</h5>
+                            <p>Évolution des corrélations de Pearson (r) entre chaque indice et la Performance (P) au fil des séances.</p>
+                            <ul>
+                                <li><strong>◎ Double cercle vide</strong> — séance avec dépôt de production.</li>
+                                <li><strong>▼ Triangle</strong> — séance avec intervention de groupe (orange N2, rouge N3).</li>
+                                <li><strong>Courbes pointillées</strong> — moyenne P des étudiants ciblés par intervention (groupe figé) et P contrôle (jamais ciblés).</li>
+                            </ul>
+                        </div>
+
+                        <div class="carte-encadree">
+                            <h5 class="titre-sans-marge-haut">Impact des jetons sur la performance</h5>
+                            <p>Compare la trajectoire P des étudiants ayant utilisé des jetons de reprise à ceux n'en ayant pas utilisé.</p>
+                            <ul>
+                                <li><strong>☐ Carré vide</strong> — séance sans jeton appliqué.</li>
+                                <li><strong>◼ Carré plein</strong> — séance avec au moins un jeton de reprise appliqué.</li>
+                                <li><strong>Menu « Élève »</strong> — affiche la courbe individuelle d'un étudiant ayant utilisé un jeton.</li>
+                            </ul>
+                            <p class="mt-10"><strong>Tooltip :</strong> pointe un ◼ pour voir la production concernée, la note originale → note de reprise, et le delta.</p>
+                            <p>Le graphique se masque automatiquement si aucun jeton de reprise n'a été utilisé dans le trimestre.</p>
+                        </div>
+
+                        <hr class="separateur-section">
+
                         <h4 class="titre-section-haut">Checklist d'utilisation hebdomadaire</h4>
 
                         <div class="carte-bleu-border">
@@ -16718,6 +16807,7 @@
     <script src="js/snapshots.js?v=2026030201"></script>
     <script src="js/graphiques-progression.js?v=2026030201"></script>
     <script src="js/correlations-longitudinales.js?v=2026032101"></script>
+        <script src="js/impact-jetons.js?v=2026032101"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=2026032002"></script>
