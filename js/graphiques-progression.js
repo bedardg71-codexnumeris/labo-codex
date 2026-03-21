@@ -99,34 +99,55 @@ function couleurBordurePoint() {
 function appliquerStyleDataset(dataset, etat, couleur) {
     var nbPoints = dataset.data.length;
     var bordure = couleurBordurePoint();
+    var hasEvents = dataset._eventPointStyle && dataset._eventPointRadius;
 
     switch (etat) {
         case 'defaut':
             dataset.borderColor = couleur;
             dataset.borderWidth = STYLE_LIGNE_EPAISSEUR;
-            dataset.pointBackgroundColor = couleur;
             dataset.pointBorderColor = bordure;
             dataset.pointBorderWidth = STYLE_POINT_BORDURE;
-            dataset.pointRadius = STYLE_POINT_RAYON;
             dataset.order = 1;
+            if (hasEvents) {
+                dataset.pointStyle = dataset._eventPointStyle.slice();
+                dataset.pointRadius = dataset._eventPointRadius.slice();
+                dataset.pointBackgroundColor = dataset._eventPointBgColor ? dataset._eventPointBgColor.slice() : couleur;
+                dataset.pointBorderWidth = dataset._eventPointBorderWidth ? dataset._eventPointBorderWidth.slice() : STYLE_POINT_BORDURE;
+            } else {
+                dataset.pointBackgroundColor = couleur;
+                dataset.pointRadius = STYLE_POINT_RAYON;
+            }
             break;
         case 'actif':
             dataset.borderColor = couleur;
             dataset.borderWidth = 3;
-            dataset.pointBackgroundColor = Array(nbPoints).fill(couleur);
             dataset.pointBorderColor = Array(nbPoints).fill(bordure);
             dataset.pointBorderWidth = STYLE_POINT_BORDURE;
-            dataset.pointRadius = Array(nbPoints).fill(6);
             dataset.order = 0;
+            if (hasEvents) {
+                dataset.pointStyle = dataset._eventPointStyle.slice();
+                dataset.pointRadius = dataset._eventPointRadius.map(function(r) { return r > STYLE_POINT_RAYON ? r + 1 : 6; });
+                dataset.pointBackgroundColor = dataset._eventPointBgColor ? dataset._eventPointBgColor.slice() : Array(nbPoints).fill(couleur);
+                dataset.pointBorderWidth = dataset._eventPointBorderWidth ? dataset._eventPointBorderWidth.slice() : STYLE_POINT_BORDURE;
+            } else {
+                dataset.pointBackgroundColor = Array(nbPoints).fill(couleur);
+                dataset.pointRadius = Array(nbPoints).fill(6);
+            }
             break;
         case 'inactif':
             dataset.borderColor = hexVersRgba(couleur, 0.2);
             dataset.borderWidth = 1.5;
-            dataset.pointBackgroundColor = Array(nbPoints).fill(hexVersRgba(couleur, 0.2));
             dataset.pointBorderColor = Array(nbPoints).fill(hexVersRgba(couleur, 0.1));
             dataset.pointBorderWidth = 1;
-            dataset.pointRadius = Array(nbPoints).fill(3);
             dataset.order = 1;
+            if (hasEvents) {
+                dataset.pointStyle = dataset._eventPointStyle.slice();
+                dataset.pointRadius = dataset._eventPointRadius.map(function(r) { return r > STYLE_POINT_RAYON ? Math.max(4, r - 2) : 3; });
+                dataset.pointBackgroundColor = Array(nbPoints).fill(hexVersRgba(couleur, 0.2));
+            } else {
+                dataset.pointBackgroundColor = Array(nbPoints).fill(hexVersRgba(couleur, 0.2));
+                dataset.pointRadius = Array(nbPoints).fill(3);
+            }
             break;
     }
 }
@@ -413,11 +434,9 @@ function genererZonesDepuisEchelle() {
  * Note: color = null signifie utiliser la couleur de base de la courbe
  */
 const STYLES_EVENEMENTS = {
-    normal: { style: 'circle', radius: 5, color: null },
-    jetonDelai: { style: 'star', radius: 9, color: null },      // Étoile (même couleur que P)
-    jetonReprise: { style: 'rectRot', radius: 9, color: null }, // Losange (même couleur que P)
-    raiNiveau2: { style: 'triangle', radius: 9, color: null },  // Triangle (même couleur que A)
-    raiNiveau3: { style: 'rect', radius: 9, color: null }       // Carré (même couleur que A)
+    normal:   { radius: 4 },                              // ● cercle standard
+    artefact: { radius: 5, borderWidth: 3, hollow: true }, // ◎ double cercle vide
+    jeton:    { radius: 7, borderWidth: 3, filled: true }, // ◉ cercle plein + contour contrasté
 };
 
 /**
@@ -549,37 +568,143 @@ function obtenirRaiParDate(da, snapshots) {
  * @returns {Object} - { pointStyle: [], pointRadius: [], pointBackgroundColor: [] }
  */
 function genererStylesPoints(snapshots, evenementsParDate, typeEvenement, couleurBase) {
+    // Legacy — conservée pour compatibilité, préférer genererStylesCombines
     const pointStyle = [];
     const pointRadius = [];
     const pointBackgroundColor = [];
 
-    snapshots.forEach(snapshot => {
-        const dateSeance = snapshot.dateSeance;
-        const evenement = evenementsParDate[dateSeance];
-
-        if (evenement && typeEvenement !== 'none') {
-            let style;
-            if (typeEvenement === 'jeton') {
-                style = STYLES_EVENEMENTS[evenement.type] || STYLES_EVENEMENTS.normal;
-            } else if (typeEvenement === 'rai') {
-                style = evenement.niveau === 3
-                    ? STYLES_EVENEMENTS.raiNiveau3
-                    : STYLES_EVENEMENTS.raiNiveau2;
-            } else {
-                style = STYLES_EVENEMENTS.normal;
-            }
-
-            pointStyle.push(style.style);
-            pointRadius.push(style.radius);
-            pointBackgroundColor.push(couleurBase); // Toujours la couleur de la courbe
-        } else {
-            pointStyle.push(STYLES_EVENEMENTS.normal.style);
-            pointRadius.push(STYLES_EVENEMENTS.normal.radius);
-            pointBackgroundColor.push(couleurBase);
-        }
+    snapshots.forEach(function() {
+        pointStyle.push('circle');
+        pointRadius.push(STYLES_EVENEMENTS.normal.radius);
+        pointBackgroundColor.push(couleurBase);
     });
 
     return { pointStyle, pointRadius, pointBackgroundColor };
+}
+
+/**
+ * Obtient les artefacts (productions) associés à chaque séance
+ * Même logique que correlations-longitudinales.js (lignes 265-322)
+ * @param {Array} snapshots - Snapshots avec dateSeance
+ * @returns {Object} - { dateSeance: [{titre, activite}] }
+ */
+function obtenirArtefactsParDateSeance(snapshots) {
+    const artefactsParDate = {};
+    try {
+        const productions = (typeof obtenirDonneesSelonMode === 'function')
+            ? obtenirDonneesSelonMode('productions') || []
+            : [];
+        const infoCours = db.getSync('infoCours', null);
+        const gcId = infoCours ? (infoCours._groupeCoursId || infoCours.id || null) : null;
+        const cadre = db.getSync(cle('cadreCalendrier'), {});
+        const dateDebutSem = cadre.dateDebut || '';
+
+        const prodFiltrees = productions.filter(function(p) {
+            if (p.facultatif || p.type === 'portfolio') return false;
+            if (typeof obtenirEcheanceEffective === 'function') {
+                var ech = obtenirEcheanceEffective(p, gcId);
+                return ech.assignee && !!ech.date && ech.date >= dateDebutSem;
+            }
+            return !!p.dateEcheance && p.dateEcheance >= dateDebutSem;
+        });
+
+        // Extraire les dates de séance triées
+        const datesSeances = snapshots.map(function(s) { return s.dateSeance; }).filter(Boolean);
+
+        prodFiltrees.forEach(function(prod) {
+            var dateEch = '';
+            if (typeof obtenirEcheanceEffective === 'function') {
+                dateEch = obtenirEcheanceEffective(prod, gcId).date || '';
+            } else {
+                dateEch = prod.dateEcheance || '';
+            }
+            if (!dateEch) return;
+            var dateEchNorm = dateEch.substring(0, 10);
+
+            // Trouver la séance la plus proche (dernière séance dont date <= échéance)
+            var dateSeanceTrouvee = null;
+            for (var i = 0; i < datesSeances.length; i++) {
+                if (datesSeances[i] <= dateEchNorm) {
+                    dateSeanceTrouvee = datesSeances[i];
+                } else {
+                    break;
+                }
+            }
+            // Correspondance exacte prioritaire
+            if (datesSeances.indexOf(dateEchNorm) !== -1) {
+                dateSeanceTrouvee = dateEchNorm;
+            }
+
+            if (dateSeanceTrouvee) {
+                if (!artefactsParDate[dateSeanceTrouvee]) artefactsParDate[dateSeanceTrouvee] = [];
+                artefactsParDate[dateSeanceTrouvee].push({
+                    titre: prod.titre || prod.description || 'Sans titre',
+                    activite: prod.description || ''
+                });
+            }
+        });
+    } catch (e) {
+        console.warn('⚠️ obtenirArtefactsParDateSeance:', e);
+    }
+    return artefactsParDate;
+}
+
+/**
+ * Génère les styles combinés pour les marqueurs d'événements pédagogiques
+ * Fusionne artefacts, jetons et RàI avec priorité : jeton > artefact > normal
+ * (Les interventions RàI sont dessinées par un plugin overlay, pas par le style du point)
+ *
+ * @param {Array} snapshots - Snapshots avec dateSeance
+ * @param {Object} jetonsParDate - { dateSeance: { type, production } }
+ * @param {Object} artefactsParDate - { dateSeance: [{titre, activite}] }
+ * @param {string} couleurBase - Couleur hex de la courbe
+ * @param {Object} options - { includeJetons: bool, includeArtefacts: bool }
+ * @returns {Object} - { pointStyle, pointRadius, pointBackgroundColor, pointBorderWidth, _eventPointBgColor }
+ */
+function genererStylesCombines(snapshots, jetonsParDate, artefactsParDate, couleurBase, options) {
+    var includeJetons = options && options.includeJetons;
+    var includeArtefacts = options && options.includeArtefacts;
+    var estClair = document.body.classList.contains('mode-clair');
+    var contourJeton = estClair ? '#000' : '#fff';
+
+    var pointStyle = [];
+    var pointRadius = [];
+    var pointBackgroundColor = [];
+    var pointBorderWidth = [];
+
+    snapshots.forEach(function(snapshot) {
+        var dateSeance = snapshot.dateSeance;
+        var jeton = includeJetons ? jetonsParDate[dateSeance] : null;
+        var artefacts = includeArtefacts ? artefactsParDate[dateSeance] : null;
+
+        if (jeton) {
+            // ◉ Cercle plein + contour contrasté
+            pointStyle.push('circle');
+            pointRadius.push(STYLES_EVENEMENTS.jeton.radius);
+            pointBackgroundColor.push(couleurBase);
+            pointBorderWidth.push(STYLES_EVENEMENTS.jeton.borderWidth);
+        } else if (artefacts && artefacts.length > 0) {
+            // ◎ Double cercle vide (transparent center + thick border)
+            pointStyle.push('circle');
+            pointRadius.push(STYLES_EVENEMENTS.artefact.radius);
+            pointBackgroundColor.push('transparent');
+            pointBorderWidth.push(STYLES_EVENEMENTS.artefact.borderWidth);
+        } else {
+            // ● Cercle normal
+            pointStyle.push('circle');
+            pointRadius.push(STYLES_EVENEMENTS.normal.radius);
+            pointBackgroundColor.push(couleurBase);
+            pointBorderWidth.push(STYLE_POINT_BORDURE);
+        }
+    });
+
+    return {
+        pointStyle: pointStyle,
+        pointRadius: pointRadius,
+        pointBackgroundColor: pointBackgroundColor,
+        pointBorderWidth: pointBorderWidth,
+        _eventPointBgColor: pointBackgroundColor.slice()
+    };
 }
 
 /* ===============================
@@ -743,14 +868,15 @@ function creerGraphiqueIndividuel(canvasId, da) {
         // Récupérer les événements pédagogiques pour marqueurs visuels
         const jetonsParDate = obtenirJetonsParDate(da, snapshots);
         const raiParDate = obtenirRaiParDate(da, snapshots);
+        const artefactsParDate = obtenirArtefactsParDateSeance(snapshots);
 
-        // Générer les styles de points personnalisés
-        const stylesA = genererStylesPoints(snapshots, raiParDate, 'rai', COULEURS_INDICES.A);
-        const stylesC = genererStylesPoints(snapshots, {}, 'none', COULEURS_INDICES.C);
-        const stylesP = genererStylesPoints(snapshots, jetonsParDate, 'jeton', COULEURS_INDICES.P);
+        // Générer les styles combinés (artefacts sur A et C, jetons+artefacts sur P)
+        const stylesA = genererStylesCombines(snapshots, jetonsParDate, artefactsParDate, COULEURS_INDICES.A, { includeArtefacts: true });
+        const stylesC = genererStylesCombines(snapshots, jetonsParDate, artefactsParDate, COULEURS_INDICES.C, { includeArtefacts: true });
+        const stylesP = genererStylesCombines(snapshots, jetonsParDate, artefactsParDate, COULEURS_INDICES.P, { includeJetons: true, includeArtefacts: true });
 
         // Stocker les infos pour les tooltips enrichis
-        const infosEvenements = { jetonsParDate, raiParDate, snapshots };
+        const infosEvenements = { jetonsParDate, raiParDate, artefactsParDate, snapshots };
 
         // Construire les datasets - style noir/fin par défaut (comme spaghetti)
         const couleursOriginales = {
@@ -760,6 +886,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
         };
 
         // ✨ #240: Courbes colorées par défaut, bordure de point thème-aware
+        const bordure = couleurBordurePoint();
         const datasets = [
             {
                 label: 'Assiduité (A)',
@@ -768,12 +895,16 @@ function creerGraphiqueIndividuel(canvasId, da) {
                 backgroundColor: 'transparent',
                 borderWidth: STYLE_LIGNE_EPAISSEUR,
                 tension: STYLE_LIGNE_TENSION,
-                pointRadius: STYLE_POINT_RAYON,
+                pointRadius: stylesA.pointRadius,
                 pointHoverRadius: STYLE_POINT_RAYON_HOVER,
-                pointStyle: 'circle',
-                pointBackgroundColor: COULEURS_INDICES.A,
-                pointBorderColor: couleurBordurePoint(),
-                pointBorderWidth: STYLE_POINT_BORDURE,
+                pointStyle: stylesA.pointStyle,
+                pointBackgroundColor: stylesA.pointBackgroundColor,
+                pointBorderColor: bordure,
+                pointBorderWidth: stylesA.pointBorderWidth,
+                _eventPointStyle: stylesA.pointStyle,
+                _eventPointRadius: stylesA.pointRadius,
+                _eventPointBgColor: stylesA._eventPointBgColor,
+                _eventPointBorderWidth: stylesA.pointBorderWidth,
                 spanGaps: false
             },
             {
@@ -783,12 +914,16 @@ function creerGraphiqueIndividuel(canvasId, da) {
                 backgroundColor: 'transparent',
                 borderWidth: STYLE_LIGNE_EPAISSEUR,
                 tension: STYLE_LIGNE_TENSION,
-                pointRadius: STYLE_POINT_RAYON,
+                pointRadius: stylesC.pointRadius,
                 pointHoverRadius: STYLE_POINT_RAYON_HOVER,
-                pointStyle: 'circle',
-                pointBackgroundColor: COULEURS_INDICES.C,
-                pointBorderColor: couleurBordurePoint(),
-                pointBorderWidth: STYLE_POINT_BORDURE,
+                pointStyle: stylesC.pointStyle,
+                pointBackgroundColor: stylesC.pointBackgroundColor,
+                pointBorderColor: bordure,
+                pointBorderWidth: stylesC.pointBorderWidth,
+                _eventPointStyle: stylesC.pointStyle,
+                _eventPointRadius: stylesC.pointRadius,
+                _eventPointBgColor: stylesC._eventPointBgColor,
+                _eventPointBorderWidth: stylesC.pointBorderWidth,
                 spanGaps: false
             },
             {
@@ -798,12 +933,16 @@ function creerGraphiqueIndividuel(canvasId, da) {
                 backgroundColor: 'transparent',
                 borderWidth: STYLE_LIGNE_EPAISSEUR,
                 tension: STYLE_LIGNE_TENSION,
-                pointRadius: STYLE_POINT_RAYON,
+                pointRadius: stylesP.pointRadius,
                 pointHoverRadius: STYLE_POINT_RAYON_HOVER,
-                pointStyle: 'circle',
-                pointBackgroundColor: COULEURS_INDICES.P,
-                pointBorderColor: couleurBordurePoint(),
-                pointBorderWidth: STYLE_POINT_BORDURE,
+                pointStyle: stylesP.pointStyle,
+                pointBackgroundColor: stylesP.pointBackgroundColor,
+                pointBorderColor: bordure,
+                pointBorderWidth: stylesP.pointBorderWidth,
+                _eventPointStyle: stylesP.pointStyle,
+                _eventPointRadius: stylesP.pointRadius,
+                _eventPointBgColor: stylesP._eventPointBgColor,
+                _eventPointBorderWidth: stylesP.pointBorderWidth,
                 spanGaps: false
             }
         ];
@@ -881,6 +1020,52 @@ function creerGraphiqueIndividuel(canvasId, da) {
             }
         };
 
+        // Plugin : triangles d'intervention RàI au-dessus des points
+        const pluginInterventionsIndiv = {
+            id: 'interventionMarkersIndiv',
+            afterDatasetsDraw: function(chart) {
+                if (!infosEvenements.raiParDate) return;
+                var xScale = chart.scales.x;
+                var yScale = chart.scales.y;
+                var ctx2 = chart.ctx;
+                var couleurN2 = '#FFA726'; // Orange — niveau 2
+                var couleurN3 = '#EF5350'; // Rouge — niveau 3
+
+                infosEvenements.snapshots.forEach(function(snapshot, idx) {
+                    var dateSeance = snapshot.dateSeance;
+                    var rai = infosEvenements.raiParDate[dateSeance];
+                    if (!rai) return;
+
+                    var x = xScale.getPixelForValue(idx);
+
+                    // Trouver le point le plus haut parmi les datasets visibles
+                    var yMin = yScale.bottom;
+                    chart.data.datasets.forEach(function(ds, di) {
+                        var meta = chart.getDatasetMeta(di);
+                        if (meta.hidden) return;
+                        var val = ds.data[idx];
+                        if (val == null) return;
+                        var yPx = yScale.getPixelForValue(val);
+                        if (yPx < yMin) yMin = yPx;
+                    });
+
+                    // Triangle pointant vers le bas, au-dessus du point le plus haut
+                    var triY = yMin - 12;
+                    var triSize = 5;
+                    ctx2.save();
+                    ctx2.beginPath();
+                    ctx2.moveTo(x - triSize, triY - triSize);
+                    ctx2.lineTo(x + triSize, triY - triSize);
+                    ctx2.lineTo(x, triY + triSize);
+                    ctx2.closePath();
+                    ctx2.fillStyle = rai.niveau >= 3 ? couleurN3 : couleurN2;
+                    ctx2.globalAlpha = 0.8;
+                    ctx2.fill();
+                    ctx2.restore();
+                });
+            }
+        };
+
         // Calculer les bornes Y dynamiques
         const bornesY = calculerBornesYDynamiques(datasets);
 
@@ -900,7 +1085,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
         const config = {
             type: 'line',
             // 🆕 BETA 96: Utiliser le plugin gradient au lieu des annotations
-            plugins: [pluginGradientFond, pluginEtiquettesZones, pluginNomIndiceSurvol],
+            plugins: [pluginGradientFond, pluginEtiquettesZones, pluginNomIndiceSurvol, pluginInterventionsIndiv],
             data: {
                 labels: labels,
                 datasets: datasets
@@ -958,6 +1143,18 @@ function creerGraphiqueIndividuel(canvasId, da) {
                                 const dateSeance = snapshot.dateSeance;
                                 const lignes = [];
 
+                                // Artefacts (productions)
+                                const arts = infosEvenements.artefactsParDate[dateSeance];
+                                if (arts && arts.length > 0) {
+                                    lignes.push('');
+                                    lignes.push('▪ Productions :');
+                                    arts.forEach(function(a) {
+                                        var ligne = '  ' + a.titre;
+                                        if (a.activite && a.activite !== a.titre) ligne += ' — ' + a.activite;
+                                        lignes.push(ligne);
+                                    });
+                                }
+
                                 const jeton = infosEvenements.jetonsParDate[dateSeance];
                                 if (jeton) {
                                     const typeLabel = jeton.type === 'jetonDelai' ? '⭐ Jeton délai' : '◆ Jeton reprise';
@@ -967,7 +1164,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
 
                                 const rai = infosEvenements.raiParDate[dateSeance];
                                 if (rai) {
-                                    const niveauLabel = rai.niveau === 3 ? '■ RàI Niveau 3' : '▲ RàI Niveau 2';
+                                    const niveauLabel = rai.niveau === 3 ? '▼ RàI Niveau 3' : '▼ RàI Niveau 2';
                                     lignes.push('');
                                     lignes.push(`${niveauLabel}: ${rai.titre}`);
                                 }
@@ -3520,7 +3717,8 @@ function obtenirDonneesCriteres(da) {
         return {
             labels,
             criteres: donneesCriteres,
-            criteresUniques
+            criteresUniques,
+            evaluations: evaluationsEtudiant
         };
     } catch (error) {
         console.error('[obtenirDonneesCriteres] Erreur:', error);
@@ -3557,15 +3755,76 @@ function creerGraphiqueCriteres(canvasId, da) {
             '#607D8B'   // Bleu-gris
         ];
 
+        // Détecter événements par index d'évaluation (jetons et interventions)
+        const evalsTriees = donnees.evaluations;
+        const jetonsParIndex = {};
+        const interventionsParIndex = {};
+        var estClairCrit = document.body.classList.contains('mode-clair');
+
+        evalsTriees.forEach(function(ev, idx) {
+            // Jetons
+            if (ev.jetonDelaiApplique || ev.jetonRepriseApplique || ev.repriseDeId) {
+                var typeJeton = ev.jetonDelaiApplique ? 'jetonDelai' : 'jetonReprise';
+                jetonsParIndex[idx] = { type: typeJeton };
+            }
+            // Interventions RàI proches de la date d'évaluation
+            if (typeof obtenirInterventionsEtudiant === 'function') {
+                try {
+                    var interventions = obtenirInterventionsEtudiant(da);
+                    var dateEval = ev.dateEvaluation || '';
+                    if (dateEval) {
+                        var niveauMax = 0;
+                        var titreIntervention = '';
+                        interventions.forEach(function(inter) {
+                            if (inter.statut !== 'completee') return;
+                            var dateInter = inter.date || '';
+                            // Intervention dans les 7 jours avant l'évaluation
+                            if (dateInter && dateInter <= dateEval && dateInter >= dateEval.substring(0, 8) + '01') {
+                                if (inter.niveauRai > niveauMax) {
+                                    niveauMax = inter.niveauRai;
+                                    titreIntervention = inter.titre || 'Intervention N' + inter.niveauRai;
+                                }
+                            }
+                        });
+                        if (niveauMax >= 2) {
+                            interventionsParIndex[idx] = { niveau: niveauMax, titre: titreIntervention };
+                        }
+                    }
+                } catch (e) { /* silencieux */ }
+            }
+        });
+
+        // Générer les styles de points partagés (jetons uniquement — interventions via plugin)
+        var nbEvals = evalsTriees.length;
+        var eventPointStyle = [];
+        var eventPointRadius = [];
+        var eventPointBorderWidth = [];
+
+        for (var ei = 0; ei < nbEvals; ei++) {
+            if (jetonsParIndex[ei]) {
+                eventPointStyle.push('circle');
+                eventPointRadius.push(STYLES_EVENEMENTS.jeton.radius);
+                eventPointBorderWidth.push(STYLES_EVENEMENTS.jeton.borderWidth);
+            } else {
+                eventPointStyle.push('circle');
+                eventPointRadius.push(STYLES_EVENEMENTS.normal.radius);
+                eventPointBorderWidth.push(STYLE_POINT_BORDURE);
+            }
+        }
+
         // Stocker les couleurs originales pour le survol
         const couleursOriginales = {};
 
-        // Créer les datasets - courbes noires par défaut (comme spaghetti)
+        // Créer les datasets avec marqueurs d'événements
         const datasets = donnees.criteresUniques.map((critere, index) => {
             const couleur = COULEURS_CRITERES[index % COULEURS_CRITERES.length];
             couleursOriginales[critere] = couleur;
 
-            // ✨ #240: Courbe colorée par défaut
+            // Couleur de fond par point (transparent pour jeton → contour contrasté)
+            var bgColors = eventPointStyle.map(function(s, i) {
+                return jetonsParIndex[i] ? couleur : couleur;
+            });
+
             return {
                 label: critere,
                 data: donnees.criteres[critere],
@@ -3573,12 +3832,16 @@ function creerGraphiqueCriteres(canvasId, da) {
                 backgroundColor: 'transparent',
                 borderWidth: STYLE_LIGNE_EPAISSEUR,
                 tension: STYLE_LIGNE_TENSION,
-                pointRadius: STYLE_POINT_RAYON,
+                pointRadius: eventPointRadius.slice(),
                 pointHoverRadius: STYLE_POINT_RAYON_HOVER,
-                pointStyle: 'circle',
-                pointBackgroundColor: couleur,
+                pointStyle: eventPointStyle.slice(),
+                pointBackgroundColor: bgColors,
                 pointBorderColor: couleurBordurePoint(),
-                pointBorderWidth: STYLE_POINT_BORDURE,
+                pointBorderWidth: eventPointBorderWidth.slice(),
+                _eventPointStyle: eventPointStyle.slice(),
+                _eventPointRadius: eventPointRadius.slice(),
+                _eventPointBgColor: bgColors.slice(),
+                _eventPointBorderWidth: eventPointBorderWidth.slice(),
                 spanGaps: false
             };
         });
@@ -3586,6 +3849,48 @@ function creerGraphiqueCriteres(canvasId, da) {
         // Réinitialiser les variables globales pour le plugin
         dernierDatasetSurvoleCriteresGlobal = -1;
         datasetVerrouilleCriteresGlobal = -1;
+
+        // Plugin : triangles d'intervention RàI sur le graphique critères
+        const pluginInterventionsCriteres = {
+            id: 'interventionMarkersCriteres',
+            afterDatasetsDraw: function(chart) {
+                var xScale = chart.scales.x;
+                var yScale = chart.scales.y;
+                var ctx2 = chart.ctx;
+                var couleurN2 = '#FFA726';
+                var couleurN3 = '#EF5350';
+
+                for (var idxStr in interventionsParIndex) {
+                    var idx = Number(idxStr);
+                    var inter = interventionsParIndex[idxStr];
+                    var x = xScale.getPixelForValue(idx);
+
+                    // Trouver le point le plus haut parmi les datasets visibles
+                    var yMin = yScale.bottom;
+                    chart.data.datasets.forEach(function(ds, di) {
+                        var meta = chart.getDatasetMeta(di);
+                        if (meta.hidden) return;
+                        var val = ds.data[idx];
+                        if (val == null) return;
+                        var yPx = yScale.getPixelForValue(val);
+                        if (yPx < yMin) yMin = yPx;
+                    });
+
+                    var triY = yMin - 12;
+                    var triSize = 5;
+                    ctx2.save();
+                    ctx2.beginPath();
+                    ctx2.moveTo(x - triSize, triY - triSize);
+                    ctx2.lineTo(x + triSize, triY - triSize);
+                    ctx2.lineTo(x, triY + triSize);
+                    ctx2.closePath();
+                    ctx2.fillStyle = inter.niveau >= 3 ? couleurN3 : couleurN2;
+                    ctx2.globalAlpha = 0.8;
+                    ctx2.fill();
+                    ctx2.restore();
+                }
+            }
+        };
 
         // Obtenir le canvas
         const canvas = document.getElementById(canvasId);
@@ -3605,7 +3910,7 @@ function creerGraphiqueCriteres(canvasId, da) {
         // Configuration du graphique
         const config = {
             type: 'line',
-            plugins: [pluginGradientFond100, pluginEtiquettesZones100, pluginNomCritereSurvol],
+            plugins: [pluginGradientFond100, pluginEtiquettesZones100, pluginNomCritereSurvol, pluginInterventionsCriteres],
             data: {
                 labels: donnees.labels,
                 datasets: datasets
@@ -3638,6 +3943,27 @@ function creerGraphiqueCriteres(canvasId, da) {
                                 const critere = context.dataset.label;
                                 const valeur = context.parsed.y;
                                 return valeur !== null ? `${critere}: ${valeur.toFixed(0)}%` : `${critere}: —`;
+                            },
+                            afterBody: function(tooltipItems) {
+                                if (!tooltipItems.length) return [];
+                                var idx = tooltipItems[0].dataIndex;
+                                var lignes = [];
+
+                                var jeton = jetonsParIndex[idx];
+                                if (jeton) {
+                                    var typeLabel = jeton.type === 'jetonDelai' ? '⭐ Jeton délai' : '◆ Jeton reprise';
+                                    lignes.push('');
+                                    lignes.push(typeLabel);
+                                }
+
+                                var inter = interventionsParIndex[idx];
+                                if (inter) {
+                                    var niveauLabel = inter.niveau >= 3 ? '▼ RàI Niveau 3' : '▼ RàI Niveau 2';
+                                    lignes.push('');
+                                    lignes.push(niveauLabel + ': ' + inter.titre);
+                                }
+
+                                return lignes;
                             }
                         }
                     }

@@ -381,19 +381,31 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
             : 'rgba(106, 172, 184, 0.2)';
         var couleurTexte = estModeClair ? '#333' : '#b0c4d0';
 
-        // Construire le tableau de pointStyles :
-        // carré = séance avec artefact, cercle = séance normale
+        // Construire les tableaux de styles par point :
+        // ◎ double cercle vide = séance avec artefact, ● cercle plein = séance normale
         var nbPoints = donnees.labels.length;
         var pointStyles = [];
         var pointRadii = [];
+        var pointBorderWidths = [];
+        var isArtefact = []; // pour générer bgColor par dataset
         for (var ps = 0; ps < nbPoints; ps++) {
             if (donnees.artefactsParSeance && donnees.artefactsParSeance[ps]) {
-                pointStyles.push('rect');
+                pointStyles.push('circle');
                 pointRadii.push(5);
+                pointBorderWidths.push(3);
+                isArtefact.push(true);
             } else {
                 pointStyles.push('circle');
                 pointRadii.push(4);
+                pointBorderWidths.push(2);
+                isArtefact.push(false);
             }
+        }
+
+        // Helper : générer un tableau de bgColor par point (transparent si artefact)
+        var bordurePoint = estModeClair ? '#fff' : '#1a2a3a';
+        function bgParPoint(couleur) {
+            return isArtefact.map(function(a) { return a ? 'transparent' : couleur; });
         }
 
         // Datasets
@@ -408,9 +420,9 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                 pointStyle: pointStyles,
                 pointRadius: pointRadii,
                 pointHoverRadius: 7,
-                pointBackgroundColor: COULEURS_CORR.AP,
-                pointBorderColor: estModeClair ? '#fff' : '#1a2a3a',
-                pointBorderWidth: 2,
+                pointBackgroundColor: bgParPoint(COULEURS_CORR.AP),
+                pointBorderColor: bordurePoint,
+                pointBorderWidth: pointBorderWidths,
                 spanGaps: false
             },
             {
@@ -423,9 +435,9 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                 pointStyle: pointStyles,
                 pointRadius: pointRadii,
                 pointHoverRadius: 7,
-                pointBackgroundColor: COULEURS_CORR.CP,
-                pointBorderColor: estModeClair ? '#fff' : '#1a2a3a',
-                pointBorderWidth: 2,
+                pointBackgroundColor: bgParPoint(COULEURS_CORR.CP),
+                pointBorderColor: bordurePoint,
+                pointBorderWidth: pointBorderWidths,
                 spanGaps: false
             },
             {
@@ -438,9 +450,9 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                 pointStyle: pointStyles,
                 pointRadius: pointRadii,
                 pointHoverRadius: 7,
-                pointBackgroundColor: COULEURS_CORR.EP,
-                pointBorderColor: estModeClair ? '#fff' : '#1a2a3a',
-                pointBorderWidth: 2,
+                pointBackgroundColor: bgParPoint(COULEURS_CORR.EP),
+                pointBorderColor: bordurePoint,
+                pointBorderWidth: pointBorderWidths,
                 spanGaps: false
             },
         ];
@@ -464,9 +476,9 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                 pointStyle: pointStyles,
                 pointRadius: pointRadii,
                 pointHoverRadius: 6,
-                pointBackgroundColor: couleurInterv,
-                pointBorderColor: estModeClair ? '#fff' : '#1a2a3a',
-                pointBorderWidth: 1.5,
+                pointBackgroundColor: bgParPoint(couleurInterv),
+                pointBorderColor: bordurePoint,
+                pointBorderWidth: pointBorderWidths,
                 spanGaps: true,
                 yAxisID: 'yPct',
                 _intervIndex: ci
@@ -494,7 +506,8 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                 pointStyle: pointStyles,
                 pointRadius: pointRadii,
                 pointHoverRadius: 4,
-                pointBackgroundColor: COULEURS_MOY[indice],
+                pointBackgroundColor: bgParPoint(COULEURS_MOY[indice]),
+                pointBorderWidth: pointBorderWidths,
                 spanGaps: true,
                 yAxisID: 'yPct',
                 hidden: true
