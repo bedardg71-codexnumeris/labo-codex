@@ -365,18 +365,27 @@ function mettreAJourContextesSections(nbEtudiants) {
         <span class="contexte-badge">${badgeTexte}</span>
     `;
 
-    // Mettre à jour les 4 sections
+    // Mettre à jour les 6 sections
     const idsContexte = [
         'contexte-indicateurs-acpe',
         'contexte-indicateurs-apprentissage',
         'contexte-evolution-temporelle',
-        'contexte-trajectoire-apprentissage'
+        'contexte-trajectoire-apprentissage',
+        'contexte-correlations',
+        'contexte-impact-jetons'
     ];
+
+    // Vérifier la préférence d'affichage
+    let afficherContexte = true;
+    try {
+        const prefs = db.getSync('preferencesAffichage') || {};
+        afficherContexte = prefs.afficherContexteGraphiques !== false;
+    } catch (e) { /* défaut: true */ }
 
     idsContexte.forEach(id => {
         const elem = document.getElementById(id);
         if (elem) {
-            elem.innerHTML = contexteHTML;
+            elem.innerHTML = afficherContexte ? contexteHTML : '';
         }
     });
 

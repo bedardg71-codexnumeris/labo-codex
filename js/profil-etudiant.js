@@ -4153,6 +4153,59 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
  * @param {string} da - Numéro DA de l'étudiant
  * @returns {string} HTML de la section
  */
+/**
+ * Génère le HTML du bandeau contextuel (trimestre | cours) pour les graphiques profil
+ * Note : pas d'effectif ici — c'est un profil individuel, pas un groupe
+ * @returns {string} HTML du bandeau ou chaîne vide si préférence désactivée
+ */
+function genererBandeauContexteProfil() {
+    // Vérifier la préférence
+    let afficher = true;
+    try {
+        const prefs = db.getSync('preferencesAffichage') || {};
+        afficher = prefs.afficherContexteGraphiques !== false;
+    } catch (e) { /* défaut: true */ }
+    if (!afficher) return '';
+
+    // Trimestre
+    let nomTrimestre = '';
+    if (typeof obtenirTrimestreActif === 'function') {
+        const trimestre = obtenirTrimestreActif();
+        if (trimestre) {
+            const sessionLower = trimestre.session?.toLowerCase();
+            if (sessionLower === 'd') {
+                nomTrimestre = 'Démo';
+            } else {
+                const sessionNom = { 'hiver': 'Hiver', 'automne': 'Automne', 'ete': 'Été', 'h': 'Hiver', 'a': 'Automne', 'e': 'Été' }[sessionLower] || trimestre.session || '';
+                nomTrimestre = `${sessionNom} ${trimestre.annee || ''}`.trim();
+            }
+        }
+    }
+
+    // Cours
+    const infoCours = db.getSync('infoCours', null);
+    let nomCours = '';
+    if (infoCours) {
+        const sigle = infoCours.codeCours || infoCours.sigle || infoCours.code || '';
+        const groupe = infoCours.groupe || '';
+        if (sigle && groupe) {
+            const modeActif = db.getSync('modeApplication', 'normal');
+            const groupeAffiche = (modeActif === 'anonymisation' && typeof anonymiserGroupe === 'function')
+                ? anonymiserGroupe(groupe)
+                : `gr. ${groupe}`;
+            nomCours = `${sigle} ${groupeAffiche}`;
+        } else if (sigle) {
+            nomCours = sigle;
+        }
+    }
+
+    return `<span style="margin-left: auto; display: flex; gap: 8px; align-items: center; font-size: 0.78rem; color: var(--texte-muted);">
+        <span>${nomTrimestre || '—'}</span>
+        <span>|</span>
+        <span>${nomCours || '—'}</span>
+    </span>`;
+}
+
 function genererSectionProgression(da) {
     // Vérifier si le module de captures existe
     if (typeof obtenirSnapshotsEtudiant !== 'function') {
@@ -4234,31 +4287,30 @@ function genererSectionProgression(da) {
     const html = `
         <div class="profil-zone-moyenne-bleu">
             <!-- Légende des indices -->
-            <div style="background: #162c36; padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+            <div style="background: #162c36; padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                 <span style="font-weight: 600; color: var(--gris-fonce);">Indices :</span>
-                <span style="display: flex; align-items: center; gap: 6px;">
-                    <span style="width: 12px; height: 12px; background: var(--bleu-clair); border-radius: 50%;"></span>
-                    <span style="color: var(--bleu-clair); font-weight: 500;">Assiduité (A)</span>
-                </span>
-                <span style="display: flex; align-items: center; gap: 6px;">
-                    <span style="width: 12px; height: 12px; background: #FF6B35; border-radius: 50%;"></span>
-                    <span style="color: #FF6B35; font-weight: 500;">Complétion (C)</span>
-                </span>
-                <span style="display: flex; align-items: center; gap: 6px;">
-                    <span style="width: 12px; height: 12px; background: var(--vert-succes); border-radius: 50%;"></span>
-                    <span style="color: var(--vert-succes); font-weight: 500;">Performance (P)</span>
-                </span>
+                <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #1976D2; font-size: 0.78rem;">
+                    <input type="checkbox" checked onchange="toggleIndiceIndiv('Assiduité (A)', this.checked, '${da}')">
+                    <span style="width: 10px; height: 10px; background: #1976D2; border-radius: 50%; display: inline-block;"></span>
+                    Assiduité (A)
+                </label>
+                <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #FF6B35; font-size: 0.78rem;">
+                    <input type="checkbox" checked onchange="toggleIndiceIndiv('Complétion (C)', this.checked, '${da}')">
+                    <span style="width: 10px; height: 10px; background: #FF6B35; border-radius: 50%; display: inline-block;"></span>
+                    Complétion (C)
+                </label>
+                <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #4CAF50; font-size: 0.78rem;">
+                    <input type="checkbox" checked onchange="toggleIndiceIndiv('Performance (P)', this.checked, '${da}')">
+                    <span style="width: 10px; height: 10px; background: #4CAF50; border-radius: 50%; display: inline-block;"></span>
+                    Performance (P)
+                </label>
                 ${checkboxSansReprises}
-                <span style="color: var(--gris-clair); font-size: 0.85rem; margin-left: auto;">Survole une courbe pour l'identifier</span>
+                ${genererBandeauContexteProfil()}
             </div>
 
             <!-- Canvas pour le graphique Chart.js -->
             <div style="background: #162c36; padding: 20px; border-radius: 6px; height: 450px;">
                 <canvas id="${canvasId}"></canvas>
-            </div>
-
-            <div style="background: #162c36; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: var(--gris-moyen);">
-                <strong>Zones colorées :</strong> ${texteZones}
             </div>
         </div>
     `;
@@ -4316,22 +4368,24 @@ function genererSectionPerformance(da) {
                 '#4CAF50', '#FF9800', '#795548', '#607D8B'
             ];
 
-            // Générer la légende HTML
+            // Générer la légende HTML avec checkboxes
             const legendeHTML = criteresUniques.map((critere, index) => {
                 const couleur = COULEURS_CRITERES[index % COULEURS_CRITERES.length];
-                return `<span style="display: flex; align-items: center; gap: 6px;">
-                    <span style="width: 12px; height: 12px; background: ${couleur}; border-radius: 50%;"></span>
-                    <span style="color: ${couleur}; font-weight: 500;">${critere}</span>
-                </span>`;
+                const critereEscaped = critere.replace(/'/g, "\\'");
+                return `<label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: ${couleur}; font-size: 0.78rem;">
+                    <input type="checkbox" checked onchange="toggleCritereIndiv('${critereEscaped}', this.checked, '${da}')">
+                    <span style="width: 10px; height: 10px; background: ${couleur}; border-radius: 50%; display: inline-block;"></span>
+                    ${critere}
+                </label>`;
             }).join('');
 
             graphiqueCriteres = `
                 <div class="profil-zone-moyenne-bleu" style="margin-bottom: 20px;">
                     <!-- Légende des critères -->
-                    <div style="background: #162c36; padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                    <div style="background: #162c36; padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                         <span style="font-weight: 600; color: var(--gris-fonce);">Critères :</span>
                         ${legendeHTML}
-                        <span style="color: var(--gris-clair); font-size: 0.85rem; margin-left: auto;">Survole une courbe pour l'identifier</span>
+                        ${genererBandeauContexteProfil()}
                     </div>
 
                     <!-- Canvas pour le graphique Chart.js -->
@@ -6674,16 +6728,41 @@ function genererSectionPerformance(da) {
 
         if (evaluationsAvecCriteres.length > 0) {
             console.log(`[DEBUG Graphique Critères] Première évaluation critères:`, evaluationsAvecCriteres[0].criteres);
+
+            // Extraire les critères uniques pour la légende
+            const criteresSet2 = new Set();
+            evaluationsAvecCriteres.forEach(e => {
+                e.criteres.forEach(c => {
+                    if (c.critereNom) criteresSet2.add(c.critereNom);
+                });
+            });
+            const criteresUniques2 = Array.from(criteresSet2).sort();
+            const COULEURS_CRITERES_2 = [
+                '#E91E63', '#9C27B0', '#3F51B5', '#00BCD4',
+                '#4CAF50', '#FF9800', '#795548', '#607D8B'
+            ];
+            const legendeHTML2 = criteresUniques2.map((critere, index) => {
+                const couleur = COULEURS_CRITERES_2[index % COULEURS_CRITERES_2.length];
+                const critereEscaped = critere.replace(/'/g, "\\'");
+                return `<label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: ${couleur}; font-size: 0.78rem;">
+                    <input type="checkbox" checked onchange="toggleCritereIndiv('${critereEscaped}', this.checked, '${da}')">
+                    <span style="width: 10px; height: 10px; background: ${couleur}; border-radius: 50%; display: inline-block;"></span>
+                    ${critere}
+                </label>`;
+            }).join('');
+
             graphiqueCriteres = `
                 <div class="profil-zone-moyenne-bleu" style="margin-bottom: 20px;">
+                    <!-- Légende des critères -->
+                    <div style="background: #162c36; padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                        <span style="font-weight: 600; color: var(--gris-fonce);">Critères :</span>
+                        ${legendeHTML2}
+                        ${genererBandeauContexteProfil()}
+                    </div>
+
                     <!-- Canvas pour le graphique Chart.js -->
                     <div style="background: #162c36; padding: 20px; border-radius: 6px; height: 450px;">
                         <canvas id="${canvasIdCriteres}"></canvas>
-                    </div>
-
-                    <div style="background: #162c36; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: var(--gris-moyen);">
-                        <strong>Conseil :</strong> Clique sur un critère dans la légende pour le masquer ou l'afficher.
-                        Survole les points pour voir les détails.
                     </div>
                 </div>
             `;

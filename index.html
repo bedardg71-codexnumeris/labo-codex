@@ -4076,11 +4076,16 @@
 
                     <!-- SECTION 5: DYNAMIQUE DES CORRÉLATIONS -->
                     <div class="carte" id="carte-correlations-longitudinales" style="margin-top: 2rem;">
-                        <h3 class="carte-titre-bleu">
-                            <span>Dynamique des corrélations</span>
-                            <span class="emoji-container">
-                                <span class="primo-aide" data-target="note-corr-long">📍</span>
-                            </span>
+                        <h3 class="carte-titre-bleu u-flex-between u-flex-wrap" style="gap: 0.5rem">
+                            <div class="u-align-center" style="display: flex; gap: 0.5rem">
+                                <span>Dynamique des corrélations</span>
+                                <span class="emoji-container">
+                                    <span class="primo-aide" data-target="note-corr-long">📍</span>
+                                </span>
+                            </div>
+                            <div id="contexte-correlations" class="carte-contexte-ligne u-align-center" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; gap: 0.75rem">
+                                <!-- Trimestre | Cours | Badge - rempli par JS -->
+                            </div>
                         </h3>
                         <div id="note-corr-long" class="carte-info-toggle carte-info-note" style="display: none;">
                             <strong>Lecture du graphique</strong>
@@ -4141,11 +4146,16 @@
 
                     <!-- SECTION 6 : Impact des jetons sur P -->
                     <div class="carte" id="carte-impact-jetons" style="margin-top: 2rem; display: none;">
-                        <h3 class="carte-titre-bleu">
-                            <span data-tooltip="tdb-impact-jetons">Impact des jetons sur la performance</span>
-                            <span class="emoji-container">
-                                <span class="primo-aide" data-target="note-impact-jetons">📍</span>
-                            </span>
+                        <h3 class="carte-titre-bleu u-flex-between u-flex-wrap" style="gap: 0.5rem">
+                            <div class="u-align-center" style="display: flex; gap: 0.5rem">
+                                <span data-tooltip="tdb-impact-jetons">Impact des jetons sur la performance</span>
+                                <span class="emoji-container">
+                                    <span class="primo-aide" data-target="note-impact-jetons">📍</span>
+                                </span>
+                            </div>
+                            <div id="contexte-impact-jetons" class="carte-contexte-ligne u-align-center" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; gap: 0.75rem">
+                                <!-- Trimestre | Cours | Badge - rempli par JS -->
+                            </div>
                         </h3>
                         <div id="note-impact-jetons" class="carte-info-toggle carte-info-note" style="display: none;">
                             <strong>Lecture du graphique</strong>
@@ -11685,6 +11695,17 @@
                             </small>
                         </div>
 
+                        <!-- Métadonnées contextuelles -->
+                        <div class="form-group u-mb-15">
+                            <label class="u-align-center" style="cursor: pointer; display: flex">
+                                <input type="checkbox" id="v2-pref-contexte-graphiques" checked onchange="sauvegarderPreferencesV2()">
+                                <strong style="margin-left: 8px;">Métadonnées contextuelles (graphiques)</strong>
+                            </label>
+                            <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
+                                Afficher le trimestre, le cours et l'effectif dans les en-têtes des graphiques. Utile pour les captures d'écran.
+                            </small>
+                        </div>
+
                         <!-- Mode clair/sombre -->
                         <div class="form-group u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
                             <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-theme">
@@ -16537,6 +16558,98 @@
                         </div>
                     </div>
 
+                    <!-- Carte: Codex -->
+                    <div class="carte accordeon" id="accordeon-aide-codex">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Le Codex — Espace de travail portable
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Bouton « Codex » dans l'en-tête de l'application</p>
+
+                            <p>Le <strong>Codex</strong> est un espace de travail portable qui rassemble toutes tes données (étudiants, présences, évaluations, fichiers de travaux) dans un fichier ZIP transportable sur clé USB. Il te permet de travailler sur plusieurs appareils (MacBook, iPad, ordinateur du bureau) sans avoir besoin d'un service cloud.</p>
+
+                            <div class="carte-gradient-bleu">
+                                <p class="titre-11-bold-bleu-mb15">Qu'est-ce qu'un Codex ?</p>
+                                <p>Un codex est un fichier <code>.codex.zip</code> qui contient :</p>
+                                <ul class="lh-2">
+                                    <li><strong>Toutes tes données</strong> : étudiants, présences, évaluations, indices A-C-P, configurations</li>
+                                    <li><strong>Les fichiers de travaux</strong> : les PDF et documents associés aux évaluations</li>
+                                    <li><strong>Un historique des versions</strong> : les 10 dernières sauvegardes (TimeMachine), pour revenir en arrière si nécessaire</li>
+                                    <li><strong>Un manifeste</strong> : métadonnées du codex (date, appareil, version de l'app)</li>
+                                </ul>
+                            </div>
+
+                            <p class="titre-11-bold-bleu-mb15" style="margin-top: 15px;">Flux de travail typique</p>
+                            <ol class="lh-2">
+                                <li><strong>Au début du trimestre</strong> : Crée un nouveau codex (Codex → Nouveau codex)</li>
+                                <li><strong>Au bureau (MacBook)</strong> : Travaille normalement. Avant de partir, enregistre le codex sur ta clé USB (Codex → Enregistrer)</li>
+                                <li><strong>En classe (iPad ou autre poste)</strong> : Ouvre le codex depuis la clé USB (Codex → Ouvrir). Saisis tes présences, évalue. Enregistre avant de partir</li>
+                                <li><strong>De retour au bureau</strong> : Ouvre le codex à jour depuis la clé USB. Tes données suivent d'un appareil à l'autre</li>
+                            </ol>
+
+                            <p class="titre-11-bold-bleu-mb15" style="margin-top: 15px;">Fonctions du menu Codex</p>
+                            <ul class="lh-2">
+                                <li><strong>Ouvrir un codex</strong> : Charge un fichier <code>.codex.zip</code> depuis ton disque ou ta clé USB</li>
+                                <li><strong>Enregistrer le codex</strong> : Sauvegarde vers le même emplacement (Chrome/Edge : sans dialogue grâce à l'auto-save)</li>
+                                <li><strong>Enregistrer sous</strong> : Sauvegarde vers un nouvel emplacement</li>
+                                <li><strong>Nouveau codex</strong> : Crée un codex à partir des données actuelles en mémoire</li>
+                                <li><strong>Historique des versions</strong> : Consulte et restaure une version antérieure (TimeMachine)</li>
+                                <li><strong>Comparer avec une version</strong> : Visualise les différences entre le codex actuel et une version précédente</li>
+                                <li><strong>Fusionner avec un codex</strong> : Combine les données de deux codex (utile quand deux enseignants travaillent sur des groupes différents)</li>
+                                <li><strong>Exporter une sélection</strong> : Exporte un sous-ensemble du codex par trimestre</li>
+                                <li><strong>Fermer le codex</strong> : Détache le codex sans supprimer les données en mémoire</li>
+                            </ul>
+
+                            <p class="titre-11-bold-bleu-mb15" style="margin-top: 15px;">Auto-save (Chrome et Edge)</p>
+                            <p>Sur Chrome et Edge, quand tu ouvres un codex avec le sélecteur de fichier natif, l'application obtient un accès en écriture au fichier. L'auto-save se déclenche alors automatiquement toutes les 5 minutes — tes données sont écrites directement sur la clé USB sans aucune intervention. Le statut apparaît dans le menu Codex.</p>
+                            <p>Sur Safari et iPad, l'auto-save n'est pas disponible (limitation du navigateur). Tu dois enregistrer manuellement.</p>
+
+                            <div class="alerte alerte-attention" style="margin-top: 15px;">
+                                <strong>Codex vs Sauvegarde (backup) — quelle différence ?</strong>
+                                <table style="width: 100%; margin-top: 10px; font-size: 0.9rem;">
+                                    <tr style="border-bottom: 1px solid var(--gris-pale);">
+                                        <td style="padding: 6px 8px;"></td>
+                                        <td style="padding: 6px 8px; font-weight: bold;">Codex</td>
+                                        <td style="padding: 6px 8px; font-weight: bold;">Sauvegarde (Réglages → Données)</td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid var(--gris-pale);">
+                                        <td style="padding: 6px 8px; font-weight: 600;">But</td>
+                                        <td style="padding: 6px 8px;">Travailler au quotidien sur plusieurs appareils</td>
+                                        <td style="padding: 6px 8px;">Copie de sécurité en cas de problème</td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid var(--gris-pale);">
+                                        <td style="padding: 6px 8px; font-weight: 600;">Format</td>
+                                        <td style="padding: 6px 8px;"><code>.codex.zip</code> (ZIP structuré)</td>
+                                        <td style="padding: 6px 8px;"><code>.json</code> (texte brut)</td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid var(--gris-pale);">
+                                        <td style="padding: 6px 8px; font-weight: 600;">Contenu</td>
+                                        <td style="padding: 6px 8px;">Données + fichiers de travaux + historique</td>
+                                        <td style="padding: 6px 8px;">Données seulement (pas de fichiers)</td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid var(--gris-pale);">
+                                        <td style="padding: 6px 8px; font-weight: 600;">Historique</td>
+                                        <td style="padding: 6px 8px;">Oui (10 versions, TimeMachine)</td>
+                                        <td style="padding: 6px 8px;">Non (un seul instantané)</td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid var(--gris-pale);">
+                                        <td style="padding: 6px 8px; font-weight: 600;">Auto-save</td>
+                                        <td style="padding: 6px 8px;">Oui (Chrome/Edge, toutes les 5 min)</td>
+                                        <td style="padding: 6px 8px;">Non (rappel périodique seulement)</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 6px 8px; font-weight: 600;">Fusion</td>
+                                        <td style="padding: 6px 8px;">Oui (fusion intelligente entre codex)</td>
+                                        <td style="padding: 6px 8px;">Non (remplacement complet)</td>
+                                    </tr>
+                                </table>
+                                <p style="margin-top: 10px; font-size: 0.85rem;"><strong>En résumé :</strong> le codex est ton outil de travail quotidien. La sauvegarde JSON est ton filet de sécurité. Les deux sont complémentaires — utilise le codex pour travailler, fais une sauvegarde JSON de temps en temps comme assurance.</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Carte: Ressources -->
                     <div class="carte accordeon" id="accordeon-aide-ressources">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this); event.stopPropagation();">
@@ -16873,8 +16986,8 @@
         // === CONFIGURATION ===
         // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
         // Les valeurs ici servent de fallback si version.json n'est pas disponible
-        let VERSION_MAJEURE = '98.9';
-        let BUILD_ID = '0321-1435';
+        let VERSION_MAJEURE = '99';
+        let BUILD_ID = '0321-1755';
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';

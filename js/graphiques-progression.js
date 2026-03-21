@@ -973,79 +973,6 @@ function creerGraphiqueIndividuel(canvasId, da) {
             });
         }
 
-        // Variables pour suivre le dataset survolé et verrouillé
-        let dernierDatasetSurvoleIndiv = -1;
-        let datasetVerrouilleIndiv = -1;
-        let zonesNomsIndices = []; // Zones cliquables pour les noms A, C, P
-
-        // Plugin pour afficher le nom de l'indice au bout de la courbe active
-        const pluginNomIndiceSurvol = {
-            id: 'nomIndiceSurvol',
-            afterDraw(chart) {
-                const datasetIndexActif = datasetVerrouilleIndiv >= 0 ? datasetVerrouilleIndiv : dernierDatasetSurvoleIndiv;
-                zonesNomsIndices = []; // Réinitialiser les zones
-
-                const ctx = chart.ctx;
-                const chartArea = chart.chartArea;
-
-                // Afficher le nom pour le dataset actif
-                chart.data.datasets.forEach((dataset, idx) => {
-                    const meta = chart.getDatasetMeta(idx);
-                    if (!meta || !meta.data || meta.data.length === 0) return;
-
-                    // Trouver le dernier point visible
-                    let dernierPoint = null;
-                    for (let i = meta.data.length - 1; i >= 0; i--) {
-                        if (dataset.data[i] !== null && dataset.data[i] !== undefined) {
-                            dernierPoint = meta.data[i];
-                            break;
-                        }
-                    }
-                    if (!dernierPoint) return;
-
-                    const x = dernierPoint.x + 10;
-                    const y = dernierPoint.y;
-
-                    // Extraire le nom court (A, C ou P)
-                    const nomCourt = dataset.label.match(/\(([ACP])\)/)?.[1] || dataset.label;
-                    const couleur = couleursOriginales[dataset.label];
-
-                    ctx.save();
-                    ctx.font = idx === datasetIndexActif ? 'bold 12px Arial' : '11px Arial';
-                    ctx.textAlign = 'left';
-                    ctx.textBaseline = 'middle';
-
-                    if (idx === datasetIndexActif) {
-                        // Fond blanc pour le nom actif
-                        const textWidth = ctx.measureText(nomCourt).width;
-                        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-                        ctx.fillRect(x - 3, y - 8, textWidth + 6, 16);
-                        ctx.strokeStyle = couleur;
-                        ctx.lineWidth = 1;
-                        ctx.strokeRect(x - 3, y - 8, textWidth + 6, 16);
-                        ctx.fillStyle = couleur;
-                    } else {
-                        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-                    }
-
-                    ctx.fillText(nomCourt, x, y);
-
-                    // Stocker la zone cliquable
-                    const textWidth = ctx.measureText(nomCourt).width;
-                    zonesNomsIndices.push({
-                        datasetIndex: idx,
-                        x: x - 3,
-                        y: y - 8,
-                        width: textWidth + 6,
-                        height: 16,
-                        label: dataset.label
-                    });
-
-                    ctx.restore();
-                });
-            }
-        };
-
         // Plugin : triangles d'intervention RàI au-dessus des points
         const pluginInterventionsIndiv = {
             id: 'interventionMarkersIndiv',
@@ -1111,7 +1038,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
         const config = {
             type: 'line',
             // 🆕 BETA 96: Utiliser le plugin gradient au lieu des annotations
-            plugins: [pluginGradientFond, pluginEtiquettesZones, pluginNomIndiceSurvol, pluginInterventionsIndiv],
+            plugins: [pluginGradientFond, pluginEtiquettesZones, pluginInterventionsIndiv],
             data: {
                 labels: labels,
                 datasets: datasets
@@ -1124,11 +1051,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                 },
                 plugins: {
                     title: {
-                        display: true,
-                        text: 'Progression temporelle - Indices A-C-P',
-                        font: { size: 16, weight: 'bold' },
-                        color: couleurTexte(),
-                        padding: { top: 10, bottom: 20 }
+                        display: false
                     },
                     legend: {
                         display: false // Masquer la légende, on utilise les checkboxes
@@ -1239,141 +1162,11 @@ function creerGraphiqueIndividuel(canvasId, da) {
                     axis: 'xy',
                     intersect: false
                 },
-                // ✨ #240: Gestionnaire survol via appliquerStyleDataset
-                onHover: function(event, activeElements, chart) {
-                    let datasetIndex = -1;
-
-                    if (activeElements.length > 0) {
-                        datasetIndex = activeElements[0].datasetIndex;
-                    }
-
-                    // Si verrouillé, forcer le datasetIndex actif
-                    const datasetActif = datasetVerrouilleIndiv >= 0 ? datasetVerrouilleIndiv : datasetIndex;
-
-                    // Éviter les mises à jour inutiles
-                    if (datasetActif === dernierDatasetSurvoleIndiv && datasetVerrouilleIndiv < 0) return;
-                    dernierDatasetSurvoleIndiv = datasetActif;
-
-                    chart.data.datasets.forEach((dataset, idx) => {
-                        const couleurOriginale = couleursOriginales[dataset.label];
-                        if (datasetActif === -1) {
-                            appliquerStyleDataset(dataset, 'defaut', couleurOriginale);
-                        } else if (idx === datasetActif) {
-                            appliquerStyleDataset(dataset, 'actif', couleurOriginale);
-                        } else {
-                            appliquerStyleDataset(dataset, 'inactif', couleurOriginale);
-                        }
-                    });
-
-                    if (chartEstValide(chart)) chart.update('none');
-                }
             }
         };
 
         // Créer le graphique
         const chart = new Chart(ctx, config);
-
-        // 🆕 BETA 96: Fonction de verrouillage/déverrouillage
-        function toggleVerrouillageIndiv(indexDataset) {
-            if (datasetVerrouilleIndiv === indexDataset) {
-                // Déverrouiller
-                datasetVerrouilleIndiv = -1;
-                dernierDatasetSurvoleIndiv = -1;
-                chart.data.datasets.forEach(dataset => {
-                    appliquerStyleDataset(dataset, 'defaut', couleursOriginales[dataset.label]);
-                });
-            } else {
-                // Verrouiller
-                datasetVerrouilleIndiv = indexDataset;
-                dernierDatasetSurvoleIndiv = indexDataset;
-                chart.data.datasets.forEach((dataset, idx) => {
-                    const couleurOriginale = couleursOriginales[dataset.label];
-                    if (idx === indexDataset) {
-                        appliquerStyleDataset(dataset, 'actif', couleurOriginale);
-                    } else {
-                        appliquerStyleDataset(dataset, 'inactif', couleurOriginale);
-                    }
-                });
-            }
-            if (chartEstValide(chart)) chart.update('none');
-        }
-
-        // Verrouillage au clic (sur nom ou point)
-        canvas.addEventListener('click', function(event) {
-            const rect = canvas.getBoundingClientRect();
-            // Appliquer le ratio de scale pour correspondre aux coordonnées du canvas
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            const clickX = (event.clientX - rect.left) * scaleX;
-            const clickY = (event.clientY - rect.top) * scaleY;
-
-            // 1. Vérifier clic sur un nom d'indice (A, C, P)
-            for (const zone of zonesNomsIndices) {
-                if (clickX >= zone.x && clickX <= zone.x + zone.width &&
-                    clickY >= zone.y && clickY <= zone.y + zone.height) {
-                    toggleVerrouillageIndiv(zone.datasetIndex);
-                    return;
-                }
-            }
-
-            // 2. Vérifier clic sur un point de la courbe
-            const elements = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
-            if (elements.length > 0) {
-                toggleVerrouillageIndiv(elements[0].datasetIndex);
-                return;
-            }
-
-            // 3. Clic ailleurs - déverrouiller si verrouillé
-            if (datasetVerrouilleIndiv >= 0) {
-                toggleVerrouillageIndiv(datasetVerrouilleIndiv);
-            }
-        });
-
-        canvas.addEventListener('mouseleave', function() {
-            if (datasetVerrouilleIndiv >= 0) {
-                dernierDatasetSurvoleIndiv = datasetVerrouilleIndiv;
-                chart.data.datasets.forEach((dataset, idx) => {
-                    const couleurOriginale = couleursOriginales[dataset.label];
-                    if (idx === datasetVerrouilleIndiv) {
-                        appliquerStyleDataset(dataset, 'actif', couleurOriginale);
-                    } else {
-                        appliquerStyleDataset(dataset, 'inactif', couleurOriginale);
-                    }
-                });
-            } else {
-                dernierDatasetSurvoleIndiv = -1;
-                chart.data.datasets.forEach(dataset => {
-                    appliquerStyleDataset(dataset, 'defaut', couleursOriginales[dataset.label]);
-                });
-            }
-            if (chartEstValide(chart)) chart.update('none');
-        });
-
-        // Changer le curseur au survol des noms ou des points
-        canvas.addEventListener('mousemove', function(event) {
-            const rect = canvas.getBoundingClientRect();
-            // Appliquer le ratio de scale pour correspondre aux coordonnées du canvas
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            const mouseX = (event.clientX - rect.left) * scaleX;
-            const mouseY = (event.clientY - rect.top) * scaleY;
-
-            let surElement = false;
-            for (const zone of zonesNomsIndices) {
-                if (mouseX >= zone.x && mouseX <= zone.x + zone.width &&
-                    mouseY >= zone.y && mouseY <= zone.y + zone.height) {
-                    surElement = true;
-                    break;
-                }
-            }
-
-            if (!surElement) {
-                const elements = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
-                surElement = elements.length > 0;
-            }
-
-            canvas.style.cursor = surElement ? 'pointer' : 'default';
-        });
 
         // Stocker l'instance pour pouvoir la détruire plus tard
         graphiquesIndividuels[da] = chart;
@@ -2445,96 +2238,6 @@ const pluginEtiquettesZones100 = {
             ctx.fillStyle = zone.borderColor || couleurTexte();
             ctx.fillText(zone.code, xLabel, yPx);
         });
-
-        ctx.restore();
-    }
-};
-
-/**
- * Variables pour le graphique des critères
- */
-let dernierDatasetSurvoleCriteresGlobal = -1;
-let datasetVerrouilleCriteresGlobal = -1;
-let zonesCriteres = [];
-
-/**
- * Plugin pour afficher le nom du critère au bout de la courbe survolée
- */
-const pluginNomCritereSurvol = {
-    id: 'nomCritereSurvol',
-    afterDraw(chart) {
-        // Utiliser le dataset verrouillé ou survolé
-        const datasetIndex = datasetVerrouilleCriteresGlobal >= 0 ? datasetVerrouilleCriteresGlobal : dernierDatasetSurvoleCriteresGlobal;
-        if (datasetIndex === -1) {
-            zonesCriteres = [];
-            return;
-        }
-
-        const ctx = chart.ctx;
-        const chartArea = chart.chartArea;
-        const dataset = chart.data.datasets[datasetIndex];
-        if (!dataset) return;
-
-        const meta = chart.getDatasetMeta(datasetIndex);
-        if (!meta || !meta.data || meta.data.length === 0) return;
-
-        // Trouver le dernier point visible
-        let dernierPoint = null;
-        let dernierIndex = -1;
-        for (let i = meta.data.length - 1; i >= 0; i--) {
-            const point = meta.data[i];
-            if (point && dataset.data[i] !== null && dataset.data[i] !== undefined) {
-                dernierPoint = point;
-                dernierIndex = i;
-                break;
-            }
-        }
-
-        if (!dernierPoint) return;
-
-        // Couleur du critère
-        const couleur = dataset.borderColor;
-        const nomCritere = dataset.label;
-
-        ctx.save();
-        ctx.font = 'bold 12px Arial';
-
-        const textWidth = ctx.measureText(nomCritere).width;
-        const marge = 10;
-
-        // Vérifier si le texte peut tenir à droite du point
-        let x, textAlign;
-        if (dernierPoint.x + marge + textWidth <= chartArea.right) {
-            // Assez de place à droite
-            x = dernierPoint.x + marge;
-            textAlign = 'left';
-        } else {
-            // Pas assez de place : afficher à gauche du point
-            x = dernierPoint.x - marge;
-            textAlign = 'right';
-        }
-
-        // Position Y : légèrement au-dessus du point pour éviter le chevauchement
-        let y = dernierPoint.y - 15;
-        // S'assurer que le texte reste dans la zone du graphique
-        if (y < chartArea.top + 10) {
-            y = dernierPoint.y + 15; // Mettre en dessous si trop haut
-        }
-
-        ctx.textAlign = textAlign;
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = couleur;
-        ctx.fillText(nomCritere, x, y);
-
-        // Stocker la zone cliquable
-        const xZone = textAlign === 'left' ? x : x - textWidth;
-        zonesCriteres = [{
-            x: xZone,
-            y: y - 10,
-            width: textWidth,
-            height: 20,
-            datasetIndex: datasetIndex
-        }];
 
         ctx.restore();
     }
@@ -3872,10 +3575,6 @@ function creerGraphiqueCriteres(canvasId, da) {
             };
         });
 
-        // Réinitialiser les variables globales pour le plugin
-        dernierDatasetSurvoleCriteresGlobal = -1;
-        datasetVerrouilleCriteresGlobal = -1;
-
         // Plugin : triangles d'intervention RàI sur le graphique critères
         const pluginInterventionsCriteres = {
             id: 'interventionMarkersCriteres',
@@ -3936,7 +3635,7 @@ function creerGraphiqueCriteres(canvasId, da) {
         // Configuration du graphique
         const config = {
             type: 'line',
-            plugins: [pluginGradientFond100, pluginEtiquettesZones100, pluginNomCritereSurvol, pluginInterventionsCriteres],
+            plugins: [pluginGradientFond100, pluginEtiquettesZones100, pluginInterventionsCriteres],
             data: {
                 labels: donnees.labels,
                 datasets: datasets
@@ -3949,11 +3648,7 @@ function creerGraphiqueCriteres(canvasId, da) {
                 },
                 plugins: {
                     title: {
-                        display: true,
-                        text: 'Développement des habiletés et compétences',
-                        font: { size: 16, weight: 'bold' },
-                        color: couleurTexte(),
-                        padding: { top: 10, bottom: 20 }
+                        display: false
                     },
                     legend: {
                         display: false
@@ -4034,137 +3729,14 @@ function creerGraphiqueCriteres(canvasId, da) {
                     axis: 'xy',
                     intersect: false
                 },
-                onHover: function(event, activeElements, chart) {
-                    let datasetIndex = -1;
-
-                    if (activeElements.length > 0) {
-                        datasetIndex = activeElements[0].datasetIndex;
-                    }
-
-                    const datasetActif = datasetVerrouilleCriteresGlobal >= 0 ? datasetVerrouilleCriteresGlobal : datasetIndex;
-
-                    if (datasetActif === dernierDatasetSurvoleCriteresGlobal && datasetVerrouilleCriteresGlobal < 0) return;
-                    dernierDatasetSurvoleCriteresGlobal = datasetActif;
-
-                    chart.data.datasets.forEach((dataset, idx) => {
-                        const couleurOriginale = couleursOriginales[dataset.label];
-                        if (datasetActif === -1) {
-                            appliquerStyleDataset(dataset, 'defaut', couleurOriginale);
-                        } else if (idx === datasetActif) {
-                            appliquerStyleDataset(dataset, 'actif', couleurOriginale);
-                        } else {
-                            appliquerStyleDataset(dataset, 'inactif', couleurOriginale);
-                        }
-                    });
-
-                    if (chartEstValide(chart)) chart.update('none');
-                }
             }
         };
 
         // Créer le graphique
         const chart = new Chart(ctx, config);
 
-        function toggleVerrouillage(indexDataset) {
-            if (datasetVerrouilleCriteresGlobal === indexDataset) {
-                // Déverrouiller
-                datasetVerrouilleCriteresGlobal = -1;
-                dernierDatasetSurvoleCriteresGlobal = -1;
-                chart.data.datasets.forEach(dataset => {
-                    appliquerStyleDataset(dataset, 'defaut', couleursOriginales[dataset.label]);
-                });
-            } else {
-                // Verrouiller
-                datasetVerrouilleCriteresGlobal = indexDataset;
-                dernierDatasetSurvoleCriteresGlobal = indexDataset;
-                chart.data.datasets.forEach((dataset, idx) => {
-                    const couleurOriginale = couleursOriginales[dataset.label];
-                    if (idx === indexDataset) {
-                        appliquerStyleDataset(dataset, 'actif', couleurOriginale);
-                    } else {
-                        appliquerStyleDataset(dataset, 'inactif', couleurOriginale);
-                    }
-                });
-            }
-            if (chartEstValide(chart)) chart.update('none');
-        }
-
-        // Verrouillage au clic (sur nom ou point)
-        canvas.addEventListener('click', function(event) {
-            const rect = canvas.getBoundingClientRect();
-            // Appliquer le ratio de scale pour correspondre aux coordonnées du canvas
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            const clickX = (event.clientX - rect.left) * scaleX;
-            const clickY = (event.clientY - rect.top) * scaleY;
-
-            // 1. Vérifier clic sur un nom de critère
-            for (const zone of zonesCriteres) {
-                if (clickX >= zone.x && clickX <= zone.x + zone.width &&
-                    clickY >= zone.y && clickY <= zone.y + zone.height) {
-                    toggleVerrouillage(zone.datasetIndex);
-                    return;
-                }
-            }
-
-            // 2. Vérifier clic sur un point de la courbe
-            const elements = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
-            if (elements.length > 0) {
-                toggleVerrouillage(elements[0].datasetIndex);
-                return;
-            }
-
-            // 3. Clic ailleurs - déverrouiller si verrouillé
-            if (datasetVerrouilleCriteresGlobal >= 0) {
-                toggleVerrouillage(datasetVerrouilleCriteresGlobal);
-            }
-        });
-
-        canvas.addEventListener('mouseleave', function() {
-            if (datasetVerrouilleCriteresGlobal >= 0) {
-                dernierDatasetSurvoleCriteresGlobal = datasetVerrouilleCriteresGlobal;
-                chart.data.datasets.forEach((dataset, idx) => {
-                    const couleurOriginale = couleursOriginales[dataset.label];
-                    if (idx === datasetVerrouilleCriteresGlobal) {
-                        appliquerStyleDataset(dataset, 'actif', couleurOriginale);
-                    } else {
-                        appliquerStyleDataset(dataset, 'inactif', couleurOriginale);
-                    }
-                });
-            } else {
-                dernierDatasetSurvoleCriteresGlobal = -1;
-                chart.data.datasets.forEach(dataset => {
-                    appliquerStyleDataset(dataset, 'defaut', couleursOriginales[dataset.label]);
-                });
-            }
-            if (chartEstValide(chart)) chart.update('none');
-        });
-
-        // Changer le curseur au survol des noms ou des points
-        canvas.addEventListener('mousemove', function(event) {
-            const rect = canvas.getBoundingClientRect();
-            // Appliquer le ratio de scale pour correspondre aux coordonnées du canvas
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            const mouseX = (event.clientX - rect.left) * scaleX;
-            const mouseY = (event.clientY - rect.top) * scaleY;
-
-            let surElement = false;
-            for (const zone of zonesCriteres) {
-                if (mouseX >= zone.x && mouseX <= zone.x + zone.width &&
-                    mouseY >= zone.y && mouseY <= zone.y + zone.height) {
-                    surElement = true;
-                    break;
-                }
-            }
-
-            if (!surElement) {
-                const elements = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
-                surElement = elements.length > 0;
-            }
-
-            canvas.style.cursor = surElement ? 'pointer' : 'default';
-        });
+        // Enregistrer l'instance pour toggle externe
+        _chartsCriteres[da] = chart;
 
         console.log(`✅ Graphique critères créé avec ${donnees.criteresUniques.length} critères`);
         return chart;
@@ -4800,7 +4372,48 @@ function togglePSansReprisesIndiv(da, visible) {
     if (chartEstValide(chart)) chart.update('none');
 }
 
+/**
+ * Toggle la visibilité d'un indice (A, C ou P) sur le graphique individuel
+ * @param {string} label - Label du dataset ('Assiduité (A)', 'Complétion (C)', 'Performance (P)')
+ * @param {boolean} visible - true pour afficher, false pour masquer
+ * @param {string} da - Numéro DA de l'étudiant
+ */
+function toggleIndiceIndiv(label, visible, da) {
+    var chart = graphiquesIndividuels[da];
+    if (!chart) return;
+    chart.data.datasets.forEach(function(ds) {
+        if (ds.label === label) {
+            ds.hidden = !visible;
+        }
+    });
+    if (chartEstValide(chart)) chart.update('none');
+}
+
+/**
+ * Registre des instances Chart.js critères par DA (pour toggle externe)
+ */
+const _chartsCriteres = {};
+
+/**
+ * Toggle la visibilité d'un critère sur le graphique critères d'un étudiant
+ * @param {string} critere - Nom du critère
+ * @param {boolean} visible - true pour afficher, false pour masquer
+ * @param {string} da - Numéro DA de l'étudiant
+ */
+function toggleCritereIndiv(critere, visible, da) {
+    const chart = _chartsCriteres[da];
+    if (!chart) return;
+    chart.data.datasets.forEach(function(ds) {
+        if (ds.label === critere) {
+            ds.hidden = !visible;
+        }
+    });
+    if (chartEstValide(chart)) chart.update('none');
+}
+
 // Exporter les fonctions pour utilisation globale
+window.toggleIndiceIndiv = toggleIndiceIndiv;
+window.toggleCritereIndiv = toggleCritereIndiv;
 window.togglePSansReprisesIndiv = togglePSansReprisesIndiv;
 window.creerGraphiqueIndividuel = creerGraphiqueIndividuel;
 window.rafraichirGraphiqueIndividuel = rafraichirGraphiqueIndividuel;
