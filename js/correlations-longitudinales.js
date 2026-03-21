@@ -50,17 +50,13 @@ function calculerCorrelationsLongitudinales() {
 
     if (!snapshots || snapshots.length < 2) return null;
 
-    // Trier par numSemaine
-    snapshots.sort(function(a, b) { return a.numSemaine - b.numSemaine; });
-
-    // Dédupliquer par semaine (garder le dernier snapshot si >1 par semaine)
-    var parSemaine = {};
-    for (var i = 0; i < snapshots.length; i++) {
-        var snap = snapshots[i];
-        parSemaine[snap.numSemaine] = snap;
-    }
-
-    var semainesUniques = Object.keys(parSemaine).map(Number).sort(function(a, b) { return a - b; });
+    // Trier par date de séance (granularité par séance, pas par semaine)
+    snapshots.sort(function(a, b) {
+        var dateA = a.dateSeance || a.dateDebut || '';
+        var dateB = b.dateSeance || b.dateDebut || '';
+        if (dateA !== dateB) return dateA < dateB ? -1 : 1;
+        return (a.numSemaine || 0) - (b.numSemaine || 0);
+    });
 
     // Charger les interventions et pré-construire une Map(da → [{date}])
     var interventions = [];
@@ -95,19 +91,20 @@ function calculerCorrelationsLongitudinales() {
         labels: [],
         dates: [],
         correlations: { AP: [], CP: [], EP: [], IntervP: [] },
+        moyennes: { A: [], C: [], P: [], E: [] },
         n: [],
         evenementsInterventions: []
     };
 
-    for (var s = 0; s < semainesUniques.length; s++) {
-        var numSem = semainesUniques[s];
-        var snapshot = parSemaine[numSem];
+    for (var s = 0; s < snapshots.length; s++) {
+        var snapshot = snapshots[s];
+        var numSem = snapshot.numSemaine || snapshot.numeroSemaine || 0;
         var etudiants = snapshot.etudiants || [];
         var dateSeance = snapshot.dateSeance || snapshot.dateDebut || '';
         var dateRef = dateSeance.substring(0, 10); // YYYY-MM-DD
 
         resultat.semaines.push(numSem);
-        resultat.labels.push('S' + numSem);
+        resultat.labels.push('Sem. ' + numSem);
         resultat.dates.push(dateRef);
 
         // Extraire valeurs A, C, P pour étudiants valides
@@ -142,6 +139,29 @@ function calculerCorrelationsLongitudinales() {
         var n = valeursA.length;
         resultat.n.push(n);
 
+        // Moyennes du groupe (depuis snapshot.groupe ou calculées)
+        if (snapshot.groupe && snapshot.groupe.moyenneA != null) {
+            resultat.moyennes.A.push(snapshot.groupe.moyenneA);
+            resultat.moyennes.C.push(snapshot.groupe.moyenneC);
+            resultat.moyennes.P.push(snapshot.groupe.moyenneP);
+            // E moyen = moyenne géométrique des moyennes individuelles
+            var sommeE = 0;
+            for (var ei = 0; ei < valeursE.length; ei++) sommeE += valeursE[ei];
+            resultat.moyennes.E.push(n > 0 ? Math.round(sommeE / n * 10) / 10 : null);
+        } else if (n > 0) {
+            var sA = 0, sC = 0, sP = 0, sE = 0;
+            for (var si2 = 0; si2 < n; si2++) { sA += valeursA[si2]; sC += valeursC[si2]; sP += valeursP[si2]; sE += valeursE[si2]; }
+            resultat.moyennes.A.push(Math.round(sA / n * 10) / 10);
+            resultat.moyennes.C.push(Math.round(sC / n * 10) / 10);
+            resultat.moyennes.P.push(Math.round(sP / n * 10) / 10);
+            resultat.moyennes.E.push(Math.round(sE / n * 10) / 10);
+        } else {
+            resultat.moyennes.A.push(null);
+            resultat.moyennes.C.push(null);
+            resultat.moyennes.P.push(null);
+            resultat.moyennes.E.push(null);
+        }
+
         if (n < SEUIL_MIN_ETUDIANTS) {
             resultat.correlations.AP.push(null);
             resultat.correlations.CP.push(null);
@@ -163,18 +183,18 @@ function calculerCorrelationsLongitudinales() {
             resultat.correlations.IntervP.push(null);
         }
 
-        // Marquer les interventions de cette semaine
+        // Marquer les interventions dont la date correspond à cette séance
         for (var ii = 0; ii < interventions.length; ii++) {
             var intDate = (interventions[ii].date || '').substring(0, 10);
-            if (intDate >= (snapshot.dateDebut || '').substring(0, 10) &&
-                intDate <= (snapshot.dateFin || dateRef).substring(0, 10)) {
+            if (intDate === dateRef) {
                 var cleInterv = interventions[ii].id || (intDate + interventions[ii].titre);
                 if (!interventionsVues[cleInterv]) {
                     interventionsVues[cleInterv] = true;
                     evenementsInterventions.push({
-                        semaine: numSem,
+                        indexSeance: s,
                         titre: interventions[ii].titre || 'Intervention',
-                        type: interventions[ii].type || 'groupe'
+                        type: interventions[ii].type || 'groupe',
+                        niveauRai: interventions[ii].niveauRai || 2
                     });
                 }
             }
@@ -182,6 +202,76 @@ function calculerCorrelationsLongitudinales() {
     }
 
     resultat.evenementsInterventions = evenementsInterventions;
+
+    // Mapper les artefacts aux séances via leur échéance
+    // Clé = index de la séance dans resultat (pas numéro de semaine)
+    resultat.artefactsParSeance = {};
+    try {
+        var productions = (typeof obtenirDonneesSelonMode === 'function')
+            ? obtenirDonneesSelonMode('productions') || []
+            : [];
+        var infoCours = db.getSync('infoCours', null);
+        var gcId = infoCours ? (infoCours._groupeCoursId || infoCours.id || null) : null;
+
+        // Borne inférieure du semestre
+        var cadre = db.getSync(cle('cadreCalendrier'), {});
+        var dateDebutSem = cadre.dateDebut || '';
+
+        var prodFiltrees = productions.filter(function(p) {
+            if (p.facultatif || p.type === 'portfolio') return false;
+            if (typeof obtenirEcheanceEffective === 'function') {
+                var ech = obtenirEcheanceEffective(p, gcId);
+                return ech.assignee && !!ech.date && ech.date >= dateDebutSem;
+            }
+            return !!p.dateEcheance && p.dateEcheance >= dateDebutSem;
+        });
+
+        for (var pi = 0; pi < prodFiltrees.length; pi++) {
+            var prod = prodFiltrees[pi];
+            var dateEch = '';
+            if (typeof obtenirEcheanceEffective === 'function') {
+                dateEch = obtenirEcheanceEffective(prod, gcId).date || '';
+            } else {
+                dateEch = prod.dateEcheance || '';
+            }
+            if (!dateEch) continue;
+            var dateEchNorm = dateEch.substring(0, 10);
+
+            // Trouver la séance la plus proche (dernière séance dont la date <= échéance)
+            var idxSeance = -1;
+            for (var fi = 0; fi < resultat.dates.length; fi++) {
+                if (resultat.dates[fi] <= dateEchNorm) {
+                    idxSeance = fi;
+                } else {
+                    break; // dates triées, on dépasse
+                }
+            }
+            // Si l'échéance tombe exactement sur une date de séance, préférer celle-ci
+            var idxExact = resultat.dates.indexOf(dateEchNorm);
+            if (idxExact !== -1) idxSeance = idxExact;
+
+            if (idxSeance >= 0) {
+                if (!resultat.artefactsParSeance[idxSeance]) resultat.artefactsParSeance[idxSeance] = [];
+                resultat.artefactsParSeance[idxSeance].push({
+                    titre: prod.titre || 'Sans titre',
+                    activite: prod.description || ''
+                });
+            }
+        }
+    } catch (e) {
+        console.warn('⚠️ Mapping artefacts-séances non disponible', e);
+    }
+
+    // Indexer les interventions par index de séance pour accès rapide
+    resultat.interventionsParSeance = {};
+    for (var ei = 0; ei < evenementsInterventions.length; ei++) {
+        var evt = evenementsInterventions[ei];
+        if (!resultat.interventionsParSeance[evt.indexSeance]) {
+            resultat.interventionsParSeance[evt.indexSeance] = [];
+        }
+        resultat.interventionsParSeance[evt.indexSeance].push(evt);
+    }
+
     return resultat;
 }
 
@@ -190,6 +280,8 @@ function calculerCorrelationsLongitudinales() {
    =============================== */
 
 var graphiqueCorrLongInstance = null;
+var _afficherArtefacts = false;
+var _afficherActivites = false;
 
 /**
  * Crée le graphique de corrélations longitudinales.
@@ -232,6 +324,21 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
             : 'rgba(106, 172, 184, 0.2)';
         var couleurTexte = estModeClair ? '#333' : '#b0c4d0';
 
+        // Construire le tableau de pointStyles :
+        // carré = séance avec artefact, cercle = séance normale
+        var nbPoints = donnees.labels.length;
+        var pointStyles = [];
+        var pointRadii = [];
+        for (var ps = 0; ps < nbPoints; ps++) {
+            if (donnees.artefactsParSeance && donnees.artefactsParSeance[ps]) {
+                pointStyles.push('rect');
+                pointRadii.push(5);
+            } else {
+                pointStyles.push('circle');
+                pointRadii.push(4);
+            }
+        }
+
         // Datasets
         var datasets = [
             {
@@ -241,7 +348,8 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                 backgroundColor: COULEURS_CORR.AP,
                 borderWidth: 2.5,
                 tension: 0.25,
-                pointRadius: 4,
+                pointStyle: pointStyles,
+                pointRadius: pointRadii,
                 pointHoverRadius: 7,
                 pointBackgroundColor: COULEURS_CORR.AP,
                 pointBorderColor: estModeClair ? '#fff' : '#1a2a3a',
@@ -255,7 +363,8 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                 backgroundColor: COULEURS_CORR.CP,
                 borderWidth: 2.5,
                 tension: 0.25,
-                pointRadius: 4,
+                pointStyle: pointStyles,
+                pointRadius: pointRadii,
                 pointHoverRadius: 7,
                 pointBackgroundColor: COULEURS_CORR.CP,
                 pointBorderColor: estModeClair ? '#fff' : '#1a2a3a',
@@ -269,7 +378,8 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                 backgroundColor: COULEURS_CORR.EP,
                 borderWidth: 2.5,
                 tension: 0.25,
-                pointRadius: 4,
+                pointStyle: pointStyles,
+                pointRadius: pointRadii,
                 pointHoverRadius: 7,
                 pointBackgroundColor: COULEURS_CORR.EP,
                 pointBorderColor: estModeClair ? '#fff' : '#1a2a3a',
@@ -284,7 +394,8 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                 borderWidth: 2,
                 borderDash: [6, 3],
                 tension: 0.25,
-                pointRadius: 3,
+                pointStyle: pointStyles,
+                pointRadius: pointRadii,
                 pointHoverRadius: 6,
                 pointBackgroundColor: COULEURS_CORR.IntervP,
                 pointBorderColor: estModeClair ? '#fff' : '#1a2a3a',
@@ -293,39 +404,147 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
             }
         ];
 
-        // Plugin : lignes verticales pour les interventions
-        var pluginInterventions = {
-            id: 'interventionMarkers',
+        // Datasets overlay : moyennes A, C, P, E (axe Y secondaire, masqués par défaut)
+        var COULEURS_MOY = {
+            A: COULEURS_CORR.AP,   // Bleu clair — même couleur que r(A,P)
+            C: COULEURS_CORR.CP,   // Orange — même couleur que r(C,P)
+            P: '#4CAF50',          // Vert — couleur standard P
+            E: COULEURS_CORR.EP    // Violet — même couleur que r(E,P)
+        };
+        var nomsIndices = { A: 'Moy. A', C: 'Moy. C', P: 'Moy. P', E: 'Moy. E' };
+        var indices = ['A', 'C', 'P', 'E'];
+        for (var di = 0; di < indices.length; di++) {
+            var indice = indices[di];
+            datasets.push({
+                label: nomsIndices[indice],
+                data: donnees.moyennes[indice],
+                borderColor: COULEURS_MOY[indice],
+                backgroundColor: 'transparent',
+                borderWidth: 1.5,
+                borderDash: [4, 4],
+                tension: 0.25,
+                pointRadius: 0,
+                pointHoverRadius: 4,
+                pointBackgroundColor: COULEURS_MOY[indice],
+                spanGaps: true,
+                yAxisID: 'yPct',
+                hidden: true
+            });
+        }
+
+        // Plugin : noms d'artefacts et/ou types d'activités sous l'axe X
+        var pluginArtefacts = {
+            id: 'artefactLabels',
             afterDraw: function(chart) {
-                if (!donnees.evenementsInterventions || donnees.evenementsInterventions.length === 0) return;
+                if (!_afficherArtefacts && !_afficherActivites) return;
+                var artefacts = donnees.artefactsParSeance;
+                if (!artefacts) return;
                 var xScale = chart.scales.x;
-                var yScale = chart.scales.y;
                 var ctx2 = chart.ctx;
+                var couleurTitre = estModeClair ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.55)';
+                var couleurType = estModeClair ? 'rgba(0,100,180,0.5)' : 'rgba(100,200,255,0.45)';
+                var couleurLigne = estModeClair ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)';
+                // Positionner sous les ticks X (qui sont en rotation 45°)
+                var baseY = chart.chartArea.bottom + 50;
 
-                var semainesMarquees = {};
-                for (var m = 0; m < donnees.evenementsInterventions.length; m++) {
-                    var evt = donnees.evenementsInterventions[m];
-                    var idx = donnees.semaines.indexOf(evt.semaine);
-                    if (idx === -1 || semainesMarquees[idx]) continue;
-                    semainesMarquees[idx] = true;
-
+                for (var idxStr in artefacts) {
+                    var idx = Number(idxStr);
+                    var items = artefacts[idxStr];
                     var x = xScale.getPixelForValue(idx);
+
+                    // Petite ligne de rappel
                     ctx2.save();
                     ctx2.beginPath();
-                    ctx2.setLineDash([4, 4]);
-                    ctx2.strokeStyle = estModeClair ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.2)';
+                    ctx2.strokeStyle = couleurLigne;
                     ctx2.lineWidth = 1;
-                    ctx2.moveTo(x, yScale.top);
-                    ctx2.lineTo(x, yScale.bottom);
+                    ctx2.moveTo(x, chart.chartArea.bottom + 44);
+                    ctx2.lineTo(x, baseY - 2);
                     ctx2.stroke();
                     ctx2.restore();
 
-                    // Petit label en haut
+                    // Empiler les labels par artefact
+                    var offset = 0;
+                    for (var ti = 0; ti < items.length; ti++) {
+                        var item = items[ti];
+
+                        // Ligne 1 : titre (si Artefacts coché)
+                        if (_afficherArtefacts) {
+                            ctx2.save();
+                            ctx2.translate(x, baseY + offset * 13);
+                            ctx2.rotate(-Math.PI / 6);
+                            ctx2.font = '9px Arial';
+                            ctx2.fillStyle = couleurTitre;
+                            ctx2.textAlign = 'right';
+                            var txt = item.titre.length > 22 ? item.titre.substring(0, 20) + '…' : item.titre;
+                            ctx2.fillText(txt, 0, 0);
+                            ctx2.restore();
+                            offset++;
+                        }
+
+                        // Ligne 2 : activité d'apprentissage (si Activités coché)
+                        if (_afficherActivites && item.activite) {
+                            ctx2.save();
+                            ctx2.translate(x, baseY + offset * 13);
+                            ctx2.rotate(-Math.PI / 6);
+                            ctx2.font = 'italic 8px Arial';
+                            ctx2.fillStyle = couleurType;
+                            ctx2.textAlign = 'right';
+                            var actTxt = item.activite;
+                            if (actTxt.length > 28) actTxt = actTxt.substring(0, 26) + '…';
+                            ctx2.fillText(actTxt, 0, 0);
+                            ctx2.restore();
+                            offset++;
+                        }
+                    }
+                }
+            }
+        };
+
+        // Plugin : triangles d'intervention sous les points de données
+        var pluginInterventions = {
+            id: 'interventionMarkers',
+            afterDatasetsDraw: function(chart) {
+                if (!donnees.interventionsParSeance) return;
+                var xScale = chart.scales.x;
+                var yScale = chart.scales.y;
+                var ctx2 = chart.ctx;
+                var couleurN2 = '#FFA726'; // Orange — niveau 2
+                var couleurN3 = '#EF5350'; // Rouge — niveau 3
+
+                for (var idxStr in donnees.interventionsParSeance) {
+                    var idx = Number(idxStr);
+                    var intervs = donnees.interventionsParSeance[idxStr];
+                    var x = xScale.getPixelForValue(idx);
+
+                    // Trouver le point le plus haut parmi les datasets visibles pour cette séance
+                    var yMin = yScale.bottom; // bas du graphique (pixel le plus grand)
+                    var datasets = chart.data.datasets;
+                    for (var di = 0; di < datasets.length; di++) {
+                        if (datasets[di].hidden || datasets[di].yAxisID === 'yPct') continue;
+                        var val = datasets[di].data[idx];
+                        if (val == null) continue;
+                        var yPx = yScale.getPixelForValue(val);
+                        if (yPx < yMin) yMin = yPx; // plus haut visuellement = pixel plus petit
+                    }
+
+                    // Niveau le plus élevé parmi les interventions de cette séance
+                    var niveauMax = 2;
+                    for (var ni = 0; ni < intervs.length; ni++) {
+                        if (intervs[ni].niveauRai > niveauMax) niveauMax = intervs[ni].niveauRai;
+                    }
+
+                    // Triangle pointant vers le bas, au-dessus du point le plus haut
+                    var triY = yMin - 12;
+                    var triSize = 5;
                     ctx2.save();
-                    ctx2.font = '9px Arial';
-                    ctx2.fillStyle = estModeClair ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.4)';
-                    ctx2.textAlign = 'center';
-                    ctx2.fillText('▼', x, yScale.top - 2);
+                    ctx2.beginPath();
+                    ctx2.moveTo(x - triSize, triY - triSize);
+                    ctx2.lineTo(x + triSize, triY - triSize);
+                    ctx2.lineTo(x, triY + triSize);
+                    ctx2.closePath();
+                    ctx2.fillStyle = niveauMax >= 3 ? couleurN3 : couleurN2;
+                    ctx2.globalAlpha = 0.8;
+                    ctx2.fill();
                     ctx2.restore();
                 }
             }
@@ -385,15 +604,7 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                 },
                 plugins: {
                     legend: {
-                        display: true,
-                        position: 'top',
-                        labels: {
-                            color: couleurTexte,
-                            font: { size: 11 },
-                            usePointStyle: true,
-                            pointStyle: 'circle',
-                            padding: 16
-                        }
+                        display: false
                     },
                     tooltip: {
                         enabled: true,
@@ -415,8 +626,39 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                                 var idx = context.dataIndex;
                                 var val = context.parsed.y;
                                 var nEtu = donnees.n[idx] || 0;
+                                if (context.dataset.yAxisID === 'yPct') {
+                                    var pctStr = val != null ? val.toFixed(1).replace('.', ',') + '%' : '—';
+                                    return ' ' + context.dataset.label + ' : ' + pctStr;
+                                }
                                 var rStr = val != null ? val.toFixed(3).replace('.', ',') : '—';
                                 return ' ' + context.dataset.label + ' : r = ' + rStr + '  (n = ' + nEtu + ')';
+                            },
+                            afterBody: function(tooltipItems) {
+                                var idx = tooltipItems[0].dataIndex;
+                                var lignes = [];
+
+                                // Artefacts de cette séance
+                                var arts = donnees.artefactsParSeance ? donnees.artefactsParSeance[idx] : null;
+                                if (arts && arts.length > 0) {
+                                    lignes.push('');
+                                    lignes.push('▪ Productions :');
+                                    for (var ai = 0; ai < arts.length; ai++) {
+                                        var ligne = '  ' + arts[ai].titre;
+                                        if (arts[ai].activite) ligne += ' — ' + arts[ai].activite;
+                                        lignes.push(ligne);
+                                    }
+                                }
+
+                                // Interventions de cette séance
+                                var intervs = donnees.interventionsParSeance ? donnees.interventionsParSeance[idx] : null;
+                                if (intervs && intervs.length > 0) {
+                                    lignes.push('');
+                                    for (var ii = 0; ii < intervs.length; ii++) {
+                                        lignes.push('▲ Intervention N' + intervs[ii].niveauRai + ' : ' + intervs[ii].titre);
+                                    }
+                                }
+
+                                return lignes;
                             }
                         }
                     }
@@ -425,13 +667,15 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                     x: {
                         title: {
                             display: true,
-                            text: 'Semaine',
+                            text: 'Séance',
                             color: couleurTexte,
                             font: { size: 12, weight: 'bold' }
                         },
                         ticks: {
                             color: couleurTexte,
-                            font: { size: 11 }
+                            font: { size: 10 },
+                            maxRotation: 45,
+                            minRotation: 45
                         },
                         grid: {
                             display: true,
@@ -461,6 +705,25 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                                 return context.tick.value === 0 ? couleurGrilleFort : couleurGrilleVal;
                             }
                         }
+                    },
+                    yPct: {
+                        position: 'right',
+                        min: 0,
+                        max: 100,
+                        display: false,
+                        title: {
+                            display: true,
+                            text: 'Moyenne (%)',
+                            color: couleurTexte,
+                            font: { size: 11 }
+                        },
+                        ticks: {
+                            color: couleurTexte,
+                            font: { size: 10 },
+                            stepSize: 25,
+                            callback: function(value) { return value + '%'; }
+                        },
+                        grid: { display: false }
                     }
                 },
                 interaction: {
@@ -492,8 +755,85 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
     }
 }
 
+/**
+ * Toggle d'une courbe de corrélation sur le graphique.
+ * @param {string} cle - 'AP', 'CP', 'EP' ou 'IntervP'
+ * @param {boolean} visible - true pour afficher
+ */
+function toggleCorrelation(cle, visible) {
+    if (!graphiqueCorrLongInstance) return;
+    var labels = { AP: 'A ↔ P', CP: 'C ↔ P', EP: 'E ↔ P', IntervP: 'Interv. ↔ P' };
+    var label = labels[cle];
+    if (!label) return;
+    var datasets = graphiqueCorrLongInstance.data.datasets;
+    for (var i = 0; i < datasets.length; i++) {
+        if (datasets[i].label === label) {
+            datasets[i].hidden = !visible;
+            break;
+        }
+    }
+    graphiqueCorrLongInstance.update();
+}
+
+/**
+ * Toggle d'un overlay moyenne sur le graphique.
+ * @param {string} indice - 'A', 'C', 'P' ou 'E'
+ * @param {boolean} visible - true pour afficher
+ */
+function toggleOverlayMoyenne(indice, visible) {
+    if (!graphiqueCorrLongInstance) return;
+    var label = 'Moy. ' + indice;
+    var datasets = graphiqueCorrLongInstance.data.datasets;
+    var auMoinsUnVisible = false;
+
+    for (var i = 0; i < datasets.length; i++) {
+        if (datasets[i].label === label) {
+            datasets[i].hidden = !visible;
+        }
+        if (datasets[i].yAxisID === 'yPct' && !datasets[i].hidden) {
+            auMoinsUnVisible = true;
+        }
+    }
+
+    // Afficher/masquer l'axe Y secondaire selon qu'au moins un overlay est visible
+    graphiqueCorrLongInstance.options.scales.yPct.display = auMoinsUnVisible;
+    graphiqueCorrLongInstance.update();
+}
+
+/**
+ * Recalcule le padding bottom selon les toggles actifs.
+ */
+function _majPaddingArtefacts() {
+    if (!graphiqueCorrLongInstance) return;
+    var pad = 0;
+    if (_afficherArtefacts && _afficherActivites) pad = 130;
+    else if (_afficherArtefacts || _afficherActivites) pad = 90;
+    graphiqueCorrLongInstance.options.layout.padding.bottom = pad;
+    graphiqueCorrLongInstance.update();
+}
+
+/**
+ * Toggle de l'affichage des noms d'artefacts sous l'axe X.
+ */
+function toggleArtefacts(visible) {
+    _afficherArtefacts = visible;
+    _majPaddingArtefacts();
+}
+
+/**
+ * Toggle de l'affichage des types d'activités sous l'axe X.
+ */
+function toggleActivites(visible) {
+    _afficherActivites = visible;
+    _majPaddingArtefacts();
+}
+
 // Exposer les fonctions globalement
 window.creerGraphiqueCorrelationsLongitudinales = creerGraphiqueCorrelationsLongitudinales;
 window.calculerCorrelationsLongitudinales = calculerCorrelationsLongitudinales;
+window.toggleCorrelation = toggleCorrelation;
+window.toggleOverlayMoyenne = toggleOverlayMoyenne;
+window.toggleArtefacts = toggleArtefacts;
+window.toggleActivites = toggleActivites;
 
 })();
