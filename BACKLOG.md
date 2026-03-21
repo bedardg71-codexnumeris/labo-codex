@@ -883,6 +883,28 @@
   - **Format** : Rapport genere (PDF ou markdown) avec tableaux et graphiques
   - **Prerequis** : #35 (Import H2024) pour avoir les 4 trimestres
 
+- [ ] **#239** Interventions N3 dans le profil etudiant — progression temporelle
+  - **Contexte** : Les interventions de niveau 3 (individuelles, 1 seul eleve) ne sont pas significatives au niveau du groupe
+  - **Objectif** : Afficher l'effet des interventions N3 dans le graphique de progression temporelle du profil etudiant
+  - **Approche** : Marqueur sur la courbe P individuelle + delta P avant/apres
+  - **Prerequis** : Graphique de progression individuel existant dans le profil etudiant
+
+- [ ] **#240** Uniformiser le style de tous les graphiques Chart.js
+  - **Contexte** : Le style du graphique « Dynamique des correlations » (fond neutre, grille subtile, points blancs, tooltips noirs) est prefere par l'enseignant
+  - **Objectif** : Etendre ce style a tous les graphiques : Developpement du groupe, Developpement individuel, graphiques spaghetti, etc.
+  - **Elements a uniformiser** : couleurs de grille, fond, tooltips, epaisseur de lignes, pointStyles, padding, axes
+  - **Reference** : `js/correlations-longitudinales.js` comme modele de style
+
+- [ ] **#241** Analyser l'impact des jetons de reprise sur P dans les courbes d'intervention
+
+- [ ] **#242** Ajouter la documentation du graphique « Dynamique des correlations » dans les info-bulles
+  - **Contexte** : La note 📍 documente la lecture du graphique, mais l'aide contextuelle (info-bulles) devrait aussi couvrir ce graphique
+  - **Objectif** : Integrer la documentation dans le systeme d'info-bulles existant (tooltips data-tooltip)
+  - **Contenu** : Explication des correlations, des courbes d'intervention, des points carres, des triangles
+  - **Contexte** : Quand un etudiant utilise un jeton de reprise, P change retroactivement. Cela peut masquer l'effet reel d'une intervention pedagogique
+  - **Objectif** : Marquer les seances ou des jetons ont ete utilises et/ou calculer un P « sans reprises » pour isoler l'effet net
+  - **Prerequis** : Comprendre la mecanique de recalcul de P apres utilisation d'un jeton
+
 ### Planification pedagogique
 
 - [x] **#34** Module Planification — Phase 2 : Enseignement explicite ✅ LIVRÉ (10 fév 2026)
