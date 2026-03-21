@@ -1589,50 +1589,38 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
         // Labels (semaines)
         const labels = snapshots.map(s => `Sem. ${s.numSemaine}`);
 
-        // Collecter tous les étudiants uniques
-        const etudiantsMap = new Map();
+        // Récupérer les étudiants du groupe actif (source de vérité pour les noms)
+        const etudiantsGroupeActif = typeof obtenirEtudiantsCoursActif === 'function'
+            ? obtenirEtudiantsCoursActif() : [];
+        if (etudiantsGroupeActif.length === 0) {
+            afficherMessageAttente(canvas, 'Aucun groupe actif', 'Sélectionne un groupe pour voir les données.');
+            return null;
+        }
+        const dasGroupeActif = new Set(etudiantsGroupeActif.map(e => e.da));
+
+        // Collecter les DAs présents dans les snapshots
+        const dasAvecDonnees = new Set();
         snapshots.forEach(snapshot => {
             if (snapshot.etudiants) {
-                snapshot.etudiants.forEach(etudiant => {
-                    if (!etudiantsMap.has(etudiant.da)) {
-                        // 🆕 BETA 96 (FIX): Vérifier le mode anonymisation
-                        const nomAnonyme = typeof anonymiserNom === 'function' ? anonymiserNom(etudiant.da) : null;
-
-                        let nomAffiche;
-                        if (nomAnonyme) {
-                            // Mode anonymisation actif : utiliser le nom anonymisé
-                            nomAffiche = nomAnonyme;
-                        } else {
-                            // Mode normal : utiliser le nom formaté "Prénom N."
-                            const nomComplet = etudiant.nom || etudiant.da;
-                            const parties = nomComplet.split(' ');
-                            const prenom = parties[0] || '';
-                            const nomFamille = parties.slice(1).join(' ') || '';
-                            nomAffiche = nomFamille ? `${prenom} ${nomFamille.charAt(0)}.` : prenom;
-                        }
-
-                        etudiantsMap.set(etudiant.da, {
-                            da: etudiant.da,
-                            nomComplet: etudiant.nom || etudiant.da,
-                            nomAffiche: nomAffiche
-                        });
-                    }
+                snapshot.etudiants.forEach(e => {
+                    if (dasGroupeActif.has(e.da)) dasAvecDonnees.add(e.da);
                 });
             }
         });
 
-        // Filtrer pour ne garder que les étudiants du groupe actif
-        // (les anciens snapshots peuvent contenir des DAs d'autres groupes)
-        // ✅ CORRECTIF (13 fév 2026): Ne JAMAIS afficher les snapshots orphelins
-        // quand aucun groupe n'est actif (fuite de données personnelles)
-        const etudiantsGroupeActif = typeof obtenirEtudiantsCoursActif === 'function'
-            ? obtenirEtudiantsCoursActif() : [];
-        const dasGroupeActif = new Set(etudiantsGroupeActif.map(e => e.da));
-        if (dasGroupeActif.size === 0) {
-            afficherMessageAttente(canvas, 'Aucun groupe actif', 'Sélectionne un groupe pour voir les données.');
-            return null;
-        }
-        const etudiants = Array.from(etudiantsMap.values()).filter(e => dasGroupeActif.has(e.da));
+        // Construire la liste d'étudiants avec noms du groupe actif (pas des snapshots)
+        const etudiants = etudiantsGroupeActif
+            .filter(e => dasAvecDonnees.has(e.da))
+            .map(etudiant => {
+                const da = etudiant.da;
+                const nomAnonyme = typeof anonymiserNom === 'function' ? anonymiserNom(da) : null;
+                const nomAffiche = nomAnonyme
+                    ? nomAnonyme
+                    : (etudiant.prenom && etudiant.nom
+                        ? `${etudiant.prenom} ${etudiant.nom.charAt(0)}.`
+                        : etudiant.nom || `DA ${da}`);
+                return { da, nomComplet: etudiant.nom || da, nomAffiche };
+            });
         if (etudiants.length === 0) {
             afficherMessageAttente(canvas, 'Aucun étudiant', 'Les snapshots ne contiennent pas de données étudiants.');
             return null;
