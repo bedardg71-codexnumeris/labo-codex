@@ -32,10 +32,21 @@ const COULEURS_INDICES = {
 };
 
 /**
- * ✨ UNIFORMISATION (8 déc 2025) : Épaisseur unique pour toutes les courbes
- * Style simple et professionnel (comme graphique critères)
+ * ✨ UNIFORMISATION (#240) : Constantes de style partagées
+ * Alignées sur le style du graphique « Dynamique des corrélations »
  */
-const EPAISSEUR_LIGNE_STANDARD = 2;
+const STYLE_LIGNE_EPAISSEUR = 2.5;
+const STYLE_LIGNE_TENSION = 0.25;
+const STYLE_POINT_RAYON = 4;
+const STYLE_POINT_RAYON_HOVER = 7;
+const STYLE_POINT_BORDURE = 2;
+const STYLE_TOOLTIP = {
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    titleColor: '#fff',
+    bodyColor: '#fff',
+    cornerRadius: 6,
+    padding: 10
+};
 
 /**
  * ✅ CORRECTIF (2 mars 2026): Vérifie qu'un chart est encore valide
@@ -53,14 +64,112 @@ function chartEstValide(chart) {
 
 /**
  * Couleur de grille dynamique selon le thème clair/sombre
- * @param {number} [opacite=0.1] - Opacité de la grille
+ * @param {number} [opacite=0.08] - Opacité de la grille
  * @returns {string} - Couleur rgba adaptée au thème
  */
 function couleurGrille(opacite) {
-    if (opacite === undefined) opacite = 0.1;
+    if (opacite === undefined) opacite = 0.08;
     return document.body.classList.contains('mode-clair')
         ? 'rgba(3, 46, 92, ' + opacite + ')'
         : 'rgba(106, 172, 184, ' + opacite + ')';
+}
+
+/**
+ * Couleur du texte (axes, labels) adaptée au thème
+ * @returns {string} - Couleur hex
+ */
+function couleurTexte() {
+    return document.body.classList.contains('mode-clair') ? '#333' : '#b0c4d0';
+}
+
+/**
+ * Couleur de bordure des points adaptée au thème
+ * @returns {string} - Couleur hex
+ */
+function couleurBordurePoint() {
+    return document.body.classList.contains('mode-clair') ? '#fff' : '#1a2a3a';
+}
+
+/**
+ * Applique un style cohérent à un dataset de graphique 3 courbes (A-C-P, critères)
+ * @param {Object} dataset - Dataset Chart.js
+ * @param {string} etat - 'defaut' | 'actif' | 'inactif'
+ * @param {string} couleur - Couleur hex de la courbe
+ */
+function appliquerStyleDataset(dataset, etat, couleur) {
+    var nbPoints = dataset.data.length;
+    var bordure = couleurBordurePoint();
+
+    switch (etat) {
+        case 'defaut':
+            dataset.borderColor = couleur;
+            dataset.borderWidth = STYLE_LIGNE_EPAISSEUR;
+            dataset.pointBackgroundColor = couleur;
+            dataset.pointBorderColor = bordure;
+            dataset.pointBorderWidth = STYLE_POINT_BORDURE;
+            dataset.pointRadius = STYLE_POINT_RAYON;
+            dataset.order = 1;
+            break;
+        case 'actif':
+            dataset.borderColor = couleur;
+            dataset.borderWidth = 3;
+            dataset.pointBackgroundColor = Array(nbPoints).fill(couleur);
+            dataset.pointBorderColor = Array(nbPoints).fill(bordure);
+            dataset.pointBorderWidth = STYLE_POINT_BORDURE;
+            dataset.pointRadius = Array(nbPoints).fill(6);
+            dataset.order = 0;
+            break;
+        case 'inactif':
+            dataset.borderColor = hexVersRgba(couleur, 0.2);
+            dataset.borderWidth = 1.5;
+            dataset.pointBackgroundColor = Array(nbPoints).fill(hexVersRgba(couleur, 0.2));
+            dataset.pointBorderColor = Array(nbPoints).fill(hexVersRgba(couleur, 0.1));
+            dataset.pointBorderWidth = 1;
+            dataset.pointRadius = Array(nbPoints).fill(3);
+            dataset.order = 1;
+            break;
+    }
+}
+
+/**
+ * Applique un style cohérent à un dataset de graphique spaghetti (multi-étudiants)
+ * @param {Object} dataset - Dataset Chart.js
+ * @param {string} etat - 'defaut' | 'actif' | 'inactif'
+ * @param {string} couleur - Couleur hex de l'indice
+ */
+function appliquerStyleSpaghetti(dataset, etat, couleur) {
+    var nbPoints = dataset.data.length;
+    var bordure = couleurBordurePoint();
+
+    switch (etat) {
+        case 'defaut':
+            dataset.borderColor = hexVersRgba(couleur, 0.4);
+            dataset.borderWidth = STYLE_LIGNE_EPAISSEUR;
+            dataset.pointBackgroundColor = hexVersRgba(couleur, 0.4);
+            dataset.pointBorderColor = bordure;
+            dataset.pointBorderWidth = STYLE_POINT_BORDURE;
+            dataset.pointRadius = STYLE_POINT_RAYON;
+            dataset.pointHoverRadius = STYLE_POINT_RAYON_HOVER;
+            break;
+        case 'actif':
+            dataset.borderColor = couleur;
+            dataset.borderWidth = 3;
+            dataset.pointRadius = Array(nbPoints).fill(6);
+            dataset.pointBackgroundColor = Array(nbPoints).fill(couleur);
+            dataset.pointBorderColor = Array(nbPoints).fill(bordure);
+            dataset.pointBorderWidth = STYLE_POINT_BORDURE;
+            dataset.pointHoverRadius = STYLE_POINT_RAYON_HOVER;
+            break;
+        case 'inactif':
+            dataset.borderColor = hexVersRgba(couleur, 0.15);
+            dataset.borderWidth = 1.5;
+            dataset.pointRadius = Array(nbPoints).fill(2);
+            dataset.pointBackgroundColor = Array(nbPoints).fill(hexVersRgba(couleur, 0.15));
+            dataset.pointBorderColor = Array(nbPoints).fill(hexVersRgba(couleur, 0.1));
+            dataset.pointBorderWidth = 1;
+            dataset.pointHoverRadius = 2;
+            break;
+    }
 }
 
 /**
@@ -650,63 +759,51 @@ function creerGraphiqueIndividuel(canvasId, da) {
             'Performance (P)': COULEURS_INDICES.P
         };
 
-        // 🆕 BETA 96: Styles uniformisés avec cercles vides bleus
+        // ✨ #240: Courbes colorées par défaut, bordure de point thème-aware
         const datasets = [
             {
                 label: 'Assiduité (A)',
                 data: donneesA,
-                borderColor: 'rgba(255, 255, 255, 0.5)',
+                borderColor: COULEURS_INDICES.A,
                 backgroundColor: 'transparent',
-                borderWidth: 2,
-                tension: 0.2,
-                pointRadius: 5,
-                pointHoverRadius: 7,
+                borderWidth: STYLE_LIGNE_EPAISSEUR,
+                tension: STYLE_LIGNE_TENSION,
+                pointRadius: STYLE_POINT_RAYON,
+                pointHoverRadius: STYLE_POINT_RAYON_HOVER,
                 pointStyle: 'circle',
-                pointBackgroundColor: 'rgba(255, 255, 255, 0.9)',
-                pointBorderColor: 'rgba(33, 150, 243, 0.5)',
-                pointBorderWidth: 2,
-                pointHoverBackgroundColor: COULEURS_INDICES.A,
-                pointHoverBorderColor: COULEURS_INDICES.A,
-                hoverBorderWidth: 3,
-                hoverBorderColor: COULEURS_INDICES.A,
+                pointBackgroundColor: COULEURS_INDICES.A,
+                pointBorderColor: couleurBordurePoint(),
+                pointBorderWidth: STYLE_POINT_BORDURE,
                 spanGaps: false
             },
             {
                 label: 'Complétion (C)',
                 data: donneesC,
-                borderColor: 'rgba(255, 255, 255, 0.5)',
+                borderColor: COULEURS_INDICES.C,
                 backgroundColor: 'transparent',
-                borderWidth: 2,
-                tension: 0.2,
-                pointRadius: 5,
-                pointHoverRadius: 7,
+                borderWidth: STYLE_LIGNE_EPAISSEUR,
+                tension: STYLE_LIGNE_TENSION,
+                pointRadius: STYLE_POINT_RAYON,
+                pointHoverRadius: STYLE_POINT_RAYON_HOVER,
                 pointStyle: 'circle',
-                pointBackgroundColor: 'rgba(255, 255, 255, 0.9)',
-                pointBorderColor: 'rgba(33, 150, 243, 0.5)',
-                pointBorderWidth: 2,
-                pointHoverBackgroundColor: COULEURS_INDICES.C,
-                pointHoverBorderColor: COULEURS_INDICES.C,
-                hoverBorderWidth: 3,
-                hoverBorderColor: COULEURS_INDICES.C,
+                pointBackgroundColor: COULEURS_INDICES.C,
+                pointBorderColor: couleurBordurePoint(),
+                pointBorderWidth: STYLE_POINT_BORDURE,
                 spanGaps: false
             },
             {
                 label: 'Performance (P)',
                 data: donneesP,
-                borderColor: 'rgba(255, 255, 255, 0.5)',
+                borderColor: COULEURS_INDICES.P,
                 backgroundColor: 'transparent',
-                borderWidth: 2,
-                tension: 0.2,
-                pointRadius: 5,
-                pointHoverRadius: 7,
+                borderWidth: STYLE_LIGNE_EPAISSEUR,
+                tension: STYLE_LIGNE_TENSION,
+                pointRadius: STYLE_POINT_RAYON,
+                pointHoverRadius: STYLE_POINT_RAYON_HOVER,
                 pointStyle: 'circle',
-                pointBackgroundColor: 'rgba(255, 255, 255, 0.9)',
-                pointBorderColor: 'rgba(33, 150, 243, 0.5)',
-                pointBorderWidth: 2,
-                pointHoverBackgroundColor: COULEURS_INDICES.P,
-                pointHoverBorderColor: COULEURS_INDICES.P,
-                hoverBorderWidth: 3,
-                hoverBorderColor: COULEURS_INDICES.P,
+                pointBackgroundColor: COULEURS_INDICES.P,
+                pointBorderColor: couleurBordurePoint(),
+                pointBorderWidth: STYLE_POINT_BORDURE,
                 spanGaps: false
             }
         ];
@@ -819,12 +916,14 @@ function creerGraphiqueIndividuel(canvasId, da) {
                         display: true,
                         text: 'Progression temporelle - Indices A-C-P',
                         font: { size: 16, weight: 'bold' },
+                        color: couleurTexte(),
                         padding: { top: 10, bottom: 20 }
                     },
                     legend: {
                         display: false // Masquer la légende, on utilise les checkboxes
                     },
                     tooltip: {
+                        ...STYLE_TOOLTIP,
                         mode: 'index',
                         intersect: false,
                         callbacks: {
@@ -884,14 +983,16 @@ function creerGraphiqueIndividuel(canvasId, da) {
                         title: {
                             display: true,
                             text: 'Semaines',
+                            color: couleurTexte(),
                             font: { size: 12, weight: 'bold' }
                         },
                         ticks: {
+                            color: couleurTexte(),
                             maxRotation: 45,
                             minRotation: 45,
                             font: { size: 10 }
                         },
-                        grid: { display: true, color: couleurGrille(0.1) }
+                        grid: { display: true, color: couleurGrille() }
                     },
                     y: {
                         min: bornesY.min,
@@ -899,13 +1000,15 @@ function creerGraphiqueIndividuel(canvasId, da) {
                         title: {
                             display: true,
                             text: 'Indice',
+                            color: couleurTexte(),
                             font: { size: 12, weight: 'bold' }
                         },
                         ticks: {
+                            color: couleurTexte(),
                             callback: value => (value * 100).toFixed(0) + '%',
                             stepSize: 0.05
                         },
-                        grid: { display: true, color: couleurGrille(0.12) }
+                        grid: { display: true, color: couleurGrille() }
                     }
                 },
                 interaction: {
@@ -913,7 +1016,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                     axis: 'xy',
                     intersect: false
                 },
-                // 🆕 BETA 96: Gestionnaire survol avec styles uniformisés et verrouillage
+                // ✨ #240: Gestionnaire survol via appliquerStyleDataset
                 onHover: function(event, activeElements, chart) {
                     let datasetIndex = -1;
 
@@ -928,38 +1031,14 @@ function creerGraphiqueIndividuel(canvasId, da) {
                     if (datasetActif === dernierDatasetSurvoleIndiv && datasetVerrouilleIndiv < 0) return;
                     dernierDatasetSurvoleIndiv = datasetActif;
 
-                    // Mettre à jour les styles de toutes les courbes
                     chart.data.datasets.forEach((dataset, idx) => {
                         const couleurOriginale = couleursOriginales[dataset.label];
-                        const nbPoints = dataset.data.length;
-
                         if (datasetActif === -1) {
-                            // Aucun survol - courbes blanches, cercles vides bleus
-                            dataset.borderColor = 'rgba(255, 255, 255, 0.5)';
-                            dataset.borderWidth = 2;
-                            dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.9)');
-                            dataset.pointBorderColor = Array(nbPoints).fill('rgba(33, 150, 243, 0.5)');
-                            dataset.pointBorderWidth = 2;
-                            dataset.pointRadius = Array(nbPoints).fill(5);
-                            dataset.order = 1; // Ordre normal
+                            appliquerStyleDataset(dataset, 'defaut', couleurOriginale);
                         } else if (idx === datasetActif) {
-                            // Courbe active (survolée ou verrouillée) - noire avec points colorés
-                            dataset.borderColor = datasetVerrouilleIndiv >= 0 ? 'rgba(0, 0, 0, 0.9)' : 'rgba(0, 0, 0, 0.7)';
-                            dataset.borderWidth = 3;
-                            dataset.pointBackgroundColor = Array(nbPoints).fill(couleurOriginale);
-                            dataset.pointBorderColor = Array(nbPoints).fill('#FFFFFF');
-                            dataset.pointBorderWidth = 2;
-                            dataset.pointRadius = Array(nbPoints).fill(6);
-                            dataset.order = 0; // 🆕 BETA 96.1: Premier plan (dessiné en dernier)
+                            appliquerStyleDataset(dataset, 'actif', couleurOriginale);
                         } else {
-                            // Autres courbes - atténuées
-                            dataset.borderColor = 'rgba(255, 255, 255, 0.3)';
-                            dataset.borderWidth = 1.5;
-                            dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.5)');
-                            dataset.pointBorderColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-                            dataset.pointBorderWidth = 1;
-                            dataset.pointRadius = Array(nbPoints).fill(3);
-                            dataset.order = 1; // Arrière-plan
+                            appliquerStyleDataset(dataset, 'inactif', couleurOriginale);
                         }
                     });
 
@@ -978,14 +1057,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                 datasetVerrouilleIndiv = -1;
                 dernierDatasetSurvoleIndiv = -1;
                 chart.data.datasets.forEach(dataset => {
-                    const nbPoints = dataset.data.length;
-                    dataset.borderColor = 'rgba(255, 255, 255, 0.5)';
-                    dataset.borderWidth = 2;
-                    dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.9)');
-                    dataset.pointBorderColor = Array(nbPoints).fill('rgba(33, 150, 243, 0.5)');
-                    dataset.pointBorderWidth = 2;
-                    dataset.pointRadius = Array(nbPoints).fill(5);
-                    dataset.order = 1; // Ordre normal
+                    appliquerStyleDataset(dataset, 'defaut', couleursOriginales[dataset.label]);
                 });
             } else {
                 // Verrouiller
@@ -993,23 +1065,10 @@ function creerGraphiqueIndividuel(canvasId, da) {
                 dernierDatasetSurvoleIndiv = indexDataset;
                 chart.data.datasets.forEach((dataset, idx) => {
                     const couleurOriginale = couleursOriginales[dataset.label];
-                    const nbPoints = dataset.data.length;
                     if (idx === indexDataset) {
-                        dataset.borderColor = 'rgba(0, 0, 0, 0.9)';
-                        dataset.borderWidth = 3;
-                        dataset.pointBackgroundColor = Array(nbPoints).fill(couleurOriginale);
-                        dataset.pointBorderColor = Array(nbPoints).fill('#FFFFFF');
-                        dataset.pointBorderWidth = 2;
-                        dataset.pointRadius = Array(nbPoints).fill(6);
-                        dataset.order = 0; // 🆕 BETA 96.1: Premier plan
+                        appliquerStyleDataset(dataset, 'actif', couleurOriginale);
                     } else {
-                        dataset.borderColor = 'rgba(255, 255, 255, 0.3)';
-                        dataset.borderWidth = 1.5;
-                        dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.5)');
-                        dataset.pointBorderColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-                        dataset.pointBorderWidth = 1;
-                        dataset.pointRadius = Array(nbPoints).fill(3);
-                        dataset.order = 1; // Arrière-plan
+                        appliquerStyleDataset(dataset, 'inactif', couleurOriginale);
                     }
                 });
             }
@@ -1047,39 +1106,21 @@ function creerGraphiqueIndividuel(canvasId, da) {
             }
         });
 
-        // Maintenir l'état verrouillé au mouseleave
         canvas.addEventListener('mouseleave', function() {
             if (datasetVerrouilleIndiv >= 0) {
                 dernierDatasetSurvoleIndiv = datasetVerrouilleIndiv;
                 chart.data.datasets.forEach((dataset, idx) => {
                     const couleurOriginale = couleursOriginales[dataset.label];
-                    const nbPoints = dataset.data.length;
                     if (idx === datasetVerrouilleIndiv) {
-                        dataset.borderColor = 'rgba(0, 0, 0, 0.9)';
-                        dataset.borderWidth = 3;
-                        dataset.pointBackgroundColor = Array(nbPoints).fill(couleurOriginale);
-                        dataset.pointBorderColor = Array(nbPoints).fill('#FFFFFF');
-                        dataset.pointBorderWidth = 2;
-                        dataset.pointRadius = Array(nbPoints).fill(6);
+                        appliquerStyleDataset(dataset, 'actif', couleurOriginale);
                     } else {
-                        dataset.borderColor = 'rgba(255, 255, 255, 0.3)';
-                        dataset.borderWidth = 1.5;
-                        dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.5)');
-                        dataset.pointBorderColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-                        dataset.pointBorderWidth = 1;
-                        dataset.pointRadius = Array(nbPoints).fill(3);
+                        appliquerStyleDataset(dataset, 'inactif', couleurOriginale);
                     }
                 });
             } else {
                 dernierDatasetSurvoleIndiv = -1;
                 chart.data.datasets.forEach(dataset => {
-                    const nbPoints = dataset.data.length;
-                    dataset.borderColor = 'rgba(255, 255, 255, 0.5)';
-                    dataset.borderWidth = 2;
-                    dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.9)');
-                    dataset.pointBorderColor = Array(nbPoints).fill('rgba(33, 150, 243, 0.5)');
-                    dataset.pointBorderWidth = 2;
-                    dataset.pointRadius = Array(nbPoints).fill(5);
+                    appliquerStyleDataset(dataset, 'defaut', couleursOriginales[dataset.label]);
                 });
             }
             if (chartEstValide(chart)) chart.update('none');
@@ -1239,26 +1280,26 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                         data: donneesA,
                         borderColor: COULEURS_INDICES.A,
                         backgroundColor: 'transparent',
-                        borderWidth: EPAISSEUR_LIGNE_STANDARD,
-                        tension: 0.4,
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
+                        borderWidth: STYLE_LIGNE_EPAISSEUR,
+                        tension: STYLE_LIGNE_TENSION,
+                        pointRadius: STYLE_POINT_RAYON,
+                        pointHoverRadius: STYLE_POINT_RAYON_HOVER,
                         pointBackgroundColor: COULEURS_INDICES.A,
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2
+                        pointBorderColor: couleurBordurePoint(),
+                        pointBorderWidth: STYLE_POINT_BORDURE
                     },
                     {
                         label: 'Complétion (C)',
                         data: donneesC,
                         borderColor: COULEURS_INDICES.C,
                         backgroundColor: 'transparent',
-                        borderWidth: EPAISSEUR_LIGNE_STANDARD,
-                        tension: 0.4,
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
+                        borderWidth: STYLE_LIGNE_EPAISSEUR,
+                        tension: STYLE_LIGNE_TENSION,
+                        pointRadius: STYLE_POINT_RAYON,
+                        pointHoverRadius: STYLE_POINT_RAYON_HOVER,
                         pointBackgroundColor: COULEURS_INDICES.C,
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
+                        pointBorderColor: couleurBordurePoint(),
+                        pointBorderWidth: STYLE_POINT_BORDURE,
                         spanGaps: false
                     },
                     {
@@ -1266,13 +1307,13 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                         data: donneesP,
                         borderColor: COULEURS_INDICES.P,
                         backgroundColor: 'transparent',
-                        borderWidth: EPAISSEUR_LIGNE_STANDARD,
-                        tension: 0.4,
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
+                        borderWidth: STYLE_LIGNE_EPAISSEUR,
+                        tension: STYLE_LIGNE_TENSION,
+                        pointRadius: STYLE_POINT_RAYON,
+                        pointHoverRadius: STYLE_POINT_RAYON_HOVER,
                         pointBackgroundColor: COULEURS_INDICES.P,
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
+                        pointBorderColor: couleurBordurePoint(),
+                        pointBorderWidth: STYLE_POINT_BORDURE,
                         spanGaps: false
                     }
                 ]
@@ -1288,7 +1329,7 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                             { size: 16, weight: 'bold' },
                             { size: 11, weight: 'normal', style: 'italic' }
                         ],
-                        color: ['#d0e0e4', '#8aa4b0'],
+                        color: [couleurTexte(), hexVersRgba(couleurTexte(), 0.6)],
                         padding: { top: 10, bottom: 20 }
                     },
                     legend: {
@@ -1297,7 +1338,8 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                         labels: {
                             usePointStyle: true,
                             padding: 15,
-                            font: { size: 12 }
+                            font: { size: 12 },
+                            color: couleurTexte()
                         },
                         onClick: function(e, legendItem, legend) {
                             // ✨ NOUVELLE FONCTIONNALITÉ (8 déc 2025) : Persistance de la légende
@@ -1317,6 +1359,7 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                         }
                     },
                     tooltip: {
+                        ...STYLE_TOOLTIP,
                         mode: 'index',
                         intersect: false,
                         callbacks: {
@@ -1331,27 +1374,34 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                             }
                         }
                     }
-                    // 🆕 BETA 96: Annotations remplacées par pluginGradientFond
                 },
                 scales: {
                     x: {
                         title: {
                             display: true,
-                            text: 'Semaines'
-                        }
+                            text: 'Semaines',
+                            color: couleurTexte(),
+                            font: { size: 12, weight: 'bold' }
+                        },
+                        ticks: { color: couleurTexte() },
+                        grid: { display: true, color: couleurGrille() }
                     },
                     y: {
                         min: bornesY.min,
                         max: bornesY.max,
                         title: {
                             display: true,
-                            text: 'Performance'
+                            text: 'Performance',
+                            color: couleurTexte(),
+                            font: { size: 12, weight: 'bold' }
                         },
                         ticks: {
+                            color: couleurTexte(),
                             callback: function(value) {
                                 return (value * 100).toFixed(0) + '%';
                             }
-                        }
+                        },
+                        grid: { display: true, color: couleurGrille() }
                     }
                 },
                 interaction: {
@@ -1371,26 +1421,12 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
 
                     chart.data.datasets.forEach((dataset, idx) => {
                         const couleurOriginale = couleursOriginales[dataset.label];
-                        const nbPoints = dataset.data.length;
-
                         if (datasetIndex === -1) {
-                            // Aucun survol : toutes les courbes colorées
-                            dataset.borderColor = couleurOriginale;
-                            dataset.borderWidth = EPAISSEUR_LIGNE_STANDARD;
-                            dataset.pointBackgroundColor = Array(nbPoints).fill(couleurOriginale);
-                            dataset.pointRadius = Array(nbPoints).fill(5);
+                            appliquerStyleDataset(dataset, 'defaut', couleurOriginale);
                         } else if (idx === datasetIndex) {
-                            // Courbe survolée : mise en évidence
-                            dataset.borderColor = couleurOriginale;
-                            dataset.borderWidth = 3;
-                            dataset.pointBackgroundColor = Array(nbPoints).fill(couleurOriginale);
-                            dataset.pointRadius = Array(nbPoints).fill(6);
+                            appliquerStyleDataset(dataset, 'actif', couleurOriginale);
                         } else {
-                            // Autres courbes : atténuées
-                            dataset.borderColor = 'rgba(150, 150, 150, 0.3)';
-                            dataset.borderWidth = 1.5;
-                            dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(150, 150, 150, 0.3)');
-                            dataset.pointRadius = Array(nbPoints).fill(3);
+                            appliquerStyleDataset(dataset, 'inactif', couleurOriginale);
                         }
                     });
 
@@ -1701,28 +1737,24 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
             // Vérifier qu'il y a au moins une valeur non-null
             if (data.every(v => v === null || v === undefined)) return null;
 
+            // ✨ #240: Couleur de l'indice à 40% par défaut
+            var couleurIndice = couleursIndices[indice] || COULEURS_INDICES.P;
             return {
                 label: etudiant.nomAffiche,
                 data: data,
                 da: etudiant.da,
-                indice: indice, // 🆕 BETA 96: Stocker l'indice pour le toggle
-                // 🆕 BETA 96: Opacités ajustées pour contraste (30% overlay par défaut)
-                borderColor: 'rgba(255, 255, 255, 0.5)',
+                indice: indice,
+                borderColor: hexVersRgba(couleurIndice, 0.4),
                 backgroundColor: 'transparent',
-                borderWidth: 2,
-                tension: 0.2,
-                pointRadius: 5,
-                pointHoverRadius: 7,
+                borderWidth: STYLE_LIGNE_EPAISSEUR,
+                tension: STYLE_LIGNE_TENSION,
+                pointRadius: STYLE_POINT_RAYON,
+                pointHoverRadius: STYLE_POINT_RAYON_HOVER,
                 pointStyle: 'circle',
-                pointBackgroundColor: 'rgba(255, 255, 255, 0.9)',
-                pointBorderColor: 'rgba(33, 150, 243, 0.5)',
-                pointBorderWidth: 2,
-                pointHoverBackgroundColor: 'rgba(33, 150, 243, 0.5)',
-                pointHoverBorderColor: 'rgba(21, 101, 192, 0.6)',
-                pointHoverBorderWidth: 2,
-                spanGaps: false,
-                hoverBorderWidth: 3,
-                hoverBorderColor: 'rgba(33, 150, 243, 0.5)'
+                pointBackgroundColor: hexVersRgba(couleurIndice, 0.4),
+                pointBorderColor: couleurBordurePoint(),
+                pointBorderWidth: STYLE_POINT_BORDURE,
+                spanGaps: false
             };
         }).filter(d => d !== null);
 
@@ -1767,6 +1799,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                     },
                     legend: { display: false },
                     tooltip: {
+                        ...STYLE_TOOLTIP,
                         enabled: true,
                         mode: 'nearest',
                         intersect: true,
@@ -1787,12 +1820,12 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                             }
                         }
                     }
-                    // 🆕 BETA 96: Annotations remplacées par pluginGradientFond
                 },
                 scales: {
                     x: {
-                        grid: { display: true, color: couleurGrille(0.1) },
+                        grid: { display: true, color: couleurGrille() },
                         ticks: {
+                            color: couleurTexte(),
                             font: { size: 10 },
                             maxRotation: 45,
                             minRotation: 45
@@ -1801,14 +1834,16 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                     y: {
                         min: bornesY.min,
                         max: bornesY.max,
-                        grid: { display: true, color: couleurGrille(0.12) },
+                        grid: { display: true, color: couleurGrille() },
                         ticks: {
+                            color: couleurTexte(),
                             callback: value => (value * 100).toFixed(0) + '%',
                             stepSize: 0.05
                         },
                         title: {
                             display: true,
                             text: nomsIndices[indice],
+                            color: couleurTexte(),
                             font: { size: 12, weight: 'bold' }
                         }
                     }
@@ -1833,53 +1868,19 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
 
                     dernierDatasetSurvoleACP = datasetActif;
 
-                    // 🆕 BETA 96: Hover=noir avec points colorés, Verrouillé=noir
+                    var couleurIndice = couleursIndices[indice] || COULEURS_INDICES.P;
                     chart.data.datasets.forEach((dataset, idx) => {
-                        const nbPoints = dataset.data.length;
-
                         if (datasetActif === -1) {
-                            // Style par défaut (noir 20%)
-                            dataset.borderColor = 'rgba(255, 255, 255, 0.5)';
-                            dataset.borderWidth = 2;
-                            dataset.pointRadius = Array(nbPoints).fill(5);
-                            dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.9)');
-                            dataset.pointBorderColor = Array(nbPoints).fill('rgba(33, 150, 243, 0.5)');
-                            dataset.pointBorderWidth = 2;
+                            appliquerStyleSpaghetti(dataset, 'defaut', couleurIndice);
                         } else if (idx === datasetActif) {
-                            if (datasetVerrouilleACP >= 0) {
-                                // Courbe VERROUILLÉE - noir avec points colorés
-                                dataset.borderColor = 'rgba(0, 0, 0, 0.9)';
-                                dataset.borderWidth = 3;
-                                dataset.pointRadius = Array(nbPoints).fill(6);
-                                dataset.pointBackgroundColor = Array(nbPoints).fill('#2196F3');
-                                dataset.pointBorderColor = Array(nbPoints).fill('#FFFFFF');
-                                dataset.pointBorderWidth = 2;
-                            } else {
-                                // Courbe SURVOLÉE - noir avec points colorés (style barres ACPE)
-                                dataset.borderColor = 'rgba(0, 0, 0, 0.7)';
-                                dataset.borderWidth = 3;
-                                dataset.pointRadius = Array(nbPoints).fill(6);
-                                dataset.pointBackgroundColor = Array(nbPoints).fill('#2196F3');  // Bleu intérieur
-                                dataset.pointBorderColor = Array(nbPoints).fill('#FFFFFF');      // Contour blanc
-                                dataset.pointBorderWidth = 2;
-
-                                if (dataIndex >= 0 && dataIndex < nbPoints && dataset.data[dataIndex] !== null) {
-                                    dataset.pointRadius[dataIndex] = 8;
-                                }
+                            appliquerStyleSpaghetti(dataset, 'actif', couleurIndice);
+                            // Agrandir le point survolé
+                            if (dataIndex >= 0 && dataIndex < dataset.data.length && dataset.data[dataIndex] !== null) {
+                                dataset.pointRadius[dataIndex] = 8;
                             }
                         } else {
-                            // Courbes très atténuées
-                            dataset.borderColor = 'rgba(255, 255, 255, 0.3)';
-                            dataset.borderWidth = 1.5;
-                            dataset.pointRadius = Array(nbPoints).fill(3);
-                            dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-                            dataset.pointBorderColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-                            dataset.pointBorderWidth = 1;
-                            if (datasetVerrouilleACP >= 0) {
-                                dataset.pointHoverRadius = 3;
-                            } else {
-                                dataset.pointHoverRadius = 6;
-                            }
+                            appliquerStyleSpaghetti(dataset, 'inactif', couleurIndice);
+                            dataset.pointHoverRadius = datasetVerrouilleACP >= 0 ? 2 : STYLE_POINT_RAYON_HOVER;
                         }
                     });
 
@@ -1891,98 +1892,53 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
         const chart = new Chart(ctx, config);
         graphiqueSpaghettiACPInstance = chart;
 
-        // 🆕 BETA 96: Verrouillé = noir
         canvas.addEventListener('mouseleave', function() {
+            var couleurIndice = couleursIndices[indice] || COULEURS_INDICES.P;
             if (datasetVerrouilleACP >= 0) {
                 dernierDatasetSurvoleACP = datasetVerrouilleACP;
                 chart.data.datasets.forEach((dataset, idx) => {
-                    const nbPoints = dataset.data.length;
                     if (idx === datasetVerrouilleACP) {
-                        // Courbe verrouillée - NOIR avec points colorés
-                        dataset.borderColor = 'rgba(0, 0, 0, 0.9)';
-                        dataset.borderWidth = 3;
-                        dataset.pointRadius = Array(nbPoints).fill(6);
-                        dataset.pointBackgroundColor = Array(nbPoints).fill('#2196F3');
-                        dataset.pointBorderColor = Array(nbPoints).fill('#FFFFFF');
-                        dataset.pointBorderWidth = 2;
-                        dataset.pointHoverRadius = 7;
+                        appliquerStyleSpaghetti(dataset, 'actif', couleurIndice);
                     } else {
-                        // Autres courbes - très atténuées (blanc)
-                        dataset.borderColor = 'rgba(255, 255, 255, 0.3)';
-                        dataset.borderWidth = 1.5;
-                        dataset.pointRadius = Array(nbPoints).fill(3);
-                        dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-                        dataset.pointBorderColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-                        dataset.pointBorderWidth = 1;
-                        dataset.pointHoverRadius = 3;
+                        appliquerStyleSpaghetti(dataset, 'inactif', couleurIndice);
+                        dataset.pointHoverRadius = 2;
                     }
                 });
             } else {
-                // Pas de verrouillage - style par défaut (noir 20%)
                 dernierDatasetSurvoleACP = -1;
                 chart.data.datasets.forEach(dataset => {
-                    const nbPoints = dataset.data.length;
-                    dataset.borderColor = 'rgba(255, 255, 255, 0.5)';
-                    dataset.borderWidth = 2;
-                    dataset.pointRadius = Array(nbPoints).fill(5);
-                    dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.9)');
-                    dataset.pointBorderColor = Array(nbPoints).fill('rgba(33, 150, 243, 0.5)');
-                    dataset.pointBorderWidth = 2;
-                    dataset.pointHoverRadius = 7;
+                    appliquerStyleSpaghetti(dataset, 'defaut', couleurIndice);
                 });
             }
             if (chartEstValide(chart)) chart.update('none');
         });
 
-        // 🆕 BETA 96: Verrouillé = noir
         function toggleVerrouillageSpaghetti(indexDataset) {
             const selecteur = document.getElementById('selecteur-etudiant-acp');
+            var couleurIndice = couleursIndices[indice] || COULEURS_INDICES.P;
 
             if (datasetVerrouilleACP === indexDataset) {
-                // Déverrouiller - retour au style par défaut (blanc 50%)
+                // Déverrouiller
                 datasetVerrouilleACP = -1;
                 dernierDatasetSurvoleACP = -1;
                 console.log('🔓 Courbe ACP déverrouillée');
                 chart.data.datasets.forEach(dataset => {
-                    const nbPoints = dataset.data.length;
-                    dataset.borderColor = 'rgba(255, 255, 255, 0.5)';
-                    dataset.borderWidth = 2;
-                    dataset.pointRadius = Array(nbPoints).fill(5);
-                    dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.9)');
-                    dataset.pointBorderColor = Array(nbPoints).fill('rgba(33, 150, 243, 0.5)');
-                    dataset.pointBorderWidth = 2;
-                    dataset.pointHoverRadius = 7;
+                    appliquerStyleSpaghetti(dataset, 'defaut', couleurIndice);
                 });
-                // Réinitialiser le dropdown
                 if (selecteur) selecteur.value = '';
             } else {
-                // Verrouiller - courbe NOIRE avec points colorés
+                // Verrouiller
                 datasetVerrouilleACP = indexDataset;
                 dernierDatasetSurvoleACP = indexDataset;
                 console.log(`🔒 Courbe ACP verrouillée: ${chart.data.datasets[indexDataset]?.label}`);
                 chart.data.datasets.forEach((dataset, idx) => {
-                    const nbPoints = dataset.data.length;
                     if (idx === indexDataset) {
-                        // Courbe verrouillée - NOIR avec points colorés
-                        dataset.borderColor = 'rgba(0, 0, 0, 0.9)';
-                        dataset.borderWidth = 3;
-                        dataset.pointRadius = Array(nbPoints).fill(6);
-                        dataset.pointBackgroundColor = Array(nbPoints).fill('#2196F3');
-                        dataset.pointBorderColor = Array(nbPoints).fill('#FFFFFF');
-                        dataset.pointBorderWidth = 2;
-                        dataset.pointHoverRadius = 7;
+                        appliquerStyleSpaghetti(dataset, 'actif', couleurIndice);
                     } else {
-                        // Autres courbes - très atténuées (blanc)
-                        dataset.borderColor = 'rgba(255, 255, 255, 0.3)';
-                        dataset.borderWidth = 1.5;
-                        dataset.pointRadius = Array(nbPoints).fill(3);
-                        dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-                        dataset.pointBorderColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-                        dataset.pointBorderWidth = 1;
-                        dataset.pointHoverRadius = 3;
+                        appliquerStyleSpaghetti(dataset, 'inactif', couleurIndice);
+                        dataset.pointHoverRadius = 2;
                     }
                 });
-                // Synchroniser le dropdown avec la courbe verrouillée
                 if (selecteur) selecteur.value = indexDataset;
             }
             if (chartEstValide(chart)) chart.update('none');
@@ -2086,22 +2042,19 @@ function selectionnerEtudiantACP() {
     const selecteur = document.getElementById('selecteur-etudiant-acp');
     if (!selecteur || !graphiqueSpaghettiACPInstance) return;
 
-    // 🆕 BETA 96: Verrouillé = noir
     const indexStr = selecteur.value;
+    // Déterminer l'indice ACP actif via le sélecteur
+    const selecteurIndice = document.getElementById('selecteur-indice-acp');
+    const indiceActif = selecteurIndice ? selecteurIndice.value : 'A';
+    const couleursIndicesLocal = { 'A': '#1976D2', 'C': '#FF6B35', 'P': '#4CAF50' };
+    var couleurIndice = couleursIndicesLocal[indiceActif] || COULEURS_INDICES.P;
+
     if (indexStr === '') {
-        // Désélectionner - retour au style par défaut (blanc 50%)
         if (datasetVerrouilleACP >= 0) {
             datasetVerrouilleACP = -1;
             dernierDatasetSurvoleACP = -1;
             graphiqueSpaghettiACPInstance.data.datasets.forEach(dataset => {
-                const nbPoints = dataset.data.length;
-                dataset.borderColor = 'rgba(255, 255, 255, 0.5)';
-                dataset.borderWidth = 2;
-                dataset.pointRadius = Array(nbPoints).fill(5);
-                dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.9)');
-                dataset.pointBorderColor = Array(nbPoints).fill('rgba(33, 150, 243, 0.5)');
-                dataset.pointBorderWidth = 2;
-                dataset.pointHoverRadius = 7;
+                appliquerStyleSpaghetti(dataset, 'defaut', couleurIndice);
             });
             graphiqueSpaghettiACPInstance.update('none');
         }
@@ -2109,31 +2062,16 @@ function selectionnerEtudiantACP() {
     }
 
     const index = parseInt(indexStr);
-    // Verrouiller - courbe NOIRE avec points colorés
     datasetVerrouilleACP = index;
     dernierDatasetSurvoleACP = index;
 
     const chart = graphiqueSpaghettiACPInstance;
     chart.data.datasets.forEach((dataset, idx) => {
-        const nbPoints = dataset.data.length;
         if (idx === index) {
-            // Courbe verrouillée - NOIR avec points colorés
-            dataset.borderColor = 'rgba(0, 0, 0, 0.9)';
-            dataset.borderWidth = 3;
-            dataset.pointRadius = Array(nbPoints).fill(6);
-            dataset.pointBackgroundColor = Array(nbPoints).fill('#2196F3');
-            dataset.pointBorderColor = Array(nbPoints).fill('#FFFFFF');
-            dataset.pointBorderWidth = 2;
-            dataset.pointHoverRadius = 7;
+            appliquerStyleSpaghetti(dataset, 'actif', couleurIndice);
         } else {
-            // Autres courbes - très atténuées (blanc)
-            dataset.borderColor = 'rgba(255, 255, 255, 0.3)';
-            dataset.borderWidth = 1.5;
-            dataset.pointRadius = Array(nbPoints).fill(3);
-            dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-            dataset.pointBorderColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-            dataset.pointBorderWidth = 1;
-            dataset.pointHoverRadius = 3;
+            appliquerStyleSpaghetti(dataset, 'inactif', couleurIndice);
+            dataset.pointHoverRadius = 2;
         }
     });
     if (chartEstValide(chart)) chart.update('none');
@@ -2244,8 +2182,8 @@ const pluginGradientFond100 = {
         ctx.fillRect(chartArea.left, chartArea.top,
             chartArea.right - chartArea.left, chartArea.bottom - chartArea.top);
 
-        // Overlay sombre à 20%
-        ctx.fillStyle = 'rgba(15, 30, 58, 0.2)';
+        // Overlay sombre à 70% — dégradé IDME atténué, courbes lisibles
+        ctx.fillStyle = 'rgba(15, 30, 58, 0.7)';
         ctx.fillRect(chartArea.left, chartArea.top,
             chartArea.right - chartArea.left, chartArea.bottom - chartArea.top);
         ctx.restore();
@@ -2633,30 +2571,14 @@ function gererSurvolSpaghetti(event, activeElements, chart) {
 
     dernierDatasetSurvole = datasetIndex;
 
-    // 🆕 BETA 96: Appliquer les styles uniformisés selon le survol
+    var couleurP = COULEURS_INDICES.P;
     chart.data.datasets.forEach((dataset, index) => {
         if (datasetIndex === -1) {
-            // Aucun survol - style par défaut (cercles vides bleus)
-            dataset.borderColor = 'rgba(255, 255, 255, 0.5)';
-            dataset.borderWidth = 2;
-            dataset.pointRadius = 5;
-            dataset.pointBackgroundColor = 'rgba(255, 255, 255, 0.9)';
-            dataset.pointBorderColor = 'rgba(33, 150, 243, 0.7)';
-            dataset.pointBorderWidth = 2;
+            appliquerStyleSpaghetti(dataset, 'defaut', couleurP);
         } else if (index === datasetIndex) {
-            // Courbe survolée - mise en évidence
-            dataset.borderColor = '#2196F3';
-            dataset.borderWidth = 3;
-            dataset.pointRadius = 6;
-            dataset.pointBackgroundColor = '#2196F3';
-            dataset.pointBorderColor = '#1565C0';
-            dataset.pointBorderWidth = 2;
+            appliquerStyleSpaghetti(dataset, 'actif', couleurP);
         } else {
-            // Autres courbes - atténuées mais visibles
-            dataset.borderColor = 'rgba(80, 80, 80, 0.35)';
-            dataset.borderWidth = 1.5;
-            dataset.pointRadius = 1;
-            dataset.pointBackgroundColor = 'rgba(80, 80, 80, 0.3)';
+            appliquerStyleSpaghetti(dataset, 'inactif', couleurP);
         }
     });
 
@@ -2672,14 +2594,9 @@ function reinitialiserStylesSpaghetti(chart) {
 
     dernierDatasetSurvole = -1;
 
-    // 🆕 BETA 96: Réinitialiser tous les datasets au style uniformisé
+    var couleurP = COULEURS_INDICES.P;
     chart.data.datasets.forEach(dataset => {
-        dataset.borderColor = 'rgba(255, 255, 255, 0.5)';
-        dataset.borderWidth = 2;
-        dataset.pointRadius = 5;
-        dataset.pointBackgroundColor = 'rgba(255, 255, 255, 0.9)';
-        dataset.pointBorderColor = 'rgba(33, 150, 243, 0.7)';
-        dataset.pointBorderWidth = 2;
+        appliquerStyleSpaghetti(dataset, 'defaut', couleurP);
     });
 
     if (chartEstValide(chart)) chart.update('none');
@@ -2991,29 +2908,22 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                 };
             }
 
+            // ✨ #240: Couleur P à 40% par défaut
             return {
                 label: nom,
-                da: da, // Stocker le DA pour identification
+                da: da,
                 data: donnees,
-                // 🆕 BETA 96: Opacité ajustée pour contraste avec fond saturé
-                // Non sélectionné : 30% overlay
-                borderColor: 'rgba(255, 255, 255, 0.5)',
+                borderColor: hexVersRgba(COULEURS_INDICES.P, 0.4),
                 backgroundColor: 'transparent',
-                borderWidth: 2,
-                tension: 0.2,
-                pointRadius: 5,
-                pointHoverRadius: 7,
+                borderWidth: STYLE_LIGNE_EPAISSEUR,
+                tension: STYLE_LIGNE_TENSION,
+                pointRadius: STYLE_POINT_RAYON,
+                pointHoverRadius: STYLE_POINT_RAYON_HOVER,
                 pointStyle: 'circle',
-                pointBackgroundColor: 'rgba(255, 255, 255, 0.9)',
-                pointBorderColor: 'rgba(33, 150, 243, 0.5)',
-                pointBorderWidth: 2,
-                pointHoverBackgroundColor: '#2196F3',
-                pointHoverBorderColor: '#1565C0',
-                pointHoverBorderWidth: 2,
-                spanGaps: false, // NE PAS connecter les trous (travaux non-remis)
-                // Propriétés pour le survol
-                hoverBorderWidth: 3,
-                hoverBorderColor: '#2196F3' // Bleu vif au survol
+                pointBackgroundColor: hexVersRgba(COULEURS_INDICES.P, 0.4),
+                pointBorderColor: couleurBordurePoint(),
+                pointBorderWidth: STYLE_POINT_BORDURE,
+                spanGaps: false
             };
         }).filter(d => d !== null);
 
@@ -3154,16 +3064,18 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                         title: {
                             display: true,
                             text: 'Activités d\'apprentissage',
+                            color: couleurTexte(),
                             font: { size: 12, weight: 'bold' }
                         },
                         ticks: {
+                            color: couleurTexte(),
                             maxRotation: 45,
                             minRotation: 45,
                             font: { size: 11 }
                         },
                         grid: {
                             display: true,
-                            color: 'rgba(0, 0, 0, 0.05)'
+                            color: couleurGrille()
                         }
                     },
                     y: {
@@ -3172,9 +3084,11 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                         title: {
                             display: true,
                             text: 'Résultat',
+                            color: couleurTexte(),
                             font: { size: 12, weight: 'bold' }
                         },
                         ticks: {
+                            color: couleurTexte(),
                             callback: function(value) {
                                 return value.toFixed(2).replace('.', ',');
                             },
@@ -3183,7 +3097,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                         },
                         grid: {
                             display: true,
-                            color: 'rgba(0, 0, 0, 0.08)'
+                            color: couleurGrille()
                         }
                     }
                 },
@@ -3217,70 +3131,33 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                     // TOUS les indices de la même activité (y compris le point survolé)
                     const indicesMemesActivites = dataIndex >= 0 ? (memesActivites[dataIndex] || []) : [];
 
-                    // 🆕 BETA 96: Hover=noir avec points colorés, Verrouillé=noir
+                    var couleurP = COULEURS_INDICES.P;
                     chart.data.datasets.forEach((dataset, idx) => {
-                        const nbPoints = dataset.data.length;
+                        var nbPoints = dataset.data.length;
 
                         if (datasetActif === -1) {
-                            // Aucun survol - style par défaut (noir 20%)
-                            dataset.borderColor = 'rgba(255, 255, 255, 0.5)';
-                            dataset.borderWidth = 2;
-                            dataset.pointRadius = Array(nbPoints).fill(5);
-                            dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.9)');
-                            dataset.pointBorderColor = Array(nbPoints).fill('rgba(33, 150, 243, 0.5)');
-                            dataset.pointBorderWidth = 2;
+                            appliquerStyleSpaghetti(dataset, 'defaut', couleurP);
                         } else if (idx === datasetActif) {
-                            if (datasetVerrouille >= 0) {
-                                // Courbe VERROUILLÉE - noir avec points colorés
-                                dataset.borderColor = 'rgba(0, 0, 0, 0.9)';
-                                dataset.borderWidth = 3;
-                                dataset.pointRadius = Array(nbPoints).fill(6);
-                                dataset.pointBackgroundColor = Array(nbPoints).fill('#2196F3');
-                                dataset.pointBorderColor = Array(nbPoints).fill('#FFFFFF');
-                                dataset.pointBorderWidth = 2;
-                            } else {
-                                // Courbe SURVOLÉE - noir avec points colorés (style barres ACPE)
-                                dataset.borderColor = 'rgba(0, 0, 0, 0.7)';
-                                dataset.borderWidth = 3;
+                            appliquerStyleSpaghetti(dataset, 'actif', couleurP);
 
-                                // Points: intérieur bleu, contour blanc (comme barres ACPE)
-                                const rayons = Array(nbPoints).fill(6);
-                                const couleurs = Array(nbPoints).fill('#2196F3');  // Bleu intérieur
-                                const bordures = Array(nbPoints).fill('#FFFFFF');  // Contour blanc
-
+                            if (datasetVerrouille < 0) {
                                 // Mettre en évidence TOUS les points de même activité (orange)
                                 if (indicesMemesActivites.length > 1) {
                                     indicesMemesActivites.forEach(i => {
                                         if (i >= 0 && i < nbPoints && dataset.data[i] !== null) {
-                                            rayons[i] = 8;
-                                            couleurs[i] = '#FF9800';  // Orange intérieur
+                                            dataset.pointRadius[i] = 8;
+                                            dataset.pointBackgroundColor[i] = '#FF9800';
                                         }
                                     });
                                 }
-
                                 // Le point directement survolé est plus gros
                                 if (dataIndex >= 0 && dataIndex < nbPoints && dataset.data[dataIndex] !== null) {
-                                    rayons[dataIndex] = 10;
+                                    dataset.pointRadius[dataIndex] = 10;
                                 }
-
-                                dataset.pointRadius = rayons;
-                                dataset.pointBackgroundColor = couleurs;
-                                dataset.pointBorderColor = bordures;
-                                dataset.pointBorderWidth = 2;
                             }
                         } else {
-                            // Autres courbes - très atténuées (blanc)
-                            dataset.borderColor = 'rgba(255, 255, 255, 0.3)';
-                            dataset.borderWidth = 1.5;
-                            dataset.pointRadius = Array(nbPoints).fill(3);
-                            dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-                            dataset.pointBorderColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-                            dataset.pointBorderWidth = 1;
-                            if (datasetVerrouille >= 0) {
-                                dataset.pointHoverRadius = 3;
-                            } else {
-                                dataset.pointHoverRadius = 7;
-                            }
+                            appliquerStyleSpaghetti(dataset, 'inactif', couleurP);
+                            dataset.pointHoverRadius = datasetVerrouille >= 0 ? 2 : STYLE_POINT_RAYON_HOVER;
                         }
                     });
 
@@ -3297,97 +3174,55 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         // Sauf si une courbe est verrouillée
         canvas.addEventListener('mouseleave', function() {
             // Si verrouillé, garder la courbe active affichée
+            var couleurP = COULEURS_INDICES.P;
             if (datasetVerrouille >= 0) {
                 dernierDatasetSurvole = datasetVerrouille;
                 dernierPointSurvole = -1;
-                // 🆕 BETA 96: Verrouillé = noir
                 chart.data.datasets.forEach((dataset, idx) => {
-                    const nbPoints = dataset.data.length;
                     if (idx === datasetVerrouille) {
-                        dataset.borderColor = 'rgba(0, 0, 0, 0.9)';
-                        dataset.borderWidth = 3;
-                        dataset.pointRadius = Array(nbPoints).fill(6);
-                        dataset.pointBackgroundColor = Array(nbPoints).fill('#2196F3');
-                        dataset.pointBorderColor = Array(nbPoints).fill('#FFFFFF');
-                        dataset.pointBorderWidth = 2;
-                        dataset.pointHoverRadius = 7;
+                        appliquerStyleSpaghetti(dataset, 'actif', couleurP);
                     } else {
-                        dataset.borderColor = 'rgba(255, 255, 255, 0.3)';
-                        dataset.borderWidth = 1.5;
-                        dataset.pointRadius = Array(nbPoints).fill(3);
-                        dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-                        dataset.pointBorderColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-                        dataset.pointBorderWidth = 1;
-                        dataset.pointHoverRadius = 3;
+                        appliquerStyleSpaghetti(dataset, 'inactif', couleurP);
+                        dataset.pointHoverRadius = 2;
                     }
                 });
             } else {
-                // Pas de verrouillage - réinitialiser au style par défaut (noir 20%)
                 dernierDatasetSurvole = -1;
                 dernierPointSurvole = -1;
                 chart.data.datasets.forEach(dataset => {
-                    const nbPoints = dataset.data.length;
-                    dataset.borderColor = 'rgba(255, 255, 255, 0.5)';
-                    dataset.borderWidth = 2;
-                    dataset.pointRadius = Array(nbPoints).fill(5);
-                    dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.9)');
-                    dataset.pointBorderColor = Array(nbPoints).fill('rgba(33, 150, 243, 0.5)');
-                    dataset.pointBorderWidth = 2;
-                    dataset.pointHoverRadius = 7;
+                    appliquerStyleSpaghetti(dataset, 'defaut', couleurP);
                 });
             }
             if (chartEstValide(chart)) chart.update('none');
         });
 
-        // 🆕 BETA 96: Verrouillé = noir, déverrouillé = blanc
         function toggleVerrouillage(indexDataset) {
             const selecteur = document.getElementById('selecteur-etudiant-spaghetti');
+            var couleurP = COULEURS_INDICES.P;
 
             if (datasetVerrouille === indexDataset) {
-                // Déverrouiller - retour au style par défaut (blanc 50%)
+                // Déverrouiller
                 datasetVerrouille = -1;
                 dernierDatasetSurvole = -1;
                 dernierPointSurvole = -1;
                 console.log('🔓 Courbe déverrouillée');
                 chart.data.datasets.forEach(dataset => {
-                    const nbPoints = dataset.data.length;
-                    dataset.borderColor = 'rgba(255, 255, 255, 0.5)';
-                    dataset.borderWidth = 2;
-                    dataset.pointRadius = Array(nbPoints).fill(5);
-                    dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.9)');
-                    dataset.pointBorderColor = Array(nbPoints).fill('rgba(33, 150, 243, 0.5)');
-                    dataset.pointBorderWidth = 2;
-                    dataset.pointHoverRadius = 7;
+                    appliquerStyleSpaghetti(dataset, 'defaut', couleurP);
                 });
                 if (selecteur) selecteur.value = '';
             } else {
-                // Verrouiller - courbe NOIRE avec points colorés
+                // Verrouiller
                 datasetVerrouille = indexDataset;
                 dernierDatasetSurvole = indexDataset;
                 console.log(`🔒 Courbe verrouillée: ${chart.data.datasets[indexDataset]?.label}`);
                 chart.data.datasets.forEach((dataset, idx) => {
-                    const nbPoints = dataset.data.length;
                     if (idx === indexDataset) {
-                        // Courbe verrouillée - NOIR avec points colorés
-                        dataset.borderColor = 'rgba(0, 0, 0, 0.9)';
-                        dataset.borderWidth = 3;
-                        dataset.pointRadius = Array(nbPoints).fill(6);
-                        dataset.pointBackgroundColor = Array(nbPoints).fill('#2196F3');
-                        dataset.pointBorderColor = Array(nbPoints).fill('#FFFFFF');
-                        dataset.pointBorderWidth = 2;
-                        dataset.pointHoverRadius = 7;
+                        appliquerStyleSpaghetti(dataset, 'actif', couleurP);
                     } else {
-                        // Autres courbes - très atténuées (blanc)
-                        dataset.borderColor = 'rgba(255, 255, 255, 0.3)';
-                        dataset.borderWidth = 1.5;
-                        dataset.pointRadius = Array(nbPoints).fill(3);
-                        dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-                        dataset.pointBorderColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-                        dataset.pointBorderWidth = 1;
-                        dataset.pointHoverRadius = 3;
+                        appliquerStyleSpaghetti(dataset, 'inactif', couleurP);
+                        dataset.pointHoverRadius = 2;
                     }
                 });
-                // Synchroniser le dropdown avec la courbe verrouillée
                 if (selecteur) selecteur.value = indexDataset;
             }
             if (chartEstValide(chart)) chart.update('none');
@@ -3482,21 +3317,14 @@ function selectionnerEtudiantSpaghetti() {
     if (!selecteur || !graphiqueSpaghettiInstance) return;
 
     const indexStr = selecteur.value;
+    var couleurP = COULEURS_INDICES.P;
     if (indexStr === '') {
-        // Désélectionner - retour au style par défaut (blanc 50%)
         if (datasetVerrouille >= 0) {
             datasetVerrouille = -1;
             dernierDatasetSurvole = -1;
             dernierPointSurvole = -1;
             graphiqueSpaghettiInstance.data.datasets.forEach(dataset => {
-                const nbPoints = dataset.data.length;
-                dataset.borderColor = 'rgba(255, 255, 255, 0.5)';
-                dataset.borderWidth = 2;
-                dataset.pointRadius = Array(nbPoints).fill(5);
-                dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.9)');
-                dataset.pointBorderColor = Array(nbPoints).fill('rgba(33, 150, 243, 0.5)');
-                dataset.pointBorderWidth = 2;
-                dataset.pointHoverRadius = 7;
+                appliquerStyleSpaghetti(dataset, 'defaut', couleurP);
             });
             graphiqueSpaghettiInstance.update('none');
         }
@@ -3527,30 +3355,15 @@ function selectionnerEtudiantSpaghetti() {
         return;
     }
 
-    // Verrouiller - courbe NOIRE avec points colorés
     datasetVerrouille = index;
     dernierDatasetSurvole = index;
 
     chart.data.datasets.forEach((dataset, idx) => {
-        const nbPoints = dataset.data.length;
         if (idx === index) {
-            // Courbe verrouillée - NOIR avec points colorés
-            dataset.borderColor = 'rgba(0, 0, 0, 0.9)';
-            dataset.borderWidth = 3;
-            dataset.pointRadius = Array(nbPoints).fill(6);
-            dataset.pointBackgroundColor = Array(nbPoints).fill('#2196F3');
-            dataset.pointBorderColor = Array(nbPoints).fill('#FFFFFF');
-            dataset.pointBorderWidth = 2;
-            dataset.pointHoverRadius = 7;
+            appliquerStyleSpaghetti(dataset, 'actif', couleurP);
         } else {
-            // Autres courbes - très atténuées (blanc)
-            dataset.borderColor = 'rgba(255, 255, 255, 0.3)';
-            dataset.borderWidth = 1.5;
-            dataset.pointRadius = Array(nbPoints).fill(3);
-            dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-            dataset.pointBorderColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-            dataset.pointBorderWidth = 1;
-            dataset.pointHoverRadius = 3;
+            appliquerStyleSpaghetti(dataset, 'inactif', couleurP);
+            dataset.pointHoverRadius = 2;
         }
     });
     if (chartEstValide(chart)) chart.update('none');
@@ -3679,8 +3492,8 @@ const pluginGradientFond = {
             chartArea.bottom - chartArea.top
         );
 
-        // Overlay sombre à 20% (comme les barres ACPE)
-        ctx.fillStyle = 'rgba(15, 30, 58, 0.2)';
+        // Overlay sombre à 70% — dégradé IDME atténué, courbes lisibles
+        ctx.fillStyle = 'rgba(15, 30, 58, 0.7)';
         ctx.fillRect(
             chartArea.left,
             chartArea.top,
@@ -3841,23 +3654,20 @@ function creerGraphiqueCriteres(canvasId, da) {
             const couleur = COULEURS_CRITERES[index % COULEURS_CRITERES.length];
             couleursOriginales[critere] = couleur;
 
+            // ✨ #240: Courbe colorée par défaut
             return {
                 label: critere,
                 data: donnees.criteres[critere],
-                borderColor: 'rgba(255, 255, 255, 0.5)',
+                borderColor: couleur,
                 backgroundColor: 'transparent',
-                borderWidth: 2,
-                tension: 0.2,
-                pointRadius: 5,
-                pointHoverRadius: 7,
+                borderWidth: STYLE_LIGNE_EPAISSEUR,
+                tension: STYLE_LIGNE_TENSION,
+                pointRadius: STYLE_POINT_RAYON,
+                pointHoverRadius: STYLE_POINT_RAYON_HOVER,
                 pointStyle: 'circle',
-                pointBackgroundColor: 'rgba(255, 255, 255, 0.9)',
-                pointBorderColor: 'rgba(33, 150, 243, 0.5)',
-                pointBorderWidth: 2,
-                pointHoverBackgroundColor: couleur,
-                pointHoverBorderColor: '#FFFFFF',
-                hoverBorderWidth: 3,
-                hoverBorderColor: 'rgba(0, 0, 0, 0.7)',
+                pointBackgroundColor: couleur,
+                pointBorderColor: couleurBordurePoint(),
+                pointBorderWidth: STYLE_POINT_BORDURE,
                 spanGaps: false
             };
         });
@@ -3899,16 +3709,16 @@ function creerGraphiqueCriteres(canvasId, da) {
                         display: true,
                         text: 'Développement des habiletés et compétences',
                         font: { size: 16, weight: 'bold' },
+                        color: couleurTexte(),
                         padding: { top: 10, bottom: 20 }
                     },
                     legend: {
-                        display: false // Masquer la légende, le survol identifie les courbes
+                        display: false
                     },
                     tooltip: {
+                        ...STYLE_TOOLTIP,
                         mode: 'nearest',
                         intersect: true,
-                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                        padding: 12,
                         titleFont: { size: 14, weight: 'bold' },
                         bodyFont: { size: 13 },
                         callbacks: {
@@ -3919,37 +3729,40 @@ function creerGraphiqueCriteres(canvasId, da) {
                             }
                         }
                     }
-                    // 🆕 BETA 96: Annotations de zones remplacées par pluginGradientFond100
                 },
                 scales: {
                     x: {
                         title: {
                             display: true,
                             text: 'Activités d\'apprentissage',
+                            color: couleurTexte(),
                             font: { size: 12, weight: 'bold' }
                         },
                         ticks: {
+                            color: couleurTexte(),
                             maxRotation: 45,
                             minRotation: 45,
                             font: { size: 10 }
                         },
-                        grid: { display: true, color: couleurGrille(0.1) }
+                        grid: { display: true, color: couleurGrille() }
                     },
                     y: {
                         title: {
                             display: true,
                             text: 'Performance',
+                            color: couleurTexte(),
                             font: { size: 12, weight: 'bold' }
                         },
                         min: bornesY.min,
                         max: bornesY.max,
                         ticks: {
+                            color: couleurTexte(),
                             stepSize: 5,
                             callback: function(value) {
                                 return value + '%';
                             }
                         },
-                        grid: { display: true, color: couleurGrille(0.12) }
+                        grid: { display: true, color: couleurGrille() }
                     }
                 },
                 interaction: {
@@ -3964,7 +3777,6 @@ function creerGraphiqueCriteres(canvasId, da) {
                         datasetIndex = activeElements[0].datasetIndex;
                     }
 
-                    // Si verrouillé, forcer le datasetIndex actif
                     const datasetActif = datasetVerrouilleCriteresGlobal >= 0 ? datasetVerrouilleCriteresGlobal : datasetIndex;
 
                     if (datasetActif === dernierDatasetSurvoleCriteresGlobal && datasetVerrouilleCriteresGlobal < 0) return;
@@ -3972,32 +3784,12 @@ function creerGraphiqueCriteres(canvasId, da) {
 
                     chart.data.datasets.forEach((dataset, idx) => {
                         const couleurOriginale = couleursOriginales[dataset.label];
-                        const nbPoints = dataset.data.length;
-
                         if (datasetActif === -1) {
-                            // Aucun survol - courbes blanches, cercles vides bleus
-                            dataset.borderColor = 'rgba(255, 255, 255, 0.5)';
-                            dataset.borderWidth = 2;
-                            dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.9)');
-                            dataset.pointBorderColor = Array(nbPoints).fill('rgba(33, 150, 243, 0.5)');
-                            dataset.pointBorderWidth = 2;
-                            dataset.pointRadius = Array(nbPoints).fill(5);
+                            appliquerStyleDataset(dataset, 'defaut', couleurOriginale);
                         } else if (idx === datasetActif) {
-                            // Courbe active (survolée ou verrouillée) - noire avec points colorés
-                            dataset.borderColor = datasetVerrouilleCriteresGlobal >= 0 ? 'rgba(0, 0, 0, 0.9)' : 'rgba(0, 0, 0, 0.7)';
-                            dataset.borderWidth = 3;
-                            dataset.pointBackgroundColor = Array(nbPoints).fill(couleurOriginale);
-                            dataset.pointBorderColor = Array(nbPoints).fill('#FFFFFF');
-                            dataset.pointBorderWidth = 2;
-                            dataset.pointRadius = Array(nbPoints).fill(6);
+                            appliquerStyleDataset(dataset, 'actif', couleurOriginale);
                         } else {
-                            // Autres courbes - atténuées
-                            dataset.borderColor = 'rgba(255, 255, 255, 0.3)';
-                            dataset.borderWidth = 1.5;
-                            dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.5)');
-                            dataset.pointBorderColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-                            dataset.pointBorderWidth = 1;
-                            dataset.pointRadius = Array(nbPoints).fill(3);
+                            appliquerStyleDataset(dataset, 'inactif', couleurOriginale);
                         }
                     });
 
@@ -4009,20 +3801,13 @@ function creerGraphiqueCriteres(canvasId, da) {
         // Créer le graphique
         const chart = new Chart(ctx, config);
 
-        // 🆕 BETA 96: Fonction de verrouillage/déverrouillage
         function toggleVerrouillage(indexDataset) {
             if (datasetVerrouilleCriteresGlobal === indexDataset) {
                 // Déverrouiller
                 datasetVerrouilleCriteresGlobal = -1;
                 dernierDatasetSurvoleCriteresGlobal = -1;
                 chart.data.datasets.forEach(dataset => {
-                    const nbPoints = dataset.data.length;
-                    dataset.borderColor = 'rgba(255, 255, 255, 0.5)';
-                    dataset.borderWidth = 2;
-                    dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.9)');
-                    dataset.pointBorderColor = Array(nbPoints).fill('rgba(33, 150, 243, 0.5)');
-                    dataset.pointBorderWidth = 2;
-                    dataset.pointRadius = Array(nbPoints).fill(5);
+                    appliquerStyleDataset(dataset, 'defaut', couleursOriginales[dataset.label]);
                 });
             } else {
                 // Verrouiller
@@ -4030,21 +3815,10 @@ function creerGraphiqueCriteres(canvasId, da) {
                 dernierDatasetSurvoleCriteresGlobal = indexDataset;
                 chart.data.datasets.forEach((dataset, idx) => {
                     const couleurOriginale = couleursOriginales[dataset.label];
-                    const nbPoints = dataset.data.length;
                     if (idx === indexDataset) {
-                        dataset.borderColor = 'rgba(0, 0, 0, 0.9)';
-                        dataset.borderWidth = 3;
-                        dataset.pointBackgroundColor = Array(nbPoints).fill(couleurOriginale);
-                        dataset.pointBorderColor = Array(nbPoints).fill('#FFFFFF');
-                        dataset.pointBorderWidth = 2;
-                        dataset.pointRadius = Array(nbPoints).fill(6);
+                        appliquerStyleDataset(dataset, 'actif', couleurOriginale);
                     } else {
-                        dataset.borderColor = 'rgba(255, 255, 255, 0.3)';
-                        dataset.borderWidth = 1.5;
-                        dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.5)');
-                        dataset.pointBorderColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-                        dataset.pointBorderWidth = 1;
-                        dataset.pointRadius = Array(nbPoints).fill(3);
+                        appliquerStyleDataset(dataset, 'inactif', couleurOriginale);
                     }
                 });
             }
@@ -4082,39 +3856,21 @@ function creerGraphiqueCriteres(canvasId, da) {
             }
         });
 
-        // Maintenir l'état verrouillé au mouseleave
         canvas.addEventListener('mouseleave', function() {
             if (datasetVerrouilleCriteresGlobal >= 0) {
                 dernierDatasetSurvoleCriteresGlobal = datasetVerrouilleCriteresGlobal;
                 chart.data.datasets.forEach((dataset, idx) => {
                     const couleurOriginale = couleursOriginales[dataset.label];
-                    const nbPoints = dataset.data.length;
                     if (idx === datasetVerrouilleCriteresGlobal) {
-                        dataset.borderColor = 'rgba(0, 0, 0, 0.9)';
-                        dataset.borderWidth = 3;
-                        dataset.pointBackgroundColor = Array(nbPoints).fill(couleurOriginale);
-                        dataset.pointBorderColor = Array(nbPoints).fill('#FFFFFF');
-                        dataset.pointBorderWidth = 2;
-                        dataset.pointRadius = Array(nbPoints).fill(6);
+                        appliquerStyleDataset(dataset, 'actif', couleurOriginale);
                     } else {
-                        dataset.borderColor = 'rgba(255, 255, 255, 0.3)';
-                        dataset.borderWidth = 1.5;
-                        dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.5)');
-                        dataset.pointBorderColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.3)');
-                        dataset.pointBorderWidth = 1;
-                        dataset.pointRadius = Array(nbPoints).fill(3);
+                        appliquerStyleDataset(dataset, 'inactif', couleurOriginale);
                     }
                 });
             } else {
                 dernierDatasetSurvoleCriteresGlobal = -1;
                 chart.data.datasets.forEach(dataset => {
-                    const nbPoints = dataset.data.length;
-                    dataset.borderColor = 'rgba(255, 255, 255, 0.5)';
-                    dataset.borderWidth = 2;
-                    dataset.pointBackgroundColor = Array(nbPoints).fill('rgba(255, 255, 255, 0.9)');
-                    dataset.pointBorderColor = Array(nbPoints).fill('rgba(33, 150, 243, 0.5)');
-                    dataset.pointBorderWidth = 2;
-                    dataset.pointRadius = Array(nbPoints).fill(5);
+                    appliquerStyleDataset(dataset, 'defaut', couleursOriginales[dataset.label]);
                 });
             }
             if (chartEstValide(chart)) chart.update('none');
@@ -4208,17 +3964,17 @@ function genererCourbeGauss(moyenne, ecartType) {
  */
 function creerDatasetGauss(label, points, couleur) {
     if (!points || points.length === 0) {
-        return { label, data: [], borderColor: 'rgba(255, 255, 255, 0.5)' };
+        return { label, data: [], borderColor: couleur || 'transparent' };
     }
 
+    // ✨ #240: Courbe colorée par défaut
     return {
         label: label,
         data: points,
-        // 🆕 BETA 96: Courbes blanches par défaut (couleur stockée pour hover)
-        borderColor: 'rgba(255, 255, 255, 0.5)',
-        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-        couleurOriginale: couleur,  // Stocké pour utilisation au survol
-        borderWidth: 2.5,
+        borderColor: couleur,
+        backgroundColor: hexVersRgba(couleur, 0.1),
+        couleurOriginale: couleur,
+        borderWidth: STYLE_LIGNE_EPAISSEUR,
         tension: 0.4,
         fill: true,
         pointRadius: 0,
@@ -4260,20 +4016,21 @@ function creerDatasetPoints(label, valeurs, couleur) {
         y: 0 // Sur l'axe X
     }));
 
-    // BETA 96: Uniformisation des points - blanc par défaut, noir au hover
+    // ✨ #240: Point coloré avec bordure thème-aware
     return {
         label: label + ' (étudiants)',
         data: points,
-        borderColor: 'rgba(33, 150, 243, 0.5)', // Bordure bleue subtile
-        backgroundColor: 'rgba(255, 255, 255, 0.9)', // Fond blanc
-        pointRadius: 5,
+        borderColor: couleurBordurePoint(),
+        backgroundColor: couleur,
+        pointRadius: STYLE_POINT_RAYON,
         pointHoverRadius: 6,
-        pointHoverBackgroundColor: 'rgba(0, 0, 0, 0.85)', // Noir au hover
-        pointHoverBorderColor: 'rgba(255, 255, 255, 0.9)', // Bordure blanche au hover
+        pointHoverBackgroundColor: couleur,
+        pointHoverBorderColor: couleurBordurePoint(),
+        pointBorderWidth: STYLE_POINT_BORDURE,
         pointStyle: 'circle',
         showLine: false,
         parsing: { xAxisKey: 'x', yAxisKey: 'y' },
-        order: 0 // Afficher au-dessus des courbes
+        order: 0
     };
 }
 
@@ -4572,13 +4329,14 @@ function creerGraphiqueDistributionACPE(canvasId) {
                         display: true,
                         text: 'Distribution des indices ACPE',
                         font: { size: 16, weight: 'bold' },
+                        color: couleurTexte(),
                         padding: { top: 10, bottom: 5 }
                     },
                     subtitle: {
                         display: true,
                         text: 'Courbes de Gauss + points = position réelle des étudiants | Bandes colorées = zones ±1σ et ±2σ',
                         font: { size: 10, style: 'italic' },
-                        color: '#8aa4b0',
+                        color: hexVersRgba(couleurTexte(), 0.6),
                         padding: { bottom: 10 }
                     },
                     legend: {
@@ -4588,12 +4346,11 @@ function creerGraphiqueDistributionACPE(canvasId) {
                             usePointStyle: true,
                             padding: 12,
                             font: { size: 11 },
-                            // Filtrer pour n'afficher que les courbes, pas les points
+                            color: couleurTexte(),
                             filter: function(item) {
                                 return !item.text.includes('(étudiants)');
                             }
                         },
-                        // Clic sur légende : masquer/afficher courbe ET ses points associés
                         onClick: function(e, legendItem, legend) {
                             const chart = legend.chart;
                             const index = legendItem.datasetIndex;
@@ -4622,11 +4379,10 @@ function creerGraphiqueDistributionACPE(canvasId) {
                         }
                     },
                     tooltip: {
+                        ...STYLE_TOOLTIP,
                         enabled: true,
                         mode: 'nearest',
                         intersect: true,
-                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                        padding: 12,
                         callbacks: {
                             title: function(items) {
                                 if (items.length > 0) {
@@ -4679,9 +4435,11 @@ function creerGraphiqueDistributionACPE(canvasId) {
                         title: {
                             display: true,
                             text: 'Valeur de l\'indice',
+                            color: couleurTexte(),
                             font: { size: 12, weight: 'bold' }
                         },
                         ticks: {
+                            color: couleurTexte(),
                             stepSize: 0.1,
                             callback: function(value) {
                                 return (value * 100).toFixed(0) + '%';
@@ -4689,7 +4447,7 @@ function creerGraphiqueDistributionACPE(canvasId) {
                         },
                         grid: {
                             display: true,
-                            color: couleurGrille(0.1)
+                            color: couleurGrille()
                         }
                     },
                     y: {
@@ -4710,7 +4468,6 @@ function creerGraphiqueDistributionACPE(canvasId) {
                     axis: 'xy',
                     intersect: true
                 },
-                // 🆕 BETA 96: Survol des courbes de Gauss (blanc → noir)
                 onHover: function(event, activeElements, chart) {
                     let datasetIndex = -1;
 
@@ -4718,28 +4475,26 @@ function creerGraphiqueDistributionACPE(canvasId) {
                         datasetIndex = activeElements[0].datasetIndex;
                     }
 
-                    // Mettre à jour les styles des courbes (pas les points)
                     chart.data.datasets.forEach((dataset, idx) => {
-                        // Ne modifier que les courbes (pas les datasets de points)
                         if (dataset.label.includes('(étudiants)')) return;
 
                         const couleurOriginale = dataset.couleurOriginale;
 
                         if (datasetIndex === -1) {
-                            // Aucun survol - courbes blanches
-                            dataset.borderColor = 'rgba(255, 255, 255, 0.5)';
-                            dataset.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                            dataset.borderWidth = 2.5;
+                            // Aucun survol — courbes colorées
+                            dataset.borderColor = couleurOriginale;
+                            dataset.backgroundColor = hexVersRgba(couleurOriginale, 0.1);
+                            dataset.borderWidth = STYLE_LIGNE_EPAISSEUR;
                         } else if (idx === datasetIndex) {
-                            // Courbe survolée - noire et épaisse
-                            dataset.borderColor = 'rgba(0, 0, 0, 0.8)';
-                            dataset.backgroundColor = hexVersRgba(couleurOriginale, 0.15);
+                            // Courbe survolée — pleine opacité
+                            dataset.borderColor = couleurOriginale;
+                            dataset.backgroundColor = hexVersRgba(couleurOriginale, 0.2);
                             dataset.borderWidth = 3.5;
                         } else {
-                            // Autres courbes - atténuées
-                            dataset.borderColor = 'rgba(255, 255, 255, 0.3)';
-                            dataset.backgroundColor = 'rgba(255, 255, 255, 0.02)';
-                            dataset.borderWidth = 2;
+                            // Autres courbes — atténuées
+                            dataset.borderColor = hexVersRgba(couleurOriginale, 0.2);
+                            dataset.backgroundColor = hexVersRgba(couleurOriginale, 0.03);
+                            dataset.borderWidth = 1.5;
                         }
                     });
 
