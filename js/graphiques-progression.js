@@ -2964,7 +2964,6 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
 
             // Vérifier si l'étudiant a au moins une évaluation
             const aDonnees = donnees.some(v => v !== null);
-            if (!aDonnees) return null;
 
             // 🆕 BETA 96 (FIX): Obtenir le nom en respectant le mode anonymisation
             // Si anonymiserNom retourne une valeur, on est en mode anonymisation
@@ -2974,6 +2973,23 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                 : (etudiant.prenom && etudiant.nom
                     ? `${etudiant.prenom} ${etudiant.nom.charAt(0)}.`
                     : etudiant.nom || `DA ${da}`);
+
+            // 🆕 BETA 98.9: Inclure les élèves sans données dans le dropdown
+            // Ils apparaissent avec un message au lieu d'une trajectoire
+            if (!aDonnees) {
+                return {
+                    label: nom,
+                    da: da,
+                    data: donnees,
+                    sansDonnees: true,
+                    borderColor: 'transparent',
+                    backgroundColor: 'transparent',
+                    borderWidth: 0,
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    hidden: true // Masquer par défaut dans le graphique
+                };
+            }
 
             return {
                 label: nom,
@@ -3440,7 +3456,10 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             datasets.forEach((dataset, index) => {
                 const option = document.createElement('option');
                 option.value = index;
-                option.textContent = dataset.label;
+                // 🆕 BETA 98.9: Marquer les élèves sans données dans le dropdown
+                option.textContent = dataset.sansDonnees
+                    ? `${dataset.label} (aucune évaluation)`
+                    : dataset.label;
                 selecteurEtudiant.appendChild(option);
             });
         }
@@ -3485,11 +3504,33 @@ function selectionnerEtudiantSpaghetti() {
     }
 
     const index = parseInt(indexStr);
+
+    const chart = graphiqueSpaghettiInstance;
+
+    // 🆕 BETA 98.9: Gérer les élèves sans données
+    const datasetSelectionne = chart.data.datasets[index];
+    const messageSansDonnees = document.getElementById('message-spaghetti-sans-donnees');
+    if (messageSansDonnees) messageSansDonnees.remove();
+
+    if (datasetSelectionne && datasetSelectionne.sansDonnees) {
+        // Afficher un message au-dessus du canvas
+        const canvas = document.getElementById('graphique-groupe-spaghetti');
+        if (canvas && canvas.parentNode) {
+            const msg = document.createElement('div');
+            msg.id = 'message-spaghetti-sans-donnees';
+            msg.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20; background: rgba(0,0,0,0.75); color: #ccc; padding: 12px 20px; border-radius: 8px; text-align: center; font-size: 0.9rem; pointer-events: none;';
+            msg.textContent = 'Aucun artefact évalué — aucune trajectoire à tracer';
+            canvas.parentNode.style.position = 'relative';
+            canvas.parentNode.appendChild(msg);
+        }
+        datasetVerrouille = -1;
+        return;
+    }
+
     // Verrouiller - courbe NOIRE avec points colorés
     datasetVerrouille = index;
     dernierDatasetSurvole = index;
 
-    const chart = graphiqueSpaghettiInstance;
     chart.data.datasets.forEach((dataset, idx) => {
         const nbPoints = dataset.data.length;
         if (idx === index) {

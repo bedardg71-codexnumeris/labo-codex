@@ -5648,8 +5648,24 @@ function determinerNiveauRaiPedagogique(da) {
     const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true);
     console.log('🔍 [determinerNiveauRaiPedagogique] Indices 3 derniers:', indices3Derniers);
 
-    // 🆕 BETA 96.1: Vérifier si données suffisantes avant interprétation
+    // 🆕 BETA 98.9: Vérifier si données suffisantes avant interprétation
     if (indices3Derniers.nbArtefacts === 0) {
+        // Élève présent mais aucune production → Non-participation (signal prioritaire)
+        if (indices.A > 0) {
+            return {
+                niveau: 3,
+                label: 'Non-participation',
+                pattern: 'Non-participation',
+                defi: 'Aucun',
+                description: 'Élève présent en classe mais aucune production remise. Profil prioritaire nécessitant une intervention immédiate.',
+                badgeClasse: 'badge-rai-3',
+                patternBadge: 'badge-pattern-blocage-critique',
+                donneesSuffisantes: false,
+                nbArtefacts: 0,
+                fenetreAnalyse: obtenirNombreProductionsPourPatterns()
+            };
+        }
+        // Aucune présence et aucune production → En attente
         return {
             niveau: 0,
             label: 'En attente',
@@ -5863,6 +5879,18 @@ function determinerCibleIntervention(da) {
     // Détecter les défis avec le seuil configurable
     const diagnostic = diagnostiquerForcesChallenges(moyennes);
     const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true); // true = dépistage (3 artefacts)
+
+    // 🆕 BETA 98.9: Non-participation — présent mais 0 production
+    if (indices3Derniers.nbArtefacts === 0 && indices.A > 0) {
+        return {
+            cible: 'Non-participation',
+            pattern: 'Non-participation',
+            niveau: 3,
+            couleur: '#dc3545',
+            emoji: '🔴'
+        };
+    }
+
     const interpMobilisation = interpreterMobilisation(indices.A / 100, indices.C / 100);
 
     // Variables pour la formule (correspondance avec Excel)
