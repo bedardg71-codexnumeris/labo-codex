@@ -25,8 +25,7 @@
 var COULEURS_CORR = {
     AP:      '#4FC3F7',  // Bleu clair
     CP:      '#FF7043',  // Orange
-    EP:      '#AB47BC',  // Violet
-    IntervP: '#78909C'   // Gris-bleu
+    EP:      '#AB47BC'   // Violet
 };
 
 var SEUIL_MIN_ETUDIANTS = 5;
@@ -90,8 +89,9 @@ function calculerCorrelationsLongitudinales() {
         semaines: [],
         labels: [],
         dates: [],
-        correlations: { AP: [], CP: [], EP: [], IntervP: [] },
+        correlations: { AP: [], CP: [], EP: [] },
         moyennes: { A: [], C: [], P: [], E: [] },
+        interventionsCourbes: [],  // [{titre, etudiants:[], moyP:[], indexDebut}] + contrôle
         n: [],
         evenementsInterventions: []
     };
@@ -166,22 +166,12 @@ function calculerCorrelationsLongitudinales() {
             resultat.correlations.AP.push(null);
             resultat.correlations.CP.push(null);
             resultat.correlations.EP.push(null);
-            resultat.correlations.IntervP.push(null);
             continue;
         }
 
         resultat.correlations.AP.push(calculerCorrelationPearson(valeursA, valeursP));
         resultat.correlations.CP.push(calculerCorrelationPearson(valeursC, valeursP));
         resultat.correlations.EP.push(calculerCorrelationPearson(valeursE, valeursP));
-
-        // IntervP : seulement si au moins une intervention a eu lieu
-        var totalInterv = 0;
-        for (var ti = 0; ti < valeursInterv.length; ti++) totalInterv += valeursInterv[ti];
-        if (totalInterv > 0) {
-            resultat.correlations.IntervP.push(calculerCorrelationPearson(valeursInterv, valeursP));
-        } else {
-            resultat.correlations.IntervP.push(null);
-        }
 
         // Marquer les interventions dont la date correspond à cette séance
         for (var ii = 0; ii < interventions.length; ii++) {
@@ -202,6 +192,75 @@ function calculerCorrelationsLongitudinales() {
     }
 
     resultat.evenementsInterventions = evenementsInterventions;
+
+    // Construire les courbes P par intervention (groupes figés)
+    // Chaque intervention a son propre groupe d'étudiants ciblés, fixe dans le temps
+    var tousLesCibles = {}; // DA → true pour tous les étudiants ciblés par au moins une intervention N2
+    for (var ci = 0; ci < interventions.length; ci++) {
+        var interv = interventions[ci];
+        if (!interv.etudiants || interv.etudiants.length === 0) continue;
+        // 1 seul étudiant → analysé dans le profil individuel, pas au niveau groupe
+        if (interv.etudiants.length <= 1) continue;
+        var dateInterv = (interv.date || '').substring(0, 10);
+        if (!dateInterv) continue;
+
+        var dasCibles = interv.etudiants.slice(); // copie figée
+        for (var dc = 0; dc < dasCibles.length; dc++) tousLesCibles[dasCibles[dc]] = true;
+
+        // Trouver l'index de la séance de l'intervention (ou la plus proche après)
+        var idxDebut = 0;
+        for (var sd = 0; sd < resultat.dates.length; sd++) {
+            if (resultat.dates[sd] >= dateInterv) { idxDebut = sd; break; }
+        }
+
+        // Calculer moy P de ce groupe figé à chaque séance (null avant l'intervention)
+        var moyP = [];
+        for (var sp = 0; sp < snapshots.length; sp++) {
+            if (sp < idxDebut) {
+                moyP.push(null);
+                continue;
+            }
+            var etusSnap = snapshots[sp].etudiants || [];
+            var somP = 0, nbP = 0;
+            for (var ep = 0; ep < etusSnap.length; ep++) {
+                if (dasCibles.indexOf(etusSnap[ep].da) !== -1 && etusSnap[ep].P != null && !isNaN(etusSnap[ep].P)) {
+                    somP += etusSnap[ep].P;
+                    nbP++;
+                }
+            }
+            moyP.push(nbP > 0 ? Math.round(somP / nbP * 10) / 10 : null);
+        }
+
+        var titreCourtInterv = interv.titre || ('Intervention ' + (ci + 1));
+        if (titreCourtInterv.length > 20) titreCourtInterv = titreCourtInterv.substring(0, 18) + '…';
+
+        resultat.interventionsCourbes.push({
+            titre: titreCourtInterv,
+            nbEtudiants: dasCibles.length,
+            niveauRai: interv.niveauRai || 2,
+            moyP: moyP
+        });
+    }
+
+    // Courbe contrôle : étudiants jamais ciblés par aucune intervention
+    var moyPControle = [];
+    for (var sc = 0; sc < snapshots.length; sc++) {
+        var etusCtrl = snapshots[sc].etudiants || [];
+        var somCtrl = 0, nbCtrl = 0;
+        for (var ec = 0; ec < etusCtrl.length; ec++) {
+            if (!tousLesCibles[etusCtrl[ec].da] && etusCtrl[ec].P != null && !isNaN(etusCtrl[ec].P)) {
+                somCtrl += etusCtrl[ec].P;
+                nbCtrl++;
+            }
+        }
+        moyPControle.push(nbCtrl > 0 ? Math.round(somCtrl / nbCtrl * 10) / 10 : null);
+    }
+    resultat.interventionsCourbes.push({
+        titre: 'Contrôle',
+        nbEtudiants: null,
+        niveauRai: 0,
+        moyP: moyPControle
+    });
 
     // Mapper les artefacts aux séances via leur échéance
     // Clé = index de la séance dans resultat (pas numéro de semaine)
@@ -280,8 +339,6 @@ function calculerCorrelationsLongitudinales() {
    =============================== */
 
 var graphiqueCorrLongInstance = null;
-var _afficherArtefacts = false;
-var _afficherActivites = false;
 
 /**
  * Crée le graphique de corrélations longitudinales.
@@ -386,23 +443,35 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                 pointBorderWidth: 2,
                 spanGaps: false
             },
-            {
-                label: 'Interv. ↔ P',
-                data: donnees.correlations.IntervP,
-                borderColor: COULEURS_CORR.IntervP,
-                backgroundColor: COULEURS_CORR.IntervP,
+        ];
+
+        // Datasets interventions : une courbe P par intervention + contrôle
+        var COULEURS_INTERV = ['#EF5350', '#FFA726', '#66BB6A', '#42A5F5'];
+        var courbes = donnees.interventionsCourbes || [];
+        for (var ci = 0; ci < courbes.length; ci++) {
+            var courbe = courbes[ci];
+            var estControle = courbe.niveauRai === 0;
+            var couleurInterv = estControle ? '#4CAF50' : (COULEURS_INTERV[ci] || COULEURS_INTERV[0]);
+            var labelInterv = estControle ? 'P contrôle' : ('P · ' + courbe.titre);
+            datasets.push({
+                label: labelInterv,
+                data: courbe.moyP,
+                borderColor: couleurInterv,
+                backgroundColor: couleurInterv,
                 borderWidth: 2,
-                borderDash: [6, 3],
+                borderDash: estControle ? [6, 3] : [8, 4],
                 tension: 0.25,
                 pointStyle: pointStyles,
                 pointRadius: pointRadii,
                 pointHoverRadius: 6,
-                pointBackgroundColor: COULEURS_CORR.IntervP,
+                pointBackgroundColor: couleurInterv,
                 pointBorderColor: estModeClair ? '#fff' : '#1a2a3a',
                 pointBorderWidth: 1.5,
-                spanGaps: false
-            }
-        ];
+                spanGaps: true,
+                yAxisID: 'yPct',
+                _intervIndex: ci
+            });
+        }
 
         // Datasets overlay : moyennes A, C, P, E (axe Y secondaire, masqués par défaut)
         var COULEURS_MOY = {
@@ -421,9 +490,9 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                 borderColor: COULEURS_MOY[indice],
                 backgroundColor: 'transparent',
                 borderWidth: 1.5,
-                borderDash: [4, 4],
                 tension: 0.25,
-                pointRadius: 0,
+                pointStyle: pointStyles,
+                pointRadius: pointRadii,
                 pointHoverRadius: 4,
                 pointBackgroundColor: COULEURS_MOY[indice],
                 spanGaps: true,
@@ -432,75 +501,7 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
             });
         }
 
-        // Plugin : noms d'artefacts et/ou types d'activités sous l'axe X
-        var pluginArtefacts = {
-            id: 'artefactLabels',
-            afterDraw: function(chart) {
-                if (!_afficherArtefacts && !_afficherActivites) return;
-                var artefacts = donnees.artefactsParSeance;
-                if (!artefacts) return;
-                var xScale = chart.scales.x;
-                var ctx2 = chart.ctx;
-                var couleurTitre = estModeClair ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.55)';
-                var couleurType = estModeClair ? 'rgba(0,100,180,0.5)' : 'rgba(100,200,255,0.45)';
-                var couleurLigne = estModeClair ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)';
-                // Positionner sous les ticks X (qui sont en rotation 45°)
-                var baseY = chart.chartArea.bottom + 50;
-
-                for (var idxStr in artefacts) {
-                    var idx = Number(idxStr);
-                    var items = artefacts[idxStr];
-                    var x = xScale.getPixelForValue(idx);
-
-                    // Petite ligne de rappel
-                    ctx2.save();
-                    ctx2.beginPath();
-                    ctx2.strokeStyle = couleurLigne;
-                    ctx2.lineWidth = 1;
-                    ctx2.moveTo(x, chart.chartArea.bottom + 44);
-                    ctx2.lineTo(x, baseY - 2);
-                    ctx2.stroke();
-                    ctx2.restore();
-
-                    // Empiler les labels par artefact
-                    var offset = 0;
-                    for (var ti = 0; ti < items.length; ti++) {
-                        var item = items[ti];
-
-                        // Ligne 1 : titre (si Artefacts coché)
-                        if (_afficherArtefacts) {
-                            ctx2.save();
-                            ctx2.translate(x, baseY + offset * 13);
-                            ctx2.rotate(-Math.PI / 6);
-                            ctx2.font = '9px Arial';
-                            ctx2.fillStyle = couleurTitre;
-                            ctx2.textAlign = 'right';
-                            var txt = item.titre.length > 22 ? item.titre.substring(0, 20) + '…' : item.titre;
-                            ctx2.fillText(txt, 0, 0);
-                            ctx2.restore();
-                            offset++;
-                        }
-
-                        // Ligne 2 : activité d'apprentissage (si Activités coché)
-                        if (_afficherActivites && item.activite) {
-                            ctx2.save();
-                            ctx2.translate(x, baseY + offset * 13);
-                            ctx2.rotate(-Math.PI / 6);
-                            ctx2.font = 'italic 8px Arial';
-                            ctx2.fillStyle = couleurType;
-                            ctx2.textAlign = 'right';
-                            var actTxt = item.activite;
-                            if (actTxt.length > 28) actTxt = actTxt.substring(0, 26) + '…';
-                            ctx2.fillText(actTxt, 0, 0);
-                            ctx2.restore();
-                            offset++;
-                        }
-                    }
-                }
-            }
-        };
-
-        // Plugin : triangles d'intervention sous les points de données
+        // Plugin : triangles d'intervention au-dessus des points de données
         var pluginInterventions = {
             id: 'interventionMarkers',
             afterDatasetsDraw: function(chart) {
@@ -658,6 +659,19 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                                     }
                                 }
 
+                                // P par intervention
+                                var courbes = donnees.interventionsCourbes || [];
+                                var aDesP = false;
+                                for (var ci2 = 0; ci2 < courbes.length; ci2++) {
+                                    var val2 = courbes[ci2].moyP[idx];
+                                    if (val2 != null) {
+                                        if (!aDesP) { lignes.push(''); aDesP = true; }
+                                        var lbl = courbes[ci2].niveauRai === 0 ? 'Contrôle' : courbes[ci2].titre;
+                                        var nb = courbes[ci2].nbEtudiants;
+                                        lignes.push((courbes[ci2].niveauRai === 0 ? '○' : '●') + ' ' + lbl + ' : P = ' + val2.toFixed(1).replace('.', ',') + '%' + (nb ? ' (n=' + nb + ')' : ''));
+                                    }
+                                }
+
                                 return lignes;
                             }
                         }
@@ -710,7 +724,7 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                         position: 'right',
                         min: 0,
                         max: 100,
-                        display: false,
+                        display: true,
                         title: {
                             display: true,
                             text: 'Moyenne (%)',
@@ -748,6 +762,44 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                 nbSem + ' semaines (' + dernierN + ' étudiants). Lignes pointillées : seuils faible (±0,3) et modéré (±0,5).';
         }
 
+        // Générer les checkboxes intervention dynamiquement
+        var conteneurChk = document.getElementById('checkboxes-interventions-corr');
+        if (conteneurChk && courbes.length > 0) {
+            conteneurChk.innerHTML = '';
+            for (var cb = 0; cb < courbes.length; cb++) {
+                var courbeChk = courbes[cb];
+                var estCtrl = courbeChk.niveauRai === 0;
+                var coulChk = estCtrl ? '#4CAF50' : (COULEURS_INTERV[cb] || COULEURS_INTERV[0]);
+                var labelChk = estCtrl ? 'P contrôle' : ('P · ' + courbeChk.titre);
+                var lbl = document.createElement('label');
+                lbl.style.cssText = 'display:inline-flex;align-items:center;gap:4px;cursor:pointer;color:' + coulChk + ';font-size:0.78rem;';
+                var inp = document.createElement('input');
+                inp.type = 'checkbox';
+                inp.checked = true;
+                inp.dataset.intervLabel = labelChk;
+                inp.addEventListener('change', function() {
+                    toggleCorrelationByLabel(this.dataset.intervLabel, this.checked);
+                });
+                lbl.appendChild(inp);
+                // SVG indicateur de style de ligne (pointillé pour interventions)
+                var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('width', '16');
+                svg.setAttribute('height', '2');
+                var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', '0');
+                line.setAttribute('y1', '1');
+                line.setAttribute('x2', '16');
+                line.setAttribute('y2', '1');
+                line.setAttribute('stroke', coulChk);
+                line.setAttribute('stroke-width', '2');
+                line.setAttribute('stroke-dasharray', estCtrl ? '4 3' : '6 3');
+                svg.appendChild(line);
+                lbl.appendChild(svg);
+                lbl.appendChild(document.createTextNode(' ' + labelChk));
+                conteneurChk.appendChild(lbl);
+            }
+        }
+
         console.log('✅ Graphique corrélations longitudinales créé (' + donnees.semaines.length + ' semaines)');
 
     } catch (err) {
@@ -756,15 +808,92 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
 }
 
 /**
- * Toggle d'une courbe de corrélation sur le graphique.
- * @param {string} cle - 'AP', 'CP', 'EP' ou 'IntervP'
- * @param {boolean} visible - true pour afficher
+ * Ajuste les bornes des deux axes Y aux données visibles.
  */
+function _ajusterAxeY() {
+    if (!graphiqueCorrLongInstance) return;
+    var datasets = graphiqueCorrLongInstance.data.datasets;
+
+    // Axe gauche (corrélations, échelle -1 à 1)
+    var minCorr = Infinity, maxCorr = -Infinity, aDesCorr = false;
+    // Axe droit (pourcentages, échelle 0 à 100)
+    var minPct = Infinity, maxPct = -Infinity, aDesPct = false;
+
+    for (var i = 0; i < datasets.length; i++) {
+        if (datasets[i].hidden) continue;
+        var data = datasets[i].data;
+        var estPct = datasets[i].yAxisID === 'yPct';
+
+        for (var j = 0; j < data.length; j++) {
+            if (data[j] == null) continue;
+            if (estPct) {
+                aDesPct = true;
+                if (data[j] < minPct) minPct = data[j];
+                if (data[j] > maxPct) maxPct = data[j];
+            } else {
+                aDesCorr = true;
+                if (data[j] < minCorr) minCorr = data[j];
+                if (data[j] > maxCorr) maxCorr = data[j];
+            }
+        }
+    }
+
+    // Axe gauche (r)
+    if (!aDesCorr || minCorr === Infinity) {
+        graphiqueCorrLongInstance.options.scales.y.min = -1;
+        graphiqueCorrLongInstance.options.scales.y.max = 1;
+    } else {
+        var margeR = 0.15;
+        var yMinR = Math.floor((minCorr - margeR) * 4) / 4;
+        var yMaxR = Math.ceil((maxCorr + margeR) * 4) / 4;
+        if (yMinR < -1) yMinR = -1;
+        if (yMaxR > 1) yMaxR = 1;
+        graphiqueCorrLongInstance.options.scales.y.min = yMinR;
+        graphiqueCorrLongInstance.options.scales.y.max = yMaxR;
+    }
+
+    // Axe droit (%)
+    if (!aDesPct || minPct === Infinity) {
+        graphiqueCorrLongInstance.options.scales.yPct.min = 0;
+        graphiqueCorrLongInstance.options.scales.yPct.max = 100;
+    } else {
+        var margePct = 5;
+        var yMinP = Math.floor((minPct - margePct) / 5) * 5;
+        var yMaxP = Math.ceil((maxPct + margePct) / 5) * 5;
+        if (yMinP < 0) yMinP = 0;
+        if (yMaxP > 100) yMaxP = 100;
+        graphiqueCorrLongInstance.options.scales.yPct.min = yMinP;
+        graphiqueCorrLongInstance.options.scales.yPct.max = yMaxP;
+    }
+}
+
+/**
+ * Met à jour la visibilité de l'axe yPct et ajuste l'axe Y.
+ */
+function _majAxes() {
+    if (!graphiqueCorrLongInstance) return;
+    var datasets = graphiqueCorrLongInstance.data.datasets;
+    var auMoinsUnPct = false;
+    for (var j = 0; j < datasets.length; j++) {
+        if (datasets[j].yAxisID === 'yPct' && !datasets[j].hidden) {
+            auMoinsUnPct = true; break;
+        }
+    }
+    graphiqueCorrLongInstance.options.scales.yPct.display = auMoinsUnPct;
+    _ajusterAxeY();
+    graphiqueCorrLongInstance.update();
+}
+
 function toggleCorrelation(cle, visible) {
     if (!graphiqueCorrLongInstance) return;
-    var labels = { AP: 'A ↔ P', CP: 'C ↔ P', EP: 'E ↔ P', IntervP: 'Interv. ↔ P' };
+    var labels = { AP: 'A ↔ P', CP: 'C ↔ P', EP: 'E ↔ P' };
     var label = labels[cle];
     if (!label) return;
+    toggleCorrelationByLabel(label, visible);
+}
+
+function toggleCorrelationByLabel(label, visible) {
+    if (!graphiqueCorrLongInstance) return;
     var datasets = graphiqueCorrLongInstance.data.datasets;
     for (var i = 0; i < datasets.length; i++) {
         if (datasets[i].label === label) {
@@ -772,7 +901,7 @@ function toggleCorrelation(cle, visible) {
             break;
         }
     }
-    graphiqueCorrLongInstance.update();
+    _majAxes();
 }
 
 /**
@@ -784,56 +913,20 @@ function toggleOverlayMoyenne(indice, visible) {
     if (!graphiqueCorrLongInstance) return;
     var label = 'Moy. ' + indice;
     var datasets = graphiqueCorrLongInstance.data.datasets;
-    var auMoinsUnVisible = false;
-
     for (var i = 0; i < datasets.length; i++) {
         if (datasets[i].label === label) {
             datasets[i].hidden = !visible;
-        }
-        if (datasets[i].yAxisID === 'yPct' && !datasets[i].hidden) {
-            auMoinsUnVisible = true;
+            break;
         }
     }
-
-    // Afficher/masquer l'axe Y secondaire selon qu'au moins un overlay est visible
-    graphiqueCorrLongInstance.options.scales.yPct.display = auMoinsUnVisible;
-    graphiqueCorrLongInstance.update();
-}
-
-/**
- * Recalcule le padding bottom selon les toggles actifs.
- */
-function _majPaddingArtefacts() {
-    if (!graphiqueCorrLongInstance) return;
-    var pad = 0;
-    if (_afficherArtefacts && _afficherActivites) pad = 130;
-    else if (_afficherArtefacts || _afficherActivites) pad = 90;
-    graphiqueCorrLongInstance.options.layout.padding.bottom = pad;
-    graphiqueCorrLongInstance.update();
-}
-
-/**
- * Toggle de l'affichage des noms d'artefacts sous l'axe X.
- */
-function toggleArtefacts(visible) {
-    _afficherArtefacts = visible;
-    _majPaddingArtefacts();
-}
-
-/**
- * Toggle de l'affichage des types d'activités sous l'axe X.
- */
-function toggleActivites(visible) {
-    _afficherActivites = visible;
-    _majPaddingArtefacts();
+    _majAxes();
 }
 
 // Exposer les fonctions globalement
 window.creerGraphiqueCorrelationsLongitudinales = creerGraphiqueCorrelationsLongitudinales;
 window.calculerCorrelationsLongitudinales = calculerCorrelationsLongitudinales;
 window.toggleCorrelation = toggleCorrelation;
+window.toggleCorrelationByLabel = toggleCorrelationByLabel;
 window.toggleOverlayMoyenne = toggleOverlayMoyenne;
-window.toggleArtefacts = toggleArtefacts;
-window.toggleActivites = toggleActivites;
 
 })();
