@@ -6690,6 +6690,10 @@ function genererSectionPerformance(da) {
     const portfolio = productions.find(p => p.type === 'portfolio');
 
     if (!portfolio) {
+        // Pas de portfolio, mais le graphique critères peut exister
+        if (graphiqueCriteres) {
+            return graphiqueCriteres;
+        }
         return `
             <div class="text-muted profil-zone-centre-p30">
                 <p>Aucun portfolio configuré</p>
@@ -6701,7 +6705,7 @@ function genererSectionPerformance(da) {
     const tousLesArtefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
     
     if (tousLesArtefactsPortfolio.length === 0) {
-        return `
+        return graphiqueCriteres + `
             <div class="text-muted profil-zone-centre-p30">
                 <p>📝 Aucun ${obtenirTermeProduction('singulier')} de portfolio créé</p>
             </div>
