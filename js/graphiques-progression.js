@@ -2168,7 +2168,8 @@ const pluginEtiquettesZones = {
 const pluginGradientFond100 = { id: 'gradientFond100' };
 
 /**
- * ✨ #240: Plugin — lignes IDME + étiquettes (version 0-100%)
+ * ✨ #240: Plugin — lignes + étiquettes (version 0-100%)
+ * Utilise genererZonesDepuisEchelle() (0-1) converti en 0-100.
  */
 const pluginEtiquettesZones100 = {
     id: 'etiquettesZones100',
@@ -2183,17 +2184,19 @@ const pluginEtiquettesZones100 = {
         const yMinVisible = yScale.min;
         const yMaxVisible = yScale.max;
 
-        // Zones IDME en échelle 0-100
-        const zones = [
-            { yMin: 0,  yMax: 64,  label: 'Insuffisant',       code: 'I', couleur: '#ff8c00' },
-            { yMin: 65, yMax: 74,  label: 'en Développement',  code: 'D', couleur: '#ffc107' },
-            { yMin: 75, yMax: 84,  label: 'Maîtrisé',          code: 'M', couleur: '#22c55e' },
-            { yMin: 85, yMax: 103, label: 'Étendu',            code: 'E', couleur: '#0ea5e9' }
-        ];
+        // Convertir les zones utilisateur (0-1) en échelle 0-100
+        const zonesUtilisateur = genererZonesDepuisEchelle();
+        const zones = zonesUtilisateur.map(zone => ({
+            yMin: zone.yMin * 100,
+            yMax: zone.yMax * 100,
+            label: zone.label,
+            code: zone.code || zone.label.charAt(0),
+            borderColor: zone.borderColor
+        }));
 
         ctx.save();
 
-        // 1. Lignes pointillées
+        // 1. Lignes pointillées aux frontières
         ctx.setLineDash([4, 6]);
         ctx.lineWidth = 1;
 
@@ -2202,9 +2205,7 @@ const pluginEtiquettesZones100 = {
             var yPx = yScale.getPixelForValue(zone.yMin);
             if (yPx < chartArea.top || yPx > chartArea.bottom) return;
 
-            ctx.strokeStyle = estModeClair
-                ? hexVersRgba(zone.couleur, 0.4)
-                : hexVersRgba(zone.couleur, 0.5);
+            ctx.strokeStyle = zone.borderColor || (estModeClair ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)');
             ctx.beginPath();
             ctx.moveTo(chartArea.left, yPx);
             ctx.lineTo(chartArea.right, yPx);
@@ -2230,7 +2231,7 @@ const pluginEtiquettesZones100 = {
 
             if (yPx < chartArea.top || yPx > chartArea.bottom) return;
 
-            ctx.fillStyle = zone.couleur;
+            ctx.fillStyle = zone.borderColor || couleurTexte();
             ctx.fillText(zone.code, xLabel, yPx);
         });
 
