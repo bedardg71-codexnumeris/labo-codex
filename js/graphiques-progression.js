@@ -1773,7 +1773,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
         const config = {
             type: 'line',
             // 🆕 BETA 96: Utiliser le plugin gradient au lieu des annotations
-            plugins: [pluginGradientFond, pluginEtiquettesZones, pluginNomEtudiantSurvolACP],
+            plugins: [pluginGradientFond, ...(indice === 'P' ? [pluginEtiquettesZones] : []), pluginNomEtudiantSurvolACP],
             data: {
                 labels: labels,
                 datasets: datasets
