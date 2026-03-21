@@ -947,6 +947,32 @@ function creerGraphiqueIndividuel(canvasId, da) {
             }
         ];
 
+        // « P sans reprises » : embranchement pointillé si l'étudiant a des jetons
+        const donneesPSansReprises = typeof genererPSansReprises === 'function'
+            ? genererPSansReprises(da, snapshots, donneesP)
+            : null;
+
+        if (donneesPSansReprises) {
+            couleursOriginales['P sans reprises'] = COULEURS_INDICES.P;
+            datasets.push({
+                label: 'P sans reprises',
+                data: donneesPSansReprises,
+                borderColor: COULEURS_INDICES.P,
+                backgroundColor: 'transparent',
+                borderWidth: 1.5,
+                borderDash: [6, 3],
+                tension: STYLE_LIGNE_TENSION,
+                pointRadius: 2,
+                pointHoverRadius: 4,
+                pointStyle: 'circle',
+                pointBackgroundColor: 'transparent',
+                pointBorderColor: COULEURS_INDICES.P,
+                pointBorderWidth: 1,
+                spanGaps: true,
+                _isSansReprises: true
+            });
+        }
+
         // Variables pour suivre le dataset survolé et verrouillé
         let dernierDatasetSurvoleIndiv = -1;
         let datasetVerrouilleIndiv = -1;
@@ -4757,7 +4783,25 @@ function creerGraphiqueDistributionACPE(canvasId) {
    EXPORTS
    =============================== */
 
+/**
+ * Toggle la courbe « P sans reprises » dans le graphique individuel d'un étudiant.
+ * @param {string} da - Numéro DA de l'étudiant
+ * @param {boolean} visible - true pour afficher, false pour masquer
+ */
+function togglePSansReprisesIndiv(da, visible) {
+    var chart = graphiquesIndividuels[da];
+    if (!chart) return;
+    var datasets = chart.data.datasets;
+    for (var i = 0; i < datasets.length; i++) {
+        if (datasets[i]._isSansReprises) {
+            datasets[i].hidden = !visible;
+        }
+    }
+    if (chartEstValide(chart)) chart.update('none');
+}
+
 // Exporter les fonctions pour utilisation globale
+window.togglePSansReprisesIndiv = togglePSansReprisesIndiv;
 window.creerGraphiqueIndividuel = creerGraphiqueIndividuel;
 window.rafraichirGraphiqueIndividuel = rafraichirGraphiqueIndividuel;
 window.creerGraphiqueGroupeMoyennes = creerGraphiqueGroupeMoyennes;

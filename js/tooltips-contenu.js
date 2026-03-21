@@ -490,6 +490,14 @@ const TOOLTIPS = {
     'tdb-graphique-individuel':
         'R\u00e9sultats par activit\u00e9 d\u2019apprentissage. Les zones denses r\u00e9v\u00e8lent les tendances du groupe.',
 
+    // --- Section Impact des jetons ---
+
+    'tdb-impact-jetons':
+        'Compare la trajectoire P des \u00e9tudiants ayant utilis\u00e9 un jeton de reprise \u00e0 ceux n\u2019en ayant pas utilis\u00e9. \u25a0 = s\u00e9ance avec jeton, \u25a1 = sans.',
+
+    'tdb-selecteur-eleve-jetons':
+        'Afficher la courbe P individuelle d\u2019un \u00e9tudiant ayant utilis\u00e9 un jeton de reprise.',
+
     // =================================================================
     // TABLEAU DE BORD — Liste des individus
     // =================================================================
@@ -546,12 +554,12 @@ const TOOLTIPS = {
     // --- Vue Progression temporelle ---
 
     'profil-progression':
-        '\u00c9volution des indices A-C-P au fil des semaines. Zones : Incomplet, en D\u00e9veloppement, Ma\u00eetris\u00e9, \u00c9tendu.',
+        '\u00c9volution des indices A-C-P au fil des semaines. Marqueurs : \u25cb artefact d\u00fb, \u25cf jeton appliqu\u00e9, \u25bc intervention R\u00e0I. Zones : Incomplet, en D\u00e9veloppement, Ma\u00eetris\u00e9, \u00c9tendu.',
 
     // --- Vue Développement des habiletés ---
 
     'profil-habiletes':
-        'Performance du portfolio et forces/d\u00e9fis par crit\u00e8re. N\u00e9cessite la configuration d\u2019une grille de r\u00e9f\u00e9rence.',
+        'Graphique d\u2019\u00e9volution des crit\u00e8res (si \u00e9valuations avec d\u00e9tails). Marqueurs : \u25cf jeton, \u25bc intervention. Forces/d\u00e9fis par crit\u00e8re.',
 
     // --- Vue Accompagnement ---
 

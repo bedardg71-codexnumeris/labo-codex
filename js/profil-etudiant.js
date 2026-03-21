@@ -4212,7 +4212,25 @@ function genererSectionProgression(da) {
         }).join(', ');
     }
 
+    // Vérifier si l'étudiant a des jetons de reprise (pour afficher la checkbox)
+    let aDesJetonsReprise = false;
+    try {
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+        aDesJetonsReprise = evaluations.some(e =>
+            e.etudiantDA === da && !e.remplaceeParId &&
+            (e.jetonRepriseApplique || e.repriseDeId ||
+             e.jetonRepriseCibleeApplique || e.repriseDeIdCiblee)
+        );
+    } catch (e) { /* silencieux */ }
+
     // Créer le HTML avec le canvas
+    const checkboxSansReprises = aDesJetonsReprise ? `
+                <label style="display: inline-flex; align-items: center; gap: 5px; cursor: pointer; color: var(--vert-succes); font-size: 0.85rem; margin-left: 8px;">
+                    <input type="checkbox" checked onchange="togglePSansReprisesIndiv('${da}', this.checked)">
+                    <svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="var(--vert-succes)" stroke-width="1.5" stroke-dasharray="4 2"/></svg>
+                    P sans reprises
+                </label>` : '';
+
     const html = `
         <div class="profil-zone-moyenne-bleu">
             <!-- Légende des indices -->
@@ -4230,6 +4248,7 @@ function genererSectionProgression(da) {
                     <span style="width: 12px; height: 12px; background: var(--vert-succes); border-radius: 50%;"></span>
                     <span style="color: var(--vert-succes); font-weight: 500;">Performance (P)</span>
                 </span>
+                ${checkboxSansReprises}
                 <span style="color: var(--gris-clair); font-size: 0.85rem; margin-left: auto;">Survole une courbe pour l'identifier</span>
             </div>
 
