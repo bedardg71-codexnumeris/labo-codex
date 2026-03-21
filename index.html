@@ -4079,6 +4079,38 @@
                         <h3 class="carte-titre-bleu">
                             <span>Dynamique des corrélations</span>
                         </h3>
+                        <div class="u-texte-petit u-mb-8" style="display: flex; flex-direction: column; gap: 6px;">
+                            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                <span style="color: var(--texte-muted); font-size: 0.75rem; min-width: 70px;">Corrélations :</span>
+                                <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #4FC3F7; font-size: 0.78rem;">
+                                    <input type="checkbox" checked onchange="toggleCorrelation('AP', this.checked)"> A ↔ P
+                                </label>
+                                <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #FF7043; font-size: 0.78rem;">
+                                    <input type="checkbox" checked onchange="toggleCorrelation('CP', this.checked)"> C ↔ P
+                                </label>
+                                <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #AB47BC; font-size: 0.78rem;">
+                                    <input type="checkbox" checked onchange="toggleCorrelation('EP', this.checked)"> E ↔ P
+                                </label>
+                                <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #78909C; font-size: 0.78rem;">
+                                    <input type="checkbox" checked onchange="toggleCorrelation('IntervP', this.checked)"> Interv. ↔ P
+                                </label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                <span style="color: var(--texte-muted); font-size: 0.75rem; min-width: 70px;">Moyennes :</span>
+                                <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #4FC3F7; font-size: 0.78rem;">
+                                    <input type="checkbox" onchange="toggleOverlayMoyenne('A', this.checked)"> Moy. A
+                                </label>
+                                <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #FF7043; font-size: 0.78rem;">
+                                    <input type="checkbox" onchange="toggleOverlayMoyenne('C', this.checked)"> Moy. C
+                                </label>
+                                <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #4CAF50; font-size: 0.78rem;">
+                                    <input type="checkbox" onchange="toggleOverlayMoyenne('P', this.checked)"> Moy. P
+                                </label>
+                                <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #AB47BC; font-size: 0.78rem;">
+                                    <input type="checkbox" onchange="toggleOverlayMoyenne('E', this.checked)"> Moy. E
+                                </label>
+                            </div>
+                        </div>
                         <div class="u-w-100" style="position: relative; height: 400px;">
                             <canvas id="graphique-correlations-longitudinales"></canvas>
                         </div>
