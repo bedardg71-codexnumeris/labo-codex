@@ -144,6 +144,12 @@
         // Appliquer immédiatement l'état de l'animation
         appliquerAnimationPoints(preferences.animationPoints !== false);
 
+        // Métadonnées contextuelles (graphiques)
+        const contexteGraphiques = document.getElementById('v2-pref-contexte-graphiques');
+        if (contexteGraphiques) {
+            contexteGraphiques.checked = preferences.afficherContexteGraphiques !== false;
+        }
+
         // Chrono évaluation
         const chronoEval = document.getElementById('v2-pref-chrono-eval');
         if (chronoEval) {
@@ -289,6 +295,8 @@
         // 🆕 BETA 96.1 : Animation des points
         preferences.animationPoints = document.getElementById('v2-pref-animation-points')?.checked !== false;
         appliquerAnimationPoints(preferences.animationPoints);
+        // Métadonnées contextuelles (graphiques)
+        preferences.afficherContexteGraphiques = document.getElementById('v2-pref-contexte-graphiques')?.checked !== false;
         // Chrono évaluation
         preferences.chronoEvaluation = document.getElementById('v2-pref-chrono-eval')?.checked === true;
         // SIS par défaut
