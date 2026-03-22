@@ -81,6 +81,11 @@ function initialiserSystemeModes() {
         document.body.classList.add('mode-clair');
         var btnTheme = document.getElementById('btn-toggle-theme');
         if (btnTheme) btnTheme.textContent = '🌑';
+        // Synchroniser les radio buttons
+        var radioClair = document.getElementById('radio-mode-clair');
+        var radioSombre = document.getElementById('radio-mode-sombre');
+        if (radioClair) radioClair.checked = true;
+        if (radioSombre) radioSombre.checked = false;
     }
 
     console.log(`✅ Mode actif: ${THEMES[modeActuel]?.nom || modeActuel}`);
@@ -895,7 +900,11 @@ function definirTheme(clair) {
     prefs.modeClair = !!clair;
     db.setSync('preferencesAffichage', prefs);
     document.body.classList.toggle('mode-clair', !!clair);
-    // Synchroniser les checkboxes
+    // Synchroniser les radio buttons et checkboxes legacy
+    var radioClair = document.getElementById('radio-mode-clair');
+    var radioSombre = document.getElementById('radio-mode-sombre');
+    if (radioClair) radioClair.checked = !!clair;
+    if (radioSombre) radioSombre.checked = !clair;
     document.querySelectorAll('#checkbox-mode-clair, #checkbox-mode-clair-accueil')
         .forEach(function(cb) { cb.checked = !!clair; });
     // Notifier les modules (graphiques, etc.)
