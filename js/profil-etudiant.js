@@ -3048,34 +3048,17 @@ function calculerDirectionRisque(da) {
  * @param {string} da - Numéro de DA
  * @returns {Object} - { structure: {symbole, interpretation}, rigueur: {...}, ... }
  */
-function calculerDirectionsCriteres(da, pratique = 'PAN') {
+function calculerDirectionsCriteres(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const productions = obtenirDonneesSelonMode('productions') || [];
 
     // Obtenir le nombre de productions configuré pour l'analyse des patterns
     const N = obtenirNombreProductionsPourPatterns() || 3;
 
-    // Filtrer les évaluations selon la pratique
-    let evaluationsEleve;
-
-    if (pratique === 'SOM') {
-        // SOM : TOUTES les évaluations avec rétroaction finale
-        evaluationsEleve = evaluations.filter(e =>
-            e.etudiantDA === da &&
-            e.retroactionFinale
-        );
-    } else {
-        // PAN : Uniquement les artefacts de portfolio évalués
-        const artefactsPortfolio = productions
-            .filter(p => p.type === 'artefact-portfolio')
-            .map(p => p.id);
-
-        evaluationsEleve = evaluations.filter(e =>
-            e.etudiantDA === da &&
-            artefactsPortfolio.includes(e.productionId) &&
-            e.retroactionFinale
-        );
-    }
+    // Toutes les évaluations de l'étudiant avec critères structurés
+    const evaluationsEleve = evaluations.filter(e =>
+        e.etudiantDA === da &&
+        e.criteres && Array.isArray(e.criteres) && e.criteres.length > 0
+    );
 
     // Résultat par défaut si données insuffisantes
     const resultatParDefaut = {
@@ -3105,7 +3088,8 @@ function calculerDirectionsCriteres(da, pratique = 'PAN') {
     const tableConversion = obtenirTableConversionIDME();
 
     // Fonction helper pour extraire les scores d'une liste d'évaluations
-    const extraireScoresCriteres = (evaluations) => {
+    // Utilise evaluation.criteres[] (fiable) au lieu du parsing regex de retroactionFinale
+    const extraireScoresCriteres = (evals) => {
         const scoresCriteres = {
             structure: [],
             rigueur: [],
@@ -3114,30 +3098,23 @@ function calculerDirectionsCriteres(da, pratique = 'PAN') {
             francais: []
         };
 
-        const regexCritere = /(STRUCTURE|RIGUEUR|PLAUSIBILIT[ÉE]|NUANCE|FRAN[ÇC]AIS\s+[ÉE]CRIT)\s*\(([IDME])\)/gi;
+        evals.forEach(evaluation => {
+            if (!evaluation.criteres || !Array.isArray(evaluation.criteres)) return;
 
-        evaluations.forEach(evaluation => {
-            const retroaction = evaluation.retroactionFinale || '';
-            let match;
-            while ((match = regexCritere.exec(retroaction)) !== null) {
-                const nomCritere = match[1].toUpperCase();
-                const niveauIDME = match[2].toUpperCase();
+            evaluation.criteres.forEach(c => {
+                const niveauIDME = c.niveauSelectionne;
                 const score = convertirNiveauIDMEEnScore(niveauIDME, tableConversion);
+                if (score === null) return;
 
-                if (score !== null) {
-                    if (nomCritere === 'STRUCTURE') {
-                        scoresCriteres.structure.push(score);
-                    } else if (nomCritere === 'RIGUEUR') {
-                        scoresCriteres.rigueur.push(score);
-                    } else if (nomCritere.startsWith('PLAUSIBILIT')) {
-                        scoresCriteres.plausibilite.push(score);
-                    } else if (nomCritere === 'NUANCE') {
-                        scoresCriteres.nuance.push(score);
-                    } else if (nomCritere.startsWith('FRAN')) {
-                        scoresCriteres.francais.push(score);
-                    }
-                }
-            }
+                const nom = (c.critereNom || '').toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+
+                if (nom === 'structure') scoresCriteres.structure.push(score);
+                else if (nom === 'rigueur') scoresCriteres.rigueur.push(score);
+                else if (nom.startsWith('plausibilit')) scoresCriteres.plausibilite.push(score);
+                else if (nom === 'nuance') scoresCriteres.nuance.push(score);
+                else if (nom.startsWith('francais') || nom.startsWith('franc')) scoresCriteres.francais.push(score);
+            });
         });
 
         return scoresCriteres;
@@ -5444,7 +5421,7 @@ function calculerProgressionEleve(da) {
     // 🆕 NOUVELLE LOGIQUE : Basée sur les critères individuels plutôt que sur la note globale
     // Obtenir les directions pour chaque critère
     const pratique = obtenirPratiqueActuelle();
-    const directionsCriteres = calculerDirectionsCriteres(da, pratique);
+    const directionsCriteres = calculerDirectionsCriteres(da);
 
     // Vérifier si nous avons suffisamment de données
     const criteres = Object.keys(directionsCriteres);
@@ -6704,6 +6681,128 @@ function genererDiagnosticGenerique(da, defisInfo) {
  * @param {string} da - Numéro de DA
  * @returns {string} - HTML de la section
  */
+
+/**
+ * Génère les barres de progression SRPNF (Forces et défis parmi les critères)
+ * Indépendant du portfolio — utilise les moyennes SRPNF de l'étudiant
+ * @param {string} da - Numéro DA
+ * @param {string} graphiqueCriteres - HTML du graphique d'évolution (optionnel)
+ * @returns {string} - HTML complet (graphique + barres + légende)
+ */
+function _genererBarresSRPNF(da, graphiqueCriteres) {
+    graphiqueCriteres = graphiqueCriteres || '';
+
+    // Récupérer les couleurs depuis l'échelle configurée
+    const echelles = db.getSync('echellesTemplates', []);
+    const echelleActive = echelles.find(e => e.active) || echelles[0];
+
+    let niveaux = [
+        { code: 'I', nom: 'Incomplet', min: 0, max: 64, couleur: 'var(--orange-accent)' },
+        { code: 'D', nom: 'Développement', min: 65, max: 74, couleur: 'var(--btn-annuler)' },
+        { code: 'M', nom: 'Maîtrisé', min: 75, max: 84, couleur: 'var(--vert-succes)' },
+        { code: 'E', nom: 'Étendu', min: 85, max: 100, couleur: 'var(--bleu-clair)' }
+    ];
+
+    if (echelleActive && echelleActive.niveaux) {
+        niveaux = echelleActive.niveaux.map(n => ({
+            code: n.code, nom: n.nom, min: n.min, max: n.max, couleur: n.couleur
+        }));
+    }
+
+    // Gradient CSS
+    const gradientStops = [];
+    niveaux.forEach((niveau, i) => {
+        if (i === 0) {
+            gradientStops.push(`${niveau.couleur} ${niveau.min}%`);
+            gradientStops.push(`${niveau.couleur} ${(i < niveaux.length - 1 ? niveaux[i + 1].min - 2 : niveau.max)}%`);
+        } else if (i === niveaux.length - 1) {
+            gradientStops.push(`${niveau.couleur} ${niveau.min + 2}%`);
+            gradientStops.push(`${niveau.couleur} ${niveau.max}%`);
+        } else {
+            gradientStops.push(`${niveau.couleur} ${niveau.min + 2}%`);
+            gradientStops.push(`${niveau.couleur} ${niveaux[i + 1].min - 2}%`);
+        }
+    });
+    const gradientCSS = `linear-gradient(to right, ${gradientStops.join(', ')})`;
+
+    // Calculer moyennes SRPNF
+    const moyennes = calculerMoyennesCriteres(da);
+    const directions = calculerDirectionsCriteres(da);
+
+    // Générer les barres
+    const barresHTML = ['structure', 'rigueur', 'plausibilite', 'nuance', 'francais'].map(cle => {
+        const nomCritere = cle === 'structure' ? 'Structure' :
+                         cle === 'rigueur' ? 'Rigueur' :
+                         cle === 'plausibilite' ? 'Plausibilité' :
+                         cle === 'nuance' ? 'Nuance' : 'Français';
+
+        const score = moyennes?.[cle];
+        if (typeof score !== 'number' || isNaN(score)) return '';
+
+        const pourcentage = Math.round(score * 100);
+        const direction = directions ? directions[cle] : null;
+        const symboleDirection = direction && direction.symbole ? direction.symbole : '';
+
+        const pointsHTML = `<div class="critere-point" style="left: ${Math.min(pourcentage, 100)}%;"></div>`;
+        const symbolesHTML = symboleDirection ? `<div style="position: absolute; left: ${Math.min(pourcentage, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--gris-fonce);" title="${direction.interpretation}">${symboleDirection}</div>` : '';
+
+        return `
+            <div class="critere-container">
+                <div class="critere-header">
+                    <span class="critere-nom" style="min-width: 120px;">${nomCritere}</span>
+                    <span class="critere-valeur" style="margin-left: auto; font-weight: 600;">${pourcentage}%</span>
+                </div>
+                <div class="critere-barre-gradient" style="background: ${gradientCSS};">
+                    ${symbolesHTML}
+                    ${pointsHTML}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Légende
+    const legendeHTML = `
+        <div class="legende-idme-container">
+            ${niveaux.map(n => {
+                const pos = (n.min + n.max) / 2;
+                return `<div class="legende-idme-item" style="left: ${pos}%; color: ${n.couleur};">
+                    <span class="legende-idme-code">${n.code}</span>
+                    <span class="legende-idme-nom">${n.nom}</span>
+                </div>`;
+            }).join('')}
+        </div>
+    `;
+
+    // Contenu des barres ou message
+    let contenuBarres = '';
+    if (!barresHTML || barresHTML.trim() === '') {
+        const grilleRef = typeof obtenirGrilleReferenceDepistage === 'function' ? obtenirGrilleReferenceDepistage() : null;
+        if (!grilleRef) {
+            contenuBarres = `<div class="info-box info-box--attention" style="margin: 15px 0;">
+                <strong style="color: var(--alerte-texte-attention);">Configuration requise</strong>
+                <p style="margin: 5px 0 0; color: var(--alerte-texte-attention); font-size: 0.9rem;">
+                    Configure une grille de référence dans Réglages → Pratique de notation → Grille de référence pour le dépistage.
+                </p>
+            </div>`;
+        } else {
+            contenuBarres = `<div class="info-box info-box--info" style="margin: 15px 0;">
+                <strong style="color: var(--alerte-texte-information);">Aucune donnée disponible</strong>
+                <p style="margin: 5px 0 0; color: var(--alerte-texte-information); font-size: 0.9rem;">
+                    Aucune évaluation complétée avec des critères correspondant à la grille de référence.
+                </p>
+            </div>`;
+        }
+    } else {
+        contenuBarres = barresHTML + legendeHTML;
+    }
+
+    return `
+        ${graphiqueCriteres}
+        <div class="section-titre" style="margin-top: 20px;">Forces et défis parmi les critères</div>
+        <div style="margin: 20px 0;">${contenuBarres}</div>
+    `;
+}
+
 function genererSectionPerformance(da) {
     // ✨ NOUVEAU (7 déc 2025) : Graphique d'évolution des critères
     const canvasIdCriteres = `graphique-criteres-${da}`;
@@ -6787,27 +6886,18 @@ function genererSectionPerformance(da) {
     const productions = obtenirDonneesSelonMode('productions') || [];
     const portfolio = productions.find(p => p.type === 'portfolio');
 
+    // Générer les barres SRPNF (indépendant du portfolio)
+    const barresSRPNF = _genererBarresSRPNF(da, graphiqueCriteres);
+
     if (!portfolio) {
-        // Pas de portfolio, mais le graphique critères peut exister
-        if (graphiqueCriteres) {
-            return graphiqueCriteres;
-        }
-        return `
-            <div class="text-muted profil-zone-centre-p30">
-                <p>Aucun portfolio configuré</p>
-            </div>
-        `;
+        return barresSRPNF;
     }
 
     // Récupérer TOUS les artefacts créés
     const tousLesArtefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
-    
+
     if (tousLesArtefactsPortfolio.length === 0) {
-        return graphiqueCriteres + `
-            <div class="text-muted profil-zone-centre-p30">
-                <p>📝 Aucun ${obtenirTermeProduction('singulier')} de portfolio créé</p>
-            </div>
-        `;
+        return barresSRPNF;
     }
 
     // ✅ CORRECTION : Identifier les artefacts RÉELLEMENT ÉVALUÉS
@@ -7142,7 +7232,7 @@ function genererSectionPerformance(da) {
 
                         // SOM : Calculer sur TOUTES les évaluations (sans filtre)
                         moyennesSOM = calculerMoyennesCriteres(da);
-                        directionsSOM = calculerDirectionsCriteres(da, 'SOM');
+                        directionsSOM = calculerDirectionsCriteres(da);
 
                         // PAN : Utiliser la méthode de la pratique PAN-Standards (N derniers artefacts)
                         const pratiquePAN = obtenirPratiqueParId('pan-standards');
@@ -7152,7 +7242,7 @@ function genererSectionPerformance(da) {
                             console.warn('  ⚠️ Pratique PAN-Standards non disponible ou méthode _calculerMoyennesCriteresRecents absente');
                             moyennesPAN = null;
                         }
-                        directionsPAN = calculerDirectionsCriteres(da, 'PAN');
+                        directionsPAN = calculerDirectionsCriteres(da);
 
                         console.log('  moyennesSOM (toutes):', moyennesSOM);
                         console.log('  moyennesPAN (N derniers):', moyennesPAN);
@@ -7162,7 +7252,7 @@ function genererSectionPerformance(da) {
                         console.log('  ❌ Mode comparatif NON activé');
                         // Mode normal : calculer les moyennes et utiliser les directions PAN par défaut
                         moyennesPAN = calculerMoyennesCriteres(da);
-                        directionsPAN = calculerDirectionsCriteres(da, 'PAN');
+                        directionsPAN = calculerDirectionsCriteres(da);
                     }
 
                     // Utiliser les moyennes appropriées selon le mode
@@ -8478,6 +8568,8 @@ window.retirerJetonPersonnaliseAvecConfirmation = retirerJetonPersonnaliseAvecCo
 window.determinerNiveauRaiPedagogique = determinerNiveauRaiPedagogique;
 window.determinerAlerteContextuelle = determinerAlerteContextuelle;
 window.determinerCibleIntervention = determinerCibleIntervention; // 🔧 FIX Beta 97.4 : Nécessaire pour afficherPatternsApprentissage
+window.calculerIndiceBlocage = calculerIndiceBlocage;
+window.calculerMoyennesCriteres = calculerMoyennesCriteres;
 
 /**
  * 🆕 BETA 91: Calcule et stocke les patterns + RàI pour TOUT le groupe
