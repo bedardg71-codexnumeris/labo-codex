@@ -3894,22 +3894,23 @@
                             </div>
                             <div style="display: flex; gap: 6px; align-items: center;">
                                 <button id="btn-toggle-panneau-prioritaire" class="btn-toggle-suivi btn-toggle-prioritaire"
-                                        title="Étudiants en difficulté (automatique)">
-                                    Prioritaire
-                                </button>
-                                <button id="btn-toggle-panneau-suivi" class="btn-toggle-suivi" title="Suivre jusqu'à 5 étudiants">
-                                    Suivi
+                                        title="Afficher les indices A-C-P sur chaque étudiant">
+                                    Détails
                                 </button>
                             </div>
                         </h3>
 
-                        <!-- Panneau suivi d'étudiants -->
+                        <!-- Panneau suivi d'étudiants (unifié avec détails) -->
                         <div id="panneau-suivi-etudiants" class="panneau-suivi-etudiants">
                             <div class="u-flex-between u-mb-8">
                                 <span class="u-texte-petit u-texte-gras" style="color: var(--texte-secondaire)">
                                     Suivi d'étudiants <span id="compteur-suivi" style="opacity: 0.6;">(0/5)</span>
                                 </span>
-                                <button id="btn-reinitialiser-suivi" class="btn-toggle-suivi">Réinitialiser</button>
+                                <span id="suivi-tri-boutons" class="prioritaire-tri-zone" style="display:none"></span>
+                                <div style="display: flex; gap: 6px; align-items: center;">
+                                    <span class="u-texte-petit" style="color: var(--gris-moyen); font-style: italic;">Cliquer un nom pour le suivre</span>
+                                    <button id="btn-reinitialiser-suivi" class="btn-toggle-suivi">Réinitialiser</button>
+                                </div>
                             </div>
                             <div id="liste-etudiants-suivi" class="liste-etudiants-suivi">
                                 <!-- Rempli dynamiquement -->

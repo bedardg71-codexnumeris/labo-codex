@@ -10155,32 +10155,32 @@ label:has(+ textarea:disabled) {
 
 /* Palette ocean saturée : danger, laiton, succès, sarcelle, alerte */
 .barre-etudiant.tracked-0 {
-    background: radial-gradient(circle at 30% 30%, #ff6060 0%, #c03030 50%, #601818 100%) !important;
-    box-shadow: 0 0 4px 1.5px rgba(192, 48, 48, 0.5), inset -1px -1px 2px rgba(0, 0, 0, 0.2), inset 1px 1px 2px rgba(255, 255, 255, 0.3);
+    background: radial-gradient(circle at 30% 30%, #70b8e8 0%, #3878b0 50%, #1a4870 100%) !important;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7), 2px 3px 6px rgba(0, 0, 0, 0.35), inset -1px -1px 2px rgba(0, 0, 0, 0.2), inset 1px 1px 2px rgba(255, 255, 255, 0.3);
     z-index: 18;
 }
 
 .barre-etudiant.tracked-1 {
-    background: radial-gradient(circle at 30% 30%, #ffe060 0%, #c8a020 50%, #806010 100%) !important;
-    box-shadow: 0 0 4px 1.5px rgba(200, 160, 32, 0.5), inset -1px -1px 2px rgba(0, 0, 0, 0.2), inset 1px 1px 2px rgba(255, 255, 255, 0.3);
+    background: radial-gradient(circle at 30% 30%, #a888e0 0%, #6848a8 50%, #382868 100%) !important;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7), 2px 3px 6px rgba(0, 0, 0, 0.35), inset -1px -1px 2px rgba(0, 0, 0, 0.2), inset 1px 1px 2px rgba(255, 255, 255, 0.3);
     z-index: 18;
 }
 
 .barre-etudiant.tracked-2 {
-    background: radial-gradient(circle at 30% 30%, #50e888 0%, #20a858 50%, #106830 100%) !important;
-    box-shadow: 0 0 4px 1.5px rgba(32, 168, 88, 0.5), inset -1px -1px 2px rgba(0, 0, 0, 0.2), inset 1px 1px 2px rgba(255, 255, 255, 0.3);
+    background: radial-gradient(circle at 30% 30%, #60d8b0 0%, #30a078 50%, #186048 100%) !important;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7), 2px 3px 6px rgba(0, 0, 0, 0.35), inset -1px -1px 2px rgba(0, 0, 0, 0.2), inset 1px 1px 2px rgba(255, 255, 255, 0.3);
     z-index: 18;
 }
 
 .barre-etudiant.tracked-3 {
-    background: radial-gradient(circle at 30% 30%, #50d0e0 0%, #2098b0 50%, #106070 100%) !important;
-    box-shadow: 0 0 4px 1.5px rgba(32, 152, 176, 0.5), inset -1px -1px 2px rgba(0, 0, 0, 0.2), inset 1px 1px 2px rgba(255, 255, 255, 0.3);
+    background: radial-gradient(circle at 30% 30%, #58d0e8 0%, #2898b8 50%, #106070 100%) !important;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7), 2px 3px 6px rgba(0, 0, 0, 0.35), inset -1px -1px 2px rgba(0, 0, 0, 0.2), inset 1px 1px 2px rgba(255, 255, 255, 0.3);
     z-index: 18;
 }
 
 .barre-etudiant.tracked-4 {
-    background: radial-gradient(circle at 30% 30%, #f0a050 0%, #c07020 50%, #784010 100%) !important;
-    box-shadow: 0 0 4px 1.5px rgba(192, 112, 32, 0.5), inset -1px -1px 2px rgba(0, 0, 0, 0.2), inset 1px 1px 2px rgba(255, 255, 255, 0.3);
+    background: radial-gradient(circle at 30% 30%, #88a8d0 0%, #5070a0 50%, #304060 100%) !important;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7), 2px 3px 6px rgba(0, 0, 0, 0.35), inset -1px -1px 2px rgba(0, 0, 0, 0.2), inset 1px 1px 2px rgba(255, 255, 255, 0.3);
     z-index: 18;
 }
 
@@ -10194,21 +10194,36 @@ label:has(+ textarea:disabled) {
     outline-offset: 2px;
 }
 
-/* ===== Prioritaire — point rouge automatique ===== */
+/* ===== Prioritaire — point corail + anneau blanc (clinique) ===== */
 .barre-etudiant.prioritaire {
-    background: radial-gradient(circle at 30% 30%, #ff4040, #cc1010, #800808) !important;
-    box-shadow: 0 0 6px 2px rgba(220, 20, 20, 0.55), 0 0 12px 4px rgba(220, 20, 20, 0.25);
+    background: radial-gradient(circle at 30% 30%, #ff8a70, #d85a40, #902818) !important;
+    box-shadow:
+        0 0 0 2px rgba(255, 255, 255, 0.7),
+        2px 3px 6px rgba(0, 0, 0, 0.35),
+        inset -1px -1px 2px rgba(0, 0, 0, 0.2),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.15);
     z-index: 19;
 }
 
-/* Prioritaire prend la préséance sur tracked */
-.barre-etudiant.prioritaire.tracked-0,
-.barre-etudiant.prioritaire.tracked-1,
-.barre-etudiant.prioritaire.tracked-2,
-.barre-etudiant.prioritaire.tracked-3,
+/* Tracked + prioritaire : garde la couleur tracked, garde l'anneau blanc */
+.barre-etudiant.prioritaire.tracked-0 {
+    background: radial-gradient(circle at 30% 30%, #70b8e8 0%, #3878b0 50%, #1a4870 100%) !important;
+    z-index: 19;
+}
+.barre-etudiant.prioritaire.tracked-1 {
+    background: radial-gradient(circle at 30% 30%, #a888e0 0%, #6848a8 50%, #382868 100%) !important;
+    z-index: 19;
+}
+.barre-etudiant.prioritaire.tracked-2 {
+    background: radial-gradient(circle at 30% 30%, #60d8b0 0%, #30a078 50%, #186048 100%) !important;
+    z-index: 19;
+}
+.barre-etudiant.prioritaire.tracked-3 {
+    background: radial-gradient(circle at 30% 30%, #58d0e8 0%, #2898b8 50%, #106070 100%) !important;
+    z-index: 19;
+}
 .barre-etudiant.prioritaire.tracked-4 {
-    background: radial-gradient(circle at 30% 30%, #ff4040, #cc1010, #800808) !important;
-    box-shadow: 0 0 6px 2px rgba(220, 20, 20, 0.55), 0 0 12px 4px rgba(220, 20, 20, 0.25);
+    background: radial-gradient(circle at 30% 30%, #88a8d0 0%, #5070a0 50%, #304060 100%) !important;
     z-index: 19;
 }
 
@@ -10238,6 +10253,26 @@ label:has(+ textarea:disabled) {
     gap: 6px;
 }
 
+/* Pilule prioritaire (non tracked) dans le panneau suivi */
+.etudiant-suivi-item.suivi-est-prioritaire {
+    border-color: rgba(216, 90, 64, 0.3);
+    background: rgba(216, 90, 64, 0.08);
+}
+
+.etudiant-suivi-item.suivi-est-prioritaire:hover {
+    background: rgba(216, 90, 64, 0.15);
+    border-color: rgba(216, 90, 64, 0.4);
+}
+
+/* Badges cliquables dans le panneau suivi — curseur profil */
+.panneau-suivi-etudiants .etudiant-prioritaire-indices {
+    cursor: pointer;
+}
+
+.panneau-suivi-etudiants .etudiant-prioritaire-indices:hover {
+    opacity: 0.8;
+}
+
 /* Pilule cliquable d'étudiant — style badge ocean par défaut */
 .etudiant-suivi-item {
     display: flex;
@@ -10260,12 +10295,12 @@ label:has(+ textarea:disabled) {
     border-color: rgba(106, 172, 184, 0.35);
 }
 
-/* Pilule active — couleurs palette ocean (danger, laiton, succès, sarcelle, alerte) */
-.etudiant-suivi-item.actif-0 { border-color: #d08080; background: rgba(122, 58, 58, 0.30); color: #ffb0b0; font-weight: 600; }
-.etudiant-suivi-item.actif-1 { border-color: #d4b878; background: rgba(200, 160, 96, 0.20); color: #f0dca0; font-weight: 600; }
-.etudiant-suivi-item.actif-2 { border-color: #5ec49a; background: rgba(42, 122, 90, 0.25); color: #88e8b8; font-weight: 600; }
-.etudiant-suivi-item.actif-3 { border-color: #7ec8d4; background: rgba(106, 172, 184, 0.20); color: #a0e8f0; font-weight: 600; }
-.etudiant-suivi-item.actif-4 { border-color: #d8a070; background: rgba(192, 120, 72, 0.25); color: #f0c098; font-weight: 600; }
+/* Pilule active — palette froide (bleu, violet, vert, sarcelle, bleu-gris) */
+.etudiant-suivi-item.actif-0 { border-color: #5e9fd0; background: rgba(94, 159, 208, 0.20); color: #a0d0f0; font-weight: 600; }
+.etudiant-suivi-item.actif-1 { border-color: #8b6cc4; background: rgba(139, 108, 196, 0.20); color: #c0a8e8; font-weight: 600; }
+.etudiant-suivi-item.actif-2 { border-color: #4db89a; background: rgba(77, 184, 154, 0.20); color: #88e8c8; font-weight: 600; }
+.etudiant-suivi-item.actif-3 { border-color: #4ab8d4; background: rgba(74, 184, 212, 0.20); color: #90d8f0; font-weight: 600; }
+.etudiant-suivi-item.actif-4 { border-color: #6a8fc0; background: rgba(106, 143, 192, 0.20); color: #a8c8e8; font-weight: 600; }
 
 /* Badge mise en évidence quand le point correspondant est sélectionné */
 .etudiant-suivi-item.surligne {
@@ -10273,11 +10308,11 @@ label:has(+ textarea:disabled) {
     background: rgba(106, 172, 184, 0.28);
 }
 
-.etudiant-suivi-item.actif-0.surligne { background: rgba(122, 58, 58, 0.50); box-shadow: 0 0 0 2px #d08080, 0 0 10px rgba(208, 128, 128, 0.4); }
-.etudiant-suivi-item.actif-1.surligne { background: rgba(200, 160, 96, 0.40); box-shadow: 0 0 0 2px #d4b878, 0 0 10px rgba(212, 184, 120, 0.4); }
-.etudiant-suivi-item.actif-2.surligne { background: rgba(42, 122, 90, 0.45); box-shadow: 0 0 0 2px #5ec49a, 0 0 10px rgba(94, 196, 154, 0.4); }
-.etudiant-suivi-item.actif-3.surligne { background: rgba(106, 172, 184, 0.40); box-shadow: 0 0 0 2px #7ec8d4, 0 0 10px rgba(126, 200, 212, 0.4); }
-.etudiant-suivi-item.actif-4.surligne { background: rgba(192, 120, 72, 0.45); box-shadow: 0 0 0 2px #d8a070, 0 0 10px rgba(216, 160, 112, 0.4); }
+.etudiant-suivi-item.actif-0.surligne { background: rgba(94, 159, 208, 0.40); box-shadow: 0 0 0 2px #5e9fd0, 0 0 10px rgba(94, 159, 208, 0.4); }
+.etudiant-suivi-item.actif-1.surligne { background: rgba(139, 108, 196, 0.40); box-shadow: 0 0 0 2px #8b6cc4, 0 0 10px rgba(139, 108, 196, 0.4); }
+.etudiant-suivi-item.actif-2.surligne { background: rgba(77, 184, 154, 0.40); box-shadow: 0 0 0 2px #4db89a, 0 0 10px rgba(77, 184, 154, 0.4); }
+.etudiant-suivi-item.actif-3.surligne { background: rgba(74, 184, 212, 0.40); box-shadow: 0 0 0 2px #4ab8d4, 0 0 10px rgba(74, 184, 212, 0.4); }
+.etudiant-suivi-item.actif-4.surligne { background: rgba(106, 143, 192, 0.40); box-shadow: 0 0 0 2px #6a8fc0, 0 0 10px rgba(106, 143, 192, 0.4); }
 
 /* Pastille ronde de couleur */
 .pastille-couleur-suivi {
@@ -10360,7 +10395,7 @@ label:has(+ textarea:disabled) {
     height: 10px;
     border-radius: 50%;
     flex-shrink: 0;
-    background: radial-gradient(circle at 30% 30%, #ff4040, #cc1010);
+    background: radial-gradient(circle at 30% 30%, #ff8a70, #d85a40);
 }
 
 .etudiant-prioritaire-nom {
@@ -20061,31 +20096,31 @@ body.mode-clair .etudiant-suivi-item:hover {
     border-color: rgba(106, 172, 184, 0.5);
 }
 
-/* Badges actifs — couleurs saturées pour fond clair */
+/* Badges actifs — palette froide pour fond clair */
 body.mode-clair .etudiant-suivi-item.actif-0 {
-    color: #8b1a1a;
-    background: rgba(208, 80, 80, 0.15);
-    border-color: #c06060;
+    color: #1a4870;
+    background: rgba(94, 159, 208, 0.15);
+    border-color: #4888b8;
 }
 body.mode-clair .etudiant-suivi-item.actif-1 {
-    color: #7a5e10;
-    background: rgba(200, 160, 32, 0.15);
-    border-color: #c0a030;
+    color: #3a2868;
+    background: rgba(139, 108, 196, 0.15);
+    border-color: #7858b0;
 }
 body.mode-clair .etudiant-suivi-item.actif-2 {
-    color: #1a6840;
-    background: rgba(42, 168, 88, 0.15);
-    border-color: #40a868;
+    color: #186048;
+    background: rgba(77, 184, 154, 0.15);
+    border-color: #3a9878;
 }
 body.mode-clair .etudiant-suivi-item.actif-3 {
-    color: #186068;
-    background: rgba(106, 172, 184, 0.18);
-    border-color: #5aa8b8;
+    color: #106068;
+    background: rgba(74, 184, 212, 0.15);
+    border-color: #3898b0;
 }
 body.mode-clair .etudiant-suivi-item.actif-4 {
-    color: #7a4010;
-    background: rgba(192, 112, 32, 0.15);
-    border-color: #c08030;
+    color: #283858;
+    background: rgba(106, 143, 192, 0.15);
+    border-color: #5878a8;
 }
 
 /* Surlignage — ombre adaptée au fond clair */
@@ -20094,39 +20129,51 @@ body.mode-clair .etudiant-suivi-item.surligne {
     box-shadow: 0 0 0 2px rgba(106, 172, 184, 0.5), 0 0 8px rgba(106, 172, 184, 0.2);
 }
 body.mode-clair .etudiant-suivi-item.actif-0.surligne {
-    background: rgba(208, 80, 80, 0.2);
-    box-shadow: 0 0 0 2px #c06060, 0 0 8px rgba(192, 48, 48, 0.25);
+    background: rgba(94, 159, 208, 0.2);
+    box-shadow: 0 0 0 2px #4888b8, 0 0 8px rgba(94, 159, 208, 0.25);
 }
 body.mode-clair .etudiant-suivi-item.actif-1.surligne {
-    background: rgba(200, 160, 32, 0.2);
-    box-shadow: 0 0 0 2px #c0a030, 0 0 8px rgba(200, 160, 32, 0.25);
+    background: rgba(139, 108, 196, 0.2);
+    box-shadow: 0 0 0 2px #7858b0, 0 0 8px rgba(139, 108, 196, 0.25);
 }
 body.mode-clair .etudiant-suivi-item.actif-2.surligne {
-    background: rgba(42, 168, 88, 0.2);
-    box-shadow: 0 0 0 2px #40a868, 0 0 8px rgba(42, 168, 88, 0.25);
+    background: rgba(77, 184, 154, 0.2);
+    box-shadow: 0 0 0 2px #3a9878, 0 0 8px rgba(77, 184, 154, 0.25);
 }
 body.mode-clair .etudiant-suivi-item.actif-3.surligne {
-    background: rgba(106, 172, 184, 0.25);
-    box-shadow: 0 0 0 2px #5aa8b8, 0 0 8px rgba(106, 172, 184, 0.25);
+    background: rgba(74, 184, 212, 0.2);
+    box-shadow: 0 0 0 2px #3898b0, 0 0 8px rgba(74, 184, 212, 0.25);
 }
 body.mode-clair .etudiant-suivi-item.actif-4.surligne {
-    background: rgba(192, 112, 32, 0.2);
-    box-shadow: 0 0 0 2px #c08030, 0 0 8px rgba(192, 112, 32, 0.25);
+    background: rgba(106, 143, 192, 0.2);
+    box-shadow: 0 0 0 2px #5878a8, 0 0 8px rgba(106, 143, 192, 0.25);
 }
 
-/* 7. Points trackés sur barres — ombres bleu foncé au lieu de blanc subtil */
+/* 6b. Pilule prioritaire en mode clair (panneau suivi unifié) */
+body.mode-clair .etudiant-suivi-item.suivi-est-prioritaire {
+    color: #6a2a18;
+    background: rgba(216, 90, 64, 0.1);
+    border-color: rgba(216, 90, 64, 0.35);
+}
+body.mode-clair .etudiant-suivi-item.suivi-est-prioritaire:hover {
+    background: rgba(216, 90, 64, 0.18);
+    border-color: rgba(216, 90, 64, 0.5);
+}
+
+/* 7. Points trackés sur barres — anneau blanc + ombre */
 body.mode-clair .barre-etudiant.tracked-0,
 body.mode-clair .barre-etudiant.tracked-1,
 body.mode-clair .barre-etudiant.tracked-2,
 body.mode-clair .barre-etudiant.tracked-3,
 body.mode-clair .barre-etudiant.tracked-4 {
     box-shadow:
-        2px 3px 6px rgba(3, 46, 92, 0.3),
-        inset 0 -1px 2px rgba(0, 0, 0, 0.15),
+        0 0 0 2px rgba(255, 255, 255, 0.85),
+        2px 3px 6px rgba(0, 0, 0, 0.25),
+        inset -1px -1px 2px rgba(0, 0, 0, 0.15),
         inset 1px 1px 2px rgba(255, 255, 255, 0.4);
 }
 
-/* 8. Points prioritaires en mode clair */
+/* 8. Points prioritaires en mode clair — même anneau blanc que mode sombre */
 body.mode-clair .barre-etudiant.prioritaire,
 body.mode-clair .barre-etudiant.prioritaire.tracked-0,
 body.mode-clair .barre-etudiant.prioritaire.tracked-1,
@@ -20134,8 +20181,10 @@ body.mode-clair .barre-etudiant.prioritaire.tracked-2,
 body.mode-clair .barre-etudiant.prioritaire.tracked-3,
 body.mode-clair .barre-etudiant.prioritaire.tracked-4 {
     box-shadow:
-        0 0 6px 2px rgba(200, 20, 20, 0.4),
-        2px 3px 6px rgba(200, 20, 20, 0.2);
+        0 0 0 2px rgba(255, 255, 255, 0.85),
+        2px 3px 6px rgba(0, 0, 0, 0.25),
+        inset -1px -1px 2px rgba(0, 0, 0, 0.2),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.15);
 }
 
 body.mode-clair .panneau-prioritaire {
