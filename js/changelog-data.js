@@ -10,18 +10,6 @@
 
     var CHANGELOG = [
         {
-            version: 'Beta 99',
-            couleur: 'bleu',
-            titre: 'Graphiques unifi\u00e9s et aide Codex',
-            items: [
-                'En-t\u00eates et l\u00e9gendes des graphiques unifi\u00e9s\u00a0: m\u00eame style sur les 6\u00a0graphiques.',
-                'Checkboxes pour masquer ou afficher chaque courbe (indices A\u2011C\u2011P et crit\u00e8res).',
-                'Bandeau contextuel (trimestre, cours, effectif) sur tous les graphiques du tableau de bord.',
-                'Nouvelle pr\u00e9f\u00e9rence\u00a0: activer ou d\u00e9sactiver les m\u00e9tadonn\u00e9es contextuelles.',
-                'Documentation compl\u00e8te du Codex dans la section Aide (flux, comparatif avec la sauvegarde).'
-            ]
-        },
-        {
             version: 'Beta 98',
             couleur: 'vert',
             titre: 'Annotation avanc\u00e9e et codex USB',
@@ -31,7 +19,9 @@
                 'Outils d\u2019annotation enrichis\u00a0: ligne, vague, duplication, s\u00e9lection et formes.',
                 'Corbeille pour les fichiers supprim\u00e9s (restauration possible pendant 30\u00a0jours).',
                 'Codex USB pour transporter tes donn\u00e9es entre appareils.',
-                'Barre d\u2019outils compacte et visionneuse redessin\u00e9e.'
+                'Barre d\u2019outils compacte et visionneuse redessin\u00e9e.',
+                'Corr\u00e9lations longitudinales et impact des jetons\u00a0: deux nouveaux graphiques au tableau de bord.',
+                'Graphiques unifi\u00e9s\u00a0: l\u00e9gendes interactives, checkboxes et m\u00e9tadonn\u00e9es contextuelles.'
             ]
         },
         {
