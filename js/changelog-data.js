@@ -10,6 +10,18 @@
 
     var CHANGELOG = [
         {
+            version: 'Beta 99',
+            couleur: 'bleu',
+            titre: 'Graphiques unifi\u00e9s et aide Codex',
+            items: [
+                'En-t\u00eates et l\u00e9gendes des graphiques unifi\u00e9s\u00a0: m\u00eame style sur les 6\u00a0graphiques.',
+                'Checkboxes pour masquer ou afficher chaque courbe (indices A\u2011C\u2011P et crit\u00e8res).',
+                'Bandeau contextuel (trimestre, cours, effectif) sur tous les graphiques du tableau de bord.',
+                'Nouvelle pr\u00e9f\u00e9rence\u00a0: activer ou d\u00e9sactiver les m\u00e9tadonn\u00e9es contextuelles.',
+                'Documentation compl\u00e8te du Codex dans la section Aide (flux, comparatif avec la sauvegarde).'
+            ]
+        },
+        {
             version: 'Beta 98',
             couleur: 'vert',
             titre: 'Annotation avanc\u00e9e et codex USB',
