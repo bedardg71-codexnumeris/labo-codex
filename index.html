@@ -11708,14 +11708,18 @@
                         </div>
 
                         <!-- Mode clair/sombre -->
-                        <div class="form-group u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
-                            <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-theme">
-                                <input type="checkbox" id="checkbox-mode-clair" onchange="definirTheme(this.checked)">
-                                <strong style="margin-left: 8px;">Mode clair</strong>
-                            </label>
-                            <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
-                                Utiliser un th&egrave;me lumineux au lieu du th&egrave;me sombre.
-                            </small>
+                        <div class="form-group u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px" data-tooltip="pref-theme">
+                            <strong style="display: block; margin-bottom: 8px;">Th&egrave;me</strong>
+                            <div style="display: flex; gap: 20px;">
+                                <label class="u-align-center" style="cursor: pointer; display: flex">
+                                    <input type="radio" name="theme-mode" id="radio-mode-sombre" value="sombre" checked onchange="definirTheme(false)">
+                                    <span style="margin-left: 6px;">Mode sombre</span>
+                                </label>
+                                <label class="u-align-center" style="cursor: pointer; display: flex">
+                                    <input type="radio" name="theme-mode" id="radio-mode-clair" value="clair" onchange="definirTheme(true)">
+                                    <span style="margin-left: 6px;">Mode clair</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
 
