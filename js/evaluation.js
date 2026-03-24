@@ -508,6 +508,7 @@ function chargerEvaluationsEtudiant() {
     // Vider la rétroaction finale
     const retroaction = document.getElementById('retroactionFinale1');
     if (retroaction) retroaction.value = '';
+    mettreAJourCompteurMots();
 
     // Initialiser evaluationEnCours avec le nouvel étudiant mais préserver les sélections
     evaluationEnCours = {
@@ -1929,17 +1930,18 @@ function genererRetroaction(num) {
                 }
 
                 // Vérifier si c'est un critère algorithmique
+                const enteteCritere = `Critère ${index + 1} (${critere.nom}) — ${niveau}`;
                 if (critere.type === 'algorithmique' && evaluationEnCours.donneesAlgorithmiques?.[critere.id]?.retroaction) {
                     const retroAlgo = evaluationEnCours.donneesAlgorithmiques[critere.id].retroaction;
-                    texte += `[Critère ${index + 1} — ${niveau}] ${critere.nom}\n${retroAlgo}\n\n`;
+                    texte += `${enteteCritere}\n${retroAlgo}\n\n`;
                 } else if (cartouche.commentaires) {
                     const cle = `${critere.id}_${niveau}`;
                     const commentaire = cartouche.commentaires[cle];
 
                     if (commentaire) {
-                        texte += `[Critère ${index + 1} — ${niveau}] ${critere.nom}\n${commentaire}\n\n`;
+                        texte += `${enteteCritere}\n${commentaire}\n\n`;
                     } else {
-                        texte += `[Critère ${index + 1} — ${niveau}] ${critere.nom}\n[Non défini]\n\n`;
+                        texte += `${enteteCritere}\n[Non défini]\n\n`;
                     }
                 }
             }
@@ -2010,6 +2012,7 @@ function genererRetroaction(num) {
 
     const textarea = document.getElementById('retroactionFinale1');
     textarea.value = texte.trim();
+    mettreAJourCompteurMots();
 
     // Auto-scroll vers le critère modifié
     if (positionCritereActif >= 0) {
@@ -2018,6 +2021,71 @@ function genererRetroaction(num) {
         textarea.scrollTop = ratio * textarea.scrollHeight;
     }
 }
+
+/**
+ * Régénère la rétroaction avec feedback visuel (avant/après)
+ */
+function regenererRetroactionAvecFeedback() {
+    const textarea = document.getElementById('retroactionFinale1');
+    if (!textarea) return;
+
+    const ancienTexte = textarea.value;
+    const ancienMots = ancienTexte.trim().length === 0 ? 0 : ancienTexte.trim().split(/\s+/).length;
+
+    genererRetroaction(1);
+
+    const nouveauTexte = textarea.value;
+    const nouveauMots = nouveauTexte.trim().length === 0 ? 0 : nouveauTexte.trim().split(/\s+/).length;
+
+    // Feedback visuel : flash du textarea
+    textarea.style.transition = 'box-shadow 0.3s';
+    const identique = ancienTexte === nouveauTexte;
+
+    if (identique) {
+        textarea.style.boxShadow = '0 0 0 2px var(--gris-moyen)';
+        afficherNotifRetro('Rétroaction identique — aucun changement détecté');
+    } else {
+        textarea.style.boxShadow = '0 0 0 2px var(--vert-principal)';
+        const diff = nouveauMots - ancienMots;
+        const signe = diff > 0 ? '+' : '';
+        afficherNotifRetro('Rétroaction régénérée (' + signe + diff + ' mots)');
+    }
+
+    setTimeout(() => { textarea.style.boxShadow = ''; }, 1500);
+}
+
+function afficherNotifRetro(message) {
+    const compteur = document.getElementById('compteur-mots-retro');
+    if (!compteur) return;
+    const original = compteur.textContent;
+    compteur.textContent = message;
+    compteur.style.color = 'var(--vert-principal)';
+    setTimeout(() => {
+        mettreAJourCompteurMots();
+        compteur.style.color = 'var(--gris-moyen)';
+    }, 2500);
+}
+
+window.regenererRetroactionAvecFeedback = regenererRetroactionAvecFeedback;
+
+/* ===============================
+   COMPTEUR DE MOTS RÉTROACTION
+   =============================== */
+
+function mettreAJourCompteurMots() {
+    const textarea = document.getElementById('retroactionFinale1');
+    const compteur = document.getElementById('compteur-mots-retro');
+    if (!textarea || !compteur) return;
+    const texte = textarea.value.trim();
+    const nbMots = texte.length === 0 ? 0 : texte.split(/\s+/).length;
+    compteur.textContent = nbMots + ' mot' + (nbMots > 1 ? 's' : '');
+}
+
+// Écouter la saisie manuelle dans le textarea
+document.addEventListener('DOMContentLoaded', function() {
+    const textarea = document.getElementById('retroactionFinale1');
+    if (textarea) textarea.addEventListener('input', mettreAJourCompteurMots);
+});
 
 /* ===============================
    SAUVEGARDE DE L'ÉVALUATION
@@ -4567,6 +4635,7 @@ function verifierEtChargerEvaluationExistante() {
                 : evaluationExistante.retroactionFinale;
             retroaction.value = texteRetroaction;
         }
+        mettreAJourCompteurMots();
 
         // Mettre à jour evaluationEnCours pour indiquer qu'on modifie cette évaluation
         if (window.evaluationEnCours) {

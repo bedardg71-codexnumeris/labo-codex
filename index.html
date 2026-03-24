@@ -5028,6 +5028,7 @@
                                     <label><input type="radio" name="affichageNote1" id="affichageNoteComplet1" value="complet" checked onchange="genererRetroaction(1)"> Note chiffrée</label>
                                     <label><input type="radio" name="affichageNote1" id="affichageNoteLettre1" value="lettre" onchange="genererRetroaction(1)"> Niveau de performance</label>
                                     <button onclick="copierRetroaction(1)" class="btn-copier-retro" title="Copier la rétroaction dans le presse-papiers">Copier</button>
+                                    <button onclick="regenererRetroactionAvecFeedback()" class="btn-copier-retro" title="Régénérer la rétroaction depuis la cartouche actuelle" style="margin-left: 4px;">Régénérer</button>
                                 </div>
                             </div>
                             <textarea id="retroactionFinale1" class="controle-form" rows="6"
@@ -5036,6 +5037,7 @@
         border: 1px solid var(--bordure-claire); font-family: inherit; resize: vertical;
         font-size: 0.8rem; line-height: 1.4; background: var(--surface-carte, #1a3040);">
 </textarea>
+                            <div id="compteur-mots-retro" style="text-align: right; font-size: 0.7rem; color: var(--gris-moyen); margin-top: 3px; padding-right: 4px;">0 mot</div>
                         </div>
 
                         <!-- VUE SPÉCIFIQUE -->
@@ -16994,7 +16996,7 @@
         // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
         // Les valeurs ici servent de fallback si version.json n'est pas disponible
         let VERSION_MAJEURE = '98.9';
-        let BUILD_ID = '0324-1355';
+        let BUILD_ID = '0324-1520';
 
         // === CLÉS LOCALSTORAGE ===
         const CLE_VERSION_VUE = 'monitorage-version-vue';
