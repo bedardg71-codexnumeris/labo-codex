@@ -337,12 +337,15 @@ function genererOptionsFiltres(groupes, productions) {
 
     // Filtre Note (selon la pratique de notation)
     const selectNote = document.getElementById('filtre-note-eval');
-    const pratiqueNotation = db.getSync('pratiqueNotation', {});
+    const pratiqueIdFiltres = typeof obtenirPratiqueActiveGroupeCours === 'function'
+        ? obtenirPratiqueActiveGroupeCours()
+        : (typeof obtenirIdPratiqueActive === 'function' ? obtenirIdPratiqueActive() : 'sommative');
+    const estPANFiltres = pratiqueIdFiltres === 'pan-standards' || pratiqueIdFiltres === 'pan-maitrise';
 
     if (selectNote) {
         selectNote.innerHTML = '<option value="">Toutes les notes</option>';
 
-        if (pratiqueNotation.pratique === 'alternative' && pratiqueNotation.typePAN === 'maitrise') {
+        if (estPANFiltres) {
             // Système IDME
             ['I', 'D', 'M', 'E'].forEach(niveau => {
                 const option = document.createElement('option');
@@ -636,7 +639,10 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
  */
 function construireLignesEvaluations(evaluations, productions, etudiants) {
     const lignes = [];
-    const pratiqueNotation = db.getSync('pratiqueNotation', {});
+    const pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
+        ? obtenirPratiqueActiveGroupeCours()
+        : (typeof obtenirIdPratiqueActive === 'function' ? obtenirIdPratiqueActive() : 'sommative');
+    const estPAN = pratiqueId === 'pan-standards' || pratiqueId === 'pan-maitrise';
 
     // Productions à évaluer (exclure le portfolio lui-même)
     const productionsAEvaluer = productions.filter(p => p.type !== 'portfolio');
@@ -718,8 +724,8 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                         grilleNom: evaluation.grilleNom || '-',
                         cartoucheId: evaluation.cartoucheId || null,
                         cartoucheNom: obtenirNomCartouche(evaluation.grilleId, evaluation.cartoucheId),
-                        note: obtenirNoteAffichee(evaluation, pratiqueNotation),
-                        noteChiffree: evaluation.noteFinale || null,
+                        note: obtenirNoteAffichee(evaluation, estPAN),
+                        noteChiffree: evaluation.noteFinale != null ? evaluation.noteFinale : null,
                         niveauFinal: evaluation.niveauFinal || '-',
                         statut: statut,
                         statutIntegrite: statutIntegrite,
@@ -817,11 +823,11 @@ function obtenirNomCartouche(grilleId, cartoucheId) {
 /**
  * Obtient la note affichée selon la pratique de notation
  */
-function obtenirNoteAffichee(evaluation, pratiqueNotation) {
-    if (pratiqueNotation.pratique === 'alternative' && pratiqueNotation.typePAN === 'maitrise') {
+function obtenirNoteAffichee(evaluation, estPAN) {
+    if (estPAN) {
         return evaluation.niveauFinal || '-';
     } else {
-        return evaluation.noteFinale ? `${evaluation.noteFinale}%` : '-';
+        return evaluation.noteFinale != null && evaluation.noteFinale !== 0 ? `${evaluation.noteFinale}%` : '-';
     }
 }
 
@@ -1784,8 +1790,10 @@ function toggleVerrouillerEvaluation(evaluationId) {
  */
 function obtenirIndicesEtudiant(da) {
     // Récupérer les indices selon la pratique active
-    const pratiqueNotation = db.getSync('pratiqueNotation', {});
-    const pratique = pratiqueNotation.pratique === 'alternative' ? 'PAN' : 'SOM';
+    const pratiqueIdIndices = typeof obtenirPratiqueActiveGroupeCours === 'function'
+        ? obtenirPratiqueActiveGroupeCours()
+        : (typeof obtenirIdPratiqueActive === 'function' ? obtenirIdPratiqueActive() : 'sommative');
+    const pratique = (pratiqueIdIndices === 'pan-standards' || pratiqueIdIndices === 'pan-maitrise') ? 'PAN' : 'SOM';
 
     // Indice A (Assiduité)
     const indicesAssiduiteDetailles = db.getSync(cle('indicesAssiduite'), {});

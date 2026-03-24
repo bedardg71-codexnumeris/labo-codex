@@ -617,6 +617,38 @@ function toggleLigneEntete(type, visible) {
 window.toggleLigneEntete = toggleLigneEntete;
 
 /**
+ * Toggle filtre minimum : grise les élèves sous le seuil et recalcule les moyennes
+ * @param {boolean} actif - true = exclure les insuffisants des moyennes
+ */
+function toggleFiltreMinimum(actif) {
+    // Griser/dé-griser les lignes
+    document.querySelectorAll('#tbody-tableau-bord-liste tr').forEach(tr => {
+        if (actif && tr.dataset.insuffisant === 'true') {
+            tr.style.opacity = '0.35';
+        } else {
+            tr.style.opacity = '';
+        }
+    });
+
+    // Mettre à jour les moyennes
+    const moy = actif ? window._moyennesQualifies : window._moyennesToutes;
+    if (!moy) return;
+
+    function fmtMoy(v) {
+        if (v === null || v === undefined || isNaN(v)) return '—';
+        return 'moy=' + Math.round(v) + '%';
+    }
+
+    var moyC = document.getElementById('moy-c');
+    var moyP = document.getElementById('moy-p');
+    var moyE = document.getElementById('moy-e');
+    if (moyC) moyC.textContent = fmtMoy(moy.C);
+    if (moyP) moyP.textContent = fmtMoy(moy.P);
+    if (moyE) moyE.textContent = fmtMoy(moy.E);
+}
+window.toggleFiltreMinimum = toggleFiltreMinimum;
+
+/**
  * Calcule le niveau de risque à l'échec (RàI) pour un étudiant
  * @param {string} da - Numéro de DA
  * @returns {Object} - { niveau: number (1|2|3), label: string, couleurFond: string, couleurTexte: string }
@@ -965,6 +997,28 @@ function afficherListeEtudiantsConsultation() {
         };
     });
 
+    // Déterminer le seuil minimum d'évaluations pour P
+    const configPratiqueActiveTab = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null;
+    const modalitesTab = db.getSync('modalitesEvaluation', {});
+    const configPortfolioTab = configPratiqueActiveTab?.portfolio || modalitesTab.configPAN?.portfolio || {};
+    const minimumCompletionTab = configPortfolioTab.minimumCompletion || modalitesTab.configPAN?.portfolio?.minimumCompletion || 3;
+
+    // Compter les évaluations par étudiant (artefacts-portfolio évalués)
+    const productionsTab = obtenirDonneesSelonMode('productions') || [];
+    const artefactIds = new Set(productionsTab.filter(p => p.type === 'artefact-portfolio').map(p => p.id));
+    const evaluationsTab = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+
+    etudiantsFiltres.forEach(e => {
+        const nbEvals = evaluationsTab.filter(ev =>
+            ev.etudiantDA === e.da &&
+            artefactIds.has(ev.productionId) &&
+            !ev.remplaceeParId &&
+            ev.noteFinale !== null && ev.noteFinale !== undefined
+        ).length;
+        e.nbEvaluations = nbEvals;
+        e.performanceInsuffisante = nbEvals > 0 && nbEvals < minimumCompletionTab;
+    });
+
     // 🆕 BETA 95.7 (22 jan): Calculer la moyenne A sur les étudiants avec PRÉSENCES SAISIES
     // (inclut les 0% = absents, exclut ceux sans aucune présence saisie)
     let presencesGlobal = obtenirDonneesSelonMode('presences') || [];
@@ -1009,6 +1063,27 @@ function afficherListeEtudiantsConsultation() {
     const moyenneC = valeursC_tous.length > 0 ? valeursC_tous.reduce((sum, val) => sum + val, 0) / valeursC_tous.length : null;
     const moyenneP = valeursP_tous.length > 0 ? valeursP_tous.reduce((sum, val) => sum + val, 0) / valeursP_tous.length : null;
     const r_EP = calculerCorrelationPearson(valeursE_tous, valeursP_tous);
+
+    // Moyennes filtrées (≥ minimum d'évaluations seulement)
+    const etudiantsQualifies = etudiantsFiltres.filter(e => !e.performanceInsuffisante && (e.indicesCalcules.C > 0 || e.indicesCalcules.P > 0));
+    const vP_qualifies = etudiantsQualifies.map(e => e.indicesCalcules.P);
+    const vC_qualifies = etudiantsQualifies.map(e => e.indicesCalcules.C);
+    const vE_qualifies = etudiantsQualifies.map(e => {
+        const A = e.indicesCalcules.A / 100, C = e.indicesCalcules.C / 100, P = e.indicesCalcules.P / 100;
+        return Math.pow(A * C * P, 1/3) * 100;
+    });
+    const moyenneP_qualifies = vP_qualifies.length > 0 ? vP_qualifies.reduce((s, v) => s + v, 0) / vP_qualifies.length : null;
+    const moyenneC_qualifies = vC_qualifies.length > 0 ? vC_qualifies.reduce((s, v) => s + v, 0) / vC_qualifies.length : null;
+    const moyenneE_qualifies = vE_qualifies.length > 0 ? vE_qualifies.reduce((s, v) => s + v, 0) / vE_qualifies.length : null;
+    const nbInsuffisants = etudiantsFiltres.filter(e => e.performanceInsuffisante).length;
+
+    // Stocker pour le toggle
+    window._moyennesQualifies = { P: moyenneP_qualifies, C: moyenneC_qualifies, E: moyenneE_qualifies, A: moyenneA, nb: etudiantsQualifies.length, nbInsuffisants };
+    window._moyennesToutes = { P: moyenneP, C: moyenneC, E: moyenneE, A: moyenneA };
+
+    // Afficher le compteur à côté de la checkbox
+    const badgeInsuf = document.getElementById('badge-nb-insuffisants');
+    if (badgeInsuf) badgeInsuf.textContent = nbInsuffisants > 0 ? '(' + nbInsuffisants + ')' : '';
 
     // Corrélations Pattern↔P, RàI↔P, Interventions↔P
     var scorePattern = { 'Non-participation': 0, 'Données insuffisantes': null, 'Blocage critique': 1, 'Blocage émergent': 2, 'Défi spécifique': 3, 'Stable': 4 };
@@ -1149,6 +1224,9 @@ function afficherListeEtudiantsConsultation() {
         const badgeRai = genererBadgeRaI(cible.niveau);
 
         const tr = document.createElement('tr');
+        if (etudiant.performanceInsuffisante) {
+            tr.dataset.insuffisant = 'true';
+        }
 
         // Rendre la ligne cliquable
         tr.style.cursor = 'pointer';

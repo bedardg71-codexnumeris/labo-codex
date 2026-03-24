@@ -70,6 +70,10 @@
     let modePanActif = false;
     let modeRedimensionnementSticker = false;
 
+    // Presse-papiers annotations : sur window pour persister entre fichiers/étudiants
+    // même si le module est désactivé/réactivé
+    if (!window._annotationClipboard) window._annotationClipboard = null;
+
     // Contexte externe (injection par module Modelisation)
     let contextExterne = null; // { canvasAnnotation, canvasSurligneur, conteneurPalette }
 
@@ -912,6 +916,20 @@
                 return;
             }
             deselectionner();
+            return;
+        }
+
+        // Ctrl/Cmd + C : Copier annotations sélectionnées
+        if ((e.ctrlKey || e.metaKey) && e.key === 'c' && !e.shiftKey && selectionsMultiples.length > 0) {
+            e.preventDefault();
+            copierSelection();
+            return;
+        }
+
+        // Ctrl/Cmd + V : Coller annotations
+        if ((e.ctrlKey || e.metaKey) && e.key === 'v' && !e.shiftKey && window._annotationClipboard) {
+            e.preventDefault();
+            collerAnnotations();
             return;
         }
 
@@ -2097,6 +2115,85 @@
     }
 
     /**
+     * Copie les annotations selectionnees dans le presse-papiers interne
+     */
+    function copierSelection() {
+        console.log('[Annotation] Cmd+C — selectionsMultiples:', selectionsMultiples.length);
+        if (selectionsMultiples.length === 0) return;
+
+        window._annotationClipboard = selectionsMultiples.map(function(sel) {
+            return { type: sel.type, data: JSON.parse(JSON.stringify(sel.data)) };
+        });
+        console.log('[Annotation] Copié:', window._annotationClipboard.length, 'annotations dans le presse-papiers');
+
+        if (typeof afficherNotificationSucces === 'function') {
+            var n = window._annotationClipboard.length;
+            afficherNotificationSucces(n + ' annotation' + (n > 1 ? 's copiées' : ' copiée'));
+        }
+    }
+
+    /**
+     * Colle les annotations du presse-papiers dans le canvas courant
+     */
+    function collerAnnotations() {
+        console.log('[Annotation] Cmd+V — clipboard:', window._annotationClipboard ? window._annotationClipboard.length : 'vide');
+        if (!window._annotationClipboard || window._annotationClipboard.length === 0) return;
+
+        var donneesPage = obtenirDonneesPage();
+        var DECALAGE = 0.02;
+        var nouveauxElements = [];
+
+        for (var i = 0; i < window._annotationClipboard.length; i++) {
+            var item = window._annotationClipboard[i];
+            var clone = JSON.parse(JSON.stringify(item.data));
+            // Generer un nouvel ID unique
+            clone.id = (item.type === 'stroke' ? 'STR_' : item.type === 'shape' ? 'SHP_' : item.type === 'sticker' ? 'STK_' : 'TXT_') + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+
+            if (item.type === 'stroke') {
+                for (var j = 0; j < clone.points.length; j++) {
+                    clone.points[j].x += DECALAGE;
+                    clone.points[j].y += DECALAGE;
+                }
+                donneesPage.strokes.push(clone);
+                var idxS = donneesPage.strokes.length - 1;
+                nouveauxElements.push({ type: 'stroke', index: idxS, data: clone, bbox: calculerBBox('stroke', clone) });
+            } else if (item.type === 'shape') {
+                clone.x1 += DECALAGE; clone.y1 += DECALAGE;
+                clone.x2 += DECALAGE; clone.y2 += DECALAGE;
+                if (clone.cx != null) { clone.cx += DECALAGE; clone.cy += DECALAGE; }
+                donneesPage.shapes.push(clone);
+                var idxH = donneesPage.shapes.length - 1;
+                nouveauxElements.push({ type: 'shape', index: idxH, data: clone, bbox: calculerBBox('shape', clone) });
+            } else if (item.type === 'text') {
+                clone.x += DECALAGE; clone.y += DECALAGE;
+                donneesPage.textAnnotations.push(clone);
+                var idxT = donneesPage.textAnnotations.length - 1;
+                nouveauxElements.push({ type: 'text', index: idxT, data: clone, bbox: calculerBBox('text', clone) });
+            } else if (item.type === 'sticker') {
+                clone.x += DECALAGE; clone.y += DECALAGE;
+                donneesPage.stickers.push(clone);
+                var idxK = donneesPage.stickers.length - 1;
+                nouveauxElements.push({ type: 'sticker', index: idxK, data: clone, bbox: calculerBBox('sticker', clone) });
+            }
+        }
+
+        if (nouveauxElements.length > 0) {
+            empilerUndo('coller-annotations', nouveauxElements.map(function(s) {
+                return { type: s.type, data: JSON.parse(JSON.stringify(s.data)) };
+            }));
+            selectionsMultiples = nouveauxElements;
+            annotationSelectionnee = nouveauxElements[nouveauxElements.length - 1];
+            reRendreAnnotations();
+            planifierSauvegarde();
+
+            if (typeof afficherNotificationSucces === 'function') {
+                var n = nouveauxElements.length;
+                afficherNotificationSucces(n + ' annotation' + (n > 1 ? 's collées' : ' collée'));
+            }
+        }
+    }
+
+    /**
      * Met a jour l'etat enabled/disabled du bouton Supprimer
      */
     function mettreAJourBoutonSupprimer() {
@@ -2713,7 +2810,8 @@
                 restaurerAnnotation(donneesPage, action.donnees.type, action.donnees.avant);
                 break;
             case 'duplication-multiple':
-                // Annuler duplication = supprimer les clones
+            case 'coller-annotations':
+                // Annuler duplication/collage = supprimer les clones
                 for (const item of action.donnees) {
                     if (item.type === 'stroke') donneesPage.strokes = donneesPage.strokes.filter(s => s.id !== item.data.id);
                     else if (item.type === 'shape') donneesPage.shapes = donneesPage.shapes.filter(s => s.id !== item.data.id);
@@ -2804,6 +2902,7 @@
                 restaurerAnnotation(donneesPage, action.donnees.type, action.donnees.apres);
                 break;
             case 'duplication-multiple':
+            case 'coller-annotations':
                 // Re-ajouter les clones
                 for (const item of action.donnees) {
                     if (item.type === 'stroke') donneesPage.strokes.push(JSON.parse(JSON.stringify(item.data)));
@@ -2990,6 +3089,8 @@
         retablir: retablir,
         // Actions
         dupliquerSelection: dupliquerSelection,
+        copierSelection: copierSelection,
+        collerAnnotations: collerAnnotations,
         supprimerSelection: supprimerSelection,
         effacerPage: effacerPage,
         sauvegarderAnnotation: sauvegarderAnnotation,

@@ -15417,10 +15417,26 @@ body.mode-clair .travaux-compteur-badge {
 }
 .eval-options-radios {
     display: flex;
+    align-items: center;
     gap: 12px;
     margin-top: 4px;
     padding-top: 4px;
     border-top: 1px solid var(--bordure-claire, rgba(255,255,255,0.1));
+}
+.btn-copier-retro {
+    margin-left: auto;
+    padding: 2px 10px;
+    font-size: 0.7rem;
+    border-radius: var(--radius-petit, 4px);
+    border: 1px solid var(--bordure-claire);
+    background: var(--surface-carte);
+    color: var(--texte-principal);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn-copier-retro:hover {
+    background: var(--bleu-moyen);
+    color: white;
 }
 .travaux-palette-eval textarea {
     min-height: 80px;

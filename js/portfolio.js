@@ -1067,34 +1067,36 @@ function calculerNoteAvecCategories(da, configCategories) {
 }
 
 /**
- * Vérifie si une configuration de catégories est active pour la pratique courante
+ * Retourne la configuration complète de la pratique active depuis pratiquesConfigurables.
+ * C'est la source de vérité pour portfolio, catégories, etc.
  *
- * @returns {object|null} - Configuration des catégories ou null si non active
+ * @returns {object|null} - Objet configuration { portfolio, categories, ... } ou null
  */
-function obtenirConfigCategories() {
-    // Lire depuis pratiquesConfigurables (la config de la pratique active)
+function obtenirConfigPratiqueActive() {
     const pratiquesConfig = db.getSync('pratiquesConfigurables', []);
-    const coursActifId = typeof getCoursActifId === 'function' ? getCoursActifId() : null;
 
-    if (!coursActifId) {
-        return null;
-    }
-
-    // Trouver la pratique associée au cours actif
-    const pratiqueId = typeof getPratiqueCours === 'function' ? getPratiqueCours(coursActifId) : null;
+    // Utiliser obtenirPratiqueActiveGroupeCours() qui gère tous les fallbacks
+    // (groupeCoursActif → infoCours → groupesCours → modalitesEvaluation)
+    const pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
+        ? obtenirPratiqueActiveGroupeCours() : null;
 
     if (!pratiqueId) {
         return null;
     }
 
-    // Chercher la configuration de cette pratique
-    const configPratique = pratiquesConfig.find(p => p.pratiqueId === pratiqueId);
+    const configPratique = pratiquesConfig.find(p => p.id === pratiqueId);
+    return configPratique?.configuration || null;
+}
 
-    if (!configPratique || !configPratique.configuration?.categories?.actif) {
-        return null;
-    }
-
-    return configPratique.configuration.categories;
+/**
+ * Vérifie si une configuration de catégories est active pour la pratique courante
+ *
+ * @returns {object|null} - Configuration des catégories ou null si non active
+ */
+function obtenirConfigCategories() {
+    const config = obtenirConfigPratiqueActive();
+    if (!config?.categories?.actif) return null;
+    return config.categories;
 }
 
 /* ===============================
@@ -1108,6 +1110,7 @@ window.calculerNoteFinaleMultiObjectifs = calculerNoteFinaleMultiObjectifs;
 // 🆕 Beta 95.4 : Exporter les fonctions de catégories
 window.calculerNoteAvecCategories = calculerNoteAvecCategories;
 window.obtenirConfigCategories = obtenirConfigCategories;
+window.obtenirConfigPratiqueActive = obtenirConfigPratiqueActive;
 
 // 🆕 Beta 95.5 : Exporter les fonctions d'indices C/P
 window.calculerEtStockerIndicesCP = calculerEtStockerIndicesCP;

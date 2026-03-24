@@ -14,14 +14,14 @@
             couleur: 'vert',
             titre: 'Annotation avanc\u00e9e et codex USB',
             items: [
+                'Indice P\u00a0: lecture fiable de la m\u00e9thode Hybride (S\u00e9lection\u00a0+\u00a0Obligatoires) dans le profil et le calcul de note.',
+                'Seuil minimum d\u2019\u00e9valuations\u00a0: P affiche \u00ab\u00a0\u2014\u00a0\u00bb tant que le minimum n\u2019est pas atteint.',
+                'Filtre \u00ab\u00a0\u2265\u00a0Min.\u00a0\u00bb au tableau de bord\u00a0: grise les \u00e9l\u00e8ves sous le seuil et recalcule les moyennes.',
                 'R\u00e9troactions personnalisables\u00a0: tampons, codes d\u2019erreur, ic\u00f4nes et couleurs modifiables par l\u2019enseignant.',
                 'Biblioth\u00e8que de tampons\u00a0: partage, export et import de collections par cat\u00e9gorie.',
                 'Outils d\u2019annotation enrichis\u00a0: ligne, vague, duplication, s\u00e9lection et formes.',
-                'Corbeille pour les fichiers supprim\u00e9s (restauration possible pendant 30\u00a0jours).',
                 'Codex USB pour transporter tes donn\u00e9es entre appareils.',
-                'Barre d\u2019outils compacte et visionneuse redessin\u00e9e.',
-                'Corr\u00e9lations longitudinales et impact des jetons\u00a0: deux nouveaux graphiques au tableau de bord.',
-                'Graphiques unifi\u00e9s\u00a0: l\u00e9gendes interactives, checkboxes et m\u00e9tadonn\u00e9es contextuelles.'
+                'Corr\u00e9lations longitudinales et impact des jetons\u00a0: deux nouveaux graphiques au tableau de bord.'
             ]
         },
         {
