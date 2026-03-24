@@ -3712,24 +3712,38 @@
                 return;
             }
             modeCourant = 'evaluer';
-            // Extraire le canvas du layout annotation avant de construire le layout eval
-            const annotColDoc = document.getElementById('annot-col-document');
-            const conteneurDoc = document.getElementById('travaux-conteneur-document');
-            const canvasContainer = document.getElementById('travaux-canvas-container');
 
-            if (annotColDoc && canvasContainer && conteneurDoc) {
-                conteneurDoc.appendChild(canvasContainer);
-            } else if (!annotColDoc && canvasContainer && conteneurDoc) {
-                // Canvas pas dans le layout annotation (layout non créé ou détruit)
-                // S'assurer que le canvas est bien sous conteneurDoc
-                if (canvasContainer.parentElement !== conteneurDoc) {
+            // Si le layout eval existe déjà (caché), le réafficher sans recréer
+            const evalFlexExistant = document.getElementById('eval-layout-flex');
+            if (evalFlexExistant) {
+                masquerPalettesAnnotation();
+                evalFlexExistant.classList.remove('u-hide');
+                const conteneurDoc = document.getElementById('travaux-conteneur-document');
+                if (conteneurDoc) conteneurDoc.classList.add('mode-eval-actif');
+                if (conteneurDoc) conteneurDoc.classList.remove('mode-annot-actif');
+                // Remettre le canvas dans le wrapper eval
+                const canvasContainer = document.getElementById('travaux-canvas-container');
+                const evalColDoc = document.getElementById('eval-col-document');
+                if (canvasContainer && evalColDoc) evalColDoc.appendChild(canvasContainer);
+            } else {
+                // Première fois : créer le layout eval
+                // Extraire le canvas du layout annotation avant de construire le layout eval
+                const annotColDoc = document.getElementById('annot-col-document');
+                const conteneurDoc = document.getElementById('travaux-conteneur-document');
+                const canvasContainer = document.getElementById('travaux-canvas-container');
+
+                if (annotColDoc && canvasContainer && conteneurDoc) {
                     conteneurDoc.appendChild(canvasContainer);
+                } else if (!annotColDoc && canvasContainer && conteneurDoc) {
+                    if (canvasContainer.parentElement !== conteneurDoc) {
+                        conteneurDoc.appendChild(canvasContainer);
+                    }
                 }
+                // Retirer mode-annot-actif pendant le mode évaluation
+                if (conteneurDoc) conteneurDoc.classList.remove('mode-annot-actif');
+                masquerPalettesAnnotation();
+                afficherPalettesEval(fichier);
             }
-            // Retirer mode-annot-actif pendant le mode évaluation
-            if (conteneurDoc) conteneurDoc.classList.remove('mode-annot-actif');
-            masquerPalettesAnnotation();
-            afficherPalettesEval(fichier);
             if (btnAnnoter) btnAnnoter.classList.remove('actif');
             if (btnEvaluer) btnEvaluer.classList.add('actif');
             // Pleine hauteur par défaut en mode évaluation
@@ -4112,11 +4126,20 @@
     }
 
     function masquerPalettesEval() {
-        // 🔧 FIX (5 mars 2026) : Vérifier aussi eval-layout-flex directement.
-        // Si les panneaux ont été détruits, travaux-palette-eval-gauche n'existe plus
-        // mais eval-layout-flex peut persister → superposition annot + eval.
-        if (document.getElementById('travaux-palette-eval-gauche') || document.getElementById('eval-layout-flex')) {
-            fermerModeEvaluation();
+        // 🔧 FIX (24 mars 2026) : Cacher au lieu de détruire pour préserver l'état de l'évaluation
+        var evalFlex = document.getElementById('eval-layout-flex');
+        if (evalFlex) {
+            evalFlex.classList.add('u-hide');
+            // Remettre le canvas dans le conteneur document principal
+            var canvasContainer = document.getElementById('travaux-canvas-container');
+            var conteneurDoc = document.getElementById('travaux-conteneur-document');
+            var annotColDoc = document.getElementById('annot-col-document');
+            if (canvasContainer && annotColDoc) {
+                annotColDoc.appendChild(canvasContainer);
+            } else if (canvasContainer && conteneurDoc) {
+                conteneurDoc.appendChild(canvasContainer);
+            }
+            conteneurDoc.classList.remove('mode-eval-actif');
         }
     }
 
