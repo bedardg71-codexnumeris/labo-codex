@@ -643,7 +643,12 @@ function toggleFiltreMinimum(actif) {
     var moyP = document.getElementById('moy-p');
     var moyE = document.getElementById('moy-e');
     if (moyC) moyC.textContent = fmtMoy(moy.C);
-    if (moyP) moyP.textContent = fmtMoy(moy.P);
+    if (moyP) {
+        moyP.textContent = fmtMoy(moy.P);
+        if (actif && window._moyennesQualifies) {
+            moyP.title = 'Moyenne P sur ' + window._moyennesQualifies.nb + ' élèves qualifiés (≥ minimum). ' + window._moyennesQualifies.nbInsuffisants + ' exclus.';
+        }
+    }
     if (moyE) moyE.textContent = fmtMoy(moy.E);
 }
 window.toggleFiltreMinimum = toggleFiltreMinimum;
@@ -1084,6 +1089,14 @@ function afficherListeEtudiantsConsultation() {
     // Afficher le compteur à côté de la checkbox
     const badgeInsuf = document.getElementById('badge-nb-insuffisants');
     if (badgeInsuf) badgeInsuf.textContent = nbInsuffisants > 0 ? '(' + nbInsuffisants + ')' : '';
+
+    // Info-bulles sur les moyennes P (Liste)
+    const moyPCell = document.getElementById('moy-p');
+    if (moyPCell) {
+        const nbTotalPour = valeursP_tous.length;
+        const nbAvecP0 = valeursP_tous.filter(v => v === 0).length;
+        moyPCell.title = 'Moyenne P sur ' + nbTotalPour + ' élèves (tous inclus, ' + nbAvecP0 + ' à 0%). L\'aperçu exclut les élèves sans évaluation.';
+    }
 
     // Corrélations Pattern↔P, RàI↔P, Interventions↔P
     var scorePattern = { 'Non-participation': 0, 'Données insuffisantes': null, 'Blocage critique': 1, 'Blocage émergent': 2, 'Défi spécifique': 3, 'Stable': 4 };

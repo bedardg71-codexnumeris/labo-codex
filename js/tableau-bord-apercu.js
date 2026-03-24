@@ -2083,7 +2083,15 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
     // HTML de la moyenne positionnée au-dessus de la barre avec couleur dynamique
     let moyennePositionneeHTML = '';
     if (!tousEnAttente && moyenneAffichee !== null) {
-        moyennePositionneeHTML = `<div style="position: absolute; top: -20px; left: ${positionMoyenne}%; transform: translateX(-50%); z-index: 10; font-size: 0.9rem; font-weight: 700; color: ${couleurMoyenne};">${moyenneAffichee}%</div>`;
+        // Info-bulle contextuelle pour P : expliquer le filtre
+        let titreInfo = '';
+        if (type === 'P') {
+            const etudiantsRef = afficherPan ? etudiantsPAN : etudiantsSOM;
+            const nbAvecEval = etudiantsRef.filter(e => !e.sansEvaluation).length;
+            const nbSans = etudiantsRef.length - nbAvecEval;
+            titreInfo = ` title="Moyenne sur ${nbAvecEval} élèves ayant au moins 1 évaluation (${nbSans} exclus). La liste des individus inclut tous les élèves."`;
+        }
+        moyennePositionneeHTML = `<div${titreInfo} style="cursor: help; position: absolute; top: -20px; left: ${positionMoyenne}%; transform: translateX(-50%); z-index: 10; font-size: 0.9rem; font-weight: 700; color: ${couleurMoyenne};">${moyenneAffichee}%</div>`;
     }
 
     return `
