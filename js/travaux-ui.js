@@ -2145,9 +2145,10 @@
     function genererBadgeFichierImporte(f, action) {
         action = action || 'ouvrirPreviewInline';
         const etudiant = travauxImport.trouverEtudiantParDA(f.etudiantDA);
-        const nomEtudiant = etudiant
+        const nomReel = etudiant
             ? (etudiant.nom ? `${echapperHtml(etudiant.nom)}, ${echapperHtml(etudiant.prenom)}` : echapperHtml(etudiant.prenom))
             : (f.etudiantDA || 'Non associé');
+        const nomEtudiant = (typeof anonymiserNom === 'function' && anonymiserNom(f.etudiantDA)) || nomReel;
 
         // Déterminer le statut le plus avancé selon le workflow
         let statutTexte = 'Importé';
@@ -2408,9 +2409,10 @@
      */
     function genererLigneTableauFichier(f, productions, evaluations, optionsProductions) {
         const etudiant = travauxImport.trouverEtudiantParDA(f.etudiantDA);
-        const nomComplet = etudiant
+        const nomReel = etudiant
             ? (etudiant.nom ? `${echapperHtml(etudiant.nom)}, ${echapperHtml(etudiant.prenom)}` : echapperHtml(etudiant.prenom))
             : (f.etudiantDA ? 'Inconnu' : 'Non associé');
+        const nomComplet = (typeof anonymiserNom === 'function' && anonymiserNom(f.etudiantDA)) || nomReel;
         const da = f.etudiantDA || '—';
 
         // Statut
