@@ -84,6 +84,16 @@
   - Harmoniser les labels dans : retroaction evaluation, reglages pratique, export PDF
   - **Fichiers** : `index.html` (radios retroaction + reglages), `js/evaluation.js`, `js/travaux-export-pdf.js`
 
+### Tampons jetons sur les travaux
+
+- [ ] **#240** Tampon visuel pour jetons (Délai, Reprise, Reprise ciblée) sur les travaux annotés
+  - Cliquer sur le mot du jeton dans le panneau Paramètres → curseur tampon
+  - Cliquer sur le travail → appose "JETON DE DÉLAI" / "JETON DE REPRISE" / "JETON DE REPRISE CIBLÉE" en rouge majuscule
+  - Une fois tamponné, la checkbox du jeton se coche automatiquement
+  - Utiliser le même mécanisme que les tampons existants (Exact, Bien, etc.)
+  - Le PDF exporté montre clairement le jeton appliqué (pas seulement en métadonnées)
+  - **Module** : `js/travaux-annotation.js`, panneau jetons dans `js/evaluation.js`
+
 ### Simplification UX Codex
 
 - [ ] **#233** UX : Simplifier le flux Codex pour l'utilisateur lambda (Mac + iPad)
