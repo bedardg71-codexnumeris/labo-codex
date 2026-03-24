@@ -97,6 +97,19 @@
     - Messages contextuels clairs a chaque etape (sauvegarde, transfert, ouverture sur l'autre appareil)
   - **Module** : `js/codex.js`
 
+- [ ] **#239** Menu Codex : adapter l'interface selon le navigateur (FSAPI)
+  - Chrome/Edge (FSAPI disponible) : "Enregistrer" ecrit directement sur le fichier ouvert (cle USB), auto-save possible
+  - Safari Mac (pas de FSAPI) : "Enregistrer" = telecharger un nouveau fichier, l'utilisateur doit manuellement remplacer sur la cle USB
+  - iPad (WebKit impose, pas de FSAPI) : meme comportement que Safari Mac
+  - Actuellement le menu affiche les memes options et le meme sous-texte peu importe le navigateur — confusant
+  - A faire :
+    - Detecter `window.showSaveFilePicker` (FSAPI) au chargement
+    - Si FSAPI absent : masquer/griser "Enregistrer le codex" (inutile sans handle), renommer en "Telecharger le codex"
+    - Adapter le sous-texte ("Vers le meme emplacement" → "Telecharge un nouveau fichier")
+    - Adapter la ligne de statut auto-save (masquer si FSAPI absent)
+    - Ajouter une note explicative dans "Details du codex" selon le navigateur
+  - **Module** : `js/codex.js`, fonctions `_construireMenu()`, `actionEnregistrer()`
+
 ### Retours testeur — 3 mars 2026
 
 - [x] **#214** Bug : Gestion avancee des ressources — suppression non persistante ✅ CORRIGE (16 mars 2026, Bug #83)
