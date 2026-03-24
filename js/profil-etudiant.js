@@ -817,12 +817,22 @@ function genererSectionMobilisationEngagement(da) {
         };
     });
 
-    // 🆕 LIRE LA CONFIGURATION DE LA PRATIQUE DE NOTATION (source unique)
+    // 🆕 LIRE LA CONFIGURATION DE LA PRATIQUE DE NOTATION
+    // Source de vérité : pratiquesConfigurables (Material Settings), fallback sur modalitesEvaluation
+    const configPratiqueActive = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null;
     const modalites = db.getSync('modalitesEvaluation', {});
-    const configPortfolio = modalites.configPAN?.portfolio || {};
+    const configPortfolio = configPratiqueActive?.portfolio || modalites.configPAN?.portfolio || {};
     const portfolioActif = configPortfolio.actif !== false;
-    const nombreARetenir = configPortfolio.nombreARetenir || portfolio?.regles?.nombreARetenir || 3;
-    const methodeSelection = configPortfolio.methodeSelection || 'meilleurs';
+    let nombreARetenir = configPortfolio.nombreARetenir || portfolio?.regles?.nombreARetenir || 3;
+    const minimumCompletion = configPortfolio.minimumCompletion || modalites.configPAN?.portfolio?.minimumCompletion || 3;
+    let methodeSelection = configPortfolio.methodeSelection || 'meilleurs';
+    // Mapper les noms Material Settings → legacy : 'derniers' → 'recents'
+    if (methodeSelection === 'derniers') methodeSelection = 'recents';
+
+    // Détecter le mode Hybride (catégories Sélection/Obligatoires)
+    const configCategories = configPratiqueActive?.categories
+        || (typeof obtenirConfigCategories === 'function' ? obtenirConfigCategories() : null);
+    const modeHybride = !!(configCategories && configCategories.actif);
 
     // Appliquer la logique de sélection selon la modalité configurée
     let artefactsSelectionnes = [];
@@ -831,8 +841,35 @@ function genererSectionMobilisationEngagement(da) {
     if (!portfolioActif) {
         // Portfolio désactivé : aucun artefact retenu
         artefactsSelectionnes = [];
+    } else if (modeHybride) {
+        // MODE HYBRIDE : N meilleures du pool Sélection + Obligatoires
+        const { nombreARetenir: nSelection, ponderation: pondSelection } = configCategories.selection || { nombreARetenir: 4, ponderation: 65 };
+        const { ponderation: pondOblig } = configCategories.obligatoires || { ponderation: 35 };
+        const productionsNonPortfolio = productions.filter(p => p.type !== 'portfolio');
+
+        // Séparer les artefacts remis par catégorie
+        const artefactsSelection = artefactsRemis.filter(a => {
+            const prod = productionsNonPortfolio.find(p => p.id === a.id);
+            return prod && prod.categorie === 'selection';
+        });
+        const artefactsObligatoires = artefactsRemis.filter(a => {
+            const prod = productionsNonPortfolio.find(p => p.id === a.id);
+            return prod && prod.categorie === 'obligatoire';
+        });
+
+        // Prendre les N meilleures du pool Sélection
+        const meilleuresSelection = [...artefactsSelection]
+            .sort((a, b) => (b.note || 0) - (a.note || 0))
+            .slice(0, nSelection);
+
+        // Toutes les Obligatoires comptent
+        artefactsSelectionnes = [...meilleuresSelection, ...artefactsObligatoires];
+
+        // Mettre à jour nombreARetenir pour l'affichage
+        nombreARetenir = nSelection;
+        methodeSelection = 'hybride-categories';
     } else {
-        // Appliquer la modalité de sélection
+        // Appliquer la modalité de sélection legacy
         switch (methodeSelection) {
             case 'meilleurs':
                 artefactsSelectionnes = artefactsRemis
@@ -906,6 +943,8 @@ function genererSectionMobilisationEngagement(da) {
     // 🆕 BETA 95.6 : Détecter si aucune donnée de complétion/performance
     const aucuneDonneeCompletion = nbTotal === 0;
     const aucuneDonneePerformance = nbRetenus === 0;
+    // P insuffisant : pas assez d'évaluations pour calculer une note fiable
+    const performanceInsuffisante = portfolioActif && nbRemis < minimumCompletion && nbRemis > 0;
 
     // Détection globale "aucune donnée" pour section Engagement
     const aucuneDonnee = aucuneDonneeAssiduite && aucuneDonneeCompletion;
@@ -1154,17 +1193,28 @@ function genererSectionMobilisationEngagement(da) {
             <div class="profil-carte">
                 <div class="u-flex-between-mb15">
                     <h3 class="profil-section-titre-seul">Performance</h3>
-                    ${genererValeursComparatives(indicesSOM.P, indicesPAN.P, modeComparatif, aucuneDonneePerformance)}
+                    ${performanceInsuffisante
+                        ? '<span class="profil-valeur-grande" style="color: var(--gris-moyen);">—</span>'
+                        : genererValeursComparatives(indicesSOM.P, indicesPAN.P, modeComparatif, aucuneDonneePerformance)}
                 </div>
 
                 <!-- Statistiques -->
                 <ul class="profil-liste-simple">
                     <li><strong>• ${(() => {
+                        if (performanceInsuffisante) {
+                            return `Minimum ${minimumCompletion} évaluations requises (${nbRemis}/${minimumCompletion} complétées)`;
+                        }
                         if (!portfolioActif) {
                             return 'Performance des productions indépendantes';
                         }
 
                         // Textes selon la modalité de sélection
+                        if (methodeSelection === 'hybride-categories') {
+                            const pondSel = configCategories?.selection?.ponderation || 65;
+                            const pondObl = configCategories?.obligatoires?.ponderation || 35;
+                            return `Performance du portfolio actuel (${nombreARetenir} meilleure${nombreARetenir > 1 ? 's' : ''} Sélection ${pondSel}% + Obligatoires ${pondObl}%)`;
+                        }
+
                         const textesPerformance = {
                             'meilleurs': `Performance du portfolio actuel (${nombreARetenir} meilleur${nombreARetenir > 1 ? 's' : ''}, maîtrise de standards)`,
                             'recents': `Performance du portfolio actuel (${nombreARetenir} plus récent${nombreARetenir > 1 ? 's' : ''}, niveau terminal)`,
@@ -1299,6 +1349,10 @@ function genererSectionMobilisationEngagement(da) {
                             return 'Productions indépendantes';
                         }
 
+                        if (methodeSelection === 'hybride-categories') {
+                            return `${nbRetenus} artefact${nbRetenus > 1 ? 's' : ''} retenus (${nombreARetenir} meilleures Sélection + Obligatoires)`;
+                        }
+
                         // Textes selon la modalité de sélection
                         const textesTitres = {
                             'meilleurs': `${nbRetenus} meilleur${nbRetenus > 1 ? 's' : ''} artefact${nbRetenus > 1 ? 's' : ''}`,
@@ -1401,6 +1455,7 @@ function genererSectionMobilisationEngagement(da) {
                 texteExplicatifE = `<span class="profil-texte-normal-gris"> (P basé sur les ${nombreArtefacts} plus récent${nombreArtefacts > 1 ? 's' : ''})</span>`;
             } else if (!decouplerPR && !modeComparatif && portfolioActif) {
                 const textesModalites = {
+                    'hybride-categories': `P basé sur les ${nombreARetenir} meilleures Sélection + Obligatoires`,
                     'meilleurs': `P basé sur les ${nombreArtefacts} meilleur${nombreArtefacts > 1 ? 's' : ''}`,
                     'recents': `P basé sur les ${nombreArtefacts} plus récent${nombreArtefacts > 1 ? 's' : ''}`,
                     'recents-meilleurs': `P basé sur les ${nombreArtefacts} récent${nombreArtefacts > 1 ? 's' : ''} parmi les meilleurs`,
@@ -7008,9 +7063,25 @@ function genererSectionPerformance(da) {
     let artefactsRetenus = [];
     let notesRetenues = [];
     let noteTop3 = null;
-    let methodeSelection = 'meilleurs';  // Valeur par défaut
-    let portfolioActif = true;
+    let methodeSelectionRapport = 'meilleurs';  // Valeur par défaut
+    let portfolioActifRapport = true;
     let nombreARetenirConfig = nombreARetenir;  // Renommer pour éviter conflit avec ligne 5019
+
+    // Détecter le mode Hybride pour le rapport détaillé (source : pratiquesConfigurables)
+    const configPratiqueRapport = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null;
+    const configCategoriesRapport = configPratiqueRapport?.categories
+        || (typeof obtenirConfigCategories === 'function' ? obtenirConfigCategories() : null);
+    const modeHybrideRapport = !!(configCategoriesRapport && configCategoriesRapport.actif);
+
+    if (modeHybrideRapport) {
+        methodeSelectionRapport = 'hybride-categories';
+        nombreARetenirConfig = configCategoriesRapport.selection?.nombreARetenir || 4;
+    } else if (configPratiqueRapport?.portfolio?.methodeSelection) {
+        // Lire la méthode depuis pratiquesConfigurables (source de vérité)
+        methodeSelectionRapport = configPratiqueRapport.portfolio.methodeSelection;
+        if (methodeSelectionRapport === 'derniers') methodeSelectionRapport = 'recents';
+        nombreARetenirConfig = configPratiqueRapport.portfolio.nombreARetenir || nombreARetenir;
+    }
 
     if (typeof obtenirIndicesCP === 'function') {
         const indicesCP = obtenirIndicesCP(da, indices.pratique);
@@ -7018,10 +7089,12 @@ function genererSectionPerformance(da) {
             const idsRetenus = indicesCP.details.artefactsRetenus || [];
             notesRetenues = indicesCP.details.notes || [];
 
-            // 🆕 LIRE LA CONFIGURATION DE LA PRATIQUE DE NOTATION
-            methodeSelection = indicesCP.details.methodeSelection || 'meilleurs';
-            portfolioActif = indicesCP.details.portfolioActif !== false;
-            nombreARetenirConfig = indicesCP.details.nombreARetenir || nombreARetenir;
+            // Lire la config depuis indicesCP si disponible (fallback si pas hybride)
+            if (!modeHybrideRapport) {
+                methodeSelectionRapport = indicesCP.details.methodeSelection || 'meilleurs';
+                portfolioActifRapport = indicesCP.details.portfolioActif !== false;
+                nombreARetenirConfig = indicesCP.details.nombreARetenir || nombreARetenir;
+            }
 
             // Récupérer les titres des artefacts retenus
             artefactsRetenus = idsRetenus.map(id => {
@@ -7080,8 +7153,13 @@ function genererSectionPerformance(da) {
             <strong>Pratique de notation active :</strong> ${indices.pratique === 'PAN' ? 'PAN (Portfolio à nombre limité)' : 'SOM (Sommative provisoire)'}
             <br><br>
             <strong>Règle de sélection :</strong> ${(() => {
-                if (!portfolioActif) {
+                if (!portfolioActifRapport) {
                     return 'Portfolio désactivé — Les productions sont évaluées de manière indépendante';
+                }
+                if (methodeSelectionRapport === 'hybride-categories') {
+                    const pondSel = configCategoriesRapport?.selection?.ponderation || 65;
+                    const pondObl = configCategoriesRapport?.obligatoires?.ponderation || 35;
+                    return `Mode <strong>Hybride</strong> : les <strong>${nombreARetenirConfig} meilleures</strong> du pool Sélection (${pondSel}%) + toutes les Obligatoires (${pondObl}%)`;
                 }
                 const textes = {
                     'meilleurs': `Les <strong>${nombreARetenirConfig} meilleures productions</strong> sont retenues pour le calcul de l'indice P (note maximale atteinte)`,
@@ -7089,7 +7167,7 @@ function genererSectionPerformance(da) {
                     'recents-meilleurs': `Les <strong>${nombreARetenirConfig} plus récentes productions parmi les 50% meilleures</strong> sont retenues pour le calcul de l'indice P (approche hybride)`,
                     'tous': `<strong>Toutes les productions</strong> sont retenues pour le calcul de l'indice P (calcul de type sommative)`
                 };
-                return textes[methodeSelection] || textes['meilleurs'];
+                return textes[methodeSelectionRapport] || textes['meilleurs'];
             })()}
             <br><br>
             <strong>${obtenirTermeProduction('pluriel', true)} retenus :</strong> ${artefactsRetenus.length > 0 ? artefactsRetenus.map((art, idx) =>
@@ -7135,6 +7213,12 @@ function genererSectionPerformance(da) {
                         return 'Performance des productions indépendantes';
                     }
 
+                    if (methodeSelectionRapport === 'hybride-categories') {
+                        const pondSel = configCategoriesRapport?.selection?.ponderation || 65;
+                        const pondObl = configCategoriesRapport?.obligatoires?.ponderation || 35;
+                        return `Performance du portfolio actuel (${nombreARetenirConfig} meilleures Sélection ${pondSel}% + Obligatoires ${pondObl}%)`;
+                    }
+
                     // Textes selon la modalité de sélection (format uniforme avec section Engagement)
                     const textesPerformance = {
                         'meilleurs': `Performance du portfolio actuel (${nombreARetenirConfig} meilleur${nombreARetenirConfig > 1 ? 's' : ''}, maîtrise de standards)`,
@@ -7143,7 +7227,7 @@ function genererSectionPerformance(da) {
                         'tous': `Performance du portfolio actuel (tous les ${obtenirTermeProduction('pluriel')}, moyenne complète)`
                     };
 
-                    return textesPerformance[methodeSelection] || textesPerformance['meilleurs'];
+                    return textesPerformance[methodeSelectionRapport] || textesPerformance['meilleurs'];
                 })()}</strong></li>
             </ul>
 
@@ -8271,12 +8355,20 @@ function calculerDetailsNoteFinale(da) {
         return null;
     }
 
+    // Source de vérité : pratiquesConfigurables, fallback sur modalitesEvaluation
+    const configPratiqueActiveNote = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null;
     const configPAN = modalites.configPAN || {};
-    const configPortfolio = configPAN.portfolio || {};
+    const configPortfolio = configPratiqueActiveNote?.portfolio || configPAN.portfolio || {};
     const nombreARetenir = configPortfolio.nombreARetenir || 4;
     const minimumRequis = configPortfolio.minimumCompletion || 7;
-    const methodeSelection = configPortfolio.methodeSelection || 'meilleurs';
-    const reglesConformite = configPortfolio.reglesConformite || { actif: false };
+    let methodeSelection = configPortfolio.methodeSelection || 'meilleurs';
+    if (methodeSelection === 'derniers') methodeSelection = 'recents';
+    const reglesConformite = configPortfolio.reglesConformite || configPAN.portfolio?.reglesConformite || { actif: false };
+
+    // Détecter Hybride : catégories actives dans pratiquesConfigurables
+    const configCategoriesNote = configPratiqueActiveNote?.categories
+        || (typeof obtenirConfigCategories === 'function' ? obtenirConfigCategories() : null);
+    const modeHybrideNote = !!(configCategoriesNote && configCategoriesNote.actif);
 
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const productions = obtenirDonneesSelonMode('productions') || [];
@@ -8348,8 +8440,9 @@ function calculerDetailsNoteFinale(da) {
         return true;
     });
 
-    // Sélectionner les N meilleurs selon la méthode
+    // Sélectionner les artefacts selon la méthode
     let artefactsRetenus = [...evaluationsArtefacts];
+    let moyennePortfolio = null;
 
     // Helper: obtenir le numéro de production pour une évaluation
     const getNumeroProduction = (ev) => {
@@ -8357,27 +8450,62 @@ function calculerDetailsNoteFinale(da) {
         return prod?.numero || parseInt(ev.productionId.match(/(\d+)$/)?.[1]) || 0;
     };
 
-    if (methodeSelection === 'meilleurs') {
-        artefactsRetenus.sort((a, b) => b.noteFinale - a.noteFinale);
-    } else if (methodeSelection === 'recents') {
-        // CORRECTION (24 jan 2026): Trier par numéro de production décroissant
-        artefactsRetenus.sort((a, b) => getNumeroProduction(b) - getNumeroProduction(a));
-    } else if (methodeSelection === 'recents-meilleurs') {
-        const nombreMeilleurs = Math.max(1, Math.ceil(artefactsRetenus.length * 0.5));
-        artefactsRetenus.sort((a, b) => b.noteFinale - a.noteFinale);
-        artefactsRetenus = artefactsRetenus.slice(0, nombreMeilleurs);
-        // CORRECTION (24 jan 2026): Trier par numéro de production décroissant
-        artefactsRetenus.sort((a, b) => getNumeroProduction(b) - getNumeroProduction(a));
-    }
+    if (modeHybrideNote) {
+        // MODE HYBRIDE : N meilleures Sélection (pondérées) + Obligatoires (pondérées)
+        const { nombreARetenir: nSelection, ponderation: pondSel } = configCategoriesNote.selection || { nombreARetenir: 4, ponderation: 65 };
+        const { ponderation: pondObl } = configCategoriesNote.obligatoires || { ponderation: 35 };
+        const productionsNonPortfolio = productions.filter(p => p.type !== 'portfolio');
 
-    // Limiter au nombre à retenir
-    artefactsRetenus = artefactsRetenus.slice(0, nombreARetenir);
+        const evalsSelection = evaluationsArtefacts.filter(ev => {
+            const prod = productionsNonPortfolio.find(p => p.id === ev.productionId);
+            return prod && prod.categorie === 'selection';
+        });
+        const evalsObligatoires = evaluationsArtefacts.filter(ev => {
+            const prod = productionsNonPortfolio.find(p => p.id === ev.productionId);
+            return prod && prod.categorie === 'obligatoire';
+        });
 
-    // Calculer la moyenne du portfolio
-    let moyennePortfolio = null;
-    if (artefactsRetenus.length > 0) {
-        const somme = artefactsRetenus.reduce((acc, e) => acc + e.noteFinale, 0);
-        moyennePortfolio = somme / artefactsRetenus.length;
+        // N meilleures du pool Sélection
+        const meilleuresSelection = [...evalsSelection]
+            .sort((a, b) => (b.noteFinale || 0) - (a.noteFinale || 0))
+            .slice(0, nSelection);
+
+        artefactsRetenus = [...meilleuresSelection, ...evalsObligatoires];
+
+        // Moyenne pondérée Hybride
+        if (meilleuresSelection.length > 0 || evalsObligatoires.length > 0) {
+            const moySel = meilleuresSelection.length > 0
+                ? meilleuresSelection.reduce((s, e) => s + e.noteFinale, 0) / meilleuresSelection.length : 0;
+            const moyObl = evalsObligatoires.length > 0
+                ? evalsObligatoires.reduce((s, e) => s + e.noteFinale, 0) / evalsObligatoires.length : 0;
+
+            if (meilleuresSelection.length > 0 && evalsObligatoires.length > 0) {
+                moyennePortfolio = (moySel * pondSel + moyObl * pondObl) / (pondSel + pondObl);
+            } else if (meilleuresSelection.length > 0) {
+                moyennePortfolio = moySel;
+            } else {
+                moyennePortfolio = moyObl;
+            }
+        }
+    } else {
+        // Méthodes legacy : meilleurs, recents, recents-meilleurs, tous
+        if (methodeSelection === 'meilleurs' || methodeSelection === 'hybride') {
+            artefactsRetenus.sort((a, b) => b.noteFinale - a.noteFinale);
+        } else if (methodeSelection === 'recents') {
+            artefactsRetenus.sort((a, b) => getNumeroProduction(b) - getNumeroProduction(a));
+        } else if (methodeSelection === 'recents-meilleurs') {
+            const nombreMeilleurs = Math.max(1, Math.ceil(artefactsRetenus.length * 0.5));
+            artefactsRetenus.sort((a, b) => b.noteFinale - a.noteFinale);
+            artefactsRetenus = artefactsRetenus.slice(0, nombreMeilleurs);
+            artefactsRetenus.sort((a, b) => getNumeroProduction(b) - getNumeroProduction(a));
+        }
+
+        artefactsRetenus = artefactsRetenus.slice(0, nombreARetenir);
+
+        if (artefactsRetenus.length > 0) {
+            const somme = artefactsRetenus.reduce((acc, e) => acc + e.noteFinale, 0);
+            moyennePortfolio = somme / artefactsRetenus.length;
+        }
     }
 
     // ========================================
@@ -8472,8 +8600,11 @@ function calculerDetailsNoteFinale(da) {
         'meilleurs': 'meilleurs',
         'recents': 'plus récents',
         'recents-meilleurs': 'récents parmi les meilleurs',
-        'tous': 'tous'
+        'tous': 'tous',
+        'hybride': 'hybride (catégories)'
     };
+    // Si Hybride actif, forcer le label
+    if (modeHybrideNote) methodeSelection = 'hybride';
 
     return {
         pratique: 'PAN-Standards',
