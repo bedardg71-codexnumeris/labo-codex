@@ -3708,7 +3708,7 @@ function afficherListeEvaluations(donneesEtudiants) {
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div style="display:flex; align-items:center; gap:10px;">
                             <span class="toggle-icon" id="toggle-${etudiant.da}">${iconToggle}</span>
-                            <strong>${echapperHtml(etudiant.nom)}, ${echapperHtml(etudiant.prenom)}</strong>
+                            <strong>${(typeof anonymiserNom === 'function' && anonymiserNom(etudiant.da)) || (echapperHtml(etudiant.nom) + ', ' + echapperHtml(etudiant.prenom))}</strong>
                             <span class="badge-info">${etudiant.da}</span>
                             <span class="badge-info">${etudiant.groupe || 'Sans groupe'}</span>
                         </div>
@@ -6048,7 +6048,7 @@ function chargerFiltresBanqueEvaluations() {
             if (etudiant) {
                 const option = document.createElement('option');
                 option.value = da;
-                option.textContent = `${etudiant.nom}, ${etudiant.prenom}`;
+                option.textContent = (typeof anonymiserNom === 'function' && anonymiserNom(da)) || `${etudiant.nom}, ${etudiant.prenom}`;
                 selectEtudiant.appendChild(option);
             }
         });
