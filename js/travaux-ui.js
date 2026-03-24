@@ -6064,6 +6064,18 @@
     }
 
     /* ===============================
+       CHANGEMENT DE MODE (anonymisation)
+       =============================== */
+
+    window.addEventListener('modeChanged', function() {
+        // Regénérer les badges fichiers pour appliquer/retirer l'anonymisation
+        var conteneurBadges = document.querySelector('.travaux-badges-liste');
+        if (conteneurBadges) {
+            afficherFichiers();
+        }
+    });
+
+    /* ===============================
        EXPORTS GLOBAUX
        =============================== */
 
