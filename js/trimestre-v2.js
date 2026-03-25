@@ -548,8 +548,8 @@ function genererCarteEvenementV2(evt, type) {
                 ${repriseInfo}
             </div>
             <div style="display: flex; gap: 8px; flex-shrink: 0;">
-                <button onclick="modifierEvenementV2('${evt.id}', '${type}')" class="btn btn-secondaire btn-sm" style="padding: 6px 12px; font-size: 0.85rem;">Modifier</button>
-                <button onclick="supprimerEvenementV2('${evt.id}', '${type}')" class="btn btn-supprimer btn-sm" style="padding: 6px 12px; font-size: 0.85rem;">Suppr.</button>
+                <button data-action="modifierEvenementV2" data-param="${evt.id}" data-param2="${type}" class="btn btn-secondaire btn-sm" style="padding: 6px 12px; font-size: 0.85rem;">Modifier</button>
+                <button data-action="supprimerEvenementV2" data-param="${evt.id}" data-param2="${type}" class="btn btn-supprimer btn-sm" style="padding: 6px 12px; font-size: 0.85rem;">Suppr.</button>
             </div>
         </div>
     </div>`;
@@ -616,7 +616,7 @@ function ajouterBoutonRetourV2(sectionLegacy) {
     btnRetour.style.cssText = 'position: sticky; top: 60px; z-index: 100; background: var(--orange-accent); color: white; padding: 10px 20px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;';
     btnRetour.innerHTML = `
         <span>Mode édition (ancienne interface)</span>
-        <button class="btn" style="background: var(--surface-conteneur, #162c36); color: var(--orange-accent); padding: 5px 15px;" onclick="retournerVueV2()">
+        <button class="btn" style="background: var(--surface-conteneur, #162c36); color: var(--orange-accent); padding: 5px 15px;" data-action="retournerVueV2">
             ← Retour à la nouvelle interface
         </button>
     `;
@@ -975,28 +975,28 @@ function afficherListeTrimestreGestion() {
         let boutons = '';
         if (estActif) {
             // Le trimestre actif ne peut pas être archivé
-            boutons = `<button class="btn btn-secondaire btn-compact" onclick="exporterTrimestreArchive('${t.id}')" title="Exporter les données">
+            boutons = `<button class="btn btn-secondaire btn-compact" data-action="exporterTrimestreArchive" data-param="${t.id}" title="Exporter les données">
                 Exporter
             </button>`;
         } else if (estArchive) {
             // Trimestre archivé : exporter ou désarchiver
             boutons = `
-                <button class="btn btn-secondaire btn-compact" onclick="exporterTrimestreArchive('${t.id}')" title="Exporter les données">
+                <button class="btn btn-secondaire btn-compact" data-action="exporterTrimestreArchive" data-param="${t.id}" title="Exporter les données">
                     Exporter
                 </button>
-                <button class="btn btn-secondaire btn-compact" onclick="confirmerDesarchivage('${t.id}')" title="Désarchiver pour permettre les modifications">
+                <button class="btn btn-secondaire btn-compact" data-action="confirmerDesarchivage" data-param="${t.id}" title="Désarchiver pour permettre les modifications">
                     Désarchiver
                 </button>`;
         } else {
             // Trimestre inactif : peut être archivé ou activé
             boutons = `
-                <button class="btn btn-principal btn-compact" onclick="changerTrimestreActifV2('${t.id}')" title="Activer ce trimestre">
+                <button class="btn btn-principal btn-compact" data-action="changerTrimestreActifV2" data-param="${t.id}" title="Activer ce trimestre">
                     Activer
                 </button>
-                <button class="btn btn-secondaire btn-compact" onclick="confirmerArchivage('${t.id}')" title="Archiver ce trimestre (lecture seule)">
+                <button class="btn btn-secondaire btn-compact" data-action="confirmerArchivage" data-param="${t.id}" title="Archiver ce trimestre (lecture seule)">
                     Archiver
                 </button>
-                <button class="btn btn-secondaire btn-compact" onclick="exporterTrimestreArchive('${t.id}')" title="Exporter les données">
+                <button class="btn btn-secondaire btn-compact" data-action="exporterTrimestreArchive" data-param="${t.id}" title="Exporter les données">
                     Exporter
                 </button>`;
         }
@@ -2346,14 +2346,14 @@ async function chargerListeEtudiantsV2() {
                 <td>${e.prenom || '—'}</td>
                 <td style="text-align: center;">${sa}</td>
                 <td style="text-align: center;">
-                    <select class="controle-form controle-form-compact" onchange="actionEtudiantV2(this, '${e.da}')">
+                    <select class="controle-form controle-form-compact" data-on-change="actionEtudiantV2Handler" data-da="${e.da}">
                         <option value="">—</option>
                         <option value="editer">Éditer</option>
                         <option value="supprimer">Supprimer</option>
                     </select>
                 </td>
                 <td style="text-align: center;">
-                    <select class="controle-form controle-form-compact" onchange="remarqueEtudiantV2(this, '${e.da}')">
+                    <select class="controle-form controle-form-compact" data-on-change="remarqueEtudiantV2Handler" data-da="${e.da}">
                         <option value=""${!statut ? ' selected' : ''}>—</option>
                         <option value="inactif"${statut === 'inactif' ? ' selected' : ''}>Inactivité</option>
                         <option value="décrochage"${statut === 'décrochage' ? ' selected' : ''}>Décrochage</option>
@@ -3221,8 +3221,8 @@ function chargerSeancesV2() {
                 <span style="flex: 1;">${heureDebut} (${periodes} pér.)</span>
                 <span class="text-muted" style="width: 80px;">${local}</span>
                 <div style="display: flex; gap: 5px;">
-                    <button class="btn btn-modifier btn-sm" onclick="modifierSeanceV2(${index})" title="Modifier">Modifier</button>
-                    <button class="btn btn-annuler btn-sm" onclick="supprimerSeanceV2(${index})" title="Supprimer">Suppr.</button>
+                    <button class="btn btn-modifier btn-sm" data-action="modifierSeanceV2" data-param="${index}" title="Modifier">Modifier</button>
+                    <button class="btn btn-annuler btn-sm" data-action="supprimerSeanceV2" data-param="${index}" title="Supprimer">Suppr.</button>
                 </div>
             </div>
         `;
@@ -4717,26 +4717,26 @@ function ouvrirModalBibliothequeGroupeCours() {
                     </div>
                     <div style="display: flex; gap: 8px;">
                         ${estMasque ? `
-                            <button onclick="afficherGroupeCoursDepuisBibliotheque('${gc.id}')"
+                            <button data-action="afficherGroupeCoursDepuisBibliotheque" data-param="${gc.id}"
                                     class="btn btn-confirmer btn-sm"
                                     title="Afficher dans le dropdown">
                                 Afficher
                             </button>
                         ` : `
                             ${!estActif ? `
-                                <button onclick="activerGroupeCoursDepuisBibliotheque('${gc.id}')"
+                                <button data-action="activerGroupeCoursDepuisBibliotheque" data-param="${gc.id}"
                                         class="btn btn-confirmer btn-sm"
                                         title="Activer ce groupe-cours">
                                     Activer
                                 </button>
                             ` : ''}
-                            <button onclick="masquerGroupeCoursDepuisBibliotheque('${gc.id}')"
+                            <button data-action="masquerGroupeCoursDepuisBibliotheque" data-param="${gc.id}"
                                     class="btn btn-secondaire btn-sm"
                                     title="Masquer du dropdown">
                                 Masquer
                             </button>
                         `}
-                        <button onclick="supprimerGroupeCoursDepuisBibliotheque('${gc.id}', '${titre.replace(/'/g, "\\'")}')"
+                        <button data-action="supprimerGroupeCoursDepuisBibliotheque" data-param="${gc.id}" data-param2="${echapperHtml(titre)}"
                                 class="btn btn-supprimer btn-sm"
                                 title="Supprimer définitivement">
                                 Supprimer
@@ -4771,7 +4771,7 @@ function ouvrirModalBibliothequeGroupeCours() {
                 box-shadow: 0 10px 40px rgba(0,0,0,0.3);
                 position: relative;
             ">
-                <button onclick="fermerModalBibliothequeGroupeCours()" style="
+                <button data-action="fermerModalBibliothequeGroupeCours" style="
                     position: sticky;
                     top: 0;
                     right: 0;
@@ -5131,6 +5131,20 @@ function mettreAJourInfoDuree() {
 }
 
 /* ===============================
+   WRAPPERS DELEGATION (Phase 5 — Lot 5.12a)
+   Adaptent la signature (el) du dispatcher change
+   vers la signature (selectEl, da) des fonctions existantes.
+   =============================== */
+
+function actionEtudiantV2Handler(el) {
+    actionEtudiantV2(el, el.dataset.da);
+}
+
+function remarqueEtudiantV2Handler(el) {
+    remarqueEtudiantV2(el, el.dataset.da);
+}
+
+/* ===============================
    EXPORTS WINDOW
    =============================== */
 
@@ -5190,7 +5204,9 @@ window.ajouterEtudiantV2 = ajouterEtudiantV2;
 window.supprimerEtudiantV2 = supprimerEtudiantV2;
 window.editerEtudiantV2 = editerEtudiantV2;
 window.actionEtudiantV2 = actionEtudiantV2;
+window.actionEtudiantV2Handler = actionEtudiantV2Handler;
 window.remarqueEtudiantV2 = remarqueEtudiantV2;
+window.remarqueEtudiantV2Handler = remarqueEtudiantV2Handler;
 window.changerStatutEtudiantV2 = changerStatutEtudiantV2;
 window.soumettreEtudiantV2 = soumettreEtudiantV2;
 window.annulerEditionEtudiantV2 = annulerEditionEtudiantV2;

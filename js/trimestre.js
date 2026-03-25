@@ -263,10 +263,10 @@ function genererCarteEvenementPrevu(evt) {
     <div class="item-carte-header">
         <strong class="item-carte-titre">${evt.description}</strong>
         <div class="item-carte-actions">
-            <button onclick="modifierEvenementEnPlace('${evt.id}', 'prevus')"
+            <button data-action="modifierEvenementEnPlace" data-param="${evt.id}" data-param2="prevus"
                     class="btn btn-modifier btn-sm"
                     style="padding: 5px 10px; font-size: 0.85rem;">Modifier</button>
-            <button onclick="supprimerEvenement('${evt.id}', 'prevus')"
+            <button data-action="supprimerEvenement" data-param="${evt.id}" data-param2="prevus"
                     class="btn btn-supprimer btn-sm"
                     style="padding: 5px 10px; font-size: 0.85rem;">Supprimer</button>
         </div>
@@ -304,9 +304,9 @@ function genererCarteEvenementPrevuEdition(evt) {
             ${evt.description}
         </strong>
         <div class="item-carte-actions">
-            <button class="btn btn-annuler btn-sm" onclick="annulerEditionEnPlace('${evt.id}', 'prevus')"
+            <button class="btn btn-annuler btn-sm" data-action="annulerEditionEnPlace" data-param="${evt.id}" data-param2="prevus"
                     style="padding: 5px 10px; font-size: 0.85rem;">Annuler</button>
-            <button class="btn btn-confirmer btn-sm" onclick="sauvegarderEditionEnPlace('${evt.id}', 'prevus')"
+            <button class="btn btn-confirmer btn-sm" data-action="sauvegarderEditionEnPlace" data-param="${evt.id}" data-param2="prevus"
                     style="padding: 5px 10px; font-size: 0.85rem;">Sauvegarder</button>
         </div>
     </div>
@@ -537,10 +537,10 @@ function genererCarteEvenementImprevu(evt) {
     <div class="item-carte-header">
         <strong class="item-carte-titre">${evt.description}</strong>
         <div class="item-carte-actions">
-            <button onclick="modifierEvenementEnPlace('${evt.id}', 'imprevus')"
+            <button data-action="modifierEvenementEnPlace" data-param="${evt.id}" data-param2="imprevus"
                     class="btn btn-modifier btn-sm"
                     style="padding: 5px 10px; font-size: 0.85rem;">Modifier</button>
-            <button onclick="supprimerEvenement('${evt.id}', 'imprevus')"
+            <button data-action="supprimerEvenement" data-param="${evt.id}" data-param2="imprevus"
                     class="btn btn-supprimer btn-sm"
                     style="padding: 5px 10px; font-size: 0.85rem;">Supprimer</button>
         </div>
@@ -578,9 +578,9 @@ function genererCarteEvenementImprevuEdition(evt) {
             ${evt.description}
         </strong>
         <div class="item-carte-actions">
-            <button class="btn btn-annuler btn-sm" onclick="annulerEditionEnPlace('${evt.id}', 'imprevus')"
+            <button class="btn btn-annuler btn-sm" data-action="annulerEditionEnPlace" data-param="${evt.id}" data-param2="imprevus"
                     style="padding: 5px 10px; font-size: 0.85rem;">Annuler</button>
-            <button class="btn btn-confirmer btn-sm" onclick="sauvegarderEditionEnPlace('${evt.id}', 'imprevus')"
+            <button class="btn btn-confirmer btn-sm" data-action="sauvegarderEditionEnPlace" data-param="${evt.id}" data-param2="imprevus"
                     style="padding: 5px 10px; font-size: 0.85rem;">Sauvegarder</button>
         </div>
     </div>
