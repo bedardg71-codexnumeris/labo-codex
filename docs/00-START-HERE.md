@@ -56,9 +56,9 @@ Ce pattern est utilise dans :
 
 ## Etat actuel du projet
 
-**Version** : Beta 95.2 (architecture modulaire groupe-cours)
-**Objectif** : Tests reseau janvier-mai 2026
-**Priorite** : **Stabilite > Nouvelles fonctionnalites**
+**Version** : Beta 98.9 (assainissement securite en cours)
+**Objectif** : Elimination de la dette technique inline (onclick → delegation)
+**Priorite** : **Securite + Proprete > Nouvelles fonctionnalites**
 
 **Derniere session** : Voir `../SESSION.md` (racine du projet)
 

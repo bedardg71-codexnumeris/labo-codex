@@ -18,8 +18,8 @@ Ce document te guidera vers :
 
 ## Etat actuel
 
-- **Version** : Beta 98.7
-- **Objectif** : Codex USB multi-appareil + qualite UX
+- **Version** : Beta 98.9
+- **Objectif** : Assainissement securite — migration onclick inline vers delegation
 - **Session en cours** : Voir `SESSION.md`
 - **Backlog** : Voir `BACKLOG.md` (taches a faire)
 
