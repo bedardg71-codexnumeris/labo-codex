@@ -248,7 +248,7 @@ function creerBulle(etape, index) {
             justify-content: space-between;
         ">
             ${index > 0 ? `
-                <button onclick="etapePrecedente()" style="
+                <button data-action="etapePrecedente" style="
                     padding: 10px 20px;
                     background: var(--surface-conteneur, #162c36);
                     color: var(--gris-moyen);
@@ -263,7 +263,7 @@ function creerBulle(etape, index) {
             ` : '<div></div>'}
 
             <div style="display: flex; gap: 10px;">
-                <button onclick="terminerTutoriel()" style="
+                <button data-action="terminerTutoriel" style="
                     padding: 10px 20px;
                     background: var(--surface-conteneur, #162c36);
                     color: var(--gris-moyen);
@@ -277,7 +277,7 @@ function creerBulle(etape, index) {
                 </button>
 
                 ${index < ETAPES_TUTORIEL.length - 1 ? `
-                    <button onclick="etapeSuivante()" style="
+                    <button data-action="etapeSuivante" style="
                         padding: 10px 20px;
                         background: linear-gradient(135deg, var(--accent-primaire), var(--bleu-clair));
                         color: white;
@@ -291,7 +291,7 @@ function creerBulle(etape, index) {
                         Suivant →
                     </button>
                 ` : `
-                    <button onclick="terminerTutoriel()" style="
+                    <button data-action="terminerTutoriel" style="
                         padding: 10px 20px;
                         background: linear-gradient(135deg, #1e5a4a, var(--vert-succes));
                         color: white;

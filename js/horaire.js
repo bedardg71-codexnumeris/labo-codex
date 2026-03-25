@@ -852,7 +852,7 @@ function genererFormulaireSeance(index, seance) {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <strong style="color: var(--texte-secondaire); font-size: 1.05rem;">Séance ${lettre}</strong>
                 ${seancesEnCours.length > 1 ? `
-                    <button type="button" class="btn btn-supprimer btn-tres-compact" onclick="supprimerFormulaireSeance(${index})">
+                    <button type="button" class="btn btn-supprimer btn-tres-compact" data-action="supprimerFormulaireSeance" data-param="${index}">
                         Supprimer
                     </button>
                 ` : ''}
@@ -911,7 +911,7 @@ function rafraichirFormulairesSeances() {
     // Ajouter le bouton "+ Ajouter une séance" si < 6 séances
     if (seancesEnCours.length < 6) {
         html += `
-            <button type="button" class="btn" onclick="ajouterFormulaireSeance()"
+            <button type="button" class="btn" data-action="ajouterFormulaireSeance"
                     style="width: 100%; margin-top: 10px; background: var(--bleu-leger); color: var(--texte-secondaire);">
                 Ajouter une séance
             </button>
@@ -1179,9 +1179,9 @@ function genererCarteSeance(seance, index) {
     <div class="item-carte-header">
         <strong class="item-carte-titre">Séance ${nomSeance}${groupeEchappe ? ` - Groupe ${groupeEchappe}` : ''}</strong>
         <div class="item-carte-actions">
-            <button onclick="modifierSeanceEnPlace(${index})"
+            <button data-action="modifierSeanceEnPlace" data-param="${index}"
                     class="btn btn-modifier btn-sm">Modifier</button>
-            <button onclick="supprimerSeance(${index})"
+            <button data-action="supprimerSeance" data-param="${index}"
                     class="btn btn-supprimer btn-sm">Supprimer</button>
         </div>
     </div>
@@ -1209,8 +1209,8 @@ function genererCarteSeanceEdition(seance, index) {
     <div class="item-carte-header">
         <strong class="item-carte-titre">Séance ${nomSeance}${groupeEchappe ? ` - Groupe ${groupeEchappe}` : ''}</strong>
         <div class="item-carte-actions">
-            <button class="btn btn-annuler btn-sm" onclick="annulerEditionSeanceEnPlace()">Annuler</button>
-            <button class="btn btn-confirmer btn-sm" onclick="sauvegarderEditionSeanceEnPlace(${index})">Sauvegarder</button>
+            <button class="btn btn-annuler btn-sm" data-action="annulerEditionSeanceEnPlace">Annuler</button>
+            <button class="btn btn-confirmer btn-sm" data-action="sauvegarderEditionSeanceEnPlace" data-param="${index}">Sauvegarder</button>
         </div>
     </div>
     <div class="grille-4col-form">
@@ -1725,6 +1725,9 @@ window.confirmerSeances = confirmerSeances;
 window.annulerAjoutSeance = annulerAjoutSeance;
 window.afficherSeancesExistantes = afficherSeancesExistantes;
 window.supprimerSeance = supprimerSeance;
+window.modifierSeanceEnPlace = modifierSeanceEnPlace;
+window.annulerEditionSeanceEnPlace = annulerEditionSeanceEnPlace;
+window.sauvegarderEditionSeanceEnPlace = sauvegarderEditionSeanceEnPlace;
 window.nettoyerDoublons = nettoyerDoublons;
 window.afficherFormAjoutSeance = afficherFormAjoutSeance;
 window.annulerFormAjoutSeance = annulerFormAjoutSeance;

@@ -565,17 +565,16 @@ function genererInputQuestion(question) {
                        cursor: pointer;
                        transition: all 0.2s;`;
 
-                const hoverEvents = isDisabled
+                const hoverAttr = isDisabled
                     ? ''
-                    : `onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.borderColor='var(--accent-primaire)';"
-                       onmouseout="if(!this.querySelector('input').checked) { this.style.background='var(--surface-conteneur)'; this.style.borderColor='var(--bordure-claire)'; }"`;
+                    : 'data-primo-radio-hover';
 
                 html += `
-                    <label style="${labelStyle}" ${hoverEvents}>
+                    <label style="${labelStyle}" ${hoverAttr}>
                         <input type="radio" name="${inputId}" value="${opt.value}"
                             style="margin-right: 10px;"
                             ${isDisabled ? 'disabled' : ''}
-                            onchange="this.parentElement.parentElement.querySelectorAll('label').forEach(l => { if(!l.querySelector('input').disabled) { l.style.background='var(--surface-conteneur)'; l.style.borderColor='var(--bordure-claire)'; } }); this.parentElement.style.background='var(--bleu-tres-pale)'; this.parentElement.style.borderColor='var(--accent-primaire)';"
+                            data-on-change="_primoRadioHighlight"
                         />
                         <strong>${opt.label}</strong>
                         ${opt.description ? `<div style="font-size: 0.85rem; color: var(--gris-moyen); margin-top: 5px; margin-left: 24px;">${opt.description}</div>` : ''}
@@ -649,7 +648,7 @@ function genererBoutonsNavigation() {
     // Bouton Précédent
     if (!estPremiere) {
         html += `
-            <button onclick="primoQuestionPrecedente()" style="
+            <button data-action="primoQuestionPrecedente" style="
                 flex: 1;
                 padding: 8px 16px;
                 background: var(--surface-conteneur, #162c36);
@@ -668,7 +667,7 @@ function genererBoutonsNavigation() {
     // Bouton Suivant, Continuer ou Terminer
     if (question.type === 'message') {
         html += `
-            <button onclick="terminerConfiguration().catch(err => console.error('[Guide] Erreur terminerConfiguration:', err))" style="
+            <button data-action="_primoTerminerConfig" style="
                 flex: 2;
                 padding: 8px 16px;
                 background: linear-gradient(135deg, #1a5266, #2d7a8c);
@@ -706,7 +705,7 @@ function genererBoutonsNavigation() {
         const texteBouton = question.type === 'instruction' ? 'Continuer →' : 'Suivant →';
 
         html += `
-            <button onclick="primoQuestionSuivante()" style="
+            <button data-action="primoQuestionSuivante" style="
                 flex: 2;
                 padding: 8px 16px;
                 background: linear-gradient(135deg, #1a5266, #2d7a8c);
@@ -725,7 +724,7 @@ function genererBoutonsNavigation() {
 
     // Bouton Annuler (toujours présent)
     html += `
-        <button onclick="confirmerAnnulation()" style="
+        <button data-action="confirmerAnnulation" style="
             padding: 8px 16px;
             background: var(--surface-conteneur, #162c36);
             color: var(--gris-moyen);
@@ -911,7 +910,7 @@ async function executerAction(question) {
                 <div style="font-size: 1rem; color: var(--rouge);">
                     Erreur lors de l'exécution : ${error.message}
                 </div>
-                <button onclick="indexQuestionActuelle++; afficherQuestionActuelle();" style="
+                <button data-action="_primoSauterEtContinuer" style="
                     margin-top: 15px;
                     padding: 10px 20px;
                     background: var(--accent-primaire);
@@ -2516,9 +2515,60 @@ style.textContent = `
 document.head.appendChild(style);
 
 // ============================================================================
+// WRAPPERS POUR DÉLÉGATION (Phase 5)
+// ============================================================================
+
+/** Wrapper: highlight radio label on change (replaces inline onchange on radio inputs) */
+function _primoRadioHighlight(el) {
+    var container = el.parentElement.parentElement;
+    if (!container) return;
+    container.querySelectorAll('label').forEach(function(l) {
+        if (!l.querySelector('input').disabled) {
+            l.style.background = 'var(--surface-conteneur)';
+            l.style.borderColor = 'var(--bordure-claire)';
+        }
+    });
+    el.parentElement.style.background = 'var(--bleu-tres-pale)';
+    el.parentElement.style.borderColor = 'var(--accent-primaire)';
+}
+
+/** Wrapper: terminerConfiguration with error catch (replaces inline onclick) */
+function _primoTerminerConfig() {
+    terminerConfiguration().catch(function(err) {
+        console.error('[Guide] Erreur terminerConfiguration:', err);
+    });
+}
+
+/** Wrapper: skip to next question on error (replaces inline onclick) */
+function _primoSauterEtContinuer() {
+    indexQuestionActuelle++;
+    afficherQuestionActuelle();
+}
+
+// Délégation hover pour les labels radio Primo (remplace onmouseover/onmouseout inline)
+document.addEventListener('mouseover', function(e) {
+    var label = e.target.closest('[data-primo-radio-hover]');
+    if (!label) return;
+    label.style.background = 'var(--bleu-tres-pale)';
+    label.style.borderColor = 'var(--accent-primaire)';
+});
+document.addEventListener('mouseout', function(e) {
+    var label = e.target.closest('[data-primo-radio-hover]');
+    if (!label) return;
+    var input = label.querySelector('input');
+    if (input && !input.checked) {
+        label.style.background = 'var(--surface-conteneur)';
+        label.style.borderColor = 'var(--bordure-claire)';
+    }
+});
+
+// ============================================================================
 // EXPORTS
 // ============================================================================
 
+window._primoRadioHighlight = _primoRadioHighlight;
+window._primoTerminerConfig = _primoTerminerConfig;
+window._primoSauterEtContinuer = _primoSauterEtContinuer;
 window.ouvrirModalConversationnel = ouvrirModalConversationnel;
 window.fermerModalConversationnel = fermerModalConversationnel;
 window.primoQuestionSuivante = primoQuestionSuivante;

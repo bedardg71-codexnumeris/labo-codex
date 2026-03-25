@@ -49,6 +49,44 @@
     };
 
     /**
+     * Convertit une chaine onclick legacy en attributs data-action.
+     * Ex: "fn('a')" -> 'data-action="fn" data-param="a"'
+     *     "fn('a', 'b')" -> 'data-action="fn" data-param="a" data-param2="b"'
+     */
+    function onclickToDataAttrs(onclickStr) {
+        if (!onclickStr) return '';
+        var m = onclickStr.match(/^([a-zA-Z0-9_.]+)\(([^)]*)\)$/);
+        if (!m) return 'data-action="' + onclickStr.replace(/[()'"]/g, '') + '"';
+        var fnName = m[1];
+        var argsStr = m[2].trim();
+        if (!argsStr) return 'data-action="' + fnName + '"';
+        var args = argsStr.split(/,\s*/).map(function(a) { return a.replace(/^['"]|['"]$/g, ''); });
+        var attrs = 'data-action="' + fnName + '" data-param="' + args[0] + '"';
+        if (args[1] !== undefined) attrs += ' data-param2="' + args[1] + '"';
+        if (args[2] !== undefined) attrs += ' data-param3="' + args[2] + '"';
+        return attrs;
+    }
+
+    /**
+     * Génère les attributs d'un bouton : supporte {action, param} (délégué) ou {onclick} (legacy)
+     * @param {Object} btn - {label, classe, title, onclick?, action?, param?}
+     * @returns {string} attributs HTML du bouton
+     */
+    function _btnAttrs(btn) {
+        if (btn.action) {
+            var attrs = 'data-action="' + btn.action + '"';
+            if (btn.param != null) attrs += ' data-param="' + btn.param + '"';
+            if (btn.param2 != null) attrs += ' data-param2="' + btn.param2 + '"';
+            return attrs;
+        }
+        // Legacy onclick string → convertir en data-action via parsing
+        if (btn.onclick) {
+            return onclickToDataAttrs(btn.onclick);
+        }
+        return '';
+    }
+
+    /**
      * Rend une carte d'item en Section 1 (dans la sélection)
      * @param {Object} opts
      * @param {string} opts.nom - Nom de l'item
@@ -64,7 +102,7 @@
 
         var boutonsHTML = '<div class="biblio-carte-actions">';
         opts.boutons.forEach(function (btn) {
-            boutonsHTML += '<button onclick="' + btn.onclick + '" class="btn ' + btn.classe + ' btn-tres-compact" title="' + (btn.title || '') + '">' + btn.label + '</button>';
+            boutonsHTML += '<button ' + _btnAttrs(btn) + ' class="btn ' + btn.classe + ' btn-tres-compact" title="' + (btn.title || '') + '">' + btn.label + '</button>';
         });
         boutonsHTML += '</div>';
 
@@ -110,7 +148,7 @@
         var boutonsHTML = '<div class="biblio-carte-actions biblio-carte-actions--vertical">';
         opts.boutons.forEach(function (btn) {
             if (!opts.dejaPresent || btn.showAlways) {
-                boutonsHTML += '<button onclick="' + btn.onclick + '" class="btn ' + btn.classe + ' btn-tres-compact" title="' + (btn.title || '') + '">' + btn.label + '</button>';
+                boutonsHTML += '<button ' + _btnAttrs(btn) + ' class="btn ' + btn.classe + ' btn-tres-compact" title="' + (btn.title || '') + '">' + btn.label + '</button>';
             }
         });
         boutonsHTML += '</div>';
@@ -183,9 +221,10 @@
      * @param {string} [config.contenuIdListe2] - ID du conteneur Section 2
      */
     BibliothequeUI.creerModal = function (config) {
+        var fermerAttr = 'data-action="' + (config.onFermerAction || config.onFermer) + '"';
         var html = '<div id="' + config.modalId + '" class="modal-js-overlay" style="z-index: 10000;">' +
             '<div class="modal-js-contenu" style="max-width: 800px;">' +
-                '<button onclick="' + config.onFermer + '()" class="modal-js-btn-fermer">×</button>' +
+                '<button ' + fermerAttr + ' class="modal-js-btn-fermer">×</button>' +
                 '<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">' +
                     '<h2 style="margin: 0; color: var(--accent-primaire);">' + config.titre + '</h2>' +
                     '<button class="btn-aide-contextuelle" data-aide="bibliotheque-fonctionnement" title="Comment fonctionne la bibliothèque">📍</button>' +

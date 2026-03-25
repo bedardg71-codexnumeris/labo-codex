@@ -278,7 +278,8 @@ function chargerPortfolioEleveDetail(da) {
                                    value="${art.id}"
                                    ${art.retenu ? 'checked' : ''}
                                    ${!art.remis ? 'disabled' : ''}
-                                   onchange="toggleArtefactPortfolio(event, '${da}', '${portfolio.id}', ${nombreARetenir})">
+                                   data-on-change="toggleArtefactPortfolioFromEl"
+                                   data-da="${da}" data-portfolio-id="${portfolio.id}" data-nombre-a-retenir="${nombreARetenir}">
                             <div class="portfolio-artefact-contenu">
                                 <div class="portfolio-artefact-titre ${art.retenu ? 'portfolio-artefact-titre-retenu' : 'portfolio-artefact-titre-normal'}">
                                     ${echapperHtml(art.description || art.titre)}
@@ -1099,9 +1100,24 @@ function obtenirConfigCategories() {
     return config.categories;
 }
 
+/**
+ * Wrapper pour data-on-change : lit les params depuis les data-attributes de l'élément.
+ * @param {HTMLElement} el - L'élément checkbox
+ */
+function toggleArtefactPortfolioFromEl(el) {
+    var da = el.getAttribute('data-da');
+    var portfolioId = el.getAttribute('data-portfolio-id');
+    var nombreARetenir = parseInt(el.getAttribute('data-nombre-a-retenir'), 10);
+    // Créer un pseudo-event avec target pour compatibilité
+    var pseudoEvent = { target: el };
+    toggleArtefactPortfolio(pseudoEvent, da, portfolioId, nombreARetenir);
+}
+
 /* ===============================
    EXPORTS GLOBAUX
    =============================== */
+
+window.toggleArtefactPortfolioFromEl = toggleArtefactPortfolioFromEl;
 
 // Exporter les fonctions multi-objectifs pour utilisation par d'autres modules
 window.calculerPerformanceParObjectif = calculerPerformanceParObjectif;

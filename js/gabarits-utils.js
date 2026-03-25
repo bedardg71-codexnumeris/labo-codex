@@ -193,7 +193,7 @@
             </label>
             <select id="${idFiltre}"
                     class="controle-form"
-                    onchange="${onchangeHandler}()"
+                    data-on-change="${onchangeHandler}"
                     style="max-width: 300px;">
                 ${options}
             </select>
@@ -249,7 +249,7 @@
                     cursor: pointer;
                     transition: all 0.2s;
                 " class="hover-translate-x"
-                   onclick="${actionClick}('${gabarit.id}')">
+                   data-action="${actionClick}" data-param="${gabarit.id}">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div style="flex: 1;">
                             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">

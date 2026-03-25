@@ -480,12 +480,12 @@ function afficherSeancesV2() {
     container.innerHTML = seancesTemp.map((s, i) => `
         <div class="seance-item" style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px; padding: 10px; background: var(--bleu-tres-pale); border-radius: 5px;">
             <span style="font-weight: 500; min-width: 70px;">Séance ${i + 1}</span>
-            <select class="controle-form controle-form-compact" style="width: 140px;" onchange="modifierSeanceV2(${i}, 'jour', this.value)">
+            <select class="controle-form controle-form-compact" style="width: 140px;" data-on-change="_modifierSeanceV2Change" data-param="${i}" data-seance-prop="jour">
                 ${joursOptions.replace(`value="${s.jour}"`, `value="${s.jour}" selected`)}
             </select>
-            <input type="time" class="controle-form controle-form-compact" style="width: 100px;" value="${s.heureDebut || '10:00'}" onchange="modifierSeanceV2(${i}, 'heureDebut', this.value)">
+            <input type="time" class="controle-form controle-form-compact" style="width: 100px;" value="${s.heureDebut || '10:00'}" data-on-change="_modifierSeanceV2Change" data-param="${i}" data-seance-prop="heureDebut">
             <span>à</span>
-            <input type="time" class="controle-form controle-form-compact" style="width: 100px;" value="${s.heureFin || '12:00'}" onchange="modifierSeanceV2(${i}, 'heureFin', this.value)">
+            <input type="time" class="controle-form controle-form-compact" style="width: 100px;" value="${s.heureFin || '12:00'}" data-on-change="_modifierSeanceV2Change" data-param="${i}" data-seance-prop="heureFin">
         </div>
     `).join('');
 }
@@ -779,8 +779,8 @@ async function afficherListeGroupeCoursV2() {
             <div class="groupe-cours-item" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--bleu-tres-pale); border-radius: 5px; margin-bottom: 8px;">
                 <span>${libelle}${actifBadge}</span>
                 <div class="btn-groupe" style="gap: 5px;">
-                    ${!gc.actif ? `<button class="btn btn-principal btn-sm" onclick="activerGroupeCoursV2('${gc.id}')">Activer</button>` : ''}
-                    <button class="btn btn-annuler btn-sm" onclick="supprimerGroupeCoursV2('${gc.id}')" title="Supprimer">✕</button>
+                    ${!gc.actif ? `<button class="btn btn-principal btn-sm" data-action="activerGroupeCoursV2" data-param="${gc.id}">Activer</button>` : ''}
+                    <button class="btn btn-annuler btn-sm" data-action="supprimerGroupeCoursV2" data-param="${gc.id}" title="Supprimer">✕</button>
                 </div>
             </div>
         `;
@@ -1031,6 +1031,13 @@ window.afficherFormGroupeCoursV2 = afficherFormGroupeCoursV2;
 // window.sauvegarderGroupeCoursV2 = sauvegarderGroupeCoursV2;
 window.activerGroupeCoursV2 = activerGroupeCoursV2;
 window.supprimerGroupeCoursV2 = supprimerGroupeCoursV2;
+window.modifierSeanceV2 = modifierSeanceV2;
+
+// Wrapper pour data-on-change : lit la prop depuis data-seance-prop et la valeur depuis el.value
+window._modifierSeanceV2Change = function(index, el) {
+    var prop = el.dataset.seanceProp;
+    modifierSeanceV2(index, prop, el.value);
+};
 window.mettreAJourApercuGroupeCours = mettreAJourApercuGroupeCours;
 
 console.log('[Entités UI] Module chargé');

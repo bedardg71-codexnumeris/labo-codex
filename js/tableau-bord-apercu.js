@@ -2748,7 +2748,7 @@ function afficherListeEtudiantsCritiques(etudiants, afficherSommatif) {
                     </div>
                 </div>
                 <button class="btn btn-principal"
-                        onclick="afficherSousSection('tableau-bord-profil'); afficherProfilComplet('${e.da}');"
+                        data-action="tbNavigerVersProfil" data-param="${e.da}"
                         class="tb-padding-compact">
                     Voir profil
                 </button>
@@ -3349,8 +3349,8 @@ function afficherAlertesPrioritaires(etudiants) {
                             </span>
                         </td>
                         <td>
-                            <button class="btn btn-principal" 
-                                    onclick="afficherSousSection('tableau-bord-profil'); chargerProfilEtudiant('${e.da}')"
+                            <button class="btn btn-principal"
+                                    data-action="tbNavigerVersProfil" data-param="${e.da}"
                                     class="tb-padding-compact">
                                 Voir profil
                             </button>
@@ -3407,11 +3407,26 @@ function setBarre(id, pourcentage) {
     }
 }
 
+/**
+ * Wrapper de navigation : ouvre la sous-section profil et charge le profil.
+ * Utilisé par data-action="tbNavigerVersProfil" data-param="<da>"
+ * @param {string} da - Le DA de l'étudiant
+ */
+function tbNavigerVersProfil(da) {
+    if (typeof afficherSousSection === 'function') {
+        afficherSousSection('tableau-bord-profil');
+    }
+    if (typeof afficherProfilComplet === 'function') {
+        afficherProfilComplet(da);
+    }
+}
+
 /* ===============================
    📤 EXPORTS GLOBAUX
    =============================== */
 
 // Export pour permettre le rafraîchissement depuis d'autres modules
+window.tbNavigerVersProfil = tbNavigerVersProfil;
 window.chargerTableauBordApercu = chargerTableauBordApercu;
 window.initialiserModuleTableauBordApercu = initialiserModuleTableauBordApercu;
 window.appliquerCouleursEtudiantsSuivis = appliquerCouleursEtudiantsSuivis;

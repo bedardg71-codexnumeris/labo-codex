@@ -1687,7 +1687,7 @@
         const evaluation = travauxResolution.trouverEvaluationPourFichier(fichier);
 
         let html = `
-            <div class="modal-overlay actif" id="travaux-modal-revision" onclick="if(event.target===this)travauxExportPDF.fermerRevision()">
+            <div class="modal-overlay actif" id="travaux-modal-revision" data-close-on-bg="travauxExportPDF.fermerRevision">
                 <div class="modal-contenu" style="max-width:600px;max-height:80vh;overflow-y:auto;">
                     <h3>Révision avant export</h3>
                     <div class="travaux-revision-stats">
@@ -1750,8 +1750,8 @@
 
         html += `
                     <div class="travaux-revision-actions">
-                        <button class="btn btn-secondaire" onclick="travauxExportPDF.fermerRevision()">Modifier</button>
-                        <button class="btn btn-principal" onclick="travauxExportPDF.fermerRevision(); travauxExportPDF.exporterPDF('${fichierId}');">Exporter le PDF</button>
+                        <button class="btn btn-secondaire" data-action="travauxExportPDF.fermerRevision">Modifier</button>
+                        <button class="btn btn-principal" data-action="_travauxRevisionExporter" data-param="${fichierId}">Exporter le PDF</button>
                     </div>
                 </div>
             </div>`;
@@ -1922,11 +1922,11 @@
                     <canvas id="preview-pdf-canvas"></canvas>
                     <div class="preview-pdf-barre-bas">
                         ${totalPages > 1 ? `
-                        <button class="preview-quicklook-fleche preview-quicklook-prec" onclick="event.stopPropagation(); travauxExportPDF.previewPDFPagePrec()">&#x25C0;</button>
+                        <button class="preview-quicklook-fleche preview-quicklook-prec" data-action="travauxExportPDF.previewPDFPagePrec" data-stop>&#x25C0;</button>
                         <span class="preview-quicklook-page" id="preview-pdf-page-info">1 / ${totalPages}</span>
-                        <button class="preview-quicklook-fleche preview-quicklook-suiv" onclick="event.stopPropagation(); travauxExportPDF.previewPDFPageSuiv()">&#x25B6;</button>
+                        <button class="preview-quicklook-fleche preview-quicklook-suiv" data-action="travauxExportPDF.previewPDFPageSuiv" data-stop>&#x25B6;</button>
                         ` : ''}
-                        <button class="btn btn-principal preview-pdf-telecharger" onclick="event.stopPropagation(); travauxExportPDF.telechargerDepuisPreview()">Télécharger PDF</button>
+                        <button class="btn btn-principal preview-pdf-telecharger" data-action="travauxExportPDF.telechargerDepuisPreview" data-stop>Télécharger PDF</button>
                     </div>
                 </div>
             `;
@@ -2015,6 +2015,12 @@
     /* ===============================
        EXPORTS GLOBAUX
        =============================== */
+
+    // Wrapper multi-statement pour data-action (fermer revision + exporter)
+    window._travauxRevisionExporter = function(fichierId) {
+        fermerRevision();
+        exporterPDF(fichierId);
+    };
 
     window.travauxExportPDF = {
         genererDocPDF: genererDocPDF,

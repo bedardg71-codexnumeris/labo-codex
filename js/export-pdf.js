@@ -2675,7 +2675,7 @@ function genererHTMLFormulairePDF() {
 
                 <div class="groupe-form u-mb-15">
                     <label for="inlinePDF-production" class="prep-pdf-label-sm">Production (optionnel)</label>
-                    <select id="inlinePDF-production" class="controle-form" onchange="mettreAJourOptionsInlinePDF()">
+                    <select id="inlinePDF-production" class="controle-form" data-on-change="mettreAJourOptionsInlinePDF">
                         <option value="">-- Aucune (grille générique) --</option>
                     </select>
                 </div>
@@ -2683,14 +2683,14 @@ function genererHTMLFormulairePDF() {
                 <div id="inlinePDF-grid-selects" class="prep-pdf-grille-selects">
                     <div class="groupe-form u-mb-0">
                         <label for="inlinePDF-grille" class="prep-pdf-label-sm">Grille de critères <span class="prep-pdf-requis">*</span></label>
-                        <select id="inlinePDF-grille" class="controle-form" onchange="mettreAJourOptionsInlinePDF()">
+                        <select id="inlinePDF-grille" class="controle-form" data-on-change="mettreAJourOptionsInlinePDF">
                             <option value="">-- Sélectionner --</option>
                         </select>
                     </div>
 
                     <div class="groupe-form u-mb-0">
                         <label for="inlinePDF-echelle" class="prep-pdf-label-sm">Échelle de performance <span class="prep-pdf-requis">*</span></label>
-                        <select id="inlinePDF-echelle" class="controle-form" onchange="mettreAJourOptionsInlinePDF()">
+                        <select id="inlinePDF-echelle" class="controle-form" data-on-change="mettreAJourOptionsInlinePDF">
                             <option value="">-- Sélectionner --</option>
                         </select>
                     </div>
@@ -2705,10 +2705,10 @@ function genererHTMLFormulairePDF() {
             </fieldset>
 
             <div class="prep-pdf-actions">
-                <button onclick="fermerFormulairePDFInline()" class="btn btn-annuler">
+                <button data-action="fermerFormulairePDFInline" class="btn btn-annuler">
                     Annuler
                 </button>
-                <button id="inlinePDF-btn-apercu" onclick="ouvrirApercuPDFDepuisInline()" class="btn btn-confirmer" disabled>
+                <button id="inlinePDF-btn-apercu" data-action="ouvrirApercuPDFDepuisInline" class="btn btn-confirmer" disabled>
                     Voir l'aperçu →
                 </button>
             </div>

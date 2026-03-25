@@ -26,7 +26,7 @@ function afficherPopupPrimo(contentHTML) {
         overlay = document.createElement('div');
         overlay.id = 'primo-overlay';
         overlay.className = 'primo-overlay';
-        overlay.onclick = fermerPopupPrimo;
+        overlay.setAttribute('data-close-on-bg', 'fermerPopupPrimo');
         document.body.appendChild(overlay);
     }
 
@@ -43,7 +43,7 @@ function afficherPopupPrimo(contentHTML) {
     popup.innerHTML = `
         <div class="primo-popup-header">
             <span><span class="primo-icon">📍</span> Conseil</span>
-            <button class="primo-popup-close" onclick="fermerPopupPrimo()">×</button>
+            <button class="primo-popup-close" data-action="fermerPopupPrimo">×</button>
         </div>
         <div class="primo-popup-body">
             ${contentHTML}

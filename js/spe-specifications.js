@@ -643,7 +643,7 @@
                            id="spec_${spec.id}"
                            class="spe-checkbox"
                            ${estCoche ? 'checked' : ''}
-                           onchange="mettreAJourSpecSPE('${spec.id}', this.checked)"
+                           data-on-change="_mettreAJourSpecSPEChange" data-param="${spec.id}"
                            style="
                                width: 20px;
                                height: 20px;
@@ -766,7 +766,7 @@
                         <h3 style="margin: 0; color: var(--accent-primaire);">
                             Créer une grille de spécifications
                         </h3>
-                        <button onclick="fermerModalGrilleSPE()" style="
+                        <button data-action="fermerModalGrilleSPE" style="
                             background: none;
                             border: none;
                             font-size: 1.5rem;
@@ -823,14 +823,14 @@ La structure est claire (intro, développement, conclusion)"></textarea>
 
                         <!-- Gabarit exemple -->
                         <div style="margin-bottom: 20px;">
-                            <button type="button" class="btn btn-secondaire" onclick="chargerExempleSpecificationsSPE()">
+                            <button type="button" class="btn btn-secondaire" data-action="chargerExempleSpecificationsSPE">
                                 Charger un exemple (Prise de position)
                             </button>
                         </div>
 
                         <!-- Actions -->
                         <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                            <button type="button" class="btn btn-secondaire" onclick="fermerModalGrilleSPE()">
+                            <button type="button" class="btn btn-secondaire" data-action="fermerModalGrilleSPE">
                                 Annuler
                             </button>
                             <button type="submit" class="btn btn-principal">
@@ -969,6 +969,11 @@ La structure est claire (intro, développement, conclusion)"></textarea>
     window.creerGrilleSpecificationsSPE = creerGrilleSpecificationsSPE;
     window.chargerExempleSpecificationsSPE = chargerExempleSpecificationsSPE;
     window.fermerModalGrilleSPE = fermerModalGrilleSPE;
+
+    // Wrapper pour data-on-change : lit el.checked et appelle mettreAJourSpecSPE(specId, checked)
+    window._mettreAJourSpecSPEChange = function(specId, el) {
+        mettreAJourSpecSPE(specId, el.checked);
+    };
     window.sauvegarderGrilleSPE = sauvegarderGrilleSPE;
 
     // Gabarits SPE

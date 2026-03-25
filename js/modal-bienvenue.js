@@ -188,7 +188,7 @@
                 </div>
 
                 <div class="modal-bienvenue-actions">
-                    <button class="btn-bienvenue btn-bienvenue-principal" onclick="window.modalBienvenue.commencerConfiguration()">
+                    <button class="btn-bienvenue btn-bienvenue-principal" data-action="modalBienvenue.commencerConfiguration">
                         <span class="btn-bienvenue-icone">🗺️</span>
                         <span class="btn-bienvenue-texte">
                             <strong>Étape par étape</strong>
@@ -196,7 +196,7 @@
                         </span>
                     </button>
 
-                    <button class="btn-bienvenue btn-bienvenue-secondaire" onclick="window.modalBienvenue.explorerApplication()">
+                    <button class="btn-bienvenue btn-bienvenue-secondaire" data-action="modalBienvenue.explorerApplication">
                         <span class="btn-bienvenue-icone">🧭</span>
                         <span class="btn-bienvenue-texte">
                             <strong>Par exploration</strong>

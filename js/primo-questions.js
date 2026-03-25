@@ -1611,7 +1611,7 @@ const QUESTIONS_PRIMO = [
     // ========================================================================
     {
         id: 'etudiants-methode',
-        texte: '**Ajout des étudiants**\n\nConsulte le système de gestion des apprentissages de ton établissement pour récupérer la liste de tes élèves.\n\nLe format attendu est : **DA, Groupe, Nom, Prénom, Programme** (séparés par virgules ou tabulations).\n\n<button onclick="copierListeEtudiantsFictifs()" class="btn btn-secondaire" style="margin-top: 10px;">📋 Copier une liste fictive (10 étudiants)</button>\n\n<small>Tu pourras coller cette liste à l\'étape suivante pour tester l\'application.</small>',
+        texte: '**Ajout des étudiants**\n\nConsulte le système de gestion des apprentissages de ton établissement pour récupérer la liste de tes élèves.\n\nLe format attendu est : **DA, Groupe, Nom, Prénom, Programme** (séparés par virgules ou tabulations).\n\n<button data-action="copierListeEtudiantsFictifs" class="btn btn-secondaire" style="margin-top: 10px;">📋 Copier une liste fictive (10 étudiants)</button>\n\n<small>Tu pourras coller cette liste à l\'étape suivante pour tester l\'application.</small>',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }

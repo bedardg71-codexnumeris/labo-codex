@@ -830,7 +830,7 @@ function filtrerEtudiants(etudiants) {
  */
 function masquerColonnesRaiSiDesactive(activerRai) {
     // Sélectionner les headers de colonnes Pattern et RàI
-    const headers = document.querySelectorAll('th[onclick="trierTableauPar(\'pattern\')"], th[onclick="trierTableauPar(\'rai\')"]');
+    const headers = document.querySelectorAll('th[data-action="trierTableauPar"][data-param="pattern"], th[data-action="trierTableauPar"][data-param="rai"]');
 
     headers.forEach(header => {
         if (activerRai) {

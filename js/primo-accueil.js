@@ -173,7 +173,7 @@ function afficherModalAccueil() {
                 ">Parcours modulaire</h3>
 
                 <!-- MODULE 1: Créer un groupe-cours -->
-                <button onclick="demarrerConfigComplete()" style="
+                <button data-action="demarrerConfigComplete" style="
                     width: 100%;
                     padding: 15px 20px;
                     margin-bottom: 8px;
@@ -193,7 +193,7 @@ function afficherModalAccueil() {
                 </button>
 
                 <!-- MODULE 2: Évaluer une production -->
-                <button onclick="demarrerEvaluation()" style="
+                <button data-action="demarrerEvaluation" style="
                     width: 100%;
                     padding: 15px 20px;
                     margin-bottom: 8px;
@@ -233,7 +233,7 @@ function afficherModalAccueil() {
                 </button>
 
                 <!-- MODULE 4: Créer ma pratique -->
-                <button onclick="demarrerWizard()" style="
+                <button data-action="demarrerWizard" style="
                     width: 100%;
                     padding: 15px 20px;
                     margin-bottom: 8px;
@@ -253,7 +253,7 @@ function afficherModalAccueil() {
                 </button>
 
                 <!-- MODULE 5: Créer du matériel pédagogique -->
-                <button onclick="demarrerCreationMateriel()" style="
+                <button data-action="demarrerCreationMateriel" style="
                     width: 100%;
                     padding: 15px 20px;
                     margin-bottom: 8px;
@@ -273,7 +273,7 @@ function afficherModalAccueil() {
                 </button>
 
                 <!-- MODULE 6: Utiliser le Codex -->
-                <button onclick="demarrerCodex()" style="
+                <button data-action="demarrerCodex" style="
                     width: 100%;
                     padding: 15px 20px;
                     margin-bottom: 8px;
@@ -293,7 +293,7 @@ function afficherModalAccueil() {
                 </button>
 
                 <!-- Consulter l'aide -->
-                <button onclick="consulterAide()" style="
+                <button data-action="consulterAide" style="
                     width: 100%;
                     padding: 15px 20px;
                     margin-bottom: 8px;
@@ -313,7 +313,7 @@ function afficherModalAccueil() {
                 </button>
 
                 <!-- Retour à la navigation libre -->
-                <button onclick="explorerLibrement()" style="
+                <button data-action="explorerLibrement" style="
                     width: 100%;
                     padding: 15px 20px;
                     background: var(--surface-conteneur, #162c36);
@@ -616,6 +616,7 @@ window.demarrerConfigComplete = demarrerConfigComplete;
 window.demarrerWizard = demarrerWizard;
 window.demarrerCreationMateriel = demarrerCreationMateriel;
 window.demarrerCodex = demarrerCodex;
+window.demarrerEvaluation = demarrerEvaluation;
 window.explorerLibrement = explorerLibrement;
 window.consulterAide = consulterAide;
 

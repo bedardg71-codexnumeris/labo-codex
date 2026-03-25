@@ -936,7 +936,7 @@
                     <td>${index + 1}</td>
                     <td>
                         <input type="text" class="form-control" value="${obj.nom || ''}"
-                               onchange="modifierObjectif(${index}, 'nom', this.value)"
+                               data-on-change="_onChangeObjectifNom" data-param="${index}"
                                style="width: 100%; padding: 4px 8px;">
                     </td>
             `;
@@ -944,7 +944,7 @@
             if (showType) {
                 html += `
                     <td>
-                        <select class="form-control" onchange="modifierObjectif(${index}, 'essentiel', this.value === 'essentiel')"
+                        <select class="form-control" data-on-change="_onChangeObjectifEssentiel" data-param="${index}"
                                 style="padding: 4px 8px;">
                             <option value="essentiel" ${obj.essentiel ? 'selected' : ''}>Essentiel</option>
                             <option value="complementaire" ${!obj.essentiel ? 'selected' : ''}>Complémentaire</option>
@@ -957,7 +957,7 @@
                 html += `
                     <td>
                         <input type="number" class="form-control" value="${obj.ponderation || 0}"
-                               onchange="modifierObjectif(${index}, 'ponderation', parseFloat(this.value))"
+                               data-on-change="_onChangeObjectifPonderation" data-param="${index}"
                                style="width: 70px; padding: 4px 8px;" min="0" max="100" step="0.5">%
                     </td>
                 `;
@@ -966,7 +966,7 @@
             html += `
                     <td style="text-align: center;">
                         <button type="button" class="btn btn-danger btn-tres-compact"
-                                onclick="supprimerObjectif(${index})"
+                                data-action="supprimerObjectif" data-param="${index}"
                                 title="Supprimer cet objectif">
                             ✕
                         </button>
@@ -1147,7 +1147,7 @@
                     <td>${nb}</td>
                     <td>
                         <input type="number" class="form-control" value="${grille[nb]}"
-                               onchange="modifierGrilleConversion(${nb}, this.value)"
+                               data-on-change="_onChangeGrilleConversion" data-param="${nb}"
                                style="width: 80px; padding: 4px 8px;" min="0" max="100">%
                     </td>
                 </tr>
@@ -1307,18 +1307,18 @@
                     <td>${index + 1}</td>
                     <td>
                         <input type="text" class="form-control" value="${type.nom || ''}"
-                               onchange="modifierTypeTravailSpecV2(${type.id}, 'nom', this.value)"
+                               data-on-change="_onChangeTypeTravailNom" data-param="${type.id}"
                                style="width: 100%; padding: 4px 8px;">
                     </td>
                     <td>
                         <input type="text" class="form-control" value="${type.description || ''}"
-                               onchange="modifierTypeTravailSpecV2(${type.id}, 'description', this.value)"
+                               data-on-change="_onChangeTypeTravailDescription" data-param="${type.id}"
                                placeholder="Ex: Analyse littéraire"
                                style="width: 100%; padding: 4px 8px;">
                     </td>
                     <td style="text-align: center;">
                         <button type="button" class="btn btn-danger btn-tres-compact"
-                                onclick="supprimerTypeTravailSpecV2(${type.id})"
+                                data-action="supprimerTypeTravailSpecV2" data-param="${type.id}"
                                 title="Supprimer ce type">
                             ✕
                         </button>
@@ -1594,12 +1594,12 @@
                 <tr data-id="${forfait.id}">
                     <td>
                         <input type="text" class="form-control" value="${forfait.lettre || ''}"
-                               onchange="modifierForfaitSpec(${forfait.id}, 'lettre', this.value)"
+                               data-on-change="_onChangeForfaitLettre" data-param="${forfait.id}"
                                style="width: 50px; padding: 4px 8px; text-align: center; font-weight: bold;">
                     </td>
                     <td>
                         <input type="number" class="form-control" value="${forfait.note || 0}"
-                               onchange="modifierForfaitSpec(${forfait.id}, 'note', parseInt(this.value))"
+                               data-on-change="_onChangeForfaitNote" data-param="${forfait.id}"
                                style="width: 70px; padding: 4px 8px;" min="0" max="100">
                     </td>
             `;
@@ -1609,7 +1609,7 @@
                 html += `
                     <td style="text-align: center;">
                         <input type="number" class="form-control" value="${quantite}"
-                               onchange="modifierTravailForfaitSpec(${forfait.id}, ${type.id}, parseInt(this.value))"
+                               data-on-change="_onChangeTravailForfait" data-param="${forfait.id}_${type.id}"
                                style="width: 50px; padding: 4px 8px; text-align: center;" min="0" max="20">
                     </td>
                 `;
@@ -1618,7 +1618,7 @@
             html += `
                     <td style="text-align: center;">
                         <button type="button" class="btn btn-danger btn-tres-compact"
-                                onclick="supprimerForfaitSpec(${forfait.id})"
+                                data-action="supprimerForfaitSpec" data-param="${forfait.id}"
                                 title="Supprimer ce forfait">
                             ✕
                         </button>
@@ -1885,6 +1885,50 @@
     }
 
     // =========================================================================
+    // WRAPPERS POUR DÉLÉGATION data-on-change (Phase 5)
+    // =========================================================================
+
+    /** Wrapper: modifierObjectif(index, 'nom', el.value) */
+    function _onChangeObjectifNom(index, el) {
+        modifierObjectif(index, 'nom', el.value);
+    }
+    /** Wrapper: modifierObjectif(index, 'essentiel', el.value === 'essentiel') */
+    function _onChangeObjectifEssentiel(index, el) {
+        modifierObjectif(index, 'essentiel', el.value === 'essentiel');
+    }
+    /** Wrapper: modifierObjectif(index, 'ponderation', parseFloat(el.value)) */
+    function _onChangeObjectifPonderation(index, el) {
+        modifierObjectif(index, 'ponderation', parseFloat(el.value));
+    }
+    /** Wrapper: modifierGrilleConversion(nb, el.value) */
+    function _onChangeGrilleConversion(nb, el) {
+        modifierGrilleConversion(nb, el.value);
+    }
+    /** Wrapper: modifierTypeTravailSpecV2(id, 'nom', el.value) */
+    function _onChangeTypeTravailNom(id, el) {
+        modifierTypeTravailSpec(id, 'nom', el.value);
+    }
+    /** Wrapper: modifierTypeTravailSpecV2(id, 'description', el.value) */
+    function _onChangeTypeTravailDescription(id, el) {
+        modifierTypeTravailSpec(id, 'description', el.value);
+    }
+    /** Wrapper: modifierForfaitSpec(id, 'lettre', el.value) */
+    function _onChangeForfaitLettre(id, el) {
+        modifierForfaitSpec(id, 'lettre', el.value);
+    }
+    /** Wrapper: modifierForfaitSpec(id, 'note', parseInt(el.value)) */
+    function _onChangeForfaitNote(id, el) {
+        modifierForfaitSpec(id, 'note', parseInt(el.value));
+    }
+    /** Wrapper: modifierTravailForfaitSpec(forfaitId, typeId, parseInt(el.value)) — param = "forfaitId_typeId" */
+    function _onChangeTravailForfait(compositeParam, el) {
+        var parts = String(compositeParam).split('_');
+        var forfaitId = parseInt(parts[0]);
+        var typeId = parseInt(parts[1]);
+        modifierTravailForfaitSpec(forfaitId, typeId, parseInt(el.value));
+    }
+
+    // =========================================================================
     // EXPORTS GLOBAUX
     // =========================================================================
 
@@ -1934,6 +1978,17 @@
     window.modifierTravailForfaitSpec = modifierTravailForfaitSpec;
     window.supprimerForfaitSpec = supprimerForfaitSpec;
     window.appliquerModeleSpecifications = appliquerModeleSpecifications;
+
+    // Exports wrappers délégation (Phase 5)
+    window._onChangeObjectifNom = _onChangeObjectifNom;
+    window._onChangeObjectifEssentiel = _onChangeObjectifEssentiel;
+    window._onChangeObjectifPonderation = _onChangeObjectifPonderation;
+    window._onChangeGrilleConversion = _onChangeGrilleConversion;
+    window._onChangeTypeTravailNom = _onChangeTypeTravailNom;
+    window._onChangeTypeTravailDescription = _onChangeTypeTravailDescription;
+    window._onChangeForfaitLettre = _onChangeForfaitLettre;
+    window._onChangeForfaitNote = _onChangeForfaitNote;
+    window._onChangeTravailForfait = _onChangeTravailForfait;
 
     // =========================================================================
     // INITIALISATION AU CHARGEMENT

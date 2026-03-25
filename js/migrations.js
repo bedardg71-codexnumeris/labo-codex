@@ -658,13 +658,13 @@ function afficherModalMigrationLegacy(detailsLegacy) {
 
                 <!-- Boutons -->
                 <div style="display: flex; gap: 12px; justify-content: center;">
-                    <button onclick="reporterMigrationLegacy()"
+                    <button data-action="reporterMigrationLegacy"
                             style="padding: 12px 24px; background: var(--surface-conteneur, #162c36); color: var(--gris-fonce);
                                    border: 1px solid var(--gris-clair); border-radius: 6px;
                                    cursor: pointer; font-size: 0.95rem;">
                         Plus tard
                     </button>
-                    <button onclick="executerMigrationLegacy()"
+                    <button data-action="executerMigrationLegacy"
                             style="padding: 12px 28px; background: var(--bleu-moyen); color: white;
                                    border: none; border-radius: 6px; cursor: pointer;
                                    font-size: 1rem; font-weight: 500;">
