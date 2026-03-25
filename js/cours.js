@@ -296,25 +296,25 @@ function afficherTableauCours() {
                 <input type="radio"
                        name="cours-actif"
                        ${c.actif ? 'checked' : ''}
-                       onchange="activerCours('${c.id}')"
+                       data-on-change="activerCours" data-param="${c.id}"
                        title="Définir comme cours actif">
             </td>
             <td>
                 <div class="btn-groupe" style="gap: 5px;">
                     <button class="btn btn-modifier btn-sm"
-                            onclick="modifierCours('${c.id}')"
+                            data-action="modifierCours" data-param="${c.id}"
                             title="Modifier"
                             style="padding: 5px 10px; font-size: 0.85rem;">
                         Modifier
                     </button>
                     <button class="btn btn-ajouter btn-sm"
-                            onclick="dupliquerCours('${c.id}')"
+                            data-action="dupliquerCours" data-param="${c.id}"
                             title="Dupliquer"
                             style="padding: 5px 10px; font-size: 0.85rem;">
                         Dupliquer
                     </button>
                     <button class="btn btn-supprimer btn-sm"
-                            onclick="supprimerCours('${c.id}')"
+                            data-action="supprimerCours" data-param="${c.id}"
                             title="Supprimer"
                             style="padding: 5px 10px; font-size: 0.85rem;">
                         Supprimer
@@ -388,7 +388,7 @@ async function afficherListeCoursSidebar() {
         const activeClass = c.actif ? ' active' : '';
 
         html += `
-            <div class="sidebar-item${activeClass}" onclick="afficherFormCours('${c.id}')">
+            <div class="sidebar-item${activeClass}" data-action="afficherFormCours" data-param="${c.id}">
                 <div class="sidebar-item-titre">
                     ${echapperHtml(c.codeCours)}
                 </div>
@@ -1223,7 +1223,7 @@ async function ouvrirModalBibliothequeCours() {
                 position: relative;
             ">
                 <!-- Bouton X sticky -->
-                <button onclick="fermerModalBibliothequeCours()" style="
+                <button data-action="fermerModalBibliothequeCours" style="
                     position: sticky;
                     top: 0;
                     right: 0;
@@ -1279,17 +1279,17 @@ async function ouvrirModalBibliothequeCours() {
                             </div>
                         </div>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            <button onclick="dupliquerCoursPourTrimestreActif('${cours.id}')"
+                            <button data-action="dupliquerCoursPourTrimestreActif" data-param="${cours.id}"
                                     class="btn btn-confirmer btn-tres-compact"
                                     title="Créer une copie de ce cours pour le trimestre actif">
                                 Dupliquer
                             </button>
-                            <button onclick="partagerCours('${cours.id}')"
+                            <button data-action="partagerCours" data-param="${cours.id}"
                                     class="btn btn-secondaire btn-tres-compact"
                                     title="Exporter ce cours en JSON pour le partager">
                                 Exporter
                             </button>
-                            <button onclick="retirerCoursDeBibliotheque('${cours.id}')"
+                            <button data-action="retirerCoursDeBibliotheque" data-param="${cours.id}"
                                     class="btn btn-supprimer btn-tres-compact"
                                     title="Retirer de ta sélection">
                                 Retirer
@@ -1304,7 +1304,7 @@ async function ouvrirModalBibliothequeCours() {
     modalHTML += `
                 </div>
                 <div style="text-align: center; margin-top: 15px;">
-                    <button onclick="partagerTousLesCours()" class="btn btn-secondaire" title="Exporter tous tes cours en un seul fichier JSON">
+                    <button data-action="partagerTousLesCours" class="btn btn-secondaire" title="Exporter tous tes cours en un seul fichier JSON">
                         Exporter tous mes cours
                     </button>
                 </div>
@@ -1341,7 +1341,7 @@ async function ouvrirModalBibliothequeCours() {
                             </div>
                         </div>
                         <div style="display: flex; gap: 8px;">
-                            <button onclick="ajouterCoursIndividuel('${cours.id}')"
+                            <button data-action="ajouterCoursIndividuel" data-param="${cours.id}"
                                     class="btn btn-confirmer btn-tres-compact"
                                     title="Ajouter ce cours à ta sélection">
                                 Ajouter à ma sélection
@@ -1355,12 +1355,12 @@ async function ouvrirModalBibliothequeCours() {
 
     modalHTML += `
                 <div style="text-align: center; margin-top: 15px;">
-                    <button onclick="document.getElementById('fichier-import-cours-modal').click()"
+                    <button data-action="ouvrirFilePickerImportCours"
                             class="btn btn-confirmer" title="Importer des cours depuis un fichier JSON">
                         Importer des cours
                     </button>
                     <input type="file" id="fichier-import-cours-modal" accept=".json"
-                           style="display: none;" onchange="importerCoursSimple(event)">
+                           style="display: none;" data-on-change="importerCoursSimple">
                 </div>
             </div>
         </div>
@@ -1472,8 +1472,9 @@ async function exporterCoursSimple() {
  *
  * @param {Event} event - Événement de changement du input file
  */
-async function importerCoursSimple(event) {
-    const file = event.target.files[0];
+async function importerCoursSimple(eventOuEl) {
+    var target = eventOuEl.target || eventOuEl;
+    var file = target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
@@ -1542,7 +1543,7 @@ async function importerCoursSimple(event) {
     reader.readAsText(file);
 
     // Réinitialiser l'input pour permettre de réimporter le même fichier
-    event.target.value = '';
+    target.value = '';
 }
 
 /* ===============================
@@ -1672,6 +1673,16 @@ function obtenirCoursActifId() {
 }
 
 /* ===============================
+   WRAPPERS DELEGATION (Phase 5)
+   =============================== */
+
+/** Ouvrir file picker import cours */
+function ouvrirFilePickerImportCours() {
+    var input = document.getElementById('fichier-import-cours-modal');
+    if (input) input.click();
+}
+
+/* ===============================
    EXPORTS - Rendre les fonctions accessibles globalement
    =============================== */
 
@@ -1696,5 +1707,6 @@ window.importerCoursSimple = importerCoursSimple;
 window.naviguerVersPratiqueNotation = naviguerVersPratiqueNotation;
 window.partagerCours = partagerCours;
 window.partagerTousLesCours = partagerTousLesCours;
+window.ouvrirFilePickerImportCours = ouvrirFilePickerImportCours;
 
 })();

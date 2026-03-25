@@ -597,8 +597,8 @@ function afficherNotificationJalon(jalon, progression) {
         ? '<p style="margin: 8px 0 0; font-size: 0.9rem;">Prochaine étape :<br><strong>' +
           prochain.numero + ' ' + prochain.titre + '</strong></p>' +
           '<div style="margin-top: 12px; display: flex; gap: 8px;">' +
-          '<button class="btn btn-principal btn-sm" onclick="window.parcours.naviguerVersJalon(\'' + prochain.id + '\'); this.closest(\'#notification-jalon\').remove();">Continuer →</button>' +
-          '<button class="btn btn-secondaire btn-sm" onclick="this.closest(\'#notification-jalon\').remove();">Plus tard</button>' +
+          '<button class="btn btn-principal btn-sm" data-action="parcours.continuerJalonNotification" data-param="' + prochain.id + '">Continuer →</button>' +
+          '<button class="btn btn-secondaire btn-sm" data-action="parcours.fermerNotificationJalon">Plus tard</button>' +
           '</div>'
         : '<p style="margin: 8px 0 0; font-size: 0.9rem;">Chapitre complété !</p>';
 
@@ -609,7 +609,7 @@ function afficherNotificationJalon(jalon, progression) {
         '<div class="parcours-notification-contenu">' +
             '<div style="display: flex; justify-content: space-between; align-items: start;">' +
                 '<strong>✅ Étape ' + jalon.numero + ' complétée !</strong>' +
-                '<button onclick="this.closest(\'#notification-jalon\').remove();" style="background:none; border:none; color:var(--gris-clair); cursor:pointer; font-size:1.2rem; padding:0; line-height:1;">×</button>' +
+                '<button data-action="parcours.fermerNotificationJalon" style="background:none; border:none; color:var(--gris-clair); cursor:pointer; font-size:1.2rem; padding:0; line-height:1;">×</button>' +
             '</div>' +
             '<p style="margin: 4px 0 0; color: var(--gris-moyen);">' + jalon.titre + '</p>' +
             prochainHTML +
@@ -691,11 +691,7 @@ function afficherCertificationAutonomie() {
                 '</div>' +
             '</div>' +
             '<div class="modal-bienvenue-actions">' +
-                '<button class="btn-bienvenue btn-bienvenue-principal" onclick="' +
-                    'document.getElementById(\'modal-autonomie\').remove(); ' +
-                    'if (window.parcours) window.parcours.mettreAJourUI(); ' +
-                    'if (typeof afficherSection === \'function\') afficherSection(\'accueil\'); ' +
-                '">' +
+                '<button class="btn-bienvenue btn-bienvenue-principal" data-action="parcours.confirmerModalBienvenue">' +
                     '<span class="btn-bienvenue-icone">🧭</span>' +
                     '<span class="btn-bienvenue-texte">' +
                         '<strong>C\'est parti !</strong>' +
@@ -746,18 +742,14 @@ function genererPanneauCTA() {
             '<p class="parcours-cta-desc">Comment préfères-tu apprendre un nouvel outil\u00a0?</p>' +
         '</div>' +
         '<div class="parcours-cta-actions">' +
-            '<button class="btn-bienvenue btn-bienvenue-principal" onclick="' +
-                'window.parcours.setMode(\'explicite\'); ' +
-                'if(typeof afficherAccueil===\'function\') afficherAccueil();">' +
+            '<button class="btn-bienvenue btn-bienvenue-principal" data-action="parcours.choisirModeExplicite">' +
                 '<span class="btn-bienvenue-icone">\uD83D\uDDFA\uFE0F</span>' +
                 '<span class="btn-bienvenue-texte">' +
                     '<strong>Étape par étape</strong>' +
                     '<small>Je suis guidé du début à la fin</small>' +
                 '</span>' +
             '</button>' +
-            '<button class="btn-bienvenue btn-bienvenue-secondaire" onclick="' +
-                'window.parcours.setMode(\'decouverte\'); ' +
-                'if(typeof afficherAccueil===\'function\') afficherAccueil();">' +
+            '<button class="btn-bienvenue btn-bienvenue-secondaire" data-action="parcours.choisirModeDecouverte">' +
                 '<span class="btn-bienvenue-icone">\uD83E\uDDED</span>' +
                 '<span class="btn-bienvenue-texte">' +
                     '<strong>Par exploration</strong>' +
@@ -794,7 +786,7 @@ function genererPanneauParcours() {
         if (dateAuto) html += ' Autonomie obtenue le ' + dateAuto + '.';
         html += '</p>';
         html += '<p style="margin: 4px 0 0;">';
-        html += '<button class="btn btn-secondaire btn-sm" onclick="window.parcours.reinitialiser(); if(typeof afficherAccueil===\'function\') afficherAccueil();">Relancer le parcours</button>';
+        html += '<button class="btn btn-secondaire btn-sm" data-action="parcours.relancerParcours">Relancer le parcours</button>';
         html += '</p>';
         html += '</div>';
         html += '</div>';
@@ -809,10 +801,7 @@ function genererPanneauParcours() {
 
     html += '<div class="accordeon-header">';
     html += '<h3 style="margin: 0; font-size: 1.1rem;">Parcourir — ' + progression.jalonsFaits + '/' + progression.totalJalons + '</h3>';
-    html += '<button class="parcours-btn-mode" title="' + autreTitre + '" onclick="' +
-        'event.stopPropagation(); ' +
-        'window.parcours.changerModeParcours(\'' + autreMode + '\'); ' +
-        'if(typeof afficherAccueil===\'function\') afficherAccueil();">' +
+    html += '<button class="parcours-btn-mode" title="' + autreTitre + '" data-stop data-action="parcours.changerModeParcoursAction" data-param="' + autreMode + '">' +
         'Assistance : ' + modeActifIcone + ' ' + modeActifLabel + '</button>';
     html += '<span class="accordeon-chevron">▼</span>';
     html += '</div>';
@@ -836,7 +825,7 @@ function genererPanneauParcours() {
 
         chapitre.jalons.forEach(function(jalon) {
             var classeJalon = jalon.fait ? 'parcours-jalon--fait' : 'parcours-jalon--a-faire';
-            var clicAction = jalon.fait ? '' : ' onclick="window.parcours.naviguerVersJalon(\'' + jalon.id + '\')" style="cursor:pointer;"';
+            var clicAction = jalon.fait ? '' : ' data-action="parcours.naviguerVersJalon" data-param="' + jalon.id + '" style="cursor:pointer;"';
             var iconeJalon = jalon.fait ? '✅' : jalon.numero;
 
             html += '<div class="parcours-jalon ' + classeJalon + '"' + clicAction + '>';
@@ -850,9 +839,7 @@ function genererPanneauParcours() {
 
         // Bouton assistant pour le chapitre Construire (non complété)
         if (chapitre.id === 'construire' && !chapitre.complete) {
-            html += '<button class="parcours-btn-assistant" onclick="' +
-                'event.stopPropagation(); ' +
-                'if(typeof demarrerCreationMateriel===\'function\') demarrerCreationMateriel();">' +
+            html += '<button class="parcours-btn-assistant" data-stop data-action="parcours.lancerAssistantCreation">' +
                 '🥋 Lancer l\u2019assistant de création' +
             '</button>';
         }
@@ -1045,19 +1032,13 @@ function afficherSuggestionProactive(jalon, texteAction, callback) {
     if (texteAction && callback) {
         // Suggestion avec bouton d'action
         suggestion._callback = callback;
-        contenu += '<button class="btn btn-principal btn-sm" onclick="' +
-            'var s = document.getElementById(\'suggestion-parcours\'); ' +
-            'if (s && s._callback) s._callback(); ' +
-            's.remove();">' + texteAction + '</button>';
+        contenu += '<button class="btn btn-principal btn-sm" data-action="parcours.executerSuggestionCallback">' + texteAction + '</button>';
     } else {
         // Suggestion avec lien de navigation
-        contenu += '<button class="btn btn-secondaire btn-sm" onclick="' +
-            'window.parcours.naviguerVersJalon(\'' + jalon.id + '\'); ' +
-            'this.closest(\'#suggestion-parcours\').remove();">Y aller →</button>';
+        contenu += '<button class="btn btn-secondaire btn-sm" data-action="parcours.naviguerSuggestionJalon" data-param="' + jalon.id + '">Y aller →</button>';
     }
 
-    contenu += '<button class="parcours-suggestion-fermer" onclick="' +
-        'this.closest(\'#suggestion-parcours\').remove();">×</button>';
+    contenu += '<button class="parcours-suggestion-fermer" data-action="parcours.fermerSuggestion">×</button>';
 
     suggestion.innerHTML = contenu;
     document.body.appendChild(suggestion);
@@ -1175,6 +1156,80 @@ function initialiserPreferencesParcours() {
     }
 }
 
+/* ===============================
+   WRAPPERS DELEGATION (Phase 5)
+   =============================== */
+
+/** Notification jalon : cliquer "Continuer" */
+function continuerJalonNotification(jalonId) {
+    naviguerVersJalon(jalonId);
+    var notif = document.getElementById('notification-jalon');
+    if (notif) notif.remove();
+}
+
+/** Notification jalon : fermer */
+function fermerNotificationJalon() {
+    var notif = document.getElementById('notification-jalon');
+    if (notif) notif.remove();
+}
+
+/** Modal bienvenue : confirmer et démarrer */
+function confirmerModalBienvenue() {
+    var modal = document.getElementById('modal-autonomie');
+    if (modal) modal.remove();
+    mettreAJourUI();
+    if (typeof afficherSection === 'function') afficherSection('accueil');
+}
+
+/** Panneau CTA : choisir mode explicite */
+function choisirModeExplicite() {
+    setMode('explicite');
+    if (typeof afficherAccueil === 'function') afficherAccueil();
+}
+
+/** Panneau CTA : choisir mode découverte */
+function choisirModeDecouverte() {
+    setMode('decouverte');
+    if (typeof afficherAccueil === 'function') afficherAccueil();
+}
+
+/** Relancer le parcours */
+function relancerParcours() {
+    reinitialiser();
+    if (typeof afficherAccueil === 'function') afficherAccueil();
+}
+
+/** Changer de mode parcours (explicite/decouverte) */
+function changerModeParcoursAction(mode) {
+    changerModeParcours(mode);
+    if (typeof afficherAccueil === 'function') afficherAccueil();
+}
+
+/** Bouton assistant — lancer création matériel */
+function lancerAssistantCreation() {
+    if (typeof demarrerCreationMateriel === 'function') demarrerCreationMateriel();
+}
+
+/** Suggestion : exécuter callback et fermer */
+function executerSuggestionCallback() {
+    var s = document.getElementById('suggestion-parcours');
+    if (s && s._callback) s._callback();
+    if (s) s.remove();
+}
+
+/** Suggestion : naviguer vers jalon et fermer */
+function naviguerSuggestionJalon(jalonId) {
+    naviguerVersJalon(jalonId);
+    var s = document.getElementById('suggestion-parcours');
+    if (s) s.remove();
+}
+
+/** Suggestion : fermer */
+function fermerSuggestion() {
+    var s = document.getElementById('suggestion-parcours');
+    if (s) s.remove();
+}
+
 // ============================================
 // EXPORTS
 // ============================================
@@ -1206,7 +1261,20 @@ window.parcours = {
 
     // Données (pour les autres modules)
     CHAPITRES: CHAPITRES,
-    JALONS: JALONS
+    JALONS: JALONS,
+
+    // Wrappers délégation (Phase 5)
+    continuerJalonNotification: continuerJalonNotification,
+    fermerNotificationJalon: fermerNotificationJalon,
+    confirmerModalBienvenue: confirmerModalBienvenue,
+    choisirModeExplicite: choisirModeExplicite,
+    choisirModeDecouverte: choisirModeDecouverte,
+    relancerParcours: relancerParcours,
+    changerModeParcoursAction: changerModeParcoursAction,
+    lancerAssistantCreation: lancerAssistantCreation,
+    executerSuggestionCallback: executerSuggestionCallback,
+    naviguerSuggestionJalon: naviguerSuggestionJalon,
+    fermerSuggestion: fermerSuggestion
 };
 
 })();
