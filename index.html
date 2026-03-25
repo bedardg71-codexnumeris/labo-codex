@@ -3655,23 +3655,23 @@
 
                         <!-- Bouton Codex -->
                         <div id="codex-controle" class="codex-controle">
-                            <button id="btn-codex" class="btn-codex-header" onclick="Codex.toggleMenu()" data-tooltip="entete-codex">
+                            <button id="btn-codex" class="btn-codex-header" data-action="Codex.toggleMenu" data-tooltip="entete-codex">
                                 <span class="codex-label-btn">Codex</span>
                                 <span id="codex-indicateur" class="codex-indicateur u-hide"></span>
                             </button>
                             <div id="codex-menu" class="codex-menu u-hide">
                                 <div id="codex-menu-statut-haut" class="codex-menu-statut-haut u-hide"></div>
-                                <button class="codex-menu-item" onclick="Codex.actionOuvrir()">
+                                <button class="codex-menu-item" data-action="Codex.actionOuvrir">
                                     <span class="codex-menu-icone">&#128194;</span> Ouvrir un codex...
                                 </button>
-                                <button class="codex-menu-item" onclick="Codex.actionEnregistrer()">
+                                <button class="codex-menu-item" data-action="Codex.actionEnregistrer">
                                     <span class="codex-menu-icone">&#128190;</span>
                                     <span class="codex-menu-contenu">
                                         Enregistrer le codex
                                         <span id="codex-menu-enreg-info" class="codex-menu-sous-texte u-hide"></span>
                                     </span>
                                 </button>
-                                <button class="codex-menu-item" onclick="Codex.actionEnregistrerSous()">
+                                <button class="codex-menu-item" data-action="Codex.actionEnregistrerSous">
                                     <span class="codex-menu-icone">&#128229;</span> Enregistrer sous...
                                 </button>
                                 <div id="codex-menu-autosave-sep" class="codex-menu-sep u-hide"></div>
@@ -3683,27 +3683,27 @@
                                     </span>
                                 </div>
                                 <div class="codex-menu-sep"></div>
-                                <button class="codex-menu-item" onclick="Codex.actionNouveau()">
+                                <button class="codex-menu-item" data-action="Codex.actionNouveau">
                                     <span class="codex-menu-icone">&#10133;</span> Nouveau codex
                                 </button>
-                                <button id="codex-menu-details" class="codex-menu-item u-hide" onclick="Codex.actionDetails()">
+                                <button id="codex-menu-details" class="codex-menu-item u-hide" data-action="Codex.actionDetails">
                                     <span class="codex-menu-icone">&#9432;</span> Détails du codex
                                 </button>
-                                <button id="codex-menu-historique" class="codex-menu-item u-hide" onclick="Codex.actionRestaurer()">
+                                <button id="codex-menu-historique" class="codex-menu-item u-hide" data-action="Codex.actionRestaurer">
                                     <span class="codex-menu-icone">&#128336;</span> Historique des versions...
                                 </button>
-                                <button id="codex-menu-comparer" class="codex-menu-item u-hide" onclick="Codex.actionComparer()">
+                                <button id="codex-menu-comparer" class="codex-menu-item u-hide" data-action="Codex.actionComparer">
                                     <span class="codex-menu-icone">&#128269;</span> Comparer avec une version...
                                 </button>
                                 <div class="codex-menu-sep"></div>
-                                <button id="codex-menu-fusionner" class="codex-menu-item u-hide" onclick="Codex.actionFusionner()">
+                                <button id="codex-menu-fusionner" class="codex-menu-item u-hide" data-action="Codex.actionFusionner">
                                     <span class="codex-menu-icone">&#128260;</span> Fusionner avec un codex...
                                 </button>
-                                <button id="codex-menu-exporter" class="codex-menu-item" onclick="Codex.actionExporterSelection()">
+                                <button id="codex-menu-exporter" class="codex-menu-item" data-action="Codex.actionExporterSelection">
                                     <span class="codex-menu-icone">&#128230;</span> Exporter une sélection...
                                 </button>
                                 <div class="codex-menu-sep"></div>
-                                <button id="codex-menu-fermer" class="codex-menu-item codex-menu-item--danger u-hide" onclick="Codex.actionFermer()">
+                                <button id="codex-menu-fermer" class="codex-menu-item codex-menu-item--danger u-hide" data-action="Codex.actionFermer">
                                     <span class="codex-menu-icone">&#10005;</span> Fermer le codex
                                 </button>
                             </div>
@@ -3712,7 +3712,7 @@
 
                     <!-- Contrôle droite : signaler un bug -->
                     <div class="entete-controles-droite">
-                        <button onclick="ouvrirModalRapportBug()" class="btn-action-header" data-tooltip="entete-signaler-bug" style="position: relative;">Signaler un bug</button>
+                        <button data-action="ouvrirModalRapportBug" class="btn-action-header" data-tooltip="entete-signaler-bug" style="position: relative;">Signaler un bug</button>
                     </div>
                 </div>
 
@@ -3751,7 +3751,7 @@
                            style="margin-right: 5px; cursor: pointer;">
                     Anonymiser
                 </label>
-                <button onclick="window.location.href='#reglages-trimestre'; afficherSousSectionActuelle('sous-section-trimestre');" class="bandeau-archive-btn">
+                <button data-action="naviguerVersReglagesTrimestre" class="bandeau-archive-btn">
                     Trimestres
                 </button>
             </div>
@@ -3761,7 +3761,7 @@
         <div id="bandeau-demo" class="bandeau-demo u-hide">
             <div class="bandeau-demo-contenu">
                 <span class="bandeau-demo-texte">Mode démonstration</span>
-                <button onclick="quitterDemo()" class="bandeau-demo-btn">
+                <button data-action="quitterDemo" class="bandeau-demo-btn">
                     Quitter la démo
                 </button>
             </div>
@@ -3769,7 +3769,7 @@
 
         <!-- NOTIFICATION VERSION / MISE À JOUR (toast chantier routier) -->
         <div id="bandeau-mise-a-jour" class="bandeau-mise-a-jour">
-            <button onclick="fermerBandeauMiseAJour()" class="bandeau-mise-a-jour-close" title="Fermer">&times;</button>
+            <button data-action="fermerBandeauMiseAJour" class="bandeau-mise-a-jour-close" title="Fermer">&times;</button>
             <div class="bandeau-mise-a-jour-header">
                 <span class="bandeau-mise-a-jour-arrow">➡︎</span>
                 <span id="bandeau-mise-a-jour-build" class="bandeau-mise-a-jour-build"></span>
@@ -3778,7 +3778,7 @@
             <span id="bandeau-mise-a-jour-texte" class="bandeau-mise-a-jour-texte"></span>
             <div class="bandeau-mise-a-jour-footer">
                 <span id="bandeau-mise-a-jour-date" class="bandeau-mise-a-jour-date"></span>
-                <button onclick="window.location.reload()" class="bandeau-mise-a-jour-btn">
+                <button data-action="rechargerPage" class="bandeau-mise-a-jour-btn">
                     Recharger
                 </button>
             </div>
@@ -3790,7 +3790,7 @@
             <div class="modal-contenu modal-compact">
 
                 <!-- Bouton fermer -->
-                <button onclick="fermerModalNouveautes()" class="modal-fermer">✕</button>
+                <button data-action="fermerModalNouveautes" class="modal-fermer">✕</button>
 
                 <!-- Titre principal -->
                 <h2 class="modal-titre">Nouveautés</h2>
@@ -3800,7 +3800,7 @@
 
                 <!-- Bouton fermer en bas -->
                 <div class="modal-actions-centre">
-                    <button onclick="fermerModalNouveautes()" class="btn btn-principal">
+                    <button data-action="fermerModalNouveautes" class="btn btn-principal">
                         Fermer
                     </button>
                 </div>
@@ -4264,7 +4264,7 @@
                                         placeholder="Nom, prénom ou DA..." oninput="afficherListeEtudiantsConsultation()">
                                 </div>
                                 <div class="groupe-form" style="display: flex; align-items: flex-end;">
-                                    <button class="btn btn-secondaire" onclick="reinitialiserFiltresListeEtudiants()" title="Réinitialiser tous les filtres">
+                                    <button class="btn btn-secondaire" data-action="reinitialiserFiltresListeEtudiants" title="Réinitialiser tous les filtres">
                                         Réinitialiser
                                     </button>
                                 </div>
@@ -6982,7 +6982,7 @@
                                 <h3 class="outil-carte-titre">Questions Flash</h3>
                                 <button id="btn-params-questions"
                                         class="btn-params-outil"
-                                        onclick="window.ouvrirModalParamsQuestions()"
+                                        data-action="ouvrirModalParamsQuestions"
                                         title="Gérer les questions">
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <circle cx="12" cy="12" r="3"></circle>
@@ -7009,7 +7009,7 @@
                             <!-- Bouton Tirer -->
                             <button id="btn-tirer-question"
                                     class="btn btn-principal"
-                                    onclick="window.lancerTirageQuestion()">
+                                    data-action="lancerTirageQuestion">
                                 Tirer !
                             </button>
 
@@ -7025,7 +7025,7 @@
                                 <h3 class="outil-carte-titre">Tirage au sort</h3>
                                 <button id="btn-params-tirage"
                                         class="btn-params-outil"
-                                        onclick="window.ouvrirModalParamsTirage()"
+                                        data-action="ouvrirModalParamsTirage"
                                         title="Paramètres du tirage">
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <circle cx="12" cy="12" r="3"></circle>
@@ -7044,7 +7044,7 @@
                             <!-- Bouton Tirer -->
                             <button id="btn-tirer"
                                     class="btn btn-principal"
-                                    onclick="window.lancerTirage()">
+                                    data-action="lancerTirage">
                                 Tirer !
                             </button>
 
@@ -7097,8 +7097,8 @@
                                 <div class="planif-toolbar-droite">
                                     <span id="planif-zoom-info-header" class="planif-zoom-info-header" data-tooltip="planif-zoom">100%</span>
                                     <button id="planif-btn-recentrer" title="Recentrer la vue sur le contenu (⌘1)">⊕ Recentrer</button>
-                                    <button id="planif-btn-largeur" title="Ajuster à la largeur" onclick="planificationCarte.zoomPleineLargeur()">Largeur</button>
-                                    <button id="planif-btn-hauteur" title="Ajuster à la hauteur" onclick="planificationCarte.zoomPleineHauteur()">Hauteur</button>
+                                    <button id="planif-btn-largeur" title="Ajuster à la largeur" data-action="planificationCarte.zoomPleineLargeur">Largeur</button>
+                                    <button id="planif-btn-hauteur" title="Ajuster à la hauteur" data-action="planificationCarte.zoomPleineHauteur">Hauteur</button>
                                     <button class="planif-btn-zoom-preset" data-zoom="1.00">100%</button>
                                     <button class="planif-btn-zoom-preset" data-zoom="0.75">75%</button>
                                     <button class="planif-btn-zoom-preset" data-zoom="0.50">50%</button>

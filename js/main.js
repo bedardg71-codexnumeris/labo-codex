@@ -166,6 +166,49 @@ window.genererBadgePratique = function(type, compact = false) {
 // Le groupe démo est maintenant géré via checkbox dans le formulaire Trimestre
 // L'import s'effectue uniquement quand l'utilisateur coche la checkbox
 
+// ===============================
+// WRAPPERS — Fonctions extraites des onclick complexes (Phase 4)
+// ===============================
+window.naviguerVersReglagesTrimestre = function() {
+    window.location.href = '#reglages-trimestre';
+    if (typeof afficherSousSectionActuelle === 'function') {
+        afficherSousSectionActuelle('sous-section-trimestre');
+    }
+};
+window.naviguerVersReglagesTrimestreDepuisPresences = function() {
+    if (typeof afficherSection === 'function') afficherSection('reglages');
+    if (typeof afficherSousSection === 'function') afficherSousSection('reglages-trimestre');
+};
+window.rechargerPage = function() { window.location.reload(); };
+window.ouvrirImportEchellesLocal = function() {
+    var el = document.getElementById('fichier-import-echelles-local');
+    if (el) el.click();
+};
+window.ouvrirImportTxtCartouche = function() {
+    var el = document.getElementById('fichier-import-txt-cartouche');
+    if (el) el.click();
+};
+window.reinitialiserParcoursAvecConfirm = function() {
+    if (confirm('Réinitialiser le parcours ? La progression sera effacée.')) {
+        if (window.parcours) {
+            window.parcours.reinitialiser();
+            if (typeof window.parcours.initialiserPreferencesParcours === 'function') {
+                window.parcours.initialiserPreferencesParcours();
+            }
+        }
+    }
+};
+window.dupliquerPratiqueMaterielActive = function() {
+    if (typeof dupliquerPratiqueMateriel === 'function' && typeof pratiqueEnEditionMateriel !== 'undefined') {
+        dupliquerPratiqueMateriel(pratiqueEnEditionMateriel);
+    }
+};
+window.supprimerPratiqueMaterielActive = function() {
+    if (typeof supprimerPratiqueMateriel === 'function' && typeof pratiqueEnEditionMateriel !== 'undefined') {
+        supprimerPratiqueMateriel(pratiqueEnEditionMateriel);
+    }
+};
+
 document.addEventListener('DOMContentLoaded', function () {
     console.log('🚀 Initialisation du système de monitorage v3.0');
     console.log('📦 Modules chargés : 01-config, 02-navigation');
@@ -643,6 +686,34 @@ document.addEventListener('DOMContentLoaded', function () {
             e.stopPropagation();
             if (typeof toggleAccordeonV2 === 'function') {
                 toggleAccordeonV2(header);
+            }
+        }
+    });
+
+    // Délégation générique des actions (remplace onclick inline dans index.html)
+    document.addEventListener('click', function(e) {
+        var el = e.target.closest('[data-action]');
+        if (!el) return;
+
+        var action = el.dataset.action;
+
+        // Confirmation optionnelle
+        if (el.dataset.confirm && !confirm(el.dataset.confirm)) return;
+
+        // stopPropagation optionnel
+        if (el.hasAttribute('data-stop')) e.stopPropagation();
+
+        // Résoudre la fonction (supporte dot notation : Codex.actionOuvrir)
+        var fn = action.split('.').reduce(function(obj, key) {
+            return obj ? obj[key] : undefined;
+        }, window);
+
+        if (typeof fn === 'function') {
+            var param = el.dataset.param;
+            if (param !== undefined) {
+                fn(param);
+            } else {
+                fn();
             }
         }
     });
