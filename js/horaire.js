@@ -1688,6 +1688,7 @@ window.formaterDuree = formaterDuree;
  * Appelé depuis le select #v2-dureePeriode dans index.html
  */
 function modifierDureePeriodeV2(minutes) {
+    if (typeof minutes === 'object' && minutes && minutes.value !== undefined) minutes = minutes.value;
     definirDureePeriode(parseInt(minutes));
     console.log(`[Horaire] Durée de période modifiée via UI: ${minutes} minutes`);
 

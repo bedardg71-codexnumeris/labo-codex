@@ -234,7 +234,8 @@ function chargerSeuilsInterpretationUI() {
  * @param {number} valeur - Valeur du seuil (0-1)
  */
 function mettreAJourAffichageSeuil(type, valeur) {
-    const valeurNum = parseFloat(valeur);
+    var v = (typeof valeur === 'object' && valeur && valeur.value !== undefined) ? valeur.value : valeur;
+    const valeurNum = parseFloat(v);
 
     if (type === 'progression') {
         document.getElementById('valeur-progression').textContent = `${(valeurNum * 100).toFixed(0)} points (%)`;

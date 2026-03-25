@@ -188,6 +188,7 @@
      * Affiche le tableau pour le type de ressource sélectionné
      */
     function afficherTableauRessource(type) {
+        if (typeof type === 'object' && type && type.value !== undefined) type = type.value;
         const container = document.getElementById('table-ressources-container');
         if (!container) return;
 

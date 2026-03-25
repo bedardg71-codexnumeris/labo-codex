@@ -605,6 +605,7 @@ function mettreAJourEntetesAvecCorrelations(r_AP, r_CP, r_EP, r_PatternP, r_RaiP
  * @param {boolean} visible
  */
 function toggleLigneEntete(type, visible) {
+    if (typeof visible === 'object' && visible !== null) visible = visible.checked;
     var tr = document.getElementById('tr-entete-' + type);
     if (tr) {
         if (visible) {
@@ -621,6 +622,7 @@ window.toggleLigneEntete = toggleLigneEntete;
  * @param {boolean} actif - true = exclure les insuffisants des moyennes
  */
 function toggleFiltreMinimum(actif) {
+    if (typeof actif === 'object' && actif !== null) actif = actif.checked;
     // Griser/dé-griser les lignes
     document.querySelectorAll('#tbody-tableau-bord-liste tr').forEach(tr => {
         if (actif && tr.dataset.insuffisant === 'true') {
