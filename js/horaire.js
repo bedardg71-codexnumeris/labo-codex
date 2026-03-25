@@ -1726,5 +1726,8 @@ window.annulerAjoutSeance = annulerAjoutSeance;
 window.afficherSeancesExistantes = afficherSeancesExistantes;
 window.supprimerSeance = supprimerSeance;
 window.nettoyerDoublons = nettoyerDoublons;
+window.afficherFormAjoutSeance = afficherFormAjoutSeance;
+window.annulerFormAjoutSeance = annulerFormAjoutSeance;
+window.confirmerAjoutSeance = confirmerAjoutSeance;
 
 })();

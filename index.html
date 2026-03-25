@@ -4298,38 +4298,38 @@
                             <table class="tableau">
                                 <thead class="thead-sticky-bleu">
                                     <tr>
-                                        <th onclick="trierTableauPar('num')" class="td-center-50" title="Cliquer pour trier">
+                                        <th data-action="trierTableauPar" data-param="num" class="td-center-50" title="Cliquer pour trier">
                                             #<span id="tri-num" class="ml-4">↕</span>
                                         </th>
-                                        <th onclick="trierTableauPar('da')" class="td-center-90-clickable" title="Cliquer pour trier">
+                                        <th data-action="trierTableauPar" data-param="da" class="td-center-90-clickable" title="Cliquer pour trier">
                                             DA<span id="tri-da" class="ml-4">↕</span>
                                         </th>
-                                        <th onclick="trierTableauPar('groupe')" class="td-center-70" title="Cliquer pour trier">
+                                        <th data-action="trierTableauPar" data-param="groupe" class="td-center-70" title="Cliquer pour trier">
                                             Groupe<span id="tri-groupe" class="ml-4">↕</span>
                                         </th>
-                                        <th onclick="trierTableauPar('nom')" class="td-left-clickable" title="Cliquer pour trier">
+                                        <th data-action="trierTableauPar" data-param="nom" class="td-left-clickable" title="Cliquer pour trier">
                                             Nom<span id="tri-nom" class="ml-4">↕</span>
                                         </th>
-                                        <th onclick="trierTableauPar('prenom')" class="td-left-clickable" title="Cliquer pour trier">
+                                        <th data-action="trierTableauPar" data-param="prenom" class="td-left-clickable" title="Cliquer pour trier">
                                             Prénom<span id="tri-prenom" class="ml-4">↕</span>
                                         </th>
                                         <th class="td-center-40" data-tooltip="liste-col-sa">SA</th>
-                                        <th onclick="trierTableauPar('assiduite')" class="td-center-clickable" title="Cliquer pour trier">
+                                        <th data-action="trierTableauPar" data-param="assiduite" class="td-center-clickable" title="Cliquer pour trier">
                                             A<br><span class="text-xs-normal">(assiduité)</span><span id="tri-assiduite" class="ml-4">↕</span>
                                         </th>
-                                        <th onclick="trierTableauPar('completion')" class="td-center-clickable" title="Cliquer pour trier">
+                                        <th data-action="trierTableauPar" data-param="completion" class="td-center-clickable" title="Cliquer pour trier">
                                             C<br><span class="text-xs-normal">(complétion)</span><span id="tri-completion" class="ml-4">↕</span>
                                         </th>
-                                        <th onclick="trierTableauPar('performance')" class="td-center-clickable" title="Cliquer pour trier">
+                                        <th data-action="trierTableauPar" data-param="performance" class="td-center-clickable" title="Cliquer pour trier">
                                             P<br><span class="text-xs-normal">(performance)</span><span id="tri-performance" class="ml-4">↕</span>
                                         </th>
-                                        <th onclick="trierTableauPar('engagement')" class="td-center-clickable" title="Cliquer pour trier">
+                                        <th data-action="trierTableauPar" data-param="engagement" class="td-center-clickable" title="Cliquer pour trier">
                                             E<br><span class="text-xs-normal">(engagement)</span><span id="tri-engagement" class="ml-4">↕</span>
                                         </th>
-                                        <th onclick="trierTableauPar('pattern')" class="td-left-140-clickable" title="Cliquer pour trier">
+                                        <th data-action="trierTableauPar" data-param="pattern" class="td-left-140-clickable" title="Cliquer pour trier">
                                             Pattern<span id="tri-pattern" class="ml-4">↕</span>
                                         </th>
-                                        <th onclick="trierTableauPar('rai')" class="td-center-100-clickable" title="Cliquer pour trier">
+                                        <th data-action="trierTableauPar" data-param="rai" class="td-center-100-clickable" title="Cliquer pour trier">
                                             RàI<span id="tri-rai" class="ml-4">↕</span>
                                         </th>
                                         <th class="td-center-80" data-tooltip="liste-col-interv">
@@ -4372,7 +4372,7 @@
                                     Va dans <strong>Réglages › Groupe</strong> pour ajouter des étudiant·es
                                 </span>
                             </p>
-                            <button onclick="resetFiltresListe()" id="btn-reset-filtres" class="btn btn-annuler">
+                            <button data-action="resetFiltresListe" id="btn-reset-filtres" class="btn btn-annuler">
                                 Réinitialiser les filtres
                             </button>
                         </div>
@@ -4504,7 +4504,7 @@
                                 séance</strong>.
                             <br>Pour définir le format exact (2×2h ou 1×4h), veuillez configurer l'horaire dans
                             <a href="#"
-                                onclick="afficherSection('reglages'); afficherSousSection('reglages-trimestre'); return false;"
+                                data-action="naviguerVersReglagesTrimestreDepuisPresences" data-prevent
                                 class="text-underline-bold">Réglages >
                                 Trimestre</a>.
                         </p>
@@ -4525,14 +4525,14 @@
                                 <div class="groupe-form" style="grid-column: span 2;">
                                     <label for="date-cours" class="label-formulaire">Date du cours</label>
                                     <div class="d-flex-gap8-center">
-                                        <button id="btn-cours-precedent" onclick="allerCoursPrecedent()"
+                                        <button id="btn-cours-precedent" data-action="allerCoursPrecedent"
                                             class="btn btn-principal btn-compact" style="flex-shrink: 0;">
                                             ← Précédent
                                         </button>
                                         <input type="date" id="date-cours" class="controle-form"
                                             class="u-flex-1" style="min-width: 0"
                                             onchange="initialiserSaisiePresences(); mettreAJourBoutonsNavigation();">
-                                        <button id="btn-cours-suivant" onclick="allerCoursSuivant()"
+                                        <button id="btn-cours-suivant" data-action="allerCoursSuivant"
                                             class="btn btn-principal btn-compact" style="flex-shrink: 0;">
                                             Suivant →
                                         </button>
@@ -4572,8 +4572,8 @@
                                 <span>Total : <span id="nb-total">0</span></span>
                                 <span>Assiduité aujourd'hui : <span id="assiduite-aujourdhui">0%</span></span>
                                 <span id="actions-presences-bar" class="u-flex-gap-8 u-align-center" style="margin-left: auto">
-                                    <button class="btn btn-confirmer btn-compact" onclick="enregistrerPresences()">Enregistrer</button>
-                                    <button class="btn btn-annuler btn-compact" onclick="afficherSousSection('presences-apercu')">Annuler</button>
+                                    <button class="btn btn-confirmer btn-compact" data-action="enregistrerPresences">Enregistrer</button>
+                                    <button class="btn btn-annuler btn-compact" data-action="afficherSousSection" data-param="presences-apercu">Annuler</button>
                                 </span>
                             </div>
                         </div>
@@ -4588,12 +4588,12 @@
                                         Présence
                                         <div class="mt-8-flex-col-gap4">
                                             <button class="btn btn-principal btn-tres-compact"
-                                                    onclick="tousPresents()"
+                                                    data-action="tousPresents"
                                                     title="Mettre tous présents">
                                                 Tous 2h
                                             </button>
                                             <button class="btn btn-annuler btn-tres-compact"
-                                                    onclick="reinitialiserSaisie()"
+                                                    data-action="reinitialiserSaisie"
                                                     title="Réinitialiser">
                                                 ↻
                                             </button>
@@ -4744,7 +4744,7 @@
                                        oninput="rechercherEvaluations()">
                             </div>
                             <div class="groupe-form" style="display: flex; align-items: flex-end;">
-                                <button class="btn btn-secondaire" onclick="reinitialiserFiltresEval()">
+                                <button class="btn btn-secondaire" data-action="reinitialiserFiltresEval">
                                     Réinitialiser
                                 </button>
                             </div>
@@ -4774,28 +4774,28 @@
                         <table class="tableau">
                             <thead class="thead-sticky-bleu">
                                 <tr>
-                                    <th class="td-left-clickable" onclick="trierTableauParColonne('da')" title="Cliquer pour trier">
+                                    <th class="td-left-clickable" data-action="trierTableauParColonne" data-param="da" title="Cliquer pour trier">
                                         DA <span id="tri-da" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
-                                    <th class="td-left-clickable" onclick="trierTableauParColonne('nom')" title="Cliquer pour trier">
+                                    <th class="td-left-clickable" data-action="trierTableauParColonne" data-param="nom" title="Cliquer pour trier">
                                         Nom <span id="tri-nom" style="font-size: 0.8em; color: var(--gris-clair);">↑</span>
                                     </th>
-                                    <th class="td-left-clickable" onclick="trierTableauParColonne('prenom')" title="Cliquer pour trier">
+                                    <th class="td-left-clickable" data-action="trierTableauParColonne" data-param="prenom" title="Cliquer pour trier">
                                         Prénom <span id="tri-prenom" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
-                                    <th class="td-left-clickable" onclick="trierTableauParColonne('production')" title="Cliquer pour trier">
+                                    <th class="td-left-clickable" data-action="trierTableauParColonne" data-param="production" title="Cliquer pour trier">
                                         Production <span id="tri-production" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
-                                    <th class="td-center-clickable" data-tooltip="eval-col-jeton" onclick="trierTableauParColonne('jetons')">
+                                    <th class="td-center-clickable" data-tooltip="eval-col-jeton" data-action="trierTableauParColonne" data-param="jetons">
                                         Jeton <span id="tri-jetons" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
-                                    <th class="td-center-clickable" data-tooltip="eval-col-niveau" onclick="trierTableauParColonne('niveau')">
+                                    <th class="td-center-clickable" data-tooltip="eval-col-niveau" data-action="trierTableauParColonne" data-param="niveau">
                                         Statut <span id="tri-niveau" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
-                                    <th class="td-center-clickable" onclick="trierTableauParColonne('niveauIDME')" title="Niveau de performance IDME">
+                                    <th class="td-center-clickable" data-action="trierTableauParColonne" data-param="niveauIDME" title="Niveau de performance IDME">
                                         Niveau <span id="tri-niveauIDME" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
-                                    <th class="td-center-clickable" onclick="trierTableauParColonne('note')" title="Cliquer pour trier">
+                                    <th class="td-center-clickable" data-action="trierTableauParColonne" data-param="note" title="Cliquer pour trier">
                                         Note % <span id="tri-note" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
                                     <th class="td-center">Actions</th>
@@ -4849,12 +4849,12 @@
                             <div class="groupe-boutons-colonne" class="mb-15">
                                 <!-- Sauvegarder et Réinitialiser -->
                                 <div class="groupe-boutons-ligne">
-                                    <button class="btn btn-principal btn-tres-compact u-flex-1" onclick="sauvegarderEvaluation()"
+                                    <button class="btn btn-principal btn-tres-compact u-flex-1" data-action="sauvegarderEvaluation"
                                         title="Sauvegarder l'évaluation">
                                         Sauvegarder
                                     </button>
 
-                                    <button class="btn btn-annuler btn-tres-compact u-flex-1" onclick="reinitialiserFormulaire()"
+                                    <button class="btn btn-annuler btn-tres-compact u-flex-1" data-action="reinitialiserFormulaire"
                                         title="Réinitialiser le formulaire en conservant les sélections" data-tooltip="eval-btn-reinitialiser">
                                         Réinitialiser
                                     </button>
@@ -4862,7 +4862,7 @@
 
                                 <!-- Supprimer cette évaluation (visible seulement en mode modification) -->
                                 <div class="groupe-boutons-ligne u-hide" id="ligneSupprimerEvaluation">
-                                    <button class="btn btn-supprimer btn-tres-compact u-w-100" onclick="confirmerSuppressionEvaluationSidebar()"
+                                    <button class="btn btn-supprimer btn-tres-compact u-w-100" data-action="confirmerSuppressionEvaluationSidebar"
                                         title="Supprimer définitivement cette évaluation" data-tooltip="eval-btn-supprimer">
                                         Supprimer cette évaluation
                                     </button>
@@ -4877,7 +4877,7 @@
                             <div id="travaux-eval-identite" class="travaux-eval-identite">
                                 <span class="travaux-eval-label-val" id="travaux-eval-label-etudiant">--</span>
                                 <span class="travaux-eval-label-val travaux-eval-label-production" id="travaux-eval-label-production">--</span>
-                                <button class="btn-lien-discret" id="travaux-eval-btn-corriger" onclick="travauxUI.toggleCorrectionIdentite()" title="Modifier l'attribution" data-tooltip="eval-modifier-attribution">Modifier</button>
+                                <button class="btn-lien-discret" id="travaux-eval-btn-corriger" data-action="travauxUI.toggleCorrectionIdentite" title="Modifier l'attribution" data-tooltip="eval-modifier-attribution">Modifier</button>
                             </div>
 
                             <!-- Section correction (cachée par défaut) -->
@@ -4903,8 +4903,8 @@
                                     </select>
                                 </div>
                                 <div class="groupe-boutons-ligne">
-                                    <button class="btn btn-principal btn-tres-compact" onclick="travauxUI.appliquerCorrectionIdentite()">Appliquer</button>
-                                    <button class="btn btn-secondaire btn-tres-compact" onclick="travauxUI.toggleCorrectionIdentite()">Annuler</button>
+                                    <button class="btn btn-principal btn-tres-compact" data-action="travauxUI.appliquerCorrectionIdentite">Appliquer</button>
+                                    <button class="btn btn-secondaire btn-tres-compact" data-action="travauxUI.toggleCorrectionIdentite">Annuler</button>
                                 </div>
                             </div>
 
@@ -5027,7 +5027,7 @@
                                 <div class="eval-options-radios">
                                     <label><input type="radio" name="affichageNote1" id="affichageNoteComplet1" value="complet" checked onchange="genererRetroaction(1)"> Note chiffrée</label>
                                     <label><input type="radio" name="affichageNote1" id="affichageNoteLettre1" value="lettre" onchange="genererRetroaction(1)"> Niveau de performance</label>
-                                    <button onclick="regenererRetroactionAvecFeedback()" class="btn-copier-retro" title="Régénérer la rétroaction depuis la cartouche actuelle">Régénérer</button>
+                                    <button data-action="regenererRetroactionAvecFeedback" class="btn-copier-retro" title="Régénérer la rétroaction depuis la cartouche actuelle">Régénérer</button>
                                 </div>
                             </div>
                             <textarea id="retroactionFinale1" class="controle-form" rows="6"
@@ -5068,7 +5068,7 @@
             <!-- Modal Réparation des évaluations -->
             <div id="modalReparationEvaluations" class="modal-overlay">
                 <div class="modal-contenu modal-compact">
-                    <button onclick="fermerModalReparationEvaluations()" class="modal-fermer">✕</button>
+                    <button data-action="fermerModalReparationEvaluations" class="modal-fermer">✕</button>
 
                     <h2 class="modal-titre">Réparation des évaluations</h2>
 
@@ -5110,10 +5110,10 @@
                     </div>
 
                     <div class="footer-border-top">
-                        <button class="btn btn-annuler" onclick="fermerModalReparationEvaluations()" class="mr-10">
+                        <button class="btn btn-annuler" data-action="fermerModalReparationEvaluations" class="mr-10">
                             Annuler
                         </button>
-                        <button class="btn btn-confirmer" onclick="lancerReparationEvaluations()">
+                        <button class="btn btn-confirmer" data-action="lancerReparationEvaluations">
                             Lancer la réparation
                         </button>
                     </div>
@@ -5213,7 +5213,7 @@
                                     Créer une échelle, une grille de critères, une production ou des cartouches en quelques étapes guidées.
                                 </p>
                             </div>
-                            <button onclick="if(typeof demarrerCreationMateriel==='function') demarrerCreationMateriel();"
+                            <button data-action="demarrerCreationMaterielSafe"
                                     class="btn btn-principal u-nowrap">
                                 Lancer l'assistant
                             </button>
@@ -5258,7 +5258,7 @@
 
                             <!-- Bouton Consulter bibliothèque -->
                             <div class="sidebar-nav-buttons u-mb-15">
-                                <button onclick="afficherBibliothequeProductions()"
+                                <button data-action="afficherBibliothequeProductions"
                                         class="btn btn-principal"
                                         data-tooltip="cn-bibliotheque"
                                         class="u-texte-09 u-w-100"
@@ -5280,13 +5280,13 @@
 
                             <!-- Boutons actions en haut à droite -->
                             <div class="u-flex-gap-10 u-mb-20 u-text-right" style="justify-content: flex-end">
-                                <button onclick="afficherFormulairePDFDepuisProduction()" class="btn btn-secondaire" data-tooltip="cn-preparer-pdf">
+                                <button data-action="afficherFormulairePDFDepuisProduction" class="btn btn-secondaire" data-tooltip="cn-preparer-pdf">
                                     📄 Préparer le PDF
                                 </button>
-                                <button id="btnExporterProductionsPDF" onclick="exporterProductionsEnPDF()" class="btn btn-secondaire btn-export-pdf" title="Exporter la liste des productions en PDF">
+                                <button id="btnExporterProductionsPDF" data-action="exporterProductionsEnPDF" class="btn btn-secondaire btn-export-pdf" title="Exporter la liste des productions en PDF">
                                     📄 Exporter liste PDF
                                 </button>
-                                <button onclick="creerNouvelleProduction()" class="btn btn-principal">
+                                <button data-action="creerNouvelleProduction" class="btn btn-principal">
                                     + Nouvelle production
                                 </button>
                             </div>
@@ -5470,20 +5470,20 @@
                                 <div class="btn-groupe u-flex-between">
                                     <!-- Boutons gauche (actions sur la production) -->
                                     <div class="u-flex-gap-10">
-                                        <button id="btnDupliquerProduction" class="btn btn-secondaire u-hide" onclick="dupliquerProductionActive()" title="Créer une copie de cette production">
+                                        <button id="btnDupliquerProduction" class="btn btn-secondaire u-hide" data-action="dupliquerProductionActive" title="Créer une copie de cette production">
                                             Dupliquer
                                         </button>
-                                        <button id="btnSupprimerProduction" class="btn btn-supprimer u-hide" onclick="supprimerProductionActive()" title="Supprimer cette production">
+                                        <button id="btnSupprimerProduction" class="btn btn-supprimer u-hide" data-action="supprimerProductionActive" title="Supprimer cette production">
                                             Supprimer
                                         </button>
-                                        <button id="btnExporterPDFProduction" class="btn btn-secondaire u-hide" onclick="exporterProductionsEnPDF()" title="Exporter les productions en PDF">
+                                        <button id="btnExporterPDFProduction" class="btn btn-secondaire u-hide" data-action="exporterProductionsEnPDF" title="Exporter les productions en PDF">
                                             Exporter en PDF
                                         </button>
                                     </div>
                                     <!-- Boutons droite (actions principales) -->
                                     <div class="u-flex-gap-10">
-                                        <button class="btn btn-annuler" onclick="annulerFormProduction()">Annuler</button>
-                                        <button class="btn btn-confirmer" onclick="sauvegarderProduction()">
+                                        <button class="btn btn-annuler" data-action="annulerFormProduction">Annuler</button>
+                                        <button class="btn btn-confirmer" data-action="sauvegarderProduction">
                                             <span id="btnTexteEvaluation">Ajouter</span>
                                         </button>
                                     </div>
@@ -5555,10 +5555,10 @@
 
                             <!-- Boutons actions en haut à droite -->
                             <div class="u-flex-gap-10 u-mb-20 u-text-right" style="justify-content: flex-end">
-                                <button onclick="afficherFormulairePreparationPDF()" class="btn btn-secondaire" data-tooltip="cn-preparer-pdf">
+                                <button data-action="afficherFormulairePreparationPDF" class="btn btn-secondaire" data-tooltip="cn-preparer-pdf">
                                     📄 Préparer le PDF
                                 </button>
-                                <button onclick="creerNouvelleGrille()" class="btn btn-principal">
+                                <button data-action="creerNouvelleGrille" class="btn btn-principal">
                                     + Nouvelle grille
                                 </button>
                             </div>
@@ -5607,10 +5607,10 @@
                                 </fieldset>
 
                                 <div class="prep-pdf-actions">
-                                    <button onclick="fermerFormulairePreparationPDF()" class="btn btn-annuler">
+                                    <button data-action="fermerFormulairePreparationPDF" class="btn btn-annuler">
                                         Annuler
                                     </button>
-                                    <button id="prepPDF-btn-apercu" onclick="ouvrirApercuPDF()" class="btn btn-confirmer" disabled>
+                                    <button id="prepPDF-btn-apercu" data-action="ouvrirApercuPDF" class="btn btn-confirmer" disabled>
                                         Voir l'aperçu →
                                     </button>
                                 </div>
@@ -5650,17 +5650,17 @@
                                 <div class="btn-groupe u-flex-between">
                                     <!-- Boutons gauche (actions sur la grille) -->
                                     <div class="u-flex-gap-10">
-                                        <button id="btnDupliquerGrille" class="btn btn-secondaire u-hide" onclick="dupliquerGrilleActive()" title="Créer une copie de cette grille">
+                                        <button id="btnDupliquerGrille" class="btn btn-secondaire u-hide" data-action="dupliquerGrilleActive" title="Créer une copie de cette grille">
                                             Dupliquer
                                         </button>
                                     </div>
                                     <!-- Boutons droite (actions principales) -->
                                     <div class="u-flex-gap-10">
-                                        <button id="btnSupprimerGrille" class="btn btn-supprimer u-hide" onclick="supprimerGrilleActive()" title="Supprimer cette grille">
+                                        <button id="btnSupprimerGrille" class="btn btn-supprimer u-hide" data-action="supprimerGrilleActive" title="Supprimer cette grille">
                                             Supprimer
                                         </button>
-                                        <button class="btn btn-annuler" onclick="annulerFormGrille()">Annuler</button>
-                                        <button class="btn btn-confirmer" onclick="sauvegarderGrilleComplete()">
+                                        <button class="btn btn-annuler" data-action="annulerFormGrille">Annuler</button>
+                                        <button class="btn btn-confirmer" data-action="sauvegarderGrilleComplete">
                                             <span id="btnTexteGrille">Sauvegarder</span>
                                         </button>
                                     </div>
@@ -5723,10 +5723,10 @@
 
                             <!-- Boutons actions en haut à droite -->
                             <div class="u-flex-gap-10 u-mb-20 u-text-right" style="justify-content: flex-end">
-                                <button onclick="afficherFormulairePDFDepuisEchelle()" class="btn btn-secondaire" data-tooltip="cn-preparer-pdf">
+                                <button data-action="afficherFormulairePDFDepuisEchelle" class="btn btn-secondaire" data-tooltip="cn-preparer-pdf">
                                     📄 Préparer le PDF
                                 </button>
-                                <button onclick="creerNouvelleEchelle()" class="btn btn-principal">
+                                <button data-action="creerNouvelleEchelle" class="btn btn-principal">
                                     + Nouvelle échelle
                                 </button>
                             </div>
@@ -5740,7 +5740,7 @@
                             <div id="zoneApercuEchelle" class="zone-apercu-pdf">
                                 <div id="contenuApercuEchelle"></div>
                                 <div class="zone-apercu-pdf-actions">
-                                    <button onclick="exporterEchelleSelectionneeEnPDF()" class="btn btn-principal">
+                                    <button data-action="exporterEchelleSelectionneeEnPDF" class="btn btn-principal">
                                         📄 Exporter en PDF
                                     </button>
                                 </div>
@@ -5780,17 +5780,17 @@
                                 <div class="btn-groupe u-flex-between">
                                     <!-- Boutons gauche (actions sur l'échelle) -->
                                     <div class="u-flex-gap-10">
-                                        <button id="btnDupliquerEchelle" class="btn btn-secondaire u-hide" onclick="dupliquerEchelleActive()" title="Créer une copie de cette échelle">
+                                        <button id="btnDupliquerEchelle" class="btn btn-secondaire u-hide" data-action="dupliquerEchelleActive" title="Créer une copie de cette échelle">
                                             Dupliquer
                                         </button>
                                     </div>
                                     <!-- Boutons droite (actions principales) -->
                                     <div class="u-flex-gap-10">
-                                        <button id="btnSupprimerEchelle" class="btn btn-supprimer u-hide" onclick="supprimerEchelleActive()" title="Supprimer cette échelle">
+                                        <button id="btnSupprimerEchelle" class="btn btn-supprimer u-hide" data-action="supprimerEchelleActive" title="Supprimer cette échelle">
                                             Supprimer
                                         </button>
-                                        <button class="btn btn-annuler" onclick="annulerFormEchelle()">Annuler</button>
-                                        <button class="btn btn-confirmer" onclick="sauvegarderEchelleComplete()">
+                                        <button class="btn btn-annuler" data-action="annulerFormEchelle">Annuler</button>
+                                        <button class="btn btn-confirmer" data-action="sauvegarderEchelleComplete">
                                             <span id="btnTexteEchelle">Sauvegarder</span>
                                         </button>
                                     </div>
@@ -5837,10 +5837,10 @@
 
                         <!-- IMPORT/EXPORT ÉCHELLES -->
                         <div class="d-flex-gap10-mb20-info">
-                            <button class="btn btn-principal" onclick="exporterEchelles()" class="flex-1">
+                            <button class="btn btn-principal" data-action="exporterEchelles" class="flex-1">
                                 Exporter l'échelle
                             </button>
-                            <button class="btn btn-principal" onclick="document.getElementById('fichier-import-echelles-local').click()" class="flex-1">
+                            <button class="btn btn-principal" data-action="ouvrirImportEchellesLocal" class="flex-1">
                                 Importer une échelle
                             </button>
                             <input type="file" id="fichier-import-echelles-local" accept=".json" style="display: none;" onchange="importerEchelles(event)">
@@ -5897,7 +5897,7 @@
                                     <input type="text" id="codesPersonnalises" class="controle-form"
                                         placeholder="Ex: Excellent, Bon, Moyen, Faible"
                                         onchange="sauvegarderConfigEchelle()">
-                                    <button class="btn btn-principal" onclick="genererNiveauxPersonnalises()">Générer</button>
+                                    <button class="btn btn-principal" data-action="genererNiveauxPersonnalises">Générer</button>
                                 </div>
                                 <small
                                     class="u-mt-5" style="color: var(--bleu-leger); font-size: 0.8rem; display: block">
@@ -5920,19 +5920,19 @@
                             <!-- Boutons d'actions -->
                             <div class="btn-groupe" class="mt-20-justify-between">
                                 <div class="d-flex-gap-10">
-                                    <button class="btn btn-principal" onclick="sauvegarderNiveaux()">
+                                    <button class="btn btn-principal" data-action="sauvegarderNiveaux">
                                         Sauvegarder les niveaux
                                     </button>
-                                    <button class="btn btn-annuler" onclick="reinitialiserNiveauxDefaut()">
+                                    <button class="btn btn-annuler" data-action="reinitialiserNiveauxDefaut">
                                         Réinitialiser par défaut
                                     </button>
                                 </div>
                                 <div class="d-flex-gap-10">
                                     <button id="btnDupliquerEchelle" class="btn btn-modifier"
-                                        onclick="dupliquerEchelleActuelle()" style="display: none;">
+                                        data-action="dupliquerEchelleActuelle" style="display: none;">
                                         Dupliquer
                                     </button>
-                                    <button class="btn btn-confirmer" onclick="enregistrerCommeEchelle()">
+                                    <button class="btn btn-confirmer" data-action="enregistrerCommeEchelle">
                                         Enregistrer comme échelle
                                     </button>
                                 </div>
@@ -6004,7 +6004,7 @@
                         <div class="sidebar-navigation">
                             <!-- Bouton bibliothèque (toujours visible) -->
                             <div class="u-mb-15">
-                                <button onclick="afficherBibliothequePratiques()" class="btn btn-principal u-texte-09 u-w-100" data-tooltip="cn-bibliotheque">
+                                <button data-action="afficherBibliothequePratiques" class="btn btn-principal u-texte-09 u-w-100" data-tooltip="cn-bibliotheque">
                                     Consulter la bibliothèque
                                 </button>
                             </div>
@@ -6019,7 +6019,7 @@
 
                             <!-- Bouton création en haut à droite -->
                             <div class="u-mb-20 u-text-right">
-                                <button onclick="creerNouvellePratique()" class="btn btn-principal">
+                                <button data-action="creerNouvellePratique" class="btn btn-principal">
                                     + Nouvelle pratique
                                 </button>
                             </div>
@@ -6042,10 +6042,10 @@
                                         <p class="u-texte-09" style="color: var(--gris-moyen); margin: 0; line-height: 1.4" id="mat-description-pratique"></p>
                                     </div>
                                     <div class="u-flex-gap-8">
-                                        <button onclick="dupliquerPratiqueMateriel(pratiqueEnEditionMateriel)" class="btn btn-secondaire">
+                                        <button data-action="dupliquerPratiqueMaterielActive" class="btn btn-secondaire">
                                             Dupliquer
                                         </button>
-                                        <button onclick="supprimerPratiqueMateriel(pratiqueEnEditionMateriel)" class="btn btn-supprimer">
+                                        <button data-action="supprimerPratiqueMaterielActive" class="btn btn-supprimer">
                                             Supprimer
                                         </button>
                                     </div>
@@ -6452,7 +6452,7 @@
                                             <div class="u-mb-20">
                                                 <div class="u-flex-between u-mb-10">
                                                     <h4 style="margin: 0; font-size: 1rem;">Liste des objectifs</h4>
-                                                    <button type="button" class="btn btn-principal btn-compact" onclick="ajouterObjectifMat()">
+                                                    <button type="button" class="btn btn-principal btn-compact" data-action="ajouterObjectifMat">
                                                         + Ajouter un objectif
                                                     </button>
                                                 </div>
@@ -6611,7 +6611,7 @@
                                                 Définis les types de productions que les étudiants devront compléter.
                                             </p>
                                             <div id="mat-spec-types-travaux-liste" class="u-mb-15"></div>
-                                            <button type="button" class="btn btn-secondaire" onclick="ajouterTypeTravailMat()">
+                                            <button type="button" class="btn btn-secondaire" data-action="ajouterTypeTravailMat">
                                                 + Ajouter un type
                                             </button>
                                         </div>
@@ -6623,7 +6623,7 @@
                                                 Chaque forfait définit un ensemble de productions requises et la note associée.
                                             </p>
                                             <div id="mat-spec-forfaits-liste" class="u-mb-15"></div>
-                                            <button type="button" class="btn btn-secondaire" onclick="ajouterForfaitMat()">
+                                            <button type="button" class="btn btn-secondaire" data-action="ajouterForfaitMat">
                                                 + Ajouter un forfait
                                             </button>
                                         </div>
@@ -6749,10 +6749,10 @@
 
                                 <!-- Actions finales -->
                                 <div class="u-flex-gap-10 u-mt-20" style="justify-content: flex-end">
-                                    <button onclick="appliquerPratiqueAuCours(pratiqueEnEditionMateriel)" class="btn btn-principal" data-tooltip="cn-pratique-appliquer">
+                                    <button data-action="appliquerPratiqueAuCoursActive" class="btn btn-principal" data-tooltip="cn-pratique-appliquer">
                                         Appliquer au cours actif
                                     </button>
-                                    <button onclick="sauvegarderPratiqueMaterielComplet()" class="btn btn-confirmer">
+                                    <button data-action="sauvegarderPratiqueMaterielComplet" class="btn btn-confirmer">
                                         Enregistrer la pratique
                                     </button>
                                 </div>
@@ -6812,10 +6812,10 @@
 
                                 <!-- Boutons actions en haut à droite -->
                                 <div class="u-flex-gap-10 u-mb-20 u-text-right" style="justify-content: flex-end">
-                                    <button onclick="afficherFormulairePDFDepuisCartouche()" class="btn btn-secondaire" data-tooltip="cn-preparer-pdf">
+                                    <button data-action="afficherFormulairePDFDepuisCartouche" class="btn btn-secondaire" data-tooltip="cn-preparer-pdf">
                                         📄 Préparer le PDF
                                     </button>
-                                    <button onclick="creerNouvelleCartouche()" class="btn btn-principal">
+                                    <button data-action="creerNouvelleCartouche" class="btn btn-principal">
                                         + Nouvelle cartouche
                                     </button>
                                 </div>
@@ -6906,7 +6906,7 @@
                             </div>
 
                             <div style="margin-top: 12px;">
-                                <button class="btn btn-secondaire btn-compact" onclick="document.getElementById('fichier-import-txt-cartouche').click()">
+                                <button class="btn btn-secondaire btn-compact" data-action="ouvrirImportTxtCartouche">
                                     Importer depuis un fichier texte (.txt / .md)
                                 </button>
                                 <input type="file" id="fichier-import-txt-cartouche" accept=".txt,.md,.text" style="display: none;" onchange="importerCartoucheDepuisTxt(event)">
@@ -6922,7 +6922,7 @@
                  border-radius: var(--radius-moyen); font-size: 0.9rem; line-height: 1.6;">
                                         <!-- L'aperçu sera généré ici par genererApercuAleatoire() -->
                                     </div>
-                                    <button class="btn btn-principal mt-2" onclick="genererApercuAleatoire()">
+                                    <button class="btn btn-principal mt-2" data-action="genererApercuAleatoire">
                                         Générer un aperçu aléatoire
                                     </button>
                                 </div>
@@ -6937,20 +6937,20 @@
                                     <!-- Boutons gauche (actions sur la cartouche) -->
                                     <!-- Note: Export/Import se font maintenant via la bibliothèque -->
                                     <div class="u-flex-gap-10">
-                                        <button id="btnDupliquerCartouche" class="btn btn-secondaire u-hide" onclick="dupliquerCartoucheActive()" title="Créer une copie de cette cartouche">
+                                        <button id="btnDupliquerCartouche" class="btn btn-secondaire u-hide" data-action="dupliquerCartoucheActive" title="Créer une copie de cette cartouche">
                                             Dupliquer
                                         </button>
-                                        <button id="btnSupprimerCartouche" class="btn btn-supprimer u-hide" onclick="supprimerCartoucheActive()" title="Supprimer cette cartouche">
+                                        <button id="btnSupprimerCartouche" class="btn btn-supprimer u-hide" data-action="supprimerCartoucheActive" title="Supprimer cette cartouche">
                                             Supprimer
                                         </button>
-                                        <button id="btnExporterPDFCartouche" class="btn btn-secondaire u-hide" onclick="exporterCartoucheSelectionneeEnPDF()" title="Exporter cette cartouche en PDF">
+                                        <button id="btnExporterPDFCartouche" class="btn btn-secondaire u-hide" data-action="exporterCartoucheSelectionneeEnPDF" title="Exporter cette cartouche en PDF">
                                             Exporter en PDF
                                         </button>
                                     </div>
                                     <!-- Boutons droite (actions principales) -->
                                     <div class="u-flex-gap-10">
-                                        <button class="btn btn-annuler" onclick="annulerFormCartouche()">Annuler</button>
-                                        <button class="btn btn-confirmer" onclick="sauvegarderCartoucheComplete()">
+                                        <button class="btn btn-annuler" data-action="annulerFormCartouche">Annuler</button>
+                                        <button class="btn btn-confirmer" data-action="sauvegarderCartoucheComplete">
                                             Sauvegarder
                                         </button>
                                     </div>
@@ -7669,7 +7669,7 @@
 
                         <!-- Bouton de sauvegarde -->
                         <div class="btn-groupe" class="justify-end">
-                            <button class="btn btn-confirmer" onclick="sauvegarderCadreCalendrier()">
+                            <button class="btn btn-confirmer" data-action="sauvegarderCadreCalendrier">
                                 Sauvegarder le cadre
                             </button>
                         </div>
@@ -7698,7 +7698,7 @@
                                 </div>
 
                                 <!-- Bouton pour afficher le formulaire d'ajout -->
-                                <button id="btnAjouterPrevu" class="btn btn-confirmer mb-30" onclick="afficherFormEvenement()">
+                                <button id="btnAjouterPrevu" class="btn btn-confirmer mb-30" data-action="afficherFormEvenement">
                                     + Ajouter un événement prévu
                                 </button>
 
@@ -7742,8 +7742,8 @@
                                         </div>
                                     </div>
                                     <div class="btn-groupe btn-groupe-droite">
-                                        <button class="btn btn-annuler btn-sm" onclick="annulerFormEvenement()">Annuler</button>
-                                        <button id="btnConfirmerPrevu" class="btn btn-confirmer btn-sm" onclick="confirmerAjoutEvenement()">Ajouter</button>
+                                        <button class="btn btn-annuler btn-sm" data-action="annulerFormEvenement">Annuler</button>
+                                        <button id="btnConfirmerPrevu" class="btn btn-confirmer btn-sm" data-action="confirmerAjoutEvenement">Ajouter</button>
                                     </div>
                                 </div><!-- FIN formulaire ajout prévu -->
                             </div>
@@ -7764,7 +7764,7 @@
 
                                 <!-- Bouton pour afficher le formulaire d'ajout -->
                                 <button id="btnAjouterEvenementImprevu" class="btn btn-confirmer"
-                                    onclick="afficherFormEvenementImprevu()">
+                                    data-action="afficherFormEvenementImprevu">
                                     + Ajouter un événement imprévu
                                 </button>
 
@@ -7807,9 +7807,9 @@
                                         </div>
                                     </div>
                                     <div class="btn-groupe btn-groupe-droite">
-                                        <button class="btn btn-annuler btn-sm" onclick="annulerFormEvenementImprevu()">Annuler</button>
+                                        <button class="btn btn-annuler btn-sm" data-action="annulerFormEvenementImprevu">Annuler</button>
                                         <button id="btnConfirmerImprevu" class="btn btn-confirmer btn-sm"
-                                            onclick="confirmerAjoutEvenementImprevu()">Ajouter</button>
+                                            data-action="confirmerAjoutEvenementImprevu">Ajouter</button>
                                     </div>
                                 </div><!-- FIN formulaire ajout imprévu -->
                             </div>
@@ -7858,7 +7858,7 @@
 
                             <!-- Bouton Consulter bibliothèque -->
                             <div class="sidebar-nav-buttons u-mb-15">
-                                <button onclick="ouvrirModalBibliothequeCours()"
+                                <button data-action="ouvrirModalBibliothequeCours"
                                         class="btn btn-principal"
                                         class="u-w-100"
                                         title="Consulter la bibliothèque de cours">
@@ -7882,7 +7882,7 @@
 
                             <!-- Bouton nouveau cours en haut -->
                             <div class="u-mb-20">
-                                <button onclick="afficherFormCours()"
+                                <button data-action="afficherFormCours"
                                         id="btnAjouterCours"
                                         class="btn btn-confirmer">
                                     + Nouveau cours
@@ -8208,7 +8208,7 @@
                                     <option value="pan-objectifs">PAN-Objectifs (par objectifs)</option>
                                 </select>
                                 <div class="u-mt-10">
-                                    <button type="button" class="btn btn-secondaire u-texte-petit" onclick="naviguerVersPratiqueNotation()" style="padding: 6px 12px">
+                                    <button type="button" class="btn btn-secondaire u-texte-petit" data-action="naviguerVersPratiqueNotation" style="padding: 6px 12px">
                                         Configurer les détails de la pratique
                                     </button>
                                 </div>
@@ -8217,10 +8217,10 @@
                             <!-- Boutons d'action -->
                             <div class="btn-groupe btn-groupe-droite"
                                  class="u-mt-25" style="padding-top: 20px; border-top: 2px solid var(--bleu-leger)">
-                                <button class="btn btn-annuler" onclick="annulerFormCours()">
+                                <button class="btn btn-annuler" data-action="annulerFormCours">
                                     Annuler
                                 </button>
-                                <button class="btn btn-confirmer" onclick="sauvegarderCours()">
+                                <button class="btn btn-confirmer" data-action="sauvegarderCours">
                                     <span id="btnTexteCours">Ajouter</span>
                                 </button>
                             </div>
@@ -8282,12 +8282,12 @@
                         </div>
 
                         <!-- Bouton pour afficher le formulaire -->
-                        <button id="btnAjouterSeance" class="btn btn-confirmer mb-30" onclick="afficherFormAjoutSeance()">
+                        <button id="btnAjouterSeance" class="btn btn-confirmer mb-30" data-action="afficherFormAjoutSeance">
                             + Ajouter une séance
                         </button>
 
                         <!-- Bouton utilitaire pour nettoyer les doublons -->
-                        <button class="btn btn-modifier mb-30 u-ml-10" onclick="nettoyerDoublons()">
+                        <button class="btn btn-modifier mb-30 u-ml-10" data-action="nettoyerDoublons">
                             🧹 Nettoyer les doublons
                         </button>
 
@@ -8336,8 +8336,8 @@
                                 </div>
                             </div>
                             <div class="btn-groupe btn-groupe-droite">
-                                <button class="btn btn-annuler btn-sm" onclick="annulerFormAjoutSeance()">Annuler</button>
-                                <button id="btnConfirmerSeance" class="btn btn-confirmer btn-sm" onclick="confirmerAjoutSeance()">Ajouter</button>
+                                <button class="btn btn-annuler btn-sm" data-action="annulerFormAjoutSeance">Annuler</button>
+                                <button id="btnConfirmerSeance" class="btn btn-confirmer btn-sm" data-action="confirmerAjoutSeance">Ajouter</button>
                             </div>
                         </div><!-- FIN formulaire ajout séance -->
                     </div><!-- FIN carte horaire -->
@@ -8416,7 +8416,7 @@
                                     <option value="">Tous les groupes</option>
                                     <!-- Section Legacy désactivée - utilisez la section Trimestre V2 -->
                                 </select>
-                                <button onclick="resetFiltreGroupe()" class="btn btn-annuler">
+                                <button data-action="resetFiltreGroupe" class="btn btn-annuler">
                                     Réinitialiser
                                 </button>
                             </div>
@@ -8490,7 +8490,7 @@
                                         </select>
                                     </div>
                                     <div>
-                                        <button onclick="addStudent()" class="btn btn-principal"
+                                        <button data-action="addStudent" class="btn btn-principal"
                                             class="td-nowrap-bold">
                                             Ajouter
                                         </button>
@@ -8694,7 +8694,7 @@
 
                             <!-- Bouton Consulter bibliothèque -->
                             <div class="sidebar-nav-buttons u-mb-15">
-                                <button onclick="ouvrirModalBibliothequePratiques()"
+                                <button data-action="ouvrirModalBibliothequePratiques"
                                         class="btn btn-principal"
                                         class="u-w-100"
                                         title="Consulter la bibliothèque de pratiques">
@@ -8715,7 +8715,7 @@
 
                             <!-- Bouton création en haut à droite -->
                             <div class="u-mb-20 u-text-right">
-                                <button onclick="ouvrirWizardV2()" class="btn btn-principal">
+                                <button data-action="ouvrirWizardV2" class="btn btn-principal">
                                     + Nouvelle pratique
                                 </button>
                             </div>
@@ -8735,10 +8735,10 @@
                                     <p id="descriptionPratiqueSelectionnee" class="text-muted u-texte-09" style="margin: 0"></p>
                                 </div>
                                 <div class="u-flex-gap-10" style="margin-left: 15px">
-                                    <button id="btnActiverPratique" onclick="activerPratiqueAffichee()" class="btn btn-principal">
+                                    <button id="btnActiverPratique" data-action="activerPratiqueAffichee" class="btn btn-principal">
                                         Activer cette pratique
                                     </button>
-                                    <button id="btnConfigurerPratique" onclick="editerPratiqueActive()" class="btn btn-modifier">
+                                    <button id="btnConfigurerPratique" data-action="editerPratiqueActive" class="btn btn-modifier">
                                         Configurer la pratique
                                     </button>
                                 </div>
@@ -8749,7 +8749,7 @@
                             <!-- ========================================= -->
 
                             <div class="carte carte-accordeon" id="carteOptionsAffichage">
-                                <h3 class="accordeon-titre" onclick="toggleAccordeon('accordeonOptionsAffichage')">
+                                <h3 class="accordeon-titre" data-action="toggleAccordeon" data-param="accordeonOptionsAffichage">
                                     <span>Options d'affichage</span>
                                     <span class="accordeon-icone">▼</span>
                                 </h3>
@@ -8813,7 +8813,7 @@
                             <!-- ========================================= -->
 
                             <div class="carte carte-accordeon" id="carteEvaluationFrancais">
-                                <h3 class="accordeon-titre" onclick="toggleAccordeon('accordeonEvaluationFrancais')">
+                                <h3 class="accordeon-titre" data-action="toggleAccordeon" data-param="accordeonEvaluationFrancais">
                                     <span>Évaluation du français</span>
                                     <span class="accordeon-icone">▼</span>
                                 </h3>
@@ -8842,7 +8842,7 @@
                             <!-- ========================================= -->
 
                             <div class="carte carte-accordeon" id="cartePortfolio">
-                                <h3 class="accordeon-titre" onclick="toggleAccordeon('accordeonPortfolio')">
+                                <h3 class="accordeon-titre" data-action="toggleAccordeon" data-param="accordeonPortfolio">
                                     <span>Configuration du portfolio d'artefacts</span>
                                     <span class="accordeon-icone">▼</span>
                                 </h3>
@@ -8991,7 +8991,7 @@
                             <!-- ========================================= -->
 
                             <div class="carte carte-accordeon" id="carteJetons">
-                                <h3 class="accordeon-titre" onclick="toggleAccordeon('accordeonJetons')">
+                                <h3 class="accordeon-titre" data-action="toggleAccordeon" data-param="accordeonJetons">
                                     <span>Système de jetons</span>
                                     <span class="accordeon-icone">▼</span>
                                 </h3>
@@ -9134,7 +9134,7 @@
                             <!-- ========================================= -->
                             <div id="modalWizardPratique" class="modal-overlay u-hide">
                                 <div class="modal-contenu" style="max-width: 500px; max-height: 85vh; overflow-y: auto;">
-                                    <button onclick="fermerWizardPratique()" class="modal-fermer">✕</button>
+                                    <button data-action="fermerWizardPratique" class="modal-fermer">✕</button>
 
                                     <!-- En-tête Primo simplifié -->
                                     <div class="u-flex-gap-15 u-mb-20 u-align-center">
@@ -9464,7 +9464,7 @@
                                                     Définis tes évaluations avec leur pondération
                                                 </p>
                                                 <div id="wizard-evaluations-liste"></div>
-                                                <button type="button" class="btn btn-tres-compact" onclick="ajouterEvaluationWizard()">+ Ajouter une évaluation</button>
+                                                <button type="button" class="btn btn-tres-compact" data-action="ajouterEvaluationWizard">+ Ajouter une évaluation</button>
 
                                                 <h4 class="u-mb-15 u-mt-25 u-texte-bleu">Options d'affichage (pratique sommative)</h4>
 
@@ -9522,7 +9522,7 @@
                                                     </div>
 
                                                     <div id="wizard-spec-types-travaux-liste"></div>
-                                                    <button type="button" class="btn btn-tres-compact" onclick="ajouterTypeTravailSpec()">+ Ajouter un type de travail</button>
+                                                    <button type="button" class="btn btn-tres-compact" data-action="ajouterTypeTravailSpec">+ Ajouter un type de travail</button>
 
                                                     <h4 class="u-texte-bleu" style="margin: 25px 0 15px 0">Table de correspondance (Bundles → Notes)</h4>
                                                     <div class="u-mb-15 u-p-12" style="background: var(--orange-tres-pale); border-left: 4px solid var(--orange-accent); border-radius: var(--radius-moyen)">
@@ -9533,7 +9533,7 @@
                                                     </div>
 
                                                     <div id="wizard-spec-bundles-liste"></div>
-                                                    <button type="button" class="btn btn-tres-compact" onclick="ajouterPalierBundle()">+ Ajouter un palier</button>
+                                                    <button type="button" class="btn btn-tres-compact" data-action="ajouterPalierBundle">+ Ajouter un palier</button>
                                                 </div>
 
                                                 <!-- Configuration NIVEAUX (Xavier) -->
@@ -9618,7 +9618,7 @@
                                                 <div class="wizard-objectifs-container">
                                                     <div class="section-header">
                                                         <label>Objectifs (compétences)</label>
-                                                        <button type="button" class="btn btn-tres-compact" onclick="ajouterObjectifWizard()">
+                                                        <button type="button" class="btn btn-tres-compact" data-action="ajouterObjectifWizard">
                                                             + Ajouter manuellement
                                                         </button>
                                                     </div>
@@ -9878,21 +9878,21 @@
                                     <!-- Boutons navigation -->
                                     <div class="footer-border-top" style="display: flex; justify-content: space-between;">
                                         <div class="u-flex-gap-10">
-                                            <button class="btn btn-compact btn-annuler" onclick="fermerWizardPratique()">
+                                            <button class="btn btn-compact btn-annuler" data-action="fermerWizardPratique">
                                                 Annuler
                                             </button>
-                                            <button id="wizard-btn-supprimer" class="btn btn-compact btn-supprimer u-hide" onclick="supprimerPratiqueDepuisWizard()">
+                                            <button id="wizard-btn-supprimer" class="btn btn-compact btn-supprimer u-hide" data-action="supprimerPratiqueDepuisWizard">
                                                 🗑️ Supprimer
                                             </button>
                                         </div>
                                         <div class="u-flex-gap-10">
-                                            <button id="wizard-btn-precedent" class="btn btn-compact u-hide" onclick="precedentEtapeWizard()">
+                                            <button id="wizard-btn-precedent" class="btn btn-compact u-hide" data-action="precedentEtapeWizard">
                                                 ← Précédent
                                             </button>
-                                            <button id="wizard-btn-suivant" class="btn btn-compact btn-principal" onclick="suivantEtapeWizard()">
+                                            <button id="wizard-btn-suivant" class="btn btn-compact btn-principal" data-action="suivantEtapeWizard">
                                                 Suivant →
                                             </button>
-                                            <button id="wizard-btn-creer" class="btn btn-compact btn-confirmer u-hide" onclick="creerPratiqueDepuisWizard()">
+                                            <button id="wizard-btn-creer" class="btn btn-compact btn-confirmer u-hide" data-action="creerPratiqueDepuisWizard">
                                                 Créer la pratique
                                             </button>
                                         </div>
@@ -10231,10 +10231,10 @@
                     <div class="carte">
                         <h3 class="carte-titre-bleu">Actions</h3>
                         <div class="d-flex-gap15-wrap">
-                            <button class="btn btn-principal" onclick="chargerSeuilsInterpretationUI()">
+                            <button class="btn btn-principal" data-action="chargerSeuilsInterpretationUI">
                                 Actualiser
                             </button>
-                            <button class="btn btn-secondaire" onclick="restaurerValeursParDefaut()">
+                            <button class="btn btn-secondaire" data-action="restaurerValeursParDefaut">
                                 Restaurer les valeurs par défaut
                             </button>
                         </div>
@@ -10302,7 +10302,7 @@
                                 Capture immédiate de tous les étudiants avec les indices actuels.
                                 Utile pour marquer un moment important dans la session.
                             </p>
-                            <button class="btn btn-principal u-mt-10" onclick="capturerSnapshotManuel()">
+                            <button class="btn btn-principal u-mt-10" data-action="capturerSnapshotManuel">
                                 Capturer maintenant
                             </button>
                         </div>
@@ -10317,7 +10317,7 @@
                             <p class="text-muted u-mt-10 u-texte-petit">
                                 ⚠️ Attention : Cette action va recalculer et remplacer les captures hebdomadaires existantes.
                             </p>
-                            <button class="btn btn-secondaire u-mt-10" onclick="lancerReconstructionRetroactive()">
+                            <button class="btn btn-secondaire u-mt-10" data-action="lancerReconstructionRetroactive">
                                 Lancer la reconstruction
                             </button>
                         </div>
@@ -10331,7 +10331,7 @@
                             <p class="text-muted u-mt-10 u-texte-petit">
                                 ⚠️ Les graphiques de progression seront vides après cette opération.
                             </p>
-                            <button class="btn btn-secondaire u-mt-10" onclick="confirmerNettoyageSnapshots()" style="border-color: #ff6f00; color: #ff6f00">
+                            <button class="btn btn-secondaire u-mt-10" data-action="confirmerNettoyageSnapshots" style="border-color: #ff6f00; color: #ff6f00">
                                 Supprimer toutes les captures
                             </button>
                         </div>
@@ -10357,7 +10357,7 @@
                                 Sauvegarde tes données dans un fichier JSON. Tu pourras choisir quelles
                                 données exporter (toutes ou sélection personnalisée).
                             </p>
-                            <button class="btn btn-principal" onclick="ouvrirModalExport()" class="mt-10">
+                            <button class="btn btn-principal" data-action="ouvrirModalExport" class="mt-10">
                                 Ouvrir l'exportation
                             </button>
                             <p class="text-muted" class="mt-10-text-09">
@@ -10371,7 +10371,7 @@
                             <p>
                                 Restaure des données depuis un fichier JSON exporté précédemment.
                             </p>
-                            <button class="btn btn-principal" onclick="ouvrirModalImport()" class="mt-10">
+                            <button class="btn btn-principal" data-action="ouvrirModalImport" class="mt-10">
                                 Ouvrir l'importation
                             </button>
                             <div class="badge-alerte" class="mt-15">
@@ -10400,7 +10400,7 @@
                                 L'export génère automatiquement un fichier JSON + un fichier LISEZMOI.txt avec les métadonnées
                                 et les instructions d'utilisation.
                             </p>
-                            <button class="btn btn-principal" onclick="exporterConfigurationComplete()" class="mt-10">
+                            <button class="btn btn-principal" data-action="exporterConfigurationComplete" class="mt-10">
                                 Exporter ma configuration complète
                             </button>
                             <p class="text-muted" class="mt-10-text-09">
@@ -10415,7 +10415,7 @@
                                 Importe une configuration pédagogique exportée précédemment.
                                 Le système détectera automatiquement le type de fichier et affichera un aperçu avant l'import.
                             </p>
-                            <button class="btn btn-principal" onclick="ouvrirImportConfigComplete()" class="mt-10">
+                            <button class="btn btn-principal" data-action="ouvrirImportConfigComplete" class="mt-10">
                                 Importer une configuration
                             </button>
                             <div class="badge-alerte" class="mt-15">
@@ -10458,7 +10458,7 @@
                             Efface <strong>toutes</strong> les données et revient à l'état initial.
                             <strong>Cette action est irréversible.</strong>
                         </p>
-                        <button class="btn btn-supprimer" onclick="reinitialiserDonnees()">
+                        <button class="btn btn-supprimer" data-action="reinitialiserDonnees">
                             Réinitialiser toutes les données
                         </button>
                         <p class="text-muted" class="mt-10-text-09">
@@ -10511,7 +10511,7 @@
 
                                 <!-- GAUCHE : Bibliothèque + Sélection -->
                                 <div class="panneau-bibliotheque">
-                                    <button class="btn btn-secondaire btn-bibliotheque" onclick="ouvrirBibliothequeTrimestreV2()" data-tooltip="reglages-bibliotheque">
+                                    <button class="btn btn-secondaire btn-bibliotheque" data-action="ouvrirBibliothequeTrimestreV2" data-tooltip="reglages-bibliotheque">
                                         📚 Bibliothèque
                                     </button>
 
@@ -10522,7 +10522,7 @@
                                         </select>
                                     </div>
 
-                                    <button class="btn btn-principal btn-sm btn-block" onclick="ouvrirModalNouveauTrimestre()">
+                                    <button class="btn btn-principal btn-sm btn-block" data-action="ouvrirModalNouveauTrimestre">
                                         + Nouveau trimestre
                                     </button>
 
@@ -10570,7 +10570,7 @@
 
                                         <!-- COLONNE GAUCHE: Bornes du trimestre -->
                                         <div class="bloc-section bloc-section--bleu bloc-section--compact">
-                                            <button onclick="reinitialiserBornesTrimestreV2()" class="btn-reset-bloc" title="Réinitialiser les bornes">✕</button>
+                                            <button data-action="reinitialiserBornesTrimestreV2" class="btn-reset-bloc" title="Réinitialiser les bornes">✕</button>
                                             <h5 class="sous-titre-section" style="margin-top: 0;" data-tooltip="reglages-trim-bornes">Bornes du trimestre</h5>
                                             <div class="grille-2col-gap15">
                                                 <div class="groupe-form">
@@ -10598,7 +10598,7 @@
 
                                         <!-- COLONNE DROITE: Semaines spéciales -->
                                         <div class="bloc-section bloc-section--bleu bloc-section--compact">
-                                            <button onclick="reinitialiserSemainesSpecialesV2()" class="btn-reset-bloc" title="Réinitialiser les semaines spéciales">✕</button>
+                                            <button data-action="reinitialiserSemainesSpecialesV2" class="btn-reset-bloc" title="Réinitialiser les semaines spéciales">✕</button>
                                             <h5 class="sous-titre-section" style="margin-top: 0;" data-tooltip="reglages-trim-semaines-speciales">Semaines spéciales</h5>
                                             <div class="grille-2col-gap15">
                                                 <!-- Semaine de planification -->
@@ -10651,7 +10651,7 @@
 
                                             <!-- Formulaire ajout événement prévu (caché par défaut) -->
                                             <div id="v2-formEvenementPrevu" class="formulaire-interne u-hide">
-                                                <button onclick="annulerFormEvenementPrevuV2()" class="btn-fermer" title="Annuler">✕</button>
+                                                <button data-action="annulerFormEvenementPrevuV2" class="btn-fermer" title="Annuler">✕</button>
                                                 <div class="u-mb-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
                                                     <div class="groupe-form">
                                                         <label style="font-size: 0.75rem">Date <span class="text-danger u-texte-medium">*</span></label>
@@ -10680,13 +10680,13 @@
                                                     </div>
                                                 </div>
                                                 <div class="u-text-right">
-                                                    <button id="v2-btnConfirmerPrevu" class="btn btn-confirmer btn-tres-compact" onclick="confirmerEvenementPrevuV2()">Ajouter</button>
+                                                    <button id="v2-btnConfirmerPrevu" class="btn btn-confirmer btn-tres-compact" data-action="confirmerEvenementPrevuV2">Ajouter</button>
                                                 </div>
                                             </div>
 
                                             <div class="u-flex-between" style="font-size: 0.8rem">
                                                 <span class="text-muted"><span id="v2-nombreEvenementsPrevus">0</span> déclarés</span>
-                                                <button class="btn btn-confirmer btn-tres-compact" onclick="afficherFormEvenementV2('prevu')">+ Ajouter</button>
+                                                <button class="btn btn-confirmer btn-tres-compact" data-action="afficherFormEvenementV2" data-param="prevu">+ Ajouter</button>
                                             </div>
                                         </div>
 
@@ -10699,7 +10699,7 @@
 
                                             <!-- Formulaire ajout événement imprévu (caché par défaut) -->
                                             <div id="v2-formEvenementImprevu" class="formulaire-interne u-hide">
-                                                <button onclick="annulerFormEvenementImprevuV2()" class="btn-fermer" title="Annuler">✕</button>
+                                                <button data-action="annulerFormEvenementImprevuV2" class="btn-fermer" title="Annuler">✕</button>
                                                 <div class="u-mb-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
                                                     <div class="groupe-form">
                                                         <label style="font-size: 0.75rem">Date <span class="text-danger u-texte-medium">*</span></label>
@@ -10728,20 +10728,20 @@
                                                     </div>
                                                 </div>
                                                 <div class="u-text-right">
-                                                    <button id="v2-btnConfirmerImprevu" class="btn btn-confirmer btn-tres-compact" onclick="confirmerEvenementImprevuV2()">Ajouter</button>
+                                                    <button id="v2-btnConfirmerImprevu" class="btn btn-confirmer btn-tres-compact" data-action="confirmerEvenementImprevuV2">Ajouter</button>
                                                 </div>
                                             </div>
 
                                             <div class="u-flex-between" style="font-size: 0.8rem">
                                                 <span class="text-muted"><span id="v2-nombreEvenementsImprevus">0</span> déclarés</span>
-                                                <button class="btn btn-confirmer btn-tres-compact" onclick="afficherFormEvenementV2('imprevu')">+ Ajouter</button>
+                                                <button class="btn btn-confirmer btn-tres-compact" data-action="afficherFormEvenementV2" data-param="imprevu">+ Ajouter</button>
                                             </div>
                                         </div>
                                     </div>
 
                                     <!-- Statistiques calculées -->
                                     <div class="info-box u-mt-15 u-text-right">
-                                        <button class="btn btn-confirmer btn-tres-compact" onclick="sauvegarderCadreCalendrierV2()">Sauvegarder le trimestre</button>
+                                        <button class="btn btn-confirmer btn-tres-compact" data-action="sauvegarderCadreCalendrierV2">Sauvegarder le trimestre</button>
                                     </div>
                                     <!-- Anciens spans masqués pour compatibilité -->
                                     <span id="v2-nombreSemaines" class="u-hide">0</span>
@@ -10767,7 +10767,7 @@
 
                                 <!-- GAUCHE : Bibliothèque + Sélection -->
                                 <div class="panneau-bibliotheque">
-                                    <button class="btn btn-secondaire btn-bibliotheque" onclick="ouvrirModalBibliothequeCours()" data-tooltip="reglages-bibliotheque">
+                                    <button class="btn btn-secondaire btn-bibliotheque" data-action="ouvrirModalBibliothequeCours" data-tooltip="reglages-bibliotheque">
                                         📚 Bibliothèque
                                     </button>
 
@@ -10778,7 +10778,7 @@
                                         </select>
                                     </div>
 
-                                    <button class="btn btn-principal btn-sm btn-block" onclick="nouveauCoursV2()">
+                                    <button class="btn btn-principal btn-sm btn-block" data-action="nouveauCoursV2">
                                         + Nouveau cours
                                     </button>
 
@@ -10981,14 +10981,14 @@
 
                                             <!-- Boutons d'action -->
                                             <div class="actions-formulaire">
-                                                <button id="v2-btnSupprimerCours" class="btn btn-supprimer u-hide" onclick="supprimerCoursV2()">
+                                                <button id="v2-btnSupprimerCours" class="btn btn-supprimer u-hide" data-action="supprimerCoursV2">
                                                     Supprimer
                                                 </button>
                                                 <div>
-                                                    <button class="btn btn-annuler" onclick="annulerFormCoursV2()">
+                                                    <button class="btn btn-annuler" data-action="annulerFormCoursV2">
                                                         Annuler
                                                     </button>
-                                                    <button class="btn btn-confirmer" onclick="sauvegarderCoursV2()">
+                                                    <button class="btn btn-confirmer" data-action="sauvegarderCoursV2">
                                                         <span id="v2-btnTexteCours">Enregistrer</span>
                                                     </button>
                                                 </div>
@@ -11021,7 +11021,7 @@
                                             <option value="">— Sélectionner —</option>
                                         </select>
                                     </div>
-                                    <button class="btn btn-secondaire btn-block" onclick="nouveauProfilEnseignantV2()">
+                                    <button class="btn btn-secondaire btn-block" data-action="nouveauProfilEnseignantV2">
                                         + Nouveau profil
                                     </button>
 
@@ -11220,14 +11220,14 @@
 
                                     <!-- Boutons d'action -->
                                     <div class="actions-formulaire">
-                                        <button class="btn btn-supprimer" onclick="supprimerProfilEnseignantV2()">
+                                        <button class="btn btn-supprimer" data-action="supprimerProfilEnseignantV2">
                                             Supprimer
                                         </button>
                                         <div>
-                                            <button class="btn btn-annuler" onclick="annulerFormEnseignantV2()">
+                                            <button class="btn btn-annuler" data-action="annulerFormEnseignantV2">
                                                 Annuler
                                             </button>
-                                            <button class="btn btn-confirmer" onclick="sauvegarderEnseignantV2()">
+                                            <button class="btn btn-confirmer" data-action="sauvegarderEnseignantV2">
                                                 Enregistrer
                                             </button>
                                         </div>
@@ -11284,13 +11284,13 @@
 
                                     <!-- Actions sur la liste -->
                                     <div class="section-actions-liste u-hide u-mt-15" id="v2-actionsEtudiants">
-                                        <button class="btn btn-secondaire btn-sm btn-block" onclick="exporterEtudiantsV2()">
+                                        <button class="btn btn-secondaire btn-sm btn-block" data-action="exporterEtudiantsV2">
                                             Exporter CSV
                                         </button>
-                                        <button class="btn btn-annuler btn-sm btn-block u-hide" id="v2-btnSupprimerGroupe" onclick="supprimerGroupeSelectionneV2()">
+                                        <button class="btn btn-annuler btn-sm btn-block u-hide" id="v2-btnSupprimerGroupe" data-action="supprimerGroupeSelectionneV2">
                                             Supprimer ce groupe
                                         </button>
-                                        <button class="btn btn-annuler btn-sm btn-block" onclick="viderListeEtudiantsV2()">
+                                        <button class="btn btn-annuler btn-sm btn-block" data-action="viderListeEtudiantsV2">
                                             Vider la liste
                                         </button>
                                     </div>
@@ -11338,10 +11338,10 @@
                                             </div>
                                         </div>
                                         <div class="u-flex-gap-10 u-mt-10">
-                                            <button class="btn btn-confirmer btn-sm" id="v2-btnSoumettreEtudiant" onclick="soumettreEtudiantV2()">
+                                            <button class="btn btn-confirmer btn-sm" id="v2-btnSoumettreEtudiant" data-action="soumettreEtudiantV2">
                                                 Ajouter l'étudiant
                                             </button>
-                                            <button class="btn btn-annuler btn-sm u-hide" id="v2-btnAnnulerEdition" onclick="annulerEditionEtudiantV2()">
+                                            <button class="btn btn-annuler btn-sm u-hide" id="v2-btnAnnulerEdition" data-action="annulerEditionEtudiantV2">
                                                 Annuler
                                             </button>
                                         </div>
@@ -11357,7 +11357,7 @@
                                                 <label class="label-compact">Coller les données :</label>
                                                 <textarea id="v2-donneesCollees" class="controle-form" rows="3"
                                                     placeholder="Depuis Excel ou Omnivox..."></textarea>
-                                                <button class="btn btn-secondaire btn-sm" onclick="previsualiserDonneesV2()">
+                                                <button class="btn btn-secondaire btn-sm" data-action="previsualiserDonneesV2">
                                                     Prévisualiser
                                                 </button>
                                             </div>
@@ -11378,8 +11378,8 @@
                                             <h6 class="u-mb-10">Prévisualisation</h6>
                                             <div id="v2-previewTable" style="max-height: 150px; overflow-y: auto;"></div>
                                             <div class="btn-groupe u-mt-10">
-                                                <button class="btn btn-annuler btn-sm" onclick="annulerImportV2()">Annuler</button>
-                                                <button class="btn btn-confirmer btn-sm" onclick="confirmerImportV2()">Confirmer</button>
+                                                <button class="btn btn-annuler btn-sm" data-action="annulerImportV2">Annuler</button>
+                                                <button class="btn btn-confirmer btn-sm" data-action="confirmerImportV2">Confirmer</button>
                                             </div>
                                         </div>
                                     </div>
@@ -11432,7 +11432,7 @@
                                     </div>
 
                                     <!-- Bouton nouvel horaire -->
-                                    <button class="btn btn-principal btn-sm btn-block" onclick="nouveauHoraireV2()">
+                                    <button class="btn btn-principal btn-sm btn-block" data-action="nouveauHoraireV2">
                                         + Nouvel horaire
                                     </button>
 
@@ -11499,14 +11499,14 @@
 
                                         <!-- Boutons d'action -->
                                         <div class="actions-formulaire">
-                                            <button id="v2-btnSupprimerHoraire" class="btn btn-supprimer u-hide" onclick="supprimerHoraireV2()">
+                                            <button id="v2-btnSupprimerHoraire" class="btn btn-supprimer u-hide" data-action="supprimerHoraireV2">
                                                 Supprimer
                                             </button>
                                             <div>
-                                                <button class="btn btn-annuler" onclick="annulerFormHoraireV2()">
+                                                <button class="btn btn-annuler" data-action="annulerFormHoraireV2">
                                                     Annuler
                                                 </button>
-                                                <button class="btn btn-confirmer" onclick="sauvegarderHoraireV2()">
+                                                <button class="btn btn-confirmer" data-action="sauvegarderHoraireV2">
                                                     <span id="v2-btnTexteHoraire">Enregistrer</span>
                                                 </button>
                                             </div>
@@ -11540,7 +11540,7 @@
                                 <div class="panneau-bibliotheque">
 
                                     <!-- 🆕 Beta 95.3 : Bouton bibliothèque -->
-                                    <button class="btn btn-secondaire btn-bibliotheque" onclick="ouvrirModalBibliothequeGroupeCours()" data-tooltip="reglages-bibliotheque">
+                                    <button class="btn btn-secondaire btn-bibliotheque" data-action="ouvrirModalBibliothequeGroupeCours" data-tooltip="reglages-bibliotheque">
                                         📚 Bibliothèque
                                     </button>
 
@@ -11563,7 +11563,7 @@
                                     </p>
 
                                     <!-- Bouton nouveau groupe-cours -->
-                                    <button class="btn btn-principal btn-sm btn-block" onclick="nouveauGroupeCoursV2()">
+                                    <button class="btn btn-principal btn-sm btn-block" data-action="nouveauGroupeCoursV2">
                                         + Nouveau groupe-cours
                                     </button>
 
@@ -11649,14 +11649,14 @@
 
                                         <!-- Boutons d'action -->
                                         <div class="actions-formulaire">
-                                            <button id="v2-btnSupprimerGroupeCours" class="btn btn-supprimer u-hide" onclick="supprimerGroupeCoursV2()">
+                                            <button id="v2-btnSupprimerGroupeCours" class="btn btn-supprimer u-hide" data-action="supprimerGroupeCoursV2">
                                                 Supprimer
                                             </button>
                                             <div>
-                                                <button class="btn btn-annuler" onclick="annulerFormGroupeCoursV2()">
+                                                <button class="btn btn-annuler" data-action="annulerFormGroupeCoursV2">
                                                     Annuler
                                                 </button>
-                                                <button class="btn btn-confirmer" id="v2-btnSauvegarderGroupeCours" onclick="sauvegarderGroupeCoursV2()">
+                                                <button class="btn btn-confirmer" id="v2-btnSauvegarderGroupeCours" data-action="sauvegarderGroupeCoursV2">
                                                     <span id="v2-btnTexteGroupeCours">Créer</span>
                                                 </button>
                                             </div>
@@ -11906,7 +11906,7 @@
 
                         <!-- Bouton réinitialiser -->
                         <div class="form-group">
-                            <button class="btn btn-secondaire btn-sm" onclick="if(confirm('Réinitialiser le parcours ? La progression sera effacée.')) { if(window.parcours) { window.parcours.reinitialiser(); window.parcours.initialiserPreferencesParcours(); } }">
+                            <button class="btn btn-secondaire btn-sm" data-action="reinitialiserParcoursAvecConfirm">
                                 Réinitialiser le parcours
                             </button>
                             <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen)">
@@ -11942,7 +11942,7 @@
 
                     <!-- Bouton sauvegarder -->
                     <div class="u-mt-20">
-                        <button class="btn btn-confirmer u-w-100" onclick="sauvegarderToutesPreferencesV2()">
+                        <button class="btn btn-confirmer u-w-100" data-action="sauvegarderToutesPreferencesV2">
                             Sauvegarder toutes les préférences
                         </button>
                     </div>
@@ -12079,7 +12079,7 @@
                         </div>
 
                         <!-- Bouton restaurer seuils de détection -->
-                        <button class="btn btn-secondaire u-mt-10" onclick="restaurerSeuilsDetectionDefautV2()" data-tooltip="depist-restaurer">
+                        <button class="btn btn-secondaire u-mt-10" data-action="restaurerSeuilsDetectionDefautV2" data-tooltip="depist-restaurer">
                             Restaurer les valeurs par défaut
                         </button>
                     </div>
@@ -12143,7 +12143,7 @@
                             </div>
 
                             <!-- Bouton restaurer seuils d'interprétation -->
-                            <button class="btn btn-secondaire u-mt-15" onclick="restaurerSeuilsInterpretationDefautV2()" data-tooltip="depist-seuils-restaurer">
+                            <button class="btn btn-secondaire u-mt-15" data-action="restaurerSeuilsInterpretationDefautV2" data-tooltip="depist-seuils-restaurer">
                                 Restaurer les valeurs par défaut
                             </button>
                         </div>
@@ -12151,7 +12151,7 @@
 
                     <!-- Bouton sauvegarder -->
                     <div class="u-mt-20">
-                        <button class="btn btn-confirmer u-w-100" onclick="sauvegarderToutesPreferencesV2()">
+                        <button class="btn btn-confirmer u-w-100" data-action="sauvegarderToutesPreferencesV2">
                             Sauvegarder les paramètres de dépistage
                         </button>
                     </div>
@@ -12183,7 +12183,7 @@
                                     Toutes tes données : cours, étudiants, présences, évaluations, etc.
                                     <br><em class="u-texte-gris">Pour restaurer sur cet appareil ou un autre.</em>
                                 </p>
-                                <button class="btn btn-principal" onclick="ouvrirModalExport()">
+                                <button class="btn btn-principal" data-action="ouvrirModalExport">
                                     Exporter mes données
                                 </button>
                             </div>
@@ -12197,7 +12197,7 @@
                                     Uniquement les outils : grilles, échelles, productions, cartouches.
                                     <br><em class="u-texte-gris">Pour partager avec des collègues (CC BY-NC-SA).</em>
                                 </p>
-                                <button class="btn btn-principal" onclick="exporterConfigurationComplete()">
+                                <button class="btn btn-principal" data-action="exporterConfigurationComplete">
                                     Exporter ma config
                                 </button>
                             </div>
@@ -12211,7 +12211,7 @@
                                     Sauvegarde personnelle ou configuration d'un collègue.
                                     <br><em class="u-texte-gris">Le type sera détecté automatiquement.</em>
                                 </p>
-                                <button class="btn btn-principal" onclick="ouvrirModalImport()">
+                                <button class="btn btn-principal" data-action="ouvrirModalImport">
                                     Choisir un fichier...
                                 </button>
                             </div>
@@ -12259,7 +12259,7 @@
                                 <!-- Actions -->
                                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                                     <div>
-                                        <button class="btn btn-secondaire u-w-100" onclick="capturerSnapshotManuel()" data-tooltip="donnees-capturer">
+                                        <button class="btn btn-secondaire u-w-100" data-action="capturerSnapshotManuel" data-tooltip="donnees-capturer">
                                             Capturer maintenant
                                         </button>
                                         <p class="text-muted u-mt-5 u-text-center" style="font-size: 0.8rem">
@@ -12267,7 +12267,7 @@
                                         </p>
                                     </div>
                                     <div>
-                                        <button class="btn btn-secondaire u-w-100" onclick="lancerReconstructionRetroactive()" data-tooltip="donnees-reconstruire">
+                                        <button class="btn btn-secondaire u-w-100" data-action="lancerReconstructionRetroactive" data-tooltip="donnees-reconstruire">
                                             Reconstruire l'historique
                                         </button>
                                         <p class="text-muted u-mt-5 u-text-center" style="font-size: 0.8rem">
@@ -12275,7 +12275,7 @@
                                         </p>
                                     </div>
                                     <div>
-                                        <button class="btn btn-secondaire u-w-100" onclick="confirmerNettoyageSnapshots()" style="border-color: #ff6f00; color: #ff6f00" data-tooltip="donnees-supprimer-captures">
+                                        <button class="btn btn-secondaire u-w-100" data-action="confirmerNettoyageSnapshots" style="border-color: #ff6f00; color: #ff6f00" data-tooltip="donnees-supprimer-captures">
                                             Supprimer les captures
                                         </button>
                                         <p class="text-muted u-mt-5 u-text-center" style="font-size: 0.8rem">
@@ -12297,7 +12297,7 @@
                                     <br><strong>Aucune donnée nominative n'est incluse.</strong>
                                 </div>
 
-                                <button class="btn btn-principal" onclick="exporterFormatRecherche()">
+                                <button class="btn btn-principal" data-action="exporterFormatRecherche">
                                     Générer l'export anonymisé
                                 </button>
                             </div>
@@ -12320,7 +12320,7 @@
                                     Efface <strong>toutes</strong> les données et revient à l'état initial.
                                     <strong>Cette action est irréversible.</strong>
                                 </p>
-                                <button class="btn btn-supprimer" onclick="reinitialiserDonnees()">
+                                <button class="btn btn-supprimer" data-action="reinitialiserDonnees">
                                     Réinitialiser toutes les données
                                 </button>
                                 <p class="text-muted u-mt-10 u-texte-petit">
@@ -12379,7 +12379,7 @@
                     <div class="modal-contenu" style="max-width: 500px;">
                         <div class="modal-header zone-danger-header">
                             <h3>Supprimer définitivement</h3>
-                            <button class="modal-fermer" onclick="fermerModalSuppressionRessource()">&times;</button>
+                            <button class="modal-fermer" data-action="fermerModalSuppressionRessource">&times;</button>
                         </div>
                         <div class="modal-body">
                             <div id="suppression-ressource-info">
@@ -12411,8 +12411,8 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button class="btn btn-secondaire" onclick="fermerModalSuppressionRessource()">Annuler</button>
-                            <button id="btn-confirmer-suppression" class="btn btn-supprimer" disabled onclick="confirmerSuppressionRessource()">
+                            <button class="btn btn-secondaire" data-action="fermerModalSuppressionRessource">Annuler</button>
+                            <button id="btn-confirmer-suppression" class="btn btn-supprimer" disabled data-action="confirmerSuppressionRessource">
                                 Supprimer définitivement
                             </button>
                         </div>
@@ -12453,7 +12453,7 @@
                                 >
                                 <button
                                     id="aide-recherche-clear"
-                                    onclick="effacerRechercheAide()"
+                                    data-action="effacerRechercheAide"
                                     class="btn-clear-input"
                                     title="Effacer la recherche"
                                 >✕</button>
@@ -17339,8 +17339,8 @@
             </div>
 
             <div class="mt-20-flex-gap10-end">
-                <button class="btn btn-annuler" onclick="fermerModalExport()">Annuler</button>
-                <button class="btn btn-confirmer" onclick="executerExport()">Exporter</button>
+                <button class="btn btn-annuler" data-action="fermerModalExport">Annuler</button>
+                <button class="btn btn-confirmer" data-action="executerExport">Exporter</button>
             </div>
         </div>
     </div>
@@ -17368,8 +17368,8 @@
             </div>
 
             <div class="d-flex-gap10-end">
-                <button class="btn btn-annuler" onclick="fermerModalImport()">Annuler</button>
-                <button class="btn btn-confirmer" id="btnExecuterImport" onclick="executerImport()" disabled>Importer</button>
+                <button class="btn btn-annuler" data-action="fermerModalImport">Annuler</button>
+                <button class="btn btn-confirmer" id="btnExecuterImport" data-action="executerImport" disabled>Importer</button>
             </div>
         </div>
     </div>
@@ -17812,7 +17812,7 @@
     <!-- ========================================= -->
     <div id="modalWizardPratiqueV2" class="modal-overlay">
         <div class="modal-contenu wizard-v2">
-            <button onclick="fermerWizardV2()" class="modal-fermer">✕</button>
+            <button data-action="fermerWizardV2" class="modal-fermer">✕</button>
 
             <!-- En-tête avec Primo -->
             <div class="wizard-v2-header">
@@ -17841,17 +17841,17 @@
             <!-- Boutons navigation -->
             <!-- 🆕 #23 (20 jan 2026) : Harmonisation Design System v7 -->
             <div class="wizard-v2-actions">
-                <button id="wizard-v2-btn-annuler" class="btn btn-annuler" onclick="fermerWizardV2()">
+                <button id="wizard-v2-btn-annuler" class="btn btn-annuler" data-action="fermerWizardV2">
                     Annuler
                 </button>
                 <div class="wizard-v2-actions-droite">
-                    <button id="wizard-v2-btn-precedent" class="btn btn-secondaire u-hide" onclick="etapePrecedenteV2()">
+                    <button id="wizard-v2-btn-precedent" class="btn btn-secondaire u-hide" data-action="etapePrecedenteV2">
                         ← Précédent
                     </button>
-                    <button id="wizard-v2-btn-suivant" class="btn btn-principal" onclick="etapeSuivanteV2()">
+                    <button id="wizard-v2-btn-suivant" class="btn btn-principal" data-action="etapeSuivanteV2">
                         Suivant →
                     </button>
-                    <button id="wizard-v2-btn-creer" class="btn btn-confirmer u-hide" onclick="creerPratiqueV2()">
+                    <button id="wizard-v2-btn-creer" class="btn btn-confirmer u-hide" data-action="creerPratiqueV2">
                         ✓ Créer la pratique
                     </button>
                 </div>
@@ -17865,7 +17865,7 @@
     <!-- ========================================= -->
     <div id="modalApercuPDF" class="modal-overlay">
         <div class="modal-contenu u-p-20" style="max-width: 95vw; width: auto">
-            <button onclick="fermerModalApercuPDF()" class="modal-fermer">✕</button>
+            <button data-action="fermerModalApercuPDF" class="modal-fermer">✕</button>
 
             <h2 class="modal-titre">📄 Aperçu du document</h2>
 
@@ -17946,10 +17946,10 @@
 
             <!-- Boutons -->
             <div class="btn-groupe u-mt-20" style="display: flex; justify-content: space-between">
-                <button onclick="fermerModalApercuPDF()" class="btn btn-secondaire">
+                <button data-action="fermerModalApercuPDF" class="btn btn-secondaire">
                     ← Modifier les options
                 </button>
-                <button onclick="exporterPDFDepuisApercu()" class="btn btn-confirmer">
+                <button data-action="exporterPDFDepuisApercu" class="btn btn-confirmer">
                     📄 Exporter en PDF
                 </button>
             </div>
@@ -17962,7 +17962,7 @@
     <!-- ========================================= -->
     <div id="modalConfidentiel" class="modal-overlay">
         <div class="modal-contenu" style="max-width: 750px; padding: 16px;">
-            <button onclick="fermerModalConfidentiel()" class="modal-fermer">✕</button>
+            <button data-action="fermerModalConfidentiel" class="modal-fermer">✕</button>
 
             <h2 class="modal-titre u-texte-11" style="margin-bottom: 4px">🔒 Informations confidentielles</h2>
             <p class="u-mb-10" style="color: var(--texte-secondaire); font-size: 0.8rem">
@@ -18139,10 +18139,10 @@
 
             <!-- Boutons -->
             <div class="btn-groupe u-flex-gap-8" style="justify-content: flex-end; margin-top: 12px">
-                <button onclick="fermerModalConfidentiel()" class="btn btn-annuler u-texte-petit" style="padding: 6px 12px">
+                <button data-action="fermerModalConfidentiel" class="btn btn-annuler u-texte-petit" style="padding: 6px 12px">
                     Annuler
                 </button>
-                <button onclick="sauvegarderConfidentiel()" class="btn btn-confirmer u-texte-petit" style="padding: 6px 12px">
+                <button data-action="sauvegarderConfidentiel" class="btn btn-confirmer u-texte-petit" style="padding: 6px 12px">
                     Enregistrer
                 </button>
             </div>

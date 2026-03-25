@@ -2593,6 +2593,7 @@ window.importerDansCartoucheActive = importerDansCartoucheActive;
 window.supprimerCartoucheActive = supprimerCartoucheActive;
 window.annulerFormCartouche = annulerFormCartouche;
 window.sauvegarderCartoucheComplete = sauvegarderCartoucheComplete;
+window.genererApercuAleatoire = genererApercuAleatoire;
 
 /* ===============================
    📝 NOTES DE DOCUMENTATION

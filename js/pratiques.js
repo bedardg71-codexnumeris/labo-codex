@@ -5103,6 +5103,7 @@ function toggleAccordeon(id) {
 }
 
 window.toggleAccordeon = toggleAccordeon;
+window.activerPratiqueAffichee = activerPratiqueAffichee;
 
 /**
  * ✅ BETA 95 : Toggle accordéon v2 (structure avec header cliquable)

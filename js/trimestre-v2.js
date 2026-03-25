@@ -5203,6 +5203,7 @@ window.annulerImportV2 = annulerImportV2;
 window.exporterEtudiantsV2 = exporterEtudiantsV2;
 window.reinitialiserEtudiantsV2 = reinitialiserEtudiantsV2;
 window.supprimerGroupeSelectionneV2 = supprimerGroupeSelectionneV2;
+window.viderListeEtudiantsV2 = viderListeEtudiantsV2;
 window.chargerHoraireGroupeActifV2 = chargerHoraireGroupeActifV2;
 window.chargerSeancesV2 = chargerSeancesV2;
 window.afficherFormSeanceV2 = afficherFormSeanceV2;

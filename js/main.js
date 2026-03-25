@@ -208,6 +208,14 @@ window.supprimerPratiqueMaterielActive = function() {
         supprimerPratiqueMateriel(pratiqueEnEditionMateriel);
     }
 };
+window.appliquerPratiqueAuCoursActive = function() {
+    if (typeof appliquerPratiqueAuCours === 'function' && typeof pratiqueEnEditionMateriel !== 'undefined') {
+        appliquerPratiqueAuCours(pratiqueEnEditionMateriel);
+    }
+};
+window.demarrerCreationMaterielSafe = function() {
+    if (typeof demarrerCreationMateriel === 'function') demarrerCreationMateriel();
+};
 
 document.addEventListener('DOMContentLoaded', function () {
     console.log('🚀 Initialisation du système de monitorage v3.0');
@@ -702,6 +710,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // stopPropagation optionnel
         if (el.hasAttribute('data-stop')) e.stopPropagation();
+
+        // preventDefault optionnel (liens <a> avec data-action)
+        if (el.hasAttribute('data-prevent')) e.preventDefault();
 
         // Résoudre la fonction (supporte dot notation : Codex.actionOuvrir)
         var fn = action.split('.').reduce(function(obj, key) {
