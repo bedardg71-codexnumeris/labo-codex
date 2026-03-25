@@ -636,6 +636,17 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     console.log('   ✅ Événement affichage cours attaché');
 
+    // Délégation des accordéons (remplace 78+ onclick inline)
+    document.addEventListener('click', function (e) {
+        var header = e.target.closest('.accordeon-header');
+        if (header) {
+            e.stopPropagation();
+            if (typeof toggleAccordeonV2 === 'function') {
+                toggleAccordeonV2(header);
+            }
+        }
+    });
+
     // ===============================
     // 3.5 EXÉCUTION DES MIGRATIONS (Beta 93.5)
     // ===============================

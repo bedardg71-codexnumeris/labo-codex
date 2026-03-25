@@ -781,7 +781,7 @@ function genererPanneauParcours() {
     // === MODE AUTONOME : panneau compact de félicitation ===
     if (progression.autonome) {
         var dateAuto = chargerProgression().dateAutonomie || '';
-        html += '<div class="accordeon-header" onclick="toggleAccordeonV2(this);">';
+        html += '<div class="accordeon-header">';
         html += '<h3 style="margin: 0; font-size: 1.1rem;">Parcourir — ' + progression.jalonsFaits + '/' + progression.totalJalons + '</h3>';
         html += '<span class="accordeon-chevron">▼</span>';
         html += '</div>';
@@ -807,7 +807,7 @@ function genererPanneauParcours() {
     var modeActifLabel = progression.mode === 'explicite' ? 'Explicite' : 'Exploration';
     var autreTitre = progression.mode === 'explicite' ? 'Passer en exploration' : 'Passer en explicite';
 
-    html += '<div class="accordeon-header" onclick="toggleAccordeonV2(this);">';
+    html += '<div class="accordeon-header">';
     html += '<h3 style="margin: 0; font-size: 1.1rem;">Parcourir — ' + progression.jalonsFaits + '/' + progression.totalJalons + '</h3>';
     html += '<button class="parcours-btn-mode" title="' + autreTitre + '" onclick="' +
         'event.stopPropagation(); ' +
