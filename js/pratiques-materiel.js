@@ -155,7 +155,7 @@ async function afficherListePratiquesMateriel() {
         const badgeType = genererBadgeTypePratique(pratique);
         const badgesCaracteristiques = genererBadgeCaracteristiques(pratique);
         return `
-            <div class="sidebar-item" data-id="${pratique.id}" onclick="chargerPratiquePourModif('${pratique.id}')">
+            <div class="sidebar-item" data-id="${pratique.id}" data-action="chargerPratiquePourModif" data-param="${pratique.id}">
                 <div class="sidebar-item-titre">${nomPratique}</div>
                 <div class="sidebar-item-badges">${badgeType} ${badgesCaracteristiques}</div>
             </div>
@@ -327,7 +327,7 @@ async function afficherBibliothequePratiques() {
         <div id="modalBibliothequePratiques" class="modal-js-overlay">
             <div class="modal-js-contenu" style="max-width: 800px;">
                 <!-- Bouton X sticky -->
-                <button onclick="fermerModalBibliothequePratiques()" class="modal-js-fermer">
+                <button data-action="fermerModalBibliothequePratiques" class="modal-js-fermer">
                     ×
                 </button>
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
@@ -408,25 +408,25 @@ async function afficherBibliothequePratiques() {
                         </div>
                         <div style="display: flex; gap: 8px; margin-left: 10px;">
                             <button
-                                onclick="dupliquerPratiqueBibliotheque('${pratique.id}')"
+                                data-action="dupliquerPratiqueBibliotheque" data-param="${pratique.id}"
                                 class="btn btn-confirmer btn-tres-compact"
                                 title="Créer une copie">
                                 Dupliquer
                             </button>
                             <button
-                                onclick="partagerPratiqueMateriel('${pratique.id}')"
+                                data-action="partagerPratiqueMateriel" data-param="${pratique.id}"
                                 class="btn btn-secondaire btn-tres-compact"
                                 title="Exporter en JSON">
                                 Exporter
                             </button>
                             <button
-                                onclick="retirerPratiqueDeBibliothequeMateriel('${pratique.id}')"
+                                data-action="retirerPratiqueDeBibliothequeMateriel" data-param="${pratique.id}"
                                 class="btn btn-secondaire btn-tres-compact"
                                 title="Retirer de la barre latérale (données conservées)">
                                 Retirer
                             </button>
                             <button
-                                onclick="supprimerPratiqueDefinitivement('${pratique.id}')"
+                                data-action="supprimerPratiqueDefinitivement" data-param="${pratique.id}"
                                 class="btn btn-supprimer btn-tres-compact"
                                 title="Supprimer définitivement">
                                 Supprimer
@@ -443,13 +443,13 @@ async function afficherBibliothequePratiques() {
 
                     <!-- Boutons Import/Export après la Section 1 -->
                     <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
-                        <button onclick="exporterPratiquesUtilisateur()" class="btn btn-secondaire">
+                        <button data-action="exporterPratiquesUtilisateur" class="btn btn-secondaire">
                             Exporter toutes mes pratiques
                         </button>
-                        <button onclick="document.getElementById('fichier-import-pratiques-modal').click()" class="btn btn-secondaire">
+                        <button data-action="ouvrirFilePickerImportPratiques" class="btn btn-secondaire">
                             Importer des pratiques
                         </button>
-                        <input type="file" id="fichier-import-pratiques-modal" accept=".json" style="display: none;" onchange="importerPratiquesUtilisateur(event)">
+                        <input type="file" id="fichier-import-pratiques-modal" accept=".json" style="display: none;" data-on-change="importerPratiquesUtilisateur">
                     </div>
                 </div>
 
@@ -467,7 +467,7 @@ async function afficherBibliothequePratiques() {
                         </label>
                         <select id="filtreTypePratiques"
                                 class="controle-form"
-                                onchange="filtrerPratiquesBibliotheque()"
+                                data-on-change="filtrerPratiquesBibliotheque"
                                 style="max-width: 300px;">
                             <option value="">Tous les types</option>
                             <option value="pan-standards">PAN-Standards (STD)</option>
@@ -484,7 +484,7 @@ async function afficherBibliothequePratiques() {
                         </label>
                         <select id="filtreDisciplinePratiques"
                                 class="controle-form"
-                                onchange="filtrerPratiquesBibliotheque()"
+                                data-on-change="filtrerPratiquesBibliotheque"
                                 style="max-width: 300px;">
                             <option value="">Toutes les disciplines</option>
     `;
@@ -544,7 +544,7 @@ async function afficherBibliothequePratiques() {
                             </div>
                         </div>
                         <button
-                            onclick="ajouterPratiqueALaSelection('${pratique.id}')"
+                            data-action="ajouterPratiqueALaSelection" data-param="${pratique.id}"
                             class="btn btn-principal btn-tres-compact"
                             title="Ajouter à ta sélection">
                             Ajouter
@@ -1448,10 +1448,10 @@ function afficherTypesTravauxMat(typesTravaux) {
     typesTravaux.forEach((t, index) => {
         html += `
             <tr>
-                <td><input type="text" class="controle-form" value="${t.nom || ''}" onchange="modifierTypeTravailMat(${index}, 'nom', this.value)"></td>
-                <td><input type="text" class="controle-form" value="${t.description || ''}" onchange="modifierTypeTravailMat(${index}, 'description', this.value)"></td>
+                <td><input type="text" class="controle-form" value="${t.nom || ''}" data-on-change="modifierTypeTravailMatHandler" data-mat-index="${index}" data-champ="nom"></td>
+                <td><input type="text" class="controle-form" value="${t.description || ''}" data-on-change="modifierTypeTravailMatHandler" data-mat-index="${index}" data-champ="description"></td>
                 <td style="text-align: center;">
-                    <button onclick="supprimerTypeTravailMat(${index})" class="btn btn-supprimer btn-tres-compact">×</button>
+                    <button data-action="supprimerTypeTravailMat" data-param="${index}" class="btn btn-supprimer btn-tres-compact">×</button>
                 </td>
             </tr>
         `;
@@ -1536,15 +1536,15 @@ function afficherForfaitsMat(forfaits, typesTravaux) {
 
     forfaits.forEach((f, index) => {
         html += `<tr>
-            <td><input type="text" class="controle-form" value="${f.lettre || ''}" style="width: 50px;" onchange="modifierForfaitMat(${index}, 'lettre', this.value)"></td>
-            <td><input type="number" class="controle-form" value="${f.note || 0}" style="width: 60px;" onchange="modifierForfaitMat(${index}, 'note', this.value)"></td>`;
+            <td><input type="text" class="controle-form" value="${f.lettre || ''}" style="width: 50px;" data-on-change="modifierForfaitMatHandler" data-mat-index="${index}" data-champ="lettre"></td>
+            <td><input type="number" class="controle-form" value="${f.note || 0}" style="width: 60px;" data-on-change="modifierForfaitMatHandler" data-mat-index="${index}" data-champ="note"></td>`;
 
         typesTravaux.forEach(t => {
             const quantite = f.travaux?.[t.id] || 0;
-            html += `<td><input type="number" class="controle-form" value="${quantite}" style="width: 50px;" min="0" onchange="modifierTravailForfaitMat(${index}, ${t.id}, this.value)"></td>`;
+            html += `<td><input type="number" class="controle-form" value="${quantite}" style="width: 50px;" min="0" data-on-change="modifierTravailForfaitMatHandler" data-mat-index="${index}" data-type-id="${t.id}"></td>`;
         });
 
-        html += `<td style="text-align: center;"><button onclick="supprimerForfaitMat(${index})" class="btn btn-supprimer btn-tres-compact">×</button></td></tr>`;
+        html += `<td style="text-align: center;"><button data-action="supprimerForfaitMat" data-param="${index}" class="btn btn-supprimer btn-tres-compact">×</button></td></tr>`;
     });
 
     html += '</tbody></table>';
@@ -1965,8 +1965,9 @@ async function exporterPratiquesUtilisateur() {
  * MODIFIÉ (8 jan 2026) : Support métadonnées CC comme les autres modules
  * @param {Event} event - Événement du changement de fichier
  */
-async function importerPratiquesUtilisateur(event) {
-    const file = event.target.files[0];
+async function importerPratiquesUtilisateur(eventOuEl) {
+    var target = eventOuEl.target || eventOuEl;
+    const file = target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
@@ -1993,8 +1994,8 @@ async function importerPratiquesUtilisateur(event) {
                     <div class="modal-js-contenu" style="max-width: 600px; padding: 20px;">
                         ${message}
                         <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
-                            <button class="btn btn-annuler" onclick="this.closest('.modal-js-overlay').parentElement.remove(); delete window._pratiquesImportEnAttente;">Annuler</button>
-                            <button class="btn btn-confirmer" onclick="window.confirmerImportPratiques(window._pratiquesImportEnAttente); this.closest('.modal-js-overlay').parentElement.remove(); delete window._pratiquesImportEnAttente;">Importer</button>
+                            <button class="btn btn-annuler" data-action="fermerModalImportPratiques">Annuler</button>
+                            <button class="btn btn-confirmer" data-action="confirmerEtFermerImportPratiques">Importer</button>
                         </div>
                     </div>
                 </div>
@@ -2211,7 +2212,7 @@ function genererCheckboxesCategorie(productions, categorie) {
                          opacity: ${opacite}; transition: background 0.15s;"
                    class="hover-fond-subtil"
                 <input type="checkbox" ${checked}
-                       onchange="toggleProductionCategorie('${prod.id}', '${categorie}', this.checked)"
+                       data-on-change="toggleProductionCategorieHandler" data-prod-id="${prod.id}" data-categorie="${categorie}"
                        style="width: 16px; height: 16px; accent-color: ${colorCategorie};"
                        ${estDansAutre ? 'disabled' : ''}>
                 <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.9rem;">
@@ -2447,11 +2448,11 @@ function afficherListeObjectifsMat(objectifs) {
     objectifs.forEach((obj, index) => {
         html += `<tr data-index="${index}">`;
         html += `<td><input type="text" class="controle-form" value="${obj.nom || ''}"
-                    onchange="modifierObjectifMat(${index}, 'nom', this.value)"></td>`;
+                    data-on-change="modifierObjectifMatHandler" data-mat-index="${index}" data-champ="nom"></td>`;
 
         if (mode === 'comptage') {
             html += `<td>
-                <select class="controle-form" onchange="modifierObjectifMat(${index}, 'type', this.value)">
+                <select class="controle-form" data-on-change="modifierObjectifMatHandler" data-mat-index="${index}" data-champ="type">
                     <option value="complementaire" ${obj.type !== 'essentiel' ? 'selected' : ''}>Complémentaire</option>
                     <option value="essentiel" ${obj.type === 'essentiel' ? 'selected' : ''}>Essentiel</option>
                 </select>
@@ -2459,11 +2460,11 @@ function afficherListeObjectifsMat(objectifs) {
         } else if (mode === 'moyenne-ponderee') {
             html += `<td><input type="number" class="controle-form" value="${obj.ponderation || 0}"
                         min="0" max="100" style="width: 80px;"
-                        onchange="modifierObjectifMat(${index}, 'ponderation', this.value)">%</td>`;
+                        data-on-change="modifierObjectifMatHandler" data-mat-index="${index}" data-champ="ponderation">%</td>`;
         }
 
         html += `<td style="text-align: center;">
-            <button onclick="supprimerObjectifMat(${index})" class="btn btn-supprimer btn-tres-compact">×</button>
+            <button data-action="supprimerObjectifMat" data-param="${index}" class="btn btn-supprimer btn-tres-compact">×</button>
         </td>`;
         html += '</tr>';
     });
@@ -2603,13 +2604,13 @@ function afficherGrilleConversionMat(grille) {
             <td>${ligne.nbObjectifs} objectif(s)</td>
             <td><input type="number" class="controle-form" value="${ligne.note}"
                     min="0" max="100" style="width: 80px;"
-                    onchange="modifierGrilleConversionMat(${index}, this.value)">%</td>
+                    data-on-change="modifierGrilleConversionMatHandler" data-mat-index="${index}">%</td>
         </tr>`;
     });
 
     html += '</tbody></table>';
     html += `<button type="button" class="btn btn-secondaire btn-compact" style="margin-top: 10px;"
-             onclick="genererGrilleConversionMat()">Regénérer la grille</button>`;
+             data-action="genererGrilleConversionMat">Regénérer la grille</button>`;
 
     conteneur.innerHTML = html;
 }
@@ -2666,6 +2667,68 @@ async function modifierGrilleConversionMat(indexLigne, valeur) {
 
     grille[indexLigne].note = parseInt(valeur) || 0;
     await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+}
+
+/* ===============================
+   WRAPPERS DELEGATION (Phase 5)
+   =============================== */
+
+/** Handler pour modifierTypeTravailMat(index, champ, value) */
+function modifierTypeTravailMatHandler(el) {
+    var index = parseInt(el.dataset.matIndex);
+    var champ = el.dataset.champ;
+    modifierTypeTravailMat(index, champ, el.value);
+}
+
+/** Handler pour modifierForfaitMat(index, champ, value) */
+function modifierForfaitMatHandler(el) {
+    var index = parseInt(el.dataset.matIndex);
+    var champ = el.dataset.champ;
+    modifierForfaitMat(index, champ, el.value);
+}
+
+/** Handler pour modifierTravailForfaitMat(index, typeId, value) */
+function modifierTravailForfaitMatHandler(el) {
+    var index = parseInt(el.dataset.matIndex);
+    var typeId = parseInt(el.dataset.typeId);
+    modifierTravailForfaitMat(index, typeId, el.value);
+}
+
+/** Handler pour modifierObjectifMat(index, champ, value) */
+function modifierObjectifMatHandler(el) {
+    var index = parseInt(el.dataset.matIndex);
+    var champ = el.dataset.champ;
+    modifierObjectifMat(index, champ, el.value);
+}
+
+/** Handler pour modifierGrilleConversionMat(index, value) */
+function modifierGrilleConversionMatHandler(el) {
+    var index = parseInt(el.dataset.matIndex);
+    modifierGrilleConversionMat(index, el.value);
+}
+
+/** Handler pour toggleProductionCategorie(prodId, categorie, checked) */
+function toggleProductionCategorieHandler(el) {
+    toggleProductionCategorie(el.dataset.prodId, el.dataset.categorie, el.checked);
+}
+
+/** Ouvrir le file picker import pratiques */
+function ouvrirFilePickerImportPratiques() {
+    var input = document.getElementById('fichier-import-pratiques-modal');
+    if (input) input.click();
+}
+
+/** Fermer modal import pratiques */
+function fermerModalImportPratiques() {
+    var overlay = document.querySelector('.modal-js-overlay');
+    if (overlay && overlay.parentElement) overlay.parentElement.remove();
+    delete window._pratiquesImportEnAttente;
+}
+
+/** Confirmer import pratiques + fermer */
+function confirmerEtFermerImportPratiques() {
+    window.confirmerImportPratiques(window._pratiquesImportEnAttente);
+    fermerModalImportPratiques();
 }
 
 /* ===============================
@@ -2743,6 +2806,21 @@ window.modifierGrilleConversionMat = modifierGrilleConversionMat;
 window.mettreAJourNomPratique = mettreAJourNomPratique;
 window.mettreAJourDescriptionPratique = mettreAJourDescriptionPratique;
 window.mettreAJourDisciplinePratique = mettreAJourDisciplinePratique;
+
+// Fonctions bibliothèque (manquantes avant Phase 5)
+window.dupliquerPratiqueBibliotheque = dupliquerPratiqueBibliotheque;
+window.supprimerPratiqueDefinitivement = supprimerPratiqueDefinitivement;
+
+// Wrappers délégation (Phase 5)
+window.modifierTypeTravailMatHandler = modifierTypeTravailMatHandler;
+window.modifierForfaitMatHandler = modifierForfaitMatHandler;
+window.modifierTravailForfaitMatHandler = modifierTravailForfaitMatHandler;
+window.modifierObjectifMatHandler = modifierObjectifMatHandler;
+window.modifierGrilleConversionMatHandler = modifierGrilleConversionMatHandler;
+window.toggleProductionCategorieHandler = toggleProductionCategorieHandler;
+window.ouvrirFilePickerImportPratiques = ouvrirFilePickerImportPratiques;
+window.fermerModalImportPratiques = fermerModalImportPratiques;
+window.confirmerEtFermerImportPratiques = confirmerEtFermerImportPratiques;
 
 // Constantes
 window.CLE_PRATIQUES_CONFIGURATIONS = CLE_PRATIQUES_CONFIGURATIONS;
