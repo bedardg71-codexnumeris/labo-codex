@@ -1043,7 +1043,7 @@ function genererSectionMobilisationEngagement(da) {
 
                             return `
                                 <div class="badge-absence ${classeBadge}"
-                                     onclick="naviguerVersPresenceAvecDate('${abs.date}')">
+                                     data-action="naviguerVersPresenceAvecDate" data-param="${abs.date}">
                                     <span class="badge-absence-date">
                                         ${dateFormatee}
                                     </span>
@@ -1098,7 +1098,7 @@ function genererSectionMobilisationEngagement(da) {
                                 const typeIcone = intervention.type === 'individuel' ? '👤' : intervention.type === 'mio' ? '✉️' : '👥';
 
                                 return `
-                                    <span class="badge-intervention-vert" onclick="naviguerVersIntervention('${intervention.id}');">
+                                    <span class="badge-intervention-vert" data-action="naviguerVersIntervention" data-param="${intervention.id}">
                                         ${typeIcone} ${dateFormatee}
                                         <span class="badge-analyse-count">
                                             ${duree} pér.
@@ -1140,7 +1140,7 @@ function genererSectionMobilisationEngagement(da) {
                             .sort((a, b) => a.indexOriginal - b.indexOriginal) // Trier par numéro croissant
                             .map(art => `
                                 <span class="badge-completion-remis"
-                                      onclick="evaluerProduction('${da}', '${art.id}')">
+                                      data-action="evaluerProduction" data-param="${da}" data-param2="${art.id}">
                                     <span class="badge-completion-titre">
                                         ${echapperHtml(art.description)}
                                     </span>
@@ -1171,7 +1171,7 @@ function genererSectionMobilisationEngagement(da) {
                             .sort((a, b) => a.indexOriginal - b.indexOriginal) // Trier par numéro croissant
                             .map(art => `
                                 <span class="${art.estNonRecevable ? 'badge-completion-non-recevable' : 'badge-completion-non-remis'}"
-                                      onclick="evaluerProduction('${da}', '${art.id}')"
+                                      data-action="evaluerProduction" data-param="${da}" data-param2="${art.id}"
                                       title="${art.estNonRecevable ? (art.statutIntegrite === 'plagiat' ? 'Plagiat détecté' : 'Utilisation IA non autorisée') : 'Non remis'}">
                                     <span class="badge-completion-titre">
                                         ${echapperHtml(art.description)}
@@ -1394,7 +1394,7 @@ function genererSectionMobilisationEngagement(da) {
                                 <div class="badge-artefact"
                                      style="background: ${couleurBadge}22; border-color: ${couleurBadge}; opacity: ${opacite}; border-width: ${bordure}; cursor: pointer;"
                                      class="hover-opaque"
-                                     onclick="evaluerProduction('${da}', '${art.id}')"
+                                     data-action="evaluerProduction" data-param="${da}" data-param2="${art.id}"
                                      title="${echapperHtml(art.description)}">
                                     <span class="badge-artefact-titre" style="color: ${couleurBadge};">
                                         A${indexOriginal}
@@ -1852,7 +1852,7 @@ function genererSectionAccompagnement(da) {
                     <strong>Services adaptés :</strong> ${etudiant.caf === 'Oui' ? '✓ CAF' : ''} ${etudiant.sa === 'Oui' ? '✓ SA' : ''} ${etudiant.caf !== 'Oui' && etudiant.sa !== 'Oui' ? 'Aucun' : ''}
                 </p>
 
-                <button onclick="ouvrirModalConfidentiel('${da}')" class="btn btn-secondaire" style="margin-top: 12px; font-size: 0.85rem;" data-tooltip="profil-confidentiel">
+                <button data-action="ouvrirModalConfidentiel" data-param="${da}" class="btn btn-secondaire" style="margin-top: 12px; font-size: 0.85rem;" data-tooltip="profil-confidentiel">
                     🔒 Confidentiel ${aDesInfosConfidentielles(da) ? '<span style="color: var(--vert-principal);">●</span>' : ''}
                 </button>
             </div>
@@ -1993,7 +1993,7 @@ function genererSectionAccompagnement(da) {
                 <h4 style="color: var(--accent-primaire); font-size: 0.95rem; margin: 0; font-weight: 600;" data-tooltip="profil-historique">
                     HISTORIQUE ${interventions && interventions.length > 0 ? `(${interventions.length} intervention${interventions.length > 1 ? 's' : ''})` : ''}
                 </h4>
-                <button class="btn btn-principal" onclick="naviguerVersNouvelleIntervention('${da}');">+ Nouvelle intervention</button>
+                <button class="btn btn-principal" data-action="naviguerVersNouvelleIntervention" data-param="${da}">+ Nouvelle intervention</button>
             </div>
         </div>
     `;
@@ -2051,7 +2051,7 @@ function genererSectionAccompagnement(da) {
                     ` : ''}
                 </div>
                 <div class="intervention-timeline-actions">
-                    <button class="btn btn-secondaire" onclick="naviguerVersIntervention('${intervention.id}');">
+                    <button class="btn btn-secondaire" data-action="naviguerVersIntervention" data-param="${intervention.id}">
                         Consulter
                     </button>
                 </div>
@@ -2824,7 +2824,7 @@ function genererSectionCollapsible(id, titre, contenu, ouvert = false) {
 
     return `
         <div class="section-collapsible" id="${sectionId}">
-            <div class="section-collapsible-header" onclick="toggleSectionCollapsible('${sectionId}')">
+            <div class="section-collapsible-header" data-action="toggleSectionCollapsible" data-param="${sectionId}">
                 <div class="section-collapsible-titre">
                     ${titre}
                 </div>
@@ -3311,7 +3311,9 @@ function genererValeursComparatives(valeurSOM, valeurPAN, modeComparatif, affich
  * Affiche le profil complet avec layout 2 colonnes
  * Inspiré de la page d'évaluation
  */
-function afficherProfilComplet(da) {
+function afficherProfilComplet(daOuEl) {
+    // Phase 5 : accepte un élément (depuis data-on-change) ou une chaîne (depuis data-action / appel direct)
+    var da = (typeof daOuEl === 'object' && daOuEl !== null) ? daOuEl.value : daOuEl;
     console.log('👤 Affichage du profil pour DA:', da);
 
     // Sauvegarder le DA pour navigation
@@ -3448,7 +3450,7 @@ function afficherProfilComplet(da) {
                 <!-- Sélecteur d'étudiant -->
                 <div class="sidebar-filtre">
                     <label class="u-texte-mini u-texte-gris" style="margin-bottom: 5px; display: block;" data-tooltip="profil-selecteur">Étudiant·e :</label>
-                    <select id="selecteurEtudiantProfil" class="controle-form" onchange="afficherProfilComplet(this.value)">
+                    <select id="selecteurEtudiantProfil" class="controle-form" data-on-change="afficherProfilComplet">
                         ${etudiants.map(e => {
                             // ✅ CORRIGÉ (29 déc 2025): Ne pas afficher DA en mode anonymisation
                             const daTexte = modeAnonymisation ? '' : ` (${echapperHtml(e.da)})`;
@@ -3464,13 +3466,13 @@ function afficherProfilComplet(da) {
                 <!-- Navigation Précédent/Suivant -->
                 <div class="sidebar-nav-buttons">
                     <button class="btn btn-principal"
-                            onclick="afficherProfilComplet('${etudiantPrecedent?.da}')"
+                            data-action="afficherProfilComplet" data-param="${etudiantPrecedent?.da}"
                             ${!etudiantPrecedent ? 'disabled' : ''}
                             title="Étudiant·e précédent·e">
                         ← Préc.
                     </button>
                     <button class="btn btn-principal"
-                            onclick="afficherProfilComplet('${etudiantSuivant?.da}')"
+                            data-action="afficherProfilComplet" data-param="${etudiantSuivant?.da}"
                             ${!etudiantSuivant ? 'disabled' : ''}
                             title="Étudiant·e suivant·e">
                         Suiv. →
@@ -3496,39 +3498,39 @@ function afficherProfilComplet(da) {
                     <div class="sidebar-section-titre" data-tooltip="profil-nav-observations">OBSERVATIONS</div>
 
                     <!-- 1. Productions -->
-                    <div class="sidebar-item ${sectionAffichee === 'productions' ? 'active' : ''}" onclick="changerSectionProfil('productions')">
+                    <div class="sidebar-item ${sectionAffichee === 'productions' ? 'active' : ''}" data-action="changerSectionProfil" data-param="productions">
                         <div class="sidebar-item-titre">Productions</div>
                     </div>
 
                     <!-- 2. Engagement -->
-                    <div class="sidebar-item ${sectionAffichee === 'mobilisation' ? 'active' : ''}" onclick="changerSectionProfil('mobilisation')">
+                    <div class="sidebar-item ${sectionAffichee === 'mobilisation' ? 'active' : ''}" data-action="changerSectionProfil" data-param="mobilisation">
                         <div class="sidebar-item-titre">Engagement</div>
                     </div>
 
                     <!-- 2b. Progression temporelle -->
-                    <div class="sidebar-item ${sectionAffichee === 'progression' ? 'active' : ''}" onclick="changerSectionProfil('progression')">
+                    <div class="sidebar-item ${sectionAffichee === 'progression' ? 'active' : ''}" data-action="changerSectionProfil" data-param="progression">
                         <div class="sidebar-item-titre">Progression temporelle</div>
                     </div>
 
                     <!-- 3. Développement des habiletés -->
-                    <div class="sidebar-item ${sectionAffichee === 'performance' ? 'active' : ''}" onclick="changerSectionProfil('performance')">
+                    <div class="sidebar-item ${sectionAffichee === 'performance' ? 'active' : ''}" data-action="changerSectionProfil" data-param="performance">
                         <div class="sidebar-item-titre">Développement des habiletés</div>
                     </div>
 
                     <!-- 4. Accompagnement (affiché uniquement si RàI activé) -->
                     ${activerRai ? `
-                    <div class="sidebar-item ${sectionAffichee === 'accompagnement' ? 'active' : ''}" onclick="changerSectionProfil('accompagnement')">
+                    <div class="sidebar-item ${sectionAffichee === 'accompagnement' ? 'active' : ''}" data-action="changerSectionProfil" data-param="accompagnement">
                         <div class="sidebar-item-titre">Accompagnement</div>
                     </div>
                     ` : ''}
 
                     <!-- 5. Travaux soumis (Beta 96.3) -->
-                    <div class="sidebar-item ${sectionAffichee === 'travaux' ? 'active' : ''}" onclick="changerSectionProfil('travaux')">
+                    <div class="sidebar-item ${sectionAffichee === 'travaux' ? 'active' : ''}" data-action="changerSectionProfil" data-param="travaux">
                         <div class="sidebar-item-titre">Travaux soumis</div>
                     </div>
 
                     <!-- 6. Rapport -->
-                    <div class="sidebar-item ${sectionAffichee === 'rapport' ? 'active' : ''}" onclick="changerSectionProfil('rapport')">
+                    <div class="sidebar-item ${sectionAffichee === 'rapport' ? 'active' : ''}" data-action="changerSectionProfil" data-param="rapport">
                         <div class="sidebar-item-titre">Rapport</div>
                     </div>
                 </div>
@@ -3654,7 +3656,7 @@ function genererSectionAssiduite(da) {
 
                     return `
                         <div class="badge-absence ${classeBadge}"
-                             onclick="naviguerVersPresenceAvecDate('${abs.date}')">
+                             data-action="naviguerVersPresenceAvecDate" data-param="${abs.date}">
                             <span class="badge-absence-date">
                                 ${dateFormatee}
                             </span>
@@ -3968,20 +3970,20 @@ function genererSectionProductions(da) {
                                     ${(ligne.statutRemise === 'non-remis' || ligne.statutRemise === 'retard')
                                         ? `
                                         <button class="btn btn-principal btn-compact"
-                                                onclick="evaluerProduction('${da}', '${ligne.productionId}')">
+                                                data-action="evaluerProduction" data-param="${da}" data-param2="${ligne.productionId}">
                                             Évaluer
                                         </button>
                                         `
                                         : (ligne.statut === 'evalue'
                                             ? `
                                             <button class="btn btn-secondaire btn-compact"
-                                                    onclick="consulterEvaluation('${da}', '${ligne.productionId}')">
+                                                    data-action="consulterEvaluation" data-param="${da}" data-param2="${ligne.productionId}">
                                                 Consulter
                                             </button>
                                             `
                                             : `
                                             <button class="btn btn-principal btn-compact"
-                                                    onclick="evaluerProduction('${da}', '${ligne.productionId}')">
+                                                    data-action="evaluerProduction" data-param="${da}" data-param2="${ligne.productionId}">
                                                 Évaluer
                                             </button>
                                             `)
@@ -4310,7 +4312,7 @@ function genererSectionProgression(da) {
     // Créer le HTML avec le canvas
     const checkboxSansReprises = aDesJetonsReprise ? `
                 <label style="display: inline-flex; align-items: center; gap: 5px; cursor: pointer; color: var(--vert-succes); font-size: 0.85rem; margin-left: 8px;">
-                    <input type="checkbox" checked onchange="togglePSansReprisesIndiv('${da}', this.checked)">
+                    <input type="checkbox" checked data-on-change="togglePSansReprisesIndivHandler" data-da="${da}">
                     <svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="var(--vert-succes)" stroke-width="1.5" stroke-dasharray="4 2"/></svg>
                     P sans reprises
                 </label>` : '';
@@ -4321,17 +4323,17 @@ function genererSectionProgression(da) {
             <div style="background: #162c36; padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                 <span style="font-weight: 600; color: var(--gris-fonce);">Indices :</span>
                 <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #1976D2; font-size: 0.78rem;">
-                    <input type="checkbox" checked onchange="toggleIndiceIndiv('Assiduité (A)', this.checked, '${da}')">
+                    <input type="checkbox" checked data-on-change="toggleIndiceIndivHandler" data-label="Assiduité (A)" data-da="${da}">
                     <span style="width: 10px; height: 10px; background: #1976D2; border-radius: 50%; display: inline-block;"></span>
                     Assiduité (A)
                 </label>
                 <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #FF6B35; font-size: 0.78rem;">
-                    <input type="checkbox" checked onchange="toggleIndiceIndiv('Complétion (C)', this.checked, '${da}')">
+                    <input type="checkbox" checked data-on-change="toggleIndiceIndivHandler" data-label="Complétion (C)" data-da="${da}">
                     <span style="width: 10px; height: 10px; background: #FF6B35; border-radius: 50%; display: inline-block;"></span>
                     Complétion (C)
                 </label>
                 <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #4CAF50; font-size: 0.78rem;">
-                    <input type="checkbox" checked onchange="toggleIndiceIndiv('Performance (P)', this.checked, '${da}')">
+                    <input type="checkbox" checked data-on-change="toggleIndiceIndivHandler" data-label="Performance (P)" data-da="${da}">
                     <span style="width: 10px; height: 10px; background: #4CAF50; border-radius: 50%; display: inline-block;"></span>
                     Performance (P)
                 </label>
@@ -4404,7 +4406,7 @@ function genererSectionPerformance(da) {
                 const couleur = COULEURS_CRITERES[index % COULEURS_CRITERES.length];
                 const critereEscaped = critere.replace(/'/g, "\\'");
                 return `<label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: ${couleur}; font-size: 0.78rem;">
-                    <input type="checkbox" checked onchange="toggleCritereIndiv('${critereEscaped}', this.checked, '${da}')">
+                    <input type="checkbox" checked data-on-change="toggleCritereIndivHandler" data-critere="${critereEscaped}" data-da="${da}">
                     <span style="width: 10px; height: 10px; background: ${couleur}; border-radius: 50%; display: inline-block;"></span>
                     ${critere}
                 </label>`;
@@ -6898,7 +6900,7 @@ function genererSectionPerformance(da) {
                 const couleur = COULEURS_CRITERES_2[index % COULEURS_CRITERES_2.length];
                 const critereEscaped = critere.replace(/'/g, "\\'");
                 return `<label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: ${couleur}; font-size: 0.78rem;">
-                    <input type="checkbox" checked onchange="toggleCritereIndiv('${critereEscaped}', this.checked, '${da}')">
+                    <input type="checkbox" checked data-on-change="toggleCritereIndivHandler" data-critere="${critereEscaped}" data-da="${da}">
                     <span style="width: 10px; height: 10px; background: ${couleur}; border-radius: 50%; display: inline-block;"></span>
                     ${critere}
                 </label>`;
@@ -7537,7 +7539,7 @@ function genererSectionAssiduiteLegacy(da) {
 
                         return `
                             <div class="badge-absence ${classeBadge}"
-                                 onclick="naviguerVersPresenceAvecDate('${abs.date}')">
+                                 data-action="naviguerVersPresenceAvecDate" data-param="${abs.date}">
                                 <span class="badge-absence-date">
                                     ${dateFormatee}
                                 </span>
@@ -7987,27 +7989,27 @@ function genererSectionRapport(da) {
                         </div>
                         <div class="grille-checkboxes u-mb-10">
                             <label class="text-sm-pointer">
-                                <input type="checkbox" id="inclure-identification-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
+                                <input type="checkbox" id="inclure-identification-${da}" data-on-change="genererEtAfficherRapport" data-param="${da}" checked>
                                 Identification
                             </label>
                             <label class="text-sm-pointer">
-                                <input type="checkbox" id="inclure-assiduite-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
+                                <input type="checkbox" id="inclure-assiduite-${da}" data-on-change="genererEtAfficherRapport" data-param="${da}" checked>
                                 Assiduité
                             </label>
                             <label class="text-sm-pointer">
-                                <input type="checkbox" id="inclure-completion-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
+                                <input type="checkbox" id="inclure-completion-${da}" data-on-change="genererEtAfficherRapport" data-param="${da}" checked>
                                 Complétion
                             </label>
                             <label class="text-sm-pointer">
-                                <input type="checkbox" id="inclure-performance-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
+                                <input type="checkbox" id="inclure-performance-${da}" data-on-change="genererEtAfficherRapport" data-param="${da}" checked>
                                 Performance
                             </label>
                             <label class="text-sm-pointer">
-                                <input type="checkbox" id="inclure-jetons-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
+                                <input type="checkbox" id="inclure-jetons-${da}" data-on-change="genererEtAfficherRapport" data-param="${da}" checked>
                                 Jetons
                             </label>
                             <label class="text-sm-pointer">
-                                <input type="checkbox" id="inclure-date-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
+                                <input type="checkbox" id="inclure-date-${da}" data-on-change="genererEtAfficherRapport" data-param="${da}" checked>
                                 Date
                             </label>
                         </div>
@@ -8015,7 +8017,7 @@ function genererSectionRapport(da) {
 
                     <!-- Colonne droite : Actions -->
                     <div style="display: flex; flex-direction: column; gap: 10px; min-width: 120px;">
-                        <button class="btn btn-principal u-w-100" onclick="copierRapport('${da}')">
+                        <button class="btn btn-principal u-w-100" data-action="copierRapport" data-param="${da}">
                             Copier
                         </button>
                     </div>
@@ -9109,7 +9111,7 @@ function genererSectionTravaux(da) {
         const aAnnotations = annotation && travauxUI.annotationContientDuContenu(annotation);
 
         html += `
-            <div class="travaux-grille-item" onclick="travauxUI.ouvrirFichier('${f.id}')" title="${echapperHtml(f.nomFichier)}">
+            <div class="travaux-grille-item" data-action="travauxUI.ouvrirFichier" data-param="${f.id}" title="${echapperHtml(f.nomFichier)}">
                 <div class="travaux-grille-thumb">
                     ${thumb ? `<img src="${thumb}" alt="">` : `<span class="travaux-grille-icone">${icone}</span>`}
                     ${aAnnotations ? '<span class="travaux-badge-annote" title="Annote">&#x270F;</span>' : ''}
@@ -9127,7 +9129,7 @@ function genererSectionTravaux(da) {
     // Bouton export
     html += `
         <div style="margin-top: 16px;">
-            <button class="btn btn-secondaire" onclick="travauxArchivage.lancerExportEtudiant('${da}', {inclureAnnotes: true})">
+            <button class="btn btn-secondaire" data-action="lancerExportEtudiantAnnotes" data-param="${da}">
                 Telecharger ZIP des travaux
             </button>
         </div>
@@ -9136,13 +9138,37 @@ function genererSectionTravaux(da) {
     return html;
 }
 
+/* ===============================
+   WRAPPERS DELEGATION (Phase 5)
+   =============================== */
+
+/** Handler pour togglePSansReprisesIndiv(da, checked) depuis checkbox */
+function togglePSansReprisesIndivHandler(el) {
+    togglePSansReprisesIndiv(el.dataset.da, el.checked);
+}
+
+/** Handler pour toggleIndiceIndiv(label, checked, da) depuis checkbox */
+function toggleIndiceIndivHandler(el) {
+    toggleIndiceIndiv(el.dataset.label, el.checked, el.dataset.da);
+}
+
+/** Handler pour toggleCritereIndiv(critere, checked, da) depuis checkbox */
+function toggleCritereIndivHandler(el) {
+    toggleCritereIndiv(el.dataset.critere, el.checked, el.dataset.da);
+}
+
+/** Handler pour travauxArchivage.lancerExportEtudiant avec {inclureAnnotes: true} */
+function lancerExportEtudiantAnnotes(da) {
+    travauxArchivage.lancerExportEtudiant(da, {inclureAnnotes: true});
+}
+
 // 🆕 BETA 93: Exporter afficherProfilComplet pour accès depuis autres modules
 window.afficherProfilComplet = afficherProfilComplet;
 // window.calculerTousLesIndices → indices.js (#206)
 window.obtenirPratiqueActuelle = obtenirPratiqueActuelle; // ✅ BETA 93.5 (10 déc): Utilisé par snapshots.js pour calcul historique P
 window.calculerDetailsNoteFinale = calculerDetailsNoteFinale; // 🆕 BETA 96 (FIX #37): Utilisé par portfolio.js pour cohérence P = Note finale
 
-// ✅ CORRECTIF (17 déc 2025): Exporter les fonctions utilisées dans les onclick du profil
+// ✅ CORRECTIF (17 déc 2025): Exporter les fonctions utilisées dans les data-action du profil
 window.changerSectionProfil = changerSectionProfil;
 window.toggleSectionCollapsible = toggleSectionCollapsible;
 window.naviguerVersPresenceAvecDate = naviguerVersPresenceAvecDate;
@@ -9150,5 +9176,11 @@ window.genererEtAfficherRapport = genererEtAfficherRapport;
 window.copierRapport = copierRapport;
 window.consulterEvaluation = consulterEvaluation;
 window.evaluerProduction = evaluerProduction;
+
+// Phase 5 : Wrappers delegation
+window.togglePSansReprisesIndivHandler = togglePSansReprisesIndivHandler;
+window.toggleIndiceIndivHandler = toggleIndiceIndivHandler;
+window.toggleCritereIndivHandler = toggleCritereIndivHandler;
+window.lancerExportEtudiantAnnotes = lancerExportEtudiantAnnotes;
 
 })();
