@@ -1153,6 +1153,7 @@ function supprimerTrimestreActif() {
  * Délègue à la fonction de trimestres.js
  */
 function changerTrimestreActifV2(valeur) {
+    if (typeof valeur === 'object' && valeur && valeur.value !== undefined) valeur = valeur.value;
     console.log('🔄 [Trimestre V2] Changement trimestre demandé:', valeur);
 
     // Appeler la fonction de trimestres.js
@@ -1438,6 +1439,7 @@ function chargerDropdownCoursV2() {
  * Change le cours sélectionné
  */
 function changerCoursSelectionneV2(coursId) {
+    if (typeof coursId === 'object' && coursId && coursId.value !== undefined) coursId = coursId.value;
     const etatVide = document.getElementById('cours-etat-vide');
     const formulaire = document.getElementById('cours-formulaire-edition');
     const listeGroupes = document.getElementById('v2-listeGroupes');
@@ -3494,6 +3496,7 @@ function populerDropdownHorairesV2() {
  * Appelé quand on change l'horaire sélectionné dans le dropdown
  */
 function changerHoraireSelectionneV2(horaireId) {
+    if (typeof horaireId === 'object' && horaireId && horaireId.value !== undefined) horaireId = horaireId.value;
     if (!horaireId) {
         // Aucun horaire sélectionné - afficher état vide
         db.setSync('horaireSelectionne', null);
@@ -4275,6 +4278,7 @@ function mettreAJourNomGroupeCoursV2() {
  * Appelé quand on change le groupe-cours sélectionné
  */
 function changerGroupeCoursSelectionneV2(gcId) {
+    if (typeof gcId === 'object' && gcId && gcId.value !== undefined) gcId = gcId.value;
     const btnSupprimer = document.getElementById('v2-btnSupprimerGroupeCours');
 
     if (!gcId) {
@@ -5736,6 +5740,7 @@ async function peuplerDropdownGroupeCoursActif() {
  * Change le groupe-cours actif depuis le header
  */
 async function changerGroupeCoursDepuisHeader(groupeCoursId) {
+    if (typeof groupeCoursId === 'object' && groupeCoursId !== null) groupeCoursId = groupeCoursId.value;
     await changerGroupeCoursActifV2(groupeCoursId);
 }
 

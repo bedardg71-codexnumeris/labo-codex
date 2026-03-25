@@ -3741,13 +3741,13 @@
                 </span>
                 <label style="cursor: pointer; margin-left: 15px; font-weight: normal;">
                     <input type="checkbox" id="checkbox-ecriture-temp"
-                           onchange="basculerModeEcritureTemp(this.checked)"
+                           data-on-change="basculerModeEcritureTemp"
                            style="margin-right: 5px; cursor: pointer;">
                     Permission d'écriture
                 </label>
                 <label class="u-ml-10" style="cursor: pointer; font-weight: normal">
                     <input type="checkbox" id="checkbox-anonymiser-archive"
-                           onchange="basculerAnonymisationArchive(this.checked)"
+                           data-on-change="basculerAnonymisationArchive"
                            style="margin-right: 5px; cursor: pointer;">
                     Anonymiser
                 </label>
@@ -3813,7 +3813,7 @@
         <div id="bandeau-groupe-cours" class="bandeau-groupe-cours">
             <div class="bandeau-groupe-cours-contenu">
                 <label>Groupe-cours actif :</label>
-                <select id="selectGroupeCoursHeader" class="dropdown-groupe-cours-header" onchange="changerGroupeCoursDepuisHeader(this.value)" data-tooltip="entete-groupe-cours">
+                <select id="selectGroupeCoursHeader" class="dropdown-groupe-cours-header" data-on-change="changerGroupeCoursDepuisHeader" data-tooltip="entete-groupe-cours">
                     <option value="">-- Aucun groupe-cours --</option>
                 </select>
             </div>
@@ -3997,7 +3997,7 @@
                             <div class="u-texte-09 u-flex-wrap u-align-center" style="display: flex; gap: 1rem; font-weight: normal">
                                 <div class="u-align-center" style="display: flex; gap: 0.5rem">
                                     <label style="color: rgba(255,255,255,0.8);" data-tooltip="tdb-selecteur-indice">Indice :</label>
-                                    <select id="selecteur-indice-acp" onchange="rafraichirGraphiqueSpaghettiACP()" class="controle-form-header">
+                                    <select id="selecteur-indice-acp" data-on-change="rafraichirGraphiqueSpaghettiACP" class="controle-form-header">
                                         <option value="A" selected style="color: var(--gris-fonce);">Assiduité (A)</option>
                                         <option value="C" style="color: var(--gris-fonce);">Complétion (C)</option>
                                         <option value="P" style="color: var(--gris-fonce);">Construction de P</option>
@@ -4005,7 +4005,7 @@
                                 </div>
                                 <div class="u-align-center" style="display: flex; gap: 0.5rem">
                                     <label style="color: rgba(255,255,255,0.8);" data-tooltip="tdb-selecteur-eleve-groupe">Élève :</label>
-                                    <select id="selecteur-etudiant-acp" onchange="selectionnerEtudiantACP()" class="controle-form-header">
+                                    <select id="selecteur-etudiant-acp" data-on-change="selectionnerEtudiantACP" class="controle-form-header">
                                         <option value="" style="color: var(--gris-fonce);">-- Sélectionner --</option>
                                     </select>
                                 </div>
@@ -4037,7 +4037,7 @@
                             </div>
                             <div class="u-texte-09 u-align-center" style="display: flex; gap: 0.5rem; font-weight: normal">
                                 <label style="color: rgba(255,255,255,0.8);" data-tooltip="tdb-selecteur-eleve-indiv">Élève :</label>
-                                <select id="selecteur-etudiant-spaghetti" onchange="selectionnerEtudiantSpaghetti()" class="controle-form-header">
+                                <select id="selecteur-etudiant-spaghetti" data-on-change="selectionnerEtudiantSpaghetti" class="controle-form-header">
                                     <option value="" style="color: var(--gris-fonce);">-- Sélectionner --</option>
                                 </select>
                             </div>
@@ -4110,13 +4110,13 @@
                             <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                                 <span style="color: var(--texte-muted); font-size: 0.75rem; min-width: 70px;">Corrélations :</span>
                                 <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #4FC3F7; font-size: 0.78rem;">
-                                    <input type="checkbox" checked onchange="toggleCorrelation('AP', this.checked)"><svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="#4FC3F7" stroke-width="2"/></svg> A ↔ P
+                                    <input type="checkbox" checked data-on-change="toggleCorrelation" data-param="AP"><svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="#4FC3F7" stroke-width="2"/></svg> A ↔ P
                                 </label>
                                 <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #FF7043; font-size: 0.78rem;">
-                                    <input type="checkbox" checked onchange="toggleCorrelation('CP', this.checked)"><svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="#FF7043" stroke-width="2"/></svg> C ↔ P
+                                    <input type="checkbox" checked data-on-change="toggleCorrelation" data-param="CP"><svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="#FF7043" stroke-width="2"/></svg> C ↔ P
                                 </label>
                                 <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #AB47BC; font-size: 0.78rem;">
-                                    <input type="checkbox" checked onchange="toggleCorrelation('EP', this.checked)"><svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="#AB47BC" stroke-width="2"/></svg> E ↔ P
+                                    <input type="checkbox" checked data-on-change="toggleCorrelation" data-param="EP"><svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="#AB47BC" stroke-width="2"/></svg> E ↔ P
                                 </label>
                                 <span style="color: var(--texte-muted); margin-left: 4px;">│</span>
                                 <span id="checkboxes-interventions-corr" style="display: inline-flex; gap: 12px; flex-wrap: wrap;"></span>
@@ -4124,16 +4124,16 @@
                             <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                                 <span style="color: var(--texte-muted); font-size: 0.75rem; min-width: 70px;">Moyennes :</span>
                                 <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #4FC3F7; font-size: 0.78rem;">
-                                    <input type="checkbox" onchange="toggleOverlayMoyenne('A', this.checked)"><svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="#4FC3F7" stroke-width="1.5"/></svg> Moy. A
+                                    <input type="checkbox" data-on-change="toggleOverlayMoyenne" data-param="A"><svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="#4FC3F7" stroke-width="1.5"/></svg> Moy. A
                                 </label>
                                 <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #FF7043; font-size: 0.78rem;">
-                                    <input type="checkbox" onchange="toggleOverlayMoyenne('C', this.checked)"><svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="#FF7043" stroke-width="1.5"/></svg> Moy. C
+                                    <input type="checkbox" data-on-change="toggleOverlayMoyenne" data-param="C"><svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="#FF7043" stroke-width="1.5"/></svg> Moy. C
                                 </label>
                                 <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #4CAF50; font-size: 0.78rem;">
-                                    <input type="checkbox" onchange="toggleOverlayMoyenne('P', this.checked)"><svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="#4CAF50" stroke-width="1.5"/></svg> Moy. P
+                                    <input type="checkbox" data-on-change="toggleOverlayMoyenne" data-param="P"><svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="#4CAF50" stroke-width="1.5"/></svg> Moy. P
                                 </label>
                                 <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #AB47BC; font-size: 0.78rem;">
-                                    <input type="checkbox" onchange="toggleOverlayMoyenne('E', this.checked)"><svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="#AB47BC" stroke-width="1.5"/></svg> Moy. E
+                                    <input type="checkbox" data-on-change="toggleOverlayMoyenne" data-param="E"><svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="#AB47BC" stroke-width="1.5"/></svg> Moy. E
                                 </label>
                             </div>
                         </div>
@@ -4225,21 +4225,21 @@
                                 <div class="groupe-form">
                                     <label for="filtre-groupe-liste">Groupe</label>
                                     <select id="filtre-groupe-liste" class="controle-form"
-                                        onchange="afficherListeEtudiantsConsultation()">
+                                        data-on-change="afficherListeEtudiantsConsultation">
                                         <option value="">Tous les groupes</option>
                                     </select>
                                 </div>
                                 <div class="groupe-form">
                                     <label for="filtre-programme-liste">Programme</label>
                                     <select id="filtre-programme-liste" class="controle-form"
-                                        onchange="afficherListeEtudiantsConsultation()">
+                                        data-on-change="afficherListeEtudiantsConsultation">
                                         <option value="">Tous les programmes</option>
                                     </select>
                                 </div>
                                 <div class="groupe-form">
                                     <label for="filtre-rai-liste" data-tooltip="liste-filtre-rai">Niveau RàI</label>
                                     <select id="filtre-rai-liste" class="controle-form"
-                                        onchange="afficherListeEtudiantsConsultation()">
+                                        data-on-change="afficherListeEtudiantsConsultation">
                                         <option value="">Tous les niveaux</option>
                                         <option value="1">Niveau 1 (Universel)</option>
                                         <option value="2">Niveau 2 (Préventif)</option>
@@ -4249,7 +4249,7 @@
                                 <div class="groupe-form">
                                     <label for="filtre-pattern-liste" data-tooltip="liste-filtre-pattern">Pattern d'apprentissage</label>
                                     <select id="filtre-pattern-liste" class="controle-form"
-                                        onchange="afficherListeEtudiantsConsultation()">
+                                        data-on-change="afficherListeEtudiantsConsultation">
                                         <option value="">Tous les patterns</option>
                                         <option value="defi-specifique">Défi spécifique</option>
                                         <option value="stable">Stable</option>
@@ -4261,7 +4261,7 @@
                                 <div class="groupe-form">
                                     <label for="recherche-nom-liste" data-tooltip="liste-recherche">Recherche</label>
                                     <input type="text" id="recherche-nom-liste" class="controle-form"
-                                        placeholder="Nom, prénom ou DA..." oninput="afficherListeEtudiantsConsultation()">
+                                        placeholder="Nom, prénom ou DA..." data-on-input="afficherListeEtudiantsConsultation">
                                 </div>
                                 <div class="groupe-form" style="display: flex; align-items: flex-end;">
                                     <button class="btn btn-secondaire" data-action="reinitialiserFiltresListeEtudiants" title="Réinitialiser tous les filtres">
@@ -4274,22 +4274,22 @@
                         <!-- Sélecteur de colonnes visibles -->
                         <div class="liste-colonnes-selecteur" id="liste-colonnes-selecteur">
                             <span class="texte-muted" style="font-size: 0.8rem;">Colonnes :</span>
-                            <label><input type="checkbox" data-colonne="da" checked onchange="toggleColonneListe(this)"> DA</label>
-                            <label><input type="checkbox" data-colonne="groupe" checked onchange="toggleColonneListe(this)"> Groupe</label>
-                            <label><input type="checkbox" data-colonne="nom" checked onchange="toggleColonneListe(this)"> Nom</label>
-                            <label><input type="checkbox" data-colonne="prenom" checked onchange="toggleColonneListe(this)"> Prénom</label>
-                            <label><input type="checkbox" data-colonne="sa" checked onchange="toggleColonneListe(this)"> SA</label>
-                            <label><input type="checkbox" data-colonne="assiduite" checked onchange="toggleColonneListe(this)"> A</label>
-                            <label><input type="checkbox" data-colonne="completion" checked onchange="toggleColonneListe(this)"> C</label>
-                            <label><input type="checkbox" data-colonne="performance" checked onchange="toggleColonneListe(this)"> P</label>
-                            <label><input type="checkbox" data-colonne="engagement" checked onchange="toggleColonneListe(this)"> E</label>
-                            <label><input type="checkbox" data-colonne="pattern" checked onchange="toggleColonneListe(this)"> Pattern</label>
-                            <label><input type="checkbox" data-colonne="rai" checked onchange="toggleColonneListe(this)"> RàI</label>
-                            <label><input type="checkbox" data-colonne="interv" checked onchange="toggleColonneListe(this)"> Interv.</label>
+                            <label><input type="checkbox" data-colonne="da" checked data-on-change="toggleColonneListe"> DA</label>
+                            <label><input type="checkbox" data-colonne="groupe" checked data-on-change="toggleColonneListe"> Groupe</label>
+                            <label><input type="checkbox" data-colonne="nom" checked data-on-change="toggleColonneListe"> Nom</label>
+                            <label><input type="checkbox" data-colonne="prenom" checked data-on-change="toggleColonneListe"> Prénom</label>
+                            <label><input type="checkbox" data-colonne="sa" checked data-on-change="toggleColonneListe"> SA</label>
+                            <label><input type="checkbox" data-colonne="assiduite" checked data-on-change="toggleColonneListe"> A</label>
+                            <label><input type="checkbox" data-colonne="completion" checked data-on-change="toggleColonneListe"> C</label>
+                            <label><input type="checkbox" data-colonne="performance" checked data-on-change="toggleColonneListe"> P</label>
+                            <label><input type="checkbox" data-colonne="engagement" checked data-on-change="toggleColonneListe"> E</label>
+                            <label><input type="checkbox" data-colonne="pattern" checked data-on-change="toggleColonneListe"> Pattern</label>
+                            <label><input type="checkbox" data-colonne="rai" checked data-on-change="toggleColonneListe"> RàI</label>
+                            <label><input type="checkbox" data-colonne="interv" checked data-on-change="toggleColonneListe"> Interv.</label>
                             <span class="texte-muted" style="font-size: 0.8rem; margin-left: 12px;">En-tête :</span>
-                            <label><input type="checkbox" id="chk-entete-moy" checked onchange="toggleLigneEntete('moy', this.checked)"> Moy.</label>
-                            <label><input type="checkbox" id="chk-entete-corr" checked onchange="toggleLigneEntete('corr', this.checked)"> r↔P</label>
-                            <label title="Griser les élèves sous le minimum d'évaluations et recalculer les moyennes"><input type="checkbox" id="chk-filtre-minimum" onchange="toggleFiltreMinimum(this.checked)"> ≥ Min. <span id="badge-nb-insuffisants" style="color: var(--gris-moyen); font-size: 0.75rem;"></span></label>
+                            <label><input type="checkbox" id="chk-entete-moy" checked data-on-change="toggleLigneEntete" data-param="moy"> Moy.</label>
+                            <label><input type="checkbox" id="chk-entete-corr" checked data-on-change="toggleLigneEntete" data-param="corr"> r↔P</label>
+                            <label title="Griser les élèves sous le minimum d'évaluations et recalculer les moyennes"><input type="checkbox" id="chk-filtre-minimum" data-on-change="toggleFiltreMinimum"> ≥ Min. <span id="badge-nb-insuffisants" style="color: var(--gris-moyen); font-size: 0.75rem;"></span></label>
                         </div>
 
                         <!-- TABLEAU DES ÉTUDIANTS -->
@@ -4531,7 +4531,7 @@
                                         </button>
                                         <input type="date" id="date-cours" class="controle-form"
                                             class="u-flex-1" style="min-width: 0"
-                                            onchange="initialiserSaisiePresences(); mettreAJourBoutonsNavigation();">
+                                            data-on-change="_wrapDateCoursChange">
                                         <button id="btn-cours-suivant" data-action="allerCoursSuivant"
                                             class="btn btn-principal btn-compact" style="flex-shrink: 0;">
                                             Suivant →
@@ -4541,14 +4541,14 @@
                                 <div class="groupe-form">
                                     <label for="selectGroupePresences" class="label-formulaire">Filtrer par groupe</label>
                                     <select id="selectGroupePresences" class="controle-form"
-                                        onchange="initialiserSaisiePresences()">
+                                        data-on-change="initialiserSaisiePresences">
                                         <option value="">Tous les groupes</option>
                                     </select>
                                 </div>
                                 <div class="groupe-form">
                                     <label for="selectTriPresences" class="label-formulaire">Trier par</label>
                                     <select id="selectTriPresences" class="controle-form"
-                                        onchange="initialiserSaisiePresences()">
+                                        data-on-change="initialiserSaisiePresences">
                                         <option value="nom">Ordre alphabétique (nom)</option>
                                         <option value="assiduite-croissant">Assiduité croissante (↑)</option>
                                         <option value="assiduite-decroissant">Assiduité décroissante (↓)</option>
@@ -4558,7 +4558,7 @@
                                     <label for="recherche-saisie-presences" class="label-formulaire">Recherche</label>
                                     <input type="text" id="recherche-saisie-presences" class="controle-form"
                                         placeholder="Nom, prénom ou DA..."
-                                        oninput="filtrerTableauPresences()">
+                                        data-on-input="filtrerTableauPresences">
                                 </div>
                             </div>
                         </div>
@@ -4714,13 +4714,13 @@
                             <div class="groupe-form">
                                 <label for="filtre-production-eval" data-tooltip="eval-filtre-production">Production</label>
                                 <select id="filtre-production-eval" class="controle-form"
-                                    onchange="filtrerListeEvaluations()">
+                                    data-on-change="filtrerListeEvaluations">
                                     <option value="">Toutes les productions</option>
                                 </select>
                             </div>
                             <div class="groupe-form">
                                 <label for="filtre-statut-eval" data-tooltip="eval-filtre-statut">Statut</label>
-                                <select id="filtre-statut-eval" class="controle-form" onchange="filtrerListeEvaluations()">
+                                <select id="filtre-statut-eval" class="controle-form" data-on-change="filtrerListeEvaluations">
                                     <option value="">Tous</option>
                                     <option value="non-recu">Non reçu</option>
                                     <option value="recu">Reçu</option>
@@ -4741,7 +4741,7 @@
                                        id="recherche-evaluations"
                                        class="controle-form"
                                        placeholder="Nom, prénom, DA, production..."
-                                       oninput="rechercherEvaluations()">
+                                       data-on-input="rechercherEvaluations">
                             </div>
                             <div class="groupe-form" style="display: flex; align-items: flex-end;">
                                 <button class="btn btn-secondaire" data-action="reinitialiserFiltresEval">
@@ -4754,14 +4754,14 @@
                     <!-- Sélecteur de colonnes visibles -->
                     <div class="eval-colonnes-selecteur" id="eval-colonnes-selecteur">
                         <span class="texte-muted" style="font-size: 0.8rem;">Colonnes :</span>
-                        <label><input type="checkbox" data-colonne="da" checked onchange="toggleColonneEval(this)"> DA</label>
-                        <label><input type="checkbox" data-colonne="nom" checked onchange="toggleColonneEval(this)"> Nom</label>
-                        <label><input type="checkbox" data-colonne="prenom" checked onchange="toggleColonneEval(this)"> Prénom</label>
-                        <label><input type="checkbox" data-colonne="production" checked onchange="toggleColonneEval(this)"> Production</label>
-                        <label><input type="checkbox" data-colonne="jeton" checked onchange="toggleColonneEval(this)"> Jeton</label>
-                        <label><input type="checkbox" data-colonne="statut" checked onchange="toggleColonneEval(this)"> Statut</label>
-                        <label><input type="checkbox" data-colonne="niveau" checked onchange="toggleColonneEval(this)"> Niveau</label>
-                        <label><input type="checkbox" data-colonne="note" checked onchange="toggleColonneEval(this)"> Note %</label>
+                        <label><input type="checkbox" data-colonne="da" checked data-on-change="toggleColonneEval"> DA</label>
+                        <label><input type="checkbox" data-colonne="nom" checked data-on-change="toggleColonneEval"> Nom</label>
+                        <label><input type="checkbox" data-colonne="prenom" checked data-on-change="toggleColonneEval"> Prénom</label>
+                        <label><input type="checkbox" data-colonne="production" checked data-on-change="toggleColonneEval"> Production</label>
+                        <label><input type="checkbox" data-colonne="jeton" checked data-on-change="toggleColonneEval"> Jeton</label>
+                        <label><input type="checkbox" data-colonne="statut" checked data-on-change="toggleColonneEval"> Statut</label>
+                        <label><input type="checkbox" data-colonne="niveau" checked data-on-change="toggleColonneEval"> Niveau</label>
+                        <label><input type="checkbox" data-colonne="note" checked data-on-change="toggleColonneEval"> Note %</label>
                     </div>
 
                     <!-- Zone de chargement -->
@@ -4885,20 +4885,20 @@
                                 <div class="groupe-form">
                                     <label class="label-formulaire">Groupe :</label>
                                     <select id="selectGroupeEval" class="controle-form"
-                                        onchange="filtrerEtudiantsParGroupe()">
+                                        data-on-change="filtrerEtudiantsParGroupe">
                                         <option value="">Tous les groupes</option>
                                     </select>
                                 </div>
                                 <div class="groupe-form">
                                     <label class="label-formulaire">Étudiant·e :</label>
                                     <select id="selectEtudiantEval" class="controle-form"
-                                        onchange="chargerEvaluationsEtudiant()">
+                                        data-on-change="chargerEvaluationsEtudiant">
                                         <option value="">-- Choisir un·e étudiant·e --</option>
                                     </select>
                                 </div>
                                 <div class="groupe-form">
                                     <label class="label-formulaire">Production :</label>
-                                    <select id="selectProduction1" class="controle-form" onchange="chargerProduction(1)">
+                                    <select id="selectProduction1" class="controle-form" data-on-change="chargerProduction" data-param="1">
                                         <option value="">-- Choisir une production --</option>
                                     </select>
                                 </div>
@@ -4910,7 +4910,7 @@
 
                             <div class="groupe-form" class="mb-12">
                                 <label class="label-formulaire" data-tooltip="eval-grille">Grille d'évaluation :</label>
-                                <select id="selectGrille1" class="controle-form" onchange="chargerGrilleSelectionnee()">
+                                <select id="selectGrille1" class="controle-form" data-on-change="chargerGrilleSelectionnee">
                                     <option value="">-- Choisir une grille --</option>
                                 </select>
                             </div>
@@ -4918,7 +4918,7 @@
                             <div class="groupe-form" class="mb-12">
                                 <label class="label-formulaire" data-tooltip="eval-echelle">Échelle de performance :</label>
                                 <select id="selectEchelle1" class="controle-form"
-                                    onchange="changerEchelleEvaluation(1)">
+                                    data-on-change="changerEchelleEvaluation" data-param="1">
                                     <option value="">-- Choisir une échelle --</option>
                                 </select>
                             </div>
@@ -4926,14 +4926,14 @@
                             <div class="groupe-form" class="mb-12">
                                 <label class="label-formulaire" data-tooltip="eval-cartouche">Cartouche de rétroaction :</label>
                                 <select id="selectCartoucheEval" class="controle-form"
-                                    onchange="cartoucheSelectionnee()">
+                                    data-on-change="cartoucheSelectionnee">
                                     <option value="">-- Choisir une cartouche --</option>
                                 </select>
                             </div>
 
                             <div class="groupe-form u-hide" class="mb-12">
                                 <label class="label-formulaire" data-tooltip="eval-statut-remise">Statut :</label>
-                                <select id="remiseProduction1" class="controle-form" onchange="changerStatutRemise(1)">
+                                <select id="remiseProduction1" class="controle-form" data-on-change="changerStatutRemise" data-param="1">
                                     <option value="non-recu">Non reçu</option>
                                     <option value="recu">Reçu</option>
                                     <option value="importe">Importé</option>
@@ -4945,7 +4945,7 @@
                             <!-- STATUT D'INTÉGRITÉ ACADÉMIQUE -->
                             <div class="groupe-form" class="mb-12">
                                 <label class="label-formulaire" data-tooltip="eval-integrite">Intégrité académique :</label>
-                                <select id="statutIntegrite" class="controle-form" onchange="changerStatutIntegrite()">
+                                <select id="statutIntegrite" class="controle-form" data-on-change="changerStatutIntegrite">
                                     <option value="recevable">Recevable</option>
                                     <option value="soupcon">Soupçon à vérifier</option>
                                     <option value="plagiat">Non recevable - Plagiat</option>
@@ -5018,15 +5018,15 @@
                         <div id="vueRetroGenerale">
                             <div class="eval-options-retroaction" data-tooltip="eval-retroaction-options">
                                 <div class="eval-options-checkboxes">
-                                    <label data-tooltip="eval-retro-description"><input type="checkbox" id="afficherDescription1" onchange="genererRetroaction(1)" checked> Activité</label>
-                                    <label data-tooltip="eval-retro-objectif"><input type="checkbox" id="afficherObjectif1" onchange="genererRetroaction(1)" checked> Objectif</label>
-                                    <label data-tooltip="eval-retro-tache"><input type="checkbox" id="afficherTache1" onchange="genererRetroaction(1)" checked> Tâche</label>
-                                    <label data-tooltip="eval-retro-adresse"><input type="checkbox" id="afficherAdresse1" onchange="genererRetroaction(1)" checked> Adresse</label>
-                                    <label data-tooltip="eval-retro-contexte"><input type="checkbox" id="afficherContexte1" onchange="genererRetroaction(1)" checked> Contexte</label>
+                                    <label data-tooltip="eval-retro-description"><input type="checkbox" id="afficherDescription1" data-on-change="genererRetroaction" data-param="1" checked> Activité</label>
+                                    <label data-tooltip="eval-retro-objectif"><input type="checkbox" id="afficherObjectif1" data-on-change="genererRetroaction" data-param="1" checked> Objectif</label>
+                                    <label data-tooltip="eval-retro-tache"><input type="checkbox" id="afficherTache1" data-on-change="genererRetroaction" data-param="1" checked> Tâche</label>
+                                    <label data-tooltip="eval-retro-adresse"><input type="checkbox" id="afficherAdresse1" data-on-change="genererRetroaction" data-param="1" checked> Adresse</label>
+                                    <label data-tooltip="eval-retro-contexte"><input type="checkbox" id="afficherContexte1" data-on-change="genererRetroaction" data-param="1" checked> Contexte</label>
                                 </div>
                                 <div class="eval-options-radios">
-                                    <label><input type="radio" name="affichageNote1" id="affichageNoteComplet1" value="complet" checked onchange="genererRetroaction(1)"> Note chiffrée</label>
-                                    <label><input type="radio" name="affichageNote1" id="affichageNoteLettre1" value="lettre" onchange="genererRetroaction(1)"> Niveau de performance</label>
+                                    <label><input type="radio" name="affichageNote1" id="affichageNoteComplet1" value="complet" checked data-on-change="genererRetroaction" data-param="1"> Note chiffrée</label>
+                                    <label><input type="radio" name="affichageNote1" id="affichageNoteLettre1" value="lettre" data-on-change="genererRetroaction" data-param="1"> Niveau de performance</label>
                                     <button data-action="regenererRetroactionAvecFeedback" class="btn-copier-retro" title="Régénérer la rétroaction depuis la cartouche actuelle">Régénérer</button>
                                 </div>
                             </div>
@@ -5324,7 +5324,7 @@
                                     <div class="groupe-form">
                                         <label data-tooltip="cn-prod-type">Type</label>
                                         <select id="productionType" class="controle-form"
-                                            onchange="gererChangementTypeProduction()">
+                                            data-on-change="gererChangementTypeProduction">
                                             <option value="">Choisir...</option>
                                             <optgroup label="Évaluations">
                                                 <option value="examen">Examen</option>
@@ -5577,7 +5577,7 @@
 
                                     <div class="groupe-form u-mb-15">
                                         <label for="prepPDF-production" class="prep-pdf-label-sm">Production (optionnel)</label>
-                                        <select id="prepPDF-production" class="controle-form" onchange="mettreAJourOptionsPreparationPDF()">
+                                        <select id="prepPDF-production" class="controle-form" data-on-change="mettreAJourOptionsPreparationPDF">
                                             <option value="">-- Aucune (grille générique) --</option>
                                         </select>
                                     </div>
@@ -5585,14 +5585,14 @@
                                     <div class="prep-pdf-grille-selects">
                                         <div class="groupe-form u-mb-0">
                                             <label for="prepPDF-grille" class="prep-pdf-label-sm">Grille de critères <span class="prep-pdf-requis">*</span></label>
-                                            <select id="prepPDF-grille" class="controle-form" onchange="mettreAJourOptionsPreparationPDF()">
+                                            <select id="prepPDF-grille" class="controle-form" data-on-change="mettreAJourOptionsPreparationPDF">
                                                 <option value="">-- Sélectionner --</option>
                                             </select>
                                         </div>
 
                                         <div class="groupe-form u-mb-0">
                                             <label for="prepPDF-echelle" class="prep-pdf-label-sm">Échelle de performance <span class="prep-pdf-requis">*</span></label>
-                                            <select id="prepPDF-echelle" class="controle-form" onchange="mettreAJourOptionsPreparationPDF()">
+                                            <select id="prepPDF-echelle" class="controle-form" data-on-change="mettreAJourOptionsPreparationPDF">
                                                 <option value="">-- Sélectionner --</option>
                                             </select>
                                         </div>
@@ -5625,7 +5625,7 @@
                                     <div class="groupe-form u-flex-1" style="min-width: 300px; margin: 0">
                                         <label>Nom de la grille :</label>
                                         <input type="text" id="nomGrilleTemplate" class="controle-form"
-                                            placeholder="Ex: Grille analyse littéraire" onchange="sauvegarderNomGrille()">
+                                            placeholder="Ex: Grille analyse littéraire" data-on-change="sauvegarderNomGrille">
                                     </div>
                                     <div id="checkboxesPratiquesGrille" style="flex-shrink: 0;"></div>
                                 </div>
@@ -5755,7 +5755,7 @@
                                     <div class="groupe-form u-flex-1" style="min-width: 300px; margin: 0">
                                         <label>Nom de l'échelle :</label>
                                         <input type="text" id="nomEchelleTemplate" class="controle-form"
-                                            placeholder="Ex: Échelle standard A-F" onchange="sauvegarderNomEchelle()">
+                                            placeholder="Ex: Échelle standard A-F" data-on-change="sauvegarderNomEchelle">
                                     </div>
                                     <div id="checkboxesPratiquesEchelle" style="flex-shrink: 0;"></div>
                                 </div>
@@ -5821,7 +5821,7 @@
                         <div class="groupe-form" class="max-w-400-mb20">
                             <label>Créer ou modifier une échelle de performance :</label>
                             <select id="selectEchelleTemplate" class="controle-form"
-                                onchange="chargerEchelleTemplate()">
+                                data-on-change="chargerEchelleTemplate">
                                 <option value="">-- Nouvelle échelle --</option>
                                 <option value="new"> Créer une nouvelle échelle</option>
                             </select>
@@ -5832,7 +5832,7 @@
                             class="max-w-400-mb20-hidden">
                             <label>Nom de l'échelle :</label>
                             <input type="text" id="nomEchelleTemplate" class="controle-form"
-                                placeholder="Ex: Échelle standard A-F" onchange="sauvegarderNomEchelle()">
+                                placeholder="Ex: Échelle standard A-F" data-on-change="sauvegarderNomEchelle">
                         </div>
 
                         <!-- IMPORT/EXPORT ÉCHELLES -->
@@ -5843,7 +5843,7 @@
                             <button class="btn btn-principal" data-action="ouvrirImportEchellesLocal" class="flex-1">
                                 Importer une échelle
                             </button>
-                            <input type="file" id="fichier-import-echelles-local" accept=".json" style="display: none;" onchange="importerEchelles(event)">
+                            <input type="file" id="fichier-import-echelles-local" accept=".json" style="display: none;" data-on-change="importerEchelles">
                         </div>
 
                         <!-- Note explicative -->
@@ -5867,7 +5867,7 @@
                             <div class="grid-2-gap15">
                                 <div class="groupe-form">
                                     <label>Type d'échelle</label>
-                                    <select id="typeEchelle" class="controle-form" onchange="changerTypeEchelle()">
+                                    <select id="typeEchelle" class="controle-form" data-on-change="changerTypeEchelle">
                                         <option value="lettres">Lettres (A, B, C...)</option>
                                         <option value="pourcentage">Pourcentage (%)</option>
                                         <option value="autre">Autre (personnalisé)</option>
@@ -5876,7 +5876,7 @@
                                 <div class="groupe-form">
                                     <label>Seuil de réussite (%)</label>
                                     <input type="number" id="seuilReussite" class="controle-form" value="60" min="0"
-                                        max="100" onchange="sauvegarderConfigEchelle()">
+                                        max="100" data-on-change="sauvegarderConfigEchelle">
                                 </div>
                             </div>
 
@@ -5896,7 +5896,7 @@
                                 <div class="d-flex-gap-10">
                                     <input type="text" id="codesPersonnalises" class="controle-form"
                                         placeholder="Ex: Excellent, Bon, Moyen, Faible"
-                                        onchange="sauvegarderConfigEchelle()">
+                                        data-on-change="sauvegarderConfigEchelle">
                                     <button class="btn btn-principal" data-action="genererNiveauxPersonnalises">Générer</button>
                                 </div>
                                 <small
@@ -6059,13 +6059,13 @@
                                             <label for="mat-pratique-nom" class="u-texte-gras" style="display: block; margin-bottom: 6px">
                                                 Nom de la configuration
                                             </label>
-                                            <input type="text" id="mat-pratique-nom" class="controle-form" placeholder="Ex: PAN-Standards Littérature" onchange="mettreAJourNomPratiqueMat()">
+                                            <input type="text" id="mat-pratique-nom" class="controle-form" placeholder="Ex: PAN-Standards Littérature" data-on-change="mettreAJourNomPratiqueMat">
                                         </div>
                                         <div class="groupe-form">
                                             <label for="mat-pratique-type" data-tooltip="cn-pratique-type" class="u-texte-gras" style="display: block; margin-bottom: 6px">
                                                 Type de pratique
                                             </label>
-                                            <select id="mat-pratique-type" class="controle-form" onchange="changerTypePratiqueMat()">
+                                            <select id="mat-pratique-type" class="controle-form" data-on-change="changerTypePratiqueMat">
                                                 <option value="">-- Choisir un type --</option>
                                                 <option value="sommative">Sommative</option>
                                                 <option value="pan-standards">PAN-Standards</option>
@@ -6083,7 +6083,7 @@
                                             <label for="mat-variante-calcul" class="u-texte-gras" style="display: block; margin-bottom: 6px">
                                                 Comment construis-tu la note finale ?
                                             </label>
-                                            <select id="mat-variante-calcul" class="controle-form" onchange="changerVariantePANStandardsMat()">
+                                            <select id="mat-variante-calcul" class="controle-form" data-on-change="changerVariantePANStandardsMat">
                                                 <option value="">-- Choisir une méthode --</option>
                                                 <option value="n-meilleurs">Je retiens les N meilleures évaluations</option>
                                                 <option value="n-recents">Je retiens les N évaluations les plus récentes</option>
@@ -6100,14 +6100,14 @@
                                         <label for="mat-pratique-description" class="u-texte-gras" style="display: block; margin-bottom: 6px">
                                             Description <span style="font-weight: normal; color: var(--gris-moyen);">(spécificités de cette pratique)</span>
                                         </label>
-                                        <textarea id="mat-pratique-description" class="controle-form" rows="2" placeholder="Décris les particularités de cette configuration..." onchange="mettreAJourDescriptionPratiqueMat()"></textarea>
+                                        <textarea id="mat-pratique-description" class="controle-form" rows="2" placeholder="Décris les particularités de cette configuration..." data-on-change="mettreAJourDescriptionPratiqueMat"></textarea>
                                     </div>
 
                                     <div class="groupe-form u-mt-15">
                                         <label for="mat-pratique-discipline" data-tooltip="cn-pratique-discipline" class="u-texte-gras" style="display: block; margin-bottom: 6px">
                                             Discipline
                                         </label>
-                                        <select id="mat-pratique-discipline" class="controle-form" onchange="mettreAJourDisciplinePratiqueMat()">
+                                        <select id="mat-pratique-discipline" class="controle-form" data-on-change="mettreAJourDisciplinePratiqueMat">
                                             <option value="">— Sélectionner —</option>
                                             <optgroup label="Sciences de la santé et techniques (100)">
                                                 <option value="101 Biologie">101 Biologie</option>
@@ -6258,9 +6258,9 @@
                                         </label>
                                         <div class="u-flex-gap-20 u-texte-09">
                                             <label><input type="radio" name="mat-affichage-note" id="mat-affichage-note-complet"
-                                                value="complet" checked onchange="sauvegarderConfigPratiqueMat()"> Note chiffrée</label>
+                                                value="complet" checked data-on-change="sauvegarderConfigPratiqueMat"> Note chiffrée</label>
                                             <label><input type="radio" name="mat-affichage-note" id="mat-affichage-note-lettre"
-                                                value="lettre" onchange="sauvegarderConfigPratiqueMat()"> Niveau de performance</label>
+                                                value="lettre" data-on-change="sauvegarderConfigPratiqueMat"> Niveau de performance</label>
                                         </div>
                                     </div>
                                 </div>
@@ -6276,7 +6276,7 @@
                                             <label for="mat-echelle-id" data-tooltip="cn-pratique-echelle" class="u-texte-gras" style="display: block; margin-bottom: 6px">
                                                 Échelle à utiliser
                                             </label>
-                                            <select id="mat-echelle-id" class="controle-form" onchange="afficherPreviewEchelleMat(); peuplerDropdownNoteMaximaleMat()">
+                                            <select id="mat-echelle-id" class="controle-form" data-on-change="onMatEchelleIdChange">
                                                 <option value="">-- Sélectionner une échelle --</option>
                                             </select>
                                             <small class="u-mt-6 u-texte-petit" style="display: block; color: var(--gris-moyen)">
@@ -6310,7 +6310,7 @@
                                                     <label for="mat-portfolio-selection" class="u-texte-gras" style="display: block; margin-bottom: 6px">
                                                         Mode de sélection
                                                     </label>
-                                                    <select id="mat-portfolio-selection" class="controle-form" onchange="onPortfolioSelectionChangeMat()">
+                                                    <select id="mat-portfolio-selection" class="controle-form" data-on-change="onPortfolioSelectionChangeMat">
                                                         <option value="meilleurs">N meilleurs artefacts</option>
                                                         <option value="derniers">N derniers artefacts</option>
                                                         <option value="tous">Tous les artefacts</option>
@@ -6321,7 +6321,7 @@
                                                     <label for="mat-portfolio-nombre" class="u-texte-gras" style="display: block; margin-bottom: 6px">
                                                         Artefacts pour la note finale
                                                     </label>
-                                                    <input type="number" id="mat-portfolio-nombre" class="controle-form" min="1" max="20" value="5" onchange="sauvegarderConfigPratiqueMat()">
+                                                    <input type="number" id="mat-portfolio-nombre" class="controle-form" min="1" max="20" value="5" data-on-change="sauvegarderConfigPratiqueMat">
                                                 </div>
                                             </div>
                                             <div class="u-mt-15" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px">
@@ -6329,13 +6329,13 @@
                                                     <label for="mat-portfolio-minimum" class="u-texte-gras" style="display: block; margin-bottom: 6px">
                                                         Nb minimal d'évaluations pour P et E
                                                     </label>
-                                                    <input type="number" id="mat-portfolio-minimum" class="controle-form" min="1" max="20" value="7" onchange="sauvegarderConfigPratiqueMat()">
+                                                    <input type="number" id="mat-portfolio-minimum" class="controle-form" min="1" max="20" value="7" data-on-change="sauvegarderConfigPratiqueMat">
                                                 </div>
                                                 <div class="groupe-form">
                                                     <label for="mat-portfolio-total" class="u-texte-gras" style="display: block; margin-bottom: 6px">
                                                         Total d'artefacts prévus
                                                     </label>
-                                                    <input type="number" id="mat-portfolio-total" class="controle-form" min="1" max="50" value="10" onchange="sauvegarderConfigPratiqueMat()">
+                                                    <input type="number" id="mat-portfolio-total" class="controle-form" min="1" max="50" value="10" data-on-change="sauvegarderConfigPratiqueMat">
                                                 </div>
                                             </div>
                                         </div>
@@ -6344,7 +6344,7 @@
                                         <div id="mat-config-categories" class="u-mt-20" style="padding-top: 20px; border-top: 1px solid var(--gris-clair)">
                                             <div class="u-mb-15">
                                                 <label class="u-flex-gap-10 u-align-center" style="cursor: pointer">
-                                                    <input type="checkbox" id="mat-categories-actif" onchange="toggleCategoriesMat()">
+                                                    <input type="checkbox" id="mat-categories-actif" data-on-change="toggleCategoriesMat">
                                                     <span class="u-texte-gras">Activer les catégories Sélection / Obligatoires</span>
                                                     <span class="tooltip-aide" title="Permet de distinguer des productions 'Sélection' (N meilleures retenues pour la note) et des productions 'Obligatoires' (toujours comptées, ex: examen final).">📍</span>
                                                 </label>
@@ -6367,13 +6367,13 @@
                                                                 <label for="mat-selection-nombre">Nombre à retenir</label>
                                                                 <input type="number" id="mat-selection-nombre" class="controle-form"
                                                                        min="1" max="20" value="4"
-                                                                       onchange="recalculerPonderationsUnitaires(); sauvegarderConfigPratiqueMat()">
+                                                                       data-on-change="onMatSelectionNombreChange">
                                                             </div>
                                                             <div class="groupe-form">
                                                                 <label for="mat-selection-ponderation">Pondération (%)</label>
                                                                 <input type="number" id="mat-selection-ponderation" class="controle-form"
                                                                        min="0" max="100" value="65"
-                                                                       onchange="validerPonderationsCategoriesMat(); recalculerPonderationsUnitaires(); sauvegarderConfigPratiqueMat()">
+                                                                       data-on-change="onMatSelectionPonderationChange">
                                                             </div>
                                                         </div>
 
@@ -6397,7 +6397,7 @@
                                                             <label for="mat-obligatoires-ponderation">Pondération (%)</label>
                                                             <input type="number" id="mat-obligatoires-ponderation" class="controle-form"
                                                                    min="0" max="100" value="35"
-                                                                   onchange="validerPonderationsCategoriesMat(); recalculerPonderationsUnitaires(); sauvegarderConfigPratiqueMat()">
+                                                                   data-on-change="onMatObligatoiresPonderationChange">
                                                         </div>
 
                                                         <div id="mat-obligatoires-unitaire" class="u-mb-10 u-texte-petit u-p-8" style="color: var(--orange-principal, #e67e22); background: rgba(230, 126, 34, 0.08); border-radius: var(--radius-moyen)">
@@ -6437,7 +6437,7 @@
                                                     <label for="mat-objectifs-mode-calcul" class="u-texte-gras" style="display: block; margin-bottom: 6px">
                                                         Mode de calcul de la note finale
                                                     </label>
-                                                    <select id="mat-objectifs-mode-calcul" class="controle-form" onchange="changerModeCalculObjectifsMat()">
+                                                    <select id="mat-objectifs-mode-calcul" class="controle-form" data-on-change="changerModeCalculObjectifsMat">
                                                         <option value="comptage">Comptage d'objectifs (Bruno V.)</option>
                                                         <option value="moyenne-ponderee">Moyenne pondérée (Michel B.)</option>
                                                         <option value="seuils-critiques">Seuils critiques (Xavier C.-T.)</option>
@@ -6474,14 +6474,14 @@
                                                         <label for="mat-comptage-seuil-maitrise" class="u-texte-gras" style="display: block; margin-bottom: 6px">
                                                             Seuil de maîtrise (%)
                                                         </label>
-                                                        <input type="number" id="mat-comptage-seuil-maitrise" class="controle-form" min="50" max="100" value="75" onchange="sauvegarderConfigPratiqueMat()">
+                                                        <input type="number" id="mat-comptage-seuil-maitrise" class="controle-form" min="50" max="100" value="75" data-on-change="sauvegarderConfigPratiqueMat">
                                                         <small class="text-muted" style="display: block; margin-top: 4px;">Note minimale pour considérer un objectif « Maîtrisé »</small>
                                                     </div>
                                                     <div class="groupe-form">
                                                         <label for="mat-comptage-plafond-essentiel" class="u-texte-gras" style="display: block; margin-bottom: 6px">
                                                             Plafond si essentiels non maîtrisés (%)
                                                         </label>
-                                                        <input type="number" id="mat-comptage-plafond-essentiel" class="controle-form" min="0" max="60" value="55" onchange="sauvegarderConfigPratiqueMat()">
+                                                        <input type="number" id="mat-comptage-plafond-essentiel" class="controle-form" min="0" max="60" value="55" data-on-change="sauvegarderConfigPratiqueMat">
                                                         <small class="text-muted" style="display: block; margin-top: 4px;">Note maximale si un objectif essentiel n'est pas maîtrisé</small>
                                                     </div>
                                                 </div>
@@ -6524,21 +6524,21 @@
                                                         <label for="mat-seuils-niveau-reussite" class="u-texte-gras" style="display: block; margin-bottom: 6px">
                                                             Niveau requis pour réussite
                                                         </label>
-                                                        <input type="number" id="mat-seuils-niveau-reussite" class="controle-form" min="1" max="4" value="3" onchange="sauvegarderConfigPratiqueMat()">
+                                                        <input type="number" id="mat-seuils-niveau-reussite" class="controle-form" min="1" max="4" value="3" data-on-change="sauvegarderConfigPratiqueMat">
                                                         <small class="text-muted" style="display: block; margin-top: 4px;">Tous les objectifs doivent atteindre ce niveau</small>
                                                     </div>
                                                     <div class="groupe-form">
                                                         <label for="mat-seuils-note-base" class="u-texte-gras" style="display: block; margin-bottom: 6px">
                                                             Note si tous réussis (%)
                                                         </label>
-                                                        <input type="number" id="mat-seuils-note-base" class="controle-form" min="60" max="100" value="80" onchange="sauvegarderConfigPratiqueMat()">
+                                                        <input type="number" id="mat-seuils-note-base" class="controle-form" min="60" max="100" value="80" data-on-change="sauvegarderConfigPratiqueMat">
                                                         <small class="text-muted" style="display: block; margin-top: 4px;">Note obtenue si tous au niveau requis</small>
                                                     </div>
                                                     <div class="groupe-form">
                                                         <label for="mat-seuils-bonus-niveau4" class="u-texte-gras" style="display: block; margin-bottom: 6px">
                                                             Bonus par objectif niveau 4 (%)
                                                         </label>
-                                                        <input type="number" id="mat-seuils-bonus-niveau4" class="controle-form" min="0" max="10" step="0.5" value="3.33" onchange="sauvegarderConfigPratiqueMat()">
+                                                        <input type="number" id="mat-seuils-bonus-niveau4" class="controle-form" min="0" max="10" step="0.5" value="3.33" data-on-change="sauvegarderConfigPratiqueMat">
                                                         <small class="text-muted" style="display: block; margin-top: 4px;">Points bonus par objectif au niveau 4</small>
                                                     </div>
                                                 </div>
@@ -6556,7 +6556,7 @@
                                                     <label for="mat-holistique-methode" class="u-texte-gras" style="display: block; margin-bottom: 6px">
                                                         Méthode de suggestion
                                                     </label>
-                                                    <select id="mat-holistique-methode" class="controle-form" onchange="sauvegarderConfigPratiqueMat()">
+                                                    <select id="mat-holistique-methode" class="controle-form" data-on-change="sauvegarderConfigPratiqueMat">
                                                         <option value="mode">Mode (niveau le plus fréquent)</option>
                                                         <option value="mediane">Médiane</option>
                                                         <option value="moyenne">Moyenne</option>
@@ -6597,7 +6597,7 @@
                                                 Seuil d'acceptabilité (%)
                                             </label>
                                             <div class="u-flex-gap-10 u-align-center">
-                                                <input type="number" id="mat-spec-seuil" class="controle-form" value="75" min="50" max="100" style="width: 80px;" onchange="sauvegarderConfigPratiqueMat()">
+                                                <input type="number" id="mat-spec-seuil" class="controle-form" value="75" min="50" max="100" style="width: 80px;" data-on-change="sauvegarderConfigPratiqueMat">
                                                 <span class="text-muted u-texte-petit">
                                                     Un travail est acceptable s'il atteint ce seuil ou plus.
                                                 </span>
@@ -6651,7 +6651,7 @@
                                         <!-- Checkbox maître pour activer/désactiver le système -->
                                         <div class="groupe-form u-mb-20 u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
                                             <label class="u-flex-gap-10 u-texte-gras u-align-center" style="cursor: pointer">
-                                                <input type="checkbox" id="mat-jetons-actif" onchange="toggleSystemeJetonsMat()">
+                                                <input type="checkbox" id="mat-jetons-actif" data-on-change="toggleSystemeJetonsMat">
                                                 Activer le système de jetons
                                             </label>
                                         </div>
@@ -6855,14 +6855,14 @@
                                     <label>Grille (critères) :
                                         <span class="tooltip-aide" title="La rétroaction fournie à l'apprenant repose sur le croisement de deux éléments : les critères d'évaluation et les niveaux de performance. Ce croisement forme une grille descriptive qui précise : le niveau atteint, ce qui est maîtrisé, ce qui reste à travailler, et comment progresser. Une rétroaction efficace est spécifique, actionnable, utile et bienveillante. Il est préférable d'éviter le « sandwich » (positif-négatif-positif) qui n'atteint pas ces objectifs.">📍</span>
                                     </label>
-                                    <select id="selectGrilleCartouche" class="controle-form" onchange="onChangeSelectionCartouche()">
+                                    <select id="selectGrilleCartouche" class="controle-form" data-on-change="onChangeSelectionCartouche">
                                         <option value="">-- Grille --</option>
                                         <!-- Options générées par JS -->
                                     </select>
                                 </div>
                                 <div class="groupe-form" style="flex: 0 0 200px; margin: 0;">
                                     <label>Échelle (niveaux) :</label>
-                                    <select id="selectEchelleCartouche" class="controle-form" onchange="onChangeSelectionCartouche()">
+                                    <select id="selectEchelleCartouche" class="controle-form" data-on-change="onChangeSelectionCartouche">
                                         <option value="">-- Échelle --</option>
                                         <!-- Options générées par JS -->
                                     </select>
@@ -6909,7 +6909,7 @@
                                 <button class="btn btn-secondaire btn-compact" data-action="ouvrirImportTxtCartouche">
                                     Importer depuis un fichier texte (.txt / .md)
                                 </button>
-                                <input type="file" id="fichier-import-txt-cartouche" accept=".txt,.md,.text" style="display: none;" onchange="importerCartoucheDepuisTxt(event)">
+                                <input type="file" id="fichier-import-txt-cartouche" accept=".txt,.md,.text" style="display: none;" data-on-change="importerCartoucheDepuisTxt">
                             </div>
                                 </div>
 
@@ -6993,7 +6993,7 @@
 
                             <!-- Filtre par catégorie -->
                             <div class="questions-filtre">
-                                <select id="questions-filtre-categorie" class="form-select" onchange="window.changerFiltreCategorie(this.value)">
+                                <select id="questions-filtre-categorie" class="form-select" data-on-change="changerFiltreCategorieFromEl">
                                     <option value="">Toutes les catégories</option>
                                     <!-- Options ajoutées dynamiquement -->
                                 </select>
@@ -7591,22 +7591,22 @@
                                     <div class="groupe-form">
                                         <label>Début du trimestre :</label>
                                         <input type="date" class="controle-form" id="debutTrimestre"
-                                            onchange="sauvegarderCadreCalendrier()">
+                                            data-on-change="sauvegarderCadreCalendrier">
                                     </div>
                                     <div class="groupe-form">
                                         <label>Fin des cours réguliers :</label>
                                         <input type="date" class="controle-form" id="finCours"
-                                            onchange="sauvegarderCadreCalendrier()">
+                                            data-on-change="sauvegarderCadreCalendrier">
                                     </div>
                                     <div class="groupe-form">
                                         <label>Fin du trimestre :</label>
                                         <input type="date" class="controle-form" id="finTrimestre"
-                                            onchange="sauvegarderCadreCalendrier()">
+                                            data-on-change="sauvegarderCadreCalendrier">
                                     </div>
                                     <div class="groupe-form">
                                         <label>Remise des notes :</label>
                                         <input type="date" class="controle-form" id="remiseNotes"
-                                            onchange="sauvegarderCadreCalendrier()">
+                                            data-on-change="sauvegarderCadreCalendrier">
                                     </div>
                                 </div>
                             </div>
@@ -7625,13 +7625,13 @@
                                             <div class="groupe-form" class="flex-1">
                                                 <label>Du :</label>
                                                 <input type="date" class="controle-form" id="semainePlanificationDebut"
-                                                    onchange="sauvegarderCadreCalendrier()">
+                                                    data-on-change="sauvegarderCadreCalendrier">
                                             </div>
                                             <span class="pt-20">au</span>
                                             <div class="groupe-form" class="flex-1">
                                                 <label>&nbsp;</label>
                                                 <input type="date" class="controle-form" id="semainePlanificationFin"
-                                                    onchange="sauvegarderCadreCalendrier()">
+                                                    data-on-change="sauvegarderCadreCalendrier">
                                             </div>
                                         </div>
                                     </div>
@@ -7643,13 +7643,13 @@
                                             <div class="groupe-form" class="flex-1">
                                                 <label>Du :</label>
                                                 <input type="date" class="controle-form" id="semaineExamensDebut"
-                                                    onchange="sauvegarderCadreCalendrier()">
+                                                    data-on-change="sauvegarderCadreCalendrier">
                                             </div>
                                             <span class="pt-20">au</span>
                                             <div class="groupe-form" class="flex-1">
                                                 <label>&nbsp;</label>
                                                 <input type="date" class="controle-form" id="semaineExamensFin"
-                                                    onchange="sauvegarderCadreCalendrier()">
+                                                    data-on-change="sauvegarderCadreCalendrier">
                                             </div>
                                         </div>
                                     </div>
@@ -8179,7 +8179,7 @@
                                     <label>Heures/semaine</label>
                                     <!-- FIX #53 (1er fév 2026) : Met à jour le format horaire dynamiquement -->
                                     <input type="number" id="heuresParSemaine" class="controle-form controle-form-compact" value="4" min="1"
-                                        max="10" onchange="mettreAJourOptionsFormatHoraire()">
+                                        max="10" data-on-change="mettreAJourOptionsFormatHoraire">
                                 </div>
                                 <div class="groupe-form">
                                     <label>Format horaire</label>
@@ -8930,7 +8930,7 @@
                                             <label for="echelleConformite" class="u-mb-5 u-texte-medium" style="display: block">
                                                 Échelle de référence
                                             </label>
-                                            <select id="echelleConformite" class="controle-form" onchange="onEchelleConformiteChange()">
+                                            <select id="echelleConformite" class="controle-form" data-on-change="onEchelleConformiteChange">
                                                 <option value="">-- Choisir une échelle --</option>
                                                 <!-- Options populées dynamiquement -->
                                             </select>
@@ -9127,7 +9127,7 @@
                             </div><!-- FIN zoneConfigurationPratique -->
 
                             <!-- Input caché pour import JSON -->
-                            <input type="file" id="inputImportPratique" accept=".json" style="display: none;" onchange="traiterImportPratique(event)">
+                            <input type="file" id="inputImportPratique" accept=".json" style="display: none;" data-on-change="traiterImportPratiqueFromEl">
 
                             <!-- ========================================= -->
                             <!-- MODAL WIZARD CRÉATION PRATIQUE -->
@@ -9334,7 +9334,7 @@
                                         <div class="wizard-step u-hide" data-step="2">
                                             <div class="groupe-form">
                                                 <label>Échelle à utiliser *</label>
-                                                <select id="wizard-echelle-id" class="controle-form" onchange="afficherPreviewEchelleWizard()">
+                                                <select id="wizard-echelle-id" class="controle-form" data-on-change="afficherPreviewEchelleWizard">
                                                     <option value="">Choisir une échelle...</option>
                                                     <!-- Options chargées dynamiquement depuis echellesTemplates -->
                                                 </select>
@@ -9385,7 +9385,7 @@
 
                                             <div class="groupe-form">
                                                 <label>Type de structure *</label>
-                                                <select id="wizard-structure-type" class="controle-form" onchange="afficherConfigStructure()">
+                                                <select id="wizard-structure-type" class="controle-form" data-on-change="afficherConfigStructure">
                                                     <option value="">Choisir un type...</option>
                                                     <option value="portfolio">Portfolio (artefacts sans pondération individuelle)</option>
                                                     <option value="standards">Notation par maîtrise – SBG (standards numérotés)</option>
@@ -9429,7 +9429,7 @@
 
                                                 <div class="groupe-form">
                                                     <label>Mode de sélection</label>
-                                                    <select id="wizard-portfolio-selection" class="controle-form" onchange="onWizardPortfolioSelectionChange()">
+                                                    <select id="wizard-portfolio-selection" class="controle-form" data-on-change="onWizardPortfolioSelectionChange">
                                                         <option value="n_meilleurs">N meilleurs artefacts</option>
                                                         <option value="tous">Tous les artefacts</option>
                                                         <option value="derniers">N derniers artefacts</option>
@@ -9500,7 +9500,7 @@
                                                 <!-- ÉTAPE 1 : Choix du type d'évaluation -->
                                                 <div class="groupe-form">
                                                     <label>Type d'évaluation *</label>
-                                                    <select id="wizard-spec-type-evaluation" class="controle-form" onchange="afficherConfigSpecType()">
+                                                    <select id="wizard-spec-type-evaluation" class="controle-form" data-on-change="afficherConfigSpecType">
                                                         <option value="">Choisir un type...</option>
                                                         <option value="binaire">Évaluation binaire (acceptable / non-acceptable)</option>
                                                         <option value="niveaux">Niveaux de performance (1-2-3-4 ou similaire)</option>
@@ -9548,7 +9548,7 @@
 
                                                     <div class="groupe-form">
                                                         <label>Nombre d'objectifs</label>
-                                                        <input type="number" id="wizard-spec-nb-objectifs" class="controle-form" min="1" max="20" value="6" onchange="genererObjectifsSpec()">
+                                                        <input type="number" id="wizard-spec-nb-objectifs" class="controle-form" min="1" max="20" value="6" data-on-change="genererObjectifsSpec">
                                                     </div>
 
                                                     <div id="wizard-spec-objectifs-liste"></div>
@@ -9607,7 +9607,7 @@
 
                                                 <div class="groupe-form">
                                                     <label>Ensemble d'objectifs</label>
-                                                    <select id="wizard-ensemble-objectifs" class="controle-form" onchange="chargerEnsembleWizard()">
+                                                    <select id="wizard-ensemble-objectifs" class="controle-form" data-on-change="chargerEnsembleWizard">
                                                         <option value="">-- Sélectionner un ensemble existant --</option>
                                                     </select>
                                                     <small class="form-text">
@@ -9652,7 +9652,7 @@
 
                                             <div class="groupe-form">
                                                 <label>Méthode de calcul *</label>
-                                                <select id="wizard-calcul-methode" class="controle-form" onchange="afficherConfigCalcul()">
+                                                <select id="wizard-calcul-methode" class="controle-form" data-on-change="afficherConfigCalcul">
                                                     <option value="">Choisir une méthode...</option>
                                                     <option value="conversion_niveaux">Conversion niveaux → pourcentage</option>
                                                     <option value="moyenne_ponderee">Moyenne pondérée</option>
@@ -9684,7 +9684,7 @@
 
                                             <div class="groupe-form">
                                                 <label>Type de reprises *</label>
-                                                <select id="wizard-reprises-type" class="controle-form" onchange="afficherConfigReprises()">
+                                                <select id="wizard-reprises-type" class="controle-form" data-on-change="afficherConfigReprises">
                                                     <option value="">Choisir un type...</option>
                                                     <option value="aucune">Aucune reprise</option>
                                                     <option value="illimitees">Reprises illimitées</option>
@@ -9718,7 +9718,7 @@
                                             <div class="u-mt-25" style="padding-top: 20px; border-top: 1px solid var(--gris-leger)">
                                                 <div class="groupe-form">
                                                     <label class="u-flex-gap-8 u-align-center" style="cursor: pointer">
-                                                        <input type="checkbox" id="wizard-utiliser-jetons" onchange="toggleResumeJetonsWizard()">
+                                                        <input type="checkbox" id="wizard-utiliser-jetons" data-on-change="toggleResumeJetonsWizard">
                                                         <strong>Utiliser le système de jetons</strong>
                                                     </label>
                                                     <small class="u-mt-6" style="color: var(--gris-moyen); display: block">
@@ -9755,7 +9755,7 @@
 
                                             <div class="groupe-form">
                                                 <label>Type de gestion des critères *</label>
-                                                <select id="wizard-criteres-type" class="controle-form" onchange="afficherConfigCriteres()">
+                                                <select id="wizard-criteres-type" class="controle-form" data-on-change="afficherConfigCriteres">
                                                     <option value="">Choisir un type...</option>
                                                     <option value="fixes">Critères fixes pour toutes les évaluations</option>
                                                     <option value="par_standard">Critères par standard (SBG)</option>
@@ -9771,7 +9771,7 @@
 
                                                 <div class="groupe-form">
                                                     <label>Grille de critères à utiliser *</label>
-                                                    <select id="wizard-grille-id" class="controle-form" onchange="afficherPreviewGrilleWizard()">
+                                                    <select id="wizard-grille-id" class="controle-form" data-on-change="afficherPreviewGrilleWizard">
                                                         <option value="">Choisir une grille...</option>
                                                         <!-- Options chargées dynamiquement depuis grillesTemplates -->
                                                     </select>
@@ -10096,7 +10096,7 @@
                                     <div class="u-flex-gap-10 u-align-center">
                                         <input type="number" id="nombreProductionsAnalyse" class="controle-form"
                                                min="3" max="20" value="3" style="width: 100px;"
-                                               onchange="sauvegarderSeuil('nombreProductionsAnalyse', parseInt(this.value))">
+                                               data-on-change="sauvegarderSeuilNombreProductions">
                                         <span class="u-texte-09" style="color: var(--gris-moyen)">dernières productions</span>
                                     </div>
                                     <small class="u-texte-petit" style="display: block; color: var(--gris-moyen); margin-top: 8px">
@@ -10137,8 +10137,8 @@
                                     </label>
                                     <input type="range" id="seuil-progression" class="controle-form"
                                            min="0.05" max="0.20" step="0.01" value="0.10"
-                                           oninput="mettreAJourAffichageSeuil('progression', this.value)"
-                                           onchange="sauvegarderSeuil('progressionArtefacts', parseFloat(this.value))"
+                                           data-on-input="mettreAJourAffichageSeuil" data-param="progression"
+                                           data-on-change="sauvegarderSeuilProgressionArtefacts"
                                            class="w-100-pointer">
                                     <div class="d-flex-between-sm-muted-mt5">
                                         <span>5 points (très sensible)</span>
@@ -10174,8 +10174,8 @@
                                     </label>
                                     <input type="range" id="seuil-risque" class="controle-form"
                                            min="0.03" max="0.15" step="0.01" value="0.05"
-                                           oninput="mettreAJourAffichageSeuil('risque', this.value)"
-                                           onchange="sauvegarderSeuil('directionRisque', parseFloat(this.value))"
+                                           data-on-input="mettreAJourAffichageSeuil" data-param="risque"
+                                           data-on-change="sauvegarderSeuilDirectionRisque"
                                            class="w-100-pointer">
                                     <div class="d-flex-between-sm-muted-mt5">
                                         <span>3 points (très sensible)</span>
@@ -10205,8 +10205,8 @@
                                     </label>
                                     <input type="range" id="seuil-defi" class="controle-form"
                                            min="0.60" max="0.80" step="0.0125" value="0.7125"
-                                           oninput="mettreAJourAffichageSeuil('defi', this.value)"
-                                           onchange="sauvegarderSeuil('defiSpecifique', parseFloat(this.value))"
+                                           data-on-input="mettreAJourAffichageSeuil" data-param="defi"
+                                           data-on-change="sauvegarderSeuilDefiSpecifique"
                                            class="w-100-pointer">
                                     <div class="d-flex-between-sm-muted-mt5">
                                         <span>60% (plus exigeant)</span>
@@ -10517,7 +10517,7 @@
 
                                     <div class="groupe-form u-mt-15">
                                         <label class="libelle-selection">Trimestre actif :</label>
-                                        <select id="selectTrimestreActif" class="controle-form" onchange="changerTrimestreActifV2(this.value)">
+                                        <select id="selectTrimestreActif" class="controle-form" data-on-change="changerTrimestreActifV2">
                                             <option value="">Chargement...</option>
                                         </select>
                                     </div>
@@ -10544,11 +10544,11 @@
                                         <div class="grille-identification">
                                             <div class="groupe-form">
                                                 <label style="font-size: 0.8rem">Nom du trimestre <span class="text-danger u-texte-medium">*</span></label>
-                                                <input type="text" class="controle-form" id="v2-nomTrimestre" placeholder="Ex: Hiver 2026" onchange="sauvegarderIdentificationTrimestreV2()">
+                                                <input type="text" class="controle-form" id="v2-nomTrimestre" placeholder="Ex: Hiver 2026" data-on-change="sauvegarderIdentificationTrimestreV2">
                                             </div>
                                             <div class="groupe-form">
                                                 <label style="font-size: 0.8rem">Session <span class="text-danger u-texte-medium">*</span></label>
-                                                <select class="controle-form" id="v2-sessionTrimestre" onchange="sauvegarderIdentificationTrimestreV2()">
+                                                <select class="controle-form" id="v2-sessionTrimestre" data-on-change="sauvegarderIdentificationTrimestreV2">
                                                     <option value="">— Choisir —</option>
                                                     <option value="automne">Automne</option>
                                                     <option value="hiver">Hiver</option>
@@ -10557,7 +10557,7 @@
                                             </div>
                                             <div class="groupe-form">
                                                 <label style="font-size: 0.8rem">Année <span class="text-danger u-texte-medium">*</span></label>
-                                                <input type="number" class="controle-form" id="v2-anneeTrimestre" min="2020" max="2050" placeholder="2026" onchange="sauvegarderIdentificationTrimestreV2()">
+                                                <input type="number" class="controle-form" id="v2-anneeTrimestre" min="2020" max="2050" placeholder="2026" data-on-change="sauvegarderIdentificationTrimestreV2">
                                             </div>
                                         </div>
                                         <p class="texte-aide u-mt-10" style="margin-bottom: 0; font-size: 0.8rem">
@@ -10576,22 +10576,22 @@
                                                 <div class="groupe-form">
                                                     <label class="u-texte-medium" style="font-size: 0.8rem">Début du trimestre :</label>
                                                     <input type="date" class="controle-form controle-form-compact" id="v2-debutTrimestre"
-                                                        onchange="sauvegarderCadreCalendrierV2()">
+                                                        data-on-change="sauvegarderCadreCalendrierV2">
                                                 </div>
                                                 <div class="groupe-form">
                                                     <label class="u-texte-medium" style="font-size: 0.8rem">Fin des cours réguliers :</label>
                                                     <input type="date" class="controle-form controle-form-compact" id="v2-finCours"
-                                                        onchange="sauvegarderCadreCalendrierV2()">
+                                                        data-on-change="sauvegarderCadreCalendrierV2">
                                                 </div>
                                                 <div class="groupe-form">
                                                     <label class="u-texte-medium" style="font-size: 0.8rem">Fin du trimestre :</label>
                                                     <input type="date" class="controle-form controle-form-compact" id="v2-finTrimestre"
-                                                        onchange="sauvegarderCadreCalendrierV2()">
+                                                        data-on-change="sauvegarderCadreCalendrierV2">
                                                 </div>
                                                 <div class="groupe-form">
                                                     <label class="u-texte-medium" style="font-size: 0.8rem">Remise des notes :</label>
                                                     <input type="date" class="controle-form controle-form-compact" id="v2-remiseNotes"
-                                                        onchange="sauvegarderCadreCalendrierV2()">
+                                                        data-on-change="sauvegarderCadreCalendrierV2">
                                                 </div>
                                             </div>
                                         </div>
@@ -10608,13 +10608,13 @@
                                                         <div class="groupe-form flex-1">
                                                             <label style="font-size: 0.75rem;">Du :</label>
                                                             <input type="date" class="controle-form controle-form-compact" id="v2-semainePlanificationDebut"
-                                                                onchange="sauvegarderCadreCalendrierV2()">
+                                                                data-on-change="sauvegarderCadreCalendrierV2">
                                                         </div>
                                                         <span style="padding-top: 15px; font-size: 0.8rem;">au</span>
                                                         <div class="groupe-form flex-1">
                                                             <label style="font-size: 0.75rem;">&nbsp;</label>
                                                             <input type="date" class="controle-form controle-form-compact" id="v2-semainePlanificationFin"
-                                                                onchange="sauvegarderCadreCalendrierV2()">
+                                                                data-on-change="sauvegarderCadreCalendrierV2">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -10625,13 +10625,13 @@
                                                         <div class="groupe-form flex-1">
                                                             <label style="font-size: 0.75rem;">Du :</label>
                                                             <input type="date" class="controle-form controle-form-compact" id="v2-semaineExamensDebut"
-                                                                onchange="sauvegarderCadreCalendrierV2()">
+                                                                data-on-change="sauvegarderCadreCalendrierV2">
                                                         </div>
                                                         <span style="padding-top: 15px; font-size: 0.8rem;">au</span>
                                                         <div class="groupe-form flex-1">
                                                             <label style="font-size: 0.75rem;">&nbsp;</label>
                                                             <input type="date" class="controle-form controle-form-compact" id="v2-semaineExamensFin"
-                                                                onchange="sauvegarderCadreCalendrierV2()">
+                                                                data-on-change="sauvegarderCadreCalendrierV2">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -10773,7 +10773,7 @@
 
                                     <div class="groupe-form u-mt-15">
                                         <label class="libelle-selection">Cours :</label>
-                                        <select id="v2-selectCours" class="controle-form" onchange="changerCoursSelectionneV2(this.value)">
+                                        <select id="v2-selectCours" class="controle-form" data-on-change="changerCoursSelectionneV2">
                                             <option value="">-- Sélectionner --</option>
                                         </select>
                                     </div>
@@ -11017,7 +11017,7 @@
                                     <!-- Dropdown sélection profil (Beta 95.2) -->
                                     <div class="groupe-form u-mb-15">
                                         <label class="u-texte-gras">Profil enseignant</label>
-                                        <select id="v2-selectEnseignant" class="controle-form" onchange="chargerEnseignantSelectionneV2()">
+                                        <select id="v2-selectEnseignant" class="controle-form" data-on-change="chargerEnseignantSelectionneV2">
                                             <option value="">— Sélectionner —</option>
                                         </select>
                                     </div>
@@ -11042,23 +11042,23 @@
                                     <div class="grille-form-2col u-mb-15">
                                         <div class="groupe-form">
                                             <label>Prénom <span class="text-danger">*</span></label>
-                                            <input type="text" id="v2-ens-prenom" class="controle-form" placeholder="Ex: Marie" onchange="mettreAJourCarteEnseignant()">
+                                            <input type="text" id="v2-ens-prenom" class="controle-form" placeholder="Ex: Marie" data-on-change="mettreAJourCarteEnseignant">
                                         </div>
                                         <div class="groupe-form">
                                             <label>Nom <span class="text-danger">*</span></label>
-                                            <input type="text" id="v2-ens-nom" class="controle-form" placeholder="Ex: Tremblay" onchange="mettreAJourCarteEnseignant()">
+                                            <input type="text" id="v2-ens-nom" class="controle-form" placeholder="Ex: Tremblay" data-on-change="mettreAJourCarteEnseignant">
                                         </div>
                                     </div>
 
                                     <div class="groupe-form u-mb-15">
                                         <label>Courriel <span class="text-danger">*</span></label>
-                                        <input type="email" id="v2-ens-courriel" class="controle-form" placeholder="Ex: marie.tremblay@cegep.qc.ca" onchange="mettreAJourCarteEnseignant()">
+                                        <input type="email" id="v2-ens-courriel" class="controle-form" placeholder="Ex: marie.tremblay@cegep.qc.ca" data-on-change="mettreAJourCarteEnseignant">
                                     </div>
 
                                     <div class="grille-form-2col u-mb-15">
                                         <div class="groupe-form">
                                             <label>Institution <span class="text-danger">*</span></label>
-                                            <input type="text" id="v2-ens-institution" class="controle-form" placeholder="Ex: Cégep de Drummondville" onchange="mettreAJourCarteEnseignant()">
+                                            <input type="text" id="v2-ens-institution" class="controle-form" placeholder="Ex: Cégep de Drummondville" data-on-change="mettreAJourCarteEnseignant">
                                         </div>
                                         <div class="groupe-form">
                                             <label>Département</label>
@@ -11258,7 +11258,7 @@
                                     <!-- Sélection du groupe -->
                                     <div class="groupe-form u-mb-15">
                                         <label class="label-compact">Groupe :</label>
-                                        <select id="v2-selectGroupe" class="controle-form" onchange="filtrerParGroupeV2()">
+                                        <select id="v2-selectGroupe" class="controle-form" data-on-change="filtrerParGroupeV2">
                                             <option value="">Tous les groupes</option>
                                             <!-- Options générées dynamiquement -->
                                         </select>
@@ -11366,7 +11366,7 @@
                                             <div class="import-option">
                                                 <label class="label-compact">Fichier CSV/TSV :</label>
                                                 <input type="file" id="v2-fichierCsvEntree" class="controle-form input-fichier-compact" accept=".csv,.tsv,.txt"
-                                                    onchange="importerFichierEtudiantsV2(event)">
+                                                    data-on-change="importerFichierEtudiantsV2FromEl">
                                                 <p class="texte-aide" style="font-size: 0.75rem; margin-top: 8px;">
                                                     Format : DA, Groupe, Nom, Prénom, Programme, (vide), SA
                                                 </p>
@@ -11408,7 +11408,7 @@
                                     <!-- Sélection de l'horaire -->
                                     <div class="groupe-form u-mb-15">
                                         <label class="label-compact">Horaire :</label>
-                                        <select id="v2-selectHoraire" class="controle-form" onchange="changerHoraireSelectionneV2(this.value)">
+                                        <select id="v2-selectHoraire" class="controle-form" data-on-change="changerHoraireSelectionneV2">
                                             <option value="">Sélectionner...</option>
                                         </select>
                                     </div>
@@ -11421,7 +11421,7 @@
                                     <!-- Configuration durée de période -->
                                     <div class="section-config-periode">
                                         <label class="label-compact">Durée d'une période :</label>
-                                        <select id="v2-dureePeriode" class="controle-form" onchange="modifierDureePeriodeV2(this.value)">
+                                        <select id="v2-dureePeriode" class="controle-form" data-on-change="modifierDureePeriodeV2">
                                             <option value="50">50 minutes</option>
                                             <option value="55" selected>55 minutes</option>
                                             <option value="60">60 minutes</option>
@@ -11467,7 +11467,7 @@
                                         <div class="grille-form-2col u-mb-15" data-tooltip="reglages-horaire-periodes">
                                             <div class="groupe-form">
                                                 <label>Séances par semaine</label>
-                                                <select id="v2-hor-nbSeances" class="controle-form" onchange="mettreAJourSeancesHoraireV2()">
+                                                <select id="v2-hor-nbSeances" class="controle-form" data-on-change="mettreAJourSeancesHoraireV2">
                                                     <option value="1">1 séance</option>
                                                     <option value="2" selected>2 séances</option>
                                                     <option value="3">3 séances</option>
@@ -11477,7 +11477,7 @@
                                             </div>
                                             <div class="groupe-form">
                                                 <label>Périodes par séance</label>
-                                                <select id="v2-hor-periodesParSeance" class="controle-form" onchange="mettreAJourSeancesHoraireV2()">
+                                                <select id="v2-hor-periodesParSeance" class="controle-form" data-on-change="mettreAJourSeancesHoraireV2">
                                                     <option value="1">1 période</option>
                                                     <option value="2" selected>2 périodes</option>
                                                     <option value="3">3 périodes</option>
@@ -11547,7 +11547,7 @@
                                     <!-- Sélection du groupe-cours -->
                                     <div class="groupe-form u-mb-15 u-mt-15">
                                         <label class="label-compact">Groupe-cours existants :</label>
-                                        <select id="v2-selectGroupeCours" class="controle-form" onchange="changerGroupeCoursSelectionneV2(this.value)">
+                                        <select id="v2-selectGroupeCours" class="controle-form" data-on-change="changerGroupeCoursSelectionneV2">
                                             <option value="">— Choisir pour modifier —</option>
                                         </select>
                                     </div>
@@ -11603,13 +11603,13 @@
                                         <div class="grille-form-2col u-mb-15">
                                             <div class="groupe-form">
                                                 <label>1. Trimestre <span class="text-danger">*</span></label>
-                                                <select id="v2-gc-trimestre" class="controle-form" onchange="mettreAJourNomGroupeCoursV2()">
+                                                <select id="v2-gc-trimestre" class="controle-form" data-on-change="mettreAJourNomGroupeCoursV2">
                                                     <option value="">— Choisir un trimestre —</option>
                                                 </select>
                                             </div>
                                             <div class="groupe-form">
                                                 <label>2. Cours à enseigner <span class="text-danger">*</span></label>
-                                                <select id="v2-gc-cours" class="controle-form" onchange="mettreAJourNomGroupeCoursV2()">
+                                                <select id="v2-gc-cours" class="controle-form" data-on-change="mettreAJourNomGroupeCoursV2">
                                                     <option value="">— Choisir un cours —</option>
                                                 </select>
                                             </div>
@@ -11619,13 +11619,13 @@
                                         <div class="grille-form-2col u-mb-15">
                                             <div class="groupe-form">
                                                 <label>3. Numéro de groupe <span class="text-danger">*</span></label>
-                                                <select id="v2-gc-groupe" class="controle-form" onchange="mettreAJourNomGroupeCoursV2()">
+                                                <select id="v2-gc-groupe" class="controle-form" data-on-change="mettreAJourNomGroupeCoursV2">
                                                     <option value="">— Choisir un groupe —</option>
                                                 </select>
                                             </div>
                                             <div class="groupe-form">
                                                 <label>4. Horaire <span class="text-danger">*</span></label>
-                                                <select id="v2-gc-horaire" class="controle-form" onchange="mettreAJourNomGroupeCoursV2()">
+                                                <select id="v2-gc-horaire" class="controle-form" data-on-change="mettreAJourNomGroupeCoursV2">
                                                     <option value="">— Choisir un horaire —</option>
                                                 </select>
                                             </div>
@@ -11635,7 +11635,7 @@
                                         <div class="grille-form-2col u-mb-15">
                                             <div class="groupe-form">
                                                 <label>5. Enseignant·e <span class="text-danger">*</span></label>
-                                                <select id="v2-gc-enseignant" class="controle-form" onchange="mettreAJourNomGroupeCoursV2()">
+                                                <select id="v2-gc-enseignant" class="controle-form" data-on-change="mettreAJourNomGroupeCoursV2">
                                                     <option value="">— Choisir un enseignant —</option>
                                                 </select>
                                             </div>
@@ -11691,7 +11691,7 @@
                         <!-- Animation des points -->
                         <div class="form-group u-mb-15">
                             <label class="u-align-center" style="cursor: pointer; display: flex">
-                                <input type="checkbox" id="v2-pref-animation-points" checked onchange="sauvegarderPreferencesV2()">
+                                <input type="checkbox" id="v2-pref-animation-points" checked data-on-change="sauvegarderPreferencesV2">
                                 <strong style="margin-left: 8px;">Animation des points (tableau de bord)</strong>
                             </label>
                             <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
@@ -11702,7 +11702,7 @@
                         <!-- Métadonnées contextuelles -->
                         <div class="form-group u-mb-15">
                             <label class="u-align-center" style="cursor: pointer; display: flex">
-                                <input type="checkbox" id="v2-pref-contexte-graphiques" checked onchange="sauvegarderPreferencesV2()">
+                                <input type="checkbox" id="v2-pref-contexte-graphiques" checked data-on-change="sauvegarderPreferencesV2">
                                 <strong style="margin-left: 8px;">Métadonnées contextuelles (graphiques)</strong>
                             </label>
                             <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
@@ -11715,11 +11715,11 @@
                             <strong style="display: block; margin-bottom: 8px;">Th&egrave;me</strong>
                             <div style="display: flex; gap: 20px;">
                                 <label class="u-align-center" style="cursor: pointer; display: flex">
-                                    <input type="radio" name="theme-mode" id="radio-mode-sombre" value="sombre" checked onchange="definirTheme(false)">
+                                    <input type="radio" name="theme-mode" id="radio-mode-sombre" value="sombre" checked data-on-change="definirThemeFromRadio">
                                     <span style="margin-left: 6px;">Mode sombre</span>
                                 </label>
                                 <label class="u-align-center" style="cursor: pointer; display: flex">
-                                    <input type="radio" name="theme-mode" id="radio-mode-clair" value="clair" onchange="definirTheme(true)">
+                                    <input type="radio" name="theme-mode" id="radio-mode-clair" value="clair" data-on-change="definirThemeFromRadio">
                                     <span style="margin-left: 6px;">Mode clair</span>
                                 </label>
                             </div>
@@ -11731,7 +11731,7 @@
                         <h3 class="carte-titre-bleu">Navigation</h3>
                         <div class="form-group u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
                             <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-navigation">
-                                <input type="checkbox" id="checkbox-mode-expert" onchange="definirModeExpert(this.checked)">
+                                <input type="checkbox" id="checkbox-mode-expert" data-on-change="definirModeExpertFromEl">
                                 <strong style="margin-left: 8px;">Ouvrir directement sur le tableau de bord</strong>
                             </label>
                             <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
@@ -11740,7 +11740,7 @@
                         </div>
                         <div class="form-group u-mt-10 u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
                             <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-tooltips">
-                                <input type="checkbox" id="checkbox-tooltips" checked onchange="definirTooltips(this.checked)">
+                                <input type="checkbox" id="checkbox-tooltips" checked data-on-change="definirTooltipsFromEl">
                                 <strong style="margin-left: 8px;">Info-bulles d'aide au survol</strong>
                             </label>
                             <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
@@ -11749,7 +11749,7 @@
                         </div>
                         <div class="form-group u-mt-10 u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
                             <label class="u-align-center" style="cursor: pointer; display: flex">
-                                <input type="checkbox" id="checkbox-aide-contextuelle" checked onchange="definirAideContextuelle(this.checked)">
+                                <input type="checkbox" id="checkbox-aide-contextuelle" checked data-on-change="definirAideContextuelleFromEl">
                                 <strong style="margin-left: 8px;">Aide contextuelle</strong>
                             </label>
                             <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
@@ -11768,7 +11768,7 @@
                         <!-- Micro données ACP -->
                         <div class="form-group u-mb-15 u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
                             <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-outils-acp">
-                                <input type="checkbox" id="v2-pref-depistage-acp" checked onchange="sauvegarderPreferencesV2()">
+                                <input type="checkbox" id="v2-pref-depistage-acp" checked data-on-change="sauvegarderPreferencesV2">
                                 <strong style="margin-left: 8px;">Micro données ACP</strong>
                             </label>
                             <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
@@ -11779,7 +11779,7 @@
                         <!-- Système RàI -->
                         <div class="form-group u-mb-15 u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
                             <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-outils-rai">
-                                <input type="checkbox" id="v2-pref-rai" checked onchange="sauvegarderPreferencesV2()">
+                                <input type="checkbox" id="v2-pref-rai" checked data-on-change="sauvegarderPreferencesV2">
                                 <strong style="margin-left: 8px;">Système RàI (Réponse à l'Intervention)</strong>
                             </label>
                             <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
@@ -11790,7 +11790,7 @@
                         <!-- Chrono évaluation -->
                         <div class="form-group u-mb-15 u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
                             <label class="u-align-center" style="cursor: pointer; display: flex">
-                                <input type="checkbox" id="v2-pref-chrono-eval" onchange="sauvegarderPreferencesV2()">
+                                <input type="checkbox" id="v2-pref-chrono-eval" data-on-change="sauvegarderPreferencesV2">
                                 <strong style="margin-left: 8px;">Chrono d'évaluation</strong>
                             </label>
                             <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
@@ -11809,7 +11809,7 @@
                         <!-- Analyse SOLO -->
                         <div class="form-group u-mb-15">
                             <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-affichage-solo">
-                                <input type="checkbox" id="v2-pref-solo" checked onchange="sauvegarderPreferencesV2()">
+                                <input type="checkbox" id="v2-pref-solo" checked data-on-change="sauvegarderPreferencesV2">
                                 <strong style="margin-left: 8px;">Observation de la structure des résultats (SOLO)</strong>
                             </label>
                             <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
@@ -11820,7 +11820,7 @@
                         <!-- Snapshots -->
                         <div class="form-group u-mb-15">
                             <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-affichage-snapshots">
-                                <input type="checkbox" id="v2-pref-snapshots" checked onchange="sauvegarderPreferencesV2()">
+                                <input type="checkbox" id="v2-pref-snapshots" checked data-on-change="sauvegarderPreferencesV2">
                                 <strong style="margin-left: 8px;">Snapshots (captures de progression)</strong>
                             </label>
                             <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
@@ -11831,7 +11831,7 @@
                         <!-- Graphiques -->
                         <div class="form-group u-mb-15">
                             <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-affichage-graphiques">
-                                <input type="checkbox" id="v2-pref-graphiques" checked onchange="sauvegarderPreferencesV2()">
+                                <input type="checkbox" id="v2-pref-graphiques" checked data-on-change="sauvegarderPreferencesV2">
                                 <strong style="margin-left: 8px;">Graphiques d'évolution</strong>
                             </label>
                             <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
@@ -11842,7 +11842,7 @@
                         <!-- Détails techniques -->
                         <div class="form-group u-mb-15">
                             <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-affichage-details">
-                                <input type="checkbox" id="v2-pref-details-techniques" onchange="sauvegarderPreferencesV2()">
+                                <input type="checkbox" id="v2-pref-details-techniques" data-on-change="sauvegarderPreferencesV2">
                                 <strong style="margin-left: 8px;">Détails techniques</strong>
                             </label>
                             <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
@@ -11855,7 +11855,7 @@
                             <label for="v2-pref-unite-affichage" class="u-texte-gras" style="display: block; margin-bottom: 6px" data-tooltip="pref-affichage-assiduite">
                                 Unité d'affichage de l'assiduité
                             </label>
-                            <select id="v2-pref-unite-affichage" class="controle-form" onchange="sauvegarderPreferencesV2()" style="max-width: 250px;">
+                            <select id="v2-pref-unite-affichage" class="controle-form" data-on-change="sauvegarderPreferencesV2" style="max-width: 250px;">
                                 <option value="periodes">Périodes (ex: 12/14 périodes)</option>
                                 <option value="heures">Heures (ex: 11.0h/12.8h)</option>
                                 <option value="les-deux">Les deux (périodes et heures)</option>
@@ -11868,7 +11868,7 @@
                         <!-- Mode comparatif (expérimental) -->
                         <div class="form-group u-p-12" style="background: var(--alerte-fond-attention); border-radius: 6px">
                             <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-affichage-comparatif">
-                                <input type="checkbox" id="v2-pref-comparatif" onchange="sauvegarderPreferencesV2()">
+                                <input type="checkbox" id="v2-pref-comparatif" data-on-change="sauvegarderPreferencesV2">
                                 <strong style="margin-left: 8px;">Mode comparatif SOM/PAN (expérimental)</strong>
                             </label>
                             <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
@@ -11889,7 +11889,7 @@
                             <label for="select-mode-parcours" class="u-texte-gras" style="display: block; margin-bottom: 6px">
                                 Mode d'apprentissage
                             </label>
-                            <select id="select-mode-parcours" class="controle-form" onchange="if(window.parcours) window.parcours.changerModeParcours(this.value);" style="max-width: 300px;">
+                            <select id="select-mode-parcours" class="controle-form" data-on-change="changerModeParcoursDelegue" style="max-width: 300px;">
                                 <option value="explicite">🗺️ Étape par étape (enseignement explicite)</option>
                                 <option value="decouverte">🧭 Par exploration (apprentissage par découverte)</option>
                                 <option value="autonome">🎓 Autonome (aide en arrière-plan)</option>
@@ -11927,7 +11927,7 @@
                             <label for="v2-pref-sis" class="u-texte-gras" style="display: block; margin-bottom: 6px">
                                 SIS utilisé par mon cégep
                             </label>
-                            <select id="v2-pref-sis" class="controle-form" onchange="sauvegarderPreferencesV2()" style="max-width: 300px;">
+                            <select id="v2-pref-sis" class="controle-form" data-on-change="sauvegarderPreferencesV2" style="max-width: 300px;">
                                 <option value="lea">Omnivox / Léa — Skytech</option>
                                 <option value="coba" disabled>COBA — Berger-Levrault (bientôt)</option>
                                 <option value="colnet" disabled>Col.NET — Collège Montmorency (bientôt)</option>
@@ -11966,7 +11966,7 @@
                         <!-- Détection des patterns -->
                         <div class="form-group u-mb-20">
                             <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="depist-activer-patterns">
-                                <input type="checkbox" id="v2-pref-patterns" checked onchange="sauvegarderPreferencesV2()">
+                                <input type="checkbox" id="v2-pref-patterns" checked data-on-change="sauvegarderPreferencesV2">
                                 <span class="u-texte-gras" style="margin-left: 8px">Activer la détection des patterns</span>
                             </label>
                             <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
@@ -11979,7 +11979,7 @@
                             <label for="v2-pref-grille-reference" class="u-texte-gras" style="display: block; margin-bottom: 6px" data-tooltip="depist-grille">
                                 Grille de critères pour le dépistage
                             </label>
-                            <select id="v2-pref-grille-reference" class="controle-form" onchange="sauvegarderPreferencesV2()">
+                            <select id="v2-pref-grille-reference" class="controle-form" data-on-change="sauvegarderPreferencesV2">
                                 <option value="">-- Sélectionner une grille --</option>
                                 <!-- Options chargées dynamiquement -->
                             </select>
@@ -11991,7 +11991,7 @@
                         <!-- Option : Découpler Performance et Risque -->
                         <div class="groupe-form u-mt-15">
                             <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="depist-decoupler-pr">
-                                <input type="checkbox" id="v2-pref-decoupler-pr" onchange="sauvegarderPreferencesV2()">
+                                <input type="checkbox" id="v2-pref-decoupler-pr" data-on-change="sauvegarderPreferencesV2">
                                 <strong style="margin-left: 8px;">Découpler Performance (P) et Risque (R)</strong>
                             </label>
                             <small class="u-texte-petit" style="display: block; color: var(--gris-moyen); margin-top: 8px; margin-left: 28px; line-height: 1.5">
@@ -12007,7 +12007,7 @@
                                 Fenêtre d'analyse des patterns
                             </label>
                             <div class="u-flex-gap-10 u-align-center">
-                                <input type="number" id="v2-pref-fenetre-patterns" class="controle-form" value="3" min="3" max="12" style="width: 80px;" onchange="sauvegarderPreferencesV2()">
+                                <input type="number" id="v2-pref-fenetre-patterns" class="controle-form" value="3" min="3" max="12" style="width: 80px;" data-on-change="sauvegarderPreferencesV2">
                                 <span class="u-texte-09">dernières productions</span>
                             </div>
                             <small class="u-texte-petit" style="display: block; color: var(--gris-moyen); margin-top: 8px">
@@ -12027,8 +12027,8 @@
                             <input type="range" id="v2-seuil-progression" class="controle-form"
                                    min="0.05" max="0.20" step="0.01" value="0.10"
                                    class="u-w-100" style="cursor: pointer"
-                                   oninput="mettreAJourAffichageSeuilV2('progression', this.value)"
-                                   onchange="sauvegarderSeuilsV2()">
+                                   data-on-input="mettreAJourAffichageSeuilV2" data-param="progression"
+                                   data-on-change="sauvegarderSeuilsV2">
                             <div class="u-mt-5" style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--gris-moyen)">
                                 <span>5 points (sensible)</span>
                                 <span>20 points (moins sensible)</span>
@@ -12047,8 +12047,8 @@
                             <input type="range" id="v2-seuil-risque" class="controle-form"
                                    min="0.03" max="0.15" step="0.01" value="0.05"
                                    class="u-w-100" style="cursor: pointer"
-                                   oninput="mettreAJourAffichageSeuilV2('risque', this.value)"
-                                   onchange="sauvegarderSeuilsV2()">
+                                   data-on-input="mettreAJourAffichageSeuilV2" data-param="risque"
+                                   data-on-change="sauvegarderSeuilsV2">
                             <div class="u-mt-5" style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--gris-moyen)">
                                 <span>3 points (sensible)</span>
                                 <span>15 points (moins sensible)</span>
@@ -12067,8 +12067,8 @@
                             <input type="range" id="v2-seuil-defi" class="controle-form"
                                    min="0.60" max="0.80" step="0.01" value="0.70"
                                    class="u-w-100" style="cursor: pointer"
-                                   oninput="mettreAJourAffichageSeuilV2('defi', this.value)"
-                                   onchange="sauvegarderSeuilsV2()">
+                                   data-on-input="mettreAJourAffichageSeuilV2" data-param="defi"
+                                   data-on-change="sauvegarderSeuilsV2">
                             <div class="u-mt-5" style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--gris-moyen)">
                                 <span>60% (plus exigeant)</span>
                                 <span>80% (moins exigeant)</span>
@@ -12098,7 +12098,7 @@
                             <!-- Indicateurs visuels des seuils -->
                             <div class="form-group u-mb-20">
                                 <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="depist-seuils-visuels">
-                                    <input type="checkbox" id="v2-pref-seuils-visuels" checked onchange="sauvegarderPreferencesV2()">
+                                    <input type="checkbox" id="v2-pref-seuils-visuels" checked data-on-change="sauvegarderPreferencesV2">
                                     <span class="u-texte-gras" style="margin-left: 8px">Indicateurs visuels des seuils</span>
                                 </label>
                                 <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
@@ -12114,7 +12114,7 @@
                                         Fragile si inférieur à
                                     </label>
                                     <div class="u-flex-gap-8 u-align-center">
-                                        <input type="number" id="v2-seuil-fragile" class="controle-form" value="70" min="50" max="80" style="width: 80px;" onchange="sauvegarderSeuilsV2()">
+                                        <input type="number" id="v2-seuil-fragile" class="controle-form" value="70" min="50" max="80" style="width: 80px;" data-on-change="sauvegarderSeuilsV2">
                                         <span>%</span>
                                     </div>
                                 </div>
@@ -12125,7 +12125,7 @@
                                         Acceptable si inférieur à
                                     </label>
                                     <div class="u-flex-gap-8 u-align-center">
-                                        <input type="number" id="v2-seuil-acceptable" class="controle-form" value="80" min="60" max="90" style="width: 80px;" onchange="sauvegarderSeuilsV2()">
+                                        <input type="number" id="v2-seuil-acceptable" class="controle-form" value="80" min="60" max="90" style="width: 80px;" data-on-change="sauvegarderSeuilsV2">
                                         <span>%</span>
                                     </div>
                                 </div>
@@ -12136,7 +12136,7 @@
                                         Bon si supérieur ou égal à
                                     </label>
                                     <div class="u-flex-gap-8 u-align-center">
-                                        <input type="number" id="v2-seuil-bon" class="controle-form" value="85" min="70" max="95" style="width: 80px;" onchange="sauvegarderSeuilsV2()">
+                                        <input type="number" id="v2-seuil-bon" class="controle-form" value="85" min="70" max="95" style="width: 80px;" data-on-change="sauvegarderSeuilsV2">
                                         <span>%</span>
                                     </div>
                                 </div>
@@ -12350,7 +12350,7 @@
                                 <!-- Sélecteur de type de ressource -->
                                 <div class="u-mb-15">
                                     <label for="select-type-ressource" class="u-mr-10 u-texte-gras">Type de ressource :</label>
-                                    <select id="select-type-ressource" class="form-control" style="display: inline-block; width: auto; min-width: 250px;" onchange="afficherTableauRessource(this.value)">
+                                    <select id="select-type-ressource" class="form-control" style="display: inline-block; width: auto; min-width: 250px;" data-on-change="afficherTableauRessource">
                                         <option value="">— Sélectionner —</option>
                                         <option value="pratiques">Pratiques de notation (<span id="count-pratiques">0</span>)</option>
                                         <option value="grilles">Grilles de critères (<span id="count-grilles">0</span>)</option>
@@ -12404,7 +12404,7 @@
                                     Pour confirmer, tape le nom de la ressource :
                                 </label>
                                 <input type="text" id="input-confirmation-nom" class="input-champ u-mb-10 u-w-100"
-                                       placeholder="Tape le nom exact ici..." oninput="verifierConfirmationSuppression()">
+                                       placeholder="Tape le nom exact ici..." data-on-input="verifierConfirmationSuppression">
                                 <p class="text-muted u-texte-petit">
                                     Nom attendu : <strong id="nom-ressource-attendu"></strong>
                                 </p>
@@ -12449,7 +12449,7 @@
                                     id="aide-recherche-input"
                                     placeholder="Rechercher dans toutes les sous-sections de l'Aide..."
                                     class="select-full-bleu"
-                                    onkeyup="rechercherDansAide()"
+                                    data-on-keyup="rechercherDansAide"
                                 >
                                 <button
                                     id="aide-recherche-clear"
@@ -16979,6 +16979,63 @@
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js?v=2025123009"></script>
 
+    <!-- Wrappers pour délégation data-on-change (Phase 5b) -->
+    <script>
+        function _wrapDateCoursChange() {
+            initialiserSaisiePresences();
+            mettreAJourBoutonsNavigation();
+        }
+
+        // --- Wrappers Phase 5b : lignes 9000-13000 ---
+
+        // File inputs : dispatcher passe l'élément, on fabrique un faux event
+        function traiterImportPratiqueFromEl(el) {
+            traiterImportPratique({ target: el });
+        }
+        function importerFichierEtudiantsV2FromEl(el) {
+            importerFichierEtudiantsV2({ target: el });
+        }
+
+        // Seuils d'interprétation (ancien) : inline avait parseInt/parseFloat(this.value)
+        // Note : quand data-param est présent, dispatcher appelle fn(param, el)
+        function sauvegarderSeuilNombreProductions(el) {
+            sauvegarderSeuil('nombreProductionsAnalyse', parseInt(el.value));
+        }
+        function sauvegarderSeuilProgressionArtefacts(paramIgnore, el) {
+            if (!el) el = paramIgnore; // fallback si appelé sans data-param
+            sauvegarderSeuil('progressionArtefacts', parseFloat(el.value));
+        }
+        function sauvegarderSeuilDirectionRisque(paramIgnore, el) {
+            if (!el) el = paramIgnore;
+            sauvegarderSeuil('directionRisque', parseFloat(el.value));
+        }
+        function sauvegarderSeuilDefiSpecifique(paramIgnore, el) {
+            if (!el) el = paramIgnore;
+            sauvegarderSeuil('defiSpecifique', parseFloat(el.value));
+        }
+
+        // Thème : radios sombre/clair, inline avait definirTheme(false) / definirTheme(true)
+        function definirThemeFromRadio(el) {
+            definirTheme(el.value === 'clair');
+        }
+
+        // Checkboxes qui passaient this.checked
+        function definirModeExpertFromEl(el) {
+            definirModeExpert(el.checked);
+        }
+        function definirTooltipsFromEl(el) {
+            definirTooltips(el.checked);
+        }
+        function definirAideContextuelleFromEl(el) {
+            definirAideContextuelle(el.checked);
+        }
+
+        // Parcours : inline avait if(window.parcours) window.parcours.changerModeParcours(this.value)
+        function changerModeParcoursDelegue(el) {
+            if (window.parcours) window.parcours.changerModeParcours(el.value);
+        }
+    </script>
+
     <!-- Script de gestion des notifications de mises à jour -->
     <script>
         /**
@@ -17327,7 +17384,7 @@
             <div class="mb-20">
                 <label
                     class="item-bleu-pale-clickable">
-                    <input type="checkbox" id="checkToutesLes" onchange="toggleToutesLesCles()"
+                    <input type="checkbox" id="checkToutesLes" data-on-change="toggleToutesLesCles"
                         class="mr-10-scale-13">
                     <strong>Toutes les clés</strong>
                 </label>
@@ -17490,7 +17547,7 @@
                 html += '<div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:6px; justify-content:center;">';
                 cartesAvecResultats.forEach(function(item) {
                     var id = item.element.id || '';
-                    html += '<button class="btn btn-secondaire btn-mini" onclick="allerVersCarte(\'' + id + '\')">' + item.titre + '</button>';
+                    html += '<button class="btn btn-secondaire btn-mini" data-action="allerVersCarte" data-param="' + id + '">' + item.titre + '</button>';
                 });
                 html += '</div>';
             }
@@ -17502,7 +17559,7 @@
                 html += 'Recherches similaires : ';
                 html += synonymes.map(function(s) {
                     var sEchappe = s.replace(/'/g, "\\'");
-                    return '<a href="#" onclick="event.preventDefault(); lancerRechercheSynonyme(\'' + sEchappe + '\')" style="color:var(--accent-primaire, #6aacb8); text-decoration:underline; cursor:pointer;">' + s + '</a>';
+                    return '<a href="#" data-prevent data-action="lancerRechercheSynonyme" data-param="' + sEchappe + '" style="color:var(--accent-primaire, #6aacb8); text-decoration:underline; cursor:pointer;">' + s + '</a>';
                 }).join(' · ');
                 html += '</div>';
             }
@@ -17691,6 +17748,42 @@
         });
     </script>
 
+    <!-- Phase 5b: Wrappers pour délégation data-on-change (multi-statement handlers) -->
+    <script>
+        // Wrapper: mat-echelle-id change (afficherPreviewEchelleMat + peuplerDropdownNoteMaximaleMat)
+        function onMatEchelleIdChange() {
+            afficherPreviewEchelleMat();
+            peuplerDropdownNoteMaximaleMat();
+        }
+
+        // Wrapper: mat-selection-nombre change (recalculer + sauvegarder)
+        function onMatSelectionNombreChange() {
+            recalculerPonderationsUnitaires();
+            sauvegarderConfigPratiqueMat();
+        }
+
+        // Wrapper: mat-selection-ponderation change (valider + recalculer + sauvegarder)
+        function onMatSelectionPonderationChange() {
+            validerPonderationsCategoriesMat();
+            recalculerPonderationsUnitaires();
+            sauvegarderConfigPratiqueMat();
+        }
+
+        // Wrapper: mat-obligatoires-ponderation change (valider + recalculer + sauvegarder)
+        function onMatObligatoiresPonderationChange() {
+            validerPonderationsCategoriesMat();
+            recalculerPonderationsUnitaires();
+            sauvegarderConfigPratiqueMat();
+        }
+
+        // Wrapper: questions-filtre-categorie change (this.value -> el.value)
+        function changerFiltreCategorieFromEl(el) {
+            if (typeof changerFiltreCategorie === 'function') {
+                changerFiltreCategorie(el.value);
+            }
+        }
+    </script>
+
     <!-- Fonctions d'import/export du matériel pédagogique (Beta 78) -->
     <script>
         // ========================================
@@ -17874,7 +17967,7 @@
                 <!-- Orientation -->
                 <div class="u-flex-gap-8 u-align-center">
                     <span class="u-texte-medium" style="color: var(--gris-moyen)">Orientation :</span>
-                    <select id="apercuPDF-orientation" class="controle-form u-texte-petit" style="width: auto; padding: 4px 8px" onchange="rafraichirApercuPDF()">
+                    <select id="apercuPDF-orientation" class="controle-form u-texte-petit" style="width: auto; padding: 4px 8px" data-on-change="rafraichirApercuPDF">
                         <option value="portrait">Portrait</option>
                         <option value="paysage">Paysage</option>
                     </select>
@@ -17884,15 +17977,15 @@
                 <div class="u-flex-gap-10 u-flex-wrap u-align-center">
                     <span class="u-texte-medium" style="color: var(--gris-moyen)">Entête :</span>
                     <label class="u-align-center" style="display: flex; gap: 4px; cursor: pointer">
-                        <input type="checkbox" id="apercuPDF-entete-code" checked onchange="rafraichirApercuPDF()">
+                        <input type="checkbox" id="apercuPDF-entete-code" checked data-on-change="rafraichirApercuPDF">
                         <span>Code cours</span>
                     </label>
                     <label class="u-align-center" style="display: flex; gap: 4px; cursor: pointer">
-                        <input type="checkbox" id="apercuPDF-entete-nom" checked onchange="rafraichirApercuPDF()">
+                        <input type="checkbox" id="apercuPDF-entete-nom" checked data-on-change="rafraichirApercuPDF">
                         <span>Nom cours</span>
                     </label>
                     <label class="u-align-center" style="display: flex; gap: 4px; cursor: pointer">
-                        <input type="checkbox" id="apercuPDF-entete-trimestre" checked onchange="rafraichirApercuPDF()">
+                        <input type="checkbox" id="apercuPDF-entete-trimestre" checked data-on-change="rafraichirApercuPDF">
                         <span>Trimestre</span>
                     </label>
                 </div>
@@ -17901,11 +17994,11 @@
                 <div class="u-flex-gap-10 u-flex-wrap u-align-center">
                     <span class="u-texte-medium" style="color: var(--gris-moyen)">Pied de page :</span>
                     <label class="u-align-center" style="display: flex; gap: 4px; cursor: pointer">
-                        <input type="checkbox" id="apercuPDF-pied-enseignant" checked onchange="rafraichirApercuPDF()">
+                        <input type="checkbox" id="apercuPDF-pied-enseignant" checked data-on-change="rafraichirApercuPDF">
                         <span>Enseignant</span>
                     </label>
                     <label class="u-align-center" style="display: flex; gap: 4px; cursor: pointer">
-                        <input type="checkbox" id="apercuPDF-pied-licence" checked onchange="rafraichirApercuPDF()">
+                        <input type="checkbox" id="apercuPDF-pied-licence" checked data-on-change="rafraichirApercuPDF">
                         <span>Licence CC</span>
                     </label>
                 </div>
@@ -17916,19 +18009,19 @@
                 <div class="u-flex-gap-15 u-flex-wrap u-align-center">
                     <span class="u-texte-medium" style="color: var(--texte-principal)">Production :</span>
                     <label class="u-align-center" style="display: flex; gap: 4px; cursor: pointer">
-                        <input type="checkbox" id="apercuPDF-prod-nom" checked onchange="rafraichirApercuPDF()">
+                        <input type="checkbox" id="apercuPDF-prod-nom" checked data-on-change="rafraichirApercuPDF">
                         <span>Nom</span>
                     </label>
                     <label class="u-align-center" style="display: flex; gap: 4px; cursor: pointer">
-                        <input type="checkbox" id="apercuPDF-prod-objectif" checked onchange="rafraichirApercuPDF()">
+                        <input type="checkbox" id="apercuPDF-prod-objectif" checked data-on-change="rafraichirApercuPDF">
                         <span>Objectif</span>
                     </label>
                     <label class="u-align-center" style="display: flex; gap: 4px; cursor: pointer">
-                        <input type="checkbox" id="apercuPDF-prod-description" checked onchange="rafraichirApercuPDF()">
+                        <input type="checkbox" id="apercuPDF-prod-description" checked data-on-change="rafraichirApercuPDF">
                         <span>Tâche</span>
                     </label>
                     <label class="u-align-center" style="display: flex; gap: 4px; cursor: pointer">
-                        <input type="checkbox" id="apercuPDF-prod-criteres" onchange="rafraichirApercuPDF()">
+                        <input type="checkbox" id="apercuPDF-prod-criteres" data-on-change="rafraichirApercuPDF">
                         <span>Desc. critères</span>
                     </label>
                 </div>
@@ -18108,7 +18201,7 @@
                         <div id="confidentiel-services-details">
                             <div class="groupe-form" style="margin-bottom: 6px;">
                                 <label for="confidentiel-categorie" style="font-size: 0.75rem;">Catégorie</label>
-                                <select id="confidentiel-categorie" class="controle-form" style="font-size: 0.8rem;" onchange="mettreAJourSousCategories()">
+                                <select id="confidentiel-categorie" class="controle-form" style="font-size: 0.8rem;" data-on-change="mettreAJourSousCategories">
                                     <option value="">-- Sélectionner --</option>
                                     <option value="sensorielle">Déficience sensorielle/physique/motrice</option>
                                     <option value="neurologique">Trouble neurologique</option>

@@ -2002,13 +2002,14 @@ window.confirmerImportCartouches = async function(donnees) {
  * - Compte les imports réussis
  * - Alerte si aucun import
  */
-function importerCartoucheDepuisTxt(event) {
-    const file = event.target.files[0];
+function importerCartoucheDepuisTxt(eventOuEl) {
+    var target = eventOuEl.target || eventOuEl;
+    const file = target.files[0];
     if (!file) return;
 
     if (!cartoucheActuel) {
         alert('Veuillez d\'abord sélectionner une grille et créer/sélectionner une cartouche');
-        event.target.value = '';
+        target.value = '';
         return;
     }
 

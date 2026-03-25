@@ -403,7 +403,8 @@
      * @param {number} valeur - Valeur du seuil (0-1)
      */
     function mettreAJourAffichageSeuilV2(type, valeur) {
-        const valeurNum = parseFloat(valeur);
+        var v = (typeof valeur === 'object' && valeur && valeur.value !== undefined) ? valeur.value : valeur;
+        const valeurNum = parseFloat(v);
 
         if (type === 'progression') {
             const elem = document.getElementById('v2-valeur-progression');

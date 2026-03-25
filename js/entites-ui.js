@@ -348,6 +348,7 @@ async function peuplerDropdownHoraires() {
  * Elle est conservée pour compatibilité mais devrait utiliser la version de trimestre-v2.js
  */
 function changerHoraireSelectionneV2(horaireId) {
+    if (typeof horaireId === 'object' && horaireId && horaireId.value !== undefined) horaireId = horaireId.value;
     const btnModifier = document.getElementById('v2-btnModifierHoraire');
     const apercu = document.getElementById('v2-apercuHoraire');
 

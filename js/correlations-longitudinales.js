@@ -898,6 +898,7 @@ function _majAxes() {
 }
 
 function toggleCorrelation(cle, visible) {
+    if (typeof visible === 'object' && visible !== null) visible = visible.checked;
     if (!graphiqueCorrLongInstance) return;
     var labels = { AP: 'A ↔ P', CP: 'C ↔ P', EP: 'E ↔ P' };
     var label = labels[cle];
@@ -923,6 +924,7 @@ function toggleCorrelationByLabel(label, visible) {
  * @param {boolean} visible - true pour afficher
  */
 function toggleOverlayMoyenne(indice, visible) {
+    if (typeof visible === 'object' && visible !== null) visible = visible.checked;
     if (!graphiqueCorrLongInstance) return;
     var label = 'Moy. ' + indice;
     var datasets = graphiqueCorrLongInstance.data.datasets;

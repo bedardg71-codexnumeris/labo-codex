@@ -1765,6 +1765,7 @@
      * @param {boolean} activer - true pour activer le mode correction
      */
     function basculerModeEcritureTemp(activer) {
+        if (typeof activer === 'object' && activer !== null) activer = activer.checked;
         if (activer) {
             document.body.classList.add('mode-ecriture-temp');
             console.log('Mode correction activé - modifications autorisées temporairement');
@@ -1780,6 +1781,7 @@
      * @param {boolean} activer - true pour anonymiser
      */
     async function basculerAnonymisationArchive(activer) {
+        if (typeof activer === 'object' && activer !== null) activer = activer.checked;
         if (activer) {
             // Activer le mode anonymisation
             await changerMode('anonymisation');
