@@ -198,7 +198,7 @@ function afficherBoutonEtapeSuivante() {
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(3, 46, 92, 0.3);
             transition: all 0.2s;
-        " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(3, 46, 92, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(3, 46, 92, 0.3)';">
+        " class="hover-elevation-bleu">
             ${texte}
         </button>
     `;

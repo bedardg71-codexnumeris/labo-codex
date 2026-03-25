@@ -4788,7 +4788,7 @@ function ouvrirModalBibliothequeGroupeCours() {
                     align-items: center;
                     justify-content: center;
                     z-index: 1;
-                " onmouseover="this.style.color='#333'" onmouseout="this.style.color='#999'">
+                " class="hover-couleur-fonce">
                     ×
                 </button>
                 <h2 style="margin-top: 0; color: var(--accent-primaire);">📚 Bibliothèque groupe-cours</h2>

@@ -1081,8 +1081,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                 <label style="display: flex; align-items: center; gap: 8px; padding: 6px 10px;
                        background: var(--gris-tres-pale); border-radius: 4px; margin: 4px 0; cursor: pointer;
                        border: 1px solid var(--bordure-claire); transition: all 0.15s;"
-                       onmouseover="this.style.borderColor='var(--vert-succes)'; this.style.background='var(--gris-tres-pale)';"
-                       onmouseout="this.style.borderColor='var(--bordure-claire)'; this.style.background='var(--gris-tres-pale)';">
+                       class="hover-bordure-succes">
                     <input type="checkbox" class="import-item import-item-${id}" data-category="${id}" data-item-id="${itemId}"
                            style="transform: scale(1.1); accent-color: var(--vert-succes);">
                     <span style="font-size: 0.85rem;">${nomAffiche}${auteurInfo}</span>
@@ -1096,7 +1095,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                 <!-- En-tête de catégorie avec checkbox "tout sélectionner" -->
                 <label style="display: flex; align-items: center; gap: 10px; padding: 12px;
                        background: var(--gris-tres-pale); cursor: pointer; border-bottom: 1px solid var(--bordure-claire);"
-                       onmouseover="this.style.background='var(--gris-tres-pale)'" onmouseout="this.style.background='var(--gris-tres-pale)'">
+                       >
                     <input type="checkbox" id="import-${id}" class="import-category-toggle"
                            data-category="${id}"
                            onchange="toggleCategoryItems('${id}', this.checked)"
@@ -1122,7 +1121,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
             <label style="display: flex; align-items: center; gap: 10px; padding: 10px;
                    background: var(--surface-conteneur, #162c36); border-radius: 6px; margin-bottom: 8px; cursor: pointer;
                    border: 1px solid var(--bordure-claire); transition: all 0.2s;"
-                   onmouseover="this.style.borderColor='var(--gris-moyen)'" onmouseout="this.style.borderColor='var(--bordure-claire)'">
+                   class="hover-bordure-gris">
                 <input type="checkbox" id="import-${id}"
                        style="transform: scale(1.2); accent-color: var(--gris-moyen);">
                 <div style="flex: 1;">
