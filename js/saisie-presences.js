@@ -715,7 +715,7 @@ function verifierConfigurationFormatHoraire() {
             <div class="alerte alerte-avertissement">
                 <strong>⚠️ Configuration incomplète</strong><br>
                 L'horaire des cours n'est pas configuré. 
-                <a href="#" onclick="afficherSection('reglages'); afficherSousSection('reglages-trimestre'); return false;">
+                <a href="#" data-prevent data-action="naviguerVersReglagesTrimestre">
                     Configurer l'horaire →
                 </a>
             </div>`;
@@ -1015,7 +1015,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
                    step="0.5"
                    style="width: 70px; text-align: center;"
                    ${estVerrouille ? 'disabled' : ''}
-                   onchange="mettreAJourLignePeriodes('${etudiant.da}', '${dateStr}', ${nombrePeriodesSeance})"
+                   data-on-change="mettreAJourLignePeriodesHandler" data-da="${etudiant.da}" data-date-str="${dateStr}" data-nb-periodes="${nombrePeriodesSeance}"
             >/<span class="max-periodes">${nombrePeriodesSeance}</span>`;
 
         // Structure : DA | Prénom | Nom | Présence | Notes | Total pér. | Assiduité
@@ -1056,13 +1056,13 @@ function chargerTableauPresences(dateStr, estVerrouille) {
             Présence
             <div class="mt-8-flex-col-gap4">
                 <button class="btn btn-principal btn-tres-compact"
-                        onclick="tousPresents()"
+                        data-action="tousPresents"
                         ${estVerrouille ? 'disabled' : ''}
                         title="Mettre tous présents (${nombrePeriodesSeance} périodes)">
                     Tous ${nombrePeriodesSeance} pér.
                 </button>
                 <button class="btn btn-annuler btn-tres-compact"
-                        onclick="reinitialiserSaisie()"
+                        data-action="reinitialiserSaisie"
                         ${estVerrouille ? 'disabled' : ''}
                         title="Réinitialiser (tous absents)">
                     ↻
@@ -1074,7 +1074,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
     // Gérer l'état des boutons principaux
     const btnTousPresents = document.getElementById('btn-tous-presents');
     const btnReinit = document.getElementById('btn-reinit-saisie');
-    const btnEnregistrer = document.querySelector('[onclick="enregistrerPresences()"]');
+    const btnEnregistrer = document.querySelector('[data-action="enregistrerPresences"]');
     const btnAnnuler = document.querySelector('#actions-presences-bar .btn-annuler');
 
     if (btnTousPresents) btnTousPresents.disabled = estVerrouille;
@@ -1609,8 +1609,8 @@ function mettreAJourBoutonsNavigation() {
         return;
     }
 
-    const btnPrecedent = document.querySelector('[onclick="allerCoursPrecedent()"]');
-    const btnSuivant = document.querySelector('[onclick="allerCoursSuivant()"]');
+    const btnPrecedent = document.querySelector('[data-action="allerCoursPrecedent"]');
+    const btnSuivant = document.querySelector('[data-action="allerCoursSuivant"]');
 
     const coursPrecedent = trouverCoursPrecedent(dateInput.value);
     const coursSuivant = trouverCoursSuivant(dateInput.value);
@@ -1708,10 +1708,25 @@ function obtenirDerniereDataSaisie(da = null) {
 
 
 /* ===============================
+   🔗 WRAPPERS DÉLÉGATION (Phase 5 — Lot 5.14c)
+   =============================== */
+
+function naviguerVersReglagesTrimestre(el) {
+    if (typeof afficherSection === 'function') afficherSection('reglages');
+    if (typeof afficherSousSection === 'function') afficherSousSection('reglages-trimestre');
+}
+
+function mettreAJourLignePeriodesHandler(el) {
+    mettreAJourLignePeriodes(el.dataset.da, el.dataset.dateStr, parseInt(el.dataset.nbPeriodes));
+}
+
+/* ===============================
    📌 EXPORT GLOBAL ET LOGS
    =============================== */
 
 // Rendre les fonctions disponibles globalement
+window.naviguerVersReglagesTrimestre = naviguerVersReglagesTrimestre;
+window.mettreAJourLignePeriodesHandler = mettreAJourLignePeriodesHandler;
 window.initialiserModuleSaisiePresences = initialiserModuleSaisiePresences;
 window.chargerGroupesPresences = chargerGroupesPresences;
 window.initialiserSaisiePresences = initialiserSaisiePresences;
@@ -1851,12 +1866,12 @@ function restaurerCompteurPresences() {
             <span>Total : <span id="nb-total">0</span></span>
             <span>Assiduité aujourd'hui : <span id="assiduite-aujourdhui">0%</span></span>
             <span id="actions-presences-bar" style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
-                <button class="btn btn-confirmer btn-compact" onclick="enregistrerPresences()">Enregistrer</button>
-                <button class="btn btn-annuler btn-compact" onclick="afficherSousSection('presences-apercu')">Annuler</button>
+                <button class="btn btn-confirmer btn-compact" data-action="enregistrerPresences">Enregistrer</button>
+                <button class="btn btn-annuler btn-compact" data-action="afficherSousSection" data-param="presences-apercu">Annuler</button>
                 <span id="controle-verrouillage-presences" class="u-hide" style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem;">
                     <input type="checkbox" id="checkbox-verrouillage-presences"
                            style="width: 16px; height: 16px; accent-color: var(--bleu-principal, #1a73e8); cursor: pointer;"
-                           onchange="basculerVerrouillageDateActive()">
+                           data-on-change="basculerVerrouillageDateActive">
                     <label for="checkbox-verrouillage-presences" style="cursor: pointer; user-select: none; white-space: nowrap;">
                         <span id="icone-verrouillage-presences">🔓</span>
                         <span id="texte-verrouillage-presences">Verrouiller</span>

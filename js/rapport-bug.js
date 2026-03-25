@@ -213,11 +213,11 @@ function genererSectionSuivi() {
                 </div>`;
             actions = `
                 <div style="display: flex; gap: 8px; margin-top: 8px;">
-                    <button onclick="confirmerTicket(${ticket.id})" class="btn btn-secondaire" style="
+                    <button data-action="confirmerTicket" data-param="${ticket.id}" class="btn btn-secondaire" style="
                         font-size: 0.8rem; padding: 4px 10px; background: var(--vert-succes); color: white; border: none;">
                         ✅ C'est réglé
                     </button>
-                    <button onclick="rouvrirTicket(${ticket.id})" class="btn btn-secondaire" style="
+                    <button data-action="rouvrirTicket" data-param="${ticket.id}" class="btn btn-secondaire" style="
                         font-size: 0.8rem; padding: 4px 10px; color: var(--orange-accent); border-color: var(--orange-accent);">
                         ⚠️ Pas résolu
                     </button>
@@ -465,14 +465,14 @@ function ouvrirModalRapportsArchives() {
                         <strong style="color: var(--accent-primaire);">${r.prenom}</strong>${typeBadge}
                         <span style="color: var(--gris-moyen); font-size: 0.85rem; margin-left: 10px;">${formatDate(r.date)}</span>
                     </div>
-                    <button onclick="supprimerEtRafraichirArchive(${r.id})" style="
+                    <button data-action="supprimerEtRafraichirArchive" data-param="${r.id}" style="
                         background: none; border: none; cursor: pointer; font-size: 1.2rem;
                         color: var(--gris-clair); padding: 0;" title="Supprimer">×</button>
                 </div>
                 <p style="margin: 0 0 8px 0; font-size: 0.9rem; color: var(--gris-fonce);">
                     ${(r.description || 'Aucune description').substring(0, 100)}${r.description?.length > 100 ? '...' : ''}
                 </p>
-                <button onclick="afficherRapportComplet(${r.id})" class="btn btn-secondaire" style="font-size: 0.8rem; padding: 4px 10px;">
+                <button data-action="afficherRapportComplet" data-param="${r.id}" class="btn btn-secondaire" style="font-size: 0.8rem; padding: 4px 10px;">
                     Voir le rapport complet
                 </button>
             </div>
@@ -491,7 +491,7 @@ function ouvrirModalRapportsArchives() {
                     <h3 style="margin: 0; color: var(--accent-primaire);">
                         Rapports archivés (${archives.length})
                     </h3>
-                    <button onclick="fermerModalRapportsArchives()" style="
+                    <button data-action="fermerModalRapportsArchives" style="
                         background: none; border: none; font-size: 1.8rem;
                         cursor: pointer; color: var(--gris-fonce);">&times;</button>
                 </div>
@@ -500,7 +500,7 @@ function ouvrirModalRapportsArchives() {
                 </div>
                 ${archives.length > 0 ? `
                 <div style="padding: 15px; border-top: 1px solid var(--gris-clair); text-align: right;">
-                    <button onclick="if(confirm('Supprimer tous les rapports archivés ?')) { viderRapportsArchives(); rafraichirListeArchives(); }"
+                    <button data-action="viderEtRafraichirArchives"
                             class="btn btn-secondaire" style="color: var(--rouge-erreur);">
                         Tout supprimer
                     </button>
@@ -528,6 +528,13 @@ function supprimerEtRafraichirArchive(id) {
 function rafraichirListeArchives() {
     fermerModalRapportsArchives();
     ouvrirModalRapportsArchives();
+}
+
+function viderEtRafraichirArchives() {
+    if (confirm('Supprimer tous les rapports archivés ?')) {
+        viderRapportsArchives();
+        rafraichirListeArchives();
+    }
 }
 
 function afficherRapportComplet(id) {
@@ -1193,7 +1200,7 @@ function ouvrirModalRapportBug() {
                     <h2 style="margin: 0; color: var(--accent-primaire); font-size: 1.3rem;">
                         Signaler un problème
                     </h2>
-                    <button onclick="fermerModalRapportBug()" style="
+                    <button data-action="fermerModalRapportBug" style="
                         background: none;
                         border: none;
                         font-size: 1.8rem;
@@ -1209,14 +1216,14 @@ function ouvrirModalRapportBug() {
 
                     <!-- Sélecteur de mode -->
                     <div style="display: flex; gap: 0; margin-bottom: 20px; border: 1px solid var(--bordure-claire); border-radius: 8px; overflow: hidden;">
-                        <button id="btnModeBug" onclick="changerModeRapport('bug')" style="
+                        <button id="btnModeBug" data-action="changerModeRapport" data-param="bug" style="
                             flex: 1; padding: 10px; border: none; cursor: pointer;
                             font-family: inherit; font-size: 0.9rem; font-weight: 600;
                             background: var(--accent-primaire); color: white;
                             transition: all 0.2s;">
                             🐛 Signaler un bug
                         </button>
-                        <button id="btnModeCommentaire" onclick="changerModeRapport('commentaire')" style="
+                        <button id="btnModeCommentaire" data-action="changerModeRapport" data-param="commentaire" style="
                             flex: 1; padding: 10px; border: none; cursor: pointer;
                             font-family: inherit; font-size: 0.9rem; font-weight: 600;
                             background: transparent; color: var(--gris-fonce);
@@ -1257,7 +1264,7 @@ function ouvrirModalRapportBug() {
                             font-family: inherit;
                             font-size: 0.95rem;
                             box-sizing: border-box;
-                        " oninput="sauvegarderPrenomEtMettreAJour()">
+                        " data-on-input="sauvegarderPrenomEtMettreAJour">
                     </div>
 
                     <!-- Description du problème -->
@@ -1284,7 +1291,7 @@ function ouvrirModalRapportBug() {
                             font-size: 0.95rem;
                             resize: vertical;
                             box-sizing: border-box;
-                        " oninput="mettreAJourRapport()"></textarea>
+                        " data-on-input="mettreAJourRapport"></textarea>
                     </div>
 
                     <!-- Rapport généré -->
@@ -1314,13 +1321,13 @@ function ouvrirModalRapportBug() {
 
                     <!-- Boutons d'action -->
                     <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 15px;">
-                        <button id="btnCopierRapport" onclick="copierRapportBug(this)" class="btn btn-principal" style="flex: 1; min-width: 120px;">
+                        <button id="btnCopierRapport" data-action="copierRapportBug" class="btn btn-principal" style="flex: 1; min-width: 120px;">
                             Copier le rapport
                         </button>
-                        <button id="btnTelechargerTxt" onclick="telechargerRapportTxt(this)" class="btn btn-secondaire" style="flex: 1; min-width: 120px;">
+                        <button id="btnTelechargerTxt" data-action="telechargerRapportTxt" class="btn btn-secondaire" style="flex: 1; min-width: 120px;">
                             Enregistrer en TXT
                         </button>
-                        <button id="btnEnvoyerCourriel" onclick="envoyerRapportParCourriel(this)" class="btn btn-secondaire" style="flex: 1; min-width: 120px;">
+                        <button id="btnEnvoyerCourriel" data-action="envoyerRapportParCourriel" class="btn btn-secondaire" style="flex: 1; min-width: 120px;">
                             Envoyer par courriel
                         </button>
                     </div>
@@ -1344,7 +1351,7 @@ function ouvrirModalRapportBug() {
 
                     <!-- Lien vers archives -->
                     <div style="text-align: center;">
-                        <button onclick="ouvrirModalRapportsArchives()" style="
+                        <button data-action="ouvrirModalRapportsArchives" style="
                             background: none; border: none; color: var(--accent-primaire);
                             cursor: pointer; font-size: 0.85rem; text-decoration: underline;">
                             📋 Voir mes rapports archivés
@@ -1601,6 +1608,7 @@ window.supprimerEtRafraichirArchive = supprimerEtRafraichirArchive;
 window.rafraichirListeArchives = rafraichirListeArchives;
 window.afficherRapportComplet = afficherRapportComplet;
 window.viderRapportsArchives = viderRapportsArchives;
+window.viderEtRafraichirArchives = viderEtRafraichirArchives;
 // Suivi des tickets
 window.confirmerTicket = confirmerTicket;
 window.rouvrirTicket = rouvrirTicket;

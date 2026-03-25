@@ -80,24 +80,24 @@
                     '<!-- Toolbar unique (badges + outils) -->' +
                     '<div class="annot-toolbar" id="model-toolbar">' +
                         '<div class="annot-toolbar-fichiers">' +
-                            '<button class="model-btn-ouvrir-compact" onclick="window.modelisation.ouvrirFichierLocal()" title="Ouvrir un fichier">+ Ouvrir</button>' +
+                            '<button class="model-btn-ouvrir-compact" data-action="modelisation.ouvrirFichierLocal" title="Ouvrir un fichier">+ Ouvrir</button>' +
                             '<div id="model-carrousel-badges" class="annot-toolbar-badges-zone"></div>' +
                         '</div>' +
                         '<div class="annot-toolbar-separateur"></div>' +
                         '<div class="annot-toolbar-outils">' +
-                            '<button id="model-btn-page-prec" class="travaux-btn-nav" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page precedente">&#x2190;</button>' +
+                            '<button id="model-btn-page-prec" class="travaux-btn-nav" data-action="travauxVisionneuse.pagePrecedente" disabled title="Page precedente">&#x2190;</button>' +
                             '<span id="model-indicateur-page">-- / --</span>' +
-                            '<button id="model-btn-page-suiv" class="travaux-btn-nav" onclick="travauxVisionneuse.pageSuivante()" disabled title="Page suivante">&#x2192;</button>' +
+                            '<button id="model-btn-page-suiv" class="travaux-btn-nav" data-action="travauxVisionneuse.pageSuivante" disabled title="Page suivante">&#x2192;</button>' +
                             '<span class="travaux-separateur"></span>' +
-                            '<button id="model-btn-fichier-prec" class="travaux-btn-nav" onclick="window.modelisation.fichierPrecedent()" disabled title="Fichier precedent">&#x276E;</button>' +
+                            '<button id="model-btn-fichier-prec" class="travaux-btn-nav" data-action="modelisation.fichierPrecedent" disabled title="Fichier precedent">&#x276E;</button>' +
                             '<span id="model-compteur-fichiers" class="model-compteur-fichiers"></span>' +
-                            '<button id="model-btn-fichier-suiv" class="travaux-btn-nav" onclick="window.modelisation.fichierSuivant()" disabled title="Fichier suivant">&#x276F;</button>' +
+                            '<button id="model-btn-fichier-suiv" class="travaux-btn-nav" data-action="modelisation.fichierSuivant" disabled title="Fichier suivant">&#x276F;</button>' +
                             '<span class="travaux-separateur"></span>' +
-                            '<button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineLargeur()" title="Ajuster a la largeur">Largeur</button>' +
-                            '<button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineHauteur()" title="Ajuster a la hauteur">Hauteur</button>' +
-                            '<button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoom100()" title="Zoom 100%">100%</button>' +
+                            '<button class="travaux-btn-zoom" data-action="travauxVisionneuse.zoomPleineLargeur" title="Ajuster a la largeur">Largeur</button>' +
+                            '<button class="travaux-btn-zoom" data-action="travauxVisionneuse.zoomPleineHauteur" title="Ajuster a la hauteur">Hauteur</button>' +
+                            '<button class="travaux-btn-zoom" data-action="travauxVisionneuse.zoom100" title="Zoom 100%">100%</button>' +
                             '<span class="travaux-separateur"></span>' +
-                            '<button class="travaux-btn-action" onclick="window.modelisation.fermerVisionneuse()" title="Fermer le fichier">Fermer</button>' +
+                            '<button class="travaux-btn-action" data-action="modelisation.fermerVisionneuse" title="Fermer le fichier">Fermer</button>' +
                         '</div>' +
                     '</div>' +
 
@@ -141,10 +141,10 @@
             var actif = f.id === fichierOuvertId ? ' actif' : '';
             var statut = determinerStatutModelisation(f);
             html +=
-                '<div class="annot-badge' + actif + '" data-id="' + f.id + '" onclick="window.modelisation.ouvrirFichier(\'' + f.id + '\')" title="' + f.nomFichier + '">' +
+                '<div class="annot-badge' + actif + '" data-id="' + f.id + '" data-action="modelisation.ouvrirFichier" data-param="' + f.id + '" title="' + f.nomFichier + '">' +
                     '<span class="annot-badge-nom">' + tronquerNom(f.nomFichier, 22) + '</span>' +
                     '<span class="travaux-badge-pill ' + statut.classe + '">' + statut.texte + '</span>' +
-                    '<button class="annot-badge-supprimer" onclick="event.stopPropagation(); window.modelisation.supprimerFichier(\'' + f.id + '\')" title="Supprimer">&times;</button>' +
+                    '<button class="annot-badge-supprimer" data-stop data-action="modelisation.supprimerFichier" data-param="' + f.id + '" title="Supprimer">&times;</button>' +
                 '</div>';
         });
         zone.innerHTML = html;
