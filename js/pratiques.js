@@ -1573,7 +1573,7 @@ function mettreAJourStatutModalites() {
         };
         statutDiv.innerHTML = `
             <span style="color: var(--vert-moyen);">✓ Alternative (${types[modalites.typePAN]})</span>
-            <button onclick="afficherParametresPAN()" class="btn btn-secondaire" style="margin-left: 15px; padding: 4px 12px; font-size: 0.85rem;">
+            <button data-action="afficherParametresPAN" class="btn btn-secondaire" style="margin-left: 15px; padding: 4px 12px; font-size: 0.85rem;">
                 Modifier les paramètres
             </button>
         `;
@@ -1607,7 +1607,7 @@ function afficherJetonsPersonnalises(jetonsPersonnalises) {
         <div style="padding: 10px; background: var(--bleu-tres-pale); border-radius: 6px; display: flex; flex-direction: column;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
                 <strong style="flex: 1;">${jeton.nom}</strong>
-                <button type="button" class="btn btn-danger" onclick="supprimerTypeJetonPersonnalise(${index})" style="margin-left: 8px;">
+                <button type="button" class="btn btn-danger" data-action="supprimerTypeJetonPersonnalise" data-param="${index}" style="margin-left: 8px;">
                     Supprimer
                 </button>
             </div>
@@ -1821,7 +1821,7 @@ function genererSelecteurPratiqueParDefaut() {
                         name="pratiqueDefaut"
                         value="sommative"
                         ${pratiqueDefaut === 'sommative' ? 'checked' : ''}
-                        onchange="changerPratiqueParDefaut('sommative')">
+                        data-on-change="changerPratiqueParDefaut" data-param="sommative">
                     <span style="margin-left: 8px;">Sommative</span>
                 </label>
                 <label style="cursor: pointer; display: flex; align-items: center;">
@@ -1830,7 +1830,7 @@ function genererSelecteurPratiqueParDefaut() {
                         name="pratiqueDefaut"
                         value="pan-standards"
                         ${pratiqueDefaut === 'pan-standards' || pratiqueDefaut === 'pan-maitrise' ? 'checked' : ''}
-                        onchange="changerPratiqueParDefaut('pan-standards')">
+                        data-on-change="changerPratiqueParDefaut" data-param="pan-standards">
                     <span style="margin-left: 8px;">PAN-Standards</span>
                 </label>
                 <label style="cursor: pointer; display: flex; align-items: center;">
@@ -1839,7 +1839,7 @@ function genererSelecteurPratiqueParDefaut() {
                         name="pratiqueDefaut"
                         value="pan-specifications"
                         ${pratiqueDefaut === 'pan-specifications' || pratiqueDefaut === 'specifications' ? 'checked' : ''}
-                        onchange="changerPratiqueParDefaut('pan-specifications')">
+                        data-on-change="changerPratiqueParDefaut" data-param="pan-specifications">
                     <span style="margin-left: 8px;">PAN-Spécifications</span>
                 </label>
                 <label style="cursor: pointer; display: flex; align-items: center; opacity: 0.5;" title="Bientôt disponible">
@@ -1877,14 +1877,14 @@ function genererCartePratique(pratique, estActive, modifiable) {
 
     // ✅ AJOUT (8 décembre 2025) : Bouton Activer OU Désactiver selon l'état
     const boutonActiver = !estActive
-        ? `<button class="btn btn-tres-compact btn-confirmer" onclick="activerPratique('${pratique.id}')">Activer</button>`
-        : `<button class="btn btn-tres-compact btn-secondaire" onclick="desactiverPratique('${pratique.id}')">Désactiver</button>`;
+        ? `<button class="btn btn-tres-compact btn-confirmer" data-action="activerPratique" data-param="${pratique.id}">Activer</button>`
+        : `<button class="btn btn-tres-compact btn-secondaire" data-action="desactiverPratique" data-param="${pratique.id}">Désactiver</button>`;
 
     const boutonsModification = modifiable ? `
-        <button class="btn btn-tres-compact btn-modifier" onclick="editerPratique('${pratique.id}')">Éditer</button>
-        <button class="btn btn-tres-compact btn-secondaire" onclick="dupliquerPratique('${pratique.id}')">Dupliquer</button>
-        <button class="btn btn-tres-compact btn-secondaire" onclick="exporterPratiqueVersJSON('${pratique.id}')">Exporter</button>
-        <button class="btn btn-tres-compact btn-supprimer" onclick="supprimerPratique('${pratique.id}')">Supprimer</button>
+        <button class="btn btn-tres-compact btn-modifier" data-action="editerPratique" data-param="${pratique.id}">Éditer</button>
+        <button class="btn btn-tres-compact btn-secondaire" data-action="dupliquerPratique" data-param="${pratique.id}">Dupliquer</button>
+        <button class="btn btn-tres-compact btn-secondaire" data-action="exporterPratiqueVersJSON" data-param="${pratique.id}">Exporter</button>
+        <button class="btn btn-tres-compact btn-supprimer" data-action="supprimerPratique" data-param="${pratique.id}">Supprimer</button>
     ` : '';
 
     const auteur = pratique.auteur ?
@@ -1898,7 +1898,7 @@ function genererCartePratique(pratique, estActive, modifiable) {
     return `
         <div class="carte pratique-carte" data-pratique-id="${pratique.id}">
             <!-- Header cliquable (toujours visible) -->
-            <div class="pratique-header" onclick="togglePratique('${pratique.id}')" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div class="pratique-header" data-action="togglePratique" data-param="${pratique.id}" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
                     <strong style="font-size: 1rem; color: var(--accent-primaire);">${pratique.nom}</strong>
                     ${badgeActif}
@@ -3292,7 +3292,7 @@ function ajouterNiveauWizard(niveauDefaut = null) {
         <input type="text" class="controle-form" placeholder="Label" value="${niveau.label}" data-field="label" style="padding: 6px;">
         <input type="number" class="controle-form" placeholder="%" value="${niveau.pct}" min="0" max="100" step="0.1" data-field="pct" style="padding: 6px;">
         <input type="color" class="controle-form" value="${niveau.couleur}" data-field="couleur" style="padding: 2px; height: 36px;">
-        <button type="button" class="btn btn-tres-compact" onclick="retirerNiveauWizard(this)" style="background: var(--rouge-erreur); color: white; padding: 6px;">🗑️</button>
+        <button type="button" class="btn btn-tres-compact" data-action="retirerNiveauWizard" style="background: var(--rouge-erreur); color: white; padding: 6px;">🗑️</button>
     `;
 
     liste.appendChild(div);
@@ -3353,7 +3353,7 @@ function ajouterEvaluationWizard() {
     div.innerHTML = `
         <input type="text" class="controle-form" placeholder="Nom de l'évaluation" data-field="nom" style="padding: 6px;">
         <input type="number" class="controle-form" placeholder="Poids %" min="0" max="100" step="1" data-field="poids" style="padding: 6px;">
-        <button type="button" class="btn btn-tres-compact" onclick="retirerEvaluationWizard(this)" style="background: var(--rouge-erreur); color: white; padding: 6px;">🗑️</button>
+        <button type="button" class="btn btn-tres-compact" data-action="retirerEvaluationWizard" style="background: var(--rouge-erreur); color: white; padding: 6px;">🗑️</button>
     `;
 
     liste.appendChild(div);
@@ -3425,14 +3425,14 @@ function chargerEnsembleWizard() {
         div.className = 'objectif-item';
 
         div.innerHTML = `
-            <input type="text" class="controle-form" placeholder="Nom de l'objectif" data-field="nom" value="${obj.nom}" oninput="calculerTotalPoidsObjectifs()">
-            <input type="number" class="controle-form" placeholder="Poids %" min="0" max="100" step="1" data-field="poids" value="${obj.poids}" oninput="calculerTotalPoidsObjectifs()">
+            <input type="text" class="controle-form" placeholder="Nom de l'objectif" data-field="nom" value="${obj.nom}" data-on-input="calculerTotalPoidsObjectifs">
+            <input type="number" class="controle-form" placeholder="Poids %" min="0" max="100" step="1" data-field="poids" value="${obj.poids}" data-on-input="calculerTotalPoidsObjectifs">
             <select class="controle-form" data-field="type">
                 <option value="fondamental" ${obj.type === 'fondamental' ? 'selected' : ''}>Fondamental</option>
                 <option value="integrateur" ${obj.type === 'integrateur' ? 'selected' : ''}>Intégrateur</option>
                 <option value="transversal" ${obj.type === 'transversal' ? 'selected' : ''}>Transversal</option>
             </select>
-            <button type="button" class="btn btn-tres-compact btn-supprimer" onclick="retirerObjectifWizard(this)">Retirer</button>
+            <button type="button" class="btn btn-tres-compact btn-supprimer" data-action="retirerObjectifWizard">Retirer</button>
         `;
 
         liste.appendChild(div);
@@ -3452,14 +3452,14 @@ function ajouterObjectifWizard() {
     div.className = 'objectif-item';
 
     div.innerHTML = `
-        <input type="text" class="controle-form" placeholder="Nom de l'objectif (ex: Limites et continuité)" data-field="nom" oninput="calculerTotalPoidsObjectifs()">
-        <input type="number" class="controle-form" placeholder="Poids %" min="0" max="100" step="1" data-field="poids" value="0" oninput="calculerTotalPoidsObjectifs()">
+        <input type="text" class="controle-form" placeholder="Nom de l'objectif (ex: Limites et continuité)" data-field="nom" data-on-input="calculerTotalPoidsObjectifs">
+        <input type="number" class="controle-form" placeholder="Poids %" min="0" max="100" step="1" data-field="poids" value="0" data-on-input="calculerTotalPoidsObjectifs">
         <select class="controle-form" data-field="type">
             <option value="fondamental">Fondamental</option>
             <option value="integrateur">Intégrateur</option>
             <option value="transversal">Transversal</option>
         </select>
-        <button type="button" class="btn btn-tres-compact btn-supprimer" onclick="retirerObjectifWizard(this)">Retirer</button>
+        <button type="button" class="btn btn-tres-compact btn-supprimer" data-action="retirerObjectifWizard">Retirer</button>
     `;
 
     liste.appendChild(div);
@@ -4295,6 +4295,14 @@ window.definirPratiqueParDefaut = definirPratiqueParDefaut;
 window.changerPratiqueParDefaut = changerPratiqueParDefaut;
 window.mettreAJourUIPratiqueDefaut = mettreAJourUIPratiqueDefaut;
 
+// Phase 5 : exports manquants pour délégation data-action
+window.afficherParametresPAN = afficherParametresPAN;
+window.desactiverPratique = desactiverPratique;
+window.togglePratique = togglePratique;
+window.chargerConfigurationPratique = chargerConfigurationPratique;
+window.retirerNiveauWizard = retirerNiveauWizard;
+window.alertFonctionnaliteAVenir = alertFonctionnaliteAVenir;
+
 // NOUVEAU Beta 92 : Gestion pratiques configurables
 window.afficherListePratiques = afficherListePratiques;
 window.activerPratique = activerPratique;
@@ -4368,7 +4376,7 @@ async function afficherListePratiquesSidebar() {
         const auteur = p.auteur ? `par ${p.auteur}` : '';
 
         html += `
-            <div class="sidebar-item${activeClass}" onclick="chargerConfigurationPratique('${p.id}')">
+            <div class="sidebar-item${activeClass}" data-action="chargerConfigurationPratique" data-param="${p.id}">
                 <div class="sidebar-item-titre">${echapperHtml(nomAffiche)}</div>
                 ${auteur ? `<div style="font-size: 0.85rem; color: var(--gris-moyen); margin-top: 3px;">${echapperHtml(auteur)}</div>` : ''}
                 ${estActiveSysteme ? '<div style="margin-top: 5px;"><span class="sidebar-item-badge">Active</span></div>' : ''}
@@ -4427,7 +4435,7 @@ async function ouvrirModalBibliothequePratiques() {
                 <!-- En-tête -->
                 <div style="padding: 20px; border-bottom: 1px solid var(--gris-clair); display: flex; justify-content: space-between; align-items: center;">
                     <h2 style="margin: 0; color: var(--accent-primaire);">Bibliothèque de pratiques</h2>
-                    <button onclick="fermerModalBibliothequePratiques()" class="modal-js-btn-fermer">&times;</button>
+                    <button data-action="fermerModalBibliothequePratiques" class="modal-js-btn-fermer">&times;</button>
                 </div>
 
                 <!-- Corps -->
@@ -4468,7 +4476,7 @@ async function ouvrirModalBibliothequePratiques() {
                                                 ${auteur ? `<div style="color: var(--gris-clair); font-size: 0.9em; margin-bottom: 4px;">${echapperHtml(auteur)}</div>` : ''}
                                                 ${description ? `<div style="color: var(--gris-moyen); font-size: 0.85em;">${echapperHtml(description)}</div>` : ''}
                                             </div>
-                                            <button onclick="alert('Fonctionnalité à venir : Créer une configuration basée sur ce canevas')" class="btn btn-secondaire btn-tres-compact" style="margin-left: 10px;">
+                                            <button data-action="alertFonctionnaliteAVenir" class="btn btn-secondaire btn-tres-compact" style="margin-left: 10px;">
                                                 Utiliser
                                             </button>
                                         </div>
@@ -4503,11 +4511,11 @@ async function ouvrirModalBibliothequePratiques() {
                                                 </div>
                                                 <div style="display: flex; gap: 5px; margin-left: 10px;">
                                                     ${estDeLUtilisateur ? `
-                                                        <button onclick="exporterPratiqueActive('${p.id}')" class="btn btn-principal btn-tres-compact">
+                                                        <button data-action="exporterPratiqueActive" data-param="${p.id}" class="btn btn-principal btn-tres-compact">
                                                             Partager
                                                         </button>
                                                     ` : ''}
-                                                    <button onclick="retirerPratiqueDeBibliotheque('${p.id}')" class="btn btn-secondaire btn-tres-compact">
+                                                    <button data-action="retirerPratiqueDeBibliotheque" data-param="${p.id}" class="btn btn-secondaire btn-tres-compact">
                                                         Retirer
                                                     </button>
                                                 </div>
@@ -4541,10 +4549,10 @@ async function ouvrirModalBibliothequePratiques() {
                                                     ${description ? `<div style="color: var(--gris-clair); font-size: 0.85em;">${echapperHtml(description)}</div>` : ''}
                                                 </div>
                                                 <div style="display: flex; gap: 5px; margin-left: 10px;">
-                                                    <button onclick="ajouterPratiqueIndividuelle('${p.id}')" class="btn btn-ajouter btn-tres-compact">
+                                                    <button data-action="ajouterPratiqueIndividuelle" data-param="${p.id}" class="btn btn-ajouter btn-tres-compact">
                                                         Ajouter
                                                     </button>
-                                                    <button onclick="supprimerPratiqueHorsBibliotheque('${p.id}')" class="btn btn-supprimer btn-tres-compact" title="Supprimer définitivement">
+                                                    <button data-action="supprimerPratiqueHorsBibliotheque" data-param="${p.id}" class="btn btn-supprimer btn-tres-compact" title="Supprimer définitivement">
                                                         Supprimer
                                                     </button>
                                                 </div>
@@ -4556,7 +4564,7 @@ async function ouvrirModalBibliothequePratiques() {
                         </div>
 
                         <div class="u-flex-gap-10">
-                            <button onclick="importerPratiqueJSON()" class="btn btn-secondaire">
+                            <button data-action="importerPratiqueJSON" class="btn btn-secondaire">
                                 📥 Importer une pratique
                             </button>
                         </div>
@@ -4566,7 +4574,7 @@ async function ouvrirModalBibliothequePratiques() {
 
                 <!-- Pied de page -->
                 <div style="padding: 15px 20px; border-top: 1px solid var(--gris-clair); text-align: right;">
-                    <button onclick="fermerModalBibliothequePratiques()" class="btn btn-secondaire">
+                    <button data-action="fermerModalBibliothequePratiques" class="btn btn-secondaire">
                         Fermer
                     </button>
                 </div>
@@ -4858,7 +4866,7 @@ function ajouterTypeTravailSpec() {
     div.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
             <h5 style="margin: 0; color: var(--accent-primaire);">Type de travail ${index + 1}</h5>
-            <button type="button" class="btn-icon" onclick="retirerTypeTravailSpec(this)" style="color: var(--rouge-erreur);">✕</button>
+            <button type="button" class="btn-icon" data-action="retirerTypeTravailSpec" style="color: var(--rouge-erreur);">✕</button>
         </div>
         <div class="groupe-form">
             <label>ID (identifiant unique)</label>
@@ -4907,7 +4915,7 @@ function ajouterPalierBundle() {
     div.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
             <h5 style="margin: 0; color: var(--accent-primaire);">Palier ${index + 1}</h5>
-            <button type="button" class="btn-icon" onclick="retirerPalierBundle(this)" style="color: var(--rouge-erreur);">✕</button>
+            <button type="button" class="btn-icon" data-action="retirerPalierBundle" style="color: var(--rouge-erreur);">✕</button>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
             <div class="groupe-form">
@@ -4970,6 +4978,13 @@ function genererObjectifsSpec() {
 
         liste.appendChild(div);
     }
+}
+
+/**
+ * Placeholder pour la fonctionnalité "Créer une configuration basée sur un canevas"
+ */
+function alertFonctionnaliteAVenir() {
+    alert('Fonctionnalité à venir : Créer une configuration basée sur ce canevas');
 }
 
 /* ===============================
