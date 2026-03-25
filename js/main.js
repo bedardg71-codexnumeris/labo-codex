@@ -722,10 +722,61 @@ document.addEventListener('DOMContentLoaded', function () {
         if (typeof fn === 'function') {
             var param = el.dataset.param;
             if (param !== undefined) {
+                if (param !== '' && !isNaN(param)) param = Number(param);
                 fn(param);
             } else {
                 fn();
             }
+        }
+    });
+
+    // Délégation change / input / keyup / mousedown (Phase 5 — remplace on* inline)
+    ['change', 'input', 'keyup', 'mousedown', 'focusin'].forEach(function(eventType) {
+        document.addEventListener(eventType, function(e) {
+            var attr = 'data-on-' + eventType;
+            var el = e.target.closest('[' + attr + ']');
+            if (!el) return;
+
+            var action = el.getAttribute(attr);
+            var fn = action.split('.').reduce(function(obj, key) {
+                return obj ? obj[key] : undefined;
+            }, window);
+
+            if (typeof fn !== 'function') return;
+
+            var param = el.dataset.param;
+            var param2 = el.dataset.param2;
+            if (param !== undefined && param !== '' && !isNaN(param)) param = Number(param);
+
+            if (param !== undefined && param2 !== undefined) {
+                fn(param, param2);
+            } else if (param !== undefined) {
+                fn(param, el);
+            } else {
+                fn(el);
+            }
+        });
+    });
+
+    // Délégation fermeture overlay (click sur le fond = fermer la modale)
+    document.addEventListener('click', function(e) {
+        if (e.target.hasAttribute && e.target.hasAttribute('data-close-on-bg')) {
+            var action = e.target.getAttribute('data-close-on-bg');
+            var fn = action.split('.').reduce(function(obj, key) {
+                return obj ? obj[key] : undefined;
+            }, window);
+            if (typeof fn === 'function') fn();
+        }
+    });
+
+    // Délégation dragstart (remplace ondragstart inline)
+    document.addEventListener('dragstart', function(e) {
+        var el = e.target.closest('[data-drag-data]');
+        if (!el) return;
+        var data = el.getAttribute('data-drag-data');
+        var idx = data.indexOf(':');
+        if (idx > -1) {
+            e.dataTransfer.setData(data.substring(0, idx), data.substring(idx + 1));
         }
     });
 
