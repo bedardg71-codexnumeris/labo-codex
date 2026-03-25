@@ -722,11 +722,17 @@ document.addEventListener('DOMContentLoaded', function () {
         if (typeof fn === 'function') {
             var param = el.dataset.param;
             var param2 = el.dataset.param2;
+            var param3 = el.dataset.param3;
             if (param !== undefined) {
                 if (param !== '' && !isNaN(param)) param = Number(param);
                 if (param2 !== undefined) {
                     if (param2 !== '' && !isNaN(param2)) param2 = Number(param2);
-                    fn(param, param2);
+                    if (param3 !== undefined) {
+                        if (param3 !== '' && !isNaN(param3)) param3 = Number(param3);
+                        fn(param, param2, param3);
+                    } else {
+                        fn(param, param2);
+                    }
                 } else {
                     fn(param);
                 }

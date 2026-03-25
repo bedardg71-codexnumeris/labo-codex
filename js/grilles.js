@@ -572,11 +572,11 @@ function afficherListeCriteres(criteres, grilleId) {
                 ` : ''}
             </div>
             <div style="white-space: nowrap; margin-left: 15px;">
-                <button class="btn btn-modifier" onclick="modifierCritere('${critere.id}')"
+                <button class="btn btn-modifier" data-action="modifierCritere" data-param="${critere.id}"
                         style="padding: 4px 10px; font-size: 0.8rem; margin-right: 5px;">
                     Modifier
                 </button>
-                <button class="btn btn-supprimer" onclick="supprimerCritere('${critere.id}')"
+                <button class="btn btn-supprimer" data-action="supprimerCritere" data-param="${critere.id}"
                         style="padding: 4px 10px; font-size: 0.8rem;">
                     Supprimer
                 </button>
@@ -813,13 +813,13 @@ async function afficherGrillesCriteres() {
                         ${grille.baseSur ? `<br><small class="grille-texte-bleu-leger">(basé sur ${grille.baseSur})</small>` : ''}
                     </div>
                     <div class="grille-nowrap">
-                        <button class="btn btn-principal" onclick="chargerGrilleEnEdition('${grille.id}')">
+                        <button class="btn btn-principal" data-action="chargerGrilleEnEdition" data-param="${grille.id}">
                             Charger
                         </button>
-                        <button class="btn btn-modifier" onclick="dupliquerGrille('${grille.id}')">
+                        <button class="btn btn-modifier" data-action="dupliquerGrille" data-param="${grille.id}">
                             Dupliquer
                         </button>
-                        <button class="btn btn-supprimer" onclick="supprimerGrille('${grille.id}')">
+                        <button class="btn btn-supprimer" data-action="supprimerGrille" data-param="${grille.id}">
                             Supprimer
                         </button>
                     </div>
@@ -1303,11 +1303,11 @@ async function afficherToutesLesGrillesCriteres() {
                     ` : ''}
                 </div>
                 <div style="white-space: nowrap; margin-left: 15px;">
-                    <button class="btn btn-modifier" onclick="modifierCritere('${critere.id}')"
+                    <button class="btn btn-modifier" data-action="modifierCritere" data-param="${critere.id}"
                             style="padding: 4px 10px; font-size: 0.8rem; margin-right: 5px;">
                         Modifier
                     </button>
-                    <button class="btn btn-supprimer" onclick="supprimerCritere('${critere.id}')"
+                    <button class="btn btn-supprimer" data-action="supprimerCritere" data-param="${critere.id}"
                             style="padding: 4px 10px; font-size: 0.8rem;">
                         Supprimer
                     </button>
@@ -1373,16 +1373,16 @@ async function afficherToutesLesGrillesCriteres() {
                     `}
 
                     <div class="u-flex-gap-10">
-                        <button class="btn btn-confirmer" onclick="ajouterCritereAGrille('${grille.id}')">
+                        <button class="btn btn-confirmer" data-action="ajouterCritereAGrille" data-param="${grille.id}">
                             + Ajouter un critère à cette grille
                         </button>
-                        <button class="btn btn-modifier" onclick="chargerGrilleTemplate('${grille.id}')">
+                        <button class="btn btn-modifier" data-action="chargerGrilleTemplate" data-param="${grille.id}">
                             ✏️ Éditer la grille
                         </button>
-                        <button class="btn btn-principal" onclick="dupliquerGrille('${grille.id}')">
+                        <button class="btn btn-principal" data-action="dupliquerGrille" data-param="${grille.id}">
                             📋 Dupliquer
                         </button>
-                        <button class="btn btn-supprimer" onclick="supprimerGrille('${grille.id}')">
+                        <button class="btn btn-supprimer" data-action="supprimerGrille" data-param="${grille.id}">
                             🗑️ Supprimer
                         </button>
                     </div>
@@ -1937,8 +1937,9 @@ async function importerDansGrilleActive(event) {
  *
  * @param {Event} event - Événement de changement du file input
  */
-function importerGrilles(event) {
-    const file = event.target.files[0];
+async function importerGrilles(eventOuEl) {
+    var target = eventOuEl.target || eventOuEl;
+    const file = target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
@@ -1965,8 +1966,8 @@ function importerGrilles(event) {
                     <div class="modal-js-contenu" style="max-width: 600px;">
                         ${message}
                         <div class="u-flex-gap-10" style="margin-top: 15px; justify-content: flex-end;">
-                            <button class="btn btn-annuler" onclick="this.closest('.modal-js-overlay').parentElement.remove(); delete window._grillesImportEnAttente;">Annuler</button>
-                            <button class="btn btn-confirmer" onclick="window.confirmerImportGrilles(window._grillesImportEnAttente); this.closest('.modal-js-overlay').parentElement.remove(); delete window._grillesImportEnAttente;">Importer</button>
+                            <button class="btn btn-annuler" data-action="fermerModalImportGrilles">Annuler</button>
+                            <button class="btn btn-confirmer" data-action="confirmerEtFermerImportGrilles">Importer</button>
                         </div>
                     </div>
                 </div>
@@ -2138,7 +2139,7 @@ async function afficherListeGrilles() {
     // ✅ AJOUT (8 décembre 2025) : Bouton "Consulter la bibliothèque" en en-tête
     let html = `
         <div class="u-mb-15">
-            <button onclick="afficherBibliothequeGrilles()" class="btn btn-principal" style="width: 100%; font-size: 0.9rem;">
+            <button data-action="afficherBibliothequeGrilles" class="btn btn-principal" style="width: 100%; font-size: 0.9rem;">
                 Consulter la bibliothèque
             </button>
         </div>
@@ -2158,7 +2159,7 @@ async function afficherListeGrilles() {
             ? GabaritsUtils.genererBadgesPratiques(grille)
             : '';
         return `
-            <div class="sidebar-item" data-id="${grille.id}" onclick="chargerGrillePourModif('${grille.id}')">
+            <div class="sidebar-item" data-id="${grille.id}" data-action="chargerGrillePourModif" data-param="${grille.id}">
                 <div class="sidebar-item-titre">${nomGrille}</div>
                 <div class="sidebar-item-badges">${badgesPratiques} <span class="badge-caracteristique">${nbCriteres} critères</span></div>
             </div>
@@ -2245,17 +2246,17 @@ async function afficherBibliothequeGrilles() {
     // Boutons après Section 1
     const boutonsApresSection1 = `
         <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-            <button onclick="ajouterMesGrillesALaBibliotheque()" class="btn btn-principal">Ajouter mes grilles à la bibliothèque</button>
-            <button onclick="exporterGrilles()" class="btn btn-secondaire">Exporter toutes mes grilles</button>
-            <button onclick="document.getElementById('fichier-import-grilles-modal').click()" class="btn btn-secondaire">Importer des grilles</button>
-            <input type="file" id="fichier-import-grilles-modal" accept=".json" style="display: none;" onchange="importerGrilles(event)">
+            <button data-action="ajouterMesGrillesALaBibliotheque" class="btn btn-principal">Ajouter mes grilles à la bibliothèque</button>
+            <button data-action="exporterGrilles" class="btn btn-secondaire">Exporter toutes mes grilles</button>
+            <button data-action="ouvrirFilePickerImportGrilles" class="btn btn-secondaire">Importer des grilles</button>
+            <input type="file" id="fichier-import-grilles-modal" accept=".json" style="display: none;" data-on-change="importerGrilles">
         </div>`;
 
     // Filtres Section 2
     const filtresHTML = `
         <div class="u-mb-15">
             <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par discipline :</label>
-            <select id="filtreDisciplineGrilles" class="controle-form" onchange="filtrerGrillesParDiscipline()" style="max-width: 300px;">
+            <select id="filtreDisciplineGrilles" class="controle-form" data-on-change="filtrerGrillesParDiscipline" style="max-width: 300px;">
                 <option value="">Toutes les disciplines</option>
                 ${data.disciplines.map(d => `<option value="${d}">${d}</option>`).join('')}
             </select>
@@ -2693,7 +2694,7 @@ function afficherCriteresTemp() {
     const html = window.tempCriteres.map((critere, index) => `
         <div class="item-liste" style="position: relative; padding: 15px; background: var(--surface-conteneur, #162c36); border: 1px solid var(--bordure-claire); border-radius: 6px; margin-bottom: 10px;">
             <button class="btn btn-supprimer btn-tres-compact"
-                    onclick="supprimerCritereTemp(${index})"
+                    data-action="supprimerCritereTemp" data-param="${index}"
                     title="Supprimer ce critère"
                     style="position: absolute; top: 8px; right: 8px;">
                 ✕
@@ -2702,13 +2703,13 @@ function afficherCriteresTemp() {
                 <div class="groupe-form" style="text-align: center;">
                     <label style="font-size: 0.85rem; color: var(--gris-moyen);">Ordre</label>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <button onclick="deplacerCritereTempHaut(${index})"
+                        <button data-action="deplacerCritereTempHaut" data-param="${index}"
                                 class="btn btn-compact"
                                 ${index === 0 ? 'disabled' : ''}
                                 title="Déplacer vers le haut">
                             ↑
                         </button>
-                        <button onclick="deplacerCritereTempBas(${index})"
+                        <button data-action="deplacerCritereTempBas" data-param="${index}"
                                 class="btn btn-compact"
                                 ${index === window.tempCriteres.length - 1 ? 'disabled' : ''}
                                 title="Déplacer vers le bas">
@@ -2722,7 +2723,7 @@ function afficherCriteresTemp() {
                            class="controle-form"
                            value="${critere.nom}"
                            placeholder="Ex: Rédaction"
-                           onchange="modifierCritereTemp(${index}, 'nom', this.value)"
+                           data-on-change="modifierCritereTempHandler" data-critere-index="${index}" data-champ="nom"
                            style="font-weight: 500;">
                 </div>
                 <div class="groupe-form">
@@ -2730,7 +2731,7 @@ function afficherCriteresTemp() {
                         <span class="tooltip-aide" title="Holistique : évalue l'ensemble en considérant les interrelations entre les éléments. Analytique : décompose et évalue chaque élément séparément. Algorithmique : calcul automatique basé sur une formule (ex : nombre d'erreurs en français écrit).">📍</span>
                     </label>
                     <select class="controle-form"
-                            onchange="modifierCritereTemp(${index}, 'type', this.value); afficherCriteresTemp();">
+                            data-on-change="modifierTypeCritereTempHandler" data-critere-index="${index}">
                         <option value="holistique" ${critere.type === 'holistique' ? 'selected' : ''}>Holistique</option>
                         <option value="analytique" ${critere.type === 'analytique' ? 'selected' : ''}>Analytique</option>
                         <option value="algorithmique" ${critere.type === 'algorithmique' ? 'selected' : ''}>Algorithmique</option>
@@ -2743,7 +2744,7 @@ function afficherCriteresTemp() {
                            value="${critere.ponderation}"
                            min="0"
                            max="100"
-                           onchange="modifierCritereTemp(${index}, 'ponderation', parseInt(this.value)); mettreAJourTotalTemp();">
+                           data-on-change="modifierPonderationCritereTempHandler" data-critere-index="${index}">
                 </div>
                 <div class="groupe-form">
                     <label style="font-size: 0.85rem; color: var(--gris-moyen);">Description</label>
@@ -2751,7 +2752,7 @@ function afficherCriteresTemp() {
                            class="controle-form"
                            value="${critere.description || ''}"
                            placeholder="Ex: Qualité de la langue, structure du texte..."
-                           onchange="modifierCritereTemp(${index}, 'description', this.value)">
+                           data-on-change="modifierCritereTempHandler" data-critere-index="${index}" data-champ="description">
                 </div>
             </div>
             ${critere.type === 'algorithmique' ? `
@@ -2764,7 +2765,7 @@ function afficherCriteresTemp() {
                                value="${critere.facteurNormalisation || 500}"
                                min="1"
                                placeholder="500"
-                               onchange="modifierCritereTemp(${index}, 'facteurNormalisation', parseInt(this.value))"
+                               data-on-change="modifierCritereTempHandler" data-critere-index="${index}" data-champ="facteurNormalisation" data-parse-int
                                title="Nombre de mots de référence pour le calcul (défaut: 500)">
                     </div>
                     <div style="grid-column: span 2;">
@@ -2780,7 +2781,7 @@ function afficherCriteresTemp() {
 
     // Ajouter le bouton pour ajouter un critère (pleine largeur comme échelles)
     container.innerHTML = html + `
-        <button class="sidebar-btn-ajouter" onclick="ajouterCritereTemp()">
+        <button class="sidebar-btn-ajouter" data-action="ajouterCritereTemp">
             + Ajouter un critère
         </button>
     `;
@@ -2950,7 +2951,7 @@ function afficherCriteresGrille(grille) {
     const html = grille.criteres.map((critere, index) => `
         <div class="item-liste" style="position: relative; padding: 15px; background: var(--surface-conteneur, #162c36); border: 1px solid var(--bordure-claire); border-radius: 6px; margin-bottom: 10px;">
             <button class="btn btn-supprimer btn-tres-compact"
-                    onclick="supprimerCritereGrille('${grille.id}', ${index})"
+                    data-action="supprimerCritereGrille" data-param="${grille.id}" data-param2="${index}"
                     title="Supprimer ce critère"
                     style="position: absolute; top: 8px; right: 8px;">
                 ✕
@@ -2959,13 +2960,13 @@ function afficherCriteresGrille(grille) {
                 <div class="groupe-form" style="text-align: center;">
                     <label style="font-size: 0.85rem; color: var(--gris-moyen);">Ordre</label>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <button onclick="deplacerCritereGrilleHaut('${grille.id}', ${index})"
+                        <button data-action="deplacerCritereGrilleHaut" data-param="${grille.id}" data-param2="${index}"
                                 class="btn btn-compact"
                                 ${index === 0 ? 'disabled' : ''}
                                 title="Déplacer vers le haut">
                             ↑
                         </button>
-                        <button onclick="deplacerCritereGrilleBas('${grille.id}', ${index})"
+                        <button data-action="deplacerCritereGrilleBas" data-param="${grille.id}" data-param2="${index}"
                                 class="btn btn-compact"
                                 ${index === grille.criteres.length - 1 ? 'disabled' : ''}
                                 title="Déplacer vers le bas">
@@ -2978,7 +2979,7 @@ function afficherCriteresGrille(grille) {
                     <input type="text"
                            class="controle-form"
                            value="${critere.nom}"
-                           onchange="modifierCritereGrille('${grille.id}', ${index}, 'nom', this.value)"
+                           data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-champ="nom"
                            style="font-weight: 500;">
                 </div>
                 <div class="groupe-form">
@@ -2986,7 +2987,7 @@ function afficherCriteresGrille(grille) {
                         <span class="tooltip-aide" title="Holistique : évalue l'ensemble en considérant les interrelations entre les éléments. Analytique : décompose et évalue chaque élément séparément. Algorithmique : calcul automatique basé sur une formule (ex : nombre d'erreurs en français écrit).">📍</span>
                     </label>
                     <select class="controle-form"
-                            onchange="modifierCritereGrille('${grille.id}', ${index}, 'type', this.value); afficherCriteresGrille(obtenirGrilleParId('${grille.id}'));">
+                            data-on-change="modifierTypeCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}">
                         <option value="holistique" ${critere.type === 'holistique' ? 'selected' : ''}>Holistique</option>
                         <option value="analytique" ${critere.type === 'analytique' ? 'selected' : ''}>Analytique</option>
                         <option value="algorithmique" ${critere.type === 'algorithmique' ? 'selected' : ''}>Algorithmique</option>
@@ -2999,14 +3000,14 @@ function afficherCriteresGrille(grille) {
                            value="${critere.ponderation}"
                            min="0"
                            max="100"
-                           onchange="modifierCritereGrille('${grille.id}', ${index}, 'ponderation', parseInt(this.value))">
+                           data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-champ="ponderation" data-parse-int>
                 </div>
                 <div class="groupe-form">
                     <label style="font-size: 0.85rem; color: var(--gris-moyen);">Description</label>
                     <input type="text"
                            class="controle-form"
                            value="${critere.description || ''}"
-                           onchange="modifierCritereGrille('${grille.id}', ${index}, 'description', this.value)">
+                           data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-champ="description">
                 </div>
             </div>
             ${critere.type === 'algorithmique' ? `
@@ -3019,7 +3020,7 @@ function afficherCriteresGrille(grille) {
                                value="${critere.facteurNormalisation || 500}"
                                min="1"
                                placeholder="500"
-                               onchange="modifierCritereGrille('${grille.id}', ${index}, 'facteurNormalisation', parseInt(this.value))"
+                               data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-champ="facteurNormalisation" data-parse-int
                                title="Nombre de mots de référence pour le calcul (défaut: 500)">
                     </div>
                     <div style="grid-column: span 2;">
@@ -3043,7 +3044,7 @@ function afficherCriteresGrille(grille) {
                         </h4>
                         ${!critere.sousCriteres || critere.sousCriteres.length === 0 ? `
                         <button class="btn btn-secondaire btn-tres-compact sous-criteres-btn-defaut"
-                                onclick="initialiserSousCriteresParDefaut('${grille.id}', ${index})">
+                                data-action="initialiserSousCriteresParDefaut" data-param="${grille.id}" data-param2="${index}">
                             📋 Utiliser sous-critères par défaut (0-10)
                         </button>
                         ` : ''}
@@ -3059,7 +3060,7 @@ function afficherCriteresGrille(grille) {
                                     <input type="text"
                                            class="controle-form sous-critere-input-code"
                                            value="${sc.code || scIndex}"
-                                           onchange="modifierSousCritere('${grille.id}', ${index}, ${scIndex}, 'code', this.value)">
+                                           data-on-change="modifierSousCritereHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-sc-index="${scIndex}" data-champ="code">
                                 </div>
                                 <div class="groupe-form">
                                     <label class="sous-critere-label-petit">Nom</label>
@@ -3067,7 +3068,7 @@ function afficherCriteresGrille(grille) {
                                            class="controle-form sous-critere-input-standard"
                                            value="${sc.nom || ''}"
                                            placeholder="Ex: Syntaxe, Ponctuation..."
-                                           onchange="modifierSousCritere('${grille.id}', ${index}, ${scIndex}, 'nom', this.value)">
+                                           data-on-change="modifierSousCritereHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-sc-index="${scIndex}" data-champ="nom">
                                 </div>
                                 <div class="groupe-form">
                                     <label class="sous-critere-label-petit">Pondération</label>
@@ -3077,11 +3078,11 @@ function afficherCriteresGrille(grille) {
                                            min="0"
                                            step="0.1"
                                            placeholder="1.0"
-                                           onchange="modifierSousCritere('${grille.id}', ${index}, ${scIndex}, 'ponderation', parseFloat(this.value))"
+                                           data-on-change="modifierSousCritereHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-sc-index="${scIndex}" data-champ="ponderation" data-parse-float
                                            title="Ex: 1.0 pour erreur complète, 0.5 pour demi-point">
                                 </div>
                                 <button class="btn btn-supprimer btn-tres-compact"
-                                        onclick="supprimerSousCritere('${grille.id}', ${index}, ${scIndex})"
+                                        data-action="supprimerSousCritere" data-param="${grille.id}" data-param2="${index}" data-param3="${scIndex}"
                                         title="Supprimer ce sous-critère">
                                     ✕
                                 </button>
@@ -3091,14 +3092,14 @@ function afficherCriteresGrille(grille) {
                                 <textarea class="controle-form sous-critere-textarea"
                                           rows="2"
                                           placeholder="Ex: La plupart des erreurs concernent la construction syntaxique..."
-                                          onchange="modifierSousCritere('${grille.id}', ${index}, ${scIndex}, 'retroaction', this.value)">${sc.retroaction || ''}</textarea>
+                                          data-on-change="modifierSousCritereHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-sc-index="${scIndex}" data-champ="retroaction">${sc.retroaction || ''}</textarea>
                             </div>
                         </div>
                         `).join('')}
 
                         <!-- Bouton ajouter après la liste -->
                         <button class="btn btn-ajouter btn-tres-compact sous-criteres-btn-ajouter-liste"
-                                onclick="ajouterSousCritere('${grille.id}', ${index})">
+                                data-action="ajouterSousCritere" data-param="${grille.id}" data-param2="${index}">
                             + Ajouter un sous-critère
                         </button>
                     </div>
@@ -3109,7 +3110,7 @@ function afficherCriteresGrille(grille) {
 
                     <!-- Bouton ajouter quand liste vide -->
                     <button class="btn btn-ajouter btn-tres-compact sous-criteres-btn-ajouter-vide"
-                            onclick="ajouterSousCritere('${grille.id}', ${index})">
+                            data-action="ajouterSousCritere" data-param="${grille.id}" data-param2="${index}">
                         + Ajouter un sous-critère
                     </button>
                     `}
@@ -3125,7 +3126,7 @@ function afficherCriteresGrille(grille) {
 
     // Ajouter un bouton pour ajouter un nouveau critère
     const btnAjouterCritere = `
-        <button class="btn btn-principal" onclick="ajouterCritereGrille('${grille.id}')" class="u-mt-10">
+        <button class="btn btn-principal" data-action="ajouterCritereGrille" data-param="${grille.id}" class="u-mt-10">
             + Ajouter un critère
         </button>
     `;
@@ -3686,8 +3687,8 @@ async function afficherConfigurationCategoriesErreurs(grilleId, critereIndex) {
                 </div>
 
                 <div style="display: flex; gap: 10px; margin-top: 25px; justify-content: flex-end;">
-                    <button class="btn btn-annuler" onclick="fermerModalCategoriesErreurs()">Annuler</button>
-                    <button class="btn btn-confirmer" onclick="sauvegarderCategoriesErreurs('${grilleId}', ${critereIndex})">Sauvegarder</button>
+                    <button class="btn btn-annuler" data-action="fermerModalCategoriesErreurs">Annuler</button>
+                    <button class="btn btn-confirmer" data-action="sauvegarderCategoriesErreurs" data-param="${grilleId}" data-param2="${critereIndex}">Sauvegarder</button>
                 </div>
             </div>
         </div>
@@ -3804,5 +3805,87 @@ window.initialiserSousCriteresParDefaut = initialiserSousCriteresParDefaut;
 window.ajouterSousCritere = ajouterSousCritere;
 window.modifierSousCritere = modifierSousCritere;
 window.supprimerSousCritere = supprimerSousCritere;
+
+/* ===============================
+   WRAPPERS DELEGATION (Phase 5)
+   =============================== */
+
+/** Handler délégué pour modifierCritereTemp(index, champ, valeur) */
+function modifierCritereTempHandler(el) {
+    var index = parseInt(el.dataset.critereIndex);
+    var champ = el.dataset.champ;
+    var valeur = el.hasAttribute('data-parse-int') ? parseInt(el.value) : el.value;
+    modifierCritereTemp(index, champ, valeur);
+}
+
+/** Handler délégué pour modifierCritereTemp + afficherCriteresTemp (type change) */
+function modifierTypeCritereTempHandler(el) {
+    var index = parseInt(el.dataset.critereIndex);
+    modifierCritereTemp(index, 'type', el.value);
+    afficherCriteresTemp();
+}
+
+/** Handler délégué pour modifierCritereGrille(grilleId, index, champ, valeur) */
+function modifierCritereGrilleHandler(el) {
+    var grilleId = el.dataset.grilleId;
+    var index = parseInt(el.dataset.critereIndex);
+    var champ = el.dataset.champ;
+    var valeur = el.hasAttribute('data-parse-int') ? parseInt(el.value) : el.value;
+    modifierCritereGrille(grilleId, index, champ, valeur);
+}
+
+/** Handler délégué pour modifierCritereGrille type + refresh */
+function modifierTypeCritereGrilleHandler(el) {
+    var grilleId = el.dataset.grilleId;
+    var index = parseInt(el.dataset.critereIndex);
+    modifierCritereGrille(grilleId, index, 'type', el.value);
+    afficherCriteresGrille(obtenirGrilleParId(grilleId));
+}
+
+/** Handler délégué pour modifierSousCritere(grilleId, critereIndex, scIndex, champ, valeur) */
+function modifierSousCritereHandler(el) {
+    var grilleId = el.dataset.grilleId;
+    var critereIndex = parseInt(el.dataset.critereIndex);
+    var scIndex = parseInt(el.dataset.scIndex);
+    var champ = el.dataset.champ;
+    var valeur = el.hasAttribute('data-parse-float') ? parseFloat(el.value) : el.value;
+    modifierSousCritere(grilleId, critereIndex, scIndex, champ, valeur);
+}
+
+/** Handler délégué pour modifierCritereTemp pondération + mise à jour total */
+function modifierPonderationCritereTempHandler(el) {
+    var index = parseInt(el.dataset.critereIndex);
+    modifierCritereTemp(index, 'ponderation', parseInt(el.value));
+    mettreAJourTotalTemp();
+}
+
+/** Annuler import grilles */
+function fermerModalImportGrilles() {
+    var overlay = document.querySelector('.modal-js-overlay');
+    if (overlay && overlay.parentElement) overlay.parentElement.remove();
+    delete window._grillesImportEnAttente;
+}
+
+/** Confirmer import + fermer modal */
+function confirmerEtFermerImportGrilles() {
+    window.confirmerImportGrilles(window._grillesImportEnAttente);
+    fermerModalImportGrilles();
+}
+
+/** Ouvrir le file picker pour import grilles */
+function ouvrirFilePickerImportGrilles() {
+    var input = document.getElementById('fichier-import-grilles-modal');
+    if (input) input.click();
+}
+
+window.modifierCritereTempHandler = modifierCritereTempHandler;
+window.modifierTypeCritereTempHandler = modifierTypeCritereTempHandler;
+window.modifierCritereGrilleHandler = modifierCritereGrilleHandler;
+window.modifierTypeCritereGrilleHandler = modifierTypeCritereGrilleHandler;
+window.modifierSousCritereHandler = modifierSousCritereHandler;
+window.modifierPonderationCritereTempHandler = modifierPonderationCritereTempHandler;
+window.fermerModalImportGrilles = fermerModalImportGrilles;
+window.confirmerEtFermerImportGrilles = confirmerEtFermerImportGrilles;
+window.ouvrirFilePickerImportGrilles = ouvrirFilePickerImportGrilles;
 
 })();
