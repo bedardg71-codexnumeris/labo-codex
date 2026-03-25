@@ -644,7 +644,7 @@ async function afficherMatriceRetroaction() {
                                   data-critere="${critere.id}"
                                   data-niveau="${niveau.code}"
                                   placeholder="Commentaire pour ${nomCritereEchappe} - ${nomNiveauEchappe}"
-                                  onchange="sauvegarderCommentaire('${key}')">${commentaireEchappe}</textarea>
+                                  data-on-change="sauvegarderCommentaire" data-param="${key}">${commentaireEchappe}</textarea>
                     </td>
             `;
         });
@@ -1207,22 +1207,22 @@ function afficherListeCartouches(cartouches, grilleId) {
                     </small>
                 </div>
                 <div>
-                    <button onclick="basculerVerrouillageCartouche('${cartouche.id}', '${grilleId}')"
+                    <button data-action="basculerVerrouillageCartouche" data-param="${cartouche.id}" data-param2="${grilleId}"
                           class="btn btn-tres-compact"
                           class="u-mr-10"
                           title="${cartouche.verrouille ? 'Verrouillée - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller'}">
                         ${cartouche.verrouille ? 'Verrouillée' : 'Modifiable'}
                     </button>
                     <button class="btn btn-modifier"
-                            onclick="chargerCartouchePourModif('${cartouche.id}', '${grilleId}')">
+                            data-action="chargerCartouchePourModif" data-param="${cartouche.id}" data-param2="${grilleId}">
                         Modifier
                     </button>
                     <button class="btn btn-principal"
-                            onclick="dupliquerCartouche('${cartouche.id}', '${grilleId}')">
+                            data-action="dupliquerCartouche" data-param="${cartouche.id}" data-param2="${grilleId}">
                         Dupliquer
                     </button>
                     <button class="btn btn-supprimer"
-                            onclick="supprimerCartoucheConfirm('${cartouche.id}', '${grilleId}')">
+                            data-action="supprimerCartoucheConfirm" data-param="${cartouche.id}" data-param2="${grilleId}">
                         Supprimer
                     </button>
                 </div>
@@ -1308,22 +1308,22 @@ async function afficherToutesLesGrillesEtCartouches() {
                                                 </small>
                                             </div>
                                             <div class="u-nowrap">
-                                                <button onclick="basculerVerrouillageCartouche('${cartouche.id}', '${grille.id}')"
+                                                <button data-action="basculerVerrouillageCartouche" data-param="${cartouche.id}" data-param2="${grille.id}"
                                                       class="btn btn-tres-compact"
                                                       class="u-mr-10"
                                                       title="${cartouche.verrouille ? 'Verrouillée - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller'}">
                                                     ${cartouche.verrouille ? 'Verrouillée' : 'Modifiable'}
                                                 </button>
                                                 <button class="btn btn-modifier"
-                                                        onclick="chargerCartouchePourModif('${cartouche.id}', '${grille.id}')">
+                                                        data-action="chargerCartouchePourModif" data-param="${cartouche.id}" data-param2="${grille.id}">
                                                     Modifier
                                                 </button>
                                                 <button class="btn btn-principal"
-                                                        onclick="dupliquerCartouche('${cartouche.id}', '${grille.id}')">
+                                                        data-action="dupliquerCartouche" data-param="${cartouche.id}" data-param2="${grille.id}">
                                                     Dupliquer
                                                 </button>
                                                 <button class="btn btn-supprimer"
-                                                        onclick="supprimerCartoucheConfirm('${cartouche.id}', '${grille.id}')">
+                                                        data-action="supprimerCartoucheConfirm" data-param="${cartouche.id}" data-param2="${grille.id}">
                                                     Supprimer
                                                 </button>
                                             </div>
@@ -1338,7 +1338,7 @@ async function afficherToutesLesGrillesEtCartouches() {
                         </p>
                     `}
 
-                    <button class="btn btn-confirmer" onclick="ajouterCartoucheAGrille('${grille.id}')">
+                    <button class="btn btn-confirmer" data-action="ajouterCartoucheAGrille" data-param="${grille.id}">
                         + Ajouter une cartouche à cette grille
                     </button>
                 </div>
@@ -1781,8 +1781,9 @@ async function exporterCartouches() {
  * - Propose de remplacer ou fusionner
  * - Les cartouches avec même ID sont remplacées
  */
-async function importerCartouches(event) {
-    const file = event.target.files[0];
+async function importerCartouches(eventOuEl) {
+    var target = eventOuEl.target || eventOuEl;
+    var file = (target.files || [])[0];
     if (!file) return;
 
     const reader = new FileReader();
@@ -1805,13 +1806,14 @@ async function importerCartouches(event) {
             // Créer modal avec badge CC
             // z-index: 10001 pour passer au-dessus des modaux de bibliothèque (10000)
             const modal = document.createElement('div');
+            modal.classList.add('modal-import-cartouches');
             modal.innerHTML = `
                 <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10001; display: flex; align-items: center; justify-content: center;">
                     <div style="background: var(--surface-conteneur, #162c36); padding: 20px; border-radius: 8px; max-width: 600px; max-height: 80vh; overflow-y: auto;">
                         ${message}
                         <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
-                            <button class="btn btn-annuler" onclick="this.closest('div[style*=fixed]').parentElement.remove(); delete window._cartouchesImportEnAttente;">Annuler</button>
-                            <button class="btn btn-confirmer" onclick="window.confirmerImportCartouches(window._cartouchesImportEnAttente); this.closest('div[style*=fixed]').parentElement.remove(); delete window._cartouchesImportEnAttente;">Importer</button>
+                            <button class="btn btn-annuler" data-action="fermerModalImportCartouches">Annuler</button>
+                            <button class="btn btn-confirmer" data-action="confirmerEtFermerImportCartouches">Importer</button>
                         </div>
                     </div>
                 </div>
@@ -2551,6 +2553,31 @@ async function sauvegarderCartoucheComplete() {
 }
 
 /* ===============================
+   WRAPPERS DELEGATION (Phase 5)
+   =============================== */
+
+/** Fermer modal import cartouches */
+function fermerModalImportCartouches() {
+    var modal = document.querySelector('.modal-import-cartouches');
+    if (modal) {
+        modal.remove();
+    }
+    delete window._cartouchesImportEnAttente;
+}
+
+/** Confirmer import + fermer modal */
+function confirmerEtFermerImportCartouches() {
+    window.confirmerImportCartouches(window._cartouchesImportEnAttente);
+    fermerModalImportCartouches();
+}
+
+/** Ouvrir file picker import cartouches */
+function ouvrirFilePickerImportCartouches() {
+    var input = document.getElementById('fichier-import-cartouches-modal');
+    if (input) input.click();
+}
+
+/* ===============================
    EXPORT DES FONCTIONS GLOBALES
    =============================== */
 
@@ -2594,6 +2621,11 @@ window.supprimerCartoucheActive = supprimerCartoucheActive;
 window.annulerFormCartouche = annulerFormCartouche;
 window.sauvegarderCartoucheComplete = sauvegarderCartoucheComplete;
 window.genererApercuAleatoire = genererApercuAleatoire;
+
+// Wrappers délégation (Phase 5)
+window.fermerModalImportCartouches = fermerModalImportCartouches;
+window.confirmerEtFermerImportCartouches = confirmerEtFermerImportCartouches;
+window.ouvrirFilePickerImportCartouches = ouvrirFilePickerImportCartouches;
 
 /* ===============================
    📝 NOTES DE DOCUMENTATION
@@ -2728,7 +2760,7 @@ async function afficherBanqueCartouches(grilleIdFiltre = '') {
     // ✅ AJOUT (8 décembre 2025) : Bouton "Consulter la bibliothèque" en en-tête
     let html = `
         <div style="margin-bottom: 15px;">
-            <button onclick="afficherBibliothequeCartouches()" class="btn btn-principal" style="width: 100%; font-size: 0.9rem;">
+            <button data-action="afficherBibliothequeCartouches" class="btn btn-principal" style="width: 100%; font-size: 0.9rem;">
                 Consulter la bibliothèque
             </button>
         </div>
@@ -2751,7 +2783,7 @@ async function afficherBanqueCartouches(grilleIdFiltre = '') {
             <div class="sidebar-item ${estActive ? 'active' : ''}"
                  data-cartouche-id="${cart.id}"
                  data-grille-id="${cart.grilleId}"
-                 onclick="chargerCartouchePourModif('${cart.id}', '${cart.grilleId}')">
+                 data-action="chargerCartouchePourModif" data-param="${cart.id}" data-param2="${cart.grilleId}">
                 <div class="sidebar-item-titre">${echapperHtml(cart.nom)}${verrouIcone}</div>
                 <div class="sidebar-item-badges">${badgesPratiques} <span class="badge-caracteristique">${echapperHtml(cart.grilleNom)}</span></div>
             </div>
@@ -3345,16 +3377,16 @@ async function afficherBibliothequeCartouches() {
 
     const boutonsApresSection1 = `
         <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
-            <button onclick="exporterCartouches()" class="btn btn-secondaire">Exporter toutes mes cartouches</button>
-            <button onclick="document.getElementById('fichier-import-cartouches-modal').click()" class="btn btn-secondaire">Importer des cartouches</button>
-            <input type="file" id="fichier-import-cartouches-modal" accept=".json" style="display: none;" onchange="importerCartouches(event)">
+            <button data-action="exporterCartouches" class="btn btn-secondaire">Exporter toutes mes cartouches</button>
+            <button data-action="ouvrirFilePickerImportCartouches" class="btn btn-secondaire">Importer des cartouches</button>
+            <input type="file" id="fichier-import-cartouches-modal" accept=".json" style="display: none;" data-on-change="importerCartouches">
         </div>`;
 
     // Filtres Section 2
     const filtresHTML = `
         <div style="margin-bottom: 15px;">
             <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par grille :</label>
-            <select id="filtreGrilleCartouches" class="controle-form" onchange="filtrerCartouchesParGrille()" style="max-width: 300px;">
+            <select id="filtreGrilleCartouches" class="controle-form" data-on-change="filtrerCartouchesParGrille" style="max-width: 300px;">
                 <option value="">Toutes les grilles</option>
                 ${data.disciplines.map(g => `<option value="${g}">${g}</option>`).join('')}
             </select>

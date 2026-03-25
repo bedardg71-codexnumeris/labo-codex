@@ -325,12 +325,12 @@
                     </td>
                     <td class="actions-cell">
                         <button class="btn btn-compact btn-secondaire"
-                                onclick="naviguerVersRessource('pratique', '${p.id}')"
+                                data-action="naviguerVersRessource" data-param="pratique" data-param2="${p.id}"
                                 title="Consulter cette pratique">
                             Voir
                         </button>
                         <button class="btn btn-compact"
-                                onclick="ouvrirModalSuppressionRessource('pratique', '${p.id}')"
+                                data-action="ouvrirModalSuppressionRessource" data-param="pratique" data-param2="${p.id}"
                                 title="Supprimer définitivement">
                             Supprimer
                         </button>
@@ -408,12 +408,12 @@
                     <td>${nbCartouches > 0 ? `${nbCartouches} cartouche${nbCartouches > 1 ? 's' : ''}` : '—'}</td>
                     <td class="actions-cell">
                         <button class="btn btn-compact btn-secondaire"
-                                onclick="naviguerVersRessource('grille', '${g.id}')"
+                                data-action="naviguerVersRessource" data-param="grille" data-param2="${g.id}"
                                 title="Consulter cette grille">
                             Voir
                         </button>
                         <button class="btn btn-compact"
-                                onclick="ouvrirModalSuppressionRessource('grille', '${g.id}')"
+                                data-action="ouvrirModalSuppressionRessource" data-param="grille" data-param2="${g.id}"
                                 title="Supprimer définitivement">
                             Supprimer
                         </button>
@@ -487,12 +487,12 @@
                     </td>
                     <td class="actions-cell">
                         <button class="btn btn-compact btn-secondaire"
-                                onclick="naviguerVersRessource('cartouche', '${c.id}')"
+                                data-action="naviguerVersRessource" data-param="cartouche" data-param2="${c.id}"
                                 title="Consulter cette cartouche">
                             Voir
                         </button>
                         <button class="btn btn-compact"
-                                onclick="ouvrirModalSuppressionRessource('cartouche', '${c.id}')"
+                                data-action="ouvrirModalSuppressionRessource" data-param="cartouche" data-param2="${c.id}"
                                 title="Supprimer définitivement">
                             Supprimer
                         </button>
@@ -565,12 +565,12 @@
                     </td>
                     <td class="actions-cell">
                         <button class="btn btn-compact btn-secondaire"
-                                onclick="naviguerVersRessource('echelle', '${e.id}')"
+                                data-action="naviguerVersRessource" data-param="echelle" data-param2="${e.id}"
                                 title="Consulter cette échelle">
                             Voir
                         </button>
                         <button class="btn btn-compact"
-                                onclick="ouvrirModalSuppressionRessource('echelle', '${e.id}')"
+                                data-action="ouvrirModalSuppressionRessource" data-param="echelle" data-param2="${e.id}"
                                 title="Supprimer définitivement">
                             Supprimer
                         </button>
@@ -641,12 +641,12 @@
                     </td>
                     <td class="actions-cell">
                         <button class="btn btn-compact btn-secondaire"
-                                onclick="naviguerVersRessource('production', '${p.id}')"
+                                data-action="naviguerVersRessource" data-param="production" data-param2="${p.id}"
                                 title="Consulter cette production">
                             Voir
                         </button>
                         <button class="btn btn-compact"
-                                onclick="ouvrirModalSuppressionRessource('production', '${p.id}')"
+                                data-action="ouvrirModalSuppressionRessource" data-param="production" data-param2="${p.id}"
                                 title="Supprimer définitivement">
                             Supprimer
                         </button>
@@ -678,7 +678,7 @@
             const dansSidebar = p.dansBibliotheque !== false;
             const usage = usages[p.id] || { coursCount: 0 };
             const badgeType = obtenirBadgeTypePratique(p.type);
-            html += `<tr><td><strong>${escapeHtml(p.nom)}</strong>${p.description ? `<br><small class="text-muted">${escapeHtml(p.description.substring(0, 50))}${p.description.length > 50 ? '...' : ''}</small>` : ''}</td><td>${badgeType}</td><td>${escapeHtml(p.auteur || 'Inconnu')}</td><td>${dansSidebar ? '<span class="badge-actif">Sidebar</span>' : '<span class="badge-archive">Masquée</span>'}</td><td>${usage.coursCount > 0 ? `<span class="badge-statut evalue">${usage.coursCount} cours</span>` : '<span class="badge-statut non-evalue">Non utilisée</span>'}</td><td class="actions-cell"><button class="btn btn-compact btn-secondaire" onclick="naviguerVersRessource('pratique', '${p.id}')" title="Consulter">Voir</button> <button class="btn btn-compact" onclick="ouvrirModalSuppressionRessource('pratique', '${p.id}')" title="Supprimer">Supprimer</button></td></tr>`;
+            html += `<tr><td><strong>${escapeHtml(p.nom)}</strong>${p.description ? `<br><small class="text-muted">${escapeHtml(p.description.substring(0, 50))}${p.description.length > 50 ? '...' : ''}</small>` : ''}</td><td>${badgeType}</td><td>${escapeHtml(p.auteur || 'Inconnu')}</td><td>${dansSidebar ? '<span class="badge-actif">Sidebar</span>' : '<span class="badge-archive">Masquée</span>'}</td><td>${usage.coursCount > 0 ? `<span class="badge-statut evalue">${usage.coursCount} cours</span>` : '<span class="badge-statut non-evalue">Non utilisée</span>'}</td><td class="actions-cell"><button class="btn btn-compact btn-secondaire" data-action="naviguerVersRessource" data-param="pratique" data-param2="${p.id}" title="Consulter">Voir</button> <button class="btn btn-compact" data-action="ouvrirModalSuppressionRessource" data-param="pratique" data-param2="${p.id}" title="Supprimer">Supprimer</button></td></tr>`;
         });
         html += '</tbody></table>';
         container.innerHTML = html;
@@ -703,7 +703,7 @@
             const nbCriteres = g.criteres?.length || 0;
             const nbCartouches = compterCartouchesGrille(g.id);
             const badgeSource = g._source === 'templates' ? '<span class="badge-source badge-source--locale">Templates</span>' : '<span class="badge-source badge-source--bibliotheque">Bibliothèque</span>';
-            html += `<tr><td><strong>${escapeHtml(g.nom)}</strong>${g.auteur ? `<br><small class="text-muted">Par ${escapeHtml(g.auteur)}</small>` : ''}</td><td>${badgeSource}</td><td>${escapeHtml(g.discipline || '—')}</td><td>${nbCriteres} critère${nbCriteres > 1 ? 's' : ''}</td><td>${dansSidebar ? '<span class="badge-actif">Sidebar</span>' : '<span class="badge-archive">Masquée</span>'}</td><td>${usage.productionsCount > 0 || usage.evaluationsCount > 0 ? `<span class="badge-statut evalue">${usage.productionsCount} prod. / ${usage.evaluationsCount} éval.</span>` : '<span class="badge-statut non-evalue">Non utilisée</span>'}</td><td>${nbCartouches > 0 ? `${nbCartouches} cartouche${nbCartouches > 1 ? 's' : ''}` : '—'}</td><td class="actions-cell"><button class="btn btn-compact btn-secondaire" onclick="naviguerVersRessource('grille', '${g.id}')" title="Consulter">Voir</button> <button class="btn btn-compact" onclick="ouvrirModalSuppressionRessource('grille', '${g.id}')" title="Supprimer">Supprimer</button></td></tr>`;
+            html += `<tr><td><strong>${escapeHtml(g.nom)}</strong>${g.auteur ? `<br><small class="text-muted">Par ${escapeHtml(g.auteur)}</small>` : ''}</td><td>${badgeSource}</td><td>${escapeHtml(g.discipline || '—')}</td><td>${nbCriteres} critère${nbCriteres > 1 ? 's' : ''}</td><td>${dansSidebar ? '<span class="badge-actif">Sidebar</span>' : '<span class="badge-archive">Masquée</span>'}</td><td>${usage.productionsCount > 0 || usage.evaluationsCount > 0 ? `<span class="badge-statut evalue">${usage.productionsCount} prod. / ${usage.evaluationsCount} éval.</span>` : '<span class="badge-statut non-evalue">Non utilisée</span>'}</td><td>${nbCartouches > 0 ? `${nbCartouches} cartouche${nbCartouches > 1 ? 's' : ''}` : '—'}</td><td class="actions-cell"><button class="btn btn-compact btn-secondaire" data-action="naviguerVersRessource" data-param="grille" data-param2="${g.id}" title="Consulter">Voir</button> <button class="btn btn-compact" data-action="ouvrirModalSuppressionRessource" data-param="grille" data-param2="${g.id}" title="Supprimer">Supprimer</button></td></tr>`;
         });
         html += '</tbody></table>';
         container.innerHTML = html;
@@ -725,7 +725,7 @@
             const usage = usages[c.id] || { evaluationsCount: 0 };
             const nbCommentaires = compterCommentairesCartouche(c);
             const nomGrille = obtenirNomGrilleAssociee(c.grilleId);
-            html += `<tr><td><strong>${escapeHtml(c.nom)}</strong>${c.auteur ? `<br><small class="text-muted">Par ${escapeHtml(c.auteur)}</small>` : ''}</td><td>${escapeHtml(nomGrille)}</td><td>${nbCommentaires} commentaire${nbCommentaires > 1 ? 's' : ''}</td><td>${dansSidebar ? '<span class="badge-actif">Sidebar</span>' : '<span class="badge-archive">Masquée</span>'}</td><td>${usage.evaluationsCount > 0 ? `<span class="badge-statut evalue">${usage.evaluationsCount} éval.</span>` : '<span class="badge-statut non-evalue">Non utilisée</span>'}</td><td class="actions-cell"><button class="btn btn-compact btn-secondaire" onclick="naviguerVersRessource('cartouche', '${c.id}')" title="Consulter">Voir</button> <button class="btn btn-compact" onclick="ouvrirModalSuppressionRessource('cartouche', '${c.id}')" title="Supprimer">Supprimer</button></td></tr>`;
+            html += `<tr><td><strong>${escapeHtml(c.nom)}</strong>${c.auteur ? `<br><small class="text-muted">Par ${escapeHtml(c.auteur)}</small>` : ''}</td><td>${escapeHtml(nomGrille)}</td><td>${nbCommentaires} commentaire${nbCommentaires > 1 ? 's' : ''}</td><td>${dansSidebar ? '<span class="badge-actif">Sidebar</span>' : '<span class="badge-archive">Masquée</span>'}</td><td>${usage.evaluationsCount > 0 ? `<span class="badge-statut evalue">${usage.evaluationsCount} éval.</span>` : '<span class="badge-statut non-evalue">Non utilisée</span>'}</td><td class="actions-cell"><button class="btn btn-compact btn-secondaire" data-action="naviguerVersRessource" data-param="cartouche" data-param2="${c.id}" title="Consulter">Voir</button> <button class="btn btn-compact" data-action="ouvrirModalSuppressionRessource" data-param="cartouche" data-param2="${c.id}" title="Supprimer">Supprimer</button></td></tr>`;
         });
         html += '</tbody></table>';
         container.innerHTML = html;
@@ -749,7 +749,7 @@
             const usage = usages[e.id] || { pratiquesCount: 0 };
             const nbNiveaux = e.niveaux?.length || 0;
             const badgeSource = e._source === 'templates' ? '<span class="badge-source badge-source--locale">Templates</span>' : '<span class="badge-source badge-source--bibliotheque">Bibliothèque</span>';
-            html += `<tr><td><strong>${escapeHtml(e.nom)}</strong>${e.auteur ? `<br><small class="text-muted">Par ${escapeHtml(e.auteur)}</small>` : ''}</td><td>${badgeSource}</td><td>${nbNiveaux} niveau${nbNiveaux > 1 ? 'x' : ''}</td><td>${dansSidebar ? '<span class="badge-actif">Sidebar</span>' : '<span class="badge-archive">Masquée</span>'}</td><td>${usage.pratiquesCount > 0 ? `<span class="badge-statut evalue">${usage.pratiquesCount} pratique(s)</span>` : '<span class="badge-statut non-evalue">Non utilisée</span>'}</td><td class="actions-cell"><button class="btn btn-compact btn-secondaire" onclick="naviguerVersRessource('echelle', '${e.id}')" title="Consulter">Voir</button> <button class="btn btn-compact" onclick="ouvrirModalSuppressionRessource('echelle', '${e.id}')" title="Supprimer">Supprimer</button></td></tr>`;
+            html += `<tr><td><strong>${escapeHtml(e.nom)}</strong>${e.auteur ? `<br><small class="text-muted">Par ${escapeHtml(e.auteur)}</small>` : ''}</td><td>${badgeSource}</td><td>${nbNiveaux} niveau${nbNiveaux > 1 ? 'x' : ''}</td><td>${dansSidebar ? '<span class="badge-actif">Sidebar</span>' : '<span class="badge-archive">Masquée</span>'}</td><td>${usage.pratiquesCount > 0 ? `<span class="badge-statut evalue">${usage.pratiquesCount} pratique(s)</span>` : '<span class="badge-statut non-evalue">Non utilisée</span>'}</td><td class="actions-cell"><button class="btn btn-compact btn-secondaire" data-action="naviguerVersRessource" data-param="echelle" data-param2="${e.id}" title="Consulter">Voir</button> <button class="btn btn-compact" data-action="ouvrirModalSuppressionRessource" data-param="echelle" data-param2="${e.id}" title="Supprimer">Supprimer</button></td></tr>`;
         });
         html += '</tbody></table>';
         container.innerHTML = html;
@@ -770,7 +770,7 @@
             const dansSidebar = p.dansBibliotheque !== false;
             const usage = usages[p.id] || { evaluationsCount: 0 };
             const typeProduction = p.type || p.categorie || '—';
-            html += `<tr><td><strong>${escapeHtml(p.nom)}</strong>${p.description ? `<br><small class="text-muted">${escapeHtml(p.description.substring(0, 50))}${p.description.length > 50 ? '...' : ''}</small>` : ''}</td><td>${escapeHtml(typeProduction)}</td><td>${dansSidebar ? '<span class="badge-actif">Sidebar</span>' : '<span class="badge-archive">Masquée</span>'}</td><td>${usage.evaluationsCount > 0 ? `<span class="badge-statut evalue">${usage.evaluationsCount} éval.</span>` : '<span class="badge-statut non-evalue">Non utilisée</span>'}</td><td class="actions-cell"><button class="btn btn-compact btn-secondaire" onclick="naviguerVersRessource('production', '${p.id}')" title="Consulter">Voir</button> <button class="btn btn-compact" onclick="ouvrirModalSuppressionRessource('production', '${p.id}')" title="Supprimer">Supprimer</button></td></tr>`;
+            html += `<tr><td><strong>${escapeHtml(p.nom)}</strong>${p.description ? `<br><small class="text-muted">${escapeHtml(p.description.substring(0, 50))}${p.description.length > 50 ? '...' : ''}</small>` : ''}</td><td>${escapeHtml(typeProduction)}</td><td>${dansSidebar ? '<span class="badge-actif">Sidebar</span>' : '<span class="badge-archive">Masquée</span>'}</td><td>${usage.evaluationsCount > 0 ? `<span class="badge-statut evalue">${usage.evaluationsCount} éval.</span>` : '<span class="badge-statut non-evalue">Non utilisée</span>'}</td><td class="actions-cell"><button class="btn btn-compact btn-secondaire" data-action="naviguerVersRessource" data-param="production" data-param2="${p.id}" title="Consulter">Voir</button> <button class="btn btn-compact" data-action="ouvrirModalSuppressionRessource" data-param="production" data-param2="${p.id}" title="Supprimer">Supprimer</button></td></tr>`;
         });
         html += '</tbody></table>';
         container.innerHTML = html;
@@ -792,7 +792,7 @@
             const auteur = a.auteur || (a.metadata_cc && a.metadata_cc.auteur_original) || '—';
             const date = a.dateAjoutBiblio ? new Date(a.dateAjoutBiblio).toLocaleDateString('fr-CA') : '—';
             const licence = (a.metadata_cc && a.metadata_cc.licence) || '';
-            html += `<tr><td><strong>${escapeHtml(a.nom || 'Sans titre')}</strong>${licence ? `<br><small class="text-muted">${escapeHtml(licence)}</small>` : ''}</td><td>${escapeHtml(auteur)}</td><td>${nbNoeuds}</td><td>${nbLiens}</td><td>${date}</td><td class="actions-cell"><button class="btn btn-compact" onclick="supprimerAlignementDeBibliotheque('${a.id}')" title="Supprimer de la bibliothèque">Supprimer</button></td></tr>`;
+            html += `<tr><td><strong>${escapeHtml(a.nom || 'Sans titre')}</strong>${licence ? `<br><small class="text-muted">${escapeHtml(licence)}</small>` : ''}</td><td>${escapeHtml(auteur)}</td><td>${nbNoeuds}</td><td>${nbLiens}</td><td>${date}</td><td class="actions-cell"><button class="btn btn-compact" data-action="supprimerAlignementDeBibliotheque" data-param="${a.id}" title="Supprimer de la bibliothèque">Supprimer</button></td></tr>`;
         });
         html += '</tbody></table>';
         container.innerHTML = html;
@@ -854,7 +854,7 @@
                 + '<td><code>' + escapeHtml(cleFinale) + '</code></td>'
                 + '<td>' + typeBadge + '<br><small>' + apercu + '</small></td>'
                 + '<td class="actions-cell">'
-                + (valeur !== null ? '<button class="btn btn-compact" onclick="supprimerParametreConfig(\'' + escapeHtml(cleFinale) + '\', \'' + escapeHtml(p.label) + '\')" title="Supprimer">Supprimer</button>' : '')
+                + (valeur !== null ? '<button class="btn btn-compact" data-action="supprimerParametreConfig" data-param="' + escapeHtml(cleFinale) + '" data-param2="' + escapeHtml(p.label) + '" title="Supprimer">Supprimer</button>' : '')
                 + '</td></tr>';
         });
 
