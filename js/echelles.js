@@ -322,13 +322,13 @@ async function afficherToutesLesEchellesNiveaux() {
                     `}
 
                     <div class="u-flex-gap-10">
-                        <button class="btn btn-modifier" onclick="(async () => { await chargerEchelleTemplate('${echelle.id}'); })()">
+                        <button class="btn btn-modifier" data-action="chargerEchelleTemplate" data-param="${echelle.id}">
                             Modifier
                         </button>
-                        <button class="btn btn-principal" onclick="(async () => { await dupliquerEchelle('${echelle.id}'); })()">
+                        <button class="btn btn-principal" data-action="dupliquerEchelle" data-param="${echelle.id}">
                             Dupliquer
                         </button>
-                        <button class="btn btn-supprimer" onclick="(async () => { await supprimerEchelle('${echelle.id}'); })()">
+                        <button class="btn btn-supprimer" data-action="supprimerEchelle" data-param="${echelle.id}">
                             Supprimer
                         </button>
                     </div>
@@ -1183,7 +1183,7 @@ async function changerTypeEchelle() {
         champAutre.classList.remove('u-hide');
         notePassageContainer.innerHTML = `
             <input type="text" id="notePassage" class="controle-form"
-                   placeholder="Ex: Compétent" onchange="sauvegarderConfigEchelle()">
+                   placeholder="Ex: Compétent" data-on-change="sauvegarderConfigEchelle">
         `;
     } else {
         champAutre.classList.add('u-hide');
@@ -1244,14 +1244,14 @@ function afficherTableauNiveaux(niveaux) {
                     <tr style="opacity: ${niveau.verrouille ? '0.7' : '1'};">
                         <td class="echelle-text-center">
                             <div style="display: flex; gap: 4px; justify-content: center;">
-                                <button onclick="(async () => { await deplacerNiveauHaut(${index}); })()"
+                                <button data-action="deplacerNiveauHaut" data-param="${index}"
                                         class="btn btn-compact"
                                         ${index === 0 ? 'disabled' : ''}
                                         title="Déplacer vers le haut"
                                         class="echelle-padding-compact">
                                     ↑
                                 </button>
-                                <button onclick="(async () => { await deplacerNiveauBas(${index}); })()"
+                                <button data-action="deplacerNiveauBas" data-param="${index}"
                                         class="btn btn-compact"
                                         ${index === niveaux.length - 1 ? 'disabled' : ''}
                                         title="Déplacer vers le bas"
@@ -1263,7 +1263,7 @@ function afficherTableauNiveaux(niveaux) {
                         <td>
                             <input type="text"
                                    value="${echapperHtml(niveau.code)}"
-                                   onchange="modifierNiveau(${index}, 'code', this.value)"
+                                   data-on-change="modifierNiveauHandler" data-niveau-index="${index}" data-champ="code"
                                    class="controle-form"
                                    class="echelle-w-60-p4"
                                    >
@@ -1271,7 +1271,7 @@ function afficherTableauNiveaux(niveaux) {
                         <td>
                             <input type="text"
                                    value="${echapperHtml(niveau.nom)}"
-                                   onchange="modifierNiveau(${index}, 'nom', this.value)"
+                                   data-on-change="modifierNiveauHandler" data-niveau-index="${index}" data-champ="nom"
                                    class="controle-form"
                                    class="echelle-w-full-p4"
                                    >
@@ -1279,7 +1279,7 @@ function afficherTableauNiveaux(niveaux) {
                         <td>
                             <input type="text"
                                    value="${echapperHtml(niveau.description || '')}"
-                                   onchange="modifierNiveau(${index}, 'description', this.value)"
+                                   data-on-change="modifierNiveauHandler" data-niveau-index="${index}" data-champ="description"
                                    class="controle-form"
                                    class="echelle-w-full-p4"
                                    >
@@ -1287,7 +1287,7 @@ function afficherTableauNiveaux(niveaux) {
                         <td>
                             <input type="number"
                                    value="${niveau.min}"
-                                   onchange="modifierNiveau(${index}, 'min', this.value)"
+                                   data-on-change="modifierNiveauHandler" data-niveau-index="${index}" data-champ="min"
                                    class="controle-form"
                                    class="echelle-w-60-p4"
                                    min="0" max="100"
@@ -1296,20 +1296,20 @@ function afficherTableauNiveaux(niveaux) {
 <td>
     <input type="number"
            value="${niveau.max}"
-           onchange="modifierNiveau(${index}, 'max', this.value)"
+           data-on-change="modifierNiveauHandler" data-niveau-index="${index}" data-champ="max"
            class="echelle-w-60" min="0" max="100"
            >
 </td>
 <td>
                             <input type="number"
                                    value="${niveau.valeurCalcul || ''}"
-                                   onchange="modifierNiveau(${index}, 'valeurCalcul', this.value)"
+                                   data-on-change="modifierNiveauHandler" data-niveau-index="${index}" data-champ="valeurCalcul"
                                    class="echelle-w-80" min="0" max="100" step="0.1"
                                    placeholder="Ex: 32"
                                    >
                         </td>
                         <td>
-    <select onchange="modifierNiveau(${index}, 'couleur', this.value)"
+    <select data-on-change="modifierNiveauHandler" data-niveau-index="${index}" data-champ="couleur"
             class="echelle-input-full"
             >
         ${paletteCouleurs.map(c => `
@@ -1324,7 +1324,7 @@ function afficherTableauNiveaux(niveaux) {
 </td>
                         <td class="echelle-text-center">
                             ${niveaux.length > 1 ?
-            `<button onclick="(async () => { await supprimerNiveau(${index}); })()"
+            `<button data-action="supprimerNiveau" data-param="${index}"
                                          class="btn btn-supprimer btn-compact"
                                          ${niveau.verrouille ? 'disabled' : ''}
                                          title="${niveau.verrouille ? 'Déverrouillez d\'abord pour supprimer' : 'Supprimer ce niveau'}">
@@ -1332,7 +1332,7 @@ function afficherTableauNiveaux(niveaux) {
                                 </button>`
             : ''}
                             <span id="cadenas-niveau-${index}"
-                                  onclick="(async () => { await basculerVerrouillageNiveau(${index}); })()"
+                                  data-action="basculerVerrouillageNiveau" data-param="${index}"
                                   style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 8px;"
                                   title="${niveau.verrouille ? 'Verrouillé - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller'}">
                                 ${niveau.verrouille ? '🔒' : '🔓'}
@@ -1342,7 +1342,7 @@ function afficherTableauNiveaux(niveaux) {
                 `).join('')}
             </tbody>
         </table>
-        <button class="btn btn-confirmer mt-2" onclick="(async () => { await ajouterNiveau(); })()">
+        <button class="btn btn-confirmer mt-2" data-action="ajouterNiveau">
             + Ajouter un niveau
         </button>
     `;
@@ -2168,8 +2168,9 @@ async function importerDansEchelleActive(event) {
  *
  * @param {Event} event - Événement de changement du file input
  */
-async function importerEchelles(event) {
-    const file = event.target.files[0];
+async function importerEchelles(eventOuEl) {
+    var target = eventOuEl.target || eventOuEl;
+    const file = target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
@@ -2196,8 +2197,8 @@ async function importerEchelles(event) {
                     <div class="modal-js-contenu" style="max-width: 600px;">
                         ${message}
                         <div class="u-flex-gap-10" style="margin-top: 15px; justify-content: flex-end;">
-                            <button class="btn btn-annuler" onclick="this.closest('.modal-js-overlay').parentElement.remove(); delete window._echellesImportEnAttente;">Annuler</button>
-                            <button class="btn btn-confirmer" onclick="window.confirmerImportEchelles(window._echellesImportEnAttente); this.closest('.modal-js-overlay').parentElement.remove(); delete window._echellesImportEnAttente;">Importer</button>
+                            <button class="btn btn-annuler" data-action="fermerModalImportEchelles">Annuler</button>
+                            <button class="btn btn-confirmer" data-action="confirmerEtFermerImportEchelles">Importer</button>
                         </div>
                     </div>
                 </div>
@@ -2348,7 +2349,7 @@ async function afficherListeEchelles() {
     // ✅ AJOUT (8 décembre 2025) : Bouton "Consulter la bibliothèque" en en-tête
     let html = `
         <div class="u-mb-15">
-            <button onclick="afficherBibliothequeEchelles()" class="btn btn-principal" style="width: 100%; font-size: 0.9rem;">
+            <button data-action="afficherBibliothequeEchelles" class="btn btn-principal" style="width: 100%; font-size: 0.9rem;">
                 Consulter la bibliothèque
             </button>
         </div>
@@ -2370,7 +2371,7 @@ async function afficherListeEchelles() {
             ? GabaritsUtils.genererBadgesPratiques(echelle)
             : '';
         return `
-            <div class="sidebar-item" data-id="${echelle.id}" onclick="(async () => { await chargerEchellePourModif('${echelle.id}'); })()">
+            <div class="sidebar-item" data-id="${echelle.id}" data-action="chargerEchellePourModif" data-param="${echelle.id}">
                 <div class="sidebar-item-titre">${nomEchelle}</div>
                 <div class="sidebar-item-badges">${badgesPratiques} <span class="badge-caracteristique">${nbNiveaux} niveaux</span></div>
             </div>
@@ -2477,10 +2478,10 @@ async function afficherBibliothequeEchelles() {
 
     const boutonsApresSection1 = `
         <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-            <button onclick="ajouterMesEchellesALaBibliotheque()" class="btn btn-principal">Ajouter mes échelles à la bibliothèque</button>
-            <button onclick="exporterEchelles()" class="btn btn-secondaire">Exporter toutes mes échelles</button>
-            <button onclick="document.getElementById('fichier-import-echelles-modal').click()" class="btn btn-secondaire">Importer des échelles</button>
-            <input type="file" id="fichier-import-echelles-modal" accept=".json" style="display: none;" onchange="importerEchelles(event)">
+            <button data-action="ajouterMesEchellesALaBibliotheque" class="btn btn-principal">Ajouter mes échelles à la bibliothèque</button>
+            <button data-action="exporterEchelles" class="btn btn-secondaire">Exporter toutes mes échelles</button>
+            <button data-action="ouvrirFilePickerImportEchelles" class="btn btn-secondaire">Importer des échelles</button>
+            <input type="file" id="fichier-import-echelles-modal" accept=".json" style="display: none;" data-on-change="importerEchelles">
         </div>`;
 
     // Section import trimestre
@@ -2495,8 +2496,8 @@ async function afficherBibliothequeEchelles() {
                         <option value="">-- Choisir un trimestre --</option>
                         ${trimestres.map(t => `<option value="${t.cle}">${t.nom} (${t.nombre} échelle${t.nombre > 1 ? 's' : ''})</option>`).join('')}
                     </select>
-                    <button onclick="afficherEchellesTrimestreModal()" class="btn btn-secondaire btn-compact">Voir les échelles</button>
-                    <button onclick="importerToutEchellesTrimestreModal()" class="btn btn-principal btn-compact">Tout importer</button>
+                    <button data-action="afficherEchellesTrimestreModal" class="btn btn-secondaire btn-compact">Voir les échelles</button>
+                    <button data-action="importerToutEchellesTrimestreModal" class="btn btn-principal btn-compact">Tout importer</button>
                 </div>
                 <div id="previewEchellesTrimestre" style="margin-top: 10px; display: none;"></div>
             </div>`;
@@ -2507,14 +2508,14 @@ async function afficherBibliothequeEchelles() {
         <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
             <div style="flex: 1; min-width: 200px;">
                 <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par discipline :</label>
-                <select id="filtreDisciplineEchelles" class="controle-form" onchange="filtrerEchellesBibliotheque()" style="max-width: 300px;">
+                <select id="filtreDisciplineEchelles" class="controle-form" data-on-change="filtrerEchellesBibliotheque" style="max-width: 300px;">
                     <option value="">Toutes les disciplines</option>
                     ${data.disciplines.map(d => `<option value="${d}">${d}</option>`).join('')}
                 </select>
             </div>
             <div style="flex: 1; min-width: 200px;">
                 <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par pratique :</label>
-                <select id="filtrePratiqueEchelles" class="controle-form" onchange="filtrerEchellesBibliotheque()" style="max-width: 300px;">
+                <select id="filtrePratiqueEchelles" class="controle-form" data-on-change="filtrerEchellesBibliotheque" style="max-width: 300px;">
                     <option value="">Toutes les pratiques</option>
                     <option value="SOM">Sommative</option>
                     <option value="STD">PAN-Standards</option>
@@ -2937,7 +2938,7 @@ function afficherEchellesTrimestreModal() {
                     ${echelle.discipline ? ` - ${echelle.discipline}` : ''}
                     <br><small style="color: var(--gris-moyen);">${nbNiveaux} niveau(x)${echelle.auteurOriginal ? ' • ' + echelle.auteurOriginal : ''}</small>
                 </div>
-                <button onclick="importerUneEchelleTrimestre('${cleSelectionnee}', '${echelle.id}')" class="btn btn-confirmer btn-tres-compact">
+                <button data-action="importerUneEchelleTrimestre" data-param="${cleSelectionnee}" data-param2="${echelle.id}" class="btn btn-confirmer btn-tres-compact">
                     Importer
                 </button>
             </div>
@@ -3101,7 +3102,7 @@ function afficherNiveauxNouvelleEchelle() {
         container.innerHTML = `
             <div style="padding: 20px; background: var(--bleu-tres-pale); border-radius: 8px; text-align: center; margin-bottom: 15px;">
                 <p style="color: var(--gris-moyen); margin-bottom: 15px;">Aucun niveau défini.</p>
-                <button class="btn btn-confirmer" onclick="ajouterPremierNiveau()">
+                <button class="btn btn-confirmer" data-action="ajouterPremierNiveau">
                     + Ajouter un niveau
                 </button>
             </div>
@@ -3124,7 +3125,7 @@ function afficherNiveauxNouvelleEchelle() {
         return `
         <div class="item-liste" style="position: relative; padding: 15px; background: var(--surface-conteneur, #162c36); margin-bottom: 10px;">
             ${niveaux.length > 1 ? `
-                <button onclick="supprimerNiveauTemp(${index})"
+                <button data-action="supprimerNiveauTemp" data-param="${index}"
                         class="btn btn-supprimer btn-tres-compact"
                         title="Supprimer ce niveau"
                         style="position: absolute; top: 8px; right: 8px;">
@@ -3135,13 +3136,13 @@ function afficherNiveauxNouvelleEchelle() {
                 <div class="groupe-form echelle-text-center">
                     <label class="echelle-texte-detail">Ordre</label>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <button onclick="deplacerNiveauTempHaut(${index})"
+                        <button data-action="deplacerNiveauTempHaut" data-param="${index}"
                                 class="btn btn-compact"
                                 ${index === 0 ? 'disabled' : ''}
                                 title="Déplacer vers le haut">
                             ↑
                         </button>
-                        <button onclick="deplacerNiveauTempBas(${index})"
+                        <button data-action="deplacerNiveauTempBas" data-param="${index}"
                                 class="btn btn-compact"
                                 ${index === niveaux.length - 1 ? 'disabled' : ''}
                                 title="Déplacer vers le bas">
@@ -3156,7 +3157,7 @@ function afficherNiveauxNouvelleEchelle() {
                            value="${niveau.code}"
                            placeholder="Ex: ${ph.code}"
                            maxlength="3"
-                           onchange="modifierNiveauTemp(${index}, 'code', this.value)"
+                           data-on-change="modifierNiveauTempHandler" data-niveau-index="${index}" data-champ="code"
                            style="font-weight: 600; text-align: center;">
                 </div>
                 <div class="groupe-form">
@@ -3165,7 +3166,7 @@ function afficherNiveauxNouvelleEchelle() {
                            class="controle-form"
                            value="${niveau.nom}"
                            placeholder="Ex: ${ph.nom}"
-                           onchange="modifierNiveauTemp(${index}, 'nom', this.value)"
+                           data-on-change="modifierNiveauTempHandler" data-niveau-index="${index}" data-champ="nom"
                            style="font-weight: 500;">
                 </div>
                 <div class="groupe-form">
@@ -3177,7 +3178,7 @@ function afficherNiveauxNouvelleEchelle() {
                            value="${niveau.min}"
                            min="0"
                            max="100"
-                           onchange="modifierNiveauTemp(${index}, 'min', parseFloat(this.value))">
+                           data-on-change="modifierNiveauTempHandler" data-niveau-index="${index}" data-champ="min" data-parse-float>
                 </div>
                 <div class="groupe-form">
                     <label class="echelle-texte-detail">Max (%)</label>
@@ -3186,7 +3187,7 @@ function afficherNiveauxNouvelleEchelle() {
                            value="${niveau.max}"
                            min="0"
                            max="100"
-                           onchange="modifierNiveauTemp(${index}, 'max', parseFloat(this.value))">
+                           data-on-change="modifierNiveauTempHandler" data-niveau-index="${index}" data-champ="max" data-parse-float>
                 </div>
                 <div class="groupe-form">
                     <label class="echelle-texte-detail" data-tooltip="cn-echelle-valeur-ponctuelle">Valeur ponctuelle
@@ -3198,14 +3199,14 @@ function afficherNiveauxNouvelleEchelle() {
                            min="0"
                            max="100"
                            step="0.01"
-                           onchange="modifierNiveauTemp(${index}, 'valeurCalcul', parseFloat(this.value))">
+                           data-on-change="modifierNiveauTempHandler" data-niveau-index="${index}" data-champ="valeurCalcul" data-parse-float>
                 </div>
                 <div class="groupe-form">
                     <label class="echelle-texte-detail">Couleur</label>
                     <input type="color"
                            class="controle-form"
                            value="${niveau.couleur}"
-                           onchange="modifierNiveauTemp(${index}, 'couleur', this.value)"
+                           data-on-change="modifierNiveauTempHandler" data-niveau-index="${index}" data-champ="couleur"
                            style="height: 38px; cursor: pointer;">
                 </div>
             </div>
@@ -3214,7 +3215,7 @@ function afficherNiveauxNouvelleEchelle() {
 
     // Bouton ajouter niveau
     const btnAjouterNiveau = `
-        <button class="sidebar-btn-ajouter" onclick="ajouterNiveauTemp()">
+        <button class="sidebar-btn-ajouter" data-action="ajouterNiveauTemp">
             + Ajouter un niveau
         </button>
     `;
@@ -3389,7 +3390,7 @@ function afficherNiveauxEchelle(echelle) {
     const html = echelle.niveaux.map((niveau, index) => `
         <div class="item-liste" style="position: relative; padding: 15px; background: var(--surface-conteneur, #162c36); margin-bottom: 10px;">
             ${echelle.niveaux.length > 1 ? `
-                <button onclick="(async () => { await supprimerNiveauEchelle('${echelle.id}', ${index}); })()"
+                <button data-action="supprimerNiveauEchelle" data-param="${echelle.id}" data-param2="${index}"
                         class="btn btn-supprimer btn-tres-compact"
                         title="Supprimer ce niveau"
                         style="position: absolute; top: 8px; right: 8px;">
@@ -3400,14 +3401,14 @@ function afficherNiveauxEchelle(echelle) {
                 <div class="groupe-form echelle-text-center">
                     <label class="echelle-texte-detail">Ordre</label>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <button onclick="(async () => { await deplacerNiveauEchelleHaut('${echelle.id}', ${index}); })()"
+                        <button data-action="deplacerNiveauEchelleHaut" data-param="${echelle.id}" data-param2="${index}"
                                 class="btn btn-compact"
                                 ${index === 0 ? 'disabled' : ''}
                                 title="Déplacer vers le haut"
                                 class="echelle-padding-compact">
                             ↑
                         </button>
-                        <button onclick="(async () => { await deplacerNiveauEchelleBas('${echelle.id}', ${index}); })()"
+                        <button data-action="deplacerNiveauEchelleBas" data-param="${echelle.id}" data-param2="${index}"
                                 class="btn btn-compact"
                                 ${index === echelle.niveaux.length - 1 ? 'disabled' : ''}
                                 title="Déplacer vers le bas"
@@ -3422,7 +3423,7 @@ function afficherNiveauxEchelle(echelle) {
                            class="controle-form"
                            value="${niveau.code}"
                            maxlength="3"
-                           onchange="modifierNiveauEchelle('${echelle.id}', ${index}, 'code', this.value)"
+                           data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}" data-champ="code"
                            style="font-weight: 600; text-align: center;">
                 </div>
                 <div class="groupe-form">
@@ -3430,7 +3431,7 @@ function afficherNiveauxEchelle(echelle) {
                     <input type="text"
                            class="controle-form"
                            value="${niveau.nom}"
-                           onchange="modifierNiveauEchelle('${echelle.id}', ${index}, 'nom', this.value)"
+                           data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}" data-champ="nom"
                            style="font-weight: 500;">
                 </div>
                 <div class="groupe-form">
@@ -3442,7 +3443,7 @@ function afficherNiveauxEchelle(echelle) {
                            value="${niveau.min}"
                            min="0"
                            max="100"
-                           onchange="modifierNiveauEchelle('${echelle.id}', ${index}, 'min', parseFloat(this.value))">
+                           data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}" data-champ="min" data-parse-float>
                 </div>
                 <div class="groupe-form">
                     <label class="echelle-texte-detail">Max (%)</label>
@@ -3451,7 +3452,7 @@ function afficherNiveauxEchelle(echelle) {
                            value="${niveau.max}"
                            min="0"
                            max="100"
-                           onchange="modifierNiveauEchelle('${echelle.id}', ${index}, 'max', parseFloat(this.value))">
+                           data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}" data-champ="max" data-parse-float>
                 </div>
                 <div class="groupe-form">
                     <label class="echelle-texte-detail" data-tooltip="cn-echelle-valeur-ponctuelle">Valeur ponctuelle
@@ -3463,14 +3464,14 @@ function afficherNiveauxEchelle(echelle) {
                            min="0"
                            max="100"
                            step="0.01"
-                           onchange="modifierNiveauEchelle('${echelle.id}', ${index}, 'valeurCalcul', parseFloat(this.value))">
+                           data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}" data-champ="valeurCalcul" data-parse-float>
                 </div>
                 <div class="groupe-form">
                     <label class="echelle-texte-detail">Couleur</label>
                     <input type="color"
                            class="controle-form"
                            value="${niveau.couleur}"
-                           onchange="modifierNiveauEchelle('${echelle.id}', ${index}, 'couleur', this.value)"
+                           data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}" data-champ="couleur"
                            style="height: 38px; cursor: pointer;">
                 </div>
             </div>
@@ -3479,7 +3480,7 @@ function afficherNiveauxEchelle(echelle) {
 
     // Ajouter un bouton pour ajouter un nouveau niveau
     const btnAjouterNiveau = `
-        <button class="sidebar-btn-ajouter" onclick="(async () => { await ajouterNiveauEchelle('${echelle.id}'); })()">
+        <button class="sidebar-btn-ajouter" data-action="ajouterNiveauEchelle" data-param="${echelle.id}">
             + Ajouter un niveau
         </button>
     `;
@@ -4008,6 +4009,54 @@ async function sauvegarderEchelleComplete() {
     }
 }
 
+/* ===============================
+   WRAPPERS DELEGATION (Phase 5)
+   =============================== */
+
+/** Handler délégué pour modifierNiveau(index, champ, valeur) */
+function modifierNiveauHandler(el) {
+    var index = parseInt(el.dataset.niveauIndex);
+    var champ = el.dataset.champ;
+    var valeur = el.value;
+    modifierNiveau(index, champ, valeur);
+}
+
+/** Handler délégué pour modifierNiveauTemp(index, champ, valeur) */
+function modifierNiveauTempHandler(el) {
+    var index = parseInt(el.dataset.niveauIndex);
+    var champ = el.dataset.champ;
+    var valeur = el.hasAttribute('data-parse-float') ? parseFloat(el.value) : el.value;
+    modifierNiveauTemp(index, champ, valeur);
+}
+
+/** Handler délégué pour modifierNiveauEchelle(echelleId, index, champ, valeur) */
+function modifierNiveauEchelleHandler(el) {
+    var echelleId = el.dataset.echelleId;
+    var index = parseInt(el.dataset.niveauIndex);
+    var champ = el.dataset.champ;
+    var valeur = el.hasAttribute('data-parse-float') ? parseFloat(el.value) : el.value;
+    modifierNiveauEchelle(echelleId, index, champ, valeur);
+}
+
+/** Annuler import échelles (fermer modal + cleanup) */
+function fermerModalImportEchelles() {
+    var overlay = document.querySelector('.modal-js-overlay');
+    if (overlay && overlay.parentElement) overlay.parentElement.remove();
+    delete window._echellesImportEnAttente;
+}
+
+/** Confirmer import + fermer modal */
+function confirmerEtFermerImportEchelles() {
+    window.confirmerImportEchelles(window._echellesImportEnAttente);
+    fermerModalImportEchelles();
+}
+
+/** Ouvrir le file picker pour import échelles */
+function ouvrirFilePickerImportEchelles() {
+    var input = document.getElementById('fichier-import-echelles-modal');
+    if (input) input.click();
+}
+
 // Export global
 window.afficherListeEchelles = afficherListeEchelles;
 window.creerNouvelleEchelle = creerNouvelleEchelle;
@@ -4055,5 +4104,13 @@ window.ajouterMesEchellesALaBibliotheque = ajouterMesEchellesALaBibliotheque;
 window.afficherEchellesTrimestreModal = afficherEchellesTrimestreModal;
 window.importerToutEchellesTrimestreModal = importerToutEchellesTrimestreModal;
 window.importerUneEchelleTrimestre = importerUneEchelleTrimestre;
+
+// Phase 5 : Exports wrappers délégation
+window.modifierNiveauHandler = modifierNiveauHandler;
+window.modifierNiveauTempHandler = modifierNiveauTempHandler;
+window.modifierNiveauEchelleHandler = modifierNiveauEchelleHandler;
+window.fermerModalImportEchelles = fermerModalImportEchelles;
+window.confirmerEtFermerImportEchelles = confirmerEtFermerImportEchelles;
+window.ouvrirFilePickerImportEchelles = ouvrirFilePickerImportEchelles;
 
 })();
