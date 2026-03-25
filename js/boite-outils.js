@@ -258,7 +258,7 @@ function animerRoulette(pool, resultats) {
 
         // Afficher un nom aléatoire
         const etudiant = pool[Math.floor(Math.random() * pool.length)];
-        affichage.innerHTML = `<span class="tirage-nom-anime">${etudiant.prenom} ${etudiant.nom}</span>`;
+        affichage.innerHTML = `<span class="tirage-nom-anime">${echapperHtml(etudiant.prenom)} ${echapperHtml(etudiant.nom)}</span>`;
 
         // Ralentir progressivement (ease-out)
         const easeOut = 1 - Math.pow(1 - progression, 3);
