@@ -2069,7 +2069,7 @@ function _actualiserMenu() {
                 ligneInfo = '<div class="codex-statut-fichier">Dernier fichier\u00a0: ' + nomFichierAffiche + '</div>';
             }
             statutHaut.innerHTML =
-                '<div class="codex-statut-nom" onclick="Codex.actionRenommer()" title="Cliquer pour renommer">' + (_etat.nom || 'Codex') + '</div>' +
+                '<div class="codex-statut-nom" data-action="Codex.actionRenommer" title="Cliquer pour renommer">' + (_etat.nom || 'Codex') + '</div>' +
                 '<div class="codex-statut-etat"><span class="codex-statut-pastille ' + classePastille + '">\u25C9</span> ' + texteEtat + '</div>' +
                 ligneInfo;
             statutHaut.classList.remove('u-hide');

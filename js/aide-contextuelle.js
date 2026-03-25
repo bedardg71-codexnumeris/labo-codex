@@ -138,7 +138,7 @@
         modal.innerHTML = `
             <div class="primo-popup-header">
                 <span class="primo-popup-titre">📍 ${aide.titre}</span>
-                <button class="primo-popup-fermer" onclick="fermerAideContextuelle()" aria-label="Fermer">×</button>
+                <button class="primo-popup-fermer" data-action="fermerAideContextuelle" aria-label="Fermer">×</button>
             </div>
             <div class="primo-popup-body aide-contextuelle-body">
                 ${contenuHTML}

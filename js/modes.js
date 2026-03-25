@@ -307,7 +307,7 @@ function appliquerTheme(mode) {
             const afficherDAReel = obtenirOptionAffichageDA();
             texte += ` | DA: <label style="cursor: pointer; margin-left: 10px;">
                 <input type="checkbox" id="checkbox-da-anonyme" ${afficherDAReel ? 'checked' : ''}
-                       onchange="definirOptionAffichageDA(this.checked)"
+                       data-on-change="definirOptionAffichageDADepuisCheckbox"
                        style="margin-right: 5px; cursor: pointer;">
                 Afficher DA réels
             </label>`;
@@ -950,6 +950,7 @@ window.anonymiserGroupe = anonymiserGroupe;
 window.estModeeLectureSeule = estModeeLectureSeule;
 window.obtenirOptionAffichageDA = obtenirOptionAffichageDA;
 window.definirOptionAffichageDA = definirOptionAffichageDA;
+window.definirOptionAffichageDADepuisCheckbox = function(el) { definirOptionAffichageDA(el.checked); };
 window.reinitialiserMappingAnonyme = reinitialiserMappingAnonyme;
 window.obtenirDAAffichage = obtenirDAAffichage;
 window.estModeClair = estModeClair;

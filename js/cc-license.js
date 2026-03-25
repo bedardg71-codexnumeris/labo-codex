@@ -1483,10 +1483,10 @@ function creerModalEditionMetadonnees() {
             </div>
 
             <div class="u-flex-gap-10" style="justify-content: flex-end;">
-                <button type="button" class="btn btn-annuler" onclick="fermerModalEditionMetadonnees()">
+                <button type="button" class="btn btn-annuler" data-action="fermerModalEditionMetadonnees">
                     Annuler
                 </button>
-                <button type="button" class="btn btn-confirmer" onclick="sauvegarderMetadonnees()">
+                <button type="button" class="btn btn-confirmer" data-action="sauvegarderMetadonnees">
                     Sauvegarder
                 </button>
             </div>

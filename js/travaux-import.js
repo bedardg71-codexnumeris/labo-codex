@@ -888,12 +888,12 @@
                         <div class="travaux-fichier-details">${taille}</div>
                     </div>
                     <div class="travaux-fichier-etudiant">
-                        <select class="form-select travaux-select-etudiant" data-index="${index}" onchange="travauxImport.changerEtudiant(${index}, this.value)">
+                        <select class="form-select travaux-select-etudiant" data-index="${index}" data-on-change="travauxImportChangerEtudiant" data-param="${index}">
                             <option value="">-- Associer --</option>
                             ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${e.da}" ${f.etudiantDA === e.da ? 'selected' : ''}>${echapperHtml(e.nom + ', ' + e.prenom)} (${e.da})</option>`).join('')}
                         </select>
                     </div>
-                    <button class="btn-supprimer-fichier" onclick="travauxImport.retirerFichier(${index})" title="Retirer">
+                    <button class="btn-supprimer-fichier" data-action="travauxImportRetirerFichier" data-param="${index}" title="Retirer">
                         &times;
                     </button>
                 </div>`;
@@ -1227,6 +1227,14 @@
         reassemblerPages: reassemblerPages,
         // Etat
         get importEnCours() { return importEnCours; }
+    };
+
+    // Wrappers délégués (data-action / data-on-change)
+    window.travauxImportRetirerFichier = function(index) {
+        travauxImport.retirerFichier(Number(index));
+    };
+    window.travauxImportChangerEtudiant = function(index, el) {
+        travauxImport.changerEtudiant(Number(index), el.value);
     };
 
 })();

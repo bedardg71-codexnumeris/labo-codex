@@ -819,7 +819,7 @@ function filtrerParGroupe() {
                     noMsg.innerHTML = `
                         <p style="font-size: 1.1rem; margin-bottom: 10px;">🔍 Aucun·e étudiant·e dans le groupe ${echapperHtml(groupeSelectionné)}</p>
                         <p style="font-size: 0.9rem;">
-                            <button onclick="resetFiltreGroupe()" class="btn btn-secondaire" style="padding: 8px 15px;">
+                            <button data-action="resetFiltreGroupe" class="btn btn-secondaire" style="padding: 8px 15px;">
                                 ← Voir tous les groupes
                             </button>
                         </p>

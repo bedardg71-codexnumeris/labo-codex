@@ -963,6 +963,11 @@ function toggleCategoryItems(category, checked) {
 // Exposer globalement
 window.toggleCategoryItems = toggleCategoryItems;
 
+// Wrapper délégué (data-on-change) — reçoit (param, el) du dispatcher
+window.toggleCategoryItemsFromEl = function(category, el) {
+    toggleCategoryItems(category, el.checked);
+};
+
 /**
  * 🆕 Beta 96.2 : Toggle l'affichage des checkboxes données perso quand l'utilisateur confirme
  * @param {boolean} checked - État de la checkbox "C'est ma propre sauvegarde"
@@ -987,6 +992,11 @@ function toggleDonneesPersoImport(checked) {
 
 // Exposer globalement
 window.toggleDonneesPersoImport = toggleDonneesPersoImport;
+
+// Wrapper délégué (data-on-change) — reçoit (el) du dispatcher
+window.toggleDonneesPersoImportFromEl = function(el) {
+    toggleDonneesPersoImport(el.checked);
+};
 
 function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
     const cles = Object.keys(config);
@@ -1098,7 +1108,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                        >
                     <input type="checkbox" id="import-${id}" class="import-category-toggle"
                            data-category="${id}"
-                           onchange="toggleCategoryItems('${id}', this.checked)"
+                           data-on-change="toggleCategoryItemsFromEl" data-param="${id}"
                            style="transform: scale(1.2); accent-color: var(--vert-succes);">
                     <div style="flex: 1;">
                         <strong style="font-size: 0.95rem;">${label}</strong>
@@ -1224,7 +1234,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                             <strong>Source non identifiée</strong> – Le fichier ne contient pas d'information sur son auteur.
                         </p>
                         <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px; background: var(--surface-conteneur, #162c36); border-radius: 6px; border: 2px solid var(--btn-annuler);">
-                            <input type="checkbox" id="confirmMaSauvegarde" onchange="toggleDonneesPersoImport(this.checked)" style="width: 20px; height: 20px;">
+                            <input type="checkbox" id="confirmMaSauvegarde" data-on-change="toggleDonneesPersoImportFromEl" style="width: 20px; height: 20px;">
                             <span style="font-size: 0.9rem; color: var(--gris-fonce);"><strong>C'est ma propre sauvegarde</strong> – Je confirme que ce fichier m'appartient</span>
                         </label>
                         <div id="checkboxesDonneesPerso" style="display: none; margin-top: 12px; padding: 12px; background: var(--alerte-fond-succes, #d4edda); border-radius: 6px;">
@@ -1301,10 +1311,10 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
 
                 <!-- Boutons -->
                 <div class="modal-actions">
-                    <button class="btn btn-secondaire" onclick="fermerModalPreviewConfigComplete()">
+                    <button class="btn btn-secondaire" data-action="fermerModalPreviewConfigComplete">
                         Annuler
                     </button>
-                    <button class="btn btn-principal" onclick="executerImportSelectif()"
+                    <button class="btn btn-principal" data-action="executerImportSelectif"
                             ${analyse.totalRessources === 0 && analyse.totalDonnees === 0 && !(analyse.entites?.groupesCours?.count > 0 || analyse.entites?.horaires?.count > 0 || analyse.entites?.enseignants?.present) ? 'disabled' : ''}>
                         Importer la sélection
                     </button>
@@ -1696,10 +1706,10 @@ function afficherModalPreviewConfigComplete(config) {
 
                 <!-- Boutons -->
                 <div class="modal-actions">
-                    <button class="btn btn-secondaire" onclick="fermerModalPreviewConfigComplete()">
+                    <button class="btn btn-secondaire" data-action="fermerModalPreviewConfigComplete">
                         Annuler
                     </button>
-                    <button class="btn btn-principal" onclick="executerImportConfigComplete()">
+                    <button class="btn btn-principal" data-action="executerImportConfigComplete">
                         Ajouter à mes bibliothèques
                     </button>
                 </div>

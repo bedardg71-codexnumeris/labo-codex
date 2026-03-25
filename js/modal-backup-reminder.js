@@ -190,10 +190,10 @@
                     </div>
 
                     <div class="modal-backup-actions">
-                        <button class="btn btn-principal" onclick="window.backupReminder.allerVersExport()">
+                        <button class="btn btn-principal" data-action="backupReminder.allerVersExport">
                             Exporter maintenant
                         </button>
-                        <button class="btn btn-neutre" onclick="window.backupReminder.gererChoixRappel()">
+                        <button class="btn btn-neutre" data-action="backupReminder.gererChoixRappel">
                             J'ai compris
                         </button>
                     </div>

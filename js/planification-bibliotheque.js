@@ -235,7 +235,7 @@ async function afficherBibliothequeAlignements() {
             '<strong>Importer depuis un autre trimestre</strong>' +
             '<div style="margin-top: 8px; display: flex; gap: 10px; align-items: center;">' +
                 '<select id="biblio-alignements-import-trimestre" class="form-control" style="display: inline-block; width: auto;">' + optionsHTML + '</select>' +
-                '<button class="btn btn-secondaire btn-tres-compact" onclick="importerAlignementsTrimestre()">Voir les cartes</button>' +
+                '<button class="btn btn-secondaire btn-tres-compact" data-action="importerAlignementsTrimestre">Voir les cartes</button>' +
             '</div>' +
             '<div id="biblio-alignements-cartes-trimestre" style="margin-top: 10px;"></div>' +
         '</div>';
@@ -243,8 +243,8 @@ async function afficherBibliothequeAlignements() {
 
     // Import fichier
     var boutonsApresSection1 = '<div style="margin-top: 15px; display: flex; gap: 10px;">' +
-        '<button class="btn btn-secondaire btn-tres-compact" onclick="document.getElementById(\'biblio-alignements-fichier-import\').click()">Importer un fichier JSON</button>' +
-        '<input type="file" id="biblio-alignements-fichier-import" accept=".json" style="display:none" onchange="importerAlignementFichier(event)">' +
+        '<button class="btn btn-secondaire btn-tres-compact" data-action="_declencherImportAlignementFichier">Importer un fichier JSON</button>' +
+        '<input type="file" id="biblio-alignements-fichier-import" accept=".json" style="display:none" data-on-change="_importerAlignementFichierChange">' +
     '</div>';
 
     BibliothequeUI.creerModal({
@@ -493,7 +493,7 @@ function importerAlignementsTrimestre() {
     cartes.forEach(function (c) {
         html += '<div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--bordure);">' +
             '<span>' + c.nom + ' <small class="text-muted">(' + c.noeuds + ' noeuds, ' + c.liens + ' liens)</small></span>' +
-            '<button class="btn btn-confirmer btn-tres-compact" onclick="importerCarteDepuisTrimestre(\'' + code + '\', \'' + c.id + '\')">Importer dans la bibliothèque</button>' +
+            '<button class="btn btn-confirmer btn-tres-compact" data-action="importerCarteDepuisTrimestre" data-param="' + code + '" data-param2="' + c.id + '">Importer dans la bibliothèque</button>' +
         '</div>';
     });
     container.innerHTML = html;
@@ -574,5 +574,16 @@ window.supprimerAlignementDeBibliotheque = supprimerAlignementDeBibliotheque;
 window.importerAlignementFichier = importerAlignementFichier;
 window.importerAlignementsTrimestre = importerAlignementsTrimestre;
 window.importerCarteDepuisTrimestre = importerCarteDepuisTrimestre;
+
+// Wrapper : clic sur bouton → déclenche le file input caché
+window._declencherImportAlignementFichier = function() {
+    var input = document.getElementById('biblio-alignements-fichier-import');
+    if (input) input.click();
+};
+
+// Wrapper : onchange du file input → construit un objet event-like pour importerAlignementFichier
+window._importerAlignementFichierChange = function(el) {
+    importerAlignementFichier({ target: el });
+};
 
 })();

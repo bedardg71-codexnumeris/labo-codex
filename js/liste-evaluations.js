@@ -1143,7 +1143,7 @@ function genererDropdownActions(ligne) {
         return '<span class="texte-muted">-</span>';
     }
 
-    return `<select class="eval-actions-select" onchange="executerActionEval(this)">
+    return `<select class="eval-actions-select" data-on-change="executerActionEval">
         <option value="">Actions...</option>
         ${options.join('')}
     </select>`;
@@ -2185,7 +2185,7 @@ function mettreAJourBoutonCorbeille() {
         const div = document.createElement('div');
         div.className = 'groupe-form';
         div.style.cssText = 'display: flex; align-items: flex-end;';
-        div.innerHTML = `<button class="btn btn-secondaire" id="btn-corbeille-eval" onclick="basculerVueCorbeille()"></button>`;
+        div.innerHTML = `<button class="btn btn-secondaire" id="btn-corbeille-eval" data-action="basculerVueCorbeille"></button>`;
         zoneFiltres.appendChild(div);
         btn = document.getElementById('btn-corbeille-eval');
     }
@@ -2253,7 +2253,7 @@ function afficherVueCorbeille() {
     let html = `<tr><td colspan="9" style="padding: 10px 12px; background: var(--surface-alt);">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <span style="font-size: 0.85em; color: var(--texte-secondaire);">Les fichiers sont supprimés automatiquement après 30 jours.</span>
-            <button class="btn btn-danger btn-sm" onclick="viderTouteCorbeille()">Vider la corbeille</button>
+            <button class="btn btn-danger btn-sm" data-action="viderTouteCorbeille">Vider la corbeille</button>
         </div>
     </td></tr>`;
 
@@ -2278,8 +2278,8 @@ function afficherVueCorbeille() {
             <td class="td-center">${dateAffichee}</td>
             <td class="td-center">${joursRestants} jour(s)</td>
             <td class="td-center" colspan="3">
-                <button class="btn btn-secondaire btn-sm" onclick="restaurerFichierCorbeille('${fichier.id}')">Restaurer</button>
-                <button class="btn btn-danger btn-sm" onclick="supprimerFichierDefinitivement('${fichier.id}')">Supprimer</button>
+                <button class="btn btn-secondaire btn-sm" data-action="restaurerFichierCorbeille" data-param="${fichier.id}">Restaurer</button>
+                <button class="btn btn-danger btn-sm" data-action="supprimerFichierDefinitivement" data-param="${fichier.id}">Supprimer</button>
             </td>
         </tr>`;
     }

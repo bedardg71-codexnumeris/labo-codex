@@ -247,8 +247,8 @@ function afficherBibliothequeTampons() {
         htmlMesTampons += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">';
         htmlMesTampons += '<span style="font-weight:600; color:var(--accent-primaire); font-size:0.85em;">' + nomCat + ' (' + nbCat + ')</span>';
         htmlMesTampons += '<div style="display:flex; gap:4px;">';
-        htmlMesTampons += '<button class="btn btn-secondaire btn-tres-compact" style="font-size:0.75em;" onclick="tamponsBibliotheque.partagerCategorie(\'' + catId + '\')" title="Ajouter toute la catégorie à la bibliothèque">Partager</button>';
-        htmlMesTampons += '<button class="btn btn-secondaire btn-tres-compact" style="font-size:0.75em;" onclick="tamponsBibliotheque.exporterCategorie(\'' + catId + '\')" title="Exporter cette catégorie en JSON">Exporter</button>';
+        htmlMesTampons += '<button class="btn btn-secondaire btn-tres-compact" style="font-size:0.75em;" data-action="tamponsBibliotheque.partagerCategorie" data-param="' + catId + '" title="Ajouter toute la catégorie à la bibliothèque">Partager</button>';
+        htmlMesTampons += '<button class="btn btn-secondaire btn-tres-compact" style="font-size:0.75em;" data-action="tamponsBibliotheque.exporterCategorie" data-param="' + catId + '" title="Exporter cette catégorie en JSON">Exporter</button>';
         htmlMesTampons += '</div></div>';
         parCat[catId].forEach(function(t) {
             htmlMesTampons += BibliothequeUI.renderCarteSelection({
@@ -259,8 +259,8 @@ function afficherBibliothequeTampons() {
                     : '<span class="badge-source badge-source--id">Intégré</span>',
                 metadonnees: nomCat,
                 boutons: [
-                    { label: 'Partager', onclick: "tamponsBibliotheque.partagerTampon('" + t.id + "')", classe: 'btn-confirmer', title: 'Ajouter à la bibliothèque partagée' },
-                    { label: 'Exporter', onclick: "tamponsBibliotheque.exporterUnTampon('" + t.id + "')", classe: 'btn-secondaire', title: 'Télécharger en JSON' }
+                    { label: 'Partager', action: 'tamponsBibliotheque.partagerTampon', param: t.id, classe: 'btn-confirmer', title: 'Ajouter à la bibliothèque partagée' },
+                    { label: 'Exporter', action: 'tamponsBibliotheque.exporterUnTampon', param: t.id, classe: 'btn-secondaire', title: 'Télécharger en JSON' }
                 ]
             });
         });
@@ -273,9 +273,9 @@ function afficherBibliothequeTampons() {
 
     // Boutons après Section 1
     var boutonsApres = '<div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">' +
-        '<button class="btn btn-secondaire btn-tres-compact" onclick="document.getElementById(\'biblio-tampons-fichier-import\').click()">Importer un fichier JSON</button>' +
-        '<input type="file" id="biblio-tampons-fichier-import" accept=".json" style="display:none" onchange="tamponsBibliotheque.importerFichier(event)">' +
-        '<button class="btn btn-secondaire btn-tres-compact" onclick="tamponsBibliotheque.exporterBibliotheque()">Exporter la bibliothèque</button>' +
+        '<button class="btn btn-secondaire btn-tres-compact" data-action="tamponsBiblioClickImport">Importer un fichier JSON</button>' +
+        '<input type="file" id="biblio-tampons-fichier-import" accept=".json" style="display:none" data-on-change="tamponsBiblioImporterFichier">' +
+        '<button class="btn btn-secondaire btn-tres-compact" data-action="tamponsBibliotheque.exporterBibliotheque">Exporter la bibliothèque</button>' +
         '</div>' +
         '<p style="font-size:0.8em; color:var(--texte-secondaire); margin-top:8px;">Assurez-vous d\'avoir les droits sur les images importées.</p>';
 
@@ -303,8 +303,8 @@ function afficherBibliothequeTampons() {
                 description: (item.metadata_cc && item.metadata_cc.description_courte) || '',
                 dejaPresent: dejaPresent,
                 boutons: [
-                    { label: 'Ajouter', onclick: "tamponsBibliotheque.ajouterDepuisBibliotheque('" + item.id + "')", classe: 'btn-confirmer', title: 'Copier dans ta palette de tampons' },
-                    { label: 'Supprimer', onclick: "tamponsBibliotheque.supprimerDeBibliotheque('" + item.id + "')", classe: 'btn-supprimer', title: 'Retirer de la bibliothèque', showAlways: true }
+                    { label: 'Ajouter', action: 'tamponsBibliotheque.ajouterDepuisBibliotheque', param: item.id, classe: 'btn-confirmer', title: 'Copier dans ta palette de tampons' },
+                    { label: 'Supprimer', action: 'tamponsBibliotheque.supprimerDeBibliotheque', param: item.id, classe: 'btn-supprimer', title: 'Retirer de la bibliothèque', showAlways: true }
                 ]
             });
         });
@@ -314,7 +314,7 @@ function afficherBibliothequeTampons() {
         modalId: MODAL_ID,
         titre: 'Bibliothèque de tampons',
         sousTitre: 'Partagez et réutilisez vos collections de tampons entre les trimestres.',
-        onFermer: 'tamponsBibliotheque.fermerModal',
+        onFermerAction: 'tamponsBibliotheque.fermerModal',
         doublonsHTML: '',
         titreSection1: 'Mes tampons (' + autocollants.filter(function(a) { return !a.legacy; }).length + ')',
         contenuIdListe1: 'listeTamponsPerso',
@@ -488,6 +488,15 @@ async function partagerCategorie(catId) {
 // ============================================
 // API PUBLIQUE
 // ============================================
+
+// Wrappers délégués (data-action / data-on-change)
+window.tamponsBiblioClickImport = function() {
+    var input = document.getElementById('biblio-tampons-fichier-import');
+    if (input) input.click();
+};
+window.tamponsBiblioImporterFichier = function(el) {
+    importerFichier({ target: el });
+};
 
 window.tamponsBibliotheque = {
     afficherBibliothequeTampons: afficherBibliothequeTampons,

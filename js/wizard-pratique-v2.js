@@ -1478,7 +1478,7 @@ function genererCheckboxCards(champ) {
                        name="${champ.id}"
                        value="${opt.value}"
                        ${exclusiveAttr}
-                       onclick="wizardV2GererExclusionCheckbox(this)">
+                       data-action="wizardV2GererExclusionCheckbox">
                 <div class="wizard-v2-card-content">
                     <div class="wizard-v2-card-title">${opt.label}</div>
                     <div class="wizard-v2-card-description">${opt.description}</div>
@@ -1544,7 +1544,7 @@ function genererSelectGrille(champ) {
                 <label>${champ.label}</label>
                 <div class="wizard-v2-info-block" style="flex-direction: column; align-items: stretch;">
                     <p style="margin: 0 0 10px 0;">Aucune grille de critères n'a été créée. Tu peux en générer une de base pour commencer.</p>
-                    <button type="button" class="wizard-v2-btn-demo-grille" onclick="wizardV2CreerGrilleDemo()" style="
+                    <button type="button" class="wizard-v2-btn-demo-grille" data-action="wizardV2CreerGrilleDemo" style="
                         background: var(--bleu-principal, #4A90D9);
                         color: white;
                         border: none;

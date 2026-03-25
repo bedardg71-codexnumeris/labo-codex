@@ -289,15 +289,13 @@ function genererHtmlMois(annee, mois, calendrierComplet) {
         }
 
         const numSemaine = statut.numeroSemaine || '';
-        const onclickAttr = estCliquable ? 'onclick="ouvrirSaisiePresence(\'' + dateStr + '\')"' : '';
+        const actionAttr = estCliquable ? ' data-action="ouvrirSaisiePresence" data-param="' + dateStr + '"' : '';
 
         html += '<td class="' + classeJour + '" ';
         html += 'data-date="' + dateStr + '" ';
         html += 'data-semaine="' + numSemaine + '" ';
-        html += 'data-type="' + statut.type + '" ';
-        html += 'onmouseenter="illuminerSemaineAmelioree(\'' + dateStr + '\')" ';
-        html += 'onmouseleave="desilluminerSemaines()" ';
-        html += onclickAttr + '>';
+        html += 'data-type="' + statut.type + '"';
+        html += actionAttr + '>';
         html += '<div class="cal-texte-moyen">' + jour + '</div>';
 
         if (statut.label) {
@@ -538,6 +536,19 @@ function afficherCalendrierScolaire() {
 
         if (conteneur) {
             conteneur.innerHTML = htmlCalendrier;
+
+            // Délégation mouseover/mouseout pour illumination de semaine
+            // (remplace onmouseenter/onmouseleave inline — ces événements ne bubblent pas,
+            //  on utilise mouseover/mouseout qui bubblent)
+            conteneur.addEventListener('mouseover', function(e) {
+                var td = e.target.closest('td[data-date]');
+                if (td) illuminerSemaineAmelioree(td.getAttribute('data-date'));
+            });
+            conteneur.addEventListener('mouseout', function(e) {
+                var td = e.target.closest('td[data-date]');
+                if (td) desilluminerSemaines();
+            });
+
             console.log('✅ Calendrier scolaire affiché avec succès');
             console.log('   - ' + nombreSemainesReel + ' semaines | ' + nombreJoursReel + ' jours (depuis trimestre.js)');
         } else {

@@ -187,7 +187,7 @@ function afficherBoutonEtapeSuivante() {
     const texte = etape.suivante ? 'Étape suivante →' : 'Terminer ✓';
 
     bouton.innerHTML = `
-        <button onclick="etapeSuivante()" style="
+        <button data-action="etapeSuivante" style="
             background: linear-gradient(135deg, #032e5c, #065dbb);
             color: white;
             border: none;
@@ -256,7 +256,7 @@ function afficherMessageGuidage() {
                     ${etape.message}
                 </div>
             </div>
-            <button onclick="masquerMessageGuidage()" style="
+            <button data-action="masquerMessageGuidage" style="
                 background: none;
                 border: none;
                 color: var(--gris-clair);
