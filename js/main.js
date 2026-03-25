@@ -721,9 +721,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (typeof fn === 'function') {
             var param = el.dataset.param;
+            var param2 = el.dataset.param2;
             if (param !== undefined) {
                 if (param !== '' && !isNaN(param)) param = Number(param);
-                fn(param);
+                if (param2 !== undefined) {
+                    if (param2 !== '' && !isNaN(param2)) param2 = Number(param2);
+                    fn(param, param2);
+                } else {
+                    fn(param);
+                }
             } else {
                 fn();
             }
