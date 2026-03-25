@@ -7219,6 +7219,8 @@ window.nouvelleEvaluation = nouvelleEvaluation;
 window.gererChangementCheckboxJetonDelai = gererChangementCheckboxJetonDelai;
 window.gererChangementCheckboxJetonReprise = gererChangementCheckboxJetonReprise;
 window.niveauSelectionne = niveauSelectionne;
+window.fermerModalReparationEvaluations = fermerModalReparationEvaluations;
+window.lancerReparationEvaluations = lancerReparationEvaluations;
 
 
 })();

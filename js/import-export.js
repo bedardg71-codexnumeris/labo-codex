@@ -2951,6 +2951,7 @@ window.reinitialiserDonnees = reinitialiserDonnees;
 window.executerImportConfigComplete = executerImportConfigComplete;
 window.fermerModalPreviewConfigComplete = fermerModalPreviewConfigComplete;
 window.exporterConfigurationComplete = exporterConfigurationComplete;
+window.ouvrirImportConfigComplete = ouvrirImportConfigComplete;
 window.executerImportVersBibliotheques = executerImportVersBibliotheques; // 🆕 BETA 95.1
 window.executerImportSelectif = executerImportSelectif; // 🆕 BETA 95.1
 

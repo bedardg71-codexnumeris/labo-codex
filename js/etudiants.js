@@ -1747,5 +1747,6 @@ window.obtenirNomProgramme = obtenirNomProgramme;
 window.reinitialiserFiltresListeEtudiants = reinitialiserFiltresListeEtudiants;
 window.calculerTauxCompletion = calculerTauxCompletion;
 window.toggleColonneListe = toggleColonneListe;
+window.resetFiltresListe = resetFiltresListe;
 
 })();
