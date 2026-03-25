@@ -257,8 +257,7 @@ function creerBulle(etape, index) {
                     cursor: pointer;
                     font-size: 0.95rem;
                     transition: all 0.2s;
-                " onmouseover="this.style.background='var(--gris-tres-pale)';"
-                   onmouseout="this.style.background='var(--surface-conteneur)';">
+                " class="hover-fond-gris">
                     ← Précédent
                 </button>
             ` : '<div></div>'}
@@ -273,8 +272,7 @@ function creerBulle(etape, index) {
                     cursor: pointer;
                     font-size: 0.95rem;
                     transition: all 0.2s;
-                " onmouseover="this.style.background='var(--gris-tres-pale)';"
-                   onmouseout="this.style.background='var(--surface-conteneur)';">
+                " class="hover-fond-gris">
                     Terminer
                 </button>
 
@@ -289,9 +287,7 @@ function creerBulle(etape, index) {
                         font-size: 0.95rem;
                         font-weight: 500;
                         transition: all 0.2s;
-                        box-shadow: 0 2px 8px rgba(3, 46, 92, 0.3);
-                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(3, 46, 92, 0.4)';"
-                       onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(3, 46, 92, 0.3)';">
+                    " class="hover-elevation-bleu">
                         Suivant →
                     </button>
                 ` : `
@@ -305,9 +301,7 @@ function creerBulle(etape, index) {
                         font-size: 0.95rem;
                         font-weight: 500;
                         transition: all 0.2s;
-                        box-shadow: 0 2px 8px rgba(30, 90, 74, 0.3);
-                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(30, 90, 74, 0.4)';"
-                       onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(30, 90, 74, 0.3)';">
+                    " class="hover-elevation-succes">
                         Terminer ✓
                     </button>
                 `}

@@ -248,8 +248,7 @@
                     margin-bottom: 10px;
                     cursor: pointer;
                     transition: all 0.2s;
-                " onmouseover="this.style.transform='translateX(4px)'; this.style.boxShadow='0 2px 8px rgba(111,66,193,0.2)'"
-                   onmouseout="this.style.transform=''; this.style.boxShadow=''"
+                " class="hover-translate-x"
                    onclick="${actionClick}('${gabarit.id}')">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div style="flex: 1;">

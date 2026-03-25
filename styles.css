@@ -685,6 +685,94 @@ body.mode-clair {
 .u-flex-col { flex-direction: column; }
 .u-align-center { align-items: center; }
 
+/* === HOVER / FOCUS (Phase 2 — remplace onmouseover/onmouseout/onfocus inline) === */
+/* Note : !important nécessaire pour surcharger les styles inline existants */
+
+/* Carte module — fond bleu + lift */
+.hover-lift-bleu:hover {
+    background: var(--bleu-tres-pale) !important;
+    transform: translateY(-2px);
+}
+
+/* Carte secondaire — fond gris + bordure */
+.hover-gris-bordure:hover {
+    background: var(--gris-tres-pale) !important;
+    border-color: var(--gris-moyen) !important;
+}
+
+/* Bouton — fond bleu léger */
+.hover-fond-bleu:hover {
+    background: var(--bleu-tres-pale) !important;
+}
+
+/* Bouton — fond gris léger */
+.hover-fond-gris:hover {
+    background: var(--gris-tres-pale) !important;
+}
+
+/* Bouton CTA primaire (teal) — lift + ombre */
+.hover-elevation-primaire {
+    box-shadow: 0 4px 12px rgba(26, 82, 102, 0.3);
+}
+.hover-elevation-primaire:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(26, 82, 102, 0.4);
+}
+
+/* Bouton CTA bleu foncé — lift + ombre */
+.hover-elevation-bleu {
+    box-shadow: 0 4px 12px rgba(3, 46, 92, 0.3);
+}
+.hover-elevation-bleu:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(3, 46, 92, 0.4);
+}
+
+/* Bouton CTA succès — lift + ombre verte */
+.hover-elevation-succes {
+    box-shadow: 0 2px 8px rgba(30, 90, 74, 0.3);
+}
+.hover-elevation-succes:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(30, 90, 74, 0.4);
+}
+
+/* Gabarit — glisse horizontale + ombre violette */
+.hover-translate-x:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(111, 66, 193, 0.2);
+}
+
+/* Item import — bordure verte au survol */
+.hover-bordure-succes:hover {
+    border-color: var(--vert-succes) !important;
+}
+
+/* Donnée import — bordure grise au survol */
+.hover-bordure-gris:hover {
+    border-color: var(--gris-moyen) !important;
+}
+
+/* Item sélection — fond subtil */
+.hover-fond-subtil:hover {
+    background: rgba(0, 0, 0, 0.02) !important;
+}
+
+/* Bouton fermer modal — couleur foncée */
+.hover-couleur-fonce:hover {
+    color: var(--gris-fonce) !important;
+}
+
+/* Badge artefact — opaque au survol */
+.hover-opaque:hover {
+    opacity: 1 !important;
+}
+
+/* Input focus — bordure accent */
+.focus-bordure-accent:focus {
+    border-color: var(--accent-primaire) !important;
+}
+
 /* === PADDING ADDITIONNELS === */
 .u-p-8 { padding: 8px; }
 .u-p-10 { padding: 10px; }

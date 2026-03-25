@@ -444,8 +444,7 @@ function genererInputQuestion(question) {
                         font-size: 1rem;
                         transition: border-color 0.2s;
                     "
-                    onfocus="this.style.borderColor='var(--accent-primaire)'"
-                    onblur="this.style.borderColor='var(--bordure-claire)'"
+                    class="focus-bordure-accent"
                 />
             `;
             break;
@@ -465,8 +464,7 @@ function genererInputQuestion(question) {
                         font-size: 1rem;
                         transition: border-color 0.2s;
                     "
-                    onfocus="this.style.borderColor='var(--accent-primaire)'"
-                    onblur="this.style.borderColor='var(--bordure-claire)'"
+                    class="focus-bordure-accent"
                 />
             `;
             break;
@@ -482,8 +480,7 @@ function genererInputQuestion(question) {
                         font-size: 1rem;
                         transition: border-color 0.2s;
                     "
-                    onfocus="this.style.borderColor='var(--accent-primaire)'"
-                    onblur="this.style.borderColor='var(--bordure-claire)'"
+                    class="focus-bordure-accent"
                 />
             `;
             break;
@@ -500,8 +497,7 @@ function genererInputQuestion(question) {
                         font-size: 1rem;
                         transition: border-color 0.2s;
                     "
-                    onfocus="this.style.borderColor='var(--accent-primaire)'"
-                    onblur="this.style.borderColor='var(--bordure-claire)'"
+                    class="focus-bordure-accent"
                 />
             `;
             break;
@@ -520,8 +516,7 @@ function genererInputQuestion(question) {
                         resize: vertical;
                         transition: border-color 0.2s;
                     "
-                    onfocus="this.style.borderColor='var(--accent-primaire)'"
-                    onblur="this.style.borderColor='var(--bordure-claire)'"
+                    class="focus-bordure-accent"
                 ></textarea>
             `;
             break;
@@ -538,8 +533,7 @@ function genererInputQuestion(question) {
                 cursor: pointer;
                 transition: border-color 0.2s;
             "
-            onfocus="this.style.borderColor='var(--accent-primaire)'"
-            onblur="this.style.borderColor='var(--bordure-claire)'">
+            class="focus-bordure-accent">
                 <option value="">-- Choisis une option --</option>`;
 
             options.forEach(opt => {
@@ -665,8 +659,7 @@ function genererBoutonsNavigation() {
                 font-size: 0.9rem;
                 cursor: pointer;
                 transition: all 0.2s;
-            " onmouseover="this.style.background='var(--bleu-tres-pale)';"
-               onmouseout="this.style.background='var(--surface-conteneur)';">
+            " class="hover-fond-bleu">
                 ← Précédent
             </button>
         `;
@@ -686,9 +679,7 @@ function genererBoutonsNavigation() {
                 font-weight: 600;
                 cursor: pointer;
                 transition: all 0.2s;
-                box-shadow: 0 4px 12px rgba(26, 82, 102, 0.3);
-            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(26, 82, 102, 0.4)';"
-               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(26, 82, 102, 0.3)';">
+            " class="hover-elevation-primaire">
                 Terminer ✓
             </button>
         `;
@@ -726,9 +717,7 @@ function genererBoutonsNavigation() {
                 font-weight: 600;
                 cursor: pointer;
                 transition: all 0.2s;
-                box-shadow: 0 4px 12px rgba(26, 82, 102, 0.3);
-            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(26, 82, 102, 0.4)';"
-               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(26, 82, 102, 0.3)';">
+            " class="hover-elevation-primaire">
                 ${texteBouton}
             </button>
         `;
@@ -745,8 +734,7 @@ function genererBoutonsNavigation() {
             font-size: 0.85rem;
             cursor: pointer;
             transition: all 0.2s;
-        " onmouseover="this.style.background='var(--gris-tres-pale)'; this.style.borderColor='var(--gris-moyen)';"
-           onmouseout="this.style.background='var(--surface-conteneur)'; this.style.borderColor='var(--bordure-claire)';">
+        " class="hover-gris-bordure">
             Annuler
         </button>
     `;

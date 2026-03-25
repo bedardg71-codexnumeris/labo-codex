@@ -185,7 +185,7 @@ function afficherModalAccueil() {
                     cursor: pointer;
                     text-align: left;
                     transition: all 0.2s;
-                " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='var(--surface-conteneur)'; this.style.transform='translateY(0)';">
+                " class="hover-lift-bleu">
                     <strong>MODULE 1 : Créer un groupe-cours</strong>
                     <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
                         Configurer cours, trimestre, horaire, groupe (3 minutes)
@@ -205,7 +205,7 @@ function afficherModalAccueil() {
                     cursor: pointer;
                     text-align: left;
                     transition: all 0.2s;
-                " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='var(--surface-conteneur)'; this.style.transform='translateY(0)';">
+                " class="hover-lift-bleu">
                     <strong>MODULE 2 : Évaluer une production</strong>
                     <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
                         Accéder à la section d'évaluation des productions
@@ -245,7 +245,7 @@ function afficherModalAccueil() {
                     cursor: pointer;
                     text-align: left;
                     transition: all 0.2s;
-                " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='var(--surface-conteneur)'; this.style.transform='translateY(0)';">
+                " class="hover-lift-bleu">
                     <strong>MODULE 4 : Créer ma pratique de notation</strong>
                     <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
                         Configurer pratique, seuils, échelle, grille (8 minutes)
@@ -265,7 +265,7 @@ function afficherModalAccueil() {
                     cursor: pointer;
                     text-align: left;
                     transition: all 0.2s;
-                " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='var(--surface-conteneur)'; this.style.transform='translateY(0)';">
+                " class="hover-lift-bleu">
                     <strong>MODULE 5 : Créer du matériel pédagogique</strong>
                     <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
                         Échelle, grille de critères, production et cartouches de rétroaction (5 minutes)
@@ -285,7 +285,7 @@ function afficherModalAccueil() {
                     cursor: pointer;
                     text-align: left;
                     transition: all 0.2s;
-                " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='var(--surface-conteneur)'; this.style.transform='translateY(0)';">
+                " class="hover-lift-bleu">
                     <strong>MODULE 6 : Utiliser le Codex</strong>
                     <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
                         Sauvegarder tes données sur clé USB et les transporter entre tes appareils
@@ -305,7 +305,7 @@ function afficherModalAccueil() {
                     cursor: pointer;
                     text-align: left;
                     transition: all 0.2s;
-                " onmouseover="this.style.background='var(--gris-tres-pale)'; this.style.borderColor='var(--gris-moyen)';" onmouseout="this.style.background='var(--surface-conteneur)'; this.style.borderColor='var(--bordure-claire)';">
+                " class="hover-gris-bordure">
                     <strong>Consulter l'aide</strong>
                     <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
                         Accéder à la documentation
@@ -324,7 +324,7 @@ function afficherModalAccueil() {
                     cursor: pointer;
                     text-align: center;
                     transition: all 0.2s;
-                " onmouseover="this.style.background='var(--gris-tres-pale)'; this.style.borderColor='var(--gris-moyen)';" onmouseout="this.style.background='var(--surface-conteneur)'; this.style.borderColor='var(--bordure-claire)';">
+                " class="hover-gris-bordure">
                     <strong>Retour à la navigation libre</strong>
                 </button>
             </div>

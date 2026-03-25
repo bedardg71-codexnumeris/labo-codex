@@ -1240,7 +1240,7 @@ async function ouvrirModalBibliothequeCours() {
                     align-items: center;
                     justify-content: center;
                     z-index: 1;
-                " onmouseover="this.style.color='var(--gris-fonce)'" onmouseout="this.style.color='var(--gris-clair)'">
+                " class="hover-couleur-fonce">
                     ×
                 </button>
                 <h2 style="margin-top: 0; color: var(--accent-primaire);">Bibliothèque de cours</h2>

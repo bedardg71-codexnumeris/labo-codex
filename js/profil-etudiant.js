@@ -1393,8 +1393,7 @@ function genererSectionMobilisationEngagement(da) {
                             return `
                                 <div class="badge-artefact"
                                      style="background: ${couleurBadge}22; border-color: ${couleurBadge}; opacity: ${opacite}; border-width: ${bordure}; cursor: pointer;"
-                                     onmouseover="this.style.opacity='1'"
-                                     onmouseout="this.style.opacity='${opacite}'"
+                                     class="hover-opaque"
                                      onclick="evaluerProduction('${da}', '${art.id}')"
                                      title="${echapperHtml(art.description)}">
                                     <span class="badge-artefact-titre" style="color: ${couleurBadge};">

@@ -2209,8 +2209,7 @@ function genererCheckboxesCategorie(productions, categorie) {
             <label style="display: flex; align-items: center; gap: 10px; padding: 8px 12px;
                          border-bottom: 1px solid var(--gris-tres-clair); cursor: ${estDansAutre ? 'not-allowed' : 'pointer'};
                          opacity: ${opacite}; transition: background 0.15s;"
-                   onmouseover="this.style.background='rgba(0,0,0,0.02)'"
-                   onmouseout="this.style.background='transparent'">
+                   class="hover-fond-subtil"
                 <input type="checkbox" ${checked}
                        onchange="toggleProductionCategorie('${prod.id}', '${categorie}', this.checked)"
                        style="width: 16px; height: 16px; accent-color: ${colorCategorie};"
