@@ -1113,7 +1113,7 @@
             const actif = obtenirTrimestreActif();
             const texteElement = bandeau.querySelector('.bandeau-archive-texte');
             if (texteElement && actif) {
-                texteElement.innerHTML = `<strong>LECTURE SEULE</strong> — ${actif.nom}`;
+                texteElement.innerHTML = `<strong>LECTURE SEULE</strong> — ${echapperHtml(actif.nom)}`;
             }
         }
     }
