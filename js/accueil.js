@@ -50,7 +50,7 @@ function afficherAccueilContenu(conteneur) {
                         <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
                             <span style="font-size:1.5rem;">&#x1F6B8;</span>
                             <input type="checkbox" id="checkbox-demo-accueil" ${demoChecked ? 'checked' : ''}
-                                onchange="if(this.checked) { if(typeof entrerEnDemo==='function') entrerEnDemo(); } else { if(typeof quitterDemo==='function') quitterDemo(); }">
+                                data-on-change="toggleDemoHandler">
                             <div>
                                 <div class="decouvrir-titre">Donn\u00e9es de d\u00e9monstration</div>
                                 <div class="decouvrir-desc">Explorer avec des donn\u00e9es fictives</div>
@@ -62,7 +62,7 @@ function afficherAccueilContenu(conteneur) {
                         <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
                             <span style="font-size:1.5rem;">&#x1F5FA;&#xFE0F;</span>
                             <input type="checkbox" id="checkbox-tour-guide-accueil" ${tourGuideActif ? 'checked' : ''}
-                                onchange="if(typeof definirTourGuide==='function') definirTourGuide(this.checked);">
+                                data-on-change="toggleTourGuideHandler">
                             <div>
                                 <div class="decouvrir-titre">Tour guid\u00e9</div>
                                 <div class="decouvrir-desc">Afficher les conseils contextuels</div>
@@ -74,7 +74,7 @@ function afficherAccueilContenu(conteneur) {
                         <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
                             <span style="font-size:1.5rem;">\uD83D\uDCAC</span>
                             <input type="checkbox" id="checkbox-tooltips-accueil" ${tooltipsActifs ? 'checked' : ''}
-                                onchange="if(typeof definirTooltips==='function') definirTooltips(this.checked);">
+                                data-on-change="toggleTooltipsHandler">
                             <div>
                                 <div class="decouvrir-titre">Info-bulles</div>
                                 <div class="decouvrir-desc">D\u00e9crire l\u2019interface au survol</div>
@@ -86,7 +86,7 @@ function afficherAccueilContenu(conteneur) {
                         <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
                             <span style="font-size:1.5rem;">&#x2139;&#xFE0F;</span>
                             <input type="checkbox" id="checkbox-aide-contextuelle-accueil" ${aideContextuelleActive ? 'checked' : ''}
-                                onchange="if(typeof definirAideContextuelle==='function') definirAideContextuelle(this.checked);">
+                                data-on-change="toggleAideContextuelleHandler">
                             <div>
                                 <div class="decouvrir-titre">Aide contextuelle</div>
                                 <div class="decouvrir-desc">Afficher les rep\u00e8res d\u2019aide</div>
@@ -122,56 +122,56 @@ function afficherAccueilContenu(conteneur) {
             </div>
             <div class="accordeon-contenu" style="display: block;">
                 <div class="accueil-cartes accueil-cartes--8">
-                    <div class="accueil-carte" onclick="afficherSection('planification'); setTimeout(function(){ afficherSousSection('planification-carte'); }, 100);">
+                    <div class="accueil-carte" data-action="naviguerAccueilCarte" data-param="planification|planification-carte">
                         <div class="accueil-carte-icone">\uD83E\uDDE9</div>
                         <div class="accueil-carte-titre">Planifier ton cours</div>
                         <div class="accueil-carte-desc">
                             Organise tes s\u00e9quences, le\u00e7ons et activit\u00e9s pour leur alignement p\u00e9dagogique.
                         </div>
                     </div>
-                    <div class="accueil-carte" onclick="afficherSection('construction'); setTimeout(function(){ if(typeof ouvrirWizardV2==='function') ouvrirWizardV2(); }, 300);">
+                    <div class="accueil-carte" data-action="naviguerVersWizard">
                         <div class="accueil-carte-icone">\uD83C\uDFA8</div>
                         <div class="accueil-carte-titre">Configurer ta pratique de notation</div>
                         <div class="accueil-carte-desc">
                             D\u00e9finis ce que tu mesures et comment tu le fais pour cr\u00e9er ta pratique de notation.
                         </div>
                     </div>
-                    <div class="accueil-carte" onclick="afficherSection('presences');">
+                    <div class="accueil-carte" data-action="afficherSection" data-param="presences">
                         <div class="accueil-carte-icone">&#x1F4CB;</div>
                         <div class="accueil-carte-titre">Saisir les pr\u00e9sences</div>
                         <div class="accueil-carte-desc">
                             Saisis les pr\u00e9sences du jour pour ton groupe et ajoute des observations.
                         </div>
                     </div>
-                    <div class="accueil-carte" onclick="afficherSection('tableau-bord');">
+                    <div class="accueil-carte" data-action="afficherSection" data-param="tableau-bord">
                         <div class="accueil-carte-icone">&#x1F4C8;</div>
                         <div class="accueil-carte-titre">Voir l\u2019\u00e9tat des lieux</div>
                         <div class="accueil-carte-desc">
                             Suis la participation, les r\u00e9sultats et la progression de ton groupe.
                         </div>
                     </div>
-                    <div class="accueil-carte" onclick="afficherSection('evaluations'); setTimeout(function(){ afficherSousSection('evaluations-importer'); }, 100);">
+                    <div class="accueil-carte" data-action="naviguerAccueilCarte" data-param="evaluations|evaluations-importer">
                         <div class="accueil-carte-icone">&#x1F4E5;</div>
                         <div class="accueil-carte-titre">Importer des travaux</div>
                         <div class="accueil-carte-desc">
                             Importe les travaux de tes \u00e9tudiants (PDF, images) et pr\u00e9pare les fichiers.
                         </div>
                     </div>
-                    <div class="accueil-carte" onclick="afficherSection('evaluations'); setTimeout(function(){ afficherSousSection('evaluations-annoter'); }, 100);">
+                    <div class="accueil-carte" data-action="naviguerAccueilCarte" data-param="evaluations|evaluations-annoter">
                         <div class="accueil-carte-icone">&#x1F4DD;</div>
                         <div class="accueil-carte-titre">Annoter et \u00e9valuer</div>
                         <div class="accueil-carte-desc">
                             Annote les travaux de tes \u00e9tudiants et \u00e9value-les selon la grille de crit\u00e8res.
                         </div>
                     </div>
-                    <div class="accueil-carte" onclick="afficherSection('tableau-bord'); setTimeout(function(){ afficherSousSection('tableau-bord-profil'); }, 100);">
+                    <div class="accueil-carte" data-action="naviguerAccueilCarte" data-param="tableau-bord|tableau-bord-profil">
                         <div class="accueil-carte-icone">\uD83D\uDC64</div>
                         <div class="accueil-carte-titre">Consulter un profil \u00e9tudiant</div>
                         <div class="accueil-carte-desc">
                             Consulte le portrait d\u2019un \u00e9l\u00e8ve\u00a0: pr\u00e9sences, r\u00e9sultats et progression.
                         </div>
                     </div>
-                    <div class="accueil-carte" onclick="afficherSection('tableau-bord'); setTimeout(function(){ afficherSousSection('tableau-bord-interventions'); }, 100);">
+                    <div class="accueil-carte" data-action="naviguerAccueilCarte" data-param="tableau-bord|tableau-bord-interventions">
                         <div class="accueil-carte-icone">\uD83D\uDEDF</div>
                         <div class="accueil-carte-titre">Pr\u00e9parer des interventions</div>
                         <div class="accueil-carte-desc">
@@ -183,10 +183,10 @@ function afficherAccueilContenu(conteneur) {
         </div>
 
         <div class="accueil-utilitaires">
-            <button class="accueil-utilitaire" onclick="if(window.backupReminder) window.backupReminder.afficherModal();">
+            <button class="accueil-utilitaire" data-action="ouvrirModalBackup">
                 \uD83D\uDCBE Sauvegarder
             </button>
-            <button class="accueil-utilitaire" onclick="afficherModalNouveautes();">
+            <button class="accueil-utilitaire" data-action="afficherModalNouveautes">
                 \u2709\uFE0F<span class="pastille-nouveautes"></span> Nouvelles
             </button>
         </div>
@@ -226,10 +226,67 @@ function initialiserAccueil() {
     }
 }
 
+/* ===============================
+   WRAPPERS DELEGATION (Phase 5)
+   =============================== */
+
+/** Toggle mode démo depuis checkbox */
+function toggleDemoHandler(el) {
+    if (el.checked) {
+        if (typeof entrerEnDemo === 'function') entrerEnDemo();
+    } else {
+        if (typeof quitterDemo === 'function') quitterDemo();
+    }
+}
+
+/** Toggle tour guidé depuis checkbox */
+function toggleTourGuideHandler(el) {
+    if (typeof definirTourGuide === 'function') definirTourGuide(el.checked);
+}
+
+/** Toggle tooltips depuis checkbox */
+function toggleTooltipsHandler(el) {
+    if (typeof definirTooltips === 'function') definirTooltips(el.checked);
+}
+
+/** Toggle aide contextuelle depuis checkbox */
+function toggleAideContextuelleHandler(el) {
+    if (typeof definirAideContextuelle === 'function') definirAideContextuelle(el.checked);
+}
+
+/** Navigation accueil : section + sous-section avec délai */
+function naviguerAccueilCarte(sectionEtSousSection) {
+    var parts = sectionEtSousSection.split('|');
+    var section = parts[0];
+    var sousSection = parts[1];
+    afficherSection(section);
+    if (sousSection) {
+        setTimeout(function() { afficherSousSection(sousSection); }, 100);
+    }
+}
+
+/** Navigation vers construction avec wizard */
+function naviguerVersWizard() {
+    afficherSection('construction');
+    setTimeout(function() { if (typeof ouvrirWizardV2 === 'function') ouvrirWizardV2(); }, 300);
+}
+
+/** Ouvrir modal backup */
+function ouvrirModalBackup() {
+    if (window.backupReminder) window.backupReminder.afficherModal();
+}
+
 // === EXPORTS ===
 window.afficherAccueil = afficherAccueil;
 window.initialiserAccueil = initialiserAccueil;
 window.definirModeExpert = definirModeExpert;
+window.toggleDemoHandler = toggleDemoHandler;
+window.toggleTourGuideHandler = toggleTourGuideHandler;
+window.toggleTooltipsHandler = toggleTooltipsHandler;
+window.toggleAideContextuelleHandler = toggleAideContextuelleHandler;
+window.naviguerAccueilCarte = naviguerAccueilCarte;
+window.naviguerVersWizard = naviguerVersWizard;
+window.ouvrirModalBackup = ouvrirModalBackup;
 
 
 })();
