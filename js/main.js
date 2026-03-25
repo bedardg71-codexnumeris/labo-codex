@@ -737,7 +737,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     fn(param);
                 }
             } else {
-                fn();
+                fn(el);
             }
         }
     });
