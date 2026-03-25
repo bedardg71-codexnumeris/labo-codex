@@ -176,11 +176,11 @@ async function afficherTableauProductions() {
                 </strong>
                 <div class="production-actions">
                     ${index > 0 ?
-                `<button onclick="monterEvaluation('${prod.id}')" class="btn btn-principal">↑</button>` : ''}
+                `<button data-action="monterEvaluation" data-param="${prod.id}" class="btn btn-principal">↑</button>` : ''}
                     ${index < evaluations.length - 1 ?
-                `<button onclick="descendreEvaluation('${prod.id}')" class="btn btn-principal">↓</button>` : ''}
-                    <button onclick="modifierProduction('${prod.id}')" class="btn btn-modifier">Modifier</button>
-                    <button onclick="supprimerProduction('${prod.id}')" class="btn btn-supprimer">Supprimer</button>
+                `<button data-action="descendreEvaluation" data-param="${prod.id}" class="btn btn-principal">↓</button>` : ''}
+                    <button data-action="modifierProduction" data-param="${prod.id}" class="btn btn-modifier">Modifier</button>
+                    <button data-action="supprimerProduction" data-param="${prod.id}" class="btn btn-supprimer">Supprimer</button>
                 </div>
             </div>
             <div class="production-champs-grille ${prod.type === 'artefact-portfolio' ? 'production-champs-grille-2col' : 'production-champs-grille-3col'}">
@@ -1729,14 +1729,14 @@ async function afficherToutesLesProductionsParType() {
                     </div>
                     <div style="white-space: nowrap; margin-left: 15px;">
                         ${index > 0 ?
-                            `<button onclick="monterEvaluation('${prod.id}')" class="btn btn-principal"
+                            `<button data-action="monterEvaluation" data-param="${prod.id}" class="btn btn-principal"
                              style="padding: 4px 8px; font-size: 0.8rem; margin-right: 3px;">↑</button>` : ''}
                         ${index < total - 1 ?
-                            `<button onclick="descendreEvaluation('${prod.id}')" class="btn btn-principal"
+                            `<button data-action="descendreEvaluation" data-param="${prod.id}" class="btn btn-principal"
                              style="padding: 4px 8px; font-size: 0.8rem; margin-right: 3px;">↓</button>` : ''}
-                        <button onclick="modifierProduction('${prod.id || 'ERROR_NO_ID'}')" class="btn btn-modifier"
+                        <button data-action="modifierProduction" data-param="${prod.id || 'ERROR_NO_ID'}" class="btn btn-modifier"
                                 style="padding: 4px 10px; font-size: 0.8rem; margin-right: 3px;">Modifier</button>
-                        <button onclick="supprimerProduction('${prod.id}')" class="btn btn-supprimer"
+                        <button data-action="supprimerProduction" data-param="${prod.id}" class="btn btn-supprimer"
                                 style="padding: 4px 10px; font-size: 0.8rem;">Supprimer</button>
                     </div>
                 </div>
@@ -1764,11 +1764,11 @@ async function afficherToutesLesProductionsParType() {
                     ${portfolio ? genererHtmlProduction(portfolio, 0, 1) : ''}
                     ${artefacts.map((art, idx) => genererHtmlProduction(art, idx, artefacts.length)).join('')}
                     ${!portfolio ? `
-                        <button class="btn btn-confirmer" onclick="ajouterProductionAuType('portfolio')" class="u-mt-10">
+                        <button class="btn btn-confirmer" data-action="ajouterProductionAuType" data-param="portfolio" class="u-mt-10">
                             + Ajouter un portfolio
                         </button>
                     ` : ''}
-                    <button class="btn btn-confirmer" onclick="ajouterProductionAuType('artefact-portfolio')" style="margin-top: 10px; margin-left: 10px;">
+                    <button class="btn btn-confirmer" data-action="ajouterProductionAuType" data-param="artefact-portfolio" style="margin-top: 10px; margin-left: 10px;">
                         + Ajouter un artefact
                     </button>
                 </div>
@@ -1791,7 +1791,7 @@ async function afficherToutesLesProductionsParType() {
                 </summary>
                 <div class="prod-p-15">
                     ${sommatives.map((prod, idx) => genererHtmlProduction(prod, idx, sommatives.length)).join('')}
-                    <button class="btn btn-confirmer" onclick="ajouterProductionAuType('examen')" class="u-mt-10">
+                    <button class="btn btn-confirmer" data-action="ajouterProductionAuType" data-param="examen" class="u-mt-10">
                         + Ajouter une évaluation sommative
                     </button>
                 </div>
@@ -1814,7 +1814,7 @@ async function afficherToutesLesProductionsParType() {
                 </summary>
                 <div class="prod-p-15">
                     ${formatives.map((prod, idx) => genererHtmlProduction(prod, idx, formatives.length)).join('')}
-                    <button class="btn btn-confirmer" onclick="ajouterProductionAuType('examen-formatif')" class="u-mt-10">
+                    <button class="btn btn-confirmer" data-action="ajouterProductionAuType" data-param="examen-formatif" class="u-mt-10">
                         + Ajouter une évaluation formative
                     </button>
                 </div>
@@ -2041,10 +2041,10 @@ async function afficherBibliothequeProductions() {
 
     const boutonsApresSection1 = `
         <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-            <button onclick="ajouterMesProductionsALaBibliotheque()" class="btn btn-principal">Ajouter mes productions à la bibliothèque</button>
-            <button onclick="exporterProductions()" class="btn btn-secondaire">Exporter toutes mes productions</button>
-            <button onclick="document.getElementById('fichier-import-productions-modal').click()" class="btn btn-secondaire">Importer des productions</button>
-            <input type="file" id="fichier-import-productions-modal" accept=".json" style="display: none;" onchange="importerProductions(event)">
+            <button data-action="ajouterMesProductionsALaBibliotheque" class="btn btn-principal">Ajouter mes productions à la bibliothèque</button>
+            <button data-action="exporterProductions" class="btn btn-secondaire">Exporter toutes mes productions</button>
+            <button data-action="ouvrirFilePickerImportProductions" class="btn btn-secondaire">Importer des productions</button>
+            <input type="file" id="fichier-import-productions-modal" accept=".json" style="display: none;" data-on-change="importerProductions">
         </div>`;
 
     // Section import trimestre
@@ -2055,15 +2055,15 @@ async function afficherBibliothequeProductions() {
             <div style="margin-top: 20px; padding: 15px; background: var(--gris-tres-pale); border-radius: 6px; border: 1px solid var(--bordure-claire);">
                 <h4 style="color: var(--accent-primaire); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre</h4>
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <select id="selectTrimestreImport" class="controle-form" style="flex: 1; min-width: 200px;" onchange="mettreAJourFiltreCoursTrimestreProductions()">
+                    <select id="selectTrimestreImport" class="controle-form" style="flex: 1; min-width: 200px;" data-on-change="mettreAJourFiltreCoursTrimestreProductions">
                         <option value="">-- Choisir un trimestre --</option>
                         ${trimestres.map(t => `<option value="${t.cle}">${t.nom} (${t.nombre} production${t.nombre > 1 ? 's' : ''})</option>`).join('')}
                     </select>
                     <select id="selectCoursImportProductions" class="controle-form" style="flex: 1; min-width: 150px; display: none;">
                         <option value="">Tous les cours</option>
                     </select>
-                    <button onclick="afficherProductionsTrimestreModal()" class="btn btn-secondaire btn-compact">Voir les productions</button>
-                    <button onclick="importerToutTrimestreModal()" class="btn btn-principal btn-compact">Tout importer</button>
+                    <button data-action="afficherProductionsTrimestreModal" class="btn btn-secondaire btn-compact">Voir les productions</button>
+                    <button data-action="importerToutTrimestreModal" class="btn btn-principal btn-compact">Tout importer</button>
                 </div>
                 <div id="previewProductionsTrimestre" style="margin-top: 10px; display: none;"></div>
             </div>`;
@@ -2073,7 +2073,7 @@ async function afficherBibliothequeProductions() {
     const filtresHTML = `
         <div style="margin-bottom: 15px;">
             <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par discipline :</label>
-            <select id="filtreDisciplineProductions" onchange="filtrerProductionsParDiscipline()" class="controle-form" style="max-width: 300px;">
+            <select id="filtreDisciplineProductions" data-on-change="filtrerProductionsParDiscipline" class="controle-form" style="max-width: 300px;">
                 <option value="">Toutes les disciplines</option>
                 ${data.disciplines.map(d => `<option value="${d}">${d}</option>`).join('')}
             </select>
@@ -2291,7 +2291,7 @@ function afficherProductionsTrimestreModal() {
                     ${prod.description ? ` - ${prod.description}` : ''}
                     <br><small style="color: var(--gris-moyen);">Type: ${prod.type || 'N/A'} • Pondération: ${prod.ponderation || 0}%${coursLabel ? ' • ' + coursLabel : ''}</small>
                 </div>
-                <button onclick="importerUneProductionTrimestre('${cleSelectionnee}', '${prod.id}')" class="btn btn-confirmer btn-tres-compact">
+                <button data-action="importerUneProductionTrimestre" data-param="${cleSelectionnee}" data-param2="${prod.id}" class="btn btn-confirmer btn-tres-compact">
                     Importer
                 </button>
             </div>
@@ -2946,10 +2946,11 @@ async function importerDansProductionActive(event) {
  * - Avertit si pas de licence (droit d'auteur classique)
  * - Demande confirmation avant import
  *
- * @param {Event} event - Événement de changement du file input
+ * @param {Event|HTMLElement} eventOuEl - Événement de changement ou élément input (delegation)
  */
-function importerProductions(event) {
-    const file = event.target.files[0];
+function importerProductions(eventOuEl) {
+    var target = eventOuEl.target || eventOuEl;
+    const file = target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
@@ -2974,8 +2975,8 @@ function importerProductions(event) {
                     <div class="modal-js-contenu" style="max-width: 600px; padding: 20px;">
                         ${message}
                         <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
-                            <button class="btn btn-annuler" onclick="this.closest('.modal-js-overlay').parentElement.remove()">Annuler</button>
-                            <button class="btn btn-confirmer" onclick="this.closest('.modal-js-overlay').parentElement.remove(); window.confirmerImportProductions(window._productionsImportEnAttente); delete window._productionsImportEnAttente;">Importer</button>
+                            <button class="btn btn-annuler" data-action="fermerModalImportProductions">Annuler</button>
+                            <button class="btn btn-confirmer" data-action="confirmerEtFermerImportProductions">Importer</button>
                         </div>
                     </div>
                 </div>
@@ -3184,10 +3185,10 @@ async function afficherAssistantMigrationCategories() {
 
                 <div style="margin-bottom: 20px; padding: 12px; background: var(--bleu-tres-pale); border-radius: var(--radius-moyen);">
                     <strong>Actions rapides :</strong>
-                    <button type="button" onclick="assignerToutesMigration('selection')" class="btn-secondaire" style="margin-left: 10px;">
+                    <button type="button" data-action="assignerToutesMigration" data-param="selection" class="btn-secondaire" style="margin-left: 10px;">
                         Tout en Sélection
                     </button>
-                    <button type="button" onclick="assignerToutesMigration('obligatoire')" class="btn-secondaire" style="margin-left: 8px;">
+                    <button type="button" data-action="assignerToutesMigration" data-param="obligatoire" class="btn-secondaire" style="margin-left: 8px;">
                         Tout en Obligatoire
                     </button>
                 </div>
@@ -3206,8 +3207,8 @@ async function afficherAssistantMigrationCategories() {
                 </table>
 
                 <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--gris-clair);">
-                    <button type="button" onclick="fermerModalMigration()" class="btn btn-annuler">Annuler</button>
-                    <button type="button" onclick="sauvegarderMigrationCategories()" class="btn btn-confirmer">
+                    <button type="button" data-action="fermerModalMigration" class="btn btn-annuler">Annuler</button>
+                    <button type="button" data-action="sauvegarderMigrationCategories" class="btn btn-confirmer">
                         💾 Sauvegarder
                     </button>
                 </div>
@@ -3283,6 +3284,29 @@ async function sauvegarderMigrationCategories() {
 }
 
 /* ===============================
+   WRAPPERS DELEGATION (Phase 5)
+   =============================== */
+
+/** Fermer le modal d'import productions (bouton Annuler) */
+function fermerModalImportProductions() {
+    var overlay = document.querySelector('.modal-js-overlay');
+    if (overlay && overlay.parentElement) overlay.parentElement.remove();
+}
+
+/** Confirmer import + fermer modal */
+function confirmerEtFermerImportProductions() {
+    window.confirmerImportProductions(window._productionsImportEnAttente);
+    delete window._productionsImportEnAttente;
+    fermerModalImportProductions();
+}
+
+/** Ouvrir le file picker import */
+function ouvrirFilePickerImportProductions() {
+    var input = document.getElementById('fichier-import-productions-modal');
+    if (input) input.click();
+}
+
+/* ===============================
    EXPORT DES FONCTIONS GLOBALES
    =============================== */
 
@@ -3346,6 +3370,11 @@ window.afficherAssistantMigrationCategories = afficherAssistantMigrationCategori
 window.assignerToutesMigration = assignerToutesMigration;
 window.fermerModalMigration = fermerModalMigration;
 window.sauvegarderMigrationCategories = sauvegarderMigrationCategories;
+
+// Wrappers délégation (Phase 5)
+window.fermerModalImportProductions = fermerModalImportProductions;
+window.confirmerEtFermerImportProductions = confirmerEtFermerImportProductions;
+window.ouvrirFilePickerImportProductions = ouvrirFilePickerImportProductions;
 
 /* ===============================
    📌 NOTES D'UTILISATION
@@ -3478,7 +3507,7 @@ async function afficherListeProductions(filtreType = '') {
             : '';
 
         return `
-            <div class="sidebar-item" data-id="${prod.id}" onclick="chargerProductionPourModif('${prod.id}')">
+            <div class="sidebar-item" data-id="${prod.id}" data-action="chargerProductionPourModif" data-param="${prod.id}">
                 <div class="sidebar-item-titre">${echapperHtml(titre)}</div>
                 ${activite ? `<div class="sidebar-item-activite">${echapperHtml(activite)}</div>` : ''}
                 <div class="sidebar-item-badges">
