@@ -1630,7 +1630,7 @@
         } else if (etat === 'success') {
             contenu = `
                 <div class="modal-contenu modal-compact">
-                    <button class="modal-fermer" onclick="fermerModalExportRecherche()">&times;</button>
+                    <button class="modal-fermer" data-action="fermerModalExportRecherche">&times;</button>
                     <h2 class="modal-titre">Export généré avec succès</h2>
 
                     <div class="alerte alerte-succes">
@@ -1663,14 +1663,14 @@
                     </div>
 
                     <div class="modal-actions">
-                        <button class="btn btn-principal" onclick="fermerModalExportRecherche()">Fermer</button>
+                        <button class="btn btn-principal" data-action="fermerModalExportRecherche">Fermer</button>
                     </div>
                 </div>
             `;
         } else if (etat === 'error') {
             contenu = `
                 <div class="modal-contenu modal-compact">
-                    <button class="modal-fermer" onclick="fermerModalExportRecherche()">&times;</button>
+                    <button class="modal-fermer" data-action="fermerModalExportRecherche">&times;</button>
                     <h2 class="modal-titre">Erreur lors de l'export</h2>
 
                     <div class="alerte alerte-erreur">
@@ -1679,7 +1679,7 @@
                     </div>
 
                     <div class="modal-actions">
-                        <button class="btn btn-principal" onclick="fermerModalExportRecherche()">Fermer</button>
+                        <button class="btn btn-principal" data-action="fermerModalExportRecherche">Fermer</button>
                     </div>
                 </div>
             `;
