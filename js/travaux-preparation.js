@@ -2391,7 +2391,7 @@
                 } else if (f.fichier) {
                     imgSrc = URL.createObjectURL(f.fichier);
                 }
-                html += `<div class="prep-header-thumb${estActif ? ' actif' : ''}" onclick="travauxPreparation.chargerFichier(${i})" title="${echapperHtml(f.nomFichier || '')}">`;
+                html += `<div class="prep-header-thumb${estActif ? ' actif' : ''}" data-action="travauxPreparation.chargerFichier" data-param="${i}" title="${echapperHtml(f.nomFichier || '')}">`;
                 if (imgSrc) {
                     html += `<img src="${imgSrc}" alt="">`;
                 } else {
@@ -2420,9 +2420,9 @@
             if (f.operations.length > 0) classes.push('modifie');
 
             html += `
-                <div class="${classes.join(' ')}" onclick="travauxPreparation.chargerFichier(${i})">
+                <div class="${classes.join(' ')}" data-action="travauxPreparation.chargerFichier" data-param="${i}">
                     <span class="prep-mini-nom">${echapperHtml(f.nomFichier || '')}</span>
-                    <button class="prep-mini-check" onclick="event.stopPropagation(); travauxPreparation.toggleSelection(${i})" title="Selectionner">
+                    <button class="prep-mini-check" data-stop data-action="travauxPreparation.toggleSelection" data-param="${i}" title="Selectionner">
                         ${selections.has(i) ? '&#x2611;' : '&#x2610;'}
                     </button>
                 </div>`;
@@ -2447,17 +2447,17 @@
         modal.innerHTML = `
                 <!-- Barre compacte -->
                 <div class="prep-header-bar">
-                    <button class="btn btn-petit" onclick="travauxPreparation.fermer()">&#x2190; Retour</button>
+                    <button class="btn btn-petit" data-action="travauxPreparation.fermer">&#x2190; Retour</button>
                     <div class="prep-header-nav">
-                        <button class="btn-icon" id="prep-btn-prec" onclick="travauxPreparation.fichierPrecedent()">&#x2190;</button>
+                        <button class="btn-icon" id="prep-btn-prec" data-action="travauxPreparation.fichierPrecedent">&#x2190;</button>
                         <div class="prep-header-carousel" id="prep-header-carousel"></div>
-                        <button class="btn-icon" id="prep-btn-suiv" onclick="travauxPreparation.fichierSuivant()">&#x2192;</button>
+                        <button class="btn-icon" id="prep-btn-suiv" data-action="travauxPreparation.fichierSuivant">&#x2192;</button>
                         <span id="prep-navigation" style="font-size:0.8rem; margin-left:6px;" class="texte-muted"></span>
                         <span id="prep-nb-ops" class="texte-muted" style="font-size:0.8rem; margin-left:4px;"></span>
                     </div>
                     <div style="display:flex; gap:6px; align-items:center;">
-                        <button class="btn btn-secondaire btn-petit" onclick="travauxPreparation.passer()">Passer</button>
-                        <button class="btn btn-principal btn-petit" id="prep-btn-confirmer" onclick="travauxPreparation.confirmerTout()">Confirmer les r\u00e9glages sp\u00e9cifiques</button>
+                        <button class="btn btn-secondaire btn-petit" data-action="travauxPreparation.passer">Passer</button>
+                        <button class="btn btn-principal btn-petit" id="prep-btn-confirmer" data-action="travauxPreparation.confirmerTout">Confirmer les r\u00e9glages sp\u00e9cifiques</button>
                     </div>
                 </div>
                 <div class="prep-progress-bar" id="prep-progress-bar" style="display:none;">
@@ -2476,10 +2476,10 @@
                         </div>
                     </div>
                     <button class="prep-btn-canvas" id="prep-btn-appliquer-crop"
-                            onclick="travauxPreparation.appliquerCrop()"
+                            data-action="travauxPreparation.appliquerCrop"
                             style="display:none;">Confirmer rognage</button>
                     <button class="prep-btn-canvas" id="prep-btn-appliquer-persp"
-                            onclick="travauxPreparation.appliquerPerspective()"
+                            data-action="travauxPreparation.appliquerPerspective"
                             style="display:none;">Confirmer perspective</button>
 
                     <!-- Barre de zoom -->
@@ -2495,57 +2495,57 @@
                     <div class="prep-palette prep-palette-etendu" id="prep-palette-outils" style="top:12px; left:12px;">
                         <div class="prep-palette-barre" data-drag="prep-palette-outils">
                             <span class="prep-palette-titre">Réglages spécifiques</span>
-                            <button class="prep-palette-toggle" onclick="travauxPreparation.togglePalette('outils')">&#x2212;</button>
+                            <button class="prep-palette-toggle" data-action="travauxPreparation.togglePalette" data-param="outils">&#x2212;</button>
                         </div>
                         <div class="prep-palette-contenu">
 
                             <!-- Section Fichiers -->
                             <div class="prep-section" id="prep-section-fichiers">
-                                <div class="prep-section-label" onclick="travauxPreparation.toggleSection('fichiers')">Fichiers</div>
+                                <div class="prep-section-label" data-action="travauxPreparation.toggleSection" data-param="fichiers">Fichiers</div>
                                 <div class="prep-section-sous-titre">navigation et assemblage</div>
                                 <div class="prep-section-body">
                                     <div id="prep-miniatures" class="prep-mini-liste"></div>
                                     <div class="prep-btn-row">
-                                        <button class="prep-btn" onclick="travauxPreparation.grouperSelection()" id="prep-btn-grouper">Grouper</button>
-                                        <button class="prep-btn" onclick="travauxPreparation.assemblerAuto()">Assemblage auto</button>
+                                        <button class="prep-btn" data-action="travauxPreparation.grouperSelection" id="prep-btn-grouper">Grouper</button>
+                                        <button class="prep-btn" data-action="travauxPreparation.assemblerAuto">Assemblage auto</button>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Section Rotation -->
                             <div class="prep-section" id="prep-section-rotation">
-                                <div class="prep-section-label" onclick="travauxPreparation.toggleSection('rotation')">Rotation</div>
+                                <div class="prep-section-label" data-action="travauxPreparation.toggleSection" data-param="rotation">Rotation</div>
                                 <div class="prep-section-sous-titre">orientation du document</div>
                                 <div class="prep-section-body">
                                     <div class="prep-btn-row">
-                                        <button class="prep-btn" onclick="travauxPreparation.rotation90CCW()" title="90 anti-horaire">&#x21BA; 90°</button>
-                                        <button class="prep-btn" onclick="travauxPreparation.rotation90CW()" title="90 horaire">&#x21BB; 90°</button>
+                                        <button class="prep-btn" data-action="travauxPreparation.rotation90CCW" title="90 anti-horaire">&#x21BA; 90°</button>
+                                        <button class="prep-btn" data-action="travauxPreparation.rotation90CW" title="90 horaire">&#x21BB; 90°</button>
                                     </div>
                                     <div class="prep-slider-groupe">
                                         <label>Fine <span id="prep-rotation-valeur" class="texte-muted">0°</span>
                                             <button class="prep-btn-reset-rotation" id="prep-btn-reset-rotation"
-                                                    onclick="travauxPreparation.resetRotationFine()"
+                                                    data-action="travauxPreparation.resetRotationFine"
                                                     title="Remettre a 0°" style="display:none;">&#x21BA; 0°</button>
                                         </label>
                                         <input type="range" id="prep-rotation-fine" min="${ROTATION_FINE_MIN}" max="${ROTATION_FINE_MAX}" value="0" step="0.5"
-                                               oninput="travauxPreparation.rotationFine(this.value)">
+                                               data-on-input="travauxPreparation.rotationFineHandler">
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Section Decoupe -->
                             <div class="prep-section" id="prep-section-decoupe">
-                                <div class="prep-section-label" onclick="travauxPreparation.toggleSection('decoupe')">Découpe</div>
+                                <div class="prep-section-label" data-action="travauxPreparation.toggleSection" data-param="decoupe">Découpe</div>
                                 <div class="prep-section-sous-titre">cadrage et perspective</div>
                                 <div class="prep-section-body">
                                     <div class="prep-btn-row">
-                                        <button class="prep-btn" onclick="travauxPreparation.activerCrop()">Recadrage</button>
-                                        <button class="prep-btn" onclick="travauxPreparation.activerPerspective()">Perspective</button>
+                                        <button class="prep-btn" data-action="travauxPreparation.activerCrop">Recadrage</button>
+                                        <button class="prep-btn" data-action="travauxPreparation.activerPerspective">Perspective</button>
                                     </div>
                                     <div class="prep-option-row" id="prep-persp-fill-row" style="display:none;">
                                         <label class="prep-option-label">Remplissage</label>
                                         <select id="prep-persp-fill" class="prep-select"
-                                                onchange="travauxPreparation.changerRemplissagePerspective(this.value)">
+                                                data-on-change="travauxPreparation.changerRemplissagePerspectiveHandler">
                                             <option value="none">Aucun (transparent)</option>
                                             <option value="white" selected>Blanc</option>
                                             <option value="auto">Auto (couleur de page)</option>
@@ -2556,47 +2556,47 @@
 
                             <!-- Section Image -->
                             <div class="prep-section" id="prep-section-image">
-                                <div class="prep-section-label" onclick="travauxPreparation.toggleSection('image')">Image</div>
+                                <div class="prep-section-label" data-action="travauxPreparation.toggleSection" data-param="image">Image</div>
                                 <div class="prep-section-sous-titre">ajustements visuels</div>
                                 <div class="prep-section-body">
                                     <div class="prep-slider-groupe">
                                         <label>Luminosite</label>
                                         <input type="range" id="prep-luminosite" min="${LUMINOSITE_MIN}" max="${LUMINOSITE_MAX}" value="0"
-                                               oninput="travauxPreparation.changerLuminosite(this.value)">
+                                               data-on-input="travauxPreparation.changerLuminositeHandler">
                                     </div>
                                     <div class="prep-slider-groupe">
                                         <label>Contraste</label>
                                         <input type="range" id="prep-contraste" min="${CONTRASTE_MIN}" max="${CONTRASTE_MAX}" value="0"
-                                               oninput="travauxPreparation.changerContraste(this.value)">
+                                               data-on-input="travauxPreparation.changerContrasteHandler">
                                     </div>
                                     <div class="prep-slider-groupe">
                                         <label>Exposition <span id="prep-exposition-valeur" class="texte-muted">0</span></label>
                                         <input type="range" id="prep-exposition" min="${EXPOSITION_MIN}" max="${EXPOSITION_MAX}" value="0" step="1"
-                                               oninput="travauxPreparation.changerExposition(this.value)">
+                                               data-on-input="travauxPreparation.changerExpositionHandler">
                                     </div>
                                     <div class="prep-btn-row">
-                                        <button class="prep-btn" id="prep-btn-balance" onclick="travauxPreparation.activerBalanceBlancs()">Balance des blancs</button>
-                                        <button class="prep-btn" onclick="travauxPreparation.basculerNiveauxDeGris()">Niveaux de gris</button>
+                                        <button class="prep-btn" id="prep-btn-balance" data-action="travauxPreparation.activerBalanceBlancs">Balance des blancs</button>
+                                        <button class="prep-btn" data-action="travauxPreparation.basculerNiveauxDeGris">Niveaux de gris</button>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Section Import (reglages par fichier) -->
                             <div class="prep-section" id="prep-section-import">
-                                <div class="prep-section-label" onclick="travauxPreparation.toggleSection('import')">Import</div>
+                                <div class="prep-section-label" data-action="travauxPreparation.toggleSection" data-param="import">Import</div>
                                 <div class="prep-section-sous-titre">r\u00e9glages par fichier</div>
                                 <div class="prep-section-body">
                                     <div class="prep-option-row">
                                         <label class="prep-option-label">
                                             <input type="checkbox" id="prep-opt-balance"
-                                                   onchange="travauxPreparation.changerOptBalance(!this.checked)">
+                                                   data-on-change="travauxPreparation.changerOptBalanceHandler">
                                             Ne pas faire de Balance des blancs pour ce document
                                         </label>
                                     </div>
                                     <div class="prep-option-row">
                                         <label class="prep-option-label">
                                             <input type="checkbox" id="prep-opt-resolution"
-                                                   onchange="travauxPreparation.changerOptResolution(this.checked)">
+                                                   data-on-change="travauxPreparation.changerOptResolutionHandler">
                                             Conserver la r\u00e9solution originale
                                         </label>
                                     </div>
@@ -2605,8 +2605,8 @@
 
                         </div>
                         <div class="prep-palette-footer">
-                            <button class="prep-btn" onclick="travauxPreparation.annulerDerniere()">Annuler</button>
-                            <button class="prep-btn" onclick="travauxPreparation.reinitialiser()">Reinit.</button>
+                            <button class="prep-btn" data-action="travauxPreparation.annulerDerniere">Annuler</button>
+                            <button class="prep-btn" data-action="travauxPreparation.reinitialiser">Reinit.</button>
                         </div>
                     </div>
                 </div>
@@ -2816,6 +2816,45 @@
     }
 
     /* ===============================
+       WRAPPERS DELEGATION (Phase 5)
+       =============================== */
+
+    /** Handler oninput pour rotationFine(value) */
+    function rotationFineHandler(el) {
+        rotationFine(el.value);
+    }
+
+    /** Handler oninput pour changerLuminosite(value) */
+    function changerLuminositeHandler(el) {
+        changerLuminosite(el.value);
+    }
+
+    /** Handler oninput pour changerContraste(value) */
+    function changerContrasteHandler(el) {
+        changerContraste(el.value);
+    }
+
+    /** Handler oninput pour changerExposition(value) */
+    function changerExpositionHandler(el) {
+        changerExposition(el.value);
+    }
+
+    /** Handler onchange pour changerRemplissagePerspective(value) */
+    function changerRemplissagePerspectiveHandler(el) {
+        changerRemplissagePerspective(el.value);
+    }
+
+    /** Handler onchange pour changerOptBalance(!checked) — note: negation */
+    function changerOptBalanceHandler(el) {
+        changerOptBalance(!el.checked);
+    }
+
+    /** Handler onchange pour changerOptResolution(checked) */
+    function changerOptResolutionHandler(el) {
+        changerOptResolution(el.checked);
+    }
+
+    /* ===============================
        EXPORTS GLOBAUX
        =============================== */
 
@@ -2855,6 +2894,14 @@
         // Palettes
         togglePalette: togglePalette,
         toggleSection: toggleSection,
+        // Wrappers delegation (Phase 5)
+        rotationFineHandler: rotationFineHandler,
+        changerLuminositeHandler: changerLuminositeHandler,
+        changerContrasteHandler: changerContrasteHandler,
+        changerExpositionHandler: changerExpositionHandler,
+        changerRemplissagePerspectiveHandler: changerRemplissagePerspectiveHandler,
+        changerOptBalanceHandler: changerOptBalanceHandler,
+        changerOptResolutionHandler: changerOptResolutionHandler,
         // Zoom
         prepZoomFit: prepZoomFit,
         // Batch
