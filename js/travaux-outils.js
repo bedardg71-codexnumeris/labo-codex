@@ -350,10 +350,10 @@
         let html = '<div class="travaux-palette-barre">';
         html += '<span class="travaux-palette-titre">Tampons</span>';
         html += '<div style="display:flex; gap:2px;">';
-        html += '<button class="travaux-palette-toggle" onclick="travauxOutils.ouvrirEditionRetroObservations()" title="Personnaliser les rétroactions">\u2699</button>';
-        html += '<button class="travaux-palette-toggle" onclick="tamponsBibliotheque.afficherBibliothequeTampons()" title="Bibliothèque de tampons">\uD83D\uDCDA</button>';
-        html += '<button class="travaux-palette-toggle" onclick="travauxOutils.togglePaletteTamponsReplie()" title="Replier">−</button>';
-        html += '<button class="travaux-palette-toggle" onclick="travauxOutils.fermerPaletteAutocollants()" title="Fermer">×</button>';
+        html += '<button class="travaux-palette-toggle" data-action="travauxOutils.ouvrirEditionRetroObservations" title="Personnaliser les rétroactions">\u2699</button>';
+        html += '<button class="travaux-palette-toggle" data-action="tamponsBibliotheque.afficherBibliothequeTampons" title="Bibliothèque de tampons">\uD83D\uDCDA</button>';
+        html += '<button class="travaux-palette-toggle" data-action="travauxOutils.togglePaletteTamponsReplie" title="Replier">−</button>';
+        html += '<button class="travaux-palette-toggle" data-action="travauxOutils.fermerPaletteAutocollants" title="Fermer">×</button>';
         html += '</div></div>';
 
         // Contenu (réutilise la fonction partagée)
@@ -764,7 +764,7 @@
         obtenirCodesOrdonnes().forEach((c, idx) => {
             const outil = OUTILS[c.id];
             const actif = outilActif === c.id ? ' actif' : '';
-            html += `<div class="travaux-errfr-item${actif}" onclick="travauxOutils.setOutilActif('${c.id}')" title="${c.nom}">`;
+            html += `<div class="travaux-errfr-item${actif}" data-action="travauxOutils.setOutilActif" data-param="${c.id}" title="${c.nom}">`;
             html += `<span class="travaux-errfr-numero" style="background:${outil.couleurBouton}">${idx + 1}</span>`;
             html += `<span class="travaux-errfr-nom">${c.nom}</span>`;
             html += `<span class="travaux-errfr-compteur u-hide" data-erreur="${c.id}"></span>`;
@@ -793,7 +793,7 @@
                 if (elemMasques.indexOf(a.id) !== -1) return;
                 var imgSrc = imagesAutocollants[a.id] ? imagesAutocollants[a.id].src : (a.fichier ? DOSSIER_AUTOCOLLANTS + a.fichier : '');
                 var actif = (getAutocollantActif() === a.id) ? ' actif' : '';
-                r += '<div class="travaux-autocollant-item' + actif + '"' + (borderStyle ? ' style="' + borderStyle + '"' : '') + ' onclick="travauxOutils.setAutocollantActif(\'' + a.id + '\')" title="' + a.nom + '">';
+                r += '<div class="travaux-autocollant-item' + actif + '"' + (borderStyle ? ' style="' + borderStyle + '"' : '') + ' data-action="travauxOutils.setAutocollantActif" data-param="' + a.id + '" title="' + a.nom + '">';
                 if (imgSrc) {
                     r += '<img src="' + imgSrc + '" alt="' + a.nom + '">';
                 } else {
@@ -819,7 +819,7 @@
                     if (elemMasques.indexOf(id) !== -1) return;
                     var outil = OUTILS[id];
                     var actif = outilActif === id ? ' actif' : '';
-                    html += '<div class="travaux-autocollant-item' + actif + '" onclick="travauxOutils.setOutilActif(\'' + id + '\')" title="' + outil.nom + '">';
+                    html += '<div class="travaux-autocollant-item' + actif + '" data-action="travauxOutils.setOutilActif" data-param="' + id + '" title="' + outil.nom + '">';
                     html += '<span style="font-size:24px; color:' + outil.couleurBouton + '; font-weight:bold;">' + outil.icone + '</span>';
                     html += '<span>' + outil.nom + '</span></div>';
                 });
@@ -827,7 +827,7 @@
                     var outil = OUTILS[s.id];
                     if (!outil) return;
                     var actif = outilActif === s.id ? ' actif' : '';
-                    html += '<div class="travaux-autocollant-item' + actif + '" onclick="travauxOutils.setOutilActif(\'' + s.id + '\')" title="' + outil.nom + '">';
+                    html += '<div class="travaux-autocollant-item' + actif + '" data-action="travauxOutils.setOutilActif" data-param="' + s.id + '" title="' + outil.nom + '">';
                     html += '<span style="font-size:24px; color:' + outil.couleurBouton + '; font-weight:bold;">' + outil.icone + '</span>';
                     html += '<span>' + outil.nom + '</span></div>';
                 });
@@ -866,9 +866,9 @@
         let html = '<div class="travaux-palette-barre">';
         html += '<span class="travaux-palette-titre">Erreurs de français</span>';
         html += '<div style="display:flex; gap:2px;">';
-        html += '<button class="travaux-palette-toggle" onclick="travauxOutils.ouvrirEditionRetroErreursFr()" title="Personnaliser les rétroactions">\u2699</button>';
-        html += '<button class="travaux-palette-toggle" onclick="travauxOutils.togglePaletteErrFrReplie()" title="Replier">\u2212</button>';
-        html += '<button class="travaux-palette-toggle" onclick="travauxOutils.fermerPaletteErreursFrancais()" title="Fermer">\u00d7</button>';
+        html += '<button class="travaux-palette-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="Personnaliser les rétroactions">\u2699</button>';
+        html += '<button class="travaux-palette-toggle" data-action="travauxOutils.togglePaletteErrFrReplie" title="Replier">\u2212</button>';
+        html += '<button class="travaux-palette-toggle" data-action="travauxOutils.fermerPaletteErreursFrancais" title="Fermer">\u00d7</button>';
         html += '</div></div>';
 
         // Contenu : liste verticale (réutilise la fonction partagée)
@@ -1187,7 +1187,7 @@
         html += '<div class="travaux-palette-barre">';
         html += '<span class="travaux-palette-titre">Annotation</span>';
         html += '<div>';
-        html += '<button class="travaux-palette-toggle" onclick="travauxOutils.togglePaletteReplie()" title="Replier/Deplier">&#x2212;</button>';
+        html += '<button class="travaux-palette-toggle" data-action="travauxOutils.togglePaletteReplie" title="Replier/Deplier">&#x2212;</button>';
         html += '</div>';
         html += '</div>';
 
@@ -1203,10 +1203,10 @@
         outilsDessin.forEach(id => {
             const outil = OUTILS[id];
             const actif = outilActif === id ? ' actif' : '';
-            html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" onclick="travauxOutils.setOutilActif('${id}')" title="${outil.nom}">${outil.icone}</button>`;
+            html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" data-action="travauxOutils.setOutilActif" data-param="${id}" title="${outil.nom}">${outil.icone}</button>`;
             // Bouton Dupliquer juste apres Selection
             if (id === 'selection') {
-                html += '<button class="travaux-btn-outil" id="travaux-btn-dupliquer" onclick="travauxAnnotation.dupliquerSelection()" title="Dupliquer la s\u00e9lection">Dupliquer</button>';
+                html += '<button class="travaux-btn-outil" id="travaux-btn-dupliquer" data-action="travauxAnnotation.dupliquerSelection" title="Dupliquer la s\u00e9lection">Dupliquer</button>';
             }
         });
 
@@ -1222,7 +1222,7 @@
             const outil = OUTILS[id];
             const actif = outilActif === id ? ' actif' : '';
             const styleCouleur = outil.couleurBouton ? ` style="color:${outil.couleurBouton}; font-weight:bold;"` : '';
-            html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" onclick="travauxOutils.setOutilActif('${id}')" title="${outil.nom}"${styleCouleur}>${outil.icone}</button>`;
+            html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" data-action="travauxOutils.setOutilActif" data-param="${id}" title="${outil.nom}"${styleCouleur}>${outil.icone}</button>`;
         });
 
         html += '</div></div>';
@@ -1240,7 +1240,7 @@
         ];
         modes.forEach(m => {
             const act = flechePointes === m.val ? ' actif' : '';
-            html += `<button class="travaux-btn-outil${act}" data-pointes="${m.val}" onclick="travauxOutils.setFlechePointes('${m.val}')" title="${m.titre}">${m.label}</button>`;
+            html += `<button class="travaux-btn-outil${act}" data-pointes="${m.val}" data-action="travauxOutils.setFlechePointes" data-param="${m.val}" title="${m.titre}">${m.label}</button>`;
         });
         html += '</div></div>';
 
@@ -1251,7 +1251,7 @@
 
         COULEURS.forEach(c => {
             const actif = couleurActive === c.hex ? ' actif' : '';
-            html += `<button class="travaux-btn-couleur${actif}" data-couleur="${c.hex}" onclick="travauxOutils.setCouleurActive('${c.hex}')" title="${c.nom}" style="background-color: ${c.hex}"></button>`;
+            html += `<button class="travaux-btn-couleur${actif}" data-couleur="${c.hex}" data-action="travauxOutils.setCouleurActive" data-param="${c.hex}" title="${c.nom}" style="background-color: ${c.hex}"></button>`;
         });
 
         html += '</div></div>';
@@ -1263,9 +1263,9 @@
         html += '<div class="travaux-palette-section">';
         html += '<div class="travaux-palette-label">Epaisseur <span id="travaux-epaisseur-px" class="travaux-epaisseur-px">' + getEpaisseurReellePixels() + 'px</span></div>';
         html += '<div class="travaux-epaisseur-controles">';
-        html += `<button class="travaux-btn-epaisseur-inc" onclick="travauxOutils.decrementerEpaisseur()" title="Moins fin">\u2190</button>`;
-        html += `<input type="range" class="travaux-slider-epaisseur" id="travaux-slider-epaisseur" min="${minEp}" max="${maxEp}" value="${epaisseurActive}" oninput="travauxOutils.setEpaisseurActive(parseInt(this.value))">`;
-        html += `<button class="travaux-btn-epaisseur-inc" onclick="travauxOutils.incrementerEpaisseur()" title="Plus \u00e9pais">\u2192</button>`;
+        html += `<button class="travaux-btn-epaisseur-inc" data-action="travauxOutils.decrementerEpaisseur" title="Moins fin">\u2190</button>`;
+        html += `<input type="range" class="travaux-slider-epaisseur" id="travaux-slider-epaisseur" min="${minEp}" max="${maxEp}" value="${epaisseurActive}" data-on-input="travauxOutils.setEpaisseurActiveFromSlider">`;
+        html += `<button class="travaux-btn-epaisseur-inc" data-action="travauxOutils.incrementerEpaisseur" title="Plus \u00e9pais">\u2192</button>`;
         html += '</div>';
         html += '<div class="travaux-apercu-trait" id="travaux-apercu-trait"></div>';
         html += '</div>';
@@ -1274,10 +1274,10 @@
 
         // Pied de palette : Undo / Redo / Effacer
         html += '<div class="travaux-palette-pied">';
-        html += '<button id="travaux-btn-undo" class="travaux-palette-btn-pied" onclick="travauxAnnotation.annuler()" disabled title="Annuler (Ctrl+Z)">Annuler</button>';
-        html += '<button id="travaux-btn-redo" class="travaux-palette-btn-pied" onclick="travauxAnnotation.retablir()" disabled title="Retablir (Ctrl+Y)">R\u00e9tablir</button>';
-        html += '<button id="travaux-btn-supprimer" class="travaux-palette-btn-pied" onclick="travauxAnnotation.supprimerSelection()" disabled title="Supprimer la sélection (Delete)">Supprimer</button>';
-        html += '<button class="travaux-palette-btn-pied travaux-palette-btn-danger" onclick="travauxAnnotation.effacerPage()" title="Effacer toute la page">Effacer tout</button>';
+        html += '<button id="travaux-btn-undo" class="travaux-palette-btn-pied" data-action="travauxAnnotation.annuler" disabled title="Annuler (Ctrl+Z)">Annuler</button>';
+        html += '<button id="travaux-btn-redo" class="travaux-palette-btn-pied" data-action="travauxAnnotation.retablir" disabled title="Retablir (Ctrl+Y)">R\u00e9tablir</button>';
+        html += '<button id="travaux-btn-supprimer" class="travaux-palette-btn-pied" data-action="travauxAnnotation.supprimerSelection" disabled title="Supprimer la sélection (Delete)">Supprimer</button>';
+        html += '<button class="travaux-palette-btn-pied travaux-palette-btn-danger" data-action="travauxAnnotation.effacerPage" title="Effacer toute la page">Effacer tout</button>';
         html += '</div>';
 
         html += '</div>'; // fin .travaux-palette-flottante
@@ -1472,20 +1472,20 @@
             var coulCat = couleursCat[catId] || '#888888';
             html += '<div class="travaux-retro-cat-draggable" style="display:flex; gap:8px; align-items:center;" data-cat-row="' + catId + '"' + (estPerso ? ' data-cat-perso-id="' + catId + '"' : '') + ' draggable="true">';
             html += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner" style="cursor:grab;">\u2630</span>';
-            html += '<button class="travaux-retro-btn-supprimer" onclick="travauxOutils.supprimerCategorieRetroObs(\'' + catId + '\')" title="Supprimer la cat\u00e9gorie" style="min-width:auto;">&times;</button>';
+            html += '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerCategorieRetroObs" data-param="' + catId + '" title="Supprimer la cat\u00e9gorie" style="min-width:auto;">&times;</button>';
             html += '<div class="travaux-retro-couleur" style="background:' + coulCat + ';" data-couleur-cat-id="' + catId + '" title="Couleur de la cat\u00e9gorie">';
             html += '<input type="color" class="travaux-retro-couleur-input" data-color-cat-id="' + catId + '" value="' + coulCat + '">';
             html += '</div>';
             html += '<input type="text" class="travaux-retro-nom-input" data-cat-id="' + catId + '"' + (estPerso ? ' data-cat-perso-id="' + catId + '"' : '') + ' value="' + (nomsCat[catId] || '') + '">';
             html += '</div>';
         });
-        html += '<button class="btn btn-secondaire" onclick="travauxOutils.ajouterCategorieRetroObs()" style="margin-top:4px;font-size:0.8rem;align-self:flex-start;">+ Ajouter une cat\u00e9gorie</button>';
+        html += '<button class="btn btn-secondaire" data-action="travauxOutils.ajouterCategorieRetroObs" style="margin-top:4px;font-size:0.8rem;align-self:flex-start;">+ Ajouter une cat\u00e9gorie</button>';
         html += '</div>';
 
         // Helper pour generer une ligne de tampon
         function _htmlRowTampon(a, texte, imgSrc) {
             var estCustom = a.custom ? ' data-custom="true"' : '';
-            var btnSuppr = '<button class="travaux-retro-btn-supprimer" onclick="travauxOutils.supprimerTamponRetroObs(\'' + a.id + '\')" title="Supprimer">&times;</button>';
+            var btnSuppr = '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerTamponRetroObs" data-param="' + a.id + '" title="Supprimer">&times;</button>';
             var r = '<div class="travaux-retro-row travaux-retro-draggable" data-obs-id="' + a.id + '"' + estCustom + ' draggable="true">';
             r += '<div class="travaux-retro-row-haut">';
             r += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>';
@@ -1504,7 +1504,7 @@
         // Helper pour generer une ligne de symbole Unicode
         function _htmlRowSymbole(id, outil, texte, estCustom) {
             var couleur = outil.couleurBouton;
-            var btnSuppr = '<button class="travaux-retro-btn-supprimer" onclick="travauxOutils.supprimerSymboleRetroObs(\'' + id + '\')" title="Supprimer">&times;</button>';
+            var btnSuppr = '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerSymboleRetroObs" data-param="' + id + '" title="Supprimer">&times;</button>';
             var r = '<div class="travaux-retro-row' + (estCustom ? ' travaux-retro-draggable' : '') + '" data-obs-id="' + id + '"' + (estCustom ? ' data-sym-custom="true" draggable="true"' : '') + '>';
             r += '<div class="travaux-retro-row-haut">';
             if (estCustom) r += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>';
@@ -1555,8 +1555,8 @@
                 });
                 html += '</div>';
                 html += '<div style="display:flex; gap:8px; margin-top:8px;">';
-                html += '<button class="btn btn-secondaire" onclick="travauxOutils.ajouterSymboleRetroObs()" style="font-size:0.8rem;">+ Symbole</button>';
-                html += '<button class="btn btn-secondaire" onclick="travauxOutils.ajouterTamponRetroObs(\'symboles\')" style="font-size:0.8rem;">+ Tampon image</button>';
+                html += '<button class="btn btn-secondaire" data-action="travauxOutils.ajouterSymboleRetroObs" style="font-size:0.8rem;">+ Symbole</button>';
+                html += '<button class="btn btn-secondaire" data-action="travauxOutils.ajouterTamponRetroObs" data-param="symboles" style="font-size:0.8rem;">+ Tampon image</button>';
                 html += '</div>';
             } else {
                 // Categorie tampons image (qualite, diagnostic, ou perso)
@@ -1568,20 +1568,20 @@
                     html += _htmlRowTampon(a, texte, imgSrc);
                 });
                 html += '</div>';
-                html += '<button class="btn btn-secondaire" onclick="travauxOutils.ajouterTamponRetroObs(\'' + catId + '\')" style="margin-top:8px;font-size:0.8rem;">+ Ajouter</button>';
+                html += '<button class="btn btn-secondaire" data-action="travauxOutils.ajouterTamponRetroObs" data-param="' + catId + '" style="margin-top:8px;font-size:0.8rem;">+ Ajouter</button>';
             }
         });
 
         html += '<div style="display:flex; gap:8px; margin:16px 0 8px; border-top:1px solid var(--bordure-claire); padding-top:12px;">';
-        html += '<button class="btn btn-secondaire" onclick="travauxOutils.exporterTampons()" style="font-size:0.8rem;">Exporter mes tampons</button>';
-        html += '<button class="btn btn-secondaire" onclick="document.getElementById(\'fichier-import-tampons\').click()" style="font-size:0.8rem;">Importer des tampons</button>';
-        html += '<input type="file" id="fichier-import-tampons" accept=".json" style="display:none;" onchange="travauxOutils.importerTampons(event)">';
+        html += '<button class="btn btn-secondaire" data-action="travauxOutils.exporterTampons" style="font-size:0.8rem;">Exporter mes tampons</button>';
+        html += '<button class="btn btn-secondaire" data-action="travauxOutils.ouvrirFilePickerImportTampons" style="font-size:0.8rem;">Importer des tampons</button>';
+        html += '<input type="file" id="fichier-import-tampons" accept=".json" style="display:none;" data-on-change="travauxOutils.importerTampons">';
         html += '</div>';
 
         html += '<div class="travaux-retro-actions">';
-        html += '<button class="btn btn-annuler" onclick="travauxOutils.reinitialiserRetroObservations()">R\u00e9initialiser</button>';
-        html += '<button class="btn btn-secondaire" onclick="document.getElementById(\'modal-retro-observations\').remove()">Annuler</button>';
-        html += '<button class="btn btn-principal" onclick="travauxOutils.enregistrerRetroObservations()">Enregistrer</button>';
+        html += '<button class="btn btn-annuler" data-action="travauxOutils.reinitialiserRetroObservations">R\u00e9initialiser</button>';
+        html += '<button class="btn btn-secondaire" data-action="travauxOutils.fermerModalRetroObservations">Annuler</button>';
+        html += '<button class="btn btn-principal" data-action="travauxOutils.enregistrerRetroObservations">Enregistrer</button>';
         html += '</div>';
         html += '</div>';
 
@@ -1969,7 +1969,7 @@
                     '<input type="file" accept="image/*" data-file-id="' + id + '" hidden>' +
                 '</div>' +
                 '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + id + '" value="" placeholder="Nom du tampon">' +
-                '<button class="travaux-retro-btn-supprimer" onclick="travauxOutils.supprimerTamponRetroObs(\'' + id + '\')" title="Supprimer">&times;</button>' +
+                '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerTamponRetroObs" data-param="' + id + '" title="Supprimer">&times;</button>' +
             '</div>' +
             '<textarea class="travaux-retro-textarea" data-retro-id="' + id + '" rows="3"></textarea>';
 
@@ -2033,7 +2033,7 @@
                 '</div>' +
                 '<input type="text" class="travaux-retro-icone-input" data-icone-id="' + id + '" value="" placeholder="\u2605" title="Caract\u00e8re Unicode" style="color:' + couleur + ';">' +
                 '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + id + '" value="" placeholder="Nom du symbole">' +
-                '<button class="travaux-retro-btn-supprimer" onclick="travauxOutils.supprimerSymboleRetroObs(\'' + id + '\')" title="Supprimer">&times;</button>' +
+                '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerSymboleRetroObs" data-param="' + id + '" title="Supprimer">&times;</button>' +
             '</div>' +
             '<textarea class="travaux-retro-textarea" data-retro-id="' + id + '" rows="3"></textarea>';
 
@@ -2084,7 +2084,7 @@
         var coulDefaut = '#888888';
         rowDiv.innerHTML =
             '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner" style="cursor:grab;">\u2630</span>' +
-            '<button class="travaux-retro-btn-supprimer" onclick="travauxOutils.supprimerCategorieRetroObs(\'' + id + '\')" title="Supprimer la cat\u00e9gorie" style="min-width:auto;">&times;</button>' +
+            '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerCategorieRetroObs" data-param="' + id + '" title="Supprimer la cat\u00e9gorie" style="min-width:auto;">&times;</button>' +
             '<div class="travaux-retro-couleur" style="background:' + coulDefaut + ';" data-couleur-cat-id="' + id + '" title="Couleur de la cat\u00e9gorie">' +
                 '<input type="color" class="travaux-retro-couleur-input" data-color-cat-id="' + id + '" value="' + coulDefaut + '">' +
             '</div>' +
@@ -2279,8 +2279,9 @@
     /**
      * Importe des tampons depuis un fichier JSON
      */
-    function importerTampons(event) {
-        var file = event.target.files[0];
+    function importerTampons(eventOuEl) {
+        var target = eventOuEl.target || eventOuEl;
+        var file = target.files[0];
         if (!file) return;
 
         var reader = new FileReader();
@@ -2312,8 +2313,8 @@
                         '<div class="modal-js-contenu" style="max-width: 500px;">' +
                             message +
                             '<div style="display:flex; gap:8px; margin-top:15px; justify-content:flex-end;">' +
-                                '<button class="btn btn-secondaire" onclick="this.closest(\'.modal-js-overlay\').parentElement.remove(); delete window._tamponsImportEnAttente;">Annuler</button>' +
-                                '<button class="btn btn-principal" onclick="travauxOutils.confirmerImportTampons(window._tamponsImportEnAttente); this.closest(\'.modal-js-overlay\').parentElement.remove(); delete window._tamponsImportEnAttente;">Importer</button>' +
+                                '<button class="btn btn-secondaire" data-action="travauxOutils.fermerModalImportTampons">Annuler</button>' +
+                                '<button class="btn btn-principal" data-action="travauxOutils.confirmerEtFermerImportTampons">Importer</button>' +
                             '</div>' +
                         '</div>' +
                     '</div>';
@@ -2444,8 +2445,8 @@
         const modeSynthese = obtenirModeSyntheseErrFr();
         html += '<div class="travaux-errfr-reglage">';
         html += '<span class="travaux-errfr-reglage-label">Synth\u00e8se PDF\u00a0:</span>';
-        html += '<label><input type="radio" name="errfr-synthese" value="principale"' + (modeSynthese === 'principale' ? ' checked' : '') + ' onchange="travauxOutils.changerModeSyntheseErrFr(\'principale\')"> Erreur principale</label>';
-        html += '<label><input type="radio" name="errfr-synthese" value="toutes"' + (modeSynthese === 'toutes' ? ' checked' : '') + ' onchange="travauxOutils.changerModeSyntheseErrFr(\'toutes\')"> Toutes les erreurs</label>';
+        html += '<label><input type="radio" name="errfr-synthese" value="principale"' + (modeSynthese === 'principale' ? ' checked' : '') + ' data-on-change="travauxOutils.changerModeSyntheseErrFr" data-param="principale"> Erreur principale</label>';
+        html += '<label><input type="radio" name="errfr-synthese" value="toutes"' + (modeSynthese === 'toutes' ? ' checked' : '') + ' data-on-change="travauxOutils.changerModeSyntheseErrFr" data-param="toutes"> Toutes les erreurs</label>';
         html += '</div>';
 
         html += '<div id="travaux-retro-errfr-liste">';
@@ -2467,9 +2468,9 @@
         html += '</div>';
 
         html += '<div class="travaux-retro-actions">';
-        html += '<button class="btn-secondaire" onclick="travauxOutils.reinitialiserRetroErreursFr()">R\u00e9initialiser</button>';
-        html += '<button class="btn-secondaire" onclick="document.getElementById(\'modal-retro-erreurs-fr\').remove()">Annuler</button>';
-        html += '<button class="btn-principal" onclick="travauxOutils.enregistrerRetroErreursFr()">Enregistrer</button>';
+        html += '<button class="btn-secondaire" data-action="travauxOutils.reinitialiserRetroErreursFr">R\u00e9initialiser</button>';
+        html += '<button class="btn-secondaire" data-action="travauxOutils.fermerModalRetroErreursFr">Annuler</button>';
+        html += '<button class="btn-principal" data-action="travauxOutils.enregistrerRetroErreursFr">Enregistrer</button>';
         html += '</div>';
         html += '</div>';
 
@@ -2660,6 +2661,46 @@
         return db.getSync('errfrModeSynthese', 'principale');
     }
 
+    /* ===============================
+       WRAPPERS DELEGATION (Phase 5)
+       =============================== */
+
+    /** Handler slider épaisseur (oninput) */
+    function setEpaisseurActiveFromSlider(el) {
+        setEpaisseurActive(parseInt(el.value));
+    }
+
+    /** Ouvrir file picker import tampons */
+    function ouvrirFilePickerImportTampons() {
+        var input = document.getElementById('fichier-import-tampons');
+        if (input) input.click();
+    }
+
+    /** Fermer modal retro observations */
+    function fermerModalRetroObservations() {
+        var modal = document.getElementById('modal-retro-observations');
+        if (modal) modal.remove();
+    }
+
+    /** Fermer modal retro erreurs français */
+    function fermerModalRetroErreursFr() {
+        var modal = document.getElementById('modal-retro-erreurs-fr');
+        if (modal) modal.remove();
+    }
+
+    /** Fermer modal import tampons */
+    function fermerModalImportTampons() {
+        var overlay = document.querySelector('.modal-js-overlay');
+        if (overlay && overlay.parentElement) overlay.parentElement.remove();
+        delete window._tamponsImportEnAttente;
+    }
+
+    /** Confirmer import tampons + fermer */
+    function confirmerEtFermerImportTampons() {
+        confirmerImportTampons(window._tamponsImportEnAttente);
+        fermerModalImportTampons();
+    }
+
     window.travauxOutils = {
         // Constantes
         COULEURS: COULEURS,
@@ -2745,7 +2786,14 @@
         obtenirModeSyntheseErrFr: obtenirModeSyntheseErrFr,
         // Bibliothèque de tampons — accès aux données
         obtenirAutocollants: function() { return AUTOCOLLANTS; },
-        obtenirImageAutocollant: function(id) { return imagesAutocollants[id] || null; }
+        obtenirImageAutocollant: function(id) { return imagesAutocollants[id] || null; },
+        // Wrappers delegation (Phase 5)
+        setEpaisseurActiveFromSlider: setEpaisseurActiveFromSlider,
+        ouvrirFilePickerImportTampons: ouvrirFilePickerImportTampons,
+        fermerModalRetroObservations: fermerModalRetroObservations,
+        fermerModalRetroErreursFr: fermerModalRetroErreursFr,
+        fermerModalImportTampons: fermerModalImportTampons,
+        confirmerEtFermerImportTampons: confirmerEtFermerImportTampons
     };
 
 })();
