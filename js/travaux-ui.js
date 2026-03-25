@@ -459,7 +459,7 @@
                     '<div class="annot-section-barre" data-section="errfr">' +
                         '<span class="annot-section-titre">' + titreCodes + '</span>' +
                         '<div style="display:flex; gap:2px;">' +
-                            '<button class="travaux-palette-toggle" onclick="travauxOutils.ouvrirEditionRetroErreursFr()" title="Personnaliser">\u2699</button>' +
+                            '<button class="travaux-palette-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="Personnaliser">\u2699</button>' +
                             '<button class="travaux-palette-toggle annot-section-toggle" data-section="errfr" title="Replier">\u2212</button>' +
                         '</div>' +
                     '</div>' +
@@ -488,8 +488,8 @@
                     '<div class="annot-section-barre" data-section="tampons">' +
                         '<span class="annot-section-titre">Tampons</span>' +
                         '<div style="display:flex; gap:2px;">' +
-                            '<button class="travaux-palette-toggle" onclick="travauxOutils.ouvrirEditionRetroObservations()" title="Personnaliser">\u2699</button>' +
-                            '<button class="travaux-palette-toggle" onclick="tamponsBibliotheque.afficherBibliothequeTampons()" title="Bibliothèque de tampons">\uD83D\uDCDA</button>' +
+                            '<button class="travaux-palette-toggle" data-action="travauxOutils.ouvrirEditionRetroObservations" title="Personnaliser">\u2699</button>' +
+                            '<button class="travaux-palette-toggle" data-action="tamponsBibliotheque.afficherBibliothequeTampons" title="Bibliothèque de tampons">\uD83D\uDCDA</button>' +
                             '<button class="travaux-palette-toggle annot-section-toggle" data-section="tampons" title="Replier">\u2212</button>' +
                         '</div>' +
                     '</div>' +
@@ -787,7 +787,7 @@
                 <div class="travaux-fsapi-config" data-tooltip="travaux-fsapi-config">
                     ${fsapiActif
                         ? '<span class="travaux-fsapi-statut actif">Stockage sur disque actif</span>'
-                        : `<button class="btn btn-secondaire" onclick="travauxUI.configurerFSAPI()">Configurer le stockage sur disque</button>
+                        : `<button class="btn btn-secondaire" data-action="travauxUI.configurerFSAPI">Configurer le stockage sur disque</button>
                            <span class="texte-muted">Recommande sur Mac</span>`
                     }
                 </div>` : ''}
@@ -829,8 +829,8 @@
 
                     <div class="pipeline-actions-import">
                         <div class="pipeline-boutons-groupe" style="flex-direction:row;justify-content:center;">
-                            <button class="btn btn-principal" onclick="travauxUI.appliquerEtImporter()">Importer</button>
-                            <button class="btn btn-secondaire" onclick="travauxImport.viderFileDAttente(); travauxUI.afficherImport();">Annuler tout</button>
+                            <button class="btn btn-principal" data-action="travauxUI.appliquerEtImporter">Importer</button>
+                            <button class="btn btn-secondaire" data-action="travauxUI.annulerImport">Annuler tout</button>
                         </div>
                         <div class="pipeline-progression-container u-hide" id="pipeline-traitement-progression">
                             <div class="pipeline-progression-barre" id="pipeline-traitement-barre"></div>
@@ -966,23 +966,23 @@
                         </div>
                         <div class="annot-toolbar-separateur"></div>
                         <div class="annot-toolbar-outils">
-                            <button id="travaux-btn-page-prec" class="travaux-btn-nav" onclick="travauxVisionneuse.pagePrecedente()" disabled title="Page précédente">&#x2190;</button>
+                            <button id="travaux-btn-page-prec" class="travaux-btn-nav" data-action="travauxVisionneuse.pagePrecedente" disabled title="Page précédente">&#x2190;</button>
                             <span id="travaux-indicateur-page">-- / --</span>
-                            <button id="travaux-btn-page-suiv" class="travaux-btn-nav" onclick="travauxVisionneuse.pageSuivante()" disabled title="Page suivante">&#x2192;</button>
+                            <button id="travaux-btn-page-suiv" class="travaux-btn-nav" data-action="travauxVisionneuse.pageSuivante" disabled title="Page suivante">&#x2192;</button>
                             <span class="travaux-separateur"></span>
-                            <button id="travaux-btn-badge-prec" class="travaux-btn-nav" onclick="travauxUI.badgePrecedent()" disabled title="Fichier précédent">&#x2190;</button>
+                            <button id="travaux-btn-badge-prec" class="travaux-btn-nav" data-action="travauxUI.badgePrecedent" disabled title="Fichier précédent">&#x2190;</button>
                             <span id="travaux-compteur-badge" class="travaux-compteur-badge">-- / --</span>
-                            <button id="travaux-btn-badge-suiv" class="travaux-btn-nav" onclick="travauxUI.badgeSuivant()" disabled title="Fichier suivant">&#x2192;</button>
+                            <button id="travaux-btn-badge-suiv" class="travaux-btn-nav" data-action="travauxUI.badgeSuivant" disabled title="Fichier suivant">&#x2192;</button>
                             <span class="travaux-separateur"></span>
                             <span id="travaux-indicateur-zoom" class="travaux-zoom-info">100%</span>
-                            <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineLargeur()" title="Ajuster à la largeur">Largeur</button>
-                            <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoomPleineHauteur()" title="Ajuster à la hauteur">Hauteur</button>
-                            <button class="travaux-btn-zoom" onclick="travauxVisionneuse.zoom100()" title="Zoom 100%">100%</button>
+                            <button class="travaux-btn-zoom" data-action="travauxVisionneuse.zoomPleineLargeur" title="Ajuster à la largeur">Largeur</button>
+                            <button class="travaux-btn-zoom" data-action="travauxVisionneuse.zoomPleineHauteur" title="Ajuster à la hauteur">Hauteur</button>
+                            <button class="travaux-btn-zoom" data-action="travauxVisionneuse.zoom100" title="Zoom 100%">100%</button>
                             <span class="travaux-separateur"></span>
-                            <button id="travaux-btn-annoter" class="travaux-btn-action actif" onclick="travauxUI.basculerMode('annoter')" data-tooltip="travaux-btn-annoter">Annoter</button>
-                            <button id="travaux-btn-evaluer" class="travaux-btn-action travaux-btn-action-vert u-hide" onclick="travauxUI.basculerMode('evaluer')" title="Évaluer cette production" data-tooltip="travaux-btn-evaluer">Évaluer</button>
-                            <button id="travaux-btn-alleger" class="travaux-btn-action u-hide" onclick="travauxUI.allegerFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Alléger ce fichier" data-tooltip="travaux-btn-alleger">Alléger</button>
-                            <button id="travaux-btn-reimporter" class="travaux-btn-action u-hide" onclick="travauxUI.reimporterFichier(travauxVisionneuse.getFichierActuel()?.id)" title="Re-importer l'original" data-tooltip="travaux-btn-reimporter">Re-importer</button>
+                            <button id="travaux-btn-annoter" class="travaux-btn-action actif" data-action="travauxUI.basculerMode" data-param="annoter" data-tooltip="travaux-btn-annoter">Annoter</button>
+                            <button id="travaux-btn-evaluer" class="travaux-btn-action travaux-btn-action-vert u-hide" data-action="travauxUI.basculerMode" data-param="evaluer" title="Évaluer cette production" data-tooltip="travaux-btn-evaluer">Évaluer</button>
+                            <button id="travaux-btn-alleger" class="travaux-btn-action u-hide" data-action="travauxUI.allegerFichierActuel" title="Alléger ce fichier" data-tooltip="travaux-btn-alleger">Alléger</button>
+                            <button id="travaux-btn-reimporter" class="travaux-btn-action u-hide" data-action="travauxUI.reimporterFichierActuel" title="Re-importer l'original" data-tooltip="travaux-btn-reimporter">Re-importer</button>
                             <span class="travaux-separateur travaux-chrono-sep${db.getSync('preferencesAffichage', {}).chronoEvaluation ? '' : ' u-hide'}"></span>
                             <span id="travaux-chrono-badge" class="travaux-chrono-badge${db.getSync('preferencesAffichage', {}).chronoEvaluation ? '' : ' u-hide'}" title="Durée annotation + évaluation">⏱️ --:--</span>
                         </div>
@@ -1059,7 +1059,7 @@
                             </select>
                         </div>
                     </div>
-                    <button class="btn btn-principal" onclick="travauxUI.lancerArchivage()">Télécharger</button>
+                    <button class="btn btn-principal" data-action="travauxUI.lancerArchivage">Télécharger</button>
                 </div>
 
                 <!-- Semestre complet -->
@@ -1086,7 +1086,7 @@
                     <div class="travaux-barre-progression-container">
                         <div id="travaux-barre-progression" class="travaux-barre-progression"></div>
                     </div>
-                    <button class="btn btn-principal" onclick="travauxUI.lancerArchivageSemestre()">Télécharger archive</button>
+                    <button class="btn btn-principal" data-action="travauxUI.lancerArchivageSemestre">Télécharger archive</button>
                 </div>
 
                 <!-- Export Lea -->
@@ -1096,14 +1096,14 @@
                     <div class="travaux-archivage-filtres">
                         <div class="groupe-form">
                             <label>Production</label>
-                            <select id="travaux-archivage-lea-production" class="form-select" onchange="travauxUI.mettreAJourCompteurLea()">
+                            <select id="travaux-archivage-lea-production" class="form-select" data-on-change="travauxUI.mettreAJourCompteurLea">
                                 <option value="">— Choisir —</option>
                                 ${productions.map(p => `<option value="${p.id}">${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                             </select>
                         </div>
                         <div class="groupe-form">
                             <label>Étudiant·e</label>
-                            <select id="travaux-archivage-lea-etudiant" class="form-select" onchange="travauxUI.mettreAJourCompteurLea()">
+                            <select id="travaux-archivage-lea-etudiant" class="form-select" data-on-change="travauxUI.mettreAJourCompteurLea">
                                 <option value="">— Tous —</option>
                                 ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${e.da}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)} (${e.daAffichage || e.da})</option>`).join('')}
                             </select>
@@ -1114,7 +1114,7 @@
                     <div class="travaux-barre-progression-container">
                         <div id="travaux-barre-progression-lea" class="travaux-barre-progression"></div>
                     </div>
-                    <button class="btn btn-confirmer" onclick="travauxUI.lancerExportLea()">Exporter pour Lea</button>
+                    <button class="btn btn-confirmer" data-action="travauxUI.lancerExportLea">Exporter pour Lea</button>
                 </div>
             </div>
 
@@ -1122,7 +1122,7 @@
             <div class="travaux-archivage-carte">
                 <h4 data-tooltip="travaux-archivage-alleger">Alléger les travaux exportés</h4>
                 <p class="texte-muted">Convertit les originaux exportés en fac-similés (NdG, 800px). Les annotations et évaluations sont conservées.</p>
-                <button class="btn btn-secondaire" onclick="travauxArchivage.lancerAllegement()">Alléger les travaux exportés</button>
+                <button class="btn btn-secondaire" data-action="travauxArchivage.lancerAllegement">Alléger les travaux exportés</button>
             </div>
 
             <!-- Quota stockage -->
@@ -1464,15 +1464,15 @@
                 colGauche += `<div class="pipeline-groupe-encadre" data-groupe-id="${echapperHtml(groupeId)}">
                     <div class="pipeline-groupe-entete">
                         <span class="pipeline-groupe-badge">${indicesGroupe.length} pages &rarr; 1 PDF</span>
-                        <button class="pipeline-groupe-defaire" onclick="event.stopPropagation(); travauxUI.defaireGroupePipeline('${echapperHtml(groupeId)}')" title="Défaire le regroupement">&times;</button>
+                        <button class="pipeline-groupe-defaire" data-stop data-action="travauxUI.defaireGroupePipeline" data-param="${echapperHtml(groupeId)}" title="Défaire le regroupement">&times;</button>
                     </div>`;
             }
 
-            colGauche += `<div class="pipeline-fichier-ligne${selectionne ? ' pipeline-fichier-selectionne' : ''}${indicesGroupe ? ' pipeline-fichier-groupe' : ''}" onclick="travauxUI.selectionnerFichierPipeline(${index})">
+            colGauche += `<div class="pipeline-fichier-ligne${selectionne ? ' pipeline-fichier-selectionne' : ''}${indicesGroupe ? ' pipeline-fichier-groupe' : ''}" data-action="travauxUI.selectionnerFichierPipeline" data-param="${index}">
                 <span class="pipeline-fichier-numero">${index + 1}</span>
                 <div class="pipeline-reorder-btns">
-                    <button class="pipeline-btn-reorder" onclick="event.stopPropagation(); travauxUI.monterFichierPipeline(${index})" ${index === 0 ? 'disabled' : ''} title="Monter">&uarr;</button>
-                    <button class="pipeline-btn-reorder" onclick="event.stopPropagation(); travauxUI.descendreFichierPipeline(${index})" ${index === queue.length - 1 ? 'disabled' : ''} title="Descendre">&darr;</button>
+                    <button class="pipeline-btn-reorder" data-stop data-action="travauxUI.monterFichierPipeline" data-param="${index}" ${index === 0 ? 'disabled' : ''} title="Monter">&uarr;</button>
+                    <button class="pipeline-btn-reorder" data-stop data-action="travauxUI.descendreFichierPipeline" data-param="${index}" ${index === queue.length - 1 ? 'disabled' : ''} title="Descendre">&darr;</button>
                 </div>
                 <div class="pipeline-fichier-thumb-col" id="pipeline-original-${index}">
                     ${thumb ? `<img src="${thumb}" alt="">` : `<span class="pipeline-icone-placeholder">${icone}</span>`}
@@ -1482,7 +1482,7 @@
                     <span class="pipeline-meta-resolution">${resolution}</span>
                     <span class="pipeline-meta-taille">${poids}</span>
                 </div>
-                <button class="pipeline-btn-retirer" onclick="event.stopPropagation(); travauxUI.retirerFichierPipeline(${index});" title="Retirer ce fichier">&times;</button>
+                <button class="pipeline-btn-retirer" data-stop data-action="travauxUI.retirerFichierPipeline" data-param="${index}" title="Retirer ce fichier">&times;</button>
             </div>`;
 
             // Fin d'un groupe multi-fichiers
@@ -1501,7 +1501,7 @@
 
         colCentre += `<div class="pipeline-production-selecteur">
             <label>Production</label>
-            <select class="form-select" id="pipeline-select-production" onchange="travauxUI.associerProductionGlobale(this.value)">
+            <select class="form-select" id="pipeline-select-production" data-on-change="travauxUI.associerProductionGlobale">
                 <option value="">-- Choisir une production --</option>
                 ${productions.map(p => `<option value="${p.id}" ${prodActuelle === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
             </select>
@@ -1510,8 +1510,8 @@
         colCentre += '<p class="texte-muted u-texte-petit" style="margin:8px 0 4px 0;">R\u00e9glages par d\u00e9faut\u00a0:</p>';
 
         colCentre += '<ul class="pipeline-checklist">';
-        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-dpi" checked onchange="travauxUI.mettreAJourPreviewsPipeline()"> Uniformisation 200 dpi</label></li>`;
-        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-balance" checked onchange="travauxUI.mettreAJourPreviewsPipeline()"> Balance des blancs</label></li>`;
+        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-dpi" checked data-on-change="travauxUI.mettreAJourPreviewsPipeline"> Uniformisation 200 dpi</label></li>`;
+        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-balance" checked data-on-change="travauxUI.mettreAJourPreviewsPipeline"> Balance des blancs</label></li>`;
         colCentre += `<li><label><input type="checkbox" id="pipeline-opt-doublons" checked> D\u00e9tection doublons (manuel)</label></li>`;
         colCentre += `<li><label><input type="checkbox" id="pipeline-opt-assemblage" checked> Assemblage automatique (par nom / production)</label></li>`;
         colCentre += '</ul>';
@@ -1521,13 +1521,13 @@
         if (nbBlobsManquants > 0) {
             colCentre += `<div class="pipeline-alerte-blobs" style="margin-top:8px; padding:8px 10px; background: var(--orange-pale, rgba(255,152,0,0.1)); border-radius: var(--radius); border-left: 3px solid var(--orange);">
                 <p class="u-texte-petit" style="margin:0 0 6px 0; color: var(--orange);"><strong>${nbBlobsManquants} fichier${nbBlobsManquants > 1 ? 's' : ''}</strong> ${nbBlobsManquants > 1 ? 'doivent' : 'doit'} \u00eatre re-d\u00e9pos\u00e9${nbBlobsManquants > 1 ? 's' : ''} (session restaur\u00e9e).</p>
-                <button class="btn btn-secondaire btn-sm" onclick="travauxUI.redeposerFichiers()">Re-d\u00e9poser les fichiers</button>
+                <button class="btn btn-secondaire btn-sm" data-action="travauxUI.redeposerFichiers">Re-d\u00e9poser les fichiers</button>
             </div>`;
         }
 
         const fSel = queue[fichierSelectionneIndex];
         const btnReglagesDisabled = fichierSelectionneIndex < 0 || !fSel?.estImage || !fSel?.fichier;
-        colCentre += `<button class="btn btn-secondaire" style="margin-top:8px;" ${btnReglagesDisabled ? 'disabled' : ''} onclick="travauxUI.ouvrirPreparationFichier(${fichierSelectionneIndex})">R\u00e9glages sp\u00e9cifiques</button>`;
+        colCentre += `<button class="btn btn-secondaire" style="margin-top:8px;" ${btnReglagesDisabled ? 'disabled' : ''} data-action="travauxUI.ouvrirPreparationFichier" data-param="${fichierSelectionneIndex}">R\u00e9glages sp\u00e9cifiques</button>`;
 
         colCentre += '</div>'; // fin pipeline-centre-global
 
@@ -1561,13 +1561,13 @@
                 <label class="pipeline-radio-label">
                     <input type="radio" name="pipeline-mode-${idx}" value="lea"
                         ${modeLea ? 'checked' : ''}
-                        onchange="travauxUI.toggleModeImport(${idx},'lea')">
+                        data-on-change="travauxUI.toggleModeImport" data-param="${idx}" data-param2="lea">
                     LEA
                 </label>
                 <label class="pipeline-radio-label">
                     <input type="radio" name="pipeline-mode-${idx}" value="autre"
                         ${!modeLea ? 'checked' : ''}
-                        onchange="travauxUI.toggleModeImport(${idx},'autre')">
+                        data-on-change="travauxUI.toggleModeImport" data-param="${idx}" data-param2="autre">
                     Autre
                 </label>
             </div>`;
@@ -1577,27 +1577,27 @@
                 <label>\u00c9tudiant</label>
                 <input type="text" class="pipeline-input-etudiant" id="pipeline-etudiant-${idx}"
                     value="${modeLea ? nomEtudiant : echapperHtml(f.etudiantManuel || '')}" placeholder="Rechercher..."
-                    oninput="travauxUI.rechercherEtudiant(${idx}, this.value)"
-                    onfocus="travauxUI.ouvrirListeEtudiants(${idx})"
+                    data-on-input="travauxUI.rechercherEtudiant" data-param="${idx}"
+                    data-on-focusin="travauxUI.ouvrirListeEtudiants"
                     autocomplete="off">
                 <div class="pipeline-autocomplete-liste u-hide" id="pipeline-autocomplete-${idx}"></div>
             </div>`;
             colCentre += `<div class="pipeline-champ">
                 <label>Production</label>
-                <select class="form-select pipeline-select-petit" onchange="travauxUI.changerProductionPipeline(${idx}, this.value)">
+                <select class="form-select pipeline-select-petit" data-on-change="travauxUI.changerProductionPipeline" data-param="${idx}">
                     <option value="">--</option>
                     ${productions.map(p => `<option value="${p.id}" ${f.productionId === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                 </select>
             </div>`;
             colCentre += `<div class="pipeline-champ">
                 <label>Date</label>
-                <input type="date" class="pipeline-input-date" value="${dateVal}" onchange="travauxUI.changerDateFichier(${idx}, this.value)">
+                <input type="date" class="pipeline-input-date" value="${dateVal}" data-on-change="travauxUI.changerDateFichier" data-param="${idx}">
             </div>`;
 
             colCentre += '</div>'; // fin pipeline-meta-champs
 
             // Lien deselectionner
-            colCentre += `<a href="#" class="texte-muted u-texte-petit" style="margin-top:6px;display:inline-block;" onclick="event.preventDefault();travauxUI.deselectionnerFichierPipeline();">D\u00e9s\u00e9lectionner</a>`;
+            colCentre += `<a href="#" class="texte-muted u-texte-petit" style="margin-top:6px;display:inline-block;" data-prevent data-action="travauxUI.deselectionnerFichierPipeline">D\u00e9s\u00e9lectionner</a>`;
         } else {
             // Placeholder
             colCentre += `<div class="pipeline-preview-placeholder">
@@ -2019,7 +2019,8 @@
      * Associe une production a tous les fichiers de la queue
      * @param {string} productionId - ID de la production
      */
-    function associerProductionGlobale(productionId) {
+    function associerProductionGlobale(productionIdOuEl) {
+        var productionId = (typeof productionIdOuEl === 'object' && productionIdOuEl !== null) ? productionIdOuEl.value : productionIdOuEl;
         const queue = travauxImport.obtenirFileDAttente();
         queue.forEach(f => {
             // Ne pas écraser les fichiers déjà identifiés individuellement par le parseur LEA
@@ -2111,14 +2112,14 @@
         const queue = travauxImport.obtenirFileDAttente();
         const aDesImages = queue.some(f => f.estImage);
         return `
-            <button class="btn btn-principal" onclick="travauxUI.lancerImport()">
+            <button class="btn btn-principal" data-action="travauxUI.lancerImport">
                 Importer ${queue.length} fichier(s)
             </button>
             ${aDesImages ? `
-            <button class="btn btn-secondaire" onclick="travauxUI.ouvrirPreparation()" title="Préparer les images avant import (rotation, crop, perspective, luminosité)">
+            <button class="btn btn-secondaire" data-action="travauxUI.ouvrirPreparation" title="Préparer les images avant import (rotation, crop, perspective, luminosité)">
                 Préparer les images
             </button>` : ''}
-            <button class="btn btn-secondaire" onclick="travauxImport.viderFileDAttente(); travauxUI.afficherImport();">
+            <button class="btn btn-secondaire" data-action="travauxUI.annulerImport">
                 Annuler
             </button>`;
     }
@@ -2171,18 +2172,18 @@
             : '';
 
         // Badge evalue/remis sur la page d'archivage → previsualisation PDF complete
-        const actionClic = (evaluation && action === 'ouvrirPreviewInline')
-            ? `travauxExportPDF.previsualiserPDF('${f.id}')`
-            : `travauxUI.${action}('${f.id}')`;
+        const actionName = (evaluation && action === 'ouvrirPreviewInline')
+            ? 'travauxExportPDF.previsualiserPDF'
+            : `travauxUI.${action}`;
 
         const estSelFusion = selectionFusion.has(f.id);
-        const checkboxFusion = `<input type="checkbox" class="fusion-checkbox" ${estSelFusion ? 'checked' : ''} onclick="event.stopPropagation(); travauxUI.toggleSelectionFusion('${f.id}')" title="Sélectionner pour fusion">`;
+        const checkboxFusion = `<input type="checkbox" class="fusion-checkbox" ${estSelFusion ? 'checked' : ''} data-stop data-action="travauxUI.toggleSelectionFusion" data-param="${f.id}" title="Sélectionner pour fusion">`;
 
-        return `<div class="annot-badge${estSelFusion ? ' annot-badge-fusion-selectionne' : ''}" data-fichier-id="${f.id}" data-etudiant-da="${f.etudiantDA || ''}" draggable="true" ondragstart="event.dataTransfer.setData('text/fichier-id', '${f.id}')" onclick="${actionClic}" title="${echapperHtml(f.nomFichier)}">
+        return `<div class="annot-badge${estSelFusion ? ' annot-badge-fusion-selectionne' : ''}" data-fichier-id="${f.id}" data-etudiant-da="${f.etudiantDA || ''}" draggable="true" data-drag-data="text/fichier-id:${f.id}" data-action="${actionName}" data-param="${f.id}" title="${echapperHtml(f.nomFichier)}">
         ${checkboxFusion}
         <span class="annot-badge-nom">${nomEtudiant}</span>
-        <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>${evaluation ? `<button class="travaux-badge-retro" onclick="event.stopPropagation(); travauxUI.afficherRetroaction('${f.id}')" title="Aperçu rétroaction">\u{1F4AC}</button>` : ''}${verrou}
-        <button class="annot-badge-supprimer" onclick="event.stopPropagation(); travauxUI.supprimerFichierImporte('${f.id}')" title="Supprimer">&times;</button>
+        <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>${evaluation ? `<button class="travaux-badge-retro" data-stop data-action="travauxUI.afficherRetroaction" data-param="${f.id}" title="Aperçu rétroaction">\u{1F4AC}</button>` : ''}${verrou}
+        <button class="annot-badge-supprimer" data-stop data-action="travauxUI.supprimerFichierImporte" data-param="${f.id}" title="Supprimer">&times;</button>
     </div>`;
     }
 
@@ -2269,7 +2270,7 @@
         // Dropdown filtre de production (toutes les productions, même sans fichier)
         let htmlDropdown = '';
         if (productions.length >= 1) {
-            htmlDropdown += '<select class="controle-form travaux-filtre-production" onchange="travauxUI.filtrerBadgesParProduction(this)">';
+            htmlDropdown += '<select class="controle-form travaux-filtre-production" data-on-change="travauxUI.filtrerBadgesParProduction">';
             if (productions.length > 1) {
                 htmlDropdown += '<option value="">Toutes les productions</option>';
             }
@@ -2291,13 +2292,13 @@
                 if (fSel && fSel.etudiantDA) dasSelectionnes.add(fSel.etudiantDA);
             });
             if (dasSelectionnes.size === 1) {
-                htmlFusion = `<button class="btn btn-principal btn-fusion-fichiers" onclick="travauxUI.fusionnerFichiers()">Fusionner (${selectionFusion.size})</button>`;
+                htmlFusion = `<button class="btn btn-principal btn-fusion-fichiers" data-action="travauxUI.fusionnerFichiers">Fusionner (${selectionFusion.size})</button>`;
             } else if (dasSelectionnes.size > 1) {
                 htmlFusion = `<span class="texte-muted u-texte-petit fusion-avertissement">Les fichiers sélectionnés doivent appartenir au même étudiant</span>`;
             }
         }
         if (selectionFusion.size > 0) {
-            htmlFusion += `<button class="btn btn-secondaire btn-petit" onclick="travauxUI.annulerSelectionFusion()">Annuler sélection</button>`;
+            htmlFusion += `<button class="btn btn-secondaire btn-petit" data-action="travauxUI.annulerSelectionFusion">Annuler sélection</button>`;
         }
 
         // Stocker le dropdown séparément pour l'afficher hors du scroll dans la toolbar
@@ -2369,16 +2370,16 @@
             <div class="conteneur" id="travaux-tableau-fichiers-conteneur">
                 <h2>Annoter et évaluer <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle">📍</button></h2>
                 <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;">
-                    <select class="controle-form controle-form-compact" id="travaux-tableau-filtre-production" onchange="travauxUI.filtrerTableauFichiers()">
+                    <select class="controle-form controle-form-compact" id="travaux-tableau-filtre-production" data-on-change="travauxUI.filtrerTableauFichiers">
                         ${htmlFiltreProduction}
                     </select>
-                    <select class="controle-form controle-form-compact" id="travaux-tableau-filtre-statut" onchange="travauxUI.filtrerTableauFichiers()">
+                    <select class="controle-form controle-form-compact" id="travaux-tableau-filtre-statut" data-on-change="travauxUI.filtrerTableauFichiers">
                         <option value="">Tous les statuts</option>
                         <option value="importe">Importé</option>
                         <option value="annote">Annoté</option>
                         <option value="evalue">Évalué</option>
                     </select>
-                    <input type="text" class="controle-form controle-form-compact" id="travaux-tableau-filtre-recherche" placeholder="Rechercher\u2026" oninput="travauxUI.filtrerTableauFichiers()" style="max-width: 220px;">
+                    <input type="text" class="controle-form controle-form-compact" id="travaux-tableau-filtre-recherche" placeholder="Rechercher\u2026" data-on-input="travauxUI.filtrerTableauFichiers" style="max-width: 220px;">
                 </div>
                 <table class="tableau" id="travaux-tableau-fichiers">
                     <thead>
@@ -2426,12 +2427,12 @@
             <td style="text-align: center;"><input type="checkbox" class="travaux-tableau-checkbox" data-fichier-id="${f.id}"></td>
             <td>${nomComplet}</td>
             <td>${echapperHtml(da)}</td>
-            <td><select class="controle-form controle-form-compact travaux-tableau-select-prod" id="${selectId}" data-fichier-id="${f.id}" onchange="travauxUI.changerProductionFichier('${f.id}', this.value); this.closest('tr').dataset.productionId = this.value;">
+            <td><select class="controle-form controle-form-compact travaux-tableau-select-prod" id="${selectId}" data-fichier-id="${f.id}" data-on-change="travauxUI.changerProductionFichierDepuisTableau">
                 <option value="">— Aucune —</option>
                 ${optionsProductions}
             </select></td>
             <td style="text-align: center;"><span class="travaux-badge-pill ${statut}">${statutLabels[statut]}</span></td>
-            <td style="text-align: center;"><button class="btn btn-petit btn-principal" onclick="travauxUI.ouvrirFichier('${f.id}')">Annoter</button></td>
+            <td style="text-align: center;"><button class="btn btn-petit btn-principal" data-action="travauxUI.ouvrirFichier" data-param="${f.id}">Annoter</button></td>
         </tr>`;
     }
 
@@ -2585,7 +2586,7 @@
             }
 
             html += `
-                <div class="travaux-miniature${actif}" data-fichier-id="${f.id}" onclick="travauxUI.ouvrirFichier('${f.id}')">
+                <div class="travaux-miniature${actif}" data-fichier-id="${f.id}" data-action="travauxUI.ouvrirFichier" data-param="${f.id}">
                     <div class="travaux-miniature-thumb">
                         ${thumb ? `<img src="${thumb}" alt="">` : `<span>${icone}</span>`}
                         ${badge}
@@ -2651,7 +2652,7 @@
             html += `
                 <div class="travaux-miniature travaux-miniature-virtuelle${actif}" data-fichier-id="${f.id}"
                      style="top: ${top}px; height: ${HAUTEUR_MINIATURE}px;"
-                     onclick="travauxUI.ouvrirFichier('${f.id}')">
+                     data-action="travauxUI.ouvrirFichier" data-param="${f.id}">
                     <div class="travaux-miniature-thumb">
                         ${thumb ? `<img src="${thumb}" alt="">` : `<span>${icone}</span>`}
                         ${badge}
@@ -3083,8 +3084,8 @@
                 <div class="alerte alerte-attention" style="margin-top: 8px; padding: 10px; border-radius: 8px;">
                     <strong>Espace bientot plein</strong>
                     <p>Archivez et nettoyez les anciens travaux pour liberer de l'espace.</p>
-                    <button class="btn btn-petit" onclick="travauxUI.proposerNettoyage()">Proposer un nettoyage</button>
-                    ${fsapiDispo && !fsapiActif ? '<button class="btn btn-petit btn-secondaire" onclick="travauxUI.configurerFSAPI()">Passer au stockage disque</button>' : ''}
+                    <button class="btn btn-petit" data-action="travauxUI.proposerNettoyage">Proposer un nettoyage</button>
+                    ${fsapiDispo && !fsapiActif ? '<button class="btn btn-petit btn-secondaire" data-action="travauxUI.configurerFSAPI">Passer au stockage disque</button>' : ''}
                 </div>` : ''}
         `;
     }
@@ -4160,7 +4161,7 @@
         barre.className = 'travaux-palette-barre';
         barre.innerHTML = `
             <span class="travaux-palette-titre">${titre}</span>
-            <button class="travaux-palette-toggle" onclick="travauxUI.togglePaletteEvalReplie('${id}')" title="Replier/Déplier">&#x2212;</button>
+            <button class="travaux-palette-toggle" data-action="travauxUI.togglePaletteEvalReplie" data-param="${id}" title="Replier/Déplier">&#x2212;</button>
         `;
         palette.appendChild(barre);
 
@@ -4500,11 +4501,11 @@
         conteneurTravail.innerHTML = `
             <div class="travaux-zone-document" id="travaux-split-document-container">
                 <div class="travaux-toolbar">
-                    <button id="travaux-split-btn-page-prec" class="btn-icon" onclick="travauxVisionneuse.pagePrecedente()" disabled>&lt;</button>
+                    <button id="travaux-split-btn-page-prec" class="btn-icon" data-action="travauxVisionneuse.pagePrecedente" disabled>&lt;</button>
                     <span id="travaux-indicateur-page">-- / --</span>
-                    <button id="travaux-split-btn-page-suiv" class="btn-icon" onclick="travauxVisionneuse.pageSuivante()" disabled>&gt;</button>
-                    <button class="btn btn-petit" onclick="travauxAnnotation.basculerAnnotation()">Annoter</button>
-                    <button class="btn-icon" onclick="travauxUI.fermerVueCoteACote()" title="Fermer">&times;</button>
+                    <button id="travaux-split-btn-page-suiv" class="btn-icon" data-action="travauxVisionneuse.pageSuivante" disabled>&gt;</button>
+                    <button class="btn btn-petit" data-action="travauxAnnotation.basculerAnnotation">Annoter</button>
+                    <button class="btn-icon" data-action="travauxUI.fermerVueCoteACote" title="Fermer">&times;</button>
                 </div>
                 <div class="travaux-canvas-container">
                     <div class="travaux-canvas-wrapper">
@@ -4677,8 +4678,8 @@
                 <div class="preview-quicklook-contenu">
                     <canvas id="pipeline-preview-canvas"></canvas>
                     ${state.totalPages > 1 ? `
-                    <button class="preview-quicklook-fleche preview-quicklook-prec" id="pipeline-prev-btn" onclick="event.stopPropagation(); travauxUI.previewPagePrec()">&#x25C0;</button>
-                    <button class="preview-quicklook-fleche preview-quicklook-suiv" id="pipeline-next-btn" onclick="event.stopPropagation(); travauxUI.previewPageSuiv()">&#x25B6;</button>
+                    <button class="preview-quicklook-fleche preview-quicklook-prec" id="pipeline-prev-btn" data-stop data-action="travauxUI.previewPagePrec">&#x25C0;</button>
+                    <button class="preview-quicklook-fleche preview-quicklook-suiv" id="pipeline-next-btn" data-stop data-action="travauxUI.previewPageSuiv">&#x25B6;</button>
                     <span class="preview-quicklook-page" id="pipeline-preview-page-info">1 / ${state.totalPages}</span>
                     ` : ''}
                 </div>
@@ -4800,7 +4801,8 @@
     /**
      * Recherche un etudiant par query (nom, prenom, DA)
      */
-    function rechercherEtudiant(index, query) {
+    function rechercherEtudiant(index, queryOuEl) {
+        var query = (typeof queryOuEl === 'object' && queryOuEl !== null) ? queryOuEl.value : queryOuEl;
         clearTimeout(debounceRechercheTimer);
         debounceRechercheTimer = setTimeout(() => {
             const liste = document.getElementById('pipeline-autocomplete-' + index);
@@ -4820,7 +4822,7 @@
             if (filtres.length === 0) { liste.classList.add('u-hide'); return; }
 
             liste.innerHTML = filtres.slice(0, 20).map(e =>
-                `<div class="pipeline-autocomplete-item" onmousedown="travauxUI.selectionnerEtudiant(${index},'${echapperHtml(e.da || '')}')">${echapperHtml((e.prenom || '') + ' ' + (e.nom || ''))} <span class="texte-muted">${echapperHtml(e.daAffichage || e.da || '')}</span></div>`
+                `<div class="pipeline-autocomplete-item" data-on-mousedown="travauxUI.selectionnerEtudiant" data-param="${index}" data-param2="${echapperHtml(e.da || '')}">${echapperHtml((e.prenom || '') + ' ' + (e.nom || ''))} <span class="texte-muted">${echapperHtml(e.daAffichage || e.da || '')}</span></div>`
             ).join('');
             liste.classList.remove('u-hide');
         }, 200);
@@ -4855,7 +4857,8 @@
     /**
      * Change la date d'un fichier
      */
-    function changerDateFichier(index, dateStr) {
+    function changerDateFichier(index, dateStrOuEl) {
+        var dateStr = (typeof dateStrOuEl === 'object' && dateStrOuEl !== null) ? dateStrOuEl.value : dateStrOuEl;
         const queue = travauxImport.obtenirFileDAttente();
         if (!queue[index]) return;
         queue[index].dateFichier = dateStr ? new Date(dateStr) : null;
@@ -4873,7 +4876,8 @@
     /**
      * Change la production d'un fichier dans le pipeline (queue)
      */
-    function changerProductionPipeline(index, productionId) {
+    function changerProductionPipeline(index, productionIdOuEl) {
+        var productionId = (typeof productionIdOuEl === 'object' && productionIdOuEl !== null) ? productionIdOuEl.value : productionIdOuEl;
         const queue = travauxImport.obtenirFileDAttente();
         if (!queue[index]) return;
         queue[index].productionId = productionId;
@@ -4963,7 +4967,7 @@
             <div class="editeur-pages-conteneur">
                 <div class="editeur-pages-entete">
                     <h4>Édition : ${nomEtudiant}</h4>
-                    <button class="btn btn-secondaire" onclick="travauxUI.fermerEditeurPages()">Annuler</button>
+                    <button class="btn btn-secondaire" data-action="travauxUI.fermerEditeurPages">Annuler</button>
                 </div>
                 <div class="editeur-pages-message-chargement" id="editeur-chargement">
                     ${messageChargement}
@@ -5041,14 +5045,14 @@
         editionPages.forEach((page, index) => {
             const sel = index === editionPageSelectionnee ? 'selectionnee' : '';
             htmlListe += `
-                <div class="editeur-page-item ${sel}" onclick="travauxUI.selectionnerPageEditeur(${index})">
+                <div class="editeur-page-item ${sel}" data-action="travauxUI.selectionnerPageEditeur" data-param="${index}">
                     <span class="editeur-page-num">${index + 1}</span>
                     <img class="editeur-page-thumb" src="${page.dataUrl}" alt="Page ${index + 1}">
                     <div class="editeur-page-actions">
-                        <button class="editeur-page-btn" onclick="event.stopPropagation(); travauxUI.monterPageEditeur(${index})" ${index === 0 ? 'disabled' : ''} title="Monter">&#x25B2;</button>
-                        <button class="editeur-page-btn" onclick="event.stopPropagation(); travauxUI.descendrePageEditeur(${index})" ${index === editionPages.length - 1 ? 'disabled' : ''} title="Descendre">&#x25BC;</button>
-                        <button class="editeur-page-btn" onclick="event.stopPropagation(); travauxUI.pivoterPageEditeur(${index})" title="Pivoter 90°">&#x21BB;</button>
-                        <button class="editeur-page-btn editeur-page-btn-supprimer" onclick="event.stopPropagation(); travauxUI.supprimerPageEditeur(${index})" title="Supprimer" ${editionPages.length <= 1 ? 'disabled' : ''}>&times;</button>
+                        <button class="editeur-page-btn" data-stop data-action="travauxUI.monterPageEditeur" data-param="${index}" ${index === 0 ? 'disabled' : ''} title="Monter">&#x25B2;</button>
+                        <button class="editeur-page-btn" data-stop data-action="travauxUI.descendrePageEditeur" data-param="${index}" ${index === editionPages.length - 1 ? 'disabled' : ''} title="Descendre">&#x25BC;</button>
+                        <button class="editeur-page-btn" data-stop data-action="travauxUI.pivoterPageEditeur" data-param="${index}" title="Pivoter 90°">&#x21BB;</button>
+                        <button class="editeur-page-btn editeur-page-btn-supprimer" data-stop data-action="travauxUI.supprimerPageEditeur" data-param="${index}" title="Supprimer" ${editionPages.length <= 1 ? 'disabled' : ''}>&times;</button>
                     </div>
                 </div>`;
         });
@@ -5061,7 +5065,7 @@
             <div class="editeur-pages-entete">
                 <h4>Édition : ${nomEtudiant || 'Document'} — ${editionPages.length} page(s)</h4>
                 <div style="display:flex;gap:8px;">
-                    <button class="btn btn-secondaire" onclick="travauxUI.fermerEditeurPages()">Annuler</button>
+                    <button class="btn btn-secondaire" data-action="travauxUI.fermerEditeurPages">Annuler</button>
                 </div>
             </div>
             <div class="editeur-pages-layout">
@@ -5071,9 +5075,9 @@
                 <div class="editeur-pages-preview">
                     ${previewSrc ? `<img src="${previewSrc}" alt="Preview page ${editionPageSelectionnee + 1}">` : '<p class="texte-muted">Aucune page</p>'}
                     <div class="editeur-pages-boutons">
-                        <button class="btn btn-secondaire" onclick="travauxUI.ajouterPagesEditeur()">+ Ajouter des pages</button>
-                        <button class="btn btn-secondaire" onclick="travauxUI.ouvrirModalFusionEditeur()">Fusionner</button>
-                        <button class="btn btn-principal" onclick="travauxUI.sauvegarderEdition()">Sauvegarder</button>
+                        <button class="btn btn-secondaire" data-action="travauxUI.ajouterPagesEditeur">+ Ajouter des pages</button>
+                        <button class="btn btn-secondaire" data-action="travauxUI.ouvrirModalFusionEditeur">Fusionner</button>
+                        <button class="btn btn-principal" data-action="travauxUI.sauvegarderEdition">Sauvegarder</button>
                     </div>
                 </div>
             </div>
@@ -5410,16 +5414,16 @@
         var htmlFichiers = _genererListeFichiersFusion(fichiersDispo, etudiantsMap, productionsMap);
 
         var html = `
-        <div class="modal-overlay actif" id="modal-fusion-editeur" onclick="if(event.target===this) travauxUI.fermerModalFusionEditeur()">
+        <div class="modal-overlay actif" id="modal-fusion-editeur" data-close-on-bg="travauxUI.fermerModalFusionEditeur">
             <div class="modal-contenu modal-fusion-editeur-contenu">
-                <button class="modal-fermer" onclick="travauxUI.fermerModalFusionEditeur()">&times;</button>
+                <button class="modal-fermer" data-action="travauxUI.fermerModalFusionEditeur">&times;</button>
                 <h3 class="modal-titre">Fusionner des documents</h3>
 
                 <div class="fusion-editeur-filtres">
-                    <select id="fusion-filtre-etudiant" onchange="travauxUI.filtrerModalFusion()">
+                    <select id="fusion-filtre-etudiant" data-on-change="travauxUI.filtrerModalFusion">
                         ${optionsEtudiants}
                     </select>
-                    <select id="fusion-filtre-production" onchange="travauxUI.filtrerModalFusion()">
+                    <select id="fusion-filtre-production" data-on-change="travauxUI.filtrerModalFusion">
                         ${optionsProductions}
                     </select>
                     <span id="fusion-compteur-selection" class="fusion-compteur">0 sélectionné(s)</span>
@@ -5430,8 +5434,8 @@
                 </div>
 
                 <div class="modal-actions">
-                    <button class="btn btn-secondaire" onclick="travauxUI.fermerModalFusionEditeur()">Annuler</button>
-                    <button class="btn btn-principal" id="btn-confirmer-fusion-editeur" onclick="travauxUI.confirmerFusionEditeur()" disabled>Fusionner la sélection</button>
+                    <button class="btn btn-secondaire" data-action="travauxUI.fermerModalFusionEditeur">Annuler</button>
+                    <button class="btn btn-principal" id="btn-confirmer-fusion-editeur" data-action="travauxUI.confirmerFusionEditeur" disabled>Fusionner la sélection</button>
                 </div>
             </div>
         </div>`;
@@ -5462,7 +5466,7 @@
 
             html += `
                 <label class="fusion-fichier-item" data-etudiant="${f.etudiantDA || ''}" data-production="${f.productionId || ''}">
-                    <input type="checkbox" class="fusion-fichier-check" value="${f.id}" onchange="travauxUI.majCompteurFusion()">
+                    <input type="checkbox" class="fusion-fichier-check" value="${f.id}" data-on-change="travauxUI.majCompteurFusion">
                     ${thumb}
                     <div class="fusion-fichier-info">
                         <span class="fusion-fichier-nom">${echapperHtml(f.nomFichier || 'Document')}</span>
@@ -5652,7 +5656,7 @@
             <div class="editeur-pages-conteneur">
                 <div class="editeur-pages-entete">
                     <h4>Fusion : ${nomEtudiant} (${fichiers.length} fichiers)</h4>
-                    <button class="btn btn-secondaire" onclick="travauxUI.fermerEditeurPages()">Annuler</button>
+                    <button class="btn btn-secondaire" data-action="travauxUI.fermerEditeurPages">Annuler</button>
                 </div>
                 <div class="editeur-pages-message-chargement" id="editeur-chargement">
                     Chargement des fichiers...
@@ -5771,9 +5775,9 @@
 
         // Construire le modal
         const html = `
-        <div class="modal-overlay actif" id="travaux-modal-retroaction" onclick="if(event.target===this) travauxUI.fermerModalRetroaction()">
+        <div class="modal-overlay actif" id="travaux-modal-retroaction" data-close-on-bg="travauxUI.fermerModalRetroaction">
             <div class="modal-contenu" style="max-width: 620px;">
-                <button class="modal-fermer" onclick="travauxUI.fermerModalRetroaction()">&times;</button>
+                <button class="modal-fermer" data-action="travauxUI.fermerModalRetroaction">&times;</button>
                 <h3 class="modal-titre">Rétroaction — ${nomEtudiant}</h3>
 
                 <div class="travaux-retro-entete">
@@ -5788,8 +5792,8 @@
                 <textarea id="travaux-modal-retro-texte" class="travaux-retro-textarea">${echapperHtml(evaluation.retroactionFinale || '')}</textarea>
 
                 <div class="modal-actions" style="margin-top: 12px;">
-                    <button class="btn btn-secondaire" onclick="travauxUI.fermerModalRetroaction()">Annuler</button>
-                    <button class="btn btn-principal" onclick="travauxUI.sauvegarderRetroactionDepuisModal('${fichierId}')">Sauvegarder</button>
+                    <button class="btn btn-secondaire" data-action="travauxUI.fermerModalRetroaction">Annuler</button>
+                    <button class="btn btn-principal" data-action="travauxUI.sauvegarderRetroactionDepuisModal" data-param="${fichierId}">Sauvegarder</button>
                 </div>
             </div>
         </div>`;
@@ -6099,6 +6103,37 @@
     });
 
     /* ===============================
+       WRAPPERS DELEGATION (Phase 5)
+       =============================== */
+
+    /** Annuler import : vide la file + rafraîchit l'UI */
+    function annulerImport() {
+        travauxImport.viderFileDAttente();
+        afficherImport();
+    }
+
+    /** Alléger le fichier actuellement ouvert dans la visionneuse */
+    function allegerFichierActuel() {
+        var fichier = travauxVisionneuse.getFichierActuel();
+        if (fichier && fichier.id) allegerFichier(fichier.id);
+    }
+
+    /** Re-importer le fichier actuellement ouvert dans la visionneuse */
+    function reimporterFichierActuel() {
+        var fichier = travauxVisionneuse.getFichierActuel();
+        if (fichier && fichier.id) reimporterFichier(fichier.id);
+    }
+
+    /** Changer la production d'un fichier depuis le tableau (onchange select) */
+    function changerProductionFichierDepuisTableau(el) {
+        var fichierId = el.dataset.fichierId;
+        var value = el.value;
+        changerProductionFichier(fichierId, value);
+        var row = el.closest('tr');
+        if (row) row.dataset.productionId = value;
+    }
+
+    /* ===============================
        EXPORTS GLOBAUX
        =============================== */
 
@@ -6220,7 +6255,12 @@
         ouvrirModalTransfert: ouvrirModalTransfert,
         // Layout annotation ancré
         creerLayoutAnnotation: creerLayoutAnnotation,
-        detruireLayoutAnnotation: detruireLayoutAnnotation
+        detruireLayoutAnnotation: detruireLayoutAnnotation,
+        // Wrappers délégation (Phase 5)
+        annulerImport: annulerImport,
+        allegerFichierActuel: allegerFichierActuel,
+        reimporterFichierActuel: reimporterFichierActuel,
+        changerProductionFichierDepuisTableau: changerProductionFichierDepuisTableau
     };
 
     // Alias pour navigation.js
