@@ -809,7 +809,7 @@ function cartoucheSelectionnee() {
                        id="eval_categories_${critere.id}"
                        class="controle-form"
                        placeholder="Ex: 1;4;6;1;4;10"
-                       oninput="calculerNoteAlgorithmiqueAvecCategories('${critere.id}', ${ponderation}, ${facteur}, '${critereGrille?.id || ''}')"
+                       data-on-input="calculerNoteAlgoCatHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}" data-critere-grille-id="${critereGrille?.id || ''}"
                        style="font-size: 0.85rem;">
                 <small style="font-size: 0.7rem; color: var(--gris-clair);">(Voir configuration de la grille)</small>
             </div>
@@ -820,7 +820,7 @@ function cartoucheSelectionnee() {
                        class="controle-form"
                        min="1"
                        placeholder="500"
-                       oninput="calculerNoteAlgorithmiqueAvecCategories('${critere.id}', ${ponderation}, ${facteur}, '${critereGrille?.id || ''}')"
+                       data-on-input="calculerNoteAlgoCatHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}" data-critere-grille-id="${critereGrille?.id || ''}"
                        style="font-size: 0.85rem;">
             </div>
         </div>
@@ -832,7 +832,7 @@ function cartoucheSelectionnee() {
         <div style="margin-top: 8px;">
             <label data-tooltip="eval-niveau-idme" style="font-size: 0.75rem; color: var(--gris-moyen); margin-bottom: 4px; display: block;">Niveau IDME (modifiable manuellement) :</label>
             <select id="eval_${critere.id}" class="controle-form"
-                    onchange="niveauSelectionne('${critere.id}')"
+                    data-on-change="niveauSelectionne" data-param="${critere.id}"
                     style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid var(--bordure-claire); width: 100%;">
                 <option value="">-- Utiliser le niveau calculé --</option>
                 ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
@@ -849,7 +849,7 @@ function cartoucheSelectionnee() {
                        class="controle-form"
                        min="0"
                        placeholder="0"
-                       oninput="calculerNoteAlgorithmiqueSimple('${critere.id}', ${ponderation}, ${facteur})"
+                       data-on-input="calculerNoteAlgoSimpleHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}"
                        style="font-size: 0.85rem;">
             </div>
             <div class="groupe-form">
@@ -859,7 +859,7 @@ function cartoucheSelectionnee() {
                        class="controle-form"
                        min="1"
                        placeholder="500"
-                       oninput="calculerNoteAlgorithmiqueSimple('${critere.id}', ${ponderation}, ${facteur})"
+                       data-on-input="calculerNoteAlgoSimpleHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}"
                        style="font-size: 0.85rem;">
             </div>
         </div>
@@ -870,7 +870,7 @@ function cartoucheSelectionnee() {
         <div style="margin-top: 8px;">
             <label data-tooltip="eval-niveau-idme" style="font-size: 0.75rem; color: var(--gris-moyen); margin-bottom: 4px; display: block;">Niveau IDME (modifiable manuellement) :</label>
             <select id="eval_${critere.id}" class="controle-form"
-                    onchange="niveauSelectionne('${critere.id}')"
+                    data-on-change="niveauSelectionne" data-param="${critere.id}"
                     style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid var(--bordure-claire); width: 100%;">
                 <option value="">-- Utiliser le niveau calculé --</option>
                 ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
@@ -880,7 +880,7 @@ function cartoucheSelectionnee() {
     `) : `
         <!-- Interface standard (holistique/analytique) -->
         <select id="eval_${critere.id}" class="controle-form"
-                onchange="niveauSelectionne('${critere.id}')"
+                data-on-change="niveauSelectionne" data-param="${critere.id}"
                 style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid var(--bordure-claire); width: 100%;">
             <option value="">--</option>
             ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
@@ -1000,7 +1000,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                                    class="controle-form"
                                    min="0"
                                    placeholder="0"
-                                   oninput="calculerNoteAlgorithmiqueSimple('${critere.id}', ${ponderation}, ${facteur})"
+                                   data-on-input="calculerNoteAlgoSimpleHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}"
                                    style="font-size: 0.85rem;">
                         </div>
                         <div class="groupe-form">
@@ -1010,7 +1010,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                                    class="controle-form"
                                    min="1"
                                    placeholder="500"
-                                   oninput="calculerNoteAlgorithmiqueSimple('${critere.id}', ${ponderation}, ${facteur})"
+                                   data-on-input="calculerNoteAlgoSimpleHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}"
                                    style="font-size: 0.85rem;">
                         </div>
                     </div>
@@ -1018,7 +1018,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                         -- erreurs sur -- mots
                     </div>
                     <select id="eval_${critere.id}" class="controle-form"
-                            onchange="niveauSelectionne('${critere.id}')"
+                            data-on-change="niveauSelectionne" data-param="${critere.id}"
                             style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid var(--bordure-claire); width: 100%;">
                         <option value="">--</option>
                         ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
@@ -1026,7 +1026,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                 ` : `
                     <!-- Interface standard -->
                     <select id="eval_${critere.id}" class="controle-form"
-                            onchange="niveauSelectionne('${critere.id}')"
+                            data-on-change="niveauSelectionne" data-param="${critere.id}"
                             style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid var(--bordure-claire); width: 100%;">
                         <option value="">--</option>
                         ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
@@ -2526,7 +2526,7 @@ function afficherBadgesJetons() {
         badges.push(`
             <span class="statut-badge" style="background: var(--violet-jeton, #9c27b0); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
                 <span>⭐ Reprise</span>
-                <button class="btn-jeton-retirer" onclick="retirerJetonDepuisSidebar('${evaluation.id}', 'reprise')"
+                <button class="btn-jeton-retirer" data-action="retirerJetonDepuisSidebar" data-param="${evaluation.id}" data-param2="reprise"
                         title="Retirer le jeton de reprise">×</button>
             </span>
         `);
@@ -2538,7 +2538,7 @@ function afficherBadgesJetons() {
         badges.push(`
             <span class="statut-badge" style="background: var(--orange-accent); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
                 <span>⭐ Délai</span>
-                <button class="btn-jeton-retirer" onclick="retirerJetonDepuisSidebar('${evaluation.id}', 'delai')"
+                <button class="btn-jeton-retirer" data-action="retirerJetonDepuisSidebar" data-param="${evaluation.id}" data-param2="delai"
                         title="Retirer le jeton de délai">×</button>
             </span>
         `);
@@ -2616,7 +2616,7 @@ function peuplementOptJetons() {
     var mapPredefinis = {
         'delai': {
             checkboxId: 'checkboxJetonDelai',
-            handler: 'gererChangementCheckboxJetonDelai()',
+            handler: 'gererChangementCheckboxJetonDelai',
             wrapperClass: 'badge-jeton-delai-wrapper',
             tooltip: 'eval-jeton-delai',
             estCoche: function() {
@@ -2626,7 +2626,7 @@ function peuplementOptJetons() {
         },
         'reprise': {
             checkboxId: 'checkboxJetonReprise',
-            handler: 'gererChangementCheckboxJetonReprise()',
+            handler: 'gererChangementCheckboxJetonReprise',
             wrapperClass: 'badge-jeton-reprise-wrapper',
             tooltip: 'eval-jeton-reprise',
             estCoche: function() {
@@ -2636,7 +2636,7 @@ function peuplementOptJetons() {
         },
         'repriseCiblee': {
             checkboxId: 'checkboxJetonRepriseCiblee',
-            handler: 'gererChangementCheckboxJetonRepriseCiblee()',
+            handler: 'gererChangementCheckboxJetonRepriseCiblee',
             wrapperClass: 'badge-jeton-reprise-ciblee-wrapper',
             tooltip: 'eval-jeton-reprise-ciblee',
             estCoche: function() {
@@ -2661,7 +2661,7 @@ function peuplementOptJetons() {
             var coche = mp.estCoche() ? ' checked' : '';
             htmlJetons.push(
                 '<div class="u-flex-gap-8 u-align-center">' +
-                    '<input type="checkbox" id="' + mp.checkboxId + '" onchange="' + mp.handler + '"' + coche + '>' +
+                    '<input type="checkbox" id="' + mp.checkboxId + '" data-on-change="' + mp.handler + '"' + coche + '>' +
                     '<span class="' + mp.wrapperClass + '">' +
                         '<span class="badge-jeton-titre" data-tooltip="' + mp.tooltip + '">' + echapperHtml(type.nom.replace(/^Jeton de /i, '').replace(/^./, function(c) { return c.toUpperCase(); })) + '</span>' +
                     '</span>' +
@@ -3772,7 +3772,7 @@ function afficherListeEvaluations(donneesEtudiants) {
         return `
             <div class="carte etudiant-evaluation-carte" data-da="${etudiant.da}">
                 <!-- En-tête cliquable -->
-                <div class="etudiant-header" onclick="toggleEtudiantEval('${etudiant.da}')" style="cursor:pointer; padding: 15px;">
+                <div class="etudiant-header" data-action="toggleEtudiantEval" data-param="${etudiant.da}" style="cursor:pointer; padding: 15px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div style="display:flex; align-items:center; gap:10px;">
                             <span class="toggle-icon" id="toggle-${etudiant.da}">${iconToggle}</span>
@@ -3882,14 +3882,14 @@ function genererDetailsEtudiant(etudiant) {
                                 <td>${item.evaluation.dateEvaluation ? new Date(item.evaluation.dateEvaluation).toLocaleDateString('fr-CA') : '—'}</td>
                                 <td>
                                     ${estRemplacee ? `
-                                        <button class="btn btn-modifier btn-compact" onclick="modifierEvaluation('${item.evaluation.id}')">
+                                        <button class="btn btn-modifier btn-compact" data-action="modifierEvaluation" data-param="${item.evaluation.id}">
                                             Consulter
                                         </button>
                                     ` : `
-                                        <button class="btn btn-modifier btn-compact" onclick="modifierEvaluation('${item.evaluation.id}')">
+                                        <button class="btn btn-modifier btn-compact" data-action="modifierEvaluation" data-param="${item.evaluation.id}">
                                             Consulter
                                         </button>
-                                        <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluation('${item.evaluation.id}')" ${item.evaluation.verrouillee ? 'disabled title="Déverrouillez d\'abord pour supprimer"' : ''}>
+                                        <button class="btn btn-supprimer btn-compact" data-action="supprimerEvaluation" data-param="${item.evaluation.id}" ${item.evaluation.verrouillee ? 'disabled title="Déverrouillez d\'abord pour supprimer"' : ''}>
                                             Supprimer
                                         </button>
                                     `}
@@ -3897,7 +3897,7 @@ function genererDetailsEtudiant(etudiant) {
                                 <td class="u-text-center">
                                     ${estRemplacee ? '' : `
                                         <span id="cadenas-${item.evaluation.id}"
-                                              onclick="basculerVerrouillageEvaluation('${item.evaluation.id}')"
+                                              data-action="basculerVerrouillageEvaluation" data-param="${item.evaluation.id}"
                                               style="font-size: 1.2rem; cursor: pointer; user-select: none;"
                                               title="${item.evaluation.verrouillee ? 'Verrouillée - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller'}">
                                             ${item.evaluation.verrouillee ? '🔒' : '🔓'}
@@ -3920,7 +3920,7 @@ function genererDetailsEtudiant(etudiant) {
                                 </td>
                                 <td>—</td>
                                 <td>
-                                    <button class="btn btn-confirmer btn-compact" onclick="evaluerProduction('${etudiant.da}', '${item.production.id}')">
+                                    <button class="btn btn-confirmer btn-compact" data-action="evaluerProduction" data-param="${etudiant.da}" data-param2="${item.production.id}">
                                         Évaluer
                                     </button>
                                 </td>
@@ -4908,7 +4908,7 @@ function insererNavigationEvaluationSerie() {
     nav.style.cssText = 'display: flex; gap: 10px; align-items: center; margin: 15px 0; justify-content: center;';
 
     nav.innerHTML = `
-        <button class="btn btn-principal btn-compact" onclick="naviguerEtudiantPrecedent()"
+        <button class="btn btn-principal btn-compact" data-action="naviguerEtudiantPrecedent"
                 title="Évaluer l'étudiant·e précédent·e"
                 style="padding: 6px 10px; min-width: auto; font-size: 0.9rem;">
             ←
@@ -4919,21 +4919,21 @@ function insererNavigationEvaluationSerie() {
             0/0 évaluations
         </span>
 
-        <button class="btn btn-principal btn-compact" onclick="naviguerEtudiantSuivant()"
+        <button class="btn btn-principal btn-compact" data-action="naviguerEtudiantSuivant"
                 title="Évaluer l'étudiant·e suivant·e"
                 style="padding: 6px 10px; min-width: auto; font-size: 0.9rem;">
             →
         </button>
 
         <button id="btnVoirProfilDepuisEval" class="btn btn-secondaire btn-compact"
-                onclick="ouvrirProfilDepuisEvaluation()"
+                data-action="ouvrirProfilDepuisEvaluation"
                 style="margin-left: 10px; display: none; padding: 6px 10px; min-width: auto; font-size: 0.85rem;"
                 title="Voir le profil de l'étudiant·e">
             👤
         </button>
 
         <button id="btnVoirTravailDepuisEval" class="btn btn-secondaire btn-compact"
-                onclick="ouvrirTravailDepuisEvaluation()"
+                data-action="ouvrirTravailDepuisEvaluation"
                 style="margin-left: 6px; display: none; padding: 6px 10px; min-width: auto; font-size: 0.85rem;"
                 title="Voir le travail de l'étudiant·e">
             📄 Travail
@@ -6267,31 +6267,31 @@ function afficherListeBanqueEvaluations(evaluations) {
                         ${estReprise ? `
                             <div style="margin-top: 10px; padding: 8px; background: var(--violet-pale, #f3e5f5); border-radius: 4px; font-size: 0.85rem; color: var(--violet-jeton, #7b1fa2); display: flex; justify-content: space-between; align-items: center;">
                                 <span>⭐ Jeton de reprise appliqué - Remplace l'évaluation précédente</span>
-                                <button class="btn-jeton-retirer" style="font-size: 1.2rem;" onclick="retirerJeton('${evaluation.id}', 'reprise')"
+                                <button class="btn-jeton-retirer" style="font-size: 1.2rem;" data-action="retirerJeton" data-param="${evaluation.id}" data-param2="reprise"
                                         title="Retirer le jeton de reprise">×</button>
                             </div>
                         ` : ''}
                         ${estDelai ? `
                             <div style="margin-top: 10px; padding: 8px; background: var(--alerte-fond-attention); border-radius: 4px; font-size: 0.85rem; color: var(--orange-accent); display: flex; justify-content: space-between; align-items: center;">
                                 <span>⭐ Jeton de délai appliqué - Date limite étendue</span>
-                                <button class="btn-jeton-retirer" style="font-size: 1.2rem;" onclick="retirerJeton('${evaluation.id}', 'delai')"
+                                <button class="btn-jeton-retirer" style="font-size: 1.2rem;" data-action="retirerJeton" data-param="${evaluation.id}" data-param2="delai"
                                         title="Retirer le jeton de délai">×</button>
                             </div>
                         ` : ''}
                     </div>
                     <div style="margin-left: 20px; display: flex; flex-direction: column; gap: 6px;">
-                        <button class="btn btn-modifier btn-compact" onclick="chargerEvaluationDepuisBanque('${evaluation.id}')">
+                        <button class="btn btn-modifier btn-compact" data-action="chargerEvaluationDepuisBanque" data-param="${evaluation.id}">
                             Charger
                         </button>
-                        <button class="btn btn-modifier btn-compact" onclick="appliquerJetonRepriseDepuisBanque('${evaluation.id}')">
+                        <button class="btn btn-modifier btn-compact" data-action="appliquerJetonRepriseDepuisBanque" data-param="${evaluation.id}">
                             Jeton de reprise
                         </button>
-                        <span onclick="basculerVerrouillageEvaluation('${evaluation.id}')"
+                        <span data-action="basculerVerrouillageEvaluation" data-param="${evaluation.id}"
                               style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-right: 8px;"
                               title="${evaluation.verrouillee ? 'Verrouillée - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller'}">
                             ${evaluation.verrouillee ? '🔒' : '🔓'}
                         </span>
-                        <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluationBanque('${evaluation.id}')">
+                        <button class="btn btn-supprimer btn-compact" data-action="supprimerEvaluationBanque" data-param="${evaluation.id}">
                             Supprimer
                         </button>
                     </div>
@@ -7183,6 +7183,29 @@ async function copierCriteresSRPNF() {
     }
 }
 
+/* ===============================
+   WRAPPERS DELEGATION (Phase 5)
+   =============================== */
+
+/** Handler oninput pour calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) */
+function calculerNoteAlgoSimpleHandler(el) {
+    calculerNoteAlgorithmiqueSimple(
+        el.dataset.critereId,
+        parseFloat(el.dataset.ponderation),
+        parseFloat(el.dataset.facteur)
+    );
+}
+
+/** Handler oninput pour calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur, critereGrilleId) */
+function calculerNoteAlgoCatHandler(el) {
+    calculerNoteAlgorithmiqueAvecCategories(
+        el.dataset.critereId,
+        parseFloat(el.dataset.ponderation),
+        parseFloat(el.dataset.facteur),
+        el.dataset.critereGrilleId || ''
+    );
+}
+
 // Exporter les fonctions
 window.afficherJetonsPersonnalisesEvaluation = afficherJetonsPersonnalisesEvaluation;
 window.peuplementOptJetons = peuplementOptJetons;
@@ -7221,6 +7244,24 @@ window.gererChangementCheckboxJetonReprise = gererChangementCheckboxJetonReprise
 window.niveauSelectionne = niveauSelectionne;
 window.fermerModalReparationEvaluations = fermerModalReparationEvaluations;
 window.lancerReparationEvaluations = lancerReparationEvaluations;
+
+// Phase 5 — wrappers delegation
+window.calculerNoteAlgoSimpleHandler = calculerNoteAlgoSimpleHandler;
+window.calculerNoteAlgoCatHandler = calculerNoteAlgoCatHandler;
+
+// Phase 5 — fonctions utilisées par data-action / data-on-change
+window.toggleEtudiantEval = toggleEtudiantEval;
+window.modifierEvaluation = modifierEvaluation;
+window.supprimerEvaluation = supprimerEvaluation;
+window.basculerVerrouillageEvaluation = basculerVerrouillageEvaluation;
+window.chargerEvaluationDepuisBanque = chargerEvaluationDepuisBanque;
+window.appliquerJetonRepriseDepuisBanque = appliquerJetonRepriseDepuisBanque;
+window.supprimerEvaluationBanque = supprimerEvaluationBanque;
+window.retirerJetonDepuisSidebar = retirerJetonDepuisSidebar;
+window.evaluerProduction = evaluerProduction;
+window.naviguerEtudiantPrecedent = naviguerEtudiantPrecedent;
+window.naviguerEtudiantSuivant = naviguerEtudiantSuivant;
+window.retirerJeton = retirerJeton;
 
 
 })();
