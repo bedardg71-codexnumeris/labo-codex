@@ -347,7 +347,7 @@ function ouvrirModalParamsTirage() {
             <div class="modal-contenu">
                 <div class="modal-entete">
                     <h2 id="titre-modal-params">Paramètres du tirage</h2>
-                    <button class="modal-fermer" onclick="window.fermerModalParamsTirage()" aria-label="Fermer">×</button>
+                    <button class="modal-fermer" data-action="fermerModalParamsTirage" aria-label="Fermer">×</button>
                 </div>
                 <div class="modal-corps">
 
@@ -389,7 +389,7 @@ function ouvrirModalParamsTirage() {
                                         <input type="checkbox"
                                                data-da="${e.da}"
                                                ${!estExclu ? 'checked' : ''}
-                                               onchange="window.toggleExclusionEtudiant('${e.da}')">
+                                               data-on-change="toggleExclusionEtudiant" data-param="${e.da}">
                                         <span class="tirage-etudiant-nom">${e.nom}, ${e.prenom}</span>
                                         ${estTire && !etatTirage.avecRemise ? '<span class="tirage-badge-tire">tiré</span>' : ''}
                                     </label>
@@ -400,9 +400,9 @@ function ouvrirModalParamsTirage() {
 
                 </div>
                 <div class="modal-pied">
-                    <button class="btn btn-modifier" onclick="window.reinitialiserTirageComplet()">Réinitialiser</button>
-                    <button class="btn btn-annuler" onclick="window.fermerModalParamsTirage()">Annuler</button>
-                    <button class="btn btn-principal" onclick="window.appliquerParamsTirage()">Appliquer</button>
+                    <button class="btn btn-modifier" data-action="reinitialiserTirageComplet">Réinitialiser</button>
+                    <button class="btn btn-annuler" data-action="fermerModalParamsTirage">Annuler</button>
+                    <button class="btn btn-principal" data-action="appliquerParamsTirage">Appliquer</button>
                 </div>
             </div>
         </div>
@@ -777,14 +777,14 @@ function ouvrirModalParamsQuestions() {
             <div class="modal-contenu modal-large">
                 <div class="modal-entete">
                     <h2>Gestion des Questions Flash</h2>
-                    <button class="modal-fermer" onclick="window.fermerModalParamsQuestions()" aria-label="Fermer">×</button>
+                    <button class="modal-fermer" data-action="fermerModalParamsQuestions" aria-label="Fermer">×</button>
                 </div>
                 <div class="modal-corps">
 
                     <!-- Options -->
                     <div class="form-groupe">
                         <label class="form-checkbox-label">
-                            <input type="checkbox" id="param-remise-questions" ${etatQuestions.avecRemise ? 'checked' : ''} onchange="window.toggleRemiseQuestions(this.checked)">
+                            <input type="checkbox" id="param-remise-questions" ${etatQuestions.avecRemise ? 'checked' : ''} data-on-change="toggleRemiseQuestionsHandler">
                             <span>Avec remise (une même question peut être tirée plusieurs fois)</span>
                         </label>
                     </div>
@@ -799,13 +799,13 @@ function ouvrirModalParamsQuestions() {
                                 ${etatQuestions.categories.map(c => `
                                     <span class="questions-categorie-tag">
                                         ${c.nom}
-                                        <button class="questions-categorie-suppr" onclick="window.supprimerCategorie('${c.id}')" title="Supprimer">×</button>
+                                        <button class="questions-categorie-suppr" data-action="supprimerCategorie" data-param="${c.id}" title="Supprimer">×</button>
                                     </span>
                                 `).join('')}
                             </div>
                             <div class="questions-ajouter-categorie">
                                 <input type="text" id="nouvelle-categorie" placeholder="Nouvelle catégorie..." class="form-input">
-                                <button class="btn btn-modifier" onclick="window.ajouterCategorie()">Ajouter</button>
+                                <button class="btn btn-modifier" data-action="ajouterCategorie">Ajouter</button>
                             </div>
                         </div>
                     </div>
@@ -824,7 +824,7 @@ function ouvrirModalParamsQuestions() {
                                         <option value="${c.id}">${c.nom}</option>
                                     `).join('')}
                                 </select>
-                                <button class="btn btn-principal" onclick="window.ajouterQuestion()">Ajouter</button>
+                                <button class="btn btn-principal" data-action="ajouterQuestion">Ajouter</button>
                             </div>
                         </div>
                     </div>
@@ -861,8 +861,8 @@ function ouvrirModalParamsQuestions() {
 
                 </div>
                 <div class="modal-pied">
-                    <button class="btn btn-modifier" onclick="window.reinitialiserQuestionsPositions()">Réinitialiser les tirages</button>
-                    <button class="btn btn-principal" onclick="window.fermerModalParamsQuestions()">Fermer</button>
+                    <button class="btn btn-modifier" data-action="reinitialiserQuestionsPositions">Réinitialiser les tirages</button>
+                    <button class="btn btn-principal" data-action="fermerModalParamsQuestions">Fermer</button>
                 </div>
             </div>
         </div>
@@ -904,13 +904,13 @@ function genererHTMLQuestionFlash(question) {
 
     return `
         <div class="question-item ${estPosee && !etatQuestions.avecRemise ? 'question-posee' : ''}">
-            <span class="question-item-texte" onclick="window.modifierQuestion('${question.id}')" title="Clique pour modifier">${question.texte}</span>
+            <span class="question-item-texte" data-action="modifierQuestion" data-param="${question.id}" title="Clique pour modifier">${question.texte}</span>
             <div class="question-item-actions">
-                <select class="question-categorie-select" onchange="window.changerCategorieQuestion('${question.id}', this.value)" title="Changer de catégorie">
+                <select class="question-categorie-select" data-on-change="changerCategorieQuestionHandler" data-question-id="${question.id}" title="Changer de catégorie">
                     ${optionsCategorie}
                 </select>
                 ${estPosee && !etatQuestions.avecRemise ? '<span class="question-badge-posee">posée</span>' : ''}
-                <button class="btn-icon" onclick="window.supprimerQuestion('${question.id}')" title="Supprimer">🗑️</button>
+                <button class="btn-icon" data-action="supprimerQuestion" data-param="${question.id}" title="Supprimer">🗑️</button>
             </div>
         </div>
     `;
@@ -1018,7 +1018,7 @@ function rafraichirListeQuestionsModal() {
         listeCategories.innerHTML = etatQuestions.categories.map(c => `
             <span class="questions-categorie-tag">
                 ${c.nom}
-                <button class="questions-categorie-suppr" onclick="window.supprimerCategorie('${c.id}')" title="Supprimer">×</button>
+                <button class="questions-categorie-suppr" data-action="supprimerCategorie" data-param="${c.id}" title="Supprimer">×</button>
             </span>
         `).join('');
     }
@@ -1176,6 +1176,20 @@ function reinitialiserQuestionsPositions() {
 }
 
 /* ===============================
+   WRAPPERS DELEGATION (Phase 5)
+   =============================== */
+
+/** Toggle remise questions depuis checkbox */
+function toggleRemiseQuestionsHandler(el) {
+    toggleRemiseQuestions(el.checked);
+}
+
+/** Changer catégorie question depuis select */
+function changerCategorieQuestionHandler(el) {
+    changerCategorieQuestion(el.dataset.questionId, el.value);
+}
+
+/* ===============================
    INITIALISATION
    =============================== */
 
@@ -1203,6 +1217,10 @@ window.supprimerQuestion = supprimerQuestion;
 window.changerCategorieQuestion = changerCategorieQuestion;
 window.reinitialiserQuestionsPositions = reinitialiserQuestionsPositions;
 window.changerFiltreCategorie = changerFiltreCategorie;
+
+// Wrappers délégation (Phase 5)
+window.toggleRemiseQuestionsHandler = toggleRemiseQuestionsHandler;
+window.changerCategorieQuestionHandler = changerCategorieQuestionHandler;
 window.initialiserQuestions = initialiserQuestions;
 
 console.log('[Boîte à outils] Module chargé');

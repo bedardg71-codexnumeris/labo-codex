@@ -401,7 +401,7 @@ function afficherListeInterventions() {
     // Bouton pour planifier une nouvelle intervention
     let html = `
         <div class="actions-principales">
-            <button onclick="afficherFormulaireIntervention()" class="btn btn-principal" data-tooltip="interv-btn-planifier">
+            <button data-action="afficherFormulaireIntervention" class="btn btn-principal" data-tooltip="interv-btn-planifier">
                 Planifier une intervention
             </button>
         </div>
@@ -442,15 +442,15 @@ function afficherListeInterventions() {
                     </div>
                     <div class="intervention-actions">
                         ${intervention.statut !== 'completee' ? `
-                            <button onclick="ouvrirIntervention('${intervention.id}')" class="btn btn-principal">
+                            <button data-action="ouvrirIntervention" data-param="${intervention.id}" class="btn btn-principal">
                                 Modifier
                             </button>
                         ` : `
-                            <button onclick="ouvrirIntervention('${intervention.id}')" class="btn btn-secondaire">
+                            <button data-action="ouvrirIntervention" data-param="${intervention.id}" class="btn btn-secondaire">
                                 Consulter
                             </button>
                         `}
-                        <button onclick="if(confirm('Supprimer cette intervention ?')) { supprimerIntervention('${intervention.id}'); afficherListeInterventions(); }" class="btn btn-supprimer">Supprimer</button>
+                        <button data-action="supprimerInterventionEtRafraichir" data-param="${intervention.id}" class="btn btn-supprimer">Supprimer</button>
                     </div>
                 </div>
 
@@ -734,7 +734,7 @@ function afficherFormulaireIntervention(daPreselectionne) {
                 </tbody>
             </table>
 
-            <form onsubmit="sauvegarderNouvelleIntervention(event); return false;">
+            <form id="form-nouvelle-intervention">
                 <input type="hidden" id="interventionDaPreselectionne" value="${daPreselectionne || ''}">
                 <!-- Layout 2 colonnes : formulaire | gestion absences -->
                 <div class="intervention-grid-1-09">
@@ -751,7 +751,7 @@ function afficherFormulaireIntervention(daPreselectionne) {
                             <div class="champ-formulaire u-m-0">
                                 <label for="interventionNiveau" class="label-formulaire">Niveau R\u00e0I :</label>
                                 <select id="interventionNiveau" class="controle-form" required
-                                        onchange="gererVisibiliteContexteIntervention();">
+                                        data-on-change="gererVisibiliteContexteIntervention">
                                     <option value="2">Niveau 2 (Groupe cibl\u00e9)</option>
                                     <option value="3">Niveau 3 (Individuel)</option>
                                 </select>
@@ -763,7 +763,7 @@ function afficherFormulaireIntervention(daPreselectionne) {
                             <div class="champ-formulaire u-m-0">
                                 <label for="interventionContexte" class="label-formulaire">Contexte de l\u2019intervention :</label>
                                 <select id="interventionContexte" class="controle-form" required
-                                        onchange="gererVisibiliteContexteIntervention();">
+                                        data-on-change="gererVisibiliteContexteIntervention">
                                     <option value="rattrapage">S\u00e9ance de rattrapage \u2014 les non-participants ont cong\u00e9</option>
                                     <option value="en-classe">Petit groupe cibl\u00e9 pendant le cours r\u00e9gulier</option>
                                 </select>
@@ -812,7 +812,7 @@ function afficherFormulaireIntervention(daPreselectionne) {
                 </div>
 
                 <div class="intervention-flex-end">
-                    <button type="button" onclick="afficherListeInterventions()" class="btn btn-secondaire">
+                    <button type="button" data-action="afficherListeInterventions" class="btn btn-secondaire">
                         Annuler
                     </button>
                     <button type="submit" class="btn btn-principal">
@@ -898,7 +898,7 @@ function afficherFormulaireModification(interventionId) {
         <div class="carte">
             <h3 class="intervention-mt-0">Modifier l'intervention</h3>
 
-            <form onsubmit="sauvegarderModificationIntervention(event, '${interventionId}'); return false;">
+            <form id="form-modification-intervention" data-intervention-id="${interventionId}">
                 <!-- Layout 2 colonnes : formulaire | gestion absences -->
                 <div class="intervention-grid-1-09">
                     <!-- Colonne gauche : Champs du formulaire (50%) -->
@@ -980,7 +980,7 @@ function afficherFormulaireModification(interventionId) {
                 </div>
 
                 <div class="intervention-flex-end">
-                    <button type="button" onclick="afficherListeInterventions()" class="btn btn-secondaire">
+                    <button type="button" data-action="afficherListeInterventions" class="btn btn-secondaire">
                         Annuler
                     </button>
                     <button type="submit" class="btn btn-principal">
@@ -1093,7 +1093,7 @@ function ouvrirIntervention(interventionId) {
             <div style="display: grid; grid-template-columns: auto 1fr 2fr auto; gap: 10px; align-items: center;
                         padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 5px;">
                 <input type="checkbox" id="etud-${etudiant.da}" value="${etudiant.da}" ${checked}
-                       onchange="afficherAnalyseTempsReel('${intervention.id}')"
+                       data-on-change="afficherAnalyseTempsReel" data-param="${intervention.id}"
                        style="width: auto; margin: 0;">
                 <label for="etud-${etudiant.da}" style="font-weight: 500; margin: 0; cursor: pointer;">
                     ${etudiant.prenom} ${etudiant.nom}
@@ -1138,7 +1138,7 @@ function ouvrirIntervention(interventionId) {
                         <div class="champ-formulaire u-m-0">
                             <label for="interventionNiveau" class="label-formulaire">Niveau R\u00e0I :</label>
                             <select id="interventionNiveau" class="controle-form" required
-                                    onchange="gererVisibiliteContexteIntervention();">
+                                    data-on-change="gererVisibiliteContexteIntervention">
                                 <option value="2" ${intervention.niveauRai === 2 ? 'selected' : ''}>Niveau 2 (Groupe cibl\u00e9)</option>
                                 <option value="3" ${intervention.niveauRai === 3 ? 'selected' : ''}>Niveau 3 (Individuel)</option>
                             </select>
@@ -1150,7 +1150,7 @@ function ouvrirIntervention(interventionId) {
                         <div class="champ-formulaire u-m-0">
                             <label for="interventionContexte" class="label-formulaire">Contexte de l\u2019intervention :</label>
                             <select id="interventionContexte" class="controle-form" required
-                                    onchange="gererVisibiliteContexteIntervention();">
+                                    data-on-change="gererVisibiliteContexteIntervention">
                                 <option value="rattrapage" ${contexteExistant === 'rattrapage' ? 'selected' : ''}>S\u00e9ance de rattrapage \u2014 les non-participants ont cong\u00e9</option>
                                 <option value="en-classe" ${contexteExistant === 'en-classe' ? 'selected' : ''}>Petit groupe cibl\u00e9 pendant le cours r\u00e9gulier</option>
                             </select>
@@ -1251,10 +1251,10 @@ function ouvrirIntervention(interventionId) {
             </div>
 
             <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-                <button onclick="afficherListeInterventions()" class="btn btn-secondaire">
+                <button data-action="afficherListeInterventions" class="btn btn-secondaire">
                     Annuler
                 </button>
-                <button onclick="sauvegarderPresencesIntervention('${interventionId}')" class="btn btn-principal">
+                <button data-action="sauvegarderPresencesIntervention" data-param="${interventionId}" class="btn btn-principal">
                     Sauvegarder
                 </button>
             </div>
@@ -1754,6 +1754,30 @@ function obtenirAbsencesMotiveesParDate(date) {
     return dasMotives;
 }
 
+/* ===============================
+   WRAPPERS DELEGATION (Phase 5)
+   =============================== */
+
+/** Supprimer intervention avec confirmation + rafraichir liste */
+function supprimerInterventionEtRafraichir(interventionId) {
+    if (confirm('Supprimer cette intervention ?')) {
+        supprimerIntervention(interventionId);
+        afficherListeInterventions();
+    }
+}
+
+// Delegation formulaires interventions (submit)
+document.addEventListener('submit', function(e) {
+    var form = e.target;
+    if (form.id === 'form-nouvelle-intervention') {
+        e.preventDefault();
+        sauvegarderNouvelleIntervention(e);
+    } else if (form.id === 'form-modification-intervention') {
+        e.preventDefault();
+        sauvegarderModificationIntervention(e, form.dataset.interventionId);
+    }
+});
+
 // Exporter les fonctions publiques
 window.obtenirInterventions = obtenirInterventions;
 window.obtenirIntervention = obtenirIntervention;
@@ -1776,6 +1800,9 @@ window.initialiserModuleInterventions = initialiserModuleInterventions;
 window.formaterDateLisible = formaterDateLisible;
 window.genererBadgeStatut = genererBadgeStatut;
 window.obtenirAbsencesMotiveesParDate = obtenirAbsencesMotiveesParDate;
+window.supprimerInterventionEtRafraichir = supprimerInterventionEtRafraichir;
+window.sauvegarderModificationIntervention = sauvegarderModificationIntervention;
+window.afficherAnalyseTempsReel = afficherAnalyseTempsReel;
 
 
 })();

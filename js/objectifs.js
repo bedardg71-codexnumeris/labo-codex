@@ -92,7 +92,7 @@ function afficherListeEnsemblesObjectifs() {
             ? GabaritsUtils.genererBadgesPratiques(ensemble)
             : '';
         html += `
-            <div class="sidebar-item" onclick="afficherEnsembleObjectifs('${ensemble.id}')">
+            <div class="sidebar-item" data-action="afficherEnsembleObjectifs" data-param="${ensemble.id}">
                 <div class="sidebar-item-titre">${ensemble.nom}</div>
                 <div class="sidebar-item-badges">${badgesPratiques} <span class="badge-caracteristique">${nbObjectifs} objectifs</span></div>
             </div>
@@ -210,7 +210,7 @@ function genererFormulaireEnsemble(ensemble) {
                    placeholder="Nom de l'objectif"
                    value="${obj.nom}"
                    data-field="nom"
-                   oninput="marquerEnsembleModifie()">
+                   data-on-input="marquerEnsembleModifie">
             <input type="number"
                    class="controle-form"
                    placeholder="Poids %"
@@ -219,15 +219,15 @@ function genererFormulaireEnsemble(ensemble) {
                    max="100"
                    step="1"
                    data-field="poids"
-                   oninput="calculerTotalPoidsEnsemble(); marquerEnsembleModifie()">
-            <select class="controle-form" data-field="type" onchange="marquerEnsembleModifie()">
+                   data-on-input="calculerTotalEtMarquerHandler">
+            <select class="controle-form" data-field="type" data-on-change="marquerEnsembleModifie">
                 <option value="fondamental" ${obj.type === 'fondamental' ? 'selected' : ''}>Fondamental</option>
                 <option value="integrateur" ${obj.type === 'integrateur' ? 'selected' : ''}>Intégrateur</option>
                 <option value="transversal" ${obj.type === 'transversal' ? 'selected' : ''}>Transversal</option>
             </select>
             <button type="button"
                     class="btn btn-tres-compact btn-supprimer"
-                    onclick="retirerObjectifEnsemble(${index})">Supprimer</button>
+                    data-action="retirerObjectifEnsemble" data-param="${index}">Supprimer</button>
         </div>
     `).join('');
 
@@ -249,7 +249,7 @@ function genererFormulaireEnsemble(ensemble) {
                            class="controle-form"
                            value="${ensemble.nom}"
                            placeholder="Ex: Objectifs Calcul différentiel"
-                           oninput="marquerEnsembleModifie()">
+                           data-on-input="marquerEnsembleModifie">
                 </div>
                 <div style="flex-shrink: 0;">
                     ${typeof GabaritsUtils !== 'undefined'
@@ -266,7 +266,7 @@ function genererFormulaireEnsemble(ensemble) {
                            class="controle-form"
                            value="${ensemble.auteur || ''}"
                            placeholder="Ton nom"
-                           oninput="marquerEnsembleModifie()">
+                           data-on-input="marquerEnsembleModifie">
                 </div>
                 <div class="groupe-form">
                     <label>Établissement</label>
@@ -275,7 +275,7 @@ function genererFormulaireEnsemble(ensemble) {
                            class="controle-form"
                            value="${ensemble.etablissement || ''}"
                            placeholder="Ex: Cégep de..."
-                           oninput="marquerEnsembleModifie()">
+                           data-on-input="marquerEnsembleModifie">
                 </div>
             </div>
 
@@ -286,7 +286,7 @@ function genererFormulaireEnsemble(ensemble) {
                        class="controle-form"
                        value="${ensemble.discipline || ''}"
                        placeholder="Ex: Mathématiques, Biologie..."
-                       oninput="marquerEnsembleModifie()">
+                       data-on-input="marquerEnsembleModifie">
             </div>
 
             <div class="groupe-form">
@@ -295,7 +295,7 @@ function genererFormulaireEnsemble(ensemble) {
                           class="controle-form"
                           rows="2"
                           placeholder="Description optionnelle de cet ensemble d'objectifs"
-                          oninput="marquerEnsembleModifie()">${ensemble.description || ''}</textarea>
+                          data-on-input="marquerEnsembleModifie">${ensemble.description || ''}</textarea>
             </div>
         </div>
 
@@ -303,7 +303,7 @@ function genererFormulaireEnsemble(ensemble) {
         <div class="objectifs-section">
             <div class="section-header">
                 <h4>Objectifs (compétences)</h4>
-                <button type="button" onclick="ajouterObjectifEnsemble()" class="btn btn-secondaire">
+                <button type="button" data-action="ajouterObjectifEnsemble" class="btn btn-secondaire">
                     + Ajouter un objectif
                 </button>
             </div>
@@ -330,22 +330,22 @@ function genererFormulaireEnsemble(ensemble) {
         <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center;">
             <!-- Boutons gauche (actions sur l'ensemble) -->
             <div style="display: flex; gap: 10px;">
-                <button onclick="dupliquerEnsembleObjectifs('${ensemble.id}')" class="btn btn-secondaire" style="display: ${ensemble.nom === 'Nouvel ensemble d\'objectifs' ? 'none' : 'inline-block'};" title="Créer une copie de cet ensemble">
+                <button data-action="dupliquerEnsembleObjectifs" data-param="${ensemble.id}" class="btn btn-secondaire" style="display: ${ensemble.nom === 'Nouvel ensemble d\'objectifs' ? 'none' : 'inline-block'};" title="Créer une copie de cet ensemble">
                     Dupliquer l'ensemble
                 </button>
                 <button class="btn btn-secondaire btn-exporter-ensemble" data-ensemble-id="${ensemble.id}" style="display: ${ensemble.nom === 'Nouvel ensemble d\'objectifs' ? 'none' : 'inline-block'};" title="Exporter cet ensemble">
                     Exporter l'ensemble
                 </button>
-                <button onclick="supprimerEnsembleObjectifs('${ensemble.id}')" class="btn btn-supprimer" title="Supprimer cet ensemble">
+                <button data-action="supprimerEnsembleObjectifs" data-param="${ensemble.id}" class="btn btn-supprimer" title="Supprimer cet ensemble">
                     Supprimer l'ensemble
                 </button>
             </div>
             <!-- Boutons droite (actions principales) -->
             <div style="display: flex; gap: 10px;">
-                <button onclick="annulerEditionEnsemble()" class="btn btn-annuler">
+                <button data-action="annulerEditionEnsemble" class="btn btn-annuler">
                     Annuler
                 </button>
-                <button onclick="sauvegarderEnsembleObjectifs()" class="btn btn-confirmer" id="btnSauvegarderEnsemble">
+                <button data-action="sauvegarderEnsembleObjectifs" class="btn btn-confirmer" id="btnSauvegarderEnsemble">
                     Sauvegarder
                 </button>
             </div>
@@ -608,7 +608,7 @@ function sauvegarderEnsembleObjectifs() {
 
     // Afficher les boutons Dupliquer et Exporter si le nom a changé (Beta 92)
     if (nom !== 'Nouvel ensemble d\'objectifs') {
-        const btnsDupliquer = document.querySelectorAll('[onclick*="dupliquerEnsembleObjectifs"]');
+        const btnsDupliquer = document.querySelectorAll('[data-action="dupliquerEnsembleObjectifs"]');
         const btnsExporter = document.querySelectorAll('.btn-exporter-ensemble');
         btnsDupliquer.forEach(btn => btn.classList.remove('u-hide'));
         btnsExporter.forEach(btn => btn.classList.remove('u-hide'));
@@ -1088,10 +1088,23 @@ function verifierPratiqueMultiObjectifs() {
 }
 
 // ============================================================================
+// WRAPPERS POUR DELEGATION
+// ============================================================================
+
+/**
+ * Wrapper multi-statement pour data-on-input sur les champs poids
+ */
+function calculerTotalEtMarquerHandler() {
+    calculerTotalPoidsEnsemble();
+    marquerEnsembleModifie();
+}
+
+// ============================================================================
 // EXPORTS
 // ============================================================================
 
 window.initialiserModuleObjectifs = initialiserModuleObjectifs;
+window.calculerTotalEtMarquerHandler = calculerTotalEtMarquerHandler;
 window.creerNouvelEnsembleObjectifs = creerNouvelEnsembleObjectifs;
 window.afficherEnsembleObjectifs = afficherEnsembleObjectifs;
 window.ajouterObjectifEnsemble = ajouterObjectifEnsemble;
