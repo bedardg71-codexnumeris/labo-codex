@@ -65,6 +65,7 @@ function normaliserPrenom(prenom) {
  * Charge les résolutions depuis resolutions.json
  */
 async function chargerResolutions() {
+    if (window.location.protocol === 'file:') return; // fetch impossible en file://
     try {
         const reponse = await fetch('resolutions.json?t=' + Date.now(), { cache: 'no-store' });
         if (!reponse.ok) return;
