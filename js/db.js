@@ -3,9 +3,19 @@
  * Architecture de cache hybride localStorage + IndexedDB
  *
  * FONCTIONNEMENT:
- * - localStorage = Cache synchrone rapide (accès immédiat)
- * - IndexedDB = Stockage principal asynchrone (grandes capacités)
- * - Synchronisation bidirectionnelle automatique
+ * - localStorage = Store primaire de facto (synchrone, survit aux crashes)
+ * - IndexedDB = Backup async (grandes capacités, fire-and-forget)
+ * - Au démarrage : syncToLocalStorageCache() recopie IDB → localStorage
+ *
+ * DÉCISIONS ARCHITECTURALES (audit 26 mars 2026):
+ * - setSync() écrit localStorage sync + IDB async sans await. Si crash
+ *   avant completion IDB, localStorage a la valeur récente, IDB non.
+ *   Au prochain démarrage, IDB peut écraser localStorage avec une valeur
+ *   plus ancienne. Risque accepté : la fenêtre de vulnérabilité est courte.
+ * - memoryCache (RAM) est utilisé quand localStorage atteint son quota.
+ *   Si crash dans cet état, données perdues. Risque accepté : rare.
+ * - Pas de flush beforeunload pour les écritures IDB pendantes.
+ *   Risque accepté : localStorage est la source de vérité en pratique.
  *
  * MÉTHODES SYNCHRONES (getSync/setSync/removeSync):
  * - Lecture: depuis localStorage (cache chaud)
