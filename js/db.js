@@ -72,16 +72,13 @@
             this.useIndexedDB = this._detectIndexedDB();
 
             if (this.useIndexedDB) {
-                console.log('📊 [DB] IndexedDB détecté, initialisation...');
                 try {
                     await this._initIndexedDB();
-                    console.log('✅ [DB] IndexedDB initialisé avec succès');
                 } catch (error) {
                     console.error('❌ [DB] Erreur initialisation IndexedDB, fallback localStorage:', error);
                     this.useIndexedDB = false;
                 }
             } else {
-                console.log('📁 [DB] Utilisation de localStorage (IndexedDB non disponible)');
             }
 
             this.ready = true;
@@ -169,7 +166,6 @@
                         // 🆕 Fallback vers localStorage si absent d'IndexedDB
                         const localValue = this._getLocalStorage(key, null);
                         if (localValue !== null) {
-                            console.log(`[DB] Fallback localStorage pour clé "${key}"`);
                             // Synchroniser vers IndexedDB pour la prochaine fois
                             this._setIndexedDB(key, localValue).catch(() => {});
                         }
@@ -377,7 +373,6 @@
                 return { success: false, error: 'IndexedDB non disponible' };
             }
 
-            console.log('🔄 [DB] Début migration localStorage → IndexedDB...');
 
             let migrated = 0;
             let skipped = 0;
@@ -413,7 +408,6 @@
                 errors
             };
 
-            console.log(`✅ [DB] Migration terminée:`, result);
             return result;
         }
 
@@ -480,7 +474,6 @@
                 const request = store.clear();
 
                 request.onsuccess = () => {
-                    console.log('🗑️ [DB] IndexedDB keyvalue vidé');
                     resolve();
                 };
 
@@ -535,7 +528,6 @@
                 return { success: false, message: 'IndexedDB non disponible' };
             }
 
-            console.log(`🧹 [DB] Nettoyage cache localStorage (seuil: ${(seuilOctets/1024).toFixed(0)} KB)...`);
 
             const clesSupprimes = [];
             let espaceLibere = 0;
@@ -551,7 +543,6 @@
                         espaceLibere += value.length;
                         localStorage.removeItem(key);
                         clesSupprimes.push({ key, size: value.length });
-                        console.log(`   🗑️ Supprimé du cache: "${key}" (${(value.length/1024).toFixed(1)} KB)`);
                     }
                 }
             }
@@ -564,7 +555,6 @@
                 details: clesSupprimes
             };
 
-            console.log(`✅ [DB] Cache nettoyé: ${clesSupprimes.length} clés, ${result.espaceLibereKB} KB libérés`);
             return result;
         }
 
@@ -575,11 +565,9 @@
          */
         async syncToLocalStorageCache() {
             if (!this.useIndexedDB) {
-                console.log('[DB] Pas de synchronisation nécessaire (IndexedDB non utilisé)');
                 return;
             }
 
-            console.log('🔄 [DB] Synchronisation IndexedDB → localStorage cache...');
 
             try {
                 const indexedDBKeys = await this.keys();
@@ -614,7 +602,6 @@
                     }
                 }
 
-                console.log(`✅ [DB] Synchronisation terminée: ${synced} clés localStorage, ${inMemory} en mémoire`);
 
                 // ✅ Définir flag global pour indiquer que la DB est prête
                 window.dbReady = true;
@@ -776,7 +763,6 @@
                 const store = tx.objectStore('fichiers');
                 const request = store.clear();
                 request.onsuccess = () => {
-                    console.log('[DB] Store fichiers vidé');
                     resolve();
                 };
                 request.onerror = () => {
@@ -957,7 +943,6 @@
                 // Pas de store fichiers : supprimer la base vide et marquer fait
                 indexedDB.deleteDatabase('MonitorageFichiers');
                 db.setSync('_migration_fichiers_done', true);
-                console.log('[DB] Migration fichiers : ancienne base vide, supprimée');
                 return;
             }
 
@@ -970,7 +955,6 @@
                 req.onerror = () => reject(req.error);
             });
 
-            console.log(`[DB] Migration fichiers : ${records.length} enregistrements à migrer`);
 
             // Copier vers le nouveau store
             for (const record of records) {
@@ -983,19 +967,16 @@
 
             // Marquer la migration complète
             db.setSync('_migration_fichiers_done', true);
-            console.log(`✅ [DB] Migration fichiers terminée : ${records.length} enregistrements migrés, MonitorageFichiers supprimée`);
         } catch (e) {
             // Si l'ancienne base n'existe pas, l'ouverture crée une base vide v1
             // On la supprime simplement
             try { indexedDB.deleteDatabase('MonitorageFichiers'); } catch (ex) { console.warn('[DB] deleteDatabase skipped:', ex.message || ex); }
             db.setSync('_migration_fichiers_done', true);
-            console.log('[DB] Migration fichiers : ancienne base inexistante, marquée fait');
         }
     }
 
     // Initialiser automatiquement et synchroniser le cache
     db.init().then(async () => {
-        console.log('✅ [DB] Base de données prête:', db.useIndexedDB ? 'IndexedDB' : 'localStorage');
 
         // Synchroniser IndexedDB → localStorage cache si IndexedDB est disponible
         if (db.useIndexedDB) {

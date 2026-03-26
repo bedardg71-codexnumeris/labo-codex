@@ -23,7 +23,6 @@
 (function() {
     'use strict';
 
-    console.log('[pratique-notation-v2] Chargement du module...');
 
     // =========================================================================
     // INITIALISATION
@@ -33,7 +32,6 @@
      * Initialise l'onglet Pratique de notation v2
      */
     function initialiserPratiqueNotationV2() {
-        console.log('[pratique-notation-v2] Initialisation...');
 
         // Charger le dropdown des échelles
         chargerDropdownEchellesV2();
@@ -41,7 +39,6 @@
         // Charger les valeurs depuis modalitesEvaluation
         chargerValeursDepuisStorage();
 
-        console.log('[pratique-notation-v2] Initialisation terminée');
     }
 
     // =========================================================================
@@ -600,7 +597,6 @@
         }
 
         db.setSync('modalitesEvaluation', modalites);
-        console.log('[pratique-notation-v2] Structure sauvegardée');
     }
 
     /**
@@ -610,8 +606,6 @@
         // DEBUG: Vérifier les valeurs des inputs
         const inputNombre = document.getElementById('v2-jetons-nombre');
         const inputDelaiDuree = document.getElementById('v2-delai-duree');
-        console.log('[DEBUG sauvegarderJetonsV2] Input nombre trouvé:', !!inputNombre, 'valeur:', inputNombre?.value);
-        console.log('[DEBUG sauvegarderJetonsV2] Input durée trouvé:', !!inputDelaiDuree, 'valeur:', inputDelaiDuree?.value);
 
         let modalites = {};
         try {
@@ -623,7 +617,6 @@
         const nombreParEleve = parseInt(inputNombre?.value) || 2;  // 🆕 Beta 95.7 : défaut 2
         const dureeDelaiJours = parseInt(inputDelaiDuree?.value) || 2;  // 🆕 Beta 95.7 : défaut 2 jours
 
-        console.log('[DEBUG sauvegarderJetonsV2] Valeurs à sauvegarder - nombreParEleve:', nombreParEleve, 'dureeDelaiJours:', dureeDelaiJours);
 
         modalites.configurationJetons = modalites.configurationJetons || {};
         modalites.configurationJetons.jetonsActif = document.getElementById('v2-jetons-actif')?.checked !== false;
@@ -658,7 +651,6 @@
         };
 
         db.setSync('modalitesEvaluation', modalites);
-        console.log('[DEBUG sauvegarderJetonsV2] Sauvegarde effectuée:', modalites.configurationJetons);
     }
 
     /**
@@ -680,7 +672,6 @@
         // Optionnel : ajouter une classe pour le style
         contenu.classList.toggle('jetons-desactive', !actif);
 
-        console.log('[toggleSystemeJetonsV2] Système de jetons:', actif ? 'ACTIVÉ' : 'DÉSACTIVÉ');
 
         if (doitSauvegarder) {
             sauvegarderJetonsV2();
@@ -1262,7 +1253,6 @@
         }
 
         db.setSync('modalitesEvaluation', modalites);
-        console.log('[pratique-notation-v2] Configuration PAN-Spécifications sauvegardée');
     }
 
     // -------------------------------------------------------------------------
@@ -1453,7 +1443,6 @@
         // Reset dropdown
         dropdown.value = '';
 
-        console.log('[pratique-notation-v2] Production importée:', prodData.titre);
     }
 
     /**
@@ -1829,7 +1818,6 @@
         }
 
         db.setSync('modalitesEvaluation', modalites);
-        console.log('[pratique-notation-v2] Modèle appliqué:', modele.nom);
 
         return true;
     }
@@ -1880,7 +1868,6 @@
         } else if (typeof window.afficherMessage === 'function') {
             window.afficherMessage(message, 'succes');
         } else {
-            console.log('[pratique-notation-v2]', message);
         }
     }
 
@@ -2010,6 +1997,5 @@
         }
     }
 
-    console.log('[pratique-notation-v2] Module chargé');
 
 })();

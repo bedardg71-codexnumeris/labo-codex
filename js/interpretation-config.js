@@ -114,7 +114,6 @@ function chargerSeuilsInterpretation() {
 function sauvegarderSeuilsInterpretation(seuils) {
     try {
         db.setSync('seuilsInterpretation', seuils);
-        console.log('✅ Seuils d\'interprétation sauvegardés');
         return true;
     } catch (e) {
         console.error('❌ Erreur lors de la sauvegarde des seuils:', e);
@@ -127,7 +126,6 @@ function sauvegarderSeuilsInterpretation(seuils) {
  */
 function reinitialiserSeuilsInterpretation() {
     sauvegarderSeuilsInterpretation(SEUILS_PAR_DEFAUT);
-    console.log('🔄 Seuils réinitialisés aux valeurs par défaut');
 }
 
 /**
@@ -166,7 +164,6 @@ function obtenirSeuil(chemin) {
  * Charge les seuils et les rend disponibles globalement
  */
 function initialiserModuleInterpretation() {
-    console.log('📊 Initialisation du module Interprétation...');
 
     // Charger les seuils
     const seuils = chargerSeuilsInterpretation();
@@ -179,8 +176,6 @@ function initialiserModuleInterpretation() {
     window.SEUILS_PAR_DEFAUT = SEUILS_PAR_DEFAUT;
     window.DESCRIPTIONS_SEUILS = DESCRIPTIONS_SEUILS;
 
-    console.log('✅ Module Interprétation initialisé');
-    console.log('   Seuils chargés:', seuils);
 }
 
 // Auto-initialisation lors du chargement du module
@@ -225,7 +220,6 @@ function chargerSeuilsInterpretationUI() {
         mettreAJourAffichageSeuil('defi', seuils.defiSpecifique);
     }
 
-    console.log('✅ Seuils chargés dans l\'interface:', seuils);
 }
 
 /**
@@ -259,7 +253,6 @@ function sauvegarderSeuil(cle, valeur) {
     seuils[cle] = valeur;
 
     if (sauvegarderSeuilsInterpretation(seuils)) {
-        console.log(`✅ Seuil ${cle} sauvegardé:`, valeur);
 
         // Afficher un message de confirmation discret
         afficherMessageConfirmation(`Seuil sauvegardé : ${cle}`);

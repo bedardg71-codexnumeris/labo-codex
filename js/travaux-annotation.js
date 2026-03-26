@@ -120,7 +120,6 @@
             }
         });
 
-        console.log('[Travaux-Annotation] Module initialise');
     }
 
     /**
@@ -2118,13 +2117,11 @@
      * Copie les annotations selectionnees dans le presse-papiers interne
      */
     function copierSelection() {
-        console.log('[Annotation] Cmd+C — selectionsMultiples:', selectionsMultiples.length);
         if (selectionsMultiples.length === 0) return;
 
         window._annotationClipboard = selectionsMultiples.map(function(sel) {
             return { type: sel.type, data: JSON.parse(JSON.stringify(sel.data)) };
         });
-        console.log('[Annotation] Copié:', window._annotationClipboard.length, 'annotations dans le presse-papiers');
 
         if (typeof afficherNotificationSucces === 'function') {
             var n = window._annotationClipboard.length;
@@ -2136,7 +2133,6 @@
      * Colle les annotations du presse-papiers dans le canvas courant
      */
     function collerAnnotations() {
-        console.log('[Annotation] Cmd+V — clipboard:', window._annotationClipboard ? window._annotationClipboard.length : 'vide');
         if (!window._annotationClipboard || window._annotationClipboard.length === 0) return;
 
         var donneesPage = obtenirDonneesPage();
@@ -3014,7 +3010,6 @@
 
         annotationCourante.dateModification = new Date().toISOString();
         travauxStockage.sauvegarderAnnotationFichier(annotationCourante);
-        console.log('[Travaux-Annotation] Annotation sauvegardee');
     }
 
     /**

@@ -11,7 +11,6 @@
  * Appelée par main.js au chargement
  */
 function initialiserModulePresencesApercu() {
-    console.log('📊 Module Présences - Aperçu initialisé');
 }
 
 /**
@@ -19,7 +18,6 @@ function initialiserModulePresencesApercu() {
  * Appelée automatiquement lors de l'affichage de la sous-section
  */
 function chargerApercuPresences() {
-    console.log('🔄 Chargement de l\'aperçu des présences...');
 
     try {
         // 🆕 BETA 96 FIX: Utiliser obtenirEtudiantsCoursActif() pour filtrer par groupe-cours actif
@@ -42,7 +40,6 @@ function chargerApercuPresences() {
         const nbEleves = etudiantsActifs.length;
         setStatText('stat-nb-eleves', nbEleves || '0');
 
-        console.log('✅ Aperçu des présences chargé');
     } catch (error) {
         console.error('❌ Erreur chargement aperçu présences:', error);
     }

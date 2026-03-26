@@ -30,7 +30,6 @@ let seancesTemp = [];
  * Initialise les interfaces des entités au chargement
  */
 async function initialiserEntitesUI() {
-    console.log('[Entités UI] Initialisation...');
 
     // Peupler les dropdowns
     await peuplerDropdownEnseignants();
@@ -38,7 +37,6 @@ async function initialiserEntitesUI() {
     await peuplerDropdownGroupeCours();
     await peuplerDropdownGroupeCoursActif();
 
-    console.log('[Entités UI] Initialisé');
 }
 
 // ============================================
@@ -110,7 +108,6 @@ async function peuplerDropdownGroupeCoursActif() {
     // Mettre à jour le dropdown header
     selectHeader.innerHTML = options;
 
-    console.log('[Entités UI] Dropdown groupe-cours actif peuplé:', groupesCours.length, 'options');
 }
 
 /**
@@ -289,12 +286,10 @@ async function sauvegarderEnseignantV2() {
         if (enseignantEnEdition) {
             // Modification
             await EnseignantsEntite.mettreAJour(enseignantEnEdition, donnees);
-            console.log('[Entités UI] Enseignant mis à jour');
         } else {
             // Création
             const nouvel = await EnseignantsEntite.creer(donnees);
             enseignantEnEdition = nouvel.id;
-            console.log('[Entités UI] Enseignant créé:', nouvel.id);
         }
 
         // Rafraîchir les dropdowns
@@ -363,7 +358,6 @@ function changerHoraireSelectionneV2(horaireId) {
 
     // Guard: Si l'élément aperçu n'existe pas, ne pas continuer
     if (!apercu) {
-        console.log('[Entités UI] v2-apercuHoraire non trouvé, utilisation interface trimestre-v2.js');
         return;
     }
 
@@ -586,12 +580,10 @@ async function sauvegarderHoraireV2() {
         if (horaireEnEdition) {
             // Modification
             await HorairesEntite.mettreAJour(horaireEnEdition, donnees);
-            console.log('[Entités UI] Horaire mis à jour');
         } else {
             // Création
             const nouvel = await HorairesEntite.creer(donnees);
             horaireEnEdition = nouvel.id;
-            console.log('[Entités UI] Horaire créé:', nouvel.id);
         }
 
         // Rafraîchir les dropdowns
@@ -706,7 +698,6 @@ async function peuplerDropdownGroupeCours() {
         }
 
         selectGroupe.innerHTML = options;
-        console.log('[Entités UI] Groupes d\'étudiants trouvés:', groupesTries.length, 'depuis clé:', cleGroupeEtudiants);
     }
 
     // Dropdown Pratique de notation - Utiliser la bibliothèque de pratiques
@@ -900,7 +891,6 @@ async function sauvegarderGroupeCoursV2() {
 
     try {
         const nouvelGC = await GroupeCoursEntite.creer(donnees);
-        console.log('[Entités UI] Groupe-cours créé:', nouvelGC.id);
 
         // Synchroniser avec infoCours pour rétrocompatibilité
         await GroupeCoursEntite.synchroniserInfoCours(trimestreActif);
@@ -946,7 +936,6 @@ async function activerGroupeCoursV2(groupeCoursId) {
             chargerCoursSelectV2();
         }
 
-        console.log('[Entités UI] Groupe-cours activé:', groupeCoursId);
 
     } catch (err) {
         console.error('[Entités UI] Erreur activation groupe-cours:', err);
@@ -971,7 +960,6 @@ async function supprimerGroupeCoursV2(groupeCoursId) {
         // Rafraîchir la liste
         await afficherListeGroupeCoursV2();
 
-        console.log('[Entités UI] Groupe-cours supprimé:', groupeCoursId);
 
     } catch (err) {
         console.error('[Entités UI] Erreur suppression groupe-cours:', err);
@@ -1041,7 +1029,6 @@ window._modifierSeanceV2Change = function(index, el) {
 };
 window.mettreAJourApercuGroupeCours = mettreAJourApercuGroupeCours;
 
-console.log('[Entités UI] Module chargé');
 
 
 })();

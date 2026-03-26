@@ -479,7 +479,6 @@ function mettreAJourContextesSections(nbEtudiants) {
         }
     });
 
-    console.log(`📊 [Contexte] Mis à jour: ${nomTrimestre} | ${nomCours} | ${badgeTexte}`);
 }
 
 /**
@@ -697,7 +696,6 @@ function calculerDistributionPerformance(etudiants) {
     let echelles = db.getSync('echellesTemplates', []);
     let echelleId = db.getSync('echellePerformanceActive', 'idme-5niv');
 
-    console.log('📊 Distribution P : echelleId =', echelleId, 'echellesTemplates.length =', echelles.length);
 
     // Trouver l'échelle active (par ID ou par défaut)
     let echelle = echelles.find(e => e.id === echelleId);
@@ -705,10 +703,8 @@ function calculerDistributionPerformance(etudiants) {
     if (!echelle) {
         // Fallback : chercher l'échelle par défaut
         echelle = echelles.find(e => e.parDefaut === true) || echelles[0];
-        console.log('📊 Distribution P : Échelle non trouvée par ID, utilisation échelle par défaut:', echelle?.id);
     }
 
-    console.log('📊 Distribution P : echelle finale =', echelle);
 
     if (!echelle || !echelle.niveaux) {
         console.warn('📊 Distribution P : Échelle ou niveaux introuvables');
@@ -720,7 +716,6 @@ function calculerDistributionPerformance(etudiants) {
         .filter(n => n.code !== '0' && n.code !== 0) // Exclure niveau 0 (plagiat)
         .sort((a, b) => (a.min || 0) - (b.min || 0));
 
-    console.log('📊 Distribution P : niveaux filtrés =', niveaux);
 
     if (niveaux.length === 0) {
         console.warn('📊 Distribution P : Aucun niveau après filtrage');
@@ -749,7 +744,6 @@ function calculerDistributionPerformance(etudiants) {
         }
     });
 
-    console.log('📊 Distribution P : compteurs =', compteurs);
 
     // Générer le HTML compact avec noms complets : "Incomplet : 5 • en Développement : 11 • etc."
     const parts = niveaux.map(niveau => {
@@ -759,7 +753,6 @@ function calculerDistributionPerformance(etudiants) {
     });
 
     const result = parts.join(' <span class="tb-m-horizontal-6">•</span> ');
-    console.log('📊 Distribution P : résultat =', result);
 
     return result;
 }
@@ -859,7 +852,6 @@ function genererBadgeSourceDonnees() {
  * Appelée par main.js au chargement
  */
 function initialiserModuleTableauBordApercu() {
-    console.log('Module Tableau de bord - Aperçu initialisé');
 
     // Charger les statistiques si la sous-section aperçu est active
     const apercu = document.getElementById('tableau-bord-apercu');
@@ -1024,7 +1016,6 @@ function initialiserModuleTableauBordApercu() {
    =============================== */
 
 function chargerTableauBordApercu() {
-    console.log('Chargement du tableau de bord - aperçu');
 
     // 🆕 FIX #220 (3 mars 2026) : Régénérer les séances complètes du groupe-cours actif
     // AVANT de calculer l'assiduité. Les seancesCompletes en cache peuvent être stale
@@ -1057,7 +1048,6 @@ function chargerTableauBordApercu() {
     if (raiActive && typeof calculerEtStockerPatternsGroupe === 'function') {
         calculerEtStockerPatternsGroupe();
     } else if (!raiActive) {
-        console.log('ℹ️ RàI désactivé, patterns non calculés');
     } else {
         console.warn('⚠️ calculerEtStockerPatternsGroupe non disponible - Module profil-etudiant.js non chargé ?');
     }
@@ -1156,7 +1146,6 @@ function chargerTableauBordApercu() {
         // 🆕 BETA 96: Distribution ACPE maintenant intégrée dans les barres de progression
         // (graphique séparé supprimé - mini-courbes Gauss dans chaque barre)
 
-        console.log('✅ Tableau de bord chargé (aperçu anonyme)');
 
         // 🆕 BETA 91: Initialiser les événements toggle après génération du HTML
         initialiserEvenementsToggle();
@@ -1324,7 +1313,6 @@ function initialiserEvenementsToggle() {
         });
     });
 
-    console.log('✅ Événements toggle initialisés');
 }
 
 /**
@@ -1414,7 +1402,6 @@ function afficherMetriquesGlobales(etudiants) {
     const groupesCours = obtenirDonneesSelonMode('groupesCours') || [];
     const groupeActif = groupesCours.find(gc => gc.actif);
 
-    console.log(`📊 [Seuil P] Groupe actif:`, groupeActif?.pratiqueId || 'aucun');
 
     // 1. Chercher dans la configuration de la pratique active
     if (groupeActif && groupeActif.pratiqueId) {
@@ -1427,7 +1414,6 @@ function afficherMetriquesGlobales(etudiants) {
             const bibliotheque = db.getSync('bibliotheque-pratiques', []);
             pratiqueActive = bibliotheque.find(p => p.id === groupeActif.pratiqueId);
             if (pratiqueActive) {
-                console.log(`📊 [Seuil P] Pratique trouvée dans bibliothèque`);
             }
         }
 
@@ -1440,27 +1426,21 @@ function afficherMetriquesGlobales(etudiants) {
             if (minComp !== undefined) {
                 seuilP = minComp;
                 seuilTrouve = true;
-                console.log(`📊 [Seuil P] ✅ Trouvé dans pratique: ${seuilP}`);
             } else {
-                console.log(`📊 [Seuil P] Pratique trouvée mais pas de minimumCompletion:`, pratiqueActive);
             }
         } else {
-            console.log(`📊 [Seuil P] Pratique non trouvée: ${groupeActif.pratiqueId}`);
         }
     }
 
     // 2. Sinon, chercher dans modalitesEvaluation (ancienne config ou fallback)
     if (!seuilTrouve) {
         const configPortfolio = config.configPAN?.portfolio || config.portfolio || {};
-        console.log(`📊 [Seuil P] Fallback modalitesEvaluation:`, configPortfolio);
         if (configPortfolio.minimumCompletion !== undefined) {
             seuilP = configPortfolio.minimumCompletion;
             seuilTrouve = true;
-            console.log(`📊 [Seuil P] ✅ Trouvé dans modalitesEvaluation: ${seuilP}`);
         }
     }
 
-    console.log(`📊 [Seuil P] Final: ${seuilP} (trouvé: ${seuilTrouve})`);
 
     // Calculer ce qui manque (0 si le seuil est atteint)
     const seancesManquantesA = Math.max(0, seuilA - nbSeancesGroupe);
@@ -1489,17 +1469,11 @@ function afficherMetriquesGlobales(etudiants) {
         texteAttenteE = `${evalsManquantesE} évaluation${evalsManquantesE > 1 ? 's' : ''} en attente`;
     }
 
-    console.log(`📊 [Métriques] Groupe: ${nbSeancesGroupe} séances, ${nbEvaluationsGroupe} évaluations (seuil P: ${seuilP})`);
-    console.log(`📊 [En attente] A: "${texteAttenteA}", C: "${texteAttenteC}", P: "${texteAttenteP}", E: "${texteAttenteE}"`);
 
     // Debug: Vérifier les indices A des étudiants
     const indicesADebug = obtenirDonneesSelonMode('indicesAssiduite') || {};
-    console.log(`📊 [Indices A] Structure:`, indicesADebug);
-    console.log(`📊 [Indices A] Nb étudiants sommatif:`, Object.keys(indicesADebug.sommatif || {}).length);
-    console.log(`📊 [Indices A] Nb étudiants alternatif:`, Object.keys(indicesADebug.alternatif || {}).length);
     if (Object.keys(indicesADebug.alternatif || {}).length > 0) {
         const premierDA = Object.keys(indicesADebug.alternatif)[0];
-        console.log(`📊 [Indices A] Exemple (${premierDA}):`, indicesADebug.alternatif[premierDA]);
     }
 
     // 🆕 BETA 95.7 (22 jan): Filtrage spécifique pour A (présences saisies, même si A=0%)
@@ -1532,9 +1506,6 @@ function afficherMetriquesGlobales(etudiants) {
         e.alternatif.nombreSeances > 0 && (ilYaDesEvalsPAN || e.alternatif.completion > 0 || e.alternatif.performance > 0)
     );
 
-    console.log(`📊 [Données] Étudiants avec présences (nombreSeances>0) SOM: ${etudiantsAvecPresencesSOM.length}, PAN: ${etudiantsAvecPresencesPAN.length}`);
-    console.log(`📊 [Données] Étudiants avec évaluations (C>0 ou P>0) SOM: ${etudiantsAvecEvalsSOM.length}, PAN: ${etudiantsAvecEvalsPAN.length}`);
-    console.log(`📊 [Données] Étudiants avec données complètes (A+C/P) SOM: ${etudiantsAvecDonneesSOM.length}, PAN: ${etudiantsAvecDonneesPAN.length}`);
 
     // 🆕 BETA 95.7: Préparer les données A avec TOUS les étudiants ayant des présences (y compris 0%)
     // IMPORTANT: Pour A (assiduité), toujours utiliser le calcul SOMMATIF (fait observable)
@@ -1729,8 +1700,6 @@ function genererCarteMetrique(label, valeurSom, valeurPan, afficherSom, afficher
  * @returns {string} HTML de la barre de distribution
  */
 function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, afficherSom, afficherPan, correlation = null, moyenneEngagement = null, texteAttente = '', nbTotal = 0) {
-    console.log(`🎯 genererBarreDistribution appelée: type="${type}", afficherSom=${afficherSom}, afficherPan=${afficherPan}, correlation=${correlation}, moyenneEngagement=${moyenneEngagement}, texteAttente="${texteAttente}", nbTotal=${nbTotal}`);
-    console.log(`   etudiantsSOM.length=${etudiantsSOM?.length || 0}, etudiantsPAN.length=${etudiantsPAN?.length || 0}`);
 
     // Gradient de couleurs selon les seuils d'engagement (4 zones, sans Insuffisant)
     // Orange (30-49%) → Jaune (50-64%) → Vert (65-79%) → Bleu (≥80%)
@@ -1772,14 +1741,11 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
         const soloActive = config.afficherDescriptionsSOLO !== false; // Par défaut true
         const raiActive = config.activerRai !== false; // Par défaut true
 
-        console.log('📊 Type P détecté, soloActive =', soloActive, 'raiActive =', raiActive);
 
         if (soloActive) {
             // 🆕 BETA 91: Distribution IDME + interprétation (si RàI activé)
-            console.log('📊 Appel calculerDistributionPerformance avec', etudiants.length, 'étudiants');
 
             const distribution = calculerDistributionPerformance(etudiants);
-            console.log('📊 Distribution retournée:', distribution);
 
             let interpretation = '';
 
@@ -1793,7 +1759,6 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 }
 
                 interpretation = echelle ? genererInterpretationPerformance(etudiants, echelle) : '';
-                console.log('📊 Interprétation IDME+patterns retournée:', interpretation);
             }
 
             if (distribution) {
@@ -1804,13 +1769,10 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                     </div>
                 `;
             } else {
-                console.log('⚠️ Distribution est null/undefined, pas d\'affichage');
             }
         } else {
             // 🆕 BETA 91: Diagnostic basique note de passage (SOLO désactivé)
-            console.log('📊 SOLO désactivé, génération diagnostic note de passage');
             const diagnostic = genererDiagnosticNotePassage(etudiants);
-            console.log('📊 Diagnostic note de passage retourné:', diagnostic);
 
             if (diagnostic) {
                 interpretationHTML = `
@@ -3016,7 +2978,6 @@ function afficherNiveauxRaI(etudiants) {
     const nbSansDonneesCP = 0;
     const nbTotal = etudiants.length;
 
-    console.log(`📊 [RàI] Total: ${nbTotal}, avec données CP: ${etudiantsAvecDonneesCP.length}, sans données CP: ${nbSansDonneesCP}`);
 
     // NOUVEAU Beta 90 : Récupérer les pratiques spécifiques
     const pratiqueSOM = typeof obtenirPratiqueParId === 'function' ? obtenirPratiqueParId('sommative') : null;

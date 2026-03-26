@@ -816,8 +816,6 @@ window.PRATIQUES_PREDEFINES = {
     PRATIQUE_PAN_JUGEMENT_GLOBAL_ISABELLE
 };
 
-console.log('✅ Module pratiques-predefines.js chargé');
-console.log(`   • ${Object.keys(window.PRATIQUES_PREDEFINES).length} pratiques disponibles`);
 
 
 })();

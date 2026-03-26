@@ -39,7 +39,6 @@ const PratiqueManager = {
         // Vérifier si c'est une pratique codée en dur ou configurable
         if (pratiqueId === 'pan-standards' || pratiqueId === 'sommative' || pratiqueId === 'pan-specifications') {
             // Pratique codée en dur existante, utiliser pratique-registre.js
-            console.log(`[PratiqueManager] Pratique codée : ${pratiqueId}`);
             return window.obtenirPratiqueActive();
         }
 
@@ -49,11 +48,9 @@ const PratiqueManager = {
 
         if (!pratiqueData) {
             console.error(`[PratiqueManager] Pratique introuvable : ${pratiqueId}`);
-            console.log('[PratiqueManager] Pratiques disponibles:', pratiquesConfigurables.map(p => p.id));
             return null;
         }
 
-        console.log(`[PratiqueManager] Chargement pratique configurable : ${pratiqueId}`);
         this.pratiqueActive = new PratiqueConfigurable(pratiqueData.config);
         return this.pratiqueActive;
     },
@@ -77,7 +74,6 @@ const PratiqueManager = {
         // Recharger la pratique
         await this.chargerPratiqueActive();
 
-        console.log(`[PratiqueManager] ✅ Pratique changée : ${pratiqueId}`);
     },
 
     /**
@@ -120,7 +116,6 @@ const PratiqueManager = {
 
             if (nbMigrees > 0) {
                 db.setSync('pratiquesConfigurables', pratiques);
-                console.log(`[PratiqueManager] ✅ ${nbMigrees} nouvelle(s) pratique(s) ajoutée(s)`);
             }
             return;
         }
@@ -155,17 +150,13 @@ const PratiqueManager = {
         if (nbCorrigees > 0) {
             db.setSync('pratiquesConfigurables', pratiques);
             db.setSync('migrationBibliothequeV2', true); // Marquer migration comme effectuée
-            console.log(`[PratiqueManager] ✅ Migration bibliothèque V2: ${nbCorrigees} pratique(s) corrigée(s)`);
             if (nbPredefinesRetirees > 0) {
-                console.log(`[PratiqueManager]    → ${nbPredefinesRetirees} prédéfinie(s) retirée(s) de la sidebar`);
             }
             if (nbUtilisateurGardees > 0) {
-                console.log(`[PratiqueManager]    → ${nbUtilisateurGardees} créée(s) par utilisateur gardée(s) dans sidebar`);
             }
         } else {
             // Aucune correction nécessaire, mais marquer migration comme effectuée
             db.setSync('migrationBibliothequeV2', true);
-            console.log(`[PratiqueManager] ✅ Migration bibliothèque V2: Aucune correction nécessaire`);
         }
     },
 
@@ -192,7 +183,6 @@ const PratiqueManager = {
         pratiques.push(pratique);
         db.setSync('pratiquesConfigurables', pratiques);
 
-        console.log(`[PratiqueManager] ✅ Pratique sauvegardée : ${pratique.id} (dansBibliotheque: ${pratique.dansBibliotheque})`);
     },
 
     /**
@@ -216,7 +206,6 @@ const PratiqueManager = {
         pratiques.splice(index, 1);
         db.setSync('pratiquesConfigurables', pratiques);
 
-        console.log(`[PratiqueManager] ✅ Pratique supprimée : ${pratiqueId}`);
     },
 
     /**
@@ -235,7 +224,6 @@ const PratiqueManager = {
         // Sauvegarder
         await this.sauvegarderPratique(pratiqueJSON);
 
-        console.log(`[PratiqueManager] ✅ Pratique importée : ${pratiqueJSON.id}`);
     },
 
     /**
@@ -251,7 +239,6 @@ const PratiqueManager = {
             throw new Error(`Pratique introuvable : ${pratiqueId}`);
         }
 
-        console.log(`[PratiqueManager] ✅ Pratique exportée : ${pratiqueId}`);
         return pratique;
     },
 
@@ -263,11 +250,9 @@ const PratiqueManager = {
         const pratiques = db.getSync('pratiquesConfigurables', []);
 
         if (pratiques.length > 0) {
-            console.log('[PratiqueManager] Pratiques déjà initialisées');
             return;
         }
 
-        console.log('[PratiqueManager] Initialisation des pratiques prédéfinies...');
 
         // Charger les pratiques prédéfinies
         if (window.PRATIQUES_PREDEFINES) {
@@ -285,13 +270,11 @@ const PratiqueManager = {
 
                 try {
                     await this.sauvegarderPratique(pratique);
-                    console.log(`   ✅ ${pratique.nom}`);
                 } catch (error) {
                     console.error(`   ❌ Erreur sauvegarde ${pratique.nom}:`, error);
                 }
             }
 
-            console.log('[PratiqueManager] ✅ Pratiques prédéfinies initialisées');
         } else {
             console.warn('[PratiqueManager] ⚠️ PRATIQUES_PREDEFINES non chargé');
         }
@@ -304,7 +287,6 @@ const PratiqueManager = {
 
 window.PratiqueManager = PratiqueManager;
 
-console.log('✅ Module pratique-manager.js chargé');
 
 
 })();

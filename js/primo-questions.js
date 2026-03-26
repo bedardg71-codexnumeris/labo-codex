@@ -289,7 +289,6 @@ const QUESTIONS_PRIMO = [
                 reponses['titre-cours'] = coursChoisi.titre || coursChoisi.nom || '';
                 reponses['code-cours'] = coursChoisi.code || coursChoisi.sigle || '';
                 reponses['numero-groupe'] = coursChoisi.groupe || '00001';
-                console.log('[Guide] Cours existant sélectionné:', reponses['code-cours']);
             }
         }
     },
@@ -2302,7 +2301,6 @@ window.validerReponse = validerReponse;
 window.transformerReponse = transformerReponse;
 window.obtenirOptions = obtenirOptions;
 
-console.log('✅ Module primo-questions.js chargé (' + QUESTIONS_PRIMO.length + ' questions)');
 
 
 })();

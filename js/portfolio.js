@@ -39,7 +39,6 @@
                 }
             }
             db.setSync(cle('portfoliosEleves'), repare);
-            console.log(`🔧 [Fix sparse] portfoliosEleves converti: Array(${donnees.length}) → Object(${Object.keys(repare).length} entrées)`);
         }
     } catch (e) {
         console.warn('[Fix sparse] Erreur réparation portfoliosEleves:', e);
@@ -228,7 +227,6 @@ function chargerPortfolioEleveDetail(da) {
                     art.retenu = selectionEleve.artefactsRetenus.includes(art.id);
                 });
 
-                console.log(`✨ Sélection automatique (${methodeSelection}) : ${artefactsSelectionnes.length} artefact(s) sélectionné(s)`);
             }
         }
 
@@ -385,7 +383,6 @@ function toggleArtefactPortfolio(event, da, portfolioId, nombreARetenir) {
             // Rouvrir automatiquement le panneau Portfolio après rechargement
             if (typeof toggleDetailIndice === 'function') {
                 toggleDetailIndice('P', da);
-                console.log('✅ Panneau Portfolio rouvert automatiquement');
             }
         } else {
             // Fallback : recharger uniquement le portfolio
@@ -494,7 +491,6 @@ function obtenirModePratique() {
     }
 
     const pratiqueId = getPratiqueCours(coursActifId);
-    console.log(`[obtenirModePratique] Cours actif: ${coursActifId}, Pratique: ${pratiqueId}`);
 
     return pratiqueId === 'sommative' ? 'SOM' : 'PAN';
 }
@@ -609,7 +605,6 @@ function calculerEtStockerIndicesCP() {
         ? obtenirPratiqueActiveGroupeCours()
         : 'sommative';
 
-    console.log(`🔄 [Beta 95.5] Calcul indices C/P pour pratique active: ${pratiqueId}`);
 
     // Obtenir la pratique depuis le registre
     const pratique = obtenirPratiqueParId(pratiqueId);
@@ -723,8 +718,6 @@ function calculerEtStockerIndicesCP() {
     // 🔧 FIX Beta 97.4 : Sauvegarde synchrone (localStorage + IndexedDB en arrière-plan)
     db.setSync(cleIndices, indicesCP);
 
-    console.log(`✅ [Beta 95.5] Indices C/P sauvegardés (pratique: ${pratiqueId})`);
-    console.log(`   Étudiants: ${etudiantsActifs.length}`);
 
     return indicesCP;
 }
@@ -839,7 +832,6 @@ function calculerPerformanceParObjectif(da, ensembleId) {
         };
     });
 
-    console.log(`[Multi-Objectifs] DA ${da}: ${Object.keys(performancesParObjectif).length} objectifs calculés`);
 
     return performancesParObjectif;
 }
@@ -920,7 +912,6 @@ function calculerNoteFinaleMultiObjectifs(da, ensembleId) {
         }
     });
 
-    console.log(`[Multi-Objectifs] Note finale DA ${da}: ${noteFinale.toFixed(1)}% (${nbObjectifsEvalues}/${ensemble.objectifs.length} objectifs évalués)`);
 
     return {
         noteFinale: noteFinale,
@@ -988,7 +979,6 @@ function calculerNoteAvecCategories(da, configCategories) {
     const prodsSelection = productions.filter(p => p.categorie === 'selection');
     const prodsObligatoires = productions.filter(p => p.categorie === 'obligatoire');
 
-    console.log(`[Catégories] DA ${da}: ${prodsSelection.length} Sélection, ${prodsObligatoires.length} Obligatoires`);
 
     // 4. Configuration
     const { nombreARetenir, ponderation: pondSelection } = configCategories.selection || { nombreARetenir: 4, ponderation: 65 };
@@ -1062,7 +1052,6 @@ function calculerNoteAvecCategories(da, configCategories) {
         }
     };
 
-    console.log(`[Catégories] DA ${da}: Note finale = ${resultat.noteFinale}% (Sél: ${moyenneSelection.toFixed(1)}×${pondSelection}% + Obl: ${moyenneObligatoires.toFixed(1)}×${pondOblig}%)`);
 
     return resultat;
 }
@@ -1133,6 +1122,5 @@ window.calculerEtStockerIndicesCP = calculerEtStockerIndicesCP;
 window.obtenirIndicesCPAsync = obtenirIndicesCPAsync;
 // window.obtenirIndicesCP, window.obtenirHistoriqueIndicesCP → indices.js (#206)
 
-console.log('✅ Module portfolio.js chargé (Beta 95.5 - indices C/P optimisés)');
 
 })();

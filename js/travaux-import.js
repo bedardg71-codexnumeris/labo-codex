@@ -283,7 +283,6 @@
 
                 canvas.toBlob(
                     (blobCompresse) => {
-                        console.log(`[Travaux-Import] Image compressee: ${(blob.size/1024).toFixed(0)}KB -> ${(blobCompresse.size/1024).toFixed(0)}KB`);
                         resolve(blobCompresse);
                     },
                     'image/jpeg',
@@ -645,7 +644,6 @@
                 hauteurOriginale: d.hauteurOriginale || 0
             }));
 
-            console.log(`[Travaux-Import] File restauree: ${fichiersEnAttente.length} fichier(s) (blobs absents)`);
         } catch (e) {
             console.warn('[Travaux-Import] Erreur restauration sessionStorage:', e);
         }
@@ -1039,7 +1037,6 @@
                     travauxStockage.sauvegarderFichiersTravaux(fichiers);
                 }
 
-                console.log(`[Travaux-Import] Fichier reimporte: ${fichierId}`);
                 if (typeof afficherNotificationSucces === 'function') {
                     afficherNotificationSucces('Fichier reimporte avec succes');
                 }
@@ -1180,7 +1177,6 @@
             });
         }
 
-        console.log(`[Travaux-Import] PDF decompose: ${fichierId} → ${pages.length} pages`);
         return pages;
     }
 

@@ -130,7 +130,7 @@ function changerModeParcoursDelegue(el) {
 // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
 // Les valeurs ici servent de fallback si version.json n'est pas disponible
 let VERSION_MAJEURE = '98.9';
-let BUILD_ID = '0326-1310';
+let BUILD_ID = '0326-1330';
 
 // === CLÉS LOCALSTORAGE ===
 const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -430,7 +430,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const sectionInterpretation = document.getElementById('reglages-interpretation');
             if (sectionInterpretation) {
                 chargerSeuilsInterpretationUI();
-                console.log('Interface des seuils d\'interprétation initialisée');
             }
         }, 100);
     }
@@ -821,73 +820,50 @@ function changerFiltreCategorieFromEl(el) {
 // ========================================
 function debugLocalStorage() {
     console.clear();
-    console.log('========================================');
-    console.log('DEBUG: Contenu du localStorage');
-    console.log('========================================');
 
     // Lister toutes les clés
-    console.log('\nToutes les clés disponibles:');
     for (let i = 0; i < localStorage.length; i++) {
         const cle = localStorage.key(i);
-        console.log(`  - ${cle}`);
     }
 
     // Vérifier productions (clé: productions)
-    console.log('\nProductions (artefacts):');
     const productions = localStorage.getItem('productions');
     if (productions) {
         try {
             const parsed = JSON.parse(productions);
-            console.log(`  Trouvées: ${Array.isArray(parsed) ? parsed.length : 'Structure invalide'} production(s)`);
-            console.log('  Contenu:', parsed);
         } catch (e) {
-            console.log('  ERREUR de parsing:', e);
         }
     } else {
-        console.log('  ❌ Aucune production trouvée (clé "productions" vide)');
     }
 
     // Vérifier grillesTemplates
-    console.log('\nGrilles de critères:');
     const grilles = localStorage.getItem('grillesTemplates');
     if (grilles) {
         try {
             const parsed = JSON.parse(grilles);
             if (Array.isArray(parsed)) {
-                console.log(`  Grilles: ${parsed.length}`);
-                console.log('  Contenu:', parsed);
             } else {
-                console.log('  Structure invalide (pas un tableau)');
             }
         } catch (e) {
-            console.log('  ERREUR de parsing:', e);
         }
     } else {
-        console.log('  ❌ Aucune grille trouvée (clé "grillesTemplates" vide)');
     }
 
     // Vérifier échelles
-    console.log('\n🧭 Échelles de performance:');
     const echellesTemplates = localStorage.getItem('echellesTemplates');
     const niveauxEchelle = localStorage.getItem('niveauxEchelle');
     const configEchelle = localStorage.getItem('configEchelle');
 
     if (echellesTemplates || niveauxEchelle || configEchelle) {
-        console.log('  Données trouvées:');
         if (echellesTemplates) {
-            console.log('    • echellesTemplates:', JSON.parse(echellesTemplates));
         }
         if (niveauxEchelle) {
-            console.log('    • niveauxEchelle:', JSON.parse(niveauxEchelle));
         }
         if (configEchelle) {
-            console.log('    • configEchelle:', JSON.parse(configEchelle));
         }
     } else {
-        console.log('  ❌ Aucune échelle trouvée');
     }
 
-    console.log('\n========================================');
     alert('Informations affichées dans la console du navigateur.\n\nAppuie sur F12 pour voir les détails.');
 }
 

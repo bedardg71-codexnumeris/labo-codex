@@ -15,7 +15,6 @@
 (function() {
     'use strict';
 
-    console.log('[spe-specifications] Chargement du module SPE...');
 
     // =========================================================================
     // CONSTANTES SPE
@@ -215,7 +214,6 @@
      * - Configure les événements
      */
     async function initialiserModuleSPE() {
-        console.log('[spe-specifications] Initialisation...');
 
         // Créer les gabarits SPE dans les bibliothèques
         await creerGabaritsSPE();
@@ -223,10 +221,8 @@
         // Initialiser le compteur si on est en mode SPE
         const modalites = db.getSync('modalitesEvaluation') || {};
         if (modalites.pratique === 'pan-specifications') {
-            console.log('[spe-specifications] Mode SPE détecté');
         }
 
-        console.log('[spe-specifications] Module initialisé');
     }
 
     /**
@@ -249,10 +245,8 @@
         const echelleSPE = bibliotheque.find(e => e.id === ECHELLE_SPE_ID);
 
         if (!echelleSPE) {
-            console.log('[spe-specifications] Création du gabarit Échelle SPE...');
             bibliotheque.push({ ...ECHELLE_SPE_DEFAUT });
             await db.set(CLE_BIBLIOTHEQUE_ECHELLES, bibliotheque);
-            console.log('[spe-specifications] Gabarit Échelle SPE créé');
         }
     }
 
@@ -280,7 +274,6 @@
 
         if (nbAjoutees > 0) {
             await db.set(CLE_BIBLIOTHEQUE_GRILLES, bibliotheque);
-            console.log(`[spe-specifications] ${nbAjoutees} gabarit(s) Grille SPE créé(s)`);
         }
     }
 
@@ -293,10 +286,8 @@
         const existe = bibliotheque.find(p => p.id === PRODUCTION_SPE_GABARIT.id);
 
         if (!existe) {
-            console.log('[spe-specifications] Création du gabarit Production SPE...');
             bibliotheque.push({ ...PRODUCTION_SPE_GABARIT });
             await db.set(CLE_BIBLIOTHEQUE_PRODUCTIONS, bibliotheque);
-            console.log('[spe-specifications] Gabarit Production SPE créé');
         }
     }
 
@@ -935,7 +926,6 @@ La structure est claire (intro, développement, conclusion)"></textarea>
         fermerModalGrilleSPE();
         alert(`Grille "${nom}" créée avec succès !\n\n${specs.length} spécification(s) ajoutée(s).\n\nTu peux maintenant l'utiliser pour évaluer tes productions.`);
 
-        console.log('[spe-specifications] Grille créée:', nouvelleGrille);
     }
 
     // =========================================================================
@@ -994,7 +984,6 @@ La structure est claire (intro, développement, conclusion)"></textarea>
 
         // Vérifier que db est disponible et prêt
         if (typeof db === 'undefined') {
-            console.log('[spe-specifications] db non disponible, attente...');
             return;
         }
 
@@ -1004,7 +993,6 @@ La structure est claire (intro, développement, conclusion)"></textarea>
             speInitialise = true;
             await initialiserModuleSPE();
         } catch (e) {
-            console.log('[spe-specifications] db pas encore prêt:', e.message);
         }
     }
 
@@ -1022,6 +1010,5 @@ La structure est claire (intro, développement, conclusion)"></textarea>
     // Et window.onload comme fallback
     window.addEventListener('load', () => setTimeout(tentativeInitSPE, 500));
 
-    console.log('[spe-specifications] Module chargé');
 
 })();

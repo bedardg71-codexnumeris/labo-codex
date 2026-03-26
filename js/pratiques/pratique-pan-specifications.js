@@ -30,7 +30,6 @@
 class PratiquePanSpecifications {
 
     constructor() {
-        console.log('📋 Initialisation de la pratique PAN-Spécifications V2.0');
 
         // =====================================================================
         // CONFIGURATION PAR DÉFAUT (surchargée par wizard)
@@ -129,7 +128,6 @@ class PratiquePanSpecifications {
             this.config.seuilExcellence = configuration.seuilExcellence;
         }
 
-        console.log('[SPEC] Pratique configurée:', this.config);
     }
 
     // ========================================================================
@@ -168,19 +166,16 @@ class PratiquePanSpecifications {
         );
 
         if (evaluationsEleve.length === 0) {
-            console.log('[SPEC] Aucune évaluation pour DA', da);
             return null;
         }
 
         // ÉTAPE 1 : Compter travaux acceptables par type
         const comptesAcceptables = this._compterTravauxAcceptables(da, evaluationsEleve);
 
-        console.log(`[SPEC] Travaux acceptables pour DA ${da}:`, comptesAcceptables);
 
         // ÉTAPE 2 : Déterminer palier de note atteint (logique bundles)
         const noteAtteinte = this._determinerPalierBundle(comptesAcceptables);
 
-        console.log(`[SPEC] Performance DA ${da}: ${noteAtteinte}%`, comptesAcceptables);
 
         return noteAtteinte / 100;
     }
@@ -213,7 +208,6 @@ class PratiquePanSpecifications {
         );
 
         if (evaluationsEleve.length === 0) {
-            console.log('[SPEC] Aucune évaluation pour DA', da);
             return null;
         }
 
@@ -243,7 +237,6 @@ class PratiquePanSpecifications {
 
         const indiceC = Math.min(totalAcceptable / totalAttendu, 1.0);
 
-        console.log(`[SPEC] Complétion DA ${da}: ${(indiceC * 100).toFixed(1)}% (${totalAcceptable}/${totalAttendu} travaux acceptables)`);
 
         return indiceC;
     }
@@ -408,10 +401,6 @@ class PratiquePanSpecifications {
         // Pour PAN-Spécifications, la cible est basée sur les objectifs non atteints
         const defiPrincipal = defis.principalDefi ? defis.principalDefi.nom : 'Aucun';
 
-        console.log('[SPEC] Génération cible RàI pour DA', da, {
-            pattern: pattern,
-            defi: defiPrincipal
-        });
 
         // Retourner un objet structuré compatible avec l'interface
         return {
@@ -680,7 +669,6 @@ class PratiquePanSpecifications {
 
     try {
         window.enregistrerPratique('specifications', instance);
-        console.log('✅ [SPEC] Pratique PAN-Spécifications enregistrée avec succès');
     } catch (error) {
         console.error('[SPEC] Erreur lors de l\'enregistrement:', error);
     }
@@ -689,7 +677,6 @@ class PratiquePanSpecifications {
 // Export de la classe pour utilisation directe
 window.PratiquePanSpecifications = PratiquePanSpecifications;
 
-console.log('✅ Module pratique-pan-specifications.js chargé');
 
 
 })();

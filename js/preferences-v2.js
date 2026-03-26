@@ -15,7 +15,6 @@
 (function() {
     'use strict';
 
-    console.log('[preferences-v2] Chargement du module...');
 
     // =========================================================================
     // INITIALISATION
@@ -25,7 +24,6 @@
      * Initialise l'onglet Préférences v2
      */
     function initialiserPreferencesV2() {
-        console.log('[preferences-v2] Initialisation...');
 
         // Charger le dropdown des grilles
         chargerDropdownGrillesPreferencesV2();
@@ -33,7 +31,6 @@
         // Charger les valeurs depuis le storage
         chargerPreferencesDepuisStorage();
 
-        console.log('[preferences-v2] Initialisation terminée');
     }
 
     // =========================================================================
@@ -304,7 +301,6 @@
 
         db.setSync('preferencesAffichage', preferences);
 
-        console.log('[preferences-v2] Préférences sauvegardées');
     }
 
     /**
@@ -349,7 +345,6 @@
         }
 
         db.setSync('seuilsInterpretation', seuils);
-        console.log('[preferences-v2] Seuils sauvegardés');
     }
 
     /**
@@ -440,7 +435,6 @@
         } else if (typeof window.afficherMessage === 'function') {
             window.afficherMessage(message, 'succes');
         } else {
-            console.log('[preferences-v2]', message);
         }
     }
 
@@ -526,7 +520,6 @@
         } else {
             document.body.classList.add('animation-points-desactivee');
         }
-        console.log('[preferences-v2] Animation des points:', activer ? 'activée' : 'désactivée');
     }
 
     // =========================================================================
@@ -567,6 +560,5 @@
         }
     }
 
-    console.log('[preferences-v2] Module chargé');
 
 })();

@@ -100,32 +100,26 @@ function obtenirTousLesEtudiants() {
 function sauvegarderTousLesEtudiants(etudiants) {
     const cleEffective = cle('groupeEtudiants');
     db.setSync(cleEffective, etudiants);
-    console.log(`💾 Sauvegarde ${etudiants.length} étudiants dans ${cleEffective}`);
 }
 
 /**
  * Initialise le module
  */
 function initialiserModuleGroupe() {
-    console.log('👥 Initialisation du module Groupe');
 
     const tbody = document.getElementById('students-tbody');
     if (!tbody) {
-        console.log('   ⚠️  Section groupe non active - tbody introuvable');
         return;
     }
 
     // DEBUG: Vérifier les données
     const donnees = obtenirDonneesSelonMode('groupeEtudiants');
-    console.log(`   📊 Nombre d'étudiants dans localStorage: ${donnees.length}`);
     if (donnees.length > 0) {
-        console.log(`   👤 Premier étudiant:`, donnees[0]);
     }
 
     afficherListeEtudiants();
     remplirSelectFiltreGroupe();
 
-    console.log('   ✅ Module Groupe initialisé');
 }
 
 /* ===============================
@@ -137,7 +131,6 @@ function initialiserModuleGroupe() {
  */
 function addStudent() {
     // DEBUG : Logs pour identifier le problème
-    console.log('🔍 DEBUG addStudent appelée');
 
     // ============================================
     // VÉRIFIER SI ON EST EN MODE MODIFICATION
@@ -146,15 +139,12 @@ function addStudent() {
     let modeModification = false;
 
     if (daEnModification) {
-        console.log('🔄 Mode modification détecté pour DA:', daEnModification);
         modeModification = true;
     }
 
     const champNom = document.getElementById('etudiantNom');
     const champPrenom = document.getElementById('etudiantPrenom');
 
-    console.log('Champ nom trouvé ?', champNom);
-    console.log('Champ prénom trouvé ?', champPrenom);
 
     if (!champNom || !champPrenom) {
         afficherNotificationErreur('Erreur technique', 'Les champs du formulaire sont introuvables. Vérifie les IDs.');
@@ -164,8 +154,6 @@ function addStudent() {
     const nom = champNom.value.trim();
     const prenom = champPrenom.value.trim();
 
-    console.log('Valeur nom:', nom);
-    console.log('Valeur prénom:', prenom);
 
     if (!nom || !prenom) {
         afficherNotificationErreur('Informations manquantes', 'Le nom et le prénom sont obligatoires');
@@ -199,7 +187,6 @@ function addStudent() {
         // SI MODE MODIFICATION : SUPPRIMER L'ANCIEN
         // ============================================
         if (modeModification) {
-            console.log('Suppression de l\'ancien étudiant avec DA:', daEnModification);
             // Supprimer de la liste complète (pas seulement du cours)
             tousLesEtudiants = tousLesEtudiants.filter(s => s.da !== daEnModification);
         }
@@ -296,10 +283,6 @@ function handleFileImport(event) {
         const hasEncodingIssues = hasReplacementChar || hasMojibake || missingExpectedAccents;
 
         if (hasEncodingIssues) {
-            console.log('⚠️ Encodage UTF-8 invalide détecté, tentative avec Windows-1252...');
-            console.log('  - Caractère remplacement:', hasReplacementChar);
-            console.log('  - Mojibake:', hasMojibake);
-            console.log('  - Accents manquants:', missingExpectedAccents);
 
             // Relire avec Windows-1252 (encodage Omnivox/Excel français)
             const readerLatin = new FileReader();
@@ -333,7 +316,6 @@ function previewPastedData() {
  */
 function parseAndPreview(content) {
     try {
-        console.log('🧹 Nettoyage automatique des données importées...');
 
         // ÉTAPE 1 : Normaliser les sauts de ligne
         content = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
@@ -362,7 +344,6 @@ function parseAndPreview(content) {
 
         // Détecter séparateur sur première ligne non-vide
         const separator = detecterSeparateur(lines[0]);
-        console.log(`✓ Séparateur détecté: "${separator === '\t' ? 'TAB' : separator}"`);
 
         // ✅ NOUVEAU (Beta 95.5) : Détection intelligente des en-têtes
         // Mapping des noms de colonnes possibles vers nos champs internes
@@ -410,7 +391,6 @@ function parseAndPreview(content) {
         let lignesATraiter = lines;
 
         if (estEnTete) {
-            console.log('✓ En-têtes de colonnes détectés, mapping intelligent activé');
             colonneMapping = {
                 da: trouverIndexColonne(premiereLigneParts, 'da'),
                 groupe: trouverIndexColonne(premiereLigneParts, 'groupe'),
@@ -420,10 +400,8 @@ function parseAndPreview(content) {
                 sa: trouverIndexColonne(premiereLigneParts, 'sa'),
                 caf: trouverIndexColonne(premiereLigneParts, 'caf')
             };
-            console.log('  Mapping colonnes:', colonneMapping);
             lignesATraiter = lines.slice(1); // Ignorer la ligne d'en-tête
         } else {
-            console.log('✓ Pas d\'en-têtes détectés, utilisation de l\'ordre par défaut');
         }
 
         tempImportData = [];
@@ -519,7 +497,6 @@ function parseAndPreview(content) {
             }
         });
 
-        console.log(`✅ Import: ${tempImportData.length} étudiant(s), ${ligneSautees} ligne(s) ignorée(s)`);
 
         if (tempImportData.length === 0) {
             afficherNotificationErreur('Aucune donnée valide',
@@ -614,7 +591,6 @@ function confirmImport() {
 
         students = students.concat(tempImportData);
         db.setSync(cleEtudiants, students);
-        console.log(`✅ [confirmerImport] Sauvegarde dans ${cleEtudiants}: ${students.length} étudiants`);
 
         const details = `Groupe : ${ancienTotal} → ${students.length} étudiant·es (+ ${tempImportData.length})`;
         afficherNotificationSucces('Importation réussie !', details);
@@ -782,7 +758,6 @@ function filtrerParGroupe() {
         const students = typeof obtenirEtudiantsCoursActif === 'function'
             ? obtenirEtudiantsCoursActif()
             : filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants') || []);
-        console.log(`🔍 filtrerParGroupe - Étudiants cours actif: ${students.length}`);
 
         const tbody = document.getElementById('students-tbody');
         const container = document.getElementById('students-list-container');
@@ -790,7 +765,6 @@ function filtrerParGroupe() {
         const compteurFiltres = document.getElementById('compteurFiltres');
 
         if (!tbody) {
-            console.log('⚠️ filtrerParGroupe - tbody introuvable');
             return;
         }
 
@@ -1167,10 +1141,8 @@ function supprimerEtudiant(id) {
         try {
             students = students.filter(s => !(s.id == id || s.da == id));
             db.setSync(cleEtudiants, students);
-            console.log(`✅ [supprimerEtudiant] Sauvegarde dans ${cleEtudiants}: ${students.length} étudiants restants`);
             afficherListeEtudiants();
 
-            console.log(`Étudiant·e supprimé·e: ${etudiantASupprimer.nom}, ${etudiantASupprimer.prenom} (DA: ${etudiantASupprimer.da})`);
         } catch (error) {
             alert(`Erreur lors de la suppression: ${error.message}`);
         }

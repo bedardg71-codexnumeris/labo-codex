@@ -108,13 +108,11 @@ function verifierUniciteIds(tableau, nomCollection) {
    =============================== */
 
 function initialiserModuleImportExport() {
-    console.log('Module import-export initialisé');
 
     const modalExport = document.getElementById('modalExport');
     const modalImport = document.getElementById('modalImport');
 
     if (modalExport && modalImport) {
-        console.log('   Modales import/export détectées');
     } else {
         console.warn('   Modales import/export manquantes');
     }
@@ -342,7 +340,6 @@ async function ouvrirModalExport() {
     let cles = [];
     try {
         cles = await db.keys();
-        console.log(`[Export] ${cles.length} clés trouvées dans la base de données`);
     } catch (e) {
         // Fallback vers localStorage si erreur
         console.warn('[Export] Erreur lecture IndexedDB, fallback localStorage:', e);
@@ -532,7 +529,6 @@ async function executerExport() {
                             converti[String(i)] = valeur[i];
                         }
                     }
-                    console.log(`🔧 [Export] Clé "${cle}" sparse Array(${valeur.length}) → Object(${Object.keys(converti).length})`);
                     valeur = converti;
                 }
             }
@@ -543,7 +539,6 @@ async function executerExport() {
     }
 
     if (nbDemoExclus > 0) {
-        console.log(`📦 Export: ${nbDemoExclus} élément(s) démo exclu(s)`);
     }
 
     const json = JSON.stringify(donnees, null, 2);
@@ -578,7 +573,6 @@ async function executerExport() {
                     nbBlobs++;
                 }
             }
-            console.log(`📦 [Export ZIP] ${nbBlobs} blob(s) ajouté(s) au ZIP`);
         }
 
         const zipBlob = await zip.generateAsync({ type: 'blob' });
@@ -609,7 +603,6 @@ async function executerExport() {
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces(`Export réussi : ${clesSelectionnees.length} clé(s) exportée(s)`);
     } else {
-        console.log(`Export réussi: ${clesSelectionnees.length} clés`);
     }
 }
 
@@ -772,7 +765,6 @@ async function executerImport() {
                     valeur = JSON.parse(valeur);
                 } catch (e) {
                     // Si ce n'est pas du JSON valide, garder la string telle quelle
-                    console.log(`[Import] Clé "${cle}" n'est pas du JSON, stockage comme string`);
                 }
             }
 
@@ -794,9 +786,7 @@ async function executerImport() {
 
         // ✅ CRITIQUE: Synchroniser le cache localStorage avec IndexedDB
         // Les modules utilisent db.getSync() qui lit depuis le cache localStorage
-        console.log('🔄 Synchronisation du cache localStorage...');
         await db.syncToLocalStorageCache();
-        console.log('✅ Cache synchronisé');
 
         // 🆕 Restauration des blobs travaux depuis le ZIP
         const nbRestores = await _restaurerBlobsDepuisZip(donneesImportEnAttente);
@@ -807,7 +797,6 @@ async function executerImport() {
         if (typeof afficherNotificationSucces === 'function') {
             afficherNotificationSucces(`Import réussi : ${nbCles} clé(s) importée(s)${msgBlobs}`);
         } else {
-            console.log(`Import réussi: ${nbCles} clés${msgBlobs}`);
         }
 
         if (confirm('Import terminé ! Recharger la page pour appliquer les changements ?')) {
@@ -850,7 +839,6 @@ async function _restaurerBlobsDepuisZip(donnees) {
     }
 
     if (nbRestores > 0) {
-        console.log(`✅ ${nbRestores} fichier(s) travaux restauré(s) depuis le ZIP`);
     }
     return nbRestores;
 }
@@ -1835,7 +1823,6 @@ async function executerImportConfigComplete() {
                     // Enregistrer le remapping
                     remapEchelles[ancienId] = nouvelId;
 
-                    console.log(`⚠️ Conflit d'ID échelle: ${ancienId} → ${nouvelId}`);
 
                     // Retourner échelle avec nouvel ID
                     return { ...echelle, id: nouvelId };
@@ -1847,7 +1834,6 @@ async function executerImportConfigComplete() {
             // Fusionner avec échelles existantes
             const echellesFusionnees = verifierUniciteIds([...echellesExistantes, ...echellesAImporter], 'échelles');
             db.setSync('echellesTemplates', echellesFusionnees);
-            console.log(`✅ ${echellesAImporter.length} échelle(s) importée(s)`);
         }
 
         // 2. Importer les grilles avec détection de conflits
@@ -1862,7 +1848,6 @@ async function executerImportConfigComplete() {
                     // Enregistrer le remapping
                     remapGrilles[ancienId] = nouvelId;
 
-                    console.log(`⚠️ Conflit d'ID grille: ${ancienId} → ${nouvelId}`);
 
                     // Retourner grille avec nouvel ID
                     return { ...grille, id: nouvelId };
@@ -1874,7 +1859,6 @@ async function executerImportConfigComplete() {
             // Fusionner avec grilles existantes
             const grillesFusionnees = verifierUniciteIds([...grillesExistantes, ...grillesAImporter], 'grilles');
             db.setSync('grillesTemplates', grillesFusionnees);
-            console.log(`✅ ${grillesAImporter.length} grille(s) importée(s)`);
         }
 
         // 3. Importer les productions avec mise à jour des références aux grilles
@@ -1893,19 +1877,16 @@ async function executerImportConfigComplete() {
                 if (idsProdsExistants.has(prod.id)) {
                     const ancienId = prod.id;
                     prod.id = genererIdUnique('PROD_');
-                    console.log(`⚠️ Conflit d'ID production: ${ancienId} → ${prod.id}`);
                 }
                 // Sinon, garder l'ID original pour préserver les références
 
                 // Mettre à jour la référence à la grille si elle a été remappée
                 if (prod.grilleId && remapGrilles[prod.grilleId]) {
-                    console.log(`🔗 Mise à jour référence grille dans production: ${prod.grilleId} → ${remapGrilles[prod.grilleId]}`);
                     prod.grilleId = remapGrilles[prod.grilleId];
                 }
 
                 // Mettre à jour la référence à l'échelle si elle a été remappée
                 if (prod.echelleId && remapEchelles[prod.echelleId]) {
-                    console.log(`🔗 Mise à jour référence échelle dans production: ${prod.echelleId} → ${remapEchelles[prod.echelleId]}`);
                     prod.echelleId = remapEchelles[prod.echelleId];
                 }
 
@@ -1915,7 +1896,6 @@ async function executerImportConfigComplete() {
             // Fusionner avec productions existantes
             const productionsFusionnees = verifierUniciteIds([...productionsExistantes, ...productionsAImporter], 'productions');
             db.setSync(cleProductions, productionsFusionnees);
-            console.log(`✅ ${productionsAImporter.length} production(s) importée(s) (clé: ${cleProductions})`);
         }
 
         // 4. Importer les cartouches avec mise à jour des clés (grilleId)
@@ -1930,7 +1910,6 @@ async function executerImportConfigComplete() {
                 const grilleIdFinal = remapGrilles[ancienGrilleId] || ancienGrilleId;
 
                 if (remapGrilles[ancienGrilleId]) {
-                    console.log(`🔗 Mise à jour clé cartouches: cartouches_${ancienGrilleId} → cartouches_${grilleIdFinal}`);
                 }
 
                 // Récupérer les cartouches existantes pour cette grille
@@ -1943,7 +1922,6 @@ async function executerImportConfigComplete() {
                 nbCartouchesTotal += cartouchesGrille.length;
             });
 
-            console.log(`✅ ${nbCartouchesTotal} cartouche(s) importée(s)`);
         }
 
         // 5. Importer les paramètres du cours (fusion avec paramètres existants)
@@ -1958,7 +1936,6 @@ async function executerImportConfigComplete() {
                 modeComparatif: contenu.parametres.mode_comparatif
             };
             db.setSync('modalitesEvaluation', modalitesFusionnees);
-            console.log('✅ Paramètres du cours importés');
         }
 
         // Afficher résumé des remappages si nécessaire
@@ -1966,12 +1943,9 @@ async function executerImportConfigComplete() {
         const nbRemapGrilles = Object.keys(remapGrilles).length;
 
         if (nbRemapEchelles > 0 || nbRemapGrilles > 0) {
-            console.log('\n📊 Résumé des conflits d\'ID résolus:');
             if (nbRemapEchelles > 0) {
-                console.log(`   - ${nbRemapEchelles} échelle(s) remappée(s)`);
             }
             if (nbRemapGrilles > 0) {
-                console.log(`   - ${nbRemapGrilles} grille(s) remappée(s)`);
             }
         }
 
@@ -2045,7 +2019,6 @@ async function executerImportLocalStorageBrut(config) {
         fermerModalPreviewConfigComplete();
 
         const msgBlobs = nbRestores > 0 ? ` + ${nbRestores} fichier(s) travaux` : '';
-        console.log(`✅ Import localStorage brut: ${nbCles} clé(s) importée(s)${msgBlobs}`);
 
         // Notification et rechargement
         alert(`Import réussi !\n\n${nbCles} clé(s) de données importée(s)${msgBlobs}.`);
@@ -2111,7 +2084,6 @@ async function executerImportVersBibliotheques() {
                     const pratiquesFusionnees = verifierUniciteIds([...pratiquesExistantes, ...pratiquesNouvelles], 'pratiques');
                     db.setSync('pratiquesConfigurables', pratiquesFusionnees);
                     compteurs.pratiques = pratiquesNouvelles.length;
-                    console.log(`✅ ${pratiquesNouvelles.length} pratique(s) ajoutée(s)`);
                 }
             }
         }
@@ -2183,7 +2155,6 @@ async function executerImportVersBibliotheques() {
             const grillesFusionnees = verifierUniciteIds([...grillesExistantes, ...grillesNouvelles], 'grilles');
             db.setSync('grillesTemplates', grillesFusionnees);
             compteurs.grilles = grillesNouvelles.length;
-            console.log(`✅ ${grillesNouvelles.length} grille(s) ajoutée(s)`);
         }
 
         // 3. ÉCHELLES
@@ -2232,7 +2203,6 @@ async function executerImportVersBibliotheques() {
                     const echellesFusionnees = verifierUniciteIds([...echellesExistantes, ...echellesNouvelles], 'échelles');
                     db.setSync('echellesTemplates', echellesFusionnees);
                     compteurs.echelles = echellesNouvelles.length;
-                    console.log(`✅ ${echellesNouvelles.length} échelle(s) ajoutée(s)`);
                 }
             }
         }
@@ -2322,7 +2292,6 @@ async function executerImportVersBibliotheques() {
                     const prodsFusionnees = verifierUniciteIds([...prodsExistantes, ...prodsNouvelles], 'productions');
                     db.setSync(cleProductions, prodsFusionnees);
                     compteurs.productions = prodsNouvelles.length;
-                    console.log(`✅ ${prodsNouvelles.length} production(s) ajoutée(s)`);
                 }
             }
         }
@@ -2354,7 +2323,6 @@ async function executerImportVersBibliotheques() {
             }
         }
 
-        console.log('📊 Résumé import fusionné:', compteurs);
 
     } catch (erreur) {
         configCompleteEnAttente = null;
@@ -2565,7 +2533,6 @@ async function executerImportSelectif() {
                 db.setSync(cleProductions, verifierUniciteIds([...prodsExistantes, ...prodsNouvelles], 'productions'));
                 compteurs.ressources += prodsNouvelles.length;
                 details.push(`${prodsNouvelles.length} production(s)`);
-                console.log(`✅ Productions importées depuis: ${clesProdsSource.join(', ')}`);
             }
         }
 
@@ -2839,7 +2806,6 @@ async function executerImportSelectif() {
             }
         }
 
-        console.log('📊 Import sélectif terminé:', { compteurs, details });
 
     } catch (erreur) {
         configCompleteEnAttente = null;
@@ -2919,14 +2885,12 @@ async function exporterConfigurationComplete() {
 
     // Informer si des ressources ont été exclues
     if (nbExclues > 0) {
-        console.log(`📦 Export: ${nbExclues} ressource(s) exclue(s) (démo/importées)`);
     }
 
     // 2. Demander les métadonnées enrichies (modal spécial pour config complète)
     const metaEnrichies = await demanderMetadonneesConfigComplete(nbRessources);
 
     if (!metaEnrichies) {
-        console.log('Export annulé par l\'utilisateur');
         return;
     }
 
@@ -2998,7 +2962,6 @@ async function exporterConfigurationComplete() {
         if (typeof afficherNotificationSucces === 'function') {
             afficherNotificationSucces('Configuration complète exportée avec succès!\n\n2 fichiers téléchargés: JSON + LISEZMOI.txt');
         }
-        console.log('✅ Configuration complète exportée:', nomFichierJSON, '+', nomFichierTXT);
     }, 500);
 }
 

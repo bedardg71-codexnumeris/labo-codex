@@ -107,7 +107,7 @@ function seederDemoSiNecessaire() {
     // Sauvegarde sync pour le seed initial (pas async)
     try {
         db.setSync(CLE_BIBLIOTHEQUE_ALIGNEMENTS, items);
-        console.log('[BiblioAlignements] Seed démo ajouté: ' + item.nom);
+
     } catch (e) {
         console.warn('[BiblioAlignements] Erreur seed:', e);
     }

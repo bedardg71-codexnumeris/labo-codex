@@ -8,7 +8,6 @@
 (function() {
 'use strict';
 
-console.log('📦 Chargement du module liste-evaluations.js...');
 
 // ============================================
 // FONCTION UTILITAIRE
@@ -121,7 +120,6 @@ let triEvaluationsActuel = {
  * ARCHITECTURE: Identique à calculerEtSauvegarderIndicesAssiduite() dans saisie-presences.js
  */
 function calculerEtSauvegarderIndiceCompletion() {
-    console.log('Calcul des indices de complétion...');
 
     const etudiants = (typeof obtenirEtudiantsCoursActif === 'function')
         ? obtenirEtudiantsCoursActif()
@@ -148,9 +146,6 @@ function calculerEtSauvegarderIndiceCompletion() {
     indicesEvaluation.completion = indices;
     db.setSync('indicesEvaluation', indicesEvaluation);
     
-    console.log('✅ Indices de complétion sauvegardés');
-    console.log('   Sommatif:', Object.keys(indices.sommatif).length, 'étudiants');
-    console.log('   Alternatif:', Object.keys(indices.alternatif).length, 'étudiants');
     
     return indices;
 }
@@ -183,7 +178,6 @@ function calculerCompletionSommative(da) {
     
     const indice = nbRemis / totalAttendus;
     
-    console.log(`   Sommatif ${da}: ${nbRemis} / ${totalAttendus} artefacts = ${(indice * 100).toFixed(1)}%`);
     
     return Math.min(indice, 1);
 }
@@ -202,13 +196,11 @@ function calculerCompletionAlternative(da) {
     // Obtenir le nombre d'artefacts depuis les réglages
     const nombreArtefacts = config.configPAN?.nombreArtefacts || 3;
     
-    console.log(`   Calcul alternatif : ${nombreArtefacts} meilleurs artefacts`);
     
     // Récupérer les évaluations de cet étudiant
     const evalsEtudiant = evaluations.filter(e => e.etudiantDA === da);
     
     if (evalsEtudiant.length === 0) {
-        console.log(`   Alternatif ${da}: Aucune évaluation, retour 0%`);
         return 0;
     }
     
@@ -220,7 +212,6 @@ function calculerCompletionAlternative(da) {
     
     const indice = meilleurs.length / nombreArtefacts;
     
-    console.log(`   Alternatif ${da}: ${meilleurs.length} / ${nombreArtefacts} meilleurs = ${(indice * 100).toFixed(1)}%`);
     
     return Math.min(indice, 1);
 }
@@ -229,37 +220,27 @@ function calculerCompletionAlternative(da) {
  * Initialise la page Liste des évaluations
  */
 function initialiserListeEvaluations() {
-    console.log('🔄 Initialisation de la liste des évaluations...');
 
     try {
-        console.log('   Étape 1: Calcul des indices de complétion...');
         // 🆕 Calculer les indices de complétion
         calculerEtSauvegarderIndiceCompletion();
-        console.log('   ✅ Indices calculés');
 
-        console.log('   Étape 2: Chargement des données...');
         // Charger et afficher les données
         chargerDonneesEvaluations();
-        console.log('   ✅ Données chargées');
 
-        console.log('   Étape 3: Initialisation des événements...');
         // Initialiser les événements des filtres
         initialiserEvenementsFilres();
-        console.log('   ✅ Événements initialisés');
 
-        console.log('   Étape 4: Initialisation du bouton réinitialiser...');
         // Initialiser le bouton de réinitialisation
         const btnReinit = document.getElementById('btn-reinitialiser-filtres');
         if (btnReinit) {
             btnReinit.addEventListener('click', reinitialiserFiltres);
         }
-        console.log('   ✅ Bouton initialisé');
 
         // Revérifier le débordement au redimensionnement
         window.removeEventListener('resize', verifierDebordementTableau);
         window.addEventListener('resize', verifierDebordementTableau);
 
-        console.log('✅ Liste des évaluations initialisée');
     } catch (error) {
         console.error('❌ Erreur lors de l\'initialisation de la liste des évaluations:', error);
         console.error('Stack trace:', error.stack);
@@ -298,10 +279,6 @@ function chargerDonneesEvaluations() {
         : [];
 
     const infoCours = db.getSync('infoCours', null);
-    console.log(`📋 [Liste-Eval] Donnees chargees: ${evaluations.length} evaluations, ${productions.length} productions, ${etudiants.length} etudiants`);
-    console.log(`📋 [Liste-Eval] infoCours:`, infoCours ? { id: infoCours.id, groupe: infoCours.groupe, _modeCours: infoCours._modeCours } : 'null');
-    console.log(`📋 [Liste-Eval] Source étudiants: ${typeof obtenirEtudiantsCoursActif === 'function' ? 'obtenirEtudiantsCoursActif()' : 'obtenirDonneesSelonMode()'}`);
-    console.log(`📋 [Liste-Eval] Groupes étudiants:`, [...new Set(etudiants.map(e => e.groupe))]);
 
     // Générer les options des filtres
     genererOptionsFiltres(groupes, productions);
@@ -420,7 +397,6 @@ function sauvegarderEtatFiltres() {
     };
 
     db.setSync('filtresListeEvaluations', etatFiltres);
-    console.log('💾 Filtres sauvegardés:', etatFiltres);
 }
 
 /**
@@ -430,14 +406,12 @@ function restaurerEtatFiltres() {
     const etatSauvegarde = db.getSync('filtresListeEvaluations', null);
 
     if (!etatSauvegarde) {
-        console.log('📂 Aucun filtre sauvegardé à restaurer');
         return;
     }
 
     try {
         // db.getSync retourne déjà un objet JavaScript, pas besoin de JSON.parse
         const etat = etatSauvegarde;
-        console.log('📂 Restauration des filtres:', etat);
 
         // Restaurer chaque filtre (attendre que les éléments soient disponibles)
         setTimeout(() => {
@@ -453,7 +427,6 @@ function restaurerEtatFiltres() {
             if (filtreNote && etat.note) filtreNote.value = etat.note;
             if (tri && etat.tri) tri.value = etat.tri;
 
-            console.log('✅ Filtres restaurés avec succès');
 
             // Appliquer les filtres après restauration
             appliquerFiltres();
@@ -506,7 +479,6 @@ function reinitialiserFiltres() {
 
     // Supprimer l'état sauvegardé dans localStorage
     db.removeSync('filtresListeEvaluations');
-    console.log('🗑️ Filtres sauvegardés supprimés');
 
     appliquerFiltres();
 }
@@ -519,7 +491,6 @@ function reinitialiserFiltres() {
  * Affiche le tableau des évaluations avec filtrage
  */
 function afficherTableauEvaluations(evaluations, productions, etudiants) {
-    console.log('📊 Affichage du tableau des évaluations...');
 
     const corpsTableau = document.getElementById('corps-tableau-evaluations');
     const zoneChargement = document.getElementById('zone-chargement-evaluations');
@@ -535,24 +506,19 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
     // Masquer le chargement
     if (zoneChargement) {
         zoneChargement.classList.add('u-hide');
-        console.log('✅ Zone de chargement masquée');
     }
 
     // Construire la liste complète : évaluations existantes + non évaluées
     const lignes = construireLignesEvaluations(evaluations, productions, etudiants);
-    console.log(`📝 ${lignes.length} ligne(s) construite(s)`);
 
     // Appliquer les filtres
     let lignesFiltrees = appliquerFiltresSurLignes(lignes);
-    console.log(`🔍 ${lignesFiltrees.length} ligne(s) après filtres`);
 
     // Appliquer la recherche par mot-clé
     lignesFiltrees = appliquerRechercheTexte(lignesFiltrees);
-    console.log(`🔎 ${lignesFiltrees.length} ligne(s) après recherche`);
 
     // Appliquer le tri par colonne cliquable
     lignesFiltrees = trierLignesParColonne(lignesFiltrees);
-    console.log(`🔄 Tri par colonne: ${triEvaluationsActuel.colonne} (${triEvaluationsActuel.ordre})`);
 
     // Mettre à jour les indicateurs de tri visuels
     mettreAJourIndicateursTri();
@@ -562,7 +528,6 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
         conteneurTableau.classList.add('u-hide');
         if (messageAucunResultat) messageAucunResultat.classList.remove('u-hide');
         if (compteur) compteur.textContent = '0 évaluation(s)';
-        console.log('📭 Aucune évaluation à afficher');
     } else {
         if (messageAucunResultat) messageAucunResultat.classList.add('u-hide');
         conteneurTableau.classList.remove('u-hide');
@@ -630,7 +595,6 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
         setTimeout(verifierDebordementTableau, 50);
 
         const logMoyenne = moyenneAffichee !== null ? ` | Moyenne: ${moyenneAffichee.toFixed(1)}%` : '';
-        console.log(`✅ ${lignesFiltrees.length} évaluation(s) affichée(s)${logMoyenne}`);
     }
 }
 
@@ -1367,7 +1331,6 @@ function confirmerSuppressionFichier(fichierId, da) {
  */
 function attacherEvenementsActions() {
     // Les événements sont gérés via onclick dans le HTML pour simplicité
-    console.log('✅ Événements des actions attachés');
 }
 
 /**
@@ -1376,7 +1339,6 @@ function attacherEvenementsActions() {
 function ouvrirCartouche(cartoucheId, productionId) {
     // Naviguer vers Réglages › Rétroaction
     // TODO: Implémenter la navigation et la pré-sélection de la cartouche
-    console.log(`🔍 Ouverture de la cartouche ${cartoucheId} pour la production ${productionId}`);
     alert('Navigation vers la cartouche à implémenter');
 }
 
@@ -1385,7 +1347,6 @@ function ouvrirCartouche(cartoucheId, productionId) {
  * RENOMMÉ consulterEvaluationDepuisListe pour éviter conflit avec evaluation.js
  */
 function consulterEvaluationDepuisListe(evaluationId) {
-    console.log(`🔍 Consultation de l'évaluation ID:`, evaluationId);
 
     // 🔧 FIX (6 mars 2026) : Annuler tout timer d'ouverture précédent pour éviter
     // qu'un clic rapide sur plusieurs évaluations ouvre le fichier d'une évaluation
@@ -1408,7 +1369,6 @@ function consulterEvaluationDepuisListe(evaluationId) {
         return;
     }
 
-    console.log(`✅ Évaluation trouvée:`, evaluation.id, '- DA:', evaluation.etudiantDA, '- Production:', evaluation.productionId);
 
     // Résolution centralisée évaluation → fichier
     let fichierId = null;
@@ -1477,7 +1437,6 @@ function consulterEvaluationDepuisListe(evaluationId) {
  * pour un étudiant et une production donnés
  */
 function evaluerProduction(da, productionId) {
-    console.log(`📝 Création nouvelle évaluation pour DA: ${da}, Production: ${productionId}`);
 
     // Déterminer l'étape du flux selon le statut du travail
     let etapeNavigation = 'evaluations-annoter'; // défaut: évaluation
@@ -1496,7 +1455,6 @@ function evaluerProduction(da, productionId) {
     if (!fichierImporte) {
         // Pas importé → aller à l'importation
         etapeNavigation = 'evaluations-importer';
-        console.log('📂 Pas de fichier importé → navigation vers import');
     } else {
         // Vérifier annotation
         const annotation = travauxStockage.obtenirAnnotationFichier(fichierImporte.id);
@@ -1506,10 +1464,8 @@ function evaluerProduction(da, productionId) {
             // Importé mais pas annoté → ouvrir en mode annotation
             etapeNavigation = 'evaluations-annoter';
             ouvrirAnnotation = true;
-            console.log('✏️ Fichier importé sans annotation → navigation vers annotation');
         } else {
             // Annoté ou évalué → évaluation (comportement actuel)
-            console.log('📝 Fichier annoté → navigation vers évaluation');
         }
     }
 
@@ -1589,10 +1545,6 @@ function evaluerProduction(da, productionId) {
             const event = new Event('change');
             selectProduction.dispatchEvent(event);
 
-            console.log('✅ Formulaire pré-rempli:', {
-                etudiant: da,
-                production: productionId
-            });
         }, 100);
     }, 200);
 }
@@ -1602,7 +1554,6 @@ function evaluerProduction(da, productionId) {
  */
 function dupliquerEvaluation(evaluationId) {
     // TODO: Implémenter la duplication
-    console.log(`Duplication de l'évaluation ${evaluationId}`);
 
     if (!confirm('Veux-tu dupliquer cette évaluation pour un autre élève ?')) {
         return;
@@ -1654,7 +1605,6 @@ function supprimerEvaluation(evaluationId) {
         return;
     }
 
-    console.log(`Évaluation ${evaluationId} supprimée`);
 
     // Recalculer les indices C et P
     if (typeof calculerEtStockerIndicesCP === 'function') {
@@ -1761,7 +1711,6 @@ function toggleVerrouillerEvaluation(evaluationId) {
 
     sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
 
-    console.log(`🔒 Évaluation ${evaluationId} ${evaluation.verrouillee ? 'verrouillée' : 'déverrouillée'}`);
 
     // Mettre à jour le cadenas dans le DOM immédiatement
     const cadenasElement = document.getElementById(`cadenas-liste-${evaluationId}`);
@@ -1931,7 +1880,6 @@ function trierListeEvaluations() {
  * @param {string} colonne - Nom de la colonne à trier
  */
 function trierTableauParColonne(colonne) {
-    console.log(`📊 Tri par colonne: ${colonne}`);
 
     // Si on clique sur la même colonne, inverser l'ordre
     if (triEvaluationsActuel.colonne === colonne) {
@@ -2358,7 +2306,6 @@ function supprimerFichierDefinitivement(id) {
             });
             if (evaluations.length < avant) {
                 db.setSync(cle('evaluationsSauvegardees'), evaluations);
-                console.log('[Corbeille] ' + (avant - evaluations.length) + ' évaluation(s) liée(s) supprimée(s) pour ' + fichier.etudiantDA + '/' + fichier.productionId);
                 if (typeof calculerEtStockerIndicesCP === 'function') {
                     calculerEtStockerIndicesCP();
                 }
@@ -2433,7 +2380,6 @@ function viderTouteCorbeille() {
             });
             if (evaluations.length < avant) {
                 db.setSync(cle('evaluationsSauvegardees'), evaluations);
-                console.log('[Corbeille] ' + (avant - evaluations.length) + ' évaluation(s) liée(s) supprimée(s) (vider corbeille)');
                 if (typeof calculerEtStockerIndicesCP === 'function') {
                     calculerEtStockerIndicesCP();
                 }
@@ -2457,7 +2403,6 @@ function viderTouteCorbeille() {
 // EXPORT
 // ============================================
 
-console.log('📤 Export des fonctions du module liste-evaluations.js...');
 
 // Rendre les fonctions accessibles globalement
 window.initialiserListeEvaluations = initialiserListeEvaluations;
@@ -2492,6 +2437,5 @@ window.restaurerFichierCorbeille = restaurerFichierCorbeille;
 window.supprimerFichierDefinitivement = supprimerFichierDefinitivement;
 window.viderTouteCorbeille = viderTouteCorbeille;
 
-console.log('✅ Module liste-evaluations.js chargé - initialiserListeEvaluations disponible:', typeof window.initialiserListeEvaluations);
 
 })();

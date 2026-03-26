@@ -66,19 +66,16 @@
  * - Sortie silencieuse si les éléments n'existent pas
  */
 function initialiserModuleVueCalendaire() {
-    console.log('Initialisation du module Vue Calendaire');
 
     // Vérifier que nous sommes dans la bonne section
     const conteneurCalendrier = document.getElementById('presences-calendrier');
     if (!conteneurCalendrier) {
-        console.log('   ⚠️  Section calendrier non active, initialisation reportée');
         return;
     }
 
     // Afficher le calendrier scolaire
     afficherCalendrierScolaire();
 
-    console.log('   ✅ Module Vue Calendaire initialisé');
 }
 
 /* ===============================
@@ -217,7 +214,6 @@ function obtenirStatutJour(dateStr, calendrierComplet) {
  * @returns {string} - HTML du calendrier mensuel
  */
 function genererHtmlMois(annee, mois, calendrierComplet) {
-    console.log('🔍 genererHtmlMois appelé avec:', { annee, mois });
     const nomsJours = ['DIM', 'LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM'];
     const nomsMois = ['', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
         'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
@@ -254,7 +250,6 @@ function genererHtmlMois(annee, mois, calendrierComplet) {
         const dateStr = calendrierVue_formaterDate(new Date(annee, mois - 1, jour));
 
         if (jour <= 2) {
-            console.log('Jour', jour, 'du mois', mois, '→ dateStr:', dateStr);
         }
         
         const statut = obtenirStatutJour(dateStr, calendrierComplet);
@@ -376,7 +371,6 @@ function desilluminerSemaines() {
  * 6. Injecte le tout dans le DOM
  */
 function afficherCalendrierScolaire() {
-    console.log('🔵 Génération du calendrier scolaire...');
 
     // Récupérer les paramètres depuis db.getSync (namespacés par trimestre)
     const cadreCalendrier = db.getSync(cle('cadreCalendrier'), {});
@@ -549,8 +543,6 @@ function afficherCalendrierScolaire() {
                 if (td) desilluminerSemaines();
             });
 
-            console.log('✅ Calendrier scolaire affiché avec succès');
-            console.log('   - ' + nombreSemainesReel + ' semaines | ' + nombreJoursReel + ' jours (depuis trimestre.js)');
         } else {
             console.error('❌ Élément #conteneur-calendrier introuvable');
         }

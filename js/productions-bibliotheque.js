@@ -81,7 +81,6 @@ async function ajouterALaBibliotheque(production) {
     // Vérifier si déjà présente (par ID)
     const existe = bibliotheque.some(p => p.id === production.id);
     if (existe) {
-        console.log('[Bibliothèque] Production déjà présente:', production.id);
         return false;
     }
 
@@ -104,7 +103,6 @@ async function ajouterALaBibliotheque(production) {
     bibliotheque.push(productionBiblio);
     await db.set(CLE_BIBLIOTHEQUE_PRODUCTIONS, bibliotheque);
 
-    console.log('[Bibliothèque] Production ajoutée:', production.titre);
     return true;
 }
 
@@ -120,12 +118,10 @@ async function retirerDeLaBibliotheque(productionId) {
     bibliotheque = bibliotheque.filter(p => p.id !== productionId);
 
     if (bibliotheque.length === indexAvant) {
-        console.log('[Bibliothèque] Production non trouvée:', productionId);
         return false;
     }
 
     await db.set(CLE_BIBLIOTHEQUE_PRODUCTIONS, bibliotheque);
-    console.log('[Bibliothèque] Production retirée:', productionId);
     return true;
 }
 
@@ -147,7 +143,6 @@ async function importerDansBibliotheque(productions) {
         }
     }
 
-    console.log(`[Bibliothèque] Import: ${ajoutees} ajoutées, ${existantes} déjà existantes`);
     return { ajoutees, existantes };
 }
 
@@ -175,15 +170,12 @@ async function migrerVersBibliotheque(cleSource) {
     // Lire depuis db.getSync (clé exacte fournie)
     const productions = db.getSync(cleSource, null);
     if (!productions) {
-        console.log('[Bibliothèque] Aucune donnée trouvée pour:', cleSource);
         return { ajoutees: 0, existantes: 0 };
     }
     if (!Array.isArray(productions)) {
-        console.log('[Bibliothèque] Format invalide pour:', cleSource);
         return { ajoutees: 0, existantes: 0 };
     }
 
-    console.log(`[Bibliothèque] Migration de ${productions.length} productions depuis ${cleSource}`);
     return await importerDansBibliotheque(productions);
 }
 

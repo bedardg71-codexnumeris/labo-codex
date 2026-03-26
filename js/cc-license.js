@@ -394,7 +394,6 @@ function ajouterContributeurSiNecessaire(document) {
             nom: enseignantActif,
             date: new Date().toISOString().split('T')[0]
         });
-        console.log(`[CC License] Contributeur ajouté: ${enseignantActif}`);
     }
 
     return document;
@@ -468,7 +467,6 @@ function verifierLicenceCC(donnees) {
 function avertirSansLicence(donnees) {
     if (!verifierLicenceCC(donnees)) {
         // Simple log console au lieu d'une alerte bloquante
-        console.log('ℹ️ Matériel importé sans métadonnées CC (usage normal)');
     }
 }
 
@@ -553,7 +551,6 @@ function demanderMetadonneesEnrichies(typeContenu, nomContenu) {
         const discipline = profilEnseignant?.discipline || coursActif.discipline || infoCours.discipline || '';
         const institution = profilEnseignant?.institution || coursActif.institution || infoCours.institution || '';
 
-        console.log('[CC Export] Pré-remplissage:', { nomComplet, courriel, siteWeb, discipline, institution });
 
         // Remplir les informations de base
         document.getElementById('metaTypeContenu').textContent = typeContenu;

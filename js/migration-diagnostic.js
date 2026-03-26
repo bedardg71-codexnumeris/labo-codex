@@ -113,7 +113,6 @@
         // --- Affichage console ---
         console.group('%c[Migration] Diagnostic complet', 'font-weight:bold; font-size:14px; color:#4CAF50');
 
-        console.log('%cFichiers', 'font-weight:bold; font-size:12px');
         console.table({
             'Total': { valeur: rapport.fichiers.total },
             'Actifs (avec productionId)': { valeur: rapport.fichiers.actifs },
@@ -121,7 +120,6 @@
             'Sans champ statut': { valeur: rapport.fichiers.sansStatut }
         });
 
-        console.log('%cÉvaluations', 'font-weight:bold; font-size:12px');
         console.table({
             'Total': { valeur: rapport.evaluations.total },
             'Actives': { valeur: rapport.evaluations.actives },
@@ -135,7 +133,6 @@
                 console.table(d.fichiers);
             });
         } else {
-            console.log('%c✓ Aucun doublon fichier', 'color:green');
         }
 
         if (doublonsEvals.length > 0) {
@@ -144,17 +141,14 @@
                 console.table(d.evaluations);
             });
         } else {
-            console.log('%c✓ Aucun doublon évaluation', 'color:green');
         }
 
         if (incoherences.length > 0) {
             console.warn(`%c⚠ ${incoherences.length} incohérence(s) fichierId↔productionId`, 'color:red; font-weight:bold');
             console.table(incoherences);
         } else {
-            console.log('%c✓ Aucune incohérence fichierId↔productionId', 'color:green');
         }
 
-        console.log(`Corbeille : ${rapport.corbeille.total} fichier(s)`);
         console.groupEnd();
 
         return rapport;
@@ -172,7 +166,6 @@
     function migrationSnapshot() {
         const flag = cle('migration_snapshot_v1');
         if (db.getSync(flag)) {
-            console.log('[Migration] Snapshot déjà existant — aucune action.');
             return false;
         }
 
@@ -185,11 +178,6 @@
         db.setSync(cle('corbeilleFichiers_backup_v1'), JSON.parse(JSON.stringify(corbeille)));
         db.setSync(flag, new Date().toISOString());
 
-        console.log(`%c[Migration] Snapshot créé`, 'color:green; font-weight:bold');
-        console.log(`  Fichiers : ${fichiers.length}`);
-        console.log(`  Évaluations : ${evaluations.length}`);
-        console.log(`  Corbeille : ${corbeille.length}`);
-        console.log(`  Date : ${new Date().toISOString()}`);
 
         return true;
     }
@@ -226,7 +214,6 @@
         sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
         sauvegarderDonneesSelonMode('corbeilleFichiers', corbeille || []);
 
-        console.log('%c[Migration] Restauration terminée. Rechargez la page.', 'color:green; font-weight:bold');
         return true;
     }
 
@@ -248,7 +235,6 @@
 
         const flagMigration = cle('migration_fichierId_supprime_v1');
         if (db.getSync(flagMigration)) {
-            console.log('[Migration] Migration fichierId déjà effectuée.');
             return null;
         }
 
@@ -295,12 +281,10 @@
         const rapport = { nbMigres, nbIncoherents, incoherents };
 
         console.group('%c[Migration] Suppression fichierId', 'font-weight:bold; font-size:14px; color:#2196F3');
-        console.log(`Migrés (fichierId effacé) : ${nbMigres}`);
         if (nbIncoherents > 0) {
             console.warn(`Incohérents (NON migrés) : ${nbIncoherents}`);
             console.table(incoherents);
         } else {
-            console.log('%c✓ Aucune incohérence', 'color:green');
         }
         console.groupEnd();
 
@@ -327,9 +311,7 @@
 
         if (nbMigres > 0) {
             sauvegarderDonneesSelonMode('fichiersTravaux', fichiers);
-            console.log(`[Migration] Statut ajouté à ${nbMigres} fichier(s)`);
         } else {
-            console.log('[Migration] Tous les fichiers ont déjà un statut.');
         }
 
         return nbMigres;
@@ -345,7 +327,6 @@
         const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
         const evalsAvecFichierId = evaluations.filter(e => e.fichierId && !e.remplaceeParId);
         if (fichiers.length > 0 || evaluations.length > 0) {
-            console.log(`[Migration] État : ${fichiers.length} fichiers, ${evaluations.length} évaluations, ${evalsAvecFichierId.length} avec fichierId`);
         }
     } catch (e) {
         // Silencieux si les fonctions de storage ne sont pas encore disponibles

@@ -70,10 +70,8 @@ async function chargerResolutions() {
         const reponse = await fetch('resolutions.json?t=' + Date.now(), { cache: 'no-store' });
         if (!reponse.ok) return;
         resolutionsData = await reponse.json();
-        console.log('[Rapport Bug] Résolutions chargées:', resolutionsData.tickets?.length || 0, 'tickets');
     } catch (e) {
         // Silencieux si hors-ligne ou fichier absent
-        console.log('[Rapport Bug] resolutions.json non disponible');
     }
 }
 
@@ -354,7 +352,6 @@ function archiverRapportBug(rapport, description, prenom, type) {
         }
 
         db.setSync(CLE_RAPPORTS_ARCHIVES, archives);
-        console.log('[Rapport Bug] Rapport archivé localement');
     } catch (e) {
         console.error('[Rapport Bug] Erreur archivage:', e);
     }
@@ -1618,7 +1615,6 @@ window.mettreAJourBadgeBug = mettreAJourBadgeBug;
 // Mode rapport
 window.changerModeRapport = changerModeRapport;
 
-console.log('Module rapport-bug.js chargé (version avec suivi des tickets et feedback)');
 
 
 })();

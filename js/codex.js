@@ -98,7 +98,6 @@ async function _migrerClesClasseurVersCodex() {
         return { migrees: 0, ignorees: 0 };
     }
 
-    console.log('📂 Migration classeur → codex : début...');
 
     var migrees = 0;
     var ignorees = 0;
@@ -123,7 +122,6 @@ async function _migrerClesClasseurVersCodex() {
                 // Suppression async — attend la confirmation IDB
                 await db.remove(paire.ancien);
                 migrees++;
-                console.log('  ✓ ' + paire.ancien + ' → ' + paire.nouveau);
             } else {
                 console.error('  ✗ Échec vérification pour ' + paire.nouveau + ', ancienne clé conservée');
                 ignorees++;
@@ -149,7 +147,6 @@ async function _migrerClesClasseurVersCodex() {
                 if (verifHist !== null) {
                     await db.remove(cle);
                     migrees++;
-                    console.log('  ✓ ' + cle + ' → ' + nouvelleCle);
                 } else {
                     console.error('  ✗ Échec vérification pour ' + nouvelleCle + ', ancienne clé conservée');
                     ignorees++;
@@ -166,7 +163,6 @@ async function _migrerClesClasseurVersCodex() {
     var anciennesRestantes = clesRestantes.filter(function(c) { return c.startsWith('_classeur_'); });
     if (anciennesRestantes.length === 0) {
         await db.set(CLE_MIGRATION_FAITE, true);
-        console.log('📂 Migration classeur → codex terminée : ' + migrees + ' migrée(s), ' + ignorees + ' ignorée(s)');
     } else {
         console.error('📂 Migration INCOMPLÈTE — clés _classeur_* restantes : ' + anciennesRestantes.join(', '));
         console.error('📂 Le drapeau de migration N\'A PAS été posé. La migration sera retentée au prochain chargement.');
@@ -191,7 +187,6 @@ function initialiserCodex() {
             if (etatMigre && etatMigre.actif) {
                 _etat = Object.assign({}, _etat, etatMigre);
                 _mettreAJourIndicateur();
-                console.log('📂 État codex rechargé après migration');
             }
         }
     }).catch(function(e) {
@@ -203,9 +198,7 @@ function initialiserCodex() {
     var etatSauve = db.getSync(CLE_ETAT_CODEX, null) || db.getSync(CLE_ETAT_ANCIEN, null);
     if (etatSauve && etatSauve.actif) {
         _etat = Object.assign({}, _etat, etatSauve);
-        console.log(`📂 Codex restauré : "${_etat.nom}"`);
     } else {
-        console.log('📂 Codex : aucun codex actif');
     }
     _mettreAJourIndicateur();
 
@@ -254,7 +247,6 @@ async function genererCodex(options = {}) {
     var _prog = silencieux ? function() {} : _majProgression;
     var _progMasquer = silencieux ? function() {} : _masquerProgression;
 
-    console.log('📂 Génération du codex...');
     if (!silencieux) _afficherProgression('Génération du codex');
     _prog(0, 'Lecture des données...');
     await _yield(); // laisser le navigateur peindre l'overlay
@@ -353,7 +345,6 @@ async function genererCodex(options = {}) {
                 taille: new Blob([jsonSnapshot]).size
             });
 
-            console.log('📂 TimeMachine : snapshot archivé (' + dateSnapshot + ')');
         }
     }
 
@@ -425,7 +416,6 @@ async function genererCodex(options = {}) {
 
     const duree = Math.round(performance.now() - debut);
     var nbSnapshotsExport = historiqueManifeste.length;
-    console.log('📂 Codex généré en ' + duree + 'ms : ' + nbBlobs + ' fichier(s), ' + nbSnapshotsExport + ' snapshot(s), ' + _formaterTaille(zipBlob.size));
 
     _prog(100, 'Codex prêt !', _formaterTaille(zipBlob.size));
 
@@ -461,7 +451,6 @@ async function chargerCodex(fichierZip) {
     }
 
     const debut = performance.now();
-    console.log('📂 Chargement du codex (' + _formaterTaille(fichierZip.size) + ')...');
     _afficherProgression('Ouverture du codex');
     _majProgression(0, 'Validation du fichier...', _formaterTaille(fichierZip.size));
     await _yield(); // laisser le navigateur peindre l'overlay
@@ -557,7 +546,6 @@ async function chargerCodex(fichierZip) {
 
     const duree = Math.round(performance.now() - debut);
     const stats = { nbCles: nbCles, nbBlobs: nbBlobs, nbSnapshots: nbSnapshots, dureeMs: duree };
-    console.log('📂 Codex chargé en ' + duree + 'ms : ' + nbCles + ' clé(s), ' + nbBlobs + ' blob(s), ' + nbSnapshots + ' snapshot(s)');
 
     _majProgression(100, 'Codex chargé !', nbCles + ' clés, ' + nbBlobs + ' fichiers');
     await new Promise(function(r) { setTimeout(r, 800); });
@@ -710,8 +698,6 @@ async function lireCodexExterne(fichierZip) {
         }
     });
 
-    console.log('📂 Codex externe lu : "' + manifeste.nom + '" — ' +
-        Object.keys(donnees).length + ' clés, ' + travauxListe.length + ' fichier(s) travaux');
 
     return {
         manifeste: manifeste,
@@ -771,7 +757,6 @@ function fermerCodex() {
     _mettreAJourIndicateur();
     // Nettoyer l'historique TimeMachine de IndexedDB
     _nettoyerHistoriqueIDB();
-    console.log('📂 Codex fermé');
 }
 
 /* ===============================
@@ -819,7 +804,6 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
     if (_fileHandle && !forcerDialogue) {
         try {
             await _ecrireViaHandle(_fileHandle, blob);
-            console.log('📂 Ré-écrit via handle FSAPI existant');
             return { methode: 'fsapi' };
         } catch (e) {
             // Handle invalide (fichier déplacé, clé USB retirée, etc.)
@@ -843,7 +827,6 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
             // Conserver le handle pour les sauvegardes suivantes
             _fileHandle = handle;
             _demarrerAutoSave();
-            console.log('📂 Sauvegardé via FSAPI, handle conservé');
             return { methode: 'fsapi' };
         } catch (e) {
             if (e.name === 'AbortError') {
@@ -969,7 +952,6 @@ function _purgerHistorique(index) {
     }
 
     if (supprimes.length > 0) {
-        console.log('📂 TimeMachine : ' + supprimes.length + ' snapshot(s) purgé(s)');
     }
 
     return gardes;
@@ -1030,7 +1012,6 @@ async function _chargerHistoriqueDepuisZip(zip, manifeste) {
     }
 
     await db.set(CLE_HIST_INDEX, index);
-    console.log('📂 TimeMachine : ' + index.length + ' snapshot(s) chargé(s) depuis le ZIP');
     return index;
 }
 
@@ -1762,12 +1743,9 @@ async function _fusionnerTravaux(zipExterne, donneesExternes, cheminsAImporter, 
 
         if (ajoutees > 0) {
             await db.set(cleFT, listeLocale);
-            console.log('📂 Fusion : ' + ajoutees + ' entrée(s) ajoutée(s) à ' + cleFT);
         }
     }
 
-    console.log('📂 Fusion travaux : ' + importes + ' importé(s), ' + ignores + ' ignoré(s)' +
-        (erreurs.length > 0 ? ', ' + erreurs.length + ' erreur(s)' : ''));
 
     return { importes: importes, ignores: ignores, erreurs: erreurs };
 }
@@ -1913,7 +1891,6 @@ function _formaterTaille(octets) {
 function _demarrerAutoSave() {
     if (!_fileHandle || _autoSaveTimerId) return;
     _autoSaveTimerId = setInterval(_executerAutoSave, AUTO_SAVE_DELAI);
-    console.log('📂 Auto-save activé (intervalle : ' + (AUTO_SAVE_DELAI / 1000) + 's)');
     _mettreAJourIndicateur();
 }
 
@@ -1924,7 +1901,6 @@ function _arreterAutoSave() {
     if (_autoSaveTimerId) {
         clearInterval(_autoSaveTimerId);
         _autoSaveTimerId = null;
-        console.log('📂 Auto-save désactivé');
     }
     _derniereAutoSave = null;
     _autoSaveEnCours = false;
@@ -1946,7 +1922,6 @@ async function _executerAutoSave() {
     if (_autoSaveEnCours) return;
 
     _autoSaveEnCours = true;
-    console.log('📂 Auto-save en cours...');
 
     try {
         var resultat = await genererCodex({ silencieux: true });
@@ -1954,7 +1929,6 @@ async function _executerAutoSave() {
         await _ecrireViaHandle(_fileHandle, resultat.blob);
 
         _derniereAutoSave = new Date().toISOString();
-        console.log('📂 Auto-save terminé : ' + _formaterTaille(resultat.blob.size));
 
         if (typeof window.afficherNotificationSucces === 'function') {
             window.afficherNotificationSucces(
@@ -2185,7 +2159,6 @@ async function actionOuvrir() {
             // Conserver le handle pour les sauvegardes suivantes
             _fileHandle = handle;
             _demarrerAutoSave();
-            console.log('📂 Ouverture via FSAPI, handle conservé');
         } catch (e) {
             if (e.name === 'AbortError') return; // Annulé par l'utilisateur
             console.warn('📂 showOpenFilePicker échoué, fallback input file', e.message);
@@ -2293,7 +2266,6 @@ function actionNouveau() {
     if (typeof window.afficherNotificationSucces === 'function') {
         window.afficherNotificationSucces('Nouveau codex : ' + nom);
     }
-    console.log('📂 Nouveau codex créé : ' + nom);
 }
 
 /**
@@ -2349,7 +2321,6 @@ async function actionRenommer() {
         modificationsDepuis: _etat.modificationsDepuis,
         manifeste: _etat.manifeste
     });
-    console.log('Codex renommé : ' + nouveauNom);
 }
 
 /**
@@ -2470,7 +2441,6 @@ async function actionRestaurer() {
     await new Promise(function(r) { setTimeout(r, 800); });
     _masquerProgression();
 
-    console.log('📂 TimeMachine : restauré vers ' + entreeChoisie.date);
 
     // 11. Proposer de recharger
     if (confirm('Version restaurée avec succès !\n\nRecharger la page pour appliquer les données ?')) {
@@ -2568,10 +2538,6 @@ async function actionComparer() {
     var titre = 'Comparaison : version du ' + _formaterDateLocale(entreeChoisie.date) + '\nvs données actuelles\n\n';
     alert(titre + _formaterDiff(diff));
 
-    console.log('📂 TimeMachine : comparaison avec ' + entreeChoisie.date + ' — ' +
-        diff.ajoutees.length + ' ajoutée(s), ' +
-        diff.supprimees.length + ' supprimée(s), ' +
-        diff.modifiees.length + ' modifiée(s)');
 }
 
 /**
@@ -2648,7 +2614,6 @@ async function actionFusionner() {
     var plan = _resoudreConflits(analyse, donneesLocales, externe.donnees, analyseTravaux);
 
     if (plan.annule) {
-        console.log('📂 Fusion annulée par l\'utilisateur');
         return;
     }
 
@@ -2728,9 +2693,6 @@ async function actionFusionner() {
 
     alert(resume);
 
-    console.log('📂 Fusion terminée — ' + nbExternes + ' importée(s), ' +
-        nbLocaux + ' locale(s), ' + nbSupprimees + ' supprimée(s), ' +
-        statsTravaux.importes + ' blob(s)');
 
     } catch (erreur) {
         _masquerProgression();
@@ -2935,9 +2897,6 @@ async function actionExporterSelection() {
     _masquerProgression();
 
     if (resultatSave.methode !== 'annule') {
-        console.log('📂 Export sélectif : ' + nomsTrimestres + ' — ' +
-            resultat.stats.gardees + ' clés, ' + nbBlobs + ' blob(s), ' +
-            _formaterTaille(zipBlob.size));
 
         if (typeof window.afficherNotificationSucces === 'function') {
             window.afficherNotificationSucces(

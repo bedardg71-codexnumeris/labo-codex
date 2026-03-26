@@ -11,7 +11,6 @@
  * Appelée par main.js au chargement
  */
 function initialiserModuleEvaluationsApercu() {
-    console.log('📊 Module Évaluations - Aperçu initialisé');
 }
 
 /**
@@ -19,7 +18,6 @@ function initialiserModuleEvaluationsApercu() {
  * Appelée automatiquement lors de l'affichage de la sous-section
  */
 function chargerApercuEvaluations() {
-    console.log('🔄 Chargement de l\'aperçu des évaluations...');
 
     try {
         // Récupérer les étudiants actifs
@@ -42,7 +40,6 @@ function chargerApercuEvaluations() {
         const nbImportes = (typeof travauxStockage !== 'undefined') ? travauxStockage.statistiquesFichiers().nombre : 0;
         setStatText('ea-travaux-importes', nbImportes);
 
-        console.log('✅ Aperçu des évaluations chargé');
     } catch (error) {
         console.error('❌ Erreur chargement aperçu évaluations:', error);
     }

@@ -1257,7 +1257,6 @@ function enregistrerCommeGrille() {
  * - Affiche totaux de pondération
  */
 async function afficherToutesLesGrillesCriteres() {
-    console.log('📋 Appel de afficherToutesLesGrillesCriteres()');
     const container = document.getElementById('vueGrillesCriteres');
     if (!container) {
         console.error('❌ Conteneur vueGrillesCriteres introuvable');
@@ -1265,7 +1264,6 @@ async function afficherToutesLesGrillesCriteres() {
     }
 
     const grilles = await db.get('grillesTemplates') || [];
-    console.log('📋 Nombre de grilles trouvées:', grilles.length);
 
     if (grilles.length === 0) {
         container.innerHTML = `
@@ -1512,7 +1510,6 @@ async function migrerGrillesVersBibliotheque() {
 
     if (nbMigrees > 0) {
         await db.set('grillesTemplates', grilles);
-        console.log(`✅ Migration bibliothèque: ${nbMigrees} grille(s) ajoutée(s) à la bibliothèque`);
     }
 }
 
@@ -1527,7 +1524,6 @@ async function assurerGrilleGenerique() {
     const existe = grilles.some(g => g.id === 'GRILLE_GENERIQUE');
     if (existe || window.estRessourceSupprimee('GRILLE_GENERIQUE')) return;
 
-    console.log('📋 Ajout de la grille générique à la bibliothèque...');
 
     const grilleGenerique = {
         id: 'GRILLE_GENERIQUE',
@@ -1546,11 +1542,9 @@ async function assurerGrilleGenerique() {
 
     grilles.push(grilleGenerique);
     await db.set('grillesTemplates', grilles);
-    console.log('   ✅ Grille générique ajoutée à la bibliothèque');
 }
 
 async function initialiserModuleGrilles() {
-    console.log('Initialisation du module Grilles');
 
     // ✅ AJOUT (8 décembre 2025) : Migration vers système bibliothèque
     await migrerGrillesVersBibliotheque();
@@ -1572,7 +1566,6 @@ async function initialiserModuleGrilles() {
     // Pas d'événements globaux à attacher pour l'instant
     // Les événements sont gérés via les attributs onclick dans le HTML
 
-    console.log('✅ Module Grilles initialisé avec layout sidebar (Beta 80.5)');
 }
 
 /* ===============================
@@ -1693,7 +1686,6 @@ async function exporterGrilles() {
     );
 
     if (!metaEnrichies) {
-        console.log('Export annulé par l\'utilisateur');
         return;
     }
 
@@ -1723,7 +1715,6 @@ async function exporterGrilles() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    console.log('✅ Grilles exportées avec licence CC BY-NC-SA 4.0');
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces(`${grilles.length} grille(s) exportée(s) avec succès`);
     }
@@ -1753,7 +1744,6 @@ async function exporterGrilleActive() {
     );
 
     if (!metaEnrichies) {
-        console.log('Export annulé par l\'utilisateur');
         return;
     }
 
@@ -1802,7 +1792,6 @@ async function exporterGrilleActive() {
     a.click();
     URL.revokeObjectURL(url);
 
-    console.log('✅ Grille exportée avec licence CC BY-NC-SA 4.0');
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces(`Grille "${grille.nom}" exportée avec succès`);
     }
@@ -1864,7 +1853,6 @@ async function importerDansGrilleActive(event) {
             );
 
             if (!confirmation) {
-                console.log('Import annulé par l\'utilisateur');
                 event.target.value = '';
                 return;
             }
@@ -1902,7 +1890,6 @@ async function importerDansGrilleActive(event) {
             // Rafraîchir la liste
             await afficherGrillesExistantes();
 
-            console.log('✅ Grille importée et remplacée avec succès');
             if (typeof afficherNotificationSucces === 'function') {
                 afficherNotificationSucces('Grille importée et remplacée avec succès');
             } else {
@@ -2062,7 +2049,6 @@ window.confirmerImportGrilles = async function(donnees) {
         if (nbMisesAJour > 0) message += `${nbMisesAJour} grille(s) mise(s) à jour.\n`;
         message += `\nConsultez "Grilles disponibles" pour les ajouter à ta barre latérale.`;
         alert(message);
-        console.log('✅ Grilles importées:', grillesImportees.length);
 
     } catch (error) {
         console.error('Erreur lors de l\'import:', error);
@@ -2405,7 +2391,6 @@ async function retirerGrilleDeBibliotheque(id) {
     fermerModalBibliothequeGrilles();
     await afficherBibliothequeGrilles();
 
-    console.log(`Grille "${grille.nom}" retirée de la barre latérale`);
 }
 
 /**
@@ -2449,7 +2434,6 @@ async function supprimerGrilleDefinitivement(id) {
     await afficherListeGrilles();
     await afficherBibliothequeGrilles();
 
-    console.log(`Grille "${grille.nom}" supprimée définitivement`);
 }
 
 /**
@@ -2537,7 +2521,6 @@ async function dupliquerGrilleBibliotheque(id) {
     await afficherListeGrilles();
     await afficherBibliothequeGrilles();
 
-    console.log(`Grille "${grille.nom}" dupliquée → "${nouvelleGrille.nom}"`);
 }
 
 /**
@@ -2675,7 +2658,6 @@ function creerNouvelleGrille() {
         item.classList.remove('active');
     });
 
-    console.log('Création nouvelle grille - Interface prête');
 }
 
 /**
@@ -2936,7 +2918,6 @@ async function chargerGrillePourModif(id) {
     // Mettre le highlight
     definirGrilleActive(id);
 
-    console.log('Grille chargée:', grille.nom);
 }
 
 function afficherCriteresGrille(grille) {
@@ -3199,7 +3180,6 @@ async function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
         calculerEtAfficherTotalPonderation(grille);
     }
 
-    console.log('Critère modifié:', champ, '=', valeur);
 }
 
 /* ===============================
@@ -3306,7 +3286,6 @@ async function initialiserSousCriteresParDefaut(grilleId, critereIndex) {
     // Réafficher la grille
     afficherCriteresGrille(grille);
 
-    console.log('Sous-critères par défaut initialisés pour critère:', critereIndex);
 }
 
 /**
@@ -3344,7 +3323,6 @@ async function ajouterSousCritere(grilleId, critereIndex) {
     // Réafficher la grille
     afficherCriteresGrille(grille);
 
-    console.log('Nouveau sous-critère ajouté au critère:', critereIndex);
 }
 
 /**
@@ -3369,7 +3347,6 @@ async function modifierSousCritere(grilleId, critereIndex, sousCritereIndex, cha
     // Sauvegarder dans localStorage
     await db.set('grillesTemplates', grilles);
 
-    console.log('Sous-critère modifié:', champ, '=', valeur);
 }
 
 /**
@@ -3396,7 +3373,6 @@ async function supprimerSousCritere(grilleId, critereIndex, sousCritereIndex) {
     // Réafficher la grille
     afficherCriteresGrille(grille);
 
-    console.log('Sous-critère supprimé:', sousCritereIndex);
 }
 
 /**
@@ -3431,7 +3407,6 @@ async function ajouterCritereGrille(grilleId) {
     // Réafficher la liste des critères (calculera automatiquement le total)
     afficherCriteresGrille(grille);
 
-    console.log('Nouveau critère ajouté à la grille:', grilleId);
 }
 
 /**
@@ -3464,7 +3439,6 @@ async function supprimerCritereGrille(grilleId, critereIndex) {
     // Réafficher la liste des critères (calculera automatiquement le total)
     afficherCriteresGrille(grille);
 
-    console.log('Critère supprimé de la grille:', grilleId);
 }
 
 function definirGrilleActive(id) {
@@ -3766,7 +3740,6 @@ async function migrerCategoriesVersSousCriteres() {
         grille.criteres.forEach(critere => {
             // Détecter l'ancienne structure avec categoriesErreurs
             if (critere.categoriesErreurs && critere.categoriesErreurs.length > 0 && !critere.sousCriteres) {
-                console.log(`🔄 Migration: Conversion de ${critere.categoriesErreurs.length} catégories en sous-critères pour critère "${critere.nom}"`);
 
                 // Convertir chaque catégorie en sous-critère
                 critere.sousCriteres = critere.categoriesErreurs.map(cat => ({
@@ -3787,7 +3760,6 @@ async function migrerCategoriesVersSousCriteres() {
 
     if (nbMigrations > 0) {
         await db.set('grillesTemplates', grilles);
-        console.log(`✅ Migration complétée: ${nbMigrations} critères migrés vers le système de sous-critères`);
     }
 }
 

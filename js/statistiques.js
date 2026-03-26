@@ -35,7 +35,6 @@
  * - main.js au chargement de la page
  */
 function initialiserModuleStatistiques() {
-    console.log('Module statistiques initialisé');
     
     // Charger les statistiques si la sous-section aperçu est affichée
     const apercu = document.getElementById('reglages-apercu');
@@ -62,7 +61,6 @@ function initialiserModuleStatistiques() {
  * 3. Met à jour les éléments HTML
  */
 function chargerStatistiquesApercu() {
-    console.log('Chargement des statistiques...');
     
     // === INFORMATIONS DU COURS ===
     chargerInfosCours();
@@ -73,7 +71,6 @@ function chargerStatistiquesApercu() {
     // === SYSTÈME ===
     chargerInfosSysteme();
     
-    console.log('✓ Statistiques chargées');
 }
 
 /* ===============================

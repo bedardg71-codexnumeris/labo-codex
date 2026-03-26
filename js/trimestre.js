@@ -91,7 +91,6 @@
  * Nécessaire pour les événements créés avant l'implémentation du système d'ID
  */
 function migrerEvenementsAvecIDs() {
-    console.log('🔄 Migration des événements : ajout des IDs manquants...');
 
     // Migrer les événements prévus
     let evenementsPrevus = db.getSync(cle('evenementsPrevus'), []);
@@ -102,7 +101,6 @@ function migrerEvenementsAvecIDs() {
         if (!evt.id || evt.id === 'undefined' || evt.id === 'null' || evt.id === '') {
             nbMigres++;
             const nouvelId = genererIdUnique('EVT_');
-            console.log(`  → Ajout ID "${nouvelId}" pour: ${evt.description}`);
             return { ...evt, id: nouvelId };
         }
         return evt;
@@ -110,7 +108,6 @@ function migrerEvenementsAvecIDs() {
 
     if (nbMigres > 0) {
         db.setSync(cle('evenementsPrevus'), evenementsPrevus);
-        console.log(`✅ ${nbMigres} événement(s) prévu(s) migré(s)`);
     }
 
     // Migrer les événements imprévus
@@ -122,7 +119,6 @@ function migrerEvenementsAvecIDs() {
         if (!evt.id || evt.id === 'undefined' || evt.id === 'null' || evt.id === '') {
             nbMigres++;
             const nouvelId = genererIdUnique('EVT_');
-            console.log(`  → Ajout ID "${nouvelId}" pour: ${evt.description}`);
             return { ...evt, id: nouvelId };
         }
         return evt;
@@ -130,18 +126,14 @@ function migrerEvenementsAvecIDs() {
 
     if (nbMigres > 0) {
         db.setSync(cle('evenementsImprevus'), evenementsImprevus);
-        console.log(`✅ ${nbMigres} événement(s) imprévu(s) migré(s)`);
     }
 
-    console.log('✅ Migration terminée');
 }
 
 function initialiserModuleTrimestre() {
-    console.log('Initialisation du module Trimestre (refonte)');
 
     const elementDebut = document.getElementById('debutTrimestre');
     if (!elementDebut) {
-        console.log('   ⚠️  Section trimestre non active, initialisation reportée');
         return;
     }
 
@@ -171,7 +163,6 @@ function initialiserModuleTrimestre() {
         chargerEvenementsImprevusV2();
     }
 
-    console.log('   ✅ Module Trimestre initialisé avec calendrier complet');
 }
 
 // [Chantier 1 — 6 fev 2026] chargerEtatCheckboxDemo supprimee (demantelement demo)
@@ -686,7 +677,6 @@ function confirmerAjoutEvenementImprevu() {
  * - Après ajout/suppression de congés
  */
 function genererCalendrierComplet() {
-    console.log('🏭 Génération du calendrier complet (source unique)...');
 
     const cadre = db.getSync(cle('cadreCalendrier'), {});
     const evenementsPrevus = db.getSync(cle('evenementsPrevus'), []);
@@ -711,7 +701,6 @@ function genererCalendrierComplet() {
         });
         if (toutesSeances.length > 0) {
             db.setSync(cle('horaireHebdo'), toutesSeances);
-            console.log('   📅 horaireHebdo synchronisé depuis', horairesEntites.length, 'entité(s) horaire:', toutesSeances.map(s => s.jour).join(', '));
         }
     }
 
@@ -723,9 +712,7 @@ function genererCalendrierComplet() {
     if (horaireHebdo && Array.isArray(horaireHebdo) && horaireHebdo.length > 0) {
         // Extraire les jours qui ont des séances
         joursAvecCours = new Set(horaireHebdo.map(s => s.jour.toLowerCase()));
-        console.log('   📅 Jours avec cours selon horaireHebdo:', [...joursAvecCours].join(', '));
     } else {
-        console.log('   📅 Pas d\'horaireHebdo défini - tous les jours ouvrables sont des jours de cours');
     }
 
     // Valeurs par défaut si rien n'est configuré
@@ -854,9 +841,6 @@ function genererCalendrierComplet() {
     // STOCKER dans localStorage - LA SOURCE UNIQUE
     db.setSync(cle('calendrierComplet'), calendrier);
 
-    console.log(`✅ Calendrier complet généré: ${Object.keys(calendrier).length} jours`);
-    console.log(`   - ${compteurJoursCours} jours de cours`);
-    console.log(`   - ${numeroSemaine} semaines`);
 
     return calendrier;
 }
@@ -903,7 +887,6 @@ function afficherStatistiquesTrimestre() {
     if (elemJours) elemJours.textContent = nbJoursCours;
     if (elemConges) elemConges.textContent = nbConges;
 
-    console.log(`Statistiques: ${nbSemaines} sem. | ${nbJoursCours} jours | ${nbConges} congés`);
 
     // Synchroniser avec trimestre-v2.js (interface V2)
     if (typeof afficherStatistiquesTrimestreV2 === 'function') {
@@ -943,7 +926,6 @@ function estDansPlage(date, debut, fin) {
 }
 
 function afficherNotification(message, details = '') {
-    console.log('📢', message);
 
     // Créer l'élément de notification
     const notification = document.createElement('div');

@@ -324,7 +324,6 @@ function afficherSousSection(idSousSection) {
         );
     }
 
-    console.log('🔵 afficherSousSection:', idSousSection);
 
     // ============================================
     // NETTOYAGE DES MODULES EN QUITTANT
@@ -349,7 +348,6 @@ function afficherSousSection(idSousSection) {
         }
     }
 
-    console.log('   Section:', section);
 
     // CORRECTION : Masquer TOUTES les sous-sections de TOUTES les sections
     document.querySelectorAll('.sous-section').forEach(ss => {
@@ -361,24 +359,20 @@ function afficherSousSection(idSousSection) {
     if (sousSection) {
         sousSection.classList.add('active');
         sousSectionActive = idSousSection;
-        console.log('   ✅ Sous-section affichée');
     } else {
         console.error('   ❌ Sous-section introuvable:', idSousSection);
     }
 
     // Mettre à jour les boutons de sous-navigation
     const boutons = document.querySelectorAll('.sous-navigation button');
-    console.log('   Nombre de boutons trouvés:', boutons.length);
 
     let boutonTrouve = false;
     boutons.forEach(btn => {
         const dataSousOnglet = btn.getAttribute('data-sous-onglet');
-        console.log('   Bouton data-sous-onglet:', dataSousOnglet);
 
         if (dataSousOnglet === idSousSection) {
             btn.classList.add('actif');
             boutonTrouve = true;
-            console.log('   ✅ Bouton activé');
         } else {
             btn.classList.remove('actif');
         }
@@ -400,14 +394,12 @@ function afficherSousSection(idSousSection) {
             break;
 
         case 'presences-apercu':
-            console.log('🔄 Rafraîchissement de l\'aperçu des présences...');
             if (typeof chargerApercuPresences === 'function') {
                 chargerApercuPresences();
             }
             break;
 
         case 'presences-calendrier':
-            console.log('🔄 Rafraîchissement de la vue calendaire...');
             if (typeof afficherCalendrierScolaire === 'function') {
                 afficherCalendrierScolaire();
             }
@@ -415,54 +407,44 @@ function afficherSousSection(idSousSection) {
 
         // ✨ REFONTE (2 jan 2026) : "materiel" → "construction"
         case 'construction-productions':
-            console.log('🔄 Rafraîchissement du module Productions...');
             if (typeof initialiserModuleProductions === 'function') {
                 initialiserModuleProductions();
             }
             break;
 
         case 'construction-grille-criteres':
-            console.log('🔄 Rafraîchissement du module Grilles...');
             if (typeof initialiserModuleGrilles === 'function') {
                 setTimeout(async () => {
                     await initialiserModuleGrilles();
-                    console.log('   ✅ Module Grilles initialisé');
                 }, 100);
             }
             break;
 
         case 'construction-echelle-performance':
-            console.log('🔄 Rafraîchissement du module Échelles...');
             if (typeof initialiserModuleEchelles === 'function') {
                 setTimeout(async () => {
                     await initialiserModuleEchelles();
-                    console.log('   ✅ Module Échelles initialisé');
                 }, 100);
             }
             break;
 
         case 'construction-pratiques-notation':
-            console.log('🔄 Rafraîchissement du module Pratiques (Construction)...');
             if (typeof initialiserModulePratiquesMateriel === 'function') {
                 setTimeout(async () => {
                     await initialiserModulePratiquesMateriel();
-                    console.log('   ✅ Module Pratiques (Construction) initialisé');
                 }, 100);
             }
             break;
 
         case 'construction-retroactions':
-            console.log('🔄 Rafraîchissement du module Cartouches...');
             if (typeof initialiserModuleCartouches === 'function') {
                 setTimeout(async () => {
                     await initialiserModuleCartouches();
-                    console.log('   ✅ Module Cartouches initialisé');
                 }, 100);
             }
             break;
 
         case 'reglages-trimestre':
-            console.log('🔄 Rafraîchissement du module Trimestre...');
             if (typeof initialiserModuleTrimestre === 'function') {
                 initialiserModuleTrimestre();
             }
@@ -470,7 +452,6 @@ function afficherSousSection(idSousSection) {
 
         // ✨ NOUVEAUX ONGLETS RÉGLAGES (Beta 95)
         case 'reglages-trimestres':
-            console.log('🔄 Chargement de Mes trimestres...');
             if (typeof chargerVueTrimestres === 'function') {
                 setTimeout(chargerVueTrimestres, 100);
             }
@@ -479,7 +460,6 @@ function afficherSousSection(idSousSection) {
         // NOTE: reglages-cours-actif supprimé (Beta 95), consolidé dans reglages-trimestre
 
         case 'reglages-preferences':
-            console.log('🔄 Chargement des Préférences...');
             if (typeof initialiserPreferencesV2 === 'function') {
                 setTimeout(initialiserPreferencesV2, 100);
             }
@@ -489,14 +469,12 @@ function afficherSousSection(idSousSection) {
             break;
 
         case 'reglages-depistage':
-            console.log('🔄 Chargement du Dépistage...');
             if (typeof initialiserPreferencesV2 === 'function') {
                 setTimeout(initialiserPreferencesV2, 100);
             }
             break;
 
         case 'reglages-donnees':
-            console.log('🔄 Chargement de Données...');
             if (typeof chargerVueDonnees === 'function') {
                 setTimeout(chargerVueDonnees, 100);
             }
@@ -508,19 +486,14 @@ function afficherSousSection(idSousSection) {
         // Fonctionnalité migrée vers Construction > Pratiques de notation
 
         case 'evaluations-apercu':
-            console.log('🔄 Rafraîchissement de l\'aperçu des évaluations...');
             if (typeof chargerApercuEvaluations === 'function') {
                 chargerApercuEvaluations();
             }
             break;
 
         case 'evaluations-liste':
-            console.log('🔄 Rafraîchissement de la liste des évaluations...');
-            console.log('   Type de initialiserListeEvaluations:', typeof initialiserListeEvaluations);
             if (typeof initialiserListeEvaluations === 'function') {
-                console.log('   ✅ Fonction trouvée, appel dans 100ms...');
                 setTimeout(() => {
-                    console.log('   🎯 Appel de initialiserListeEvaluations()');
                     initialiserListeEvaluations();
                 }, 100);
             } else {
@@ -535,14 +508,12 @@ function afficherSousSection(idSousSection) {
             break;
 
         case 'construction-apercu':
-            console.log('🔄 Rafraîchissement de l\'aperçu Construction de la note...');
             if (typeof chargerMaterielConfigure === 'function') {
                 chargerMaterielConfigure();
             }
             break;
 
         case 'reglages-snapshots':
-            console.log('🔄 Affichage du statut des snapshots...');
             if (typeof afficherStatutSnapshots === 'function') {
                 setTimeout(afficherStatutSnapshots, 100);
             }
@@ -550,7 +521,6 @@ function afficherSousSection(idSousSection) {
 
         // Module Planification (Carte mentale)
         case 'planification-carte':
-            console.log('🔄 Initialisation du module Planification...');
             if (typeof initialiserModulePlanification === 'function') {
                 setTimeout(initialiserModulePlanification, 100);
             }
@@ -558,7 +528,6 @@ function afficherSousSection(idSousSection) {
 
         // Module Organisateur (sous-onglet Planification)
         case 'planification-organisateur':
-            console.log('🔄 Initialisation du module Organisateur...');
             if (typeof initialiserModuleOrganisateur === 'function') {
                 setTimeout(initialiserModuleOrganisateur, 100);
             }
@@ -566,7 +535,6 @@ function afficherSousSection(idSousSection) {
 
         // 🆕 BETA 96.1 : Boîte à outils
         case 'boite-outils-tirage':
-            console.log('🔄 Initialisation de la boîte à outils...');
             if (typeof initialiserTirage === 'function') {
                 setTimeout(initialiserTirage, 100);
             }
@@ -576,7 +544,6 @@ function afficherSousSection(idSousSection) {
             break;
 
         case 'boite-outils-modelisation':
-            console.log('🔄 Initialisation de la Modelisation...');
             if (typeof initialiserModelisation === 'function') {
                 setTimeout(initialiserModelisation, 100);
             }
@@ -584,7 +551,6 @@ function afficherSousSection(idSousSection) {
 
         // Onglet Importer et préparer
         case 'evaluations-importer':
-            console.log('🔄 Initialisation du module Travaux (Import)...');
             if (typeof initialiserModuleTravaux === 'function') {
                 setTimeout(() => {
                     initialiserModuleTravaux();
@@ -597,7 +563,6 @@ function afficherSousSection(idSousSection) {
 
         // Onglet Annoter et évaluer
         case 'evaluations-annoter':
-            console.log('🔄 Initialisation du module Travaux (Annoter)...');
             if (typeof initialiserModuleTravaux === 'function') {
                 setTimeout(() => {
                     initialiserModuleTravaux();
@@ -607,7 +572,6 @@ function afficherSousSection(idSousSection) {
 
         // Onglet Exporter et archiver
         case 'evaluations-exporter':
-            console.log('🔄 Initialisation du module Travaux (Exporter)...');
             if (typeof initialiserModuleTravaux === 'function') {
                 setTimeout(() => {
                     initialiserModuleTravaux();
@@ -621,7 +585,6 @@ function afficherSousSection(idSousSection) {
 
         // Recharger le tableau de bord selon la sous-section
     if (idSousSection === 'tableau-bord-apercu') {
-        console.log('🔄 Rechargement automatique de l\'aperçu...');
         if (typeof chargerTableauBordApercu === 'function') {
             setTimeout(() => chargerTableauBordApercu(), 150);
         }

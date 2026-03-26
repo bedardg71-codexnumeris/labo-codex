@@ -45,14 +45,12 @@ let modeActuel = db.getSync('modeApplication', MODES.NORMAL);
  * Initialise le système de modes
  */
 function initialiserSystemeModes() {
-    console.log('🎭 Initialisation du système de modes...');
 
     // Récupérer le mode sauvegardé
     modeActuel = db.getSync('modeApplication', MODES.NORMAL);
 
     // [Chantier 2] Migration : si mode 'simulation' en stockage, migrer vers 'normal'
     if (modeActuel === 'simulation') {
-        console.log('🔄 Migration mode simulation → normal');
         modeActuel = MODES.NORMAL;
         db.setSync('modeApplication', MODES.NORMAL);
     }
@@ -88,7 +86,6 @@ function initialiserSystemeModes() {
         if (radioSombre) radioSombre.checked = false;
     }
 
-    console.log(`✅ Mode actif: ${THEMES[modeActuel]?.nom || modeActuel}`);
 }
 
 // ============================================
@@ -156,7 +153,6 @@ function creerSelecteurMode() {
 async function changerMode(nouveauMode) {
     if (nouveauMode === modeActuel) return;
 
-    console.log(`🔄 Changement de mode: ${modeActuel} → ${nouveauMode}`);
 
     // Sauvegarder le nouveau mode
     modeActuel = nouveauMode;
@@ -175,7 +171,6 @@ async function changerMode(nouveauMode) {
     // SANS recharger toute la page
     rafraichirContenuSelonMode();
 
-    console.log(`✅ Mode changé: ${THEMES[nouveauMode].nom}`);
 }
 
 /**
@@ -183,7 +178,6 @@ async function changerMode(nouveauMode) {
  * SANS recharger toute la page
  */
 function rafraichirContenuSelonMode() {
-    console.log('🔄 Rafraîchissement du contenu selon le nouveau mode...');
 
     // Sauvegarder la sous-section active
     const sousSectionSauvegardee = sousSectionActive;
@@ -211,7 +205,6 @@ function rafraichirContenuSelonMode() {
         const fonctionAAppeler = mappingModules[sousSectionSauvegardee];
 
         if (fonctionAAppeler && typeof window[fonctionAAppeler] === 'function') {
-            console.log(`   → Rafraîchissement: ${fonctionAAppeler}()`);
 
             // SPÉCIAL : Pour afficherProfilComplet
             if (fonctionAAppeler === 'afficherProfilComplet' && window.profilActuelDA) {
@@ -231,7 +224,6 @@ function rafraichirContenuSelonMode() {
 
                 if (etudiantExiste) {
                     // L'étudiant existe dans le nouveau mode, afficher son profil
-                    console.log(`   ✅ Même étudiant (DA: ${window.profilActuelDA})`);
                     window[fonctionAAppeler](window.profilActuelDA);
                 } else {
                     // L'étudiant n'existe pas : afficher l'étudiant à la même position dans la nouvelle liste
@@ -240,18 +232,15 @@ function rafraichirContenuSelonMode() {
                     if (indexAvant >= 0 && indexAvant < etudiantsTries.length) {
                         // Afficher l'étudiant à la même position
                         daAAfficher = etudiantsTries[indexAvant].da;
-                        console.log(`   ↔️ DA inexistant, position ${indexAvant + 1}/${etudiantsTries.length} → DA: ${daAAfficher}`);
                     } else {
                         // Position invalide : afficher le premier étudiant
                         daAAfficher = etudiantsTries[0]?.da;
-                        console.log(`   ↔️ DA inexistant, affichage du premier étudiant → DA: ${daAAfficher}`);
                     }
 
                     if (daAAfficher) {
                         window[fonctionAAppeler](daAAfficher);
                     } else {
                         // Aucun étudiant disponible, retourner à la liste
-                        console.log(`   ⚠️ Aucun étudiant disponible, retour à la liste`);
                         if (typeof afficherSousSection === 'function') {
                             afficherSousSection('tableau-bord-apercu');
                         }
@@ -268,7 +257,6 @@ function rafraichirContenuSelonMode() {
         }
     }
 
-    console.log('✅ Contenu rafraîchi');
 }
 
 /**
@@ -593,7 +581,6 @@ function obtenirDonneesSelonMode(cle) {
             });
             if (donnees.length !== totalAvant) {
                 const modeLabel = estModeCours ? 'tous groupes' : `groupe ${coursActif.groupe}`;
-                console.log(`📋 [coursId] Filtré ${cleBase}: ${donnees.length}/${totalAvant} pour cours ${coursActif.id} (${modeLabel})`);
             }
         }
     }
@@ -629,7 +616,6 @@ function sauvegarderDonneesSelonMode(cle, donnees) {
         // Utiliser window.cle() pour le namespacing par trimestre (paramètre cle shadowed)
         const cleEffective = window.cle(cle);
         db.setSync(cleEffective, donnees);
-        console.log(`[${mode}] Sauvegarde dans ${cleEffective}`);
         return true;
     } catch (error) {
         // Détecter erreur de quota dépassé
@@ -661,7 +647,6 @@ function obtenirOptionAffichageDA() {
  */
 function definirOptionAffichageDA(afficherDAReel) {
     db.setSync('anonymisation_afficher_da_reel', afficherDAReel);
-    console.log(`📝 Option DA anonymisation: ${afficherDAReel ? 'DA réel' : 'DA fictif (ANONYME)'}`);
 
     // Rafraîchir l'affichage si on est en mode anonymisation
     if (modeActuel === MODES.ANONYMISATION && typeof rafraichirContenuSelonMode === 'function') {
@@ -707,7 +692,6 @@ function anonymiserGroupe(groupe) {
         });
 
         db.setSync('mapping_groupes_anonymes', mappingGroupes);
-        console.log('🎭 Mapping groupes anonymes créé:', mappingGroupes);
     }
 
     return mappingGroupes[groupe] || `Gr. ?`;
@@ -720,16 +704,13 @@ function anonymiserGroupe(groupe) {
  * @returns {Array|Object} - Données anonymisées
  */
 function anonymiserDonnees(cle, donnees) {
-    console.log(`🎭 [anonymiserDonnees] Appelé pour clé: "${cle}", type:`, Array.isArray(donnees) ? 'tableau' : typeof donnees);
 
     if (!Array.isArray(donnees)) {
-        console.log(`🎭 [anonymiserDonnees] Pas un tableau, retour sans modification`);
         return donnees; // Si ce n'est pas un tableau, retourner tel quel
     }
 
     const mapping = genererMappingAnonyme();
     const afficherDAReel = obtenirOptionAffichageDA();
-    console.log(`🎭 [anonymiserDonnees] Mapping généré:`, Object.keys(mapping).length, 'étudiants, afficherDAReel:', afficherDAReel);
 
     // Anonymiser selon le type de clé
     switch (cle) {
@@ -1005,7 +986,6 @@ function obtenirEtudiantsCoursActif() {
 
     // Si aucun cours actif, retourner tableau vide
     if (!coursActif || !coursActif.id) {
-        console.log('[Modes] Aucun cours actif - liste étudiants vide');
         return [];
     }
 
@@ -1016,12 +996,6 @@ function obtenirEtudiantsCoursActif() {
     const estModeCours = coursActif._modeCours || coursActif.groupe === null;
 
     // DEBUG (11 jan 2026)
-    console.log('[Modes] DEBUG infoCours:', {
-        id: coursActif.id,
-        groupe: coursActif.groupe,
-        _modeCours: coursActif._modeCours,
-        estModeCours
-    });
 
     // Filtrer par coursId (et optionnellement par groupe)
     const etudiantsFiltres = tousEtudiants.filter(e => {
@@ -1063,11 +1037,9 @@ function obtenirEtudiantsCoursActif() {
     });
 
     const modeLabel = estModeCours ? 'tous groupes' : `groupe ${coursActif.groupe}`;
-    console.log(`[Modes] Étudiants cours actif (${coursActif.id}, ${modeLabel}): ${etudiantsFiltres.length}/${tousEtudiants.length}`);
 
     // DEBUG (11 jan 2026) : Afficher les groupes distincts des étudiants
     const groupesDistincts = [...new Set(tousEtudiants.map(e => e.groupe))];
-    console.log('[Modes] DEBUG groupes étudiants:', groupesDistincts);
 
     // Appliquer le filtrage par mode (exclure groupe 9999 en mode normal)
     return filtrerEtudiantsParMode(etudiantsFiltres);
@@ -1108,14 +1080,12 @@ function obtenirPratiqueActiveGroupeCours() {
     // 1. Essayer depuis groupeCoursActif (source principale)
     const gcActif = db.getSync('groupeCoursActif', null);
     if (gcActif && gcActif.pratiqueId) {
-        console.log('[Modes] Pratique active depuis groupeCoursActif:', gcActif.pratiqueId);
         return gcActif.pratiqueId;
     }
 
     // 2. Essayer depuis infoCours (rétrocompatibilité)
     const infoCours = db.getSync('infoCours', null);
     if (infoCours && infoCours.pratiqueId) {
-        console.log('[Modes] Pratique active depuis infoCours:', infoCours.pratiqueId);
         return infoCours.pratiqueId;
     }
 
@@ -1125,7 +1095,6 @@ function obtenirPratiqueActiveGroupeCours() {
         const groupesCours = db.getSync(cleGC, []);
         const gc = groupesCours.find(g => g.id === gcActif.id);
         if (gc && gc.pratiqueId) {
-            console.log('[Modes] Pratique active depuis groupesCours:', gc.pratiqueId);
             return gc.pratiqueId;
         }
     }
@@ -1133,7 +1102,6 @@ function obtenirPratiqueActiveGroupeCours() {
     // 4. Fallback : lire depuis modalitesEvaluation (ancienne méthode)
     const modalites = db.getSync('modalitesEvaluation', {});
     if (modalites.pratiqueNotation) {
-        console.log('[Modes] Pratique active depuis modalitesEvaluation:', modalites.pratiqueNotation);
         return modalites.pratiqueNotation;
     }
 
@@ -1155,17 +1123,14 @@ window.obtenirPratiqueActiveGroupeCours = obtenirPratiqueActiveGroupeCours;
  * Initialisation immédiate du système de modes
  * S'exécute dès que modes.js est chargé (AVANT tous les autres modules)
  */
-console.log('🎭 Chargement de modes.js VERSION 2025-11-17 08:42...');
 
 // Attendre que le DOM soit prêt
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        console.log('🎭 DOM prêt, initialisation du système de modes...');
         initialiserSystemeModes();
     });
 } else {
     // DOM déjà prêt
-    console.log('🎭 DOM déjà prêt, initialisation immédiate du système de modes...');
     initialiserSystemeModes();
 }
 

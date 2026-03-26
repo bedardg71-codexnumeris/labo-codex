@@ -168,7 +168,6 @@ class PratiqueTest {
 
     try {
         window.enregistrerPratique('test', instance);
-        console.log('✅ [PratiqueTest] Pratique de test enregistrée avec succès');
     } catch (error) {
         console.error('[PratiqueTest] Erreur lors de l\'enregistrement:', error);
     }
@@ -185,69 +184,36 @@ class PratiqueTest {
  * testerPratiqueTest()
  */
 function testerPratiqueTest() {
-    console.log('=== DÉBUT DES TESTS DE LA PRATIQUE TEST ===\n');
 
     const pratique = new PratiqueTest();
     const daTest = '1234567';
     const daInvalide = '123'; // Trop court
 
     // Test 1: Méthodes d'identité
-    console.log('Test 1: Méthodes d\'identité');
-    console.log('  Nom:', pratique.obtenirNom());
-    console.log('  ID:', pratique.obtenirId());
-    console.log('  Description:', pratique.obtenirDescription());
-    console.log('  ✅ Méthodes d\'identité OK\n');
 
     // Test 2: Calculs avec DA valide
-    console.log('Test 2: Calculs avec DA valide');
     const p = pratique.calculerPerformance(daTest);
     const c = pratique.calculerCompletion(daTest);
-    console.log('  Performance:', p, '(attendu: 0.75)');
-    console.log('  Complétion:', c, '(attendu: 0.80)');
-    console.log(p === 0.75 && c === 0.80 ? '  ✅ Calculs OK\n' : '  ❌ Calculs incorrects\n');
 
     // Test 3: Calculs avec DA invalide
-    console.log('Test 3: Calculs avec DA invalide');
     const pInvalide = pratique.calculerPerformance(daInvalide);
     const cInvalide = pratique.calculerCompletion(daInvalide);
-    console.log('  Performance:', pInvalide, '(attendu: null)');
-    console.log('  Complétion:', cInvalide, '(attendu: null)');
-    console.log(pInvalide === null && cInvalide === null ? '  ✅ Gestion erreurs OK\n' : '  ❌ Gestion erreurs incorrecte\n');
 
     // Test 4: Détection défis
-    console.log('Test 4: Détection défis');
     const defis = pratique.detecterDefis(daTest);
-    console.log('  Type:', defis.type);
-    console.log('  Nombre de défis:', defis.defis.length, '(attendu: 2)');
-    console.log('  Nombre de forces:', defis.forces.length, '(attendu: 1)');
-    console.log(defis.type === 'test' && defis.defis.length === 2 ? '  ✅ Défis OK\n' : '  ❌ Défis incorrects\n');
 
     // Test 5: Identification pattern
-    console.log('Test 5: Identification pattern');
     const pattern = pratique.identifierPattern(daTest);
-    console.log('  Type:', pattern.type);
-    console.log('  Description:', pattern.description);
-    console.log('  Indices:', pattern.indices);
-    console.log(pattern.type === 'stable' ? '  ✅ Pattern OK\n' : '  ❌ Pattern incorrect\n');
 
     // Test 6: Génération cible RàI
-    console.log('Test 6: Génération cible RàI');
     const cible = pratique.genererCibleIntervention(daTest);
-    console.log('  Type:', cible.type);
-    console.log('  Nombre de stratégies:', cible.strategies.length, '(attendu: 3)');
-    console.log('  Nombre de ressources:', cible.ressources.length, '(attendu: 2)');
-    console.log(cible.type === 'test' && cible.strategies.length === 3 ? '  ✅ Cible RàI OK\n' : '  ❌ Cible RàI incorrecte\n');
 
-    console.log('=== FIN DES TESTS ===');
-    console.log('Tous les tests sont passés avec succès ! ✅');
 }
 
 // Exporter pour utilisation dans la console
 window.testerPratiqueTest = testerPratiqueTest;
 window.PratiqueTest = PratiqueTest;
 
-console.log('✅ Module pratique-test.js chargé');
-console.log('💡 Pour tester, exécutez : testerPratiqueTest()');
 
 
 })();

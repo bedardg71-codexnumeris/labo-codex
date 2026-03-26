@@ -44,11 +44,9 @@ function obtenirConfigurationNotation() {
 }
 
 function initialiserModuleSaisiePresences() {
-    console.log('⚡ Initialisation du module Saisie des Présences');
 
     const sectionSaisie = document.getElementById('presences-saisie');
     if (!sectionSaisie) {
-        console.log('⚠️ Section saisie non active, initialisation reportée');
         return;
     }
 
@@ -92,7 +90,6 @@ function initialiserModuleSaisiePresences() {
         initialiserSaisiePresences();
         calculerEtSauvegarderIndicesAssiduite();
 
-        console.log('✅ Module Saisie des Présences initialisé');
     }
 }
 
@@ -107,7 +104,6 @@ function initialiserModuleSaisiePresences() {
 function chargerGroupesPresences() {
     const selectGroupe = document.getElementById('selectGroupePresences');
     if (!selectGroupe) {
-        console.log('⚠️ Element selectGroupePresences non trouvé');
         return;
     }
 
@@ -143,7 +139,6 @@ function chargerGroupesPresences() {
         selectGroupe.classList.remove('u-hide');
     }
 
-    console.log(`✅ ${groupes.length} groupes chargés (groupe-cours actif: ${etudiants.length} étudiants)`);
     calculerEtSauvegarderIndicesAssiduite();
 }
 
@@ -226,10 +221,8 @@ function obtenirToutesDatesCours() {
         });
 
         datesAvecSeances.sort();
-        console.log(`✅ ${datesAvecSeances.length} dates avec séances trouvées`);
 
         if (datesAvecSeances.length > 0) {
-            console.log('Exemples:', datesAvecSeances.slice(0, 5));
             return datesAvecSeances;
         }
     }
@@ -261,7 +254,6 @@ function obtenirToutesDatesCours() {
         }
     });
 
-    console.log('Jours configurés dans l\'horaire:', Array.from(joursAvecSeances));
 
     // Filtrer pour ne garder que les jours qui correspondent à l'horaire
     const datesCours = [];
@@ -282,7 +274,6 @@ function obtenirToutesDatesCours() {
     });
 
     datesCours.sort();
-    console.log(`✅ ${datesCours.length} dates de cours filtrées (jours avec séances)`);
 
     return datesCours;
 }
@@ -307,7 +298,6 @@ function obtenirHeuresSeance(dateStr) {
         seances = seancesCompletes[dateStr] || [];
     }
 
-    console.log(`📚 Séances pour ${dateStr}:`, seances);
 
     if (!seances || seances.length === 0) {
         // Pour les jours de cours sans séances définies, utiliser valeur par défaut
@@ -315,7 +305,6 @@ function obtenirHeuresSeance(dateStr) {
         if (infoJour && (infoJour.statut === 'cours' || infoJour.statut === 'reprise')) {
             const formatHoraire = db.getSync('formatHoraire', null);
             const heuresDefaut = formatHoraire === '1x4' ? 4 : 2;
-            console.log(`⚠️ Pas de séances définies pour ce jour de cours, utilisation de ${heuresDefaut}h par défaut`);
             return heuresDefaut;
         }
         return 0;
@@ -506,7 +495,6 @@ function validerDateSaisie(dateStr) {
                 const jourSemaine = joursNoms[new Date(dateStr + 'T00:00:00').getDay()];
                 const aCoursAujourdhui = seancesHoraire.some(s => s.jour && s.jour.toLowerCase() === jourSemaine);
                 if (aCoursAujourdhui) {
-                    console.log(`✅ [validerDateSaisie] ${dateStr} (${jourSemaine}) : jour-ouvrable dans le calendrier mais cours confirmé par l'horaire du cours actif`);
                     // Continuer la validation normalement
                 } else {
                     return { valide: false, raison: 'pas-cours', verrouille: false };
@@ -561,12 +549,10 @@ function basculerVerrouillageDate(dateStr) {
     if (index > -1) {
         // Déverrouillage
         datesVerrouillees.splice(index, 1);
-        console.log('🔓 Date déverrouillée:', dateStr);
     } else {
         // 🆕 FIX (3 fév 2026) : Sauvegarder les présences AVANT de verrouiller
         sauvegarderPresencesSansValidation(dateStr);
         datesVerrouillees.push(dateStr);
-        console.log('🔒 Date verrouillée:', dateStr);
     }
 
     db.setSync('datesVerrouillees', datesVerrouillees);
@@ -619,7 +605,6 @@ window.basculerVerrouillageDateActive = basculerVerrouillageDateActive;
  * Utilisé lors du verrouillage pour ne pas perdre les données saisies
  */
 function sauvegarderPresencesSansValidation(dateStr) {
-    console.log('💾 Sauvegarde des présences avant verrouillage pour:', dateStr);
 
     // Obtenir les étudiants du cours actif
     const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
@@ -693,7 +678,6 @@ function sauvegarderPresencesSansValidation(dateStr) {
 
     // Sauvegarder
     db.setSync(clePresences, presences);
-    console.log(`✅ ${compteur} présences sauvegardées pour ${dateStr}`);
 }
 
 /**
@@ -1358,14 +1342,12 @@ function enregistrerPresences() {
 
     setTimeout(() => message.remove(), 3000);
 
-    console.log(`✅ Présences enregistrées pour le ${dateStr}`);
     calculerEtSauvegarderIndicesAssiduite();
 
     // ========== NOUVEAU : Recharger le tableau de bord ==========
     // Si le tableau de bord est visible, le rafraîchir
     const sectionTableauBord = document.getElementById('tableau-bord');
     if (sectionTableauBord && sectionTableauBord.classList.contains('active')) {
-        console.log('🔄 Rafraîchissement du tableau de bord après saisie...');
 
         // Recharger l'aperçu si c'est la sous-section active
         const apercu = document.getElementById('tableau-bord-apercu');
@@ -1376,7 +1358,6 @@ function enregistrerPresences() {
         }
     }
 
-    console.log(`✅ Présences enregistrées pour le ${dateStr}`);
 }
 
 /* ===============================
@@ -1436,7 +1417,6 @@ function tousPresents() {
 
             if (estAbsenceMotivee) {
                 // Ne pas toucher aux absences motivées RàI
-                console.log(`   ⚪ ${da}: Absence motivée RàI préservée (0 période)`);
                 nbAbsencesMotiveesPreservees++;
             } else {
                 // Mettre présent (toutes les périodes)
@@ -1453,9 +1433,7 @@ function tousPresents() {
         }
     });
 
-    console.log(`✅ ${nbMisPresents} étudiant(s) mis présents (${nombrePeriodesSeance} périodes)`);
     if (nbAbsencesMotiveesPreservees > 0) {
-        console.log(`   ⚪ ${nbAbsencesMotiveesPreservees} absence(s) motivée(s) RàI préservée(s)`);
     }
 }
 
@@ -1488,7 +1466,6 @@ function reinitialiserSaisie() {
         }
     });
 
-    console.log('✅ Saisie réinitialisée');
 }
 
 /* ===============================
@@ -1529,26 +1506,21 @@ function trouverCoursPrecedent(dateActuelle) {
  * Navigate vers le cours suivant
  */
 function allerCoursSuivant() {
-    console.log('🔵 Navigation vers le cours suivant');
 
     const dateInput = document.getElementById('date-cours');
     if (!dateInput || !dateInput.value) {
-        console.log('❌ Aucune date sélectionnée');
         return;
     }
 
     const dateActuelle = dateInput.value;
     const datesCours = obtenirToutesDatesCours();
 
-    console.log(`Date actuelle: ${dateActuelle}`);
-    console.log(`📚 Nombre total de dates de cours: ${datesCours.length}`);
 
     // Trouver le prochain cours après la date actuelle
     let coursSuivant = null;
     for (let i = 0; i < datesCours.length; i++) {
         if (datesCours[i] > dateActuelle) {
             coursSuivant = datesCours[i];
-            console.log(`✅ Prochain cours trouvé: ${coursSuivant}`);
             break;
         }
     }
@@ -1558,7 +1530,6 @@ function allerCoursSuivant() {
         initialiserSaisiePresences();
         mettreAJourBoutonsNavigation();
     } else {
-        console.log('⚠️ Aucun cours suivant disponible');
     }
 }
 
@@ -1566,26 +1537,21 @@ function allerCoursSuivant() {
  * Navigate vers le cours précédent
  */
 function allerCoursPrecedent() {
-    console.log('🔵 Navigation vers le cours précédent');
 
     const dateInput = document.getElementById('date-cours');
     if (!dateInput || !dateInput.value) {
-        console.log('❌ Aucune date sélectionnée');
         return;
     }
 
     const dateActuelle = dateInput.value;
     const datesCours = obtenirToutesDatesCours();
 
-    console.log(`Date actuelle: ${dateActuelle}`);
-    console.log(`📚 Nombre total de dates de cours: ${datesCours.length}`);
 
     // Trouver le cours précédent avant la date actuelle
     let coursPrecedent = null;
     for (let i = datesCours.length - 1; i >= 0; i--) {
         if (datesCours[i] < dateActuelle) {
             coursPrecedent = datesCours[i];
-            console.log(`✅ Cours précédent trouvé: ${coursPrecedent}`);
             break;
         }
     }
@@ -1595,7 +1561,6 @@ function allerCoursPrecedent() {
         initialiserSaisiePresences();
         mettreAJourBoutonsNavigation();
     } else {
-        console.log('⚠️ Aucun cours précédent disponible');
     }
 }
 
@@ -1605,7 +1570,6 @@ function allerCoursPrecedent() {
 function mettreAJourBoutonsNavigation() {
     const dateInput = document.getElementById('date-cours');
     if (!dateInput || !dateInput.value) {
-        console.log('⚠️ Pas de date pour la navigation');
         return;
     }
 
@@ -1619,14 +1583,12 @@ function mettreAJourBoutonsNavigation() {
         btnPrecedent.disabled = !coursPrecedent;
         btnPrecedent.style.opacity = coursPrecedent ? '1' : '0.5';
         btnPrecedent.style.cursor = coursPrecedent ? 'pointer' : 'not-allowed';
-        console.log('Bouton précédent:', coursPrecedent ? 'actif' : 'inactif');
     }
 
     if (btnSuivant) {
         btnSuivant.disabled = !coursSuivant;
         btnSuivant.style.opacity = coursSuivant ? '1' : '0.5';
         btnSuivant.style.cursor = coursSuivant ? 'pointer' : 'not-allowed';
-        console.log('Bouton suivant:', coursSuivant ? 'actif' : 'inactif');
     }
 }
 
@@ -1640,7 +1602,6 @@ function mettreAJourBoutonsNavigation() {
  * Ouvre la saisie de présence depuis le calendrier
  */
 function ouvrirSaisiePresence(date) {
-    console.log('Ouverture saisie depuis calendrier pour:', date);
 
     // Naviguer vers la section présences
     if (typeof sectionActive !== 'undefined' && sectionActive !== 'presences') {
@@ -1704,7 +1665,6 @@ function obtenirDerniereDataSaisie(da = null) {
 
     return dates[dates.length - 1];
 }
-
 
 
 /* ===============================
@@ -1919,7 +1879,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (sectionSaisie.classList.contains('active')) {
                     const dateInput = document.getElementById('date-cours');
                     if (dateInput && dateInput.value) {
-                        console.log('🔄 Rechargement automatique du tableau de présences');
                         initialiserSaisiePresences();
                     }
                 }
@@ -1933,9 +1892,7 @@ document.addEventListener('DOMContentLoaded', function() {
         attributeFilter: ['class']
     });
 
-    console.log('✅ Observer de rechargement automatique activé pour presences-saisie');
 });
 
-console.log('✅ Module saisie-presences.js chargé (version refondée complète)');
 
 })();

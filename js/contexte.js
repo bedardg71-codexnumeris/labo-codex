@@ -36,7 +36,6 @@ function mettreAJourContexteEntete() {
 
             if (groupesCours.length > 0) {
                 utilisationGroupeCours = true;
-                console.log('[Contexte] Mode Beta 95.2 : groupe-cours trouvés:', groupesCours.length);
 
                 // Hydrater les groupe-cours avec les entités
                 const cours = db.getSync('cours', []);
@@ -82,10 +81,8 @@ function mettreAJourContexteEntete() {
             const infoCours = db.getSync('infoCours', null);
             coursActif = infoCours ? groupesCours.find(gc => gc.id === infoCours.id) : groupesCours.find(gc => gc.actif) || groupesCours[0];
 
-            console.log('[Contexte] Mode legacy : cours trouvés:', groupesCours.length);
         }
 
-        console.log('[Contexte] Groupe-cours/Cours actif:', coursActif);
 
         // Obtenir la pratique du cours actif
         let pratiqueName = '';
@@ -220,7 +217,6 @@ function mettreAJourContexteEntete() {
 function changerCoursDepuisEntete(id, estGroupeCours) {
     if (!id) return;
 
-    console.log('[Contexte] Changement vers:', id, estGroupeCours ? '(groupe-cours)' : '(legacy)');
 
     if (estGroupeCours) {
         // 🆕 BETA 95.2 : Mode groupe-cours
@@ -257,7 +253,6 @@ function changerCoursDepuisEntete(id, estGroupeCours) {
         // Synchroniser vers infoCours pour compatibilité
         if (typeof GroupeCoursEntite !== 'undefined' && typeof GroupeCoursEntite.synchroniserInfoCours === 'function') {
             GroupeCoursEntite.synchroniserInfoCours(id).then(() => {
-                console.log('[Contexte] infoCours synchronisé depuis groupe-cours');
             }).catch(e => {
                 console.warn('[Contexte] Erreur sync infoCours:', e);
             });
@@ -283,7 +278,6 @@ function changerCoursDepuisEntete(id, estGroupeCours) {
             db.setSync('infoCours', infoCours);
         }
 
-        console.log('[Contexte] Groupe-cours activé:', gcSelectionne.id);
 
     } else {
         // Mode legacy (listeCours)
@@ -302,7 +296,6 @@ function changerCoursDepuisEntete(id, estGroupeCours) {
         listeCours.forEach(c => c.actif = (c.id === id));
         db.setSync('listeCours', listeCours);
 
-        console.log('[Contexte] Cours activé:', coursSelectionne.codeCours || coursSelectionne.sigle || coursSelectionne.code);
     }
 
     // Mettre à jour l'en-tête (pratique peut changer)
@@ -318,13 +311,11 @@ function changerCoursDepuisEntete(id, estGroupeCours) {
  * ✅ BETA 95.2 : Rafraîchit aussi la liste groupe-cours
  */
 function rafraichirVuesApresCours() {
-    console.log('[Contexte] Rafraîchissement des vues après changement de cours...');
 
     // 🆕 BETA 95.2 : Rafraîchir la liste des groupe-cours dans l'UI
     if (typeof chargerListeGroupeCoursV2 === 'function') {
         try {
             chargerListeGroupeCoursV2();
-            console.log('   ✅ Liste groupe-cours rafraîchie');
         } catch (e) {
             console.warn('   ⚠️ Erreur rafraîchissement liste groupe-cours:', e);
         }
@@ -334,7 +325,6 @@ function rafraichirVuesApresCours() {
     if (typeof chargerTableauBordApercu === 'function') {
         try {
             chargerTableauBordApercu();
-            console.log('   ✅ Tableau de bord rafraîchi');
         } catch (e) {
             console.warn('   ⚠️ Erreur rafraîchissement tableau de bord:', e);
         }
@@ -344,7 +334,6 @@ function rafraichirVuesApresCours() {
     if (typeof rechargerListeEtudiants === 'function') {
         try {
             rechargerListeEtudiants();
-            console.log('   ✅ Liste étudiants rafraîchie');
         } catch (e) {
             console.warn('   ⚠️ Erreur rafraîchissement liste étudiants:', e);
         }
@@ -354,7 +343,6 @@ function rafraichirVuesApresCours() {
     if (typeof mettreAJourStatistiquesGroupes === 'function') {
         try {
             mettreAJourStatistiquesGroupes();
-            console.log('   ✅ Statistiques groupe rafraîchies');
         } catch (e) {
             console.warn('   ⚠️ Erreur rafraîchissement statistiques:', e);
         }
@@ -364,7 +352,6 @@ function rafraichirVuesApresCours() {
     if (typeof chargerDropdownCoursV2 === 'function') {
         try {
             chargerDropdownCoursV2();
-            console.log('   ✅ Dropdown V2 rafraîchi');
         } catch (e) {
             console.warn('   ⚠️ Erreur rafraîchissement dropdown V2:', e);
         }
@@ -375,7 +362,6 @@ function rafraichirVuesApresCours() {
     if (typeof chargerSeancesV2 === 'function') {
         try {
             chargerSeancesV2();
-            console.log('   ✅ Séances horaire V2 rafraîchies');
         } catch (e) {
             console.warn('   ⚠️ Erreur rafraîchissement séances V2:', e);
         }
@@ -384,7 +370,6 @@ function rafraichirVuesApresCours() {
     if (typeof afficherSeancesExistantes === 'function') {
         try {
             afficherSeancesExistantes();
-            console.log('   ✅ Séances horaire rafraîchies');
         } catch (e) {
             console.warn('   ⚠️ Erreur rafraîchissement séances horaire:', e);
         }
@@ -394,7 +379,6 @@ function rafraichirVuesApresCours() {
     if (typeof genererSeancesCompletes === 'function') {
         try {
             genererSeancesCompletes(null);
-            console.log('   ✅ Séances complètes régénérées');
         } catch (e) {
             console.warn('   ⚠️ Erreur régénération séances complètes:', e);
         }
@@ -404,7 +388,6 @@ function rafraichirVuesApresCours() {
     if (typeof afficherCalendrierScolaire === 'function') {
         try {
             afficherCalendrierScolaire();
-            console.log('   ✅ Vue calendrier rafraîchie');
         } catch (e) {
             console.warn('   ⚠️ Erreur rafraîchissement calendrier:', e);
         }
@@ -414,24 +397,19 @@ function rafraichirVuesApresCours() {
     if (typeof chargerCadreCalendrierV2 === 'function') {
         try {
             chargerCadreCalendrierV2();
-            console.log('   ✅ Cadre calendrier V2 rafraîchi');
         } catch (e) {
             console.warn('   ⚠️ Erreur rafraîchissement cadre calendrier V2:', e);
         }
     }
 
     // 🆕 BETA 96.1 : Rafraîchir le tirage au sort si actif
-    console.log('   🎲 Vérification tirage:', typeof window.initialiserTirage);
     if (typeof window.initialiserTirage === 'function') {
         try {
-            console.log('   🎲 Appel initialiserTirage()...');
             window.initialiserTirage();
-            console.log('   ✅ Tirage au sort rafraîchi');
         } catch (e) {
             console.warn('   ⚠️ Erreur rafraîchissement tirage:', e);
         }
     } else {
-        console.log('   ⚠️ initialiserTirage non disponible');
     }
 
     // Notification de succès
@@ -448,9 +426,7 @@ function rafraichirVuesApresCours() {
  * Appelé par main.js au chargement
  */
 function initialiserModuleContexte() {
-    console.log('🔄 Initialisation du module Contexte');
     mettreAJourContexteEntete();
-    console.log('   ✅ Module Contexte initialisé');
 }
 
 // Exporter les fonctions

@@ -94,25 +94,7 @@ function obtenirInterventionsEtudiant(da) {
  * @param {Array} interventions - Liste des interventions
  */
 function sauvegarderInterventions(interventions) {
-    console.log('💾 sauvegarderInterventions() - ÉCRITURE localStorage');
-    console.log('   Nombre d\'interventions à sauvegarder:', interventions.length);
-
-    // Afficher les DAs de chaque intervention pour debug
-    interventions.forEach((interv, index) => {
-        console.log(`   [${index}] ${interv.id}:`, {
-            titre: interv.titre,
-            nbEtudiants: interv.etudiants.length,
-            etudiants: interv.etudiants
-        });
-    });
-
     db.setSync(cle('interventions'), interventions);
-
-    // Vérifier immédiatement la lecture
-    const verification = db.getSync(cle('interventions'), null);
-    console.log('   ✅ Vérification lecture immédiate:');
-    console.log('   Nombre d\'interventions relues:', verification ? verification.length : 0);
-    console.log('💾 sauvegarderInterventions() - FIN');
 }
 
 /* ===============================
@@ -158,11 +140,6 @@ function creerIntervention(data) {
  * @param {Array} dasEtudiants - Liste des DAs des étudiants présents
  */
 function marquerPresences(interventionId, dasEtudiants) {
-    console.log('🔍 marquerPresences() - DÉBUT');
-    console.log('   interventionId:', interventionId);
-    console.log('   dasEtudiants reçus:', dasEtudiants);
-    console.log('   Nombre d\'étudiants:', dasEtudiants.length);
-
     const interventions = obtenirInterventions();
     const intervention = interventions.find(i => i.id === interventionId);
 
@@ -171,33 +148,22 @@ function marquerPresences(interventionId, dasEtudiants) {
         return;
     }
 
-    console.log('   État AVANT modification:', {
-        etudiantsAvant: intervention.etudiants,
-        nbAvant: intervention.etudiants.length
-    });
 
     intervention.etudiants = dasEtudiants;
     intervention.dateModification = Date.now();
 
-    console.log('   État APRÈS modification:', {
-        etudiantsApres: intervention.etudiants,
-        nbApres: intervention.etudiants.length
-    });
 
     // Générer l'analyse du sous-groupe
     if (dasEtudiants.length > 0) {
         intervention.analyse = analyserSousGroupe(dasEtudiants);
-        console.log('   ✅ Analyse générée pour', dasEtudiants.length, 'étudiant(s)');
     }
 
     // Changer le statut si c'était planifié
     if (intervention.statut === 'planifiee') {
         intervention.statut = 'en-cours';
-        console.log('   ✅ Statut changé: planifiee → en-cours');
     }
 
     sauvegarderInterventions(interventions);
-    console.log('🔍 marquerPresences() - FIN');
 }
 
 /**
@@ -367,7 +333,6 @@ function supprimerIntervention(interventionId) {
  * Afficher la liste des interventions
  */
 function afficherListeInterventions() {
-    console.log('📋 afficherListeInterventions() appelée');
 
     // S'assurer que le conteneur principal existe et contient le bon HTML
     const conteneurPrincipal = document.getElementById('conteneurPrincipal');
@@ -375,7 +340,6 @@ function afficherListeInterventions() {
         // Vérifier si #listeInterventions existe, sinon le recréer
         let container = document.getElementById('listeInterventions');
         if (!container) {
-            console.log('   ⚠️ #listeInterventions manquant, restauration...');
             conteneurPrincipal.innerHTML = '<div id="listeInterventions"></div>';
             container = document.getElementById('listeInterventions');
         }
@@ -388,8 +352,6 @@ function afficherListeInterventions() {
         console.error('❌ Conteneur #listeInterventions introuvable');
         return;
     }
-
-    console.log(`   ✅ Affichage de ${interventions.length} intervention(s)`);
 
     // Trier par date (plus récentes en premier)
     interventions.sort((a, b) => {
@@ -1063,12 +1025,6 @@ function ouvrirIntervention(interventionId) {
         ? obtenirEtudiantsCoursActif()
         : obtenirDonneesSelonMode('groupeEtudiants');
 
-    console.log('🔍 ouvrirIntervention() - RENDU CHECKBOXES');
-    console.log('   interventionId:', interventionId);
-    console.log('   intervention.etudiants:', intervention.etudiants);
-    console.log('   Nombre d\'étudiants présents:', intervention.etudiants.length);
-    console.log('   Nombre total d\'étudiants du groupe:', etudiants.length);
-
     // Trier alphabétiquement
     etudiants.sort((a, b) => {
         const nomA = (a.nom + ' ' + a.prenom).toLowerCase();
@@ -1083,7 +1039,6 @@ function ouvrirIntervention(interventionId) {
         const checked = intervention.etudiants.includes(etudiant.da) ? 'checked' : '';
         if (checked) {
             nbCheckboxesCochees++;
-            console.log(`   ✅ Checkbox cochée pour: ${etudiant.prenom} ${etudiant.nom} (${etudiant.da})`);
         }
         const indices = calculerTousLesIndices(etudiant.da);
         const cible = determinerCibleIntervention(etudiant.da);
@@ -1105,9 +1060,6 @@ function ouvrirIntervention(interventionId) {
             </div>
         `;
     });
-
-    console.log(`   📊 Résumé rendu: ${nbCheckboxesCochees} checkbox(es) cochée(s) sur ${etudiants.length}`);
-    console.log('🔍 ouvrirIntervention() - FIN RENDU');
 
     // Contexte existant ou dérivé pour rétrocompatibilité
     var contexteExistant = intervention.contexte || '';
@@ -1347,9 +1299,6 @@ function afficherNotesIndividuelles(interventionId, dasSelectionnes) {
  * @param {string} interventionId - ID de l'intervention
  */
 function sauvegarderPresencesIntervention(interventionId) {
-    console.log('====================================');
-    console.log('📝 DÉBUT sauvegarderPresencesIntervention()');
-    console.log('====================================');
 
     const checkboxes = document.querySelectorAll('#listeEtudiantsIntervention input[type="checkbox"]:checked');
     const dasSelectionnes = Array.from(checkboxes).map(cb => cb.value);
@@ -1359,12 +1308,6 @@ function sauvegarderPresencesIntervention(interventionId) {
     // Lire le statut depuis les boutons radio
     const statutRadio = document.querySelector('input[name="interventionStatut"]:checked');
     const nouveauStatut = statutRadio ? statutRadio.value : 'en-cours';
-
-    console.log('💾 Sauvegarde intervention:', interventionId);
-    console.log('   Nombre de checkboxes cochées trouvées:', checkboxes.length);
-    console.log('   DAs extraits:', dasSelectionnes);
-    console.log('   Observations:', observations ? `"${observations.substring(0, 50)}..."` : 'Aucune');
-    console.log('   Nouveau statut:', nouveauStatut);
 
     // Marquer les présences (met à jour etudiants et analyse)
     marquerPresences(interventionId, dasSelectionnes);
@@ -1421,17 +1364,12 @@ function sauvegarderPresencesIntervention(interventionId) {
 
         interventions[index].dateModification = Date.now();
         sauvegarderInterventions(interventions);
-        console.log('✅ Intervention sauvegardée dans localStorage');
-        console.log('   Notes individuelles:', Object.keys(notesIndividuelles).length, 'étudiant(s)');
-
         // Si l'intervention vient d'être marquée comme complétée, transférer les présences
         if (nouveauStatut === 'completee' && ancienStatut !== 'completee') {
-            console.log('🔄 Intervention marquée comme complétée : transfert des présences vers le module...');
             transfererPresencesVersModule(interventionId);
         }
         // Si l'intervention est déjà complétée, re-transférer les présences au cas où il y aurait des changements
         else if (nouveauStatut === 'completee') {
-            console.log('🔄 Intervention complétée : re-transfert des présences vers le module...');
             transfererPresencesVersModule(interventionId);
         }
     }
@@ -1442,9 +1380,6 @@ function sauvegarderPresencesIntervention(interventionId) {
     // Notification de succès
     afficherNotificationSucces('Intervention sauvegardée avec succès');
 
-    console.log('====================================');
-    console.log('✅ FIN sauvegarderPresencesIntervention()');
-    console.log('====================================');
 }
 
 /**
@@ -1457,8 +1392,6 @@ function terminerIntervention(interventionId) {
     const dasSelectionnes = Array.from(checkboxes).map(cb => cb.value);
     const observationsField = document.getElementById('observationsIntervention');
     const observations = observationsField ? observationsField.value : '';
-
-    console.log('✅ Complétion intervention:', interventionId);
 
     // Marquer les présences (met à jour etudiants et analyse)
     marquerPresences(interventionId, dasSelectionnes);
@@ -1533,8 +1466,6 @@ function rouvrirIntervention(interventionId) {
         return;
     }
 
-    console.log('🔄 Réouverture intervention:', interventionId);
-
     const interventions = obtenirInterventions();
     const index = interventions.findIndex(i => i.id === interventionId);
 
@@ -1544,7 +1475,6 @@ function rouvrirIntervention(interventionId) {
         interventions[index].dateModification = Date.now();
 
         sauvegarderInterventions(interventions);
-        console.log('✅ Intervention rouverte: statut changé à "en-cours"');
     }
 
     // Recharger la page de l'intervention pour afficher le bouton "Marquer comme complétée"
@@ -1562,10 +1492,6 @@ function rouvrirIntervention(interventionId) {
  * @param {string} interventionId - ID de l'intervention
  */
 function transfererPresencesVersModule(interventionId) {
-    console.log('====================================');
-    console.log('📤 DÉBUT transfererPresencesVersModule()');
-    console.log('====================================');
-
     const intervention = obtenirIntervention(interventionId);
     if (!intervention) {
         console.error('❌ Intervention introuvable:', interventionId);
@@ -1574,20 +1500,13 @@ function transfererPresencesVersModule(interventionId) {
 
     // Les MIO ne génèrent pas d'entrées de présences/absences
     if (intervention.type === 'mio') {
-        console.log('   ✉️ Type MIO — aucun impact sur les présences');
         return;
     }
-
-    console.log('   Intervention:', intervention.titre);
-    console.log('   Date:', intervention.date);
-    console.log('   Étudiants présents:', intervention.etudiants.length);
 
     // Obtenir tous les étudiants du groupe (filtrés par groupe-cours actif)
     const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
         ? obtenirEtudiantsCoursActif()
         : obtenirDonneesSelonMode('groupeEtudiants');
-    console.log('   Total étudiants du groupe:', etudiants.length);
-
     // Obtenir les présences existantes
     // ✅ CORRIGÉ (22 janvier 2026) : Utiliser la clé namespacée pour le trimestre actif
     const clePresences = cle('presences');
@@ -1595,8 +1514,6 @@ function transfererPresencesVersModule(interventionId) {
 
     // Supprimer les entrées existantes pour cette date (pour éviter les doublons)
     presences = presences.filter(p => p.date !== intervention.date);
-    console.log('   Présences après filtrage doublons:', presences.length);
-
     // Créer une entrée de présence pour chaque étudiant
     let nbPresentsAjoutes = 0;
     let nbAbsentsAjoutes = 0;
@@ -1616,7 +1533,6 @@ function transfererPresencesVersModule(interventionId) {
 
         // Si checkbox NON cochée : ignorer les non-participants (pas d'entrée de présence créée)
         if (!marquerMotives && !estPresent) {
-            console.log(`   ⊘ ${etudiant.prenom} ${etudiant.nom}: NON CONCERNÉ (checkbox non cochée)`);
             return; // Ne pas créer d'entrée de présence
         }
 
@@ -1627,13 +1543,11 @@ function transfererPresencesVersModule(interventionId) {
             heures = dureeIntervention;
             note = `Intervention RàI : ${intervention.titre}`;
             nbPresentsAjoutes++;
-            console.log(`   ✅ ${etudiant.prenom} ${etudiant.nom}: PRÉSENT (${heures} pér.)`);
         } else {
             // Étudiant absent (niveau 2 seulement) : 0 heures + note d'absence motivée
             heures = 0;
             note = 'Absence motivée RàI';
             nbAbsentsAjoutes++;
-            console.log(`   ⚪ ${etudiant.prenom} ${etudiant.nom}: ABSENT MOTIVÉ (absence justifiée)`);
         }
 
         // Ajouter l'entrée de présence avec le flag facultatif
@@ -1646,30 +1560,16 @@ function transfererPresencesVersModule(interventionId) {
         });
     });
 
-    console.log('   ───────────────────────────────────');
-    if (estNiveau3) {
-        console.log(`   📊 Résumé niveau 3 (hors classe): ${nbPresentsAjoutes} participant(s) ajouté(s)`);
-        console.log(`   ℹ️  Les autres étudiants ne sont PAS affectés (pas d'entrée de présence créée)`);
-    } else {
-        console.log(`   📊 Résumé niveau 2 (en classe): ${nbPresentsAjoutes} présents, ${nbAbsentsAjoutes} absents motivés`);
-    }
-    console.log('   ───────────────────────────────────');
-
     // Sauvegarder les présences mises à jour
     db.setSync(clePresences, presences);
-    console.log('   💾 Présences sauvegardées dans localStorage');
 
     // Recalculer les indices d'assiduité
     if (typeof calculerEtSauvegarderIndicesAssiduite === 'function') {
         calculerEtSauvegarderIndicesAssiduite();
-        console.log('   🔄 Indices d\'assiduité recalculés');
     } else {
         console.warn('   ⚠️ Fonction calculerEtSauvegarderIndicesAssiduite non disponible');
     }
 
-    console.log('====================================');
-    console.log(`✅ FIN transfererPresencesVersModule()`);
-    console.log('====================================');
 }
 
 /* ===============================
@@ -1689,7 +1589,6 @@ function initialiserModuleInterventions() {
     const observer = new MutationObserver(() => {
         const sousSection = document.getElementById('tableau-bord-interventions');
         if (sousSection && sousSection.classList.contains('active')) {
-            console.log('🔄 Sous-section Interventions devenue active, affichage de la liste...');
             afficherListeInterventions();
         }
     });
@@ -1705,7 +1604,6 @@ function initialiserModuleInterventions() {
         afficherListeInterventions();
     }
 
-    console.log('✅ Module Interventions initialisé');
 }
 
 /**

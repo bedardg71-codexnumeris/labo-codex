@@ -110,7 +110,6 @@ function obtenirSeancesHoraire(coursId) {
                 const horaires = db.getSync(cleHoraires, []);
                 const horaire = horaires.find(h => h.id === groupeCoursActif.horaireId);
                 if (horaire && horaire.seances && horaire.seances.length > 0) {
-                    console.log('[Horaire] Séances depuis entité horaire:', horaire.nom, horaire.seances.map(s => s.jour));
                     return horaire.seances;
                 }
             }
@@ -125,7 +124,6 @@ function obtenirSeancesHoraire(coursId) {
                 const horaires = db.getSync(cleHoraires, []);
                 const horaire = horaires.find(h => h.id === gc.horaireId);
                 if (horaire && horaire.seances && horaire.seances.length > 0) {
-                    console.log('[Horaire] Séances depuis entité horaire (via GC):', horaire.nom, horaire.seances.map(s => s.jour));
                     return horaire.seances;
                 }
             }
@@ -138,27 +136,23 @@ function obtenirSeancesHoraire(coursId) {
     const cleCours = cleHoraire(coursId);
     let seances = db.getSync(cleCours, null);
     if (seances && seances.length > 0) {
-        console.log('[Horaire] Séances depuis clé cours:', cleCours);
         return seances;
     }
 
     // 3. Fallback sur horaireHebdo (format V2)
     seances = db.getSync(cle('horaireHebdo'), null);
     if (seances && seances.length > 0) {
-        console.log('[Horaire] Séances depuis horaireHebdo namespacé');
         return seances;
     }
 
     // 4. Fallback sur seancesHoraire namespacé par trimestre
     seances = db.getSync(cle('seancesHoraire'), null);
     if (seances && seances.length > 0) {
-        console.log('[Horaire] Séances depuis seancesHoraire namespacé');
         return seances;
     }
 
     // 5. Fallback sur clé legacy non namespacée
     seances = db.getSync('seancesHoraire', []);
-    console.log('[Horaire] Séances depuis clé legacy seancesHoraire');
     return seances || [];
 }
 
@@ -179,12 +173,10 @@ function obtenirSeancesHoraire(coursId) {
  * - Sortie silencieuse si les éléments n'existent pas
  */
 function initialiserModuleHoraire() {
-    console.log('🕐 Initialisation du module Horaire');
 
     // Vérifier que nous sommes dans la bonne section
     const container = document.getElementById('seancesContainer');
     if (!container) {
-        console.log('   ⚠️  Section horaire non active, initialisation reportée');
         return;
     }
 
@@ -194,7 +186,6 @@ function initialiserModuleHoraire() {
     // Générer les séances complètes du trimestre
     genererSeancesCompletes();
 
-    console.log('   ✅ Module Horaire initialisé');
 }
 
 /* ===============================
@@ -305,7 +296,6 @@ function definirDureePeriode(minutes) {
     const modalites = db.getSync(cle('modalitesEvaluation'), {});
     modalites.dureePeriodeMinutes = parseInt(minutes) || 55;
     db.setSync(cle('modalitesEvaluation'), modalites);
-    console.log(`[Horaire] Durée de période définie: ${minutes} minutes`);
 }
 
 /**
@@ -453,7 +443,6 @@ function migrerDonneesSeances() {
 
     if (migrationNecessaire) {
         db.setSync('seancesHoraire', seancesHoraire);
-        console.log('   ✅ Migration des données séances effectuée');
     }
 
     return migrationNecessaire;
@@ -498,7 +487,6 @@ function migrerDonneesSeances() {
  */
 function genererSeancesCompletes(coursId = null) {
     const idCours = coursId || (typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null);
-    console.log('📚 Génération des séances complètes...', idCours ? `(cours: ${idCours})` : '(global)');
 
     // Migrer les anciennes données si nécessaire
     migrerDonneesSeances();
@@ -508,13 +496,11 @@ function genererSeancesCompletes(coursId = null) {
 
     // 🔍 FIX #220 : Log diagnostic pour vérifier le bon nombre de séances
     const joursUniques = [...new Set(seancesHoraire.map(s => s.jour))];
-    console.log(`📚 Horaire retourné: ${seancesHoraire.length} séance(s) sur ${joursUniques.length} jour(s):`, joursUniques);
 
     // Clé de sortie spécifique au cours
     const cleOutput = cleSeancesCompletes(idCours);
 
     if (seancesHoraire.length === 0) {
-        console.log('   ⚠️  Aucune séance hebdomadaire configurée');
         db.setSync(cleOutput, {});
         return {};
     }
@@ -623,10 +609,7 @@ function genererSeancesCompletes(coursId = null) {
     // 🆕 BETA 95 : Stocker dans clé spécifique au cours
     db.setSync(cleOutput, seancesCompletes);
 
-    console.log(`✅ Séances complètes générées: ${compteurSeances} séances`);
-    console.log(`   - Réparties sur ${Object.keys(seancesCompletes).length} jours de cours`);
     if (idCours) {
-        console.log(`   - Clé de stockage: ${cleOutput}`);
     }
 
     return seancesCompletes;
@@ -647,7 +630,6 @@ function obtenirSeancesCompletes(coursId = null) {
     const seancesCompletes = db.getSync(cleCours, null);
 
     if (!seancesCompletes) {
-        console.log('⚠️  seancesCompletes non trouvé, génération...');
         return genererSeancesCompletes(coursId);
     }
 
@@ -1114,7 +1096,6 @@ function confirmerSeances() {
     // 🆕 BETA 95 : Sauvegarder dans la clé spécifique au cours actif
     const cleCours = cleHoraire(null);
     db.setSync(cleCours, seancesAEnregistrer);
-    console.log(`[Horaire] Séances sauvegardées dans: ${cleCours}`);
 
     // Rafraîchir l'affichage des séances existantes
     afficherSeancesExistantes();
@@ -1690,7 +1671,6 @@ window.formaterDuree = formaterDuree;
 function modifierDureePeriodeV2(minutes) {
     if (typeof minutes === 'object' && minutes && minutes.value !== undefined) minutes = minutes.value;
     definirDureePeriode(parseInt(minutes));
-    console.log(`[Horaire] Durée de période modifiée via UI: ${minutes} minutes`);
 
     // Afficher confirmation visuelle
     const select = document.getElementById('v2-dureePeriode');
@@ -1713,7 +1693,6 @@ function chargerDureePeriodeUI() {
     if (select) {
         const dureeSauvegardee = obtenirDureePeriode();
         select.value = dureeSauvegardee.toString();
-        console.log(`[Horaire] Durée de période chargée: ${dureeSauvegardee} minutes`);
     }
 }
 window.chargerDureePeriodeUI = chargerDureePeriodeUI;

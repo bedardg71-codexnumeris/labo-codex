@@ -218,20 +218,16 @@ window.demarrerCreationMaterielSafe = function() {
 };
 
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('🚀 Initialisation du système de monitorage v3.0');
-    console.log('📦 Modules chargés : 01-config, 02-navigation');
 
     // ===============================
     // FONCTION UTILITAIRE : Recalcul indices C-P
     // ===============================
     function recalculerIndicesSiDemande() {
         if (db.getSync('recalculerIndicesCP', null) === 'true') {
-            console.log('🔄 [Main] Recalcul des indices C et P demandé...');
             db.setSync('recalculerIndicesCP', null); // Effacer le flag immédiatement
             if (typeof calculerEtStockerIndicesCP === 'function') {
                 try {
                     calculerEtStockerIndicesCP();
-                    console.log('✅ [Main] Indices C et P recalculés');
                 } catch (e) {
                     console.error('❌ [Main] Erreur lors du recalcul:', e);
                 }
@@ -246,7 +242,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // ===============================
     // Recharger les données quand la synchronisation IndexedDB → localStorage est terminée
     window.addEventListener('db-ready', async function(event) {
-        console.log('🔄 [Main] Données synchronisées, rechargement...');
 
         // 🆕 BETA 95.1 (5 jan 2026): Vérifier si migration legacy nécessaire
         if (typeof verifierEtProposerMigrationLegacy === 'function') {
@@ -277,7 +272,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // ===============================
     // 1. GÉNÉRATION DYNAMIQUE DES BULLES D'APPRENTISSAGE
     // ===============================
-    console.log('🎨 Génération des bulles d\'apprentissage...');
 
     // BETA 96.2: Durées selon taille pour effet parallaxe
     // Grande = proche = rapide, Petite = loin = lente
@@ -373,7 +367,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const listeEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
         const nbEtudiants = listeEtudiants.length || 10; // Par défaut 10 si pas d'étudiants
 
-        console.log(`   → Création de ${nbEtudiants} bulles (1 par étudiant)`);
 
         // BETA 96.2: Toutes les bulles blanches, tailles variées pour effet parallaxe
         const tailles = ['petite', 'moyenne', 'grande'];
@@ -392,7 +385,6 @@ document.addEventListener('DOMContentLoaded', function () {
             container.appendChild(bulle);
         }
 
-        console.log(`   ✅ ${nbEtudiants} bulles créées (toutes visibles immédiatement, cycle continu)`);
     }
 
     // Générer les bulles au chargement
@@ -401,7 +393,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Régénérer si la liste d'étudiants change
     window.addEventListener('storage', function(e) {
         if (e.key && e.key.includes('groupeEtudiants')) {
-            console.log('   → Mise à jour du nombre de bulles');
             const container = document.getElementById('bulles-container');
             if (container) {
                 container.innerHTML = '';
@@ -413,12 +404,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // ===============================
     // 1. NAVIGATION PRINCIPALE
     // ===============================
-    console.log(' Initialisation de la navigation...');
 
     document.querySelectorAll('.navigation-principale button').forEach(bouton => {
         bouton.addEventListener('click', function () {
             const onglet = this.getAttribute('data-onglet');
-            console.log(`   → Navigation vers: ${onglet}`);
             afficherSection(onglet);
         });
     });
@@ -433,14 +422,11 @@ document.addEventListener('DOMContentLoaded', function () {
     } else {
         afficherSection('accueil');
     }
-    console.log('✅ Navigation initialisée - Section par défaut:', _demoActif ? 'tableau-bord (démo)' : _modeExpert ? 'tableau-bord (expert)' : 'accueil');
 
 // ===============================
     // 2. CHARGEMENTS CONDITIONNELS
     // ===============================
-    console.log(' Vérification des modules additionnels...');
 
-    console.log('✅ Application initialisée');
 
     // ===============================
     // PRIORITÉ 0 : MULTI-TRIMESTRES (Beta 95)
@@ -448,7 +434,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // ===============================
 
     if (typeof initialiserModuleTrimestres === 'function') {
-        console.log('   → Module Multi-Trimestres détecté');
         initialiserModuleTrimestres();
     }
 
@@ -459,13 +444,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // MODULE TRIMESTRE: Génère calendrierComplet (source unique)
     if (typeof initialiserModuleTrimestre === 'function') {
-        console.log('   → Module Trimestre détecté');
         initialiserModuleTrimestre();
     }
 
     // MODULE HORAIRE: Génère seancesCompletes (source unique)
     if (typeof initialiserModuleHoraire === 'function') {
-        console.log('   → Module 10-horaire détecté');
         initialiserModuleHoraire();
     }
 
@@ -475,85 +458,70 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // MODULE 03: Liste des étudiants
     if (typeof initialiserModuleListeEtudiants === 'function') {
-        console.log('   → Module 03-liste-etudiants détecté');
         initialiserModuleListeEtudiants();
     }
 
     // MODULE 04: Productions et évaluations
     if (typeof initialiserModuleProductions === 'function') {
-        console.log('   → Module 04-productions détecté');
         initialiserModuleProductions();
     }
 
     // MODULE 05: Grilles de critères
     if (typeof initialiserModuleGrilles === 'function') {
-        console.log('   → Module 05-grilles détecté');
         initialiserModuleGrilles();
     }
 
     // MODULE 06: Échelles de performance
     if (typeof initialiserModuleEchelles === 'function') {
-        console.log('   → Module 06-echelles détecté');
         initialiserModuleEchelles();
     }
 
     // MODULE 07: Cartouches de rétroaction
     if (typeof initialiserModuleCartouches === 'function') {
-        console.log('   → Module 07-cartouches détecté');
         initialiserModuleCartouches();
     }
 
     // MODULE 07B: Objectifs d'apprentissage
     if (typeof initialiserModuleObjectifs === 'function') {
-        console.log('   → Module 07b-objectifs détecté');
         initialiserModuleObjectifs();
     }
 
     // MODULE 08: Cours
     if (typeof initialiserModuleCours === 'function') {
-        console.log('   → Module 08-cours détecté');
         initialiserModuleCours();
     }
 
     // MODULE CONTEXTE: Affichage informations contextuelles dans l'en-tête
     if (typeof initialiserModuleContexte === 'function') {
-        console.log('   → Module Contexte détecté');
         initialiserModuleContexte();
     }
 
     // MODULE DONNÉES DEMO: Initialisation + nettoyage résidus (Chantier 2)
     if (typeof initialiserModuleDonneesDemo === 'function') {
-        console.log('   → Module Données Demo détecté');
         initialiserModuleDonneesDemo();
     }
     // Filet de sécurité : nettoyer les résidus de démo si crash pendant la démo
     if (typeof nettoyerResiduDemo === 'function') {
-        nettoyerResiduDemo().then(cleaned => {
-            if (cleaned) console.log('[Main] Résidus démo nettoyés');
-        });
+        nettoyerResiduDemo();
     }
 
     // MODULE ACCUEIL: Page d'accueil (Chantier 3)
     if (typeof initialiserAccueil === 'function') {
-        console.log('   → Module Accueil détecté');
         initialiserAccueil();
     }
 
     // MODULE 11: Gestion du groupe
     if (typeof initialiserModuleGroupe === 'function') {
-        console.log('   → Module 11-groupe détecté');
         initialiserModuleGroupe();
     }
 
     // MODULE 12: Pratiques de notation
     if (typeof initialiserModulePratiques === 'function') {
-        console.log('   → Module 12-pratiques détecté');
         initialiserModulePratiques();
     }
 
     // REGISTRE DES PRATIQUES: Initialiser et vérifier les pratiques enregistrées
     if (typeof initialiserRegistrePratiques === 'function') {
-        console.log('   → Registre de pratiques détecté');
         initialiserRegistrePratiques();
     }
 
@@ -564,13 +532,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // MODULE 09-1: Vue calendaire (lit calendrierComplet)
     if (typeof initialiserModuleVueCalendaire === 'function') {
-        console.log('   → Module 09-1-vue-calendaire détecté');
         initialiserModuleVueCalendaire();
     }
 
     // MODULE 09-2: Saisie des présences (lit seancesCompletes)
     if (typeof initialiserModuleSaisiePresences === 'function') {
-        console.log('   → Module 09-2-saisie-presences détecté');
         initialiserModuleSaisiePresences();
     }
 
@@ -580,44 +546,37 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // MODULE EVALUATION: Évaluations
     if (typeof initialiserModuleEvaluation === 'function') {
-        console.log('   → Module Evaluation détecté');
         initialiserModuleEvaluation();
     }
 
     // MODULE 14: Statistiques
     if (typeof initialiserModuleStatistiques === 'function') {
-        console.log('   → Module 14-statistiques détecté');
         initialiserModuleStatistiques();
     }
 
     // MODULE 15: Profil étudiant
     if (typeof initialiserModuleProfilEtudiant === 'function') {
-        console.log('   → Module 15-profil-etudiant détecté');
         initialiserModuleProfilEtudiant();
     }
 
     // MODULE 16: Liste des évaluations
     if (typeof initialiserListeEvaluations === 'function') {
-        console.log('   → Module 16-liste-evaluations détecté');
         // Note: Initialisation différée lors de l'affichage de la sous-section
     }
 
     // MODULE 17: Gestion des modes
     if (typeof initialiserSystemeModes === 'function') {
-        console.log('   → Module 17-modes détecté (déjà initialisé automatiquement)');
         // Note: initialiserSystemeModes() est appelé automatiquement à la fin de modes.js
         // pour garantir que le système est prêt AVANT les autres modules
     }
 
     // MODULE: Interventions RàI (Beta 85)
     if (typeof initialiserModuleInterventions === 'function') {
-        console.log('   → Module Interventions RàI détecté');
         initialiserModuleInterventions();
     }
 
     // MODULE: Snapshots progression longitudinale (Beta 93)
     if (typeof initialiserModuleSnapshots === 'function') {
-        console.log('   → Module Snapshots détecté');
         initialiserModuleSnapshots();
     }
 
@@ -627,13 +586,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // MODULE : Utilitaires
     if (typeof initialiserModuleUtilitaires === 'function') {
-        console.log('   → Module-utilitaires détecté');
         initialiserModuleUtilitaires();
     }
 
     // MODULE : Import/Export
     if (typeof initialiserModuleImportExport === 'function') {
-        console.log('   → Module import-export détecté');
         initialiserModuleImportExport();
     }
 
@@ -643,24 +600,20 @@ document.addEventListener('DOMContentLoaded', function () {
     // ===============================
     
     if (typeof initialiserModuleTableauBordApercu === 'function') {
-        console.log('   → Module Tableau de bord (aperçu) détecté');
         initialiserModuleTableauBordApercu();
     }
 
     if (typeof initialiserModulePresencesApercu === 'function') {
-        console.log('   → Module Présences (aperçu) détecté');
         initialiserModulePresencesApercu();
     }
 
     if (typeof initialiserModuleEvaluationsApercu === 'function') {
-        console.log('   → Module Évaluations (aperçu) détecté');
         initialiserModuleEvaluationsApercu();
     }
 
     // ===============================
     // 3. ÉVÉNEMENTS GLOBAUX
     // ===============================
-    console.log(' Initialisation des événements globaux...');
 
     // Sélecteur d'étudiant dans le détail individuel
     const selectEtudiant = document.getElementById('select-etudiant');
@@ -668,10 +621,8 @@ document.addEventListener('DOMContentLoaded', function () {
         selectEtudiant.addEventListener('change', function () {
             if (typeof chargerDetailEtudiant === 'function') {
                 chargerDetailEtudiant(this.value);
-                console.log(`   → Chargement détail étudiant: ${this.value}`);
             }
         });
-        console.log('   ✅ Événement select-etudiant attaché');
     }
 
     // Affichage du tableau des cours
@@ -680,12 +631,10 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => {
                 if (typeof afficherTableauCours === 'function') {
                     afficherTableauCours();
-                    console.log('   → Affichage tableau des cours');
                 }
             }, 50);
         }
     });
-    console.log('   ✅ Événement affichage cours attaché');
 
     // Délégation des accordéons (remplace 78+ onclick inline)
     document.addEventListener('click', function (e) {
@@ -838,8 +787,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // ===============================
     // 4. FIN D'INITIALISATION
     // ===============================
-    console.log('✅ Système initialisé avec succès');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 });
 
 })();

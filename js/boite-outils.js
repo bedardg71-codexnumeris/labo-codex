@@ -79,14 +79,10 @@ function initialiserTirage() {
         console.warn('[Tirage] Erreur lecture ancien coursId:', e);
     }
 
-    console.log(`[Tirage] ===== INITIALISATION =====`);
-    console.log(`[Tirage] coursActuelId: ${coursActuelId}`);
-    console.log(`[Tirage] ancienCoursId (localStorage): ${ancienCoursId}`);
 
     // Vérifier si la section tirage est visible (DOM existe)
     const container = document.getElementById('tirage-container');
     if (!container) {
-        console.log('[Tirage] Section non active, mise à jour état seulement');
         // Mettre à jour le coursId même si la section n'est pas visible
         etatTirage.coursId = coursActuelId;
         sauvegarderEtatTirage();
@@ -98,9 +94,7 @@ function initialiserTirage() {
 
     // Détecter le changement de groupe-cours
     const groupeAChange = ancienCoursId !== null && ancienCoursId !== coursActuelId;
-    console.log(`[Tirage] groupeAChange: ${groupeAChange} (ancien=${ancienCoursId}, actuel=${coursActuelId})`);
     if (groupeAChange) {
-        console.log(`[Tirage] ⚠️ CHANGEMENT DE GROUPE - Reset tirés/exclus`);
         etatTirage.dejaTires = [];
         etatTirage.exclus = [];
         reinitialiserAffichage();
@@ -111,9 +105,7 @@ function initialiserTirage() {
     let etudiants = [];
     if (typeof obtenirEtudiantsCoursActif === 'function') {
         etudiants = obtenirEtudiantsCoursActif();
-        console.log(`[Tirage] Étudiants obtenus: ${etudiants.length}`);
         if (etudiants.length > 0) {
-            console.log(`[Tirage] Premier étudiant: ${etudiants[0].prenom} ${etudiants[0].nom}`);
         }
     } else {
         // Fallback
@@ -156,7 +148,6 @@ function initialiserTirage() {
         reinitialiserAffichage();
     }
 
-    console.log(`[Tirage] Initialisé avec ${etatTirage.pool.length} étudiants`);
 }
 
 /**
@@ -337,7 +328,6 @@ function afficherMessageTirage(message, type = 'info') {
  * Ouvre le modal des paramètres de tirage
  */
 function ouvrirModalParamsTirage() {
-    console.log('[Tirage] Ouverture modal paramètres');
 
     const disponibles = obtenirEtudiantsDisponibles();
     const total = etatTirage.pool.length;
@@ -512,7 +502,6 @@ function sauvegarderEtatQuestions() {
         coursId: etatQuestions.coursId
     };
     db.setSync(cle, etatASauvegarder);
-    console.log(`[Questions] Sauvegardé dans ${cle}:`, etatQuestions.questions.length, 'questions');
 }
 
 /**
@@ -528,7 +517,6 @@ function restaurerEtatQuestions() {
             etatQuestions.dejaPositions = sauvegarde.dejaPositions || [];
             etatQuestions.avecRemise = sauvegarde.avecRemise || false;
             etatQuestions.coursId = sauvegarde.coursId || null;
-            console.log(`[Questions] Restauré depuis ${cle}:`, etatQuestions.questions.length, 'questions');
             return true;
         }
     } catch (e) {
@@ -544,13 +532,10 @@ function initialiserQuestions() {
     const infoCours = db.getSync('infoCours', null);
     const coursActuelId = infoCours?.id || null;
 
-    console.log(`[Questions] ===== INITIALISATION =====`);
-    console.log(`[Questions] coursActuelId: ${coursActuelId}`);
 
     // Vérifier si la section questions est visible
     const container = document.getElementById('questions-container');
     if (!container) {
-        console.log('[Questions] Section non active');
         return;
     }
 
@@ -562,7 +547,6 @@ function initialiserQuestions() {
     // Mettre à jour le dropdown des catégories
     mettreAJourDropdownCategories();
     mettreAJourCompteurQuestions();
-    console.log(`[Questions] Initialisé avec ${etatQuestions.questions.length} questions`);
 }
 
 /**
@@ -609,7 +593,6 @@ function changerFiltreCategorie(valeur) {
     }
 
     mettreAJourCompteurQuestions();
-    console.log(`[Questions] Filtre catégorie: ${etatQuestions.categorieFiltre === null ? 'Toutes' : etatQuestions.categorieFiltre || 'Sans catégorie'}`);
 }
 
 /**
@@ -756,14 +739,12 @@ function afficherMessageQuestion(message, type = 'info') {
  * Ouvre le modal de gestion des questions
  */
 function ouvrirModalParamsQuestions() {
-    console.log('[Questions] Ouverture modal gestion');
 
     // S'assurer que les questions sont restaurées depuis localStorage
     restaurerEtatQuestions();
 
     const disponibles = obtenirQuestionsDisponibles();
     const total = etatQuestions.questions.length;
-    console.log(`[Questions] Modal: ${total} questions, ${disponibles.length} disponibles`);
 
     // Grouper les questions par catégorie
     const questionsSansCategorie = etatQuestions.questions.filter(q => !q.categorieId);
@@ -886,7 +867,6 @@ function toggleRemiseQuestions(checked) {
     etatQuestions.avecRemise = checked;
     sauvegarderEtatQuestions();
     mettreAJourCompteurQuestions();
-    console.log('[Questions] Mode avec remise:', checked);
 }
 
 /**
@@ -930,7 +910,6 @@ function changerCategorieQuestion(questionId, nouvelleCategorieId) {
     rafraichirListeQuestionsModal();
     mettreAJourCompteurQuestions();
 
-    console.log(`[Questions] Question ${questionId} déplacée vers:`, nouvelleCategorieId || 'Sans catégorie');
 }
 
 /**
@@ -1223,7 +1202,6 @@ window.toggleRemiseQuestionsHandler = toggleRemiseQuestionsHandler;
 window.changerCategorieQuestionHandler = changerCategorieQuestionHandler;
 window.initialiserQuestions = initialiserQuestions;
 
-console.log('[Boîte à outils] Module chargé');
 
 
 })();
