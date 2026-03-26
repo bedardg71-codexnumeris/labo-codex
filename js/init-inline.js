@@ -238,6 +238,15 @@ function afficherBuildNumero() {
  * puis rafraîchit l'en-tête. Source unique de vérité.
  */
 async function chargerVersionJSON() {
+    // file:// : fetch bloqué par CORS dans Chrome — utiliser les fallback directement
+    if (window.location.protocol === 'file:') {
+        afficherBuildNumero();
+        var spanBeta = document.getElementById('apropos-version-beta');
+        var spanBuild = document.getElementById('apropos-version-build');
+        if (spanBeta) spanBeta.textContent = 'Beta ' + VERSION_MAJEURE;
+        if (spanBuild) spanBuild.textContent = BUILD_ID;
+        return;
+    }
     try {
         const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
         if (!r.ok) return;
@@ -328,6 +337,7 @@ function fermerBandeauMiseAJour() {
  */
 async function verifierMiseAJourDistante() {
     if (miseAJourDejaSignalee) return;
+    if (window.location.protocol === 'file:') return; // fetch impossible en file://
     try {
         const reponse = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
         if (!reponse.ok) return;
