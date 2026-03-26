@@ -100,7 +100,7 @@
         if (db.useIndexedDB && cleSnap) {
             try {
                 snapshots = await db.get(cleSnap);
-            } catch (e) { /* fallback getSync */ }
+            } catch (e) { console.warn('[Donnees-V2] IndexedDB read failed, fallback getSync:', e.message || e); }
         }
         if (!snapshots) {
             snapshots = db.getSync(cleSnap, { hebdomadaires: [], interventions: [] });
@@ -831,7 +831,7 @@
             let valeur = null;
             try {
                 valeur = db.getSync(cleFinale, null);
-            } catch(e) { /* silencieux */ }
+            } catch(e) { console.warn('[Donnees-V2] db.getSync read skipped for key:', cleFinale, e.message || e); }
 
             let apercu = '—';
             let typeBadge = '<span class="badge-statut non-evalue">Vide</span>';

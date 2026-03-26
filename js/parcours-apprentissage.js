@@ -953,7 +953,7 @@ function onNavigationChange(idSousSection) {
             if (etudiants.length > 0) {
                 marquerJalon('consulter-tdb');
             }
-        } catch(e) { /* ignore */ }
+        } catch(e) { console.warn('[Parcours] jalon auto-detection skipped:', e.message || e); }
     }
 
     // Vérifier tous les jalons détectables automatiquement

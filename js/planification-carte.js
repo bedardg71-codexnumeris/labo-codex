@@ -1616,7 +1616,7 @@ function dessinerLien(donnees) {
                 bg.setAttribute('width', bbox.width + 6);
                 bg.setAttribute('height', bbox.height + 2);
                 bg.setAttribute('rx', '3');
-            } catch(e) {}
+            } catch(e) { console.warn('[Planif-Carte] SVG label bbox measurement failed:', e.message || e); }
         });
     }
 
@@ -3415,7 +3415,7 @@ function afficherDetailsProduction(productionId, productions) {
                 if (echelle) nomEchelle = echelle.nom || nomEchelle;
             }
         }
-    } catch(e) {}
+    } catch(e) { console.warn('[Planif-Carte] grille/echelle lookup skipped:', e.message || e); }
     // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
     var infoCDet = db.getSync('infoCours', null);
     var gcDetPlanif = infoCDet ? (infoCDet._groupeCoursId || infoCDet.id || null) : null;

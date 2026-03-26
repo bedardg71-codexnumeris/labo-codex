@@ -470,7 +470,7 @@ function mettreAJourContextesSections(nbEtudiants) {
     try {
         const prefs = db.getSync('preferencesAffichage') || {};
         afficherContexte = prefs.afficherContexteGraphiques !== false;
-    } catch (e) { /* défaut: true */ }
+    } catch (e) { console.warn('[TDB-Apercu] preferencesAffichage read fallback (default: true):', e.message || e); }
 
     idsContexte.forEach(id => {
         const elem = document.getElementById(id);

@@ -1423,7 +1423,7 @@ function restaurerPreferencesColonnesListe() {
                 }
             }
         });
-    } catch (e) { /* ignorer les données corrompues */ }
+    } catch (e) { console.warn('[Etudiants] column prefs corrupted, using defaults:', e.message || e); }
 }
 
 function verifierDebordementTableauListe() {

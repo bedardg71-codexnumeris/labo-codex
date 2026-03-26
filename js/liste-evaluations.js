@@ -2121,7 +2121,7 @@ function restaurerPreferencesColonnes() {
                 }
             }
         });
-    } catch (e) { /* ignorer les données corrompues */ }
+    } catch (e) { console.warn('[ListeEval] column prefs corrupted, using defaults:', e.message || e); }
 }
 
 /**

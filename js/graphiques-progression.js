@@ -829,7 +829,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                 }
                 return !!p.dateEcheance;
             });
-        } catch (e) { /* silencieux */ }
+        } catch (e) { console.warn('[Graphiques] productions filter for individual chart skipped:', e.message || e); }
 
         // Helper : si aucune production n'est due à la date du snapshot, retourner null
         const corrigerAvantEcheance = (s, valeur) => {
@@ -1670,7 +1670,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
         try {
             const cadre = db.getSync(cle('cadreCalendrier'), null);
             if (cadre && cadre.dateDebut) dateDebutSemestre = cadre.dateDebut;
-        } catch (e) { /* silencieux */ }
+        } catch (e) { console.warn('[Graphiques] cadreCalendrier read skipped:', e.message || e); }
         if (indice === 'C' || indice === 'P') {
             try {
                 const productions = obtenirDonneesSelonMode('productions') || [];
@@ -1684,7 +1684,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                     }
                     return !!p.dateEcheance && p.dateEcheance >= dateDebutSemestre;
                 });
-            } catch (e) { /* silencieux */ }
+            } catch (e) { console.warn('[Graphiques] productions filter for spaghetti skipped:', e.message || e); }
         }
 
         // Créer un dataset par étudiant
@@ -3519,7 +3519,7 @@ function creerGraphiqueCriteres(canvasId, da) {
                             interventionsParIndex[idx] = { niveau: niveauMax, titre: titreIntervention };
                         }
                     }
-                } catch (e) { /* silencieux */ }
+                } catch (e) { console.warn('[Graphiques] intervention detection skipped:', e.message || e); }
             }
         });
 
@@ -4436,10 +4436,10 @@ window.addEventListener('themeChanged', function() {
         rafraichirGraphiqueIndividuel(window.profilActuelDA);
     }
     if (typeof rafraichirGraphiqueSpaghettiACP === 'function') {
-        try { rafraichirGraphiqueSpaghettiACP(); } catch(e) { /* section pas visible */ }
+        try { rafraichirGraphiqueSpaghettiACP(); } catch(e) { console.warn('[Graphiques] spaghettiACP refresh skipped (section not visible):', e.message || e); }
     }
     if (typeof rafraichirGraphiqueSpaghetti === 'function') {
-        try { rafraichirGraphiqueSpaghetti(); } catch(e) { /* section pas visible */ }
+        try { rafraichirGraphiqueSpaghetti(); } catch(e) { console.warn('[Graphiques] spaghetti refresh skipped (section not visible):', e.message || e); }
     }
 });
 
