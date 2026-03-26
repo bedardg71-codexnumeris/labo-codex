@@ -28,8 +28,36 @@ Ce document te guidera vers :
 ## Contraintes techniques
 
 - **Stack** : HTML5 / CSS3 / JavaScript ES6+ pur (aucune dependance externe sauf Chart.js)
-- **Stockage** : IndexedDB (principal) + localStorage (cache synchrone)
+- **Stockage** : localStorage (store primaire de facto) + IndexedDB (backup async) via `db.js`
 - **Fonctionnement** : 100% hors-ligne
+- **CSP** : `script-src 'self'` — zero script inline, zero `eval()`
+
+---
+
+## Regles de securite (audit 26 mars 2026)
+
+**Ces regles sont NON NEGOCIABLES. Tout nouveau code DOIT les respecter.**
+
+### innerHTML et donnees utilisateur
+Tout `innerHTML` qui injecte des donnees utilisateur (noms d'etudiants, titres de productions, texte libre, donnees importees) **DOIT** utiliser `echapperHtml()`. Pas d'exception.
+```javascript
+// INTERDIT :
+container.innerHTML = '<div>' + etudiant.nom + '</div>';
+// OBLIGATOIRE :
+container.innerHTML = '<div>' + echapperHtml(etudiant.nom) + '</div>';
+```
+
+### Handlers inline
+Zero handler inline (`onclick=`, `onchange=`, etc.) dans le HTML genere. Utiliser `data-action`, `data-on-change`, etc. (voir dispatcher dans `main.js` lignes 700-780).
+
+### Imports ZIP
+Tout import ZIP **DOIT** passer par `validerZipSecurite(zip)` (definie dans `import-export.js`). Cette fonction verifie : taille decompressee < 2 Go, pas de path traversal, pas de chemins absolus.
+
+### Imports images/PDF
+Tout import de fichier image ou PDF **DOIT** passer par `validerMagicBytes(blob)` (definie dans `travaux-import.js`). Verifie les signatures PNG/JPEG/PDF/WebP/HEIC.
+
+### console.log
+Nouveau code = `console.warn` / `console.error` uniquement. Les `console.log` de debug doivent etre retires avant commit.
 
 ---
 
