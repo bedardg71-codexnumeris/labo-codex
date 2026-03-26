@@ -2,51 +2,57 @@
 
 **Date** : 26 mars 2026
 **Version** : Beta 98.9 (Build 0326-0750)
-**Statut** : Assainissement sécurité + audit terminés. Données réparées.
+**Statut** : Assainissement sécurité terminé. Réparation données EN COURS.
+
+---
+
+## URGENT — Réparation données (prochaine session)
+
+### Situation
+Les données sont réparties entre Safari et Chrome avec des références incohérentes.
+Safari = données les plus complètes (présences correctes, trimestres passés).
+Chrome = corrections de code appliquées mais données corrompues par import Safari.
+
+### Marche à suivre (dans Safari)
+1. Ouvrir l'app dans **Safari** (navigateur de travail quotidien)
+2. Ouvrir la console Safari (Cmd+Option+C)
+3. Coller le script `fix-data.js` (fichier à la racine du projet)
+4. Recharger la page
+5. Vérifier : 25 personnes gr.00002, 24 personnes gr.00008
+6. Vérifier : graphiques de présences corrects
+7. Supprimer le cours XSS s'il est encore là (Réglages → Cours)
+8. Sauvegarder un **Codex depuis Safari** → ce codex devient la référence unique
+9. NE PAS importer de Codex dans Chrome tant que les données Safari ne sont pas validées
+
+### Script de correction (fix-data.js à la racine)
+Corrige en une passe : groupesCours, étudiants (coursId + groupeCoursId),
+productions, évaluations, présences, suppression cours XSS, reconstruction snapshots.
+
+### Attention
+- Ne PAS ouvrir un Codex Safari dans Chrome (ça écrase les corrections)
+- Les cache busters `?v=` sont INOPÉRANTS en file:// — quitter le navigateur pour forcer le rechargement
+- Les DA sont des strings — le dispatcher ne les convertit plus en nombre (fix < 10000)
 
 ---
 
 ## Chantier terminé : Assainissement sécurité + Audit (25-26 mars 2026)
 
-### Phases 0-6 — Migration handlers inline (~1302 handlers → 0)
-- Dispatcher `data-action` / `data-on-change` / `data-on-input` / etc. dans main.js
-- CSP `script-src 'self'` active, 9 blocs script externalisés dans `init-inline.js`
-- Zéro handler inline exécutable dans tout le projet
+### Résumé
+- ~1302 handlers inline → 0 (Phases 0-6)
+- CSP `script-src 'self'` active
+- Audit lots A-H complet (imports ZIP, catch vides, innerHTML XSS, FSAPI, architecture)
+- 5 règles sécurité non négociables dans CLAUDE.md
+- Bug navigation profil Préc./Suiv. corrigé (DA auto-conversion < 10000)
+- Bug Chart.js canvas reuse corrigé (destroy avant recréation)
 
-### Audit sécurité (Lots A-H)
-- **A** : `validerZipSecurite()` centralisée + `validerMagicBytes()` pour images/PDF
-- **B** : 62 catch vides → `console.warn` contextualisé
-- **D1-D2** : 27 `echapperHtml()` ajoutés sur innerHTML vulnérables (7 fichiers)
-- **E** : FSAPI abort/error dans codex.js, décisions architecturales documentées (db.js)
-- **F** : Stratégie cache indices documentée (indices.js), fichiers protégés intacts
-- **H** : 5 règles de sécurité non négociables ajoutées dans CLAUDE.md
-
-### Réparation des données
-- Cours XSS de test (`601-XSS <img src=x...>`) supprimé (résidu sprint 22 mars)
-- Groupe-cours 00002 reconfiguré (était lié au cours XSS)
-- `coursId` corrigé sur 51 étudiants + 10 productions + 180 évaluations + 927 présences
-  (`COURS1766455789356` → `h2026-601-101-MQ-00001`)
-- `groupeCoursId` ajouté aux 51 étudiants (champ manquant)
-- Snapshots historiques reconstruits pour groupe 00002 (17 semaines)
-
-### Corrections techniques connexes
-- `chargerVersionJSON()` et `verifierMiseAJourDistante()` : guard `file://` (CORS Chrome)
-- `chargerResolutions()` : guard `file://`
-- Cache busters mis à jour sur 7 scripts modifiés
-- `groupe.js` : sélecteurs `[onclick*=...]` → `[data-action=...]`
+### Commits de la session
+Voir `git log --oneline` pour la liste complète (~32 commits).
 
 ---
 
-## Pour la prochaine session
-1. Lire ce fichier → `docs/00-START-HERE.md`
-2. Plan d'audit : `plans de travail/Plan - Audit sécurité et dette technique.md`
-3. Lot G (console.log cleanup) est optionnel — 2781 occurrences dans 102 fichiers
-4. Les données sont réparées et fonctionnelles pour les deux groupes
-
-## Architecture de délégation (référence)
-```
-Dispatcher click : data-action, data-param/2/3, data-stop, data-prevent, data-close-on-bg
-Dispatcher change/input/keyup/mousedown/focusin : data-on-change, etc. + data-param/2
-Dispatcher dragstart : data-drag-data="type:value"
-CSP : script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:
-```
+## Pour reprendre
+1. Lire ce fichier
+2. Appliquer le script fix-data.js **dans Safari**
+3. Valider les données
+4. Sauvegarder un Codex de référence
+5. Puis continuer le backlog normal
