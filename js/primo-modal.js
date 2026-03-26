@@ -268,7 +268,6 @@ async function afficherQuestionActuelle() {
 
     // Si c'est une action, l'exécuter automatiquement après affichage
     if (question.type === 'action') {
-        console.log('[Guide] Question type action détectée - déclenchement automatique');
         // Petit délai pour que l'utilisateur voie le message
         setTimeout(() => {
             executerAction(question);
@@ -753,11 +752,9 @@ function primoQuestionSuivante() {
     const questionsActives = obtenirQuestionsActives(reponsesPrimo);
     const question = questionsActives[indexQuestionActuelle];
 
-    console.log('[Guide] primoQuestionSuivante() - Type:', question.type, 'ID:', question.id);
 
     // En mode notification, simplement avancer sans validation
     if (modeNotification) {
-        console.log('[Guide] Mode notification - passage direct');
         indexQuestionActuelle++;
         afficherNotificationActuelle();
 
@@ -778,7 +775,6 @@ function primoQuestionSuivante() {
 
     // Pour les types 'instruction', 'message' et 'info', pas de validation nécessaire
     if (question.type === 'instruction' || question.type === 'message' || question.type === 'info') {
-        console.log('[Guide] Type instruction/message/info - passage direct');
         indexQuestionActuelle++;
         afficherQuestionActuelle();
         return;
@@ -786,7 +782,6 @@ function primoQuestionSuivante() {
 
     // Pour le type 'action', exécuter l'action puis passer à la suite
     if (question.type === 'action') {
-        console.log('[Guide] Type action détecté - appel executerAction()');
         executerAction(question);
         return; // L'action appellera afficherQuestionActuelle() après son exécution
     }
@@ -808,7 +803,6 @@ function primoQuestionSuivante() {
     if (question.actionApres && typeof question.actionApres === 'function') {
         try {
             question.actionApres(reponse, reponsesPrimo);
-            console.log('[Guide] actionApres exécutée pour', question.id);
         } catch (e) {
             console.error('[Guide] Erreur dans actionApres:', e);
         }
@@ -842,7 +836,6 @@ function confirmerAnnulation() {
  * Exécute une action spéciale (import données demo, etc.)
  */
 async function executerAction(question) {
-    console.log(`[Guide] Exécution de l'action: ${question.action}`);
 
     try {
         // Action spéciale : passer en mode notification (sans afficher de statut)
@@ -864,7 +857,6 @@ async function executerAction(question) {
 
         // Exécuter l'action selon son type
         if (question.action === 'importerDonneesDemo') {
-            console.log('[Guide] importerDonneesDemo desactive (Chantier 1 — demantelement demo)');
         } else if (question.action === 'importerMaterielPedagogique') {
             await importerMaterielPedagogique();
         } else if (question.action === 'importerEchelleIDME') {
@@ -930,13 +922,11 @@ async function executerAction(question) {
  * Importe le matériel pédagogique (échelle, grille, cartouches)
  */
 async function importerMaterielPedagogique() {
-    console.log('[Guide] 🚀 Import du matériel pédagogique...');
 
     let compteur = 0;
 
     try {
         // 1. Importer l'échelle IDME
-        console.log('[Guide] 📥 Import échelle IDME...');
         const responseEchelle = await fetch('materiel-demo/echelle-idme.json');
         if (!responseEchelle.ok) throw new Error('Échelle IDME introuvable');
         const echelleData = await responseEchelle.json();
@@ -955,10 +945,8 @@ async function importerMaterielPedagogique() {
 
         db.setSync('echelles', echelles);
         compteur++;
-        console.log('[Guide] ✅ Échelle IDME importée');
 
         // 2. Importer la grille SRPNF
-        console.log('[Guide] 📥 Import grille SRPNF...');
         const responseGrille = await fetch('materiel-demo/grille-srpnf.json');
         if (!responseGrille.ok) throw new Error('Grille SRPNF introuvable');
         const grilleData = await responseGrille.json();
@@ -977,10 +965,8 @@ async function importerMaterielPedagogique() {
 
         db.setSync('grillesTemplates', grilles);
         compteur++;
-        console.log('[Guide] ✅ Grille SRPNF importée');
 
         // 3. Importer les cartouches
-        console.log('[Guide] 📥 Import cartouches SRPNF...');
         const responseCartouches = await fetch('materiel-demo/cartouches-srpnf.json');
         if (!responseCartouches.ok) throw new Error('Cartouches SRPNF introuvables');
         const cartouchesData = await responseCartouches.json();
@@ -1000,9 +986,7 @@ async function importerMaterielPedagogique() {
 
         db.setSync(cleCartouche, cartouchesExistantes);
         compteur++;
-        console.log('[Guide] ✅ Cartouches SRPNF importées');
 
-        console.log(`[Guide] 🎉 Matériel pédagogique importé avec succès (${compteur}/3)`);
 
     } catch (error) {
         console.error('[Guide] ❌ Erreur import matériel pédagogique:', error);
@@ -1014,11 +998,9 @@ async function importerMaterielPedagogique() {
  * Importe uniquement l'échelle IDME
  */
 async function importerEchelleIDME() {
-    console.log('[Guide] 🚀 Import de l\'échelle IDME...');
 
     try {
         // Importer l'échelle IDME
-        console.log('[Guide] 📥 Import échelle IDME...');
         const responseEchelle = await fetch('materiel-demo/echelle-idme.json');
         if (!responseEchelle.ok) throw new Error('Échelle IDME introuvable');
         const echelleData = await responseEchelle.json();
@@ -1036,7 +1018,6 @@ async function importerEchelleIDME() {
         }
 
         db.setSync('echelles', echelles);
-        console.log('[Guide] ✅ Échelle IDME importée avec succès');
 
     } catch (error) {
         console.error('[Guide] ❌ Erreur import échelle IDME:', error);
@@ -1048,7 +1029,6 @@ async function importerEchelleIDME() {
  * Crée une production automatiquement avec les données collectées par Primo
  */
 async function creerProduction() {
-    console.log('[Guide] 🚀 Création de la production...');
 
     try {
         // Récupérer les données saisies par l'utilisateur
@@ -1056,7 +1036,6 @@ async function creerProduction() {
         const description = reponsesPrimo['production-description'] || 'Évaluation des connaissances';
         const ponderation = parseInt(reponsesPrimo['production-ponderation']) || 10;
 
-        console.log('[Guide] 📝 Données production:', { titre, description, ponderation });
 
         // Trouver la grille SRPNF importée
         const grillesTemplates = db.getSync('grillesTemplates', []);
@@ -1066,7 +1045,6 @@ async function creerProduction() {
             throw new Error('Grille SRPNF non trouvée. Assure-toi que l\'import du matériel pédagogique a fonctionné.');
         }
 
-        console.log('[Guide] 📋 Grille SRPNF trouvée:', grilleSRPNF.id);
 
         // Créer l'objet production
         const nouvelleProduction = {
@@ -1081,7 +1059,6 @@ async function creerProduction() {
             verrouille: false
         };
 
-        console.log('[Guide] 💾 Objet production créé:', nouvelleProduction);
 
         // ✅ CORRECTION (Beta 95 - 2 jan 2026) : Utiliser clé namespacée
         // Ajouter la production dans localStorage
@@ -1090,7 +1067,6 @@ async function creerProduction() {
         productions.push(nouvelleProduction);
         db.setSync(cleProductions, productions);
 
-        console.log('[Guide] ✅ Production créée avec succès:', titre);
 
         // Sauvegarder l'ID pour référence future
         reponsesPrimo.productionCreeeId = nouvelleProduction.id;
@@ -1120,7 +1096,6 @@ function detecterContexteMateriel() {
         reponsesPrimo['materiel-pratique-detectee'] = pratique;
     }
 
-    console.log('[Guide] Pratique détectée pour module matériel:', reponsesPrimo['materiel-pratique-detectee']);
 }
 
 /**
@@ -1202,7 +1177,6 @@ function creerEchelleDepuisParcours() {
             reponsesPrimo['materiel-echelle-id-cree'] = echelle.id;
             reponsesPrimo['materiel-echelle-nom-cree'] = echelle.nom;
             reponsesPrimo['materiel-echelle-nb-niveaux-crees'] = echelle.niveaux.length.toString();
-            console.log('[Guide] ✅ Échelle créée:', echelle.nom, '(' + echelle.niveaux.length + ' niveaux)');
         } else {
             throw new Error('Échelle non trouvée après création dans IndexedDB');
         }
@@ -1272,7 +1246,6 @@ function creerGrilleDepuisParcours() {
             reponsesPrimo['materiel-grille-id-cree'] = grille.id;
             reponsesPrimo['materiel-grille-nom-cree'] = grille.nom;
             reponsesPrimo['materiel-grille-nb-criteres-crees'] = grille.criteres.length.toString();
-            console.log('[Guide] ✅ Grille créée:', grille.nom, '(' + grille.criteres.length + ' critères)');
         } else {
             throw new Error('Grille non trouvée après création dans IndexedDB');
         }
@@ -1312,7 +1285,6 @@ function creerProductionDepuisParcours() {
 
     if (trouvee) {
         reponsesPrimo['materiel-production-id-cree'] = production.id;
-        console.log('[Guide] ✅ Production créée:', titre, '(' + ponderation + '%)');
     } else {
         throw new Error('Production non trouvée après création dans IndexedDB');
     }
@@ -1369,7 +1341,6 @@ function creerCartoucheDepuisParcours() {
     var trouvee = cartouchesVerif.find(function(c) { return c.id === cartouche.id; });
 
     if (trouvee) {
-        console.log('[Guide] ✅ Cartouche créée:', cartouche.nom);
     } else {
         throw new Error('Cartouche non trouvée après création dans IndexedDB');
     }
@@ -1473,7 +1444,6 @@ function afficherErreur(message) {
 function creerSeancesHoraire() {
     const horaire = db.getSync('horaireHebdomadaire', null);
     if (!horaire || !horaire.nombreSeances) {
-        console.log('[Guide] Aucun horaire à convertir');
         return;
     }
 
@@ -1482,7 +1452,6 @@ function creerSeancesHoraire() {
     if (!infoCours || !infoCours.id) {
         console.warn('[Guide] Impossible de sauvegarder horaire: infoCours.id manquant');
         // Fallback sur clé legacy pour ne pas perdre les données
-        console.log('[Guide] Fallback sur clé legacy seancesHoraire');
     }
     const coursId = infoCours?.id;
 
@@ -1519,12 +1488,10 @@ function creerSeancesHoraire() {
         // ✅ Sauvegarder dans la clé namespacée par cours
         const cleSauvegarde = coursId ? `seancesHoraire_${coursId}` : 'seancesHoraire';
         db.setSync(cleSauvegarde, seances);
-        console.log(`[Guide] ${seances.length} séance(s) créée(s) dans ${cleSauvegarde}:`, seances);
 
         // 🆕 BETA 95.1 (Bug Bruno) : Aussi sauvegarder dans horaireHebdo namespacé
         // pour que genererCalendrierComplet() puisse déterminer les jours avec cours
         db.setSync(cle('horaireHebdo'), seances);
-        console.log(`[Guide] Séances aussi copiées dans ${cle('horaireHebdo')}`);
     }
 }
 
@@ -1532,10 +1499,6 @@ function creerSeancesHoraire() {
  * Termine la configuration et sauvegarde toutes les réponses
  */
 async function terminerConfiguration() {
-    console.log('[Guide] Configuration terminée !');
-    console.log('[Guide] Réponses collectées:', reponsesPrimo);
-    console.log('[Guide] DEBUG code-cours:', reponsesPrimo['code-cours']);
-    console.log('[Guide] DEBUG titre-cours:', reponsesPrimo['titre-cours']);
 
     // Vérifier si c'est un parcours modulaire (retour au menu)
     const questionsActives = obtenirQuestionsActives(reponsesPrimo);
@@ -1563,18 +1526,15 @@ async function terminerConfiguration() {
     // Générer le calendrier complet à partir des données du trimestre
     if (typeof genererCalendrierComplet === 'function') {
         genererCalendrierComplet();
-        console.log('[Guide] Calendrier complet généré');
     }
 
     // Générer les séances complètes à partir de l'horaire
     if (typeof genererSeancesCompletes === 'function') {
         genererSeancesCompletes();
-        console.log('[Guide] Séances complètes générées');
     }
 
     if (estParcoursModulaire) {
         // PARCOURS MODULAIRE : Retourner au menu d'accueil
-        console.log('[Guide] Parcours modulaire terminé - retour au menu');
 
         // Afficher notification de succès
         if (typeof afficherNotificationSucces === 'function') {
@@ -1616,14 +1576,12 @@ async function terminerConfiguration() {
 
     } else {
         // PARCOURS COMPLET : Configuration complète avec import matériel
-        console.log('[Guide] Parcours complet - import matériel et rechargement');
 
         // Importer le matériel pédagogique de démarrage (asynchrone)
         await importerMaterielDemarrage();
 
         // [Chantier 2] Mode Assisté supprimé — rester en mode normal
         db.setSync('modeApplication', 'normal');
-        console.log('[Guide] Mode de travail défini sur "normal"');
 
         // Afficher notification de succès
         if (typeof afficherNotificationSucces === 'function') {
@@ -1659,7 +1617,6 @@ function sauvegarderReponses(reponses) {
         if (question.type === 'instruction' && question.champsCibles) {
             question.champsCibles.forEach(cible => {
                 if (cible.valeurFixe !== undefined) {
-                    console.log(`[Guide] Sauvegarde valeur fixe pour ${question.id}:`, cible.valeurFixe);
                     sauvegarderChamp(cible, cible.valeurFixe);
                 }
             });
@@ -1678,7 +1635,6 @@ function sauvegarderReponses(reponses) {
         });
     });
 
-    console.log('[Guide] Toutes les réponses ont été sauvegardées dans localStorage');
 }
 
 /**
@@ -1688,7 +1644,6 @@ function transformerReponse(questionId, valeur) {
     const question = obtenirQuestion(questionId);
 
     if (question && typeof question.transformation === 'function') {
-        console.log(`[Guide] Transformation appliquée pour ${questionId}`);
         return question.transformation(valeur);
     }
 
@@ -1729,7 +1684,6 @@ function sauvegarderChamp(cible, valeur) {
         db.setSync(cle, objet);
     }
 
-    console.log(`[Guide] Sauvegardé: ${cle}${champ ? '.' + champ : ''} =`, valeur);
 }
 
 /**
@@ -1739,7 +1693,6 @@ function creerEchelleIDMEParDefaut() {
     const echelleExistante = db.getSync('echellePerformance', null);
 
     if (echelleExistante) {
-        console.log('[Guide] Échelle IDME déjà configurée');
         return;
     }
 
@@ -1757,41 +1710,30 @@ function creerEchelleIDMEParDefaut() {
     };
 
     db.setSync('echellePerformance', echelleIDME);
-    console.log('[Guide] Échelle IDME créée par défaut');
 }
 
 /**
  * Importe le matériel pédagogique de démarrage (échelle IDME + grille SRPNF + cartouches)
  */
 async function importerMaterielDemarrage() {
-    console.log('[Guide] 🚀 Début import matériel de démarrage...');
 
     // Vérifier si du matériel existe déjà
     const echellesExistantes = db.getSync('echellesTemplates', []);
     const grillesExistantes = db.getSync('grillesTemplates', []);
 
-    console.log('[Guide] 🔍 Vérification matériel existant:', {
-        echelles: echellesExistantes.length,
-        grilles: grillesExistantes.length
-    });
 
     if (echellesExistantes.length > 0 || grillesExistantes.length > 0) {
-        console.log('[Guide] ⏭️ Matériel pédagogique déjà présent, import annulé');
-        console.log('[Guide] Échelles existantes:', echellesExistantes);
-        console.log('[Guide] Grilles existantes:', grillesExistantes);
         return;
     }
 
     try {
         // Charger le fichier materiel-demarrage.json
-        console.log('[Guide] 📥 Chargement de materiel-demarrage.json...');
         const response = await fetch('materiel-demarrage.json');
         if (!response.ok) {
             throw new Error(`Erreur HTTP ${response.status}: ${response.statusText}`);
         }
 
         const config = await response.json();
-        console.log('[Guide] 📦 Fichier chargé:', config.metadata?.nom);
 
         const contenu = config.contenu;
         let nbImporte = 0;
@@ -1800,14 +1742,12 @@ async function importerMaterielDemarrage() {
         if (contenu.echelles && contenu.echelles.length > 0) {
             db.setSync('echellesTemplates', contenu.echelles);
             nbImporte += contenu.echelles.length;
-            console.log(`[Guide] ✅ ${contenu.echelles.length} échelle(s) importée(s)`);
         }
 
         // Importer les grilles
         if (contenu.grilles && contenu.grilles.length > 0) {
             db.setSync('grillesTemplates', contenu.grilles);
             nbImporte += contenu.grilles.length;
-            console.log(`[Guide] ✅ ${contenu.grilles.length} grille(s) importée(s)`);
         }
 
         // Importer les cartouches
@@ -1817,11 +1757,9 @@ async function importerMaterielDemarrage() {
                 const cle = `cartouches_${cartouche.grilleId}`;
                 db.setSync(cle, [cartouche]);
                 nbImporte++;
-                console.log(`[Guide] ✅ Cartouche importée pour grille ${cartouche.grilleId}`);
             });
         }
 
-        console.log(`[Guide] 🎉 Matériel pédagogique importé: ${nbImporte} ressources`);
 
         // Notification à l'utilisateur
         if (typeof afficherNotificationSucces === 'function') {
@@ -1893,10 +1831,8 @@ function creerCoursInitial(reponses) {
     const indexExistant = cours.findIndex(c => c.id === coursId);
     if (indexExistant >= 0) {
         cours[indexExistant] = nouveauCours;
-        console.log('[Guide] Cours mis à jour:', nouveauCours);
     } else {
         cours.push(nouveauCours);
-        console.log('[Guide] Nouveau cours créé:', nouveauCours);
     }
 
     db.setSync('listeCours', cours);
@@ -1908,7 +1844,6 @@ function creerCoursInitial(reponses) {
     // Créer le trimestre si inexistant
     creerTrimestreSiAbsent(trimestreId, session, annee);
 
-    console.log('[Guide] coursId:', coursId, 'trimestreId:', trimestreId);
 }
 
 /**
@@ -1927,7 +1862,6 @@ function creerTrimestreSiAbsent(trimestreId, session, annee) {
             actif: true
         });
         db.setSync('trimestres', trimestres);
-        console.log('[Guide] Trimestre créé:', trimestreId);
     }
 }
 
@@ -1963,7 +1897,6 @@ function creerGroupeCoursDepuisPrimo(reponses) {
     // Vérifier si un groupe-cours existe déjà pour ce cours
     const existant = groupesCours.find(gc => gc.coursId === coursId);
     if (existant) {
-        console.log('[Guide] Groupe-cours existant pour ce cours:', existant.id);
         db.setSync('groupeCoursActif', existant.id);
         return;
     }
@@ -1993,7 +1926,6 @@ function creerGroupeCoursDepuisPrimo(reponses) {
     // Marquer comme actif
     db.setSync('groupeCoursActif', nouveauGC.id);
 
-    console.log('[Guide] Groupe-cours créé:', nouveauGC);
 }
 
 /**
@@ -2026,7 +1958,6 @@ function creerOuRecupererEnseignantPrimo(reponses) {
     enseignants.push(nouvelEnseignant);
     db.setSync('enseignants', enseignants);
 
-    console.log('[Guide] Enseignant créé:', nouvelEnseignant.id);
     return nouvelEnseignant.id;
 }
 
@@ -2052,7 +1983,6 @@ function creerHoraireDansBanquePrimo(reponses, coursId) {
 
     // Ne pas créer si pas de séances
     if (!seances || seances.length === 0) {
-        console.log('[Guide] Pas de séances trouvées, horaire non créé');
         return null;
     }
 
@@ -2066,7 +1996,6 @@ function creerHoraireDansBanquePrimo(reponses, coursId) {
     horaires.push(nouvelHoraire);
     db.setSync(cleHoraires, horaires);
 
-    console.log('[Guide] Horaire créé:', nouvelHoraire.id, 'avec', seances.length, 'séance(s)');
     return nouvelHoraire.id;
 }
 
@@ -2132,7 +2061,6 @@ let indexDepartModule = 0; // 🆕 BETA 92: Index de départ du module (pour lim
  * @param {number} indexDepart - Index de la question de départ
  */
 function demarrerModeNotification(indexDepart = 0) {
-    console.log('[Guide] 🚀 Démarrage direct en mode notification');
 
     // Initialiser l'état
     indexQuestionActuelle = indexDepart;
@@ -2148,7 +2076,6 @@ function demarrerModeNotification(indexDepart = 0) {
  * Passe du mode modal au mode notification
  */
 function passerEnModeNotification() {
-    console.log('[Guide] 🔄 Passage en mode notification');
 
     modeNotification = true;
 
@@ -2260,7 +2187,6 @@ function passerEnModeNotification() {
             modeNotification = false;
             modalPrimoActif = false;
 
-            console.log('[Guide] 🛑 MODULE 2 quitté par l\'utilisateur');
         }
     };
 
@@ -2353,7 +2279,6 @@ function afficherNotificationActuelle() {
     const question = questionsActives[indexQuestionActuelle];
 
     if (!question) {
-        console.log('[Guide] Fin du mode notification');
         revenirEnModeModal();
         return;
     }
@@ -2445,7 +2370,6 @@ function afficherNotificationActuelle() {
  * Revient au mode modal pour la conclusion
  */
 function revenirEnModeModal() {
-    console.log('[Guide] 🔄 Retour en mode modal pour conclusion');
 
     modeNotification = false;
 
@@ -2577,8 +2501,6 @@ window.confirmerAnnulation = confirmerAnnulation;
 window.terminerConfiguration = terminerConfiguration;
 window.passerEnModeNotification = passerEnModeNotification;
 window.demarrerModeNotification = demarrerModeNotification;
-
-console.log('✅ Module primo-modal.js chargé');
 
 
 })();

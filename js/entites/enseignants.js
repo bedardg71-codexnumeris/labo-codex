@@ -70,7 +70,6 @@ async function creerEnseignant(donnees) {
     enseignants.push(nouvelEnseignant);
     await db.set(CLE_ENSEIGNANTS, enseignants);
 
-    console.log('[Enseignants] Créé:', nouvelEnseignant.prenom, nouvelEnseignant.nom);
     return nouvelEnseignant;
 }
 
@@ -169,7 +168,6 @@ async function mettreAJourEnseignant(enseignantId, modifications) {
     enseignants[index].dateModification = new Date().toISOString();
 
     await db.set(CLE_ENSEIGNANTS, enseignants);
-    console.log('[Enseignants] Mis à jour:', enseignants[index].prenom, enseignants[index].nom);
 
     return enseignants[index];
 }
@@ -195,7 +193,6 @@ async function supprimerEnseignant(enseignantId) {
     }
 
     await db.set(CLE_ENSEIGNANTS, enseignants);
-    console.log('[Enseignants] Supprimé:', enseignantId);
     return true;
 }
 
@@ -364,7 +361,6 @@ window.EnseignantsEntite = {
     NIVEAUX: NIVEAUX_ENSEIGNEMENT
 };
 
-console.log('[Entités] Module Enseignants chargé');
 
 
 })();

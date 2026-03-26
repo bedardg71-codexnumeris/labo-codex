@@ -47,7 +47,6 @@ function migrerEtudiantsVersCoursId() {
     if (nbMigres > 0) {
         // ✅ CORRECTION (Beta 95 - 2 jan 2026) : Sauvegarder dans la clé namespacée
         db.setSync(cleEtudiants, etudiants);
-        console.log(`✅ [Migration] ${nbMigres} étudiant(s) → coursId: ${coursActif.id} (clé: ${cleEtudiants})`);
     }
 
     return nbMigres;
@@ -84,7 +83,6 @@ function migrerProductionsVersCoursId() {
 
     if (nbMigres > 0) {
         db.setSync(cleProductions, productions);
-        console.log(`✅ [Migration] ${nbMigres} production(s) → coursId: ${coursActif.id} (clé: ${cleProductions})`);
     }
 
     return nbMigres;
@@ -147,7 +145,6 @@ function migrerPresencesVersCoursId() {
 
     if (nbMigres > 0) {
         db.setSync(clePresences, presences);
-        console.log(`✅ [Migration] ${nbMigres} date(s) de présences → coursId: ${coursActif.id} (clé: ${clePresences})`);
     }
 
     return nbMigres;
@@ -177,7 +174,6 @@ function migrerCoursVersTrimestreId() {
 
     if (nbMigres > 0) {
         db.setSync('listeCours', cours);
-        console.log(`✅ [Migration] ${nbMigres} cours → trimestreId`);
     }
 
     return nbMigres;
@@ -191,8 +187,6 @@ function migrerCoursVersTrimestreId() {
  * @returns {Object} Résultats des migrations { etudiants, productions, presences, cours }
  */
 function executerMigrationsBeta935() {
-    console.log('🔄 [Migration] Démarrage migrations Beta 93.5...');
-
     const resultats = {
         etudiants: migrerEtudiantsVersCoursId(),
         productions: migrerProductionsVersCoursId(),
@@ -201,16 +195,6 @@ function executerMigrationsBeta935() {
     };
 
     const total = Object.values(resultats).reduce((sum, n) => sum + (n || 0), 0);
-
-    if (total > 0) {
-        console.log(`✅ [Migration] Beta 93.5 terminée (${total} éléments migrés)`);
-        console.log(`   - Étudiants: ${resultats.etudiants}`);
-        console.log(`   - Productions: ${resultats.productions}`);
-        console.log(`   - Présences: ${resultats.presences}`);
-        console.log(`   - Cours: ${resultats.cours}`);
-    } else {
-        console.log('✅ [Migration] Aucune migration nécessaire (déjà à jour)');
-    }
 
     return resultats;
 }
@@ -236,13 +220,10 @@ function executerMigrationsBeta935() {
  * @returns {Object} { nbCoursMigres, nbSeancesGenerees }
  */
 function migrerHoraireVersMultiCours() {
-    console.log('🔄 [Migration Beta 95] Migration horaires multi-cours...');
-
     // Obtenir le trimestre actif
     const trimestres = db.getSync('trimestres', []);
     const trimestreActif = trimestres.find(t => t.actif);
     if (!trimestreActif) {
-        console.log('   ⚠️ Aucun trimestre actif, migration reportée');
         return { nbCoursMigres: 0, nbSeancesGenerees: 0 };
     }
 
@@ -250,7 +231,6 @@ function migrerHoraireVersMultiCours() {
     const listeCours = db.getSync('listeCours', []);
     const coursTrimestreActif = listeCours.filter(c => c.trimestreId === trimestreActif.id);
     if (coursTrimestreActif.length === 0) {
-        console.log('   ⚠️ Aucun cours dans le trimestre actif');
         return { nbCoursMigres: 0, nbSeancesGenerees: 0 };
     }
 
@@ -271,12 +251,8 @@ function migrerHoraireVersMultiCours() {
     }
 
     if (horaireGlobal.length === 0) {
-        console.log('   ⚠️ Aucun horaire global existant, pas de migration nécessaire');
         return { nbCoursMigres: 0, nbSeancesGenerees: 0 };
     }
-
-    console.log(`   📋 Horaire global trouvé: ${horaireGlobal.length} séance(s)`);
-    console.log(`   📚 Cours à migrer: ${coursTrimestreActif.length}`);
 
     // Copier l'horaire vers chaque cours qui n'en a pas encore
     let nbCoursMigres = 0;
@@ -288,7 +264,6 @@ function migrerHoraireVersMultiCours() {
             // Copier l'horaire global vers ce cours
             db.setSync(cleHoraireCours, horaireGlobal);
             nbCoursMigres++;
-            console.log(`   ✅ Horaire copié vers: ${cours.sigle || cours.id} (${cours.groupe || 'sans groupe'})`);
         }
     });
 
@@ -305,8 +280,6 @@ function migrerHoraireVersMultiCours() {
         });
     }
 
-    console.log(`✅ [Migration Beta 95] Terminée: ${nbCoursMigres} cours migré(s), ${nbSeancesGenerees} séances générées`);
-
     return { nbCoursMigres, nbSeancesGenerees };
 }
 
@@ -318,19 +291,11 @@ function migrerHoraireVersMultiCours() {
  * @returns {Object} Résultats des migrations
  */
 function executerMigrationsBeta95() {
-    console.log('🔄 [Migration] Démarrage migrations Beta 95...');
-
     const resultats = {
         horaires: migrerHoraireVersMultiCours()
     };
 
     const total = resultats.horaires.nbCoursMigres || 0;
-
-    if (total > 0) {
-        console.log(`✅ [Migration] Beta 95 terminée (${total} cours migré(s))`);
-    } else {
-        console.log('✅ [Migration] Aucune migration Beta 95 nécessaire (déjà à jour)');
-    }
 
     return resultats;
 }
@@ -355,11 +320,8 @@ function executerMigrationsBeta95() {
  * @returns {Object} { nbSeancesMigrees, nbCoursMigres }
  */
 function migrerSeancesVersPeriodes() {
-    console.log('🔄 [Migration Beta 95.1] Migration séances vers périodes...');
-
     const listeCours = db.getSync('listeCours', []);
     if (listeCours.length === 0) {
-        console.log('   ⚠️ Aucun cours, pas de migration nécessaire');
         return { nbSeancesMigrees: 0, nbCoursMigres: 0 };
     }
 
@@ -412,7 +374,6 @@ function migrerSeancesVersPeriodes() {
     });
 
     if (nbSeancesMigrees > 0) {
-        console.log(`   ✅ ${nbSeancesMigrees} séance(s) migrée(s) (${nbCoursMigres} cours)`);
     }
 
     return { nbSeancesMigrees, nbCoursMigres };
@@ -428,8 +389,6 @@ function migrerSeancesVersPeriodes() {
  * @returns {number} Nombre de présences migrées
  */
 function migrerPresencesVersPeriodes() {
-    console.log('🔄 [Migration Beta 95.1] Migration présences vers périodes...');
-
     // Obtenir la durée de période (défaut: 55 min)
     const modalites = db.getSync('modalitesEvaluation', {});
     const dureePeriode = modalites.dureePeriodeMinutes || 55;
@@ -439,7 +398,6 @@ function migrerPresencesVersPeriodes() {
     const presences = db.getSync(clePresences, []);
 
     if (!Array.isArray(presences) || presences.length === 0) {
-        console.log('   ⚠️ Aucune présence, pas de migration nécessaire');
         return 0;
     }
 
@@ -455,7 +413,6 @@ function migrerPresencesVersPeriodes() {
 
     if (nbMigrees > 0) {
         db.setSync(clePresences, presences);
-        console.log(`   ✅ ${nbMigrees} présence(s) migrée(s)`);
     }
 
     return nbMigrees;
@@ -469,8 +426,6 @@ function migrerPresencesVersPeriodes() {
  * @returns {Object} Résultats des migrations
  */
 function executerMigrationsBeta951() {
-    console.log('🔄 [Migration] Démarrage migrations Beta 95.1...');
-
     const resultats = {
         seances: migrerSeancesVersPeriodes(),
         presences: migrerPresencesVersPeriodes()
@@ -479,14 +434,6 @@ function executerMigrationsBeta951() {
     const totalSeances = resultats.seances.nbSeancesMigrees || 0;
     const totalPresences = resultats.presences || 0;
     const total = totalSeances + totalPresences;
-
-    if (total > 0) {
-        console.log(`✅ [Migration] Beta 95.1 terminée:`);
-        console.log(`   - Séances: ${totalSeances}`);
-        console.log(`   - Présences: ${totalPresences}`);
-    } else {
-        console.log('✅ [Migration] Aucune migration Beta 95.1 nécessaire (déjà à jour)');
-    }
 
     return resultats;
 }
@@ -526,7 +473,6 @@ function detecterDonneesLegacy() {
             const cleTest2 = `${t.id}_groupesCours`;
             if (db.getSync(cleTest, null) !== null || db.getSync(cleTest2, null) !== null) {
                 // Données namespacées détectées → marquer migration effectuée
-                console.log(`✅ [Migration] Données namespacées détectées (${t.id}), migration non nécessaire`);
                 db.setSync('migrationLegacyEffectuee', true);
                 return { isLegacy: false, details: 'Données namespacées détectées' };
             }
@@ -699,7 +645,6 @@ function reporterMigrationLegacy() {
     fermerModalMigrationLegacy();
     // Flag de session pour ne pas redemander
     window._migrationLegacyReportee = true;
-    console.log('⏸️ Migration legacy reportée par l\'utilisateur');
 }
 
 /**
@@ -713,8 +658,6 @@ function reporterMigrationLegacy() {
  * 5. Marquer comme migré
  */
 async function executerMigrationLegacy() {
-    console.log('🚀 [Migration Legacy] Démarrage...');
-
     try {
         // 1. CRÉER LE TRIMESTRE
         const maintenant = new Date();
@@ -748,8 +691,6 @@ async function executerMigrationLegacy() {
         // Sauvegarder le trimestre
         db.setSync('trimestres', [nouveauTrimestre]);
         db.setSync('trimestreActif', trimestreId);
-        console.log(`   ✅ Trimestre créé: ${nouveauTrimestre.nom} (${trimestreId})`);
-
         // 2. CRÉER UN COURS PAR DÉFAUT
         // Essayer de récupérer infoCours legacy pour les infos
         const infoCours = db.getSync('infoCours', {});
@@ -772,8 +713,6 @@ async function executerMigrationLegacy() {
         };
 
         db.setSync('listeCours', [nouveauCours]);
-        console.log(`   ✅ Cours créé: ${sigle} gr.${groupe} (${coursId})`);
-
         // 3. COPIER LES DONNÉES VERS LES CLÉS NAMESPACÉES
         // Préfixe pour ce trimestre
         const prefixe = trimestreId + '_';
@@ -784,7 +723,6 @@ async function executerMigrationLegacy() {
             if (valeur !== null) {
                 const cleNamespacee = prefixe + cleDestSuffix;
                 db.setSync(cleNamespacee, valeur);
-                console.log(`   📦 ${cleSource} → ${cleNamespacee}`);
                 return true;
             }
             return false;
@@ -803,11 +741,9 @@ async function executerMigrationLegacy() {
         const horaireGlobal = db.getSync('seancesHoraire', null) || db.getSync('horaireHebdo', null);
         if (horaireGlobal) {
             db.setSync(`seancesHoraire_${coursId}`, horaireGlobal);
-            console.log(`   📦 Horaire → seancesHoraire_${coursId}`);
         }
 
         // 4. EXÉCUTER LES MIGRATIONS PROGRESSIVES
-        console.log('   🔄 Exécution des migrations progressives...');
 
         // Beta 93.5 : Ajouter coursId
         migrerEtudiantsVersCoursId();
@@ -826,8 +762,6 @@ async function executerMigrationLegacy() {
         db.setSync('migrationLegacyEffectuee', true);
         db.setSync('migrationLegacyDate', maintenant.toISOString());
         db.setSync('migrationLegacyVersion', 'Beta 95.1');
-
-        console.log('✅ [Migration Legacy] Terminée avec succès !');
 
         // Fermer le modal
         fermerModalMigrationLegacy();
@@ -858,14 +792,10 @@ function verifierEtProposerMigrationLegacy() {
     const detection = detecterDonneesLegacy();
 
     if (detection.isLegacy) {
-        console.log('🔍 [Migration] Données legacy détectées:', detection.details);
-
         // Petit délai pour laisser l'interface se charger
         setTimeout(() => {
             afficherModalMigrationLegacy(detection.details);
         }, 500);
-    } else {
-        console.log('✅ [Migration] Données au format moderne');
     }
 }
 
@@ -887,13 +817,10 @@ function verifierEtProposerMigrationLegacy() {
  * @returns {Object} { nbEnseignantsExtraits, mapAncienNouvel }
  */
 async function migrerVersEntiteEnseignants() {
-    console.log('🔄 [Migration Beta 95.2] Extraction des enseignants...');
-
     const listeCours = db.getSync('listeCours', []);
     const enseignantsExistants = db.getSync('enseignants', []);
 
     if (enseignantsExistants.length > 0) {
-        console.log('   ⚠️ Des enseignants existent déjà, migration non nécessaire');
         return { nbEnseignantsExtraits: 0, mapAncienNouvel: {} };
     }
 
@@ -953,7 +880,6 @@ async function migrerVersEntiteEnseignants() {
     const enseignantsArray = Array.from(enseignantsMap.values());
     if (enseignantsArray.length > 0) {
         db.setSync('enseignants', enseignantsArray);
-        console.log(`   ✅ ${enseignantsArray.length} enseignant(s) extrait(s)`);
     }
 
     return {
@@ -968,13 +894,10 @@ async function migrerVersEntiteEnseignants() {
  * @returns {Object} { nbCoursExtraits, mapAncienNouvel }
  */
 async function migrerVersEntiteCours() {
-    console.log('🔄 [Migration Beta 95.2] Extraction des cours (infos générales)...');
-
     const listeCours = db.getSync('listeCours', []);
     const coursExistants = db.getSync('cours', []);
 
     if (coursExistants.length > 0) {
-        console.log('   ⚠️ Des cours existent déjà, migration non nécessaire');
         return { nbCoursExtraits: 0, mapAncienNouvel: {} };
     }
 
@@ -1023,7 +946,6 @@ async function migrerVersEntiteCours() {
     const coursArray = Array.from(coursMap.values());
     if (coursArray.length > 0) {
         db.setSync('cours', coursArray);
-        console.log(`   ✅ ${coursArray.length} cours extrait(s)`);
     }
 
     return {
@@ -1038,15 +960,12 @@ async function migrerVersEntiteCours() {
  * @returns {Object} { nbHorairesExtraits, mapAncienNouvel }
  */
 async function migrerVersEntiteHoraires() {
-    console.log('🔄 [Migration Beta 95.2] Extraction des horaires...');
-
     const listeCours = db.getSync('listeCours', []);
     // 🆕 FIX (1er fév 2026) : Utiliser cle() pour namespacing (horaires est dans CLES_NAMESPACEES)
     const cleHoraires = cle('horaires');
     const horairesExistants = db.getSync(cleHoraires, []);
 
     if (horairesExistants.length > 0) {
-        console.log('   ⚠️ Des horaires existent déjà, migration non nécessaire');
         return { nbHorairesExtraits: 0, mapAncienNouvel: {} };
     }
 
@@ -1117,7 +1036,6 @@ async function migrerVersEntiteHoraires() {
     // Sauvegarder les horaires
     if (horairesArray.length > 0) {
         db.setSync('horaires', horairesArray);
-        console.log(`   ✅ ${horairesArray.length} horaire(s) extrait(s)`);
     }
 
     return {
@@ -1135,8 +1053,6 @@ async function migrerVersEntiteHoraires() {
  * @returns {Object} { nbGroupeCoursCreés }
  */
 async function migrerVersGroupeCours(mapEnseignants, mapCours, mapHoraires) {
-    console.log('🔄 [Migration Beta 95.2] Création des groupe-cours...');
-
     const listeCours = db.getSync('listeCours', []);
     const trimestres = db.getSync('trimestres', []);
 
@@ -1149,7 +1065,6 @@ async function migrerVersGroupeCours(mapEnseignants, mapCours, mapHoraires) {
         const groupesCoursExistants = db.getSync(cleGC, []);
 
         if (groupesCoursExistants.length > 0) {
-            console.log(`   ⚠️ ${trimestre.id}: groupe-cours existants, ignoré`);
             continue;
         }
 
@@ -1179,7 +1094,6 @@ async function migrerVersGroupeCours(mapEnseignants, mapCours, mapHoraires) {
 
         if (groupesCours.length > 0) {
             db.setSync(cleGC, groupesCours);
-            console.log(`   ✅ ${trimestre.id}: ${groupesCours.length} groupe-cours créé(s)`);
         }
     }
 
@@ -1192,11 +1106,8 @@ async function migrerVersGroupeCours(mapEnseignants, mapCours, mapHoraires) {
  * @returns {Object} Résultats des migrations
  */
 async function executerMigrationsBeta96() {
-    console.log('🔄 [Migration] Démarrage migrations Beta 95.2 (entités modulaires)...');
-
     // Vérifier si déjà migré
     if (db.getSync('migrationBeta96Effectuee', false)) {
-        console.log('✅ [Migration] Beta 95.2 déjà effectuée');
         return { deja_effectuee: true };
     }
 
@@ -1229,16 +1140,6 @@ async function executerMigrationsBeta96() {
         };
 
         const total = Object.values(resultats).reduce((a, b) => a + b, 0);
-
-        if (total > 0) {
-            console.log(`✅ [Migration] Beta 95.2 terminée:`);
-            console.log(`   - Enseignants: ${resultats.enseignants}`);
-            console.log(`   - Cours: ${resultats.cours}`);
-            console.log(`   - Horaires: ${resultats.horaires}`);
-            console.log(`   - Groupe-cours: ${resultats.groupesCours}`);
-        } else {
-            console.log('✅ [Migration] Aucune migration Beta 95.2 nécessaire (données vides ou déjà migrées)');
-        }
 
         return resultats;
 
@@ -1273,7 +1174,6 @@ function migrerCleProductionsPedagogiques() {
             if (!existantes || existantes.length === 0) {
                 // Copier vers la nouvelle clé
                 db.setSync(nouvelleCle, anciennes);
-                console.log(`✅ [Migration] ${ancienneCle} → ${nouvelleCle} (${anciennes.length} productions)`);
                 nbMigres += anciennes.length;
             } else {
                 // Fusionner : ajouter celles qui manquent
@@ -1281,7 +1181,6 @@ function migrerCleProductionsPedagogiques() {
                 const nouvelles = anciennes.filter(p => !idsExistants.has(p.id));
                 if (nouvelles.length > 0) {
                     db.setSync(nouvelleCle, [...existantes, ...nouvelles]);
-                    console.log(`✅ [Migration] Fusionné ${nouvelles.length} productions de ${ancienneCle} vers ${nouvelleCle}`);
                     nbMigres += nouvelles.length;
                 }
             }
@@ -1295,14 +1194,10 @@ function migrerCleProductionsPedagogiques() {
         const existantes = db.getSync(cleNouv, []);
         if (!existantes || existantes.length === 0) {
             db.setSync(cleNouv, nue);
-            console.log(`✅ [Migration] productionsPedagogiques (nue) → ${cleNouv} (${nue.length})`);
             nbMigres += nue.length;
         }
     }
 
-    if (nbMigres > 0) {
-        console.log(`🔄 [Migration] Total : ${nbMigres} productions migrées de productionsPedagogiques → productions`);
-    }
     db.setSync('migrationCleProductionsFaite', true);
     return nbMigres;
 }

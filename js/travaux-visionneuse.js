@@ -57,7 +57,6 @@
     function configurerPDFjs() {
         if (typeof pdfjsLib !== 'undefined') {
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'libs/pdf.worker.min.js';
-            console.log('[Travaux-Visionneuse] PDF.js configure');
         } else {
             console.warn('[Travaux-Visionneuse] PDF.js non disponible');
         }
@@ -609,7 +608,6 @@
 
         configurerPan(conteneur);
 
-        console.log('[Travaux-Visionneuse] Gestes zoom configures (Safari:', estSafari, ')');
     }
 
     /**
@@ -1063,7 +1061,6 @@
 
     function initialiserVisionneuse() {
         configurerPDFjs();
-        console.log('[Travaux-Visionneuse] Module initialise');
     }
 
     /* ===============================

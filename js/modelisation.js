@@ -42,7 +42,6 @@
             return;
         }
 
-        console.log('[Modelisation] Initialisation du module...');
 
         if (typeof travauxStockage !== 'undefined') {
             travauxStockage.initialiser();
@@ -59,7 +58,6 @@
         afficherCarrousel();
 
         moduleInitialise = true;
-        console.log('[Modelisation] Module initialise');
     }
 
     /* ===============================
@@ -285,7 +283,6 @@
                 sauvegarderFichiers();
                 afficherCarrousel();
                 await ouvrirFichierModelisation(id);
-                console.log('[Modelisation] Fichier importe:', file.name);
             } catch (err) {
                 console.error('[Modelisation] Erreur import fichier:', err);
                 alert('Erreur lors de l\u2019importation du fichier.');
@@ -433,7 +430,6 @@
         sauvegarderFichiers();
         afficherCarrousel();
 
-        console.log('[Modelisation] Fichier supprime:', id);
     }
 
     /* ===============================
@@ -470,7 +466,6 @@
        =============================== */
 
     function nettoyerModelisation() {
-        console.log('[Modelisation] Nettoyage...');
 
         if (typeof travauxAnnotation !== 'undefined' && travauxAnnotation.estActif()) {
             travauxAnnotation.desactiverAnnotation();
@@ -513,6 +508,5 @@
         fichierSuivant: fichierSuivant
     };
 
-    console.log('[Modelisation] Module charge');
 
 })();

@@ -48,7 +48,6 @@ class PratiqueConfigurable {
             throw new Error('Échelle de type "niveaux" requiert le champ "niveaux"');
         }
 
-        console.log(`✅ Pratique "${this.config.nom}" validée`);
     }
 
     // ========================================================================
@@ -381,12 +380,6 @@ class PratiqueConfigurable {
             // Ajouter les objectifs transversaux en monitoring
             defisTransversaux.forEach(d => defis.push(d.nom));
 
-            console.log(`[Multi-Objectifs] Défis détectés pour DA ${da}:`, {
-                integrateurs: defisIntegrateurs.length,
-                fondamentaux: nbFondamentauxFaibles >= 3 ? defisFondamentaux.length : 0,
-                transversaux: defisTransversaux.length,
-                total: defis.length
-            });
 
             return defis;
         }
@@ -875,7 +868,6 @@ class PratiqueConfigurable {
 
 window.PratiqueConfigurable = PratiqueConfigurable;
 
-console.log('✅ Module pratique-configurable.js chargé');
 
 
 })();

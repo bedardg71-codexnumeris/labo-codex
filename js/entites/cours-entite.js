@@ -57,7 +57,6 @@ async function creerCours(donnees) {
     cours.push(nouveauCours);
     await db.set(CLE_COURS, cours);
 
-    console.log('[Cours] Créé:', nouveauCours.codeCours, nouveauCours.id);
     return nouveauCours;
 }
 
@@ -156,7 +155,6 @@ async function mettreAJourCours(coursId, modifications) {
     cours[index].dateModification = new Date().toISOString();
 
     await db.set(CLE_COURS, cours);
-    console.log('[Cours] Mis à jour:', cours[index].codeCours);
 
     return cours[index];
 }
@@ -182,7 +180,6 @@ async function supprimerCours(coursId) {
     }
 
     await db.set(CLE_COURS, cours);
-    console.log('[Cours] Supprimé:', coursId);
     return true;
 }
 
@@ -281,7 +278,6 @@ window.CoursEntite = {
     CLE: CLE_COURS
 };
 
-console.log('[Entités] Module Cours chargé');
 
 
 })();

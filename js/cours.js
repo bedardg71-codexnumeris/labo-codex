@@ -73,7 +73,6 @@ function migrerCoursVersPratiques() {
 
     if (nbMigres > 0) {
         db.setSync('listeCours', cours);
-        console.log(`[Migration cours] ✅ ${nbMigres} cours migré(s) avec pratique par défaut`);
     }
 
     return nbMigres;
@@ -106,7 +105,6 @@ function migrerCoursDansBibliotheque() {
 
     if (nbMigres > 0) {
         db.setSync('listeCours', cours);
-        console.log(`[Migration cours] ✅ ${nbMigres} cours migré(s) avec flag dansBibliotheque`);
     }
 
     return nbMigres;
@@ -185,7 +183,6 @@ function peupleSelecteurTrimestre() {
  * - Sortie silencieuse si les éléments n'existent pas
  */
 function initialiserModuleCours() {
-    console.log('📚 Initialisation du module Cours');
 
     // Exécuter les migrations
     migrerCoursVersPratiques();
@@ -194,14 +191,12 @@ function initialiserModuleCours() {
     // Vérifier que nous sommes dans la bonne section
     const tableauContainer = document.getElementById('listeCoursSidebar');
     if (!tableauContainer) {
-        console.log('   ⚠️  Section cours non active, initialisation reportée');
         return;
     }
 
     // Afficher la liste des cours dans la sidebar
     afficherListeCoursSidebar();
 
-    console.log('   ✅ Module Cours initialisé');
 }
 
 /* ===============================
@@ -919,7 +914,6 @@ function dupliquerCoursPourTrimestreActif(id) {
     }
 
     afficherNotificationSucces(`Cours dupliqué pour ${trimestreActif.nom} !`);
-    console.log('[Cours] Cours dupliqué pour trimestre actif:', trimestreActif.id, nouveauCours);
 }
 
 /* ===============================
@@ -1052,17 +1046,14 @@ function supprimerCours(id) {
     // 1. Supprimer les étudiants du cours
     const nouveauxEtudiants = etudiants.filter(e => e.coursId !== id);
     db.setSync(cleEtudiants, nouveauxEtudiants);
-    console.log(`✅ [Suppression] ${nbEtudiants} étudiant(s) supprimé(s) dans ${cleEtudiants}`);
 
     // 2. Supprimer les productions du cours
     const nouvellesProductions = productions.filter(p => p.coursId !== id);
     db.setSync(cleProductions, nouvellesProductions);
-    console.log(`✅ [Suppression] ${nbProductions} production(s) supprimée(s) dans ${cleProductions}`);
 
     // 3. Supprimer les évaluations liées aux productions supprimées
     const nouvellesEvaluations = evaluations.filter(e => !productionsIds.includes(e.productionId));
     db.setSync(cleEvaluations, nouvellesEvaluations);
-    console.log(`✅ [Suppression] ${nbEvaluations} évaluation(s) supprimée(s)`);
 
     // 4. Supprimer les présences du cours
     const nouvellesPresences = Array.isArray(presences)
@@ -1075,7 +1066,6 @@ function supprimerCours(id) {
             return obj;
         })();
     db.setSync(clePresences, nouvellesPresences);
-    console.log(`✅ [Suppression] ${nbPresences} date(s) de présences supprimée(s) dans ${clePresences}`);
 
     // 5. Supprimer le cours lui-même
     const nouveauxCours = cours.filter(c => c.id !== id);
@@ -1083,7 +1073,6 @@ function supprimerCours(id) {
     // 6. Activer un autre cours si nécessaire
     if (coursASupprimer.actif && nouveauxCours.length > 0) {
         nouveauxCours[0].actif = true;
-        console.log(`✅ [Suppression] Cours ${nouveauxCours[0].id} activé automatiquement`);
     }
 
     db.setSync('listeCours', nouveauxCours);
@@ -1091,7 +1080,6 @@ function supprimerCours(id) {
     // ✅ BETA 93.5: Si suppression du groupe démo (9999), mémoriser le choix
     if (id === '601-101-h2026-9999' || coursASupprimer.groupe === '9999') {
         db.setSync('groupeDemoSupprime', true);
-        console.log('✅ [Suppression] Groupe démo supprimé - préférence mémorisée');
     }
 
     // 7. Rafraîchir l'affichage
@@ -1111,7 +1099,6 @@ function supprimerCours(id) {
         }
     }
 
-    console.log(`✅ [Suppression] Cours ${id} et toutes ses données supprimés avec succès`);
 }
 
 /* ===============================

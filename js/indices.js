@@ -241,7 +241,6 @@ function calculerAssiduite(da, dateLimite) {
  * @returns {Object} Structure { sommatif: { da: {...} }, dateCalcul }
  */
 function calculerEtSauvegarderIndicesAssiduite() {
-    console.log('📊 [Assiduité] Calcul des indices d\'assiduité...');
 
     var etudiants = obtenirDonneesSelonMode('groupeEtudiants');
 
@@ -264,7 +263,6 @@ function calculerEtSauvegarderIndicesAssiduite() {
         calculerEtStockerIndicesCP();
     }
 
-    console.log('📊 [Assiduité] ✅ Indices sauvegardés (' + Object.keys(indices.sommatif).length + ' étudiants)');
     return indices;
 }
 
@@ -468,7 +466,6 @@ function calculerPerformancePAN(da) {
 
             if (evaluationsRetenues.length > 0) {
                 const moyenne = evaluationsRetenues.reduce((sum, e) => sum + e.noteFinale, 0) / evaluationsRetenues.length;
-                console.log(`Indice P calculé depuis ${evaluationsRetenues.length} artefact(s) sélectionné(s): ${moyenne.toFixed(1)}%`);
                 return moyenne / 100;
             }
         }
@@ -483,7 +480,6 @@ function calculerPerformancePAN(da) {
     if (meilleuresNotes.length === 0) return 0;
 
     const moyenne = meilleuresNotes.reduce((sum, note) => sum + note, 0) / meilleuresNotes.length;
-    console.log(`Indice P calculé depuis les ${meilleuresNotes.length} meilleure(s) note(s): ${moyenne.toFixed(1)}%`);
     return moyenne / 100;
 }
 
@@ -636,6 +632,5 @@ window.calculerAssiduite = calculerAssiduite;
 window.calculerEtSauvegarderIndicesAssiduite = calculerEtSauvegarderIndicesAssiduite;
 window.calculerAssiduitePourAffichage = calculerAssiduitePourAffichage;
 
-console.log('✅ Module indices.js chargé (Beta 98.4 - refacto indice A #224)');
 
 })();

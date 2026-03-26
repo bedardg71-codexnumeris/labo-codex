@@ -115,13 +115,11 @@
                     idsGardes.add(t.id);
                     trimestresUniques.push(t);
                 } else {
-                    console.log(`[Trimestres] Doublon supprimé: ${t.nom} (${t.id})`);
                 }
             });
 
             // Sauvegarder la liste nettoyée
             db.setSync('trimestres', trimestresUniques);
-            console.log(`[Trimestres] Nettoyage terminé: ${trimestres.length} → ${trimestresUniques.length} trimestres`);
 
             return trimestresUniques;
         }
@@ -163,7 +161,6 @@
         const sessionAttendue = (moisActuel >= 1 && moisActuel <= 6) ? 'H' : 'A';
         const idAttendu = `${sessionAttendue.toLowerCase()}${anneeActuelle}`;
 
-        console.log(`[Trimestres] Trimestre attendu selon la date: ${idAttendu}`);
 
         // Chercher ce trimestre
         let trimestreAGarder = trimestres.find(t => t.id === idAttendu);
@@ -185,7 +182,6 @@
             trimestres.forEach(t => t.actif = false);
             trimestreAGarder.actif = true;
             db.setSync('trimestres', trimestres);
-            console.log(`[Trimestres] ✅ Trimestre actif corrigé: ${trimestreAGarder.nom} (${trimestreAGarder.id})`);
         }
     }
 
@@ -298,7 +294,6 @@
         trimestres.push(nouveauTrimestre);
         db.setSync('trimestres', trimestres);
 
-        console.log(`[Trimestres] Trimestre créé: ${nom} (${id})`);
         return nouveauTrimestre;
     }
 
@@ -334,7 +329,6 @@
         db.setSync('infoCours', null);
         db.setSync('groupeCoursActif', null);
 
-        console.log(`[Trimestres] Trimestre actif changé: ${trimestre.nom} (${id})`);
 
         // 🆕 FIX (21 jan 2026): Créer groupe-cours demo si nécessaire
         // Corrige le bug où les données demo n'étaient pas affichables
@@ -350,7 +344,6 @@
         if (typeof genererCalendrierComplet === 'function') {
             try {
                 genererCalendrierComplet();
-                console.log('[Trimestres] Calendrier régénéré pour', id);
             } catch (e) {
                 console.warn('[Trimestres] Erreur régénération calendrier:', e);
             }
@@ -365,7 +358,6 @@
      * Corrige le bug où les données demo n'avaient pas de groupe-cours
      */
     function creerGroupeCoursDemoSiNecessaire() {
-        console.log('[Trimestres] Vérification groupe-cours demo...');
 
         // Vérifier si le groupe-cours demo existe
         const cleGC = cle('groupesCours');
@@ -373,7 +365,6 @@
         const gcDemo = groupesCours.find(gc => gc.id === 'GC_DEMO');
 
         if (gcDemo) {
-            console.log('[Trimestres] Groupe-cours demo existant');
             return;
         }
 
@@ -394,7 +385,6 @@
             };
             horaires.push(nouvelHoraire);
             db.setSync(cleHoraires, horaires);
-            console.log('[Trimestres] Horaire demo créé');
         }
 
         // Récupérer le cours demo depuis listeCours
@@ -420,7 +410,6 @@
         };
         groupesCours.push(nouveauGC);
         db.setSync(cleGC, groupesCours);
-        console.log('[Trimestres] Groupe-cours demo créé:', nouveauGC.nom);
     }
 
     /* ===============================
@@ -460,7 +449,6 @@
 
         // 🆕 BETA 96: Créer des snapshots des ressources
         const snapshotResult = creerSnapshotRessources(id);
-        console.log(`[Trimestres] Snapshot ressources créé: ${snapshotResult.success ? 'OK' : 'Erreur'}`);
 
         // Marquer comme archivé
         trimestre.archive = true;
@@ -470,7 +458,6 @@
 
         db.setSync('trimestres', trimestres);
 
-        console.log(`[Trimestres] Trimestre archivé: ${trimestre.nom}`);
 
         // Générer export automatique
         const exportResult = exporterTrimestreArchive(id);
@@ -528,11 +515,6 @@
             pratiqueIds.add(modalites.pratiqueId);
         }
 
-        console.log(`[Trimestres] Templates utilisés par ${trimestreId}:`, {
-            grilles: grilleIds.size,
-            echelles: echelleIds.size,
-            pratiques: pratiqueIds.size
-        });
 
         return { grilleIds, echelleIds, pratiqueIds };
     }
@@ -571,11 +553,6 @@
             db.setSync(`${trimestreId}_echellesTemplates`, echellesUtilisees);
             db.setSync(`${trimestreId}_pratiquesConfigurables`, pratiquesUtilisees);
 
-            console.log(`[Trimestres] Templates copiés pour archivage ${trimestreId}:`, {
-                grilles: grillesUtilisees.length,
-                echelles: echellesUtilisees.length,
-                pratiques: pratiquesUtilisees.length
-            });
 
             // ✅ AJOUT (28 jan 2026) : Copier les cartouches des grilles utilisées
             let nbCartouchesCopies = 0;
@@ -587,7 +564,6 @@
                 }
             });
 
-            console.log(`[Trimestres] Cartouches copiés: ${nbCartouchesCopies} pour ${grilleIds.size} grille(s)`);
 
             // Ressources pour le snapshot (backup complet)
             const ressources = {
@@ -607,7 +583,6 @@
             // Sauvegarder le snapshot (backup)
             db.setSync(cleSnapshot, ressources);
 
-            console.log(`[Trimestres] Snapshot créé: ${cleSnapshot}`);
 
             return {
                 success: true,
@@ -653,7 +628,6 @@
 
         db.setSync('trimestres', trimestres);
 
-        console.log(`[Trimestres] Trimestre désarchivé: ${trimestre.nom}`);
 
         return { success: true, trimestre: trimestre };
     }
@@ -789,7 +763,6 @@
 
             URL.revokeObjectURL(url);
 
-            console.log(`[Trimestres] Export généré: ${nomFichier}`);
             return { success: true, nomFichier: nomFichier };
 
         } catch (error) {
@@ -810,7 +783,6 @@
      * @returns {Object} Résultat de la migration
      */
     function forcerMigration(trimestreId) {
-        console.log(`[Trimestres] Migration forcée vers: ${trimestreId}`);
 
         let clesMigrees = 0;
         CLES_NAMESPACEES.forEach(nomCle => {
@@ -820,11 +792,9 @@
                 db.setSync(nouvelleCle, valeur);
                 db.removeSync(nomCle);
                 clesMigrees++;
-                console.log(`  → ${nomCle} → ${nouvelleCle}`);
             }
         });
 
-        console.log(`[Trimestres] Migration forcée terminée: ${clesMigrees} clés migrées`);
         return { success: true, clesMigrees: clesMigrees };
     }
 
@@ -840,7 +810,6 @@
      * @returns {Object} Résultat de la migration
      */
     function migrerVersMultiTrimestres() {
-        console.log('[Trimestres] Vérification migration multi-trimestres...');
 
         // Vérifier si des clés non-namespacées existent encore
         const calendrierNonNamespace = db.getSync('calendrierComplet', null);
@@ -853,18 +822,15 @@
                 // Les clés ne sont pas encore migrées, forcer la migration
                 const actif = obtenirTrimestreActif();
                 if (actif) {
-                    console.log('[Trimestres] Clés non migrées détectées, migration forcée...');
                     return forcerMigration(actif.id);
                 }
             }
-            console.log('[Trimestres] Migration déjà effectuée');
             return { success: true, alreadyMigrated: true };
         }
 
         // Vérifier si des données anciennes existent
         const cadreCalendrier = db.getSync('cadreCalendrier', null);
         if (!cadreCalendrier) {
-            console.log('[Trimestres] Pas de données à migrer');
             return { success: true, noData: true };
         }
 
@@ -891,7 +857,6 @@
         const trimestreId = `${session.toLowerCase()}${annee}`;
         const nomTrimestre = `${session === 'H' ? 'Hiver' : 'Automne'} ${annee}`;
 
-        console.log(`[Trimestres] Migration vers: ${nomTrimestre} (${trimestreId})`);
 
         // Créer l'entrée dans le registre
         const nouveauTrimestre = {
@@ -914,11 +879,9 @@
                 db.setSync(nouvelleCle, valeur);
                 db.removeSync(nomCle);
                 clesMigrees++;
-                console.log(`  → ${nomCle} → ${nouvelleCle}`);
             }
         });
 
-        console.log(`[Trimestres] Migration terminée: ${clesMigrees} clés migrées`);
 
         return {
             success: true,
@@ -973,7 +936,6 @@
                     // Ne migrer que si la clé a2025_* n'existe pas déjà
                     if (existantes === null) {
                         db.setSync(cleA2025, donneesAnciennes);
-                        console.log(`[Trimestres] → ${nomCle} COPIÉ vers ${cleA2025}`);
                         clesMigrees++;
                     }
 
@@ -986,7 +948,6 @@
         });
 
         if (clesMigrees > 0) {
-            console.log(`[Trimestres] Migration terminée: ${clesMigrees} clés migrées vers a2025_*`);
         }
     }
 
@@ -1014,14 +975,12 @@
                 // Ne migrer que si la clé namespacée n'existe pas ou est vide
                 if (existantes === null || (Array.isArray(existantes) && existantes.length === 0)) {
                     db.setSync(cleNouvelle, donneesAnciennes);
-                    console.log(`[Trimestres] → ${nomCle} (${donneesAnciennes.length}) COPIÉ vers ${cleNouvelle}`);
                     clesMigrees++;
                 }
             }
         });
 
         if (clesMigrees > 0) {
-            console.log(`[Trimestres] Migration horaires/groupesCours: ${clesMigrees} clés migrées vers ${prefixe}*`);
         }
     }
 
@@ -1030,7 +989,6 @@
        =============================== */
 
     function initialiserModuleTrimestres() {
-        console.log('[Trimestres] Initialisation du module multi-trimestres...');
 
         // Exécuter la migration si nécessaire
         const resultatMigration = migrerVersMultiTrimestres();
@@ -1044,11 +1002,9 @@
         if (resultatMigration.success) {
             const actif = obtenirTrimestreActif();
             if (actif) {
-                console.log(`[Trimestres] Trimestre actif: ${actif.nom} (${actif.id})`);
             }
         }
 
-        console.log('[Trimestres] Module initialisé');
 
         // Mettre à jour l'affichage du bandeau d'archivage
         mettreAJourBandeauArchive();
@@ -1091,7 +1047,6 @@
 
         // Si on était en mode anonymisation, revenir en mode normal
         if (modeActuel === 'anonymisation' && typeof window.changerMode === 'function') {
-            console.log('[Trimestres] Retour mode normal (défaut)');
             window.changerMode('normal');
         }
 
@@ -1103,7 +1058,6 @@
             if (bandeauMode) {
                 bandeauMode.classList.add('u-hide');
             }
-            console.log('[Trimestres] Mode archivé activé - Lecture seule');
         } else {
             document.body.classList.remove('mode-archive');
         }
@@ -1160,14 +1114,12 @@
      * @returns {Promise<Object>} Résultat de l'export
      */
     async function exporterFormatRecherche(options = {}) {
-        console.log('[Export Recherche] Démarrage export format recherche...');
 
         try {
             // 1. Obtenir ou générer la clé d'anonymisation
             let cleSecrete = options.cleSecrete;
             if (!cleSecrete) {
                 cleSecrete = genererCleAnonymisation();
-                console.log('[Export Recherche] Nouvelle clé générée');
             }
 
             // 2. Collecter les données sources
@@ -1214,7 +1166,6 @@
                 return { success: false, error: 'Aucun trimestre trouvé' };
             }
 
-            console.log('[Export Recherche] Trimestre identifié:', trimestre.id, trimestre.nom);
 
             // Obtenir le cadreCalendrier du bon trimestre
             const cadreCalendrier = db.getSync(trimestre.id + '_cadreCalendrier', {})
@@ -1422,11 +1373,6 @@
                 URL.revokeObjectURL(urlTable);
             }, 500);
 
-            console.log('[Export Recherche] Export terminé avec succès');
-            console.log(`[Export Recherche] ${etudiantsActifs.length} étudiants anonymisés`);
-            console.log(`[Export Recherche] ${evaluations.length} évaluations exportées`);
-            console.log(`[Export Recherche] ${presences.length} présences exportées`);
-            console.log(`[Export Recherche] ${snapshots.length} snapshots exportés`);
 
             return {
                 success: true,
@@ -1768,10 +1714,8 @@
         if (typeof activer === 'object' && activer !== null) activer = activer.checked;
         if (activer) {
             document.body.classList.add('mode-ecriture-temp');
-            console.log('Mode correction activé - modifications autorisées temporairement');
         } else {
             document.body.classList.remove('mode-ecriture-temp');
-            console.log('Mode correction désactivé - retour en lecture seule');
         }
     }
 
@@ -1795,7 +1739,6 @@
             if (bandeauArchive) {
                 bandeauArchive.style.background = 'var(--bleu-fonce)'; // Bleu très foncé (anonymisation)
             }
-            console.log('Mode anonymisation activé - identités masquées');
         } else {
             // Retour au mode normal
             await changerMode('normal');
@@ -1809,7 +1752,6 @@
             if (bandeauArchive) {
                 bandeauArchive.style.background = 'var(--bleu-clair, #065dbb)';
             }
-            console.log('Mode anonymisation désactivé - identités visibles');
         }
     }
 

@@ -93,7 +93,6 @@ function enregistrerPratique(id, instance) {
 
     // Enregistrer la pratique
     pratiquesEnregistrees.set(id, instance);
-    console.log(`✅ Pratique enregistrée : ${id} (${instance.obtenirNom()})`);
 
     // Invalider le cache si c'est la pratique active
     if (pratiqueCacheId === id) {
@@ -273,7 +272,6 @@ function obtenirPratiqueActive() {
     // NOUVEAU (Beta 92): Si non trouvée dans le registre, chercher dans les pratiques configurables
     // MISE À JOUR (Beta 96.2): Utilise construireConfigComplete pour normaliser les formats
     if (!instance && window.PratiqueManager) {
-        console.log(`[Registre] Pratique "${idActif}" non trouvée dans le registre, tentative via PratiqueManager...`);
 
         const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
         const pratiqueData = pratiquesConfigurables.find(p => p.id === idActif);
@@ -283,7 +281,6 @@ function obtenirPratiqueActive() {
             try {
                 const configComplete = construireConfigComplete(pratiqueData);
                 instance = new PratiqueConfigurable(configComplete);
-                console.log(`✅ Pratique configurable chargée : ${idActif} (${instance.obtenirNom()})`);
             } catch (error) {
                 console.error(`Erreur lors du chargement de la pratique configurable "${idActif}":`, error);
                 return null;
@@ -303,7 +300,6 @@ function obtenirPratiqueActive() {
     pratiqueCacheId = idActif;
     pratiqueCacheActive = instance;
 
-    console.log(`🎯 Pratique active : ${idActif} (${instance.obtenirNom()})`);
     return instance;
 }
 
@@ -415,7 +411,6 @@ function obtenirPratiqueParId(id) {
 function invaliderCachePratique() {
     pratiqueCacheActive = null;
     pratiqueCacheId = null;
-    console.log('🔄 Cache de pratique invalidé');
 }
 
 // ============================================================================
@@ -432,7 +427,6 @@ function desenregistrerPratique(id) {
     const existed = pratiquesEnregistrees.delete(id);
 
     if (existed) {
-        console.log(`🗑️ Pratique désenregistrée : ${id}`);
 
         // Invalider le cache si c'était la pratique active
         if (pratiqueCacheId === id) {
@@ -449,7 +443,6 @@ function desenregistrerPratique(id) {
 function viderRegistre() {
     pratiquesEnregistrees.clear();
     invaliderCachePratique();
-    console.log('🗑️ Registre vidé');
 }
 
 // ============================================================================
@@ -471,7 +464,6 @@ function viderRegistre() {
  * initialiserRegistrePratiques();
  */
 function initialiserRegistrePratiques() {
-    console.log('📋 Initialisation du registre de pratiques...');
 
     // Les pratiques doivent s'enregistrer elles-mêmes au chargement de leur module
     // Cette fonction vérifie simplement qu'au moins une pratique est disponible
@@ -484,17 +476,14 @@ function initialiserRegistrePratiques() {
             'Assure-toi que les modules de pratiques sont chargés.'
         );
     } else {
-        console.log(`✅ ${nbPratiques} pratique(s) disponible(s)`);
 
         // Afficher les pratiques enregistrées
         for (const pratique of listerPratiquesDisponibles()) {
-            console.log(`   • ${pratique.id} : ${pratique.nom}`);
         }
 
         // Afficher la pratique active
         const active = obtenirPratiqueActive();
         if (active) {
-            console.log(`🎯 Pratique active : ${active.obtenirNom()}`);
         } else {
             console.warn('⚠️ Aucune pratique active configurée');
         }
@@ -521,7 +510,6 @@ window.invaliderCachePratique = invaliderCachePratique;
 window.desenregistrerPratique = desenregistrerPratique;
 window.viderRegistre = viderRegistre;
 
-console.log('✅ Module pratique-registre.js chargé');
 
 
 })();

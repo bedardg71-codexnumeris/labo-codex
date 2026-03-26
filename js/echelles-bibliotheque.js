@@ -79,7 +79,6 @@ async function ajouterEchelleALaBibliotheque(echelle) {
 
     const existe = bibliotheque.some(e => e.id === echelle.id);
     if (existe) {
-        console.log('[Bibliothèque Échelles] Échelle déjà présente:', echelle.id);
         return false;
     }
 
@@ -96,7 +95,6 @@ async function ajouterEchelleALaBibliotheque(echelle) {
     bibliotheque.push(echelleBiblio);
     await db.set(CLE_BIBLIOTHEQUE_ECHELLES, bibliotheque);
 
-    console.log('[Bibliothèque Échelles] Échelle ajoutée:', echelle.nom);
     return true;
 }
 
@@ -116,7 +114,6 @@ async function retirerEchelleDeLaBibliotheque(echelleId) {
     }
 
     await db.set(CLE_BIBLIOTHEQUE_ECHELLES, bibliotheque);
-    console.log('[Bibliothèque Échelles] Échelle retirée:', echelleId);
     return true;
 }
 
@@ -138,7 +135,6 @@ async function importerEchellesDansBibliotheque(echelles) {
         }
     }
 
-    console.log(`[Bibliothèque Échelles] Import: ${ajoutees} ajoutées, ${existantes} déjà existantes`);
     return { ajoutees, existantes };
 }
 
@@ -166,14 +162,12 @@ async function exporterBibliothequeEchelles() {
 async function migrerEchellesVersBibliotheque(cleSource) {
     const echelles = db.getSync(cleSource, null);
     if (!echelles) {
-        console.log('[Bibliothèque Échelles] Aucune donnée trouvée pour:', cleSource);
         return { ajoutees: 0, existantes: 0 };
     }
     if (!Array.isArray(echelles)) {
         return { ajoutees: 0, existantes: 0 };
     }
 
-    console.log(`[Bibliothèque Échelles] Migration de ${echelles.length} échelles depuis ${cleSource}`);
     return await importerEchellesDansBibliotheque(echelles);
 }
 

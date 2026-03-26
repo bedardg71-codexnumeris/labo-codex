@@ -75,12 +75,10 @@
  * - Sortie silencieuse si les éléments n'existent pas
  */
 function initialiserModuleEvaluation() {
-    console.log('📝 Initialisation du module Évaluation');
 
     // Vérifier que nous sommes dans la bonne section
     const selectEtudiant = document.getElementById('selectEtudiantEval');
     if (!selectEtudiant) {
-        console.log('   ⚠️  Section évaluations non active, initialisation reportée');
         return;
     }
 
@@ -101,7 +99,6 @@ function initialiserModuleEvaluation() {
     // 🔄 Initialiser le mode évaluation en série
     initialiserModeEvaluationSerie();
 
-    console.log('   ✅ Module Évaluation initialisé (v2025122905 - Fix anonymisation)');
 }
 
 /* ===============================
@@ -121,7 +118,6 @@ function initialiserModuleEvaluation() {
 function chargerListeEtudiantsEval() {
     // 🆕 FIX (9 jan 2026) : Log groupe-cours actif pour debug
     const groupeCoursActif = db.getSync('groupeCoursActif', null);
-    console.log('📚 [Évaluation] Groupe-cours actif:', groupeCoursActif?.id || 'AUCUN', '| Groupe:', groupeCoursActif?.groupe || 'N/A');
 
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const select = document.getElementById('selectEtudiantEval');
@@ -135,7 +131,6 @@ function chargerListeEtudiantsEval() {
     const modeAnonymisation = modeDepuisDb === 'anonymisation' ||
                               (typeof estModeeLectureSeule === 'function' && estModeeLectureSeule());
 
-    console.log('🔍 [chargerListeEtudiantsEval] Mode:', modeDepuisDb, '| Étudiants:', etudiants.length);
 
     // NOUVEAU (Beta 84): Trier par nom de famille (ordre alphabétique)
     etudiants.sort((a, b) => {
@@ -209,13 +204,6 @@ function filtrerEtudiantsParGroupe() {
     const estModeDepuisFonction = estFonctionDisponible ? estModeeLectureSeule() : false;
     const modeAnonymisation = modeDepuisDb === 'anonymisation' || estModeDepuisFonction;
 
-    console.log('🔍 [filtrerEtudiantsParGroupe] Debug mode:', {
-        modeDepuisDb,
-        estFonctionDisponible,
-        estModeDepuisFonction,
-        modeAnonymisation,
-        nbEtudiants: etudiants.length
-    });
 
     const etudiantsFiltres = groupeId
         ? etudiants.filter(e => e.groupe === groupeId)
@@ -412,7 +400,6 @@ function chargerEchellePerformance() {
     }
 
     const totalEchelles = (echelles?.length || 0) + (echellePratique ? 1 : 0);
-    console.log('✅ Échelles de performance chargées:', totalEchelles, 'échelle(s) disponible(s)', echellePratique ? '(dont pratique active)' : '');
 }
 
 /* ===============================
@@ -497,7 +484,6 @@ function chargerEvaluationsEtudiant() {
         spans.forEach(span => span.textContent = '--');
     });
 
-    console.log(`🧹 Champs algorithmiques vidés: ${champsCategories.length} catégories, ${champsErreurs.length} erreurs, ${champsMots.length} mots`);
 
     // Réinitialiser la note et le niveau
     const noteElem = document.getElementById('noteProduction1');
@@ -575,7 +561,6 @@ function chargerProduction(productionNum) {
     const production = productions.find(p => p.id === productionId);
 
     if (production) {
-        console.log('Production chargée:', production.titre || production.nom);
 
         // Pré-sélectionner la grille associée à cette production
         if (production.grilleId) {
@@ -933,7 +918,6 @@ function cartoucheSelectionnee() {
  * @param {string} echelleId - ID de l'échelle
  */
 function afficherCriteresDepuisGrille(grilleId, echelleId) {
-    console.log(`🔧 [Fallback] Génération critères depuis grille ${grilleId} avec échelle ${echelleId}`);
 
     const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === grilleId);
@@ -1042,7 +1026,6 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
     }).join('');
 
     document.getElementById('listeCriteresGrille1').innerHTML = html;
-    console.log(`✅ ${grille.criteres.length} critères générés depuis la grille (sans cartouche)`);
 }
 
 /* ===============================
@@ -1231,7 +1214,6 @@ function _autoSauvegarderCriteres() {
     }
 
     sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
-    console.log('[Évaluation] Auto-sauvegarde (' + criteres.length + ' critères)');
 }
 
 /**
@@ -1900,7 +1882,6 @@ function genererRetroaction(num) {
 
         if (etudiant) {
             // Utiliser prenom qui sera soit le vrai nom en mode normal, soit "Élève X" en mode anonymisation
-            console.log(`📝 [genererRetroaction] Mode actuel: ${db.getSync('modeApplication', null)}, Nom utilisé: ${etudiant.prenom}`);
             texte += `\nBonjour ${etudiant.prenom} !\n\n`;
         }
     }
@@ -2318,7 +2299,6 @@ function sauvegarderEvaluation() {
         }
         if (Object.keys(modifications).length > 0) {
             travauxStockage.mettreAJourFichier(fichierActuel.id, modifications);
-            console.log(`[Évaluation] Métadonnées synchronisées sur le fichier ${fichierActuel.id}:`, Object.keys(modifications).join(', '));
         }
     }
 
@@ -2487,12 +2467,8 @@ function afficherBadgesJetons() {
     const section = document.getElementById('gestionJetonsEvaluation');
     const conteneur = document.getElementById('infoJetonsAppliques');
 
-    console.log('🔍 afficherBadgesJetons() - section:', section ? 'TROUVÉ' : 'NON TROUVÉ');
-    console.log('🔍 afficherBadgesJetons() - conteneur:', conteneur ? 'TROUVÉ' : 'NON TROUVÉ');
-    console.log('🔍 afficherBadgesJetons() - evaluationEnCours.idModification:', window.evaluationEnCours?.idModification);
 
     if (!section || !conteneur || !window.evaluationEnCours?.idModification) {
-        console.log('❌ Sortie précoce de afficherBadgesJetons()');
         if (section) section.classList.add('u-hide');
         return;
     }
@@ -2501,14 +2477,7 @@ function afficherBadgesJetons() {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     const evaluation = evaluations.find(e => e.id === window.evaluationEnCours.idModification);
 
-    console.log('🔍 Évaluation trouvée:', evaluation ? 'OUI' : 'NON');
     if (evaluation) {
-        console.log('   - ID:', evaluation.id);
-        console.log('   - ID commence par EVAL_REPRISE_:', evaluation.id.startsWith('EVAL_REPRISE_'));
-        console.log('   - jetonRepriseApplique:', evaluation.jetonRepriseApplique);
-        console.log('   - repriseDeId:', evaluation.repriseDeId);
-        console.log('   - jetonDelaiApplique:', evaluation.jetonDelaiApplique);
-        console.log('   - delaiAccorde:', evaluation.delaiAccorde);
     }
 
     if (!evaluation) {
@@ -2522,7 +2491,6 @@ function afficherBadgesJetons() {
     // CORRECTION: Vérifier aussi si l'ID commence par EVAL_REPRISE_ (même logique que le tableau)
     const estNouvelleReprise = evaluation.jetonRepriseApplique || evaluation.repriseDeId || evaluation.id.startsWith('EVAL_REPRISE_');
     if (estNouvelleReprise) {
-        console.log('✅ Ajout badge jeton de reprise');
         badges.push(`
             <span class="statut-badge" style="background: var(--violet-jeton, #9c27b0); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
                 <span>⭐ Reprise</span>
@@ -2546,11 +2514,9 @@ function afficherBadgesJetons() {
 
     // Afficher ou masquer la section selon qu'il y a des badges
     if (badges.length > 0) {
-        console.log('✅ Affichage des badges (' + badges.length + ')');
         conteneur.innerHTML = badges.join('');
         section.classList.remove('u-hide');
     } else {
-        console.log('⚠️ Aucun badge à afficher');
         section.classList.add('u-hide');
     }
 }
@@ -2709,7 +2675,6 @@ function gererChangementCheckboxJetonDelai() {
         // Nouvelle évaluation : on laisse la checkbox cochée
         // Le jeton sera appliqué lors de la sauvegarde
         if (checkbox.checked) {
-            console.log('✅ Jeton de délai marqué pour application lors de la sauvegarde');
         }
         return;
     }
@@ -2822,7 +2787,6 @@ function gererChangementCheckboxJetonRepriseCiblee() {
         }
     } else {
         // Retirer le jeton (TODO: implémenter si nécessaire)
-        console.log('ℹ️ Retrait du jeton de reprise ciblée');
     }
 }
 
@@ -2832,7 +2796,6 @@ function gererChangementCheckboxJetonRepriseCiblee() {
  * @param {string} typeJeton - Type de jeton à retirer ('reprise', 'delai', ou 'reprise-ciblee')
  */
 function retirerJetonDepuisSidebar(evaluationId, typeJeton) {
-    console.log('🗑️ Retrait jeton:', typeJeton, 'pour évaluation:', evaluationId);
 
     if (typeJeton === 'reprise') {
         // Utiliser le module evaluation-jetons.js pour retirer le jeton de reprise
@@ -2895,7 +2858,6 @@ function cocherOptionsParDefaut() {
         if (!pratiqueActive && pratiqueId) {
             pratiqueActive = configurations.find(function(p) { return p.type === pratiqueId; });
         }
-        console.log('[cocherOptionsParDefaut] pratiqueId:', pratiqueId, 'affichageNote:', pratiqueActive?.affichageNote);
         if (pratiqueActive?.affichageNote === 'lettre') {
             document.getElementById('affichageNoteLettre1').checked = true;
         } else {
@@ -2943,7 +2905,6 @@ function nouvelleEvaluation() {
 
     // 🔄 Effacer les sélections mémorisées du mode évaluation en série
     db.removeSync('dernieresSelectionsEvaluation');
-    console.log('✅ Sélections mémorisées effacées et mode nouvelle évaluation activé');
 
     // Masquer l'indicateur de progression
     const indicateur = document.getElementById('indicateurProgressionEval');
@@ -3011,7 +2972,6 @@ function naviguerVersListeEvaluations() {
  * @param {string} productionId - ID de la production à évaluer
  */
 function evaluerProduction(da, productionId) {
-    console.log('🎯 Navigation vers évaluation:', { da, productionId });
 
     // 1. Naviguer vers la section Évaluations › Annoter et évaluer
     afficherSection('evaluations');
@@ -3053,7 +3013,6 @@ function evaluerProduction(da, productionId) {
             const event = new Event('change', { bubbles: true });
             selectProduction.dispatchEvent(event);
 
-            console.log('✅ Formulaire d\'évaluation prêt pour:', { da, productionId });
         }, 200);
     }, 100);
 }
@@ -3413,7 +3372,6 @@ let donneesEvaluationsFiltrees = [];
  * Basé sur le Guide de monitorage
  */
 function calculerEtSauvegarderIndicesEvaluation() {
-    console.log('Calcul des indices C et P...');
 
     // ✅ NAMESPACING (Beta 95.5) : Utiliser obtenirDonneesSelonMode pour le filtrage par trimestre/cours
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
@@ -3473,7 +3431,6 @@ function calculerEtSauvegarderIndicesEvaluation() {
 
     // Sauvegarder dans localStorage
     db.setSync('indicesEvaluation', indicesEvaluation);
-    console.log('✅ Indices C et P sauvegardés:', indicesEvaluation);
 
     return indicesEvaluation;
 }
@@ -3602,7 +3559,6 @@ function obtenirClasseNote(note, echelleId) {
  * Charge et affiche la liste des évaluations avec accordéon
  */
 function chargerListeEvaluationsRefonte() {
-    console.log('Chargement de la liste des évaluations...');
 
     // 🆕 NOUVEAU : Les indices sont maintenant calculés par liste-evaluations.js
     // L'ancien calcul est désactivé pour éviter les conflits de structure
@@ -4106,7 +4062,6 @@ function trierListeEvaluations() {
     let donneesTries = [...donneesEvaluationsFiltrees];
 
     // Debug - voir avant le tri
-    console.log('Avant tri:', donneesTries.map(e => e.nom).slice(0, 5));
 
     switch (critere) {
         case 'nom-asc':
@@ -4151,7 +4106,6 @@ function trierListeEvaluations() {
     }
 
     // Debug - voir après le tri
-    console.log('Après tri:', donneesTries.map(e => e.nom).slice(0, 5));
 
     // IMPORTANT : Mettre à jour la variable globale
     donneesEvaluationsFiltrees = donneesTries;
@@ -4358,7 +4312,6 @@ function memoriserSelectionsEvaluation() {
     };
 
     db.setSync('dernieresSelectionsEvaluation', selections);
-    console.log('✅ Sélections mémorisées');
 }
 
 /**
@@ -4387,7 +4340,6 @@ function sauvegarderSelectionsEvaluation() {
     };
 
     db.setSync('dernieresSelectionsEvaluation', JSON.stringify(selections));
-    console.log('💾 Sélections sauvegardées:', selections);
 }
 
 /**
@@ -4460,7 +4412,6 @@ function restaurerSelectionsEvaluation() {
                     if (radioComplet) radioComplet.checked = true;
                 }
 
-                console.log('✅ Sélections restaurées');
 
                 // Après restauration, vérifier s'il existe une évaluation sauvegardée pour cet étudiant
                 setTimeout(() => {
@@ -4480,7 +4431,6 @@ function restaurerSelectionsEvaluation() {
 function verifierEtChargerEvaluationExistante() {
     // 🔧 FIX (20 mars 2026) : Ne pas interférer quand modifierEvaluation charge une évaluation spécifique
     if (window._modifierEvaluationEnCours) {
-        console.log('⏭️ verifierEtChargerEvaluationExistante ignorée — modifierEvaluation en cours');
         return;
     }
 
@@ -4492,12 +4442,10 @@ function verifierEtChargerEvaluationExistante() {
     if (window.evaluationEnCours?.idModification &&
         window.evaluationEnCours?.etudiantDA === etudiantDA &&
         window.evaluationEnCours?.productionId === productionId) {
-        console.log('⏭️ verifierEtChargerEvaluationExistante ignorée — évaluation déjà chargée par ID');
         return;
     }
 
     if (!etudiantDA || !productionId) {
-        console.log('Pas d\'étudiant ou de production sélectionné, skip');
         return;
     }
 
@@ -4510,7 +4458,6 @@ function verifierEtChargerEvaluationExistante() {
     );
 
     if (!evaluationExistante) {
-        console.log('Aucune évaluation existante pour cet étudiant et cette production');
 
         // Masquer l'indicateur de verrouillage et réactiver le formulaire
         afficherOuMasquerBoutonVerrouillage(false);
@@ -4541,7 +4488,6 @@ function verifierEtChargerEvaluationExistante() {
             spans.forEach(span => span.textContent = '--');
         });
 
-        console.log(`🧹 Champs algorithmiques réinitialisés: ${champsCategories.length + champsErreurs.length} champs erreurs, ${champsMots.length} champs mots`);
 
         // Masquer les badges de jetons
         const section = document.getElementById('gestionJetonsEvaluation');
@@ -4552,7 +4498,6 @@ function verifierEtChargerEvaluationExistante() {
         return;
     }
 
-    console.log('📂 Évaluation existante trouvée, chargement des données...', evaluationExistante);
 
     // Charger la grille (AVANT la cartouche — nécessaire pour peupler les options cartouche)
     if (evaluationExistante.grilleId) {
@@ -4613,7 +4558,6 @@ function verifierEtChargerEvaluationExistante() {
                     // Pour les critères algorithmiques, laisser le select VIDE
                     // Le niveau sera calculé automatiquement à partir des données algorithmiques
                     selectCritere.value = '';
-                    console.log(`  ⚙️ Critère algorithmique ${critere.critereId}: select laissé vide (niveau calculé: ${critere.niveauSelectionne})`);
                 } else {
                     // Pour les critères normaux, restaurer le niveau sélectionné
                     selectCritere.value = critere.niveauSelectionne;
@@ -4623,7 +4567,6 @@ function verifierEtChargerEvaluationExistante() {
             }
         });
 
-        console.log(`✅ ${criteresCharges}/${evaluationExistante.criteres.length} niveaux de maîtrise chargés`);
 
         // Charger la rétroaction finale
         // ✅ CORRECTION (30 déc 2025): Anonymiser le texte si en mode Anonymisé
@@ -4652,7 +4595,6 @@ function verifierEtChargerEvaluationExistante() {
 
             // Restaurer les données algorithmiques (français écrit)
             if (evaluationExistante.donneesAlgorithmiques && Object.keys(evaluationExistante.donneesAlgorithmiques).length > 0) {
-                console.log('📊 Restauration données algorithmiques');
 
                 // Sauvegarder dans evaluationEnCours
                 window.evaluationEnCours.donneesAlgorithmiques = evaluationExistante.donneesAlgorithmiques;
@@ -4665,7 +4607,6 @@ function verifierEtChargerEvaluationExistante() {
                         const inputCategories = document.getElementById(`eval_categories_${critereId}`);
                         if (inputCategories) {
                             inputCategories.value = donnees.codes.join(';');
-                            console.log(`  ✓ Codes restaurés pour ${critereId}: ${donnees.codes.join(';')}`);
                         }
                     }
 
@@ -4674,7 +4615,6 @@ function verifierEtChargerEvaluationExistante() {
                         const inputMots = document.getElementById(`eval_mots_${critereId}`);
                         if (inputMots) {
                             inputMots.value = donnees.mots;
-                            console.log(`  ✓ Mots restaurés pour ${critereId}: ${donnees.mots}`);
                         }
                     }
 
@@ -4685,7 +4625,6 @@ function verifierEtChargerEvaluationExistante() {
                         const inputErreurs = document.getElementById(`eval_erreurs_${critereId}`);
                         if (inputErreurs) {
                             inputErreurs.value = nbErreurs;
-                            console.log(`  ✓ Erreurs restaurées pour ${critereId}: ${nbErreurs}`);
                         }
                     }
 
@@ -4702,7 +4641,6 @@ function verifierEtChargerEvaluationExistante() {
                     }, 100);
                 });
 
-                console.log(`✅ ${Object.keys(evaluationExistante.donneesAlgorithmiques).length} critères algorithmiques restaurés`);
             }
 
             // Note: Jetons de délai sont maintenant gérés par les badges cliquables
@@ -4728,7 +4666,6 @@ function verifierEtChargerEvaluationExistante() {
         setTimeout(() => {
             if (typeof calculerNote === 'function') {
                 calculerNote();
-                console.log('✅ Note finale recalculée après restauration critères et données algorithmiques');
             }
             // Restaurer les options d'affichage sauvegardées dans l'évaluation
             if (evaluationExistante.optionsAffichage) {
@@ -4948,7 +4885,6 @@ function insererNavigationEvaluationSerie() {
         selectEtudiant.parentElement?.appendChild(nav);
     }
 
-    console.log('✅ Navigation évaluation en série insérée');
 }
 
 /**
@@ -4977,7 +4913,6 @@ function initialiserModeEvaluationSerie() {
 
     mettreAJourIndicateurProgression();
 
-    console.log('✅ Mode évaluation en série initialisé');
 }
 
 /* ===============================
@@ -5016,7 +4951,6 @@ function extraireNiveauxDepuisRetroaction(retroaction, grille) {
 
         if (critere) {
             niveauxExtrait[critere.id] = niveau;
-            console.log(`  ✅ Extrait : ${nomCritere} → ${niveau}`);
         } else {
             console.warn(`  ⚠️ Critère non trouvé dans la grille : ${nomCritere}`);
         }
@@ -5056,7 +4990,6 @@ function lancerReparationEvaluations() {
  * ⚠️ À utiliser manuellement en cas de pépin (ne s'active PAS automatiquement)
  */
 function reparer_evaluations_criteres_manquants() {
-    console.log('Début de la réparation des évaluations...');
 
     const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const grilles = db.getSync('grillesTemplates', []);
@@ -5074,7 +5007,6 @@ function reparer_evaluations_criteres_manquants() {
                                evaluation.criteres.length === 0;
 
         if (criteresMissing) {
-            console.log(`\nÉvaluation à réparer : ${evaluation.etudiantNom} - ${evaluation.productionNom}`);
 
             // Récupérer la grille
             const grille = grilles.find(g => g.id === evaluation.grilleId);
@@ -5110,7 +5042,6 @@ function reparer_evaluations_criteres_manquants() {
                     };
                 });
 
-                console.log(`  ✅ ${nbExtrait} critère(s) restauré(s)`);
                 nbEvaluationsReparees++;
                 rapport.push(`✅ ${evaluation.etudiantNom} - ${evaluation.productionNom} : ${nbExtrait} critère(s) restauré(s)`);
             } else {
@@ -5126,16 +5057,9 @@ function reparer_evaluations_criteres_manquants() {
     // Sauvegarder les modifications
     if (nbEvaluationsReparees > 0) {
         db.setSync(cle('evaluationsSauvegardees'), evaluations);
-        console.log(`\n${nbEvaluationsReparees} évaluation(s) sauvegardée(s)`);
     }
 
     // Rapport final
-    console.log('\nRAPPORT DE RÉPARATION :');
-    console.log(`  ✅ Réparées : ${nbEvaluationsReparees}`);
-    console.log(`  Ignorées (déjà OK) : ${nbEvaluationsIgnorees}`);
-    console.log(`  ❌ Échecs : ${nbEchoues}`);
-    console.log('\nDétails :');
-    rapport.forEach(ligne => console.log(`  ${ligne}`));
 
     // Notification utilisateur
     if (nbEvaluationsReparees > 0) {
@@ -5165,7 +5089,6 @@ function reparer_evaluations_criteres_manquants() {
  * @param {string} evaluationId - ID de l'évaluation à charger
  */
 function modifierEvaluation(evaluationId) {
-    console.log('📝 Chargement de l\'évaluation:', evaluationId);
 
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     const evaluation = evaluations.find(e => e.id === evaluationId);
@@ -5175,12 +5098,6 @@ function modifierEvaluation(evaluationId) {
         return;
     }
 
-    console.log('🔍 Évaluation trouvée:', {
-        id: evaluation.id,
-        etudiant: evaluation.etudiantNom,
-        production: evaluation.productionNom,
-        nbCriteres: evaluation.criteres?.length || 0
-    });
 
     const estVerrouillee = evaluation.verrouillee || false;
 
@@ -5211,7 +5128,6 @@ function modifierEvaluation(evaluationId) {
 
                 if (optionTrouvee) {
                     clearInterval(intervalle);
-                    console.log(`✅ #${selectId} option "${valeurCherchee}" trouvée après ${tentatives} tentatives`);
                     resolve(select);
                 } else if (tentatives >= maxTentatives) {
                     clearInterval(intervalle);
@@ -5244,13 +5160,11 @@ function modifierEvaluation(evaluationId) {
         const autreEval = evaluations.find(e => e.etudiantDA === da && e.id !== evaluationId);
 
         if (autreEval && autreEval.groupe) {
-            console.log(`✅ Groupe trouvé via autre évaluation: ${autreEval.groupe}`);
             return autreEval.groupe;
         }
 
         // Si l'évaluation actuelle contient le groupe, l'utiliser
         if (evaluation.groupe) {
-            console.log(`✅ Groupe trouvé dans évaluation actuelle: ${evaluation.groupe}`);
             return evaluation.groupe;
         }
 
@@ -5278,7 +5192,6 @@ function modifierEvaluation(evaluationId) {
 
                 if (premierSelect) {
                     clearInterval(intervalle);
-                    console.log(`✅ Selects de critères générés après ${tentatives} tentatives`);
                     resolve(true);
                 } else if (tentatives >= maxTentatives) {
                     clearInterval(intervalle);
@@ -5326,7 +5239,6 @@ function modifierEvaluation(evaluationId) {
             // sont déjà peuplés par afficherPalettesEval(). Les reconfigurer provoque un timeout
             // car le handler du change groupe vide puis re-remplit le select étudiant.
             if (enModeEvaluer) {
-                console.log('⏭️ Mode évaluer détecté — étapes 0-3 sautées (selects déjà remplis par afficherPalettesEval)');
 
                 // Juste s'assurer que la grille est bien sélectionnée
                 if (typeof chargerGrillesDansSelect === 'function') chargerGrillesDansSelect();
@@ -5336,22 +5248,17 @@ function modifierEvaluation(evaluationId) {
                 if (selectGrille && evaluation.grilleId) {
                     selectGrille.value = evaluation.grilleId;
                     selectGrille.dispatchEvent(new Event('change', { bubbles: true }));
-                    console.log('✅ Grille chargée (mode évaluer)');
                 }
             } else {
                 // ÉTAPE 0: Charger les selects de base (groupes, grilles, échelles)
-                console.log('0️⃣ Initialisation des selects de base');
                 if (typeof chargerGroupesEval === 'function') {
                     chargerGroupesEval();
-                    console.log('  ✓ Groupes chargés');
                 }
                 if (typeof chargerGrillesDansSelect === 'function') {
                     chargerGrillesDansSelect();
-                    console.log('  ✓ Grilles chargées');
                 }
                 if (typeof chargerEchellePerformance === 'function') {
                     chargerEchellePerformance();
-                    console.log('  ✓ Échelles chargées');
                 }
 
                 // ÉTAPE 1: Charger le groupe (CRITIQUE - manquait dans l'ancienne version!)
@@ -5360,7 +5267,6 @@ function modifierEvaluation(evaluationId) {
                     throw new Error(`Groupe introuvable pour étudiant DA ${evaluation.etudiantDA}`);
                 }
 
-                console.log(`1️⃣ Chargement groupe: ${numeroGroupe}`);
                 const selectGroupe = document.getElementById('selectGroupeEval');
                 if (selectGroupe) {
                     selectGroupe.value = numeroGroupe;
@@ -5368,32 +5274,25 @@ function modifierEvaluation(evaluationId) {
                 }
 
                 // ÉTAPE 2: Attendre et charger l'étudiant
-                console.log(`2️⃣ Attente option étudiant: ${evaluation.etudiantDA}`);
                 await attendreOption('selectEtudiantEval', evaluation.etudiantDA);
                 const selectEtudiant = document.getElementById('selectEtudiantEval');
                 selectEtudiant.value = evaluation.etudiantDA;
                 selectEtudiant.dispatchEvent(new Event('change', { bubbles: true }));
-                console.log('✅ Étudiant chargé');
 
                 // ÉTAPE 3: Attendre et charger la production
-                console.log(`3️⃣ Attente option production: ${evaluation.productionId}`);
                 await attendreOption('selectProduction1', evaluation.productionId);
                 const selectProduction = document.getElementById('selectProduction1');
                 selectProduction.value = evaluation.productionId;
                 selectProduction.dispatchEvent(new Event('change', { bubbles: true }));
-                console.log('✅ Production chargée');
 
                 // ÉTAPE 4: Attendre et charger la grille
-                console.log(`4️⃣ Attente option grille: ${evaluation.grilleId}`);
                 await attendreOption('selectGrille1', evaluation.grilleId);
                 const selectGrille = document.getElementById('selectGrille1');
                 selectGrille.value = evaluation.grilleId;
                 selectGrille.dispatchEvent(new Event('change', { bubbles: true }));
-                console.log('✅ Grille chargée');
             }
 
             // ÉTAPE 5: Initialiser evaluationEnCours (AVANT cartouche/échelle)
-            console.log('5️⃣ Initialisation evaluationEnCours');
             window.evaluationEnCours = {
                 etudiantDA: evaluation.etudiantDA,
                 productionId: evaluation.productionId,
@@ -5423,7 +5322,6 @@ function modifierEvaluation(evaluationId) {
                 evaluation.criteres.forEach(critere => {
                     window.evaluationEnCours.criteres[critere.critereId] = critere.niveauSelectionne;
                 });
-                console.log(`✅ ${evaluation.criteres.length} critères pré-remplis`);
             } else {
                 // FALLBACK : Extraire depuis rétroaction si criteres[] vide
                 console.warn('⚠️ Extraction niveaux depuis rétroaction...');
@@ -5439,13 +5337,11 @@ function modifierEvaluation(evaluationId) {
                             critereNom: grille.criteres.find(c => c.id === critereId)?.nom || critereId,
                             niveauSelectionne: niveauxExtrait[critereId]
                         }));
-                        console.log(`✅ ${Object.keys(niveauxExtrait).length} niveaux extraits`);
                     }
                 }
             }
 
             // ÉTAPE 6: Charger échelle
-            console.log('6️⃣ Chargement échelle');
             const selectEchelle = document.getElementById('selectEchelle1');
             if (selectEchelle) {
                 selectEchelle.value = evaluation.echelleId;
@@ -5453,7 +5349,6 @@ function modifierEvaluation(evaluationId) {
             }
 
             // ÉTAPE 7: Charger cartouche OU générer critères depuis grille (fallback)
-            console.log('7️⃣ Chargement cartouche');
             const selectCartouche = document.getElementById('selectCartoucheEval');
             let cartoucheChargee = false;
 
@@ -5461,7 +5356,6 @@ function modifierEvaluation(evaluationId) {
                 // ✅ CORRIGÉ (31 déc 2025) : Peupler explicitement le dropdown avant de sélectionner
                 // Le dropdown peut être vide si chargerGrilleSelectionnee() n'a pas été appelée
                 const cartouches = db.getSync(`cartouches_${evaluation.grilleId}`, []);
-                console.log(`   📋 ${cartouches.length} cartouche(s) trouvée(s) pour ${evaluation.grilleId}`);
 
                 // Peupler le dropdown
                 selectCartouche.innerHTML = '<option value="">-- Choisir une cartouche --</option>';
@@ -5479,7 +5373,6 @@ function modifierEvaluation(evaluationId) {
                         selectCartouche.value = evaluation.cartoucheId;
                         selectCartouche.dispatchEvent(new Event('change', { bubbles: true }));
                         cartoucheChargee = true;
-                        console.log('   ✅ Cartouche chargée:', evaluation.cartoucheId);
                     } else {
                         console.warn(`   ⚠️ Cartouche ${evaluation.cartoucheId} non trouvée dans les ${cartouches.length} cartouches`);
                     }
@@ -5488,12 +5381,10 @@ function modifierEvaluation(evaluationId) {
 
             // FALLBACK: Si pas de cartouche, générer les critères directement depuis la grille
             if (!cartoucheChargee) {
-                console.log('   🔧 Fallback: génération critères depuis grille');
                 afficherCriteresDepuisGrille(evaluation.grilleId, evaluation.echelleId);
             }
 
             // ÉTAPE 8: Charger statut de remise
-            console.log('8️⃣ Chargement statut remise');
             const selectRemise = document.getElementById('remiseProduction1');
             if (selectRemise) {
                 selectRemise.value = evaluation.statutRemise;
@@ -5517,12 +5408,10 @@ function modifierEvaluation(evaluationId) {
             afficherBadgesJetons();
 
             // ÉTAPE 9: Attendre que les selects de critères soient générés
-            console.log('9️⃣ Attente génération selects de critères');
             const criteresGeneres = await attendreSelectsCriteres(evaluation);
 
             // ÉTAPE 10: Charger les valeurs des critères
             if (criteresGeneres && evaluation.criteres && Array.isArray(evaluation.criteres)) {
-                console.log('🔟 Chargement des valeurs des critères');
                 let criteresCharges = 0;
 
                 evaluation.criteres.forEach(critere => {
@@ -5533,17 +5422,14 @@ function modifierEvaluation(evaluationId) {
                         selectCritere.value = critere.niveauSelectionne;
                         selectCritere.dispatchEvent(new Event('change', { bubbles: true }));
                         criteresCharges++;
-                        console.log(`  ✓ ${critere.critereNom}: ${critere.niveauSelectionne}`);
                     } else {
                         console.warn(`  ⚠️ Select non trouvé pour critère ${critere.critereId}`);
                     }
                 });
 
-                console.log(`✅ ${criteresCharges}/${evaluation.criteres.length} critères chargés`);
 
                 // ÉTAPE 10.5: Restaurer les données algorithmiques (français écrit)
                 if (evaluation.donneesAlgorithmiques && Object.keys(evaluation.donneesAlgorithmiques).length > 0) {
-                    console.log('🔟.5️⃣ Restauration données algorithmiques');
 
                     Object.keys(evaluation.donneesAlgorithmiques).forEach(critereId => {
                         const donnees = evaluation.donneesAlgorithmiques[critereId];
@@ -5553,7 +5439,6 @@ function modifierEvaluation(evaluationId) {
                             const inputCategories = document.getElementById(`eval_categories_${critereId}`);
                             if (inputCategories) {
                                 inputCategories.value = donnees.codes.join(';');
-                                console.log(`  ✓ Codes restaurés pour ${critereId}: ${donnees.codes.join(';')}`);
                             }
                         }
 
@@ -5562,7 +5447,6 @@ function modifierEvaluation(evaluationId) {
                             const inputMots = document.getElementById(`eval_mots_${critereId}`);
                             if (inputMots) {
                                 inputMots.value = donnees.mots;
-                                console.log(`  ✓ Mots restaurés pour ${critereId}: ${donnees.mots}`);
                             }
                         }
 
@@ -5571,7 +5455,6 @@ function modifierEvaluation(evaluationId) {
                             const inputErreurs = document.getElementById(`eval_erreurs_${critereId}`);
                             if (inputErreurs) {
                                 inputErreurs.value = donnees.erreurs;
-                                console.log(`  ✓ Erreurs restaurées pour ${critereId}: ${donnees.erreurs}`);
                             }
                         }
 
@@ -5589,14 +5472,12 @@ function modifierEvaluation(evaluationId) {
                         }, 100);
                     });
 
-                    console.log(`✅ ${Object.keys(evaluation.donneesAlgorithmiques).length} critères algorithmiques restaurés`);
                 }
 
                 // Forcer le recalcul de la note après restauration données algorithmiques
                 setTimeout(() => {
                     if (typeof calculerNote === 'function') {
                         calculerNote();
-                        console.log('✅ Note finale recalculée après restauration données algorithmiques');
                     }
                 }, 200);
             }
@@ -5605,14 +5486,12 @@ function modifierEvaluation(evaluationId) {
             // 🔧 FIX (24 fév 2026) : Les checkboxes d'affichage sont toujours cochées par défaut
             // au chargement. L'utilisateur peut les décocher manuellement s'il le veut.
             // Les valeurs sauvegardées ne reflétaient pas forcément l'intention de l'utilisateur.
-            console.log('1️⃣1️⃣ Chargement options d\'affichage');
             // cocherOptionsParDefaut() coche toutes les checkboxes ET applique
             // la préférence de la pratique pour le radio affichageNote
             cocherOptionsParDefaut();
 
             // ÉTAPE 12: Charger la rétroaction finale
             // ✅ CORRECTION (30 déc 2025): Anonymiser le texte si en mode Anonymisé
-            console.log('1️⃣2️⃣ Chargement rétroaction finale');
             const retroaction = document.getElementById('retroactionFinale1');
             if (retroaction) {
                 const texteRetroaction = typeof anonymiserTexteRetroaction === 'function'
@@ -5622,11 +5501,9 @@ function modifierEvaluation(evaluationId) {
             }
 
             // ÉTAPE 13: Afficher indicateur de mode modification
-            console.log('1️⃣3️⃣ Affichage indicateur modification');
             afficherIndicateurModeModification(evaluation);
 
             // ÉTAPE 14: Gérer le verrouillage
-            console.log('1️⃣4️⃣ Gestion verrouillage');
             afficherOuMasquerBoutonVerrouillage(true, estVerrouillee);
             if (estVerrouillee) {
                 desactiverFormulaireEvaluation(true);
@@ -5636,11 +5513,9 @@ function modifierEvaluation(evaluationId) {
             }
 
             // ÉTAPE 15: Afficher la section de gestion des jetons
-            console.log('1️⃣5️⃣ Affichage gestion jetons');
             afficherGestionJetons(true);
 
             // ÉTAPE 16: Afficher la ligne Supprimer cette évaluation
-            console.log('1️⃣6️⃣ Affichage ligne suppression');
             const ligneSupprimer = document.getElementById('ligneSupprimerEvaluation');
             if (ligneSupprimer) {
                 ligneSupprimer.classList.remove('u-hide');
@@ -5655,7 +5530,6 @@ function modifierEvaluation(evaluationId) {
                     if (fichierCote) {
                         const conteneurGrille = document.getElementById('listeCriteresGrille1')?.closest('.form-group') || document.getElementById('listeCriteresGrille1');
                         if (conteneurGrille) {
-                            console.log('1️⃣7️⃣ Ouverture du travail en vue côte à côte:', fichierCote.id);
                             await travauxUI.ouvrirVueCoteACote(fichierCote.id, conteneurGrille);
                         }
                     }
@@ -5664,7 +5538,6 @@ function modifierEvaluation(evaluationId) {
                 }
             }
 
-            console.log('✅ Évaluation chargée avec succès');
 
         } catch (erreur) {
             console.error('❌ Erreur lors du chargement de l\'évaluation:', erreur);
@@ -6721,7 +6594,6 @@ function afficherOuMasquerBoutonVerrouillage(afficher, estVerrouillee = false) {
  * Désactive ou active les champs du formulaire d'évaluation
  */
 function desactiverFormulaireEvaluation(desactiver) {
-    console.log(`${desactiver ? '🔒' : '🔓'} ${desactiver ? 'Désactivation' : 'Activation'} du formulaire d'évaluation...`);
 
     // Désactiver les selects de paramètres principaux
     const selects = [
@@ -6739,20 +6611,17 @@ function desactiverFormulaireEvaluation(desactiver) {
         const elem = document.getElementById(id);
         if (elem) {
             elem.disabled = desactiver;
-            console.log(`  ${id}: ${elem.disabled ? 'DÉSACTIVÉ' : 'ACTIVÉ'}`);
         }
     });
 
     // Désactiver tous les selects de critères dans listeCriteresGrille1
     const selectsCriteres = document.querySelectorAll('#listeCriteresGrille1 select');
-    console.log(`  Trouvé ${selectsCriteres.length} selects de critères`);
     selectsCriteres.forEach(select => {
         select.disabled = desactiver;
     });
 
     // Désactiver tous les champs algorithmiques (codes d'erreurs, nombre de mots)
     const inputsAlgorithmiques = document.querySelectorAll('#listeCriteresGrille1 input[type="text"], #listeCriteresGrille1 input[type="number"]');
-    console.log(`  Trouvé ${inputsAlgorithmiques.length} champs algorithmiques`);
     inputsAlgorithmiques.forEach(input => {
         input.disabled = desactiver;
     });
@@ -6761,7 +6630,6 @@ function desactiverFormulaireEvaluation(desactiver) {
     const retroaction = document.getElementById('retroactionFinale1');
     if (retroaction) {
         retroaction.disabled = desactiver;
-        console.log(`  retroactionFinale1: ${retroaction.disabled ? 'DÉSACTIVÉ' : 'ACTIVÉ'}`);
     }
 
     // Désactiver les checkboxes d'options d'affichage
@@ -6783,11 +6651,9 @@ function desactiverFormulaireEvaluation(desactiver) {
     boutonsSauvegarde.forEach(btn => {
         if (btn.textContent.includes('Sauvegarder')) {
             btn.disabled = desactiver;
-            console.log(`  Bouton sauvegarde: ${btn.disabled ? 'DÉSACTIVÉ' : 'ACTIVÉ'}`);
         }
     });
 
-    console.log(`✅ Formulaire ${desactiver ? 'verrouillé' : 'déverrouillé'}`);
 }
 
 /**
@@ -6982,7 +6848,6 @@ window.afficherNotificationSucces = afficherNotificationSucces; // Utilisé par 
 function afficherJetonsPersonnalisesEvaluation() {
     const conteneur = document.getElementById('jetonsPersonnalisesOptions');
     if (!conteneur) {
-        console.log('⚠️ Conteneur jetonsPersonnalisesOptions non trouvé');
         return;
     }
 
@@ -6990,7 +6855,6 @@ function afficherJetonsPersonnalisesEvaluation() {
     const config = db.getSync('modalitesEvaluation', {});
     const jetonsPersonnalises = config.jetons?.typesPersonnalises || [];
 
-    console.log('🎯 Jetons personnalisés configurés:', jetonsPersonnalises.length, jetonsPersonnalises);
 
     if (jetonsPersonnalises.length === 0) {
         conteneur.innerHTML = '';
@@ -7106,11 +6970,9 @@ function confirmerSuppressionEvaluationSidebar() {
 
 // Écouter les changements de mode pour régénérer la rétroaction avec les noms anonymisés/réels
 window.addEventListener('modeChanged', (event) => {
-    console.log(`🔄 [evaluation.js] Mode changé détecté, régénération de la rétroaction si nécessaire`);
 
     // Si une évaluation est en cours et que la checkbox d'adresse est cochée, régénérer la rétroaction
     if (window.evaluationEnCours && document.getElementById('afficherAdresse1')?.checked) {
-        console.log(`📝 [evaluation.js] Régénération de la rétroaction avec le nouveau mode: ${event.detail.mode}`);
         genererRetroaction(1);
     }
 });
@@ -7148,7 +7010,6 @@ async function copierCriteresSRPN() {
     const criteres = texte.split('\t');
     const srpn = criteres.slice(0, 4).join('\t');
 
-    console.log('[Debug] Copie SRPN TSV:', { texte, criteres, srpn });
 
     // Copier en format TSV
     const succes = await copierEnFormatTSV(srpn);
@@ -7172,7 +7033,6 @@ async function copierCriteresSRPNF() {
     // Copier tous les critères avec tabulations
     const texte = element.textContent.trim();
 
-    console.log('[Debug] Copie SRPNF TSV:', { texte, length: texte.length });
 
     // Copier en format TSV
     const succes = await copierEnFormatTSV(texte);

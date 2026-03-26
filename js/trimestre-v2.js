@@ -20,7 +20,6 @@ function afficherNotificationSucces(message, details) {
     if (typeof window.afficherNotificationSucces === 'function') {
         window.afficherNotificationSucces(message, details);
     } else {
-        console.log('[Trimestre V2] Succès :', message, details || '');
     }
 }
 
@@ -41,7 +40,6 @@ function afficherNotificationErreur(message, details) {
  * Appelé au chargement de la page
  */
 function initialiserTrimestreV2() {
-    console.log('[Trimestre V2] Initialisation...');
 
     // Charger l'identification du trimestre (nom, session, année)
     chargerIdentificationTrimestreV2();
@@ -88,7 +86,6 @@ function initialiserTrimestreV2() {
     // Mettre à jour le guide groupe-cours (indicateurs d'état)
     mettreAJourGuideGroupeCours();
 
-    console.log('[Trimestre V2] Initialisation terminée');
 }
 
 /* ===============================
@@ -132,7 +129,6 @@ function sauvegarderIdentificationTrimestreV2() {
 
     // Validation minimale
     if (!session || !annee) {
-        console.log('[Trimestre V2] Identification incomplète, sauvegarde ignorée');
         return;
     }
 
@@ -163,10 +159,8 @@ function sauvegarderIdentificationTrimestreV2() {
 
         // Si l'ID a changé, il faudrait migrer les données (complexe, pour l'instant on log)
         if (ancienId !== id) {
-            console.log(`[Trimestre V2] ID changé de ${ancienId} à ${id} - migration manuelle requise`);
         }
 
-        console.log(`[Trimestre V2] Trimestre mis à jour: ${nomTrimestre} (${id})`);
     } else {
         // Créer un nouveau trimestre
         const nouveauTrimestre = {
@@ -185,7 +179,6 @@ function sauvegarderIdentificationTrimestreV2() {
         db.setSync('trimestres', trimestres);
         window.trimestreActif = id;
 
-        console.log(`[Trimestre V2] Nouveau trimestre créé: ${nomTrimestre} (${id})`);
     }
 
     // Rafraîchir la liste dans Gestion des trimestres si la fonction existe
@@ -249,7 +242,6 @@ function chargerCadreCalendrierV2() {
     if (doitRegenerer && cadre.dateDebut && cadre.finCours && cadre.finTrimestre) {
         if (typeof genererCalendrierComplet === 'function') {
             genererCalendrierComplet();
-            console.log('[Trimestre V2] Calendrier généré/régénéré (bornes mises à jour)');
         }
     }
 
@@ -285,7 +277,6 @@ function sauvegarderCadreCalendrierV2() {
     // Régénérer le calendrier complet
     if (typeof genererCalendrierComplet === 'function') {
         genererCalendrierComplet();
-        console.log('[Trimestre V2] Calendrier régénéré');
     } else {
         console.warn('[Trimestre V2] Fonction genererCalendrierComplet non disponible');
     }
@@ -402,11 +393,9 @@ function afficherStatistiquesTrimestreV2() {
     const elemJoursSidebar = document.getElementById('v2-nombreJoursCoursSidebar');
     const elemCongesReprisesSidebar = document.getElementById('v2-statsCongesReprisesSidebar');
 
-    console.log('[Trimestre V2] Calendrier lu:', calendrier ? Object.keys(calendrier).length + ' jours' : 'null');
 
     // Vérifier si le calendrier existe ET a des données
     if (!calendrier || typeof calendrier !== 'object' || Object.keys(calendrier).length === 0) {
-        console.log('[Trimestre V2] Calendrier non disponible ou vide');
         if (elemSemaines) elemSemaines.textContent = '0';
         if (elemJours) elemJours.textContent = '0';
         if (elemCongesReprises) elemCongesReprises.textContent = '';
@@ -443,7 +432,6 @@ function afficherStatistiquesTrimestreV2() {
     // Fallback sur division par 5 si pas de numeroSemaine
     const semaines = maxSemaine > 0 ? maxSemaine : Math.ceil(joursCours / 5);
 
-    console.log(`[Trimestre V2] Stats: ${semaines} semaines, ${joursCours} jours, ${conges} congés, ${reprises} reprises`);
 
     // Remplir éléments originaux (masqués)
     if (elemSemaines) elemSemaines.textContent = semaines;
@@ -899,7 +887,6 @@ function populerDropdownTrimestreV2() {
         trimestres = trimestres.filter(t => t.id !== 'demo');
     }
 
-    console.log('🔄 [Dropdown Trim] Mode:', modeActuel, '- Trimestre actif:', trimestreActif?.id);
 
     select.innerHTML = '';
 
@@ -923,7 +910,6 @@ function populerDropdownTrimestreV2() {
         select.value = trimestreActif.id;
     }
 
-    console.log('[Trimestre V2] Dropdown peuplé avec', trimestres.length, 'trimestre(s)');
 
     // Mettre à jour aussi la liste de gestion des trimestres
     afficherListeTrimestreGestion();
@@ -1097,7 +1083,6 @@ function afficherFormulaireTrimestreActif() {
     // - afficherStatistiquesTrimestreV2()
 
     // Cette fonction est appelée pour s'assurer que tout est à jour
-    console.log('[Trimestre V2] Formulaire trimestre actif rafraîchi');
 }
 
 /**
@@ -1154,13 +1139,10 @@ function supprimerTrimestreActif() {
  */
 function changerTrimestreActifV2(valeur) {
     if (typeof valeur === 'object' && valeur && valeur.value !== undefined) valeur = valeur.value;
-    console.log('🔄 [Trimestre V2] Changement trimestre demandé:', valeur);
 
     // Appeler la fonction de trimestres.js
     if (typeof window.changerTrimestreActif === 'function') {
         const success = window.changerTrimestreActif(valeur);
-        console.log('🔄 [Trimestre V2] Résultat changerTrimestreActif:', success);
-        console.log('🔄 [Trimestre V2] window.trimestreActif après changement:', window.trimestreActif);
 
         if (success) {
             // Recharger l'interface complète
@@ -1186,7 +1168,6 @@ function changerTrimestreActifV2(valeur) {
             // (la liste d'étudiants, le tableau de bord, etc.)
             if (typeof rafraichirVuesApresCours === 'function') {
                 rafraichirVuesApresCours();
-                console.log('[Trimestre V2] Vues rafraîchies après changement de cours');
             }
 
             // Mettre à jour le bandeau d'archivage si applicable
@@ -1194,7 +1175,6 @@ function changerTrimestreActifV2(valeur) {
                 mettreAJourBandeauArchive();
             }
 
-            console.log('[Trimestre V2] Interface rafraîchie après changement');
         }
     } else {
         console.error('[Trimestre V2] Fonction changerTrimestreActif non disponible');
@@ -1295,14 +1275,10 @@ function chargerDropdownCoursV2() {
         anciensListeCours.forEach(c => { if (c.id && !coursMap.has(c.id)) coursMap.set(c.id, c); });
         db.setSync('cours', Array.from(coursMap.values()));
         db.setSync('listeCours', []);
-        console.log('[Trimestre V2] Migration listeCours → cours effectuée');
     }
     const tousCours = db.getSync('cours', []);
     const coursActif = db.getSync('infoCours', null);
 
-    console.log('[Trimestre V2] Chargement dropdown cours...');
-    console.log('[Trimestre V2] cours:', tousCours.length, 'cours');
-    console.log('[Trimestre V2] infoCours:', coursActif);
 
     // Obtenir le trimestre actif
     const trimestreActifId = typeof obtenirTrimestreId === 'function' ? obtenirTrimestreId() : '';
@@ -1343,13 +1319,11 @@ function chargerDropdownCoursV2() {
             const trimestreDerive = deriverTrimestreId(c);
             const inclus = trimestreDerive === trimestreActifId || trimestreDerive === null;
             if (!inclus) {
-                console.log(`[Trimestre V2] Cours exclu: ${obtenirTexteCours(c)} (trimestre: ${trimestreDerive})`);
             }
             return inclus;
         })
         : tousCours;
 
-    console.log(`[Trimestre V2] Dropdown cours: ${coursFiltres.length}/${tousCours.length} cours pour trimestre ${trimestreActifId || '(aucun)'}`);
 
     select.innerHTML = '<option value="">Sélectionner un cours...</option>';
 
@@ -1366,17 +1340,14 @@ function chargerDropdownCoursV2() {
         if (!coursAfficher.find(c => c.id === coursActif.id)) {
             // Pas dans la liste, l'ajouter
             coursAfficher.unshift(coursActif);
-            console.log('[Trimestre V2] Cours actif (infoCours) ajouté:', obtenirTexteCours(coursActif));
         }
         coursASelectionner = coursActif;
     } else if (coursFiltres.length > 0) {
         // infoCours n'est pas dans le bon trimestre, utiliser le premier cours filtré
         coursASelectionner = coursFiltres[0];
-        console.log('[Trimestre V2] infoCours hors trimestre, sélection:', obtenirTexteCours(coursASelectionner));
 
         // Mettre à jour infoCours avec le bon cours
         db.setSync('infoCours', coursASelectionner);
-        console.log('[Trimestre V2] infoCours mis à jour avec le cours du trimestre actif');
     }
 
     if (coursAfficher.length === 0) {
@@ -1389,7 +1360,6 @@ function chargerDropdownCoursV2() {
 
         // IMPORTANT: Réinitialiser infoCours pour éviter d'afficher des données d'un autre trimestre
         db.setSync('infoCours', null);
-        console.log('[Trimestre V2] infoCours réinitialisé (aucun cours pour ce trimestre)');
 
         // Vider l'affichage des détails du cours
         viderAffichageCoursV2();
@@ -1517,7 +1487,6 @@ function supprimerCoursV2() {
         db.setSync('infoCours', null);
     }
 
-    console.log('[Trimestre V2] Cours supprimé:', coursEnEditionV2);
 
     // Réinitialiser l'interface
     coursEnEditionV2 = null;
@@ -1546,7 +1515,6 @@ function supprimerCoursV2() {
  * Appelé quand il n'y a aucun cours pour le trimestre actif
  */
 function viderAffichageCoursV2() {
-    console.log('[Trimestre V2] Vidage de l\'affichage cours et étudiants');
 
     // Vider l'aperçu du cours
     const apercuCours = document.getElementById('v2-apercuCours');
@@ -1589,7 +1557,6 @@ function afficherDetailsCoursV2(cours) {
     const conteneur = document.getElementById('v2-apercuCours');
     if (!conteneur) return;
 
-    console.log('[Trimestre V2] Affichage détails cours:', cours);
 
     // Normaliser le sigle (codeCours, sigle, code ou numero)
     // 🆕 FIX (4 fév 2026) : Priorité codeCours, ajouter code pour Primo
@@ -1675,7 +1642,6 @@ async function nouveauCoursV2() {
     const btnSupprimer = document.getElementById('v2-btnSupprimerCours');
     if (btnSupprimer) btnSupprimer.classList.add('u-hide');
 
-    console.log('[Trimestre V2] Formulaire nouveau cours affiché');
 }
 
 /**
@@ -1774,7 +1740,6 @@ function dupliquerCoursSelectionneV2() {
         formulaire.scrollIntoView({ behavior: 'smooth' });
     }
 
-    console.log('[Trimestre V2] Duplication du cours:', coursSelectionne.codeCours || coursSelectionne.sigle || coursSelectionne.code);
 }
 
 /**
@@ -1782,7 +1747,6 @@ function dupliquerCoursSelectionneV2() {
  * Gère différents formats de données (Beta 95)
  */
 function remplirFormCoursV2(cours) {
-    console.log('[Trimestre V2] Remplissage formulaire avec:', cours);
 
     // Informations générales du cours
     // 🆕 FIX (4 fév 2026) : Priorité codeCours, ajouter code pour Primo
@@ -2102,7 +2066,6 @@ async function chargerDropdownPratiquesCours() {
         }
     }
 
-    console.log('[trimestre-v2] Dropdown pratiques chargé:', pratiques.length, 'pratiques');
 }
 
 /**
@@ -2131,7 +2094,6 @@ function annulerFormCoursV2() {
     if (selectCours) selectCours.value = '';
 
     reinitialiserFormCoursV2();
-    console.log('[Trimestre V2] Formulaire cours annulé');
 }
 
 /**
@@ -2276,7 +2238,6 @@ async function chargerListeEtudiantsV2() {
     const tousLesEtudiants = await db.get(cleEtudiants) || [];
 
     // 🔍 DEBUG (9 jan 2026): Tracer la source des données
-    console.log(`🔍 [chargerListeEtudiantsV2] Clé: ${cleEtudiants}, Nb étudiants: ${tousLesEtudiants.length} (depuis IndexedDB)`);
 
     // Mettre à jour le dropdown des groupes (avec tous les étudiants)
     populerDropdownGroupesV2(tousLesEtudiants);
@@ -2885,7 +2846,6 @@ function traiterDonneesImportV2(contenu) {
  * Confirme l'import des données
  */
 async function confirmerImportV2() {
-    console.log('📥 [confirmerImportV2] Début - donneesImportEnAttenteV2:', donneesImportEnAttenteV2.length);
 
     if (donneesImportEnAttenteV2.length === 0) {
         console.warn('⚠️ [confirmerImportV2] Aucune donnée en attente !');
@@ -2895,11 +2855,9 @@ async function confirmerImportV2() {
     const coursActif = db.getSync('infoCours', null);
     // ✅ CORRECTION (31 déc 2025): Utiliser namespace
     const cleEtud = cle('groupeEtudiants');
-    console.log('📥 [confirmerImportV2] Clé:', cleEtud);
 
     // ✅ CORRECTION (9 jan 2026): Lire depuis IndexedDB pour avoir les données complètes
     let etudiants = await db.get(cleEtud) || [];
-    console.log('📥 [confirmerImportV2] Étudiants existants:', etudiants.length);
 
     donneesImportEnAttenteV2.forEach(e => {
         etudiants.push({
@@ -2908,14 +2866,12 @@ async function confirmerImportV2() {
         });
     });
 
-    console.log('📥 [confirmerImportV2] Total après ajout:', etudiants.length);
 
     // ✅ CORRECTION (9 jan 2026): Utiliser db.set (async) pour écriture fiable
     await db.set(cleEtud, etudiants);
 
     // Vérification immédiate
     const verification = db.getSync(cleEtud, []).length;
-    console.log('📥 [confirmerImportV2] Vérification après save:', verification);
 
     // Nettoyer
     donneesImportEnAttenteV2 = [];
@@ -3798,12 +3754,10 @@ function sauvegarderHoraireV2() {
     });
     const cleHoraireHebdo = cle('horaireHebdo');
     db.setSync(cleHoraireHebdo, toutesSeances);
-    console.log(`📅 horaireHebdo synchronisé avec ${toutesSeances.length} jour(s):`, toutesSeances.map(s => s.jour).join(', '));
 
     // Regénérer le calendrier avec les nouveaux jours de cours
     if (typeof genererCalendrierComplet === 'function') {
         genererCalendrierComplet();
-        console.log('📅 Calendrier regénéré');
     }
 
     // Rafraîchir l'interface
@@ -4635,7 +4589,6 @@ function supprimerGroupeCoursV2() {
         db.setSync('groupeCoursActif', null);
     }
 
-    console.log('[Trimestre V2] Groupe-cours supprimé:', groupeCoursEnEditionId);
 
     // Réinitialiser l'interface
     groupeCoursEnEditionId = null;
@@ -5035,7 +4988,6 @@ function mettreAJourOptionsFormatHoraire() {
         selectFormat.selectedIndex = 0;
     }
 
-    console.log(`[Trimestre] Format horaire mis à jour pour ${heures}h:`, diviseurs.map(d => `${d}x${heures/d}`));
 }
 
 // Export pour le HTML
@@ -5279,7 +5231,6 @@ function mettreAJourGuideGroupeCours() {
     statusEtudiants.textContent = etudiantsOk ? '●' : '○';
     statusEtudiants.style.color = etudiantsOk ? 'var(--vert-succes)' : 'var(--gris-moyen)';
 
-    console.log('[Guide] État:', { coursOk, groupeOk, horaireOk, etudiantsOk });
 }
 
 /* ===============================
@@ -5634,7 +5585,6 @@ async function peuplerDropdownGroupeCoursActif() {
     const trimestres = db.getSync('trimestres', []);
     const trimestreActif = trimestres.find(t => t.actif);
 
-    console.log('🔄 [GC Dropdown] Trimestre actif:', trimestreActif?.id, trimestreActif?.nom);
 
     if (!trimestreActif) {
         selectHeader.innerHTML = '<option value="">-- Sélectionne un trimestre --</option>';
@@ -5643,9 +5593,7 @@ async function peuplerDropdownGroupeCoursActif() {
 
     // Utiliser cle() pour cohérence avec sauvegarderGroupeCoursV2
     const cleGC = cle('groupesCours');
-    console.log('🔄 [GC Dropdown] Clé groupesCours:', cleGC);
     const tousGroupesCours = db.getSync(cleGC, []);
-    console.log('🔄 [GC Dropdown] Groupe-cours trouvés:', tousGroupesCours.length);
 
     // 🆕 (10 jan 2026) : Filtrer les groupe-cours masqués (dansSidebar !== false)
     const groupesCours = tousGroupesCours.filter(gc => gc.dansSidebar !== false);
@@ -5711,7 +5659,6 @@ async function peuplerDropdownGroupeCoursActif() {
     }
 
     selectHeader.innerHTML = options;
-    console.log('[Trimestre V2] Dropdown groupe-cours actif peuplé:', groupesCours.length, 'groupe-cours');
 
     // 🆕 BETA 95.5 : Auto-sélection si aucun groupe-cours actif
     // Vérifie si le groupe-cours actuellement actif appartient au trimestre actif
@@ -5720,18 +5667,14 @@ async function peuplerDropdownGroupeCoursActif() {
     const gcActif = db.getSync('groupeCoursActif', null);
     const gcActifValide = gcActif && tousGroupesCours.some(gc => gc.id === gcActif.id);
 
-    console.log('🔄 [GC Dropdown] gcActif:', gcActif?.id, '- trimestreId:', gcActif?.trimestreId);
-    console.log('🔄 [GC Dropdown] gcActifValide:', gcActifValide);
 
     if (!gcActifValide && groupesCours.length > 0) {
         // Sélectionner le premier groupe-cours du trimestre
         const premierGC = groupesCours[0];
-        console.log('🔄 [GC Dropdown] Auto-sélection du premier groupe-cours:', premierGC.id);
         await changerGroupeCoursActifV2(premierGC.id);
         selectHeader.value = premierGC.id;
     } else if (gcActifValide) {
         // S'assurer que le dropdown reflète la sélection actuelle
-        console.log('🔄 [GC Dropdown] Groupe-cours actif valide, sélection:', gcActif.modeCours ? `cours:${gcActif.coursId}` : gcActif.id);
         selectHeader.value = gcActif.modeCours ? `cours:${gcActif.coursId}` : gcActif.id;
     }
 }
@@ -5750,12 +5693,10 @@ async function changerGroupeCoursDepuisHeader(groupeCoursId) {
  */
 async function changerGroupeCoursActifV2(valeur) {
     // DEBUG (11 jan 2026)
-    console.log('[Trimestre V2] changerGroupeCoursActifV2 appelée avec:', valeur);
 
     if (!valeur) {
         db.setSync('groupeCoursActif', null);
         db.setSync('infoCours', null);
-        console.log('[Trimestre V2] Groupe-cours désélectionné');
         return;
     }
 
@@ -5880,7 +5821,6 @@ async function changerGroupeCoursActifV2(valeur) {
             if (saC && !saC.classList.contains('u-hide') && typeof travauxUI.afficherArchivage === 'function') travauxUI.afficherArchivage();
         }
 
-        console.log('[Trimestre V2] Mode COURS activé:', coursId, '(tous groupes)');
         return;
     }
 
@@ -5927,7 +5867,6 @@ async function changerGroupeCoursActifV2(valeur) {
         _groupeCoursId: gc.id  // ID du groupe-cours
     });
 
-    console.log('[Trimestre V2] infoCours mis à jour pour groupe:', gc.groupe || gc.groupeNum);
 
     const selectHeader = document.getElementById('selectGroupeCoursHeader');
     if (selectHeader) selectHeader.value = groupeCoursId || '';
@@ -6017,7 +5956,6 @@ async function changerGroupeCoursActifV2(valeur) {
         if (saGC && !saGC.classList.contains('u-hide') && typeof travauxUI.afficherArchivage === 'function') travauxUI.afficherArchivage();
     }
 
-    console.log('[Trimestre V2] Groupe-cours activé:', gc.id);
 }
 
 /**
@@ -6256,7 +6194,6 @@ async function activerGroupeCoursV2(groupeCoursId) {
             chargerCoursSelectV2();
         }
 
-        console.log('[Trimestre V2] Groupe-cours activé:', groupeCoursId);
 
     } catch (err) {
         console.error('[Trimestre V2] Erreur activation groupe-cours:', err);

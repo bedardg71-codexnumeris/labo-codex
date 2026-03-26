@@ -813,7 +813,7 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
             }
         }
 
-        console.log('✅ Graphique corrélations longitudinales créé (' + donnees.semaines.length + ' semaines)');
+
 
     } catch (err) {
         console.error('❌ Erreur création graphique corrélations longitudinales:', err);

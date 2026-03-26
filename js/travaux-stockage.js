@@ -69,7 +69,6 @@
                 console.warn('[Travaux-Stockage] Impossible de persister le handle FSAPI');
             }
 
-            console.log('[Travaux-Stockage] FSAPI configure:', fsapiDirectoryHandle.name);
             return true;
         } catch (e) {
             if (e.name !== 'AbortError') {
@@ -110,7 +109,6 @@
             if (permission === 'granted') {
                 fsapiDirectoryHandle = handle;
                 fsapiActif = true;
-                console.log('[Travaux-Stockage] FSAPI restaure:', handle.name);
                 return true;
             }
 
@@ -119,7 +117,6 @@
             if (newPermission === 'granted') {
                 fsapiDirectoryHandle = handle;
                 fsapiActif = true;
-                console.log('[Travaux-Stockage] FSAPI re-autorise:', handle.name);
                 return true;
             }
         } catch (e) {
@@ -140,7 +137,6 @@
         const writable = await fileHandle.createWritable();
         await writable.write(blob);
         await writable.close();
-        console.log(`[Travaux-Stockage] Blob FSAPI stocke: ${id} (${(blob.size / 1024).toFixed(1)} KB)`);
     }
 
     /**
@@ -167,7 +163,6 @@
     async function supprimerBlobFSAPI(id) {
         try {
             await fsapiDirectoryHandle.removeEntry(id);
-            console.log(`[Travaux-Stockage] Blob FSAPI supprime: ${id}`);
         } catch (e) {
             if (e.name !== 'NotFoundError') throw e;
         }
@@ -218,7 +213,6 @@
                 blob: blob,
                 dateStored: new Date().toISOString()
             });
-            console.log(`[Travaux-Stockage] Blob stocke: ${id} (${(blob.size / 1024).toFixed(1)} KB)`);
         } catch (err) {
             if (err?.name === 'QuotaExceededError') {
                 if (typeof afficherNotificationErreur === 'function') {
@@ -260,7 +254,6 @@
 
         // Délégation vers db.js
         await db.deleteBlob(id);
-        console.log(`[Travaux-Stockage] Blob supprime: ${id}`);
     }
 
     /**
@@ -541,7 +534,6 @@
         fichiers[idx].dateModification = new Date().toISOString();
         sauvegarderFichiersTravaux(fichiers);
 
-        console.log(`[Travaux-Stockage] Réassociation: ${id} → productionId=${fichiers[idx].productionId}, etudiantDA=${fichiers[idx].etudiantDA}`);
         return true;
     }
 
@@ -575,7 +567,6 @@
 
         if (compteur > 0) {
             sauvegarderFichiersTravaux(fichiers);
-            console.log(`[Travaux-Stockage] Réassociation batch: ${compteur} fichier(s)`);
         }
         return compteur;
     }
@@ -831,7 +822,6 @@
         fichiers.splice(index, 1);
         sauvegarderFichiersTravaux(fichiers);
 
-        console.log(`[Travaux-Stockage] Fichier déplacé en corbeille: ${id}`);
         return true;
     }
 
@@ -857,7 +847,6 @@
         fichiers.push(fichier);
         sauvegarderFichiersTravaux(fichiers);
 
-        console.log(`[Travaux-Stockage] Fichier restauré de la corbeille: ${id}`);
         return true;
     }
 
@@ -880,7 +869,6 @@
         if (index !== -1) {
             corbeille.splice(index, 1);
             sauvegarderCorbeille(corbeille);
-            console.log(`[Travaux-Stockage] Fichier supprimé définitivement: ${id}`);
             return true;
         }
         return false;
@@ -917,7 +905,6 @@
         }
 
         sauvegarderCorbeille(restantes);
-        console.log(`[Travaux-Stockage] Corbeille purgée: ${expirees.length} fichier(s) expiré(s)`);
         return expirees.length;
     }
 
@@ -939,7 +926,6 @@
 
         const nb = corbeille.length;
         sauvegarderCorbeille([]);
-        console.log(`[Travaux-Stockage] Corbeille vidée: ${nb} fichier(s)`);
         return nb;
     }
 
@@ -961,7 +947,6 @@
         }
         if (modifie) {
             sauvegarderFichiersTravaux(fichiers);
-            console.log('[Travaux-Stockage] Migration blobStatut effectuee');
         }
     }
 
@@ -1019,7 +1004,6 @@
             fichier.dateModification = new Date().toISOString();
             sauvegarderFichiersTravaux(fichiers);
 
-            console.log(`[Travaux-Stockage] Fac-simile cree: ${fichierId} (${formaterTaille(facsimileBlob.size)})`);
             return true;
         } catch (e) {
             console.error('[Travaux-Stockage] Erreur fac-simile:', e);
@@ -1154,14 +1138,12 @@
             if (fsapiDisponible) {
                 const restaure = await restaurerFSAPI();
                 if (restaure) {
-                    console.log('[Travaux-Stockage] FSAPI restaure depuis session precedente');
                 }
             }
 
             // Demander le stockage persistant si disponible
             if (navigator.storage && navigator.storage.persist) {
                 const persistent = await navigator.storage.persist();
-                console.log(`[Travaux-Stockage] Stockage persistant: ${persistent ? 'accorde' : 'refuse'}`);
             }
 
             // Migration blobStatut pour fichiers existants
@@ -1170,7 +1152,6 @@
             // Purger les fichiers expirés de la corbeille (> 30 jours)
             purgerCorbeilleExpiree();
 
-            console.log(`[Travaux-Stockage] Module initialise (mode: ${fsapiActif ? 'FSAPI' : 'IndexedDB'})`);
         } catch (error) {
             console.error('[Travaux-Stockage] Erreur initialisation:', error);
         }

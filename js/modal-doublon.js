@@ -282,6 +282,6 @@
     window.genererNomSuggere = genererNomSuggere;
     window.nomExiste = nomExiste;
 
-    console.log('[Modal Doublon] Module charge');
+
 
 })();

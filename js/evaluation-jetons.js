@@ -129,7 +129,6 @@ function verifierDisponibiliteJeton(da, type) {
  * @returns {boolean} Succès ou échec
  */
 function appliquerJetonDelai(evaluationId) {
-    console.log('⭐ Application jeton de délai:', evaluationId);
 
     // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec les modes
     const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
@@ -177,9 +176,7 @@ function appliquerJetonDelai(evaluationId) {
 
     // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation)
     sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
-    console.log('✅ Évaluations sauvegardées avec jeton de délai');
 
-    console.log('✅ Jeton de délai appliqué');
 
     // Mettre à jour evaluationEnCours si c'est l'évaluation active
     if (window.evaluationEnCours?.idModification === evaluationId) {
@@ -213,7 +210,6 @@ function appliquerJetonDelai(evaluationId) {
  * @returns {boolean} Succès ou échec
  */
 function retirerJetonDelai(evaluationId) {
-    console.log('🗑️ Retrait jeton de délai:', evaluationId);
 
     // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec les modes
     const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
@@ -232,9 +228,7 @@ function retirerJetonDelai(evaluationId) {
 
     // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation)
     sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
-    console.log('✅ Évaluations sauvegardées après retrait jeton de délai');
 
-    console.log('✅ Jeton de délai retiré');
 
     // Mettre à jour evaluationEnCours si c'est l'évaluation active
     if (window.evaluationEnCours?.idModification === evaluationId) {
@@ -275,7 +269,6 @@ function retirerJetonDelai(evaluationId) {
  * @returns {object|null} La nouvelle évaluation créée, ou null si échec
  */
 function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) {
-    console.log('⭐ Application jeton de reprise:', evaluationOriginaleId);
 
     // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec les modes
     const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
@@ -325,7 +318,6 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
         archiverOriginale = config.reprise.archiverOriginale;
     }
 
-    console.log('Archivage:', archiverOriginale ? 'OUI' : 'NON (suppression)');
 
     // ✅ CORRECTIF (30 déc 2025): Deep copy pour éviter la modification de l'original
     const copieOriginale = structuredClone(evaluationOriginale);
@@ -345,8 +337,6 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
         heureModification: undefined
     };
 
-    console.log('📋 Nouvelle évaluation créée avec ID:', nouvelId);
-    console.log('📋 Lien vers originale:', evaluationOriginaleId);
 
     // Journal de bord — jeton de reprise (avant splice pour garder la bonne référence)
     var refOriginale = evaluations[indexOriginal];
@@ -365,11 +355,9 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
         evaluations[indexOriginal].dateRemplacement = new Date().toISOString();
         evaluations[indexOriginal].archivee = true;
         evaluations[indexOriginal].dateArchivage = new Date().toISOString();
-        console.log('📦 Originale archivée');
     } else {
         // Option 2: Supprimer l'originale
         evaluations.splice(indexOriginal, 1);
-        console.log('🗑️ Originale supprimée');
     }
 
     // Ajouter la nouvelle évaluation
@@ -377,8 +365,6 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
 
     // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation)
     sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
-    console.log('✅ Évaluations sauvegardées avec jeton de reprise');
-    console.log('✅ Jeton de reprise appliqué, nouvelle évaluation:', nouvelleEvaluation.id);
 
     // Recalculer les indices
     if (typeof calculerEtStockerIndicesCP === 'function') {
@@ -402,7 +388,6 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
  * @returns {boolean} Succès ou échec
  */
 function retirerJetonReprise(evaluationId) {
-    console.log('🗑️ Retrait jeton de reprise:', evaluationId);
 
     // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec les modes
     const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
@@ -435,7 +420,6 @@ function retirerJetonReprise(evaluationId) {
 
         if (garderReprise) {
             // Garder la reprise, archiver l'originale
-            console.log('✅ Conservation de la reprise, archivage de l\'originale');
 
             // Nettoyer les propriétés de jeton de la reprise
             delete evaluationReprise.repriseDeId;
@@ -447,7 +431,6 @@ function retirerJetonReprise(evaluationId) {
             afficherNotificationSucces('Reprise conservée, originale archivée');
         } else {
             // Supprimer la reprise, restaurer l'originale
-            console.log('✅ Suppression de la reprise, restauration de l\'originale');
 
             // Retirer les flags de l'originale
             delete evaluationOriginale.remplaceeParId;
@@ -471,7 +454,6 @@ function retirerJetonReprise(evaluationId) {
         }
     } else {
         // Pas d'originale trouvée, juste nettoyer les propriétés
-        console.log('⚠️ Aucune originale trouvée, nettoyage simple');
         delete evaluationReprise.repriseDeId;
         delete evaluationReprise.jetonRepriseApplique;
         delete evaluationReprise.dateApplicationJetonReprise;
@@ -481,7 +463,6 @@ function retirerJetonReprise(evaluationId) {
 
     // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation)
     sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
-    console.log('✅ Évaluations sauvegardées après retrait jeton de reprise');
 
     // Recalculer les indices
     if (typeof calculerEtStockerIndicesCP === 'function') {
@@ -644,7 +625,6 @@ function attribuerJetonPersonnalise(da, jetonId, motif = '') {
     });
 
     db.setSync('jetonsEtudiants', jetons);
-    console.log(`✅ Jeton personnalisé "${jetonId}" attribué à ${da}`);
 
     return true;
 }
@@ -675,7 +655,6 @@ function retirerJetonPersonnalise(da, jetonId) {
     });
 
     db.setSync('jetonsEtudiants', jetons);
-    console.log(`✅ Jeton personnalisé "${jetonId}" retiré de ${da}`);
 
     return true;
 }
@@ -694,7 +673,6 @@ function retirerJetonPersonnalise(da, jetonId) {
  * @returns {object|null} La nouvelle évaluation créée, ou null si échec
  */
 function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, archiverOriginale = null) {
-    console.log('⭐ Application jeton de reprise ciblée:', evaluationOriginaleId, 'critère:', critereId);
 
     // IMPORTANT: Utiliser directement db.getSync pour éviter conflit avec les modes
     const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
@@ -725,7 +703,6 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
         archiverOriginale = configRepriseCiblee.archiverOriginale !== false; // Par défaut: archiver
     }
 
-    console.log('Archivage:', archiverOriginale ? 'OUI' : 'NON (suppression)');
 
     // ✅ CORRECTIF (30 déc 2025): Deep copy pour éviter la modification de l'original
     const copieOriginale = structuredClone(evaluationOriginale);
@@ -752,8 +729,6 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
         dateArchivage: undefined
     };
 
-    console.log('📋 Nouvelle évaluation ciblée créée avec ID:', nouvelId);
-    console.log('📋 Lien vers originale:', evaluationOriginaleId);
 
     // Journal de bord — jeton de reprise ciblée (avant splice pour garder la bonne référence)
     var refOriginaleCiblee = evaluations[indexOriginal];
@@ -772,11 +747,9 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
         evaluations[indexOriginal].dateRemplacement = new Date().toISOString();
         evaluations[indexOriginal].archivee = true;
         evaluations[indexOriginal].dateArchivage = new Date().toISOString();
-        console.log('📦 Originale archivée');
     } else {
         // Option 2: Supprimer l'originale
         evaluations.splice(indexOriginal, 1);
-        console.log('🗑️ Originale supprimée');
     }
 
     // Ajouter la nouvelle évaluation
@@ -784,8 +757,6 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
 
     // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation)
     sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
-    console.log('✅ Évaluations sauvegardées avec jeton de reprise ciblée');
-    console.log('✅ Jeton de reprise ciblée appliqué, nouvelle évaluation:', nouvelleEvaluation.id);
 
     // Recalculer les indices
     if (typeof calculerEtStockerIndicesCP === 'function') {
@@ -812,7 +783,6 @@ function nettoyerEvaluationsRepriseCiblee() {
     evaluations.forEach(evaluation => {
         // Si c'est une reprise ciblée qui a incorrectement remplaceeParId
         if (evaluation.jetonRepriseCibleeApplique === true && evaluation.remplaceeParId) {
-            console.log('🧹 Nettoyage reprise ciblée:', evaluation.id);
             delete evaluation.remplaceeParId;
             delete evaluation.dateRemplacement;
             delete evaluation.archivee;
@@ -823,7 +793,6 @@ function nettoyerEvaluationsRepriseCiblee() {
 
     if (nbNettoyees > 0) {
         sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
-        console.log(`✅ ${nbNettoyees} évaluation(s) de reprise ciblée nettoyée(s)`);
 
         // Rafraîchir la liste
         if (typeof initialiserListeEvaluations === 'function') {
@@ -855,7 +824,6 @@ window.obtenirStatutJetonsEtudiant = obtenirStatutJetonsEtudiant;
 window.attribuerJetonPersonnalise = attribuerJetonPersonnalise;
 window.retirerJetonPersonnalise = retirerJetonPersonnalise;
 
-console.log('✅ Module evaluation-jetons.js chargé');
 
 
 })();

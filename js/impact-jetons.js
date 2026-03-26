@@ -435,7 +435,7 @@ function creerGraphiqueImpactJetons(canvasId) {
                 donnees.nbSansJetons + ' sans, sur ' + donnees.labels.length + ' semaines.';
         }
 
-        console.log('✅ Graphique impact jetons créé (' + donnees.nbAvecJetons + ' avec, ' + donnees.nbSansJetons + ' sans)');
+
 
     } catch (e) {
         console.error('❌ Erreur création graphique impact jetons:', e);

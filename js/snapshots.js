@@ -97,11 +97,9 @@ function cleSnapshots() {
 }
 
 function initialiserModuleSnapshots() {
-    console.log('🔄 Initialisation module snapshots...');
 
     const cleSnap = cleSnapshots();
     if (!cleSnap) {
-        console.log('⚠️ Aucun cours actif – module snapshots en attente');
         return;
     }
 
@@ -113,7 +111,6 @@ function initialiserModuleSnapshots() {
         db.get(cleSnap).then(snapshotsFrais => {
             if (snapshotsFrais) {
                 // IndexedDB a des données → peupler le memoryCache pour getSync()
-                console.log(`✅ Snapshots chargés depuis IndexedDB: ${snapshotsFrais.hebdomadaires?.length || 0} captures`);
                 db.memoryCache.set(cleSnap, snapshotsFrais);
                 // Aussi tenter localStorage (sera ignoré si trop grand)
                 try {
@@ -136,7 +133,6 @@ function initialiserModuleSnapshots() {
                     }
                 };
                 db.set(cleSnap, structure);
-                console.log('✅ Structure snapshots créée (première utilisation)');
             }
             // Rafraîchir l'affichage si on est dans Réglages
             if (typeof afficherStatutSnapshots === 'function') {
@@ -163,14 +159,12 @@ function initialiserModuleSnapshots() {
                 interventions: [],
                 metadata: { version: '1.0.0', dateCreation: new Date().toISOString(), dernierSnapshotHebdo: null, dernierSnapshotIntervention: null }
             });
-            console.log('✅ Structure snapshots créée');
         }
     }
 
     // Vérifier si nouveau snapshot hebdomadaire nécessaire
     verifierEtCapturerSnapshotHebdomadaire();
 
-    console.log('✅ Module snapshots initialisé');
 }
 
 /* ===============================
@@ -417,7 +411,6 @@ async function verifierEtCapturerSnapshotHebdomadaire() {
     const snapshotExiste = snapshots.hebdomadaires.some(s => s.numSemaine === numSemaineActuelle);
 
     if (!snapshotExiste) {
-        console.log(`📸 Capture snapshot hebdomadaire semaine ${numSemaineActuelle}...`);
         await capturerSnapshotHebdomadaire(numSemaineActuelle);
     }
 }
@@ -476,7 +469,6 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
             numeroSemaine = infoJour.numeroSemaine;
         }
 
-        console.log(`📸 Capture snapshot pour séance du ${dateSeance} (semaine ${numeroSemaine})`);
 
         // Calculer indices pour chaque étudiant
         // ✅ CORRECTIF (13 fév 2026): Utiliser obtenirEtudiantsCoursActif() qui filtre par
@@ -527,11 +519,9 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
 
         if (!evaluationsCache) {
             try {
-                console.log('⚡ Chargement évaluations depuis IndexedDB...');
                 // ✅ CORRECTION (7 déc 2025): Utiliser 'evaluationsSauvegardees' (clé correcte)
                 // 🆕 FIX (9 jan 2026): Namespacing par trimestre via cle()
                 evaluationsCache = await db.get(cle('evaluationsSauvegardees'));
-                console.log(`✓ ${evaluationsCache ? evaluationsCache.length : 0} évaluations chargées depuis IndexedDB`);
             } catch (e) {
                 console.warn('Impossible de charger depuis IndexedDB:', e.message);
                 evaluationsCache = [];
@@ -682,7 +672,6 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
         // ⚡ Sauvegarder dans IndexedDB (plusieurs GB disponibles)
         await db.set(cleSnapshots(), snapshots);
 
-        console.log(`✅ Snapshot séance ${dateSeance} capturé (${nbEtudiants} étudiants)`);
         return snapshot;
 
     } catch (error) {
@@ -775,7 +764,6 @@ function capturerSnapshotIntervention(interventionId, etudiantsDA, type, titre) 
         snapshots.metadata.dernierSnapshotIntervention = snapshotIntervention.date;
         db.setSync(cleSnapshots(), snapshots);
 
-        console.log(`✅ Snapshot intervention "${titre}" capturé (avant) - ${etudiantsDA.length} étudiants`);
         return snapshotIntervention;
 
     } catch (error) {
@@ -824,7 +812,6 @@ function mettreAJourSnapshotIntervention(interventionId) {
 
         db.setSync(cleSnapshots(), snapshots);
 
-        console.log(`✅ Snapshot intervention "${snapshotIntervention.titre}" mis à jour (après)`);
         return true;
 
     } catch (error) {
@@ -844,30 +831,24 @@ function mettreAJourSnapshotIntervention(interventionId) {
  * @returns {Object} - { succes: boolean, nbSnapshots: number, message: string }
  */
 async function reconstruireSnapshotsHistoriques() {
-    console.log('🔄 Début reconstruction snapshots historiques (PAR SÉANCE)...');
 
     try {
         // ✅ CORRECTIF (16 fév 2026): Régénérer le calendrier avec l'union de tous les horaires.
         // genererCalendrierComplet() synchronise désormais horaireHebdo automatiquement
         // depuis toutes les entités horaire (couvre tous les groupes-cours).
-        console.log('🔄 Régénération calendrier...');
         if (typeof genererCalendrierComplet === 'function') {
             genererCalendrierComplet();
-            console.log('✅ Calendrier régénéré');
         }
 
         // ⚡ Charger les évaluations depuis IndexedDB (évite QuotaExceededError)
-        console.log('⚡ Chargement évaluations depuis IndexedDB...');
         // ✅ CORRECTION (7 déc 2025): Utiliser 'evaluationsSauvegardees' (clé correcte)
         // 🆕 FIX (9 jan 2026): Namespacing par trimestre via cle()
         const evaluationsCache = await db.get(cle('evaluationsSauvegardees'));
-        console.log(`✓ ${evaluationsCache ? evaluationsCache.length : 0} évaluations chargées`);
 
         // ✅ CORRECTIF (13 fév 2026): Forcer la régénération des séancesCompletes
         // depuis le calendrier fraîchement régénéré (évite données périmées d'un autre trimestre)
         let seancesCompletes;
         if (typeof genererSeancesCompletes === 'function') {
-            console.log('🔄 Régénération séancesCompletes pour le groupe actif...');
             seancesCompletes = genererSeancesCompletes();
         } else {
             seancesCompletes = obtenirSeancesCompletes();
@@ -903,11 +884,7 @@ async function reconstruireSnapshotsHistoriques() {
             : [];
         const nbEtudiants = etudiants.length;
 
-        console.log(`✓ Séances du groupe détectées: ${datesCours.length}`);
         if (datesCours.length > 0) {
-            console.log(`  Première séance: ${datesCours[0]}`);
-            console.log(`  Dernière séance: ${datesCours[datesCours.length - 1]}`);
-            console.log(`  📊 Estimation: ${datesCours.length} snapshots × ${nbEtudiants} étudiants × ~2 KB = ~${Math.round(datesCours.length * nbEtudiants * 2 / 1024)} MB`);
         }
 
         // Effacer snapshots existants (reconstruction complète)
@@ -922,7 +899,6 @@ async function reconstruireSnapshotsHistoriques() {
                 dernierSnapshotIntervention: null
             }
         });
-        console.log('✓ Snapshots existants effacés (IndexedDB)');
 
         // ✨ NOUVEAU : Capturer snapshot pour CHAQUE SÉANCE
         let nbSnapshots = 0;
@@ -932,7 +908,6 @@ async function reconstruireSnapshotsHistoriques() {
         for (let index = 0; index < datesCours.length; index++) {
             const dateSeance = datesCours[index];
             const progression = Math.round(((index + 1) / nbSeancesTotal) * 100);
-            console.log(`📸 [${index + 1}/${nbSeancesTotal}] Séance ${dateSeance} (${progression}%)...`);
 
             // Obtenir le numéro de semaine depuis seancesCompletes (group-specific)
             // Ceci court-circuite la validation calendrierComplet qui est partagé par trimestre
@@ -944,14 +919,12 @@ async function reconstruireSnapshotsHistoriques() {
             const snapshot = await capturerSnapshotSeance(dateSeance, evaluationsCache, { numeroSemaine: numSemaine });
             if (snapshot) {
                 nbSnapshots++;
-                console.log(`  ✅ Séance ${dateSeance} capturée (${snapshot.etudiants.length} étudiants)`);
             } else {
                 nbEchecs++;
                 console.warn(`  ⚠️ Séance ${dateSeance} échec`);
             }
         }
 
-        console.log(`✅ Reconstruction terminée : ${nbSnapshots} captures par séance créées, ${nbEchecs} échecs`);
 
         // ✅ CORRECTIF CRITIQUE (2 mars 2026): Forcer la synchro du cache pour les snapshots
         // Problème : après reconstruction, les snapshots sont dans IndexedDB (11 captures)
@@ -961,7 +934,6 @@ async function reconstruireSnapshotsHistoriques() {
         // Solution : supprimer la clé périmée et forcer le memoryCache.
         const cleSnap = cleSnapshots();
         if (cleSnap) {
-            console.log('🔄 Forçage du cache snapshots...');
             try {
                 // 1. Relire les données fraîches depuis IndexedDB
                 const snapshotsFrais = await db.get(cleSnap);
@@ -974,10 +946,8 @@ async function reconstruireSnapshotsHistoriques() {
                 // 4. Essayer de mettre à jour localStorage aussi
                 try {
                     localStorage.setItem(cleSnap, JSON.stringify(snapshotsFrais));
-                    console.log('✅ Cache localStorage + memoryCache mis à jour');
                 } catch (e) {
                     // QuotaExceeded — memoryCache déjà peuplé au step 2
-                    console.log('✅ Cache memoryCache mis à jour (trop grand pour localStorage)');
                 }
             } catch (e) {
                 console.warn('⚠️ Impossible de forcer le cache snapshots:', e.message);
@@ -1022,7 +992,6 @@ function importerSnapshots(json) {
     try {
         const snapshots = JSON.parse(json);
         db.setSync(cleSnapshots(), snapshots);
-        console.log('✅ Snapshots importés avec succès');
         return true;
     } catch (error) {
         console.error('❌ Erreur import snapshots:', error);
@@ -1189,7 +1158,6 @@ async function lancerReconstructionRetroactive() {
     }
 
     try {
-        console.log('🔄 Lancement de la reconstruction rétroactive...');
         // ⚡ NOUVEAU : Appel asynchrone (charge depuis IndexedDB)
         const resultats = await reconstruireSnapshotsHistoriques();
 
@@ -1294,7 +1262,6 @@ window.capturerSnapshotManuel = capturerSnapshotManuel;
 window.lancerReconstructionRetroactive = lancerReconstructionRetroactive;
 window.confirmerNettoyageSnapshots = confirmerNettoyageSnapshots;
 
-console.log('📦 Module snapshots.js chargé');
 
 
 })();

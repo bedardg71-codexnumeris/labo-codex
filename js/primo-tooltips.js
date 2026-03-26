@@ -83,7 +83,6 @@ function gererClicPrimo(event) {
     const icone = event.currentTarget;
     const targetId = icone.dataset.target;
 
-    console.log('[Guide] Clic sur icône, target:', targetId);
 
     if (!targetId) {
         console.warn('[Guide] Pas de data-target sur l\'icône', icone);
@@ -98,7 +97,6 @@ function gererClicPrimo(event) {
         return;
     }
 
-    console.log('[Guide] Élément trouvé, innerHTML length:', contenuElement.innerHTML.length);
 
     // Afficher le popup avec le contenu
     afficherPopupPrimo(contenuElement.innerHTML);
@@ -127,14 +125,12 @@ function gererVisibilitePrimoSelonMode() {
         toggleDisplay(icone, afficherPrimo);
     });
 
-    console.log(`🎯 [Guide Tooltips] Mode Assisté: ${modeAssiste}, Aide contextuelle: ${aideActive} - ${icones.length} icônes ${afficherPrimo ? 'affichées' : 'masquées'}`);
 }
 
 /**
  * Initialise le système de tooltips Primo
  */
 function initialiserPrimoTooltips() {
-    console.log('🎯 [Guide Tooltips] Initialisation...');
 
     // Attacher les événements à toutes les icônes Primo
     const icones = document.querySelectorAll('.primo-aide');
@@ -142,7 +138,6 @@ function initialiserPrimoTooltips() {
         icone.addEventListener('click', gererClicPrimo);
     });
 
-    console.log(`✅ [Guide Tooltips] ${icones.length} icônes initialisées`);
 
     // Fermer le popup avec Échap
     document.addEventListener('keydown', (e) => {

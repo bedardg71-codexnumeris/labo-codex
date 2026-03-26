@@ -112,12 +112,6 @@ function sauvegarderEtatAvantDemo() {
     etat.trimestreActifId = trimestreActif?.id || null;
 
     db.setSync('demo-etat-precedent', etat);
-    console.log('[Demo] État sauvegardé:', {
-        trimestre: etat.trimestreActifId,
-        cours: etat.infoCours?.id,
-        gc: etat.groupeCoursActif?.id,
-        mode: etat.modeApplication
-    });
 }
 
 /**
@@ -162,11 +156,6 @@ async function restaurerEtatApresDemo() {
     // Nettoyer l'état sauvegardé
     db.removeSync('demo-etat-precedent');
 
-    console.log('[Demo] État restauré:', {
-        trimestre: etat.trimestreActifId,
-        cours: etat.infoCours?.id,
-        mode: mode
-    });
 }
 
 // ============================================
@@ -183,16 +172,13 @@ async function entrerEnDemo() {
         // Vérifier si on est réellement en démo (bandeau visible) ou si c'est un résidu
         var bandeau = document.getElementById('bandeau-demo');
         if (bandeau && bandeau.style.display !== 'none') {
-            console.log('[Demo] Déjà en mode démo');
             return;
         }
         // Résidu d'une session crashée — nettoyer et continuer
-        console.log('[Demo] Résidu détecté, nettoyage avant re-entrée...');
         db.setSync('demo-actif', null);
         db.setSync('demo-chargees', null);
     }
 
-    console.log('🎬 [Demo] Entrée en mode démo...');
 
     try {
         // 1. Sauvegarder l'état actuel
@@ -217,13 +203,10 @@ async function entrerEnDemo() {
         const etudiantsVerif = db.getSync('demo_groupeEtudiants', null);
         if (!etudiantsVerif || !Array.isArray(etudiantsVerif) || etudiantsVerif.length === 0) {
             console.error('[Demo] ❌ Données demo_groupeEtudiants absentes après chargement!');
-            console.log('[Demo] Tentative IndexedDB → localStorage sync...');
             await db.syncToLocalStorageCache();
             // Re-vérifier après sync
             const etudiantsRetry = db.getSync('demo_groupeEtudiants', []);
-            console.log(`[Demo] Après sync: ${etudiantsRetry.length} étudiants`);
         } else {
-            console.log(`[Demo] ✅ ${etudiantsVerif.length} étudiants vérifiés dans demo_groupeEtudiants`);
         }
 
         // 4. Activer le trimestre demo
@@ -251,16 +234,13 @@ async function entrerEnDemo() {
         // qui pointent maintenant vers demo_* grâce à changerTrimestreActif('demo')
         if (typeof genererCalendrierComplet === 'function') {
             genererCalendrierComplet();
-            console.log('[Demo] ✅ calendrierComplet généré pour la démo');
         }
 
         // 6c. Reconstruire les snapshots pour la démo
         // Permet d'avoir les graphiques de progression A-C-P disponibles
         if (typeof reconstruireSnapshotsHistoriques === 'function') {
-            console.log('[Demo] Reconstruction des snapshots...');
             const resultat = await reconstruireSnapshotsHistoriques();
             if (resultat && resultat.succes) {
-                console.log(`[Demo] ✅ ${resultat.nbSnapshots} snapshots reconstruits`);
             } else {
                 console.warn('[Demo] ⚠️ Reconstruction snapshots échouée:', resultat?.message);
             }
@@ -290,7 +270,6 @@ async function entrerEnDemo() {
             rafraichirContenuSelonMode();
         }
 
-        console.log('🎬 [Demo] Entrée en mode démo terminée');
 
     } catch (error) {
         console.error('[Demo] Erreur entrée en démo:', error);
@@ -309,7 +288,6 @@ async function entrerEnDemo() {
  * Appelé par le bouton "Quitter la démo" dans le bandeau
  */
 async function quitterDemo() {
-    console.log('🏁 [Demo] Sortie du mode démo...');
 
     try {
         // 1. Décharger les données demo (supprime demo_* + globaux)
@@ -345,7 +323,6 @@ async function quitterDemo() {
             rafraichirContenuSelonMode();
         }
 
-        console.log('🏁 [Demo] Sortie du mode démo terminée');
 
     } catch (error) {
         console.error('[Demo] Erreur sortie de démo:', error);
@@ -382,7 +359,6 @@ async function nettoyerResiduDemo() {
         // Restaurer l'état précédent si disponible
         await restaurerEtatApresDemo();
 
-        console.log('[Demo] Résidus nettoyés avec succès');
         return true;
 
     } catch (error) {
@@ -427,11 +403,9 @@ function afficherBandeauDemo(show) {
  */
 async function chargerDonneesDemo() {
     try {
-        console.log('📦 [Demo] Chargement des données de démonstration...');
 
         // Vérifier si déjà chargées
         if (db.getSync('demo-chargees', null) === 'true') {
-            console.log('   ℹ️ Données demo déjà chargées');
             return true;
         }
 
@@ -444,7 +418,6 @@ async function chargerDonneesDemo() {
             return false;
         }
 
-        console.log(`   → Pack: ${packDemo.groupeEtudiants?.length || 0} étudiants, ${packDemo.listeCours?.length || 0} cours`);
 
         // Créer le trimestre demo s'il n'existe pas
         const trimestres = db.getSync('trimestres', []);
@@ -471,27 +444,22 @@ async function chargerDonneesDemo() {
         // [Chantier 2] Charger cadreCalendrier et horaireHebdo (manquants dans fusionnerDonneesDemo)
         if (packDemo.cadreCalendrier) {
             db.setSync('demo_cadreCalendrier', packDemo.cadreCalendrier);
-            console.log('   ➜ demo_cadreCalendrier chargé');
         }
         if (packDemo.horaireHebdo) {
             db.setSync('demo_horaireHebdo', packDemo.horaireHebdo);
-            console.log('   ➜ demo_horaireHebdo chargé');
         }
 
         // [Chantier 2] Sauvegarder et écraser modalitesEvaluation (clé globale)
         if (packDemo.modalitesEvaluation) {
             db.setSync('modalitesEvaluation', packDemo.modalitesEvaluation);
-            console.log('   ➜ modalitesEvaluation demo écrasé');
         }
 
         // Carte mentale démo (alignement pédagogique)
         db.setSync('demo_planification_mindmap', CARTE_DEMO_ALIGNEMENT);
-        console.log('   ➜ demo_planification_mindmap chargée');
 
         // Marquer comme chargées
         db.setSync('demo-chargees', 'true');
 
-        console.log('   ✅ Données demo chargées avec succès');
         return true;
 
     } catch (error) {
@@ -526,11 +494,9 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
         }
     }
     db.setSync('listeCours', listeCours);
-    console.log('   ➜ listeCours fusionnée');
 
     // 2. Fusionner groupeEtudiants
     const cleEtudiants = cleDemo('groupeEtudiants');
-    console.log(`   📦 Clé étudiants: ${cleEtudiants}`);
     const groupeEtudiants = db.getSync(cleEtudiants, []);
     const etudiantsDemo = packDemo.groupeEtudiants || [];
 
@@ -544,12 +510,10 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
         }
     }
     db.setSync(cleEtudiants, groupeEtudiants);
-    console.log(`   ➜ ${cleEtudiants} fusionné (${etudiantsDemo.length} étudiants demo)`);
 
     // 3. Fusionner productions
     if (packDemo.productions) {
         const cleProductions = cleDemo('productions');
-        console.log(`   📦 Clé productions: ${cleProductions}`);
         const productions = db.getSync(cleProductions, []);
         const productionsDemo = packDemo.productions || [];
 
@@ -563,14 +527,12 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
             }
         }
         db.setSync(cleProductions, productions);
-        console.log(`   ➜ ${cleProductions} fusionnées (${productionsDemo.length} productions demo)`);
     }
 
     // 4. Fusionner evaluations (evaluationsSauvegardees)
     const evaluationsDemo = packDemo.evaluationsSauvegardees || packDemo.evaluations || [];
     if (evaluationsDemo.length > 0) {
         const cleEvaluations = cleDemo('evaluationsSauvegardees');
-        console.log(`   📦 Clé évaluations: ${cleEvaluations}`);
         const evaluations = db.getSync(cleEvaluations, []);
 
         for (const evalDemo of evaluationsDemo) {
@@ -582,7 +544,6 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
             }
         }
         db.setSync(cleEvaluations, evaluations);
-        console.log(`   ➜ ${cleEvaluations} fusionnées (${evaluationsDemo.length} évaluations demo)`);
     }
 
     // 5. Fusionner grilles (si présentes)
@@ -600,7 +561,6 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
             }
         }
         db.setSync('grillesTemplates', grilles);
-        console.log('   ➜ grillesTemplates fusionnées');
     }
 
     // 6. Fusionner échelles (si présentes)
@@ -618,13 +578,11 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
             }
         }
         db.setSync('echellesTemplates', echelles);
-        console.log(`   ➜ echellesTemplates fusionnées (${echellesDemo.length} ajoutées)`);
     }
 
     // 7. Fusionner présences (si présentes)
     if (packDemo.presences) {
         const clePresences = cleDemo('presences');
-        console.log(`   📦 Clé présences: ${clePresences}`);
         let presences = db.getSync(clePresences, []);
         if (!Array.isArray(presences)) presences = [];
         const presencesDemo = packDemo.presences || {};
@@ -644,7 +602,6 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
             }
         }
         db.setSync(clePresences, presences);
-        console.log(`   ➜ ${clePresences} fusionnées (${presences.length} entrées)`);
     }
 
     // 8. Fusionner cartouches (clés cartouches_*)
@@ -662,13 +619,11 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
                 }
             }
             db.setSync(cleCartouche, cartouches);
-            console.log(`   ➜ ${cleCartouche} fusionnées (${cartouchesDemo.length} ajoutées)`);
         }
     }
 
     // 9. Créer un horaire demo (s'il n'existe pas)
     const cleHoraires = cleDemo('horaires');
-    console.log(`   📦 Clé horaires: ${cleHoraires}`);
     let horaires = db.getSync(cleHoraires, []);
     const horaireDemo = horaires.find(h => h.id === 'HOR_DEMO');
 
@@ -692,11 +647,9 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
         horaires.push(nouvelHoraire);
     }
     db.setSync(cleHoraires, horaires);
-    console.log(`   ➜ Horaire demo ${horaireDemo ? 'mis à jour' : 'créé'}: ${nouvelHoraire.nom}`);
 
     // 10. Créer un groupe-cours demo (s'il n'existe pas)
     const cleGC = cleDemo('groupesCours');
-    console.log(`   📦 Clé groupesCours: ${cleGC}`);
     let groupesCours = db.getSync(cleGC, []);
     const gcDemo = groupesCours.find(gc => gc.id === 'GC_DEMO');
 
@@ -721,9 +674,7 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
         };
         groupesCours.push(nouveauGC);
         db.setSync(cleGC, groupesCours);
-        console.log(`   ➜ Groupe-cours demo créé: ${nouveauGC.nom}`);
     } else {
-        console.log('   ➜ Groupe-cours demo déjà existant');
     }
 }
 
@@ -738,7 +689,6 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
  */
 async function dechargerDonneesDemo() {
     try {
-        console.log('🗑️ [Demo] Déchargement des données de démonstration...');
 
         // 1. Supprimer les données namespacées demo_*
         await supprimerDonneesNamespaceesDemo();
@@ -752,7 +702,6 @@ async function dechargerDonneesDemo() {
         const trimSansDemo = trimestres.filter(t => t.id !== 'demo');
         db.setSync('trimestres', trimSansDemo);
         await db.set('trimestres', trimSansDemo);
-        console.log('   ➜ Trimestre demo supprimé de la liste');
 
         // 4. Marquer comme non chargées
         db.setSync('demo-chargees', null);
@@ -760,7 +709,6 @@ async function dechargerDonneesDemo() {
         // 5. Synchroniser
         await db.syncToLocalStorageCache();
 
-        console.log('   ✅ Données demo déchargées avec succès');
         return true;
 
     } catch (error) {
@@ -787,7 +735,6 @@ async function supprimerDonneesNamespaceesDemo() {
         db.removeSync(prefixe + cle);   // 🔧 FIX: Nettoyer localStorage immédiatement
         await db.remove(prefixe + cle); // Nettoyer IndexedDB
     }
-    console.log(`   ➜ ${clesNamespacees.length} clés demo_* supprimées (localStorage + IndexedDB)`);
 
     // Supprimer les clés avec suffixe groupe-cours démo (non-préfixées demo_)
     const clesGroupeCoursDemo = ['demo_snapshots_GC_DEMO', 'seancesCompletes_gc_GC_DEMO'];
@@ -795,7 +742,6 @@ async function supprimerDonneesNamespaceesDemo() {
         db.removeSync(cleGCDemo);
         await db.remove(cleGCDemo);
     }
-    console.log(`   ➜ ${clesGroupeCoursDemo.length} clés groupe-cours démo supprimées`);
 
     // Nettoyage générique : supprimer TOUTE clé commençant par demo_ dans IndexedDB
     try {
@@ -806,7 +752,6 @@ async function supprimerDonneesNamespaceesDemo() {
             await db.remove(cleDemo);
         }
         if (clesDemoRestantes.length > 0) {
-            console.log(`   ➜ ${clesDemoRestantes.length} clé(s) demo_* résiduelles supprimées`);
         }
     } catch (e) {
         console.warn('   ⚠️ Nettoyage générique demo_* impossible:', e.message);
@@ -825,28 +770,24 @@ async function supprimerDonneesGlobalesDemo() {
     const coursFiltres = listeCours.filter(c => !c.isDemo);
     db.setSync('listeCours', coursFiltres);
     await db.set('listeCours', coursFiltres);
-    console.log(`   ➜ Cours demo supprimés (${listeCours.length - coursFiltres.length})`);
 
     // Grilles demo (grillesTemplates est globale)
     const grilles = db.getSync('grillesTemplates', []);
     const grillesFiltrees = grilles.filter(g => !g.estDemo);
     db.setSync('grillesTemplates', grillesFiltrees);
     await db.set('grillesTemplates', grillesFiltrees);
-    console.log(`   ➜ Grilles demo supprimées (${grilles.length - grillesFiltrees.length})`);
 
     // Échelles demo (echellesTemplates est globale)
     const echelles = db.getSync('echellesTemplates', []);
     const echellesFiltrees = echelles.filter(e => !e.estDemo);
     db.setSync('echellesTemplates', echellesFiltrees);
     await db.set('echellesTemplates', echellesFiltrees);
-    console.log(`   ➜ Échelles demo supprimées (${echelles.length - echellesFiltrees.length})`);
 
     // Cartouches demo (clés cartouches_* sont globales)
     const cartouchesDemo = db.getSync('cartouches_GRILLE_DEMO', []);
     if (cartouchesDemo.length > 0) {
         db.removeSync('cartouches_GRILLE_DEMO');
         await db.remove('cartouches_GRILLE_DEMO');
-        console.log('   ➜ cartouches_GRILLE_DEMO supprimées');
     }
 }
 
@@ -872,7 +813,6 @@ function sontDonnesDemoChargees() {
  * Le nettoyage des résidus est géré par main.js
  */
 function initialiserModuleDonneesDemo() {
-    console.log('🔄 [Demo] Module Données Demo initialisé');
 
     // Afficher le bandeau si déjà en mode démo (rechargement de page)
     if (db.getSync('demo-actif', null) === 'true') {

@@ -74,7 +74,6 @@
             const { doc, nomSortie } = await genererDocPDF(fichierId);
             doc.save(nomSortie);
             travauxStockage.marquerExporte(fichierId);
-            console.log('[Travaux-Export] PDF exporte:', nomSortie);
         } catch (e) {
             console.error('[Travaux-Export] Erreur export PDF:', e);
             alert('Erreur lors de l\'export PDF. Voir la console.');
@@ -806,7 +805,6 @@
         }
 
         if (!evaluation) {
-            console.log('[Travaux-Export] Pas d\'evaluation trouvee, page de synthese omise');
             return;
         }
 
@@ -1658,7 +1656,6 @@
             // Marquer le fichier comme exporte (cycle de vie)
             travauxStockage.marquerExporte(fichier.id);
 
-            console.log('[Travaux-Export] Dossier complet exporte:', nomSortie);
         } catch (e) {
             console.error('[Travaux-Export] Erreur export dossier complet:', e);
             alert('Erreur lors de l\'export du dossier. Voir la console.');
@@ -2008,7 +2005,6 @@
         if (!state) return;
         state.doc.save(state.nomSortie);
         travauxStockage.marquerExporte(state.fichierId);
-        console.log('[Travaux-Export] PDF telecharge depuis preview:', state.nomSortie);
         fermerPreviewPDF();
     }
 

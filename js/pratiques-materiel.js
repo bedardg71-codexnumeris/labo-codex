@@ -99,7 +99,6 @@ function genererIdCourtPratique(id) {
  * Note: Renommé en "Materiel" pour éviter conflit avec pratiques.js
  */
 async function initialiserModulePratiquesMateriel() {
-    console.log('[pratiques-materiel] Initialisation du module Pratiques (Construction)');
 
     // Afficher la sidebar avec la liste des pratiques
     await afficherListePratiquesMateriel();
@@ -111,7 +110,6 @@ async function initialiserModulePratiquesMateriel() {
     if (conteneurEdition) conteneurEdition.classList.add('u-hide');
     if (accueil) accueil.classList.remove('u-hide');
 
-    console.log('   ✅ Module Pratiques initialisé');
 }
 
 /* ===============================
@@ -124,24 +122,20 @@ async function initialiserModulePratiquesMateriel() {
  * Renommé avec suffixe "Materiel" pour éviter conflit avec pratiques.js
  */
 async function afficherListePratiquesMateriel() {
-    console.log('[pratiques-materiel] afficherListePratiquesMateriel() appelé');
 
     const container = document.getElementById('sidebarListePratiques');
     if (!container) {
         console.warn('[pratiques-materiel] ⚠️ Élément sidebarListePratiques introuvable');
         return;
     }
-    console.log('[pratiques-materiel] Container trouvé:', container);
 
     // 🆕 FIX v3 (20 jan 2026) : Utiliser localStorage (cache synchrone) comme source principale
     // localStorage est toujours à jour grâce à la double écriture (setSync + set)
     const configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
-    console.log('[pratiques-materiel] Configurations chargées:', configurations.length, configurations);
 
     // Filtrer les pratiques dans la bibliothèque (affichées dans la sidebar)
     const pratiquesDansBibliotheque = configurations.filter(p => p.dansBibliotheque !== false);
 
-    console.log('[pratiques-materiel] Pratiques filtrées (dansBibliotheque):', pratiquesDansBibliotheque.length, pratiquesDansBibliotheque);
 
     // Si aucune pratique, afficher message
     if (pratiquesDansBibliotheque.length === 0) {
@@ -606,7 +600,6 @@ function filtrerPratiquesBibliotheque() {
  * Ajoute une pratique de la bibliothèque à la sélection de l'utilisateur
  */
 async function ajouterPratiqueALaSelection(pratiqueId) {
-    console.log('[pratiques-materiel] Ajout de la pratique:', pratiqueId);
 
     // Obtenir la configuration depuis la bibliothèque
     let configSource = null;
@@ -636,7 +629,6 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
         existante.dansBibliotheque = true;
         existante.dateAjout = new Date().toISOString();
         db.setSync(CLE_PRATIQUES_CONFIGURATIONS, configurations);
-        console.log('[pratiques-materiel] Pratique réactivée:', configSource.nom);
     } else {
         // Ajouter avec le flag dansBibliotheque
         const nouvelleConfig = {
@@ -647,7 +639,6 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
 
         configurations.push(nouvelleConfig);
         db.setSync(CLE_PRATIQUES_CONFIGURATIONS, configurations);
-        console.log('[pratiques-materiel] Pratique ajoutée:', configSource.nom);
     }
 
     // Rafraîchir la sidebar et fermer le modal
@@ -663,7 +654,6 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
  * Retire une pratique de la sélection (mais pas de la bibliothèque globale)
  */
 async function retirerPratiqueDeLaSelection(pratiqueId) {
-    console.log('[pratiques-materiel] Retrait de la pratique:', pratiqueId);
 
     // Utiliser getSync/setSync pour cohérence avec afficherListePratiquesMateriel
     const configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
@@ -716,7 +706,6 @@ async function supprimerPratiqueDefinitivement(pratiqueId) {
     await afficherListePratiques();
     await afficherBibliothequePratiques();
 
-    console.log(`Pratique "${pratique.nom}" supprimée définitivement`);
 }
 
 /**
@@ -755,7 +744,6 @@ async function dupliquerPratiqueBibliotheque(pratiqueId) {
     await afficherListePratiques();
     await afficherBibliothequePratiques();
 
-    console.log(`Pratique "${pratique.nom}" dupliquée → "${nouvellePratique.nom}"`);
 }
 
 /* ===============================
@@ -767,7 +755,6 @@ async function dupliquerPratiqueBibliotheque(pratiqueId) {
  * Utilise le formulaire HTML statique (IDs préfixés mat-)
  */
 async function chargerPratiquePourModif(pratiqueId) {
-    console.log('[pratiques-materiel] Chargement de la pratique:', pratiqueId);
 
     pratiqueEnEditionMateriel = pratiqueId;
 
@@ -1163,7 +1150,6 @@ async function sauvegarderConfigPratiqueMat() {
 
     // 🆕 FIX #4 (20 jan 2026) : Ne pas sauvegarder pendant le remplissage du formulaire
     if (enChargementFormulaire) {
-        console.log('[pratiques-materiel] ⏸️ Sauvegarde ignorée (chargement en cours)');
         return;
     }
 
@@ -1303,7 +1289,6 @@ async function sauvegarderPratiqueMaterielComplet() {
         const pratiqueTrouvee = verification.find(p => p.id === pratiqueEnEditionMateriel);
 
         if (pratiqueTrouvee) {
-            console.log('[pratiques-materiel] ✅ Sauvegarde complète vérifiée');
             if (typeof afficherNotificationSucces === 'function') {
                 afficherNotificationSucces('Pratique enregistrée');
             }
@@ -1630,7 +1615,6 @@ async function supprimerForfaitMat(indexForfait) {
  * Crée une nouvelle pratique
  */
 async function creerNouvellePratique() {
-    console.log('[pratiques-materiel] Création d\'une nouvelle pratique');
 
     // Générer un ID unique
     const nouvelId = genererIdUnique('pratique_');
@@ -1691,7 +1675,6 @@ async function creerNouvellePratique() {
             }
         }
 
-        console.log('[pratiques-materiel] ✅ Pratique sauvegardée et vérifiée:', nouvelId);
 
         // Rafraîchir la sidebar et charger la nouvelle pratique
         await afficherListePratiquesMateriel();
@@ -1821,7 +1804,6 @@ async function supprimerPratiqueMateriel(pratiqueId) {
  * Applique une pratique au cours actif
  */
 async function appliquerPratiqueAuCours(pratiqueId) {
-    console.log('[pratiques-materiel] Application de la pratique au cours:', pratiqueId);
 
     if (typeof appliquerConfigurationPratique === 'function') {
         const succes = await appliquerConfigurationPratique(pratiqueId);
@@ -1846,7 +1828,6 @@ async function sauvegarderPratiqueMateriel() {
         return;
     }
 
-    console.log('[pratiques-materiel] Sauvegarde de la pratique:', pratiqueEnEditionMateriel);
 
     // Les modifications sont déjà sauvegardées au fur et à mesure
     // Cette fonction sert de confirmation visuelle
@@ -1915,7 +1896,6 @@ async function exporterPratiquesUtilisateur() {
     let infoExclusion = '';
     if (nbExclues > 0) {
         infoExclusion = ` (${nbExclues} exclue(s) : démo/importées)`;
-        console.log(`📦 Export pratiques: ${nbExclues} pratique(s) exclue(s) (démo/importées)`);
     }
 
     // ✅ AJOUTÉ (8 jan 2026) : Demander métadonnées enrichies CC
@@ -1925,7 +1905,6 @@ async function exporterPratiquesUtilisateur() {
     );
 
     if (!metaEnrichies) {
-        console.log('Export annulé par l\'utilisateur');
         return;
     }
 
@@ -1954,7 +1933,6 @@ async function exporterPratiquesUtilisateur() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    console.log('✅ Pratiques exportées avec licence CC BY-NC-SA 4.0');
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces(`${configurations.length} pratique(s) exportée(s) avec succès`);
     }
@@ -2080,7 +2058,6 @@ window.confirmerImportPratiques = async function(donnees) {
         if (nbMisesAJour > 0) message += `${nbMisesAJour} pratique(s) mise(s) à jour.\n`;
         message += `\nConsulte « Pratiques disponibles » pour les ajouter à ta barre latérale.`;
         alert(message);
-        console.log('✅ Pratiques importées:', nbAjoutees + nbMisesAJour);
 
     } catch (error) {
         console.error('Erreur lors de l\'import:', error);
@@ -2176,7 +2153,6 @@ async function chargerProductionsPourCategories() {
     // Charger les productions avec la bonne clé namespacée
     const cleProductions = cle('productions');
     const productions = await db.get(cleProductions) || [];
-    console.log('[Catégories] Productions chargées:', productions.length, 'depuis', cleProductions);
 
     // Filtrer : exclure portfolio conteneur et formatifs
     const productionsFiltrables = productions.filter(p =>
@@ -2235,7 +2211,6 @@ async function toggleProductionCategorie(prodId, categorie, checked) {
     if (prod) {
         prod.categorie = checked ? categorie : null;
         await db.set(cleProductions, productions);
-        console.log(`[Catégories] Production "${prod.titre}" → ${checked ? categorie : 'non définie'}`);
 
         // Rafraîchir les deux listes (pour gérer l'exclusivité)
         chargerProductionsPourCategories();
@@ -2826,7 +2801,6 @@ window.confirmerEtFermerImportPratiques = confirmerEtFermerImportPratiques;
 window.CLE_PRATIQUES_CONFIGURATIONS = CLE_PRATIQUES_CONFIGURATIONS;
 window.pratiqueEnEditionMateriel = pratiqueEnEditionMateriel;
 
-console.log('[pratiques-materiel] Module chargé');
 
 
 })();

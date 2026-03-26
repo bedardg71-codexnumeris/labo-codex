@@ -12,7 +12,6 @@
 (function() {
     'use strict';
 
-    console.log('[gabarits-utils] Chargement du module utilitaire gabarits...');
 
     // =========================================================================
     // CONSTANTES
@@ -457,13 +456,11 @@
             if (!existe) {
                 bibliotheque.push(gabarit);
                 modifie = true;
-                console.log(`[gabarits-utils] Gabarit ajouté: ${gabarit.nom || gabarit.titre}`);
             }
         });
 
         if (modifie) {
             db.setSync(cleStorage, bibliotheque);
-            console.log(`[gabarits-utils] Bibliothèque ${cleStorage} mise à jour`);
         }
     }
 
@@ -517,14 +514,12 @@
      * Initialise tous les gabarits par défaut dans les bibliothèques
      */
     function initialiserTousLesGabarits() {
-        console.log('[gabarits-utils] Initialisation des gabarits par défaut...');
 
         ajouterGabaritsDefautSiManquants('bibliothequeEchelles', GABARITS_ECHELLES_DEFAUT);
         ajouterGabaritsDefautSiManquants('bibliothequeGrilles', GABARITS_GRILLES_DEFAUT);
         ajouterGabaritsDefautSiManquants('bibliothequeProductions', GABARITS_PRODUCTIONS_DEFAUT);
         ajouterGabaritsDefautSiManquants('bibliothequeCartouches', GABARITS_CARTOUCHES_DEFAUT);
 
-        console.log('[gabarits-utils] Gabarits initialisés');
     }
 
     // =========================================================================
@@ -574,6 +569,5 @@
         setTimeout(initialiserTousLesGabarits, 100);
     }
 
-    console.log('[gabarits-utils] Module chargé');
 
 })();

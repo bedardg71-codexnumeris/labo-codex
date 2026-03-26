@@ -36,7 +36,6 @@ function initialiserModuleObjectifs() {
         }
     });
 
-    console.log('✅ Module objectifs.js initialisé');
 }
 
 // ============================================================================
@@ -715,7 +714,6 @@ async function exporterEnsembleObjectifs(ensembleId) {
     );
 
     if (!metaEnrichies) {
-        console.log('Export annulé par l\'utilisateur');
         return;
     }
 
@@ -744,7 +742,6 @@ async function exporterEnsembleObjectifs(ensembleId) {
     URL.revokeObjectURL(url);
 
     afficherNotificationSucces('Ensemble d\'objectifs exporté avec succès');
-    console.log('✅ Ensemble d\'objectifs exporté avec licence CC BY-NC-SA 4.0');
 }
 
 /**
@@ -994,14 +991,12 @@ function creerEnsembleCalculDiff() {
     // Vérifier si l'ensemble existe déjà
     const existant = ensembles.find(e => e.id === ensemble.id);
     if (existant) {
-        console.log('ℹ️ Ensemble de Michel déjà existant, non recréé');
         return ensemble.id;
     }
 
     ensembles.push(ensemble);
     sauvegarderEnsemblesObjectifs(ensembles);
 
-    console.log(`✅ Ensemble créé: "${ensemble.nom}" (${ensemble.objectifs.length} objectifs, ${total}%)`);
     return ensemble.id;
 }
 
@@ -1041,7 +1036,6 @@ function activerPratiqueMultiObjectifs(ensembleId) {
     // Sauvegarder
     db.setSync('modalitesEvaluation', modalites);
 
-    console.log(`✅ [Multi-Objectifs] Pratique activée avec ensemble "${ensemble.nom}" (${ensemble.objectifs.length} objectifs)`);
 
     return true;
 }
@@ -1057,7 +1051,6 @@ function desactiverPratiqueMultiObjectifs() {
     if (modalites.configPAN) {
         delete modalites.configPAN.ensembleObjectifsId;
         db.setSync('modalitesEvaluation', modalites);
-        console.log('✅ [Multi-Objectifs] Pratique désactivée');
         return true;
     }
 
@@ -1127,7 +1120,6 @@ window.activerPratiqueMultiObjectifs = activerPratiqueMultiObjectifs;
 window.desactiverPratiqueMultiObjectifs = desactiverPratiqueMultiObjectifs;
 window.verifierPratiqueMultiObjectifs = verifierPratiqueMultiObjectifs;
 
-console.log('✅ Module objectifs.js chargé');
 
 
 })();

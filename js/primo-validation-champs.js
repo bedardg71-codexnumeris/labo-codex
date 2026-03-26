@@ -69,11 +69,9 @@ function validerChampsSousSection(sousSectionId) {
     const champs = CHAMPS_A_VALIDER[sousSectionId];
 
     if (!champs) {
-        console.log('[Guide] Pas de validation pour:', sousSectionId);
         return;
     }
 
-    console.log('[Guide] Validation des champs pour:', sousSectionId);
 
     // Cas spécial: groupe d'étudiants
     if (sousSectionId === 'reglages-trimestre') {
@@ -211,13 +209,11 @@ function retirerValidationVisuelle(sousSectionId) {
  * Initialise le système de validation au chargement
  */
 function initialiserValidationChamps() {
-    console.log('✅ Module primo-validation-champs.js chargé');
 
     // Vérifier si Primo a été complété
     const primoComplete = db.getSync('primo_accueil_vu', false);
 
     if (primoComplete) {
-        console.log('[Guide] Configuration complétée - Validation activée');
         activerValidationAutomatique();
     }
 }

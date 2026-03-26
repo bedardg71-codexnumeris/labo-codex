@@ -146,9 +146,7 @@
 
         // Compter les fichiers a traiter
         const aTraiter = fichiers.filter(f => f.operations.length > 0);
-        console.log('[Travaux-Preparation] Fichiers avec operations:', aTraiter.length, '/', fichiers.length);
         aTraiter.forEach((f, idx) => {
-            console.log(`  Fichier ${idx}: ${f.nomFichier}, ops:`, f.operations.map(o => o.type));
         });
 
         if (aTraiter.length === 0) {
@@ -184,9 +182,7 @@
             if (barreText) barreText.textContent = `${traites} / ${aTraiter.length}`;
 
             try {
-                console.log(`[Travaux-Preparation] Rendu fichier ${i}: ${f.nomFichier}, ops:`, f.operations.map(o => o.type));
                 const blobFinal = await renduFinal(f);
-                console.log(`[Travaux-Preparation] Blob final fichier ${i}:`, blobFinal ? `${(blobFinal.size/1024).toFixed(0)}KB` : 'null');
 
                 if (blobFinal && queue[i + queueOffset]) {
                     queue[i + queueOffset].fichier = blobFinal;
@@ -202,7 +198,6 @@
             }
         }
 
-        console.log(`[Travaux-Preparation] Rendu termine: ${reussis}/${aTraiter.length} reussis`);
 
         fermer();
 
@@ -787,7 +782,6 @@
 
         // Appliquer les operations
         for (const op of fichierData.operations) {
-            console.log(`[Travaux-Preparation] renduFinal op: ${op.type}, canvas: ${canvas.width}x${canvas.height}`);
             if (op.type === 'perspective') {
                 canvas = await renduPerspectivePixel(canvas, op.corners, op.fill);
             } else if (op.type === 'whiteBalance') {
@@ -1443,23 +1437,18 @@
         const paperEdges = filtrerAretesDocument(edges, blurred, dw, dh);
         let nbPaper = 0;
         for (let i = 0; i < paperEdges.length; i++) if (paperEdges[i]) nbPaper++;
-        console.log('[Auto-persp] Aretes filtrees par contraste:', nbPaper, 'pixels');
 
         // 6. Hough sur les aretes filtrees
         let seuilHough = Math.max(20, Math.round(Math.min(dw, dh) * 0.09));
         let lines = houghLines(paperEdges, dw, dh, seuilHough);
-        console.log('[Auto-persp] Hough: seuil=' + seuilHough + ', lignes=' + lines.length);
 
         // Fallback : aretes Canny brutes si pas assez de lignes
         if (lines.length < 4) {
-            console.log('[Auto-persp] Fallback Canny brut');
             seuilHough = Math.max(40, Math.round(Math.min(dw, dh) * 0.20));
             lines = houghLines(edges, dw, dh, seuilHough);
-            console.log('[Auto-persp] Canny brut: seuil=' + seuilHough + ', lignes=' + lines.length);
         }
 
         if (lines.length < 2) {
-            console.log('[Auto-persp] ECHEC: pas assez de lignes (' + lines.length + ')');
             return null;
         }
 
@@ -1478,9 +1467,7 @@
             }
         }
 
-        console.log('[Auto-persp] Clusters:', clusters.length, clusters.map(c => c.length + ' lignes, theta~' + Math.round(c[0].theta) + '°').join(' | '));
         if (clusters.length < 2) {
-            console.log('[Auto-persp] ECHEC: < 2 clusters');
             return null;
         }
 
@@ -1556,11 +1543,8 @@
         // Trier et logger les top 5 candidats pour debug
         candidats.sort((a, b) => b.score - a.score);
         const top5 = candidats.slice(0, 5);
-        console.log('[Auto-persp] Candidats valides:', candidats.length,
-            top5.map(c => 'θ' + c.theta1 + '°×θ' + c.theta2 + '° surf=' + c.surface.toFixed(3) + ' score=' + c.score.toFixed(3)).join(' | '));
 
         if (candidats.length === 0) {
-            console.log('[Auto-persp] ECHEC: aucun candidat valide');
             return null;
         }
 
@@ -1568,10 +1552,6 @@
         candidats.sort((a, b) => b.score - a.score);
         const meilleur = candidats[0];
 
-        console.log('[Auto-persp] Meilleur: θ' + meilleur.theta1 + '°×θ' + meilleur.theta2 +
-            '° surf=' + meilleur.surface.toFixed(3) + ' score=' + meilleur.score.toFixed(3));
-        console.log('[Auto-persp] Coins:', meilleur.result.map(p => '(' + p.x.toFixed(3) + ',' + p.y.toFixed(3) + ')').join(' '));
-        console.log('[Auto-persp] SUCCES');
         return meilleur.result;
     }
 
@@ -2335,7 +2315,6 @@
 
         selections.clear();
         mettreAJourMiniatures();
-        console.log(`[Travaux-Preparation] Assemblage auto: ${nbGroupes} groupe(s) detecte(s)`);
     }
 
     /* ===============================
@@ -2910,6 +2889,5 @@
         get actif() { return actif; }
     };
 
-    console.log('[Travaux-Preparation] Module charge');
 
 })();

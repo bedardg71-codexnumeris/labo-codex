@@ -291,7 +291,6 @@ function calculerBornesYDynamiques(datasets) {
         borneMax = Math.min(1.03, centre + 0.15);
     }
 
-    console.log(`📊 [Échelle Y dynamique] Données: ${(minData*100).toFixed(0)}%-${(maxData*100).toFixed(0)}% → Affichage: ${(borneMin*100).toFixed(0)}%-${(borneMax*100).toFixed(0)}%`);
 
     return { min: borneMin, max: borneMax };
 }
@@ -343,7 +342,6 @@ function calculerBornesYDynamiques100(datasets) {
         borneMax = Math.min(103, centre + 15);
     }
 
-    console.log(`📊 [Échelle Y dynamique 100] Données: ${minData.toFixed(0)}%-${maxData.toFixed(0)}% → Affichage: ${borneMin.toFixed(0)}%-${borneMax.toFixed(0)}%`);
 
     return { min: borneMin, max: borneMax };
 }
@@ -460,7 +458,6 @@ function obtenirJetonsParDate(da, snapshots) {
             (e.jetonDelaiApplique || e.jetonRepriseApplique || e.repriseDeId)
         );
 
-        console.log(`🎫 Jetons pour DA ${da}: ${evalsAvecJetons.length} évaluations avec jetons trouvées`);
 
         evalsAvecJetons.forEach(evaluation => {
             // Trouver la production pour obtenir le titre et la date d'échéance
@@ -491,7 +488,6 @@ function obtenirJetonsParDate(da, snapshots) {
             }
 
             if (typeJeton) {
-                console.log(`  ✅ Jeton ${typeJeton} sur "${titreProduction}" → séance ${dateSeance}`);
                 // Stocker (prioriser reprise sur délai)
                 if (!jetonsParDate[dateSeance] || typeJeton === 'jetonReprise') {
                     jetonsParDate[dateSeance] = {
@@ -1171,7 +1167,6 @@ function creerGraphiqueIndividuel(canvasId, da) {
         // Stocker l'instance pour pouvoir la détruire plus tard
         graphiquesIndividuels[da] = chart;
 
-        console.log(`✅ Graphique individuel créé pour DA ${da}`);
         return chart;
 
     } catch (error) {
@@ -1221,7 +1216,6 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
             const existingChart = Chart.getChart(canvas);
             if (existingChart) {
                 existingChart.destroy();
-                console.log('🗑️ Graphique existant détruit');
             }
         }
 
@@ -1468,7 +1462,6 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
         });
         if (chartEstValide(chart)) chart.update();
 
-        console.log('✅ Graphique groupe moyennes créé');
         return chart;
 
     } catch (error) {
@@ -1928,7 +1921,6 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                 // Déverrouiller
                 datasetVerrouilleACP = -1;
                 dernierDatasetSurvoleACP = -1;
-                console.log('🔓 Courbe ACP déverrouillée');
                 chart.data.datasets.forEach(dataset => {
                     appliquerStyleSpaghetti(dataset, 'defaut', couleurIndice);
                 });
@@ -1937,7 +1929,6 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                 // Verrouiller
                 datasetVerrouilleACP = indexDataset;
                 dernierDatasetSurvoleACP = indexDataset;
-                console.log(`🔒 Courbe ACP verrouillée: ${chart.data.datasets[indexDataset]?.label}`);
                 chart.data.datasets.forEach((dataset, idx) => {
                     if (idx === indexDataset) {
                         appliquerStyleSpaghetti(dataset, 'actif', couleurIndice);
@@ -2024,7 +2015,6 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
             });
         }
 
-        console.log(`✅ Graphique spaghetti ACP créé (${indice}) avec ${datasets.length} étudiants`);
         return chart;
 
     } catch (error) {
@@ -2082,7 +2072,6 @@ function selectionnerEtudiantACP() {
         }
     });
     if (chartEstValide(chart)) chart.update('none');
-    console.log(`🔒 Étudiant sélectionné (dropdown): ${chart.data.datasets[index]?.label}`);
 }
 
 /* ===============================
@@ -2534,7 +2523,6 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             const existingChart = Chart.getChart(canvas);
             if (existingChart) {
                 existingChart.destroy();
-                console.log('🗑️ Graphique spaghetti existant détruit');
             }
         }
 
@@ -2573,7 +2561,6 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             description: descriptionsParTitre[p.titre] || p.description
         }));
 
-        console.log(`📊 [Spaghetti] Productions trouvées: ${productions.length}`);
 
         // Filtrer les productions : garder les artefacts évaluables + évaluation terminale
         // Exclure uniquement : Portfolio (conteneur vide), Analyse finale (réflexion non comparable)
@@ -2604,7 +2591,6 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             return true;
         });
 
-        console.log(`📊 [Spaghetti] Productions artefacts: ${productionsArtefacts.length}`);
 
         if (productionsArtefacts.length === 0) {
             console.warn('Aucune production disponible pour le graphique spaghetti');
@@ -2642,7 +2628,6 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         });
 
         const evaluations = Array.from(evaluationsMap.values());
-        console.log(`📊 [Spaghetti] Évaluations: ${evaluationsBrutes.length} brutes → ${evaluations.length} après dédoublonnage`);
 
         // Créer un index rapide pour le tooltip : [da][productionId] → évaluation
         const evaluationsIndex = {};
@@ -2670,7 +2655,6 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             etudiants = db.getSync(cleEtudiants, []);
         }
 
-        console.log(`📊 [Spaghetti] Étudiants trouvés: ${etudiants.length}`);
 
         if (etudiants.length === 0) {
             console.warn('Aucun étudiant disponible');
@@ -2683,9 +2667,6 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         const evalProdIds = [...new Set(evaluations.map(e => e.productionId))];
         const correspondances = evalProdIds.filter(id => prodIds.has(id));
 
-        console.log(`📊 [Spaghetti] IDs productions: ${[...prodIds].slice(0, 3).join(', ')}...`);
-        console.log(`📊 [Spaghetti] IDs dans évaluations: ${evalProdIds.slice(0, 3).join(', ')}...`);
-        console.log(`📊 [Spaghetti] Correspondances: ${correspondances.length}/${evalProdIds.length}`);
 
         // Créer un index productionId → position pour le tri
         const indexProductions = {};
@@ -2735,7 +2716,6 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         });
 
         // Debug: afficher les activités regroupées
-        console.log('📊 [Spaghetti] Activités regroupées:', Object.entries(activitesMap).filter(([k, v]) => v.length > 1));
 
         // Fonction pour convertir une note (0-1) en code selon l'échelle utilisateur
         const zonesEchelle = genererZonesDepuisEchelle();
@@ -3116,7 +3096,6 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                 datasetVerrouille = -1;
                 dernierDatasetSurvole = -1;
                 dernierPointSurvole = -1;
-                console.log('🔓 Courbe déverrouillée');
                 chart.data.datasets.forEach(dataset => {
                     appliquerStyleSpaghetti(dataset, 'defaut', couleurP);
                 });
@@ -3125,7 +3104,6 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                 // Verrouiller
                 datasetVerrouille = indexDataset;
                 dernierDatasetSurvole = indexDataset;
-                console.log(`🔒 Courbe verrouillée: ${chart.data.datasets[indexDataset]?.label}`);
                 chart.data.datasets.forEach((dataset, idx) => {
                     if (idx === indexDataset) {
                         appliquerStyleSpaghetti(dataset, 'actif', couleurP);
@@ -3210,7 +3188,6 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             });
         }
 
-        console.log(`✅ Graphique spaghetti créé avec ${datasets.length} trajectoires sur ${productionsArtefacts.length} artefacts`);
         return chart;
 
     } catch (error) {
@@ -3278,7 +3255,6 @@ function selectionnerEtudiantSpaghetti() {
         }
     });
     if (chartEstValide(chart)) chart.update('none');
-    console.log(`🔒 Étudiant sélectionné (dropdown): ${chart.data.datasets[index]?.label}`);
 }
 
 /**
@@ -3747,7 +3723,6 @@ function creerGraphiqueCriteres(canvasId, da) {
         // Enregistrer l'instance pour toggle externe
         _chartsCriteres[da] = chart;
 
-        console.log(`✅ Graphique critères créé avec ${donnees.criteresUniques.length} critères`);
         return chart;
 
     } catch (error) {
@@ -3888,7 +3863,6 @@ function creerDatasetPoints(label, valeurs, couleur) {
  */
 function creerGraphiqueDistributionACPE(canvasId) {
     try {
-        console.log('📊 [Distribution ACPE] Création du graphique...');
 
         // Détruire le graphique existant si présent
         const canvas = document.getElementById(canvasId);
@@ -3960,7 +3934,6 @@ function creerGraphiqueDistributionACPE(canvasId) {
             }
         });
 
-        console.log(`📊 [Distribution ACPE] Valeurs collectées: A=${valeursA.length}, C=${valeursC.length}, P=${valeursP.length}, E=${valeursE.length}`);
 
         // Calculer les statistiques pour chaque indice
         const statsA = calculerStatistiques(valeursA);
@@ -3976,7 +3949,6 @@ function creerGraphiqueDistributionACPE(canvasId) {
             E: { ...statsE, valeurs: valeursE }
         };
 
-        console.log(`📊 [Distribution ACPE] Stats: A(μ=${(statsA.moyenne*100).toFixed(1)}%, σ=${(statsA.ecartType*100).toFixed(1)}%), C(μ=${(statsC.moyenne*100).toFixed(1)}%, σ=${(statsC.ecartType*100).toFixed(1)}%)`);
 
         // Générer les courbes de Gauss
         const courbeA = genererCourbeGauss(statsA.moyenne, statsA.ecartType);
@@ -4351,7 +4323,6 @@ function creerGraphiqueDistributionACPE(canvasId) {
         // Créer le graphique
         const chart = new Chart(ctx, config);
 
-        console.log('✅ Graphique distribution ACPE créé');
         return chart;
 
     } catch (error) {
@@ -4452,7 +4423,6 @@ window.addEventListener('themeChanged', function() {
     }
 });
 
-console.log('📊 Module graphiques-progression.js chargé');
 
 
 })();

@@ -238,7 +238,6 @@ function obtenirGrilleReferenceDepistage() {
         return null;
     }
 
-    console.log(`✅ Grille de référence: "${grille.nom}" (${grille.criteres.length} critères)`);
     return grille;
 }
 
@@ -296,16 +295,13 @@ function obtenirCriteresAvecValeurs(da) {
  * via afficherProfilComplet(da)
  */
 function initialiserModuleProfilEtudiant() {
-    console.log('👤 Initialisation du module Profil Étudiant');
 
     // Vérifier que le conteneur existe
     const container = document.getElementById('contenuProfilEtudiant');
     if (!container) {
-        console.log('   ⚠️  Conteneur profil non trouvé, initialisation reportée');
         return;
     }
 
-    console.log('   ✅ Module Profil Étudiant initialisé');
 }
 
 /* ===============================
@@ -1702,7 +1698,6 @@ function genererSectionAccompagnement(da) {
     // Défis: I (<65%) ET D (65-75%)
     const defis = criteres.filter(c => c.valeur > 0 && c.valeur < seuilMaitrise);
 
-    console.log('Forces et défis pour DA', da, { forces, defis, seuilMaitrise, seuilDeveloppement, criteres });
 
     // Badge RàI avec classes CSS
     let badgeClasse = '';
@@ -3018,7 +3013,6 @@ function changerSectionProfil(section) {
         }
     }, 100);
 
-    console.log(`📄 Section "${section}" chargée pour DA ${da}`);
 }
 
 /**
@@ -3316,7 +3310,6 @@ function afficherProfilComplet(daOuEl) {
     var da = (typeof daOuEl === 'object' && daOuEl !== null) ? daOuEl.value : daOuEl;
     // Les DA sont des identifiants string — le dispatcher peut les convertir en nombre
     if (da !== null && da !== undefined) da = String(da);
-    console.log('👤 Affichage du profil pour DA:', da);
 
     // Sauvegarder le DA pour navigation
     profilActuelDA = da;
@@ -3571,7 +3564,6 @@ function afficherProfilComplet(daOuEl) {
         }
     }, 100);
 
-    console.log('✅ Profil affiché (layout 2 colonnes) pour:', eleve.prenom, eleve.nom);
 }
 
 /* ===============================
@@ -3679,7 +3671,6 @@ function genererSectionAssiduite(da) {
         `}
     `;
 }
-
 
 
 /**
@@ -4369,13 +4360,10 @@ function genererSectionPerformance(da) {
     let graphiqueCriteres = '';
 
     // 🐛 DEBUG (8 déc 2025) : Tracer exécution
-    console.log(`[DEBUG Graphique Critères] DA: ${da}`);
-    console.log(`[DEBUG Graphique Critères] Fonction creerGraphiqueCriteres existe: ${typeof creerGraphiqueCriteres === 'function'}`);
 
     // Vérifier si l'étudiant a des évaluations avec détails critères
     if (typeof creerGraphiqueCriteres === 'function') {
         const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-        console.log(`[DEBUG Graphique Critères] Total évaluations: ${evaluations.length}`);
 
         const evaluationsAvecCriteres = evaluations.filter(e =>
             e.etudiantDA === da &&
@@ -4383,10 +4371,8 @@ function genererSectionPerformance(da) {
             Array.isArray(e.criteres) &&
             e.criteres.length > 0
         );
-        console.log(`[DEBUG Graphique Critères] Évaluations avec critères: ${evaluationsAvecCriteres.length}`);
 
         if (evaluationsAvecCriteres.length > 0) {
-            console.log(`[DEBUG Graphique Critères] Première évaluation critères:`, evaluationsAvecCriteres[0].criteres);
 
             // Extraire les critères uniques pour la légende
             const criteresSet = new Set();
@@ -4927,9 +4913,6 @@ function calculerMoyennesCriteres(da) {
     // Filtrer toutes les évaluations de l'étudiant avec rétroaction finale
     const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da && e.retroactionFinale);
 
-    console.log('calculerMoyennesCriteres (TOUTES) pour DA:', da);
-    console.log('  Total évaluations dans système:', evaluations.length);
-    console.log('  Évaluations de cet élève:', evaluationsEleve.length);
 
     if (evaluationsEleve.length === 0) {
         return null;
@@ -4957,7 +4940,6 @@ function calculerMoyennesCriteres(da) {
 
     // NOUVELLE APPROCHE: Lire directement depuis evaluation.criteres[]
     // Plus fiable que de parser la rétroaction (qui peut avoir des formats variables)
-    console.log(`✅ Extraction depuis evaluation.criteres[] pour ${grille.criteres.length} critères de référence`);
 
     evaluationsEleve.forEach(evaluation => {
         // Vérifier si cette évaluation a un tableau criteres[]
@@ -5007,7 +4989,6 @@ function calculerMoyennesCriteres(da) {
         });
     });
 
-    console.log('  Scores extraits:', scoresCriteres);
 
     // Calculer les moyennes avec clés standardisées
     const moyennes = {};
@@ -5077,9 +5058,6 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
     // Prendre les N derniers (ou moins si pas assez)
     const derniersArtefacts = evaluationsEleve.slice(0, nombreArtefacts);
 
-    console.log(`calculerMoyennesCriteresRecents pour DA ${da}:`);
-    console.log(`  Nombre d'artefacts demandés: ${nombreArtefacts}`);
-    console.log(`  Nombre d'artefacts retenus: ${derniersArtefacts.length}`);
 
     // Lire la grille de référence configurée
     const grille = obtenirGrilleReferenceDepistage();
@@ -5104,7 +5082,6 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
 
     // NOUVELLE APPROCHE: Lire directement depuis evaluation.criteres[]
     // Plus fiable que de parser la rétroaction (qui peut avoir des formats variables)
-    console.log(`✅ Extraction depuis evaluation.criteres[] pour ${grille.criteres.length} critères de référence`);
 
     derniersArtefacts.forEach(evaluation => {
         // Vérifier si cette évaluation a un tableau criteres[]
@@ -5154,7 +5131,6 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
         });
     });
 
-    console.log(`  Scores extraits (${derniersArtefacts.length} derniers):`, scoresCriteres);
 
     // Calculer les moyennes avec clés standardisées
     const moyennes = {};
@@ -5446,12 +5422,6 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
         ? scoresFrancais.reduce((sum, s) => sum + s, 0) / scoresFrancais.length
         : 0;
 
-    console.log(`Indices ${nombreArtefacts} derniers artefacts pour DA ${da}:`, {
-        nbArtefacts: troisDerniers.length,
-        performance: (performance * 100).toFixed(1) + '%',
-        idmeMoyen: (idmeMoyen * 100).toFixed(1) + '%',
-        francaisMoyen: francaisMoyen.toFixed(1) + '%'
-    });
 
     return {
         performance: performance,
@@ -5538,14 +5508,6 @@ function calculerProgressionEleve(da) {
     });
     const differenceGlobale = nbDifferences > 0 ? (sommeDifferences / nbDifferences).toFixed(1) : '0.0';
 
-    console.log(`Progression pour DA ${da}:`, {
-        direction,
-        interpretation,
-        nbAmelioration,
-        nbBaisse,
-        nbPlateau,
-        differenceGlobale: differenceGlobale + ' points (moyenne des critères)'
-    });
 
     return {
         direction,
@@ -5671,12 +5633,6 @@ function identifierDefiSpecifique(da) {
         }
     }
 
-    console.log(`Défi spécifique pour DA ${da}:`, {
-        defi: defiMinimum || 'Aucun',
-        score: defiMinimum ? (scoreMinimum * 100).toFixed(1) + '%' : null,
-        scoreNormalise: defiMinimum ? scoreMinimum.toFixed(4) : null,
-        moyennes: moyennes
-    });
 
     return {
         defi: defiMinimum || 'Aucun',
@@ -5700,33 +5656,23 @@ function identifierPatternActuel(performancePAN3, aUnDefi) {
     const seuilInsuffisant = obtenirSeuil('idme.insuffisant');      // Par défaut 0.64 (64%)
     const seuilDeveloppement = obtenirSeuil('idme.developpement');  // Par défaut 0.75 (75%)
 
-    console.log('🔍 [identifierPatternActuel]', {
-        performance: (performancePAN3 * 100).toFixed(1) + '%',
-        aUnDefi: aUnDefi,
-        seuilInsuffisant: (seuilInsuffisant * 100) + '%',
-        seuilDeveloppement: (seuilDeveloppement * 100) + '%'
-    });
 
     // Blocage critique : Performance < 64% (Incomplet - unistructurel)
     if (performancePAN3 < seuilInsuffisant) {
-        console.log('   → Pattern: Blocage critique');
         return 'Blocage critique';
     }
 
     // Blocage émergent : Performance < 75% (En développement - multistructurel) ET a un défi
     if (performancePAN3 < seuilDeveloppement && aUnDefi) {
-        console.log('   → Pattern: Blocage émergent');
         return 'Blocage émergent';
     }
 
     // Défi spécifique : Performance acceptable mais a un défi récurrent
     if (aUnDefi) {
-        console.log('   → Pattern: Défi spécifique');
         return 'Défi spécifique';
     }
 
     // Stable : Pas de défi ou performance maîtrisée
-    console.log('   → Pattern: Stable');
     return 'Stable';
 }
 
@@ -5756,14 +5702,11 @@ function determinerNiveauRaiPedagogique(da) {
         ? calculerMoyennesCriteresRecents(da)
         : calculerMoyennesCriteres(da);
 
-    console.log('🔍 [determinerNiveauRaiPedagogique] DA:', da, 'Moyennes:', moyennes);
 
     // Détecter les défis
     const diagnostic = diagnostiquerForcesChallenges(moyennes);
-    console.log('🔍 [determinerNiveauRaiPedagogique] Diagnostic:', diagnostic);
 
     const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true);
-    console.log('🔍 [determinerNiveauRaiPedagogique] Indices 3 derniers:', indices3Derniers);
 
     // 🆕 BETA 98.9: Vérifier si données suffisantes avant interprétation
     if (indices3Derniers.nbArtefacts === 0) {
@@ -5805,11 +5748,6 @@ function determinerNiveauRaiPedagogique(da) {
     const seuilDeveloppement = obtenirSeuil('idme.developpement');
     const seuilInsuffisant = obtenirSeuil('idme.insuffisant');
 
-    console.log('🎓 Modèle de la Réponse à l\'intervention (RàI) pour DA', da, {
-        P: (P * 100).toFixed(1) + '%',
-        pattern,
-        defiPrincipal: diagnostic.principalDefi?.nom || 'Aucun'
-    });
 
     // LOGIQUE PÉDAGOGIQUE (basée uniquement sur P et SRPNF)
 
@@ -5892,12 +5830,6 @@ function determinerAlerteContextuelle(da) {
     // Interpréter la mobilisation
     const interpMobilisation = interpreterMobilisation(A, C);
 
-    console.log('📊 Contexte d\'apprentissage pour DA', da, {
-        A: (A * 100).toFixed(1) + '%',
-        C: (C * 100).toFixed(1) + '%',
-        cEstCalculable,
-        mobilisation: interpMobilisation.niveau
-    });
 
     // 🆕 BETA 96.1: Si C n'est pas calculable, retourner un état "en attente"
     if (!cEstCalculable) {
@@ -6017,14 +5949,6 @@ function determinerCibleIntervention(da) {
     const N = diagnostic.principalDefi ? diagnostic.principalDefi.nom : 'Aucun'; // Défi principal
     const performancePAN3 = indices3Derniers.performance;
 
-    console.log('🎯 Détermination cible pour DA', da, {
-        mobilisation: E,
-        engagement: indices.E,
-        pattern: M,
-        defi: N,
-        francais: (I != null ? I.toFixed(1) : '?') + '%',
-        perfPAN3: (performancePAN3 != null ? (performancePAN3 * 100).toFixed(1) : '?') + '%'
-    });
 
     // LOGIQUE DE DÉCISION (formule Excel traduite en JavaScript)
 
@@ -6319,13 +6243,9 @@ function genererDiagnosticCriteres(da) {
     // Obtenir les défis selon la pratique
     const defisInfo = pratique.detecterDefis(da);
 
-    console.log('🎯 Diagnostic défis pour DA:', da);
-    console.log('  Type:', defisInfo.type);
-    console.log('  Nombre de défis:', defisInfo.defis?.length || 0);
 
     // Si aucune donnée, ne rien afficher
     if (!defisInfo || (!defisInfo.defis && !defisInfo.forces)) {
-        console.log('  ⚠️ Pas de données disponibles - diagnostic non affiché');
         return '';
     }
 
@@ -6351,8 +6271,6 @@ function genererDiagnosticSRPNF(da, defisInfo) {
     }
 
     const diagnostic = defisInfo; // Utiliser les défis de la pratique
-    console.log('  Forces:', diagnostic.forces.length);
-    console.log('  Défis:', diagnostic.defis.length);
 
     // Fonction helper pour obtenir la couleur selon le score
     const obtenirCouleurScore = (score) => {
@@ -6594,7 +6512,6 @@ function genererDiagnosticSRPNF(da, defisInfo) {
  * Génère le diagnostic génériques (Sommative)
  */
 function genererDiagnosticGenerique(da, defisInfo) {
-    console.log('  Défis génériques:', defisInfo.defis.length);
 
     if (defisInfo.defis.length === 0 && !defisInfo.tendance) {
         return `
@@ -6867,13 +6784,10 @@ function genererSectionPerformance(da) {
     let graphiqueCriteres = '';
 
     // 🐛 DEBUG (8 déc 2025) : Tracer exécution
-    console.log(`[DEBUG Graphique Critères] DA: ${da}`);
-    console.log(`[DEBUG Graphique Critères] Fonction creerGraphiqueCriteres existe: ${typeof creerGraphiqueCriteres === 'function'}`);
 
     // Vérifier si l'étudiant a des évaluations avec détails critères
     if (typeof creerGraphiqueCriteres === 'function') {
         const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-        console.log(`[DEBUG Graphique Critères] Total évaluations: ${evaluations.length}`);
 
         const evaluationsAvecCriteres = evaluations.filter(e =>
             e.etudiantDA === da &&
@@ -6881,10 +6795,8 @@ function genererSectionPerformance(da) {
             Array.isArray(e.criteres) &&
             e.criteres.length > 0
         );
-        console.log(`[DEBUG Graphique Critères] Évaluations avec critères: ${evaluationsAvecCriteres.length}`);
 
         if (evaluationsAvecCriteres.length > 0) {
-            console.log(`[DEBUG Graphique Critères] Première évaluation critères:`, evaluationsAvecCriteres[0].criteres);
 
             // Extraire les critères uniques pour la légende
             const criteresSet2 = new Set();
@@ -6928,14 +6840,12 @@ function genererSectionPerformance(da) {
             setTimeout(() => {
                 const canvas = document.getElementById(canvasIdCriteres);
                 if (canvas) {
-                    console.log(`[DEBUG Graphique Critères] Canvas trouvé, création du graphique...`);
                     creerGraphiqueCriteres(canvasIdCriteres, da);
                 } else {
                     console.error(`[DEBUG Graphique Critères] Canvas #${canvasIdCriteres} introuvable dans le DOM`);
                 }
             }, 100);
         } else {
-            console.log(`[DEBUG Graphique Critères] Aucune évaluation avec critères, graphique non généré`);
         }
     } else {
         console.error(`[DEBUG Graphique Critères] Fonction creerGraphiqueCriteres non disponible`);
@@ -7301,12 +7211,6 @@ function genererSectionPerformance(da) {
                     const afficherPan = affichage.afficherAlternatif !== false;
                     const modeComparatif = afficherSom && afficherPan;
 
-                    console.log('🔍 DEBUG BARRES SRPNF - Mode comparatif');
-                    console.log('  config:', config);
-                    console.log('  affichage:', affichage);
-                    console.log('  afficherSom:', afficherSom);
-                    console.log('  afficherPan:', afficherPan);
-                    console.log('  modeComparatif:', modeComparatif);
 
                     // Calculer moyennes et directions pour SOM et PAN si en mode comparatif
                     let moyennesSOM = null;
@@ -7315,7 +7219,6 @@ function genererSectionPerformance(da) {
                     let directionsPAN = null;
 
                     if (modeComparatif) {
-                        console.log('  ✅ Mode comparatif activé - calcul des deux pratiques');
 
                         // SOM : Calculer sur TOUTES les évaluations (sans filtre)
                         moyennesSOM = calculerMoyennesCriteres(da);
@@ -7331,12 +7234,7 @@ function genererSectionPerformance(da) {
                         }
                         directionsPAN = calculerDirectionsCriteres(da);
 
-                        console.log('  moyennesSOM (toutes):', moyennesSOM);
-                        console.log('  moyennesPAN (N derniers):', moyennesPAN);
-                        console.log('  directionsSOM:', directionsSOM);
-                        console.log('  directionsPAN:', directionsPAN);
                     } else {
-                        console.log('  ❌ Mode comparatif NON activé');
                         // Mode normal : calculer les moyennes et utiliser les directions PAN par défaut
                         moyennesPAN = calculerMoyennesCriteres(da);
                         directionsPAN = calculerDirectionsCriteres(da);
@@ -7578,7 +7476,6 @@ function genererSectionAssiduiteLegacy(da) {
  * @param {string} dateStr - Date au format YYYY-MM-DD
  */
 function naviguerVersPresenceAvecDate(dateStr) {
-    console.log('🔀 Navigation vers Présences › Saisie avec date:', dateStr);
 
     // 1. Afficher la section Présences
     if (typeof afficherSection === 'function') {
@@ -7600,7 +7497,6 @@ function naviguerVersPresenceAvecDate(dateStr) {
             const event = new Event('change', { bubbles: true });
             inputDate.dispatchEvent(event);
 
-            console.log('✅ Date pré-sélectionnée:', dateStr);
 
             // Scroll vers le haut pour voir le formulaire
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -7656,7 +7552,6 @@ function reattacherEvenementsToggles() {
         });
     });
 
-    console.log(`✅ ${emojiToggles.length} toggles emoji réattachés`);
 }
 
 /* ===============================
@@ -7779,7 +7674,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     // Recharger avec un court délai (debounce)
                     timeoutRechargement = setTimeout(function() {
-                        console.log('🔄 Rechargement automatique du profil étudiant:', daActuel);
                         dernierDARecharge = daActuel;
 
                         // Vérifier que la fonction existe avant de l'appeler
@@ -7805,7 +7699,6 @@ document.addEventListener('DOMContentLoaded', function() {
         attributeFilter: ['class']
     });
 
-    console.log('✅ Observer de rechargement automatique activé pour tableau-bord-profil');
 });
 
 /* ===============================
@@ -8073,7 +7966,6 @@ function genererEtAfficherRapport(da) {
     // Afficher le rapport
     textarea.value = rapport;
 
-    console.log(`✅ Rapport généré pour DA ${da}`);
 }
 
 /**
@@ -8519,7 +8411,6 @@ function calculerDetailsNoteFinale(da) {
     const deficit = minimumRequis - nombreEvalues;
 
     if (reglesConformite.actif && deficit > 0 && moyennePortfolio !== null) {
-        console.log(`[calculerDetailsNoteFinale] Déficit détecté: ${deficit} (${nombreEvalues}/${minimumRequis})`);
 
         // Trouver le plafond applicable selon le déficit
         const plafonds = reglesConformite.plafonds || [];
@@ -8545,7 +8436,6 @@ function calculerDetailsNoteFinale(da) {
                     moyenneOriginale: moyennePortfolio
                 };
                 moyennePortfolio = 0;
-                console.log(`[calculerDetailsNoteFinale] Échec automatique appliqué`);
             } else if (plafondApplicable.seuilMax !== null && moyennePortfolio > plafondApplicable.seuilMax) {
                 // Plafonnement au niveau
                 plafonnement = {
@@ -8557,7 +8447,6 @@ function calculerDetailsNoteFinale(da) {
                     moyenneOriginale: moyennePortfolio
                 };
                 moyennePortfolio = plafondApplicable.seuilMax;
-                console.log(`[calculerDetailsNoteFinale] Plafonnement à ${plafondApplicable.seuilMax}% (niveau ${plafondApplicable.niveauCode})`);
             }
         }
     }
@@ -8717,7 +8606,6 @@ function calculerEtStockerPatternsGroupe() {
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const patternsGroupe = {};
 
-    console.log('📊 Calcul des patterns pour', etudiants.length, 'étudiants...');
 
     etudiants.forEach(etudiant => {
         const da = etudiant.da;
@@ -8752,7 +8640,6 @@ function calculerEtStockerPatternsGroupe() {
     // Stocker dans localStorage
     db.setSync('indicesPatternsRaI', patternsGroupe);
 
-    console.log('✅ Patterns stockés pour', Object.keys(patternsGroupe).length, 'étudiants');
 
     return patternsGroupe;
 }
@@ -8960,7 +8847,6 @@ function sauvegarderNotesPresencesConfidentiel() {
 
     if (modifications > 0) {
         db.setSync(clePresences, presences);
-        console.log(`[Confidentiel] ${modifications} note(s) de présence modifiée(s)`);
     }
 }
 

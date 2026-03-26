@@ -566,7 +566,6 @@ function lireEcheancesParGroupeDepuisFormulaire() {
  * 5. Charge la liste des grilles disponibles
  */
 async function afficherFormProduction(id) {
-    console.log('📝 afficherFormProduction appelée avec ID:', id, 'type:', typeof id);
 
     const form = document.getElementById('formulaireProduction');
     const btnAjouter = document.getElementById('btnajouterProduction');
@@ -581,17 +580,11 @@ async function afficherFormProduction(id) {
     const selectGrille = document.getElementById('productionGrille');
     const selectGrilleInline = document.getElementById('productionGrilleInline');
 
-    console.log('📋 Chargement des grilles disponibles...');
-    console.log('   - selectGrille trouvé?', !!selectGrille);
-    console.log('   - selectGrilleInline trouvé?', !!selectGrilleInline);
 
     if (selectGrille || selectGrilleInline) {
         // 🆕 Beta 95.4 : Utiliser la clé namespacée pour n'afficher que les grilles du trimestre
         const cleGrilles = cle('grillesTemplates');
         const grilles = await db.get(cleGrilles) || [];
-        console.log('   - Clé utilisée:', cleGrilles);
-        console.log('   - Nombre de grilles:', grilles.length);
-        console.log('   - Grilles:', grilles.map(g => ({ id: g.id, nom: g.nom })));
 
         const optionsHtml = '<option value="">Aucune</option>' +
             grilles.map(g => `<option value="${g.id}">${g.nom}</option>`).join('');
@@ -640,17 +633,13 @@ async function afficherFormProduction(id) {
         // 🆕 Beta 95.4 : Utiliser la clé namespacée pour le trimestre actif
         const cleProductions = cle('productions');
         const evaluations = await db.get(cleProductions) || [];
-        console.log('📦 Nombre de productions:', evaluations.length, '(clé:', cleProductions, ')');
-        console.log('🔑 IDs disponibles:', evaluations.map(e => e.id));
 
         // Debug détaillé de la recherche
         evaluations.forEach((e, idx) => {
             const match = e.id === id;
-            console.log(`   [${idx}] "${e.id}" === "${id}" ? ${match} (types: ${typeof e.id} vs ${typeof id})`);
         });
 
         const prod = evaluations.find(e => e.id === id);
-        console.log('📍 Production trouvée?', !!prod);
 
         if (prod) {
             productionEnEdition = id;
@@ -694,7 +683,6 @@ async function afficherFormProduction(id) {
             // Si c'est un portfolio, pas de configuration supplémentaire
             // Les règles de calcul (nombreARetenir, etc.) sont dans Réglages → Pratique de notation
             if (prod.type === 'portfolio') {
-                console.log('📖 Chargement Portfolio - Les règles de calcul sont configurées dans Réglages › Pratique de notation');
             }
 
             // Afficher les checkboxes de pratiques compatibles
@@ -951,7 +939,6 @@ async function sauvegarderProduction() {
     if (type === 'portfolio') {
         // ✅ CORRECTION Phase 3: Les règles de calcul ne sont PLUS sauvegardées ici
         // Elles sont configurées dans Réglages → Pratique de notation → Configuration PAN
-        console.log('📊 Sauvegarde Portfolio - Les règles de calcul sont dans modalitesEvaluation.configPAN.portfolio');
 
         // Pas besoin de stocker artefactsIds - sera détecté dynamiquement
         productionData.modeCalcul = 'provisoire';
@@ -959,11 +946,8 @@ async function sauvegarderProduction() {
 
     if (productionEnEdition) {
         // Modifier la production existante
-        console.log('✏️ MODE ÉDITION - ID:', productionEnEdition);
         const index = evaluations.findIndex(e => e.id === productionEnEdition);
         if (index !== -1) {
-            console.log('   - Index trouvé:', index);
-            console.log('   - Avant:', JSON.stringify(evaluations[index].regles));
             evaluations[index] = {
                 ...evaluations[index],
                 ...productionData
@@ -974,13 +958,11 @@ async function sauvegarderProduction() {
                 evaluations[index] = ajouterContributeurSiNecessaire(evaluations[index]);
             }
 
-            console.log('   - Après:', JSON.stringify(evaluations[index].regles));
         } else {
             console.error('❌ Index non trouvé pour ID:', productionEnEdition);
         }
     } else {
         // Ajouter nouvelle production
-        console.log('➕ MODE AJOUT - Nouvelle production');
         productionData.id = genererIdUnique('PROD_');
 
         // 🆕 Beta 95.4 : Pour nouvelle production, définir l'auteur original
@@ -992,12 +974,9 @@ async function sauvegarderProduction() {
         }
 
         evaluations.push(productionData);
-        console.log('   - Nouveau ID:', productionData.id);
     }
 
-    console.log('💾 Sauvegarde dans db.set...', cleProductions);
     await db.set(cleProductions, evaluations);
-    console.log('✅ Sauvegarde terminée');
 
     // 🆕 BETA 95.1 : Garder l'ID pour réafficher après sauvegarde
     const idSauvegarde = productionEnEdition || productionData.id;
@@ -1155,20 +1134,15 @@ async function supprimerProduction(id) {
  * 5. Rafraîchit l'affichage
  */
 async function verrouillerEvaluation(id) {
-    console.log('🔐 verrouillerEvaluation appelée avec ID:', id, 'type:', typeof id);
 
     let evaluations = await db.get(getCleProductions()) || [];
-    console.log('📦 Nombre de productions:', evaluations.length);
-    console.log('🔑 IDs disponibles:', evaluations.map(e => e.id));
 
     // Debug détaillé de la recherche
     evaluations.forEach((e, idx) => {
         const match = e.id === id;
-        console.log(`   [${idx}] "${e.id}" === "${id}" ? ${match} (types: ${typeof e.id} vs ${typeof id})`);
     });
 
     const index = evaluations.findIndex(e => e.id === id);
-    console.log('📍 Index trouvé:', index);
 
     if (index !== -1) {
         evaluations[index].verrouille = !evaluations[index].verrouille;
@@ -1898,12 +1872,10 @@ async function migrerProductionsVersBibliotheque() {
 
     if (nbMigrees > 0) {
         await db.set(getCleProductions(), productions);
-        console.log(`✅ Migration bibliothèque: ${nbMigrees} production(s) ajoutée(s) à la bibliothèque`);
     }
 }
 
 function initialiserModuleProductions() {
-    console.log('Initialisation du module Productions');
 
     // ✅ AJOUT (8 décembre 2025) : Migration vers système bibliothèque
     migrerProductionsVersBibliotheque();
@@ -1911,12 +1883,9 @@ function initialiserModuleProductions() {
     // ✅ CORRECTION (8 décembre 2025) : Afficher la sidebar sans condition
     // comme pour les autres sections (Cours, Grilles, Échelles, Cartouches)
     const container = document.getElementById('sidebarListeProductions');
-    console.log('[Productions] Container trouvé:', !!container);
     if (container) {
-        console.log('[Productions] Appel afficherListeProductions()');
         afficherListeProductions();
     } else {
-        console.log('[Productions] ⚠️ Container sidebarListeProductions non trouvé au chargement');
     }
 
     // Afficher aussi l'ancienne vue si on est sur la page productions
@@ -1929,7 +1898,6 @@ function initialiserModuleProductions() {
     // Pas d'événements globaux à attacher pour l'instant
     // Les événements sont gérés via les attributs onclick dans le HTML
 
-    console.log('✅ Module Productions initialisé avec layout sidebar (Beta 80.5)');
 }
 
 /* ===============================
@@ -2140,7 +2108,6 @@ async function ajouterProductionIndividuelle(id) {
             productions.push(prod);
             await db.set(getCleProductions(), productions);
 
-            console.log('[Productions] Importée depuis bibliothèque:', prod.titre);
         } else {
             // Production déjà dans le cours, juste la marquer comme visible
             prod.dansBibliotheque = true;
@@ -2434,7 +2401,6 @@ async function retirerProductionDeBibliotheque(id) {
 
         await db.set(getCleProductions(), productions);
 
-        console.log('✅ Production retirée de la sélection:', id);
 
         fermerModalBibliothequeProductions();
         await afficherBibliothequeProductions();
@@ -2475,7 +2441,6 @@ async function supprimerProductionDefinitivement(id) {
     await afficherBibliothequeProductions();
     await afficherListeProductions();
 
-    console.log(`Production "${production.titre}" supprimée définitivement`);
 }
 
 /**
@@ -2532,7 +2497,6 @@ async function dupliquerProductionBibliotheque(id) {
     await afficherBibliothequeProductions();
     await afficherListeProductions();
 
-    console.log(`Production "${production.titre}" dupliquée → "${nouvelleProduction.titre}"`);
 }
 
 /**
@@ -2561,9 +2525,7 @@ async function ajouterProductionsABibliotheque() {
                 if (prodExistante.dansBibliotheque === false) {
                     prodExistante.dansBibliotheque = true;
                     ajoutees++;
-                    console.log(`✅ Réajoutée à la sélection : ${prodExistante.titre}`);
                 } else {
-                    console.log(`Production déjà dans la sélection : ${id}`);
                 }
             } else {
                 // Ajouter nouvelle production de la bibliothèque
@@ -2572,13 +2534,11 @@ async function ajouterProductionsABibliotheque() {
                     dansBibliotheque: true
                 });
                 ajoutees++;
-                console.log(`✅ Ajoutée à la sélection : ${productionData.titre}`);
             }
         });
 
         await db.set(getCleProductions(), productions);
 
-        console.log(`✅ ${ajoutees} production(s) ajoutée(s) à la sélection`);
 
         fermerModalBibliothequeProductions();
         await afficherListeProductions();
@@ -2683,7 +2643,6 @@ async function exporterProductions() {
     );
 
     if (!metaEnrichies) {
-        console.log('Export annulé par l\'utilisateur');
         return;
     }
 
@@ -2713,7 +2672,6 @@ async function exporterProductions() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    console.log('✅ Productions exportées avec licence CC BY-NC-SA 4.0');
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces(`${productions.length} production(s) exportée(s) avec succès`);
     }
@@ -2751,7 +2709,6 @@ async function exporterProductionActive() {
     );
 
     if (!metaEnrichies) {
-        console.log('Export annulé par l\'utilisateur');
         return;
     }
 
@@ -2805,7 +2762,6 @@ async function exporterProductionActive() {
     a.click();
     URL.revokeObjectURL(url);
 
-    console.log('✅ Production exportée avec licence CC BY-NC-SA 4.0');
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces(`Production "${production.description || production.titre}" exportée avec succès`);
     }
@@ -2875,7 +2831,6 @@ async function importerDansProductionActive(event) {
             );
 
             if (!confirmation) {
-                console.log('Import annulé par l\'utilisateur');
                 event.target.value = '';
                 return;
             }
@@ -2913,7 +2868,6 @@ async function importerDansProductionActive(event) {
             // Rafraîchir la liste
             await afficherListeProductions();
 
-            console.log('✅ Production importée et remplacée avec succès');
             if (typeof afficherNotificationSucces === 'function') {
                 afficherNotificationSucces('Production importée et remplacée avec succès');
             } else {
@@ -3056,11 +3010,9 @@ window.confirmerImportProductions = async function(donnees) {
                 `Continuer quand même ?`;
 
             if (!confirm(message)) {
-                console.log('Import annulé par l\'utilisateur (dépendances manquantes)');
                 return;
             }
 
-            console.log(`⚠️ Import avec ${nbGrillesManquantes} dépendance(s) manquante(s):`, grillesManquantes);
         }
 
         // ✅ CORRIGÉ (8 janvier 2026) : Ajouter UNIQUEMENT dans bibliothequeProductions
@@ -3098,7 +3050,6 @@ window.confirmerImportProductions = async function(donnees) {
         if (nbMisesAJour > 0) message += `${nbMisesAJour} production(s) mise(s) à jour.\n`;
         message += `\nConsulte "Productions disponibles" pour les ajouter à ta barre latérale.`;
         alert(message);
-        console.log('✅ Productions importées:', productionsImportees.length);
 
     } catch (error) {
         console.error('Erreur lors de l\'import:', error);
@@ -3133,7 +3084,6 @@ async function verifierMigrationCategories() {
         return false;
     }
 
-    console.log(`[Migration] ${sansCategorie.length} production(s) sans catégorie détectée(s)`);
     return true;
 }
 
@@ -3265,7 +3215,6 @@ async function sauvegarderMigrationCategories() {
 
     if (nbMises > 0) {
         await db.set(getCleProductions(), productions);
-        console.log(`[Migration] ${nbMises} production(s) mise(s) à jour avec catégorie`);
 
         // Notification
         if (typeof afficherNotificationSucces === 'function') {
@@ -3451,20 +3400,13 @@ async function afficherListeProductions(filtreType = '') {
     const grilles = await db.get(cleGrilles) || [];
     const container = document.getElementById('sidebarListeProductions');
 
-    console.log('[Productions] Total productions:', productions.length);
-    console.log('[Productions] Productions détails:', productions.map(p => ({
-        description: p.description,
-        dansBibliotheque: p.dansBibliotheque
-    })));
 
     if (!container) {
-        console.log('[Productions] ⚠️ Container sidebarListeProductions introuvable');
         return;
     }
 
     // ✅ AJOUT (8 décembre 2025) : Filtrer uniquement les productions dans la bibliothèque
     const productionsDansBibliotheque = productions.filter(p => p.dansBibliotheque !== false);
-    console.log('[Productions] Dans bibliothèque:', productionsDansBibliotheque.length);
 
     // Filtrer selon le type si nécessaire
     let productionsFiltrees = productionsDansBibliotheque;
@@ -3541,7 +3483,6 @@ function filtrerListeProductions() {
  * Appelée par le clic sur un item de la sidebar
  */
 async function chargerProductionPourModif(id) {
-    console.log('🔄 chargerProductionPourModif appelée avec ID:', id);
 
     // Masquer le message d'accueil
     const accueil = document.getElementById('accueilProductions');
@@ -3729,11 +3670,6 @@ async function chargerGrillesDisponiblesPourProduction() {
     const selectStandard = document.getElementById('productionGrille');
     const selectInline = document.getElementById('productionGrilleInline');
 
-    console.log('📋 chargerGrillesDisponiblesPourProduction appelée');
-    console.log('   - Clé utilisée:', cleGrilles);
-    console.log('   - Nombre de grilles:', grilles.length);
-    console.log('   - selectStandard trouvé?', !!selectStandard);
-    console.log('   - selectInline trouvé?', !!selectInline);
 
     if (!selectStandard && !selectInline) {
         console.warn('⚠️ Aucun sélecteur de grille trouvé!');
@@ -3745,12 +3681,10 @@ async function chargerGrillesDisponiblesPourProduction() {
 
     if (selectStandard) {
         selectStandard.innerHTML = optionsHtml;
-        console.log('✅ Grilles chargées dans selectStandard');
     }
 
     if (selectInline) {
         selectInline.innerHTML = optionsHtml;
-        console.log('✅ Grilles chargées dans selectInline');
     }
 }
 

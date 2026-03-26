@@ -394,7 +394,6 @@ function demarrerWizard() {
 
     // Délai pour permettre la fermeture du modal d'accueil
     setTimeout(() => {
-        console.log('[Guide] Ouverture du Wizard V2...');
 
         if (typeof ouvrirWizardV2 === 'function') {
             ouvrirWizardV2();
@@ -489,7 +488,6 @@ function demarrerCreationMateriel() {
         var reponsesInitiales = {
             'materiel-pratique-detectee': pratique || 'aucune'
         };
-        console.log('[Guide] Pratique pré-détectée:', reponsesInitiales['materiel-pratique-detectee']);
 
         // Trouver l'index de materiel-intro et sauter au suivant
         const questionsActives = obtenirQuestionsActives(reponsesInitiales);
@@ -502,7 +500,6 @@ function demarrerCreationMateriel() {
         }
 
         // Ouvrir à l'étape suivante (la détection est déjà faite)
-        console.log('[Guide] Lancement du parcours matériel à l\'index', indexMateriel + 1);
         ouvrirModalConversationnel(indexMateriel + 1, reponsesInitiales);
     }, 500);
 }
@@ -583,15 +580,12 @@ function verifierEtAfficherAccueil() {
         const modeAssiste = typeof estModeAssiste === 'function' ? estModeAssiste() : false;
 
         if (!modeAssiste) {
-            console.log('ℹ️ Mode Normal/Anonymisé - Tour guidé désactivé (auto)');
             return;
         }
 
         if (estPremiereUtilisation()) {
-            console.log('👋 Première utilisation détectée - Affichage AUTO du tour guidé');
             afficherModalAccueil();
         } else {
-            console.log('✅ Utilisateur existant - Tour guidé accessible via bouton 🗺️ seulement');
         }
     }, 1000);
 }
@@ -621,7 +615,6 @@ window.explorerLibrement = explorerLibrement;
 window.consulterAide = consulterAide;
 
 // Auto-initialisation
-console.log('👋 Module Tour Guide chargé');
 initialiserPrimoAccueil();
 
 

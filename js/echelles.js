@@ -446,7 +446,6 @@ async function migrerEchellesVersBibliotheque() {
 
     if (nbMigrees > 0) {
         await db.set('echellesTemplates', echelles);
-        console.log(`✅ Migration bibliothèque: ${nbMigrees} échelle(s) ajoutée(s) à la bibliothèque`);
     }
 }
 
@@ -461,7 +460,6 @@ async function assurerEchelleGenerique() {
     const existe = echelles.some(e => e.id === 'ECHELLE_GENERIQUE');
     if (existe || window.estRessourceSupprimee('ECHELLE_GENERIQUE')) return;
 
-    console.log('📊 Ajout de l\'échelle générique à la bibliothèque...');
 
     const echelleGenerique = {
         id: 'ECHELLE_GENERIQUE',
@@ -479,7 +477,6 @@ async function assurerEchelleGenerique() {
 
     echelles.push(echelleGenerique);
     await db.set('echellesTemplates', echelles);
-    console.log('   ✅ Échelle générique ajoutée à la bibliothèque');
 }
 
 /**
@@ -497,7 +494,6 @@ async function assurerEchellesPersonnalisees() {
     // Standards avec comptage, seuil maîtrise 75%
     // ============================================================================
     if (!echelles.some(e => e.id === 'ECHELLE_BRUNO_CHIMIE') && !supprimees.includes('ECHELLE_BRUNO_CHIMIE')) {
-        console.log('📊 Ajout échelle Chimie organique...');
         echelles.push({
             id: 'ECHELLE_BRUNO_CHIMIE',
             nom: 'Échelle Chimie organique',
@@ -522,7 +518,6 @@ async function assurerEchellesPersonnalisees() {
     // STD+SPE hybride, 4 niveaux numériques (1-4), seuil niveau 3
     // ============================================================================
     if (!echelles.some(e => e.id === 'ECHELLE_XAVIER_INFO') && !supprimees.includes('ECHELLE_XAVIER_INFO')) {
-        console.log('📊 Ajout échelle Interfaces/BD...');
         echelles.push({
             id: 'ECHELLE_XAVIER_INFO',
             nom: 'Échelle Interfaces/BD',
@@ -547,7 +542,6 @@ async function assurerEchellesPersonnalisees() {
     // PAN-Standards holistique, 4 niveaux IDME qualitatifs
     // ============================================================================
     if (!echelles.some(e => e.id === 'ECHELLE_ISABELLE_BIO') && !supprimees.includes('ECHELLE_ISABELLE_BIO')) {
-        console.log('📊 Ajout échelle Anatomie...');
         echelles.push({
             id: 'ECHELLE_ISABELLE_BIO',
             nom: 'Échelle Anatomie',
@@ -573,7 +567,6 @@ async function assurerEchellesPersonnalisees() {
     // Sommative avec portfolio, échelle pourcentages standard
     // ============================================================================
     if (!echelles.some(e => e.id === 'ECHELLE_HELENE_PHILO') && !supprimees.includes('ECHELLE_HELENE_PHILO')) {
-        console.log('📊 Ajout échelle Philosophie...');
         echelles.push({
             id: 'ECHELLE_HELENE_PHILO',
             nom: 'Échelle Philosophie',
@@ -598,7 +591,6 @@ async function assurerEchellesPersonnalisees() {
     // Sommative avec critères fixes, échelle pourcentages
     // ============================================================================
     if (!echelles.some(e => e.id === 'ECHELLE_MARIEHELENE_LITT') && !supprimees.includes('ECHELLE_MARIEHELENE_LITT')) {
-        console.log('📊 Ajout échelle Littérature...');
         echelles.push({
             id: 'ECHELLE_MARIEHELENE_LITT',
             nom: 'Échelle Littérature',
@@ -623,7 +615,6 @@ async function assurerEchellesPersonnalisees() {
     // Sommative traditionnelle, échelle pourcentages
     // ============================================================================
     if (!echelles.some(e => e.id === 'ECHELLE_ETIENNE_ADMIN') && !supprimees.includes('ECHELLE_ETIENNE_ADMIN')) {
-        console.log('📊 Ajout échelle Comptabilité...');
         echelles.push({
             id: 'ECHELLE_ETIENNE_ADMIN',
             nom: 'Échelle Comptabilité',
@@ -648,7 +639,6 @@ async function assurerEchellesPersonnalisees() {
     // Sommative traditionnelle, échelle pourcentages
     // ============================================================================
     if (!echelles.some(e => e.id === 'ECHELLE_OLIVIER_GEO') && !supprimees.includes('ECHELLE_OLIVIER_GEO')) {
-        console.log('📊 Ajout échelle Géographie...');
         echelles.push({
             id: 'ECHELLE_OLIVIER_GEO',
             nom: 'Échelle Géographie',
@@ -673,7 +663,6 @@ async function assurerEchellesPersonnalisees() {
     // Sommative avec remplacement, échelle pourcentages
     // ============================================================================
     if (!echelles.some(e => e.id === 'ECHELLE_JORDAN_PHILO') && !supprimees.includes('ECHELLE_JORDAN_PHILO')) {
-        console.log('📊 Ajout échelle Philosophie 101...');
         echelles.push({
             id: 'ECHELLE_JORDAN_PHILO',
             nom: 'Échelle Philosophie 101',
@@ -695,12 +684,10 @@ async function assurerEchellesPersonnalisees() {
 
     if (nbAjoutees > 0) {
         await db.set('echellesTemplates', echelles);
-        console.log(`   ✅ ${nbAjoutees} échelle(s) personnalisée(s) ajoutée(s)`);
     }
 }
 
 async function initialiserModuleEchelles() {
-    console.log('📈 Initialisation du module Échelles de performance');
 
     // ✅ AJOUT (8 décembre 2025) : Migration vers système de bibliothèque
     await migrerEchellesVersBibliotheque();
@@ -719,7 +706,6 @@ async function initialiserModuleEchelles() {
     // Vérifier que nous sommes dans la bonne section
     const elementTypeEchelle = document.getElementById('typeEchelle');
     if (!elementTypeEchelle) {
-        console.log('   ⚠️  Section échelles non active (layout sidebar actif)');
         return;
     }
 
@@ -732,7 +718,6 @@ async function initialiserModuleEchelles() {
     // Charger la configuration
     await chargerConfigurationEchelle();
 
-    console.log('   ✅ Module Échelles initialisé avec nouvelle vue hiérarchique');
 }
 
 /* ===============================
@@ -1423,7 +1408,6 @@ async function ajouterNiveau() {
 
     // Si on est dans le contexte d'une échelle de la sidebar, rediriger vers la nouvelle fonction
     if (echelleTemplateActuelle && echelleTemplateActuelle.id) {
-        console.log('🔄 Redirection vers await ajouterNiveauEchelle()');
         await ajouterNiveauEchelle(echelleTemplateActuelle.id);
         return;
     }
@@ -1923,7 +1907,6 @@ async function exporterEchelles() {
     );
 
     if (!metaEnrichies) {
-        console.log('Export annulé par l\'utilisateur');
         return;
     }
 
@@ -1953,7 +1936,6 @@ async function exporterEchelles() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    console.log('✅ Échelles exportées avec licence CC BY-NC-SA 4.0');
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces(`${echelles.length} échelle(s) exportée(s) avec succès`);
     }
@@ -1984,7 +1966,6 @@ async function exporterEchelleActive() {
     );
 
     if (!metaEnrichies) {
-        console.log('Export annulé par l\'utilisateur');
         return;
     }
 
@@ -2033,7 +2014,6 @@ async function exporterEchelleActive() {
     a.click();
     URL.revokeObjectURL(url);
 
-    console.log('✅ Échelle exportée avec licence CC BY-NC-SA 4.0');
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces(`Échelle "${echelle.nom}" exportée avec succès`);
     }
@@ -2095,7 +2075,6 @@ async function importerDansEchelleActive(event) {
             );
 
             if (!confirmation) {
-                console.log('Import annulé par l\'utilisateur');
                 event.target.value = '';
                 return;
             }
@@ -2133,7 +2112,6 @@ async function importerDansEchelleActive(event) {
             // Rafraîchir la liste
             afficherEchellesExistantes();
 
-            console.log('✅ Échelle importée et remplacée avec succès');
             if (typeof afficherNotificationSucces === 'function') {
                 afficherNotificationSucces('Échelle importée et remplacée avec succès');
             } else {
@@ -2283,7 +2261,6 @@ window.confirmerImportEchelles = async function(donnees) {
         if (nbMisesAJour > 0) message += `${nbMisesAJour} échelle(s) mise(s) à jour.\n`;
         message += `\nConsultez "Échelles disponibles" pour les ajouter à ta barre latérale.`;
         alert(message);
-        console.log('✅ Échelles importées:', echellesImportees.length);
 
     } catch (error) {
         console.error('Erreur lors de l\'import:', error);
@@ -2335,7 +2312,6 @@ window.importerEchelles = importerEchelles;
 
 async function afficherListeEchelles() {
     const echelles = await db.get('echellesTemplates') ||  [];
-    console.log('📊 afficherListeEchelles - Nombre d\'échelles:', echelles.length);
 
     const container = document.getElementById('sidebarListeEchelles');
     if (!container) {
@@ -2361,7 +2337,6 @@ async function afficherListeEchelles() {
         return;
     }
 
-    console.log('   ✅ Affichage de', echellesDansBibliotheque.length, 'échelle(s) dans la bibliothèque');
 
     html += echellesDansBibliotheque.map(echelle => {
         const nomEchelle = echelle.nom || 'Sans titre';
@@ -2650,7 +2625,6 @@ async function retirerEchelleDeBibliotheque(id) {
     fermerModalBibliothequeEchelles();
     await afficherBibliothequeEchelles();
 
-    console.log(`Échelle "${echelle.nom}" retirée de la barre latérale`);
 }
 
 /**
@@ -2689,7 +2663,6 @@ async function supprimerEchelleDefinitivement(id) {
     await afficherListeEchelles();
     await afficherBibliothequeEchelles();
 
-    console.log(`Échelle "${echelle.nom}" supprimée définitivement`);
 }
 
 /**
@@ -2777,7 +2750,6 @@ async function dupliquerEchelleBibliotheque(id) {
     await afficherListeEchelles();
     await afficherBibliothequeEchelles();
 
-    console.log(`Échelle "${echelle.nom}" dupliquée → "${nouvelleEchelle.nom}"`);
 }
 
 /**
@@ -3062,7 +3034,6 @@ async function creerNouvelleEchelle() {
     // Réinitialiser la référence à l'échelle actuelle
     echelleTemplateActuelle = null;
 
-    console.log('Création nouvelle échelle - Interface prête');
 }
 
 /**
@@ -3314,7 +3285,6 @@ function annulerFormEchelle() {
     // Réinitialiser la référence à l'échelle actuelle
     echelleTemplateActuelle = null;
 
-    console.log('Édition annulée - Retour à l\'accueil');
 }
 
 async function chargerEchellePourModif(id) {
@@ -3367,12 +3337,6 @@ function afficherNiveauxEchelle(echelle) {
     const container = document.getElementById('tableauNiveauxEchelle');
     const apercuContainer = document.getElementById('apercuEchelleNiveaux');
 
-    console.log('📊 afficherNiveauxEchelle appelée:', {
-        echelleNom: echelle?.nom,
-        nbNiveaux: echelle?.niveaux?.length,
-        niveaux: echelle?.niveaux,
-        containerExiste: !!container
-    });
 
     if (!container) {
         console.error('❌ Container tableauNiveauxEchelle introuvable');
@@ -3673,7 +3637,6 @@ async function deplacerNiveauEchelleHaut(echelleId, index) {
     // Réafficher
     afficherNiveauxEchelle(echelleTemplateActuelle);
 
-    console.log('Niveau déplacé vers le haut');
 }
 
 /**
@@ -3707,7 +3670,6 @@ async function deplacerNiveauEchelleBas(echelleId, index) {
     // Réafficher
     afficherNiveauxEchelle(echelleTemplateActuelle);
 
-    console.log('Niveau déplacé vers le bas');
 }
 
 async function definirEchelleActive(id) {

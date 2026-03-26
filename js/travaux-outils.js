@@ -604,7 +604,7 @@
             if (masques && Array.isArray(masques) && masques.length > 10) {
                 // Corruption probable — réinitialiser
                 db.setSync('elementsMasques', null);
-                console.log('[Travaux-Outils] elementsMasques corrompus nettoyés (' + masques.length + ' entrées)');
+
             }
         }
     })();

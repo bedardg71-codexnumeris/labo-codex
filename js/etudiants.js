@@ -96,12 +96,10 @@ let donneesTableauCache = [];
  * (à chaque changement de section) pour recharger les données
  */
 function initialiserModuleListeEtudiants() {
-    console.log('👥 Initialisation du module Liste des Étudiants');
 
     // Vérifier que nous sommes dans la bonne section
     const tbody = document.getElementById('tbody-tableau-bord-liste');
     if (!tbody) {
-        console.log('   ⚠️  Section liste des étudiants non active, initialisation reportée');
         return;
     }
 
@@ -118,7 +116,6 @@ function initialiserModuleListeEtudiants() {
     // Afficher la liste des étudiants
     afficherListeEtudiantsConsultation();
 
-    console.log('   ✅ Module Liste des Étudiants initialisé');
 }
 
 /**
@@ -132,7 +129,6 @@ function rechargerListeEtudiants() {
  * Alias pour le rechargement (appelé par navigation.js)
  */
 function chargerListeEtudiants() {
-    console.log('🔄 chargerListeEtudiants() appelée');
     rechargerListeEtudiants();
 }
 
@@ -169,7 +165,6 @@ function chargerOptionsFiltres() {
             filtreGroupe.appendChild(option);
         });
 
-        console.log('✅ ' + groupes.length + ' groupes chargés dans le filtre');
     }
 
     // Charger les programmes
@@ -192,7 +187,6 @@ function chargerOptionsFiltres() {
             filtreProgramme.appendChild(option);
         });
 
-        console.log('✅ ' + programmes.length + ' programmes chargés dans le filtre');
     }
 }
 
@@ -591,12 +585,6 @@ function mettreAJourEntetesAvecCorrelations(r_AP, r_CP, r_EP, r_PatternP, r_RaiP
     if (corrRai) corrRai.textContent = fmtCorr(r_RaiP);
     if (corrInterv) corrInterv.textContent = fmtCorr(r_IntervP);
 
-    console.log('📊 Corrélations avec P: A r=' + (r_AP !== null ? r_AP.toFixed(2) : '—')
-        + ', C r=' + (r_CP !== null ? r_CP.toFixed(2) : '—')
-        + ', E r=' + (r_EP !== null ? r_EP.toFixed(2) : '—')
-        + ', Pattern r=' + (r_PatternP !== null ? r_PatternP.toFixed(2) : '—')
-        + ', RàI r=' + (r_RaiP !== null ? r_RaiP.toFixed(2) : '—')
-        + ', Interv r=' + (r_IntervP !== null ? r_IntervP.toFixed(2) : '—'));
 }
 
 /**
@@ -864,7 +852,6 @@ function masquerColonnesRaiSiDesactive(activerRai) {
  */
 
 function afficherListeEtudiantsConsultation() {
-    console.log('🔵 Affichage de la liste des étudiants...');
 
     // 🔄 FORCER le recalcul des indices A, C et P avant affichage
     if (typeof calculerEtSauvegarderIndicesAssiduite === 'function') {
@@ -890,7 +877,6 @@ function afficherListeEtudiantsConsultation() {
     const tableContainer = document.getElementById('tableEtudiantsListe');
 
     if (!tbody) {
-        console.log('❌ Élément #tbody-tableau-bord-liste introuvable');        // ← CHANGÉ (message d'erreur)
         return;
     }
 
@@ -899,12 +885,10 @@ function afficherListeEtudiantsConsultation() {
         ? obtenirEtudiantsCoursActif()
         : filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants') || []);
 
-    console.log('Nombre total d\'étudiants:', etudiants.length);
 
     // Appliquer les filtres
     let etudiantsFiltres = filtrerEtudiants(etudiants);
 
-    console.log('Nombre d\'étudiants après filtrage:', etudiantsFiltres.length);
 
     // NOUVEAU: Mettre à jour les statistiques
     mettreAJourStatistiques(etudiantsFiltres);
@@ -1033,19 +1017,15 @@ function afficherListeEtudiantsConsultation() {
 
     // 🆕 BETA 95.7 (23 jan): Filtrer les présences par coursId du groupe-cours actif
     const coursIdActif = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
-    console.log('📊 [Etudiants] coursIdActif:', coursIdActif, '- Total présences:', presencesGlobal.length);
 
     // Filtrer pour ne garder que les présences du cours actif
     const presencesCours = coursIdActif
         ? presencesGlobal.filter(p => p.coursId === coursIdActif)
         : presencesGlobal;
-    console.log('📊 [Etudiants] Présences pour ce cours:', presencesCours.length);
 
     // 🆕 DEBUG: Voir les DA dans les présences vs les DA des étudiants
     const dasPresences = [...new Set(presencesCours.map(p => p.da))];
     const dasEtudiants = etudiants.slice(0, 5).map(e => e.da); // 5 premiers pour debug
-    console.log('📊 [Etudiants] DA dans présences (exemples):', dasPresences.slice(0, 5));
-    console.log('📊 [Etudiants] DA des étudiants (exemples):', dasEtudiants);
 
     const valeursA_avecPresences = [];
     etudiants.forEach((etudiant, index) => {
@@ -1054,7 +1034,6 @@ function afficherListeEtudiantsConsultation() {
             valeursA_avecPresences.push(valeursA_tous[index]);
         }
     });
-    console.log('📊 [Etudiants] Étudiants avec présences:', valeursA_avecPresences.length);
     const moyenneA = valeursA_avecPresences.length > 0 ? valeursA_avecPresences.reduce((sum, val) => sum + val, 0) / valeursA_avecPresences.length : null;
 
     // 🆕 BETA 91: Calculer la moyenne de l'engagement E sur TOUS les étudiants (cohérence avec corrélations)
@@ -1350,7 +1329,6 @@ function afficherListeEtudiantsConsultation() {
         tbody.appendChild(tr);
     });
 
-    console.log('✅ Liste des étudiants affichée avec ' + etudiantsFiltres.length + ' étudiant(s)');
 
     // Restaurer les préférences de colonnes visibles et vérifier le débordement
     restaurerPreferencesColonnesListe();
@@ -1556,7 +1534,6 @@ function reinitialiserFiltresListeEtudiants() {
  * @param {string} da - Numéro de DA de l'étudiant
  */
 function afficherPortfolio(da) {
-    console.log('📂 Affichage du profil pour DA:', da);
 
     // Basculer vers la sous-section profil
     afficherSousSection('tableau-bord-profil');
@@ -1589,7 +1566,6 @@ function afficherPortfolio(da) {
         }
     }
 
-    console.log('✅ Profil chargé pour DA:', da);
 }
 
 /* ===============================
@@ -1601,7 +1577,6 @@ function afficherPortfolio(da) {
  * @param {string} colonne - Nom de la colonne à trier
  */
 function trierTableauPar(colonne) {
-    console.log(`📊 Tri par colonne: ${colonne}`);
 
     // Si on clique sur la même colonne, inverser l'ordre
     if (triActuel.colonne === colonne) {

@@ -1052,7 +1052,6 @@ function etapeSuivanteV2() {
         if (!wizardState.reponses.modeConfig) {
             wizardState.reponses.modeConfig = 'exploration';
         }
-        console.log('[WizardV2] Classification déduite:', classification);
     }
 
     // Obtenir l'étape suivante
@@ -1065,7 +1064,6 @@ function etapeSuivanteV2() {
         afficherEtapeWizardV2(suivante);
     } else {
         // Fin du wizard - créer la pratique
-        console.log('[WizardV2] Fin du wizard, création de la pratique...');
     }
 }
 
@@ -1139,7 +1137,6 @@ function afficherEtapeWizardV2(etapeId) {
         return;
     }
 
-    console.log('[WizardV2] Affichage étape:', etapeId);
 
     // Mettre à jour le titre et la description
     const titreEl = document.getElementById('wizard-v2-titre');
@@ -1153,14 +1150,11 @@ function afficherEtapeWizardV2(etapeId) {
 
     // Générer le contenu
     const contenu = genererContenuEtape(etape);
-    console.log('[WizardV2] Contenu généré:', contenu);
 
     const conteneurContenu = document.getElementById('wizard-v2-contenu');
-    console.log('[WizardV2] Conteneur trouvé:', conteneurContenu);
 
     if (conteneurContenu) {
         conteneurContenu.innerHTML = contenu;
-        console.log('[WizardV2] Contenu inséré, innerHTML:', conteneurContenu.innerHTML.substring(0, 200));
     } else {
         console.error('[WizardV2] Conteneur #wizard-v2-contenu non trouvé !');
     }
@@ -1178,7 +1172,6 @@ function afficherEtapeWizardV2(etapeId) {
  * @returns {string} - HTML du contenu
  */
 function genererContenuEtape(etape) {
-    console.log('[WizardV2] genererContenuEtape pour:', etape.id);
 
     if (etape.id === 'recapitulatif') {
         return genererRecapitulatif();
@@ -1186,18 +1179,15 @@ function genererContenuEtape(etape) {
 
     // Obtenir les champs (statiques ou dynamiques)
     let champs = etape.champs || [];
-    console.log('[WizardV2] Champs trouvés:', champs.length, champs);
 
     if (etape.getChampsDynamiques) {
         champs = etape.getChampsDynamiques(wizardState.reponses);
-        console.log('[WizardV2] Champs dynamiques:', champs.length);
     }
 
     let html = '<div class="wizard-v2-champs">';
 
     champs.forEach((champ, index) => {
         const champHtml = genererChamp(champ);
-        console.log(`[WizardV2] Champ ${index} (${champ.id}):`, champHtml.substring(0, 100));
         html += champHtml;
     });
 
@@ -1913,13 +1903,6 @@ function validerEtape(etapeId) {
                 valeurTrouvee = element?.value || '';
             }
 
-            console.log(`[WizardV2] Validation champ "${champ.id}" (type: ${champ.type}):`, {
-                elementTrouve: !!element,
-                tagName: element?.tagName,
-                valeur: valeurTrouvee,
-                valeurTrimmed: valeurTrouvee.trim(),
-                inputType: element?.type
-            });
 
             // Validation selon le type
             let estValide = false;
@@ -1934,7 +1917,6 @@ function validerEtape(etapeId) {
             if (!estValide) {
                 valide = false;
                 champsInvalides.push(champ.label || champ.id);
-                console.log(`[WizardV2] ❌ Champ invalide: ${champ.id} (valeur: "${valeurTrouvee}")`);
 
                 // Afficher une erreur visuelle
                 const container = document.querySelector(`[name="${champ.id}"]`)?.closest('.wizard-v2-champ') ||
@@ -1943,7 +1925,6 @@ function validerEtape(etapeId) {
                     container.classList.add('wizard-v2-champ-erreur');
                 }
             } else {
-                console.log(`[WizardV2] ✅ Champ valide: ${champ.id} (valeur: "${valeurTrouvee}")`);
 
                 // Retirer l'erreur visuelle si présente
                 const container = document.getElementById(`${WIZARD_V2_ID_PREFIX}${champ.id}`)?.closest('.wizard-v2-champ');
@@ -2007,7 +1988,6 @@ function sauvegarderReponsesEtape(etapeId) {
 
     champs.forEach(sauvegarderChamp);
 
-    console.log('[WizardV2] Réponses sauvegardées:', wizardState.reponses);
 }
 
 /**
@@ -2349,7 +2329,6 @@ async function creerPratiqueV2() {
         }
     }
 
-    console.log('[WizardV2] Pratique créée:', pratique);
 
     // Sauvegarder la pratique (attendre pour s'assurer que c'est fait)
     await sauvegarderPratique(pratique);
@@ -2411,7 +2390,6 @@ async function sauvegarderPratique(pratique) {
  * @param {string} pratiqueId - ID de la pratique à modifier (si modeEdition)
  */
 function ouvrirWizardV2(modeEdition = false, pratiqueId = null) {
-    console.log('[WizardV2] Ouverture du wizard', modeEdition ? `(édition: ${pratiqueId})` : '(création)');
 
     // Réinitialiser l'état
     wizardState.etapeActuelle = 'infos-base';
@@ -2428,7 +2406,6 @@ function ouvrirWizardV2(modeEdition = false, pratiqueId = null) {
             wizardState.reponses.nomAuteur = profilEnseignant.nom || '';
             wizardState.reponses.etablissement = profilEnseignant.institution || '';
             wizardState.reponses.discipline = profilEnseignant.discipline || '';
-            console.log('[WizardV2] Pré-remplissage avec profil enseignant:', profilEnseignant);
         }
     }
 
@@ -2582,7 +2559,6 @@ window.deduireTypePratique = deduireTypePratique;
 window.wizardV2GererExclusionCheckbox = wizardV2GererExclusionCheckbox;
 window.wizardV2CreerGrilleDemo = wizardV2CreerGrilleDemo;
 
-console.log('[WizardV2] Module chargé (classification comportementale active)');
 
 
 })();

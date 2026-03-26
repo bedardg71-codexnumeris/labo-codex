@@ -89,7 +89,6 @@ async function creerHoraire(donnees) {
     horaires.push(nouvelHoraire);
     await db.set(CLE_HORAIRES, horaires);
 
-    console.log('[Horaires] Créé:', nouvelHoraire.nom);
     return nouvelHoraire;
 }
 
@@ -170,7 +169,6 @@ async function mettreAJourHoraire(horaireId, modifications) {
     horaires[index].dateModification = new Date().toISOString();
 
     await db.set(CLE_HORAIRES, horaires);
-    console.log('[Horaires] Mis à jour:', horaires[index].nom);
 
     return horaires[index];
 }
@@ -196,7 +194,6 @@ async function supprimerHoraire(horaireId) {
     }
 
     await db.set(CLE_HORAIRES, horaires);
-    console.log('[Horaires] Supprimé:', horaireId);
     return true;
 }
 
@@ -399,7 +396,6 @@ window.HorairesEntite = {
     FORMATS: FORMATS_HORAIRE
 };
 
-console.log('[Entités] Module Horaires chargé');
 
 
 })();

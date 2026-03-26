@@ -79,7 +79,6 @@ async function ajouterCartoucheALaBibliotheque(cartouche) {
 
     const existe = bibliotheque.some(c => c.id === cartouche.id);
     if (existe) {
-        console.log('[Bibliothèque Cartouches] Cartouche déjà présente:', cartouche.id);
         return false;
     }
 
@@ -96,7 +95,6 @@ async function ajouterCartoucheALaBibliotheque(cartouche) {
     bibliotheque.push(cartoucheBiblio);
     await db.set(CLE_BIBLIOTHEQUE_CARTOUCHES, bibliotheque);
 
-    console.log('[Bibliothèque Cartouches] Cartouche ajoutée:', cartouche.nom);
     return true;
 }
 
@@ -116,7 +114,6 @@ async function retirerCartoucheDeLaBibliotheque(cartoucheId) {
     }
 
     await db.set(CLE_BIBLIOTHEQUE_CARTOUCHES, bibliotheque);
-    console.log('[Bibliothèque Cartouches] Cartouche retirée:', cartoucheId);
     return true;
 }
 
@@ -138,7 +135,6 @@ async function importerCartouchesDansBibliotheque(cartouches) {
         }
     }
 
-    console.log(`[Bibliothèque Cartouches] Import: ${ajoutees} ajoutées, ${existantes} déjà existantes`);
     return { ajoutees, existantes };
 }
 
@@ -166,14 +162,12 @@ async function exporterBibliothequeCartouches() {
 async function migrerCartouchesVersBibliotheque(cleSource) {
     const cartouches = db.getSync(cleSource, null);
     if (!cartouches) {
-        console.log('[Bibliothèque Cartouches] Aucune donnée trouvée pour:', cleSource);
         return { ajoutees: 0, existantes: 0 };
     }
     if (!Array.isArray(cartouches)) {
         return { ajoutees: 0, existantes: 0 };
     }
 
-    console.log(`[Bibliothèque Cartouches] Migration de ${cartouches.length} cartouches depuis ${cleSource}`);
     return await importerCartouchesDansBibliotheque(cartouches);
 }
 

@@ -293,7 +293,6 @@ function highlighterBoutonEtape() {
     const etape = ETAPES_CONFIGURATION.find(e => e.id === etapeActuelle);
     if (!etape) return;
 
-    console.log('[Guidage] Tentative highlight pour:', etape.sousSection);
 
     // Chercher le bouton de la sous-section dans la sous-navigation
     const sousNav = document.getElementById('sous-navigation');
@@ -304,7 +303,6 @@ function highlighterBoutonEtape() {
 
     // Trouver tous les boutons de sous-section
     const boutons = sousNav.querySelectorAll('button');
-    console.log('[Guidage] Nombre de boutons trouvés:', boutons.length);
 
     let boutonTrouve = false;
     boutons.forEach(bouton => {
@@ -312,17 +310,11 @@ function highlighterBoutonEtape() {
         const dataSousOnglet = bouton.getAttribute('data-sous-onglet');
         const onClick = bouton.getAttribute('onclick');
 
-        console.log('[Guidage] Bouton:', {
-            text: bouton.textContent.trim(),
-            dataSousOnglet,
-            onClick
-        });
 
         // Matcher par data-sous-onglet
         if (dataSousOnglet === etape.sousSection) {
             bouton.classList.add('highlight-etape-guidage');
             boutonTrouve = true;
-            console.log('[Guidage] ✅ Highlight appliqué sur:', bouton.textContent.trim());
         }
     });
 
@@ -365,7 +357,6 @@ function initialiserGuidage() {
         }, 1000);
     }
 
-    console.log('✅ Module guidage.js chargé');
 }
 
 // ============================================

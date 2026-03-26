@@ -57,7 +57,6 @@ function migrerConfigurationsSpecifiques() {
     const migrationEffectuee = db.getSync('migrationConfigsSpecifiques', false);
 
     if (migrationEffectuee) {
-        console.log('[migrerConfigurationsSpecifiques] Migration déjà effectuée');
         return;
     }
 
@@ -103,10 +102,8 @@ function migrerConfigurationsSpecifiques() {
     if (nbMigrees > 0) {
         db.setSync('pratiquesConfigurables', pratiques);
         db.setSync('migrationConfigsSpecifiques', true);
-        console.log(`[migrerConfigurationsSpecifiques] ✅ ${nbMigrees} pratique(s) migrée(s)`);
     } else {
         db.setSync('migrationConfigsSpecifiques', true);
-        console.log('[migrerConfigurationsSpecifiques] ✅ Aucune migration nécessaire');
     }
 }
 
@@ -124,13 +121,11 @@ function migrerConfigurationsSpecifiques() {
  * - Sortie silencieuse si les éléments n'existent pas
  */
 function initialiserModulePratiques() {
-    console.log('Initialisation du module Pratiques de notation');
 
     // Vérifier que nous sommes dans la bonne section
     // ✅ MODIFIÉ (9 décembre 2025) : Vérifier listePratiquesSidebar au lieu de listePratiques
     const listePratiquesSidebar = document.getElementById('listePratiquesSidebar');
     if (!listePratiquesSidebar) {
-        console.log('   ⚠️  Section pratiques non active, initialisation reportée');
         return;
     }
 
@@ -159,8 +154,6 @@ function initialiserModulePratiques() {
 
     // Charger les valeurs du portfolio et jetons depuis localStorage
     const modalites = db.getSync('modalitesEvaluation', {});
-    console.log('[initialiserModulePratiques] modalites:', modalites);
-    console.log('[initialiserModulePratiques] configPAN:', modalites.configPAN);
 
     // Initialiser les règles de conformité (événements checkbox) - AVANT chargerConfigurationPAN
     // ✅ CORRECTIF (16 déc 2025) : Doit être appelé AVANT chargerConfigurationPAN sinon
@@ -168,13 +161,10 @@ function initialiserModulePratiques() {
     initialiserReglesConformite();
 
     if (modalites.configPAN) {
-        console.log('[initialiserModulePratiques] Appel de chargerConfigurationPAN()');
         chargerConfigurationPAN(modalites.configPAN);
     } else {
-        console.log('[initialiserModulePratiques] Pas de configPAN à charger');
     }
 
-    console.log('   ✅ Module Pratiques initialisé');
 
     // 🔄 Migration automatique de la configuration (Phase 3)
     migrerConfigurationPortfolio();
@@ -184,7 +174,6 @@ function initialiserModulePratiques() {
 
     // 🔄 Écouter l'événement db-ready pour recharger les grilles après synchronisation IndexedDB
     window.addEventListener('db-ready', function() {
-        console.log('🔄 [Pratiques] Rechargement des grilles après synchronisation IndexedDB');
         chargerGrillesDisponibles();
 
         // Restaurer les valeurs sauvegardées après rechargement des grilles
@@ -194,14 +183,12 @@ function initialiserModulePratiques() {
         const selectGrilleRef = document.getElementById('grilleReferenceDepistage');
         if (selectGrilleRef && modalitesDB.grilleReferenceDepistage) {
             selectGrilleRef.value = modalitesDB.grilleReferenceDepistage;
-            console.log('🔄 [Pratiques] Grille de référence restaurée:', modalitesDB.grilleReferenceDepistage);
         }
 
         // Restaurer la checkbox de catégorisation des erreurs
         const checkCategorisation = document.getElementById('activerCategorisationErreurs');
         if (checkCategorisation) {
             checkCategorisation.checked = modalitesDB.activerCategorisationErreurs === true;
-            console.log('🔄 [Pratiques] Catégorisation erreurs restaurée:', modalitesDB.activerCategorisationErreurs);
         }
     });
 }
@@ -245,12 +232,10 @@ function getPratiqueCours(coursId) {
 
     // Si le cours a une pratique définie, la retourner
     if (coursActuel.pratiqueId) {
-        console.log(`[getPratiqueCours] Cours ${coursId} utilise la pratique: ${coursActuel.pratiqueId}`);
         return coursActuel.pratiqueId;
     }
 
     // Sinon, utiliser la pratique par défaut
-    console.log(`[getPratiqueCours] Cours ${coursId} n'a pas de pratique définie, utilisation de sommative par défaut`);
     return 'sommative'; // Pratique par défaut
 }
 
@@ -334,7 +319,6 @@ function definirPratiqueParDefaut(pratiqueId) {
     db.setSync('pratiqueParDefaut', pratiqueId);
 
     const nomPratique = pratiqueId === 'sommative' ? 'Sommative traditionnelle' : 'PAN-Standards';
-    console.log(`[definirPratiqueParDefaut] Pratique par défaut définie : ${nomPratique}`);
 
     // Afficher notification
     if (typeof afficherNotificationSucces === 'function') {
@@ -414,11 +398,9 @@ function migrerConfigurationPortfolio() {
 
     // Vérifier si migration déjà effectuée
     if (modalites.configPAN && modalites.configPAN.portfolio && modalites.configPAN._migrationV1Complete) {
-        console.log('[Migration Phase 3] Déjà effectuée, skip');
         return false;
     }
 
-    console.log('[Migration Phase 3] 🔄 Début migration configuration portfolio...');
 
     // Lire productions pour trouver le portfolio
     const productions = db.getSync(cle('productions'), []);
@@ -443,14 +425,12 @@ function migrerConfigurationPortfolio() {
         modalites.configPAN._migrationV1Complete = true;
         db.setSync('modalitesEvaluation', modalites);
 
-        console.log('[Migration Phase 3] ✅ Configuration par défaut créée');
         return true;
     }
 
     // Migrer depuis productions.regles
     const anciennesRegles = portfolio.regles;
 
-    console.log('[Migration Phase 3] 📖 Anciennes règles lues:', JSON.stringify(anciennesRegles));
 
     // Créer nouvelle structure
     if (!modalites.configPAN) {
@@ -472,9 +452,6 @@ function migrerConfigurationPortfolio() {
     // Sauvegarder
     db.setSync('modalitesEvaluation', modalites);
 
-    console.log('[Migration Phase 3] ✅ Configuration migrée vers modalitesEvaluation.configPAN.portfolio');
-    console.log('[Migration Phase 3] 📊 Nouvelle config:', JSON.stringify(modalites.configPAN.portfolio));
-    console.log('[Migration Phase 3] ℹ️  Note: Ancienne config dans productions préservée pour rétrocompatibilité');
 
     return true;
 }
@@ -712,7 +689,6 @@ function sauvegarderOptionsAffichage() {
     // ✅ NOUVEAU (9 décembre 2025) : Sauvegarder aussi dans la pratique active
     sauvegarderDansConfiguration('affichage', { modeComparatif });
 
-    console.log('Options d\'affichage sauvegardées:', modalites.affichageTableauBord);
 }
 
 /* ===============================
@@ -1018,7 +994,6 @@ function afficherCartesExtras() {
  * Sauvegarde la configuration PAN
  */
 function sauvegarderConfigurationPAN() {
-    console.log('[sauvegarderConfigurationPAN] Début de la sauvegarde');
     const modalites = db.getSync('modalitesEvaluation', {});
 
     // Période d'évaluation
@@ -1034,11 +1009,9 @@ function sauvegarderConfigurationPAN() {
 
     const selectNombreARetenir = document.getElementById('configNombreARetenir');
     const nombreARetenir = selectNombreARetenir ? parseInt(selectNombreARetenir.value) : 5;
-    console.log('[sauvegarderConfigurationPAN] nombreARetenir lu:', nombreARetenir, 'depuis champ:', selectNombreARetenir?.value);
 
     const inputMinimumCompletion = document.getElementById('configMinimumCompletion');
     const minimumCompletion = inputMinimumCompletion ? parseInt(inputMinimumCompletion.value) : 7;
-    console.log('[sauvegarderConfigurationPAN] minimumCompletion lu:', minimumCompletion, 'depuis champ:', inputMinimumCompletion?.value);
 
     const inputNombreTotal = document.getElementById('configNombreTotal');
     const nombreTotal = inputNombreTotal ? parseInt(inputNombreTotal.value) : 10;
@@ -1136,7 +1109,6 @@ function sauvegarderConfigurationPAN() {
     sauvegarderDansConfiguration('portfolio', modalites.configPAN.portfolio);
     sauvegarderDansConfiguration('jetons', modalites.configPAN.jetons);
 
-    console.log('✅ Configuration PAN sauvegardée:', modalites.configPAN);
 }
 
 /* ===============================
@@ -1186,7 +1158,6 @@ function sauvegarderPratiqueNotation() {
     const selectGrilleRef = document.getElementById('grilleReferenceDepistage');
     if (selectGrilleRef) {
         modalites.grilleReferenceDepistage = selectGrilleRef.value || null;
-        console.log('[sauvegarderPratiqueNotation] Grille de référence:', selectGrilleRef.value);
     }
 
     // ✅ CORRECTION (9 décembre 2025) : Toujours lire l'état de la checkbox modeComparatif
@@ -1237,25 +1208,19 @@ function sauvegarderPratiqueNotation() {
     const checkCategorisation = document.getElementById('activerCategorisationErreurs');
     if (checkCategorisation) {
         modalites.activerCategorisationErreurs = checkCategorisation.checked;
-        console.log('[sauvegarderPratiqueNotation] Catégorisation erreurs:', checkCategorisation.checked);
     } else {
         // Par défaut désactivé si l'élément n'existe pas (mode simple par défaut)
         modalites.activerCategorisationErreurs = false;
-        console.log('[sauvegarderPratiqueNotation] Élément activerCategorisationErreurs non trouvé');
     }
 
     db.setSync('modalitesEvaluation', modalites);
-    console.log('[sauvegarderPratiqueNotation] Modalités sauvegardées:', modalites);
 
     // Sauvegarder toutes les configurations (portfolio et jetons)
-    console.log('[sauvegarderPratiqueNotation] Appel de sauvegarderConfigurationPAN()');
     sauvegarderConfigurationPAN();
 
-    console.log('[sauvegarderPratiqueNotation] Affichage de la notification');
     afficherNotificationSucces('Toutes les configurations ont été sauvegardées !');
     mettreAJourStatutModalites();
 
-    console.log('[sauvegarderPratiqueNotation] Configuration complète sauvegardée:', modalites);
 }
 
 /**
@@ -1285,7 +1250,6 @@ function chargerModalites() {
 
     // Si pas de données sauvegardées, initialiser avec pratique par défaut
     if (!modalites.pratique) {
-        console.log('[chargerModalites] Aucune pratique configurée, initialisation avec sommative par défaut');
         modalites.pratique = 'sommative';
         modalites.affichageTableauBord = {
             afficherSommatif: true,
@@ -1323,7 +1287,6 @@ function chargerModalites() {
     // Charger les options d'affichage
     // Si affichageTableauBord n'existe pas, l'initialiser selon la pratique choisie
     if (!modalites.affichageTableauBord) {
-        console.log('[chargerModalites] Initialisation affichageTableauBord par défaut');
         if (modalites.pratique === 'sommative') {
             modalites.affichageTableauBord = {
                 afficherSommatif: true,
@@ -1405,16 +1368,13 @@ function chargerModalites() {
  * @param {Object} configPAN - Configuration PAN depuis localStorage
  */
 function chargerConfigurationPAN(configPAN) {
-    console.log('[chargerConfigurationPAN] Appelée avec:', configPAN);
 
     if (!configPAN) {
-        console.log('[chargerConfigurationPAN] Pas de configPAN, sortie');
         return;
     }
 
     // Charger configuration du portfolio
     if (configPAN.portfolio) {
-        console.log('[chargerConfigurationPAN] Chargement portfolio:', configPAN.portfolio);
 
         const checkPortfolio = document.getElementById('portfolioActif');
         if (checkPortfolio) {
@@ -1429,19 +1389,16 @@ function chargerConfigurationPAN(configPAN) {
         const inputNombreARetenir = document.getElementById('configNombreARetenir');
         if (inputNombreARetenir && configPAN.portfolio.nombreARetenir) {
             inputNombreARetenir.value = configPAN.portfolio.nombreARetenir;
-            console.log('[chargerConfigurationPAN] nombreARetenir chargé:', configPAN.portfolio.nombreARetenir);
         }
 
         const inputMinimum = document.getElementById('configMinimumCompletion');
         if (inputMinimum && configPAN.portfolio.minimumCompletion) {
             inputMinimum.value = configPAN.portfolio.minimumCompletion;
-            console.log('[chargerConfigurationPAN] minimumCompletion chargé:', configPAN.portfolio.minimumCompletion);
         }
 
         const inputNombreTotal = document.getElementById('configNombreTotal');
         if (inputNombreTotal && configPAN.portfolio.nombreTotal) {
             inputNombreTotal.value = configPAN.portfolio.nombreTotal;
-            console.log('[chargerConfigurationPAN] nombreTotal chargé:', configPAN.portfolio.nombreTotal);
         }
 
         const checkDecoupler = document.getElementById('decouplerPR');
@@ -1740,7 +1697,6 @@ function chargerGrillesDisponibles() {
         select.value = valeurActuelle;
     }
 
-    console.log(`✅ ${grilles.length} grille(s) chargée(s) dans le sélecteur de référence`);
 }
 
 // ============================================================================
@@ -1763,13 +1719,11 @@ function migrerEtablissementsPratiques() {
         if (p.auteur && !p.etablissement && etablissements[p.auteur]) {
             p.etablissement = etablissements[p.auteur];
             modifie = true;
-            console.log(`[Migration] Ajout établissement pour ${p.auteur}: ${p.etablissement}`);
         }
     });
 
     if (modifie) {
         db.setSync('pratiquesConfigurables', pratiques);
-        console.log('✅ [Migration] Établissements ajoutés aux pratiques existantes');
         return true;
     }
 
@@ -1864,8 +1818,6 @@ function genererSelecteurPratiqueParDefaut() {
  * @returns {string} HTML de la carte
  */
 function genererCartePratique(pratique, estActive, modifiable) {
-    console.log(`[genererCartePratique] ${pratique.id} - estActive:${estActive}, modifiable:${modifiable}`);
-    console.log(`   auteur: "${pratique.auteur}", etablissement: "${pratique.etablissement}"`);
 
     const badgeActif = estActive ? `<span class="badge-pratique badge-pratique-active">ACTIVE</span>` : '';
 
@@ -1964,7 +1916,6 @@ async function activerPratique(id, confirmer = true) {
     // Vérifier si la pratique est déjà active
     const modalites = db.getSync('modalitesEvaluation', {});
     if (modalites.pratique === id) {
-        console.log('Pratique déjà active:', id);
         // ✅ NOUVEAU (9 décembre 2025) : Même si déjà active, recharger sa config
         // pour afficher ses options spécifiques à droite
         chargerConfigurationPratique(id);
@@ -1978,7 +1929,6 @@ async function activerPratique(id, confirmer = true) {
 
     try {
         await PratiqueManager.changerPratiqueActive(id);
-        console.log('✅ Pratique activée:', id);
 
         // ✅ NOUVEAU (9 décembre 2025) : Charger la configuration spécifique de cette pratique
         chargerConfigurationPratique(id);
@@ -2034,7 +1984,6 @@ function sauvegarderDansConfiguration(cle, valeur) {
     // Sauvegarder les pratiques
     db.setSync('pratiquesConfigurables', pratiques);
 
-    console.log(`[sauvegarderDansConfiguration] ✅ ${cle} sauvegardé dans pratique ${pratiqueActiveId}:`, valeur);
 }
 
 /**
@@ -2043,7 +1992,6 @@ function sauvegarderDansConfiguration(cle, valeur) {
  * @param {string} id - ID de la pratique dont on veut charger la config
  */
 function chargerConfigurationPratique(id) {
-    console.log('[chargerConfigurationPratique] Chargement config pour:', id);
 
     // Charger la pratique depuis pratiquesConfigurables
     const pratiques = db.getSync('pratiquesConfigurables', []);
@@ -2142,11 +2090,6 @@ function chargerConfigurationPratique(id) {
     chargerModalites();
     chargerConfigurationPAN();
 
-    console.log('[chargerConfigurationPratique] ✅ Config appliquée:', {
-        affichage: config.affichage,
-        portfolio: config.portfolio,
-        jetons: config.jetons
-    });
 }
 
 /**
@@ -2215,12 +2158,6 @@ function afficherSectionsSelonConfig(config) {
         }
     }
 
-    console.log('[afficherSectionsSelonConfig] ✅ Sections mises à jour:', {
-        optionsAffichage: 'visible',
-        evaluationFrancais: 'visible',
-        portfolio: config.portfolio?.actif ? 'visible' : 'masquée',
-        jetons: config.jetons?.actif ? 'visible' : 'masquée'
-    });
 }
 
 /**
@@ -2238,7 +2175,6 @@ async function desactiverPratique(id) {
     try {
         // Activer la pratique par défaut à la place
         await PratiqueManager.changerPratiqueActive(pratiqueDefaut);
-        console.log('✅ Pratique désactivée, retour à la pratique par défaut:', pratiqueDefaut);
 
         // Recharger l'affichage
         await afficherListePratiques();
@@ -2342,7 +2278,6 @@ function ouvrirWizardPratique(modeEdition = false, idPratique = null) {
             modal.dataset.originalParentId = legacyParent.id || '';
             document.body.appendChild(modal);
             modal.dataset.movedToBody = 'true';
-            console.log('[Pratiques] Modal wizard déplacé vers body (depuis section legacy)');
         }
     }
 
@@ -2388,7 +2323,6 @@ function ouvrirWizardPratique(modeEdition = false, idPratique = null) {
  * @param {object} config - Configuration de la pratique à éditer
  */
 function preremplirWizardPourEdition(config) {
-    console.log('[preremplirWizardPourEdition] Début pré-remplissage', config);
 
     // Étape 1 : Informations de base
     document.getElementById('wizard-nom').value = config.nom || '';
@@ -2575,7 +2509,6 @@ function preremplirWizardPourEdition(config) {
         }
     }
 
-    console.log('[preremplirWizardPourEdition] Pré-remplissage terminé');
 }
 
 /**
@@ -2610,7 +2543,6 @@ async function dupliquerPratique(id) {
         // Sauvegarder
         await PratiqueManager.sauvegarderPratique(copie);
 
-        console.log('✅ Pratique dupliquée:', copie.id);
 
         // Recharger
         await afficherListePratiques();
@@ -2651,7 +2583,6 @@ async function supprimerPratique(id) {
 
     try {
         await PratiqueManager.supprimerPratique(id);
-        console.log('✅ Pratique supprimée:', id);
 
         // Recharger
         await afficherListePratiques();
@@ -2685,7 +2616,6 @@ async function exporterPratiqueVersJSON(id) {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        console.log('✅ Pratique exportée:', id);
     } catch (error) {
         console.error('Erreur lors de l\'export:', error);
         alert(`❌ Erreur : ${error.message}`);
@@ -3803,7 +3733,6 @@ async function creerPratiqueDepuisWizard() {
                     config: pratiqueConfig
                 };
                 db.setSync('pratiquesConfigurables', pratiques);
-                console.log('✅ Pratique modifiée:', idPratique);
             }
         } else {
             // Mode création : Sauvegarder via PratiqueManager
@@ -3817,7 +3746,6 @@ async function creerPratiqueDepuisWizard() {
                 dansBibliotheque: true,  // Ajout immédiat à la sidebar
                 estDeLUtilisateur: true  // ✅ NOUVEAU (9 décembre 2025) : Flag pour distinguer les pratiques créées vs importées
             });
-            console.log('✅ Pratique créée:', pratiqueConfig.id);
         }
 
         // Fermer le wizard
@@ -4201,7 +4129,6 @@ async function traiterImportPratique(event) {
         // Importer via PratiqueManager
         await PratiqueManager.importerPratique(pratiqueJSON);
 
-        console.log('✅ Pratique importée:', pratiqueJSON.id);
 
         // Recharger
         await afficherListePratiques();
@@ -4339,18 +4266,12 @@ async function afficherListePratiquesSidebar() {
     ];
 
     // DEBUG: Afficher les flags dansBibliotheque de toutes les pratiques
-    console.log('[afficherListePratiquesSidebar] Toutes les pratiques:', pratiquesConfigurables.map(p => ({
-        id: p.id,
-        nom: p.nom,
-        dansBibliotheque: p.dansBibliotheque
-    })));
 
     // Filtrer les pratiques : dans bibliothèque ET pas un canevas de base
     const pratiquesDansBibliotheque = pratiquesConfigurables.filter(p =>
         p.dansBibliotheque !== false && !idsCanevasDeBase.includes(p.id)
     );
 
-    console.log('[afficherListePratiquesSidebar] Pratiques filtrées pour sidebar:', pratiquesDansBibliotheque.length);
 
     const container = document.getElementById('listePratiquesSidebar');
 
@@ -4611,7 +4532,6 @@ async function retirerPratiqueDeBibliotheque(pratiqueId) {
     pratique.dansBibliotheque = false;
     db.setSync('pratiquesConfigurables', pratiques);
 
-    console.log('✅ Pratique retirée de la bibliothèque:', pratiqueId);
 
     // Rafraîchir la sidebar d'abord
     await afficherListePratiquesSidebar();
@@ -4659,7 +4579,6 @@ async function ajouterPratiqueIndividuelle(pratiqueId) {
     pratique.dansBibliotheque = true;
     db.setSync('pratiquesConfigurables', pratiques);
 
-    console.log('✅ Pratique ajoutée à la bibliothèque:', pratiqueId);
 
     // Rafraîchir la sidebar d'abord
     await afficherListePratiquesSidebar();
@@ -4713,7 +4632,6 @@ async function supprimerPratiqueHorsBibliotheque(pratiqueId) {
             db.setSync('pratiquesConfigurables', pratiques);
         }
 
-        console.log('✅ Pratique hors-bibliothèque supprimée:', pratiqueId);
 
         // Rafraîchir le modal
         fermerModalBibliothequePratiques();
@@ -4813,7 +4731,6 @@ async function exporterPratiqueActive(pratiqueId) {
         link.click();
         URL.revokeObjectURL(url);
 
-        console.log('✅ Pratique exportée:', nomFichier);
         alert('Pratique exportée avec succès !');
 
     } catch (error) {
@@ -5042,7 +4959,6 @@ window.creerPratiqueDepuisWizard = creerPratiqueDepuisWizard;
  */
 function listerPratiquesConfigurables() {
     const pratiques = db.getSync('pratiquesConfigurables', []);
-    console.log('📋 Pratiques configurables (' + pratiques.length + ') :');
     console.table(pratiques.map(p => ({
         id: p.id,
         nom: p.nom,
@@ -5064,12 +4980,10 @@ async function supprimerPratiqueParNom(nomRecherche) {
 
     if (!pratiqueTrouvee) {
         console.error('❌ Aucune pratique trouvée avec le nom contenant:', nomRecherche);
-        console.log('💡 Pratiques disponibles:');
         listerPratiquesConfigurables();
         return;
     }
 
-    console.log('✅ Pratique trouvée:', pratiqueTrouvee.nom, '(ID:', pratiqueTrouvee.id + ')');
 
     if (confirm(`Supprimer la pratique "${pratiqueTrouvee.nom}" ?\n\nCette action est irréversible.`)) {
         await supprimerPratique(pratiqueTrouvee.id);
@@ -5108,12 +5022,10 @@ function toggleAccordeon(id) {
         // Fermer
         contenu.classList.remove('ouvert');
         if (icone) icone.classList.remove('ouvert');
-        console.log('[toggleAccordeon] Fermé:', id);
     } else {
         // Ouvrir
         contenu.classList.add('ouvert');
         if (icone) icone.classList.add('ouvert');
-        console.log('[toggleAccordeon] Ouvert:', id);
     }
 }
 
@@ -5233,20 +5145,17 @@ window.restaurerEtatAccordeons = restaurerEtatAccordeons;
  * ✅ NOUVEAU (15 décembre 2025)
  */
 function initialiserReglesConformite() {
-    console.log('[initialiserReglesConformite] Initialisation...');
 
     const checkbox = document.getElementById('activerReglesConformite');
     const details = document.getElementById('detailsReglesConformite');
 
     if (!checkbox || !details) {
-        console.log('[initialiserReglesConformite] Éléments non trouvés');
         return;
     }
 
     // Gérer la checkbox
     checkbox.addEventListener('change', function() {
         toggleDisplay(details, this.checked);
-        console.log('[initialiserReglesConformite] Checkbox changée:', this.checked);
         // Peupler les sélecteurs quand on affiche les détails
         if (this.checked) {
             populerSelecteursNiveaux();
@@ -5261,23 +5170,19 @@ function initialiserReglesConformite() {
  * Peuple les sélecteurs de plafond avec les niveaux de l'échelle configurée
  */
 function populerSelecteursNiveaux() {
-    console.log('[populerSelecteursNiveaux] Peuplement du sélecteur d\'échelles...');
 
     const selectEchelle = document.getElementById('echelleConformite');
     if (!selectEchelle) {
-        console.log('[populerSelecteursNiveaux] Sélecteur echelleConformite non trouvé');
         return;
     }
 
     // Charger les échelles disponibles (clé: echellesTemplates)
     const echelles = db.getSync('echellesTemplates', []);
-    console.log('[populerSelecteursNiveaux] Nombre d\'échelles disponibles:', echelles.length);
 
     // Vider et repeupler le sélecteur d'échelles
     selectEchelle.innerHTML = '<option value="">-- Choisir une échelle --</option>';
 
     if (!echelles || echelles.length === 0) {
-        console.log('[populerSelecteursNiveaux] Aucune échelle disponible');
         selectEchelle.innerHTML = '<option value="" disabled selected>Crée d\'abord une échelle</option>';
         return;
     }
@@ -5290,7 +5195,6 @@ function populerSelecteursNiveaux() {
         selectEchelle.appendChild(option);
     });
 
-    console.log('[populerSelecteursNiveaux] Sélecteur d\'échelles peuplé avec', echelles.length, 'échelles');
 }
 
 /**
@@ -5300,7 +5204,6 @@ function onEchelleConformiteChange() {
     const selectEchelle = document.getElementById('echelleConformite');
     const echelleId = selectEchelle?.value;
 
-    console.log('[onEchelleConformiteChange] Échelle sélectionnée:', echelleId);
 
     const selecteurs = ['plafondDeficit1', 'plafondDeficit2', 'plafondDeficit3'];
 
@@ -5320,11 +5223,9 @@ function onEchelleConformiteChange() {
     const echelle = echelles.find(e => e.id === echelleId);
 
     if (!echelle || !echelle.niveaux) {
-        console.log('[onEchelleConformiteChange] Échelle non trouvée:', echelleId);
         return;
     }
 
-    console.log('[onEchelleConformiteChange] Peuplement des sélecteurs avec:', echelle.nom);
     populerSelecteursAvecEchelle(echelle, selecteurs);
 }
 
@@ -5338,7 +5239,6 @@ function populerSelecteursAvecEchelle(echelle, selecteurs) {
     // Trier les niveaux par valeur décroissante (du plus haut au plus bas)
     const niveauxTries = [...echelle.niveaux].sort((a, b) => b.valeur - a.valeur);
 
-    console.log('[populerSelecteursNiveaux] Niveaux trouvés:', niveauxTries.map(n => n.code));
 
     // Peupler les sélecteurs avec les niveaux
     selecteurs.forEach((selecteurId, index) => {
@@ -5368,7 +5268,6 @@ function populerSelecteursAvecEchelle(echelle, selecteurs) {
         });
     });
 
-    console.log('[populerSelecteursNiveaux] Sélecteurs peuplés');
 }
 
 /**
@@ -5458,7 +5357,6 @@ function getReglesConformiteConfig() {
  * @param {Object} regles - Configuration des règles de conformité
  */
 function chargerReglesConformiteConfig(regles) {
-    console.log('[chargerReglesConformiteConfig] Chargement:', regles);
 
     if (!regles) return;
 
@@ -5480,7 +5378,6 @@ function chargerReglesConformiteConfig(regles) {
     // ENSUITE charger l'échelle sélectionnée
     if (selectEchelle && regles.echelleId) {
         selectEchelle.value = regles.echelleId;
-        console.log('[chargerReglesConformiteConfig] Échelle définie:', regles.echelleId);
         // Déclencher le peuplement des sélecteurs de plafonds
         onEchelleConformiteChange();
     }
@@ -5499,7 +5396,6 @@ function chargerReglesConformiteConfig(regles) {
                 }
             });
         }
-        console.log('[chargerReglesConformiteConfig] Plafonds chargés');
     }, 50);
 }
 

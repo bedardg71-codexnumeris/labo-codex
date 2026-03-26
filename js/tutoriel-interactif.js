@@ -118,7 +118,6 @@ let bulleElement = null;
 function demarrerTutoriel() {
     if (tutorielActif) return;
 
-    console.log('🎓 Démarrage du tutoriel interactif');
     tutorielActif = true;
     etapeTutorielActuelle = 0;
 
@@ -161,7 +160,6 @@ function afficherEtape(index) {
     etapeTutorielActuelle = index;
     const etape = ETAPES_TUTORIEL[index];
 
-    console.log(`📍 Étape ${index + 1}/${ETAPES_TUTORIEL.length}: ${etape.titre}`);
 
     // Supprimer l'ancienne bulle si elle existe
     if (bulleElement) {
@@ -432,7 +430,6 @@ function terminerTutoriel() {
         return;
     }
 
-    console.log('✅ Tutoriel terminé');
     tutorielActif = false;
 
     // Nettoyer
@@ -470,7 +467,6 @@ function verifierDemarrageAutoTutoriel() {
 
     // Si données démo chargées ET tutoriel pas encore vu
     if (donneesDemo && !tutorielVu) {
-        console.log('🎓 Données démo détectées, démarrage auto du tutoriel dans 2 secondes');
         setTimeout(() => {
             demarrerTutoriel();
         }, 2000);
@@ -485,7 +481,6 @@ function demarrerTutorielParcours() {
     const tutorielVu = db.getSync('tutoriel_demo_vu', false);
     if (tutorielVu || tutorielActif) return;
 
-    console.log('🎓 Tutoriel déclenché par le parcours d\'apprentissage');
     demarrerTutoriel();
 }
 
@@ -528,7 +523,6 @@ window.etapePrecedente = etapePrecedente;
 window.verifierDemarrageAutoTutoriel = verifierDemarrageAutoTutoriel;
 
 // Auto-vérification au chargement
-console.log('🎓 Module Tutoriel Interactif chargé');
 setTimeout(() => {
     verifierDemarrageAutoTutoriel();
 }, 2000);

@@ -2976,7 +2976,7 @@ window.chargerOptionsInlinePDF = chargerOptionsInlinePDF;
 window.mettreAJourOptionsInlinePDF = mettreAJourOptionsInlinePDF;
 window.ouvrirApercuPDFDepuisInline = ouvrirApercuPDFDepuisInline;
 
-console.log('[export-pdf.js] Module charge - jsPDF disponible:', typeof window.jspdf !== 'undefined');
+
 
 
 })();

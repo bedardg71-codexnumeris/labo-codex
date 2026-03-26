@@ -32,7 +32,6 @@ var NOMS_ETAPES = ['ouverture', 'modelisation', 'pratiqueGuidee', 'pratiqueAuton
 // ============================================================
 
 function initialiserModuleOrganisateur() {
-    console.log('📋 Initialisation du module Organisateur...');
 
     // S'assurer que la carte est initialisée (pour accéder aux données)
     if (window.planificationCarte && !window.planificationCarte.etat.initialise) {
@@ -62,7 +61,6 @@ function initialiserModuleOrganisateur() {
 
         brancherEvenements();
         initialise = true;
-        console.log('   ✅ Module Organisateur initialisé');
     }
 
     // Rafraîchir les données

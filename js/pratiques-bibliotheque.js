@@ -689,7 +689,6 @@ async function ajouterPratiqueALaBibliotheque(configuration) {
 
     const existe = bibliotheque.some(p => p.id === configuration.id);
     if (existe) {
-        console.log('[Bibliothèque Pratiques] Configuration déjà présente:', configuration.id);
         return false;
     }
 
@@ -706,7 +705,6 @@ async function ajouterPratiqueALaBibliotheque(configuration) {
     bibliotheque.push(configBiblio);
     await db.set(CLE_BIBLIOTHEQUE_PRATIQUES, bibliotheque);
 
-    console.log('[Bibliothèque Pratiques] Configuration ajoutée:', configuration.nom);
     return true;
 }
 
@@ -730,7 +728,6 @@ async function mettreAJourConfigurationPratique(configuration) {
     };
 
     await db.set(CLE_BIBLIOTHEQUE_PRATIQUES, bibliotheque);
-    console.log('[Bibliothèque Pratiques] Configuration mise à jour:', configuration.nom);
     return true;
 }
 
@@ -742,7 +739,6 @@ async function mettreAJourConfigurationPratique(configuration) {
 async function retirerPratiqueDeLaBibliotheque(configId) {
     // Ne pas permettre la suppression des gabarits prédéfinis
     if (MODELES_PRATIQUES_PREDEFINIS[configId]) {
-        console.log('[Bibliothèque Pratiques] Impossible de supprimer un gabarit prédéfini:', configId);
         return false;
     }
 
@@ -756,7 +752,6 @@ async function retirerPratiqueDeLaBibliotheque(configId) {
     }
 
     await db.set(CLE_BIBLIOTHEQUE_PRATIQUES, bibliotheque);
-    console.log('[Bibliothèque Pratiques] Configuration retirée:', configId);
     return true;
 }
 
@@ -885,7 +880,6 @@ async function appliquerConfigurationPratique(configId) {
     }
 
     db.setSync('modalitesEvaluation', modalites);
-    console.log('[Bibliothèque Pratiques] Configuration appliquée:', config.nom);
 
     // Rafraîchir l'interface selon le type
     if (config.type === 'pan-specifications') {
@@ -968,7 +962,6 @@ async function importerPratiquesDansBibliotheque(configurations) {
         }
     }
 
-    console.log(`[Bibliothèque Pratiques] Import: ${ajoutees} ajoutées, ${existantes} déjà existantes`);
     return { ajoutees, existantes };
 }
 
@@ -1157,7 +1150,6 @@ window.ouvrirModaleSauvegardeConfig = ouvrirModaleSauvegardeConfig;
 window.CLE_BIBLIOTHEQUE_PRATIQUES = CLE_BIBLIOTHEQUE_PRATIQUES;
 window.MODELES_PRATIQUES_PREDEFINIS = MODELES_PRATIQUES_PREDEFINIS;
 
-console.log('[pratiques-bibliotheque] Module chargé');
 
 
 })();

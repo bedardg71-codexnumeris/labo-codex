@@ -135,12 +135,9 @@ function genererIdCourtCartouche(id) {
  * - Sortie silencieuse si les éléments n'existent pas
  */
 async function initialiserModuleCartouches() {
-    console.log('💬 Initialisation du module Cartouches de rétroaction');
-
     // Vérifier que nous sommes dans la bonne section
     const listeBanque = document.getElementById('listeCartouchesBanque');
     if (!listeBanque) {
-        console.log('   ⚠️  Section rétroactions non active, initialisation reportée');
         return;
     }
 
@@ -171,7 +168,6 @@ async function initialiserModuleCartouches() {
     // ✅ AJOUT (3 janvier 2026) : Assurer présence de la cartouche générique
     await assurerCartoucheGenerique();
 
-    console.log('   ✅ Module Cartouches initialisé (interface unifiée 2 colonnes)');
 }
 
 /**
@@ -188,8 +184,6 @@ async function assurerCartoucheGenerique() {
     const cartouches = await db.get('cartouches_GRILLE_GENERIQUE') || [];
     const existe = cartouches.some(c => c.id === 'CART_GENERIQUE');
     if (existe || window.estRessourceSupprimee('CART_GENERIQUE')) return;
-
-    console.log('💬 Ajout de la cartouche générique à la bibliothèque...');
 
     const cartoucheGenerique = {
         id: 'CART_GENERIQUE',
@@ -233,7 +227,6 @@ async function assurerCartoucheGenerique() {
 
     cartouches.push(cartoucheGenerique);
     await db.set('cartouches_GRILLE_GENERIQUE', cartouches);
-    console.log('   ✅ Cartouche générique ajoutée à la bibliothèque');
 }
 
 /**
@@ -266,7 +259,6 @@ async function migrerCartouchesVersBibliotheque() {
     }
 
     if (nbMigrees > 0) {
-        console.log(`✅ Migration bibliothèque: ${nbMigrees} cartouche(s) ajoutée(s) à la bibliothèque`);
     }
 }
 
@@ -462,7 +454,7 @@ async function initialiserNouveauCartouche(grilleId) {
  * - Changement d'événement sur #selectCartouche
  */
 async function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam = null) {
-    console.log('📋 await chargerMatriceRetroaction() appelé avec params:', cartoucheIdParam, grilleIdParam);
+
 
     // Si appelé avec paramètres (nouvelle interface sidebar), utiliser directement
     let grilleId = grilleIdParam;
@@ -473,17 +465,11 @@ async function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam 
         const selectGrille = document.getElementById('selectGrilleRetroaction');
         const selectCartouche = document.getElementById('selectCartouche');
 
-        console.log('Lecture depuis selects - selectGrille trouvé:', !!selectGrille, 'valeur:', selectGrille?.value);
-        console.log('Lecture depuis selects - selectCartouche trouvé:', !!selectCartouche, 'valeur:', selectCartouche?.value);
-
         grilleId = grilleId || selectGrille?.value;
         cartoucheId = cartoucheId || selectCartouche?.value;
     }
 
-    console.log('GrilleId final:', grilleId, 'CartoucheId final:', cartoucheId);
-
     if (!cartoucheId) {
-        console.log('⚠️ Pas de cartouche sélectionnée, initialisation nouvelle cartouche');
         // Nouvelle cartouche
         await initialiserNouveauCartouche(grilleId);
         return;
@@ -491,10 +477,7 @@ async function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam 
 
     // Charger la cartouche existante
     const cartouches = await db.get(`cartouches_${grilleId}`) || [];
-    console.log('Cartouches trouvées:', cartouches.length);
-
     cartoucheActuel = cartouches.find(c => c.id === cartoucheId);
-    console.log('cartoucheActuel trouvé:', !!cartoucheActuel);
 
     if (cartoucheActuel) {
         // Stocker dans window pour accès global
@@ -517,8 +500,6 @@ async function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam 
             containerPratiques.innerHTML = GabaritsUtils.genererCheckboxesPratiques('cartouche', pratiquesActuelles);
         }
 
-        console.log('Champs nom/contexte remplis');
-
         // Afficher la matrice
         await afficherMatriceRetroaction();
         await calculerPourcentageComplete();
@@ -526,7 +507,6 @@ async function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam 
         document.getElementById('matriceRetroaction').classList.remove('u-hide');
         document.getElementById('apercuRetroaction').classList.remove('u-hide');
 
-        console.log('✅ Matrice affichée');
     } else {
         console.warn('❌ cartoucheActuel non trouvé');
     }
@@ -816,7 +796,6 @@ async function sauvegarderCartouche() {
         await afficherBanqueCartouches();
     }
 
-    console.log('✅ Cartouche sauvegardée avec succès');
 }
 
 /* ===============================
@@ -1386,7 +1365,6 @@ async function basculerVerrouillageCartouche(cartoucheId, grilleId) {
 
         // Afficher une notification spécifique
         const statut = cartouches[index].verrouille ? 'verrouillée' : 'déverrouillée';
-        console.log(`🔒 Cartouche "${cartouches[index].nom}" ${statut}`);
 
         // DÉSACTIVÉ Beta 80.5+ : ancienne interface remplacée par sidebar
         // afficherListeCartouches(cartouches, grilleId);
@@ -1450,7 +1428,6 @@ async function dupliquerCartouche(cartoucheId, grilleId) {
             await afficherBanqueCartouches();
         }
 
-        console.log('✅ Cartouche dupliquée avec succès');
     }
 }
 
@@ -1466,13 +1443,10 @@ async function dupliquerCartouche(cartoucheId, grilleId) {
  * - Bouton «Modifier» dans afficherListeCartouches()
  */
 async function chargerCartouchePourModif(cartoucheId, grilleId) {
-    console.log('📝 Chargement cartouche:', cartoucheId, 'de la grille:', grilleId);
 
     const cartouches = await db.get(`cartouches_${grilleId}`) || [];
     const cartouche = cartouches.find(c => c.id === cartoucheId);
 
-    console.log('Cartouche trouvée:', cartouche ? 'OUI' : 'NON');
-    console.log('Verrouillée:', cartouche?.verrouille);
 
     if (cartouche) {
         // Mettre à jour les selects cachés pour compatibilité (ancienne interface)
@@ -1501,31 +1475,23 @@ async function chargerCartouchePourModif(cartoucheId, grilleId) {
 
         // Afficher toutes les zones nécessaires
         const messageAccueil = document.getElementById('messageAccueilCartouche');
-        console.log('messageAccueil trouvé:', !!messageAccueil);
         if (messageAccueil) {
             messageAccueil.classList.add('u-hide');
-            console.log('messageAccueil masqué');
         }
 
         const infoCartouche = document.getElementById('infoCartouche');
-        console.log('infoCartouche trouvé:', !!infoCartouche);
         if (infoCartouche) {
             infoCartouche.classList.remove('u-hide');
-            console.log('infoCartouche affiché');
         }
 
         const zoneImport = document.getElementById('zoneImportUnifiee');
-        console.log('zoneImport trouvé:', !!zoneImport);
         if (zoneImport) {
             zoneImport.classList.remove('u-hide');
-            console.log('zoneImport affiché');
         }
 
         const matriceRetroaction = document.getElementById('matriceRetroaction');
-        console.log('matriceRetroaction trouvé:', !!matriceRetroaction);
         if (matriceRetroaction) {
             matriceRetroaction.classList.remove('u-hide');
-            console.log('matriceRetroaction affiché');
         }
 
         // Générer la checklist pour l'import partiel
@@ -1537,7 +1503,6 @@ async function chargerCartouchePourModif(cartoucheId, grilleId) {
             panneauMeta.innerHTML = genererPanneauMetadonnees(cartouche, 'cartouche');
         }
 
-        console.log('✅ Cartouche chargée avec succès');
 
         // Afficher le bouton export PDF dans la barre de boutons
         const btnExportPDF = document.getElementById('btnExporterPDFCartouche');
@@ -1548,7 +1513,6 @@ async function chargerCartouchePourModif(cartoucheId, grilleId) {
         const btnDeverrouiller = document.getElementById('btnDeverrouillerCartouche');
 
         if (cartouche.verrouille) {
-            console.log('🔒 Cartouche en lecture seule (verrouillée)');
             if (alerteVerrouillage) alerteVerrouillage.classList.remove('u-hide');
 
             // Attacher l'événement au bouton
@@ -1624,7 +1588,6 @@ async function supprimerCartoucheConfirm(cartoucheId, grilleId) {
             await afficherBanqueCartouches();
         }
 
-        console.log('✅ Cartouche supprimée');
     }
 }
 
@@ -1723,7 +1686,6 @@ async function exporterCartouches() {
     );
 
     if (!metaEnrichies) {
-        console.log('Export annulé par l\'utilisateur');
         return;
     }
 
@@ -1753,7 +1715,6 @@ async function exporterCartouches() {
     URL.revokeObjectURL(url);
 
     afficherNotificationSucces(`${nbCartouches} cartouche(s) exportée(s) avec succès`);
-    console.log('✅ Cartouches exportées avec licence CC BY-NC-SA 4.0');
 }
 
 /**
@@ -1906,11 +1867,9 @@ window.confirmerImportCartouches = async function(donnees) {
                 `Continuer quand même ?`;
 
             if (!confirm(message)) {
-                console.log('Import annulé par l\'utilisateur (dépendances manquantes)');
                 return;
             }
 
-            console.log(`⚠️ Import avec ${nbGrillesManquantes} dépendance(s) manquante(s):`, grillesManquantes);
         }
 
         // ✅ CORRIGÉ (8 janvier 2026) : Ajouter UNIQUEMENT dans bibliothequeCartouches
@@ -1965,7 +1924,6 @@ window.confirmerImportCartouches = async function(donnees) {
         if (nbMisesAJour > 0) message += `${nbMisesAJour} cartouche(s) mise(s) à jour.\n`;
         message += `\nConsulte « Cartouches disponibles » pour les ajouter à ta sélection.`;
         afficherNotificationSucces(message);
-        console.log('✅ Cartouches importées:', nbAjoutees + nbMisesAJour);
 
     } catch (error) {
         console.error('Erreur lors de l\'import:', error);
@@ -2025,7 +1983,6 @@ function importerCartoucheDepuisTxt(eventOuEl) {
 
             // PRÉ-PROCESSEUR : Nettoyer et normaliser automatiquement le fichier
             // Cela rend l'import beaucoup plus tolérant aux erreurs de format
-            console.log('🧹 Nettoyage automatique du fichier...');
 
             // 1. Normaliser les sauts de ligne (Windows/Mac/Linux)
             texte = texte.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
@@ -2042,7 +1999,6 @@ function importerCartoucheDepuisTxt(eventOuEl) {
             // 5. Nettoyer les espaces en fin de ligne
             texte = texte.split('\n').map(l => l.trimEnd()).join('\n');
 
-            console.log('✅ Nettoyage terminé');
 
             // Parser le texte avec support multiligne
             const lignes = texte.split('\n');
@@ -2067,7 +2023,6 @@ function importerCartoucheDepuisTxt(eventOuEl) {
                     normaliserNom(c.nom) === rechercheNorm
                 );
                 if (critere) {
-                    console.log(`✓ Match exact: "${nomRecherche}" → "${critere.nom}"`);
                     return critere;
                 }
 
@@ -2077,7 +2032,6 @@ function importerCartoucheDepuisTxt(eventOuEl) {
                     normaliserNom(c.nom).includes(rechercheNorm)
                 );
                 if (critere) {
-                    console.log(`✓ Match partiel (contenu): "${nomRecherche}" → "${critere.nom}"`);
                     return critere;
                 }
 
@@ -2087,7 +2041,6 @@ function importerCartoucheDepuisTxt(eventOuEl) {
                     rechercheNorm.includes(normaliserNom(c.nom))
                 );
                 if (critere) {
-                    console.log(`✓ Match partiel (inversé): "${nomRecherche}" → "${critere.nom}"`);
                     return critere;
                 }
 
@@ -2111,7 +2064,6 @@ function importerCartoucheDepuisTxt(eventOuEl) {
                 });
 
                 if (meilleurMatch) {
-                    console.log(`✓ Match flou: "${nomRecherche}" → "${meilleurMatch.nom}"`);
                     return meilleurMatch;
                 }
 
@@ -2131,11 +2083,9 @@ function importerCartoucheDepuisTxt(eventOuEl) {
                             const key = `${critere.id}_${niveauActuel}`;
                             cartoucheActuel.commentaires[key] = commentaire;
                             compteur++;
-                            console.log(`✅ Importé: ${critere.nom} (${niveauActuel}) - ${commentaire.substring(0, 50)}...`);
                         } else {
                             const critereNormalise = normaliserNom(critereActuel);
                             console.warn(`⚠️ Critère non trouvé: "${critereActuel}" (normalisé: "${critereNormalise}")`);
-                            console.log('Critères disponibles:', cartoucheActuel.criteres.map(c => `"${c.nom}" (normalisé: "${normaliserNom(c.nom)}")`));
                         }
                     }
                 }
@@ -2157,7 +2107,6 @@ function importerCartoucheDepuisTxt(eventOuEl) {
                     // Sauvegarder le commentaire précédent si nécessaire
                     sauvegarderCommentaire();
                     critereActuel = ligne.replace('##', '').trim().toUpperCase();
-                    console.log(`📋 Section critère détectée: "${critereActuel}"`);
                     return;
                 }
 
@@ -2174,8 +2123,6 @@ function importerCartoucheDepuisTxt(eventOuEl) {
                     const niveau = matchDebut[2].trim();
                     const debutCommentaire = matchDebut[3].trim();
 
-                    console.log(`🔍 Regex matché: "${nomCritere}" (${niveau}) - Critère actuel: "${critereActuel}"`);
-                    console.log(`   Normalisé: "${normaliserNom(nomCritere)}" vs "${normaliserNom(critereActuel || '')}"`);
 
                     // Sauvegarder le commentaire précédent si nécessaire
                     sauvegarderCommentaire();
@@ -2188,18 +2135,15 @@ function importerCartoucheDepuisTxt(eventOuEl) {
                         if (debutCommentaire) {
                             commentaireEnCours.push(debutCommentaire);
                         }
-                        console.log(`📝 Début commentaire détecté: ${nomCritere} (${niveau})`);
                     } else {
                         // Si pas de match direct, changer le critère actuel
                         // (cas où on saute une section ou mauvais ordre)
-                        console.log(`⚠️ Pas de match: "${nomCritere}" ≠ "${critereActuel}" - Changement de contexte`);
                         critereActuel = nomCritere;
                         niveauActuel = niveau;
                         commentaireEnCours = [];
                         if (debutCommentaire) {
                             commentaireEnCours.push(debutCommentaire);
                         }
-                        console.log(`📝 Début commentaire détecté (nouveau critère): ${nomCritere} (${niveau})`);
                     }
                     return;
                 }
@@ -2337,7 +2281,6 @@ async function exporterCartoucheActive() {
     );
 
     if (!metaEnrichies) {
-        console.log('Export annulé par l\'utilisateur');
         return;
     }
 
@@ -2368,7 +2311,6 @@ async function exporterCartoucheActive() {
     URL.revokeObjectURL(url);
 
     afficherNotificationSucces('Cartouche exportée avec succès');
-    console.log('✅ Cartouche exportée avec licence CC BY-NC-SA 4.0');
 }
 
 /**
@@ -2430,7 +2372,6 @@ function importerDansCartoucheActive(event) {
             );
 
             if (!confirmation) {
-                console.log('Import annulé par l\'utilisateur');
                 event.target.value = '';
                 return;
             }
@@ -2466,7 +2407,6 @@ function importerDansCartoucheActive(event) {
             // Recharger la cartouche dans le formulaire
             await chargerCartouchePourModif(cartoucheId, grilleId);
 
-            console.log('✅ Cartouche importée et remplacée avec succès');
             if (typeof afficherNotificationSucces === 'function') {
                 afficherNotificationSucces('Cartouche importée et remplacée avec succès');
             } else {
@@ -2528,7 +2468,6 @@ function annulerFormCartouche() {
         selectEchelle.disabled = false;
     }
 
-    console.log('Édition annulée - Retour à l\'accueil');
 }
 
 /**
@@ -2716,7 +2655,6 @@ async function chargerFiltreGrillesCartouche() {
  */
 async function afficherBanqueCartouches(grilleIdFiltre = '') {
     const grilles = await db.get('grillesTemplates') || [];
-    console.log('💬 afficherBanqueCartouches - Nombre de grilles:', grilles.length);
     let toutesLesCartouches = [];
 
     // Récupérer toutes les cartouches de toutes les grilles
@@ -2730,7 +2668,6 @@ async function afficherBanqueCartouches(grilleIdFiltre = '') {
             cartouches = [cartouches];
         }
 
-        console.log(`   Grille "${grille.nom}": ${cartouches.length} cartouche(s)`);
         cartouches.forEach(cart => {
             toutesLesCartouches.push({
                 ...cart,
@@ -2749,7 +2686,6 @@ async function afficherBanqueCartouches(grilleIdFiltre = '') {
         cartouchesFiltrees = cartouchesFiltrees.filter(c => c.grilleId === grilleIdFiltre);
     }
 
-    console.log('   Total cartouches:', cartouchesFiltrees.length);
 
     // Générer HTML de la liste
     const container = document.getElementById('listeCartouchesBanque');
@@ -2792,7 +2728,6 @@ async function afficherBanqueCartouches(grilleIdFiltre = '') {
     }).join('');
 
     container.innerHTML = html;
-    console.log('   ✅ Banque cartouches affichée avec succès');
 }
 
 /**
@@ -2919,7 +2854,6 @@ async function initialiserNouveauCartoucheAvecEchelle(grilleId, echelleId) {
     // Les niveaux viennent de l'échelle sélectionnée
     const niveaux = echelle.niveaux || [];
 
-    console.log(`📊 Matrice : ${criteres.length} critères × ${niveaux.length} niveaux`);
 
     // Préserver les données existantes si on change de grille/échelle dynamiquement
     const nomActuel = document.getElementById('nomCartouche')?.value || '';
@@ -3015,7 +2949,6 @@ async function creerNouvelleCartouche() {
         await onChangeSelectionCartouche();
     }
 
-    console.log('📝 Formulaire nouvelle cartouche affiché');
 }
 
 /**
@@ -3563,7 +3496,6 @@ async function supprimerCartoucheDefinitivement(id, grilleId) {
     await afficherBanqueCartouches();
     await afficherBibliothequeCartouches();
 
-    console.log(`Cartouche "${cartouche.nom}" supprimée définitivement`);
 }
 
 /**
@@ -3621,7 +3553,6 @@ async function dupliquerCartoucheBibliotheque(id, grilleId) {
     await afficherBanqueCartouches();
     await afficherBibliothequeCartouches();
 
-    console.log(`Cartouche "${cartouche.nom}" dupliquée → "${nouvelleCartouche.nom}"`);
 }
 
 /**
@@ -3685,7 +3616,6 @@ async function ajouterCartouchesABibliotheque() {
     if (nbAjoutees > 0) {
         fermerModalBibliothequeCartouches();
         await afficherBanqueCartouches();
-        console.log(`✅ ${nbAjoutees} cartouche(s) ajoutée(s) à la bibliothèque`);
     }
 }
 

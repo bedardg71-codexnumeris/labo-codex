@@ -82,7 +82,6 @@ async function creerGroupeCours(donnees) {
     groupesCours.push(nouveauGroupeCours);
     await db.set(cle, groupesCours);
 
-    console.log('[GroupeCours] Créé:', nouveauGroupeCours.id, 'pour trimestre:', trimestreId);
     return { succes: true, groupeCours: nouveauGroupeCours };
 }
 
@@ -211,7 +210,6 @@ async function mettreAJourGroupeCours(trimestreId, groupeCoursId, modifications)
     groupesCours[index].dateModification = new Date().toISOString();
 
     await db.set(cle, groupesCours);
-    console.log('[GroupeCours] Mis à jour:', groupeCoursId);
 
     return groupesCours[index];
 }
@@ -242,7 +240,6 @@ async function definirGroupeCoursActif(trimestreId, groupeCoursId) {
     }
 
     await db.set(cle, groupesCours);
-    console.log('[GroupeCours] Activé:', groupeCoursId);
 
     // Émettre un événement pour notifier le changement
     window.dispatchEvent(new CustomEvent('groupeCoursChange', {
@@ -281,7 +278,6 @@ async function supprimerGroupeCours(trimestreId, groupeCoursId) {
     }
 
     await db.set(cle, groupesCours);
-    console.log('[GroupeCours] Supprimé:', groupeCoursId);
     return true;
 }
 
@@ -481,10 +477,8 @@ async function synchroniserInfoCours(trimestreId) {
         // Également la clé legacy non namespacée (pour certains modules)
         await db.set('seancesHoraire', gcComplet.horaire.seances);
 
-        console.log('[GroupeCours] Séances horaire synchronisées:', gcComplet.horaire.seances.length, 'séances');
     }
 
-    console.log('[GroupeCours] infoCours synchronisé pour rétrocompatibilité');
 }
 
 // ============================================
@@ -517,7 +511,6 @@ window.GroupeCoursEntite = {
     getCle: getCleGroupesCours
 };
 
-console.log('[Entités] Module GroupeCours chargé');
 
 
 })();

@@ -30,7 +30,6 @@
 class PratiquePANObjectifs {
 
     constructor() {
-        console.log('🎯 Initialisation de la pratique PAN-Objectifs');
     }
 
     // ========================================================================
@@ -82,14 +81,12 @@ class PratiquePANObjectifs {
         const niveauxObjectifs = this._calculerNiveauxObjectifs(da, objectifs);
 
         if (niveauxObjectifs === null || niveauxObjectifs.length === 0) {
-            console.log('[PAN-Objectifs] Aucune évaluation pour DA', da);
             return null;
         }
 
         // Appliquer la logique de notation non-linéaire
         const noteFinal = this._calculerNoteFinale(niveauxObjectifs);
 
-        console.log(`[PAN-Objectifs] Performance DA ${da}: ${(noteFinal * 100).toFixed(1)}%`, niveauxObjectifs);
 
         return noteFinal;
     }
@@ -129,7 +126,6 @@ class PratiquePANObjectifs {
 
         const indiceC = nbObjectifsEvalues / nbObjectifsTotal;
 
-        console.log(`[PAN-Objectifs] Complétion DA ${da}: ${(indiceC * 100).toFixed(1)}% (${nbObjectifsEvalues}/${nbObjectifsTotal} objectifs)`);
 
         return indiceC;
     }
@@ -631,7 +627,6 @@ if (typeof window !== 'undefined') {
     }
 }
 
-console.log('✅ Module pratique-pan-objectifs.js chargé');
 
 
 })();

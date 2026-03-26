@@ -653,7 +653,6 @@
             return;
         }
 
-        console.log('[Travaux-UI] Initialisation du module Travaux...');
 
         // Initialiser les sous-modules
         await travauxStockage.initialiser();
@@ -661,7 +660,6 @@
         travauxAnnotation.initialiser();
 
         moduleInitialise = true;
-        console.log('[Travaux-UI] Module Travaux initialise');
 
         // Corriger les groupeCoursId des fichiers orphelins
         corrigerGroupeCoursIdFichiers();
@@ -1824,7 +1822,6 @@
         input.addEventListener('change', function() {
             if (input.files && input.files.length > 0) {
                 const rattaches = travauxImport.reattacherBlobs(input.files);
-                console.log(`[Pipeline] ${rattaches} fichier(s) re-attach\u00e9(s)`);
                 rafraichirPipelineUI();
             }
             document.body.removeChild(input);
@@ -2099,7 +2096,6 @@
 
         rafraichirPipelineUI();
         if (modifies > 0) {
-            console.log(`[Travaux-UI] Identification automatique: ${modifies} fichier(s) identifie(s)`);
         }
     }
 
@@ -2220,7 +2216,6 @@
         const nbMisAJour = Object.keys(modifications).length;
         if (nbMisAJour > 0) {
             travauxStockage.mettreAJourFichiersBatch(modifications);
-            console.log(`[Travaux-UI] Correction groupeCoursId : ${nbMisAJour} fichier(s) mis à jour`);
         }
     }
 
@@ -3567,7 +3562,6 @@
                     } catch (e) { console.warn('[Travaux-UI] PDF thumbnail regeneration failed:', e.message || e); }
                 }
 
-                console.log(`[Pipeline] Groupe "${cle}" assemble : ${images.length} images → 1 PDF`);
             } catch (e) {
                 console.error(`[Pipeline] Erreur assemblage groupe "${cle}":`, e);
             }
@@ -3670,7 +3664,6 @@
 
         const ok = travauxStockage.reassocierFichier(fichierId, { productionId: nouveauProductionId });
         if (ok) {
-            console.log('[Travaux-UI] Production mise a jour pour', fichierId, '→', nouveauProductionId);
         }
     }
 
@@ -4404,7 +4397,6 @@
         // 🔧 FIX (20 mars 2026) : Ne pas pré-remplir si modifierEvaluation est en cours
         // (sinon preRemplirEvaluation charge la reprise active et écrase l'originale remplacée)
         if (window._modifierEvaluationEnCours) {
-            console.log('⏭️ preRemplirEvaluation ignorée — modifierEvaluation en cours');
             return;
         }
         let essais = 0;
@@ -5297,7 +5289,6 @@
                 for (const idASupprimer of editionFichiersASupprimer) {
                     try {
                         await travauxStockage.supprimerFichierTravail(idASupprimer);
-                        console.log('[Editeur Pages] Fichier fusionne supprime:', idASupprimer);
                     } catch (e) {
                         console.warn('[Editeur Pages] Erreur suppression fichier fusionne:', idASupprimer, e);
                     }
@@ -6032,7 +6023,6 @@
             afficherNotificationSucces(`${nb} fichier(s) transféré(s) vers le groupe cible`);
         }
 
-        console.log(`[Travaux-UI] Transfert: ${nb} fichiers vers groupe ${groupeCoursCibleId}`);
     }
 
     /* ===============================

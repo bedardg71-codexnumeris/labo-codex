@@ -119,7 +119,6 @@
                 return;
             }
             da = trouve.da;
-            console.log(`Étudiant trouvé : ${trouve.prenom} ${trouve.nom} (DA: ${da})`);
         }
 
         if (!da) {
@@ -135,23 +134,14 @@
         const prodNom = {};
         productions.forEach(p => { prodNom[p.id] = p.titre || p.nom || p.id; });
 
-        console.log('\n%c=== FICHIERS ===', 'font-weight:bold; font-size:14px');
         fichiers.forEach(f => {
-            console.log(
-                `  ${f.id}  prod=${f.productionId || '(aucun)'}  [${prodNom[f.productionId] || '?'}]  nom="${f.nomFichier}"  statut=${f.statut || '?'}  modif=${f.dateModification || '?'}`
-            );
         });
 
         const evalsDA = evaluations.filter(e => e.etudiantDA === da && !e.remplaceeParId);
-        console.log('\n%c=== ÉVALUATIONS (actives) ===', 'font-weight:bold; font-size:14px');
         evalsDA.forEach(e => {
             const fichierResolu = trouverFichierPourEvaluation(e);
-            console.log(
-                `  ${e.id}  prod=${e.productionId}  [${prodNom[e.productionId] || '?'}]  → fichier résolu: ${fichierResolu ? fichierResolu.id + ' "' + fichierResolu.nomFichier + '"' : 'AUCUN'}  (via clé composite)`
-            );
         });
 
-        console.log('\n%c=== CROISEMENT ===', 'font-weight:bold; font-size:14px');
         evalsDA.forEach(e => {
             const fichierResolu = trouverFichierPourEvaluation(e);
             if (fichierResolu && fichierResolu.productionId !== e.productionId) {

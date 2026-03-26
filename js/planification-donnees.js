@@ -145,7 +145,6 @@ function migrerDonneesProto() {
         return false;
     }
 
-    console.log('[Planification] Migration des données du prototype...');
 
     // Cas 1 : ancien format unique → convertir en multi-cartes
     if (ancienneCarteUnique && !protoIndex) {
@@ -161,7 +160,6 @@ function migrerDonneesProto() {
         setDonnees(donnees);
         // Nettoyer le localStorage proto
         localStorage.removeItem('proto_carte_mentale');
-        console.log('[Planification] Migration (ancien format unique) terminée.');
         return true;
     }
 
@@ -188,7 +186,6 @@ function migrerDonneesProto() {
         }
         localStorage.removeItem('proto_carte_mentale');
 
-        console.log('[Planification] Migration (' + protoIndex.cartes.length + ' carte(s)) terminée.');
         return true;
     }
 

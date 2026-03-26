@@ -14,7 +14,6 @@
 (function() {
     'use strict';
 
-    console.log('[donnees-v2] Chargement du module...');
 
     // =========================================================================
     // ÉTAT LOCAL
@@ -50,7 +49,6 @@
      * Initialise l'onglet Données v2
      */
     function initialiserDonneesV2() {
-        console.log('[donnees-v2] Initialisation...');
 
         // Charger les statistiques des snapshots
         chargerStatistiquesSnapshots();
@@ -58,7 +56,6 @@
         // Charger les compteurs de ressources
         chargerCompteursRessources();
 
-        console.log('[donnees-v2] Initialisation terminée');
     }
 
     /**
@@ -66,7 +63,6 @@
      * Rafraîchit les compteurs à chaque navigation vers cette section
      */
     function chargerVueDonnees() {
-        console.log('[donnees-v2] Chargement de la vue Données...');
 
         // Rafraîchir les compteurs
         chargerCompteursRessources();
@@ -89,7 +85,6 @@
         const statDerniere = document.getElementById('v2-stat-derniere-capture');
 
         if (!statHebdo || !statInterventions || !statDerniere) {
-            console.log('[donnees-v2] Éléments statistiques non trouvés');
             return;
         }
 
@@ -1300,31 +1295,26 @@
                 if (typeof afficherSousSection === 'function') {
                     afficherSousSection('construction-pratiques-notation');
                 }
-                console.log('[donnees-v2] Navigation vers pratique:', id);
             } else if (type === 'grille') {
                 // Naviguer vers Construction de la note > Grilles de critères
                 if (typeof afficherSousSection === 'function') {
                     afficherSousSection('construction-grille-criteres');
                 }
-                console.log('[donnees-v2] Navigation vers grille:', id);
             } else if (type === 'cartouche') {
                 // Naviguer vers Construction de la note > Rétroactions (Cartouches)
                 if (typeof afficherSousSection === 'function') {
                     afficherSousSection('construction-retroactions');
                 }
-                console.log('[donnees-v2] Navigation vers cartouche:', id);
             } else if (type === 'echelle') {
                 // Naviguer vers Construction de la note > Échelles de performance
                 if (typeof afficherSousSection === 'function') {
                     afficherSousSection('construction-echelle-performance');
                 }
-                console.log('[donnees-v2] Navigation vers échelle:', id);
             } else if (type === 'production') {
                 // Naviguer vers Construction de la note > Productions
                 if (typeof afficherSousSection === 'function') {
                     afficherSousSection('construction-productions');
                 }
-                console.log('[donnees-v2] Navigation vers production:', id);
             }
         }, 100);
     }
@@ -1560,7 +1550,6 @@
             console.warn('[donnees-v2] Erreur calcul usages:', e.message);
         }
 
-        console.log('[donnees-v2] Pratique supprimée:', pratiqueId);
         return true;
     }
 
@@ -1591,13 +1580,11 @@
             templates = templates.filter(g => g.id !== grilleId);
             if (templates.length !== avant) {
                 await db.set('grillesTemplates', templates);
-                console.log('[donnees-v2] Grille retirée de grillesTemplates:', grilleId);
             }
         } catch (e) {
             console.warn('[donnees-v2] Erreur suppression grille templates:', e.message);
         }
 
-        console.log('[donnees-v2] Grille supprimée (avec cartouches):', grilleId);
         return true;
     }
 
@@ -1614,7 +1601,6 @@
             await retirerCartoucheDeLaBibliotheque(cartoucheId);
         }
 
-        console.log('[donnees-v2] Cartouche supprimée:', cartoucheId);
         return true;
     }
 
@@ -1638,13 +1624,11 @@
             templates = templates.filter(e => e.id !== echelleId);
             if (templates.length !== avant) {
                 await db.set('echellesTemplates', templates);
-                console.log('[donnees-v2] Échelle retirée de echellesTemplates:', echelleId);
             }
         } catch (e) {
             console.warn('[donnees-v2] Erreur suppression échelle templates:', e.message);
         }
 
-        console.log('[donnees-v2] Échelle supprimée:', echelleId);
         return true;
     }
 
@@ -1667,7 +1651,6 @@
             }
         }
 
-        console.log('[donnees-v2] Production supprimée:', productionId);
         return true;
     }
 
@@ -1750,6 +1733,5 @@
         }
     }
 
-    console.log('[donnees-v2] Module chargé');
 
 })();

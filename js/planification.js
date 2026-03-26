@@ -18,7 +18,6 @@ var dejaInitialise = false;
  * Appelé par navigation.js lors de l'affichage de la sous-section planification-carte.
  */
 function initialiserModulePlanification() {
-    console.log('🗺️ Initialisation du module Planification...');
 
     // Activer les raccourcis clavier pour ce module
     if (window.planificationCarte) {
@@ -31,7 +30,6 @@ function initialiserModulePlanification() {
             window.planificationCarte.initialiser();
         }
         dejaInitialise = true;
-        console.log('   ✅ Module Planification initialisé');
     } else {
         // Retour vers la section : recharger les données du trimestre actif et recentrer
         if (window.planificationCarte && window.planificationDonnees) {
@@ -42,7 +40,6 @@ function initialiserModulePlanification() {
                 window.planificationCarte.centrerVueSurContenu();
             });
         }
-        console.log('   ✅ Module Planification réactivé');
     }
 }
 

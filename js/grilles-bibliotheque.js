@@ -79,7 +79,6 @@ async function ajouterGrilleALaBibliotheque(grille) {
 
     const existe = bibliotheque.some(g => g.id === grille.id);
     if (existe) {
-        console.log('[Bibliothèque Grilles] Grille déjà présente:', grille.id);
         return false;
     }
 
@@ -96,7 +95,6 @@ async function ajouterGrilleALaBibliotheque(grille) {
     bibliotheque.push(grilleBiblio);
     await db.set(CLE_BIBLIOTHEQUE_GRILLES, bibliotheque);
 
-    console.log('[Bibliothèque Grilles] Grille ajoutée:', grille.nom);
     return true;
 }
 
@@ -116,7 +114,6 @@ async function retirerGrilleDeLaBibliotheque(grilleId) {
     }
 
     await db.set(CLE_BIBLIOTHEQUE_GRILLES, bibliotheque);
-    console.log('[Bibliothèque Grilles] Grille retirée:', grilleId);
     return true;
 }
 
@@ -138,7 +135,6 @@ async function importerGrillesDansBibliotheque(grilles) {
         }
     }
 
-    console.log(`[Bibliothèque Grilles] Import: ${ajoutees} ajoutées, ${existantes} déjà existantes`);
     return { ajoutees, existantes };
 }
 
@@ -166,14 +162,12 @@ async function exporterBibliothequeGrilles() {
 async function migrerGrillesVersBibliotheque(cleSource) {
     const grilles = db.getSync(cleSource, null);
     if (!grilles) {
-        console.log('[Bibliothèque Grilles] Aucune donnée trouvée pour:', cleSource);
         return { ajoutees: 0, existantes: 0 };
     }
     if (!Array.isArray(grilles)) {
         return { ajoutees: 0, existantes: 0 };
     }
 
-    console.log(`[Bibliothèque Grilles] Migration de ${grilles.length} grilles depuis ${cleSource}`);
     return await importerGrillesDansBibliotheque(grilles);
 }
 

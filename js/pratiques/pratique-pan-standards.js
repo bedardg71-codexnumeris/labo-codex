@@ -272,9 +272,6 @@ class PratiquePANStandards {
         // ✅ DEBUG TEMPORAIRE (10 déc 2025): Vérifier filtrage pour DA spécifique
         if (da === '9000116') {
             const toutes = evaluationsCache.filter(e => e.etudiantDA === da);
-            console.log(`[PAN-Historique-DEBUG] DA ${da} @ ${dateLimite}:`);
-            console.log(`  - Total évaluations: ${toutes.length}`);
-            console.log(`  - Artefacts IDs portfolio: [${artefactsIds.join(', ')}]`);
 
             const avecDateEcheance = toutes.map(e => {
                 const prod = productions.find(p => p.id === e.productionId);
@@ -285,7 +282,6 @@ class PratiquePANStandards {
                     noteFinale: e.noteFinale
                 };
             });
-            console.log(`  - Productions avec dates:`, avecDateEcheance);
         }
 
         // Filtrer évaluations de cet étudiant sur artefacts portfolio jusqu'à dateLimite
@@ -423,7 +419,6 @@ class PratiquePANStandards {
 
         // ✅ DEBUG TEMPORAIRE (10 déc 2025): Vérifier calcul historique
         if (da === '9000116') {
-            console.log(`[PAN-Historique] DA ${da} @ ${dateLimite}: ${moyennePonderee.toFixed(1)}% (Portfolio: ${moyennePortfolio.toFixed(1)}% × ${ponderationPortfolio}%, Terminale: ${evalTerminale ? evalTerminale.noteFinale : 'N/A'}% × ${ponderationTerminale}%)`);
         }
 
         return indiceP;
