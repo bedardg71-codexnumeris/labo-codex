@@ -27,6 +27,37 @@
 
     const EXTENSIONS_ACCEPTEES = ['.pdf', '.jpg', '.jpeg', '.png', '.heic', '.heif', '.webp'];
 
+    /**
+     * Vérifie les magic bytes d'un fichier pour confirmer son type réel.
+     * @param {File|Blob} fichier - Le fichier à vérifier
+     * @returns {Promise<boolean>} true si les magic bytes correspondent au type déclaré
+     */
+    async function validerMagicBytes(fichier) {
+        try {
+            var slice = fichier.slice(0, 8);
+            var buffer = await slice.arrayBuffer();
+            var bytes = new Uint8Array(buffer);
+            if (bytes.length < 4) return false;
+
+            // PDF : %PDF (25 50 44 46)
+            if (bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46) return true;
+            // PNG : 89 50 4E 47
+            if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) return true;
+            // JPEG : FF D8 FF
+            if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) return true;
+            // WebP : RIFF....WEBP (52 49 46 46 xx xx xx xx 57 45 42 50)
+            if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 && bytes.length >= 12 &&
+                bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) return true;
+            // HEIC/HEIF : ftyp (xx xx xx xx 66 74 79 70) — offset 4
+            if (bytes.length >= 8 && bytes[4] === 0x66 && bytes[5] === 0x74 && bytes[6] === 0x79 && bytes[7] === 0x70) return true;
+
+            return false;
+        } catch (e) {
+            console.warn('[Travaux-Import] Impossible de lire les magic bytes:', e);
+            return true; // En cas d'erreur, accepter par défaut (fallback gracieux)
+        }
+    }
+
     // Patterns pour detecter un DA dans le nom de fichier
     // Ex: "1234567_travail.pdf", "Beaulieu_Emma_1234567.pdf", etc.
     const PATTERNS_DA = [
@@ -382,6 +413,12 @@
 
         if (!blob) {
             throw new Error('Le fichier original n\'est plus disponible (session expirée). Veuillez re-déposer le fichier.');
+        }
+
+        // Validation magic bytes (A2 — audit sécurité)
+        var magicValide = await validerMagicBytes(blob);
+        if (!magicValide) {
+            throw new Error('Le fichier « ' + (fichierPrepare.nomFichier || 'inconnu') + ' » ne correspond pas à un format d\'image ou PDF valide. Il a peut-être été renommé.');
         }
 
         // Compresser les images si necessaire

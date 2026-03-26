@@ -6,6 +6,54 @@
 (function() {
 'use strict';
 
+/* ===============================
+   VALIDATION ZIP SÉCURITÉ (Phase 6 — Audit)
+   =============================== */
+
+/**
+ * Valide la sécurité d'un ZIP chargé par JSZip.
+ * Vérifie : taille décompressée, path traversal, noms d'entrées.
+ * @param {JSZip} zip - Instance JSZip déjà chargée
+ * @returns {{valide: boolean, erreur: string}} Résultat de validation
+ */
+function validerZipSecurite(zip) {
+    var TAILLE_MAX_DECOMPRESSEE = 2 * 1024 * 1024 * 1024; // 2 Go
+    var tailleDecompressee = 0;
+
+    var noms = Object.keys(zip.files);
+    for (var i = 0; i < noms.length; i++) {
+        var nom = noms[i];
+        var entry = zip.files[nom];
+
+        // A3 — Path traversal : rejeter entrées avec .. ou commençant par /
+        if (nom.indexOf('..') !== -1) {
+            return { valide: false, erreur: 'Entrée ZIP suspecte (path traversal) : ' + nom };
+        }
+        if (nom.charAt(0) === '/') {
+            return { valide: false, erreur: 'Entrée ZIP suspecte (chemin absolu) : ' + nom };
+        }
+
+        // A1 — Sommer la taille décompressée (si disponible)
+        if (!entry.dir && entry._data && entry._data.uncompressedSize) {
+            tailleDecompressee += entry._data.uncompressedSize;
+        }
+    }
+
+    // A1 — Rejeter si taille décompressée > 2 Go
+    if (tailleDecompressee > TAILLE_MAX_DECOMPRESSEE) {
+        return {
+            valide: false,
+            erreur: 'ZIP trop volumineux une fois décompressé (' +
+                (tailleDecompressee / 1024 / 1024 / 1024).toFixed(1) + ' Go). Limite : 2 Go.'
+        };
+    }
+
+    return { valide: true, erreur: null };
+}
+
+// Export global pour que codex.js puisse l'utiliser
+window.validerZipSecurite = validerZipSecurite;
+
 /**
  * Vérifie l'unicité des IDs dans un tableau d'objets.
  * Si des doublons sont détectés, ré-identifie les entrées dupliquées avec genererIdUnique().
@@ -610,6 +658,13 @@ function previsualiserImport(event) {
         lecteurZip.onload = async function(e) {
             try {
                 const zip = await JSZip.loadAsync(e.target.result);
+
+                // Validation sécurité ZIP (taille décompressée + path traversal)
+                var securite = validerZipSecurite(zip);
+                if (!securite.valide) {
+                    alert('ZIP rejeté : ' + securite.erreur);
+                    return;
+                }
 
                 // Bloquer les codex : ils doivent passer par le bouton Codex
                 if (zip.file('codex-manifeste.json') || zip.file('classeur-manifeste.json')) {
