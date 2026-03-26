@@ -3314,6 +3314,8 @@ function genererValeursComparatives(valeurSOM, valeurPAN, modeComparatif, affich
 function afficherProfilComplet(daOuEl) {
     // Phase 5 : accepte un élément (depuis data-on-change) ou une chaîne (depuis data-action / appel direct)
     var da = (typeof daOuEl === 'object' && daOuEl !== null) ? daOuEl.value : daOuEl;
+    // Les DA sont des identifiants string — le dispatcher peut les convertir en nombre
+    if (da !== null && da !== undefined) da = String(da);
     console.log('👤 Affichage du profil pour DA:', da);
 
     // Sauvegarder le DA pour navigation

@@ -3627,6 +3627,15 @@ function creerGraphiqueCriteres(canvasId, da) {
             console.warn(`Canvas ${canvasId} non visible (parent display:none) — graphique différé`);
             return null;
         }
+
+        // Détruire le graphique existant sur ce canvas (évite "Canvas already in use")
+        if (_chartsCriteres[da]) {
+            _chartsCriteres[da].destroy();
+            delete _chartsCriteres[da];
+        }
+        var existant = Chart.getChart(canvas);
+        if (existant) existant.destroy();
+
         const ctx = canvas.getContext('2d');
 
         // Calculer les bornes Y dynamiques (échelle 0-100)

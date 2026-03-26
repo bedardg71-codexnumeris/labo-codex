@@ -720,15 +720,18 @@ document.addEventListener('DOMContentLoaded', function () {
         }, window);
 
         if (typeof fn === 'function') {
+            // Auto-conversion numérique limitée aux petits nombres (indices).
+            // Les DA (7 chiffres), IDs et grands nombres restent strings.
+            var _num = function(v) { return v !== '' && !isNaN(v) && Number(v) < 10000 ? Number(v) : v; };
             var param = el.dataset.param;
             var param2 = el.dataset.param2;
             var param3 = el.dataset.param3;
             if (param !== undefined) {
-                if (param !== '' && !isNaN(param)) param = Number(param);
+                param = _num(param);
                 if (param2 !== undefined) {
-                    if (param2 !== '' && !isNaN(param2)) param2 = Number(param2);
+                    param2 = _num(param2);
                     if (param3 !== undefined) {
-                        if (param3 !== '' && !isNaN(param3)) param3 = Number(param3);
+                        param3 = _num(param3);
                         fn(param, param2, param3);
                     } else {
                         fn(param, param2);
@@ -758,7 +761,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             var param = el.dataset.param;
             var param2 = el.dataset.param2;
-            if (param !== undefined && param !== '' && !isNaN(param)) param = Number(param);
+            var _num = function(v) { return v !== '' && !isNaN(v) && Number(v) < 10000 ? Number(v) : v; };
+            if (param !== undefined) param = _num(param);
 
             if (param !== undefined && param2 !== undefined) {
                 fn(param, param2);
