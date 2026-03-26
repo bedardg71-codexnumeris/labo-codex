@@ -1838,10 +1838,10 @@ function afficherSyntheseCours(cours) {
     const competence = cours.numeroCompetence || cours.competence || '—';
 
     sidebar.innerHTML = `
-        <div class="apercu-titre">${nom}</div>
-        <div class="apercu-code">${code}</div>
-        <div class="apercu-detail">Discipline : ${discipline}</div>
-        <div class="apercu-detail">Compétence : ${competence}</div>
+        <div class="apercu-titre">${echapperHtml(nom)}</div>
+        <div class="apercu-code">${echapperHtml(code)}</div>
+        <div class="apercu-detail">Discipline : ${echapperHtml(discipline)}</div>
+        <div class="apercu-detail">Compétence : ${echapperHtml(competence)}</div>
     `;
 }
 
@@ -2005,10 +2005,10 @@ function afficherSyntheseGroupeCours(gc) {
     const complets = elements.filter(Boolean).length;
 
     sidebar.innerHTML = `
-        <div class="apercu-titre">${titre}</div>
-        <div class="apercu-detail">${nomEns}</div>
+        <div class="apercu-titre">${echapperHtml(titre)}</div>
+        <div class="apercu-detail">${echapperHtml(nomEns)}</div>
         <div class="apercu-detail">${nbSeances} séance${nbSeances !== 1 ? 's' : ''}/sem.</div>
-        <div class="apercu-detail">Pratique : ${nomPratique}</div>
+        <div class="apercu-detail">Pratique : ${echapperHtml(nomPratique)}</div>
         <div class="apercu-completude" style="font-size: 0.75rem; color: ${complets === 5 ? 'var(--vert-principal)' : 'var(--orange-principal)'}; margin-top: 5px;">
             ${complets}/5 éléments configurés
         </div>
@@ -4350,12 +4350,12 @@ function mettreAJourCarteResumeGroupeCoursV2(gc) {
     const texteCompletude = estComplet ? 'Complet' : `${score}/5 configurés`;
 
     carte.innerHTML = `
-        <div class="resume-gc-nom">${gc.nom || gc.id}</div>
+        <div class="resume-gc-nom">${echapperHtml(gc.nom || gc.id)}</div>
         <div class="resume-gc-details">
-            <div><span class="label-gc">Cours</span><span>${coursNom}</span></div>
-            <div><span class="label-gc">Groupe</span><span>${gc.groupeNum || gc.groupe || '—'}</span></div>
-            <div><span class="label-gc">Horaire</span><span>${horaireNom}</span></div>
-            <div><span class="label-gc">Enseig.</span><span>${enseignantNom}</span></div>
+            <div><span class="label-gc">Cours</span><span>${echapperHtml(coursNom)}</span></div>
+            <div><span class="label-gc">Groupe</span><span>${echapperHtml(gc.groupeNum || gc.groupe || '—')}</span></div>
+            <div><span class="label-gc">Horaire</span><span>${echapperHtml(horaireNom)}</span></div>
+            <div><span class="label-gc">Enseig.</span><span>${echapperHtml(enseignantNom)}</span></div>
         </div>
         <div class="score-completude ${classeCompletude}">
             <span class="score-valeur">${texteCompletude}</span>
@@ -6067,12 +6067,12 @@ function changerEnseignantSelectionneV2(enseignantId) {
             if (!ens || !apercu) return;
             apercu.innerHTML = `
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-                    <div><strong>Nom :</strong> ${ens.prenom} ${ens.nom}</div>
-                    <div><strong>Courriel :</strong> ${ens.courriel || '-'}</div>
-                    <div><strong>Institution :</strong> ${ens.institution || '-'}</div>
-                    <div><strong>Département :</strong> ${ens.departement || '-'}</div>
-                    <div><strong>Discipline :</strong> ${ens.discipline || '-'}</div>
-                    <div><strong>Site web :</strong> ${ens.siteWeb ? `<a href="${ens.siteWeb}" target="_blank">${ens.siteWeb}</a>` : '-'}</div>
+                    <div><strong>Nom :</strong> ${echapperHtml(ens.prenom)} ${echapperHtml(ens.nom)}</div>
+                    <div><strong>Courriel :</strong> ${echapperHtml(ens.courriel || '-')}</div>
+                    <div><strong>Institution :</strong> ${echapperHtml(ens.institution || '-')}</div>
+                    <div><strong>Département :</strong> ${echapperHtml(ens.departement || '-')}</div>
+                    <div><strong>Discipline :</strong> ${echapperHtml(ens.discipline || '-')}</div>
+                    <div><strong>Site web :</strong> ${ens.siteWeb ? `<a href="${echapperHtml(ens.siteWeb)}" target="_blank">${echapperHtml(ens.siteWeb)}</a>` : '-'}</div>
                 </div>
             `;
         });

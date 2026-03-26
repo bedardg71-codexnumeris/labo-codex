@@ -557,7 +557,7 @@ function afficherListeCriteres(criteres, grilleId) {
              display: flex; justify-content: space-between; align-items: center;">
             <div class="grille-flex-1">
                 <div style="font-weight: 600; color: var(--accent-primaire); margin-bottom: 2px;">
-                    ${critere.nom} (${critere.ponderation || 0}%) • ${getTypeCritereLabel(critere.type)}${critere.type === 'algorithmique' && critere.formule ? ` • ${critere.formule}` : ''}
+                    ${echapperHtml(critere.nom)} (${critere.ponderation || 0}%) • ${getTypeCritereLabel(critere.type)}${critere.type === 'algorithmique' && critere.formule ? ` • ${echapperHtml(critere.formule)}` : ''}
                 </div>
                 ${critere.description ? `
                     <details class="grille-mt-4">
@@ -566,7 +566,7 @@ function afficherListeCriteres(criteres, grilleId) {
                         </summary>
                         <div style="margin-top: 8px; padding: 8px; background: var(--bleu-tres-pale);
                              border-radius: 4px; font-size: 0.85rem; color: var(--gris-moyen);">
-                            ${critere.description}
+                            ${echapperHtml(critere.description)}
                         </div>
                     </details>
                 ` : ''}
@@ -806,7 +806,7 @@ async function afficherGrillesCriteres() {
             <div class="item-liste" style="background: var(--bleu-tres-pale); padding: 15px; margin-bottom: 15px;">
                 <div class="grille-flex-between-mb10">
                     <div>
-                        <strong style="color: var(--accent-primaire);">${grille.nom}</strong>
+                        <strong style="color: var(--accent-primaire);">${echapperHtml(grille.nom)}</strong>
                         <small style="color: var(--bleu-leger); margin-left: 10px;">
                             ${new Date(grille.dateCreation).toLocaleDateString()}
                         </small>
@@ -2160,7 +2160,7 @@ async function afficherListeGrilles() {
             : '';
         return `
             <div class="sidebar-item" data-id="${grille.id}" data-action="chargerGrillePourModif" data-param="${grille.id}">
-                <div class="sidebar-item-titre">${nomGrille}</div>
+                <div class="sidebar-item-titre">${echapperHtml(nomGrille)}</div>
                 <div class="sidebar-item-badges">${badgesPratiques} <span class="badge-caracteristique">${nbCriteres} critères</span></div>
             </div>
         `;
@@ -2978,7 +2978,7 @@ function afficherCriteresGrille(grille) {
                     <label data-tooltip="cn-grille-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Nom du critère</label>
                     <input type="text"
                            class="controle-form"
-                           value="${critere.nom}"
+                           value="${echapperHtml(critere.nom)}"
                            data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-champ="nom"
                            style="font-weight: 500;">
                 </div>
@@ -3006,7 +3006,7 @@ function afficherCriteresGrille(grille) {
                     <label style="font-size: 0.85rem; color: var(--gris-moyen);">Description</label>
                     <input type="text"
                            class="controle-form"
-                           value="${critere.description || ''}"
+                           value="${echapperHtml(critere.description || '')}"
                            data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-champ="description">
                 </div>
             </div>

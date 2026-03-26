@@ -3154,7 +3154,7 @@ function afficherNiveauxNouvelleEchelle() {
                     <label class="echelle-texte-detail">Code</label>
                     <input type="text"
                            class="controle-form"
-                           value="${niveau.code}"
+                           value="${echapperHtml(niveau.code)}"
                            placeholder="Ex: ${ph.code}"
                            maxlength="3"
                            data-on-change="modifierNiveauTempHandler" data-niveau-index="${index}" data-champ="code"
@@ -3164,7 +3164,7 @@ function afficherNiveauxNouvelleEchelle() {
                     <label class="echelle-texte-detail" data-tooltip="cn-echelle-niveau">Nom du niveau</label>
                     <input type="text"
                            class="controle-form"
-                           value="${niveau.nom}"
+                           value="${echapperHtml(niveau.nom)}"
                            placeholder="Ex: ${ph.nom}"
                            data-on-change="modifierNiveauTempHandler" data-niveau-index="${index}" data-champ="nom"
                            style="font-weight: 500;">
@@ -3226,7 +3226,7 @@ function afficherNiveauxNouvelleEchelle() {
     if (apercuContainer) {
         const apercuHtml = niveaux.map(niveau => `
             <div style="text-align: center; flex: 1; padding: 10px; background: ${niveau.couleur}20; border-radius: 4px; margin: 0 2px;">
-                <strong style="font-size: 1.2rem; color: ${niveau.couleur};">${niveau.code || '?'}</strong>
+                <strong style="font-size: 1.2rem; color: ${niveau.couleur};">${echapperHtml(niveau.code || '?')}</strong>
                 <div class="echelle-texte-petit-mt5">${niveau.min}%-${niveau.max}%</div>
             </div>
         `).join('');
@@ -3421,7 +3421,7 @@ function afficherNiveauxEchelle(echelle) {
                     <label class="echelle-texte-detail">Code</label>
                     <input type="text"
                            class="controle-form"
-                           value="${niveau.code}"
+                           value="${echapperHtml(niveau.code)}"
                            maxlength="3"
                            data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}" data-champ="code"
                            style="font-weight: 600; text-align: center;">
@@ -3430,7 +3430,7 @@ function afficherNiveauxEchelle(echelle) {
                     <label class="echelle-texte-detail" data-tooltip="cn-echelle-niveau">Nom du niveau</label>
                     <input type="text"
                            class="controle-form"
-                           value="${niveau.nom}"
+                           value="${echapperHtml(niveau.nom)}"
                            data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}" data-champ="nom"
                            style="font-weight: 500;">
                 </div>
@@ -3491,7 +3491,7 @@ function afficherNiveauxEchelle(echelle) {
     if (apercuContainer) {
         const apercuHtml = echelle.niveaux.map(niveau => `
             <div style="text-align: center; flex: 1; padding: 10px; background: ${niveau.couleur}20; border-radius: 4px; margin: 0 2px;">
-                <strong style="font-size: 1.2rem; color: ${niveau.couleur};">${niveau.code}</strong>
+                <strong style="font-size: 1.2rem; color: ${niveau.couleur};">${echapperHtml(niveau.code)}</strong>
                 <div class="echelle-texte-petit-mt5">${niveau.min}%-${niveau.max}%</div>
             </div>
         `).join('');

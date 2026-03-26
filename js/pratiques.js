@@ -1606,12 +1606,12 @@ function afficherJetonsPersonnalises(jetonsPersonnalises) {
     liste.innerHTML = jetonsPersonnalises.map((jeton, index) => `
         <div style="padding: 10px; background: var(--bleu-tres-pale); border-radius: 6px; display: flex; flex-direction: column;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                <strong style="flex: 1;">${jeton.nom}</strong>
+                <strong style="flex: 1;">${echapperHtml(jeton.nom)}</strong>
                 <button type="button" class="btn btn-danger" data-action="supprimerTypeJetonPersonnalise" data-param="${index}" style="margin-left: 8px;">
                     Supprimer
                 </button>
             </div>
-            <p class="text-muted" style="margin: 0; font-size: 0.85rem;">${jeton.description}</p>
+            <p class="text-muted" style="margin: 0; font-size: 0.85rem;">${echapperHtml(jeton.description)}</p>
         </div>
     `).join('');
 }
@@ -2844,7 +2844,7 @@ function afficherPreviewGrilleWizard() {
     grille.criteres.forEach(critere => {
         html += `
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--surface-conteneur, #162c36); border-radius: 4px;">
-                <strong>${critere.nom}</strong>
+                <strong>${echapperHtml(critere.nom)}</strong>
                 <span style="color: var(--gris-moyen); font-size: 0.9rem;">${critere.ponderation}%</span>
             </div>
         `;
@@ -2979,7 +2979,7 @@ function afficherPreviewEchelleWizard() {
             <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: var(--surface-conteneur, #162c36); border-radius: 4px;">
                 <div style="width: 30px; height: 30px; border-radius: 4px; background: ${couleurStyle};"></div>
                 <div style="flex: 1;">
-                    <strong>${niveau.code} - ${niveau.nom}</strong>
+                    <strong>${echapperHtml(niveau.code)} - ${echapperHtml(niveau.nom)}</strong>
                     <div style="font-size: 0.85rem; color: var(--gris-moyen);">
                         Plage : ${Math.round(niveau.min)}-${Math.round(niveau.max)}% • Calcul : ${valeurCalculFormatee}%
                     </div>
@@ -3288,8 +3288,8 @@ function ajouterNiveauWizard(niveauDefaut = null) {
     div.style.cssText = 'display: grid; grid-template-columns: 80px 1fr 100px 80px 40px; gap: 10px; margin-bottom: 10px; padding: 12px; background: var(--surface-conteneur, #162c36); border-radius: 4px; border: 1px solid var(--gris-leger);';
 
     div.innerHTML = `
-        <input type="text" class="controle-form" placeholder="Code" value="${niveau.code}" data-field="code" style="padding: 6px;">
-        <input type="text" class="controle-form" placeholder="Label" value="${niveau.label}" data-field="label" style="padding: 6px;">
+        <input type="text" class="controle-form" placeholder="Code" value="${echapperHtml(niveau.code)}" data-field="code" style="padding: 6px;">
+        <input type="text" class="controle-form" placeholder="Label" value="${echapperHtml(niveau.label)}" data-field="label" style="padding: 6px;">
         <input type="number" class="controle-form" placeholder="%" value="${niveau.pct}" min="0" max="100" step="0.1" data-field="pct" style="padding: 6px;">
         <input type="color" class="controle-form" value="${niveau.couleur}" data-field="couleur" style="padding: 2px; height: 36px;">
         <button type="button" class="btn btn-tres-compact" data-action="retirerNiveauWizard" style="background: var(--rouge-erreur); color: white; padding: 6px;">🗑️</button>
@@ -3425,8 +3425,8 @@ function chargerEnsembleWizard() {
         div.className = 'objectif-item';
 
         div.innerHTML = `
-            <input type="text" class="controle-form" placeholder="Nom de l'objectif" data-field="nom" value="${obj.nom}" data-on-input="calculerTotalPoidsObjectifs">
-            <input type="number" class="controle-form" placeholder="Poids %" min="0" max="100" step="1" data-field="poids" value="${obj.poids}" data-on-input="calculerTotalPoidsObjectifs">
+            <input type="text" class="controle-form" placeholder="Nom de l'objectif" data-field="nom" value="${echapperHtml(obj.nom)}" data-on-input="calculerTotalPoidsObjectifs">
+            <input type="number" class="controle-form" placeholder="Poids %" min="0" max="100" step="1" data-field="poids" value="${echapperHtml(obj.poids)}" data-on-input="calculerTotalPoidsObjectifs">
             <select class="controle-form" data-field="type">
                 <option value="fondamental" ${obj.type === 'fondamental' ? 'selected' : ''}>Fondamental</option>
                 <option value="integrateur" ${obj.type === 'integrateur' ? 'selected' : ''}>Intégrateur</option>
