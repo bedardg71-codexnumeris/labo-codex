@@ -597,6 +597,14 @@ async function validerCodex(fichierZip) {
         return { valide: false, erreurs: ['Fichier ZIP invalide : ' + e.message] };
     }
 
+    // 2b. Validation sécurité ZIP (taille décompressée + path traversal)
+    if (typeof validerZipSecurite === 'function') {
+        var securite = validerZipSecurite(zip);
+        if (!securite.valide) {
+            return { valide: false, erreurs: [securite.erreur] };
+        }
+    }
+
     // 3. Vérifier la présence du manifeste (accepte aussi l'ancien nom)
     var entreeManifeste = zip.file(NOM_MANIFESTE) || zip.file(NOM_MANIFESTE_ANCIEN);
     if (!entreeManifeste) {
