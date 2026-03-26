@@ -2,51 +2,53 @@
 
 **Date** : 26 mars 2026
 **Version** : Beta 98.9 (Build 2503-1135)
-**Statut** : Audit sécurité et dette technique — Phase 1 à démarrer
+**Statut** : Audit sécurité terminé. Données à investiguer en prochaine session.
 
 ---
 
-## Chantier terminé : Assainissement sécurité (Phases 0-6)
+## Chantier terminé : Assainissement sécurité (Phases 0-6) + Audit
 
-### Bilan final
-| Phase | Description | Handlers | Commits |
-|-------|-------------|----------|---------|
-| 0 | Nettoyage artefacts sprint | — | `d9b6662` |
-| 1 | 2 vulnérabilités innerHTML | — | `d9b6662` |
-| 2 | 29 onmouseover/onfocus → CSS | 29 | `e0c5d47` |
-| 3 | 82 toggleAccordeonV2 | 82 | `654b7c6` |
-| 4 | 228 onclick index.html | 228 | `780a03b`, `c7f4643` |
-| 5 | ~721 handlers JS (56 fichiers) | ~721 | Lots 5.1-5.15 |
-| 5b | 212 handlers index.html | 212 | 4 segments parallèles |
-| 6 | Scripts inline externalisés + CSP | 9 blocs | `a923207` |
-| **Total** | | **~1302** | **18 commits** |
+### Bilan complet (25-26 mars 2026)
 
-**Résultat** : 0 handler inline exécutable. CSP `script-src 'self'` active. `init-inline.js` (917 lignes) externalisé.
+| Phase/Lot | Description | Résultat |
+|-----------|-------------|----------|
+| Phases 0-4 | Nettoyage + 228 onclick HTML | 339 handlers |
+| Phase 5 | ~721 handlers JS (56 fichiers) | 0 restant |
+| Phase 5b | 212 handlers index.html | 0 restant |
+| Phase 6 | Scripts externalisés + CSP | `script-src 'self'` |
+| **Audit A** | Sécurité imports ZIP | `validerZipSecurite()` + magic bytes |
+| **Audit B** | Catch vides | 62 → console.warn contextualisé |
+| **Audit D1-D2** | XSS innerHTML | 27 `echapperHtml()` ajoutés (6 fichiers) |
+| **Audit E** | Architecture db.js | Décisions documentées, FSAPI abort/error |
+| **Audit F** | SSoT indices, fichiers protégés | Stratégie cache documentée, fichiers intacts |
+| **Audit H** | Garde-fous CLAUDE.md | 5 règles non négociables ajoutées |
 
-### Architecture de délégation (référence)
-```
-Dispatcher click : data-action, data-param, data-param2, data-param3
-                   data-stop, data-prevent, data-close-on-bg
-Dispatcher change/input/keyup/mousedown/focusin :
-                   data-on-change, data-on-input, data-on-keyup,
-                   data-on-mousedown, data-on-focusin
-                   + data-param, data-param2
-Dispatcher dragstart : data-drag-data="type:value"
-```
+### Résultat audit : **Aucune faille critique. 0 dette technique non documentée.**
 
 ---
 
-## Chantier en cours : Audit sécurité et dette technique
+## Données à investiguer (prochaine session)
 
-### Plan de travail
-**Plan détaillé** : `plans de travail/Plan - Audit sécurité et dette technique.md`
-**Horodatage** : 26 mars 2026, 16h30
+### Contexte
+Le cours XSS de test (`601-XSS <img src=x...>`) du sprint 22 mars a été supprimé. Les groupe-cours ont été reconfigurés. Le `coursId` des élèves du groupe 00002 a été corrigé (`COURS1766455789356` → `h2026-601-101-MQ-00001`).
 
-### Phases
-1. **Corrections immédiates** : Lot A (imports ZIP), Lot B (catch vides), Lot C (ObjectURL), Lot D1 (innerHTML boite-outils), Lot D2 (triage innerHTML)
-2. **Audit lecture seule** : Lot E-arch (écritures async, cache dual), Lot E-fact (Codex, double-stringify), Lot F (SSoT indices, fichiers protégés, données démo)
-3. **Garde-fous pérennes** : Lot H (règles CLAUDE.md), Lot G (console.log optionnel)
+### Reste à vérifier
+- Présences, évaluations, productions : vérifier si leur `coursId` matche aussi
+- Graphiques vides dans le tableau de bord : probablement même problème de `coursId`
+- « Aucun artefact défini » : productions possiblement liées à l'ancien coursId
+- Données du groupe 00008 : vérifier cohérence
 
 ### Pour reprendre
-1. Lire ce fichier → plan détaillé → commencer par Lot A (validerZipSecurite)
-2. Charger les skills : `Skills pour Claude Code/SKILL_labo_codex.md`
+1. Lire ce fichier → vérifier `coursId` sur presences/evaluations/productions
+2. Pattern de diagnostic : `db.getSync(cle('KEY'))?.slice(0,2).map(e => ({id: e.id, coursId: e.coursId}))`
+3. Si coursId incorrect → corriger comme pour groupeEtudiants
+
+---
+
+## Architecture de délégation (référence)
+```
+Dispatcher click : data-action, data-param/2/3, data-stop, data-prevent, data-close-on-bg
+Dispatcher change/input/keyup/mousedown/focusin : data-on-change, etc. + data-param/2
+Dispatcher dragstart : data-drag-data="type:value"
+CSP : script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:
+```
