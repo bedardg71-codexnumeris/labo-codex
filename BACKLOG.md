@@ -94,6 +94,19 @@
   - Le PDF exporté montre clairement le jeton appliqué (pas seulement en métadonnées)
   - **Module** : `js/travaux-annotation.js`, panneau jetons dans `js/evaluation.js`
 
+### Codex — Comparaison et portabilite (26 mars 2026)
+
+- [ ] **#243** Codex : Rapport de comparaison en texte exportable (pas alert())
+  - Actuellement la comparaison affiche un `alert()` non copiable et tronque
+  - Remplacer par une modale avec texte selectionnable + bouton Copier/Exporter
+  - Afficher toutes les differences d'un coup (pas un detail a la fois)
+  - **Module** : `js/codex.js` (fonction `actionComparer` ou equivalent)
+
+- [ ] **#244** Codex : Identifier le navigateur source dans le manifeste
+  - Ajouter `navigateur` (ex: "Chrome 146 / macOS") et `userAgent` au manifeste du codex
+  - Facilite le diagnostic quand un codex Safari et un codex Chrome divergent
+  - **Module** : `js/codex.js` (fonction `genererCodex`)
+
 ### Simplification UX Codex
 
 - [ ] **#233** UX : Simplifier le flux Codex pour l'utilisateur lambda (Mac + iPad)
