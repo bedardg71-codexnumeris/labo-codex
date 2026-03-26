@@ -294,7 +294,7 @@ function afficherResultat(resultats) {
         const e = resultats[0];
         affichage.innerHTML = `
             <div class="tirage-resultat-unique">
-                <span class="tirage-nom-complet">${e.prenom} ${e.nom}</span>
+                <span class="tirage-nom-complet">${echapperHtml(e.prenom)} ${echapperHtml(e.nom)}</span>
             </div>
         `;
     } else {
@@ -304,7 +304,7 @@ function afficherResultat(resultats) {
                 ${resultats.map((e, i) => `
                     <div class="tirage-resultat-item">
                         <span class="tirage-numero">${i + 1}</span>
-                        <span class="tirage-nom-complet">${e.prenom} ${e.nom}</span>
+                        <span class="tirage-nom-complet">${echapperHtml(e.prenom)} ${echapperHtml(e.nom)}</span>
                     </div>
                 `).join('')}
             </div>
@@ -326,7 +326,7 @@ function afficherMessageTirage(message, type = 'info') {
     const affichage = document.getElementById('tirage-affichage');
     if (!affichage) return;
 
-    affichage.innerHTML = `<span class="tirage-message tirage-message-${type}">${message}</span>`;
+    affichage.innerHTML = `<span class="tirage-message tirage-message-${echapperHtml(type)}">${echapperHtml(message)}</span>`;
 }
 
 /* ===============================
@@ -698,7 +698,7 @@ function animerRouletteQuestion(pool, resultat) {
         // Afficher une question aléatoire
         const q = pool[Math.floor(Math.random() * pool.length)];
         const texteAffiche = q.texte.length > 80 ? q.texte.substring(0, 80) + '...' : q.texte;
-        affichage.innerHTML = `<span class="question-texte-anime">${texteAffiche}</span>`;
+        affichage.innerHTML = `<span class="question-texte-anime">${echapperHtml(texteAffiche)}</span>`;
 
         // Ralentir progressivement
         const easeOut = 1 - Math.pow(1 - progression, 3);
@@ -727,7 +727,7 @@ function afficherResultatQuestion(question) {
 
     affichage.innerHTML = `
         <div class="question-resultat">
-            <span class="question-texte-final">${question.texte}</span>
+            <span class="question-texte-final">${echapperHtml(question.texte)}</span>
         </div>
     `;
 
@@ -745,7 +745,7 @@ function afficherMessageQuestion(message, type = 'info') {
     const affichage = document.getElementById('questions-affichage');
     if (!affichage) return;
 
-    affichage.innerHTML = `<span class="question-message question-message-${type}">${message}</span>`;
+    affichage.innerHTML = `<span class="question-message question-message-${echapperHtml(type)}">${echapperHtml(message)}</span>`;
 }
 
 /* ===============================
