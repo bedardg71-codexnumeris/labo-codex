@@ -240,10 +240,10 @@ function addStudent() {
             const accordeonGroupe = document.getElementById('accordeon-groupe');
             let btnAjouter = null;
             if (accordeonGroupe) {
-                btnAjouter = accordeonGroupe.querySelector('button[onclick*="addStudent"]');
+                btnAjouter = accordeonGroupe.querySelector('button[data-action="addStudent"], button[data-action="ajouterEtudiant"]');
             }
             if (!btnAjouter) {
-                btnAjouter = document.querySelector('button[onclick*="addStudent"]');
+                btnAjouter = document.querySelector('button[data-action="addStudent"], button[data-action="ajouterEtudiant"]');
             }
             if (btnAjouter) {
                 btnAjouter.textContent = 'Ajouter';
@@ -970,13 +970,10 @@ function modifierEtudiant(da) {
         // Changer le texte du bouton (chercher addStudent ou ajouterEtudiant)
         let btnAjouter = null;
         if (accordeonGroupe) {
-            btnAjouter = accordeonGroupe.querySelector('button[onclick*="addStudent"]');
+            btnAjouter = accordeonGroupe.querySelector('button[data-action="addStudent"], button[data-action="ajouterEtudiant"]');
         }
         if (!btnAjouter) {
-            btnAjouter = document.querySelector('button[onclick*="ajouterEtudiant"]');
-        }
-        if (!btnAjouter) {
-            btnAjouter = document.querySelector('button[onclick*="addStudent"]');
+            btnAjouter = document.querySelector('button[data-action="ajouterEtudiant"], button[data-action="addStudent"]');
         }
 
         if (btnAjouter) {
