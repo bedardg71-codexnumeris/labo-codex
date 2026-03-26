@@ -121,7 +121,7 @@ function initialiserModuleSnapshots() {
                     localStorage.setItem(cleSnap, JSON.stringify(snapshotsFrais));
                 } catch (e) {
                     // QuotaExceeded — memoryCache suffit
-                    try { localStorage.removeItem(cleSnap); } catch (ex) { /* ignore */ }
+                    try { localStorage.removeItem(cleSnap); } catch (ex) { console.warn('[Snapshots] localStorage.removeItem skipped:', cleSnap, ex.message || ex); }
                 }
             } else {
                 // Vraiment première utilisation — créer la structure
@@ -254,7 +254,7 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
     try {
         const cadreHist = db.getSync(cle('cadreCalendrier'), null);
         if (cadreHist && cadreHist.dateDebut) dateDebutTrimestreHist = cadreHist.dateDebut;
-    } catch (e) { /* silencieux */ }
+    } catch (e) { console.warn('[Snapshots] cadreCalendrier read skipped:', e.message || e); }
     const productionsDues = productions.filter(production => {
         if (production.facultatif) return false;
         if (production.type === 'portfolio') return false;
@@ -506,7 +506,7 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
         try {
             const cadreSnap = db.getSync(cle('cadreCalendrier'), null);
             if (cadreSnap && cadreSnap.dateDebut) dateDebutTrimestreSnap = cadreSnap.dateDebut;
-        } catch (e) { /* silencieux */ }
+        } catch (e) { console.warn('[Snapshots] cadreCalendrier read skipped:', e.message || e); }
         const productionsDues = productions.filter(p => {
             if (p.facultatif || p.type === 'portfolio') return false;
             const { date, assignee } = obtenirEcheanceEffective(p, gcIdSnapshot);
@@ -970,7 +970,7 @@ async function reconstruireSnapshotsHistoriques() {
                     db.memoryCache.set(cleSnap, snapshotsFrais);
                 }
                 // 3. Supprimer la version périmée dans localStorage
-                try { localStorage.removeItem(cleSnap); } catch (ex) { /* ignore */ }
+                try { localStorage.removeItem(cleSnap); } catch (ex) { console.warn('[Snapshots] localStorage.removeItem skipped:', cleSnap, ex.message || ex); }
                 // 4. Essayer de mettre à jour localStorage aussi
                 try {
                     localStorage.setItem(cleSnap, JSON.stringify(snapshotsFrais));
@@ -1092,7 +1092,7 @@ async function afficherStatutSnapshots() {
         try {
             snapshots = await db.get(cleSnap);
             source = 'IndexedDB';
-        } catch (e) { /* fallback getSync */ }
+        } catch (e) { console.warn('[Snapshots] IndexedDB read failed, fallback getSync:', e.message || e); }
     }
     if (!snapshots) {
         snapshots = db.getSync(cleSnap, { hebdomadaires: [], interventions: [] });

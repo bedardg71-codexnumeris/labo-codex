@@ -394,7 +394,7 @@ function _capturerImageBase64(tamponId) {
             canvas.getContext('2d').drawImage(img, 0, 0);
             return canvas.toDataURL('image/png');
         }
-    } catch (e) { /* ignore */ }
+    } catch (e) { console.warn('[Tampons] image base64 capture failed:', e.message || e); }
     return '';
 }
 

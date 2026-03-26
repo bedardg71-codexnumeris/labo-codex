@@ -4197,7 +4197,7 @@ function genererBandeauContexteProfil() {
     try {
         const prefs = db.getSync('preferencesAffichage') || {};
         afficher = prefs.afficherContexteGraphiques !== false;
-    } catch (e) { /* défaut: true */ }
+    } catch (e) { console.warn('[Profil] preferencesAffichage read fallback (default: true):', e.message || e); }
     if (!afficher) return '';
 
     // Trimestre
@@ -4307,7 +4307,7 @@ function genererSectionProgression(da) {
             (e.jetonRepriseApplique || e.repriseDeId ||
              e.jetonRepriseCibleeApplique || e.repriseDeIdCiblee)
         );
-    } catch (e) { /* silencieux */ }
+    } catch (e) { console.warn('[Profil] jetons reprise detection skipped:', e.message || e); }
 
     // Créer le HTML avec le canvas
     const checkboxSansReprises = aDesJetonsReprise ? `

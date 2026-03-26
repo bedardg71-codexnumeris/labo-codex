@@ -128,14 +128,14 @@ function migrerDonneesProto() {
     try {
         const json = localStorage.getItem(PROTO_CLE_INDEX);
         if (json) protoIndex = JSON.parse(json);
-    } catch (e) { /* ignorer */ }
+    } catch (e) { console.warn('[Planif-Donnees] proto index JSON parse fallback:', e.message || e); }
 
     // Vérifier aussi l'ancien format unique
     let ancienneCarteUnique = null;
     try {
         const json = localStorage.getItem('proto_carte_mentale');
         if (json) ancienneCarteUnique = JSON.parse(json);
-    } catch (e) { /* ignorer */ }
+    } catch (e) { console.warn('[Planif-Donnees] legacy carte JSON parse fallback:', e.message || e); }
 
     if (!protoIndex && !ancienneCarteUnique) return false; // Rien à migrer
 
@@ -172,7 +172,7 @@ function migrerDonneesProto() {
             try {
                 const json = localStorage.getItem(PROTO_PREFIXE + carte.id);
                 if (json) cartes[carte.id] = JSON.parse(json);
-            } catch (e) { /* ignorer */ }
+            } catch (e) { console.warn('[Planif-Donnees] carte migration JSON parse fallback:', carte.id, e.message || e); }
         }
 
         const donnees = {

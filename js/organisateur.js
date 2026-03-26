@@ -235,7 +235,7 @@ function sauvegarderSelectionsOrg() {
             sequence: selectSequence ? selectSequence.value : '',
             lecon: selectLecon ? selectLecon.value : ''
         }));
-    } catch(e) {}
+    } catch(e) { console.warn('[Organisateur] localStorage save selections skipped:', e.message || e); }
 }
 
 function chargerSelectionsOrg() {
@@ -1735,7 +1735,7 @@ function sauvegarderSeances(seances) {
     try {
         var cleSeances = window.planificationCarte ? window.planificationCarte.CLE_SEANCES : 'planification_seances';
         db.setSync(window.cle(cleSeances), seances);
-    } catch(e) {}
+    } catch(e) { console.warn('[Organisateur] sauvegarderSeances skipped:', e.message || e); }
 }
 
 function sauvegarderDonneeLecon(leconId, cle, valeur) {

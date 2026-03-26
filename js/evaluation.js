@@ -3218,7 +3218,7 @@ function genererRetroactionBilan() {
             .filter(function(e) { return e.etudiantDA === da && !e.remplaceeParId; })
             .sort(function(a, b) { return new Date(b.dateEvaluation) - new Date(a.dateEvaluation); })
             .slice(0, 5);
-    } catch(e) { /* silencieux */ }
+    } catch(e) { console.warn('[Evaluation] historique eleve load skipped:', e.message || e); }
     var evalPrecedente = historiqueEleve.length > 0 ? historiqueEleve[0] : null;
 
     // Grille pour descriptions
@@ -3226,7 +3226,7 @@ function genererRetroactionBilan() {
     try {
         var grilles = db.getSync('grillesTemplates', []);
         grilleDef = grilles.find(function(g) { return g.id === ec.grilleId; }) || null;
-    } catch(e) { /* silencieux */ }
+    } catch(e) { console.warn('[Evaluation] grille lookup skipped:', e.message || e); }
 
     // Critères actuels depuis evaluationEnCours
     var criteres = [];
@@ -3328,7 +3328,7 @@ function genererRetroactionBilan() {
                     html += '<p class="retro-jetons">Jetons restants : ' + jetonsTextes.join(', ') + '.</p>';
                 }
             }
-        } catch(e) { /* silencieux */ }
+        } catch(e) { console.warn('[Evaluation] jetons restants calculation skipped:', e.message || e); }
     }
 
     // Question métacognitive

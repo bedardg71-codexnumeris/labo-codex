@@ -129,7 +129,7 @@
             const obj = raw ? JSON.parse(raw) : {};
             obj[key] = width;
             localStorage.setItem(STORAGE_KEY_PANNEAUX, JSON.stringify(obj));
-        } catch (_) { /* quota ou JSON invalide */ }
+        } catch (_) { console.warn('[Travaux-UI] panel width save skipped (quota or invalid JSON):', _.message || _); }
     }
 
     function obtenirLargeurPanneau(key) {
@@ -162,7 +162,7 @@
                 delete obj['eval-retro'];
                 localStorage.setItem(STORAGE_KEY_PANNEAUX, JSON.stringify(obj));
             }
-        } catch (_) { /* ignore */ }
+        } catch (_) { console.warn('[Travaux-UI] eval widths migration skipped:', _.message || _); }
         localStorage.setItem(MIGRATION_KEY, '1');
     })();
 
@@ -268,7 +268,7 @@
                     delete obj[storageKey];
                     localStorage.setItem(STORAGE_KEY_PANNEAUX, JSON.stringify(obj));
                 }
-            } catch (_) { /* ignore */ }
+            } catch (_) { console.warn('[Travaux-UI] panel width reset skipped:', _.message || _); }
         });
 
         return handle;
@@ -359,7 +359,7 @@
                     delete obj[storageKey];
                     localStorage.setItem(STORAGE_KEY_PANNEAUX, JSON.stringify(obj));
                 }
-            } catch (_) { /* ignore */ }
+            } catch (_) { console.warn('[Travaux-UI] panel width reset skipped:', _.message || _); }
         });
 
         return handle;
@@ -3564,7 +3564,7 @@
                         const result = await travauxStockage.genererMiniaturePDF(pdfBlob);
                         f.thumbnailDataUrl = result.thumbnail;
                         f.nombrePages = result.nombrePages;
-                    } catch (e) {}
+                    } catch (e) { console.warn('[Travaux-UI] PDF thumbnail regeneration failed:', e.message || e); }
                 }
 
                 console.log(`[Pipeline] Groupe "${cle}" assemble : ${images.length} images → 1 PDF`);
@@ -5764,7 +5764,7 @@
             const configurations = db.getSync('pratiquesConfigurables', []);
             const pratiqueActive = pratiqueId ? configurations.find(p => p.id === pratiqueId) : null;
             if (pratiqueActive?.affichageNote === 'lettre') modeNote = 'lettre';
-        } catch(e) { /* fallback complet */ }
+        } catch(e) { console.warn('[Travaux-UI] pratique affichageNote fallback:', e.message || e); }
 
         let noteHTML;
         if (modeNote === 'lettre') {

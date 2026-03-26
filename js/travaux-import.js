@@ -1027,12 +1027,12 @@
                 // Regenerer la miniature
                 let thumbnail = '';
                 if (estImage(typeMIME)) {
-                    try { thumbnail = await travauxStockage.genererMiniatureImage(blob); } catch (e) {}
+                    try { thumbnail = await travauxStockage.genererMiniatureImage(blob); } catch (e) { console.warn('[Travaux-Import] image thumbnail generation failed:', e.message || e); }
                 } else if (estPDF(typeMIME)) {
                     try {
                         const result = await travauxStockage.genererMiniaturePDF(blob);
                         thumbnail = result.thumbnail;
-                    } catch (e) {}
+                    } catch (e) { console.warn('[Travaux-Import] PDF thumbnail generation failed:', e.message || e); }
                 }
                 if (thumbnail && idx !== -1) {
                     fichiers[idx].thumbnailDataUrl = thumbnail;

@@ -1104,7 +1104,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                 ? JSON.parse(config.infoCours)
                 : config.infoCours;
             auteurImport = extraireNomEnseignant(infoCoursImport);
-        } catch (e) { /* ignore */ }
+        } catch (e) { console.warn('[Import-Export] auteur import extraction skipped:', e.message || e); }
     }
 
     // Déterminer si c'est un collègue (auteurs différents ET non vides)
@@ -1644,7 +1644,7 @@ function analyserRessourcesDetaillees(config) {
                 travauxFolder.forEach(function() { nbBlobs++; });
                 result.fichiersTravaux.nbBlobsZip = nbBlobs;
             }
-        } catch (e) { /* ignore */ }
+        } catch (e) { console.warn('[Import-Export] ZIP travaux blob count skipped:', e.message || e); }
     }
 
     // Totaux

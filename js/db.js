@@ -246,7 +246,7 @@
                         // 🆕 Beta 95.5 : Stocker dans memoryCache pour accès synchrone
                         this.memoryCache.set(key, value);
                         // Supprimer du cache localStorage si elle y était
-                        try { localStorage.removeItem(key); } catch (ex) { /* ignore */ }
+                        try { localStorage.removeItem(key); } catch (ex) { console.warn('[DB] localStorage.removeItem skipped:', key, ex.message || ex); }
                     } else {
                         // Autre erreur, la remonter
                         throw e;
@@ -502,7 +502,7 @@
                         req.onsuccess = () => resolve(req.result);
                         req.onerror = () => resolve(0);
                     });
-                } catch (e) { /* ignore */ }
+                } catch (e) { console.warn('[DB] blob count query skipped:', e.message || e); }
             }
 
             return {
@@ -595,7 +595,7 @@
                             (e.message && e.message.toLowerCase().includes('quota'))) {
                             console.warn(`[DB] ⚠️ Clé "${key}" trop grande pour localStorage (${this._estimateSize(value)} bytes), utilisation cache mémoire`);
                             // Supprimer la version périmée de localStorage
-                            try { localStorage.removeItem(key); } catch (ex) { /* ignore */ }
+                            try { localStorage.removeItem(key); } catch (ex) { console.warn('[DB] localStorage.removeItem skipped:', key, ex.message || ex); }
                             this.memoryCache.set(key, value);
                             inMemory++;
                         } else {
@@ -834,7 +834,7 @@
                     if (this.ready && this.useIndexedDB) {
                         console.warn(`[DB] ⚠️ Quota localStorage dépassé pour "${key}" (${this._estimateSize(value)} bytes), utilisation cache mémoire + IndexedDB`);
                         // Supprimer du localStorage pour libérer de l'espace
-                        try { localStorage.removeItem(key); } catch (ex) { /* ignore */ }
+                        try { localStorage.removeItem(key); } catch (ex) { console.warn('[DB] localStorage.removeItem skipped:', key, ex.message || ex); }
                         // Stocker dans le cache mémoire pour accès synchrone
                         this.memoryCache.set(key, value);
                     } else {
@@ -977,7 +977,7 @@
         } catch (e) {
             // Si l'ancienne base n'existe pas, l'ouverture crée une base vide v1
             // On la supprime simplement
-            try { indexedDB.deleteDatabase('MonitorageFichiers'); } catch (ex) { /* ignore */ }
+            try { indexedDB.deleteDatabase('MonitorageFichiers'); } catch (ex) { console.warn('[DB] deleteDatabase skipped:', ex.message || ex); }
             db.setSync('_migration_fichiers_done', true);
             console.log('[DB] Migration fichiers : ancienne base inexistante, marquée fait');
         }

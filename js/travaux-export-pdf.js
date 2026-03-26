@@ -680,7 +680,7 @@
                     nomEnseignant = ens.prenom + ' ' + ens.nom;
                 }
             }
-        } catch(e) { /* silencieux */ }
+        } catch(e) { console.warn('[PDF-Export] enseignant name lookup skipped:', e.message || e); }
 
         // Cours actif pour le pied de page (via groupe-cours du trimestre)
         let codeCoursPied = '';
@@ -702,7 +702,7 @@
                     }
                 }
             }
-        } catch(e) { /* silencieux */ }
+        } catch(e) { console.warn('[PDF-Export] cours code lookup skipped:', e.message || e); }
 
         // Construire le texte du pied de page gauche
         let textePiedGauche = '';
@@ -839,7 +839,7 @@
         try {
             const productions = obtenirDonneesSelonMode(cle('productions'));
             production = productions.find(p => p.id === evaluation.productionId) || null;
-        } catch(e) { /* silencieux */ }
+        } catch(e) { console.warn('[PDF-Export] production lookup skipped:', e.message || e); }
         try {
             const coursCollection = db.getSync('cours', []);
             if (production && production.coursId) {
@@ -849,7 +849,7 @@
             if (!cours && coursCollection.length > 0) {
                 cours = coursCollection.find(c => c.actif) || coursCollection[0];
             }
-        } catch(e) { /* silencieux */ }
+        } catch(e) { console.warn('[PDF-Export] cours lookup skipped:', e.message || e); }
 
         // Nom du cours et code
         if (cours && (cours.codeCours || cours.nomCours)) {
@@ -875,7 +875,7 @@
         try {
             const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
             etudiant = etudiants.find(e => e.da === fichier.etudiantDA) || null;
-        } catch(e) { /* silencieux */ }
+        } catch(e) { console.warn('[PDF-Export] etudiant lookup skipped:', e.message || e); }
 
         doc.setFontSize(cfg.polices.texteNormal);
         doc.setFont('helvetica', 'normal');
@@ -919,7 +919,7 @@
             try {
                 const cartouches = db.getSync('cartouches_' + evaluation.grilleId, []);
                 cartouchePdf = cartouches.find(function(c) { return c.id === evaluation.cartoucheId; }) || null;
-            } catch(e) { /* silencieux */ }
+            } catch(e) { console.warn('[PDF-Export] cartouche lookup skipped:', e.message || e); }
         }
 
         if (evaluation.criteres && evaluation.criteres.length > 0) {
@@ -947,7 +947,7 @@
             try {
                 const grilles = db.getSync('grillesTemplates', []);
                 grilleDef = grilles.find(g => g.id === evaluation.grilleId) || null;
-            } catch(e) { /* silencieux */ }
+            } catch(e) { console.warn('[PDF-Export] grille lookup skipped:', e.message || e); }
 
             // Trier : forces (M/E) en premier, defis (I/D) ensuite
             const ordreNiveau = { 'E': 0, 'M': 1, 'D': 2, 'I': 3 };
@@ -1059,7 +1059,7 @@
                 const configurations = db.getSync('pratiquesConfigurables', []);
                 const pratiqueActive = pratiqueId ? configurations.find(p => p.id === pratiqueId) : null;
                 if (pratiqueActive && pratiqueActive.affichageNote) modeNote = pratiqueActive.affichageNote;
-            } catch(e) { /* silencieux */ }
+            } catch(e) { console.warn('[PDF-Export] pratique affichageNote fallback:', e.message || e); }
         }
         if (!modeNote) modeNote = 'complet';
 
@@ -1114,7 +1114,7 @@
                 .filter(function(e) { return e.etudiantDA === da && !e.remplaceeParId && e.id !== evaluation.id; })
                 .sort(function(a, b) { return new Date(b.dateEvaluation) - new Date(a.dateEvaluation); })
                 .slice(0, 5);
-        } catch(e) { /* silencieux */ }
+        } catch(e) { console.warn('[PDF-Export] historique eleve load skipped:', e.message || e); }
         var evalPrecedente = historiqueEleve.length > 0 ? historiqueEleve[0] : null;
 
         // Charger la grille pour les descriptions de criteres
@@ -1122,7 +1122,7 @@
         try {
             var grillesBilan = db.getSync('grillesTemplates', []);
             grilleBilan = grillesBilan.find(function(g) { return g.id === evaluation.grilleId; }) || null;
-        } catch(e) { /* silencieux */ }
+        } catch(e) { console.warn('[PDF-Export] grille bilan lookup skipped:', e.message || e); }
 
         // Detecter les patrons recurrents (I/D sur 3 productions)
         var nomsPatrons = [];
@@ -1282,7 +1282,7 @@
                         bilanLignes.push({ type: 'jetons', texte: 'Jetons restants : ' + jetonsTextes.join(', ') + '.' });
                     }
                 }
-            } catch(e) { /* silencieux */ }
+            } catch(e) { console.warn('[PDF-Export] jetons restants calculation skipped:', e.message || e); }
         }
 
         // Question metacognitive
@@ -1442,7 +1442,7 @@
             try {
                 var cc = db.getSync('couleursCategories', null) || {};
                 for (var k in cc) couleursParCat[k] = _hexVersRgb(cc[k]);
-            } catch(e) { /* silencieux */ }
+            } catch(e) { console.warn('[PDF-Export] couleurs categories load skipped:', e.message || e); }
 
             for (const catId of ordreCategories) {
                 const tamponsCat = autocollantsDef.filter(a => !a.legacy && a.categorie === catId);
@@ -1466,7 +1466,7 @@
                 try {
                     var ccRaw = db.getSync('couleursCategories', null) || {};
                     hexCat = ccRaw[catId] || null;
-                } catch(e) { /* silencieux */ }
+                } catch(e) { console.warn('[PDF-Export] hex couleur categorie load skipped:', e.message || e); }
 
                 for (let i = 0; i < tamponsUtilises.length; i++) {
                     const a = tamponsUtilises[i];
@@ -1727,7 +1727,7 @@
                     const pId = mods.pratique;
                     const pActive = pId ? (cfgs.find(p => p.id === pId) || cfgs.find(p => p.type === pId)) : null;
                     if (pActive?.affichageNote === 'lettre') modeNotePreview = 'lettre';
-                } catch(e) { /* fallback complet */ }
+                } catch(e) { console.warn('[PDF-Export] pratique affichageNote preview fallback:', e.message || e); }
             }
 
             if (modeNotePreview === 'lettre') {

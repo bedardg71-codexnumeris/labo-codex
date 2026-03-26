@@ -89,7 +89,7 @@
         // 🔧 FIX (5 mars 2026) : Nettoyer l'ancien document PDF et le cache de pages
         // avant d'ouvrir le nouveau fichier, pour éviter un flash de contenu stale.
         if (pdfDocument) {
-            try { pdfDocument.cleanup(); } catch (_) { /* ignore */ }
+            try { pdfDocument.cleanup(); } catch (_) { console.warn('[Visionneuse] PDF cleanup skipped:', _.message || _); }
             pdfDocument = null;
         }
         cachePages.clear();
@@ -926,7 +926,7 @@
             } else {
                 conteneurGestesZoom.classList.remove('travaux-pan-pret');
             }
-            try { conteneurGestesZoom.releasePointerCapture(e.pointerId); } catch(ex) {}
+            try { conteneurGestesZoom.releasePointerCapture(e.pointerId); } catch(ex) { console.warn('[Visionneuse] pointer release skipped:', ex.message || ex); }
         }
     }
 

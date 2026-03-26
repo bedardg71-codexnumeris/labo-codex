@@ -274,7 +274,7 @@ function definirTooltips(etat) {
         const prefs = window.db ? window.db.getSync('preferencesAffichage', {}) : {};
         prefs.tooltips = actif;
         if (window.db) window.db.setSync('preferencesAffichage', prefs);
-    } catch (e) { /* silencieux */ }
+    } catch (e) { console.warn('[Tooltips] preference save skipped:', e.message || e); }
 }
 
 // Initialisation : lire la preference et synchroniser le checkbox
