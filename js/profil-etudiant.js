@@ -9043,7 +9043,7 @@ function mettreAJourSousCategories() {
 
     const sousCategories = SOUS_CATEGORIES_SERVICES[categorie] || [];
     selectSousCategorie.innerHTML = '<option value="">-- Sélectionner --</option>' +
-        sousCategories.map(sc => `<option value="${sc}">${sc}</option>`).join('');
+        sousCategories.map(sc => `<option value="${echapperHtml(sc)}">${echapperHtml(sc)}</option>`).join('');
 }
 
 /**

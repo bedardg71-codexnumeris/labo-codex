@@ -6009,8 +6009,8 @@ function afficherIndicateurModeModification(evaluation) {
         <div class="u-flex-1">
             <strong>MODE MODIFICATION</strong><br>
             <span style="font-size: 0.9rem; opacity: 0.95;">
-                Tu modifies l'évaluation de <strong>${evaluation.etudiantNom}</strong>
-                pour <strong>${evaluation.productionNom}</strong><br>
+                Tu modifies l'évaluation de <strong>${echapperHtml(evaluation.etudiantNom)}</strong>
+                pour <strong>${echapperHtml(evaluation.productionNom)}</strong><br>
                 Évaluation initiale : ${dateEval}
             </span>
         </div>
