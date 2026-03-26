@@ -15,6 +15,17 @@
    - calculerAssiduitePourAffichage(da, dateStr, periodesSeanceActuelle) → ici
    - calculerEtStockerIndicesCP() → portfolio.js
 
+   STRATÉGIE CACHE (audit 26 mars 2026) :
+   - Les indices sont recalculés à la demande par les modules lecteurs
+     (profil-etudiant, tableau-bord-apercu) via calculerTousLesIndices().
+   - Les valeurs sont aussi persistées (cle('indicesAssiduite'), cle('indicesCP'))
+     et lues par evaluation.js et portfolio.js sans recalcul.
+   - Pas d'invalidation automatique : si des présences/évaluations changent,
+     les indices stockés peuvent être stale jusqu'au prochain recalcul.
+   - Ce compromis est accepté : les modules qui affichent les indices
+     recalculent toujours (SSoT respecté en lecture), et les modules qui
+     lisent le cache (portfolio, évaluation) tolèrent un léger décalage.
+
    DÉPENDANCES (chargées avant) :
    - db.js → db.getSync(), db.setSync()
    - modes.js → obtenirDonneesSelonMode(), sauvegarderDonneesSelonMode(), cle()

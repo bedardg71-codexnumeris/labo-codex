@@ -785,9 +785,18 @@ function fermerCodex() {
  * @returns {Promise<void>}
  */
 async function _ecrireViaHandle(handle, blob) {
+    // FSAPI atomicité : createWritable() écrit dans un fichier temporaire.
+    // close() remplace l'original atomiquement. abort() annule sans corruption.
+    // Si crash avant close(), l'ancien fichier est préservé (comportement Chrome).
     var writable = await handle.createWritable();
-    await writable.write(blob);
-    await writable.close();
+    try {
+        await writable.write(blob);
+        await writable.close();
+    } catch (e) {
+        // Écriture échouée → avorter proprement sans corrompre le fichier original
+        try { await writable.abort(); } catch (_) { /* ignore abort error */ }
+        throw e;
+    }
 }
 
 /**
