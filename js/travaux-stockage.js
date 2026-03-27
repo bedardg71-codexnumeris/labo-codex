@@ -325,7 +325,10 @@
             nomFichierLea: metadonnees.nomFichierLea || '',
             leaParsed: metadonnees.leaParsed || null,
             groupeDocumentId: metadonnees.groupeDocumentId || '',
-            format11x17: metadonnees.format11x17 || false
+            format11x17: metadonnees.format11x17 || false,
+            // Jeton de reprise
+            evaluationId: metadonnees.evaluationId || '',
+            estReprise: metadonnees.estReprise || false
         };
 
         fichiers.push(fichier);

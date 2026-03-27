@@ -8581,6 +8581,14 @@ summary.summary-materiel:hover {
     color: var(--texte-principal, #d0e0e4);
 }
 
+/* Score original affiché dans le badge reprise */
+.badge-jeton-original {
+    font-size: 0.65rem;
+    opacity: 0.7;
+    font-weight: 400;
+    color: var(--texte-principal, #d0e0e4);
+}
+
 /* Numéro d'artefact dans le badge jeton */
 .badge-jeton-numero {
     padding: 2px 8px;

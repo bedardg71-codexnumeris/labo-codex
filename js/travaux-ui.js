@@ -1420,11 +1420,16 @@
         const nbImages = queue.filter(f => f.estImage).length;
         const productions = obtenirDonneesSelonMode(cle('productions'));
 
-        // Production globale actuelle (prendre celle du premier fichier qui en a une, ou la valeur persistée)
-        const prodActuelle = queue.find(f => f.productionId)?.productionId
-            || travauxImport.getProductionGlobale()
+        // Production globale actuelle (prioriser le choix explicite de l'utilisateur)
+        const prodActuelle = travauxImport.getProductionGlobale()
+            || queue.find(f => f.productionId && !f.productionIdParLea)?.productionId
             || sessionStorage.getItem('travaux-pipeline-production')
             || '';
+
+        // Jetons de reprise : vérifier si le système est actif
+        const configJetons = (typeof obtenirConfigJetons === 'function') ? obtenirConfigJetons() : null;
+        const jetonsActifs = configJetons && configJetons.actif;
+        const modeJetonActif = queue.some(f => f.estReprise);
 
         // === Colonne gauche : Originaux (apercu pre-traitement) ===
         // Index des groupes multi-fichiers pour affichage visuel
@@ -1502,8 +1507,22 @@
             <select class="form-select" id="pipeline-select-production" data-on-change="travauxUI.associerProductionGlobale">
                 <option value="">-- Choisir une production --</option>
                 ${productions.map(p => `<option value="${p.id}" ${prodActuelle === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
+                ${jetonsActifs ? `<option value="__jeton_reprise__" ${prodActuelle === '__jeton_reprise__' || modeJetonActif ? 'selected' : ''}>Jeton de reprise</option>` : ''}
             </select>
         </div>`;
+        // Sous-sélecteur : quelle production le jeton cible-t-il ?
+        if (prodActuelle === '__jeton_reprise__' || modeJetonActif) {
+            const prodJeton = queue.find(f => f.estReprise && f.productionId)?.productionId
+                || sessionStorage.getItem('travaux-jeton-production')
+                || '';
+            colCentre += `<div class="pipeline-jeton-sous-select" id="pipeline-jeton-production">
+                <label>Pour quelle production ?</label>
+                <select class="form-select" data-on-change="travauxUI.associerJetonProduction">
+                    <option value="">-- Choisir --</option>
+                    ${productions.map(p => `<option value="${p.id}" ${prodJeton === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
+                </select>
+            </div>`;
+        }
 
         colCentre += '<p class="texte-muted u-texte-petit" style="margin:8px 0 4px 0;">R\u00e9glages par d\u00e9faut\u00a0:</p>';
 
@@ -1584,9 +1603,20 @@
                 <label>Production</label>
                 <select class="form-select pipeline-select-petit" data-on-change="travauxUI.changerProductionPipeline" data-param="${idx}">
                     <option value="">--</option>
-                    ${productions.map(p => `<option value="${p.id}" ${f.productionId === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
+                    ${productions.map(p => `<option value="${p.id}" ${f.productionId === p.id && !f.estReprise ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
+                    ${jetonsActifs ? `<option value="__jeton_reprise__" ${f.estReprise ? 'selected' : ''}>Jeton de reprise</option>` : ''}
                 </select>
             </div>`;
+            // Sous-sélecteur par fichier pour jeton
+            if (f.estReprise) {
+                colCentre += `<div class="pipeline-champ pipeline-jeton-sous-select">
+                    <label>Pour quelle production ?</label>
+                    <select class="form-select pipeline-select-petit" data-on-change="travauxUI.changerJetonProductionPipeline" data-param="${idx}">
+                        <option value="">--</option>
+                        ${productions.map(p => `<option value="${p.id}" ${f.productionId === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
+                    </select>
+                </div>`;
+            }
             colCentre += `<div class="pipeline-champ">
                 <label>Date</label>
                 <input type="date" class="pipeline-input-date" value="${dateVal}" data-on-change="travauxUI.changerDateFichier" data-param="${idx}">
@@ -2018,16 +2048,61 @@
      */
     function associerProductionGlobale(productionIdOuEl) {
         var productionId = (typeof productionIdOuEl === 'object' && productionIdOuEl !== null) ? productionIdOuEl.value : productionIdOuEl;
+
+        // Mode jeton de reprise : ne pas associer directement, marquer comme reprise
+        // Le choix explicite "Jeton" par l'utilisateur prime sur l'identification LEA
+        if (productionId === '__jeton_reprise__') {
+            const queue = travauxImport.obtenirFileDAttente();
+            queue.forEach(f => {
+                f.estReprise = true;
+                f.productionId = ''; // sera défini par le sous-sélecteur
+                f.productionIdParLea = false; // l'utilisateur a explicitement choisi jeton
+            });
+            travauxImport.setProductionGlobale('__jeton_reprise__');
+            sessionStorage.setItem('travaux-pipeline-production', '__jeton_reprise__');
+            rafraichirPipelineUI();
+            return;
+        }
+
         const queue = travauxImport.obtenirFileDAttente();
         queue.forEach(f => {
-            // Ne pas écraser les fichiers déjà identifiés individuellement par le parseur LEA
-            if (!f.productionId) {
+            // Écraser sauf si identifié automatiquement par le parseur LEA
+            if (!f.productionIdParLea) {
                 f.productionId = productionId;
+                f.estReprise = false; // retour au mode normal
             }
         });
         travauxImport.setProductionGlobale(productionId);
         sessionStorage.setItem('travaux-pipeline-production', productionId || '');
+        sessionStorage.removeItem('travaux-jeton-production');
         identifierAutoPipeline();
+        rafraichirPipelineUI();
+    }
+
+    /**
+     * Associe la production cible pour un jeton de reprise (sélecteur global)
+     */
+    function associerJetonProduction(productionIdOuEl) {
+        var productionId = (typeof productionIdOuEl === 'object' && productionIdOuEl !== null) ? productionIdOuEl.value : productionIdOuEl;
+        const queue = travauxImport.obtenirFileDAttente();
+        queue.forEach(f => {
+            if (f.estReprise) {
+                f.productionId = productionId;
+            }
+        });
+        // Persister le choix pour que le sous-sélecteur le retrouve au rafraîchissement
+        sessionStorage.setItem('travaux-jeton-production', productionId || '');
+        rafraichirPipelineUI();
+    }
+
+    /**
+     * Change la production cible d'un jeton de reprise pour un fichier individuel
+     */
+    function changerJetonProductionPipeline(index, productionIdOuEl) {
+        var productionId = (typeof productionIdOuEl === 'object' && productionIdOuEl !== null) ? productionIdOuEl.value : productionIdOuEl;
+        const queue = travauxImport.obtenirFileDAttente();
+        if (!queue[index]) return;
+        queue[index].productionId = productionId;
         rafraichirPipelineUI();
     }
 
@@ -2081,7 +2156,10 @@
                     const titre = normaliserNomProductionPipeline(p.titre || p.nom || '');
                     return nomProd && titre && (correspondanceProductionPipeline(titre, nomProd) || correspondanceProductionPipeline(nomProd, titre));
                 });
-                if (prodTrouvee) f.productionId = prodTrouvee.id;
+                if (prodTrouvee) {
+                    f.productionId = prodTrouvee.id;
+                    f.productionIdParLea = true;
+                }
             }
 
             // Passer en identifie si tout est present
@@ -3327,12 +3405,18 @@
             await traiterDoublonsImport(resultat.doublons);
         }
 
+        // Phase Jetons : appliquer les jetons de reprise pour les fichiers importés comme reprises
+        const nbJetons = await appliquerJetonsReprisePostImport();
+
         afficherImport();
 
         if (typeof afficherNotificationSucces === 'function') {
             const msg = `${resultat.importes} fichier(s) import\u00e9(s)`;
-            const det = resultat.erreurs > 0 ? `${resultat.erreurs} erreur(s)` : (resultat.doublons && resultat.doublons.length > 0 ? `${resultat.doublons.length} doublon(s) traité(s)` : '');
-            afficherNotificationSucces(msg, det);
+            var details = [];
+            if (resultat.erreurs > 0) details.push(resultat.erreurs + ' erreur(s)');
+            if (resultat.doublons && resultat.doublons.length > 0) details.push(resultat.doublons.length + ' doublon(s) traité(s)');
+            if (nbJetons > 0) details.push(nbJetons + ' jeton(s) de reprise appliqué(s)');
+            afficherNotificationSucces(msg, details.join(' — '));
         }
     }
 
@@ -3342,43 +3426,56 @@
      * @param {Array} doublons - Résultats de type { doublon: true, fichierExistant, fichierPrepare, productionId }
      */
     async function traiterDoublonsImport(doublons) {
-        for (const d of doublons) {
-            const etudiant = travauxImport.trouverEtudiantParDA(d.fichierExistant.etudiantDA);
-            const nomEtudiant = etudiant ? `${etudiant.prenom} ${etudiant.nom}` : d.fichierExistant.etudiantDA;
-            const productions = db.getSync(cle('productions'), []);
-            const prod = productions.find(p => p.id === d.productionId);
-            const nomProd = prod ? (prod.titre || prod.nom) : d.productionId;
+        var annule = false;
+        for (var i = 0; i < doublons.length; i++) {
+            if (annule) break;
+            var d = doublons[i];
+            var etudiant = travauxImport.trouverEtudiantParDA(d.fichierExistant.etudiantDA);
+            var nomEtudiant = etudiant ? (etudiant.prenom + ' ' + etudiant.nom) : d.fichierExistant.etudiantDA;
+            var productions = db.getSync(cle('productions'), []);
+            var prod = productions.find(function(p) { return p.id === d.productionId; });
+            var nomProd = prod ? (prod.titre || prod.nom) : d.productionId;
+            var compteur = (doublons.length > 1) ? ' (' + (i + 1) + '/' + doublons.length + ')' : '';
 
-            const choix = await new Promise(resolve => {
-                const overlay = document.createElement('div');
+            var choix = await new Promise(function(resolve) {
+                var overlay = document.createElement('div');
                 overlay.className = 'modal-overlay actif';
                 overlay.style.zIndex = '10001';
-                overlay.innerHTML = `
-                    <div class="modal-contenu" style="max-width:480px;padding:24px">
-                        <h3 style="margin-top:0">Doublon détecté</h3>
-                        <p>Un fichier existe déjà pour <strong>${echapperHtml(nomEtudiant)}</strong> — <strong>${echapperHtml(nomProd)}</strong>.</p>
-                        <p style="font-size:13px;color:var(--couleur-texte-secondaire)">
-                            Existant : ${echapperHtml(d.fichierExistant.nomFichier)}<br>
-                            Nouveau : ${echapperHtml(d.fichierPrepare.nomFichier)}
-                        </p>
-                        <div class="modal-actions" style="flex-wrap:wrap;margin-top:16px;justify-content:flex-start">
-                            <button class="btn btn-principal" data-choix="remplacer">Remplacer l'existant</button>
-                            <button class="btn btn-secondaire" data-choix="garder">Garder l'existant</button>
-                            <button class="btn btn-secondaire" data-choix="orphelin">Importer sans association</button>
-                        </div>
-                    </div>
-                `;
+                overlay.innerHTML =
+                    '<div class="modal-contenu" style="max-width:520px;padding:24px">' +
+                        '<h3 style="margin-top:0">Doublon d\u00e9tect\u00e9' + echapperHtml(compteur) + '</h3>' +
+                        '<p>Un fichier existe d\u00e9j\u00e0 pour <strong>' + echapperHtml(nomEtudiant) + '</strong> \u2014 <strong>' + echapperHtml(nomProd) + '</strong>.</p>' +
+                        '<p style="font-size:13px;color:var(--couleur-texte-secondaire)">' +
+                            'Existant\u00a0: ' + echapperHtml(d.fichierExistant.nomFichier) + '<br>' +
+                            'Nouveau\u00a0: ' + echapperHtml(d.fichierPrepare.nomFichier) +
+                        '</p>' +
+                        '<div style="margin-top:16px;display:flex;flex-direction:column;gap:8px;">' +
+                            '<button class="btn btn-principal" data-choix="remplacer">Remplacer l\u2019existant' +
+                                '<span style="display:block;font-size:11px;font-weight:400;opacity:0.8;">L\u2019ancien fichier est envoy\u00e9 \u00e0 la corbeille. Le nouveau prend sa place.</span>' +
+                            '</button>' +
+                            '<button class="btn btn-secondaire" data-choix="garder">Garder l\u2019existant' +
+                                '<span style="display:block;font-size:11px;font-weight:400;opacity:0.8;">Le nouveau fichier est ignor\u00e9. Rien ne change.</span>' +
+                            '</button>' +
+                            '<button class="btn btn-secondaire" data-choix="orphelin">Importer sans association' +
+                                '<span style="display:block;font-size:11px;font-weight:400;opacity:0.8;">Le nouveau fichier est import\u00e9 mais n\u2019est li\u00e9 \u00e0 aucune production.</span>' +
+                            '</button>' +
+                            '<button class="btn btn-secondaire" data-choix="annuler" style="margin-top:4px;opacity:0.7;">Annuler' +
+                                '<span style="display:block;font-size:11px;font-weight:400;opacity:0.8;">Arr\u00eater le traitement des doublons. Les fichiers restants ne seront pas import\u00e9s.</span>' +
+                            '</button>' +
+                        '</div>' +
+                    '</div>';
                 document.body.appendChild(overlay);
-                overlay.querySelectorAll('button').forEach(btn => {
-                    btn.addEventListener('click', () => {
+                overlay.querySelectorAll('button').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
                         overlay.remove();
                         resolve(btn.dataset.choix);
                     });
                 });
             });
 
-            if (choix === 'remplacer') {
-                // Ancien fichier en corbeille, importer le nouveau
+            if (choix === 'annuler') {
+                annule = true;
+            } else if (choix === 'remplacer') {
                 travauxStockage.deplacerEnCorbeille(d.fichierExistant.id);
                 try {
                     await travauxImport.importerFichier(d.fichierPrepare, d.productionId);
@@ -3386,7 +3483,6 @@
                     console.error('[Travaux-UI] Erreur import remplacement:', e);
                 }
             } else if (choix === 'orphelin') {
-                // Importer sans productionId
                 try {
                     await travauxImport.importerFichier(d.fichierPrepare, '');
                 } catch (e) {
@@ -3395,6 +3491,86 @@
             }
             // 'garder' → ne rien faire
         }
+    }
+
+    /**
+     * Applique automatiquement les jetons de reprise pour les fichiers importés comme reprises.
+     * Cherche l'évaluation active correspondante, crée la nouvelle éval, et lie les fichiers.
+     * @returns {number} Nombre de jetons appliqués
+     */
+    async function appliquerJetonsReprisePostImport() {
+        if (typeof travauxStockage === 'undefined' || typeof appliquerJetonReprise !== 'function') return 0;
+
+        // Trouver les fichiers fraîchement importés marqués comme reprises
+        var tousLesFichiers = travauxStockage.obtenirFichiersTravaux();
+        var fichiersReprise = tousLesFichiers.filter(function(f) {
+            return f.estReprise && !f.evaluationId && f.etudiantDA && f.productionId;
+        });
+
+        if (fichiersReprise.length === 0) return 0;
+
+        var compteur = 0;
+        var echecsSansEval = [];
+        var echecsLimite = [];
+
+        for (var i = 0; i < fichiersReprise.length; i++) {
+            var fichier = fichiersReprise[i];
+            var etudiant = travauxImport.trouverEtudiantParDA(fichier.etudiantDA);
+            var nomEtudiant = etudiant ? (etudiant.prenom + ' ' + etudiant.nom) : fichier.etudiantDA;
+
+            // Trouver l'évaluation active pour ce (DA, productionId)
+            var evaluation = travauxResolution.trouverEvaluationPourFichier(fichier);
+            if (!evaluation) {
+                echecsSansEval.push(nomEtudiant);
+                continue;
+            }
+
+            // Trouver le fichier original (PAS la reprise) pour lui associer l'évaluation originale
+            var fichiersEtudiant = travauxStockage.obtenirFichiersEtudiant(fichier.etudiantDA);
+            var fichierOriginal = null;
+            for (var j = 0; j < fichiersEtudiant.length; j++) {
+                var fo = fichiersEtudiant[j];
+                if (fo.productionId === fichier.productionId && fo.id !== fichier.id && !fo.estReprise) {
+                    fichierOriginal = fo;
+                    break;
+                }
+            }
+
+            // Appliquer le jeton de reprise (silencieux — on gère les notifications ici)
+            var nouvelleEval = appliquerJetonReprise(evaluation.id, null, { silencieux: true });
+            if (!nouvelleEval) {
+                echecsLimite.push(nomEtudiant);
+                continue;
+            }
+
+            // Lier le fichier de reprise à la nouvelle évaluation
+            travauxStockage.mettreAJourFichier(fichier.id, { evaluationId: nouvelleEval.id });
+
+            // Lier le fichier original à l'évaluation archivée
+            if (fichierOriginal && !fichierOriginal.evaluationId) {
+                travauxStockage.mettreAJourFichier(fichierOriginal.id, { evaluationId: evaluation.id });
+            }
+
+            compteur++;
+        }
+
+        // Notification consolidée
+        if (echecsSansEval.length > 0) {
+            afficherNotificationErreur(
+                'Jetons non appliqués',
+                'Aucune évaluation existante trouvée pour : ' + echecsSansEval.join(', ') +
+                '. Les fichiers ont été importés, mais le jeton doit être appliqué manuellement.'
+            );
+        }
+        if (echecsLimite.length > 0) {
+            afficherNotificationErreur(
+                'Limite de jetons atteinte',
+                'Le maximum de reprises est déjà atteint pour : ' + echecsLimite.join(', ') +
+                '. Les fichiers ont été importés, mais aucun jeton supplémentaire n\u2019a été appliqué.'
+            );
+        }
+
+        return compteur;
     }
 
     /**
@@ -4452,6 +4628,12 @@
                 if (optionExiste) {
                     selectProduction.value = prodId;
                     selectProduction.dispatchEvent(new Event('change'));
+
+                    // Vérifier si une évaluation existante doit être chargée
+                    // (reprises, évaluations modifiées, etc.)
+                    setTimeout(function() {
+                        chargerEvaluationExistanteSiPresente(da, prodId);
+                    }, 300);
                 }
             }
 
@@ -4459,6 +4641,23 @@
         }
 
         setTimeout(tentative, INTERVALLE);
+    }
+
+    /**
+     * Charge une évaluation existante dans evaluationEnCours si elle existe.
+     * Corrige le cas où la visionneuse ouvre un fichier pour un (DA, productionId)
+     * qui a déjà été évalué — sans ceci, evaluationEnCours reste undefined et la sauvegarde échoue.
+     */
+    function chargerEvaluationExistanteSiPresente(da, productionId) {
+        if (window._modifierEvaluationEnCours) return;
+        var evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+        // Chercher l'évaluation active (non remplacée) pour ce (DA, productionId)
+        var evalActive = evaluations.find(function(e) {
+            return e.etudiantDA === da && e.productionId === productionId && !e.remplaceeParId;
+        });
+        if (evalActive && typeof window.modifierEvaluationParId === 'function') {
+            window.modifierEvaluationParId(evalActive.id);
+        }
     }
 
     /* ===============================
@@ -4872,7 +5071,19 @@
         var productionId = (typeof productionIdOuEl === 'object' && productionIdOuEl !== null) ? productionIdOuEl.value : productionIdOuEl;
         const queue = travauxImport.obtenirFileDAttente();
         if (!queue[index]) return;
+
+        if (productionId === '__jeton_reprise__') {
+            queue[index].estReprise = true;
+            queue[index].productionId = ''; // sera défini par le sous-sélecteur
+            queue[index].productionIdParLea = false;
+            rafraichirPipelineUI();
+            return;
+        }
+
         queue[index].productionId = productionId;
+        queue[index].productionIdParLea = false;
+        queue[index].estReprise = false;
+        rafraichirPipelineUI();
     }
 
     /* ===============================
@@ -6150,6 +6361,8 @@
         associerEtudiantPipeline: associerEtudiantPipeline,
         associerProductionPipeline: associerProductionPipeline,
         associerProductionGlobale: associerProductionGlobale,
+        associerJetonProduction: associerJetonProduction,
+        changerJetonProductionPipeline: changerJetonProductionPipeline,
         identifierAutoPipeline: identifierAutoPipeline,
         rafraichirPipelineUI: rafraichirPipelineUI,
         // Archivage
