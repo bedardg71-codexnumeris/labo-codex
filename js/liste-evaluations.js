@@ -1283,10 +1283,17 @@ function associerProductionDepuisListe(fichierId, da) {
         if (fichier) productionActuelle = fichier.productionId;
     }
 
-    const optionsHTML = productions.map(p => {
-        const label = p.description ? `${p.titre} - ${p.description}` : p.titre;
-        return `<option value="${p.id}" ${p.id === productionActuelle ? 'selected' : ''}>${echapperHtml(label)}</option>`;
+    // Vérifier si les jetons de reprise sont activés
+    var configJetons = (typeof obtenirConfigJetons === 'function') ? obtenirConfigJetons() : null;
+    var jetonsActifs = configJetons && configJetons.actif;
+
+    var optionsHTML = productions.map(function(p) {
+        var label = p.description ? (p.titre + ' - ' + p.description) : p.titre;
+        return '<option value="' + p.id + '" ' + (p.id === productionActuelle ? 'selected' : '') + '>' + echapperHtml(label) + '</option>';
     }).join('');
+    if (jetonsActifs) {
+        optionsHTML += '<option value="__jeton_reprise__">Jeton de reprise</option>';
+    }
 
     // Retirer une modale existante
     const existante = document.getElementById('associer-prod-modal-overlay');
@@ -1317,15 +1324,62 @@ function associerProductionDepuisListe(fichierId, da) {
     document.getElementById('associer-prod-btn-annuler').onclick = fermer;
     overlay.addEventListener('click', (e) => { if (e.target === overlay) fermer(); });
 
-    document.getElementById('associer-prod-btn-confirmer').onclick = () => {
-        const prodId = document.getElementById('associer-prod-select').value;
+    // Quand "Jeton de reprise" est sélectionné, afficher le sous-sélecteur de production cible
+    var selectProd = document.getElementById('associer-prod-select');
+    selectProd.addEventListener('change', function() {
+        var sousSelect = document.getElementById('associer-jeton-prod-container');
+        if (selectProd.value === '__jeton_reprise__') {
+            if (!sousSelect) {
+                var div = document.createElement('div');
+                div.id = 'associer-jeton-prod-container';
+                div.style.cssText = 'margin: 6px 0 16px 0;';
+                div.innerHTML = '<label style="font-size: 0.85em; color: var(--texte-secondaire);">Pour quelle production ?</label>' +
+                    '<select id="associer-jeton-prod-select" class="controle-form" style="margin: 4px 0 0 0; width: 100%;">' +
+                    '<option value="">-- Choisir --</option>' + optionsHTML.replace('__jeton_reprise__', '').replace(/<option[^>]*__jeton_reprise__[^>]*>[^<]*<\/option>/g, '') + '</select>';
+                selectProd.parentNode.insertBefore(div, selectProd.nextSibling.nextSibling);
+            }
+        } else if (sousSelect) {
+            sousSelect.remove();
+        }
+    });
+
+    document.getElementById('associer-prod-btn-confirmer').onclick = function() {
+        var prodId = document.getElementById('associer-prod-select').value;
         if (!prodId) return;
+
+        if (prodId === '__jeton_reprise__') {
+            // Mode jeton : associer comme reprise
+            var jetonProdSelect = document.getElementById('associer-jeton-prod-select');
+            var jetonProdId = jetonProdSelect ? jetonProdSelect.value : '';
+            if (!jetonProdId) return;
+
+            // Réassocier le fichier à la production cible + marquer comme reprise
+            if (typeof travauxUI !== 'undefined' && typeof travauxUI.changerProductionFichier === 'function') {
+                travauxUI.changerProductionFichier(fichierId, jetonProdId);
+            }
+            travauxStockage.mettreAJourFichier(fichierId, { estReprise: true });
+
+            // Appliquer le jeton de reprise si une évaluation existe
+            var evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+            var evalActive = evaluations.find(function(e) {
+                return e.etudiantDA === da && e.productionId === jetonProdId && !e.remplaceeParId;
+            });
+            if (evalActive && typeof appliquerJetonReprise === 'function') {
+                var nouvelleEval = appliquerJetonReprise(evalActive.id);
+                if (nouvelleEval) {
+                    travauxStockage.mettreAJourFichier(fichierId, { evaluationId: nouvelleEval.id });
+                }
+            }
+
+            overlay.remove();
+            appliquerFiltres();
+            return;
+        }
 
         if (typeof travauxUI !== 'undefined' && typeof travauxUI.changerProductionFichier === 'function') {
             travauxUI.changerProductionFichier(fichierId, prodId);
         }
         overlay.remove();
-        // Rafraîchir le tableau
         appliquerFiltres();
     };
 }
