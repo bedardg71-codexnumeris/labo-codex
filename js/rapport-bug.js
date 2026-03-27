@@ -941,7 +941,7 @@ function ouvrirModalRapportBug() {
                         ">
                             Ton prénom :
                         </label>
-                        <input type="text" id="prenomTesteur" placeholder="Ex: Grégoire" value="${echapperHtmlLocal(prenomSauvegarde)}" style="
+                        <input type="text" id="prenomTesteur" placeholder="Ex: Grégoire" value="${typeof echapperHtml === 'function' ? echapperHtml(prenomSauvegarde) : ''}" style="
                             width: 100%;
                             max-width: 250px;
                             padding: 10px 12px;
