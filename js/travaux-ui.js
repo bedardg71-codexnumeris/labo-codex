@@ -3296,7 +3296,15 @@
 
         // Confirmation de la production et du groupe avant import
         const selectProd = document.getElementById('pipeline-select-production');
-        const nomProduction = selectProd?.selectedOptions[0]?.textContent?.trim() || '';
+        var nomProduction = selectProd?.selectedOptions[0]?.textContent?.trim() || '';
+        // Si mode jeton, préciser la production cible
+        if (selectProd && selectProd.value === '__jeton_reprise__') {
+            var selectJetonProd = document.querySelector('#pipeline-jeton-production select');
+            var nomProdCible = selectJetonProd?.selectedOptions[0]?.textContent?.trim() || '';
+            if (nomProdCible && nomProdCible !== '-- Choisir --') {
+                nomProduction = 'Jeton de reprise pour ' + nomProdCible;
+            }
+        }
         const nbFichiers = queue.length;
         const msgProduction = nomProduction && selectProd.value
             ? `associés à la production <strong>${echapperHtml(nomProduction)}</strong>`

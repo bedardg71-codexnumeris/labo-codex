@@ -982,8 +982,12 @@ function genererLigneHTML(ligne) {
     }
 
     // Afficher le statut workflow avec badge coloré
-    const statutW = ligne.statutWorkflow || 'non-recu';
-    const libelleStatut = obtenirLibelleStatut(statutW);
+    var statutW = ligne.statutWorkflow || 'non-recu';
+    // Reprise en attente de réévaluation : pas encore resauvegardée (verrouillee=false)
+    if (ligne.badgeType === 'nouvelle-reprise' && !ligne.verrouille) {
+        statutW = 'a-reevaluer';
+    }
+    const libelleStatut = statutW === 'a-reevaluer' ? 'À réévaluer' : obtenirLibelleStatut(statutW);
     let affichageNiveau;
     if (ligne.statut === 'non-recevable') {
         affichageNiveau = '<strong style="color: var(--gris-clair);">0</strong>';
