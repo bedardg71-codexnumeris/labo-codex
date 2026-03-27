@@ -109,7 +109,9 @@
 
                 request.onsuccess = (event) => {
                     this.db = event.target.result;
-                    resolve();
+                    // Pré-charger les clés IDB manquantes dans memoryCache
+                    // (clés trop volumineuses évincées de localStorage par QuotaExceeded)
+                    this._prechargerDepuisIDB().then(resolve).catch(() => resolve());
                 };
 
                 request.onupgradeneeded = (event) => {
@@ -129,6 +131,47 @@
                     }
                 };
             });
+        }
+
+        /**
+         * Pré-charge dans memoryCache les clés IDB qui ne sont pas dans localStorage.
+         * Corrige le problème où les grosses clés (évincées par QuotaExceeded)
+         * sont perdues après un rechargement de page car memoryCache est vide
+         * et localStorage ne les contient plus.
+         */
+        async _prechargerDepuisIDB() {
+            if (!this.db) return;
+            try {
+                var tx = this.db.transaction('keyvalue', 'readonly');
+                var store = tx.objectStore('keyvalue');
+                var request = store.getAll();
+                var self = this;
+                await new Promise(function(resolve, reject) {
+                    request.onsuccess = function() {
+                        var items = request.result || [];
+                        var count = 0;
+                        for (var i = 0; i < items.length; i++) {
+                            var item = items[i];
+                            if (item.key && !self.memoryCache.has(item.key)) {
+                                // Vérifier si la clé est dans localStorage
+                                var inLS = false;
+                                try { inLS = localStorage.getItem(item.key) !== null; } catch(e) {}
+                                if (!inLS) {
+                                    self.memoryCache.set(item.key, item.value);
+                                    count++;
+                                }
+                            }
+                        }
+                        if (count > 0) {
+                            console.warn('[DB] Pré-chargé ' + count + ' clé(s) depuis IndexedDB (absentes de localStorage)');
+                        }
+                        resolve();
+                    };
+                    request.onerror = function() { resolve(); };
+                });
+            } catch(e) {
+                console.warn('[DB] Erreur pré-chargement IDB:', e);
+            }
         }
 
         /**
