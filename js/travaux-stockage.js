@@ -331,6 +331,12 @@
             estReprise: metadonnees.estReprise || false
         };
 
+        // Extraire la thumbnail vers IDB (ne pas la stocker dans fichiersTravaux)
+        if (fichier.thumbnailDataUrl) {
+            stockerThumbnail(id, fichier.thumbnailDataUrl);
+            fichier.thumbnailDataUrl = '';
+        }
+
         fichiers.push(fichier);
         sauvegarderFichiersTravaux(fichiers);
 
@@ -349,6 +355,8 @@
         } catch (e) {
             console.warn(`[Travaux-Stockage] Blob introuvable pour ${id}`);
         }
+        // Supprimer la thumbnail IDB
+        supprimerThumbnail(id).catch(function() {});
 
         // Supprimer les metadonnees
         const fichiers = obtenirFichiersTravaux();
@@ -424,6 +432,10 @@
         for (const [champ, valeur] of Object.entries(modifications)) {
             if (CHAMPS_PROTEGES.includes(champ)) {
                 console.warn(`[Travaux-Stockage] mettreAJourFichier() refuse le champ protégé "${champ}" — utiliser reassocierFichier()`);
+            } else if (champ === 'thumbnailDataUrl' && valeur) {
+                // Router la thumbnail vers IDB au lieu de la stocker dans fichiersTravaux
+                stockerThumbnail(id, valeur);
+                modifsSafe.thumbnailDataUrl = '';
             } else {
                 modifsSafe[champ] = valeur;
             }
@@ -666,6 +678,135 @@
     }
 
     /* ===============================
+       STOCKAGE MINIATURES (IDB)
+       Thumbnails stockees dans IDB keyvalue (cle thumbnail_{FT_id})
+       pour eviter de gonfler fichiersTravaux dans localStorage.
+       Cache memoire pour acces synchrone apres premier chargement.
+       =============================== */
+
+    const thumbnailCache = new Map();
+
+    /**
+     * Stocke une thumbnail dans IDB et le cache memoire
+     * @param {string} fichierId - ID du fichier (FT_xxx)
+     * @param {string} dataUrl - Data URL base64 de la miniature
+     */
+    function stockerThumbnail(fichierId, dataUrl) {
+        if (!fichierId || !dataUrl) return;
+        thumbnailCache.set(fichierId, dataUrl);
+        // Ecriture IDB fire-and-forget (le cache memoire est la source synchrone)
+        db.set('thumbnail_' + fichierId, dataUrl).catch(function(e) {
+            console.warn('[Travaux-Stockage] Erreur stockage thumbnail IDB:', fichierId, e);
+        });
+    }
+
+    /**
+     * Recupere une thumbnail depuis le cache ou IDB (async)
+     * @param {string} fichierId - ID du fichier (FT_xxx)
+     * @returns {Promise<string>} Data URL ou '' si absente
+     */
+    async function obtenirThumbnail(fichierId) {
+        if (!fichierId) return '';
+        // Cache memoire (chaud apres migration ou premier chargement)
+        var cached = thumbnailCache.get(fichierId);
+        if (cached) return cached;
+        // Fallback IDB
+        try {
+            var dataUrl = await db.get('thumbnail_' + fichierId, null);
+            if (dataUrl) {
+                thumbnailCache.set(fichierId, dataUrl);
+                return dataUrl;
+            }
+        } catch (e) {
+            console.warn('[Travaux-Stockage] Erreur lecture thumbnail IDB:', fichierId, e);
+        }
+        return '';
+    }
+
+    /**
+     * Recupere une thumbnail depuis le cache memoire uniquement (synchrone)
+     * Retourne '' si pas en cache — utile pour les templates innerHTML synchrones
+     * @param {string} fichierId - ID du fichier (FT_xxx)
+     * @returns {string} Data URL ou ''
+     */
+    function obtenirThumbnailSync(fichierId) {
+        if (!fichierId) return '';
+        return thumbnailCache.get(fichierId) || '';
+    }
+
+    /**
+     * Supprime une thumbnail du cache et d'IDB
+     * @param {string} fichierId - ID du fichier (FT_xxx)
+     * @returns {Promise<void>}
+     */
+    async function supprimerThumbnail(fichierId) {
+        if (!fichierId) return;
+        thumbnailCache.delete(fichierId);
+        try {
+            await db.remove('thumbnail_' + fichierId);
+        } catch (e) {
+            console.warn('[Travaux-Stockage] Erreur suppression thumbnail IDB:', fichierId, e);
+        }
+    }
+
+    /**
+     * Charge les thumbnails manquantes dans un conteneur DOM
+     * Cherche les elements avec data-thumbnail-id et remplit leur src depuis IDB
+     * @param {Element} conteneur - Element DOM parent
+     */
+    async function chargerThumbnailsConteneur(conteneur) {
+        if (!conteneur) return;
+        var elements = conteneur.querySelectorAll('[data-thumbnail-id]');
+        if (elements.length === 0) return;
+
+        // Collecter les IDs uniques a charger
+        var ids = [];
+        for (var i = 0; i < elements.length; i++) {
+            var id = elements[i].getAttribute('data-thumbnail-id');
+            if (id && !thumbnailCache.has(id)) {
+                ids.push(id);
+            }
+        }
+
+        // Charger les thumbnails manquantes en batch
+        for (var j = 0; j < ids.length; j++) {
+            await obtenirThumbnail(ids[j]);
+        }
+
+        // Appliquer les thumbnails aux elements
+        for (var k = 0; k < elements.length; k++) {
+            var el = elements[k];
+            var thumbId = el.getAttribute('data-thumbnail-id');
+            var url = thumbnailCache.get(thumbId);
+            if (url) {
+                if (el.tagName === 'IMG') {
+                    el.src = url;
+                    el.style.display = '';
+                } else {
+                    // Conteneur div : creer une img a l'interieur
+                    el.innerHTML = '<img src="' + url + '" alt="" style="max-width:100%;max-height:100%;">';
+                }
+                // Masquer le placeholder frere
+                var placeholder = el.nextElementSibling;
+                if (placeholder && placeholder.tagName === 'SPAN') {
+                    placeholder.style.display = 'none';
+                }
+            }
+        }
+    }
+
+    /**
+     * Pre-remplit le cache pour une liste d'IDs de fichiers
+     * @param {Array<string>} fichierIds - Liste d'IDs de fichiers
+     */
+    async function prechargerThumbnails(fichierIds) {
+        if (!fichierIds || fichierIds.length === 0) return;
+        for (var i = 0; i < fichierIds.length; i++) {
+            await obtenirThumbnail(fichierIds[i]);
+        }
+    }
+
+    /* ===============================
        QUOTA ET STATISTIQUES
        =============================== */
 
@@ -865,6 +1006,8 @@
         } catch (e) {
             console.warn(`[Travaux-Stockage] Blob introuvable pour ${id}`);
         }
+        // Supprimer la thumbnail IDB
+        supprimerThumbnail(id).catch(function() {});
 
         // Retirer de la corbeille
         const corbeille = obtenirCorbeilleComplete();
@@ -925,6 +1068,7 @@
             } catch (e) {
                 console.warn(`[Travaux-Stockage] Blob introuvable pour ${f.id}`);
             }
+            supprimerThumbnail(f.id).catch(function() {});
         }
 
         const nb = corbeille.length;
@@ -1130,6 +1274,56 @@
     }
 
     /* ===============================
+       MIGRATION THUMBNAILS
+       =============================== */
+
+    /**
+     * Migration one-shot : extrait les thumbnailDataUrl de fichiersTravaux
+     * et de la corbeille vers IDB keyvalue (cle thumbnail_{FT_id}).
+     * Idempotente grace au flag _migration_thumbnails_done.
+     */
+    async function _migrerThumbnailsVersIDB() {
+        if (db.getSync('_migration_thumbnails_done', false)) return;
+
+        var compteur = 0;
+
+        // 1. Migrer fichiersTravaux
+        var fichiers = obtenirFichiersTravaux();
+        for (var i = 0; i < fichiers.length; i++) {
+            if (fichiers[i].thumbnailDataUrl) {
+                await db.set('thumbnail_' + fichiers[i].id, fichiers[i].thumbnailDataUrl);
+                thumbnailCache.set(fichiers[i].id, fichiers[i].thumbnailDataUrl);
+                fichiers[i].thumbnailDataUrl = '';
+                compteur++;
+            }
+        }
+        if (compteur > 0) {
+            sauvegarderFichiersTravaux(fichiers);
+        }
+
+        // 2. Migrer la corbeille
+        var compteurCorbeille = 0;
+        var corbeille = obtenirCorbeilleComplete();
+        for (var j = 0; j < corbeille.length; j++) {
+            if (corbeille[j].thumbnailDataUrl) {
+                await db.set('thumbnail_' + corbeille[j].id, corbeille[j].thumbnailDataUrl);
+                thumbnailCache.set(corbeille[j].id, corbeille[j].thumbnailDataUrl);
+                corbeille[j].thumbnailDataUrl = '';
+                compteurCorbeille++;
+            }
+        }
+        if (compteurCorbeille > 0) {
+            sauvegarderCorbeille(corbeille);
+        }
+
+        db.setSync('_migration_thumbnails_done', true);
+
+        if (compteur + compteurCorbeille > 0) {
+            console.warn('[Travaux-Stockage] Migration thumbnails: ' + (compteur + compteurCorbeille) + ' miniature(s) extraite(s) vers IDB');
+        }
+    }
+
+    /* ===============================
        INITIALISATION
        =============================== */
 
@@ -1151,6 +1345,9 @@
 
             // Migration blobStatut pour fichiers existants
             migrerBlobStatut();
+
+            // Migration thumbnails : extraire vers IDB pour desaturer localStorage
+            await _migrerThumbnailsVersIDB();
 
             // Purger les fichiers expirés de la corbeille (> 30 jours)
             purgerCorbeilleExpiree();
@@ -1201,9 +1398,16 @@
         mettreAJourFichiersBatch: mettreAJourFichiersBatch,
         reassocierFichier: reassocierFichier,
         reassocierFichiersBatch: reassocierFichiersBatch,
-        // Miniatures
+        // Miniatures — generation
         genererMiniatureImage: genererMiniatureImage,
         genererMiniaturePDF: genererMiniaturePDF,
+        // Miniatures — stockage IDB
+        stockerThumbnail: stockerThumbnail,
+        obtenirThumbnail: obtenirThumbnail,
+        obtenirThumbnailSync: obtenirThumbnailSync,
+        supprimerThumbnail: supprimerThumbnail,
+        chargerThumbnailsConteneur: chargerThumbnailsConteneur,
+        prechargerThumbnails: prechargerThumbnails,
         // Quota
         estimerQuota: estimerQuota,
         formaterTaille: formaterTaille,

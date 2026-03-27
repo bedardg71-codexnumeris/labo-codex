@@ -274,9 +274,14 @@
                     typeMIME: file.type || 'application/pdf',
                     tailleFichier: file.size,
                     source: 'modelisation',
-                    thumbnailDataUrl: thumbnailDataUrl,
+                    thumbnailDataUrl: '',
                     dateImport: new Date().toISOString()
                 };
+
+                // Stocker la thumbnail dans IDB (pas dans les metadonnees)
+                if (thumbnailDataUrl) {
+                    travauxStockage.stockerThumbnail(id, thumbnailDataUrl);
+                }
 
                 await travauxStockage.stockerBlob(id, blob, '', '');
                 fichiers.push(metadata);

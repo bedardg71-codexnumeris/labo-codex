@@ -616,7 +616,7 @@
                 parseLea: f.parseLea,
                 pipelineStatut: f.pipelineStatut,
                 groupeDocumentId: f.groupeDocumentId,
-                thumbnailDataUrl: f.thumbnailDataUrl,
+                // thumbnailDataUrl omis : regeneree depuis le blob au reattachement
                 productionId: f.productionId,
                 largeurOriginale: f.largeurOriginale || 0,
                 hauteurOriginale: f.hauteurOriginale || 0
@@ -655,7 +655,7 @@
                 parseLea: d.parseLea || { nom: '', da: '', nomProduction: '', dateRemise: null, raw: '' },
                 pipelineStatut: d.pipelineStatut || 'apercu',
                 groupeDocumentId: d.groupeDocumentId || '',
-                thumbnailDataUrl: d.thumbnailDataUrl || null,
+                thumbnailDataUrl: null, // regeneree au reattachement des blobs
                 productionId: d.productionId || '',
                 largeurOriginale: d.largeurOriginale || 0,
                 hauteurOriginale: d.hauteurOriginale || 0

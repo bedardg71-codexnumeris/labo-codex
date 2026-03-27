@@ -2363,7 +2363,7 @@
             indices.forEach(i => {
                 const f = fichiers[i];
                 const estActif = i === indexActuel;
-                const thumb = f.thumbnailDataUrl;
+                const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
                 let imgSrc = '';
                 if (thumb) {
                     imgSrc = thumb;
@@ -2380,6 +2380,10 @@
             });
 
             carousel.innerHTML = html;
+            // Charger les thumbnails async si necessaire
+            if (typeof travauxStockage !== 'undefined') {
+                travauxStockage.chargerThumbnailsConteneur(carousel);
+            }
         }
     }
 

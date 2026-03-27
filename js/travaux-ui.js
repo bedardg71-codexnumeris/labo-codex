@@ -862,6 +862,9 @@
             rafraichirPipelineUI();
         });
 
+        // Charger les thumbnails async pour les placeholders data-thumbnail-id
+        travauxStockage.chargerThumbnailsConteneur(conteneur);
+
         // Lancer les previews apres le rendu si des fichiers sont en queue
         if (queue.length > 0) {
             mettreAJourPreviewsPipeline();
@@ -1208,8 +1211,9 @@
         if (!conteneur) return;
 
         if (f.estPDF) {
-            if (f.thumbnailDataUrl) {
-                conteneur.innerHTML = `<img src="${f.thumbnailDataUrl}" alt="">`;
+            var pdfThumb = f.thumbnailDataUrl || await travauxStockage.obtenirThumbnail(f.id);
+            if (pdfThumb) {
+                conteneur.innerHTML = `<img src="${pdfThumb}" alt="">`;
             } else {
                 conteneur.innerHTML = '<span class="pipeline-icone-placeholder">&#x1F4C4;</span>';
             }
@@ -1218,7 +1222,8 @@
 
         // Utiliser le blob original pour une preview de qualite
         const source = f.fichier || null;
-        if (!source && !f.thumbnailDataUrl) {
+        var imgThumb = f.thumbnailDataUrl || await travauxStockage.obtenirThumbnail(f.id);
+        if (!source && !imgThumb) {
             conteneur.innerHTML = '<span class="pipeline-icone-placeholder">&#x1F5BC;</span>';
             return;
         }
@@ -1233,7 +1238,7 @@
                     img._blobUrl = url;
                     img.src = url;
                 } else {
-                    img.src = f.thumbnailDataUrl;
+                    img.src = imgThumb;
                 }
             });
             if (img._blobUrl) URL.revokeObjectURL(img._blobUrl);
@@ -1354,9 +1359,10 @@
         // Toujours utiliser le blob original (pas le blob traite)
         const source = f.fichierOriginal || f.fichier || null;
         if (!source) {
-            // Fallback sur thumbnailDataUrl
-            if (f.thumbnailDataUrl) {
-                conteneur.innerHTML = `<img src="${f.thumbnailDataUrl}" alt="">`;
+            // Fallback sur thumbnail IDB
+            var origFallback = f.thumbnailDataUrl || await travauxStockage.obtenirThumbnail(f.id);
+            if (origFallback) {
+                conteneur.innerHTML = `<img src="${origFallback}" alt="">`;
             }
             return;
         }
@@ -1387,8 +1393,9 @@
             conteneur.appendChild(imgResult);
         } catch (e) {
             // Fallback silencieux
-            if (f.thumbnailDataUrl) {
-                conteneur.innerHTML = `<img src="${f.thumbnailDataUrl}" alt="">`;
+            var origCatchFallback = f.thumbnailDataUrl || await travauxStockage.obtenirThumbnail(f.id);
+            if (origCatchFallback) {
+                conteneur.innerHTML = `<img src="${origCatchFallback}" alt="">`;
             }
         }
     }
@@ -1451,7 +1458,7 @@
         const groupesOuverts = new Set(); // pour tracker les debuts de groupe
 
         queue.forEach((f, index) => {
-            const thumb = f.thumbnailDataUrl;
+            const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
             const icone = f.estPDF ? '&#x1F4C4;' : '&#x1F5BC;';
             const nomCourt = (f.parseLea.nom || f.nomFichier).substring(0, 18);
             const resolution = (f.largeurOriginale && f.hauteurOriginale)
@@ -1658,7 +1665,7 @@
             colDroite += `<div class="pipeline-fichier-colonne">
                 <span class="pipeline-fichier-numero">${index + 1}</span>
                 <div class="pipeline-fichier-thumb-col" id="pipeline-preview-${index}">
-                    ${f.thumbnailDataUrl ? `<img src="${f.thumbnailDataUrl}" alt="">` : `<span class="pipeline-icone-placeholder">${f.estPDF ? '&#x1F4C4;' : '&#x1F5BC;'}</span>`}
+                    ${thumb ? `<img src="${thumb}" alt="">` : `<img data-thumbnail-id="${f.id}" src="" alt="" style="display:none"><span class="pipeline-icone-placeholder">${f.estPDF ? '&#x1F4C4;' : '&#x1F5BC;'}</span>`}
                 </div>
                 <div class="pipeline-fichier-meta-col">
                     ${badgeSpecifique}
@@ -1888,8 +1895,9 @@
         if (!conteneur) return;
 
         if (f.estPDF) {
-            if (f.thumbnailDataUrl) {
-                conteneur.innerHTML = `<img src="${f.thumbnailDataUrl}" alt="" style="max-width:100%;max-height:500px;object-fit:contain;">`;
+            var centreThumbPdf = f.thumbnailDataUrl || await travauxStockage.obtenirThumbnail(f.id);
+            if (centreThumbPdf) {
+                conteneur.innerHTML = `<img src="${centreThumbPdf}" alt="" style="max-width:100%;max-height:500px;object-fit:contain;">`;
             } else {
                 conteneur.innerHTML = '<span class="pipeline-icone-placeholder" style="font-size:3rem;">&#x1F4C4;</span>';
             }
@@ -1897,7 +1905,8 @@
         }
 
         const source = f.fichier || null;
-        if (!source && !f.thumbnailDataUrl) {
+        var centreThumbImg = f.thumbnailDataUrl || await travauxStockage.obtenirThumbnail(f.id);
+        if (!source && !centreThumbImg) {
             conteneur.innerHTML = '<span class="pipeline-icone-placeholder" style="font-size:3rem;">&#x1F5BC;</span>';
             return;
         }
@@ -1912,7 +1921,7 @@
                     img._blobUrl = url;
                     img.src = url;
                 } else {
-                    img.src = f.thumbnailDataUrl;
+                    img.src = centreThumbImg;
                 }
             });
             if (img._blobUrl) URL.revokeObjectURL(img._blobUrl);
@@ -2647,7 +2656,7 @@
     function genererMiniaturesHTML(fichiers) {
         let html = '';
         fichiers.forEach(f => {
-            const thumb = f.thumbnailDataUrl || '';
+            const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
             const icone = f.typeMIME === 'application/pdf' ? '&#x1F4C4;' : '&#x1F5BC;';
             const actif = travauxVisionneuse.getFichierActuel()?.id === f.id ? ' actif' : '';
 
@@ -2662,7 +2671,7 @@
             html += `
                 <div class="travaux-miniature${actif}" data-fichier-id="${f.id}" data-action="travauxUI.ouvrirFichier" data-param="${f.id}">
                     <div class="travaux-miniature-thumb">
-                        ${thumb ? `<img src="${thumb}" alt="">` : `<span>${icone}</span>`}
+                        ${thumb ? `<img src="${thumb}" alt="">` : `<img data-thumbnail-id="${f.id}" src="" alt="" style="display:none"><span>${icone}</span>`}
                         ${badge}
                     </div>
                     <div class="travaux-miniature-nom">${echapperHtml(f.nomFichier)}</div>
@@ -2710,7 +2719,7 @@
         let html = '';
         for (let i = indexDebut; i < indexFin; i++) {
             const f = fichiersPourScroll[i];
-            const thumb = f.thumbnailDataUrl || '';
+            const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
             const icone = f.typeMIME === 'application/pdf' ? '&#x1F4C4;' : '&#x1F5BC;';
             const actif = travauxVisionneuse.getFichierActuel()?.id === f.id ? ' actif' : '';
             const top = i * HAUTEUR_MINIATURE;
@@ -2728,7 +2737,7 @@
                      style="top: ${top}px; height: ${HAUTEUR_MINIATURE}px;"
                      data-action="travauxUI.ouvrirFichier" data-param="${f.id}">
                     <div class="travaux-miniature-thumb">
-                        ${thumb ? `<img src="${thumb}" alt="">` : `<span>${icone}</span>`}
+                        ${thumb ? `<img src="${thumb}" alt="">` : `<img data-thumbnail-id="${f.id}" src="" alt="" style="display:none"><span>${icone}</span>`}
                         ${badge}
                     </div>
                     <div class="travaux-miniature-nom">${echapperHtml(f.nomFichier)}</div>
@@ -2736,6 +2745,7 @@
         }
 
         viewportScroll.innerHTML = html;
+        travauxStockage.chargerThumbnailsConteneur(viewportScroll);
     }
 
     /**
@@ -3054,6 +3064,8 @@
         if (conteneur) {
             conteneur.innerHTML = genererMiniatures(fichiers);
             initialiserScrollVirtuel();
+            // Charger les thumbnails async pour les placeholders
+            travauxStockage.chargerThumbnailsConteneur(conteneur);
         }
     }
 
@@ -5716,6 +5728,10 @@
         </div>`;
 
         document.body.insertAdjacentHTML('beforeend', html);
+
+        // Charger les thumbnails async pour la modale fusion
+        var modalFusion = document.getElementById('modal-fusion-editeur');
+        if (modalFusion) travauxStockage.chargerThumbnailsConteneur(modalFusion);
     }
 
     /**
@@ -5735,9 +5751,10 @@
                 ? echapperHtml(productionsMap[f.productionId])
                 : 'Non associé';
             var pages = f.nombrePages ? f.nombrePages + ' p.' : '1 p.';
-            var thumb = f.thumbnailDataUrl
-                ? '<img class="fusion-fichier-thumb" src="' + f.thumbnailDataUrl + '" alt="">'
-                : '<div class="fusion-fichier-thumb fusion-fichier-thumb-vide"></div>';
+            var thumbUrl = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
+            var thumb = thumbUrl
+                ? '<img class="fusion-fichier-thumb" src="' + thumbUrl + '" alt="">'
+                : '<div class="fusion-fichier-thumb fusion-fichier-thumb-vide" data-thumbnail-id="' + f.id + '"></div>';
 
             html += `
                 <label class="fusion-fichier-item" data-etudiant="${f.etudiantDA || ''}" data-production="${f.productionId || ''}">

@@ -2996,6 +2996,11 @@ function changerSectionProfil(section) {
         </div>
     `;
 
+    // Charger les thumbnails async (section travaux)
+    if (section === 'travaux' && typeof travauxStockage !== 'undefined') {
+        travauxStockage.chargerThumbnailsConteneur(contenuContainer);
+    }
+
     // Réattacher les événements des toggles et Primo après changement de section
     setTimeout(() => {
         if (typeof reattacherEvenementsToggles === 'function') {
@@ -3561,6 +3566,11 @@ function afficherProfilComplet(daOuEl) {
         // Restaurer les préférences du rapport si on est sur cette section
         if (sectionAffichee === 'rapport') {
             restaurerPreferencesRapport(da);
+        }
+
+        // Charger les thumbnails async (section travaux)
+        if (sectionAffichee === 'travaux' && typeof travauxStockage !== 'undefined') {
+            travauxStockage.chargerThumbnailsConteneur(container);
         }
     }, 100);
 
@@ -8993,7 +9003,7 @@ function genererSectionTravaux(da) {
     let html = '<div class="travaux-grille">';
 
     fichiers.forEach(f => {
-        const thumb = f.thumbnailDataUrl || '';
+        const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
         const icone = f.typeMIME === 'application/pdf' ? '&#x1F4C4;' : '&#x1F5BC;';
         const production = productions.find(p => p.id === f.productionId);
         const nomProd = production ? echapperHtml(production.titre || production.nom || '') : '';
@@ -9003,7 +9013,7 @@ function genererSectionTravaux(da) {
         html += `
             <div class="travaux-grille-item" data-action="travauxUI.ouvrirFichier" data-param="${f.id}" title="${echapperHtml(f.nomFichier)}">
                 <div class="travaux-grille-thumb">
-                    ${thumb ? `<img src="${thumb}" alt="">` : `<span class="travaux-grille-icone">${icone}</span>`}
+                    ${thumb ? `<img src="${thumb}" alt="">` : `<img data-thumbnail-id="${f.id}" src="" alt="" style="display:none"><span class="travaux-grille-icone">${icone}</span>`}
                     ${aAnnotations ? '<span class="travaux-badge-annote" title="Annote">&#x270F;</span>' : ''}
                 </div>
                 <div class="travaux-grille-info">
