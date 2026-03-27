@@ -3436,6 +3436,9 @@
      */
     async function traiterDoublonsImport(doublons) {
         var annule = false;
+        var configJetons = (typeof obtenirConfigJetons === 'function') ? obtenirConfigJetons() : null;
+        var jetonsActifs = configJetons && configJetons.actif;
+
         for (var i = 0; i < doublons.length; i++) {
             if (annule) break;
             var d = doublons[i];
@@ -3445,6 +3448,17 @@
             var prod = productions.find(function(p) { return p.id === d.productionId; });
             var nomProd = prod ? (prod.titre || prod.nom) : d.productionId;
             var compteur = (doublons.length > 1) ? ' (' + (i + 1) + '/' + doublons.length + ')' : '';
+
+            // Vérifier si un jeton de reprise est disponible pour cet élève
+            var boutonJeton = '';
+            if (jetonsActifs && d.fichierExistant.etudiantDA && typeof verifierDisponibiliteJeton === 'function') {
+                var jetonDispo = verifierDisponibiliteJeton(d.fichierExistant.etudiantDA, 'reprise');
+                if (jetonDispo) {
+                    boutonJeton = '<button class="btn btn-secondaire" data-choix="jeton" style="border-color:var(--attention);">Appliquer comme jeton de reprise' +
+                        '<span style="display:block;font-size:11px;font-weight:400;opacity:0.8;">Les deux fichiers sont conserv\u00e9s. L\u2019\u00e9valuation originale est archiv\u00e9e.</span>' +
+                    '</button>';
+                }
+            }
 
             var choix = await new Promise(function(resolve) {
                 var overlay = document.createElement('div');
@@ -3459,6 +3473,7 @@
                             'Nouveau\u00a0: ' + echapperHtml(d.fichierPrepare.nomFichier) +
                         '</p>' +
                         '<div style="margin-top:16px;display:flex;flex-direction:column;gap:8px;">' +
+                            boutonJeton +
                             '<button class="btn btn-principal" data-choix="remplacer">Remplacer l\u2019existant' +
                                 '<span style="display:block;font-size:11px;font-weight:400;opacity:0.8;">L\u2019ancien fichier est envoy\u00e9 \u00e0 la corbeille. Le nouveau prend sa place.</span>' +
                             '</button>' +
@@ -3484,6 +3499,32 @@
 
             if (choix === 'annuler') {
                 annule = true;
+            } else if (choix === 'jeton') {
+                // Importer comme reprise + appliquer le jeton
+                d.fichierPrepare.estReprise = true;
+                try {
+                    var fichierImporte = await travauxImport.importerFichier(d.fichierPrepare, d.productionId);
+                    if (fichierImporte && !fichierImporte.doublon) {
+                        // Trouver l'évaluation active et appliquer le jeton
+                        var evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+                        var evalActive = evaluations.find(function(e) {
+                            return e.etudiantDA === d.fichierExistant.etudiantDA &&
+                                e.productionId === d.productionId && !e.remplaceeParId;
+                        });
+                        if (evalActive) {
+                            var nouvelleEval = appliquerJetonReprise(evalActive.id, null, { silencieux: true });
+                            if (nouvelleEval) {
+                                travauxStockage.mettreAJourFichier(fichierImporte.id, { evaluationId: nouvelleEval.id });
+                                if (!d.fichierExistant.evaluationId) {
+                                    travauxStockage.mettreAJourFichier(d.fichierExistant.id, { evaluationId: evalActive.id });
+                                }
+                                afficherNotificationSucces('Jeton de reprise appliqu\u00e9 pour ' + echapperHtml(nomEtudiant));
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error('[Travaux-UI] Erreur import jeton:', e);
+                }
             } else if (choix === 'remplacer') {
                 travauxStockage.deplacerEnCorbeille(d.fichierExistant.id);
                 try {
