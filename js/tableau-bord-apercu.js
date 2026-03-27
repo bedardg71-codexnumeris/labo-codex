@@ -1385,7 +1385,7 @@ function afficherMetriquesGlobales(etudiants) {
     // Compter le nombre d'évaluations du groupe (productions distinctes évaluées)
     let evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     if (!Array.isArray(evaluations)) evaluations = [];
-    const productionsDistinctes = [...new Set(evaluations.map(e => e.productionId || e.artefactId))];
+    const productionsDistinctes = [...new Set(evaluations.filter(function(e) { return !e.remplaceeParId; }).map(e => e.productionId || e.artefactId))];
     const nbEvaluationsGroupe = productionsDistinctes.length;
 
     // Seuils minimaux par indice

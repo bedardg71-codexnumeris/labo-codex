@@ -1206,14 +1206,33 @@ function executerActionEval(select) {
 }
 
 /**
- * Ouvre un fichier en mode annotation depuis la liste des évaluations
+ * Ouvre un fichier en mode annotation depuis la liste des évaluations.
+ * Charge aussi l'évaluation existante (si présente) pour que evaluationEnCours
+ * soit initialisé et que la sauvegarde fonctionne quand l'utilisateur bascule en mode Évaluer.
  */
 function ouvrirAnnotationDepuisListe(fichierId) {
+    // Trouver l'évaluation associée au fichier (pour charger evaluationEnCours)
+    var fichier = (typeof travauxStockage !== 'undefined') ? travauxStockage.obtenirFichierParId(fichierId) : null;
+    var evaluation = (fichier && typeof travauxResolution !== 'undefined')
+        ? travauxResolution.trouverEvaluationPourFichier(fichier) : null;
+
     afficherSection('evaluations');
     if (typeof afficherSousSection === 'function') {
         afficherSousSection('evaluations-annoter');
     }
-    setTimeout(() => {
+
+    if (evaluation) {
+        // Charger l'évaluation après ouverture du fichier (même pattern que consulterEvaluationDepuisListe)
+        window._apresOuvertureFichier = function() {
+            setTimeout(function() {
+                if (typeof window.modifierEvaluationParId === 'function') {
+                    window.modifierEvaluationParId(evaluation.id);
+                }
+            }, 600);
+        };
+    }
+
+    setTimeout(function() {
         if (typeof travauxUI !== 'undefined' && typeof travauxUI.ouvrirFichier === 'function') {
             travauxUI.ouvrirFichier(fichierId);
         }

@@ -101,8 +101,8 @@ function calculerStatistiquesEvaluations(etudiants, evaluations, productions) {
     // PRODUCTIONS RÉALISÉES (compter les productions avec au moins une évaluation complétée)
     const productionsRealisees = new Set();
     evaluations.forEach(ev => {
-        // Vérifier si l'évaluation a une note valide (pas null, pas undefined, pas "--")
-        if (ev.productionId && ev.noteFinale !== undefined && ev.noteFinale !== null && ev.noteFinale !== '--') {
+        // Vérifier si l'évaluation a une note valide et n'est pas archivée (remplacée par un jeton de reprise)
+        if (ev.productionId && !ev.remplaceeParId && ev.noteFinale !== undefined && ev.noteFinale !== null && ev.noteFinale !== '--') {
             productionsRealisees.add(ev.productionId);
         }
     });

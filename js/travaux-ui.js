@@ -671,9 +671,10 @@
         if (fichierRestaure && !window._apresOuvertureFichier) {
             const fichiers = travauxStockage.obtenirFichiersGroupeActif();
             if (fichiers.some(f => f.id === fichierRestaure)) {
-                // Ne restaurer que si on est sur l'onglet Annoter (pas Importer)
+                // Ne restaurer que si on est sur l'onglet Annoter (pas Importer/Exporter)
                 setTimeout(() => {
-                    if (sousSectionActive !== 'evaluations-annoter') return;
+                    var sousSection = (typeof sousSectionActive !== 'undefined') ? sousSectionActive : '';
+                    if (sousSection !== 'evaluations-annoter') return;
                     // Vérifier à nouveau — le callback peut avoir été défini entre-temps
                     if (window._apresOuvertureFichier) return;
                     ouvrirFichier(fichierRestaure);
