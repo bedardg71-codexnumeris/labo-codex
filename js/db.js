@@ -54,6 +54,8 @@
             this.memoryCache = new Map();
             // Écritures IDB en cours (pour flush dans beforeunload)
             this._pendingWrites = new Set();
+            // Notification quota affichée une seule fois par session
+            this._quotaAlertShown = false;
         }
 
         /**
@@ -111,9 +113,7 @@
 
                 request.onsuccess = (event) => {
                     this.db = event.target.result;
-                    // Pré-charger les clés IDB manquantes dans memoryCache
-                    // (clés trop volumineuses évincées de localStorage par QuotaExceeded)
-                    this._prechargerDepuisIDB().then(resolve).catch(() => resolve());
+                    resolve();
                 };
 
                 request.onupgradeneeded = (event) => {
@@ -133,47 +133,6 @@
                     }
                 };
             });
-        }
-
-        /**
-         * Pré-charge dans memoryCache les clés IDB qui ne sont pas dans localStorage.
-         * Corrige le problème où les grosses clés (évincées par QuotaExceeded)
-         * sont perdues après un rechargement de page car memoryCache est vide
-         * et localStorage ne les contient plus.
-         */
-        async _prechargerDepuisIDB() {
-            if (!this.db) return;
-            try {
-                var tx = this.db.transaction('keyvalue', 'readonly');
-                var store = tx.objectStore('keyvalue');
-                var request = store.getAll();
-                var self = this;
-                await new Promise(function(resolve, reject) {
-                    request.onsuccess = function() {
-                        var items = request.result || [];
-                        var count = 0;
-                        for (var i = 0; i < items.length; i++) {
-                            var item = items[i];
-                            if (item.key && !self.memoryCache.has(item.key)) {
-                                // Vérifier si la clé est dans localStorage
-                                var inLS = false;
-                                try { inLS = localStorage.getItem(item.key) !== null; } catch(e) {}
-                                if (!inLS) {
-                                    self.memoryCache.set(item.key, item.value);
-                                    count++;
-                                }
-                            }
-                        }
-                        if (count > 0) {
-                            console.warn('[DB] Pré-chargé ' + count + ' clé(s) depuis IndexedDB (absentes de localStorage)');
-                        }
-                        resolve();
-                    };
-                    request.onerror = function() { resolve(); };
-                });
-            } catch(e) {
-                console.warn('[DB] Erreur pré-chargement IDB:', e);
-            }
         }
 
         /**
@@ -619,6 +578,8 @@
                 let synced = 0;
                 let inMemory = 0;
 
+                var SEUIL_IDB_FIRST = 200 * 1024; // 200 Ko
+
                 for (const key of indexedDBKeys) {
                     // Skip : FileSystemDirectoryHandle non sérialisable en JSON
                     if (key === 'travaux_fsapi_handle') continue;
@@ -626,19 +587,27 @@
                     // Lire depuis IndexedDB
                     const value = await this.get(key);
 
-                    // Toujours synchroniser depuis IndexedDB (source de vérité)
+                    // Seuil IDB-first : les grosses valeurs restent dans memoryCache
+                    // (pas de tentative localStorage, cohérent avec setSync)
+                    var taille = this._estimateSize(value);
+                    if (taille > SEUIL_IDB_FIRST) {
+                        try { localStorage.removeItem(key); } catch (ex) {}
+                        this.memoryCache.set(key, value);
+                        inMemory++;
+                        continue;
+                    }
+
+                    // Valeur raisonnable → synchroniser dans localStorage
                     try {
                         this._setLocalStorage(key, value);
-                        // localStorage à jour, pas besoin du cache mémoire
                         this.memoryCache.delete(key);
                         synced++;
                     } catch (e) {
-                        // Quota dépassé - stocker dans le cache mémoire
+                        // Quota dépassé malgré le seuil → cache mémoire
                         if (e.name === 'QuotaExceededError' || e.code === 22 ||
                             (e.message && e.message.toLowerCase().includes('quota'))) {
-                            console.warn(`[DB] ⚠️ Clé "${key}" trop grande pour localStorage (${this._estimateSize(value)} bytes), utilisation cache mémoire`);
-                            // Supprimer la version périmée de localStorage
-                            try { localStorage.removeItem(key); } catch (ex) { console.warn('[DB] localStorage.removeItem skipped:', key, ex.message || ex); }
+                            console.warn('[DB] Quota localStorage dépassé pour "' + key + '" (' + taille + ' bytes), utilisation cache mémoire');
+                            try { localStorage.removeItem(key); } catch (ex) {}
                             this.memoryCache.set(key, value);
                             inMemory++;
                         } else {
@@ -893,6 +862,14 @@
                         try { localStorage.removeItem(key); } catch (ex) {}
                         // Stocker dans le cache mémoire pour accès synchrone
                         this.memoryCache.set(key, value);
+                        // Notification utilisateur (une seule fois par session)
+                        if (!this._quotaAlertShown && typeof afficherNotificationErreur === 'function') {
+                            this._quotaAlertShown = true;
+                            afficherNotificationErreur(
+                                'Stockage local saturé',
+                                'Certaines données sont stockées en mémoire temporaire. Tes données sont préservées mais un rechargement rapide (Cmd+Q) pourrait en perdre.'
+                            );
+                        }
                     } else {
                         // Pas d'IndexedDB disponible, on ne peut pas sauvegarder
                         console.error('[DB] Quota localStorage dépassé et IndexedDB non disponible pour "' + key + '"');
