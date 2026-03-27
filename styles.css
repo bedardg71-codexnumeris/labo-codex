@@ -21065,6 +21065,12 @@ body.mode-clair .annot-toolbar {
     color: #fff;
 }
 
+/* Reprise en attente de réévaluation */
+.travaux-badge-pill.a-reevaluer {
+    background: var(--attention, #ff9800);
+    color: #fff;
+}
+
 /* Remis — vert foncé */
 .travaux-badge-pill.remis {
     background: var(--vert-fonce, #1b7a34);
