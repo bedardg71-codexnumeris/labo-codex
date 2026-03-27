@@ -3850,7 +3850,7 @@
 
         overlay.innerHTML = `
             <div class="modal-contenu modal-compact">
-                <button class="modal-fermer" id="pipeline-modal-fermer">&times;</button>
+                <button class="modal-fermer" data-action="fermerOverlayParent">&times;</button>
                 <h3 class="modal-titre">${echapperHtml(titre)}</h3>
                 ${contenuHTML}
                 <div class="modal-actions">
@@ -3859,9 +3859,6 @@
             </div>`;
 
         document.body.appendChild(overlay);
-
-        // Fermer via le X
-        document.getElementById('pipeline-modal-fermer').onclick = () => overlay.remove();
 
         // Fermer en cliquant l'overlay (pas le contenu)
         overlay.addEventListener('click', (e) => {
@@ -6227,7 +6224,7 @@
         overlay.className = 'modal-overlay actif';
         overlay.innerHTML = `
             <div class="modal-contenu modal-compact" style="max-width: 560px;">
-                <button class="modal-fermer" id="transfert-modal-fermer">&times;</button>
+                <button class="modal-fermer" data-action="fermerOverlayParent">&times;</button>
                 <h3 class="modal-titre">Transférer des fichiers</h3>
 
                 <label style="font-size: 0.85em; color: var(--texte-secondaire);">Groupe cible :</label>
@@ -6250,17 +6247,14 @@
 
                 <div class="modal-actions">
                     <button class="btn btn-principal" id="transfert-btn-executer" disabled>Transférer 0 fichier(s)</button>
-                    <button class="btn btn-secondaire" id="transfert-btn-annuler">Annuler</button>
+                    <button class="btn btn-secondaire" data-action="fermerOverlayParent">Annuler</button>
                 </div>
             </div>`;
 
         document.body.appendChild(overlay);
 
         // Evenements
-        const fermer = () => overlay.remove();
-        document.getElementById('transfert-modal-fermer').onclick = fermer;
-        document.getElementById('transfert-btn-annuler').onclick = fermer;
-        overlay.addEventListener('click', (e) => { if (e.target === overlay) fermer(); });
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
 
         // Tout selectionner
         const toutSelCheckbox = document.getElementById('transfert-tout-selectionner');
@@ -6294,7 +6288,7 @@
             const cibleCoursId = selectCible.selectedOptions[0].getAttribute('data-cours-id');
             if (selectionnes.length === 0 || !cibleId) return;
             executerTransfert(selectionnes, cibleId, cibleCoursId);
-            fermer();
+            overlay.remove();
         };
     }
 

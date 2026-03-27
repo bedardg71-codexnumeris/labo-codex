@@ -130,7 +130,7 @@ function changerModeParcoursDelegue(el) {
 // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
 // Les valeurs ici servent de fallback si version.json n'est pas disponible
 let VERSION_MAJEURE = '98.9';
-let BUILD_ID = '0327-1715';
+let BUILD_ID = '0327-1730';
 
 // === CLÉS LOCALSTORAGE ===
 const CLE_VERSION_VUE = 'monitorage-version-vue';

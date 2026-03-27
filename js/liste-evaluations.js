@@ -1304,7 +1304,7 @@ function associerProductionDepuisListe(fichierId, da) {
     overlay.className = 'modal-overlay actif';
     overlay.innerHTML = `
         <div class="modal-contenu modal-compact" style="max-width: 440px;">
-            <button class="modal-fermer" id="associer-prod-modal-fermer">&times;</button>
+            <button class="modal-fermer" data-action="fermerOverlayParent">&times;</button>
             <h3 class="modal-titre">${productionActuelle ? 'Réassocier' : 'Associer'} à une production</h3>
             <label style="font-size: 0.85em; color: var(--texte-secondaire);">Production :</label>
             <select id="associer-prod-select" class="controle-form" style="margin: 6px 0 16px 0; width: 100%;">
@@ -1313,15 +1313,13 @@ function associerProductionDepuisListe(fichierId, da) {
             </select>
             <div class="modal-actions">
                 <button class="btn btn-principal" id="associer-prod-btn-confirmer">Confirmer</button>
-                <button class="btn btn-secondaire" id="associer-prod-btn-annuler">Annuler</button>
+                <button class="btn btn-secondaire" data-action="fermerOverlayParent">Annuler</button>
             </div>
         </div>`;
 
     document.body.appendChild(overlay);
 
     const fermer = () => overlay.remove();
-    document.getElementById('associer-prod-modal-fermer').onclick = fermer;
-    document.getElementById('associer-prod-btn-annuler').onclick = fermer;
     overlay.addEventListener('click', (e) => { if (e.target === overlay) fermer(); });
 
     // Quand "Jeton de reprise" est sélectionné, afficher le sous-sélecteur de production cible
@@ -1409,7 +1407,7 @@ function confirmerSuppressionFichier(fichierId, da) {
     overlay.className = 'modal-overlay actif';
     overlay.innerHTML = `
         <div class="modal-contenu modal-compact" style="max-width: 440px;">
-            <button class="modal-fermer" id="supprimer-fichier-modal-fermer">&times;</button>
+            <button class="modal-fermer" data-action="fermerOverlayParent">&times;</button>
             <h3 class="modal-titre">Déplacer à la corbeille ?</h3>
             <p style="margin: 8px 0 16px 0; font-size: 0.9em;">
                 Déplacer le fichier de <strong>${echapperHtml(nomEtudiant)}</strong> à la corbeille ?<br>
@@ -1420,16 +1418,13 @@ function confirmerSuppressionFichier(fichierId, da) {
             </p>
             <div class="modal-actions">
                 <button class="btn btn-danger" id="supprimer-fichier-btn-confirmer">Déplacer à la corbeille</button>
-                <button class="btn btn-secondaire" id="supprimer-fichier-btn-annuler">Annuler</button>
+                <button class="btn btn-secondaire" data-action="fermerOverlayParent">Annuler</button>
             </div>
         </div>`;
 
     document.body.appendChild(overlay);
 
-    const fermer = () => overlay.remove();
-    document.getElementById('supprimer-fichier-modal-fermer').onclick = fermer;
-    document.getElementById('supprimer-fichier-btn-annuler').onclick = fermer;
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) fermer(); });
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
 
     document.getElementById('supprimer-fichier-btn-confirmer').onclick = () => {
         travauxStockage.deplacerEnCorbeille(fichierId);
@@ -2393,7 +2388,7 @@ function supprimerFichierDefinitivement(id) {
     overlay.className = 'modal-overlay actif';
     overlay.innerHTML = `
         <div class="modal-contenu modal-compact" style="max-width: 440px;">
-            <button class="modal-fermer" id="supprimer-definitif-modal-fermer">&times;</button>
+            <button class="modal-fermer" data-action="fermerOverlayParent">&times;</button>
             <h3 class="modal-titre">Supprimer définitivement ?</h3>
             <p style="margin: 8px 0 16px 0; font-size: 0.9em;">
                 Le fichier sera supprimé de façon permanente.
@@ -2403,16 +2398,13 @@ function supprimerFichierDefinitivement(id) {
             </p>
             <div class="modal-actions">
                 <button class="btn btn-danger" id="supprimer-definitif-btn-confirmer">Supprimer définitivement</button>
-                <button class="btn btn-secondaire" id="supprimer-definitif-btn-annuler">Annuler</button>
+                <button class="btn btn-secondaire" data-action="fermerOverlayParent">Annuler</button>
             </div>
         </div>`;
 
     document.body.appendChild(overlay);
 
-    const fermer = () => overlay.remove();
-    document.getElementById('supprimer-definitif-modal-fermer').onclick = fermer;
-    document.getElementById('supprimer-definitif-btn-annuler').onclick = fermer;
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) fermer(); });
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
 
     document.getElementById('supprimer-definitif-btn-confirmer').onclick = async () => {
         // ✅ CORRIGÉ (16 mars 2026) : supprimer aussi les évaluations liées au fichier
@@ -2466,7 +2458,7 @@ function viderTouteCorbeille() {
     overlay.className = 'modal-overlay actif';
     overlay.innerHTML = `
         <div class="modal-contenu modal-compact" style="max-width: 440px;">
-            <button class="modal-fermer" id="vider-corbeille-modal-fermer">&times;</button>
+            <button class="modal-fermer" data-action="fermerOverlayParent">&times;</button>
             <h3 class="modal-titre">Vider la corbeille ?</h3>
             <p style="margin: 8px 0 16px 0; font-size: 0.9em;">
                 Supprimer définitivement les <strong>${corbeille.length}</strong> fichier(s) de la corbeille ?
@@ -2476,16 +2468,13 @@ function viderTouteCorbeille() {
             </p>
             <div class="modal-actions">
                 <button class="btn btn-danger" id="vider-corbeille-btn-confirmer">Tout supprimer</button>
-                <button class="btn btn-secondaire" id="vider-corbeille-btn-annuler">Annuler</button>
+                <button class="btn btn-secondaire" data-action="fermerOverlayParent">Annuler</button>
             </div>
         </div>`;
 
     document.body.appendChild(overlay);
 
-    const fermer = () => overlay.remove();
-    document.getElementById('vider-corbeille-modal-fermer').onclick = fermer;
-    document.getElementById('vider-corbeille-btn-annuler').onclick = fermer;
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) fermer(); });
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
 
     document.getElementById('vider-corbeille-btn-confirmer').onclick = async () => {
         // ✅ CORRIGÉ (16 mars 2026) : supprimer aussi les évaluations liées aux fichiers de la corbeille

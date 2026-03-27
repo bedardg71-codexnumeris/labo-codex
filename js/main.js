@@ -745,6 +745,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    /**
+     * Ferme la modale/overlay la plus proche en remontant le DOM.
+     * Usage : data-action="fermerOverlayParent"
+     */
+    window.fermerOverlayParent = function(el) {
+        var overlay = el.closest('.modal-overlay');
+        if (overlay) overlay.remove();
+    };
+
     // ===============================
     // 3.5 EXÉCUTION DES MIGRATIONS (Beta 93.5)
     // ===============================
