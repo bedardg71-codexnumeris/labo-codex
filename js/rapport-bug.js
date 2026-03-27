@@ -891,6 +891,14 @@ function obtenirEtatStockage() {
         // Ignorer
     }
 
+    // Stats de stockage (diagnostic quota)
+    if (window._storageStats) {
+        var stats = window._storageStats;
+        etat['localStorage'] = stats.localStorage.nbCles + ' clés, ' + stats.localStorage.tailleFormatee;
+        etat['memoryCache'] = stats.memoryCache.nbCles + ' clés';
+        etat['IDB'] = stats.idb.nbCles + ' clés (' + stats.idb.syncLocalStorage + ' sync LS, ' + stats.idb.dansMemoryCache + ' en mémoire)';
+    }
+
     return etat;
 }
 

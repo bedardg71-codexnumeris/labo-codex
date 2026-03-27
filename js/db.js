@@ -2,39 +2,42 @@
  * Couche d'abstraction unifiée pour le stockage de données
  * Architecture de cache hybride localStorage + IndexedDB
  *
- * FONCTIONNEMENT:
- * - localStorage = Store primaire de facto (synchrone, survit aux crashes)
- * - IndexedDB = Backup async (grandes capacités, fire-and-forget)
- * - Au démarrage : syncToLocalStorageCache() recopie IDB → localStorage
+ * SOURCE DE VÉRITÉ (mise à jour 27 mars 2026):
  *
- * DÉCISIONS ARCHITECTURALES (audit 26 mars 2026):
- * - setSync() écrit localStorage sync + IDB async sans await. Si crash
- *   avant completion IDB, localStorage a la valeur récente, IDB non.
- *   Au prochain démarrage, IDB peut écraser localStorage avec une valeur
- *   plus ancienne. Risque accepté : la fenêtre de vulnérabilité est courte.
- * - memoryCache (RAM) est utilisé quand localStorage atteint son quota.
- *   Si crash dans cet état, données perdues. Risque accepté : rare.
- * - Pas de flush beforeunload pour les écritures IDB pendantes.
- *   Risque accepté : localStorage est la source de vérité en pratique.
+ *   Petites clés (< 200 Ko) :
+ *     localStorage = source synchrone, IDB = backup async
+ *     getSync() lit localStorage puis memoryCache
+ *     setSync() écrit localStorage + IDB fire-and-forget
+ *
+ *   Grosses clés (> 200 Ko) :
+ *     IDB + memoryCache = source de vérité
+ *     setSync() saute localStorage, écrit memoryCache + IDB
+ *     getSync() lit memoryCache (chargé par syncToLocalStorageCache au démarrage)
+ *
+ * DÉMARRAGE:
+ *   init() → syncToLocalStorageCache() lit TOUTES les clés IDB :
+ *   - Petites → localStorage (cache synchrone)
+ *   - Grosses → memoryCache (seuil 200 Ko, pas de tentative localStorage)
+ *   - Émet événement 'db-ready' quand terminé
+ *
+ * SÉCURITÉ DONNÉES:
+ *   - Écritures IDB trackées dans _pendingWrites (Set de promesses)
+ *   - beforeunload signale si des écritures sont en cours
+ *   - db.flush() attend la fin de toutes les écritures pendantes
+ *   - Notification utilisateur (une fois/session) si quota localStorage dépassé
  *
  * MÉTHODES SYNCHRONES (getSync/setSync/removeSync):
- * - Lecture: depuis localStorage (cache chaud)
- * - Écriture: dans localStorage (synchrone) + IndexedDB (async en arrière-plan)
- * - Suppression: de localStorage (synchrone) + IndexedDB (async en arrière-plan)
+ * - Lecture: memoryCache (prioritaire) puis localStorage
+ * - Écriture: localStorage ou memoryCache (selon taille) + IDB async
+ * - Suppression: localStorage + memoryCache + IDB async
  *
  * MÉTHODES ASYNCHRONES (get/set/remove):
- * - Accès direct à IndexedDB ou localStorage selon disponibilité
- * - Utilisées pour migration et synchronisation
- *
- * AVANTAGES:
- * - Accès synchrone rapide (pas de changement dans le code applicatif)
- * - Capacité de stockage étendue (IndexedDB > localStorage)
- * - Résilience (localStorage fonctionne toujours si IndexedDB échoue)
- * - Support multi-groupes futur (bases IndexedDB séparées)
+ * - Accès direct à IndexedDB avec fallback localStorage
+ * - Utilisées pour migration, thumbnails, et synchronisation
  *
  * @author Grégoire Bédard avec assistance Claude Code
- * @version Beta 91.6 (Cache hybride IndexedDB)
- * @date 26 novembre 2025
+ * @version Beta 98.9 (Seuil IDB-first, flush beforeunload)
+ * @date 27 mars 2026
  */
 
 (function() {
@@ -617,6 +620,32 @@
                 }
 
 
+                // Diagnostic storage (accessible via window._storageStats)
+                var lsTaille = 0;
+                try {
+                    for (var lsKey in localStorage) {
+                        if (localStorage.hasOwnProperty(lsKey)) {
+                            lsTaille += (localStorage.getItem(lsKey) || '').length * 2; // UTF-16
+                        }
+                    }
+                } catch (e) {}
+                window._storageStats = {
+                    localStorage: {
+                        nbCles: Object.keys(localStorage).length,
+                        tailleEstimee: lsTaille,
+                        tailleFormatee: (lsTaille / 1024).toFixed(1) + ' Ko'
+                    },
+                    memoryCache: {
+                        nbCles: this.memoryCache.size
+                    },
+                    idb: {
+                        nbCles: indexedDBKeys.length,
+                        syncLocalStorage: synced,
+                        dansMemoryCache: inMemory
+                    },
+                    seuilIDBFirst: '200 Ko'
+                };
+
                 // ✅ Définir flag global pour indiquer que la DB est prête
                 window.dbReady = true;
 
@@ -1055,6 +1084,86 @@
             event.returnValue = '';
         }
     });
+
+    /**
+     * Test de résistance stockage — exécutable via console :
+     *   window._testResistanceStorage()
+     *
+     * Crée des clés de test de taille croissante, vérifie la cohérence
+     * getSync/IDB, puis nettoie.
+     */
+    window._testResistanceStorage = async function() {
+        var resultats = [];
+        var CLE_PREFIX = '_test_resistance_';
+        var tailles = [1, 10, 50, 100, 200, 500, 1000]; // Ko
+
+        console.warn('[Test résistance] Début — ' + tailles.length + ' tailles à tester');
+
+        for (var i = 0; i < tailles.length; i++) {
+            var ko = tailles[i];
+            var cle = CLE_PREFIX + ko + 'ko';
+            // Générer une valeur de la taille voulue
+            var payload = '';
+            for (var j = 0; j < ko * 100; j++) {
+                payload += '0123456789';  // 10 chars × ko×100 = ko×1000 chars ≈ ko Ko
+            }
+            var valeur = { data: payload, taille: ko + ' Ko', timestamp: Date.now() };
+
+            // Écrire via setSync
+            var t0 = performance.now();
+            try {
+                db.setSync(cle, valeur);
+            } catch (e) {
+                resultats.push({ taille: ko + ' Ko', erreur: e.message });
+                continue;
+            }
+            var tEcriture = (performance.now() - t0).toFixed(1);
+
+            // Lire via getSync (memoryCache ou localStorage)
+            var lu = db.getSync(cle, null);
+            var coherent = lu && lu.taille === ko + ' Ko';
+
+            // Vérifier où la donnée est stockée
+            var dansLS = false;
+            try { dansLS = localStorage.getItem(cle) !== null; } catch (e) {}
+            var dansCache = db.memoryCache.has(cle);
+            var stockage = dansLS ? 'localStorage' : (dansCache ? 'memoryCache' : 'inconnu');
+
+            // Attendre flush IDB et vérifier
+            await db.flush();
+            var dansIDB = await db.get(cle, null) !== null;
+
+            resultats.push({
+                taille: ko + ' Ko',
+                ecriture: tEcriture + ' ms',
+                stockage: stockage,
+                idb: dansIDB,
+                coherent: coherent
+            });
+        }
+
+        // Nettoyage
+        for (var k = 0; k < tailles.length; k++) {
+            var cleNettoyage = CLE_PREFIX + tailles[k] + 'ko';
+            db.removeSync(cleNettoyage);
+            try { await db.remove(cleNettoyage); } catch (e) {}
+        }
+
+        console.warn('[Test résistance] Résultats :');
+        console.table(resultats);
+
+        // Résumé
+        var erreurs = resultats.filter(function(r) { return r.erreur; });
+        var incoherents = resultats.filter(function(r) { return r.coherent === false; });
+        if (erreurs.length === 0 && incoherents.length === 0) {
+            console.warn('[Test résistance] SUCCÈS — toutes les tailles gérées correctement');
+        } else {
+            if (erreurs.length > 0) console.error('[Test résistance] ' + erreurs.length + ' erreur(s)');
+            if (incoherents.length > 0) console.error('[Test résistance] ' + incoherents.length + ' incohérence(s)');
+        }
+
+        return resultats;
+    };
 
     // Exporter globalement
     window.db = db;
