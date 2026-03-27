@@ -1,11 +1,47 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 14 mars 2026 (Beta 98.6)
+> **Derniere mise a jour** : 27 mars 2026 (Beta 98.9, Build 0327-1730)
 
 ---
 
 ## A faire
+
+### Desaturation localStorage — COMPLETE (27 mars 2026)
+
+- [x] **Phase 1a** Extraire thumbnails de fichiersTravaux vers IDB (gain ~3.3 Mo) *(commit 233fdfc)*
+- [x] **Phase 2a** Seuil IDB-first 200 Ko dans setSync (grosses cles → memoryCache + IDB) *(commit a329f81)*
+- [x] **Phase 1b** Flush beforeunload (ecritures IDB trackees, dialogue si Cmd+Q) *(commit a329f81)*
+- [x] **Phase 2c** Fusionner _prechargerDepuisIDB dans syncToLocalStorageCache *(commit 51d7176)*
+- [x] **Phase 1c** Audit appels directs localStorage (tous legitimes, RAS)
+- [x] **Phase 3b** Notification quota → retiree (comportement normal avec IDB-first)
+- [x] **Phase 2b** Documentation db.js mise a jour *(commit f25f12c)*
+- [x] **Phase 2d** Audit evaluationsSauvegardees (gere par seuil IDB-first)
+- [x] **Phase 3a** Diagnostic storage (window._storageStats + rapport-bug) *(commit f25f12c)*
+- [x] **Phase 3c** Test de resistance (window._testResistanceStorage() — SUCCES) *(commit f25f12c)*
+- **Plan detaille** : `plans de travail/Plan - Desaturation localStorage (analyse).md`
+
+### Assainissement securite — ~87% COMPLETE (25-27 mars 2026)
+
+- [x] Phases 0-6 : ~1302 handlers inline migres vers delegation (18 commits)
+- [x] index.html : 0 onclick inline
+- [x] CSP `script-src 'self'` active
+- [x] Dispatcher data-action/data-on-change operationnel dans main.js
+- [x] fermerOverlayParent() generique pour modales *(commit 68af8d4)*
+- [x] Migration close/cancel modales vers data-action (11 handlers) *(commit 68af8d4)*
+- Reste : 21 .onclick directs dans JS (closures, createElement — tous programmatiques, aucun inline HTML)
+
+### Jetons de reprise avec fichiers — COMPLETE (27 mars 2026)
+
+- [x] Import via "Jeton de reprise" dans le pipeline + sous-selecteur production
+- [x] Application automatique post-import + liaison fichier↔evaluation
+- [x] Badge "Reprise (etait X · Y%)" + badge "A reevaluer" (orange)
+- [x] Modale doublon avec option "Jeton de reprise"
+- [x] Reassociation avec option "Jeton de reprise"
+- [x] Annoter depuis la liste charge l'evaluation existante
+- [x] Filtrage `!remplaceeParId` dans profil, dashboard, graphiques
+- [x] Fix db.js : pre-chargement IDB au demarrage (quota localStorage)
+- **8 commits** : `86cd409` a `63dd1d2`
 
 ### Codex — Flux USB multi-appareil (14 mars 2026)
 
@@ -240,6 +276,7 @@
 - [ ] **#207** Integrer travaux-stockage.js dans db.js : creer une API blob dans db.js au lieu d'ouvrir une base IndexedDB parallele (`MonitorageFichiers`)
   - **Fichier** : `js/travaux-stockage.js:51`
   - **Ref audit** : ARC-01
+  - **Avancement** : Migration MonitorageFichiers → MonitoragePedagogique.fichiers FAITE (Beta 95). API blob dans db.js en place (storeBlob/getBlob/deleteBlob). Thumbnails migrees vers IDB keyvalue (Beta 98.9). Reste : fusionner les modules si pertinent.
 
 #### Reste a faire — CSS
 
