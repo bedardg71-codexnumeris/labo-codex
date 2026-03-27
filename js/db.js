@@ -57,8 +57,6 @@
             this.memoryCache = new Map();
             // Écritures IDB en cours (pour flush dans beforeunload)
             this._pendingWrites = new Set();
-            // Notification quota affichée une seule fois par session
-            this._quotaAlertShown = false;
         }
 
         /**
@@ -891,14 +889,8 @@
                         try { localStorage.removeItem(key); } catch (ex) {}
                         // Stocker dans le cache mémoire pour accès synchrone
                         this.memoryCache.set(key, value);
-                        // Notification utilisateur (une seule fois par session)
-                        if (!this._quotaAlertShown && typeof afficherNotificationErreur === 'function') {
-                            this._quotaAlertShown = true;
-                            afficherNotificationErreur(
-                                'Stockage local saturé',
-                                'Certaines données sont stockées en mémoire temporaire. Tes données sont préservées mais un rechargement rapide (Cmd+Q) pourrait en perdre.'
-                            );
-                        }
+                        // Pas de notification utilisateur : avec IDB-first,
+                        // le fallback memoryCache est un comportement normal et géré.
                     } else {
                         // Pas d'IndexedDB disponible, on ne peut pas sauvegarder
                         console.error('[DB] Quota localStorage dépassé et IndexedDB non disponible pour "' + key + '"');
