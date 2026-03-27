@@ -52,6 +52,8 @@
             // Cache mémoire pour les clés trop grandes pour localStorage
             // Permet un accès synchrone même si la donnée n'est pas dans localStorage
             this.memoryCache = new Map();
+            // Écritures IDB en cours (pour flush dans beforeunload)
+            this._pendingWrites = new Set();
         }
 
         /**
@@ -857,11 +859,26 @@
          * @throws {Error} Si IndexedDB non disponible ET localStorage plein
          */
         setSync(key, value) {
+            // Seuil IDB-first : les grosses valeurs vont directement dans
+            // memoryCache + IDB, sans tenter localStorage (évite QuotaExceeded)
+            var SEUIL_IDB_FIRST = 200 * 1024; // 200 Ko
+
+            var taille = this._estimateSize(value);
+            var idbDispo = this.ready && this.useIndexedDB;
+
+            if (idbDispo && taille > SEUIL_IDB_FIRST) {
+                // Grosse valeur → IDB-first, pas de localStorage
+                this.memoryCache.set(key, value);
+                // Supprimer l'éventuelle ancienne version de localStorage
+                try { localStorage.removeItem(key); } catch (ex) {}
+                // Écriture IDB en arrière-plan (trackée pour flush)
+                this._trackWrite(key, value);
+                return;
+            }
+
             // 1. Essayer d'écrire dans localStorage (cache rapide)
-            let writtenToLocalStorage = false;
             try {
                 this._setLocalStorage(key, value);
-                writtenToLocalStorage = true;
                 // Supprimer du cache mémoire si la donnée est maintenant dans localStorage
                 this.memoryCache.delete(key);
             } catch (e) {
@@ -870,15 +887,15 @@
                     (e.message && e.message.toLowerCase().includes('quota'))) {
 
                     // Si IndexedDB est disponible, on peut continuer sans cache localStorage
-                    if (this.ready && this.useIndexedDB) {
-                        console.warn(`[DB] ⚠️ Quota localStorage dépassé pour "${key}" (${this._estimateSize(value)} bytes), utilisation cache mémoire + IndexedDB`);
+                    if (idbDispo) {
+                        console.warn('[DB] Quota localStorage dépassé pour "' + key + '" (' + taille + ' bytes), utilisation cache mémoire + IndexedDB');
                         // Supprimer du localStorage pour libérer de l'espace
-                        try { localStorage.removeItem(key); } catch (ex) { console.warn('[DB] localStorage.removeItem skipped:', key, ex.message || ex); }
+                        try { localStorage.removeItem(key); } catch (ex) {}
                         // Stocker dans le cache mémoire pour accès synchrone
                         this.memoryCache.set(key, value);
                     } else {
                         // Pas d'IndexedDB disponible, on ne peut pas sauvegarder
-                        console.error(`[DB] ❌ Quota localStorage dépassé et IndexedDB non disponible pour "${key}"`);
+                        console.error('[DB] Quota localStorage dépassé et IndexedDB non disponible pour "' + key + '"');
                         throw e;
                     }
                 } else {
@@ -887,13 +904,34 @@
                 }
             }
 
-            // 2. Écriture asynchrone dans IndexedDB si disponible (en arrière-plan)
-            if (this.ready && this.useIndexedDB) {
-                this._setIndexedDB(key, value).catch(error => {
-                    console.warn(`[DB] Erreur écriture async IndexedDB clé "${key}":`, error);
-                    // Si localStorage ou memoryCache a la valeur, on continue
-                });
+            // 2. Écriture asynchrone dans IndexedDB si disponible (trackée pour flush)
+            if (idbDispo) {
+                this._trackWrite(key, value);
             }
+        }
+
+        /**
+         * Lance une écriture IDB et la tracke dans _pendingWrites
+         * pour permettre le flush dans beforeunload
+         */
+        _trackWrite(key, value) {
+            var self = this;
+            var promise = this._setIndexedDB(key, value).catch(function(error) {
+                console.warn('[DB] Erreur écriture async IDB clé "' + key + '":', error);
+            }).finally(function() {
+                self._pendingWrites.delete(promise);
+            });
+            this._pendingWrites.add(promise);
+        }
+
+        /**
+         * Attend que toutes les écritures IDB pendantes soient terminées.
+         * Utile avant un rechargement volontaire de page.
+         * @returns {Promise<void>}
+         */
+        async flush() {
+            if (this._pendingWrites.size === 0) return;
+            await Promise.all(Array.from(this._pendingWrites));
         }
 
         /**
@@ -1030,6 +1068,15 @@
         }
     }).catch((error) => {
         console.error('❌ [DB] Erreur initialisation:', error);
+    });
+
+    // Beforeunload : signaler si des écritures IDB sont en cours
+    // Le returnValue donne au navigateur le temps de finir les transactions
+    window.addEventListener('beforeunload', function(event) {
+        if (db._pendingWrites.size > 0) {
+            console.warn('[DB] ' + db._pendingWrites.size + ' écriture(s) IDB en cours au déchargement');
+            event.returnValue = '';
+        }
     });
 
     // Exporter globalement
