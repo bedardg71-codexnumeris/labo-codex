@@ -61,13 +61,28 @@
         if (!evaluation) return null;
         if (typeof travauxStockage === 'undefined') return null;
 
-        // Résolution par clé composite (etudiantDA, productionId)
+        // Chemin prioritaire : résolution directe par evaluationId
+        if (evaluation.id) {
+            var tousLesFichiers = travauxStockage.obtenirFichiersTravaux();
+            var parEvalId = tousLesFichiers.filter(function(f) {
+                return f.evaluationId === evaluation.id && f.statut !== 'corbeille';
+            });
+            if (parEvalId.length === 1) return parEvalId[0];
+            if (parEvalId.length > 1) {
+                parEvalId.sort(function(a, b) {
+                    return new Date(b.dateModification || 0) - new Date(a.dateModification || 0);
+                });
+                return parEvalId[0];
+            }
+        }
+
+        // Fallback : résolution par clé composite (etudiantDA, productionId)
         if (!evaluation.etudiantDA) {
             return null;
         }
-        let fichiers = travauxStockage.obtenirFichiersEtudiant(evaluation.etudiantDA);
+        var fichiers = travauxStockage.obtenirFichiersEtudiant(evaluation.etudiantDA);
         if (evaluation.productionId) {
-            fichiers = fichiers.filter(f => f.productionId === evaluation.productionId);
+            fichiers = fichiers.filter(function(f) { return f.productionId === evaluation.productionId; });
         }
         if (fichiers.length === 0) {
             return null;
@@ -75,15 +90,15 @@
         if (fichiers.length === 1) return fichiers[0];
 
         // 2+ résultats : retourner le plus récent + signaler l'ambiguïté
-        fichiers.sort((a, b) =>
-            new Date(b.dateModification || 0) - new Date(a.dateModification || 0)
-        );
-        console.warn(`[Résolution] AMBIGUÏTÉ: ${fichiers.length} fichiers pour (${evaluation.etudiantDA}, ${evaluation.productionId}) — retourne le plus récent`);
+        fichiers.sort(function(a, b) {
+            return new Date(b.dateModification || 0) - new Date(a.dateModification || 0);
+        });
+        console.warn('[Résolution] AMBIGUÏTÉ: ' + fichiers.length + ' fichiers pour (' + evaluation.etudiantDA + ', ' + evaluation.productionId + ') — retourne le plus récent');
         _dernierAvertissement = {
             type: 'ambiguite-fichier',
             da: evaluation.etudiantDA,
             productionId: evaluation.productionId,
-            candidats: fichiers.map(f => ({ id: f.id, nom: f.nomFichier, date: f.dateModification }))
+            candidats: fichiers.map(function(f) { return { id: f.id, nom: f.nomFichier, date: f.dateModification }; })
         };
         return fichiers[0];
     }

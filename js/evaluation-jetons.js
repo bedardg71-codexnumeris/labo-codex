@@ -266,16 +266,19 @@ function retirerJetonDelai(evaluationId) {
  *
  * @param {string} evaluationOriginaleId - ID de l'évaluation à remplacer
  * @param {boolean} archiverOriginale - Si true, archive l'originale; sinon la supprime (optionnel, lit config si omis)
+ * @param {Object} [options] - { silencieux: false } pour supprimer les notifications
  * @returns {object|null} La nouvelle évaluation créée, ou null si échec
  */
-function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) {
+function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, options) {
+    if (archiverOriginale === undefined) archiverOriginale = null;
+    var silencieux = options && options.silencieux;
 
     // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec les modes
     const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const indexOriginal = evaluations.findIndex(e => e.id === evaluationOriginaleId);
 
     if (indexOriginal === -1) {
-        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        if (!silencieux) afficherNotificationErreur('Erreur', 'Évaluation introuvable');
         return null;
     }
 
@@ -286,9 +289,9 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
     if (!verifierDisponibiliteJeton(da, 'reprise')) {
         const config = obtenirConfigJetons();
         const utilises = compterJetonsUtilises(da, 'reprise');
-        afficherNotificationErreur(
+        if (!silencieux) afficherNotificationErreur(
             'Jetons épuisés',
-            `Plus de jetons de reprise disponibles (${utilises}/${config.reprise.nombre} utilisés)`
+            'Plus de jetons de reprise disponibles (' + utilises + '/' + config.reprise.nombre + ' utilisés)'
         );
         return null;
     }
@@ -305,9 +308,9 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
     ).length;
 
     if (reprisesExistantes >= config.reprise.maxParProduction) {
-        afficherNotificationErreur(
+        if (!silencieux) afficherNotificationErreur(
             'Limite atteinte',
-            `Maximum de reprises atteint pour cette production (${reprisesExistantes}/${config.reprise.maxParProduction})`
+            'Maximum de reprises atteint pour cette production (' + reprisesExistantes + '/' + config.reprise.maxParProduction + ')'
         );
         return null;
     }
@@ -323,6 +326,7 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
     const copieOriginale = structuredClone(evaluationOriginale);
 
     // Créer la nouvelle évaluation (duplicata) avec un nouvel ID unique
+    // Les scores de l'originale sont conservés — l'enseignant les modifiera lors de la réévaluation
     const nouvelId = genererIdUnique('EVAL_');
     const nouvelleEvaluation = {
         ...copieOriginale,
@@ -376,7 +380,7 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
         setTimeout(() => initialiserListeEvaluations(), 150);
     }
 
-    afficherNotificationSucces(`Jeton de reprise appliqué (${archiverOriginale ? 'originale archivée' : 'originale supprimée'})`);
+    if (!silencieux) afficherNotificationSucces('Jeton de reprise appliqué (' + (archiverOriginale ? 'originale archivée' : 'originale supprimée') + ')');
     return nouvelleEvaluation;
 }
 

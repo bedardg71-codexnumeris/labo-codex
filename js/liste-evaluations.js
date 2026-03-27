@@ -677,6 +677,18 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
 
                     // Évaluation existante
                     // ✅ NOUVEAU (29 déc 2025): Ajouter daAffichage pour anonymisation
+                    // Si c'est une reprise, chercher les scores de l'originale
+                    var scoresOriginaux = null;
+                    if (estNouvelleReprise && evaluation.repriseDeId) {
+                        var originale = evaluations.find(function(e) { return e.id === evaluation.repriseDeId; });
+                        if (originale) {
+                            scoresOriginaux = {
+                                niveauFinal: originale.niveauFinal || '-',
+                                noteFinale: originale.noteFinale != null ? originale.noteFinale : null
+                            };
+                        }
+                    }
+
                     lignes.push({
                         da: etudiant.da,
                         daAffichage: etudiant.daAffichage || etudiant.da,
@@ -697,7 +709,8 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                         evaluationId: evaluation.id,
                         verrouille: evaluation.verrouillee || false,
                         remplacee: estOriginaleRemplacee,
-                        badgeType: badgeType
+                        badgeType: badgeType,
+                        scoresOriginaux: scoresOriginaux
                     });
                 });
             } else {
@@ -948,8 +961,21 @@ function genererLigneHTML(ligne) {
         // Nouvelle de reprise ciblée : badge "Reprise ciblée"
         badgeJeton = ' <span class="badge-jeton-reprise-ciblee-wrapper"><span class="badge-jeton-titre">Reprise ciblée</span></span>';
     } else if (ligne.badgeType === 'nouvelle-reprise') {
-        // Nouvelle de reprise standard : badge "Reprise"
-        badgeJeton = ' <span class="badge-jeton-reprise-wrapper"><span class="badge-jeton-titre">Reprise</span></span>';
+        // Nouvelle de reprise standard : badge "Reprise" + scores originaux
+        var infoOriginale = '';
+        if (ligne.scoresOriginaux) {
+            var parties = [];
+            if (ligne.scoresOriginaux.niveauFinal && ligne.scoresOriginaux.niveauFinal !== '-') {
+                parties.push(ligne.scoresOriginaux.niveauFinal);
+            }
+            if (ligne.scoresOriginaux.noteFinale != null) {
+                parties.push(ligne.scoresOriginaux.noteFinale + '%');
+            }
+            if (parties.length > 0) {
+                infoOriginale = ' <span class="badge-jeton-original">(était ' + parties.join(' · ') + ')</span>';
+            }
+        }
+        badgeJeton = ' <span class="badge-jeton-reprise-wrapper"><span class="badge-jeton-titre">Reprise</span>' + infoOriginale + '</span>';
     } else if (ligne.badgeType === 'delai') {
         // Délai : badge "Délai"
         badgeJeton = ' <span class="badge-jeton-delai-wrapper"><span class="badge-jeton-titre">Délai</span></span>';
@@ -1013,10 +1039,18 @@ function genererDropdownActions(ligne) {
         const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
         const productions = db.getSync(cle('productions'), []);
         const productionIdsConnus = new Set(productions.map(p => p.id));
-        // Match strict par DA + productionId
-        fichierImporte = fichiers.find(f =>
-            f.etudiantDA === ligne.da && f.productionId && f.productionId === ligne.productionId
-        );
+        // Match prioritaire par evaluationId (distingue original vs reprise)
+        if (ligne.evaluationId) {
+            fichierImporte = fichiers.find(f =>
+                f.evaluationId === ligne.evaluationId
+            );
+        }
+        // Fallback : match strict par DA + productionId
+        if (!fichierImporte) {
+            fichierImporte = fichiers.find(f =>
+                f.etudiantDA === ligne.da && f.productionId && f.productionId === ligne.productionId
+            );
+        }
         // Match souple : fichier du même DA sans productionId ou avec productionId orphelin
         // 🔧 FIX (5 mars 2026) : Ne soft-matcher que si l'étudiant n'a qu'UN seul fichier
         // non-associé. Sinon le match est ambigu (pourrait être pour une autre production).
@@ -1386,7 +1420,11 @@ function consulterEvaluationDepuisListe(evaluationId) {
             sessionStorage.setItem('travaux-filtre-production', evaluation.productionId);
         }
         // Workflow visionneuse : ouvrir le fichier, basculer en mode évaluer,
-        // puis charger l'évaluation sauvegardée
+        // puis charger l'évaluation sauvegardée.
+        // preRemplirEvaluation (déclenché par basculerMode) a besoin de ~450ms
+        // pour peupler les selects (150ms étudiant + 150ms production + change events).
+        // modifierEvaluationParId doit s'exécuter APRÈS pour écraser evaluationEnCours
+        // avec la bonne version (incluant idModification).
         window._apresOuvertureFichier = function() {
             if (typeof travauxUI.basculerMode === 'function') {
                 travauxUI.basculerMode('evaluer');
@@ -1395,7 +1433,7 @@ function consulterEvaluationDepuisListe(evaluationId) {
                 if (typeof window.modifierEvaluationParId === 'function') {
                     window.modifierEvaluationParId(evaluation.id);
                 }
-            }, 200);
+            }, 600);
         };
         afficherSousSection('evaluations-annoter');
         window._consulterEvalTimerId = setTimeout(function() {

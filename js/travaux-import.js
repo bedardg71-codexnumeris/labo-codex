@@ -378,11 +378,24 @@
                             const titre = normaliserNomProduction(p.titre || p.nom || '');
                             return titre && correspondanceProduction(nomNorm, titre);
                         });
-                        if (prodTrouvee) prepare.productionId = prodTrouvee.id;
+                        if (prodTrouvee) {
+                            prepare.productionId = prodTrouvee.id;
+                            prepare.productionIdParLea = true;
+                        }
                     }
                 }
-                // Fallback final : production globale selectionnee
-                if (productionSelectionnee && !prepare.productionId) {
+                // Mode jeton de reprise : marquer les fichiers ajoutés pendant que le mode est actif
+                if (productionSelectionnee === '__jeton_reprise__') {
+                    prepare.estReprise = true;
+                    prepare.productionIdParLea = false;
+                    // Le productionId sera défini par le sous-sélecteur de jeton
+                    var jetonProd = (typeof sessionStorage !== 'undefined') ? sessionStorage.getItem('travaux-jeton-production') : '';
+                    if (jetonProd) {
+                        prepare.productionId = jetonProd;
+                    }
+                }
+                // Fallback final : production globale selectionnee (mode normal)
+                else if (productionSelectionnee && !prepare.productionId) {
                     prepare.productionId = productionSelectionnee;
                 }
                 fichiersEnAttente.push(prepare);
@@ -446,7 +459,8 @@
         }
 
         // Phase 4 : vérifier s'il existe déjà un fichier actif avec (etudiantDA, productionId)
-        if (fichierPrepare.etudiantDA && productionId) {
+        // Les fichiers de reprise (jeton) ne sont pas des doublons — ils coexistent avec l'original
+        if (fichierPrepare.etudiantDA && productionId && !fichierPrepare.estReprise) {
             const existants = travauxStockage.obtenirFichiersGroupeActif()
                 .filter(f => f.etudiantDA === fichierPrepare.etudiantDA && f.productionId === productionId);
             if (existants.length > 0) {
@@ -479,7 +493,10 @@
             modeImport: fichierPrepare.modeImport || 'lea',
             nomDocumentLibre: fichierPrepare.nomDocumentLibre || '',
             dateFichier: fichierPrepare.dateFichier ? fichierPrepare.dateFichier.toISOString() : null,
-            format11x17: fichierPrepare.format11x17 || false
+            format11x17: fichierPrepare.format11x17 || false,
+            // Jeton de reprise
+            evaluationId: fichierPrepare.evaluationId || '',
+            estReprise: fichierPrepare.estReprise || false
         };
 
         // Ajouter les metadonnees
@@ -698,6 +715,7 @@
                 });
                 if (prodTrouvee) {
                     fichierPrepare.productionId = prodTrouvee.id;
+                    fichierPrepare.productionIdParLea = true;
                     fichierPrepare.pipelineStatut = 'identifie';
                 }
             }
