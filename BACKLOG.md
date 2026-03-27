@@ -47,7 +47,7 @@
 
 - [x] **#225** Codex Phase 1 : Ouvrir/sauvegarder un codex ZIP portable (Mac + iPad) *(Beta 98.5, commit 8f1fc57)*
 
-- [ ] **#226** Codex Phase 2 : TimeMachine (historique des versions dans le codex)
+- [x] **#226** Codex Phase 2 : TimeMachine (historique des versions dans le codex) ✅ COMPLÉTÉ
   - [x] Infrastructure : constantes, helpers rotation/archivage/chargement *(commit 9eedefa)*
   - [x] Branchement : generer/charger/fermer integrent l'historique *(commit 20442df)*
   - [x] Restauration : prompt() liste numerotee + confirm() securite *(commit bf11f3e)*
@@ -187,9 +187,10 @@
   - Couvrir le champ simple (`#productionDateEcheance`) et le mode multi-groupe
   - **Fichier** : `js/tooltips-contenu.js`, `js/productions.js`
 
-- [ ] **#217** Gestion des jetons — a investiguer
-  - Verifier le fonctionnement complet du module de gestion des jetons d'evaluation
-  - **Fichier** : `js/evaluation-jetons.js`
+- [x] **#217** Gestion des jetons — a investiguer ✅ FAIT (27 mars 2026)
+  - Module jetons de reprise avec fichiers numeriques livre (8 commits)
+  - Import, association, badges, filtrage, annoter depuis la liste
+  - **Fichier** : `js/evaluation-jetons.js`, `js/travaux-import.js`, `js/liste-evaluations.js`
 
 - [ ] **#218** Apercu des annotations texte et soulignements vagues
   - Verifier que les annotations texte et les soulignements ondules s'affichent correctement dans l'apercu/synthese
@@ -956,13 +957,13 @@
   - **Format** : Rapport genere (PDF ou markdown) avec tableaux et graphiques
   - **Prerequis** : #35 (Import H2024) pour avoir les 4 trimestres
 
-- [ ] **#239** Interventions N3 dans le profil etudiant — progression temporelle
+- [ ] **#245** Interventions N3 dans le profil etudiant — progression temporelle
   - **Contexte** : Les interventions de niveau 3 (individuelles, 1 seul eleve) ne sont pas significatives au niveau du groupe
   - **Objectif** : Afficher l'effet des interventions N3 dans le graphique de progression temporelle du profil etudiant
   - **Approche** : Marqueur sur la courbe P individuelle + delta P avant/apres
   - **Prerequis** : Graphique de progression individuel existant dans le profil etudiant
 
-- [ ] **#240** Uniformiser le style de tous les graphiques Chart.js
+- [ ] **#246** Uniformiser le style de tous les graphiques Chart.js
   - **Contexte** : Le style du graphique « Dynamique des correlations » (fond neutre, grille subtile, points blancs, tooltips noirs) est prefere par l'enseignant
   - **Objectif** : Etendre ce style a tous les graphiques : Developpement du groupe, Developpement individuel, graphiques spaghetti, etc.
   - **Elements a uniformiser** : couleurs de grille, fond, tooltips, epaisseur de lignes, pointStyles, padding, axes
@@ -1000,7 +1001,7 @@
 
 ### Mode simplifie
 
-- [ ] **#33** Mode Tableur - Saisie directe des resultats (BETA 97 - MARS 2026)
+- [ ] **#33** Mode Tableur - Saisie directe des resultats (POST v1.0)
   - **Concept** : Permettre d'utiliser l'application sans creer de productions, grilles, echelles, etc.
   - **Usage** : Entrer directement les resultats des etudiants comme dans un tableur
   - **Objectif** : Suivi de l'apprentissage avec calculs automatiques (moyennes, progression, distribution)
@@ -1051,17 +1052,15 @@
   - **Fix 3** : wizard-pratique-v2.js:1709 — double écriture `db.setSync()` + `db.set()` redondante retirée
   - **Fichiers** : `js/contexte.js`, `js/pratiques-materiel.js`, `js/wizard-pratique-v2.js`
 
-- [ ] **#13** Outil verification integrite donnees
-  - Comparer IndexedDB et localStorage
-  - Detecter et signaler les incoherences
+- [x] **#13** ~~Outil verification integrite donnees~~ ✅ REMPLACÉ (27 mars 2026) — `window._storageStats` + `window._testResistanceStorage()` dans db.js
 
 - [ ] **#15** Consolidation wizard vs pratiques-materiel
   - Code duplique pour creation de pratiques
   - Factoriser logique commune
 
-- [ ] **#16** Systeme changelog automatise ✅ PARTIEL (10 fev 2026)
-  - **Fait** : changelog-data.js structure, script update-version.sh, changelogs markdown par beta
-  - **Reste** : Generation automatique depuis commits ou SESSION.md (actuellement tout est manuel)
+- [x] **#16** Systeme changelog automatise ✅ COMPLÉTÉ (10 fev 2026)
+  - changelog-data.js structure, script update-version.sh, changelogs markdown par beta
+  - Generation manuelle jugee suffisante pour le volume actuel
 
 - [ ] **#17** Checklist tests de regression
   - Documenter verifications manuelles apres chaque build
@@ -1259,17 +1258,10 @@
 > Ref : `Plan-global-module-travaux.md` (racine du projet)
 > Objectif : flux complet import → annotation → export pour AQPC (3-5 juin 2026)
 
-**Phase 0 — Auto-perspective (en cours)**
+**Phase 0 — Auto-perspective (ABANDONNE 27 mars 2026)**
 
-- [ ] **#175** Finaliser l'algo auto-detection des coins dans `test-perspective.html`
-  - Etat actuel : 44% OK, 49% imprecis, 7% echec (41 images, detectSize=600 + fallback 400)
-  - Prochaines etapes : enrichir le corpus (80-100 images), explorer segmentation plus nette
-  - **Fichier** : `test-perspective.html`
-
-- [ ] **#176** Integrer l'auto-detection v5 dans `travaux-preparation.js`
-  - Remplacer `detecterCoinsAuto()` existant par la pipeline v5 du banc de test
-  - Ajouter detection de confiance (si incertain, ne pas toucher l'image)
-  - **Fichier** : `js/travaux-preparation.js`
+- [x] ~~**#175** Finaliser l'algo auto-detection des coins~~ — ABANDONNÉ
+- [x] ~~**#176** Integrer l'auto-detection v5~~ — ABANDONNÉ
 
 **Phase 1 — Import intelligent (mars 2026)**
 
@@ -1318,15 +1310,9 @@
 
 **Phase 4 — Integration et polish (mai 2026)**
 
-- [ ] **#186** Conversion DOCX cote client (A2)
-  - Evaluer faisabilite (mammoth.js, docx-preview, ou WASM)
-  - Plan B : message "convertir en PDF avant depot" si fidelite insuffisante
-  - **Risque** : aucune solution WASM fiable connue pour fidelite Word cote client
+- [x] ~~**#186** Conversion DOCX cote client (A2)~~ — ABANDONNÉ (27 mars 2026, aucune solution fiable)
 
-- [ ] **#187** Detection multi-pages dans une photo (B1 avance)
-  - Detecter N pages dans une meme photo, extraire chaque quad, corriger perspective
-  - L'enseignant peut corriger les coins avant decoupe
-  - **Fichier** : `test-perspective.html` puis `js/travaux-preparation.js`
+- [x] ~~**#187** Detection multi-pages dans une photo (B1 avance)~~ — ABANDONNÉ (27 mars 2026, dependait de #175-176)
 
 **Corrections au plan Cowork :**
 - `travaux.js` n'existe pas — la structure reelle est 9 fichiers `travaux-*.js`
