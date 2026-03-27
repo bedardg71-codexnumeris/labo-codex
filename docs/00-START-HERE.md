@@ -56,8 +56,8 @@ Ce pattern est utilise dans :
 
 ## Etat actuel du projet
 
-**Version** : Beta 98.9 (assainissement securite en cours)
-**Objectif** : Elimination de la dette technique inline (onclick → delegation)
+**Version** : Beta 98.9 (Build 0327-1715)
+**Objectif** : Migration des .onclick directs restants (~164 refs dans JS, index.html propre)
 **Priorite** : **Securite + Proprete > Nouvelles fonctionnalites**
 
 **Derniere session** : Voir `../SESSION.md` (racine du projet)

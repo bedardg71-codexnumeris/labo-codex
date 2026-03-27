@@ -18,8 +18,8 @@ Ce document te guidera vers :
 
 ## Etat actuel
 
-- **Version** : Beta 98.9
-- **Objectif** : Assainissement securite — migration onclick inline vers delegation
+- **Version** : Beta 98.9 (Build 0327-1715)
+- **Objectif** : Assainissement securite — migration des .onclick directs restants (~164 refs)
 - **Session en cours** : Voir `SESSION.md`
 - **Backlog** : Voir `BACKLOG.md` (taches a faire)
 
@@ -28,7 +28,7 @@ Ce document te guidera vers :
 ## Contraintes techniques
 
 - **Stack** : HTML5 / CSS3 / JavaScript ES6+ pur (aucune dependance externe sauf Chart.js)
-- **Stockage** : localStorage (store primaire de facto) + IndexedDB (backup async) via `db.js`
+- **Stockage** : Hybride localStorage (< 200 Ko) + IndexedDB/memoryCache (> 200 Ko) via `db.js`
 - **Fonctionnement** : 100% hors-ligne
 - **CSP** : `script-src 'self'` — zero script inline, zero `eval()`
 
