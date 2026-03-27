@@ -1,22 +1,20 @@
 /* ===============================
    MODULE: RAPPORT DE BUG POUR TESTEURS
-   Beta 96 - 25 janvier 2026
+   Beta 98.9 - 27 mars 2026
 
    Permet aux testeurs d'envoyer facilement des rapports de bug
-   avec les informations techniques nécessaires au débogage.
+   avec les informations techniques necessaires au debogage.
 
-   ✅ AMÉLIORATIONS (18 jan 2026) :
+   FONCTIONNALITES :
    - Stack trace complet pour les erreurs
-   - Historique des 10 dernières actions (clics, navigation)
-   - Contexte de données selon la section active
-   - Capture d'écran intégrée
-   - État stockage pertinent
-
-   ✅ AJOUT (25 fév 2026) :
-   - Système de suivi des tickets (resolutions.json)
-   - Badge de notification pour tickets en attente
-   - Persistance du prénom testeur
+   - Historique des 10 dernieres actions (clics, navigation)
+   - Contexte de donnees selon la section active
+   - Etat stockage pertinent (localStorage, memoryCache, IDB)
+   - Selecteur de gravite (bloquant/genant/mineur)
+   - Protection troncature mailto: (copie presse-papiers si trop long)
+   - Persistance du prenom testeur
    - Mode commentaire/feedback
+   - Archivage local des rapports
    =============================== */
 
 (function() {
@@ -40,18 +38,12 @@ function getVersionApp() {
 const CLE_RAPPORTS_ARCHIVES = 'rapportsBugArchives';
 const MAX_RAPPORTS_ARCHIVES = 50;
 
-// ===============================
-// SUIVI DES TICKETS (RÉSOLUTIONS)
-// ===============================
-
 const CLE_PRENOM_TESTEUR = 'prenomTesteurBug';
-const CLE_TICKETS_CONFIRMES = 'bugTicketsConfirmes';
-
-// Résolutions chargées en mémoire
-let resolutionsData = null;
 
 // Mode actif du modal (bug ou commentaire)
 let modeRapport = 'bug';
+// Gravité du rapport (bloquant, normal, mineur)
+let graviteRapport = 'normal';
 
 /**
  * Normalise un prénom pour comparaison (minuscules, sans accents, sans espaces superflus)
@@ -61,271 +53,9 @@ function normaliserPrenom(prenom) {
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
-/**
- * Charge les résolutions depuis resolutions.json
- */
-async function chargerResolutions() {
-    if (window.location.protocol === 'file:') return; // fetch impossible en file://
-    try {
-        const reponse = await fetch('resolutions.json?t=' + Date.now(), { cache: 'no-store' });
-        if (!reponse.ok) return;
-        resolutionsData = await reponse.json();
-    } catch (e) {
-        // Silencieux si hors-ligne ou fichier absent
-    }
-}
 
-/**
- * Obtient les IDs des tickets confirmés par le testeur
- */
-function obtenirTicketsConfirmes() {
-    try {
-        const data = localStorage.getItem(CLE_TICKETS_CONFIRMES);
-        return data ? JSON.parse(data) : [];
-    } catch (e) {
-        return [];
-    }
-}
-
-/**
- * Sauvegarde un ticket comme confirmé
- */
-function confirmerTicket(id) {
-    const confirmes = obtenirTicketsConfirmes();
-    if (!confirmes.includes(id)) {
-        confirmes.push(id);
-        localStorage.setItem(CLE_TICKETS_CONFIRMES, JSON.stringify(confirmes));
-    }
-    // Rafraîchir la section suivi dans le modal
-    const sectionSuivi = document.getElementById('sectionSuiviBugs');
-    if (sectionSuivi) {
-        sectionSuivi.outerHTML = genererSectionSuivi();
-    }
-    // Mettre à jour le badge
-    mettreAJourBadgeBug();
-}
-
-/**
- * Action "Pas résolu" — pré-remplit un nouveau rapport
- */
-function rouvrirTicket(id) {
-    if (!resolutionsData?.tickets) return;
-    const ticket = resolutionsData.tickets.find(t => t.id === id);
-    if (!ticket) return;
-
-    const textarea = document.getElementById('descriptionBug');
-    if (textarea) {
-        textarea.value = `⚠️ RÉOUVERTURE ticket #${ticket.id}\nProblème original : ${ticket.resume}\nCorrection proposée : ${ticket.correction}\n\nLe problème persiste : `;
-        textarea.focus();
-        // Placer le curseur à la fin
-        textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
-        // Mettre à jour le rapport technique
-        mettreAJourRapport();
-        // Scroller vers la description
-        textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
-    // Si on est en mode commentaire, basculer vers bug
-    if (modeRapport !== 'bug') {
-        modeRapport = 'bug';
-        const sectionFormulaire = document.getElementById('sectionFormulaireBug');
-        if (sectionFormulaire) {
-            mettreAJourModeRapport();
-        }
-    }
-}
-
-/**
- * Génère le HTML de la section "Suivi de vos bugs"
- */
-function genererSectionSuivi() {
-    const prenom = normaliserPrenom(localStorage.getItem(CLE_PRENOM_TESTEUR) || '');
-    const confirmes = obtenirTicketsConfirmes();
-    const tickets = resolutionsData?.tickets || [];
-
-    // Filtrer les tickets du testeur (si prénom vide, afficher tous)
-    const ticketsFiltres = prenom
-        ? tickets.filter(t => normaliserPrenom(t.testeur) === prenom)
-        : tickets;
-
-    // Aussi inclure les rapports archivés qui n'ont pas de résolution (rouge)
-    const archives = obtenirRapportsArchives();
-    const archivesSansResolution = [];
-    if (prenom) {
-        archives.forEach(r => {
-            const prenomArchive = normaliserPrenom(r.prenom);
-            if (prenomArchive !== prenom) return;
-            // Vérifier si ce rapport a un ticket correspondant
-            const aTicket = tickets.some(t =>
-                normaliserPrenom(t.testeur) === prenomArchive
-            );
-            // On n'ajoute pas de faux rouges — les rouges sont gérés différemment
-            // Les tickets absents du JSON mais ayant un rapport archivé seront rouges
-        });
-    }
-
-    if (ticketsFiltres.length === 0) {
-        return '<div id="sectionSuiviBugs"></div>';
-    }
-
-    // Compter les tickets jaunes non confirmés
-    const nbEnAttente = ticketsFiltres.filter(t =>
-        t.statut === 'jaune' && !confirmes.includes(t.id)
-    ).length;
-
-    const titreSection = nbEnAttente > 0
-        ? `Suivi de vos bugs (${nbEnAttente} en attente)`
-        : `Suivi de vos bugs`;
-
-    let html = `<div id="sectionSuiviBugs" style="
-        margin-bottom: 20px;
-        padding: 15px;
-        background: var(--gris-tres-pale);
-        border-radius: 8px;
-        border: 1px solid var(--bordure-claire);
-    ">
-        <h3 style="margin: 0 0 12px 0; font-size: 1rem; color: var(--accent-primaire);">
-            📋 ${titreSection}
-        </h3>`;
-
-    ticketsFiltres.forEach(ticket => {
-        const estConfirme = confirmes.includes(ticket.id);
-        let couleur, icone, contenu, actions;
-
-        if (ticket.statut === 'vert' || (ticket.statut === 'jaune' && estConfirme)) {
-            // Vert — confirmé
-            couleur = 'var(--vert-succes)';
-            icone = '🟢';
-            contenu = `<span style="color: var(--gris-moyen); font-style: italic;">Résolu et confirmé ✓</span>`;
-            actions = '';
-        } else if (ticket.statut === 'jaune') {
-            // Jaune — en attente de confirmation
-            couleur = 'var(--orange-accent)';
-            icone = '🟡';
-            const dateFormatee = formaterDateTicket(ticket.dateCorrection);
-            contenu = `
-                <div style="font-size: 0.85rem; color: var(--gris-fonce); margin-bottom: 6px;">
-                    Correction: ${echapperHtmlLocal(ticket.correction)}
-                </div>
-                <div style="font-size: 0.8rem; color: var(--gris-moyen);">
-                    Build ${ticket.build} — ${dateFormatee}
-                </div>`;
-            actions = `
-                <div style="display: flex; gap: 8px; margin-top: 8px;">
-                    <button data-action="confirmerTicket" data-param="${ticket.id}" class="btn btn-secondaire" style="
-                        font-size: 0.8rem; padding: 4px 10px; background: var(--vert-succes); color: white; border: none;">
-                        ✅ C'est réglé
-                    </button>
-                    <button data-action="rouvrirTicket" data-param="${ticket.id}" class="btn btn-secondaire" style="
-                        font-size: 0.8rem; padding: 4px 10px; color: var(--orange-accent); border-color: var(--orange-accent);">
-                        ⚠️ Pas résolu
-                    </button>
-                </div>`;
-        } else {
-            // Rouge — en investigation (cas par défaut)
-            couleur = 'var(--rouge-erreur)';
-            icone = '🔴';
-            contenu = `<span style="color: var(--gris-moyen); font-style: italic;">En cours d'investigation...</span>`;
-            actions = '';
-        }
-
-        html += `
-            <div style="
-                background: var(--surface-conteneur, #162c36);
-                border-radius: 8px;
-                padding: 10px 12px;
-                margin-bottom: 8px;
-                border-left: 3px solid ${couleur};
-            ">
-                <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 4px;">
-                    ${icone} #${ticket.id} — ${echapperHtmlLocal(ticket.resume)}
-                </div>
-                ${contenu}
-                ${actions}
-            </div>`;
-    });
-
-    html += '</div>';
-    return html;
-}
-
-/**
- * Formate une date ISO (YYYY-MM-DD) en format lisible
- */
-function formaterDateTicket(dateStr) {
-    if (!dateStr) return '';
-    try {
-        const mois = ['jan', 'fév', 'mars', 'avr', 'mai', 'juin',
-                       'juil', 'août', 'sept', 'oct', 'nov', 'déc'];
-        const [annee, moisNum, jour] = dateStr.split('-');
-        return `${parseInt(jour)} ${mois[parseInt(moisNum) - 1]} ${annee}`;
-    } catch (e) {
-        return dateStr;
-    }
-}
-
-/**
- * Échappement HTML local (pour éviter XSS dans les données de résolution)
- */
-function echapperHtmlLocal(str) {
-    if (typeof echapperHtml === 'function') return echapperHtml(str);
-    const div = document.createElement('div');
-    div.textContent = str || '';
-    return div.innerHTML;
-}
-
-/**
- * Met à jour le badge de notification sur le bouton bug dans l'en-tête
- */
-function mettreAJourBadgeBug() {
-    const prenom = normaliserPrenom(localStorage.getItem(CLE_PRENOM_TESTEUR) || '');
-    const confirmes = obtenirTicketsConfirmes();
-    const tickets = resolutionsData?.tickets || [];
-
-    // Compter les tickets jaunes non confirmés pour ce testeur
-    const ticketsFiltres = prenom
-        ? tickets.filter(t => normaliserPrenom(t.testeur) === prenom)
-        : tickets;
-
-    const nbEnAttente = ticketsFiltres.filter(t =>
-        t.statut === 'jaune' && !confirmes.includes(t.id)
-    ).length;
-
-    // Chercher ou créer le badge
-    const btnBug = document.querySelector('.entete-controles-droite .btn-action-header');
-    if (!btnBug) return;
-
-    let badge = document.getElementById('badgeBugNotification');
-    if (nbEnAttente > 0) {
-        if (!badge) {
-            badge = document.createElement('span');
-            badge.id = 'badgeBugNotification';
-            badge.style.cssText = `
-                position: absolute;
-                top: -6px;
-                right: -6px;
-                background: var(--rouge-erreur);
-                color: white;
-                font-size: 0.7rem;
-                font-weight: 700;
-                min-width: 18px;
-                height: 18px;
-                border-radius: 9px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 0 4px;
-                line-height: 1;
-            `;
-            // S'assurer que le parent est en position relative
-            btnBug.style.position = 'relative';
-            btnBug.appendChild(badge);
-        }
-        badge.textContent = nbEnAttente;
-    } else if (badge) {
-        badge.remove();
-    }
-}
+// mettreAJourBadgeBug : stub vide (suivi tickets retiré, conservé car exporté)
+function mettreAJourBadgeBug() {}
 
 /**
  * Archive un rapport de bug localement
@@ -390,51 +120,14 @@ function viderRapportsArchives() {
     db.setSync(CLE_RAPPORTS_ARCHIVES, []);
 }
 
-/**
- * Détermine la couleur de bordure d'un rapport archivé en fonction des résolutions
- */
-function obtenirCouleurArchive(rapport) {
-    if (!resolutionsData?.tickets) return 'var(--accent-primaire)';
-
-    const prenomArchive = normaliserPrenom(rapport.prenom);
-    const confirmes = obtenirTicketsConfirmes();
-
-    // Chercher un ticket correspondant (même testeur)
-    const ticketCorrespondant = resolutionsData.tickets.find(t =>
-        normaliserPrenom(t.testeur) === prenomArchive
-    );
-
-    if (!ticketCorrespondant) {
-        // Pas de résolution → rouge (en investigation)
-        return 'var(--rouge-erreur)';
-    }
-
-    if (ticketCorrespondant.statut === 'vert' || confirmes.includes(ticketCorrespondant.id)) {
-        return 'var(--vert-succes)';
-    }
-
-    if (ticketCorrespondant.statut === 'jaune') {
-        return 'var(--orange-accent)';
-    }
-
+// Couleur de bordure des archives (suivi tickets retiré — couleur neutre)
+function obtenirCouleurArchive() {
     return 'var(--accent-primaire)';
 }
 
-/**
- * Détermine si un rapport archivé est confirmé (vert) pour l'opacité réduite
- */
-function estArchiveConfirme(rapport) {
-    if (!resolutionsData?.tickets) return false;
-
-    const prenomArchive = normaliserPrenom(rapport.prenom);
-    const confirmes = obtenirTicketsConfirmes();
-
-    const ticketCorrespondant = resolutionsData.tickets.find(t =>
-        normaliserPrenom(t.testeur) === prenomArchive
-    );
-
-    if (!ticketCorrespondant) return false;
-    return ticketCorrespondant.statut === 'vert' || confirmes.includes(ticketCorrespondant.id);
+// Opacité des archives (suivi tickets retiré — jamais confirmé)
+function estArchiveConfirme() {
+    return false;
 }
 
 /**
@@ -928,7 +621,14 @@ function genererRapportBug(descriptionUtilisateur = '', prenomTesteur = '') {
     rapport += `${idRapport}.txt\n`;
     rapport += `Testeur: ${prenomTesteur.trim() || 'Non spécifié'}\n`;
     rapport += `Date: ${etatApp.dateHeure}\n`;
-    rapport += `Version: ${etatApp.version} (Build ${etatApp.build})\n\n`;
+    rapport += `Version: ${etatApp.version} (Build ${etatApp.build})\n`;
+
+    // Gravité (uniquement en mode bug)
+    if (modeRapport !== 'commentaire') {
+        var labelsGravite = { bloquant: 'BLOQUANT', normal: 'GÊNANT', mineur: 'MINEUR' };
+        rapport += `Gravité: ${labelsGravite[graviteRapport] || 'GÊNANT'}\n`;
+    }
+    rapport += `\n`;
 
     rapport += `--- SYSTÈME ---\n`;
     rapport += `Appareil: ${infosSysteme.appareil || 'Inconnu'}\n`;
@@ -1037,67 +737,6 @@ async function capturerEcran() {
     return null;
 }
 
-/**
- * ✅ NOUVEAU : Télécharge la capture d'écran
- */
-async function telechargerCaptureEcran(btn) {
-    const modal = document.getElementById('modalRapportBug');
-    if (!modal) return;
-
-    // Sauvegarder le texte original du bouton
-    const texteOriginal = btn ? btn.textContent : '📸 Capture écran';
-
-    // Cacher le modal temporairement
-    modal.classList.add('u-hide');
-
-    // Créer un overlay de décompte
-    const overlay = document.createElement('div');
-    overlay.id = 'overlayDecompteCapture';
-    overlay.innerHTML = `
-        <div style="
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); display: flex; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 10002;
-            color: white; font-family: system-ui, sans-serif;">
-            <div id="decompteNumero" style="font-size: 6rem; font-weight: bold; margin-bottom: 20px;">3</div>
-            <div style="font-size: 1.5rem; margin-bottom: 30px;">Prends ta capture d'écran maintenant !</div>
-            <div style="font-size: 1rem; opacity: 0.8; text-align: center; max-width: 400px;">
-                <strong>Mac:</strong> Cmd + Shift + 4<br>
-                <strong>Windows:</strong> Win + Shift + S<br>
-                <strong>iPad:</strong> Power + Volume haut
-            </div>
-        </div>
-    `;
-    document.body.appendChild(overlay);
-
-    // Décompte de 3 secondes
-    const decompteEl = document.getElementById('decompteNumero');
-    let compte = 3;
-
-    const intervalle = setInterval(() => {
-        compte--;
-        if (compte > 0) {
-            decompteEl.textContent = compte;
-        } else {
-            clearInterval(intervalle);
-            // Retirer l'overlay et réafficher le modal
-            overlay.remove();
-            modal.classList.remove('u-hide');
-
-            // Feedback visuel sur le bouton
-            const btnCapture = document.getElementById('btnCaptureEcran');
-            if (btnCapture) {
-                btnCapture.textContent = '✓ Temps écoulé';
-                btnCapture.style.background = 'var(--vert-positif)';
-                setTimeout(() => {
-                    btnCapture.textContent = texteOriginal;
-                    btnCapture.style.background = '';
-                }, 2000);
-            }
-        }
-    }, 1000);
-}
-
 // ===============================
 // INTERFACE UTILISATEUR
 // ===============================
@@ -1137,6 +776,39 @@ function mettreAJourModeRapport() {
             : "Exemple :\n- J'étais dans la section Réglages > Cours\n- J'ai cliqué sur le bouton «Ajouter un cours»\n- Rien ne s'est passé (ou message d'erreur...)\n- Je m'attendais à voir le formulaire de création";
     }
 
+    // Masquer/afficher le sélecteur de gravité selon le mode
+    var selecteurGravite = document.getElementById('selecteurGravite');
+    if (selecteurGravite) {
+        selecteurGravite.style.display = modeRapport === 'bug' ? 'flex' : 'none';
+    }
+
+    // Mettre à jour le rapport
+    mettreAJourRapport();
+}
+
+/**
+ * Change la gravité du rapport et met à jour le style du bouton actif
+ */
+function changerGravite(el) {
+    var param = el.getAttribute ? el.getAttribute('data-param') : el;
+    if (param) graviteRapport = param;
+
+    // Mettre à jour le style des boutons
+    var conteneur = document.getElementById('selecteurGravite');
+    if (conteneur) {
+        var boutons = conteneur.querySelectorAll('button');
+        for (var i = 0; i < boutons.length; i++) {
+            var btnParam = boutons[i].getAttribute('data-param');
+            if (btnParam === graviteRapport) {
+                boutons[i].style.background = 'var(--accent-primaire)';
+                boutons[i].style.color = 'white';
+            } else {
+                boutons[i].style.background = 'transparent';
+                boutons[i].style.color = 'var(--gris-fonce)';
+            }
+        }
+    }
+
     // Mettre à jour le rapport
     mettreAJourRapport();
 }
@@ -1155,14 +827,6 @@ function changerModeRapport(mode) {
 function ouvrirModalRapportBug() {
     // Réinitialiser le mode
     modeRapport = 'bug';
-
-    // Charger les résolutions au passage
-    chargerResolutions().then(() => {
-        const sectionSuivi = document.getElementById('sectionSuiviBugs');
-        if (sectionSuivi) {
-            sectionSuivi.outerHTML = genererSectionSuivi();
-        }
-    });
 
     // Récupérer le prénom sauvegardé
     const prenomSauvegarde = localStorage.getItem(CLE_PRENOM_TESTEUR) || '';
@@ -1235,6 +899,22 @@ function ouvrirModalRapportBug() {
                             background: transparent; color: var(--gris-fonce);
                             transition: all 0.2s;">
                             💬 Partager un commentaire
+                        </button>
+                    </div>
+
+                    <!-- Sélecteur de gravité (visible uniquement en mode bug) -->
+                    <div id="selecteurGravite" style="display: flex; gap: 8px; margin-bottom: 15px;">
+                        <button data-action="changerGravite" data-param="bloquant"
+                            class="btn btn-secondaire" style="flex:1; font-size: 0.85rem;">
+                            Bloquant
+                        </button>
+                        <button data-action="changerGravite" data-param="normal"
+                            class="btn btn-secondaire" id="btnGraviteNormal" style="flex:1; font-size: 0.85rem;">
+                            Gênant
+                        </button>
+                        <button data-action="changerGravite" data-param="mineur"
+                            class="btn btn-secondaire" style="flex:1; font-size: 0.85rem;">
+                            Mineur
                         </button>
                     </div>
 
@@ -1322,7 +1002,7 @@ function ouvrirModalRapportBug() {
                             overflow-y: auto;
                             border: 1px solid var(--gris-clair);
                             margin: 0;
-                        ">${typeof echapperHtml === 'function' ? echapperHtml(rapportInitial) : rapportInitial}</pre>
+                        "></pre>
                     </div>
 
                     <!-- Boutons d'action -->
@@ -1352,8 +1032,9 @@ function ouvrirModalRapportBug() {
                         iPad: <code style="background: var(--bordure-claire); padding: 2px 6px; border-radius: 4px;">Power+Vol.haut</code>
                     </div>
 
-                    <!-- Section suivi des tickets -->
-                    ${genererSectionSuivi()}
+                    <div style="text-align: center; font-size: 0.85rem; color: var(--gris-moyen); margin-bottom: 15px;">
+                        Consulte les <strong>Nouvelles</strong> sur la page d'accueil pour voir les corrections récentes.
+                    </div>
 
                     <!-- Lien vers archives -->
                     <div style="text-align: center;">
@@ -1372,6 +1053,15 @@ function ouvrirModalRapportBug() {
     const container = document.createElement('div');
     container.innerHTML = modalHTML;
     document.body.appendChild(container);
+
+    // Injecter le rapport via textContent (pas innerHTML) pour éviter tout risque XSS
+    var preRapport = document.getElementById('rapportBugTexte');
+    if (preRapport) preRapport.textContent = rapportInitial;
+
+    // Initialiser le sélecteur de gravité (Gênant actif par défaut)
+    graviteRapport = 'normal';
+    var btnGraviteNormal = document.getElementById('btnGraviteNormal');
+    if (btnGraviteNormal) changerGravite(btnGraviteNormal);
 }
 
 /**
@@ -1390,15 +1080,6 @@ function fermerModalRapportBug() {
 function sauvegarderPrenomEtMettreAJour() {
     const prenom = document.getElementById('prenomTesteur')?.value || '';
     localStorage.setItem(CLE_PRENOM_TESTEUR, prenom);
-
-    // Rafraîchir la section suivi avec le nouveau prénom
-    const sectionSuivi = document.getElementById('sectionSuiviBugs');
-    if (sectionSuivi) {
-        sectionSuivi.outerHTML = genererSectionSuivi();
-    }
-
-    // Mettre à jour le badge
-    mettreAJourBadgeBug();
 
     // Mettre à jour le rapport technique
     mettreAJourRapport();
@@ -1556,30 +1237,48 @@ function envoyerRapportParCourriel(btn) {
 
     try {
         // Construire le mailto
-        const typeLabel = modeRapport === 'commentaire' ? 'Feedback' : 'Bug';
-        const sujet = encodeURIComponent(`[${typeLabel} Monitorage ${getVersionApp()}] ${description.substring(0, 50) || 'Rapport de bug'}...`);
-        const corpsNettoye = nettoyerUTF16(rapport + '\n\n--- JOINS TES CAPTURES D\'ÉCRAN À CE COURRIEL ---');
-        const corps = encodeURIComponent(corpsNettoye);
+        var typeLabel = modeRapport === 'commentaire' ? 'Feedback' : 'Bug';
+        var graviteLabel = graviteRapport === 'bloquant' ? ' BLOQUANT' : (graviteRapport === 'mineur' ? ' mineur' : '');
+        var sujet = encodeURIComponent('[' + typeLabel + graviteLabel + ' Monitorage ' + getVersionApp() + '] ' + (description.substring(0, 50) || 'Rapport de bug') + '...');
+        var corpsNettoye = nettoyerUTF16(rapport + '\n\n--- JOINS TES CAPTURES D\'ÉCRAN À CE COURRIEL ---');
+        var corps = encodeURIComponent(corpsNettoye);
+        var mailtoUrl = 'mailto:labo@codexnumeris.org?subject=' + sujet + '&body=' + corps;
 
         // Archiver le rapport localement
         archiverRapportBug(rapport, description, prenom, modeRapport === 'commentaire' ? 'commentaire' : 'bug');
 
+        // Protection troncature : si l'URL est trop longue, copier dans le presse-papiers
+        if (mailtoUrl.length > 1800 && navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(rapport).then(function() {
+                // Corps court avec instruction de coller
+                var corpsCourt = encodeURIComponent('[Le rapport complet a été copié dans ton presse-papiers — colle-le ici (Cmd+V)]');
+                window.location.href = 'mailto:labo@codexnumeris.org?subject=' + sujet + '&body=' + corpsCourt;
+            });
+            // Feedback visuel adapté
+            if (btn) {
+                var texteOrig = btn.textContent;
+                btn.textContent = 'Rapport copié — colle-le dans le courriel';
+                btn.style.background = 'var(--vert-positif)';
+                setTimeout(function() { btn.textContent = texteOrig; btn.style.background = ''; }, 3000);
+            }
+            return;
+        }
+
         // Feedback visuel
         if (btn) {
-            const texteOriginal = btn.textContent;
+            var texteOriginal = btn.textContent;
             btn.textContent = '✓ Envoyé !';
             btn.style.background = 'var(--vert-positif)';
-            setTimeout(() => {
-                btn.textContent = texteOriginal;
-                btn.style.background = '';
-            }, 2000);
+            setTimeout(function() { btn.textContent = texteOriginal; btn.style.background = ''; }, 2000);
         }
 
         // Ouvrir le client courriel
-        window.location.href = `mailto:labo@codexnumeris.org?subject=${sujet}&body=${corps}`;
+        window.location.href = mailtoUrl;
     } catch (e) {
         console.error('Erreur lors de l\'envoi par courriel:', e);
-        alert('Erreur lors de la préparation du courriel.\n\nUtilisez le bouton "Copier" pour copier le rapport manuellement.');
+        if (typeof afficherNotificationErreur === 'function') {
+            afficherNotificationErreur('Erreur courriel', 'Utilise le bouton Copier pour copier le rapport manuellement.');
+        }
     }
 }
 
@@ -1588,11 +1287,6 @@ function envoyerRapportParCourriel(btn) {
 // ===============================
 
 // Charger les résolutions et mettre à jour le badge au démarrage
-document.addEventListener('DOMContentLoaded', function() {
-    chargerResolutions().then(() => {
-        mettreAJourBadgeBug();
-    });
-});
 
 // ===============================
 // EXPORTS GLOBAUX
@@ -1605,7 +1299,6 @@ window.sauvegarderPrenomEtMettreAJour = sauvegarderPrenomEtMettreAJour;
 window.copierRapportBug = copierRapportBug;
 window.telechargerRapportTxt = telechargerRapportTxt;
 window.envoyerRapportParCourriel = envoyerRapportParCourriel;
-window.telechargerCaptureEcran = telechargerCaptureEcran;
 window.enregistrerAction = enregistrerAction;
 // Gestion des rapports archivés
 window.ouvrirModalRapportsArchives = ouvrirModalRapportsArchives;
@@ -1615,13 +1308,10 @@ window.rafraichirListeArchives = rafraichirListeArchives;
 window.afficherRapportComplet = afficherRapportComplet;
 window.viderRapportsArchives = viderRapportsArchives;
 window.viderEtRafraichirArchives = viderEtRafraichirArchives;
-// Suivi des tickets
-window.confirmerTicket = confirmerTicket;
-window.rouvrirTicket = rouvrirTicket;
-window.chargerResolutions = chargerResolutions;
-window.mettreAJourBadgeBug = mettreAJourBadgeBug;
+window.mettreAJourBadgeBug = mettreAJourBadgeBug; // stub vide, conservé pour compatibilité
 // Mode rapport
 window.changerModeRapport = changerModeRapport;
+window.changerGravite = changerGravite;
 
 
 
