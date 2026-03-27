@@ -4367,6 +4367,7 @@ function genererSectionPerformance(da) {
 
         const evaluationsAvecCriteres = evaluations.filter(e =>
             e.etudiantDA === da &&
+            !e.remplaceeParId &&
             e.criteres &&
             Array.isArray(e.criteres) &&
             e.criteres.length > 0
@@ -6791,6 +6792,7 @@ function genererSectionPerformance(da) {
 
         const evaluationsAvecCriteres = evaluations.filter(e =>
             e.etudiantDA === da &&
+            !e.remplaceeParId &&
             e.criteres &&
             Array.isArray(e.criteres) &&
             e.criteres.length > 0
