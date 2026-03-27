@@ -1222,12 +1222,21 @@ function ouvrirAnnotationDepuisListe(fichierId) {
     }
 
     if (evaluation) {
-        // Charger l'évaluation après ouverture du fichier (même pattern que consulterEvaluationDepuisListe)
+        // Charger l'évaluation après ouverture du fichier
+        // Flag _resterEnModeAnnoter empêche modifierEvaluation de basculer en mode Évaluer
         window._apresOuvertureFichier = function() {
+            window._resterEnModeAnnoter = true;
             setTimeout(function() {
                 if (typeof window.modifierEvaluationParId === 'function') {
                     window.modifierEvaluationParId(evaluation.id);
                 }
+                // Rebasculer en mode annotation après chargement
+                setTimeout(function() {
+                    window._resterEnModeAnnoter = false;
+                    if (typeof travauxUI !== 'undefined' && typeof travauxUI.basculerMode === 'function') {
+                        travauxUI.basculerMode('annoter');
+                    }
+                }, 800);
             }, 600);
         };
     }

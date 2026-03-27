@@ -2924,7 +2924,7 @@
             // _apresOuvertureFichier est en attente — le callback fera lui-même le
             // basculement avec modifierEvaluationParId, évitant un double setup
             // (preRemplirEvaluation + modifierEvaluationParId en parallèle).
-            if (modeAvantNavigation === 'evaluer' && !window._apresOuvertureFichier) {
+            if (modeAvantNavigation === 'evaluer' && !window._apresOuvertureFichier && !window._resterEnModeAnnoter) {
                 const fichierNav = travauxVisionneuse.getFichierActuel();
                 if (fichierNav && fichierNav.etudiantDA) {
                     basculerMode('evaluer');
@@ -3510,7 +3510,7 @@
     async function appliquerJetonsReprisePostImport() {
         if (typeof travauxStockage === 'undefined' || typeof appliquerJetonReprise !== 'function') return 0;
 
-        // Trouver les fichiers fraîchement importés marqués comme reprises
+        // Trouver les fichiers marqués comme reprises sans evaluationId
         var tousLesFichiers = travauxStockage.obtenirFichiersTravaux();
         var fichiersReprise = tousLesFichiers.filter(function(f) {
             return f.estReprise && !f.evaluationId && f.etudiantDA && f.productionId;
@@ -3518,23 +3518,51 @@
 
         if (fichiersReprise.length === 0) return 0;
 
+        // Dédoublonner : garder seulement le fichier le plus récent par (DA, productionId)
+        var parCle = {};
+        for (var k = 0; k < fichiersReprise.length; k++) {
+            var cleUnique = fichiersReprise[k].etudiantDA + '_' + fichiersReprise[k].productionId;
+            var existant = parCle[cleUnique];
+            if (!existant || new Date(fichiersReprise[k].dateImport || 0) > new Date(existant.dateImport || 0)) {
+                parCle[cleUnique] = fichiersReprise[k];
+            }
+        }
+        fichiersReprise = Object.values(parCle);
+
+        var evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
         var compteur = 0;
         var echecsSansEval = [];
-        var echecsLimite = [];
 
         for (var i = 0; i < fichiersReprise.length; i++) {
             var fichier = fichiersReprise[i];
             var etudiant = travauxImport.trouverEtudiantParDA(fichier.etudiantDA);
             var nomEtudiant = etudiant ? (etudiant.prenom + ' ' + etudiant.nom) : fichier.etudiantDA;
 
-            // Trouver l'évaluation active pour ce (DA, productionId)
-            var evaluation = travauxResolution.trouverEvaluationPourFichier(fichier);
+            // Vérifier si un jeton a déjà été appliqué pour ce (DA, productionId)
+            var repriseExistante = evaluations.find(function(e) {
+                return e.etudiantDA === fichier.etudiantDA &&
+                    e.productionId === fichier.productionId &&
+                    e.jetonRepriseApplique && !e.remplaceeParId;
+            });
+            if (repriseExistante) {
+                // Jeton déjà appliqué — lier le fichier à l'évaluation existante
+                travauxStockage.mettreAJourFichier(fichier.id, { evaluationId: repriseExistante.id });
+                compteur++;
+                continue;
+            }
+
+            // Trouver l'évaluation active (originale) pour ce (DA, productionId)
+            var evaluation = evaluations.find(function(e) {
+                return e.etudiantDA === fichier.etudiantDA &&
+                    e.productionId === fichier.productionId &&
+                    !e.remplaceeParId;
+            });
             if (!evaluation) {
                 echecsSansEval.push(nomEtudiant);
                 continue;
             }
 
-            // Trouver le fichier original (PAS la reprise) pour lui associer l'évaluation originale
+            // Trouver le fichier original (PAS la reprise)
             var fichiersEtudiant = travauxStockage.obtenirFichiersEtudiant(fichier.etudiantDA);
             var fichierOriginal = null;
             for (var j = 0; j < fichiersEtudiant.length; j++) {
@@ -3545,10 +3573,10 @@
                 }
             }
 
-            // Appliquer le jeton de reprise (silencieux — on gère les notifications ici)
+            // Appliquer le jeton de reprise (silencieux)
             var nouvelleEval = appliquerJetonReprise(evaluation.id, null, { silencieux: true });
             if (!nouvelleEval) {
-                echecsLimite.push(nomEtudiant);
+                // Ne pas notifier si c'est juste une limite — le fichier est importé quand même
                 continue;
             }
 
@@ -3560,6 +3588,8 @@
                 travauxStockage.mettreAJourFichier(fichierOriginal.id, { evaluationId: evaluation.id });
             }
 
+            // Rafraîchir la liste des évaluations pour la prochaine itération
+            evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
             compteur++;
         }
 
@@ -3569,13 +3599,6 @@
                 'Jetons non appliqués',
                 'Aucune évaluation existante trouvée pour : ' + echecsSansEval.join(', ') +
                 '. Les fichiers ont été importés, mais le jeton doit être appliqué manuellement.'
-            );
-        }
-        if (echecsLimite.length > 0) {
-            afficherNotificationErreur(
-                'Limite de jetons atteinte',
-                'Le maximum de reprises est déjà atteint pour : ' + echecsLimite.join(', ') +
-                '. Les fichiers ont été importés, mais aucun jeton supplémentaire n\u2019a été appliqué.'
             );
         }
 
