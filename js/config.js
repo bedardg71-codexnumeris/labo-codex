@@ -63,7 +63,8 @@ const configurationsOnglets = {
     // Outils interactifs pour l'animation en classe
     'boite-outils': [
         { id: 'tirage', label: 'Tirage au sort' },
-        { id: 'modelisation', label: 'Modélisation' }
+        { id: 'modelisation', label: 'Modélisation' },
+        { id: 'bilan', label: 'Bilan réflexif' }
     ],
     'planification': [
         { id: 'carte', label: 'Alignement pédagogique' },
