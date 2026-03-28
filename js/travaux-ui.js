@@ -1651,6 +1651,7 @@
             const dims = calculerDimensionsCibles(f);
             const tailleEst = estimerTailleFichier(dims.w, dims.h, f);
             const resCible = f.estPDF ? 'PDF' : `${dims.w} x ${dims.h}`;
+            const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
             const nomEtudiant = f.etudiantAssocie
                 ? echapperHtml(f.etudiantAssocie.nom || '')
                 : '';
