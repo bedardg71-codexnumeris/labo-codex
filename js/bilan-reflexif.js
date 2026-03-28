@@ -113,7 +113,33 @@ function injecterStyles() {
 
         /* Confirmation toast */
         '.bilan-toast{position:fixed;bottom:20px;right:20px;padding:12px 20px;background:var(--vert-succes,#34c759);color:#fff;border-radius:var(--radius-moyen,6px);font-size:14px;z-index:9999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none}',
-        '.bilan-toast.visible{opacity:1;transform:translateY(0)}'
+        '.bilan-toast.visible{opacity:1;transform:translateY(0)}',
+
+        /* Parcours — Activités */
+        '.bilan-activite{display:flex;align-items:center;gap:10px;padding:10px 14px;margin-bottom:8px;background:var(--bleu-tres-pale,#142428);border:1px solid rgba(106,172,184,.12);border-radius:var(--radius-moyen,6px);transition:background .15s}',
+        '.bilan-activite:hover{background:var(--bleu-pale,#1a3040)}',
+        '.bilan-activite-num{font-size:12px;font-weight:700;color:var(--texte-secondaire,#8aa4b0);min-width:22px}',
+        '.bilan-activite-titre{flex:1;font-size:14px;color:var(--texte-principal,#d0e0e4);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
+        '.bilan-activite-type{font-size:11px;padding:2px 8px;border-radius:var(--radius-petit,5px);white-space:nowrap}',
+        '.bilan-type-production{background:rgba(106,172,184,.15);color:var(--bleu-clair,#6aacb8)}',
+        '.bilan-type-cours{background:rgba(200,160,96,.15);color:var(--orange-accent,#c8a060)}',
+        '.bilan-type-evenement{background:rgba(58,170,138,.15);color:var(--vert-leger,#3aaa8a)}',
+
+        /* Parcours — Émotions (chips) */
+        '.bilan-emotions-list{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}',
+        '.bilan-emotion-tag{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;background:var(--bleu-pale,#1a3040);border:1px solid rgba(106,172,184,.12);border-radius:var(--radius-pill,20px);font-size:13px;color:var(--texte-principal,#d0e0e4)}',
+        '.bilan-emotion-tag .bilan-btn-mini{font-size:11px;padding:1px 3px;margin-left:2px}',
+
+        /* Parcours — Questions transversales */
+        '.bilan-transversale{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(106,172,184,.08)}',
+        '.bilan-transversale:last-child{border-bottom:none}',
+        '.bilan-transversale-texte{flex:1;font-size:13px;color:var(--texte-principal,#d0e0e4);line-height:1.4}',
+
+        /* Parcours — Bannière info */
+        '.bilan-info{padding:12px 16px;background:rgba(106,172,184,.08);border-left:3px solid var(--bleu-clair,#6aacb8);border-radius:0 var(--radius-moyen,6px) var(--radius-moyen,6px) 0;margin-bottom:16px;font-size:13px;color:var(--texte-secondaire,#8aa4b0);line-height:1.5}',
+
+        /* Parcours — Sous-sections */
+        '.bilan-sous-titre{font-size:14px;font-weight:600;color:var(--texte-principal,#d0e0e4);margin:20px 0 8px;padding-bottom:6px;border-bottom:1px solid rgba(106,172,184,.1)}'
     ].join('\n');
     document.head.appendChild(style);
 }
@@ -125,16 +151,19 @@ function injecterStyles() {
 var etat = {
     vue: 'editeur',
     questionnaire: null,
+    parcours: null,
     resultats: null,
     graphiques: {},
     blocOuvert: null,
     questionEnEdition: null,
+    activiteEnEdition: null,
     mappingImport: null,
     donneesCSVParsees: null
 };
 
 var CLE_QUESTIONNAIRE = function() { return window.cle ? window.cle('questionnaireBilan') : 'questionnaireBilan'; };
 var CLE_RESULTATS = function() { return window.cle ? window.cle('resultatsBilan') : 'resultatsBilan'; };
+var CLE_PARCOURS = function() { return window.cle ? window.cle('parcoursBilan') : 'parcoursBilan'; };
 
 function genId() {
     return Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 6);
@@ -158,6 +187,15 @@ function initialiserBilanReflexif() {
         sauvegarderQuestionnaire();
     }
 
+    // Charger le parcours existant ou créer un vide
+    var pSauve = db.getSync(CLE_PARCOURS(), null);
+    if (pSauve) {
+        etat.parcours = pSauve;
+    } else {
+        etat.parcours = BILAN_REFLEXIF_DATA.creerParcoursVide();
+        sauvegarderParcours();
+    }
+
     // Charger les résultats existants
     etat.resultats = db.getSync(CLE_RESULTATS(), null);
 
@@ -179,10 +217,12 @@ function rendreInterface() {
     conteneur.innerHTML = [
         '<div class="bilan-nav">',
             '<button class="bilan-nav-btn actif" data-action="BilanReflexif.afficherVue" data-param="editeur">Questionnaire</button>',
+            '<button class="bilan-nav-btn" data-action="BilanReflexif.afficherVue" data-param="parcours">Parcours</button>',
             '<button class="bilan-nav-btn" data-action="BilanReflexif.afficherVue" data-param="import">Importer les r\u00e9sultats</button>',
             '<button class="bilan-nav-btn' + (hasResultats ? '' : '" disabled') + '" data-action="BilanReflexif.afficherVue" data-param="rapport"' + (hasResultats ? '' : ' disabled') + '>Rapport d\u2019analyse</button>',
         '</div>',
         '<div id="bilan-vue-editeur" class="bilan-vue"></div>',
+        '<div id="bilan-vue-parcours" class="bilan-vue"></div>',
         '<div id="bilan-vue-import" class="bilan-vue"></div>',
         '<div id="bilan-vue-rapport" class="bilan-vue"></div>',
         '<div id="bilan-toast" class="bilan-toast"></div>'
@@ -221,6 +261,7 @@ function afficherVue(nomVue) {
 
     // Rendre le contenu de la vue
     if (nomVue === 'editeur') rendreEditeur();
+    else if (nomVue === 'parcours') rendreParcours();
     else if (nomVue === 'import') rendreImport();
     else if (nomVue === 'rapport' && etat.resultats) rendreRapport();
 }
@@ -628,6 +669,373 @@ function trouverQuestionPerso(questionId) {
 
 function sauvegarderQuestionnaire() {
     db.setSync(CLE_QUESTIONNAIRE(), etat.questionnaire);
+}
+
+/* ===============================
+   SECTION 3b : ÉDITEUR DU PARCOURS D'APPRENTISSAGE
+   =============================== */
+
+function rendreParcours() {
+    var vue = document.getElementById('bilan-vue-parcours');
+    if (!vue) return;
+
+    var p = etat.parcours;
+    var html = [];
+
+    // Bannière de recommandation
+    html.push('<div class="bilan-info">');
+    html.push('S\u00e9lectionne <strong>5 \u00e0 7 activit\u00e9s marquantes</strong> du trimestre plut\u00f4t que l\u2019int\u00e9gralit\u00e9. ');
+    html.push('Le parcours est un formulaire <strong>s\u00e9par\u00e9</strong> du questionnaire Likert \u2014 il sera distribu\u00e9 ind\u00e9pendamment.');
+    html.push('</div>');
+
+    // Barre d'actions
+    html.push('<div class="bilan-actions">');
+    html.push('<button class="bilan-btn bilan-btn-principal" data-action="BilanReflexif.exporterTexteParcours">Copier le formulaire</button>');
+    html.push('<button class="bilan-btn bilan-btn-secondaire" data-action="BilanReflexif.importerProductions">Importer depuis les productions</button>');
+    html.push('</div>');
+
+    // === Liste des activités ===
+    html.push('<div class="bilan-sous-titre">Activit\u00e9s d\u2019apprentissage (' + p.activites.length + ')</div>');
+
+    if (p.activites.length === 0) {
+        html.push('<div class="bilan-vide" style="padding:20px">');
+        html.push('<p>Aucune activit\u00e9 configur\u00e9e. Ajoute des activit\u00e9s manuellement ou importe-les depuis tes productions.</p>');
+        html.push('</div>');
+    } else {
+        for (var i = 0; i < p.activites.length; i++) {
+            html.push(rendreActiviteHTML(p.activites[i], i));
+        }
+    }
+
+    // Formulaire d'ajout d'activité
+    html.push('<div class="bilan-ajout-form" style="margin-top:12px">');
+    html.push('<input type="text" class="bilan-ajout-input" id="bilan-parcours-titre-input" placeholder="Titre de l\u2019activit\u00e9 (ex: Analyse litt\u00e9raire \u2014 Le Survenant)">');
+    html.push('<select class="bilan-ajout-select" id="bilan-parcours-type-input">');
+    var types = BILAN_REFLEXIF_DATA.TYPES_ACTIVITE;
+    for (var t = 0; t < types.length; t++) {
+        html.push('<option value="' + types[t].id + '">' + echapperHtml(types[t].label) + '</option>');
+    }
+    html.push('</select>');
+    html.push('<button class="bilan-btn bilan-btn-secondaire" data-action="BilanReflexif.ajouterActivite">Ajouter</button>');
+    html.push('</div>');
+
+    // === Émotions disponibles ===
+    html.push('<div class="bilan-sous-titre">\u00c9motions propos\u00e9es aux \u00e9tudiants (' + p.emotionsDisponibles.length + ')</div>');
+    html.push('<div class="bilan-emotions-list">');
+    for (var e = 0; e < p.emotionsDisponibles.length; e++) {
+        html.push('<span class="bilan-emotion-tag">');
+        html.push(echapperHtml(p.emotionsDisponibles[e]));
+        html.push(' <button class="bilan-btn-mini" data-action="BilanReflexif.supprimerEmotion" data-param="' + e + '" title="Retirer">\u2715</button>');
+        html.push('</span>');
+    }
+    html.push('</div>');
+    html.push('<div class="bilan-ajout-form">');
+    html.push('<input type="text" class="bilan-ajout-input" id="bilan-emotion-input" placeholder="Ajouter une \u00e9motion\u2026" style="max-width:250px">');
+    html.push('<button class="bilan-btn bilan-btn-secondaire" data-action="BilanReflexif.ajouterEmotion">Ajouter</button>');
+    html.push('</div>');
+
+    // === Questions transversales ===
+    html.push('<div class="bilan-sous-titre">Questions de synth\u00e8se (fin du parcours)</div>');
+    var qTrans = BILAN_REFLEXIF_DATA.QUESTIONS_TRANSVERSALES;
+    for (var q = 0; q < qTrans.length; q++) {
+        var qt = qTrans[q];
+        var actif = p.questionsTransversales[qt.id] !== false;
+        html.push('<div class="bilan-transversale">');
+        html.push('<button class="bilan-toggle' + (actif ? ' actif' : '') + '" data-action="BilanReflexif.toggleTransversale" data-param="' + qt.id + '" title="' + (actif ? 'D\u00e9sactiver' : 'Activer') + '"></button>');
+        html.push('<span class="bilan-transversale-texte' + (actif ? '' : '" style="opacity:.45') + '">' + echapperHtml(qt.texte) + '</span>');
+        html.push('</div>');
+    }
+
+    vue.innerHTML = html.join('');
+}
+
+function rendreActiviteHTML(activite, index) {
+    var html = [];
+    var typeClasse = 'bilan-type-' + (activite.type || 'production');
+    var typeLabel = '';
+    var types = BILAN_REFLEXIF_DATA.TYPES_ACTIVITE;
+    for (var t = 0; t < types.length; t++) {
+        if (types[t].id === activite.type) { typeLabel = types[t].label; break; }
+    }
+
+    html.push('<div class="bilan-activite" data-activite="' + activite.id + '">');
+    html.push('<span class="bilan-activite-num">' + (index + 1) + '.</span>');
+
+    if (etat.activiteEnEdition === activite.id) {
+        html.push('<input type="text" class="bilan-edit-input" id="bilan-edit-act-' + activite.id + '" value="' + echapperHtml(activite.titre) + '" style="flex:1">');
+        html.push('<select class="bilan-ajout-select" id="bilan-edit-type-' + activite.id + '">');
+        for (var ts = 0; ts < types.length; ts++) {
+            html.push('<option value="' + types[ts].id + '"' + (types[ts].id === activite.type ? ' selected' : '') + '>' + echapperHtml(types[ts].label) + '</option>');
+        }
+        html.push('</select>');
+        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.confirmerModifActivite" data-param="' + activite.id + '" title="Confirmer">\u2713</button>');
+        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.annulerModifActivite" title="Annuler">\u2717</button>');
+    } else {
+        html.push('<span class="bilan-activite-titre">' + echapperHtml(activite.titre) + '</span>');
+        html.push('<span class="bilan-activite-type ' + typeClasse + '">' + echapperHtml(typeLabel) + '</span>');
+        html.push('<div class="bilan-question-actions">');
+        if (index > 0) {
+            html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.deplacerActivite" data-param="' + activite.id + '" data-param2="-1" title="Monter">\u2191</button>');
+        }
+        if (index < etat.parcours.activites.length - 1) {
+            html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.deplacerActivite" data-param="' + activite.id + '" data-param2="1" title="Descendre">\u2193</button>');
+        }
+        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.modifierActivite" data-param="' + activite.id + '" title="Modifier">\u270E</button>');
+        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerActivite" data-param="' + activite.id + '" data-confirm="Supprimer cette activit\u00e9 ?" title="Supprimer">\u2715</button>');
+        html.push('</div>');
+    }
+
+    html.push('</div>');
+    return html.join('');
+}
+
+// === Actions parcours ===
+
+function ajouterActivite() {
+    var input = document.getElementById('bilan-parcours-titre-input');
+    var typeInput = document.getElementById('bilan-parcours-type-input');
+    if (!input || !input.value.trim()) return;
+
+    etat.parcours.activites.push({
+        id: 'act_' + genId(),
+        titre: input.value.trim(),
+        type: typeInput ? typeInput.value : 'production',
+        ordre: etat.parcours.activites.length + 1
+    });
+
+    sauvegarderParcours();
+    rendreParcours();
+}
+
+function modifierActivite(actId) {
+    etat.activiteEnEdition = actId;
+    rendreParcours();
+    setTimeout(function() {
+        var input = document.getElementById('bilan-edit-act-' + actId);
+        if (input) { input.focus(); input.select(); }
+    }, 50);
+}
+
+function confirmerModifActivite(actId) {
+    var input = document.getElementById('bilan-edit-act-' + actId);
+    var typeInput = document.getElementById('bilan-edit-type-' + actId);
+    if (!input || !input.value.trim()) return;
+
+    var act = trouverActivite(actId);
+    if (act) {
+        act.titre = input.value.trim();
+        if (typeInput) act.type = typeInput.value;
+    }
+
+    etat.activiteEnEdition = null;
+    sauvegarderParcours();
+    rendreParcours();
+}
+
+function annulerModifActivite() {
+    etat.activiteEnEdition = null;
+    rendreParcours();
+}
+
+function supprimerActivite(actId) {
+    var activites = etat.parcours.activites;
+    for (var i = 0; i < activites.length; i++) {
+        if (activites[i].id === actId) {
+            activites.splice(i, 1);
+            break;
+        }
+    }
+    recalculerOrdreActivites();
+    sauvegarderParcours();
+    rendreParcours();
+}
+
+function deplacerActivite(actId, direction) {
+    var activites = etat.parcours.activites;
+    var idx = -1;
+    for (var i = 0; i < activites.length; i++) {
+        if (activites[i].id === actId) { idx = i; break; }
+    }
+    if (idx < 0) return;
+    var newIdx = idx + direction;
+    if (newIdx < 0 || newIdx >= activites.length) return;
+
+    var temp = activites[idx];
+    activites[idx] = activites[newIdx];
+    activites[newIdx] = temp;
+
+    recalculerOrdreActivites();
+    sauvegarderParcours();
+    rendreParcours();
+}
+
+function importerProductions() {
+    var productions = [];
+    try {
+        productions = db.getSync(window.cle ? window.cle('productions') : 'productions', []) || [];
+    } catch (e) {
+        productions = [];
+    }
+
+    if (!productions || productions.length === 0) {
+        afficherToast('Aucune production trouv\u00e9e dans l\u2019application');
+        return;
+    }
+
+    // Vérifier les doublons avec les activités existantes
+    var titresExistants = {};
+    for (var e = 0; e < etat.parcours.activites.length; e++) {
+        titresExistants[etat.parcours.activites[e].titre.toLowerCase()] = true;
+    }
+
+    var nbAjoutees = 0;
+    for (var i = 0; i < productions.length; i++) {
+        var prod = productions[i];
+        var titre = prod.titre || prod.description || prod.nom || ('Production ' + (i + 1));
+        if (titresExistants[titre.toLowerCase()]) continue;
+
+        etat.parcours.activites.push({
+            id: 'act_' + genId(),
+            titre: titre,
+            type: 'production',
+            ordre: etat.parcours.activites.length + 1
+        });
+        titresExistants[titre.toLowerCase()] = true;
+        nbAjoutees++;
+    }
+
+    if (nbAjoutees === 0) {
+        afficherToast('Toutes les productions sont d\u00e9j\u00e0 dans la liste');
+    } else {
+        sauvegarderParcours();
+        rendreParcours();
+        afficherToast(nbAjoutees + ' production' + (nbAjoutees > 1 ? 's import\u00e9es' : ' import\u00e9e'));
+    }
+}
+
+function ajouterEmotion() {
+    var input = document.getElementById('bilan-emotion-input');
+    if (!input || !input.value.trim()) return;
+
+    var emotion = input.value.trim();
+    // Vérifier les doublons (insensible à la casse)
+    var existe = etat.parcours.emotionsDisponibles.some(function(e) {
+        return e.toLowerCase() === emotion.toLowerCase();
+    });
+    if (existe) {
+        afficherToast('Cette \u00e9motion existe d\u00e9j\u00e0');
+        return;
+    }
+
+    etat.parcours.emotionsDisponibles.push(emotion);
+    sauvegarderParcours();
+    rendreParcours();
+}
+
+function supprimerEmotion(index) {
+    if (index < 0 || index >= etat.parcours.emotionsDisponibles.length) return;
+    etat.parcours.emotionsDisponibles.splice(index, 1);
+    sauvegarderParcours();
+    rendreParcours();
+}
+
+function toggleTransversale(cleQuestion) {
+    var qt = etat.parcours.questionsTransversales;
+    qt[cleQuestion] = !qt[cleQuestion];
+    sauvegarderParcours();
+    rendreParcours();
+}
+
+function exporterTexteParcours() {
+    var p = etat.parcours;
+    if (!p || p.activites.length === 0) {
+        afficherToast('Ajoute des activit\u00e9s avant d\u2019exporter');
+        return;
+    }
+
+    var lignes = [];
+    lignes.push('=== PARCOURS D\u2019APPRENTISSAGE ===');
+    lignes.push('');
+    lignes.push('Pour chaque activit\u00e9 ci-dessous, r\u00e9ponds aux questions.');
+    lignes.push('');
+
+    // Par activité
+    for (var i = 0; i < p.activites.length; i++) {
+        var act = p.activites[i];
+        lignes.push('--- ' + act.titre + ' ---');
+        lignes.push('a) As-tu compl\u00e9t\u00e9 cette activit\u00e9\u00a0?');
+        lignes.push('   [ ] Oui  [ ] Partiellement  [ ] Non');
+        lignes.push('b) Si non ou partiellement, qu\u2019est-ce qui t\u2019a emp\u00each\u00e9\u00a0?');
+        lignes.push('   [R\u00e9ponse libre]');
+        lignes.push('c) Quel niveau d\u2019effort\u00a0?');
+        var effortLabels = BILAN_REFLEXIF_DATA.ECHELLE_EFFORT.map(function(e) { return '[ ] ' + e.label; });
+        lignes.push('   ' + effortLabels.join('  '));
+        lignes.push('d) Quelle(s) \u00e9motion(s) d\u00e9crivent le mieux ton exp\u00e9rience\u00a0?');
+        var emotionLabels = p.emotionsDisponibles.map(function(e) { return '[ ] ' + e; });
+        lignes.push('   ' + emotionLabels.join('  '));
+        lignes.push('e) Moment marquant\u00a0? (optionnel)');
+        lignes.push('   [R\u00e9ponse libre]');
+        lignes.push('');
+    }
+
+    // Questions transversales
+    var qTrans = BILAN_REFLEXIF_DATA.QUESTIONS_TRANSVERSALES;
+    var transActives = [];
+    for (var q = 0; q < qTrans.length; q++) {
+        if (p.questionsTransversales[qTrans[q].id] !== false) {
+            transActives.push(qTrans[q]);
+        }
+    }
+
+    if (transActives.length > 0) {
+        lignes.push('=== QUESTIONS DE SYNTH\u00c8SE ===');
+        for (var t = 0; t < transActives.length; t++) {
+            var qt = transActives[t];
+            lignes.push((t + 1) + '. ' + qt.texte);
+            if (qt.type === 'choix_multiple_ouvert' && qt.choix) {
+                var choixLabels = qt.choix.map(function(c) { return '[ ] ' + c; });
+                lignes.push('   ' + choixLabels.join('  '));
+                lignes.push('   [R\u00e9ponse libre]');
+            } else {
+                lignes.push('   [R\u00e9ponse libre]');
+            }
+        }
+    }
+
+    var texte = lignes.join('\n');
+    try {
+        navigator.clipboard.writeText(texte).then(function() {
+            afficherToast('Formulaire du parcours copi\u00e9 dans le presse-papier');
+        });
+    } catch (err) {
+        var ta = document.createElement('textarea');
+        ta.value = texte;
+        ta.style.cssText = 'position:fixed;left:-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        afficherToast('Formulaire du parcours copi\u00e9');
+    }
+}
+
+// === Utilitaires parcours ===
+
+function trouverActivite(actId) {
+    for (var i = 0; i < etat.parcours.activites.length; i++) {
+        if (etat.parcours.activites[i].id === actId) return etat.parcours.activites[i];
+    }
+    return null;
+}
+
+function recalculerOrdreActivites() {
+    for (var i = 0; i < etat.parcours.activites.length; i++) {
+        etat.parcours.activites[i].ordre = i + 1;
+    }
+}
+
+function sauvegarderParcours() {
+    db.setSync(CLE_PARCOURS(), etat.parcours);
 }
 
 /* ===============================
@@ -1788,6 +2196,7 @@ if (typeof _originalAfficherSection === 'function') {
 // API publique
 window.BilanReflexif = {
     afficherVue: afficherVue,
+    // Éditeur Likert
     modifierTitre: modifierTitre,
     toggleBloc: toggleBloc,
     toggleOuverture: toggleOuverture,
@@ -1801,6 +2210,19 @@ window.BilanReflexif = {
     ajouterPerso: ajouterPerso,
     reinitialiserDemo: reinitialiserDemo,
     exporterTexte: exporterTexte,
+    // Éditeur Parcours
+    ajouterActivite: ajouterActivite,
+    modifierActivite: modifierActivite,
+    confirmerModifActivite: confirmerModifActivite,
+    annulerModifActivite: annulerModifActivite,
+    supprimerActivite: supprimerActivite,
+    deplacerActivite: deplacerActivite,
+    importerProductions: importerProductions,
+    ajouterEmotion: ajouterEmotion,
+    supprimerEmotion: supprimerEmotion,
+    toggleTransversale: toggleTransversale,
+    exporterTexteParcours: exporterTexteParcours,
+    // Import / Rapport
     declencherImport: declencherImport,
     chargerResultatsDemo: chargerResultatsDemo,
     modifierMapping: modifierMapping,

@@ -271,6 +271,76 @@ var COLONNES_IGNOREES_PATTERNS = [
     /^score$/i, /^note$/i, /^total$/i
 ];
 
+// ================================================
+// === PARCOURS D'APPRENTISSAGE — Données de référence ===
+// ================================================
+
+// Émotions par défaut
+var EMOTIONS_PAR_DEFAUT = [
+    'Fiert\u00e9', 'Satisfaction', 'Curiosit\u00e9', 'Soulagement', 'Surprise',
+    'Confusion', 'Stress', 'D\u00e9couragement', 'Indiff\u00e9rence', 'Ennui'
+];
+
+// Échelle d'effort (5 niveaux — ce n'est PAS du Likert)
+var ECHELLE_EFFORT = [
+    { valeur: 1, label: 'Tr\u00e8s facile' },
+    { valeur: 2, label: 'Facile' },
+    { valeur: 3, label: 'Mod\u00e9r\u00e9' },
+    { valeur: 4, label: 'Exigeant' },
+    { valeur: 5, label: 'Tr\u00e8s exigeant' }
+];
+
+// Questions transversales (fin de parcours)
+var QUESTIONS_TRANSVERSALES = [
+    {
+        id: 'momentPivot',
+        texte: 'Quelle activit\u00e9 a \u00e9t\u00e9 un moment pivot dans ton apprentissage\u00a0? Pourquoi\u00a0?',
+        type: 'ouvert',
+        defautActif: true
+    },
+    {
+        id: 'changementVision',
+        texte: 'Y a-t-il un cours ou un moment du trimestre qui a chang\u00e9 ta fa\u00e7on de voir les choses\u00a0?',
+        type: 'ouvert',
+        defautActif: true
+    },
+    {
+        id: 'coursManques',
+        texte: 'As-tu manqu\u00e9 des cours\u00a0? Si oui, pour quelle(s) raison(s)\u00a0?',
+        type: 'choix_multiple_ouvert',
+        choix: ['Maladie', 'Surcharge d\u2019autres cours', 'D\u00e9motivation', 'Travail', 'Raisons personnelles', 'Autre'],
+        defautActif: true
+    },
+    {
+        id: 'conseilFuturs',
+        texte: 'Quel conseil donnerais-tu aux futurs \u00e9tudiants de ce cours\u00a0?',
+        type: 'ouvert',
+        defautActif: true
+    }
+];
+
+// Types d'activités
+var TYPES_ACTIVITE = [
+    { id: 'production', label: 'Production \u00e9valu\u00e9e' },
+    { id: 'cours', label: 'Cours / activit\u00e9 en classe' },
+    { id: 'evenement', label: '\u00c9v\u00e9nement / autre' }
+];
+
+// Créer un parcours vide
+function creerParcoursVide() {
+    return {
+        id: 'parcours_' + Date.now().toString(36),
+        activites: [],
+        emotionsDisponibles: EMOTIONS_PAR_DEFAUT.slice(),
+        questionsTransversales: {
+            momentPivot: true,
+            changementVision: true,
+            coursManques: true,
+            conseilFuturs: true
+        }
+    };
+}
+
 // API publique
 return {
     ECHELLE_LIKERT4: ECHELLE_LIKERT4,
@@ -278,8 +348,13 @@ return {
     COULEURS_LIKERT: COULEURS_LIKERT,
     BLOCS_DEMO: BLOCS_DEMO,
     COLONNES_IGNOREES_PATTERNS: COLONNES_IGNOREES_PATTERNS,
+    EMOTIONS_PAR_DEFAUT: EMOTIONS_PAR_DEFAUT,
+    ECHELLE_EFFORT: ECHELLE_EFFORT,
+    QUESTIONS_TRANSVERSALES: QUESTIONS_TRANSVERSALES,
+    TYPES_ACTIVITE: TYPES_ACTIVITE,
     creerQuestionnaireDemoComplet: creerQuestionnaireDemoComplet,
-    genererResultatsDemo: genererResultatsDemo
+    genererResultatsDemo: genererResultatsDemo,
+    creerParcoursVide: creerParcoursVide
 };
 
 })();
