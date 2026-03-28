@@ -131,6 +131,8 @@ function changerModeParcoursDelegue(el) {
 // Les valeurs ici servent de fallback si version.json n'est pas disponible
 let VERSION_MAJEURE = '98.9';
 let BUILD_ID = '0328-0800';
+// Snapshot du build contenu dans CE fichier script (pour détecter les scripts périmés)
+const _SCRIPT_BUILD = BUILD_ID;
 
 // === CLÉS LOCALSTORAGE ===
 const CLE_VERSION_VUE = 'monitorage-version-vue';
@@ -236,10 +238,59 @@ function afficherBuildNumero() {
 /**
  * Charge version.json pour synchroniser VERSION_MAJEURE et BUILD_ID
  * puis rafraîchit l'en-tête. Source unique de vérité.
+ *
+ * Sur file:// : utilise XMLHttpRequest (fetch est bloqué par CORS dans Chrome,
+ * mais XHR fonctionne sur Safari). Détecte les scripts périmés et tente
+ * un rechargement automatique.
  */
 async function chargerVersionJSON() {
-    // file:// : fetch bloqué par CORS dans Chrome — utiliser les fallback directement
     if (window.location.protocol === 'file:') {
+        // Lire version.json via XHR synchrone (fonctionne sur Safari file://)
+        try {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'version.json', false);
+            xhr.send();
+            if (xhr.status === 0 || xhr.status === 200) {
+                var data = JSON.parse(xhr.responseText);
+                if (data.beta) VERSION_MAJEURE = data.beta;
+                if (data.build) BUILD_ID = data.build;
+            }
+        } catch (e) {
+            // XHR échoué — garder les valeurs fallback
+        }
+
+        window.VERSION_MAJEURE = VERSION_MAJEURE;
+        window.BUILD_ID = BUILD_ID;
+
+        // Détecter les scripts périmés (fallback du script != version.json)
+        if (BUILD_ID !== _SCRIPT_BUILD) {
+            var cleReload = '_monitorage_reload_' + BUILD_ID;
+            if (!sessionStorage.getItem(cleReload)) {
+                // Première tentative : recharger la page pour forcer la relecture des fichiers
+                sessionStorage.setItem(cleReload, '1');
+                location.reload();
+                return;
+            }
+            // Le rechargement n'a pas suffi — avertir l'utilisateur
+            console.warn('[init] Scripts p\u00e9rim\u00e9s. Build attendu : ' + BUILD_ID + ', scripts charg\u00e9s : ' + _SCRIPT_BUILD);
+            setTimeout(function() {
+                var bandeau = document.createElement('div');
+                bandeau.style.cssText = 'position:fixed;top:0;left:0;right:0;padding:10px 16px;background:#e84057;color:#fff;text-align:center;z-index:99999;font-size:14px;font-family:system-ui,sans-serif';
+                bandeau.innerHTML = 'Scripts p\u00e9rim\u00e9s (build ' + _SCRIPT_BUILD + ' au lieu de ' + BUILD_ID + '). <strong>Quitter Safari (Cmd+Q) et le relancer.</strong>';
+                document.body.prepend(bandeau);
+            }, 300);
+        } else {
+            // Scripts à jour — nettoyer les anciens flags de reload
+            try {
+                for (var i = sessionStorage.length - 1; i >= 0; i--) {
+                    var k = sessionStorage.key(i);
+                    if (k && k.indexOf('_monitorage_reload_') === 0) {
+                        sessionStorage.removeItem(k);
+                    }
+                }
+            } catch (e) { /* ignore */ }
+        }
+
         afficherBuildNumero();
         var spanBeta = document.getElementById('apropos-version-beta');
         var spanBuild = document.getElementById('apropos-version-build');
@@ -247,6 +298,8 @@ async function chargerVersionJSON() {
         if (spanBuild) spanBuild.textContent = BUILD_ID;
         return;
     }
+
+    // === Protocole HTTP/HTTPS — fetch normal ===
     try {
         const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
         if (!r.ok) return;
@@ -256,7 +309,6 @@ async function chargerVersionJSON() {
         window.VERSION_MAJEURE = VERSION_MAJEURE;
         window.BUILD_ID = BUILD_ID;
         afficherBuildNumero();
-        // Mettre à jour la page À propos
         var spanBeta = document.getElementById('apropos-version-beta');
         var spanBuild = document.getElementById('apropos-version-build');
         if (spanBeta) spanBeta.textContent = 'Beta ' + VERSION_MAJEURE;
