@@ -319,6 +319,48 @@ var QUESTIONS_TRANSVERSALES = [
     }
 ];
 
+// Questions par défaut posées pour chaque activité (éditables par l'enseignant)
+var QUESTIONS_PAR_ACTIVITE_DEFAUT = [
+    {
+        id: 'qpa_completion',
+        texte: 'As-tu compl\u00e9t\u00e9 cette activit\u00e9\u00a0?',
+        type: 'choix_unique',
+        choix: ['Oui', 'Partiellement', 'Non'],
+        actif: true,
+        obligatoire: true,
+        sousQuestion: {
+            condition: ['Partiellement', 'Non'],
+            texte: 'Qu\u2019est-ce qui t\u2019a emp\u00each\u00e9 de la compl\u00e9ter\u00a0?',
+            type: 'texte_libre'
+        },
+        personnalisee: false
+    },
+    {
+        id: 'qpa_effort',
+        texte: 'Quel niveau d\u2019effort cette activit\u00e9 a-t-elle demand\u00e9\u00a0?',
+        type: 'echelle5',
+        actif: true,
+        obligatoire: true,
+        personnalisee: false
+    },
+    {
+        id: 'qpa_emotion',
+        texte: 'Quelle \u00e9motion d\u00e9crit le mieux ton exp\u00e9rience avec cette activit\u00e9\u00a0?',
+        type: 'choix_multiple',
+        actif: true,
+        obligatoire: true,
+        personnalisee: false
+    },
+    {
+        id: 'qpa_moment',
+        texte: 'Y a-t-il eu un moment de d\u00e9clic, de compr\u00e9hension ou de difficult\u00e9 particuli\u00e8re autour de cette activit\u00e9\u00a0?',
+        type: 'texte_libre',
+        actif: true,
+        obligatoire: false,
+        personnalisee: false
+    }
+];
+
 // Types d'activités
 var TYPES_ACTIVITE = [
     { id: 'production', label: 'Production \u00e9valu\u00e9e' },
@@ -330,6 +372,7 @@ var TYPES_ACTIVITE = [
 function creerParcoursVide() {
     return {
         id: 'parcours_' + Date.now().toString(36),
+        questionsParActivite: JSON.parse(JSON.stringify(QUESTIONS_PAR_ACTIVITE_DEFAUT)),
         activites: [],
         emotionsDisponibles: EMOTIONS_PAR_DEFAUT.slice(),
         questionsTransversales: {
@@ -351,6 +394,7 @@ return {
     EMOTIONS_PAR_DEFAUT: EMOTIONS_PAR_DEFAUT,
     ECHELLE_EFFORT: ECHELLE_EFFORT,
     QUESTIONS_TRANSVERSALES: QUESTIONS_TRANSVERSALES,
+    QUESTIONS_PAR_ACTIVITE_DEFAUT: QUESTIONS_PAR_ACTIVITE_DEFAUT,
     TYPES_ACTIVITE: TYPES_ACTIVITE,
     creerQuestionnaireDemoComplet: creerQuestionnaireDemoComplet,
     genererResultatsDemo: genererResultatsDemo,
