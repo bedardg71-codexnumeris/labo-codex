@@ -138,6 +138,20 @@ function injecterStyles() {
         /* Parcours — Bannière info */
         '.bilan-info{padding:12px 16px;background:rgba(106,172,184,.08);border-left:3px solid var(--bleu-clair,#6aacb8);border-radius:0 var(--radius-moyen,6px) var(--radius-moyen,6px) 0;margin-bottom:16px;font-size:13px;color:var(--texte-secondaire,#8aa4b0);line-height:1.5}',
 
+        /* Panneau d'aide repliable */
+        '.bilan-info-aide{padding:0;border:1px solid rgba(106,172,184,.12);border-left:3px solid var(--bleu-clair,#6aacb8);border-radius:0 var(--radius-moyen,6px) var(--radius-moyen,6px) 0;margin-bottom:16px;overflow:hidden;background:rgba(106,172,184,.05)}',
+        '.bilan-aide-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;user-select:none}',
+        '.bilan-aide-header:hover{background:rgba(106,172,184,.06)}',
+        '.bilan-aide-titre{font-size:13px;font-weight:600;color:var(--texte-secondaire,#8aa4b0);display:flex;align-items:center;gap:6px}',
+        '.bilan-aide-chevron{font-size:11px;color:var(--texte-secondaire,#8aa4b0);transition:transform .2s}',
+        '.bilan-aide-body{padding:0 14px 14px;font-size:13px;color:var(--texte-secondaire,#8aa4b0);line-height:1.6}',
+        '.bilan-aide-body ol{margin:6px 0 10px;padding-left:20px}',
+        '.bilan-aide-body li{margin-bottom:4px}',
+        '.bilan-aide-body li strong{color:var(--texte-principal,#d0e0e4)}',
+        '.bilan-aide-astuce{margin-top:10px;padding:8px 12px;background:rgba(106,172,184,.06);border-radius:var(--radius-petit,5px);font-size:12px;font-style:italic}',
+        '.bilan-info-aide.replie .bilan-aide-body{display:none}',
+        '.bilan-info-aide.replie .bilan-aide-chevron{transform:rotate(-90deg)}',
+
         /* Parcours — Sous-sections */
         '.bilan-sous-titre{font-size:14px;font-weight:600;color:var(--texte-principal,#d0e0e4);margin:20px 0 8px;padding-bottom:6px;border-bottom:1px solid rgba(106,172,184,.1)}'
     ].join('\n');
@@ -219,7 +233,7 @@ function rendreInterface() {
             '<button class="bilan-nav-btn actif" data-action="BilanReflexif.afficherVue" data-param="editeur">Questionnaire</button>',
             '<button class="bilan-nav-btn" data-action="BilanReflexif.afficherVue" data-param="parcours">Parcours</button>',
             '<button class="bilan-nav-btn" data-action="BilanReflexif.afficherVue" data-param="import">Importer les r\u00e9sultats</button>',
-            '<button class="bilan-nav-btn' + (hasResultats ? '' : '" disabled') + '" data-action="BilanReflexif.afficherVue" data-param="rapport"' + (hasResultats ? '' : ' disabled') + '>Rapport d\u2019analyse</button>',
+            '<button class="bilan-nav-btn" data-action="BilanReflexif.afficherVue" data-param="rapport"' + (hasResultats ? '' : ' disabled') + '>Rapport d\u2019analyse</button>',
         '</div>',
         '<div id="bilan-vue-editeur" class="bilan-vue"></div>',
         '<div id="bilan-vue-parcours" class="bilan-vue"></div>',
@@ -293,6 +307,21 @@ function rendreEditeur() {
     html.push('<button class="bilan-btn bilan-btn-principal" data-action="BilanReflexif.exporterTexte">Copier les questions</button>');
     html.push('<button class="bilan-btn bilan-btn-secondaire" data-action="BilanReflexif.reinitialiserDemo">R\u00e9initialiser le mod\u00e8le</button>');
     html.push('</div>');
+
+    // Panneau d'aide — distribution du questionnaire Likert
+    html.push(rendreAideHTML('editeur',
+        'Comment distribuer ce questionnaire\u00a0?',
+        '<ol>' +
+        '<li><strong>Copie les questions</strong> \u2014 Clique sur \u00ab\u00a0Copier les questions\u00a0\u00bb. Le texte est copi\u00e9 dans ton presse-papier.</li>' +
+        '<li><strong>Ouvre ton outil de formulaire en ligne</strong> \u2014 La plupart des outils (formulaires institutionnels, outils gratuits) permettent de cr\u00e9er des questionnaires avec des questions \u00e0 choix multiples.</li>' +
+        '<li><strong>Cr\u00e9e une question par item</strong> \u2014 Pour chaque question Likert, cr\u00e9e une question de type \u00ab\u00a0choix unique\u00a0\u00bb ou \u00ab\u00a0\u00e9chelle\u00a0\u00bb avec les 4 options\u00a0: Tout \u00e0 fait d\u2019accord / Plut\u00f4t d\u2019accord / Plut\u00f4t en d\u00e9saccord / Pas du tout d\u2019accord.</li>' +
+        '<li><strong>Pour les questions ouvertes</strong>, cr\u00e9e une question de type \u00ab\u00a0texte long\u00a0\u00bb ou \u00ab\u00a0paragraphe\u00a0\u00bb.</li>' +
+        '<li><strong>Configure l\u2019anonymat</strong> \u2014 Assure-toi que le formulaire ne collecte pas le nom ni le courriel des r\u00e9pondants.</li>' +
+        '<li><strong>Distribue le lien</strong> \u2014 Partage le lien du formulaire \u00e0 tes \u00e9tudiants.</li>' +
+        '<li><strong>Exporte les r\u00e9sultats en CSV</strong> \u2014 Une fois les r\u00e9ponses collect\u00e9es, exporte-les au format CSV depuis ton outil. Tu pourras ensuite les importer dans l\u2019onglet \u00ab\u00a0Importer les r\u00e9sultats\u00a0\u00bb.</li>' +
+        '</ol>' +
+        '<div class="bilan-aide-astuce">Certains outils de formulaire permettent d\u2019importer les questions directement depuis un document structur\u00e9. V\u00e9rifie si ton outil offre cette option \u2014 \u00e7a peut t\u2019\u00e9conomiser la saisie manuelle.</div>'
+    ));
 
     // Blocs thématiques
     for (var i = 0; i < q.blocs.length; i++) {
@@ -640,6 +669,33 @@ function exporterTexte() {
     }
 }
 
+// === Panneau d'aide ===
+
+function rendreAideHTML(cle, titre, contenu) {
+    var lsKey = 'bilan_aide_' + cle;
+    var replie = false;
+    try { replie = localStorage.getItem(lsKey) === '1'; } catch (e) { /* ignore */ }
+
+    var html = [];
+    html.push('<div class="bilan-info-aide' + (replie ? ' replie' : '') + '" id="bilan-aide-' + cle + '">');
+    html.push('<div class="bilan-aide-header" data-action="BilanReflexif.toggleAide" data-param="' + cle + '">');
+    html.push('<span class="bilan-aide-titre">\u2753 ' + titre + '</span>');
+    html.push('<span class="bilan-aide-chevron">\u25BC</span>');
+    html.push('</div>');
+    html.push('<div class="bilan-aide-body">' + contenu + '</div>');
+    html.push('</div>');
+    return html.join('');
+}
+
+function toggleAide(cle) {
+    var panneau = document.getElementById('bilan-aide-' + cle);
+    if (!panneau) return;
+    var lsKey = 'bilan_aide_' + cle;
+    var estReplie = panneau.classList.contains('replie');
+    panneau.classList.toggle('replie');
+    try { localStorage.setItem(lsKey, estReplie ? '0' : '1'); } catch (e) { /* ignore */ }
+}
+
 // === Utilitaires éditeur ===
 
 function trouverBloc(blocId) {
@@ -693,6 +749,19 @@ function rendreParcours() {
     html.push('<button class="bilan-btn bilan-btn-principal" data-action="BilanReflexif.exporterTexteParcours">Copier le formulaire</button>');
     html.push('<button class="bilan-btn bilan-btn-secondaire" data-action="BilanReflexif.importerProductions">Importer depuis les productions</button>');
     html.push('</div>');
+
+    // Panneau d'aide — distribution du parcours
+    html.push(rendreAideHTML('parcours',
+        'Comment distribuer le parcours\u00a0?',
+        '<ol>' +
+        '<li><strong>Copie le formulaire</strong> \u2014 Clique sur \u00ab\u00a0Copier le formulaire\u00a0\u00bb. Le texte complet (activit\u00e9s + questions de synth\u00e8se) est copi\u00e9.</li>' +
+        '<li><strong>Cr\u00e9e un formulaire s\u00e9par\u00e9</strong> \u2014 Le parcours est un formulaire distinct du questionnaire Likert. Distribue-les s\u00e9par\u00e9ment pour \u00e9viter la fatigue de r\u00e9ponse.</li>' +
+        '<li><strong>Pour chaque activit\u00e9, cr\u00e9e une section</strong> avec\u00a0: compl\u00e9tion (choix unique\u00a0: Oui / Partiellement / Non), raison si non compl\u00e9t\u00e9e (texte court, conditionnel si possible), effort per\u00e7u (\u00e9chelle 1-5 ou choix unique), \u00e9motion dominante (choix multiples, 1-2 parmi la liste), moment marquant (texte long, optionnel).</li>' +
+        '<li><strong>Ajoute les questions de synth\u00e8se</strong> en fin de formulaire.</li>' +
+        '<li><strong>Configure l\u2019anonymat</strong> et distribue le lien.</li>' +
+        '<li><strong>Exporte en CSV</strong> et importe dans l\u2019onglet \u00ab\u00a0Importer les r\u00e9sultats\u00a0\u00bb.</li>' +
+        '</ol>'
+    ));
 
     // === Liste des activités ===
     html.push('<div class="bilan-sous-titre">Activit\u00e9s d\u2019apprentissage (' + p.activites.length + ')</div>');
@@ -2199,7 +2268,7 @@ var _originalAfficherSection = window.afficherSection;
 if (typeof _originalAfficherSection === 'function') {
     window.afficherSection = function(nomSection) {
         if (nomSection !== 'boite-outils') {
-            detruireGraphiques();
+            try { detruireGraphiques(); } catch (e) { console.error('[BilanReflexif] Erreur detruireGraphiques:', e); }
         }
         return _originalAfficherSection.apply(this, arguments);
     };
@@ -2234,6 +2303,8 @@ window.BilanReflexif = {
     supprimerEmotion: supprimerEmotion,
     toggleTransversale: toggleTransversale,
     exporterTexteParcours: exporterTexteParcours,
+    // Aide
+    toggleAide: toggleAide,
     // Import / Rapport
     declencherImport: declencherImport,
     chargerResultatsDemo: chargerResultatsDemo,

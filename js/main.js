@@ -691,6 +691,8 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 fn(el);
             }
+        } else if (action) {
+            console.warn('[data-action] Fonction non trouv\u00e9e : "' + action + '". V\u00e9rifier que le module est charg\u00e9.');
         }
     });
 
@@ -706,7 +708,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 return obj ? obj[key] : undefined;
             }, window);
 
-            if (typeof fn !== 'function') return;
+            if (typeof fn !== 'function') {
+                if (action) console.warn('[' + attr + '] Fonction non trouv\u00e9e : "' + action + '".');
+                return;
+            }
 
             var param = el.dataset.param;
             var param2 = el.dataset.param2;
