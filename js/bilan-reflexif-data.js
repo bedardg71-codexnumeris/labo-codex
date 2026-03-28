@@ -384,6 +384,84 @@ function creerParcoursVide() {
     };
 }
 
+// ================================================
+// === AUTO-RÉFLEXION — Données de référence ===
+// ================================================
+
+// Questions miroirs par défaut (Bloc A — une par bloc Likert)
+var QUESTIONS_MIROIR_DEFAUT = {
+    'bloc_evaluation':   { id: 'qma_evaluation',   texte: 'Mon syst\u00e8me d\u2019\u00e9valuation permet aux \u00e9tudiants de se situer dans leur apprentissage.' },
+    'bloc_retroaction':  { id: 'qma_retroaction',  texte: 'Mes r\u00e9troactions sont suffisamment claires et fr\u00e9quentes pour que les \u00e9tudiants puissent s\u2019am\u00e9liorer.' },
+    'bloc_pedagogie':    { id: 'qma_pedagogie',    texte: 'Mon approche p\u00e9dagogique favorise l\u2019engagement actif des \u00e9tudiants.' },
+    'bloc_metacognition':{ id: 'qma_metacognition', texte: 'Les activit\u00e9s propos\u00e9es d\u00e9veloppent la capacit\u00e9 des \u00e9tudiants \u00e0 \u00e9valuer leur propre travail.' },
+    'bloc_transfert':    { id: 'qma_transfert',     texte: 'Les \u00e9tudiants sont en mesure de transf\u00e9rer leurs acquis au-del\u00e0 du cours.' },
+    'bloc_efficacite':   { id: 'qma_efficacite',   texte: 'Les \u00e9tudiants terminent le trimestre avec un sentiment de comp\u00e9tence accru.' },
+    'bloc_climat':       { id: 'qma_climat',       texte: 'Le climat de classe est propice \u00e0 la prise de risque intellectuelle.' },
+    'bloc_preparation':  { id: 'qma_preparation',  texte: 'Les \u00e9tudiants sont outill\u00e9s pour r\u00e9ussir le cours suivant.' }
+};
+
+// Questions par défaut du bloc B (miroir parcours — par activité)
+var QUESTIONS_MIROIR_PARCOURS_DEFAUT = [
+    { id: 'qmb_intention',   texte: 'Qu\u2019est-ce que je visais avec cette activit\u00e9\u00a0?', type: 'texte_court', actif: true, personnalisee: false },
+    { id: 'qmb_observation', texte: 'Qu\u2019est-ce que j\u2019ai observ\u00e9 en classe\u00a0?', type: 'texte_court', actif: true, personnalisee: false },
+    { id: 'qmb_surprise',    texte: 'Y a-t-il eu un \u00e9cart entre mes attentes et ce qui s\u2019est pass\u00e9\u00a0?', type: 'oui_non_texte', actif: true, personnalisee: false },
+    { id: 'qmb_ajustement',  texte: 'Qu\u2019est-ce que je changerais la prochaine fois\u00a0?', type: 'texte_court', actif: true, personnalisee: false }
+];
+
+// Questions de synthèse par défaut (Bloc C)
+var QUESTIONS_SYNTHESE_DEFAUT = [
+    { id: 'qmc_moments_forts',  texte: 'Quels sont les moments du trimestre o\u00f9 j\u2019ai senti que mon enseignement fonctionnait le mieux\u00a0? Pourquoi\u00a0?', type: 'texte_long', actif: true, personnalisee: false },
+    { id: 'qmc_ajustements',    texte: 'Quels sont les moments o\u00f9 j\u2019ai d\u00fb ajuster ma d\u00e9marche en cours de route\u00a0?', type: 'texte_long', actif: true, personnalisee: false },
+    { id: 'qmc_approfondir',    texte: 'Quels aspects de ma pratique souhaiterais-je approfondir ou modifier au prochain trimestre\u00a0?', type: 'texte_long', actif: true, personnalisee: false },
+    { id: 'qmc_angles_morts',   texte: 'Y a-t-il un angle mort \u2014 quelque chose que les r\u00e9sultats \u00e9tudiants r\u00e9v\u00e8lent et que je n\u2019avais pas anticip\u00e9\u00a0?', type: 'texte_long', actif: true, personnalisee: false }
+];
+
+// Créer une auto-réflexion vide avec les questions par défaut
+function creerAutoReflexionVide(questionnaire, parcours) {
+    // Bloc A — générer une question miroir par bloc Likert actif
+    var questionsA = [];
+    if (questionnaire && questionnaire.blocs) {
+        for (var i = 0; i < questionnaire.blocs.length; i++) {
+            var bloc = questionnaire.blocs[i];
+            if (!bloc.actif) continue;
+            var miroir = QUESTIONS_MIROIR_DEFAUT[bloc.id];
+            questionsA.push({
+                id: miroir ? miroir.id : ('qma_' + bloc.id),
+                blocLikertSource: bloc.id,
+                texte: miroir ? miroir.texte : ('Ma perception de : ' + bloc.titre),
+                type: 'likert4',
+                actif: true,
+                personnalisee: false,
+                reponses: { avant: null, apres: null },
+                commentaire: ''
+            });
+        }
+    }
+
+    return {
+        id: 'autoreflexion_' + Date.now().toString(36),
+        dateCreation: new Date().toISOString(),
+        dateModification: new Date().toISOString(),
+        etat: 'avant_resultats',
+        blocA: {
+            actif: true,
+            questions: questionsA
+        },
+        blocB: {
+            actif: true,
+            questionsParDefaut: JSON.parse(JSON.stringify(QUESTIONS_MIROIR_PARCOURS_DEFAUT)),
+            reponses: {}
+        },
+        blocC: {
+            actif: true,
+            questions: JSON.parse(JSON.stringify(QUESTIONS_SYNTHESE_DEFAUT)).map(function(q) {
+                q.reponses = { avant: '', apres: '' };
+                return q;
+            })
+        }
+    };
+}
+
 // API publique
 return {
     ECHELLE_LIKERT4: ECHELLE_LIKERT4,
@@ -398,7 +476,11 @@ return {
     TYPES_ACTIVITE: TYPES_ACTIVITE,
     creerQuestionnaireDemoComplet: creerQuestionnaireDemoComplet,
     genererResultatsDemo: genererResultatsDemo,
-    creerParcoursVide: creerParcoursVide
+    creerParcoursVide: creerParcoursVide,
+    QUESTIONS_MIROIR_DEFAUT: QUESTIONS_MIROIR_DEFAUT,
+    QUESTIONS_MIROIR_PARCOURS_DEFAUT: QUESTIONS_MIROIR_PARCOURS_DEFAUT,
+    QUESTIONS_SYNTHESE_DEFAUT: QUESTIONS_SYNTHESE_DEFAUT,
+    creerAutoReflexionVide: creerAutoReflexionVide
 };
 
 })();
