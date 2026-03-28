@@ -648,37 +648,41 @@ function exporterTexte() {
     lignes.push('');
 
     var num = 1;
-    var echelleTexte = '   [ ] Tout \u00e0 fait d\u2019accord  [ ] Plut\u00f4t d\u2019accord  [ ] Plut\u00f4t en d\u00e9saccord  [ ] Pas du tout d\u2019accord';
 
     for (var i = 0; i < q.blocs.length; i++) {
         var bloc = q.blocs[i];
         if (!bloc.actif) continue;
 
         lignes.push('SECTION : ' + bloc.titre);
+        lignes.push('');
         for (var j = 0; j < bloc.questions.length; j++) {
             var question = bloc.questions[j];
             lignes.push(num + '. ' + question.texte);
             if (question.type === 'likert4') {
-                lignes.push(echelleTexte);
-            } else {
-                lignes.push('   [R\u00e9ponse libre]');
+                lignes.push('a. Tout \u00e0 fait d\u2019accord');
+                lignes.push('b. Plut\u00f4t d\u2019accord');
+                lignes.push('c. Plut\u00f4t en d\u00e9saccord');
+                lignes.push('d. Pas du tout d\u2019accord');
             }
+            lignes.push('');
             num++;
         }
-        lignes.push('');
     }
 
     // Questions personnalisées
     if (q.questionsPersonnalisees && q.questionsPersonnalisees.length > 0) {
         lignes.push('SECTION : Questions suppl\u00e9mentaires');
+        lignes.push('');
         for (var k = 0; k < q.questionsPersonnalisees.length; k++) {
             var qp = q.questionsPersonnalisees[k];
             lignes.push(num + '. ' + qp.texte);
             if (qp.type === 'likert4') {
-                lignes.push(echelleTexte);
-            } else {
-                lignes.push('   [R\u00e9ponse libre]');
+                lignes.push('a. Tout \u00e0 fait d\u2019accord');
+                lignes.push('b. Plut\u00f4t d\u2019accord');
+                lignes.push('c. Plut\u00f4t en d\u00e9saccord');
+                lignes.push('d. Pas du tout d\u2019accord');
             }
+            lignes.push('');
             num++;
         }
     }
@@ -1220,43 +1224,47 @@ function exporterTexteParcours() {
     var lignes = [];
     lignes.push('=== PARCOURS D\u2019APPRENTISSAGE ===');
     lignes.push('');
-    lignes.push('Pour chaque activit\u00e9 ci-dessous, r\u00e9ponds aux questions.');
-    lignes.push('');
 
     // Questions actives par activité
     var qpa = (p.questionsParActivite || []).filter(function(q) { return q.actif; });
     var lettres = 'abcdefghijklmnopqrstuvwxyz';
+    var num = 1;
 
     // Par activité
     for (var i = 0; i < p.activites.length; i++) {
         var act = p.activites[i];
         lignes.push('--- ' + act.titre + ' ---');
+        lignes.push('');
 
         for (var qi = 0; qi < qpa.length; qi++) {
             var question = qpa[qi];
-            var lettre = qi < lettres.length ? lettres[qi] : (qi + 1);
-            lignes.push(lettre + ') ' + question.texte);
+            lignes.push(num + '. ' + question.texte);
 
             if (question.type === 'choix_unique' && question.choix) {
-                lignes.push('   ' + question.choix.map(function(c) { return '[ ] ' + c; }).join('  '));
+                for (var ci = 0; ci < question.choix.length; ci++) {
+                    lignes.push(lettres[ci] + '. ' + question.choix[ci]);
+                }
             } else if (question.type === 'echelle5') {
-                var effortLabels = BILAN_REFLEXIF_DATA.ECHELLE_EFFORT.map(function(e) { return '[ ] ' + e.label; });
-                lignes.push('   ' + effortLabels.join('  '));
+                var echelle = BILAN_REFLEXIF_DATA.ECHELLE_EFFORT;
+                for (var ei = 0; ei < echelle.length; ei++) {
+                    lignes.push(lettres[ei] + '. ' + echelle[ei].label);
+                }
             } else if (question.type === 'choix_multiple') {
-                var emotionLabels = p.emotionsDisponibles.map(function(e) { return '[ ] ' + e; });
-                lignes.push('   ' + emotionLabels.join('  '));
-            } else {
-                lignes.push('   [R\u00e9ponse libre]');
+                for (var mi = 0; mi < p.emotionsDisponibles.length; mi++) {
+                    lignes.push(lettres[mi] + '. ' + p.emotionsDisponibles[mi]);
+                }
             }
+
+            lignes.push('');
+            num++;
 
             // Sous-question conditionnelle
             if (question.sousQuestion) {
-                lignes.push('   Si ' + question.sousQuestion.condition.join(' ou ') + ' : ' + question.sousQuestion.texte);
-                lignes.push('   [R\u00e9ponse libre]');
+                lignes.push(num + '. ' + question.sousQuestion.texte + ' (si ' + question.sousQuestion.condition.join(' ou ') + ')');
+                lignes.push('');
+                num++;
             }
         }
-
-        lignes.push('');
     }
 
     // Questions transversales
@@ -1270,16 +1278,17 @@ function exporterTexteParcours() {
 
     if (transActives.length > 0) {
         lignes.push('=== QUESTIONS DE SYNTH\u00c8SE ===');
+        lignes.push('');
         for (var t = 0; t < transActives.length; t++) {
             var qt = transActives[t];
-            lignes.push((t + 1) + '. ' + qt.texte);
+            lignes.push(num + '. ' + qt.texte);
             if (qt.type === 'choix_multiple_ouvert' && qt.choix) {
-                var choixLabels = qt.choix.map(function(c) { return '[ ] ' + c; });
-                lignes.push('   ' + choixLabels.join('  '));
-                lignes.push('   [R\u00e9ponse libre]');
-            } else {
-                lignes.push('   [R\u00e9ponse libre]');
+                for (var cti = 0; cti < qt.choix.length; cti++) {
+                    lignes.push(lettres[cti] + '. ' + qt.choix[cti]);
+                }
             }
+            lignes.push('');
+            num++;
         }
     }
 
