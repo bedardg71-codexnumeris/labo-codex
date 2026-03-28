@@ -218,6 +218,11 @@ function initialiserBilanReflexif() {
     var pSauve = db.getSync(CLE_PARCOURS(), null);
     if (pSauve) {
         etat.parcours = pSauve;
+        // Migration : ajouter questionsParActivite si absent (parcours créés avant la refonte)
+        if (!etat.parcours.questionsParActivite) {
+            etat.parcours.questionsParActivite = JSON.parse(JSON.stringify(BILAN_REFLEXIF_DATA.QUESTIONS_PAR_ACTIVITE_DEFAUT));
+            sauvegarderParcours();
+        }
     } else {
         etat.parcours = BILAN_REFLEXIF_DATA.creerParcoursVide();
         sauvegarderParcours();
@@ -769,12 +774,31 @@ function rendreParcours() {
         '<ol>' +
         '<li><strong>Copie le formulaire</strong> \u2014 Clique sur \u00ab\u00a0Copier le formulaire\u00a0\u00bb. Le texte complet (activit\u00e9s + questions de synth\u00e8se) est copi\u00e9.</li>' +
         '<li><strong>Cr\u00e9e un formulaire s\u00e9par\u00e9</strong> \u2014 Le parcours est un formulaire distinct du questionnaire Likert. Distribue-les s\u00e9par\u00e9ment pour \u00e9viter la fatigue de r\u00e9ponse.</li>' +
-        '<li><strong>Pour chaque activit\u00e9, cr\u00e9e une section</strong> avec\u00a0: compl\u00e9tion (choix unique\u00a0: Oui / Partiellement / Non), raison si non compl\u00e9t\u00e9e (texte court, conditionnel si possible), effort per\u00e7u (\u00e9chelle 1-5 ou choix unique), \u00e9motion dominante (choix multiples, 1-2 parmi la liste), moment marquant (texte long, optionnel).</li>' +
+        '<li><strong>Pour chaque activit\u00e9, cr\u00e9e une section</strong> avec les questions ci-dessous.</li>' +
         '<li><strong>Ajoute les questions de synth\u00e8se</strong> en fin de formulaire.</li>' +
         '<li><strong>Configure l\u2019anonymat</strong> et distribue le lien.</li>' +
         '<li><strong>Exporte en CSV</strong> et importe dans l\u2019onglet \u00ab\u00a0Importer les r\u00e9sultats\u00a0\u00bb.</li>' +
         '</ol>'
     ));
+
+    // === Questions posées pour chaque activité (éditables) ===
+    var qpa = p.questionsParActivite || [];
+    html.push('<div class="bilan-sous-titre">Questions pos\u00e9es pour chaque activit\u00e9 (' + qpa.filter(function(q) { return q.actif; }).length + ' actives)</div>');
+
+    for (var qi = 0; qi < qpa.length; qi++) {
+        html.push(rendreQuestionParActiviteHTML(qpa[qi], qi, p));
+    }
+
+    // Ajout d'une question personnalisée au bloc
+    html.push('<div class="bilan-ajout-form">');
+    html.push('<input type="text" class="bilan-ajout-input" id="bilan-qpa-input" placeholder="Ajouter une question par activit\u00e9\u2026">');
+    html.push('<select class="bilan-ajout-select" id="bilan-qpa-type">');
+    html.push('<option value="texte_libre">Texte libre</option>');
+    html.push('<option value="choix_unique">Choix unique</option>');
+    html.push('<option value="echelle5">\u00c9chelle 1-5</option>');
+    html.push('</select>');
+    html.push('<button class="bilan-btn bilan-btn-secondaire" data-action="BilanReflexif.ajouterQuestionParActivite">Ajouter</button>');
+    html.push('</div>');
 
     // === Liste des activités ===
     html.push('<div class="bilan-sous-titre">Activit\u00e9s d\u2019apprentissage (' + p.activites.length + ')</div>');
@@ -801,35 +825,17 @@ function rendreParcours() {
     html.push('<button class="bilan-btn bilan-btn-secondaire" data-action="BilanReflexif.ajouterActivite">Ajouter</button>');
     html.push('</div>');
 
-    // === Émotions disponibles ===
-    html.push('<div class="bilan-sous-titre">\u00c9motions propos\u00e9es aux \u00e9tudiants (' + p.emotionsDisponibles.length + ')</div>');
-    html.push('<div class="bilan-emotions-list">');
-    for (var e = 0; e < p.emotionsDisponibles.length; e++) {
-        html.push('<span class="bilan-emotion-tag">');
-        html.push(echapperHtml(p.emotionsDisponibles[e]));
-        html.push(' <button class="bilan-btn-mini" data-action="BilanReflexif.supprimerEmotion" data-param="' + e + '" title="Retirer">\u2715</button>');
-        html.push('</span>');
-    }
-    html.push('</div>');
-    html.push('<div class="bilan-ajout-form">');
-    html.push('<input type="text" class="bilan-ajout-input" id="bilan-emotion-input" placeholder="Ajouter une \u00e9motion\u2026" style="max-width:250px">');
-    html.push('<button class="bilan-btn bilan-btn-secondaire" data-action="BilanReflexif.ajouterEmotion">Ajouter</button>');
-    html.push('</div>');
-
     // === Questions transversales ===
     html.push('<div class="bilan-sous-titre">Questions de synth\u00e8se (fin du parcours)</div>');
     var qTrans = BILAN_REFLEXIF_DATA.QUESTIONS_TRANSVERSALES;
     for (var q = 0; q < qTrans.length; q++) {
         var qt = qTrans[q];
-        var actif = p.questionsTransversales[qt.id] !== false;
+        var actifT = p.questionsTransversales[qt.id] !== false;
         html.push('<div class="bilan-transversale">');
-        html.push('<button class="bilan-toggle' + (actif ? ' actif' : '') + '" data-action="BilanReflexif.toggleTransversale" data-param="' + qt.id + '" title="' + (actif ? 'D\u00e9sactiver' : 'Activer') + '"></button>');
-        html.push('<span class="bilan-transversale-texte' + (actif ? '' : '" style="opacity:.45') + '">' + echapperHtml(qt.texte) + '</span>');
+        html.push('<button class="bilan-toggle' + (actifT ? ' actif' : '') + '" data-action="BilanReflexif.toggleTransversale" data-param="' + qt.id + '" title="' + (actifT ? 'D\u00e9sactiver' : 'Activer') + '"></button>');
+        html.push('<span class="bilan-transversale-texte"' + (actifT ? '' : ' style="opacity:.45"') + '>' + echapperHtml(qt.texte) + '</span>');
         html.push('</div>');
     }
-
-    // === Aperçu du formulaire pour l'élève ===
-    html.push(rendreApercuParcours(p));
 
     vue.innerHTML = html.join('');
 }
@@ -874,98 +880,159 @@ function rendreActiviteHTML(activite, index) {
     return html.join('');
 }
 
-// === Aperçu formulaire élève ===
+// === Rendu des questions par activité ===
 
-function rendreApercuParcours(p) {
+function rendreQuestionParActiviteHTML(question, index, parcours) {
     var html = [];
-    html.push('<div class="bilan-preview">');
-    html.push('<div class="bilan-preview-titre">\uD83D\uDC41 Aper\u00e7u du formulaire pour l\u2019\u00e9l\u00e8ve</div>');
+    var lettres = 'abcdefghijklmnopqrstuvwxyz';
+    var lettre = index < lettres.length ? lettres[index] : (index + 1);
 
-    if (!p.activites || p.activites.length === 0) {
-        html.push('<div class="bilan-vide" style="padding:12px;font-size:13px">Ajoute au moins une activit\u00e9 pour voir l\u2019aper\u00e7u.</div>');
-        html.push('</div>');
-        return html.join('');
-    }
+    // Type lisible
+    var typeLabels = {
+        'choix_unique': 'Choix unique',
+        'echelle5': '\u00c9chelle 1-5',
+        'choix_multiple': 'Choix multiples',
+        'texte_libre': 'Texte libre'
+    };
+    var typeLabel = typeLabels[question.type] || question.type;
 
-    // Afficher la première activité comme exemple
-    var act = p.activites[0];
-    var echelle = BILAN_REFLEXIF_DATA.ECHELLE_EFFORT;
+    html.push('<div class="bilan-question" style="' + (question.actif ? '' : 'opacity:.45') + '">');
+    html.push('<button class="bilan-toggle' + (question.actif ? ' actif' : '') + '" data-action="BilanReflexif.toggleQuestionParActivite" data-param="' + question.id + '" style="align-self:center;flex-shrink:0"></button>');
+    html.push('<span class="bilan-question-num">' + lettre + ')</span>');
 
-    html.push('<div class="bilan-preview-activite">');
-    html.push('<div class="bilan-preview-act-titre">' + echapperHtml(act.titre) + '</div>');
-
-    // a) Complétion
-    html.push('<div class="bilan-preview-question"><strong>a)</strong> As-tu compl\u00e9t\u00e9 cette activit\u00e9\u00a0?</div>');
-    html.push('<div class="bilan-preview-choix">');
-    html.push('<span class="bilan-preview-option">Oui</span>');
-    html.push('<span class="bilan-preview-option">Partiellement</span>');
-    html.push('<span class="bilan-preview-option">Non</span>');
-    html.push('</div>');
-
-    // b) Raison si non complétée
-    html.push('<div class="bilan-preview-question"><strong>b)</strong> Si non ou partiellement, qu\u2019est-ce qui t\u2019a emp\u00each\u00e9\u00a0?</div>');
-    html.push('<div class="bilan-preview-libre">R\u00e9ponse libre</div>');
-
-    // c) Effort
-    html.push('<div class="bilan-preview-question"><strong>c)</strong> Quel niveau d\u2019effort cette activit\u00e9 a-t-elle demand\u00e9\u00a0?</div>');
-    html.push('<div class="bilan-preview-choix">');
-    for (var i = 0; i < echelle.length; i++) {
-        html.push('<span class="bilan-preview-option">' + echapperHtml(echelle[i].label) + '</span>');
-    }
-    html.push('</div>');
-
-    // d) Émotions (utilise les émotions configurées par l'enseignant)
-    html.push('<div class="bilan-preview-question"><strong>d)</strong> Quelle(s) \u00e9motion(s) d\u00e9crivent le mieux ton exp\u00e9rience\u00a0? <em style="font-size:11px;color:var(--texte-secondaire)">(1-2 choix)</em></div>');
-    html.push('<div class="bilan-preview-choix">');
-    for (var j = 0; j < p.emotionsDisponibles.length; j++) {
-        html.push('<span class="bilan-preview-option">' + echapperHtml(p.emotionsDisponibles[j]) + '</span>');
-    }
-    html.push('</div>');
-
-    // e) Moment marquant
-    html.push('<div class="bilan-preview-question"><strong>e)</strong> Moment marquant\u00a0? <em style="font-size:11px;color:var(--texte-secondaire)">(optionnel)</em></div>');
-    html.push('<div class="bilan-preview-libre">R\u00e9ponse libre</div>');
-
-    html.push('</div>'); // fin preview-activite
-
-    // Indication des autres activités
-    if (p.activites.length > 1) {
-        html.push('<div style="font-size:12px;color:var(--texte-secondaire);margin:8px 0;font-style:italic">');
-        html.push('\u2026 m\u00eames questions pour les ' + (p.activites.length - 1) + ' autre' + (p.activites.length > 2 ? 's' : '') + ' activit\u00e9' + (p.activites.length > 2 ? 's' : '') + '.');
-        html.push('</div>');
-    }
-
-    // Questions transversales actives
-    var qTrans = BILAN_REFLEXIF_DATA.QUESTIONS_TRANSVERSALES;
-    var transActives = [];
-    for (var t = 0; t < qTrans.length; t++) {
-        if (p.questionsTransversales[qTrans[t].id] !== false) {
-            transActives.push(qTrans[t]);
-        }
-    }
-
-    if (transActives.length > 0) {
-        html.push('<div class="bilan-preview-section">');
-        html.push('<div class="bilan-preview-section-titre">Questions de synth\u00e8se</div>');
-        for (var k = 0; k < transActives.length; k++) {
-            var qt = transActives[k];
-            html.push('<div class="bilan-preview-question"><strong>' + (k + 1) + '.</strong> ' + echapperHtml(qt.texte) + '</div>');
-            if (qt.type === 'choix_multiple_ouvert' && qt.choix) {
-                html.push('<div class="bilan-preview-choix">');
-                for (var c = 0; c < qt.choix.length; c++) {
-                    html.push('<span class="bilan-preview-option">' + echapperHtml(qt.choix[c]) + '</span>');
-                }
-                html.push('</div>');
-                html.push('<div class="bilan-preview-libre">R\u00e9ponse libre (optionnel)</div>');
-            } else {
-                html.push('<div class="bilan-preview-libre">R\u00e9ponse libre</div>');
-            }
+    if (etat.questionEnEdition === question.id) {
+        html.push('<input type="text" class="bilan-edit-input" id="bilan-edit-' + question.id + '" value="' + echapperHtml(question.texte) + '">');
+        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.confirmerEditionQPA" data-param="' + question.id + '" title="Confirmer">\u2713</button>');
+        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.annulerEdition" title="Annuler">\u2717</button>');
+    } else {
+        html.push('<span class="bilan-question-texte">' + echapperHtml(question.texte) + '</span>');
+        html.push('<span class="bilan-question-type">' + echapperHtml(typeLabel) + '</span>');
+        html.push('<div class="bilan-question-actions">');
+        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.editerQuestionQPA" data-param="' + question.id + '" title="Modifier">\u270E</button>');
+        if (question.personnalisee) {
+            html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerQuestionParActivite" data-param="' + question.id + '" data-confirm="Supprimer cette question ?" title="Supprimer">\u2715</button>');
         }
         html.push('</div>');
     }
 
-    html.push('</div>'); // fin bilan-preview
+    html.push('</div>');
+
+    // Sous-question conditionnelle (ex: raison de non-complétion)
+    if (question.sousQuestion && question.actif) {
+        html.push('<div class="bilan-question" style="padding-left:52px;font-size:12px;color:var(--texte-secondaire)">');
+        html.push('<span class="bilan-question-num">\u21B3</span>');
+        html.push('<span class="bilan-question-texte" style="font-style:italic">' + echapperHtml(question.sousQuestion.texte));
+        html.push(' <em>(si ' + question.sousQuestion.condition.join(' ou ') + ')</em></span>');
+        html.push('<span class="bilan-question-type">Texte libre</span>');
+        html.push('</div>');
+    }
+
+    // Choix pour choix_unique (afficher les options)
+    if (question.type === 'choix_unique' && question.choix && question.actif) {
+        html.push('<div class="bilan-preview-choix" style="padding-left:52px;margin-bottom:4px">');
+        for (var c = 0; c < question.choix.length; c++) {
+            html.push('<span class="bilan-preview-option">' + echapperHtml(question.choix[c]) + '</span>');
+        }
+        html.push('</div>');
+    }
+
+    // Échelle pour echelle5
+    if (question.type === 'echelle5' && question.actif) {
+        var echelle = BILAN_REFLEXIF_DATA.ECHELLE_EFFORT;
+        html.push('<div class="bilan-preview-choix" style="padding-left:52px;margin-bottom:4px">');
+        for (var ei = 0; ei < echelle.length; ei++) {
+            html.push('<span class="bilan-preview-option">' + echapperHtml(echelle[ei].label) + '</span>');
+        }
+        html.push('</div>');
+    }
+
+    // Émotions pour choix_multiple (+ éditeur d'émotions intégré)
+    if (question.type === 'choix_multiple' && question.actif) {
+        html.push('<div style="padding-left:52px;margin-bottom:4px">');
+        html.push('<div class="bilan-emotions-list">');
+        for (var em = 0; em < parcours.emotionsDisponibles.length; em++) {
+            html.push('<span class="bilan-emotion-tag">');
+            html.push(echapperHtml(parcours.emotionsDisponibles[em]));
+            html.push(' <button class="bilan-btn-mini" data-action="BilanReflexif.supprimerEmotion" data-param="' + em + '" title="Retirer">\u2715</button>');
+            html.push('</span>');
+        }
+        html.push('</div>');
+        html.push('<div class="bilan-ajout-form">');
+        html.push('<input type="text" class="bilan-ajout-input" id="bilan-emotion-input" placeholder="Ajouter une \u00e9motion\u2026" style="max-width:220px">');
+        html.push('<button class="bilan-btn bilan-btn-secondaire" data-action="BilanReflexif.ajouterEmotion">Ajouter</button>');
+        html.push('</div>');
+        html.push('</div>');
+    }
+
     return html.join('');
+}
+
+// === Actions questions par activité ===
+
+function toggleQuestionParActivite(qpaId) {
+    var qpa = etat.parcours.questionsParActivite;
+    for (var i = 0; i < qpa.length; i++) {
+        if (qpa[i].id === qpaId) {
+            qpa[i].actif = !qpa[i].actif;
+            break;
+        }
+    }
+    sauvegarderParcours();
+    rendreParcours();
+}
+
+function editerQuestionQPA(qpaId) {
+    etat.questionEnEdition = qpaId;
+    rendreParcours();
+    setTimeout(function() {
+        var input = document.getElementById('bilan-edit-' + qpaId);
+        if (input) { input.focus(); input.select(); }
+    }, 50);
+}
+
+function confirmerEditionQPA(qpaId) {
+    var input = document.getElementById('bilan-edit-' + qpaId);
+    if (!input || !input.value.trim()) return;
+    var qpa = etat.parcours.questionsParActivite;
+    for (var i = 0; i < qpa.length; i++) {
+        if (qpa[i].id === qpaId) {
+            qpa[i].texte = input.value.trim();
+            break;
+        }
+    }
+    etat.questionEnEdition = null;
+    sauvegarderParcours();
+    rendreParcours();
+}
+
+function ajouterQuestionParActivite() {
+    var input = document.getElementById('bilan-qpa-input');
+    var typeSelect = document.getElementById('bilan-qpa-type');
+    if (!input || !input.value.trim()) return;
+
+    etat.parcours.questionsParActivite.push({
+        id: 'qpa_' + genId(),
+        texte: input.value.trim(),
+        type: typeSelect ? typeSelect.value : 'texte_libre',
+        actif: true,
+        obligatoire: false,
+        personnalisee: true
+    });
+
+    sauvegarderParcours();
+    rendreParcours();
+}
+
+function supprimerQuestionParActivite(qpaId) {
+    var qpa = etat.parcours.questionsParActivite;
+    for (var i = 0; i < qpa.length; i++) {
+        if (qpa[i].id === qpaId) {
+            qpa.splice(i, 1);
+            break;
+        }
+    }
+    sauvegarderParcours();
+    rendreParcours();
 }
 
 // === Actions parcours ===
@@ -1142,22 +1209,39 @@ function exporterTexteParcours() {
     lignes.push('Pour chaque activit\u00e9 ci-dessous, r\u00e9ponds aux questions.');
     lignes.push('');
 
+    // Questions actives par activité
+    var qpa = (p.questionsParActivite || []).filter(function(q) { return q.actif; });
+    var lettres = 'abcdefghijklmnopqrstuvwxyz';
+
     // Par activité
     for (var i = 0; i < p.activites.length; i++) {
         var act = p.activites[i];
         lignes.push('--- ' + act.titre + ' ---');
-        lignes.push('a) As-tu compl\u00e9t\u00e9 cette activit\u00e9\u00a0?');
-        lignes.push('   [ ] Oui  [ ] Partiellement  [ ] Non');
-        lignes.push('b) Si non ou partiellement, qu\u2019est-ce qui t\u2019a emp\u00each\u00e9\u00a0?');
-        lignes.push('   [R\u00e9ponse libre]');
-        lignes.push('c) Quel niveau d\u2019effort\u00a0?');
-        var effortLabels = BILAN_REFLEXIF_DATA.ECHELLE_EFFORT.map(function(e) { return '[ ] ' + e.label; });
-        lignes.push('   ' + effortLabels.join('  '));
-        lignes.push('d) Quelle(s) \u00e9motion(s) d\u00e9crivent le mieux ton exp\u00e9rience\u00a0?');
-        var emotionLabels = p.emotionsDisponibles.map(function(e) { return '[ ] ' + e; });
-        lignes.push('   ' + emotionLabels.join('  '));
-        lignes.push('e) Moment marquant\u00a0? (optionnel)');
-        lignes.push('   [R\u00e9ponse libre]');
+
+        for (var qi = 0; qi < qpa.length; qi++) {
+            var question = qpa[qi];
+            var lettre = qi < lettres.length ? lettres[qi] : (qi + 1);
+            lignes.push(lettre + ') ' + question.texte);
+
+            if (question.type === 'choix_unique' && question.choix) {
+                lignes.push('   ' + question.choix.map(function(c) { return '[ ] ' + c; }).join('  '));
+            } else if (question.type === 'echelle5') {
+                var effortLabels = BILAN_REFLEXIF_DATA.ECHELLE_EFFORT.map(function(e) { return '[ ] ' + e.label; });
+                lignes.push('   ' + effortLabels.join('  '));
+            } else if (question.type === 'choix_multiple') {
+                var emotionLabels = p.emotionsDisponibles.map(function(e) { return '[ ] ' + e; });
+                lignes.push('   ' + emotionLabels.join('  '));
+            } else {
+                lignes.push('   [R\u00e9ponse libre]');
+            }
+
+            // Sous-question conditionnelle
+            if (question.sousQuestion) {
+                lignes.push('   Si ' + question.sousQuestion.condition.join(' ou ') + ' : ' + question.sousQuestion.texte);
+                lignes.push('   [R\u00e9ponse libre]');
+            }
+        }
+
         lignes.push('');
     }
 
@@ -2417,6 +2501,12 @@ window.BilanReflexif = {
     supprimerEmotion: supprimerEmotion,
     toggleTransversale: toggleTransversale,
     exporterTexteParcours: exporterTexteParcours,
+    // Questions par activité
+    toggleQuestionParActivite: toggleQuestionParActivite,
+    editerQuestionQPA: editerQuestionQPA,
+    confirmerEditionQPA: confirmerEditionQPA,
+    ajouterQuestionParActivite: ajouterQuestionParActivite,
+    supprimerQuestionParActivite: supprimerQuestionParActivite,
     // Aide
     toggleAide: toggleAide,
     // Import / Rapport
