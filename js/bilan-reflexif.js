@@ -2170,13 +2170,25 @@ function tronquer(texte, max) {
    SECTION 8 : HOOKS NAVIGATION ET API PUBLIQUE
    =============================== */
 
+// Auto-enregistrement dans la config (résilience si config.js est en cache)
+if (window.configurationsOnglets && window.configurationsOnglets['boite-outils']) {
+    var _boite = window.configurationsOnglets['boite-outils'];
+    var _hasBilan = false;
+    for (var _b = 0; _b < _boite.length; _b++) {
+        if (_boite[_b].id === 'bilan') { _hasBilan = true; break; }
+    }
+    if (!_hasBilan) {
+        _boite.push({ id: 'bilan', label: 'Bilan r\u00e9flexif' });
+    }
+}
+
 // Hook sur afficherSousSection pour initialiser quand on navigue vers bilan
 var _originalAfficherSousSection = window.afficherSousSection;
 if (typeof _originalAfficherSousSection === 'function') {
     window.afficherSousSection = function(idSousSection) {
         var resultat = _originalAfficherSousSection.apply(this, arguments);
         if (idSousSection === 'boite-outils-bilan') {
-            initialiserBilanReflexif();
+            try { initialiserBilanReflexif(); } catch (e) { console.error('[BilanReflexif] Erreur init:', e); }
         }
         return resultat;
     };
