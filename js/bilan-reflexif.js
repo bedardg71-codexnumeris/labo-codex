@@ -331,6 +331,13 @@ function rendreEditeur() {
     var q = etat.questionnaire;
     var html = [];
 
+    // Description d'introduction
+    html.push('<div class="bilan-info">');
+    html.push('Cet outil te permet de construire un questionnaire anonyme \u00e0 distribuer \u00e0 tes \u00e9l\u00e8ves en fin de trimestre. ');
+    html.push('Il recueille leurs perceptions sur la qualit\u00e9 de l\u2019enseignement, du syst\u00e8me d\u2019\u00e9valuation et de l\u2019accompagnement re\u00e7u. ');
+    html.push('Les r\u00e9ponses te donneront un portrait du v\u00e9cu de ton groupe.');
+    html.push('</div>');
+
     // Titre du questionnaire
     html.push('<input type="text" class="bilan-titre-input" id="bilan-titre" value="' + echapperHtml(q.titre) + '" data-on-change="BilanReflexif.modifierTitre" placeholder="Titre du questionnaire">');
 
@@ -774,8 +781,12 @@ function rendreParcours() {
     var p = etat.parcours;
     var html = [];
 
-    // Bannière de recommandation
+    // Description d'introduction + recommandation
     html.push('<div class="bilan-info">');
+    html.push('Cet outil recueille l\u2019exp\u00e9rience v\u00e9cue de l\u2019\u00e9l\u00e8ve \u00e0 travers les productions du trimestre. ');
+    html.push('Pour chaque activit\u00e9 d\u2019apprentissage, l\u2019\u00e9l\u00e8ve situe son effort, ses \u00e9motions et les moments marquants de son parcours. ');
+    html.push('Le portrait de groupe qui en \u00e9merge r\u00e9v\u00e8le les zones de friction, les moments de bascule et les r\u00e9ussites collectives.');
+    html.push('<br><br>');
     html.push('S\u00e9lectionne <strong>5 \u00e0 7 activit\u00e9s marquantes</strong> du trimestre plut\u00f4t que l\u2019int\u00e9gralit\u00e9. ');
     html.push('Le parcours est un formulaire <strong>s\u00e9par\u00e9</strong> du questionnaire Likert \u2014 il sera distribu\u00e9 ind\u00e9pendamment.');
     html.push('</div>');
@@ -1340,10 +1351,12 @@ function rendreReflexion() {
     var html = [];
     var modeApres = r.etat === 'apres_resultats';
 
-    // Bannière
+    // Description d'introduction
     html.push('<div class="bilan-info">');
-    html.push('Cet espace est <strong>personnel</strong>. Tes r\u00e9ponses restent dans l\u2019application et ne sont pas partag\u00e9es. ');
-    html.push('Tu peux le remplir en deux temps\u00a0: avant et apr\u00e8s avoir consult\u00e9 les r\u00e9sultats de tes \u00e9tudiants.');
+    html.push('Cet outil t\u2019accompagne dans une introspection sur ta propre pratique. ');
+    html.push('Tu y consignes ta perception de l\u2019enseignement offert et tes observations sur chaque activit\u00e9. ');
+    html.push('Apr\u00e8s avoir consult\u00e9 les r\u00e9sultats de tes \u00e9l\u00e8ves, tu peux revenir sur tes r\u00e9ponses et identifier les \u00e9carts entre ta perception et la leur. ');
+    html.push('C\u2019est un espace personnel \u2014 rien n\u2019est partag\u00e9.');
     html.push('</div>');
 
     // Indicateur d'état avant/après
