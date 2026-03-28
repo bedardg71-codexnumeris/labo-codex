@@ -152,6 +152,19 @@ function injecterStyles() {
         '.bilan-info-aide.replie .bilan-aide-body{display:none}',
         '.bilan-info-aide.replie .bilan-aide-chevron{transform:rotate(-90deg)}',
 
+        /* Prévisualisation formulaire élève */
+        '.bilan-preview{margin-top:24px;padding:16px;border:2px dashed rgba(106,172,184,.2);border-radius:var(--radius-grand,12px);background:rgba(106,172,184,.03)}',
+        '.bilan-preview-titre{font-size:14px;font-weight:600;color:var(--texte-secondaire,#8aa4b0);margin-bottom:12px;display:flex;align-items:center;gap:6px}',
+        '.bilan-preview-activite{margin-bottom:16px;padding:12px 14px;background:var(--bleu-tres-pale,#142428);border-radius:var(--radius-moyen,6px);border-left:3px solid var(--bleu-clair,#6aacb8)}',
+        '.bilan-preview-act-titre{font-size:14px;font-weight:600;color:var(--texte-principal,#d0e0e4);margin-bottom:10px}',
+        '.bilan-preview-question{margin-bottom:8px;font-size:13px;color:var(--texte-principal,#d0e0e4);line-height:1.5}',
+        '.bilan-preview-question strong{color:var(--texte-secondaire,#8aa4b0);font-weight:600}',
+        '.bilan-preview-choix{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 0 16px}',
+        '.bilan-preview-option{padding:3px 10px;font-size:12px;border:1px solid rgba(106,172,184,.15);border-radius:var(--radius-pill,20px);color:var(--texte-secondaire,#8aa4b0);background:transparent}',
+        '.bilan-preview-libre{margin:4px 0 0 16px;padding:6px 10px;font-size:12px;color:var(--texte-secondaire,#8aa4b0);font-style:italic;border:1px dashed rgba(106,172,184,.15);border-radius:var(--radius-petit,5px);display:inline-block}',
+        '.bilan-preview-section{margin-top:14px;padding-top:12px;border-top:1px solid rgba(106,172,184,.1)}',
+        '.bilan-preview-section-titre{font-size:13px;font-weight:600;color:var(--texte-secondaire,#8aa4b0);margin-bottom:8px}',
+
         /* Parcours — Sous-sections */
         '.bilan-sous-titre{font-size:14px;font-weight:600;color:var(--texte-principal,#d0e0e4);margin:20px 0 8px;padding-bottom:6px;border-bottom:1px solid rgba(106,172,184,.1)}'
     ].join('\n');
@@ -815,6 +828,9 @@ function rendreParcours() {
         html.push('</div>');
     }
 
+    // === Aperçu du formulaire pour l'élève ===
+    html.push(rendreApercuParcours(p));
+
     vue.innerHTML = html.join('');
 }
 
@@ -855,6 +871,100 @@ function rendreActiviteHTML(activite, index) {
     }
 
     html.push('</div>');
+    return html.join('');
+}
+
+// === Aperçu formulaire élève ===
+
+function rendreApercuParcours(p) {
+    var html = [];
+    html.push('<div class="bilan-preview">');
+    html.push('<div class="bilan-preview-titre">\uD83D\uDC41 Aper\u00e7u du formulaire pour l\u2019\u00e9l\u00e8ve</div>');
+
+    if (!p.activites || p.activites.length === 0) {
+        html.push('<div class="bilan-vide" style="padding:12px;font-size:13px">Ajoute au moins une activit\u00e9 pour voir l\u2019aper\u00e7u.</div>');
+        html.push('</div>');
+        return html.join('');
+    }
+
+    // Afficher la première activité comme exemple
+    var act = p.activites[0];
+    var echelle = BILAN_REFLEXIF_DATA.ECHELLE_EFFORT;
+
+    html.push('<div class="bilan-preview-activite">');
+    html.push('<div class="bilan-preview-act-titre">' + echapperHtml(act.titre) + '</div>');
+
+    // a) Complétion
+    html.push('<div class="bilan-preview-question"><strong>a)</strong> As-tu compl\u00e9t\u00e9 cette activit\u00e9\u00a0?</div>');
+    html.push('<div class="bilan-preview-choix">');
+    html.push('<span class="bilan-preview-option">Oui</span>');
+    html.push('<span class="bilan-preview-option">Partiellement</span>');
+    html.push('<span class="bilan-preview-option">Non</span>');
+    html.push('</div>');
+
+    // b) Raison si non complétée
+    html.push('<div class="bilan-preview-question"><strong>b)</strong> Si non ou partiellement, qu\u2019est-ce qui t\u2019a emp\u00each\u00e9\u00a0?</div>');
+    html.push('<div class="bilan-preview-libre">R\u00e9ponse libre</div>');
+
+    // c) Effort
+    html.push('<div class="bilan-preview-question"><strong>c)</strong> Quel niveau d\u2019effort cette activit\u00e9 a-t-elle demand\u00e9\u00a0?</div>');
+    html.push('<div class="bilan-preview-choix">');
+    for (var i = 0; i < echelle.length; i++) {
+        html.push('<span class="bilan-preview-option">' + echapperHtml(echelle[i].label) + '</span>');
+    }
+    html.push('</div>');
+
+    // d) Émotions (utilise les émotions configurées par l'enseignant)
+    html.push('<div class="bilan-preview-question"><strong>d)</strong> Quelle(s) \u00e9motion(s) d\u00e9crivent le mieux ton exp\u00e9rience\u00a0? <em style="font-size:11px;color:var(--texte-secondaire)">(1-2 choix)</em></div>');
+    html.push('<div class="bilan-preview-choix">');
+    for (var j = 0; j < p.emotionsDisponibles.length; j++) {
+        html.push('<span class="bilan-preview-option">' + echapperHtml(p.emotionsDisponibles[j]) + '</span>');
+    }
+    html.push('</div>');
+
+    // e) Moment marquant
+    html.push('<div class="bilan-preview-question"><strong>e)</strong> Moment marquant\u00a0? <em style="font-size:11px;color:var(--texte-secondaire)">(optionnel)</em></div>');
+    html.push('<div class="bilan-preview-libre">R\u00e9ponse libre</div>');
+
+    html.push('</div>'); // fin preview-activite
+
+    // Indication des autres activités
+    if (p.activites.length > 1) {
+        html.push('<div style="font-size:12px;color:var(--texte-secondaire);margin:8px 0;font-style:italic">');
+        html.push('\u2026 m\u00eames questions pour les ' + (p.activites.length - 1) + ' autre' + (p.activites.length > 2 ? 's' : '') + ' activit\u00e9' + (p.activites.length > 2 ? 's' : '') + '.');
+        html.push('</div>');
+    }
+
+    // Questions transversales actives
+    var qTrans = BILAN_REFLEXIF_DATA.QUESTIONS_TRANSVERSALES;
+    var transActives = [];
+    for (var t = 0; t < qTrans.length; t++) {
+        if (p.questionsTransversales[qTrans[t].id] !== false) {
+            transActives.push(qTrans[t]);
+        }
+    }
+
+    if (transActives.length > 0) {
+        html.push('<div class="bilan-preview-section">');
+        html.push('<div class="bilan-preview-section-titre">Questions de synth\u00e8se</div>');
+        for (var k = 0; k < transActives.length; k++) {
+            var qt = transActives[k];
+            html.push('<div class="bilan-preview-question"><strong>' + (k + 1) + '.</strong> ' + echapperHtml(qt.texte) + '</div>');
+            if (qt.type === 'choix_multiple_ouvert' && qt.choix) {
+                html.push('<div class="bilan-preview-choix">');
+                for (var c = 0; c < qt.choix.length; c++) {
+                    html.push('<span class="bilan-preview-option">' + echapperHtml(qt.choix[c]) + '</span>');
+                }
+                html.push('</div>');
+                html.push('<div class="bilan-preview-libre">R\u00e9ponse libre (optionnel)</div>');
+            } else {
+                html.push('<div class="bilan-preview-libre">R\u00e9ponse libre</div>');
+            }
+        }
+        html.push('</div>');
+    }
+
+    html.push('</div>'); // fin bilan-preview
     return html.join('');
 }
 
@@ -960,7 +1070,11 @@ function importerProductions() {
     var nbAjoutees = 0;
     for (var i = 0; i < productions.length; i++) {
         var prod = productions[i];
-        var titre = prod.titre || prod.description || prod.nom || ('Production ' + (i + 1));
+        var titre = prod.titre || '';
+        if (prod.description) {
+            titre = titre ? (titre + ' \u2014 ' + prod.description) : prod.description;
+        }
+        if (!titre) titre = prod.nom || ('Production ' + (i + 1));
         if (titresExistants[titre.toLowerCase()]) continue;
 
         etat.parcours.activites.push({
