@@ -1207,39 +1207,27 @@ function executerActionEval(select) {
 
 /**
  * Ouvre un fichier en mode annotation depuis la liste des évaluations.
- * Charge aussi l'évaluation existante (si présente) pour que evaluationEnCours
- * soit initialisé et que la sauvegarde fonctionne quand l'utilisateur bascule en mode Évaluer.
+ * L'évaluation existante sera chargée automatiquement par preRemplirEvaluation
+ * → chargerEvaluationExistanteSiPresente quand l'utilisateur bascule en mode Évaluer.
+ *
+ * 🔧 FIX (29 mars 2026) : L'ancien callback appelait modifierEvaluationParId en mode
+ * annotation (sans eval-layout-flex), ce qui déclenchait le chemin standalone :
+ * masquage de evaluations-contenu-fichiers, affichage du formulaire pleine largeur,
+ * et _modifierEvaluationEnCours restait collé — contaminant les opérations suivantes.
  */
 function ouvrirAnnotationDepuisListe(fichierId) {
-    // Trouver l'évaluation associée au fichier (pour charger evaluationEnCours)
-    var fichier = (typeof travauxStockage !== 'undefined') ? travauxStockage.obtenirFichierParId(fichierId) : null;
-    var evaluation = (fichier && typeof travauxResolution !== 'undefined')
-        ? travauxResolution.trouverEvaluationPourFichier(fichier) : null;
-
     afficherSection('evaluations');
     if (typeof afficherSousSection === 'function') {
         afficherSousSection('evaluations-annoter');
     }
 
-    if (evaluation) {
-        // Charger l'évaluation après ouverture du fichier
-        // Flag _resterEnModeAnnoter empêche modifierEvaluation de basculer en mode Évaluer
-        window._apresOuvertureFichier = function() {
-            window._resterEnModeAnnoter = true;
-            setTimeout(function() {
-                if (typeof window.modifierEvaluationParId === 'function') {
-                    window.modifierEvaluationParId(evaluation.id);
-                }
-                // Rebasculer en mode annotation après chargement
-                setTimeout(function() {
-                    window._resterEnModeAnnoter = false;
-                    if (typeof travauxUI !== 'undefined' && typeof travauxUI.basculerMode === 'function') {
-                        travauxUI.basculerMode('annoter');
-                    }
-                }, 800);
-            }, 600);
-        };
-    }
+    // Callback minimal : empêche initialiserModuleTravaux de restaurer une session
+    // précédente (qui ouvrirait le mauvais fichier). Le fichier cible sera ouvert
+    // par le setTimeout ci-dessous.
+    window._apresOuvertureFichier = function() {
+        // No-op volontaire. L'évaluation sera chargée via preRemplirEvaluation
+        // quand l'utilisateur cliquera sur Évaluer.
+    };
 
     setTimeout(function() {
         if (typeof travauxUI !== 'undefined' && typeof travauxUI.ouvrirFichier === 'function') {
