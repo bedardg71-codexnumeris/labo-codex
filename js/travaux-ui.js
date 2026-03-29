@@ -1115,6 +1115,10 @@
                             </select>
                         </div>
                     </div>
+                    <label style="display:flex;align-items:center;gap:6px;margin-top:6px;cursor:pointer">
+                        <input type="checkbox" id="travaux-lea-reprises-seulement" data-on-change="travauxUI.mettreAJourCompteurLea">
+                        Reprises seulement
+                    </label>
                     <div id="travaux-lea-compteur" class="texte-muted"></div>
                     <div id="travaux-texte-progression-lea" class="texte-muted"></div>
                     <div class="travaux-barre-progression-container">
@@ -2256,6 +2260,19 @@
             statutClasse = 'evalue';
         }
 
+        // 🔧 FIX (29 mars 2026) : Indicateurs reprise/remplacée dans les badges
+        // Étoile ★ pour les reprises (comme le profil Engagement)
+        // Opacité réduite pour les originales remplacées
+        // Utiliser le flag du FICHIER (pas de l'évaluation) pour distinguer
+        // l'original de la reprise — trouverEvaluationPourFichier retourne
+        // la même évaluation (reprise) pour les deux fichiers.
+        const estReprise = f.estReprise === true;
+        // L'original est remplacé si l'évaluation trouvée est une reprise mais le fichier ne l'est pas
+        const estRemplacee = !estReprise && evaluation && (evaluation.repriseDeId || evaluation.jetonRepriseCibleeApplique);
+        const indicateurReprise = estReprise
+            ? '<span class="profil-texte-petit" title="Reprise" style="margin-left:2px">★</span>'
+            : '';
+
         const verrou = (evaluation && evaluation.verrouillee)
             ? '<span class="travaux-badge-verrou" title="Évaluation verrouillée">\u{1F512}</span>'
             : '';
@@ -2268,10 +2285,10 @@
         const estSelFusion = selectionFusion.has(f.id);
         const checkboxFusion = `<input type="checkbox" class="fusion-checkbox" ${estSelFusion ? 'checked' : ''} data-stop data-action="travauxUI.toggleSelectionFusion" data-param="${f.id}" title="Sélectionner pour fusion">`;
 
-        return `<div class="annot-badge${estSelFusion ? ' annot-badge-fusion-selectionne' : ''}" data-fichier-id="${f.id}" data-etudiant-da="${f.etudiantDA || ''}" draggable="true" data-drag-data="text/fichier-id:${f.id}" data-action="${actionName}" data-param="${f.id}" title="${echapperHtml(f.nomFichier)}">
+        return `<div class="annot-badge${estSelFusion ? ' annot-badge-fusion-selectionne' : ''}${estRemplacee ? ' eval-remplacee' : ''}" data-fichier-id="${f.id}" data-etudiant-da="${f.etudiantDA || ''}" draggable="true" data-drag-data="text/fichier-id:${f.id}" data-action="${actionName}" data-param="${f.id}" title="${echapperHtml(f.nomFichier)}${estRemplacee ? ' (Remplacée par reprise)' : ''}${estReprise ? ' (Reprise)' : ''}">
         ${checkboxFusion}
         <span class="annot-badge-nom">${nomEtudiant}</span>
-        <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>${evaluation ? `<button class="travaux-badge-retro" data-stop data-action="travauxUI.afficherRetroaction" data-param="${f.id}" title="Aperçu rétroaction">\u{1F4AC}</button>` : ''}${verrou}
+        <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>${indicateurReprise}${evaluation ? `<button class="travaux-badge-retro" data-stop data-action="travauxUI.afficherRetroaction" data-param="${f.id}" title="Aperçu rétroaction">\u{1F4AC}</button>` : ''}${verrou}
         <button class="annot-badge-supprimer" data-stop data-action="travauxUI.supprimerFichierImporte" data-param="${f.id}" title="Supprimer">&times;</button>
     </div>`;
     }
@@ -3121,7 +3138,8 @@
             return;
         }
         const da = document.getElementById('travaux-archivage-lea-etudiant')?.value || null;
-        travauxArchivage.lancerExportLea(productionId, da);
+        const reprisesSeulement = document.getElementById('travaux-lea-reprises-seulement')?.checked || false;
+        travauxArchivage.lancerExportLea(productionId, da, reprisesSeulement);
     }
 
     /**
@@ -3133,6 +3151,7 @@
 
         const productionId = document.getElementById('travaux-archivage-lea-production')?.value;
         const da = document.getElementById('travaux-archivage-lea-etudiant')?.value || null;
+        const reprisesSeulement = document.getElementById('travaux-lea-reprises-seulement')?.checked || false;
 
         if (!productionId) {
             compteur.textContent = '';
@@ -3143,18 +3162,20 @@
         const dasGroupeActif = new Set(
             travauxStockage.obtenirFichiersGroupeActif().map(f => f.etudiantDA).filter(Boolean)
         );
-        const dasEvalues = new Set(
-            (obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [])
-                .filter(e => e.productionId === productionId && dasGroupeActif.has(e.etudiantDA))
-                .map(e => e.etudiantDA)
-        );
+        let evalsComptees = (obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [])
+            .filter(e => e.productionId === productionId && !e.remplaceeParId && dasGroupeActif.has(e.etudiantDA));
+        if (reprisesSeulement) {
+            evalsComptees = evalsComptees.filter(e => e.repriseDeId || e.jetonRepriseCibleeApplique);
+        }
+        const dasEvalues = new Set(evalsComptees.map(e => e.etudiantDA));
 
         if (da) {
             compteur.textContent = dasEvalues.has(da) ? '1 évaluation prête' : 'Aucune évaluation';
         } else {
+            const label = reprisesSeulement ? 'reprise(s)' : 'évaluation(s)';
             compteur.textContent = dasEvalues.size > 0
-                ? `${dasEvalues.size} évaluation(s) pour ${dasEvalues.size} étudiant(s)`
-                : 'Aucune évaluation trouvée';
+                ? `${dasEvalues.size} ${label} pour ${dasEvalues.size} étudiant(s)`
+                : reprisesSeulement ? 'Aucune reprise trouvée' : 'Aucune évaluation trouvée';
         }
     }
 

@@ -281,10 +281,11 @@
      * Seuls les fichiers ayant une evaluation completee sont inclus
      * @param {string} productionId - ID de la production
      * @param {string|null} da - DA d'un etudiant specifique (null = tous)
+     * @param {boolean} reprisesSeulement - N'exporter que les reprises
      * @param {Function} onProgression - Callback(traites, total)
      * @returns {Promise<{blobs: Array<{blob: Blob, nom: string}>}>} Les PDFs generes
      */
-    async function exporterPourLea(productionId, da, onProgression) {
+    async function exporterPourLea(productionId, da, reprisesSeulement, onProgression) {
         const fichiers = travauxStockage.obtenirFichiersGroupeActif();
         const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
         const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
@@ -293,26 +294,40 @@
         const nomProd = (production?.titre || production?.nom || 'production')
             .replace(/[^a-zA-ZÀ-ÿ0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 
-        // Filtrer les fichiers qui ont une évaluation (résolution centralisée)
-        let fichiersAvecEval = fichiers.filter(f => {
-            const evalF = travauxResolution.trouverEvaluationPourFichier(
-                f.productionId === productionId ? f : { ...f, productionId }
-            );
-            return !!evalF;
-        });
+        // 🔧 FIX (29 mars 2026) : Partir des ÉVALUATIONS actives (non remplacées)
+        // plutôt que des fichiers, pour garantir que la reprise (et son fichier)
+        // soit exportée au lieu de l'originale.
+        // Restreindre aux DAs du groupe-cours actif (évite d'exporter les 2 groupes)
+        const dasGroupeActif = new Set(fichiers.map(f => f.etudiantDA).filter(Boolean));
+
+        // 1. Collecter les évaluations actives pour cette production + groupe
+        let evalsActives = evaluations.filter(e =>
+            e.productionId === productionId && !e.remplaceeParId && dasGroupeActif.has(e.etudiantDA)
+        );
+        if (reprisesSeulement) {
+            evalsActives = evalsActives.filter(e => e.repriseDeId || e.jetonRepriseCibleeApplique);
+        }
         if (da) {
-            fichiersAvecEval = fichiersAvecEval.filter(f => f.etudiantDA === da);
+            evalsActives = evalsActives.filter(e => e.etudiantDA === da);
         }
 
-        // 1 PDF par étudiant : privilégier le fichier de cette production
-        const parEtudiant = new Map();
-        for (const f of fichiersAvecEval) {
-            const existant = parEtudiant.get(f.etudiantDA);
-            if (!existant || (f.productionId === productionId && existant.productionId !== productionId)) {
-                parEtudiant.set(f.etudiantDA, f);
+        // 2. 1 PDF par étudiant : prioriser la reprise sur l'originale
+        const evalParEtudiant = new Map();
+        for (const e of evalsActives) {
+            const existant = evalParEtudiant.get(e.etudiantDA);
+            if (!existant || e.repriseDeId || e.jetonRepriseCibleeApplique) {
+                evalParEtudiant.set(e.etudiantDA, e);
             }
         }
-        fichiersAvecEval = [...parEtudiant.values()];
+
+        // 3. Résoudre chaque évaluation vers son fichier
+        const fichiersAvecEval = [];
+        for (const [daEtud, evaluation] of evalParEtudiant) {
+            const fichier = travauxResolution.trouverFichierPourEvaluation(evaluation);
+            if (fichier) {
+                fichiersAvecEval.push(fichier);
+            }
+        }
 
         if (fichiersAvecEval.length === 0) {
             throw new Error('Aucune évaluation trouvée pour ces critères.');
@@ -548,7 +563,7 @@
      * @param {string} productionId - ID de la production
      * @param {string|null} da - DA d'un etudiant specifique (null = tous)
      */
-    async function lancerExportLea(productionId, da) {
+    async function lancerExportLea(productionId, da, reprisesSeulement) {
         if (!productionId) {
             alert('Veuillez sélectionner une production.');
             return;
@@ -557,7 +572,7 @@
         try {
             const date = new Date().toISOString().split('T')[0];
 
-            const { blobs, nomProd } = await exporterPourLea(productionId, da, (traites, total) => {
+            const { blobs, nomProd } = await exporterPourLea(productionId, da, reprisesSeulement, (traites, total) => {
                 const pourcent = Math.round((traites / total) * 100);
                 const barre = document.getElementById('travaux-barre-progression-lea');
                 if (barre) barre.style.width = pourcent + '%';

@@ -56,7 +56,7 @@ Ce pattern est utilise dans :
 
 ## Etat actuel du projet
 
-**Version** : Beta 98.9 (Build 0327-1715)
+**Version** : Beta 98.9 (Build 0329-0930)
 **Objectif** : Migration des .onclick directs restants (~164 refs dans JS, index.html propre)
 **Priorite** : **Securite + Proprete > Nouvelles fonctionnalites**
 
