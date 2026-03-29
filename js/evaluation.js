@@ -5219,6 +5219,14 @@ function modifierEvaluation(evaluationId) {
                 var layoutFlex = document.getElementById('eval-layout-flex');
                 if (layoutFlex) layoutFlex.remove();
             }
+            // 🔧 FIX (29 mars 2026) : Ne JAMAIS basculer en standalone si _resterEnModeAnnoter
+            // est actif — l'appel vient du mode annotation et masquer le conteneur fichiers
+            // détruit la visionneuse. L'évaluation sera chargée via preRemplirEvaluation
+            // quand l'utilisateur basculera en mode Évaluer.
+            if (!enModeEvaluer && window._resterEnModeAnnoter) {
+                window._modifierEvaluationEnCours = false;
+                return;
+            }
             if (!enModeEvaluer) {
                 const evalDiv = document.getElementById('evaluations-contenu-evaluation');
                 const fichiersDiv = document.getElementById('evaluations-contenu-fichiers');

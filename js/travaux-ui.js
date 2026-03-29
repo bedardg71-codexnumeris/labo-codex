@@ -642,7 +642,11 @@
             modeCourant = 'annoter';
             rafraichirUI();
             // Restaurer le mode Évaluer si c'était le mode actif avant navigation
-            if (etaitEnModeEvaluer) {
+            // 🔧 FIX (29 mars 2026) : Ne restaurer QUE sur l'onglet Annoter.
+            // Sur Importer (éditeur) ou Exporter, la restauration déclenche
+            // preRemplirEvaluation → chargerEvaluationExistanteSiPresente →
+            // modifierEvaluationParId qui écrase l'éditeur après ~1 seconde.
+            if (etaitEnModeEvaluer && sousSectionActive === 'evaluations-annoter') {
                 const fichier = travauxVisionneuse.getFichierActuel();
                 if (fichier && fichier.etudiantDA) {
                     setTimeout(() => {
@@ -2824,12 +2828,13 @@
         // Reset du chrono au changement de fichier
         resetChrono();
 
-        // 🔧 FIX (29 mars 2026) : Nettoyer _resterEnModeAnnoter si aucun callback
-        // d'annotation n'est en attente. Sans ceci, le flag reste collé après une
-        // opération Annoter et bloque la restauration du mode Évaluer pour tous
-        // les fichiers suivants.
-        if (window._resterEnModeAnnoter && !window._apresOuvertureFichier) {
-            window._resterEnModeAnnoter = false;
+        // 🔧 FIX (29 mars 2026) : Nettoyer les flags orphelins d'une opération
+        // précédente. Sans callback en attente, ces flags sont des résidus qui
+        // contaminent le flux suivant (ex: Consulter via profil après un Consulter
+        // cassé via la liste).
+        if (!window._apresOuvertureFichier) {
+            if (window._resterEnModeAnnoter) window._resterEnModeAnnoter = false;
+            if (window._modifierEvaluationEnCours) window._modifierEvaluationEnCours = false;
         }
 
         // Mémoriser le mode courant AVANT fermeture (pour le restaurer après chargement)
