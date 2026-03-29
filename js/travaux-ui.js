@@ -2824,6 +2824,14 @@
         // Reset du chrono au changement de fichier
         resetChrono();
 
+        // 🔧 FIX (29 mars 2026) : Nettoyer _resterEnModeAnnoter si aucun callback
+        // d'annotation n'est en attente. Sans ceci, le flag reste collé après une
+        // opération Annoter et bloque la restauration du mode Évaluer pour tous
+        // les fichiers suivants.
+        if (window._resterEnModeAnnoter && !window._apresOuvertureFichier) {
+            window._resterEnModeAnnoter = false;
+        }
+
         // Mémoriser le mode courant AVANT fermeture (pour le restaurer après chargement)
         const modeAvantNavigation = modeCourant;
 
