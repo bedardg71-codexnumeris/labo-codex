@@ -74,6 +74,21 @@
                 });
                 return parEvalId[0];
             }
+
+            // Chaîne de reprise : si l'évaluation est une reprise,
+            // chercher le fichier lié à l'évaluation originale
+            if (parEvalId.length === 0 && evaluation.repriseDeId) {
+                var parOriginaleId = tousLesFichiers.filter(function(f) {
+                    return f.evaluationId === evaluation.repriseDeId && f.statut !== 'corbeille';
+                });
+                if (parOriginaleId.length === 1) return parOriginaleId[0];
+                if (parOriginaleId.length > 1) {
+                    parOriginaleId.sort(function(a, b) {
+                        return new Date(b.dateModification || 0) - new Date(a.dateModification || 0);
+                    });
+                    return parOriginaleId[0];
+                }
+            }
         }
 
         // Fallback : résolution par clé composite (etudiantDA, productionId)
