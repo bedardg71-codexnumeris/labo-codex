@@ -1142,22 +1142,13 @@
         var wCol = colLargeur - mm(4);
 
         if (evaluation.criteres && evaluation.criteres.length > 0) {
-            // Ta force (meilleur critere M/E)
-            var meilleur = null; var meilleurOrdre = 0;
-            evaluation.criteres.forEach(function(c) {
-                var o = ORDRE_NIV[c.niveauSelectionne] || 0;
-                if (o > meilleurOrdre) { meilleurOrdre = o; meilleur = c; }
-            });
-            if (meilleur && (meilleur.niveauSelectionne === 'M' || meilleur.niveauSelectionne === 'E')) {
-                bilanLignes.push({ type: 'force', texte: 'Ta force : ' + meilleur.critereNom + ' (' + (NOMS_NIV[meilleur.niveauSelectionne] || '') + ')' });
-            }
-
-            // Priorites (2 plus faibles avec description de la grille)
+            // Priorités (2 plus faibles avec description de la grille)
             var defis = evaluation.criteres
                 .filter(function(c) { return c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D'; })
                 .sort(function(a, b) { return (ORDRE_NIV[a.niveauSelectionne] || 0) - (ORDRE_NIV[b.niveauSelectionne] || 0); });
+            var tousMaitrises = defis.length === 0;
+
             if (defis.length > 0) {
-                bilanLignes.push({ type: 'titre', texte: 'Pr\u00e9sentement, il faut se concentrer sur :' });
                 for (var ip = 0; ip < Math.min(2, defis.length); ip++) {
                     var d = defis[ip];
                     var descCrit = '';
@@ -1171,6 +1162,25 @@
                         txtPrio += '. Cet objectif est prioritaire depuis 3 productions';
                     }
                     bilanLignes.push({ type: 'priorite', texte: txtPrio });
+                }
+                // Ta force (en contexte, seulement si des défis existent)
+                var meilleur = null; var meilleurOrdre = 0;
+                evaluation.criteres.forEach(function(c) {
+                    var o = ORDRE_NIV[c.niveauSelectionne] || 0;
+                    if (o > meilleurOrdre) { meilleurOrdre = o; meilleur = c; }
+                });
+                if (meilleur && (meilleur.niveauSelectionne === 'M' || meilleur.niveauSelectionne === 'E')) {
+                    bilanLignes.push({ type: 'force', texte: 'Ta force : ' + meilleur.critereNom + ' (' + (NOMS_NIV[meilleur.niveauSelectionne] || '') + ')' });
+                }
+            } else if (tousMaitrises && statsVisuelles && statsVisuelles.totalErreursFr > 0) {
+                bilanLignes.push({ type: 'priorite', texte: 'Tous les crit\u00e8res sont ma\u00eetris\u00e9s. Concentre-toi sur la qualit\u00e9 du fran\u00e7ais (' + statsVisuelles.totalErreursFr + ' erreur' + (statsVisuelles.totalErreursFr > 1 ? 's' : '') + ' annot\u00e9e' + (statsVisuelles.totalErreursFr > 1 ? 's' : '') + ').' });
+            } else if (tousMaitrises) {
+                var maitriseLongtemps = evalPrecedente && evalPrecedente.criteres &&
+                    evalPrecedente.criteres.every(function(c) { return c.niveauSelectionne === 'M' || c.niveauSelectionne === 'E'; });
+                if (maitriseLongtemps) {
+                    bilanLignes.push({ type: 'force', texte: 'Tous les crit\u00e8res sont ma\u00eetris\u00e9s depuis plus d\u2019un artefact. Tu peux aider tes coll\u00e8gues \u2014 c\u2019est une excellente fa\u00e7on d\u2019\u00e9tendre tes comp\u00e9tences vers le niveau \u00c9 (transfert \u00e0 d\u2019autres contextes).' });
+                } else {
+                    bilanLignes.push({ type: 'force', texte: 'Tous les crit\u00e8res sont ma\u00eetris\u00e9s. Continue sur cette lanc\u00e9e !' });
                 }
             }
         }
@@ -1211,18 +1221,18 @@
             bilanLignes.push({ type: 'francais', texte: 'Fran\u00e7ais : ' + statsVisuelles.totalErreursFr + ' erreur' + (statsVisuelles.totalErreursFr > 1 ? 's' : '') + (nomErrPrinc ? ' (principalement : ' + nomErrPrinc + ')' : '') });
         }
 
-        // Progression (seulement si stable ou en hausse)
+        // Progression (comparaison de l'élève avec lui-même)
         if (evalPrecedente && evaluation.niveauFinal && evalPrecedente.niveauFinal) {
             var nivAct = evaluation.niveauFinal;
             var nivPre = evalPrecedente.niveauFinal;
             var ordreAct = ORDRE_NIV[nivAct] || 0;
             var ordrePre = ORDRE_NIV[nivPre] || 0;
             if (ordreAct >= ordrePre) {
-                var prodPrec = evalPrecedente.productionNom || 'la production precedente';
+                var prodPrec = evalPrecedente.productionNom || 'la production pr\u00e9c\u00e9dente';
                 if (ordreAct > ordrePre) {
-                    bilanLignes.push({ type: 'progression', texte: 'Progression : ' + nivPre + ' > ' + nivAct + ' depuis ' + prodPrec });
+                    bilanLignes.push({ type: 'progression', texte: 'Progr\u00e8s : ' + nivPre + ' \u2192 ' + nivAct + ' depuis ' + prodPrec });
                 }
-                // Tendance (seulement stable ou hausse)
+                // Parcours sur plusieurs productions
                 if (historiqueEleve.length >= 2) {
                     var niveaux = [ordreAct];
                     for (var ih = 0; ih < historiqueEleve.length; ih++) niveaux.push(ORDRE_NIV[historiqueEleve[ih].niveauFinal] || 0);
@@ -1231,8 +1241,8 @@
                     for (var ir = 0; ir < moitie; ir++) moyR += niveaux[ir]; moyR /= moitie;
                     for (var ia = moitie; ia < niveaux.length; ia++) moyA += niveaux[ia]; moyA /= (niveaux.length - moitie);
                     if (moyR >= moyA - 0.3) {
-                        var tend = moyR > moyA + 0.3 ? 'en hausse' : 'stable';
-                        bilanLignes.push({ type: 'tendance', texte: 'Tendance sur ' + niveaux.length + ' productions : ' + tend });
+                        var tend = moyR > moyA + 0.3 ? 'en progr\u00e8s' : 'en consolidation';
+                        bilanLignes.push({ type: 'tendance', texte: 'Parcours sur ' + niveaux.length + ' productions : ' + tend });
                     }
                 }
             }
@@ -1254,94 +1264,132 @@
             }
         }
 
-        // Jetons restants (tous les types actifs)
-        if (typeof obtenirConfigJetons === 'function' && typeof compterJetonsUtilises === 'function') {
+        // 🔧 REFONTE (29 mars 2026) : Portrait complet des jetons utilisés
+        // Affiche un compteur global X / 2 + détail par artefact
+        if (typeof obtenirConfigJetons === 'function' && da) {
             try {
                 var configJetons = obtenirConfigJetons();
-                if (configJetons && configJetons.actif && da) {
-                    var jetonsTextes = [];
-                    // Reprise
-                    if (configJetons.reprise && configJetons.reprise.nombre > 0) {
-                        var nbRep = configJetons.reprise.nombre - compterJetonsUtilises(da, 'reprise');
-                        jetonsTextes.push(Math.max(0, nbRep) + ' reprise' + (nbRep > 1 ? 's' : '') + ' sur ' + configJetons.reprise.nombre);
-                    }
-                    // Reprise ciblee
-                    if (configJetons.repriseCiblee && configJetons.repriseCiblee.actif) {
-                        var nbCib = (configJetons.repriseCiblee.nombre || configJetons.reprise.nombre) - compterJetonsUtilises(da, 'repriseCiblee');
-                        var totalCib = configJetons.repriseCiblee.nombre || configJetons.reprise.nombre;
-                        jetonsTextes.push(Math.max(0, nbCib) + ' reprise' + (nbCib > 1 ? 's' : '') + ' cibl\u00e9e' + (nbCib > 1 ? 's' : '') + ' sur ' + totalCib);
-                    }
-                    // Delai
-                    if (configJetons.delai && configJetons.delai.nombre > 0) {
-                        var nbDel = configJetons.delai.nombre - compterJetonsUtilises(da, 'delai');
-                        jetonsTextes.push(Math.max(0, nbDel) + ' d\u00e9lai' + (nbDel > 1 ? 's' : '') + ' sur ' + configJetons.delai.nombre);
-                    }
-                    if (jetonsTextes.length > 0) {
-                        bilanLignes.push({ type: 'jetons', texte: 'Jetons restants : ' + jetonsTextes.join(', ') + '.' });
+                if (configJetons && configJetons.actif) {
+                    var maxJetons = configJetons.reprise ? configJetons.reprise.nombre : 2;
+                    var toutesEvals = db.getSync(cle('evaluationsSauvegardees'), []);
+                    var productions = obtenirDonneesSelonMode(cle('productions')) || [];
+
+                    // Collecter les jetons utilisés (évaluations actives seulement)
+                    var jetonsUtilises = [];
+                    toutesEvals.filter(function(e) {
+                        return e.etudiantDA === da && !e.remplaceeParId;
+                    }).forEach(function(e) {
+                        var prod = productions.find(function(p) { return p.id === e.productionId; });
+                        var nomProd = prod ? (prod.titre || prod.nom || e.productionId) : e.productionId;
+                        if (e.jetonDelaiApplique) {
+                            jetonsUtilises.push({ type: 'D\u00e9lai', artefact: nomProd });
+                        }
+                        if (e.jetonRepriseApplique || e.repriseDeId) {
+                            jetonsUtilises.push({ type: 'Reprise', artefact: nomProd });
+                        }
+                        if (e.jetonRepriseCibleeApplique) {
+                            jetonsUtilises.push({ type: 'Reprise cibl\u00e9e', artefact: nomProd });
+                        }
+                    });
+
+                    var nbUtilises = jetonsUtilises.length;
+                    bilanLignes.push({ type: 'jetons', texte: 'Jetons utilis\u00e9s : ' + nbUtilises + ' / ' + maxJetons });
+                    if (nbUtilises > 0) {
+                        jetonsUtilises.forEach(function(j) {
+                            bilanLignes.push({ type: 'jetons', texte: '  \u2022 ' + j.type + ' \u2014 ' + j.artefact });
+                        });
                     }
                 }
-            } catch(e) { console.warn('[PDF-Export] jetons restants calculation skipped:', e.message || e); }
+            } catch(e) { console.warn('[PDF-Export] jetons calculation skipped:', e.message || e); }
         }
 
-        // Question metacognitive
-        bilanLignes.push({ type: 'question', texte: 'Selon toi, quel aspect de ta production m\u00e9riterait le plus d\u2019attention ?' });
+        // --- RENDU du Bilan sous forme de tableau (même style que Rétroaction) ---
+        // Construire les 3 rangées du tableau Bilan
+        var bilanTableBody = [];
 
-        // --- RENDU dans la colonne droite ---
-        if (bilanLignes.length > 1) {
-            // Calculer la hauteur
-            var bilanH = mm(7);
-            for (var ib = 0; ib < bilanLignes.length; ib++) {
-                var nbL = doc.splitTextToSize(bilanLignes[ib].texte, wCol).length;
-                bilanH += nbL * mm(3.5) + mm(0.5);
-            }
-            bilanH += mm(2);
+        // Rangée 1 : Se concentrer sur...
+        var texteConcentrer = '';
+        var forceTexte = bilanLignes.filter(function(l) { return l.type === 'force'; }).map(function(l) { return l.texte; }).join('\n');
+        var prioTextes = bilanLignes.filter(function(l) { return l.type === 'priorite'; }).map(function(l) { return '- ' + l.texte; }).join('\n');
+        if (forceTexte) texteConcentrer += forceTexte + '\n';
+        if (prioTextes) texteConcentrer += prioTextes;
+        if (!texteConcentrer) texteConcentrer = 'Aucun d\u00e9fi identifi\u00e9.';
+        bilanTableBody.push(['Pr\u00e9sentement,\nil faut se\nconcentrer sur...', texteConcentrer.trim()]);
 
-            if (yDroite + bilanH > seuilPage) {
-                doc.addPage([612, 792], 'portrait');
-                yDroite = mm(cfg.marges.haut);
-            }
+        // Rangée 2 : Points récurrents
+        var texteRecurrents = '';
+        var tampTextes = bilanLignes.filter(function(l) { return l.type === 'tampon'; }).map(function(l) { return '- ' + l.texte; }).join('\n');
+        if (tampTextes) texteRecurrents += tampTextes;
+        var frTextes = bilanLignes.filter(function(l) { return l.type === 'francais'; }).map(function(l) { return l.texte; }).join('\n');
+        if (frTextes) texteRecurrents += (texteRecurrents ? '\n' : '') + frTextes;
+        var progTextes = bilanLignes.filter(function(l) { return l.type === 'progression' || l.type === 'tendance'; }).map(function(l) { return l.texte; }).join('\n');
+        if (progTextes) texteRecurrents += (texteRecurrents ? '\n' : '') + progTextes;
+        var amelTextes = bilanLignes.filter(function(l) { return l.type === 'amelioration'; }).map(function(l) { return l.texte; }).join('\n');
+        if (amelTextes) texteRecurrents += (texteRecurrents ? '\n' : '') + amelTextes;
+        if (!texteRecurrents) texteRecurrents = 'Aucun point r\u00e9current.';
+        bilanTableBody.push(['Points\nr\u00e9currents', texteRecurrents.trim()]);
 
-            // Titre de section (meme style que Retroaction generale / specifique)
-            doc.setFontSize(cfg.polices.titreSection - 2);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(...cfg.couleurs.titreSection);
-            doc.text('Bilan', colDroiteX, yDroite);
-            yDroite += mm(5);
+        // Rangée 3 : Jetons utilisés
+        var jetonsLignes = bilanLignes.filter(function(l) { return l.type === 'jetons'; });
+        var texteJetons = jetonsLignes.map(function(l) { return l.texte; }).join('\n');
+        if (!texteJetons) texteJetons = 'Aucun jeton utilis\u00e9.';
+        bilanTableBody.push(['Jetons\nutilis\u00e9s', texteJetons.trim()]);
 
-            var xB = colDroiteX;
-
-            for (var ibl = 0; ibl < bilanLignes.length; ibl++) {
-                var ligne = bilanLignes[ibl];
-                var fs = cfg.polices.textePetit - 1;
-
-                if (ligne.type === 'force') {
-                    doc.setFont('helvetica', 'bold'); doc.setTextColor(46, 125, 50);
-                } else if (ligne.type === 'titre') {
-                    doc.setFont('helvetica', 'bold'); doc.setTextColor(...cfg.couleurs.textePrincipal); fs = cfg.polices.textePetit - 1;
-                } else if (ligne.type === 'priorite') {
-                    doc.setFont('helvetica', 'normal'); doc.setTextColor(...cfg.couleurs.textePrincipal);
-                } else if (ligne.type === 'amelioration') {
-                    doc.setFont('helvetica', 'italic'); doc.setTextColor(46, 125, 50);
-                } else if (ligne.type === 'question') {
-                    doc.setFont('helvetica', 'italic'); doc.setTextColor(...cfg.couleurs.texteSecondaire);
-                } else if (ligne.type === 'jetons') {
-                    doc.setFont('helvetica', 'normal'); doc.setTextColor(...cfg.couleurs.texteSecondaire);
-                } else {
-                    doc.setFont('helvetica', 'normal'); doc.setTextColor(...cfg.couleurs.textePrincipal);
-                }
-                doc.setFontSize(fs);
-
-                var puce = (ligne.type === 'priorite' || ligne.type === 'tampon') ? '- ' : '';
-                var lignesRendu = doc.splitTextToSize(puce + ligne.texte, wCol);
-                for (var ilr = 0; ilr < lignesRendu.length; ilr++) {
-                    doc.text(lignesRendu[ilr], xB, yDroite);
-                    yDroite += mm(3.5);
-                }
-                yDroite += mm(0.5);
-            }
-
-            yDroite += mm(2);
+        if (yDroite + mm(30) > seuilPage) {
+            doc.addPage([612, 792], 'portrait');
+            yDroite = mm(cfg.marges.haut);
         }
+
+        // Titre de section
+        doc.setFontSize(cfg.polices.titreSection - 2);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...cfg.couleurs.titreSection);
+        doc.text('Bilan', colDroiteX, yDroite);
+        yDroite += mm(5);
+
+        // Description (même style que Rétroaction générale/spécifique)
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(cfg.polices.textePetit - 2);
+        doc.setTextColor(...cfg.couleurs.texteSecondaire);
+        var descBilan = 'Mes standards sont tr\u00e8s \u00e9lev\u00e9s \u00e0 ton \u00e9gard parce que je crois que tu as tout ce qu\u2019il faut pour les atteindre et j\u2019ai confiance en toi. Si tu as besoin d\u2019aide, viens me voir.\nSelon toi, quel aspect de ta production m\u00e9riterait le plus d\u2019attention ?';
+        var descRendu = doc.splitTextToSize(descBilan, colLargeur);
+        for (var idesc = 0; idesc < descRendu.length; idesc++) {
+            doc.text(descRendu[idesc], colDroiteX, yDroite);
+            yDroite += mm(3.5);
+        }
+        yDroite += mm(2);
+
+        doc.autoTable({
+            startY: yDroite,
+            head: [['Section', 'D\u00e9tail']],
+            body: bilanTableBody,
+            theme: 'grid',
+            headStyles: {
+                fillColor: cfg.couleurs.titreSection,
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                fontSize: cfg.polices.textePetit - 1
+            },
+            bodyStyles: {
+                fontSize: cfg.polices.textePetit - 2,
+                textColor: cfg.couleurs.textePrincipal,
+                cellPadding: mm(1.2)
+            },
+            columnStyles: {
+                0: { cellWidth: colLargeur * 0.25, fontStyle: 'bold', fontSize: cfg.polices.textePetit - 1 },
+                1: { cellWidth: colLargeur * 0.75 }
+            },
+            margin: { left: colDroiteX, right: mm(cfg.marges.droite) },
+            didParseCell: function(data) {
+                if (data.section === 'body' && data.column.index === 0) {
+                    data.cell.styles.valign = 'middle';
+                }
+            }
+        });
+
+        yDroite = doc.lastAutoTable.finalY + mm(4);
+
+        yDroite += mm(0.5);
 
 
         // =============== SUITE (pleine largeur) ===============

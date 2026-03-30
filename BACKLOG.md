@@ -1,11 +1,36 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 27 mars 2026 (Beta 98.9, Build 0327-1730)
+> **Derniere mise a jour** : 30 mars 2026 (Beta 98.9, Build 0329-0930)
 
 ---
 
 ## A faire
+
+### Chantier structurel — Machine a etats pour le chargement d'evaluations
+
+- [ ] **#239** Remplacer les 5 flags globaux + setTimeout imbriques par un module eval-chargement.js
+  - **Contexte** : Le systeme actuel coordonne l'ouverture de fichiers et le chargement
+    d'evaluations avec 5 flags booleens globaux (`_modifierEvaluationEnCours`,
+    `_apresOuvertureFichier`, `_resterEnModeAnnoter`, `_forceStandaloneEval`,
+    `_consulterEvalTimerId`) et des chaines de setTimeout (150-800ms) non annulables.
+    Cela cause des flags collants, des race conditions entre preRemplirEvaluation et
+    modifierEvaluationParId, et une restauration aveugle du mode Evaluer sur les mauvais onglets.
+  - **Correctifs tactiques en place** (29 mars 2026, commits `5969054` + `256c65d`) :
+    nettoyage des flags orphelins, guard `sousSectionActive`, callback no-op pour Annoter.
+    Ces patches tiennent mais ne resolvent pas la fragilite structurelle.
+  - **Solution** : Module IIFE `eval-chargement.js` avec machine a etats
+    (idle → navigating → loading → ready), timers annulables via `differer()`,
+    annulation propre a la navigation, shims retrocompatibles pendant la migration.
+  - **5 phases** : (1) Module + cleanup navigation, (2) Migrer Consulter liste,
+    (3) Migrer Annoter liste, (4) Migrer profil + standalone + chargerExistante,
+    (5) Retirer shims et anciens flags.
+  - **6 points d'entree** a migrer : consulterEvaluationDepuisListe,
+    ouvrirAnnotationDepuisListe, evaluerProduction, modifierEvaluationRemplacee,
+    consulterEvaluation (profil), chargerEvaluationExistanteSiPresente.
+  - **Plan detaille** : `plans de travail/Plan — Machine a etats pour le chargement d'evaluations.txt`
+  - **Contre-expertise** : `plans de travail/Contre-expertise — Machine a etats eval-chargement.md`
+  - **Priorite** : Moyenne — a planifier quand les correctifs de session ne suffisent plus
 
 ### Desaturation localStorage — COMPLETE (27 mars 2026)
 
