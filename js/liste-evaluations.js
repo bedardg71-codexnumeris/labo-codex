@@ -1237,19 +1237,140 @@ function ouvrirAnnotationDepuisListe(fichierId) {
 }
 
 /**
- * Ouvre l'éditeur de pages depuis la liste des évaluations
+ * Ouvre l'éditeur de pages depuis la liste des évaluations.
+ * Accès direct à l'éditeur — le bouton « Propriétés » est dans l'éditeur.
  */
 function ouvrirEditeurDepuisListe(fichierId) {
     afficherSection('evaluations');
     if (typeof afficherSousSection === 'function') {
         afficherSousSection('evaluations-importer');
     }
-    setTimeout(() => {
+    setTimeout(function() {
         if (typeof travauxUI !== 'undefined' && typeof travauxUI.ouvrirEditeurPages === 'function') {
             travauxUI.ouvrirEditeurPages(fichierId);
         }
     }, 200);
 }
+
+/**
+ * Ouvre la modale Propriétés d'un fichier (nom, étudiant, production).
+ * Accessible depuis un bouton dans l'éditeur de pages ou la liste.
+ * @param {string} fichierId - ID du fichier à modifier
+ */
+function ouvrirProprieteFichier(fichierId) {
+    var fichier = (typeof travauxStockage !== 'undefined')
+        ? travauxStockage.obtenirFichierParId(fichierId) : null;
+    if (!fichier) return;
+
+    // Étudiants du groupe actif
+    var etudiants = (typeof obtenirEtudiantsCoursActif === 'function')
+        ? obtenirEtudiantsCoursActif() : [];
+    etudiants.sort(function(a, b) {
+        return (a.nom || '').localeCompare(b.nom || '') || (a.prenom || '').localeCompare(b.prenom || '');
+    });
+    var optionsEtudiants = etudiants.map(function(e) {
+        var label = (e.nom || '') + ', ' + (e.prenom || '') + ' (' + (e.da || '') + ')';
+        var selected = (e.da === fichier.etudiantDA) ? ' selected' : '';
+        return '<option value="' + echapperHtml(e.da || '') + '"' + selected + '>' + echapperHtml(label) + '</option>';
+    }).join('');
+
+    // Productions
+    var productions = db.getSync(cle('productions'), []);
+    var optionsProductions = productions.map(function(p) {
+        var label = p.description ? (p.titre + ' - ' + p.description) : p.titre;
+        var selected = (p.id === fichier.productionId) ? ' selected' : '';
+        return '<option value="' + echapperHtml(p.id) + '"' + selected + '>' + echapperHtml(label) + '</option>';
+    }).join('');
+
+    // Évaluations de cet étudiant (pour lier le fichier à la bonne évaluation)
+    var toutesEvals = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+    var evalsEtudiant = toutesEvals.filter(function(e) {
+        return e.etudiantDA === fichier.etudiantDA;
+    });
+    var optionsEvals = evalsEtudiant.map(function(e) {
+        var prod = productions.find(function(p) { return p.id === e.productionId; });
+        var nomProd = prod ? (prod.titre || prod.nom) : (e.productionId || '?');
+        var type = e.remplaceeParId ? ' (Remplac\u00e9e)' : (e.repriseDeId ? ' (Reprise)' : '');
+        var note = e.noteFinale != null ? ' \u2014 ' + e.niveauFinal + ' ' + e.noteFinale + '%' : '';
+        var label = nomProd + type + note;
+        var selected = (e.id === fichier.evaluationId) ? ' selected' : '';
+        return '<option value="' + echapperHtml(e.id) + '"' + selected + '>' + echapperHtml(label) + '</option>';
+    }).join('');
+
+    // Retirer une modale existante
+    var existante = document.getElementById('proprietes-fichier-overlay');
+    if (existante) existante.remove();
+
+    var overlay = document.createElement('div');
+    overlay.id = 'proprietes-fichier-overlay';
+    overlay.className = 'modal-overlay actif';
+    overlay.innerHTML =
+        '<div class="modal-contenu modal-compact" style="max-width: 520px;">' +
+            '<button class="modal-fermer" data-action="fermerOverlayParent">&times;</button>' +
+            '<h3 class="modal-titre">Propri\u00e9t\u00e9s du fichier</h3>' +
+            '<label style="font-size: 0.85em; color: var(--texte-secondaire);">Nom du document :</label>' +
+            '<input type="text" id="prop-fichier-nom" class="controle-form" style="margin: 4px 0 12px 0; width: 100%;" value="' + echapperHtml(fichier.nomFichier || '') + '">' +
+            '<label style="font-size: 0.85em; color: var(--texte-secondaire);">\u00c9tudiant\u00b7e :</label>' +
+            '<select id="prop-fichier-etudiant" class="controle-form" style="margin: 4px 0 12px 0; width: 100%;">' +
+                '<option value="">\u2014 Non associ\u00e9 \u2014</option>' +
+                optionsEtudiants +
+            '</select>' +
+            '<label style="font-size: 0.85em; color: var(--texte-secondaire);">Production (artefact) :</label>' +
+            '<select id="prop-fichier-production" class="controle-form" style="margin: 4px 0 12px 0; width: 100%;">' +
+                '<option value="">\u2014 Non associ\u00e9 \u2014</option>' +
+                optionsProductions +
+            '</select>' +
+            '<label style="font-size: 0.85em; color: var(--texte-secondaire);">\u00c9valuation li\u00e9e :</label>' +
+            '<select id="prop-fichier-evaluation" class="controle-form" style="margin: 4px 0 16px 0; width: 100%;">' +
+                '<option value="">\u2014 Aucune \u2014</option>' +
+                optionsEvals +
+            '</select>' +
+            '<small style="display:block;color:var(--gris-moyen);margin:-12px 0 16px 0;font-size:0.75em">Lier ce fichier \u00e0 une \u00e9valuation sp\u00e9cifique (originale ou reprise).</small>' +
+            '<div class="modal-actions" style="display:flex;gap:8px">' +
+                '<button class="btn btn-confirmer" id="prop-fichier-btn-sauver">Sauvegarder</button>' +
+                '<button class="btn btn-secondaire" data-action="fermerOverlayParent">Annuler</button>' +
+            '</div>' +
+        '</div>';
+
+    document.body.appendChild(overlay);
+
+    var fermer = function() { overlay.remove(); };
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) fermer(); });
+
+    document.getElementById('prop-fichier-btn-sauver').onclick = function() {
+        var nouveauNom = (document.getElementById('prop-fichier-nom') || {}).value || fichier.nomFichier;
+        var nouveauDA = (document.getElementById('prop-fichier-etudiant') || {}).value || '';
+        var nouvelleProd = (document.getElementById('prop-fichier-production') || {}).value || '';
+        var nouvelleEval = (document.getElementById('prop-fichier-evaluation') || {}).value || '';
+        var modifie = false;
+
+        // etudiantDA et productionId sont des champs protégés → utiliser reassocierFichier
+        var association = {};
+        if (nouveauDA !== (fichier.etudiantDA || '')) association.etudiantDA = nouveauDA;
+        if (nouvelleProd !== (fichier.productionId || '')) association.productionId = nouvelleProd;
+        if (Object.keys(association).length > 0) {
+            travauxStockage.reassocierFichier(fichierId, association);
+            modifie = true;
+        }
+
+        // nomFichier et evaluationId → mettreAJourFichier (champs non protégés)
+        var miseAJour = {};
+        if (nouveauNom !== fichier.nomFichier) miseAJour.nomFichier = nouveauNom;
+        if (nouvelleEval !== (fichier.evaluationId || '')) miseAJour.evaluationId = nouvelleEval;
+        if (Object.keys(miseAJour).length > 0) {
+            travauxStockage.mettreAJourFichier(fichierId, miseAJour);
+            modifie = true;
+        }
+
+        if (modifie) {
+            if (typeof afficherNotificationSucces === 'function') {
+                afficherNotificationSucces('Propri\u00e9t\u00e9s mises \u00e0 jour');
+            }
+        }
+        fermer();
+    };
+}
+window.ouvrirProprieteFichier = ouvrirProprieteFichier;
 
 /**
  * Ouvre une modale pour associer (ou réassocier) un fichier importé à une production
