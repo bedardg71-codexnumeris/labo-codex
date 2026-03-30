@@ -549,11 +549,8 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
         const nbProductions = productionsUniques.length;
 
         // Mettre à jour les statistiques en haut
-        // ✅ Afficher le nombre total de lignes filtrées (pas seulement les recevables)
         if (compteur) {
-            // Adapter le texte selon le contexte
             const nbTotal = lignesFiltrees.length;
-            const nbRecevables = evaluationsRecevables.length;
 
             // Adapter le texte selon le filtre de statut
             const filtreStatut = document.getElementById('filtre-statut-eval')?.value;
@@ -561,12 +558,16 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
                 compteur.textContent = `${nbTotal} non évalué(s)`;
             } else if (filtreStatut === 'non-remis') {
                 compteur.textContent = `${nbTotal} non remis`;
-            } else if (nbTotal === nbRecevables) {
-                // Toutes les lignes affichées sont recevables
-                compteur.textContent = `${nbTotal} évaluation(s)`;
             } else {
-                // Mix de recevables et non-recevables
-                compteur.textContent = `${nbTotal} résultat(s) (${nbRecevables} évaluation(s) recevable(s))`;
+                // Compter importés et évalués via statutWorkflow
+                const nbImportes = lignesFiltrees.filter(l => l.statutWorkflow === 'importe' || l.statutWorkflow === 'annote').length;
+                const nbEvalues = lignesFiltrees.filter(l => l.statutWorkflow === 'evalue').length;
+                const details = [];
+                if (nbImportes > 0) details.push(`${nbImportes} importé(s)`);
+                if (nbEvalues > 0) details.push(`${nbEvalues} évalué(s)`);
+                compteur.textContent = details.length > 0
+                    ? `${nbTotal} résultat(s) (${details.join(', ')})`
+                    : `${nbTotal} résultat(s)`;
             }
         }
 
