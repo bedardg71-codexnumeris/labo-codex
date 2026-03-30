@@ -936,6 +936,12 @@ async function activerGroupeCoursV2(groupeCoursId) {
             chargerCoursSelectV2();
         }
 
+        // 🔧 FIX (30 mars 2026) : Regénérer le calendrier pour le nouveau groupe
+        // synchroniserInfoCours met à jour horaireHebdo avec les séances du groupe actif,
+        // mais le calendrier en mémoire utilise encore les anciens jours.
+        if (typeof genererCalendrierComplet === 'function') {
+            genererCalendrierComplet();
+        }
 
     } catch (err) {
         console.error('[Entités UI] Erreur activation groupe-cours:', err);
