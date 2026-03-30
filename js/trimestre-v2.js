@@ -5879,6 +5879,23 @@ async function changerGroupeCoursActifV2(valeur) {
         afficherNotificationSucces('Groupe-cours activé');
     }
 
+    // 🔧 FIX (30 mars 2026) : Synchroniser horaireHebdo avec le groupe actif
+    // AVANT de regénérer le calendrier (sinon il utilise les horaires fusionnés)
+    if (gc.horaireId) {
+        var horaires = db.getSync(cle('horaires'), []);
+        var horaireGC = horaires.find(function(h) { return h.id === gc.horaireId; });
+        if (horaireGC && horaireGC.seances && horaireGC.seances.length > 0) {
+            db.setSync(cle('horaireHebdo'), horaireGC.seances);
+            db.setSync(cle('seancesHoraire'), horaireGC.seances);
+            db.setSync('seancesHoraire', horaireGC.seances);
+        }
+    }
+
+    // Regénérer le calendrier avec les bons jours
+    if (typeof genererCalendrierComplet === 'function') {
+        genererCalendrierComplet();
+    }
+
     // 🆕 BETA 95.2 : Rafraîchir le calendrier si visible
     if (typeof afficherCalendrierScolaire === 'function') {
         afficherCalendrierScolaire();

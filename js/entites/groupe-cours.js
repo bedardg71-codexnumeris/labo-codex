@@ -477,6 +477,11 @@ async function synchroniserInfoCours(trimestreId) {
         // Également la clé legacy non namespacée (pour certains modules)
         await db.set('seancesHoraire', gcComplet.horaire.seances);
 
+        // 🔧 FIX (30 mars 2026) : Synchroniser horaireHebdo avec le groupe actif
+        // genererCalendrierComplet() lit cette clé pour marquer les jours de cours.
+        // Sans cette sync, horaireHebdo contient les horaires fusionnés de tous les groupes
+        // → le calendrier affiche les mauvais jours.
+        db.setSync(cle('horaireHebdo'), gcComplet.horaire.seances);
     }
 
 }
