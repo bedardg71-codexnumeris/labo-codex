@@ -5286,8 +5286,11 @@
         conteneur.innerHTML = `
             <div class="editeur-pages-conteneur">
                 <div class="editeur-pages-entete">
-                    <h4>Édition : ${nomEtudiant}</h4>
-                    <button class="btn btn-secondaire" data-action="travauxUI.fermerEditeurPages">Annuler</button>
+                    <h4>\u00c9dition : ${nomEtudiant}</h4>
+                    <div style="display:flex;gap:8px;">
+                        <button class="btn btn-secondaire" data-action="ouvrirProprieteFichier" data-param="${fichierId}">Propri\u00e9t\u00e9s</button>
+                        <button class="btn btn-secondaire" data-action="travauxUI.fermerEditeurPages">Annuler</button>
+                    </div>
                 </div>
                 <div class="editeur-pages-message-chargement" id="editeur-chargement">
                     ${messageChargement}
@@ -5385,6 +5388,7 @@
             <div class="editeur-pages-entete">
                 <h4>Édition : ${nomEtudiant || 'Document'} — ${editionPages.length} page(s)</h4>
                 <div style="display:flex;gap:8px;">
+                    <button class="btn btn-secondaire" data-action="ouvrirProprieteFichier" data-param="${editionFichierId}">Propri\u00e9t\u00e9s</button>
                     <button class="btn btn-secondaire" data-action="travauxUI.fermerEditeurPages">Annuler</button>
                 </div>
             </div>
