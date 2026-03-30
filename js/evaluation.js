@@ -3213,38 +3213,77 @@ function genererRetroactionBilan() {
         });
     }
 
-    // Ta force
-    var meilleur = null; var meilleurOrdre = 0;
-    criteres.forEach(function(c) {
-        var o = ORDRE_NIV[c.niveauSelectionne] || 0;
-        if (o > meilleurOrdre) { meilleurOrdre = o; meilleur = c; }
-    });
-    if (meilleur && (meilleur.niveauSelectionne === 'M' || meilleur.niveauSelectionne === 'E')) {
-        html += '<p class="retro-force">Ta force : ' + meilleur.critereNom + ' (' + (NOMS_NIV[meilleur.niveauSelectionne] || '') + ')</p>';
-    }
+    // Compter les erreurs de français (annotation du fichier courant)
+    var totalErreursFr = 0;
+    try {
+        var fichierBilan = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
+            ? travauxVisionneuse.getFichierActuel() : null;
+        if (fichierBilan && typeof travauxStockage !== 'undefined') {
+            var annotBilan = travauxStockage.obtenirAnnotationFichier(fichierBilan.id);
+            if (annotBilan && annotBilan.pages) {
+                for (var pgId in annotBilan.pages) {
+                    var pg = annotBilan.pages[pgId];
+                    if (pg.shapes) pg.shapes.forEach(function(f) {
+                        if (f.type && f.type.indexOf('errfr_') === 0) totalErreursFr++;
+                    });
+                }
+            }
+        }
+    } catch(e) { /* ignore */ }
 
-    // Priorités
+    // === Message d'encouragement + Question métacognitive (en haut, sous le titre) ===
+    html += '<p style="margin-bottom:6px; font-style:italic; color: var(--texte-secondaire);">Mes standards sont tr\u00e8s \u00e9lev\u00e9s \u00e0 ton \u00e9gard parce que je crois que tu as tout ce qu\u2019il faut pour les atteindre et j\u2019ai confiance en toi. Si tu as besoin d\u2019aide, viens me voir.</p>';
+    html += '<p class="retro-question" style="margin-bottom:8px">Selon toi, quel aspect de ta production m\u00e9riterait le plus d\u2019attention ?</p>';
+
+    // === 1. Présentement, il faut se concentrer sur... ===
+    html += '<h5>Pr\u00e9sentement, il faut se concentrer sur :</h5>';
+
     var defis = criteres
         .filter(function(c) { return c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D'; })
         .sort(function(a, b) { return (ORDRE_NIV[a.niveauSelectionne] || 0) - (ORDRE_NIV[b.niveauSelectionne] || 0); });
+    var tousMaitrises = defis.length === 0 && criteres.length > 0;
+
     if (defis.length > 0) {
-        html += '<h5>Pr\u00e9sentement, il faut se concentrer sur :</h5>';
         for (var i = 0; i < Math.min(2, defis.length); i++) {
             var d = defis[i];
             var desc = d.description ? d.description.toLowerCase() : d.critereNom;
             var patron = nomsPatrons.indexOf(d.critereNom) !== -1 ? '. Cet objectif est prioritaire depuis 3 productions' : '';
             html += '<p>- ' + desc + ' (' + d.critereNom + ' ' + (NOMS_NIV[d.niveauSelectionne] || '') + ')' + patron + '</p>';
         }
+    } else if (tousMaitrises && totalErreursFr > 0) {
+        html += '<p>Tous les crit\u00e8res sont ma\u00eetris\u00e9s. Concentre-toi sur la qualit\u00e9 du fran\u00e7ais (' + totalErreursFr + ' erreur' + (totalErreursFr > 1 ? 's' : '') + ' annot\u00e9e' + (totalErreursFr > 1 ? 's' : '') + ').</p>';
+    } else if (tousMaitrises) {
+        // Vérifier si maîtrisé depuis 2+ artefacts
+        var maitriseLongtemps = evalPrecedente && evalPrecedente.criteres &&
+            evalPrecedente.criteres.every(function(c) { return c.niveauSelectionne === 'M' || c.niveauSelectionne === 'E'; });
+        if (maitriseLongtemps) {
+            html += '<p class="retro-force">Tous les crit\u00e8res sont ma\u00eetris\u00e9s depuis plus d\u2019un artefact. Tu peux aider tes coll\u00e8gues \u2014 c\u2019est une excellente fa\u00e7on d\u2019\u00e9tendre tes comp\u00e9tences vers le niveau \u00c9 (transfert \u00e0 d\u2019autres contextes).</p>';
+        } else {
+            html += '<p class="retro-force">Tous les crit\u00e8res sont ma\u00eetris\u00e9s. Continue sur cette lanc\u00e9e !</p>';
+        }
     }
 
-    // Progression (seulement hausse ou stable)
+    // Ta force (en contexte)
+    var meilleur = null; var meilleurOrdre = 0;
+    criteres.forEach(function(c) {
+        var o = ORDRE_NIV[c.niveauSelectionne] || 0;
+        if (o > meilleurOrdre) { meilleurOrdre = o; meilleur = c; }
+    });
+    if (meilleur && (meilleur.niveauSelectionne === 'M' || meilleur.niveauSelectionne === 'E') && defis.length > 0) {
+        html += '<p class="retro-force">Ta force : ' + meilleur.critereNom + ' (' + (NOMS_NIV[meilleur.niveauSelectionne] || '') + ')</p>';
+    }
+
+    // === 2. Points récurrents ===
+    var recurrentsHtml = '';
+
+    // Progrès (comparaison de l'élève avec lui-même)
     if (evalPrecedente && evalPrecedente.niveauFinal) {
         var nivAct = document.getElementById('niveauProduction1')?.textContent || '';
         var nivPre = evalPrecedente.niveauFinal;
         var ordreAct = ORDRE_NIV[nivAct] || 0;
         var ordrePre = ORDRE_NIV[nivPre] || 0;
         if (ordreAct > ordrePre) {
-            html += '<p>Progression : ' + nivPre + ' &gt; ' + nivAct + ' depuis ' + (evalPrecedente.productionNom || 'la production pr\u00e9c\u00e9dente') + '</p>';
+            recurrentsHtml += '<p>Progr\u00e8s : ' + nivPre + ' \u2192 ' + nivAct + ' depuis ' + (evalPrecedente.productionNom || 'la production pr\u00e9c\u00e9dente') + '</p>';
         }
     }
 
@@ -3260,38 +3299,39 @@ function genererRetroactionBilan() {
             }
         });
         if (ameliorations.length > 0) {
-            html += '<p class="retro-amelioration">Tu as progress\u00e9 en ' + ameliorations.join(' et ') + '.</p>';
+            recurrentsHtml += '<p class="retro-amelioration">Tu as progress\u00e9 en ' + ameliorations.join(' et ') + '.</p>';
         }
     }
 
-    // Jetons (tous les types actifs)
-    if (typeof obtenirConfigJetons === 'function' && typeof compterJetonsUtilises === 'function') {
-        try {
-            var configJetons = obtenirConfigJetons();
-            if (configJetons && configJetons.actif && da) {
-                var jetonsTextes = [];
-                if (configJetons.reprise && configJetons.reprise.nombre > 0) {
-                    var nbRep = configJetons.reprise.nombre - compterJetonsUtilises(da, 'reprise');
-                    jetonsTextes.push(Math.max(0, nbRep) + ' reprise' + (nbRep > 1 ? 's' : '') + ' sur ' + configJetons.reprise.nombre);
-                }
-                if (configJetons.repriseCiblee && configJetons.repriseCiblee.actif) {
-                    var totalCib = configJetons.repriseCiblee.nombre || configJetons.reprise.nombre;
-                    var nbCib = totalCib - compterJetonsUtilises(da, 'repriseCiblee');
-                    jetonsTextes.push(Math.max(0, nbCib) + ' reprise' + (nbCib > 1 ? 's' : '') + ' cibl\u00e9e' + (nbCib > 1 ? 's' : '') + ' sur ' + totalCib);
-                }
-                if (configJetons.delai && configJetons.delai.nombre > 0) {
-                    var nbDel = configJetons.delai.nombre - compterJetonsUtilises(da, 'delai');
-                    jetonsTextes.push(Math.max(0, nbDel) + ' d\u00e9lai' + (nbDel > 1 ? 's' : '') + ' sur ' + configJetons.delai.nombre);
-                }
-                if (jetonsTextes.length > 0) {
-                    html += '<p class="retro-jetons">Jetons restants : ' + jetonsTextes.join(', ') + '.</p>';
-                }
-            }
-        } catch(e) { console.warn('[Evaluation] jetons restants calculation skipped:', e.message || e); }
+    if (recurrentsHtml) {
+        html += '<h5>Points r\u00e9currents</h5>' + recurrentsHtml;
     }
 
-    // Question métacognitive
-    html += '<p class="retro-question">Selon toi, quel aspect de ta production m\u00e9riterait le plus d\u2019attention ?</p>';
+    // === 3. Jetons utilisés ===
+    if (typeof obtenirConfigJetons === 'function' && da) {
+        try {
+            var configJetons = obtenirConfigJetons();
+            if (configJetons && configJetons.actif) {
+                var maxJetons = configJetons.reprise ? configJetons.reprise.nombre : 2;
+                var toutesEvalsJ = db.getSync(cle('evaluationsSauvegardees'), []);
+                var productions = obtenirDonneesSelonMode(cle('productions')) || [];
+                var jetonsUtilises = [];
+                toutesEvalsJ.filter(function(e) {
+                    return e.etudiantDA === da && !e.remplaceeParId;
+                }).forEach(function(e) {
+                    var prod = productions.find(function(p) { return p.id === e.productionId; });
+                    var nomProd = prod ? (prod.titre || prod.nom || e.productionId) : e.productionId;
+                    if (e.jetonDelaiApplique) jetonsUtilises.push('D\u00e9lai \u2014 ' + nomProd);
+                    if (e.jetonRepriseApplique || e.repriseDeId) jetonsUtilises.push('Reprise \u2014 ' + nomProd);
+                    if (e.jetonRepriseCibleeApplique) jetonsUtilises.push('Reprise cibl\u00e9e \u2014 ' + nomProd);
+                });
+                html += '<h5>Jetons utilis\u00e9s : ' + jetonsUtilises.length + ' / ' + maxJetons + '</h5>';
+                if (jetonsUtilises.length > 0) {
+                    html += jetonsUtilises.map(function(j) { return '<p>\u2022 ' + j + '</p>'; }).join('');
+                }
+            }
+        } catch(e) { console.warn('[Evaluation] jetons calculation skipped:', e.message || e); }
+    }
 
     conteneur.innerHTML = html;
 }
