@@ -2578,10 +2578,10 @@ function peuplementOptJetons() {
     var statut = (da && typeof obtenirStatutJetonsEtudiant === 'function')
         ? obtenirStatutJetonsEtudiant(da) : {};
 
-    // === 1. Résumé des jetons utilisés (style Bilan) ===
+    // === 1. Collecter les jetons utilisés par type (avec noms d'artefacts) ===
     var totalUtilises = 0;
     var totalMax = 0;
-    var jetonsUtilisesListe = [];
+    var jetonsParType = { delai: [], reprise: [], repriseCiblee: [] };
 
     if (da) {
         var toutesEvals = db.getSync(cle('evaluationsSauvegardees'), []);
@@ -2592,11 +2592,11 @@ function peuplementOptJetons() {
         }).forEach(function(e) {
             var prod = productions.find(function(p) { return p.id === e.productionId; });
             var nomProd = prod ? (prod.titre || prod.nom || e.productionId) : e.productionId;
-            if (e.jetonDelaiApplique) jetonsUtilisesListe.push('D\u00e9lai \u2014 ' + echapperHtml(nomProd));
-            if (e.jetonRepriseApplique || e.repriseDeId) jetonsUtilisesListe.push('Reprise \u2014 ' + echapperHtml(nomProd));
-            if (e.jetonRepriseCibleeApplique) jetonsUtilisesListe.push('Reprise cibl\u00e9e \u2014 ' + echapperHtml(nomProd));
+            if (e.jetonDelaiApplique) jetonsParType.delai.push(echapperHtml(nomProd));
+            if (e.jetonRepriseApplique || e.repriseDeId) jetonsParType.reprise.push(echapperHtml(nomProd));
+            if (e.jetonRepriseCibleeApplique) jetonsParType.repriseCiblee.push(echapperHtml(nomProd));
         });
-        totalUtilises = jetonsUtilisesListe.length;
+        totalUtilises = jetonsParType.delai.length + jetonsParType.reprise.length + jetonsParType.repriseCiblee.length;
         // Max global = nombreParEleve (quota configuré dans la pratique de notation)
         var modalites = db.getSync('modalitesEvaluation', {});
         totalMax = (modalites.configPAN && modalites.configPAN.jetons && modalites.configPAN.jetons.nombreParEleve)
@@ -2638,19 +2638,7 @@ function peuplementOptJetons() {
         }
     };
 
-    // === 2. Résumé (en-dessous des checkboxes) ===
-    var htmlResume = '<div style="margin-top: 10px; padding: 5px 8px; background: var(--surface-base, rgba(0,0,0,0.15)); border-radius: 6px; font-size: 0.72rem; line-height: 1.4;">';
-    htmlResume += '<strong>Jetons utilis\u00e9s\u00a0: ' + totalUtilises + ' / ' + totalMax + '</strong>';
-    if (jetonsUtilisesListe.length > 0) {
-        htmlResume += '<div style="margin-top: 3px; color: var(--gris-clair, #aaa);">';
-        jetonsUtilisesListe.forEach(function(j) {
-            htmlResume += '<div>\u2022 ' + j + '</div>';
-        });
-        htmlResume += '</div>';
-    }
-    htmlResume += '</div>';
-
-    // === 3. Checkboxes pour appliquer ===
+    // === 2. Checkboxes avec détails par artefact sous chaque type ===
     var htmlJetons = [];
     var htmlPerso = [];
 
@@ -2658,22 +2646,28 @@ function peuplementOptJetons() {
         var type = types[i];
         var s = statut[type.id] || { utilises: 0, total: type.nombreTotal || 0 };
         var compteur = s.utilises + '/' + s.total;
+        var artefacts = jetonsParType[type.id] || [];
 
         if (type.predefini && mapPredefinis[type.id]) {
-            // Jeton prédéfini — badge avec style distinctif
             var mp = mapPredefinis[type.id];
             var coche = mp.estCoche() ? ' checked' : '';
-            htmlJetons.push(
-                '<div class="u-flex-gap-8 u-align-center">' +
-                    '<input type="checkbox" id="' + mp.checkboxId + '" data-on-change="' + mp.handler + '"' + coche + '>' +
-                    '<span class="' + mp.wrapperClass + '">' +
-                        '<span class="badge-jeton-titre" data-tooltip="' + mp.tooltip + '">' + echapperHtml(type.nom.replace(/^Jeton de /i, '').replace(/^./, function(c) { return c.toUpperCase(); })) + '</span>' +
-                    '</span>' +
-                    '<span class="u-texte-mini u-texte-gris">' + compteur + '</span>' +
-                '</div>'
-            );
+            var ligneHtml =
+                '<div>' +
+                    '<div class="u-flex-gap-8 u-align-center">' +
+                        '<input type="checkbox" id="' + mp.checkboxId + '" data-on-change="' + mp.handler + '"' + coche + '>' +
+                        '<span class="' + mp.wrapperClass + '">' +
+                            '<span class="badge-jeton-titre" data-tooltip="' + mp.tooltip + '">' + echapperHtml(type.nom.replace(/^Jeton de /i, '').replace(/^./, function(c) { return c.toUpperCase(); })) + '</span>' +
+                        '</span>' +
+                        '<span class="u-texte-mini u-texte-gris">' + compteur + '</span>' +
+                    '</div>';
+            if (artefacts.length > 0) {
+                ligneHtml += '<div style="margin: 2px 0 0 26px; font-size: 0.7rem; color: var(--gris-clair, #aaa); line-height: 1.3;">';
+                artefacts.forEach(function(nom) { ligneHtml += '<div>\u2022 ' + nom + '</div>'; });
+                ligneHtml += '</div>';
+            }
+            ligneHtml += '</div>';
+            htmlJetons.push(ligneHtml);
         } else if (!type.predefini) {
-            // Jeton personnalisé
             htmlPerso.push(
                 '<div style="display: flex; align-items: flex-start; gap: 10px;">' +
                     '<input type="checkbox" id="checkboxJetonPerso_' + type.id + '" class="u-mt-6">' +
@@ -2689,7 +2683,12 @@ function peuplementOptJetons() {
         }
     }
 
-    // Assembler : checkboxes prédéfinis + personnalisés + résumé en-dessous
+    // === 3. Ligne total ===
+    var htmlTotal = '<div style="margin-top: 6px; padding: 4px 0; border-top: 1px solid var(--bordure-claire, rgba(255,255,255,0.1)); font-size: 0.72rem; text-align: right; color: var(--gris-clair, #aaa);">' +
+        'Total utilis\u00e9s\u00a0: <strong>' + totalUtilises + ' / ' + totalMax + '</strong>' +
+        '</div>';
+
+    // Assembler : checkboxes + détails + total
     var html = '<div style="display: flex; flex-direction: column; gap: 8px;">' +
                htmlJetons.join('') +
                '</div>';
@@ -2698,7 +2697,7 @@ function peuplementOptJetons() {
         html += '<div class="u-flex-gap-10 u-flex-col" style="margin-top: 10px;">' + htmlPerso.join('') + '</div>';
     }
 
-    html += htmlResume;
+    html += htmlTotal;
 
     conteneur.innerHTML = html;
 }
@@ -2961,11 +2960,9 @@ function nouvelleEvaluation() {
     // Afficher les options de jetons pour nouvelle évaluation
     afficherGestionJetons(true);
 
-    // Masquer la ligne Supprimer cette évaluation (seulement pour évaluations existantes)
-    const ligneSupprimer = document.getElementById('ligneSupprimerEvaluation');
-    if (ligneSupprimer) {
-        ligneSupprimer.classList.add('u-hide');
-    }
+    // Masquer le bouton Éditer (sera réaffiché au prochain chargement d'évaluation)
+    var btnEditer = document.getElementById('btnEditerFichierEval');
+    if (btnEditer) btnEditer.classList.add('u-hide');
 
     afficherNotificationSucces('Paramètres réinitialisés - Prêt pour une nouvelle série d\'évaluations');
 }
@@ -5603,10 +5600,16 @@ function modifierEvaluation(evaluationId) {
             // ÉTAPE 15: Afficher la section de gestion des jetons
             afficherGestionJetons(true);
 
-            // ÉTAPE 16: Afficher la ligne Supprimer cette évaluation
-            const ligneSupprimer = document.getElementById('ligneSupprimerEvaluation');
-            if (ligneSupprimer) {
-                ligneSupprimer.classList.remove('u-hide');
+            // ÉTAPE 16: Afficher le bouton Éditer si un fichier est disponible
+            var btnEditer = document.getElementById('btnEditerFichierEval');
+            if (btnEditer) {
+                var fichierDispo = (typeof travauxVisionneuse !== 'undefined' && typeof travauxVisionneuse.getFichierActuel === 'function')
+                    ? travauxVisionneuse.getFichierActuel() : null;
+                if (fichierDispo) {
+                    btnEditer.classList.remove('u-hide');
+                } else {
+                    btnEditer.classList.add('u-hide');
+                }
             }
 
             // ÉTAPE 17: Ouvrir le travail de l'étudiant en vue côte à côte (si disponible)
@@ -7210,6 +7213,40 @@ window.evaluerProduction = evaluerProduction;
 window.naviguerEtudiantPrecedent = naviguerEtudiantPrecedent;
 window.naviguerEtudiantSuivant = naviguerEtudiantSuivant;
 window.retirerJeton = retirerJeton;
+window.editerFichierDepuisEvaluation = editerFichierDepuisEvaluation;
 
+/**
+ * Ouvre l'éditeur de pages PDF pour le fichier actuellement chargé.
+ * Cherche le fichier via la visionneuse, puis via travauxResolution en fallback.
+ */
+function editerFichierDepuisEvaluation() {
+    // Trouver le fichier : visionneuse d'abord, puis résolution par évaluation en cours
+    var fichier = (typeof travauxVisionneuse !== 'undefined' && typeof travauxVisionneuse.getFichierActuel === 'function')
+        ? travauxVisionneuse.getFichierActuel() : null;
+
+    if (!fichier && window.evaluationEnCours) {
+        var da = window.evaluationEnCours.etudiantDA;
+        var prodId = window.evaluationEnCours.productionId;
+        if (da && prodId && typeof travauxResolution !== 'undefined' && typeof travauxResolution.trouverFichierPourEvaluation === 'function') {
+            fichier = travauxResolution.trouverFichierPourEvaluation({ etudiantDA: da, productionId: prodId });
+        }
+    }
+
+    if (!fichier || !fichier.id) {
+        console.warn('[Évaluation] Bouton Éditer : aucun fichier trouvé');
+        alert('Aucun fichier n\u2019est associ\u00e9 \u00e0 cette \u00e9valuation.');
+        return;
+    }
+
+    // Ouvrir l'éditeur de pages dans la sous-section Préparer et importer
+    if (typeof afficherSousSection === 'function') {
+        afficherSousSection('evaluations-importer');
+    }
+    setTimeout(function() {
+        if (typeof travauxUI !== 'undefined' && typeof travauxUI.ouvrirEditeurPages === 'function') {
+            travauxUI.ouvrirEditeurPages(fichier.id);
+        }
+    }, 300);
+}
 
 })();
