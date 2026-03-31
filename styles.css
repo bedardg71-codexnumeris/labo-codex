@@ -22027,12 +22027,11 @@ body.mode-clair .annot-toolbar {
 /* Colonne Document (centre, scrollable, colle en haut) */
 .eval-col-document {
     flex: 1;
-    overflow: auto;
+    overflow: hidden;
     min-width: 0;
     position: relative;
     display: flex;
     flex-direction: column;
-    align-items: center;
 }
 .eval-col-document .travaux-canvas-wrapper {
     position: relative;
@@ -22143,12 +22142,11 @@ body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0
 }
 .annot-col-document {
     flex: 1;
-    overflow: auto;
+    overflow: hidden;
     min-width: 0;
     position: relative;
     display: flex;
     flex-direction: column;
-    align-items: center;
 }
 /* Le canvas est déplacé dans .annot-col-document par JS — pas de masquage CSS nécessaire */
 
