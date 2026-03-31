@@ -15230,6 +15230,144 @@ body.mode-clair .prep-select {
 .palette-sous-section .groupe-form:last-child {
     margin-bottom: 0 !important;
 }
+/* ============================================
+   CLASSES EVAL-* — Uniformisation page Évaluer
+   Préfixe eval- réutilisable pour page Annoter
+   ============================================ */
+
+/* Carte de critère (conteneur par critère) */
+.eval-critere-carte {
+    margin-bottom: 15px;
+    padding: 12px;
+    background: var(--surface-conteneur, #162c36);
+    border-radius: var(--radius-moyen, 6px);
+}
+
+/* En-tête critère : nom + pondération + badge algo */
+.eval-critere-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+/* Description italique sous le nom du critère */
+.eval-critere-description {
+    display: block;
+    color: var(--gris-clair);
+    font-style: italic;
+    font-size: 0.8rem;
+    margin-bottom: 10px;
+    line-height: 1.3;
+}
+
+/* Label compact (champs de formulaire dans les palettes) */
+.eval-label {
+    font-size: 0.75rem;
+    color: var(--gris-moyen);
+    margin-bottom: 2px;
+    display: block;
+}
+
+/* Texte d'aide petit sous un champ */
+.eval-aide {
+    font-size: 0.7rem;
+    color: var(--gris-clair);
+    display: block;
+    margin-top: 4px;
+}
+
+/* Boîte résultat algorithmique */
+.eval-resultat-algo {
+    padding: 8px;
+    background: var(--bleu-tres-pale);
+    border-radius: var(--radius-petit, 4px);
+    font-size: 0.85rem;
+    color: var(--gris-moyen);
+    margin-bottom: 8px;
+}
+
+/* Grille 2 colonnes (critères algorithmiques) */
+.eval-grille-algo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.eval-grille-algo-large {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+/* Select de niveau IDME */
+.eval-select-niveau {
+    font-size: 0.85rem;
+    transition: background-color 0.3s ease;
+    border: 1px solid var(--bordure-claire);
+    width: 100%;
+    font-weight: normal;
+}
+
+/* Badge ALGORITHMIQUE */
+.eval-badge-algo {
+    font-size: 0.7rem;
+    color: var(--orange-accent);
+    font-weight: bold;
+    margin-left: 6px;
+}
+
+/* Textarea de rétroaction */
+.eval-textarea {
+    width: 100%;
+    padding: 8px;
+    border-radius: var(--radius-moyen, 5px);
+    border: 1px solid var(--bordure-claire);
+    font-family: inherit;
+    resize: vertical;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    background: var(--surface-carte, #1a3040);
+    color: var(--texte-principal);
+}
+
+/* Bouton icône compact (↺, etc.) */
+.btn-icon-compact {
+    padding: 4px 10px;
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+/* Compteur de mots */
+.eval-compteur-mots {
+    text-align: right;
+    font-size: 0.7rem;
+    color: var(--gris-moyen);
+    margin-top: 3px;
+    padding-right: 4px;
+}
+
+/* Contenu rétroaction en lecture */
+.eval-retro-contenu {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    padding: 8px;
+    color: var(--texte-principal);
+}
+
+/* Texte état vide / italique gris */
+.eval-vide {
+    color: var(--gris-moyen);
+    font-style: italic;
+}
+
+/* Chronomètre dans la palette */
+.eval-chrono-wrapper {
+    text-align: center;
+    margin-bottom: 6px;
+}
+
 .travaux-palette-eval .boite-note-finale {
     margin-top: 8px !important;
     padding: 6px !important;

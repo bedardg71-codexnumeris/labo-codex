@@ -4848,8 +4848,9 @@
                     </div>
                     <div class="travaux-panneau-corps carte-bleu-fonce">
                             <!-- Chronomètre (déplacé depuis la toolbar) -->
-                            <div id="travaux-chrono-palette" class="u-hide" style="text-align: center; margin-bottom: 6px;">
-                                <span id="travaux-chrono-badge" class="travaux-chrono-badge" title="Durée annotation + évaluation" style="font-size: 0.85rem;">⏱️ --:--</span>
+                            <div id="travaux-chrono-palette" class="eval-chrono-wrapper u-hide">
+                                <span id="travaux-chrono-badge" class="travaux-chrono-badge" title="Durée annotation + évaluation">⏱️ --:--</span>
+                                <hr class="separateur-horizontal">
                             </div>
 
                             <!-- Boutons de gestion des évaluations -->
@@ -4861,9 +4862,8 @@
                                         Sauvegarder
                                     </button>
 
-                                    <button class="btn btn-annuler btn-tres-compact" data-action="reinitialiserFormulaire"
-                                        title="Réinitialiser le formulaire en conservant les sélections" data-tooltip="eval-btn-reinitialiser"
-                                        style="padding: 4px 10px; font-size: 1.1rem;">↺</button>
+                                    <button class="btn btn-annuler btn-tres-compact btn-icon-compact" data-action="reinitialiserFormulaire"
+                                        title="Réinitialiser le formulaire en conservant les sélections" data-tooltip="eval-btn-reinitialiser">↺</button>
                                 </div>
                                 <div class="groupe-boutons-ligne">
                                     <button id="btnEditerFichierEval" class="btn btn-secondaire btn-tres-compact u-w-100 u-hide"
@@ -5017,25 +5017,19 @@
                                     <button data-action="regenererRetroactionAvecFeedback" class="btn-copier-retro" title="Régénérer la rétroaction depuis la cartouche actuelle">Régénérer</button>
                                 </div>
                             </div>
-                            <textarea id="retroactionFinale1" class="controle-form" rows="6"
-                                placeholder="La rétroaction sera générée automatiquement ici selon tes évaluations et les options cochées."
-                                style="width: 100%; padding: 8px; border-radius: 5px;
-        border: 1px solid var(--bordure-claire); font-family: inherit; resize: vertical;
-        font-size: 0.8rem; line-height: 1.4; background: var(--surface-carte, #1a3040);">
-</textarea>
-                            <div id="compteur-mots-retro" style="text-align: right; font-size: 0.7rem; color: var(--gris-moyen); margin-top: 3px; padding-right: 4px;">0 mot</div>
+                            <textarea id="retroactionFinale1" class="eval-textarea" rows="6"
+                                placeholder="La rétroaction sera générée automatiquement ici selon tes évaluations et les options cochées."></textarea>
+                            <div id="compteur-mots-retro" class="eval-compteur-mots">0 mot</div>
                         </div>
 
                         <!-- VUE SPÉCIFIQUE -->
                         <div id="vueRetroSpecifique" class="u-hide">
-                            <div id="contenuRetroSpecifique" class="retro-vue-contenu"
-                                style="font-size: 0.8rem; line-height: 1.5; padding: 8px; color: var(--texte-principal);"></div>
+                            <div id="contenuRetroSpecifique" class="retro-vue-contenu eval-retro-contenu"></div>
                         </div>
 
                         <!-- VUE BILAN -->
                         <div id="vueRetroBilan" class="u-hide">
-                            <div id="contenuRetroBilan" class="retro-vue-contenu"
-                                style="font-size: 0.8rem; line-height: 1.5; padding: 8px; color: var(--texte-principal);"></div>
+                            <div id="contenuRetroBilan" class="retro-vue-contenu eval-retro-contenu"></div>
                         </div>
                     </div>
                 </div>
