@@ -22005,7 +22005,7 @@ body.mode-clair .annot-toolbar {
     position: relative;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
 }
 .eval-col-document .travaux-canvas-container {
     flex: 1;
@@ -22130,6 +22130,7 @@ body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0
     position: relative;
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
 /* Le canvas est déplacé dans .annot-col-document par JS — pas de masquage CSS nécessaire */
 
