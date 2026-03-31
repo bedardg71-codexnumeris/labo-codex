@@ -1448,10 +1448,11 @@
         palette.className = 'palette-flottante palette-chrono';
 
         let html = '<div class="palette-flottante-barre">';
-        html += '<span class="palette-flottante-titre">Chrono</span>';
+        html += '<span class="palette-flottante-titre">Chronométrer</span>';
         html += '</div>';
         html += '<div class="palette-flottante-contenu palette-chrono-contenu">';
-        html += '<span id="chrono-badge" class="travaux-chrono-badge" title="Durée annotation + évaluation">⏱️ --:--</span>';
+        html += '<small class="palette-chrono-note">Démarre à la 1re annotation et s\'arrête à la sauvegarde. Indique ensuite une durée moyenne.</small>';
+        html += '<span id="chrono-badge" class="travaux-chrono-badge">⏱️ --:--</span>';
         html += '</div>';
 
         palette.innerHTML = html;
