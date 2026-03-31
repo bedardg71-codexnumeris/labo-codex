@@ -4125,14 +4125,6 @@
                 spacer.style.flex = '1';
                 sousBarre.appendChild(spacer);
 
-                const btnCopier = document.createElement('button');
-                btnCopier.className = 'btn btn-compact';
-                btnCopier.textContent = 'Copier';
-                btnCopier.title = 'Copier la section active';
-                btnCopier.style.cssText = 'font-size:10px; padding:2px 6px;';
-                btnCopier.addEventListener('click', function() { copierRetroaction(1); });
-                sousBarre.appendChild(btnCopier);
-
                 const btnCopierTout = document.createElement('button');
                 btnCopierTout.className = 'btn btn-compact';
                 btnCopierTout.textContent = 'Copier tout';
@@ -4143,6 +4135,17 @@
 
                 // Insérer en premier dans le contenu
                 contenuRetro.insertBefore(sousBarre, contenuRetro.firstChild);
+
+                // Bouton Copier dans le pied (à côté de Régénérer et compteur de mots)
+                const piedRetro = contenuRetro.querySelector('.eval-retro-pied');
+                if (piedRetro) {
+                    const btnCopier = document.createElement('button');
+                    btnCopier.className = 'btn-copier-retro';
+                    btnCopier.textContent = 'Copier';
+                    btnCopier.title = 'Copier la section active';
+                    btnCopier.addEventListener('click', function() { copierRetroaction(1); });
+                    piedRetro.appendChild(btnCopier);
+                }
             }
             evalFlex.appendChild(paletteR);
         }
