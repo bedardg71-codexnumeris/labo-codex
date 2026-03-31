@@ -4098,12 +4098,11 @@
             paletteR.style.right = '12px';
             paletteR.style.left = 'auto';
 
-            // Bouton Copier compact dans la barre de titre
-            const barreRetro = paletteR.querySelector('.palette-flottante-barre');
-            if (barreRetro) {
-                // 2e ligne : radios + boutons Copier / Copier tout
-                const ligne2 = document.createElement('div');
-                ligne2.style.cssText = 'display:flex; align-items:center; gap:6px; width:100%; font-size:0.7rem;';
+            // Sous-barre : radios (Générale/Spécifique/Bilan) + boutons Copier
+            const contenuRetro = paletteR.querySelector('.palette-flottante-contenu');
+            if (contenuRetro) {
+                const sousBarre = document.createElement('div');
+                sousBarre.className = 'retro-sous-barre';
 
                 const radiosDiv = document.createElement('div');
                 radiosDiv.className = 'retro-vues-radios';
@@ -4120,32 +4119,30 @@
                     lbl.appendChild(document.createTextNode(' ' + label));
                     radiosDiv.appendChild(lbl);
                 });
-                ligne2.appendChild(radiosDiv);
+                sousBarre.appendChild(radiosDiv);
 
-                // Spacer
                 var spacer = document.createElement('span');
                 spacer.style.flex = '1';
-                ligne2.appendChild(spacer);
+                sousBarre.appendChild(spacer);
 
-                // Bouton Copier (section active)
                 const btnCopier = document.createElement('button');
                 btnCopier.className = 'btn btn-compact';
                 btnCopier.textContent = 'Copier';
                 btnCopier.title = 'Copier la section active';
                 btnCopier.style.cssText = 'font-size:10px; padding:2px 6px;';
                 btnCopier.addEventListener('click', function() { copierRetroaction(1); });
-                ligne2.appendChild(btnCopier);
+                sousBarre.appendChild(btnCopier);
 
-                // Bouton Copier tout
                 const btnCopierTout = document.createElement('button');
                 btnCopierTout.className = 'btn btn-compact';
                 btnCopierTout.textContent = 'Copier tout';
                 btnCopierTout.title = 'Copier les 3 sections';
                 btnCopierTout.style.cssText = 'font-size:10px; padding:2px 6px;';
                 btnCopierTout.addEventListener('click', function() { copierToutRetroaction(); });
-                ligne2.appendChild(btnCopierTout);
+                sousBarre.appendChild(btnCopierTout);
 
-                barreRetro.appendChild(ligne2);
+                // Insérer en premier dans le contenu
+                contenuRetro.insertBefore(sousBarre, contenuRetro.firstChild);
             }
             evalFlex.appendChild(paletteR);
         }
