@@ -4847,6 +4847,11 @@
                         <span class="travaux-panneau-header-titre">Paramètres</span>
                     </div>
                     <div class="travaux-panneau-corps carte-bleu-fonce">
+                            <!-- Chronomètre (déplacé depuis la toolbar) -->
+                            <div id="travaux-chrono-palette" class="u-hide" style="text-align: center; margin-bottom: 6px;">
+                                <span id="travaux-chrono-badge" class="travaux-chrono-badge" title="Durée annotation + évaluation" style="font-size: 0.85rem;">⏱️ --:--</span>
+                            </div>
+
                             <!-- Boutons de gestion des évaluations -->
                             <div class="groupe-boutons-colonne" class="mb-15">
                                 <!-- Sauvegarder, Réinitialiser et Éditer -->
@@ -4972,7 +4977,7 @@
                             <div id="noteFinale1" class="boite-note-finale" data-tooltip="eval-note-finale">
                                 <div class="u-flex-between">
                                     <div>
-                                        <div class="label u-texte-gris u-mb-5" style="font-size: 0.8rem">Note finale</div>
+                                        <div class="label u-texte-gris u-mb-5" style="font-size: 0.8rem">Note chiffrée</div>
                                         <div class="valeur u-texte-bold u-texte-bleu" style="font-size: 2rem">
                                             <span id="noteProduction1">0.0</span>
                                         </div>

@@ -310,7 +310,7 @@
         }
 
         const viewport = page.getViewport({ scale: 1.0 });
-        const conteneur = conteneurVisionneuse || document.getElementById('travaux-conteneur-document');
+        const conteneur = _obtenirConteneurZoom();
         if (!conteneur) return 1.0;
 
         const largeurDispo = conteneur.clientWidth - 40; // marge
@@ -329,6 +329,16 @@
     }
 
     /**
+     * Retourne le conteneur de référence pour le calcul de zoom.
+     * En mode évaluer, utilise eval-col-document (espace réel entre les palettes).
+     */
+    function _obtenirConteneurZoom() {
+        var evalCol = document.getElementById('eval-col-document');
+        if (evalCol && evalCol.offsetWidth > 0) return evalCol;
+        return conteneurVisionneuse || document.getElementById('travaux-conteneur-document');
+    }
+
+    /**
      * Calcule le zoom effectif pour une image
      * @param {HTMLImageElement} img - L'image
      * @returns {number} Scale a appliquer
@@ -338,7 +348,7 @@
             return zoomActuel;
         }
 
-        const conteneur = conteneurVisionneuse || document.getElementById('travaux-conteneur-document');
+        const conteneur = _obtenirConteneurZoom();
         if (!conteneur) return 1.0;
 
         const largeurDispo = conteneur.clientWidth - 40;
@@ -440,10 +450,10 @@
         if (btnPrec) btnPrec.disabled = pageActuelle <= 1;
         if (btnSuiv) btnSuiv.disabled = pageActuelle >= nombrePagesTotal;
 
-        // Zoom
-        const indicateurZoom = document.getElementById('travaux-indicateur-zoom');
-        if (indicateurZoom) {
-            indicateurZoom.textContent = Math.round(zoomActuel * 100) + '%';
+        // Zoom — mettre à jour le bouton zoom100 avec le pourcentage réel
+        var btnZoom100 = document.getElementById('travaux-btn-zoom100');
+        if (btnZoom100) {
+            btnZoom100.textContent = Math.round(zoomActuel * 100) + '%';
         }
     }
 

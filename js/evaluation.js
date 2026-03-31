@@ -774,7 +774,7 @@ function cartoucheSelectionnee() {
         }
 
         return `
-    <div style="margin-bottom: 15px; padding: 12px; background: var(--surface-conteneur, #162c36); border-left: 3px solid ${estAlgorithmique ? 'var(--orange-accent)' : 'var(--bleu-moyen)'};">
+    <div style="margin-bottom: 15px; padding: 12px; background: var(--surface-conteneur, #162c36); border-radius: 6px;">
         <div class="eval-grid-critere">
             <div>
     <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;">
@@ -818,7 +818,7 @@ function cartoucheSelectionnee() {
             <label data-tooltip="eval-niveau-idme" style="font-size: 0.75rem; color: var(--gris-moyen); margin-bottom: 4px; display: block;">Niveau IDME (modifiable manuellement) :</label>
             <select id="eval_${critere.id}" class="controle-form"
                     data-on-change="niveauSelectionne" data-param="${critere.id}"
-                    style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid var(--bordure-claire); width: 100%;">
+                    style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 1px solid var(--bordure-claire); width: 100%;">
                 <option value="">-- Utiliser le niveau calculé --</option>
                 ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
             </select>
@@ -856,7 +856,7 @@ function cartoucheSelectionnee() {
             <label data-tooltip="eval-niveau-idme" style="font-size: 0.75rem; color: var(--gris-moyen); margin-bottom: 4px; display: block;">Niveau IDME (modifiable manuellement) :</label>
             <select id="eval_${critere.id}" class="controle-form"
                     data-on-change="niveauSelectionne" data-param="${critere.id}"
-                    style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid var(--bordure-claire); width: 100%;">
+                    style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 1px solid var(--bordure-claire); width: 100%;">
                 <option value="">-- Utiliser le niveau calculé --</option>
                 ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
             </select>
@@ -866,7 +866,7 @@ function cartoucheSelectionnee() {
         <!-- Interface standard (holistique/analytique) -->
         <select id="eval_${critere.id}" class="controle-form"
                 data-on-change="niveauSelectionne" data-param="${critere.id}"
-                style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid var(--bordure-claire); width: 100%;">
+                style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 1px solid var(--bordure-claire); width: 100%;">
             <option value="">--</option>
             ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
         </select>
@@ -964,7 +964,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
         const facteur = critere.facteurNormalisation || 500;
 
         return `
-    <div style="margin-bottom: 15px; padding: 12px; background: var(--surface-conteneur, #162c36); border-left: 3px solid ${estAlgorithmique ? 'var(--orange-accent)' : 'var(--bleu-moyen)'};">
+    <div style="margin-bottom: 15px; padding: 12px; background: var(--surface-conteneur, #162c36); border-radius: 6px;">
         <div class="eval-grid-critere">
             <div>
                 <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;">
@@ -1003,7 +1003,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                     </div>
                     <select id="eval_${critere.id}" class="controle-form"
                             data-on-change="niveauSelectionne" data-param="${critere.id}"
-                            style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid var(--bordure-claire); width: 100%;">
+                            style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 1px solid var(--bordure-claire); width: 100%;">
                         <option value="">--</option>
                         ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
                     </select>
@@ -1011,7 +1011,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                     <!-- Interface standard -->
                     <select id="eval_${critere.id}" class="controle-form"
                             data-on-change="niveauSelectionne" data-param="${critere.id}"
-                            style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid var(--bordure-claire); width: 100%;">
+                            style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 1px solid var(--bordure-claire); width: 100%;">
                         <option value="">--</option>
                         ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
                     </select>
@@ -1057,7 +1057,7 @@ function niveauSelectionne(critereId) {
         const couleur = obtenirCouleurNiveau(niveau);
         selectElement.style.backgroundColor = couleur + '30'; // 30 = 20% opacité
         selectElement.style.borderColor = couleur;
-        selectElement.style.fontWeight = 'bold';
+        selectElement.style.fontWeight = 'normal';
     } else {
         selectElement.style.backgroundColor = 'transparent';
         selectElement.style.borderColor = 'var(--bordure-claire)';

@@ -58,6 +58,7 @@
 
     function demarrerChrono() {
         const prefs = db.getSync('preferencesAffichage', {});
+        _afficherWrapperChrono(prefs.chronoEvaluation);
         if (!prefs.chronoEvaluation) return;
         if (_chronoDebut) return; // déjà en cours
         _chronoDebut = Date.now();
@@ -65,6 +66,14 @@
         _chronoFichierId = fichier ? fichier.id : null;
         _majAffichageChrono();
         _chronoInterval = setInterval(_majAffichageChrono, 1000);
+    }
+
+    function _afficherWrapperChrono(visible) {
+        var wrapper = document.getElementById('travaux-chrono-palette');
+        if (wrapper) {
+            if (visible) wrapper.classList.remove('u-hide');
+            else wrapper.classList.add('u-hide');
+        }
     }
 
     function arreterChrono() {
@@ -980,17 +989,15 @@
                             <span id="travaux-compteur-badge" class="travaux-compteur-badge">-- / --</span>
                             <button id="travaux-btn-badge-suiv" class="travaux-btn-nav" data-action="travauxUI.badgeSuivant" disabled title="Fichier suivant">&#x2192;</button>
                             <span class="travaux-separateur"></span>
-                            <span id="travaux-indicateur-zoom" class="travaux-zoom-info">100%</span>
-                            <button class="travaux-btn-zoom" data-action="travauxVisionneuse.zoomPleineLargeur" title="Ajuster à la largeur">Largeur</button>
-                            <button class="travaux-btn-zoom" data-action="travauxVisionneuse.zoomPleineHauteur" title="Ajuster à la hauteur">Hauteur</button>
-                            <button class="travaux-btn-zoom" data-action="travauxVisionneuse.zoom100" title="Zoom 100%">100%</button>
+                            <button class="travaux-btn-nav" data-action="travauxVisionneuse.zoomPleineLargeur" title="Ajuster à la largeur">&#x2194;</button>
+                            <button class="travaux-btn-nav" data-action="travauxVisionneuse.zoomPleineHauteur" title="Ajuster à la hauteur">&#x2195;</button>
+                            <button id="travaux-btn-zoom100" class="travaux-btn-zoom" data-action="travauxVisionneuse.zoom100" title="Remettre à 100%">100%</button>
                             <span class="travaux-separateur"></span>
                             <button id="travaux-btn-annoter" class="travaux-btn-action actif" data-action="travauxUI.basculerMode" data-param="annoter" data-tooltip="travaux-btn-annoter">Annoter</button>
                             <button id="travaux-btn-evaluer" class="travaux-btn-action travaux-btn-action-vert u-hide" data-action="travauxUI.basculerMode" data-param="evaluer" title="Évaluer cette production" data-tooltip="travaux-btn-evaluer">Évaluer</button>
                             <button id="travaux-btn-alleger" class="travaux-btn-action u-hide" data-action="travauxUI.allegerFichierActuel" title="Alléger ce fichier" data-tooltip="travaux-btn-alleger">Alléger</button>
                             <button id="travaux-btn-reimporter" class="travaux-btn-action u-hide" data-action="travauxUI.reimporterFichierActuel" title="Re-importer l'original" data-tooltip="travaux-btn-reimporter">Re-importer</button>
-                            <span class="travaux-separateur travaux-chrono-sep${db.getSync('preferencesAffichage', {}).chronoEvaluation ? '' : ' u-hide'}"></span>
-                            <span id="travaux-chrono-badge" class="travaux-chrono-badge${db.getSync('preferencesAffichage', {}).chronoEvaluation ? '' : ' u-hide'}" title="Durée annotation + évaluation">⏱️ --:--</span>
+                            <!-- Chronomètre déplacé dans la palette Paramètres -->
                         </div>
                     </div>
 
@@ -3999,6 +4006,8 @@
                 return;
             }
             modeCourant = 'evaluer';
+            // Afficher le chronomètre dans la palette si la préférence est active
+            _afficherWrapperChrono(db.getSync('preferencesAffichage', {}).chronoEvaluation);
 
             // Si le layout eval existe déjà (caché), le réafficher sans recréer
             const evalFlexExistant = document.getElementById('eval-layout-flex');
@@ -4173,6 +4182,9 @@
         if (paletteD) {
             paletteD.style.position = 'static';
             paletteD.classList.add('eval-col-evaluation');
+            // Retirer le bouton replier (inutile pour la palette Évaluation)
+            var btnToggleD = paletteD.querySelector('.travaux-palette-toggle');
+            if (btnToggleD) btnToggleD.remove();
 
             // Splitter 2 : Document | Evaluation
             evalFlex.appendChild(creerSplitter({
@@ -4189,6 +4201,9 @@
         if (paletteR) {
             paletteR.style.position = 'static';
             paletteR.classList.add('eval-col-retro');
+            // Retirer le bouton replier (inutile pour la palette Rétroaction)
+            var btnToggleR = paletteR.querySelector('.travaux-palette-toggle');
+            if (btnToggleR) btnToggleR.remove();
 
             // Splitter 3 : Evaluation | Retroaction (redimensionne Rétroaction à droite)
             evalFlex.appendChild(creerSplitter({
