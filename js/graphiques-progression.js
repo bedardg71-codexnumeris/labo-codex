@@ -162,6 +162,22 @@ function appliquerStyleSpaghetti(dataset, etat, couleur) {
     var nbPoints = dataset.data.length;
     var bordure = couleurBordurePoint();
 
+    // Élèves exclus (inactif/décrochage/abandon) : toujours gris pointillé
+    if (dataset.exclu) {
+        var gris = etat === 'actif' ? 'rgba(150, 150, 150, 0.6)' : 'rgba(150, 150, 150, 0.35)';
+        var grisDim = etat === 'inactif' ? 'rgba(150, 150, 150, 0.12)' : gris;
+        dataset.borderColor = grisDim;
+        dataset.borderDash = [6, 4];
+        dataset.borderWidth = etat === 'actif' ? 2.5 : 1.5;
+        dataset.pointRadius = etat === 'actif' ? Array(nbPoints).fill(4) : Array(nbPoints).fill(2);
+        dataset.pointBackgroundColor = Array(nbPoints).fill(grisDim);
+        dataset.pointBorderColor = Array(nbPoints).fill('transparent');
+        dataset.pointBorderWidth = 0;
+        dataset.pointHoverRadius = etat === 'actif' ? 5 : 2;
+        return;
+    }
+
+    dataset.borderDash = [];
     switch (etat) {
         case 'defaut':
             dataset.borderColor = hexVersRgba(couleur, 0.4);
@@ -1535,16 +1551,19 @@ const pluginNomEtudiantSurvolACP = {
         const rectW = textWidth + 10;
         const rectH = 20;
 
-        ctx.fillStyle = estVerrouille ? 'rgba(233, 30, 99, 0.15)' : 'rgba(255, 255, 255, 0.9)';
+        var estExclu = dataset.exclu;
+        ctx.fillStyle = estExclu ? 'rgba(150, 150, 150, 0.15)'
+            : estVerrouille ? 'rgba(233, 30, 99, 0.15)' : 'rgba(255, 255, 255, 0.9)';
         ctx.fillRect(rectX, rectY, rectW, rectH);
 
-        if (estVerrouille) {
+        if (estVerrouille && !estExclu) {
             ctx.strokeStyle = '#E91E63';
             ctx.lineWidth = 1;
             ctx.strokeRect(rectX, rectY, rectW, rectH);
         }
 
-        ctx.fillStyle = estVerrouille ? '#C2185B' : '#1976D2';
+        ctx.fillStyle = estExclu ? '#999'
+            : estVerrouille ? '#C2185B' : '#1976D2';
         ctx.fillText(texteAffiche, x, y);
         ctx.restore();
 
@@ -1628,7 +1647,8 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                     : (etudiant.prenom && etudiant.nom
                         ? `${etudiant.prenom} ${etudiant.nom}`
                         : etudiant.nom || `DA ${da}`);
-                return { da, nomComplet: etudiant.nom || da, nomAffiche };
+                const exclu = typeof estEtudiantExclu === 'function' && estEtudiantExclu(etudiant);
+                return { da, nomComplet: etudiant.nom || da, nomAffiche, exclu };
             });
         if (etudiants.length === 0) {
             afficherMessageAttente(canvas, 'Aucun étudiant', 'Les snapshots ne contiennent pas de données étudiants.');
@@ -1738,22 +1758,26 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
             if (data.every(v => v === null || v === undefined)) return null;
 
             // ✨ #240: Couleur de l'indice à 40% par défaut
+            // Inactifs : gris pointillé, exclus des stats (déjà exclus à la capture des snapshots)
             var couleurIndice = couleursIndices[indice] || COULEURS_INDICES.P;
+            var couleurLigne = etudiant.exclu ? 'rgba(150, 150, 150, 0.35)' : hexVersRgba(couleurIndice, 0.4);
             return {
                 label: etudiant.nomAffiche,
                 data: data,
                 da: etudiant.da,
                 indice: indice,
-                borderColor: hexVersRgba(couleurIndice, 0.4),
+                exclu: etudiant.exclu,
+                borderColor: couleurLigne,
                 backgroundColor: 'transparent',
-                borderWidth: STYLE_LIGNE_EPAISSEUR,
+                borderWidth: etudiant.exclu ? 1.5 : STYLE_LIGNE_EPAISSEUR,
+                borderDash: etudiant.exclu ? [6, 4] : [],
                 tension: STYLE_LIGNE_TENSION,
-                pointRadius: STYLE_POINT_RAYON,
-                pointHoverRadius: STYLE_POINT_RAYON_HOVER,
+                pointRadius: etudiant.exclu ? 2 : STYLE_POINT_RAYON,
+                pointHoverRadius: etudiant.exclu ? 3 : STYLE_POINT_RAYON_HOVER,
                 pointStyle: 'circle',
-                pointBackgroundColor: hexVersRgba(couleurIndice, 0.4),
-                pointBorderColor: couleurBordurePoint(),
-                pointBorderWidth: STYLE_POINT_BORDURE,
+                pointBackgroundColor: couleurLigne,
+                pointBorderColor: etudiant.exclu ? 'transparent' : couleurBordurePoint(),
+                pointBorderWidth: etudiant.exclu ? 0 : STYLE_POINT_BORDURE,
                 spanGaps: false
             };
         }).filter(d => d !== null);
@@ -2010,7 +2034,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
             datasets.forEach((dataset, index) => {
                 const option = document.createElement('option');
                 option.value = index;
-                option.textContent = dataset.label;
+                option.textContent = dataset.exclu ? `${dataset.label} (inactif)` : dataset.label;
                 selecteurEtudiant.appendChild(option);
             });
         }

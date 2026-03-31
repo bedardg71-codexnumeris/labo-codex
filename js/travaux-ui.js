@@ -4138,6 +4138,8 @@
                 });
                 const btnToggle = barreParam.querySelector('.travaux-palette-toggle');
                 barreParam.insertBefore(btnVerrou, btnToggle);
+                // Retirer le bouton replier (inutile pour la palette Paramètres)
+                if (btnToggle) btnToggle.remove();
             }
 
             // Jetons : maintenant unifiés dans optionsJetons (rendu dynamique via peuplementOptJetons)
