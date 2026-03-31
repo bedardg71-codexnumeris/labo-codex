@@ -3909,34 +3909,6 @@
         basculerMode('evaluer');
     }
 
-    /**
-     * Capture scroll + zoom de la visionneuse avant une bascule de mode
-     */
-    function _capturerScrollVisionneuse() {
-        const colDoc = document.getElementById('annot-col-document') || document.getElementById('eval-col-document');
-        return {
-            scrollTop: colDoc ? colDoc.scrollTop : 0,
-            scrollLeft: colDoc ? colDoc.scrollLeft : 0
-        };
-    }
-
-    /**
-     * Restaure scroll de la visionneuse après une bascule de mode
-     */
-    function _restaurerScrollVisionneuse(state) {
-        if (!state) return;
-        // Double RAF pour attendre que le layout ait ses dimensions finales
-        requestAnimationFrame(function() {
-            requestAnimationFrame(function() {
-                var colDoc = document.getElementById('eval-col-document') || document.getElementById('annot-col-document');
-                if (colDoc) {
-                    colDoc.scrollTop = state.scrollTop;
-                    colDoc.scrollLeft = state.scrollLeft;
-                }
-            });
-        });
-    }
-
     function basculerMode(mode) {
         // Permettre la re-creation si le mode est 'evaluer' mais les palettes n'existent plus
         if (mode === modeCourant) {
@@ -3956,9 +3928,6 @@
                 return;
             }
             modeCourant = 'evaluer';
-
-            // Capturer scroll + zoom avant la bascule
-            const _scrollState = _capturerScrollVisionneuse();
 
             // Si le layout eval existe déjà (caché), le réafficher sans recréer
             const evalFlexExistant = document.getElementById('eval-layout-flex');
@@ -3992,18 +3961,19 @@
             if (btnAnnoter) btnAnnoter.classList.remove('actif');
             if (btnEvaluer) btnEvaluer.classList.add('actif');
 
-            // Restaurer scroll après le déplacement DOM
-            _restaurerScrollVisionneuse(_scrollState);
+            // Recentrer le document
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    travauxVisionneuse.zoomPleineHauteur();
+                    setTimeout(() => travauxVisionneuse.scrollerEnHaut(), 100);
+                });
+            });
             // Si productionId manquant, ouvrir le panneau correction d'identité
             if (!fichier.productionId) {
                 setTimeout(() => toggleCorrectionIdentite(), 100);
             }
         } else {
             modeCourant = 'annoter';
-
-            // Capturer scroll + zoom avant la bascule
-            const _scrollStateA = _capturerScrollVisionneuse();
-
             masquerPalettesEval();
             afficherPalettesAnnotation();
             // Remettre mode-annot-actif si le layout annotation existe
@@ -4014,8 +3984,13 @@
             if (btnAnnoter) btnAnnoter.classList.add('actif');
             if (btnEvaluer) btnEvaluer.classList.remove('actif');
 
-            // Restaurer scroll après le déplacement DOM
-            _restaurerScrollVisionneuse(_scrollStateA);
+            // Recentrer le document
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    travauxVisionneuse.zoomPleineHauteur();
+                    setTimeout(() => travauxVisionneuse.scrollerEnHaut(), 100);
+                });
+            });
         }
         sauvegarderEtatSession();
     }
