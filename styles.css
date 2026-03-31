@@ -22015,8 +22015,7 @@ body.mode-clair .annot-toolbar {
     display: none;
 }
 .eval-col-document .travaux-canvas-container {
-    flex: 1;
-    width: 100%;
+    overflow: visible;
 }
 
 .eval-layout-flex {
@@ -22031,11 +22030,10 @@ body.mode-clair .annot-toolbar {
 /* Colonne Document (centre, scrollable, colle en haut) */
 .eval-col-document {
     flex: 1;
-    overflow: hidden;
+    overflow: auto;
     min-width: 0;
+    min-height: 0;
     position: relative;
-    display: flex;
-    flex-direction: column;
 }
 .eval-col-document .travaux-canvas-wrapper {
     position: relative;
