@@ -17357,12 +17357,14 @@ body.mode-clair .travaux-apercu-trait {
 .palette-flottante-ancree {
     position: relative;
     flex-shrink: 0;
+    align-self: flex-start;
     height: auto;
-    max-height: none;
-    resize: vertical;
+    max-height: 100%;
+    overflow: visible;
 }
 .palette-flottante-ancree .palette-flottante-contenu {
     max-height: none;
+    overflow-y: visible;
 }
 .palette-flottante-ancree .palette-flottante-barre {
     cursor: default;
