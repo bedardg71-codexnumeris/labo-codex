@@ -362,13 +362,15 @@
 
         palette.innerHTML = html;
 
-        // Insérer dans le layout annotation — bas à droite
+        // Insérer dans le layout annotation — bas à droite, moitié inférieure
         const layout = document.getElementById('annot-layout-flex') || document.getElementById('travaux-conteneur-document');
         if (layout) {
-            palette.style.bottom = '12px';
-            palette.style.right = '12px';
+            palette.style.top = '50%';
+            palette.style.bottom = '0';
+            palette.style.right = '0';
             palette.style.left = 'auto';
-            palette.style.top = 'auto';
+            palette.style.height = '50%';
+            palette.style.borderRadius = '0';
             layout.appendChild(palette);
             configurerDragPalette(palette, layout);
         }
@@ -846,12 +848,14 @@
 
         palette.innerHTML = html;
 
-        // Insérer dans le layout annotation
+        // Insérer dans le layout annotation — haut à droite, moitié supérieure
         const layout = document.getElementById('annot-layout-flex') || document.getElementById('travaux-conteneur-document');
         if (layout) {
-            palette.style.top = '56px';
-            palette.style.right = '12px';
+            palette.style.top = '0';
+            palette.style.right = '0';
             palette.style.left = 'auto';
+            palette.style.height = '50%';
+            palette.style.borderRadius = '0';
             layout.appendChild(palette);
             configurerDragPalette(palette, layout);
         }
