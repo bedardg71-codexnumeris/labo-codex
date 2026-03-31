@@ -1212,7 +1212,7 @@ function executerActionEval(select) {
  * → chargerEvaluationExistanteSiPresente quand l'utilisateur bascule en mode Évaluer.
  *
  * 🔧 FIX (29 mars 2026) : L'ancien callback appelait modifierEvaluationParId en mode
- * annotation (sans eval-layout-flex), ce qui déclenchait le chemin standalone :
+ * annotation (sans palettes eval), ce qui déclenchait le chemin standalone :
  * masquage de evaluations-contenu-fichiers, affichage du formulaire pleine largeur,
  * et _modifierEvaluationEnCours restait collé — contaminant les opérations suivantes.
  */

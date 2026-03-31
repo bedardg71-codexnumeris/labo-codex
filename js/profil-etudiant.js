@@ -8155,7 +8155,7 @@ function consulterEvaluation(da, productionId) {
         // puis ouvrir le fichier. Le callback _apresOuvertureFichier est appelé
         // par ouvrirFichier APRÈS que le fichier soit complètement chargé dans le canvas.
         window._apresOuvertureFichier = function() {
-            // Basculer en mode évaluer (crée le layout eval-layout-flex avec canvas + panneaux)
+            // Basculer en mode évaluer (affiche les palettes eval par-dessus le canvas)
             if (typeof travauxUI.basculerMode === 'function') {
                 travauxUI.basculerMode('evaluer');
             }

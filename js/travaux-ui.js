@@ -415,49 +415,32 @@
     function creerLayoutAnnotation(options) {
         options = options || {};
         const conteneurDocId = options.conteneurDocId || 'travaux-conteneur-document';
-        const canvasContainerId = options.canvasContainerId || 'travaux-canvas-container';
 
         const conteneurDoc = document.getElementById(conteneurDocId);
         if (!conteneurDoc) return;
 
-        // Ne pas recréer si déjà présent dans CE conteneur
-        if (conteneurDoc.querySelector('.annot-layout-flex')) return;
+        // Ne pas recréer si la palette annotation existe déjà
+        if (conteneurDoc.querySelector('#travaux-palette-flottante')) return;
 
-        // --- Conteneur principal (position relative pour les palettes flottantes) ---
-        const layoutFlex = document.createElement('div');
-        layoutFlex.className = 'annot-layout-flex';
-        if (conteneurDocId === 'travaux-conteneur-document') {
-            layoutFlex.id = 'annot-layout-flex';
-        }
+        const zoneCanvas = conteneurDoc.querySelector('#travaux-zone-canvas') || conteneurDoc;
 
-        // --- Colonne document (prend tout l'espace, document centré) ---
-        const colDoc = document.createElement('div');
-        colDoc.className = 'annot-col-document';
-        colDoc.id = 'annot-col-document';
-        const canvasContainer = document.getElementById(canvasContainerId);
-        if (canvasContainer) {
-            colDoc.appendChild(canvasContainer);
-        }
-        layoutFlex.appendChild(colDoc);
-
-        // --- Palette Annotation (flottante par-dessus, top-left) ---
+        // --- Palette Annotation (flottante par-dessus le canvas, top-left) ---
         const paletteDiv = document.createElement('div');
         paletteDiv.innerHTML = travauxOutils.genererHTMLPalette();
         const paletteEl = paletteDiv.firstElementChild;
         paletteEl.style.top = '12px';
         paletteEl.style.left = '12px';
-        layoutFlex.appendChild(paletteEl);
+        zoneCanvas.appendChild(paletteEl);
 
-        // Insérer après la toolbar (.annot-toolbar ou .travaux-toolbar)
-        const toolbar = conteneurDoc.querySelector('.annot-toolbar') || conteneurDoc.querySelector('.travaux-toolbar');
-        if (toolbar) {
-            toolbar.after(layoutFlex);
-        } else {
-            conteneurDoc.appendChild(layoutFlex);
+        // Ouvrir les palettes Codes et Tampons par défaut
+        if (typeof travauxOutils !== 'undefined') {
+            if (!document.getElementById('travaux-palette-erreurs-fr') && travauxOutils.togglePaletteErreursFrancais) {
+                travauxOutils.togglePaletteErreursFrancais();
+            }
+            if (!document.getElementById('travaux-palette-tampons') && travauxOutils.togglePaletteAutocollants) {
+                travauxOutils.togglePaletteAutocollants();
+            }
         }
-
-        // Marquer le conteneur
-        conteneurDoc.classList.add('mode-annot-actif');
     }
 
     function detruireLayoutAnnotation(conteneurDocId) {
@@ -465,26 +448,9 @@
         const conteneurDoc = document.getElementById(conteneurDocId);
         if (!conteneurDoc) return;
 
-        // Trouver le layout dans CE conteneur (pas globalement)
-        const layoutFlex = conteneurDoc.querySelector('.annot-layout-flex');
-        if (!layoutFlex) return;
-
-        // Remettre le canvas dans le conteneur principal
-        const canvasContainerId = conteneurDocId === 'travaux-conteneur-document'
-            ? 'travaux-canvas-container'
-            : 'model-canvas-container';
-        const canvasContainer = document.getElementById(canvasContainerId);
-        if (canvasContainer) {
-            conteneurDoc.appendChild(canvasContainer);
-        }
-
         // Supprimer la palette d'annotation
-        const palette = layoutFlex.querySelector('#travaux-palette-flottante');
+        const palette = conteneurDoc.querySelector('#travaux-palette-flottante');
         if (palette) palette.remove();
-
-        layoutFlex.remove();
-
-        conteneurDoc.classList.remove('mode-annot-actif');
     }
 
     /* ===============================
@@ -907,6 +873,7 @@
                                 <button class="actions-item" id="travaux-btn-annoter" data-action="travauxUI.basculerMode" data-param="annoter">Annoter</button>
                                 <button class="actions-item actions-item-vert" id="travaux-btn-evaluer" data-action="travauxUI.basculerMode" data-param="evaluer">Évaluer</button>
                                 <div class="actions-separateur"></div>
+                                <button class="actions-item" id="travaux-btn-editer" data-action="editerFichierDepuisEvaluation">Éditer</button>
                                 <button class="actions-item" id="travaux-btn-alleger" data-action="travauxUI.allegerFichierActuel">Alléger</button>
                                 <button class="actions-item" id="travaux-btn-reimporter" data-action="travauxUI.reimporterFichierActuel">Re-importer</button>
                             </div>
@@ -931,19 +898,20 @@
                         </div>
                     </div>
 
-                    <!-- Canvas container -->
-                    <div class="travaux-canvas-container" id="travaux-canvas-container">
-                        <div class="travaux-canvas-wrapper" id="travaux-canvas-wrapper">
-                            <canvas id="travaux-canvas-document"></canvas>
-                            <canvas id="travaux-canvas-surligneur" class="u-hide" style="pointer-events:none;"></canvas>
-                            <canvas id="travaux-canvas-annotation" class="u-hide" style="pointer-events:none;"></canvas>
+                    <!-- Zone canvas + palettes flottantes -->
+                    <div class="travaux-zone-canvas" id="travaux-zone-canvas">
+                        <div class="travaux-canvas-container" id="travaux-canvas-container">
+                            <div class="travaux-canvas-wrapper" id="travaux-canvas-wrapper">
+                                <canvas id="travaux-canvas-document"></canvas>
+                                <canvas id="travaux-canvas-surligneur" class="u-hide" style="pointer-events:none;"></canvas>
+                                <canvas id="travaux-canvas-annotation" class="u-hide" style="pointer-events:none;"></canvas>
+                            </div>
+                            <div id="travaux-placeholder-visionneuse" class="travaux-placeholder">
+                                <p>Clique sur un fichier ci-dessus pour l'ouvrir</p>
+                            </div>
                         </div>
-                        <div id="travaux-placeholder-visionneuse" class="travaux-placeholder">
-                            <p>Clique sur un fichier ci-dessus pour l'ouvrir</p>
-                        </div>
+                        <!-- Palettes flottantes inserees dynamiquement par JS -->
                     </div>
-
-                    <!-- Palettes flottantes (annotation, tampons, evaluation) inserees dynamiquement par JS -->
                 </div>
         `;
         conteneur.appendChild(visionDiv);
@@ -2828,13 +2796,8 @@
             fermerModeEvaluation();
             // Réinitialiser modeCourant pour que basculerMode('evaluer') fonctionne ensuite
             modeCourant = 'annoter';
-            // Réafficher le layout annotation (masqué par masquerPalettesAnnotation lors du passage en eval)
+            // Réafficher les palettes annotation (masquées lors du passage en eval)
             afficherPalettesAnnotation();
-            // Remettre mode-annot-actif si le layout existe
-            const conteneurDocR = document.getElementById('travaux-conteneur-document');
-            if (conteneurDocR && document.getElementById('annot-layout-flex')) {
-                conteneurDocR.classList.add('mode-annot-actif');
-            }
         }
         // Masquer la section evaluation si visible (fallback)
         // Ne pas masquer si modifierEvaluation() est en cours de chargement
@@ -3932,36 +3895,19 @@
                 return;
             }
             modeCourant = 'evaluer';
+            masquerPalettesAnnotation();
 
-            // Si le layout eval existe déjà (caché), le réafficher sans recréer
-            const evalFlexExistant = document.getElementById('eval-layout-flex');
-            if (evalFlexExistant) {
-                masquerPalettesAnnotation();
-                evalFlexExistant.classList.remove('u-hide');
-                const conteneurDoc = document.getElementById('travaux-conteneur-document');
-                if (conteneurDoc) conteneurDoc.classList.add('mode-eval-actif');
-                if (conteneurDoc) conteneurDoc.classList.remove('mode-annot-actif');
-                // Remettre le canvas dans le wrapper eval
-                const canvasContainer = document.getElementById('travaux-canvas-container');
-                const evalColDoc = document.getElementById('eval-col-document');
-                if (canvasContainer && evalColDoc) evalColDoc.appendChild(canvasContainer);
+            // Si les palettes eval existent déjà (cachées), les réafficher
+            if (document.getElementById('travaux-palette-eval-gauche')) {
+                ['travaux-palette-eval-gauche', 'travaux-palette-eval-droite', 'travaux-palette-eval-retro'].forEach(function(id) {
+                    var el = document.getElementById(id);
+                    if (el) el.classList.remove('u-hide');
+                });
             } else {
-                // Première fois : créer le layout eval
-                const annotColDoc = document.getElementById('annot-col-document');
-                const conteneurDoc = document.getElementById('travaux-conteneur-document');
-                const canvasContainer = document.getElementById('travaux-canvas-container');
-
-                if (annotColDoc && canvasContainer && conteneurDoc) {
-                    conteneurDoc.appendChild(canvasContainer);
-                } else if (!annotColDoc && canvasContainer && conteneurDoc) {
-                    if (canvasContainer.parentElement !== conteneurDoc) {
-                        conteneurDoc.appendChild(canvasContainer);
-                    }
-                }
-                if (conteneurDoc) conteneurDoc.classList.remove('mode-annot-actif');
-                masquerPalettesAnnotation();
+                // Première fois : créer les palettes eval
                 afficherPalettesEval(fichier);
             }
+
             if (btnAnnoter) btnAnnoter.classList.remove('actif');
             if (btnEvaluer) btnEvaluer.classList.add('actif');
 
@@ -3980,11 +3926,7 @@
             modeCourant = 'annoter';
             masquerPalettesEval();
             afficherPalettesAnnotation();
-            // Remettre mode-annot-actif si le layout annotation existe
-            const conteneurDocA = document.getElementById('travaux-conteneur-document');
-            if (conteneurDocA && document.getElementById('annot-layout-flex')) {
-                conteneurDocA.classList.add('mode-annot-actif');
-            }
+
             if (btnAnnoter) btnAnnoter.classList.add('actif');
             if (btnEvaluer) btnEvaluer.classList.remove('actif');
 
@@ -4000,34 +3942,19 @@
     }
 
     function masquerPalettesAnnotation() {
-        // Masquer le layout annotation ancré
-        const annotLayout = document.getElementById('annot-layout-flex');
-        if (annotLayout) annotLayout.classList.add('u-hide');
-        // Masquer les palettes secondaires (tampons, erreurs-fr restent flottantes)
-        ['travaux-palette-tampons', 'travaux-palette-erreurs-fr'].forEach(id => {
-            const el = document.getElementById(id);
+        // Masquer toutes les palettes du lot annotation
+        ['travaux-palette-flottante', 'travaux-palette-tampons', 'travaux-palette-erreurs-fr'].forEach(function(id) {
+            var el = document.getElementById(id);
             if (el) el.classList.add('u-hide');
         });
-        // Fallback: masquer aussi la palette si elle est hors layout (vue côte-à-côte)
-        const paletteFlottante = document.getElementById('travaux-palette-flottante');
-        if (paletteFlottante && !annotLayout) paletteFlottante.classList.add('u-hide');
     }
 
     function afficherPalettesAnnotation() {
-        // Afficher le layout annotation ancré s'il existe
-        const annotLayout = document.getElementById('annot-layout-flex');
-        if (annotLayout) {
-            annotLayout.classList.remove('u-hide');
-            // Défense en profondeur : s'assurer que les sections ancrées sont visibles
-            ['travaux-palette-erreurs-fr', 'travaux-palette-tampons'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.classList.remove('u-hide');
-            });
-            return;
-        }
-        // Fallback: palette flottante (vue côte-à-côte)
-        const paletteAnnot = document.getElementById('travaux-palette-flottante');
-        if (paletteAnnot) paletteAnnot.classList.remove('u-hide');
+        // Afficher toutes les palettes du lot annotation
+        ['travaux-palette-flottante', 'travaux-palette-tampons', 'travaux-palette-erreurs-fr'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.classList.remove('u-hide');
+        });
     }
 
     function afficherPalettesEval(fichier) {
@@ -4036,28 +3963,12 @@
 
         const conteneurDoc = document.getElementById('travaux-conteneur-document');
         if (!conteneurDoc) return;
+        const zoneCanvas = document.getElementById('travaux-zone-canvas') || conteneurDoc;
 
         // Creer les panneaux
         const panneauGauche = document.getElementById('travaux-eval-gauche');
         const panneauDroite = document.getElementById('travaux-eval-droite');
         const panneauRetro = document.getElementById('travaux-eval-retroaction');
-
-        // Créer le conteneur (position relative pour les palettes flottantes)
-        const evalFlex = document.createElement('div');
-        evalFlex.id = 'eval-layout-flex';
-        evalFlex.className = 'eval-layout-flex';
-
-        // --- Colonne document : le canvas occupe tout l'espace, document centré ---
-        const canvasContainer = document.getElementById('travaux-canvas-container');
-        const centreWrapper = document.createElement('div');
-        centreWrapper.className = 'eval-col-document';
-        centreWrapper.id = 'eval-col-document';
-        if (canvasContainer) {
-            centreWrapper.appendChild(canvasContainer);
-        } else {
-            console.warn('[afficherPalettesEval] canvas-container introuvable — layout eval incomplet');
-        }
-        evalFlex.appendChild(centreWrapper);
 
         // --- Palette Paramètres (flottante, top-left) ---
         const paletteG = panneauGauche ? creerPaletteEval('travaux-palette-eval-gauche', 'Paramètres', panneauGauche) : null;
@@ -4083,7 +3994,7 @@
                 barreParam.insertBefore(btnVerrou, btnToggle);
             }
 
-            evalFlex.appendChild(paletteG);
+            zoneCanvas.appendChild(paletteG);
         }
 
         // --- Palette Évaluation (flottante, right) ---
@@ -4092,7 +4003,7 @@
             paletteD.style.top = '12px';
             paletteD.style.right = '300px';
             paletteD.style.left = 'auto';
-            evalFlex.appendChild(paletteD);
+            zoneCanvas.appendChild(paletteD);
         }
 
         // --- Palette Rétroaction (flottante, far-right) ---
@@ -4151,25 +4062,13 @@
                     piedRetro.appendChild(btnCopier);
                 }
             }
-            evalFlex.appendChild(paletteR);
-        }
-
-        // Insérer le layout sous la toolbar
-        const toolbar = conteneurDoc.querySelector('.travaux-toolbar');
-        if (toolbar) {
-            toolbar.after(evalFlex);
-        } else {
-            conteneurDoc.appendChild(evalFlex);
+            zoneCanvas.appendChild(paletteR);
         }
 
         // Configurer le drag pour chaque palette flottante
         if (paletteG) configurerDragPaletteEval('travaux-palette-eval-gauche');
         if (paletteD) configurerDragPaletteEval('travaux-palette-eval-droite');
         if (paletteR) configurerDragPaletteEval('travaux-palette-eval-retro');
-
-        // Marquer le conteneur en mode eval (pour CSS)
-        conteneurDoc.classList.add('mode-eval-actif');
-
 
         // Bloquer la mémorisation pendant le setup pour ne pas écraser les bonnes valeurs
         window._bloquerMemorisation = true;
@@ -4325,21 +4224,11 @@
     }
 
     function masquerPalettesEval() {
-        // 🔧 FIX (24 mars 2026) : Cacher au lieu de détruire pour préserver l'état de l'évaluation
-        var evalFlex = document.getElementById('eval-layout-flex');
-        if (evalFlex) {
-            evalFlex.classList.add('u-hide');
-            // Remettre le canvas dans le conteneur document principal
-            var canvasContainer = document.getElementById('travaux-canvas-container');
-            var conteneurDoc = document.getElementById('travaux-conteneur-document');
-            var annotColDoc = document.getElementById('annot-col-document');
-            if (canvasContainer && annotColDoc) {
-                annotColDoc.appendChild(canvasContainer);
-            } else if (canvasContainer && conteneurDoc) {
-                conteneurDoc.appendChild(canvasContainer);
-            }
-            conteneurDoc.classList.remove('mode-eval-actif');
-        }
+        // Cacher les 3 palettes eval (sans détruire pour préserver l'état)
+        ['travaux-palette-eval-gauche', 'travaux-palette-eval-droite', 'travaux-palette-eval-retro'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.classList.add('u-hide');
+        });
     }
 
     /**
@@ -4473,9 +4362,8 @@
      */
     function fermerModeEvaluation() {
         let evalDiv = document.getElementById('evaluations-contenu-evaluation');
-        const conteneurDoc = document.getElementById('travaux-conteneur-document');
 
-        // 🔧 FIX (5 mars 2026) : Si le conteneur d'évaluation n'existe plus, le recréer
+        // Si le conteneur d'évaluation n'existe plus, le recréer
         // pour pouvoir y remettre les panneaux (sinon palette.remove() les détruit)
         if (!evalDiv) {
             const annoterSection = document.getElementById('evaluations-annoter');
@@ -4488,17 +4376,7 @@
             }
         }
 
-        // Remettre le canvas container : dans le layout annotation s'il existe, sinon dans le conteneur document
-        const canvasContainer = document.getElementById('travaux-canvas-container');
-        const annotColDoc = document.getElementById('annot-col-document');
-        if (canvasContainer && annotColDoc) {
-            annotColDoc.appendChild(canvasContainer);
-        } else if (canvasContainer && conteneurDoc) {
-            conteneurDoc.appendChild(canvasContainer);
-        }
-
-        // Panneau jetons unifié dans optionsJetons — rien à restaurer
-
+        // Remettre les panneaux dans leur conteneur d'origine et supprimer les palettes
         const ids = ['travaux-palette-eval-gauche', 'travaux-palette-eval-droite', 'travaux-palette-eval-retro'];
         const panneauIds = ['travaux-eval-gauche', 'travaux-eval-droite', 'travaux-eval-retroaction'];
 
@@ -4518,13 +4396,6 @@
             palette.remove();
         }
 
-        // Supprimer le layout flex
-        const evalFlex = document.getElementById('eval-layout-flex');
-        if (evalFlex) evalFlex.remove();
-
-        // Retirer la classe mode eval
-        if (conteneurDoc) conteneurDoc.classList.remove('mode-eval-actif');
-
         // Remettre la section identite visible et masquer la correction
         const sectionIdentite = document.getElementById('travaux-eval-identite');
         const sectionCorrection = document.getElementById('travaux-eval-correction');
@@ -4539,7 +4410,7 @@
     function configurerDragPaletteEval(paletteId) {
         const palette = document.getElementById(paletteId);
         if (!palette) return;
-        const layout = document.getElementById('eval-layout-flex') || document.getElementById('travaux-conteneur-document');
+        const layout = document.getElementById('travaux-zone-canvas') || document.getElementById('travaux-conteneur-document');
         travauxOutils.configurerDragPalette(palette, layout);
     }
 

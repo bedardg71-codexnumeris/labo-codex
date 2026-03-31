@@ -330,11 +330,8 @@
 
     /**
      * Retourne le conteneur de référence pour le calcul de zoom.
-     * En mode évaluer, utilise eval-col-document (espace réel entre les palettes).
      */
     function _obtenirConteneurZoom() {
-        var evalCol = document.getElementById('eval-col-document');
-        if (evalCol && evalCol.offsetWidth > 0) return evalCol;
         return conteneurVisionneuse || document.getElementById('travaux-conteneur-document');
     }
 

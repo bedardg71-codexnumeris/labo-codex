@@ -5276,12 +5276,9 @@ function modifierEvaluation(evaluationId) {
             // Sinon (standalone, sans fichier), afficher le formulaire directement.
             // 🔧 FIX (20 mars 2026) : _forceStandaloneEval permet à modifierEvaluationRemplacee()
             // de forcer le mode standalone pour éviter que preRemplirEvaluation charge la reprise
-            const enModeEvaluer = !window._forceStandaloneEval && !!document.getElementById('eval-layout-flex');
+            const enModeEvaluer = !window._forceStandaloneEval && !!document.getElementById('travaux-palette-eval-gauche');
             if (window._forceStandaloneEval) {
                 window._forceStandaloneEval = false;
-                // Retirer le layout flex s'il existe pour garantir le mode standalone
-                var layoutFlex = document.getElementById('eval-layout-flex');
-                if (layoutFlex) layoutFlex.remove();
             }
             // 🔧 FIX (29 mars 2026) : Ne JAMAIS basculer en standalone si _resterEnModeAnnoter
             // est actif — l'appel vient du mode annotation et masquer le conteneur fichiers

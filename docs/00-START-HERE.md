@@ -56,8 +56,8 @@ Ce pattern est utilise dans :
 
 ## Etat actuel du projet
 
-**Version** : Beta 98.9 (Build 0329-0930)
-**Objectif** : Migration des .onclick directs restants (~164 refs dans JS, index.html propre)
+**Version** : Beta 98.9 (Build 0331-1820)
+**Objectif** : Refactoring Annoter/Evaluer — canevas unique, palettes flottantes interchangeables
 **Priorite** : **Securite + Proprete > Nouvelles fonctionnalites**
 
 **Derniere session** : Voir `../SESSION.md` (racine du projet)

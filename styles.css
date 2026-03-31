@@ -15415,6 +15415,37 @@ body.mode-clair .prep-select {
 #travaux-palette-eval-retro {
     min-width: 100px;
     max-width: 90vw;
+    height: calc(100% - 24px); /* Remplir la zone canvas verticalement */
+    display: flex;
+    flex-direction: column;
+}
+#travaux-palette-eval-retro .palette-flottante-contenu {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+#travaux-palette-eval-retro #travaux-eval-retroaction {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+#travaux-palette-eval-retro .zone-retroaction {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+#travaux-palette-eval-retro #vueRetroGenerale {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+#travaux-palette-eval-retro #retroactionFinale1 {
+    flex: 1;
+    min-height: 80px;
+    resize: vertical;
 }
 
 /* Panneaux internes : style palette (comme prep-palette / planif-palette) */
@@ -17043,6 +17074,16 @@ body.mode-clair .pipeline-autocomplete-item:hover {
     font-size: 11px;
     color: var(--texte-secondaire, #8aa4b0);
     white-space: nowrap;
+}
+
+/* --- Zone canvas + palettes flottantes (contexte de positionnement) --- */
+.travaux-zone-canvas {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
 }
 
 /* --- Canvas container --- */
@@ -22006,43 +22047,8 @@ body.mode-clair .annot-toolbar {
 }
 
 
-/* ===============================
-   LAYOUT FLEX MODE EVALUATION
-   =============================== */
-
-/* Le conteneur document masque son canvas direct (deplace dans le flex) */
-.travaux-zone-document.mode-eval-actif > .travaux-canvas-container {
-    display: none;
-}
-.eval-col-document .travaux-canvas-container {
-    overflow: visible;
-}
-
-.eval-layout-flex {
-    display: flex;
-    flex: 1;
-    gap: 0;
-    overflow: hidden;
-    min-height: 0;
-    position: relative;
-}
-
-/* Colonne Document (centre, scrollable, colle en haut) */
-.eval-col-document {
-    flex: 1;
-    overflow: auto;
-    min-width: 0;
-    min-height: 0;
-    position: relative;
-}
-.eval-col-document .travaux-canvas-wrapper {
-    position: relative;
-    margin: 0;
-}
-
 /* Palettes flottantes d'évaluation — ajustements */
-/* palette eval : contenu suit le scroll de la palette */
-.eval-layout-flex .travaux-palette-eval #retroactionFinale1 {
+.travaux-palette-eval #retroactionFinale1 {
     min-height: 120px;
     width: 100%;
     resize: vertical;
@@ -22102,121 +22108,36 @@ body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0
 }
 
 /* ===============================
-   LAYOUT ANNOTATION (palettes flottantes)
+   PALETTE ANNOTATION (styles compacts)
    =============================== */
 
-.annot-layout-flex {
-    display: flex;
-    flex: 1;
-    gap: 0;
-    overflow: hidden;
-    min-height: 0;
-    position: relative;
-}
-
 /* Boutons outils dans la palette flottante : compact */
-.annot-layout-flex .travaux-palette-outils {
+.palette-flottante .travaux-palette-outils {
     display: flex;
     flex-wrap: wrap;
     gap: 3px;
 }
-.annot-layout-flex .travaux-palette-outils--grille2x2 {
+.palette-flottante .travaux-palette-outils--grille2x2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 3px;
 }
-.annot-layout-flex .travaux-btn-outil {
+.palette-flottante .travaux-btn-outil {
     padding: 3px 6px;
     font-size: 0.68rem;
     min-height: 24px;
 }
 /* Sections compactes */
-.annot-layout-flex .travaux-palette-section {
+.palette-flottante .travaux-palette-section {
     margin-bottom: 2px;
 }
-.annot-layout-flex .travaux-palette-label {
+.palette-flottante .travaux-palette-label {
     font-size: 0.6rem;
     margin-bottom: 1px;
 }
 /* Couleurs : pastilles légèrement réduites */
-.annot-layout-flex .travaux-btn-couleur {
+.palette-flottante .travaux-btn-couleur {
     width: 18px; height: 18px; min-width: 18px; min-height: 18px;
-}
-.annot-col-document {
-    flex: 1;
-    overflow: hidden;
-    min-width: 0;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-}
-/* Le canvas est déplacé dans .annot-col-document par JS — pas de masquage CSS nécessaire */
-
-/* --- Colonne droite annotation (Erreurs FR + Tampons) --- */
-.annot-col-droite {
-    flex: 0 0 220px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    min-width: 0;
-    background: var(--surface-carte, #1a3040);
-    border-left: 1px solid var(--bordure);
-}
-.annot-section-palette {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 50%;
-    min-height: 80px;
-    overflow: hidden;
-}
-.annot-section-palette.replie {
-    flex: 0 0 auto;
-    min-height: 0;
-}
-.annot-section-palette.replie .annot-section-contenu {
-    display: none;
-}
-.annot-section-palette + .splitter-handle-h + .annot-section-palette {
-    /* Le splitter horizontal sert de séparateur visuel */
-}
-.annot-section-barre {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 4px 8px;
-    background: var(--surface-carte, #1a3040);
-    border-bottom: 1px solid rgba(106, 172, 184, 0.15);
-    flex-shrink: 0;
-}
-.annot-section-titre {
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--texte-principal);
-}
-.annot-section-contenu {
-    flex: 1;
-    overflow-y: auto;
-    padding: 4px;
-}
-/* Grilles tampons dans la colonne droite : 3 colonnes */
-.annot-col-droite .travaux-autocollants-grille {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 3px;
-}
-.annot-col-droite .travaux-autocollants-label {
-    font-size: 0.65rem;
-    padding: 3px 4px 1px;
-    color: var(--texte-secondaire);
-}
-.annot-col-droite .travaux-autocollant-item {
-    padding: 3px 2px;
-    font-size: 0.6rem;
-}
-.annot-col-droite .travaux-autocollant-item img {
-    width: 28px;
-    height: 28px;
 }
 /* Erreurs FR compactes dans la colonne droite */
 .travaux-errfr-reglage {

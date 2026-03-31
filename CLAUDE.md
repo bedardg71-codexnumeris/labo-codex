@@ -18,8 +18,8 @@ Ce document te guidera vers :
 
 ## Etat actuel
 
-- **Version** : Beta 98.9 (Build 0329-0930)
-- **Objectif** : Assainissement securite — migration des .onclick directs restants (~164 refs)
+- **Version** : Beta 98.9 (Build 0331-1820)
+- **Objectif** : Refactoring Annoter/Evaluer — canevas unique, palettes flottantes interchangeables
 - **Session en cours** : Voir `SESSION.md`
 - **Backlog** : Voir `BACKLOG.md` (taches a faire)
 
