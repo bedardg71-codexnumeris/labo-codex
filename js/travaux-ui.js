@@ -44,9 +44,8 @@
         return min + ':' + String(sec).padStart(2, '0');
     }
 
-    // IDs des badges/wrappers chrono dans les deux palettes
-    var _chronoBadgeIds = ['travaux-chrono-badge', 'annot-chrono-badge'];
-    var _chronoWrapperIds = ['travaux-chrono-palette', 'annot-chrono-palette'];
+    // IDs des badges chrono (palette flottante indépendante + toolbar legacy)
+    var _chronoBadgeIds = ['chrono-badge', 'travaux-chrono-badge'];
 
     function _majAffichageChrono() {
         var texte = _chronoDebut ? '\u23f1\ufe0f ' + _formaterDuree(Date.now() - _chronoDebut) : '\u23f1\ufe0f --:--';
@@ -61,24 +60,17 @@
 
     function demarrerChrono() {
         const prefs = db.getSync('preferencesAffichage', {});
-        _afficherWrapperChrono(prefs.chronoEvaluation);
         if (!prefs.chronoEvaluation) return;
         if (_chronoDebut) return; // déjà en cours
         _chronoDebut = Date.now();
         const fichier = travauxVisionneuse.getFichierActuel();
         _chronoFichierId = fichier ? fichier.id : null;
+        // Ouvrir automatiquement la palette chrono
+        if (typeof travauxOutils !== 'undefined' && travauxOutils.ouvrirPaletteChrono) {
+            travauxOutils.ouvrirPaletteChrono();
+        }
         _majAffichageChrono();
         _chronoInterval = setInterval(_majAffichageChrono, 1000);
-    }
-
-    function _afficherWrapperChrono(visible) {
-        _chronoWrapperIds.forEach(function(id) {
-            var wrapper = document.getElementById(id);
-            if (wrapper) {
-                if (visible) wrapper.classList.remove('u-hide');
-                else wrapper.classList.add('u-hide');
-            }
-        });
     }
 
     function arreterChrono() {

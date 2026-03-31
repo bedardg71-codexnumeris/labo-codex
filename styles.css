@@ -16848,6 +16848,20 @@ body.mode-clair .pipeline-autocomplete-item:hover {
     color: var(--accent-principal);
 }
 
+/* Palette chrono flottante */
+.palette-chrono {
+    min-width: 80px;
+    width: auto;
+    max-width: 200px;
+    resize: none;
+}
+.palette-chrono-contenu {
+    text-align: center;
+    padding: 8px 12px;
+    font-size: 1.1rem;
+}
+.palette-chrono::after { display: none; }
+
 .btn-icon {
     background: none;
     border: 1px solid var(--bordure-claire);
