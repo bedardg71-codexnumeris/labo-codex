@@ -17580,6 +17580,15 @@ body.mode-clair .travaux-autocollant-item img {
     filter: none;
 }
 
+/* Tampons dans palette flottante : images réduites aux 2/3 */
+.palette-flottante .travaux-autocollant-item img {
+    width: 24px;
+    height: 24px;
+}
+.palette-flottante .travaux-autocollant-item span {
+    font-size: 0.5rem;
+}
+
 .travaux-autocollant-item span {
     font-size: 0.55rem;
     text-align: center;

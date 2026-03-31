@@ -362,12 +362,13 @@
 
         palette.innerHTML = html;
 
-        // Insérer dans le layout annotation (position: relative)
+        // Insérer dans le layout annotation — bas à droite
         const layout = document.getElementById('annot-layout-flex') || document.getElementById('travaux-conteneur-document');
         if (layout) {
-            palette.style.top = '56px';
+            palette.style.bottom = '12px';
             palette.style.right = '12px';
             palette.style.left = 'auto';
+            palette.style.top = 'auto';
             layout.appendChild(palette);
             configurerDragPalette(palette, layout);
         }
