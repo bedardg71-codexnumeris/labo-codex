@@ -890,6 +890,10 @@
         const conteneur = document.getElementById('evaluations-contenu-fichiers');
         if (!conteneur) return;
 
+        // Supprimer le padding de la section parente (comme Planification)
+        const section = document.getElementById('section-evaluations');
+        if (section) section.classList.add('visionneuse-ouverte');
+
         const visionDiv = document.createElement('div');
         visionDiv.className = 'travaux-visionneuse-layout';
         visionDiv.innerHTML = `

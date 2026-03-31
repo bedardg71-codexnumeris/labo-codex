@@ -15137,14 +15137,19 @@ body.mode-clair .prep-select {
 }
 
 /* --- Layout Visionneuse --- */
+/* Quand la visionneuse est ouverte, supprimer le padding de la section */
+#section-evaluations.section.active.visionneuse-ouverte {
+    padding: 0;
+    border-radius: 0;
+    background: none;
+}
+
 .travaux-visionneuse-layout {
     display: flex;
     height: calc(100vh - 120px);
     min-height: 400px;
     gap: 0;
     overflow: hidden;
-    border-top: none;
-    margin-top: -1px;
 }
 
 /* --- Palettes flottantes evaluation --- */
