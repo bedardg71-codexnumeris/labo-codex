@@ -17061,7 +17061,7 @@ body.mode-clair .pipeline-autocomplete-item:hover {
 .travaux-canvas-wrapper {
     position: relative;
     display: inline-block;
-    margin: 40vh 40vw; /* Espace de defilement autour du document (comme planif-espace 10000x6000) */
+    margin: 100vh 100vw; /* Grand espace de défilement autour du document */
 }
 
 .travaux-canvas-container.travaux-pan-pret {
