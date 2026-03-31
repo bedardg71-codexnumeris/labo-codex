@@ -898,6 +898,16 @@
 
                     <!-- Toolbar unique (badges + outils — Phase A) -->
                     <div class="annot-toolbar">
+                        <div class="actions-menu" id="travaux-actions-menu">
+                            <button class="travaux-btn-action" id="travaux-btn-actions">Actions &#x25BE;</button>
+                            <div class="actions-dropdown" id="travaux-actions-dropdown">
+                                <button class="actions-item" id="travaux-btn-annoter" data-action="travauxUI.basculerMode" data-param="annoter">Annoter</button>
+                                <button class="actions-item actions-item-vert" id="travaux-btn-evaluer" data-action="travauxUI.basculerMode" data-param="evaluer">Évaluer</button>
+                                <div class="actions-separateur"></div>
+                                <button class="actions-item" id="travaux-btn-alleger" data-action="travauxUI.allegerFichierActuel">Alléger</button>
+                                <button class="actions-item" id="travaux-btn-reimporter" data-action="travauxUI.reimporterFichierActuel">Re-importer</button>
+                            </div>
+                        </div>
                         ${_htmlDropdownProduction ? `<div class="annot-toolbar-production">${_htmlDropdownProduction}</div>` : ''}
                         <div class="annot-toolbar-fichiers travaux-fichiers-compact">
                             ${_htmlBadgesGrille}
@@ -915,17 +925,6 @@
                             <button class="travaux-btn-nav" data-action="travauxVisionneuse.zoomPleineLargeur" title="Ajuster à la largeur">&#x2194;</button>
                             <button class="travaux-btn-nav" data-action="travauxVisionneuse.zoomPleineHauteur" title="Ajuster à la hauteur">&#x2195;</button>
                             <button id="travaux-btn-zoom100" class="travaux-btn-zoom" data-action="travauxVisionneuse.zoom100" title="Remettre à 100%">100%</button>
-                            <span class="travaux-separateur"></span>
-                            <div class="actions-menu" id="travaux-actions-menu">
-                                <button class="travaux-btn-action" id="travaux-btn-actions">Actions &#x25BE;</button>
-                                <div class="actions-dropdown" id="travaux-actions-dropdown">
-                                    <button class="actions-item" id="travaux-btn-annoter" data-action="travauxUI.basculerMode" data-param="annoter">Annoter</button>
-                                    <button class="actions-item actions-item-vert" id="travaux-btn-evaluer" data-action="travauxUI.basculerMode" data-param="evaluer">Évaluer</button>
-                                    <div class="actions-separateur"></div>
-                                    <button class="actions-item" id="travaux-btn-alleger" data-action="travauxUI.allegerFichierActuel">Alléger</button>
-                                    <button class="actions-item" id="travaux-btn-reimporter" data-action="travauxUI.reimporterFichierActuel">Re-importer</button>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
