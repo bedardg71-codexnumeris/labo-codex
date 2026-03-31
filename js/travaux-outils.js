@@ -1230,12 +1230,6 @@
         html += '</div>';
         html += '<div class="travaux-apercu-trait" id="travaux-apercu-trait"></div>';
 
-        // Chronomètre (en bas du contenu, visible si préférence active)
-        html += '<div id="annot-chrono-palette" class="eval-chrono-wrapper u-hide">';
-        html += '<hr class="separateur-horizontal">';
-        html += '<span id="annot-chrono-badge" class="travaux-chrono-badge" title="Durée annotation + évaluation">⏱️ --:--</span>';
-        html += '</div>';
-
         html += '</div>'; // fin .palette-flottante-contenu
 
         // Barre d'emojis en bas
@@ -1244,6 +1238,7 @@
         html += '<button class="palette-flottante-aide-btn" data-action="tamponsBibliotheque.afficherBibliothequeTampons" title="Bibliothèque de tampons">📚</button>';
         html += '<button class="palette-flottante-aide-btn" id="btn-toggle-codes" data-action="travauxOutils.togglePaletteErreursFrancais" title="Afficher/masquer les codes">🚦</button>';
         html += '<button class="palette-flottante-aide-btn" id="btn-toggle-tampons" data-action="travauxOutils.togglePaletteAutocollants" title="Afficher/masquer les tampons">🫥</button>';
+        html += '<button class="palette-flottante-aide-btn" id="btn-toggle-chrono" data-action="travauxOutils.togglePaletteChrono" title="Chronomètre">⏱️</button>';
         html += '</div>';
 
         html += '</div>'; // fin .palette-flottante
@@ -1430,6 +1425,66 @@
      */
     function afficherRaccourcis() {
         alert('Raccourcis clavier\n\nCtrl+Z : Annuler\nCtrl+Y : Rétablir\nDelete : Supprimer sélection\nEchap : Outil Position');
+    }
+
+    /* ===============================
+       PALETTE CHRONOMÈTRE (flottante)
+       =============================== */
+
+    /**
+     * Toggle la palette chronomètre flottante
+     */
+    function togglePaletteChrono() {
+        let palette = document.getElementById('travaux-palette-chrono');
+
+        if (palette) {
+            palette.remove();
+            majEtatBtnToggle('btn-toggle-chrono', false);
+            return;
+        }
+
+        palette = document.createElement('div');
+        palette.id = 'travaux-palette-chrono';
+        palette.className = 'palette-flottante palette-chrono';
+
+        let html = '<div class="palette-flottante-barre">';
+        html += '<span class="palette-flottante-titre">Chrono</span>';
+        html += '</div>';
+        html += '<div class="palette-flottante-contenu palette-chrono-contenu">';
+        html += '<span id="chrono-badge" class="travaux-chrono-badge" title="Durée annotation + évaluation">⏱️ --:--</span>';
+        html += '</div>';
+
+        palette.innerHTML = html;
+
+        // Insérer dans le layout annotation ou le conteneur document
+        const layout = document.getElementById('annot-layout-flex')
+            || document.getElementById('eval-layout-flex')
+            || document.getElementById('travaux-conteneur-document');
+        if (layout) {
+            // Positionner sous la palette annotation
+            const paletteAnnot = document.getElementById('travaux-palette-flottante');
+            if (paletteAnnot) {
+                const rect = paletteAnnot.getBoundingClientRect();
+                const layoutRect = layout.getBoundingClientRect();
+                palette.style.top = (rect.bottom - layoutRect.top + 8) + 'px';
+                palette.style.left = (rect.left - layoutRect.left) + 'px';
+            } else {
+                palette.style.top = '12px';
+                palette.style.left = '220px';
+            }
+            layout.appendChild(palette);
+            configurerDragPalette(palette, layout);
+        }
+        majEtatBtnToggle('btn-toggle-chrono', true);
+    }
+
+    /**
+     * Ouvre la palette chrono si elle n'est pas déjà ouverte
+     */
+    function ouvrirPaletteChrono() {
+        if (!document.getElementById('travaux-palette-chrono')) {
+            togglePaletteChrono();
+        }
     }
 
     /* ===============================
@@ -2780,6 +2835,8 @@
         focusPalette: focusPalette,
         togglePaletteReplie: togglePaletteReplie,
         afficherRaccourcis: afficherRaccourcis,
+        togglePaletteChrono: togglePaletteChrono,
+        ouvrirPaletteChrono: ouvrirPaletteChrono,
         // Contenu réutilisable (colonne droite + flottant)
         genererContenuErreursFr: genererContenuErreursFr,
         genererContenuTampons: genererContenuTampons,
