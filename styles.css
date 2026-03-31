@@ -17259,9 +17259,7 @@ body.mode-clair .travaux-apercu-trait {
     max-width: 320px;
     user-select: none;
     resize: both;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    overflow: auto;
 }
 
 .palette-flottante-barre {
@@ -17272,7 +17270,10 @@ body.mode-clair .travaux-apercu-trait {
     cursor: grab;
     border-bottom: 1px solid rgba(106, 172, 184, 0.2);
     border-radius: 10px 10px 0 0;
-    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--surface-carte, #1a3040);
 }
 .palette-flottante-barre:active { cursor: grabbing; }
 
@@ -17309,10 +17310,6 @@ body.mode-clair .travaux-apercu-trait {
     flex-direction: column;
     gap: 8px;
     padding: 8px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    flex: 1;
-    max-height: calc(100vh - 250px);
 }
 
 .palette-flottante-bas-btns {
@@ -17322,7 +17319,10 @@ body.mode-clair .travaux-apercu-trait {
     gap: 6px;
     padding: 4px 8px;
     border-top: 1px solid rgba(106, 172, 184, 0.2);
-    flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
+    background: var(--surface-carte, #1a3040);
+    z-index: 1;
 }
 
 .palette-flottante-aide-btn {
@@ -17379,10 +17379,6 @@ body.mode-clair .travaux-apercu-trait {
 }
 
 /* Indicateur de resize */
-.palette-flottante-contenu {
-    /* Espace pour le coin de resize en bas à droite */
-    padding-bottom: 14px;
-}
 .palette-flottante::after {
     content: '';
     position: absolute;
@@ -17409,6 +17405,10 @@ body.mode-clair .palette-flottante-barre {
 }
 body.mode-clair .palette-flottante-bas-btns {
     border-top-color: rgba(3, 46, 92, 0.08);
+    background: #e8f2fd;
+}
+body.mode-clair .palette-flottante-barre {
+    background: #e8f2fd;
 }
 body.mode-clair .palette-flottante-aide-btn:hover {
     background: rgba(3, 46, 92, 0.1);
@@ -22026,9 +22026,7 @@ body.mode-clair .annot-toolbar {
 }
 
 /* Palettes flottantes d'évaluation — ajustements */
-.eval-layout-flex .travaux-palette-eval .palette-flottante-contenu {
-    overflow-y: auto;
-}
+/* palette eval : contenu suit le scroll de la palette */
 .eval-layout-flex .travaux-palette-eval #retroactionFinale1 {
     min-height: 120px;
     width: 100%;
