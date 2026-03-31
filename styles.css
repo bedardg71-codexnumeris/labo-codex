@@ -15217,6 +15217,19 @@ body.mode-clair .prep-select {
 .travaux-palette-eval .groupe-form {
     margin-bottom: 4px !important;
 }
+/* Sous-sections encadrées dans les palettes (Paramètres, Annotation) */
+.palette-sous-section {
+    margin-top: 8px;
+    padding: 8px 10px;
+    background: var(--bleu-tres-pale, rgba(0,0,0,0.15));
+    border-radius: var(--radius-moyen, 8px);
+}
+.palette-sous-section .groupe-form {
+    margin-bottom: 6px !important;
+}
+.palette-sous-section .groupe-form:last-child {
+    margin-bottom: 0 !important;
+}
 .travaux-palette-eval .boite-note-finale {
     margin-top: 8px !important;
     padding: 6px !important;

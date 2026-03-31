@@ -4849,7 +4849,7 @@
                     <div class="travaux-panneau-corps carte-bleu-fonce">
                             <!-- Boutons de gestion des évaluations -->
                             <div class="groupe-boutons-colonne" class="mb-15">
-                                <!-- Sauvegarder et Réinitialiser -->
+                                <!-- Sauvegarder, Réinitialiser et Éditer -->
                                 <div class="groupe-boutons-ligne">
                                     <button class="btn btn-principal btn-tres-compact u-flex-1" data-action="sauvegarderEvaluation"
                                         title="Sauvegarder l'évaluation">
@@ -4860,103 +4860,93 @@
                                         title="Réinitialiser le formulaire en conservant les sélections" data-tooltip="eval-btn-reinitialiser"
                                         style="padding: 4px 10px; font-size: 1.1rem;">↺</button>
                                 </div>
-
-                                <!-- Suppression retirée — utiliser Actions > Supprimer dans la liste des évaluations -->
+                                <div class="groupe-boutons-ligne">
+                                    <button id="btnEditerFichierEval" class="btn btn-secondaire btn-tres-compact u-w-100 u-hide"
+                                        data-action="editerFichierDepuisEvaluation"
+                                        title="Ouvrir le fichier dans l'éditeur de pages">
+                                        Éditer
+                                    </button>
+                                </div>
                             </div>
 
                             <hr class="separateur-horizontal">
-
-                            <!-- Indicateur de verrouillage déplacé dans l'en-tête de palette (btnVerrouPalette) -->
 
                             <!-- Labels d'identité (affichage compact, sans clés) -->
                             <div id="travaux-eval-identite" class="travaux-eval-identite">
                                 <span class="travaux-eval-label-val" id="travaux-eval-label-etudiant">--</span>
                                 <span class="travaux-eval-label-val travaux-eval-label-production" id="travaux-eval-label-production">--</span>
-                                <button class="btn-lien-discret" id="travaux-eval-btn-corriger" data-action="travauxUI.toggleCorrectionIdentite" title="Modifier l'attribution" data-tooltip="eval-modifier-attribution">Modifier</button>
                             </div>
 
-                            <!-- Section correction (cachée par défaut) -->
-                            <div id="travaux-eval-correction" class="u-hide">
+                            <!-- Selects cachés — utilisés par sauvegarderEvaluation() et le pré-remplissage -->
+                            <div id="travaux-eval-correction" class="u-hide" aria-hidden="true">
+                                <select id="selectGroupeEval" class="controle-form"
+                                    data-on-change="filtrerEtudiantsParGroupe">
+                                    <option value="">Tous les groupes</option>
+                                </select>
+                                <select id="selectEtudiantEval" class="controle-form"
+                                    data-on-change="chargerEvaluationsEtudiant">
+                                    <option value="">-- Choisir un·e étudiant·e --</option>
+                                </select>
+                                <select id="selectProduction1" class="controle-form" data-on-change="chargerProduction" data-param="1">
+                                    <option value="">-- Choisir une production --</option>
+                                </select>
+                            </div>
+
+                            <!-- SOUS-SECTION : Configuration de l'évaluation -->
+                            <div class="palette-sous-section">
                                 <div class="groupe-form">
-                                    <label class="label-formulaire">Groupe :</label>
-                                    <select id="selectGroupeEval" class="controle-form"
-                                        data-on-change="filtrerEtudiantsParGroupe">
-                                        <option value="">Tous les groupes</option>
+                                    <label class="label-formulaire" data-tooltip="eval-grille">Grille d'évaluation :</label>
+                                    <select id="selectGrille1" class="controle-form" data-on-change="chargerGrilleSelectionnee">
+                                        <option value="">-- Choisir une grille --</option>
                                     </select>
                                 </div>
+
                                 <div class="groupe-form">
-                                    <label class="label-formulaire">Étudiant·e :</label>
-                                    <select id="selectEtudiantEval" class="controle-form"
-                                        data-on-change="chargerEvaluationsEtudiant">
-                                        <option value="">-- Choisir un·e étudiant·e --</option>
+                                    <label class="label-formulaire" data-tooltip="eval-echelle">Échelle de performance :</label>
+                                    <select id="selectEchelle1" class="controle-form"
+                                        data-on-change="changerEchelleEvaluation" data-param="1">
+                                        <option value="">-- Choisir une échelle --</option>
                                     </select>
                                 </div>
+
                                 <div class="groupe-form">
-                                    <label class="label-formulaire">Production :</label>
-                                    <select id="selectProduction1" class="controle-form" data-on-change="chargerProduction" data-param="1">
-                                        <option value="">-- Choisir une production --</option>
+                                    <label class="label-formulaire" data-tooltip="eval-cartouche">Cartouche de rétroaction :</label>
+                                    <select id="selectCartoucheEval" class="controle-form"
+                                        data-on-change="cartoucheSelectionnee">
+                                        <option value="">-- Choisir une cartouche --</option>
                                     </select>
                                 </div>
-                                <div class="groupe-boutons-ligne">
-                                    <button class="btn btn-principal btn-tres-compact" data-action="travauxUI.appliquerCorrectionIdentite">Appliquer</button>
-                                    <button class="btn btn-secondaire btn-tres-compact" data-action="travauxUI.toggleCorrectionIdentite">Annuler</button>
+
+                                <div class="groupe-form u-hide">
+                                    <label class="label-formulaire" data-tooltip="eval-statut-remise">Statut :</label>
+                                    <select id="remiseProduction1" class="controle-form" data-on-change="changerStatutRemise" data-param="1">
+                                        <option value="non-recu">Non reçu</option>
+                                        <option value="recu">Reçu</option>
+                                        <option value="importe">Importé</option>
+                                        <option value="annote">Annoté</option>
+                                        <option value="evalue">Évalué</option>
+                                    </select>
+                                </div>
+
+                                <div class="groupe-form">
+                                    <label class="label-formulaire" data-tooltip="eval-integrite">Intégrité académique :</label>
+                                    <select id="statutIntegrite" class="controle-form" data-on-change="changerStatutIntegrite">
+                                        <option value="recevable">Recevable</option>
+                                        <option value="soupcon">Soupçon à vérifier</option>
+                                        <option value="plagiat">Non recevable - Plagiat</option>
+                                        <option value="ia">Non recevable - IA non autorisée</option>
+                                    </select>
+                                </div>
+
+                                <div id="divNotesIntegrite" class="groupe-form u-hide">
+                                    <label class="label-formulaire">Notes (optionnel) :</label>
+                                    <textarea id="notesIntegrite" class="controle-form" rows="3" placeholder="Détails du cas, preuves, références..."></textarea>
                                 </div>
                             </div>
 
-                            <div class="groupe-form" class="mb-12">
-                                <label class="label-formulaire" data-tooltip="eval-grille">Grille d'évaluation :</label>
-                                <select id="selectGrille1" class="controle-form" data-on-change="chargerGrilleSelectionnee">
-                                    <option value="">-- Choisir une grille --</option>
-                                </select>
-                            </div>
-
-                            <div class="groupe-form" class="mb-12">
-                                <label class="label-formulaire" data-tooltip="eval-echelle">Échelle de performance :</label>
-                                <select id="selectEchelle1" class="controle-form"
-                                    data-on-change="changerEchelleEvaluation" data-param="1">
-                                    <option value="">-- Choisir une échelle --</option>
-                                </select>
-                            </div>
-
-                            <div class="groupe-form" class="mb-12">
-                                <label class="label-formulaire" data-tooltip="eval-cartouche">Cartouche de rétroaction :</label>
-                                <select id="selectCartoucheEval" class="controle-form"
-                                    data-on-change="cartoucheSelectionnee">
-                                    <option value="">-- Choisir une cartouche --</option>
-                                </select>
-                            </div>
-
-                            <div class="groupe-form u-hide" class="mb-12">
-                                <label class="label-formulaire" data-tooltip="eval-statut-remise">Statut :</label>
-                                <select id="remiseProduction1" class="controle-form" data-on-change="changerStatutRemise" data-param="1">
-                                    <option value="non-recu">Non reçu</option>
-                                    <option value="recu">Reçu</option>
-                                    <option value="importe">Importé</option>
-                                    <option value="annote">Annoté</option>
-                                    <option value="evalue">Évalué</option>
-                                </select>
-                            </div>
-
-                            <!-- STATUT D'INTÉGRITÉ ACADÉMIQUE -->
-                            <div class="groupe-form" class="mb-12">
-                                <label class="label-formulaire" data-tooltip="eval-integrite">Intégrité académique :</label>
-                                <select id="statutIntegrite" class="controle-form" data-on-change="changerStatutIntegrite">
-                                    <option value="recevable">Recevable</option>
-                                    <option value="soupcon">Soupçon à vérifier</option>
-                                    <option value="plagiat">Non recevable - Plagiat</option>
-                                    <option value="ia">Non recevable - IA non autorisée</option>
-                                </select>
-                            </div>
-
-                            <!-- NOTES SUR L'INTÉGRITÉ (optionnel) -->
-                            <div id="divNotesIntegrite" class="groupe-form u-hide">
-                                <label class="label-formulaire">Notes (optionnel) :</label>
-                                <textarea id="notesIntegrite" class="controle-form" rows="3" placeholder="Détails du cas, preuves, références..."></textarea>
-                            </div>
-
-                            <!-- OPTIONS DE JETONS (peuplé dynamiquement par peuplementOptJetons()) -->
-                            <div id="optionsJetons" class="groupe-form u-hide">
-                                <label class="label-formulaire" data-tooltip="eval-jetons">Jetons :</label>
+                            <!-- SOUS-SECTION : Application de jetons -->
+                            <div id="optionsJetons" class="palette-sous-section u-hide">
+                                <label class="label-formulaire" data-tooltip="eval-jetons">Application de jeton :</label>
                                 <div id="optionsJetonsContenu">
                                     <!-- Rendu dynamique basé sur obtenirTousTypesJetons() -->
                                 </div>
