@@ -3909,6 +3909,29 @@
         basculerMode('evaluer');
     }
 
+    /**
+     * Capture scroll + zoom de la visionneuse avant une bascule de mode
+     */
+    function _capturerScrollVisionneuse() {
+        const colDoc = document.getElementById('annot-col-document') || document.getElementById('eval-col-document');
+        return {
+            scrollTop: colDoc ? colDoc.scrollTop : 0,
+            scrollLeft: colDoc ? colDoc.scrollLeft : 0
+        };
+    }
+
+    /**
+     * Restaure scroll de la visionneuse après une bascule de mode
+     */
+    function _restaurerScrollVisionneuse(state) {
+        if (!state) return;
+        const colDoc = document.getElementById('annot-col-document') || document.getElementById('eval-col-document');
+        if (colDoc) {
+            colDoc.scrollTop = state.scrollTop;
+            colDoc.scrollLeft = state.scrollLeft;
+        }
+    }
+
     function basculerMode(mode) {
         // Permettre la re-creation si le mode est 'evaluer' mais les palettes n'existent plus
         if (mode === modeCourant) {
@@ -3929,6 +3952,9 @@
             }
             modeCourant = 'evaluer';
 
+            // Capturer scroll + zoom avant la bascule
+            const _scrollState = _capturerScrollVisionneuse();
+
             // Si le layout eval existe déjà (caché), le réafficher sans recréer
             const evalFlexExistant = document.getElementById('eval-layout-flex');
             if (evalFlexExistant) {
@@ -3943,7 +3969,6 @@
                 if (canvasContainer && evalColDoc) evalColDoc.appendChild(canvasContainer);
             } else {
                 // Première fois : créer le layout eval
-                // Extraire le canvas du layout annotation avant de construire le layout eval
                 const annotColDoc = document.getElementById('annot-col-document');
                 const conteneurDoc = document.getElementById('travaux-conteneur-document');
                 const canvasContainer = document.getElementById('travaux-canvas-container');
@@ -3955,27 +3980,25 @@
                         conteneurDoc.appendChild(canvasContainer);
                     }
                 }
-                // Retirer mode-annot-actif pendant le mode évaluation
                 if (conteneurDoc) conteneurDoc.classList.remove('mode-annot-actif');
                 masquerPalettesAnnotation();
                 afficherPalettesEval(fichier);
             }
             if (btnAnnoter) btnAnnoter.classList.remove('actif');
             if (btnEvaluer) btnEvaluer.classList.add('actif');
-            // Pleine hauteur par défaut en mode évaluation
-            // 🔧 FIX (5 mars 2026) : double RAF pour attendre que le layout ait ses dimensions finales
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    travauxVisionneuse.zoomPleineHauteur();
-                    setTimeout(() => travauxVisionneuse.scrollerEnHaut(), 100);
-                });
-            });
+
+            // Restaurer scroll après le déplacement DOM
+            requestAnimationFrame(() => { _restaurerScrollVisionneuse(_scrollState); });
             // Si productionId manquant, ouvrir le panneau correction d'identité
             if (!fichier.productionId) {
                 setTimeout(() => toggleCorrectionIdentite(), 100);
             }
         } else {
             modeCourant = 'annoter';
+
+            // Capturer scroll + zoom avant la bascule
+            const _scrollStateA = _capturerScrollVisionneuse();
+
             masquerPalettesEval();
             afficherPalettesAnnotation();
             // Remettre mode-annot-actif si le layout annotation existe
@@ -3985,14 +4008,9 @@
             }
             if (btnAnnoter) btnAnnoter.classList.add('actif');
             if (btnEvaluer) btnEvaluer.classList.remove('actif');
-            // Pleine hauteur par défaut en mode annotation
-            // 🔧 FIX (5 mars 2026) : double RAF pour attendre que le layout ait ses dimensions finales
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    travauxVisionneuse.zoomPleineHauteur();
-                    setTimeout(() => travauxVisionneuse.scrollerEnHaut(), 100);
-                });
-            });
+
+            // Restaurer scroll après le déplacement DOM
+            requestAnimationFrame(() => { _restaurerScrollVisionneuse(_scrollStateA); });
         }
         sauvegarderEtatSession();
     }
