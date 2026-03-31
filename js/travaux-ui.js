@@ -430,14 +430,7 @@
             layoutFlex.id = 'annot-layout-flex';
         }
 
-        // --- Palette Annotation (flex child à gauche, pousse le canvas) ---
-        const paletteDiv = document.createElement('div');
-        paletteDiv.innerHTML = travauxOutils.genererHTMLPalette();
-        const paletteEl = paletteDiv.firstElementChild;
-        paletteEl.classList.add('palette-flottante-ancree');
-        layoutFlex.appendChild(paletteEl);
-
-        // --- Colonne document (prend le reste de l'espace) ---
+        // --- Colonne document (prend tout l'espace, document centré) ---
         const colDoc = document.createElement('div');
         colDoc.className = 'annot-col-document';
         colDoc.id = 'annot-col-document';
@@ -446,6 +439,14 @@
             colDoc.appendChild(canvasContainer);
         }
         layoutFlex.appendChild(colDoc);
+
+        // --- Palette Annotation (flottante par-dessus, top-left) ---
+        const paletteDiv = document.createElement('div');
+        paletteDiv.innerHTML = travauxOutils.genererHTMLPalette();
+        const paletteEl = paletteDiv.firstElementChild;
+        paletteEl.style.top = '12px';
+        paletteEl.style.left = '12px';
+        layoutFlex.appendChild(paletteEl);
 
         // Insérer après la toolbar (.annot-toolbar ou .travaux-toolbar)
         const toolbar = conteneurDoc.querySelector('.annot-toolbar') || conteneurDoc.querySelector('.travaux-toolbar');
@@ -4044,10 +4045,23 @@
         evalFlex.id = 'eval-layout-flex';
         evalFlex.className = 'eval-layout-flex';
 
-        // --- Palette Paramètres (flex child à gauche, pousse le canvas) ---
+        // --- Colonne document : le canvas occupe tout l'espace, document centré ---
+        const canvasContainer = document.getElementById('travaux-canvas-container');
+        const centreWrapper = document.createElement('div');
+        centreWrapper.className = 'eval-col-document';
+        centreWrapper.id = 'eval-col-document';
+        if (canvasContainer) {
+            centreWrapper.appendChild(canvasContainer);
+        } else {
+            console.warn('[afficherPalettesEval] canvas-container introuvable — layout eval incomplet');
+        }
+        evalFlex.appendChild(centreWrapper);
+
+        // --- Palette Paramètres (flottante, top-left) ---
         const paletteG = panneauGauche ? creerPaletteEval('travaux-palette-eval-gauche', 'Paramètres', panneauGauche) : null;
         if (paletteG) {
-            paletteG.classList.add('palette-flottante-ancree');
+            paletteG.style.top = '12px';
+            paletteG.style.left = '12px';
 
             // Bouton cadenas compact dans la barre de titre
             const barreParam = paletteG.querySelector('.palette-flottante-barre');
@@ -4069,18 +4083,6 @@
 
             evalFlex.appendChild(paletteG);
         }
-
-        // --- Colonne document : le canvas occupe le reste de l'espace ---
-        const canvasContainer = document.getElementById('travaux-canvas-container');
-        const centreWrapper = document.createElement('div');
-        centreWrapper.className = 'eval-col-document';
-        centreWrapper.id = 'eval-col-document';
-        if (canvasContainer) {
-            centreWrapper.appendChild(canvasContainer);
-        } else {
-            console.warn('[afficherPalettesEval] canvas-container introuvable — layout eval incomplet');
-        }
-        evalFlex.appendChild(centreWrapper);
 
         // --- Palette Évaluation (flottante, right) ---
         const paletteD = panneauDroite ? creerPaletteEval('travaux-palette-eval-droite', 'Évaluation', panneauDroite) : null;
