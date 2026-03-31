@@ -22000,7 +22000,7 @@ body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0
     flex-direction: column;
     overflow: hidden;
     min-width: 0;
-    background: var(--surface-1);
+    background: var(--surface-carte, #1a3040);
     border-left: 1px solid var(--bordure);
 }
 .annot-section-palette {
@@ -22025,13 +22025,15 @@ body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0
     align-items: center;
     justify-content: space-between;
     padding: 4px 8px;
-    background: var(--surface-2);
-    border-bottom: 1px solid var(--bordure);
+    background: var(--surface-carte, #1a3040);
+    border-bottom: 1px solid rgba(106, 172, 184, 0.15);
     flex-shrink: 0;
 }
 .annot-section-titre {
     font-size: 0.75rem;
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     color: var(--texte-principal);
 }
 .annot-section-contenu {

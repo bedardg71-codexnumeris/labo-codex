@@ -351,9 +351,7 @@
         html += '<span class="travaux-palette-titre">Tampons</span>';
         html += '<div style="display:flex; gap:2px;">';
         html += '<button class="travaux-palette-toggle" data-action="travauxOutils.ouvrirEditionRetroObservations" title="Personnaliser les rétroactions">\u2699</button>';
-        html += '<button class="travaux-palette-toggle" data-action="tamponsBibliotheque.afficherBibliothequeTampons" title="Bibliothèque de tampons">\uD83D\uDCDA</button>';
-        html += '<button class="travaux-palette-toggle" data-action="travauxOutils.togglePaletteTamponsReplie" title="Replier">−</button>';
-        html += '<button class="travaux-palette-toggle" data-action="travauxOutils.fermerPaletteAutocollants" title="Fermer">×</button>';
+        html += '<button class="travaux-palette-toggle" data-action="tamponsBibliotheque.afficherBibliothequeTampons" title="Biblioth\u00e8que de tampons">\uD83D\uDCDA</button>';
         html += '</div></div>';
 
         // Contenu (réutilise la fonction partagée)
@@ -864,11 +862,9 @@
 
         // Barre de titre
         let html = '<div class="travaux-palette-barre">';
-        html += '<span class="travaux-palette-titre">Erreurs de français</span>';
+        html += '<span class="travaux-palette-titre">Codes</span>';
         html += '<div style="display:flex; gap:2px;">';
         html += '<button class="travaux-palette-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="Personnaliser les rétroactions">\u2699</button>';
-        html += '<button class="travaux-palette-toggle" data-action="travauxOutils.togglePaletteErrFrReplie" title="Replier">\u2212</button>';
-        html += '<button class="travaux-palette-toggle" data-action="travauxOutils.fermerPaletteErreursFrancais" title="Fermer">\u00d7</button>';
         html += '</div></div>';
 
         // Contenu : liste verticale (réutilise la fonction partagée)
@@ -1183,16 +1179,28 @@
     function genererHTMLPalette() {
         let html = '<div class="travaux-palette-flottante" id="travaux-palette-flottante">';
 
-        // Barre de titre draggable
+        // Barre de titre (sans bouton replier)
         html += '<div class="travaux-palette-barre">';
         html += '<span class="travaux-palette-titre">Annotation</span>';
-        html += '<div>';
-        html += '<button class="travaux-palette-toggle" data-action="travauxOutils.togglePaletteReplie" title="Replier/Deplier">&#x2212;</button>';
-        html += '</div>';
         html += '</div>';
 
         // Contenu (sections verticales)
         html += '<div class="travaux-palette-contenu">';
+
+        // Chronomètre (visible si préférence active)
+        // Boutons d'action
+        html += '<div class="groupe-boutons-colonne">';
+        html += '<div class="groupe-boutons-ligne">';
+        html += '<button id="travaux-btn-supprimer" class="btn btn-secondaire btn-tres-compact u-flex-1" data-action="travauxAnnotation.supprimerSelection" disabled title="Supprimer la s\u00e9lection (Delete)">Supprimer</button>';
+        html += '<button id="travaux-btn-undo" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.annuler" disabled title="Annuler (Ctrl+Z)">\u21b6</button>';
+        html += '<button id="travaux-btn-redo" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.retablir" disabled title="R\u00e9tablir (Ctrl+Y)">\u21b7</button>';
+        html += '</div>';
+        html += '<div class="groupe-boutons-ligne">';
+        html += '<button class="btn btn-supprimer btn-tres-compact u-flex-1" data-action="travauxAnnotation.effacerPage" title="Effacer toute la page">Effacer tout</button>';
+        html += '</div>';
+        html += '</div>';
+
+        html += '<hr class="separateur-horizontal">';
 
         // Outils de dessin
         html += '<div class="travaux-palette-section">';
@@ -1212,7 +1220,7 @@
 
         html += '</div></div>';
 
-        // Formes (grille 2x2 : Cercle+Ligne / Rect.+Vague)
+        // Formes (grille 2x2)
         html += '<div class="travaux-palette-section">';
         html += '<div class="travaux-palette-label">Formes</div>';
         html += '<div class="travaux-palette-outils travaux-palette-outils--grille2x2">';
@@ -1227,7 +1235,7 @@
 
         html += '</div></div>';
 
-        // Options extrémités : 4 modes de pointes (visible quand outil fleche ou ondule actif)
+        // Options extrémités (visible quand outil fleche ou ondule actif)
         const montrerExtremites = outilActif === 'fleche' || outilActif === 'ondule';
         html += '<div class="travaux-palette-section travaux-options-fleche" id="travaux-options-fleche"' + (montrerExtremites ? '' : ' style="display:none"') + '>';
         html += '<div class="travaux-palette-label">Extr\u00e9mit\u00e9s</div>';
@@ -1243,6 +1251,8 @@
             html += `<button class="travaux-btn-outil${act}" data-pointes="${m.val}" data-action="travauxOutils.setFlechePointes" data-param="${m.val}" title="${m.titre}">${m.label}</button>`;
         });
         html += '</div></div>';
+
+        html += '<hr class="separateur-horizontal">';
 
         // Couleurs
         html += '<div class="travaux-palette-section">';
@@ -1268,17 +1278,14 @@
         html += `<button class="travaux-btn-epaisseur-inc" data-action="travauxOutils.incrementerEpaisseur" title="Plus \u00e9pais">\u2192</button>`;
         html += '</div>';
         html += '<div class="travaux-apercu-trait" id="travaux-apercu-trait"></div>';
+
+        // Chronomètre (en bas, visible si préférence active)
+        html += '<div id="annot-chrono-palette" class="eval-chrono-wrapper u-hide">';
+        html += '<hr class="separateur-horizontal">';
+        html += '<span id="annot-chrono-badge" class="travaux-chrono-badge" title="Dur\u00e9e annotation + \u00e9valuation">\u23f1\ufe0f --:--</span>';
         html += '</div>';
 
         html += '</div>'; // fin .travaux-palette-contenu
-
-        // Pied de palette : Undo / Redo / Effacer
-        html += '<div class="travaux-palette-pied">';
-        html += '<button id="travaux-btn-undo" class="travaux-palette-btn-pied" data-action="travauxAnnotation.annuler" disabled title="Annuler (Ctrl+Z)">Annuler</button>';
-        html += '<button id="travaux-btn-redo" class="travaux-palette-btn-pied" data-action="travauxAnnotation.retablir" disabled title="Retablir (Ctrl+Y)">R\u00e9tablir</button>';
-        html += '<button id="travaux-btn-supprimer" class="travaux-palette-btn-pied" data-action="travauxAnnotation.supprimerSelection" disabled title="Supprimer la sélection (Delete)">Supprimer</button>';
-        html += '<button class="travaux-palette-btn-pied travaux-palette-btn-danger" data-action="travauxAnnotation.effacerPage" title="Effacer toute la page">Effacer tout</button>';
-        html += '</div>';
 
         html += '</div>'; // fin .travaux-palette-flottante
 
