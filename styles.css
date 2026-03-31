@@ -17433,12 +17433,14 @@ body.mode-clair .palette-flottante-aide-btn:hover {
     max-height: calc(100vh - 250px);
 }
 
-.travaux-palette-contenu .travaux-palette-section {
+.travaux-palette-contenu .travaux-palette-section,
+.palette-flottante-contenu .travaux-palette-section {
     flex-direction: column;
     align-items: flex-start;
 }
 
-.travaux-palette-contenu .travaux-palette-outils {
+.travaux-palette-contenu .travaux-palette-outils,
+.palette-flottante-contenu .travaux-palette-outils {
     flex-wrap: wrap;
 }
 
