@@ -15563,6 +15563,15 @@ body.mode-clair .travaux-compteur-badge {
     flex-wrap: wrap;
     gap: 6px;
 }
+.retro-sous-barre {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-bottom: 1px solid rgba(106, 172, 184, 0.15);
+    font-size: 0.7rem;
+    flex-shrink: 0;
+}
 .retro-vues-radios {
     display: flex;
     gap: 8px;
