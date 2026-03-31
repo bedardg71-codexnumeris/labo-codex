@@ -843,7 +843,7 @@
         document.addEventListener('keydown', onPanKeyDown);
         document.addEventListener('keyup', onPanKeyUp);
         conteneur.addEventListener('pointerdown', onPanPointerDown);
-        conteneur.addEventListener('pointermove', onPanPointerMove);
+        conteneur.addEventListener('pointermove', onPanPointerMove, { passive: true });
         conteneur.addEventListener('pointerup', onPanPointerUp);
         conteneur.addEventListener('pointercancel', onPanPointerUp);
         conteneur.addEventListener('mousedown', function(e) {
@@ -913,13 +913,21 @@
         }
     }
 
+    var _panRAF = null;
     function onPanPointerMove(e) {
         if (!panState.actif) return;
-        e.preventDefault();
-        var dx = e.clientX - panState.startX;
-        var dy = e.clientY - panState.startY;
-        conteneurGestesZoom.scrollLeft = panState.scrollXDepart - dx;
-        conteneurGestesZoom.scrollTop = panState.scrollYDepart - dy;
+        // Stocker les dernières coordonnées
+        panState.lastX = e.clientX;
+        panState.lastY = e.clientY;
+        // Throttle à 1 update par frame (fluidité)
+        if (_panRAF) return;
+        _panRAF = requestAnimationFrame(function() {
+            _panRAF = null;
+            var dx = panState.lastX - panState.startX;
+            var dy = panState.lastY - panState.startY;
+            conteneurGestesZoom.scrollLeft = panState.scrollXDepart - dx;
+            conteneurGestesZoom.scrollTop = panState.scrollYDepart - dy;
+        });
     }
 
     function onPanPointerUp(e) {
