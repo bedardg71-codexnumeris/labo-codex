@@ -689,7 +689,7 @@ const TOOLTIPS = {
         'Indiquer si la production a \u00e9t\u00e9 remise. Conditionne le calcul de l\u2019indice de compl\u00e9tion (C).',
 
     'eval-integrite':
-        'Recevable ou non. Les travaux non recevables sont exclus des calculs de moyenne.',
+        'Recevable ou non.\nLes travaux non recevables (plagiat, IA non autoris\u00e9e) sont exclus des calculs de moyenne et de l\u2019indice P.',
 
     'eval-jetons':
         'D\u00e9lai (orange), Reprise (vert) ou Reprise cibl\u00e9e (violet). Permet \u00e0 l\u2019\u00e9tudiant de d\u00e9montrer sa progression.',

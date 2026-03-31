@@ -2573,10 +2573,36 @@ function peuplementOptJetons() {
         ? obtenirDonneesSelonMode('evaluationsSauvegardees') || [] : [];
     var evalCourante = evalId ? evaluations.find(function(e) { return e.id === evalId; }) : null;
 
-    // Obtenir le statut (restants/total) pour l'étudiant courant
+    // Obtenir le statut (utilisés/total) pour l'étudiant courant
     var da = window.evaluationEnCours ? window.evaluationEnCours.etudiantDA : null;
     var statut = (da && typeof obtenirStatutJetonsEtudiant === 'function')
         ? obtenirStatutJetonsEtudiant(da) : {};
+
+    // === 1. Résumé des jetons utilisés (style Bilan) ===
+    var totalUtilises = 0;
+    var totalMax = 0;
+    var jetonsUtilisesListe = [];
+
+    if (da) {
+        var toutesEvals = db.getSync(cle('evaluationsSauvegardees'), []);
+        var productions = typeof obtenirDonneesSelonMode === 'function'
+            ? obtenirDonneesSelonMode('productions') || [] : [];
+        toutesEvals.filter(function(e) {
+            return e.etudiantDA === da && !e.remplaceeParId;
+        }).forEach(function(e) {
+            var prod = productions.find(function(p) { return p.id === e.productionId; });
+            var nomProd = prod ? (prod.titre || prod.nom || e.productionId) : e.productionId;
+            if (e.jetonDelaiApplique) jetonsUtilisesListe.push('D\u00e9lai \u2014 ' + echapperHtml(nomProd));
+            if (e.jetonRepriseApplique || e.repriseDeId) jetonsUtilisesListe.push('Reprise \u2014 ' + echapperHtml(nomProd));
+            if (e.jetonRepriseCibleeApplique) jetonsUtilisesListe.push('Reprise cibl\u00e9e \u2014 ' + echapperHtml(nomProd));
+        });
+        totalUtilises = jetonsUtilisesListe.length;
+        // Max global = nombreParEleve (quota configuré dans la pratique de notation)
+        var modalites = db.getSync('modalitesEvaluation', {});
+        totalMax = (modalites.configPAN && modalites.configPAN.jetons && modalites.configPAN.jetons.nombreParEleve)
+            || (modalites.configurationJetons && modalites.configurationJetons.nombreParEleve)
+            || 2;
+    }
 
     // Map des IDs de checkbox et handlers pour les jetons prédéfinis
     var mapPredefinis = {
@@ -2612,14 +2638,26 @@ function peuplementOptJetons() {
         }
     };
 
-    // Construire le HTML
+    // === 2. Résumé (en-dessous des checkboxes) ===
+    var htmlResume = '<div style="margin-top: 10px; padding: 5px 8px; background: var(--surface-base, rgba(0,0,0,0.15)); border-radius: 6px; font-size: 0.72rem; line-height: 1.4;">';
+    htmlResume += '<strong>Jetons utilis\u00e9s\u00a0: ' + totalUtilises + ' / ' + totalMax + '</strong>';
+    if (jetonsUtilisesListe.length > 0) {
+        htmlResume += '<div style="margin-top: 3px; color: var(--gris-clair, #aaa);">';
+        jetonsUtilisesListe.forEach(function(j) {
+            htmlResume += '<div>\u2022 ' + j + '</div>';
+        });
+        htmlResume += '</div>';
+    }
+    htmlResume += '</div>';
+
+    // === 3. Checkboxes pour appliquer ===
     var htmlJetons = [];
     var htmlPerso = [];
 
     for (var i = 0; i < types.length; i++) {
         var type = types[i];
-        var s = statut[type.id] || { restants: type.nombreTotal || 0, total: type.nombreTotal || 0 };
-        var compteur = s.restants + '/' + s.total;
+        var s = statut[type.id] || { utilises: 0, total: type.nombreTotal || 0 };
+        var compteur = s.utilises + '/' + s.total;
 
         if (type.predefini && mapPredefinis[type.id]) {
             // Jeton prédéfini — badge avec style distinctif
@@ -2651,7 +2689,7 @@ function peuplementOptJetons() {
         }
     }
 
-    // Assembler : liste verticale de prédéfinis + personnalisés en dessous
+    // Assembler : checkboxes prédéfinis + personnalisés + résumé en-dessous
     var html = '<div style="display: flex; flex-direction: column; gap: 8px;">' +
                htmlJetons.join('') +
                '</div>';
@@ -2659,6 +2697,8 @@ function peuplementOptJetons() {
     if (htmlPerso.length > 0) {
         html += '<div class="u-flex-gap-10 u-flex-col" style="margin-top: 10px;">' + htmlPerso.join('') + '</div>';
     }
+
+    html += htmlResume;
 
     conteneur.innerHTML = html;
 }

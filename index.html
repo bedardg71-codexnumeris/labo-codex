@@ -4856,19 +4856,12 @@
                                         Sauvegarder
                                     </button>
 
-                                    <button class="btn btn-annuler btn-tres-compact u-flex-1" data-action="reinitialiserFormulaire"
-                                        title="Réinitialiser le formulaire en conservant les sélections" data-tooltip="eval-btn-reinitialiser">
-                                        Réinitialiser
-                                    </button>
+                                    <button class="btn btn-annuler btn-tres-compact" data-action="reinitialiserFormulaire"
+                                        title="Réinitialiser le formulaire en conservant les sélections" data-tooltip="eval-btn-reinitialiser"
+                                        style="padding: 4px 10px; font-size: 1.1rem;">↺</button>
                                 </div>
 
-                                <!-- Supprimer cette évaluation (visible seulement en mode modification) -->
-                                <div class="groupe-boutons-ligne u-hide" id="ligneSupprimerEvaluation">
-                                    <button class="btn btn-supprimer btn-tres-compact u-w-100" data-action="confirmerSuppressionEvaluationSidebar"
-                                        title="Supprimer définitivement cette évaluation" data-tooltip="eval-btn-supprimer">
-                                        Supprimer cette évaluation
-                                    </button>
-                                </div>
+                                <!-- Suppression retirée — utiliser Actions > Supprimer dans la liste des évaluations -->
                             </div>
 
                             <hr class="separateur-horizontal">
@@ -4953,9 +4946,6 @@
                                     <option value="plagiat">Non recevable - Plagiat</option>
                                     <option value="ia">Non recevable - IA non autorisée</option>
                                 </select>
-                                <p class="text-085-muted-m5-0-0-28 u-texte-mini">
-                                    Les travaux non recevables sont exclus des calculs de moyenne.
-                                </p>
                             </div>
 
                             <!-- NOTES SUR L'INTÉGRITÉ (optionnel) -->
@@ -4966,7 +4956,7 @@
 
                             <!-- OPTIONS DE JETONS (peuplé dynamiquement par peuplementOptJetons()) -->
                             <div id="optionsJetons" class="groupe-form u-hide">
-                                <label class="label-formulaire" data-tooltip="eval-jetons">Appliquer un jeton :</label>
+                                <label class="label-formulaire" data-tooltip="eval-jetons">Jetons :</label>
                                 <div id="optionsJetonsContenu">
                                     <!-- Rendu dynamique basé sur obtenirTousTypesJetons() -->
                                 </div>
