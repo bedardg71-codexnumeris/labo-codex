@@ -386,7 +386,30 @@
     }
 
     /* ===============================
-       LAYOUT ANNOTATION ANCRÉ
+       DROPDOWN ACTIONS (Annoter / Évaluer / Alléger)
+       =============================== */
+
+    function _configurerDropdownActions() {
+        var btn = document.getElementById('travaux-btn-actions');
+        var dropdown = document.getElementById('travaux-actions-dropdown');
+        if (!btn || !dropdown) return;
+
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdown.classList.toggle('ouvert');
+        });
+        // Fermer au clic ailleurs
+        document.addEventListener('click', function() {
+            dropdown.classList.remove('ouvert');
+        });
+        // Fermer après un clic dans le menu (l'action est déjà déléguée par data-action)
+        dropdown.addEventListener('click', function() {
+            dropdown.classList.remove('ouvert');
+        });
+    }
+
+    /* ===============================
+       LAYOUT ANNOTATION (palettes flottantes)
        =============================== */
 
     function creerLayoutAnnotation(options) {
@@ -893,11 +916,16 @@
                             <button class="travaux-btn-nav" data-action="travauxVisionneuse.zoomPleineHauteur" title="Ajuster à la hauteur">&#x2195;</button>
                             <button id="travaux-btn-zoom100" class="travaux-btn-zoom" data-action="travauxVisionneuse.zoom100" title="Remettre à 100%">100%</button>
                             <span class="travaux-separateur"></span>
-                            <button id="travaux-btn-annoter" class="travaux-btn-action actif" data-action="travauxUI.basculerMode" data-param="annoter" data-tooltip="travaux-btn-annoter">Annoter</button>
-                            <button id="travaux-btn-evaluer" class="travaux-btn-action travaux-btn-action-vert u-hide" data-action="travauxUI.basculerMode" data-param="evaluer" title="Évaluer cette production" data-tooltip="travaux-btn-evaluer">Évaluer</button>
-                            <button id="travaux-btn-alleger" class="travaux-btn-action u-hide" data-action="travauxUI.allegerFichierActuel" title="Alléger ce fichier" data-tooltip="travaux-btn-alleger">Alléger</button>
-                            <button id="travaux-btn-reimporter" class="travaux-btn-action u-hide" data-action="travauxUI.reimporterFichierActuel" title="Re-importer l'original" data-tooltip="travaux-btn-reimporter">Re-importer</button>
-                            <!-- Chronomètre déplacé dans la palette Paramètres -->
+                            <div class="actions-menu" id="travaux-actions-menu">
+                                <button class="travaux-btn-action" id="travaux-btn-actions">Actions &#x25BE;</button>
+                                <div class="actions-dropdown" id="travaux-actions-dropdown">
+                                    <button class="actions-item" id="travaux-btn-annoter" data-action="travauxUI.basculerMode" data-param="annoter">Annoter</button>
+                                    <button class="actions-item actions-item-vert" id="travaux-btn-evaluer" data-action="travauxUI.basculerMode" data-param="evaluer">Évaluer</button>
+                                    <div class="actions-separateur"></div>
+                                    <button class="actions-item" id="travaux-btn-alleger" data-action="travauxUI.allegerFichierActuel">Alléger</button>
+                                    <button class="actions-item" id="travaux-btn-reimporter" data-action="travauxUI.reimporterFichierActuel">Re-importer</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -917,6 +945,9 @@
                 </div>
         `;
         conteneur.appendChild(visionDiv);
+
+        // Menu déroulant Actions
+        _configurerDropdownActions();
 
         // Configurer la visionneuse
         const conteneurDoc = document.getElementById('travaux-conteneur-document');
@@ -2854,9 +2885,9 @@
                 }
             }
 
-            // Afficher le bouton evaluer
+            // Activer l'option Évaluer dans le menu Actions
             const btnEvaluer = document.getElementById('travaux-btn-evaluer');
-            if (btnEvaluer) btnEvaluer.classList.remove('u-hide');
+            if (btnEvaluer) btnEvaluer.disabled = false;
 
             // Replier la sidebar
             const sidebar = document.getElementById('travaux-sidebar');
@@ -2913,17 +2944,10 @@
                     }
                 }
 
-                // Bouton alleger : visible si exporte
-                if (btnAlleger) {
-                    if (statut === 'exporte') btnAlleger.classList.remove('u-hide');
-                    else btnAlleger.classList.add('u-hide');
-                }
-
-                // Bouton reimporter : visible si facsimile
-                if (btnReimporter) {
-                    if (statut === 'facsimile') btnReimporter.classList.remove('u-hide');
-                    else btnReimporter.classList.add('u-hide');
-                }
+                // Option Alléger : active si exporté
+                if (btnAlleger) btnAlleger.disabled = (statut !== 'exporte');
+                // Option Re-importer : active si allégé (facsimile)
+                if (btnReimporter) btnReimporter.disabled = (statut !== 'facsimile');
             }
 
             // Scroll le badge actif dans le strip toolbar pour qu'il soit visible
@@ -3906,8 +3930,6 @@
                 return;
             }
             modeCourant = 'evaluer';
-            // Afficher le chronomètre dans la palette si la préférence est active
-            _afficherWrapperChrono(db.getSync('preferencesAffichage', {}).chronoEvaluation);
 
             // Si le layout eval existe déjà (caché), le réafficher sans recréer
             const evalFlexExistant = document.getElementById('eval-layout-flex');

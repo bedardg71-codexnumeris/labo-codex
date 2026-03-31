@@ -21288,6 +21288,65 @@ body.mode-clair .prioritaire-indice-attention {
     flex-shrink: 0;
 }
 
+/* --- Menu déroulant Actions (toolbar travaux) --- */
+.actions-menu {
+    position: relative;
+    display: inline-block;
+}
+.actions-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 180px;
+    background: var(--surface-carte, #1a3040);
+    border: 1px solid rgba(106, 172, 184, 0.2);
+    border-radius: 8px;
+    padding: 4px 0;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    z-index: 1000;
+}
+.actions-dropdown.ouvert { display: block; }
+
+.actions-item {
+    display: block;
+    width: 100%;
+    padding: 8px 14px;
+    border: none;
+    background: none;
+    color: var(--texte-principal, #d0e0e4);
+    font-size: 0.85rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.1s;
+}
+.actions-item:hover { background: rgba(106, 172, 184, 0.1); }
+.actions-item.actif {
+    font-weight: 700;
+    color: var(--accent-principal, #4a90d9);
+}
+.actions-item-vert { color: var(--vert-positif, #27ae60); }
+.actions-item-vert:hover { background: rgba(39, 174, 96, 0.08); }
+.actions-item:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+.actions-item:disabled:hover { background: none; }
+
+.actions-separateur {
+    border-top: 1px solid rgba(106, 172, 184, 0.15);
+    margin: 4px 0;
+}
+
+/* Mode clair */
+body.mode-clair .actions-dropdown {
+    background: #ffffff;
+    border-color: rgba(3, 46, 92, 0.12);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+body.mode-clair .actions-item { color: var(--texte-principal); }
+body.mode-clair .actions-item:hover { background: rgba(3, 46, 92, 0.06); }
+
 .annot-toolbar-badges-zone {
     display: flex;
     gap: 6px;
