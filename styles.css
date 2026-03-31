@@ -15143,6 +15143,8 @@ body.mode-clair .prep-select {
     min-height: 400px;
     gap: 0;
     overflow: hidden;
+    border-top: none;
+    margin-top: -1px;
 }
 
 /* --- Palettes flottantes evaluation --- */
@@ -21294,6 +21296,7 @@ body.mode-clair .prioritaire-indice-attention {
     padding: 4px 8px;
     background: var(--surface-carte, #1a3040);
     border-bottom: 1px solid var(--bordure-claire, #334155);
+    border-top: none;
     flex-shrink: 0;
     z-index: 90;
     gap: 0;
