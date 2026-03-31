@@ -22014,6 +22014,10 @@ body.mode-clair .annot-toolbar {
 .travaux-zone-document.mode-eval-actif > .travaux-canvas-container {
     display: none;
 }
+.eval-col-document .travaux-canvas-container {
+    flex: 1;
+    width: 100%;
+}
 
 .eval-layout-flex {
     display: flex;
