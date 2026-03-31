@@ -17580,6 +17580,11 @@ body.mode-clair .travaux-autocollant-item img {
     filter: none;
 }
 
+/* Palettes ancrées au bord (height explicite) : contenu prend tout l'espace */
+.palette-flottante[style*="height"] .palette-flottante-contenu {
+    max-height: none;
+}
+
 /* Tampons dans palette flottante : images réduites aux 2/3 */
 .palette-flottante .travaux-autocollant-item img {
     width: 24px;
