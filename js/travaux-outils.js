@@ -1457,23 +1457,21 @@
 
         palette.innerHTML = html;
 
-        // Insérer dans le layout annotation ou le conteneur document
-        const layout = document.getElementById('annot-layout-flex')
-            || document.getElementById('eval-layout-flex')
-            || document.getElementById('travaux-conteneur-document');
-        if (layout) {
-            // Positionner sous la palette annotation
+        // Insérer dans le conteneur document (parent commun, persiste entre modes)
+        const conteneur = document.getElementById('travaux-conteneur-document');
+        if (conteneur) {
+            // Positionner sous la palette annotation si visible
             const paletteAnnot = document.getElementById('travaux-palette-flottante');
             if (paletteAnnot) {
                 const rect = paletteAnnot.getBoundingClientRect();
-                const layoutRect = layout.getBoundingClientRect();
-                palette.style.top = (rect.bottom - layoutRect.top + 8) + 'px';
-                palette.style.left = (rect.left - layoutRect.left) + 'px';
+                const cRect = conteneur.getBoundingClientRect();
+                palette.style.top = (rect.bottom - cRect.top + 8) + 'px';
+                palette.style.left = (rect.left - cRect.left) + 'px';
             } else {
                 palette.style.top = '12px';
                 palette.style.left = '220px';
             }
-            layout.appendChild(palette);
+            conteneur.appendChild(palette);
             configurerDragPalette(palette, layout);
         }
         majEtatBtnToggle('btn-toggle-chrono', true);
