@@ -350,10 +350,8 @@
         // Barre de titre
         let html = '<div class="palette-flottante-barre">';
         html += '<span class="palette-flottante-titre">Tampons</span>';
-        html += '<div style="display:flex; gap:2px;">';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroObservations" title="Personnaliser">⚙</button>';
-        html += '<button class="palette-flottante-toggle" data-action="tamponsBibliotheque.afficherBibliothequeTampons" title="Bibliothèque de tampons">📚</button>';
-        html += '</div></div>';
+        html += '</div>';
 
         // Contenu (réutilise la fonction partagée)
         html += '<div class="palette-flottante-contenu" id="travaux-tampons-contenu">';
@@ -365,12 +363,10 @@
         // Insérer dans le layout annotation — bas à droite, moitié inférieure
         const layout = document.getElementById('annot-layout-flex') || document.getElementById('travaux-conteneur-document');
         if (layout) {
-            palette.style.top = '50%';
-            palette.style.bottom = '0';
-            palette.style.right = '0';
+            palette.style.top = 'calc(50% + 6px)';
+            palette.style.right = '12px';
             palette.style.left = 'auto';
-            palette.style.height = '50%';
-            palette.style.borderRadius = '0';
+            palette.style.height = 'calc(50% - 18px)';
             layout.appendChild(palette);
             configurerDragPalette(palette, layout);
         }
@@ -851,11 +847,10 @@
         // Insérer dans le layout annotation — haut à droite, moitié supérieure
         const layout = document.getElementById('annot-layout-flex') || document.getElementById('travaux-conteneur-document');
         if (layout) {
-            palette.style.top = '0';
-            palette.style.right = '0';
+            palette.style.top = '12px';
+            palette.style.right = '12px';
             palette.style.left = 'auto';
-            palette.style.height = '50%';
-            palette.style.borderRadius = '0';
+            palette.style.height = 'calc(50% - 18px)';
             layout.appendChild(palette);
             configurerDragPalette(palette, layout);
         }
