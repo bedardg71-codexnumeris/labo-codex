@@ -44,16 +44,19 @@
         return min + ':' + String(sec).padStart(2, '0');
     }
 
+    // IDs des badges/wrappers chrono dans les deux palettes
+    var _chronoBadgeIds = ['travaux-chrono-badge', 'annot-chrono-badge'];
+    var _chronoWrapperIds = ['travaux-chrono-palette', 'annot-chrono-palette'];
+
     function _majAffichageChrono() {
-        const badge = document.getElementById('travaux-chrono-badge');
-        if (!badge) return;
-        if (!_chronoDebut) {
-            badge.textContent = '⏱️ --:--';
-            badge.classList.remove('actif');
-            return;
-        }
-        badge.textContent = '⏱️ ' + _formaterDuree(Date.now() - _chronoDebut);
-        badge.classList.add('actif');
+        var texte = _chronoDebut ? '\u23f1\ufe0f ' + _formaterDuree(Date.now() - _chronoDebut) : '\u23f1\ufe0f --:--';
+        _chronoBadgeIds.forEach(function(id) {
+            var badge = document.getElementById(id);
+            if (!badge) return;
+            badge.textContent = texte;
+            if (_chronoDebut) badge.classList.add('actif');
+            else badge.classList.remove('actif');
+        });
     }
 
     function demarrerChrono() {
@@ -69,11 +72,13 @@
     }
 
     function _afficherWrapperChrono(visible) {
-        var wrapper = document.getElementById('travaux-chrono-palette');
-        if (wrapper) {
-            if (visible) wrapper.classList.remove('u-hide');
-            else wrapper.classList.add('u-hide');
-        }
+        _chronoWrapperIds.forEach(function(id) {
+            var wrapper = document.getElementById(id);
+            if (wrapper) {
+                if (visible) wrapper.classList.remove('u-hide');
+                else wrapper.classList.add('u-hide');
+            }
+        });
     }
 
     function arreterChrono() {
@@ -92,12 +97,15 @@
         const cinqDernieres = historique.slice(-5);
         const moyenneMs = cinqDernieres.reduce((s, e) => s + e.dureeMs, 0) / cinqDernieres.length;
 
-        // Afficher résultat + moyenne
-        const badge = document.getElementById('travaux-chrono-badge');
-        if (badge) {
-            badge.textContent = '⏱️ ' + _formaterDuree(dureeMs) + ' (moy. ' + _formaterDuree(moyenneMs) + ')';
-            badge.classList.remove('actif');
-        }
+        // Afficher résultat + moyenne dans les deux palettes
+        var texteResultat = '\u23f1\ufe0f ' + _formaterDuree(dureeMs) + ' (moy. ' + _formaterDuree(moyenneMs) + ')';
+        _chronoBadgeIds.forEach(function(id) {
+            var badge = document.getElementById(id);
+            if (badge) {
+                badge.textContent = texteResultat;
+                badge.classList.remove('actif');
+            }
+        });
 
         _chronoDebut = null;
         _chronoFichierId = null;
@@ -466,10 +474,9 @@
                 sectionErrFr.id = 'travaux-palette-erreurs-fr';
                 sectionErrFr.innerHTML =
                     '<div class="annot-section-barre" data-section="errfr">' +
-                        '<span class="annot-section-titre">' + titreCodes + '</span>' +
+                        '<span class="annot-section-titre">Codes</span>' +
                         '<div style="display:flex; gap:2px;">' +
                             '<button class="travaux-palette-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="Personnaliser">\u2699</button>' +
-                            '<button class="travaux-palette-toggle annot-section-toggle" data-section="errfr" title="Replier">\u2212</button>' +
                         '</div>' +
                     '</div>' +
                     '<div class="annot-section-contenu" id="annot-errfr-contenu">' +
@@ -498,8 +505,7 @@
                         '<span class="annot-section-titre">Tampons</span>' +
                         '<div style="display:flex; gap:2px;">' +
                             '<button class="travaux-palette-toggle" data-action="travauxOutils.ouvrirEditionRetroObservations" title="Personnaliser">\u2699</button>' +
-                            '<button class="travaux-palette-toggle" data-action="tamponsBibliotheque.afficherBibliothequeTampons" title="Bibliothèque de tampons">\uD83D\uDCDA</button>' +
-                            '<button class="travaux-palette-toggle annot-section-toggle" data-section="tampons" title="Replier">\u2212</button>' +
+                            '<button class="travaux-palette-toggle" data-action="tamponsBibliotheque.afficherBibliothequeTampons" title="Biblioth\u00e8que de tampons">\uD83D\uDCDA</button>' +
                         '</div>' +
                     '</div>' +
                     '<div class="annot-section-contenu" id="annot-tampons-contenu">' +
