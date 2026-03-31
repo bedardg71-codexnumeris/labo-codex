@@ -774,99 +774,90 @@ function cartoucheSelectionnee() {
         }
 
         return `
-    <div style="margin-bottom: 15px; padding: 12px; background: var(--surface-conteneur, #162c36); border-radius: 6px;">
+    <div class="eval-critere-carte">
         <div class="eval-grid-critere">
             <div>
-    <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;">
+    <div class="eval-critere-header">
         <strong class="u-texte-09" data-tooltip="eval-critere">${echapperHtml(critere.nom)}</strong>
-        <small style="color: var(--gris-moyen);">(${ponderation}%)</small>
-        ${estAlgorithmique ? '<span data-tooltip="eval-francais-ecrit" style="font-size: 0.7rem; color: var(--orange-accent); font-weight: bold; margin-left: 6px;">ALGORITHMIQUE</span>' : ''}
+        <small class="eval-label">(${ponderation}%)</small>
+        ${estAlgorithmique ? '<span data-tooltip="eval-francais-ecrit" class="eval-badge-algo">ALGORITHMIQUE</span>' : ''}
     </div>
     ${critereGrille?.description ?
-                `<small style="display: block; color: var(--gris-clair); font-style: italic; margin-bottom: 10px; line-height: 1.3;">${echapperHtml(critereGrille.description)}</small>` : ''}
+                `<small class="eval-critere-description">${echapperHtml(critereGrille.description)}</small>` : ''}
 
     ${estAlgorithmique ? (categorisationActive ? `
         <!-- Interface algorithmique AVEC catégorisation -->
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 10px;">
+        <div class="eval-grille-algo-large">
             <div class="groupe-form">
-                <label data-tooltip="eval-codes-erreurs" style="font-size: 0.75rem; color: var(--gris-moyen);">Codes d'erreurs → séparer par ;</label>
+                <label data-tooltip="eval-codes-erreurs" class="eval-label">Codes d'erreurs → séparer par ;</label>
                 <input type="text"
                        id="eval_categories_${critere.id}"
                        class="controle-form"
                        placeholder="Ex: 1;4;6;1;4;10"
-                       data-on-input="calculerNoteAlgoCatHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}" data-critere-grille-id="${critereGrille?.id || ''}"
-                       style="font-size: 0.85rem;">
-                <small style="font-size: 0.7rem; color: var(--gris-clair);">(Voir configuration de la grille)</small>
+                       data-on-input="calculerNoteAlgoCatHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}" data-critere-grille-id="${critereGrille?.id || ''}">
+                <small class="eval-aide">(Voir configuration de la grille)</small>
             </div>
             <div class="groupe-form">
-                <label style="font-size: 0.75rem; color: var(--gris-moyen);">Nombre de mots</label>
+                <label class="eval-label">Nombre de mots</label>
                 <input type="number"
                        id="eval_mots_${critere.id}"
                        class="controle-form"
                        min="1"
                        placeholder="500"
-                       data-on-input="calculerNoteAlgoCatHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}" data-critere-grille-id="${critereGrille?.id || ''}"
-                       style="font-size: 0.85rem;">
+                       data-on-input="calculerNoteAlgoCatHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}" data-critere-grille-id="${critereGrille?.id || ''}">
             </div>
         </div>
-        <div id="resultat_algo_${critere.id}" style="padding: 8px; background: var(--bleu-tres-pale); border-radius: 4px; font-size: 0.85rem; color: var(--gris-moyen); margin-bottom: 8px;">
+        <div id="resultat_algo_${critere.id}" class="eval-resultat-algo">
             <span id="total_erreurs_${critere.id}">--</span> erreurs / <span id="mots_formule_${critere.id}">--</span> mots → <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>%) | Niveau: <span id="niveau_algo_${critere.id}">--</span><br>
-            <strong>Catégorie dominante:</strong> <span id="cat_dominante_${critere.id}" style="color: var(--orange-accent);">--</span>
+            <strong>Catégorie dominante:</strong> <span id="cat_dominante_${critere.id}" class="eval-badge-algo">--</span>
         </div>
-        <!-- Menu sélecteur IDME pour modification manuelle (ex: jeton de reprise ciblée) -->
-        <div style="margin-top: 8px;">
-            <label data-tooltip="eval-niveau-idme" style="font-size: 0.75rem; color: var(--gris-moyen); margin-bottom: 4px; display: block;">Niveau IDME (modifiable manuellement) :</label>
-            <select id="eval_${critere.id}" class="controle-form"
-                    data-on-change="niveauSelectionne" data-param="${critere.id}"
-                    style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 1px solid var(--bordure-claire); width: 100%;">
+        <div>
+            <label data-tooltip="eval-niveau-idme" class="eval-label">Niveau IDME (modifiable manuellement) :</label>
+            <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
+                    data-on-change="niveauSelectionne" data-param="${critere.id}">
                 <option value="">-- Utiliser le niveau calculé --</option>
                 ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
             </select>
-            <small style="font-size: 0.7rem; color: var(--gris-clair); display: block; margin-top: 4px;">Par défaut: utilise le niveau calculé automatiquement. Modifiez uniquement si nécessaire (ex: jeton de reprise ciblée).</small>
+            <small class="eval-aide">Par défaut: utilise le niveau calculé automatiquement. Modifiez uniquement si nécessaire (ex: jeton de reprise ciblée).</small>
         </div>
     ` : `
         <!-- Interface algorithmique SIMPLE (sans catégorisation) -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+        <div class="eval-grille-algo">
             <div class="groupe-form">
-                <label style="font-size: 0.75rem; color: var(--gris-moyen);">Nombre d'erreurs</label>
+                <label class="eval-label">Nombre d'erreurs</label>
                 <input type="number"
                        id="eval_erreurs_${critere.id}"
                        class="controle-form"
                        min="0"
                        placeholder="0"
-                       data-on-input="calculerNoteAlgoSimpleHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}"
-                       style="font-size: 0.85rem;">
+                       data-on-input="calculerNoteAlgoSimpleHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}">
             </div>
             <div class="groupe-form">
-                <label style="font-size: 0.75rem; color: var(--gris-moyen);">Nombre de mots</label>
+                <label class="eval-label">Nombre de mots</label>
                 <input type="number"
                        id="eval_mots_${critere.id}"
                        class="controle-form"
                        min="1"
                        placeholder="500"
-                       data-on-input="calculerNoteAlgoSimpleHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}"
-                       style="font-size: 0.85rem;">
+                       data-on-input="calculerNoteAlgoSimpleHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}">
             </div>
         </div>
-        <div id="resultat_algo_${critere.id}" style="padding: 8px; background: var(--bleu-tres-pale); border-radius: 4px; font-size: 0.85rem; color: var(--gris-moyen); margin-bottom: 8px;">
-            <span id="total_erreurs_simple_${critere.id}">--</span> errreurs sur <span id="mots_simple_${critere.id}">--</span> mots → <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>%) | Niveau: <span id="niveau_algo_${critere.id}">--</span>
+        <div id="resultat_algo_${critere.id}" class="eval-resultat-algo">
+            <span id="total_erreurs_simple_${critere.id}">--</span> erreurs sur <span id="mots_simple_${critere.id}">--</span> mots → <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>%) | Niveau: <span id="niveau_algo_${critere.id}">--</span>
         </div>
-        <!-- Menu sélecteur IDME pour modification manuelle (ex: jeton de reprise ciblée) -->
-        <div style="margin-top: 8px;">
-            <label data-tooltip="eval-niveau-idme" style="font-size: 0.75rem; color: var(--gris-moyen); margin-bottom: 4px; display: block;">Niveau IDME (modifiable manuellement) :</label>
-            <select id="eval_${critere.id}" class="controle-form"
-                    data-on-change="niveauSelectionne" data-param="${critere.id}"
-                    style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 1px solid var(--bordure-claire); width: 100%;">
+        <div>
+            <label data-tooltip="eval-niveau-idme" class="eval-label">Niveau IDME (modifiable manuellement) :</label>
+            <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
+                    data-on-change="niveauSelectionne" data-param="${critere.id}">
                 <option value="">-- Utiliser le niveau calculé --</option>
                 ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
             </select>
-            <small style="font-size: 0.7rem; color: var(--gris-clair); display: block; margin-top: 4px;">Par défaut: utilise le niveau calculé automatiquement. Modifiez uniquement si nécessaire (ex: jeton de reprise ciblée).</small>
+            <small class="eval-aide">Par défaut: utilise le niveau calculé automatiquement. Modifiez uniquement si nécessaire (ex: jeton de reprise ciblée).</small>
         </div>
     `) : `
         <!-- Interface standard (holistique/analytique) -->
-        <select id="eval_${critere.id}" class="controle-form"
-                data-on-change="niveauSelectionne" data-param="${critere.id}"
-                style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 1px solid var(--bordure-claire); width: 100%;">
+        <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
+                data-on-change="niveauSelectionne" data-param="${critere.id}">
             <option value="">--</option>
             ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
         </select>
@@ -964,60 +955,56 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
         const facteur = critere.facteurNormalisation || 500;
 
         return `
-    <div style="margin-bottom: 15px; padding: 12px; background: var(--surface-conteneur, #162c36); border-radius: 6px;">
+    <div class="eval-critere-carte">
         <div class="eval-grid-critere">
             <div>
-                <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;">
+                <div class="eval-critere-header">
                     <strong class="u-texte-09" data-tooltip="eval-critere">${echapperHtml(critere.nom)}</strong>
-                    <small style="color: var(--gris-moyen);">(${ponderation}%)</small>
-                    ${estAlgorithmique ? '<span data-tooltip="eval-francais-ecrit" style="font-size: 0.7rem; color: var(--orange-accent); font-weight: bold; margin-left: 6px;">ALGORITHMIQUE</span>' : ''}
+                    <small class="eval-label">(${ponderation}%)</small>
+                    ${estAlgorithmique ? '<span data-tooltip="eval-francais-ecrit" class="eval-badge-algo">ALGORITHMIQUE</span>' : ''}
                 </div>
-                ${critere.description ? `<small style="display: block; color: var(--gris-clair); font-style: italic; margin-bottom: 10px; line-height: 1.3;">${echapperHtml(critere.description)}</small>` : ''}
+                ${critere.description ? `<small class="eval-critere-description">${echapperHtml(critere.description)}</small>` : ''}
 
                 ${estAlgorithmique ? `
                     <!-- Interface algorithmique SIMPLE (mode consultation) -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                    <div class="eval-grille-algo">
                         <div class="groupe-form">
-                            <label style="font-size: 0.75rem; color: var(--gris-moyen);">Nombre d'erreurs</label>
+                            <label class="eval-label">Nombre d'erreurs</label>
                             <input type="number"
                                    id="eval_erreurs_${critere.id}"
                                    class="controle-form"
                                    min="0"
                                    placeholder="0"
-                                   data-on-input="calculerNoteAlgoSimpleHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}"
-                                   style="font-size: 0.85rem;">
+                                   data-on-input="calculerNoteAlgoSimpleHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}">
                         </div>
                         <div class="groupe-form">
-                            <label style="font-size: 0.75rem; color: var(--gris-moyen);">Nombre de mots</label>
+                            <label class="eval-label">Nombre de mots</label>
                             <input type="number"
                                    id="eval_mots_${critere.id}"
                                    class="controle-form"
                                    min="1"
                                    placeholder="500"
-                                   data-on-input="calculerNoteAlgoSimpleHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}"
-                                   style="font-size: 0.85rem;">
+                                   data-on-input="calculerNoteAlgoSimpleHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}">
                         </div>
                     </div>
-                    <div id="resultat_algo_${critere.id}" style="padding: 8px; background: var(--bleu-tres-pale); border-radius: 4px; font-size: 0.85rem; color: var(--gris-moyen); margin-bottom: 8px;">
+                    <div id="resultat_algo_${critere.id}" class="eval-resultat-algo">
                         -- erreurs sur -- mots
                     </div>
-                    <select id="eval_${critere.id}" class="controle-form"
-                            data-on-change="niveauSelectionne" data-param="${critere.id}"
-                            style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 1px solid var(--bordure-claire); width: 100%;">
+                    <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
+                            data-on-change="niveauSelectionne" data-param="${critere.id}">
                         <option value="">--</option>
                         ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
                     </select>
                 ` : `
                     <!-- Interface standard -->
-                    <select id="eval_${critere.id}" class="controle-form"
-                            data-on-change="niveauSelectionne" data-param="${critere.id}"
-                            style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 1px solid var(--bordure-claire); width: 100%;">
+                    <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
+                            data-on-change="niveauSelectionne" data-param="${critere.id}">
                         <option value="">--</option>
                         ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
                     </select>
                 `}
             </div>
-            <div id="comm_${critere.id}" style="display:none;">
+            <div id="comm_${critere.id}" class="u-hide">
                 ${estAlgorithmique ? 'Saisissez les erreurs et le nombre de mots' : 'Sélectionne un niveau'}
             </div>
         </div>
@@ -2557,13 +2544,13 @@ function peuplementOptJetons() {
     // Vérifier si le système de jetons est actif
     var config = typeof obtenirConfigJetons === 'function' ? obtenirConfigJetons() : null;
     if (!config || !config.actif) {
-        conteneur.innerHTML = '<p class="texte-aide" style="font-size:0.8rem; color:var(--gris-moyen);">Système de jetons désactivé</p>';
+        conteneur.innerHTML = '<p class="eval-vide">Système de jetons désactivé</p>';
         return;
     }
 
     var types = typeof obtenirTousTypesJetons === 'function' ? obtenirTousTypesJetons() : [];
     if (types.length === 0) {
-        conteneur.innerHTML = '<p class="texte-aide" style="font-size:0.8rem; color:var(--gris-moyen);">Aucun type de jeton configuré</p>';
+        conteneur.innerHTML = '<p class="eval-vide">Aucun type de jeton configuré</p>';
         return;
     }
 
@@ -2661,7 +2648,7 @@ function peuplementOptJetons() {
                         '<span class="u-texte-mini u-texte-gris">' + compteur + '</span>' +
                     '</div>';
             if (artefacts.length > 0) {
-                ligneHtml += '<div style="margin: 2px 0 0 26px; font-size: 0.7rem; color: var(--gris-clair, #aaa); line-height: 1.3;">';
+                ligneHtml += '<div class="eval-aide" style="margin-left: 26px;">';
                 artefacts.forEach(function(nom) { ligneHtml += '<div>\u2022 ' + nom + '</div>'; });
                 ligneHtml += '</div>';
             }
@@ -2684,7 +2671,7 @@ function peuplementOptJetons() {
     }
 
     // === 3. Ligne total ===
-    var htmlTotal = '<div style="margin-top: 6px; padding: 4px 0; border-top: 1px solid var(--bordure-claire, rgba(255,255,255,0.1)); font-size: 0.72rem; text-align: right; color: var(--gris-clair, #aaa);">' +
+    var htmlTotal = '<div class="eval-aide" style="margin-top: 6px; padding-top: 4px; border-top: 1px solid var(--bordure-claire); text-align: right;">' +
         'Total utilis\u00e9s\u00a0: <strong>' + totalUtilises + ' / ' + totalMax + '</strong>' +
         '</div>';
 
@@ -3114,14 +3101,14 @@ function genererRetroactionSpecifique() {
     var fichier = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
         ? travauxVisionneuse.getFichierActuel() : null;
     if (!fichier) {
-        conteneur.innerHTML = '<p style="color: var(--gris-moyen); font-style: italic;">Ouvre un fichier pour voir la rétroaction spécifique.</p>';
+        conteneur.innerHTML = '<p class="eval-vide">Ouvre un fichier pour voir la rétroaction spécifique.</p>';
         return;
     }
 
     var annotation = (typeof travauxStockage !== 'undefined')
         ? travauxStockage.obtenirAnnotationFichier(fichier.id) : null;
     if (!annotation || !annotation.pages) {
-        conteneur.innerHTML = '<p style="color: var(--gris-moyen); font-style: italic;">Aucune annotation sur ce fichier.</p>';
+        conteneur.innerHTML = '<p class="eval-vide">Aucune annotation sur ce fichier.</p>';
         return;
     }
 
@@ -3185,7 +3172,7 @@ function genererRetroactionSpecifique() {
     }
 
     if (!html) {
-        html = '<p style="color: var(--gris-moyen); font-style: italic;">Aucun tampon ni erreur de français annotés.</p>';
+        html = '<p class="eval-vide">Aucun tampon ni erreur de français annotés.</p>';
     }
 
     conteneur.innerHTML = html;
@@ -3197,7 +3184,7 @@ function genererRetroactionBilan() {
 
     var ec = window.evaluationEnCours;
     if (!ec || !ec.etudiantDA || !ec.grilleId) {
-        conteneur.innerHTML = '<p style="color: var(--gris-moyen); font-style: italic;">Sélectionne un étudiant et une grille pour voir le bilan.</p>';
+        conteneur.innerHTML = '<p class="eval-vide">Sélectionne un étudiant et une grille pour voir le bilan.</p>';
         return;
     }
 
@@ -3269,8 +3256,8 @@ function genererRetroactionBilan() {
     } catch(e) { /* ignore */ }
 
     // === Message d'encouragement + Question métacognitive (en haut, sous le titre) ===
-    html += '<p style="margin-bottom:6px; font-style:italic; color: var(--texte-secondaire);">Mes standards sont tr\u00e8s \u00e9lev\u00e9s \u00e0 ton \u00e9gard parce que je crois que tu as tout ce qu\u2019il faut pour les atteindre et j\u2019ai confiance en toi. Si tu as besoin d\u2019aide, viens me voir.</p>';
-    html += '<p class="retro-question" style="margin-bottom:8px">Selon toi, quel aspect de ta production m\u00e9riterait le plus d\u2019attention ?</p>';
+    html += '<p class="eval-vide" style="margin-bottom:6px;">Mes standards sont tr\u00e8s \u00e9lev\u00e9s \u00e0 ton \u00e9gard parce que je crois que tu as tout ce qu\u2019il faut pour les atteindre et j\u2019ai confiance en toi. Si tu as besoin d\u2019aide, viens me voir.</p>';
+    html += '<p class="retro-question" style="margin-bottom:8px;">Selon toi, quel aspect de ta production m\u00e9riterait le plus d\u2019attention ?</p>';
 
     // === 1. Présentement, il faut se concentrer sur... ===
     html += '<h5>Pr\u00e9sentement, il faut se concentrer sur :</h5>';
