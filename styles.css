@@ -15554,14 +15554,15 @@ body.mode-clair .travaux-compteur-badge {
 /* Retroaction dans palette eval */
 .travaux-palette-eval .zone-retroaction {
     margin: 0;
+    padding: 0;
+    background: none;
+    border-radius: 0;
     display: flex;
     flex-direction: column;
     height: 100%;
 }
 .travaux-palette-eval .zone-retroaction-header {
-    margin-bottom: 6px;
-    flex-wrap: wrap;
-    gap: 6px;
+    display: none;
 }
 .retro-sous-barre {
     display: flex;
@@ -15589,9 +15590,6 @@ body.mode-clair .travaux-compteur-badge {
 .retro-vue-contenu {
     flex: 1;
     overflow-y: auto;
-    border: 1px solid var(--bordure-claire);
-    border-radius: 5px;
-    background: var(--surface-carte, #1a3040);
 }
 /* Textarea et vues remplissent la hauteur disponible */
 .eval-col-retro .travaux-palette-contenu {
@@ -15654,13 +15652,14 @@ body.mode-clair .travaux-compteur-badge {
     margin-bottom: 6px;
 }
 
-/* Options rétroaction compactes (checkboxes + radios) */
+/* Options rétroaction compactes (checkboxes + radios) — flat, séparateurs */
 .eval-options-retroaction {
-    background: var(--surface-carte, #1a3040);
-    border-radius: var(--radius-moyen);
-    padding: 6px 10px;
+    background: none;
+    border-radius: 0;
+    padding: 6px 0;
     font-size: 0.7rem;
-    margin-bottom: 6px;
+    margin-bottom: 0;
+    border-bottom: 1px solid rgba(106, 172, 184, 0.15);
 }
 .eval-options-checkboxes {
     display: flex;
@@ -17380,6 +17379,10 @@ body.mode-clair .travaux-apercu-trait {
 }
 
 /* Indicateur de resize */
+.palette-flottante-contenu {
+    /* Espace pour le coin de resize en bas à droite */
+    padding-bottom: 14px;
+}
 .palette-flottante::after {
     content: '';
     position: absolute;
@@ -17391,6 +17394,7 @@ body.mode-clair .travaux-apercu-trait {
     border-bottom: 2px solid var(--texte-muted, #5a7a88);
     border-radius: 0 0 4px 0;
     opacity: 0.5;
+    z-index: 1;
     pointer-events: none;
 }
 .palette-flottante.replie::after { display: none; }
