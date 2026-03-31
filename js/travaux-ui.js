@@ -3925,11 +3925,16 @@
      */
     function _restaurerScrollVisionneuse(state) {
         if (!state) return;
-        const colDoc = document.getElementById('annot-col-document') || document.getElementById('eval-col-document');
-        if (colDoc) {
-            colDoc.scrollTop = state.scrollTop;
-            colDoc.scrollLeft = state.scrollLeft;
-        }
+        // Double RAF pour attendre que le layout ait ses dimensions finales
+        requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+                var colDoc = document.getElementById('eval-col-document') || document.getElementById('annot-col-document');
+                if (colDoc) {
+                    colDoc.scrollTop = state.scrollTop;
+                    colDoc.scrollLeft = state.scrollLeft;
+                }
+            });
+        });
     }
 
     function basculerMode(mode) {
@@ -3988,7 +3993,7 @@
             if (btnEvaluer) btnEvaluer.classList.add('actif');
 
             // Restaurer scroll après le déplacement DOM
-            requestAnimationFrame(() => { _restaurerScrollVisionneuse(_scrollState); });
+            _restaurerScrollVisionneuse(_scrollState);
             // Si productionId manquant, ouvrir le panneau correction d'identité
             if (!fichier.productionId) {
                 setTimeout(() => toggleCorrectionIdentite(), 100);
@@ -4010,7 +4015,7 @@
             if (btnEvaluer) btnEvaluer.classList.remove('actif');
 
             // Restaurer scroll après le déplacement DOM
-            requestAnimationFrame(() => { _restaurerScrollVisionneuse(_scrollStateA); });
+            _restaurerScrollVisionneuse(_scrollStateA);
         }
         sauvegarderEtatSession();
     }
