@@ -361,7 +361,7 @@
         palette.innerHTML = html;
 
         // Insérer dans le layout annotation — bas à droite, moitié inférieure
-        const layout = document.getElementById('annot-layout-flex') || document.getElementById('travaux-conteneur-document');
+        const layout = document.getElementById('travaux-zone-canvas') || document.getElementById('travaux-conteneur-document');
         if (layout) {
             palette.style.top = 'calc(50% + 6px)';
             palette.style.right = '12px';
@@ -845,7 +845,7 @@
         palette.innerHTML = html;
 
         // Insérer dans le layout annotation — haut à droite, moitié supérieure
-        const layout = document.getElementById('annot-layout-flex') || document.getElementById('travaux-conteneur-document');
+        const layout = document.getElementById('travaux-zone-canvas') || document.getElementById('travaux-conteneur-document');
         if (layout) {
             palette.style.top = '12px';
             palette.style.right = '12px';
@@ -1457,22 +1457,23 @@
 
         palette.innerHTML = html;
 
-        // Insérer dans le conteneur document (parent commun, persiste entre modes)
-        const conteneur = document.getElementById('travaux-conteneur-document');
+        // Insérer dans la zone canvas (parent commun, persiste entre modes)
+        const conteneur = document.getElementById('travaux-zone-canvas') || document.getElementById('travaux-conteneur-document');
         if (conteneur) {
-            // Positionner sous la palette annotation si visible
-            const paletteAnnot = document.getElementById('travaux-palette-flottante');
-            if (paletteAnnot) {
-                const rect = paletteAnnot.getBoundingClientRect();
+            // Positionner sous la palette Annotation ou Paramètres (selon le mode)
+            const paletteRef = document.getElementById('travaux-palette-flottante')
+                || document.getElementById('travaux-palette-eval-gauche');
+            if (paletteRef) {
+                const rect = paletteRef.getBoundingClientRect();
                 const cRect = conteneur.getBoundingClientRect();
                 palette.style.top = (rect.bottom - cRect.top + 8) + 'px';
                 palette.style.left = (rect.left - cRect.left) + 'px';
             } else {
                 palette.style.top = '12px';
-                palette.style.left = '220px';
+                palette.style.left = '12px';
             }
             conteneur.appendChild(palette);
-            configurerDragPalette(palette, layout);
+            configurerDragPalette(palette, conteneur);
         }
         majEtatBtnToggle('btn-toggle-chrono', true);
     }
