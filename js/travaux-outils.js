@@ -338,38 +338,40 @@
         if (palette) {
             palette.remove();
             paletteAutoVisible = false;
+            majEtatBtnToggle('btn-toggle-tampons', false);
             return;
         }
 
         paletteAutoVisible = true;
         palette = document.createElement('div');
         palette.id = 'travaux-palette-tampons';
-        palette.className = 'travaux-palette-flottante travaux-palette-tampons';
+        palette.className = 'palette-flottante';
 
         // Barre de titre
-        let html = '<div class="travaux-palette-barre">';
-        html += '<span class="travaux-palette-titre">Tampons</span>';
+        let html = '<div class="palette-flottante-barre">';
+        html += '<span class="palette-flottante-titre">Tampons</span>';
         html += '<div style="display:flex; gap:2px;">';
-        html += '<button class="travaux-palette-toggle" data-action="travauxOutils.ouvrirEditionRetroObservations" title="Personnaliser les rétroactions">\u2699</button>';
-        html += '<button class="travaux-palette-toggle" data-action="tamponsBibliotheque.afficherBibliothequeTampons" title="Biblioth\u00e8que de tampons">\uD83D\uDCDA</button>';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroObservations" title="Personnaliser">⚙</button>';
+        html += '<button class="palette-flottante-toggle" data-action="tamponsBibliotheque.afficherBibliothequeTampons" title="Bibliothèque de tampons">📚</button>';
         html += '</div></div>';
 
         // Contenu (réutilise la fonction partagée)
-        html += '<div class="travaux-palette-contenu" id="travaux-tampons-contenu">';
+        html += '<div class="palette-flottante-contenu" id="travaux-tampons-contenu">';
         html += genererContenuTampons();
         html += '</div>';
 
         palette.innerHTML = html;
 
-        // Inserer dans la zone-document (comme la palette annotation)
-        const zoneDocument = document.getElementById('travaux-conteneur-document');
-        if (zoneDocument) {
+        // Insérer dans le layout annotation (position: relative)
+        const layout = document.getElementById('annot-layout-flex') || document.getElementById('travaux-conteneur-document');
+        if (layout) {
             palette.style.top = '56px';
             palette.style.right = '12px';
             palette.style.left = 'auto';
-            zoneDocument.appendChild(palette);
-            configurerDragPaletteTampons();
+            layout.appendChild(palette);
+            configurerDragPalette(palette, layout);
         }
+        majEtatBtnToggle('btn-toggle-tampons', true);
     }
 
     /**
@@ -379,40 +381,8 @@
         const palette = document.getElementById('travaux-palette-tampons');
         if (!palette) return;
         palette.classList.toggle('replie');
-        const btn = palette.querySelector('.travaux-palette-toggle');
+        const btn = palette.querySelector('.palette-flottante-toggle');
         if (btn) btn.textContent = palette.classList.contains('replie') ? '+' : '−';
-    }
-
-    /**
-     * Drag de la palette tampons
-     */
-    function configurerDragPaletteTampons() {
-        const palette = document.getElementById('travaux-palette-tampons');
-        const barre = palette?.querySelector('.travaux-palette-barre');
-        if (!barre) return;
-        barre.addEventListener('mousedown', function(e) {
-            if (e.target.closest('.travaux-palette-toggle')) return;
-            e.preventDefault();
-            const startX = e.clientX, startY = e.clientY;
-            const rect = palette.getBoundingClientRect();
-            const container = document.getElementById('travaux-conteneur-document');
-            const cRect = container.getBoundingClientRect();
-            const startLeft = rect.left - cRect.left;
-            const startTop = rect.top - cRect.top;
-            // Passer de right a left pour le drag
-            palette.style.right = 'auto';
-            palette.style.left = startLeft + 'px';
-            function onMove(e2) {
-                palette.style.left = Math.max(0, startLeft + e2.clientX - startX) + 'px';
-                palette.style.top = Math.max(0, startTop + e2.clientY - startY) + 'px';
-            }
-            function onUp() {
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup', onUp);
-            }
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onUp);
-        });
     }
 
     function fermerPaletteAutocollants() {
@@ -852,43 +822,44 @@
         if (palette) {
             palette.remove();
             paletteErrFrVisible = false;
+            majEtatBtnToggle('btn-toggle-codes', false);
             return;
         }
 
         paletteErrFrVisible = true;
         palette = document.createElement('div');
         palette.id = 'travaux-palette-erreurs-fr';
-        palette.className = 'travaux-palette-flottante travaux-palette-erreurs-fr';
+        palette.className = 'palette-flottante';
 
         // Barre de titre
-        let html = '<div class="travaux-palette-barre">';
-        html += '<span class="travaux-palette-titre">Codes</span>';
+        let html = '<div class="palette-flottante-barre">';
+        html += '<span class="palette-flottante-titre">Codes</span>';
         html += '<div style="display:flex; gap:2px;">';
-        html += '<button class="travaux-palette-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="Personnaliser les rétroactions">\u2699</button>';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="Personnaliser">⚙</button>';
         html += '</div></div>';
 
         // Contenu : liste verticale (réutilise la fonction partagée)
-        html += '<div class="travaux-palette-contenu" id="travaux-errfr-contenu">';
+        html += '<div class="palette-flottante-contenu" id="travaux-errfr-contenu">';
         html += genererContenuErreursFr();
         html += '</div>';
 
         palette.innerHTML = html;
 
-        // Inserer dans la zone-document
-        const zoneDocument = document.getElementById('travaux-conteneur-document');
-        if (zoneDocument) {
+        // Insérer dans le layout annotation
+        const layout = document.getElementById('annot-layout-flex') || document.getElementById('travaux-conteneur-document');
+        if (layout) {
             palette.style.top = '56px';
-            // Positionner à droite de la palette annotation (largeur réelle ou 170px par défaut)
-            const paletteAnnot = document.getElementById('travaux-palette-flottante');
-            const annotLeft = paletteAnnot ? (paletteAnnot.getBoundingClientRect().width + 10) : 240;
-            palette.style.left = Math.round(annotLeft) + 'px';
-            zoneDocument.appendChild(palette);
-            configurerDragPaletteErrFr();
+            palette.style.right = '12px';
+            palette.style.left = 'auto';
+            layout.appendChild(palette);
+            configurerDragPalette(palette, layout);
         }
+        majEtatBtnToggle('btn-toggle-codes', true);
     }
 
     function fermerPaletteErreursFrancais() {
         paletteErrFrVisible = false;
+        majEtatBtnToggle('btn-toggle-codes', false);
         const palette = document.getElementById('travaux-palette-erreurs-fr');
         if (palette) palette.remove();
     }
@@ -897,36 +868,16 @@
         const palette = document.getElementById('travaux-palette-erreurs-fr');
         if (!palette) return;
         palette.classList.toggle('replie');
-        const btn = palette.querySelector('.travaux-palette-toggle');
-        if (btn) btn.textContent = palette.classList.contains('replie') ? '+' : '\u2212';
+        const btn = palette.querySelector('.palette-flottante-toggle');
+        if (btn) btn.textContent = palette.classList.contains('replie') ? '+' : '−';
     }
 
-    function configurerDragPaletteErrFr() {
-        const palette = document.getElementById('travaux-palette-erreurs-fr');
-        const barre = palette?.querySelector('.travaux-palette-barre');
-        if (!barre) return;
-        barre.addEventListener('mousedown', function(e) {
-            if (e.target.closest('.travaux-palette-toggle')) return;
-            e.preventDefault();
-            const startX = e.clientX, startY = e.clientY;
-            const rect = palette.getBoundingClientRect();
-            const container = document.getElementById('travaux-conteneur-document');
-            const cRect = container.getBoundingClientRect();
-            const startLeft = rect.left - cRect.left;
-            const startTop = rect.top - cRect.top;
-            palette.style.right = 'auto';
-            palette.style.left = startLeft + 'px';
-            function onMove(e2) {
-                palette.style.left = Math.max(0, startLeft + e2.clientX - startX) + 'px';
-                palette.style.top = Math.max(0, startTop + e2.clientY - startY) + 'px';
-            }
-            function onUp() {
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup', onUp);
-            }
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onUp);
-        });
+    /**
+     * Met à jour l'état actif/inactif d'un bouton emoji dans la palette annotation
+     */
+    function majEtatBtnToggle(btnId, actif) {
+        const btn = document.getElementById(btnId);
+        if (btn) btn.classList.toggle('actif', actif);
     }
 
     /* ===============================
@@ -1177,17 +1128,17 @@
      * @returns {string} HTML
      */
     function genererHTMLPalette() {
-        let html = '<div class="travaux-palette-flottante" id="travaux-palette-flottante">';
+        let html = '<div class="palette-flottante" id="travaux-palette-flottante">';
 
-        // Barre de titre (sans bouton replier)
-        html += '<div class="travaux-palette-barre">';
-        html += '<span class="travaux-palette-titre">Annotation</span>';
+        // Barre de titre (draggable + toggle)
+        html += '<div class="palette-flottante-barre">';
+        html += '<span class="palette-flottante-titre">Annotation</span>';
+        html += '<button class="palette-flottante-toggle" id="travaux-palette-toggle" title="Réduire la palette">&#x2212;</button>';
         html += '</div>';
 
         // Contenu (sections verticales)
-        html += '<div class="travaux-palette-contenu">';
+        html += '<div class="palette-flottante-contenu">';
 
-        // Chronomètre (visible si préférence active)
         // Boutons d'action
         html += '<div class="groupe-boutons-colonne">';
         html += '<div class="groupe-boutons-ligne">';
@@ -1279,15 +1230,23 @@
         html += '</div>';
         html += '<div class="travaux-apercu-trait" id="travaux-apercu-trait"></div>';
 
-        // Chronomètre (en bas, visible si préférence active)
+        // Chronomètre (en bas du contenu, visible si préférence active)
         html += '<div id="annot-chrono-palette" class="eval-chrono-wrapper u-hide">';
         html += '<hr class="separateur-horizontal">';
-        html += '<span id="annot-chrono-badge" class="travaux-chrono-badge" title="Dur\u00e9e annotation + \u00e9valuation">\u23f1\ufe0f --:--</span>';
+        html += '<span id="annot-chrono-badge" class="travaux-chrono-badge" title="Durée annotation + évaluation">⏱️ --:--</span>';
         html += '</div>';
 
-        html += '</div>'; // fin .travaux-palette-contenu
+        html += '</div>'; // fin .palette-flottante-contenu
 
-        html += '</div>'; // fin .travaux-palette-flottante
+        // Barre d'emojis en bas
+        html += '<div class="palette-flottante-bas-btns">';
+        html += '<button class="palette-flottante-aide-btn" data-action="travauxOutils.afficherRaccourcis" title="Raccourcis clavier">🛎️</button>';
+        html += '<button class="palette-flottante-aide-btn" data-action="tamponsBibliotheque.afficherBibliothequeTampons" title="Bibliothèque de tampons">📚</button>';
+        html += '<button class="palette-flottante-aide-btn" id="btn-toggle-codes" data-action="travauxOutils.togglePaletteErreursFrancais" title="Afficher/masquer les codes">🚦</button>';
+        html += '<button class="palette-flottante-aide-btn" id="btn-toggle-tampons" data-action="travauxOutils.togglePaletteAutocollants" title="Afficher/masquer les tampons">🫥</button>';
+        html += '</div>';
+
+        html += '</div>'; // fin .palette-flottante
 
         return html;
     }
@@ -1357,19 +1316,80 @@
     /**
      * Configure le drag de la palette flottante par sa barre de titre
      */
-    function configurerDragPalette() {
-        const palette = document.getElementById('travaux-palette-flottante');
-        const barre = palette?.querySelector('.travaux-palette-barre');
+    /**
+     * Configure le drag d'une palette flottante par sa barre de titre.
+     * Fonctionne avec .palette-flottante-barre (nouveau) et .travaux-palette-barre (legacy).
+     * @param {HTMLElement} palette - L'élément palette
+     * @param {HTMLElement} [conteneur] - Le conteneur de référence (défaut : travaux-conteneur-document)
+     */
+    /** Z-index courant pour le focus des palettes */
+    var _paletteZIndex = 80;
+
+    /**
+     * Monte le z-index d'une palette au-dessus des autres (focus)
+     */
+    function focusPalette(palette) {
+        if (!palette) return;
+        _paletteZIndex++;
+        palette.style.zIndex = _paletteZIndex;
+    }
+
+    /**
+     * Sauvegarde la position d'une palette dans localStorage
+     */
+    function sauvegarderPositionPalette(palette) {
+        if (!palette || !palette.id) return;
+        try {
+            localStorage.setItem(palette.id + '-pos', JSON.stringify({
+                left: palette.style.left,
+                top: palette.style.top,
+                width: palette.style.width || '',
+                height: palette.style.height || ''
+            }));
+        } catch(e) { /* quota */ }
+    }
+
+    /**
+     * Restaure la position d'une palette depuis localStorage
+     */
+    function restaurerPositionPalette(palette) {
+        if (!palette || !palette.id) return;
+        try {
+            const raw = localStorage.getItem(palette.id + '-pos');
+            if (!raw) return;
+            const pos = JSON.parse(raw);
+            if (pos.left) { palette.style.left = pos.left; palette.style.right = 'auto'; }
+            if (pos.top) palette.style.top = pos.top;
+            if (pos.width) palette.style.width = pos.width;
+            if (pos.height) palette.style.height = pos.height;
+        } catch(e) { /* JSON parse error */ }
+    }
+
+    function configurerDragPalette(palette, conteneur) {
+        if (!palette) {
+            palette = document.getElementById('travaux-palette-flottante');
+        }
+        const barre = palette?.querySelector('.palette-flottante-barre') || palette?.querySelector('.travaux-palette-barre');
         if (!barre) return;
+
+        // Restaurer la position persistée
+        restaurerPositionPalette(palette);
+
+        // Focus (z-index) au mousedown sur la palette entière
+        palette.addEventListener('mousedown', function() { focusPalette(palette); });
+
         barre.addEventListener('mousedown', function(e) {
-            if (e.target.closest('.travaux-palette-toggle')) return;
+            if (e.target.closest('.palette-flottante-toggle') || e.target.closest('.travaux-palette-toggle')) return;
             e.preventDefault();
             const startX = e.clientX, startY = e.clientY;
             const rect = palette.getBoundingClientRect();
-            const container = document.getElementById('travaux-conteneur-document');
-            const cRect = container.getBoundingClientRect();
+            const cont = conteneur || document.getElementById('travaux-conteneur-document');
+            const cRect = cont.getBoundingClientRect();
             const startLeft = rect.left - cRect.left;
             const startTop = rect.top - cRect.top;
+            // Convertir right → left pour le drag (palettes positionnées avec right)
+            palette.style.right = 'auto';
+            palette.style.left = startLeft + 'px';
             function onMove(e2) {
                 palette.style.left = Math.max(0, startLeft + e2.clientX - startX) + 'px';
                 palette.style.top = Math.max(0, startTop + e2.clientY - startY) + 'px';
@@ -1377,30 +1397,39 @@
             function onUp() {
                 document.removeEventListener('mousemove', onMove);
                 document.removeEventListener('mouseup', onUp);
+                sauvegarderPositionPalette(palette);
             }
             document.addEventListener('mousemove', onMove);
             document.addEventListener('mouseup', onUp);
         });
 
-        // Double-clic sur la barre : reset taille
+        // Double-clic sur la barre : reset taille et position sauvegardée
         barre.addEventListener('dblclick', function(e) {
-            if (e.target.closest('.travaux-palette-toggle')) return;
+            if (e.target.closest('.palette-flottante-toggle') || e.target.closest('.travaux-palette-toggle')) return;
             palette.style.width = '';
             palette.style.height = '';
+            sauvegarderPositionPalette(palette);
         });
     }
 
     /**
-     * Replie / deplie la palette flottante
+     * Replie / deplie la palette flottante annotation
      */
     function togglePaletteReplie() {
         const palette = document.getElementById('travaux-palette-flottante');
         if (!palette) return;
         palette.classList.toggle('replie');
-        const btn = palette.querySelector('.travaux-palette-toggle');
+        const btn = palette.querySelector('.palette-flottante-toggle') || palette.querySelector('.travaux-palette-toggle');
         if (btn) {
             btn.innerHTML = palette.classList.contains('replie') ? '&#x002B;' : '&#x2212;';
         }
+    }
+
+    /**
+     * Affiche les raccourcis clavier (placeholder — action future)
+     */
+    function afficherRaccourcis() {
+        alert('Raccourcis clavier\n\nCtrl+Z : Annuler\nCtrl+Y : Rétablir\nDelete : Supprimer sélection\nEchap : Outil Position');
     }
 
     /* ===============================
@@ -2747,7 +2776,10 @@
         togglePaletteErrFrReplie: togglePaletteErrFrReplie,
         // Palette flottante
         configurerDragPalette: configurerDragPalette,
+        restaurerPositionPalette: restaurerPositionPalette,
+        focusPalette: focusPalette,
         togglePaletteReplie: togglePaletteReplie,
+        afficherRaccourcis: afficherRaccourcis,
         // Contenu réutilisable (colonne droite + flottant)
         genererContenuErreursFr: genererContenuErreursFr,
         genererContenuTampons: genererContenuTampons,

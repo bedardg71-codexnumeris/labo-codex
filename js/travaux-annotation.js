@@ -210,7 +210,7 @@
         if (paletteExistante) {
             if (paletteExistante.classList.contains('replie')) {
                 paletteExistante.classList.remove('replie');
-                const btnR = paletteExistante.querySelector('.travaux-palette-toggle');
+                const btnR = paletteExistante.querySelector('.palette-flottante-toggle') || paletteExistante.querySelector('.travaux-palette-toggle');
                 if (btnR) btnR.textContent = '\u2212';
             }
         } else {
@@ -258,7 +258,7 @@
         const paletteFlottante = document.getElementById('travaux-palette-flottante');
         if (paletteFlottante && !paletteFlottante.classList.contains('replie')) {
             paletteFlottante.classList.add('replie');
-            const btnR = paletteFlottante.querySelector('.travaux-palette-toggle');
+            const btnR = paletteFlottante.querySelector('.palette-flottante-toggle') || paletteFlottante.querySelector('.travaux-palette-toggle');
             if (btnR) btnR.textContent = '+';
         }
 

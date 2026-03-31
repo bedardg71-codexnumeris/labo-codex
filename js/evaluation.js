@@ -1086,7 +1086,7 @@ function niveauSelectionne(critereId) {
     const paletteRetro = document.getElementById('travaux-palette-eval-retro');
     if (paletteRetro && paletteRetro.classList.contains('replie')) {
         paletteRetro.classList.remove('replie');
-        const btn = paletteRetro.querySelector('.travaux-palette-toggle');
+        const btn = paletteRetro.querySelector('.palette-flottante-toggle') || paletteRetro.querySelector('.travaux-palette-toggle');
         if (btn) btn.innerHTML = '&#x2212;';
     }
 

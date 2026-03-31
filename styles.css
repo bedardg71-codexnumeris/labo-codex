@@ -17220,7 +17220,156 @@ body.mode-clair .travaux-apercu-trait {
     border-color: var(--bordure-claire, #d0d8e0);
 }
 
-/* --- Palette flottante annotation --- */
+/* ===============================
+   PALETTE FLOTTANTE — Classe partagée réutilisable
+   Utilisée par : Annotation, Codes, Tampons, Évaluer
+   =============================== */
+
+.palette-flottante {
+    position: absolute;
+    z-index: 80;
+    background: var(--surface-carte, #1a3040);
+    border: 1px solid rgba(106, 172, 184, 0.2);
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    min-width: 140px;
+    max-width: 260px;
+    user-select: none;
+    resize: both;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.palette-flottante-barre {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    cursor: grab;
+    border-bottom: 1px solid rgba(106, 172, 184, 0.2);
+    border-radius: 10px 10px 0 0;
+    flex-shrink: 0;
+}
+.palette-flottante-barre:active { cursor: grabbing; }
+
+.palette-flottante-titre {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--texte-secondaire, #8aa4b0);
+}
+
+.palette-flottante-toggle {
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: none;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--texte-muted, #5a7a88);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+.palette-flottante-toggle:hover {
+    background: rgba(106, 172, 184, 0.1);
+    color: var(--texte-principal, #d0e0e4);
+}
+
+.palette-flottante-contenu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 1;
+    max-height: calc(100vh - 250px);
+}
+
+.palette-flottante-bas-btns {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-top: 1px solid rgba(106, 172, 184, 0.2);
+    flex-shrink: 0;
+}
+
+.palette-flottante-aide-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: none;
+    border-radius: 50%;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background 0.15s;
+}
+.palette-flottante-aide-btn:hover {
+    background: rgba(106, 172, 184, 0.15);
+}
+.palette-flottante-aide-btn.actif {
+    background: rgba(106, 172, 184, 0.25);
+    box-shadow: inset 0 0 0 1px rgba(106, 172, 184, 0.3);
+}
+
+/* États repliés */
+.palette-flottante.replie .palette-flottante-contenu,
+.palette-flottante.replie .palette-flottante-bas-btns {
+    display: none;
+}
+.palette-flottante.replie {
+    resize: none;
+}
+.palette-flottante.replie .palette-flottante-barre {
+    border-bottom: none;
+    border-radius: 10px;
+}
+
+/* Indicateur de resize */
+.palette-flottante::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 10px;
+    height: 10px;
+    border-right: 2px solid var(--texte-muted, #5a7a88);
+    border-bottom: 2px solid var(--texte-muted, #5a7a88);
+    border-radius: 0 0 4px 0;
+    opacity: 0.5;
+    pointer-events: none;
+}
+.palette-flottante.replie::after { display: none; }
+
+/* Mode clair */
+body.mode-clair .palette-flottante {
+    background: #e8f2fd;
+    border-color: rgba(3, 46, 92, 0.1);
+}
+body.mode-clair .palette-flottante-barre {
+    border-bottom-color: rgba(3, 46, 92, 0.08);
+}
+body.mode-clair .palette-flottante-bas-btns {
+    border-top-color: rgba(3, 46, 92, 0.08);
+}
+body.mode-clair .palette-flottante-aide-btn:hover {
+    background: rgba(3, 46, 92, 0.1);
+}
+
+/* --- Palette flottante annotation (legacy, sera migrée) --- */
 .travaux-palette-flottante {
     position: absolute;
     z-index: 80;
@@ -21738,23 +21887,7 @@ body.mode-clair .annot-toolbar {
     gap: 0;
     overflow: hidden;
     min-height: 0;
-}
-
-/* Colonne Parametres */
-.eval-layout-flex .eval-col-params {
-    flex: 0 0 260px;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    overflow-x: hidden;
-    border-radius: 0;
-    resize: none;
-}
-.eval-layout-flex .eval-col-params::after { display: none; }
-.eval-layout-flex .eval-col-params .travaux-palette-contenu {
-    max-height: none;
-    flex: 1;
-    overflow-y: auto;
+    position: relative;
 }
 
 /* Colonne Document (centre, scrollable, colle en haut) */
@@ -21779,69 +21912,14 @@ body.mode-clair .annot-toolbar {
     margin: 0;
 }
 
-/* Colonne Evaluation */
-.eval-layout-flex .eval-col-evaluation {
-    flex: 0 0 160px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    border-radius: 0;
-    resize: none;
-    min-width: 0;
-    min-height: 0;
-}
-.eval-layout-flex .eval-col-evaluation::after { display: none; }
-.eval-layout-flex .eval-col-evaluation .travaux-palette-contenu {
-    flex: 1;
+/* Palettes flottantes d'évaluation — ajustements */
+.eval-layout-flex .travaux-palette-eval .palette-flottante-contenu {
     overflow-y: auto;
-    min-height: 0;
 }
-
-/* Colonne Retroaction (pleine hauteur, redimensionnable via splitter) */
-.eval-layout-flex .eval-col-retro {
-    flex: 0 1 280px;
-    display: flex;
-    flex-direction: column;
-    overflow: auto;
-    border-radius: 0;
-    resize: none;
-    min-height: 0;
-    min-width: 0;
-}
-.eval-layout-flex .eval-col-retro::after { display: none; }
-.eval-layout-flex .eval-col-retro .travaux-palette-contenu {
-    max-height: none;
-    flex: 1;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-.eval-layout-flex .eval-col-retro #travaux-eval-retroaction {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    min-width: 0;
-}
-.eval-layout-flex .eval-col-retro .zone-retroaction {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    height: auto;
-    min-height: 0;
-    min-width: 0;
-}
-.eval-layout-flex .eval-col-retro #retroactionFinale1 {
-    flex: 1;
+.eval-layout-flex .travaux-palette-eval #retroactionFinale1 {
     min-height: 120px;
-    min-width: 0;
     width: 100%;
-    resize: none;
-}
-.eval-layout-flex .eval-col-retro .eval-options-retroaction {
-    min-width: 0;
-    overflow: hidden;
+    resize: vertical;
 }
 
 /* Jetons integres dans Parametres */
@@ -21856,13 +21934,6 @@ body.mode-clair .annot-toolbar {
     text-transform: uppercase;
     letter-spacing: 0.03em;
     color: var(--texte-secondaire, #a0b0c0);
-}
-
-/* Toutes les palettes dans le flex : pas de position absolue */
-.eval-layout-flex .travaux-palette-flottante {
-    position: static !important;
-    box-shadow: none;
-    border-radius: 0;
 }
 
 /* ===============================
@@ -21905,7 +21976,7 @@ body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0
 }
 
 /* ===============================
-   LAYOUT ANNOTATION ANCRE
+   LAYOUT ANNOTATION (palettes flottantes)
    =============================== */
 
 .annot-layout-flex {
@@ -21914,28 +21985,10 @@ body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0
     gap: 0;
     overflow: hidden;
     min-height: 0;
+    position: relative;
 }
-.annot-layout-flex .annot-col-palette {
-    flex: 0 0 170px;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-.annot-layout-flex .travaux-palette-flottante {
-    position: static !important;
-    box-shadow: none;
-    border-radius: 0;
-    min-width: unset;
-    max-width: unset;
-    width: 100%;
-    resize: none;
-}
-.annot-layout-flex .travaux-palette-flottante::after { display: none; }
-.annot-layout-flex .travaux-palette-barre { cursor: default; }
-.annot-layout-flex .travaux-palette-contenu { max-height: none; flex: 1; gap: 4px; padding: 6px; }
 
-/* Boutons outils : flex compact avec retour à la ligne */
+/* Boutons outils dans la palette flottante : compact */
 .annot-layout-flex .travaux-palette-outils {
     display: flex;
     flex-wrap: wrap;
@@ -21962,26 +22015,6 @@ body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0
 /* Couleurs : pastilles légèrement réduites */
 .annot-layout-flex .travaux-btn-couleur {
     width: 18px; height: 18px; min-width: 18px; min-height: 18px;
-}
-/* Pied : wrap sur 2 lignes */
-.annot-layout-flex .travaux-palette-pied {
-    flex-wrap: wrap;
-    gap: 3px;
-    padding: 4px 6px;
-}
-.annot-layout-flex .travaux-palette-btn-pied {
-    flex: 1 1 40%;
-    font-size: 0.65rem;
-    padding: 3px 2px;
-    text-align: center;
-}
-/* Toggles secondaires (tampons, erreurs-fr) : compact */
-.annot-layout-flex .travaux-palette-toggles {
-    gap: 3px;
-    padding: 4px 6px;
-}
-.annot-layout-flex .travaux-palette-toggles .travaux-palette-btn-pied {
-    flex: 1 1 auto;
 }
 .annot-col-document {
     flex: 1;
