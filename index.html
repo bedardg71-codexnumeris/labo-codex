@@ -5014,12 +5014,14 @@
                                 <div class="eval-options-radios">
                                     <label><input type="radio" name="affichageNote1" id="affichageNoteComplet1" value="complet" checked data-on-change="genererRetroaction" data-param="1"> Note chiffrée</label>
                                     <label><input type="radio" name="affichageNote1" id="affichageNoteLettre1" value="lettre" data-on-change="genererRetroaction" data-param="1"> Niveau de performance</label>
-                                    <button data-action="regenererRetroactionAvecFeedback" class="btn-copier-retro" title="Régénérer la rétroaction depuis la cartouche actuelle">Régénérer</button>
                                 </div>
                             </div>
                             <textarea id="retroactionFinale1" class="eval-textarea" rows="6"
                                 placeholder="La rétroaction sera générée automatiquement ici selon tes évaluations et les options cochées."></textarea>
-                            <div id="compteur-mots-retro" class="eval-compteur-mots">0 mot</div>
+                            <div class="eval-retro-pied">
+                                <div id="compteur-mots-retro" class="eval-compteur-mots">0 mot</div>
+                                <button data-action="regenererRetroactionAvecFeedback" class="btn-copier-retro" title="Régénérer la rétroaction depuis la cartouche actuelle">Régénérer</button>
+                            </div>
                         </div>
 
                         <!-- VUE SPÉCIFIQUE -->

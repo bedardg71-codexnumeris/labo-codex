@@ -15142,6 +15142,7 @@ body.mode-clair .prep-select {
     height: calc(100vh - 120px);
     min-height: 400px;
     gap: 0;
+    overflow: hidden;
 }
 
 /* --- Palettes flottantes evaluation --- */
@@ -15340,12 +15341,17 @@ body.mode-clair .prep-select {
 }
 
 /* Compteur de mots */
-.eval-compteur-mots {
-    text-align: right;
-    font-size: 0.7rem;
-    color: var(--gris-moyen);
+.eval-retro-pied {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
     margin-top: 3px;
     padding-right: 4px;
+}
+.eval-compteur-mots {
+    font-size: 0.7rem;
+    color: var(--gris-moyen);
 }
 
 /* Contenu rétroaction en lecture */
