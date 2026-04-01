@@ -23,7 +23,7 @@
     function trouverEvaluationPourFichier(fichier) {
         _dernierAvertissement = null;
         if (!fichier) return null;
-        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
 
         // Résolution par clé composite (etudiantDA, productionId)
         if (!fichier.etudiantDA || !fichier.productionId) return null;

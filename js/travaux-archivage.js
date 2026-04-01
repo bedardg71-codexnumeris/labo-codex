@@ -29,7 +29,7 @@
 
         const zip = new JSZip();
         const fichiers = travauxStockage.obtenirFichiersEtudiant(da);
-        const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
+        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
         const etudiant = etudiants.find(e => e.da === da);
 
         const nomDossier = etudiant
@@ -58,7 +58,7 @@
 
         // Ajouter les evaluations si demande
         if (options.inclureEvaluations) {
-            const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
+            const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
             const evalsEtudiant = evaluations.filter(e => e.etudiantDA === da);
 
             if (evalsEtudiant.length > 0) {
@@ -83,7 +83,7 @@
 
         const zip = new JSZip();
         const fichiers = travauxStockage.obtenirFichiersProduction(productionId);
-        const productions = obtenirDonneesSelonMode(cle('productions'));
+        const productions = obtenirDonneesSelonMode('productions');
         const production = productions.find(p => p.id === productionId);
 
         const nomDossier = production
@@ -92,7 +92,7 @@
 
         const dossier = zip.folder(nomDossier);
 
-        const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
+        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
 
         for (const fichier of fichiers) {
             const blob = await travauxStockage.recupererBlob(fichier.id);
@@ -117,7 +117,7 @@
 
         // Ajouter les evaluations si demande
         if (options.inclureEvaluations) {
-            const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
+            const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
             const evalsProd = evaluations.filter(e => e.productionId === productionId);
 
             if (evalsProd.length > 0) {
@@ -155,7 +155,7 @@
             throw new Error('Aucun fichier trouvé pour ces critères.');
         }
 
-        const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
+        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
 
         for (const fichier of fichiers) {
             const blob = await travauxStockage.recupererBlob(fichier.id);
@@ -178,7 +178,7 @@
         }
 
         // Toujours inclure les evaluations
-        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
         let evalsFiltre = evaluations;
         if (da) evalsFiltre = evalsFiltre.filter(e => e.etudiantDA === da);
         if (productionId) evalsFiltre = evalsFiltre.filter(e => e.productionId === productionId);
@@ -203,8 +203,8 @@
 
         const zip = new JSZip();
         let fichiers = travauxStockage.obtenirFichiersGroupeActif();
-        const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
-        const productions = obtenirDonneesSelonMode(cle('productions'));
+        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+        const productions = obtenirDonneesSelonMode('productions');
 
         // Filtres optionnels
         if (options.da) {
@@ -252,7 +252,7 @@
         }
 
         // Toujours inclure les evaluations
-        let evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
+        let evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
         if (options.da) evaluations = evaluations.filter(e => e.etudiantDA === options.da);
         if (options.productionId) evaluations = evaluations.filter(e => e.productionId === options.productionId);
         if (evaluations.length > 0) {
@@ -287,9 +287,9 @@
      */
     async function exporterPourLea(productionId, da, reprisesSeulement, onProgression) {
         const fichiers = travauxStockage.obtenirFichiersGroupeActif();
-        const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
-        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees'));
-        const productions = obtenirDonneesSelonMode(cle('productions'));
+        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+        const productions = obtenirDonneesSelonMode('productions');
         const production = productions.find(p => p.id === productionId);
         const nomProd = (production?.titre || production?.nom || 'production')
             .replace(/[^a-zA-ZÀ-ÿ0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
@@ -465,7 +465,7 @@
     async function lancerExportEtudiant(da, options = {}) {
         try {
             const zip = await exporterParEtudiant(da, options);
-            const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
+            const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
             const etudiant = etudiants.find(e => e.da === da);
             const nom = etudiant ? `${etudiant.nom}_${etudiant.prenom}` : da;
             telechargerBlob(zip, `travaux_${nom}.zip`);
@@ -510,12 +510,12 @@
             // Nom du fichier selon le filtre
             let nomZip = 'travaux';
             if (da) {
-                const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
+                const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
                 const etudiant = etudiants.find(e => e.da === da);
                 nomZip += '_' + (etudiant ? etudiant.nom + '_' + etudiant.prenom : da);
             }
             if (productionId) {
-                const productions = obtenirDonneesSelonMode(cle('productions'));
+                const productions = obtenirDonneesSelonMode('productions');
                 const prod = productions.find(p => p.id === productionId);
                 const titreProd = (prod?.titre || prod?.nom || productionId).replace(/[^a-zA-Z0-9]/g, '_');
                 nomZip += '_' + titreProd;

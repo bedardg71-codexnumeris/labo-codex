@@ -3711,13 +3711,8 @@ async function dupliquerEchelleDepuisSidebar(id) {
  * @returns {Object} {utilisee: boolean, nbEvaluations: number, evaluations: Array}
  */
 async function verifierUtilisationEchelle(echelleId) {
-    // Récupérer toutes les évaluations (essayer avec et sans namespace)
-    let evaluations = await db.get('evaluations');
-
-    // Si pas trouvé, essayer avec la clé namespacée
-    if (!evaluations) {
-        evaluations = await db.get(window.cle('evaluations'));
-    }
+    // Récupérer les évaluations du trimestre actif
+    let evaluations = await db.get(cle('evaluationsSauvegardees'));
 
     // S'assurer que c'est un tableau
     if (!Array.isArray(evaluations)) {
@@ -3741,7 +3736,7 @@ async function verifierUtilisationEchelle(echelleId) {
  * @returns {number} Nombre d'évaluations migrées
  */
 async function migrerEvaluationsVersNouvelleEchelle(ancienneEchelleId, nouvelleEchelleId) {
-    const evaluations = await db.get('evaluations') ||  [];
+    const evaluations = await db.get(cle('evaluationsSauvegardees')) || [];
     let nbMigrees = 0;
 
     evaluations.forEach(ev => {
@@ -3751,7 +3746,7 @@ async function migrerEvaluationsVersNouvelleEchelle(ancienneEchelleId, nouvelleE
         }
     });
 
-    await db.set('evaluations',  evaluations);
+    await db.set(cle('evaluationsSauvegardees'), evaluations);
     return nbMigrees;
 }
 

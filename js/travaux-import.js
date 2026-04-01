@@ -157,7 +157,7 @@
      */
     function trouverEtudiantParDA(da) {
         if (!da) return null;
-        const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
+        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
         return etudiants.find(e => e.da === da) || null;
     }
 
@@ -167,7 +167,7 @@
      * @returns {Object|null} L'etudiant trouve ou null
      */
     function trouverEtudiantParNom(nomFichier) {
-        const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
+        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
         const nomLower = nomFichier.toLowerCase().replace(/[_\-]/g, ' ');
 
         for (const etudiant of etudiants) {
@@ -368,7 +368,7 @@
                 // Tenter le matching par nom LEA si parseLea a identifié une production
                 // (plus fiable que le sélecteur global qui applique aveuglément)
                 if (!prepare.productionId && prepare.parseLea && prepare.parseLea.nomProduction) {
-                    const productions = obtenirDonneesSelonMode(cle('productions'));
+                    const productions = obtenirDonneesSelonMode('productions');
                     const nomNorm = normaliserNomProduction(prepare.parseLea.nomProduction);
                     if (nomNorm && productions.length) {
                         const prodTrouvee = productions.find(p => {
@@ -707,7 +707,7 @@
             fichierPrepare.pipelineStatut = 'pret';
             // Si parseLea a reussi et on trouve un etudiant, passer en identifie
             if (fichierPrepare.parseLea.da && fichierPrepare.etudiantAssocie) {
-                const productions = obtenirDonneesSelonMode(cle('productions'));
+                const productions = obtenirDonneesSelonMode('productions');
                 const prodTrouvee = productions.find(p => {
                     const titre = normaliserNomProduction(p.titre || p.nom || '');
                     const nomProd = normaliserNomProduction(fichierPrepare.parseLea.nomProduction);
@@ -920,7 +920,7 @@
             return '<p class="texte-muted">Aucun fichier en attente</p>';
         }
 
-        const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
+        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
 
         let html = '<div class="travaux-file-attente">';
 
