@@ -416,7 +416,7 @@ function afficherListeInterventions() {
                     </div>
                 </div>
 
-                <p class="intervention-description">${intervention.description || ''} <span class="text-muted">${formaterDateLisible(intervention.date)}${intervention.heure ? ` à ${intervention.heure}` : ''}</span></p>
+                <p class="intervention-description">${echapperHtml(typeof anonymiserTexteRetroaction === 'function' ? anonymiserTexteRetroaction(intervention.description || '', null) : (intervention.description || ''))} <span class="text-muted">${formaterDateLisible(intervention.date)}${intervention.heure ? ` à ${echapperHtml(intervention.heure)}` : ''}</span></p>
 
                 ${(intervention.analyse || (intervention.notesIndividuelles && Object.keys(intervention.notesIndividuelles).length > 0)) ? `
                     <h4 class="intervention-titre u-mb-10 u-mt-10">Aperçu du sous-groupe (${intervention.analyse ? intervention.analyse.nbEtudiants : 0} étudiant·e·s)</h4>
@@ -429,7 +429,7 @@ function afficherListeInterventions() {
                 ${intervention.observations ? `
                     <div class="carte intervention-observations">
                         <h5>Observations générales</h5>
-                        <p>${intervention.observations}</p>
+                        <p>${echapperHtml(typeof anonymiserTexteRetroaction === 'function' ? anonymiserTexteRetroaction(intervention.observations, null) : intervention.observations)}</p>
                     </div>
                 ` : ''}
             </div>
@@ -584,9 +584,12 @@ function genererAffichageNotesIndividuelles(notesIndividuelles) {
     Object.entries(notesIndividuelles).forEach(([da, note]) => {
         const etudiant = etudiants.find(e => e.da === da);
         if (etudiant && note) {
+            // ✅ ANONYMISATION (Tier 0.4) + SÉCURITÉ : echapperHtml + anonymiser prénoms dans le texte libre
+            const noteAff = typeof anonymiserTexteRetroaction === 'function'
+                ? anonymiserTexteRetroaction(note, da) : note;
             html += `
                 <div style="margin-bottom: 8px; font-size: 0.9rem;">
-                    <strong>${etudiant.prenom} ${etudiant.nom}:</strong> ${note}
+                    <strong>${echapperHtml(etudiant.prenom)} ${echapperHtml(etudiant.nom)}:</strong> ${echapperHtml(noteAff)}
                 </div>
             `;
         }
@@ -1051,11 +1054,11 @@ function ouvrirIntervention(interventionId) {
                        data-on-change="afficherAnalyseTempsReel" data-param="${intervention.id}"
                        style="width: auto; margin: 0;">
                 <label for="etud-${etudiant.da}" style="font-weight: 500; margin: 0; cursor: pointer;">
-                    ${etudiant.prenom} ${etudiant.nom}
+                    ${echapperHtml(etudiant.prenom)} ${echapperHtml(etudiant.nom)}
                 </label>
                 <textarea id="note-${etudiant.da}" class="controle-form" rows="1"
                           placeholder="Note individuelle..."
-                          style="font-size: 0.85rem; resize: vertical;">${noteExistante}</textarea>
+                          style="font-size: 0.85rem; resize: vertical;">${echapperHtml(typeof anonymiserTexteRetroaction === 'function' ? anonymiserTexteRetroaction(noteExistante, etudiant.da) : noteExistante)}</textarea>
                 <span class="badge-rai-${cible.niveau}">Niveau ${cible.niveau}</span>
             </div>
         `;
