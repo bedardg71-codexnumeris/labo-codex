@@ -2728,9 +2728,9 @@
         html += '</div>';
 
         html += '<div class="travaux-retro-actions">';
-        html += '<button class="btn-secondaire" data-action="travauxOutils.reinitialiserRetroErreursFr">R\u00e9initialiser</button>';
-        html += '<button class="btn-secondaire" data-action="travauxOutils.fermerModalRetroErreursFr">Annuler</button>';
-        html += '<button class="btn-principal" data-action="travauxOutils.enregistrerRetroErreursFr">Enregistrer</button>';
+        html += '<button class="btn btn-annuler" data-action="travauxOutils.reinitialiserRetroErreursFr">R\u00e9initialiser</button>';
+        html += '<button class="btn btn-secondaire" data-action="travauxOutils.fermerModalRetroErreursFr">Annuler</button>';
+        html += '<button class="btn btn-principal" data-action="travauxOutils.enregistrerRetroErreursFr">Enregistrer</button>';
         html += '</div>';
         html += '</div>';
 
