@@ -56,8 +56,8 @@ Ce pattern est utilise dans :
 
 ## Etat actuel du projet
 
-**Version** : Beta 99 (Build 0401-1220)
-**Objectif** : Palettes flottantes redimensionnables, raccourcis clavier, icones annotation
+**Version** : Beta 99.01 (Build 0401-2205)
+**Objectif** : Plan de consolidation avril 2026 (Tier 0 termine, Tier 1 en cours)
 **Priorite** : **Securite + Proprete > Nouvelles fonctionnalites**
 
 **Derniere session** : Voir `../SESSION.md` (racine du projet)

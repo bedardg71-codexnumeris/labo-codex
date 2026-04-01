@@ -18,8 +18,8 @@ Ce document te guidera vers :
 
 ## Etat actuel
 
-- **Version** : Beta 99 (Build 0401-1220)
-- **Objectif** : Palettes flottantes redimensionnables, raccourcis clavier, icones annotation
+- **Version** : Beta 99.01 (Build 0401-2205)
+- **Objectif** : Plan de consolidation avril 2026 (Tier 0 termine, Tier 1 en cours)
 - **Session en cours** : Voir `SESSION.md`
 - **Backlog** : Voir `BACKLOG.md` (taches a faire)
 
