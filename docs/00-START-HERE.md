@@ -56,8 +56,8 @@ Ce pattern est utilise dans :
 
 ## Etat actuel du projet
 
-**Version** : Beta 98.9 (Build 0331-1820)
-**Objectif** : Refactoring Annoter/Evaluer — canevas unique, palettes flottantes interchangeables
+**Version** : Beta 99 (Build 0401-1220)
+**Objectif** : Palettes flottantes redimensionnables, raccourcis clavier, icones annotation
 **Priorite** : **Securite + Proprete > Nouvelles fonctionnalites**
 
 **Derniere session** : Voir `../SESSION.md` (racine du projet)

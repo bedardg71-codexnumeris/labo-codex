@@ -10,6 +10,21 @@
 
     var CHANGELOG = [
         {
+            version: 'Beta 99',
+            couleur: 'vert',
+            titre: 'Palettes redessin\u00e9es et raccourcis clavier',
+            items: [
+                'Palettes Codes, Tampons et \u00c9valuation redimensionnables\u00a0: boutons \u2194/\u2195 pour basculer entre disposition horizontale et verticale.',
+                'Raccourcis clavier\u00a0: touches 1\u20139/0 pour les codes d\u2019erreur, lettres configurables pour les tampons.',
+                'Ic\u00f4nes dans la palette Annotation\u00a0: outils et formes remplac\u00e9s par des ic\u00f4nes visuelles.',
+                'Chrono avec pause\u00a0: bouton pause/play, reprise automatique \u00e0 la prochaine annotation.',
+                'Menu Actions\u00a0: affiche le mode actif (Annoter/\u00c9valuer), op\u00e9rations destructives retir\u00e9es.',
+                'Grille CSS responsive pour les crit\u00e8res d\u2019\u00e9valuation (SRPNF c\u00f4te \u00e0 c\u00f4te en mode large).',
+                'Correction du compte des s\u00e9ances donn\u00e9es (source unique obtenirSeancesCompletes).',
+                'Correction de la s\u00e9lection du cartouche de r\u00e9troaction depuis la production.'
+            ]
+        },
+        {
             version: 'Beta 98',
             couleur: 'vert',
             titre: 'S\u00e9curit\u00e9 renforc\u00e9e et codex USB',

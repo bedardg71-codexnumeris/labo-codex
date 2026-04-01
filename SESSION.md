@@ -1,8 +1,26 @@
-# SESSION ACTIVE — BETA 98.9
+# SESSION ACTIVE — BETA 99
 
-**Date** : 27 mars 2026
-**Version** : Beta 98.9 (Build 0327-1715)
-**Statut** : Désaturation localStorage — COMPLÉTÉ (10/10 chantiers)
+**Date** : 1er avril 2026
+**Version** : Beta 99 (Build 0401-1220)
+**Statut** : Palettes flottantes, raccourcis clavier, icônes — DÉPLOYÉ
+
+---
+
+## Bilan de la session (1er avril 2026)
+
+### Palettes flottantes et UX annotation (12 commits)
+- Séances données : source unique `obtenirSeancesCompletes()` (fix 27/30 erroné)
+- Palettes Codes/Tampons : largeur libre, grille CSS auto-fill, boutons ↔/↕
+- Palettes Évaluation : boutons ↔/↕, grille critères responsive (auto-fill 120px)
+- Critère algorithmique (Français) : pleine largeur via `:has(.eval-badge-algo)`
+- Menu Actions : affiche le mode actif, Alléger/Re-importer retirés (opérations fichier)
+- Alléger : confirm() explicatif ajouté (opération destructive)
+- Palette Annotation : bouton replier fonctionnel, icônes PNG (icons8)
+- Palette Chrono : pause/play, reprise auto sur annotation, layout compact
+- Raccourcis clavier : codes 1-9/0, tampons configurables (⌨ dans réglages)
+- Fix doublons palettes eval, fix NotFoundError insertBefore, fix panneaux perdus
+- Fix cartouche rétroaction : sélection immédiate (race condition éliminée)
+- Fix build fallback init-inline.js
 
 ---
 
