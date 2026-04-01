@@ -1459,7 +1459,8 @@
         html += '<button class="palette-flottante-toggle" title="Démarre à la 1re annotation et s\'arrête à la sauvegarde. Indique ensuite une durée moyenne.">?</button>';
         html += '</div>';
         html += '<div class="palette-flottante-contenu palette-chrono-contenu">';
-        html += '<span id="chrono-badge" class="travaux-chrono-badge">⏱️ --:--</span>';
+        html += '<button id="chrono-btn-pause" class="chrono-btn-etat" data-action="travauxUI.togglePauseChrono" style="display:none" title="Pause">\u23f8\ufe0f</button>';
+        html += '<span id="chrono-badge" class="travaux-chrono-badge">--:--</span>';
         html += '</div>';
 
         palette.innerHTML = html;
