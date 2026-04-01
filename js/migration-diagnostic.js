@@ -23,9 +23,9 @@
      * @returns {Object} Rapport structuré
      */
     function migrationDiagnostic() {
-        const fichiers = obtenirDonneesSelonMode(cle('fichiersTravaux')) || [];
-        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
-        const corbeille = obtenirDonneesSelonMode(cle('corbeilleFichiers')) || [];
+        const fichiers = obtenirDonneesSelonMode('fichiersTravaux') || [];
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+        const corbeille = obtenirDonneesSelonMode('corbeilleFichiers') || [];
 
         // --- Fichiers ---
         const fichiersOrphelins = fichiers.filter(f => !f.productionId);
@@ -169,9 +169,9 @@
             return false;
         }
 
-        const fichiers = obtenirDonneesSelonMode(cle('fichiersTravaux')) || [];
-        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
-        const corbeille = obtenirDonneesSelonMode(cle('corbeilleFichiers')) || [];
+        const fichiers = obtenirDonneesSelonMode('fichiersTravaux') || [];
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+        const corbeille = obtenirDonneesSelonMode('corbeilleFichiers') || [];
 
         db.setSync(cle('fichiersTravaux_backup_v1'), JSON.parse(JSON.stringify(fichiers)));
         db.setSync(cle('evaluationsSauvegardees_backup_v1'), JSON.parse(JSON.stringify(evaluations)));
@@ -300,7 +300,7 @@
      * @returns {number} Nombre de fichiers migrés
      */
     function migrationAjouterStatut() {
-        const fichiers = obtenirDonneesSelonMode(cle('fichiersTravaux')) || [];
+        const fichiers = obtenirDonneesSelonMode('fichiersTravaux') || [];
         let nbMigres = 0;
 
         fichiers.forEach(f => {
@@ -323,8 +323,8 @@
 
     // Log léger au chargement (pas de console.table pour ne pas polluer)
     try {
-        const fichiers = obtenirDonneesSelonMode(cle('fichiersTravaux')) || [];
-        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+        const fichiers = obtenirDonneesSelonMode('fichiersTravaux') || [];
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
         const evalsAvecFichierId = evaluations.filter(e => e.fichierId && !e.remplaceeParId);
         if (fichiers.length > 0 || evaluations.length > 0) {
         }

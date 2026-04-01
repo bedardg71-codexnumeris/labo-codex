@@ -1284,7 +1284,7 @@ function ouvrirProprieteFichier(fichierId) {
     }).join('');
 
     // Évaluations de cet étudiant (pour lier le fichier à la bonne évaluation)
-    var toutesEvals = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+    var toutesEvals = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     var evalsEtudiant = toutesEvals.filter(function(e) {
         return e.etudiantDA === fichier.etudiantDA;
     });
@@ -1468,7 +1468,7 @@ function associerProductionDepuisListe(fichierId, da) {
             travauxStockage.mettreAJourFichier(fichierId, { estReprise: true });
 
             // Appliquer le jeton de reprise si une évaluation existe
-            var evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+            var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
             var evalActive = evaluations.find(function(e) {
                 return e.etudiantDA === da && e.productionId === jetonProdId && !e.remplaceeParId;
             });

@@ -913,10 +913,10 @@ La structure est claire (intro, développement, conclusion)"></textarea>
             dansBibliotheque: true
         };
 
-        // Sauvegarder dans les grilles
-        let grilles = await db.get('grilles') || [];
+        // Sauvegarder dans les grilles (clé globale grillesTemplates)
+        let grilles = await db.get('grillesTemplates') || [];
         grilles.push(nouvelleGrille);
-        await db.set('grilles', grilles);
+        await db.set('grillesTemplates', grilles);
 
         // Ajouter aussi à la bibliothèque partagée
         if (typeof ajouterGrilleALaBibliotheque === 'function') {

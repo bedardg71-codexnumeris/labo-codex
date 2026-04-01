@@ -522,7 +522,7 @@
 
             // Vérifier évaluation orpheline : une éval existe pour (DA, ancien prodId) ?
             if (fichier.productionId && fichier.productionId !== nouveauProdId) {
-                const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+                const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
                 const evalOrpheline = evaluations.find(e =>
                     !e.remplaceeParId &&
                     e.etudiantDA === fichier.etudiantDA &&

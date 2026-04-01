@@ -2626,7 +2626,9 @@ function obtenirDetailsAssiduite(da) {
         ? obtenirSeancesCompletes() : {};
     const aujourdhui = new Date().toISOString().split('T')[0];
 
-    const seances = db.getSync('seancesHoraire', []);
+    const seances = typeof obtenirSeancesHoraire === 'function'
+        ? obtenirSeancesHoraire()
+        : db.getSync(cle('seancesHoraire'), []);
     const dureePeriodeMin = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
 
     // Détecter les absences (totales ET partielles)
@@ -6935,7 +6937,7 @@ function genererSectionPerformance(da) {
                 dateSelection: new Date().toISOString(),
                 auto: true
             };
-            db.setSync('portfoliosEleves', selectionsPortfolios);
+            db.setSync(cle('portfoliosEleves'), selectionsPortfolios);
 
             // 🔄 Recalculer les indices C et P après sélection automatique
             if (typeof calculerEtStockerIndicesCP === 'function') {

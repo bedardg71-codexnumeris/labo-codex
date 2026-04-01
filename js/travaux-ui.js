@@ -1002,8 +1002,8 @@
         const conteneur = document.getElementById('evaluations-contenu-archivage');
         if (!conteneur) return;
 
-        const tousEtudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
-        const productions = obtenirDonneesSelonMode(cle('productions'));
+        const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
+        const productions = obtenirDonneesSelonMode('productions');
         const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
         const dasActifs = new Set(fichiersTravaux.map(f => f.etudiantDA).filter(Boolean));
         const etudiants = tousEtudiants.filter(e => dasActifs.has(e.da));
@@ -1408,7 +1408,7 @@
      */
     function genererEtape2Colonnes(queue, groupes) {
         const nbImages = queue.filter(f => f.estImage).length;
-        const productions = obtenirDonneesSelonMode(cle('productions'));
+        const productions = obtenirDonneesSelonMode('productions');
 
         // Production globale actuelle (prioriser le choix explicite de l'utilisateur)
         const prodActuelle = travauxImport.getProductionGlobale()
@@ -2132,7 +2132,7 @@
      */
     function identifierAutoPipeline() {
         const queue = travauxImport.obtenirFileDAttente();
-        const productions = obtenirDonneesSelonMode(cle('productions'));
+        const productions = obtenirDonneesSelonMode('productions');
         let modifies = 0;
 
         queue.forEach(f => {
@@ -2338,8 +2338,8 @@
     function genererGrilleFichiers(fichiers, action) {
         if (fichiers.length === 0) return '';
 
-        const productions = obtenirDonneesSelonMode(cle('productions'));
-        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+        const productions = obtenirDonneesSelonMode('productions');
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
 
         // Grouper par productionId
         const groupes = {};
@@ -2427,8 +2427,8 @@
     function genererTableauFichiers(fichiers) {
         if (fichiers.length === 0) return '';
 
-        const productions = obtenirDonneesSelonMode(cle('productions'));
-        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+        const productions = obtenirDonneesSelonMode('productions');
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
 
         // Options pour le select de production
         const optionsProductions = productions.map(p =>
@@ -2752,7 +2752,7 @@
      * @returns {string} HTML options
      */
     function genererOptionsEtudiants() {
-        const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
+        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
         return [...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e =>
             `<option value="${e.da}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)}</option>`
         ).join('');
@@ -3127,7 +3127,7 @@
         const dasGroupeActif = new Set(
             travauxStockage.obtenirFichiersGroupeActif().map(f => f.etudiantDA).filter(Boolean)
         );
-        let evalsComptees = (obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [])
+        let evalsComptees = (obtenirDonneesSelonMode('evaluationsSauvegardees') || [])
             .filter(e => e.productionId === productionId && !e.remplaceeParId && dasGroupeActif.has(e.etudiantDA));
         if (reprisesSeulement) {
             evalsComptees = evalsComptees.filter(e => e.repriseDeId || e.jetonRepriseCibleeApplique);
@@ -3237,7 +3237,7 @@
             if (!choix) return;
 
             // Supprimer l'évaluation
-            const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+            const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
             const evaluationsMaj = evaluations.filter(e => e.id !== evalAssociee.id);
             sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluationsMaj);
         } else {
@@ -3518,7 +3518,7 @@
                     var fichierImporte = await travauxImport.importerFichier(d.fichierPrepare, d.productionId);
                     if (fichierImporte && !fichierImporte.doublon) {
                         // Trouver l'évaluation active et appliquer le jeton
-                        var evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+                        var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
                         var evalActive = evaluations.find(function(e) {
                             return e.etudiantDA === d.fichierExistant.etudiantDA &&
                                 e.productionId === d.productionId && !e.remplaceeParId;
@@ -3582,7 +3582,7 @@
         }
         fichiersReprise = Object.values(parCle);
 
-        var evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+        var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
         var compteur = 0;
         var echecsSansEval = [];
 
@@ -3642,7 +3642,7 @@
             }
 
             // Rafraîchir la liste des évaluations pour la prochaine itération
-            evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+            evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
             compteur++;
         }
 
@@ -4385,7 +4385,7 @@
      */
     function remplirLabelsIdentite(fichier, productionIdOverride) {
         const etudiant = travauxImport.trouverEtudiantParDA(fichier.etudiantDA);
-        const productions = obtenirDonneesSelonMode(cle('productions'));
+        const productions = obtenirDonneesSelonMode('productions');
         const prodId = productionIdOverride || fichier.productionId;
         const production = (productions && prodId) ? productions.find(p => p.id === prodId) : null;
 
@@ -4626,7 +4626,7 @@
      */
     function chargerEvaluationExistanteSiPresente(da, productionId) {
         if (window._modifierEvaluationEnCours) return;
-        var evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+        var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
         // Chercher l'évaluation active (non remplacée) pour ce (DA, productionId)
         var evalActive = evaluations.find(function(e) {
             return e.etudiantDA === da && e.productionId === productionId && !e.remplaceeParId;
@@ -4975,7 +4975,7 @@
             const liste = document.getElementById('pipeline-autocomplete-' + index);
             if (!liste) return;
 
-            const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
+            const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
             if (!etudiants || !etudiants.length) { liste.classList.add('u-hide'); return; }
 
             const q = (query || '').toLowerCase().trim();
@@ -5001,7 +5001,7 @@
     function selectionnerEtudiant(index, da) {
         const queue = travauxImport.obtenirFileDAttente();
         if (!queue[index]) return;
-        const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
+        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
         const etudiant = etudiants.find(e => e.da === da);
         queue[index].etudiantDA = da;
         queue[index].etudiantAssocie = etudiant || null;
@@ -5569,7 +5569,7 @@
             }
             if (f.productionId) {
                 if (!productionsMap[f.productionId]) {
-                    var prods = obtenirDonneesSelonMode(cle('productions')) || [];
+                    var prods = obtenirDonneesSelonMode('productions') || [];
                     var prod = prods.find(function(p) { return p.id === f.productionId; });
                     productionsMap[f.productionId] = prod ? prod.titre : f.productionId;
                 }
@@ -6010,7 +6010,7 @@
 
         const evalTrouvee = travauxResolution.trouverEvaluationPourFichier(fichier);
         if (!evalTrouvee) return;
-        let evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+        let evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
         const index = evaluations.findIndex(e => e.id === evalTrouvee.id);
 
         if (index === -1) return;
@@ -6086,7 +6086,7 @@
         }
 
         // Determiner le statut de chaque fichier
-        const evaluations = obtenirDonneesSelonMode(cle('evaluationsSauvegardees')) || [];
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
         const lignesFichiers = fichiersTravaux.map(f => {
             const etudiant = travauxImport.trouverEtudiantParDA(f.etudiantDA);
             const nomEtudiant = etudiant

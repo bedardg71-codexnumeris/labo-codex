@@ -3349,7 +3349,7 @@ function genererRetroactionBilan() {
             if (configJetons && configJetons.actif) {
                 var maxJetons = configJetons.reprise ? configJetons.reprise.nombre : 2;
                 var toutesEvalsJ = db.getSync(cle('evaluationsSauvegardees'), []);
-                var productions = obtenirDonneesSelonMode(cle('productions')) || [];
+                var productions = obtenirDonneesSelonMode('productions') || [];
                 var jetonsUtilises = [];
                 toutesEvalsJ.filter(function(e) {
                     return e.etudiantDA === da && !e.remplaceeParId;
@@ -4043,10 +4043,10 @@ function chargerFiltresEvaluations() {
     const selectGroupe = document.getElementById('filtre-groupe-eval');
     if (selectGroupe) {
         const groupes = [...new Set(donneesEvaluationsFiltrees.map(e => e.groupe).filter(g => g))];
-        selectGroupe.innerHTML = '<option value="">Tous les groupes</option>';
-        groupes.sort().forEach(groupe => {
-            selectGroupe.innerHTML += `<option value="${groupe}">Groupe ${groupe}</option>`;
-        });
+        selectGroupe.innerHTML = '<option value="">Tous les groupes</option>' +
+            groupes.sort().map(groupe =>
+                `<option value="${echapperHtml(groupe)}">Groupe ${echapperHtml(groupe)}</option>`
+            ).join('');
     }
 
     // Charger les productions
@@ -4321,6 +4321,8 @@ function obtenirTendance(evaluations) {
     const triees = [...evaluations].sort((a, b) =>
         new Date(b.dateEvaluation || b.dateRemise || 0) - new Date(a.dateEvaluation || a.dateRemise || 0)
     );
+
+    if (triees.length < 2) return '—';
 
     // Comparer les 2 dernières évaluations
     const derniere = convertirNoteEnValeur(triees[0].niveauFinal);
