@@ -56,8 +56,8 @@ Ce pattern est utilise dans :
 
 ## Etat actuel du projet
 
-**Version** : Beta 99.01 (Build 0401-2205)
-**Objectif** : Plan de consolidation avril 2026 (Tier 0 termine, Tier 1 en cours)
+**Version** : Beta 99.01 (Build 0104-1915)
+**Objectif** : Plan de consolidation avril 2026 (Tier 0+1+2 termines, Tier 2.5 en file)
 **Priorite** : **Securite + Proprete > Nouvelles fonctionnalites**
 
 **Derniere session** : Voir `../SESSION.md` (racine du projet)

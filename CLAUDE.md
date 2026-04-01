@@ -18,8 +18,8 @@ Ce document te guidera vers :
 
 ## Etat actuel
 
-- **Version** : Beta 99.01 (Build 0401-2205)
-- **Objectif** : Plan de consolidation avril 2026 (Tier 0 termine, Tier 1 en cours)
+- **Version** : Beta 99.01 (Build 0104-1915)
+- **Objectif** : Plan de consolidation avril 2026 (Tier 0+1+2 termines, Tier 2.5 en file)
 - **Session en cours** : Voir `SESSION.md`
 - **Backlog** : Voir `BACKLOG.md` (taches a faire)
 
