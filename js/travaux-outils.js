@@ -1279,10 +1279,10 @@
 
         html += '</div></div>';
 
-        // Formes (grille 2x2)
+        // Formes
         html += '<div class="travaux-palette-section">';
         html += '<div class="travaux-palette-label">Formes</div>';
-        html += '<div class="travaux-palette-outils travaux-palette-outils--grille2x2">';
+        html += '<div class="travaux-palette-outils">';
 
         const outilsFormes = ['cercle', 'rectangle', 'fleche', 'ondule'];
         outilsFormes.forEach(id => {

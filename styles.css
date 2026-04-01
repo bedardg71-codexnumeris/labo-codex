@@ -17246,13 +17246,14 @@ body.mode-clair .pipeline-autocomplete-item:hover {
 }
 
 .travaux-palette-outils {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
     gap: 4px;
 }
 
 .travaux-palette-outils--grille2x2 {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
     gap: 4px;
 }
 
@@ -22192,7 +22193,7 @@ body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0
 }
 .palette-flottante .travaux-palette-outils--grille2x2 {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
     gap: 3px;
 }
 .palette-flottante .travaux-btn-outil {
