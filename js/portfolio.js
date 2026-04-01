@@ -111,7 +111,7 @@ function selectionnerArtefactsSelonModalite(artefactsRemisAvecNote, nombreAReten
 function chargerPortfolioEleveDetail(da) {
     try {
         // Récupérer les données
-        const productions = db.getSync(cle('productions'), []);
+        const productions = obtenirDonneesSelonMode('productions');
         const portfolio = productions.find(p => p.type === 'portfolio');
 
         if (!portfolio) {
@@ -124,7 +124,7 @@ function chargerPortfolioEleveDetail(da) {
         const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
 
         // Récupérer les évaluations de cet élève
-        const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
         const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
 
         // Récupérer les sélections de portfolio

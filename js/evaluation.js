@@ -557,7 +557,7 @@ function chargerProduction(productionNum) {
     evaluationEnCours.productionId = productionId;
 
     // Récupérer les infos de la production
-    const productions = db.getSync(cle('productions'), []);
+    const productions = obtenirDonneesSelonMode('productions');
     const production = productions.find(p => p.id === productionId);
 
     if (production) {
@@ -1855,7 +1855,7 @@ function genererRetroaction(num) {
 
     if (!cartouche) return;
 
-    const productions = db.getSync(cle('productions'), []);
+    const productions = obtenirDonneesSelonMode('productions');
     const production = productions.find(p => p.id === evaluationEnCours.productionId);
 
     let texte = '';
@@ -2581,7 +2581,7 @@ function peuplementOptJetons() {
     var jetonsParType = { delai: [], reprise: [], repriseCiblee: [] };
 
     if (da) {
-        var toutesEvals = db.getSync(cle('evaluationsSauvegardees'), []);
+        var toutesEvals = obtenirDonneesSelonMode('evaluationsSauvegardees');
         var productions = typeof obtenirDonneesSelonMode === 'function'
             ? obtenirDonneesSelonMode('productions') || [] : [];
         toutesEvals.filter(function(e) {
@@ -3207,7 +3207,7 @@ function genererRetroactionBilan() {
     // Charger l'historique
     var historiqueEleve = [];
     try {
-        var toutesEvals = db.getSync(cle('evaluationsSauvegardees'), []);
+        var toutesEvals = obtenirDonneesSelonMode('evaluationsSauvegardees');
         historiqueEleve = toutesEvals
             .filter(function(e) { return e.etudiantDA === da && !e.remplaceeParId; })
             .sort(function(a, b) { return new Date(b.dateEvaluation) - new Date(a.dateEvaluation); })
@@ -3348,7 +3348,7 @@ function genererRetroactionBilan() {
             var configJetons = obtenirConfigJetons();
             if (configJetons && configJetons.actif) {
                 var maxJetons = configJetons.reprise ? configJetons.reprise.nombre : 2;
-                var toutesEvalsJ = db.getSync(cle('evaluationsSauvegardees'), []);
+                var toutesEvalsJ = obtenirDonneesSelonMode('evaluationsSauvegardees');
                 var productions = obtenirDonneesSelonMode('productions') || [];
                 var jetonsUtilises = [];
                 toutesEvalsJ.filter(function(e) {
@@ -3748,7 +3748,7 @@ function genererBadgeCompletion(etudiant) {
 
     // PRIORITÉ 3 : Fallback final - Calculer depuis le nombre d'artefacts
     if (completion === 0 && nbArtefacts > 0) {
-        const productions = db.getSync(cle('productions'), []);
+        const productions = obtenirDonneesSelonMode('productions');
         const productionsAttendues = productions.filter(p => p.type !== 'portfolio').length;
         completion = productionsAttendues > 0 ? nbArtefacts / productionsAttendues : 0;
     }
@@ -3834,7 +3834,7 @@ ${genererBadgeCompletion(etudiant)}
  */
 function genererDetailsEtudiant(etudiant) {
     const evaluations = etudiant.evaluations || [];
-    const productions = db.getSync(cle('productions'), []);
+    const productions = obtenirDonneesSelonMode('productions');
 
     // Créer un tableau avec TOUTES les productions et leur statut
     const tableauComplet = productions.map(production => {
@@ -4052,7 +4052,7 @@ function chargerFiltresEvaluations() {
     // Charger les productions
     const selectProduction = document.getElementById('filtre-production-eval');
     if (selectProduction) {
-        const productions = db.getSync(cle('productions'), []);
+        const productions = obtenirDonneesSelonMode('productions');
         selectProduction.innerHTML = '<option value="">Toutes les productions</option>';
         productions.forEach(prod => {
             selectProduction.innerHTML += `<option value="${prod.id}">${echapperHtml(prod.titre || prod.nom)}</option>`;
@@ -4067,7 +4067,7 @@ function chargerFiltresEvaluations() {
 function rechargerFiltreProduction() {
     const selectProduction = document.getElementById('filtre-production-eval');
     if (selectProduction) {
-        const productions = db.getSync(cle('productions'), []);
+        const productions = obtenirDonneesSelonMode('productions');
         selectProduction.innerHTML = '<option value="">Toutes les productions</option>';
         productions.forEach(prod => {
             selectProduction.innerHTML += `<option value="${prod.id}">${echapperHtml(prod.titre || prod.nom)}</option>`;
@@ -4234,7 +4234,7 @@ function mettreAJourStatistiquesEvaluations() {
 
     // 🎯 Calculer le total d'artefacts DONNÉS (même logique que portfolio.js)
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const productions = db.getSync(cle('productions'), []);
+    const productions = obtenirDonneesSelonMode('productions');
 
     // Identifier les artefacts-portfolio
     const artefactsPortfolioIds = new Set(

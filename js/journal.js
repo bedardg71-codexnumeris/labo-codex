@@ -101,7 +101,7 @@ function ajouterEntree(evaluation, action, details) {
  */
 function obtenirJournal(evaluationId) {
     if (!evaluationId) return [];
-    var evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+    var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     var evaluation = evaluations.find(function(e) { return e.id === evaluationId; });
     return (evaluation && evaluation.journal) || [];
 }
@@ -252,7 +252,7 @@ function formaterEntreeJournal(entree) {
 function afficherJournal(evaluationId) {
     if (!evaluationId) return;
 
-    var evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+    var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     var evaluation = evaluations.find(function(e) { return e.id === evaluationId; });
     if (!evaluation) {
         if (typeof afficherNotificationErreur === 'function') {
@@ -319,6 +319,7 @@ function fermerJournal() {
  * Génère un ZIP téléchargeable contenant un JSON anonymisé.
  */
 function exporterExperienceAnonymisee() {
+    // ACCÈS DIRECT INTENTIONNEL — export complet, doit lire TOUTES les évaluations du trimestre
     var evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     if (!evaluations || evaluations.length === 0) {
         if (typeof afficherNotificationErreur === 'function') {
