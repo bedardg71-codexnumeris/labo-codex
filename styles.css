@@ -1342,12 +1342,13 @@ h1, h2, h3, h4 {
 }
 
 .dropdown-groupe-cours-header {
-    background: rgba(106, 172, 184, 0.12);
+    background-color: rgba(106, 172, 184, 0.12);
     border: 1px solid rgba(106, 172, 184, 0.25);
     border-radius: var(--radius-moyen);
     color: white;
     font-size: 0.9rem;
-    padding: 6px 28px 6px 12px;
+    height: 34px;
+    padding: 0 28px 0 12px;
     cursor: pointer;
     outline: none;
     appearance: none;
@@ -1357,16 +1358,16 @@ h1, h2, h3, h4 {
     background-repeat: no-repeat;
     background-position: right 10px center;
     min-width: 200px;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .dropdown-groupe-cours-header:hover {
-    background: rgba(106, 172, 184, 0.22);
+    background-color: rgba(106, 172, 184, 0.22);
     border-color: rgba(106, 172, 184, 0.4);
 }
 
 .dropdown-groupe-cours-header:focus {
-    background: rgba(106, 172, 184, 0.28);
+    background-color: rgba(106, 172, 184, 0.28);
     border-color: rgba(106, 172, 184, 0.5);
     box-shadow: 0 0 0 3px rgba(106, 172, 184, 0.2);
 }
@@ -1431,14 +1432,14 @@ h1, h2, h3, h4 {
 }
 
 .nav-icone {
-    width: 22px;
-    height: 22px;
+    width: 26px;
+    height: 26px;
     object-fit: contain;
     filter: brightness(0) invert(1);
     vertical-align: middle;
 }
 body.mode-clair .nav-icone {
-    filter: none;
+    filter: brightness(0) invert(1);
 }
 
 /* ===============================
@@ -5387,33 +5388,39 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .select-mode {
-    padding: 6px 12px;
-    border: 2px solid rgba(106, 172, 184, 0.25);
+    background-color: rgba(106, 172, 184, 0.12);
+    border: 1px solid rgba(106, 172, 184, 0.25);
     border-radius: var(--radius-moyen);
-    background: rgba(106, 172, 184, 0.12);
     color: white;
     font-size: 0.9rem;
-    font-weight: 500;
+    height: 34px;
+    padding: 0 28px 0 12px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(5px);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .select-mode:hover {
-    background: rgba(106, 172, 184, 0.22);
+    background-color: rgba(106, 172, 184, 0.22);
     border-color: rgba(106, 172, 184, 0.4);
 }
 
 .select-mode:focus {
-    outline: none;
-    border-color: rgba(106, 172, 184, 0.6);
-    box-shadow: 0 0 0 3px rgba(106, 172, 184, 0.1);
+    background-color: rgba(106, 172, 184, 0.28);
+    border-color: rgba(106, 172, 184, 0.5);
+    box-shadow: 0 0 0 3px rgba(106, 172, 184, 0.2);
 }
 
 .select-mode option {
     background: var(--bleu-principal);
     color: white;
-    padding: 8px;
+    padding: 10px;
 }
 
 /* ===============================
@@ -20133,6 +20140,22 @@ body.mode-clair .dropdown-groupe-cours-header option {
 body.mode-clair .dropdown-cours-entete option {
     color: white;
     background: var(--bleu-fonce);
+}
+
+/* Select mode — même apparence que groupe-cours en mode clair */
+body.mode-clair .select-mode {
+    background-color: rgba(3, 46, 92, 0.6);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: white;
+}
+body.mode-clair .select-mode:hover {
+    background-color: rgba(3, 46, 92, 0.75);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+body.mode-clair .select-mode:focus {
+    background-color: rgba(3, 46, 92, 0.75);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
 }
 
 /* Navigation principale — bleu principal solide */
