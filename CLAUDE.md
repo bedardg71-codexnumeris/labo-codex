@@ -18,8 +18,8 @@ Ce document te guidera vers :
 
 ## Etat actuel
 
-- **Version** : Beta 98.9 (Build 0331-1820)
-- **Objectif** : Refactoring Annoter/Evaluer — canevas unique, palettes flottantes interchangeables
+- **Version** : Beta 99 (Build 0401-1220)
+- **Objectif** : Palettes flottantes redimensionnables, raccourcis clavier, icones annotation
 - **Session en cours** : Voir `SESSION.md`
 - **Backlog** : Voir `BACKLOG.md` (taches a faire)
 
