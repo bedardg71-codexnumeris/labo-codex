@@ -1144,6 +1144,8 @@ function _autoSauvegarderCriteres() {
         }
     });
 
+    // ACCÈS DIRECT — read-modify-write : doit lire TOUTES les évaluations du trimestre
+    // pour ne pas perdre celles d'autres cours lors de la réécriture (idem lignes 2222, 5656+)
     let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const idx = evaluations.findIndex(function(e) {
         return !e.remplaceeParId &&
@@ -1164,7 +1166,7 @@ function _autoSauvegarderCriteres() {
         // Creer une nouvelle evaluation (brouillon non verrouille)
         var etudiants = obtenirDonneesSelonMode('groupeEtudiants');
         var etudiant = etudiants.find(function(e) { return e.da === ec.etudiantDA; });
-        var productions = db.getSync(cle('productions'), []);
+        var productions = obtenirDonneesSelonMode('productions');
         var production = productions.find(function(p) { return p.id === ec.productionId; });
         if (!etudiant || !production) return;
 
@@ -2114,7 +2116,7 @@ function sauvegarderEvaluation() {
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const etudiant = etudiants.find(e => e.da === etudiantDA);
 
-    const productions = db.getSync(cle('productions'), []);
+    const productions = obtenirDonneesSelonMode('productions');
     const production = productions.find(p => p.id === productionId);
 
     const grilles = db.getSync('grillesTemplates', []);
