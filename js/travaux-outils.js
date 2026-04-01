@@ -1133,7 +1133,7 @@
         // Barre de titre (draggable + toggle)
         html += '<div class="palette-flottante-barre">';
         html += '<span class="palette-flottante-titre">Annotation</span>';
-        html += '<button class="palette-flottante-toggle" id="travaux-palette-toggle" title="Réduire la palette">&#x2212;</button>';
+        html += '<button class="palette-flottante-toggle" id="travaux-palette-toggle" data-action="travauxOutils.togglePaletteReplie" title="Réduire la palette">&#x2212;</button>';
         html += '</div>';
 
         // Contenu (sections verticales)
@@ -1326,6 +1326,13 @@
     function focusPalette(palette) {
         if (!palette) return;
         _paletteZIndex++;
+        if (_paletteZIndex > 99) {
+            // Plafond atteint : remettre toutes les palettes au z-index de base
+            document.querySelectorAll('.palette-flottante, .travaux-palette-flottante').forEach(function(p) {
+                p.style.zIndex = 80;
+            });
+            _paletteZIndex = 81;
+        }
         palette.style.zIndex = _paletteZIndex;
     }
 
@@ -1468,6 +1475,7 @@
                 const cRect = conteneur.getBoundingClientRect();
                 palette.style.top = (rect.bottom - cRect.top + 8) + 'px';
                 palette.style.left = (rect.left - cRect.left) + 'px';
+                palette.style.width = rect.width + 'px';
             } else {
                 palette.style.top = '12px';
                 palette.style.left = '12px';

@@ -17607,10 +17607,13 @@ body.mode-clair .palette-flottante-aide-btn:hover {
 .travaux-palette-flottante.replie::after { display: none; }
 
 /* --- Popup autocollants --- */
-/* Palette flottante tampons — herite de .travaux-palette-flottante */
-.travaux-palette-tampons {
-    min-width: 180px;
-    max-width: 220px;
+/* Palettes droites (Codes + Tampons) — largeur et resize alignés */
+#travaux-palette-erreurs-fr,
+#travaux-palette-tampons {
+    width: 200px;
+    min-width: 200px;
+    max-width: 200px;
+    resize: vertical;
 }
 
 .travaux-autocollants-label {
@@ -21344,7 +21347,7 @@ body.mode-clair .prioritaire-indice-attention {
     border-bottom: 1px solid var(--bordure-claire, #334155);
     border-top: none;
     flex-shrink: 0;
-    z-index: 90;
+    z-index: 100;
     gap: 0;
 }
 
