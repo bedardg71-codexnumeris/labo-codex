@@ -1442,7 +1442,10 @@
         queue.forEach((f, index) => {
             const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
             const icone = f.estPDF ? '&#x1F4C4;' : '&#x1F5BC;';
-            const nomCourt = (f.parseLea.nom || f.nomFichier).substring(0, 18);
+            // ✅ ANONYMISATION (Tier 0.2) : anonymiser les noms de fichiers affichés
+            const nomFichierAff = typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : f.nomFichier;
+            const nomLeaAff = typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.parseLea.nom, f.etudiantDA) : f.parseLea.nom;
+            const nomCourt = (nomLeaAff || nomFichierAff).substring(0, 18);
             const resolution = (f.largeurOriginale && f.hauteurOriginale)
                 ? `${f.largeurOriginale} x ${f.hauteurOriginale}`
                 : 'PDF';
@@ -1471,7 +1474,7 @@
                     ${thumb ? `<img src="${thumb}" alt="">` : `<span class="pipeline-icone-placeholder">${icone}</span>`}
                 </div>
                 <div class="pipeline-fichier-meta-col">
-                    <span class="pipeline-meta-nom" title="${echapperHtml(f.nomFichier)}">${echapperHtml(nomCourt)}</span>
+                    <span class="pipeline-meta-nom" title="${echapperHtml(nomFichierAff)}">${echapperHtml(nomCourt)}</span>
                     <span class="pipeline-meta-resolution">${resolution}</span>
                     <span class="pipeline-meta-taille">${poids}</span>
                 </div>
@@ -2259,7 +2262,7 @@
         const estSelFusion = selectionFusion.has(f.id);
         const checkboxFusion = `<input type="checkbox" class="fusion-checkbox" ${estSelFusion ? 'checked' : ''} data-stop data-action="travauxUI.toggleSelectionFusion" data-param="${f.id}" title="Sélectionner pour fusion">`;
 
-        return `<div class="annot-badge${estSelFusion ? ' annot-badge-fusion-selectionne' : ''}${estRemplacee ? ' eval-remplacee' : ''}" data-fichier-id="${f.id}" data-etudiant-da="${f.etudiantDA || ''}" draggable="true" data-drag-data="text/fichier-id:${f.id}" data-action="${actionName}" data-param="${f.id}" title="${echapperHtml(f.nomFichier)}${estRemplacee ? ' (Remplacée par reprise)' : ''}${estReprise ? ' (Reprise)' : ''}">
+        return `<div class="annot-badge${estSelFusion ? ' annot-badge-fusion-selectionne' : ''}${estRemplacee ? ' eval-remplacee' : ''}" data-fichier-id="${f.id}" data-etudiant-da="${f.etudiantDA || ''}" draggable="true" data-drag-data="text/fichier-id:${f.id}" data-action="${actionName}" data-param="${f.id}" title="${echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : f.nomFichier)}${estRemplacee ? ' (Remplacée par reprise)' : ''}${estReprise ? ' (Reprise)' : ''}">
         ${checkboxFusion}
         <span class="annot-badge-nom">${nomEtudiant}</span>
         <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>${indicateurReprise}${evaluation ? `<button class="travaux-badge-retro" data-stop data-action="travauxUI.afficherRetroaction" data-param="${f.id}" title="Aperçu rétroaction">\u{1F4AC}</button>` : ''}${verrou}
@@ -2670,7 +2673,7 @@
                         ${thumb ? `<img src="${thumb}" alt="">` : `<img data-thumbnail-id="${f.id}" src="" alt="" style="display:none"><span>${icone}</span>`}
                         ${badge}
                     </div>
-                    <div class="travaux-miniature-nom">${echapperHtml(f.nomFichier)}</div>
+                    <div class="travaux-miniature-nom">${echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : f.nomFichier)}</div>
                 </div>`;
         });
         return html;
@@ -2736,7 +2739,7 @@
                         ${thumb ? `<img src="${thumb}" alt="">` : `<img data-thumbnail-id="${f.id}" src="" alt="" style="display:none"><span>${icone}</span>`}
                         ${badge}
                     </div>
-                    <div class="travaux-miniature-nom">${echapperHtml(f.nomFichier)}</div>
+                    <div class="travaux-miniature-nom">${echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : f.nomFichier)}</div>
                 </div>`;
         }
 
@@ -3478,8 +3481,8 @@
                         '<h3 style="margin-top:0">Doublon d\u00e9tect\u00e9' + echapperHtml(compteur) + '</h3>' +
                         '<p>Un fichier existe d\u00e9j\u00e0 pour <strong>' + echapperHtml(nomEtudiant) + '</strong> \u2014 <strong>' + echapperHtml(nomProd) + '</strong>.</p>' +
                         '<p style="font-size:13px;color:var(--couleur-texte-secondaire)">' +
-                            'Existant\u00a0: ' + echapperHtml(d.fichierExistant.nomFichier) + '<br>' +
-                            'Nouveau\u00a0: ' + echapperHtml(d.fichierPrepare.nomFichier) +
+                            'Existant\u00a0: ' + echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(d.fichierExistant.nomFichier, d.fichierExistant.etudiantDA) : d.fichierExistant.nomFichier) + '<br>' +
+                            'Nouveau\u00a0: ' + echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(d.fichierPrepare.nomFichier, d.fichierPrepare.etudiantDA) : d.fichierPrepare.nomFichier) +
                         '</p>' +
                         '<div style="margin-top:16px;display:flex;flex-direction:column;gap:8px;">' +
                             boutonJeton +
@@ -3690,7 +3693,7 @@
             html += `<div class="pipeline-doublon-groupe"><strong>${echapperHtml(cleGroupe)}</strong>`;
             fichiers.forEach((f) => {
                 const idx = queue.indexOf(f);
-                html += `<div class="pipeline-doublon-item"><label><input type="checkbox" class="doublon-check" data-index="${idx}"> ${echapperHtml(f.nomFichier)} (${travauxStockage.formaterTaille(f.tailleFichier)})</label></div>`;
+                html += `<div class="pipeline-doublon-item"><label><input type="checkbox" class="doublon-check" data-index="${idx}"> ${echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : f.nomFichier)} (${travauxStockage.formaterTaille(f.tailleFichier)})</label></div>`;
             });
             html += '</div>';
         });
@@ -5653,7 +5656,7 @@
                     <input type="checkbox" class="fusion-fichier-check" value="${f.id}" data-on-change="travauxUI.majCompteurFusion">
                     ${thumb}
                     <div class="fusion-fichier-info">
-                        <span class="fusion-fichier-nom">${echapperHtml(f.nomFichier || 'Document')}</span>
+                        <span class="fusion-fichier-nom">${echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : (f.nomFichier || 'Document'))}</span>
                         <span class="fusion-fichier-meta">${nomEtudiant} — ${nomProduction} — ${pages}</span>
                     </div>
                 </label>`;
@@ -5928,7 +5931,11 @@
         let criteresHTML = '';
         if (evaluation.criteres && evaluation.criteres.length > 0) {
             const lignes = evaluation.criteres.map(c => {
-                const extrait = c.retroaction ? echapperHtml(c.retroaction.substring(0, 120)) : '';
+                // ✅ ANONYMISATION (Tier 0.3) : anonymiser les prénoms dans les rétroactions
+                const retroTexte = typeof anonymiserTexteRetroaction === 'function'
+                    ? anonymiserTexteRetroaction(c.retroaction || '', evaluation.etudiantDA)
+                    : (c.retroaction || '');
+                const extrait = retroTexte ? echapperHtml(retroTexte.substring(0, 120)) : '';
                 return `<li>
                     <strong>${echapperHtml(c.critereNom || '')}</strong>
                     <span class="niveau">${echapperHtml(c.niveauSelectionne || '—')}</span>
@@ -5973,7 +5980,7 @@
                 ${criteresHTML}
 
                 <h4 style="margin: 12px 0 4px;">Rétroaction globale</h4>
-                <textarea id="travaux-modal-retro-texte" class="travaux-retro-textarea">${echapperHtml(evaluation.retroactionFinale || '')}</textarea>
+                <textarea id="travaux-modal-retro-texte" class="travaux-retro-textarea">${echapperHtml(typeof anonymiserTexteRetroaction === 'function' ? anonymiserTexteRetroaction(evaluation.retroactionFinale || '', evaluation.etudiantDA) : (evaluation.retroactionFinale || ''))}</textarea>
 
                 <div class="modal-actions" style="margin-top: 12px;">
                     <button class="btn btn-secondaire" data-action="travauxUI.fermerModalRetroaction">Annuler</button>
@@ -6096,7 +6103,7 @@
             );
             if (evaluation) statut = 'évalué';
 
-            return { id: f.id, nom: f.nomFichier, etudiant: nomEtudiant, statut: statut };
+            return { id: f.id, nom: typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : f.nomFichier, etudiant: nomEtudiant, statut: statut };
         });
 
         // Construire la modale

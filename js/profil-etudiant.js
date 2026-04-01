@@ -9011,13 +9011,13 @@ function genererSectionTravaux(da) {
         const aAnnotations = annotation && travauxUI.annotationContientDuContenu(annotation);
 
         html += `
-            <div class="travaux-grille-item" data-action="travauxUI.ouvrirFichier" data-param="${f.id}" title="${echapperHtml(f.nomFichier)}">
+            <div class="travaux-grille-item" data-action="travauxUI.ouvrirFichier" data-param="${f.id}" title="${echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : f.nomFichier)}">
                 <div class="travaux-grille-thumb">
                     ${thumb ? `<img src="${thumb}" alt="">` : `<img data-thumbnail-id="${f.id}" src="" alt="" style="display:none"><span class="travaux-grille-icone">${icone}</span>`}
                     ${aAnnotations ? '<span class="travaux-badge-annote" title="Annote">&#x270F;</span>' : ''}
                 </div>
                 <div class="travaux-grille-info">
-                    <div class="travaux-grille-nom">${echapperHtml(f.nomFichier)}</div>
+                    <div class="travaux-grille-nom">${echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : f.nomFichier)}</div>
                     ${nomProd ? `<div class="travaux-grille-etudiant">${nomProd}</div>` : ''}
                     <div class="travaux-grille-etudiant">${travauxStockage.formaterTaille(f.tailleFichier)}</div>
                 </div>

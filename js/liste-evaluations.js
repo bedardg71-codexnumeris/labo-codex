@@ -758,7 +758,7 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                 da: '',
                 daAffichage: '',
                 nom: '?',
-                prenom: fichier.nomFichier || 'Fichier non identifié',
+                prenom: (typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(fichier.nomFichier, fichier.etudiantDA) : fichier.nomFichier) || 'Fichier non identifié',
                 groupe: '',
                 productionId: fichier.productionId || '',
                 productionNom: '',
@@ -1310,7 +1310,7 @@ function ouvrirProprieteFichier(fichierId) {
             '<button class="modal-fermer" data-action="fermerOverlayParent">&times;</button>' +
             '<h3 class="modal-titre">Propri\u00e9t\u00e9s du fichier</h3>' +
             '<label style="font-size: 0.85em; color: var(--texte-secondaire);">Nom du document :</label>' +
-            '<input type="text" id="prop-fichier-nom" class="controle-form" style="margin: 4px 0 12px 0; width: 100%;" value="' + echapperHtml(fichier.nomFichier || '') + '">' +
+            '<input type="text" id="prop-fichier-nom" class="controle-form" style="margin: 4px 0 12px 0; width: 100%;" value="' + echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(fichier.nomFichier, fichier.etudiantDA) : (fichier.nomFichier || '')) + '">' +
             '<label style="font-size: 0.85em; color: var(--texte-secondaire);">\u00c9tudiant\u00b7e :</label>' +
             '<select id="prop-fichier-etudiant" class="controle-form" style="margin: 4px 0 12px 0; width: 100%;">' +
                 '<option value="">\u2014 Non associ\u00e9 \u2014</option>' +

@@ -56,7 +56,9 @@
 
         ajouterPageSynthese(doc, fichier, productionIdOverride);
 
-        const nomSortie = fichier.nomFichier.replace(/\.[^.]+$/, '') + '_annote.pdf';
+        // ✅ ANONYMISATION (Tier 0.2) : anonymiser le nom du fichier de sortie
+        const nomFichierAff = typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(fichier.nomFichier, fichier.etudiantDA) : fichier.nomFichier;
+        const nomSortie = nomFichierAff.replace(/\.[^.]+$/, '') + '_annote.pdf';
         return { doc, nomSortie, fichierId };
     }
 
@@ -823,7 +825,9 @@
             : '';
         const titreProduction = evaluation.productionNom || '';
         const titrePdf = titreProduction ? '\u00c9VALUATION \u2014 ' + titreProduction : '\u00c9VALUATION';
-        const nomEtudiantEntete = (evaluation.etudiantNom || '') + (fichier.etudiantDA ? ' (' + fichier.etudiantDA + ')' : '');
+        // ✅ ANONYMISATION (Tier 0.1) : utiliser le nom anonymisé si le mode est actif
+        const nomAnonyme = typeof anonymiserNom === 'function' ? anonymiserNom(fichier.etudiantDA) : null;
+        const nomEtudiantEntete = (nomAnonyme || evaluation.etudiantNom || '') + (fichier.etudiantDA && !nomAnonyme ? ' (' + fichier.etudiantDA + ')' : '');
         let y = ajouterEnteteRetroaction(doc, titrePdf, {
             etudiant: nomEtudiantEntete,
             date: dateEval
@@ -835,7 +839,8 @@
         let etudiant = null;
         let cours = null;
         try {
-            const productions = obtenirDonneesSelonMode(cle('productions'));
+            // ✅ ANONYMISATION (Tier 0.1) : clé de base (obtenirDonneesSelonMode applique cle() en interne)
+            const productions = obtenirDonneesSelonMode('productions');
             production = productions.find(p => p.id === evaluation.productionId) || null;
         } catch(e) { console.warn('[PDF-Export] production lookup skipped:', e.message || e); }
         try {
@@ -871,7 +876,8 @@
             y += mm(6);
         }
         try {
-            const etudiants = obtenirDonneesSelonMode(cle('groupeEtudiants'));
+            // ✅ ANONYMISATION (Tier 0.1) : clé de base sans double namespace
+            const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
             etudiant = etudiants.find(e => e.da === fichier.etudiantDA) || null;
         } catch(e) { console.warn('[PDF-Export] etudiant lookup skipped:', e.message || e); }
 
@@ -965,10 +971,14 @@
                         cellCritere += '\n' + critDef.description;
                     }
                 }
+                // ✅ ANONYMISATION (Tier 0.3) : anonymiser les prénoms dans les rétroactions
+                const retroAnon = typeof anonymiserTexteRetroaction === 'function'
+                    ? anonymiserTexteRetroaction(c.retroaction || '', evaluation.etudiantDA)
+                    : (c.retroaction || '');
                 return [
                     cellCritere,
                     c.niveauSelectionne || '\u2014',
-                    c.retroaction || ''
+                    retroAnon
                 ];
             });
 
@@ -1107,7 +1117,8 @@
         // Charger l'historique de l'eleve
         var historiqueEleve = [];
         try {
-            var toutesEvals = db.getSync(cle('evaluationsSauvegardees'), []);
+            // ✅ ANONYMISATION (Tier 0.1) : passer par obtenirDonneesSelonMode pour namespace + filtrage cours
+            var toutesEvals = obtenirDonneesSelonMode('evaluationsSauvegardees');
             historiqueEleve = toutesEvals
                 .filter(function(e) { return e.etudiantDA === da && !e.remplaceeParId && e.id !== evaluation.id; })
                 .sort(function(a, b) { return new Date(b.dateEvaluation) - new Date(a.dateEvaluation); })
@@ -1271,8 +1282,9 @@
                 var configJetons = obtenirConfigJetons();
                 if (configJetons && configJetons.actif) {
                     var maxJetons = configJetons.reprise ? configJetons.reprise.nombre : 2;
-                    var toutesEvals = db.getSync(cle('evaluationsSauvegardees'), []);
-                    var productions = obtenirDonneesSelonMode(cle('productions')) || [];
+                    // ✅ ANONYMISATION (Tier 0.1) : clé de base sans double namespace
+                    var toutesEvals = obtenirDonneesSelonMode('evaluationsSauvegardees');
+                    var productions = obtenirDonneesSelonMode('productions') || [];
 
                     // Collecter les jetons utilisés (évaluations actives seulement)
                     var jetonsUtilises = [];
@@ -1696,7 +1708,8 @@
             ajouterPageSynthese(doc, fichier);
 
             // Telecharger
-            const etudiant = obtenirDonneesSelonMode(cle('groupeEtudiants')).find(e => e.da === da);
+            // ✅ ANONYMISATION (Tier 0.1) : clé de base — prenom/nom sont anonymisés par obtenirDonneesSelonMode
+            const etudiant = obtenirDonneesSelonMode('groupeEtudiants').find(e => e.da === da);
             const nomEtudiant = etudiant ? `${etudiant.prenom}_${etudiant.nom}` : da;
             const nomSortie = `dossier_${nomEtudiant}_${productionId}.pdf`;
             doc.save(nomSortie);
@@ -1736,8 +1749,8 @@
                 <div class="modal-contenu" style="max-width:600px;max-height:80vh;overflow-y:auto;">
                     <h3>Révision avant export</h3>
                     <div class="travaux-revision-stats">
-                        <p><strong>Fichier :</strong> ${echapperHtml(fichier.nomFichier)}</p>
-                        <p><strong>Étudiant :</strong> ${echapperHtml(evaluation?.etudiantNom || fichier.etudiantDA || 'Non associé')}</p>
+                        <p><strong>Fichier :</strong> ${echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(fichier.nomFichier, fichier.etudiantDA) : fichier.nomFichier)}</p>
+                        <p><strong>Étudiant :</strong> ${echapperHtml((typeof anonymiserNom === 'function' && anonymiserNom(evaluation?.etudiantDA || fichier.etudiantDA)) || evaluation?.etudiantNom || fichier.etudiantDA || 'Non associé')}</p>
                         <p><strong>Pages annotées :</strong> ${stats.pagesAnnotees} sur ${stats.pagesTotal}</p>
                         <p><strong>Traits :</strong> ${stats.traits} | <strong>Formes :</strong> ${stats.formes} | <strong>Textes :</strong> ${stats.textes}</p>`;
 
@@ -1754,7 +1767,11 @@
             if (evaluation.criteres && evaluation.criteres.length > 0) {
                 html += '<ul class="travaux-revision-criteres">';
                 for (const c of evaluation.criteres) {
-                    const extrait = c.retroaction ? c.retroaction.substring(0, 80) + (c.retroaction.length > 80 ? '...' : '') : '—';
+                    // ✅ ANONYMISATION (Tier 0.3) : anonymiser les prénoms dans les rétroactions
+                    const retroTexte = typeof anonymiserTexteRetroaction === 'function'
+                        ? anonymiserTexteRetroaction(c.retroaction || '', evaluation.etudiantDA)
+                        : (c.retroaction || '');
+                    const extrait = retroTexte ? retroTexte.substring(0, 80) + (retroTexte.length > 80 ? '...' : '') : '—';
                     html += `<li><strong>${echapperHtml(c.critereNom)}</strong> — ${echapperHtml(c.niveauSelectionne || '—')}<br><span class="texte-muted">${echapperHtml(extrait)}</span></li>`;
                 }
                 html += '</ul>';
