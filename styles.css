@@ -1430,6 +1430,17 @@ h1, h2, h3, h4 {
     height: 22px;
 }
 
+.nav-icone {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    vertical-align: middle;
+}
+body.mode-clair .nav-icone {
+    filter: none;
+}
+
 /* ===============================
    SOUS-NAVIGATION - GLASSMORPHISME
    =============================== */
@@ -8579,6 +8590,17 @@ summary.summary-materiel:hover {
     font-weight: 600;
     font-size: 0.7rem;
     color: var(--texte-principal, #d0e0e4);
+}
+.jeton-icone {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    vertical-align: middle;
+    flex-shrink: 0;
+    filter: invert(1);
+}
+body.mode-clair .jeton-icone {
+    filter: none;
 }
 
 /* Score original affiché dans le badge reprise */
@@ -17313,6 +17335,26 @@ body.mode-clair .pipeline-autocomplete-item:hover {
     box-shadow: 0 0 0 1px white, 0 0 0 2px var(--gris-fonce);
 }
 
+.travaux-epaisseur-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 2px;
+}
+.travaux-epaisseur-icone {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    filter: invert(1);
+    opacity: 0.6;
+}
+body.mode-clair .travaux-epaisseur-icone {
+    filter: none;
+}
+.travaux-epaisseur-px {
+    font-size: 0.7rem;
+    color: var(--texte-secondaire);
+}
 .travaux-epaisseur-controles {
     display: flex;
     align-items: center;
@@ -17478,6 +17520,8 @@ body.mode-clair .travaux-apercu-trait {
 }
 .palette-flottante.replie {
     resize: none;
+    height: auto !important;
+    overflow: hidden;
 }
 .palette-flottante.replie .palette-flottante-barre {
     border-bottom: none;
@@ -21494,12 +21538,7 @@ body.mode-clair .prioritaire-indice-attention {
     transition: background 0.1s;
 }
 .actions-item:hover { background: rgba(106, 172, 184, 0.1); }
-.actions-item.actif {
-    font-weight: 700;
-    color: var(--accent-principal, #4a90d9);
-}
-.actions-item-vert { color: var(--vert-positif, #27ae60); }
-.actions-item-vert:hover { background: rgba(39, 174, 96, 0.08); }
+/* Pas de style spécial sur les items — apparence uniforme */
 .actions-item:disabled {
     opacity: 0.35;
     cursor: default;

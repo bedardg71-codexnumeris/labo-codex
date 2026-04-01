@@ -560,7 +560,10 @@
                 formeEnCours.amplitude = 6;
                 formeEnCours.wavelength = 30;
             }
-            if (outil.id === 'fleche' || outil.id === 'ondule') {
+            if (outil.id === 'pointille') {
+                formeEnCours.tirets = outil.tirets || [6, 4];
+            }
+            if (outil.id === 'fleche' || outil.id === 'ondule' || outil.id === 'pointille') {
                 formeEnCours.pointes = _outils().getFlechePointes();
             }
             enDessin = true;
@@ -1520,7 +1523,7 @@
             const bbox = calculerBBox('shape', forme);
 
             // Fleches et lignes : hit-testing specifique (droite ou courbe)
-            if (forme.type === 'fleche' || forme.type === 'ligne' || forme.type === 'ondule') {
+            if (forme.type === 'fleche' || forme.type === 'ligne' || forme.type === 'ondule' || forme.type === 'pointille') {
                 if (testProximiteFleche(forme, xNorm, yNorm, seuil)) {
                     return { type: 'shape', index: i, data: forme, bbox: bbox };
                 }
@@ -2467,6 +2470,16 @@
                 if (pointeDebut) {
                     dessinerPointeFleche(ctx, x1, y1, angle + Math.PI, headLen, headAngle);
                 }
+                break;
+            }
+
+            case 'pointille': {
+                var ep = (forme.lineWidth || 2) * ratioResolution;
+                var dash = ep * 3;
+                var gap = ep * 2;
+                ctx.setLineDash([dash, gap]);
+                dessinerFleche(ctx, x1, y1, x2, y2, forme);
+                ctx.setLineDash([]);
                 break;
             }
 
