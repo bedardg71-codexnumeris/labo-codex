@@ -1437,6 +1437,10 @@ h1, h2, h3, h4 {
     filter: brightness(0) invert(1);
     vertical-align: middle;
 }
+#btn-section-aide .nav-icone {
+    width: 22px;
+    height: 22px;
+}
 body.mode-clair .nav-icone {
     filter: brightness(0) invert(1);
 }
@@ -3652,124 +3656,7 @@ body.mode-clair .changelog-entry--sarcelle .changelog-title { color: #065dbb; }
     border-top: 1px solid var(--bleu-pale);
 }
 
-/* Modal Backup Reminder */
-.modal-backup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 10000;
-}
-
-.modal-backup-contenu {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: var(--surface-carte, #1a3040);
-    border-radius: var(--radius-grand);
-    box-shadow: var(--shadow-fort);
-    max-width: 520px;
-    width: 90%;
-    z-index: 10001;
-}
-
-.modal-header-warning {
-    background: linear-gradient(135deg, var(--btn-annuler-hover) 0%, var(--orange-accent) 100%);
-    color: white;
-    padding: 1.25rem 1.5rem;
-    border-radius: 12px 12px 0 0;
-}
-
-.modal-header-warning h2 {
-    margin: 0;
-    font-size: 1.3rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.modal-header-warning h2 span {
-    font-size: 1.5rem;
-}
-
-.modal-backup-body {
-    padding: 1.5rem;
-}
-
-.modal-backup-body > p {
-    margin: 0 0 1rem 0;
-    color: var(--gris-fonce);
-    line-height: 1.6;
-}
-
-.modal-backup-body ul {
-    margin: 0 0 1.25rem 0;
-    padding-left: 1.5rem;
-    color: var(--gris-moyen);
-    line-height: 1.8;
-}
-
-.modal-backup-solution {
-    background: var(--alerte-fond-information);
-    border-left: 4px solid var(--alerte-bordure-information);
-    padding: 1rem;
-    border-radius: 0 8px 8px 0;
-    margin-bottom: 1.5rem;
-}
-
-.modal-backup-solution p {
-    margin: 0;
-    color: var(--alerte-texte-information);
-    font-size: 0.95rem;
-}
-
-.modal-backup-controles {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.modal-backup-rappel {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.modal-backup-rappel label {
-    color: var(--gris-moyen);
-    font-size: 0.9rem;
-}
-
-.modal-backup-rappel select {
-    padding: 0.4rem 0.6rem;
-    border: 1px solid var(--gris-moyen);
-    border-radius: var(--radius-moyen);
-    font-size: 0.9rem;
-    background: var(--surface-carte, #1a3040);
-    color: var(--gris-fonce);
-    cursor: pointer;
-    min-width: 140px;
-    position: relative;
-    z-index: 10;
-    -webkit-appearance: menulist;
-    appearance: menulist;
-}
-
-.modal-backup-rappel select:focus {
-    outline: none;
-    border-color: var(--accent-primaire);
-    box-shadow: 0 0 0 2px rgba(66, 139, 202, 0.2);
-}
-
-.modal-backup-actions {
-    display: flex;
-    gap: 0.5rem;
-}
+/* Modal Backup Reminder — utilise les classes standard DS (.modal-overlay, .modal-contenu, etc.) */
 
 /* ===============================
    MODAL BIENVENUE (Premier lancement)

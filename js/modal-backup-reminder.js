@@ -139,65 +139,55 @@
             return;
         }
 
-        // Overlay
+        // Overlay (classe standard DS)
         const overlay = document.createElement('div');
         overlay.id = 'overlay-backup-reminder';
-        overlay.className = 'modal-backup-overlay';
+        overlay.className = 'modal-overlay actif';
 
-        // Modal
+        // Modal (classes standard DS)
         const modal = document.createElement('div');
         modal.id = 'modal-backup-reminder';
-        modal.className = 'modal-backup-contenu';
+        modal.className = 'modal-contenu modal-compact';
 
         modal.innerHTML = `
-            <div class="modal-header-warning">
-                <h2>
-                    <span>⚠️</span>
-                    Protège tes données
-                </h2>
-            </div>
+            <button class="modal-fermer" data-action="backupReminder.fermerModal">&times;</button>
+            <h3 class="modal-titre">Protège tes données</h3>
 
-            <div class="modal-backup-body">
-                <p>
+            <div class="modal-section">
+                <div class="alerte alerte-attention">
                     Tes données sont stockées <strong>localement dans ton navigateur</strong>.
                     Personne d'autre n'y a accès, mais elles peuvent être <strong>perdues</strong> si :
-                </p>
-
-                <ul>
-                    <li>Tu effaces l'historique de navigation <em>(avec « données de sites »)</em></li>
-                    <li>Tu utilises la <strong>navigation privée</strong></li>
-                    <li>Tu changes de navigateur <em>(Chrome ≠ Safari ≠ Firefox)</em></li>
-                    <li>Tu réinstalles ton navigateur ou changes d'ordinateur</li>
-                </ul>
-
-                <div class="modal-backup-solution">
-                    <p>
-                        <strong>Solution :</strong> Exporte régulièrement tes données via
-                        <strong>Réglages → Données</strong>. Le fichier JSON peut être réimporté
-                        à tout moment pour restaurer tes données.
-                    </p>
+                    <ul style="margin: 0.5rem 0 0 0; padding-left: 1.25rem">
+                        <li>Tu effaces l'historique de navigation <em>(avec « données de sites »)</em></li>
+                        <li>Tu utilises la <strong>navigation privée</strong></li>
+                        <li>Tu changes de navigateur <em>(Chrome ≠ Safari ≠ Firefox)</em></li>
+                        <li>Tu réinstalles ton navigateur ou changes d'ordinateur</li>
+                    </ul>
                 </div>
 
-                <div class="modal-backup-controles">
-                    <div class="modal-backup-rappel">
-                        <label for="select-rappel-backup">Rappel :</label>
-                        <select id="select-rappel-backup">
-                            <option value="7">Dans 7 jours</option>
-                            <option value="14" selected>Dans 14 jours</option>
-                            <option value="30">Dans 30 jours</option>
-                            <option value="jamais">Ne plus rappeler</option>
-                        </select>
-                    </div>
-
-                    <div class="modal-backup-actions">
-                        <button class="btn btn-principal" data-action="backupReminder.allerVersExport">
-                            Exporter maintenant
-                        </button>
-                        <button class="btn btn-neutre" data-action="backupReminder.gererChoixRappel">
-                            J'ai compris
-                        </button>
-                    </div>
+                <div class="alerte alerte-information" style="margin-bottom: 0">
+                    <strong>Solution :</strong> Exporte régulièrement tes données via
+                    <strong>Réglages → Données</strong>. Le fichier JSON peut être réimporté
+                    à tout moment pour restaurer tes données.
                 </div>
+            </div>
+
+            <div class="modal-actions" style="flex-wrap: wrap; align-items: center">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-right: auto">
+                    <label for="select-rappel-backup" style="color: var(--texte-secondaire); font-size: 0.9rem">Rappel :</label>
+                    <select id="select-rappel-backup" style="padding: 0.4rem 0.6rem; border: 1px solid var(--gris-moyen); border-radius: var(--radius-moyen); font-size: 0.9rem; background: var(--surface-carte); color: var(--texte-secondaire); cursor: pointer">
+                        <option value="7">Dans 7 jours</option>
+                        <option value="14" selected>Dans 14 jours</option>
+                        <option value="30">Dans 30 jours</option>
+                        <option value="jamais">Ne plus rappeler</option>
+                    </select>
+                </div>
+                <button class="btn btn-neutre" data-action="backupReminder.gererChoixRappel">
+                    J'ai compris
+                </button>
+                <button class="btn btn-principal" data-action="backupReminder.allerVersExport">
+                    Exporter maintenant
+                </button>
             </div>
         `;
 
