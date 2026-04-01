@@ -568,29 +568,25 @@ function chargerProduction(productionNum) {
             if (selectGrille) {
                 selectGrille.value = production.grilleId;
 
-                // Déclencher le chargement de la grille et des cartouches
+                // Déclencher le chargement de la grille et des cartouches (synchrone)
                 chargerGrilleSelectionnee();
 
-                // 🆕 Pré-sélectionner l'échelle depuis la production
+                // Pré-sélectionner l'échelle depuis la production
                 if (production.echelleId) {
                     const selE = document.getElementById('selectEchelle1');
                     if (selE) selE.value = production.echelleId;
                 }
 
-                // 🆕 Pré-sélectionner la cartouche (après chargement des options par chargerGrilleSelectionnee)
-                if (production.cartoucheId) {
-                    setTimeout(() => {
-                        const selC = document.getElementById('selectCartoucheEval');
-                        if (selC) {
-                            selC.value = production.cartoucheId;
-                            selC.dispatchEvent(new Event('change', { bubbles: true }));
-                        }
-                    }, 150);
-                }
+                // Pré-sélectionner la cartouche immédiatement (les options sont déjà là)
+                _selectionnerCartoucheProduction(production.cartoucheId);
 
-                // Attendre que les cartouches soient chargées, puis vérifier si une évaluation existe
+                // Vérifier si une évaluation existante doit être chargée,
+                // puis réappliquer la cartouche au cas où le chargement l'écrase
                 setTimeout(() => {
                     verifierEtChargerEvaluationExistante();
+                    if (production.cartoucheId) {
+                        setTimeout(() => _selectionnerCartoucheProduction(production.cartoucheId), 200);
+                    }
                 }, 100);
             }
         }
@@ -602,13 +598,27 @@ function chargerProduction(productionNum) {
    =============================== */
 
 /**
+ * Sélectionne une cartouche dans le select si l'option existe
+ */
+function _selectionnerCartoucheProduction(cartoucheId) {
+    if (!cartoucheId) return;
+    const selC = document.getElementById('selectCartoucheEval');
+    if (!selC) return;
+    const optionExiste = Array.from(selC.options).some(o => o.value === cartoucheId);
+    if (optionExiste) {
+        selC.value = cartoucheId;
+        selC.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+}
+
+/**
  * Charge la grille sélectionnée
- * 
+ *
  * FONCTIONNEMENT:
  * 1. Récupère la grille sélectionnée
  * 2. Charge les cartouches disponibles pour cette grille
  * 3. Met à jour evaluationEnCours
- * 
+ *
  * UTILISÉ PAR:
  * - onchange="#selectGrille1" dans le HTML
  */

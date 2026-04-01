@@ -406,6 +406,17 @@
         dropdown.addEventListener('click', function() {
             dropdown.classList.remove('ouvert');
         });
+
+        // Label initial selon le mode courant
+        _majLabelBtnActions(modeCourant === 'evaluer' ? 'Évaluer' : 'Annoter');
+    }
+
+    /**
+     * Met à jour le texte du bouton Actions avec le mode actif
+     */
+    function _majLabelBtnActions(label) {
+        var btn = document.getElementById('travaux-btn-actions');
+        if (btn) btn.textContent = label + ' \u25BE';
     }
 
     /* ===============================
@@ -874,8 +885,7 @@
                                 <button class="actions-item actions-item-vert" id="travaux-btn-evaluer" data-action="travauxUI.basculerMode" data-param="evaluer">Évaluer</button>
                                 <div class="actions-separateur"></div>
                                 <button class="actions-item" id="travaux-btn-editer" data-action="editerFichierDepuisEvaluation">Éditer</button>
-                                <button class="actions-item" id="travaux-btn-alleger" data-action="travauxUI.allegerFichierActuel">Alléger</button>
-                                <button class="actions-item" id="travaux-btn-reimporter" data-action="travauxUI.reimporterFichierActuel">Re-importer</button>
+                                <!-- Alléger et Re-importer : opérations sur fichier, disponibles dans Exporter et archiver -->
                             </div>
                         </div>
                         ${_htmlDropdownProduction ? `<div class="annot-toolbar-production">${_htmlDropdownProduction}</div>` : ''}
@@ -3817,6 +3827,15 @@
      * @param {string} fichierId
      */
     async function allegerFichier(fichierId) {
+        const confirme = confirm(
+            'Alléger ce fichier ?\n\n'
+            + 'Cette opération convertit le fichier en fac-similé '
+            + '(niveaux de gris, résolution réduite, JPEG compressé). '
+            + 'Le fichier original sera écrasé et ne pourra pas être récupéré.\n\n'
+            + 'Pour retrouver l\'original, il faudra le ré-importer.'
+        );
+        if (!confirme) return;
+
         const ok = await travauxStockage.convertirEnFacsimile(fichierId);
         if (ok) {
             if (typeof afficherNotificationSucces === 'function') {
@@ -3910,6 +3929,7 @@
 
             if (btnAnnoter) btnAnnoter.classList.remove('actif');
             if (btnEvaluer) btnEvaluer.classList.add('actif');
+            _majLabelBtnActions('Évaluer');
 
             // Recentrer le document
             requestAnimationFrame(() => {
@@ -3924,11 +3944,14 @@
             }
         } else {
             modeCourant = 'annoter';
-            masquerPalettesEval();
+            // Remettre les panneaux eval dans le HTML statique (pas juste masquer)
+            // pour qu'ils survivent si le DOM est recréé (rafraichirUI, navigation)
+            fermerModeEvaluation();
             afficherPalettesAnnotation();
 
             if (btnAnnoter) btnAnnoter.classList.add('actif');
             if (btnEvaluer) btnEvaluer.classList.remove('actif');
+            _majLabelBtnActions('Annoter');
 
             // Recentrer le document
             requestAnimationFrame(() => {
@@ -3965,10 +3988,15 @@
         if (!conteneurDoc) return;
         const zoneCanvas = document.getElementById('travaux-zone-canvas') || conteneurDoc;
 
-        // Creer les panneaux
+        // Creer les panneaux (source dans le HTML statique)
         const panneauGauche = document.getElementById('travaux-eval-gauche');
         const panneauDroite = document.getElementById('travaux-eval-droite');
         const panneauRetro = document.getElementById('travaux-eval-retroaction');
+
+        if (!panneauGauche && !panneauDroite && !panneauRetro) {
+            console.error('⚠️ [afficherPalettesEval] Panneaux source introuvables — DOM détruit ?');
+            return;
+        }
 
         // --- Palette Paramètres (flottante, top-left) ---
         const paletteG = panneauGauche ? creerPaletteEval('travaux-palette-eval-gauche', 'Paramètres', panneauGauche) : null;

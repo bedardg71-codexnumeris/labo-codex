@@ -93,8 +93,15 @@ function calculerStatistiquesPresences(etudiants, indicesAssiduite, presences) {
     setStatText('pa-taux-moyen', `${tauxMoyen}%`);
 
     // SÉANCES DONNÉES (format X / Total)
-    const seancesCompletees = calculerSeancesCompletees(presences);
-    const totalSeances = calculerTotalSeances();
+    // ✅ FIX: Utiliser obtenirSeancesCompletes() comme source unique de vérité
+    // pour les deux valeurs (séances données ET total du trimestre).
+    // Aligné avec indices.js qui utilise la même source pour le calcul d'assiduité.
+    const seancesCompletes = typeof obtenirSeancesCompletes === 'function'
+        ? obtenirSeancesCompletes() : {};
+    const aujourdhui = new Date().toISOString().split('T')[0];
+    const toutesDatesSessions = Object.keys(seancesCompletes);
+    const totalSeances = toutesDatesSessions.length;
+    const seancesCompletees = toutesDatesSessions.filter(d => d <= aujourdhui).length;
     setStatText('pa-seances-donnees', `${seancesCompletees} / ${totalSeances}`);
 
     // PROCHAINE SÉANCE
