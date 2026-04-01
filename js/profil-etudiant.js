@@ -8651,8 +8651,8 @@ function calculerEtStockerPatternsGroupe() {
         }
     });
 
-    // Stocker dans localStorage
-    db.setSync('indicesPatternsRaI', patternsGroupe);
+    // Stocker avec namespace trimestre
+    db.setSync(cle('indicesPatternsRaI'), patternsGroupe);
 
 
     return patternsGroupe;
@@ -8664,7 +8664,7 @@ function calculerEtStockerPatternsGroupe() {
  * @returns {Object|null} - Pattern et RàI de l'étudiant, ou null si non trouvé
  */
 function obtenirPatternEtudiant(da) {
-    const patterns = db.getSync('indicesPatternsRaI', {});
+    const patterns = db.getSync(cle('indicesPatternsRaI'), null) || db.getSync('indicesPatternsRaI', {});
     return patterns[da] || null;
 }
 

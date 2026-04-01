@@ -1202,6 +1202,38 @@ function migrerCleProductionsPedagogiques() {
     return nbMigres;
 }
 
+/**
+ * 🆕 Beta 99.01 — Migration des clés sans namespace vers clés namespacées
+ * Concerne : indicesPatternsRaI, indicesEvaluation, horaireSelectionne
+ * Ces clés étaient stockées sans préfixe trimestre. Cette migration copie
+ * les données vers la clé namespacée cle('x') sans supprimer l'ancienne.
+ */
+function migrerClesSansNamespace() {
+    if (typeof cle !== 'function') return 0;
+
+    const clesAMigrer = ['indicesPatternsRaI', 'indicesEvaluation', 'horaireSelectionne'];
+    let nbMigrees = 0;
+
+    clesAMigrer.forEach(function(cleBrute) {
+        const cleNamespacee = cle(cleBrute);
+
+        // Si la clé namespacée est identique à la clé brute, pas de migration nécessaire
+        if (cleNamespacee === cleBrute) return;
+
+        const donneesNues = db.getSync(cleBrute, null);
+        const donneesNamespacees = db.getSync(cleNamespacee, null);
+
+        // Migrer seulement si : données nues existent ET clé namespacée vide
+        if (donneesNues !== null && donneesNamespacees === null) {
+            db.setSync(cleNamespacee, donneesNues);
+            nbMigrees++;
+            console.warn('[migrations] Clé migrée : ' + cleBrute + ' → ' + cleNamespacee);
+        }
+    });
+
+    return nbMigrees;
+}
+
 // Export des fonctions
 if (typeof window !== 'undefined') {
     window.executerMigrationsBeta935 = executerMigrationsBeta935;
@@ -1227,6 +1259,8 @@ if (typeof window !== 'undefined') {
     window.executerMigrationsBeta96 = executerMigrationsBeta96;
     // 🆕 Beta 97 - Unification clé productions
     window.migrerCleProductionsPedagogiques = migrerCleProductionsPedagogiques;
+    // 🆕 Beta 99.01 - Clés sans namespace → namespacées
+    window.migrerClesSansNamespace = migrerClesSansNamespace;
     window.migrerVersEntiteEnseignants = migrerVersEntiteEnseignants;
     window.migrerVersEntiteCours = migrerVersEntiteCours;
     window.migrerVersEntiteHoraires = migrerVersEntiteHoraires;

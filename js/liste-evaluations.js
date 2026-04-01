@@ -142,9 +142,9 @@ function calculerEtSauvegarderIndiceCompletion() {
     });
     
     // Récupérer ou créer la structure indicesEvaluation
-    let indicesEvaluation = db.getSync('indicesEvaluation', {});
+    let indicesEvaluation = db.getSync(cle('indicesEvaluation'), null) || db.getSync('indicesEvaluation', {});
     indicesEvaluation.completion = indices;
-    db.setSync('indicesEvaluation', indicesEvaluation);
+    db.setSync(cle('indicesEvaluation'), indicesEvaluation);
     
     
     return indices;

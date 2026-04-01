@@ -784,6 +784,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ===============================
+    // 3.6c MIGRATION CLÉS SANS NAMESPACE (Beta 99.01)
+    // ===============================
+    // Copier indicesPatternsRaI, indicesEvaluation, horaireSelectionne vers clés namespacées
+    if (typeof migrerClesSansNamespace === 'function') {
+        migrerClesSansNamespace();
+    }
+
+    // ===============================
     // 3.7 GROUPE DÉMO (Beta 93.5)
     // ===============================
     // ✅ Préchargement automatique supprimé

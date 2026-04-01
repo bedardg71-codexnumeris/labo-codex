@@ -3506,8 +3506,8 @@ function calculerEtSauvegarderIndicesEvaluation() {
         };
     });
 
-    // Sauvegarder dans localStorage
-    db.setSync('indicesEvaluation', indicesEvaluation);
+    // Sauvegarder avec namespace trimestre
+    db.setSync(cle('indicesEvaluation'), indicesEvaluation);
 
     return indicesEvaluation;
 }

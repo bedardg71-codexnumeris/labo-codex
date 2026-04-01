@@ -607,7 +607,7 @@ function genererInterpretationPerformance(etudiants, echelle) {
     }
 
     // Lire les patterns stockés
-    const patterns = db.getSync('indicesPatternsRaI', {});
+    const patterns = db.getSync(cle('indicesPatternsRaI'), null) || db.getSync('indicesPatternsRaI', {});
 
     // Classifier les étudiants par niveau IDME
     const niveaux = echelle.niveaux.filter(n => n.code !== '0' && n.code !== 0);
