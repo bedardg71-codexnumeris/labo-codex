@@ -505,6 +505,43 @@ function anonymiserTexteRetroaction(texte, daEtudiant) {
 // Exposer la fonction globalement
 window.anonymiserTexteRetroaction = anonymiserTexteRetroaction;
 
+/**
+ * Anonymise un nom de fichier en mode anonymisation
+ * ✅ NOUVEAU (Tier 0.2 — avril 2026)
+ * Les noms de fichiers importés (ex: Tremblay_Sophie_TP2.pdf) peuvent contenir
+ * des noms réels d'étudiants. En mode anonymisation, on les remplace par un nom
+ * générique basé sur le nom anonymisé de l'étudiant associé.
+ *
+ * @param {string} nomFichier - Le nom du fichier original
+ * @param {string} etudiantDA - Le DA de l'étudiant associé au fichier
+ * @returns {string} - Le nom anonymisé (ou original si pas en mode anonymisation)
+ */
+function anonymiserNomFichier(nomFichier, etudiantDA) {
+    if (modeActuel !== MODES.ANONYMISATION) {
+        return nomFichier;
+    }
+
+    if (!nomFichier) return nomFichier;
+
+    // Extraire l'extension du fichier original
+    const match = nomFichier.match(/\.[^.]+$/);
+    const extension = match ? match[0] : '';
+
+    // Si on a un DA associé, utiliser le nom anonymisé
+    if (etudiantDA) {
+        const mapping = genererMappingAnonyme();
+        const info = mapping[etudiantDA];
+        if (info) {
+            return `${info.prenom}_${info.nom}_document${extension}`;
+        }
+    }
+
+    // Fallback : nom générique si pas de DA ou pas dans le mapping
+    return `Document${extension}`;
+}
+
+window.anonymiserNomFichier = anonymiserNomFichier;
+
 // ============================================
 // UTILITAIRES
 // ============================================

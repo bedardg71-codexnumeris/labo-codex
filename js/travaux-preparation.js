@@ -2370,7 +2370,7 @@
                 } else if (f.fichier) {
                     imgSrc = URL.createObjectURL(f.fichier);
                 }
-                html += `<div class="prep-header-thumb${estActif ? ' actif' : ''}" data-action="travauxPreparation.chargerFichier" data-param="${i}" title="${echapperHtml(f.nomFichier || '')}">`;
+                html += `<div class="prep-header-thumb${estActif ? ' actif' : ''}" data-action="travauxPreparation.chargerFichier" data-param="${i}" title="${echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : (f.nomFichier || ''))}">`;
                 if (imgSrc) {
                     html += `<img src="${imgSrc}" alt="">`;
                 } else {
@@ -2404,7 +2404,7 @@
 
             html += `
                 <div class="${classes.join(' ')}" data-action="travauxPreparation.chargerFichier" data-param="${i}">
-                    <span class="prep-mini-nom">${echapperHtml(f.nomFichier || '')}</span>
+                    <span class="prep-mini-nom">${echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : (f.nomFichier || ''))}</span>
                     <button class="prep-mini-check" data-stop data-action="travauxPreparation.toggleSelection" data-param="${i}" title="Selectionner">
                         ${selections.has(i) ? '&#x2611;' : '&#x2610;'}
                     </button>
