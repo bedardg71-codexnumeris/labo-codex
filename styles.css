@@ -22200,6 +22200,18 @@ body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0
     font-size: 0.68rem;
     min-height: 24px;
 }
+.palette-flottante .travaux-btn-outil img,
+.palette-flottante .btn-icon-compact img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    filter: invert(1);
+    vertical-align: middle;
+}
+body.mode-clair .palette-flottante .travaux-btn-outil img,
+body.mode-clair .palette-flottante .btn-icon-compact img {
+    filter: none;
+}
 /* Sections compactes */
 .palette-flottante .travaux-palette-section {
     margin-bottom: 2px;
