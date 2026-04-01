@@ -15855,6 +15855,49 @@ body.mode-clair .travaux-compteur-badge {
     flex-shrink: 0;
 }
 
+/* Input raccourci dans les réglages tampons */
+.travaux-retro-raccourci-input {
+    width: 28px;
+    min-width: 28px;
+    max-width: 28px;
+    text-align: center;
+    font-family: monospace;
+    font-size: 0.85rem;
+    padding: 2px;
+    border: 1px solid rgba(106, 172, 184, 0.2);
+    border-radius: 4px;
+    background: var(--surface-carte, #1a3040);
+    color: var(--texte-principal, #d0e0e4);
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+.travaux-retro-raccourci-input::placeholder {
+    font-size: 0.7rem;
+    opacity: 0.4;
+}
+
+/* Badge raccourci clavier (codes + tampons) */
+.raccourci-badge {
+    font-size: 0.55rem;
+    background: rgba(106, 172, 184, 0.15);
+    border-radius: 3px;
+    padding: 1px 4px;
+    color: var(--texte-muted, #5a7a88);
+    margin-left: auto;
+    flex-shrink: 0;
+    font-family: monospace;
+    text-transform: uppercase;
+}
+.raccourci-badge--coin {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    margin-left: 0;
+}
+.travaux-autocollant-item {
+    position: relative;
+}
+
 .travaux-sidebar {
     width: 200px;
     min-width: 200px;

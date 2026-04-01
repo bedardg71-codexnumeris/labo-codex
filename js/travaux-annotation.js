@@ -942,6 +942,17 @@
         if ((e.ctrlKey || e.metaKey) && (e.key === 'Z' || e.key === 'y')) {
             e.preventDefault();
             retablir();
+            return;
+        }
+
+        // Raccourcis codes/tampons : touches sans modificateur
+        if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.length === 1) {
+            if (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirItemParTouche) {
+                var itemId = travauxOutils.obtenirItemParTouche(e.key);
+                if (itemId && travauxOutils.activerItemParId(itemId)) {
+                    e.preventDefault();
+                }
+            }
         }
     }
 
