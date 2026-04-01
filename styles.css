@@ -17657,8 +17657,8 @@ body.mode-clair .palette-flottante-aide-btn:hover {
 }
 
 .travaux-autocollants-grille {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
     gap: 2px;
 }
 
