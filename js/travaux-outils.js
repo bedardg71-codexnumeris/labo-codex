@@ -350,8 +350,11 @@
         // Barre de titre
         let html = '<div class="palette-flottante-barre">';
         html += '<span class="palette-flottante-titre">Tampons</span>';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroObservations" title="Personnaliser">⚙</button>';
-        html += '</div>';
+        html += '<div style="display:flex; gap:2px;">';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="travaux-palette-tampons" title="Disposition horizontale">\u2194</button>';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="travaux-palette-tampons" title="Disposition verticale">\u2195</button>';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroObservations" title="Personnaliser">\u2699</button>';
+        html += '</div></div>';
 
         // Contenu (réutilise la fonction partagée)
         html += '<div class="palette-flottante-contenu" id="travaux-tampons-contenu">';
@@ -834,7 +837,9 @@
         let html = '<div class="palette-flottante-barre">';
         html += '<span class="palette-flottante-titre">Codes</span>';
         html += '<div style="display:flex; gap:2px;">';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="Personnaliser">⚙</button>';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="travaux-palette-erreurs-fr" title="Disposition horizontale">\u2194</button>';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="travaux-palette-erreurs-fr" title="Disposition verticale">\u2195</button>';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="Personnaliser">\u2699</button>';
         html += '</div></div>';
 
         // Contenu : liste verticale (réutilise la fonction partagée)
@@ -1337,6 +1342,36 @@
     }
 
     /**
+     * Disposition horizontale : palette en bandeau (largeur max, hauteur limitée)
+     */
+    function layoutPaletteH(paletteId) {
+        var palette = document.getElementById(paletteId);
+        var conteneur = document.getElementById('travaux-zone-canvas') || document.getElementById('travaux-conteneur-document');
+        if (!palette || !conteneur) return;
+        var cRect = conteneur.getBoundingClientRect();
+        palette.style.left = '12px';
+        palette.style.right = 'auto';
+        palette.style.width = (cRect.width - 24) + 'px';
+        palette.style.height = Math.min(cRect.height - 24, cRect.height * 0.6) + 'px';
+        sauvegarderPositionPalette(palette);
+    }
+
+    /**
+     * Disposition verticale : palette en colonne droite (200px, hauteur max)
+     */
+    function layoutPaletteV(paletteId) {
+        var palette = document.getElementById(paletteId);
+        var conteneur = document.getElementById('travaux-zone-canvas') || document.getElementById('travaux-conteneur-document');
+        if (!palette || !conteneur) return;
+        var cRect = conteneur.getBoundingClientRect();
+        palette.style.right = '12px';
+        palette.style.left = 'auto';
+        palette.style.width = '200px';
+        palette.style.height = (cRect.height - 24) + 'px';
+        sauvegarderPositionPalette(palette);
+    }
+
+    /**
      * Sauvegarde la position d'une palette dans localStorage
      */
     function sauvegarderPositionPalette(palette) {
@@ -1344,6 +1379,7 @@
         try {
             localStorage.setItem(palette.id + '-pos', JSON.stringify({
                 left: palette.style.left,
+                right: palette.style.right || '',
                 top: palette.style.top,
                 width: palette.style.width || '',
                 height: palette.style.height || ''
@@ -1360,7 +1396,13 @@
             const raw = localStorage.getItem(palette.id + '-pos');
             if (!raw) return;
             const pos = JSON.parse(raw);
-            if (pos.left) { palette.style.left = pos.left; palette.style.right = 'auto'; }
+            if (pos.right && pos.right !== 'auto' && (!pos.left || pos.left === 'auto')) {
+                palette.style.right = pos.right;
+                palette.style.left = 'auto';
+            } else if (pos.left) {
+                palette.style.left = pos.left;
+                palette.style.right = 'auto';
+            }
             if (pos.top) palette.style.top = pos.top;
             if (pos.width) palette.style.width = pos.width;
             if (pos.height) palette.style.height = pos.height;
@@ -2843,6 +2885,8 @@
         restaurerPositionPalette: restaurerPositionPalette,
         focusPalette: focusPalette,
         togglePaletteReplie: togglePaletteReplie,
+        layoutPaletteH: layoutPaletteH,
+        layoutPaletteV: layoutPaletteV,
         afficherRaccourcis: afficherRaccourcis,
         togglePaletteChrono: togglePaletteChrono,
         ouvrirPaletteChrono: ouvrirPaletteChrono,

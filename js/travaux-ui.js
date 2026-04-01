@@ -870,6 +870,10 @@
 
         // Si la visionneuse est déjà ouverte, la recréer avec les badges à jour
         if (document.getElementById('travaux-conteneur-document')) {
+            // Sauver les panneaux eval avant de détruire le DOM
+            if (document.getElementById('travaux-palette-eval-gauche')) {
+                fermerModeEvaluation();
+            }
             conteneur.innerHTML = '';
             afficherVisionneuse();
             if (productionFiltreActive) {
@@ -4033,8 +4037,25 @@
     }
 
     function afficherPalettesEval(fichier) {
-        // Ne creer que si pas deja presentes
-        if (document.getElementById('travaux-palette-eval-gauche')) return;
+        // Nettoyer les résidus de palettes eval existantes
+        // (évite les doublons si fermerModeEvaluation a partiellement échoué)
+        var _idsEval = ['travaux-palette-eval-gauche', 'travaux-palette-eval-droite', 'travaux-palette-eval-retro'];
+        var _panneauIds = ['travaux-eval-gauche', 'travaux-eval-droite', 'travaux-eval-retroaction'];
+        var existantes = _idsEval.some(function(id) { return document.getElementById(id); });
+        if (existantes) {
+            // Remettre les panneaux dans le HTML statique avant de supprimer les wrappers
+            var evalDiv = document.getElementById('evaluations-contenu-evaluation');
+            for (var _i = 0; _i < _idsEval.length; _i++) {
+                var _pal = document.getElementById(_idsEval[_i]);
+                if (!_pal) continue;
+                var _pan = document.getElementById(_panneauIds[_i]);
+                if (_pan && evalDiv) {
+                    _pan.classList.add('u-hide');
+                    evalDiv.appendChild(_pan);
+                }
+                _pal.remove();
+            }
+        }
 
         const conteneurDoc = document.getElementById('travaux-conteneur-document');
         if (!conteneurDoc) return;
@@ -4045,8 +4066,11 @@
         const panneauDroite = document.getElementById('travaux-eval-droite');
         const panneauRetro = document.getElementById('travaux-eval-retroaction');
 
+        if (!panneauGauche) console.warn('⚠️ [afficherPalettesEval] travaux-eval-gauche introuvable');
+        if (!panneauDroite) console.warn('⚠️ [afficherPalettesEval] travaux-eval-droite introuvable');
+        if (!panneauRetro) console.warn('⚠️ [afficherPalettesEval] travaux-eval-retroaction introuvable');
         if (!panneauGauche && !panneauDroite && !panneauRetro) {
-            console.error('⚠️ [afficherPalettesEval] Panneaux source introuvables — DOM détruit ?');
+            console.error('⚠️ [afficherPalettesEval] Aucun panneau source — DOM détruit ?');
             return;
         }
 
@@ -4070,8 +4094,9 @@
                         basculerVerrouillageEvaluationCourante();
                     }
                 });
-                const btnToggle = barreParam.querySelector('.palette-flottante-toggle');
-                barreParam.insertBefore(btnVerrou, btnToggle);
+                const btnGroup = barreParam.querySelector('div');
+                if (btnGroup) btnGroup.insertBefore(btnVerrou, btnGroup.firstChild);
+                else barreParam.appendChild(btnVerrou);
             }
 
             zoneCanvas.appendChild(paletteG);
@@ -4328,7 +4353,11 @@
         barre.className = 'palette-flottante-barre';
         barre.innerHTML = `
             <span class="palette-flottante-titre">${echapperHtml(titre)}</span>
-            <button class="palette-flottante-toggle" data-action="travauxUI.togglePaletteEvalReplie" data-param="${id}" title="Replier/Déplier">&#x2212;</button>
+            <div style="display:flex; gap:2px;">
+                <button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="${id}" title="Disposition horizontale">\u2194</button>
+                <button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="${id}" title="Disposition verticale">\u2195</button>
+                <button class="palette-flottante-toggle" data-action="travauxUI.togglePaletteEvalReplie" data-param="${id}" title="Replier/Déplier">&#x2212;</button>
+            </div>
         `;
         palette.appendChild(barre);
 

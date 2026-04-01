@@ -15179,15 +15179,24 @@ body.mode-clair .prep-select {
 }
 .travaux-palette-eval .zone-criteres > .conteneur-liste > div {
     padding: 8px !important;
-    margin-bottom: 8px !important;
+    margin-bottom: 0 !important;
     max-width: 100%;
     box-sizing: border-box;
     overflow: hidden;
+}
+/* Critère algorithmique (Français) : pleine largeur de la grille */
+.travaux-palette-eval .zone-criteres > .conteneur-liste > div:has(.eval-badge-algo) {
+    grid-column: 1 / -1;
 }
 .travaux-palette-eval .zone-criteres,
 .travaux-palette-eval .conteneur-liste {
     max-width: 100%;
     box-sizing: border-box;
+}
+.travaux-palette-eval .conteneur-liste {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 6px;
 }
 .travaux-palette-eval .zone-criteres * {
     max-width: 100%;
@@ -15789,8 +15798,8 @@ body.mode-clair .travaux-compteur-badge {
 }
 .travaux-errfr-liste {
     display: flex;
-    flex-direction: column;
-    gap: 1px;
+    flex-wrap: wrap;
+    gap: 2px;
     padding: 4px;
 }
 .travaux-errfr-item {
@@ -15828,6 +15837,7 @@ body.mode-clair .travaux-compteur-badge {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    min-width: 0;
 }
 .travaux-errfr-compteur {
     margin-left: auto;
@@ -17622,13 +17632,13 @@ body.mode-clair .palette-flottante-aide-btn:hover {
 .travaux-palette-flottante.replie::after { display: none; }
 
 /* --- Popup autocollants --- */
-/* Palettes droites (Codes + Tampons) — largeur et resize alignés */
+/* Palettes droites (Codes + Tampons) — redimensionnables sans plafond */
 #travaux-palette-erreurs-fr,
 #travaux-palette-tampons {
     width: 200px;
-    min-width: 200px;
-    max-width: 200px;
-    resize: vertical;
+    min-width: 120px;
+    max-width: none;
+    resize: both;
 }
 
 .travaux-autocollants-label {
@@ -17638,6 +17648,8 @@ body.mode-clair .palette-flottante-aide-btn:hover {
     letter-spacing: 0.5px;
     margin-bottom: 4px;
     margin-top: 8px;
+    width: 100%;
+    flex-basis: 100%;
 }
 
 .travaux-autocollants-label:first-child {
@@ -17645,8 +17657,8 @@ body.mode-clair .palette-flottante-aide-btn:hover {
 }
 
 .travaux-autocollants-grille {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
+    flex-wrap: wrap;
     gap: 2px;
 }
 
@@ -17661,7 +17673,7 @@ body.mode-clair .palette-flottante-aide-btn:hover {
 }
 
 .travaux-autocollants-grille--symboles {
-    grid-template-columns: repeat(3, 1fr);
+    /* hérite du flex-wrap de .travaux-autocollants-grille */
 }
 .travaux-autocollant-item:hover {
     background: var(--bleu-tres-pale);
