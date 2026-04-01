@@ -2718,7 +2718,9 @@
             html += '<span class="travaux-retro-numero" style="background:' + outil.couleurBouton + '" data-pastille-id="' + c.id + '">' + (idx + 1) + '</span>';
             html += '<input type="color" value="' + outil.couleurBouton + '" data-color-id="' + c.id + '" title="Changer la couleur">';
             html += '</div>';
+            var raccourci = obtenirRaccourciPourItem(c.id) || '';
             html += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + c.id + '" value="' + c.nom + '">';
+            html += '<input type="text" class="travaux-retro-raccourci-input" data-raccourci-id="' + c.id + '" value="' + raccourci + '" maxlength="1" placeholder="\u2328" title="Raccourci clavier (1 touche)">';
             html += '</div>';
             html += '<textarea class="travaux-retro-textarea" data-retro-id="' + c.id + '" rows="3">' + texte + '</textarea>';
             html += '</div>';
@@ -2832,6 +2834,16 @@
             persObj[id].couleur = inp.value;
         });
         sauvegarderPersonnalisationErreursFr(persObj);
+        // Raccourcis clavier
+        modal.querySelectorAll('input[data-raccourci-id]').forEach(function(inp) {
+            var id = inp.dataset.raccourciId;
+            var touche = inp.value.trim().toLowerCase();
+            if (touche.length === 1) {
+                definirRaccourci(id, touche);
+            } else if (touche === '') {
+                definirRaccourci(id, null);
+            }
+        });
         // Ordre personnalisé
         const liste = modal.querySelector('#travaux-retro-errfr-liste');
         if (liste) {
