@@ -1858,6 +1858,7 @@ function supprimerEvaluation(evaluationId) {
  * que preRemplirEvaluation charge la reprise active à la place de l'originale.
  */
 function modifierEvaluationRemplacee(evaluationId) {
+    // ACCÈS DIRECT — doit trouver l'évaluation dans TOUTES celles du trimestre (peut être cross-cours)
     var evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     var evaluation = evaluations.find(function(e) { return e.id === evaluationId; });
 
@@ -2524,6 +2525,7 @@ function supprimerFichierDefinitivement(id) {
         await travauxStockage.supprimerDefinitivement(id);
 
         // Nettoyer les évaluations liées (par etudiantDA + productionId)
+        // ACCÈS DIRECT — read-modify-write : doit lire TOUTES les évaluations pour réécrire sans perte
         if (fichier && fichier.etudiantDA && fichier.productionId) {
             var evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
             var avant = evaluations.length;
@@ -2592,6 +2594,7 @@ function viderTouteCorbeille() {
         await travauxStockage.viderCorbeille();
 
         // Nettoyer les évaluations liées à chaque fichier supprimé
+        // ACCÈS DIRECT — read-modify-write : doit lire TOUTES les évaluations pour réécrire sans perte
         if (fichiersCorbeille.length > 0) {
             var evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
             var avant = evaluations.length;
