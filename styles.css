@@ -1160,7 +1160,6 @@ h1, h2, h3, h4 {
 /* === SÉLECTEUR DE MODE === */
 
 #selecteur-mode {
-    margin-top: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -5381,7 +5380,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
    =============================================== */
 
 #selecteur-mode {
-    margin-top: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
