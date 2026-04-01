@@ -1,8 +1,45 @@
-# SESSION ACTIVE — BETA 99
+# SESSION ACTIVE — BETA 99.01
 
 **Date** : 1er avril 2026
-**Version** : Beta 99 (Build 0401-1220)
-**Statut** : Palettes flottantes, raccourcis clavier, icônes — DÉPLOYÉ
+**Version** : Beta 99.01 (Build 0401-2205)
+**Statut** : Plan de consolidation avril 2026 — Tier 0 TERMINÉ, Tier 1 À FAIRE
+
+---
+
+## Bilan de la session (1er avril 2026 — soir)
+
+### Plan de consolidation — Tier 0 Anonymisation (2 commits)
+
+**Objectif** : Anonymisation étanche pour le colloque AQPC (juin 2026).
+
+**Tier 0.1** — Fuites dans les exports PDF (`travaux-export-pdf.js`) :
+- En-tête PDF : `evaluation.etudiantNom` remplacé par `anonymiserNom()`
+- Historique élève + jetons : `db.getSync()` remplacé par `obtenirDonneesSelonMode()`
+- 4 cas de double namespace `cle('...')` dans `obtenirDonneesSelonMode` corrigés
+- Écran de révision : nom étudiant anonymisé
+
+**Tier 0.2** — Noms de fichiers travaux :
+- Nouvelle fonction `anonymiserNomFichier()` dans `modes.js`
+- 13 points d'affichage corrigés dans 5 fichiers (travaux-ui, travaux-preparation, travaux-export-pdf, profil-etudiant, liste-evaluations)
+- Nom du fichier PDF téléchargé aussi anonymisé
+
+**Tier 0.3** — Rétroactions dans les exports PDF :
+- `anonymiserTexteRetroaction()` appliqué sur rétroactions par critère (PDF + écran révision)
+- `retroactionFinale` anonymisée dans les modales UI
+
+**Tier 0.4** — Audit de complétude :
+- ~15 types de données évalués systématiquement
+- `interventions` : 4 points de texte libre corrigés (notes, description, observations) + XSS
+- `corbeilleFichiers` : risque faible documenté (pas d'UI visible)
+- Audit documenté dans `docs/audit-anonymisation-tier0.md`
+
+### Prochaine étape : Tier 1 — Corrections critiques
+
+Reprendre à `PLAN-CONSOLIDATION-AVRIL-2026.md` section Tier 1 :
+- 1.1 Lectures/écritures sans namespace trimestre
+- 1.2 Accès tableau sans vérification de bornes
+- 1.3 Normaliser les lectures de groupeEtudiants
+- 1.4 Échappement HTML manquant dans evaluation.js
 
 ---
 
