@@ -631,6 +631,103 @@
         return ordre.map(id => map[id]).filter(Boolean);
     }
 
+    /* ===============================
+       RACCOURCIS CLAVIER ANNOTATION
+       =============================== */
+
+    var _raccourcisCache = null;
+
+    /**
+     * Retourne le dictionnaire des raccourcis { itemId: touche }.
+     * Génère les défauts si la clé n'existe pas encore.
+     */
+    function obtenirRaccourcisAnnotation() {
+        if (_raccourcisCache) return _raccourcisCache;
+        var stored = db.getSync('raccourcisAnnotation', null);
+        if (stored && typeof stored === 'object' && Object.keys(stored).length > 0) {
+            _raccourcisCache = stored;
+            return _raccourcisCache;
+        }
+        // Générer les défauts : codes 1-9, 0 dans l'ordre personnalisé
+        var defauts = {};
+        var codes = obtenirCodesOrdonnes();
+        codes.forEach(function(c, idx) {
+            defauts[c.id] = idx < 9 ? String(idx + 1) : '0';
+        });
+        db.setSync('raccourcisAnnotation', defauts);
+        _raccourcisCache = defauts;
+        return _raccourcisCache;
+    }
+
+    /**
+     * Assigne une touche à un item (ou null pour supprimer le raccourci).
+     */
+    function definirRaccourci(itemId, touche) {
+        var raccourcis = obtenirRaccourcisAnnotation();
+        if (touche) {
+            // Retirer la touche d'un éventuel ancien item
+            Object.keys(raccourcis).forEach(function(id) {
+                if (raccourcis[id] === touche) delete raccourcis[id];
+            });
+            raccourcis[itemId] = touche;
+        } else {
+            delete raccourcis[itemId];
+        }
+        db.setSync('raccourcisAnnotation', raccourcis);
+        _raccourcisCache = raccourcis;
+    }
+
+    /**
+     * Lookup inverse : touche → itemId (ou null).
+     */
+    function obtenirItemParTouche(touche) {
+        var raccourcis = obtenirRaccourcisAnnotation();
+        var ids = Object.keys(raccourcis);
+        for (var i = 0; i < ids.length; i++) {
+            if (raccourcis[ids[i]] === touche) return ids[i];
+        }
+        return null;
+    }
+
+    /**
+     * Retourne la touche assignée à un item (ou null).
+     */
+    function obtenirRaccourciPourItem(itemId) {
+        var raccourcis = obtenirRaccourcisAnnotation();
+        return raccourcis[itemId] || null;
+    }
+
+    /**
+     * Détermine le type d'un item par son ID et l'active.
+     * @returns {boolean} true si un item a été activé
+     */
+    function activerItemParId(itemId) {
+        if (!itemId) return false;
+        // Code erreur français
+        if (itemId.startsWith('errfr_') && OUTILS[itemId]) {
+            setOutilActif(itemId);
+            return true;
+        }
+        // Tampon (autocollant)
+        if (AUTOCOLLANTS.some(function(a) { return a.id === itemId; })) {
+            setAutocollantActif(itemId);
+            return true;
+        }
+        // Outil de dessin
+        if (OUTILS[itemId]) {
+            setOutilActif(itemId);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Invalide le cache (après réordonnancement des codes, par ex.)
+     */
+    function invaliderCacheRaccourcis() {
+        _raccourcisCache = null;
+    }
+
     /**
      * Applique les personnalisations (noms, images, couleurs) directement
      * sur les objets AUTOCOLLANTS, CODES_ERREURS_FR et OUTILS.
@@ -734,10 +831,12 @@
         obtenirCodesOrdonnes().forEach((c, idx) => {
             const outil = OUTILS[c.id];
             const actif = outilActif === c.id ? ' actif' : '';
-            html += `<div class="travaux-errfr-item${actif}" data-action="travauxOutils.setOutilActif" data-param="${c.id}" title="${c.nom}">`;
+            const raccourci = obtenirRaccourciPourItem(c.id);
+            html += `<div class="travaux-errfr-item${actif}" data-action="travauxOutils.setOutilActif" data-param="${c.id}" title="${c.nom}${raccourci ? ' [' + raccourci + ']' : ''}">`;
             html += `<span class="travaux-errfr-numero" style="background:${outil.couleurBouton}">${idx + 1}</span>`;
             html += `<span class="travaux-errfr-nom">${c.nom}</span>`;
             html += `<span class="travaux-errfr-compteur u-hide" data-erreur="${c.id}"></span>`;
+            if (raccourci) html += `<span class="raccourci-badge">${raccourci}</span>`;
             html += '</div>';
         });
         html += '</div>';
@@ -763,7 +862,9 @@
                 if (elemMasques.indexOf(a.id) !== -1) return;
                 var imgSrc = imagesAutocollants[a.id] ? imagesAutocollants[a.id].src : (a.fichier ? DOSSIER_AUTOCOLLANTS + a.fichier : '');
                 var actif = (getAutocollantActif() === a.id) ? ' actif' : '';
-                r += '<div class="travaux-autocollant-item' + actif + '"' + (borderStyle ? ' style="' + borderStyle + '"' : '') + ' data-action="travauxOutils.setAutocollantActif" data-param="' + a.id + '" title="' + a.nom + '">';
+                var racc = obtenirRaccourciPourItem(a.id);
+                r += '<div class="travaux-autocollant-item' + actif + '"' + (borderStyle ? ' style="' + borderStyle + '"' : '') + ' data-action="travauxOutils.setAutocollantActif" data-param="' + a.id + '" title="' + a.nom + (racc ? ' [' + racc + ']' : '') + '">';
+                if (racc) r += '<span class="raccourci-badge raccourci-badge--coin">' + racc + '</span>';
                 if (imgSrc) {
                     r += '<img src="' + imgSrc + '" alt="' + a.nom + '">';
                 } else {
@@ -1628,6 +1729,7 @@
         function _htmlRowTampon(a, texte, imgSrc) {
             var estCustom = a.custom ? ' data-custom="true"' : '';
             var btnSuppr = '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerTamponRetroObs" data-param="' + a.id + '" title="Supprimer">&times;</button>';
+            var raccourci = obtenirRaccourciPourItem(a.id) || '';
             var r = '<div class="travaux-retro-row travaux-retro-draggable" data-obs-id="' + a.id + '"' + estCustom + ' draggable="true">';
             r += '<div class="travaux-retro-row-haut">';
             r += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>';
@@ -1636,6 +1738,7 @@
             r += '<input type="file" accept="image/*" data-file-id="' + a.id + '" hidden>';
             r += '</div>';
             r += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + a.id + '" value="' + a.nom + '"' + (a.custom ? ' placeholder="Nom du tampon"' : '') + '>';
+            r += '<input type="text" class="travaux-retro-raccourci-input" data-raccourci-id="' + a.id + '" value="' + raccourci + '" maxlength="1" placeholder="\u2328" title="Raccourci clavier (1 touche)">';
             r += btnSuppr;
             r += '</div>';
             r += '<textarea class="travaux-retro-textarea" data-retro-id="' + a.id + '" rows="3">' + texte + '</textarea>';
@@ -1647,6 +1750,7 @@
         function _htmlRowSymbole(id, outil, texte, estCustom) {
             var couleur = outil.couleurBouton;
             var btnSuppr = '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerSymboleRetroObs" data-param="' + id + '" title="Supprimer">&times;</button>';
+            var raccourci = obtenirRaccourciPourItem(id) || '';
             var r = '<div class="travaux-retro-row' + (estCustom ? ' travaux-retro-draggable' : '') + '" data-obs-id="' + id + '"' + (estCustom ? ' data-sym-custom="true" draggable="true"' : '') + '>';
             r += '<div class="travaux-retro-row-haut">';
             if (estCustom) r += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>';
@@ -1655,6 +1759,7 @@
             r += '</div>';
             r += '<input type="text" class="travaux-retro-icone-input" data-icone-id="' + id + '" value="' + outil.icone + '" title="Caract\u00e8re Unicode" style="color:' + couleur + ';">';
             r += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + id + '" value="' + outil.nom + '"' + (estCustom ? ' placeholder="Nom du symbole"' : '') + '>';
+            r += '<input type="text" class="travaux-retro-raccourci-input" data-raccourci-id="' + id + '" value="' + raccourci + '" maxlength="1" placeholder="\u2328" title="Raccourci clavier (1 touche)">';
             r += btnSuppr;
             r += '</div>';
             r += '<textarea class="travaux-retro-textarea" data-retro-id="' + id + '" rows="3">' + texte + '</textarea>';
@@ -2004,6 +2109,17 @@
             couleursCat[inp.dataset.colorCatId] = inp.value;
         });
         sauvegarderCouleursCategories(couleursCat);
+
+        // Raccourcis clavier
+        modal.querySelectorAll('input[data-raccourci-id]').forEach(function(inp) {
+            var id = inp.dataset.raccourciId;
+            var touche = inp.value.trim().toLowerCase();
+            if (touche.length === 1) {
+                definirRaccourci(id, touche);
+            } else if (touche === '') {
+                definirRaccourci(id, null);
+            }
+        });
 
         // Sauvegarder l'ordre des categories
         var catContainer = modal.querySelector('#travaux-retro-categories');
@@ -2890,6 +3006,13 @@
         afficherRaccourcis: afficherRaccourcis,
         togglePaletteChrono: togglePaletteChrono,
         ouvrirPaletteChrono: ouvrirPaletteChrono,
+        // Raccourcis clavier annotation
+        obtenirRaccourcisAnnotation: obtenirRaccourcisAnnotation,
+        definirRaccourci: definirRaccourci,
+        obtenirItemParTouche: obtenirItemParTouche,
+        obtenirRaccourciPourItem: obtenirRaccourciPourItem,
+        activerItemParId: activerItemParId,
+        invaliderCacheRaccourcis: invaliderCacheRaccourcis,
         // Contenu réutilisable (colonne droite + flottant)
         genererContenuErreursFr: genererContenuErreursFr,
         genererContenuTampons: genererContenuTampons,
