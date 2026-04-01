@@ -45,25 +45,27 @@
        OUTILS
        =============================== */
 
+    var ICONS_DIR = 'icons/';
+
     const OUTILS = {
         position: {
             id: 'position',
             nom: 'Position',
-            icone: '✋',
+            icone: '<img src="' + ICONS_DIR + 'outils-hand-100.png" alt="Position">',
             curseur: 'grab',
             type: 'position'
         },
         selection: {
             id: 'selection',
             nom: 'S\u00e9lection',
-            icone: 'S\u00e9lection',
+            icone: '<img src="' + ICONS_DIR + 'outils-move-100.png" alt="S\u00e9lection">',
             curseur: 'default',
             type: 'selection'
         },
         stylo: {
             id: 'stylo',
             nom: 'Stylo',
-            icone: 'Stylo',
+            icone: '<img src="' + ICONS_DIR + 'outils-edit-pencil-100.png" alt="Stylo">',
             curseur: 'crosshair',
             epaisseurDefaut: 2,
             epaisseurMin: 1,
@@ -76,7 +78,7 @@
         surligneur: {
             id: 'surligneur',
             nom: 'Surligneur',
-            icone: 'Surligneur',
+            icone: '<img src="' + ICONS_DIR + 'outils-marker-pen-100.png" alt="Surligneur">',
             curseur: 'crosshair',
             type: 'surligneur',
             epaisseurDefaut: 20,
@@ -88,14 +90,14 @@
         gomme: {
             id: 'gomme',
             nom: 'Gomme',
-            icone: 'Gomme',
+            icone: '<img src="' + ICONS_DIR + 'outils-eraser-100.png" alt="Gomme">',
             curseur: 'pointer',
             mode: 'effacer-trait' // efface le trait entier au contact
         },
         texte: {
             id: 'texte',
             nom: 'Texte',
-            icone: 'Texte',
+            icone: '<img src="' + ICONS_DIR + 'outils-text-100.png" alt="Texte">',
             curseur: 'text',
             tailleDefaut: 14,
             tailleMin: 10,
@@ -104,7 +106,7 @@
         cercle: {
             id: 'cercle',
             nom: 'Cercle',
-            icone: 'Cercle',
+            icone: '<img src="' + ICONS_DIR + 'outils-oval-100.png" alt="Cercle">',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2,
@@ -113,7 +115,7 @@
         fleche: {
             id: 'fleche',
             nom: 'Ligne',
-            icone: 'Ligne',
+            icone: '<img src="' + ICONS_DIR + 'outils-line-filled-100.png" alt="Ligne">',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2
@@ -121,7 +123,7 @@
         rectangle: {
             id: 'rectangle',
             nom: 'Rectangle',
-            icone: 'Rectangle',
+            icone: '<img src="' + ICONS_DIR + 'outils-rectangular-96.png" alt="Rectangle">',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2,
@@ -132,7 +134,7 @@
         ondule: {
             id: 'ondule',
             nom: 'Vague',
-            icone: 'Vague',
+            icone: '<img src="' + ICONS_DIR + 'outils-wavy-line-100.png" alt="Vague">',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2
@@ -1249,8 +1251,8 @@
         html += '<div class="groupe-boutons-colonne">';
         html += '<div class="groupe-boutons-ligne">';
         html += '<button id="travaux-btn-supprimer" class="btn btn-secondaire btn-tres-compact u-flex-1" data-action="travauxAnnotation.supprimerSelection" disabled title="Supprimer la s\u00e9lection (Delete)">Supprimer</button>';
-        html += '<button id="travaux-btn-undo" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.annuler" disabled title="Annuler (Ctrl+Z)">\u21b6</button>';
-        html += '<button id="travaux-btn-redo" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.retablir" disabled title="R\u00e9tablir (Ctrl+Y)">\u21b7</button>';
+        html += '<button id="travaux-btn-undo" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.annuler" disabled title="Annuler (Ctrl+Z)"><img src="' + ICONS_DIR + 'outils-undo-100.png" alt="Annuler"></button>';
+        html += '<button id="travaux-btn-redo" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.retablir" disabled title="R\u00e9tablir (Ctrl+Y)"><img src="' + ICONS_DIR + 'outils-redo-100.png" alt="R\u00e9tablir"></button>';
         html += '</div>';
         html += '<div class="groupe-boutons-ligne">';
         html += '<button class="btn btn-supprimer btn-tres-compact u-flex-1" data-action="travauxAnnotation.effacerPage" title="Effacer toute la page">Effacer tout</button>';
@@ -1271,7 +1273,7 @@
             html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" data-action="travauxOutils.setOutilActif" data-param="${id}" title="${outil.nom}">${outil.icone}</button>`;
             // Bouton Dupliquer juste apres Selection
             if (id === 'selection') {
-                html += '<button class="travaux-btn-outil" id="travaux-btn-dupliquer" data-action="travauxAnnotation.dupliquerSelection" title="Dupliquer la s\u00e9lection">Dupliquer</button>';
+                html += '<button class="travaux-btn-outil" id="travaux-btn-dupliquer" data-action="travauxAnnotation.dupliquerSelection" title="Dupliquer la s\u00e9lection"><img src="' + ICONS_DIR + 'outils-duplicate-100.png" alt="Dupliquer"></button>';
             }
         });
 
