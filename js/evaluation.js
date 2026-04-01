@@ -2642,7 +2642,8 @@ function peuplementOptJetons() {
     for (var i = 0; i < types.length; i++) {
         var type = types[i];
         var s = statut[type.id] || { utilises: 0, total: type.nombreTotal || 0 };
-        var compteur = s.utilises + '/' + s.total;
+        var tokenIdx = Math.min(s.utilises, 2);
+        var tokenImg = '<img src="icons/outils-token' + tokenIdx + '-100.png" alt="' + s.utilises + '/' + s.total + '" class="jeton-icone" title="' + s.utilises + ' / ' + s.total + ' utilis\u00e9s">';
         var artefacts = jetonsParType[type.id] || [];
 
         if (type.predefini && mapPredefinis[type.id]) {
@@ -2655,7 +2656,7 @@ function peuplementOptJetons() {
                         '<span class="' + mp.wrapperClass + '">' +
                             '<span class="badge-jeton-titre" data-tooltip="' + mp.tooltip + '">' + echapperHtml(type.nom.replace(/^Jeton de /i, '').replace(/^./, function(c) { return c.toUpperCase(); })) + '</span>' +
                         '</span>' +
-                        '<span class="u-texte-mini u-texte-gris">' + compteur + '</span>' +
+                        tokenImg +
                     '</div>';
             if (artefacts.length > 0) {
                 ligneHtml += '<div class="eval-aide" style="margin-left: 26px;">';
@@ -2674,7 +2675,7 @@ function peuplementOptJetons() {
                         '</span>' +
                         (type.description ? '<p class="text-085-muted-m5-0-0-0" style="margin: 4px 0 0 0; font-size: 0.75rem;">' + echapperHtml(type.description) + '</p>' : '') +
                     '</div>' +
-                    '<span class="u-texte-mini u-texte-gris">' + compteur + '</span>' +
+                    tokenImg +
                 '</div>'
             );
         }

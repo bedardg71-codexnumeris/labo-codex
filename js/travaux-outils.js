@@ -51,15 +51,15 @@
         position: {
             id: 'position',
             nom: 'Position',
-            icone: '<img src="' + ICONS_DIR + 'outils-hand-100.png" alt="Position">',
-            curseur: 'grab',
+            icone: '<img src="' + ICONS_DIR + 'outils-move-100.png" alt="Position">',
+            curseur: 'move',
             type: 'position'
         },
         selection: {
             id: 'selection',
             nom: 'S\u00e9lection',
-            icone: '<img src="' + ICONS_DIR + 'outils-move-100.png" alt="S\u00e9lection">',
-            curseur: 'default',
+            icone: '<img src="' + ICONS_DIR + 'outils-hand-100.png" alt="S\u00e9lection">',
+            curseur: 'grab',
             type: 'selection'
         },
         stylo: {
@@ -134,10 +134,19 @@
         ondule: {
             id: 'ondule',
             nom: 'Vague',
-            icone: '<img src="' + ICONS_DIR + 'outils-wavy-line-100.png" alt="Vague">',
+            icone: '<img src="' + ICONS_DIR + 'outils-squiggly-line-100.png" alt="Vague">',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2
+        },
+        pointille: {
+            id: 'pointille',
+            nom: 'Pointill\u00e9',
+            icone: '<img src="' + ICONS_DIR + 'outils-dashed-line-100.png" alt="Pointill\u00e9">',
+            curseur: 'crosshair',
+            type: 'forme',
+            epaisseurDefaut: 2,
+            tirets: [6, 4]
         },
         crochet: {
             id: 'crochet',
@@ -351,11 +360,12 @@
 
         // Barre de titre
         let html = '<div class="palette-flottante-barre">';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroObservations" title="Personnaliser">\u2699</button>';
         html += '<span class="palette-flottante-titre">Tampons</span>';
         html += '<div style="display:flex; gap:2px;">';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="travaux-palette-tampons" title="Disposition horizontale">\u2194</button>';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="travaux-palette-tampons" title="Disposition verticale">\u2195</button>';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroObservations" title="Personnaliser">\u2699</button>';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.togglePaletteTamponsReplie" title="Replier/D\u00e9plier">\u2212</button>';
         html += '</div></div>';
 
         // Contenu (réutilise la fonction partagée)
@@ -385,8 +395,9 @@
         const palette = document.getElementById('travaux-palette-tampons');
         if (!palette) return;
         palette.classList.toggle('replie');
-        const btn = palette.querySelector('.palette-flottante-toggle');
-        if (btn) btn.textContent = palette.classList.contains('replie') ? '+' : '−';
+        var btns = palette.querySelectorAll('.palette-flottante-barre .palette-flottante-toggle');
+        var btn = btns[btns.length - 1];
+        if (btn) btn.textContent = palette.classList.contains('replie') ? '+' : '\u2212';
     }
 
     function fermerPaletteAutocollants() {
@@ -938,11 +949,12 @@
 
         // Barre de titre
         let html = '<div class="palette-flottante-barre">';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="Personnaliser">\u2699</button>';
         html += '<span class="palette-flottante-titre">Codes</span>';
         html += '<div style="display:flex; gap:2px;">';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="travaux-palette-erreurs-fr" title="Disposition horizontale">\u2194</button>';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="travaux-palette-erreurs-fr" title="Disposition verticale">\u2195</button>';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="Personnaliser">\u2699</button>';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.togglePaletteErrFrReplie" title="Replier/D\u00e9plier">\u2212</button>';
         html += '</div></div>';
 
         // Contenu : liste verticale (réutilise la fonction partagée)
@@ -976,8 +988,9 @@
         const palette = document.getElementById('travaux-palette-erreurs-fr');
         if (!palette) return;
         palette.classList.toggle('replie');
-        const btn = palette.querySelector('.palette-flottante-toggle');
-        if (btn) btn.textContent = palette.classList.contains('replie') ? '+' : '−';
+        var btns = palette.querySelectorAll('.palette-flottante-barre .palette-flottante-toggle');
+        var btn = btns[btns.length - 1];
+        if (btn) btn.textContent = palette.classList.contains('replie') ? '+' : '\u2212';
     }
 
     /**
@@ -1095,26 +1108,78 @@
         const couleur = getCouleurActive();
         const epaisseur = Math.max(outil.epaisseurMin || 1, Math.min(epaisseurActive, outil.epaisseurMax || 20));
         const opacite = outil.opacite || 1.0;
-        // Hauteur du viewBox adaptee a l'epaisseur pour ne pas tronquer
-        const vbH = Math.max(24, epaisseur + 8);
+        const vbH = Math.max(24, epaisseur + 12);
         const midY = vbH / 2;
+        const pointes = flechePointes || 'aucune';
+        const estLigne = outil.id === 'fleche' || outil.id === 'ondule' || outil.id === 'pointille';
+        const marge = estLigne && pointes !== 'aucune' ? 16 : 10;
+
         apercu.innerHTML = '';
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('width', '100%');
         svg.setAttribute('height', '100%');
         svg.setAttribute('viewBox', '0 0 120 ' + vbH);
         svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', '10');
-        line.setAttribute('y1', String(midY));
-        line.setAttribute('x2', '110');
-        line.setAttribute('y2', String(midY));
-        line.setAttribute('stroke', couleur);
-        line.setAttribute('stroke-width', epaisseur);
-        line.setAttribute('stroke-linecap', 'round');
-        line.setAttribute('opacity', opacite);
-        svg.appendChild(line);
+
+        // Dessiner selon le type d'outil
+        if (outil.id === 'ondule') {
+            // Vague sinusoïdale
+            var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            var d = 'M ' + marge + ' ' + midY;
+            var len = 120 - 2 * marge;
+            for (var i = 1; i <= len; i++) {
+                var px = marge + i;
+                var py = midY + Math.sin(i / 8 * Math.PI) * 4;
+                d += ' L ' + px + ' ' + py.toFixed(1);
+            }
+            path.setAttribute('d', d);
+            path.setAttribute('stroke', couleur);
+            path.setAttribute('stroke-width', epaisseur);
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke-linecap', 'round');
+            path.setAttribute('opacity', opacite);
+            svg.appendChild(path);
+        } else {
+            // Ligne droite (pleine ou pointillée)
+            var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', String(marge));
+            line.setAttribute('y1', String(midY));
+            line.setAttribute('x2', String(120 - marge));
+            line.setAttribute('y2', String(midY));
+            line.setAttribute('stroke', couleur);
+            line.setAttribute('stroke-width', epaisseur);
+            line.setAttribute('stroke-linecap', 'round');
+            line.setAttribute('opacity', opacite);
+            if (outil.id === 'pointille') {
+                line.setAttribute('stroke-dasharray', (epaisseur * 3) + ' ' + (epaisseur * 2));
+            }
+            svg.appendChild(line);
+        }
+
+        // Pointes de flèche
+        if (estLigne && pointes !== 'aucune') {
+            var headSize = Math.max(6, epaisseur * 2);
+            if (pointes === 'fin' || pointes === 'double') {
+                _svgPointe(svg, 120 - marge, midY, headSize, couleur, 0);
+            }
+            if (pointes === 'debut' || pointes === 'double') {
+                _svgPointe(svg, marge, midY, headSize, couleur, Math.PI);
+            }
+        }
+
         apercu.appendChild(svg);
+    }
+
+    function _svgPointe(svg, x, y, size, couleur, angle) {
+        var p = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        var cos = Math.cos, sin = Math.sin;
+        var a1 = angle + 2.75, a2 = angle - 2.75;
+        var pts = x + ',' + y + ' '
+            + (x + cos(a1) * size).toFixed(1) + ',' + (y + sin(a1) * size).toFixed(1) + ' '
+            + (x + cos(a2) * size).toFixed(1) + ',' + (y + sin(a2) * size).toFixed(1);
+        p.setAttribute('points', pts);
+        p.setAttribute('fill', couleur);
+        svg.appendChild(p);
     }
 
     /* ===============================
@@ -1250,9 +1315,9 @@
         // Boutons d'action
         html += '<div class="groupe-boutons-colonne">';
         html += '<div class="groupe-boutons-ligne">';
-        html += '<button id="travaux-btn-supprimer" class="btn btn-secondaire btn-tres-compact u-flex-1" data-action="travauxAnnotation.supprimerSelection" disabled title="Supprimer la s\u00e9lection (Delete)">Supprimer</button>';
-        html += '<button id="travaux-btn-undo" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.annuler" disabled title="Annuler (Ctrl+Z)"><img src="' + ICONS_DIR + 'outils-undo-100.png" alt="Annuler"></button>';
-        html += '<button id="travaux-btn-redo" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.retablir" disabled title="R\u00e9tablir (Ctrl+Y)"><img src="' + ICONS_DIR + 'outils-redo-100.png" alt="R\u00e9tablir"></button>';
+        html += '<button id="travaux-btn-supprimer" class="btn btn-secondaire btn-tres-compact btn-icon-compact u-flex-1" data-action="travauxAnnotation.supprimerSelection" disabled title="Supprimer la s\u00e9lection (Delete)"><img src="' + ICONS_DIR + 'outils-delete-100.png" alt="Supprimer"></button>';
+        html += '<button id="travaux-btn-undo" class="btn btn-secondaire btn-tres-compact btn-icon-compact u-flex-1" data-action="travauxAnnotation.annuler" disabled title="Annuler (Ctrl+Z)"><img src="' + ICONS_DIR + 'outils-undo-100.png" alt="Annuler"></button>';
+        html += '<button id="travaux-btn-redo" class="btn btn-secondaire btn-tres-compact btn-icon-compact u-flex-1" data-action="travauxAnnotation.retablir" disabled title="R\u00e9tablir (Ctrl+Y)"><img src="' + ICONS_DIR + 'outils-redo-100.png" alt="R\u00e9tablir"></button>';
         html += '</div>';
         html += '<div class="groupe-boutons-ligne">';
         html += '<button class="btn btn-supprimer btn-tres-compact u-flex-1" data-action="travauxAnnotation.effacerPage" title="Effacer toute la page">Effacer tout</button>';
@@ -1284,7 +1349,7 @@
         html += '<div class="travaux-palette-label">Formes</div>';
         html += '<div class="travaux-palette-outils">';
 
-        const outilsFormes = ['cercle', 'rectangle', 'fleche', 'ondule'];
+        const outilsFormes = ['cercle', 'rectangle', 'fleche', 'pointille', 'ondule'];
         outilsFormes.forEach(id => {
             const outil = OUTILS[id];
             const actif = outilActif === id ? ' actif' : '';
@@ -1295,8 +1360,7 @@
         html += '</div></div>';
 
         // Options extrémités (visible quand outil fleche ou ondule actif)
-        const montrerExtremites = outilActif === 'fleche' || outilActif === 'ondule';
-        html += '<div class="travaux-palette-section travaux-options-fleche" id="travaux-options-fleche"' + (montrerExtremites ? '' : ' style="display:none"') + '>';
+        html += '<div class="travaux-palette-section travaux-options-fleche" id="travaux-options-fleche">';
         html += '<div class="travaux-palette-label">Extr\u00e9mit\u00e9s</div>';
         html += '<div class="travaux-palette-outils">';
         const modes = [
@@ -1313,9 +1377,8 @@
 
         html += '<hr class="separateur-horizontal">';
 
-        // Couleurs
+        // Couleurs (sans label — les pastilles sont explicites)
         html += '<div class="travaux-palette-section">';
-        html += '<div class="travaux-palette-label">Couleur</div>';
         html += '<div class="travaux-palette-couleurs">';
 
         COULEURS.forEach(c => {
@@ -1330,7 +1393,10 @@
         const minEp = outilInit.epaisseurMin || 1;
         const maxEp = outilInit.epaisseurMax || 20;
         html += '<div class="travaux-palette-section">';
-        html += '<div class="travaux-palette-label">Epaisseur <span id="travaux-epaisseur-px" class="travaux-epaisseur-px">' + getEpaisseurReellePixels() + 'px</span></div>';
+        html += '<div class="travaux-epaisseur-header">';
+        html += '<img src="' + ICONS_DIR + 'outils-line-width-100.png" alt="Epaisseur" class="travaux-epaisseur-icone">';
+        html += '<span id="travaux-epaisseur-px" class="travaux-epaisseur-px">' + getEpaisseurReellePixels() + 'px</span>';
+        html += '</div>';
         html += '<div class="travaux-epaisseur-controles">';
         html += `<button class="travaux-btn-epaisseur-inc" data-action="travauxOutils.decrementerEpaisseur" title="Moins fin">\u2190</button>`;
         html += `<input type="range" class="travaux-slider-epaisseur" id="travaux-slider-epaisseur" min="${minEp}" max="${maxEp}" value="${epaisseurActive}" data-on-input="travauxOutils.setEpaisseurActiveFromSlider">`;
@@ -1342,7 +1408,6 @@
 
         // Barre d'emojis en bas
         html += '<div class="palette-flottante-bas-btns">';
-        html += '<button class="palette-flottante-aide-btn" data-action="travauxOutils.afficherRaccourcis" title="Raccourcis clavier">🛎️</button>';
         html += '<button class="palette-flottante-aide-btn" data-action="tamponsBibliotheque.afficherBibliothequeTampons" title="Bibliothèque de tampons">📚</button>';
         html += '<button class="palette-flottante-aide-btn" id="btn-toggle-codes" data-action="travauxOutils.togglePaletteErreursFrancais" title="Afficher/masquer les codes">🚦</button>';
         html += '<button class="palette-flottante-aide-btn" id="btn-toggle-tampons" data-action="travauxOutils.togglePaletteAutocollants" title="Afficher/masquer les tampons">🫥</button>';
@@ -1385,7 +1450,7 @@
         // Options extrémités : afficher/masquer selon outil actif + maj boutons pointes
         const sectionFleche = document.getElementById('travaux-options-fleche');
         if (sectionFleche) {
-            sectionFleche.style.display = (outilActif === 'fleche' || outilActif === 'ondule') ? '' : 'none';
+            sectionFleche.style.display = '';
             sectionFleche.querySelectorAll('[data-pointes]').forEach(btn => {
                 btn.classList.toggle('actif', btn.dataset.pointes === flechePointes);
             });
