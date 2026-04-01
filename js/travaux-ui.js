@@ -2278,6 +2278,7 @@
         const fichiers = travauxStockage.obtenirFichiersTravaux();
         if (!fichiers.length) return;
 
+        // ACCÈS DIRECT INTENTIONNEL — correction cross-cours, doit lire TOUS les étudiants du trimestre
         const tousEtudiants = db.getSync(cle('groupeEtudiants'), []);
         const tousGC = db.getSync(cle('groupesCours'), []);
         const normaliserGroupe = (g) => String(g || '').padStart(5, '0');
@@ -3456,7 +3457,7 @@
             var d = doublons[i];
             var etudiant = travauxImport.trouverEtudiantParDA(d.fichierExistant.etudiantDA);
             var nomEtudiant = etudiant ? (etudiant.prenom + ' ' + etudiant.nom) : d.fichierExistant.etudiantDA;
-            var productions = db.getSync(cle('productions'), []);
+            var productions = obtenirDonneesSelonMode('productions');
             var prod = productions.find(function(p) { return p.id === d.productionId; });
             var nomProd = prod ? (prod.titre || prod.nom) : d.productionId;
             var compteur = (doublons.length > 1) ? ' (' + (i + 1) + '/' + doublons.length + ')' : '';
@@ -3916,7 +3917,7 @@
         const verif = travauxStockage.reassocierFichier(fichierId, { productionId: nouveauProductionId }, { verificationSeule: true });
 
         if (verif && verif.conflit) {
-            const productions = db.getSync(cle('productions'), []);
+            const productions = obtenirDonneesSelonMode('productions');
             const prod = productions.find(p => p.id === nouveauProductionId);
             const nomProd = prod ? (prod.titre || prod.nom) : nouveauProductionId;
             const confirme = confirm(`Un fichier existe déjà pour cette production (${nomProd}). Remplacer l'existant ?`);

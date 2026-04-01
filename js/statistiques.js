@@ -132,7 +132,7 @@ function chargerMaterielConfigure() {
     // setStatText('stat-pratique', pratique); // RETIRÉ : Carte "Pratique de notation" supprimée de l'aperçu matériel
 
     // Productions
-    const productions = db.getSync(cle('productions'), []);
+    const productions = obtenirDonneesSelonMode('productions');
     setStatText('stat-productions', productions.length);
     
     // Grilles de critères

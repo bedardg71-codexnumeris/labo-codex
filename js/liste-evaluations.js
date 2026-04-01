@@ -33,7 +33,7 @@ function calculerStatutWorkflow(ligne) {
         // Soft-match : si pas de fichier trouvé, chercher un fichier non-associé unique
         if (!fichier) {
             const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
-            const productions = db.getSync(cle('productions'), []);
+            const productions = obtenirDonneesSelonMode('productions');
             const productionIdsConnus = new Set(productions.map(p => p.id));
             const fichiersNonAssocies = fichiers.filter(f =>
                 f.etudiantDA === ligne.da && (!f.productionId || !productionIdsConnus.has(f.productionId))
@@ -1042,7 +1042,7 @@ function genererDropdownActions(ligne) {
     let fichierImporte = null;
     if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersTravaux === 'function') {
         const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
-        const productions = db.getSync(cle('productions'), []);
+        const productions = obtenirDonneesSelonMode('productions');
         const productionIdsConnus = new Set(productions.map(p => p.id));
         // Match prioritaire par evaluationId (distingue original vs reprise)
         if (ligne.evaluationId) {
@@ -1276,7 +1276,7 @@ function ouvrirProprieteFichier(fichierId) {
     }).join('');
 
     // Productions
-    var productions = db.getSync(cle('productions'), []);
+    var productions = obtenirDonneesSelonMode('productions');
     var optionsProductions = productions.map(function(p) {
         var label = p.description ? (p.titre + ' - ' + p.description) : p.titre;
         var selected = (p.id === fichier.productionId) ? ' selected' : '';
@@ -1377,7 +1377,7 @@ window.ouvrirProprieteFichier = ouvrirProprieteFichier;
  * Ouvre une modale pour associer (ou réassocier) un fichier importé à une production
  */
 function associerProductionDepuisListe(fichierId, da) {
-    const productions = db.getSync(cle('productions'), []);
+    const productions = obtenirDonneesSelonMode('productions');
     if (productions.length === 0) {
         if (typeof afficherNotificationErreur === 'function') {
             afficherNotificationErreur('Aucune production', 'Crée d\'abord des productions dans « Construction de la note ».');
@@ -1503,8 +1503,8 @@ function confirmerSuppressionFichier(fichierId, da) {
     const fichier = fichiers.find(f => f.id === fichierId);
     const nomFichier = fichier ? (fichier.nomFichier || fichier.id) : fichierId;
 
-    // Trouver le nom de l'étudiant
-    const etudiants = db.getSync(cle('groupeEtudiants'), []);
+    // Trouver le nom de l'étudiant (filtré par cours actif + anonymisation)
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const etudiant = etudiants.find(e => e.da === da);
     const nomEtudiant = etudiant ? `${etudiant.prenom} ${etudiant.nom}` : da;
 
@@ -2402,8 +2402,8 @@ function afficherVueCorbeille() {
 
     if (zoneChargement) zoneChargement.classList.add('u-hide');
 
-    const etudiants = db.getSync(cle('groupeEtudiants'), []);
-    const productions = db.getSync(cle('productions'), []);
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const productions = obtenirDonneesSelonMode('productions');
 
     if (corbeille.length === 0) {
         conteneurTableau.classList.add('u-hide');

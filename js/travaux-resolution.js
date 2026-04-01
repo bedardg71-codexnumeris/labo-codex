@@ -134,6 +134,7 @@
      * @param {string} [daOuPrenom] - DA de l'étudiant ou début de prénom
      */
     function diagnostiquer(daOuPrenom) {
+        // ACCÈS DIRECT INTENTIONNEL — outil diagnostic console, doit lire TOUS les étudiants
         const etudiants = db.getSync(cle('groupeEtudiants'), []);
         let da = daOuPrenom;
 
