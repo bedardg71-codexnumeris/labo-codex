@@ -3406,7 +3406,7 @@ function chargerHorairesV2() {
     populerDropdownHorairesV2();
 
     // ✅ CORRIGÉ (8 janvier 2026) : Restaurer le dernier horaire sélectionné
-    const horaireIdSauvegarde = db.getSync('horaireSelectionne', null);
+    const horaireIdSauvegarde = db.getSync(cle('horaireSelectionne'), null) || db.getSync('horaireSelectionne', null);
     if (horaireIdSauvegarde) {
         const cleHoraires = cle('horaires');
         const horaires = db.getSync(cleHoraires, []);
@@ -3455,7 +3455,7 @@ function changerHoraireSelectionneV2(horaireId) {
     if (typeof horaireId === 'object' && horaireId && horaireId.value !== undefined) horaireId = horaireId.value;
     if (!horaireId) {
         // Aucun horaire sélectionné - afficher état vide
-        db.setSync('horaireSelectionne', null);
+        db.setSync(cle('horaireSelectionne'), null);
         mettreAJourCarteResumeHoraireV2(null);
         afficherEtatVideHoraireV2();
         return;
@@ -3467,7 +3467,7 @@ function changerHoraireSelectionneV2(horaireId) {
 
     if (horaire) {
         // Sauvegarder la sélection pour persistance (Beta 95.2)
-        db.setSync('horaireSelectionne', horaireId);
+        db.setSync(cle('horaireSelectionne'), horaireId);
         mettreAJourCarteResumeHoraireV2(horaire);
         editerHoraireV2(horaire);
     }
@@ -3825,7 +3825,7 @@ function supprimerHoraireV2() {
     }
 
     // Effacer la sélection sauvegardée
-    db.setSync('horaireSelectionne', null);
+    db.setSync(cle('horaireSelectionne'), null);
 
     // Réinitialiser l'interface
     horaireEnEditionId = null;
