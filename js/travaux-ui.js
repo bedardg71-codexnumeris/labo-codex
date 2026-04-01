@@ -33,9 +33,11 @@
        CHRONO ÉVALUATION
        =============================== */
 
-    let _chronoDebut = null;       // Date.now() du début
+    let _chronoDebut = null;       // Date.now() du début du segment actif
     let _chronoFichierId = null;   // fichier actif
     let _chronoInterval = null;    // setInterval pour affichage live
+    let _chronoPaused = false;     // en pause ?
+    let _chronoElapsed = 0;        // ms accumulées avant la pause courante
 
     function _formaterDuree(ms) {
         const totalSec = Math.floor(ms / 1000);
@@ -44,25 +46,47 @@
         return min + ':' + String(sec).padStart(2, '0');
     }
 
+    function _chronoTotalMs() {
+        if (_chronoDebut) return _chronoElapsed + (Date.now() - _chronoDebut);
+        return _chronoElapsed;
+    }
+
     // IDs des badges chrono (palette flottante indépendante + toolbar legacy)
     var _chronoBadgeIds = ['chrono-badge', 'travaux-chrono-badge'];
 
     function _majAffichageChrono() {
-        var texte = _chronoDebut ? '\u23f1\ufe0f ' + _formaterDuree(Date.now() - _chronoDebut) : '\u23f1\ufe0f --:--';
+        var total = _chronoTotalMs();
+        var enCours = _chronoDebut && !_chronoPaused;
+        var chronoActif = enCours || _chronoPaused;
+        var texte = (total > 0 || enCours) ? _formaterDuree(total) : '--:--';
         _chronoBadgeIds.forEach(function(id) {
             var badge = document.getElementById(id);
             if (!badge) return;
             badge.textContent = texte;
-            if (_chronoDebut) badge.classList.add('actif');
-            else badge.classList.remove('actif');
+            badge.classList.toggle('actif', enCours);
+            badge.classList.toggle('pause', _chronoPaused);
         });
+        // Bouton unique pause/play (palette flottante)
+        var btn = document.getElementById('chrono-btn-pause');
+        if (btn) {
+            btn.style.display = chronoActif ? '' : 'none';
+            btn.textContent = _chronoPaused ? '\u25b6\ufe0f' : '\u23f8\ufe0f';
+            btn.title = _chronoPaused ? 'Reprendre (ou annoter)' : 'Pause';
+        }
     }
 
     function demarrerChrono() {
         const prefs = db.getSync('preferencesAffichage', {});
         if (!prefs.chronoEvaluation) return;
+        // Si en pause → reprendre automatiquement
+        if (_chronoPaused) {
+            reprendreChrono();
+            return;
+        }
         if (_chronoDebut) return; // déjà en cours
         _chronoDebut = Date.now();
+        _chronoElapsed = 0;
+        _chronoPaused = false;
         const fichier = travauxVisionneuse.getFichierActuel();
         _chronoFichierId = fichier ? fichier.id : null;
         // Ouvrir automatiquement la palette chrono
@@ -73,9 +97,31 @@
         _chronoInterval = setInterval(_majAffichageChrono, 1000);
     }
 
+    function pauserChrono() {
+        if (!_chronoDebut || _chronoPaused) return;
+        _chronoElapsed += Date.now() - _chronoDebut;
+        _chronoDebut = null;
+        _chronoPaused = true;
+        if (_chronoInterval) { clearInterval(_chronoInterval); _chronoInterval = null; }
+        _majAffichageChrono();
+    }
+
+    function reprendreChrono() {
+        if (!_chronoPaused) return;
+        _chronoPaused = false;
+        _chronoDebut = Date.now();
+        _majAffichageChrono();
+        _chronoInterval = setInterval(_majAffichageChrono, 1000);
+    }
+
+    function togglePauseChrono() {
+        if (_chronoPaused) reprendreChrono();
+        else pauserChrono();
+    }
+
     function arreterChrono() {
-        if (!_chronoDebut) return;
-        const dureeMs = Date.now() - _chronoDebut;
+        if (!_chronoDebut && _chronoElapsed === 0) return;
+        const dureeMs = _chronoTotalMs();
         if (_chronoInterval) { clearInterval(_chronoInterval); _chronoInterval = null; }
 
         // Stocker dans les 20 dernières entrées
@@ -90,27 +136,33 @@
         const moyenneMs = cinqDernieres.reduce((s, e) => s + e.dureeMs, 0) / cinqDernieres.length;
 
         // Afficher résultat + moyenne dans les deux palettes
-        var texteResultat = '\u23f1\ufe0f ' + _formaterDuree(dureeMs) + ' (moy. ' + _formaterDuree(moyenneMs) + ')';
+        var texteResultat = _formaterDuree(dureeMs) + ' (moy. ' + _formaterDuree(moyenneMs) + ')';
         _chronoBadgeIds.forEach(function(id) {
             var badge = document.getElementById(id);
             if (badge) {
                 badge.textContent = texteResultat;
                 badge.classList.remove('actif');
+                badge.classList.remove('pause');
             }
         });
 
         _chronoDebut = null;
         _chronoFichierId = null;
+        _chronoElapsed = 0;
+        _chronoPaused = false;
+        _majBtnPause();
     }
 
     function getDureeMs() {
-        return _chronoDebut ? Date.now() - _chronoDebut : null;
+        return (_chronoDebut || _chronoElapsed > 0) ? _chronoTotalMs() : null;
     }
 
     function resetChrono() {
         if (_chronoInterval) { clearInterval(_chronoInterval); _chronoInterval = null; }
         _chronoDebut = null;
         _chronoFichierId = null;
+        _chronoElapsed = 0;
+        _chronoPaused = false;
         _majAffichageChrono();
     }
 
@@ -6301,6 +6353,9 @@
         // Chrono évaluation
         demarrerChrono: demarrerChrono,
         arreterChrono: arreterChrono,
+        pauserChrono: pauserChrono,
+        reprendreChrono: reprendreChrono,
+        togglePauseChrono: togglePauseChrono,
         getDureeMs: getDureeMs,
         resetChrono: resetChrono,
         // Association production

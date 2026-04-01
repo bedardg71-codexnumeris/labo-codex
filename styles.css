@@ -16899,6 +16899,9 @@ body.mode-clair .pipeline-autocomplete-item:hover {
 .travaux-chrono-badge.actif {
     color: var(--accent-principal);
 }
+.travaux-chrono-badge.pause {
+    color: var(--couleur-attention, #f0ad4e);
+}
 
 /* Palette chrono flottante */
 .palette-chrono {
@@ -16908,10 +16911,22 @@ body.mode-clair .pipeline-autocomplete-item:hover {
     resize: none;
 }
 .palette-chrono-contenu {
-    text-align: center;
-    padding: 8px 12px;
-    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 4px 10px;
 }
+.chrono-btn-etat {
+    border: none;
+    background: none;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    color: var(--texte-secondaire);
+}
+.chrono-btn-etat:hover { color: var(--texte-principal); }
 .palette-chrono::after { display: none; }
 
 .btn-icon {
