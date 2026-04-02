@@ -24,7 +24,6 @@ class PratiqueSommative {
 
     constructor() {
         // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-        // console.log('📊 Initialisation de la pratique Sommative');
     }
 
     // ========================================================================
@@ -75,7 +74,6 @@ class PratiqueSommative {
         );
 
         if (evaluationsEleve.length === 0) {
-            // console.log('[SOM] Aucune évaluation pour DA', da);
             return null;
         }
 
@@ -97,7 +95,6 @@ class PratiqueSommative {
         const indiceP = moyennePonderee / 100;
 
         // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-        // console.log(`[SOM] Performance DA ${da}: ${moyennePonderee.toFixed(1)}% (${evaluationsEleve.length} évaluations)`);
 
         return indiceP;
     }
@@ -158,7 +155,6 @@ class PratiqueSommative {
 
         if (evaluationsEleve.length === 0) {
             // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-            // console.log(`[SOM-Historique] Aucune évaluation pour DA ${da} jusqu'à ${dateLimite}`);
             return null;
         }
 
@@ -180,7 +176,6 @@ class PratiqueSommative {
         const indiceP = moyennePonderee / 100;
 
         // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-        // console.log(`[SOM-Historique] DA ${da}: ${moyennePonderee.toFixed(1)}% (${evaluationsEleve.length} évaluations)`);
 
         return indiceP;
     }
@@ -219,7 +214,6 @@ class PratiqueSommative {
         });
 
         if (productionsEvaluees.length === 0) {
-            // console.log('[SOM] Aucune production évaluée pour DA', da);
             return null;
         }
 
@@ -236,7 +230,6 @@ class PratiqueSommative {
         const indiceC = productionsRemises.length / productionsEvaluees.length;
 
         // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-        // console.log(`[SOM] Complétion DA ${da}: ${(indiceC * 100).toFixed(1)}% (${productionsRemises.length}/${productionsEvaluees.length} évaluées)`);
 
         return indiceC;
     }
@@ -461,10 +454,6 @@ class PratiqueSommative {
         const defis = this.detecterDefis(da);
 
         // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-        // console.log('[SOM] Génération cible RàI pour DA', da, {
-        //     pattern: pattern.type,
-        //     nbDefis: defis.defis.length
-        // });
 
         // Identifier la production la plus faible
         const productionFaible = defis.defis.find(d => d.type === 'note-faible');
@@ -728,7 +717,6 @@ class PratiqueSommative {
     try {
         window.enregistrerPratique('sommative', instance);
         // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-        // console.log('✅ [SOM] Pratique Sommative enregistrée avec succès');
     } catch (error) {
         console.error('[SOM] Erreur lors de l\'enregistrement:', error);
     }
@@ -738,7 +726,5 @@ class PratiqueSommative {
 window.PratiqueSommative = PratiqueSommative;
 
 // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-// console.log('✅ Module pratique-sommative.js chargé');
-
 
 })();

@@ -2291,10 +2291,6 @@ window.modifierNiveau = modifierNiveau;
 window.supprimerNiveau = supprimerNiveau;
 window.basculerVerrouillageNiveau = basculerVerrouillageNiveau;
 window.reinitialiserNiveauxDefaut = reinitialiserNiveauxDefaut;
-// window.afficherEchellesPerformance = afficherEchellesPerformance; // FIXME: fonction n'existe pas
-// window.fermerModalEchelles = fermerModalEchelles; // FIXME: fonction n'existe pas
-// window.convertirNiveauVersNote = convertirNiveauVersNote; // FIXME: fonction n'existe pas - utiliser convertirNiveauEnPourcentage() dans portfolio.js
-// window.convertirNoteVersNiveau = convertirNoteVersNiveau; // FIXME: fonction n'existe pas
 
 // Export/Import avec licence CC
 window.exporterEchelles = exporterEchelles;

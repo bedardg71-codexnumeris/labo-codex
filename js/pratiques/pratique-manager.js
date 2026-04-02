@@ -4,6 +4,8 @@
  * Gère le chargement, la sauvegarde et le changement de pratiques
  * d'évaluation configurables (JSON).
  *
+ * ÉCRITURES pratiquesConfigurables : migration (ajout flags), création, suppression
+ *
  * S'intègre avec pratique-registre.js existant pour supporter
  * à la fois les pratiques codées en dur (PAN-Standards, Sommative)
  * et les pratiques configurables JSON.

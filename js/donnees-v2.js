@@ -2,6 +2,8 @@
  * donnees-v2.js
  * Module de gestion de l'onglet Données (Beta 96)
  *
+ * ÉCRITURES pratiquesConfigurables : suppression (nettoyage via calculerUsagesPratiques)
+ *
  * Gère l'affichage et l'initialisation de l'onglet Données :
  * - Statistiques des snapshots
  * - Gestion des ressources (pratiques, grilles, cartouches)

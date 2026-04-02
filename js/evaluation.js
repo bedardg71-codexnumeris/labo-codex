@@ -131,7 +131,6 @@ function chargerListeEtudiantsEval() {
     const modeAnonymisation = modeDepuisDb === 'anonymisation' ||
                               (typeof estModeeLectureSeule === 'function' && estModeeLectureSeule());
 
-
     // NOUVEAU (Beta 84): Trier par nom de famille (ordre alphabétique)
     etudiants.sort((a, b) => {
         const nomA = (a.nom + ' ' + a.prenom).toLowerCase();
@@ -203,7 +202,6 @@ function filtrerEtudiantsParGroupe() {
     const estFonctionDisponible = typeof estModeeLectureSeule === 'function';
     const estModeDepuisFonction = estFonctionDisponible ? estModeeLectureSeule() : false;
     const modeAnonymisation = modeDepuisDb === 'anonymisation' || estModeDepuisFonction;
-
 
     const etudiantsFiltres = groupeId
         ? etudiants.filter(e => e.groupe === groupeId)
@@ -479,7 +477,6 @@ function chargerEvaluationsEtudiant() {
         const spans = div.querySelectorAll('span');
         spans.forEach(span => span.textContent = '--');
     });
-
 
     // Réinitialiser la note et le niveau
     const noteElem = document.getElementById('noteProduction1');
@@ -2462,7 +2459,6 @@ function afficherBadgesJetons() {
     const section = document.getElementById('gestionJetonsEvaluation');
     const conteneur = document.getElementById('infoJetonsAppliques');
 
-
     if (!section || !conteneur || !window.evaluationEnCours?.idModification) {
         if (section) section.classList.add('u-hide');
         return;
@@ -4336,18 +4332,15 @@ function obtenirTendance(evaluations) {
  */
 // DÉSACTIVÉ : Cette fonction est maintenant gérée par liste-evaluations.js (vue tableau)
 // function initialiserListeEvaluations() {
-//     console.log('Initialisation de la liste des évaluations');
 //
 //     const sousSection = document.getElementById('evaluations-liste');
 //     if (!sousSection) {
-//         console.log('⚠️ Sous-section liste évaluations non trouvée');
 //         return;
 //     }
 //
 //     // Charger la liste refaite
 //     chargerListeEvaluationsRefonte();
 //
-//     console.log('✅ Liste des évaluations initialisée');
 // }
 
 // Appeler lors du changement vers cette sous-section
@@ -4483,7 +4476,6 @@ function restaurerSelectionsEvaluation() {
                     if (radioComplet) radioComplet.checked = true;
                 }
 
-
                 // Après restauration, vérifier s'il existe une évaluation sauvegardée pour cet étudiant
                 setTimeout(() => {
                     verifierEtChargerEvaluationExistante();
@@ -4559,7 +4551,6 @@ function verifierEtChargerEvaluationExistante() {
             spans.forEach(span => span.textContent = '--');
         });
 
-
         // Masquer les badges de jetons
         const section = document.getElementById('gestionJetonsEvaluation');
         if (section) section.classList.add('u-hide');
@@ -4568,7 +4559,6 @@ function verifierEtChargerEvaluationExistante() {
         genererRetroaction(1);
         return;
     }
-
 
     // Charger la grille (AVANT la cartouche — nécessaire pour peupler les options cartouche)
     if (evaluationExistante.grilleId) {
@@ -4637,7 +4627,6 @@ function verifierEtChargerEvaluationExistante() {
                 criteresCharges++;
             }
         });
-
 
         // Charger la rétroaction finale
         // ✅ CORRECTION (30 déc 2025): Anonymiser le texte si en mode Anonymisé
@@ -5231,7 +5220,6 @@ function modifierEvaluation(evaluationId) {
         return;
     }
 
-
     const estVerrouillee = evaluation.verrouillee || false;
 
     // Flag pour empêcher afficherFichiers() de masquer le formulaire d'évaluation
@@ -5599,7 +5587,6 @@ function modifierEvaluation(evaluationId) {
                     }
                 });
 
-
                 // ÉTAPE 10.5: Restaurer les données algorithmiques (français écrit)
                 if (evaluation.donneesAlgorithmiques && Object.keys(evaluation.donneesAlgorithmiques).length > 0) {
 
@@ -5715,7 +5702,6 @@ function modifierEvaluation(evaluationId) {
                     console.warn('⚠️ Ouverture du travail ignorée:', e.message);
                 }
             }
-
 
         } catch (erreur) {
             console.error('❌ Erreur lors du chargement de l\'évaluation:', erreur);
@@ -7033,7 +7019,6 @@ function afficherJetonsPersonnalisesEvaluation() {
     const config = db.getSync('modalitesEvaluation', {});
     const jetonsPersonnalises = config.jetons?.typesPersonnalises || [];
 
-
     if (jetonsPersonnalises.length === 0) {
         conteneur.innerHTML = '';
         conteneur.classList.add('u-hide');
@@ -7188,7 +7173,6 @@ async function copierCriteresSRPN() {
     const criteres = texte.split('\t');
     const srpn = criteres.slice(0, 4).join('\t');
 
-
     // Copier en format TSV
     const succes = await copierEnFormatTSV(srpn);
     if (succes) {
@@ -7210,7 +7194,6 @@ async function copierCriteresSRPNF() {
 
     // Copier tous les critères avec tabulations
     const texte = element.textContent.trim();
-
 
     // Copier en format TSV
     const succes = await copierEnFormatTSV(texte);

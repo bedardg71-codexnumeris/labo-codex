@@ -7572,11 +7572,6 @@ function reattacherEvenementsToggles() {
    📌 SECTIONS À DÉVELOPPER
    =============================== */
 
-// TODO: Ajouter fonction afficherIndicesACP(da)
-// TODO: Ajouter fonction afficherHistoriqueAssiduité(da)
-// TODO: Ajouter fonction afficherGraphiquesProgression(da)
-// TODO: Ajouter fonction afficherEvaluationsDetaillees(da)
-
 /**
  * Toggle l'affichage d'une section détaillée
  * @param {string} sectionId - ID de la section à afficher/cacher

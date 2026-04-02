@@ -409,13 +409,30 @@ async function chargerDonneesDemo() {
             return true;
         }
 
-        // Obtenir le pack de données
+        // Obtenir le pack de données (lazy-load si nécessaire)
         let packDemo = null;
         if (typeof PACK_DEMARRAGE !== 'undefined' && PACK_DEMARRAGE) {
             packDemo = PACK_DEMARRAGE;
         } else {
-            console.error('   ❌ PACK_DEMARRAGE non disponible');
-            return false;
+            // Chargement dynamique de pack-demo-20.js
+            try {
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = 'js/pack-demo-20.js';
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+                if (typeof PACK_DEMARRAGE !== 'undefined' && PACK_DEMARRAGE) {
+                    packDemo = PACK_DEMARRAGE;
+                }
+            } catch (e) {
+                console.error('[Demo] Impossible de charger pack-demo-20.js');
+            }
+            if (!packDemo) {
+                console.error('   ❌ PACK_DEMARRAGE non disponible');
+                return false;
+            }
         }
 
 

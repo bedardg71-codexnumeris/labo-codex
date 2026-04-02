@@ -6,6 +6,8 @@
    des clés localStorage/IndexedDB pour isoler les données
    de chaque trimestre (A2025, H2026, etc.)
 
+   ÉCRITURES pratiquesConfigurables : copie namespacée lors de l'archivage de trimestre
+
    IMPORTANT: Ce module NE REMPLACE PAS trimestre.js ni trimestre-v2.js
    Il s'ajoute PAR-DESSUS pour permettre la gestion de plusieurs trimestres.
    =============================== */
@@ -160,7 +162,6 @@
         // Hiver (H) = janvier-juin, Automne (A) = août-décembre
         const sessionAttendue = (moisActuel >= 1 && moisActuel <= 6) ? 'H' : 'A';
         const idAttendu = `${sessionAttendue.toLowerCase()}${anneeActuelle}`;
-
 
         // Chercher ce trimestre
         let trimestreAGarder = trimestres.find(t => t.id === idAttendu);
@@ -329,7 +330,6 @@
         db.setSync('infoCours', null);
         db.setSync('groupeCoursActif', null);
 
-
         // 🆕 FIX (21 jan 2026): Créer groupe-cours demo si nécessaire
         // Corrige le bug où les données demo n'étaient pas affichables
         // car le groupe-cours n'existait pas (données chargées avant la correction)
@@ -458,7 +458,6 @@
 
         db.setSync('trimestres', trimestres);
 
-
         // Générer export automatique
         const exportResult = exporterTrimestreArchive(id);
 
@@ -515,7 +514,6 @@
             pratiqueIds.add(modalites.pratiqueId);
         }
 
-
         return { grilleIds, echelleIds, pratiqueIds };
     }
 
@@ -553,7 +551,6 @@
             db.setSync(`${trimestreId}_echellesTemplates`, echellesUtilisees);
             db.setSync(`${trimestreId}_pratiquesConfigurables`, pratiquesUtilisees);
 
-
             // ✅ AJOUT (28 jan 2026) : Copier les cartouches des grilles utilisées
             let nbCartouchesCopies = 0;
             grilleIds.forEach(grilleId => {
@@ -563,7 +560,6 @@
                     nbCartouchesCopies += cartouches.length;
                 }
             });
-
 
             // Ressources pour le snapshot (backup complet)
             const ressources = {
@@ -582,7 +578,6 @@
 
             // Sauvegarder le snapshot (backup)
             db.setSync(cleSnapshot, ressources);
-
 
             return {
                 success: true,
@@ -627,7 +622,6 @@
         // Conserver statistiquesFinales comme référence historique
 
         db.setSync('trimestres', trimestres);
-
 
         return { success: true, trimestre: trimestre };
     }
@@ -857,7 +851,6 @@
         const trimestreId = `${session.toLowerCase()}${annee}`;
         const nomTrimestre = `${session === 'H' ? 'Hiver' : 'Automne'} ${annee}`;
 
-
         // Créer l'entrée dans le registre
         const nouveauTrimestre = {
             id: trimestreId,
@@ -881,7 +874,6 @@
                 clesMigrees++;
             }
         });
-
 
         return {
             success: true,
@@ -942,7 +934,6 @@
                     // ⚠️ NE PAS supprimer l'ancienne clé pour l'instant
                     // Les modules qui lisent directement sans cle() en ont besoin
                     // db.removeSync(nomCle);
-                    // console.log(`[Trimestres] → Ancienne clé "${nomCle}" supprimée`);
                 }
             }
         });
@@ -1004,7 +995,6 @@
             if (actif) {
             }
         }
-
 
         // Mettre à jour l'affichage du bandeau d'archivage
         mettreAJourBandeauArchive();
@@ -1165,7 +1155,6 @@
             if (!trimestre) {
                 return { success: false, error: 'Aucun trimestre trouvé' };
             }
-
 
             // Obtenir le cadreCalendrier du bon trimestre
             const cadreCalendrier = db.getSync(trimestre.id + '_cadreCalendrier', {})
@@ -1372,7 +1361,6 @@
                 lienTable.click();
                 URL.revokeObjectURL(urlTable);
             }, 500);
-
 
             return {
                 success: true,
