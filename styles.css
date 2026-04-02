@@ -15357,6 +15357,7 @@ body.mode-clair .prep-select {
     flex: 1;
     overflow-y: auto;
     min-height: 0;
+    padding: 8px;
 }
 #travaux-palette-eval-retro #travaux-eval-retroaction {
     display: flex;
