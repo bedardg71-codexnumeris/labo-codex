@@ -2673,7 +2673,7 @@ function peuplementOptJetons() {
                         '<span class="badge-jeton-personnalise-wrapper">' +
                             '<span class="badge-jeton-titre">' + echapperHtml(type.nom) + '</span>' +
                         '</span>' +
-                        (type.description ? '<p class="text-085-muted-m5-0-0-0" style="margin: 4px 0 0 0; font-size: 0.75rem;">' + echapperHtml(type.description) + '</p>' : '') +
+                        (type.description ? '<p class="text-085-muted-m5-0-0-0 u-texte-075">' + echapperHtml(type.description) + '</p>' : '') +
                     '</div>' +
                     tokenImg +
                 '</div>'

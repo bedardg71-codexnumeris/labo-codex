@@ -542,6 +542,7 @@ body.mode-demo .sous-navigation {
 
 /* === TEXTE - TAILLES === */
 .u-texte-mini { font-size: 0.7rem; }
+.u-texte-075 { font-size: 0.75rem; }
 .u-texte-petit { font-size: 0.85rem; }
 .u-texte-09 { font-size: 0.9rem; }
 .u-texte-moyen { font-size: 0.95rem; }
@@ -9508,13 +9509,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
    MEDIA QUERIES - RESPONSIVE
    =============================== */
 
-/* Grille des seuils d'interprétation - Responsive */
-@media (max-width: 1200px) {
-    #reglages-interpretation > div[style*="grid-template-columns: repeat(2, 1fr)"] {
-        grid-template-columns: 1fr !important;
-    }
-}
-
 /* ===============================
    PAGE TRIMESTRE - CLASSES UTILITAIRES
    =============================== */
@@ -12267,27 +12261,25 @@ tr.etudiant-inactif td {
 
 /* --- Suppression arrondis bordures gauches --- */
 /* Les éléments avec bordure gauche doivent avoir coins carrés à gauche */
-#reglages-trimestre [style*="border-left"],
 #reglages-trimestre .alerte,
 #reglages-trimestre .modal-info,
 #reglages-trimestre .carte-info-toggle {
-    border-radius: 0 var(--radius-moyen) var(--radius-moyen) 0 !important;
+    border-radius: 0 var(--radius-moyen) var(--radius-moyen) 0;
 }
 
 /* --- Uniformisation tailles de police labels --- */
 /* Tous les labels de formulaire : 0.8rem uniforme */
 #reglages-trimestre .groupe-form label,
-#reglages-trimestre .panneau-formulaire label,
-#reglages-trimestre label[style*="font-size"] {
-    font-size: 0.8rem !important;
-    font-weight: 500 !important;
+#reglages-trimestre .panneau-formulaire label {
+    font-size: 0.8rem;
+    font-weight: 500;
     color: var(--gris-fonce);
     margin-bottom: 4px;
 }
 
 /* Sous-labels (Du:/Au:) : 0.7rem */
 #reglages-trimestre .d-flex-gap-10-center label {
-    font-size: 0.7rem !important;
+    font-size: 0.7rem;
 }
 
 /* --- Uniformisation sous-titres sections --- */
@@ -12299,9 +12291,8 @@ tr.etudiant-inactif td {
 }
 
 /* --- Uniformisation textes d'aide --- */
-#reglages-trimestre .texte-aide,
-#reglages-trimestre p[style*="font-size: 0.8rem"] {
-    font-size: 0.75rem !important;
+#reglages-trimestre .texte-aide {
+    font-size: 0.75rem;
     color: var(--gris-moyen);
 }
 
@@ -12391,8 +12382,7 @@ tr.etudiant-inactif td {
 }
 
 /* Boutons pleine largeur */
-#reglages-trimestre .btn-block,
-#reglages-trimestre .btn.btn-sm[style*="width: 100%"] {
+#reglages-trimestre .btn-block {
     width: 100%;
     margin-top: 8px;
 }
@@ -14706,13 +14696,13 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     gap: 8px;
 }
 
-/* Contenu compact dans les palettes évaluation (override des inline styles) */
+/* Contenu compact dans les palettes évaluation */
 .travaux-palette-eval .zone-criteres {
-    padding: 6px !important;
+    padding: 6px;
 }
 .travaux-palette-eval .zone-criteres > .conteneur-liste > div {
-    padding: 8px !important;
-    margin-bottom: 0 !important;
+    padding: 8px;
+    margin-bottom: 0;
     max-width: 100%;
     box-sizing: border-box;
     overflow: hidden;
@@ -14737,35 +14727,35 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 }
 .travaux-palette-eval strong,
 .travaux-palette-eval .u-texte-09 {
-    word-wrap: break-word !important;
-    overflow-wrap: break-word !important;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 .travaux-palette-eval .eval-grid-critere {
     font-size: 0.8rem;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 6px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 .travaux-palette-eval .controle-form {
-    font-size: 0.78rem !important;
-    padding: 3px 6px !important;
+    font-size: 0.78rem;
+    padding: 3px 6px;
 }
 .travaux-palette-eval select.controle-form {
-    width: 100% !important;
-    max-width: 100% !important;
+    width: 100%;
+    max-width: 100%;
     box-sizing: border-box;
 }
 .travaux-palette-eval .u-texte-09 {
-    font-size: 0.8rem !important;
+    font-size: 0.8rem;
 }
 .travaux-palette-eval small {
-    font-size: 0.68rem !important;
+    font-size: 0.68rem;
 }
 .travaux-palette-eval .groupe-form label {
-    font-size: 0.72rem !important;
+    font-size: 0.72rem;
 }
 .travaux-palette-eval .groupe-form {
-    margin-bottom: 4px !important;
+    margin-bottom: 4px;
 }
 /* Sous-sections encadrées dans les palettes (Paramètres, Annotation) */
 .palette-sous-section {
@@ -14775,10 +14765,10 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     border-radius: var(--radius-moyen, 8px);
 }
 .palette-sous-section .groupe-form {
-    margin-bottom: 6px !important;
+    margin-bottom: 6px;
 }
 .palette-sous-section .groupe-form:last-child {
-    margin-bottom: 0 !important;
+    margin-bottom: 0;
 }
 /* ============================================
    CLASSES EVAL-* — Uniformisation page Évaluer
@@ -14924,34 +14914,27 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 }
 
 .travaux-palette-eval .boite-note-finale {
-    margin-top: 8px !important;
-    padding: 6px !important;
+    margin-top: 8px;
+    padding: 6px;
 }
-.travaux-palette-eval .boite-note-finale .valeur,
-.travaux-palette-eval .boite-note-finale div[style*="font-size: 2rem"] {
-    font-size: 1.4rem !important;
+.travaux-palette-eval .boite-note-finale .valeur {
+    font-size: 1.4rem;
 }
-.travaux-palette-eval .boite-note-finale .label,
-.travaux-palette-eval .boite-note-finale div[style*="font-size: 0.8rem"] {
-    font-size: 0.72rem !important;
-}
-/* Grilles internes : s'adapter à la largeur de la palette */
-.travaux-palette-eval div[style*="grid-template-columns"] {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 6px !important;
+.travaux-palette-eval .boite-note-finale .label {
+    font-size: 0.72rem;
 }
 .travaux-palette-eval input.controle-form {
-    width: 100% !important;
-    max-width: 100% !important;
+    width: 100%;
+    max-width: 100%;
     box-sizing: border-box;
 }
 /* Paragraphes et textes inline dans la palette */
 .travaux-palette-eval p {
-    font-size: 0.75rem !important;
+    font-size: 0.75rem;
 }
 .travaux-palette-eval .eval-texte-placeholder,
 .travaux-palette-eval .eval-texte-italic-gris {
-    font-size: 0.78rem !important;
+    font-size: 0.78rem;
 }
 
 #travaux-palette-eval-retro {
@@ -17977,6 +17960,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 
 .planif-noeud:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
+/* !important nécessaire : le JS pose transition inline pendant le drag */
 .planif-snap-transition {
     transition: left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
                 top 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
@@ -18040,10 +18024,11 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     border-color: var(--planif-couleur-selection);
 }
 
+/* !important nécessaire : le JS pose borderColor/background inline sur .planif-noeud */
 .planif-noeud.planif-conteneur.planif-conteneur-survol {
     border-color: var(--planif-couleur-selection) !important;
     border-style: dashed !important;
-    box-shadow: 0 0 0 4px rgba(59,130,246,0.18), 0 4px 16px rgba(59,130,246,0.12) !important;
+    box-shadow: 0 0 0 4px rgba(59,130,246,0.18), 0 4px 16px rgba(59,130,246,0.12);
     background: rgba(59,130,246,0.04) !important;
 }
 
@@ -18054,6 +18039,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     z-index: 10;
 }
 
+/* !important nécessaire : le JS pose borderColor inline sur .planif-noeud */
 .planif-noeud.planif-mode-individuel {
     border: 2px solid var(--planif-couleur-selection) !important;
     border-style: solid !important;

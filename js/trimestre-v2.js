@@ -1578,25 +1578,25 @@ function afficherDetailsCoursV2(cours) {
     conteneur.innerHTML = `
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
             <div>
-                <label class="text-muted" style="font-size: 0.85rem;">Code du cours</label>
+                <label class="text-muted">Code du cours</label>
                 <div style="font-weight: 600; font-size: 1.1rem; color: var(--accent-primaire);">${sigle}</div>
             </div>
             <div>
-                <label class="text-muted" style="font-size: 0.85rem;">Nom du cours</label>
+                <label class="text-muted">Nom du cours</label>
                 <div style="font-weight: 600;">${nomCours}</div>
             </div>
             <div>
-                <label class="text-muted" style="font-size: 0.85rem;">Discipline</label>
+                <label class="text-muted">Discipline</label>
                 <div>${discipline}</div>
             </div>
             <div>
-                <label class="text-muted" style="font-size: 0.85rem;">Compétence${numeroCompetence ? ` (${numeroCompetence})` : ''}</label>
+                <label class="text-muted">Compétence${numeroCompetence ? ` (${numeroCompetence})` : ''}</label>
                 <div>${competence}</div>
             </div>
         </div>
         ${elementsCompetence ? `
         <div style="margin-top: 15px;">
-            <label class="text-muted" style="font-size: 0.85rem;">Éléments de compétence</label>
+            <label class="text-muted">Éléments de compétence</label>
             <div style="font-size: 0.9rem; white-space: pre-line;">${elementsCompetence}</div>
         </div>
         ` : ''}
