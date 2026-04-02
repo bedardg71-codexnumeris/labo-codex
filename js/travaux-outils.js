@@ -654,18 +654,50 @@
      * Retourne le dictionnaire des raccourcis { itemId: touche }.
      * Génère les défauts si la clé n'existe pas encore.
      */
+    // Raccourcis par défaut pour les outils/formes (lettres)
+    var RACCOURCIS_OUTILS_DEFAUT = {
+        position: 'v',     // V = déplacer (View)
+        selection: 's',    // S = sélection
+        stylo: 'd',        // D = dessiner
+        surligneur: 'h',   // H = highlight
+        gomme: 'e',        // E = effacer
+        texte: 't',        // T = texte
+        cercle: 'o',       // O = ovale
+        rectangle: 'r',    // R = rectangle
+        fleche: 'l',       // L = ligne
+        pointille: 'p',    // P = pointillé
+        ondule: 'w'        // W = wave
+    };
+
     function obtenirRaccourcisAnnotation() {
         if (_raccourcisCache) return _raccourcisCache;
         var stored = db.getSync('raccourcisAnnotation', null);
         if (stored && typeof stored === 'object' && Object.keys(stored).length > 0) {
+            // Enrichir avec les raccourcis outils manquants (sans écraser)
+            var modifie = false;
+            var touchesUtilisees = new Set(Object.values(stored));
+            Object.keys(RACCOURCIS_OUTILS_DEFAUT).forEach(function(id) {
+                if (!stored[id]) {
+                    var touche = RACCOURCIS_OUTILS_DEFAUT[id];
+                    if (!touchesUtilisees.has(touche)) {
+                        stored[id] = touche;
+                        touchesUtilisees.add(touche);
+                        modifie = true;
+                    }
+                }
+            });
+            if (modifie) db.setSync('raccourcisAnnotation', stored);
             _raccourcisCache = stored;
             return _raccourcisCache;
         }
-        // Générer les défauts : codes 1-9, 0 dans l'ordre personnalisé
+        // Générer les défauts : codes 1-9, 0 + outils/formes
         var defauts = {};
         var codes = obtenirCodesOrdonnes();
         codes.forEach(function(c, idx) {
             defauts[c.id] = idx < 9 ? String(idx + 1) : '0';
+        });
+        Object.keys(RACCOURCIS_OUTILS_DEFAUT).forEach(function(id) {
+            defauts[id] = RACCOURCIS_OUTILS_DEFAUT[id];
         });
         db.setSync('raccourcisAnnotation', defauts);
         _raccourcisCache = defauts;
@@ -1306,6 +1338,7 @@
         // Barre de titre (draggable + toggle)
         html += '<div class="palette-flottante-barre">';
         html += '<span class="palette-flottante-titre">Annotation</span>';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.afficherRaccourcis" title="Raccourcis clavier outils">&#x2328;</button>';
         html += '<button class="palette-flottante-toggle" id="travaux-palette-toggle" data-action="travauxOutils.togglePaletteReplie" title="Réduire la palette">&#x2212;</button>';
         html += '</div>';
 
@@ -1340,7 +1373,8 @@
         outilsDessin.forEach(id => {
             const outil = OUTILS[id];
             const actif = outilActif === id ? ' actif' : '';
-            html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" data-action="travauxOutils.setOutilActif" data-param="${id}" title="${outil.nom}">${outil.icone}</button>`;
+            const raccourci = obtenirRaccourciPourItem(id);
+            html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" data-action="travauxOutils.setOutilActif" data-param="${id}" title="${outil.nom}${raccourci ? ' [' + raccourci + ']' : ''}">${outil.icone}${raccourci ? '<span class="raccourci-badge">' + raccourci + '</span>' : ''}</button>`;
             // Bouton Dupliquer juste apres Selection
             if (id === 'selection') {
                 html += '<button class="travaux-btn-outil" id="travaux-btn-dupliquer" data-action="travauxAnnotation.dupliquerSelection" title="Dupliquer la s\u00e9lection"><img src="' + ICONS_DIR + 'outils-duplicate-100.png" alt="Dupliquer"></button>';
@@ -1359,7 +1393,8 @@
             const outil = OUTILS[id];
             const actif = outilActif === id ? ' actif' : '';
             const styleCouleur = outil.couleurBouton ? ` style="color:${outil.couleurBouton}; font-weight:bold;"` : '';
-            html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" data-action="travauxOutils.setOutilActif" data-param="${id}" title="${outil.nom}"${styleCouleur}>${outil.icone}</button>`;
+            const raccourci = obtenirRaccourciPourItem(id);
+            html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" data-action="travauxOutils.setOutilActif" data-param="${id}" title="${outil.nom}${raccourci ? ' [' + raccourci + ']' : ''}"${styleCouleur}>${outil.icone}${raccourci ? '<span class="raccourci-badge">' + raccourci + '</span>' : ''}</button>`;
         });
 
         html += '</div></div>';
@@ -1643,10 +1678,59 @@
     }
 
     /**
-     * Affiche les raccourcis clavier (placeholder — action future)
+     * Ouvre la modale de configuration des raccourcis outils/formes
      */
     function afficherRaccourcis() {
-        alert('Raccourcis clavier\n\nCtrl+Z : Annuler\nCtrl+Y : Rétablir\nDelete : Supprimer sélection\nEchap : Outil Position');
+        var existant = document.getElementById('modal-raccourcis-outils');
+        if (existant) existant.remove();
+
+        var outilsIds = ['position', 'selection', 'stylo', 'surligneur', 'gomme', 'texte',
+                         'cercle', 'rectangle', 'fleche', 'pointille', 'ondule'];
+
+        var lignes = outilsIds.map(function(id) {
+            var outil = OUTILS[id];
+            var raccourci = obtenirRaccourciPourItem(id) || '';
+            return '<div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">' +
+                '<span style="width:120px; font-size:0.9rem;">' + echapperHtml(outil.nom) + '</span>' +
+                '<input type="text" class="travaux-retro-raccourci-input" data-raccourci-id="' + id + '" value="' + echapperHtml(raccourci) + '" maxlength="1" placeholder="\u2328" title="Raccourci clavier (1 touche)" style="width:36px; text-align:center; font-size:0.9rem; padding:4px;">' +
+                '</div>';
+        }).join('');
+
+        var html = '<div class="modale-overlay" style="z-index:10000;">' +
+            '<div class="modale-contenu" style="max-width:320px; padding:20px;">' +
+            '<h3 style="margin:0 0 12px;">Raccourcis outils</h3>' +
+            '<p style="font-size:0.85rem; color:var(--texte-secondaire); margin-bottom:12px;">Ctrl+Z : Annuler &middot; Ctrl+Y : R\u00e9tablir &middot; Delete : Supprimer &middot; Echap : Position</p>' +
+            lignes +
+            '<div style="display:flex; gap:8px; margin-top:12px;">' +
+            '<button class="btn btn-principal btn-tres-compact u-flex-1" id="raccourcis-outils-sauver">Enregistrer</button>' +
+            '<button class="btn btn-annuler btn-tres-compact" id="raccourcis-outils-fermer">Fermer</button>' +
+            '</div></div></div>';
+
+        var modal = document.createElement('div');
+        modal.id = 'modal-raccourcis-outils';
+        modal.innerHTML = html;
+        document.body.appendChild(modal);
+
+        document.getElementById('raccourcis-outils-sauver').addEventListener('click', function() {
+            modal.querySelectorAll('input[data-raccourci-id]').forEach(function(inp) {
+                var id = inp.dataset.raccourciId;
+                var touche = inp.value.trim().toLowerCase();
+                if (touche.length === 1) {
+                    definirRaccourci(id, touche);
+                } else if (touche === '') {
+                    definirRaccourci(id, null);
+                }
+            });
+            rafraichirPalettesApresPersonnalisation();
+            modal.remove();
+            if (typeof afficherNotificationSucces === 'function') {
+                afficherNotificationSucces('Raccourcis outils enregistr\u00e9s');
+            }
+        });
+
+        document.getElementById('raccourcis-outils-fermer').addEventListener('click', function() {
+            modal.remove();
+        });
     }
 
     /* ===============================
