@@ -3497,32 +3497,39 @@ function creerGraphiqueCriteres(canvasId, da) {
                 var typeJeton = ev.jetonDelaiApplique ? 'jetonDelai' : 'jetonReprise';
                 jetonsParIndex[idx] = { type: typeJeton };
             }
-            // Interventions RàI proches de la date d'évaluation
-            if (typeof obtenirInterventionsEtudiant === 'function') {
-                try {
-                    var interventions = obtenirInterventionsEtudiant(da);
-                    var dateEval = ev.dateEvaluation || '';
-                    if (dateEval) {
-                        var niveauMax = 0;
-                        var titreIntervention = '';
-                        interventions.forEach(function(inter) {
-                            if (inter.statut !== 'completee') return;
-                            var dateInter = inter.date || '';
-                            // Intervention dans les 7 jours avant l'évaluation
-                            if (dateInter && dateInter <= dateEval && dateInter >= dateEval.substring(0, 8) + '01') {
-                                if (inter.niveauRai > niveauMax) {
-                                    niveauMax = inter.niveauRai;
-                                    titreIntervention = inter.titre || 'Intervention N' + inter.niveauRai;
-                                }
-                            }
-                        });
-                        if (niveauMax >= 2) {
-                            interventionsParIndex[idx] = { niveau: niveauMax, titre: titreIntervention };
-                        }
-                    }
-                } catch (e) { console.warn('[Graphiques] intervention detection skipped:', e.message || e); }
-            }
         });
+
+        // Interventions RàI : placer chaque intervention sur l'évaluation la plus proche
+        // (dernière évaluation dont la date est <= date de l'intervention)
+        if (typeof obtenirInterventionsEtudiant === 'function') {
+            try {
+                var interventions = obtenirInterventionsEtudiant(da);
+                interventions.forEach(function(inter) {
+                    if (inter.statut !== 'completee' || inter.niveauRai < 2) return;
+                    var dateInter = inter.date || '';
+                    if (!dateInter) return;
+
+                    // Trouver l'évaluation la plus proche avant ou le jour de l'intervention
+                    var meilleurIdx = -1;
+                    evalsTriees.forEach(function(ev, idx) {
+                        var dateEval = (ev.dateEvaluation || '').substring(0, 10); // ISO → YYYY-MM-DD
+                        if (dateEval && dateEval <= dateInter) {
+                            meilleurIdx = idx;
+                        }
+                    });
+                    if (meilleurIdx === -1) return;
+
+                    // Garder le niveau le plus élevé si plusieurs interventions tombent sur le même index
+                    var existant = interventionsParIndex[meilleurIdx];
+                    if (!existant || inter.niveauRai > existant.niveau) {
+                        interventionsParIndex[meilleurIdx] = {
+                            niveau: inter.niveauRai,
+                            titre: inter.titre || 'Intervention N' + inter.niveauRai
+                        };
+                    }
+                });
+            } catch (e) { console.warn('[Graphiques] intervention detection skipped:', e.message || e); }
+        }
 
         // Générer les styles de points partagés (jetons uniquement — interventions via plugin)
         var nbEvals = evalsTriees.length;
