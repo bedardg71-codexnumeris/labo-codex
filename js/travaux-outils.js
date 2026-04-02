@@ -3034,6 +3034,33 @@
      * Détecte si les palettes sont ancrées (colonne droite) ou flottantes.
      */
     function rafraichirPalettesApresPersonnalisation() {
+        // Palette Annotation — rafraîchir les boutons outils et formes (badges raccourcis)
+        const paletteAnnot = document.getElementById('travaux-palette-flottante');
+        if (paletteAnnot) {
+            const contenu = paletteAnnot.querySelector('.palette-flottante-contenu');
+            if (contenu) {
+                // Sauvegarder l'identité affichée
+                const etudLabel = document.getElementById('travaux-annot-label-etudiant');
+                const prodLabel = document.getElementById('travaux-annot-label-production');
+                const etudTxt = etudLabel ? etudLabel.textContent : '--';
+                const prodTxt = prodLabel ? prodLabel.textContent : '--';
+
+                // Régénérer le contenu
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = genererHTMLPalette();
+                const nouveauContenu = tempDiv.querySelector('.palette-flottante-contenu');
+                if (nouveauContenu) {
+                    contenu.innerHTML = nouveauContenu.innerHTML;
+                }
+
+                // Restaurer l'identité
+                const newEtud = document.getElementById('travaux-annot-label-etudiant');
+                const newProd = document.getElementById('travaux-annot-label-production');
+                if (newEtud) newEtud.textContent = etudTxt;
+                if (newProd) newProd.textContent = prodTxt;
+            }
+        }
+
         // Palettes ancrées dans la colonne droite — re-rendre le contenu in-place
         const ancreErrFr = document.getElementById('annot-errfr-contenu');
         if (ancreErrFr) {
