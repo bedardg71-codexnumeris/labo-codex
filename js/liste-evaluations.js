@@ -1284,19 +1284,22 @@ function ouvrirAnnotationDepuisListe(fichierId, productionId) {
     };
 
     setTimeout(function() {
-        // Synchroniser le dropdown filtre production dans le DOM
-        if (productionId) {
-            const select = document.querySelector('#evaluations-contenu-fichiers .travaux-filtre-production');
-            if (select) {
-                select.value = productionId;
-                if (typeof travauxUI !== 'undefined' && typeof travauxUI.filtrerBadgesParProduction === 'function') {
-                    travauxUI.filtrerBadgesParProduction(select);
-                }
-            }
-        }
-
         if (typeof travauxUI !== 'undefined' && typeof travauxUI.ouvrirFichier === 'function') {
             travauxUI.ouvrirFichier(fichierId);
+        }
+
+        // Synchroniser le dropdown APRÈS ouvrirFichier (qui reconstruit le DOM)
+        if (productionId) {
+            setTimeout(function() {
+                const select = document.querySelector('.annot-toolbar .travaux-filtre-production') ||
+                               document.querySelector('#evaluations-contenu-fichiers .travaux-filtre-production');
+                if (select) {
+                    select.value = productionId;
+                    if (typeof travauxUI !== 'undefined' && typeof travauxUI.filtrerBadgesParProduction === 'function') {
+                        travauxUI.filtrerBadgesParProduction(select);
+                    }
+                }
+            }, 400);
         }
     }, 200);
 }
