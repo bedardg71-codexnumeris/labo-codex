@@ -885,7 +885,6 @@
             html += '</div>';
         });
         html += '</div>';
-        html += '<div class="travaux-errfr-total" id="travaux-errfr-total" style="text-align:right; font-size:0.8rem; color:var(--texte-secondaire); padding:4px 0; font-weight:600;">Total : <span id="travaux-errfr-total-valeur">0</span></div>';
         return html;
     }
 
@@ -983,7 +982,7 @@
         // Barre de titre
         let html = '<div class="palette-flottante-barre">';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="Personnaliser">\u2699</button>';
-        html += '<span class="palette-flottante-titre">Codes</span>';
+        html += '<span class="palette-flottante-titre">Codes <span id="travaux-errfr-total-header" style="font-weight:400; font-size:0.75rem; color:var(--texte-secondaire);"></span></span>';
         html += '<div style="display:flex; gap:2px;">';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="travaux-palette-erreurs-fr" title="Disposition horizontale">\u2194</button>';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="travaux-palette-erreurs-fr" title="Disposition verticale">\u2195</button>';
@@ -1832,10 +1831,10 @@
             }
         });
 
-        // Afficher le total dans la palette CODES
-        const spanTotal = document.getElementById('travaux-errfr-total-valeur');
+        // Afficher le total dans l'entête de la palette CODES
+        const spanTotal = document.getElementById('travaux-errfr-total-header');
         if (spanTotal) {
-            spanTotal.textContent = total;
+            spanTotal.textContent = total > 0 ? '(' + total + ')' : '';
         }
 
         // Propager le total dans le champ « Nombre d'erreurs » du critère algorithmique
