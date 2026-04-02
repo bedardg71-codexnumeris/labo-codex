@@ -1338,7 +1338,7 @@
         // Barre de titre (draggable + toggle)
         html += '<div class="palette-flottante-barre">';
         html += '<span class="palette-flottante-titre">Annotation</span>';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.afficherRaccourcis" title="Raccourcis clavier outils">&#x2328;</button>';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.afficherRaccourcis" title="Personnaliser">\u2699</button>';
         html += '<button class="palette-flottante-toggle" id="travaux-palette-toggle" data-action="travauxOutils.togglePaletteReplie" title="Réduire la palette">&#x2212;</button>';
         html += '</div>';
 
