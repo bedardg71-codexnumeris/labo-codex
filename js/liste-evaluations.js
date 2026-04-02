@@ -746,34 +746,74 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
         });
     });
 
-    // Ajouter des lignes pour les fichiers importés sans étudiant identifié (etudiantDA vide)
-    // Les fichiers avec DA valide mais productionId invalide sont déjà couverts
-    // par le match souple dans calculerStatutWorkflow (tag « Non associé »)
+    // Ajouter des lignes dédiées pour les fichiers non associés
+    // (DA vide OU productionId orphelin) — une ligne par FICHIER réel
     if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersGroupeActif === 'function') {
         const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
-        const fichiersSansEtudiant = fichiers.filter(f => !f.etudiantDA);
+        const productionIdsConnus = new Set(productions.map(p => p.id));
 
-        fichiersSansEtudiant.forEach(fichier => {
+        // Fichiers sans étudiant (DA vide)
+        fichiers.filter(f => !f.etudiantDA).forEach(fichier => {
             lignes.push({
-                da: '',
-                daAffichage: '',
-                nom: '?',
+                da: '', daAffichage: '', nom: '?',
                 prenom: (typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(fichier.nomFichier, fichier.etudiantDA) : fichier.nomFichier) || 'Fichier non identifié',
-                groupe: '',
-                productionId: fichier.productionId || '',
-                productionNom: '',
-                associationManquante: true,
-                etudiantManquant: true,
-                grilleNom: '-',
-                cartoucheId: null,
-                cartoucheNom: '-',
-                note: '-',
-                noteChiffree: null,
-                niveauFinal: '-',
-                statut: 'non-evalue',
-                statutRemise: 'non-remis',
-                evaluationId: null,
-                verrouille: false
+                groupe: '', productionId: fichier.productionId || '', productionNom: 'Non associé',
+                associationManquante: true, estFichierNonAssocie: true, etudiantManquant: true, fichierId: fichier.id,
+                grilleNom: '-', cartoucheId: null, cartoucheNom: '-',
+                note: '-', noteChiffree: null, niveauFinal: '-',
+                statut: 'non-evalue', statutRemise: 'non-remis', evaluationId: null, verrouille: false
+            });
+        });
+
+        // Fichiers avec DA valide mais productionId orphelin ou vide
+        const fichiersOrphelins = fichiers.filter(f =>
+            f.etudiantDA && (!f.productionId || !productionIdsConnus.has(f.productionId))
+        );
+
+        // Indexer les fichiers correctement associés par DA (pour détection doublon)
+        const fichiersAssociesParDA = new Map();
+        fichiers.forEach(f => {
+            if (f.etudiantDA && f.productionId && productionIdsConnus.has(f.productionId)) {
+                if (!fichiersAssociesParDA.has(f.etudiantDA)) fichiersAssociesParDA.set(f.etudiantDA, []);
+                fichiersAssociesParDA.get(f.etudiantDA).push(f);
+            }
+        });
+
+        fichiersOrphelins.forEach(fichier => {
+            const etudiant = etudiants.find(e => e.da === fichier.etudiantDA);
+            const nomFichier = typeof anonymiserNomFichier === 'function'
+                ? anonymiserNomFichier(fichier.nomFichier, fichier.etudiantDA)
+                : fichier.nomFichier;
+
+            // Détection doublon : même DA + même nomFichier ou même taille qu'un fichier associé
+            let estDoublon = false;
+            let diagnosticDoublon = '';
+            const associes = fichiersAssociesParDA.get(fichier.etudiantDA) || [];
+            if (associes.length > 0) {
+                const match = associes.find(a =>
+                    (a.nomFichier && a.nomFichier === fichier.nomFichier) ||
+                    (a.tailleFichier && a.tailleFichier > 0 && a.tailleFichier === fichier.tailleFichier)
+                );
+                if (match) {
+                    const prod = productions.find(p => p.id === match.productionId);
+                    const nomProd = prod ? (prod.titre || prod.nom || prod.description) : match.productionId;
+                    const critere = (match.nomFichier === fichier.nomFichier) ? 'même nom' : 'même taille';
+                    estDoublon = true;
+                    diagnosticDoublon = nomProd + ' (' + critere + ')';
+                }
+            }
+
+            lignes.push({
+                da: fichier.etudiantDA, daAffichage: fichier.etudiantDA,
+                nom: etudiant ? etudiant.nom : '?',
+                prenom: etudiant ? etudiant.prenom : (nomFichier || 'Fichier non identifié'),
+                groupe: etudiant ? (etudiant.groupe || '') : '',
+                productionId: '', productionNom: nomFichier || 'Fichier non associé',
+                associationManquante: true, estFichierNonAssocie: true, fichierId: fichier.id,
+                estDoublon, diagnosticDoublon,
+                grilleNom: '-', cartoucheId: null, cartoucheNom: '-',
+                note: '-', noteChiffree: null, niveauFinal: '-',
+                statut: 'non-evalue', statutRemise: 'non-remis', evaluationId: null, verrouille: false
             });
         });
     }
@@ -862,6 +902,8 @@ function appliquerFiltresSurLignes(lignes) {
             if (ligne.statutWorkflow !== 'evalue') return false;
         } else if (filtreStatut === 'non-evalue') {
             if (ligne.statut !== 'non-evalue') return false;
+        } else if (filtreStatut === 'non-associe') {
+            if (!ligne.estFichierNonAssocie) return false;
         } else if (filtreStatut === 'jeton-delai') {
             if (ligne.badgeType !== 'delai') return false;
         } else if (filtreStatut === 'jeton-reprise') {
@@ -1021,7 +1063,9 @@ function genererLigneHTML(ligne) {
             <td class="td-left">${echapperHtml(ligne.nom)}</td>
             <td class="td-left">${echapperHtml(ligne.prenom)}</td>
             <td class="td-left">${ligne.associationManquante
-                ? `${echapperHtml(ligne.productionNom)} <span style="color: var(--attention); font-size: 0.85em;">⚠ Non associé</span>`
+                ? `${echapperHtml(ligne.productionNom)} ${ligne.estDoublon
+                    ? `<span style="color: var(--rouge-danger); font-size: 0.85em;" title="Doublon : ce fichier est déjà associé à ${echapperHtml(ligne.diagnosticDoublon || '')}. Suppression sécuritaire.">⚠ Doublon</span>`
+                    : `<span style="color: var(--attention); font-size: 0.85em;">⚠ Non associé</span>`}`
                 : ligne.fichierAutreProduction
                     ? `${echapperHtml(ligne.productionNom)} <span style="color: var(--attention); font-size: 0.85em;">⚠ Fichier sous autre production</span>`
                     : echapperHtml(ligne.productionNom)}</td>
@@ -1044,8 +1088,12 @@ function genererDropdownActions(ligne) {
         const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
         const productions = obtenirDonneesSelonMode('productions');
         const productionIdsConnus = new Set(productions.map(p => p.id));
+        // Match direct par fichierId (lignes dédiées non-associées)
+        if (ligne.fichierId) {
+            fichierImporte = fichiers.find(f => f.id === ligne.fichierId);
+        }
         // Match prioritaire par evaluationId (distingue original vs reprise)
-        if (ligne.evaluationId) {
+        if (!fichierImporte && ligne.evaluationId) {
             fichierImporte = fichiers.find(f =>
                 f.evaluationId === ligne.evaluationId
             );
