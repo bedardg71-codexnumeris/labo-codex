@@ -971,6 +971,7 @@ async function sauvegarderProduction() {
             if (!productionData.metadata_cc) productionData.metadata_cc = {};
             productionData.metadata_cc.auteur_original = enseignantActif;
             productionData.metadata_cc.date_creation = new Date().toISOString().split('T')[0];
+            if (!productionData.metadata_cc.contributeurs) productionData.metadata_cc.contributeurs = [];
         }
 
         evaluations.push(productionData);

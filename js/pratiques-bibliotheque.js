@@ -971,13 +971,16 @@ async function importerPratiquesDansBibliotheque(configurations) {
  */
 async function exporterBibliothequePratiques() {
     const bibliotheque = await db.get(CLE_BIBLIOTHEQUE_PRATIQUES) || [];
+    const configurations = typeof ajouterMetadonnéesCC === 'function'
+        ? bibliotheque.map(p => ajouterMetadonnéesCC(p, 'pratique', p.nom || '').contenu || p)
+        : bibliotheque;
 
     return {
         version: '1.0',
         type: 'configurations-pratiques',
         dateExport: new Date().toISOString(),
-        nombreConfigurations: bibliotheque.length,
-        configurations: bibliotheque
+        nombreConfigurations: configurations.length,
+        configurations
     };
 }
 

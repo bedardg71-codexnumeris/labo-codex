@@ -152,12 +152,15 @@ async function importerDansBibliotheque(productions) {
  */
 async function exporterBibliotheque() {
     const bibliotheque = await db.get(CLE_BIBLIOTHEQUE_PRODUCTIONS) || [];
+    const productions = typeof ajouterMetadonnéesCC === 'function'
+        ? bibliotheque.map(p => ajouterMetadonnéesCC(p, 'production', p.titre || p.nom || '').contenu || p)
+        : bibliotheque;
 
     return {
         version: '1.0',
         dateExport: new Date().toISOString(),
-        nombreProductions: bibliotheque.length,
-        productions: bibliotheque
+        nombreProductions: productions.length,
+        productions
     };
 }
 
