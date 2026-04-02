@@ -15080,7 +15080,8 @@ body.mode-clair .prep-select {
     max-width: none;
 }
 
-.travaux-palette-eval .travaux-palette-contenu {
+.travaux-palette-eval .travaux-palette-contenu,
+.travaux-palette-eval .palette-flottante-contenu {
     max-height: calc(100vh - 200px);
     padding: 0;
     flex: 1;
