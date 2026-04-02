@@ -332,7 +332,7 @@ body.mode-demo .sous-navigation {
 /* ===============================
    MODE CLAIR
    =============================== */
-body.mode-clair {
+.mode-clair {
     color-scheme: light;
 
     /* Bleus — Palette originale Mode Normal */
@@ -1372,7 +1372,7 @@ h1, h2, h3, h4 {
     width: 22px;
     height: 22px;
 }
-body.mode-clair .nav-icone {
+.mode-clair .nav-icone {
     filter: brightness(0) invert(1);
 }
 
@@ -2115,7 +2115,7 @@ body.mode-clair .nav-icone {
     letter-spacing: 0.02em;
 }
 
-body.mode-clair .entete-stat-cell {
+.mode-clair .entete-stat-cell {
     color: rgba(255, 255, 255, 0.9);
 }
 
@@ -2901,12 +2901,12 @@ textarea {
 /* Classes légères pour validation Primo (champs de formulaire) */
 .primo-champ-vide {
     border: 2px solid var(--orange-accent) !important;
-    background-color: #fff3e0 !important;
+    background-color: var(--alerte-fond-attention) !important;
     box-shadow: 0 0 8px rgba(255, 152, 0, 0.3);
 }
 .primo-champ-rempli {
     border: 2px solid var(--vert-succes) !important;
-    background-color: #f1f8e9 !important;
+    background-color: var(--alerte-fond-succes) !important;
     box-shadow: none;
 }
 
@@ -3130,39 +3130,39 @@ textarea {
 .changelog-entry--sarcelle .changelog-title { color: #6aacb8; }
 
 /* Mode clair — changelog */
-body.mode-clair .changelog-entry {
+.mode-clair .changelog-entry {
     color: var(--texte-principal);
 }
-body.mode-clair .changelog-entry--bleu {
+.mode-clair .changelog-entry--bleu {
     background: #f0f8ff;
     border-color: #065dbb;
 }
-body.mode-clair .changelog-entry--vert {
+.mode-clair .changelog-entry--vert {
     background: #f0fdf4;
     border-color: #28a745;
 }
-body.mode-clair .changelog-entry--orange {
+.mode-clair .changelog-entry--orange {
     background: #fff8f0;
     border-color: var(--orange-accent);
 }
-body.mode-clair .changelog-entry--rose {
+.mode-clair .changelog-entry--rose {
     background: #fdf0f5;
     border-color: #d81b60;
 }
-body.mode-clair .changelog-entry--violet {
+.mode-clair .changelog-entry--violet {
     background: #f5f0ff;
     border-color: #7c3aed;
 }
-body.mode-clair .changelog-entry--sarcelle {
+.mode-clair .changelog-entry--sarcelle {
     background: #f0f8ff;
     border-color: #065dbb;
 }
-body.mode-clair .changelog-entry--vert .changelog-title { color: #1e7e34; }
-body.mode-clair .changelog-entry--orange .changelog-title { color: #a07830; }
-body.mode-clair .changelog-entry--bleu .changelog-title { color: #065dbb; }
-body.mode-clair .changelog-entry--rose .changelog-title { color: #c2185b; }
-body.mode-clair .changelog-entry--violet .changelog-title { color: #5b21b6; }
-body.mode-clair .changelog-entry--sarcelle .changelog-title { color: #065dbb; }
+.mode-clair .changelog-entry--vert .changelog-title { color: #1e7e34; }
+.mode-clair .changelog-entry--orange .changelog-title { color: #a07830; }
+.mode-clair .changelog-entry--bleu .changelog-title { color: #065dbb; }
+.mode-clair .changelog-entry--rose .changelog-title { color: #c2185b; }
+.mode-clair .changelog-entry--violet .changelog-title { color: #5b21b6; }
+.mode-clair .changelog-entry--sarcelle .changelog-title { color: #065dbb; }
 
 /* ===============================
    BOUTONS (padding unifié 10px 15px)
@@ -8223,7 +8223,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     flex-shrink: 0;
     filter: invert(1);
 }
-body.mode-clair .jeton-icone {
+.mode-clair .jeton-icone {
     filter: none;
 }
 
@@ -13226,7 +13226,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 }
 
 /* Responsive : réduire la page sur petits écrans */
-@media (max-width: 900px) {
+@media (max-width: 850px) {
     .apercu-pdf-page.apercu-pdf-portrait,
     .apercu-pdf-page.apercu-pdf-paysage {
         transform: scale(0.8);
@@ -13234,7 +13234,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     }
 }
 
-@media (max-width: 650px) {
+@media (max-width: 600px) {
     .apercu-pdf-page.apercu-pdf-portrait,
     .apercu-pdf-page.apercu-pdf-paysage {
         transform: scale(0.6);
@@ -13258,7 +13258,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     margin: 0 auto;
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1024px) {
     .outils-grid {
         grid-template-columns: 1fr;
     }
@@ -14377,11 +14377,11 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 }
 
 /* Mode clair */
-body.mode-clair .prep-zoom-bar {
+.mode-clair .prep-zoom-bar {
     background: #fff;
     border-color: rgba(3, 46, 92, 0.15);
 }
-body.mode-clair .prep-btn-zoom {
+.mode-clair .prep-btn-zoom {
     background: #f0f4f8;
 }
 
@@ -14554,7 +14554,7 @@ body.mode-clair .prep-btn-zoom {
     color: var(--texte-principal);
     font-size: 0.7rem;
 }
-body.mode-clair .prep-select {
+.mode-clair .prep-select {
     background: #ffffff;
     border-color: rgba(3, 46, 92, 0.15);
 }
@@ -15068,74 +15068,74 @@ body.mode-clair .prep-select {
 }
 
 /* Mode clair */
-body.mode-clair .travaux-palette-eval {
+.mode-clair .travaux-palette-eval {
     background: #e8f2fd;
     border-color: rgba(3, 46, 92, 0.1);
 }
-body.mode-clair .travaux-panneau-header {
+.mode-clair .travaux-panneau-header {
     background: #e8f2fd;
     border-bottom-color: rgba(3, 46, 92, 0.08);
 }
-body.mode-clair .travaux-palette-flottante {
+.mode-clair .travaux-palette-flottante {
     background: #e8f2fd;
     border-color: rgba(3, 46, 92, 0.1);
 }
-body.mode-clair .travaux-palette-barre {
+.mode-clair .travaux-palette-barre {
     border-bottom-color: rgba(3, 46, 92, 0.08);
 }
 /* Toolbar harmonisée — mode clair */
-body.mode-clair .travaux-toolbar {
+.mode-clair .travaux-toolbar {
     background: var(--surface-carte, #ffffff);
     border-bottom-color: rgba(3, 46, 92, 0.1);
 }
-body.mode-clair .travaux-toolbar-gauche {
+.mode-clair .travaux-toolbar-gauche {
     border-right-color: rgba(3, 46, 92, 0.1);
 }
-body.mode-clair .travaux-btn-nav {
+.mode-clair .travaux-btn-nav {
     background: #ffffff;
     border-color: rgba(3, 46, 92, 0.15);
     color: var(--texte-secondaire);
 }
-body.mode-clair .travaux-btn-nav:hover:not(:disabled) {
+.mode-clair .travaux-btn-nav:hover:not(:disabled) {
     border-color: var(--bleu-principal);
     color: var(--texte-principal);
 }
-body.mode-clair .travaux-btn-zoom {
+.mode-clair .travaux-btn-zoom {
     background: #ffffff;
     border-color: rgba(3, 46, 92, 0.12);
     color: var(--texte-secondaire);
 }
-body.mode-clair .travaux-btn-zoom:hover {
+.mode-clair .travaux-btn-zoom:hover {
     background: rgba(6, 93, 187, 0.08);
     color: var(--texte-principal);
 }
-body.mode-clair .travaux-btn-action {
+.mode-clair .travaux-btn-action {
     background: #ffffff;
     border-color: rgba(3, 46, 92, 0.15);
     color: var(--texte-secondaire);
 }
-body.mode-clair .travaux-btn-action:hover {
+.mode-clair .travaux-btn-action:hover {
     border-color: var(--bleu-principal);
     color: var(--texte-principal);
 }
-body.mode-clair .travaux-btn-action.actif {
+.mode-clair .travaux-btn-action.actif {
     background: var(--planif-couleur-selection, #6aacb8);
     color: #fff;
     border-color: var(--planif-couleur-selection, #6aacb8);
 }
-body.mode-clair .travaux-btn-action-vert {
+.mode-clair .travaux-btn-action-vert {
     border-color: rgba(40, 167, 69, 0.3);
     color: var(--vert-succes, #28a745);
 }
-body.mode-clair .travaux-btn-action-vert:hover {
+.mode-clair .travaux-btn-action-vert:hover {
     background: rgba(40, 167, 69, 0.08);
 }
-body.mode-clair .travaux-canvas-container {
+.mode-clair .travaux-canvas-container {
     background: var(--surface-conteneur, #ffffff);
 }
-body.mode-clair .travaux-zoom-info,
-body.mode-clair #travaux-indicateur-page,
-body.mode-clair .travaux-compteur-badge {
+.mode-clair .travaux-zoom-info,
+.mode-clair #travaux-indicateur-page,
+.mode-clair .travaux-compteur-badge {
     color: var(--texte-secondaire);
 }
 /* Retroaction dans palette eval */
@@ -16020,7 +16020,7 @@ body.mode-clair .travaux-compteur-badge {
     padding: 8px;
 }
 
-body.mode-clair .pipeline-preview-centre {
+.mode-clair .pipeline-preview-centre {
     background: #f5f7fa;
 }
 
@@ -16030,7 +16030,7 @@ body.mode-clair .pipeline-preview-centre {
     border-radius: var(--radius-petit);
 }
 
-body.mode-clair .pipeline-fichier-selectionne {
+.mode-clair .pipeline-fichier-selectionne {
     background: rgba(59, 130, 246, 0.08);
     border-color: rgba(59, 130, 246, 0.4);
 }
@@ -16225,8 +16225,8 @@ body.mode-clair .pipeline-fichier-selectionne {
     color: var(--texte-principal, #e0e0e0);
 }
 
-body.mode-clair .pipeline-champ input,
-body.mode-clair .pipeline-champ select {
+.mode-clair .pipeline-champ input,
+.mode-clair .pipeline-champ select {
     background: #fff;
     color: var(--texte-principal, #1a1a1a);
     border-color: var(--bordure-claire, #d0d8e0);
@@ -16255,7 +16255,7 @@ body.mode-clair .pipeline-champ select {
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
-body.mode-clair .pipeline-autocomplete-liste {
+.mode-clair .pipeline-autocomplete-liste {
     background: #fff;
     border-color: var(--bordure-claire, #d0d8e0);
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -16272,7 +16272,7 @@ body.mode-clair .pipeline-autocomplete-liste {
     background: rgba(106, 172, 184, 0.15);
 }
 
-body.mode-clair .pipeline-autocomplete-item:hover {
+.mode-clair .pipeline-autocomplete-item:hover {
     background: var(--gris-tres-clair, #f0f4f8);
 }
 
@@ -16290,7 +16290,7 @@ body.mode-clair .pipeline-autocomplete-item:hover {
     color: var(--texte-secondaire);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 850px) {
     .pipeline-3col-grid {
         grid-template-columns: 1fr;
     }
@@ -16864,7 +16864,7 @@ body.mode-clair .pipeline-autocomplete-item:hover {
     filter: invert(1);
     opacity: 0.6;
 }
-body.mode-clair .travaux-epaisseur-icone {
+.mode-clair .travaux-epaisseur-icone {
     filter: none;
 }
 .travaux-epaisseur-px {
@@ -16898,12 +16898,12 @@ body.mode-clair .travaux-epaisseur-icone {
 .travaux-btn-epaisseur-inc:hover {
     background: var(--fond-survol, #2a3a4e);
 }
-body.mode-clair .travaux-btn-epaisseur-inc {
+.mode-clair .travaux-btn-epaisseur-inc {
     background: var(--fond-surface-clair, #fff);
     color: var(--texte-principal-clair, #1e293b);
     border-color: var(--bordure-claire, #d0d8e0);
 }
-body.mode-clair .travaux-btn-epaisseur-inc:hover {
+.mode-clair .travaux-btn-epaisseur-inc:hover {
     background: var(--fond-survol-clair, #f1f5f9);
 }
 
@@ -16918,7 +16918,7 @@ body.mode-clair .travaux-btn-epaisseur-inc:hover {
     justify-content: center;
     margin-top: 4px;
 }
-body.mode-clair .travaux-apercu-trait {
+.mode-clair .travaux-apercu-trait {
     background: #fff;
     border-color: var(--bordure-claire, #d0d8e0);
 }
@@ -17079,21 +17079,21 @@ body.mode-clair .travaux-apercu-trait {
 .palette-flottante.replie::after { display: none; }
 
 /* Mode clair */
-body.mode-clair .palette-flottante {
+.mode-clair .palette-flottante {
     background: #e8f2fd;
     border-color: rgba(3, 46, 92, 0.1);
 }
-body.mode-clair .palette-flottante-barre {
+.mode-clair .palette-flottante-barre {
     border-bottom-color: rgba(3, 46, 92, 0.08);
 }
-body.mode-clair .palette-flottante-bas-btns {
+.mode-clair .palette-flottante-bas-btns {
     border-top-color: rgba(3, 46, 92, 0.08);
     background: #e8f2fd;
 }
-body.mode-clair .palette-flottante-barre {
+.mode-clair .palette-flottante-barre {
     background: #e8f2fd;
 }
-body.mode-clair .palette-flottante-aide-btn:hover {
+.mode-clair .palette-flottante-aide-btn:hover {
     background: rgba(3, 46, 92, 0.1);
 }
 
@@ -17294,7 +17294,7 @@ body.mode-clair .palette-flottante-aide-btn:hover {
     object-fit: contain;
     filter: invert(1);
 }
-body.mode-clair .travaux-autocollant-item img {
+.mode-clair .travaux-autocollant-item img {
     filter: none;
 }
 
@@ -19518,7 +19518,7 @@ body.mode-clair .travaux-autocollant-item img {
 }
 
 /* Mode clair — dropdown */
-body.mode-clair .planif-actions-dropdown {
+.mode-clair .planif-actions-dropdown {
     background: #ffffff;
     border-color: rgba(3, 46, 92, 0.12);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
@@ -19571,196 +19571,196 @@ body.mode-clair .planif-actions-dropdown {
    =============================== */
 
 /* Texte général — couvre la majorité des color: white sur éléments de contenu */
-body.mode-clair {
+.mode-clair {
     color: var(--texte-principal);
 }
 
 /* EN-TÊTE — gradient bleu pur design system */
-body.mode-clair .entete {
+.mode-clair .entete {
     background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
     color: white;
 }
 
-body.mode-clair .titre-section h1 {
+.mode-clair .titre-section h1 {
     color: white;
 }
 
-body.mode-clair .titre-section .meta {
+.mode-clair .titre-section .meta {
     color: var(--bleu-meta);
 }
 
-body.mode-clair .info-contextuelles-centre {
+.mode-clair .info-contextuelles-centre {
     color: rgba(255, 255, 255, 0.90);
 }
 
-body.mode-clair .info-contexte-item {
+.mode-clair .info-contexte-item {
     color: rgba(255, 255, 255, 0.90);
 }
 
-body.mode-clair .logo-meta {
+.mode-clair .logo-meta {
     color: var(--bleu-meta);
 }
 
-body.mode-clair .separateur-contexte {
+.mode-clair .separateur-contexte {
     color: rgba(255, 255, 255, 0.60);
 }
 
 /* Dropdown cours dans en-tête — même bleu que la navigation */
-body.mode-clair .dropdown-cours-entete {
+.mode-clair .dropdown-cours-entete {
     background: rgba(3, 46, 92, 0.6);
     border-color: rgba(255, 255, 255, 0.15);
     color: white;
 }
 
-body.mode-clair .dropdown-cours-entete:hover {
+.mode-clair .dropdown-cours-entete:hover {
     background: rgba(3, 46, 92, 0.75);
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-body.mode-clair .dropdown-cours-entete:focus {
+.mode-clair .dropdown-cours-entete:focus {
     background: rgba(3, 46, 92, 0.75);
     border-color: rgba(255, 255, 255, 0.3);
     box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
 }
 
 /* Dropdown groupe-cours dans en-tête — même bleu que la navigation */
-body.mode-clair .dropdown-groupe-cours-header {
+.mode-clair .dropdown-groupe-cours-header {
     background: rgba(3, 46, 92, 0.6);
     border-color: rgba(255, 255, 255, 0.15);
     color: white;
 }
 
-body.mode-clair .dropdown-groupe-cours-header:hover {
+.mode-clair .dropdown-groupe-cours-header:hover {
     background: rgba(3, 46, 92, 0.75);
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-body.mode-clair .dropdown-groupe-cours-header:focus {
+.mode-clair .dropdown-groupe-cours-header:focus {
     background: rgba(3, 46, 92, 0.75);
     border-color: rgba(255, 255, 255, 0.3);
     box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
 }
 
-body.mode-clair .dropdown-groupe-cours-header option {
+.mode-clair .dropdown-groupe-cours-header option {
     color: white;
     background: var(--bleu-fonce);
 }
 
-body.mode-clair .dropdown-cours-entete option {
+.mode-clair .dropdown-cours-entete option {
     color: white;
     background: var(--bleu-fonce);
 }
 
 /* Select mode — même apparence que groupe-cours en mode clair */
-body.mode-clair .select-mode {
+.mode-clair .select-mode {
     background-color: rgba(3, 46, 92, 0.6);
     border-color: rgba(255, 255, 255, 0.15);
     color: white;
 }
-body.mode-clair .select-mode:hover {
+.mode-clair .select-mode:hover {
     background-color: rgba(3, 46, 92, 0.75);
     border-color: rgba(255, 255, 255, 0.3);
 }
-body.mode-clair .select-mode:focus {
+.mode-clair .select-mode:focus {
     background-color: rgba(3, 46, 92, 0.75);
     border-color: rgba(255, 255, 255, 0.3);
     box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
 }
 
 /* Navigation principale — bleu principal solide */
-body.mode-clair .navigation-principale button {
+.mode-clair .navigation-principale button {
     background: #032e5c;
     border: 1px solid rgba(255, 255, 255, 0.15);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
 }
 
-body.mode-clair .navigation-principale button:hover {
+.mode-clair .navigation-principale button:hover {
     background: #0a4a7e;
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-body.mode-clair .navigation-principale button.actif {
+.mode-clair .navigation-principale button.actif {
     background: #0a4a7e;
     border-color: rgba(255, 255, 255, 0.4);
     box-shadow: 0 4px 12px rgba(3, 46, 92, 0.3);
 }
 
 /* Conteneur — bordure ultra-subtile */
-body.mode-clair .conteneur {
+.mode-clair .conteneur {
     border: 1px solid rgba(3,46,92,0.04);
     box-shadow: var(--shadow-normal);
 }
 
 /* Cartes — bordure ultra-subtile, pas de bordure gauche colorée */
-body.mode-clair .carte {
+.mode-clair .carte {
     border: 1px solid rgba(3,46,92,0.04);
 }
 
 /* Profil sidebar — bordure adaptée */
-body.mode-clair .profil-sidebar {
+.mode-clair .profil-sidebar {
     border-color: rgba(3, 46, 92, 0.15);
 }
 
 /* Modaux — fond blanc, bordure douce */
-body.mode-clair .modal-js-contenu {
+.mode-clair .modal-js-contenu {
     border: 1px solid rgba(3, 46, 92, 0.1);
 }
 
 /* Titres hors en-tête — couleur texte foncée */
-body.mode-clair .contenu h1,
-body.mode-clair .contenu h2,
-body.mode-clair .contenu h3 {
+.mode-clair .contenu h1,
+.mode-clair .contenu h2,
+.mode-clair .contenu h3 {
     color: var(--texte-principal);
 }
 
 /* Titres dans bandeaux dégradés — forcer blanc */
-body.mode-clair .outil-carte-header .outil-carte-titre,
-body.mode-clair .carte h3.carte-titre-bleu,
-body.mode-clair .carte.accordeon .accordeon-header h3 {
+.mode-clair .outil-carte-header .outil-carte-titre,
+.mode-clair .carte h3.carte-titre-bleu,
+.mode-clair .carte.accordeon .accordeon-header h3 {
     color: white;
 }
 
 /* Labels, texte courant */
-body.mode-clair label,
-body.mode-clair .form-group label,
-body.mode-clair td,
-body.mode-clair th {
+.mode-clair label,
+.mode-clair .form-group label,
+.mode-clair td,
+.mode-clair th {
     color: var(--texte-principal);
 }
 
 /* Texte secondaire */
-body.mode-clair .texte-secondaire,
-body.mode-clair small,
-body.mode-clair .info-texte {
+.mode-clair .texte-secondaire,
+.mode-clair small,
+.mode-clair .info-texte {
     color: var(--texte-secondaire);
 }
 
 /* Select mode option — lisible sur fond clair */
-body.mode-clair .select-mode option {
+.mode-clair .select-mode option {
     color: #1a1a2e;
     background: white;
 }
 
 /* Scrollbar — couleurs claires */
-body.mode-clair ::-webkit-scrollbar-track {
+.mode-clair ::-webkit-scrollbar-track {
     background: #f0f8ff;
 }
 
-body.mode-clair ::-webkit-scrollbar-thumb {
+.mode-clair ::-webkit-scrollbar-thumb {
     background: rgba(3, 46, 92, 0.2);
 }
 
-body.mode-clair ::-webkit-scrollbar-thumb:hover {
+.mode-clair ::-webkit-scrollbar-thumb:hover {
     background: rgba(3, 46, 92, 0.35);
 }
 
-body.mode-clair * {
+.mode-clair * {
     scrollbar-color: rgba(3, 46, 92, 0.2) #f0f8ff;
 }
 
 /* Sous-navigation — même bleu principal solide */
-body.mode-clair .sous-navigation button {
+.mode-clair .sous-navigation button {
     color: white;
     background: #032e5c;
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -19768,14 +19768,14 @@ body.mode-clair .sous-navigation button {
     -webkit-backdrop-filter: none;
 }
 
-body.mode-clair .sous-navigation button:hover {
+.mode-clair .sous-navigation button:hover {
     color: white;
     background: #0a4a7e;
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-body.mode-clair .sous-navigation button.active,
-body.mode-clair .sous-navigation button.actif {
+.mode-clair .sous-navigation button.active,
+.mode-clair .sous-navigation button.actif {
     color: white;
     background: #0a4a7e;
     border-color: rgba(255, 255, 255, 0.4);
@@ -19783,428 +19783,428 @@ body.mode-clair .sous-navigation button.actif {
 }
 
 /* Bouton principal — fond sombre, texte reste blanc */
-body.mode-clair .bouton-principal {
+.mode-clair .bouton-principal {
     color: white;
 }
 
 /* En-têtes de section — dégradé bleu principal → bleu foncé, texte blanc */
-body.mode-clair .carte h3.carte-titre-bleu,
-body.mode-clair .carte.accordeon .accordeon-header,
-body.mode-clair .section-accordeon h3,
-body.mode-clair .section-accordeon h4,
-body.mode-clair .apercu-nom-groupe-cours,
-body.mode-clair .info-trimestre-groupe-cours,
-body.mode-clair .cartouche-gradient-bleu,
-body.mode-clair .primo-popup-header,
-body.mode-clair .modal-bienvenue-header,
-body.mode-clair .btn-bienvenue-principal,
-body.mode-clair .outil-carte-header {
+.mode-clair .carte h3.carte-titre-bleu,
+.mode-clair .carte.accordeon .accordeon-header,
+.mode-clair .section-accordeon h3,
+.mode-clair .section-accordeon h4,
+.mode-clair .apercu-nom-groupe-cours,
+.mode-clair .info-trimestre-groupe-cours,
+.mode-clair .cartouche-gradient-bleu,
+.mode-clair .primo-popup-header,
+.mode-clair .modal-bienvenue-header,
+.mode-clair .btn-bienvenue-principal,
+.mode-clair .outil-carte-header {
     background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
     color: white;
 }
 
 /* Liens site — couleur adaptée */
-body.mode-clair .site-link {
+.mode-clair .site-link {
     color: var(--bleu-clair);
 }
 
-body.mode-clair .site-link:hover {
+.mode-clair .site-link:hover {
     color: var(--bleu-principal);
     border-bottom-color: var(--bleu-principal);
 }
 
 /* Glassmorphism — adapter pour fond clair */
-body.mode-clair .carte-metrique-bleue,
-body.mode-clair .item-carte,
-body.mode-clair .item-carte-header,
-body.mode-clair .item-carte-body {
+.mode-clair .carte-metrique-bleue,
+.mode-clair .item-carte,
+.mode-clair .item-carte-header,
+.mode-clair .item-carte-body {
     border-color: rgba(3, 46, 92, 0.1);
 }
 
 /* Badge source */
-body.mode-clair .badge-source--id {
+.mode-clair .badge-source--id {
     background: var(--surface-carte);
     color: var(--texte-secondaire);
     border-color: rgba(3, 46, 92, 0.15);
 }
 
 /* Tableaux — lignes alternées et bordures */
-body.mode-clair .tableau thead th {
+.mode-clair .tableau thead th {
     background: var(--bleu-principal);
     color: white;
 }
 
 /* Parcours d'apprentissage — bordures adaptées */
-body.mode-clair .parcours-panneau.accordeon {
+.mode-clair .parcours-panneau.accordeon {
     border-color: rgba(3, 46, 92, 0.12);
     border-left-color: var(--accent-primaire);
 }
 
-body.mode-clair .parcours-btn-mode {
+.mode-clair .parcours-btn-mode {
     border-color: rgba(3, 46, 92, 0.2);
 }
 
-body.mode-clair .parcours-btn-mode:hover {
+.mode-clair .parcours-btn-mode:hover {
     background: rgba(3, 46, 92, 0.08);
 }
 
-body.mode-clair .parcours-btn-assistant {
+.mode-clair .parcours-btn-assistant {
     background: rgba(6, 93, 187, 0.08);
     border-color: var(--accent-primaire);
     color: var(--accent-primaire);
 }
 
-body.mode-clair .parcours-btn-assistant:hover {
+.mode-clair .parcours-btn-assistant:hover {
     background: rgba(6, 93, 187, 0.15);
 }
 
-body.mode-clair .parcours-barre-conteneur {
+.mode-clair .parcours-barre-conteneur {
     background: rgba(3, 46, 92, 0.1);
 }
 
-body.mode-clair .parcours-chapitre {
+.mode-clair .parcours-chapitre {
     background: rgba(3, 46, 92, 0.04);
     border: 1px solid rgba(3, 46, 92, 0.1);
 }
 
-body.mode-clair .parcours-chapitre--en-cours {
+.mode-clair .parcours-chapitre--en-cours {
     background: rgba(6, 93, 187, 0.08);
     border-color: rgba(6, 93, 187, 0.2);
 }
 
-body.mode-clair .parcours-jalon--a-faire:hover {
+.mode-clair .parcours-jalon--a-faire:hover {
     background: rgba(3, 46, 92, 0.06);
 }
 
-body.mode-clair .tableau tbody tr {
+.mode-clair .tableau tbody tr {
     border-bottom-color: rgba(3, 46, 92, 0.08);
 }
 
 /* Inputs — fond et bordure adaptés */
-body.mode-clair .contenu input[type="text"],
-body.mode-clair .contenu input[type="number"],
-body.mode-clair .contenu input[type="email"],
-body.mode-clair .contenu input[type="date"],
-body.mode-clair .contenu input[type="search"],
-body.mode-clair .contenu textarea,
-body.mode-clair .contenu select,
-body.mode-clair .modal-js-contenu input[type="text"],
-body.mode-clair .modal-js-contenu input[type="number"],
-body.mode-clair .modal-js-contenu textarea,
-body.mode-clair .modal-js-contenu select {
+.mode-clair .contenu input[type="text"],
+.mode-clair .contenu input[type="number"],
+.mode-clair .contenu input[type="email"],
+.mode-clair .contenu input[type="date"],
+.mode-clair .contenu input[type="search"],
+.mode-clair .contenu textarea,
+.mode-clair .contenu select,
+.mode-clair .modal-js-contenu input[type="text"],
+.mode-clair .modal-js-contenu input[type="number"],
+.mode-clair .modal-js-contenu textarea,
+.mode-clair .modal-js-contenu select {
     background: white;
     color: var(--texte-principal);
     border-color: rgba(3, 46, 92, 0.2);
 }
 
-body.mode-clair input::placeholder,
-body.mode-clair textarea::placeholder {
+.mode-clair input::placeholder,
+.mode-clair textarea::placeholder {
     color: var(--gris-clair);
 }
 
 /* u-bg-blanc utilitaire */
-body.mode-clair .u-bg-blanc {
+.mode-clair .u-bg-blanc {
     background: var(--surface-carte);
 }
 
 /* Carte mentale (planification) — fond blanc, palette bleu pâle */
-body.mode-clair #section-planification .planif-wrapper {
+.mode-clair #section-planification .planif-wrapper {
     background: #ffffff;
 }
 
-body.mode-clair #section-planification .planif-header {
+.mode-clair #section-planification .planif-header {
     background: #ffffff;
     border-bottom-color: rgba(3, 46, 92, 0.08);
 }
 
-body.mode-clair #planif-palette {
+.mode-clair #planif-palette {
     background: #e8f2fd;
     border-color: rgba(3, 46, 92, 0.1);
 }
 
-body.mode-clair .planif-palette-barre {
+.mode-clair .planif-palette-barre {
     background: #e8f2fd;
     border-bottom-color: rgba(3, 46, 92, 0.08);
 }
 
 /* Carte mentale — noeuds, liens, labels */
-body.mode-clair .planif-noeud {
+.mode-clair .planif-noeud {
     border-color: rgba(3, 46, 92, 0.15);
 }
-body.mode-clair .planif-noeud-entete {
+.mode-clair .planif-noeud-entete {
     border-bottom-color: rgba(3, 46, 92, 0.1);
 }
-body.mode-clair .planif-lien-label {
+.mode-clair .planif-lien-label {
     fill: var(--texte-secondaire);
 }
-body.mode-clair .planif-lien-label-bg {
+.mode-clair .planif-lien-label-bg {
     fill: #ffffff;
 }
-body.mode-clair .planif-lien {
+.mode-clair .planif-lien {
     stroke: #9ca3af;
 }
-body.mode-clair .planif-btn-carte {
+.mode-clair .planif-btn-carte {
     background: #ffffff;
     border-color: rgba(3, 46, 92, 0.15);
     color: var(--texte-secondaire);
 }
-body.mode-clair .planif-btn-carte:hover {
+.mode-clair .planif-btn-carte:hover {
     border-color: var(--bleu-principal);
     color: var(--texte-principal);
 }
-body.mode-clair .planif-palette-btn {
+.mode-clair .planif-palette-btn {
     border-color: rgba(3, 46, 92, 0.12);
 }
-body.mode-clair .planif-noeud-port {
+.mode-clair .planif-noeud-port {
     background: #ffffff;
 }
-body.mode-clair #planif-titre-carte {
+.mode-clair #planif-titre-carte {
     color: var(--texte-principal);
 }
-body.mode-clair #planif-titre-carte:focus {
+.mode-clair #planif-titre-carte:focus {
     background: #f0f8ff;
 }
-body.mode-clair #planif-selecteur-cartes select {
+.mode-clair #planif-selecteur-cartes select {
     background: #ffffff;
     border-color: rgba(3, 46, 92, 0.2);
     color: var(--texte-principal);
 }
-body.mode-clair .planif-actions-dropdown {
+.mode-clair .planif-actions-dropdown {
     background: #ffffff;
     border-color: rgba(3, 46, 92, 0.12);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
-body.mode-clair .planif-action-item {
+.mode-clair .planif-action-item {
     color: var(--texte-principal);
 }
-body.mode-clair .planif-action-item:hover {
+.mode-clair .planif-action-item:hover {
     background: rgba(3, 46, 92, 0.06);
 }
-body.mode-clair .planif-action-item.planif-danger {
+.mode-clair .planif-action-item.planif-danger {
     color: #dc2626;
 }
-body.mode-clair .planif-btn-zoom-preset {
+.mode-clair .planif-btn-zoom-preset {
     background: #ffffff;
     border-color: rgba(3, 46, 92, 0.12);
     color: var(--texte-secondaire);
 }
-body.mode-clair .planif-btn-zoom-preset:hover,
-body.mode-clair .planif-btn-zoom-preset.actif {
+.mode-clair .planif-btn-zoom-preset:hover,
+.mode-clair .planif-btn-zoom-preset.actif {
     background: rgba(6, 93, 187, 0.08);
     color: var(--texte-principal);
 }
 
 /* Poste de preparation — mode clair */
-body.mode-clair .prep-palette {
+.mode-clair .prep-palette {
     background: #e8f2fd;
     border-color: rgba(3, 46, 92, 0.1);
 }
-body.mode-clair .prep-palette-barre {
+.mode-clair .prep-palette-barre {
     background: #e8f2fd;
     border-bottom-color: rgba(3, 46, 92, 0.08);
 }
-body.mode-clair .prep-btn {
+.mode-clair .prep-btn {
     background: #ffffff;
     color: var(--texte-principal);
     border-color: rgba(3, 46, 92, 0.12);
 }
-body.mode-clair .prep-btn:hover {
+.mode-clair .prep-btn:hover {
     border-color: var(--bleu-principal);
 }
-body.mode-clair .prep-btn.actif {
+.mode-clair .prep-btn.actif {
     background: var(--accent-primaire);
     color: #fff;
     border-color: var(--accent-primaire);
 }
-body.mode-clair .prep-section[id="prep-section-fichiers"]  { background: rgba(59, 130, 246, 0.08); }
-body.mode-clair .prep-section[id="prep-section-rotation"]  { background: rgba(249, 115, 22, 0.08); }
-body.mode-clair .prep-section[id="prep-section-decoupe"]   { background: rgba(22, 163, 74, 0.08); }
-body.mode-clair .prep-section[id="prep-section-image"]     { background: rgba(106, 172, 184, 0.08); }
+.mode-clair .prep-section[id="prep-section-fichiers"]  { background: rgba(59, 130, 246, 0.08); }
+.mode-clair .prep-section[id="prep-section-rotation"]  { background: rgba(249, 115, 22, 0.08); }
+.mode-clair .prep-section[id="prep-section-decoupe"]   { background: rgba(22, 163, 74, 0.08); }
+.mode-clair .prep-section[id="prep-section-image"]     { background: rgba(106, 172, 184, 0.08); }
 
 /* Calendrier intégré à la palette */
-body.mode-clair .planif-cal-liens .planif-cal-lien-item {
+.mode-clair .planif-cal-liens .planif-cal-lien-item {
     color: var(--texte-principal);
 }
 
 /* Organisateur / Plan de la leçon — mode clair */
-body.mode-clair .org-conteneur {
+.mode-clair .org-conteneur {
     background: #ffffff;
 }
-body.mode-clair .org-entete {
+.mode-clair .org-entete {
     border-bottom-color: rgba(3, 46, 92, 0.1);
 }
-body.mode-clair .org-selecteurs {
+.mode-clair .org-selecteurs {
     background: rgba(3, 46, 92, 0.04);
     border-bottom-color: rgba(3, 46, 92, 0.1);
 }
-body.mode-clair .org-selecteurs select {
+.mode-clair .org-selecteurs select {
     background: #ffffff;
     border-color: rgba(3, 46, 92, 0.2);
     color: var(--texte-principal);
 }
-body.mode-clair .org-section {
+.mode-clair .org-section {
     border-bottom-color: rgba(3, 46, 92, 0.08);
 }
-body.mode-clair .org-section-titre {
+.mode-clair .org-section-titre {
     color: var(--texte-secondaire);
 }
-body.mode-clair .org-section-contenu {
+.mode-clair .org-section-contenu {
     color: var(--texte-principal);
 }
-body.mode-clair .org-objectif-contenu {
+.mode-clair .org-objectif-contenu {
     color: var(--texte-principal);
 }
-body.mode-clair .org-objectif-contenu:hover {
+.mode-clair .org-objectif-contenu:hover {
     border-color: rgba(3, 46, 92, 0.15);
 }
-body.mode-clair .org-objectif-contenu:focus {
+.mode-clair .org-objectif-contenu:focus {
     background: #f0f8ff;
 }
-body.mode-clair .org-prerequis-nom {
+.mode-clair .org-prerequis-nom {
     color: var(--texte-principal);
 }
-body.mode-clair .org-prerequis-type,
-body.mode-clair .org-prerequis-fleche {
+.mode-clair .org-prerequis-type,
+.mode-clair .org-prerequis-fleche {
     color: var(--texte-secondaire);
 }
-body.mode-clair .org-prerequis-cible {
+.mode-clair .org-prerequis-cible {
     color: var(--texte-principal);
 }
-body.mode-clair .org-activite {
+.mode-clair .org-activite {
     background: #ffffff;
     border-color: rgba(3, 46, 92, 0.12);
 }
-body.mode-clair .org-activite-titre {
+.mode-clair .org-activite-titre {
     color: var(--texte-principal);
 }
-body.mode-clair .org-activite-type {
+.mode-clair .org-activite-type {
     color: var(--texte-secondaire);
 }
-body.mode-clair .org-activite-detail label {
+.mode-clair .org-activite-detail label {
     color: var(--texte-secondaire);
 }
-body.mode-clair .org-activite-detail select {
+.mode-clair .org-activite-detail select {
     background: #ffffff;
     border-color: rgba(3, 46, 92, 0.15);
     color: var(--texte-principal);
 }
-body.mode-clair .org-placeholder {
+.mode-clair .org-placeholder {
     color: var(--texte-muted);
 }
-body.mode-clair .org-seance-badge {
+.mode-clair .org-seance-badge {
     background: rgba(6, 93, 187, 0.06);
     border-color: rgba(6, 93, 187, 0.2);
     color: var(--accent-primaire);
 }
-body.mode-clair .org-panneau-calendrier {
+.mode-clair .org-panneau-calendrier {
     background: rgba(3, 46, 92, 0.02);
     border-left-color: rgba(3, 46, 92, 0.1);
 }
-body.mode-clair .org-panneau-calendrier-titre {
+.mode-clair .org-panneau-calendrier-titre {
     color: var(--accent-primaire);
 }
-body.mode-clair .org-cal-btn-copier {
+.mode-clair .org-cal-btn-copier {
     background: rgba(6, 93, 187, 0.08);
     border-color: rgba(6, 93, 187, 0.2);
     color: var(--accent-primaire);
 }
-body.mode-clair .org-cal-date-lecon {
+.mode-clair .org-cal-date-lecon {
     color: var(--texte-secondaire);
 }
-body.mode-clair .org-duree {
+.mode-clair .org-duree {
     color: var(--texte-secondaire);
     background: rgba(3, 46, 92, 0.05);
 }
-body.mode-clair .org-production-pond {
+.mode-clair .org-production-pond {
     color: var(--texte-secondaire);
 }
-body.mode-clair .org-production-detail {
+.mode-clair .org-production-detail {
     color: var(--texte-muted);
 }
-body.mode-clair .org-avertissement {
+.mode-clair .org-avertissement {
     background: rgba(180, 130, 40, 0.08);
     border-color: rgba(180, 130, 40, 0.25);
     color: #92600a;
 }
-body.mode-clair .org-btn-reinit {
+.mode-clair .org-btn-reinit {
     border-color: rgba(3, 46, 92, 0.15);
     color: var(--texte-secondaire);
 }
-body.mode-clair .org-ee-notes {
+.mode-clair .org-ee-notes {
     background: #ffffff;
     border-color: rgba(3, 46, 92, 0.15);
     color: var(--texte-principal);
 }
-body.mode-clair .org-checkbox-label {
+.mode-clair .org-checkbox-label {
     color: var(--texte-principal);
 }
 
 /* Enseignement explicite — mode clair */
-body.mode-clair .org-ee-non-assignees {
+.mode-clair .org-ee-non-assignees {
     background: #f8fafc;
     border-bottom-color: rgba(3, 46, 92, 0.1);
 }
-body.mode-clair .org-ee-etape {
+.mode-clair .org-ee-etape {
     border-bottom-color: rgba(3, 46, 92, 0.1);
 }
-body.mode-clair .org-ee-etape-entete {
+.mode-clair .org-ee-etape-entete {
     background: rgba(6, 93, 187, 0.04);
 }
-body.mode-clair .org-ee-etape-desc {
+.mode-clair .org-ee-etape-desc {
     color: var(--texte-muted);
 }
-body.mode-clair .org-ee-zone-depot {
+.mode-clair .org-ee-zone-depot {
     border-color: rgba(3, 46, 92, 0.2);
 }
-body.mode-clair .org-ee-activite-mini {
+.mode-clair .org-ee-activite-mini {
     background: #ffffff;
     border-color: rgba(3, 46, 92, 0.15);
     color: var(--texte-principal);
 }
-body.mode-clair .org-ee-cloture-rappel .org-section-contenu {
+.mode-clair .org-ee-cloture-rappel .org-section-contenu {
     color: var(--texte-secondaire);
 }
-body.mode-clair #org-ee-ouverture-sections .org-section,
-body.mode-clair #org-ee-cloture-sections .org-section {
+.mode-clair #org-ee-ouverture-sections .org-section,
+.mode-clair #org-ee-cloture-sections .org-section {
     border-bottom-color: rgba(3, 46, 92, 0.08);
 }
 
 /* Titre "Découvrir" — blanc sur fond dégradé */
-body.mode-clair #accueil-decouvrir .accordeon-header h3 {
+.mode-clair #accueil-decouvrir .accordeon-header h3 {
     color: white;
 }
 
-body.mode-clair #accueil-decouvrir {
+.mode-clair #accueil-decouvrir {
     border-color: rgba(3, 46, 92, 0.04);
 }
 
 /* Cartes de tâches page d'accueil — mode clair */
-body.mode-clair .accueil-carte {
+.mode-clair .accueil-carte {
     background: #ffffff;
     border: 1px solid rgba(3, 46, 92, 0.08);
     box-shadow: var(--shadow-normal);
 }
 
-body.mode-clair .accueil-carte:hover {
+.mode-clair .accueil-carte:hover {
     border-color: var(--bleu-principal);
     box-shadow: var(--shadow-prononce);
 }
 
-body.mode-clair .accueil-carte-titre {
+.mode-clair .accueil-carte-titre {
     color: var(--bleu-principal);
 }
 
-body.mode-clair .accueil-carte-desc {
+.mode-clair .accueil-carte-desc {
     color: var(--texte-secondaire);
 }
 
 /* Cartes Découvrir — même traitement */
-body.mode-clair .accueil-carte-decouvrir {
+.mode-clair .accueil-carte-decouvrir {
     background: #ffffff;
     border-color: rgba(3, 46, 92, 0.08);
 }
 
-body.mode-clair .accueil-carte-decouvrir--action:hover {
+.mode-clair .accueil-carte-decouvrir--action:hover {
     background: rgba(3, 46, 92, 0.04);
 }
 
@@ -20213,35 +20213,35 @@ body.mode-clair .accueil-carte-decouvrir--action:hover {
    =============================== */
 
 /* 1. Courbes de Gauss — traits blancs en mode clair */
-body.mode-clair .barre-gauss-svg path {
+.mode-clair .barre-gauss-svg path {
     fill: rgba(255, 255, 255, 0.4);
     stroke: rgba(255, 255, 255, 0.8);
 }
-body.mode-clair .barre-gauss-svg .ligne-mu {
+.mode-clair .barre-gauss-svg .ligne-mu {
     stroke: rgba(255, 255, 255, 0.9);
 }
-body.mode-clair .barre-gauss-svg .ligne-sigma {
+.mode-clair .barre-gauss-svg .ligne-sigma {
     stroke: rgba(255, 255, 255, 0.6);
 }
 
 /* 2. Overlays des barres — opacité ajustée pour fond clair */
-body.mode-clair .barre-indicateur-overlay {
+.mode-clair .barre-indicateur-overlay {
     background: rgba(3, 46, 92, 0.12);
 }
-body.mode-clair .barre-patterns-overlay {
+.mode-clair .barre-patterns-overlay {
     background: rgba(3, 46, 92, 0.25);
 }
-body.mode-clair .barre-rai-overlay {
+.mode-clair .barre-rai-overlay {
     background: rgba(3, 46, 92, 0.3);
 }
 
 /* 3. Points étudiants 3D — ombres renforcées pour profondeur */
-body.mode-clair .barre-etudiant {
+.mode-clair .barre-etudiant {
     box-shadow:
         2px 3px 8px rgba(3, 46, 92, 0.35),
         inset 0 -1px 2px rgba(0, 0, 0, 0.15);
 }
-body.mode-clair .barre-etudiant:hover {
+.mode-clair .barre-etudiant:hover {
     box-shadow:
         0 6px 16px rgba(3, 46, 92, 0.3),
         0 0 20px rgba(3, 46, 92, 0.15),
@@ -20250,101 +20250,101 @@ body.mode-clair .barre-etudiant:hover {
 }
 
 /* 4. Tooltip points étudiants — fond blanc en mode clair */
-body.mode-clair .barre-etudiant-info {
+.mode-clair .barre-etudiant-info {
     background: rgba(255, 255, 255, 0.95);
     color: var(--texte-principal);
     box-shadow: 0 2px 12px rgba(3, 46, 92, 0.2);
     border: 1px solid rgba(3, 46, 92, 0.1);
 }
-body.mode-clair .barre-etudiant-info::after {
+.mode-clair .barre-etudiant-info::after {
     border-color: rgba(255, 255, 255, 0.95) transparent transparent;
 }
 
 /* 5. Navigation principale — voir ligne ~16256 (backdrop-filter ajouté au bloc existant) */
 
 /* 6. Badges de suivi d'étudiants — contraste renforcé */
-body.mode-clair .etudiant-suivi-item {
+.mode-clair .etudiant-suivi-item {
     color: #1a3a4a;
     background: rgba(106, 172, 184, 0.15);
     border-color: rgba(106, 172, 184, 0.35);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
 }
-body.mode-clair .etudiant-suivi-item:hover {
+.mode-clair .etudiant-suivi-item:hover {
     background: rgba(106, 172, 184, 0.28);
     border-color: rgba(106, 172, 184, 0.5);
 }
 
 /* Badges actifs — palette froide pour fond clair */
-body.mode-clair .etudiant-suivi-item.actif-0 {
+.mode-clair .etudiant-suivi-item.actif-0 {
     color: #1a4870;
     background: rgba(94, 159, 208, 0.15);
     border-color: #4888b8;
 }
-body.mode-clair .etudiant-suivi-item.actif-1 {
+.mode-clair .etudiant-suivi-item.actif-1 {
     color: #3a2868;
     background: rgba(139, 108, 196, 0.15);
     border-color: #7858b0;
 }
-body.mode-clair .etudiant-suivi-item.actif-2 {
+.mode-clair .etudiant-suivi-item.actif-2 {
     color: #186048;
     background: rgba(77, 184, 154, 0.15);
     border-color: #3a9878;
 }
-body.mode-clair .etudiant-suivi-item.actif-3 {
+.mode-clair .etudiant-suivi-item.actif-3 {
     color: #106068;
     background: rgba(74, 184, 212, 0.15);
     border-color: #3898b0;
 }
-body.mode-clair .etudiant-suivi-item.actif-4 {
+.mode-clair .etudiant-suivi-item.actif-4 {
     color: #283858;
     background: rgba(106, 143, 192, 0.15);
     border-color: #5878a8;
 }
 
 /* Surlignage — ombre adaptée au fond clair */
-body.mode-clair .etudiant-suivi-item.surligne {
+.mode-clair .etudiant-suivi-item.surligne {
     background: rgba(106, 172, 184, 0.25);
     box-shadow: 0 0 0 2px rgba(106, 172, 184, 0.5), 0 0 8px rgba(106, 172, 184, 0.2);
 }
-body.mode-clair .etudiant-suivi-item.actif-0.surligne {
+.mode-clair .etudiant-suivi-item.actif-0.surligne {
     background: rgba(94, 159, 208, 0.2);
     box-shadow: 0 0 0 2px #4888b8, 0 0 8px rgba(94, 159, 208, 0.25);
 }
-body.mode-clair .etudiant-suivi-item.actif-1.surligne {
+.mode-clair .etudiant-suivi-item.actif-1.surligne {
     background: rgba(139, 108, 196, 0.2);
     box-shadow: 0 0 0 2px #7858b0, 0 0 8px rgba(139, 108, 196, 0.25);
 }
-body.mode-clair .etudiant-suivi-item.actif-2.surligne {
+.mode-clair .etudiant-suivi-item.actif-2.surligne {
     background: rgba(77, 184, 154, 0.2);
     box-shadow: 0 0 0 2px #3a9878, 0 0 8px rgba(77, 184, 154, 0.25);
 }
-body.mode-clair .etudiant-suivi-item.actif-3.surligne {
+.mode-clair .etudiant-suivi-item.actif-3.surligne {
     background: rgba(74, 184, 212, 0.2);
     box-shadow: 0 0 0 2px #3898b0, 0 0 8px rgba(74, 184, 212, 0.25);
 }
-body.mode-clair .etudiant-suivi-item.actif-4.surligne {
+.mode-clair .etudiant-suivi-item.actif-4.surligne {
     background: rgba(106, 143, 192, 0.2);
     box-shadow: 0 0 0 2px #5878a8, 0 0 8px rgba(106, 143, 192, 0.25);
 }
 
 /* 6b. Pilule prioritaire en mode clair (panneau suivi unifié) */
-body.mode-clair .etudiant-suivi-item.suivi-est-prioritaire {
+.mode-clair .etudiant-suivi-item.suivi-est-prioritaire {
     color: #6a2a18;
     background: rgba(216, 90, 64, 0.1);
     border-color: rgba(216, 90, 64, 0.35);
 }
-body.mode-clair .etudiant-suivi-item.suivi-est-prioritaire:hover {
+.mode-clair .etudiant-suivi-item.suivi-est-prioritaire:hover {
     background: rgba(216, 90, 64, 0.18);
     border-color: rgba(216, 90, 64, 0.5);
 }
 
 /* 7. Points trackés sur barres — anneau blanc + ombre */
-body.mode-clair .barre-etudiant.tracked-0,
-body.mode-clair .barre-etudiant.tracked-1,
-body.mode-clair .barre-etudiant.tracked-2,
-body.mode-clair .barre-etudiant.tracked-3,
-body.mode-clair .barre-etudiant.tracked-4 {
+.mode-clair .barre-etudiant.tracked-0,
+.mode-clair .barre-etudiant.tracked-1,
+.mode-clair .barre-etudiant.tracked-2,
+.mode-clair .barre-etudiant.tracked-3,
+.mode-clair .barre-etudiant.tracked-4 {
     box-shadow:
         0 0 0 2px rgba(255, 255, 255, 0.85),
         2px 3px 6px rgba(0, 0, 0, 0.25),
@@ -20353,12 +20353,12 @@ body.mode-clair .barre-etudiant.tracked-4 {
 }
 
 /* 8. Points prioritaires en mode clair — même anneau blanc que mode sombre */
-body.mode-clair .barre-etudiant.prioritaire,
-body.mode-clair .barre-etudiant.prioritaire.tracked-0,
-body.mode-clair .barre-etudiant.prioritaire.tracked-1,
-body.mode-clair .barre-etudiant.prioritaire.tracked-2,
-body.mode-clair .barre-etudiant.prioritaire.tracked-3,
-body.mode-clair .barre-etudiant.prioritaire.tracked-4 {
+.mode-clair .barre-etudiant.prioritaire,
+.mode-clair .barre-etudiant.prioritaire.tracked-0,
+.mode-clair .barre-etudiant.prioritaire.tracked-1,
+.mode-clair .barre-etudiant.prioritaire.tracked-2,
+.mode-clair .barre-etudiant.prioritaire.tracked-3,
+.mode-clair .barre-etudiant.prioritaire.tracked-4 {
     box-shadow:
         0 0 0 2px rgba(255, 255, 255, 0.85),
         2px 3px 6px rgba(0, 0, 0, 0.25),
@@ -20366,58 +20366,58 @@ body.mode-clair .barre-etudiant.prioritaire.tracked-4 {
         inset 1px 1px 2px rgba(255, 255, 255, 0.15);
 }
 
-body.mode-clair .panneau-prioritaire {
+.mode-clair .panneau-prioritaire {
     background: rgba(220, 53, 69, 0.06);
     border-color: rgba(220, 53, 69, 0.2);
 }
 
-body.mode-clair .etudiant-prioritaire-item {
+.mode-clair .etudiant-prioritaire-item {
     color: var(--texte-principal, #1a1a1a);
     background: rgba(220, 53, 69, 0.06);
     border-color: rgba(220, 53, 69, 0.18);
 }
 
-body.mode-clair .etudiant-prioritaire-item:hover {
+.mode-clair .etudiant-prioritaire-item:hover {
     background: rgba(220, 53, 69, 0.14);
     border-color: rgba(220, 53, 69, 0.3);
 }
 
-body.mode-clair .btn-toggle-prioritaire.actif {
+.mode-clair .btn-toggle-prioritaire.actif {
     background: var(--rouge-danger);
     color: white;
     border-color: var(--rouge-danger);
 }
 
-body.mode-clair .etudiant-prioritaire-diagnostic {
+.mode-clair .etudiant-prioritaire-diagnostic {
     color: #666;
 }
 
-body.mode-clair .prioritaire-tri-btn {
+.mode-clair .prioritaire-tri-btn {
     border-color: rgba(0, 0, 0, 0.12);
     color: #666;
 }
 
-body.mode-clair .prioritaire-tri-btn:hover {
+.mode-clair .prioritaire-tri-btn:hover {
     background: rgba(0, 0, 0, 0.05);
 }
 
-body.mode-clair .prioritaire-tri-actif {
+.mode-clair .prioritaire-tri-actif {
     background: rgba(220, 53, 69, 0.12);
     border-color: rgba(220, 53, 69, 0.4);
     color: #b01020;
 }
 
-body.mode-clair .prioritaire-indice {
+.mode-clair .prioritaire-indice {
     background: rgba(0, 0, 0, 0.06);
     color: #555;
 }
 
-body.mode-clair .prioritaire-indice-critique {
+.mode-clair .prioritaire-indice-critique {
     background: rgba(220, 20, 20, 0.12);
     color: #b01020;
 }
 
-body.mode-clair .prioritaire-indice-attention {
+.mode-clair .prioritaire-indice-attention {
     background: rgba(200, 140, 0, 0.12);
     color: #906000;
 }
@@ -21100,13 +21100,13 @@ body.mode-clair .prioritaire-indice-attention {
 }
 
 /* Mode clair */
-body.mode-clair .actions-dropdown {
+.mode-clair .actions-dropdown {
     background: #ffffff;
     border-color: rgba(3, 46, 92, 0.12);
     box-shadow: 0 8px 24px rgba(0,0,0,0.1);
 }
-body.mode-clair .actions-item { color: var(--texte-principal); }
-body.mode-clair .actions-item:hover { background: rgba(3, 46, 92, 0.06); }
+.mode-clair .actions-item { color: var(--texte-principal); }
+.mode-clair .actions-item:hover { background: rgba(3, 46, 92, 0.06); }
 
 .annot-toolbar-badges-zone {
     display: flex;
@@ -21116,7 +21116,7 @@ body.mode-clair .actions-item:hover { background: rgba(3, 46, 92, 0.06); }
     min-width: 0;
 }
 
-body.mode-clair .annot-toolbar {
+.mode-clair .annot-toolbar {
     background: var(--surface-carte, #ffffff);
     border-bottom-color: rgba(3, 46, 92, 0.1);
 }
@@ -21756,9 +21756,9 @@ body.mode-clair .annot-toolbar {
     opacity: 0.5;
 }
 .splitter-handle:hover::after { opacity: 1; }
-body.mode-clair .splitter-handle { background: rgba(3, 46, 92, 0.06); }
-body.mode-clair .splitter-handle:hover,
-body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0.15); }
+.mode-clair .splitter-handle { background: rgba(3, 46, 92, 0.06); }
+.mode-clair .splitter-handle:hover,
+.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0.15); }
 /* Splitter horizontal (row-resize) */
 .splitter-handle-h {
     flex: 0 0 5px;
@@ -21797,14 +21797,14 @@ body.mode-clair .splitter-handle.splitter-active { background: rgba(3, 46, 92, 0
     filter: invert(1);
     vertical-align: middle;
 }
-body.mode-clair .palette-flottante .travaux-btn-outil img,
-body.mode-clair .palette-flottante .btn-icon-compact img {
+.mode-clair .palette-flottante .travaux-btn-outil img,
+.mode-clair .palette-flottante .btn-icon-compact img {
     filter: none;
 }
-body.mode-clair .palette-flottante .btn-secondaire.btn-icon-compact img {
+.mode-clair .palette-flottante .btn-secondaire.btn-icon-compact img {
     filter: invert(1);
 }
-body.mode-clair .palette-flottante .travaux-btn-outil.actif img {
+.mode-clair .palette-flottante .travaux-btn-outil.actif img {
     filter: invert(1);
 }
 /* Sections compactes */
@@ -21909,12 +21909,12 @@ body.mode-clair .palette-flottante .travaux-btn-outil.actif img {
 }
 
 /* Mode clair — badges unifies */
-body.mode-clair .annot-badge {
+.mode-clair .annot-badge {
     background: var(--surface-carte, #ffffff);
     border-color: var(--gris-bordure, #d1d5db);
 }
 
-body.mode-clair .annot-badge.actif {
+.mode-clair .annot-badge.actif {
     background: var(--bleu-pale, rgba(59, 130, 246, 0.1));
 }
 
