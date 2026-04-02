@@ -21,15 +21,8 @@
    CONFIGURATION GLOBALE
    =============================== */
 
-/**
- * Couleurs standardisées pour les indices
- */
-const COULEURS_INDICES = {
-    A: '#1976D2',      // Bleu foncé (Assiduité)
-    C: '#FF6B35',      // Orange vif (Complétion)
-    P: '#4CAF50',      // Vert émeraude (Performance)
-    E: '#9C27B0'       // Violet (Engagement)
-};
+// Couleurs indices A-C-P-E : centralisées dans js/couleurs.js (COULEURS.indices)
+const COULEURS_INDICES = COULEURS.indices;
 
 /**
  * ✨ UNIFORMISATION (#240) : Constantes de style partagées

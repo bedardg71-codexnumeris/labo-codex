@@ -22,11 +22,8 @@
    CONFIGURATION
    =============================== */
 
-var COULEURS_CORR = {
-    AP:      '#4FC3F7',  // Bleu clair
-    CP:      '#FF7043',  // Orange
-    EP:      '#AB47BC'   // Violet
-};
+// Couleurs corrélations : centralisées dans js/couleurs.js (COULEURS.correlations)
+var COULEURS_CORR = COULEURS.correlations;
 
 var SEUIL_MIN_ETUDIANTS = 5;
 
@@ -486,12 +483,7 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
         }
 
         // Datasets overlay : moyennes A, C, P, E (axe Y secondaire, masqués par défaut)
-        var COULEURS_MOY = {
-            A: COULEURS_CORR.AP,   // Bleu clair — même couleur que r(A,P)
-            C: COULEURS_CORR.CP,   // Orange — même couleur que r(C,P)
-            P: '#4CAF50',          // Vert — couleur standard P
-            E: COULEURS_CORR.EP    // Violet — même couleur que r(E,P)
-        };
+        var COULEURS_MOY = COULEURS.indices;
         var nomsIndices = { A: 'Moy. A', C: 'Moy. C', P: 'Moy. P', E: 'Moy. E' };
         var indices = ['A', 'C', 'P', 'E'];
         for (var di = 0; di < indices.length; di++) {
