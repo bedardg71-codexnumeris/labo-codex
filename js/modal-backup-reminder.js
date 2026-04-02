@@ -103,10 +103,6 @@
      * Ferme le modal
      */
     function fermerModal() {
-        const modal = document.getElementById('modal-backup-reminder');
-        if (modal) {
-            modal.remove();
-        }
         const overlay = document.getElementById('overlay-backup-reminder');
         if (overlay) {
             overlay.remove();
@@ -191,9 +187,9 @@
             </div>
         `;
 
-        // Ajouter au DOM
+        // Ajouter au DOM (modal DANS l'overlay pour hériter du position:fixed + z-index)
+        overlay.appendChild(modal);
         document.body.appendChild(overlay);
-        document.body.appendChild(modal);
     }
 
     /**
