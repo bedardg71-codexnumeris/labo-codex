@@ -6,13 +6,13 @@
 
 ---
 
-## Bilan final (5 commits)
+## Bilan final (6 commits)
 
 | Metrique | Avant | Apres | Delta |
 |---|---|---|---|
-| Lignes totales | 22 675 | 22 035 | **-640** |
+| Lignes totales | 22 675 | 21 312 | **-1 363** |
 | Variables CSS inutilisees | 28 | 0 | **-28** |
-| Selecteurs morts supprimes | — | 70 | **-70** |
+| Selecteurs morts supprimes | — | 161 | **-161** |
 | `!important` | 112 | 73 | **-39** |
 | `[style*=...]` anti-patterns | 5 | 2 | **-3** |
 | Breakpoints distincts | 10 | 6 | **-4** (alignes) |
@@ -25,12 +25,12 @@
 2. `6019ee8` — Phase B : body.mode-clair simplifie, breakpoints alignes, couleurs primo
 3. `86d1066` — Phase C : 34 !important retires, inline styles nettoyes (index.html, evaluation.js, trimestre-v2.js)
 4. `88db4f8` — Chantiers 3+1P1 : 8 !important supprimes, 38 selecteurs Beta 91 morts (-247 lignes)
-5. *(ce commit)* — Chantiers 2+4 : inventaire breakpoints, rapport final
+5. *(commit precedent)* — Chantiers 2+4 : inventaire breakpoints, rapport final
+6. *(ce commit)* — Chantier 1 P2 : 91 selecteurs morts dans Patterns/RaI + Accordeon (-723 lignes)
 
-### Ce qui reste (Chantier 1 P2-P3, optionnel)
+### Ce qui reste (Chantier 1 P3, optionnel)
 
-- **P2** : Audit selecteurs morts dans Patterns/RaI (10543-12164) et Accordeon (7207-8719) — ~350 classes
-- **P3** : Audit module Planification (12498-22232) — ~900 classes, module actif, faux positifs probables
+- **P3** : Audit module Planification (~900 classes, module actif, risque de faux positifs)
 
 ### !important restants (73) — tous documentes
 
@@ -52,6 +52,54 @@
 | 1200px | Desktop large | 2 |
 
 Les media queries sont colocalisees avec leurs composants (pas de fusion).
+
+---
+
+## Chantier 1 P2 — Selecteurs morts Patterns/RaI + Accordeon (2 avril 2026)
+
+91 selecteurs morts supprimes, -723 lignes. Audit par grep systematique de chaque classe CSS contre `index.html` et `js/*.js`.
+
+### Section Accordeon/Bibliotheque (~7100-8600) — 61 selecteurs morts, ~405 lignes
+
+| Cluster | Classes mortes | Lignes |
+|---|---|---|
+| Separateur import UI | `separateur-ou`, `section-import` | ~30 |
+| Button icon variant | `btn-icon-danger` | ~7 |
+| Groupe-cours info panels | `info-enseignant-groupe-cours`, `label-info`, `info-trimestre-groupe-cours`, `info-horaire-groupe-cours` | ~62 |
+| Profil carte header (ancien) | `profil-carte-titre`, `valeur-indice`, `profil-carte-description` | ~19 |
+| Profil artefacts (ancien format) | `profil-artefacts-container`, `profil-artefact-item`, `profil-artefact-nom`, `profil-artefact-note` | ~25 |
+| Profil message succes (ancien) | `profil-message-succes` + icone/texte | ~15 |
+| Profil jetons section (ancien) | `profil-section-bordure-gauche`, `profil-jetons-reprise/delai` + 8 enfants | ~66 |
+| Profil artefacts selectionne | `profil-artefacts-liste`, `profil-artefact-selectionne` + enfants | ~23 |
+| Profil badge jeton inline | `profil-badge-jeton` + reprise/delai | ~11 |
+| Profil artefact non-remis | `profil-artefact-non-remis` + nom/statut | ~16 |
+| Profil zone avertissement | `profil-zone-avertissement` | ~10 |
+| Profil toggle details | `profil-toggle-details/btn/fleche`, `profil-details-contenu/titre/liste` | ~50 |
+| Profil recommandations neutre | `profil-recommandations-neutre` | ~5 |
+| Profil carte risque | `profil-carte-risque` + 7 sous-classes | ~44 |
+| Profil objectif/progression | `profil-message-objectif` + enfants, `profil-message-progression` + texte | ~32 |
+
+Interpretation : vestiges d'une version anterieure du profil etudiant, remplacee par les classes `profil-indicateur-*`, `profil-echelle-*`, etc.
+
+### Section Patterns/RaI/DOTS (~10256-11850) — 30 selecteurs morts, ~267 lignes
+
+| Cluster | Classes mortes | Lignes |
+|---|---|---|
+| DOTS barres | `barre-dots`, `barre-dot` | ~21 |
+| #souspage-evaluation1 (ID inexistant) | 4 regles scopees | ~26 |
+| Note finale deficit/plafonnement | `note-finale-deficit`, `note-finale-plafonnement` | ~21 |
+| Wizard V2 info standalone | `wizard-v2-info` | ~7 |
+| Wizard V2 Phase 2 (non implemente) | dynamic-list (4), weight-slider (6), replacement-pair (2) | ~125 |
+| SPE modificateurs morts | `badge-spe.non-acceptable`, `spe-spec-item.checked`, `spe-resultat.acceptable/non-acceptable` | ~15 |
+| SPE forfait (non implemente) | `spe-forfait-atteint` + aucun/lettre/note | ~24 |
+| SPE gabarit (non implemente) | `spe-gabarit` + titre/description | ~19 |
+
+Interpretation : Wizard V2 Phase 2 et SPE forfait/gabarit = CSS pre-construit pour fonctionnalites jamais implementees en JS.
+
+### Selecteurs conserves (design-system-only)
+
+- `.badge-jeton-numero-personnalise` : reference uniquement dans design-system.html (confiance moyenne)
+- `.pan` : reference uniquement dans archives design-system (retrocompat possible via echelles.js)
 
 ---
 

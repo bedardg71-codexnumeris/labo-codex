@@ -7316,18 +7316,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-weight: 600;
 }
 
-.section-import {
-    background: var(--bleu-pale);
-    border-radius: var(--radius-standard);
-    padding: 15px;
-    margin-bottom: 15px;
-}
-
-.section-import .sous-titre-section {
-    margin-top: 0;
-    margin-bottom: 10px;
-}
-
 /* Section Import à droite (Beta 95.3) */
 .section-import-droite {
     background: var(--bleu-pale);
@@ -7358,32 +7346,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-weight: 500;
     margin-bottom: 5px;
     color: var(--gris-texte);
-}
-
-.separateur-ou {
-    text-align: center;
-    color: var(--gris-texte-pale);
-    font-size: 0.8rem;
-    margin: 12px 0;
-    position: relative;
-}
-
-.separateur-ou::before,
-.separateur-ou::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    width: 35%;
-    height: 1px;
-    background: var(--bleu-leger);
-}
-
-.separateur-ou::before {
-    left: 0;
-}
-
-.separateur-ou::after {
-    right: 0;
 }
 
 .input-fichier-compact {
@@ -7495,14 +7457,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 .btn-icon:hover {
     background-color: var(--bleu-pale);
-}
-
-.btn-icon-danger {
-    color: var(--orange-fonce);
-}
-
-.btn-icon-danger:hover {
-    background-color: var(--orange-clair);
 }
 
 /* Mode édition du formulaire */
@@ -7691,69 +7645,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     word-break: break-word;
 }
 
-.info-enseignant-groupe-cours {
-    background: var(--gris-clair);
-    border-radius: var(--radius-standard);
-    padding: 12px 15px;
-    margin-bottom: 15px;
-    font-size: 0.9rem;
-}
-
-.info-enseignant-groupe-cours .label-info {
-    color: var(--gris-texte-pale);
-    margin-right: 8px;
-}
-
-.info-enseignant-groupe-cours span:last-child {
-    font-weight: 600;
-    color: var(--accent-primaire);
-}
-
-/* Trimestre actif dans groupe-cours */
-.info-trimestre-groupe-cours {
-    background: #244858;
-    color: white;
-    border-radius: var(--radius-standard);
-    padding: 10px 15px;
-    margin-bottom: 15px;
-    font-size: 0.9rem;
-}
-
-.info-trimestre-groupe-cours .label-info {
-    opacity: 0.9;
-    margin-right: 8px;
-}
-
-.info-trimestre-groupe-cours #v2-gc-trimestreNom {
-    font-weight: 600;
-}
-
-/* Horaire en lecture seule dans groupe-cours */
-.info-horaire-groupe-cours {
-    background: var(--bleu-tres-pale);
-    border: 1px dashed var(--bleu-principal);
-    border-radius: var(--radius-standard);
-    padding: 12px 15px;
-    margin-bottom: 15px;
-    font-size: 0.9rem;
-}
-
-.info-horaire-groupe-cours .label-info {
-    color: var(--gris-texte-pale);
-    margin-right: 8px;
-}
-
-.info-horaire-groupe-cours #v2-gc-horaireNom {
-    font-weight: 600;
-    color: var(--bleu-fonce);
-}
-
-.info-horaire-groupe-cours.sans-horaire #v2-gc-horaireNom {
-    color: var(--orange-accent);
-    font-style: italic;
-    font-weight: 400;
-}
-
 /* ======================================
    CLASSES POUR PROFIL ÉTUDIANT
    Élimination des styles inline
@@ -7766,26 +7657,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     border-radius: var(--radius-grand);
     padding: 20px;
     margin-bottom: 30px;
-}
-
-.profil-carte-titre {
-    margin-bottom: 15px;
-}
-
-.profil-carte-titre strong {
-    font-size: 1.1rem;
-}
-
-.profil-carte-titre .valeur-indice {
-    font-size: 1.3rem;
-    font-weight: bold;
-    margin-left: 10px;
-}
-
-.profil-carte-description {
-    font-size: 0.95rem;
-    color: var(--texte-secondaire, #8aa4b0);
-    line-height: 1.6;
 }
 
 /* Grid 2 colonnes pour mobilisation */
@@ -7865,117 +7736,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-weight: 600;
 }
 
-/* Conteneur flex pour artefacts */
-.profil-artefacts-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-/* Item artefact individuel */
-.profil-artefact-item {
-    flex: 0 0 auto;
-    min-width: 140px;
-    padding: 8px 10px;
-    background: rgba(52, 199, 89, 0.12);
-    border-left: 3px solid #28a745;
-    border-radius: var(--radius-moyen);
-}
-
-.profil-artefact-nom {
-    color: var(--accent-primaire);
-    font-weight: 500;
-}
-
-.profil-artefact-note {
-    font-size: 0.8rem;
-    color: var(--texte-secondaire, #8aa4b0);
-}
-
-/* Message de succès (assiduité parfaite) */
-.profil-message-succes {
-    text-align: center;
-    padding: 15px;
-    background: rgba(52, 199, 89, 0.12);
-    border-radius: var(--radius-moyen);
-    color: #5ae080;
-}
-
-.profil-message-succes-icone {
-    font-size: 1.5rem;
-}
-
-.profil-message-succes-texte {
-    font-weight: 500;
-}
-
-/* Section avec bordure gauche colorée */
-.profil-section-bordure-gauche {
-    border-left: 4px solid;
-    border-radius: var(--radius-grand);
-    padding: 12px;
-    margin-bottom: 15px;
-}
-
-/* Jetons de reprise (violet) */
-.profil-jetons-reprise {
-    background: var(--jetons-reprise-fond);
-    border-color: var(--jetons-reprise-bordure);
-}
-
-.profil-jetons-reprise-titre {
-    font-size: 1rem;
-    color: var(--jetons-reprise-titre);
-    font-weight: 600;
-}
-
-.profil-jetons-reprise-icone {
-    font-size: 1.2rem;
-}
-
-.profil-jetons-details {
-    font-size: 0.85rem;
-    color: var(--texte-secondaire, #8aa4b0);
-    margin-top: 8px;
-}
-
-.profil-jetons-details div {
-    padding: 4px 0;
-}
-
-/* Jetons de délai (orange) */
-.profil-jetons-delai {
-    background: var(--jetons-delai-fond);
-    border-color: var(--jetons-delai-bordure);
-}
-
-.profil-jetons-delai-titre {
-    font-size: 1rem;
-    color: var(--jetons-delai-titre);
-    font-weight: 600;
-}
-
-/* Liste de jetons (nouvelle version avec badges) */
-.profil-jetons-liste {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 15px;
-}
-
-.profil-jeton-item {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-/* Badges de jetons en flex (format compact) */
-.profil-jetons-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 15px;
-}
 
 /* Badge jeton délai (style comme badge-completion) */
 .badge-jeton-delai-wrapper {
@@ -8112,44 +7872,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-weight: 600;
 }
 
-/* Artefacts sélectionnés */
-.profil-artefacts-liste {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 15px;
-}
-
-.profil-artefact-selectionne {
-    padding: 8px 10px;
-    background: rgba(52, 199, 89, 0.12);
-    border-left: 3px solid #28a745;
-    border-radius: var(--radius-moyen);
-}
-
-.profil-artefact-selectionne-nom {
-    color: #5ae080;
-    font-weight: 500;
-}
-
-.profil-artefact-selectionne-details {
-    font-size: 0.8rem;
-    color: var(--texte-secondaire, #8aa4b0);
-}
-
-/* Badge jeton inline */
-.profil-badge-jeton {
-    margin-left: 6px;
-}
-
-.profil-badge-jeton-reprise {
-    color: #9c27b0;
-}
-
-.profil-badge-jeton-delai {
-    color: #ff6f00;
-}
-
 /* Message vide/aucun */
 .profil-message-vide {
     text-align: center;
@@ -8168,88 +7890,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     border-radius: var(--radius-moyen);
     color: #5ae080;
     font-size: 0.85rem;
-}
-
-/* Artefact non remis */
-.profil-artefact-non-remis {
-    padding: 8px 10px;
-    background: var(--surface-carte, #1a3a48);
-    border-left: 3px solid #ddd;
-    border-radius: var(--radius-moyen);
-}
-
-.profil-artefact-non-remis-nom {
-    color: var(--texte-secondaire, #8aa4b0);
-    font-weight: 500;
-}
-
-.profil-artefact-non-remis-statut {
-    font-size: 0.8rem;
-    color: var(--texte-muted, #5a7a88);
-}
-
-/* Zone d'avertissement avec bordure pointillée */
-.profil-zone-avertissement {
-    background: var(--bleu-tres-pale);
-    border: 2px dashed var(--bleu-pale);
-    border-radius: var(--radius-grand);
-    padding: 20px;
-    text-align: center;
-    margin: 20px 0;
-    font-size: 0.9rem;
-    line-height: 1.6;
-}
-
-/* Toggle détails techniques */
-.profil-toggle-details {
-    margin-top: 25px;
-}
-
-.profil-toggle-btn {
-    background: var(--bleu-pale);
-    border: 1px solid var(--bleu-moyen);
-    border-radius: var(--radius-grand);
-    padding: 12px 20px;
-    width: 100%;
-    cursor: pointer;
-    font-weight: 600;
-    color: var(--accent-primaire);
-    transition: all 0.2s ease;
-}
-
-.profil-toggle-fleche {
-    font-size: 0.8rem;
-    opacity: 0.7;
-}
-
-.profil-details-contenu {
-    background: var(--surface-carte, #1a3040);
-    padding: 12px;
-    border-radius: var(--radius-moyen);
-    font-family: 'Courier New', monospace;
-    font-size: 0.85rem;
-}
-
-.profil-details-titre {
-    color: var(--accent-primaire);
-    margin: 0 0 10px 0;
-    font-size: 0.95rem;
-}
-
-.profil-details-liste {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    line-height: 1.8;
-}
-
-.profil-details-liste li {
-    color: var(--texte-secondaire, #8aa4b0);
-    font-size: 0.9rem;
-}
-
-.profil-details-liste li:not(:first-child) {
-    margin-left: 20px;
 }
 
 /* Carte interprétation (gradient) */
@@ -8305,13 +7945,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     line-height: 1.6;
 }
 
-/* Recommandations - variantes de couleur */
-.profil-recommandations-neutre {
-    background: var(--surface-carte, #1a3a48);
-    border-color: var(--gris-clair);
-    color: #616161;
-}
-
 .profil-recommandations-avertissement {
     background: rgba(200, 160, 96, 0.15);
     border-color: var(--btn-annuler);
@@ -8342,52 +7975,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     color: var(--bleu-clair);
 }
 
-
-/* Carte principale de risque */
-.profil-carte-risque {
-    border: 2px solid;
-    border-radius: var(--radius-grand);
-    padding: 25px;
-    margin-bottom: 25px;
-}
-
-.profil-carte-risque-centre {
-    text-align: center;
-    margin-bottom: 12px;
-}
-
-.profil-carte-risque-emoji {
-    font-size: 3rem;
-    margin-bottom: 8px;
-}
-
-.profil-carte-risque-niveau {
-    font-size: 1.3rem;
-    font-weight: bold;
-    margin-bottom: 8px;
-}
-
-.profil-carte-risque-valeur {
-    font-size: 2rem;
-    font-weight: bold;
-}
-
-.profil-carte-risque-urgence {
-    background: var(--surface-carte, #1a3040);
-    padding: 12px;
-    border-radius: var(--radius-moyen);
-    margin-top: 12px;
-}
-
-.profil-carte-risque-urgence-titre {
-    font-weight: bold;
-    margin-bottom: 8px;
-}
-
-.profil-carte-risque-urgence-texte {
-    color: var(--texte-secondaire, #8aa4b0);
-    font-size: 0.95rem;
-}
 
 /* Échelle de risque visuelle (alignée avec barres SRPNF) */
 .profil-echelle-risque {
@@ -8486,40 +8073,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-size: 0.9rem;
     color: var(--texte-secondaire, #8aa4b0);
     line-height: 1.6;
-}
-
-/* Message objectif (bleu) */
-.profil-message-objectif {
-    background: #e7f3ff;
-    border: 1px solid var(--bleu-clair);
-    padding: 15px;
-    border-radius: var(--radius-moyen);
-    margin-bottom: 15px;
-}
-
-.profil-message-objectif-titre {
-    color: var(--bleu-clair);
-    margin-bottom: 10px;
-    font-weight: 600;
-}
-
-.profil-message-objectif-texte {
-    color: var(--bleu-clair);
-    line-height: 1.6;
-}
-
-/* Message progression (gradient bleu) */
-.profil-message-progression {
-    background: linear-gradient(to right, #2196F322, #2196F311);
-    border-left: 4px solid var(--bleu-clair);
-    padding: 15px;
-    border-radius: var(--radius-moyen);
-    margin-bottom: 15px;
-}
-
-.profil-message-progression-texte {
-    color: var(--bleu-clair);
-    font-weight: bold;
 }
 
 /* === BADGES PRATIQUE (4 FAMILLES : SOM/STD/SPE/DEN) === */
@@ -10313,28 +9866,6 @@ label:has(+ textarea:disabled) {
     z-index: 1;
 }
 
-/* === DOTS (Points blancs sur les barres) === */
-
-.barre-dots {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 100%;
-    padding: 0 20px;
-    display: flex;
-    gap: 15px;
-    pointer-events: none;
-}
-
-.barre-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--surface-carte, #1a3040);
-    border: 2px solid rgba(3, 46, 92, 0.2);
-    box-shadow: var(--shadow-normal);
-}
-
 /* ===============================
    TABLEAU DES ÉTUDIANTS - COLONNES CENTRÉES
    =============================== */
@@ -10562,33 +10093,6 @@ label:has(+ textarea:disabled) {
     .tableau-objectifs-profil td {
         padding: 10px 8px;
     }
-}
-
-/* ============================================================================
-   OPTIMISATION ESPACE VERTICAL - Formulaire d'évaluation
-   ============================================================================ */
-
-/* Réduire taille des labels dans le formulaire d'évaluation */
-#souspage-evaluation1 .label-formulaire {
-    font-size: 0.75rem;
-    margin-bottom: 4px;
-}
-
-/* Réduire espacement entre groupes de formulaire */
-#souspage-evaluation1 .groupe-form {
-    margin-bottom: 12px;
-}
-
-/* Compacter l'en-tête des paramètres */
-#souspage-evaluation1 .indicateur-verrouillage h4 {
-    font-size: 1rem;
-    margin-bottom: 8px;
-}
-
-/* Réduire padding du texte d'aide sous Intégrité académique */
-#souspage-evaluation1 .text-085-muted-m5-0-0-28 {
-    font-size: 0.75rem;
-    margin-top: 3px;
 }
 
 /* ============================================================================
@@ -10998,29 +10502,6 @@ body[data-mode="simulation"] table tr:hover {
     background: rgba(220, 53, 69, 0.1);
 }
 
-/* Indicateur de déficit */
-.note-finale-deficit {
-    display: inline-block;
-    margin-left: 10px;
-    padding: 2px 8px;
-    background: var(--rouge-danger);
-    color: white;
-    border-radius: var(--radius-moyen);
-    font-size: 0.8rem;
-    font-weight: normal;
-}
-
-/* Message de plafonnement */
-.note-finale-plafonnement {
-    background: rgba(200, 160, 96, 0.15);
-    border: 1px solid var(--btn-annuler);
-    border-radius: var(--radius-moyen);
-    padding: 8px 12px;
-    margin-bottom: 10px;
-    font-size: 0.85rem;
-    color: var(--alerte-texte-attention);
-}
-
 /* Note originale barrée */
 .note-finale-valeur-originale {
     text-decoration: line-through;
@@ -11329,14 +10810,6 @@ body[data-mode="simulation"] table tr:hover {
     color: var(--alerte-texte-attention);
 }
 
-.wizard-v2-info {
-    padding: 12px 15px;
-    background: var(--bleu-tres-pale);
-    border-radius: var(--radius-moyen);
-    font-size: 0.9rem;
-    color: var(--gris-moyen);
-}
-
 /* Récapitulatif */
 .wizard-v2-recapitulatif {
     display: flex;
@@ -11429,136 +10902,6 @@ body[data-mode="simulation"] table tr:hover {
 }
 
 /* ===============================
-   WIZARD V2 - Dynamic List (Phase 2)
-   =============================== */
-
-.wizard-v2-dynamic-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.wizard-v2-dynamic-list-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    background: var(--surface-carte, #1e3a4a);
-    border: 1px solid var(--gris-clair, #3a5a6a);
-    border-radius: var(--radius-moyen, 6px);
-}
-
-.wizard-v2-dynamic-list-item input,
-.wizard-v2-dynamic-list-item select {
-    flex: 1;
-    padding: 6px 8px;
-    border: 1px solid var(--gris-clair, #3a5a6a);
-    border-radius: var(--radius-moyen, 6px);
-    background: var(--surface-base, #0f2530);
-    color: var(--texte-principal, #e8f0f2);
-}
-
-.wizard-v2-dynamic-list-add {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px;
-    border: 2px dashed var(--gris-clair, #3a5a6a);
-    border-radius: var(--radius-moyen, 6px);
-    color: var(--texte-muted, #5a7a88);
-    cursor: pointer;
-    transition: border-color 0.2s, color 0.2s;
-}
-
-.wizard-v2-dynamic-list-add:hover {
-    border-color: var(--accent-primaire, #1a5266);
-    color: var(--accent-primaire, #1a5266);
-}
-
-.wizard-v2-dynamic-list-remove {
-    background: none;
-    border: none;
-    color: var(--rouge-erreur, #e74c3c);
-    cursor: pointer;
-    font-size: 1.1rem;
-    padding: 2px 6px;
-    border-radius: 50%;
-    transition: background-color 0.2s;
-}
-
-.wizard-v2-dynamic-list-remove:hover {
-    background: rgba(231, 76, 60, 0.15);
-}
-
-/* ===============================
-   WIZARD V2 - Weight Slider (Phase 2)
-   =============================== */
-
-.wizard-v2-weight-slider {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.wizard-v2-weight-slider input[type="number"] {
-    width: 70px;
-    text-align: center;
-}
-
-.wizard-v2-weight-bar {
-    flex: 1;
-    height: 8px;
-    background: var(--gris-clair, #3a5a6a);
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.wizard-v2-weight-bar-fill {
-    height: 100%;
-    background: var(--accent-primaire, #1a5266);
-    border-radius: 4px;
-    transition: width 0.3s;
-}
-
-.wizard-v2-weight-total {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--texte-muted, #5a7a88);
-}
-
-.wizard-v2-weight-total.wizard-v2-weight-valid {
-    color: var(--vert-succes, #28a745);
-}
-
-.wizard-v2-weight-total.wizard-v2-weight-invalid {
-    color: var(--rouge-erreur, #e74c3c);
-}
-
-/* ===============================
-   WIZARD V2 - Replacement Pair (Phase 2)
-   =============================== */
-
-.wizard-v2-replacement-pair {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    background: var(--surface-carte, #1e3a4a);
-    border: 1px solid var(--gris-clair, #3a5a6a);
-    border-radius: var(--radius-moyen, 6px);
-}
-
-.wizard-v2-replacement-pair select {
-    flex: 1;
-}
-
-.wizard-v2-replacement-pair .wizard-v2-pair-arrow {
-    color: var(--accent-primaire, #1a5266);
-    font-size: 1.2rem;
-    flex-shrink: 0;
-}
-
-/* ===============================
    STYLES PAN-SPÉCIFICATIONS (SPE)
    Ajouté le 2 janvier 2026
    =============================== */
@@ -11577,10 +10920,6 @@ body[data-mode="simulation"] table tr:hover {
 
 .badge-spe.acceptable {
     background: #28a745;
-}
-
-.badge-spe.non-acceptable {
-    background: var(--rouge-danger);
 }
 
 /* Checklist SPE */
@@ -11602,11 +10941,6 @@ body[data-mode="simulation"] table tr:hover {
 
 .spe-spec-item:hover {
     border-color: rgba(106, 172, 184, 0.3);
-}
-
-.spe-spec-item.checked {
-    background: rgba(52, 199, 89, 0.12);
-    border-color: #28a745;
 }
 
 .spe-checkbox {
@@ -11631,18 +10965,6 @@ body[data-mode="simulation"] table tr:hover {
     font-weight: bold;
 }
 
-.spe-resultat.acceptable {
-    background: rgba(52, 199, 89, 0.12);
-    border: 2px solid #28a745;
-    color: #28a745;
-}
-
-.spe-resultat.non-acceptable {
-    background: rgba(232, 64, 87, 0.12);
-    border: 2px solid var(--rouge-danger);
-    color: var(--rouge-danger);
-}
-
 /* Dashboard SPE */
 .spe-dashboard {
     padding: 15px;
@@ -11656,31 +10978,6 @@ body[data-mode="simulation"] table tr:hover {
     color: var(--accent-primaire);
 }
 
-.spe-forfait-atteint {
-    background: rgba(52, 199, 89, 0.12);
-    border: 2px solid #28a745;
-    border-radius: var(--radius-grand);
-    padding: 15px;
-    text-align: center;
-    margin-bottom: 15px;
-}
-
-.spe-forfait-atteint.aucun {
-    background: rgba(200, 160, 96, 0.15);
-    border-color: var(--btn-annuler);
-}
-
-.spe-forfait-lettre {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #28a745;
-}
-
-.spe-forfait-note {
-    font-size: 1.5rem;
-    color: var(--texte-secondaire, #8aa4b0);
-}
-
 /* Récapitulatif classe SPE */
 .spe-recap-classe {
     overflow-x: auto;
@@ -11689,27 +10986,6 @@ body[data-mode="simulation"] table tr:hover {
 .spe-recap-classe table {
     width: 100%;
     min-width: 600px;
-}
-
-/* Gabarit SPE */
-.spe-gabarit {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border: 2px dashed var(--texte-muted, #5a7a88);
-    border-radius: var(--radius-grand);
-    padding: 20px;
-    margin: 15px 0;
-}
-
-.spe-gabarit-titre {
-    font-weight: bold;
-    color: var(--accent-primaire);
-    margin-bottom: 10px;
-}
-
-.spe-gabarit-description {
-    font-size: 0.9rem;
-    color: var(--texte-secondaire, #8aa4b0);
-    margin-bottom: 15px;
 }
 
 /* ===============================
