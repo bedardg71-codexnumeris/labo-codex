@@ -18,8 +18,8 @@ Ce document te guidera vers :
 
 ## Etat actuel
 
-- **Version** : Beta 99.02 (Build 0204-0655)
-- **Objectif** : Plan de consolidation avril 2026 — TOUS LES TIERS TERMINES (0→5.5)
+- **Version** : Beta 99.02 (Build 0402-1655)
+- **Objectif** : Plan de consolidation avril 2026 — TOUS LES TIERS TERMINES (0→5.5) + Audit CSS 5.2
 - **Session en cours** : Voir `SESSION.md`
 - **Backlog** : Voir `BACKLOG.md` (taches a faire)
 
