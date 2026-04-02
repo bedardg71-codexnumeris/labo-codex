@@ -21396,6 +21396,8 @@ body.mode-clair .prioritaire-indice-attention {
 
 .annot-toolbar-production select {
     max-width: 220px;
+    font-size: 12px;
+    height: 28px;
 }
 
 .annot-toolbar-fichiers {
