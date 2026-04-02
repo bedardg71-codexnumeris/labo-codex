@@ -1696,8 +1696,8 @@
                 '</div>';
         }).join('');
 
-        var html = '<div class="modale-overlay" style="z-index:10000;">' +
-            '<div class="modale-contenu" style="max-width:320px; padding:20px;">' +
+        var html = '<div class="modal-overlay actif">' +
+            '<div class="modal-contenu" style="max-width:320px; padding:20px;">' +
             '<h3 style="margin:0 0 12px;">Raccourcis outils</h3>' +
             '<p style="font-size:0.85rem; color:var(--texte-secondaire); margin-bottom:12px;">Ctrl+Z : Annuler &middot; Ctrl+Y : R\u00e9tablir &middot; Delete : Supprimer &middot; Echap : Position</p>' +
             lignes +
