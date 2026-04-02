@@ -4417,6 +4417,18 @@
         if (labelAnnotProd) {
             labelAnnotProd.textContent = labelProd ? labelProd.textContent : '--';
         }
+
+        // Synchroniser le select production dans la toolbar
+        if (prodId) {
+            const select = document.querySelector('.annot-toolbar .travaux-filtre-production') ||
+                           document.querySelector('#evaluations-contenu-fichiers .travaux-filtre-production');
+            if (select && select.value !== prodId) {
+                select.value = prodId;
+                productionFiltreActive = prodId;
+                sessionStorage.setItem('travaux-filtre-production', prodId);
+                filtrerBadgesParProduction(select);
+            }
+        }
     }
 
     /**
