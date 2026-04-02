@@ -15082,7 +15082,7 @@ body.mode-clair .prep-select {
 
 .travaux-palette-eval .travaux-palette-contenu {
     max-height: calc(100vh - 200px);
-    padding: 8px;
+    padding: 0;
     flex: 1;
     overflow-x: hidden;
     min-width: 0;
@@ -15093,6 +15093,8 @@ body.mode-clair .prep-select {
     overflow-y: auto;
     overflow-x: hidden;
     min-width: 0;
+    padding: 8px;
+    gap: 8px;
 }
 
 /* Contenu compact dans les palettes évaluation (override des inline styles) */
