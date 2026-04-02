@@ -15082,7 +15082,7 @@ body.mode-clair .prep-select {
 
 .travaux-palette-eval .travaux-palette-contenu {
     max-height: calc(100vh - 200px);
-    padding: 0;
+    padding: 8px;
     flex: 1;
     overflow-x: hidden;
     min-width: 0;
