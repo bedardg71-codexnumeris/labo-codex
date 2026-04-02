@@ -144,13 +144,16 @@ async function importerGrillesDansBibliotheque(grilles) {
  */
 async function exporterBibliothequeGrilles() {
     const bibliotheque = await db.get(CLE_BIBLIOTHEQUE_GRILLES) || [];
+    const grilles = typeof ajouterMetadonnéesCC === 'function'
+        ? bibliotheque.map(g => ajouterMetadonnéesCC(g, 'grille', g.nom || '').contenu || g)
+        : bibliotheque;
 
     return {
         version: '1.0',
         type: 'grilles',
         dateExport: new Date().toISOString(),
-        nombreGrilles: bibliotheque.length,
-        grilles: bibliotheque
+        nombreGrilles: grilles.length,
+        grilles
     };
 }
 

@@ -144,13 +144,16 @@ async function importerEchellesDansBibliotheque(echelles) {
  */
 async function exporterBibliothequeEchelles() {
     const bibliotheque = await db.get(CLE_BIBLIOTHEQUE_ECHELLES) || [];
+    const echelles = typeof ajouterMetadonnéesCC === 'function'
+        ? bibliotheque.map(e => ajouterMetadonnéesCC(e, 'echelle', e.nom || '').contenu || e)
+        : bibliotheque;
 
     return {
         version: '1.0',
         type: 'echelles',
         dateExport: new Date().toISOString(),
-        nombreEchelles: bibliotheque.length,
-        echelles: bibliotheque
+        nombreEchelles: echelles.length,
+        echelles
     };
 }
 

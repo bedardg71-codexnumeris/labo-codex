@@ -93,7 +93,7 @@ async function partagerTampon(tamponId) {
         custom: tampon.custom || false,
         metadata_cc: {
             licence: 'CC BY-NC-SA 4.0',
-            auteur: '',
+            auteur_original: (typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : '') || '',
             description_courte: tampon.nom
         }
     };
@@ -164,7 +164,7 @@ function exporterBibliotheque() {
         tampons: items,
         metadata_cc: {
             licence: 'CC BY-NC-SA 4.0',
-            auteur: '',
+            auteur_original: (typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : '') || '',
             description_courte: 'Collection de tampons Labo Codex'
         }
     };
@@ -293,7 +293,7 @@ function afficherBibliothequeTampons() {
         biblioItems.forEach(function(item) {
             var dejaPresent = idsActuels.has(item.id);
             var meta = (item.categorie ? (nomsCat[item.categorie] || item.categorie) : '') +
-                (item.metadata_cc && item.metadata_cc.auteur ? ' · ' + item.metadata_cc.auteur : '') +
+                (item.metadata_cc && (item.metadata_cc.auteur_original || item.metadata_cc.auteur) ? ' · ' + (item.metadata_cc.auteur_original || item.metadata_cc.auteur) : '') +
                 (item.dateAjoutBiblio ? ' · ' + new Date(item.dateAjoutBiblio).toLocaleDateString('fr-CA') : '');
             htmlBiblio += BibliothequeUI.renderCarteDisponible({
                 nom: item.nom || 'Sans titre',

@@ -144,13 +144,16 @@ async function importerCartouchesDansBibliotheque(cartouches) {
  */
 async function exporterBibliothequeCartouches() {
     const bibliotheque = await db.get(CLE_BIBLIOTHEQUE_CARTOUCHES) || [];
+    const cartouches = typeof ajouterMetadonnéesCC === 'function'
+        ? bibliotheque.map(c => ajouterMetadonnéesCC(c, 'cartouche', c.nom || '').contenu || c)
+        : bibliotheque;
 
     return {
         version: '1.0',
         type: 'cartouches',
         dateExport: new Date().toISOString(),
-        nombreCartouches: bibliotheque.length,
-        cartouches: bibliotheque
+        nombreCartouches: cartouches.length,
+        cartouches
     };
 }
 

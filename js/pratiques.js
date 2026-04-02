@@ -3740,14 +3740,20 @@ async function creerPratiqueDepuisWizard() {
         } else {
             // Mode création : Sauvegarder via PratiqueManager
             // ✅ Les pratiques créées par l'utilisateur sont directement dans la bibliothèque
+            const enseignantActif = typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : null;
             await PratiqueManager.sauvegarderPratique({
                 id: pratiqueConfig.id,
                 nom: pratiqueConfig.nom,
                 auteur: pratiqueConfig.auteur,
                 description: pratiqueConfig.description,
                 config: pratiqueConfig,
-                dansBibliotheque: true,  // Ajout immédiat à la sidebar
-                estDeLUtilisateur: true  // ✅ NOUVEAU (9 décembre 2025) : Flag pour distinguer les pratiques créées vs importées
+                dansBibliotheque: true,
+                estDeLUtilisateur: true,
+                metadata_cc: enseignantActif ? {
+                    auteur_original: enseignantActif,
+                    date_creation: new Date().toISOString().split('T')[0],
+                    contributeurs: []
+                } : undefined
             });
         }
 
