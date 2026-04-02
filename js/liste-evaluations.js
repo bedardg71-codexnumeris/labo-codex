@@ -1266,8 +1266,8 @@ function executerActionEval(select) {
  */
 function ouvrirAnnotationDepuisListe(fichierId, productionId) {
     // Pré-sélectionner la production dans le filtre de la page Annoter
-    if (productionId) {
-        sessionStorage.setItem('travaux-filtre-production', productionId);
+    if (productionId && typeof travauxUI !== 'undefined' && typeof travauxUI.setProductionFiltre === 'function') {
+        travauxUI.setProductionFiltre(productionId);
     }
 
     afficherSection('evaluations');
@@ -1286,20 +1286,6 @@ function ouvrirAnnotationDepuisListe(fichierId, productionId) {
     setTimeout(function() {
         if (typeof travauxUI !== 'undefined' && typeof travauxUI.ouvrirFichier === 'function') {
             travauxUI.ouvrirFichier(fichierId);
-        }
-
-        // Synchroniser le dropdown APRÈS ouvrirFichier (qui reconstruit le DOM)
-        if (productionId) {
-            setTimeout(function() {
-                const select = document.querySelector('.annot-toolbar .travaux-filtre-production') ||
-                               document.querySelector('#evaluations-contenu-fichiers .travaux-filtre-production');
-                if (select) {
-                    select.value = productionId;
-                    if (typeof travauxUI !== 'undefined' && typeof travauxUI.filtrerBadgesParProduction === 'function') {
-                        travauxUI.filtrerBadgesParProduction(select);
-                    }
-                }
-            }, 400);
         }
     }, 200);
 }
