@@ -1766,11 +1766,8 @@ async function chargerEchellePerformance() {
 
     if (!selectEchelle) return;
 
-    selectEchelle.innerHTML = '<option value="">-- Choisir une échelle --</option>';
-    echelles.forEach(echelle => {
-        const nomEchappe = echapperHtml(echelle.nom || 'Échelle sans nom');
-        selectEchelle.innerHTML += `<option value="${echelle.id}">${nomEchappe}</option>`;
-    });
+    selectEchelle.innerHTML = '<option value="">-- Choisir une échelle --</option>' +
+        echelles.map(echelle => `<option value="${echelle.id}">${echapperHtml(echelle.nom || 'Échelle sans nom')}</option>`).join('');
 }
 
 /**

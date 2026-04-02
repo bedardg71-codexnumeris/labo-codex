@@ -1536,28 +1536,22 @@ async function chargerOptionsExportPDF() {
     if (selectProduction) {
         const cleProductions = cle('productions');
         const productions = await db.get(cleProductions) || [];
-        selectProduction.innerHTML = '<option value="">-- Aucune (grille générique) --</option>';
-        productions.forEach(p => {
-            selectProduction.innerHTML += `<option value="${p.id}">${escapeHtml(p.titre || p.description || 'Sans titre')}</option>`;
-        });
+        selectProduction.innerHTML = '<option value="">-- Aucune (grille générique) --</option>' +
+            productions.map(p => `<option value="${p.id}">${escapeHtml(p.titre || p.description || 'Sans titre')}</option>`).join('');
     }
 
     // Charger les grilles
     if (selectGrille) {
         const grilles = await db.get('grillesTemplates') || [];
-        selectGrille.innerHTML = '<option value="">-- Sélectionner --</option>';
-        grilles.forEach(g => {
-            selectGrille.innerHTML += `<option value="${g.id}">${escapeHtml(g.nom || 'Sans nom')}</option>`;
-        });
+        selectGrille.innerHTML = '<option value="">-- Sélectionner --</option>' +
+            grilles.map(g => `<option value="${g.id}">${escapeHtml(g.nom || 'Sans nom')}</option>`).join('');
     }
 
     // Charger les echelles
     if (selectEchelle) {
         const echelles = await db.get('echellesTemplates') || [];
-        selectEchelle.innerHTML = '<option value="">-- Sélectionner --</option>';
-        echelles.forEach(e => {
-            selectEchelle.innerHTML += `<option value="${e.id}">${escapeHtml(e.nom || 'Sans nom')}</option>`;
-        });
+        selectEchelle.innerHTML = '<option value="">-- Sélectionner --</option>' +
+            echelles.map(e => `<option value="${e.id}">${escapeHtml(e.nom || 'Sans nom')}</option>`).join('');
     }
 }
 
@@ -1590,10 +1584,8 @@ async function mettreAJourApercuPDF() {
         if (cartouches.length > 0) {
             sectionCartouche.classList.remove('u-hide');
             const currentValue = selectCartouche.value;
-            selectCartouche.innerHTML = '<option value="">-- Sans rétroaction --</option>';
-            cartouches.forEach(c => {
-                selectCartouche.innerHTML += `<option value="${c.id}">${escapeHtml(c.nom || 'Cartouche sans nom')}</option>`;
-            });
+            selectCartouche.innerHTML = '<option value="">-- Sans rétroaction --</option>' +
+                cartouches.map(c => `<option value="${c.id}">${escapeHtml(c.nom || 'Cartouche sans nom')}</option>`).join('');
             // Restaurer la selection si possible
             if (currentValue && cartouches.find(c => c.id === currentValue)) {
                 selectCartouche.value = currentValue;
@@ -2271,30 +2263,24 @@ async function chargerOptionsPreparationPDF() {
         const cleProductions = cle('productions');
         const toutesProductions = await db.get(cleProductions) || [];
         const productions = toutesProductions.filter(p => p.dansBibliotheque !== false);
-        selectProduction.innerHTML = '<option value="">-- Aucune (grille générique) --</option>';
-        productions.forEach(p => {
-            selectProduction.innerHTML += `<option value="${p.id}">${escapeHtml(p.titre || p.description || 'Sans titre')}</option>`;
-        });
+        selectProduction.innerHTML = '<option value="">-- Aucune (grille générique) --</option>' +
+            productions.map(p => `<option value="${p.id}">${escapeHtml(p.titre || p.description || 'Sans titre')}</option>`).join('');
     }
 
     // Charger les grilles (filtrées par dansBibliotheque)
     if (selectGrille) {
         const toutesGrilles = await db.get('grillesTemplates') || [];
         const grilles = toutesGrilles.filter(g => g.dansBibliotheque !== false);
-        selectGrille.innerHTML = '<option value="">-- Sélectionner --</option>';
-        grilles.forEach(g => {
-            selectGrille.innerHTML += `<option value="${g.id}">${escapeHtml(g.nom || 'Sans nom')}</option>`;
-        });
+        selectGrille.innerHTML = '<option value="">-- Sélectionner --</option>' +
+            grilles.map(g => `<option value="${g.id}">${escapeHtml(g.nom || 'Sans nom')}</option>`).join('');
     }
 
     // Charger les echelles (filtrées par dansBibliotheque)
     if (selectEchelle) {
         const toutesEchelles = await db.get('echellesTemplates') || [];
         const echelles = toutesEchelles.filter(e => e.dansBibliotheque !== false);
-        selectEchelle.innerHTML = '<option value="">-- Sélectionner --</option>';
-        echelles.forEach(e => {
-            selectEchelle.innerHTML += `<option value="${e.id}">${escapeHtml(e.nom || 'Sans nom')}</option>`;
-        });
+        selectEchelle.innerHTML = '<option value="">-- Sélectionner --</option>' +
+            echelles.map(e => `<option value="${e.id}">${escapeHtml(e.nom || 'Sans nom')}</option>`).join('');
     }
 }
 
@@ -2325,10 +2311,8 @@ async function mettreAJourOptionsPreparationPDF() {
         if (cartouches.length > 0) {
             sectionCartouche.classList.remove('u-hide');
             const currentValue = selectCartouche.value;
-            selectCartouche.innerHTML = '<option value="">-- Sans rétroaction --</option>';
-            cartouches.forEach(c => {
-                selectCartouche.innerHTML += `<option value="${c.id}">${escapeHtml(c.nom || 'Cartouche sans nom')}</option>`;
-            });
+            selectCartouche.innerHTML = '<option value="">-- Sans rétroaction --</option>' +
+                cartouches.map(c => `<option value="${c.id}">${escapeHtml(c.nom || 'Cartouche sans nom')}</option>`).join('');
             // Restaurer la selection si possible
             if (currentValue && cartouches.find(c => c.id === currentValue)) {
                 selectCartouche.value = currentValue;
