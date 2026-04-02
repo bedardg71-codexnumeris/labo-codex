@@ -1,23 +1,61 @@
 # Audit CSS — Tier 5.2 (styles.css)
 
 **Date** : 2 avril 2026
-**Fichier** : `styles.css` (22 675 lignes)
+**Fichier** : `styles.css`
 **Portee** : Variables inutilisees, selecteurs morts, specificite, media queries
 
 ---
 
-## Chiffres cles
+## Bilan final (5 commits)
 
-| Metrique | Valeur |
-|---|---|
-| Lignes totales | 22 675 |
-| Sections majeures | ~90 |
-| Variables CSS declarees (uniques) | 210 |
-| Variables jamais utilisees | **28** |
-| Selecteurs morts (confiance haute) | **32** (~213 lignes) |
-| `!important` | 112 (57 legitimes, 37 suspects, 18 problematiques) |
-| Media queries | 34 (10 breakpoints distincts) |
-| Profondeur max selecteurs | 4 niveaux (bon) |
+| Metrique | Avant | Apres | Delta |
+|---|---|---|---|
+| Lignes totales | 22 675 | 22 035 | **-640** |
+| Variables CSS inutilisees | 28 | 0 | **-28** |
+| Selecteurs morts supprimes | — | 70 | **-70** |
+| `!important` | 112 | 73 | **-39** |
+| `[style*=...]` anti-patterns | 5 | 2 | **-3** |
+| Breakpoints distincts | 10 | 6 | **-4** (alignes) |
+| `@media print` doublons | 2 | 1 | **-1** (fusionne) |
+| Inline styles supprimes (HTML/JS) | ~30 | 0 | **-30** |
+
+### Commits
+
+1. `f3148d2` — Phase A : variables mortes, selecteurs morts, fusion print (-399 lignes)
+2. `6019ee8` — Phase B : body.mode-clair simplifie, breakpoints alignes, couleurs primo
+3. `86d1066` — Phase C : 34 !important retires, inline styles nettoyes (index.html, evaluation.js, trimestre-v2.js)
+4. `88db4f8` — Chantiers 3+1P1 : 8 !important supprimes, 38 selecteurs Beta 91 morts (-247 lignes)
+5. *(ce commit)* — Chantiers 2+4 : inventaire breakpoints, rapport final
+
+### Ce qui reste (Chantier 1 P2-P3, optionnel)
+
+- **P2** : Audit selecteurs morts dans Patterns/RaI (10543-12164) et Accordeon (7207-8719) — ~350 classes
+- **P3** : Audit module Planification (12498-22232) — ~900 classes, module actif, faux positifs probables
+
+### !important restants (73) — tous documentes
+
+- 57 legitimes (utilitaires, print, hover inline, saisie heures, tracked points, mode assiste)
+- 9 legitimes documentes (planification drag&drop, palette height, highlight guidage)
+- 7 restent a examiner dans les sections non auditees
+
+---
+
+## Breakpoints officiels
+
+| Breakpoint | Role | Usages |
+|---|---|---|
+| 480px | Mobile tres etroit | 1 |
+| 600px | Mobile etroit | 5 |
+| **768px** | Tablette → Mobile (pivot) | 12 |
+| 850px | Tablette avec sidebar | 5 |
+| **1024px** | Desktop → Tablette (pivot) | 6 |
+| 1200px | Desktop large | 2 |
+
+Les media queries sont colocalisees avec leurs composants (pas de fusion).
+
+---
+
+## Details de l'audit initial (reference)
 
 ---
 

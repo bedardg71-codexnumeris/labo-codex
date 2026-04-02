@@ -1,8 +1,27 @@
 # SESSION ACTIVE — BETA 99.02
 
 **Date** : 2 avril 2026
-**Version** : Beta 99.02 (Build 0204-0655)
-**Statut** : Plan de consolidation avril 2026 — **TOUS LES TIERS TERMINÉS (0→5.5)**
+**Version** : Beta 99.02 (Build 0402-1655)
+**Statut** : Plan de consolidation avril 2026 — **TOUS LES TIERS TERMINÉS (0→5.5)** + Audit CSS 5.2
+
+---
+
+## Bilan de la session (2 avril 2026, soir) — Audit CSS Tier 5.2 (5 commits)
+
+**Commits** : `f3148d2`, `6019ee8`, `86d1066`, `88db4f8`, + commit final
+**1 fichier créé (docs/audit-css-tier5.2.md), ~5 fichiers modifiés.**
+
+### Résultats
+- **-640 lignes** supprimées de styles.css (22 675 → 22 035)
+- 28 variables CSS mortes supprimées (+ re-déclarations dans 4 modes)
+- 70 sélecteurs CSS morts supprimés (sidebar, profil ×25, Beta 91 ×38, etc.)
+- 39 `!important` éliminés (112 → 73), inline styles nettoyés dans index.html/JS
+- Breakpoints alignés (10 → 6), @media print fusionnés, body.mode-clair simplifié
+- Rapport complet : `docs/audit-css-tier5.2.md`
+
+### Ce qui reste (Chantier 1 P2-P3)
+- **P2** : Sélecteurs morts dans Patterns/RàI + Accordéon (~350 classes)
+- **P3** : Module Planification (~900 classes, optionnel)
 
 ---
 

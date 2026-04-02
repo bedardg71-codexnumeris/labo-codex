@@ -1,9 +1,16 @@
 /* ===============================
-   SYSTÈME DE DESIGN - Beta 97.8
-   Index: 97.8 16-02-2026
+   SYSTÈME DE DESIGN - Beta 99.02
    Convention: 100% français
    Palette: "Océan & Boussole" (C4)
-   Dernière mise à jour: 16-02-2026
+   Dernière mise à jour: 2 avril 2026
+
+   BREAKPOINTS OFFICIELS (colocalisés avec leurs composants) :
+     480px  — mobile très étroit (1 usage)
+     600px  — mobile étroit (5 usages)
+     768px  — tablette → mobile (12 usages) ← pivot principal
+     850px  — tablette avec sidebar (5 usages)
+    1024px  — desktop → tablette (6 usages) ← pivot principal
+    1200px  — desktop large (2 usages)
    =============================== */
 
 /* ===============================
