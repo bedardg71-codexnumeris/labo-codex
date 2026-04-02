@@ -196,6 +196,11 @@
         attacherEvenements();
         chargerAnnotationsPage();
 
+        // Mettre à jour les compteurs d'erreurs après chargement des annotations
+        if (typeof travauxOutils !== 'undefined' && typeof travauxOutils.mettreAJourCompteursErreurs === 'function') {
+            travauxOutils.mettreAJourCompteursErreurs();
+        }
+
         canvasAnnotation.classList.remove('u-hide');
         canvasAnnotation.style.pointerEvents = 'auto';
         if (canvasSurligneur) canvasSurligneur.classList.remove('u-hide');
