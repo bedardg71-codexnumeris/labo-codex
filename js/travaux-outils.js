@@ -51,14 +51,14 @@
         position: {
             id: 'position',
             nom: 'Position',
-            icone: '<img src="' + ICONS_DIR + 'outils-move-100.png" alt="Position">',
+            icone: '<img src="' + ICONS_DIR + 'outils-hand-100.png" alt="Position">',
             curseur: 'move',
             type: 'position'
         },
         selection: {
             id: 'selection',
             nom: 'S\u00e9lection',
-            icone: '<img src="' + ICONS_DIR + 'outils-hand-100.png" alt="S\u00e9lection">',
+            icone: '<img src="' + ICONS_DIR + 'outils-move-100.png" alt="S\u00e9lection">',
             curseur: 'grab',
             type: 'selection'
         },
