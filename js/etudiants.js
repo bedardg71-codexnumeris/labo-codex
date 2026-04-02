@@ -995,17 +995,21 @@ function afficherListeEtudiantsConsultation() {
     const minimumCompletionTab = configPortfolioTab.minimumCompletion || modalitesTab.configPAN?.portfolio?.minimumCompletion || 3;
 
     // Compter les évaluations par étudiant (artefacts-portfolio évalués)
+    // Pré-indexé par DA pour éviter O(N*M) — une seule passe sur les évaluations
     const productionsTab = obtenirDonneesSelonMode('productions') || [];
     const artefactIds = new Set(productionsTab.filter(p => p.type === 'artefact-portfolio').map(p => p.id));
     const evaluationsTab = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
 
+    const evalsParDA = new Map();
+    evaluationsTab.forEach(ev => {
+        if (artefactIds.has(ev.productionId) && !ev.remplaceeParId &&
+            ev.noteFinale !== null && ev.noteFinale !== undefined) {
+            evalsParDA.set(ev.etudiantDA, (evalsParDA.get(ev.etudiantDA) || 0) + 1);
+        }
+    });
+
     etudiantsFiltres.forEach(e => {
-        const nbEvals = evaluationsTab.filter(ev =>
-            ev.etudiantDA === e.da &&
-            artefactIds.has(ev.productionId) &&
-            !ev.remplaceeParId &&
-            ev.noteFinale !== null && ev.noteFinale !== undefined
-        ).length;
+        const nbEvals = evalsParDA.get(e.da) || 0;
         e.nbEvaluations = nbEvals;
         e.performanceInsuffisante = nbEvals > 0 && nbEvals < minimumCompletionTab;
     });

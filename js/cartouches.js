@@ -285,11 +285,8 @@ async function chargerSelectGrillesRetroaction() {
     
     if (!select) return;
     
-    select.innerHTML = '<option value="">-- Choisir une grille --</option>';
-    grilles.forEach(grille => {
-        const nomEchappe = echapperHtml(grille.nom);
-        select.innerHTML += `<option value="${grille.id}">${nomEchappe}</option>`;
-    });
+    select.innerHTML = '<option value="">-- Choisir une grille --</option>' +
+        grilles.map(grille => `<option value="${grille.id}">${echapperHtml(grille.nom)}</option>`).join('');
 }
 
 /**
@@ -328,11 +325,8 @@ async function chargerCartouchesRetroaction() {
         cartouches = [cartouches];
     }
 
-    selectCartouche.innerHTML = '<option value="">-- Nouvelle cartouche --</option>';
-    cartouches.forEach(cartouche => {
-        const nomEchappe = echapperHtml(cartouche.nom);
-        selectCartouche.innerHTML += `<option value="${cartouche.id}">${nomEchappe}</option>`;
-    });
+    selectCartouche.innerHTML = '<option value="">-- Nouvelle cartouche --</option>' +
+        cartouches.map(cartouche => `<option value="${cartouche.id}">${echapperHtml(cartouche.nom)}</option>`).join('');
 
     document.getElementById('aucuneEvalRetroaction').classList.add('u-hide');
     document.getElementById('infoCartouche').classList.remove('u-hide');

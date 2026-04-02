@@ -379,11 +379,11 @@ function chargerEchellePerformance() {
 
     // Ajouter les échelles personnalisées
     if (echelles && echelles.length > 0) {
-        echelles.forEach(echelle => {
+        select.innerHTML += echelles.map(echelle => {
             const nomEchappe = echapperHtml(echelle.nom || 'Échelle sans nom');
             const nbNiveaux = echelle.niveaux?.length || 0;
-            select.innerHTML += `<option value="${echelle.id}">${nomEchappe} (${nbNiveaux} niveaux)</option>`;
-        });
+            return `<option value="${echelle.id}">${nomEchappe} (${nbNiveaux} niveaux)</option>`;
+        }).join('');
     }
 
     // Sélection automatique
@@ -4051,10 +4051,8 @@ function chargerFiltresEvaluations() {
     const selectProduction = document.getElementById('filtre-production-eval');
     if (selectProduction) {
         const productions = obtenirDonneesSelonMode('productions');
-        selectProduction.innerHTML = '<option value="">Toutes les productions</option>';
-        productions.forEach(prod => {
-            selectProduction.innerHTML += `<option value="${prod.id}">${echapperHtml(prod.titre || prod.nom)}</option>`;
-        });
+        selectProduction.innerHTML = '<option value="">Toutes les productions</option>' +
+            productions.map(prod => `<option value="${prod.id}">${echapperHtml(prod.titre || prod.nom)}</option>`).join('');
     }
 }
 
@@ -4066,10 +4064,8 @@ function rechargerFiltreProduction() {
     const selectProduction = document.getElementById('filtre-production-eval');
     if (selectProduction) {
         const productions = obtenirDonneesSelonMode('productions');
-        selectProduction.innerHTML = '<option value="">Toutes les productions</option>';
-        productions.forEach(prod => {
-            selectProduction.innerHTML += `<option value="${prod.id}">${echapperHtml(prod.titre || prod.nom)}</option>`;
-        });
+        selectProduction.innerHTML = '<option value="">Toutes les productions</option>' +
+            productions.map(prod => `<option value="${prod.id}">${echapperHtml(prod.titre || prod.nom)}</option>`).join('');
     }
 }
 
