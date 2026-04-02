@@ -3278,9 +3278,29 @@ function genererRetroactionBilan() {
         .sort(function(a, b) { return (ORDRE_NIV[a.niveauSelectionne] || 0) - (ORDRE_NIV[b.niveauSelectionne] || 0); });
     var tousMaitrises = defis.length === 0 && criteres.length > 0;
 
+    // Vérifier si le critère algorithmique (français écrit) est à 0% et le prioriser
+    var algoA0 = null;
+    if (ec.donneesAlgorithmiques && grilleDef) {
+        grilleDef.criteres.forEach(function(gc) {
+            if (gc.type === 'algorithmique' && ec.donneesAlgorithmiques[gc.id]) {
+                var da = ec.donneesAlgorithmiques[gc.id];
+                if (da.pourcentage === 0 && da.erreurs > 0) {
+                    algoA0 = { critereNom: gc.nom, erreurs: da.erreurs, mots: da.mots };
+                }
+            }
+        });
+    }
+
+    if (algoA0) {
+        html += '<p>- <strong>la qualit\u00e9 du fran\u00e7ais \u00e9crit est \u00e0 travailler en priorit\u00e9</strong> (' + algoA0.critereNom + ' : ' + algoA0.erreurs + ' erreur' + (algoA0.erreurs > 1 ? 's' : '') + ' sur ' + algoA0.mots + ' mots, Insuffisant)</p>';
+    }
+
     if (defis.length > 0) {
-        for (var i = 0; i < Math.min(2, defis.length); i++) {
+        var maxDefis = algoA0 ? 1 : 2;
+        for (var i = 0; i < Math.min(maxDefis, defis.length); i++) {
             var d = defis[i];
+            // Ne pas répéter le critère algorithmique déjà mentionné
+            if (algoA0 && d.critereNom === algoA0.critereNom) { maxDefis++; continue; }
             var desc = d.description ? d.description.toLowerCase() : d.critereNom;
             var patron = nomsPatrons.indexOf(d.critereNom) !== -1 ? '. Cet objectif est prioritaire depuis 3 productions' : '';
             html += '<p>- ' + desc + ' (' + d.critereNom + ' ' + (NOMS_NIV[d.niveauSelectionne] || '') + ')' + patron + '</p>';
