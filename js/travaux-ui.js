@@ -495,6 +495,15 @@
         paletteEl.style.left = '12px';
         zoneCanvas.appendChild(paletteEl);
 
+        // Bouton réglages annotation (click direct — le dispatcher ne traverse pas le canvas overlay)
+        const btnReglagesAnnot = document.getElementById('travaux-btn-reglages-annotation');
+        if (btnReglagesAnnot) {
+            btnReglagesAnnot.addEventListener('click', function(e) {
+                e.stopPropagation();
+                travauxOutils.afficherRaccourcis();
+            });
+        }
+
         // Ouvrir les palettes Codes et Tampons par défaut
         if (typeof travauxOutils !== 'undefined') {
             if (!document.getElementById('travaux-palette-erreurs-fr') && travauxOutils.togglePaletteErreursFrancais) {
