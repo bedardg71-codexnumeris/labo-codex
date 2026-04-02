@@ -56,8 +56,8 @@ Ce pattern est utilise dans :
 
 ## Etat actuel du projet
 
-**Version** : Beta 99.02 (Build 0204-0655)
-**Objectif** : Plan de consolidation avril 2026 — TOUS LES TIERS TERMINES (0→5.5)
+**Version** : Beta 99.02 (Build 0402-1655)
+**Objectif** : Plan de consolidation avril 2026 — TOUS LES TIERS TERMINES (0→5.5) + Audit CSS 5.2
 **Priorite** : **Securite + Proprete > Nouvelles fonctionnalites**
 
 **Derniere session** : Voir `../SESSION.md` (racine du projet)
