@@ -4402,6 +4402,16 @@
                 ? (production.titre || production.nom)
                 : 'Non associée';
         }
+
+        // Synchroniser les labels de la palette Annotation
+        const labelAnnotEtud = document.getElementById('travaux-annot-label-etudiant');
+        if (labelAnnotEtud) {
+            labelAnnotEtud.textContent = labelEtud ? labelEtud.textContent : '--';
+        }
+        const labelAnnotProd = document.getElementById('travaux-annot-label-production');
+        if (labelAnnotProd) {
+            labelAnnotProd.textContent = labelProd ? labelProd.textContent : '--';
+        }
     }
 
     /**

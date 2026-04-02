@@ -1322,6 +1322,11 @@
         html += '<div class="groupe-boutons-ligne">';
         html += '<button class="btn btn-supprimer btn-tres-compact u-flex-1" data-action="travauxAnnotation.effacerPage" title="Effacer toute la page">Effacer tout</button>';
         html += '</div>';
+        // Info étudiant/production (même info que palette Paramètres)
+        html += '<div id="travaux-annot-identite" class="travaux-eval-identite" style="margin-top: 6px;">';
+        html += '<span class="travaux-eval-label-val" id="travaux-annot-label-etudiant" style="font-weight: 600;">--</span>';
+        html += '<span class="travaux-eval-label-val travaux-eval-label-production" id="travaux-annot-label-production">--</span>';
+        html += '</div>';
         html += '</div>';
 
         html += '<hr class="separateur-horizontal">';
