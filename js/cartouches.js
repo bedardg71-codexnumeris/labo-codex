@@ -2524,7 +2524,6 @@ window.supprimerCartoucheConfirm = supprimerCartoucheConfirm;
 window.chargerCartouchesRetroaction = chargerCartouchesRetroaction;
 window.sauvegarderCartouche = sauvegarderCartouche;
 window.sauvegarderCommentaire = sauvegarderCommentaire;
-// window.genererApercuRetroaction = genererApercuRetroaction; // FIXME: fonction n'existe pas
 window.importerCommentaires = importerCommentaires;
 window.initialiserModuleCartouches = initialiserModuleCartouches;
 

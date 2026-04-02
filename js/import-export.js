@@ -1,6 +1,8 @@
 /* ===============================
    📦 MODULE: IMPORT/EXPORT DE DONNÉES
    Adapté de index 35-M5
+
+   ÉCRITURES pratiquesConfigurables : import JSON (fusion), import Code Connect (fusion)
    =============================== */
 
 (function() {

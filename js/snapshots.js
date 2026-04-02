@@ -379,7 +379,6 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
     };
 
     // 🐛 DEBUG - Désactivé pour performance
-    // console.log(`[calculerIndicesHistoriques] RETOUR: A=${resultat.A}, C=${resultat.C}, P=${resultat.P}`);
 
     return resultat;
 }
@@ -468,7 +467,6 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
 
             numeroSemaine = infoJour.numeroSemaine;
         }
-
 
         // Calculer indices pour chaque étudiant
         // ✅ CORRECTIF (13 fév 2026): Utiliser obtenirEtudiantsCoursActif() qui filtre par
@@ -925,7 +923,6 @@ async function reconstruireSnapshotsHistoriques() {
             }
         }
 
-
         // ✅ CORRECTIF CRITIQUE (2 mars 2026): Forcer la synchro du cache pour les snapshots
         // Problème : après reconstruction, les snapshots sont dans IndexedDB (11 captures)
         // mais le cache localStorage peut contenir une version périmée (4 captures).
@@ -1261,7 +1258,5 @@ window.afficherStatutSnapshots = afficherStatutSnapshots;
 window.capturerSnapshotManuel = capturerSnapshotManuel;
 window.lancerReconstructionRetroactive = lancerReconstructionRetroactive;
 window.confirmerNettoyageSnapshots = confirmerNettoyageSnapshots;
-
-
 
 })();

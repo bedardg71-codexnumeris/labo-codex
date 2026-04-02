@@ -28,7 +28,6 @@ class PratiquePANStandards {
 
     constructor() {
         // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-        // console.log('🎯 Initialisation de la pratique PAN-Standards');
     }
 
     // ========================================================================
@@ -95,7 +94,6 @@ class PratiquePANStandards {
 
         // Si portfolio désactivé, retourner null (productions indépendantes)
         if (!portfolioActif) {
-            // console.log('[PAN] Portfolio désactivé - productions indépendantes');
             return null;
         }
 
@@ -113,7 +111,6 @@ class PratiquePANStandards {
         );
 
         if (evaluationsEleve.length === 0) {
-            // console.log('[PAN] Aucune évaluation pour DA', da);
             return null;
         }
 
@@ -205,7 +202,6 @@ class PratiquePANStandards {
         const indiceP = moyennePonderee / 100;
 
         // ✅ DÉSACTIVÉ (10 déc 2025): Pour performance Safari
-        // console.log(`[PAN] Performance DA ${da}: ${(indiceP * 100).toFixed(1)}% (Portfolio: ${moyennePortfolio.toFixed(1)}% × ${ponderationPortfolio}%, Terminale: ${evalTerminale.noteFinale}% × ${ponderationTerminale}%)`);
 
         return indiceP;
     }
@@ -236,7 +232,6 @@ class PratiquePANStandards {
         // Si portfolio désactivé, retourner null
         if (!portfolioActif) {
             // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-            // console.log('[PAN-Historique] Portfolio désactivé');
             return null;
         }
 
@@ -304,7 +299,6 @@ class PratiquePANStandards {
 
         if (evaluationsEleve.length === 0) {
             // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-            // console.log(`[PAN-Historique] Aucune évaluation pour DA ${da} jusqu'à ${dateLimite}`);
             return null;
         }
 
@@ -316,7 +310,6 @@ class PratiquePANStandards {
             const indiceP = moyenne / 100;
 
             // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-            // console.log(`[PAN-Historique] DA ${da}: ${moyenne.toFixed(1)}% (${evaluationsEleve.length}/${nombreARetenir} artefacts - moyenne de TOUS)`);
             return indiceP;
         }
 
@@ -444,7 +437,6 @@ class PratiquePANStandards {
 
         // Si portfolio désactivé, retourner null (productions indépendantes)
         if (!portfolioActif) {
-            // console.log('[PAN] Portfolio désactivé - productions indépendantes');
             return null;
         }
 
@@ -462,7 +454,6 @@ class PratiquePANStandards {
         );
 
         if (evaluationsEleve.length === 0) {
-            // console.log('[PAN] Aucune évaluation récente pour DA', da);
             return null;
         }
 
@@ -478,7 +469,6 @@ class PratiquePANStandards {
         const indicePRecent = moyenne / 100;
 
         // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-        // console.log(`[PAN] Performance récente DA ${da}: ${(indicePRecent * 100).toFixed(1)}% (${artefactsRecents.length} derniers artefacts)`);
 
         return indicePRecent;
     }
@@ -522,7 +512,6 @@ class PratiquePANStandards {
         });
 
         if (travauxAssignes.length === 0) {
-            // console.log('[PAN] Aucun travail assigné avec dateEcheance');
             return null;
         }
 
@@ -541,7 +530,6 @@ class PratiquePANStandards {
         const indiceC = travauxRemis.length / travauxAssignes.length;
 
         // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-        // console.log(`[PAN] Complétion DA ${da}: ${(indiceC * 100).toFixed(1)}% (${travauxRemis.length}/${travauxAssignes.length} assignés)`);
 
         return indiceC;
     }
@@ -566,7 +554,6 @@ class PratiquePANStandards {
         const moyennes = this._calculerMoyennesCriteresRecents(da);
 
         if (!moyennes) {
-            // console.log('[PAN] Pas de moyennes calculables pour DA', da);
             return { type: 'srpnf', defis: [], forces: [] };
         }
 
@@ -687,11 +674,6 @@ class PratiquePANStandards {
         const francaisMoyen = indices3Derniers.francaisMoyen;
 
         // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-        // console.log('[PAN] Génération cible RàI pour DA', da, {
-        //     pattern: pattern.type,
-        //     defi: defiPrincipal,
-        //     francais: francaisMoyen.toFixed(1) + '%'
-        // });
 
         // Logique de décision selon pattern et défi principal
         return this._determinerCibleIntervention(
@@ -932,7 +914,6 @@ class PratiquePANStandards {
         const regexCritere = new RegExp(`(${nomsRegex})\\s*\\(([IDME0])\\)`, 'gi');
 
         // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-        // console.log(`✅ [PAN-Standards] Regex dynamique: ${regexCritere.source}`);
 
         derniersArtefacts.forEach(evaluation => {
             const retroaction = evaluation.retroactionFinale || '';
@@ -1625,7 +1606,6 @@ class PratiquePANStandards {
     try {
         window.enregistrerPratique('pan-standards', instance);
         // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-        // console.log('✅ [PAN-Standards] Pratique PAN-Standards enregistrée avec succès');
     } catch (error) {
         console.error('[PAN-Standards] Erreur lors de l\'enregistrement:', error);
     }
@@ -1635,7 +1615,5 @@ class PratiquePANStandards {
 window.PratiquePANStandards = PratiquePANStandards;
 
 // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-// console.log('✅ Module pratique-pan-standards.js chargé');
-
 
 })();

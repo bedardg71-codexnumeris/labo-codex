@@ -2,6 +2,8 @@
  * WIZARD PRATIQUE V2
  * Wizard de création de pratique de notation aligné sur l'architecture Beta 95
  *
+ * ÉCRITURES pratiquesConfigurables : création et modification via wizard
+ *
  * Structure :
  * 1. Définition des étapes (ETAPES_WIZARD)
  * 2. Gestion de la navigation (suivant, précédent, saut conditionnel)

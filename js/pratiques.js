@@ -2,7 +2,10 @@
    MODULE 12: PRATIQUES DE NOTATION
    Index: 50 10-10-2025a → Modularisation
    Étendu le 20 octobre 2025 pour supporter les options d'affichage
-   
+
+   ÉCRITURES pratiquesConfigurables : migration (jetons, établissements),
+   modification (config, wizard, bibliothèque), suppression, partage CC
+
    ⚠️ AVERTISSEMENT ⚠️
    Ce module gère la configuration du système de notation
    du cours (traditionnelle ou alternative) ET les options
