@@ -1247,7 +1247,9 @@ function calculerNoteAlgorithmique(critereId, ponderation, facteur) {
 
     let niveauIDME = '--';
     if (echelleSelectionnee && echelleSelectionnee.niveaux) {
+        // Exclure le niveau "0" (Non recevable) — réservé à l'intégrité académique
         const niveau = echelleSelectionnee.niveaux.find(n => {
+            if (n.code === '0' || n.code === 0) return false;
             return pctFinal >= n.min && pctFinal <= n.max;
         });
         niveauIDME = niveau ? niveau.code : '--';
@@ -1402,7 +1404,9 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
 
     let niveauIDME = '--';
     if (echelleSelectionnee && echelleSelectionnee.niveaux) {
+        // Exclure le niveau "0" (Non recevable) — réservé à l'intégrité académique
         const niveau = echelleSelectionnee.niveaux.find(n => {
+            if (n.code === '0' || n.code === 0) return false;
             return pctFinal >= n.min && pctFinal <= n.max;
         });
         niveauIDME = niveau ? niveau.code : '--';
@@ -1577,7 +1581,9 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
 
     let niveauIDME = '--';
     if (echelleSelectionnee && echelleSelectionnee.niveaux) {
+        // Exclure le niveau "0" (Non recevable) — réservé à l'intégrité académique
         const niveau = echelleSelectionnee.niveaux.find(n => {
+            if (n.code === '0' || n.code === 0) return false;
             return pctFinal >= n.min && pctFinal <= n.max;
         });
         niveauIDME = niveau ? niveau.code : '--';
