@@ -15161,7 +15161,7 @@ body.mode-clair .prep-select {
 /* Sous-sections encadrées dans les palettes (Paramètres, Annotation) */
 .palette-sous-section {
     margin-top: 8px;
-    padding: 8px 10px;
+    padding: 8px;
     background: var(--bleu-tres-pale, rgba(0,0,0,0.15));
     border-radius: var(--radius-moyen, 8px);
 }
@@ -15416,10 +15416,10 @@ body.mode-clair .prep-select {
 
 /* Contenu du panneau */
 .travaux-panneau-corps {
-    padding: 8px 10px;
+    padding: 8px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
     overflow-y: auto;
     max-height: calc(100vh - 120px);
 }
