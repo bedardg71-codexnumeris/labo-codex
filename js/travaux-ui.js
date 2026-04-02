@@ -4300,6 +4300,13 @@
         // (gère le chaînage complet : étudiant → productions → grille → évaluation existante)
         preRemplirEvaluation(fichier.etudiantDA, productionIdEffective);
 
+        // Injecter les compteurs d'erreurs après que la grille soit chargée
+        setTimeout(function() {
+            if (typeof travauxOutils !== 'undefined' && typeof travauxOutils.mettreAJourCompteursErreurs === 'function') {
+                travauxOutils.mettreAJourCompteursErreurs();
+            }
+        }, 2000);
+
         // Attacher les événements de mémorisation pour persister les sélections
         if (typeof attacherEvenementsMemorisation === 'function') {
             attacherEvenementsMemorisation();
