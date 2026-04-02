@@ -2933,6 +2933,11 @@
             // Charger les annotations du nouveau fichier (nécessaire dans les deux modes)
             travauxAnnotation.activerAnnotation();
 
+            // Mettre à jour les labels identité dans la palette Annotation
+            if (fichierOuvert) {
+                remplirLabelsIdentite(fichierOuvert);
+            }
+
             // Restaurer le mode courant (Annoter ou Évaluer) sans flash
             // 🔧 FIX (5 mars 2026) : Ne PAS re-basculer en mode évaluer si un callback
             // _apresOuvertureFichier est en attente — le callback fera lui-même le
@@ -6407,6 +6412,11 @@
         resetChrono: resetChrono,
         // Association production
         changerProductionFichier: changerProductionFichier,
+        // Filtre production (appelé depuis liste-evaluations pour pré-sélectionner)
+        setProductionFiltre: function(prodId) {
+            productionFiltreActive = prodId || '';
+            sessionStorage.setItem('travaux-filtre-production', productionFiltreActive);
+        },
         // Preview inline
         ouvrirPreviewInline: ouvrirPreviewInline,
         previewPagePrec: previewPagePrec,
