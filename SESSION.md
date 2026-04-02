@@ -1,8 +1,64 @@
-# SESSION ACTIVE — BETA 99.01
+# SESSION ACTIVE — BETA 99.02
 
-**Date** : 1er avril 2026
-**Version** : Beta 99.01 (Build 0104-1915)
-**Statut** : Plan de consolidation avril 2026 — Tier 0 TERMINÉ, Tier 1 TERMINÉ, Tier 2 TERMINÉ
+**Date** : 2 avril 2026
+**Version** : Beta 99.02 (Build 0204-0655)
+**Statut** : Plan de consolidation avril 2026 — **TOUS LES TIERS TERMINÉS (0→5.5)**
+
+---
+
+## Bilan de la session (2 avril 2026) — Plan de consolidation COMPLET (6 commits)
+
+**Commits** : `4191e3c`, `d263b61`, `491f631`, `1ce5b72`, `b1ba769`, `2abc00e`
+**~30 fichiers JS modifiés, 1 créé (couleurs.js), 1 archivé (entites-ui.js).**
+
+### Tier 2.5 — Sécurité des imports
+- 20 vulnérabilités XSS corrigées (échappement innerHTML) dans 7 fichiers
+- travaux-export-pdf.js validé sans correction nécessaire
+- Absence de validation de schéma documentée comme risque accepté
+- Audit : `docs/audit-securite-imports-tier2.5.md`
+
+### Tier 3 — Performance
+- etudiants.js : boucle O(N*M) → O(N+M) via Map pré-indexée
+- 18 innerHTML += en boucle forEach convertis en map().join() (6 fichiers)
+- Diagnostic storage déjà en place (session 27 mars)
+
+### Tier 3.5 — Cohérence visuelle
+- `js/couleurs.js` créé : lit les variables CSS du design system, expose `COULEURS.indices/pratiques/risque/idme/graphiques/correlations`
+- graphiques-progression.js et correlations-longitudinales.js redirigés vers COULEURS
+- Hex orphelines CSS et tampons documentés (vérification visuelle requise — voir ci-dessous)
+
+### Tier 4 — Hygiène structurelle
+- 18 écritures pratiquesConfigurables documentées dans 6 fichiers
+- Paires V1/V2 vérifiées (pas de vrai doublon)
+- `entites-ui.js` archivé dans `js/_archives/` (1040 lignes, non chargé)
+- `pack-demo-20.js` (18 737 lignes) en lazy-load dynamique
+- 39 console.log commentés supprimés, 9 FIXME/TODO obsolètes supprimés
+
+### Tier 4.5 — Métadonnées CC
+- metadata_cc ajouté à la création des pratiques
+- Champ contributeurs ajouté aux productions
+- 5 exports de bibliothèques enrichis avec ajouterMetadonnéesCC()
+- Tampons : champ auteur → auteur_original (6 occurrences)
+
+### Tiers 5 + 5.5 — Consolidation + Préparation AQPC
+- Zéro handler inline dans index.html (confirmé)
+- Zéro console.log actif (mesure #9 atteinte)
+- 549 alert() audités — tous en français, modules démo = 0 alert()
+- Notification quota dans sauvegarderDonneesSelonMode()
+- `listerTrimestresOrphelins()` + `purgerTrimestresOrphelins()` dans trimestres.js
+- `window._verifierPreDemo()` : checklist automatique pré-colloque
+
+### Ce qui reste (hors code)
+- **5.5.1** : Test données réelles anonymisées (walkthrough manuel par Grégoire)
+- **5.5.6** : Lisibilité projecteur (test sur écran externe)
+- **3.5.2** : Couleurs tampons d'annotation — décision Grégoire (intentionnelles ou arbitraires ?)
+
+### CSS reporté
+- **3.5.3** : ~381 hex en dur dans styles.css. `#d4b878` (10 occ.) et `#f06878` (2 occ.) ont des variables CSS mais les remplacer changerait le rendu en mode clair. Nécessite vérification visuelle.
+- **5.2** : Audit CSS complet (22 000 lignes) — sélecteurs morts, variables inutilisées, spécificité. Chantier structurel lourd.
+
+### Constats importants
+- **rapport-bug.js** a toujours des changements pré-existants non commités (refactoring modales inline → classes CSS). Pas de cette session.
 
 ---
 
