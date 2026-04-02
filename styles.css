@@ -23,23 +23,16 @@
     --bleu-carte: #1a3a48;
     --bleu-pale: #1a3040;
     --bleu-tres-pale: #142428;
-    --bleu-simulation: #1a5266;
 
     /* Fond de page - Palette ocean sombre */
     --fond-page-sature: #0e1e28;
     --fond-page-clair: #0c1a22;
-    --bleu-anonymisation: #0c1a22;
-
-    /* === GRADIENTS (04b-box-shadow) === */
-    --gradient-entete: linear-gradient(135deg, #0a1820 0%, #142a38 40%, #1a3848 70%, #0e2028 100%);
-    --gradient-fond-page: linear-gradient(135deg, #0e1e28 0%, #0c1a22 100%);
 
     /* === OMBRES - 5 niveaux (renforcées pour fond sombre) === */
     --shadow-subtil: 0 1px 4px rgba(10, 30, 40, 0.3);
     --shadow-normal: 0 2px 8px rgba(10, 30, 40, 0.4);
     --shadow-prononce: 0 4px 14px rgba(10, 30, 40, 0.5);
     --shadow-fort: 0 8px 24px rgba(10, 30, 40, 0.55);
-    --shadow-inset: inset 0 1px 3px rgba(10, 30, 40, 0.15);
 
     /* === BORDER-RADIUS - 4 niveaux (04b-box-shadow) === */
     --radius-petit: 5px;      /* Badges Tétris */
@@ -47,20 +40,11 @@
     --radius-grand: 12px;     /* Conteneurs, cartes, modaux */
     --radius-pill: 20px;      /* Pills uniformes */
 
-    /* === TOKENS BADGES TÉTRIS === */
-    --badge-padding: 3px 8px;
-    --badge-font-size: 0.75rem;
-    --badge-border-radius: var(--radius-petit);
-
     /* === TAILLES TÉTRIS (SPECS_TETRIS) === */
     --padding-compact: 3px 8px;
     --font-compact: 0.75rem;
-    --padding-compact-pill: 3px 10px;
     --padding-moyen: 10px 15px;
     --font-moyen: 0.9rem;
-    --padding-moyen-pill: 6px 15px;
-    --font-moyen-pill: 0.85rem;
-    --padding-large: 15px;
 
     /* Couleurs d'accent (ocean: sarcelle + laiton) */
     --orange-accent: #c8a060;
@@ -93,26 +77,7 @@
     /* Couleurs de tableau */
     --table-hover: rgba(106, 172, 184, 0.12);
 
-    /* === NAVIGATION === */
-    --nav-bg: #122a34;
-    --nav-normal: #8aa4b0;
-    --nav-hover: #6aacb8;
-    --nav-actif: #6aacb8;
-    --nav-bordure-actif: var(--orange-accent);
-
-    /* Navigation - États actifs par mode */
-    --nav-actif-normal: #6aacb8;
-    --nav-actif-simulation: #6aacb8;
-    --nav-actif-anonymisation: #5a7a88;
-
-    /* === SOUS-NAVIGATION === */
-    --sous-nav-bg: #0e1e28;
-    --sous-nav-normal: #8aa4b0;
-    --sous-nav-hover: #6aacb8;
-    --sous-nav-actif: #7ec8d4;
-
     /* Sous-navigation - Fonds par mode */
-    --sous-nav-bg-normal: #0e1e28;
     --sous-nav-bg-simulation: #0e1e28;
     --sous-nav-bg-anonymisation: #0e1e28;
 
@@ -151,7 +116,6 @@
     --idme-insuffisant: #F44336;
 
     /* === COULEURS GRISES (inversées pour fond sombre) === */
-    --gris-tres-fonce: #d0e0e4;
     --gris-fonce: #b0c4cc;
     --gris-moyen: #8aa4b0;
     --gris-clair: #5a7a88;
@@ -272,12 +236,10 @@
     --surface-carte: #1a3040;
     --surface-element: #244858;
     --surface-input: rgba(106, 172, 184, 0.08);
-    --ocean-moyen: #1a3040;
     --texte-principal: #d0e0e4;
     --texte-secondaire: #8aa4b0;
     --texte-muted: #5a7a88;
     --accent-primaire: #6aacb8;
-    --accent-secondaire: #c8a060;
 }
 
 /* ===============================
@@ -294,17 +256,6 @@
     --bleu-carte: var(--sarcelle-carte);
     --bleu-pale: var(--sarcelle-pale);
     --bleu-tres-pale: var(--sarcelle-tres-pale);
-
-    /* Navigation */
-    --nav-normal: var(--texte-secondaire, #8aa4b0);
-    --nav-actif: var(--accent-primaire, #6aacb8);
-    --nav-actif-normal: var(--accent-primaire, #6aacb8);
-
-    /* Sous-navigation */
-    --sous-nav-bg: var(--sarcelle-pale);
-    --sous-nav-bg-normal: var(--sarcelle-pale);
-    --sous-nav-normal: var(--texte-secondaire, #8aa4b0);
-    --sous-nav-actif: var(--sarcelle-clair);
 
     /* Boutons */
     --btn-principal: var(--sarcelle-principal);
@@ -336,17 +287,6 @@ body.mode-demo {
     --bleu-carte: var(--sarcelle-carte);
     --bleu-pale: var(--sarcelle-pale);
     --bleu-tres-pale: var(--sarcelle-tres-pale);
-
-    /* Navigation */
-    --nav-normal: var(--texte-secondaire, #8aa4b0);
-    --nav-actif: var(--accent-primaire, #6aacb8);
-    --nav-actif-normal: var(--accent-primaire, #6aacb8);
-
-    /* Sous-navigation */
-    --sous-nav-bg: var(--sarcelle-pale);
-    --sous-nav-bg-normal: var(--sarcelle-pale);
-    --sous-nav-normal: var(--texte-secondaire, #8aa4b0);
-    --sous-nav-actif: var(--sarcelle-clair);
 
     /* Boutons */
     --btn-principal: var(--sarcelle-principal);
@@ -380,17 +320,6 @@ body.mode-demo .sous-navigation {
     --bleu-pale: #1a3040;
     --bleu-tres-pale: #0c1820;
 
-    /* Navigation */
-    --nav-normal: #6a8a94;
-    --nav-actif: #5a8a94;
-    --nav-actif-normal: #5a8a94;
-
-    /* Sous-navigation */
-    --sous-nav-bg: #0c1820;
-    --sous-nav-bg-normal: #0c1820;
-    --sous-nav-normal: #6a8a94;
-    --sous-nav-actif: #5a8a94;
-
     /* Boutons */
     --btn-principal: #1a3040;
     --btn-principal-hover: #1e3848;
@@ -415,23 +344,19 @@ body.mode-clair {
     --bleu-carte: #e8f2fd;
     --bleu-pale: #e8f2fd;
     --bleu-tres-pale: #f0f8ff;
-    --bleu-simulation: #1a5266;
     --bleu-meta: #3a7cc6;
 
     /* Fond de page */
     --fond-page-sature: #d4e6f5;
     --fond-page-clair: #e8f2fd;
-    --gradient-fond-page: linear-gradient(135deg, #d4e6f5 0%, #e8f2fd 100%);
 
     /* Ombres — bleutées double couche */
     --shadow-subtil: 0 1px 3px rgba(3,46,92,0.06), 0 2px 6px rgba(3,46,92,0.08);
     --shadow-normal: 0 2px 4px rgba(3,46,92,0.08), 0 4px 12px rgba(3,46,92,0.15);
     --shadow-prononce: 0 4px 8px rgba(3,46,92,0.1), 0 8px 20px rgba(3,46,92,0.18);
     --shadow-fort: 0 6px 12px rgba(3,46,92,0.12), 0 12px 32px rgba(3,46,92,0.2);
-    --shadow-inset: inset 0 1px 3px rgba(3,46,92,0.06);
 
     /* Gris — inversés (foncés pour texte, clairs pour fond) */
-    --gris-tres-fonce: #1a1a2e;
     --gris-fonce: #333344;
     --gris-moyen: #666677;
     --gris-clair: #999aab;
@@ -445,7 +370,6 @@ body.mode-clair {
 
     /* Accents — rester vifs, légèrement assombris pour contraste sur clair */
     --accent-primaire: #065dbb;
-    --accent-secondaire: #a07830;
 
     /* Surfaces */
     --surface-page: #d4e6f5;
@@ -454,7 +378,6 @@ body.mode-clair {
     --surface-carte: #ffffff;
     --surface-element: #f0f8ff;
     --surface-input: rgba(3, 46, 92, 0.06);
-    --ocean-moyen: #f0f8ff;
 
     /* Navigation — RESTE SOMBRE (en-tête conservé) */
     /* pas de redéfinition des --nav-* ni --sous-nav-* */
@@ -1561,11 +1484,6 @@ body.mode-clair .nav-icone {
 .sous-section.active {
     display: block;
     animation: apparition 0.3s ease;
-}
-
-/* Forcer l'affichage des sous-sections dans réglages */
-#section-reglages .sous-section.active {
-    display: block !important;
 }
 
 @keyframes apparition {
@@ -4350,36 +4268,6 @@ body.mode-clair .changelog-entry--sarcelle .changelog-title { color: #065dbb; }
    IMPRESSION
    =============================== */
 
-@media print {
-    body {
-        background: var(--surface-section, #142428);
-        padding: 0;
-    }
-
-    .navigation-principale,
-    .sous-navigation,
-    .btn,
-    .statut-sauvegarde {
-        display: none !important;
-    }
-
-    .conteneur {
-        box-shadow: none;
-        border-radius: 0;
-        max-width: 100%;
-    }
-
-    .carte {
-        break-inside: avoid;
-    }
-
-    .entete {
-        background: var(--surface-section, #142428);
-        color: var(--accent-primaire);
-        border-bottom: 2px solid var(--bleu-principal);
-    }
-}
-
 /* ===============================
    RESPONSIVE
    =============================== */
@@ -4710,43 +4598,6 @@ body.mode-clair .changelog-entry--sarcelle .changelog-title { color: #065dbb; }
    (Conservé du redesign précédent)
    =============================== */
 
-/* Métriques compactes pour header du profil */
-.metriques-header {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.metrique-compacte {
-    text-align: center;
-    padding: 12px 8px;
-    background: var(--bleu-tres-pale);
-    border-radius: var(--radius-moyen);
-    border: 1px solid var(--bleu-pale);
-    transition: all 0.2s;
-}
-
-.metrique-compacte:hover {
-    background: var(--surface-element, #244858);
-    box-shadow: var(--shadow-normal);
-    transform: translateY(-1px);
-}
-
-.metrique-compacte-valeur {
-    font-size: 1.5rem;
-    font-weight: bold;
-    display: block;
-    margin-bottom: 4px;
-}
-
-.metrique-compacte-label {
-    font-size: 0.8rem;
-    color: var(--bleu-moyen);
-    display: block;
-    font-weight: 500;
-}
-
 /* Carte premium pour cible d'intervention */
 .carte-cible-intervention {
     background: var(--surface-carte, #1a3040);
@@ -4862,42 +4713,6 @@ body.mode-clair .changelog-entry--sarcelle .changelog-title { color: #065dbb; }
     border-top: 1px solid var(--bleu-pale);
 }
 
-/* Toggle pour détails techniques */
-.toggle-details {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 0.85rem;
-    color: var(--bleu-moyen);
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: var(--radius-moyen);
-    transition: background 0.2s;
-    user-select: none;
-    border: 1px solid transparent;
-}
-
-.toggle-details:hover {
-    background: var(--bleu-pale);
-    border-color: var(--bleu-moyen);
-}
-
-.details-techniques {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-    opacity: 0;
-}
-
-.details-techniques.visible {
-    max-height: 800px;
-    padding: 15px;
-    background: var(--bleu-tres-pale);
-    border-radius: var(--radius-moyen);
-    margin-top: 10px;
-    opacity: 1;
-}
-
 /* Chevron rotatif pour toggles */
 .chevron {
     display: inline-block;
@@ -4911,19 +4726,6 @@ body.mode-clair .changelog-entry--sarcelle .changelog-title { color: #065dbb; }
 
 /* Responsive - Mobile */
 @media (max-width: 768px) {
-    .metriques-header {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-    }
-
-    .metrique-compacte {
-        padding: 10px 6px;
-    }
-
-    .metrique-compacte-valeur {
-        font-size: 1.3rem;
-    }
-
     .carte-cible-texte-principal {
         font-size: 1.1rem;
     }
@@ -7277,7 +7079,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     box-shadow: var(--shadow-prononce);
 }
 
-.nom-cartouche,
 .sidebar-item-titre {
     font-weight: 600;
     font-size: 0.95rem;
@@ -7362,50 +7163,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     text-transform: lowercase;
 }
 
-.actions-cartouche,
-.sidebar-item-actions {
-    display: flex;
-    gap: 4px;
-    margin-top: 6px;
-}
-
-.actions-cartouche .btn-icone,
-.sidebar-item-actions .btn-icone {
-    font-size: 0.8rem;
-    padding: 4px 10px;
-    cursor: pointer;
-    border-radius: var(--radius-moyen);
-    font-weight: 500;
-    transition: all 0.15s;
-    color: white;
-    border: none;
-}
-
-/* Bouton Dupliquer - violet */
-.actions-cartouche .btn-icone:first-child,
-.sidebar-item-actions .btn-icone:first-child {
-    background: #4a3a6a;
-}
-
-.actions-cartouche .btn-icone:first-child:hover,
-.sidebar-item-actions .btn-icone:first-child:hover {
-    background: #3a2a5a;
-    box-shadow: 0 2px 6px rgba(74, 58, 106, 0.3);
-}
-
-/* Bouton Supprimer - rouge */
-.actions-cartouche .btn-icone:last-child,
-.sidebar-item-actions .btn-icone:last-child {
-    background: #8a2a2a;
-}
-
-.actions-cartouche .btn-icone:last-child:hover,
-.sidebar-item-actions .btn-icone:last-child:hover {
-    background: #7a1a1a;
-    box-shadow: 0 2px 6px rgba(138, 42, 42, 0.3);
-}
-
-.btn-ajouter-cartouche,
 .sidebar-btn-ajouter {
     width: 100%;
     margin-top: 15px;
@@ -7421,13 +7178,11 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     transition: all 0.15s;
 }
 
-.btn-ajouter-cartouche:hover,
 .sidebar-btn-ajouter:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 10px rgba(30, 90, 74, 0.4);
 }
 
-.zone-centrale-cartouche,
 .zone-principale {
     display: flex;
     flex-direction: column;
@@ -7449,7 +7204,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 /* === SECTION ACCORDÉON D'IMPORT === */
-.accordeon-import,
 .section-accordeon {
     margin: 20px 0;
     border: 1px solid var(--bleu-leger);
@@ -7457,8 +7211,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     overflow: hidden;
 }
 
-.accordeon-import h3,
-.accordeon-import h4,
 .section-accordeon h3,
 .section-accordeon h4 {
     background: #244858;
@@ -7468,12 +7220,10 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-size: 1rem;
 }
 
-.accordeon-import details,
 .section-accordeon details {
     border-top: 1px solid #ddd;
 }
 
-.accordeon-import summary,
 .section-accordeon summary {
     padding: 12px 15px;
     cursor: pointer;
@@ -7483,27 +7233,10 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     user-select: none;
 }
 
-.accordeon-import summary:hover,
 .section-accordeon summary:hover {
     background: var(--bleu-pale);
 }
 
-/* Summary pour sections de matériel pédagogique - style uniformisé */
-summary.summary-materiel {
-    background: #244858;
-    color: white;
-    padding: 12px 15px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 1rem;
-    margin: 0;
-}
-
-summary.summary-materiel:hover {
-    background: #2a5468;
-}
-
-.panneau-import,
 .accordeon-contenu {
     padding: 15px;
     background: var(--surface-carte, #1a3040);
@@ -7518,20 +7251,11 @@ summary.summary-materiel:hover {
     font-size: 0.85rem;
 }
 
-.checkboxes-import-partiel,
-.liste-checkboxes {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin: 10px 0;
-}
-
 #listeCartouchesBanque,
 .sidebar-liste {
     margin: 15px 0;
 }
 
-.filtre-grille-cartouche,
 .sidebar-filtre {
     margin-bottom: 15px;
 }
@@ -9676,15 +9400,6 @@ body.mode-clair .jeton-icone {
    INTERVENTIONS RàI (Beta 85)
    =============================== */
 
-.profil-info-item {
-    margin-bottom: 15px;
-    line-height: 1.6;
-}
-
-.profil-info-item strong {
-    color: var(--accent-primaire);
-}
-
 .liste-etudiants-intervention {
     max-height: 400px;
     overflow-y: auto;
@@ -10905,44 +10620,11 @@ label:has(+ textarea:disabled) {
    UTILITAIRES - Objectifs d'apprentissage (Beta 91)
    =============================== */
 
-/* En-tête avec actions (gauche + droite) */
-.actions-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-/* Groupe d'actions (gauche) */
-.actions-group {
-    display: flex;
-    gap: 10px;
-}
-
-/* Input file caché */
-.input-file-hidden {
-    display: none;
-}
-
 /* Utilitaire pour cacher des éléments */
 .hidden {
     display: none !important;
 }
 
-/* En-tête d'un ensemble avec titre et actions */
-.ensemble-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid var(--gris-leger);
-}
-
-.ensemble-header h3 {
-    margin: 0;
-    color: var(--accent-primaire);
-}
 
 /* Carte d'information avec fond bleu pâle */
 .carte-info-section {
@@ -11023,15 +10705,6 @@ label:has(+ textarea:disabled) {
     margin: 8px 0 0 0;
     font-size: 0.85rem;
     color: var(--gris-moyen);
-}
-
-/* Pied de page avec boutons d'action */
-.actions-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    padding-top: 20px;
-    border-top: 2px solid var(--gris-leger);
 }
 
 /* Alerte conseil (vert pâle) */
@@ -12340,21 +12013,6 @@ body[data-mode="simulation"] table tr:hover {
     line-height: 1;
 }
 
-/* Conteneur scrollable pour listes d'événements */
-.liste-evenements {
-    margin-bottom: 10px;
-    max-height: 150px;
-    overflow-y: auto;
-}
-
-/* Pied de section avec compteur et bouton */
-.section-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.8rem;
-}
-
 /* Grille 2 colonnes avec espacement 15px */
 .grille-2col-gap15 {
     display: grid;
@@ -12376,62 +12034,12 @@ body[data-mode="simulation"] table tr:hover {
     font-weight: 500;
 }
 
-.label-tres-compact {
-    font-size: 0.75rem;
-}
-
 /* Info box harmonisée */
 .info-box {
     background: var(--bleu-tres-pale);
     border-radius: var(--radius-grand);
     padding: 15px;
     margin-top: 15px;
-}
-
-/* Aperçu de groupe-cours */
-.apercu-groupe-cours {
-    background: var(--bleu-tres-pale);
-    border: 1px solid var(--bleu-pale);
-    border-radius: var(--radius-grand);
-    padding: 15px;
-}
-
-.apercu-groupe-cours h5 {
-    margin: 0 0 10px 0;
-    color: var(--accent-primaire);
-    font-size: 0.9rem;
-}
-
-.apercu-groupe-cours p {
-    margin: 5px 0;
-    font-size: 0.85rem;
-    color: var(--gris-fonce);
-}
-
-/* Résumé horaire */
-.resume-horaire {
-    background: var(--bleu-tres-pale);
-    padding: 12px;
-    border-radius: var(--radius-grand);
-    margin-top: 15px;
-}
-
-.resume-horaire h5 {
-    margin: 0 0 8px 0;
-    font-size: 0.85rem;
-    color: var(--accent-primaire);
-}
-
-.resume-horaire-ligne {
-    display: flex;
-    gap: 10px;
-    font-size: 0.8rem;
-    padding: 4px 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.resume-horaire-ligne:last-child {
-    border-bottom: none;
 }
 
 /* ===============================
@@ -20184,7 +19792,6 @@ body.mode-clair .carte h3.carte-titre-bleu,
 body.mode-clair .carte.accordeon .accordeon-header,
 body.mode-clair .section-accordeon h3,
 body.mode-clair .section-accordeon h4,
-body.mode-clair summary.summary-materiel,
 body.mode-clair .apercu-nom-groupe-cours,
 body.mode-clair .info-trimestre-groupe-cours,
 body.mode-clair .cartouche-gradient-bleu,
@@ -20837,15 +20444,21 @@ body.mode-clair .prioritaire-indice-attention {
     body {
         background: white !important;
         color: #1a1a1a !important;
+        padding: 0;
     }
 
     .conteneur {
         background: white !important;
+        box-shadow: none;
+        border-radius: 0;
+        max-width: 100%;
     }
 
     .navigation-principale,
     .sous-navigation,
-    .bandeau-mode {
+    .bandeau-mode,
+    .btn,
+    .statut-sauvegarde {
         display: none !important;
     }
 
@@ -20853,6 +20466,16 @@ body.mode-clair .prioritaire-indice-attention {
     .parcours-notification,
     .parcours-suggestion {
         display: none !important;
+    }
+
+    .carte {
+        break-inside: avoid;
+    }
+
+    .entete {
+        background: white;
+        color: var(--bleu-principal);
+        border-bottom: 2px solid var(--bleu-principal);
     }
 }
 
@@ -22305,20 +21928,6 @@ body.mode-clair .annot-badge.actif {
     overflow-y: auto;
 }
 
-.travaux-retro-item {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    margin-bottom: 16px;
-}
-
-.travaux-retro-item img {
-    width: 36px;
-    height: 36px;
-    flex-shrink: 0;
-    margin-top: 2px;
-}
-
 .travaux-retro-numero {
     width: 28px;
     height: 28px;
@@ -22331,14 +21940,6 @@ body.mode-clair .annot-badge.actif {
     color: white;
     flex-shrink: 0;
     margin-top: 4px;
-}
-
-.travaux-retro-nom {
-    font-weight: 600;
-    min-width: 140px;
-    flex-shrink: 0;
-    padding-top: 6px;
-    font-size: 0.85rem;
 }
 
 .travaux-retro-modal .travaux-retro-textarea {
