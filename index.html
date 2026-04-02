@@ -4973,14 +4973,14 @@
                             <div id="noteFinale1" class="boite-note-finale" data-tooltip="eval-note-finale">
                                 <div class="u-flex-between">
                                     <div>
-                                        <div class="label u-texte-gris u-mb-5" style="font-size: 0.8rem">Note chiffrée</div>
-                                        <div class="valeur u-texte-bold u-texte-bleu" style="font-size: 2rem">
+                                        <div class="label u-texte-gris u-mb-5">Note chiffrée</div>
+                                        <div class="valeur u-texte-bold u-texte-bleu">
                                             <span id="noteProduction1">0.0</span>
                                         </div>
                                     </div>
                                     <div class="u-text-right">
-                                        <div class="u-texte-gris u-mb-5" style="font-size: 0.8rem">Niveau</div>
-                                        <div class="u-texte-bold u-texte-bleu" style="font-size: 2rem">
+                                        <div class="label u-texte-gris u-mb-5">Niveau</div>
+                                        <div class="valeur u-texte-bold u-texte-bleu">
                                             <span id="niveauProduction1">--</span>
                                         </div>
                                     </div>
@@ -10482,11 +10482,11 @@
                                         <h5 class="sous-titre-section u-mb-12" style="margin-top: 0" data-tooltip="reglages-trim-identification">Identification du trimestre</h5>
                                         <div class="grille-identification">
                                             <div class="groupe-form">
-                                                <label style="font-size: 0.8rem">Nom du trimestre <span class="text-danger u-texte-medium">*</span></label>
+                                                <label>Nom du trimestre <span class="text-danger u-texte-medium">*</span></label>
                                                 <input type="text" class="controle-form" id="v2-nomTrimestre" placeholder="Ex: Hiver 2026" data-on-change="sauvegarderIdentificationTrimestreV2">
                                             </div>
                                             <div class="groupe-form">
-                                                <label style="font-size: 0.8rem">Session <span class="text-danger u-texte-medium">*</span></label>
+                                                <label>Session <span class="text-danger u-texte-medium">*</span></label>
                                                 <select class="controle-form" id="v2-sessionTrimestre" data-on-change="sauvegarderIdentificationTrimestreV2">
                                                     <option value="">— Choisir —</option>
                                                     <option value="automne">Automne</option>
@@ -10495,11 +10495,11 @@
                                                 </select>
                                             </div>
                                             <div class="groupe-form">
-                                                <label style="font-size: 0.8rem">Année <span class="text-danger u-texte-medium">*</span></label>
+                                                <label>Année <span class="text-danger u-texte-medium">*</span></label>
                                                 <input type="number" class="controle-form" id="v2-anneeTrimestre" min="2020" max="2050" placeholder="2026" data-on-change="sauvegarderIdentificationTrimestreV2">
                                             </div>
                                         </div>
-                                        <p class="texte-aide u-mt-10" style="margin-bottom: 0; font-size: 0.8rem">
+                                        <p class="texte-aide u-mt-10" style="margin-bottom: 0">
                                             Ces informations identifient ton trimestre de travail et préfixent tes données.
                                         </p>
                                     </div>
@@ -10513,22 +10513,22 @@
                                             <h5 class="sous-titre-section" style="margin-top: 0;" data-tooltip="reglages-trim-bornes">Bornes du trimestre</h5>
                                             <div class="grille-2col-gap15">
                                                 <div class="groupe-form">
-                                                    <label class="u-texte-medium" style="font-size: 0.8rem">Début du trimestre :</label>
+                                                    <label class="u-texte-medium">Début du trimestre :</label>
                                                     <input type="date" class="controle-form controle-form-compact" id="v2-debutTrimestre"
                                                         data-on-change="sauvegarderCadreCalendrierV2">
                                                 </div>
                                                 <div class="groupe-form">
-                                                    <label class="u-texte-medium" style="font-size: 0.8rem">Fin des cours réguliers :</label>
+                                                    <label class="u-texte-medium">Fin des cours réguliers :</label>
                                                     <input type="date" class="controle-form controle-form-compact" id="v2-finCours"
                                                         data-on-change="sauvegarderCadreCalendrierV2">
                                                 </div>
                                                 <div class="groupe-form">
-                                                    <label class="u-texte-medium" style="font-size: 0.8rem">Fin du trimestre :</label>
+                                                    <label class="u-texte-medium">Fin du trimestre :</label>
                                                     <input type="date" class="controle-form controle-form-compact" id="v2-finTrimestre"
                                                         data-on-change="sauvegarderCadreCalendrierV2">
                                                 </div>
                                                 <div class="groupe-form">
-                                                    <label class="u-texte-medium" style="font-size: 0.8rem">Remise des notes :</label>
+                                                    <label class="u-texte-medium">Remise des notes :</label>
                                                     <input type="date" class="controle-form controle-form-compact" id="v2-remiseNotes"
                                                         data-on-change="sauvegarderCadreCalendrierV2">
                                                 </div>
@@ -10542,16 +10542,16 @@
                                             <div class="grille-2col-gap15">
                                                 <!-- Semaine de planification -->
                                                 <div>
-                                                    <label class="u-texte-medium" style="font-size: 0.8rem">Semaine de planification</label>
+                                                    <label class="u-texte-medium">Semaine de planification</label>
                                                     <div class="d-flex-gap-10-center">
                                                         <div class="groupe-form flex-1">
-                                                            <label style="font-size: 0.75rem;">Du :</label>
+                                                            <label>Du :</label>
                                                             <input type="date" class="controle-form controle-form-compact" id="v2-semainePlanificationDebut"
                                                                 data-on-change="sauvegarderCadreCalendrierV2">
                                                         </div>
                                                         <span style="padding-top: 15px; font-size: 0.8rem;">au</span>
                                                         <div class="groupe-form flex-1">
-                                                            <label style="font-size: 0.75rem;">&nbsp;</label>
+                                                            <label>&nbsp;</label>
                                                             <input type="date" class="controle-form controle-form-compact" id="v2-semainePlanificationFin"
                                                                 data-on-change="sauvegarderCadreCalendrierV2">
                                                         </div>
@@ -10559,16 +10559,16 @@
                                                 </div>
                                                 <!-- Semaine d'examens -->
                                                 <div>
-                                                    <label class="u-texte-medium" style="font-size: 0.8rem">Semaine d'examens</label>
+                                                    <label class="u-texte-medium">Semaine d'examens</label>
                                                     <div class="d-flex-gap-10-center">
                                                         <div class="groupe-form flex-1">
-                                                            <label style="font-size: 0.75rem;">Du :</label>
+                                                            <label>Du :</label>
                                                             <input type="date" class="controle-form controle-form-compact" id="v2-semaineExamensDebut"
                                                                 data-on-change="sauvegarderCadreCalendrierV2">
                                                         </div>
                                                         <span style="padding-top: 15px; font-size: 0.8rem;">au</span>
                                                         <div class="groupe-form flex-1">
-                                                            <label style="font-size: 0.75rem;">&nbsp;</label>
+                                                            <label>&nbsp;</label>
                                                             <input type="date" class="controle-form controle-form-compact" id="v2-semaineExamensFin"
                                                                 data-on-change="sauvegarderCadreCalendrierV2">
                                                         </div>
@@ -10593,17 +10593,17 @@
                                                 <button data-action="annulerFormEvenementPrevuV2" class="btn-fermer" title="Annuler">✕</button>
                                                 <div class="u-mb-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
                                                     <div class="groupe-form">
-                                                        <label style="font-size: 0.75rem">Date <span class="text-danger u-texte-medium">*</span></label>
+                                                        <label>Date <span class="text-danger u-texte-medium">*</span></label>
                                                         <input type="date" id="v2-dateEvenementPrevu" class="controle-form controle-form-compact">
                                                     </div>
                                                     <div class="groupe-form">
-                                                        <label style="font-size: 0.75rem">Description <span class="text-danger u-texte-medium">*</span></label>
+                                                        <label>Description <span class="text-danger u-texte-medium">*</span></label>
                                                         <input type="text" id="v2-descriptionPrevu" class="controle-form controle-form-compact" placeholder="Ex: Fête du travail">
                                                     </div>
                                                 </div>
                                                 <div class="u-mb-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
                                                     <div class="groupe-form">
-                                                        <label class="u-texte-medium" style="font-size: 0.75rem">Horaire de reprise</label>
+                                                        <label class="u-texte-medium">Horaire de reprise</label>
                                                         <select id="v2-horaireReprisePrevu" class="controle-form controle-form-compact">
                                                             <option value="">— Aucune —</option>
                                                             <option value="Lundi">Lundi</option>
@@ -10614,7 +10614,7 @@
                                                         </select>
                                                     </div>
                                                     <div class="groupe-form">
-                                                        <label class="u-texte-medium" style="font-size: 0.75rem">Date de reprise</label>
+                                                        <label class="u-texte-medium">Date de reprise</label>
                                                         <input type="date" id="v2-dateReprisePrevu" class="controle-form controle-form-compact">
                                                     </div>
                                                 </div>
@@ -10641,17 +10641,17 @@
                                                 <button data-action="annulerFormEvenementImprevuV2" class="btn-fermer" title="Annuler">✕</button>
                                                 <div class="u-mb-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
                                                     <div class="groupe-form">
-                                                        <label style="font-size: 0.75rem">Date <span class="text-danger u-texte-medium">*</span></label>
+                                                        <label>Date <span class="text-danger u-texte-medium">*</span></label>
                                                         <input type="date" id="v2-dateEvenementImprevu" class="controle-form controle-form-compact">
                                                     </div>
                                                     <div class="groupe-form">
-                                                        <label style="font-size: 0.75rem">Description <span class="text-danger u-texte-medium">*</span></label>
+                                                        <label>Description <span class="text-danger u-texte-medium">*</span></label>
                                                         <input type="text" id="v2-descriptionImprevu" class="controle-form controle-form-compact" placeholder="Ex: Tempête">
                                                     </div>
                                                 </div>
                                                 <div class="u-mb-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
                                                     <div class="groupe-form">
-                                                        <label class="u-texte-medium" style="font-size: 0.75rem">Horaire de reprise</label>
+                                                        <label class="u-texte-medium">Horaire de reprise</label>
                                                         <select id="v2-horaireRepriseImprevu" class="controle-form controle-form-compact">
                                                             <option value="">— Aucune —</option>
                                                             <option value="Lundi">Lundi</option>
@@ -10662,7 +10662,7 @@
                                                         </select>
                                                     </div>
                                                     <div class="groupe-form">
-                                                        <label class="u-texte-medium" style="font-size: 0.75rem">Date de reprise</label>
+                                                        <label class="u-texte-medium">Date de reprise</label>
                                                         <input type="date" id="v2-dateRepriseImprevu" class="controle-form controle-form-compact">
                                                     </div>
                                                 </div>
@@ -10969,7 +10969,7 @@
                                         <p class="profil-detail" id="enseignant-resume-courriel"></p>
                                         <p class="profil-detail" id="enseignant-resume-institution"></p>
                                     </div>
-                                    <p class="texte-aide u-mt-15" style="font-size: 0.8rem">
+                                    <p class="texte-aide u-mt-15">
                                         Ces informations servent de métadonnées pour tes ressources partagées.
                                     </p>
                                 </div>
@@ -11497,7 +11497,7 @@
                                     </div>
 
                                     <!-- Info -->
-                                    <p class="texte-aide u-mt-15" style="font-size: 0.8rem">
+                                    <p class="texte-aide u-mt-15">
                                         Le groupe-cours actif apparaît dans l'en-tête de l'application.
                                     </p>
 
