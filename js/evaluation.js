@@ -5162,6 +5162,68 @@ function reparer_evaluations_criteres_manquants() {
 }
 
 /**
+ * Affiche les critères d'une évaluation quand la grille n'existe plus dans les templates.
+ * Reconstruit un affichage en lecture seule depuis les données sauvegardées.
+ */
+function _afficherCriteresDepuisEvaluation(evaluation) {
+    const conteneur = document.getElementById('listeCriteresGrille1');
+    if (!conteneur) return;
+
+    // Récupérer les niveaux de l'échelle pour afficher les noms
+    let niveauxMap = {};
+    const echelleId = evaluation.echelleId;
+    if (echelleId && echelleId.startsWith('pratique-')) {
+        const pratiqueId = echelleId.replace('pratique-', '');
+        const pratiques = db.getSync('pratiquesConfigurables', []);
+        const p = pratiques.find(pr => pr.id === pratiqueId);
+        if (p?.config?.echelle?.niveaux) {
+            p.config.echelle.niveaux.forEach(n => { niveauxMap[n.code] = n.nom || n.code; });
+        }
+    } else {
+        const echelles = db.getSync('echellesTemplates', []);
+        const echelle = echelles.find(e => e.id === echelleId);
+        if (echelle?.niveaux) {
+            echelle.niveaux.forEach(n => { niveauxMap[n.code] = n.nom || n.code; });
+        }
+    }
+    // Fallback IDME
+    if (Object.keys(niveauxMap).length === 0) {
+        niveauxMap = { I: 'Insuffisant', D: 'Développement', M: 'Maîtrisé', E: 'Étendu' };
+    }
+
+    const html = evaluation.criteres.map(critere => {
+        const nom = echapperHtml(critere.critereNom || critere.critereId);
+        const niveau = critere.niveauSelectionne || '--';
+        const niveauNom = niveauxMap[niveau] || niveau;
+        // Générer un <select> avec le même ID que le flux normal pour que l'étape 10 puisse le remplir
+        const selectId = `eval_${critere.critereId}`;
+        const optionsHtml = Object.keys(niveauxMap).map(code =>
+            `<option value="${code}"${code === niveau ? ' selected' : ''}>${code} — ${echapperHtml(niveauxMap[code])}</option>`
+        ).join('');
+        return `
+        <div class="eval-critere-carte">
+            <div class="eval-grid-critere">
+                <div>
+                    <strong class="u-texte-09">${nom}</strong>
+                </div>
+                <div>
+                    <select id="${selectId}" class="eval-select-niveau" data-on-change="niveauSelectionne" data-param="${critere.critereId}">
+                        <option value="">--</option>
+                        ${optionsHtml}
+                    </select>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+
+    conteneur.innerHTML = `
+        <div class="alerte alerte-attention" style="margin-bottom: 1rem">
+            Grille d'origine introuvable dans les modèles actuels — affichage depuis les données sauvegardées.
+        </div>
+        ${html}`;
+}
+
+/**
  * Charge une évaluation existante pour modification
  * Refactorisé le 16 novembre 2025 pour corriger bug timing chargement
  *
@@ -5345,35 +5407,49 @@ function modifierEvaluation(evaluationId) {
                     chargerEchellePerformance();
                 }
 
-                // ÉTAPE 1: Charger le groupe (CRITIQUE - manquait dans l'ancienne version!)
+                // ÉTAPES 1-3: Charger groupe, étudiant, production
+                // Tolérantes aux données manquantes (ancien trimestre)
                 const numeroGroupe = trouverGroupeEtudiant(evaluation.etudiantDA);
-                if (!numeroGroupe) {
-                    throw new Error(`Groupe introuvable pour étudiant DA ${evaluation.etudiantDA}`);
+                if (numeroGroupe) {
+                    const selectGroupe = document.getElementById('selectGroupeEval');
+                    if (selectGroupe) {
+                        selectGroupe.value = numeroGroupe;
+                        selectGroupe.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                } else {
+                    console.warn('⚠️ Groupe introuvable pour DA', evaluation.etudiantDA, '— étapes étudiant/production ignorées');
                 }
 
-                const selectGroupe = document.getElementById('selectGroupeEval');
-                if (selectGroupe) {
-                    selectGroupe.value = numeroGroupe;
-                    selectGroupe.dispatchEvent(new Event('change', { bubbles: true }));
+                // Étudiant (peut ne pas exister si ancien trimestre)
+                try {
+                    await attendreOption('selectEtudiantEval', evaluation.etudiantDA);
+                    const selectEtudiant = document.getElementById('selectEtudiantEval');
+                    selectEtudiant.value = evaluation.etudiantDA;
+                    selectEtudiant.dispatchEvent(new Event('change', { bubbles: true }));
+                } catch (_errEtudiant) {
+                    console.warn('⚠️ Étudiant', evaluation.etudiantDA, 'introuvable dans les selects');
                 }
 
-                // ÉTAPE 2: Attendre et charger l'étudiant
-                await attendreOption('selectEtudiantEval', evaluation.etudiantDA);
-                const selectEtudiant = document.getElementById('selectEtudiantEval');
-                selectEtudiant.value = evaluation.etudiantDA;
-                selectEtudiant.dispatchEvent(new Event('change', { bubbles: true }));
-
-                // ÉTAPE 3: Attendre et charger la production
-                await attendreOption('selectProduction1', evaluation.productionId);
-                const selectProduction = document.getElementById('selectProduction1');
-                selectProduction.value = evaluation.productionId;
-                selectProduction.dispatchEvent(new Event('change', { bubbles: true }));
+                // Production (peut ne pas exister si ancien trimestre)
+                try {
+                    await attendreOption('selectProduction1', evaluation.productionId);
+                    const selectProduction = document.getElementById('selectProduction1');
+                    selectProduction.value = evaluation.productionId;
+                    selectProduction.dispatchEvent(new Event('change', { bubbles: true }));
+                } catch (_errProd) {
+                    console.warn('⚠️ Production', evaluation.productionId, 'introuvable dans les selects');
+                }
 
                 // ÉTAPE 4: Attendre et charger la grille
-                await attendreOption('selectGrille1', evaluation.grilleId);
-                const selectGrille = document.getElementById('selectGrille1');
-                selectGrille.value = evaluation.grilleId;
-                selectGrille.dispatchEvent(new Event('change', { bubbles: true }));
+                // La grille peut ne plus exister dans les templates (évaluation d'un ancien trimestre)
+                try {
+                    await attendreOption('selectGrille1', evaluation.grilleId);
+                    const selectGrille = document.getElementById('selectGrille1');
+                    selectGrille.value = evaluation.grilleId;
+                    selectGrille.dispatchEvent(new Event('change', { bubbles: true }));
+                } catch (_errGrille) {
+                    console.warn('⚠️ Grille', evaluation.grilleId, 'introuvable dans les templates — affichage depuis les données sauvegardées');
+                }
             }
 
             // ÉTAPE 5: Initialiser evaluationEnCours (AVANT cartouche/échelle)
@@ -5466,6 +5542,26 @@ function modifierEvaluation(evaluationId) {
             // FALLBACK: Si pas de cartouche, générer les critères directement depuis la grille
             if (!cartoucheChargee) {
                 afficherCriteresDepuisGrille(evaluation.grilleId, evaluation.echelleId);
+            }
+
+            // FALLBACK GRILLE MANQUANTE: Si la grille n'existe plus dans les templates,
+            // afficherCriteresDepuisGrille a affiché "Grille introuvable".
+            // Reconstruire un affichage minimal depuis les données de l'évaluation.
+            const grilles = db.getSync('grillesTemplates', []);
+            const grilleExiste = grilles.some(g => g.id === evaluation.grilleId);
+            if (!grilleExiste) {
+                if (evaluation.criteres && Array.isArray(evaluation.criteres) && evaluation.criteres.length > 0) {
+                    _afficherCriteresDepuisEvaluation(evaluation);
+                }
+                // Afficher la note et le niveau sauvegardés (calculerNote() ne peut pas fonctionner sans grille)
+                const noteElem = document.getElementById('noteProduction1');
+                const niveauElem = document.getElementById('niveauProduction1');
+                if (noteElem && evaluation.noteFinale != null) {
+                    noteElem.textContent = Math.round(evaluation.noteFinale * 10) / 10 + ' %';
+                }
+                if (niveauElem && evaluation.niveauFinal) {
+                    niveauElem.textContent = evaluation.niveauFinal;
+                }
             }
 
             // ÉTAPE 8: Charger statut de remise
