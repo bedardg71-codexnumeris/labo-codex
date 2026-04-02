@@ -1130,7 +1130,7 @@ function genererDropdownActions(ligne) {
 
     // Annoter — si fichier importé, sauf remplacée/non-recevable
     if (fichierId && ligne.statut !== 'remplacee' && ligne.statut !== 'non-recevable') {
-        options.push(`<option value="annoter|${fichierId}">Annoter</option>`);
+        options.push(`<option value="annoter|${fichierId}|${prodId}">Annoter</option>`);
     }
 
     // Consulter — si évaluation existe
@@ -1216,7 +1216,7 @@ function executerActionEval(select) {
             evaluerProduction(parts[1], parts[2]);
             break;
         case 'annoter':
-            ouvrirAnnotationDepuisListe(parts[1]);
+            ouvrirAnnotationDepuisListe(parts[1], parts[2]);
             break;
         case 'consulter':
             consulterEvaluationDepuisListe(parts[1]);
@@ -1264,7 +1264,12 @@ function executerActionEval(select) {
  * masquage de evaluations-contenu-fichiers, affichage du formulaire pleine largeur,
  * et _modifierEvaluationEnCours restait collé — contaminant les opérations suivantes.
  */
-function ouvrirAnnotationDepuisListe(fichierId) {
+function ouvrirAnnotationDepuisListe(fichierId, productionId) {
+    // Pré-sélectionner la production dans le filtre de la page Annoter
+    if (productionId) {
+        sessionStorage.setItem('travaux-filtre-production', productionId);
+    }
+
     afficherSection('evaluations');
     if (typeof afficherSousSection === 'function') {
         afficherSousSection('evaluations-annoter');
