@@ -22171,6 +22171,9 @@ body.mode-clair .palette-flottante .travaux-btn-outil img,
 body.mode-clair .palette-flottante .btn-icon-compact img {
     filter: none;
 }
+body.mode-clair .palette-flottante .travaux-btn-outil.actif img {
+    filter: invert(1);
+}
 /* Sections compactes */
 .palette-flottante .travaux-palette-section {
     margin-bottom: 2px;
