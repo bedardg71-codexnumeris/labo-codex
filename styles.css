@@ -618,7 +618,7 @@ body.mode-demo .sous-navigation {
 .u-align-center { align-items: center; }
 
 /* === HOVER / FOCUS (Phase 2 — remplace onmouseover/onmouseout/onfocus inline) === */
-/* Note : !important nécessaire pour surcharger les styles inline existants */
+/* !important LÉGITIME : ces classes sont appliquées sur des éléments avec style="background:..." inline (primo-accueil, import-export, etc.) */
 
 /* Carte module — fond bleu + lift */
 .hover-lift-bleu:hover {
@@ -1549,6 +1549,7 @@ h1, h2, h3, h4 {
     }
 }
 
+/* !important LÉGITIME : doit surcharger les boutons nav qui ont position/z-index variés */
 .highlight-etape-guidage {
     animation: highlight-glow 3s ease-in-out infinite !important;
     position: relative !important;
@@ -2900,14 +2901,15 @@ textarea {
 }
 
 /* Classes légères pour validation Primo (champs de formulaire) */
+/* Déclarées après .controle-form → cascade suffit, pas besoin de !important */
 .primo-champ-vide {
-    border: 2px solid var(--orange-accent) !important;
-    background-color: var(--alerte-fond-attention) !important;
+    border: 2px solid var(--orange-accent);
+    background-color: var(--alerte-fond-attention);
     box-shadow: 0 0 8px rgba(255, 152, 0, 0.3);
 }
 .primo-champ-rempli {
-    border: 2px solid var(--vert-succes) !important;
-    background-color: var(--alerte-fond-succes) !important;
+    border: 2px solid var(--vert-succes);
+    background-color: var(--alerte-fond-succes);
     box-shadow: none;
 }
 
@@ -4760,12 +4762,10 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
 }
 
 /* Adaptation des sidebars aux modes */
-body[data-mode="simulation"] .sidebar-cartouches,
 body[data-mode="simulation"] .sidebar-navigation {
     background: var(--sous-nav-bg-simulation);
 }
 
-body[data-mode="anonymisation"] .sidebar-cartouches,
 body[data-mode="anonymisation"] .sidebar-navigation {
     background: var(--sous-nav-bg-anonymisation);
 }
@@ -5397,17 +5397,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     border-spacing: 0;
 }
 
-/* Cellules de jours du calendrier */
-.jour-calendrier {
-    text-align: center;
-    padding: 8px 4px;
-    position: relative;
-    transition: opacity 0.15s ease;
-    min-height: 50px;
-    vertical-align: top;
-    border: 2px solid rgba(106, 172, 184, 0.2);
-}
-
 /* 🆕 BETA 91: Styles des cellules de jours selon statut */
 /* Base commune pour tous les jours */
 .calendrier-jour {
@@ -5496,11 +5485,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     background: var(--bleu-tres-pale);
     border-radius: var(--radius-grand);
     border: 2px solid var(--bleu-pale);
-}
-
-.calendrier-legende-titre {
-    margin: 0 0 15px 0;
-    color: var(--accent-primaire);
 }
 
 .calendrier-legende-grille {
@@ -5612,27 +5596,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-    margin-bottom: 20px;
-}
-
-/* Grilles pour métriques d'analyse */
-.grille-metriques-3col {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-}
-
-.grille-metriques-pondérée {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    gap: 15px;
-    margin-bottom: 15px;
-}
-
-.grille-metriques-2col {
-    display: grid;
-    grid-template-columns: 1fr 0.9fr;
-    gap: 20px;
     margin-bottom: 20px;
 }
 
@@ -6006,12 +5969,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     padding-right: 40px;
 }
 
-.profil-section-titre-compact {
-    color: var(--accent-primaire);
-    margin-bottom: 12px;
-    font-size: 1rem;
-}
-
 .profil-section-titre-sous {
     font-size: 1.1rem;
     margin-bottom: 15px;
@@ -6070,30 +6027,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     margin-bottom: 20px;
 }
 
-/* Zone vide centrée */
-.profil-zone-vide {
-    text-align: center;
-    padding: 30px;
-}
-
-/* Alias pour compatibilité - utilise le style .tableau standard */
-.profil-tableau-full {
-    /* Hérite de .tableau - pas besoin de redéfinir les styles */
-}
-
-/* Tableau headers */
-.profil-tableau-header-gauche {
-    padding: 12px;
-    text-align: left;
-    font-weight: 600;
-}
-
-.profil-tableau-header-centre {
-    padding: 12px;
-    text-align: center;
-    font-weight: 600;
-}
-
 .profil-tableau-cellule {
     padding: 12px;
 }
@@ -6131,36 +6064,10 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 
-.profil-carte-grise {
-    background: var(--surface-carte, #1a3a48);
-    padding: 15px;
-    border-radius: var(--radius-grand);
-    margin-bottom: 15px;
-}
-
 .profil-flex-gap {
     display: flex;
     gap: 10px;
     margin-bottom: 10px;
-}
-
-.profil-texte-fort {
-    font-weight: bold;
-    color: var(--accent-primaire);
-}
-
-
-.profil-flex-between-mb15 {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 15px;
-}
-
-.profil-grid-gap10-mb15 {
-    display: grid;
-    gap: 10px;
-    margin-bottom: 15px;
 }
 
 /* Encadré de gestion des jetons */
@@ -6203,21 +6110,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     height: 100%;
     transition: width 0.3s ease;
 }
-
-.profil-texte-petit-ml10 {
-    color: var(--texte-secondaire, #8aa4b0);
-    font-size: 0.8rem;
-    font-weight: normal;
-    margin-left: 10px;
-}
-
-.profil-flex-between-mb8 {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-}
-
 
 .profil-texte-petit {
     font-size: 0.8rem;
@@ -6308,58 +6200,11 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     margin-bottom: 10px;
 }
 
-.profil-zone-centre-p30 {
-    text-align: center;
-    padding: 30px;
-}
-
-.profil-tableau-header-gauche-p12 {
-    padding: 12px;
-    text-align: left;
-    font-weight: 600;
-}
-
-.profil-tableau-header-centre-p12 {
-    padding: 12px;
-    text-align: center;
-    font-weight: 600;
-}
-
 .profil-tableau-cellule-p12 {
     padding: 12px;
 }
 
-.profil-texte-danger-gras {
-    font-weight: 600;
-    color: #dc2626;
-    margin-bottom: 4px;
-    font-size: 0.85rem;
-}
 
-.profil-texte-succes-gras {
-    font-weight: 600;
-    color: #16a34a;
-    margin-bottom: 4px;
-    font-size: 0.85rem;
-}
-
-
-
-
-
-.profil-flex-between-mb20 {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 0 0 20px 0;
-}
-
-.profil-flex-between-mb10 {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-}
 
 .profil-flex-gap15-baseline {
     display: flex;
@@ -6408,16 +6253,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 
-
-.profil-texte-centre-gris {
-    text-align: center;
-    color: var(--texte-muted, #5a7a88);
-}
-
-.profil-tableau-full {
-    width: 100%;
-    border-collapse: collapse;
-}
 
 .profil-position-relative-mt15 {
     position: relative;
@@ -6564,36 +6399,10 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     color: green;
 }
 
-.tb-padding-top {
-    padding: 20px 20px 20px 20px;
-    margin-top: 0;
-}
-
-.tb-padding-top-espacé {
-    padding: 20px 20px 0 20px;
-    margin-top: 10px;
-}
-
-
-
 .tb-valeur-tres-grande-bleu-std {
     font-size: 1.8rem;
     color: var(--std-bleu);
     font-weight: 700;
-}
-
-.tb-texte-moyen-orange {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--som-orange);
-    margin-left: 10px;
-}
-
-.tb-texte-moyen-bleu-std {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--std-bleu);
-    margin-left: 10px;
 }
 
 .tb-texte-gris-mb10 {
@@ -6969,11 +6778,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 
-.etud-texte-gris-mini {
-    color: var(--texte-muted, #5a7a88);
-    font-size: 0.75rem;
-}
-
 .etud-texte-gris-moyen {
     color: var(--gris-moyen);
     font-size: 0.9rem;
@@ -7006,10 +6810,8 @@ body[data-mode="anonymisation"] .sidebar-navigation {
  *   <div class="zone-principale">...</div>
  * </div>
  *
- * Alias : .layout-cartouches-2col (rétrocompatibilité)
  */
 
-.layout-cartouches-2col,
 .layout-sidebar-2col {
     display: grid;
     grid-template-columns: 280px 1fr;
@@ -7020,7 +6822,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 /* 🆕 FIX (1er fév 2026) : Responsive pour iPad/tablettes */
 /* Corrige le contenu tronqué à droite sur iPad */
 @media (max-width: 1024px) {
-    .layout-cartouches-2col,
     .layout-sidebar-2col {
         grid-template-columns: 220px 1fr;
         gap: 15px;
@@ -7028,13 +6829,11 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 @media (max-width: 850px) {
-    .layout-cartouches-2col,
     .layout-sidebar-2col {
         grid-template-columns: 1fr;
         gap: 15px;
     }
 
-    .sidebar-cartouches,
     .sidebar-navigation {
         position: static;
         max-height: none;
@@ -7042,7 +6841,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 /* === SIDEBARS (fond bleu pâle, radius 12px) - 03b-cartes-sidebars === */
-.sidebar-cartouches,
 .sidebar-navigation {
     position: sticky;
     top: 20px;
@@ -10262,20 +10060,6 @@ label:has(+ textarea:disabled) {
 
 
 
-.cartouche-texte-bleu-leger {
-    color: var(--bleu-leger);
-}
-
-.cartouche-texte-bleu-leger-ml10 {
-    color: var(--bleu-leger);
-    margin-left: 10px;
-}
-
-.cartouche-texte-bleu-mb15 {
-    color: var(--accent-primaire);
-    margin-bottom: 15px;
-}
-
 .cartouche-texte-italique-bleu-leger {
     color: var(--bleu-leger);
     font-style: italic;
@@ -10392,24 +10176,6 @@ label:has(+ textarea:disabled) {
 .portfolio-texte-gris-fade {
     color: var(--texte-muted, #5a7a88);
 }
-
-/* 🆕 BETA 91: Module saisie-presences (optimisations Phase B) */
-
-.presences-texte-gris {
-    color: var(--texte-secondaire, #8aa4b0);
-}
-
-.presences-texte-petit {
-    font-size: 0.9rem;
-}
-
-
-
-.presences-text-center-erreur {
-    text-align: center;
-    color: var(--rouge-erreur);
-}
-
 
 /* ===============================
    BARRES DE PROGRESSION - Beta 96.2
@@ -12486,7 +12252,7 @@ tr.etudiant-inactif td {
 
     #reglages-trimestre .d-flex-gap-10-center span {
         text-align: center;
-        padding: 5px 0 !important;
+        padding: 5px 0;
     }
 
     /* Grille identification : empiler sur mobile */
@@ -16216,8 +15982,8 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 }
 
 .pipeline-select-petit {
-    font-size: 0.7rem !important;
-    padding: 3px 6px !important;
+    font-size: 0.7rem;
+    padding: 3px 6px;
 }
 
 .pipeline-input-date {
@@ -17017,6 +16783,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 .palette-flottante.replie .palette-flottante-bas-btns {
     display: none;
 }
+/* !important nécessaire : le JS pose style.height inline sur la palette */
 .palette-flottante.replie {
     resize: none;
     height: auto !important;
@@ -17427,7 +17194,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 
 /* --- Vue cote-a-cote --- */
 .travaux-split-view {
-    display: flex !important;
+    display: flex;
     gap: 0;
 }
 
