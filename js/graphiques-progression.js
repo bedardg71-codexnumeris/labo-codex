@@ -4438,7 +4438,10 @@ window.addEventListener('themeChanged', function() {
     // Les graphiques seront recréés avec les bonnes couleurs
     // lors du prochain appel de rafraîchissement de la section
     if (typeof rafraichirGraphiqueIndividuel === 'function' && window.profilActuelDA) {
-        rafraichirGraphiqueIndividuel(window.profilActuelDA);
+        var canvasId = 'graphique-progression-' + window.profilActuelDA;
+        if (document.getElementById(canvasId)) {
+            rafraichirGraphiqueIndividuel(window.profilActuelDA);
+        }
     }
     if (typeof rafraichirGraphiqueSpaghettiACP === 'function') {
         try { rafraichirGraphiqueSpaghettiACP(); } catch(e) { console.warn('[Graphiques] spaghettiACP refresh skipped (section not visible):', e.message || e); }
