@@ -1820,14 +1820,25 @@
         const palette = document.getElementById('travaux-palette-erreurs-fr');
         if (!palette) return;
         const compteurs = compterErreursFrancais();
+        let total = 0;
         CODES_ERREURS_FR.forEach(c => {
+            const count = compteurs[c.id] || 0;
+            total += count;
             const badge = palette.querySelector('.travaux-errfr-compteur[data-erreur="' + c.id + '"]');
             if (badge) {
-                const count = compteurs[c.id] || 0;
                 badge.textContent = count > 0 ? count : '';
                 badge.classList.toggle('u-hide', count === 0);
             }
         });
+
+        // Injecter le total dans le champ « Nombre d'erreurs » du critère algorithmique
+        if (total > 0) {
+            const inputErreurs = document.querySelector('input[id^="eval_erreurs_"]');
+            if (inputErreurs) {
+                inputErreurs.value = total;
+                inputErreurs.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }
     }
 
     window.addEventListener('travaux-annotation-modifiee', mettreAJourCompteursErreurs);
