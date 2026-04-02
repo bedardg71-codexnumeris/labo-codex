@@ -6,6 +6,23 @@
 
 ---
 
+## Bilan de la session (2 avril 2026, nuit) — Audit CSS Tier 5.2 P2
+
+**1 fichier CSS modifié, rapport mis à jour.**
+
+### Résultats
+- **-723 lignes** supprimées de styles.css (22 035 → 21 312) — Chantier 1 P2
+- 91 sélecteurs CSS morts supprimés dans 2 sections :
+  - Accordéon/Bibliothèque : 61 classes (ancien profil étudiant, groupe-cours info, etc.)
+  - Patterns/RàI : 30 classes (Wizard V2 Phase 2, SPE forfait/gabarit, dots, etc.)
+- Bilan cumulé Tier 5.2 : **-1 363 lignes** (22 675 → 21 312), **161 sélecteurs morts** supprimés
+- Rapport complet : `docs/audit-css-tier5.2.md`
+
+### Ce qui reste (Chantier 1 P3, optionnel)
+- **P3** : Module Planification (~900 classes, module actif, risque de faux positifs)
+
+---
+
 ## Bilan de la session (2 avril 2026, soir) — Audit CSS Tier 5.2 (5 commits)
 
 **Commits** : `f3148d2`, `6019ee8`, `86d1066`, `88db4f8`, + commit final
@@ -18,10 +35,6 @@
 - 39 `!important` éliminés (112 → 73), inline styles nettoyés dans index.html/JS
 - Breakpoints alignés (10 → 6), @media print fusionnés, body.mode-clair simplifié
 - Rapport complet : `docs/audit-css-tier5.2.md`
-
-### Ce qui reste (Chantier 1 P2-P3)
-- **P2** : Sélecteurs morts dans Patterns/RàI + Accordéon (~350 classes)
-- **P3** : Module Planification (~900 classes, optionnel)
 
 ---
 

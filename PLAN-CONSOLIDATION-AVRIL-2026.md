@@ -639,10 +639,10 @@ Resultats :
 - Breakpoints alignes (10 → 6), @media print fusionnes, body.mode-clair simplifie
 - Inventaire des 6 breakpoints officiels documente en en-tete de styles.css
 
-**Reste (optionnel, Chantier 1 P2-P3)** :
-- P2 : Selecteurs morts dans Patterns/RaI (lignes ~10239-11850) et Accordeon/Bibliotheque (lignes ~7100-8600) — ~350 classes a auditer
-- P3 : Module Planification (lignes ~12400-21900) — ~900 classes, module actif, risque de faux positifs
-- Plan detaille dans `.claude/plans/buzzing-wiggling-flask.md`
+**P2 FAIT** (session 2 avril 2026, nuit) : 91 selecteurs morts supprimes dans Patterns/RaI + Accordeon (-723 lignes, 22 035 → 21 312). Details dans `docs/audit-css-tier5.2.md`.
+
+**Reste (optionnel)** :
+- P3 : Module Planification (~900 classes, module actif, risque de faux positifs)
 
 ### 5.3 Notification utilisateur de quota
 
