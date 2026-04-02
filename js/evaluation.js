@@ -3278,14 +3278,28 @@ function genererRetroactionBilan() {
         .sort(function(a, b) { return (ORDRE_NIV[a.niveauSelectionne] || 0) - (ORDRE_NIV[b.niveauSelectionne] || 0); });
     var tousMaitrises = defis.length === 0 && criteres.length > 0;
 
-    // Vérifier si le critère algorithmique (français écrit) est à 0% et le prioriser
+    // Vérifier si le français écrit est une faiblesse majeure
+    // Source 1 : donneesAlgorithmiques (si le calcul a eu lieu)
+    // Source 2 : totalErreursFr (comptage direct des annotations)
     var algoA0 = null;
-    if (ec.donneesAlgorithmiques && grilleDef) {
+    if (grilleDef) {
         grilleDef.criteres.forEach(function(gc) {
-            if (gc.type === 'algorithmique' && ec.donneesAlgorithmiques[gc.id]) {
+            if (gc.type !== 'algorithmique') return;
+            // Source 1 : données algorithmiques calculées
+            if (ec.donneesAlgorithmiques && ec.donneesAlgorithmiques[gc.id]) {
                 var da = ec.donneesAlgorithmiques[gc.id];
-                if (da.pourcentage === 0 && da.erreurs > 0) {
+                if (da.pourcentage !== undefined && da.pourcentage <= 0 && da.erreurs > 0) {
                     algoA0 = { critereNom: gc.nom, erreurs: da.erreurs, mots: da.mots };
+                }
+            }
+            // Source 2 : comptage direct des codes d'erreur annotés
+            if (!algoA0 && totalErreursFr > 0) {
+                var pond = gc.ponderation || 20;
+                var facteur = gc.facteurNormalisation || 500;
+                var motsEstime = parseInt((document.getElementById('eval_mots_' + gc.id) || {}).value) || 500;
+                var noteEstimee = pond - (totalErreursFr / motsEstime * facteur);
+                if (noteEstimee <= 0) {
+                    algoA0 = { critereNom: gc.nom, erreurs: totalErreursFr, mots: motsEstime };
                 }
             }
         });
