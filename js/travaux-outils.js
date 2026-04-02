@@ -677,7 +677,7 @@
             var modifie = false;
             var touchesUtilisees = new Set(Object.values(stored));
             Object.keys(RACCOURCIS_OUTILS_DEFAUT).forEach(function(id) {
-                if (!stored[id]) {
+                if (!(id in stored)) {
                     var touche = RACCOURCIS_OUTILS_DEFAUT[id];
                     if (!touchesUtilisees.has(touche)) {
                         stored[id] = touche;
@@ -712,11 +712,11 @@
         if (touche) {
             // Retirer la touche d'un éventuel ancien item
             Object.keys(raccourcis).forEach(function(id) {
-                if (raccourcis[id] === touche) delete raccourcis[id];
+                if (raccourcis[id] === touche) raccourcis[id] = '';
             });
             raccourcis[itemId] = touche;
         } else {
-            delete raccourcis[itemId];
+            raccourcis[itemId] = '';
         }
         db.setSync('raccourcisAnnotation', raccourcis);
         _raccourcisCache = raccourcis;
