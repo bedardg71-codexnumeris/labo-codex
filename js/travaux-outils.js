@@ -1834,7 +1834,7 @@
         // Afficher le total dans l'entête de la palette CODES
         const spanTotal = document.getElementById('travaux-errfr-total-header');
         if (spanTotal) {
-            spanTotal.textContent = total > 0 ? '(' + total + ')' : '';
+            spanTotal.textContent = total > 0 ? '(' + total + ' erreur' + (total > 1 ? 's' : '') + ')' : '';
         }
 
         // Propager le total dans le champ « Nombre d'erreurs » du critère algorithmique
