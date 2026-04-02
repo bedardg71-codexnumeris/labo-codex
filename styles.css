@@ -69,6 +69,7 @@
     --vert-leger: #3aaa8a;
     --vert-succes: #34c759;
     --rouge-erreur: #e84057;
+    --rouge-danger: #dc3545;      /* Rouge Bootstrap — badges, bordures danger */
 
     /* Couleurs mode Assisté (palette sarcelle/teal — ocean-native) */
     --sarcelle-principal: #1a4a5e;
@@ -86,6 +87,8 @@
     --spe-vert: #22c55e;        /* SPE = Vert */
     --den-violet: #8b5cf6;      /* DEN = Mauve/Violet */
     --hybride-violet: #9c27b0;  /* Hybride (obsolète) */
+
+    --bleu-meta: #9fc5e8;        /* Bleu pâle pour méta-infos, logos, liens secondaires */
 
     /* Couleurs de tableau */
     --table-hover: rgba(106, 172, 184, 0.12);
@@ -126,6 +129,10 @@
     --btn-annuler-hover: #9a7040;
     --btn-supprimer: #7a3a3a;
     --btn-supprimer-hover: #6a2a2a;
+
+    /* === BADGES RàI === */
+    --rai-niveau-2: #818cf8;     /* Indigo — niveau 2 */
+    --rai-niveau-3: #a78bfa;     /* Violet — niveau 3 */
 
     /* === INDICATEURS DE RISQUE === */
     --risque-nul: #6aacb8;
@@ -409,6 +416,7 @@ body.mode-clair {
     --bleu-pale: #e8f2fd;
     --bleu-tres-pale: #f0f8ff;
     --bleu-simulation: #1a5266;
+    --bleu-meta: #3a7cc6;
 
     /* Fond de page */
     --fond-page-sature: #d4e6f5;
@@ -929,7 +937,7 @@ h1, h2, h3, h4 {
 
 .logo-meta {
     font-size: 0.75rem;
-    color: #9fc5e8;
+    color: var(--bleu-meta);
     line-height: 1.2;
     max-width: 150px;
 }
@@ -966,7 +974,7 @@ h1, h2, h3, h4 {
 
 .titre-section .meta {
     font-size: 0.75rem;
-    color: #9fc5e8;
+    color: var(--bleu-meta);
     margin: 0;
     white-space: nowrap;
     display: flex;
@@ -1312,7 +1320,7 @@ h1, h2, h3, h4 {
 }
 
 .site-link:active {
-    color: #9fc5e8;
+    color: var(--bleu-meta);
 }
 
 /* ===============================
@@ -2337,7 +2345,7 @@ body.mode-clair .entete-stat-cell {
 input.saisie-absence {
     background-color: rgba(232, 64, 87, 0.15) !important;
     border-color: rgba(232, 64, 87, 0.4) !important;
-    color: #f06878 !important;
+    color: var(--alerte-texte-erreur) !important;
     font-weight: 600;
 }
 
@@ -2345,7 +2353,7 @@ input.saisie-absence {
 input.saisie-retard {
     background-color: rgba(200, 160, 96, 0.15) !important;
     border-color: var(--btn-annuler) !important;
-    color: #d4b878 !important;
+    color: var(--alerte-texte-attention) !important;
     font-weight: 600;
 }
 
@@ -2582,7 +2590,7 @@ input[type="number"].controle-form {
     font-weight: 600;
     line-height: 1.2;
     background: rgba(99, 102, 241, 0.15);
-    color: #818cf8;
+    color: var(--rai-niveau-2);
     transition: all 0.2s ease;
 }
 
@@ -2594,7 +2602,7 @@ input[type="number"].controle-form {
     font-weight: 600;
     line-height: 1.2;
     background: rgba(124, 58, 237, 0.15);
-    color: #a78bfa;
+    color: var(--rai-niveau-3);
     transition: all 0.2s ease;
 }
 
@@ -2633,7 +2641,7 @@ input[type="number"].controle-form {
 
 .badge-rai-analyse-2 {
     background: rgba(99, 102, 241, 0.15);
-    color: #818cf8;
+    color: var(--rai-niveau-2);
 }
 
 .badge-rai-analyse-2 .badge-analyse-count {
@@ -2642,7 +2650,7 @@ input[type="number"].controle-form {
 
 .badge-rai-analyse-3 {
     background: rgba(124, 58, 237, 0.15);
-    color: #a78bfa;
+    color: var(--rai-niveau-3);
 }
 
 .badge-rai-analyse-3 .badge-analyse-count {
@@ -2664,7 +2672,7 @@ input[type="number"].controle-form {
 
 .badge-risque-analyse-modere {
     background: rgba(200, 160, 96, 0.15);
-    color: #d4b878;
+    color: var(--alerte-texte-attention);
 }
 
 .badge-risque-analyse-modere .badge-analyse-count {
@@ -2998,7 +3006,7 @@ textarea {
 .info-box--attention {
     background: rgba(200, 160, 96, 0.15);
     border-color: var(--btn-annuler);
-    color: #d4b878;
+    color: var(--alerte-texte-attention);
 }
 .info-box--info {
     background: var(--bleu-tres-pale);
@@ -3276,7 +3284,7 @@ body.mode-clair .changelog-entry--sarcelle .changelog-title { color: #065dbb; }
 }
 
 .btn-danger {
-    background: #dc3545;
+    background: var(--rouge-danger);
     color: white;
 }
 
@@ -5150,7 +5158,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .details-calculs-alerte strong {
-    color: #d4b878;
+    color: var(--alerte-texte-attention);
 }
 
 /* Liste de détails dans les toggles */
@@ -6036,7 +6044,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .portfolio-note-provisoire h4 {
-    color: #d4b878;
+    color: var(--alerte-texte-attention);
 }
 
 .portfolio-note-carte p:last-child {
@@ -6048,7 +6056,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .portfolio-note-provisoire p:last-child {
-    color: #d4b878;
+    color: var(--alerte-texte-attention);
 }
 
 .portfolio-note-detail {
@@ -8561,8 +8569,8 @@ body.mode-clair .jeton-icone {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #dc354522;
-    border: 2px solid #dc3545;
+    background: color-mix(in srgb, var(--rouge-danger) 13%, transparent);
+    border: 2px solid var(--rouge-danger);
     border-radius: var(--radius-grand);
     padding: 2px 6px;
     transition: all 0.2s ease;
@@ -8781,7 +8789,7 @@ body.mode-clair .jeton-icone {
 
 .profil-recommandations-danger {
     background: rgba(232, 64, 87, 0.12);
-    border-color: #dc3545;
+    border-color: var(--rouge-danger);
 }
 
 .profil-recommandations-info {
@@ -8796,7 +8804,7 @@ body.mode-clair .jeton-icone {
 
 /* Texte de couleur dynamique pour recommandations */
 .profil-texte-avertissement {
-    color: #d4b878;
+    color: var(--alerte-texte-attention);
 }
 
 
@@ -9119,12 +9127,12 @@ body.mode-clair .jeton-icone {
 }
 
 .badge-absence-complete {
-    background: #dc354522;
-    border-color: #dc3545;
+    background: color-mix(in srgb, var(--rouge-danger) 13%, transparent);
+    border-color: var(--rouge-danger);
 }
 
 .badge-absence-complete .badge-absence-date {
-    color: #dc3545;
+    color: var(--rouge-danger);
 }
 
 .badge-absence-partielle {
@@ -9133,7 +9141,7 @@ body.mode-clair .jeton-icone {
 }
 
 .badge-absence-partielle .badge-absence-date {
-    color: #dc3545;
+    color: var(--rouge-danger);
 }
 
 .badge-absence-date {
@@ -9150,14 +9158,14 @@ body.mode-clair .jeton-icone {
 
 /* Badge heures pour absences complètes (rouge) */
 .badge-absence-complete .badge-absence-heures {
-    background: #dc3545;
+    background: var(--rouge-danger);
     color: white;
 }
 
 /* Badge heures pour retards (orange avec texte rouge) */
 .badge-absence-partielle .badge-absence-heures {
     background: var(--btn-annuler);
-    color: #dc3545;
+    color: var(--rouge-danger);
 }
 
 /* Badge intervention RàI (style positif en vert) */
@@ -9328,8 +9336,8 @@ body.mode-clair .jeton-icone {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: #dc354522;
-    border: 2px solid #dc3545;
+    background: color-mix(in srgb, var(--rouge-danger) 13%, transparent);
+    border: 2px solid var(--rouge-danger);
     border-radius: var(--radius-petit);
     padding: var(--padding-compact);
     font-size: var(--font-compact);
@@ -9350,7 +9358,7 @@ body.mode-clair .jeton-icone {
 }
 
 .badge-completion-non-recevable .badge-completion-numero {
-    background: #dc3545;
+    background: var(--rouge-danger);
     color: white;
 }
 
@@ -11546,7 +11554,7 @@ body[data-mode="simulation"] table tr:hover {
 
 /* Composante avec plafonnement appliqué */
 .note-finale-composante-plafonnee {
-    border: 2px solid #dc3545;
+    border: 2px solid var(--rouge-danger);
     background: rgba(220, 53, 69, 0.1);
 }
 
@@ -11555,7 +11563,7 @@ body[data-mode="simulation"] table tr:hover {
     display: inline-block;
     margin-left: 10px;
     padding: 2px 8px;
-    background: #dc3545;
+    background: var(--rouge-danger);
     color: white;
     border-radius: var(--radius-moyen);
     font-size: 0.8rem;
@@ -11570,7 +11578,7 @@ body[data-mode="simulation"] table tr:hover {
     padding: 8px 12px;
     margin-bottom: 10px;
     font-size: 0.85rem;
-    color: #d4b878;
+    color: var(--alerte-texte-attention);
 }
 
 /* Note originale barrée */
@@ -11878,7 +11886,7 @@ body[data-mode="simulation"] table tr:hover {
     border: 1px solid var(--btn-annuler);
     border-radius: var(--radius-moyen);
     font-size: 0.9rem;
-    color: #d4b878;
+    color: var(--alerte-texte-attention);
 }
 
 .wizard-v2-info {
@@ -12132,7 +12140,7 @@ body[data-mode="simulation"] table tr:hover {
 }
 
 .badge-spe.non-acceptable {
-    background: #dc3545;
+    background: var(--rouge-danger);
 }
 
 /* Checklist SPE */
@@ -12191,8 +12199,8 @@ body[data-mode="simulation"] table tr:hover {
 
 .spe-resultat.non-acceptable {
     background: rgba(232, 64, 87, 0.12);
-    border: 2px solid #dc3545;
-    color: #dc3545;
+    border: 2px solid var(--rouge-danger);
+    color: var(--rouge-danger);
 }
 
 /* Dashboard SPE */
@@ -18876,7 +18884,7 @@ body.mode-clair .travaux-autocollant-item img {
     width: 100%;
     padding: 8px;
     background: rgba(232, 64, 87, 0.12);
-    color: #f06878;
+    color: var(--alerte-texte-erreur);
     border: 1px solid rgba(232, 64, 87, 0.3);
     border-radius: 6px;
     font-size: 13px;
@@ -19257,7 +19265,7 @@ body.mode-clair .travaux-autocollant-item img {
 }
 .planif-org-avertissement {
     background: rgba(200, 160, 96, 0.1); border: 1px solid rgba(200, 160, 96, 0.3); border-radius: 6px;
-    padding: 6px 10px; font-size: 11px; color: #d4b878; margin-bottom: 8px;
+    padding: 6px 10px; font-size: 11px; color: var(--alerte-texte-attention); margin-bottom: 8px;
 }
 
 /* =============================================================
@@ -19539,7 +19547,7 @@ body.mode-clair .travaux-autocollant-item img {
     border-radius: 8px;
     padding: 8px 12px;
     font-size: 12px;
-    color: #d4b878;
+    color: var(--alerte-texte-attention);
     margin-bottom: 10px;
 }
 
@@ -19962,7 +19970,7 @@ body.mode-clair .titre-section h1 {
 }
 
 body.mode-clair .titre-section .meta {
-    color: #9fc5e8;
+    color: var(--bleu-meta);
 }
 
 body.mode-clair .info-contextuelles-centre {
@@ -19974,7 +19982,7 @@ body.mode-clair .info-contexte-item {
 }
 
 body.mode-clair .logo-meta {
-    color: #9fc5e8;
+    color: var(--bleu-meta);
 }
 
 body.mode-clair .separateur-contexte {
@@ -20760,9 +20768,9 @@ body.mode-clair .etudiant-prioritaire-item:hover {
 }
 
 body.mode-clair .btn-toggle-prioritaire.actif {
-    background: #dc3545;
+    background: var(--rouge-danger);
     color: white;
-    border-color: #dc3545;
+    border-color: var(--rouge-danger);
 }
 
 body.mode-clair .etudiant-prioritaire-diagnostic {
