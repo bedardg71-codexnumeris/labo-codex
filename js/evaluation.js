@@ -373,18 +373,14 @@ function chargerEchellePerformance() {
     // NOUVEAU: Ajouter l'échelle de la pratique en premier (si disponible)
     if (echellePratique) {
         const nbNiveaux = echellePratique.niveaux?.length || 0;
-        const nomEchappe = echellePratique.nom.replace(/[<>&"']/g, c => ({
-            '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;'
-        }[c]));
+        const nomEchappe = echapperHtml(echellePratique.nom);
         select.innerHTML += `<option value="${echellePratique.id}" style="background: var(--bleu-pale); font-weight: 600;">${nomEchappe} (${nbNiveaux} niveaux)</option>`;
     }
 
     // Ajouter les échelles personnalisées
     if (echelles && echelles.length > 0) {
         echelles.forEach(echelle => {
-            const nomEchappe = (echelle.nom || 'Échelle sans nom').replace(/[<>&"']/g, c => ({
-                '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;'
-            }[c]));
+            const nomEchappe = echapperHtml(echelle.nom || 'Échelle sans nom');
             const nbNiveaux = echelle.niveaux?.length || 0;
             select.innerHTML += `<option value="${echelle.id}">${nomEchappe} (${nbNiveaux} niveaux)</option>`;
         });

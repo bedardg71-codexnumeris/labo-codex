@@ -1786,7 +1786,7 @@ function genererSectionAccompagnement(da) {
                     ${criteres.map(c => {
                         const pct = c.valeur * 100;
                         const niveau = pct >= 85 ? 'E' : pct >= 75 ? 'M' : pct >= 65 ? 'D' : 'I';
-                        return `<li>${c.nom} : ${niveau} ${pct.toFixed(0)}%</li>`;
+                        return `<li>${echapperHtml(c.nom)} : ${niveau} ${pct.toFixed(0)}%</li>`;
                     }).join('')}
                 </ul>
 
@@ -3842,7 +3842,7 @@ function genererSectionProductions(da) {
                 portfolio.artefactsRetenus.map((art, i) => {
                     const prod = productionsMap[art.productionId];
                     const titre = prod?.description || prod?.titre || `Artefact ${i + 1}`;
-                    return `<li>${titre} <strong>${art.niveau} ${art.note.toFixed(1)}%</strong></li>`;
+                    return `<li>${echapperHtml(titre)} <strong>${art.niveau} ${art.note.toFixed(1)}%</strong></li>`;
                 }).join('') +
                 '</ul>';
         }
@@ -6447,7 +6447,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                             ${parNiveau['E'].length > 1 ? ` (${parNiveau['E'].length})` : ''}
                         </div>
                         <div style="color: ${couleur}; font-size: 0.9rem;">
-                            ${parNiveau['E'].map(c => `<strong>${c.nom}</strong> (${Math.round(c.pourcentage)}%)`).join(', ')}
+                            ${parNiveau['E'].map(c => `<strong>${echapperHtml(c.nom)}</strong> (${Math.round(c.pourcentage)}%)`).join(', ')}
                         </div>
                     </div>
                 `;
@@ -6463,7 +6463,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                             ${parNiveau['M'].length > 1 ? ` (${parNiveau['M'].length})` : ''}
                         </div>
                         <div style="color: ${couleur}; font-size: 0.9rem;">
-                            ${parNiveau['M'].map(c => `<strong>${c.nom}</strong> (${Math.round(c.pourcentage)}%)`).join(', ')}
+                            ${parNiveau['M'].map(c => `<strong>${echapperHtml(c.nom)}</strong> (${Math.round(c.pourcentage)}%)`).join(', ')}
                         </div>
                     </div>
                 `;
@@ -6479,7 +6479,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                             ${parNiveau['D'].length > 1 ? ` (${parNiveau['D'].length})` : ''}
                         </div>
                         <div style="color: ${couleur}; font-size: 0.9rem;">
-                            ${parNiveau['D'].map(c => `<strong>${c.nom}</strong> (${Math.round(c.pourcentage)}%)`).join(', ')}
+                            ${parNiveau['D'].map(c => `<strong>${echapperHtml(c.nom)}</strong> (${Math.round(c.pourcentage)}%)`).join(', ')}
                         </div>
                     </div>
                 `;
@@ -6495,7 +6495,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                             ${parNiveau['I'].length > 1 ? ` (${parNiveau['I'].length})` : ''}
                         </div>
                         <div style="color: ${couleur}; font-size: 0.9rem;">
-                            ${parNiveau['I'].map(c => `<strong>${c.nom}</strong> (${Math.round(c.pourcentage)}%)`).join(', ')}
+                            ${parNiveau['I'].map(c => `<strong>${echapperHtml(c.nom)}</strong> (${Math.round(c.pourcentage)}%)`).join(', ')}
                         </div>
                         <div style="margin-top: 8px; font-size: 0.85rem; color: ${couleur};">
                             💡 Cibler les efforts sur ${parNiveau['I'].length > 1 ? 'ces critères' : 'ce critère'}
@@ -7110,9 +7110,9 @@ function genererSectionPerformance(da) {
                 const grilleActive = grilles.find(g => g.active) || grilles[0];
                 if (grilleActive && grilleActive.criteres) {
                     const ponderations = grilleActive.criteres
-                        .map(c => `${c.nom}: ${c.ponderation || 0}%`)
+                        .map(c => `${echapperHtml(c.nom)}: ${c.ponderation || 0}%`)
                         .join(', ');
-                    return `Pondération des critères configurés dans la grille «${grilleActive.nom}» (${ponderations})`;
+                    return `Pondération des critères configurés dans la grille «${echapperHtml(grilleActive.nom)}» (${ponderations})`;
                 }
                 return 'Pondération des critères déterminée dans les réglages';
             })()}${selectionEleve.auto ? '<br><br><strong>Note :</strong> Sélection automatique basée sur les meilleures notes' : ''}

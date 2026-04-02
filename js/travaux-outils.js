@@ -845,9 +845,9 @@
             const outil = OUTILS[c.id];
             const actif = outilActif === c.id ? ' actif' : '';
             const raccourci = obtenirRaccourciPourItem(c.id);
-            html += `<div class="travaux-errfr-item${actif}" data-action="travauxOutils.setOutilActif" data-param="${c.id}" title="${c.nom}${raccourci ? ' [' + raccourci + ']' : ''}">`;
+            html += `<div class="travaux-errfr-item${actif}" data-action="travauxOutils.setOutilActif" data-param="${c.id}" title="${echapperHtml(c.nom)}${raccourci ? ' [' + raccourci + ']' : ''}">`;
             html += `<span class="travaux-errfr-numero" style="background:${outil.couleurBouton}">${idx + 1}</span>`;
-            html += `<span class="travaux-errfr-nom">${c.nom}</span>`;
+            html += `<span class="travaux-errfr-nom">${echapperHtml(c.nom)}</span>`;
             html += `<span class="travaux-errfr-compteur u-hide" data-erreur="${c.id}"></span>`;
             if (raccourci) html += `<span class="raccourci-badge">${raccourci}</span>`;
             html += '</div>';
@@ -1383,7 +1383,7 @@
 
         COULEURS.forEach(c => {
             const actif = couleurActive === c.hex ? ' actif' : '';
-            html += `<button class="travaux-btn-couleur${actif}" data-couleur="${c.hex}" data-action="travauxOutils.setCouleurActive" data-param="${c.hex}" title="${c.nom}" style="background-color: ${c.hex}"></button>`;
+            html += `<button class="travaux-btn-couleur${actif}" data-couleur="${c.hex}" data-action="travauxOutils.setCouleurActive" data-param="${c.hex}" title="${echapperHtml(c.nom)}" style="background-color: ${c.hex}"></button>`;
         });
 
         html += '</div></div>';
