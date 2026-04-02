@@ -851,5 +851,57 @@ window.afficherBandeauDemo = afficherBandeauDemo;
 window.initialiserModuleDonneesDemo = initialiserModuleDonneesDemo;
 window.CARTE_DEMO_ALIGNEMENT = CARTE_DEMO_ALIGNEMENT;
 
+// Script pré-démo AQPC (5.5.5)
+// Appeler window._verifierPreDemo() dans la console avant la présentation
+window._verifierPreDemo = function() {
+    const checks = [];
+    let ok = true;
+
+    // 1. Mode anonymisation actif ?
+    const modeAnon = typeof obtenirModeActuel === 'function' && obtenirModeActuel() === 'anonymisation';
+    checks.push(modeAnon ? '✅ Mode anonymisation actif' : '❌ Mode anonymisation INACTIF');
+    if (!modeAnon) ok = false;
+
+    // 2. Données chargées ?
+    const etudiants = typeof obtenirDonneesSelonMode === 'function' ? obtenirDonneesSelonMode('groupeEtudiants') : [];
+    const evals = typeof obtenirDonneesSelonMode === 'function' ? obtenirDonneesSelonMode('evaluationsSauvegardees') : [];
+    checks.push(etudiants.length > 0
+        ? '✅ ' + etudiants.length + ' étudiants chargés'
+        : '❌ Aucun étudiant chargé');
+    checks.push(evals.length > 0
+        ? '✅ ' + evals.length + ' évaluations chargées'
+        : '⚠️ Aucune évaluation chargée');
+    if (etudiants.length === 0) ok = false;
+
+    // 3. localStorage sous 3 Mo ?
+    var taille = 0;
+    for (var i = 0; i < localStorage.length; i++) {
+        taille += (localStorage.getItem(localStorage.key(i)) || '').length * 2;
+    }
+    var tailleMo = (taille / 1024 / 1024).toFixed(2);
+    checks.push(taille < 3 * 1024 * 1024
+        ? '✅ localStorage : ' + tailleMo + ' Mo (< 3 Mo)'
+        : '⚠️ localStorage : ' + tailleMo + ' Mo (> 3 Mo — envisager une purge)');
+
+    // 4. Erreurs console au démarrage ?
+    var erreurs = window._dernieresErreurs || [];
+    checks.push(erreurs.length === 0
+        ? '✅ Aucune erreur console au démarrage'
+        : '⚠️ ' + erreurs.length + ' erreur(s) capturée(s)');
+    if (erreurs.length > 0) ok = false;
+
+    // 5. Trimestres orphelins ?
+    if (typeof listerTrimestresOrphelins === 'function') {
+        var orphelins = listerTrimestresOrphelins();
+        checks.push(orphelins.length === 0
+            ? '✅ Aucun trimestre orphelin'
+            : '⚠️ ' + orphelins.length + ' trimestre(s) orphelin(s) — purger dans Réglages');
+    }
+
+    // Affichage
+    console.warn('%c' + (ok ? '✅ Prêt pour la démo' : '⚠️ Vérifications à corriger'), 'font-size: 16px; font-weight: bold;');
+    checks.forEach(function(c) { console.warn('  ' + c); });
+    return ok;
+};
 
 })();

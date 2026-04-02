@@ -1775,6 +1775,68 @@
     window.fermerModalExportRecherche = fermerModalExportRecherche;
     window.afficherTrimestreCibleExport = afficherTrimestreCibleExport;
 
+    // Purge des trimestres orphelins (5.5.4)
+    function listerTrimestresOrphelins() {
+        const trimestres = obtenirTrimestres();
+        const actif = obtenirTrimestreActif();
+        const prefixeActif = actif ? actif.id + '_' : null;
+
+        // Scanner toutes les clés localStorage pour détecter les préfixes de trimestre
+        const prefixesTrouves = new Map();
+        for (let i = 0; i < localStorage.length; i++) {
+            const cle = localStorage.key(i);
+            const match = cle.match(/^([a-z]\d{4})_/);
+            if (match) {
+                const prefixe = match[1];
+                if (!prefixesTrouves.has(prefixe)) {
+                    prefixesTrouves.set(prefixe, { cles: 0, taille: 0 });
+                }
+                const info = prefixesTrouves.get(prefixe);
+                info.cles++;
+                info.taille += (localStorage.getItem(cle) || '').length * 2;
+            }
+        }
+
+        // Identifier les orphelins (pas le trimestre actif, pas 'demo')
+        const orphelins = [];
+        prefixesTrouves.forEach((info, prefixe) => {
+            const estActif = prefixeActif && prefixeActif.startsWith(prefixe);
+            const estDemo = prefixe === 'demo';
+            const estDansTrimestres = trimestres.some(t => t.id === prefixe);
+            if (!estActif && !estDemo) {
+                orphelins.push({
+                    prefixe,
+                    cles: info.cles,
+                    tailleMo: (info.taille / 1024 / 1024).toFixed(2),
+                    dansTrimestres: estDansTrimestres
+                });
+            }
+        });
+
+        return orphelins;
+    }
+
+    function purgerTrimestresOrphelins(prefixes) {
+        let clesSupprimees = 0;
+        prefixes.forEach(prefixe => {
+            const aSupprimer = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const cle = localStorage.key(i);
+                if (cle.startsWith(prefixe + '_')) {
+                    aSupprimer.push(cle);
+                }
+            }
+            aSupprimer.forEach(cle => {
+                localStorage.removeItem(cle);
+                clesSupprimees++;
+            });
+        });
+        return clesSupprimees;
+    }
+
+    window.listerTrimestresOrphelins = listerTrimestresOrphelins;
+    window.purgerTrimestresOrphelins = purgerTrimestresOrphelins;
+
     // Constantes exportées pour debug
     window.CLES_NAMESPACEES = CLES_NAMESPACEES;
     window.CLES_GLOBALES = CLES_GLOBALES;
