@@ -615,7 +615,7 @@ async function afficherFormProduction(id) {
         }
         const cartouches = await db.get(`cartouches_${grilleId}`) || [];
         selectCartouche.innerHTML = '<option value="">Aucune</option>' +
-            cartouches.map(c => `<option value="${c.id}">${c.nom}</option>`).join('');
+            cartouches.map(c => `<option value="${c.id}">${echapperHtml(c.nom)}</option>`).join('');
     };
 
     // Listener : repeupler cartouches quand la grille change

@@ -810,7 +810,7 @@ async function afficherGrillesCriteres() {
                         <small style="color: var(--bleu-leger); margin-left: 10px;">
                             ${new Date(grille.dateCreation).toLocaleDateString()}
                         </small>
-                        ${grille.baseSur ? `<br><small class="grille-texte-bleu-leger">(basé sur ${grille.baseSur})</small>` : ''}
+                        ${grille.baseSur ? `<br><small class="grille-texte-bleu-leger">(basé sur ${echapperHtml(grille.baseSur)})</small>` : ''}
                     </div>
                     <div class="grille-nowrap">
                         <button class="btn btn-principal" data-action="chargerGrilleEnEdition" data-param="${grille.id}">
@@ -835,8 +835,8 @@ async function afficherGrillesCriteres() {
                     <div style="margin-top: 10px; padding: 10px; background: var(--surface-conteneur, #162c36); border-radius: 4px;">
                         ${(grille.criteres || []).map(c => `
                             <div style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--bleu-tres-pale);">
-                                <strong>${c.nom}</strong> (${c.ponderation}% - ${getTypeCritereLabel(c.type)})
-                                ${c.description ? `<br><small style="color: var(--gris-moyen);">${c.description}</small>` : ''}
+                                <strong>${echapperHtml(c.nom)}</strong> (${c.ponderation}% - ${getTypeCritereLabel(c.type)})
+                                ${c.description ? `<br><small style="color: var(--gris-moyen);">${echapperHtml(c.description)}</small>` : ''}
                             </div>
                         `).join('')}
                     </div>
@@ -2703,7 +2703,7 @@ function afficherCriteresTemp() {
                     <label data-tooltip="cn-grille-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Nom du critère</label>
                     <input type="text"
                            class="controle-form"
-                           value="${critere.nom}"
+                           value="${echapperHtml(critere.nom)}"
                            placeholder="Ex: Rédaction"
                            data-on-change="modifierCritereTempHandler" data-critere-index="${index}" data-champ="nom"
                            style="font-weight: 500;">

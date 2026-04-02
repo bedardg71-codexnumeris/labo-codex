@@ -779,7 +779,7 @@ function ouvrirModalParamsQuestions() {
                             <div class="questions-categories-liste">
                                 ${etatQuestions.categories.map(c => `
                                     <span class="questions-categorie-tag">
-                                        ${c.nom}
+                                        ${echapperHtml(c.nom)}
                                         <button class="questions-categorie-suppr" data-action="supprimerCategorie" data-param="${c.id}" title="Supprimer">×</button>
                                     </span>
                                 `).join('')}
@@ -802,7 +802,7 @@ function ouvrirModalParamsQuestions() {
                                 <select id="categorie-nouvelle-question" class="form-select">
                                     <option value="">Sans catégorie</option>
                                     ${etatQuestions.categories.map(c => `
-                                        <option value="${c.id}">${c.nom}</option>
+                                        <option value="${c.id}">${echapperHtml(c.nom)}</option>
                                     `).join('')}
                                 </select>
                                 <button class="btn btn-principal" data-action="ajouterQuestion">Ajouter</button>
@@ -986,7 +986,7 @@ function rafraichirListeQuestionsModal() {
         selectCategorie.innerHTML = `
             <option value="">Sans catégorie</option>
             ${etatQuestions.categories.map(c => `
-                <option value="${c.id}" ${c.id === valeurActuelle ? 'selected' : ''}>${c.nom}</option>
+                <option value="${c.id}" ${c.id === valeurActuelle ? 'selected' : ''}>${echapperHtml(c.nom)}</option>
             `).join('')}
         `;
     }
@@ -996,7 +996,7 @@ function rafraichirListeQuestionsModal() {
     if (listeCategories) {
         listeCategories.innerHTML = etatQuestions.categories.map(c => `
             <span class="questions-categorie-tag">
-                ${c.nom}
+                ${echapperHtml(c.nom)}
                 <button class="questions-categorie-suppr" data-action="supprimerCategorie" data-param="${c.id}" title="Supprimer">×</button>
             </span>
         `).join('');
