@@ -3990,12 +3990,17 @@
             modeCourant = 'evaluer';
             masquerPalettesAnnotation();
 
-            // Si les palettes eval existent déjà (cachées), les réafficher
+            // Si les palettes eval existent déjà (cachées), les réafficher et re-remplir
             if (document.getElementById('travaux-palette-eval-gauche')) {
                 ['travaux-palette-eval-gauche', 'travaux-palette-eval-droite', 'travaux-palette-eval-retro'].forEach(function(id) {
                     var el = document.getElementById(id);
                     if (el) el.classList.remove('u-hide');
                 });
+                // Re-remplir les selects pour le fichier courant
+                remplirLabelsIdentite(fichier);
+                const prodIdEff = fichier.productionId ||
+                    (typeof travauxResolution !== 'undefined' ? travauxResolution.trouverProductionPourFichier(fichier) : null);
+                preRemplirEvaluation(fichier.etudiantDA, prodIdEff || fichier.productionId);
             } else {
                 // Première fois : créer les palettes eval
                 afficherPalettesEval(fichier);
