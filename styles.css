@@ -15769,9 +15769,10 @@ body.mode-clair .travaux-compteur-badge {
     margin-left: auto;
     min-width: 18px;
     height: 18px;
-    border-radius: 9px;
-    background: var(--accent-primaire, #6aacb8);
-    color: #fff;
+    border-radius: 4px;
+    background: transparent;
+    border: 1.5px solid var(--texte-secondaire, #8aa4b0);
+    color: var(--texte-secondaire, #8aa4b0);
     font-size: 0.65rem;
     font-weight: 700;
     display: flex;
