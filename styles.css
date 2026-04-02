@@ -17204,6 +17204,9 @@ body.mode-clair .pipeline-autocomplete-item:hover {
     color: white;
     border-color: var(--bleu-clair);
 }
+.travaux-btn-outil.actif img {
+    filter: invert(1);
+}
 
 .travaux-palette-couleurs {
     display: flex;
