@@ -885,6 +885,7 @@
             html += '</div>';
         });
         html += '</div>';
+        html += '<div class="travaux-errfr-total" id="travaux-errfr-total" style="text-align:right; font-size:0.8rem; color:var(--texte-secondaire); padding:4px 0; font-weight:600;">Total : <span id="travaux-errfr-total-valeur">0</span></div>';
         return html;
     }
 
@@ -1831,13 +1832,17 @@
             }
         });
 
-        // Injecter le total dans le champ « Nombre d'erreurs » du critère algorithmique
-        if (total > 0) {
-            const inputErreurs = document.querySelector('input[id^="eval_erreurs_"]');
-            if (inputErreurs) {
-                inputErreurs.value = total;
-                inputErreurs.dispatchEvent(new Event('input', { bubbles: true }));
-            }
+        // Afficher le total dans la palette CODES
+        const spanTotal = document.getElementById('travaux-errfr-total-valeur');
+        if (spanTotal) {
+            spanTotal.textContent = total;
+        }
+
+        // Propager le total dans le champ « Nombre d'erreurs » du critère algorithmique
+        const inputErreurs = document.querySelector('input[id^="eval_erreurs_"]');
+        if (inputErreurs) {
+            inputErreurs.value = total;
+            inputErreurs.dispatchEvent(new Event('input', { bubbles: true }));
         }
     }
 
