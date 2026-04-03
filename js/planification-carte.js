@@ -4570,10 +4570,10 @@ function initialiser() {
         if (typeof window.organisateur !== 'undefined' && leconId) {
             window.organisateur.naviguerVersLecon(leconId);
         } else if (typeof afficherSousSection === 'function') {
-            afficherSousSection('planification-organisateur');
+            afficherSousSection('structure-organisateur');
             var boutons = document.querySelectorAll('.sous-navigation button');
             boutons.forEach(function(btn) {
-                btn.classList.toggle('actif', btn.getAttribute('data-sous-onglet') === 'planification-organisateur');
+                btn.classList.toggle('actif', btn.getAttribute('data-sous-onglet') === 'structure-organisateur');
             });
         }
     });

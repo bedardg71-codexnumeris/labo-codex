@@ -21,7 +21,7 @@ const ETAPES_CONFIGURATION = [
     {
         id: 'cours',
         section: 'reglages',
-        sousSection: 'reglages-trimestre',
+        sousSection: 'contexte-trimestre',
         titre: 'Étape 1/5 : Informations du cours',
         message: 'Configure les informations de base de ton cours dans la section Trimestre.',
         suivante: 'trimestre'
@@ -29,7 +29,7 @@ const ETAPES_CONFIGURATION = [
     {
         id: 'trimestre',
         section: 'reglages',
-        sousSection: 'reglages-trimestre',
+        sousSection: 'contexte-trimestre',
         titre: 'Étape 2/5 : Calendrier du trimestre',
         message: 'Définis les dates de début et fin de ton trimestre, ainsi que les congés.',
         suivante: 'horaire'
@@ -37,8 +37,8 @@ const ETAPES_CONFIGURATION = [
     {
         id: 'horaire',
         section: 'reglages',
-        // 🆕 FIX (1er fév 2026) : reglages-horaire supprimé en Beta 95, intégré dans reglages-trimestre
-        sousSection: 'reglages-trimestre',
+        // 🆕 FIX (1er fév 2026) : reglages-horaire supprimé en Beta 95, intégré dans contexte-trimestre
+        sousSection: 'contexte-trimestre',
         titre: 'Étape 3/5 : Horaire des séances',
         message: 'Configure l\'horaire hebdomadaire de tes cours dans la section Trimestre.',
         suivante: 'groupe'
@@ -46,15 +46,15 @@ const ETAPES_CONFIGURATION = [
     {
         id: 'groupe',
         section: 'reglages',
-        sousSection: 'reglages-trimestre',
+        sousSection: 'contexte-trimestre',
         titre: 'Étape 4/5 : Liste des étudiants',
         message: 'Ajoute tes étudiants dans la section Trimestre (import CSV ou ajout manuel).',
         suivante: 'pratique'
     },
     {
         id: 'pratique',
-        section: 'construction',
-        sousSection: 'construction-pratiques-notation',
+        section: 'contexte',
+        sousSection: 'contexte-pratiques-notation',
         titre: 'Étape 5/5 : Pratique de notation',
         message: 'Configure ta pratique de notation dans Construction → Pratiques de notation.',
         suivante: null // Dernière étape

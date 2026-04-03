@@ -170,14 +170,14 @@ window.genererBadgePratique = function(type, compact = false) {
 // WRAPPERS — Fonctions extraites des onclick complexes (Phase 4)
 // ===============================
 window.naviguerVersReglagesTrimestre = function() {
-    window.location.href = '#reglages-trimestre';
+    window.location.href = '#contexte-trimestre';
     if (typeof afficherSousSectionActuelle === 'function') {
         afficherSousSectionActuelle('sous-section-trimestre');
     }
 };
 window.naviguerVersReglagesTrimestreDepuisPresences = function() {
     if (typeof afficherSection === 'function') afficherSection('reglages');
-    if (typeof afficherSousSection === 'function') afficherSousSection('reglages-trimestre');
+    if (typeof afficherSousSection === 'function') afficherSousSection('contexte-trimestre');
 };
 window.rechargerPage = function() { window.location.reload(); };
 window.ouvrirImportEchellesLocal = function() {
@@ -416,9 +416,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const _modeExpert = db.getSync('preferencesAffichage', {}).modeExpert || false;
     const _demoActif = db.getSync('demo-actif', null) === 'true';
     if (_demoActif) {
-        afficherSection('tableau-bord');
+        afficherSection('apercu');
     } else if (_modeExpert) {
-        afficherSection('tableau-bord');
+        afficherSection('apercu');
     } else {
         afficherSection('accueil');
     }

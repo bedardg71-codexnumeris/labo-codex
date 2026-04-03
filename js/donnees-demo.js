@@ -262,7 +262,7 @@ async function entrerEnDemo() {
 
         // 10. Naviguer vers le tableau de bord
         if (typeof afficherSection === 'function') {
-            afficherSection('tableau-bord');
+            afficherSection('apercu');
         }
 
         // 11. Rafraîchir le contenu
@@ -315,7 +315,7 @@ async function quitterDemo() {
 
         // 7. Naviguer vers le tableau de bord
         if (typeof afficherSection === 'function') {
-            afficherSection('tableau-bord');
+            afficherSection('apercu');
         }
 
         // 8. Rafraîchir le contenu

@@ -509,7 +509,7 @@ async function afficherPratiqueEnLectureSeule() {
  */
 function naviguerVersPratiqueNotation() {
     // Naviguer vers Construction → Pratiques de notation
-    afficherSousSection('construction-pratiques-notation');
+    afficherSousSection('contexte-pratiques-notation');
 }
 
 /**

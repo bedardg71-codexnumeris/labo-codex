@@ -6917,14 +6917,14 @@ function ouvrirProfilDepuisEvaluation() {
         return;
     }
 
-    // Naviguer vers la section Tableau de bord > Profil
-    afficherSection('tableau-bord');
+    // Naviguer vers la section Suivi > Profil
+    afficherSection('suivi');
 
     // Attendre que la section soit chargée
     setTimeout(() => {
         // Afficher la sous-section profil
         if (typeof afficherSousSection === 'function') {
-            afficherSousSection('tableau-bord-profil');
+            afficherSousSection('suivi-profil');
         }
 
         // Attendre un peu puis charger le profil de l'étudiant

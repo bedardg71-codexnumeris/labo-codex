@@ -942,7 +942,7 @@ function genererActiviteMiniHTML(noeud, carte, etape) {
 // ============================================================
 
 function configurerDragDrop() {
-    var conteneur = document.getElementById('planification-organisateur');
+    var conteneur = document.getElementById('structure-organisateur');
     if (!conteneur) return;
 
     // Retirer une activité d'une étape spécifique (bouton ×)
@@ -1809,11 +1809,11 @@ function debounce(fn, delai) {
 function naviguerVersLecon(leconId) {
     // Naviguer vers le sous-onglet Organisateur
     if (typeof afficherSousSection === 'function') {
-        afficherSousSection('planification-organisateur');
+        afficherSousSection('structure-organisateur');
         // Mettre à jour le bouton actif
         var boutons = document.querySelectorAll('.sous-navigation button');
         boutons.forEach(function(btn) {
-            btn.classList.toggle('actif', btn.getAttribute('data-sous-onglet') === 'planification-organisateur');
+            btn.classList.toggle('actif', btn.getAttribute('data-sous-onglet') === 'structure-organisateur');
         });
     }
 

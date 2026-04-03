@@ -28,7 +28,7 @@
    - echapperHtml() (depuis config.js)
    
    Éléments HTML requis:
-   - #presences-calendrier : Section calendaire
+   - #contexte-calendrier : Section calendaire
    - #conteneur-calendrier : Conteneur du calendrier (dans la carte)
    
    LocalStorage utilisé:
@@ -68,7 +68,7 @@
 function initialiserModuleVueCalendaire() {
 
     // Vérifier que nous sommes dans la bonne section
-    const conteneurCalendrier = document.getElementById('presences-calendrier');
+    const conteneurCalendrier = document.getElementById('contexte-calendrier');
     if (!conteneurCalendrier) {
         return;
     }
@@ -523,7 +523,7 @@ function afficherCalendrierScolaire() {
     htmlCalendrier = htmlStats + htmlCalendrier;
 
     // Injecter dans le DOM
-    const conteneurCalendrier = document.getElementById('presences-calendrier');
+    const conteneurCalendrier = document.getElementById('contexte-calendrier');
     if (conteneurCalendrier) {
         const carteCalendrier = conteneurCalendrier.querySelector('.carte') || conteneurCalendrier;
         const conteneur = carteCalendrier.querySelector('#conteneur-calendrier');
@@ -547,7 +547,7 @@ function afficherCalendrierScolaire() {
             console.error('❌ Élément #conteneur-calendrier introuvable');
         }
     } else {
-        console.error('❌ Section #presences-calendrier introuvable');
+        console.error('❌ Section #contexte-calendrier introuvable');
     }
 }
 

@@ -26,13 +26,12 @@ const ETAPES_TUTORIEL = [
         position: 'center'
     },
     {
-        id: 'tableau-bord',
-        titre: '📊 Tableau de bord',
-        description: 'Voici ton tableau de bord ! Ici tu vois les indicateurs globaux (A-C-P) et le niveau d\'engagement de tes étudiants.',
-        cible: '[data-section="tableau-bord"]', // Bouton navigation
+        id: 'apercu',
+        titre: '📊 Aperçu',
+        description: 'Voici ton aperçu ! Ici tu vois les indicateurs globaux (A-C-P) et le niveau d\'engagement de tes étudiants.',
+        cible: '[data-onglet="apercu"]',
         action: () => {
-            afficherSection('tableau-bord');
-            afficherSousSection('tableau-bord-apercu');
+            afficherSection('apercu');
         },
         position: 'bottom'
     },
@@ -81,11 +80,11 @@ const ETAPES_TUTORIEL = [
     {
         id: 'pratiques',
         titre: '⚙️ Pratiques de notation',
-        description: 'Tu peux changer de pratique (Sommative, STD, etc.) ou créer la tienne dans Construction → Pratiques de notation.',
-        cible: '[data-section="construction"]',
+        description: 'Tu peux changer de pratique (Sommative, STD, etc.) ou créer la tienne dans Contexte → Pratiques de notation.',
+        cible: '[data-onglet="contexte"]',
         action: () => {
-            afficherSection('construction');
-            afficherSousSection('construction-pratiques-notation');
+            afficherSection('contexte');
+            afficherSousSection('contexte-pratiques-notation');
         },
         position: 'bottom'
     },

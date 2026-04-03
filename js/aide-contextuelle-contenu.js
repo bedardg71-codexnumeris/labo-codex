@@ -47,14 +47,14 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Si ton devis indique « Repérer et classer des thèmes », tu pourrais te demander : « Comment je sais qu'un étudiant repère bien les thèmes ? » Tes réponses deviennent tes critères : identification des thèmes, précision du vocabulaire, organisation du classement, etc."
             }
         ],
-        voirAussi: ['construction-grilles', 'construction-echelles', 'construction-apercu']
+        voirAussi: ['construction-grilles', 'construction-echelles', 'structure-apercu-legacy']
     },
 
     // =========================================================================
     // CONSTRUCTION - APERÇU
     // =========================================================================
 
-    'construction-apercu': {
+    'structure-apercu-legacy': {
         titre: "Vue d'ensemble du matériel pédagogique",
         sections: [
             {
@@ -81,7 +81,7 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Prendre le temps de réfléchir à tes objectifs d'apprentissage avant de configurer ton matériel peut t'aider à créer des grilles plus cohérentes. Clique sur le bouton 📍 « Réfléchir à tes objectifs » si tu veux des pistes de réflexion."
             }
         ],
-        voirAussi: ['construction-objectifs-reflexion', 'construction-productions', 'construction-grilles', 'construction-pratiques']
+        voirAussi: ['construction-objectifs-reflexion', 'structure-productions', 'construction-grilles', 'construction-pratiques']
     },
 
     // =========================================================================
@@ -125,7 +125,7 @@ const AIDE_CONTEXTUELLE = {
         voirAussi: ['evaluations-annoter', 'construction-grilles', 'construction-echelles', 'construction-cartouches']
     },
 
-    'construction-productions': {
+    'structure-productions': {
         titre: "Gérer les productions étudiantes",
         sections: [
             {
@@ -293,14 +293,14 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Changer de pratique en cours de trimestre recalcule toutes les notes. Informe tes étudiants de la méthode choisie dès le début."
             }
         ],
-        voirAussi: ['construction-productions', 'construction-echelles']
+        voirAussi: ['structure-productions', 'construction-echelles']
     },
 
     // =========================================================================
     // PHASE 2 - HAUTE PRIORITÉ (4 aides)
     // =========================================================================
 
-    'tableau-bord-apercu': {
+    'apercu-contenu': {
         titre: "Comprendre le tableau de bord",
         sections: [
             {
@@ -327,7 +327,7 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Consulte ce tableau chaque semaine pour détecter les situations à risque avant qu'elles ne s'aggravent."
             }
         ],
-        voirAussi: ['tableau-bord-rai', 'presences-saisie']
+        voirAussi: ['tableau-bord-rai', 'suivi-saisie']
     },
 
     'tableau-bord-rai': {
@@ -356,10 +356,10 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Documente tes interventions dans l'onglet dédié. Cela permet de suivre leur efficacité et d'ajuster ton approche."
             }
         ],
-        voirAussi: ['tableau-bord-apercu', 'tableau-bord-liste']
+        voirAussi: ['apercu-contenu', 'suivi-liste']
     },
 
-    'presences-saisie': {
+    'suivi-saisie': {
         titre: "Saisir les présences efficacement",
         sections: [
             {
@@ -386,10 +386,10 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Les présences sont liées à la date du cours. Vérifie que la bonne date est sélectionnée avant de saisir."
             }
         ],
-        voirAussi: ['tableau-bord-apercu', 'presences-calendrier']
+        voirAussi: ['apercu-contenu', 'contexte-calendrier']
     },
 
-    'reglages-trimestre': {
+    'contexte-trimestre': {
         titre: "Configurer le trimestre",
         sections: [
             {
@@ -416,14 +416,14 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Utilise la fonction d'import pour récupérer la liste de tes étudiants depuis un fichier CSV exporté de Clara ou Omnivox."
             }
         ],
-        voirAussi: ['construction-pratiques', 'presences-saisie']
+        voirAussi: ['construction-pratiques', 'suivi-saisie']
     },
 
     // =========================================================================
     // PHASE 3 - MOYENNE PRIORITÉ (3 aides)
     // =========================================================================
 
-    'tableau-bord-liste': {
+    'suivi-liste': {
         titre: "La liste des étudiants",
         sections: [
             {
@@ -445,10 +445,10 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Trie par l'indice le plus problématique pour créer ta liste de suivi prioritaire."
             }
         ],
-        voirAussi: ['tableau-bord-apercu', 'tableau-bord-rai']
+        voirAussi: ['apercu-contenu', 'tableau-bord-rai']
     },
 
-    'presences-calendrier': {
+    'contexte-calendrier': {
         titre: "Le calendrier des présences",
         sections: [
             {
@@ -470,7 +470,7 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Repère les patterns : un étudiant souvent absent le lundi peut avoir un conflit d'horaire à signaler."
             }
         ],
-        voirAussi: ['presences-saisie', 'tableau-bord-apercu']
+        voirAussi: ['suivi-saisie', 'apercu-contenu']
     },
 
     // =========================================================================
@@ -579,7 +579,7 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Exporte les résultats filtrés en CSV pour les importer dans ton système de notes officiel."
             }
         ],
-        voirAussi: ['evaluations-proceder', 'construction-productions']
+        voirAussi: ['evaluations-proceder', 'structure-productions']
     }
 };
 

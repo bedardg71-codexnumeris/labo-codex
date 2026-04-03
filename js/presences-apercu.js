@@ -67,7 +67,7 @@ function calculerStatistiquesPresences(etudiants, indicesAssiduite, presences) {
     let totalTaux = 0;
     let nbAvecDonnees = 0;
 
-    // 🆕 BETA 96 FIX: Extraire .indice si l'indice est un objet (comme le fait tableau-bord-apercu.js)
+    // 🆕 BETA 96 FIX: Extraire .indice si l'indice est un objet (comme le fait apercu-contenu.js)
     const extraireIndice = (val) => {
         if (typeof val === 'object' && val !== null) {
             return val.indice || 0;

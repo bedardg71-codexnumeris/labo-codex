@@ -192,14 +192,14 @@ function rafraichirContenuSelonMode() {
     if (sousSectionSauvegardee) {
         // Identifier quel module doit se rafraîchir
         const mappingModules = {
-            // NOTE: reglages-groupe supprimé (Beta 95), consolidé dans reglages-trimestre
-            'reglages-trimestre': 'initialiserTrimestreV2',  // 🆕 FIX (20 jan 2026): Rafraîchir section Trimestre
+            // NOTE: reglages-groupe supprimé (Beta 95), consolidé dans contexte-trimestre
+            'contexte-trimestre': 'initialiserTrimestreV2',  // 🆕 FIX (20 jan 2026): Rafraîchir section Trimestre
             'etudiants-liste': 'afficherListeEtudiantsConsultation',
             'etudiants-profil': 'afficherProfilEtudiant',
             'evaluations-liste-evaluations': 'chargerListeEvaluationsRefonte',
-            'presences-saisie': 'afficherTableauPresences',
-            'tableau-bord-apercu': 'afficherTableauBordApercu',
-            'tableau-bord-profil': 'afficherProfilComplet'  // AJOUT: Rafraîchir le profil lors du changement de mode
+            'suivi-saisie': 'afficherTableauPresences',
+            'apercu-contenu': 'afficherTableauBordApercu',
+            'suivi-profil': 'afficherProfilComplet'  // AJOUT: Rafraîchir le profil lors du changement de mode
         };
 
         const fonctionAAppeler = mappingModules[sousSectionSauvegardee];
@@ -242,7 +242,7 @@ function rafraichirContenuSelonMode() {
                     } else {
                         // Aucun étudiant disponible, retourner à la liste
                         if (typeof afficherSousSection === 'function') {
-                            afficherSousSection('tableau-bord-apercu');
+                            afficherSousSection('apercu-contenu');
                         }
                     }
                 }

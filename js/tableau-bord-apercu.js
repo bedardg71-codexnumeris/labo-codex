@@ -7,7 +7,7 @@
 'use strict';
 
 /**
- * MODULE: tableau-bord-apercu.js
+ * MODULE: apercu-contenu.js
  *
  * RÔLE:
  * Calcule et affiche les statistiques pédagogiques du tableau de bord
@@ -854,7 +854,7 @@ function genererBadgeSourceDonnees() {
 function initialiserModuleTableauBordApercu() {
 
     // Charger les statistiques si la sous-section aperçu est active
-    const apercu = document.getElementById('tableau-bord-apercu');
+    const apercu = document.getElementById('apercu-contenu');
     if (apercu && apercu.classList.contains('active')) {
         chargerTableauBordApercu();
     }
@@ -877,7 +877,7 @@ function initialiserModuleTableauBordApercu() {
         if (badgeClic) {
             const itemParent = badgeClic.closest('.etudiant-suivi-item');
             if (itemParent && itemParent.dataset.da) {
-                if (typeof afficherSousSection === 'function') afficherSousSection('tableau-bord-profil');
+                if (typeof afficherSousSection === 'function') afficherSousSection('suivi-profil');
                 if (typeof afficherProfilComplet === 'function') afficherProfilComplet(itemParent.dataset.da);
                 // Naviguer vers la section Engagement (mobilisation) du profil
                 setTimeout(function() {
@@ -1076,7 +1076,7 @@ function chargerTableauBordApercu() {
         });
 
         // Ajouter l'indicateur de pratique ou les checkboxes selon le mode
-        const titre = document.querySelector('#tableau-bord-apercu h2');
+        const titre = document.querySelector('#apercu-contenu h2');
         if (titre) {
             const config = db.getSync('modalitesEvaluation', {});
             const affichage = config.affichageTableauBord || {};
@@ -2615,7 +2615,7 @@ function afficherAlertesPrioritairesCompteurs(etudiants) {
     });
 
     // Trouver la carte Niveau d'engagement
-    const cartes = document.querySelectorAll('#tableau-bord-apercu .carte');
+    const cartes = document.querySelectorAll('#apercu-contenu .carte');
     let carteEngagement = null;
     cartes.forEach(carte => {
         const h3 = carte.querySelector('h3 span');
@@ -3375,7 +3375,7 @@ function setBarre(id, pourcentage) {
  */
 function tbNavigerVersProfil(da) {
     if (typeof afficherSousSection === 'function') {
-        afficherSousSection('tableau-bord-profil');
+        afficherSousSection('suivi-profil');
     }
     if (typeof afficherProfilComplet === 'function') {
         afficherProfilComplet(da);
@@ -3417,7 +3417,7 @@ window.calculerEtudiantsPrioritaires = calculerEtudiantsPrioritaires;
  * - 'productions' : Array des productions
  * 
  * HTML REQUIS:
- * Éléments avec IDs dans la sous-section tableau-bord-apercu:
+ * Éléments avec IDs dans la sous-section apercu-contenu:
  * - tb-total-etudiants
  * - tb-assiduite-moyenne
  * - tb-completion-moyenne

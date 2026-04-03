@@ -3348,7 +3348,7 @@ function afficherProfilComplet(daOuEl) {
     const modeAnonymisation = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
 
     if (typeof afficherSousSection === 'function') {
-        afficherSousSection('tableau-bord-profil');
+        afficherSousSection('suivi-profil');
     }
 
     const container = document.getElementById('contenuProfilEtudiant');
@@ -7491,14 +7491,14 @@ function genererSectionAssiduiteLegacy(da) {
  */
 function naviguerVersPresenceAvecDate(dateStr) {
 
-    // 1. Afficher la section Présences
+    // 1. Afficher la section Suivi (saisie des présences)
     if (typeof afficherSection === 'function') {
-        afficherSection('presences');
+        afficherSection('suivi');
     }
 
     // 2. Afficher la sous-section Saisie
     if (typeof afficherSousSection === 'function') {
-        afficherSousSection('presences-saisie');
+        afficherSousSection('suivi-saisie');
     }
 
     // 3. Attendre que le DOM soit mis à jour, puis pré-sélectionner la date
@@ -7599,8 +7599,8 @@ function toggleSection(sectionId) {
  */
 function naviguerVersNouvelleIntervention(daPreselectionne) {
     // Naviguer vers la section
-    afficherSection('tableau-bord');
-    afficherSousSection('tableau-bord-interventions');
+    afficherSection('suivi');
+    afficherSousSection('suivi-interventions');
 
     // Attendre que le conteneur soit prêt
     const checkConteneur = setInterval(() => {
@@ -7621,8 +7621,8 @@ function naviguerVersNouvelleIntervention(daPreselectionne) {
  */
 function naviguerVersIntervention(interventionId) {
     // Naviguer vers la section
-    afficherSection('tableau-bord');
-    afficherSousSection('tableau-bord-interventions');
+    afficherSection('suivi');
+    afficherSousSection('suivi-interventions');
 
     // Attendre que le conteneur soit prêt
     const checkConteneur = setInterval(() => {
@@ -7651,12 +7651,12 @@ window.naviguerVersIntervention = naviguerVersIntervention;
    =============================== */
 
 /**
- * Surveille l'activation de la sous-section 'tableau-bord-profil'
+ * Surveille l'activation de la sous-section 'suivi-profil'
  * et recharge automatiquement le profil pour refléter les changements
  * faits depuis d'autres sections (ex: modifications d'interventions RàI)
  */
 document.addEventListener('DOMContentLoaded', function() {
-    const sectionProfil = document.getElementById('tableau-bord-profil');
+    const sectionProfil = document.getElementById('suivi-profil');
     if (!sectionProfil) return;
 
     let dernierDARecharge = null;
@@ -8605,7 +8605,7 @@ window.calculerMoyennesCriteres = calculerMoyennesCriteres;
 
 /**
  * 🆕 BETA 91: Calcule et stocke les patterns + RàI pour TOUT le groupe
- * Cette fonction est appelée par tableau-bord-apercu.js au chargement
+ * Cette fonction est appelée par apercu-contenu.js au chargement
  * pour avoir des données à jour pour tous les étudiants
  *
  * @returns {Object} - Patterns et RàI de tous les étudiants

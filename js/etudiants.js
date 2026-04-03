@@ -98,7 +98,7 @@ let donneesTableauCache = [];
 function initialiserModuleListeEtudiants() {
 
     // Vérifier que nous sommes dans la bonne section
-    const tbody = document.getElementById('tbody-tableau-bord-liste');
+    const tbody = document.getElementById('tbody-suivi-liste');
     if (!tbody) {
         return;
     }
@@ -612,7 +612,7 @@ window.toggleLigneEntete = toggleLigneEntete;
 function toggleFiltreMinimum(actif) {
     if (typeof actif === 'object' && actif !== null) actif = actif.checked;
     // Griser/dé-griser les lignes
-    document.querySelectorAll('#tbody-tableau-bord-liste tr').forEach(tr => {
+    document.querySelectorAll('#tbody-suivi-liste tr').forEach(tr => {
         if (actif && tr.dataset.insuffisant === 'true') {
             tr.style.opacity = '0.35';
         } else {
@@ -871,8 +871,8 @@ function afficherListeEtudiantsConsultation() {
     // NOUVEAU: Mettre à jour l'indicateur de tri visuel au chargement
     mettreAJourIndicateursTri();
 
-    const tbody = document.getElementById('tbody-tableau-bord-liste');
-    const compteur = document.getElementById('compteur-tableau-bord-liste');
+    const tbody = document.getElementById('tbody-suivi-liste');
+    const compteur = document.getElementById('compteur-suivi-liste');
     const messageVide = document.getElementById('message-aucun-etudiant');
     const tableContainer = document.getElementById('tableEtudiantsListe');
 
@@ -951,7 +951,7 @@ function afficherListeEtudiantsConsultation() {
     const afficherSommatif = affichage.afficherSommatif !== false;
     const afficherAlternatif = affichage.afficherAlternatif !== false;
 
-    // Déterminer quelle pratique afficher (cohérence avec tableau-bord-apercu.js)
+    // Déterminer quelle pratique afficher (cohérence avec apercu-contenu.js)
     let pratiqueAffichee = null;
     if (afficherSommatif && !afficherAlternatif) {
         pratiqueAffichee = 'SOM';
@@ -1230,7 +1230,7 @@ function afficherListeEtudiantsConsultation() {
         tr.style.cursor = 'pointer';
         tr.onclick = function () {
             // Afficher le profil ET basculer vers la sous-section Profil
-            afficherSousSection('tableau-bord-profil');
+            afficherSousSection('suivi-profil');
             afficherProfilComplet(etudiant.da);
         };
 
@@ -1540,7 +1540,7 @@ function reinitialiserFiltresListeEtudiants() {
 function afficherPortfolio(da) {
 
     // Basculer vers la sous-section profil
-    afficherSousSection('tableau-bord-profil');
+    afficherSousSection('suivi-profil');
 
     // Déléguer au module profil-etudiant.js pour l'affichage complet
     if (typeof afficherProfilComplet === 'function') {
