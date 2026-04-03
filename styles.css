@@ -6280,7 +6280,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     text-align: center;
 }
 
-/* 🆕 BETA 91: Module tableau-bord-apercu (optimisations Phase B) */
+/* 🆕 BETA 91: Module Aperçu (anciennement tableau-bord-apercu, optimisations Phase B) */
 .tb-texte-mini {
     font-size: 0.7rem;
     font-weight: 400;
@@ -11091,63 +11091,63 @@ body[data-mode="simulation"] table tr:hover {
    =============================== */
 
 /* Réduire l'espacement entre accordéons */
-#reglages-trimestre .carte.accordeon {
+#contexte-trimestre .carte.accordeon {
     margin-top: 12px;
 }
 
-#reglages-trimestre .carte.accordeon:first-of-type {
+#contexte-trimestre .carte.accordeon:first-of-type {
     margin-top: 0;
 }
 
 /* Compacter le contenu des accordéons */
-#reglages-trimestre .accordeon-contenu {
+#contexte-trimestre .accordeon-contenu {
     padding: 12px 0 0 0;
 }
 
 /* Compacter la disposition bibliothèque/formulaire */
-#reglages-trimestre .disposition-bibliotheque-formulaire {
+#contexte-trimestre .disposition-bibliotheque-formulaire {
     gap: 12px;
 }
 
 /* Compacter le panneau formulaire */
-#reglages-trimestre .panneau-formulaire {
+#contexte-trimestre .panneau-formulaire {
     padding: 12px;
     min-height: auto;
 }
 
 /* Compacter les blocs section */
-#reglages-trimestre .bloc-section {
+#contexte-trimestre .bloc-section {
     padding: 10px 12px;
     margin-bottom: 10px;
 }
 
-#reglages-trimestre .bloc-section--compact {
+#contexte-trimestre .bloc-section--compact {
     padding: 8px 10px;
 }
 
 /* Compacter les sous-titres */
-#reglages-trimestre .sous-titre-section {
+#contexte-trimestre .sous-titre-section {
     font-size: 0.85rem;
     margin-bottom: 8px;
 }
 
 /* Compacter les groupes de formulaire */
-#reglages-trimestre .groupe-form {
+#contexte-trimestre .groupe-form {
     margin-bottom: 8px;
 }
 
-#reglages-trimestre .groupe-form label {
+#contexte-trimestre .groupe-form label {
     font-size: 0.75rem;
     margin-bottom: 3px;
 }
 
 /* Compacter les inputs */
-#reglages-trimestre .controle-form {
+#contexte-trimestre .controle-form {
     padding: 6px 10px;
     font-size: 0.85rem;
 }
 
-#reglages-trimestre .controle-form-compact {
+#contexte-trimestre .controle-form-compact {
     padding: 5px 8px;
     font-size: 0.8rem;
 }
@@ -11173,37 +11173,37 @@ tr.etudiant-inactif td {
 }
 
 /* Compacter les grilles */
-#reglages-trimestre .grille-2col {
+#contexte-trimestre .grille-2col {
     gap: 10px;
 }
 
-#reglages-trimestre .grille-2col-gap15 {
+#contexte-trimestre .grille-2col-gap15 {
     gap: 8px;
 }
 
-#reglages-trimestre .grille-form-2col {
+#contexte-trimestre .grille-form-2col {
     gap: 10px;
     margin-bottom: 10px;
 }
 
 /* Compacter les textes d'aide */
-#reglages-trimestre .texte-aide {
+#contexte-trimestre .texte-aide {
     font-size: 0.75rem;
     margin-top: 6px;
 }
 
 /* Compacter le panneau bibliothèque */
-#reglages-trimestre .panneau-bibliotheque {
+#contexte-trimestre .panneau-bibliotheque {
     padding: 10px;
 }
 
-#reglages-trimestre .panneau-bibliotheque .btn {
+#contexte-trimestre .panneau-bibliotheque .btn {
     padding: 6px 10px;
     font-size: 0.8rem;
 }
 
 /* Compacter l'aperçu sidebar */
-#reglages-trimestre .apercu-trimestre-sidebar {
+#contexte-trimestre .apercu-trimestre-sidebar {
     padding: 10px;
     margin-top: 12px;
     font-size: 0.8rem;
@@ -11212,7 +11212,7 @@ tr.etudiant-inactif td {
 }
 
 /* ========== SYNTHÈSES SIDEBAR (Beta 95.3) ========== */
-#reglages-trimestre .apercu-sidebar {
+#contexte-trimestre .apercu-sidebar {
     padding: 10px;
     margin-top: 12px;
     font-size: 0.8rem;
@@ -11220,27 +11220,27 @@ tr.etudiant-inactif td {
     border-radius: var(--radius-grand);
 }
 
-#reglages-trimestre .apercu-titre {
+#contexte-trimestre .apercu-titre {
     font-weight: 600;
     font-size: 0.85rem;
     margin-bottom: 2px;
     color: var(--texte-fonce);
 }
 
-#reglages-trimestre .apercu-code {
+#contexte-trimestre .apercu-code {
     font-size: 0.75rem;
     color: var(--texte-secondaire, #8aa4b0);
     margin-bottom: 8px;
 }
 
-#reglages-trimestre .apercu-detail {
+#contexte-trimestre .apercu-detail {
     font-size: 0.75rem;
     color: var(--texte-secondaire, #8aa4b0);
     line-height: 1.4;
 }
 
 /* Score de complétude groupe-cours */
-#reglages-trimestre .score-completude {
+#contexte-trimestre .score-completude {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -11250,55 +11250,55 @@ tr.etudiant-inactif td {
     font-size: 0.75rem;
 }
 
-#reglages-trimestre .score-completude .score-valeur {
+#contexte-trimestre .score-completude .score-valeur {
     font-weight: 600;
 }
 
-#reglages-trimestre .score-completude.complet .score-valeur {
+#contexte-trimestre .score-completude.complet .score-valeur {
     color: var(--vert-fonce);
 }
 
-#reglages-trimestre .score-completude.incomplet .score-valeur {
+#contexte-trimestre .score-completude.incomplet .score-valeur {
     color: #d97706;
 }
 
 /* Top programmes groupe étudiants */
-#reglages-trimestre .top-programmes {
+#contexte-trimestre .top-programmes {
     margin-top: 8px;
     padding-top: 8px;
     border-top: 1px solid rgba(0,0,0,0.1);
     font-size: 0.75rem;
 }
 
-#reglages-trimestre .top-programmes .label-top {
+#contexte-trimestre .top-programmes .label-top {
     font-weight: 500;
     color: var(--texte-secondaire, #8aa4b0);
     margin-bottom: 4px;
 }
 
-#reglages-trimestre .top-programmes .programme-item {
+#contexte-trimestre .top-programmes .programme-item {
     display: flex;
     justify-content: space-between;
     color: var(--texte-secondaire, #8aa4b0);
 }
 
 /* Compacter les états vides */
-#reglages-trimestre .etat-vide-formulaire {
+#contexte-trimestre .etat-vide-formulaire {
     padding: 15px;
 }
 
 /* Compacter les actions formulaire */
-#reglages-trimestre .actions-formulaire {
+#contexte-trimestre .actions-formulaire {
     margin-top: 12px;
     padding-top: 10px;
 }
 
 /* Réduire hauteur du titre h2 */
-#reglages-trimestre > h2 {
+#contexte-trimestre > h2 {
     margin-bottom: 8px;
 }
 
-#reglages-trimestre > p.text-muted {
+#contexte-trimestre > p.text-muted {
     margin-bottom: 12px;
     font-size: 0.85rem;
 }
@@ -11310,16 +11310,16 @@ tr.etudiant-inactif td {
 
 /* --- Suppression arrondis bordures gauches --- */
 /* Les éléments avec bordure gauche doivent avoir coins carrés à gauche */
-#reglages-trimestre .alerte,
-#reglages-trimestre .modal-info,
-#reglages-trimestre .carte-info-toggle {
+#contexte-trimestre .alerte,
+#contexte-trimestre .modal-info,
+#contexte-trimestre .carte-info-toggle {
     border-radius: 0 var(--radius-moyen) var(--radius-moyen) 0;
 }
 
 /* --- Uniformisation tailles de police labels --- */
 /* Tous les labels de formulaire : 0.8rem uniforme */
-#reglages-trimestre .groupe-form label,
-#reglages-trimestre .panneau-formulaire label {
+#contexte-trimestre .groupe-form label,
+#contexte-trimestre .panneau-formulaire label {
     font-size: 0.8rem;
     font-weight: 500;
     color: var(--gris-fonce);
@@ -11327,12 +11327,12 @@ tr.etudiant-inactif td {
 }
 
 /* Sous-labels (Du:/Au:) : 0.7rem */
-#reglages-trimestre .d-flex-gap-10-center label {
+#contexte-trimestre .d-flex-gap-10-center label {
     font-size: 0.7rem;
 }
 
 /* --- Uniformisation sous-titres sections --- */
-#reglages-trimestre .sous-titre-section {
+#contexte-trimestre .sous-titre-section {
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--accent-primaire);
@@ -11340,14 +11340,14 @@ tr.etudiant-inactif td {
 }
 
 /* --- Uniformisation textes d'aide --- */
-#reglages-trimestre .texte-aide {
+#contexte-trimestre .texte-aide {
     font-size: 0.75rem;
     color: var(--gris-moyen);
 }
 
 /* --- Uniformisation boutons --- */
 /* Boutons primaires/secondaires dans la page */
-#reglages-trimestre .btn {
+#contexte-trimestre .btn {
     font-size: 0.8rem;
     padding: 8px 14px;
     border-radius: var(--radius-moyen);
@@ -11355,20 +11355,20 @@ tr.etudiant-inactif td {
 }
 
 /* Boutons compacts */
-#reglages-trimestre .btn-tres-compact,
-#reglages-trimestre .btn-compact {
+#contexte-trimestre .btn-tres-compact,
+#contexte-trimestre .btn-compact {
     padding: 5px 10px;
     font-size: 0.75rem;
 }
 
 /* Boutons bibliothèque */
-#reglages-trimestre .btn-bibliotheque {
+#contexte-trimestre .btn-bibliotheque {
     width: 100%;
     margin-bottom: 10px;
 }
 
 /* Boutons dans les actions formulaire - Supprimer à gauche, Annuler/Enregistrer à droite */
-#reglages-trimestre .actions-formulaire {
+#contexte-trimestre .actions-formulaire {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -11379,30 +11379,30 @@ tr.etudiant-inactif td {
 }
 
 /* Quand pas de bouton Supprimer, aligner à droite */
-#reglages-trimestre .actions-formulaire > div:only-child {
+#contexte-trimestre .actions-formulaire > div:only-child {
     margin-left: auto;
 }
 
 /* Boutons de réinitialisation dans les blocs */
-#reglages-trimestre .btn-reset-bloc {
+#contexte-trimestre .btn-reset-bloc {
     font-size: 1rem;
     opacity: 0.6;
 }
 
-#reglages-trimestre .btn-reset-bloc:hover {
+#contexte-trimestre .btn-reset-bloc:hover {
     opacity: 1;
 }
 
 /* --- Uniformisation encadrés --- */
 /* Tous les blocs-section en bleu pâle uniforme */
-#reglages-trimestre .bloc-section {
+#contexte-trimestre .bloc-section {
     background: var(--bleu-pale);
     border: none;
     border-radius: var(--radius-grand);
 }
 
 /* Formulaires internes */
-#reglages-trimestre .formulaire-interne {
+#contexte-trimestre .formulaire-interne {
     background: var(--bleu-tres-pale);
     border-radius: var(--radius-moyen);
     padding: 10px;
@@ -11411,38 +11411,38 @@ tr.etudiant-inactif td {
 }
 
 /* --- Uniformisation selects et inputs --- */
-#reglages-trimestre .controle-form,
-#reglages-trimestre select,
-#reglages-trimestre input[type="text"],
-#reglages-trimestre input[type="number"],
-#reglages-trimestre input[type="date"] {
+#contexte-trimestre .controle-form,
+#contexte-trimestre select,
+#contexte-trimestre input[type="text"],
+#contexte-trimestre input[type="number"],
+#contexte-trimestre input[type="date"] {
     font-size: 0.85rem;
     padding: 6px 10px;
     border: 1px solid var(--gris-clair);
     border-radius: var(--radius-moyen);
 }
 
-#reglages-trimestre .controle-form:focus,
-#reglages-trimestre select:focus,
-#reglages-trimestre input:focus {
+#contexte-trimestre .controle-form:focus,
+#contexte-trimestre select:focus,
+#contexte-trimestre input:focus {
     border-color: var(--accent-primaire);
     outline: none;
     box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.15);
 }
 
 /* Boutons pleine largeur */
-#reglages-trimestre .btn-block {
+#contexte-trimestre .btn-block {
     width: 100%;
     margin-top: 8px;
 }
 
-#reglages-trimestre .btn-block:first-of-type {
+#contexte-trimestre .btn-block:first-of-type {
     margin-top: 0;
 }
 
 /* Boutons - Utilisation des variables Design System */
-#reglages-trimestre .btn-supprimer,
-#reglages-trimestre .btn-danger {
+#contexte-trimestre .btn-supprimer,
+#contexte-trimestre .btn-danger {
     background: var(--btn-supprimer);
     color: white;
     border: none;
@@ -11451,40 +11451,40 @@ tr.etudiant-inactif td {
     border-radius: var(--radius-moyen);
 }
 
-#reglages-trimestre .btn-supprimer:hover,
-#reglages-trimestre .btn-danger:hover {
+#contexte-trimestre .btn-supprimer:hover,
+#contexte-trimestre .btn-danger:hover {
     background: var(--btn-supprimer-hover);
 }
 
-#reglages-trimestre .btn-annuler {
+#contexte-trimestre .btn-annuler {
     background: var(--btn-annuler);
     color: white;
     border: none;
 }
 
-#reglages-trimestre .btn-annuler:hover {
+#contexte-trimestre .btn-annuler:hover {
     background: var(--btn-annuler-hover);
 }
 
-#reglages-trimestre .btn-confirmer {
+#contexte-trimestre .btn-confirmer {
     background: var(--btn-confirmer);
     color: white;
     border: none;
 }
 
-#reglages-trimestre .btn-confirmer:hover {
+#contexte-trimestre .btn-confirmer:hover {
     background: var(--btn-confirmer-hover);
 }
 
 /* Espacement uniforme entre boutons côte à côte */
-#reglages-trimestre .btn-groupe,
-#reglages-trimestre .actions-formulaire div {
+#contexte-trimestre .btn-groupe,
+#contexte-trimestre .actions-formulaire div {
     display: flex;
     gap: 8px;
 }
 
 /* Badges compteurs dans les en-têtes accordéon */
-#reglages-trimestre .badge-compteur {
+#contexte-trimestre .badge-compteur {
     font-size: 0.75rem;
     padding: 3px 8px;
     background: var(--bleu-tres-pale);
@@ -11495,27 +11495,27 @@ tr.etudiant-inactif td {
 /* 🆕 FIX (1er fév 2026) : Responsive iPad pour section Trimestre */
 /* Corrige le contenu tronqué à droite signalé par Gregoire */
 @media (max-width: 1024px) {
-    #reglages-trimestre .zone-principale {
+    #contexte-trimestre .zone-principale {
         overflow-x: auto;
         min-width: 0;
     }
 
-    #reglages-trimestre .grille-2col {
+    #contexte-trimestre .grille-2col {
         gap: 12px;
     }
 
-    #reglages-trimestre .d-flex-gap-10-center {
+    #contexte-trimestre .d-flex-gap-10-center {
         flex-wrap: wrap;
         gap: 8px;
     }
 
     /* Réduire padding des blocs section */
-    #reglages-trimestre .bloc-section {
+    #contexte-trimestre .bloc-section {
         padding: 10px;
     }
 
     /* Inputs date plus compacts */
-    #reglages-trimestre input[type="date"] {
+    #contexte-trimestre input[type="date"] {
         padding: 5px 8px;
         font-size: 0.8rem;
     }
@@ -11523,23 +11523,23 @@ tr.etudiant-inactif td {
 
 @media (max-width: 850px) {
     /* Empiler les colonnes Bornes/Semaines spéciales */
-    #reglages-trimestre .grille-2col {
+    #contexte-trimestre .grille-2col {
         grid-template-columns: 1fr;
     }
 
     /* Empiler les dates Du/Au */
-    #reglages-trimestre .d-flex-gap-10-center {
+    #contexte-trimestre .d-flex-gap-10-center {
         flex-direction: column;
         align-items: stretch;
     }
 
-    #reglages-trimestre .d-flex-gap-10-center span {
+    #contexte-trimestre .d-flex-gap-10-center span {
         text-align: center;
         padding: 5px 0;
     }
 
     /* Grille identification : empiler sur mobile */
-    #reglages-trimestre .grille-identification {
+    #contexte-trimestre .grille-identification {
         grid-template-columns: 1fr;
     }
 }
@@ -16632,7 +16632,8 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 /* ===============================
    MODULE: PLANIFICATION — CARTE MENTALE
    Préfixe : planif-
-   Scopé sous #section-planification
+   Scopé sous #section-structure (anciennement #section-planification)
+   Les overrides plein écran ciblent #structure-carte (la sous-section)
    =============================== */
 
 /* === TOKENS COULEUR NŒUDS (ajoutés au :root existant) === */
@@ -16664,17 +16665,18 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 }
 
 /* === LAYOUT PRINCIPAL === */
-#section-planification.section.active {
+/* Overrides plein écran scopés à la sous-section carte mentale */
+#structure-carte {
     padding: 0;
     margin: 0;
     background: none;
     border-radius: 0;
 }
-/* Retirer le padding du conteneur parent quand planification est active */
-.contenu:has(#section-planification.active) {
+/* Retirer le padding du conteneur parent quand la carte mentale est visible */
+.contenu:has(#structure-carte:not([style*="display: none"])) {
     padding: 0;
 }
-#section-planification .planif-wrapper {
+#section-structure .planif-wrapper {
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -16684,7 +16686,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 }
 
 /* === BARRE SUPÉRIEURE === */
-#section-planification .planif-header {
+#section-structure .planif-header {
     display: flex;
     padding: 4px 12px;
     background: var(--surface-carte, #1a3040);
@@ -16742,7 +16744,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     text-align: right;
 }
 
-#section-planification .planif-header h3 span { color: var(--texte-secondaire, #8aa4b0); font-weight: 400; }
+#section-structure .planif-header h3 span { color: var(--texte-secondaire, #8aa4b0); font-weight: 400; }
 
 #planif-titre-carte {
     font-size: 16px;
@@ -18421,7 +18423,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 #planif-menu-lien button.actif { background: rgba(106, 172, 184, 0.1); color: var(--planif-couleur-selection); font-weight: 600; }
 
 /* === BARRE D'ÉTAT === */
-#section-planification .planif-footer {
+#section-structure .planif-footer {
     display: flex;
     align-items: center;
     gap: 16px;
@@ -18433,7 +18435,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     flex-shrink: 0;
 }
 
-#section-planification .planif-footer kbd {
+#section-structure .planif-footer kbd {
     padding: 1px 5px;
     background: rgba(106, 172, 184, 0.06);
     border: 1px solid var(--planif-couleur-bordure);
@@ -18944,11 +18946,11 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 }
 
 /* Carte mentale (planification) — fond blanc, palette bleu pâle */
-.mode-clair #section-planification .planif-wrapper {
+.mode-clair #section-structure .planif-wrapper {
     background: #ffffff;
 }
 
-.mode-clair #section-planification .planif-header {
+.mode-clair #section-structure .planif-header {
     background: #ffffff;
     border-bottom-color: rgba(3, 46, 92, 0.08);
 }

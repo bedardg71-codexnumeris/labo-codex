@@ -11,6 +11,7 @@
 > **Contre-expertise** : Verification code par Claude Code (27 mars 2026). Corrections factuelles appliquees — voir errata ci-dessous.
 > **Contexte colloque** : Presentation devant ~150 personnes sur MacBook (pas iPad). Pas de kiosque. USB codex non termine.
 > **Demo** : La demo au colloque doit refleter l'experience reelle de Gregoire (donnees, flux de travail). La preparation du scenario de demo est un chantier separe, a planifier fin avril / debut mai.
+> **Mise a jour (2 avril 21h30)** : Integration du Tier 5.7 (reorganisation navigation) au plan. Deplace de « Post-consolidation (mai) » vers un tier a part entiere, a executer AVANT les Tiers 6 et 7. Justification : le Tier 7 (aide) modifie les memes fichiers que la navigation — faire la navigation d'abord evite le travail en double. Plan detaille dans `PLAN-NAVIGATION.md`.
 
 ---
 
@@ -774,6 +775,72 @@ Resultats :
 
 ---
 
+## Tier 5.7 — Reorganisation de la navigation
+
+**Source** : PLAN-NAVIGATION.md (2 avril 2026, 21h30) + `architecture-navigation-actuelle (2 avril 2026).txt`
+**Priorite** : HAUTE — prerequis du Tier 7, et la nouvelle navigation doit etre rodee avant le colloque AQPC
+**Effort** : ~9-12 heures (3 sessions)
+**Risque si non fait** : Navigation incoherente au colloque (9 sections dont 2 a supprimer, 2 a creer), travail en double avec le Tier 7
+
+### Contexte
+
+La navigation actuelle a 9 sections et 34 sous-sections. La reorganisation restructure en 9 sections (meme nombre, mais differentes) et 30 sous-sections. Le mecanisme (`config.js` → `navigation.js` → `index.html`) ne change pas — seules les donnees (IDs, libelles, regroupements) et les blocs HTML sont modifies.
+
+**Pourquoi maintenant (et pas en mai comme prevu initialement)** :
+- Le Tier 7 (aide) modifie `aide-contextuelle-contenu.js` qui contient **33 references** aux anciens IDs de navigation. Faire la navigation d'abord evite de travailler avec des IDs obsoletes puis de tout renommer.
+- Aucune des 5 decisions en attente (D-SSOT-1 a D-AIDE-2) ne bloque ce tier.
+- Plus de temps de rodage avant le colloque = moins de risque de bug de navigation en demo.
+
+### Inventaire des references a modifier
+
+~362 occurrences dans le codebase :
+
+| ID a renommer | JS | HTML | CSS | Total |
+|---|---|---|---|---|
+| `tableau-bord*` | 72 | 23 | 1 | 96 |
+| `construction-*` | 53 | 13 | 0 | 66 |
+| `presences-*` | 38 | 12 | 0 | 50 |
+| `reglages-trimestre` | 28 | 4 | 82 | 114 |
+| `planification-*` | 20 | 8 | 6 | 34 |
+| `boite-outils-bilan` | 1 | 1 | 0 | 2 |
+
+### Sessions et phases
+
+| Session | Phases | Contenu | Effort |
+|---------|--------|---------|--------|
+| **S1** | 1 → 2.5 + 3 | config.js, HTML, CSS (82 selecteurs `reglages-trimestre`), navigation.js | ~4-5h |
+| **S2** | 4 → 6 | References JS (~28 fichiers, 212 occ.), noms_stables.json, boutons nav | ~3-4h |
+| **S3** | 7 | Validation exhaustive (grep controle + checklist 20 points) + corrections | ~2-3h |
+
+Un commit par phase. Les Phases 1+2 sont commitees ensemble (config.js seul casserait la nav).
+
+### Risques principaux
+
+| Risque | Mitigation |
+|---|---|
+| Faux positif renommage sections generiques (`presences` = cle de donnees vs section nav) | Regles de contexte documentees dans PLAN-NAVIGATION.md Phase 4 — items 1-17 safe en global, items 18-21 manuels |
+| 82 selecteurs CSS `reglages-trimestre` | Phase 2.5 dediee + verification visuelle mode sombre/clair |
+| Boucle infinie profil (anti-reentrance cassee) | Verification croisee `profil-etudiant.js` ↔ `navigation.js` documentee |
+| Variables CSS `--planification-*` renommees par erreur | Regle explicite : ne pas toucher les variables CSS de design |
+
+### Zones protegees
+
+Ce tier touche `config.js`, `navigation.js` et `noms_stables.json` — **autorisation donnee par Gregoire** pour cette reorganisation (decision #3 dans PLAN-NAVIGATION.md).
+
+### Criteres de reussite
+
+- Navigation complete entre les 9 sections et 30 sous-sections sans erreur console
+- Grep des anciens IDs de sous-sections retourne zero resultat
+- Section `contexte-trimestre` visuellement identique a l'ancien `reglages-trimestre`
+- Anti-reentrance profil fonctionne (pas de boucle infinie)
+- Guidage demo, parcours d'apprentissage et aide contextuelle pointent aux bons endroits
+
+### Procedure complete
+
+Voir **PLAN-NAVIGATION.md** — le plan detaille contient les 7 phases, le code exact pour `config.js` et `navigation.js`, la cartographie des 362 references, les regles de faux positifs et la checklist de validation.
+
+---
+
 ## Chantier separe — Scenario de demo AQPC
 
 La demo au colloque doit refleter l'**experience reelle** de Gregoire : ses donnees, son flux de travail, ses cas d'usage quotidiens — pas une vitrine artificielle. Ce chantier est distinct de la consolidation technique et doit etre planifie separement (fin avril / debut mai).
@@ -899,6 +966,7 @@ C'est la violation #1 (CRITIQUE — 25+ ecrivains, 36 lecteurs), mais la decompo
 **Priorite** : HAUTE — le systeme d'aide sera le premier contact des visiteurs AQPC avec l'application
 **Effort** : ~19-27 heures (4 sprints sur 8 semaines)
 **Risque si non fait** : Visiteurs AQPC bloques sans aide, boutons inaccessibles sur iPad, articles obsoletes
+**Prerequis** : Tier 5.7 (navigation) TERMINE — `aide-contextuelle-contenu.js` contient 33 references aux IDs de navigation. Travailler sur l'aide avec les nouveaux IDs en place evite le travail en double.
 
 ### Contexte
 
@@ -1006,6 +1074,12 @@ La Boite a outils n'a qu'**1 seul tooltip** (`nav-bao-tirage`). C'est le trou le
 
 ---
 
+## Post-consolidation (mai — avant AQPC)
+
+- ~~**Reorganisation de la navigation**~~ → **Integre au plan comme Tier 5.7** (mise a jour 2 avril 21h30). Voir ci-dessus.
+
+---
+
 ## Hors scope (post-AQPC)
 
 Ces chantiers sont documentes mais explicitement reportes :
@@ -1054,16 +1128,21 @@ Ces chantiers sont documentes mais explicitement reportes :
 22. **Aide — ARIA sur modales** : `role="dialog"`, `aria-modal`, focus trap sur les modales d'aide et Primo
 23. **Aide — couverture zones demos** : profil etudiant et interventions ont chacun au moins un article d'aide contextuelle
 24. **Aide — articles a jour** : les 65 articles thematiques relus et mis a jour pour la Beta 99
+25. **Navigation — zero ancien ID** : grep des anciens IDs de sous-sections (`tableau-bord-*`, `construction-*`, `planification-*`, `presences-*`, `reglages-trimestre`, `boite-outils-bilan`) retourne zero dans JS, HTML et CSS
+26. **Navigation — toutes sections fonctionnelles** : les 9 sections et 30 sous-sections s'affichent sans erreur console
+27. **Navigation — CSS intact** : `contexte-trimestre` visuellement identique a l'ancien `reglages-trimestre` (82 selecteurs migres)
+28. **Navigation — liens internes** : guidage demo, parcours apprentissage et aide contextuelle pointent aux bons endroits avec les nouveaux IDs
 
 ---
 
 ## Notes pour Claude Code
 
-- **Zones protegees** (ne jamais modifier sans autorisation) : `js/config.js`, `js/navigation.js`, `noms_stables.json`
+- **Zones protegees** (ne jamais modifier sans autorisation) : `js/config.js`, `js/navigation.js`, `noms_stables.json`. **Exception** : autorisation donnee par Gregoire pour le Tier 5.7 (navigation).
 - **Regles de securite** : tout `innerHTML` avec donnees utilisateur → `echapperHtml()`. Zero handler inline. Zero `eval()`.
 - **Avant chaque commit** : demander le numero de beta a Gregoire. Mettre a jour `version.json` ET le fallback dans `index.html`.
 - **Tests** : tester sur Safari macOS (M3). L'iPad n'est PAS la cible pour le colloque AQPC.
 - **Demo AQPC** : presentation devant ~150 personnes sur MacBook + projecteur. Gregoire prefere le mode sombre ; le mode clair est l'option de repli. Les deux modes doivent etre lisibles sur projecteur. Donnees reelles anonymisees (pas donnees demo).
 - **Decisions en attente** : 5 decisions requises de Gregoire avant de progresser sur certains items — D-SSOT-1 (indicesEvaluation), D-SSOT-2 (assertions dev), D-AIDE-1 (aide contextuelle en mode Normal), D-AIDE-2 (differenciation visuelle aide/Primo), D-SSOT/AIDE-3 (priorite relative des deux plans vs BACKLOG)
-- **Plans detailles** : PLAN-SSOT.md et PLAN-AIDE.md contiennent les procedures pas-a-pas, numeros de lignes exacts et justifications completes. Ce document (Tiers 6 et 7) est le resume integre.
+- **Plans detailles** : PLAN-NAVIGATION.md, PLAN-SSOT.md et PLAN-AIDE.md contiennent les procedures pas-a-pas, numeros de lignes exacts et justifications completes. Ce document (Tiers 5.7, 6 et 7) est le resume integre.
+- **Ordonnancement** : Tier 5.7 (navigation) → Tier 6 (SSOT) → Tier 7 (aide). Le Tier 7 depend du 5.7 (memes fichiers). Les Tiers 6 et 7 dependent des decisions de Gregoire.
 - **En cas de doute** : poser la question a Gregoire plutot que de supposer.

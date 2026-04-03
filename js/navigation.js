@@ -43,8 +43,8 @@
  * Affiche une section principale et met à jour la navigation
  * 
  * @param {string} nomSection - Identifiant de la section à afficher
- *                             Valeurs: 'tableau-bord' | 'etudiants' | 'presences' | 
- *                                     'evaluations' | 'reglages'
+ *                             Valeurs: 'accueil' | 'apercu' | 'structure' | 'contexte' |
+ *                                     'suivi' | 'evaluations' | 'boite-outils' | 'aide' | 'reglages'
  * 
  * UTILISÉ PAR:
  * - Événements click sur les boutons de navigation principale
@@ -101,6 +101,11 @@ function afficherSection(nomSection) {
     if (nomSection === 'accueil' && typeof afficherAccueil === 'function') {
         afficherAccueil();
     }
+
+    // Section Aperçu (plate, sans sous-navigation) — charger le tableau de bord
+    if (nomSection === 'apercu' && typeof chargerTableauBordApercu === 'function') {
+        setTimeout(() => chargerTableauBordApercu(), 150);
+    }
 }
 
 /* ===============================
@@ -113,8 +118,8 @@ function afficherSection(nomSection) {
  * Affiche la sous-navigation pour une section donnée
  * 
  * @param {string} nomOnglet - Identifiant de la section parent
- *                            Valeurs: 'tableau-bord' | 'etudiants' | 'presences' | 
- *                                    'evaluations' | 'reglages'
+ *                            Valeurs: 'accueil' | 'apercu' | 'structure' | 'contexte' |
+ *                                    'suivi' | 'evaluations' | 'boite-outils' | 'aide' | 'reglages'
  * 
  * UTILISÉ PAR:
  * - afficherSection() après un changement de section
@@ -143,30 +148,40 @@ function afficherSection(nomSection) {
  * // → Génère 3 boutons: Aperçu, Liste des individus, Profil
  */
 // Mapping sous-onglet → clé tooltip (généré depuis Tooltips_Navigation.md)
+// ✨ RÉORGANISATION NAVIGATION (3 avril 2026, Tier 5.7)
 const TOOLTIPS_SOUS_NAV = {
-    'tableau-bord-apercu': 'nav-tdb-apercu',
-    'tableau-bord-liste': 'nav-tdb-liste',
-    'tableau-bord-profil': 'nav-tdb-profil',
-    'tableau-bord-interventions': 'nav-tdb-interventions',
-    'presences-apercu': 'nav-pres-apercu',
-    'presences-calendrier': 'nav-pres-calendrier',
-    'presences-saisie': 'nav-pres-saisie',
-    'evaluations-apercu': 'nav-eval-apercu',
-    'evaluations-liste': 'nav-eval-liste',
+    // Accueil
+    'accueil-decouvrir': 'nav-acc-decouvrir',
+    'accueil-parcourir': 'nav-acc-parcourir',
+    'accueil-piloter': 'nav-acc-piloter',
+    // Aperçu : section plate, pas de sous-nav
+    // Structure
+    'structure-carte': 'nav-str-alignement',
+    'structure-organisateur': 'nav-str-organisateur',
+    'structure-productions': 'nav-str-productions',
+    'structure-grille-criteres': 'nav-str-grilles',
+    'structure-echelle-performance': 'nav-str-echelles',
+    'structure-retroactions': 'nav-str-cartouches',
+    // Contexte
+    'contexte-trimestre': 'nav-ctx-trimestre',
+    'contexte-calendrier': 'nav-ctx-calendrier',
+    'contexte-pratiques-notation': 'nav-ctx-pratiques',
+    'contexte-bilan': 'nav-ctx-bilan',
+    // Suivi
+    'suivi-liste': 'nav-suivi-liste',
+    'suivi-saisie': 'nav-suivi-saisie',
+    'suivi-profil': 'nav-suivi-profil',
+    'suivi-interventions': 'nav-suivi-interventions',
+    // Évaluations
     'evaluations-importer': 'nav-eval-importer',
+    'evaluations-liste': 'nav-eval-liste',
     'evaluations-annoter': 'nav-eval-annoter',
     'evaluations-exporter': 'nav-eval-exporter',
-    'construction-apercu': 'nav-cn-apercu',
-    'construction-productions': 'nav-cn-productions',
-    'construction-grille-criteres': 'nav-cn-grilles',
-    'construction-echelle-performance': 'nav-cn-echelles',
-    'construction-retroactions': 'nav-cn-cartouches',
-    'construction-pratiques-notation': 'nav-cn-pratiques',
+    // Boîte à outils
     'boite-outils-tirage': 'nav-bao-tirage',
     'boite-outils-modelisation': 'nav-bao-modelisation',
-    'planification-carte': 'nav-planif-alignement',
-    'planification-organisateur': 'nav-planif-organisateur',
-    'reglages-trimestre': 'nav-reg-trimestre',
+    // Aide (tooltips gérés séparément si existants)
+    // Réglages
     'reglages-preferences': 'nav-reg-preferences',
     'reglages-depistage': 'nav-reg-depistage',
     'reglages-donnees': 'nav-reg-donnees',
@@ -229,8 +244,8 @@ function afficherSousNavigation(nomOnglet) {
  * 
  * @param {string} idSousSection - Identifiant complet de la sous-section
  *                                Format: '{section}-{sous-section}'
- *                                Exemples: 'etudiants-liste', 'presences-saisie',
- *                                         'reglages-productions'
+ *                                Exemples: 'suivi-liste', 'suivi-profil',
+ *                                         'structure-productions'
  * 
  * UTILISÉ PAR:
  * - afficherSousNavigation() pour la sous-section par défaut
@@ -253,7 +268,7 @@ function afficherSousNavigation(nomOnglet) {
  * Ces logs peuvent être retirés en production si nécessaire.
  * 
  * EXEMPLE:
- * afficherSousSection('presences-saisie');
+ * afficherSousSection('suivi-saisie');
  * // → Affiche la sous-section de saisie des présences
  */
 
@@ -272,7 +287,7 @@ function afficherSousSection(idSousSection) {
         }
     }
 
-    // Détection d'appels à arguments multiples (ex: 'tableau-bord', 'profil')
+    // Détection d'appels à arguments multiples (ex: 'suivi', 'profil')
     if (arguments.length > 1) {
         const idCorrige = Array.from(arguments).join('-');
         console.warn(
@@ -289,7 +304,7 @@ function afficherSousSection(idSousSection) {
     if (typeof idSousSection !== 'string' || !idSousSection) {
         console.error(
             '❌ afficherSousSection() : paramètre invalide:', idSousSection,
-            '\n   Attendu: string (ex: "tableau-bord-profil")',
+            '\n   Attendu: string (ex: "suivi-profil")',
             '\n   Appelant:', new Error().stack.split('\n')[2]
         );
         return;
@@ -386,49 +401,34 @@ function afficherSousSection(idSousSection) {
     // RAFRAÎCHISSEMENT DES MODULES PAR SOUS-SECTION
     // ============================================
 
+    // ✨ RÉORGANISATION NAVIGATION (3 avril 2026, Tier 5.7)
     switch (idSousSection) {
-        case 'tableau-bord-liste':
+
+        // === SUIVI ===
+        case 'suivi-liste':
             if (typeof rechargerListeEtudiants === 'function') {
                 setTimeout(rechargerListeEtudiants, 100);
             }
             break;
 
-        case 'presences-apercu':
-            if (typeof chargerApercuPresences === 'function') {
-                chargerApercuPresences();
-            }
+        case 'suivi-saisie':
+            // Pas d'initialisation spécifique requise
             break;
 
-        case 'presences-calendrier':
+        // === CONTEXTE ===
+        case 'contexte-calendrier':
             if (typeof afficherCalendrierScolaire === 'function') {
                 afficherCalendrierScolaire();
             }
             break;
 
-        // ✨ REFONTE (2 jan 2026) : "materiel" → "construction"
-        case 'construction-productions':
-            if (typeof initialiserModuleProductions === 'function') {
-                initialiserModuleProductions();
+        case 'contexte-trimestre':
+            if (typeof initialiserModuleTrimestre === 'function') {
+                initialiserModuleTrimestre();
             }
             break;
 
-        case 'construction-grille-criteres':
-            if (typeof initialiserModuleGrilles === 'function') {
-                setTimeout(async () => {
-                    await initialiserModuleGrilles();
-                }, 100);
-            }
-            break;
-
-        case 'construction-echelle-performance':
-            if (typeof initialiserModuleEchelles === 'function') {
-                setTimeout(async () => {
-                    await initialiserModuleEchelles();
-                }, 100);
-            }
-            break;
-
-        case 'construction-pratiques-notation':
+        case 'contexte-pratiques-notation':
             if (typeof initialiserModulePratiquesMateriel === 'function') {
                 setTimeout(async () => {
                     await initialiserModulePratiquesMateriel();
@@ -436,7 +436,36 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
-        case 'construction-retroactions':
+        case 'contexte-bilan':
+            if (typeof initialiserBilanReflexif === 'function') {
+                setTimeout(initialiserBilanReflexif, 100);
+            }
+            break;
+
+        // === STRUCTURE ===
+        case 'structure-productions':
+            if (typeof initialiserModuleProductions === 'function') {
+                initialiserModuleProductions();
+            }
+            break;
+
+        case 'structure-grille-criteres':
+            if (typeof initialiserModuleGrilles === 'function') {
+                setTimeout(async () => {
+                    await initialiserModuleGrilles();
+                }, 100);
+            }
+            break;
+
+        case 'structure-echelle-performance':
+            if (typeof initialiserModuleEchelles === 'function') {
+                setTimeout(async () => {
+                    await initialiserModuleEchelles();
+                }, 100);
+            }
+            break;
+
+        case 'structure-retroactions':
             if (typeof initialiserModuleCartouches === 'function') {
                 setTimeout(async () => {
                     await initialiserModuleCartouches();
@@ -444,21 +473,60 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
-        case 'reglages-trimestre':
-            if (typeof initialiserModuleTrimestre === 'function') {
-                initialiserModuleTrimestre();
+        case 'structure-carte':
+            if (typeof initialiserModulePlanification === 'function') {
+                setTimeout(initialiserModulePlanification, 100);
             }
             break;
 
-        // ✨ NOUVEAUX ONGLETS RÉGLAGES (Beta 95)
-        case 'reglages-trimestres':
-            if (typeof chargerVueTrimestres === 'function') {
-                setTimeout(chargerVueTrimestres, 100);
+        case 'structure-organisateur':
+            if (typeof initialiserModuleOrganisateur === 'function') {
+                setTimeout(initialiserModuleOrganisateur, 100);
             }
             break;
 
-        // NOTE: reglages-cours-actif supprimé (Beta 95), consolidé dans reglages-trimestre
+        // === ÉVALUATIONS ===
+        case 'evaluations-liste':
+            if (typeof initialiserListeEvaluations === 'function') {
+                setTimeout(() => {
+                    initialiserListeEvaluations();
+                }, 100);
+            } else {
+                console.error('   ❌ initialiserListeEvaluations n\'est pas une fonction!');
+            }
+            break;
 
+        case 'evaluations-importer':
+            if (typeof initialiserModuleTravaux === 'function') {
+                setTimeout(() => {
+                    initialiserModuleTravaux();
+                    if (typeof travauxUI !== 'undefined') {
+                        travauxUI.afficherImport();
+                    }
+                }, 100);
+            }
+            break;
+
+        case 'evaluations-annoter':
+            if (typeof initialiserModuleTravaux === 'function') {
+                setTimeout(() => {
+                    initialiserModuleTravaux();
+                }, 100);
+            }
+            break;
+
+        case 'evaluations-exporter':
+            if (typeof initialiserModuleTravaux === 'function') {
+                setTimeout(() => {
+                    initialiserModuleTravaux();
+                    if (typeof travauxUI !== 'undefined') {
+                        travauxUI.afficherArchivage();
+                    }
+                }, 100);
+            }
+            break;
+
+        // === RÉGLAGES ===
         case 'reglages-preferences':
             if (typeof initialiserPreferencesV2 === 'function') {
                 setTimeout(initialiserPreferencesV2, 100);
@@ -480,60 +548,7 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
-        // NOTE: reglages-groupe supprimé (Beta 95), consolidé dans reglages-trimestre
-
-        // NOTE: reglages-pratique-notation supprimé (2 jan 2026)
-        // Fonctionnalité migrée vers Construction > Pratiques de notation
-
-        case 'evaluations-apercu':
-            if (typeof chargerApercuEvaluations === 'function') {
-                chargerApercuEvaluations();
-            }
-            break;
-
-        case 'evaluations-liste':
-            if (typeof initialiserListeEvaluations === 'function') {
-                setTimeout(() => {
-                    initialiserListeEvaluations();
-                }, 100);
-            } else {
-                console.error('   ❌ initialiserListeEvaluations n\'est pas une fonction!');
-            }
-            break;
-
-        case 'reglages-apercu':
-            if (typeof chargerStatistiquesApercu === 'function') {
-                chargerStatistiquesApercu();
-            }
-            break;
-
-        case 'construction-apercu':
-            if (typeof chargerMaterielConfigure === 'function') {
-                chargerMaterielConfigure();
-            }
-            break;
-
-        case 'reglages-snapshots':
-            if (typeof afficherStatutSnapshots === 'function') {
-                setTimeout(afficherStatutSnapshots, 100);
-            }
-            break;
-
-        // Module Planification (Carte mentale)
-        case 'planification-carte':
-            if (typeof initialiserModulePlanification === 'function') {
-                setTimeout(initialiserModulePlanification, 100);
-            }
-            break;
-
-        // Module Organisateur (sous-onglet Planification)
-        case 'planification-organisateur':
-            if (typeof initialiserModuleOrganisateur === 'function') {
-                setTimeout(initialiserModuleOrganisateur, 100);
-            }
-            break;
-
-        // 🆕 BETA 96.1 : Boîte à outils
+        // === BOÎTE À OUTILS ===
         case 'boite-outils-tirage':
             if (typeof initialiserTirage === 'function') {
                 setTimeout(initialiserTirage, 100);
@@ -548,54 +563,11 @@ function afficherSousSection(idSousSection) {
                 setTimeout(initialiserModelisation, 100);
             }
             break;
-
-        // Onglet Importer et préparer
-        case 'evaluations-importer':
-            if (typeof initialiserModuleTravaux === 'function') {
-                setTimeout(() => {
-                    initialiserModuleTravaux();
-                    if (typeof travauxUI !== 'undefined') {
-                        travauxUI.afficherImport();
-                    }
-                }, 100);
-            }
-            break;
-
-        // Onglet Annoter et évaluer
-        case 'evaluations-annoter':
-            if (typeof initialiserModuleTravaux === 'function') {
-                setTimeout(() => {
-                    initialiserModuleTravaux();
-                }, 100);
-            }
-            break;
-
-        // Onglet Exporter et archiver
-        case 'evaluations-exporter':
-            if (typeof initialiserModuleTravaux === 'function') {
-                setTimeout(() => {
-                    initialiserModuleTravaux();
-                    if (typeof travauxUI !== 'undefined') {
-                        travauxUI.afficherArchivage();
-                    }
-                }, 100);
-            }
-            break;
     }
 
-        // Recharger le tableau de bord selon la sous-section
-    if (idSousSection === 'tableau-bord-apercu') {
-        if (typeof chargerTableauBordApercu === 'function') {
-            setTimeout(() => chargerTableauBordApercu(), 150);
-        }
-    } else if (idSousSection === 'tableau-bord-liste') {
-        // Recharger la liste des étudiants
-        if (typeof chargerListeEtudiants === 'function') {
-            setTimeout(() => chargerListeEtudiants(), 100);
-        }
-    } else if (idSousSection === 'tableau-bord-profil') {
-        // Charger le dernier profil consulté, ou le premier étudiant
-        // Garde anti-réentrance : afficherProfilComplet() appelle afficherSousSection()
+    // Charger le profil étudiant (suivi-profil, anciennement tableau-bord-profil)
+    // Garde anti-réentrance : afficherProfilComplet() appelle afficherSousSection()
+    if (idSousSection === 'suivi-profil') {
         if (!window._profilAutoChargement) {
             window._profilAutoChargement = true;
             setTimeout(() => {
@@ -640,13 +612,13 @@ function afficherSousSection(idSousSection) {
 /**
  * Navigue vers une sous-section en gérant section + sous-section en une seule opération.
  *
- * @param {string} section - Identifiant de la section (ex: 'tableau-bord', 'evaluations')
+ * @param {string} section - Identifiant de la section (ex: 'suivi', 'evaluations')
  * @param {string} sousSection - Identifiant court de la sous-section (ex: 'profil', 'liste')
  * @returns {boolean} true si la navigation a réussi, false sinon
  *
  * EXEMPLE:
- * naviguerVers('tableau-bord', 'profil');
- * // → afficherSection('tableau-bord') + afficherSousSection('tableau-bord-profil')
+ * naviguerVers('suivi', 'profil');
+ * // → afficherSection('suivi') + afficherSousSection('suivi-profil')
  */
 function naviguerVers(section, sousSection) {
     // Valider que la section existe
@@ -715,7 +687,7 @@ function naviguerVers(section, sousSection) {
  * });
  * 
  * // Afficher la section par défaut
- * afficherSection('tableau-bord');
+ * afficherSection('apercu');
  * 
  * COMPATIBILITÉ:
  * - Nécessite ES6+ pour les arrow functions et template literals
