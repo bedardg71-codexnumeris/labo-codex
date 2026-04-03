@@ -5,7 +5,7 @@
    Regroupe les fonctions de LECTURE, CALCUL et UTILITAIRES
    des indices A-C-P-E, précédemment dispersées dans :
    - profil-etudiant.js (calculerTousLesIndices, calculerPerformancePAN)
-   - tableau-bord-apercu.js (calculerIndicesEtudiant, calculerCorrelationPearson, determinerNiveauEngagement)
+   - apercu-contenu.js (calculerIndicesEtudiant, calculerCorrelationPearson, determinerNiveauEngagement)
    - etudiants.js (calculerCorrelationPearson - doublon)
    - portfolio.js (obtenirIndicesCP, obtenirHistoriqueIndicesCP)
 
@@ -17,7 +17,7 @@
 
    STRATÉGIE CACHE (audit 26 mars 2026) :
    - Les indices sont recalculés à la demande par les modules lecteurs
-     (profil-etudiant, tableau-bord-apercu) via calculerTousLesIndices().
+     (profil-etudiant, apercu-contenu) via calculerTousLesIndices().
    - Les valeurs sont aussi persistées (cle('indicesAssiduite'), cle('indicesCP'))
      et lues par evaluation.js et portfolio.js sans recalcul.
    - Pas d'invalidation automatique : si des présences/évaluations changent,

@@ -1590,7 +1590,7 @@ function initialiserModuleInterventions() {
 
     // Observer les changements de visibilité de la sous-section
     const observer = new MutationObserver(() => {
-        const sousSection = document.getElementById('tableau-bord-interventions');
+        const sousSection = document.getElementById('suivi-interventions');
         if (sousSection && sousSection.classList.contains('active')) {
             afficherListeInterventions();
         }
@@ -1602,7 +1602,7 @@ function initialiserModuleInterventions() {
     });
 
     // Afficher la liste si la sous-section est déjà active
-    const sousSection = document.getElementById('tableau-bord-interventions');
+    const sousSection = document.getElementById('suivi-interventions');
     if (sousSection && sousSection.classList.contains('active')) {
         afficherListeInterventions();
     }

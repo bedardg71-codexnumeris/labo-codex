@@ -1285,37 +1285,37 @@
      * Navigue vers la page de consultation d'une ressource
      */
     function naviguerVersRessource(type, id) {
-        // D'abord afficher la section principale "Construction de la note"
+        // Afficher la section appropriée selon le type de ressource
         if (typeof afficherSection === 'function') {
-            afficherSection('construction');
+            afficherSection(type === 'pratique' ? 'contexte' : 'structure');
         }
 
         // Ensuite afficher la bonne sous-section
         setTimeout(() => {
             if (type === 'pratique') {
-                // Naviguer vers Construction de la note > Pratiques de notation
+                // Naviguer vers Contexte > Pratiques de notation
                 if (typeof afficherSousSection === 'function') {
-                    afficherSousSection('construction-pratiques-notation');
+                    afficherSousSection('contexte-pratiques-notation');
                 }
             } else if (type === 'grille') {
                 // Naviguer vers Construction de la note > Grilles de critères
                 if (typeof afficherSousSection === 'function') {
-                    afficherSousSection('construction-grille-criteres');
+                    afficherSousSection('structure-grille-criteres');
                 }
             } else if (type === 'cartouche') {
                 // Naviguer vers Construction de la note > Rétroactions (Cartouches)
                 if (typeof afficherSousSection === 'function') {
-                    afficherSousSection('construction-retroactions');
+                    afficherSousSection('structure-retroactions');
                 }
             } else if (type === 'echelle') {
                 // Naviguer vers Construction de la note > Échelles de performance
                 if (typeof afficherSousSection === 'function') {
-                    afficherSousSection('construction-echelle-performance');
+                    afficherSousSection('structure-echelle-performance');
                 }
             } else if (type === 'production') {
                 // Naviguer vers Construction de la note > Productions
                 if (typeof afficherSousSection === 'function') {
-                    afficherSousSection('construction-productions');
+                    afficherSousSection('structure-productions');
                 }
             }
         }, 100);

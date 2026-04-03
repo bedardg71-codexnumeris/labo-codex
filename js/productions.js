@@ -1890,7 +1890,7 @@ function initialiserModuleProductions() {
     }
 
     // Afficher aussi l'ancienne vue si on est sur la page productions
-    const sousSection = document.querySelector('#construction-productions');
+    const sousSection = document.querySelector('#structure-productions');
     if (sousSection && sousSection.classList.contains('active')) {
         afficherTableauProductions();
         mettreAJourPonderationTotale();

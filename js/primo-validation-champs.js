@@ -28,17 +28,17 @@ const CHAMPS_A_VALIDER = {
         { id: 'enseignant', cle: 'infoCours', champ: 'enseignant' },
         { id: 'competence', cle: 'infoCours', champ: 'competence' }
     ],
-    'reglages-trimestre': [
+    'contexte-trimestre': [
         { id: 'date-debut', cle: 'informationsTrimestre', champ: 'dateDebut' },
         { id: 'date-fin', cle: 'informationsTrimestre', champ: 'dateFin' },
         { id: 'date-maj', cle: 'informationsTrimestre', champ: 'dateMiseAJour' }
     ],
-    // NOTE (1er fév 2026) : reglages-horaire supprimé en Beta 95, intégré dans reglages-trimestre
+    // NOTE (1er fév 2026) : reglages-horaire supprimé en Beta 95, intégré dans contexte-trimestre
     // Les champs horaire utilisent maintenant les IDs v2-* dans la section Trimestre
-    // NOTE: reglages-groupe supprimé (Beta 95), validation étudiants intégrée dans reglages-trimestre
+    // NOTE: reglages-groupe supprimé (Beta 95), validation étudiants intégrée dans contexte-trimestre
     // NOTE: reglages-pratique-notation supprimé (2 jan 2026)
-    // Fonctionnalité migrée vers construction-pratiques-notation
-    'construction-pratiques-notation': [
+    // Fonctionnalité migrée vers contexte-pratiques-notation
+    'contexte-pratiques-notation': [
         // Validation sur existence de pratiquesConfigurables
     ]
 };
@@ -74,7 +74,7 @@ function validerChampsSousSection(sousSectionId) {
 
 
     // Cas spécial: groupe d'étudiants
-    if (sousSectionId === 'reglages-trimestre') {
+    if (sousSectionId === 'contexte-trimestre') {
         validerGroupeEtudiants();
         return;
     }
@@ -168,14 +168,14 @@ function validerGroupeEtudiants() {
 
     if (etudiants.length === 0) {
         // Aucun étudiant : mettre en évidence le bouton "Ajouter"
-        const btnAjouter = document.querySelector('#reglages-trimestre .section-import-droite button');
+        const btnAjouter = document.querySelector('#contexte-trimestre .section-import-droite button');
         if (btnAjouter && btnAjouter.textContent.includes('Ajouter')) {
             btnAjouter.classList.add('primo-champ-vide');
             btnAjouter.setAttribute('title', '⚠️ Aucun étudiant - Clique pour ajouter');
         }
     } else {
         // Étudiants présents : retirer le style
-        const btnAjouter = document.querySelector('#reglages-trimestre .section-import-droite button');
+        const btnAjouter = document.querySelector('#contexte-trimestre .section-import-droite button');
         if (btnAjouter) {
             btnAjouter.classList.remove('primo-champ-vide');
             btnAjouter.removeAttribute('title');

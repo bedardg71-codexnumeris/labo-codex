@@ -122,7 +122,7 @@ function afficherAccueilContenu(conteneur) {
             </div>
             <div class="accordeon-contenu" style="display: block;">
                 <div class="accueil-cartes accueil-cartes--8">
-                    <div class="accueil-carte" data-action="naviguerAccueilCarte" data-param="planification|planification-carte">
+                    <div class="accueil-carte" data-action="naviguerAccueilCarte" data-param="planification|structure-carte">
                         <div class="accueil-carte-icone">\uD83E\uDDE9</div>
                         <div class="accueil-carte-titre">Planifier ton cours</div>
                         <div class="accueil-carte-desc">
@@ -164,14 +164,14 @@ function afficherAccueilContenu(conteneur) {
                             Annote les travaux de tes \u00e9tudiants et \u00e9value-les selon la grille de crit\u00e8res.
                         </div>
                     </div>
-                    <div class="accueil-carte" data-action="naviguerAccueilCarte" data-param="tableau-bord|tableau-bord-profil">
+                    <div class="accueil-carte" data-action="naviguerAccueilCarte" data-param="tableau-bord|suivi-profil">
                         <div class="accueil-carte-icone">\uD83D\uDC64</div>
                         <div class="accueil-carte-titre">Consulter un profil \u00e9tudiant</div>
                         <div class="accueil-carte-desc">
                             Consulte le portrait d\u2019un \u00e9l\u00e8ve\u00a0: pr\u00e9sences, r\u00e9sultats et progression.
                         </div>
                     </div>
-                    <div class="accueil-carte" data-action="naviguerAccueilCarte" data-param="tableau-bord|tableau-bord-interventions">
+                    <div class="accueil-carte" data-action="naviguerAccueilCarte" data-param="tableau-bord|suivi-interventions">
                         <div class="accueil-carte-icone">\uD83D\uDEDF</div>
                         <div class="accueil-carte-titre">Pr\u00e9parer des interventions</div>
                         <div class="accueil-carte-desc">
@@ -265,9 +265,9 @@ function naviguerAccueilCarte(sectionEtSousSection) {
     }
 }
 
-/** Navigation vers construction avec wizard */
+/** Navigation vers structure avec wizard */
 function naviguerVersWizard() {
-    afficherSection('construction');
+    afficherSection('structure');
     setTimeout(function() { if (typeof ouvrirWizardV2 === 'function') ouvrirWizardV2(); }, 300);
 }
 

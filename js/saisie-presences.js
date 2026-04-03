@@ -45,7 +45,7 @@ function obtenirConfigurationNotation() {
 
 function initialiserModuleSaisiePresences() {
 
-    const sectionSaisie = document.getElementById('presences-saisie');
+    const sectionSaisie = document.getElementById('suivi-saisie');
     if (!sectionSaisie) {
         return;
     }
@@ -1346,11 +1346,11 @@ function enregistrerPresences() {
 
     // ========== NOUVEAU : Recharger le tableau de bord ==========
     // Si le tableau de bord est visible, le rafraîchir
-    const sectionTableauBord = document.getElementById('tableau-bord');
-    if (sectionTableauBord && sectionTableauBord.classList.contains('active')) {
+    const sectionApercu = document.getElementById('section-apercu');
+    if (sectionApercu && sectionApercu.classList.contains('active')) {
 
         // Recharger l'aperçu si c'est la sous-section active
-        const apercu = document.getElementById('tableau-bord-apercu');
+        const apercu = document.getElementById('apercu-contenu');
         if (apercu && apercu.classList.contains('active')) {
             if (typeof chargerTableauBordApercu === 'function') {
                 setTimeout(() => chargerTableauBordApercu(), 300);
@@ -1603,16 +1603,16 @@ function mettreAJourBoutonsNavigation() {
  */
 function ouvrirSaisiePresence(date) {
 
-    // Naviguer vers la section présences
-    if (typeof sectionActive !== 'undefined' && sectionActive !== 'presences') {
+    // Naviguer vers la section suivi (saisie des présences)
+    if (typeof sectionActive !== 'undefined' && sectionActive !== 'suivi') {
         if (typeof afficherSection === 'function') {
-            afficherSection('presences');
+            afficherSection('suivi');
         }
     }
 
     // Afficher la sous-section saisie
     if (typeof afficherSousSection === 'function') {
-        afficherSousSection('presences-saisie');
+        afficherSousSection('suivi-saisie');
     }
 
     // Mettre à jour les boutons de navigation
@@ -1620,7 +1620,7 @@ function ouvrirSaisiePresence(date) {
         const boutonsNav = document.querySelectorAll('.sous-navigation button');
         boutonsNav.forEach(btn => {
             btn.classList.remove('actif');
-            if (btn.getAttribute('data-sous-onglet') === 'presences-saisie') {
+            if (btn.getAttribute('data-sous-onglet') === 'suivi-saisie') {
                 btn.classList.add('actif');
             }
         });
@@ -1673,7 +1673,7 @@ function obtenirDerniereDataSaisie(da = null) {
 
 function naviguerVersReglagesTrimestre(el) {
     if (typeof afficherSection === 'function') afficherSection('reglages');
-    if (typeof afficherSousSection === 'function') afficherSousSection('reglages-trimestre');
+    if (typeof afficherSousSection === 'function') afficherSousSection('contexte-trimestre');
 }
 
 function mettreAJourLignePeriodesHandler(el) {
@@ -1827,7 +1827,7 @@ function restaurerCompteurPresences() {
             <span>Assiduité aujourd'hui : <span id="assiduite-aujourdhui">0%</span></span>
             <span id="actions-presences-bar" style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
                 <button class="btn btn-confirmer btn-compact" data-action="enregistrerPresences">Enregistrer</button>
-                <button class="btn btn-annuler btn-compact" data-action="afficherSousSection" data-param="presences-apercu">Annuler</button>
+                <button class="btn btn-annuler btn-compact" data-action="afficherSousSection" data-param="suivi-apercu-legacy">Annuler</button>
                 <span id="controle-verrouillage-presences" class="u-hide" style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem;">
                     <input type="checkbox" id="checkbox-verrouillage-presences"
                            style="width: 16px; height: 16px; accent-color: var(--bleu-principal, #1a73e8); cursor: pointer;"
@@ -1863,12 +1863,12 @@ window.genererOptionsPeriodesPresentes = genererOptionsPeriodesPresentes;
    =============================== */
 
 /**
- * Surveille l'activation de la sous-section 'presences-saisie'
+ * Surveille l'activation de la sous-section 'suivi-saisie'
  * et recharge automatiquement le tableau pour refléter les changements
  * faits depuis d'autres sections (ex: modifications d'interventions RàI)
  */
 document.addEventListener('DOMContentLoaded', function() {
-    const sectionSaisie = document.getElementById('presences-saisie');
+    const sectionSaisie = document.getElementById('suivi-saisie');
     if (!sectionSaisie) return;
 
     // Observer les changements de la classe 'active' sur la sous-section

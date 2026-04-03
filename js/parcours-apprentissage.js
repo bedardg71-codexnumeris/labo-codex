@@ -60,70 +60,70 @@ const JALONS = {
         titre: 'Créer un trimestre',
         description: 'Définir les dates et la session du trimestre.',
         chapitre: 'configurer',
-        navigation: { section: 'reglages', sousSection: 'reglages-trimestre' }
+        navigation: { section: 'reglages', sousSection: 'contexte-trimestre' }
     },
     'configurer-cours': {
         numero: '②',
         titre: 'Configurer un cours',
         description: 'Entrer le sigle, le titre et la compétence du cours.',
         chapitre: 'configurer',
-        navigation: { section: 'reglages', sousSection: 'reglages-trimestre' }
+        navigation: { section: 'reglages', sousSection: 'contexte-trimestre' }
     },
     'creer-groupe': {
         numero: '③',
         titre: 'Créer un groupe-cours',
         description: 'Ajouter les étudiants dans ton groupe.',
         chapitre: 'configurer',
-        navigation: { section: 'reglages', sousSection: 'reglages-trimestre' }
+        navigation: { section: 'reglages', sousSection: 'contexte-trimestre' }
     },
     'creer-pratique': {
         numero: '④',
         titre: 'Créer une pratique de notation',
         description: 'Définir comment tu évalues tes étudiants.',
         chapitre: 'construire',
-        navigation: { section: 'construction', sousSection: 'construction-pratiques-notation' }
+        navigation: { section: 'contexte', sousSection: 'contexte-pratiques-notation' }
     },
     'creer-grille': {
         numero: '⑤',
         titre: 'Créer une grille de critères',
         description: 'Définir les critères d\'évaluation et leur pondération.',
         chapitre: 'construire',
-        navigation: { section: 'construction', sousSection: 'construction-grille-criteres' }
+        navigation: { section: 'structure', sousSection: 'structure-grille-criteres' }
     },
     'creer-echelle': {
         numero: '⑥',
         titre: 'Créer une échelle de niveaux',
         description: 'Définir les niveaux de performance (ex: A, B, C, D, E).',
         chapitre: 'construire',
-        navigation: { section: 'construction', sousSection: 'construction-echelle-performance' }
+        navigation: { section: 'structure', sousSection: 'structure-echelle-performance' }
     },
     'creer-production': {
         numero: '⑦',
         titre: 'Créer une production',
         description: 'Définir un travail à évaluer.',
         chapitre: 'construire',
-        navigation: { section: 'construction', sousSection: 'construction-productions' }
+        navigation: { section: 'structure', sousSection: 'structure-productions' }
     },
     'creer-alignement': {
         numero: '⑧',
         titre: 'Créer un alignement pédagogique',
         description: 'Relier les compétences aux activités et évaluations.',
         chapitre: 'planifier',
-        navigation: { section: 'planification', sousSection: 'planification-carte' }
+        navigation: { section: 'structure', sousSection: 'structure-carte' }
     },
     'organiser-seances': {
         numero: '⑨',
         titre: 'Organiser les séances',
         description: 'Placer les leçons dans le calendrier du trimestre.',
         chapitre: 'planifier',
-        navigation: { section: 'planification', sousSection: 'planification-organisateur' }
+        navigation: { section: 'structure', sousSection: 'structure-organisateur' }
     },
     'prendre-presences': {
         numero: '⑩',
         titre: 'Prendre les présences',
         description: 'Saisir les présences d\'une séance de cours.',
         chapitre: 'enseigner',
-        navigation: { section: 'presences', sousSection: 'presences-saisie' }
+        navigation: { section: 'suivi', sousSection: 'suivi-saisie' }
     },
     'annoter-travaux': {
         numero: '⑪',
@@ -144,7 +144,7 @@ const JALONS = {
         titre: 'Consulter le tableau de bord',
         description: 'Voir l\'état des lieux de ton groupe.',
         chapitre: 'enseigner',
-        navigation: { section: 'tableau-bord', sousSection: 'tableau-bord-apercu' }
+        navigation: { section: 'apercu' }
     }
 };
 
@@ -944,7 +944,7 @@ function onNavigationChange(idSousSection) {
     if (!progression.mode || progression.autonome) return;
 
     // Jalon spécial : consulter le TDB avec des données
-    if (idSousSection === 'tableau-bord-apercu') {
+    if (idSousSection === 'apercu-contenu') {
         try {
             var etudiants = [];
             if (typeof obtenirDonneesSelonMode === 'function') {
@@ -974,8 +974,8 @@ function onNavigationChange(idSousSection) {
     var prochain = prog.prochainJalon;
     if (!prochain) return;
 
-    // Déclencher le tutoriel interactif au jalon ⑩ (presences-saisie)
-    if (prochain.id === 'prendre-presences' && idSousSection === 'presences-saisie') {
+    // Déclencher le tutoriel interactif au jalon ⑩ (suivi-saisie)
+    if (prochain.id === 'prendre-presences' && idSousSection === 'suivi-saisie') {
         if (typeof demarrerTutorielParcours === 'function') {
             setTimeout(function() { demarrerTutorielParcours(); }, 1000);
         }

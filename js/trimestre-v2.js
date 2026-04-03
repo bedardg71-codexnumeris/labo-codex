@@ -615,8 +615,8 @@ function ajouterBoutonRetourV2(sectionLegacy) {
  * Retourne à la vue v2
  */
 function retournerVueV2() {
-    const sectionLegacy = document.getElementById('reglages-trimestre-legacy');
-    const sectionV2 = document.getElementById('reglages-trimestre');
+    const sectionLegacy = document.getElementById('contexte-trimestre-legacy');
+    const sectionV2 = document.getElementById('contexte-trimestre');
     const btnRetour = document.getElementById('btnRetourV2');
 
     if (sectionLegacy) {
@@ -5765,7 +5765,7 @@ async function changerGroupeCoursActifV2(valeur) {
 
         // 🆕 BETA 95.6 : Rafraîchir le profil étudiant si affiché
         // Vérifie si la sous-section profil est active et si un DA est mémorisé
-        const sousSectionProfil = document.getElementById('tableau-bord-profil');
+        const sousSectionProfil = document.getElementById('suivi-profil');
         if (sousSectionProfil && !sousSectionProfil.classList.contains('u-hide') && window.profilActuelDA) {
             if (typeof afficherProfilComplet === 'function') {
                 // Récupérer la liste des étudiants du nouveau groupe-cours
@@ -5796,7 +5796,7 @@ async function changerGroupeCoursActifV2(valeur) {
         }
 
         // 🆕 FIX (3 fév 2026) : Rafraîchir le module de saisie des présences si visible
-        const sectionSaisiePresencesCours = document.getElementById('presences-saisie');
+        const sectionSaisiePresencesCours = document.getElementById('suivi-saisie');
         if (sectionSaisiePresencesCours && !sectionSaisiePresencesCours.classList.contains('u-hide')) {
             if (typeof initialiserModuleSaisiePresences === 'function') {
                 initialiserModuleSaisiePresences();
@@ -5916,7 +5916,7 @@ async function changerGroupeCoursActifV2(valeur) {
 
     // 🆕 BETA 95.6 : Rafraîchir le profil étudiant si affiché
     // Vérifie si la sous-section profil est active et si un DA est mémorisé
-    const sousSectionProfilGC = document.getElementById('tableau-bord-profil');
+    const sousSectionProfilGC = document.getElementById('suivi-profil');
     if (sousSectionProfilGC && !sousSectionProfilGC.classList.contains('u-hide') && window.profilActuelDA) {
         if (typeof afficherProfilComplet === 'function') {
             // Récupérer la liste des étudiants du nouveau groupe-cours
@@ -5948,7 +5948,7 @@ async function changerGroupeCoursActifV2(valeur) {
 
     // 🆕 FIX (3 fév 2026) : Rafraîchir le module de saisie des présences si visible
     // Les dates de séances dépendent de l'horaire du groupe-cours actif
-    const sectionSaisiePresences = document.getElementById('presences-saisie');
+    const sectionSaisiePresences = document.getElementById('suivi-saisie');
     if (sectionSaisiePresences && !sectionSaisiePresences.classList.contains('u-hide')) {
         if (typeof initialiserModuleSaisiePresences === 'function') {
             initialiserModuleSaisiePresences();
@@ -6269,14 +6269,14 @@ async function mettreAJourApercuGroupeCours() {
  * 🆕 BETA 95.2
  */
 function accederCalendrierRapide() {
-    // Naviguer vers la section Présences
+    // Naviguer vers la section Contexte (calendrier)
     if (typeof afficherSection === 'function') {
-        afficherSection('presences');
+        afficherSection('contexte');
     }
     // Puis vers la sous-section Calendrier (avec délai pour laisser le DOM se mettre à jour)
     setTimeout(() => {
         if (typeof afficherSousSection === 'function') {
-            afficherSousSection('presences-calendrier');
+            afficherSousSection('contexte-calendrier');
         }
     }, 100);
 }
