@@ -132,12 +132,17 @@
             document.body.appendChild(modal);
         }
 
+        // Tier 7.3 : Sémantique ARIA
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-labelledby', 'aide-ctx-titre');
+
         // Générer le contenu
         const contenuHTML = rendreContenuAide(aide);
 
         modal.innerHTML = `
             <div class="primo-popup-header">
-                <span class="primo-popup-titre">📍 ${aide.titre}</span>
+                <span id="aide-ctx-titre" class="primo-popup-titre">📍 ${aide.titre}</span>
                 <button class="primo-popup-fermer" data-action="fermerAideContextuelle" aria-label="Fermer">×</button>
             </div>
             <div class="primo-popup-body aide-contextuelle-body">
@@ -149,6 +154,13 @@
         overlay.classList.add('active');
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
+
+        // Tier 7.3 : Focus trap — placer le focus sur le bouton fermer
+        const btnFermer = modal.querySelector('.primo-popup-fermer');
+        if (btnFermer) btnFermer.focus();
+
+        // Sauvegarder l'élément déclencheur pour y restaurer le focus
+        modal._declencheur = document.activeElement;
     }
 
     /**
@@ -158,9 +170,16 @@
         const overlay = document.querySelector('.aide-contextuelle-overlay');
         const modal = document.querySelector('.aide-contextuelle-modal');
 
+        // Tier 7.3 : Restaurer le focus sur le bouton déclencheur
+        const declencheur = modal && modal._declencheur;
+
         if (overlay) overlay.classList.remove('active');
         if (modal) modal.classList.remove('active');
         document.body.style.overflow = '';
+
+        if (declencheur && typeof declencheur.focus === 'function') {
+            declencheur.focus();
+        }
     }
 
     // =========================================================================
@@ -198,12 +217,28 @@
             }
         });
 
-        // Écouter la touche Escape pour fermer
+        // Écouter Escape pour fermer + focus trap (Tier 7.3)
         document.addEventListener('keydown', function(event) {
+            const modal = document.querySelector('.aide-contextuelle-modal.active');
+            if (!modal) return;
+
             if (event.key === 'Escape') {
-                const modal = document.querySelector('.aide-contextuelle-modal.active');
-                if (modal) {
-                    fermerAideContextuelle();
+                fermerAideContextuelle();
+                return;
+            }
+
+            // Focus trap : Tab/Shift+Tab piégé dans la modale
+            if (event.key === 'Tab') {
+                const focusables = modal.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])');
+                if (focusables.length === 0) return;
+                const premier = focusables[0];
+                const dernier = focusables[focusables.length - 1];
+                if (event.shiftKey && document.activeElement === premier) {
+                    event.preventDefault();
+                    dernier.focus();
+                } else if (!event.shiftKey && document.activeElement === dernier) {
+                    event.preventDefault();
+                    premier.focus();
                 }
             }
         });

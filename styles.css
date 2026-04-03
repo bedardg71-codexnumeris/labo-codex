@@ -11553,10 +11553,11 @@ tr.etudiant-inactif td {
     display: none;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    /* Tier 7.2 : cible tactile ≥ 44px (WCAG / iPad) */
+    width: 44px;
+    height: 44px;
     padding: 0;
-    margin-left: 8px;
+    margin-left: 4px;
     background: transparent;
     border: 2px solid var(--sarcelle-moyen, #1a5266);
     border-radius: 50%;
@@ -11571,6 +11572,16 @@ tr.etudiant-inactif td {
 .btn-aide-contextuelle:hover {
     background: var(--sarcelle-tres-pale, #e8f4f7);
     transform: scale(1.1);
+}
+@media (prefers-reduced-motion: reduce) {
+    .btn-aide-contextuelle,
+    .btn-aide-contextuelle:hover {
+        transition: none;
+        transform: none;
+    }
+    .aide-contextuelle-modal {
+        transition: none;
+    }
 }
 
 .btn-aide-contextuelle:focus {
@@ -11770,8 +11781,9 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     }
 
     .btn-aide-contextuelle {
-        width: 32px;
-        height: 32px;
+        /* Tier 7.2 : maintenir 44px minimum même en mobile (WCAG) */
+        width: 44px;
+        height: 44px;
         font-size: 16px;
     }
 }
