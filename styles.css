@@ -11561,7 +11561,11 @@ tr.etudiant-inactif td {
     background: transparent;
     border: 2px solid var(--sarcelle-moyen, #1a5266);
     border-radius: 50%;
-    font-size: 14px;
+    /* Tier 7.8 D-AIDE-2 : "?" au lieu de "📍" pour différencier de Primo */
+    font-size: 20px;
+    font-weight: 700;
+    font-family: Georgia, serif;
+    color: var(--sarcelle-moyen, #1a5266);
     line-height: 1;
     cursor: pointer;
     transition: all 0.2s ease;
