@@ -580,6 +580,128 @@ const AIDE_CONTEXTUELLE = {
             }
         ],
         voirAussi: ['evaluations-proceder', 'structure-productions']
+    },
+
+    // =========================================================================
+    // PROFIL ÉTUDIANT — INDICATEURS (Tier 7.5, zones démo AQPC)
+    // =========================================================================
+
+    'profil-etudiant-indicateurs': {
+        titre: "Lire les indicateurs du profil",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Le profil individuel affiche quatre indices qui te permettent de cerner rapidement la situation d'un \u00e9tudiant."
+            },
+            {
+                type: 'liste',
+                titre: "Les 4 indices A-C-P-E",
+                items: [
+                    "A (Assiduité) — Taux de présence aux cours. Calculé automatiquement depuis la saisie des présences.",
+                    "C (Complétion) — Proportion d'artefacts remis par rapport aux artefacts attendus.",
+                    "P (Performance) — Résultat composite basé sur les meilleurs artefacts évalués (selon la pratique configurée).",
+                    "E (Engagement) — Cohérence entre A, C et P. Un E élevé signifie que l'étudiant est présent, remet ses travaux et performe."
+                ]
+            },
+            {
+                type: 'liste',
+                titre: "Barres SRPNF (habiletés)",
+                items: [
+                    "S (Structure) — Organisation logique du travail.",
+                    "R (Rigueur) — Précision méthodologique et respect des consignes.",
+                    "P (Plausibilité) — Cohérence du raisonnement et des arguments.",
+                    "N (Nuance) — Profondeur de l'analyse et prise en compte de la complexité.",
+                    "F (Français) — Qualité de la langue écrite."
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: "Compare les barres SRPNF entre elles pour identifier les forces et les défis récurrents. Un étudiant fort en S et R mais faible en P et N a besoin d'un accompagnement différent de celui qui est faible en F."
+            },
+            {
+                type: 'liste',
+                titre: "Niveaux RàI (Réponse à l'Intervention)",
+                items: [
+                    "Niveau 1 (vert) — Progression normale. L'enseignement universel suffit.",
+                    "Niveau 2 (jaune) — Signes de difficulté. Interventions préventives ciblées recommandées.",
+                    "Niveau 3 (rouge) — Difficulté persistante. Intervention intensive et soutien individualisé nécessaires."
+                ]
+            }
+        ],
+        voirAussi: ['profil-etudiant-accompagnement']
+    },
+
+    // =========================================================================
+    // PROFIL ÉTUDIANT — ACCOMPAGNEMENT (Tier 7.5)
+    // =========================================================================
+
+    'profil-etudiant-accompagnement': {
+        titre: "Accompagner un étudiant depuis son profil",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Le profil individuel centralise tout ce dont tu as besoin pour prendre des décisions d'accompagnement éclairées."
+            },
+            {
+                type: 'liste',
+                titre: "Ce que tu peux faire depuis le profil",
+                items: [
+                    "Consulter l'historique des évaluations et la progression dans le temps.",
+                    "Identifier les patterns comportementaux (consolidation, stagnation, amélioration, régression).",
+                    "Lire les rétroactions passées pour assurer la cohérence de ton accompagnement.",
+                    "Créer une intervention RàI de niveau 2 ou 3 directement depuis le profil.",
+                    "Exporter un rapport PDF pour un suivi institutionnel ou une rencontre parent."
+                ]
+            },
+            {
+                type: 'exemple',
+                titre: "Cas typique",
+                contenu: "Un étudiant montre A=85%, C=60%, P=45%. Son assiduité est bonne, mais il remet peu d'artefacts et ceux qu'il remet sont faibles. Le pattern suggère un problème de méthode de travail, pas de motivation. Une intervention de niveau 2 axée sur la planification et l'organisation pourrait aider."
+            },
+            {
+                type: 'conseil',
+                contenu: "Le profil est un outil d'aide à la décision, pas un diagnostic automatique. Les indices te guident, mais ton expertise professionnelle reste le facteur déterminant."
+            }
+        ],
+        voirAussi: ['profil-etudiant-indicateurs']
+    },
+
+    // =========================================================================
+    // INTERVENTIONS — PLANIFICATION (Tier 7.5)
+    // =========================================================================
+
+    'interventions-planification': {
+        titre: "Planifier et documenter les interventions RàI",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Le module d'interventions te permet de documenter les actions que tu poses auprès des étudiants en difficulté, selon le modèle Réponse à l'Intervention (RàI) à 3 niveaux."
+            },
+            {
+                type: 'liste',
+                titre: "Les 3 niveaux RàI",
+                items: [
+                    "Niveau 1 — Enseignement universel. C'est ce que tu fais pour tout le groupe : cours magistral, activités, rétroactions. Pas besoin de le documenter ici.",
+                    "Niveau 2 — Interventions préventives ciblées. Pour les étudiants qui montrent des signes de difficulté (C ou P en baisse, pattern de stagnation). Exemples : rencontre individuelle, exercices supplémentaires, tutorat par les pairs.",
+                    "Niveau 3 — Interventions intensives. Pour les étudiants en difficulté persistante malgré le niveau 2. Exemples : plan d'intervention formel, référence au centre d'aide, accommodements, suivi hebdomadaire structuré."
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: "Documente tes interventions même brièvement. En fin de trimestre, cette trace te permettra de justifier tes décisions pédagogiques et de planifier le trimestre suivant."
+            },
+            {
+                type: 'exemple',
+                titre: "Quand passer au niveau supérieur ?",
+                contenu: "Si après 2-3 semaines d'intervention de niveau 2, les indices C et P de l'étudiant ne s'améliorent pas (ou continuent de baisser), il est temps de considérer le niveau 3. Le profil étudiant te montre cette progression dans le temps."
+            },
+            {
+                type: 'alerte',
+                niveau: 'attention',
+                contenu: "Les interventions de niveau 3 impliquent souvent des ressources externes (centre d'aide, API, conseiller pédagogique). Vérifie les ressources disponibles dans ton cégep avant de t'engager dans un plan intensif."
+            }
+        ],
+        voirAussi: ['profil-etudiant-indicateurs', 'profil-etudiant-accompagnement']
     }
 };
 

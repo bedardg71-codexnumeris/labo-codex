@@ -942,46 +942,88 @@ const TOOLTIPS = {
         'Documentation, tutoriels et ressources d\u2019aide.',
 
     // =================================================================
-    // SOUS-NAVIGATION — Tableau de bord
+    // SOUS-NAVIGATION — Accueil (Tier 5.7)
     // =================================================================
 
-    'nav-tdb-apercu':
+    'nav-acc-decouvrir':
+        'D\u00e9couvrir les fonctionnalit\u00e9s et les outils de monitorage.',
+
+    'nav-acc-parcourir':
+        'Parcourir les diff\u00e9rentes sections de l\u2019application.',
+
+    'nav-acc-piloter':
+        'Acc\u00e9der aux outils de pilotage p\u00e9dagogique.',
+
+    // =================================================================
+    // SOUS-NAVIGATION — Aper\u00e7u (section plate, pas de sous-nav)
+    // =================================================================
+
+    'nav-apercu':
         'Observer les indices A-C-E-P, les patterns, les niveaux R\u00e0I et le d\u00e9veloppement du groupe via des graphiques.',
 
-    'nav-tdb-liste':
-        'Tableau complet des \u00e9tudiants avec indices, patterns et niveaux R\u00e0I. Filtrable et triable par colonne.',
-
-    'nav-tdb-profil':
-        'Fiche individuelle d\u2019un \u00e9tudiant : productions, engagement, progression, habilet\u00e9s, accompagnement et rapport.',
-
-    'nav-tdb-interventions':
-        'Planifier et documenter les interventions R\u00e0I de niveaux 2 (pr\u00e9ventif) et 3 (intensif).',
-
     // =================================================================
-    // SOUS-NAVIGATION — Pr\u00e9sences
+    // SOUS-NAVIGATION — Structure (Tier 5.7)
     // =================================================================
 
-    'nav-pres-apercu':
-        'Statistiques synth\u00e9tiques : taux d\u2019assiduit\u00e9 moyen, s\u00e9ances donn\u00e9es, prochaine s\u00e9ance et effectif.',
+    'nav-str-alignement':
+        'Carte mentale interactive : visualiser l\u2019alignement objectifs \u2192 activit\u00e9s \u2192 \u00e9valuations.',
 
-    'nav-pres-calendrier':
+    'nav-str-organisateur':
+        'Calendrier des s\u00e9quences sur 15 semaines et plans de le\u00e7ons avec enseignement explicite en 5 \u00e9tapes.',
+
+    'nav-str-productions':
+        'D\u00e9finir les productions \u00e9tudiantes : portfolio, artefacts et travaux avec pond\u00e9rations et \u00e9ch\u00e9ances.',
+
+    'nav-str-grilles':
+        'Cr\u00e9er des grilles r\u00e9utilisables avec crit\u00e8res nomm\u00e9s, typ\u00e9s et pond\u00e9r\u00e9s.',
+
+    'nav-str-echelles':
+        'Configurer les \u00e9chelles IDME : seuils, valeurs ponctuelles, couleurs et aper\u00e7u visuel.',
+
+    'nav-str-cartouches':
+        'Cr\u00e9er des matrices de commentaires automatiques (crit\u00e8res \u00d7 niveaux) pour la r\u00e9troaction diff\u00e9renci\u00e9e.',
+
+    // =================================================================
+    // SOUS-NAVIGATION — Contexte (Tier 5.7)
+    // =================================================================
+
+    'nav-ctx-trimestre':
+        'Configuration du trimestre, du cours, de l\u2019enseignant, du groupe d\u2019\u00e9tudiants, de l\u2019horaire et du groupe-cours.',
+
+    'nav-ctx-calendrier':
         'Calendrier du trimestre : grilles mensuelles, jours de cours, cong\u00e9s et reprises.',
 
-    'nav-pres-saisie':
+    'nav-ctx-pratiques':
+        'Assembler une pratique compl\u00e8te (SOM, STD, SPE, DEN) en associant \u00e9chelle, structure et jetons.',
+
+    'nav-ctx-bilan':
+        'Bilan r\u00e9flexif de la d\u00e9marche p\u00e9dagogique : forces, d\u00e9fis et pistes d\u2019am\u00e9lioration.',
+
+    // =================================================================
+    // SOUS-NAVIGATION — Suivi (Tier 5.7)
+    // =================================================================
+
+    'nav-suivi-liste':
+        'Tableau complet des \u00e9tudiants avec indices, patterns et niveaux R\u00e0I. Filtrable et triable par colonne.',
+
+    'nav-suivi-saisie':
         'Saisir les pr\u00e9sences et absences pour chaque s\u00e9ance du groupe.',
+
+    'nav-suivi-profil':
+        'Fiche individuelle d\u2019un \u00e9tudiant : productions, engagement, progression, habilet\u00e9s, accompagnement et rapport.',
+
+    'nav-suivi-interventions':
+        'Planifier et documenter les interventions R\u00e0I de niveaux 2 (pr\u00e9ventif) et 3 (intensif).',
 
     // =================================================================
     // SOUS-NAVIGATION — \u00c9valuations
     // =================================================================
 
-    'nav-eval-apercu':
-        'Statistiques synth\u00e9tiques : taux de compl\u00e9tion moyen, productions r\u00e9alis\u00e9es et configur\u00e9es.',
+    'nav-eval-importer':
+        'Importer les travaux des \u00e9tudiants (PDF, images) et pr\u00e9parer les fichiers (rotation, assemblage).',
 
     'nav-eval-liste':
         'Tableau exhaustif des \u00e9valuations : r\u00e9sultats, niveaux IDME, jetons et dossiers PDF.',
-
-    'nav-eval-importer':
-        'Importer les travaux des \u00e9tudiants (PDF, images) et pr\u00e9parer les fichiers (rotation, assemblage).',
 
     'nav-eval-annoter':
         'Annoter les copies et \u00e9valuer selon la grille de crit\u00e8res, sur le m\u00eame document.',
@@ -996,50 +1038,18 @@ const TOOLTIPS = {
         'Exporter les PDF annot\u00e9s aux \u00e9tudiants, archiver le semestre et all\u00e9ger le stockage.',
 
     // =================================================================
-    // SOUS-NAVIGATION — Construction de la note
-    // =================================================================
-
-    'nav-cn-apercu':
-        'D\u00e9compte des ressources configur\u00e9es : productions, grilles, \u00e9chelles, pratiques et cartouches.',
-
-    'nav-cn-productions':
-        'D\u00e9finir les productions \u00e9tudiantes : portfolio, artefacts et travaux avec pond\u00e9rations et \u00e9ch\u00e9ances.',
-
-    'nav-cn-grilles':
-        'Cr\u00e9er des grilles r\u00e9utilisables avec crit\u00e8res nomm\u00e9s, typ\u00e9s et pond\u00e9r\u00e9s.',
-
-    'nav-cn-echelles':
-        'Configurer les \u00e9chelles IDME : seuils, valeurs ponctuelles, couleurs et aper\u00e7u visuel.',
-
-    'nav-cn-cartouches':
-        'Cr\u00e9er des matrices de commentaires automatiques (crit\u00e8res \u00d7 niveaux) pour la r\u00e9troaction diff\u00e9renci\u00e9e.',
-
-    'nav-cn-pratiques':
-        'Assembler une pratique compl\u00e8te (SOM, STD, SPE, DEN) en associant \u00e9chelle, structure et jetons.',
-
-    // =================================================================
     // SOUS-NAVIGATION — Bo\u00eete \u00e0 outils
     // =================================================================
 
     'nav-bao-tirage':
-        'Tirage au sort al\u00e9atoire dans le groupe d\u2019\u00e9tudiants.',
+        'Tirage au sort al\u00e9atoire et questions flash pour l\u2019animation en classe.',
 
-    // =================================================================
-    // SOUS-NAVIGATION — Planification
-    // =================================================================
-
-    'nav-planif-alignement':
-        'Carte mentale interactive : visualiser l\u2019alignement objectifs \u2192 activit\u00e9s \u2192 \u00e9valuations.',
-
-    'nav-planif-organisateur':
-        'Calendrier des s\u00e9quences sur 15 semaines et plans de le\u00e7ons avec enseignement explicite en 5 \u00e9tapes.',
+    'nav-bao-modelisation':
+        'D\u00e9monstrations interactives et mod\u00e9lisations visuelles pour illustrer des concepts.',
 
     // =================================================================
     // SOUS-NAVIGATION — R\u00e9glages
     // =================================================================
-
-    'nav-reg-trimestre':
-        'Configuration du trimestre, du cours, de l\u2019enseignant, du groupe d\u2019\u00e9tudiants, de l\u2019horaire et du groupe-cours.',
 
     'nav-reg-preferences':
         'Personnaliser l\u2019interface : outils actifs, ressources affich\u00e9es, effets visuels et comportement de navigation.',
