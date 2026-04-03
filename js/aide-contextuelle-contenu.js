@@ -98,7 +98,7 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'alerte',
                 niveau: 'attention',
-                contenu: "Avant d'évaluer, assure-toi d'avoir créé au moins : une <strong>grille de critères</strong>, une <strong>échelle de performance</strong>, une <strong>cartouche de rétroaction</strong> et une <strong>production</strong>. Ces éléments se configurent dans l'onglet Construction de la note."
+                contenu: "Avant d'évaluer, assure-toi d'avoir créé au moins : une <strong>grille de critères</strong>, une <strong>échelle de performance</strong>, une <strong>cartouche de rétroaction</strong> et une <strong>production</strong>. Ces éléments se configurent dans la section Structure."
             },
             {
                 type: 'liste',
@@ -301,11 +301,11 @@ const AIDE_CONTEXTUELLE = {
     // =========================================================================
 
     'apercu-contenu': {
-        titre: "Comprendre le tableau de bord",
+        titre: "Comprendre l'aperçu",
         sections: [
             {
                 type: 'texte',
-                contenu: "Le tableau de bord offre une vue d'ensemble de la progression de ton groupe. Les indices A-C-P-E permettent d'identifier rapidement les étudiants nécessitant un suivi particulier."
+                contenu: "L'aperçu offre une vue d'ensemble de la progression de ton groupe. Les indices A-C-P-E permettent d'identifier rapidement les étudiants nécessitant un suivi particulier."
             },
             {
                 type: 'liste',
@@ -364,7 +364,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "La saisie des présences alimente l'indice d'Assiduité du tableau de bord et permet de repérer les patterns d'absence problématiques."
+                contenu: "La saisie des présences alimente l'indice d'Assiduité de l'aperçu et permet de repérer les patterns d'absence problématiques."
             },
             {
                 type: 'liste',
