@@ -108,7 +108,10 @@ function afficherAccueilContenu(conteneur) {
 
     conteneur.innerHTML = `
         <div class="accueil-hero">
-            <div style="font-style: italic; font-size: 0.82rem; line-height: 1.7; color: var(--texte-muted); max-width: 700px; margin: 0 auto 1.5rem; text-align: justify;">
+            <div id="manifeste-accueil" style="font-style: italic; font-size: 0.82rem; line-height: 1.7; color: var(--texte-muted); max-width: 700px; margin: 0 auto 1.5rem; text-align: justify;${db.getSync('manifeste-masque', false) ? ' display: none;' : ''}">
+                <div style="text-align: center; margin-bottom: 0.3rem;">
+                    <span data-action="masquerManifeste" style="cursor: pointer; font-size: 1.1rem; opacity: 0.5;" title="Masquer ce texte">\uD83D\uDCCD</span>
+                </div>
                 <p><strong>Labo Codex</strong> est un laboratoire p\u00e9dagogique. Ce n\u2019est pas un produit fini, c\u2019est un outil de recherche-action qui \u00e9volue avec ceux qui l\u2019utilisent.</p>
                 <p style="margin-top: 0.6rem;"><strong>\u00c0 quoi sert ce labo\u00a0?</strong> \u00c0 transformer les gestes que tu fais d\u00e9j\u00e0 (observer, annoter, \u00e9valuer) en micro-donn\u00e9es qui \u00e9clairent ton jugement professionnel. L\u2019application ne remplace pas ton regard sur tes \u00e9l\u00e8ves. Elle le rend plus pr\u00e9cis, plus continu, plus partageable.</p>
                 <p style="margin-top: 0.6rem;"><strong>Qu\u2019est-ce que \u00e7a change\u00a0?</strong> Le labo rend plus visibles des patterns\u00a0: un d\u00e9crochage silencieux, un blocage r\u00e9current, un progr\u00e8s qu\u2019une note seule ne montre pas. La diff\u00e9rence\u00a0: chaque geste laisse une trace utile. Chaque geste peut alimenter une boucle de r\u00e9troaction, autant pour ton \u00e9l\u00e8ve que pour toi. Tu interviens plus t\u00f4t, plus justement. La relation p\u00e9dagogique y gagne.</p>
@@ -295,5 +298,11 @@ window.naviguerAccueilCarte = naviguerAccueilCarte;
 window.naviguerVersWizard = naviguerVersWizard;
 window.ouvrirModalBackup = ouvrirModalBackup;
 
+/** Masquer le manifeste d'accueil (mémorisé) */
+window.masquerManifeste = function() {
+    var el = document.getElementById('manifeste-accueil');
+    if (el) el.style.display = 'none';
+    db.setSync('manifeste-masque', true);
+};
 
 })();
