@@ -8836,9 +8836,7 @@ function sauvegarderNotesPresencesConfidentiel() {
     const textareas = document.querySelectorAll('#confidentiel-notes-presences .note-presence-editable');
     if (textareas.length === 0) return;
 
-    const clePresences = cle('presences');
-    const presences = db.getSync(clePresences, []);
-
+    // Tier 6.4 : utiliser l'API centralisée de saisie-presences.js
     let modifications = 0;
 
     textareas.forEach(textarea => {
@@ -8846,17 +8844,12 @@ function sauvegarderNotesPresencesConfidentiel() {
         const da = textarea.dataset.da;
         const nouvelleNote = textarea.value.trim();
 
-        // Trouver la présence correspondante
-        const presence = presences.find(p => p.da === da && p.date === date);
-        if (presence && presence.notes !== nouvelleNote) {
-            presence.notes = nouvelleNote;
-            modifications++;
+        if (typeof window.modifierNotesPresence === 'function') {
+            if (window.modifierNotesPresence(da, date, nouvelleNote)) {
+                modifications++;
+            }
         }
     });
-
-    if (modifications > 0) {
-        db.setSync(clePresences, presences);
-    }
 }
 
 /**

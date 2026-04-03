@@ -3858,4 +3858,56 @@ window.fermerModalImportGrilles = fermerModalImportGrilles;
 window.confirmerEtFermerImportGrilles = confirmerEtFermerImportGrilles;
 window.ouvrirFilePickerImportGrilles = ouvrirFilePickerImportGrilles;
 
+// ================================================================
+// API SSOT — Point d'écriture centralisé pour `grillesTemplates`
+// Tier 6.4 : Les modules externes doivent passer par cette fonction
+// au lieu d'écrire directement dans 'grillesTemplates'.
+// ================================================================
+
+/**
+ * Importe des grilles depuis une source externe (import, primo, démo).
+ * Gère la déduplication par ID et le merge avec les grilles existantes.
+ *
+ * @param {Array} nouvellesGrilles - Grilles à importer
+ * @param {Object} [options] - Options d'import
+ * @param {boolean} [options.remplacer=false] - Remplacer les grilles existantes avec le même ID
+ * @param {boolean} [options.silencieux=false] - Ne pas rafraîchir l'UI
+ * @returns {number} nombre de grilles ajoutées/mises à jour
+ */
+window.importerGrillesExternes = function(nouvellesGrilles, options) {
+    if (!nouvellesGrilles || nouvellesGrilles.length === 0) return 0;
+    options = options || {};
+
+    var grilles = db.getSync('grillesTemplates', []);
+    var compteur = 0;
+
+    for (var i = 0; i < nouvellesGrilles.length; i++) {
+        var grille = nouvellesGrilles[i];
+        var index = grilles.findIndex(function(g) { return g.id === grille.id; });
+
+        if (index >= 0) {
+            if (options.remplacer) {
+                grilles[index] = grille;
+                compteur++;
+            }
+            // sinon: grille existe déjà, on la saute
+        } else {
+            grilles.push(grille);
+            compteur++;
+        }
+    }
+
+    if (compteur > 0) {
+        db.setSync('grillesTemplates', grilles);
+
+        if (!options.silencieux) {
+            if (typeof chargerListeGrillesTemplates === 'function') chargerListeGrillesTemplates();
+            if (typeof afficherToutesLesGrillesCriteres === 'function') afficherToutesLesGrillesCriteres();
+            if (typeof afficherListeGrilles === 'function') afficherListeGrilles();
+        }
+    }
+
+    return compteur;
+};
+
 })();

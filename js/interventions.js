@@ -1507,70 +1507,60 @@ function transfererPresencesVersModule(interventionId) {
     }
 
     // Obtenir tous les étudiants du groupe (filtrés par groupe-cours actif)
+    // Tier 6.4 : Utiliser l'API centralisée de saisie-presences.js
     const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
         ? obtenirEtudiantsCoursActif()
         : obtenirDonneesSelonMode('groupeEtudiants');
-    // Obtenir les présences existantes
-    // ✅ CORRIGÉ (22 janvier 2026) : Utiliser la clé namespacée pour le trimestre actif
-    const clePresences = cle('presences');
-    let presences = db.getSync(clePresences, []);
 
-    // Supprimer les entrées existantes pour cette date (pour éviter les doublons)
-    presences = presences.filter(p => p.date !== intervention.date);
-    // Créer une entrée de présence pour chaque étudiant
+    const dureeIntervention = intervention.duree || 2;
+    const marquerMotives = intervention.marquerNonParticipantsMotives === true;
+
+    // Construire les entrées de présence
+    const entrees = [];
     let nbPresentsAjoutes = 0;
     let nbAbsentsAjoutes = 0;
-
-    // Obtenir la durée de l'intervention (par défaut 2h si non spécifiée)
-    const dureeIntervention = intervention.duree || 2;
-
-    // RÈGLE IMPORTANTE :
-    // - Niveau 2 (préventif en classe) : Si checkbox cochée, créer entrée pour TOUS (absents = motivés)
-    // - Niveau 3 (intensif hors classe) : Si checkbox cochée, créer entrée pour TOUS (absents = motivés)
-    // - Si checkbox NON cochée : Créer entrée UNIQUEMENT pour participants
-    const estNiveau3 = intervention.niveauRai === 3;
-    const marquerMotives = intervention.marquerNonParticipantsMotives === true;
 
     etudiants.forEach(etudiant => {
         const estPresent = intervention.etudiants.includes(etudiant.da);
 
-        // Si checkbox NON cochée : ignorer les non-participants (pas d'entrée de présence créée)
         if (!marquerMotives && !estPresent) {
-            return; // Ne pas créer d'entrée de présence
+            return;
         }
 
-        // Déterminer les heures et la note selon la présence
         let heures, note;
         if (estPresent) {
-            // Étudiant présent : heures selon la durée de l'intervention
             heures = dureeIntervention;
             note = `Intervention RàI : ${intervention.titre}`;
             nbPresentsAjoutes++;
         } else {
-            // Étudiant absent (niveau 2 seulement) : 0 heures + note d'absence motivée
             heures = 0;
             note = 'Absence motivée RàI';
             nbAbsentsAjoutes++;
         }
 
-        // Ajouter l'entrée de présence avec le flag facultatif
-        presences.push({
+        entrees.push({
             date: intervention.date,
             da: etudiant.da,
             heures: heures,
             notes: note,
-            facultatif: true  // Flag indiquant que cette séance est facultative
+            coursId: typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : undefined,
+            facultatif: true
         });
     });
 
-    // Sauvegarder les présences mises à jour
-    db.setSync(clePresences, presences);
-
-    // Recalculer les indices d'assiduité
-    if (typeof calculerEtSauvegarderIndicesAssiduite === 'function') {
-        calculerEtSauvegarderIndicesAssiduite();
+    // Écriture centralisée (inclut recalcul indices d'assiduité)
+    if (typeof window.ajouterPresencesIntervention === 'function') {
+        window.ajouterPresencesIntervention(entrees);
     } else {
-        console.warn('   ⚠️ Fonction calculerEtSauvegarderIndicesAssiduite non disponible');
+        // Fallback si l'API n'est pas encore chargée
+        console.warn('⚠️ ajouterPresencesIntervention non disponible — écriture directe');
+        const clePresences = cle('presences');
+        let presences = db.getSync(clePresences, []);
+        entrees.forEach(e => presences.push(e));
+        db.setSync(clePresences, presences);
+        if (typeof calculerEtSauvegarderIndicesAssiduite === 'function') {
+            calculerEtSauvegarderIndicesAssiduite();
+        }
     }
 
 }

@@ -4063,4 +4063,53 @@ window.fermerModalImportEchelles = fermerModalImportEchelles;
 window.confirmerEtFermerImportEchelles = confirmerEtFermerImportEchelles;
 window.ouvrirFilePickerImportEchelles = ouvrirFilePickerImportEchelles;
 
+// ================================================================
+// API SSOT — Point d'écriture centralisé pour `echellesTemplates`
+// Tier 6.4 : Les modules externes doivent passer par cette fonction.
+// ================================================================
+
+/**
+ * Importe des échelles depuis une source externe.
+ *
+ * @param {Array} nouvellesEchelles - Échelles à importer
+ * @param {Object} [options] - Options d'import
+ * @param {boolean} [options.remplacer=false] - Remplacer si même ID
+ * @param {boolean} [options.silencieux=false] - Ne pas rafraîchir l'UI
+ * @returns {number} nombre d'échelles ajoutées/mises à jour
+ */
+window.importerEchellesExternes = function(nouvellesEchelles, options) {
+    if (!nouvellesEchelles || nouvellesEchelles.length === 0) return 0;
+    options = options || {};
+
+    var echelles = db.getSync('echellesTemplates', []);
+    var compteur = 0;
+
+    for (var i = 0; i < nouvellesEchelles.length; i++) {
+        var echelle = nouvellesEchelles[i];
+        var index = echelles.findIndex(function(e) { return e.id === echelle.id; });
+
+        if (index >= 0) {
+            if (options.remplacer) {
+                echelles[index] = echelle;
+                compteur++;
+            }
+        } else {
+            echelles.push(echelle);
+            compteur++;
+        }
+    }
+
+    if (compteur > 0) {
+        db.setSync('echellesTemplates', echelles);
+
+        if (!options.silencieux) {
+            if (typeof chargerEchellesTemplates === 'function') chargerEchellesTemplates();
+            if (typeof afficherToutesLesEchellesNiveaux === 'function') afficherToutesLesEchellesNiveaux();
+            if (typeof afficherListeEchelles === 'function') afficherListeEchelles();
+        }
+    }
+
+    return compteur;
+};
+
 })();

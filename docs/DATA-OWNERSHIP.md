@@ -109,9 +109,9 @@
 | # | Cle | Severite | Description | Plan |
 |---|-----|----------|-------------|------|
 | #1 | `modalitesEvaluation` | CRITIQUE | 25+ ecrivains, 36 lecteurs | Reporte post-AQPC (trop risque) |
-| #2 | `grillesTemplates` | HAUTE | 4 contourneurs ecrivent directement | Tier 6.4 — `importerGrillesExternes()` |
-| #3 | `echellesTemplates` | HAUTE | 3 contourneurs ecrivent directement | Tier 6.4 — `importerEchellesExternes()` |
-| #5 | `presences` | MOYENNE | 2 contourneurs (interventions, profil-etudiant) | Tier 6.4 — API dans saisie-presences |
+| #2 | `grillesTemplates` | HAUTE | API `importerGrillesExternes()` creee | Tier 6.4 — API en place, migration contourneurs en cours |
+| #3 | `echellesTemplates` | HAUTE | API `importerEchellesExternes()` creee | Tier 6.4 — API en place, migration contourneurs en cours |
+| #5 | ~~`presences`~~ | ~~MOYENNE~~ | ~~2 contourneurs~~ | **CORRIGE** Tier 6.4 (3 avril 2026) — API `modifierNotesPresence()` + `ajouterPresencesIntervention()` |
 | #7 | ~~`calculerTauxCompletion`~~ | ~~MOYENNE~~ | ~~Recalcul divergent de l'indice C~~ | **CORRIGE** Tier 6.1 (3 avril 2026) |
 | #9 | ~~`_moyennesQualifies`~~ | ~~FAIBLE~~ | ~~Cache jamais invalide~~ | **CORRIGE** Tier 6.3 (3 avril 2026) |
 
