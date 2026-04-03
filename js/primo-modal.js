@@ -953,17 +953,17 @@ async function importerMaterielPedagogique() {
 
         // Extraire la grille du nouveau format { metadata, contenu }
         const grille = grilleData.contenu || grilleData.grille || grilleData;
-        const grilles = db.getSync('grillesTemplates', []);
 
-        // Vérifier si la grille existe déjà
-        const indexGrille = grilles.findIndex(g => g.id === grille.id);
-        if (indexGrille !== -1) {
-            grilles[indexGrille] = grille; // Remplacer
+        // Tier 6.4 : API centralisée
+        if (typeof window.importerGrillesExternes === 'function') {
+            window.importerGrillesExternes([grille], { remplacer: true, silencieux: true });
         } else {
-            grilles.push(grille); // Ajouter
+            const grilles = db.getSync('grillesTemplates', []);
+            const indexGrille = grilles.findIndex(g => g.id === grille.id);
+            if (indexGrille !== -1) grilles[indexGrille] = grille;
+            else grilles.push(grille);
+            db.setSync('grillesTemplates', grilles);
         }
-
-        db.setSync('grillesTemplates', grilles);
         compteur++;
 
         // 3. Importer les cartouches
@@ -1234,9 +1234,14 @@ function creerGrilleDepuisParcours() {
     }
 
     if (grille) {
-        var grilles = db.getSync('grillesTemplates', []);
-        grilles.push(grille);
-        db.setSync('grillesTemplates', grilles);
+        // Tier 6.4 : API centralisée
+        if (typeof window.importerGrillesExternes === 'function') {
+            window.importerGrillesExternes([grille], { silencieux: true });
+        } else {
+            var grilles = db.getSync('grillesTemplates', []);
+            grilles.push(grille);
+            db.setSync('grillesTemplates', grilles);
+        }
 
         // Vérification post-création
         var grillesVerif = db.getSync('grillesTemplates', []);
@@ -1738,15 +1743,22 @@ async function importerMaterielDemarrage() {
         const contenu = config.contenu;
         let nbImporte = 0;
 
-        // Importer les échelles
+        // Tier 6.4 : Importer via API centralisées
         if (contenu.echelles && contenu.echelles.length > 0) {
-            db.setSync('echellesTemplates', contenu.echelles);
+            if (typeof window.importerEchellesExternes === 'function') {
+                window.importerEchellesExternes(contenu.echelles, { remplacer: true, silencieux: true });
+            } else {
+                db.setSync('echellesTemplates', contenu.echelles);
+            }
             nbImporte += contenu.echelles.length;
         }
 
-        // Importer les grilles
         if (contenu.grilles && contenu.grilles.length > 0) {
-            db.setSync('grillesTemplates', contenu.grilles);
+            if (typeof window.importerGrillesExternes === 'function') {
+                window.importerGrillesExternes(contenu.grilles, { remplacer: true, silencieux: true });
+            } else {
+                db.setSync('grillesTemplates', contenu.grilles);
+            }
             nbImporte += contenu.grilles.length;
         }
 
