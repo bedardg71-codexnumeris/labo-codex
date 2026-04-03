@@ -30,76 +30,61 @@
  * ⚠️ NE PAS MODIFIER - Référencé dans noms_stables.json
  */
 const configurationsOnglets = {
-    'accueil': [],
-    'tableau-bord': [
-        { id: 'apercu', label: 'Aperçu' },
-        { id: 'liste', label: 'Liste des individus' },
-        { id: 'profil', label: 'Profil' },
-        { id: 'interventions', label: 'Interventions RàI' }
+    // ✨ RÉORGANISATION NAVIGATION (3 avril 2026, Tier 5.7)
+    // Ancien: 9 sections / 34 sous-sections (dont 4 Aperçus)
+    // Nouveau: 9 sections / 30 sous-sections
+    // Sections supprimées: tableau-bord, presences, construction, planification
+    // Sections créées: apercu (plate), structure, contexte, suivi
+    'accueil': [
+        { id: 'decouvrir', label: 'Découvrir' },
+        { id: 'parcourir', label: 'Parcourir' },
+        { id: 'piloter', label: 'Piloter' }
     ],
-    'presences': [
-        { id: 'apercu', label: 'Aperçu' },
+    'apercu': [],
+    'structure': [
+        { id: 'carte', label: 'Alignement pédagogique' },
+        { id: 'organisateur', label: 'Plan de la leçon' },
+        { id: 'productions', label: 'Productions étudiantes' },
+        { id: 'grille-criteres', label: 'Grilles de critères' },
+        { id: 'echelle-performance', label: 'Échelles de performance' },
+        { id: 'retroactions', label: 'Cartouches de rétroaction' }
+    ],
+    'contexte': [
+        { id: 'trimestre', label: 'Trimestre' },
         { id: 'calendrier', label: 'Vue calendaire' },
-        { id: 'saisie', label: 'Saisie' }
+        { id: 'pratiques-notation', label: 'Pratiques de notation' },
+        { id: 'bilan', label: 'Bilan réflexif' }
+    ],
+    'suivi': [
+        { id: 'liste', label: 'Liste des élèves' },
+        { id: 'saisie', label: 'Saisie des présences' },
+        { id: 'profil', label: 'Profils individuels' },
+        { id: 'interventions', label: 'Interventions' }
     ],
     'evaluations': [
-        { id: 'apercu', label: 'Aperçu' },
         { id: 'importer', label: 'Préparer et importer' },
         { id: 'liste', label: 'Liste des évaluations' },
         { id: 'annoter', label: 'Annoter et évaluer' },
         { id: 'exporter', label: 'Exporter et archiver' }
     ],
-    // ✨ REFONTE (2 jan 2026) : "Matériel" → "Construction de la note"
-    // Ajout "Pratiques de notation", retrait "Ensembles d'objectifs"
-    'construction': [
-        { id: 'apercu', label: 'Aperçu' },
-        { id: 'productions', label: 'Productions étudiantes' },
-        { id: 'grille-criteres', label: 'Grilles de critères' },
-        { id: 'echelle-performance', label: 'Échelles de performance' },
-        { id: 'retroactions', label: 'Cartouches de rétroaction' },
-        { id: 'pratiques-notation', label: 'Pratiques de notation' }
-    ],
-    // 🆕 BETA 96.1 : Boîte à outils pédagogiques
-    // Outils interactifs pour l'animation en classe
     'boite-outils': [
         { id: 'tirage', label: 'Tirage au sort' },
-        { id: 'modelisation', label: 'Modélisation' },
-        { id: 'bilan', label: 'Bilan réflexif' }
+        { id: 'modelisation', label: 'Modélisation' }
     ],
-    'planification': [
-        { id: 'carte', label: 'Alignement pédagogique' },
-        { id: 'organisateur', label: 'Plan de la leçon' }
+    'aide': [
+        { id: 'introduction', label: 'Introduction' },
+        { id: 'configuration', label: 'Configuration' },
+        { id: 'formation', label: 'Formation et démonstration' },
+        { id: 'utilisation', label: 'Utilisation hebdomadaire' },
+        { id: 'consultation', label: 'Consultation' },
+        { id: 'reference', label: 'Référence rapide' }
     ],
-    // 🆕 BETA 96.3 : Module Travaux (migré sous Évaluations)
-    // ✨ REFONTE UX (18 déc 2025) : 3 onglets (Pratique de notation migrée vers Construction)
-    // Structure : Trimestre, Préférences, Données
     'reglages': [
-        { id: 'trimestre', label: 'Trimestre' },
         { id: 'preferences', label: 'Préférences' },
         { id: 'depistage', label: 'Dépistage' },
         { id: 'donnees', label: 'Données' },
         { id: 'a-propos', label: 'À propos' }
-    ],
-    // Anciennes sous-sections (conservées pour référence, à migrer)
-    // 'reglages-legacy': [
-    //     { id: 'apercu', label: 'Aperçu' },
-    //     { id: 'trimestre', label: 'Trimestre' },
-    //     { id: 'cours', label: 'Cours' },
-    //     { id: 'horaire', label: 'Horaire' },
-    //     { id: 'groupe', label: 'Groupe' },
-    //     { id: 'pratique-notation', label: 'Pratique de notation' },
-    //     { id: 'interpretation', label: 'Interprétation des données' },
-    //     { id: 'snapshots', label: 'Captures de progression' },
-    //     { id: 'import-export', label: 'Import/Export' }
-    // ],
-  'aide': [
-      { id: 'introduction', label: 'Introduction' },
-      { id: 'configuration', label: 'Configuration' },
-      { id: 'formation', label: 'Formation et démonstration' },
-      { id: 'utilisation', label: 'Utilisation hebdomadaire' },
-      { id: 'consultation', label: 'Consultation' },
-      { id: 'reference', label: 'Référence rapide' }
-  ]
+    ]
 };
 
 /* ===============================
@@ -110,15 +95,15 @@ const configurationsOnglets = {
 
 /**
  * Section actuellement affichée
- * Valeurs possibles: 'tableau-bord' | 'etudiants' | 'presences' | 'evaluations' | 'reglages'
- * 
+ * Valeurs possibles: 'accueil' | 'apercu' | 'structure' | 'contexte' | 'suivi' | 'evaluations' | 'boite-outils' | 'aide' | 'reglages'
+ *
  * UTILISÉ PAR:
  * - afficherSection() pour mettre à jour l'état
  * - Diverses fonctions pour déterminer le contexte actuel
- * 
+ *
  * ⚠️ NE PAS MODIFIER - Référencé dans noms_stables.json
  */
-let sectionActive = 'tableau-bord';
+let sectionActive = 'apercu';
 
 /**
  * Sous-section actuellement affichée
