@@ -112,3 +112,15 @@ nav [data-tooltip],
     animation: tooltip-pulse 1.8s ease-in-out infinite;
     transition: outline-color 0.2s ease;
 }
+
+/* Tier 7.4 : Respecter prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+    [data-tooltip-visible]::after,
+    [data-tooltip-visible]::before {
+        transition: none;
+    }
+    .tooltip-cible-active {
+        animation: none;
+        transition: none;
+    }
+}
