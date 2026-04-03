@@ -74,6 +74,7 @@ Nouveau code = `console.warn` / `console.error` uniquement. Les `console.log` de
 
 **Single Source of Truth** : Chaque donnee a UNE source unique.
 Les modules ne se parlent JAMAIS directement - communication via localStorage/IndexedDB uniquement.
+Registre complet des cles avec proprietaires : `docs/DATA-OWNERSHIP.md`.
 
 ---
 

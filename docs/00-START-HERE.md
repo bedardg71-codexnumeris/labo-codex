@@ -30,6 +30,7 @@ Avant de commencer, identifie ce sur quoi tu travailles :
 ### Je fais une MIGRATION ou REFACTORING
 - Lis : `operations/migration-checklist.md`
 - Execute : `operations/validation-architecture.js`
+- Consulte : `DATA-OWNERSHIP.md` (registre de propriete des cles de stockage)
 
 ### Je travaille sur ETUDIANTS/GROUPES
 - Lis : `modules/etudiants-groupes.md`
