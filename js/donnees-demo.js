@@ -899,7 +899,15 @@ window._verifierPreDemo = function() {
     // 8. Pas de snapshot pré-démo orphelin
     check('Pas d\'état démo orphelin', !db.getSync('demo-etat-precedent', null));
 
-    // 9. Erreurs console (vérification manuelle)
+    // 9. Aide contextuelle disponible
+    var aideOk = typeof window.AIDE_CONTEXTUELLE === 'object' && Object.keys(window.AIDE_CONTEXTUELLE).length > 0;
+    check('Aide contextuelle chargée', aideOk, aideOk ? Object.keys(window.AIDE_CONTEXTUELLE).length + ' articles' : 'non chargée');
+
+    // 10. Tooltips disponibles
+    var tooltipsOk = typeof window.TOOLTIPS === 'object' && Object.keys(window.TOOLTIPS).length > 0;
+    check('Tooltips chargés', tooltipsOk, tooltipsOk ? Object.keys(window.TOOLTIPS).length + ' entrées' : 'non chargés');
+
+    // 11. Erreurs console (vérification manuelle)
     resultats.push('ℹ️ Vérifier manuellement : aucune erreur rouge dans la console');
 
     // Résumé
