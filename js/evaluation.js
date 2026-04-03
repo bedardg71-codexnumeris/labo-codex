@@ -2271,6 +2271,10 @@ function sauvegarderEvaluation() {
         return;
     }
 
+    // Tier 6.3 : Invalider les caches de moyennes
+    window._moyennesQualifies = null;
+    window._moyennesToutes = null;
+
     afficherNotificationSucces(`Évaluation sauvegardée : ${evaluation.etudiantNom} - ${evaluation.productionNom}`);
 
     // Arrêter le chrono évaluation
@@ -3476,73 +3480,10 @@ let donneesEvaluationsFiltrees = [];
    CALCUL DES INDICES
    =============================== */
 
-/**
- * Calcule et sauvegarde les indices C (Complétion) et P (Performance)
- * Basé sur le Guide de monitorage
- */
-function calculerEtSauvegarderIndicesEvaluation() {
-
-    // ✅ NAMESPACING (Beta 95.5) : Utiliser obtenirDonneesSelonMode pour le filtrage par trimestre/cours
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-    const productions = obtenirDonneesSelonMode('productions');
-
-    const indicesEvaluation = {};
-
-    // Filtrer les étudiants actifs
-    const etudiantsActifs = etudiants.filter(e => !estEtudiantExclu(e));
-
-    etudiantsActifs.forEach(etudiant => {
-        // === CALCUL DE LA COMPLÉTION (C) ===
-        // Compter les artefacts attendus
-        const artefactsAttendus = productions.filter(p =>
-            p.type === 'artefact-portfolio' || p.type === 'production'
-        );
-
-        // Compter les artefacts remis par cet étudiant
-        // ⚠️ IMPORTANT: Exclure les évaluations remplacées par un jeton de reprise
-        const evaluationsEtudiant = evaluations.filter(e =>
-            e.etudiantDA === etudiant.da && !e.remplaceeParId
-        );
-
-        // Calculer le taux de complétion
-        const completion = artefactsAttendus.length > 0
-            ? evaluationsEtudiant.length / artefactsAttendus.length
-            : 0;
-
-        // === CALCUL DE LA PERFORMANCE (P) ===
-        // Prendre les 3 dernières évaluations
-        const dernieresEvals = evaluationsEtudiant
-            .sort((a, b) => new Date(b.dateEvaluation) - new Date(a.dateEvaluation))
-            .slice(0, 3);
-
-        let performance = 0;
-        if (dernieresEvals.length > 0) {
-            // Calculer la moyenne des notes IDME
-            const sommeNotes = dernieresEvals.reduce((sum, evaluation) => {
-                // Convertir la note lettre en valeur numérique
-                const noteNumerique = convertirNoteEnValeur(evaluation.niveauFinal || evaluation.noteFinale);
-                return sum + noteNumerique;
-            }, 0);
-
-            // Moyenne sur 4 (selon le Guide)
-            performance = (sommeNotes / dernieresEvals.length) / 4;
-        }
-
-        // Sauvegarder les indices
-        indicesEvaluation[etudiant.da] = {
-            completion: Math.min(completion, 1), // Plafonner à 100%
-            performance: Math.min(performance, 1), // Plafonner à 100%
-            nbEvaluations: evaluationsEtudiant.length,
-            nbAttendus: artefactsAttendus.length
-        };
-    });
-
-    // Sauvegarder avec namespace trimestre
-    db.setSync(cle('indicesEvaluation'), indicesEvaluation);
-
-    return indicesEvaluation;
-}
+// SUPPRIMÉ (Tier 6.2, 3 avril 2026) : calculerEtSauvegarderIndicesEvaluation()
+// Écrivait dans cle('indicesEvaluation') avec une structure {DA: {completion, performance}}
+// mais la clé n'est lue par aucun module. Les vrais indices C et P sont dans
+// cle('indicesCP') (calculés par portfolio.js). Code mort supprimé.
 
 /**
  * Convertit une note lettre en valeur numérique
@@ -5157,6 +5098,9 @@ function reparer_evaluations_criteres_manquants() {
     // Sauvegarder les modifications
     if (nbEvaluationsReparees > 0) {
         db.setSync(cle('evaluationsSauvegardees'), evaluations);
+        // Tier 6.3 : Invalider les caches de moyennes (recalcul au prochain affichage)
+        window._moyennesQualifies = null;
+        window._moyennesToutes = null;
     }
 
     // Rapport final
@@ -7137,6 +7081,9 @@ function appliquerJetonPersonnalise(jetonId) {
 
     // Sauvegarder
     db.setSync(cle('evaluationsSauvegardees'), evaluations);
+    // Tier 6.3 : Invalider les caches de moyennes
+    window._moyennesQualifies = null;
+    window._moyennesToutes = null;
 
     // Rafraîchir l'affichage
     afficherBadgesJetons();
