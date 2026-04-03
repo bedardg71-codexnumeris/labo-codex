@@ -413,6 +413,16 @@ function afficherSousSection(idSousSection) {
             // Pas d'initialisation spécifique requise
             break;
 
+        case 'suivi-labo':
+            // Graphiques déplacés depuis l'Aperçu
+            if (typeof creerGraphiqueCorrelationsLongitudinales === 'function') {
+                setTimeout(() => creerGraphiqueCorrelationsLongitudinales('graphique-correlations-longitudinales'), 100);
+            }
+            if (typeof creerGraphiqueImpactJetons === 'function') {
+                setTimeout(() => creerGraphiqueImpactJetons('graphique-impact-jetons'), 100);
+            }
+            break;
+
         // === CONTEXTE ===
         case 'contexte-calendrier':
             if (typeof afficherCalendrierScolaire === 'function') {
