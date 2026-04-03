@@ -12,16 +12,16 @@
         {
             version: 'Beta 99',
             couleur: 'vert',
-            titre: 'Palettes redessin\u00e9es et raccourcis clavier',
+            titre: 'Consolidation et r\u00e9organisation',
             items: [
-                'Palettes Codes, Tampons et \u00c9valuation redimensionnables\u00a0: boutons \u2194/\u2195 pour basculer entre disposition horizontale et verticale.',
-                'Raccourcis clavier\u00a0: touches 1\u20139/0 pour les codes d\u2019erreur, lettres configurables pour les tampons.',
-                'Ic\u00f4nes dans la palette Annotation\u00a0: outils et formes remplac\u00e9s par des ic\u00f4nes visuelles.',
-                'Chrono avec pause\u00a0: bouton pause/play, reprise automatique \u00e0 la prochaine annotation.',
-                'Menu Actions\u00a0: affiche le mode actif (Annoter/\u00c9valuer), op\u00e9rations destructives retir\u00e9es.',
-                'Grille CSS responsive pour les crit\u00e8res d\u2019\u00e9valuation (SRPNF c\u00f4te \u00e0 c\u00f4te en mode large).',
-                'Correction du compte des s\u00e9ances donn\u00e9es (source unique obtenirSeancesCompletes).',
-                'Correction de la s\u00e9lection du cartouche de r\u00e9troaction depuis la production.'
+                'Navigation r\u00e9organis\u00e9e\u00a0: Aper\u00e7u, Structure, Contexte, Suivi, \u00c9valuations \u2014 plus intuitif.',
+                'Nouveau\u00a0: section Labo dans Suivi pour analyser les corr\u00e9lations et l\u2019impact des jetons.',
+                'Aide enrichie\u00a0: articles sur le profil \u00e9tudiant, les interventions R\u00e0I et le fonctionnement des biblioth\u00e8ques.',
+                'Boutons d\u2019aide (?) plus grands et accessibles sur tablette.',
+                'Anonymisation renforc\u00e9e pour les pr\u00e9sentations et le partage entre coll\u00e8gues.',
+                'Palettes d\u2019annotation redimensionnables et raccourcis clavier (1\u20139 pour les codes, lettres pour les tampons).',
+                'V\u00e9rification pr\u00e9-d\u00e9mo\u00a0: un script v\u00e9rifie que tout est pr\u00eat avant une pr\u00e9sentation.',
+                'Glossaire enrichi\u00a0: anonymisation, codex, ELLAC.'
             ]
         },
         {
@@ -35,7 +35,7 @@
                 'Biblioth\u00e8que de tampons\u00a0: partage, export et import de collections par cat\u00e9gorie.',
                 'Outils d\u2019annotation enrichis\u00a0: ligne, vague, duplication, s\u00e9lection et formes.',
                 'Codex USB pour transporter tes donn\u00e9es entre appareils.',
-                'Corr\u00e9lations longitudinales et impact des jetons\u00a0: deux nouveaux graphiques au tableau de bord.',
+                'Corr\u00e9lations longitudinales et impact des jetons\u00a0: deux graphiques d\u2019analyse (maintenant dans Suivi \u203a Labo).',
                 'Console all\u00e9g\u00e9e\u00a0: 2600+ messages de debug retir\u00e9s pour une exp\u00e9rience plus propre.'
             ]
         },
