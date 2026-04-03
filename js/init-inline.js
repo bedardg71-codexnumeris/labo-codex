@@ -130,7 +130,7 @@ function changerModeParcoursDelegue(el) {
 // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
 // Les valeurs ici servent de fallback si version.json n'est pas disponible
 let VERSION_MAJEURE = '99.03';
-let BUILD_ID = '0403-0915';
+let BUILD_ID = '0403-0945';
 // Snapshot du build contenu dans CE fichier script (pour détecter les scripts périmés)
 const _SCRIPT_BUILD = BUILD_ID;
 
@@ -227,7 +227,7 @@ function fermerModalNouveautes() {
 function afficherBuildNumero() {
     const spanVersion = document.getElementById('version-entete');
     if (spanVersion) {
-        spanVersion.textContent = `Beta ${VERSION_MAJEURE} - Développement actif`;
+        spanVersion.textContent = `Beta ${VERSION_MAJEURE} - Consolidation`;
     }
     const span = document.getElementById('build-numero');
     if (span) {
