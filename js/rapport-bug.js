@@ -170,27 +170,15 @@ function ouvrirModalRapportsArchives() {
         `}).join('');
 
     const modalHTML = `
-        <div id="modalRapportsArchives" style="
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); display: flex; align-items: center;
-            justify-content: center; z-index: 10001;">
-            <div style="background: var(--surface-conteneur, #162c36); border-radius: 12px; width: 90%; max-width: 600px;
-                 max-height: 80vh; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
-                <div style="padding: 20px; border-bottom: 1px solid var(--gris-clair);
-                     display: flex; justify-content: space-between; align-items: center;
-                     background: var(--bleu-tres-pale);">
-                    <h3 style="margin: 0; color: var(--accent-primaire);">
-                        Rapports archivés (${archives.length})
-                    </h3>
-                    <button data-action="fermerModalRapportsArchives" style="
-                        background: none; border: none; font-size: 1.8rem;
-                        cursor: pointer; color: var(--gris-fonce);">&times;</button>
-                </div>
-                <div id="listeRapportsArchives" style="padding: 20px; max-height: 60vh; overflow-y: auto;">
+        <div id="modalRapportsArchives" class="modal-overlay actif" style="z-index: 10001;">
+            <div class="modal-contenu modal-compact">
+                <button class="modal-fermer" data-action="fermerModalRapportsArchives">&times;</button>
+                <h3 class="modal-titre">Rapports archivés (${archives.length})</h3>
+                <div class="modal-section" id="listeRapportsArchives" style="max-height: 55vh; overflow-y: auto;">
                     ${listeHTML}
                 </div>
                 ${archives.length > 0 ? `
-                <div style="padding: 15px; border-top: 1px solid var(--gris-clair); text-align: right;">
+                <div class="modal-actions">
                     <button data-action="viderEtRafraichirArchives"
                             class="btn btn-secondaire" style="color: var(--rouge-erreur);">
                         Tout supprimer
@@ -498,7 +486,7 @@ function obtenirContexteSection() {
         // Contexte selon la section
         switch (section) {
             case 'reglages':
-                if (sousSection === 'trimestre' || sousSection === 'reglages-trimestre') {
+                if (sousSection === 'trimestre' || sousSection === 'contexte-trimestre') {
                     contexte.trimestreActif = db.getSync('trimestreActif', 'non défini');
                     contexte.infoCours = db.getSync('infoCours', {});
                 }
@@ -525,7 +513,7 @@ function obtenirContexteSection() {
                 contexte.horaireActif = db.getSync('horaireActif', 'non défini');
                 break;
 
-            case 'construction':
+            case 'structure':
                 if (sousSection === 'productions') {
                     contexte.nbProductions = (db.getSync(cle('productions'), []) || []).length;
                 }
@@ -835,70 +823,27 @@ function ouvrirModalRapportBug() {
     const rapportInitial = genererRapportBug('', prenomSauvegarde);
 
     const modalHTML = `
-        <div id="modalRapportBug" style="
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-        ">
-            <div style="
-                background: var(--surface-conteneur, #162c36);
-                border-radius: 12px;
-                width: 90%;
-                max-width: 700px;
-                max-height: 90vh;
-                overflow-y: auto;
-                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-                position: relative;
-            ">
-                <!-- En-tête -->
-                <div style="
-                    padding: 20px 25px;
-                    border-bottom: 1px solid var(--gris-clair);
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    background: var(--bleu-tres-pale);
-                    border-radius: 12px 12px 0 0;
-                ">
-                    <h2 style="margin: 0; color: var(--accent-primaire); font-size: 1.3rem;">
-                        Signaler un problème
-                    </h2>
-                    <button data-action="fermerModalRapportBug" style="
-                        background: none;
-                        border: none;
-                        font-size: 1.8rem;
-                        cursor: pointer;
-                        color: var(--gris-fonce);
-                        padding: 0;
-                        line-height: 1;
-                    ">&times;</button>
-                </div>
+        <div id="modalRapportBug" class="modal-overlay actif" style="z-index: 10000;">
+            <div class="modal-contenu" style="max-width: 700px;">
+                <button class="modal-fermer" data-action="fermerModalRapportBug">&times;</button>
+                <h3 class="modal-titre">Signaler un problème</h3>
 
-                <!-- Contenu -->
-                <div style="padding: 25px;">
-
+                <div class="modal-section">
                     <!-- Sélecteur de mode -->
-                    <div style="display: flex; gap: 0; margin-bottom: 20px; border: 1px solid var(--bordure-claire); border-radius: 8px; overflow: hidden;">
+                    <div style="display: flex; gap: 0; margin-bottom: 20px; border: 1px solid var(--bordure-claire); border-radius: var(--radius-moyen); overflow: hidden;">
                         <button id="btnModeBug" data-action="changerModeRapport" data-param="bug" style="
                             flex: 1; padding: 10px; border: none; cursor: pointer;
                             font-family: inherit; font-size: 0.9rem; font-weight: 600;
                             background: var(--accent-primaire); color: white;
                             transition: all 0.2s;">
-                            🐛 Signaler un bug
+                            Signaler un bug
                         </button>
                         <button id="btnModeCommentaire" data-action="changerModeRapport" data-param="commentaire" style="
                             flex: 1; padding: 10px; border: none; cursor: pointer;
                             font-family: inherit; font-size: 0.9rem; font-weight: 600;
                             background: transparent; color: var(--gris-fonce);
                             transition: all 0.2s;">
-                            💬 Partager un commentaire
+                            Partager un commentaire
                         </button>
                     </div>
 
@@ -919,48 +864,30 @@ function ouvrirModalRapportBug() {
                     </div>
 
                     <!-- Instructions -->
-                    <div class="info-box info-box--attention" style="
-                        margin-bottom: 20px;
-                        border-radius: 0 8px 8px 0;
-                    ">
+                    <div class="alerte alerte-attention">
                         <strong>Comment signaler un bug :</strong>
                         <ol style="margin: 10px 0 0 0; padding-left: 20px;">
                             <li>Décris le problème ci-dessous</li>
-                            <li>Clique sur «Copier le rapport»</li>
+                            <li>Clique sur « Copier le rapport »</li>
                             <li>Envoie-le par courriel avec tes captures d'écran</li>
                         </ol>
                     </div>
 
                     <!-- Prénom du testeur -->
                     <div style="margin-bottom: 20px;">
-                        <label for="prenomTesteur" style="
-                            display: block;
-                            font-weight: 600;
-                            margin-bottom: 8px;
-                            color: var(--accent-primaire);
-                        ">
+                        <label for="prenomTesteur" style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--accent-primaire);">
                             Ton prénom :
                         </label>
                         <input type="text" id="prenomTesteur" placeholder="Ex: Grégoire" value="${typeof echapperHtml === 'function' ? echapperHtml(prenomSauvegarde) : ''}" style="
-                            width: 100%;
-                            max-width: 250px;
-                            padding: 10px 12px;
-                            border: 1px solid var(--gris-clair);
-                            border-radius: 8px;
-                            font-family: inherit;
-                            font-size: 0.95rem;
-                            box-sizing: border-box;
+                            width: 100%; max-width: 250px; padding: 10px 12px;
+                            border: 1px solid var(--gris-clair); border-radius: var(--radius-moyen);
+                            font-family: inherit; font-size: 0.95rem; box-sizing: border-box;
                         " data-on-input="sauvegarderPrenomEtMettreAJour">
                     </div>
 
                     <!-- Description du problème -->
                     <div id="sectionFormulaireBug" style="margin-bottom: 20px;">
-                        <label id="labelDescriptionBug" for="descriptionBug" style="
-                            display: block;
-                            font-weight: 600;
-                            margin-bottom: 8px;
-                            color: var(--accent-primaire);
-                        ">
+                        <label id="labelDescriptionBug" for="descriptionBug" style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--accent-primaire);">
                             Décris le problème rencontré :
                         </label>
                         <textarea id="descriptionBug" placeholder="Exemple :
@@ -968,82 +895,59 @@ function ouvrirModalRapportBug() {
 - J'ai cliqué sur le bouton «Ajouter un cours»
 - Rien ne s'est passé (ou message d'erreur...)
 - Je m'attendais à voir le formulaire de création" style="
-                            width: 100%;
-                            height: 100px;
-                            padding: 12px;
-                            border: 1px solid var(--gris-clair);
-                            border-radius: 8px;
-                            font-family: inherit;
-                            font-size: 0.95rem;
-                            resize: vertical;
-                            box-sizing: border-box;
+                            width: 100%; height: 100px; padding: 12px;
+                            border: 1px solid var(--gris-clair); border-radius: var(--radius-moyen);
+                            font-family: inherit; font-size: 0.95rem; resize: vertical; box-sizing: border-box;
                         " data-on-input="mettreAJourRapport"></textarea>
                     </div>
 
                     <!-- Rapport généré -->
                     <div style="margin-bottom: 20px;">
-                        <label style="
-                            display: block;
-                            font-weight: 600;
-                            margin-bottom: 8px;
-                            color: var(--accent-primaire);
-                        ">
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--accent-primaire);">
                             Rapport technique (généré automatiquement) :
                         </label>
                         <pre id="rapportBugTexte" style="
-                            background: var(--gris-tres-pale);
-                            padding: 15px;
-                            border-radius: 8px;
-                            font-size: 0.75rem;
-                            overflow-x: auto;
-                            white-space: pre-wrap;
-                            word-wrap: break-word;
-                            max-height: 300px;
-                            overflow-y: auto;
-                            border: 1px solid var(--gris-clair);
-                            margin: 0;
+                            background: var(--gris-tres-pale); padding: 15px;
+                            border-radius: var(--radius-moyen); font-size: 0.75rem;
+                            overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;
+                            max-height: 300px; overflow-y: auto;
+                            border: 1px solid var(--gris-clair); margin: 0;
                         "></pre>
                     </div>
+                </div>
 
-                    <!-- Boutons d'action -->
-                    <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 15px;">
-                        <button id="btnCopierRapport" data-action="copierRapportBug" class="btn btn-principal" style="flex: 1; min-width: 120px;">
-                            Copier le rapport
-                        </button>
-                        <button id="btnTelechargerTxt" data-action="telechargerRapportTxt" class="btn btn-secondaire" style="flex: 1; min-width: 120px;">
-                            Enregistrer en TXT
-                        </button>
-                        <button id="btnEnvoyerCourriel" data-action="envoyerRapportParCourriel" class="btn btn-secondaire" style="flex: 1; min-width: 120px;">
-                            Envoyer par courriel
-                        </button>
-                    </div>
+                <!-- Boutons d'action -->
+                <div class="modal-actions" style="flex-wrap: wrap;">
+                    <button id="btnCopierRapport" data-action="copierRapportBug" class="btn btn-principal" style="flex: 1; min-width: 120px;">
+                        Copier le rapport
+                    </button>
+                    <button id="btnTelechargerTxt" data-action="telechargerRapportTxt" class="btn btn-secondaire" style="flex: 1; min-width: 120px;">
+                        Enregistrer en TXT
+                    </button>
+                    <button id="btnEnvoyerCourriel" data-action="envoyerRapportParCourriel" class="btn btn-secondaire" style="flex: 1; min-width: 120px;">
+                        Envoyer par courriel
+                    </button>
+                </div>
 
-                    <!-- Note captures d'écran -->
-                    <div style="
-                        padding: 12px;
-                        background: var(--bleu-tres-pale);
-                        border-radius: 8px;
-                        font-size: 0.85rem;
-                        margin-bottom: 15px;
-                    ">
-                        <strong>Captures d'écran :</strong>
-                        Mac: <code style="background: var(--bordure-claire); padding: 2px 6px; border-radius: 4px;">Cmd+Shift+4</code> |
-                        Windows: <code style="background: var(--bordure-claire); padding: 2px 6px; border-radius: 4px;">Win+Shift+S</code> |
-                        iPad: <code style="background: var(--bordure-claire); padding: 2px 6px; border-radius: 4px;">Power+Vol.haut</code>
-                    </div>
+                <!-- Note captures d'écran -->
+                <div class="alerte alerte-information" style="margin-top: 15px;">
+                    <strong>Captures d'écran :</strong>
+                    Mac: <code style="background: var(--bordure-claire); padding: 2px 6px; border-radius: 4px;">Cmd+Shift+4</code> |
+                    Windows: <code style="background: var(--bordure-claire); padding: 2px 6px; border-radius: 4px;">Win+Shift+S</code> |
+                    iPad: <code style="background: var(--bordure-claire); padding: 2px 6px; border-radius: 4px;">Power+Vol.haut</code>
+                </div>
 
-                    <div style="text-align: center; font-size: 0.85rem; color: var(--gris-moyen); margin-bottom: 15px;">
-                        Consulte les <strong>Nouvelles</strong> sur la page d'accueil pour voir les corrections récentes.
-                    </div>
+                <div style="text-align: center; font-size: 0.85rem; color: var(--texte-secondaire); margin-top: 15px;">
+                    Consulte les <strong>Nouvelles</strong> sur la page d'accueil pour voir les corrections récentes.
+                </div>
 
-                    <!-- Lien vers archives -->
-                    <div style="text-align: center;">
-                        <button data-action="ouvrirModalRapportsArchives" style="
-                            background: none; border: none; color: var(--accent-primaire);
-                            cursor: pointer; font-size: 0.85rem; text-decoration: underline;">
-                            📋 Voir mes rapports archivés
-                        </button>
-                    </div>
+                <!-- Lien vers archives -->
+                <div style="text-align: center; margin-top: 10px;">
+                    <button data-action="ouvrirModalRapportsArchives" style="
+                        background: none; border: none; color: var(--accent-primaire);
+                        cursor: pointer; font-size: 0.85rem; text-decoration: underline;">
+                        Voir mes rapports archivés
+                    </button>
                 </div>
             </div>
         </div>
