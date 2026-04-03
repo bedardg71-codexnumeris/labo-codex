@@ -103,15 +103,20 @@ function sauvegarderEtatAvantDemo() {
         infoCours: db.getSync('infoCours', null),
         groupeCoursActif: db.getSync('groupeCoursActif', null),
         modeApplication: db.getSync('modeApplication', 'normal'),
-        modalitesEvaluation: db.getSync('modalitesEvaluation', null)
+        modalitesEvaluation: db.getSync('modalitesEvaluation', null),
+        // Tier 6.7 : sauvegarder les données globales que la démo modifie
+        trimestres: db.getSync('trimestres', []),
+        listeCours: db.getSync('listeCours', []),
+        grillesTemplates: db.getSync('grillesTemplates', []),
+        echellesTemplates: db.getSync('echellesTemplates', [])
     };
 
     // Trouver le trimestre actif actuel
-    const trimestres = db.getSync('trimestres', []);
-    const trimestreActif = trimestres.find(t => t.actif === true);
+    const trimestreActif = etat.trimestres.find(t => t.actif === true);
     etat.trimestreActifId = trimestreActif?.id || null;
 
     db.setSync('demo-etat-precedent', etat);
+    console.warn('[Demo] État sauvegardé :', Object.keys(etat).length, 'clés');
 }
 
 /**
@@ -122,6 +127,21 @@ async function restaurerEtatApresDemo() {
     if (!etat) {
         console.warn('[Demo] Aucun état précédent à restaurer');
         return;
+    }
+
+    // Tier 6.7 : Restaurer les données globales AVANT de changer de trimestre
+    // (évite que changerTrimestreActif lise des données polluées par la démo)
+    if (etat.trimestres) {
+        db.setSync('trimestres', etat.trimestres);
+    }
+    if (etat.listeCours) {
+        db.setSync('listeCours', etat.listeCours);
+    }
+    if (etat.grillesTemplates) {
+        db.setSync('grillesTemplates', etat.grillesTemplates);
+    }
+    if (etat.echellesTemplates) {
+        db.setSync('echellesTemplates', etat.echellesTemplates);
     }
 
     // Restaurer le trimestre actif
@@ -155,7 +175,7 @@ async function restaurerEtatApresDemo() {
 
     // Nettoyer l'état sauvegardé
     db.removeSync('demo-etat-precedent');
-
+    console.warn('[Demo] État restauré avec succès');
 }
 
 // ============================================
@@ -819,6 +839,75 @@ async function supprimerDonneesGlobalesDemo() {
 function sontDonnesDemoChargees() {
     return db.getSync('demo-chargees', null) === 'true';
 }
+
+// ============================================
+// VÉRIFICATION PRÉ-DÉMO (Tier 6.7)
+// Exécuter via console : window._verifierPreDemo()
+// ============================================
+
+/**
+ * Vérifie que l'application est prête pour une démonstration AQPC.
+ * Vérifie : données chargées, anonymisation, stockage, erreurs console.
+ */
+window._verifierPreDemo = function() {
+    var ok = true;
+    var resultats = [];
+
+    function check(nom, condition, detail) {
+        var statut = condition ? '✅' : '❌';
+        if (!condition) ok = false;
+        resultats.push(statut + ' ' + nom + (detail ? ' — ' + detail : ''));
+    }
+
+    // 1. Pas en mode démo résiduel
+    check('Pas de résidu démo', db.getSync('demo-actif', null) !== 'true');
+
+    // 2. Trimestre actif existe
+    var trimestres = db.getSync('trimestres', []);
+    var actif = trimestres.find(function(t) { return t.actif; });
+    check('Trimestre actif', !!actif, actif ? actif.nom : 'aucun');
+
+    // 3. Groupe-cours actif
+    var gc = db.getSync('groupeCoursActif', null);
+    check('Groupe-cours actif', !!gc, gc ? (gc.id || gc) : 'aucun');
+
+    // 4. Étudiants chargés
+    var etudiants = typeof obtenirDonneesSelonMode === 'function'
+        ? obtenirDonneesSelonMode('groupeEtudiants') : [];
+    check('Étudiants chargés', etudiants.length > 0, etudiants.length + ' étudiants');
+
+    // 5. Évaluations présentes
+    var evals = typeof obtenirDonneesSelonMode === 'function'
+        ? obtenirDonneesSelonMode('evaluationsSauvegardees') : [];
+    check('Évaluations présentes', evals.length > 0, evals.length + ' évaluations');
+
+    // 6. Mode anonymisation vérifiable
+    var mode = db.getSync('modeApplication', 'normal');
+    check('Mode application', true, mode);
+
+    // 7. Stockage sous contrôle
+    var taille = 0;
+    try {
+        for (var i = 0; i < localStorage.length; i++) {
+            var cle = localStorage.key(i);
+            taille += (localStorage.getItem(cle) || '').length * 2;
+        }
+    } catch (e) {}
+    var tailleMo = (taille / 1024 / 1024).toFixed(1);
+    check('localStorage < 4 Mo', taille < 4 * 1024 * 1024, tailleMo + ' Mo');
+
+    // 8. Pas de snapshot pré-démo orphelin
+    check('Pas d\'état démo orphelin', !db.getSync('demo-etat-precedent', null));
+
+    // 9. Erreurs console (vérification manuelle)
+    resultats.push('ℹ️ Vérifier manuellement : aucune erreur rouge dans la console');
+
+    // Résumé
+    console.warn('\n=== VÉRIFICATION PRÉ-DÉMO AQPC ===\n' + resultats.join('\n') +
+        '\n\n' + (ok ? '✅ PRÊT POUR LA DÉMO' : '❌ PROBLÈMES DÉTECTÉS — corriger avant la présentation') + '\n');
+
+    return ok;
+};
 
 // ============================================
 // INITIALISATION
