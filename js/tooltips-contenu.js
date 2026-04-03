@@ -945,14 +945,7 @@ const TOOLTIPS = {
     // SOUS-NAVIGATION — Accueil (Tier 5.7)
     // =================================================================
 
-    'nav-acc-decouvrir':
-        'D\u00e9couvrir les fonctionnalit\u00e9s et les outils de monitorage.',
-
-    'nav-acc-parcourir':
-        'Parcourir les diff\u00e9rentes sections de l\u2019application.',
-
-    'nav-acc-piloter':
-        'Acc\u00e9der aux outils de pilotage p\u00e9dagogique.',
+    // Accueil : section plate (pas de sous-nav, toggles dans accueil.js)
 
     // =================================================================
     // SOUS-NAVIGATION — Aper\u00e7u (section plate, pas de sous-nav)
@@ -1014,6 +1007,9 @@ const TOOLTIPS = {
 
     'nav-suivi-interventions':
         'Planifier et documenter les interventions R\u00e0I de niveaux 2 (pr\u00e9ventif) et 3 (intensif).',
+
+    'nav-suivi-labo':
+        'Analyser les r\u00e9sultats de la d\u00e9marche p\u00e9dagogique : graphiques de progression, corr\u00e9lations et trajectoires.',
 
     // =================================================================
     // SOUS-NAVIGATION — \u00c9valuations

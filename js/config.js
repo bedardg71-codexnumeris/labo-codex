@@ -35,11 +35,7 @@ const configurationsOnglets = {
     // Nouveau: 9 sections / 30 sous-sections
     // Sections supprimées: tableau-bord, presences, construction, planification
     // Sections créées: apercu (plate), structure, contexte, suivi
-    'accueil': [
-        { id: 'decouvrir', label: 'Découvrir' },
-        { id: 'parcourir', label: 'Parcourir' },
-        { id: 'piloter', label: 'Piloter' }
-    ],
+    'accueil': [],
     'apercu': [],
     'structure': [
         { id: 'carte', label: 'Alignement pédagogique' },
@@ -59,7 +55,8 @@ const configurationsOnglets = {
         { id: 'liste', label: 'Liste des élèves' },
         { id: 'saisie', label: 'Saisie des présences' },
         { id: 'profil', label: 'Profils individuels' },
-        { id: 'interventions', label: 'Interventions' }
+        { id: 'interventions', label: 'Interventions' },
+        { id: 'labo', label: 'Labo' }
     ],
     'evaluations': [
         { id: 'importer', label: 'Préparer et importer' },

@@ -150,10 +150,7 @@ function afficherSection(nomSection) {
 // Mapping sous-onglet → clé tooltip (généré depuis Tooltips_Navigation.md)
 // ✨ RÉORGANISATION NAVIGATION (3 avril 2026, Tier 5.7)
 const TOOLTIPS_SOUS_NAV = {
-    // Accueil
-    'accueil-decouvrir': 'nav-acc-decouvrir',
-    'accueil-parcourir': 'nav-acc-parcourir',
-    'accueil-piloter': 'nav-acc-piloter',
+    // Accueil : section plate (toggles gérés par accueil.js)
     // Aperçu : section plate, pas de sous-nav
     // Structure
     'structure-carte': 'nav-str-alignement',
@@ -172,6 +169,7 @@ const TOOLTIPS_SOUS_NAV = {
     'suivi-saisie': 'nav-suivi-saisie',
     'suivi-profil': 'nav-suivi-profil',
     'suivi-interventions': 'nav-suivi-interventions',
+    'suivi-labo': 'nav-suivi-labo',
     // Évaluations
     'evaluations-importer': 'nav-eval-importer',
     'evaluations-liste': 'nav-eval-liste',
