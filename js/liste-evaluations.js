@@ -141,12 +141,10 @@ function calculerEtSauvegarderIndiceCompletion() {
         indices.alternatif[etudiant.da] = calculerCompletionAlternative(etudiant.da);
     });
     
-    // Récupérer ou créer la structure indicesEvaluation
-    let indicesEvaluation = db.getSync(cle('indicesEvaluation'), null) || db.getSync('indicesEvaluation', {});
-    indicesEvaluation.completion = indices;
-    db.setSync(cle('indicesEvaluation'), indicesEvaluation);
-    
-    
+    // SUPPRIMÉ (Tier 6.2, 3 avril 2026) : écriture dans cle('indicesEvaluation')
+    // La clé n'est lue par aucun module. Les indices C et P canoniques sont dans
+    // cle('indicesCP') (calculés par portfolio.js).
+
     return indices;
 }
 
@@ -2587,6 +2585,9 @@ function supprimerFichierDefinitivement(id) {
             });
             if (evaluations.length < avant) {
                 db.setSync(cle('evaluationsSauvegardees'), evaluations);
+                // Tier 6.3 : Invalider les caches de moyennes
+                window._moyennesQualifies = null;
+                window._moyennesToutes = null;
                 if (typeof calculerEtStockerIndicesCP === 'function') {
                     calculerEtStockerIndicesCP();
                 }
@@ -2659,6 +2660,9 @@ function viderTouteCorbeille() {
             });
             if (evaluations.length < avant) {
                 db.setSync(cle('evaluationsSauvegardees'), evaluations);
+                // Tier 6.3 : Invalider les caches de moyennes
+                window._moyennesQualifies = null;
+                window._moyennesToutes = null;
                 if (typeof calculerEtStockerIndicesCP === 'function') {
                     calculerEtStockerIndicesCP();
                 }

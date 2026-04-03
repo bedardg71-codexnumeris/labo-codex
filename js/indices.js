@@ -542,7 +542,8 @@ function calculerTousLesIndices(da, pratique = null) {
             // Fallback : calculer à la volée si pas encore généré
             console.warn(`⚠️ indicesCP non trouvé pour ${da} (${pratique}) - Calcul à la volée`);
             if (typeof calculerTauxCompletion === 'function') {
-                C = calculerTauxCompletion(da) / 100;
+                const taux = calculerTauxCompletion(da);
+                C = taux !== null ? taux / 100 : 0;
             }
             P = calculerPerformancePAN(da);
             const E_brut = A * C * P;
@@ -552,7 +553,8 @@ function calculerTousLesIndices(da, pratique = null) {
         // Fallback : fonctions anciennes si module pas chargé
         console.warn('⚠️ obtenirIndicesCP non disponible - Calcul à la volée');
         if (typeof calculerTauxCompletion === 'function') {
-            C = calculerTauxCompletion(da) / 100;
+            const taux = calculerTauxCompletion(da);
+            C = taux !== null ? taux / 100 : 0;
         }
         P = calculerPerformancePAN(da);
         const E_brut = A * C * P;

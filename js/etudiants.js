@@ -303,9 +303,10 @@ function obtenirCouleurAssiduite(taux) {
  * @returns {number} - Taux de complétion en pourcentage (0-100)
  */
 function calculerTauxCompletion(da) {
-    // LIRE depuis la source unique de vérité (portfolio.js)
+    // Tier 6.1 : LIRE UNIQUEMENT depuis la source unique de vérité (portfolio.js)
+    // Le recalcul de secours a été supprimé pour éviter deux algorithmes divergents.
+    // Si indicesCP n'est pas encore calculé, retourner null (les appelants gèrent ce cas).
     if (typeof obtenirIndicesCP === 'function') {
-        // Détecter la pratique active
         const config = db.getSync('modalitesEvaluation', {});
         const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
 
@@ -316,40 +317,8 @@ function calculerTauxCompletion(da) {
         }
     }
 
-    // Fallback : si obtenirIndicesCP n'est pas disponible ou pas encore calculé
-    console.warn(`⚠️ Indice C non trouvé pour ${da} - Recalcul à la volée`);
-
-    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
-    const productions = obtenirDonneesSelonMode('productions') || [];
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-
-    // ✅ CORRECTION : Ne compter QUE les artefacts-portfolio pour l'indice C
-    const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
-
-    // ✅ ÉTAPE 1 : Identifier les artefacts-portfolio RÉELLEMENT DONNÉS
-    // (ceux pour lesquels au moins un étudiant a été évalué)
-    const artefactsPortfolioIds = new Set(artefactsPortfolio.map(a => a.id));
-    const artefactsDonnes = new Set();
-
-    evaluations.forEach(evaluation => {
-        if (artefactsPortfolioIds.has(evaluation.productionId)) {
-            artefactsDonnes.add(evaluation.productionId);
-        }
-    });
-
-    const nombreArtefactsDonnes = artefactsDonnes.size;
-
-    // ✅ ÉTAPE 2 : Compter combien l'étudiant a remis parmi les artefacts-portfolio donnés
-    const evaluationsEleve = evaluations.filter(e =>
-        e.etudiantDA === da &&
-        artefactsDonnes.has(e.productionId)
-    );
-
-    // Si aucun artefact n'a encore été donné, retourner 0
-    if (nombreArtefactsDonnes === 0) return 0;
-
-    // Calculer le pourcentage (sans dépasser 100%)
-    return Math.min(100, Math.round((evaluationsEleve.length / nombreArtefactsDonnes) * 100));
+    console.warn(`⚠️ calculerTauxCompletion(${da}) : indicesCP non disponible — retourne null`);
+    return null;
 }
 
 /**
@@ -682,7 +651,8 @@ function calculerNiveauRaI(da) {
 
     // Fallback : calculer avec nouvelle formule R basée sur P uniquement
     const assiduite = calculerAssiduitéGlobale(da) / 100;
-    const completion = calculerTauxCompletion(da) / 100;
+    const tauxC = calculerTauxCompletion(da);
+    const completion = tauxC !== null ? tauxC / 100 : 0;
     let performance = calculerPerformance(da) / 100;
 
     // ========================================
