@@ -855,6 +855,31 @@
          * @throws {Error} Si IndexedDB non disponible ET localStorage plein
          */
         setSync(key, value) {
+            // Tier 6.6 : Assertions SSOT en mode développement
+            // Activer via console : window._SSOT_DEV_MODE = true
+            // Voir docs/DATA-OWNERSHIP.md pour le registre complet
+            if (window._SSOT_DEV_MODE && db._SSOT_OWNERS) {
+                var cleBase = key;
+                // Extraire la clé de base si namespacée (ex: h2026_presences → presences)
+                var match = key.match(/^[ah]\d{4}_(.+)$/);
+                if (match) cleBase = match[1];
+
+                var proprietaire = db._SSOT_OWNERS[cleBase];
+                if (proprietaire) {
+                    var stack = new Error().stack || '';
+                    var appelant = stack.split('\n').slice(1, 4).join(' ');
+                    var estProprietaire = proprietaire.some(function(f) {
+                        return appelant.indexOf(f) !== -1;
+                    });
+                    if (!estProprietaire) {
+                        console.warn(
+                            '⚠️ [SSOT] Écriture dans "' + cleBase + '" depuis un module non propriétaire.' +
+                            '\n   Propriétaires déclarés : ' + proprietaire.join(', ') +
+                            '\n   Appelant : ' + appelant.trim().substring(0, 200)
+                        );
+                    }
+                }
+            }
             // Seuil IDB-first : les grosses valeurs vont directement dans
             // memoryCache + IDB, sans tenter localStorage (évite QuotaExceeded)
             var SEUIL_IDB_FIRST = 200 * 1024; // 200 Ko
@@ -1166,5 +1191,39 @@
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = db;
     }
+
+    // ================================================================
+    // Tier 6.6 : Registre SSOT des propriétaires de clés
+    // Activer via console : window._SSOT_DEV_MODE = true
+    // Chaque clé liste les fichiers JS autorisés à écrire.
+    // Les migrations et imports sont tolérés (non listés = warning seulement).
+    // Voir docs/DATA-OWNERSHIP.md pour le registre complet.
+    // ================================================================
+    db._SSOT_OWNERS = {
+        // Données étudiantes
+        'groupeEtudiants':          ['trimestre-v2.js', 'primo-modal.js'],
+        'evaluationsSauvegardees':  ['evaluation.js'],
+        'presences':                ['saisie-presences.js'],
+        'fichiersTravaux':          ['travaux-stockage.js', 'travaux-import.js'],
+        'annotationsTravaux':       ['travaux-stockage.js'],
+        'corbeilleFichiers':        ['travaux-stockage.js'],
+        'portfoliosEleves':         ['portfolio.js'],
+        'interventions':            ['interventions.js'],
+        // Structure pédagogique
+        'productions':              ['productions.js', 'primo-modal.js'],
+        'grillesTemplates':         ['grilles.js'],
+        'echellesTemplates':        ['echelles.js'],
+        'pratiquesConfigurables':   ['pratiques.js', 'wizard-pratique-v2.js'],
+        // Indices
+        'indicesCP':                ['portfolio.js'],
+        'indicesAssiduite':         ['indices.js', 'saisie-presences.js'],
+        // Planification
+        'calendrierComplet':        ['trimestre.js'],
+        'cadreCalendrier':          ['trimestre.js'],
+        'planification_mindmap':    ['planification-donnees.js'],
+        // Configuration
+        'modeApplication':          ['modes.js'],
+        'groupeCoursActif':         ['trimestre-v2.js', 'primo-modal.js']
+    };
 
 })();
