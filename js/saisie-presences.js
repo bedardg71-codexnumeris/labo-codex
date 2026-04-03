@@ -1894,5 +1894,77 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 
+// ================================================================
+// API SSOT — Points d'écriture centralisés pour `presences`
+// Tier 6.4 : Les modules externes doivent passer par ces fonctions
+// au lieu d'écrire directement dans cle('presences').
+// ================================================================
+
+/**
+ * Modifie les notes confidentielles d'une présence existante.
+ * Utilisé par : profil-etudiant.js (modal confidentiel)
+ *
+ * @param {string} da - DA de l'étudiant
+ * @param {string} date - Date de la séance (format ISO)
+ * @param {string} notes - Nouvelles notes
+ * @returns {boolean} true si modifié
+ */
+window.modifierNotesPresence = function(da, date, notes) {
+    var clePresences = cle('presences');
+    var presences = db.getSync(clePresences, []);
+    var modifie = false;
+
+    for (var i = 0; i < presences.length; i++) {
+        if (presences[i].da === da && presences[i].date === date) {
+            presences[i].notes = notes;
+            modifie = true;
+            break;
+        }
+    }
+
+    if (modifie) {
+        db.setSync(clePresences, presences);
+        // Pas de recalcul d'indices nécessaire (les notes n'affectent pas l'assiduité)
+    }
+    return modifie;
+};
+
+/**
+ * Ajoute des entrées de présence depuis une intervention RàI.
+ * Utilisé par : interventions.js (transfererPresencesVersModule)
+ *
+ * @param {Array} entrees - Objets présence { da, date, periodesPresentes, heures, notes, coursId, facultatif }
+ * @returns {number} nombre d'entrées ajoutées
+ */
+window.ajouterPresencesIntervention = function(entrees) {
+    if (!entrees || entrees.length === 0) return 0;
+
+    var clePresences = cle('presences');
+    var presences = db.getSync(clePresences, []);
+    var ajoutees = 0;
+
+    for (var i = 0; i < entrees.length; i++) {
+        var e = entrees[i];
+        // Vérifier doublon (même da + même date + même coursId)
+        var existe = presences.some(function(p) {
+            return p.da === e.da && p.date === e.date && p.coursId === e.coursId;
+        });
+        if (!existe) {
+            // Marquer comme facultatif (intervention RàI)
+            e.facultatif = true;
+            presences.push(e);
+            ajoutees++;
+        }
+    }
+
+    if (ajoutees > 0) {
+        db.setSync(clePresences, presences);
+        // Recalculer les indices d'assiduité (les présences facultatives comptent)
+        if (typeof calculerEtSauvegarderIndicesAssiduite === 'function') {
+            calculerEtSauvegarderIndicesAssiduite();
+        }
+    }
+    return ajoutees;
+};
 
 })();
