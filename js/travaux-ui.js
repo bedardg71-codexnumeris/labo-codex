@@ -150,7 +150,7 @@
         _chronoFichierId = null;
         _chronoElapsed = 0;
         _chronoPaused = false;
-        _majBtnPause();
+        _majAffichageChrono();
     }
 
     function getDureeMs() {
@@ -4000,6 +4000,16 @@
                 remplirLabelsIdentite(fichier);
                 const prodIdEff = fichier.productionId ||
                     (typeof travauxResolution !== 'undefined' ? travauxResolution.trouverProductionPourFichier(fichier) : null);
+                // Nettoyer les critères si l'élève ou la production a changé
+                // (évite de conserver les critères de l'évaluation précédente)
+                if (window.evaluationEnCours &&
+                    (window.evaluationEnCours.etudiantDA !== (fichier.etudiantDA || '') ||
+                     window.evaluationEnCours.productionId !== (prodIdEff || fichier.productionId || ''))) {
+                    window.evaluationEnCours.criteres = {};
+                    window.evaluationEnCours.donneesAlgorithmiques = {};
+                    window.evaluationEnCours.etudiantDA = fichier.etudiantDA || '';
+                    window.evaluationEnCours.productionId = prodIdEff || fichier.productionId || '';
+                }
                 preRemplirEvaluation(fichier.etudiantDA, prodIdEff || fichier.productionId);
             } else {
                 // Première fois : créer les palettes eval
@@ -4235,8 +4245,11 @@
             selProd.value = productionIdEffective;
         }
 
-        // Initialiser evaluationEnCours si absent (requis par chargerGrilleSelectionnee)
-        if (!window.evaluationEnCours) {
+        // Réinitialiser evaluationEnCours si absent OU si l'élève/production a changé
+        // (évite de conserver les critères de l'évaluation précédente dans le bilan)
+        var daChange = window.evaluationEnCours && window.evaluationEnCours.etudiantDA !== (fichier.etudiantDA || '');
+        var prodChange = window.evaluationEnCours && window.evaluationEnCours.productionId !== (productionIdEffective || '');
+        if (!window.evaluationEnCours || daChange || prodChange) {
             window.evaluationEnCours = {
                 etudiantDA: fichier.etudiantDA || '',
                 productionId: productionIdEffective || '',
