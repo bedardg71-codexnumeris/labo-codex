@@ -699,7 +699,12 @@
         Object.keys(RACCOURCIS_OUTILS_DEFAUT).forEach(function(id) {
             defauts[id] = RACCOURCIS_OUTILS_DEFAUT[id];
         });
-        db.setSync('raccourcisAnnotation', defauts);
+        // Ne persister les défauts que si IDB a fini de charger.
+        // Sinon les raccourcis personnalisés (en IDB) seraient écrasés
+        // avant d'avoir été synchronisés en mémoire.
+        if (db.ready) {
+            db.setSync('raccourcisAnnotation', defauts);
+        }
         _raccourcisCache = defauts;
         return _raccourcisCache;
     }
@@ -772,6 +777,13 @@
     function invaliderCacheRaccourcis() {
         _raccourcisCache = null;
     }
+
+    // Quand IDB finit de charger, invalider le cache des raccourcis
+    // pour que la prochaine lecture récupère les vrais raccourcis
+    // (au lieu des défauts temporaires générés avant le chargement IDB)
+    window.addEventListener('db-ready', function() {
+        _raccourcisCache = null;
+    });
 
     /**
      * Applique les personnalisations (noms, images, couleurs) directement
