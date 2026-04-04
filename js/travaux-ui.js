@@ -4280,10 +4280,10 @@
             if (selG && Array.from(selG.options).some(o => o.value === prod.grilleId)) {
                 selG.value = prod.grilleId;
                 window.evaluationEnCours.grilleId = prod.grilleId;
-                if (typeof chargerGrilleSelectionnee === 'function') chargerGrilleSelectionnee();
             }
 
-            // 🆕 Pré-sélectionner l'échelle depuis la production
+            // Pré-sélectionner l'échelle AVANT chargerGrilleSelectionnee
+            // (sinon echelleId est vide et les critères ne s'affichent pas)
             if (prod.echelleId) {
                 const selE = document.getElementById('selectEchelle1');
                 if (selE && Array.from(selE.options).some(o => o.value === prod.echelleId)) {
@@ -4292,7 +4292,10 @@
                 }
             }
 
-            // 🆕 Pré-sélectionner la cartouche (avec délai car les options dépendent de chargerGrilleSelectionnee)
+            // Charger la grille (utilise echelleId pour afficher les critères)
+            if (typeof chargerGrilleSelectionnee === 'function') chargerGrilleSelectionnee();
+
+            // Pré-sélectionner la cartouche (avec délai car les options dépendent de chargerGrilleSelectionnee)
             if (prod.cartoucheId) {
                 setTimeout(() => {
                     const selC = document.getElementById('selectCartoucheEval');
