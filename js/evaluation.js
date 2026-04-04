@@ -561,14 +561,16 @@ function chargerProduction(productionNum) {
             if (selectGrille) {
                 selectGrille.value = production.grilleId;
 
-                // Déclencher le chargement de la grille et des cartouches (synchrone)
-                chargerGrilleSelectionnee();
-
-                // Pré-sélectionner l'échelle depuis la production
+                // Pré-sélectionner l'échelle AVANT chargerGrilleSelectionnee
+                // (sinon echelleId est vide et les critères ne s'affichent pas)
                 if (production.echelleId) {
                     const selE = document.getElementById('selectEchelle1');
                     if (selE) selE.value = production.echelleId;
+                    if (evaluationEnCours) evaluationEnCours.echelleId = production.echelleId;
                 }
+
+                // Déclencher le chargement de la grille et des cartouches
+                chargerGrilleSelectionnee();
 
                 // Pré-sélectionner la cartouche immédiatement (les options sont déjà là)
                 _selectionnerCartoucheProduction(production.cartoucheId);
