@@ -60,21 +60,21 @@ const JALONS = {
         titre: 'Créer un trimestre',
         description: 'Définir les dates et la session du trimestre.',
         chapitre: 'configurer',
-        navigation: { section: 'reglages', sousSection: 'contexte-trimestre' }
+        navigation: { section: 'contexte', sousSection: 'contexte-trimestre' }
     },
     'configurer-cours': {
         numero: '②',
         titre: 'Configurer un cours',
         description: 'Entrer le sigle, le titre et la compétence du cours.',
         chapitre: 'configurer',
-        navigation: { section: 'reglages', sousSection: 'contexte-trimestre' }
+        navigation: { section: 'contexte', sousSection: 'contexte-trimestre' }
     },
     'creer-groupe': {
         numero: '③',
         titre: 'Créer un groupe-cours',
         description: 'Ajouter les étudiants dans ton groupe.',
         chapitre: 'configurer',
-        navigation: { section: 'reglages', sousSection: 'contexte-trimestre' }
+        navigation: { section: 'contexte', sousSection: 'contexte-trimestre' }
     },
     'creer-pratique': {
         numero: '④',
