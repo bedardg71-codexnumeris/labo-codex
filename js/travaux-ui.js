@@ -2885,6 +2885,13 @@
         if (!document.getElementById('travaux-conteneur-document')) {
             const conteneur = document.getElementById('evaluations-contenu-fichiers');
             if (conteneur) {
+                // Générer les badges si pas encore fait (ex: session restaurée sans passer par afficherFichiers)
+                if (!_htmlBadgesGrille) {
+                    const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
+                    if (fichiersTravaux.length > 0) {
+                        _htmlBadgesGrille = genererGrilleFichiers(fichiersTravaux, 'ouvrirFichier');
+                    }
+                }
                 conteneur.innerHTML = '';
                 afficherVisionneuse();
                 if (productionFiltreActive) {

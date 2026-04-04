@@ -1257,10 +1257,13 @@ function calculerNoteAlgorithmique(critereId, ponderation, facteur) {
         niveauIDME = niveau ? niveau.code : '--';
     }
 
-    // Afficher les résultats
-    document.getElementById(`note_algo_${critereId}`).textContent = noteCalculee.toFixed(2);
-    document.getElementById(`pct_algo_${critereId}`).textContent = pctFinal.toFixed(1);
-    document.getElementById(`niveau_algo_${critereId}`).textContent = niveauIDME;
+    // Afficher les résultats (guards si éléments pas encore dans le DOM)
+    var noteAlgoEl = document.getElementById(`note_algo_${critereId}`);
+    var pctAlgoEl = document.getElementById(`pct_algo_${critereId}`);
+    var nivAlgoEl = document.getElementById(`niveau_algo_${critereId}`);
+    if (noteAlgoEl) noteAlgoEl.textContent = noteCalculee.toFixed(2);
+    if (pctAlgoEl) pctAlgoEl.textContent = pctFinal.toFixed(1);
+    if (nivAlgoEl) nivAlgoEl.textContent = niveauIDME;
 
     // Sauvegarder dans evaluationEnCours
     evaluationEnCours.criteres[critereId] = niveauIDME;
@@ -1414,10 +1417,13 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
         niveauIDME = niveau ? niveau.code : '--';
     }
 
-    // Afficher les résultats
-    document.getElementById(`note_algo_${critereId}`).textContent = noteCalculee.toFixed(2);
-    document.getElementById(`pct_algo_${critereId}`).textContent = pctFinal.toFixed(1);
-    document.getElementById(`niveau_algo_${critereId}`).textContent = niveauIDME;
+    // Afficher les résultats (guards si éléments pas encore dans le DOM)
+    var noteAlgoEl = document.getElementById(`note_algo_${critereId}`);
+    var pctAlgoEl = document.getElementById(`pct_algo_${critereId}`);
+    var nivAlgoEl = document.getElementById(`niveau_algo_${critereId}`);
+    if (noteAlgoEl) noteAlgoEl.textContent = noteCalculee.toFixed(2);
+    if (pctAlgoEl) pctAlgoEl.textContent = pctFinal.toFixed(1);
+    if (nivAlgoEl) nivAlgoEl.textContent = niveauIDME;
 
     // ⚠️ IMPORTANT: Sauvegarder le niveau dans evaluationEnCours pour qu'il soit inclus dans calculerNote()
     evaluationEnCours.criteres[critereId] = niveauIDME;
@@ -1560,10 +1566,13 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
     if (motsElem) motsElem.textContent = mots;
 
     if (mots === 0) {
-        // Réinitialiser l'affichage
-        document.getElementById(`note_algo_${critereId}`).textContent = '--';
-        document.getElementById(`pct_algo_${critereId}`).textContent = '--';
-        document.getElementById(`niveau_algo_${critereId}`).textContent = '--';
+        // Réinitialiser l'affichage (guards si éléments pas encore dans le DOM)
+        var noteEl = document.getElementById(`note_algo_${critereId}`);
+        var pctEl = document.getElementById(`pct_algo_${critereId}`);
+        var nivEl = document.getElementById(`niveau_algo_${critereId}`);
+        if (noteEl) noteEl.textContent = '--';
+        if (pctEl) pctEl.textContent = '--';
+        if (nivEl) nivEl.textContent = '--';
         if (totalErreursElem) totalErreursElem.textContent = '--';
         if (motsElem) motsElem.textContent = '--';
         return;
@@ -1591,10 +1600,13 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
         niveauIDME = niveau ? niveau.code : '--';
     }
 
-    // Afficher les résultats
-    document.getElementById(`note_algo_${critereId}`).textContent = noteCalculee.toFixed(2);
-    document.getElementById(`pct_algo_${critereId}`).textContent = pctFinal.toFixed(1);
-    document.getElementById(`niveau_algo_${critereId}`).textContent = niveauIDME;
+    // Afficher les résultats (guards si éléments pas encore dans le DOM)
+    var noteAlgoEl = document.getElementById(`note_algo_${critereId}`);
+    var pctAlgoEl = document.getElementById(`pct_algo_${critereId}`);
+    var nivAlgoEl = document.getElementById(`niveau_algo_${critereId}`);
+    if (noteAlgoEl) noteAlgoEl.textContent = noteCalculee.toFixed(2);
+    if (pctAlgoEl) pctAlgoEl.textContent = pctFinal.toFixed(1);
+    if (nivAlgoEl) nivAlgoEl.textContent = niveauIDME;
 
     // Construire la rétroaction générique simple
     let retroactionGenerique = `Ta rédaction contient ${erreurs} erreur${erreurs > 1 ? 's' : ''} de français pour ${mots} mots.`;
