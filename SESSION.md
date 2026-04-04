@@ -8,8 +8,8 @@
 
 ## Bilan de la session (4 avril 2026) — Nettoyage aide utilisateur (10 chantiers)
 
-**Build** : 0404-1407, Beta 99.04
-**Fichiers modifiés** : index.html, changelog-data.js, version.json, init-inline.js, CLAUDE.md, 00-START-HERE.md
+**Build** : 0404-1620, Beta 99.04
+**Fichiers modifiés** : index.html, changelog-data.js, version.json, init-inline.js, CLAUDE.md, 00-START-HERE.md, travaux-export-pdf.js
 **Fichier créé** : docs/debug-guide.md
 
 ### Chantiers 1-9 — Nettoyage pédagogique
@@ -36,6 +36,13 @@ Rendre la section Aide accessible à un enseignant novice. Éliminer le jargon t
 Modifications complémentaires : paragraphe SRPNF réécrit, paragraphe IDME renvoie à SOLO.
 
 ### Zéro changement fonctionnel. Zéro risque de régression.
+
+### Refonte page rétroaction PDF (travaux-export-pdf.js)
+3 améliorations à la page de synthèse qui accompagne le travail évalué :
+
+- **Résolution** : la page de synthèse prend désormais les mêmes dimensions que les pages annotées (au lieu de 612×792 px fixe). Helpers `smm()` et `sfont()` pour scaler toutes les mesures proportionnellement. Les 4 fonctions de rendu converties.
+- **Cercles colorés erreurs français** : la colonne Code du tableau erreurs dessine un cercle plein de la couleur du tampon (respecte les personnalisations) avec le numéro blanc centré, identique visuellement aux annotations sur la copie.
+- **Note provisoire dans le Bilan** : nouvelle rangée montrant la note provisoire selon la pratique active (sommative = moyenne pondérée, PAN = N meilleurs artefacts retenus avec liste). Si pas assez d'artefacts, indique combien il en manque. Config lue dynamiquement.
 
 ---
 

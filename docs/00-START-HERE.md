@@ -57,7 +57,7 @@ Ce pattern est utilise dans :
 
 ## Etat actuel du projet
 
-**Version** : Beta 99.04 (Build 0404-1407)
+**Version** : Beta 99.04 (Build 0404-1620)
 **Objectif** : Plan de consolidation avril 2026 — COMPLET (Tiers 0→7.8) + Nettoyage aide utilisateur
 **Priorite** : **Securite + Proprete > Nouvelles fonctionnalites**
 
