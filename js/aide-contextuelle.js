@@ -1,6 +1,6 @@
 /**
  * aide-contextuelle.js
- * Module de gestion des aides contextuelles pour le Mode Assisté
+ * Module de gestion des aides contextuelles (📍 pins d'aide)
  * Utilise le système .primo-popup existant pour l'affichage
  */
 

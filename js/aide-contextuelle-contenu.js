@@ -1,6 +1,6 @@
 /**
  * aide-contextuelle-contenu.js
- * Contenu des aides contextuelles pour le Mode Assisté
+ * Contenu des aides contextuelles (📍 pins d'aide)
  *
  * Types de sections supportés :
  * - texte : paragraphe simple

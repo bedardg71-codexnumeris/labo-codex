@@ -1,8 +1,8 @@
 /**
- * PRIMO TOOLTIPS - Système de tooltips riches (mode Assisté uniquement)
+ * PRIMO TOOLTIPS - Système de tooltips riches (Tour guide / Aide contextuelle)
  *
  * Gère l'affichage des aides contextuelles du Tour guide (📍)
- * Visible uniquement en mode Assisté
+ * Visible uniquement si le Tour guide ou l'aide contextuelle est actif
  *
  * VERSION : 1.0
  * DATE : 29 novembre 2025
@@ -107,18 +107,18 @@ function gererClicPrimo(event) {
 // ============================================================================
 
 /**
- * Vérifie si on est en mode Assisté et masque/affiche les icônes
+ * Vérifie si le tour guide ou l'aide contextuelle est actif et masque/affiche les icônes
  */
 function gererVisibilitePrimoSelonMode() {
-    // Vérifier si la fonction estModeAssiste existe
-    if (typeof estModeAssiste !== 'function') {
-        console.warn('[Guide Tooltips] Fonction estModeAssiste non disponible');
+    // Vérifier si la fonction estTourGuideActif existe
+    if (typeof estTourGuideActif !== 'function') {
+        console.warn('[Guide Tooltips] Fonction estTourGuideActif non disponible');
         return;
     }
 
-    const modeAssiste = estModeAssiste();
+    const tourGuide = estTourGuideActif();
     const aideActive = typeof estAideContextuelleActive === 'function' && estAideContextuelleActive();
-    const afficherPrimo = modeAssiste || aideActive;
+    const afficherPrimo = tourGuide || aideActive;
     const icones = document.querySelectorAll('.primo-aide');
 
     icones.forEach(icone => {

@@ -74,10 +74,10 @@ let etapeActuelle = null;
 
 /**
  * Vérifie si le guidage est autorisé dans le contexte actuel
- * Autorisé en Mode Assisté OU en parcours explicite
+ * Autorisé si Tour guide actif OU en parcours explicite
  */
 function estGuidageAutorise() {
-    if (typeof estModeGuide === 'function' && estModeGuide()) return true;
+    if (typeof estTourGuideActif === 'function' && estTourGuideActif()) return true;
     if (window.parcours && window.parcours.getMode() === 'explicite') return true;
     return false;
 }

@@ -734,7 +734,7 @@ class PratiquePANStandards {
     }
 
     /**
-     * Lit les évaluations depuis db.getSync (avec support mode simulation)
+     * Lit les évaluations depuis db.getSync
      * @private
      */
     _lireEvaluations() {

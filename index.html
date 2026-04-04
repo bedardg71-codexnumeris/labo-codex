@@ -28,7 +28,6 @@
             --bleu-carte: #1a3a48;
             --bleu-pale: #1a3040;
             --bleu-tres-pale: #142428;
-            --bleu-simulation: #1a5266;
             --bleu-anonymisation: #0c1a22;
 
             /* Couleurs d'accent (ocean: sarcelle + laiton) */
@@ -84,7 +83,6 @@
 
             /* Navigation - États actifs par mode */
             --nav-actif-normal: #6aacb8;
-            --nav-actif-simulation: #6aacb8;
             --nav-actif-anonymisation: #5a7a88;
 
             /* === SOUS-NAVIGATION === */
@@ -95,7 +93,6 @@
 
             /* Sous-navigation - Fonds par mode */
             --sous-nav-bg-normal: #0e1e28;
-            --sous-nav-bg-simulation: #0e1e28;
             --sous-nav-bg-anonymisation: #0e1e28;
 
             /* === BOUTONS D'ACTION - Palette Océan & Boussole === */
@@ -201,14 +198,6 @@
 
             /* === COMPATIBILITÉ (anciennes variables) === */
             --succes: var(--vert-succes);
-        }
-
-        /* ===============================
-           MODE ASSISTÉ - CONVERSION BLEU → SARCELLE
-           =============================== */
-        body[data-mode="simulation"] {
-            --bleu-carte: var(--surface-carte, #1a3a48);
-            --table-hover: rgba(106, 172, 184, 0.12);
         }
 
         /* ===============================
@@ -1123,11 +1112,6 @@
 
         /* Mode Anonymisé */
         body[data-mode="anonymisation"] .sous-navigation {
-            background: transparent !important;
-        }
-
-        /* Mode Assisté */
-        body[data-mode="simulation"] .sous-navigation {
             background: transparent !important;
         }
 
@@ -12468,7 +12452,7 @@
                         </div>
                     </div>
 
-                    <!-- Carte: Trois modes d'utilisation -->
+                    <!-- Carte: Deux modes d'utilisation + outils d'accompagnement -->
                     <div class="carte accordeon" id="accordeon-aide-modes">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
@@ -12476,16 +12460,11 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p>L'application fonctionne selon trois modes distincts :</p>
+                            <p>L'application fonctionne selon deux modes :</p>
 
                             <div class="alerte alerte-information">
                                 <h4 class="u-mb-10 u-texte-bleu">Mode Normal</h4>
                                 <p>Toutes les fonctionnalités de gestion de cours et d'évaluation sont disponibles. C'est le mode par défaut pour l'utilisation quotidienne.</p>
-                            </div>
-
-                            <div class="alerte alerte-information">
-                                <h4 class="u-mb-10 u-texte-bleu">Aide contextuelle</h4>
-                                <p>Active des indices et conseils contextuels directement dans l'interface. L'aide contextuelle s'active depuis la page d'accueil et accompagne l'enseignant·e à travers les fonctionnalités sans être surchargé par la complexité des options disponibles. L'assistant <strong>Primo</strong> guide les premières étapes de configuration.</p>
                             </div>
 
                             <div class="alerte alerte-information">
@@ -12501,7 +12480,18 @@
 
                             <div class="alerte alerte-succes">
                                 <p><strong>Accès aux modes</strong></p>
-                                <p>Le sélecteur de mode se trouve dans <strong>Réglages → Préférences</strong>. Le mode peut être changé à tout moment.</p>
+                                <p>Le sélecteur de mode se trouve dans l'en-tête de l'application, à droite du groupe-cours actif. Le mode peut être changé à tout moment.</p>
+                            </div>
+
+                            <div class="alerte alerte-information">
+                                <h4 class="u-mb-10 u-texte-bleu">Outils d'accompagnement</h4>
+                                <p>En complément des modes, plusieurs outils t'accompagnent dans la prise en main :</p>
+                                <ul class="mt-5">
+                                    <li><strong>Bac à sable</strong> : Données de démonstration pour explorer sans risque (activable depuis l'accueil)</li>
+                                    <li><strong>Aide contextuelle</strong> : Info-bulles et repères 📍 disséminés dans l'interface</li>
+                                    <li><strong>Primo</strong> : Assistant conversationnel pour la configuration guidée</li>
+                                    <li><strong>Tour guidé</strong> 🗺️ : Visite interactive des fonctionnalités principales</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
@@ -12592,7 +12582,7 @@
                             <p><strong>Deux méthodes possibles :</strong></p>
                             <ul>
                                 <li><strong>Méthode manuelle</strong> : Section Trimestre avec 6 accordéons (configuration détaillée)</li>
-                                <li><strong>Méthode assistée</strong> : Primo guide conversationnellement (plus rapide)</li>
+                                <li><strong>Configuration guidée</strong> : Primo guide conversationnellement (plus rapide)</li>
                             </ul>
 
                             <div class="alerte alerte-succes">
@@ -12605,7 +12595,7 @@
                     <div class="carte accordeon" id="accordeon-aide-primo">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Configuration avec le tour guidé 🗺️
+                                <span class="accordeon-chevron">▼</span> Configuration guidée avec Primo
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
@@ -13423,14 +13413,14 @@
                     <p class="text-muted">Modes de fonctionnement pour explorer l'application sans risque</p>
 
                     <!-- Carte: Modes de fonctionnement -->
-                    <div class="carte accordeon ouvert" id="accordeon-aide-modes">
+                    <div class="carte accordeon ouvert" id="accordeon-aide-modes-formation">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Les trois modes de l'application
+                                <span class="accordeon-chevron">▼</span> Les deux modes de l'application
                             </h3>
                         </div>
                         <div class="accordeon-contenu" style="display: block;">
-                            <p>L'application offre trois modes de fonctionnement. Tu peux basculer entre eux avec le sélecteur en haut à droite de l'interface.</p>
+                            <p>L'application offre deux modes de fonctionnement. Tu peux basculer entre eux avec le sélecteur dans l'en-tête, à droite du groupe-cours actif.</p>
 
                             <div class="alerte-success-bleu-pale">
                                 <h4 class="text-success-mb10">Mode Normal</h4>
@@ -13442,24 +13432,12 @@
                                 </ul>
                             </div>
 
-                            <div class="alerte-warning-jaune">
-                                <h4 class="text-warning-856-mb10">🗺️ Tour guidé</h4>
-                                <p><strong>Découverte et exploration</strong> — Données de démonstration</p>
-                                <ul class="mt-8">
-                                    <li>Groupe fictif de 20 étudiants avec résultats complets</li>
-                                    <li>11 productions, plus de 200 évaluations, une session complète de présences (42 dates)</li>
-                                    <li>Données isolées (préfixe <code>demo_</code>) — tes vraies données restent intactes</li>
-                                    <li>Tour guidé 🗺️ disponible pour te guider pas à pas</li>
-                                </ul>
-                                <p class="mt-10"><strong>Idéal pour :</strong> Découvrir l'application, tester des fonctionnalités, voir l'aperçu en action</p>
-                            </div>
-
                             <div class="alerte-info-cyan">
                                 <h4 class="u-mb-10 u-texte-bleu">Mode Anonymisé</h4>
                                 <p><strong>Présentations publiques</strong> — Confidentialité protégée</p>
                                 <ul class="mt-8">
                                     <li>Tes vraies données avec noms fictifs automatiques</li>
-                                    <li>Préfixe "AN." devant les numéros de groupe</li>
+                                    <li>Préfixe «AN.» devant les numéros de groupe</li>
                                     <li>Lecture seule (aucune modification possible)</li>
                                     <li>Parfait pour captures d'écran et présentations</li>
                                 </ul>
@@ -13471,7 +13449,7 @@
                     </div>
 
                     <!-- Carte: Explorer la démonstration -->
-                    <div class="carte accordeon" id="accordeon-aide-mode-assiste">
+                    <div class="carte accordeon" id="accordeon-aide-demo">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▼</span> Explorer la démonstration
@@ -16271,6 +16249,13 @@
                                 <dd class="ml-20-mb-10">Indice primaire mesurant la présence en classe. Calculé automatiquement à partir des présences saisies. Formule : (nombre de présences / nombre de séances) × 100. Reflète l'engagement cognitif de l'étudiant.</dd>
                             </dl>
 
+                            <h4 class="titre-section-principal">B</h4>
+
+                            <dl class="ml-10">
+                                <dt class="titre-section-aide">Bac &agrave; sable (D&eacute;mo)</dt>
+                                <dd class="ml-20-mb-10">Mode d'exploration qui charge des donn&eacute;es fictives (20 &eacute;tudiants, &eacute;valuations, pr&eacute;sences) pour d&eacute;couvrir l'application sans risque. S'active via la case &agrave; cocher sur la page d'accueil. Les vraies donn&eacute;es sont mises de c&ocirc;t&eacute; et restaur&eacute;es automatiquement en quittant la d&eacute;mo.</dd>
+                            </dl>
+
                             <h4 class="titre-section-principal">C</h4>
 
                             <dl class="ml-10">
@@ -16371,8 +16356,11 @@
                                 <dt class="titre-section-aide">Production</dt>
                                 <dd class="ml-20-mb-10">Terme générique désignant toute évaluation du cours : examen, travail écrit, quiz, présentation, portfolio. Chaque production a un type, une pondération, et peut être liée à une grille de critères.</dd>
 
+                                <dt class="titre-section-aide">Primo</dt>
+                                <dd class="ml-20-mb-10">Assistant conversationnel int&eacute;gr&eacute; qui guide la configuration du syst&egrave;me de suivi. Propose 4 modules : cr&eacute;er un groupe-cours, &eacute;valuer une production, explorer les diagnostics, cr&eacute;er une pratique de notation. Accessible via le bouton 🗺️ dans l'en-t&ecirc;te (lorsque le tour guid&eacute; est activ&eacute;) ou automatiquement au premier lancement.</dd>
+
                                 <dt class="titre-section-aide">Tour guidé (🗺️)</dt>
-                                <dd class="ml-20-mb-10">Système d'aide contextuelle guidant les utilisateurs dans l'interface. Propose des conseils contextuels dans chaque section. Activable depuis la page d'accueil ou les réglages. Propose 4 modules : créer un groupe-cours, évaluer une production, explorer les diagnostics, créer une pratique de notation. Voir la section Configuration pour plus de détails.</dd>
+                                <dd class="ml-20-mb-10">Pr&eacute;f&eacute;rence d'accompagnement qui rend visibles les outils d'aide dans l'interface : bouton Primo, rep&egrave;res 📍, banni&egrave;res d'assistant. Activable depuis la page d'accueil ou les r&eacute;glages. D&eacute;sactivable &agrave; tout moment.</dd>
                             </dl>
 
                             <h4 class="titre-section-principal">R</h4>
@@ -16850,7 +16838,7 @@
     <script src="js/aide-contextuelle-contenu.js?v=2026011901"></script>
     <script src="js/aide-contextuelle.js?v=2026011901"></script>
 
-    <!-- GUIDAGE - Système d'assistance contextuelle en mode Assisté (Beta 92) -->
+    <!-- GUIDAGE - Système d'assistance contextuelle (Tour guide, Beta 92) -->
     <script src="js/guidage.js?v=2025112706"></script>
 
     <!-- TUTORIEL INTERACTIF - Guide après données démo (Beta 92) -->

@@ -571,15 +571,15 @@ function initialiserPrimoAccueil() {
 
 /**
  * Vérifie et affiche l'accueil si nécessaire
- * SEULEMENT en mode Assisté - Affichage AUTO uniquement pour premiers utilisateurs
+ * SEULEMENT si Tour guide actif — Affichage AUTO uniquement pour premiers utilisateurs
  */
 function verifierEtAfficherAccueil() {
     // Attendre 1 seconde après le chargement pour laisser l'interface se stabiliser
     setTimeout(() => {
-        // Vérifier si on est en mode Assisté
-        const modeAssiste = typeof estModeAssiste === 'function' ? estModeAssiste() : false;
+        // Vérifier si le tour guide est actif
+        const tourGuideActif = typeof estTourGuideActif === 'function' ? estTourGuideActif() : false;
 
-        if (!modeAssiste) {
+        if (!tourGuideActif) {
             return;
         }
 

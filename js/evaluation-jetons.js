@@ -68,8 +68,7 @@ function obtenirConfigJetons() {
  * @returns {number} Nombre de jetons utilisés
  */
 function compterJetonsUtilises(da, type) {
-    // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec obtenirDonneesSelonMode
-    // qui peut retourner les données de simulation au lieu des données réelles
+    // IMPORTANT: Utiliser directement db.getSync pour accéder aux données réelles
     const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
 
     if (type === 'delai') {

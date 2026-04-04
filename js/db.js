@@ -984,7 +984,7 @@
     // ============================================
 
     /**
-     * Obtient les données selon le mode actif (normal, simulation, anonymisation)
+     * Obtient les données selon le mode actif (normal, anonymisation)
      * Fonction utilitaire pour simplifier l'accès aux données dans tous les modules
      *
      * @param {string} cle - Clé de stockage (ex: 'groupeEtudiants', 'evaluationsSauvegardees')
