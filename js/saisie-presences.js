@@ -1316,7 +1316,7 @@ function enregistrerPresences() {
         }
     });
 
-    // Protection : bloquer en mode anonymisation, rediriger en mode simulation
+    // Protection : bloquer en mode anonymisation (lecture seule)
     if (!sauvegarderDonneesSelonMode('presences', presences)) {
         afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder les présences en mode anonymisation');
         return;

@@ -79,7 +79,7 @@
 
     /**
      * Lance le mode explicite (🗺️ Étape par étape)
-     * Initialise le parcours, puis lance Primo en mode Assisté
+     * Initialise le parcours, puis active le tour guide et lance Primo
      */
     function commencerConfiguration() {
         // Enregistrer le choix dans le parcours d'apprentissage
@@ -89,20 +89,17 @@
 
         fermerModal();
 
-        // Changer vers le mode Assisté
-        if (typeof changerMode === 'function') {
-            changerMode('simulation').then(() => {
-                // Attendre un peu que le mode soit actif puis lancer Primo
-                setTimeout(() => {
-                    if (typeof afficherModalAccueil === 'function') {
-                        afficherModalAccueil();
-                    }
-                }, 300);
-            });
-        } else {
-            // Fallback si changerMode n'est pas disponible
-            console.warn('[Bienvenue] changerMode non disponible');
+        // Activer le tour guide pour accompagner la configuration
+        if (typeof definirTourGuide === 'function') {
+            definirTourGuide(true);
         }
+
+        // Lancer Primo pour guider l'utilisateur
+        setTimeout(() => {
+            if (typeof afficherModalAccueil === 'function') {
+                afficherModalAccueil();
+            }
+        }, 300);
     }
 
     /**

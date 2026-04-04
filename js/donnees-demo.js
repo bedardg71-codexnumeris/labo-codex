@@ -169,7 +169,7 @@ async function restaurerEtatApresDemo() {
         db.setSync('modalitesEvaluation', etat.modalitesEvaluation);
     }
 
-    // Restaurer le mode (forcer normal si c'était simulation)
+    // Restaurer le mode (forcer normal si valeur legacy en stockage)
     const mode = (etat.modeApplication === 'simulation') ? 'normal' : (etat.modeApplication || 'normal');
     db.setSync('modeApplication', mode);
 
@@ -923,7 +923,7 @@ window._verifierPreDemo = function() {
 
 /**
  * Initialise le module des données demo
- * [Chantier 2] Plus d'auto-chargement sur mode simulation
+ * Les données démo sont chargées via le bac à sable (checkbox accueil)
  * Le nettoyage des résidus est géré par main.js
  */
 function initialiserModuleDonneesDemo() {

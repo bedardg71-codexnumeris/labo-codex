@@ -3,7 +3,6 @@
  * MODULE 17 : GESTION DES MODES
  * ============================================
  * Gestion des modes Normal / Anonymisation
- * [Chantier 2 — 6 fev 2026] Mode Simulation (Assisté) supprimé
  */
 
 (function() {
@@ -49,7 +48,7 @@ function initialiserSystemeModes() {
     // Récupérer le mode sauvegardé
     modeActuel = db.getSync('modeApplication', MODES.NORMAL);
 
-    // [Chantier 2] Migration : si mode 'simulation' en stockage, migrer vers 'normal'
+    // Migration legacy : si 'simulation' en stockage (ancien mode supprimé), migrer vers 'normal'
     if (modeActuel === 'simulation') {
         modeActuel = MODES.NORMAL;
         db.setSync('modeApplication', MODES.NORMAL);
@@ -64,9 +63,9 @@ function initialiserSystemeModes() {
     // Gérer l'affichage des boutons selon le mode
     gererAffichageBoutonPrimo(modeActuel);
 
-    // Appliquer la classe mode-assiste si le tour guide est actif
-    if (estModeAssiste()) {
-        document.body.classList.add('mode-assiste');
+    // Appliquer la classe tour-guide-actif si le tour guide est actif
+    if (estTourGuideActif()) {
+        document.body.classList.add('tour-guide-actif');
     }
 
     // Appliquer la classe aide-contextuelle-active si la préférence est active
@@ -557,9 +556,8 @@ window.anonymiserNomFichier = anonymiserNomFichier;
 function obtenirDonneesSelonMode(cle) {
     const mode = modeActuel;
     // ===================================
-    // MODE ASSISTÉ et NORMAL : Données réelles partagées
+    // MODE NORMAL : Données réelles
     // ===================================
-    // Depuis Beta 92, le mode Assisté utilise les mêmes données réelles que Normal
     // (Primo aide l'utilisateur avec ses vraies données, pas des données simulées)
 
     // ✅ CORRECTION (Beta 97.11) : Extraire la clé de base (sans namespace trimestre)
@@ -648,8 +646,7 @@ function sauvegarderDonneesSelonMode(cle, donnees) {
         return false;
     }
 
-    // MODE ASSISTÉ et NORMAL : Sauvegarder dans les mêmes clés réelles
-    // Depuis Beta 92, le mode Assisté partage les données avec Normal
+    // MODE NORMAL : Sauvegarder dans les clés réelles
     try {
         // Utiliser window.cle() pour le namespacing par trimestre (paramètre cle shadowed)
         const cleEffective = window.cle(cle);
@@ -852,14 +849,14 @@ function gererAffichageBoutonPrimo(mode) {
  * Vérifie si le Tour guide est actif (lecture de la préférence)
  * @returns {boolean} true si le tour guide est activé
  */
-function estModeAssiste() {
+function estTourGuideActif() {
     const prefs = db.getSync('preferencesAffichage', {});
     return !!prefs.tourGuide;
 }
 
-function estModeGuide() {
-    return estModeAssiste();
-}
+// Alias rétrocompatibles (seront retirés dans une future version)
+function estModeAssiste() { return estTourGuideActif(); }
+function estModeGuide() { return estTourGuideActif(); }
 
 /**
  * Active ou désactive le Tour guide
@@ -872,7 +869,7 @@ function definirTourGuide(etat) {
     // Synchroniser les checkboxes miroirs
     document.querySelectorAll('#checkbox-tour-guide, #checkbox-tour-guide-accueil').forEach(cb => cb.checked = !!etat);
     // Appliquer la classe CSS qui contrôle la visibilité des icônes
-    document.body.classList.toggle('mode-assiste', !!etat);
+    document.body.classList.toggle('tour-guide-actif', !!etat);
     // Notifier les modules (primo-tooltips écoute cet événement)
     window.dispatchEvent(new Event('modeChanged'));
 }
@@ -962,8 +959,9 @@ function estEnModeDemo() {
 window.MODES = MODES;
 window.initialiserSystemeModes = initialiserSystemeModes;
 window.changerMode = changerMode;
-window.estModeAssiste = estModeAssiste;
-window.estModeGuide = estModeGuide;
+window.estTourGuideActif = estTourGuideActif;
+window.estModeAssiste = estModeAssiste;  // alias rétrocompatible
+window.estModeGuide = estModeGuide;      // alias rétrocompatible
 window.definirTourGuide = definirTourGuide;
 window.estAideContextuelleActive = estAideContextuelleActive;
 window.definirAideContextuelle = definirAideContextuelle;

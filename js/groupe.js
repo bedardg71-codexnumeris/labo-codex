@@ -68,7 +68,7 @@ let tempImportData = [];
 /**
  * SUPPRIMÉ : Cette fonction écrasait celle de modes.js et empêchait l'anonymisation
  * La vraie fonction obtenirDonneesSelonMode() est définie dans modes.js
- * et gère correctement les modes Normal/Simulation/Anonymisation
+ * et gère correctement les modes Normal/Anonymisation
  */
 // function obtenirDonneesSelonMode(cle) - SUPPRIMÉE, utiliser celle de modes.js
 

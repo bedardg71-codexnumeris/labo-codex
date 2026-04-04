@@ -1585,7 +1585,7 @@ async function terminerConfiguration() {
         // Importer le matériel pédagogique de démarrage (asynchrone)
         await importerMaterielDemarrage();
 
-        // [Chantier 2] Mode Assisté supprimé — rester en mode normal
+        // Rester en mode normal après la configuration initiale
         db.setSync('modeApplication', 'normal');
 
         // Afficher notification de succès
