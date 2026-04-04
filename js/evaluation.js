@@ -1771,7 +1771,21 @@ function calculerNote() {
             return pourcentage >= n.min && pourcentage <= n.max;
         });
 
-        niveauGlobal = niveauFinal ? niveauFinal.code : '--';
+        if (niveauFinal) {
+            niveauGlobal = niveauFinal.code;
+        } else if (niveaux.length > 0) {
+            // Fallback : si le pourcentage ne tombe dans aucune plage exacte
+            // (bornes non contiguës ou arrondis), prendre le niveau le plus proche
+            var plusProche = niveaux[0];
+            var distMin = Infinity;
+            niveaux.forEach(function(n) {
+                var mid = (n.min + n.max) / 2;
+                var dist = Math.abs(pourcentage - mid);
+                if (dist < distMin) { distMin = dist; plusProche = n; }
+            });
+            niveauGlobal = plusProche.code;
+            console.warn('[calculerNote] Fallback niveau : ' + pourcentage.toFixed(1) + '% → ' + plusProche.code + ' (aucune plage exacte, plus proche de [' + plusProche.min + '-' + plusProche.max + '])');
+        }
 
     }
 
