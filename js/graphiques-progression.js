@@ -3287,14 +3287,16 @@ function afficherMessageAttente(canvas, titre, details) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.font = 'bold 14px Arial';
-    ctx.fillStyle = '#8aa4b0';
+    ctx.fillStyle = couleurTexte();
     ctx.textAlign = 'center';
     ctx.fillText(titre, canvas.width / 2, canvas.height / 2 - 10);
 
     if (details) {
         ctx.font = '12px Arial';
-        ctx.fillStyle = '#5a7a88';
+        ctx.fillStyle = couleurTexte();
+        ctx.globalAlpha = 0.7;
         ctx.fillText(details, canvas.width / 2, canvas.height / 2 + 15);
+        ctx.globalAlpha = 1;
     }
 }
 
@@ -4011,7 +4013,7 @@ function creerGraphiqueDistributionACPE(canvasId) {
         if (datasetsCourbes.length === 0) {
             console.warn('[Distribution ACPE] Aucune donnée à afficher');
             ctx.font = '14px Arial';
-            ctx.fillStyle = '#8aa4b0';
+            ctx.fillStyle = couleurTexte();
             ctx.textAlign = 'center';
             ctx.fillText('Données insuffisantes pour afficher la distribution', canvas.width / 2, canvas.height / 2);
             return null;
