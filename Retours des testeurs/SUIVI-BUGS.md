@@ -1,7 +1,7 @@
 # Suivi des bugs testeurs
 
 > **Objectif** : Tracker les bugs rapportés par les testeurs pour éviter le travail en double.
-> **Dernière mise à jour** : 24 février 2026
+> **Dernière mise à jour** : 4 avril 2026
 
 ---
 
@@ -9,6 +9,20 @@
 
 | # | Testeur | Date | Description | Priorité | Fichier(s) concerné(s) |
 |---|---------|------|-------------|----------|------------------------|
+
+---
+
+## Corrigés (4 avril 2026)
+
+| # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
+|---|---------|--------------|---------|-------|-------------|------------|
+| 95 | Grégoire | 4 avril | 4 avril | 0404-1104 | Cartouche de rétroaction non chargée au premier chargement | Données IDB pas encore en mémoire lors de la sélection. Retry (8×250ms) au lieu d'un seul setTimeout (travaux-ui.js) |
+| 94 | Grégoire | 4 avril | 4 avril | 0404-1104 | TypeError `note_algo_*` null dans calculerNoteAlgorithmiqueSimple | Éléments DOM absents quand la fonction est appelée avant le rendu des critères. Guards null ajoutés sur 4 accès (evaluation.js) |
+| 93 | Grégoire | 4 avril | 4 avril | 0404-1104 | Toolbar badges (pills étudiants) et sélect production absents | `ouvrirFichier()` créait la visionneuse avec `_htmlBadgesGrille` vide (session restaurée sans passer par `afficherFichiers()`). Génération garantie avant création + régénération défensive au retour (travaux-ui.js) |
+| 92 | Grégoire | 4 avril | 4 avril | 0404-1104 | Critères non affichés — palette Évaluation vide malgré grille sélectionnée | Ordre d'exécution : échelle configurée APRÈS `chargerGrilleSelectionnee()`, donc `echelleId` vide → critères non rendus. Échelle déplacée AVANT dans `afficherPalettesEval()` et `chargerProduction()` (travaux-ui.js, evaluation.js) |
+| 91 | Grégoire | 4 avril | 4 avril | 0404-1104 | Palettes disparues après Éditer → retour Annoter et évaluer | Cas 1 de `initialiserModuleTravaux()` faisait `return` après `activerAnnotation()` sans restaurer les palettes flottantes. Ajout `afficherPalettesAnnotation()` (travaux-ui.js) |
+| 90 | Grégoire | 4 avril | 4 avril | 0404-1104 | Bilan affiche « Ta force : Structure (M) » de l'élève précédent | `evaluationEnCours` jamais réinitialisé au changement d'élève/production → `chargerGrilleSelectionnee()` restaurait les critères par nom. Reset quand DA ou productionId change dans `afficherPalettesEval()` et `basculerMode()` (travaux-ui.js) |
+| 89 | Grégoire | 4 avril | 4 avril | 0404-1104 | ReferenceError `_majBtnPause` à chaque sauvegarde d'évaluation | Fonction inexistante appelée dans `arreterChrono()`. Remplacée par `_majAffichageChrono()` (travaux-ui.js) |
 
 ---
 
