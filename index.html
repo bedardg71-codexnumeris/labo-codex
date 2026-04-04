@@ -12223,7 +12223,7 @@
 
                             <p><strong>Fonctionnalités principales :</strong></p>
                             <ul>
-                                <li><strong>Aperçu</strong> : Indicateurs globaux A-C-P-E, détection précoce des difficultés</li>
+                                <li><strong>Aperçu</strong> : Indicateurs globaux A-C-P, détection précoce des difficultés</li>
                                 <li><strong>Portraits individuels</strong> : Profil détaillé de chaque étudiant avec forces, défis et recommandations</li>
                                 <li><strong>Captures hebdomadaires</strong> : Vue longitudinale de la progression (snapshots)</li>
                                 <li><strong>Rétroactions personnalisées</strong> : Assemblage automatique de commentaires selon tes cartouches</li>
@@ -12232,7 +12232,7 @@
 
                             <div class="alerte alerte-succes">
                                 <p><strong>Autonomie et sobriété</strong></p>
-                                <p>L'application fonctionne <strong>entièrement en local</strong>, directement dans ton navigateur. Les données sont stockées sur ton appareil (localStorage/IndexedDB), sans aucun transfert cloud. Aucune IA générative n'est utilisée pour l'analyse.</p>
+                                <p>L'application fonctionne <strong>entièrement en local</strong>, directement dans ton navigateur. Les données sont stockées sur ton appareil, sans aucun transfert cloud. Aucune IA générative n'est utilisée pour l'analyse.</p>
                             </div>
                         </div>
                     </div>
@@ -12263,6 +12263,10 @@
                                 <li><strong>Ta pratique pédagogique</strong> : Évaluation par compétences (PAN) ou sommative traditionnelle</li>
                             </ul>
 
+                            <div class="alerte alerte-attention" style="margin-bottom: 10px;">
+                                <p><strong>L'application s'adapte à ta discipline et à ta pratique.</strong> L'exemple ci-dessous illustre une configuration possible en littérature. Tu peux créer tes propres critères, tes propres échelles et ta propre pratique de notation.</p>
+                            </div>
+
                             <div class="alerte alerte-information">
                                 <p><strong>📝 Exemple : Pratique PAN-Standards</strong></p>
                                 <p>La pratique PAN-Standards développée par Grégoire utilise :</p>
@@ -12287,28 +12291,150 @@
                             <div class="alerte alerte-information">
                                 <h4 class="u-mb-10 u-texte-bleu">A - Assiduité</h4>
                                 <p><strong>Présence en classe</strong> - Mesure l'engagement cognitif</p>
-                                <p class="text-muted u-texte-09"><em>Module source : saisie-presences.js</em></p>
                                 <p>Les étudiants assidus sont davantage exposés au contenu, aux explications et aux pratiques guidées.</p>
                             </div>
 
                             <div class="alerte alerte-information">
                                 <h4 class="u-mb-10 u-texte-bleu">C - Complétion</h4>
                                 <p><strong>Remise des travaux</strong> - Mesure la mobilisation</p>
-                                <p class="text-muted u-texte-09"><em>Module source : portfolio.js</em></p>
                                 <p>Reflète la constance et la persévérance dans les efforts, la régularité d'exécution et le respect des délais.</p>
                             </div>
 
                             <div class="alerte alerte-information">
                                 <h4 class="u-mb-10 u-texte-bleu">P - Performance</h4>
                                 <p><strong>Qualité des productions</strong> - Mesure la maîtrise</p>
-                                <p class="text-muted u-texte-09"><em>Module source : portfolio.js</em></p>
                                 <p>Évalue la qualité des travaux selon tes critères et ton échelle de notation.</p>
                                 <p class="text-muted u-mt-10 u-texte-09"><em>Le calcul dépend de ta pratique : en PAN-Standards, P = moyenne des N meilleurs artefacts (IDME). En Sommative, P = moyenne pondérée de toutes les évaluations (0-100%).</em></p>
                             </div>
 
+                            <div class="alerte alerte-info" style="margin-top: 15px;">
+                                <p class="text-muted u-texte-09"><em>Note : Certains écrans peuvent encore afficher un indice « E » (Engagement). Cet indice composite est en cours de retrait et sera remplacé par des indicateurs plus précis dans une version future.</em></p>
+                            </div>
+
                             <div class="u-mt-15 u-text-center">
-                                <img src="img/aide/Tableau de bord - indicateurs globaux ACPE.png" alt="Tableau de bord - Indicateurs A-C-P-E" style="max-width: 100%; border-radius: var(--radius-moyen); box-shadow: var(--shadow-normal);">
-                                <p class="text-muted u-texte-petit" style="margin-top: 8px">Vue des indicateurs globaux A-C-P-E dans l'aperçu</p>
+                                <img src="img/aide/Tableau de bord - indicateurs globaux ACPE.png" alt="Tableau de bord - Indicateurs A-C-P" style="max-width: 100%; border-radius: var(--radius-moyen); box-shadow: var(--shadow-normal);">
+                                <p class="text-muted u-texte-petit" style="margin-top: 8px">Vue des indicateurs globaux A-C-P dans l'aperçu</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Modèle RàI (Réponse à l'Intervention) -->
+                    <div class="carte accordeon" id="accordeon-aide-rai">
+                        <div class="accordeon-header">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> La Réponse à l'Intervention (RàI)
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p>La Réponse à l'Intervention (RàI) est un modèle de suivi en quatre temps : <strong>dépister</strong> les étudiants en difficulté d'apprentissage, <strong>agir</strong> rapidement avec des interventions adaptées, <strong>observer</strong> l'effet de ces interventions, puis <strong>s'ajuster</strong> selon les résultats.</p>
+
+                            <p class="mt-10">Labo Codex structure ce cycle en trois niveaux d'intervention&nbsp;:</p>
+
+                            <div class="alerte alerte-succes" style="margin-top: 10px;">
+                                <p><strong>Universel</strong> — le suivi de base pour tous les étudiants (indices A-C-P, progression dans le trimestre).</p>
+                            </div>
+                            <div class="alerte alerte-attention" style="margin-top: 8px;">
+                                <p><strong>Préventif</strong> — un suivi plus attentif pour les étudiants dont les indices signalent des difficultés d'apprentissage.</p>
+                            </div>
+                            <div class="alerte alerte-erreur" style="margin-top: 8px;">
+                                <p><strong>Intensif</strong> — un accompagnement individualisé pour les étudiants en situation critique.</p>
+                            </div>
+
+                            <div class="alerte alerte-information" style="margin-top: 15px;">
+                                <p>L'objectif n'est pas de classer les étudiants, mais de <strong>détecter tôt les difficultés</strong> pour intervenir avant qu'elles ne s'aggravent. Le cycle dépister → agir → observer → ajuster se répète tout au long du trimestre.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Taxonomie SOLO -->
+                    <div class="carte accordeon" id="accordeon-aide-solo">
+                        <div class="accordeon-header">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> La taxonomie SOLO : évaluer la profondeur de l'apprentissage
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p>La taxonomie SOLO (Structure of Observed Learning Outcomes, Biggs &amp; Collis) décrit des niveaux de profondeur cognitive dans un travail&nbsp;:</p>
+
+                            <table class="tableau" style="margin-top: 10px;">
+                                <thead>
+                                    <tr>
+                                        <th>Niveau SOLO</th>
+                                        <th>Ce que l'étudiant démontre</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Unistructurel</strong></td>
+                                        <td>Un seul élément pertinent est abordé</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Multistructurel</strong></td>
+                                        <td>Plusieurs éléments pertinents, mais traités séparément</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Relationnel</strong></td>
+                                        <td>Les éléments sont intégrés et mis en relation</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Abstrait étendu</strong></td>
+                                        <td>La réflexion dépasse le cadre initial, avec transfert ou généralisation</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <p class="mt-10">L'échelle <strong>IDME</strong> (Insuffisant, Développement, Maîtrisé, Étendu) traduit ces niveaux en cotes d'évaluation. Le seuil critique est <strong>M (Maîtrisé)</strong>, correspondant au niveau relationnel et à un indice de performance de 0.75. C'est le niveau qui prédit la réussite dans le cours suivant.</p>
+
+                            <div class="alerte alerte-information" style="margin-top: 15px;">
+                                <p><strong>💡 Pourquoi SOLO plutôt qu'une note sur 100&nbsp;?</strong></p>
+                                <p>Une note chiffrée dit <em>combien</em>. La taxonomie SOLO dit <em>comment</em> l'étudiant structure sa compréhension. C'est cette information qualitative qui permet d'orienter l'intervention pédagogique.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Pratique Alternative de Notation (PAN) -->
+                    <div class="carte accordeon" id="accordeon-aide-pan">
+                        <div class="accordeon-header">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> La Pratique Alternative de Notation (PAN)
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p>La Pratique Alternative de Notation (PAN) évalue la <strong>compétence atteinte</strong> plutôt que le parcours d'erreurs. Au lieu de faire la moyenne de toutes les évaluations du trimestre, l'enseignant sélectionne les <strong>N meilleurs artefacts</strong> du portfolio de l'étudiant.</p>
+
+                            <p class="mt-10">Ce choix repose sur un principe simple&nbsp;: ce qui compte, c'est ce que l'étudiant <strong>sait faire au terme de son apprentissage</strong>, pas les erreurs commises en chemin. Un étudiant qui démarre difficilement mais progresse jusqu'à la maîtrise n'est pas pénalisé par ses premiers essais.</p>
+
+                            <div class="alerte alerte-information" style="margin-top: 15px;">
+                                <p><strong>📍 Différentes variantes de PAN</strong></p>
+                                <p>Labo Codex supporte plusieurs variantes&nbsp;: <strong>PAN-Standards</strong> (évaluation par niveaux de maîtrise, ex. IDME), <strong>PAN-Spécifications</strong> (évaluation binaire par objectif). Tu choisis la variante qui correspond à ta pratique dans <strong>Structure → Pratique de notation</strong>.</p>
+                            </div>
+
+                            <div class="alerte alerte-attention" style="margin-top: 10px;">
+                                <p><strong>La PAN n'est pas obligatoire.</strong> L'application supporte aussi l'évaluation sommative traditionnelle (moyenne pondérée). Configure ta pratique dans <strong>Structure → Pratique de notation</strong>.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Critères d'évaluation et dépistage -->
+                    <div class="carte accordeon" id="accordeon-aide-criteres">
+                        <div class="accordeon-header">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Tes critères d'évaluation : le socle du dépistage
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p>Labo Codex utilise <strong>tes critères d'évaluation</strong> pour calculer la progression de tes étudiants et détecter les difficultés d'apprentissage. Ces critères sont entièrement personnalisables selon ta discipline.</p>
+
+                            <div class="alerte alerte-attention" style="margin-top: 10px;">
+                                <p><strong>Règle essentielle pour le dépistage</strong></p>
+                                <p>Les critères que tu choisis doivent <strong>rester les mêmes pendant tout le trimestre</strong>. C'est cette constance qui permet à l'application de calculer une progression cohérente et de repérer les étudiants en difficulté d'apprentissage. Si les critères changent en cours de route, la comparaison entre les évaluations perd son sens.</p>
+                            </div>
+
+                            <p class="mt-10">L'exemple qui suit (<strong>SRPNF</strong>) illustre une grille de critères inspirée du modèle ELLAC (<a href="https://ellac.ca" target="_blank" rel="noopener">ellac.ca</a>), développé pour l'enseignement de la lecture littéraire au collégial. Ce sont des critères <strong>holistiques liés à la littératie</strong> — la capacité à lire et à écrire.</p>
+
+                            <div class="alerte alerte-information" style="margin-top: 10px;">
+                                <p><strong>💡 Adapte les critères à ta discipline</strong></p>
+                                <p>Un enseignant de chimie, de philosophie ou de toute autre discipline peut définir ses propres critères. Ce qui compte, c'est qu'ils reflètent les compétences visées dans ton cours et qu'ils restent stables pendant le trimestre.</p>
                             </div>
                         </div>
                     </div>
@@ -12321,7 +12447,8 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p>Inspirés de l'approche ELLAC (Enseignement de la Lecture Littéraire Au Collégial)</p>
+                            <p class="text-muted u-texte-09" style="margin-bottom: 10px;"><em>Exemple de configuration disciplinaire — adaptable à ton contexte</em></p>
+                            <p>Voici un exemple concret de grille critériée. Ces critères sont utilisés dans une pratique PAN-Standards en littérature.</p>
 
                             <table class="tableau">
                                 <thead>
@@ -12375,7 +12502,8 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p>L'échelle IDME traduit la profondeur de compréhension selon la taxonomie SOLO de Biggs & Collis :</p>
+                            <p class="text-muted u-texte-09" style="margin-bottom: 10px;"><em>Exemple de configuration disciplinaire — adaptable à ton contexte</em></p>
+                            <p>L'échelle IDME est la traduction concrète de la taxonomie SOLO (présentée plus haut) en cotes d'évaluation :</p>
 
                             <table class="tableau">
                                 <thead>
@@ -12434,21 +12562,21 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Principe fondamental :</strong> Chaque donnée a UNE source unique qui la génère et la stocke. Les autres modules la lisent via localStorage.</p>
+                            <p><strong>Principe fondamental :</strong> Chaque donnée est calculée à un seul endroit, ce qui garantit la cohérence.</p>
 
                             <div class="carte-code-light">
-                                <p class="m-0-success"><strong>MODULE SOURCE</strong> (génère/stocke)</p>
-                                <p class="my-5-mx-20">trimestre.js → calendrierComplet</p>
-                                <p class="my-5-mx-20">saisie-presences.js → indicesAssiduiteDetailles</p>
-                                <p class="my-5-mx-20">portfolio.js → indicesCP</p>
+                                <p class="m-0-success"><strong>SECTION SOURCE</strong> (calcule la donnée)</p>
+                                <p class="my-5-mx-20">Section Trimestre → génère le calendrier de ta session</p>
+                                <p class="my-5-mx-20">Saisie des présences → calcule l'assiduité (A) de chaque étudiant</p>
+                                <p class="my-5-mx-20">Portfolio / Évaluations → calcule la complétion (C) et la performance (P)</p>
 
-                                <p class="m-15-0-0-0-primary"><strong>MODULE LECTEUR</strong> (lit/affiche)</p>
-                                <p class="my-5-mx-20">calendrier-vue.js → lit calendrierComplet</p>
-                                <p class="my-5-mx-20">tableau-bord-apercu.js → lit indices A, C, P</p>
-                                <p class="my-5-mx-20">profil-etudiant.js → lit indices A, C, P</p>
+                                <p class="m-15-0-0-0-primary"><strong>SECTION LECTRICE</strong> (affiche la donnée)</p>
+                                <p class="my-5-mx-20">Vue calendaire → affiche le calendrier de session</p>
+                                <p class="my-5-mx-20">Aperçu (tableau de bord) → affiche les indices A, C, P</p>
+                                <p class="my-5-mx-20">Profil étudiant → affiche les indices A, C, P</p>
                             </div>
 
-                            <p class="mt-15"><strong>Règle d'or :</strong> Les modules ne se parlent JAMAIS directement. Communication via localStorage uniquement.</p>
+                            <p class="mt-15"><strong>Règle d'or :</strong> Les autres sections de l'application utilisent ces données automatiquement.</p>
                         </div>
                     </div>
 
@@ -12515,7 +12643,7 @@
                             </ul>
 
                             <div class="alerte alerte-information">
-                                <h4 class="u-mb-10 u-texte-bleu">Import depuis un trimestre précédent (Beta 95.3)</h4>
+                                <h4 class="u-mb-10 u-texte-bleu">Import depuis un trimestre précédent</h4>
                                 <p>Réutilise ton matériel d'un trimestre à l'autre sans tout recréer :</p>
                                 <ul class="mt-5">
                                     <li><strong>Échelles</strong> : Section "Importer depuis un autre trimestre" dans la bibliothèque</li>
@@ -12542,7 +12670,7 @@
                             </div>
 
                             <div class="alerte alerte-info">
-                                <p><strong>Nommage des fichiers export (Beta 95.3)</strong></p>
+                                <p><strong>Nommage des fichiers export</strong></p>
                                 <p>Les fichiers exportés suivent un format standardisé : <code>type-nom-cours-discipline-date.json</code></p>
                                 <p class="mt-5 text-muted u-texte-09">Ex: <em>echelle-IDME-601101-litterature-2026-01-09.json</em></p>
                             </div>
@@ -12568,14 +12696,14 @@
                             <p>La configuration se fait principalement dans <strong>Contexte → Trimestre</strong> qui centralise toutes les étapes :</p>
 
                             <div class="carte-gradient-bleu">
-                                <p class="titre-11-bold-bleu-mb15">Workflow Beta 95 (recommandé) :</p>
+                                <p class="titre-11-bold-bleu-mb15">Workflow recommandé :</p>
                                 <ol class="lh-2">
                                     <li><strong>Trimestre</strong> : Définir les dates (génère le calendrier)</li>
                                     <li><strong>Cours</strong> : Créer ou sélectionner le cours</li>
                                     <li><strong>Enseignant·e</strong> : Créer ton profil</li>
                                     <li><strong>Groupe</strong> : Importer la liste d'étudiants (CSV/TXT)</li>
                                     <li><strong>Horaire</strong> : Définir les séances hebdomadaires</li>
-                                    <li><strong>Groupe-cours</strong> : Assembler les 5 éléments + pratique de notation</li>
+                                    <li><strong>Groupe-cours</strong> (l'ensemble des paramètres qui définissent ton cours : étudiants, horaire, pratique de notation) : Assembler les 5 éléments + pratique de notation</li>
                                 </ol>
                             </div>
 
@@ -12697,11 +12825,11 @@
                         </div>
                     </div>
 
-                    <!-- Carte: 2. Section Trimestre (Beta 95) -->
+                    <!-- Carte: 2. Section Trimestre -->
                     <div class="carte accordeon" id="accordeon-aide-trimestre">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> 2. Section Trimestre - Configuration centralisée (Beta 95)
+                                <span class="accordeon-chevron">▼</span> 2. Section Trimestre - Configuration centralisée
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
@@ -12713,7 +12841,7 @@
                                 <ol class="lh-2">
                                     <li><strong>Gestion des trimestres</strong> : Dates début/fin, congés, aperçu statistiques</li>
                                     <li><strong>Gestion des cours</strong> : Code, titre, discipline, compétence</li>
-                                    <li><strong>Enseignant·e</strong> : Multi-profils avec dropdown (Beta 95.3)</li>
+                                    <li><strong>Enseignant·e</strong> : Multi-profils avec dropdown</li>
                                     <li><strong>Groupe d'étudiants</strong> : Import CSV/TXT, gestion SA/CAF</li>
                                     <li><strong>Horaire hebdomadaire</strong> : Séances avec jour, heures, local</li>
                                     <li><strong>Assemblage groupe-cours</strong> : Combine les 5 éléments ci-dessus</li>
@@ -12721,7 +12849,7 @@
                             </div>
 
                             <div class="alerte alerte-information">
-                                <h4 class="u-mb-10 u-texte-bleu">Synthèses intelligentes (Beta 95.3)</h4>
+                                <h4 class="u-mb-10 u-texte-bleu">Synthèses intelligentes</h4>
                                 <p>Chaque accordéon affiche une <strong>synthèse calculée</strong> dans sa barre latérale :</p>
                                 <ul class="mt-5">
                                     <li><strong>Trimestre</strong> : "Hiver 2026 • 15 sem., 31 jours cours, 10 congés"</li>
@@ -12811,11 +12939,11 @@
                         </div>
                     </div>
 
-                    <!-- Carte: 2c. Concept Groupe-cours (Beta 95) -->
+                    <!-- Carte: 2c. Concept Groupe-cours -->
                     <div class="carte accordeon" id="accordeon-aide-groupe-cours">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> 2c. Le concept Groupe-cours (Beta 95)
+                                <span class="accordeon-chevron">▼</span> 2c. Le concept Groupe-cours
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
@@ -12841,7 +12969,7 @@
                             </ul>
 
                             <div class="alerte alerte-information">
-                                <h4 class="u-mb-10 u-texte-bleu">Bibliothèque groupe-cours (Beta 95.3)</h4>
+                                <h4 class="u-mb-10 u-texte-bleu">Bibliothèque groupe-cours</h4>
                                 <p>Le bouton <strong>📚 Bibliothèque</strong> dans l'accordéon Groupe-cours ouvre une modal avec :</p>
                                 <ul class="mt-5">
                                     <li>Liste de tous tes groupes-cours du trimestre</li>
@@ -13472,7 +13600,7 @@
                                 <li><strong>Une session complète de présences</strong> (42 dates, août à décembre)</li>
                                 <li><strong>3 grilles de critères</strong>, 2 échelles de performance, 3 cartouches de rétroaction</li>
                                 <li><strong>1 carte mentale</strong> d'alignement pédagogique complète</li>
-                                <li><strong>Indices ACPE calculés</strong> pour chaque étudiant</li>
+                                <li><strong>Indices ACP calculés</strong> pour chaque étudiant</li>
                             </ul>
 
                             <p class="titre-105-mt20"><strong>Comment activer la démonstration :</strong></p>
@@ -13592,74 +13720,50 @@
                                 <li>Section «Grille de critères pour le dépistage»</li>
                                 <li>Sélectionner ta grille dans le menu déroulant</li>
                                 <li>Cliquer sur «Sauvegarder les réglages»</li>
-                                <li>Ouvrir la <strong>console du navigateur</strong> (Safari: Cmd+Alt+C, Chrome: Cmd+Alt+J)</li>
-                                <li>Recharger la page (Cmd+R)</li>
-                                <li>Observer les messages dans la console</li>
+                                <li>Ouvrir le profil d'un étudiant ayant des évaluations</li>
+                                <li>Vérifier que la section « Forces et défis » affiche les noms de tes critères (ex. Structure, Rigueur...)</li>
                             </ol>
-                            <p><strong>✅ Messages attendus dans la console :</strong></p>
-                            <pre class="u-texte-petit u-p-10" style="background: var(--surface-carte, #1a3a48); border-radius: var(--radius-moyen)">✅ Module Interprétation initialisé
-✅ 1 grille(s) chargée(s) dans le sélecteur de référence
-✅ Grille de référence: "Grille SRPNF Littérature" (5 critères)</pre>
+                            <p><strong>✅ Résultat attendu :</strong> Les critères de ta grille apparaissent dans la section « Forces et défis » du profil étudiant. Si la section est vide, ta grille de référence n'est pas encore définie.</p>
                         </div>
 
                         <div class="alerte-purple">
-                            <h4 class="text-purple-mb10">Test 4 : Diagnostic forces/défis (avec données)</h4>
+                            <h4 class="text-purple-mb10">Test 4 : Vérifier le changement de grille</h4>
                             <p><strong>Prérequis :</strong> Avoir des étudiants avec au moins une évaluation</p>
                             <p><strong>Étapes :</strong></p>
                             <ol class="lh-relaxed">
-                                <li>Aller dans <strong>Consultation → Profils individuels</strong></li>
-                                <li>Ouvrir le profil d'un étudiant évalué</li>
-                                <li>Section «Développement des habiletés et compétences»</li>
-                                <li>Vérifier l'affichage des forces et défis</li>
-                                <li>Ouvrir la console et observer les logs</li>
+                                <li>Change ta grille de référence dans <strong>Contexte → Pratiques de notation</strong></li>
+                                <li>Sauvegarde les réglages</li>
+                                <li>Recharge la page</li>
+                                <li>Ouvre le profil d'un étudiant évalué</li>
+                                <li>Vérifie que les profils étudiants reflètent les nouveaux critères</li>
                             </ol>
                             <p><strong>✅ Résultat attendu :</strong></p>
                             <ul>
                                 <li>Forces affichées avec pourcentages (ex: Nuance 82%, Rigueur 78%)</li>
                                 <li>Défis affichés avec pourcentages (ex: Structure 65%, Plausibilité 68%)</li>
-                                <li>Console : <code>✅ Grille de référence: "Ta grille" (X critères)</code></li>
-                                <li>Console : <code>✅ Regex dynamique pour X critères: /(...)/gi</code></li>
+                                <li>Les noms de critères correspondent à la nouvelle grille sélectionnée</li>
                             </ul>
                         </div>
 
                         <div class="alerte-info-cyan">
-                            <h4 class="u-mb-10 u-texte-bleu">Test 5 : Tester avec grille alternative (optionnel)</h4>
-                            <p><strong>Objectif :</strong> Valider que le changement de grille fonctionne sans erreur</p>
+                            <h4 class="u-mb-10 u-texte-bleu">Test 5 : Vérifier le tableau de bord</h4>
+                            <p><strong>Objectif :</strong> Valider que l'aperçu affiche correctement les données</p>
                             <p><strong>Étapes :</strong></p>
                             <ol class="lh-relaxed">
-                                <li>Créer une seconde grille pour une autre discipline (ex: Chimie si tu avais créé Littérature)</li>
-                                <li>Dans <strong>Contexte → Pratiques de notation</strong>, basculer vers la nouvelle grille</li>
-                                <li>Sauvegarder</li>
-                                <li>Ouvrir un profil étudiant et observer la console</li>
-                                <li>Vérifier que les nouveaux critères apparaissent</li>
+                                <li>Ouvre l'aperçu (tableau de bord)</li>
+                                <li>Vérifie que les cartes d'étudiants critiques s'affichent</li>
+                                <li>Vérifie que les indicateurs de groupe sont visibles</li>
                             </ol>
                             <p><strong>✅ Résultat attendu :</strong></p>
                             <ul>
-                                <li>Console : Confirmation de la nouvelle grille (ex: «4 critères» au lieu de «5 critères»)</li>
-                                <li>Si l'étudiant n'a pas d'évaluations avec ces critères : affichage «Aucune donnée disponible» (normal)</li>
-                                <li><strong>Aucune erreur JavaScript</strong> dans la console</li>
+                                <li>Les cartes d'étudiants affichent leurs indices A, C, P</li>
+                                <li>Les indicateurs de groupe sont calculés et affichés</li>
+                                <li>Si tout est vide, vérifie que tu as saisi des présences et des évaluations</li>
                             </ul>
                         </div>
 
-                        <div class="carte-gradient-bleu">
-                            <p class="titre-11-bold-bleu-mb10">
-                                🔍 Messages de la console à surveiller :
-                            </p>
-                            <p><strong>Messages normaux (OK) :</strong></p>
-                            <pre class="u-p-8" style="background: rgba(255,255,255,0.3); border-radius: var(--radius-moyen); font-size: 0.8rem">✅ Module Interprétation initialisé
-✅ Grille de référence: "Nom grille" (X critères)
-✅ Regex dynamique pour X critères: /(CRITÈRE1|CRITÈRE2...)/gi
-⚠️ Pas de grille de référence (si non configurée - normal au 1er démarrage)</pre>
-
-                            <p class="mt-12"><strong>Erreurs interdites (PROBLÈME) :</strong></p>
-                            <pre class="u-p-8" style="background: rgba(255,0,0,0.1); border-radius: var(--radius-moyen); font-size: 0.8rem; color: #d32f2f">❌ TypeError: Cannot read property 'criteres' of null
-❌ ReferenceError: obtenirGrilleReferenceDepistage is not defined
-❌ Grille de référence "xxx" introuvable</pre>
-                            <p style="margin-top: 8px;"><strong>→ Si tu vois ces erreurs</strong> : Vérifier que la grille existe bien et qu'elle est correctement sélectionnée dans les réglages.</p>
-                        </div>
-
-                            <div class="alerte alerte-succes" class="mt-15">
-                                <strong>💡 Conseil :</strong> Gardez la console ouverte lors des premiers tests. Elle affiche des informations précieuses sur le fonctionnement du système et aide à diagnostiquer rapidement tout problème de configuration.
+                        <div class="alerte alerte-succes" style="margin-top: 15px;">
+                                <strong>💡 Conseil :</strong> Si un test ne donne pas le résultat attendu, vérifie que ta grille est correctement sélectionnée dans Contexte → Pratiques de notation, puis recharge la page.
                             </div>
                         </div>
                     </div>
@@ -13855,7 +13959,7 @@
                             </ul>
 
                             <div class="alerte alerte-information">
-                                <strong>💡 Astuce :</strong> Les images dépassant 2000px sont automatiquement compressées (JPEG 85%) pour optimiser le stockage. Sur Mac, l'API File System Access permet de stocker les fichiers sur ton disque au lieu d'IndexedDB.
+                                <strong>💡 Astuce :</strong> Les images dépassant 2000px sont automatiquement compressées (JPEG 85%) pour optimiser le stockage. Sur Mac, les fichiers peuvent être stockés directement sur ton disque pour économiser l'espace du navigateur.
                             </div>
                         </div>
                     </div>
@@ -13903,7 +14007,7 @@
                             <p>Avant d'annoter, tu peux réordonner ou supprimer des pages depuis la zone « Éditer un document ».</p>
 
                             <div class="alerte alerte-information">
-                                <strong>💡 Stockage :</strong> Les fichiers sont stockés dans IndexedDB (par défaut) ou via l'API File System Access sur Mac, ce qui permet de les conserver sur ton disque local.
+                                <strong>💡 Stockage :</strong> Les fichiers sont sauvegardés automatiquement. Sur Mac, ils peuvent aussi être stockés directement sur ton disque.
                             </div>
                         </div>
                     </div>
@@ -13991,7 +14095,7 @@
                             <p>La conversion en fac-similé (niveaux de gris, 800px) permet d'économiser considérablement l'espace de stockage tout en conservant la lisibilité.</p>
 
                             <div class="alerte alerte-attention">
-                                <strong>⚠️ Espace de stockage :</strong> Consulte le moniteur d'espace (quota IndexedDB ou File System Access) pour vérifier ta capacité restante avant un import massif.
+                                <strong>⚠️ Espace de stockage :</strong> Consulte le moniteur d'espace pour vérifier ta capacité restante avant un import massif.
                             </div>
                         </div>
                     </div>
@@ -14788,7 +14892,7 @@
                             <p>Ouvre la modal de réglages pour consulter la liste d'étudiants, voir les badges « tiré » et réinitialiser les tirages.</p>
 
                             <div class="alerte alerte-information">
-                                <strong>💡 Astuce :</strong> L'état des tirages persiste entre les sessions grâce au localStorage. Tu retrouves tes données même après avoir fermé le navigateur.
+                                <strong>💡 Astuce :</strong> L'état des tirages persiste entre les sessions automatiquement. Tu retrouves tes données même après avoir fermé le navigateur.
                             </div>
                         </div>
                     </div>
@@ -14825,7 +14929,7 @@
                             </ul>
 
                             <div class="alerte alerte-succes">
-                                <strong>✅ Persistance :</strong> Les annotations sont sauvegardées dans IndexedDB et persistent entre les séances. Tu retrouves ton document annoté à la prochaine ouverture.
+                                <strong>✅ Persistance :</strong> Les annotations sont sauvegardées sur ton appareil et persistent entre les séances. Tu retrouves ton document annoté à la prochaine ouverture.
                             </div>
                         </div>
                     </div>
@@ -14938,7 +15042,7 @@
 
                         <div class="u-text-center" style="margin: 15px 0">
                             <img src="img/aide/Tableau de bord - Liste des individus.png" alt="Liste des individus dans l'aperçu" style="max-width: 100%; border-radius: var(--radius-moyen); box-shadow: var(--shadow-normal);">
-                            <p class="text-muted u-texte-petit" style="margin-top: 8px">Vue d'ensemble des étudiants avec leurs indices A-C-P-E</p>
+                            <p class="text-muted u-texte-petit" style="margin-top: 8px">Vue d'ensemble des étudiants avec leurs indices A-C-P</p>
                         </div>
 
                             <div class="alerte alerte-information">
@@ -15916,38 +16020,34 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Les modules sources ne doivent JAMAIS être contournés.</strong></p>
+                            <p><strong>Chaque donnée est calculée par une seule section de l'application. Les autres sections la lisent automatiquement, ce qui évite les incohérences.</strong></p>
 
                         <table class="tableau">
                             <thead>
                                 <tr>
-                                    <th>Module SOURCE</th>
-                                    <th>Génère/Stocke</th>
-                                    <th>Module LECTEUR</th>
+                                    <th>Section</th>
+                                    <th>Ce qu'elle génère</th>
+                                    <th>Utilisé par</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><strong>trimestre.js</strong></td>
-                                    <td><code>calendrierComplet</code></td>
-                                    <td>calendrier-vue.js</td>
+                                    <td><strong>Trimestre</strong></td>
+                                    <td>Calendrier de session</td>
+                                    <td>Calendrier, Aperçu</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>saisie-presences.js</strong></td>
-                                    <td><code>indicesAssiduiteDetailles</code></td>
-                                    <td>tableau-bord-apercu.js<br>profil-etudiant.js</td>
+                                    <td><strong>Saisie des présences</strong></td>
+                                    <td>Indice d'assiduité (A)</td>
+                                    <td>Aperçu, Profil étudiant</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>portfolio.js</strong></td>
-                                    <td><code>indicesCP</code></td>
-                                    <td>tableau-bord-apercu.js<br>profil-etudiant.js</td>
+                                    <td><strong>Évaluations</strong></td>
+                                    <td>Indices de complétion (C) et performance (P)</td>
+                                    <td>Aperçu, Profil étudiant</td>
                                 </tr>
                             </tbody>
                         </table>
-
-                            <div class="alerte alerte-information">
-                                <strong>Règle d'or :</strong> Les modules ne se parlent JAMAIS directement. Toute communication passe exclusivement par localStorage.
-                            </div>
                         </div>
                     </div>
 
@@ -15962,62 +16062,36 @@
 
                         <div class="alerte-info-grise">
                             <h4 style="color: var(--bleu-principal)">Calendrier vide après rechargement</h4>
-                            <p><strong>Cause :</strong> calendrierComplet pas généré ou corrompu</p>
+                            <p><strong>Cause :</strong> Le calendrier n'a pas été créé ou est endommagé</p>
                             <p><strong>Solution :</strong> Aller dans Contexte → Trimestre → Régénérer le calendrier</p>
                         </div>
 
                         <div class="alerte-info-grise">
                             <h4 style="color: var(--bleu-principal)">Indices A non calculés</h4>
-                            <p><strong>Cause :</strong> Présences pas saisies ou module non initialisé</p>
+                            <p><strong>Cause :</strong> Aucune présence n'a encore été saisie</p>
                             <p><strong>Solution :</strong>
                                 <ol class="m-5-0-0-20">
-                                    <li>Vérifier ordre de chargement dans index 71</li>
                                     <li>Aller dans Suivi → Saisie des présences</li>
-                                    <li>Saisir au moins une présence pour initialiser</li>
+                                    <li>Saisir au moins une présence pour initialiser le calcul</li>
                                 </ol>
                             </p>
                         </div>
 
                         <div class="alerte-info-grise">
                             <h4 style="color: var(--bleu-principal)">« Invalid Date » dans le calendrier</h4>
-                            <p><strong>Cause :</strong> Conflit de noms de fonctions entre modules</p>
-                            <p><strong>Solution :</strong> Vérifier que les fonctions sont préfixées (ex: formaterDateTrimestreYMD au lieu de formaterDate)</p>
+                            <p><strong>Cause :</strong> Bug connu lié à un conflit interne</p>
+                            <p><strong>Solution :</strong> Recharger la page devrait corriger le problème. Si le problème persiste, régénère le calendrier dans Contexte → Trimestre.</p>
                         </div>
 
                         <div class="alerte-info-grise">
                             <h4 style="color: var(--bleu-principal)">Données perdues</h4>
-                            <p><strong>Cause :</strong> localStorage effacé (navigation privée, nettoyage navigateur)</p>
-                            <p><strong>Solution :</strong> Utiliser Import/Export régulièrement pour backup JSON</p>
-                            <p><strong>Prévention :</strong> Activer Export automatique hebdomadaire (prévu dans une version future)</p>
+                            <p><strong>Cause :</strong> Les données du navigateur ont été supprimées (navigation privée ou nettoyage du navigateur)</p>
+                            <p><strong>Solution :</strong> Utiliser Import/Export régulièrement pour créer des sauvegardes JSON</p>
+                            <p><strong>Prévention :</strong> Exporter tes données régulièrement via le Codex ou Réglages → Données</p>
                         </div>
                         </div>
                     </div>
 
-                    <!-- Carte: Debug localStorage -->
-                    <div class="carte accordeon" id="accordeon-aide-debug">
-                        <div class="accordeon-header">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Debug - Console navigateur
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                            <p>Commandes à exécuter dans la console du navigateur (F12) :</p>
-
-                        <div class="carte-code-dark">
-                            <p class="text-secondary">// Vérifier calendrierComplet</p>
-                            <p style="color: #66d9ef;">console</p><span style="color: #f8f8f2;">.log(</span><span style="color: #e6db74;">'calendrierComplet existe?'</span><span style="color: #f8f8f2;">, </span><span style="color: #f92672;">!!</span><span style="color: #66d9ef;">localStorage</span><span style="color: #f8f8f2;">.getItem(</span><span style="color: #e6db74;">'calendrierComplet'</span><span style="color: #f8f8f2;">));</span>
-                            <br><br>
-                            <p class="text-secondary">// Voir contenu calendrier</p>
-                            <p><span style="color: #66d9ef;">JSON</span><span style="color: #f8f8f2;">.parse(</span><span style="color: #66d9ef;">localStorage</span><span style="color: #f8f8f2;">.getItem(</span><span style="color: #e6db74;">'calendrierComplet'</span><span style="color: #f8f8f2;">));</span></p>
-                            <br>
-                            <p class="text-secondary">// Vérifier indices A</p>
-                            <p><span style="color: #66d9ef;">console</span><span style="color: #f8f8f2;">.log(</span><span style="color: #e6db74;">'Indices A existent?'</span><span style="color: #f8f8f2;">, </span><span style="color: #f92672;">!!</span><span style="color: #66d9ef;">localStorage</span><span style="color: #f8f8f2;">.getItem(</span><span style="color: #e6db74;">'indicesAssiduiteDetailles'</span><span style="color: #f8f8f2;">));</span></p>
-                            <br>
-                            <p class="text-secondary">// Vérifier APIs disponibles</p>
-                            <p><span style="color: #66d9ef;">console</span><span style="color: #f8f8f2;">.log(</span><span style="color: #e6db74;">'API calendrier:'</span><span style="color: #f8f8f2;">, </span><span style="color: #f92672;">typeof</span><span style="color: #f8f8f2;"> obtenirCalendrierComplet);</span></p>
-                        </div>
-                        </div>
-                    </div>
 
                     <!-- Carte: FAQ (Phase 2) -->
                     <div class="carte accordeon" id="accordeon-aide-faq">
@@ -16111,9 +16185,9 @@
                             <details class="carte-grise-info">
                                 <summary class="titre-cliquable">Mes données sont-elles sauvegardées automatiquement ?</summary>
                                 <div class="mt-10-pl-10">
-                                    <p><strong>Oui,</strong> toutes les modifications sont sauvegardées automatiquement dans le localStorage du navigateur.</p>
+                                    <p><strong>Oui,</strong> toutes les modifications sont sauvegardées automatiquement dans ton navigateur.</p>
                                     <div class="alerte alerte-attention" class="mt-10">
-                                        <strong>⚠️ Important :</strong> Le localStorage peut être effacé si tu :
+                                        <strong>⚠️ Important :</strong> Tes données peuvent être perdues si tu :
                                         <ul class="m-10-0-0-20">
                                             <li>Utilises le mode navigation privée</li>
                                             <li>Nettoies l'historique/les données du navigateur</li>
@@ -16260,7 +16334,7 @@
 
                             <dl class="ml-10">
                                 <dt class="titre-section-aide">Calendrier complet</dt>
-                                <dd class="ml-20-mb-10">Structure de données générée par le module trimestre.js. Contient 124 jours (début session jusqu'à fin + 10 jours). Chaque jour indique s'il y a cours, congé, reprise, etc. Source unique pour toutes les dates de l'application.</dd>
+                                <dd class="ml-20-mb-10">Calendrier généré automatiquement à partir des dates de ton trimestre. Couvre toute la session (début à fin + 10 jours) et indique pour chaque jour s'il y a cours, congé ou reprise. Créé dans la section Trimestre, utilisé partout dans l'application.</dd>
 
                                 <dt class="titre-section-aide">Cartouche de rétroaction</dt>
                                 <dd class="ml-20-mb-10">Matrice de commentaires prédéfinis organisés par critère SRPNF et niveau de performance IDME. Permet de générer rapidement des rétroactions personnalisées et cohérentes. Peut être verrouillée une fois finalisée.</dd>
@@ -16269,7 +16343,7 @@
                                 <dd class="ml-20-mb-10">Fichier de sauvegarde portable (format ZIP) contenant toutes les donn&eacute;es d'un trimestre. Permet le transfert entre appareils via cl&eacute; USB et la sauvegarde hors-ligne. G&eacute;r&eacute; par le module Codex (menu en haut &agrave; droite).</dd>
 
                                 <dt class="titre-section-aide">Complétion (C)</dt>
-                                <dd class="ml-20-mb-10">Indice primaire mesurant la remise des travaux. Formule : (nombre d'artefacts complétés / nombre d'artefacts attendus) × 100. Reflète la mobilisation de l'étudiant. Calculé par portfolio.js.</dd>
+                                <dd class="ml-20-mb-10">Indice primaire mesurant la remise des travaux. Formule : (nombre d'artefacts complétés / nombre d'artefacts attendus) × 100. Reflète la mobilisation de l'étudiant. Calculé automatiquement à partir de tes évaluations.</dd>
 
                                 <dt class="titre-section-aide">Congé imprévu</dt>
                                 <dd class="ml-20-mb-10">Jour où le cours est annulé de manière non planifiée (tempête, urgence, etc.). N'affecte pas le calcul des semaines. Peut nécessiter une reprise pour maintenir le nombre de séances requis.</dd>
@@ -16324,8 +16398,8 @@
                             <h4 class="titre-section-principal">L</h4>
 
                             <dl class="ml-10">
-                                <dt class="titre-section-aide">localStorage</dt>
-                                <dd class="ml-20-mb-10">Mécanisme de stockage local du navigateur. Toutes les données de l'application y sont sauvegardées automatiquement. Permet le fonctionnement 100% hors-ligne. Limité à 5-10 MB selon les navigateurs. Peut être effacé (mode privé, nettoyage) d'où l'importance des exports réguliers.</dd>
+                                <dt class="titre-section-aide">Sauvegarde locale</dt>
+                                <dd class="ml-20-mb-10">Espace de sauvegarde dans ton navigateur. Tes données restent sur ton appareil, sans aucun transfert vers le cloud. Important : si tu nettoies les données du navigateur ou utilises la navigation privée, tes données seront perdues. Pense à exporter régulièrement via le Codex.</dd>
                             </dl>
 
                             <h4 class="titre-section-principal">M</h4>
@@ -16345,7 +16419,7 @@
                                 <dd class="ml-20-mb-10">Système de notation permettant de sélectionner automatiquement les N meilleurs artefacts d'un portfolio. Exemple : sur 9 artefacts, retenir les 3 meilleurs. Règle configurable par portfolio. Respecte un minimum de complétion requis.</dd>
 
                                 <dt class="titre-section-aide">Performance (P)</dt>
-                                <dd class="ml-20-mb-10">Indice primaire mesurant la qualité des productions. Moyenne pondérée des scores SRPNF des artefacts sélectionnés (PAN). Reflète le niveau de maîtrise des compétences. Calculé par portfolio.js.</dd>
+                                <dd class="ml-20-mb-10">Indice primaire mesurant la qualité des productions. Moyenne pondérée des scores SRPNF des artefacts sélectionnés (PAN). Reflète le niveau de maîtrise des compétences. Calculé automatiquement à partir de tes évaluations.</dd>
 
                                 <dt class="titre-section-aide">Pondération</dt>
                                 <dd class="ml-20-mb-10">Poids relatif d'une évaluation dans la note finale (%). La somme de toutes les pondérations doit être exactement 100%. Les artefacts d'un portfolio n'ont pas de pondération individuelle ; seul le Portfolio conteneur en a une.</dd>
@@ -16377,10 +16451,10 @@
 
                             <dl class="ml-10">
                                 <dt class="titre-section-aide">Séances complètes</dt>
-                                <dd class="ml-20-mb-10">Structure de données générée par horaire.js. Fusionne les plages horaires (seancesHoraire) avec le calendrier complet pour créer la liste exhaustive de toutes les séances du trimestre avec leurs horaires précis. Source unique pour la saisie des présences.</dd>
+                                <dd class="ml-20-mb-10">Liste de toutes les séances du trimestre avec leurs horaires précis. Générée automatiquement à partir de ton horaire hebdomadaire et du calendrier de session. C'est cette liste qui sert de base à la saisie des présences.</dd>
 
                                 <dt class="titre-section-aide">Single Source of Truth</dt>
-                                <dd class="ml-20-mb-10">Principe architectural : chaque donnée a UNE source unique qui la génère et la stocke dans localStorage. Les autres modules la lisent uniquement. Exemples : trimestre.js génère calendrierComplet, saisie-presences.js génère indicesAssiduiteDetailles. Évite les duplications et incohérences.</dd>
+                                <dd class="ml-20-mb-10">Principe de conception de l'application : chaque donnée est calculée à un seul endroit, ce qui garantit la cohérence. Par exemple, l'assiduité est calculée uniquement par la Saisie des présences. Toutes les autres sections qui affichent l'assiduité utilisent ce même calcul.</dd>
 
                                 <dt class="titre-section-aide">SOLO (Taxonomie)</dt>
                                 <dd class="ml-20-mb-10">Structure of Observed Learning Outcomes (Biggs & Collis). Hiérarchie de 5 niveaux de compréhension : Préstructurel, Unistructurel, Multistructurel, Relationnel, Abstrait étendu. Fondement théorique de l'échelle IDME.</dd>
@@ -16396,7 +16470,7 @@
 
                             <dl class="ml-10">
                                 <dt class="titre-section-aide">Trimestre</dt>
-                                <dd class="ml-20-mb-10">Période académique (automne, hiver, été). Défini par une date de début, une date de fin, et un nombre de semaines de cours. Le module trimestre.js génère automatiquement le calendrier complet de 124 jours couvrant toute la session.</dd>
+                                <dd class="ml-20-mb-10">Période académique (automne, hiver, été). Définie par une date de début, une date de fin, et un nombre de semaines de cours. Le calendrier complet couvrant toute la session est généré automatiquement à partir de ces paramètres.</dd>
                             </dl>
 
                             <h4 class="titre-section-principal">V</h4>
@@ -16443,7 +16517,7 @@
                             </ul>
 
                             <div class="alerte alerte-attention">
-                                <strong>⚠️ Important :</strong> Les données sont stockées dans le navigateur (IndexedDB/localStorage). Si tu nettoies les données du navigateur ou utilises la navigation privée, tes données seront perdues. L'export JSON est ta seule protection.
+                                <strong>⚠️ Important :</strong> Les données sont stockées dans le navigateur. Si tu nettoies les données du navigateur ou utilises la navigation privée, tes données seront perdues. L'export JSON est ta seule protection.
                             </div>
 
                             <p><strong>Captures de progression (Snapshots) :</strong></p>
