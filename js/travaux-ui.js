@@ -4322,16 +4322,21 @@
             // Charger la grille (utilise echelleId pour afficher les critères)
             if (typeof chargerGrilleSelectionnee === 'function') chargerGrilleSelectionnee();
 
-            // Pré-sélectionner la cartouche (avec délai car les options dépendent de chargerGrilleSelectionnee)
+            // Pré-sélectionner la cartouche (retry car les données IDB peuvent ne pas être prêtes)
             if (prod.cartoucheId) {
-                setTimeout(() => {
-                    const selC = document.getElementById('selectCartoucheEval');
-                    if (selC && Array.from(selC.options).some(o => o.value === prod.cartoucheId)) {
+                var _tentativesCartouche = 0;
+                var _essayerCartouche = function() {
+                    _tentativesCartouche++;
+                    var selC = document.getElementById('selectCartoucheEval');
+                    if (selC && Array.from(selC.options).some(function(o) { return o.value === prod.cartoucheId; })) {
                         selC.value = prod.cartoucheId;
                         window.evaluationEnCours.cartoucheId = prod.cartoucheId;
                         selC.dispatchEvent(new Event('change', { bubbles: true }));
+                    } else if (_tentativesCartouche < 8) {
+                        setTimeout(_essayerCartouche, 250);
                     }
-                }, 150);
+                };
+                setTimeout(_essayerCartouche, 150);
             }
         }
 
