@@ -1161,7 +1161,7 @@
         }
 
         const optDPI = document.getElementById('pipeline-opt-dpi')?.checked;
-        if (!optDPI || f.format11x17) {
+        if (!optDPI) {
             return { w: f.largeurOriginale, h: f.hauteurOriginale };
         }
 
@@ -1170,8 +1170,10 @@
 
         let maxW, maxH;
         if (w > 2500 || h > 2500) {
-            maxW = 2200; maxH = 3400;
+            // Tabloid 300 DPI
+            maxW = 3300; maxH = 5100;
         } else {
+            // Lettre 200 DPI
             maxW = 1700; maxH = 2200;
         }
 
@@ -3397,8 +3399,8 @@
                         }
                     }
 
-                    // Uniformisation 200 dpi (par fichier : sauf si format11x17)
-                    if (optDPI && !f.format11x17) {
+                    // Uniformisation DPI (lettre 200 DPI, tabloid 300 DPI)
+                    if (optDPI) {
                         try {
                             blob = await uniformiser200DPI(blob);
                         } catch (e) {
@@ -3740,9 +3742,9 @@
     }
 
     /**
-     * Uniformise une image a 200 DPI
-     * Lettre (8.5"x11") : 1700x2200px max — si deux dimensions <= 2500px
-     * Tabloid (11"x17") : 2200x3400px max — si une dimension > 2500px
+     * Uniformise une image selon le format detecte
+     * Lettre (8.5"x11") : 1700x2200px max (200 DPI)
+     * Tabloid (11"x17") : 3300x5100px max (300 DPI) — preserve la lisibilite du texte
      * @param {Blob} blob - Le blob image
      * @returns {Promise<Blob>} Le blob redimensionne
      */
@@ -3760,9 +3762,9 @@
                 // Determiner le format cible par seuil de dimension
                 let maxW, maxH;
                 if (w > 2500 || h > 2500) {
-                    // Tabloid 11"x17" a 200 DPI
-                    maxW = 2200;
-                    maxH = 3400;
+                    // Tabloid 11"x17" a 300 DPI (lisibilite texte sur double page)
+                    maxW = 3300;
+                    maxH = 5100;
                 } else {
                     // Lettre 8.5"x11" a 200 DPI
                     maxW = 1700;

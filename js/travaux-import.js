@@ -885,8 +885,9 @@
                 img.src = imgData;
             });
 
-            // Dimensions en mm (72 DPI par defaut pour PDF)
-            const mmPerPx = 25.4 / 200; // 200 DPI
+            // Dimensions en mm — DPI selon le format detecte
+            const dpi = (dims.width > 2500 || dims.height > 2500) ? 300 : 200;
+            const mmPerPx = 25.4 / dpi;
             const pageW = dims.width * mmPerPx;
             const pageH = dims.height * mmPerPx;
 
@@ -1219,8 +1220,9 @@
                 reader.readAsDataURL(blob);
             });
 
-            // Dimensions en mm (200 DPI)
-            const mmPerPx = 25.4 / 200;
+            // Dimensions en mm — DPI selon le format detecte
+            const dpi = (page.largeur > 2500 || page.hauteur > 2500) ? 300 : 200;
+            const mmPerPx = 25.4 / dpi;
             const pageW = page.largeur * mmPerPx;
             const pageH = page.hauteur * mmPerPx;
 
