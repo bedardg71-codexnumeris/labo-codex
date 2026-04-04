@@ -569,11 +569,17 @@
 
             // Retour sur l'onglet Annoter : restaurer la session
             if (sousSectionActive === 'evaluations-annoter') {
-                // Cas 1 : fichier deja ouvert dans la visionneuse — juste reactiver
+                // Cas 1 : fichier deja ouvert dans la visionneuse — reactiver + restaurer palettes
                 const fichierOuvert = travauxVisionneuse.getFichierActuel();
                 if (fichierOuvert) {
                     if (typeof travauxAnnotation !== 'undefined' && travauxAnnotation.activerAnnotation) {
                         travauxAnnotation.activerAnnotation();
+                    }
+                    // Restaurer les palettes flottantes (annotation ou évaluation)
+                    if (modeCourant === 'evaluer' && fichierOuvert.etudiantDA) {
+                        basculerMode('evaluer');
+                    } else {
+                        afficherPalettesAnnotation();
                     }
                     return;
                 }
