@@ -572,6 +572,26 @@
                 // Cas 1 : fichier deja ouvert dans la visionneuse — reactiver + restaurer palettes
                 const fichierOuvert = travauxVisionneuse.getFichierActuel();
                 if (fichierOuvert) {
+                    // Régénérer les badges toolbar s'ils ont été perdus (navigation entre sous-sections)
+                    const badgeStrip = document.querySelector('.annot-toolbar-fichiers');
+                    if (badgeStrip && badgeStrip.children.length === 0) {
+                        const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
+                        if (fichiersTravaux.length > 0) {
+                            _htmlBadgesGrille = genererGrilleFichiers(fichiersTravaux, 'ouvrirFichier');
+                            badgeStrip.innerHTML = _htmlBadgesGrille;
+                            // Marquer le badge actif
+                            const badgeActif = badgeStrip.querySelector('[data-fichier-id="' + fichierOuvert.id + '"]');
+                            if (badgeActif) badgeActif.classList.add('actif');
+                            // Restaurer le dropdown production si absent
+                            if (_htmlDropdownProduction && !document.querySelector('.annot-toolbar-production')) {
+                                var prodDiv = document.createElement('div');
+                                prodDiv.className = 'annot-toolbar-production';
+                                prodDiv.innerHTML = _htmlDropdownProduction;
+                                badgeStrip.parentNode.insertBefore(prodDiv, badgeStrip);
+                            }
+                            if (productionFiltreActive) filtrerBadgesParProduction();
+                        }
+                    }
                     if (typeof travauxAnnotation !== 'undefined' && travauxAnnotation.activerAnnotation) {
                         travauxAnnotation.activerAnnotation();
                     }
