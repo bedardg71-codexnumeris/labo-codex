@@ -1,8 +1,41 @@
-# SESSION ACTIVE — BETA 99.02
+# SESSION ACTIVE — BETA 99.04
 
-**Date** : 2 avril 2026
-**Version** : Beta 99.02 (Build 0402-1655)
-**Statut** : Plan de consolidation avril 2026 — **TOUS LES TIERS TERMINÉS (0→5.5)** + Audit CSS 5.2
+**Date** : 4 avril 2026
+**Version** : Beta 99.04 (Build 0404-1407)
+**Statut** : Nettoyage pédagogique section Aide (chantiers 1-10)
+
+---
+
+## Bilan de la session (4 avril 2026) — Nettoyage aide utilisateur (10 chantiers)
+
+**Build** : 0404-1407, Beta 99.04
+**Fichiers modifiés** : index.html, changelog-data.js, version.json, init-inline.js, CLAUDE.md, 00-START-HERE.md
+**Fichier créé** : docs/debug-guide.md
+
+### Chantiers 1-9 — Nettoyage pédagogique
+Rendre la section Aide accessible à un enseignant novice. Éliminer le jargon technique.
+
+- **Chantier 1** : 3 mentions « Module source : xxx.js » supprimées, 2 cartes SSoT réécrites en langage fonctionnel, carte Debug Console supprimée (déplacée dans docs/debug-guide.md), carte Résolution de problèmes réécrite
+- **Chantier 2** : 9 occurrences localStorage/IndexedDB/API File System Access remplacées par du langage utilisateur
+- **Chantier 3** : 7 entrées glossaire réécrites (localStorage→Sauvegarde locale, SSoT, Calendrier complet, Séances complètes, Complétion, Performance, Trimestre)
+- **Chantier 4** : 4 mentions A-C-P-E→A-C-P harmonisées + note de transition ajoutée
+- **Chantier 5** : Encadré « adaptable à ta discipline » ajouté, mention « Exemple disciplinaire » sur cartes SRPNF et IDME
+- **Chantier 6** : Tests 3-5 réécrits avec vérifications visuelles (plus de console navigateur)
+- **Chantier 7** : 8 mentions « (Beta XX) » retirées des titres et descriptions
+- **Chantier 8** : Mini-définition inline pour « Groupe-cours »
+- **Chantier 9** : Couvert par le chantier 2
+
+### Chantier 10 — Concepts fondateurs
+4 nouvelles cartes pédagogiques insérées entre ACP et SRPNF :
+
+1. **RàI** (accordeon-aide-rai) : modèle dépister→agir→observer→ajuster, 3 niveaux
+2. **SOLO** (accordeon-aide-solo) : taxonomie cognitive, lien IDME, seuil M=0.75
+3. **PAN** (accordeon-aide-pan) : N meilleurs artefacts, variantes Standards/Spécifications
+4. **Critères** (accordeon-aide-criteres) : constance pendant le trimestre, transition vers SRPNF
+
+Modifications complémentaires : paragraphe SRPNF réécrit, paragraphe IDME renvoie à SOLO.
+
+### Zéro changement fonctionnel. Zéro risque de régression.
 
 ---
 

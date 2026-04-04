@@ -21,7 +21,8 @@
                 'Anonymisation renforc\u00e9e pour les pr\u00e9sentations et le partage entre coll\u00e8gues.',
                 'Palettes d\u2019annotation redimensionnables et raccourcis clavier (1\u20139 pour les codes, lettres pour les tampons).',
                 'V\u00e9rification pr\u00e9-d\u00e9mo\u00a0: un script v\u00e9rifie que tout est pr\u00eat avant une pr\u00e9sentation.',
-                'Glossaire enrichi\u00a0: anonymisation, codex, ELLAC.'
+                'Glossaire enrichi\u00a0: anonymisation, codex, ELLAC.',
+                'Aide repens\u00e9e pour les novices\u00a0: jargon technique retir\u00e9, nouveaux articles sur la R\u00e0I, SOLO, PAN et les crit\u00e8res d\u2019\u00e9valuation.'
             ]
         },
         {
