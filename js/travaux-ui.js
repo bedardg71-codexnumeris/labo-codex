@@ -4187,8 +4187,10 @@
             paletteR.style.left = 'auto';
 
             // Sous-barre : radios (Générale/Spécifique/Bilan) + boutons Copier
+            // Nettoyer les éléments injectés précédemment (le panneau persiste entre les cycles Annoter ↔ Évaluer)
             const contenuRetro = paletteR.querySelector('.palette-flottante-contenu');
             if (contenuRetro) {
+                contenuRetro.querySelectorAll('.retro-sous-barre, .btn-copier-retro').forEach(function(el) { el.remove(); });
                 const sousBarre = document.createElement('div');
                 sousBarre.className = 'retro-sous-barre';
 
