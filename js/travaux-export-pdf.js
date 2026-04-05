@@ -1474,17 +1474,19 @@
                             texteNote += '\nArtefacts obligatoires' + pondOblLabel + ' :\n';
                             artefactsObligatoires.forEach(function(prod) {
                                 var label = prod.titre || 'Artefact';
+                                var activiteObl = prod.description || '';
+                                var echeanceObl = obtenirEcheancePdf(prod);
                                 var evalObl = toutesEvalsNote.find(function(e) {
                                     return e.productionId === prod.id && e.etudiantDA === da && !e.remplaceeParId && e.noteFinale != null;
                                 });
                                 texteNote += '  \u2022 ' + label;
                                 if (evalObl) {
-                                    var activiteObl = prod.description || '';
                                     texteNote += ' (' + (evalObl.niveauFinal || '?') + ')';
-                                    if (activiteObl) texteNote += ' : ' + activiteObl;
                                 } else {
                                     texteNote += ' (non remis)';
                                 }
+                                if (activiteObl) texteNote += ' : ' + activiteObl;
+                                if (echeanceObl) texteNote += ' (\u00e9ch\u00e9ance : ' + formaterDatePdf(echeanceObl) + ')';
                                 texteNote += '\n';
                             });
                         }
