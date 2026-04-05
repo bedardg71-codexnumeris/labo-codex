@@ -412,6 +412,10 @@ function chargerEchellePerformance() {
  * - onchange="#selectEtudiantEval" dans le HTML
  */
 function chargerEvaluationsEtudiant() {
+    // Annuler tout auto-save en attente pour éviter d'écraser les critères
+    // de l'évaluation précédente avec des données vides (race condition)
+    if (_timerAutoSave) { clearTimeout(_timerAutoSave); _timerAutoSave = null; }
+
     const etudiantDA = document.getElementById('selectEtudiantEval').value;
     const btnVoirProfil = document.getElementById('btnVoirProfilDepuisEval');
 
@@ -1108,12 +1112,24 @@ let _timerAutoSave = null;
 
 function _debouncerAutoSave() {
     if (_timerAutoSave) clearTimeout(_timerAutoSave);
-    _timerAutoSave = setTimeout(_autoSauvegarderCriteres, 3000);
+    // Snapshot de l'état au moment du debounce pour éviter la race condition
+    // si l'utilisateur change d'élève avant que le timer fire
+    var snapshot = {
+        etudiantDA: window.evaluationEnCours?.etudiantDA,
+        productionId: window.evaluationEnCours?.productionId,
+        grilleId: window.evaluationEnCours?.grilleId,
+        echelleId: window.evaluationEnCours?.echelleId,
+        cartoucheId: window.evaluationEnCours?.cartoucheId,
+        criteres: Object.assign({}, window.evaluationEnCours?.criteres),
+        donneesAlgorithmiques: window.evaluationEnCours?.donneesAlgorithmiques
+            ? JSON.parse(JSON.stringify(window.evaluationEnCours.donneesAlgorithmiques)) : {}
+    };
+    _timerAutoSave = setTimeout(function() { _autoSauvegarderCriteres(snapshot); }, 3000);
 }
 
-function _autoSauvegarderCriteres() {
+function _autoSauvegarderCriteres(snapshot) {
     _timerAutoSave = null;
-    const ec = window.evaluationEnCours;
+    var ec = snapshot || window.evaluationEnCours;
     if (!ec || !ec.etudiantDA || !ec.productionId || !ec.grilleId) return;
 
     // Au moins un critere doit etre renseigne
@@ -2965,6 +2981,9 @@ function nouvelleEvaluation() {
     if (boutonReprise) boutonReprise.classList.add('u-hide');
 
     cocherOptionsParDefaut();
+
+    // Annuler tout auto-save en attente (race condition)
+    if (_timerAutoSave) { clearTimeout(_timerAutoSave); _timerAutoSave = null; }
 
     // 🔄 Réinitialiser evaluationEnCours à un objet vide (pas null) pour permettre l'affichage des jetons
     window.evaluationEnCours = {
@@ -5443,6 +5462,9 @@ function modifierEvaluation(evaluationId) {
                     console.warn('⚠️ Grille', evaluation.grilleId, 'introuvable dans les templates — affichage depuis les données sauvegardées');
                 }
             }
+
+            // Annuler tout auto-save en attente (race condition)
+            if (_timerAutoSave) { clearTimeout(_timerAutoSave); _timerAutoSave = null; }
 
             // ÉTAPE 5: Initialiser evaluationEnCours (AVANT cartouche/échelle)
             window.evaluationEnCours = {
