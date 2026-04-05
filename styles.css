@@ -16284,7 +16284,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 /* --- Archivage --- */
 .travaux-archivage-options {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 16px;
     margin: 16px 0;
 }
@@ -16310,6 +16310,11 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     display: block;
     font-size: 0.85rem;
     margin-bottom: 4px;
+}
+
+.travaux-archivage-filtres .groupe-form select {
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .travaux-archivage-checks {
@@ -16442,7 +16447,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     }
 
     .travaux-archivage-options {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 

@@ -1054,6 +1054,13 @@
             ${genererGrilleFichiers(fichiersTravaux, 'ouvrirPreviewInline')}
 
             <div class="travaux-archivage-options">
+                <!-- Allégement -->
+                <div class="travaux-archivage-carte">
+                    <h4 data-tooltip="travaux-archivage-alleger">All\u00e9ger les travaux export\u00e9s</h4>
+                    <p class="texte-muted">Convertit les originaux export\u00e9s en fac-simil\u00e9s (NdG, 800px). Les annotations et \u00e9valuations sont conserv\u00e9es.</p>
+                    <button class="btn btn-secondaire" data-action="travauxArchivage.lancerAllegement">All\u00e9ger les travaux export\u00e9s</button>
+                </div>
+
                 <!-- Exporter des travaux -->
                 <div class="travaux-archivage-carte">
                     <h4>Exporter des travaux</h4>
@@ -1137,12 +1144,6 @@
                 </div>
             </div>
 
-            <!-- Allegement -->
-            <div class="travaux-archivage-carte">
-                <h4 data-tooltip="travaux-archivage-alleger">Alléger les travaux exportés</h4>
-                <p class="texte-muted">Convertit les originaux exportés en fac-similés (NdG, 800px). Les annotations et évaluations sont conservées.</p>
-                <button class="btn btn-secondaire" data-action="travauxArchivage.lancerAllegement">Alléger les travaux exportés</button>
-            </div>
 
             <!-- Quota stockage -->
             <div class="travaux-quota-section">
