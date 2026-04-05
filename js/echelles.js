@@ -875,6 +875,7 @@ async function sauvegarderNomEchelle() {
 
         // Mettre à jour en mémoire
         echelleTemplateActuelle.nom = nom;
+        echelleTemplateActuelle.description = document.getElementById('descriptionEchelle')?.value?.trim() || '';
         echelleTemplateActuelle.pratiquesCompatibles = pratiquesCompatibles;
         echelleTemplateActuelle.dateModification = new Date().toISOString();
 
@@ -3008,6 +3009,7 @@ async function creerNouvelleEchelle() {
 
     // Réinitialiser le formulaire
     document.getElementById('nomEchelleTemplate').value = '';
+    document.getElementById('descriptionEchelle').value = '';
 
     // ✅ AJOUT (6 jan 2026) : Vider le panneau métadonnées (mode création)
     const panneauMeta = document.getElementById('panneauMetadonneesEchelle');
@@ -3273,6 +3275,7 @@ function annulerFormEchelle() {
 
     // Réinitialiser les champs
     document.getElementById('nomEchelleTemplate').value = '';
+    document.getElementById('descriptionEchelle').value = '';
     document.getElementById('tableauNiveauxEchelle').innerHTML = '';
 
     // Réinitialiser la référence à l'échelle actuelle
@@ -3304,6 +3307,7 @@ async function chargerEchellePourModif(id) {
 
     // Remplir le formulaire
     document.getElementById('nomEchelleTemplate').value = echelle.nom || '';
+    document.getElementById('descriptionEchelle').value = echelle.description || '';
 
     // Afficher les checkboxes pratiques compatibles
     const containerPratiques = document.getElementById('checkboxesPratiquesEchelle');
@@ -3918,10 +3922,12 @@ async function sauvegarderEchelleComplete() {
             id: genererIdUnique('ECH_'),
             nom: nom,
             niveaux: niveaux,
+            description: document.getElementById('descriptionEchelle')?.value?.trim() || '',
             pratiquesCompatibles: pratiquesCompatibles,
             discipline: discipline, // 🆕 Beta 95.3
             dansBibliotheque: true,
             dateCreation: new Date().toISOString(),
+            dateModification: new Date().toISOString(),
             metadata_cc: enseignantActif ? {
                 auteur_original: enseignantActif,
                 date_creation: new Date().toISOString().split('T')[0],

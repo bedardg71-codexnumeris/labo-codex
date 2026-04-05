@@ -952,6 +952,8 @@ async function sauvegarderProduction() {
                 ...evaluations[index],
                 ...productionData
             };
+            // 🆕 Beta 99.05 : Mise à jour dateModification systématique
+            evaluations[index].dateModification = new Date().toISOString();
 
             // 🆕 Beta 95.4 : Ajouter contributeur si l'utilisateur actif n'est pas l'auteur
             if (typeof ajouterContributeurSiNecessaire === 'function') {
@@ -964,6 +966,9 @@ async function sauvegarderProduction() {
     } else {
         // Ajouter nouvelle production
         productionData.id = genererIdUnique('PROD_');
+        // 🆕 Beta 99.05 : Dates de création et modification
+        productionData.dateCreation = new Date().toISOString();
+        productionData.dateModification = new Date().toISOString();
 
         // 🆕 Beta 95.4 : Pour nouvelle production, définir l'auteur original
         const enseignantActif = typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : null;
