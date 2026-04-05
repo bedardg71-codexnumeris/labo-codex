@@ -835,23 +835,12 @@
         const dateEval = dateObj
             ? dateObj.toLocaleDateString('fr-CA', { timeZone: 'America/Toronto' }) + ' \u00e0 ' + dateObj.toLocaleTimeString('fr-CA', { timeZone: 'America/Toronto', hour: '2-digit', minute: '2-digit' })
             : '';
-        const titreProduction = evaluation.productionNom || '';
-        const titrePdf = titreProduction ? '\u00c9VALUATION \u2014 ' + titreProduction : '\u00c9VALUATION';
-        // ✅ ANONYMISATION (Tier 0.1) : utiliser le nom anonymisé si le mode est actif
-        const nomAnonyme = typeof anonymiserNom === 'function' ? anonymiserNom(fichier.etudiantDA) : null;
-        const nomEtudiantEntete = (nomAnonyme || evaluation.etudiantNom || '') + (fichier.etudiantDA && !nomAnonyme ? ' (' + fichier.etudiantDA + ')' : '');
-        let y = ajouterEnteteRetroaction(doc, titrePdf, {
-            etudiant: nomEtudiantEntete,
-            date: dateEval
-        });
-
-        // --- EN-TETE PERSONNALISE (selon optionsAffichage) ---
+        // --- DONNÉES FRAÎCHES (production, cours) avant l'en-tête ---
         const opts = evaluation.optionsAffichage || {};
         let production = null;
         let etudiant = null;
         let cours = null;
         try {
-            // ✅ ANONYMISATION (Tier 0.1) : clé de base (obtenirDonneesSelonMode applique cle() en interne)
             const productions = obtenirDonneesSelonMode('productions');
             production = productions.find(p => p.id === evaluation.productionId) || null;
         } catch(e) { console.warn('[PDF-Export] production lookup skipped:', e.message || e); }
@@ -860,65 +849,28 @@
             if (production && production.coursId) {
                 cours = coursCollection.find(c => c.id === production.coursId) || null;
             }
-            // Fallback vers le cours actif
             if (!cours && coursCollection.length > 0) {
                 cours = coursCollection.find(c => c.actif) || coursCollection[0];
             }
         } catch(e) { console.warn('[PDF-Export] cours lookup skipped:', e.message || e); }
 
-        // Nom du cours et code
-        if (cours && (cours.codeCours || cours.nomCours)) {
-            doc.setFontSize(sfont(cfg.polices.texteNormal));
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(...cfg.couleurs.textePrincipal);
-            let texteCours = '';
-            if (cours.codeCours) texteCours += cours.codeCours;
-            if (cours.codeCours && cours.nomCours) texteCours += ' — ';
-            if (cours.nomCours) texteCours += cours.nomCours;
-            doc.text(texteCours, margeG, y);
-            y += smm(5);
-        }
+        // Titre depuis données fraîches (production.titre reflète les renommages)
+        const titreProduction = (production ? production.titre : null) || evaluation.productionNom || '';
+        const titrePdf = titreProduction ? '\u00c9VALUATION \u2014 ' + titreProduction : '\u00c9VALUATION';
+        const nomAnonyme = typeof anonymiserNom === 'function' ? anonymiserNom(fichier.etudiantDA) : null;
+        const nomEtudiantEntete = (nomAnonyme || evaluation.etudiantNom || '') + (fichier.etudiantDA && !nomAnonyme ? ' (' + fichier.etudiantDA + ')' : '');
+        let y = ajouterEnteteRetroaction(doc, titrePdf, {
+            etudiant: nomEtudiantEntete,
+            date: dateEval
+        });
 
-        // Nom de la grille (italique, gris)
-        if (evaluation.grilleNom) {
-            doc.setFontSize(sfont(cfg.polices.texteNormal));
-            doc.setFont('helvetica', 'italic');
-            doc.setTextColor(...cfg.couleurs.texteSecondaire);
-            doc.text('Grille : ' + evaluation.grilleNom, margeG, y);
-            y += smm(6);
-        }
         try {
             // ✅ ANONYMISATION (Tier 0.1) : clé de base sans double namespace
             const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
             etudiant = etudiants.find(e => e.da === fichier.etudiantDA) || null;
         } catch(e) { console.warn('[PDF-Export] etudiant lookup skipped:', e.message || e); }
 
-        doc.setFontSize(sfont(cfg.polices.texteNormal));
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(...cfg.couleurs.textePrincipal);
-
-        // Helper pour texte long avec wrapping
-        function ajouterTexteWrappe(label, texte) {
-            const lignes = doc.splitTextToSize(label + texte, largeurContenu);
-            for (const ligne of lignes) {
-                doc.text(ligne, margeG, y);
-                y += smm(4.5);
-            }
-            y += smm(1);
-        }
-
-        if (opts.description && production && production.description) {
-            ajouterTexteWrappe('Production : ', production.description);
-        }
-        if (opts.objectif && production && production.objectif) {
-            ajouterTexteWrappe('Objectif : ', production.objectif);
-        }
-        if (opts.tache && production && production.tache) {
-            ajouterTexteWrappe('Tâche : ', production.tache);
-        }
-
-
-        // --- LAYOUT 2 COLONNES ---
+        // --- LAYOUT 2 COLONNES (immédiat après l'en-tête) ---
         const colGap = smm(3);
         const colLargeur = (largeurContenu - colGap) / 2;
         const colDroiteX = margeG + colLargeur + colGap;
@@ -926,8 +878,54 @@
         const yDebutColonnes = y;
         const pageDebutColonnes = doc.internal.getCurrentPageInfo().pageNumber;
 
-        // =============== COLONNE GAUCHE : Critères + Note ===============
+        // =============== COLONNE GAUCHE : Métadonnées + Critères + Note ===============
         let yGauche = yDebutColonnes;
+        const policeMeta = sfont(cfg.polices.textePetit - 1);
+
+        // --- Métadonnées (cours, grille, production, objectif, tâche) ---
+        if (cours && (cours.codeCours || cours.nomCours)) {
+            doc.setFontSize(policeMeta);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(...cfg.couleurs.textePrincipal);
+            let texteCours = '';
+            if (cours.codeCours) texteCours += cours.codeCours;
+            if (cours.codeCours && cours.nomCours) texteCours += ' \u2014 ';
+            if (cours.nomCours) texteCours += cours.nomCours;
+            const lignesCours = doc.splitTextToSize(texteCours, colLargeur);
+            doc.text(lignesCours, margeG, yGauche);
+            yGauche += lignesCours.length * smm(3.5);
+        }
+
+        if (evaluation.grilleNom) {
+            doc.setFontSize(policeMeta);
+            doc.setFont('helvetica', 'italic');
+            doc.setTextColor(...cfg.couleurs.texteSecondaire);
+            doc.text('Grille : ' + evaluation.grilleNom, margeG, yGauche);
+            yGauche += smm(3.5);
+        }
+
+        doc.setFontSize(policeMeta);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...cfg.couleurs.textePrincipal);
+
+        function ajouterTexteColG(label, texte) {
+            const lignes = doc.splitTextToSize(label + texte, colLargeur);
+            for (const ligne of lignes) {
+                doc.text(ligne, margeG, yGauche);
+                yGauche += smm(3.5);
+            }
+        }
+
+        if (opts.description && production && production.description) {
+            ajouterTexteColG('Production : ', production.description);
+        }
+        if (opts.objectif && production && production.objectif) {
+            ajouterTexteColG('Objectif : ', production.objectif);
+        }
+        if (opts.tache && production && production.tache) {
+            ajouterTexteColG('Tâche : ', production.tache);
+        }
+        yGauche += smm(3);
 
         // Charger la cartouche pour les textes de contexte
         let cartouchePdf = null;
@@ -1088,7 +1086,7 @@
                 doc.addPage([refW, refH], 'portrait');
                 yGauche = smm(cfg.marges.haut);
             }
-            doc.setFontSize(sfont(cfg.polices.texteNormal));
+            doc.setFontSize(policeMeta);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(...cfg.couleurs.textePrincipal);
 
@@ -1102,7 +1100,7 @@
             }
             if (texteNote) {
                 doc.text(texteNote, margeG, yGauche);
-                yGauche += smm(5);
+                yGauche += smm(4);
             }
         }
 
@@ -1366,7 +1364,6 @@
                 if (detailsNote && detailsNote.portfolio && detailsNote.portfolio.artefactsRetenus.length > 0) {
                     var productionsNote = obtenirDonneesSelonMode('productions') || [];
                     var toutesEvalsNote = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-                    var grillesNote = db.getSync('grillesTemplates', []);
                     var artefactsPortfolio = productionsNote.filter(function(p) { return p.type === 'artefact-portfolio'; });
                     if (artefactsPortfolio.length === 0) {
                         artefactsPortfolio = productionsNote.filter(function(p) { return p.type !== 'portfolio'; });
@@ -1388,18 +1385,10 @@
                         }
                     }
 
-                    // Helper : nom de la grille depuis évaluation ou production
-                    function trouverGrilleNomPdf(productionId) {
-                        var ev = toutesEvalsNote.find(function(e) {
-                            return e.productionId === productionId && e.etudiantDA === da && !e.remplaceeParId;
-                        });
-                        if (ev && ev.grilleNom) return ev.grilleNom;
+                    // Helper : activité d'apprentissage (description) d'une production
+                    function obtenirActivitePdf(productionId) {
                         var pr = productionsNote.find(function(p) { return p.id === productionId; });
-                        if (pr && pr.grilleId) {
-                            var gr = grillesNote.find(function(g) { return g.id === pr.grilleId; });
-                            if (gr) return gr.nom;
-                        }
-                        return '';
+                        return pr ? (pr.description || '') : '';
                     }
 
                     // Helper : échéance d'une production
@@ -1424,11 +1413,11 @@
                     texteNote = 'Voici les ' + portfolio.nombreRetenus + ' meilleurs artefacts que tu as produits' + pondSelLabel + ' :\n';
                     var retenusTries = portfolio.artefactsRetenus.slice().sort(function(a, b) { return (b.note || 0) - (a.note || 0); });
                     retenusTries.forEach(function(art) {
-                        var indexArt = artefactsPortfolio.findIndex(function(p) { return p.id === art.productionId; }) + 1;
-                        var label = indexArt > 0 ? 'Artefact ' + indexArt : 'Artefact';
-                        var grilleNom = trouverGrilleNomPdf(art.productionId);
+                        var prod = productionsNote.find(function(p) { return p.id === art.productionId; });
+                        var label = prod ? (prod.titre || 'Artefact') : 'Artefact';
+                        var activite = obtenirActivitePdf(art.productionId);
                         texteNote += '  \u2022 ' + label + ' (' + (art.niveau || '?') + ')';
-                        if (grilleNom) texteNote += ' : ' + grilleNom;
+                        if (activite) texteNote += ' : ' + activite;
                         texteNote += '\n';
                     });
 
@@ -1460,18 +1449,15 @@
                     if (artefactsAvenir.length > 0) {
                         texteNote += '\n\nArtefacts \u00e0 venir :\n';
                         artefactsAvenir.forEach(function(prod) {
-                            var indexArt = artefactsPortfolio.findIndex(function(p) { return p.id === prod.id; }) + 1;
-                            var label = indexArt > 0 ? 'Artefact ' + indexArt : (prod.titre || 'Artefact');
-                            var grilleNom = '';
-                            if (prod.grilleId) {
-                                var gr = grillesNote.find(function(g) { return g.id === prod.grilleId; });
-                                if (gr) grilleNom = gr.nom;
-                            }
+                            var label = prod.titre || 'Artefact';
+                            var activite = prod.description || '';
                             var echeance = obtenirEcheancePdf(prod);
                             texteNote += '  \u2022 ' + label;
-                            if (grilleNom) {
-                                texteNote += ' : ' + grilleNom;
+                            if (activite) {
+                                texteNote += ' : ' + activite;
                                 if (echeance) texteNote += ' (\u00e9ch\u00e9ance : ' + formaterDatePdf(echeance) + ')';
+                            } else if (echeance) {
+                                texteNote += ' (\u00e9ch\u00e9ance : ' + formaterDatePdf(echeance) + ')';
                             } else {
                                 texteNote += ' (configuration \u00e0 venir)';
                             }
@@ -1487,14 +1473,15 @@
                         if (artefactsObligatoires.length > 0) {
                             texteNote += '\nArtefacts obligatoires' + pondOblLabel + ' :\n';
                             artefactsObligatoires.forEach(function(prod) {
-                                var indexArt = artefactsPortfolio.findIndex(function(p) { return p.id === prod.id; }) + 1;
-                                var label = indexArt > 0 ? 'Artefact ' + indexArt : (prod.titre || 'Artefact');
+                                var label = prod.titre || 'Artefact';
                                 var evalObl = toutesEvalsNote.find(function(e) {
                                     return e.productionId === prod.id && e.etudiantDA === da && !e.remplaceeParId && e.noteFinale != null;
                                 });
                                 texteNote += '  \u2022 ' + label;
                                 if (evalObl) {
-                                    texteNote += ' (' + (evalObl.niveauFinal || '?') + ') : ' + (evalObl.grilleNom || '');
+                                    var activiteObl = prod.description || '';
+                                    texteNote += ' (' + (evalObl.niveauFinal || '?') + ')';
+                                    if (activiteObl) texteNote += ' : ' + activiteObl;
                                 } else {
                                     texteNote += ' (non remis)';
                                 }
@@ -1522,7 +1509,7 @@
 
         // Description (même style que Rétroaction générale/spécifique)
         doc.setFont('helvetica', 'italic');
-        doc.setFontSize(sfont(cfg.polices.textePetit - 2));
+        doc.setFontSize(policeMeta);
         doc.setTextColor(...cfg.couleurs.texteSecondaire);
         var descBilan = 'Mes standards sont tr\u00e8s \u00e9lev\u00e9s \u00e0 ton \u00e9gard parce que je crois que tu as tout ce qu\u2019il faut pour les atteindre et j\u2019ai confiance en toi. Si tu as besoin d\u2019aide, viens me voir.\nSelon toi, quel aspect de ta production m\u00e9riterait le plus d\u2019attention ?';
         var descRendu = doc.splitTextToSize(descBilan, colLargeur);
@@ -1544,12 +1531,12 @@
                 fontSize: sfont(cfg.polices.textePetit - 1)
             },
             bodyStyles: {
-                fontSize: sfont(cfg.polices.textePetit - 2),
+                fontSize: policeMeta,
                 textColor: cfg.couleurs.textePrincipal,
                 cellPadding: smm(1.2)
             },
             columnStyles: {
-                0: { cellWidth: colLargeur * 0.25, fontStyle: 'bold', fontSize: sfont(cfg.polices.textePetit - 1) },
+                0: { cellWidth: colLargeur * 0.25, fontStyle: 'bold' },
                 1: { cellWidth: colLargeur * 0.75 }
             },
             margin: { left: colDroiteX, right: smm(cfg.marges.droite) },
