@@ -1057,8 +1057,8 @@
                 <!-- Allégement -->
                 <div class="travaux-archivage-carte">
                     <h4 data-tooltip="travaux-archivage-alleger">All\u00e9ger les travaux export\u00e9s</h4>
-                    <p class="texte-muted">Convertit les originaux export\u00e9s en fac-simil\u00e9s (NdG, 800px). Les annotations et \u00e9valuations sont conserv\u00e9es.</p>
-                    <button class="btn btn-secondaire" data-action="travauxArchivage.lancerAllegement">All\u00e9ger les travaux export\u00e9s</button>
+                    <p class="texte-muted">Convertit les originaux export\u00e9s en fac-simil\u00e9s. Fonctionnalit\u00e9 en cours de refonte.</p>
+                    <button class="btn btn-secondaire" disabled style="opacity:0.5;cursor:not-allowed">All\u00e9ger les travaux export\u00e9s</button>
                 </div>
 
                 <!-- Exporter des travaux -->
