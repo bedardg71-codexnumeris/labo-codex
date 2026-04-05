@@ -1359,107 +1359,150 @@
         if (!texteJetons) texteJetons = 'Aucun jeton utilis\u00e9.';
         bilanTableBody.push(['Jetons\nutilis\u00e9s', texteJetons.trim()]);
 
-        // Rangée 4 : Note provisoire (selon la pratique de notation active)
+        // Rangée 4 : Note provisoire (SSOT : calculerDetailsNoteFinale)
         try {
-            var modalites = db.getSync('modalitesEvaluation', null);
-            var typePratique = modalites ? modalites.pratique : null;
-            var toutesEvalsNote = obtenirDonneesSelonMode('evaluationsSauvegardees');
-            var productionsNote = obtenirDonneesSelonMode('productions') || [];
-            var evalsEleve = toutesEvalsNote.filter(function(e) {
-                return e.etudiantDA === da && e.noteFinale != null && !e.remplaceeParId;
-            });
-
-            if (typePratique && evalsEleve.length > 0) {
-                var texteNote = '';
-
-                if (typePratique === 'sommative') {
-                    // Sommative : moyenne pondérée de toutes les évaluations
-                    var sommeP = 0; var totalPond = 0;
-                    evalsEleve.forEach(function(ev) {
-                        var prod = productionsNote.find(function(p) { return p.id === ev.productionId; });
-                        var pond = prod ? (prod.ponderation || 0) : 0;
-                        if (pond > 0) {
-                            sommeP += ev.noteFinale * pond;
-                            totalPond += pond;
-                        }
-                    });
-                    var nbEvalues = evalsEleve.length;
-                    var nbTotal = productionsNote.length;
-                    if (totalPond > 0) {
-                        var noteP = Math.round(sommeP / totalPond * 10) / 10;
-                        texteNote = 'Ta note provisoire est ' + noteP + '% (' + nbEvalues + ' \u00e9valuation' + (nbEvalues > 1 ? 's' : '') + ' sur ' + nbTotal + '). Elle \u00e9voluera avec tes prochains travaux.';
+            if (typeof calculerDetailsNoteFinale === 'function') {
+                var detailsNote = calculerDetailsNoteFinale(da);
+                if (detailsNote && detailsNote.portfolio && detailsNote.portfolio.artefactsRetenus.length > 0) {
+                    var productionsNote = obtenirDonneesSelonMode('productions') || [];
+                    var toutesEvalsNote = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+                    var grillesNote = db.getSync('grillesTemplates', []);
+                    var artefactsPortfolio = productionsNote.filter(function(p) { return p.type === 'artefact-portfolio'; });
+                    if (artefactsPortfolio.length === 0) {
+                        artefactsPortfolio = productionsNote.filter(function(p) { return p.type !== 'portfolio'; });
                     }
-                } else if (typePratique.indexOf('pan') !== -1 && modalites.configPAN && modalites.configPAN.portfolio) {
-                    // Miroir de chargerPortfolioEleveDetail (portfolio.js)
-                    var configPAN = modalites.configPAN.portfolio;
-                    var nombreARetenir = configPAN.nombreARetenir || 3;
-                    var methode = configPAN.methodeSelection || 'meilleurs';
+                    var portfolio = detailsNote.portfolio;
+                    var estHybride = portfolio.methodeSelection.indexOf('hybride') !== -1;
+                    var texteNote = '';
 
-                    // Pool d'artefacts : artefact-portfolio si portfolio existe, sinon toutes les productions évaluées
-                    var portfolioObj = productionsNote.find(function(p) { return p.type === 'portfolio'; });
-                    var artefactsCandidats = productionsNote.filter(function(p) { return p.type === 'artefact-portfolio'; });
-                    if (artefactsCandidats.length === 0) {
-                        // Pas de structure portfolio — prendre toutes les productions qui ont une évaluation
-                        artefactsCandidats = productionsNote.filter(function(p) { return p.type !== 'portfolio'; });
-                    }
-
-                    // Construire la liste avec statut
-                    var artefacts = [];
-                    artefactsCandidats.forEach(function(art) {
-                        var ev = evalsEleve.find(function(e) { return e.productionId === art.id; });
-                        artefacts.push({
-                            id: art.id,
-                            titre: art.titre || art.description || art.id,
-                            remis: !!ev,
-                            note: ev ? ev.noteFinale : null,
-                            niveau: ev ? (ev.niveauFinal || null) : null
-                        });
-                    });
-
-                    // Lire la sélection sauvegardée (si portfolio existe)
-                    var idsRetenus = [];
-                    if (portfolioObj) {
-                        var selectionsPortfolios = db.getSync(cle('portfoliosEleves'), {});
-                        var selEleve = selectionsPortfolios[da] && selectionsPortfolios[da][portfolioObj.id];
-                        idsRetenus = selEleve ? (selEleve.artefactsRetenus || []) : [];
-                    }
-
-                    // Si pas de sélection sauvegardée, sélection automatique
-                    if (idsRetenus.length === 0 && typeof selectionnerArtefactsSelonModalite === 'function') {
-                        var artefactsRemisAvecNote = artefacts.filter(function(a) { return a.remis && a.note !== null; });
-                        var artefactsSelectionnes = selectionnerArtefactsSelonModalite(artefactsRemisAvecNote, nombreARetenir, methode);
-                        idsRetenus = artefactsSelectionnes.map(function(a) { return a.id; });
-                    }
-
-                    // Récupérer les artefacts retenus
-                    var retenus = [];
-                    idsRetenus.forEach(function(artId) {
-                        var art = artefacts.find(function(a) { return a.id === artId; });
-                        if (art && art.note !== null) retenus.push(art);
-                    });
-
-                    if (retenus.length > 0) {
-                        var somme = retenus.reduce(function(s, a) { return s + a.note; }, 0);
-                        var moyenne = Math.round(somme / retenus.length * 10) / 10;
-                        retenus.sort(function(a, b) { return b.note - a.note; });
-
-                        texteNote = 'Tes ' + retenus.length + ' meilleurs artefacts retenus :\n';
-                        retenus.forEach(function(art) {
-                            texteNote += '  \u2022 ' + art.titre;
-                            if (art.niveau) texteNote += ' ' + art.niveau;
-                            texteNote += ' ' + art.note + '%\n';
-                        });
-                        texteNote += 'Moyenne : ' + moyenne + '%. Cette note peut changer en fonction de tes prochains travaux.';
-                    } else {
-                        var nbRemis = artefacts.filter(function(a) { return a.remis; }).length;
-                        if (nbRemis < nombreARetenir) {
-                            var manquants = nombreARetenir - nbRemis;
-                            texteNote = 'Il te manque ' + manquants + ' artefact' + (manquants > 1 ? 's' : '') + ' pour pouvoir construire ta note.';
+                    // Pondérations des catégories (mode hybride)
+                    var pondSelLabel = '';
+                    var pondOblLabel = '';
+                    if (estHybride) {
+                        var cfgPratNote = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null;
+                        var cfgCats = cfgPratNote && cfgPratNote.categories ? cfgPratNote.categories : null;
+                        if (!cfgCats && typeof obtenirConfigCategories === 'function') cfgCats = obtenirConfigCategories();
+                        if (cfgCats) {
+                            pondSelLabel = cfgCats.selection ? ' (' + (cfgCats.selection.ponderation || 65) + '%)' : '';
+                            pondOblLabel = cfgCats.obligatoires ? ' (' + (cfgCats.obligatoires.ponderation || 35) + '%)' : '';
                         }
                     }
-                }
 
-                if (texteNote) {
+                    // Helper : nom de la grille depuis évaluation ou production
+                    function trouverGrilleNomPdf(productionId) {
+                        var ev = toutesEvalsNote.find(function(e) {
+                            return e.productionId === productionId && e.etudiantDA === da && !e.remplaceeParId;
+                        });
+                        if (ev && ev.grilleNom) return ev.grilleNom;
+                        var pr = productionsNote.find(function(p) { return p.id === productionId; });
+                        if (pr && pr.grilleId) {
+                            var gr = grillesNote.find(function(g) { return g.id === pr.grilleId; });
+                            if (gr) return gr.nom;
+                        }
+                        return '';
+                    }
+
+                    // Helper : échéance d'une production
+                    function obtenirEcheancePdf(prod) {
+                        if (prod.dateEcheance) return prod.dateEcheance;
+                        if (prod.echeancesParGroupe) {
+                            for (var gcId in prod.echeancesParGroupe) {
+                                var entree = prod.echeancesParGroupe[gcId];
+                                if (entree && entree.date) return entree.date;
+                            }
+                        }
+                        return null;
+                    }
+
+                    // Helper : formater une date en français
+                    function formaterDatePdf(dateStr) {
+                        var d = new Date(dateStr + 'T00:00:00');
+                        return d.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long' });
+                    }
+
+                    // === 1. Artefacts retenus ===
+                    texteNote = 'Voici les ' + portfolio.nombreRetenus + ' meilleurs artefacts que tu as produits' + pondSelLabel + ' :\n';
+                    var retenusTries = portfolio.artefactsRetenus.slice().sort(function(a, b) { return (b.note || 0) - (a.note || 0); });
+                    retenusTries.forEach(function(art) {
+                        var indexArt = artefactsPortfolio.findIndex(function(p) { return p.id === art.productionId; }) + 1;
+                        var label = indexArt > 0 ? 'Artefact ' + indexArt : 'Artefact';
+                        var grilleNom = trouverGrilleNomPdf(art.productionId);
+                        texteNote += '  \u2022 ' + label + ' (' + (art.niveau || '?') + ')';
+                        if (grilleNom) texteNote += ' : ' + grilleNom;
+                        texteNote += '\n';
+                    });
+
+                    // === 2. Note provisoire ===
+                    var moyenne = Math.round(portfolio.moyenne * 10) / 10;
+                    texteNote += '\nLa note chiffr\u00e9e provisoire de ton portfolio est ' + moyenne + '%. Cette note peut changer en fonction de tes prochains travaux et des jetons que tu appliques.';
+
+                    // Plafonnement
+                    if (portfolio.plafonnement && portfolio.plafonnement.actif) {
+                        if (portfolio.plafonnement.echec) {
+                            texteNote += '\nNote plafonn\u00e9e (\u00e9chec) : d\u00e9ficit de ' + portfolio.plafonnement.deficit + ' production(s).';
+                        } else {
+                            texteNote += '\nNote plafonn\u00e9e \u00e0 ' + portfolio.plafonnement.seuilMax + '% (d\u00e9ficit de ' + portfolio.plafonnement.deficit + ' production(s)).';
+                        }
+                    }
+
+                    // === 3. Artefacts à venir (sélection non évalués) ===
+                    var idsEvaluesNote = new Set();
+                    toutesEvalsNote.filter(function(e) {
+                        return e.etudiantDA === da && !e.remplaceeParId && e.noteFinale != null;
+                    }).forEach(function(e) { idsEvaluesNote.add(e.productionId); });
+
+                    var artefactsAvenir = artefactsPortfolio.filter(function(p) {
+                        if (idsEvaluesNote.has(p.id)) return false;
+                        if (estHybride && p.categorie === 'obligatoire') return false;
+                        return true;
+                    });
+
+                    if (artefactsAvenir.length > 0) {
+                        texteNote += '\n\nArtefacts \u00e0 venir :\n';
+                        artefactsAvenir.forEach(function(prod) {
+                            var indexArt = artefactsPortfolio.findIndex(function(p) { return p.id === prod.id; }) + 1;
+                            var label = indexArt > 0 ? 'Artefact ' + indexArt : (prod.titre || 'Artefact');
+                            var grilleNom = '';
+                            if (prod.grilleId) {
+                                var gr = grillesNote.find(function(g) { return g.id === prod.grilleId; });
+                                if (gr) grilleNom = gr.nom;
+                            }
+                            var echeance = obtenirEcheancePdf(prod);
+                            texteNote += '  \u2022 ' + label;
+                            if (grilleNom) {
+                                texteNote += ' : ' + grilleNom;
+                                if (echeance) texteNote += ' (\u00e9ch\u00e9ance : ' + formaterDatePdf(echeance) + ')';
+                            } else {
+                                texteNote += ' (configuration \u00e0 venir)';
+                            }
+                            texteNote += '\n';
+                        });
+                    }
+
+                    // === 4. Artefacts obligatoires (mode hybride uniquement) ===
+                    if (estHybride) {
+                        var artefactsObligatoires = artefactsPortfolio.filter(function(p) {
+                            return p.categorie === 'obligatoire';
+                        });
+                        if (artefactsObligatoires.length > 0) {
+                            texteNote += '\nArtefacts obligatoires' + pondOblLabel + ' :\n';
+                            artefactsObligatoires.forEach(function(prod) {
+                                var indexArt = artefactsPortfolio.findIndex(function(p) { return p.id === prod.id; }) + 1;
+                                var label = indexArt > 0 ? 'Artefact ' + indexArt : (prod.titre || 'Artefact');
+                                var evalObl = toutesEvalsNote.find(function(e) {
+                                    return e.productionId === prod.id && e.etudiantDA === da && !e.remplaceeParId && e.noteFinale != null;
+                                });
+                                texteNote += '  \u2022 ' + label;
+                                if (evalObl) {
+                                    texteNote += ' (' + (evalObl.niveauFinal || '?') + ') : ' + (evalObl.grilleNom || '');
+                                } else {
+                                    texteNote += ' (non remis)';
+                                }
+                                texteNote += '\n';
+                            });
+                        }
+                    }
+
                     bilanTableBody.push(['Note\nprovisoire', texteNote.trim()]);
                 }
             }
