@@ -3483,13 +3483,22 @@ textarea {
    PANNEAU METADONNEES (Beta 95.1)
    =============================== */
 
+/* --- Panneau métadonnées (redesign avril 2026) --- */
+
 .panneau-metadata {
     background: var(--bleu-tres-pale);
     border: 1px solid var(--bleu-pale);
     border-radius: var(--radius-moyen);
-    padding: 12px 16px;
+    padding: 0;
     margin-top: 15px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 0.25s ease;
+}
+
+.panneau-metadata:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .panneau-metadata .meta-titre {
@@ -3501,11 +3510,34 @@ textarea {
     gap: 8px;
 }
 
+.panneau-metadata-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, var(--bleu-pale) 0%, transparent 100%);
+    border-bottom: 1px solid var(--bleu-pale);
+}
+
+.panneau-metadata-titre {
+    font-weight: 700;
+    color: var(--accent-primaire);
+    font-size: 0.82rem;
+    letter-spacing: 0.02em;
+    text-transform: none;
+}
+
 .panneau-metadata .meta-ligne {
     display: flex;
-    gap: 8px;
-    padding: 4px 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    gap: 12px;
+    padding: 7px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    align-items: baseline;
+    transition: background 0.15s ease;
+}
+
+.panneau-metadata .meta-ligne:hover {
+    background: rgba(0, 0, 0, 0.02);
 }
 
 .panneau-metadata .meta-ligne:last-child {
@@ -3513,28 +3545,41 @@ textarea {
 }
 
 .panneau-metadata .meta-label {
-    font-weight: 500;
-    color: var(--gris-moyen);
-    min-width: 100px;
+    font-weight: 600;
+    color: var(--texte-secondaire);
+    min-width: 90px;
+    flex-shrink: 0;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
 .panneau-metadata .meta-valeur {
-    color: var(--gris-fonce);
+    color: var(--texte-principal);
+    line-height: 1.4;
 }
 
-.panneau-metadata-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--bleu-pale);
+.panneau-metadata .meta-description .meta-valeur {
+    font-style: italic;
+    opacity: 0.8;
 }
 
-.panneau-metadata-titre {
-    font-weight: 600;
-    color: var(--accent-primaire);
-    font-size: 0.95rem;
+.panneau-metadata .meta-licence {
+    margin-top: 0;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, transparent 0%, var(--bleu-pale) 100%);
+    border-top: 1px solid var(--bleu-pale);
+}
+
+.panneau-metadata .meta-licence .meta-valeur img {
+    height: 15px;
+    vertical-align: middle;
+    opacity: 0.85;
+    transition: opacity 0.2s ease;
+}
+
+.panneau-metadata .meta-licence .meta-valeur img:hover {
+    opacity: 1;
 }
 
 .btn-edit-metadata {
@@ -3543,23 +3588,14 @@ textarea {
     cursor: pointer;
     padding: 4px 8px;
     border-radius: var(--radius-petit);
-    font-size: 0.9rem;
-    transition: background 0.2s;
+    font-size: 0.8rem;
+    color: var(--texte-secondaire);
+    transition: background 0.2s, color 0.2s;
 }
 
 .btn-edit-metadata:hover {
-    background: rgba(0, 0, 0, 0.05);
-}
-
-.panneau-metadata .meta-description .meta-valeur {
-    font-style: italic;
-    color: var(--gris-moyen);
-}
-
-.panneau-metadata .meta-licence {
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid var(--bleu-pale);
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--accent-primaire);
 }
 
 /* Modal Backup Reminder — utilise les classes standard DS (.modal-overlay, .modal-contenu, etc.) */

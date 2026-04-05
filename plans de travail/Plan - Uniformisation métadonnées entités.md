@@ -1,7 +1,7 @@
 # Plan — Uniformisation des métadonnées des entités
 
 **Date** : 5 avril 2026
-**Statut** : Planifié — prochaine session
+**Statut** : ✅ Terminé — 5 avril 2026
 **Priorité** : Qualité / cohérence UI
 
 ---
