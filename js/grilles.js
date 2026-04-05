@@ -679,6 +679,7 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
     if (grilleTemplateActuelle) {
         // Mode édition
         grilleTemplateActuelle.nom = nomGrille;
+        grilleTemplateActuelle.description = document.getElementById('descriptionGrille')?.value?.trim() || '';
         grilleTemplateActuelle.pratiquesCompatibles = pratiquesCompatibles;
         grilleTemplateActuelle.dateModification = new Date().toISOString();
 
@@ -706,6 +707,7 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
             criteres: window.tempCriteres || [],
             pratiquesCompatibles: pratiquesCompatibles,
             discipline: discipline, // 🆕 Beta 95.3
+            description: document.getElementById('descriptionGrille')?.value?.trim() || '',
             dateCreation: new Date().toISOString(),
             dateModification: new Date().toISOString(),
             dansBibliotheque: true,  // ✅ AJOUT (8 décembre 2025) - Nouvelle grille dans bibliothèque par défaut
@@ -2627,6 +2629,7 @@ function creerNouvelleGrille() {
 
     // Réinitialiser le formulaire
     document.getElementById('nomGrilleTemplate').value = '';
+    document.getElementById('descriptionGrille').value = '';
 
     // ✅ AJOUT (6 jan 2026) : Vider le panneau métadonnées (mode création)
     const panneauMeta = document.getElementById('panneauMetadonneesGrille');
@@ -2896,6 +2899,7 @@ async function chargerGrillePourModif(id) {
 
     // Remplir le formulaire
     document.getElementById('nomGrilleTemplate').value = grille.nom || '';
+    document.getElementById('descriptionGrille').value = grille.description || '';
 
     // Afficher les checkboxes pratiques compatibles
     const containerPratiques = document.getElementById('checkboxesPratiquesGrille');

@@ -279,10 +279,12 @@ const SCHEMAS_IMPORT = {
         criteres: { type: 'array' },
         auteurOriginal: { type: 'string', maxLen: 100 },
         dateImport: { type: 'string', maxLen: 50 },
+        dateCreation: { type: 'string', maxLen: 50 },
+        dateModification: { type: 'string', maxLen: 50 },
         estDemo: { type: 'boolean' },
         isDemo: { type: 'boolean' },
-        dateCreation: { type: 'string', maxLen: 50 },
-        description: { type: 'string', maxLen: 500 }
+        description: { type: 'string', maxLen: 500 },
+        metadata_cc: { type: 'object' }
     },
     echelle: {
         id: { type: 'string', maxLen: 100 },
@@ -290,10 +292,12 @@ const SCHEMAS_IMPORT = {
         niveaux: { type: 'array' },
         auteurOriginal: { type: 'string', maxLen: 100 },
         dateImport: { type: 'string', maxLen: 50 },
+        dateCreation: { type: 'string', maxLen: 50 },
+        dateModification: { type: 'string', maxLen: 50 },
         estDemo: { type: 'boolean' },
         isDemo: { type: 'boolean' },
-        dateCreation: { type: 'string', maxLen: 50 },
-        description: { type: 'string', maxLen: 500 }
+        description: { type: 'string', maxLen: 500 },
+        metadata_cc: { type: 'object' }
     },
     pratique: {
         id: { type: 'string', maxLen: 100 },
@@ -302,11 +306,13 @@ const SCHEMAS_IMPORT = {
         description: { type: 'string', maxLen: 500 },
         auteurOriginal: { type: 'string', maxLen: 100 },
         dateImport: { type: 'string', maxLen: 50 },
+        dateModification: { type: 'string', maxLen: 50 },
         estDemo: { type: 'boolean' },
         isDemo: { type: 'boolean' },
         criteres: { type: 'array' },
         ponderation: { type: 'object' },
-        seuilReussite: { type: 'number' }
+        seuilReussite: { type: 'number' },
+        metadata_cc: { type: 'object' }
     },
     production: {
         id: { type: 'string', maxLen: 100 },
@@ -316,13 +322,16 @@ const SCHEMAS_IMPORT = {
         description: { type: 'string', maxLen: 500 },
         auteurOriginal: { type: 'string', maxLen: 100 },
         dateImport: { type: 'string', maxLen: 50 },
+        dateCreation: { type: 'string', maxLen: 50 },
+        dateModification: { type: 'string', maxLen: 50 },
         dateEcheance: { type: 'string', maxLen: 50 },
         estDemo: { type: 'boolean' },
         isDemo: { type: 'boolean' },
         facultatif: { type: 'boolean' },
         grilleId: { type: 'string', maxLen: 100 },
         echelleId: { type: 'string', maxLen: 100 },
-        pratiqueId: { type: 'string', maxLen: 100 }
+        pratiqueId: { type: 'string', maxLen: 100 },
+        metadata_cc: { type: 'object' }
     }
 };
 

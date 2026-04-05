@@ -412,15 +412,29 @@ async function initialiserNouveauCartouche(grilleId) {
         nom: '',
         grilleId: grilleId,
         contexte: '',
+        description: '', // 🆕 Beta 99.05 : Champ description uniforme
         criteres: criteres.map(c => ({ id: c.id, nom: c.nom })),
         niveaux: niveaux.map(n => ({ code: n.code, nom: n.nom })),
         commentaires: {},
         verrouille: false,
+        dateCreation: new Date().toISOString(),
+        dateModification: new Date().toISOString(),
         dansBibliotheque: true  // ✅ AJOUT (8 décembre 2025) : Visible dans la bibliothèque par défaut
     };
+
+    // Initialiser metadata_cc (uniforme avec grille, production, échelle)
+    const enseignantActif = typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : null;
+    if (enseignantActif) {
+        cartoucheActuel.metadata_cc = {
+            auteur_original: enseignantActif,
+            date_creation: new Date().toISOString().split('T')[0],
+            contributeurs: []
+        };
+    }
     
     // Réinitialiser les champs
     document.getElementById('nomCartouche').value = '';
+    document.getElementById('descriptionCartouche').value = '';
     document.getElementById('contexteCartouche').value = '';
     var specClear = document.getElementById('contexteSpecifiqueCartouche');
     if (specClear) specClear.value = '';
@@ -483,6 +497,8 @@ async function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam 
         const inputContexte = document.getElementById('contexteCartouche');
 
         if (inputNom) inputNom.value = cartoucheActuel.nom;
+        const inputDesc = document.getElementById('descriptionCartouche');
+        if (inputDesc) inputDesc.value = cartoucheActuel.description || '';
         if (inputContexte) inputContexte.value = cartoucheActuel.contexte || '';
         const inputContexteSpec = document.getElementById('contexteSpecifiqueCartouche');
         if (inputContexteSpec) inputContexteSpec.value = cartoucheActuel.contexteSpecifique || '';
@@ -741,6 +757,7 @@ async function sauvegarderCartouche() {
 
     // Mettre à jour les champs
     cartoucheActuel.nom = nom;
+    cartoucheActuel.description = document.getElementById('descriptionCartouche')?.value?.trim() || '';
     cartoucheActuel.contexte = document.getElementById('contexteCartouche').value.trim();
     cartoucheActuel.contexteSpecifique = (document.getElementById('contexteSpecifiqueCartouche') || {}).value ? document.getElementById('contexteSpecifiqueCartouche').value.trim() : '';
     cartoucheActuel.pratiquesCompatibles = pratiquesCompatibles;
@@ -757,6 +774,9 @@ async function sauvegarderCartouche() {
     if (!cartoucheActuel.metadata_cc.contributeurs) {
         cartoucheActuel.metadata_cc.contributeurs = [];
     }
+
+    // 🆕 Beta 99.05 : Mise à jour dateModification systématique
+    cartoucheActuel.dateModification = new Date().toISOString();
 
     // Vérifier si la cartouche existe déjà
     const index = cartouches.findIndex(c => c.id === cartoucheActuel.id);
@@ -2446,6 +2466,7 @@ function annulerFormCartouche() {
 
     // Réinitialiser les champs
     document.getElementById('nomCartouche').value = '';
+    document.getElementById('descriptionCartouche').value = '';
     document.getElementById('contexteCartouche').value = '';
     var specClear2 = document.getElementById('contexteSpecifiqueCartouche');
     if (specClear2) specClear2.value = '';
@@ -2916,6 +2937,7 @@ async function creerNouvelleCartouche() {
 
     // Réinitialiser les champs
     document.getElementById('nomCartouche').value = '';
+    document.getElementById('descriptionCartouche').value = '';
     document.getElementById('contexteCartouche').value = '';
     var specClear3 = document.getElementById('contexteSpecifiqueCartouche');
     if (specClear3) specClear3.value = '';

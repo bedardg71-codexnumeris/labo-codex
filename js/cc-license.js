@@ -233,8 +233,9 @@ function genererBadgeCC(metadata) {
 
     return `
         <div class="cc-badge">
-            <img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-nc-sa.svg"
-                 alt="CC BY-NC-SA 4.0">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">
+                <img src="licence CC/by-nc-sa-2.svg" alt="CC BY-NC-SA 4.0" style="height: 15px;">
+            </a>
 
             <p class="cc-badge-titre">${metadata.nom || 'Matériel pédagogique'}</p>
 
@@ -481,8 +482,9 @@ function avertirSansLicence(donnees) {
 function genererBadgeCCPermanent() {
     return `
         <div class="cc-badge">
-            <img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-nc-sa.svg"
-                 alt="CC BY-NC-SA 4.0">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">
+                <img src="licence CC/by-nc-sa-2.svg" alt="CC BY-NC-SA 4.0" style="height: 15px;">
+            </a>
 
             <p class="cc-badge-titre">Matériel partagé sous licence libre</p>
 
@@ -700,7 +702,7 @@ function creerModalMetadonneesEnrichies() {
                 <span>Metadonnees d'export</span>
                 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank"
                    class="u-texte-mini" style="color: var(--bleu-leger); text-decoration: none; display: flex; align-items: center; gap: 5px;">
-                    <img src="https://mirrors.creativecommons.org/presskit/buttons/80x15/svg/by-nc-sa.svg"
+                    <img src="licence CC/by-nc-sa-2.svg"
                          alt="CC BY-NC-SA 4.0" style="height: 15px;">
                     En savoir plus
                 </a>
@@ -1153,7 +1155,7 @@ function genererPanneauMetadonnees(ressource, typeRessource) {
         'production': 'Métadonnées sur cette production',
         'grille': 'Métadonnées sur cette grille',
         'echelle': 'Métadonnées sur cette échelle',
-        'cartouche': 'Métadonnées sur ce cartouche',
+        'cartouche': 'Métadonnées sur cette cartouche',
         'pratique': 'Métadonnées sur cette pratique'
     };
     const titreMetadonnees = titreParType[typeRessource] || 'Métadonnées';
@@ -1260,16 +1262,16 @@ function genererPanneauMetadonnees(ressource, typeRessource) {
         </div>
     `;
 
-    // 3. Date de modification (toujours affichée, sauf si identique à création)
+    // 3. Date de modification (toujours affichée)
     const dateModifFormatee = formatDate(dateModif);
-    if (dateModifFormatee && dateModifFormatee !== dateCreationFormatee) {
-        lignesHTML += `
-            <div class="meta-ligne">
-                <span class="meta-label">Modifié le</span>
-                <span class="meta-valeur">${dateModifFormatee}</span>
-            </div>
-        `;
-    }
+    const modifAffichee = (dateModifFormatee && dateModifFormatee !== dateCreationFormatee)
+        ? dateModifFormatee : '—';
+    lignesHTML += `
+        <div class="meta-ligne">
+            <span class="meta-label">Modifié le</span>
+            <span class="meta-valeur">${modifAffichee}</span>
+        </div>
+    `;
 
     // 4. Contributeurs (si présents)
     if (contributeurs.length > 0) {
@@ -1307,15 +1309,13 @@ function genererPanneauMetadonnees(ressource, typeRessource) {
         `;
     }
 
-    // 7. Description (si présente)
-    if (description) {
-        lignesHTML += `
-            <div class="meta-ligne meta-description">
-                <span class="meta-label">Description</span>
-                <span class="meta-valeur">${echapperHtmlCC(description)}</span>
-            </div>
-        `;
-    }
+    // 7. Description (toujours affichée)
+    lignesHTML += `
+        <div class="meta-ligne meta-description">
+            <span class="meta-label">Description</span>
+            <span class="meta-valeur">${description ? echapperHtmlCC(description) : '—'}</span>
+        </div>
+    `;
 
     // 8. Licence (toujours affichée en dernier)
     lignesHTML += `
@@ -1323,8 +1323,8 @@ function genererPanneauMetadonnees(ressource, typeRessource) {
             <span class="meta-label">Licence</span>
             <span class="meta-valeur">
                 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank"
-                   style="color: var(--texte-secondaire); text-decoration: none;">
-                    ${echapperHtmlCC(licence)}
+                   style="text-decoration: none;">
+                    <img src="licence CC/by-nc-sa-2.svg" alt="${echapperHtmlCC(licence)}" style="height: 15px; vertical-align: middle;">
                 </a>
             </span>
         </div>
