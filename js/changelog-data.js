@@ -12,17 +12,16 @@
         {
             version: 'Beta 99',
             couleur: 'vert',
-            titre: 'Consolidation et r\u00e9organisation',
+            titre: 'Consolidation, rythme et bien-\u00eatre',
             items: [
+                'Nouveau\u00a0: Rythme de travail \u2014 statistiques de dur\u00e9e par activit\u00e9, estimation de la charge et planning hebdomadaire.',
+                'Planification par groupe-cours\u00a0: chaque lot respecte sa date de remise, les lots termin\u00e9s restent visibles.',
+                'Portrait temporel\u00a0: heatmap jour\u00d7moment pour visualiser tes habitudes d\u2019\u00e9valuation.',
+                'Hygi\u00e8ne de travail\u00a0: rappels de pauses, alertes weekend/soir tardif, tampon pr\u00e9-cours \u2014 tout configurable.',
                 'Navigation r\u00e9organis\u00e9e\u00a0: Aper\u00e7u, Structure, Contexte, Suivi, \u00c9valuations \u2014 plus intuitif.',
-                'Nouveau\u00a0: section Labo dans Suivi pour analyser les corr\u00e9lations et l\u2019impact des jetons.',
-                'Aide enrichie\u00a0: articles sur le profil \u00e9tudiant, les interventions R\u00e0I et le fonctionnement des biblioth\u00e8ques.',
-                'Boutons d\u2019aide (?) plus grands et accessibles sur tablette.',
+                'Aide enrichie et repens\u00e9e pour les novices\u00a0: jargon technique retir\u00e9, nouveaux articles.',
                 'Anonymisation renforc\u00e9e pour les pr\u00e9sentations et le partage entre coll\u00e8gues.',
-                'Palettes d\u2019annotation redimensionnables et raccourcis clavier (1\u20139 pour les codes, lettres pour les tampons).',
-                'V\u00e9rification pr\u00e9-d\u00e9mo\u00a0: un script v\u00e9rifie que tout est pr\u00eat avant une pr\u00e9sentation.',
-                'Glossaire enrichi\u00a0: anonymisation, codex, ELLAC.',
-                'Aide repens\u00e9e pour les novices\u00a0: jargon technique retir\u00e9, nouveaux articles sur la R\u00e0I, SOLO, PAN et les crit\u00e8res d\u2019\u00e9valuation.'
+                'Zoom centr\u00e9 dans la visionneuse\u00a0: le document reste en place quand tu zoomes.'
             ]
         },
         {

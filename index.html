@@ -8574,6 +8574,62 @@
                         <div id="rythme-planning" class="u-mt-20" style="display:none">
                             <div id="rythme-planning-contenu"></div>
                         </div>
+
+                        <div id="rythme-hygiene" class="u-mt-20">
+                            <h3>Hygiène de travail</h3>
+                            <p class="u-texte-secondaire">Rappels doux pendant l'évaluation — rien n'est obligatoire, tout est désactivable.</p>
+                            <div class="rythme-prefs-grille u-mt-10">
+                                <div class="groupe-form">
+                                    <label class="rythme-hygiene-label">
+                                        <input type="checkbox" id="rythme-pref-rappel-pause" checked
+                                            data-on-change="Rythme.sauvegarderPreferences">
+                                        Rappel de pause après
+                                    </label>
+                                    <div class="rythme-hygiene-detail">
+                                        <input type="number" id="rythme-pref-pause-minutes" class="controle-form" min="15" max="120" value="45" style="width:60px"
+                                            data-on-input="Rythme.sauvegarderPreferences">
+                                        <small class="u-texte-secondaire">minutes</small>
+                                    </div>
+                                </div>
+                                <div class="groupe-form">
+                                    <label class="rythme-hygiene-label">
+                                        <input type="checkbox" id="rythme-pref-alerte-weekend" checked
+                                            data-on-change="Rythme.sauvegarderPreferences">
+                                        Signaler l'évaluation en weekend
+                                    </label>
+                                </div>
+                                <div class="groupe-form">
+                                    <label class="rythme-hygiene-label">
+                                        <input type="checkbox" id="rythme-pref-alerte-soir" checked
+                                            data-on-change="Rythme.sauvegarderPreferences">
+                                        Signaler l'évaluation tardive après
+                                    </label>
+                                    <div class="rythme-hygiene-detail">
+                                        <input type="number" id="rythme-pref-heure-soir" class="controle-form" min="18" max="23" value="21" style="width:60px"
+                                            data-on-input="Rythme.sauvegarderPreferences">
+                                        <small class="u-texte-secondaire">h</small>
+                                    </div>
+                                </div>
+                                <div class="groupe-form">
+                                    <label class="rythme-hygiene-label">
+                                        <input type="checkbox" id="rythme-pref-tampon-cours" checked
+                                            data-on-change="Rythme.sauvegarderPreferences">
+                                        Signaler un cours à venir dans
+                                    </label>
+                                    <div class="rythme-hygiene-detail">
+                                        <input type="number" id="rythme-pref-tampon-minutes" class="controle-form" min="10" max="60" value="30" style="width:60px"
+                                            data-on-input="Rythme.sauvegarderPreferences">
+                                        <small class="u-texte-secondaire">minutes</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="rythme-portrait" class="u-mt-20" style="display:none">
+                            <h3>Portrait temporel</h3>
+                            <p class="u-texte-secondaire">Quand est-ce que tu évalues ? Répartition par jour et moment de la journée.</p>
+                            <div id="rythme-portrait-contenu"></div>
+                        </div>
                     </div>
                 </div><!-- fin sous-section rythme -->
 
