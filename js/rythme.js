@@ -166,13 +166,14 @@
             var nbImportes = fichiersImportes.length;
             if (nbImportes === 0) return; // aucun fichier importé
 
-            // Évaluations déjà faites
+            // Évaluations déjà faites (non remplacées)
             var evalsFaites = evaluations.filter(function (ev) {
                 return ev.productionId === prod.id && !ev.remplaceeParId;
             }).length;
 
             var copiesRestantes = Math.max(0, nbImportes - evalsFaites);
-            if (copiesRestantes === 0) return; // production terminée
+            // Production terminée si <= 2 copies restantes (tolérance pour fichiers mal classés)
+            if (copiesRestantes <= 2 && evalsFaites >= nbImportes * 0.8) return;
 
             var tempsEstimeMs = copiesRestantes * stats.moyenne;
             var tempsTotal = tempsEstimeMs * prefs.marge;
@@ -398,10 +399,13 @@
             var jour = s.jour;
             if (!jours[jour]) return;
             var duree = s.duree || (s.nombrePeriodes ? s.nombrePeriodes * 0.833 : 0);
+            if (duree <= 0) return; // séance sans durée
+            var groupe = s.groupe || '';
             jours[jour].cours.push({
-                debut: s.debut || '??',
+                debut: s.debut || '',
                 duree: duree,
-                local: s.local || ''
+                local: s.local || '',
+                groupe: groupe
             });
             jours[jour].heuresOccupees += duree;
         });
@@ -664,9 +668,10 @@
 
                     if (plage.cours && plage.cours.length > 0) {
                         plage.cours.forEach(function (c) {
-                            if (c.debut && c.debut !== '??') {
-                                html += '<div class="rythme-cours">Cours ' + c.debut + ' (' + c.duree.toFixed(1) + 'h)</div>';
-                            }
+                            var label = 'Cours';
+                            if (c.debut) label += ' ' + c.debut;
+                            label += ' (' + c.duree.toFixed(1) + 'h)';
+                            html += '<div class="rythme-cours">' + label + '</div>';
                         });
                     }
 
