@@ -102,6 +102,14 @@
         if (productionId) {
             var historique = db.getSync(cle('chronoEvaluations'), []);
             var moyenneInfo = _calculerMoyenneProduction(historique, productionId);
+            // Enrichir le nom si absent de l'historique
+            if (!moyenneInfo.productionNom) {
+                var prods = (typeof obtenirDonneesSelonMode === 'function')
+                    ? obtenirDonneesSelonMode('productions')
+                    : db.getSync(cle('productions'), []);
+                var prod = prods.find(function(p) { return p.id === productionId; });
+                if (prod) moyenneInfo.productionNom = prod.titre || prod.nom;
+            }
             _afficherInfoMoyenne(moyenneInfo);
         }
     }
@@ -136,7 +144,14 @@
         // Identifier la production en cours
         var ec = window.evaluationEnCours;
         var productionId = ec ? ec.productionId : null;
-        var productionNom = ec ? ec.productionNom : null;
+        var productionNom = null;
+        if (productionId) {
+            var prods = (typeof obtenirDonneesSelonMode === 'function')
+                ? obtenirDonneesSelonMode('productions')
+                : db.getSync(cle('productions'), []);
+            var prod = prods.find(function(p) { return p.id === productionId; });
+            productionNom = prod ? (prod.titre || prod.nom) : null;
+        }
 
         // Stocker dans les 50 dernières entrées (avec productionId)
         const cleStock = cle('chronoEvaluations');
