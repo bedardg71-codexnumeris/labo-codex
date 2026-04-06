@@ -178,31 +178,55 @@ Le module lit (lecture seule, principe SSOT) :
 
 ## 5. Phases d'implémentation
 
-### Phase 1 — Chrono par activité (immédiat, ~30 min)
-- Modifier `arreterChrono()` pour stocker `activite` (prod.description)
-- Modifier `_calculerMoyenneProduction()` → `_calculerMoyenneActivite()`
-- Filtrer par activité au lieu de productionId
-- Afficher le type d'activité dans la palette chrono
+### Phase 1 — Chrono par activité ✅ (6 avril 2026)
+- Chrono groupé par `activiteApprentissage` au lieu de `productionId`
+- Moyenne filtrée par activité dans la palette flottante
+- Historique élargi à 200 entrées avec champ `activite`
+- Renommage `prod.description` → `prod.activiteApprentissage` (72 refs, 15 fichiers)
 
-### Phase 2 — Onglet Rythme : statistiques (1-2h)
-- Créer `js/rythme.js` avec le tableau synthèse par activité
-- Section dans Boîte à outils avec le tableau + barres comparatives
-- Drill-down par activité (productions, groupes)
+### Phase 2 — Onglet Rythme : statistiques ✅ (6 avril 2026)
+- Module `js/rythme.js` créé (~500 lignes)
+- Tableau synthèse par activité (moyenne, médiane, min/max, tendance)
+- Barres comparatives horizontales
+- Données fusionnées chrono + évaluations sauvegardées (dédoublonnées)
 
-### Phase 3 — Planification de la charge (1-2h)
-- Estimation du temps par lot (copies restantes × moyenne)
-- Vue par groupe-cours
-- Suggestion de plages (basée sur l'horaire du calendrier)
+### Phase 3 — Planification de la charge ✅ partiellement (6 avril 2026)
+- Estimation du temps : copies IMPORTÉES (via `travauxStockage`) sans évaluation
+- Productions terminées exclues automatiquement
+- Planning multi-semaines jusqu'à date objectif configurable
+- Reprises du calendrier (jourRemplace), congés travaillables, weekends
+- Préférences persistées (heures/jour, marge, weekends, congés)
+- Répartition greedy des lots dans les plages disponibles
 
-### Phase 4 — Préférences et bien-être (1h)
-- Configuration des plages de travail
-- Rappels de pauses (notification discrète après N minutes)
-- Portrait temporel (heatmap jour/moment)
+#### Ce qui reste dans Phase 3 :
+- [ ] **Séances de cours non affichées** : `obtenirSeances()` ne trouve pas les
+  horaires. Les séances sont dans `cle('horaires')` (entités modernes) avec
+  champs `jour`, `debut`, `fin`, `local`. Debugger avec `console.warn` dans
+  `obtenirSeances()` pour identifier quelle source retourne des données.
+  Le calcul debut/fin → durée est en place, c'est la lecture qui échoue.
+- [ ] **Échéances par groupe** : lire `prod.echeancesGroupes` (déjà dans le
+  gabarit de production — voir capture "Échéances par groupe" avec dates par
+  groupe). Chaque production+groupe a sa propre date de remise. La planification
+  devrait commencer à partir de cette date (pas la date globale).
+- [ ] **Objectif de remise par production** : remplacer la date objectif globale
+  par un objectif par production (ex: « remettre Artefact 6 le jeudi 16 avril »).
+  L'estimation et la répartition doivent être par production+groupe.
+- [ ] **Estimation par groupe-cours** : ventiler les copies restantes par groupe
+  (ex: gr. 00002 = 12 copies, gr. 00008 = 14 copies) au lieu d'un total global.
+- [ ] **Conformité design system** : appliquer les variables CSS de `design-system.html`
+  (surfaces, ombres, radius, couleurs modes sombre/clair).
+
+### Phase 4 — Préférences et bien-être (à venir)
+- [ ] Rappels de pauses (notification discrète après N minutes d'évaluation continue)
+- [ ] Portrait temporel (heatmap jour/moment — quand est-ce que tu évalues ?)
+- [ ] Alerte douce si évaluation en weekend ou soir tardif
+- [ ] Tampon pré-cours : signaler (sans bloquer) l'évaluation juste avant un cours
 
 ### Phase 5 — Raffinements (selon usage)
-- Courbe d'apprentissage de l'évaluateur (tendance par activité)
-- Alerte weekend / soir tardif
-- Export du portrait pour réflexion professionnelle
+- [ ] Courbe d'apprentissage de l'évaluateur (tendance temporelle par activité)
+- [ ] Export du portrait pour réflexion professionnelle
+- [ ] Drill-down par activité → détail productions/groupes
+- [ ] Planification multi-productions avec priorités
 
 ---
 
