@@ -21067,6 +21067,45 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 }
 
 /* ===============================
+   AUDIT UX — Cohérence visuelle mode clair (6 avril 2026)
+   =============================== */
+
+/* #2 — Boutons sauvegarde Réglages : largeur standard, aligné droite
+   (au lieu de pleine largeur, cohérent avec les autres boutons de l'app) */
+#reglages-preferences .btn[data-action="sauvegarderToutesPreferencesV2"],
+#reglages-depistage .btn[data-action="sauvegarderToutesPreferencesV2"] {
+    width: auto;
+    display: block;
+    margin-left: auto;
+}
+
+/* #3 — Cartes métriques Engagement (profil étudiant) :
+   bordure gauche colorée + ombre, cohérent avec DS section 14 */
+.mode-clair .profil-carte-importante {
+    background: #ffffff;
+    border: 1px solid rgba(3, 46, 92, 0.12);
+    border-left: 4px solid var(--accent-primaire);
+    box-shadow: var(--shadow-subtil);
+}
+
+/* #5 — Cartes options export (Archivage) :
+   fond, ombre et bordure gauche pour structure visuelle */
+.mode-clair .travaux-archivage-carte {
+    background: #ffffff;
+    border: 1px solid rgba(3, 46, 92, 0.1);
+    border-left: 3px solid var(--accent-primaire);
+    box-shadow: var(--shadow-subtil);
+}
+
+/* #7 — Cartes Accompagnement (profil étudiant) :
+   bordure et ombre visibles en mode clair */
+.mode-clair .profil-carte {
+    background: #ffffff;
+    border: 1px solid rgba(3, 46, 92, 0.12);
+    box-shadow: var(--shadow-subtil);
+}
+
+/* ===============================
    MODAL EDITION RETROACTIONS (tampons + erreurs FR)
    =============================== */
 
