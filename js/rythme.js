@@ -148,35 +148,39 @@
         var evaluations = (typeof obtenirDonneesSelonMode === 'function')
             ? obtenirDonneesSelonMode('evaluationsSauvegardees')
             : [];
-        var etudiants = (typeof obtenirDonneesSelonMode === 'function')
-            ? obtenirDonneesSelonMode('groupeEtudiants')
-            : db.getSync(cle('groupeEtudiants'), []);
-        var nbEtudiants = etudiants.length || 0;
+        // Compter les fichiers importés par production (pas les étudiants)
+        var fichiers = db.getSync(cle('fichiersTravaux'), []);
+        var prefs = chargerPreferences();
 
         var estimations = [];
 
         productions.forEach(function (prod) {
             var activite = prod.activiteApprentissage || prod.description || '';
             var stats = statsMap[activite];
-            if (!stats) return; // pas de données pour cette activité
+            if (!stats) return;
 
-            // Compter les évaluations déjà faites pour cette production
+            // Fichiers importés pour cette production
+            var fichiersImportes = fichiers.filter(function (f) {
+                return f.productionId === prod.id;
+            });
+            var nbImportes = fichiersImportes.length;
+            if (nbImportes === 0) return; // aucun fichier importé
+
+            // Évaluations déjà faites
             var evalsFaites = evaluations.filter(function (ev) {
                 return ev.productionId === prod.id && !ev.remplaceeParId;
             }).length;
 
-            var copiesRestantes = Math.max(0, nbEtudiants - evalsFaites);
-            if (copiesRestantes === 0) return;
+            var copiesRestantes = Math.max(0, nbImportes - evalsFaites);
+            if (copiesRestantes === 0) return; // production terminée
 
             var tempsEstimeMs = copiesRestantes * stats.moyenne;
-            // Ajouter la marge configurable pour post-évaluation (relecture, PDF, LÉA)
-            var prefs = chargerPreferences();
             var tempsTotal = tempsEstimeMs * prefs.marge;
 
             estimations.push({
                 productionNom: prod.titre + (activite ? ' — ' + activite : ''),
                 activite: activite,
-                totalCopies: nbEtudiants,
+                totalCopies: nbImportes,
                 copiesFaites: evalsFaites,
                 copiesRestantes: copiesRestantes,
                 moyenneMs: stats.moyenne,
@@ -303,19 +307,22 @@
        =============================== */
 
     var JOURS_SEMAINE = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
+    var JOURS_COMPLETS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+    var NOMS_JOURS_JS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 
     /**
      * Charge les préférences de rythme depuis le stockage.
      */
     function chargerPreferences() {
-        var defaut = { heuresJour: 6, heuresDemi: 3, heuresSoir: 2, marge: 1.25, dateObjectif: '' };
+        var defaut = { heuresJour: 6, heuresDemi: 3, heuresSoir: 2, marge: 1.25, dateObjectif: '', weekends: false };
         var prefs = db.getSync('preferencesRythme', defaut);
         return {
             heuresJour: prefs.heuresJour || defaut.heuresJour,
             heuresDemi: prefs.heuresDemi || defaut.heuresDemi,
             heuresSoir: prefs.heuresSoir || defaut.heuresSoir,
             marge: prefs.marge || defaut.marge,
-            dateObjectif: prefs.dateObjectif || ''
+            dateObjectif: prefs.dateObjectif || '',
+            weekends: !!prefs.weekends
         };
     }
 
@@ -328,7 +335,8 @@
             heuresDemi: parseInt(document.getElementById('rythme-pref-heures-demi')?.value) || 3,
             heuresSoir: parseInt(document.getElementById('rythme-pref-heures-soir')?.value) || 2,
             marge: parseFloat(document.getElementById('rythme-pref-marge')?.value) || 1.25,
-            dateObjectif: document.getElementById('rythme-pref-date-objectif')?.value || ''
+            dateObjectif: document.getElementById('rythme-pref-date-objectif')?.value || '',
+            weekends: document.getElementById('rythme-pref-weekends')?.checked || false
         };
         db.setSync('preferencesRythme', prefs);
         afficherRythme();
@@ -341,11 +349,13 @@
         var elSoir = document.getElementById('rythme-pref-heures-soir');
         var elMarge = document.getElementById('rythme-pref-marge');
         var elDate = document.getElementById('rythme-pref-date-objectif');
+        var elWE = document.getElementById('rythme-pref-weekends');
         if (elJour) elJour.value = prefs.heuresJour;
         if (elDemi) elDemi.value = prefs.heuresDemi;
         if (elSoir) elSoir.value = prefs.heuresSoir;
         if (elMarge) elMarge.value = prefs.marge;
         if (elDate) elDate.value = prefs.dateObjectif || '';
+        if (elWE) elWE.checked = prefs.weekends;
     }
 
     /**
@@ -414,26 +424,53 @@
      * Collecte tous les jours ouvrables du calendrier entre deux dates.
      * @returns {Array<{date: string, jourSemaine: string, statut: string, motif: string|null, numeroSemaine: number|null}>}
      */
-    function obtenirJoursOuvrables(dateDebut, dateFin) {
+    /**
+     * Collecte tous les jours entre deux dates.
+     * Inclut weekends si la préférence est activée.
+     * Retourne des semaines complètes (lundi à vendredi ou dimanche).
+     */
+    function obtenirJoursCalendrier(dateDebut, dateFin, inclureWeekends) {
         var calendrier = (typeof obtenirCalendrierComplet === 'function')
             ? obtenirCalendrierComplet()
             : db.getSync(cle('calendrierComplet'), {});
 
+        var joursAcceptes = inclureWeekends ? JOURS_COMPLETS : JOURS_SEMAINE;
+
+        // Élargir au lundi de la semaine de début pour avoir des semaines complètes
+        var dDebut = new Date(dateDebut + 'T12:00:00');
+        while (NOMS_JOURS_JS[dDebut.getDay()] !== 'Lundi') {
+            dDebut.setDate(dDebut.getDate() - 1);
+        }
+
+        // Élargir au vendredi (ou dimanche si weekends) de la semaine de fin
+        var dFin = new Date(dateFin + 'T12:00:00');
+        var jourFinSem = inclureWeekends ? 'Dimanche' : 'Vendredi';
+        while (NOMS_JOURS_JS[dFin.getDay()] !== jourFinSem) {
+            dFin.setDate(dFin.getDate() + 1);
+        }
+
         var jours = [];
-        // Itérer de dateDebut à dateFin
-        var d = new Date(dateDebut + 'T12:00:00');
-        var fin = new Date(dateFin + 'T12:00:00');
-        while (d <= fin) {
+        var d = new Date(dDebut);
+        var dernierNumSemaine = null;
+        while (d <= dFin) {
             var str = d.toISOString().split('T')[0];
             var info = calendrier[str];
-            var jourSemaine = info ? info.jourSemaine : ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'][d.getDay()];
-            if (JOURS_SEMAINE.indexOf(jourSemaine) >= 0) {
+            var jourSemaine = NOMS_JOURS_JS[d.getDay()];
+
+            if (joursAcceptes.indexOf(jourSemaine) >= 0) {
+                var numSem = info ? info.numeroSemaine : null;
+                // Inférer le numéro de semaine si absent
+                if (!numSem && dernierNumSemaine) numSem = dernierNumSemaine;
+                if (numSem) dernierNumSemaine = numSem;
+
+                var estWeekend = jourSemaine === 'Samedi' || jourSemaine === 'Dimanche';
                 jours.push({
                     date: str,
                     jourSemaine: jourSemaine,
-                    statut: info ? info.statut : 'jour-ouvrable',
+                    statut: estWeekend ? 'weekend' : (info ? info.statut : 'jour-ouvrable'),
                     motif: info ? info.motif : null,
-                    numeroSemaine: info ? info.numeroSemaine : null
+                    numeroSemaine: numSem,
+                    estWeekend: estWeekend
                 });
             }
             d.setDate(d.getDate() + 1);
@@ -444,22 +481,43 @@
     /**
      * Répartit les estimations dans les jours disponibles.
      */
-    function repartirDansJours(estimations, joursDisponibles, joursHoraire) {
+    function repartirDansJours(estimations, joursCalendrier, joursHoraire, prefs) {
+        var aujourdHui = new Date().toISOString().split('T')[0];
         // Enrichir chaque jour avec ses heures libres
         var plages = [];
-        joursDisponibles.forEach(function (j) {
-            if (j.statut === 'conge' || j.statut === 'weekend') return;
+        joursCalendrier.forEach(function (j) {
+            var estConge = j.statut === 'conge';
+            var estWeekend = j.estWeekend;
+            var estPasse = j.date < aujourdHui;
             var infoHoraire = joursHoraire[j.jourSemaine];
-            if (!infoHoraire) return;
+
+            var heuresLibres = 0;
+            var type = 'conge';
+            var cours = [];
+
+            if (estConge) {
+                type = 'conge';
+            } else if (estWeekend) {
+                heuresLibres = prefs.heuresDemi; // demi-journée le weekend
+                type = 'weekend';
+            } else if (infoHoraire) {
+                heuresLibres = infoHoraire.heuresLibres;
+                type = infoHoraire.type;
+                cours = infoHoraire.cours;
+            }
+
             plages.push({
                 date: j.date,
                 jourSemaine: j.jourSemaine,
                 statut: j.statut,
                 motif: j.motif,
                 numeroSemaine: j.numeroSemaine,
-                heuresLibres: infoHoraire.heuresLibres,
-                type: infoHoraire.type,
-                cours: infoHoraire.cours,
+                estWeekend: estWeekend,
+                estConge: estConge,
+                estPasse: estPasse,
+                heuresLibres: (estConge || estPasse) ? 0 : heuresLibres,
+                type: type,
+                cours: cours,
                 heuresUtilisees: 0,
                 taches: []
             });
@@ -517,20 +575,15 @@
             dateObjectif = d14.toISOString().split('T')[0];
         }
 
-        // Lendemain (ne pas planifier aujourd'hui si déjà bien avancé)
-        var demain = new Date();
-        demain.setDate(demain.getDate() + 1);
-        var datePlanification = demain.toISOString().split('T')[0];
+        var joursCalendrier = obtenirJoursCalendrier(aujourdHui, dateObjectif, prefs.weekends);
 
-        var joursOuvrables = obtenirJoursOuvrables(datePlanification, dateObjectif);
-
-        if (joursOuvrables.length === 0) {
-            contenuPlanning.innerHTML = '<p class="u-texte-secondaire">Aucun jour ouvrable entre demain et la date objectif.</p>';
+        if (joursCalendrier.length === 0) {
+            contenuPlanning.innerHTML = '<p class="u-texte-secondaire">Aucun jour disponible d\'ici la date objectif.</p>';
             sectionPlanning.style.display = '';
             return;
         }
 
-        var plages = repartirDansJours(estimations, joursOuvrables, joursHoraire);
+        var plages = repartirDansJours(estimations, joursCalendrier, joursHoraire, prefs);
         var totalHeuresLibres = plages.reduce(function (s, p) { return s + p.heuresLibres; }, 0);
         var totalChargeMs = estimations.reduce(function (s, e) { return s + e.tempsEstimeMs; }, 0);
 
@@ -542,7 +595,7 @@
             semaines[num].push(p);
         });
 
-        var html = '<p class="u-texte-petit u-texte-secondaire" style="margin-bottom:.75rem">Du ' + formaterDateCourte(datePlanification) + ' au <strong>' + formaterDateCourte(dateObjectif) + '</strong>' + (prefs.dateObjectif ? ' (date objectif)' : ' (14 jours par défaut — indique une date objectif ci-dessus)') + '</p>';
+        var html = '<p class="u-texte-petit u-texte-secondaire" style="margin-bottom:.75rem">D\'aujourd\'hui au <strong>' + formaterDateCourte(dateObjectif) + '</strong>' + (prefs.dateObjectif ? ' (date objectif)' : ' (14 jours par défaut — indique une date objectif)') + '</p>';
 
         for (var numSem in semaines) {
             var joursSem = semaines[numSem];
@@ -550,15 +603,23 @@
             var dernierJour = joursSem[joursSem.length - 1].date;
 
             html += '<div class="rythme-semaine-titre">Semaine ' + numSem + ' <span class="u-texte-secondaire">(' + formaterDateCourte(premierJour) + ' — ' + formaterDateCourte(dernierJour) + ')</span></div>';
-            html += '<div class="rythme-semaine-grille">';
+            html += '<div class="rythme-semaine-grille' + (prefs.weekends ? ' rythme-avec-weekends' : '') + '">';
 
             joursSem.forEach(function (plage) {
-                var estConge = plage.statut === 'conge';
-                html += '<div class="rythme-jour' + (estConge ? ' rythme-jour-conge' : '') + '">';
+                var classes = 'rythme-jour';
+                if (plage.estConge) classes += ' rythme-jour-conge';
+                if (plage.estPasse) classes += ' rythme-jour-passe';
+                if (plage.estWeekend) classes += ' rythme-jour-weekend';
+                var estAuj = plage.date === aujourdHui;
+                if (estAuj) classes += ' rythme-jour-aujourdhui';
+
+                html += '<div class="' + classes + '">';
                 html += '<div class="rythme-jour-titre">' + plage.jourSemaine + ' <small>' + parseInt(plage.date.substring(8)) + '</small></div>';
 
-                if (estConge) {
+                if (plage.estConge) {
                     html += '<div class="rythme-jour-info">Congé' + (plage.motif ? ' — ' + echapperHtml(plage.motif) : '') + '</div>';
+                } else if (plage.estWeekend && plage.heuresLibres === 0) {
+                    html += '<div class="rythme-jour-info">Weekend</div>';
                 } else {
                     if (plage.cours && plage.cours.length > 0) {
                         plage.cours.forEach(function (c) {
@@ -568,10 +629,13 @@
                         });
                     }
 
-                    var labelType = plage.type === 'libre' ? 'Journée libre'
-                        : plage.type === 'partiel' ? 'Demi-journée'
-                        : 'Soirée';
-                    html += '<div class="rythme-jour-libre">' + labelType + ' · ' + plage.heuresLibres + 'h</div>';
+                    if (plage.heuresLibres > 0) {
+                        var labelType = plage.estWeekend ? 'Weekend'
+                            : plage.type === 'libre' ? 'Journée libre'
+                            : plage.type === 'partiel' ? 'Demi-journée'
+                            : 'Soirée';
+                        html += '<div class="rythme-jour-libre">' + labelType + ' · ' + plage.heuresLibres + 'h</div>';
+                    }
 
                     if (plage.taches.length > 0) {
                         plage.taches.forEach(function (t) {

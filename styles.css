@@ -15720,6 +15720,10 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 8px;
+    margin-bottom: 1.25rem;
+}
+.rythme-semaine-grille.rythme-avec-weekends {
+    grid-template-columns: repeat(7, 1fr);
 }
 @media (max-width: 900px) {
     .rythme-semaine-grille { grid-template-columns: repeat(2, 1fr); }
@@ -15730,8 +15734,10 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     padding: .75rem;
     min-height: 120px;
 }
-.rythme-jour-passe { opacity: .45; }
+.rythme-jour-passe { opacity: .4; }
 .rythme-jour-conge { background: var(--avertissement-fond, rgba(255,152,0,.08)); }
+.rythme-jour-weekend { background: var(--surface-tertiaire, rgba(128,128,128,.04)); }
+.rythme-jour-aujourdhui { border: 2px solid var(--bleu-principal, #032e5c); }
 .rythme-jour-titre {
     font-weight: 600;
     font-size: .85rem;
