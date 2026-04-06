@@ -310,7 +310,7 @@ function calculerCorrelationsLongitudinales() {
                 if (!resultat.artefactsParSeance[idxSeance]) resultat.artefactsParSeance[idxSeance] = [];
                 resultat.artefactsParSeance[idxSeance].push({
                     titre: prod.titre || 'Sans titre',
-                    activite: prod.description || ''
+                    activite: prod.activiteApprentissage || prod.description || ''
                 });
             }
         }

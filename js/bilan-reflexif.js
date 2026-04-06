@@ -1167,8 +1167,9 @@ function importerProductions() {
     for (var i = 0; i < productions.length; i++) {
         var prod = productions[i];
         var titre = prod.titre || '';
-        if (prod.description) {
-            titre = titre ? (titre + ' \u2014 ' + prod.description) : prod.description;
+        var descProd = prod.activiteApprentissage || prod.description;
+        if (descProd) {
+            titre = titre ? (titre + ' \u2014 ' + descProd) : descProd;
         }
         if (!titre) titre = prod.nom || ('Production ' + (i + 1));
         if (titresExistants[titre.toLowerCase()]) continue;

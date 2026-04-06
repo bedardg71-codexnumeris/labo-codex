@@ -930,8 +930,8 @@
             }
         }
 
-        if (opts.description && production && production.description) {
-            ajouterTexteColG('Production : ', production.description);
+        if (opts.description && production && (production.activiteApprentissage || production.description)) {
+            ajouterTexteColG('Production : ', production.activiteApprentissage || production.description);
         }
         if (opts.objectif && production && production.objectif) {
             ajouterTexteColG('Objectif : ', production.objectif);
@@ -1464,7 +1464,7 @@
                         texteNote += '\n\nArtefacts \u00e0 venir :\n';
                         artefactsAvenir.forEach(function(prod) {
                             var label = prod.titre || 'Artefact';
-                            var activite = prod.description || '';
+                            var activite = prod.activiteApprentissage || prod.description || '';
                             var echeance = obtenirEcheancePdf(prod);
                             texteNote += '  \u2022 ' + label;
                             if (activite) {
@@ -1488,7 +1488,7 @@
                             texteNote += '\nArtefacts obligatoires' + pondOblLabel + ' :\n';
                             artefactsObligatoires.forEach(function(prod) {
                                 var label = prod.titre || 'Artefact';
-                                var activiteObl = prod.description || '';
+                                var activiteObl = prod.activiteApprentissage || prod.description || '';
                                 var echeanceObl = obtenirEcheancePdf(prod);
                                 var evalObl = toutesEvalsNote.find(function(e) {
                                     return e.productionId === prod.id && e.etudiantDA === da && !e.remplaceeParId && e.noteFinale != null;

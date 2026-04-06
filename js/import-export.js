@@ -319,6 +319,7 @@ const SCHEMAS_IMPORT = {
         nom: { type: 'string', maxLen: 200 },
         titre: { type: 'string', maxLen: 200 },
         type: { type: 'string', maxLen: 100 },
+        activiteApprentissage: { type: 'string', maxLen: 500 },
         description: { type: 'string', maxLen: 500 },
         auteurOriginal: { type: 'string', maxLen: 100 },
         dateImport: { type: 'string', maxLen: 50 },
@@ -1436,7 +1437,8 @@ function analyserRessourcesDetaillees(config) {
             result.ressources.pratiques.items = pratiques.map(p => ({
                 id: p.id,
                 nom: p.nom || 'Sans nom',
-                description: p.description || ''
+                activiteApprentissage: p.activiteApprentissage || p.description || '',
+                description: p.activiteApprentissage || p.description || ''
             }));
             result.ressources.pratiques.count = pratiques.length;
         }

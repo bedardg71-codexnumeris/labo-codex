@@ -991,7 +991,7 @@ function calculerNoteAvecCategories(da, configCategories) {
         if (ev) {
             evalsSelection.push({
                 productionId: prod.id,
-                titre: prod.titre || prod.description,
+                titre: prod.titre || prod.activiteApprentissage || prod.description,
                 note: ev.noteFinale
             });
         }
@@ -1011,7 +1011,7 @@ function calculerNoteAvecCategories(da, configCategories) {
         const ev = evaluationsEleve.find(e => e.productionId === prod.id);
         notesObligatoires.push({
             productionId: prod.id,
-            titre: prod.titre || prod.description,
+            titre: prod.titre || prod.activiteApprentissage || prod.description,
             note: ev ? ev.noteFinale : 0,  // 0 si non remise
             manquante: !ev
         });

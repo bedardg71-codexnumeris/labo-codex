@@ -1930,8 +1930,8 @@ function genererRetroaction(num) {
     let texte = '';
 
     // Options (Description, Objectif, Tâche)
-    if (document.getElementById('afficherDescription1')?.checked && production?.description) {
-        texte += `Production : ${production.description}\n`;
+    if (document.getElementById('afficherDescription1')?.checked && (production?.activiteApprentissage || production?.description)) {
+        texte += `Production : ${production?.activiteApprentissage || production?.description}\n`;
     }
     if (document.getElementById('afficherObjectif1')?.checked && production?.objectif) {
         texte += `Objectif : ${production.objectif}\n`;

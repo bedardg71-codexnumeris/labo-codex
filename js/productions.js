@@ -42,7 +42,7 @@
    - #ponderationTotale : Total pondération
    - #statutPonderation : Statut de la pondération
    - #typesEvaluations : Résumé des types
-   - Tous les champs du formulaire (productionTitre, productionDescription, etc.)
+   - Tous les champs du formulaire (productionTitre, productionActivite, etc.)
    
    LocalStorage utilisé:
    - 'productions' : Array des productions/évaluations (namespacé par trimestre via cle())
@@ -172,7 +172,7 @@ async function afficherTableauProductions() {
         <div class="item-liste" style="background: ${bgColor}; border-color: ${borderColor}; border-width: 2px;">
             <div class="production-header">
                 <strong class="production-titre">
-                    ${estPortfolio ? '📁 ' : ''}${prod.titre}${prod.description ? ' - ' + prod.description : ''}
+                    ${estPortfolio ? '📁 ' : ''}${prod.titre}${(prod.activiteApprentissage || prod.description) ? ' - ' + (prod.activiteApprentissage || prod.description) : ''}
                 </strong>
                 <div class="production-actions">
                     ${index > 0 ?
@@ -647,7 +647,7 @@ async function afficherFormProduction(id) {
             if (btnTexte) btnTexte.textContent = 'Sauvegarder';
 
             document.getElementById('productionTitre').value = prod.titre;
-            document.getElementById('productionDescription').value = prod.description || '';
+            document.getElementById('productionActivite').value = prod.activiteApprentissage || prod.description || '';
             document.getElementById('productionType').value = prod.type;
             document.getElementById('productionPonderation').value = prod.ponderation;
             if (selectGrille) selectGrille.value = prod.grilleId || '';
@@ -710,7 +710,7 @@ async function afficherFormProduction(id) {
 
         // Réinitialiser les champs
         document.getElementById('productionTitre').value = '';
-        document.getElementById('productionDescription').value = '';
+        document.getElementById('productionActivite').value = '';
         document.getElementById('productionType').value = '';
         document.getElementById('productionPonderation').value = '';
         if (selectGrille) selectGrille.value = '';
@@ -772,7 +772,7 @@ async function afficherFormProduction(id) {
 
 async function sauvegarderProduction() {
     const titre = document.getElementById('productionTitre').value.trim();
-    const description = document.getElementById('productionDescription').value.trim();
+    const activiteApprentissage = document.getElementById('productionActivite').value.trim();
     const type = document.getElementById('productionType').value;
     const ponderation = parseInt(document.getElementById('productionPonderation').value) || 0;
     const objectif = document.getElementById('productionObjectif').value.trim();
@@ -918,7 +918,8 @@ async function sauvegarderProduction() {
 
     let productionData = {
         titre: titreFinal,  // ✅ Utilise titreFinal en cas de renommage
-        description,
+        activiteApprentissage,
+        description: activiteApprentissage,  // Rétrocompat exports existants
         type,
         ponderation,
         objectif,
@@ -1685,7 +1686,7 @@ async function afficherToutesLesProductionsParType() {
                 <div class="production-compact-header">
                     <div class="prod-flex-1">
                         <div class="production-compact-titre">
-                            ${estPortfolio ? '📁 ' : ''}${echapperHtml(prod.titre)}${prod.description ? ' - ' + echapperHtml(prod.description) : ''}
+                            ${estPortfolio ? '📁 ' : ''}${echapperHtml(prod.titre)}${(prod.activiteApprentissage || prod.description) ? ' - ' + echapperHtml(prod.activiteApprentissage || prod.description) : ''}
                         </div>
                         <div class="production-compact-meta">
                             ${getTypeLabel(prod.type)}
@@ -1932,7 +1933,7 @@ async function preparerDonneesBibliothequeProductions() {
 
     // Section 1
     const cartesSection1 = productionsDansSelection.map(prod => ({
-        nom: `${prod.titre}${prod.description ? ' - ' + prod.description : ''}`,
+        nom: `${prod.titre}${(prod.activiteApprentissage || prod.description) ? ' - ' + (prod.activiteApprentissage || prod.description) : ''}`,
         id: prod.id,
         badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsDansSelection),
         metadonnees: `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%${prod.objectif ? ' • Objectif: ' + prod.objectif : ''}`,
@@ -1963,7 +1964,7 @@ async function preparerDonneesBibliothequeProductions() {
     Object.keys(parDiscipline).sort().forEach(discipline => {
         parDiscipline[discipline].forEach(prod => {
             cartesSection2.push({
-                nom: `${prod.titre}${prod.description ? ' - ' + prod.description : ''}`,
+                nom: `${prod.titre}${(prod.activiteApprentissage || prod.description) ? ' - ' + (prod.activiteApprentissage || prod.description) : ''}`,
                 id: prod.id,
                 badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsUtilisateur),
                 metadonnees: `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%${prod.auteur ? ' • Par ' + prod.auteur : ''}`,
@@ -2261,7 +2262,7 @@ function afficherProductionsTrimestreModal() {
             <div style="padding: 8px; border-bottom: 1px solid var(--bordure-claire); display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <strong>${prod.titre || 'Sans titre'}</strong>
-                    ${prod.description ? ` - ${prod.description}` : ''}
+                    ${(prod.activiteApprentissage || prod.description) ? ` - ${prod.activiteApprentissage || prod.description}` : ''}
                     <br><small style="color: var(--gris-moyen);">Type: ${prod.type || 'N/A'} • Pondération: ${prod.ponderation || 0}%${coursLabel ? ' • ' + coursLabel : ''}</small>
                 </div>
                 <button data-action="importerUneProductionTrimestre" data-param="${cleSelectionnee}" data-param2="${prod.id}" class="btn btn-confirmer btn-tres-compact">
@@ -2711,7 +2712,7 @@ async function exporterProductionActive() {
     // NOUVEAU (Beta 91): Demander métadonnées enrichies
     const metaEnrichies = await demanderMetadonneesEnrichies(
         'Production pédagogique',
-        production.description || production.titre || 'Production'
+        production.activiteApprentissage || production.description || production.titre || 'Production'
     );
 
     if (!metaEnrichies) {
@@ -2751,7 +2752,7 @@ async function exporterProductionActive() {
     const exportAvecCC = ajouterMetadonnéesCC(
         contenuExport,
         'production',
-        production.description || production.titre || 'Production',
+        production.activiteApprentissage || production.description || production.titre || 'Production',
         metaEnrichies
     );
 
@@ -2762,14 +2763,14 @@ async function exporterProductionActive() {
     a.href = url;
     // 🆕 Beta 95.3 : Nommage standardisé
     const nomExport = typeof genererNomFichierExport === 'function'
-        ? genererNomFichierExport('production', { nom: production.description || production.titre, discipline: production.discipline, inclureLicence: true })
-        : `production-${(production.description || production.titre || 'production').replace(/[^a-z0-9]/gi, '-')}-CC-BY-SA-${new Date().toISOString().split('T')[0]}.json`;
+        ? genererNomFichierExport('production', { nom: production.activiteApprentissage || production.description || production.titre, discipline: production.discipline, inclureLicence: true })
+        : `production-${(production.activiteApprentissage || production.description || production.titre || 'production').replace(/[^a-z0-9]/gi, '-')}-CC-BY-SA-${new Date().toISOString().split('T')[0]}.json`;
     a.download = nomExport;
     a.click();
     URL.revokeObjectURL(url);
 
     if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(`Production "${production.description || production.titre}" exportée avec succès`);
+        afficherNotificationSucces(`Production "${production.activiteApprentissage || production.description || production.titre}" exportée avec succès`);
     }
 }
 
@@ -3117,7 +3118,7 @@ async function afficherAssistantMigrationCategories() {
         <tr>
             <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
                 ${echapperHtml(prod.titre || 'Sans titre')}
-                ${prod.description ? `<br><small style="color: var(--gris-moyen);">${echapperHtml(prod.description)}</small>` : ''}
+                ${(prod.activiteApprentissage || prod.description) ? `<br><small style="color: var(--gris-moyen);">${echapperHtml(prod.activiteApprentissage || prod.description)}</small>` : ''}
             </td>
             <td style="text-align: center;">${getTypeLabel(prod.type)}</td>
             <td style="text-align: center;">
@@ -3441,7 +3442,7 @@ async function afficherListeProductions(filtreType = '') {
     const html = productionsFiltrees.map(prod => {
         const titre = prod.titre || 'Sans titre';
         // ✅ MODIF (28 janvier 2026) : Afficher l'activité d'apprentissage sous le titre
-        const activite = prod.description || '';
+        const activite = prod.activiteApprentissage || prod.description || '';
 
         // 🆕 Beta 95.4 : Badges uniformisés avec grilles/échelles
         // Générer badges pratiques compatibles (utilise gabarits-utils.js)
@@ -3556,7 +3557,7 @@ function creerNouvelleProduction() {
     if (btnExportPDFNew) btnExportPDFNew.classList.add('u-hide');
 
     // Réinitialiser le formulaire
-    document.getElementById('productionDescription').value = '';
+    document.getElementById('productionActivite').value = '';
     document.getElementById('productionTitre').value = '';
     document.getElementById('productionType').value = '';
     document.getElementById('productionPonderation').value = '';
@@ -3709,7 +3710,8 @@ async function dupliquerProduction(id) {
     const copie = {
         ...production,
         id: genererIdUnique('PROD_'),
-        description: `${production.description} (copie)`,
+        activiteApprentissage: `${production.activiteApprentissage || production.description || ''} (copie)`,
+        description: `${production.activiteApprentissage || production.description || ''} (copie)`,
         verrouille: false
     };
 
@@ -3730,7 +3732,7 @@ async function dupliquerProduction(id) {
         window.rechargerFiltreProduction();
     }
 
-    alert(`Production "${copie.description}" dupliquée avec succès`);
+    alert(`Production "${copie.activiteApprentissage || copie.description}" dupliquée avec succès`);
 }
 
 /**

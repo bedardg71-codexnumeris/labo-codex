@@ -1265,6 +1265,34 @@ if (typeof window !== 'undefined') {
     window.migrerVersEntiteCours = migrerVersEntiteCours;
     window.migrerVersEntiteHoraires = migrerVersEntiteHoraires;
     window.migrerVersGroupeCours = migrerVersGroupeCours;
+    // 🆕 Beta 99.06 - Renommage description → activiteApprentissage
+    window.migrerDescriptionVersActivite = migrerDescriptionVersActivite;
+}
+
+/**
+ * Migre le champ `description` → `activiteApprentissage` sur les productions.
+ * Copie la valeur existante sans supprimer l'ancien champ (rétrocompat exports).
+ */
+function migrerDescriptionVersActivite() {
+    var flag = 'migration_activiteApprentissage';
+    if (db.getSync(flag)) return 0;
+    var productions = (typeof obtenirDonneesSelonMode === 'function')
+        ? obtenirDonneesSelonMode('productions')
+        : db.getSync(cle('productions'), []);
+    if (!productions || productions.length === 0) { db.setSync(flag, true); return 0; }
+    var nb = 0;
+    productions.forEach(function(p) {
+        if (p.description && !p.activiteApprentissage) {
+            p.activiteApprentissage = p.description;
+            nb++;
+        }
+    });
+    if (nb > 0) {
+        sauvegarderDonneesSelonMode('productions', productions);
+        console.warn('[migrations] ' + nb + ' productions : description → activiteApprentissage');
+    }
+    db.setSync(flag, true);
+    return nb;
 }
 
 

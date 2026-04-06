@@ -1541,7 +1541,7 @@ async function chargerOptionsExportPDF() {
         const cleProductions = cle('productions');
         const productions = await db.get(cleProductions) || [];
         selectProduction.innerHTML = '<option value="">-- Aucune (grille générique) --</option>' +
-            productions.map(p => `<option value="${p.id}">${escapeHtml(p.titre || p.description || 'Sans titre')}</option>`).join('');
+            productions.map(p => `<option value="${p.id}">${escapeHtml(p.titre || p.activiteApprentissage || p.description || 'Sans titre')}</option>`).join('');
     }
 
     // Charger les grilles
@@ -1700,7 +1700,7 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
     let titre = grille.nom || 'Grille de critères';
     if (options.production && options.inclureNomProduction) {
         const nomProd = options.production.titre || 'Production';
-        const activite = options.production.description || '';
+        const activite = options.production.activiteApprentissage || options.production.description || '';
         titre = activite ? `${nomProd} - ${activite}` : nomProd;
     }
 
@@ -1930,7 +1930,7 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
     let titre = grille.nom || 'Grille de critères';
     if (options.production && options.inclureNomProduction) {
         const nomProd = options.production.titre || 'Production';
-        const activite = options.production.description || '';
+        const activite = options.production.activiteApprentissage || options.production.description || '';
         titre = activite ? `${nomProd} - ${activite}` : nomProd;
     }
 
@@ -2119,7 +2119,7 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
     // Nom du fichier selon le contenu
     let nomFichier = '';
     if (options.production && options.inclureNomProduction) {
-        const nomProd = (options.production.titre || options.production.description || 'production')
+        const nomProd = (options.production.titre || options.production.activiteApprentissage || options.production.description || 'production')
             .replace(/[^a-zA-Z0-9àâäéèêëïîôùûüç\s-]/g, '')
             .replace(/\s+/g, '-')
             .toLowerCase()
@@ -2268,7 +2268,7 @@ async function chargerOptionsPreparationPDF() {
         const toutesProductions = await db.get(cleProductions) || [];
         const productions = toutesProductions.filter(p => p.dansBibliotheque !== false);
         selectProduction.innerHTML = '<option value="">-- Aucune (grille générique) --</option>' +
-            productions.map(p => `<option value="${p.id}">${escapeHtml(p.titre || p.description || 'Sans titre')}</option>`).join('');
+            productions.map(p => `<option value="${p.id}">${escapeHtml(p.titre || p.activiteApprentissage || p.description || 'Sans titre')}</option>`).join('');
     }
 
     // Charger les grilles (filtrées par dansBibliotheque)
@@ -2792,7 +2792,7 @@ async function chargerOptionsInlinePDF() {
         const cleProductions = cle('productions');
         const productions = await db.get(cleProductions) || [];
         selectProd.innerHTML = '<option value="">-- Aucune (grille générique) --</option>' +
-            productions.map(p => `<option value="${p.id}">${p.titre}${p.description ? ' - ' + p.description : ''}</option>`).join('');
+            productions.map(p => `<option value="${p.id}">${p.titre}${(p.activiteApprentissage || p.description) ? ' - ' + (p.activiteApprentissage || p.description) : ''}</option>`).join('');
     }
 
     // Charger les grilles
