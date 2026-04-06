@@ -3182,9 +3182,11 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             }
 
             // Vérifier si sur un point de courbe
-            if (!surElement) {
-                const elements = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
-                surElement = elements.length > 0;
+            if (!surElement && chart.canvas) {
+                try {
+                    const elements = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
+                    surElement = elements.length > 0;
+                } catch (_) { return; }
             }
 
             canvas.style.cursor = surElement ? 'pointer' : 'default';
