@@ -178,6 +178,7 @@ const TOOLTIPS_SOUS_NAV = {
     // Boîte à outils
     'boite-outils-tirage': 'nav-bao-tirage',
     'boite-outils-modelisation': 'nav-bao-modelisation',
+    'boite-outils-rythme': 'nav-bao-rythme',
     // Aide (tooltips gérés séparément si existants)
     // Réglages
     'reglages-preferences': 'nav-reg-preferences',
