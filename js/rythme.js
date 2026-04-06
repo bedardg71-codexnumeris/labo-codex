@@ -439,6 +439,9 @@
             var estimationsActives = estimations.filter(function (e) { return e.copiesRestantes > 0; });
             afficherPlanning(estimationsActives);
         }
+
+        // Phase 4 : portrait temporel
+        construirePortrait(entrees);
     }
 
     /* ===============================
@@ -453,7 +456,15 @@
      * Charge les préférences de rythme depuis le stockage.
      */
     function chargerPreferences() {
-        var defaut = { heuresJour: 6, heuresDemi: 3, heuresSoir: 2, marge: 1.25, dateObjectif: '', heureObjectif: '', weekends: false, feries: false };
+        var defaut = {
+            heuresJour: 6, heuresDemi: 3, heuresSoir: 2, marge: 1.25,
+            dateObjectif: '', heureObjectif: '', weekends: false, feries: false,
+            // Hygiène de travail
+            rappelPause: true, pauseApresMinutes: 45,
+            alerteWeekend: true,
+            alerteSoirTardif: true, heureDebutSoirTardif: 21,
+            tamponPreCours: true, tamponPreCoursMinutes: 30
+        };
         var prefs = db.getSync('preferencesRythme', defaut);
         return {
             heuresJour: prefs.heuresJour || defaut.heuresJour,
@@ -463,7 +474,14 @@
             dateObjectif: prefs.dateObjectif || '',
             heureObjectif: prefs.heureObjectif || '',
             weekends: !!prefs.weekends,
-            feries: !!prefs.feries
+            feries: !!prefs.feries,
+            rappelPause: prefs.rappelPause !== false,
+            pauseApresMinutes: prefs.pauseApresMinutes || 45,
+            alerteWeekend: prefs.alerteWeekend !== false,
+            alerteSoirTardif: prefs.alerteSoirTardif !== false,
+            heureDebutSoirTardif: prefs.heureDebutSoirTardif || 21,
+            tamponPreCours: prefs.tamponPreCours !== false,
+            tamponPreCoursMinutes: prefs.tamponPreCoursMinutes || 30
         };
     }
 
@@ -479,7 +497,15 @@
             dateObjectif: document.getElementById('rythme-pref-date-objectif')?.value || '',
             heureObjectif: document.getElementById('rythme-pref-heure-objectif')?.value || '',
             weekends: document.getElementById('rythme-pref-weekends')?.checked || false,
-            feries: document.getElementById('rythme-pref-feries')?.checked || false
+            feries: document.getElementById('rythme-pref-feries')?.checked || false,
+            // Hygiène de travail
+            rappelPause: document.getElementById('rythme-pref-rappel-pause')?.checked !== false,
+            pauseApresMinutes: parseInt(document.getElementById('rythme-pref-pause-minutes')?.value) || 45,
+            alerteWeekend: document.getElementById('rythme-pref-alerte-weekend')?.checked !== false,
+            alerteSoirTardif: document.getElementById('rythme-pref-alerte-soir')?.checked !== false,
+            heureDebutSoirTardif: parseInt(document.getElementById('rythme-pref-heure-soir')?.value) || 21,
+            tamponPreCours: document.getElementById('rythme-pref-tampon-cours')?.checked !== false,
+            tamponPreCoursMinutes: parseInt(document.getElementById('rythme-pref-tampon-minutes')?.value) || 30
         };
         db.setSync('preferencesRythme', prefs);
         afficherRythme();
@@ -503,6 +529,22 @@
         if (elWE) elWE.checked = prefs.weekends;
         var elFeries = document.getElementById('rythme-pref-feries');
         if (elFeries) elFeries.checked = prefs.feries;
+        // Hygiène de travail
+        var el;
+        el = document.getElementById('rythme-pref-rappel-pause');
+        if (el) el.checked = prefs.rappelPause;
+        el = document.getElementById('rythme-pref-pause-minutes');
+        if (el) el.value = prefs.pauseApresMinutes;
+        el = document.getElementById('rythme-pref-alerte-weekend');
+        if (el) el.checked = prefs.alerteWeekend;
+        el = document.getElementById('rythme-pref-alerte-soir');
+        if (el) el.checked = prefs.alerteSoirTardif;
+        el = document.getElementById('rythme-pref-heure-soir');
+        if (el) el.value = prefs.heureDebutSoirTardif;
+        el = document.getElementById('rythme-pref-tampon-cours');
+        if (el) el.checked = prefs.tamponPreCours;
+        el = document.getElementById('rythme-pref-tampon-minutes');
+        if (el) el.value = prefs.tamponPreCoursMinutes;
     }
 
     /**
@@ -962,6 +1004,193 @@
     }
 
     /* ===============================
+       PHASE 4 — PORTRAIT TEMPOREL
+       =============================== */
+
+    var TRANCHES_HEURE = [
+        { id: 'matin', label: 'Matin (6h–12h)', min: 6, max: 12 },
+        { id: 'apres-midi', label: 'Après-midi (12h–17h)', min: 12, max: 17 },
+        { id: 'soiree', label: 'Soirée (17h–21h)', min: 17, max: 21 },
+        { id: 'nuit', label: 'Nuit (21h–6h)', min: 21, max: 6 }
+    ];
+
+    function construirePortrait(entrees) {
+        var section = document.getElementById('rythme-portrait');
+        var contenu = document.getElementById('rythme-portrait-contenu');
+        if (!section || !contenu) return;
+
+        if (entrees.length === 0) {
+            section.style.display = 'none';
+            return;
+        }
+
+        // Compter par jour × tranche
+        var grille = {};
+        JOURS_COMPLETS.forEach(function (j) {
+            grille[j] = { 'matin': 0, 'apres-midi': 0, 'soiree': 0, 'nuit': 0 };
+        });
+
+        var maxCount = 0;
+        var totalWeekend = 0;
+        var totalSoir = 0;
+        var total = 0;
+
+        entrees.forEach(function (e) {
+            if (!e.date) return;
+            var d = new Date(e.date);
+            if (isNaN(d.getTime())) return;
+            var jour = NOMS_JOURS_JS[d.getDay()];
+            var heure = d.getHours();
+
+            var tranche = 'nuit';
+            if (heure >= 6 && heure < 12) tranche = 'matin';
+            else if (heure >= 12 && heure < 17) tranche = 'apres-midi';
+            else if (heure >= 17 && heure < 21) tranche = 'soiree';
+
+            if (grille[jour]) {
+                grille[jour][tranche]++;
+                if (grille[jour][tranche] > maxCount) maxCount = grille[jour][tranche];
+            }
+
+            total++;
+            if (jour === 'Samedi' || jour === 'Dimanche') totalWeekend++;
+            if (heure >= 21 || heure < 6) totalSoir++;
+        });
+
+        // Construire le heatmap
+        var html = '<div class="rythme-heatmap">';
+        html += '<div class="rythme-heatmap-coin"></div>';
+        JOURS_COMPLETS.forEach(function (j) {
+            var abr = j.substring(0, 3);
+            html += '<div class="rythme-heatmap-jour">' + abr + '</div>';
+        });
+
+        TRANCHES_HEURE.forEach(function (t) {
+            html += '<div class="rythme-heatmap-tranche">' + t.label + '</div>';
+            JOURS_COMPLETS.forEach(function (j) {
+                var n = grille[j][t.id];
+                var intensite = maxCount > 0 ? n / maxCount : 0;
+                var cls = 'rythme-heatmap-cellule';
+                if (n === 0) cls += ' rythme-heatmap-vide';
+                html += '<div class="' + cls + '" style="opacity:' + Math.max(0.15, intensite).toFixed(2) + '" title="' + j + ' ' + t.label + ' : ' + n + '">';
+                if (n > 0) html += n;
+                html += '</div>';
+            });
+        });
+        html += '</div>';
+
+        // Résumé
+        var pctWeekend = total > 0 ? Math.round(totalWeekend / total * 100) : 0;
+        var pctSoir = total > 0 ? Math.round(totalSoir / total * 100) : 0;
+        html += '<div class="rythme-portrait-resume u-mt-10">';
+        if (pctWeekend > 0) {
+            html += '<span>' + pctWeekend + '% de tes évaluations sont en weekend</span>';
+        }
+        if (pctSoir > 0) {
+            html += '<span>' + pctSoir + '% sont en soirée tardive ou la nuit</span>';
+        }
+        if (pctWeekend === 0 && pctSoir === 0) {
+            html += '<span>Toutes tes évaluations sont en semaine pendant la journée</span>';
+        }
+        html += '</div>';
+
+        contenu.innerHTML = html;
+        section.style.display = '';
+    }
+
+    /* ===============================
+       PHASE 4 — RAPPELS DE BIEN-ÊTRE
+       =============================== */
+
+    var _rappelTimer = null;
+    var _rappelDernierAffiche = 0;
+
+    /**
+     * Vérifie le contexte de l'évaluation et affiche des rappels doux.
+     * Appelé au démarrage du chrono via Rythme.verifierBienEtre().
+     */
+    function verifierBienEtre() {
+        var prefs = chargerPreferences();
+        var maintenant = new Date();
+        var jour = NOMS_JOURS_JS[maintenant.getDay()];
+        var heure = maintenant.getHours();
+
+        // Alerte weekend
+        if (prefs.alerteWeekend && (jour === 'Samedi' || jour === 'Dimanche')) {
+            afficherRappel('Évaluation un ' + jour.toLowerCase() + ' — les copies seront encore là lundi.');
+        }
+
+        // Alerte soir tardif
+        var seuilSoir = prefs.heureDebutSoirTardif;
+        if (prefs.alerteSoirTardif && (heure >= seuilSoir || heure < 6)) {
+            afficherRappel('Il est ' + String(heure).padStart(2, '0') + 'h — le repos aussi fait partie du travail.');
+        }
+
+        // Tampon pré-cours
+        if (prefs.tamponPreCours) {
+            verifierTamponPreCours(maintenant, prefs.tamponPreCoursMinutes);
+        }
+
+        // Programmer le rappel de pause
+        if (prefs.rappelPause) {
+            programmerRappelPause(prefs.pauseApresMinutes);
+        }
+    }
+
+    function programmerRappelPause(delaiMin) {
+        if (_rappelTimer) clearTimeout(_rappelTimer);
+        delaiMin = delaiMin || 45;
+        _rappelTimer = setTimeout(function () {
+            afficherRappel('Tu évalues depuis ' + delaiMin + ' min — une pause de 5 min ?');
+            programmerRappelPause(delaiMin);
+        }, delaiMin * 60 * 1000);
+    }
+
+    function arreterRappelPause() {
+        if (_rappelTimer) { clearTimeout(_rappelTimer); _rappelTimer = null; }
+    }
+
+    function verifierTamponPreCours(maintenant, tamponMinutes) {
+        var seances = obtenirSeances();
+        var jour = NOMS_JOURS_JS[maintenant.getDay()];
+        var minutesMaintenant = maintenant.getHours() * 60 + maintenant.getMinutes();
+
+        seances.forEach(function (s) {
+            if (s.jour !== jour || !s.debut) return;
+            var parts = s.debut.split(':');
+            var minutesCours = parseInt(parts[0]) * 60 + parseInt(parts[1] || 0);
+            var delta = minutesCours - minutesMaintenant;
+            if (delta > 0 && delta <= tamponMinutes) {
+                var label = s.groupe ? 'Cours gr. ' + s.groupe : 'Cours';
+                afficherRappel(label + ' dans ' + delta + ' min — bon moment pour s\'arrêter.');
+            }
+        });
+    }
+
+    function afficherRappel(message) {
+        // Éviter le spam : max 1 rappel par 5 minutes
+        var maintenant = Date.now();
+        if (maintenant - _rappelDernierAffiche < 300000) return;
+        _rappelDernierAffiche = maintenant;
+
+        var el = document.createElement('div');
+        el.className = 'rythme-rappel';
+        el.textContent = message;
+        document.body.appendChild(el);
+
+        // Animer l'entrée
+        requestAnimationFrame(function () {
+            el.classList.add('rythme-rappel-visible');
+        });
+
+        // Disparaître après 8 secondes
+        setTimeout(function () {
+            el.classList.remove('rythme-rappel-visible');
+            setTimeout(function () { el.remove(); }, 400);
+        }, 8000);
+    }
+
+    /* ===============================
        INITIALISATION
        =============================== */
 
@@ -1012,7 +1241,9 @@
         afficherRythme: afficherRythme,
         collecterDurees: collecterDurees,
         calculerStatsParActivite: calculerStatsParActivite,
-        sauvegarderPreferences: sauvegarderPreferences
+        sauvegarderPreferences: sauvegarderPreferences,
+        verifierBienEtre: verifierBienEtre,
+        arreterRappelPause: arreterRappelPause
     };
 
 })();

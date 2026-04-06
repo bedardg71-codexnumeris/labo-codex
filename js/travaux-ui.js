@@ -96,6 +96,11 @@
         _majAffichageChrono();
         _chronoInterval = setInterval(_majAffichageChrono, 1000);
 
+        // Rappels de bien-être (Phase 4 Rythme)
+        if (typeof Rythme !== 'undefined' && Rythme.verifierBienEtre) {
+            Rythme.verifierBienEtre();
+        }
+
         // Afficher la moyenne pour cette activité dès le démarrage
         var ec = window.evaluationEnCours;
         var productionId = ec ? ec.productionId : null;
@@ -139,6 +144,10 @@
         if (!_chronoDebut && _chronoElapsed === 0) return;
         const dureeMs = _chronoTotalMs();
         if (_chronoInterval) { clearInterval(_chronoInterval); _chronoInterval = null; }
+        // Arrêter les rappels de bien-être
+        if (typeof Rythme !== 'undefined' && Rythme.arreterRappelPause) {
+            Rythme.arreterRappelPause();
+        }
 
         // Identifier l'activité d'apprentissage en cours
         var ec = window.evaluationEnCours;

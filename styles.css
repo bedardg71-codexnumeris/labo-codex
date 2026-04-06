@@ -15788,6 +15788,91 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     color: var(--succes, #2e7d32);
     font-weight: 500;
 }
+/* Hygiène de travail */
+.rythme-hygiene-label {
+    font-size: .85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.rythme-hygiene-detail {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    padding-left: 22px;
+}
+/* Portrait temporel (heatmap) */
+.rythme-heatmap {
+    display: grid;
+    grid-template-columns: auto repeat(7, 1fr);
+    gap: 4px;
+    max-width: 600px;
+}
+.rythme-heatmap-coin { }
+.rythme-heatmap-jour {
+    text-align: center;
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--texte-secondaire);
+}
+.rythme-heatmap-tranche {
+    font-size: .75rem;
+    color: var(--texte-secondaire);
+    padding-right: 8px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+}
+.rythme-heatmap-cellule {
+    background: var(--bleu-principal, #032e5c);
+    color: #fff;
+    border-radius: var(--radius-sm, 4px);
+    text-align: center;
+    font-size: .8rem;
+    font-weight: 600;
+    padding: 8px 4px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.rythme-heatmap-vide {
+    background: var(--surface-secondaire, rgba(128,128,128,.08));
+    color: transparent;
+}
+.rythme-portrait-resume {
+    font-size: .85rem;
+    color: var(--texte-secondaire);
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+/* Rappels de bien-être */
+.rythme-rappel {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface-section, #1a2a30);
+    color: var(--texte-principal, #e0e0e0);
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-md, 8px);
+    padding: 12px 24px;
+    font-size: .9rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,.3);
+    opacity: 0;
+    transition: opacity .4s ease, transform .4s ease;
+    z-index: 9999;
+    pointer-events: none;
+    max-width: 500px;
+    text-align: center;
+}
+.rythme-rappel-visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
 
 .btn-icon {
     background: none;

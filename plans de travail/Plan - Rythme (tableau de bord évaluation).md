@@ -209,11 +209,15 @@ Le module lit (lecture seule, principe SSOT) :
 - Tableau 2 enrichi : colonne Remise par groupe, lots terminés visibles
 - Heure objectif : champ time pour dire « avant mardi midi »
 
-### Phase 4 — Préférences et bien-être (à venir)
-- [ ] Rappels de pauses (notification discrète après N minutes d'évaluation continue)
-- [ ] Portrait temporel (heatmap jour/moment — quand est-ce que tu évalues ?)
-- [ ] Alerte douce si évaluation en weekend ou soir tardif
-- [ ] Tampon pré-cours : signaler (sans bloquer) l'évaluation juste avant un cours
+### Phase 4 — Préférences et bien-être ✅ (6 avril 2026)
+- Rappels de pauses configurables (défaut 45 min, plage 15–120)
+- Portrait temporel : heatmap jour×moment (matin/après-midi/soirée/nuit) avec résumé %
+- Alerte douce weekend (on/off) et soir tardif (seuil configurable, défaut 21h)
+- Tampon pré-cours : alerte si cours dans N minutes (défaut 30, plage 10–60)
+- Section « Hygiène de travail » dans l'onglet Rythme avec toutes les préférences
+- Notifications toast animées (fond centré, anti-spam 5 min, auto-disparition 8s)
+- Intégration chrono : `verifierBienEtre()` au démarrage, `arreterRappelPause()` à l'arrêt
+- Changelog Beta 99 mis à jour avec les nouveautés Rythme
 
 ### Phase 5 — Raffinements (selon usage)
 - [ ] Courbe d'apprentissage de l'évaluateur (tendance temporelle par activité)
