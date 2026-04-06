@@ -15701,6 +15701,15 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     font-weight: 600;
     color: var(--texte-principal);
 }
+/* Préférences rythme */
+.rythme-prefs-grille {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-top: .5rem;
+}
+.rythme-prefs-grille .groupe-form { min-width: 120px; }
+.rythme-prefs-grille .label-formulaire { font-size: .8rem; }
 /* Planning semaine */
 .rythme-semaine-titre {
     font-weight: 600;
@@ -15771,6 +15780,10 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 .rythme-alerte {
     color: var(--erreur, #c62828);
     font-weight: 600;
+}
+.rythme-marge {
+    color: var(--succes, #2e7d32);
+    font-weight: 500;
 }
 
 .btn-icon {
