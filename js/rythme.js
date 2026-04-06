@@ -288,7 +288,271 @@
             });
             contenuEstimation.innerHTML = htmlEst;
             sectionEstimation.style.display = '';
+
+            // Phase 3 : planning hebdomadaire
+            afficherPlanning(estimations);
         }
+    }
+
+    /* ===============================
+       PHASE 3 — PLANNING HEBDOMADAIRE
+       =============================== */
+
+    var JOURS_SEMAINE = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
+    var HEURES_DISPO_JOUR = 6;     // heures de travail max par journée libre
+    var HEURES_DISPO_DEMI = 3;     // heures disponibles si demi-journée libre
+    var HEURES_DISPO_SOIR = 2;     // heures si on accepte de travailler le soir
+
+    /**
+     * Récupère les séances de cours de l'horaire actif.
+     * @returns {Array<{jour: string, debut: string, duree: number}>}
+     */
+    function obtenirSeances() {
+        if (typeof obtenirSeancesHoraire === 'function') {
+            var seances = obtenirSeancesHoraire(null);
+            if (seances && seances.length > 0) return seances;
+        }
+        // Fallback : lire directement depuis la clé
+        var horaires = db.getSync(cle('horaires'), []);
+        for (var i = 0; i < horaires.length; i++) {
+            if (horaires[i].seances && horaires[i].seances.length > 0) {
+                return horaires[i].seances;
+            }
+        }
+        return db.getSync(cle('seancesHoraire'), []) || [];
+    }
+
+    /**
+     * Analyse l'horaire pour identifier les jours avec/sans cours.
+     * @returns {Object<string, {cours: Array, heuresOccupees: number, heuresLibres: number}>}
+     */
+    function analyserHoraireHebdo() {
+        var seances = obtenirSeances();
+        var jours = {};
+
+        JOURS_SEMAINE.forEach(function (j) {
+            jours[j] = { cours: [], heuresOccupees: 0, heuresLibres: HEURES_DISPO_JOUR };
+        });
+
+        seances.forEach(function (s) {
+            var jour = s.jour;
+            if (!jours[jour]) return;
+            var duree = s.duree || (s.nombrePeriodes ? s.nombrePeriodes * 0.833 : 0);
+            jours[jour].cours.push({
+                debut: s.debut || '??',
+                duree: duree,
+                local: s.local || ''
+            });
+            jours[jour].heuresOccupees += duree;
+        });
+
+        // Calculer les heures libres par jour
+        for (var j in jours) {
+            var info = jours[j];
+            if (info.heuresOccupees === 0) {
+                // Journée sans cours
+                info.heuresLibres = HEURES_DISPO_JOUR;
+                info.type = 'libre';
+            } else if (info.heuresOccupees <= 3) {
+                // Demi-journée de cours → l'autre demi-journée est libre
+                info.heuresLibres = HEURES_DISPO_DEMI;
+                info.type = 'partiel';
+            } else {
+                // Journée chargée → seulement le soir
+                info.heuresLibres = HEURES_DISPO_SOIR;
+                info.type = 'soir';
+            }
+        }
+
+        return jours;
+    }
+
+    /**
+     * Identifie la semaine courante dans le calendrier.
+     * @returns {{ numeroSemaine: number, lundi: string, vendredi: string, dates: Object }}
+     */
+    function obtenirSemaineCourante() {
+        var calendrier = (typeof obtenirCalendrierComplet === 'function')
+            ? obtenirCalendrierComplet()
+            : db.getSync(cle('calendrierComplet'), {});
+        var aujourdHui = new Date().toISOString().split('T')[0];
+
+        // Trouver la semaine courante
+        var infoAuj = calendrier[aujourdHui];
+        var numSemaine = infoAuj ? infoAuj.numeroSemaine : null;
+
+        // Collecter les dates de cette semaine
+        var datesSemaine = {};
+        var lundi = null, vendredi = null;
+        for (var dateStr in calendrier) {
+            var info = calendrier[dateStr];
+            if (info.numeroSemaine === numSemaine && JOURS_SEMAINE.indexOf(info.jourSemaine) >= 0) {
+                datesSemaine[info.jourSemaine] = {
+                    date: dateStr,
+                    statut: info.statut,
+                    motif: info.motif || null
+                };
+                if (info.jourSemaine === 'Lundi') lundi = dateStr;
+                if (info.jourSemaine === 'Vendredi') vendredi = dateStr;
+            }
+        }
+
+        return {
+            numeroSemaine: numSemaine,
+            lundi: lundi,
+            vendredi: vendredi,
+            dates: datesSemaine
+        };
+    }
+
+    /**
+     * Répartit les estimations dans les plages horaires disponibles.
+     */
+    function repartirDansPlages(estimations, joursHoraire, semaine) {
+        var plagesDisponibles = [];
+
+        JOURS_SEMAINE.forEach(function (jour) {
+            var infoJour = joursHoraire[jour];
+            var infoDate = semaine.dates[jour];
+            if (!infoJour) return;
+
+            // Jour de congé ou weekend → pas de plage
+            if (infoDate && (infoDate.statut === 'conge' || infoDate.statut === 'weekend')) return;
+
+            // Jour dans le passé → pas de plage
+            if (infoDate && infoDate.date < new Date().toISOString().split('T')[0]) return;
+
+            if (infoJour.heuresLibres > 0.5) {
+                plagesDisponibles.push({
+                    jour: jour,
+                    date: infoDate ? infoDate.date : '',
+                    heuresLibres: infoJour.heuresLibres,
+                    type: infoJour.type,
+                    heuresUtilisees: 0,
+                    taches: []
+                });
+            }
+        });
+
+        // Trier les estimations par temps décroissant (plus gros lots en premier)
+        var estTriees = estimations.slice().sort(function (a, b) {
+            return b.tempsEstimeMs - a.tempsEstimeMs;
+        });
+
+        // Répartir (greedy : chaque tâche va dans la première plage qui a assez de temps)
+        estTriees.forEach(function (est) {
+            var heuresNecessaires = est.tempsEstimeMs / 3600000;
+
+            for (var i = 0; i < plagesDisponibles.length; i++) {
+                var plage = plagesDisponibles[i];
+                var heuresRestantes = plage.heuresLibres - plage.heuresUtilisees;
+                if (heuresRestantes >= 0.5) {
+                    var heuresAllouees = Math.min(heuresNecessaires, heuresRestantes);
+                    plage.taches.push({
+                        nom: est.productionNom,
+                        heures: heuresAllouees,
+                        copies: Math.round(est.copiesRestantes * (heuresAllouees / heuresNecessaires))
+                    });
+                    plage.heuresUtilisees += heuresAllouees;
+                    heuresNecessaires -= heuresAllouees;
+                    if (heuresNecessaires < 0.1) break;
+                }
+            }
+        });
+
+        return plagesDisponibles;
+    }
+
+    /**
+     * Affiche le planning de la semaine.
+     */
+    function afficherPlanning(estimations) {
+        var sectionPlanning = document.getElementById('rythme-planning');
+        var contenuPlanning = document.getElementById('rythme-planning-contenu');
+        if (!sectionPlanning || !contenuPlanning) return;
+
+        var joursHoraire = analyserHoraireHebdo();
+        var semaine = obtenirSemaineCourante();
+
+        if (!semaine.numeroSemaine) {
+            contenuPlanning.innerHTML = '<p class="u-texte-secondaire">Calendrier non configuré — configure le trimestre dans Réglages pour voir le planning.</p>';
+            sectionPlanning.style.display = '';
+            return;
+        }
+
+        var plages = repartirDansPlages(estimations, joursHoraire, semaine);
+        var totalHeuresLibres = plages.reduce(function (s, p) { return s + p.heuresLibres; }, 0);
+        var totalChargeMs = estimations.reduce(function (s, e) { return s + e.tempsEstimeMs; }, 0);
+
+        var html = '<div class="rythme-semaine-titre">Semaine ' + semaine.numeroSemaine;
+        if (semaine.lundi && semaine.vendredi) {
+            html += ' <span class="u-texte-secondaire">(' + formaterDateCourte(semaine.lundi) + ' — ' + formaterDateCourte(semaine.vendredi) + ')</span>';
+        }
+        html += '</div>';
+
+        html += '<div class="rythme-semaine-grille">';
+
+        JOURS_SEMAINE.forEach(function (jour) {
+            var info = joursHoraire[jour];
+            var infoDate = semaine.dates[jour];
+            var estConge = infoDate && infoDate.statut === 'conge';
+            var estPasse = infoDate && infoDate.date < new Date().toISOString().split('T')[0];
+
+            html += '<div class="rythme-jour' + (estConge ? ' rythme-jour-conge' : '') + (estPasse ? ' rythme-jour-passe' : '') + '">';
+            html += '<div class="rythme-jour-titre">' + jour;
+            if (infoDate && infoDate.date) html += ' <small>' + infoDate.date.substring(8) + '</small>';
+            html += '</div>';
+
+            if (estConge) {
+                html += '<div class="rythme-jour-info">Congé' + (infoDate.motif ? ' — ' + echapperHtml(infoDate.motif) : '') + '</div>';
+            } else {
+                // Afficher les cours
+                if (info.cours.length > 0) {
+                    info.cours.forEach(function (c) {
+                        html += '<div class="rythme-cours">Cours ' + c.debut + ' (' + c.duree.toFixed(1) + 'h)</div>';
+                    });
+                }
+
+                // Afficher le temps libre
+                var labelType = info.type === 'libre' ? 'Journée libre'
+                    : info.type === 'partiel' ? 'Demi-journée libre'
+                    : 'Soirée disponible';
+                html += '<div class="rythme-jour-libre">' + labelType + ' · ' + info.heuresLibres + 'h</div>';
+
+                // Tâches assignées
+                var plage = plages.find(function (p) { return p.jour === jour; });
+                if (plage && plage.taches.length > 0) {
+                    plage.taches.forEach(function (t) {
+                        html += '<div class="rythme-tache">';
+                        html += echapperHtml(t.nom);
+                        html += '<small> · ~' + t.copies + ' copies · ' + formaterDureeTexte(t.heures * 3600000) + '</small>';
+                        html += '</div>';
+                    });
+                }
+            }
+            html += '</div>';
+        });
+
+        html += '</div>';
+
+        // Résumé
+        html += '<div class="rythme-resume">';
+        html += '<span>Disponible cette semaine : <strong>' + totalHeuresLibres.toFixed(0) + 'h</strong></span>';
+        html += '<span>Charge restante : <strong>' + formaterDureeTexte(totalChargeMs) + '</strong></span>';
+        if (totalChargeMs > totalHeuresLibres * 3600000) {
+            html += '<span class="rythme-alerte">La charge dépasse le temps disponible cette semaine</span>';
+        }
+        html += '</div>';
+
+        contenuPlanning.innerHTML = html;
+        sectionPlanning.style.display = '';
+    }
+
+    function formaterDateCourte(dateStr) {
+        if (!dateStr) return '';
+        var parts = dateStr.split('-');
+        var mois = ['jan.', 'fév.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+        return parseInt(parts[2]) + ' ' + mois[parseInt(parts[1]) - 1];
     }
 
     /* ===============================
