@@ -1048,6 +1048,12 @@ function niveauSelectionne(critereId) {
 
     evaluationEnCours.criteres[critereId] = niveau;
 
+    // Si le dropdown est vidé et qu'il y a des données algorithmiques, restaurer le niveau calculé
+    // (corrige le bug où le critère était ignoré du calcul après revert d'une sélection manuelle)
+    if (!niveau && evaluationEnCours.donneesAlgorithmiques?.[critereId]?.niveau) {
+        evaluationEnCours.criteres[critereId] = evaluationEnCours.donneesAlgorithmiques[critereId].niveau;
+    }
+
     // Mettre à jour la couleur du select
     if (niveau) {
         const couleur = obtenirCouleurNiveau(niveau);
@@ -1444,6 +1450,14 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
     // ⚠️ IMPORTANT: Sauvegarder le niveau dans evaluationEnCours pour qu'il soit inclus dans calculerNote()
     evaluationEnCours.criteres[critereId] = niveauIDME;
 
+    // Réinitialiser le sélecteur manuel pour que calculerNote() utilise le % exact algorithmique
+    const selectAlgoCat = document.getElementById(`eval_${critereId}`);
+    if (selectAlgoCat && selectAlgoCat.value) {
+        selectAlgoCat.value = '';
+        selectAlgoCat.style.backgroundColor = 'transparent';
+        selectAlgoCat.style.borderColor = 'var(--bordure-claire)';
+    }
+
     // === CALCUL DU MODE (sous-critère dominant) ===
     const frequences = {};
     let maxFreq = 0;
@@ -1508,6 +1522,7 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
                 sommePonderee: sommePonderee,
                 noteCalculee: noteCalculee,
                 pourcentage: pctFinal,
+                niveau: niveauIDME,
                 retroaction: retroactionFinale
             };
 
@@ -1541,6 +1556,7 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
                 sommePonderee: sommePonderee,
                 noteCalculee: noteCalculee,
                 pourcentage: pctFinal,
+                niveau: niveauIDME,
                 retroaction: retroactionGenerique
             };
         }
@@ -1655,6 +1671,14 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
 
     // Sauvegarder le critère dans evaluationEnCours.criteres avec le niveau
     evaluationEnCours.criteres[critereId] = niveauIDME;
+
+    // Réinitialiser le sélecteur manuel pour que calculerNote() utilise le % exact algorithmique
+    const selectAlgo = document.getElementById(`eval_${critereId}`);
+    if (selectAlgo && selectAlgo.value) {
+        selectAlgo.value = '';
+        selectAlgo.style.backgroundColor = 'transparent';
+        selectAlgo.style.borderColor = 'var(--bordure-claire)';
+    }
 
     // Déclencher le recalcul et la régénération de rétroaction
     calculerNote();
