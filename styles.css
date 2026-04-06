@@ -3598,6 +3598,201 @@ textarea {
     color: var(--accent-primaire);
 }
 
+/* ===============================
+   BARRE DE CONVERGENCE (Contexte > Trimestre)
+   6 étapes → Groupe-cours
+   =============================== */
+
+.barre-convergence {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0;
+    padding: 16px 12px 12px;
+    margin-bottom: 20px;
+    background: var(--surface-carte);
+    border: 1px solid var(--bleu-pale);
+    border-radius: var(--radius-moyen);
+    overflow-x: auto;
+}
+
+.bc-etape {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 6px;
+    min-width: 72px;
+    transition: transform 0.15s ease;
+}
+
+.bc-etape:hover {
+    transform: translateY(-2px);
+}
+
+.bc-etape:focus-visible {
+    outline: 2px solid var(--accent-primaire);
+    outline-offset: 4px;
+    border-radius: var(--radius-moyen);
+}
+
+/* Noeud (cercle) */
+.bc-noeud {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--bleu-moyen);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+    position: relative;
+}
+
+.bc-check {
+    font-size: 13px;
+    color: transparent;
+    transition: color 0.2s ease;
+    line-height: 1;
+}
+
+/* État complété */
+.bc-etape.bc-complet .bc-noeud {
+    border-color: var(--vert-succes, #4caf50);
+    background: var(--vert-succes, #4caf50);
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
+}
+
+.bc-etape.bc-complet .bc-check {
+    color: #fff;
+}
+
+.bc-etape.bc-complet .bc-label {
+    color: var(--texte-principal);
+}
+
+/* État incomplet */
+.bc-etape:not(.bc-complet) .bc-label {
+    color: var(--texte-secondaire);
+}
+
+/* Label */
+.bc-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Info (compteur) */
+.bc-info {
+    font-size: 0.65rem;
+    color: var(--texte-secondaire);
+    min-height: 14px;
+}
+
+.bc-etape.bc-complet .bc-info {
+    color: var(--accent-primaire);
+}
+
+/* Ligne de liaison */
+.bc-liaison {
+    flex: 1;
+    height: 2px;
+    background: var(--bleu-moyen);
+    margin-top: 17px; /* centré sur le noeud */
+    min-width: 16px;
+    max-width: 48px;
+    transition: background 0.3s ease;
+}
+
+.bc-liaison.bc-liaison-ok {
+    background: var(--vert-succes, #4caf50);
+}
+
+/* Destination (Groupe-cours) — noeud plus grand, double bordure */
+.bc-destination .bc-noeud {
+    width: 34px;
+    height: 34px;
+    border-width: 3px;
+    border-color: var(--accent-primaire);
+}
+
+.bc-destination.bc-complet .bc-noeud {
+    border-color: var(--vert-succes, #4caf50);
+    background: var(--vert-succes, #4caf50);
+    box-shadow: 0 0 12px rgba(76, 175, 80, 0.4);
+}
+
+.bc-destination .bc-label {
+    font-weight: 700;
+    font-size: 0.72rem;
+}
+
+/* Liaison finale (avant destination) — style pointillé si incomplet */
+.bc-liaison-finale {
+    border-top: 2px dashed var(--bleu-moyen);
+    background: none;
+    height: 0;
+    margin-top: 18px;
+}
+
+.bc-liaison-finale.bc-liaison-ok {
+    border-top-style: solid;
+    border-top-color: var(--vert-succes, #4caf50);
+}
+
+/* Responsive iPad */
+@media (max-width: 768px) {
+    .barre-convergence {
+        padding: 12px 8px 8px;
+    }
+    .bc-etape {
+        min-width: 56px;
+        padding: 4px 2px;
+    }
+    .bc-label {
+        font-size: 0.62rem;
+    }
+    .bc-noeud {
+        width: 24px;
+        height: 24px;
+    }
+    .bc-destination .bc-noeud {
+        width: 28px;
+        height: 28px;
+    }
+    .bc-liaison {
+        min-width: 8px;
+        margin-top: 15px;
+    }
+    .bc-liaison-finale {
+        margin-top: 15px;
+    }
+}
+
+/* Animation d'entrée */
+@keyframes bc-apparition {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.barre-convergence .bc-etape {
+    animation: bc-apparition 0.3s ease both;
+}
+
+.barre-convergence .bc-etape:nth-child(1) { animation-delay: 0s; }
+.barre-convergence .bc-etape:nth-child(3) { animation-delay: 0.05s; }
+.barre-convergence .bc-etape:nth-child(5) { animation-delay: 0.1s; }
+.barre-convergence .bc-etape:nth-child(7) { animation-delay: 0.15s; }
+.barre-convergence .bc-etape:nth-child(9) { animation-delay: 0.2s; }
+.barre-convergence .bc-etape:nth-child(11) { animation-delay: 0.25s; }
+
 /* Modal Backup Reminder — utilise les classes standard DS (.modal-overlay, .modal-contenu, etc.) */
 
 /* ===============================

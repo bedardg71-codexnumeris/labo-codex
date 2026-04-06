@@ -1969,6 +1969,354 @@
     </div>
 </section>
 
+<!-- ============================================================
+     SECTION 20 — ACCORDÉONS
+     ============================================================ -->
+<section id="accordeons" class="guide-section">
+    <h2 class="guide-section-title">20. Accordéons</h2>
+    <p class="guide-section-intro">Composant .carte.accordeon avec header cliquable et contenu dépliable. Utilisé dans Contexte, Structure et Aide.</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Accordéon ouvert</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="carte accordeon">
+                    <div class="accordeon-header">
+                        <h3 class="carte-titre-bleu" style="margin:0">
+                            <span class="accordeon-chevron">▼</span> Titre de la section
+                        </h3>
+                    </div>
+                    <div class="accordeon-contenu">
+                        <p style="color:var(--texte-secondaire); font-size:0.9rem; margin:10px 0 0">Contenu de l'accordéon. Le chevron tourne de 90° à l'ouverture. Le contenu apparaît avec une transition de max-height et opacity.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="carte accordeon">
+                    <div class="accordeon-header">
+                        <h3 class="carte-titre-bleu" style="margin:0">
+                            <span class="accordeon-chevron">▼</span> Titre de la section
+                        </h3>
+                    </div>
+                    <div class="accordeon-contenu">
+                        <p style="color:var(--texte-secondaire); font-size:0.9rem; margin:10px 0 0">Contenu de l'accordéon. Le chevron tourne de 90° à l'ouverture. Le contenu apparaît avec une transition de max-height et opacity.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="guide-component-title">Accordéon fermé</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="carte accordeon ferme">
+                    <div class="accordeon-header">
+                        <h3 class="carte-titre-bleu" style="margin:0">
+                            <span class="accordeon-chevron">▶</span> Section repliée
+                        </h3>
+                    </div>
+                    <div class="accordeon-contenu">
+                        <p>Ce contenu est masqué.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="carte accordeon ferme">
+                    <div class="accordeon-header">
+                        <h3 class="carte-titre-bleu" style="margin:0">
+                            <span class="accordeon-chevron">▶</span> Section repliée
+                        </h3>
+                    </div>
+                    <div class="accordeon-contenu">
+                        <p>Ce contenu est masqué.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="guide-specs-title">Specs</div>
+        <ul>
+            <li>Classes : <code>.carte.accordeon</code> (ouvert) / <code>.carte.accordeon.ferme</code> (fermé)</li>
+            <li>Header : <code>.accordeon-header</code> avec <code>.carte-titre-bleu</code></li>
+            <li>Contenu : <code>.accordeon-contenu</code> — transition CSS via <code>:not(.ferme)</code></li>
+            <li>JS : <code>toggleAccordeonV2(headerElement)</code></li>
+        </ul>
+    </div>
+</section>
+
+<!-- ============================================================
+     SECTION 21 — BARRE DE CONVERGENCE
+     ============================================================ -->
+<section id="barre-convergence" class="guide-section">
+    <h2 class="guide-section-title">21. Barre de convergence</h2>
+    <p class="guide-section-intro">Barre de statut horizontale montrant la progression de configuration. Les étapes convergent vers une destination finale (Groupe-cours).</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">État mixte (3/6 complétés)</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <nav class="barre-convergence" style="margin:0" aria-label="Exemple">
+                    <div class="bc-etape bc-complet">
+                        <span class="bc-noeud"><span class="bc-check">&#10003;</span></span>
+                        <span class="bc-label">Étape 1</span>
+                        <span class="bc-info">Actif</span>
+                    </div>
+                    <span class="bc-liaison bc-liaison-ok"></span>
+                    <div class="bc-etape bc-complet">
+                        <span class="bc-noeud"><span class="bc-check">&#10003;</span></span>
+                        <span class="bc-label">Étape 2</span>
+                        <span class="bc-info">3 items</span>
+                    </div>
+                    <span class="bc-liaison bc-liaison-ok"></span>
+                    <div class="bc-etape bc-complet">
+                        <span class="bc-noeud"><span class="bc-check">&#10003;</span></span>
+                        <span class="bc-label">Étape 3</span>
+                        <span class="bc-info">1 item</span>
+                    </div>
+                    <span class="bc-liaison"></span>
+                    <div class="bc-etape">
+                        <span class="bc-noeud"><span class="bc-check">&#10003;</span></span>
+                        <span class="bc-label">Étape 4</span>
+                        <span class="bc-info"></span>
+                    </div>
+                    <span class="bc-liaison"></span>
+                    <div class="bc-etape">
+                        <span class="bc-noeud"><span class="bc-check">&#10003;</span></span>
+                        <span class="bc-label">Étape 5</span>
+                        <span class="bc-info"></span>
+                    </div>
+                    <span class="bc-liaison bc-liaison-finale"></span>
+                    <div class="bc-etape bc-destination">
+                        <span class="bc-noeud"><span class="bc-check">&#10003;</span></span>
+                        <span class="bc-label">Destination</span>
+                        <span class="bc-info"></span>
+                    </div>
+                </nav>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <nav class="barre-convergence" style="margin:0" aria-label="Exemple">
+                    <div class="bc-etape bc-complet">
+                        <span class="bc-noeud"><span class="bc-check">&#10003;</span></span>
+                        <span class="bc-label">Étape 1</span>
+                        <span class="bc-info">Actif</span>
+                    </div>
+                    <span class="bc-liaison bc-liaison-ok"></span>
+                    <div class="bc-etape bc-complet">
+                        <span class="bc-noeud"><span class="bc-check">&#10003;</span></span>
+                        <span class="bc-label">Étape 2</span>
+                        <span class="bc-info">3 items</span>
+                    </div>
+                    <span class="bc-liaison bc-liaison-ok"></span>
+                    <div class="bc-etape bc-complet">
+                        <span class="bc-noeud"><span class="bc-check">&#10003;</span></span>
+                        <span class="bc-label">Étape 3</span>
+                        <span class="bc-info">1 item</span>
+                    </div>
+                    <span class="bc-liaison"></span>
+                    <div class="bc-etape">
+                        <span class="bc-noeud"><span class="bc-check">&#10003;</span></span>
+                        <span class="bc-label">Étape 4</span>
+                        <span class="bc-info"></span>
+                    </div>
+                    <span class="bc-liaison"></span>
+                    <div class="bc-etape">
+                        <span class="bc-noeud"><span class="bc-check">&#10003;</span></span>
+                        <span class="bc-label">Étape 5</span>
+                        <span class="bc-info"></span>
+                    </div>
+                    <span class="bc-liaison bc-liaison-finale"></span>
+                    <div class="bc-etape bc-destination">
+                        <span class="bc-noeud"><span class="bc-check">&#10003;</span></span>
+                        <span class="bc-label">Destination</span>
+                        <span class="bc-info"></span>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+        <div class="guide-specs-title">Specs</div>
+        <ul>
+            <li>Conteneur : <code>.barre-convergence</code> — fond surface-carte, bordure bleu-pale</li>
+            <li>Étape : <code>.bc-etape</code> + <code>.bc-complet</code> (noeud vert) — cliquable</li>
+            <li>Destination : <code>.bc-etape.bc-destination</code> — noeud plus grand, bordure accent</li>
+            <li>Liaison : <code>.bc-liaison</code> + <code>.bc-liaison-ok</code> (vert) — trait entre les noeuds</li>
+            <li>Liaison finale : <code>.bc-liaison-finale</code> — pointillé avant la destination</li>
+            <li>Animation : entrée décalée par étape (animation-delay)</li>
+            <li>JS : <code>mettreAJourBarreContexte()</code></li>
+        </ul>
+    </div>
+</section>
+
+<!-- ============================================================
+     SECTION 22 — PANNEAU MÉTADONNÉES
+     ============================================================ -->
+<section id="panneau-metadata" class="guide-section">
+    <h2 class="guide-section-title">22. Panneau métadonnées</h2>
+    <p class="guide-section-intro">Panneau en lecture seule affichant les métadonnées CC d'une ressource (grille, production, échelle, cartouche).</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Panneau complet</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="panneau-metadata" data-type="grille">
+                    <div class="panneau-metadata-header">
+                        <span class="panneau-metadata-titre">Métadonnées sur cette grille</span>
+                    </div>
+                    <div class="meta-ligne">
+                        <span class="meta-label">Auteur</span>
+                        <span class="meta-valeur">Grégoire Bédard</span>
+                    </div>
+                    <div class="meta-ligne">
+                        <span class="meta-label">Créé le</span>
+                        <span class="meta-valeur">7 janvier 2026</span>
+                    </div>
+                    <div class="meta-ligne">
+                        <span class="meta-label">Modifié le</span>
+                        <span class="meta-valeur">5 avril 2026</span>
+                    </div>
+                    <div class="meta-ligne meta-description">
+                        <span class="meta-label">Description</span>
+                        <span class="meta-valeur">Grille pour l'analyse de textes narratifs</span>
+                    </div>
+                    <div class="meta-ligne meta-licence">
+                        <span class="meta-label">Licence</span>
+                        <span class="meta-valeur">
+                            <img src="licence CC/by-nc-sa-2.svg" alt="CC BY-NC-SA 4.0" style="height:15px; vertical-align:middle;">
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="panneau-metadata" data-type="grille">
+                    <div class="panneau-metadata-header">
+                        <span class="panneau-metadata-titre">Métadonnées sur cette grille</span>
+                    </div>
+                    <div class="meta-ligne">
+                        <span class="meta-label">Auteur</span>
+                        <span class="meta-valeur">Grégoire Bédard</span>
+                    </div>
+                    <div class="meta-ligne">
+                        <span class="meta-label">Créé le</span>
+                        <span class="meta-valeur">7 janvier 2026</span>
+                    </div>
+                    <div class="meta-ligne">
+                        <span class="meta-label">Modifié le</span>
+                        <span class="meta-valeur">5 avril 2026</span>
+                    </div>
+                    <div class="meta-ligne meta-description">
+                        <span class="meta-label">Description</span>
+                        <span class="meta-valeur">Grille pour l'analyse de textes narratifs</span>
+                    </div>
+                    <div class="meta-ligne meta-licence">
+                        <span class="meta-label">Licence</span>
+                        <span class="meta-valeur">
+                            <img src="licence CC/by-nc-sa-2.svg" alt="CC BY-NC-SA 4.0" style="height:15px; vertical-align:middle;">
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="guide-specs-title">Specs</div>
+        <ul>
+            <li>Conteneur : <code>.panneau-metadata</code> — fond bleu-tres-pale, bordure bleu-pale, radius moyen</li>
+            <li>Header : <code>.panneau-metadata-header</code> — gradient subtil, titre uppercase bold</li>
+            <li>Lignes : <code>.meta-ligne</code> — flex, séparateurs quasi-transparents, hover highlight</li>
+            <li>Labels : <code>.meta-label</code> — uppercase, letter-spacing, texte-secondaire</li>
+            <li>Description : <code>.meta-description .meta-valeur</code> — italic, opacity réduite</li>
+            <li>Licence : <code>.meta-licence</code> — gradient miroir du header, séparateur top</li>
+            <li>5 champs toujours affichés : Auteur, Créé le, Modifié le, Description, Licence</li>
+            <li>JS : <code>genererPanneauMetadonnees(ressource, typeRessource)</code></li>
+        </ul>
+    </div>
+</section>
+
+<!-- ============================================================
+     SECTION 23 — LAYOUT BIBLIOTHÈQUE / FORMULAIRE
+     ============================================================ -->
+<section id="layout-bibliotheque" class="guide-section">
+    <h2 class="guide-section-title">23. Layout bibliothèque / formulaire</h2>
+    <p class="guide-section-intro">Disposition à deux colonnes utilisée dans Contexte &gt; Trimestre pour chaque accordéon : sidebar (bibliothèque + sélecteur + aperçu) à gauche, formulaire d'édition à droite.</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Disposition complète</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="disposition-bibliotheque-formulaire" style="font-size:0.85rem">
+                    <div class="panneau-bibliotheque">
+                        <button class="btn btn-secondaire btn-bibliotheque" style="width:100%">📚 Bibliothèque</button>
+                        <div class="groupe-form" style="margin-top:12px">
+                            <label class="libelle-selection" style="font-size:0.8rem">Élément actif :</label>
+                            <select class="controle-form" style="font-size:0.8rem">
+                                <option>Hiver 2026</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-principal btn-sm" style="width:100%; margin-top:8px">+ Nouveau</button>
+                        <div class="apercu-trimestre-sidebar" style="margin-top:12px; font-size:0.75rem">
+                            <strong>Aperçu :</strong><br>
+                            16 semaines · 47 jours
+                        </div>
+                    </div>
+                    <div class="panneau-formulaire" style="padding:12px">
+                        <div class="bloc-section bloc-section--vert" style="padding:12px">
+                            <h5 style="margin:0 0 8px; font-size:0.85rem">Identification</h5>
+                            <div class="groupe-form">
+                                <label style="font-size:0.75rem">Nom</label>
+                                <input type="text" class="controle-form" value="Hiver 2026" style="font-size:0.8rem">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="disposition-bibliotheque-formulaire" style="font-size:0.85rem">
+                    <div class="panneau-bibliotheque">
+                        <button class="btn btn-secondaire btn-bibliotheque" style="width:100%">📚 Bibliothèque</button>
+                        <div class="groupe-form" style="margin-top:12px">
+                            <label class="libelle-selection" style="font-size:0.8rem">Élément actif :</label>
+                            <select class="controle-form" style="font-size:0.8rem">
+                                <option>Hiver 2026</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-principal btn-sm" style="width:100%; margin-top:8px">+ Nouveau</button>
+                        <div class="apercu-trimestre-sidebar" style="margin-top:12px; font-size:0.75rem">
+                            <strong>Aperçu :</strong><br>
+                            16 semaines · 47 jours
+                        </div>
+                    </div>
+                    <div class="panneau-formulaire" style="padding:12px">
+                        <div class="bloc-section bloc-section--vert" style="padding:12px">
+                            <h5 style="margin:0 0 8px; font-size:0.85rem">Identification</h5>
+                            <div class="groupe-form">
+                                <label style="font-size:0.75rem">Nom</label>
+                                <input type="text" class="controle-form" value="Hiver 2026" style="font-size:0.8rem">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="guide-specs-title">Specs</div>
+        <ul>
+            <li>Conteneur : <code>.disposition-bibliotheque-formulaire</code> — grid 2 colonnes (sidebar 250px + formulaire 1fr)</li>
+            <li>Sidebar : <code>.panneau-bibliotheque</code> — bouton Bibliothèque, sélecteur, bouton Nouveau, aperçu</li>
+            <li>Formulaire : <code>.panneau-formulaire</code> — contient les blocs-section colorés</li>
+            <li>Blocs-section : <code>.bloc-section--vert</code> / <code>.bloc-section--bleu</code> — bordure gauche colorée</li>
+            <li>Utilisé dans : Trimestre, Cours, Enseignant, Horaire, Groupe-cours (6 accordéons)</li>
+        </ul>
+    </div>
+</section>
+
 </div><!-- /guide-container -->
 </body>
 </html>

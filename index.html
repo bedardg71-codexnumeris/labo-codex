@@ -5478,6 +5478,45 @@
                         Configuration du cadre temporel et organisationnel du trimestre actif.
                     </p>
 
+                    <!-- Barre de convergence : statut des 6 composantes → Groupe-cours -->
+                    <nav class="barre-convergence" id="barreConvergence" aria-label="Statut de configuration">
+                        <button class="bc-etape" data-etape="trimestre" data-accordeon="accordeon-gestion-trimestres">
+                            <span class="bc-noeud"><span class="bc-check">&#10003;</span></span>
+                            <span class="bc-label">Trimestre</span>
+                            <span class="bc-info" id="bc-info-trimestre"></span>
+                        </button>
+                        <span class="bc-liaison" aria-hidden="true"></span>
+                        <button class="bc-etape" data-etape="cours" data-accordeon="accordeon-cours">
+                            <span class="bc-noeud"><span class="bc-check">&#10003;</span></span>
+                            <span class="bc-label">Cours</span>
+                            <span class="bc-info" id="bc-info-cours"></span>
+                        </button>
+                        <span class="bc-liaison" aria-hidden="true"></span>
+                        <button class="bc-etape" data-etape="enseignant" data-accordeon="accordeon-enseignant">
+                            <span class="bc-noeud"><span class="bc-check">&#10003;</span></span>
+                            <span class="bc-label">Enseignant</span>
+                            <span class="bc-info" id="bc-info-enseignant"></span>
+                        </button>
+                        <span class="bc-liaison" aria-hidden="true"></span>
+                        <button class="bc-etape" data-etape="etudiants" data-accordeon="accordeon-groupe-etudiants">
+                            <span class="bc-noeud"><span class="bc-check">&#10003;</span></span>
+                            <span class="bc-label">Étudiants</span>
+                            <span class="bc-info" id="bc-info-etudiants"></span>
+                        </button>
+                        <span class="bc-liaison" aria-hidden="true"></span>
+                        <button class="bc-etape" data-etape="horaire" data-accordeon="accordeon-horaire">
+                            <span class="bc-noeud"><span class="bc-check">&#10003;</span></span>
+                            <span class="bc-label">Horaire</span>
+                            <span class="bc-info" id="bc-info-horaire"></span>
+                        </button>
+                        <span class="bc-liaison bc-liaison-finale" aria-hidden="true"></span>
+                        <button class="bc-etape bc-destination" data-etape="groupe-cours" data-accordeon="accordeon-groupe-cours">
+                            <span class="bc-noeud"><span class="bc-check">&#10003;</span></span>
+                            <span class="bc-label">Groupe-cours</span>
+                            <span class="bc-info" id="bc-info-groupe-cours"></span>
+                        </button>
+                    </nav>
+
                     <!-- ========== GESTION DES TRIMESTRES ========== -->
                     <div class="carte accordeon" id="accordeon-gestion-trimestres">
                         <div class="accordeon-header" data-tooltip="reglages-gestion-trimestres">
