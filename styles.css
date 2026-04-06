@@ -15701,6 +15701,77 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     font-weight: 600;
     color: var(--texte-principal);
 }
+/* Planning semaine */
+.rythme-semaine-titre {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: .75rem;
+}
+.rythme-semaine-grille {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+@media (max-width: 900px) {
+    .rythme-semaine-grille { grid-template-columns: repeat(2, 1fr); }
+}
+.rythme-jour {
+    background: var(--surface-secondaire, rgba(128,128,128,.06));
+    border-radius: var(--radius-md, 8px);
+    padding: .75rem;
+    min-height: 120px;
+}
+.rythme-jour-passe { opacity: .45; }
+.rythme-jour-conge { background: var(--avertissement-fond, rgba(255,152,0,.08)); }
+.rythme-jour-titre {
+    font-weight: 600;
+    font-size: .85rem;
+    margin-bottom: .5rem;
+    border-bottom: 1px solid var(--bordure-claire);
+    padding-bottom: .35rem;
+}
+.rythme-jour-titre small {
+    font-weight: 400;
+    color: var(--texte-secondaire);
+}
+.rythme-jour-info {
+    font-size: .8rem;
+    color: var(--texte-secondaire);
+    font-style: italic;
+}
+.rythme-cours {
+    font-size: .75rem;
+    color: var(--texte-secondaire);
+    padding: 2px 0;
+}
+.rythme-jour-libre {
+    font-size: .8rem;
+    color: var(--succes, #2e7d32);
+    font-weight: 500;
+    margin: .35rem 0;
+}
+.rythme-tache {
+    font-size: .8rem;
+    background: var(--bleu-principal, #032e5c);
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm, 4px);
+    margin-top: 4px;
+}
+.rythme-tache small { opacity: .8; }
+.rythme-resume {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+    padding-top: .75rem;
+    border-top: 1px solid var(--bordure-claire);
+    font-size: .85rem;
+    flex-wrap: wrap;
+}
+.rythme-alerte {
+    color: var(--erreur, #c62828);
+    font-weight: 600;
+}
 
 .btn-icon {
     background: none;
