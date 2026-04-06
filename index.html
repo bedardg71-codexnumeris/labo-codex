@@ -8518,9 +8518,46 @@
                             <div id="rythme-estimation-contenu"></div>
                         </div>
 
+                        <div id="rythme-preferences" class="u-mt-20">
+                            <h3>Planification</h3>
+                            <div class="rythme-prefs-grille">
+                                <div class="groupe-form">
+                                    <label class="label-formulaire">Date objectif (remise)</label>
+                                    <input type="date" id="rythme-pref-date-objectif" class="controle-form" style="width:160px"
+                                        data-on-change="Rythme.sauvegarderPreferences">
+                                </div>
+                                <div class="groupe-form">
+                                    <label class="label-formulaire">Journée libre</label>
+                                    <input type="number" id="rythme-pref-heures-jour" class="controle-form" min="1" max="10" value="6" style="width:70px"
+                                        data-on-input="Rythme.sauvegarderPreferences">
+                                    <small class="u-texte-secondaire">heures</small>
+                                </div>
+                                <div class="groupe-form">
+                                    <label class="label-formulaire">Demi-journée</label>
+                                    <input type="number" id="rythme-pref-heures-demi" class="controle-form" min="1" max="6" value="3" style="width:70px"
+                                        data-on-input="Rythme.sauvegarderPreferences">
+                                    <small class="u-texte-secondaire">heures</small>
+                                </div>
+                                <div class="groupe-form">
+                                    <label class="label-formulaire">Soirée</label>
+                                    <input type="number" id="rythme-pref-heures-soir" class="controle-form" min="0" max="4" value="2" style="width:70px"
+                                        data-on-input="Rythme.sauvegarderPreferences">
+                                    <small class="u-texte-secondaire">heures</small>
+                                </div>
+                                <div class="groupe-form">
+                                    <label class="label-formulaire">Marge</label>
+                                    <select id="rythme-pref-marge" class="controle-form" style="width:90px"
+                                        data-on-change="Rythme.sauvegarderPreferences">
+                                        <option value="1.15">+15%</option>
+                                        <option value="1.25" selected>+25%</option>
+                                        <option value="1.35">+35%</option>
+                                        <option value="1.50">+50%</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
                         <div id="rythme-planning" class="u-mt-20" style="display:none">
-                            <h3>Planning de la semaine</h3>
-                            <p class="u-texte-secondaire u-texte-petit">Basé sur ton horaire de cours. Les plages libres sont des suggestions — tu restes maître de ton temps.</p>
                             <div id="rythme-planning-contenu"></div>
                         </div>
                     </div>
