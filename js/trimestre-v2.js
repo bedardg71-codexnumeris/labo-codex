@@ -6299,6 +6299,101 @@ window.supprimerGroupeCoursV2 = supprimerGroupeCoursV2;
 window.mettreAJourApercuGroupeCours = mettreAJourApercuGroupeCours;
 
 /* ===============================
+   BARRE DE CONVERGENCE (statut configuration)
+   =============================== */
+
+/**
+ * Met à jour la barre de convergence en haut de la page Trimestre.
+ * Vérifie l'état de chaque composante et affiche complété/incomplet.
+ */
+function mettreAJourBarreContexte() {
+    const barre = document.getElementById('barreConvergence');
+    if (!barre || typeof db === 'undefined' || !db.getSync) return;
+
+    const cle = window.cle || (k => k);
+
+    // Vérifier chaque composante
+    const etapes = {
+        'trimestre': {
+            ok: !!db.getSync('trimestreActif', null),
+            info: db.getSync('trimestreActif', '') ? 'Actif' : ''
+        },
+        'cours': {
+            ok: (db.getSync('cours', []) || []).length > 0,
+            info: (() => { const n = (db.getSync('cours', []) || []).length; return n > 0 ? n + ' cours' : ''; })()
+        },
+        'enseignant': {
+            ok: (db.getSync('enseignants', []) || []).length > 0,
+            info: (() => { const e = db.getSync('enseignants', []) || []; return e.length > 0 && e[0].nom ? e[0].prenom + ' ' + e[0].nom : ''; })()
+        },
+        'etudiants': {
+            ok: (db.getSync(cle('groupeEtudiants'), []) || []).length > 0,
+            info: (() => { const n = (db.getSync(cle('groupeEtudiants'), []) || []).length; return n > 0 ? n + ' étud.' : ''; })()
+        },
+        'horaire': {
+            ok: (db.getSync(cle('horaires'), []) || []).length > 0,
+            info: (() => { const n = (db.getSync(cle('horaires'), []) || []).length; return n > 0 ? n + ' hor.' : ''; })()
+        },
+        'groupe-cours': {
+            ok: (db.getSync(cle('groupesCours'), []) || []).length > 0,
+            info: (() => { const n = (db.getSync(cle('groupesCours'), []) || []).length; return n > 0 ? n + ' GC' : ''; })()
+        }
+    };
+
+    // Appliquer l'état visuel à chaque étape
+    const boutons = barre.querySelectorAll('.bc-etape');
+    let precedentComplet = true;
+
+    boutons.forEach(btn => {
+        const id = btn.dataset.etape;
+        const etat = etapes[id];
+        if (!etat) return;
+
+        // Toggle classe complété
+        btn.classList.toggle('bc-complet', etat.ok);
+
+        // Mettre à jour le compteur
+        const infoEl = btn.querySelector('.bc-info');
+        if (infoEl) infoEl.textContent = etat.info;
+
+        // Mettre à jour la liaison précédente
+        const liaisonPrecedente = btn.previousElementSibling;
+        if (liaisonPrecedente && liaisonPrecedente.classList.contains('bc-liaison')) {
+            liaisonPrecedente.classList.toggle('bc-liaison-ok', precedentComplet && etat.ok);
+        }
+
+        precedentComplet = etat.ok;
+    });
+}
+
+// Click handler : scroll vers l'accordéon et l'ouvrir
+document.addEventListener('click', function(e) {
+    const etape = e.target.closest('.bc-etape');
+    if (!etape) return;
+
+    const accordeonId = etape.dataset.accordeon;
+    if (!accordeonId) return;
+
+    const accordeon = document.getElementById(accordeonId);
+    if (!accordeon) return;
+
+    // Ouvrir si fermé
+    if (accordeon.classList.contains('ferme')) {
+        const header = accordeon.querySelector('.accordeon-header');
+        if (header && typeof toggleAccordeonV2 === 'function') {
+            toggleAccordeonV2(header);
+        }
+    }
+
+    // Scroll avec un léger délai pour laisser l'accordéon s'ouvrir
+    setTimeout(function() {
+        accordeon.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+});
+
+window.mettreAJourBarreContexte = mettreAJourBarreContexte;
+
+/* ===============================
    INITIALISATION AUTOMATIQUE
    =============================== */
 
@@ -6308,10 +6403,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Avant, on vérifiait db.getSync qui existe AVANT la fin de la synchronisation
     if (window.dbReady) {
         initialiserTrimestreV2();
+        mettreAJourBarreContexte();
     } else {
         // Attendre l'événement db-ready (déclenché après syncToLocalStorageCache)
         window.addEventListener('db-ready', function() {
             initialiserTrimestreV2();
+            mettreAJourBarreContexte();
         }, { once: true });
     }
 });
