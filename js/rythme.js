@@ -148,8 +148,10 @@
         var evaluations = (typeof obtenirDonneesSelonMode === 'function')
             ? obtenirDonneesSelonMode('evaluationsSauvegardees')
             : [];
-        // Compter les fichiers importés par production (pas les étudiants)
-        var fichiers = db.getSync(cle('fichiersTravaux'), []);
+        // Fichiers importés : source de vérité = travauxStockage
+        var fichiers = (typeof travauxStockage !== 'undefined' && travauxStockage.obtenirFichiersTravaux)
+            ? travauxStockage.obtenirFichiersTravaux()
+            : db.getSync(cle('fichiersTravaux'), []);
         var prefs = chargerPreferences();
 
         var estimations = [];
@@ -159,13 +161,15 @@
             var stats = statsMap[activite];
             if (!stats) return;
 
-            // Fichiers importés pour cette production
-            var fichiersImportes = fichiers.filter(function (f) {
-                return f.productionId === prod.id;
+            // DAs avec un fichier importé pour cette production (dédoublonnés)
+            var dasImportes = {};
+            fichiers.forEach(function (f) {
+                if (f.productionId === prod.id && f.etudiantDA) {
+                    dasImportes[f.etudiantDA] = true;
+                }
             });
-            if (fichiersImportes.length === 0) return;
 
-            // DAs qui ont déjà une évaluation pour cette production
+            // DAs qui ont déjà une évaluation (statut ÉVALUÉ)
             var dasEvalues = {};
             evaluations.forEach(function (ev) {
                 if (ev.productionId === prod.id && !ev.remplaceeParId && ev.etudiantDA) {
@@ -173,13 +177,14 @@
                 }
             });
 
-            // Copies restantes = fichiers importés dont l'étudiant n'a pas encore d'évaluation
-            var fichiersRestants = fichiersImportes.filter(function (f) {
-                return f.etudiantDA && !dasEvalues[f.etudiantDA];
-            });
-            var copiesRestantes = fichiersRestants.length;
+            // Statut IMPORTÉ = fichier importé SANS évaluation
+            var copiesRestantes = 0;
+            for (var da in dasImportes) {
+                if (!dasEvalues[da]) copiesRestantes++;
+            }
             var evalsFaites = Object.keys(dasEvalues).length;
-            if (copiesRestantes === 0) return; // production terminée
+            var nbImportes = Object.keys(dasImportes).length;
+            if (copiesRestantes === 0) return;
 
             var tempsEstimeMs = copiesRestantes * stats.moyenne;
             var tempsTotal = tempsEstimeMs * prefs.marge;
@@ -295,7 +300,7 @@
                 htmlEst += '<div class="rythme-estimation-ligne">';
                 htmlEst += '<strong>' + echapperHtml(est.productionNom) + '</strong>';
                 htmlEst += '<div class="rythme-estimation-details">';
-                htmlEst += '<span>' + est.copiesFaites + '/' + est.totalCopies + ' évaluées</span>';
+                htmlEst += '<span>' + est.copiesFaites + ' évaluées</span>';
                 htmlEst += '<span>' + est.copiesRestantes + ' restantes × ~' + formaterDuree(est.moyenneMs) + '</span>';
                 htmlEst += '<span class="rythme-estimation-total">≈ ' + formaterDureeTexte(est.tempsEstimeMs) + ' (incl. révision)</span>';
                 htmlEst += '</div>';
