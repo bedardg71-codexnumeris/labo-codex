@@ -3860,7 +3860,7 @@
      =================================== -->
             <section id="section-apercu" class="section">
                     <h2 class="titre-avec-emoji-toggles">
-                        <span>État des lieux</span>
+                        <span>Aperçu</span>
                         <span class="titre-emoji-container">
                             <button class="btn-aide-contextuelle" data-aide="tableau-bord-apercu" aria-label="Aide contextuelle">?</button>
                         </span>
@@ -8523,8 +8523,12 @@
                             <div class="rythme-prefs-grille">
                                 <div class="groupe-form">
                                     <label class="label-formulaire">Date objectif (remise)</label>
-                                    <input type="date" id="rythme-pref-date-objectif" class="controle-form" style="width:160px"
-                                        data-on-change="Rythme.sauvegarderPreferences">
+                                    <div style="display:flex;gap:6px;align-items:center">
+                                        <input type="date" id="rythme-pref-date-objectif" class="controle-form" style="width:160px"
+                                            data-on-change="Rythme.sauvegarderPreferences">
+                                        <input type="time" id="rythme-pref-heure-objectif" class="controle-form" style="width:100px"
+                                            data-on-change="Rythme.sauvegarderPreferences">
+                                    </div>
                                 </div>
                                 <div class="groupe-form">
                                     <label class="label-formulaire">Journée libre</label>

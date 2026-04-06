@@ -922,10 +922,14 @@ function initialiserModuleTableauBordApercu() {
                 calculerEtudiantsPrioritaires();
             }
 
-            // Ouvrir le panneau suivi si pas déjà ouvert
+            // Ouvrir/fermer le panneau suivi selon l'état du bouton
             var panneauSuivi = document.getElementById('panneau-suivi-etudiants');
-            if (panneauSuivi && btn && btn.classList.contains('actif') && !panneauSuivi.classList.contains('ouvert')) {
-                panneauSuivi.classList.add('ouvert');
+            if (panneauSuivi && btn) {
+                if (btn.classList.contains('actif')) {
+                    panneauSuivi.classList.add('ouvert');
+                } else {
+                    panneauSuivi.classList.remove('ouvert');
+                }
             }
 
             // Rafraîchir le panneau suivi (avec ou sans filtre)
@@ -1093,7 +1097,7 @@ function chargerTableauBordApercu() {
             // Layout uniforme : titre à gauche, badges à droite
             conteneurTitre.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;';
             conteneurTitre.innerHTML = `
-                <span>État des lieux</span>
+                <span>Aperçu</span>
                 ${genererIndicateurPratiqueOuCheckboxes()}
             `;
 

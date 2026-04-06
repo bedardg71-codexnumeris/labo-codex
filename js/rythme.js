@@ -85,17 +85,25 @@
      * @returns {Array<{activite: string, moyenne: number, mediane: number, min: number, max: number, count: number, tendance: string}>}
      */
     function calculerStatsParActivite(entrees) {
-        // Regrouper par activité
+        // Regrouper par activité avec métadonnées
         var groupes = {};
         entrees.forEach(function (e) {
             var act = e.activite || '(sans activité)';
-            if (!groupes[act]) groupes[act] = [];
-            groupes[act].push(e.dureeMs);
+            if (!groupes[act]) groupes[act] = { durees: [], productions: {}, dateMin: '', dateMax: '' };
+            var g = groupes[act];
+            g.durees.push(e.dureeMs);
+            if (e.productionNom) g.productions[e.productionNom] = true;
+            if (e.date) {
+                var d = e.date.substring(0, 10);
+                if (!g.dateMin || d < g.dateMin) g.dateMin = d;
+                if (!g.dateMax || d > g.dateMax) g.dateMax = d;
+            }
         });
 
         var stats = [];
         for (var act in groupes) {
-            var durees = groupes[act].sort(function (a, b) { return a - b; });
+            var g = groupes[act];
+            var durees = g.durees.sort(function (a, b) { return a - b; });
             var n = durees.length;
             var somme = durees.reduce(function (s, d) { return s + d; }, 0);
             var moyenne = somme / n;
@@ -106,8 +114,8 @@
             // Tendance : comparer la moyenne des 5 dernières vs les 5 précédentes
             var tendance = '→';
             if (n >= 6) {
-                var recentes = groupes[act].slice(-5);
-                var precedentes = groupes[act].slice(-10, -5);
+                var recentes = g.durees.slice(-5);
+                var precedentes = g.durees.slice(-10, -5);
                 if (precedentes.length >= 3) {
                     var moyRecentes = recentes.reduce(function (s, d) { return s + d; }, 0) / recentes.length;
                     var moyPrecedentes = precedentes.reduce(function (s, d) { return s + d; }, 0) / precedentes.length;
@@ -124,7 +132,10 @@
                 min: durees[0],
                 max: durees[n - 1],
                 count: n,
-                tendance: tendance
+                tendance: tendance,
+                productions: Object.keys(g.productions),
+                dateMin: g.dateMin,
+                dateMax: g.dateMax
             });
         }
 
@@ -153,6 +164,7 @@
             ? travauxStockage.obtenirFichiersTravaux()
             : db.getSync(cle('fichiersTravaux'), []);
         var prefs = chargerPreferences();
+        var groupesCours = db.getSync(cle('groupesCours'), []);
 
         var estimations = [];
 
@@ -161,46 +173,82 @@
             var stats = statsMap[activite];
             if (!stats) return;
 
-            // DAs avec un fichier importé pour cette production (dédoublonnés)
-            var dasImportes = {};
-            fichiers.forEach(function (f) {
-                if (f.productionId === prod.id && f.etudiantDA) {
-                    dasImportes[f.etudiantDA] = true;
-                }
-            });
+            var echeances = prod.echeancesParGroupe || {};
+            var gcIds = Object.keys(echeances);
 
-            // DAs qui ont déjà une évaluation (statut ÉVALUÉ)
-            var dasEvalues = {};
-            evaluations.forEach(function (ev) {
-                if (ev.productionId === prod.id && !ev.remplaceeParId && ev.etudiantDA) {
-                    dasEvalues[ev.etudiantDA] = true;
-                }
-            });
-
-            // Statut IMPORTÉ = fichier importé SANS évaluation
-            var copiesRestantes = 0;
-            for (var da in dasImportes) {
-                if (!dasEvalues[da]) copiesRestantes++;
+            // Si pas d'échéances par groupe, traiter globalement (legacy)
+            if (gcIds.length === 0) {
+                var est = estimerPourLot(prod, null, null, fichiers, evaluations, stats, prefs);
+                if (est) estimations.push(est);
+                return;
             }
-            var evalsFaites = Object.keys(dasEvalues).length;
-            var nbImportes = Object.keys(dasImportes).length;
-            if (copiesRestantes === 0) return;
 
-            var tempsEstimeMs = copiesRestantes * stats.moyenne;
-            var tempsTotal = tempsEstimeMs * prefs.marge;
-
-            estimations.push({
-                productionNom: prod.titre + (activite ? ' — ' + activite : ''),
-                activite: activite,
-                totalCopies: nbImportes,
-                copiesFaites: evalsFaites,
-                copiesRestantes: copiesRestantes,
-                moyenneMs: stats.moyenne,
-                tempsEstimeMs: tempsTotal
+            // Ventiler par groupe-cours
+            gcIds.forEach(function (gcId) {
+                var entree = echeances[gcId];
+                if (!entree || entree.assignee === false) return;
+                var gc = groupesCours.find(function (g) { return g.id === gcId; });
+                var groupeNum = gc ? (gc.groupe || gc.groupeNum || '') : '';
+                var est = estimerPourLot(prod, gcId, groupeNum, fichiers, evaluations, stats, prefs);
+                if (est) {
+                    est.dateRemise = entree.date || '';
+                    estimations.push(est);
+                }
             });
         });
 
         return estimations;
+    }
+
+    /**
+     * Estime la charge pour un lot production × groupe (ou production globale si gcId est null).
+     */
+    function estimerPourLot(prod, gcId, groupeNum, fichiers, evaluations, stats, prefs) {
+        var activite = prod.activiteApprentissage || prod.description || '';
+
+        // DAs avec un fichier importé pour cette production (et ce groupe si ventilé)
+        var dasImportes = {};
+        fichiers.forEach(function (f) {
+            if (f.productionId !== prod.id || !f.etudiantDA) return;
+            if (gcId && f.groupeCoursId !== gcId) return;
+            dasImportes[f.etudiantDA] = true;
+        });
+
+        // DAs qui ont déjà une évaluation (statut ÉVALUÉ)
+        var dasEvalues = {};
+        evaluations.forEach(function (ev) {
+            if (ev.productionId !== prod.id || !ev.etudiantDA || ev.remplaceeParId) return;
+            if (gcId && ev.groupeCoursId !== gcId) return;
+            dasEvalues[ev.etudiantDA] = true;
+        });
+
+        // Statut IMPORTÉ = fichier importé SANS évaluation
+        var copiesRestantes = 0;
+        for (var da in dasImportes) {
+            if (!dasEvalues[da]) copiesRestantes++;
+        }
+        var evalsFaites = Object.keys(dasEvalues).length;
+        var nbImportes = Object.keys(dasImportes).length;
+        if (copiesRestantes === 0 && evalsFaites === 0) return null;
+
+        var tempsEstimeMs = copiesRestantes * stats.moyenne;
+        var tempsTotal = tempsEstimeMs * prefs.marge;
+
+        var nomLot = prod.titre + (activite ? ' — ' + activite : '');
+        if (groupeNum) nomLot += ' (gr. ' + groupeNum + ')';
+
+        return {
+            productionId: prod.id,
+            gcId: gcId || '',
+            productionNom: nomLot,
+            activite: activite,
+            totalCopies: nbImportes,
+            copiesFaites: evalsFaites,
+            copiesRestantes: copiesRestantes,
+            moyenneMs: stats.moyenne,
+            tempsEstimeMs: tempsTotal,
+            dateRemise: ''
+        };
     }
 
     /* ===============================
@@ -247,16 +295,46 @@
         var stats = calculerStatsParActivite(entrees);
         var maxMoyenne = Math.max.apply(null, stats.map(function (s) { return s.moyenne; }));
 
-        // Construire le tableau
-        var html = '<table class="tableau-donnees rythme-tableau">';
+        // Colonnes du tableau 1 (durées par activité)
+        var colonnesT1 = [
+            { id: 'prod', label: 'Production', defaut: true },
+            { id: 'periode', label: 'Période', defaut: true },
+            { id: 'moy', label: 'Moy.', defaut: true },
+            { id: 'med', label: 'Méd.', defaut: false },
+            { id: 'min', label: 'Min', defaut: false },
+            { id: 'max', label: 'Max', defaut: false },
+            { id: 'n', label: 'N', defaut: true },
+            { id: 'tendance', label: 'Tendance', defaut: true }
+        ];
+        var prefsCol1 = db.getSync('rythmeColonnesT1', null);
+        if (!prefsCol1) {
+            prefsCol1 = {};
+            colonnesT1.forEach(function (c) { prefsCol1[c.id] = c.defaut; });
+        }
+
+        // Construire le tableau des durées par activité
+        var html = '';
+
+        // Checkboxes colonnes
+        html += '<div class="rythme-colonnes-toggle">';
+        html += 'Colonnes : ';
+        colonnesT1.forEach(function (c) {
+            var checked = prefsCol1[c.id] !== false ? ' checked' : '';
+            html += '<label><input type="checkbox" data-tableau="t1" data-col="' + c.id + '"' + checked + '> ' + c.label + '</label>';
+        });
+        html += '</div>';
+
+        html += '<table class="tableau" id="rythme-table-durees">';
         html += '<thead><tr>';
-        html += '<th>Activité</th>';
-        html += '<th class="u-texte-centre">Moy.</th>';
-        html += '<th class="u-texte-centre">Méd.</th>';
-        html += '<th class="u-texte-centre">Min</th>';
-        html += '<th class="u-texte-centre">Max</th>';
-        html += '<th class="u-texte-centre">N</th>';
-        html += '<th></th>';
+        html += '<th>Activité d\'apprentissage</th>';
+        html += '<th class="rythme-col-t1-prod"' + (prefsCol1.prod === false ? ' hidden' : '') + '>Production</th>';
+        html += '<th class="rythme-col-t1-periode rythme-col-centre"' + (prefsCol1.periode === false ? ' hidden' : '') + '>Période</th>';
+        html += '<th class="rythme-col-t1-moy rythme-col-centre"' + (prefsCol1.moy === false ? ' hidden' : '') + '>Moy.</th>';
+        html += '<th class="rythme-col-t1-med rythme-col-centre"' + (prefsCol1.med === false ? ' hidden' : '') + '>Méd.</th>';
+        html += '<th class="rythme-col-t1-min rythme-col-centre"' + (prefsCol1.min === false ? ' hidden' : '') + '>Min</th>';
+        html += '<th class="rythme-col-t1-max rythme-col-centre"' + (prefsCol1.max === false ? ' hidden' : '') + '>Max</th>';
+        html += '<th class="rythme-col-t1-n rythme-col-centre"' + (prefsCol1.n === false ? ' hidden' : '') + '>N</th>';
+        html += '<th class="rythme-col-t1-tendance rythme-col-tendance"' + (prefsCol1.tendance === false ? ' hidden' : '') + '>Tendance</th>';
         html += '</tr></thead><tbody>';
 
         // Map pour l'estimation
@@ -268,14 +346,26 @@
             var tendanceLabel = s.tendance === '↘' ? 'Accélère'
                 : s.tendance === '↗' ? 'Ralentit' : 'Stable';
 
+            // Productions associées
+            var prodsLabel = s.productions.length > 0 ? s.productions.join(', ') : '—';
+            // Période (date min — date max)
+            var periodeLabel = '—';
+            if (s.dateMin && s.dateMax) {
+                periodeLabel = s.dateMin === s.dateMax
+                    ? formaterDateCourte(s.dateMin)
+                    : formaterDateCourte(s.dateMin) + ' — ' + formaterDateCourte(s.dateMax);
+            }
+
             html += '<tr>';
-            html += '<td><strong>' + echapperHtml(s.activite) + '</strong></td>';
-            html += '<td class="u-texte-centre"><strong>' + formaterDuree(s.moyenne) + '</strong></td>';
-            html += '<td class="u-texte-centre">' + formaterDuree(s.mediane) + '</td>';
-            html += '<td class="u-texte-centre">' + formaterDuree(s.min) + '</td>';
-            html += '<td class="u-texte-centre">' + formaterDuree(s.max) + '</td>';
-            html += '<td class="u-texte-centre">' + s.count + '</td>';
-            html += '<td>';
+            html += '<td><strong>' + echapperHtml(s.activite || '(sans activité)') + '</strong></td>';
+            html += '<td class="rythme-col-t1-prod"' + (prefsCol1.prod === false ? ' hidden' : '') + '><small>' + echapperHtml(prodsLabel) + '</small></td>';
+            html += '<td class="rythme-col-t1-periode rythme-col-nowrap"' + (prefsCol1.periode === false ? ' hidden' : '') + '><small>' + periodeLabel + '</small></td>';
+            html += '<td class="rythme-col-t1-moy rythme-col-centre"' + (prefsCol1.moy === false ? ' hidden' : '') + '><strong>' + formaterDuree(s.moyenne) + '</strong></td>';
+            html += '<td class="rythme-col-t1-med rythme-col-centre"' + (prefsCol1.med === false ? ' hidden' : '') + '>' + formaterDuree(s.mediane) + '</td>';
+            html += '<td class="rythme-col-t1-min rythme-col-centre"' + (prefsCol1.min === false ? ' hidden' : '') + '>' + formaterDuree(s.min) + '</td>';
+            html += '<td class="rythme-col-t1-max rythme-col-centre"' + (prefsCol1.max === false ? ' hidden' : '') + '>' + formaterDuree(s.max) + '</td>';
+            html += '<td class="rythme-col-t1-n rythme-col-centre"' + (prefsCol1.n === false ? ' hidden' : '') + '>' + s.count + '</td>';
+            html += '<td class="rythme-col-t1-tendance rythme-col-tendance"' + (prefsCol1.tendance === false ? ' hidden' : '') + '>';
             html += '<div class="rythme-barre-conteneur">';
             html += '<div class="rythme-barre" style="width:' + pctBarre.toFixed(0) + '%"></div>';
             html += '</div>';
@@ -295,22 +385,59 @@
         var contenuEstimation = document.getElementById('rythme-estimation-contenu');
 
         if (estimations.length > 0 && sectionEstimation && contenuEstimation) {
-            var htmlEst = '';
-            estimations.forEach(function (est) {
-                htmlEst += '<div class="rythme-estimation-ligne">';
-                htmlEst += '<strong>' + echapperHtml(est.productionNom) + '</strong>';
-                htmlEst += '<div class="rythme-estimation-details">';
-                htmlEst += '<span>' + est.copiesFaites + ' évaluées</span>';
-                htmlEst += '<span>' + est.copiesRestantes + ' restantes × ~' + formaterDuree(est.moyenneMs) + '</span>';
-                htmlEst += '<span class="rythme-estimation-total">≈ ' + formaterDureeTexte(est.tempsEstimeMs) + ' (incl. révision)</span>';
-                htmlEst += '</div>';
-                htmlEst += '</div>';
+            // Colonnes du tableau 2 (charge)
+            var colonnesT2 = [
+                { id: 'remise', label: 'Remise', defaut: true },
+                { id: 'evaluees', label: 'Évaluées', defaut: true },
+                { id: 'restantes', label: 'Restantes', defaut: true },
+                { id: 'moy2', label: 'Moy.', defaut: true },
+                { id: 'temps', label: 'Temps estimé', defaut: true }
+            ];
+            var prefsCol2 = db.getSync('rythmeColonnesT2', null);
+            if (!prefsCol2) {
+                prefsCol2 = {};
+                colonnesT2.forEach(function (c) { prefsCol2[c.id] = c.defaut; });
+            }
+
+            var htmlEst = '<div class="rythme-colonnes-toggle">';
+            htmlEst += 'Colonnes : ';
+            colonnesT2.forEach(function (c) {
+                var checked = prefsCol2[c.id] !== false ? ' checked' : '';
+                htmlEst += '<label><input type="checkbox" data-tableau="t2" data-col="' + c.id + '"' + checked + '> ' + c.label + '</label>';
             });
+            htmlEst += '</div>';
+
+            htmlEst += '<table class="tableau" id="rythme-table-charge">';
+            htmlEst += '<thead><tr>';
+            htmlEst += '<th>Production</th>';
+            htmlEst += '<th class="rythme-col-t2-remise rythme-col-centre"' + (prefsCol2.remise === false ? ' hidden' : '') + '>Remise</th>';
+            htmlEst += '<th class="rythme-col-t2-evaluees rythme-col-centre"' + (prefsCol2.evaluees === false ? ' hidden' : '') + '>Évaluées</th>';
+            htmlEst += '<th class="rythme-col-t2-restantes rythme-col-centre"' + (prefsCol2.restantes === false ? ' hidden' : '') + '>Restantes</th>';
+            htmlEst += '<th class="rythme-col-t2-moy2 rythme-col-centre"' + (prefsCol2.moy2 === false ? ' hidden' : '') + '>Moy.</th>';
+            htmlEst += '<th class="rythme-col-t2-temps rythme-col-centre"' + (prefsCol2.temps === false ? ' hidden' : '') + '>Temps estimé</th>';
+            htmlEst += '</tr></thead><tbody>';
+
+            estimations.forEach(function (est) {
+                var estComplet = est.copiesRestantes === 0;
+                htmlEst += '<tr' + (estComplet ? ' class="rythme-lot-complet"' : '') + '>';
+                htmlEst += '<td><strong>' + echapperHtml(est.productionNom) + '</strong>';
+                if (estComplet) htmlEst += ' <small class="rythme-badge-termine">Terminé</small>';
+                htmlEst += '</td>';
+                htmlEst += '<td class="rythme-col-t2-remise rythme-col-centre"' + (prefsCol2.remise === false ? ' hidden' : '') + '>' + (est.dateRemise ? formaterDateCourte(est.dateRemise) : '—') + '</td>';
+                htmlEst += '<td class="rythme-col-t2-evaluees rythme-col-centre"' + (prefsCol2.evaluees === false ? ' hidden' : '') + '>' + est.copiesFaites + '</td>';
+                htmlEst += '<td class="rythme-col-t2-restantes rythme-col-centre"' + (prefsCol2.restantes === false ? ' hidden' : '') + '>' + (estComplet ? '—' : est.copiesRestantes) + '</td>';
+                htmlEst += '<td class="rythme-col-t2-moy2 rythme-col-centre"' + (prefsCol2.moy2 === false ? ' hidden' : '') + '>' + formaterDuree(est.moyenneMs) + '</td>';
+                htmlEst += '<td class="rythme-col-t2-temps rythme-col-centre"' + (prefsCol2.temps === false ? ' hidden' : '') + '><strong>' + (estComplet ? '—' : formaterDureeTexte(est.tempsEstimeMs)) + '</strong></td>';
+                htmlEst += '</tr>';
+            });
+
+            htmlEst += '</tbody></table>';
             contenuEstimation.innerHTML = htmlEst;
             sectionEstimation.style.display = '';
 
-            // Phase 3 : planning hebdomadaire
-            afficherPlanning(estimations);
+            // Phase 3 : planning hebdomadaire (exclure les lots terminés)
+            var estimationsActives = estimations.filter(function (e) { return e.copiesRestantes > 0; });
+            afficherPlanning(estimationsActives);
         }
     }
 
@@ -326,7 +453,7 @@
      * Charge les préférences de rythme depuis le stockage.
      */
     function chargerPreferences() {
-        var defaut = { heuresJour: 6, heuresDemi: 3, heuresSoir: 2, marge: 1.25, dateObjectif: '', weekends: false, feries: false };
+        var defaut = { heuresJour: 6, heuresDemi: 3, heuresSoir: 2, marge: 1.25, dateObjectif: '', heureObjectif: '', weekends: false, feries: false };
         var prefs = db.getSync('preferencesRythme', defaut);
         return {
             heuresJour: prefs.heuresJour || defaut.heuresJour,
@@ -334,6 +461,7 @@
             heuresSoir: prefs.heuresSoir || defaut.heuresSoir,
             marge: prefs.marge || defaut.marge,
             dateObjectif: prefs.dateObjectif || '',
+            heureObjectif: prefs.heureObjectif || '',
             weekends: !!prefs.weekends,
             feries: !!prefs.feries
         };
@@ -349,6 +477,7 @@
             heuresSoir: parseInt(document.getElementById('rythme-pref-heures-soir')?.value) || 2,
             marge: parseFloat(document.getElementById('rythme-pref-marge')?.value) || 1.25,
             dateObjectif: document.getElementById('rythme-pref-date-objectif')?.value || '',
+            heureObjectif: document.getElementById('rythme-pref-heure-objectif')?.value || '',
             weekends: document.getElementById('rythme-pref-weekends')?.checked || false,
             feries: document.getElementById('rythme-pref-feries')?.checked || false
         };
@@ -369,6 +498,8 @@
         if (elSoir) elSoir.value = prefs.heuresSoir;
         if (elMarge) elMarge.value = prefs.marge;
         if (elDate) elDate.value = prefs.dateObjectif || '';
+        var elHeure = document.getElementById('rythme-pref-heure-objectif');
+        if (elHeure) elHeure.value = prefs.heureObjectif || '';
         if (elWE) elWE.checked = prefs.weekends;
         var elFeries = document.getElementById('rythme-pref-feries');
         if (elFeries) elFeries.checked = prefs.feries;
@@ -387,10 +518,29 @@
         var vus = {};
 
         // Source 1 : entités horaires (structure moderne)
+        // Chaque horaire a { id, nom, groupeAssocie, seances: [{jour, heureDebut, heureFin, local}] }
+        // Filtrer : ne garder que les horaires liés à un groupe-cours actif
+        var groupesCours = db.getSync(cle('groupesCours'), []);
+        var horairesActifs = {};
+        groupesCours.forEach(function (gc) {
+            if (gc.horaireId) horairesActifs[gc.horaireId] = true;
+        });
         var horaires = db.getSync(cle('horaires'), []);
+        horaires = horaires.filter(function (h) { return horairesActifs[h.id]; });
         horaires.forEach(function (h) {
             if (h.seances) h.seances.forEach(function (s) {
-                if (!vus[s.id]) { vus[s.id] = true; toutes.push(s); }
+                var cleSeance = (s.jour || '') + '|' + (s.heureDebut || '') + '|' + (h.groupeAssocie || '');
+                if (!vus[cleSeance]) {
+                    vus[cleSeance] = true;
+                    toutes.push({
+                        jour: s.jour,
+                        debut: s.heureDebut,
+                        fin: s.heureFin,
+                        local: s.local || '',
+                        groupe: h.groupeAssocie || '',
+                        horaireNom: h.nom || ''
+                    });
+                }
             });
         });
         if (toutes.length > 0) return toutes;
@@ -550,8 +700,15 @@
     /**
      * Répartit les estimations dans les jours disponibles.
      */
-    function repartirDansJours(estimations, joursCalendrier, joursHoraire, prefs) {
+    function repartirDansJours(estimations, joursCalendrier, joursHoraire, prefs, dateObjectif) {
         var aujourdHui = new Date().toISOString().split('T')[0];
+        // Heures disponibles le jour de l'objectif si une heure limite est définie
+        var heuresLimiteObjectif = 0;
+        if (prefs.heureObjectif && dateObjectif) {
+            var parts = prefs.heureObjectif.split(':');
+            heuresLimiteObjectif = parseInt(parts[0]) + (parseInt(parts[1] || 0) / 60);
+        }
+
         var plages = [];
         joursCalendrier.forEach(function (j) {
             var estPasse = j.date < aujourdHui;
@@ -580,6 +737,23 @@
                 cours = infoHoraire.cours;
             }
 
+            // Limiter les heures du jour objectif si une heure est définie
+            if (heuresLimiteObjectif > 0 && j.date === dateObjectif) {
+                // Soustraire les heures de cours avant l'heure limite
+                var heuresCoursMatin = 0;
+                cours.forEach(function (c) {
+                    if (c.debut && c.fin) {
+                        var hd = c.debut.split(':'), hf = c.fin.split(':');
+                        var dH = parseInt(hd[0]) + parseInt(hd[1] || 0) / 60;
+                        var fH = parseInt(hf[0]) + parseInt(hf[1] || 0) / 60;
+                        if (dH < heuresLimiteObjectif) {
+                            heuresCoursMatin += Math.min(fH, heuresLimiteObjectif) - dH;
+                        }
+                    }
+                });
+                heuresLibres = Math.max(0, heuresLimiteObjectif - 8 - heuresCoursMatin);
+            }
+
             plages.push({
                 date: j.date,
                 jourSemaine: j.jourSemaine,
@@ -599,8 +773,15 @@
             });
         });
 
-        // Répartir (greedy, plus gros lots en premier)
+        // Répartir (greedy) : trier par date de remise puis par charge décroissante
         var estTriees = estimations.slice().sort(function (a, b) {
+            // D'abord par date de remise (lots disponibles en premier)
+            if (a.dateRemise && b.dateRemise && a.dateRemise !== b.dateRemise) {
+                return a.dateRemise < b.dateRemise ? -1 : 1;
+            }
+            if (a.dateRemise && !b.dateRemise) return 1;
+            if (!a.dateRemise && b.dateRemise) return -1;
+            // Puis par charge décroissante
             return b.tempsEstimeMs - a.tempsEstimeMs;
         });
 
@@ -608,6 +789,8 @@
             var heuresRestant = est.tempsEstimeMs / 3600000;
             for (var i = 0; i < plages.length && heuresRestant > 0.1; i++) {
                 var plage = plages[i];
+                // Ne pas placer de copies avant leur date de remise
+                if (est.dateRemise && plage.date < est.dateRemise) continue;
                 var dispo = plage.heuresLibres - plage.heuresUtilisees;
                 if (dispo >= 0.5) {
                     var alloue = Math.min(heuresRestant, dispo);
@@ -643,15 +826,31 @@
         var joursHoraire = analyserHoraireHebdo();
         var aujourdHui = new Date().toISOString().split('T')[0];
 
-        // Date objectif : utilisateur ou +14 jours par défaut
+        // Date de début : la plus ancienne date de remise, ou aujourd'hui
+        var premierRemise = '';
+        estimations.forEach(function (est) {
+            if (est.dateRemise && (!premierRemise || est.dateRemise < premierRemise)) {
+                premierRemise = est.dateRemise;
+            }
+        });
+        var dateDebut = premierRemise && premierRemise > aujourdHui ? aujourdHui : aujourdHui;
+
+        // Date objectif : utilisateur ou dernière remise + 14 jours par défaut
         var dateObjectif = prefs.dateObjectif || '';
         if (!dateObjectif || dateObjectif <= aujourdHui) {
-            var d14 = new Date();
+            var derniereRemise = '';
+            estimations.forEach(function (est) {
+                if (est.dateRemise && est.dateRemise > derniereRemise) {
+                    derniereRemise = est.dateRemise;
+                }
+            });
+            var base = derniereRemise || aujourdHui;
+            var d14 = new Date(base + 'T12:00:00');
             d14.setDate(d14.getDate() + 14);
             dateObjectif = d14.toISOString().split('T')[0];
         }
 
-        var joursCalendrier = obtenirJoursCalendrier(aujourdHui, dateObjectif, prefs);
+        var joursCalendrier = obtenirJoursCalendrier(dateDebut, dateObjectif, prefs);
 
         if (joursCalendrier.length === 0) {
             contenuPlanning.innerHTML = '<p class="u-texte-secondaire">Aucun jour disponible d\'ici la date objectif.</p>';
@@ -659,7 +858,7 @@
             return;
         }
 
-        var plages = repartirDansJours(estimations, joursCalendrier, joursHoraire, prefs);
+        var plages = repartirDansJours(estimations, joursCalendrier, joursHoraire, prefs, dateObjectif);
         var totalHeuresLibres = plages.reduce(function (s, p) { return s + p.heuresLibres; }, 0);
         var totalChargeMs = estimations.reduce(function (s, e) { return s + e.tempsEstimeMs; }, 0);
 
@@ -671,7 +870,8 @@
             semaines[num].push(p);
         });
 
-        var html = '<p class="u-texte-petit u-texte-secondaire" style="margin-bottom:.75rem">D\'aujourd\'hui au <strong>' + formaterDateCourte(dateObjectif) + '</strong>' + (prefs.dateObjectif ? ' (date objectif)' : ' (14 jours par défaut — indique une date objectif)') + '</p>';
+        var labelHeure = prefs.heureObjectif && prefs.dateObjectif ? ' à ' + prefs.heureObjectif : '';
+        var html = '<p class="u-texte-petit u-texte-secondaire u-mb-10">D\'aujourd\'hui au <strong>' + formaterDateCourte(dateObjectif) + labelHeure + '</strong>' + (prefs.dateObjectif ? ' (date objectif)' : ' (14 jours par défaut — indique une date objectif)') + '</p>';
 
         for (var numSem in semaines) {
             var joursSem = semaines[numSem];
@@ -699,16 +899,17 @@
                 } else {
                     // Mention reprise
                     if (plage.estReprise && plage.jourEffectif !== plage.jourSemaine) {
-                        html += '<div class="rythme-cours" style="font-style:italic">Horaire du ' + plage.jourEffectif + ' (reprise)</div>';
+                        html += '<div class="rythme-cours rythme-cours-info">Horaire du ' + plage.jourEffectif + ' (reprise)</div>';
                     }
                     // Mention congé travaillé
                     if (plage.type === 'ferie-travaille') {
-                        html += '<div class="rythme-cours" style="font-style:italic">Congé' + (plage.motif ? ' — ' + echapperHtml(plage.motif) : '') + '</div>';
+                        html += '<div class="rythme-cours rythme-cours-info">Congé' + (plage.motif ? ' — ' + echapperHtml(plage.motif) : '') + '</div>';
                     }
 
                     if (plage.cours && plage.cours.length > 0) {
                         plage.cours.forEach(function (c) {
                             var label = 'Cours';
+                            if (c.groupe) label += ' gr. ' + echapperHtml(c.groupe);
                             if (c.debut && c.fin) label += ' ' + c.debut + '–' + c.fin;
                             else if (c.debut) label += ' ' + c.debut + ' (' + c.duree.toFixed(1) + 'h)';
                             html += '<div class="rythme-cours">' + label + '</div>';
@@ -763,6 +964,27 @@
     /* ===============================
        INITIALISATION
        =============================== */
+
+    // Toggle colonnes (délégation)
+    document.addEventListener('change', function (e) {
+        var cb = e.target;
+        if (!cb.dataset || !cb.dataset.tableau || !cb.dataset.col) return;
+        var tableau = cb.dataset.tableau;
+        var col = cb.dataset.col;
+        var visible = cb.checked;
+        var clePrefs = tableau === 't1' ? 'rythmeColonnesT1' : 'rythmeColonnesT2';
+        var prefs = db.getSync(clePrefs, {});
+        prefs[col] = visible;
+        db.setSync(clePrefs, prefs);
+
+        // Basculer la visibilité des cellules correspondantes
+        var className = 'rythme-col-' + tableau + '-' + col;
+        var cellules = document.querySelectorAll('.' + className);
+        cellules.forEach(function (el) {
+            if (visible) el.removeAttribute('hidden');
+            else el.setAttribute('hidden', '');
+        });
+    });
 
     // Rafraîchir quand on navigue vers l'onglet
     document.addEventListener('click', function (e) {
