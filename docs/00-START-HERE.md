@@ -57,7 +57,7 @@ Ce pattern est utilise dans :
 
 ## Etat actuel du projet
 
-**Version** : Beta 99.06 (Build 0406-0615)
+**Version** : Beta 99.06 (Build 0406-1500)
 **Objectif** : Plan de consolidation avril 2026 — COMPLET (Tiers 0→7.8) + Audit UX cohérence visuelle
 **Priorite** : **Securite + Proprete > Nouvelles fonctionnalites**
 

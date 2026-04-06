@@ -15665,9 +15665,14 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 .palette-chrono { max-width: 260px; }
 
 /* Rythme de travail */
-.rythme-tableau { width: 100%; }
-.rythme-tableau th { font-size: .8rem; white-space: nowrap; }
-.rythme-tableau td { font-size: .85rem; padding: .5rem .6rem; }
+.rythme-colonnes-toggle {
+    margin-bottom: .5rem;
+    font-size: .8rem;
+}
+.rythme-colonnes-toggle label {
+    margin-right: .75rem;
+    cursor: pointer;
+}
 .rythme-barre-conteneur {
     width: 80px;
     height: 8px;
@@ -15684,23 +15689,15 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     border-radius: 4px;
     transition: width .3s ease;
 }
-.rythme-estimation-ligne {
-    padding: .75rem 0;
-    border-bottom: 1px solid var(--bordure-claire);
+.rythme-col-centre { text-align: center; }
+.rythme-col-nowrap { text-align: center; white-space: nowrap; }
+.rythme-col-tendance { min-width: 120px; }
+.rythme-lot-complet { opacity: .6; }
+.rythme-badge-termine {
+    color: var(--succes, #2e7d32);
+    font-size: .8em;
 }
-.rythme-estimation-ligne:last-child { border-bottom: none; }
-.rythme-estimation-details {
-    display: flex;
-    gap: 1.5rem;
-    margin-top: .35rem;
-    font-size: .85rem;
-    color: var(--texte-secondaire);
-    flex-wrap: wrap;
-}
-.rythme-estimation-total {
-    font-weight: 600;
-    color: var(--texte-principal);
-}
+.rythme-cours-info { font-style: italic; }
 /* Préférences rythme */
 .rythme-prefs-grille {
     display: flex;
@@ -15773,7 +15770,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     border-radius: var(--radius-sm, 4px);
     margin-top: 4px;
 }
-.rythme-tache small { opacity: .8; }
+.rythme-tache small { color: #fff; }
 .rythme-resume {
     display: flex;
     gap: 2rem;

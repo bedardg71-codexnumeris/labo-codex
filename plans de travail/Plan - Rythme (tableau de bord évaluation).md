@@ -190,31 +190,24 @@ Le module lit (lecture seule, principe SSOT) :
 - Barres comparatives horizontales
 - Données fusionnées chrono + évaluations sauvegardées (dédoublonnées)
 
-### Phase 3 — Planification de la charge ✅ partiellement (6 avril 2026)
+### Phase 3 — Planification de la charge ✅ (6 avril 2026)
 - Estimation du temps : copies IMPORTÉES (via `travauxStockage`) sans évaluation
 - Productions terminées exclues automatiquement
-- Planning multi-semaines jusqu'à date objectif configurable
+- Planning multi-semaines jusqu'à date objectif configurable (date + heure)
 - Reprises du calendrier (jourRemplace), congés travaillables, weekends
 - Préférences persistées (heures/jour, marge, weekends, congés)
 - Répartition greedy des lots dans les plages disponibles
-
-#### Ce qui reste dans Phase 3 :
-- [ ] **Séances de cours non affichées** : `obtenirSeances()` ne trouve pas les
-  horaires. Les séances sont dans `cle('horaires')` (entités modernes) avec
-  champs `jour`, `debut`, `fin`, `local`. Debugger avec `console.warn` dans
-  `obtenirSeances()` pour identifier quelle source retourne des données.
-  Le calcul debut/fin → durée est en place, c'est la lecture qui échoue.
-- [ ] **Échéances par groupe** : lire `prod.echeancesGroupes` (déjà dans le
-  gabarit de production — voir capture "Échéances par groupe" avec dates par
-  groupe). Chaque production+groupe a sa propre date de remise. La planification
-  devrait commencer à partir de cette date (pas la date globale).
-- [ ] **Objectif de remise par production** : remplacer la date objectif globale
-  par un objectif par production (ex: « remettre Artefact 6 le jeudi 16 avril »).
-  L'estimation et la répartition doivent être par production+groupe.
-- [ ] **Estimation par groupe-cours** : ventiler les copies restantes par groupe
-  (ex: gr. 00002 = 12 copies, gr. 00008 = 14 copies) au lieu d'un total global.
-- [ ] **Conformité design system** : appliquer les variables CSS de `design-system.html`
-  (surfaces, ombres, radius, couleurs modes sombre/clair).
+- Fix `obtenirSeances()` : normalisation champs `heureDebut`→`debut`, dédup corrigée
+- Séances filtrées par groupes-cours du trimestre actif (exclut les anciens groupes)
+- Numéro de groupe affiché avec chaque séance de cours dans le planning
+- Ventilation par groupe-cours : `prod.echeancesParGroupe` → un lot par production×groupe
+- Date de remise par groupe : copies placées uniquement après leur date de remise
+- Lots complétés (0 restantes) affichés avec badge « Terminé » (encouragement)
+- Tableaux conformes design system (`.tableau`), zéro style inline
+- Colonnes toggleables avec checkboxes persistées (comme le tableau indices)
+- Tableau 1 enrichi : colonnes Production, Période, en-tête Tendance
+- Tableau 2 enrichi : colonne Remise par groupe, lots terminés visibles
+- Heure objectif : champ time pour dire « avant mardi midi »
 
 ### Phase 4 — Préférences et bien-être (à venir)
 - [ ] Rappels de pauses (notification discrète après N minutes d'évaluation continue)

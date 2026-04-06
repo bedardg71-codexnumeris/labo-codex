@@ -461,12 +461,32 @@
     /**
      * Zoom avant
      */
+    /**
+     * Zoom avec recentrage : préserve le point focal (centre de la vue)
+     */
+    async function zoomAvecRecentrage(ancienZoom) {
+        if (!conteneurGestesZoom) {
+            await reRendrePageActuelle();
+            return;
+        }
+        // Point focal = centre de la vue en coordonnées du contenu
+        var cX = conteneurGestesZoom.scrollLeft + conteneurGestesZoom.clientWidth / 2;
+        var cY = conteneurGestesZoom.scrollTop + conteneurGestesZoom.clientHeight / 2;
+        var ratio = ancienZoom > 0 ? zoomActuel / ancienZoom : 1;
+
+        await reRendrePageActuelle();
+
+        conteneurGestesZoom.scrollLeft = cX * ratio - conteneurGestesZoom.clientWidth / 2;
+        conteneurGestesZoom.scrollTop = cY * ratio - conteneurGestesZoom.clientHeight / 2;
+    }
+
     async function zoomAvant() {
         modeZoom = 'manual';
+        var ancien = zoomActuel;
         zoomActuel = Math.min(zoomActuel + ZOOM_PAS, ZOOM_MAX);
         mettreAJourNavigation();
         cachePages.clear();
-        await reRendrePageActuelle();
+        await zoomAvecRecentrage(ancien);
     }
 
     /**
@@ -474,10 +494,11 @@
      */
     async function zoomArriere() {
         modeZoom = 'manual';
+        var ancien = zoomActuel;
         zoomActuel = Math.max(zoomActuel - ZOOM_PAS, ZOOM_MIN);
         mettreAJourNavigation();
         cachePages.clear();
-        await reRendrePageActuelle();
+        await zoomAvecRecentrage(ancien);
     }
 
     /**
@@ -487,6 +508,7 @@
         modeZoom = ZOOM_FIT;
         cachePages.clear();
         await reRendrePageActuelle();
+        recentrerVue();
     }
 
     /**
@@ -496,6 +518,7 @@
         modeZoom = ZOOM_FIT_WIDTH;
         cachePages.clear();
         await reRendrePageActuelle();
+        recentrerVue();
     }
 
     /**
@@ -505,6 +528,7 @@
         modeZoom = ZOOM_FIT_HEIGHT;
         cachePages.clear();
         await reRendrePageActuelle();
+        recentrerVue();
     }
 
     /**
@@ -512,9 +536,10 @@
      */
     async function zoom100() {
         modeZoom = 'manual';
+        var ancien = zoomActuel;
         zoomActuel = 1.0;
         cachePages.clear();
-        await reRendrePageActuelle();
+        await zoomAvecRecentrage(ancien);
     }
 
     /**
