@@ -1,9 +1,15 @@
 # Plan — Audit UX cohérence visuelle
 
 **Date** : 6 avril 2026
-**Statut** : Planifié — prochaine session
+**Statut** : TERMINÉ — Beta 99.06 (Build 0406-0615)
 **Priorité** : Qualité / cohérence UI
 **Prérequis** : Design system mis à jour (sections 20-23 ajoutées le 6 avril)
+
+### Résultats
+- 32 captures design system (étalon) + 91 captures app (5 contextes, mode clair)
+- 13 écarts identifiés (3 axes : cohérence interne, différenciation, mode clair)
+- 4 corrections CSS appliquées (Lots 1+2), Lot 3 non requis
+- Commit `a8fea53` — styles.css (+39 lignes mode clair)
 
 ---
 
