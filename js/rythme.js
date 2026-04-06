@@ -432,14 +432,20 @@
         seances.forEach(function (s) {
             var jour = s.jour;
             if (!jours[jour]) return;
-            var duree = s.duree || (s.nombrePeriodes ? s.nombrePeriodes * 0.833 : 0);
-            if (duree <= 0) return; // séance sans durée
-            var groupe = s.groupe || '';
+            // Calculer la durée : d'abord duree, puis nombrePeriodes, puis debut/fin
+            var duree = s.duree || 0;
+            if (!duree && s.nombrePeriodes) duree = s.nombrePeriodes * 0.833;
+            if (!duree && s.debut && s.fin) {
+                var hd = s.debut.split(':'), hf = s.fin.split(':');
+                duree = (parseInt(hf[0]) + parseInt(hf[1] || 0) / 60) - (parseInt(hd[0]) + parseInt(hd[1] || 0) / 60);
+            }
+            if (duree <= 0) return;
             jours[jour].cours.push({
-                debut: s.debut || '',
+                debut: s.debut || s.heureDebut || '',
+                fin: s.fin || s.heureFin || '',
                 duree: duree,
                 local: s.local || '',
-                groupe: groupe
+                groupe: s.groupe || s.groupeId || ''
             });
             jours[jour].heuresOccupees += duree;
         });
@@ -703,8 +709,8 @@
                     if (plage.cours && plage.cours.length > 0) {
                         plage.cours.forEach(function (c) {
                             var label = 'Cours';
-                            if (c.debut) label += ' ' + c.debut;
-                            label += ' (' + c.duree.toFixed(1) + 'h)';
+                            if (c.debut && c.fin) label += ' ' + c.debut + '–' + c.fin;
+                            else if (c.debut) label += ' ' + c.debut + ' (' + c.duree.toFixed(1) + 'h)';
                             html += '<div class="rythme-cours">' + label + '</div>';
                         });
                     }
