@@ -15664,6 +15664,44 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 }
 .palette-chrono { max-width: 260px; }
 
+/* Rythme de travail */
+.rythme-tableau { width: 100%; }
+.rythme-tableau th { font-size: .8rem; white-space: nowrap; }
+.rythme-tableau td { font-size: .85rem; padding: .5rem .6rem; }
+.rythme-barre-conteneur {
+    width: 80px;
+    height: 8px;
+    background: var(--surface-secondaire, rgba(128,128,128,.1));
+    border-radius: 4px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+.rythme-barre {
+    height: 100%;
+    background: var(--bleu-principal, #032e5c);
+    border-radius: 4px;
+    transition: width .3s ease;
+}
+.rythme-estimation-ligne {
+    padding: .75rem 0;
+    border-bottom: 1px solid var(--bordure-claire);
+}
+.rythme-estimation-ligne:last-child { border-bottom: none; }
+.rythme-estimation-details {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: .35rem;
+    font-size: .85rem;
+    color: var(--texte-secondaire);
+    flex-wrap: wrap;
+}
+.rythme-estimation-total {
+    font-weight: 600;
+    color: var(--texte-principal);
+}
+
 .btn-icon {
     background: none;
     border: 1px solid var(--bordure-claire);

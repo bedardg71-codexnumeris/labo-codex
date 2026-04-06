@@ -66,7 +66,8 @@ const configurationsOnglets = {
     ],
     'boite-outils': [
         { id: 'tirage', label: 'Tirage au sort' },
-        { id: 'modelisation', label: 'Modélisation' }
+        { id: 'modelisation', label: 'Modélisation' },
+        { id: 'rythme', label: 'Rythme de travail' }
     ],
     'aide': [
         { id: 'introduction', label: 'Introduction' },
