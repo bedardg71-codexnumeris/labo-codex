@@ -314,7 +314,7 @@
      * Charge les préférences de rythme depuis le stockage.
      */
     function chargerPreferences() {
-        var defaut = { heuresJour: 6, heuresDemi: 3, heuresSoir: 2, marge: 1.25, dateObjectif: '', weekends: false };
+        var defaut = { heuresJour: 6, heuresDemi: 3, heuresSoir: 2, marge: 1.25, dateObjectif: '', weekends: false, feries: false };
         var prefs = db.getSync('preferencesRythme', defaut);
         return {
             heuresJour: prefs.heuresJour || defaut.heuresJour,
@@ -322,7 +322,8 @@
             heuresSoir: prefs.heuresSoir || defaut.heuresSoir,
             marge: prefs.marge || defaut.marge,
             dateObjectif: prefs.dateObjectif || '',
-            weekends: !!prefs.weekends
+            weekends: !!prefs.weekends,
+            feries: !!prefs.feries
         };
     }
 
@@ -336,7 +337,8 @@
             heuresSoir: parseInt(document.getElementById('rythme-pref-heures-soir')?.value) || 2,
             marge: parseFloat(document.getElementById('rythme-pref-marge')?.value) || 1.25,
             dateObjectif: document.getElementById('rythme-pref-date-objectif')?.value || '',
-            weekends: document.getElementById('rythme-pref-weekends')?.checked || false
+            weekends: document.getElementById('rythme-pref-weekends')?.checked || false,
+            feries: document.getElementById('rythme-pref-feries')?.checked || false
         };
         db.setSync('preferencesRythme', prefs);
         afficherRythme();
@@ -356,6 +358,8 @@
         if (elMarge) elMarge.value = prefs.marge;
         if (elDate) elDate.value = prefs.dateObjectif || '';
         if (elWE) elWE.checked = prefs.weekends;
+        var elFeries = document.getElementById('rythme-pref-feries');
+        if (elFeries) elFeries.checked = prefs.feries;
     }
 
     /**
@@ -425,57 +429,78 @@
      * @returns {Array<{date: string, jourSemaine: string, statut: string, motif: string|null, numeroSemaine: number|null}>}
      */
     /**
-     * Collecte tous les jours entre deux dates.
-     * Inclut weekends si la préférence est activée.
-     * Retourne des semaines complètes (lundi à vendredi ou dimanche).
+     * Collecte tous les jours entre deux dates (semaines complètes).
+     * Tient compte des reprises (jourRemplace) du calendrier.
      */
-    function obtenirJoursCalendrier(dateDebut, dateFin, inclureWeekends) {
+    function obtenirJoursCalendrier(dateDebut, dateFin, prefs) {
         var calendrier = (typeof obtenirCalendrierComplet === 'function')
             ? obtenirCalendrierComplet()
             : db.getSync(cle('calendrierComplet'), {});
 
-        var joursAcceptes = inclureWeekends ? JOURS_COMPLETS : JOURS_SEMAINE;
+        var joursAcceptes = prefs.weekends ? JOURS_COMPLETS : JOURS_SEMAINE;
 
-        // Élargir au lundi de la semaine de début pour avoir des semaines complètes
+        // Élargir au lundi de la semaine de début
         var dDebut = new Date(dateDebut + 'T12:00:00');
         while (NOMS_JOURS_JS[dDebut.getDay()] !== 'Lundi') {
             dDebut.setDate(dDebut.getDate() - 1);
         }
 
-        // Élargir au vendredi (ou dimanche si weekends) de la semaine de fin
+        // Élargir au vendredi (ou dimanche) de la semaine de fin
         var dFin = new Date(dateFin + 'T12:00:00');
-        var jourFinSem = inclureWeekends ? 'Dimanche' : 'Vendredi';
+        var jourFinSem = prefs.weekends ? 'Dimanche' : 'Vendredi';
         while (NOMS_JOURS_JS[dFin.getDay()] !== jourFinSem) {
             dFin.setDate(dFin.getDate() + 1);
         }
 
-        var jours = [];
+        // Premier passage : collecter et trouver les numéros de semaine
+        var joursBruts = [];
         var d = new Date(dDebut);
-        var dernierNumSemaine = null;
         while (d <= dFin) {
             var str = d.toISOString().split('T')[0];
             var info = calendrier[str];
             var jourSemaine = NOMS_JOURS_JS[d.getDay()];
 
             if (joursAcceptes.indexOf(jourSemaine) >= 0) {
-                var numSem = info ? info.numeroSemaine : null;
-                // Inférer le numéro de semaine si absent
-                if (!numSem && dernierNumSemaine) numSem = dernierNumSemaine;
-                if (numSem) dernierNumSemaine = numSem;
-
                 var estWeekend = jourSemaine === 'Samedi' || jourSemaine === 'Dimanche';
-                jours.push({
+                var statut = estWeekend ? 'weekend' : (info ? info.statut : 'jour-ouvrable');
+                var estConge = statut === 'conge';
+                var estReprise = statut === 'reprise';
+
+                // Jour effectif pour l'horaire : si c'est une reprise, utiliser le jour remplacé
+                var jourEffectif = jourSemaine;
+                if (estReprise && info && info.jourRemplace) {
+                    jourEffectif = info.jourRemplace;
+                }
+
+                joursBruts.push({
                     date: str,
                     jourSemaine: jourSemaine,
-                    statut: estWeekend ? 'weekend' : (info ? info.statut : 'jour-ouvrable'),
-                    motif: info ? info.motif : null,
-                    numeroSemaine: numSem,
+                    jourEffectif: jourEffectif,
+                    statut: statut,
+                    estConge: estConge,
+                    estReprise: estReprise,
+                    motif: info ? (info.motif || (estReprise ? 'Reprise ' + (info.jourRemplace || '') : null)) : null,
+                    numeroSemaine: info ? info.numeroSemaine : null,
                     estWeekend: estWeekend
                 });
             }
             d.setDate(d.getDate() + 1);
         }
-        return jours;
+
+        // Deuxième passage : inférer les numéros de semaine manquants (congés, weekends)
+        // D'abord vers l'avant, puis vers l'arrière
+        var dernierNum = null;
+        for (var i = 0; i < joursBruts.length; i++) {
+            if (joursBruts[i].numeroSemaine) dernierNum = joursBruts[i].numeroSemaine;
+            else if (dernierNum) joursBruts[i].numeroSemaine = dernierNum;
+        }
+        dernierNum = null;
+        for (var k = joursBruts.length - 1; k >= 0; k--) {
+            if (joursBruts[k].numeroSemaine) dernierNum = joursBruts[k].numeroSemaine;
+            else if (dernierNum) joursBruts[k].numeroSemaine = dernierNum;
+        }
+
+        return joursBruts;
     }
 
     /**
@@ -483,22 +508,27 @@
      */
     function repartirDansJours(estimations, joursCalendrier, joursHoraire, prefs) {
         var aujourdHui = new Date().toISOString().split('T')[0];
-        // Enrichir chaque jour avec ses heures libres
         var plages = [];
         joursCalendrier.forEach(function (j) {
-            var estConge = j.statut === 'conge';
-            var estWeekend = j.estWeekend;
             var estPasse = j.date < aujourdHui;
-            var infoHoraire = joursHoraire[j.jourSemaine];
+
+            // Utiliser le jour effectif pour l'horaire (reprises : mercredi → horaire du lundi)
+            var infoHoraire = joursHoraire[j.jourEffectif || j.jourSemaine];
 
             var heuresLibres = 0;
             var type = 'conge';
             var cours = [];
 
-            if (estConge) {
-                type = 'conge';
-            } else if (estWeekend) {
-                heuresLibres = prefs.heuresDemi; // demi-journée le weekend
+            if (j.estConge) {
+                // Congé travaillable si la préférence est activée
+                if (prefs.feries) {
+                    heuresLibres = prefs.heuresJour;
+                    type = 'ferie-travaille';
+                } else {
+                    type = 'conge';
+                }
+            } else if (j.estWeekend) {
+                heuresLibres = prefs.heuresDemi;
                 type = 'weekend';
             } else if (infoHoraire) {
                 heuresLibres = infoHoraire.heuresLibres;
@@ -509,13 +539,15 @@
             plages.push({
                 date: j.date,
                 jourSemaine: j.jourSemaine,
+                jourEffectif: j.jourEffectif,
                 statut: j.statut,
+                estReprise: j.estReprise,
                 motif: j.motif,
                 numeroSemaine: j.numeroSemaine,
-                estWeekend: estWeekend,
-                estConge: estConge,
+                estWeekend: j.estWeekend,
+                estConge: j.estConge,
                 estPasse: estPasse,
-                heuresLibres: (estConge || estPasse) ? 0 : heuresLibres,
+                heuresLibres: estPasse ? 0 : heuresLibres,
                 type: type,
                 cours: cours,
                 heuresUtilisees: 0,
@@ -575,7 +607,7 @@
             dateObjectif = d14.toISOString().split('T')[0];
         }
 
-        var joursCalendrier = obtenirJoursCalendrier(aujourdHui, dateObjectif, prefs.weekends);
+        var joursCalendrier = obtenirJoursCalendrier(aujourdHui, dateObjectif, prefs);
 
         if (joursCalendrier.length === 0) {
             contenuPlanning.innerHTML = '<p class="u-texte-secondaire">Aucun jour disponible d\'ici la date objectif.</p>';
@@ -616,11 +648,20 @@
                 html += '<div class="' + classes + '">';
                 html += '<div class="rythme-jour-titre">' + plage.jourSemaine + ' <small>' + parseInt(plage.date.substring(8)) + '</small></div>';
 
-                if (plage.estConge) {
+                if (plage.estConge && plage.type !== 'ferie-travaille') {
                     html += '<div class="rythme-jour-info">Congé' + (plage.motif ? ' — ' + echapperHtml(plage.motif) : '') + '</div>';
                 } else if (plage.estWeekend && plage.heuresLibres === 0) {
                     html += '<div class="rythme-jour-info">Weekend</div>';
                 } else {
+                    // Mention reprise
+                    if (plage.estReprise && plage.jourEffectif !== plage.jourSemaine) {
+                        html += '<div class="rythme-cours" style="font-style:italic">Horaire du ' + plage.jourEffectif + ' (reprise)</div>';
+                    }
+                    // Mention congé travaillé
+                    if (plage.type === 'ferie-travaille') {
+                        html += '<div class="rythme-cours" style="font-style:italic">Congé' + (plage.motif ? ' — ' + echapperHtml(plage.motif) : '') + '</div>';
+                    }
+
                     if (plage.cours && plage.cours.length > 0) {
                         plage.cours.forEach(function (c) {
                             if (c.debut && c.debut !== '??') {
@@ -630,7 +671,8 @@
                     }
 
                     if (plage.heuresLibres > 0) {
-                        var labelType = plage.estWeekend ? 'Weekend'
+                        var labelType = plage.type === 'ferie-travaille' ? 'Journée libre'
+                            : plage.estWeekend ? 'Weekend'
                             : plage.type === 'libre' ? 'Journée libre'
                             : plage.type === 'partiel' ? 'Demi-journée'
                             : 'Soirée';
