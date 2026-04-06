@@ -621,12 +621,13 @@
             const dansSidebar = p.dansBibliotheque !== false;
             const usage = usages[p.id] || { evaluationsCount: 0 };
             const typeProduction = p.type || p.categorie || '—';
+            const descAff = p.activiteApprentissage || p.description;
 
             html += `
                 <tr>
                     <td>
                         <strong>${escapeHtml(p.nom)}</strong>
-                        ${p.description ? `<br><small class="text-muted">${escapeHtml(p.description.substring(0, 50))}${p.description.length > 50 ? '...' : ''}</small>` : ''}
+                        ${descAff ? `<br><small class="text-muted">${escapeHtml(descAff.substring(0, 50))}${descAff.length > 50 ? '...' : ''}</small>` : ''}
                     </td>
                     <td>${escapeHtml(typeProduction)}</td>
                     <td>
@@ -768,7 +769,8 @@
             const dansSidebar = p.dansBibliotheque !== false;
             const usage = usages[p.id] || { evaluationsCount: 0 };
             const typeProduction = p.type || p.categorie || '—';
-            html += `<tr><td><strong>${escapeHtml(p.nom)}</strong>${p.description ? `<br><small class="text-muted">${escapeHtml(p.description.substring(0, 50))}${p.description.length > 50 ? '...' : ''}</small>` : ''}</td><td>${escapeHtml(typeProduction)}</td><td>${dansSidebar ? '<span class="badge-actif">Sidebar</span>' : '<span class="badge-archive">Masquée</span>'}</td><td>${usage.evaluationsCount > 0 ? `<span class="badge-statut evalue">${usage.evaluationsCount} éval.</span>` : '<span class="badge-statut non-evalue">Non utilisée</span>'}</td><td class="actions-cell"><button class="btn btn-compact btn-secondaire" data-action="naviguerVersRessource" data-param="production" data-param2="${p.id}" title="Consulter">Voir</button> <button class="btn btn-compact" data-action="ouvrirModalSuppressionRessource" data-param="production" data-param2="${p.id}" title="Supprimer">Supprimer</button></td></tr>`;
+            const descAffCompact = p.activiteApprentissage || p.description;
+            html += `<tr><td><strong>${escapeHtml(p.nom)}</strong>${descAffCompact ? `<br><small class="text-muted">${escapeHtml(descAffCompact.substring(0, 50))}${descAffCompact.length > 50 ? '...' : ''}</small>` : ''}</td><td>${escapeHtml(typeProduction)}</td><td>${dansSidebar ? '<span class="badge-actif">Sidebar</span>' : '<span class="badge-archive">Masquée</span>'}</td><td>${usage.evaluationsCount > 0 ? `<span class="badge-statut evalue">${usage.evaluationsCount} éval.</span>` : '<span class="badge-statut non-evalue">Non utilisée</span>'}</td><td class="actions-cell"><button class="btn btn-compact btn-secondaire" data-action="naviguerVersRessource" data-param="production" data-param2="${p.id}" title="Consulter">Voir</button> <button class="btn btn-compact" data-action="ouvrirModalSuppressionRessource" data-param="production" data-param2="${p.id}" title="Supprimer">Supprimer</button></td></tr>`;
         });
         html += '</tbody></table>';
         container.innerHTML = html;

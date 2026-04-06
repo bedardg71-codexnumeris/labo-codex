@@ -106,7 +106,7 @@ function calculerImpactJetons() {
         if (idxSeance >= 0) {
             if (!jetonsParIndex[idxSeance]) jetonsParIndex[idxSeance] = [];
             jetonsParIndex[idxSeance].push({
-                production: prod ? (prod.titre || prod.description || '') : '',
+                production: prod ? (prod.titre || prod.activiteApprentissage || prod.description || '') : '',
                 noteOriginale: originale ? originale.noteFinale : null,
                 noteReprise: ev.noteFinale,
                 type: ev.jetonRepriseCibleeApplique ? 'repriseCiblee' : 'reprise'

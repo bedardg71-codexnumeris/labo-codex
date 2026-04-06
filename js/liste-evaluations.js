@@ -670,8 +670,9 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
 
                     // Formater le nom de production avec description
                     let productionNomComplet = production.titre;
-                    if (production.description && production.description.trim() !== '') {
-                        productionNomComplet = `${production.titre} - ${production.description}`;
+                    const descriptionAff = production.activiteApprentissage || production.description;
+                    if (descriptionAff && descriptionAff.trim() !== '') {
+                        productionNomComplet = `${production.titre} - ${descriptionAff}`;
                     }
 
                     // Évaluation existante
@@ -715,8 +716,9 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
             } else {
                 // Formater le nom de production avec description pour les non évaluées aussi
                 let productionNomComplet = production.titre;
-                if (production.description && production.description.trim() !== '') {
-                    productionNomComplet = `${production.titre} - ${production.description}`;
+                const descriptionAffNonEval = production.activiteApprentissage || production.description;
+                if (descriptionAffNonEval && descriptionAffNonEval.trim() !== '') {
+                    productionNomComplet = `${production.titre} - ${descriptionAffNonEval}`;
                 }
 
                 // Évaluation manquante
@@ -794,7 +796,7 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                 );
                 if (match) {
                     const prod = productions.find(p => p.id === match.productionId);
-                    const nomProd = prod ? (prod.titre || prod.nom || prod.description) : match.productionId;
+                    const nomProd = prod ? (prod.titre || prod.nom || prod.activiteApprentissage || prod.description) : match.productionId;
                     const critere = (match.nomFichier === fichier.nomFichier) ? 'même nom' : 'même taille';
                     estDoublon = true;
                     diagnosticDoublon = nomProd + ' (' + critere + ')';

@@ -3780,7 +3780,7 @@ function genererSectionProductions(da) {
 
             return {
                 production: production.titre,
-                description: production.description || production.titre,
+                description: production.activiteApprentissage || production.description || production.titre,
                 note: `${evaluation.niveauFinal} ${evaluation.noteFinale}%`,
                 date: dateFormatee,
                 statut: estNonRemis ? 'non-remis' : 'evalue',
@@ -3807,7 +3807,7 @@ function genererSectionProductions(da) {
             const dateFormateeNonEval = dateEcheance ? new Date(dateEcheance + 'T12:00:00').toLocaleDateString('fr-CA') : '—';
             return {
                 production: production.titre,
-                description: production.description || production.titre,
+                description: production.activiteApprentissage || production.description || production.titre,
                 note: null,
                 date: dateFormateeNonEval,
                 statut: 'non-evalue',
@@ -3841,7 +3841,7 @@ function genererSectionProductions(da) {
             listeArtefacts = '<ul class="note-finale-liste-artefacts">' +
                 portfolio.artefactsRetenus.map((art, i) => {
                     const prod = productionsMap[art.productionId];
-                    const titre = prod?.description || prod?.titre || `Artefact ${i + 1}`;
+                    const titre = prod?.activiteApprentissage || prod?.description || prod?.titre || `Artefact ${i + 1}`;
                     return `<li>${echapperHtml(titre)} <strong>${art.niveau} ${art.note.toFixed(1)}%</strong></li>`;
                 }).join('') +
                 '</ul>';
@@ -7802,7 +7802,7 @@ function genererRapportAPI(da, options = {}) {
             const production = productions.find(p => p.id === e.productionId);
 
             return {
-                productionNom: production?.description || production?.nom || `Artefact ${e.productionId}`,
+                productionNom: production?.activiteApprentissage || production?.description || production?.nom || `Artefact ${e.productionId}`,
                 niveauFinal: e.niveauFinal, // La lettre (I, D, M, E)
                 notePct: parseFloat(e.noteFinale) // Le pourcentage réel (60.5, 73.5, 79.7, etc.)
             };
@@ -8526,7 +8526,7 @@ function calculerDetailsNoteFinale(da) {
             plafonnement: plafonnement
         },
         terminal: {
-            nom: productionTerminale?.titre || productionTerminale?.description || 'Évaluation terminale',
+            nom: productionTerminale?.titre || productionTerminale?.activiteApprentissage || productionTerminale?.description || 'Évaluation terminale',
             note: noteTerminale,
             niveau: evaluationTerminale?.niveauFinal || null,
             ponderation: ponderationTerminale,

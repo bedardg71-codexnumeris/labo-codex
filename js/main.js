@@ -791,6 +791,11 @@ document.addEventListener('DOMContentLoaded', function () {
         migrerClesSansNamespace();
     }
 
+    // Renommage description → activiteApprentissage (Beta 99.06)
+    if (typeof migrerDescriptionVersActivite === 'function') {
+        migrerDescriptionVersActivite();
+    }
+
     // ===============================
     // 3.7 GROUPE DÉMO (Beta 93.5)
     // ===============================

@@ -471,7 +471,7 @@ function obtenirJetonsParDate(da, snapshots) {
         evalsAvecJetons.forEach(evaluation => {
             // Trouver la production pour obtenir le titre et la date d'échéance
             const production = productions.find(p => p.id === evaluation.productionId);
-            const titreProduction = production?.description || production?.titre || production?.nom || 'Production';
+            const titreProduction = production?.activiteApprentissage || production?.description || production?.titre || production?.nom || 'Production';
             const dateEcheance = production?.dateEcheance;
 
             if (!dateEcheance) {
@@ -643,8 +643,8 @@ function obtenirArtefactsParDateSeance(snapshots) {
             if (dateSeanceTrouvee) {
                 if (!artefactsParDate[dateSeanceTrouvee]) artefactsParDate[dateSeanceTrouvee] = [];
                 artefactsParDate[dateSeanceTrouvee].push({
-                    titre: prod.titre || prod.description || 'Sans titre',
-                    activite: prod.description || ''
+                    titre: prod.titre || prod.activiteApprentissage || prod.description || 'Sans titre',
+                    activite: prod.activiteApprentissage || prod.description || ''
                 });
             }
         });
@@ -2694,7 +2694,10 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         // Préparer les labels - utiliser le champ "description" qui contient l'activité d'apprentissage
         // Ex: titre="Artefact 1", description="Portrait de lecteur" → "Portrait de lecteur"
         const labels = productionsArtefacts.map((prod, index) => {
-            // Priorité : description (activité) > titre > fallback
+            // Priorité : activiteApprentissage > description (activité) > titre > fallback
+            if (prod.activiteApprentissage && prod.activiteApprentissage.trim()) {
+                return prod.activiteApprentissage.trim();
+            }
             if (prod.description && prod.description.trim()) {
                 return prod.description.trim();
             }
@@ -2905,7 +2908,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
                                 const production = productionsArtefacts[dataIndex];
                                 // Titre : activité d'apprentissage (description) ou titre
                                 // Note: le nom de l'élève est déjà affiché à droite de la courbe
-                                return production?.description || production?.titre || `Production ${dataIndex + 1}`;
+                                return production?.activiteApprentissage || production?.description || production?.titre || `Production ${dataIndex + 1}`;
                             },
                             label: function(context) {
                                 const lignes = [];
@@ -3410,7 +3413,7 @@ function obtenirDonneesCriteres(da) {
         // Préparer les labels (noms des productions)
         const labels = evaluationsEtudiant.map(e => {
             const production = productions.find(p => p.id === e.productionId);
-            return production?.description || production?.nom || `Prod. ${e.productionId}`;
+            return production?.activiteApprentissage || production?.description || production?.nom || `Prod. ${e.productionId}`;
         });
 
         // Préparer les données par critère
