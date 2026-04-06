@@ -96,21 +96,20 @@
         _majAffichageChrono();
         _chronoInterval = setInterval(_majAffichageChrono, 1000);
 
-        // Afficher la moyenne pour cette production dès le démarrage
+        // Afficher la moyenne pour cette activité dès le démarrage
         var ec = window.evaluationEnCours;
         var productionId = ec ? ec.productionId : null;
         if (productionId) {
-            var historique = db.getSync(cle('chronoEvaluations'), []);
-            var moyenneInfo = _calculerMoyenneProduction(historique, productionId);
-            // Enrichir le nom si absent de l'historique
-            if (!moyenneInfo.productionNom) {
-                var prods = (typeof obtenirDonneesSelonMode === 'function')
-                    ? obtenirDonneesSelonMode('productions')
-                    : db.getSync(cle('productions'), []);
-                var prod = prods.find(function(p) { return p.id === productionId; });
-                if (prod) moyenneInfo.productionNom = prod.titre || prod.nom;
+            var prods = (typeof obtenirDonneesSelonMode === 'function')
+                ? obtenirDonneesSelonMode('productions')
+                : db.getSync(cle('productions'), []);
+            var prod = prods.find(function(p) { return p.id === productionId; });
+            var activite = prod ? (prod.activiteApprentissage || prod.description || null) : null;
+            if (activite) {
+                var historique = db.getSync(cle('chronoEvaluations'), []);
+                var moyenneInfo = _calculerMoyenneActivite(historique, activite);
+                _afficherInfoMoyenne(moyenneInfo);
             }
-            _afficherInfoMoyenne(moyenneInfo);
         }
     }
 
@@ -141,32 +140,37 @@
         const dureeMs = _chronoTotalMs();
         if (_chronoInterval) { clearInterval(_chronoInterval); _chronoInterval = null; }
 
-        // Identifier la production en cours
+        // Identifier l'activité d'apprentissage en cours
         var ec = window.evaluationEnCours;
         var productionId = ec ? ec.productionId : null;
+        var activite = null;
         var productionNom = null;
         if (productionId) {
             var prods = (typeof obtenirDonneesSelonMode === 'function')
                 ? obtenirDonneesSelonMode('productions')
                 : db.getSync(cle('productions'), []);
             var prod = prods.find(function(p) { return p.id === productionId; });
-            productionNom = prod ? (prod.titre || prod.nom) : null;
+            if (prod) {
+                activite = prod.activiteApprentissage || prod.description || null;
+                productionNom = prod.titre || prod.nom;
+            }
         }
 
-        // Stocker dans les 50 dernières entrées (avec productionId)
+        // Stocker dans les 200 dernières entrées (groupées par activité)
         const cleStock = cle('chronoEvaluations');
         let historique = db.getSync(cleStock, []);
         historique.push({
             dureeMs: dureeMs,
             date: new Date().toISOString(),
+            activite: activite,
             productionId: productionId,
             productionNom: productionNom
         });
-        if (historique.length > 50) historique = historique.slice(-50);
+        if (historique.length > 200) historique = historique.slice(-200);
         db.setSync(cleStock, historique);
 
-        // Calculer la moyenne pour cette production spécifique
-        var moyenneInfo = _calculerMoyenneProduction(historique, productionId);
+        // Calculer la moyenne pour cette activité d'apprentissage
+        var moyenneInfo = _calculerMoyenneActivite(historique, activite);
 
         // Afficher résultat + moyenne dans les badges
         var texteResultat = _formaterDuree(dureeMs) + ' (moy. ' + _formaterDuree(moyenneInfo.moyenneMs) + ')';
@@ -190,22 +194,24 @@
     }
 
     /**
-     * Calcule la moyenne des durées pour une production donnée.
-     * @returns {{ moyenneMs: number, count: number, productionNom: string|null }}
+     * Calcule la moyenne des durées pour une activité d'apprentissage.
+     * Regroupe par activité (ex: "Rédaction") plutôt que par production spécifique.
+     * Fallback sur productionId pour les anciennes entrées sans champ activite.
+     * @returns {{ moyenneMs: number, count: number, activite: string|null }}
      */
-    function _calculerMoyenneProduction(historique, productionId) {
+    function _calculerMoyenneActivite(historique, activite) {
         var entrees;
-        if (productionId) {
-            entrees = historique.filter(function(e) { return e.productionId === productionId; });
+        if (activite) {
+            entrees = historique.filter(function(e) { return e.activite === activite; });
         } else {
             entrees = historique;
         }
-        if (entrees.length === 0) return { moyenneMs: 0, count: 0, productionNom: null };
+        if (entrees.length === 0) return { moyenneMs: 0, count: 0, activite: null };
         var somme = entrees.reduce(function(s, e) { return s + e.dureeMs; }, 0);
         return {
             moyenneMs: somme / entrees.length,
             count: entrees.length,
-            productionNom: entrees[entrees.length - 1].productionNom || null
+            activite: activite || null
         };
     }
 
@@ -219,8 +225,7 @@
             el.style.display = 'none';
             return;
         }
-        var nom = moyenneInfo.productionNom || '';
-        // Tronquer le nom si trop long
+        var nom = moyenneInfo.activite || '';
         if (nom.length > 30) nom = nom.substring(0, 28) + '…';
         el.textContent = 'Moy. ' + _formaterDuree(moyenneInfo.moyenneMs) + ' × ' + moyenneInfo.count + (nom ? ' · ' + nom : '');
         el.style.display = '';
