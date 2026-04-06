@@ -163,17 +163,23 @@
             var fichiersImportes = fichiers.filter(function (f) {
                 return f.productionId === prod.id;
             });
-            var nbImportes = fichiersImportes.length;
-            if (nbImportes === 0) return; // aucun fichier importé
+            if (fichiersImportes.length === 0) return;
 
-            // Évaluations déjà faites (non remplacées)
-            var evalsFaites = evaluations.filter(function (ev) {
-                return ev.productionId === prod.id && !ev.remplaceeParId;
-            }).length;
+            // DAs qui ont déjà une évaluation pour cette production
+            var dasEvalues = {};
+            evaluations.forEach(function (ev) {
+                if (ev.productionId === prod.id && !ev.remplaceeParId && ev.etudiantDA) {
+                    dasEvalues[ev.etudiantDA] = true;
+                }
+            });
 
-            var copiesRestantes = Math.max(0, nbImportes - evalsFaites);
-            // Production terminée si <= 2 copies restantes (tolérance pour fichiers mal classés)
-            if (copiesRestantes <= 2 && evalsFaites >= nbImportes * 0.8) return;
+            // Copies restantes = fichiers importés dont l'étudiant n'a pas encore d'évaluation
+            var fichiersRestants = fichiersImportes.filter(function (f) {
+                return f.etudiantDA && !dasEvalues[f.etudiantDA];
+            });
+            var copiesRestantes = fichiersRestants.length;
+            var evalsFaites = Object.keys(dasEvalues).length;
+            if (copiesRestantes === 0) return; // production terminée
 
             var tempsEstimeMs = copiesRestantes * stats.moyenne;
             var tempsTotal = tempsEstimeMs * prefs.marge;
@@ -367,19 +373,42 @@
      * Récupère les séances de cours de l'horaire actif.
      * @returns {Array<{jour: string, debut: string, duree: number}>}
      */
+    /**
+     * Récupère TOUTES les séances de cours (tous les groupes-cours).
+     * Collecte depuis toutes les sources disponibles.
+     */
     function obtenirSeances() {
-        if (typeof obtenirSeancesHoraire === 'function') {
-            var seances = obtenirSeancesHoraire(null);
-            if (seances && seances.length > 0) return seances;
-        }
-        // Fallback : lire directement depuis la clé
+        var toutes = [];
+        var vus = {};
+
+        // Source 1 : entités horaires (structure moderne)
         var horaires = db.getSync(cle('horaires'), []);
-        for (var i = 0; i < horaires.length; i++) {
-            if (horaires[i].seances && horaires[i].seances.length > 0) {
-                return horaires[i].seances;
+        horaires.forEach(function (h) {
+            if (h.seances) h.seances.forEach(function (s) {
+                if (!vus[s.id]) { vus[s.id] = true; toutes.push(s); }
+            });
+        });
+        if (toutes.length > 0) return toutes;
+
+        // Source 2 : obtenirSeancesHoraire par groupe-cours
+        var groupesCours = db.getSync(cle('groupesCours'), []);
+        groupesCours.forEach(function (gc) {
+            if (typeof obtenirSeancesHoraire === 'function') {
+                var seances = obtenirSeancesHoraire(gc.coursId || gc.id);
+                if (seances) seances.forEach(function (s) {
+                    var cle = (s.jour || '') + (s.debut || '') + (s.groupe || '');
+                    if (!vus[cle]) { vus[cle] = true; toutes.push(s); }
+                });
             }
-        }
-        return db.getSync(cle('seancesHoraire'), []) || [];
+        });
+        if (toutes.length > 0) return toutes;
+
+        // Source 3 : clé directe (legacy)
+        var legacy = db.getSync(cle('seancesHoraire'), []);
+        if (legacy && legacy.length > 0) return legacy;
+
+        // Source 4 : horaireHebdo (legacy)
+        return db.getSync(cle('horaireHebdo'), []) || [];
     }
 
     /**
