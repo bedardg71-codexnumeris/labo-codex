@@ -95,6 +95,15 @@
         }
         _majAffichageChrono();
         _chronoInterval = setInterval(_majAffichageChrono, 1000);
+
+        // Afficher la moyenne pour cette production dès le démarrage
+        var ec = window.evaluationEnCours;
+        var productionId = ec ? ec.productionId : null;
+        if (productionId) {
+            var historique = db.getSync(cle('chronoEvaluations'), []);
+            var moyenneInfo = _calculerMoyenneProduction(historique, productionId);
+            _afficherInfoMoyenne(moyenneInfo);
+        }
     }
 
     function pauserChrono() {
@@ -124,19 +133,28 @@
         const dureeMs = _chronoTotalMs();
         if (_chronoInterval) { clearInterval(_chronoInterval); _chronoInterval = null; }
 
-        // Stocker dans les 20 dernières entrées
+        // Identifier la production en cours
+        var ec = window.evaluationEnCours;
+        var productionId = ec ? ec.productionId : null;
+        var productionNom = ec ? ec.productionNom : null;
+
+        // Stocker dans les 50 dernières entrées (avec productionId)
         const cleStock = cle('chronoEvaluations');
         let historique = db.getSync(cleStock, []);
-        historique.push({ dureeMs: dureeMs, date: new Date().toISOString() });
-        if (historique.length > 20) historique = historique.slice(-20);
+        historique.push({
+            dureeMs: dureeMs,
+            date: new Date().toISOString(),
+            productionId: productionId,
+            productionNom: productionNom
+        });
+        if (historique.length > 50) historique = historique.slice(-50);
         db.setSync(cleStock, historique);
 
-        // Calculer la moyenne des 5 dernières
-        const cinqDernieres = historique.slice(-5);
-        const moyenneMs = cinqDernieres.reduce((s, e) => s + e.dureeMs, 0) / cinqDernieres.length;
+        // Calculer la moyenne pour cette production spécifique
+        var moyenneInfo = _calculerMoyenneProduction(historique, productionId);
 
-        // Afficher résultat + moyenne dans les deux palettes
-        var texteResultat = _formaterDuree(dureeMs) + ' (moy. ' + _formaterDuree(moyenneMs) + ')';
+        // Afficher résultat + moyenne dans les badges
+        var texteResultat = _formaterDuree(dureeMs) + ' (moy. ' + _formaterDuree(moyenneInfo.moyenneMs) + ')';
         _chronoBadgeIds.forEach(function(id) {
             var badge = document.getElementById(id);
             if (badge) {
@@ -146,11 +164,51 @@
             }
         });
 
+        // Afficher le détail dans la ligne d'info
+        _afficherInfoMoyenne(moyenneInfo);
+
         _chronoDebut = null;
         _chronoFichierId = null;
         _chronoElapsed = 0;
         _chronoPaused = false;
         _majAffichageChrono();
+    }
+
+    /**
+     * Calcule la moyenne des durées pour une production donnée.
+     * @returns {{ moyenneMs: number, count: number, productionNom: string|null }}
+     */
+    function _calculerMoyenneProduction(historique, productionId) {
+        var entrees;
+        if (productionId) {
+            entrees = historique.filter(function(e) { return e.productionId === productionId; });
+        } else {
+            entrees = historique;
+        }
+        if (entrees.length === 0) return { moyenneMs: 0, count: 0, productionNom: null };
+        var somme = entrees.reduce(function(s, e) { return s + e.dureeMs; }, 0);
+        return {
+            moyenneMs: somme / entrees.length,
+            count: entrees.length,
+            productionNom: entrees[entrees.length - 1].productionNom || null
+        };
+    }
+
+    /**
+     * Affiche l'info moyenne dans la palette chrono.
+     */
+    function _afficherInfoMoyenne(moyenneInfo) {
+        var el = document.getElementById('chrono-info-moyenne');
+        if (!el) return;
+        if (moyenneInfo.count < 2) {
+            el.style.display = 'none';
+            return;
+        }
+        var nom = moyenneInfo.productionNom || '';
+        // Tronquer le nom si trop long
+        if (nom.length > 30) nom = nom.substring(0, 28) + '…';
+        el.textContent = 'Moy. ' + _formaterDuree(moyenneInfo.moyenneMs) + ' × ' + moyenneInfo.count + (nom ? ' · ' + nom : '');
+        el.style.display = '';
     }
 
     function getDureeMs() {
@@ -4711,7 +4769,7 @@
 
                 if (optionExiste) {
                     selectProduction.value = prodId;
-                    selectProduction.dispatchEvent(new Event('change'));
+                    selectProduction.dispatchEvent(new Event('change', { bubbles: true }));
 
                     // Vérifier si une évaluation existante doit être chargée
                     // (reprises, évaluations modifiées, etc.)

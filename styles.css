@@ -3370,8 +3370,8 @@ textarea {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(3, 46, 92, 0.4);           /* Bleu principal avec alpha */
-    backdrop-filter: blur(2px);                  /* Flou moderne */
+    background: rgba(3, 46, 92, 0.65);          /* Bleu principal — opacifié pour lisibilité */
+    backdrop-filter: blur(6px);                  /* Flou renforcé */
     z-index: 9999;
     overflow-y: auto;
 }
@@ -15653,6 +15653,16 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 }
 .chrono-btn-etat:hover { color: var(--texte-principal); }
 .palette-chrono::after { display: none; }
+.chrono-info-moyenne {
+    font-size: .7rem;
+    color: var(--texte-secondaire);
+    text-align: center;
+    padding: 0 8px 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.palette-chrono { max-width: 260px; }
 
 .btn-icon {
     background: none;

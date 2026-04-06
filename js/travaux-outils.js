@@ -1773,6 +1773,7 @@
         html += '<button id="chrono-btn-pause" class="chrono-btn-etat" data-action="travauxUI.togglePauseChrono" style="display:none" title="Pause">\u23f8\ufe0f</button>';
         html += '<span id="chrono-badge" class="travaux-chrono-badge">--:--</span>';
         html += '</div>';
+        html += '<div id="chrono-info-moyenne" class="chrono-info-moyenne" style="display:none"></div>';
 
         palette.innerHTML = html;
 
