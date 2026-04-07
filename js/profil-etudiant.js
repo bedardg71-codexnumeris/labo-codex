@@ -8765,6 +8765,8 @@ window.determinerNiveauRaiPedagogique = determinerNiveauRaiPedagogique;
 window.determinerAlerteContextuelle = determinerAlerteContextuelle;
 window.determinerCibleIntervention = determinerCibleIntervention; // 🔧 FIX Beta 97.4 : Nécessaire pour afficherPatternsApprentissage
 window.calculerMoyennesCriteres = calculerMoyennesCriteres;
+window.calculerIPB = calculerIPB;
+window.obtenirGrilleReferenceDepistage = obtenirGrilleReferenceDepistage;
 
 /**
  * 🆕 BETA 91: Calcule et stocke les patterns + RàI pour TOUT le groupe
