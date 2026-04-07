@@ -1180,60 +1180,64 @@ function chargerTableauBordApercu() {
 }
 
 /**
- * 🆕 BETA 91: Génère une interprétation des patterns d'apprentissage du groupe
- * Ton réaliste équilibré : présente forces et défis sans jugement
- * Format : nombres absolus ET pourcentages (ex: "17 étudiants, 68%")
- * @param {Array} patterns - Distribution des patterns [{pattern, count}, ...]
- * @param {number} totalEtudiants - Nombre total d'étudiants
+ * Génère une interprétation du suivi de l'apprentissage des fondamentaux.
+ * S'appuie sur les diagnostics IPB × direction de _tousEtudiantsEnrichis.
  * @returns {string} Message d'interprétation HTML
  */
-function genererInterpretationPatterns(patterns, totalEtudiants) {
-    if (!patterns || totalEtudiants === 0) return '';
+function genererInterpretationSuiviFondamentaux() {
+    if (!_tousEtudiantsEnrichis || _tousEtudiantsEnrichis.length === 0) return '';
 
-    // Classifier les patterns par catégories
-    const favorables = ['Progression', 'Stable', 'Excellence émergente'];
-    const difficultesEmergentes = ['Difficulté émergente', 'Défi spécifique'];
-    const critiques = ['Difficulté persistante'];
-
-    let nbFavorables = 0;
-    let nbDifficultesEmergentes = 0;
-    let nbCritiques = 0;
-
-    patterns.forEach(p => {
-        if (favorables.includes(p.pattern)) {
-            nbFavorables += p.count;
-        } else if (difficultesEmergentes.includes(p.pattern)) {
-            nbDifficultesEmergentes += p.count;
-        } else if (critiques.includes(p.pattern)) {
-            nbCritiques += p.count;
-        }
+    // Grouper par diagnostic IPB
+    var compteurs = {};
+    var total = 0;
+    _tousEtudiantsEnrichis.forEach(function(e) {
+        if (!e.suivi || !e.suivi.diagnostic) return;
+        var d = e.suivi.diagnostic;
+        compteurs[d] = (compteurs[d] || 0) + 1;
+        total++;
     });
 
-    const pctFavorables = Math.round((nbFavorables / totalEtudiants) * 100);
-    const pctDifficultesEmergentes = Math.round((nbDifficultesEmergentes / totalEtudiants) * 100);
-    const pctCritiques = Math.round((nbCritiques / totalEtudiants) * 100);
+    if (total === 0) return '';
 
-    // Construction du message équilibré
-    const messages = [];
+    // Regrouper par niveau de préoccupation
+    var maitrise = (compteurs['Maîtrise acquise'] || 0) + (compteurs['Difficulté résolue'] || 0);
+    var progression = compteurs['Progression'] || 0;
+    var plateau = compteurs['Plateau'] || 0;
+    var emergente = compteurs['Difficulté émergente'] || 0;
+    var constante = compteurs['Difficulté constante'] || 0;
+    var persistante = compteurs['Difficulté persistante'] || 0;
 
-    // 1. Trajectoires favorables
-    if (nbFavorables > 0) {
-        messages.push(`${nbFavorables} étudiants (${pctFavorables}%) montrent une trajectoire d'apprentissage favorable (Progression, Stable, Excellence émergente)`);
+    function pct(n) { return Math.round((n / total) * 100); }
+
+    var messages = [];
+
+    // Fondamentaux acquis (IPB 0-1, ↗)
+    if (maitrise > 0) {
+        messages.push(maitrise + ' étudiant' + (maitrise > 1 ? 's' : '') + ' (' + pct(maitrise) + '%) ' +
+            (maitrise > 1 ? 'maîtrisent' : 'maîtrise') + ' les fondamentaux multistructurels');
     }
 
-    // 2. Difficultés émergentes
-    if (nbDifficultesEmergentes > 0) {
-        messages.push(`${nbDifficultesEmergentes} étudiants (${pctDifficultesEmergentes}%) rencontrent des difficultés émergentes et nécessitent un soutien préventif`);
+    // En progression (IPB 2, ↗)
+    if (progression > 0) {
+        messages.push(progression + ' (' + pct(progression) + '%) en progression vers la maîtrise');
     }
 
-    // 3. Difficultés persistantes
-    if (nbCritiques > 0) {
-        messages.push(`${nbCritiques} étudiants (${pctCritiques}%) présentent une difficulté persistante et nécessitent un accompagnement différencié immédiat`);
+    // Plateau (IPB 2, →)
+    if (plateau > 0) {
+        messages.push(plateau + ' (' + pct(plateau) + '%) en plateau — consolidation ou stagnation à surveiller');
     }
 
-    if (messages.length === 0) {
-        return '';
+    // Difficultés actives (émergente + constante + persistante)
+    var diffActives = emergente + constante + persistante;
+    if (diffActives > 0) {
+        var details = [];
+        if (emergente > 0) details.push(emergente + ' émergente' + (emergente > 1 ? 's' : ''));
+        if (constante > 0) details.push(constante + ' constante' + (constante > 1 ? 's' : ''));
+        if (persistante > 0) details.push(persistante + ' persistante' + (persistante > 1 ? 's' : ''));
+        messages.push(diffActives + ' (' + pct(diffActives) + '%) en difficulté sur les fondamentaux (' + details.join(', ') + ')');
     }
+
+    if (messages.length === 0) return '';
 
     return messages.join('. ') + '.';
 }
@@ -1643,10 +1647,10 @@ function afficherMetriquesGlobales(etudiants) {
     const html = `
         <div class="tb-p-20">
             ${legendeUnique}
-            ${genererBarreDistribution('Assiduité (A)', etudiantsSOM_A, etudiantsPAN_A, 'A', afficherSom, afficherPan, r_AP, null, texteAttenteA, nbTotal)}
-            ${genererBarreDistribution('Complétion (C)', etudiantsSOM_C, etudiantsPAN_C, 'C', afficherSom, afficherPan, r_CP, null, texteAttenteC, nbTotal)}
-            ${genererBarreDistribution('Engagement (E)', etudiantsSOM_E, etudiantsPAN_E, 'E', afficherSom, afficherPan, null, moyenneE, texteAttenteE, nbTotal)}
-            ${genererBarreDistribution('Performance (P)', etudiantsSOM_P, etudiantsPAN_P, 'P', afficherSom, afficherPan, null, null, texteAttenteP, nbTotal)}
+            ${genererBarreDistribution('Assiduité (A) — sommatif', etudiantsSOM_A, etudiantsPAN_A, 'A', afficherSom, afficherPan, r_AP, null, texteAttenteA, nbTotal)}
+            ${genererBarreDistribution('Complétion (C) — sommatif', etudiantsSOM_C, etudiantsPAN_C, 'C', afficherSom, afficherPan, r_CP, null, texteAttenteC, nbTotal)}
+            ${genererBarreDistribution('Engagement (E) — sommatif composite', etudiantsSOM_E, etudiantsPAN_E, 'E', afficherSom, afficherPan, null, moyenneE, texteAttenteE, nbTotal)}
+            ${genererBarreDistribution('Performance (P) — alternatif', etudiantsSOM_P, etudiantsPAN_P, 'P', afficherSom, afficherPan, null, null, texteAttenteP, nbTotal)}
         </div>
     `;
 
@@ -2089,6 +2093,19 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
  * @returns {string} HTML de la barre
  */
 function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, nbSansDonnees = 0, nbTotal = 0, infoFiabilite = null) {
+    // Lire les critères multistructurels pour le sous-titre contextuel
+    var nomsMulti = [];
+    if (typeof obtenirGrilleReferenceDepistage === 'function') {
+        var grille = obtenirGrilleReferenceDepistage();
+        if (grille && grille.criteres) {
+            nomsMulti = grille.criteres
+                .filter(function(c) { return (c.niveauSOLO || 'multistructurel') === 'multistructurel'; })
+                .map(function(c) { return c.nom; });
+        }
+    }
+    var sousTitreMulti = nomsMulti.length > 0
+        ? '<div style="color: var(--texte-muted); font-size: 0.8rem; margin-bottom: 4px;">Critères multistructurels surveillés : ' + echapperHtml(nomsMulti.join(', ')) + '</div>'
+        : '';
     // 🆕 BETA 95.6 : Gérer le cas où tous les étudiants sont sans données
     const nbAvecDonnees = (afficherPan ? etudiantsPAN.length : etudiantsSOM.length) || 0;
     const tousEnAttente = nbTotal > 0 && nbAvecDonnees === 0;
@@ -2096,7 +2113,8 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
     if (tousEnAttente) {
         return `
             <div class="distribution-container u-mb-15">
-                <h4 class="tb-titre-metrique" data-tooltip="tdb-patterns">Répartition des patterns d'apprentissage</h4>
+                <h4 class="tb-titre-metrique" data-tooltip="tdb-patterns">Suivi de l'apprentissage des fondamentaux</h4>
+                ${sousTitreMulti}
                 <div class="tb-texte-description" style="color: var(--texte-muted); font-style: italic;">
                     En attente de données pour ${nbTotal} étudiant${nbTotal > 1 ? 's' : ''}.
                 </div>
@@ -2270,45 +2288,8 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
         labelCritique += `<br><span class="tb-texte-mini-bleu-std">${critiquePAN} (${critiquePctPAN}%)</span>`;
     }
 
-    // 🆕 BETA 91: Générer l'interprétation des patterns
-    let interpretation = '';
-    const etudiants = afficherSom ? etudiantsSOM : etudiantsPAN;
-    if (etudiants && etudiants.length > 0) {
-        // Note: stableSOM inclut déjà stable + progression (ligne 1337)
-        // Si mode comparatif, utiliser les données de la pratique affichée
-        if (afficherSom && afficherPan) {
-            // Mode comparatif : utiliser les données de SOM uniquement (car les deux sont affichés)
-            const patternsDistributionSOM = [
-                { pattern: 'Progression', count: stableSOM },  // stable + progression regroupés
-                { pattern: 'Stable', count: 0 },
-                { pattern: 'Excellence émergente', count: 0 },
-                { pattern: 'Défi spécifique', count: defiSOM },
-                { pattern: 'Difficulté émergente', count: emergentSOM },
-                { pattern: 'Difficulté persistante', count: critiqueSOM }
-            ];
-            interpretation = genererInterpretationPatterns(patternsDistributionSOM, etudiantsSOM.length);
-        } else if (afficherSom) {
-            const patternsDistributionSOM = [
-                { pattern: 'Progression', count: stableSOM },  // stable + progression regroupés
-                { pattern: 'Stable', count: 0 },
-                { pattern: 'Excellence émergente', count: 0 },
-                { pattern: 'Défi spécifique', count: defiSOM },
-                { pattern: 'Difficulté émergente', count: emergentSOM },
-                { pattern: 'Difficulté persistante', count: critiqueSOM }
-            ];
-            interpretation = genererInterpretationPatterns(patternsDistributionSOM, etudiantsSOM.length);
-        } else if (afficherPan) {
-            const patternsDistributionPAN = [
-                { pattern: 'Progression', count: stablePAN },  // stable + progression regroupés
-                { pattern: 'Stable', count: 0 },
-                { pattern: 'Excellence émergente', count: 0 },
-                { pattern: 'Défi spécifique', count: defiPAN },
-                { pattern: 'Difficulté émergente', count: emergentPAN },
-                { pattern: 'Difficulté persistante', count: critiquePAN }
-            ];
-            interpretation = genererInterpretationPatterns(patternsDistributionPAN, etudiantsPAN.length);
-        }
-    }
+    // Interprétation basée sur les diagnostics IPB × direction (données multistructurelles)
+    const interpretation = genererInterpretationSuiviFondamentaux();
 
     // 🆕 Indicateur de fiabilité
     let messageFiabilite = '';
@@ -2326,7 +2307,8 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
 
     return `
         <div class="distribution-container u-mb-15">
-            <h4 class="tb-titre-metrique" style="margin-bottom: 4px;" data-tooltip="tdb-patterns">Répartition des patterns d'apprentissage</h4>
+            <h4 class="tb-titre-metrique" style="margin-bottom: 4px;" data-tooltip="tdb-patterns">Suivi de l'apprentissage des fondamentaux</h4>
+            ${sousTitreMulti}
             ${messageFiabilite}
             <div class="barre-patterns tb-barre-simple">
                 <div class="barre-patterns-overlay"></div>
@@ -2899,13 +2881,11 @@ function afficherPatternsApprentissage(etudiants) {
         barreExistante.remove();
     }
 
-    // 🆕 Calculer l'indicateur de fiabilité pour le groupe
+    // Calculer l'indicateur de fiabilité depuis les données IPB (suivi) déjà calculées
     const fenetreAnalyse = typeof obtenirNombreProductionsPourPatterns === 'function' ? obtenirNombreProductionsPourPatterns() : 3;
-    const nbArtefactsParEtudiant = etudiantsAvecDonneesCP.map(e => {
-        try {
-            return calculerIndicesNDerniersArtefacts(e.da, true).nbArtefacts || 0;
-        } catch (err) { return 0; }
-    });
+    const nbArtefactsParEtudiant = _tousEtudiantsEnrichis
+        .filter(function(e) { return e.suivi && e.suivi.scoresParArtefact; })
+        .map(function(e) { return e.suivi.scoresParArtefact.length; });
     let infoFiabilite = null;
     if (nbArtefactsParEtudiant.length > 0) {
         const minArtefacts = Math.min(...nbArtefactsParEtudiant);
@@ -3033,13 +3013,11 @@ function afficherNiveauxRaI(etudiants) {
         barreExistante.remove();
     }
 
-    // 🆕 Calculer l'indicateur de fiabilité pour le groupe
+    // Calculer l'indicateur de fiabilité depuis les données IPB (suivi) déjà calculées
     const fenetreAnalyse = typeof obtenirNombreProductionsPourPatterns === 'function' ? obtenirNombreProductionsPourPatterns() : 3;
-    const nbArtefactsParEtudiant = etudiantsAvecDonneesCP.map(e => {
-        try {
-            return calculerIndicesNDerniersArtefacts(e.da, true).nbArtefacts || 0;
-        } catch (err) { return 0; }
-    });
+    const nbArtefactsParEtudiant = _tousEtudiantsEnrichis
+        .filter(function(e) { return e.suivi && e.suivi.scoresParArtefact; })
+        .map(function(e) { return e.suivi.scoresParArtefact.length; });
     let infoFiabilite = null;
     if (nbArtefactsParEtudiant.length > 0) {
         const minArtefacts = Math.min(...nbArtefactsParEtudiant);
