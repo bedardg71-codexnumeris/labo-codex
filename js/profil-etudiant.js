@@ -5454,6 +5454,9 @@ function calculerIPB(da) {
         }
     }
 
+    // Scores en ordre chronologique (ancien → récent) pour l'affichage
+    var scoresChronologiques = scoresRecents.slice().reverse();
+
     return {
         ipb: ipb,
         scoreActuel: scoreActuel,
@@ -5462,7 +5465,8 @@ function calculerIPB(da) {
         criteresMulti: nomsMulti.map(function (c) { return c.nom; }),
         criteresEnDefi: criteresEnDefi,
         fenetre: limite,
-        seuil: seuilDefi
+        seuil: seuilDefi,
+        scoresParArtefact: scoresChronologiques
     };
 }
 
@@ -5527,7 +5531,8 @@ function diagnostiquerSuiviApprentissage(da) {
         criteresMulti: ipbData.criteresMulti,
         couleur: couleur,
         fenetre: ipbData.fenetre,
-        seuil: ipbData.seuil
+        seuil: ipbData.seuil,
+        scoresParArtefact: ipbData.scoresParArtefact
     };
 }
 
@@ -7085,12 +7090,29 @@ function _genererBarresSRPNF(da, graphiqueCriteres) {
     if (typeof diagnostiquerSuiviApprentissage === 'function') {
         var suivi = diagnostiquerSuiviApprentissage(da);
         if (suivi) {
-            // Pastilles IPB (●=sous seuil, ○=au-dessus)
+            // Pastilles par artefact — couleurs IDME de l'échelle configurée
+            // Ordre chronologique : ancien (gauche) → récent (droite)
+            var niveauxEchelle = db.getSync('niveauxEchelle', []);
+            var couleursIDME = { I: 'var(--orange-accent, #ff9800)', D: 'var(--btn-annuler, #ffc107)', M: 'var(--succes, #28a745)', E: 'var(--bleu-principal, #2196f3)' };
+            niveauxEchelle.forEach(function (n) {
+                if (n.couleur && ['I', 'D', 'M', 'E'].indexOf(n.code) >= 0) {
+                    couleursIDME[n.code] = n.couleur;
+                }
+            });
+
             var pastilles = '';
-            for (var pi = 0; pi < suivi.fenetre; pi++) {
-                pastilles += pi < suivi.ipb
-                    ? '<span style="color:' + suivi.couleur + '; font-size: 1.1rem;">●</span>'
-                    : '<span style="color: var(--gris-moyen); font-size: 1.1rem;">○</span>';
+            var scores = suivi.scoresParArtefact || [];
+            for (var pi = 0; pi < scores.length; pi++) {
+                var s = scores[pi];
+                var couleurPastille = 'var(--gris-moyen)';
+                var codeNiveau = '?';
+                if (s !== null) {
+                    if (s >= 0.85) { couleurPastille = couleursIDME.E; codeNiveau = 'E'; }
+                    else if (s >= 0.75) { couleurPastille = couleursIDME.M; codeNiveau = 'M'; }
+                    else if (s >= 0.65) { couleurPastille = couleursIDME.D; codeNiveau = 'D'; }
+                    else { couleurPastille = couleursIDME.I; codeNiveau = 'I'; }
+                }
+                pastilles += '<span style="color:' + couleurPastille + '; font-size: 1.1rem;" title="Artefact ' + (pi + 1) + ' : ' + (s !== null ? Math.round(s * 100) + '% (' + codeNiveau + ')' : 'N/A') + '">●</span>';
             }
 
             // Noms des critères multistructurels surveillés
@@ -7130,7 +7152,7 @@ function _genererBarresSRPNF(da, graphiqueCriteres) {
                         '</div>' +
                     '</div>' +
                     '<div style="display: flex; align-items: center; gap: 12px;">' +
-                        '<div style="letter-spacing: 3px;" title="IPB : ' + suivi.ipb + ' artefact' + (suivi.ipb > 1 ? 's' : '') + ' consécutif' + (suivi.ipb > 1 ? 's' : '') + ' sous le seuil">' + pastilles + '</div>' +
+                        '<div style="letter-spacing: 3px;" title="Score multistructurel par artefact (ancien → récent). IPB : ' + suivi.ipb + ' consécutif' + (suivi.ipb > 1 ? 's' : '') + ' sous ' + Math.round(suivi.seuil * 100) + '%">' + pastilles + '</div>' +
                         (scoreTexte ? '<div style="font-weight: 600; font-size: 0.95rem; color: var(--texte-principal);">' + scoreTexte + '</div>' : '') +
                     '</div>' +
                 '</div>' +
