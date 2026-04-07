@@ -1,12 +1,13 @@
 /**
- * MODULE IMPACT DES ARTEFACTS SUR LES FONDAMENTAUX
+ * MODULE PROGRESSION DES FONDAMENTAUX PAR ACTIVITÉ
  *
- * Analyse l'effet de chaque artefact (et de chaque jeton de reprise) sur la
- * trajectoire des scores multistructurels (fondations SOLO).
+ * Observe la trajectoire des scores multistructurels (fondations SOLO)
+ * au fil des activités d'apprentissage évaluées. Ne prétend pas à la
+ * causalité — fournit des signaux pour le jugement professionnel.
  *
  * Deux niveaux de granularité :
- * - Individuel : sparkline dans le profil étudiant (creerSparklineImpactArtefacts)
- * - Groupe : bar chart dans Suivi › Labo (creerGraphiqueImpactArtefactsGroupe)
+ * - Individuel : sparkline dans le profil étudiant
+ * - Groupe : graphique combiné dans Suivi › Labo
  *
  * Condition préalable : dépistage actif (grille avec critères multistructurels).
  * Données source : calculerIPB(da).historiqueComplet
@@ -56,7 +57,8 @@ function classifierDelta(delta) {
    =============================== */
 
 /**
- * Calcule l'impact de chaque artefact sur les fondamentaux pour un étudiant.
+ * Observe la progression des fondamentaux pour un étudiant, activité par activité.
+ * Fournit le score, la variation et le contexte (seuil, jeton) — sans attribution causale.
  * @param {string} da - Numéro de DA
  * @returns {Object|null} { points: [...], seuil, criteresMulti }
  */
@@ -81,27 +83,13 @@ function calculerImpactArtefacts(da) {
             score: hist[i].score,
             delta: delta,
             deltaPercent: deltaPercent,
-            categorie: i === 0 ? 'Premier artefact' : cat.label,
+            categorie: i === 0 ? 'Point de départ' : cat.label,
             couleur: i === 0 ? 'var(--gris-moyen, #999)' : cat.couleurVar,
             estJeton: hist[i].estJeton,
             productionId: hist[i].productionId,
             productionTitre: hist[i].productionTitre,
-            date: hist[i].date,
-            impactDiffere: null
+            date: hist[i].date
         });
-    }
-
-    // Détection d'impact différé
-    for (var n = 0; n < points.length - 1; n++) {
-        var estNeutre = Math.abs(points[n].delta) < SEUILS.neutre;
-        var prochainFort = Math.abs(points[n + 1].delta) >= SEUILS.moderePositif;
-        if (n > 0 && estNeutre && prochainFort) {
-            points[n].impactDiffere = {
-                deltaManifeste: points[n + 1].delta,
-                deltaManifestePct: points[n + 1].deltaPercent,
-                manifesteSurIndex: n + 1
-            };
-        }
     }
 
     return {
@@ -172,7 +160,7 @@ function calculerImpactArtefactsGroupe() {
             if (pt.estJeton) {
                 p.nbJetons++;
                 jetonsTotal++;
-                if (pt.delta >= SEUILS.moderePositif || (pt.impactDiffere && pt.impactDiffere.deltaManifeste >= SEUILS.moderePositif)) {
+                if (pt.delta >= SEUILS.moderePositif) {
                     p.jetonsImpactPositif++;
                     jetonsImpactPositif++;
                 } else if (pt.delta <= -SEUILS.moderePositif) {
@@ -270,7 +258,6 @@ function creerSparklineImpactArtefacts(canvasId, da) {
     var pointStyles = pts.map(function(p) { return p.estJeton ? 'triangle' : 'circle'; });
     var pointRadii = pts.map(function(p) { return p.estJeton ? 7 : 4; });
     var pointBorders = pts.map(function(p) {
-        if (p.impactDiffere) return 3;
         return p.estJeton ? 2 : 1;
     });
 
@@ -341,17 +328,17 @@ function creerSparklineImpactArtefacts(canvasId, da) {
                         label: function(item) {
                             var idx = item.dataIndex;
                             var p = pts[idx];
-                            var lines = ['Score : ' + (p.score !== null ? Math.round(p.score * 100) + '%' : 'N/A')];
+                            var score100 = p.score !== null ? Math.round(p.score * 100) : null;
+                            var lines = ['Score fondamentaux : ' + (score100 !== null ? score100 + '%' : 'N/A')];
+                            if (score100 !== null) {
+                                lines.push(score100 >= seuil100 ? 'Au-dessus du seuil' : 'Sous le seuil de ' + seuil100 + '%');
+                            }
                             if (idx > 0) {
                                 var signe = p.deltaPercent >= 0 ? '+' : '';
-                                lines.push('Delta : ' + signe + p.deltaPercent + 'pp (' + p.categorie + ')');
+                                lines.push('Variation : ' + signe + p.deltaPercent + ' pp depuis l\'activite precedente');
                             }
                             if (p.estJeton) {
-                                lines.push('Jeton de reprise');
-                            }
-                            if (p.impactDiffere) {
-                                var sd = p.impactDiffere.deltaManifestePct >= 0 ? '+' : '';
-                                lines.push('Impact differe : ' + sd + p.impactDiffere.deltaManifestePct + 'pp sur artefact suivant');
+                                lines.push('Jeton de reprise applique');
                             }
                             return lines;
                         }
