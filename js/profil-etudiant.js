@@ -6935,8 +6935,8 @@ function _genererBarresSRPNF(da, graphiqueCriteres) {
             var canvasIdImpact = 'sparkline-impact-' + da;
             sparklineImpactHTML = '<div style="margin: 16px 0;">' +
                 '<div style="font-weight: 600; font-size: 0.85rem; color: var(--texte-principal); margin-bottom: 8px;">' +
-                    'Impact des artefacts sur les fondamentaux ' +
-                    '<button class="btn-aide-contextuelle" data-aide="impact-artefacts-fondamentaux" aria-label="Aide : impact des artefacts" style="font-size: 0.75rem; vertical-align: middle;">📍</button>' +
+                    'Progression des fondamentaux par activité ' +
+                    '<button class="btn-aide-contextuelle" data-aide="impact-artefacts-fondamentaux" aria-label="Aide : progression des fondamentaux" style="font-size: 0.75rem; vertical-align: middle;">📍</button>' +
                 '</div>' +
                 '<div style="background: var(--surface-conteneur, #142428); padding: 12px 16px; border-radius: 6px; height: 180px;">' +
                     '<canvas id="' + canvasIdImpact + '"></canvas>' +

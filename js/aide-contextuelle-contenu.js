@@ -741,36 +741,25 @@ const AIDE_CONTEXTUELLE = {
     // =========================================================================
 
     'impact-artefacts-fondamentaux': {
-        titre: "Impact des artefacts sur les fondamentaux",
+        titre: "Progression des fondamentaux par activité",
         sections: [
             {
                 type: 'texte',
-                contenu: "Ce graphique montre comment chaque artefact évalué a fait évoluer le score multistructurel (fondations). La ligne trace la trajectoire du score, et chaque point représente un artefact."
+                contenu: "Ce graphique trace la trajectoire du score multistructurel (fondations) au fil des activités d'apprentissage évaluées. Chaque point représente le score après une activité."
             },
             {
                 type: 'liste',
                 titre: 'Lecture du graphique',
                 items: [
                     "La couleur de chaque point correspond au niveau IDME du score : rouge (I), orange (D), vert (M), bleu (E).",
-                    "Les triangles signalent les jetons de reprise.",
-                    "Un contour épais indique un impact différé détecté — l'effet se manifeste sur l'artefact suivant.",
-                    "La ligne pointillée orange marque le seuil de maîtrise configurable."
-                ]
-            },
-            {
-                type: 'liste',
-                titre: 'Catégories d\'impact',
-                items: [
-                    "Fort positif : ≥ +10 points de pourcentage",
-                    "Modéré positif : +5 à +10 pp",
-                    "Neutre : ±5 pp",
-                    "Modéré négatif : -5 à -10 pp",
-                    "Fort négatif : ≤ -10 pp"
+                    "Les triangles signalent les activités où un jeton de reprise a été appliqué.",
+                    "La ligne pointillée orange marque le seuil de maîtrise configurable.",
+                    "Le tooltip affiche le score, la variation depuis l'activité précédente, et le contexte par rapport au seuil."
                 ]
             },
             {
                 type: 'conseil',
-                contenu: "L'impact différé est fréquent en apprentissage : un artefact exigeant peut ne pas montrer de progression immédiate, mais l'effort se consolide sur la production suivante."
+                contenu: "Ce graphique montre des corrélations, pas des causalités. Une progression observée après une activité peut être liée à l'activité elle-même, à l'enseignement, au temps qui passe, ou à d'autres facteurs. C'est un signal pour ton jugement professionnel."
             }
         ],
         voirAussi: ['suivi-apprentissage-fondamentaux']

@@ -466,7 +466,7 @@ const TOOLTIPS = {
         'Niveau d\u2019intervention selon la performance globale (indice P, tous crit\u00e8res). Compl\u00e9mentaire au suivi des fondamentaux qui cible les crit\u00e8res multistructurels.',
 
     'tdb-impact-artefacts':
-        'Identifie les productions qui font le plus progresser (ou r\u00e9gresser) les crit\u00e8res multistructurels du groupe. Inclut l\u2019impact des jetons de reprise.',
+        'Observe la progression des fondamentaux au fil des activit\u00e9s. Montre combien d\u2019\u00e9tudiants progressent, stagnent ou r\u00e9gressent apr\u00e8s chaque production, avec le score m\u00e9dian du groupe.',
 
     // --- Section Développement du groupe ---
 
