@@ -460,10 +460,10 @@ const TOOLTIPS = {
         'Suivi de l\u2019apprentissage des fondamentaux (SOLO) et r\u00e9partition par niveaux d\u2019intervention R\u00e0I.',
 
     'tdb-patterns':
-        'Suivi des crit\u00e8res multistructurels (fondations SOLO). Diagnostics : progression, plateau, difficult\u00e9 \u00e9mergente, constante ou persistante.',
+        'Progression sur les crit\u00e8res multistructurels (fondations SOLO) identifi\u00e9s dans ta grille. Compl\u00e9mentaire au mod\u00e8le R\u00e0I qui regarde la performance globale.',
 
     'tdb-rai':
-        'Trois niveaux R\u00e0I : universel, pr\u00e9ventif, intensif. Indique le type d\u2019intervention sugg\u00e9r\u00e9 pour chaque groupe d\u2019\u00e9tudiants.',
+        'Niveau d\u2019intervention selon la performance globale (indice P, tous crit\u00e8res). Compl\u00e9mentaire au suivi des fondamentaux qui cible les crit\u00e8res multistructurels.',
 
     // --- Section Développement du groupe ---
 
