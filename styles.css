@@ -15770,7 +15770,8 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     border-radius: var(--radius-sm, 4px);
     margin-top: 4px;
 }
-.rythme-tache small { color: #fff; }
+.rythme-tache small { color: rgba(255, 255, 255, .85); }
+.mode-clair .rythme-tache small { color: rgba(255, 255, 255, .85); }
 .rythme-resume {
     display: flex;
     gap: 2rem;
@@ -21313,7 +21314,6 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 .mode-clair .travaux-archivage-carte {
     background: #ffffff;
     border: 1px solid rgba(3, 46, 92, 0.1);
-    border-left: 3px solid var(--accent-primaire);
     box-shadow: var(--shadow-subtil);
 }
 

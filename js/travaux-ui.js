@@ -173,7 +173,9 @@
             date: new Date().toISOString(),
             activite: activite,
             productionId: productionId,
-            productionNom: productionNom
+            productionNom: productionNom,
+            etudiantDA: ec ? (ec.etudiantDA || '') : '',
+            groupeCoursId: ec ? (ec.groupeCoursId || '') : ''
         });
         if (historique.length > 200) historique = historique.slice(-200);
         db.setSync(cleStock, historique);
@@ -1171,9 +1173,9 @@
                     <button class="btn btn-principal" data-action="travauxUI.lancerArchivage">Télécharger</button>
                 </div>
 
-                <!-- Semestre complet -->
+                <!-- Trimestre complet -->
                 <div class="travaux-archivage-carte">
-                    <h4>Semestre complet</h4>
+                    <h4>Trimestre complet</h4>
                     <p class="texte-muted">Toutes les productions en PDF classées par élève + évaluations en JSON</p>
                     <div class="travaux-archivage-filtres">
                         <div class="groupe-form">

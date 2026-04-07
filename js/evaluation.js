@@ -4519,13 +4519,23 @@ function restaurerSelectionsEvaluation() {
                     if (checkbox) checkbox.checked = value ?? true;
                 });
 
-                // Restaurer le radio affichageNote
-                if (selections.affichageNote === 'lettre') {
-                    const radioLettre = document.getElementById('affichageNoteLettre1');
-                    if (radioLettre) radioLettre.checked = true;
-                } else {
-                    const radioComplet = document.getElementById('affichageNoteComplet1');
-                    if (radioComplet) radioComplet.checked = true;
+                // Appliquer affichageNote depuis la PRATIQUE ACTIVE (pas la mémorisation)
+                try {
+                    var _pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
+                        ? obtenirPratiqueActiveGroupeCours() : null;
+                    var _configs = db.getSync('pratiquesConfigurables', []);
+                    var _pratique = _pratiqueId ? _configs.find(function(p) { return p.id === _pratiqueId; }) : null;
+                    if (!_pratique && _pratiqueId) {
+                        _pratique = _configs.find(function(p) { return p.type === _pratiqueId; });
+                    }
+                    if (_pratique?.affichageNote === 'lettre') {
+                        document.getElementById('affichageNoteLettre1').checked = true;
+                    } else {
+                        document.getElementById('affichageNoteComplet1').checked = true;
+                    }
+                } catch(_e) {
+                    var _rc = document.getElementById('affichageNoteComplet1');
+                    if (_rc) _rc.checked = true;
                 }
 
                 // Après restauration, vérifier s'il existe une évaluation sauvegardée pour cet étudiant
