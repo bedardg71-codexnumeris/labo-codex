@@ -7080,8 +7080,60 @@ function _genererBarresSRPNF(da, graphiqueCriteres) {
         contenuBarres = barresHTML + legendeHTML;
     }
 
+    // Encadré Suivi de l'apprentissage (IPB × direction)
+    var encadreSuivi = '';
+    if (typeof diagnostiquerSuiviApprentissage === 'function') {
+        var suivi = diagnostiquerSuiviApprentissage(da);
+        if (suivi) {
+            // Pastilles IPB (●=sous seuil, ○=au-dessus)
+            var pastilles = '';
+            for (var pi = 0; pi < suivi.fenetre; pi++) {
+                pastilles += pi < suivi.ipb
+                    ? '<span style="color:' + suivi.couleur + '; font-size: 1.1rem;">●</span>'
+                    : '<span style="color: var(--gris-moyen); font-size: 1.1rem;">○</span>';
+            }
+
+            // Texte descriptif des critères en défi
+            var texteDefis = '';
+            if (suivi.criteresEnDefi.length > 0) {
+                var nomsDefis = suivi.criteresEnDefi.map(function (c) {
+                    return c.charAt(0).toUpperCase() + c.slice(1);
+                });
+                texteDefis = nomsDefis.join(', ') + ' sous le seuil de ' + Math.round(suivi.seuil * 100) + '%';
+            }
+
+            // Score actuel formaté
+            var scoreTexte = suivi.scoreActuel !== null
+                ? Math.round(suivi.scoreActuel * 100) + '% ' + suivi.direction
+                : '';
+
+            // Note pédagogique pour les plateaux
+            var notePlateau = suivi.diagnostic === 'Plateau'
+                ? '<p style="font-size: 0.8rem; color: var(--gris-moyen); margin: 8px 0 0; font-style: italic;">Un plateau peut indiquer une consolidation ou une stagnation — le jugement professionnel est essentiel.</p>'
+                : '';
+
+            encadreSuivi = '<div style="margin: 20px 0; padding: 14px 16px; border-left: 4px solid ' + suivi.couleur + '; background: linear-gradient(to right, ' + suivi.couleur + '11, transparent); border-radius: 0 6px 6px 0;">' +
+                '<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">' +
+                    '<div>' +
+                        '<div style="font-weight: 600; font-size: 0.95rem; color: var(--texte-principal);">Suivi de l\'apprentissage</div>' +
+                        '<div style="font-size: 0.9rem; margin-top: 4px; color: var(--texte-principal);">' +
+                            '<span style="font-weight: 600; color: ' + suivi.couleur + ';">' + echapperHtml(suivi.diagnostic) + '</span>' +
+                            (texteDefis ? ' — ' + echapperHtml(texteDefis) : '') +
+                        '</div>' +
+                    '</div>' +
+                    '<div style="display: flex; align-items: center; gap: 12px;">' +
+                        '<div style="letter-spacing: 3px;" title="IPB : ' + suivi.ipb + ' artefact' + (suivi.ipb > 1 ? 's' : '') + ' consécutif' + (suivi.ipb > 1 ? 's' : '') + ' sous le seuil">' + pastilles + '</div>' +
+                        (scoreTexte ? '<div style="font-weight: 600; font-size: 0.95rem; color: var(--texte-principal);">' + scoreTexte + '</div>' : '') +
+                    '</div>' +
+                '</div>' +
+                notePlateau +
+            '</div>';
+        }
+    }
+
     return `
         ${graphiqueCriteres}
+        ${encadreSuivi}
         <div class="section-titre" style="margin-top: 20px;">Forces et défis parmi les critères</div>
         <div style="margin: 20px 0;">${contenuBarres}</div>
     `;
