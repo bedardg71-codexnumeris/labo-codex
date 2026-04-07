@@ -5252,13 +5252,32 @@ function calculerIPB(da) {
         return { score: totalScore / totalPond, details: scores };
     }
 
-    // Calculer les scores pour les artefacts récents (dans la fenêtre)
+    // Calculer les scores pour les artefacts récents (dans la fenêtre IPB)
     var scoresRecents = [];
     var limite = Math.min(evaluationsEleve.length, fenetreN);
     for (var i = 0; i < limite; i++) {
         var result = scorePourArtefact(evaluationsEleve[i]);
         scoresRecents.push(result ? result.score : null);
     }
+
+    // Historique complet (tous les artefacts) avec métadonnées — pour l'analyse d'impact
+    var prodMap = {};
+    productions.forEach(function (p) { prodMap[p.id] = p; });
+    var historiqueRecentsVersAnciens = [];
+    for (var h = 0; h < evaluationsEleve.length; h++) {
+        var ev = evaluationsEleve[h];
+        var res = scorePourArtefact(ev);
+        var prod = prodMap[ev.productionId];
+        historiqueRecentsVersAnciens.push({
+            score: res ? res.score : null,
+            productionId: ev.productionId,
+            productionTitre: prod ? prod.titre : '',
+            date: (ev.dateEvaluation || ev.dateCreation || '').substring(0, 10),
+            estJeton: !!(ev.repriseDeId || ev.jetonRepriseApplique || ev.jetonRepriseCibleeApplique),
+            evaluationId: ev.id || ev.evaluationId || ''
+        });
+    }
+    var historiqueComplet = historiqueRecentsVersAnciens.slice().reverse(); // ancien → récent
 
     // IPB : compter les consécutifs sous le seuil (depuis le plus récent)
     var ipb = 0;
@@ -5307,7 +5326,8 @@ function calculerIPB(da) {
         criteresEnDefi: criteresEnDefi,
         fenetre: limite,
         seuil: seuilDefi,
-        scoresParArtefact: scoresChronologiques
+        scoresParArtefact: scoresChronologiques,
+        historiqueComplet: historiqueComplet // tous les artefacts (ancien → récent) avec métadonnées
     };
 }
 
@@ -5373,7 +5393,8 @@ function diagnostiquerSuiviApprentissage(da) {
         couleur: couleur,
         fenetre: ipbData.fenetre,
         seuil: ipbData.seuil,
-        scoresParArtefact: ipbData.scoresParArtefact
+        scoresParArtefact: ipbData.scoresParArtefact,
+        historiqueComplet: ipbData.historiqueComplet
     };
 }
 
@@ -6902,9 +6923,33 @@ function _genererBarresSRPNF(da, graphiqueCriteres) {
         }
     }
 
+    // Sparkline impact des artefacts (conditionnel : dépistage actif + ≥2 artefacts)
+    var sparklineImpactHTML = '';
+    if (typeof calculerImpactArtefacts === 'function') {
+        var impactData = calculerImpactArtefacts(da);
+        if (impactData && impactData.points.length >= 2) {
+            var canvasIdImpact = 'sparkline-impact-' + da;
+            sparklineImpactHTML = '<div style="margin: 16px 0;">' +
+                '<div style="font-weight: 600; font-size: 0.85rem; color: var(--texte-principal); margin-bottom: 8px;">' +
+                    'Impact des artefacts sur les fondamentaux ' +
+                    '<button class="btn-aide-contextuelle" data-aide="impact-artefacts-fondamentaux" aria-label="Aide : impact des artefacts" style="font-size: 0.75rem; vertical-align: middle;">📍</button>' +
+                '</div>' +
+                '<div style="background: var(--surface-conteneur, #142428); padding: 12px 16px; border-radius: 6px; height: 100px;">' +
+                    '<canvas id="' + canvasIdImpact + '"></canvas>' +
+                '</div>' +
+            '</div>';
+            setTimeout(function() {
+                if (typeof creerSparklineImpactArtefacts === 'function') {
+                    creerSparklineImpactArtefacts(canvasIdImpact, da);
+                }
+            }, 150);
+        }
+    }
+
     return `
         ${graphiqueCriteres}
         ${encadreSuivi}
+        ${sparklineImpactHTML}
         <div class="section-titre" style="margin-top: 20px;">Forces et défis parmi les critères</div>
         <div style="margin: 20px 0;">${contenuBarres}</div>
     `;

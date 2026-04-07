@@ -1148,6 +1148,11 @@ function chargerTableauBordApercu() {
             creerGraphiqueImpactJetons('graphique-impact-jetons');
         }
 
+        // Impact des artefacts sur les fondamentaux (Labo)
+        if (typeof creerGraphiqueImpactArtefactsGroupe === 'function') {
+            creerGraphiqueImpactArtefactsGroupe('graphique-impact-artefacts-groupe');
+        }
+
         // 🆕 BETA 96: Distribution ACPE maintenant intégrée dans les barres de progression
         // (graphique séparé supprimé - mini-courbes Gauss dans chaque barre)
 

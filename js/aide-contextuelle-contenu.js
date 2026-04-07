@@ -733,7 +733,47 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Configure les critères surveillés dans Structure → Grille de critères (tag SOLO). Ajuste le seuil et la fenêtre d'analyse dans Contexte → Dépistage."
             }
         ],
-        voirAussi: ['profil-etudiant-indicateurs']
+        voirAussi: ['profil-etudiant-indicateurs', 'impact-artefacts-fondamentaux']
+    },
+
+    // =========================================================================
+    // IMPACT DES ARTEFACTS SUR LES FONDAMENTAUX
+    // =========================================================================
+
+    'impact-artefacts-fondamentaux': {
+        titre: "Impact des artefacts sur les fondamentaux",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Ce graphique montre comment chaque artefact évalué a fait évoluer le score multistructurel (fondations). La ligne trace la trajectoire du score, et chaque point représente un artefact."
+            },
+            {
+                type: 'liste',
+                titre: 'Lecture du graphique',
+                items: [
+                    "La couleur de chaque point correspond au niveau IDME du score : rouge (I), orange (D), vert (M), bleu (E).",
+                    "Les triangles signalent les jetons de reprise.",
+                    "Un contour épais indique un impact différé détecté — l'effet se manifeste sur l'artefact suivant.",
+                    "La ligne pointillée orange marque le seuil de maîtrise configurable."
+                ]
+            },
+            {
+                type: 'liste',
+                titre: 'Catégories d\'impact',
+                items: [
+                    "Fort positif : ≥ +10 points de pourcentage",
+                    "Modéré positif : +5 à +10 pp",
+                    "Neutre : ±5 pp",
+                    "Modéré négatif : -5 à -10 pp",
+                    "Fort négatif : ≤ -10 pp"
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: "L'impact différé est fréquent en apprentissage : un artefact exigeant peut ne pas montrer de progression immédiate, mais l'effort se consolide sur la production suivante."
+            }
+        ],
+        voirAussi: ['suivi-apprentissage-fondamentaux']
     }
 };
 

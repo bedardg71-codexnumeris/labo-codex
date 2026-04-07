@@ -7975,6 +7975,32 @@
                         </p>
                     </div>
 
+                    <!-- Carte : Impact des artefacts sur les fondamentaux -->
+                    <div class="carte" id="carte-impact-artefacts-fondamentaux" style="margin-top: 2rem; display: none;">
+                        <h3 class="carte-titre-bleu u-flex-between u-flex-wrap" style="gap: 0.5rem">
+                            <div class="u-align-center" style="display: flex; gap: 0.5rem">
+                                <span data-tooltip="tdb-impact-artefacts">Impact des artefacts sur les fondamentaux</span>
+                                <span class="emoji-container">
+                                    <span class="primo-aide" data-target="note-impact-artefacts">📍</span>
+                                </span>
+                            </div>
+                        </h3>
+                        <div id="note-impact-artefacts" class="carte-info-toggle carte-info-note" style="display: none;">
+                            <strong>Lecture du graphique</strong>
+                            <ul style="margin: 8px 0; padding-left: 18px; font-size: 0.85rem; line-height: 1.6;">
+                                <li>Chaque barre repr&eacute;sente une production, class&eacute;e par son impact m&eacute;dian sur les crit&egrave;res multistructurels du groupe.</li>
+                                <li><strong>Vert</strong> = impact positif (les fondamentaux progressent apr&egrave;s cette production).</li>
+                                <li><strong>Rouge</strong> = impact n&eacute;gatif (r&eacute;gression sur les fondamentaux).</li>
+                                <li>Le tooltip d&eacute;taille le nombre d'&eacute;tudiants &eacute;valu&eacute;s et l'impact des jetons de reprise.</li>
+                            </ul>
+                            <em style="color: var(--gris-moyen); font-size: 0.8rem;">L'impact peut &ecirc;tre imm&eacute;diat ou diff&eacute;r&eacute; (manifest&eacute; sur l'artefact suivant).</em>
+                        </div>
+                        <div class="u-w-100" style="position: relative; height: 400px;">
+                            <canvas id="graphique-impact-artefacts-groupe"></canvas>
+                        </div>
+                        <p id="impact-artefacts-description" class="u-texte-petit u-mt-8" style="color: var(--texte-muted);"></p>
+                    </div>
+
                     </div><!-- fin labo-conteneur -->
                 </div><!-- FIN sous-section suivi-labo -->
 
@@ -17172,6 +17198,7 @@
     <script src="js/graphiques-progression.js?v=2026030201"></script>
     <script src="js/correlations-longitudinales.js?v=2026032101"></script>
         <script src="js/impact-jetons.js?v=2026032101"></script>
+        <script src="js/impact-artefacts.js?v=2026040701"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=2026032002"></script>
