@@ -397,14 +397,15 @@ function creerGraphiqueImpactArtefactsGroupe(canvasId) {
     var ctx = canvas.getContext('2d');
     var prods = donnees.productions;
 
-    var labels = prods.map(function(p) { return echapperHtml(p.titre || p.productionId); });
-    var medianes = prods.map(function(p) { return Math.round(p.medianeDelta * 100); });
+    var labels = prods.map(function(p) { return p.titre || p.productionId; });
+    var medianes = prods.map(function(p) { return Math.round(p.medianeDelta * 1000) / 10; }); // 1 décimale
 
     // Couleurs selon direction
     var bgColors = medianes.map(function(v) {
         if (v >= 5) return 'rgba(40, 167, 69, 0.7)';
-        if (v >= 0) return 'rgba(40, 167, 69, 0.3)';
-        if (v > -5) return 'rgba(255, 152, 0, 0.3)';
+        if (v >= 1) return 'rgba(40, 167, 69, 0.4)';
+        if (v > -1) return 'rgba(150, 150, 150, 0.25)';
+        if (v > -5) return 'rgba(255, 152, 0, 0.4)';
         return 'rgba(220, 53, 69, 0.7)';
     });
     var borderColors = medianes.map(function(v) {
@@ -421,6 +422,29 @@ function creerGraphiqueImpactArtefactsGroupe(canvasId) {
         canvas._chartInstance.destroy();
     }
 
+    // Plugin pour afficher la valeur à droite de chaque barre
+    var pluginValeurBarre = {
+        id: 'valeurBarre',
+        afterDatasetsDraw: function(chart) {
+            var ctx2 = chart.ctx;
+            chart.data.datasets.forEach(function(dataset, i) {
+                var meta = chart.getDatasetMeta(i);
+                meta.data.forEach(function(bar, index) {
+                    var val = dataset.data[index];
+                    if (val === 0 || val === null) return;
+                    var signe = val >= 0 ? '+' : '';
+                    ctx2.save();
+                    ctx2.fillStyle = couleurTexte;
+                    ctx2.font = '11px sans-serif';
+                    ctx2.textAlign = 'left';
+                    ctx2.textBaseline = 'middle';
+                    ctx2.fillText(signe + val.toFixed(1) + ' pp', bar.x + 6, bar.y);
+                    ctx2.restore();
+                });
+            });
+        }
+    };
+
     var chart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -433,6 +457,7 @@ function creerGraphiqueImpactArtefactsGroupe(canvasId) {
                 borderWidth: 1
             }]
         },
+        plugins: [pluginValeurBarre],
         options: {
             responsive: true,
             maintainAspectRatio: false,
@@ -446,8 +471,8 @@ function creerGraphiqueImpactArtefactsGroupe(canvasId) {
                             var p = prods[idx];
                             var signe = item.raw >= 0 ? '+' : '';
                             var lines = [
-                                'Impact median : ' + signe + item.raw + 'pp',
-                                'Moyenne : ' + (p.moyenneDelta >= 0 ? '+' : '') + Math.round(p.moyenneDelta * 100) + 'pp',
+                                'Impact median : ' + signe + item.raw.toFixed(1) + ' pp',
+                                'Moyenne : ' + (p.moyenneDelta >= 0 ? '+' : '') + (p.moyenneDelta * 100).toFixed(1) + ' pp',
                                 p.nbEtudiants + ' etudiants evalues'
                             ];
                             if (p.nbJetons > 0) {
