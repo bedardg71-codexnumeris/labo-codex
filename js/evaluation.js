@@ -6879,7 +6879,11 @@ function desactiverFormulaireEvaluation(desactiver) {
     });
 
     // Désactiver le bouton de sauvegarde
-    const boutonsSauvegarde = document.querySelectorAll('#evaluations-contenu-evaluation button');
+    // Chercher dans le formulaire statique ET dans les palettes flottantes
+    // (en mode visionneuse, les panneaux sont déplacés dans les palettes)
+    const boutonsSauvegarde = document.querySelectorAll(
+        '#evaluations-contenu-evaluation button, .travaux-palette-eval button'
+    );
     boutonsSauvegarde.forEach(btn => {
         if (btn.textContent.includes('Sauvegarder')) {
             btn.disabled = desactiver;

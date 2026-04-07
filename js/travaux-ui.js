@@ -4123,8 +4123,9 @@
                 remplirLabelsIdentite(fichier);
                 const prodIdEff = fichier.productionId ||
                     (typeof travauxResolution !== 'undefined' ? travauxResolution.trouverProductionPourFichier(fichier) : null);
-                // Nettoyer les critères si l'élève ou la production a changé
-                // (évite de conserver les critères de l'évaluation précédente)
+                // Nettoyer les critères et le mode modification si l'élève ou la production a changé
+                // (évite de conserver les critères de l'évaluation précédente ET
+                // un idModification stale qui empêcherait la sauvegarde d'une nouvelle évaluation)
                 if (window.evaluationEnCours &&
                     (window.evaluationEnCours.etudiantDA !== (fichier.etudiantDA || '') ||
                      window.evaluationEnCours.productionId !== (prodIdEff || fichier.productionId || ''))) {
@@ -4132,6 +4133,11 @@
                     window.evaluationEnCours.donneesAlgorithmiques = {};
                     window.evaluationEnCours.etudiantDA = fichier.etudiantDA || '';
                     window.evaluationEnCours.productionId = prodIdEff || fichier.productionId || '';
+                    delete window.evaluationEnCours.idModification;
+                    // Réactiver le formulaire si le fichier précédent l'avait verrouillé
+                    if (typeof desactiverFormulaireEvaluation === 'function') {
+                        desactiverFormulaireEvaluation(false);
+                    }
                 }
                 preRemplirEvaluation(fichier.etudiantDA, prodIdEff || fichier.productionId);
             } else {
