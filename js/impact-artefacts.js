@@ -104,105 +104,102 @@ function calculerImpactArtefacts(da) {
    =============================== */
 
 /**
- * Agrège l'impact des artefacts sur les fondamentaux pour tout le groupe.
- * Pour chaque production : nb étudiants en progression / stagnation / régression,
- * score médian du groupe, et impact des jetons.
- * Les productions sont en ordre chronologique (première évaluée en premier).
- * @returns {Object|null} { productions: [...], seuil, jetonsAggreges: {...} }
+ * Compare le score fondamentaux médian des étudiants ayant fait chaque production
+ * vs ceux ne l'ayant pas faite. Répond à : « Quel travail est le plus associé
+ * à la progression des fondamentaux ? »
+ * @returns {Object|null} { productions: [...], seuil, nbEtudiantsTotal }
  */
 function calculerImpactArtefactsGroupe() {
     var etudiants = obtenirDonneesSelonMode('groupeEtudiants') || [];
     if (etudiants.length < 3) return null;
 
-    // Collecter toutes les données par productionId, en préservant l'ordre chronologique
-    var parProduction = {};
-    var ordreProductions = []; // pour garder l'ordre chronologique
+    // Pour chaque étudiant, obtenir le dernier score multistructurel connu
+    // et la liste des productionIds qu'il a réalisés
+    var donneesParEtudiant = [];
     var seuil = 0.70;
-    var jetonsTotal = 0;
-    var jetonsImpactPositif = 0;
-    var jetonsImpactNeutre = 0;
-    var jetonsImpactNegatif = 0;
+    var toutesProductionIds = {};
 
     etudiants.forEach(function(e) {
         var impact = calculerImpactArtefacts(e.da);
-        if (!impact) return;
+        if (!impact || impact.points.length === 0) return;
         seuil = impact.seuil;
 
+        // Dernier score connu (le plus récent)
+        var dernierScore = null;
+        for (var i = impact.points.length - 1; i >= 0; i--) {
+            if (impact.points[i].score !== null) {
+                dernierScore = impact.points[i].score;
+                break;
+            }
+        }
+
+        // Productions réalisées par cet étudiant
+        var prodFaites = {};
         impact.points.forEach(function(pt) {
-            if (!parProduction[pt.productionId]) {
-                parProduction[pt.productionId] = {
-                    productionId: pt.productionId,
-                    titre: pt.productionTitre,
-                    scores: [],
-                    nbProgression: 0,
-                    nbStagnation: 0,
-                    nbRegression: 0,
-                    nbJetons: 0,
-                    jetonsImpactPositif: 0,
-                    jetonsImpactNeutre: 0
-                };
-                ordreProductions.push(pt.productionId);
+            prodFaites[pt.productionId] = true;
+            if (!toutesProductionIds[pt.productionId]) {
+                toutesProductionIds[pt.productionId] = pt.productionTitre;
             }
-            var p = parProduction[pt.productionId];
-            if (pt.score !== null) p.scores.push(pt.score);
+        });
 
-            // Compter progression/stagnation/régression (sauf premier artefact)
-            if (pt.index > 0) {
-                if (pt.delta >= SEUILS.moderePositif) {
-                    p.nbProgression++;
-                } else if (pt.delta <= -SEUILS.moderePositif) {
-                    p.nbRegression++;
-                } else {
-                    p.nbStagnation++;
-                }
-            }
-
-            if (pt.estJeton) {
-                p.nbJetons++;
-                jetonsTotal++;
-                if (pt.delta >= SEUILS.moderePositif) {
-                    p.jetonsImpactPositif++;
-                    jetonsImpactPositif++;
-                } else if (pt.delta <= -SEUILS.moderePositif) {
-                    jetonsImpactNegatif++;
-                } else {
-                    p.jetonsImpactNeutre++;
-                    jetonsImpactNeutre++;
-                }
-            }
+        donneesParEtudiant.push({
+            da: e.da,
+            dernierScore: dernierScore,
+            prodFaites: prodFaites
         });
     });
 
-    // Construire le tableau en ordre chronologique avec score médian
-    var productions = ordreProductions.map(function(key) {
-        var p = parProduction[key];
-        var sorted = p.scores.slice().sort(function(a, b) { return a - b; });
-        var mid = Math.floor(sorted.length / 2);
-        var scoreMedian = sorted.length === 0 ? null :
-            sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
-        var nbTotal = p.nbProgression + p.nbStagnation + p.nbRegression;
+    if (donneesParEtudiant.length < 3) return null;
+
+    // Fonctions utilitaires
+    function mediane(arr) {
+        if (arr.length === 0) return null;
+        var s = arr.slice().sort(function(a, b) { return a - b; });
+        var m = Math.floor(s.length / 2);
+        return s.length % 2 !== 0 ? s[m] : (s[m - 1] + s[m]) / 2;
+    }
+
+    // Pour chaque production : comparer le score final de ceux qui l'ont faite vs pas faite
+    var productionIds = Object.keys(toutesProductionIds);
+    var productions = productionIds.map(function(prodId) {
+        var scoresFait = [];
+        var scoresPasFait = [];
+
+        donneesParEtudiant.forEach(function(e) {
+            if (e.dernierScore === null) return;
+            if (e.prodFaites[prodId]) {
+                scoresFait.push(e.dernierScore);
+            } else {
+                scoresPasFait.push(e.dernierScore);
+            }
+        });
+
+        var medianeFait = mediane(scoresFait);
+        var medianePasFait = mediane(scoresPasFait);
+        var ecart = (medianeFait !== null && medianePasFait !== null)
+            ? medianeFait - medianePasFait : null;
 
         return {
-            productionId: p.productionId,
-            titre: p.titre,
-            scoreMedian: scoreMedian,
-            nbEtudiants: p.scores.length,
-            nbProgression: p.nbProgression,
-            nbStagnation: p.nbStagnation,
-            nbRegression: p.nbRegression,
-            nbTotal: nbTotal,
-            nbJetons: p.nbJetons,
-            jetonsImpactPositif: p.jetonsImpactPositif,
-            jetonsImpactNeutre: p.jetonsImpactNeutre
+            productionId: prodId,
+            titre: toutesProductionIds[prodId] || prodId,
+            nbOntFait: scoresFait.length,
+            nbPasFait: scoresPasFait.length,
+            medianeFait: medianeFait,
+            medianePasFait: medianePasFait,
+            ecart: ecart
         };
     });
 
-    // Supprimer les doublons (garder le premier par productionId)
-    var vus = {};
+    // Trier par écart décroissant (plus forte association en premier)
+    productions.sort(function(a, b) {
+        var ea = a.ecart !== null ? a.ecart : -999;
+        var eb = b.ecart !== null ? b.ecart : -999;
+        return eb - ea;
+    });
+
+    // Ne garder que les productions où il y a au moins 1 étudiant dans chaque groupe
     productions = productions.filter(function(p) {
-        if (vus[p.productionId]) return false;
-        vus[p.productionId] = true;
-        return true;
+        return p.nbOntFait > 0;
     });
 
     if (productions.length < 2) return null;
@@ -210,12 +207,7 @@ function calculerImpactArtefactsGroupe() {
     return {
         productions: productions,
         seuil: seuil,
-        jetonsAggreges: {
-            total: jetonsTotal,
-            impactPositif: jetonsImpactPositif,
-            impactNeutre: jetonsImpactNeutre,
-            impactNegatif: jetonsImpactNegatif
-        }
+        nbEtudiantsTotal: donneesParEtudiant.length
     };
 }
 
@@ -380,6 +372,12 @@ function creerSparklineImpactArtefacts(canvasId, da) {
  * Productions en ordre chronologique.
  * @param {string} canvasId - ID du canvas
  */
+/**
+ * Crée un graphique horizontal comparant, pour chaque production,
+ * le score fondamentaux médian des étudiants qui l'ont faite vs pas faite.
+ * Lecture immédiate : grand écart = cette production compte pour les fondamentaux.
+ * @param {string} canvasId - ID du canvas
+ */
 function creerGraphiqueImpactArtefactsGroupe(canvasId) {
     var canvas = document.getElementById(canvasId);
     if (!canvas) return;
@@ -415,10 +413,8 @@ function creerGraphiqueImpactArtefactsGroupe(canvasId) {
     var seuil100 = Math.round(donnees.seuil * 100);
 
     var labels = prods.map(function(p) { return p.titre || p.productionId; });
-    var dataProgression = prods.map(function(p) { return p.nbProgression; });
-    var dataStagnation = prods.map(function(p) { return p.nbStagnation; });
-    var dataRegression = prods.map(function(p) { return -p.nbRegression; }); // négatif pour barres vers le bas
-    var dataScoreMedian = prods.map(function(p) { return p.scoreMedian !== null ? Math.round(p.scoreMedian * 100) : null; });
+    var dataFait = prods.map(function(p) { return p.medianeFait !== null ? Math.round(p.medianeFait * 100) : null; });
+    var dataPasFait = prods.map(function(p) { return p.medianePasFait !== null ? Math.round(p.medianePasFait * 100) : null; });
 
     // Mode sombre/clair
     var estModeClair = document.body.classList.contains('mode-clair');
@@ -435,62 +431,25 @@ function creerGraphiqueImpactArtefactsGroupe(canvasId) {
             labels: labels,
             datasets: [
                 {
-                    label: 'Progression',
-                    data: dataProgression,
+                    label: 'Ont fait le travail',
+                    data: dataFait,
                     backgroundColor: 'rgba(40, 167, 69, 0.6)',
                     borderColor: '#28a745',
-                    borderWidth: 1,
-                    stack: 'impact',
-                    yAxisID: 'yEtudiants',
-                    order: 2
+                    borderWidth: 1
                 },
                 {
-                    label: 'Stagnation',
-                    data: dataStagnation,
-                    backgroundColor: estModeClair ? 'rgba(150, 150, 150, 0.25)' : 'rgba(200, 200, 200, 0.2)',
-                    borderColor: estModeClair ? '#bbb' : '#666',
-                    borderWidth: 1,
-                    stack: 'impact',
-                    yAxisID: 'yEtudiants',
-                    order: 2
-                },
-                {
-                    label: 'Régression',
-                    data: dataRegression,
-                    backgroundColor: 'rgba(220, 53, 69, 0.5)',
-                    borderColor: '#dc3545',
-                    borderWidth: 1,
-                    stack: 'impact',
-                    yAxisID: 'yEtudiants',
-                    order: 2
-                },
-                {
-                    label: 'Score median du groupe (%)',
-                    data: dataScoreMedian,
-                    type: 'line',
-                    borderColor: '#7986CB',
-                    backgroundColor: 'transparent',
-                    borderWidth: 2.5,
-                    pointRadius: 5,
-                    pointBackgroundColor: dataScoreMedian.map(function(v) {
-                        if (v === null) return '#999';
-                        if (v >= 85) return '#2196f3';
-                        if (v >= seuil100) return '#28a745';
-                        if (v >= 65) return '#ff9800';
-                        return '#dc3545';
-                    }),
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 1.5,
-                    tension: 0.25,
-                    spanGaps: true,
-                    yAxisID: 'yScore',
-                    order: 1
+                    label: 'N\'ont pas fait le travail',
+                    data: dataPasFait,
+                    backgroundColor: 'rgba(150, 150, 150, 0.4)',
+                    borderColor: '#999',
+                    borderWidth: 1
                 }
             ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            indexAxis: 'y',
             plugins: {
                 legend: {
                     display: true,
@@ -501,9 +460,8 @@ function creerGraphiqueImpactArtefactsGroupe(canvasId) {
                     annotations: {
                         seuilLine: {
                             type: 'line',
-                            yScaleID: 'yScore',
-                            yMin: seuil100,
-                            yMax: seuil100,
+                            xMin: seuil100,
+                            xMax: seuil100,
                             borderColor: 'rgba(255, 152, 0, 0.6)',
                             borderWidth: 1.5,
                             borderDash: [6, 4],
@@ -524,13 +482,13 @@ function creerGraphiqueImpactArtefactsGroupe(canvasId) {
                             if (!items.length) return '';
                             var idx = items[0].dataIndex;
                             var p = prods[idx];
-                            var lines = [];
-                            if (p.scoreMedian !== null) {
-                                lines.push('Score median : ' + Math.round(p.scoreMedian * 100) + '%' + (p.scoreMedian < donnees.seuil ? ' (sous le seuil)' : ''));
-                            }
-                            lines.push(p.nbEtudiants + ' etudiants evalues');
-                            if (p.nbJetons > 0) {
-                                lines.push(p.nbJetons + ' jeton(s) dont ' + p.jetonsImpactPositif + ' avec impact positif');
+                            var lines = [
+                                p.nbOntFait + ' ont fait, ' + p.nbPasFait + ' n\'ont pas fait'
+                            ];
+                            if (p.ecart !== null) {
+                                var ecartPct = Math.round(p.ecart * 100);
+                                var signe = ecartPct >= 0 ? '+' : '';
+                                lines.push('Ecart : ' + signe + ecartPct + ' pp');
                             }
                             return lines;
                         }
@@ -539,31 +497,19 @@ function creerGraphiqueImpactArtefactsGroupe(canvasId) {
             },
             scales: {
                 x: {
-                    ticks: { color: couleurTexte, font: { size: 10 }, maxRotation: 35 },
-                    grid: { display: false }
-                },
-                yEtudiants: {
-                    position: 'left',
-                    title: {
-                        display: true,
-                        text: 'Nombre d\'etudiants',
-                        color: couleurTexte,
-                        font: { size: 11 }
-                    },
-                    ticks: { color: couleurTexte, stepSize: 1 },
-                    grid: { color: couleurGrille }
-                },
-                yScore: {
-                    position: 'right',
-                    title: {
-                        display: true,
-                        text: 'Score multistructurel median (%)',
-                        color: couleurTexte,
-                        font: { size: 11 }
-                    },
                     min: 0,
                     max: 100,
+                    title: {
+                        display: true,
+                        text: 'Score fondamentaux median (%)',
+                        color: couleurTexte,
+                        font: { size: 11 }
+                    },
                     ticks: { color: couleurTexte },
+                    grid: { color: couleurGrille }
+                },
+                y: {
+                    ticks: { color: couleurTexte, font: { size: 11 } },
                     grid: { display: false }
                 }
             }
@@ -572,29 +518,29 @@ function creerGraphiqueImpactArtefactsGroupe(canvasId) {
 
     canvas._chartInstance = chart;
 
-    // Description textuelle sous le graphique
+    // Description textuelle
     var descEl = document.getElementById('impact-artefacts-description');
     if (descEl) {
         var messages = [];
 
         prods.forEach(function(p) {
-            if (p.nbTotal === 0) return;
-            var scoreStr = p.scoreMedian !== null ? Math.round(p.scoreMedian * 100) + '%' : '?';
-            var contexte = p.scoreMedian !== null && p.scoreMedian < donnees.seuil ? ' (sous le seuil)' : '';
             var titre = echapperHtml(p.titre || p.productionId);
+            var scoreFait = p.medianeFait !== null ? Math.round(p.medianeFait * 100) + '%' : '?';
+            var scorePas = p.medianePasFait !== null ? Math.round(p.medianePasFait * 100) + '%' : '—';
+            var ecartStr = '';
+            if (p.ecart !== null) {
+                var ecartPct = Math.round(p.ecart * 100);
+                ecartStr = ' · ecart ' + (ecartPct >= 0 ? '+' : '') + ecartPct + ' pp';
+            }
+            var contexte = '';
+            if (p.nbPasFait === 0) {
+                contexte = ' (tous l\'ont fait)';
+            }
             messages.push('<strong>' + titre + '</strong> : ' +
-                p.nbProgression + ' en progression, ' +
-                p.nbStagnation + ' stables, ' +
-                p.nbRegression + ' en regression' +
-                ' — score median ' + scoreStr + contexte +
-                (p.nbJetons > 0 ? ' · ' + p.nbJetons + ' jeton(s)' : ''));
+                p.nbOntFait + '/' + donnees.nbEtudiantsTotal + ' l\'ont fait → ' + scoreFait +
+                (p.nbPasFait > 0 ? ' vs ' + scorePas + ' pour ceux qui ne l\'ont pas fait' : '') +
+                ecartStr + contexte);
         });
-
-        // Bilan jetons
-        var j = donnees.jetonsAggreges;
-        if (j.total > 0) {
-            messages.push('<br><strong>Jetons de reprise</strong> : ' + j.total + ' appliques, ' + j.impactPositif + ' avec impact positif, ' + j.impactNeutre + ' neutres, ' + j.impactNegatif + ' negatifs.');
-        }
 
         descEl.innerHTML = messages.join('<br>');
     }
