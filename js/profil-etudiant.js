@@ -5152,21 +5152,18 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
     Object.keys(scoresCriteres).forEach(cle => {
         const scores = scoresCriteres[cle];
 
-        // Standardiser la clé pour compatibilité avec l'interface
+        // Standardiser la clé en minuscules (cohérent avec calculerMoyennesCriteres)
         // "francaisecrit" → "francais" (pour éviter NaN)
         let cleStandard = cle;
         if (cle.startsWith('francais')) {
             cleStandard = 'francais';
         }
 
-        // Capitaliser la première lettre (Structure, Rigueur, etc.)
-        const cleFormatee = cleStandard.charAt(0).toUpperCase() + cleStandard.slice(1);
-
         if (scores.length > 0) {
-            moyennes[cleFormatee] = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+            moyennes[cleStandard] = scores.reduce((sum, score) => sum + score, 0) / scores.length;
             aucuneDonnee = false;
         } else {
-            moyennes[cleFormatee] = null;
+            moyennes[cleStandard] = null;
         }
     });
 
@@ -5233,6 +5230,107 @@ function calculerIndiceBlocage(moyennes) {
         partiel: criteresManquants.length > 0,
         criteresManquants: criteresManquants
     };
+}
+
+/**
+ * Calcule la progression longitudinale de l'indice de blocage.
+ * Fenêtre glissante de N artefacts à chaque position.
+ * @param {string} da - Numéro de DA
+ * @returns {Object|null} - { points: [{position, productionNom, date, score}], tendance, delta }
+ */
+function calculerProgressionBlocage(da) {
+    var fenetreN = obtenirNombreProductionsPourPatterns() || 3;
+
+    var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    var productions = obtenirDonneesSelonMode('productions') || [];
+    var productionsIds = obtenirIdsProductionsEvaluables(productions);
+    var prodMap = {};
+    productions.forEach(function (p) { prodMap[p.id] = p; });
+
+    var evaluationsEleve = evaluations.filter(function (e) {
+        return e.etudiantDA === da &&
+            productionsIds.indexOf(e.productionId) >= 0 &&
+            e.retroactionFinale &&
+            e.criteres && Array.isArray(e.criteres);
+    });
+
+    if (evaluationsEleve.length < 2) return null;
+
+    // Trier chronologiquement (plus ancien d'abord)
+    evaluationsEleve.sort(function (a, b) {
+        var dateA = a.dateEvaluation || a.dateCreation || '';
+        var dateB = b.dateEvaluation || b.dateCreation || '';
+        return dateA < dateB ? -1 : dateA > dateB ? 1 : 0;
+    });
+
+    var grille = obtenirGrilleReferenceDepistage();
+    if (!grille || !grille.criteres) return null;
+    var tableConversion = obtenirTableConversionIDME();
+
+    var points = [];
+
+    // Pour chaque position i, calculer le score sur la fenêtre [max(0, i-N+1) ... i]
+    for (var i = 0; i < evaluationsEleve.length; i++) {
+        var debut = Math.max(0, i - fenetreN + 1);
+        var fenetre = evaluationsEleve.slice(debut, i + 1);
+
+        // Calculer moyennes SRPNF sur cette fenêtre
+        var scoresCriteres = {};
+        grille.criteres.forEach(function (c) {
+            var cle = c.nom.toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+            scoresCriteres[cle] = [];
+        });
+
+        fenetre.forEach(function (ev) {
+            if (!ev.criteres) return;
+            ev.criteres.forEach(function (cs) {
+                var score = convertirNiveauIDMEEnScore(cs.niveauSelectionne, tableConversion);
+                if (score === null) return;
+                var critRef = grille.criteres.find(function (c) {
+                    var nomRef = c.nom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+                    var nomEval = cs.critereNom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+                    return nomRef === nomEval || nomRef.startsWith(nomEval) || nomEval.startsWith(nomRef);
+                });
+                if (critRef) {
+                    var cle = critRef.nom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+                    if (cle.startsWith('francais')) cle = 'francais';
+                    scoresCriteres[cle].push(score);
+                }
+            });
+        });
+
+        var moyennes = {};
+        Object.keys(scoresCriteres).forEach(function (cle) {
+            var s = scoresCriteres[cle];
+            moyennes[cle] = s.length > 0 ? s.reduce(function (a, b) { return a + b; }, 0) / s.length : null;
+        });
+
+        var blocage = calculerIndiceBlocage(moyennes);
+        var ev = evaluationsEleve[i];
+        var prod = prodMap[ev.productionId];
+        points.push({
+            position: i + 1,
+            productionNom: prod ? prod.titre : '',
+            date: (ev.dateEvaluation || ev.dateCreation || '').substring(0, 10),
+            score: blocage ? blocage.score : null,
+            fenetre: fenetre.length
+        });
+    }
+
+    // Calculer la tendance (comparer dernier point vs avant-dernier)
+    var pointsValides = points.filter(function (p) { return p.score !== null; });
+    var tendance = '—';
+    var delta = 0;
+    if (pointsValides.length >= 2) {
+        var dernier = pointsValides[pointsValides.length - 1].score;
+        var precedent = pointsValides[pointsValides.length - 2].score;
+        delta = dernier - precedent;
+        if (delta > 0.03) tendance = '↗';
+        else if (delta < -0.03) tendance = '↘';
+    }
+
+    return { points: points, tendance: tendance, delta: delta };
 }
 
 /**

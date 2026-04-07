@@ -119,12 +119,21 @@ function calculerEtudiantsPrioritaires() {
         var rai = typeof determinerNiveauRaiPedagogique === 'function'
             ? determinerNiveauRaiPedagogique(e.da) : { niveau: 0, pattern: '' };
 
-        // Indice de blocage (SRPNF)
+        // Indice de blocage (SRPNF) — fenêtre glissante pour PAN, global pour SOM
         var blocageScore = null;
-        if (typeof calculerMoyennesCriteres === 'function' && typeof calculerIndiceBlocage === 'function') {
-            var moyennes = calculerMoyennesCriteres(e.da);
+        var blocageProgression = null;
+        if (typeof calculerIndiceBlocage === 'function') {
+            var config = db.getSync('modalitesEvaluation', {});
+            var pratique = config.pratique || 'alternative';
+            var moyennes = (pratique === 'alternative' && typeof calculerMoyennesCriteresRecents === 'function')
+                ? calculerMoyennesCriteresRecents(e.da)
+                : (typeof calculerMoyennesCriteres === 'function' ? calculerMoyennesCriteres(e.da) : null);
             var blocage = calculerIndiceBlocage(moyennes);
             if (blocage) blocageScore = blocage.score;
+            // Progression longitudinale
+            if (typeof calculerProgressionBlocage === 'function') {
+                blocageProgression = calculerProgressionBlocage(e.da);
+            }
         }
 
         var M = Math.round((indices.A + indices.C) / 2);
@@ -138,7 +147,8 @@ function calculerEtudiantsPrioritaires() {
             C: indices.C,
             P: indices.P,
             M: M,
-            blocageScore: blocageScore
+            blocageScore: blocageScore,
+            blocageProgression: blocageProgression
         });
     });
 

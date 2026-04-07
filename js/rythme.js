@@ -14,13 +14,17 @@
 (function () {
     'use strict';
 
+    var _dernieresEstimations = null;
+    var _rafraichirTimer = null;
+
     /* ===============================
        COLLECTE DES DONNÉES
        =============================== */
 
     /**
-     * Collecte toutes les durées d'évaluation depuis les deux sources.
-     * Dédoublonne par date+productionId pour éviter les doublons chrono/éval.
+     * Collecte les évaluations avec statut évalué (source de vérité pour N)
+     * et enrichit les durées depuis le chronomètre quand disponible.
+     * Dédoublonne par productionId + etudiantDA.
      * @returns {Array<{dureeMs: number, activite: string, productionId: string, productionNom: string, date: string, groupeCoursId: string}>}
      */
     function collecterDurees() {
@@ -32,42 +36,48 @@
             prodMap[p.id] = p;
         });
 
-        var entrees = [];
-        var vus = {}; // clé: productionId + '|' + date (minute) pour dédoublonnage
-
-        // Source 1 : historique chronomètre
+        // Index chrono par productionId|etudiantDA (durée la plus récente)
+        var chronoDurees = {};
         var chrono = db.getSync(cle('chronoEvaluations'), []);
         chrono.forEach(function (e) {
-            if (!e.dureeMs || e.dureeMs < 5000) return; // ignorer < 5s
-            var prod = e.productionId ? prodMap[e.productionId] : null;
-            var activite = e.activite || (prod ? (prod.activiteApprentissage || prod.description) : null) || '';
-            var cleDedup = (e.productionId || '') + '|' + (e.date || '').substring(0, 16);
-            vus[cleDedup] = true;
-            entrees.push({
-                dureeMs: e.dureeMs,
-                activite: activite,
-                productionId: e.productionId || '',
-                productionNom: e.productionNom || (prod ? prod.titre : ''),
-                date: e.date || '',
-                groupeCoursId: e.groupeCoursId || ''
-            });
+            if (!e.dureeMs || e.dureeMs < 5000 || !e.etudiantDA || !e.productionId) return;
+            var k = e.productionId + '|' + e.etudiantDA;
+            if (!chronoDurees[k] || (e.date || '') > (chronoDurees[k].date || '')) {
+                chronoDurees[k] = { dureeMs: e.dureeMs, date: e.date || '' };
+            }
         });
 
-        // Source 2 : évaluations sauvegardées (backup, durées non chronométrées)
+        // Source de vérité : évaluations sauvegardées (une par élève par production)
         var evaluations = (typeof obtenirDonneesSelonMode === 'function')
             ? obtenirDonneesSelonMode('evaluationsSauvegardees')
             : [];
+        var vus = {};
+        var entrees = [];
+
         evaluations.forEach(function (ev) {
-            if (!ev.dureeEvaluation || ev.dureeEvaluation < 5) return; // ignorer < 5s
-            var cleDedup = (ev.productionId || '') + '|' + (ev.dateCreation || '').substring(0, 16);
-            if (vus[cleDedup]) return; // déjà dans le chrono
-            var prod = ev.productionId ? prodMap[ev.productionId] : null;
+            if (!ev.etudiantDA || !ev.productionId) return;
+            if (ev.remplaceeParId) return;
+            var cleDedup = ev.productionId + '|' + ev.etudiantDA;
+            if (vus[cleDedup]) return;
+            vus[cleDedup] = true;
+
+            // Durée : chrono (plus précis) > dureeEvaluation > 0
+            var chronoInfo = chronoDurees[cleDedup];
+            var dureeMs = 0;
+            if (chronoInfo) {
+                dureeMs = chronoInfo.dureeMs;
+            } else if (ev.dureeEvaluation && ev.dureeEvaluation >= 5) {
+                dureeMs = ev.dureeEvaluation * 1000;
+            }
+
+            var prod = prodMap[ev.productionId];
             var activite = prod ? (prod.activiteApprentissage || prod.description || '') : '';
+
             entrees.push({
-                dureeMs: ev.dureeEvaluation * 1000,
+                dureeMs: dureeMs,
                 activite: activite,
-                productionId: ev.productionId || '',
-                productionNom: ev.productionNom || (prod ? prod.titre : ''),
+                productionId: ev.productionId,
+                productionNom: prod ? prod.titre : '',
                 date: ev.dateCreation || ev.dateModification || '',
                 groupeCoursId: ev.groupeCoursId || ''
             });
@@ -89,9 +99,10 @@
         var groupes = {};
         entrees.forEach(function (e) {
             var act = e.activite || '(sans activité)';
-            if (!groupes[act]) groupes[act] = { durees: [], productions: {}, dateMin: '', dateMax: '' };
+            if (!groupes[act]) groupes[act] = { durees: [], total: 0, productions: {}, dateMin: '', dateMax: '' };
             var g = groupes[act];
-            g.durees.push(e.dureeMs);
+            g.total++;
+            if (e.dureeMs > 0) g.durees.push(e.dureeMs);
             if (e.productionNom) g.productions[e.productionNom] = true;
             if (e.date) {
                 var d = e.date.substring(0, 10);
@@ -105,6 +116,7 @@
             var g = groupes[act];
             var durees = g.durees.sort(function (a, b) { return a - b; });
             var n = durees.length;
+            if (n === 0) continue;
             var somme = durees.reduce(function (s, d) { return s + d; }, 0);
             var moyenne = somme / n;
             var mediane = n % 2 === 0
@@ -131,7 +143,7 @@
                 mediane: mediane,
                 min: durees[0],
                 max: durees[n - 1],
-                count: n,
+                count: g.total,
                 tendance: tendance,
                 productions: Object.keys(g.productions),
                 dateMin: g.dateMin,
@@ -375,7 +387,8 @@
         });
 
         html += '</tbody></table>';
-        html += '<p class="u-texte-petit u-texte-secondaire u-mt-10">' + entrees.length + ' évaluations mesurées au total</p>';
+        var nbAvecDuree = entrees.filter(function (e) { return e.dureeMs > 0; }).length;
+        html += '<p class="u-texte-petit u-texte-secondaire u-mt-10">' + entrees.length + ' évaluations au total (' + nbAvecDuree + ' avec durée mesurée)</p>';
 
         conteneur.innerHTML = html;
 
@@ -437,6 +450,7 @@
 
             // Phase 3 : planning hebdomadaire (exclure les lots terminés)
             var estimationsActives = estimations.filter(function (e) { return e.copiesRestantes > 0; });
+            _dernieresEstimations = estimationsActives;
             afficherPlanning(estimationsActives);
         }
 
@@ -508,7 +522,13 @@
             tamponPreCoursMinutes: parseInt(document.getElementById('rythme-pref-tampon-minutes')?.value) || 30
         };
         db.setSync('preferencesRythme', prefs);
-        afficherRythme();
+        // Rafraîchir le calendrier immédiatement (réactif)
+        if (_dernieresEstimations) {
+            afficherPlanning(_dernieresEstimations);
+        }
+        // Pipeline complet (tableaux + estimations) avec délai anti-cascade
+        clearTimeout(_rafraichirTimer);
+        _rafraichirTimer = setTimeout(afficherRythme, 400);
     }
 
     function restaurerPreferences() {
@@ -879,7 +899,7 @@
 
         // Date objectif : utilisateur ou dernière remise + 14 jours par défaut
         var dateObjectif = prefs.dateObjectif || '';
-        if (!dateObjectif || dateObjectif <= aujourdHui) {
+        if (!dateObjectif || dateObjectif < aujourdHui) {
             var derniereRemise = '';
             estimations.forEach(function (est) {
                 if (est.dateRemise && est.dateRemise > derniereRemise) {
