@@ -5334,6 +5334,204 @@ function calculerProgressionBlocage(da) {
 }
 
 /**
+ * Calcule l'Indice de Persistance du Blocage (IPB) sur les critères multistructurels.
+ * Compte les artefacts consécutifs récents dont le score pondéré des critères
+ * multistructurels est sous le seuil de défi configurable.
+ * @param {string} da - Numéro de DA
+ * @returns {Object|null} - { ipb, scoreActuel, scorePrecedent, direction, criteresMulti, criteresEnDefi }
+ */
+function calculerIPB(da) {
+    var grille = obtenirGrilleReferenceDepistage();
+    if (!grille || !grille.criteres) return null;
+
+    // Filtrer les critères multistructurels (défaut si pas de tag)
+    var criteresMulti = grille.criteres.filter(function (c) {
+        return (c.niveauSOLO || 'multistructurel') === 'multistructurel';
+    });
+    if (criteresMulti.length === 0) return null;
+
+    var seuilDefi = obtenirSeuil('defiSpecifique') || 0.70;
+    var seuilProgression = (obtenirSeuil('progressionArtefacts') || 0.10);
+    var fenetreN = obtenirNombreProductionsPourPatterns() || 3;
+
+    var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    var productions = obtenirDonneesSelonMode('productions') || [];
+    var productionsIds = obtenirIdsProductionsEvaluables(productions);
+    var tableConversion = obtenirTableConversionIDME();
+
+    var evaluationsEleve = evaluations.filter(function (e) {
+        return e.etudiantDA === da &&
+            productionsIds.indexOf(e.productionId) >= 0 &&
+            e.retroactionFinale &&
+            e.criteres && Array.isArray(e.criteres);
+    });
+
+    if (evaluationsEleve.length === 0) return null;
+
+    // Trier chronologiquement (plus récent d'abord)
+    evaluationsEleve.sort(function (a, b) {
+        var dateA = a.dateEvaluation || a.dateCreation || '';
+        var dateB = b.dateEvaluation || b.dateCreation || '';
+        return dateA > dateB ? -1 : dateA < dateB ? 1 : 0;
+    });
+
+    // Normaliser les noms des critères multistructurels
+    var nomsMulti = criteresMulti.map(function (c) {
+        var nom = c.nom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+        if (nom.startsWith('francais')) nom = 'francais';
+        return { nom: nom, ponderation: c.ponderation || 0 };
+    });
+
+    // Calculer le score multistructurel pour chaque artefact
+    function scorePourArtefact(ev) {
+        var scores = {};
+        ev.criteres.forEach(function (cs) {
+            var score = convertirNiveauIDMEEnScore(cs.niveauSelectionne, tableConversion);
+            if (score === null) return;
+            var nomEval = cs.critereNom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+            if (nomEval.startsWith('francais')) nomEval = 'francais';
+            nomsMulti.forEach(function (cm) {
+                if (cm.nom === nomEval || cm.nom.startsWith(nomEval) || nomEval.startsWith(cm.nom)) {
+                    scores[cm.nom] = score;
+                }
+            });
+        });
+
+        // Moyenne pondérée adaptative (ignorer les critères absents)
+        var totalPond = 0;
+        var totalScore = 0;
+        nomsMulti.forEach(function (cm) {
+            if (scores[cm.nom] !== undefined) {
+                var pond = cm.ponderation || 1;
+                totalPond += pond;
+                totalScore += scores[cm.nom] * pond;
+            }
+        });
+        if (totalPond === 0) return null;
+        return { score: totalScore / totalPond, details: scores };
+    }
+
+    // Calculer les scores pour les artefacts récents (dans la fenêtre)
+    var scoresRecents = [];
+    var limite = Math.min(evaluationsEleve.length, fenetreN);
+    for (var i = 0; i < limite; i++) {
+        var result = scorePourArtefact(evaluationsEleve[i]);
+        scoresRecents.push(result ? result.score : null);
+    }
+
+    // IPB : compter les consécutifs sous le seuil (depuis le plus récent)
+    var ipb = 0;
+    for (var j = 0; j < scoresRecents.length; j++) {
+        if (scoresRecents[j] !== null && scoresRecents[j] < seuilDefi) {
+            ipb++;
+        } else {
+            break;
+        }
+    }
+
+    // Scores pour la direction
+    var scoreActuel = scoresRecents.length > 0 ? scoresRecents[0] : null;
+    var scorePrecedent = scoresRecents.length > 1 ? scoresRecents[1] : null;
+
+    // Direction
+    var direction = '→';
+    if (scoreActuel !== null && scorePrecedent !== null) {
+        var delta = scoreActuel - scorePrecedent;
+        if (delta > seuilProgression) direction = '↗';
+        else if (delta < -seuilProgression) direction = '↘';
+    }
+
+    // Critères individuels en défi (score < seuil sur le dernier artefact)
+    var criteresEnDefi = [];
+    if (evaluationsEleve.length > 0) {
+        var dernierResult = scorePourArtefact(evaluationsEleve[0]);
+        if (dernierResult) {
+            nomsMulti.forEach(function (cm) {
+                if (dernierResult.details[cm.nom] !== undefined && dernierResult.details[cm.nom] < seuilDefi) {
+                    criteresEnDefi.push(cm.nom);
+                }
+            });
+        }
+    }
+
+    return {
+        ipb: ipb,
+        scoreActuel: scoreActuel,
+        scorePrecedent: scorePrecedent,
+        direction: direction,
+        criteresMulti: nomsMulti.map(function (c) { return c.nom; }),
+        criteresEnDefi: criteresEnDefi,
+        fenetre: limite,
+        seuil: seuilDefi
+    };
+}
+
+/**
+ * Diagnostique le portrait de suivi de l'apprentissage.
+ * Croise l'IPB (persistance) avec la direction pour produire un diagnostic en langage clair.
+ * @param {string} da - Numéro de DA
+ * @returns {Object|null} - { diagnostic, ipb, direction, scoreActuel, niveauRaI, criteresEnDefi, couleur }
+ */
+function diagnostiquerSuiviApprentissage(da) {
+    var ipbData = calculerIPB(da);
+    if (!ipbData) return null;
+
+    var ipb = ipbData.ipb;
+    var dir = ipbData.direction;
+    var diagnostic, couleur, niveauRaI;
+
+    if (ipb === 0) {
+        diagnostic = 'Maîtrise acquise';
+        couleur = '#28a745';
+        niveauRaI = 1;
+    } else if (ipb === 1 && dir === '↗') {
+        diagnostic = 'Difficulté résolue';
+        couleur = '#28a745';
+        niveauRaI = 1;
+    } else if (ipb === 1) {
+        diagnostic = 'Difficulté émergente';
+        couleur = '#ff9800';
+        niveauRaI = 1;
+    } else if (ipb === 2 && dir === '↗') {
+        diagnostic = 'Progression';
+        couleur = '#2196f3';
+        niveauRaI = 2;
+    } else if (ipb === 2 && dir === '→') {
+        diagnostic = 'Plateau';
+        couleur = '#ff9800';
+        niveauRaI = 2;
+    } else if (ipb === 2) {
+        diagnostic = 'Difficulté constante';
+        couleur = '#dc3545';
+        niveauRaI = 2;
+    } else {
+        // ipb >= 3
+        if (dir === '↗') {
+            diagnostic = 'Progression lente';
+            couleur = '#2196f3';
+            niveauRaI = 2;
+        } else {
+            diagnostic = 'Difficulté persistante';
+            couleur = '#dc3545';
+            niveauRaI = 3;
+        }
+    }
+
+    return {
+        diagnostic: diagnostic,
+        ipb: ipb,
+        direction: dir,
+        scoreActuel: ipbData.scoreActuel,
+        niveauRaI: niveauRaI,
+        criteresEnDefi: ipbData.criteresEnDefi,
+        criteresMulti: ipbData.criteresMulti,
+        couleur: couleur,
+        fenetre: ipbData.fenetre,
+        seuil: ipbData.seuil
+    };
+}
+
+/**
  * Interprète l'indice de Blocage selon les seuils pédagogiques
  * @param {number} blocage - Indice de blocage (0-1)
  * @returns {Object} - { niveau, couleur, description }
