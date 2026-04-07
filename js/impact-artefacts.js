@@ -104,8 +104,9 @@ function calculerImpactArtefacts(da) {
    =============================== */
 
 /**
- * Compare le score fondamentaux médian des étudiants ayant fait chaque production
- * vs ceux ne l'ayant pas faite. Répond à : « Quel travail est le plus associé
+ * Compare, pour chaque production, le score fondamentaux des étudiants qui l'ont
+ * faite (score SUR cette production) vs ceux qui ne l'ont pas faite (dernier score
+ * connu avant cette production). Répond à : « Quel travail est le plus associé
  * à la progression des fondamentaux ? »
  * @returns {Object|null} { productions: [...], seuil, nbEtudiantsTotal }
  */
@@ -113,45 +114,33 @@ function calculerImpactArtefactsGroupe() {
     var etudiants = obtenirDonneesSelonMode('groupeEtudiants') || [];
     if (etudiants.length < 3) return null;
 
-    // Pour chaque étudiant, obtenir le dernier score multistructurel connu
-    // et la liste des productionIds qu'il a réalisés
-    var donneesParEtudiant = [];
+    // Collecter les trajectoires complètes de chaque étudiant
+    var trajectoires = []; // [{ da, points: [{productionId, score}] }]
     var seuil = 0.70;
     var toutesProductionIds = {};
+    var ordreProductions = [];
 
     etudiants.forEach(function(e) {
         var impact = calculerImpactArtefacts(e.da);
         if (!impact || impact.points.length === 0) return;
         seuil = impact.seuil;
 
-        // Dernier score connu (le plus récent)
-        var dernierScore = null;
-        for (var i = impact.points.length - 1; i >= 0; i--) {
-            if (impact.points[i].score !== null) {
-                dernierScore = impact.points[i].score;
-                break;
-            }
-        }
-
-        // Productions réalisées par cet étudiant
-        var prodFaites = {};
+        // Enregistrer les productionIds dans l'ordre d'apparition
         impact.points.forEach(function(pt) {
-            prodFaites[pt.productionId] = true;
             if (!toutesProductionIds[pt.productionId]) {
                 toutesProductionIds[pt.productionId] = pt.productionTitre;
+                ordreProductions.push(pt.productionId);
             }
         });
 
-        donneesParEtudiant.push({
+        trajectoires.push({
             da: e.da,
-            dernierScore: dernierScore,
-            prodFaites: prodFaites
+            points: impact.points // ancien → récent, avec score et productionId
         });
     });
 
-    if (donneesParEtudiant.length < 3) return null;
+    if (trajectoires.length < 3) return null;
 
-    // Fonctions utilitaires
     function mediane(arr) {
         if (arr.length === 0) return null;
         var s = arr.slice().sort(function(a, b) { return a - b; });
@@ -159,18 +148,39 @@ function calculerImpactArtefactsGroupe() {
         return s.length % 2 !== 0 ? s[m] : (s[m - 1] + s[m]) / 2;
     }
 
-    // Pour chaque production : comparer le score final de ceux qui l'ont faite vs pas faite
-    var productionIds = Object.keys(toutesProductionIds);
-    var productions = productionIds.map(function(prodId) {
-        var scoresFait = [];
-        var scoresPasFait = [];
+    // Pour chaque production : score SUR cette prod (ont fait) vs dernier score AVANT (pas fait)
+    var productions = ordreProductions.map(function(prodId) {
+        var scoresFait = [];    // score sur cette production
+        var scoresPasFait = []; // dernier score avant cette production
 
-        donneesParEtudiant.forEach(function(e) {
-            if (e.dernierScore === null) return;
-            if (e.prodFaites[prodId]) {
-                scoresFait.push(e.dernierScore);
+        trajectoires.forEach(function(traj) {
+            // Chercher si l'étudiant a cette production dans sa trajectoire
+            var indexProd = -1;
+            for (var i = 0; i < traj.points.length; i++) {
+                if (traj.points[i].productionId === prodId) {
+                    indexProd = i;
+                    break;
+                }
+            }
+
+            if (indexProd >= 0 && traj.points[indexProd].score !== null) {
+                // A fait cette production → score SUR cette production
+                scoresFait.push(traj.points[indexProd].score);
             } else {
-                scoresPasFait.push(e.dernierScore);
+                // N'a PAS fait cette production → dernier score connu avant
+                var dernierAvant = null;
+                for (var j = traj.points.length - 1; j >= 0; j--) {
+                    // Chercher le dernier score avant cette production dans l'ordre global
+                    var ptProdIdx = ordreProductions.indexOf(traj.points[j].productionId);
+                    var cibleIdx = ordreProductions.indexOf(prodId);
+                    if (ptProdIdx < cibleIdx && traj.points[j].score !== null) {
+                        dernierAvant = traj.points[j].score;
+                        break;
+                    }
+                }
+                if (dernierAvant !== null) {
+                    scoresPasFait.push(dernierAvant);
+                }
             }
         });
 
@@ -197,7 +207,7 @@ function calculerImpactArtefactsGroupe() {
         return eb - ea;
     });
 
-    // Ne garder que les productions où il y a au moins 1 étudiant dans chaque groupe
+    // Ne garder que les productions avec au moins 1 étudiant qui l'a faite
     productions = productions.filter(function(p) {
         return p.nbOntFait > 0;
     });
@@ -207,7 +217,7 @@ function calculerImpactArtefactsGroupe() {
     return {
         productions: productions,
         seuil: seuil,
-        nbEtudiantsTotal: donneesParEtudiant.length
+        nbEtudiantsTotal: trajectoires.length
     };
 }
 
