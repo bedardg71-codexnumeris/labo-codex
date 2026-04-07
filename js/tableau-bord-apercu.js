@@ -119,21 +119,12 @@ function calculerEtudiantsPrioritaires() {
         var rai = typeof determinerNiveauRaiPedagogique === 'function'
             ? determinerNiveauRaiPedagogique(e.da) : { niveau: 0, pattern: '' };
 
-        // Indice de blocage (SRPNF) — fenêtre glissante pour PAN, global pour SOM
+        // Suivi de l'apprentissage (IPB × direction sur critères multistructurels)
+        var suivi = null;
         var blocageScore = null;
-        var blocageProgression = null;
-        if (typeof calculerIndiceBlocage === 'function') {
-            var config = db.getSync('modalitesEvaluation', {});
-            var pratique = config.pratique || 'alternative';
-            var moyennes = (pratique === 'alternative' && typeof calculerMoyennesCriteresRecents === 'function')
-                ? calculerMoyennesCriteresRecents(e.da)
-                : (typeof calculerMoyennesCriteres === 'function' ? calculerMoyennesCriteres(e.da) : null);
-            var blocage = calculerIndiceBlocage(moyennes);
-            if (blocage) blocageScore = blocage.score;
-            // Progression longitudinale
-            if (typeof calculerProgressionBlocage === 'function') {
-                blocageProgression = calculerProgressionBlocage(e.da);
-            }
+        if (typeof diagnostiquerSuiviApprentissage === 'function') {
+            suivi = diagnostiquerSuiviApprentissage(e.da);
+            if (suivi) blocageScore = suivi.scoreActuel;
         }
 
         var M = Math.round((indices.A + indices.C) / 2);
@@ -148,7 +139,7 @@ function calculerEtudiantsPrioritaires() {
             P: indices.P,
             M: M,
             blocageScore: blocageScore,
-            blocageProgression: blocageProgression
+            suivi: suivi
         });
     });
 
@@ -181,7 +172,7 @@ function appliquerFiltres() {
                     if (e.M >= 65) return false;
                     break;
                 case 'blocage':
-                    if (e.blocageScore === null || e.blocageScore >= 0.60) return false;
+                    if (!e.suivi || e.suivi.ipb < 2) return false;
                     break;
                 case 'rai':
                     if (e.niveau < 2) return false;
@@ -200,7 +191,7 @@ function appliquerFiltres() {
                 switch (_filtresActifs[i]) {
                     case 'P': score += Math.max(0, 65 - e.P); break;
                     case 'M': score += Math.max(0, 65 - e.M); break;
-                    case 'blocage': score += e.blocageScore !== null ? Math.max(0, (0.60 - e.blocageScore) * 100) : 0; break;
+                    case 'blocage': score += e.suivi ? e.suivi.ipb * 30 + (e.suivi.direction === '↘' ? 20 : e.suivi.direction === '→' ? 10 : 0) : 0; break;
                     case 'rai': score += e.niveau * 20; break;
                 }
             }
