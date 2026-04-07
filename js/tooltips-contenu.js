@@ -457,10 +457,10 @@ const TOOLTIPS = {
     // --- Section Intervenir ---
 
     'tdb-intervenir':
-        'D\u00e9tection de patterns d\u2019apprentissage et r\u00e9partition par niveaux d\u2019intervention R\u00e0I.',
+        'Suivi de l\u2019apprentissage des fondamentaux (SOLO) et r\u00e9partition par niveaux d\u2019intervention R\u00e0I.',
 
     'tdb-patterns':
-        'R\u00e9partition des trajectoires : progression stable, d\u00e9fi sp\u00e9cifique, difficult\u00e9 \u00e9mergente ou persistante.',
+        'Suivi des crit\u00e8res multistructurels (fondations SOLO). Diagnostics : progression, plateau, difficult\u00e9 \u00e9mergente, constante ou persistante.',
 
     'tdb-rai':
         'Trois niveaux R\u00e0I : universel, pr\u00e9ventif, intensif. Indique le type d\u2019intervention sugg\u00e9r\u00e9 pour chaque groupe d\u2019\u00e9tudiants.',
