@@ -5268,10 +5268,14 @@ function calculerIPB(da) {
         var ev = evaluationsEleve[h];
         var res = scorePourArtefact(ev);
         var prod = prodMap[ev.productionId];
+        var nomActivite = '';
+        if (prod) {
+            nomActivite = prod.activiteApprentissage || prod.description || prod.titre || prod.nom || '';
+        }
         historiqueRecentsVersAnciens.push({
             score: res ? res.score : null,
             productionId: ev.productionId,
-            productionTitre: prod ? prod.titre : '',
+            productionTitre: nomActivite,
             date: (ev.dateEvaluation || ev.dateCreation || '').substring(0, 10),
             estJeton: !!(ev.repriseDeId || ev.jetonRepriseApplique || ev.jetonRepriseCibleeApplique),
             evaluationId: ev.id || ev.evaluationId || ''
@@ -6934,7 +6938,7 @@ function _genererBarresSRPNF(da, graphiqueCriteres) {
                     'Impact des artefacts sur les fondamentaux ' +
                     '<button class="btn-aide-contextuelle" data-aide="impact-artefacts-fondamentaux" aria-label="Aide : impact des artefacts" style="font-size: 0.75rem; vertical-align: middle;">📍</button>' +
                 '</div>' +
-                '<div style="background: var(--surface-conteneur, #142428); padding: 12px 16px; border-radius: 6px; height: 100px;">' +
+                '<div style="background: var(--surface-conteneur, #142428); padding: 12px 16px; border-radius: 6px; height: 180px;">' +
                     '<canvas id="' + canvasIdImpact + '"></canvas>' +
                 '</div>' +
             '</div>';
