@@ -573,8 +573,8 @@ class PratiquePANStandards {
      * Identifie le pattern d'apprentissage de l'étudiant
      *
      * Patterns PAN :
-     * - Blocage critique : Performance < 64% (unistructurel)
-     * - Blocage émergent : Performance < 75% ET a un défi
+     * - Difficulté persistante : Performance < 64% (unistructurel)
+     * - Difficulté émergente : Performance < 75% ET a un défi
      * - Défi spécifique : Performance acceptable mais a un défi récurrent
      * - Stable : Pas de défi ou performance maîtrisée
      *
@@ -606,14 +606,14 @@ class PratiquePANStandards {
         let description, couleur, recommandation;
 
         switch (patternType) {
-            case 'Blocage critique':
-                description = 'Blocage critique - Risque d\'échec élevé';
+            case 'Difficulté persistante':
+                description = 'Difficulté persistante - Risque d\'échec élevé';
                 couleur = '#dc3545'; // Rouge
                 recommandation = 'Intervention intensive immédiate (Niveau 3 RàI)';
                 break;
 
-            case 'Blocage émergent':
-                description = 'Blocage émergent - Performance en développement avec défis';
+            case 'Difficulté émergente':
+                description = 'Difficulté émergente - Performance en développement avec défis';
                 couleur = '#ff9800'; // Orange
                 recommandation = 'Intervention préventive ciblée (Niveau 2 RàI)';
                 break;
@@ -652,7 +652,7 @@ class PratiquePANStandards {
      * Génère une cible d'intervention RàI personnalisée
      *
      * Cible basée sur :
-     * - Pattern actuel (Blocage critique/émergent, Défi spécifique, Stable)
+     * - Pattern actuel (Difficulté persistante/émergente, Défi spécifique, Stable)
      * - Défi principal SRPNF identifié
      * - Niveau de français (indicateur secondaire)
      *
@@ -1123,21 +1123,21 @@ class PratiquePANStandards {
      * @private
      * @param {number} performancePAN3 - Performance sur N derniers (0-1)
      * @param {boolean} aUnDefi - Si l'étudiant a au moins un défi
-     * @returns {string} 'Blocage critique'|'Blocage émergent'|'Défi spécifique'|'Stable'
+     * @returns {string} 'Difficulté persistante'|'Difficulté émergente'|'Défi spécifique'|'Stable'
      */
     _identifierPatternActuel(performancePAN3, aUnDefi) {
         // Seuils IDME configurables
         const seuilInsuffisant = this._obtenirSeuil('idme.insuffisant') || 0.64;
         const seuilDeveloppement = this._obtenirSeuil('idme.developpement') || 0.75;
 
-        // Blocage critique : < 64% (unistructurel)
+        // Difficulté persistante : < 64% (unistructurel)
         if (performancePAN3 < seuilInsuffisant) {
-            return 'Blocage critique';
+            return 'Difficulté persistante';
         }
 
-        // Blocage émergent : < 75% (multistructurel) ET a un défi
+        // Difficulté émergente : < 75% (multistructurel) ET a un défi
         if (performancePAN3 < seuilDeveloppement && aUnDefi) {
-            return 'Blocage émergent';
+            return 'Difficulté émergente';
         }
 
         // Défi spécifique : Performance acceptable mais défi récurrent
@@ -1174,8 +1174,8 @@ class PratiquePANStandards {
             emoji: '🟢'
         };
 
-        // BLOCAGE CRITIQUE (Niveau 3 RàI)
-        if (pattern === 'Blocage critique') {
+        // DIFFICULTÉ PERSISTANTE (Niveau 3 RàI)
+        if (pattern === 'Difficulté persistante') {
             cible.niveau = 3;
             cible.couleur = '#dc3545';
             cible.emoji = '🔴';
@@ -1197,8 +1197,8 @@ class PratiquePANStandards {
             }
         }
 
-        // BLOCAGE ÉMERGENT (Niveau 2 RàI)
-        else if (pattern === 'Blocage émergent') {
+        // DIFFICULTÉ ÉMERGENTE (Niveau 2 RàI)
+        else if (pattern === 'Difficulté émergente') {
             cible.niveau = 2;
             cible.couleur = '#ff9800';
             cible.emoji = '🟠';

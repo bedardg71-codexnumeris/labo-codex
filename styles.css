@@ -2395,7 +2395,7 @@ input[type="number"].controle-form {
 /* === BADGES DE PATTERN D'APPRENTISSAGE === */
 /* Couleurs alignées sur le gradient de la barre patterns */
 /* Format uniformisé avec les autres badges */
-.badge-pattern-blocage-critique {
+.badge-pattern-difficulte-persistante {
     display: inline-block;
     padding: 4px 10px;
     border-radius: var(--radius-moyen);
@@ -2405,11 +2405,11 @@ input[type="number"].controle-form {
     color: var(--badge-pattern-critique-texte);
 }
 
-.badge-pattern-blocage-critique .badge-analyse-count {
+.badge-pattern-difficulte-persistante .badge-analyse-count {
     background: var(--badge-pattern-critique-texte);
 }
 
-.badge-pattern-blocage-emergent {
+.badge-pattern-difficulte-emergente {
     display: inline-block;
     padding: 4px 10px;
     border-radius: var(--radius-moyen);
@@ -2419,7 +2419,7 @@ input[type="number"].controle-form {
     color: var(--badge-pattern-emergent-texte);
 }
 
-.badge-pattern-blocage-emergent .badge-analyse-count {
+.badge-pattern-difficulte-emergente .badge-analyse-count {
     background: var(--badge-pattern-emergent-texte);
 }
 

@@ -460,7 +460,7 @@ const TOOLTIPS = {
         'D\u00e9tection de patterns d\u2019apprentissage et r\u00e9partition par niveaux d\u2019intervention R\u00e0I.',
 
     'tdb-patterns':
-        'R\u00e9partition des trajectoires : progression stable, d\u00e9fi sp\u00e9cifique, blocage \u00e9mergent ou critique.',
+        'R\u00e9partition des trajectoires : progression stable, d\u00e9fi sp\u00e9cifique, difficult\u00e9 \u00e9mergente ou persistante.',
 
     'tdb-rai':
         'Trois niveaux R\u00e0I : universel, pr\u00e9ventif, intensif. Indique le type d\u2019intervention sugg\u00e9r\u00e9 pour chaque groupe d\u2019\u00e9tudiants.',
@@ -512,7 +512,7 @@ const TOOLTIPS = {
         'Filtrer par niveau d\u2019intervention : Tous, Niveau 1 (universel), Niveau 2 (pr\u00e9ventif), Niveau 3 (intensif).',
 
     'liste-filtre-pattern':
-        'Filtrer par trajectoire d\u00e9tect\u00e9e : progression stable, d\u00e9fi sp\u00e9cifique, blocage \u00e9mergent ou critique.',
+        'Filtrer par trajectoire d\u00e9tect\u00e9e : progression stable, d\u00e9fi sp\u00e9cifique, difficult\u00e9 \u00e9mergente ou persistante.',
 
     'liste-recherche':
         'Rechercher un \u00e9tudiant par nom, pr\u00e9nom ou num\u00e9ro d\u2019admission (DA).',

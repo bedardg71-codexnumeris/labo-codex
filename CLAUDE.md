@@ -18,8 +18,8 @@ Ce document te guidera vers :
 
 ## Etat actuel
 
-- **Version** : Beta 99.06 (Build 0406-1520)
-- **Objectif** : Plan de consolidation avril 2026 — TOUS LES TIERS TERMINES (0→7.8) + Audit UX cohérence visuelle
+- **Version** : Beta 99.07 (Build 0407-1215)
+- **Objectif** : Suivi de l'apprentissage (dépistage SOLO) — Phase 6 nettoyage complet
 - **Session en cours** : Voir `SESSION.md`
 - **Backlog** : Voir `BACKLOG.md` (taches a faire)
 

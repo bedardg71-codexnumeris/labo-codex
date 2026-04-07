@@ -57,8 +57,8 @@ Ce pattern est utilise dans :
 
 ## Etat actuel du projet
 
-**Version** : Beta 99.06 (Build 0406-1520)
-**Objectif** : Plan de consolidation avril 2026 — COMPLET (Tiers 0→7.8) + Audit UX cohérence visuelle
+**Version** : Beta 99.07 (Build 0407-1215)
+**Objectif** : Suivi de l'apprentissage (dépistage SOLO) — Phase 6 nettoyage complet
 **Priorite** : **Securite + Proprete > Nouvelles fonctionnalites**
 
 **Derniere session** : Voir `../SESSION.md` (racine du projet)

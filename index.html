@@ -1493,7 +1493,7 @@
             border: 2px solid var(--btn-modifier);
         }
 
-        /* Carte métrique jaune-pale pour blocage émergent */
+        /* Carte métrique jaune-pale pour difficulté émergente */
         .carte-metrique-jaune-pale {
             background: var(--alerte-fond-attention);
             padding: 15px;
@@ -1501,7 +1501,7 @@
             border: 2px solid var(--risque-modere);
         }
 
-        /* Carte métrique rouge-attention pour blocage critique */
+        /* Carte métrique rouge-attention pour difficulté persistante */
         .carte-metrique-rouge-attention {
             background: var(--alerte-fond-attention);
             padding: 15px;
@@ -3955,8 +3955,8 @@
                             <ul style="margin: 10px 0; padding-left: 20px;">
                                 <li><strong>Progression stable</strong> : Amélioration régulière ou maintien d'un bon niveau</li>
                                 <li><strong>Défi spécifique</strong> : Difficulté ponctuelle sur un type de tâche</li>
-                                <li><strong>Blocage émergent</strong> : Début de difficulté nécessitant vigilance</li>
-                                <li><strong>Blocage critique</strong> : Difficulté persistante nécessitant intervention</li>
+                                <li><strong>Difficulté émergente</strong> : Début de difficulté nécessitant vigilance</li>
+                                <li><strong>Difficulté persistante</strong> : Difficulté soutenue nécessitant intervention</li>
                             </ul>
                             <strong>Modèle RàI (Réponse à l'intervention) :</strong> Classification selon l'intensité du soutien nécessaire.
                             <ul style="margin: 10px 0; padding-left: 20px;">
@@ -7570,8 +7570,8 @@
                                         <option value="">Tous les patterns</option>
                                         <option value="defi-specifique">Défi spécifique</option>
                                         <option value="stable">Stable</option>
-                                        <option value="blocage-emergent">Blocage émergent</option>
-                                        <option value="blocage-critique">Blocage critique</option>
+                                        <option value="difficulte-emergente">Difficulté émergente</option>
+                                        <option value="difficulte-persistante">Difficulté persistante</option>
                                         <option value="progression">En progression</option>
                                     </select>
                                 </div>
@@ -11130,7 +11130,7 @@
                             💡 Rappel : Conditions pour la détection des patterns
                         </p>
                         <p class="u-texte-petit" style="margin: 0; line-height: 1.5; color: var(--gris-moyen)">
-                            Les <strong>patterns d'apprentissage</strong> (progression stable, défi spécifique, blocages) sont identifiés en analysant l'évolution des performances sur chaque critère d'évaluation au fil du temps. Cette analyse longitudinale n'est possible que si tu utilises <strong>les mêmes critères et la même échelle de performance</strong> pour tous les artefacts évalués durant le trimestre.
+                            Les <strong>patterns d'apprentissage</strong> (progression stable, défi spécifique, difficultés) sont identifiés en analysant l'évolution des performances sur chaque critère d'évaluation au fil du temps. Cette analyse longitudinale n'est possible que si tu utilises <strong>les mêmes critères et la même échelle de performance</strong> pour tous les artefacts évalués durant le trimestre.
                         </p>
                         <p class="u-texte-petit" style="margin: 8px 0 0 0; line-height: 1.5; color: var(--gris-moyen)">
                             Si tu varies les critères ou les échelles entre les productions, le système ne pourra pas établir de comparaisons valides et les patterns ne seront pas détectables. Dans ce cas, concentre-toi sur les indices A-C-P et les niveaux RàI pour le dépistage.
@@ -12389,7 +12389,7 @@
 
                             <p class="mt-10"><strong>&Agrave; quoi sert ce labo&nbsp;?</strong> &Agrave; transformer les gestes que tu fais d&eacute;j&agrave; (observer, annoter, &eacute;valuer) en micro-donn&eacute;es qui &eacute;clairent ton jugement professionnel. L'application ne remplace pas ton regard sur tes &eacute;l&egrave;ves. Elle le rend plus pr&eacute;cis, plus continu, plus partageable.</p>
 
-                            <p class="mt-10"><strong>Qu'est-ce que &ccedil;a change&nbsp;?</strong> Le labo rend plus visibles des patterns&nbsp;: un d&eacute;crochage silencieux, un blocage r&eacute;current, un progr&egrave;s qu'une note seule ne montre pas. La diff&eacute;rence&nbsp;: chaque geste laisse une trace utile. Chaque geste peut alimenter une boucle de r&eacute;troaction, autant pour ton &eacute;l&egrave;ve que pour toi. Tu interviens plus t&ocirc;t, plus justement. La relation p&eacute;dagogique y gagne.</p>
+                            <p class="mt-10"><strong>Qu'est-ce que &ccedil;a change&nbsp;?</strong> Le labo rend plus visibles des patterns&nbsp;: un d&eacute;crochage silencieux, une difficult&eacute; r&eacute;currente, un progr&egrave;s qu'une note seule ne montre pas. La diff&eacute;rence&nbsp;: chaque geste laisse une trace utile. Chaque geste peut alimenter une boucle de r&eacute;troaction, autant pour ton &eacute;l&egrave;ve que pour toi. Tu interviens plus t&ocirc;t, plus justement. La relation p&eacute;dagogique y gagne.</p>
 
                             <p class="mt-10"><strong>Qu'est-ce que &ccedil;a demande&nbsp;?</strong> De faire d'abord dans l'application ce que tu faisais d&eacute;j&agrave; sur papier. Le flux est le m&ecirc;me. Peut-&ecirc;tre aussi d'ajuster tes pratiques, mais l'application est l&agrave; pour te soutenir. Et derri&egrave;re l'application il y a du vrai monde. Des humains. Aucune IA.</p>
 
@@ -13494,7 +13494,7 @@
                             <p><strong>Comment le système utilise la grille :</strong></p>
                             <ul>
                                 <li><strong>Diagnostic forces/défis</strong> : Identifie automatiquement les critères maîtrisés (≥70%) et les défis (&lt;70%)</li>
-                                <li><strong>Patterns d'apprentissage</strong> : Détecte progression, blocages émergents, blocages critiques</li>
+                                <li><strong>Patterns d'apprentissage</strong> : Détecte progression, difficultés émergentes, difficultés persistantes</li>
                                 <li><strong>Priorisation</strong> : Les critères avec pondération élevée sont priorisés dans les recommandations</li>
                                 <li><strong>Suivi longitudinal</strong> : Calcule l'évolution de chaque critère au fil du temps</li>
                             </ul>
@@ -15332,7 +15332,7 @@
                                 <li><strong>Performance SRPNF</strong> : Détail par critère (S, R, P, N, F)</li>
                                 <li><strong>Forces identifiées</strong> : Critères ≥ 75%</li>
                                 <li><strong>Défis identifiés</strong> : Critères &lt; 75%</li>
-                                <li><strong>Diagnostic pattern</strong> : Stable / Défi spécifique / Blocage émergent / Blocage critique</li>
+                                <li><strong>Diagnostic pattern</strong> : Stable / Défi spécifique / Difficulté émergente / Difficulté persistante</li>
                             </ul>
                         </div>
 
@@ -15418,7 +15418,7 @@
                         <div class="alerte alerte-info u-mt-15">
                             <h4 class="u-mb-10 u-texte-bleu">Option 1 : Détection des patterns et RàI</h4>
                             <p><strong>Activation :</strong> Contexte → Pratiques de notation → Cocher «Activer RàI et détection des patterns»</p>
-                            <p><strong>Fonction :</strong> Identifie automatiquement 4 patterns d'apprentissage (Stable, Défi spécifique, Blocage émergent, Blocage critique) et recommande des niveaux d'intervention selon le cadre Réponse à l'Intervention (RàI).</p>
+                            <p><strong>Fonction :</strong> Identifie automatiquement 4 patterns d'apprentissage (Stable, Défi spécifique, Difficulté émergente, Difficulté persistante) et recommande des niveaux d'intervention selon le cadre Réponse à l'Intervention (RàI).</p>
                             <p><strong>Utilisation recommandée :</strong></p>
                             <ul class="u-mt-5">
                                 <li><strong>✅ Activer si :</strong> Tu utilises une grille de critères cohérente pour toutes les évaluations (ex: SRPNF, compétences disciplinaires)</li>
@@ -15479,14 +15479,14 @@
                         </div>
 
                         <div class="alerte-danger-rouge">
-                            <h4 class="u-mb-10" style="color: var(--risque-tres-eleve)">Blocage émergent</h4>
+                            <h4 class="u-mb-10" style="color: var(--risque-tres-eleve)">Difficulté émergente</h4>
                             <p><strong>Conditions :</strong> Performance &lt; 75% (en développement) ET au moins un défi identifié sur un critère</p>
                             <p><strong>Intervention :</strong> RàI Niveau 2 — Intervention préventive ciblée</p>
                             <p><strong>Action :</strong> Remédiation ciblée sur le critère en difficulté</p>
                         </div>
 
                         <div class="alerte-danger-dark">
-                            <h4 class="text-white-mb10">Blocage critique</h4>
+                            <h4 class="text-white-mb10">Difficulté persistante</h4>
                             <p><strong>Conditions :</strong> Performance &lt; 64% (insuffisant — compréhension unistructurelle)</p>
                             <p><strong>Intervention :</strong> RàI Niveau 3 — Intervention intensive individualisée</p>
                             <p><strong>Action :</strong> Rencontre individuelle, ré-enseignement, référence aux services adaptés si nécessaire</p>
@@ -15659,7 +15659,7 @@
                                             • Remédiation intensive individuelle<br>
                                             • Enseignement explicite du critère<br>
                                             • Pratique guidée avec rétroaction immédiate<br>
-                                            • Référer aux services d'aide si blocage persistant
+                                            • Référer aux services d'aide si difficulté persistante
                                         </td>
                                     </tr>
                                     <tr>
@@ -15955,7 +15955,7 @@
 
                         <div class="alerte-danger-rouge">
                             <h4 class="text-danger-bs">Niveau 3 : Intervention très intensive ou spécialisée</h4>
-                            <p><strong>Pour qui :</strong> Blocages critiques (performance ≤ 1.5 ou risque &gt; 70%)</p>
+                            <p><strong>Pour qui :</strong> Difficultés persistantes (performance ≤ 1.5 ou risque &gt; 70%)</p>
                             <p><strong>Modalités :</strong></p>
                             <ul>
                                 <li>Hors classe, sur rendez-vous</li>
@@ -15973,7 +15973,7 @@
                             <p><strong>Exemples concrets :</strong></p>
                             <ul>
                                 <li>"Rencontre individuelle | CAF | Dépistage"</li>
-                                <li>"Blocage critique | Intervention intensive | Services adaptés"</li>
+                                <li>"Difficulté persistante | Intervention intensive | Services adaptés"</li>
                             </ul>
                         </div>
                         </div>

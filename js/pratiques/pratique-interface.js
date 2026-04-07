@@ -169,8 +169,8 @@
  * @example
  * // Pattern universel
  * identifierPattern("1234567") => {
- *   type: 'blocage-critique',
- *   description: 'Blocage critique - Risque d\'échec élevé',
+ *   type: 'difficulte-persistante',
+ *   description: 'Difficulté persistante - Risque d\'échec élevé',
  *   indices: { A: 0.55, C: 0.60, P: 0.58 },
  *   couleur: '#d32f2f',
  *   recommandation: 'Intervention intensive immédiate (Niveau 3)'
@@ -185,8 +185,8 @@
  * }
  *
  * PATTERNS STANDARDS :
- * - blocage-critique : P < 60% OU Risque > 70%
- * - blocage-emergent : A ≥ 75% mais C ou P < 65%
+ * - difficulte-persistante : P < 60% OU Risque > 70%
+ * - difficulte-emergente : A ≥ 75% mais C ou P < 65%
  * - defi-specifique : P entre 70-80% avec défis identifiés
  * - stable : P entre 80-85% sans défis majeurs
  * - progression : P > 85% avec engagement soutenu

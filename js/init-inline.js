@@ -130,7 +130,7 @@ function changerModeParcoursDelegue(el) {
 // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
 // Les valeurs ici servent de fallback si version.json n'est pas disponible
 let VERSION_MAJEURE = '99.07';
-let BUILD_ID = '0407-1150';
+let BUILD_ID = '0407-1215';
 // Snapshot du build contenu dans CE fichier script (pour détecter les scripts périmés)
 const _SCRIPT_BUILD = BUILD_ID;
 
@@ -520,7 +520,7 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 var SYNONYMES_AIDE = [
     ['rai', 'réponse à l\'intervention', 'niveau 1', 'niveau 2', 'niveau 3', 'interventions', 'dépistage'],
-    ['blocage', 'blocage critique', 'risque', 'défi spécifique', 'indice de blocage', 'pattern'],
+    ['difficulté', 'difficulté persistante', 'difficulté émergente', 'défi spécifique', 'score multistructurel', 'pattern', 'suivi'],
     ['performance', 'indice p', 'note', 'artefact', 'portfolio', 'meilleurs artefacts'],
     ['assiduité', 'indice a', 'présence', 'absence', 'taux de présence'],
     ['complétion', 'indice c', 'remise', 'taux de remise'],

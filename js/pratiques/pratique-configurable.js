@@ -422,7 +422,7 @@ class PratiqueConfigurable {
     /**
      * Identifie le pattern actuel de l'étudiant
      * @param {string} da - DA de l'étudiant
-     * @returns {string} Pattern identifié ('stable', 'fragile', 'blocage', etc.)
+     * @returns {string} Pattern identifié ('stable', 'fragile', 'difficulte', etc.)
      */
     identifierPattern(da) {
         const defis = this.detecterDefis(da);
@@ -433,7 +433,7 @@ class PratiqueConfigurable {
         } else if (defis.length <= 2) {
             return 'fragile';
         } else {
-            return 'blocage';
+            return 'difficulte';
         }
     }
 

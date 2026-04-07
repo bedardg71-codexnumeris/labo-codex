@@ -2108,7 +2108,7 @@ const QUESTIONS_PRIMO = [
     // ========================================================================
     {
         id: 'apercu',
-        texte: '**Découvre le tableau de bord**\n\n1️⃣ Va dans **Aperçu**\n\nTu vois maintenant :\n• Indicateurs globaux (moyennes A-C-P)\n• Étudiants à risque (niveau RàI)\n• Patterns détectés (défis, blocages)\n\nC\'est ici que tu identifies qui a besoin d\'aide !\n\nTu y es ?',
+        texte: '**Découvre le tableau de bord**\n\n1️⃣ Va dans **Aperçu**\n\nTu vois maintenant :\n• Indicateurs globaux (moyennes A-C-P)\n• Étudiants à risque (niveau RàI)\n• Patterns détectés (défis, difficultés)\n\nC\'est ici que tu identifies qui a besoin d\'aide !\n\nTu y es ?',
         type: 'radio',
         options: [
             { value: 'oui', label: 'Oui' },
