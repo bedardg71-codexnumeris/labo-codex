@@ -222,8 +222,8 @@ class PratiquePANObjectifs {
         if (nbNiveau1 > 0 || nbNiveau2 >= 2) {
             // Échec certain (niveau 1 présent OU 2+ objectifs niveau 2)
             return {
-                type: 'blocage-critique',
-                description: 'Blocage critique - Échec du cours imminent',
+                type: 'difficulte-persistante',
+                description: 'Difficulté persistante - Échec du cours imminent',
                 couleur: '#d32f2f',
                 recommandation: 'Intervention intensive immédiate (Niveau 3)',
                 details: `${nbNiveau1} objectif(s) niveau 1, ${nbNiveau2} objectif(s) niveau 2`
@@ -233,8 +233,8 @@ class PratiquePANObjectifs {
         if (nbNiveau2 === 1) {
             // Risque d'échec (1 objectif niveau 2)
             return {
-                type: 'blocage-emergent',
-                description: 'Blocage émergent - Un objectif sous le seuil de réussite',
+                type: 'difficulte-emergente',
+                description: 'Difficulté émergente - Un objectif sous le seuil de réussite',
                 couleur: '#f57c00',
                 recommandation: 'Intervention ciblée urgente (Niveau 2-3)',
                 details: '1 objectif niveau 2 (note : 55%)'

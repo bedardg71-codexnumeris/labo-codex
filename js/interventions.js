@@ -31,7 +31,7 @@
  *   analyse: {
  *     nbEtudiants: 7,
  *     defisCommuns: { 'Rigueur': 5, 'Nuance': 4 },
- *     patternsCommuns: { 'Blocage émergent': 5 },
+ *     patternsCommuns: { 'Difficulté émergente': 5 },
  *     progressions: { 'En progression': 3, 'Plateau': 2, 'Régression': 2 },
  *     niveauxRai: { '1': 0, '2': 5, '3': 2 },
  *     engagementMoyen: 0.55,
@@ -478,8 +478,8 @@ function obtenirClassePattern(pattern) {
         'stable': 'badge-pattern-stable',
         'progression': 'badge-pattern-progression',
         'defi-specifique': 'badge-pattern-defi-specifique',
-        'blocage-emergent': 'badge-pattern-blocage-emergent',
-        'blocage-critique': 'badge-pattern-blocage-critique'
+        'difficulte-emergente': 'badge-pattern-difficulte-emergente',
+        'difficulte-persistante': 'badge-pattern-difficulte-persistante'
     };
 
     return mapping[patternNormalise] || 'badge-pattern-analyse';

@@ -37,7 +37,7 @@ const CLE_SUIVI = 'etudiantsSuivis';
 
 let _etudiantsPrioritaires = [];
 let _tousEtudiantsEnrichis = []; // Tous les étudiants avec indices calculés
-let _filtresActifs = []; // Filtres toggle : 'P', 'M', 'blocage', 'rai'
+let _filtresActifs = []; // Filtres toggle : 'P', 'M', 'suivi', 'rai'
 
 function obtenirEtudiantsSuivis() {
     return db.getSync(CLE_SUIVI, []);
@@ -121,10 +121,10 @@ function calculerEtudiantsPrioritaires() {
 
         // Suivi de l'apprentissage (IPB × direction sur critères multistructurels)
         var suivi = null;
-        var blocageScore = null;
+        var scoreMulti = null;
         if (typeof diagnostiquerSuiviApprentissage === 'function') {
             suivi = diagnostiquerSuiviApprentissage(e.da);
-            if (suivi) blocageScore = suivi.scoreActuel;
+            if (suivi) scoreMulti = suivi.scoreActuel;
         }
 
         var M = Math.round((indices.A + indices.C) / 2);
@@ -138,7 +138,7 @@ function calculerEtudiantsPrioritaires() {
             C: indices.C,
             P: indices.P,
             M: M,
-            blocageScore: blocageScore,
+            scoreMulti: scoreMulti,
             suivi: suivi
         });
     });
@@ -171,7 +171,7 @@ function appliquerFiltres() {
                 case 'M':
                     if (e.M >= 65) return false;
                     break;
-                case 'blocage':
+                case 'suivi':
                     if (!e.suivi || e.suivi.ipb < 2) return false;
                     break;
                 case 'rai':
@@ -191,7 +191,7 @@ function appliquerFiltres() {
                 switch (_filtresActifs[i]) {
                     case 'P': score += Math.max(0, 65 - e.P); break;
                     case 'M': score += Math.max(0, 65 - e.M); break;
-                    case 'blocage': score += e.suivi ? e.suivi.ipb * 30 + (e.suivi.direction === '↘' ? 20 : e.suivi.direction === '→' ? 10 : 0) : 0; break;
+                    case 'suivi': score += e.suivi ? e.suivi.ipb * 30 + (e.suivi.direction === '↘' ? 20 : e.suivi.direction === '→' ? 10 : 0) : 0; break;
                     case 'rai': score += e.niveau * 20; break;
                 }
             }
@@ -272,7 +272,7 @@ function genererPanneauSuiviEtudiants() {
                 { id: 'alpha', label: 'A→Z' },
                 { id: 'P', label: 'P < 65%' },
                 { id: 'M', label: 'A+C < 65%' },
-                { id: 'blocage', label: 'Blocage' },
+                { id: 'suivi', label: 'Suivi' },
                 { id: 'rai', label: 'RàI 2-3' }
             ];
             var nbFiltres = _etudiantsPrioritaires.length;
@@ -656,11 +656,11 @@ function genererInterpretationPerformance(etudiants, echelle) {
         messages.push(`${dEnProgression.length} étudiants en Développement montrent une progression favorable et pourraient atteindre la maîtrise prochainement`);
     }
 
-    // 3. Parmi les I, combien montrent des progrès (pattern pas blocage critique)
+    // 3. Parmi les I, combien montrent des progrès (pattern pas difficulté persistante)
     const niveauI = parNiveau['I'] || [];
     const iAvecProgres = niveauI.filter(etudiant => {
         const pattern = patterns[etudiant.da];
-        return pattern && pattern.pattern !== 'Blocage critique';
+        return pattern && pattern.pattern !== 'Difficulté persistante';
     });
 
     if (niveauI.length > 0) {
@@ -1192,8 +1192,8 @@ function genererInterpretationPatterns(patterns, totalEtudiants) {
 
     // Classifier les patterns par catégories
     const favorables = ['Progression', 'Stable', 'Excellence émergente'];
-    const difficultesEmergentes = ['Blocage émergent', 'Défi spécifique'];
-    const critiques = ['Blocage critique'];
+    const difficultesEmergentes = ['Difficulté émergente', 'Défi spécifique'];
+    const critiques = ['Difficulté persistante'];
 
     let nbFavorables = 0;
     let nbDifficultesEmergentes = 0;
@@ -1226,9 +1226,9 @@ function genererInterpretationPatterns(patterns, totalEtudiants) {
         messages.push(`${nbDifficultesEmergentes} étudiants (${pctDifficultesEmergentes}%) rencontrent des difficultés émergentes et nécessitent un soutien préventif`);
     }
 
-    // 3. Blocages critiques
+    // 3. Difficultés persistantes
     if (nbCritiques > 0) {
-        messages.push(`${nbCritiques} étudiants (${pctCritiques}%) sont en blocage critique et nécessitent un accompagnement différencié immédiat`);
+        messages.push(`${nbCritiques} étudiants (${pctCritiques}%) présentent une difficulté persistante et nécessitent un accompagnement différencié immédiat`);
     }
 
     if (messages.length === 0) {
@@ -2106,8 +2106,8 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
                 <div class="distribution-legende tb-barre-distribution">
                     <span style="position: absolute; left: 12.5%; transform: translateX(-50%); color: var(--badge-pattern-stable-texte); font-weight: 600; text-align: center;">Progression<br>stable<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0%)</span></span>
                     <span style="position: absolute; left: 37.5%; transform: translateX(-50%); color: var(--badge-pattern-defi-texte); font-weight: 600; text-align: center;">Défi<br>spécifique<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0%)</span></span>
-                    <span style="position: absolute; left: 62.5%; transform: translateX(-50%); color: var(--badge-pattern-emergent-texte); font-weight: 600; text-align: center;">Blocage<br>émergent<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0%)</span></span>
-                    <span style="position: absolute; left: 87.5%; transform: translateX(-50%); color: var(--badge-pattern-critique-texte); font-weight: 600; text-align: center;">Blocage<br>critique<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0%)</span></span>
+                    <span style="position: absolute; left: 62.5%; transform: translateX(-50%); color: var(--badge-pattern-emergent-texte); font-weight: 600; text-align: center;">Difficulté<br>émergente<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0%)</span></span>
+                    <span style="position: absolute; left: 87.5%; transform: translateX(-50%); color: var(--badge-pattern-critique-texte); font-weight: 600; text-align: center;">Difficulté<br>persistante<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0%)</span></span>
                 </div>
             </div>
         `;
@@ -2122,14 +2122,14 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
         'stable': 12.5,          // Centre de 0-25%
         'progression': 12.5,
         'defi-specifique': 37.5, // Centre de 25-50%
-        'blocage-emergent': 62.5,// Centre de 50-75%
-        'blocage-critique': 87.5,// Centre de 75-100%
-        'non-participation': 87.5 // 🆕 BETA 98.9: Même zone que blocage critique
+        'difficulte-emergente': 62.5,// Centre de 50-75%
+        'difficulte-persistante': 87.5,// Centre de 75-100%
+        'non-participation': 87.5 // 🆕 BETA 98.9: Même zone que difficulté persistante
     };
 
     // Calculer les compteurs par pattern pour SOM et PAN
-    const compteursSOM = { 'stable': 0, 'progression': 0, 'defi-specifique': 0, 'blocage-emergent': 0, 'blocage-critique': 0, 'non-participation': 0 };
-    const compteursPAN = { 'stable': 0, 'progression': 0, 'defi-specifique': 0, 'blocage-emergent': 0, 'blocage-critique': 0, 'non-participation': 0 };
+    const compteursSOM = { 'stable': 0, 'progression': 0, 'defi-specifique': 0, 'difficulte-emergente': 0, 'difficulte-persistante': 0, 'non-participation': 0 };
+    const compteursPAN = { 'stable': 0, 'progression': 0, 'defi-specifique': 0, 'difficulte-emergente': 0, 'difficulte-persistante': 0, 'non-participation': 0 };
 
     // Générer les points pour SOM avec jitter (nuage de points)
     // SOM = GAUCHE de chaque zone (position - 2%)
@@ -2236,22 +2236,22 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
     const defiPctSOM = Math.round((defiSOM / totalSOM) * 100);
     const defiPctPAN = Math.round((defiPAN / totalPAN) * 100);
 
-    const emergentSOM = compteursSOM['blocage-emergent'] || 0;
-    const emergentPAN = compteursPAN['blocage-emergent'] || 0;
+    const emergentSOM = compteursSOM['difficulte-emergente'] || 0;
+    const emergentPAN = compteursPAN['difficulte-emergente'] || 0;
     const emergentPctSOM = Math.round((emergentSOM / totalSOM) * 100);
     const emergentPctPAN = Math.round((emergentPAN / totalPAN) * 100);
 
     // 🆕 BETA 98.9: Inclure les non-participants dans le compteur critique
-    const critiqueSOM = (compteursSOM['blocage-critique'] || 0) + (compteursSOM['non-participation'] || 0);
-    const critiquePAN = (compteursPAN['blocage-critique'] || 0) + (compteursPAN['non-participation'] || 0);
+    const critiqueSOM = (compteursSOM['difficulte-persistante'] || 0) + (compteursSOM['non-participation'] || 0);
+    const critiquePAN = (compteursPAN['difficulte-persistante'] || 0) + (compteursPAN['non-participation'] || 0);
     const critiquePctSOM = Math.round((critiqueSOM / totalSOM) * 100);
     const critiquePctPAN = Math.round((critiquePAN / totalPAN) * 100);
 
     // Générer labels avec compteurs et pourcentages
     let labelStable = 'Progression<br>stable';
     let labelDefi = 'Défi<br>spécifique';
-    let labelEmergent = 'Blocage<br>émergent';
-    let labelCritique = 'Blocage<br>critique';
+    let labelEmergent = 'Difficulté<br>émergente';
+    let labelCritique = 'Difficulté<br>persistante';
 
     if (afficherSom && afficherPan) {
         labelStable += `<br><span class="tb-texte-mini-orange">${stableSOM} (${stablePctSOM}%)</span> <span class="tb-texte-mini-bleu-std">${stablePAN} (${stablePctPAN}%)</span>`;
@@ -2283,8 +2283,8 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
                 { pattern: 'Stable', count: 0 },
                 { pattern: 'Excellence émergente', count: 0 },
                 { pattern: 'Défi spécifique', count: defiSOM },
-                { pattern: 'Blocage émergent', count: emergentSOM },
-                { pattern: 'Blocage critique', count: critiqueSOM }
+                { pattern: 'Difficulté émergente', count: emergentSOM },
+                { pattern: 'Difficulté persistante', count: critiqueSOM }
             ];
             interpretation = genererInterpretationPatterns(patternsDistributionSOM, etudiantsSOM.length);
         } else if (afficherSom) {
@@ -2293,8 +2293,8 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
                 { pattern: 'Stable', count: 0 },
                 { pattern: 'Excellence émergente', count: 0 },
                 { pattern: 'Défi spécifique', count: defiSOM },
-                { pattern: 'Blocage émergent', count: emergentSOM },
-                { pattern: 'Blocage critique', count: critiqueSOM }
+                { pattern: 'Difficulté émergente', count: emergentSOM },
+                { pattern: 'Difficulté persistante', count: critiqueSOM }
             ];
             interpretation = genererInterpretationPatterns(patternsDistributionSOM, etudiantsSOM.length);
         } else if (afficherPan) {
@@ -2303,8 +2303,8 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
                 { pattern: 'Stable', count: 0 },
                 { pattern: 'Excellence émergente', count: 0 },
                 { pattern: 'Défi spécifique', count: defiPAN },
-                { pattern: 'Blocage émergent', count: emergentPAN },
-                { pattern: 'Blocage critique', count: critiquePAN }
+                { pattern: 'Difficulté émergente', count: emergentPAN },
+                { pattern: 'Difficulté persistante', count: critiquePAN }
             ];
             interpretation = genererInterpretationPatterns(patternsDistributionPAN, etudiantsPAN.length);
         }
@@ -3088,7 +3088,7 @@ function determinerPattern(indices) {
         return 'émergent';
     }
 
-    // Défi: au moins un indice sous 0.75 mais pas de blocage critique
+    // Défi: au moins un indice sous 0.75 mais pas de difficulté persistante
     return 'défi';
 }
 */

@@ -366,11 +366,11 @@ function genererBadgePatternProfil(pattern) {
     let classe = '';
 
     switch(pattern) {
-        case 'Blocage critique':
-            classe = 'badge-sys badge-pattern-blocage-critique';
+        case 'Difficulté persistante':
+            classe = 'badge-sys badge-pattern-difficulte-persistante';
             break;
-        case 'Blocage émergent':
-            classe = 'badge-sys badge-pattern-blocage-emergent';
+        case 'Difficulté émergente':
+            classe = 'badge-sys badge-pattern-difficulte-emergente';
             break;
         case 'Défi spécifique':
             classe = 'badge-sys badge-pattern-defi-specifique';
@@ -2774,7 +2774,7 @@ function genererCarteCibleIntervention(da) {
             <br><br>
             <strong>Niveaux RàI :</strong> Niveau 1 (Universel) : suivi régulier en classe • Niveau 2 (Préventif) : interventions préventives ciblées • Niveau 3 (Intensif) : interventions intensives individuelles hors classe
             <br><br>
-            <strong>Méthodologie :</strong> Le système analyse l'engagement (E = A × C × P), le pattern d'apprentissage actuel (basé sur les ${nbArtefacts} dernier${nbArtefacts > 1 ? 's' : ''} ${obtenirTermeProduction(nbArtefacts > 1 ? 'pluriel' : 'singulier')}), et les défis identifiés sur les critères de la grille de référence. La logique de décision priorise les situations de décrochage, puis les blocages critiques et émergents, avant de recommander des cibles d'enrichissement ou de maintien.
+            <strong>Méthodologie :</strong> Le système analyse l'engagement (E = A × C × P), le pattern d'apprentissage actuel (basé sur les ${nbArtefacts} dernier${nbArtefacts > 1 ? 's' : ''} ${obtenirTermeProduction(nbArtefacts > 1 ? 'pluriel' : 'singulier')}), et les défis identifiés sur les critères de la grille de référence. La logique de décision priorise les situations de décrochage, puis les difficultés persistantes et émergentes, avant de recommander des cibles d'enrichissement ou de maintien.
             <br><br>
             <strong>Utilisation :</strong> Cette section te guide dans le choix d'interventions appropriées. Les recommandations sont contextualisées selon les besoins spécifiques de l'étudiant. Consulte la section Accompagnement pour planifier et documenter tes interventions.
         </div>
@@ -5170,168 +5170,9 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
     return aucuneDonnee ? null : moyennes;
 }
 
-/**
- * Calcule l'indice de Blocage (compétences transversales critiques)
- * Blocage = 0.35 × Structure + 0.35 × Français + 0.30 × Rigueur
- * @param {Object} moyennes - Moyennes par critère
- * @returns {Object|null} - { score, partiel, criteresManquants } ou null si données insuffisantes
- */
-function calculerIndiceBlocage(moyennes) {
-    if (!moyennes) {
-        return null;
-    }
+// [Phase 6] calculerIndiceBlocage() supprimé — remplacé par calculerIPB() + diagnostiquerSuiviApprentissage()
 
-    const criteresDisponibles = {
-        structure: moyennes.structure !== null,
-        francais: moyennes.francais !== null,
-        rigueur: moyennes.rigueur !== null
-    };
-
-    const nbCriteresDisponibles = Object.values(criteresDisponibles).filter(Boolean).length;
-
-    // Si moins de 2 critères disponibles, impossible de calculer
-    if (nbCriteresDisponibles < 2) {
-        return null;
-    }
-
-    // Calcul avec pondération ajustée si certains critères manquent
-    let score = 0;
-    let ponderationTotale = 0;
-    const criteresManquants = [];
-
-    if (criteresDisponibles.structure) {
-        score += 0.35 * moyennes.structure;
-        ponderationTotale += 0.35;
-    } else {
-        criteresManquants.push('Structure');
-    }
-
-    if (criteresDisponibles.francais) {
-        score += 0.35 * moyennes.francais;
-        ponderationTotale += 0.35;
-    } else {
-        criteresManquants.push('Français');
-    }
-
-    if (criteresDisponibles.rigueur) {
-        score += 0.30 * moyennes.rigueur;
-        ponderationTotale += 0.30;
-    } else {
-        criteresManquants.push('Rigueur');
-    }
-
-    // Normaliser si pondération partielle
-    if (ponderationTotale > 0 && ponderationTotale < 1.0) {
-        score = score / ponderationTotale;
-    }
-
-    return {
-        score: score,
-        partiel: criteresManquants.length > 0,
-        criteresManquants: criteresManquants
-    };
-}
-
-/**
- * Calcule la progression longitudinale de l'indice de blocage.
- * Fenêtre glissante de N artefacts à chaque position.
- * @param {string} da - Numéro de DA
- * @returns {Object|null} - { points: [{position, productionNom, date, score}], tendance, delta }
- */
-function calculerProgressionBlocage(da) {
-    var fenetreN = obtenirNombreProductionsPourPatterns() || 3;
-
-    var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    var productions = obtenirDonneesSelonMode('productions') || [];
-    var productionsIds = obtenirIdsProductionsEvaluables(productions);
-    var prodMap = {};
-    productions.forEach(function (p) { prodMap[p.id] = p; });
-
-    var evaluationsEleve = evaluations.filter(function (e) {
-        return e.etudiantDA === da &&
-            productionsIds.indexOf(e.productionId) >= 0 &&
-            e.retroactionFinale &&
-            e.criteres && Array.isArray(e.criteres);
-    });
-
-    if (evaluationsEleve.length < 2) return null;
-
-    // Trier chronologiquement (plus ancien d'abord)
-    evaluationsEleve.sort(function (a, b) {
-        var dateA = a.dateEvaluation || a.dateCreation || '';
-        var dateB = b.dateEvaluation || b.dateCreation || '';
-        return dateA < dateB ? -1 : dateA > dateB ? 1 : 0;
-    });
-
-    var grille = obtenirGrilleReferenceDepistage();
-    if (!grille || !grille.criteres) return null;
-    var tableConversion = obtenirTableConversionIDME();
-
-    var points = [];
-
-    // Pour chaque position i, calculer le score sur la fenêtre [max(0, i-N+1) ... i]
-    for (var i = 0; i < evaluationsEleve.length; i++) {
-        var debut = Math.max(0, i - fenetreN + 1);
-        var fenetre = evaluationsEleve.slice(debut, i + 1);
-
-        // Calculer moyennes SRPNF sur cette fenêtre
-        var scoresCriteres = {};
-        grille.criteres.forEach(function (c) {
-            var cle = c.nom.toLowerCase()
-                .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
-            scoresCriteres[cle] = [];
-        });
-
-        fenetre.forEach(function (ev) {
-            if (!ev.criteres) return;
-            ev.criteres.forEach(function (cs) {
-                var score = convertirNiveauIDMEEnScore(cs.niveauSelectionne, tableConversion);
-                if (score === null) return;
-                var critRef = grille.criteres.find(function (c) {
-                    var nomRef = c.nom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
-                    var nomEval = cs.critereNom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
-                    return nomRef === nomEval || nomRef.startsWith(nomEval) || nomEval.startsWith(nomRef);
-                });
-                if (critRef) {
-                    var cle = critRef.nom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
-                    if (cle.startsWith('francais')) cle = 'francais';
-                    scoresCriteres[cle].push(score);
-                }
-            });
-        });
-
-        var moyennes = {};
-        Object.keys(scoresCriteres).forEach(function (cle) {
-            var s = scoresCriteres[cle];
-            moyennes[cle] = s.length > 0 ? s.reduce(function (a, b) { return a + b; }, 0) / s.length : null;
-        });
-
-        var blocage = calculerIndiceBlocage(moyennes);
-        var ev = evaluationsEleve[i];
-        var prod = prodMap[ev.productionId];
-        points.push({
-            position: i + 1,
-            productionNom: prod ? prod.titre : '',
-            date: (ev.dateEvaluation || ev.dateCreation || '').substring(0, 10),
-            score: blocage ? blocage.score : null,
-            fenetre: fenetre.length
-        });
-    }
-
-    // Calculer la tendance (comparer dernier point vs avant-dernier)
-    var pointsValides = points.filter(function (p) { return p.score !== null; });
-    var tendance = '—';
-    var delta = 0;
-    if (pointsValides.length >= 2) {
-        var dernier = pointsValides[pointsValides.length - 1].score;
-        var precedent = pointsValides[pointsValides.length - 2].score;
-        delta = dernier - precedent;
-        if (delta > 0.03) tendance = '↗';
-        else if (delta < -0.03) tendance = '↘';
-    }
-
-    return { points: points, tendance: tendance, delta: delta };
-}
+// [Phase 6] calculerProgressionBlocage() supprimé — utilisait calculerIndiceBlocage() retiré ci-dessus
 
 /**
  * Calcule l'Indice de Persistance du Blocage (IPB) sur les critères multistructurels.
@@ -5536,43 +5377,7 @@ function diagnostiquerSuiviApprentissage(da) {
     };
 }
 
-/**
- * Interprète l'indice de Blocage selon les seuils pédagogiques
- * @param {number} blocage - Indice de blocage (0-1)
- * @returns {Object} - { niveau, couleur, description }
- */
-function interpreterIndiceBlocage(blocage) {
-    if (blocage === null) {
-        return null;
-    }
-
-    if (blocage < 0.375) {
-        return {
-            niveau: 'Blocage critique',
-            couleur: '#dc3545', // Rouge
-            description: 'Les compétences de base (Structure, Français, Rigueur) sont insuffisantes et bloquent la progression. Intervention immédiate requise.'
-        };
-    }
-    if (blocage < 0.5) {
-        return {
-            niveau: 'Risque de blocage',
-            couleur: '#ff9800', // Orange
-            description: 'Les compétences de base sont fragiles. Un soutien ciblé sur ces fondamentaux est nécessaire pour éviter un blocage.'
-        };
-    }
-    if (blocage < 0.625) {
-        return {
-            niveau: 'Progression possible',
-            couleur: '#ffc107', // Jaune
-            description: 'Les compétences de base permettent la progression, mais nécessitent un renforcement pour assurer la réussite.'
-        };
-    }
-    return {
-        niveau: 'Progression normale',
-        couleur: '#28a745', // Vert
-        description: 'Les compétences de base sont maîtrisées. La progression dans les apprentissages peut se faire normalement.'
-    };
-}
+// [Phase 6] interpreterIndiceBlocage() supprimé — remplacé par diagnostiquerSuiviApprentissage()
 
 /**
  * Diagnostique les forces et défis selon le seuil pédagogique
@@ -5957,13 +5762,13 @@ function identifierDefiSpecifique(da) {
 /**
  * Identifie le Pattern actuel selon la formule pédagogique
  *
- * Formule: SI(AH≤0,4;"Blocage critique";
- *             SI(ET(AH≤0,5;N≠"Aucun");"Blocage émergent";
+ * Formule: SI(AH≤0,4;"Difficulté persistante";
+ *             SI(ET(AH≤0,5;N≠"Aucun");"Difficulté émergente";
  *                SI(ET(AH≤0,75;N≠"Aucun");"Défi spécifique";"Stable")))
  *
  * @param {number} performancePAN3 - Performance sur 3 derniers artefacts (0-1)
  * @param {boolean} aUnDefi - True si un défi est identifié
- * @returns {string} - Pattern: 'Blocage critique', 'Blocage émergent', 'Défi spécifique', 'Stable'
+ * @returns {string} - Pattern: 'Difficulté persistante', 'Difficulté émergente', 'Défi spécifique', 'Stable'
  */
 function identifierPatternActuel(performancePAN3, aUnDefi) {
     // Utiliser les seuils configurables IDME
@@ -5971,14 +5776,14 @@ function identifierPatternActuel(performancePAN3, aUnDefi) {
     const seuilDeveloppement = obtenirSeuil('idme.developpement');  // Par défaut 0.75 (75%)
 
 
-    // Blocage critique : Performance < 64% (Incomplet - unistructurel)
+    // Difficulté persistante : Performance < 64% (Incomplet - unistructurel)
     if (performancePAN3 < seuilInsuffisant) {
-        return 'Blocage critique';
+        return 'Difficulté persistante';
     }
 
-    // Blocage émergent : Performance < 75% (En développement - multistructurel) ET a un défi
+    // Difficulté émergente : Performance < 75% (En développement - multistructurel) ET a un défi
     if (performancePAN3 < seuilDeveloppement && aUnDefi) {
-        return 'Blocage émergent';
+        return 'Difficulté émergente';
     }
 
     // Défi spécifique : Performance acceptable mais a un défi récurrent
@@ -6033,7 +5838,7 @@ function determinerNiveauRaiPedagogique(da) {
                 defi: 'Aucun',
                 description: 'Élève présent en classe mais aucune production remise. Profil prioritaire nécessitant une intervention immédiate.',
                 badgeClasse: 'badge-rai-3',
-                patternBadge: 'badge-pattern-blocage-critique',
+                patternBadge: 'badge-pattern-difficulte-persistante',
                 donneesSuffisantes: false,
                 nbArtefacts: 0,
                 fenetreAnalyse: obtenirNombreProductionsPourPatterns()
@@ -6065,8 +5870,8 @@ function determinerNiveauRaiPedagogique(da) {
 
     // LOGIQUE PÉDAGOGIQUE (basée uniquement sur P et SRPNF)
 
-    // Niveau 3 - Intensif : Blocage critique (P < insuffisant OU plusieurs critères < développement)
-    if (pattern === 'Blocage critique' || P < seuilInsuffisant) {
+    // Niveau 3 - Intensif : Difficulté persistante (P < insuffisant OU plusieurs critères < développement)
+    if (pattern === 'Difficulté persistante' || P < seuilInsuffisant) {
         return {
             niveau: 3,
             label: 'Niveau 3 - Intensif',
@@ -6074,21 +5879,21 @@ function determinerNiveauRaiPedagogique(da) {
             defi: diagnostic.principalDefi?.nom || 'Aucun',
             description: 'Difficultés pédagogiques majeures nécessitant un soutien intensif.',
             badgeClasse: 'badge-rai-3',
-            patternBadge: 'badge-pattern-blocage-critique',
+            patternBadge: 'badge-pattern-difficulte-persistante',
             nbArtefacts: indices3Derniers.nbArtefacts,
             fenetreAnalyse: obtenirNombreProductionsPourPatterns()
         };
     }
 
-    // Niveau 2 - Préventif : Performance en développement (<75%) OU Blocage émergent OU Défi spécifique
+    // Niveau 2 - Préventif : Performance en développement (<75%) OU Difficulté émergente OU Défi spécifique
     // Un élève avec P en zone "Développement" (65-74%) nécessite un accompagnement préventif,
     // même si son pattern est "Stable" (pas de défi identifié).
-    if (P < seuilDeveloppement || pattern === 'Blocage émergent' || pattern === 'Défi spécifique') {
+    if (P < seuilDeveloppement || pattern === 'Difficulté émergente' || pattern === 'Défi spécifique') {
         // Déterminer la description selon le contexte
         let description;
         if (P < seuilDeveloppement && pattern === 'Stable') {
             description = 'Performance en développement nécessitant un accompagnement préventif.';
-        } else if (pattern === 'Blocage émergent') {
+        } else if (pattern === 'Difficulté émergente') {
             description = 'Difficultés émergentes nécessitant une intervention préventive ciblée.';
         } else {
             description = 'Défi spécifique identifié nécessitant un accompagnement ciblé.';
@@ -6101,8 +5906,8 @@ function determinerNiveauRaiPedagogique(da) {
             defi: diagnostic.principalDefi?.nom || 'Aucun',
             description: description,
             badgeClasse: 'badge-rai-2',
-            patternBadge: pattern === 'Blocage émergent'
-                ? 'badge-pattern-blocage-emergent'
+            patternBadge: pattern === 'Difficulté émergente'
+                ? 'badge-pattern-difficulte-emergente'
                 : pattern === 'Défi spécifique'
                     ? 'badge-pattern-defi-specifique'
                     : 'badge-pattern-stable',
@@ -6278,8 +6083,8 @@ function determinerCibleIntervention(da) {
         };
     }
 
-    // 2. Blocage critique
-    if (M === 'Blocage critique') {
+    // 2. Difficulté persistante
+    if (M === 'Difficulté persistante') {
         if (N === 'Français' && I <= 17) {
             return {
                 cible: 'Rencontre individuelle | CAF | Dépistage',
@@ -6318,8 +6123,8 @@ function determinerCibleIntervention(da) {
         }
     }
 
-    // 3. Blocage émergent
-    if (M === 'Blocage émergent') {
+    // 3. Difficulté émergente
+    if (M === 'Difficulté émergente') {
         if (N === 'Français' && I >= 18 && I <= 20) {
             return {
                 cible: 'Remédiation en stratégie de révision ciblée | CAF recommandé',
@@ -6635,71 +6440,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
             </div>
         </div>
 
-        <!-- INDICE DE BLOCAGE -->
-        ${(() => {
-            const resultBlocage = calculerIndiceBlocage(moyennes);
-            if (resultBlocage === null) return '';
-
-            const interpBlocage = interpreterIndiceBlocage(resultBlocage.score);
-            const pourcentageBlocage = Math.round(resultBlocage.score * 100);
-
-            // Construire l'affichage de la formule selon les critères disponibles
-            let formuleDetail = '';
-            let formuleTexte = '';
-            const parts = [];
-
-            if (moyennes.structure !== null) {
-                parts.push(`0.35 × ${Math.round(moyennes.structure * 100)}%`);
-            }
-            if (moyennes.francais !== null) {
-                parts.push(`0.35 × ${Math.round(moyennes.francais * 100)}%`);
-            }
-            if (moyennes.rigueur !== null) {
-                parts.push(`0.30 × ${Math.round(moyennes.rigueur * 100)}%`);
-            }
-
-            formuleDetail = parts.join(' + ');
-            formuleTexte = resultBlocage.partiel
-                ? '0.35 × Structure + 0.35 × Français + 0.30 × Rigueur (pondération ajustée)'
-                : '0.35 × Structure + 0.35 × Français + 0.30 × Rigueur';
-
-            return `
-                <div style="background: linear-gradient(to right, ${interpBlocage.couleur}22, ${interpBlocage.couleur}11);
-                            border-left: 4px solid ${interpBlocage.couleur};
-                            padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-                    <div class="u-flex-between-mb10">
-                        <h4 style="color: ${interpBlocage.couleur}; margin: 0; font-size: 1rem;">
-                            Indice de Blocage ${resultBlocage.partiel ? '(partiel)' : ''}
-                        </h4>
-                        <div style="font-size: 1.5rem; font-weight: bold; color: ${interpBlocage.couleur};">
-                            ${pourcentageBlocage}%
-                        </div>
-                    </div>
-                    ${resultBlocage.partiel ? `
-                        <div style="background: var(--alerte-fond-attention); padding: 8px; margin-bottom: 10px; border-left: 3px solid var(--btn-annuler);">
-                            <div style="font-size: 0.85rem; color: var(--alerte-texte-attention);">
-                                ⚠️ <strong>Calcul partiel :</strong> ${resultBlocage.criteresManquants.join(', ')} non évalué(s).
-                                La pondération a été ajustée automatiquement.
-                            </div>
-                        </div>
-                    ` : ''}
-                    <div style="background: var(--surface-conteneur, #142428); padding: 10px; border-radius: 4px; margin-bottom: 10px;">
-                        <div class="u-texte-mini u-texte-gris" style="margin-bottom: 8px;">
-                            <strong>Formule :</strong> ${formuleTexte}
-                        </div>
-                        <div class="profil-texte-detail-compact">
-                            = ${formuleDetail} = <strong>${pourcentageBlocage}%</strong>
-                        </div>
-                    </div>
-                    <div style="font-weight: bold; color: ${interpBlocage.couleur}; margin-bottom: 8px;">
-                        ${interpBlocage.niveau}
-                    </div>
-                    <div style="color: var(--gris-fonce); font-size: 0.9rem; line-height: 1.5;">
-                        ${interpBlocage.description}
-                    </div>
-                </div>
-            `;
-        })()}
+        <!-- [Phase 6] Ancien encadré "Indice de Blocage" supprimé — remplacé par encadreSuivi (IPB × direction) -->
 
         <!-- Résumé forces et défis par niveau IDME -->
         ${(() => {
@@ -8978,7 +8719,6 @@ window.retirerJetonPersonnaliseAvecConfirmation = retirerJetonPersonnaliseAvecCo
 window.determinerNiveauRaiPedagogique = determinerNiveauRaiPedagogique;
 window.determinerAlerteContextuelle = determinerAlerteContextuelle;
 window.determinerCibleIntervention = determinerCibleIntervention; // 🔧 FIX Beta 97.4 : Nécessaire pour afficherPatternsApprentissage
-window.calculerIndiceBlocage = calculerIndiceBlocage;
 window.calculerMoyennesCriteres = calculerMoyennesCriteres;
 
 /**

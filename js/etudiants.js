@@ -1054,7 +1054,7 @@ function afficherListeEtudiantsConsultation() {
     }
 
     // Corrélations Pattern↔P, RàI↔P, Interventions↔P
-    var scorePattern = { 'Non-participation': 0, 'Données insuffisantes': null, 'Blocage critique': 1, 'Blocage émergent': 2, 'Défi spécifique': 3, 'Stable': 4 };
+    var scorePattern = { 'Non-participation': 0, 'Données insuffisantes': null, 'Difficulté persistante': 1, 'Difficulté émergente': 2, 'Défi spécifique': 3, 'Stable': 4 };
     var valeursPattern = [];
     var valeursRai = [];
     var valeursInterv = [];
@@ -1651,10 +1651,10 @@ function genererBadgeEngagement(indices) {
  */
 function genererBadgePattern(pattern) {
     switch(pattern) {
-        case 'Blocage critique':
-            return { label: pattern, classe: 'badge-sys badge-pattern-blocage-critique' };
-        case 'Blocage émergent':
-            return { label: pattern, classe: 'badge-sys badge-pattern-blocage-emergent' };
+        case 'Difficulté persistante':
+            return { label: pattern, classe: 'badge-sys badge-pattern-difficulte-persistante' };
+        case 'Difficulté émergente':
+            return { label: pattern, classe: 'badge-sys badge-pattern-difficulte-emergente' };
         case 'Défi spécifique':
             return { label: pattern, classe: 'badge-sys badge-pattern-defi-specifique' };
         case 'Stable':

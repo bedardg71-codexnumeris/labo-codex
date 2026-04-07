@@ -336,8 +336,8 @@ class PratiqueSommative {
      * Identifie le pattern d'apprentissage de l'étudiant
      *
      * Patterns universels (basés sur A-C-P) :
-     * - Blocage critique : P < 60% OU Engagement < 30%
-     * - Blocage émergent : A ≥ 75% mais C ou P < 65%
+     * - Difficulté persistante : P < 60% OU Engagement < 30%
+     * - Difficulté émergente : A ≥ 75% mais C ou P < 65%
      * - Défi spécifique : P entre 70-80% avec défis identifiés
      * - Stable : P entre 80-85% sans défis majeurs
      * - Progression : P > 85% avec engagement soutenu
@@ -389,13 +389,13 @@ class PratiqueSommative {
         let patternType, description, couleur, recommandation;
 
         if (indiceP < 0.60 || engagement < 0.30) {
-            patternType = 'blocage-critique';
-            description = 'Blocage critique - Engagement insuffisant';
+            patternType = 'difficulte-persistante';
+            description = 'Difficulté persistante - Engagement insuffisant';
             couleur = '#dc3545';
             recommandation = 'Intervention intensive immédiate (Niveau 3 RàI)';
         } else if (indiceA >= 0.75 && (indiceC < 0.65 || indiceP < 0.65)) {
-            patternType = 'blocage-emergent';
-            description = 'Blocage émergent - Assiduité présente mais performance faible';
+            patternType = 'difficulte-emergente';
+            description = 'Difficulté émergente - Assiduité présente mais performance faible';
             couleur = '#ff9800';
             recommandation = 'Intervention préventive ciblée (Niveau 2 RàI)';
         } else if (indiceP >= 0.70 && indiceP < 0.80 && aDesDefis) {
@@ -469,8 +469,8 @@ class PratiqueSommative {
             emoji: '🟢'
         };
 
-        // BLOCAGE CRITIQUE (Niveau 3 RàI)
-        if (pattern.type === 'blocage-critique') {
+        // DIFFICULTÉ PERSISTANTE (Niveau 3 RàI)
+        if (pattern.type === 'difficulte-persistante') {
             cible.niveau = 3;
             cible.couleur = '#dc3545';
             cible.emoji = '🔴';
@@ -501,8 +501,8 @@ class PratiqueSommative {
             ];
         }
 
-        // BLOCAGE ÉMERGENT (Niveau 2 RàI)
-        else if (pattern.type === 'blocage-emergent') {
+        // DIFFICULTÉ ÉMERGENTE (Niveau 2 RàI)
+        else if (pattern.type === 'difficulte-emergente') {
             cible.niveau = 2;
             cible.couleur = '#ff9800';
             cible.emoji = '🟠';
