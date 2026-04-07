@@ -7987,6 +7987,7 @@
 
                 <!-- Sous-section: Liste des évaluations -->
                 <div id="evaluations-liste" class="sous-section">
+                <div class="carte">
                     <h2 class="titre-avec-emoji-toggles">
                         <span data-tooltip="eval-liste">Historique et filtres</span>
                         <span class="titre-emoji-container">
@@ -8113,13 +8114,15 @@
                     </div>
                 </div>
             </div>
-
+            </div><!-- fin carte englobante evaluations-liste -->
 
 
                 <!-- Onglet 3 : Importer et préparer -->
                 <div id="evaluations-importer" class="sous-section">
-                    <div id="evaluations-contenu-import">
-                        <p class="texte-muted">Chargement...</p>
+                    <div class="carte">
+                        <div id="evaluations-contenu-import">
+                            <p class="texte-muted">Chargement...</p>
+                        </div>
                     </div>
                 </div>
 
@@ -8338,8 +8341,10 @@
 
                 <!-- Onglet 5 : Exporter et archiver -->
                 <div id="evaluations-exporter" class="sous-section">
-                    <div id="evaluations-contenu-archivage">
-                        <p class="texte-muted">Chargement...</p>
+                    <div class="carte">
+                        <div id="evaluations-contenu-archivage">
+                            <p class="texte-muted">Chargement...</p>
+                        </div>
                     </div>
                 </div>
 
@@ -9898,6 +9903,11 @@
                                         Cette grille définit les critères utilisés pour identifier les <strong>forces et défis</strong> des étudiant·es.
                                         Les pondérations de la grille sont prises en compte dans le diagnostic.
                                         Tu dois utiliser cette même grille pour toutes les évaluations afin que le dépistage soit efficace.
+                                        <br><br>
+                                        <strong>Niveau SOLO des critères :</strong> chaque critère de la grille peut être étiqueté selon son niveau cognitif
+                                        (multistructurel, relationnel ou abstrait étendu). Le suivi des fondamentaux surveille la progression
+                                        sur les critères <strong>multistructurels</strong> — les fondations dont dépendent les critères de niveau supérieur.
+                                        Configure le niveau SOLO dans l'éditeur de grille (colonne « Niveau SOLO »).
                                     </small>
                                 </div>
                                 </div><!-- Fin accordeonOptionsAffichage -->
@@ -13278,7 +13288,7 @@
                         <div class="accordeon-contenu">
                             <p><strong>Navigation :</strong> Structure → Productions étudiantes</p>
 
-                            <p>Ce module te permet de définir les productions que tes étudiants devront remettre au cours du semestre.</p>
+                            <p>Ce module te permet de définir les productions que tes étudiants devront remettre au cours du trimestre.</p>
 
                             <p><strong>Layout :</strong> 2 colonnes — sidebar (liste des productions) + formulaire de configuration.</p>
 
@@ -14141,7 +14151,7 @@
                             <p><strong>3. Archiver et exporter :</strong></p>
                             <ul>
                                 <li><strong>Export par étudiant</strong> : Télécharger les travaux annotés individuellement</li>
-                                <li><strong>Export semestre complet</strong> : Archive complète organisée par étudiant</li>
+                                <li><strong>Export trimestre complet</strong> : Archive complète organisée par étudiant</li>
                                 <li><strong>Moniteur de stockage</strong> : Barre de progression avec alerte à 80% de capacité</li>
                             </ul>
 
@@ -14268,7 +14278,7 @@
                             <ol>
                                 <li><strong>Par étudiant (ZIP)</strong> : Un fichier ZIP contenant tous les travaux d'un étudiant</li>
                                 <li><strong>Par production (ZIP)</strong> : Un fichier ZIP regroupant tous les travaux d'une même production</li>
-                                <li><strong>Semestre complet (ZIP)</strong> : Archive complète de toutes les productions du semestre</li>
+                                <li><strong>Trimestre complet (ZIP)</strong> : Archive complète de toutes les productions du trimestre</li>
                                 <li><strong>Export Lea (PDF)</strong> : PDF avec les pages annotées aplaties + une page synthèse incluant la note, les critères et la rétroaction</li>
                             </ol>
 
