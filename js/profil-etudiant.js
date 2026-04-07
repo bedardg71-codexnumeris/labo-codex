@@ -7093,13 +7093,21 @@ function _genererBarresSRPNF(da, graphiqueCriteres) {
                     : '<span style="color: var(--gris-moyen); font-size: 1.1rem;">○</span>';
             }
 
-            // Texte descriptif des critères en défi
+            // Noms des critères multistructurels surveillés
+            var nomsMulti = suivi.criteresMulti.map(function (c) {
+                return c.charAt(0).toUpperCase() + c.slice(1);
+            });
+            var labelMulti = nomsMulti.join(', ');
+
+            // Texte descriptif selon le diagnostic
             var texteDefis = '';
             if (suivi.criteresEnDefi.length > 0) {
                 var nomsDefis = suivi.criteresEnDefi.map(function (c) {
                     return c.charAt(0).toUpperCase() + c.slice(1);
                 });
                 texteDefis = nomsDefis.join(', ') + ' sous le seuil de ' + Math.round(suivi.seuil * 100) + '%';
+            } else {
+                texteDefis = labelMulti + ' au-dessus du seuil de ' + Math.round(suivi.seuil * 100) + '%';
             }
 
             // Score actuel formaté
@@ -7115,7 +7123,7 @@ function _genererBarresSRPNF(da, graphiqueCriteres) {
             encadreSuivi = '<div style="margin: 20px 0; padding: 14px 16px; border-left: 4px solid ' + suivi.couleur + '; background: linear-gradient(to right, ' + suivi.couleur + '11, transparent); border-radius: 0 6px 6px 0;">' +
                 '<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">' +
                     '<div>' +
-                        '<div style="font-weight: 600; font-size: 0.95rem; color: var(--texte-principal);">Suivi de l\'apprentissage</div>' +
+                        '<div style="font-weight: 600; font-size: 0.95rem; color: var(--texte-principal);">Suivi de l\'apprentissage <span style="font-weight: 400; font-size: 0.8rem; color: var(--gris-moyen);">(' + echapperHtml(labelMulti) + ')</span></div>' +
                         '<div style="font-size: 0.9rem; margin-top: 4px; color: var(--texte-principal);">' +
                             '<span style="font-weight: 600; color: ' + suivi.couleur + ';">' + echapperHtml(suivi.diagnostic) + '</span>' +
                             (texteDefis ? ' — ' + echapperHtml(texteDefis) : '') +
