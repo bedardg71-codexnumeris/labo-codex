@@ -7145,7 +7145,7 @@ function _genererBarresSRPNF(da, graphiqueCriteres) {
             encadreSuivi = '<div style="margin: 20px 0; padding: 14px 16px; border-left: 4px solid ' + suivi.couleur + '; background: linear-gradient(to right, ' + suivi.couleur + '11, transparent); border-radius: 0 6px 6px 0;">' +
                 '<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">' +
                     '<div>' +
-                        '<div style="font-weight: 600; font-size: 0.95rem; color: var(--texte-principal);">Suivi de l\'apprentissage <span style="font-weight: 400; font-size: 0.8rem; color: var(--gris-moyen);">(' + echapperHtml(labelMulti) + ')</span></div>' +
+                        '<div style="font-weight: 600; font-size: 0.95rem; color: var(--texte-principal);">Suivi de l\'apprentissage des fondamentaux <span style="font-weight: 400; font-size: 0.8rem; color: var(--gris-moyen);">(' + echapperHtml(labelMulti) + ')</span></div>' +
                         '<div style="font-size: 0.9rem; margin-top: 4px; color: var(--texte-principal);">' +
                             '<span style="font-weight: 600; color: ' + suivi.couleur + ';">' + echapperHtml(suivi.diagnostic) + '</span>' +
                             (texteDefis ? ' — ' + echapperHtml(texteDefis) : '') +
