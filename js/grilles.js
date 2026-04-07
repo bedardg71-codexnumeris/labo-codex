@@ -332,6 +332,7 @@ async function sauvegarderCritere() {
         ponderation: parseInt(document.getElementById('criterePonderation')?.value) || 0,
         type: document.getElementById('critereType')?.value || 'holistique',
         formule: document.getElementById('critereFormule')?.value?.trim() || '',
+        niveauSOLO: 'multistructurel',
         verrouille: false
     };
 
@@ -2682,7 +2683,7 @@ function afficherCriteresTemp() {
                     style="position: absolute; top: 8px; right: 8px;">
                 ✕
             </button>
-            <div style="display: grid; grid-template-columns: 60px 2fr 140px 90px 3fr; gap: 12px; align-items: end;">
+            <div style="display: grid; grid-template-columns: 60px 2fr 140px 90px 150px 3fr; gap: 12px; align-items: end;">
                 <div class="groupe-form" style="text-align: center;">
                     <label style="font-size: 0.85rem; color: var(--gris-moyen);">Ordre</label>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
@@ -2728,6 +2729,17 @@ function afficherCriteresTemp() {
                            min="0"
                            max="100"
                            data-on-change="modifierPonderationCritereTempHandler" data-critere-index="${index}">
+                </div>
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Niveau SOLO
+                        <span class="tooltip-aide" title="Niveau cognitif du critère selon la taxonomie SOLO. Les critères multistructurels (fondations) sont surveillés par le dépistage pour détecter les difficultés persistantes.">📍</span>
+                    </label>
+                    <select class="controle-form"
+                            data-on-change="modifierCritereTempHandler" data-critere-index="${index}" data-champ="niveauSOLO">
+                        <option value="multistructurel" ${(critere.niveauSOLO || 'multistructurel') === 'multistructurel' ? 'selected' : ''}>Multistructurel</option>
+                        <option value="relationnel" ${critere.niveauSOLO === 'relationnel' ? 'selected' : ''}>Relationnel</option>
+                        <option value="abstrait_etendu" ${critere.niveauSOLO === 'abstrait_etendu' ? 'selected' : ''}>Abstrait étendu</option>
+                    </select>
                 </div>
                 <div class="groupe-form">
                     <label style="font-size: 0.85rem; color: var(--gris-moyen);">Description</label>
@@ -2939,7 +2951,7 @@ function afficherCriteresGrille(grille) {
                     style="position: absolute; top: 8px; right: 8px;">
                 ✕
             </button>
-            <div style="display: grid; grid-template-columns: 60px 2fr 140px 90px 3fr; gap: 12px; align-items: end;">
+            <div style="display: grid; grid-template-columns: 60px 2fr 140px 90px 150px 3fr; gap: 12px; align-items: end;">
                 <div class="groupe-form" style="text-align: center;">
                     <label style="font-size: 0.85rem; color: var(--gris-moyen);">Ordre</label>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
@@ -2984,6 +2996,17 @@ function afficherCriteresGrille(grille) {
                            min="0"
                            max="100"
                            data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-champ="ponderation" data-parse-int>
+                </div>
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Niveau SOLO
+                        <span class="tooltip-aide" title="Niveau cognitif du critère selon la taxonomie SOLO. Les critères multistructurels (fondations) sont surveillés par le dépistage pour détecter les difficultés persistantes.">📍</span>
+                    </label>
+                    <select class="controle-form"
+                            data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-champ="niveauSOLO">
+                        <option value="multistructurel" ${(critere.niveauSOLO || 'multistructurel') === 'multistructurel' ? 'selected' : ''}>Multistructurel</option>
+                        <option value="relationnel" ${critere.niveauSOLO === 'relationnel' ? 'selected' : ''}>Relationnel</option>
+                        <option value="abstrait_etendu" ${critere.niveauSOLO === 'abstrait_etendu' ? 'selected' : ''}>Abstrait étendu</option>
+                    </select>
                 </div>
                 <div class="groupe-form">
                     <label style="font-size: 0.85rem; color: var(--gris-moyen);">Description</label>
