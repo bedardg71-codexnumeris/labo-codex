@@ -465,6 +465,9 @@ const TOOLTIPS = {
     'tdb-rai':
         'Niveau d\u2019intervention selon la performance globale (indice P, tous crit\u00e8res). Compl\u00e9mentaire au suivi des fondamentaux qui cible les crit\u00e8res multistructurels.',
 
+    'tdb-impact-artefacts':
+        'Identifie les productions qui font le plus progresser (ou r\u00e9gresser) les crit\u00e8res multistructurels du groupe. Inclut l\u2019impact des jetons de reprise.',
+
     // --- Section Développement du groupe ---
 
     'tdb-dev-groupe':
