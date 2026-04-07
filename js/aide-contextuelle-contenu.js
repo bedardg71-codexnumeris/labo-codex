@@ -702,6 +702,38 @@ const AIDE_CONTEXTUELLE = {
             }
         ],
         voirAussi: ['profil-etudiant-indicateurs', 'profil-etudiant-accompagnement']
+    },
+
+    // =========================================================================
+    // SUIVI DE L'APPRENTISSAGE DES FONDAMENTAUX
+    // =========================================================================
+
+    'suivi-apprentissage-fondamentaux': {
+        titre: "Suivi de l'apprentissage des fondamentaux",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Cet encadré surveille la progression de l'étudiant sur les critères multistructurels (fondations) de ta grille de dépistage. Il croise deux informations : combien d'artefacts consécutifs sont sous le seuil (IPB) et la direction de la progression."
+            },
+            {
+                type: 'liste',
+                titre: 'Lecture des pastilles',
+                items: [
+                    "Chaque pastille représente un artefact évalué (ancien → récent, de gauche à droite).",
+                    "La couleur correspond au niveau IDME du score multistructurel : I (insuffisant), D (développement), M (maîtrisé), E (étendu).",
+                    "L'IPB compte les pastilles consécutives sous le seuil de maîtrise, en partant du plus récent."
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: "Un diagnostic de « Plateau » n'est pas nécessairement négatif — un score stable en zone D peut indiquer une consolidation. Le jugement professionnel reste essentiel."
+            },
+            {
+                type: 'texte',
+                contenu: "Configure les critères surveillés dans Structure → Grille de critères (tag SOLO). Ajuste le seuil et la fenêtre d'analyse dans Contexte → Dépistage."
+            }
+        ],
+        voirAussi: ['profil-etudiant-indicateurs']
     }
 };
 

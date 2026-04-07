@@ -520,7 +520,7 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 var SYNONYMES_AIDE = [
     ['rai', 'réponse à l\'intervention', 'niveau 1', 'niveau 2', 'niveau 3', 'interventions', 'dépistage'],
-    ['difficulté', 'difficulté persistante', 'difficulté émergente', 'défi spécifique', 'score multistructurel', 'pattern', 'suivi'],
+    ['difficulté', 'difficulté persistante', 'difficulté émergente', 'défi spécifique', 'score multistructurel', 'pattern', 'suivi', 'ipb', 'fondamentaux', 'plateau'],
     ['performance', 'indice p', 'note', 'artefact', 'portfolio', 'meilleurs artefacts'],
     ['assiduité', 'indice a', 'présence', 'absence', 'taux de présence'],
     ['complétion', 'indice c', 'remise', 'taux de remise'],

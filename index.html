@@ -12540,6 +12540,8 @@
                             <div class="alerte alerte-information" style="margin-top: 15px;">
                                 <p>L'objectif n'est pas de classer les étudiants, mais de <strong>détecter tôt les difficultés</strong> pour intervenir avant qu'elles ne s'aggravent. Le cycle dépister → agir → observer → ajuster se répète tout au long du trimestre.</p>
                             </div>
+
+                            <p class="mt-10">Le <strong>suivi de l'apprentissage des fondamentaux</strong> (visible dans le profil de chaque étudiant) alimente directement ce modèle&nbsp;: l'indice de persistance (IPB) détermine automatiquement le niveau RàI suggéré. Voir la carte <em>Suivi de l'apprentissage et dépistage SOLO</em> pour les détails.</p>
                         </div>
                     </div>
 
@@ -12586,6 +12588,8 @@
                                 <p><strong>💡 Pourquoi SOLO plutôt qu'une note sur 100&nbsp;?</strong></p>
                                 <p>Une note chiffrée dit <em>combien</em>. La taxonomie SOLO dit <em>comment</em> l'étudiant structure sa compréhension. C'est cette information qualitative qui permet d'orienter l'intervention pédagogique.</p>
                             </div>
+
+                            <p class="mt-10"><strong>SOLO et le dépistage</strong>&nbsp;: dans ta grille de critères, chaque critère peut être étiqueté avec son niveau SOLO (multistructurel, relationnel ou abstrait étendu). Le dépistage surveille les critères <strong>multistructurels</strong> — les fondations — pour détecter les difficultés avant qu'elles n'affectent les niveaux supérieurs. Voir la carte <em>Suivi de l'apprentissage et dépistage SOLO</em>.</p>
                         </div>
                     </div>
 
@@ -12612,6 +12616,68 @@
                         </div>
                     </div>
 
+                    <!-- Carte: Suivi de l'apprentissage et dépistage SOLO -->
+                    <div class="carte accordeon" id="accordeon-aide-suivi-apprentissage">
+                        <div class="accordeon-header">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Suivi de l'apprentissage et dépistage SOLO
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Qu'est-ce que le suivi de l'apprentissage&nbsp;?</strong></p>
+                            <p>L'application observe la progression de chaque élève sur les <strong>critères fondamentaux</strong> (multistructurels) de ta grille d'évaluation. Un signal de dépistage apparaît quand la progression stagne sur ces fondations pendant plusieurs artefacts consécutifs.</p>
+
+                            <p class="mt-10"><strong>Comment ça fonctionne&nbsp;?</strong></p>
+                            <ul class="u-mt-5">
+                                <li>Chaque critère de ta grille est associé à un <strong>niveau cognitif</strong> (taxonomie SOLO)&nbsp;: multistructurel (fondation), relationnel (mise en relation), abstrait étendu (transfert).</li>
+                                <li>L'application calcule un <strong>score pondéré</strong> sur tes critères multistructurels pour chaque artefact évalué.</li>
+                                <li>L'<strong>indice de persistance (IPB)</strong> compte combien d'artefacts consécutifs récents sont sous le seuil de maîtrise configurable.</li>
+                                <li>Le croisement IPB × direction de progression donne un <strong>diagnostic en langage clair</strong>&nbsp;: maîtrise acquise, progression, plateau, difficulté émergente, constante ou persistante.</li>
+                            </ul>
+
+                            <p class="mt-10"><strong>Pourquoi les critères multistructurels&nbsp;?</strong></p>
+                            <p>La taxonomie SOLO montre que les habiletés de base (organiser, être rigoureux, s'exprimer correctement) sont <strong>prérequises</strong> aux habiletés de niveau supérieur (interpréter, nuancer, transférer). Un élève qui stagne sur les fondations aura du mal à progresser sur les critères plus complexes — c'est un signal d'intervention précoce.</p>
+
+                            <div class="alerte alerte-information" style="margin-top: 10px;">
+                                <p><strong>💡 Transférable à toute discipline</strong></p>
+                                <p>Un prof de chimie avec «&nbsp;Manipulation&nbsp;» (multistructurel) et «&nbsp;Interprétation&nbsp;» (relationnel) devrait observer le même phénomène. Les fondations varient d'une discipline à l'autre, mais le principe reste le même.</p>
+                            </div>
+
+                            <p class="mt-10"><strong>Comment configurer&nbsp;?</strong></p>
+                            <ul class="u-mt-5">
+                                <li><strong>Structure → Grille de critères</strong>&nbsp;: étiquette chaque critère avec son niveau SOLO (multistructurel, relationnel ou abstrait étendu).</li>
+                                <li><strong>Contexte → Dépistage → Seuil de défi</strong>&nbsp;: ajuste selon ton exigence (75% par défaut).</li>
+                                <li><strong>Contexte → Dépistage → Fenêtre d'analyse</strong>&nbsp;: nombre de productions récentes à observer (4 par défaut).</li>
+                            </ul>
+
+                            <p class="mt-10"><strong>Comment interpréter les diagnostics&nbsp;?</strong></p>
+
+                            <table class="tableau" style="margin-top: 10px;">
+                                <thead>
+                                    <tr>
+                                        <th>IPB</th>
+                                        <th>Direction</th>
+                                        <th>Diagnostic</th>
+                                        <th>Niveau RàI</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>0</td><td>—</td><td>Maîtrise acquise</td><td>1</td></tr>
+                                    <tr><td>1</td><td>↗</td><td>Difficulté résolue</td><td>1</td></tr>
+                                    <tr><td>1</td><td>→ ou ↘</td><td>Difficulté émergente</td><td>1</td></tr>
+                                    <tr><td>2</td><td>↗</td><td>Progression</td><td>2</td></tr>
+                                    <tr><td>2</td><td>→</td><td>Plateau</td><td>2</td></tr>
+                                    <tr><td>2</td><td>↘</td><td>Difficulté constante</td><td>2</td></tr>
+                                    <tr><td>≥ 3</td><td>→ ou ↘</td><td>Difficulté persistante</td><td>3</td></tr>
+                                </tbody>
+                            </table>
+
+                            <div class="alerte alerte-attention" style="margin-top: 15px;">
+                                <p><strong>«&nbsp;Plateau&nbsp;» n'est pas un verdict négatif</strong> — un score stable en zone de développement peut indiquer une consolidation ou une stagnation. Le jugement professionnel est toujours essentiel. L'application révèle les conditions, l'enseignant décide de l'action.</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Carte: Critères d'évaluation et dépistage -->
                     <div class="carte accordeon" id="accordeon-aide-criteres">
                         <div class="accordeon-header">
@@ -12633,6 +12699,8 @@
                                 <p><strong>💡 Adapte les critères à ta discipline</strong></p>
                                 <p>Un enseignant de chimie, de philosophie ou de toute autre discipline peut définir ses propres critères. Ce qui compte, c'est qu'ils reflètent les compétences visées dans ton cours et qu'ils restent stables pendant le trimestre.</p>
                             </div>
+
+                            <p class="mt-10"><strong>Niveau cognitif SOLO</strong>&nbsp;: chaque critère de ta grille peut recevoir un tag indiquant son niveau dans la taxonomie SOLO (multistructurel, relationnel ou abstrait étendu). Ce tag détermine quels critères sont surveillés par le dépistage automatique. Par défaut, tous les critères sont considérés multistructurels — tu peux affiner en étiquetant tes critères de niveau supérieur. Configure le tag dans <strong>Structure → Grille de critères</strong>.</p>
                         </div>
                     </div>
 
