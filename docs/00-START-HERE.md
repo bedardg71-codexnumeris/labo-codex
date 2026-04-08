@@ -57,7 +57,7 @@ Ce pattern est utilise dans :
 
 ## Etat actuel du projet
 
-**Version** : Beta 99.07 (Build 0407-1215)
+**Version** : Beta 99.08 (Build 0408-0935)
 **Objectif** : Suivi de l'apprentissage (dépistage SOLO) — Phase 6 nettoyage complet
 **Priorite** : **Securite + Proprete > Nouvelles fonctionnalites**
 

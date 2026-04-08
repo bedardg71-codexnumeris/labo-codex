@@ -7975,30 +7975,35 @@
                         </p>
                     </div>
 
-                    <!-- Carte : Progression des fondamentaux par activité -->
-                    <div class="carte" id="carte-impact-artefacts-fondamentaux" style="margin-top: 2rem; display: none;">
+                    <!-- SECTION 7 : Consolidation des apprentissages -->
+                    <div class="carte" id="carte-consolidation" style="margin-top: 2rem;">
                         <h3 class="carte-titre-bleu u-flex-between u-flex-wrap" style="gap: 0.5rem">
                             <div class="u-align-center" style="display: flex; gap: 0.5rem">
-                                <span data-tooltip="tdb-impact-artefacts">Progression des fondamentaux par activité</span>
+                                <span>Consolidation des apprentissages</span>
                                 <span class="emoji-container">
-                                    <span class="primo-aide" data-target="note-impact-artefacts">📍</span>
+                                    <span class="primo-aide" data-target="note-consolidation">📍</span>
                                 </span>
                             </div>
+                            <div class="carte-contexte-ligne u-align-center" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; gap: 0.75rem">
+                                <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.78rem; color: var(--texte-secondaire);">
+                                    <input type="checkbox" id="toggle-prerequis-consolidation" data-on-change="togglePrerequisConsolidation"> Comparer prérequis
+                                </label>
+                            </div>
                         </h3>
-                        <div id="note-impact-artefacts" class="carte-info-toggle carte-info-note" style="display: none;">
-                            <strong>Lecture du graphique</strong>
+                        <div id="note-consolidation" class="carte-info-toggle carte-info-note" style="display: none;">
+                            <strong>Lecture de la matrice</strong>
                             <ul style="margin: 8px 0; padding-left: 18px; font-size: 0.85rem; line-height: 1.6;">
-                                <li>Chaque barre repr&eacute;sente une production, class&eacute;e par son impact m&eacute;dian sur les crit&egrave;res multistructurels du groupe.</li>
-                                <li><strong>Vert</strong> = impact positif (les fondamentaux progressent apr&egrave;s cette production).</li>
-                                <li><strong>Rouge</strong> = impact n&eacute;gatif (r&eacute;gression sur les fondamentaux).</li>
-                                <li>Le tooltip d&eacute;taille le nombre d'&eacute;tudiants &eacute;valu&eacute;s et l'impact des jetons de reprise.</li>
+                                <li><strong>Taux de rétention</strong> — pourcentage d'élèves ayant atteint la maîtrise (≥ M) à cet artefact et l'ayant maintenue sur ≥ 75 % des artefacts suivants.</li>
+                                <li><strong>Vert foncé</strong> (≥ 75 %) : consolidation durable. <strong>Vert clair</strong> (65-74 %) : consolidation fragile. <strong>Rouge</strong> (&lt; 65 %) : non consolidé.</li>
+                                <li><strong>Point de consolidation</strong> (ligne du bas) : premier artefact où ≥ 75 % du groupe retient la maîtrise.</li>
+                                <li><strong>n</strong> = nombre d'élèves ayant atteint M sur cette cellule (base du calcul).</li>
+                                <li><strong>Grisé</strong> = critère non évalué sur cet artefact (ex : Français sur A1, A3, A5, A7, A9).</li>
+                                <li><strong>A9-A10</strong> : pas assez d'artefacts suivants pour mesurer la rétention — le score moyen du groupe est affiché à la place.</li>
                             </ul>
-                            <em style="color: var(--gris-moyen); font-size: 0.8rem;">L'impact peut &ecirc;tre imm&eacute;diat ou diff&eacute;r&eacute; (manifest&eacute; sur l'artefact suivant).</em>
+                            <em style="color: var(--gris-moyen); font-size: 0.8rem;">Survole une cellule pour voir le détail du calcul.</em>
                         </div>
-                        <div class="u-w-100" style="position: relative; height: 400px;">
-                            <canvas id="graphique-impact-artefacts-groupe"></canvas>
-                        </div>
-                        <p id="impact-artefacts-description" class="u-texte-petit u-mt-8" style="color: var(--texte-muted);"></p>
+                        <div id="conteneur-matrice-consolidation" style="overflow-x: auto; margin-top: 1rem;"></div>
+                        <div id="consolidation-synthese" style="margin-top: 1rem;"></div>
                     </div>
 
                     </div><!-- fin labo-conteneur -->
@@ -17198,7 +17203,7 @@
     <script src="js/graphiques-progression.js?v=2026030201"></script>
     <script src="js/correlations-longitudinales.js?v=2026032101"></script>
         <script src="js/impact-jetons.js?v=2026032101"></script>
-        <script src="js/impact-artefacts.js?v=2026040701"></script>
+    <script src="js/consolidation.js?v=2026040801"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=2026032002"></script>
