@@ -3649,10 +3649,53 @@ function creerGraphiqueCriteres(canvasId, da) {
         // Calculer les bornes Y dynamiques (échelle 0-100)
         const bornesY = calculerBornesYDynamiques100(datasets);
 
+        // Plugin : pointillés entre points non consécutifs (ex. Français évalué 1×/2)
+        const pluginPointillesGaps = {
+            id: 'dashedGapLines',
+            afterDatasetsDraw: function(chart) {
+                var ctx2 = chart.ctx;
+                var xScale = chart.scales.x;
+                var yScale = chart.scales.y;
+
+                chart.data.datasets.forEach(function(ds, di) {
+                    var meta = chart.getDatasetMeta(di);
+                    if (meta.hidden) return;
+
+                    var data = ds.data;
+                    var lastNonNull = -1;
+
+                    for (var i = 0; i < data.length; i++) {
+                        if (data[i] == null) continue;
+
+                        if (lastNonNull >= 0 && i - lastNonNull > 1) {
+                            // Il y a un gap — dessiner un pointillé
+                            var x0 = xScale.getPixelForValue(lastNonNull);
+                            var y0 = yScale.getPixelForValue(data[lastNonNull]);
+                            var x1 = xScale.getPixelForValue(i);
+                            var y1 = yScale.getPixelForValue(data[i]);
+
+                            ctx2.save();
+                            ctx2.strokeStyle = ds.borderColor || '#999';
+                            ctx2.lineWidth = (ds.borderWidth || 2) * 0.7;
+                            ctx2.globalAlpha = 0.5;
+                            ctx2.setLineDash([6, 4]);
+                            ctx2.beginPath();
+                            ctx2.moveTo(x0, y0);
+                            ctx2.lineTo(x1, y1);
+                            ctx2.stroke();
+                            ctx2.restore();
+                        }
+
+                        lastNonNull = i;
+                    }
+                });
+            }
+        };
+
         // Configuration du graphique
         const config = {
             type: 'line',
-            plugins: [pluginGradientFond100, pluginEtiquettesZones100, pluginInterventionsCriteres],
+            plugins: [pluginGradientFond100, pluginEtiquettesZones100, pluginInterventionsCriteres, pluginPointillesGaps],
             data: {
                 labels: donnees.labels,
                 datasets: datasets
