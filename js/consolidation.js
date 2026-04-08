@@ -49,6 +49,15 @@ function _chargerContexte() {
     var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     var productions = obtenirDonneesSelonMode('productions') || [];
 
+    // Filtrer par groupe actif (cohérent avec le bandeau contextuel)
+    var infoCours = db.getSync('infoCours', null);
+    if (infoCours && !infoCours._modeCours && infoCours.groupe) {
+        var groupeNorm = String(infoCours.groupe).padStart(5, '0');
+        evaluations = evaluations.filter(function(ev) {
+            return String(ev.groupe || '').padStart(5, '0') === groupeNorm;
+        });
+    }
+
     // ── Échelle ──────────────────────────────────────────────────────────
     var echelle = _detecterEchelle(productions);
     var conversion = _construireConversion(echelle);
