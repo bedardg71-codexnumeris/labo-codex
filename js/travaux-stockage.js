@@ -768,10 +768,8 @@
             }
         }
 
-        // Charger les thumbnails manquantes en batch
-        for (var j = 0; j < ids.length; j++) {
-            await obtenirThumbnail(ids[j]);
-        }
+        // Charger les thumbnails manquantes en parallèle
+        await Promise.all(ids.map(function(id) { return obtenirThumbnail(id); }));
 
         // Appliquer les thumbnails aux elements
         for (var k = 0; k < elements.length; k++) {
@@ -801,9 +799,7 @@
      */
     async function prechargerThumbnails(fichierIds) {
         if (!fichierIds || fichierIds.length === 0) return;
-        for (var i = 0; i < fichierIds.length; i++) {
-            await obtenirThumbnail(fichierIds[i]);
-        }
+        await Promise.all(fichierIds.map(function(id) { return obtenirThumbnail(id); }));
     }
 
     /* ===============================
