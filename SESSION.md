@@ -1,8 +1,45 @@
-# SESSION ACTIVE — BETA 99.04
+# SESSION ACTIVE — BETA 99.09
 
-**Date** : 4 avril 2026
-**Version** : Beta 99.04 (Build 0404-1407)
-**Statut** : Nettoyage pédagogique section Aide (chantiers 1-10)
+**Date** : 9 avril 2026
+**Version** : Beta 99.09 (Build 0409-1510)
+**Statut** : Interface, import et fiabilité de sauvegarde
+
+---
+
+## Bilan de la session (9 avril 2026) — Interface, import 250 dpi, fiabilité sauvegarde
+
+**Build** : 0409-1510, Beta 99.09
+**Fichiers modifiés** : index.html, productions.js, graphiques-progression.js, travaux-import.js, travaux-ui.js, travaux-stockage.js, travaux-annotation.js, evaluation.js, changelog-data.js, version.json, init-inline.js, CLAUDE.md, 00-START-HERE.md
+
+### Interface — Tri des productions et graphiques chronologiques (2 commits)
+- **Sidebar** : sélecteur de tri (titre / type / date d'échéance) dans la barre latérale des productions
+- **Graphiques** : axe X toujours ordonné par date d'échéance du groupe actif (progression temporelle)
+- Les deux mécanismes sont indépendants
+
+### Import des travaux — Résolution DPI configurable (3 commits)
+- Résolution d'import passée de 200 à 250 dpi par défaut
+- Sélecteur DPI (200/250/300 ou désactivé) dans le pipeline d'optimisation
+- DPI propagé à l'uniformisation des images et à l'assemblage PDF
+
+### Import des travaux — Audit de performance (8 commits)
+- **Fix crash Safari** : sélection de production avec 68+ fichiers ne re-décode plus les blobs
+- **Fuite ObjectURL** : `finally` block dans les 3 générateurs de thumbnails
+- **Fuite scroll listeners** : cleanup avant réattachement (empêche l'accumulation)
+- **Thumbnails IDB** : chargement parallèle (`Promise.all`) au lieu de séquentiel
+- **Concurrence thumbnails** : max 4 simultanées + 1 seul refresh UI groupé (était 68 × re-render)
+- **Yield 100ms** entre lots d'import pour la barre de progression
+- **Cache double** previews bal/raw : toggle balance des blancs instantané
+- **Debounce re-render** : 150ms + sélection CSS instantanée
+
+### Fiabilité de sauvegarde — Audit évaluation/annotation (6 commits)
+- **Flush debounce annotation** avant désactivation (changement de mode ou de fichier)
+- **Flush auto-save évaluation** au changement d'étudiant (était tué sans sauvegarder → perte erreurs de français)
+- **`beforeunload`** flush maintenant les deux debounces (annotation + évaluation)
+- **Debounce évaluation** réduit de 3s à 1.5s
+- **Sauvegarde manuelle** annule le debounce en attente (évite conflit)
+- **Changement de fichier** flush l'évaluation en cours
+
+### Zéro régression attendue. 19 commits.
 
 ---
 
