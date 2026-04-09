@@ -131,6 +131,40 @@
     let productionSelectionnee = '';
     let importEnCours = false;
 
+    // Limiteur de concurrence pour la génération de thumbnails
+    const THUMB_CONCURRENCE_MAX = 4;
+    let _thumbEnCours = 0;
+    let _thumbFile = [];
+    let _thumbRefreshTimer = null;
+
+    function _planifierRefreshUI() {
+        if (_thumbRefreshTimer) return;
+        _thumbRefreshTimer = setTimeout(function() {
+            _thumbRefreshTimer = null;
+            if (typeof window.rafraichirPipelineUI === 'function') {
+                window.rafraichirPipelineUI();
+            }
+        }, 500);
+    }
+
+    async function _traiterThumbQueue() {
+        while (_thumbEnCours < THUMB_CONCURRENCE_MAX && _thumbFile.length > 0) {
+            const fichierPrepare = _thumbFile.shift();
+            _thumbEnCours++;
+            genererThumbnailQueue(fichierPrepare)
+                .catch(function(err) { console.warn('[Travaux-Import] Erreur thumbnail:', err); })
+                .finally(function() {
+                    _thumbEnCours--;
+                    _traiterThumbQueue();
+                });
+        }
+    }
+
+    function planifierThumbnail(fichierPrepare) {
+        _thumbFile.push(fichierPrepare);
+        _traiterThumbQueue();
+    }
+
     /* ===============================
        DETECTION DA
        =============================== */
@@ -400,10 +434,8 @@
                 }
                 fichiersEnAttente.push(prepare);
                 acceptes.push(prepare);
-                // Generer les thumbnails en fire-and-forget
-                genererThumbnailQueue(prepare).catch(err => {
-                    console.warn('[Travaux-Import] Erreur génération thumbnail:', err);
-                });
+                // Générer les thumbnails via le planificateur (max 4 concurrentes)
+                planifierThumbnail(prepare);
             } else {
                 console.warn(`[Travaux-Import] Type refuse: ${fichier.name} (${fichier.type})`);
             }
@@ -757,10 +789,8 @@
             console.warn('[Travaux-Import] Erreur thumbnail queue:', e);
         }
         persisterFileDAttente();
-        // Rafraichir l'UI pipeline
-        if (typeof window.rafraichirPipelineUI === 'function') {
-            window.rafraichirPipelineUI();
-        }
+        // Planifier un refresh UI groupé (évite 68 re-renders)
+        _planifierRefreshUI();
     }
 
     /**
