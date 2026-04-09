@@ -412,9 +412,9 @@ function chargerEchellePerformance() {
  * - onchange="#selectEtudiantEval" dans le HTML
  */
 function chargerEvaluationsEtudiant() {
-    // Annuler tout auto-save en attente pour éviter d'écraser les critères
-    // de l'évaluation précédente avec des données vides (race condition)
-    if (_timerAutoSave) { clearTimeout(_timerAutoSave); _timerAutoSave = null; }
+    // Flusher l'auto-save en attente AVANT de charger le nouvel étudiant
+    // (sauvegarde les erreurs de français et critères non encore persistés)
+    _flusherAutoSave();
 
     const etudiantDA = document.getElementById('selectEtudiantEval').value;
     const btnVoirProfil = document.getElementById('btnVoirProfilDepuisEval');
@@ -1115,12 +1115,12 @@ function niveauSelectionne(critereId) {
    =============================== */
 
 let _timerAutoSave = null;
+let _pendingAutoSaveSnapshot = null;
 
 function _debouncerAutoSave() {
     if (_timerAutoSave) clearTimeout(_timerAutoSave);
-    // Snapshot de l'état au moment du debounce pour éviter la race condition
-    // si l'utilisateur change d'élève avant que le timer fire
-    var snapshot = {
+    // Snapshot de l'état ACTUEL pour pouvoir flusher si l'utilisateur change d'élève
+    _pendingAutoSaveSnapshot = {
         etudiantDA: window.evaluationEnCours?.etudiantDA,
         productionId: window.evaluationEnCours?.productionId,
         grilleId: window.evaluationEnCours?.grilleId,
@@ -1130,7 +1130,21 @@ function _debouncerAutoSave() {
         donneesAlgorithmiques: window.evaluationEnCours?.donneesAlgorithmiques
             ? JSON.parse(JSON.stringify(window.evaluationEnCours.donneesAlgorithmiques)) : {}
     };
-    _timerAutoSave = setTimeout(function() { _autoSauvegarderCriteres(snapshot); }, 3000);
+    _timerAutoSave = setTimeout(function() { _autoSauvegarderCriteres(_pendingAutoSaveSnapshot); }, 3000);
+}
+
+/**
+ * Flush l'auto-save en attente immédiatement (appelé avant changement d'étudiant/fermeture)
+ */
+function _flusherAutoSave() {
+    if (_timerAutoSave) {
+        clearTimeout(_timerAutoSave);
+        _timerAutoSave = null;
+    }
+    if (_pendingAutoSaveSnapshot) {
+        _autoSauvegarderCriteres(_pendingAutoSaveSnapshot);
+        _pendingAutoSaveSnapshot = null;
+    }
 }
 
 function _autoSauvegarderCriteres(snapshot) {
