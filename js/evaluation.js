@@ -1110,7 +1110,7 @@ function niveauSelectionne(critereId) {
 }
 
 /* ===============================
-   AUTO-SAUVEGARDE DEBOUNCE (3s)
+   AUTO-SAUVEGARDE DEBOUNCE (1.5s)
    Persiste les criteres en IDB apres chaque modification
    =============================== */
 
@@ -1130,7 +1130,7 @@ function _debouncerAutoSave() {
         donneesAlgorithmiques: window.evaluationEnCours?.donneesAlgorithmiques
             ? JSON.parse(JSON.stringify(window.evaluationEnCours.donneesAlgorithmiques)) : {}
     };
-    _timerAutoSave = setTimeout(function() { _autoSauvegarderCriteres(_pendingAutoSaveSnapshot); }, 3000);
+    _timerAutoSave = setTimeout(function() { _autoSauvegarderCriteres(_pendingAutoSaveSnapshot); }, 1500);
 }
 
 /**
