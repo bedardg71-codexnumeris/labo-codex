@@ -244,6 +244,12 @@
     function desactiverAnnotation() {
         if (!annotationActive) return;
 
+        // Flush du debounce en attente avant sauvegarde finale
+        if (timerSauvegarde) {
+            clearTimeout(timerSauvegarde);
+            timerSauvegarde = null;
+        }
+
         sauvegarderAnnotation();
         detacherEvenements();
         annotationActive = false;
