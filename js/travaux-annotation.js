@@ -113,10 +113,18 @@
             }
         });
 
-        // Sauvegarder les annotations avant rechargement/fermeture de page
+        // Sauvegarder les annotations ET flusher l'évaluation avant rechargement/fermeture
         window.addEventListener('beforeunload', () => {
+            if (timerSauvegarde) {
+                clearTimeout(timerSauvegarde);
+                timerSauvegarde = null;
+            }
             if (annotationActive && annotationCourante) {
                 sauvegarderAnnotation();
+            }
+            // Flusher l'auto-save évaluation en attente
+            if (typeof _flusherAutoSave === 'function') {
+                _flusherAutoSave();
             }
         });
 
