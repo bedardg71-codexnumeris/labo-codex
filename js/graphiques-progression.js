@@ -2615,6 +2615,19 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
             return null;
         }
 
+        // 🆕 Beta 99.08 : Trier les productions par date d'échéance (progression chronologique)
+        const infoCoursSort = db.getSync('infoCours', null);
+        const gcIdSort = infoCoursSort ? (infoCoursSort._groupeCoursId || infoCoursSort.id || null) : null;
+        productionsArtefacts.sort((a, b) => {
+            const dateA = (typeof obtenirEcheanceEffective === 'function')
+                ? (obtenirEcheanceEffective(a, gcIdSort).date || '9999')
+                : (a.dateEcheance || '9999');
+            const dateB = (typeof obtenirEcheanceEffective === 'function')
+                ? (obtenirEcheanceEffective(b, gcIdSort).date || '9999')
+                : (b.dateEcheance || '9999');
+            return dateA.localeCompare(dateB);
+        });
+
         // Récupérer les évaluations
         let evaluationsBrutes = [];
 
