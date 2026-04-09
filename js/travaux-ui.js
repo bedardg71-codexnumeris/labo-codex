@@ -1345,20 +1345,19 @@
             return;
         }
 
+        let blobUrl = null;
         try {
             const img = new Image();
             await new Promise((resolve, reject) => {
                 img.onload = resolve;
                 img.onerror = reject;
                 if (source) {
-                    const url = URL.createObjectURL(source);
-                    img._blobUrl = url;
-                    img.src = url;
+                    blobUrl = URL.createObjectURL(source);
+                    img.src = blobUrl;
                 } else {
                     img.src = imgThumb;
                 }
             });
-            if (img._blobUrl) URL.revokeObjectURL(img._blobUrl);
 
             // Preview a 400px max pour une bonne nettete
             const maxPreviewW = 400;
@@ -1423,6 +1422,8 @@
         } catch (e) {
             console.warn('[Pipeline] Erreur preview thumbnail:', f.nomFichier, e);
             conteneur.innerHTML = '<span class="pipeline-icone-placeholder">&#x1F5BC;</span>';
+        } finally {
+            if (blobUrl) URL.revokeObjectURL(blobUrl);
         }
     }
 
@@ -1494,15 +1495,15 @@
             return;
         }
 
+        let url = null;
         try {
-            const url = URL.createObjectURL(source);
+            url = URL.createObjectURL(source);
             const img = new Image();
             await new Promise((resolve, reject) => {
                 img.onload = resolve;
                 img.onerror = reject;
                 img.src = url;
             });
-            URL.revokeObjectURL(url);
 
             // Thumbnail a 120px max
             const scale = Math.min(1, 120 / Math.max(img.width, img.height));
@@ -1528,6 +1529,8 @@
                 f._cachedOriginalThumb = origCatchFallback;
                 conteneur.innerHTML = `<img src="${origCatchFallback}" alt="">`;
             }
+        } finally {
+            if (url) URL.revokeObjectURL(url);
         }
     }
 
@@ -2046,20 +2049,19 @@
             return;
         }
 
+        let blobUrl = null;
         try {
             const img = new Image();
             await new Promise((resolve, reject) => {
                 img.onload = resolve;
                 img.onerror = reject;
                 if (source) {
-                    const url = URL.createObjectURL(source);
-                    img._blobUrl = url;
-                    img.src = url;
+                    blobUrl = URL.createObjectURL(source);
+                    img.src = blobUrl;
                 } else {
                     img.src = centreThumbImg;
                 }
             });
-            if (img._blobUrl) URL.revokeObjectURL(img._blobUrl);
 
             // Preview a 600px max pour la zone centre
             const maxPreviewW = 600;
@@ -2124,6 +2126,8 @@
         } catch (e) {
             console.warn('[Pipeline] Erreur preview centre:', f.nomFichier, e);
             conteneur.innerHTML = '<span class="pipeline-icone-placeholder" style="font-size:3rem;">&#x1F5BC;</span>';
+        } finally {
+            if (blobUrl) URL.revokeObjectURL(blobUrl);
         }
     }
 
