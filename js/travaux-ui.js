@@ -1260,7 +1260,7 @@
        =============================== */
 
     /**
-     * Calcule les dimensions cibles apres uniformisation 200 DPI
+     * Calcule les dimensions cibles apres uniformisation 250 DPI
      * Reprend la logique de uniformiser200DPI() sans toucher aux pixels
      * @param {Object} f - Fichier prepare
      * @returns {{w: number, h: number}} Dimensions cibles
@@ -1280,9 +1280,9 @@
 
         let maxW, maxH;
         if (w > 2500 || h > 2500) {
-            maxW = 2200; maxH = 3400;
+            maxW = 2750; maxH = 4250;
         } else {
-            maxW = 1700; maxH = 2200;
+            maxW = 2125; maxH = 2750;
         }
 
         if (w <= maxW && h <= maxH) {
@@ -1645,7 +1645,7 @@
         colCentre += '<p class="texte-muted u-texte-petit" style="margin:8px 0 4px 0;">R\u00e9glages par d\u00e9faut\u00a0:</p>';
 
         colCentre += '<ul class="pipeline-checklist">';
-        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-dpi" checked data-on-change="travauxUI.mettreAJourPreviewsPipeline"> Uniformisation 200 dpi</label></li>`;
+        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-dpi" checked data-on-change="travauxUI.mettreAJourPreviewsPipeline"> Uniformisation 250 dpi</label></li>`;
         colCentre += `<li><label><input type="checkbox" id="pipeline-opt-balance" checked data-on-change="travauxUI.mettreAJourPreviewsPipeline"> Balance des blancs</label></li>`;
         colCentre += `<li><label><input type="checkbox" id="pipeline-opt-doublons" checked> D\u00e9tection doublons (manuel)</label></li>`;
         colCentre += `<li><label><input type="checkbox" id="pipeline-opt-assemblage" checked> Assemblage automatique (par nom / production)</label></li>`;
@@ -3514,7 +3514,7 @@
                         }
                     }
 
-                    // Uniformisation 200 dpi (par fichier : sauf si format11x17)
+                    // Uniformisation 250 dpi (par fichier : sauf si format11x17)
                     if (optDPI && !f.format11x17) {
                         try {
                             blob = await uniformiser200DPI(blob);
@@ -3857,9 +3857,9 @@
     }
 
     /**
-     * Uniformise une image a 200 DPI
-     * Lettre (8.5"x11") : 1700x2200px max — si deux dimensions <= 2500px
-     * Tabloid (11"x17") : 2200x3400px max — si une dimension > 2500px
+     * Uniformise une image a 250 DPI
+     * Lettre (8.5"x11") : 2125x2750px max — si deux dimensions <= 2500px
+     * Tabloid (11"x17") : 2750x4250px max — si une dimension > 2500px
      * @param {Blob} blob - Le blob image
      * @returns {Promise<Blob>} Le blob redimensionne
      */
@@ -3877,13 +3877,13 @@
                 // Determiner le format cible par seuil de dimension
                 let maxW, maxH;
                 if (w > 2500 || h > 2500) {
-                    // Tabloid 11"x17" a 200 DPI
-                    maxW = 2200;
-                    maxH = 3400;
+                    // Tabloid 11"x17" a 250 DPI
+                    maxW = 2750;
+                    maxH = 4250;
                 } else {
-                    // Lettre 8.5"x11" a 200 DPI
-                    maxW = 1700;
-                    maxH = 2200;
+                    // Lettre 8.5"x11" a 250 DPI
+                    maxW = 2125;
+                    maxH = 2750;
                 }
 
                 // Redimensionner proportionnellement si necessaire
