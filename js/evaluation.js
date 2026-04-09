@@ -2175,6 +2175,10 @@ document.addEventListener('DOMContentLoaded', function() {
  * }
  */
 function sauvegarderEvaluation() {
+    // Annuler le debounce auto-save (la sauvegarde manuelle prend le relais)
+    if (_timerAutoSave) { clearTimeout(_timerAutoSave); _timerAutoSave = null; }
+    _pendingAutoSaveSnapshot = null;
+
     // 🔄 Détecter si on est en mode modification d'une évaluation existante
     if (window.evaluationEnCours?.idModification) {
         sauvegarderEvaluationModifiee();
@@ -5802,6 +5806,10 @@ function modifierEvaluation(evaluationId) {
  * Appelée à la place de sauvegarderEvaluation() si on modifie une évaluation existante
  */
 function sauvegarderEvaluationModifiee() {
+    // Annuler le debounce auto-save (la sauvegarde manuelle prend le relais)
+    if (_timerAutoSave) { clearTimeout(_timerAutoSave); _timerAutoSave = null; }
+    _pendingAutoSaveSnapshot = null;
+
     const evaluationId = window.evaluationEnCours?.idModification;
 
     if (!evaluationId) {
