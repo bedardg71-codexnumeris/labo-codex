@@ -1332,8 +1332,10 @@
         // Cache : réutiliser la preview déjà générée (évite de re-décoder le blob)
         const optBalance = document.getElementById('pipeline-opt-balance')?.checked;
         const cacheKey = optBalance ? 'bal' : 'raw';
-        if (f._cachedPreviewThumb && f._cachedPreviewKey === cacheKey) {
-            conteneur.innerHTML = `<img src="${f._cachedPreviewThumb}" alt="">`;
+        // Cache double : garder les deux versions (bal/raw) pour éviter de recalculer au toggle
+        if (!f._previewCache) f._previewCache = {};
+        if (f._previewCache[cacheKey]) {
+            conteneur.innerHTML = `<img src="${f._previewCache[cacheKey]}" alt="">`;
             return;
         }
 
@@ -1412,8 +1414,7 @@
             }
 
             const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
-            f._cachedPreviewThumb = dataUrl;
-            f._cachedPreviewKey = cacheKey;
+            f._previewCache[cacheKey] = dataUrl;
 
             const imgResult = document.createElement('img');
             imgResult.src = dataUrl;
