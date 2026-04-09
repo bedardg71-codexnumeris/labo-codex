@@ -886,7 +886,7 @@
             });
 
             // Dimensions en mm (72 DPI par defaut pour PDF)
-            const mmPerPx = 25.4 / 200; // 200 DPI
+            const mmPerPx = 25.4 / 250; // 250 DPI
             const pageW = dims.width * mmPerPx;
             const pageH = dims.height * mmPerPx;
 
@@ -1174,7 +1174,7 @@
 
         for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
-            const scale = 800 / page.getViewport({ scale: 1 }).width;
+            const scale = 1000 / page.getViewport({ scale: 1 }).width;
             const viewport = page.getViewport({ scale: scale });
 
             const canvas = document.createElement('canvas');
@@ -1219,8 +1219,8 @@
                 reader.readAsDataURL(blob);
             });
 
-            // Dimensions en mm (200 DPI)
-            const mmPerPx = 25.4 / 200;
+            // Dimensions en mm (250 DPI)
+            const mmPerPx = 25.4 / 250;
             const pageW = page.largeur * mmPerPx;
             const pageH = page.hauteur * mmPerPx;
 
