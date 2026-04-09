@@ -1901,25 +1901,44 @@
     /**
      * Synchronise le scroll entre les colonnes gauche et droite du pipeline.
      * Appelee apres chaque re-rendu pour reattacher les listeners.
+     * Utilise des références nommées pour éviter l'accumulation de listeners.
      */
+    let _scrollSyncG = null;
+    let _scrollSyncD = null;
+    let _scrollSyncColG = null;
+    let _scrollSyncColD = null;
+
     function initialiserSyncScrollColonnes() {
+        // Retirer les anciens listeners si les éléments ont changé (re-render innerHTML)
+        if (_scrollSyncColG && _scrollSyncG) {
+            _scrollSyncColG.removeEventListener('scroll', _scrollSyncG);
+        }
+        if (_scrollSyncColD && _scrollSyncD) {
+            _scrollSyncColD.removeEventListener('scroll', _scrollSyncD);
+        }
+
         const colG = document.querySelector('.pipeline-col-originaux');
         const colD = document.querySelector('.pipeline-col-confirmes');
         if (!colG || !colD) return;
 
         let enSync = false;
-        colG.addEventListener('scroll', function() {
+        _scrollSyncG = function() {
             if (enSync) return;
             enSync = true;
             colD.scrollTop = colG.scrollTop;
             enSync = false;
-        });
-        colD.addEventListener('scroll', function() {
+        };
+        _scrollSyncD = function() {
             if (enSync) return;
             enSync = true;
             colG.scrollTop = colD.scrollTop;
             enSync = false;
-        });
+        };
+        _scrollSyncColG = colG;
+        _scrollSyncColD = colD;
+
+        colG.addEventListener('scroll', _scrollSyncG);
+        colD.addEventListener('scroll', _scrollSyncD);
     }
 
     /**
