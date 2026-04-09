@@ -104,6 +104,10 @@
         // Ecouter la fermeture de fichier
         window.addEventListener('travaux-fichier-ferme', () => {
             desactiverAnnotation();
+            // Flusher l'auto-save évaluation (erreurs de français en cours)
+            if (typeof _flusherAutoSave === 'function') {
+                _flusherAutoSave();
+            }
             // Cacher les canvas quand le fichier est ferme
             if (canvasAnnotation) {
                 canvasAnnotation.classList.add('u-hide');
