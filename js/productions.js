@@ -83,6 +83,34 @@ function obtenirEcheanceEffective(production, groupeCoursId) {
 }
 
 /**
+ * 🆕 Beta 99.08 : Obtenir la date d'échéance la plus tôt parmi tous les groupes
+ * Utilisé pour le tri dans la sidebar (sans contexte de groupe spécifique)
+ * @param {Object} production - La production
+ * @returns {string|null} Date YYYY-MM-DD la plus tôt, ou null
+ */
+function obtenirEcheancePlusTot(production) {
+    let plusTot = production.dateEcheance || null;
+    if (production.echeancesParGroupe) {
+        for (const gcId in production.echeancesParGroupe) {
+            const entree = production.echeancesParGroupe[gcId];
+            if (entree && entree.date) {
+                if (!plusTot || entree.date < plusTot) {
+                    plusTot = entree.date;
+                }
+            }
+        }
+    }
+    return plusTot;
+}
+
+/**
+ * 🆕 Beta 99.08 : Handler pour le select de tri dans la sidebar
+ */
+function trierListeProductions() {
+    afficherListeProductions();
+}
+
+/**
  * ✅ AJOUT (28 janvier 2026) : Détecter les doublons potentiels dans les productions
  * Retourne une liste des titres qui apparaissent plus d'une fois
  * @param {Array} productionsLocales - Productions de l'utilisateur
@@ -3433,6 +3461,24 @@ async function afficherListeProductions(filtreType = '') {
 
     // ✅ CORRECTION (8 décembre 2025) : Ne plus générer le bouton bibliothèque
     // car il est maintenant dans le HTML (comme pour Cours, Grilles, etc.)
+
+    // 🆕 Beta 99.08 : Tri des productions dans la sidebar
+    const selectTri = document.getElementById('triProductions');
+    const tri = selectTri ? selectTri.value : '';
+    if (tri) {
+        productionsFiltrees = [...productionsFiltrees].sort((a, b) => {
+            if (tri === 'titre') {
+                return (a.titre || '').localeCompare(b.titre || '', 'fr');
+            } else if (tri === 'type') {
+                return (a.type || '').localeCompare(b.type || '', 'fr');
+            } else if (tri === 'echeance') {
+                const dateA = obtenirEcheancePlusTot(a) || '9999';
+                const dateB = obtenirEcheancePlusTot(b) || '9999';
+                return dateA.localeCompare(dateB);
+            }
+            return 0;
+        });
+    }
 
     if (productionsFiltrees.length === 0) {
         container.innerHTML = '<p class="text-muted text-italic" style="font-size: 0.9rem; text-align: center; padding: 20px 10px;">Crée une nouvelle production ou puise dans la bibliothèque</p>';
