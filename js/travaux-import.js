@@ -859,9 +859,10 @@
     /**
      * Assemble un groupe d'images en un seul PDF via jsPDF
      * @param {Array} fichiersDuGroupe - Liste de fichiers prepares (images)
+     * @param {number} [dpi=250] - DPI pour la conversion pixels → mm
      * @returns {Promise<Blob>} Le blob PDF assemble
      */
-    async function assemblerPDFGroupe(fichiersDuGroupe) {
+    async function assemblerPDFGroupe(fichiersDuGroupe, dpi) {
         const { jsPDF } = window.jspdf;
         let doc = null;
 
@@ -885,8 +886,8 @@
                 img.src = imgData;
             });
 
-            // Dimensions en mm (72 DPI par defaut pour PDF)
-            const mmPerPx = 25.4 / 250; // 250 DPI
+            // Dimensions en mm
+            const mmPerPx = 25.4 / (dpi || 250);
             const pageW = dims.width * mmPerPx;
             const pageH = dims.height * mmPerPx;
 

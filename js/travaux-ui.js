@@ -1260,7 +1260,7 @@
        =============================== */
 
     /**
-     * Calcule les dimensions cibles apres uniformisation 250 DPI
+     * Calcule les dimensions cibles apres uniformisation DPI
      * Reprend la logique de uniformiser200DPI() sans toucher aux pixels
      * @param {Object} f - Fichier prepare
      * @returns {{w: number, h: number}} Dimensions cibles
@@ -1270,8 +1270,8 @@
             return { w: 0, h: 0 };
         }
 
-        const optDPI = document.getElementById('pipeline-opt-dpi')?.checked;
-        if (!optDPI || f.format11x17) {
+        const dpi = parseInt(document.getElementById('pipeline-opt-dpi')?.value) || 0;
+        if (!dpi || f.format11x17) {
             return { w: f.largeurOriginale, h: f.hauteurOriginale };
         }
 
@@ -1280,9 +1280,11 @@
 
         let maxW, maxH;
         if (w > 2500 || h > 2500) {
-            maxW = 2750; maxH = 4250;
+            // Tabloid 11"x17"
+            maxW = Math.round(11 * dpi); maxH = Math.round(17 * dpi);
         } else {
-            maxW = 2125; maxH = 2750;
+            // Lettre 8.5"x11"
+            maxW = Math.round(8.5 * dpi); maxH = Math.round(11 * dpi);
         }
 
         if (w <= maxW && h <= maxH) {
@@ -1645,7 +1647,7 @@
         colCentre += '<p class="texte-muted u-texte-petit" style="margin:8px 0 4px 0;">R\u00e9glages par d\u00e9faut\u00a0:</p>';
 
         colCentre += '<ul class="pipeline-checklist">';
-        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-dpi" checked data-on-change="travauxUI.mettreAJourPreviewsPipeline"> Uniformisation 250 dpi</label></li>`;
+        colCentre += `<li><label>Uniformisation <select id="pipeline-opt-dpi" data-on-change="travauxUI.mettreAJourPreviewsPipeline" class="controle-form-compact" style="width:auto;display:inline-block;font-size:inherit;padding:2px 4px;"><option value="0">désactivée</option><option value="200">200 dpi</option><option value="250" selected>250 dpi</option><option value="300">300 dpi</option></select></label></li>`;
         colCentre += `<li><label><input type="checkbox" id="pipeline-opt-balance" checked data-on-change="travauxUI.mettreAJourPreviewsPipeline"> Balance des blancs</label></li>`;
         colCentre += `<li><label><input type="checkbox" id="pipeline-opt-doublons" checked> D\u00e9tection doublons (manuel)</label></li>`;
         colCentre += `<li><label><input type="checkbox" id="pipeline-opt-assemblage" checked> Assemblage automatique (par nom / production)</label></li>`;
@@ -3478,7 +3480,7 @@
     async function executerImportPipeline() {
         const queue = travauxImport.obtenirFileDAttente();
 
-        const optDPI = document.getElementById('pipeline-opt-dpi')?.checked;
+        const dpiCible = parseInt(document.getElementById('pipeline-opt-dpi')?.value) || 0;
         const optBalance = document.getElementById('pipeline-opt-balance')?.checked;
         const optDoublons = document.getElementById('pipeline-opt-doublons')?.checked;
         const optAssemblage = document.getElementById('pipeline-opt-assemblage')?.checked;
@@ -3514,10 +3516,10 @@
                         }
                     }
 
-                    // Uniformisation 250 dpi (par fichier : sauf si format11x17)
-                    if (optDPI && !f.format11x17) {
+                    // Uniformisation DPI (par fichier : sauf si format11x17)
+                    if (dpiCible && !f.format11x17) {
                         try {
-                            blob = await uniformiser200DPI(blob);
+                            blob = await uniformiser200DPI(blob, dpiCible);
                         } catch (e) {
                             console.warn('[Pipeline] Erreur uniformisation DPI:', f.nomFichier, e);
                         }
@@ -3537,7 +3539,7 @@
 
         // === Assemblage PDF si coche ===
         if (optAssemblage) {
-            await assemblerGroupesPipeline(queue);
+            await assemblerGroupesPipeline(queue, dpiCible || 250);
         }
 
         // === Auto-identification ===
@@ -3857,13 +3859,13 @@
     }
 
     /**
-     * Uniformise une image a 250 DPI
-     * Lettre (8.5"x11") : 2125x2750px max — si deux dimensions <= 2500px
-     * Tabloid (11"x17") : 2750x4250px max — si une dimension > 2500px
+     * Uniformise une image au DPI cible
+     * Lettre (8.5"x11") ou Tabloid (11"x17") selon les dimensions originales
      * @param {Blob} blob - Le blob image
+     * @param {number} dpi - DPI cible (200, 250 ou 300)
      * @returns {Promise<Blob>} Le blob redimensionne
      */
-    function uniformiser200DPI(blob) {
+    function uniformiser200DPI(blob, dpi) {
         return new Promise((resolve, reject) => {
             const img = new Image();
             const url = URL.createObjectURL(blob);
@@ -3877,13 +3879,13 @@
                 // Determiner le format cible par seuil de dimension
                 let maxW, maxH;
                 if (w > 2500 || h > 2500) {
-                    // Tabloid 11"x17" a 250 DPI
-                    maxW = 2750;
-                    maxH = 4250;
+                    // Tabloid 11"x17"
+                    maxW = Math.round(11 * dpi);
+                    maxH = Math.round(17 * dpi);
                 } else {
-                    // Lettre 8.5"x11" a 250 DPI
-                    maxW = 2125;
-                    maxH = 2750;
+                    // Lettre 8.5"x11"
+                    maxW = Math.round(8.5 * dpi);
+                    maxH = Math.round(11 * dpi);
                 }
 
                 // Redimensionner proportionnellement si necessaire
@@ -3920,8 +3922,9 @@
     /**
      * Assemble les groupes d'images en PDF via le pipeline
      * @param {Array} queue - File d'attente complete
+     * @param {number} [dpi=250] - DPI pour la conversion pixels → mm
      */
-    async function assemblerGroupesPipeline(queue) {
+    async function assemblerGroupesPipeline(queue, dpi) {
         const groupes = travauxImport.regrouperParDocument();
 
         for (const [cle, fichiers] of groupes) {
@@ -3930,7 +3933,7 @@
             if (images.length < 2) continue;
 
             try {
-                const pdfBlob = await travauxImport.assemblerPDFGroupe(images);
+                const pdfBlob = await travauxImport.assemblerPDFGroupe(images, dpi);
 
                 // Remplacer les images par un seul PDF dans la queue
                 const premierFichier = images[0];
