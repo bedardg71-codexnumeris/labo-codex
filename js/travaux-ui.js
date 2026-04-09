@@ -1329,6 +1329,14 @@
             return;
         }
 
+        // Cache : réutiliser la preview déjà générée (évite de re-décoder le blob)
+        const optBalance = document.getElementById('pipeline-opt-balance')?.checked;
+        const cacheKey = optBalance ? 'bal' : 'raw';
+        if (f._cachedPreviewThumb && f._cachedPreviewKey === cacheKey) {
+            conteneur.innerHTML = `<img src="${f._cachedPreviewThumb}" alt="">`;
+            return;
+        }
+
         // Utiliser le blob original pour une preview de qualite
         const source = f.fichier || null;
         var imgThumb = f.thumbnailDataUrl || await travauxStockage.obtenirThumbnail(f.id);
@@ -1365,7 +1373,6 @@
             ctx.drawImage(img, 0, 0, cw, ch);
 
             // Appliquer balance des blancs si checkbox cochee
-            const optBalance = document.getElementById('pipeline-opt-balance')?.checked;
             if (optBalance) {
                 const imgData = ctx.getImageData(0, 0, cw, ch);
                 const d = imgData.data;
@@ -1405,8 +1412,12 @@
                 }
             }
 
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+            f._cachedPreviewThumb = dataUrl;
+            f._cachedPreviewKey = cacheKey;
+
             const imgResult = document.createElement('img');
-            imgResult.src = canvas.toDataURL('image/jpeg', 0.92);
+            imgResult.src = dataUrl;
             conteneur.innerHTML = '';
             conteneur.appendChild(imgResult);
         } catch (e) {
@@ -1465,12 +1476,19 @@
         const conteneur = document.getElementById('pipeline-original-' + index);
         if (!conteneur) return;
 
+        // Cache : réutiliser la thumbnail déjà générée (évite de re-décoder le blob)
+        if (f._cachedOriginalThumb) {
+            conteneur.innerHTML = `<img src="${f._cachedOriginalThumb}" alt="">`;
+            return;
+        }
+
         // Toujours utiliser le blob original (pas le blob traite)
         const source = f.fichierOriginal || f.fichier || null;
         if (!source) {
             // Fallback sur thumbnail IDB
             var origFallback = f.thumbnailDataUrl || await travauxStockage.obtenirThumbnail(f.id);
             if (origFallback) {
+                f._cachedOriginalThumb = origFallback;
                 conteneur.innerHTML = `<img src="${origFallback}" alt="">`;
             }
             return;
@@ -1496,14 +1514,18 @@
             canvas.height = ch;
             canvas.getContext('2d').drawImage(img, 0, 0, cw, ch);
 
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            f._cachedOriginalThumb = dataUrl;
+
             const imgResult = document.createElement('img');
-            imgResult.src = canvas.toDataURL('image/jpeg', 0.85);
+            imgResult.src = dataUrl;
             conteneur.innerHTML = '';
             conteneur.appendChild(imgResult);
         } catch (e) {
             // Fallback silencieux
             var origCatchFallback = f.thumbnailDataUrl || await travauxStockage.obtenirThumbnail(f.id);
             if (origCatchFallback) {
+                f._cachedOriginalThumb = origCatchFallback;
                 conteneur.innerHTML = `<img src="${origCatchFallback}" alt="">`;
             }
         }
