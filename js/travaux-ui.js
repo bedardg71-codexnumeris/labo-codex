@@ -1842,8 +1842,17 @@
     /**
      * Rafraichit l'interface pipeline sans remonter la drop zone
      * Preserve les positions de scroll des colonnes gauche/droite
+     * Debouncé pour éviter les re-renders multiples lors d'actions rapides.
      */
+    let _rafraichirTimer = null;
+
     function rafraichirPipelineUI() {
+        if (_rafraichirTimer) clearTimeout(_rafraichirTimer);
+        _rafraichirTimer = setTimeout(_rafraichirPipelineUIImpl, 150);
+    }
+
+    function _rafraichirPipelineUIImpl() {
+        _rafraichirTimer = null;
         const queue = travauxImport.obtenirFileDAttente();
         if (fichierSelectionneIndex >= queue.length) fichierSelectionneIndex = -1;
 
@@ -1865,38 +1874,27 @@
 
     /**
      * Selectionne un fichier dans la colonne gauche du pipeline
+     * Optimisé : swap CSS instantané + re-render déféré pour le panneau central
      * @param {number} index - Index du fichier dans la queue
      */
     function selectionnerFichierPipeline(index) {
+        const ancienIndex = fichierSelectionneIndex;
         fichierSelectionneIndex = index;
-
-        // Sauvegarder le scroll avant re-rendu
-        const colG = document.querySelector('.pipeline-col-originaux');
-        const scrollAvant = colG ? colG.scrollTop : 0;
 
         const queue = travauxImport.obtenirFileDAttente();
         if (fichierSelectionneIndex >= queue.length) fichierSelectionneIndex = -1;
-        afficherImport();
 
-        // Restaurer le scroll et defiler vers le fichier selectionne
-        requestAnimationFrame(() => {
-            const newColG = document.querySelector('.pipeline-col-originaux');
-            const newColD = document.querySelector('.pipeline-col-confirmes');
-            if (newColG) newColG.scrollTop = scrollAvant;
-            if (newColD) newColD.scrollTop = scrollAvant;
+        // Feedback visuel instantané : swap de classe CSS sans re-render
+        const colG = document.querySelector('.pipeline-col-originaux');
+        if (colG) {
+            const lignes = colG.querySelectorAll('.pipeline-fichier-ligne');
+            lignes.forEach((ligne, i) => {
+                ligne.classList.toggle('pipeline-fichier-selectionne', i === fichierSelectionneIndex);
+            });
+        }
 
-            // Defiler vers le fichier selectionne si hors de la vue
-            const selectionne = newColG?.querySelector('.pipeline-fichier-selectionne');
-            if (selectionne && newColG) {
-                const rect = selectionne.getBoundingClientRect();
-                const contRect = newColG.getBoundingClientRect();
-                if (rect.top < contRect.top || rect.bottom > contRect.bottom) {
-                    selectionne.scrollIntoView({ block: 'nearest', behavior: 'instant' });
-                    if (newColD) newColD.scrollTop = newColG.scrollTop;
-                }
-            }
-            initialiserSyncScrollColonnes();
-        });
+        // Re-render déféré pour mettre à jour le panneau central (aperçu, métadonnées)
+        rafraichirPipelineUI();
     }
 
     /**
