@@ -3578,7 +3578,8 @@
                     afficherProgressionPipeline(traites, total);
                 }));
 
-                await new Promise(r => setTimeout(r, 0));
+                // Yield 100ms pour permettre au navigateur de mettre à jour la barre de progression
+                await new Promise(r => setTimeout(r, 100));
             }
         }
 
