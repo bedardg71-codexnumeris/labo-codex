@@ -182,7 +182,7 @@ var BANQUE_VERBES = {
 // Types de nœuds qui acceptent le sélecteur de niveau cognitif
 var TYPES_AVEC_NIVEAU_COGNITIF = ['competence', 'idee-maitresse', 'activite', 'soutien', 'revision', 'evaluation'];
 
-// === GUIDE INTÉGRÉ — 7 pages pédagogiques ===
+// === GUIDE INTÉGRÉ — 8 pages (7 pédagogiques + 1 technique import/export) ===
 var GUIDE_PAGES = [
     {
         titre: 'Construis ta carte d\u2019alignement',
@@ -194,7 +194,7 @@ var GUIDE_PAGES = [
                 '<li><strong>!</strong> (badge gris) = il manque une connexion.</li>' +
                 '<li><strong>⚠</strong> = attention, une évaluation manque quelque part dans la chaîne.</li>' +
             '</ul>' +
-            '<p>Ce guide te propose 6\u00a0étapes pour construire ta carte. Tu peux le consulter à tout moment depuis la palette.</p>' +
+            '<p>Ce guide te propose 7\u00a0étapes pour construire ta carte et utiliser l\u2019import\u00a0/\u00a0export. Tu peux le consulter à tout moment depuis la palette.</p>' +
             '<p class="planif-guide-ref">Anderson, L.\u00a0W. (2026). <em>Curricular alignment: A re-examination</em> (Educational Practices Series, No.\u00a037). UNESCO International Bureau of Education. <a href="https://unesdoc.unesco.org/ark:/48223/pf0000397143.locale=en" target="_blank" rel="noopener">unesdoc.unesco.org</a></p>'
     },
     {
@@ -264,6 +264,32 @@ var GUIDE_PAGES = [
                 '<li>Quand une compétence est atteinte par au moins une évaluation à travers la chaîne, son badge d\u2019avertissement disparaît.</li>' +
             '</ol>' +
             '<p class="planif-guide-conclusion">L\u2019objectif\u00a0: quand tous les badges de ta carte affichent <strong>✓</strong> et qu\u2019il n\u2019y a plus de <strong>⚠</strong>, ton cours est aligné — chaque compétence est enseignée et évaluée de manière cohérente.</p>'
+    },
+    {
+        titre: 'Exporter et importer un plan',
+        contenu:
+            '<p class="planif-guide-pourquoi">Tu peux exporter ton plan de leçons en format texte (Markdown), le retravailler avec une IA ou un collègue, puis le réimporter. La carte se reconstruit automatiquement.</p>' +
+            '<p><strong>Exporter</strong></p>' +
+            '<ol>' +
+                '<li>Va dans <strong>Plan de la leçon</strong> (onglet du haut).</li>' +
+                '<li>Clique <strong>Exporter\u00a0/\u00a0Importer</strong>.</li>' +
+                '<li>Utilise <strong>Copier MD</strong> pour copier le plan dans le presse-papiers, ou <strong>Exporter MD</strong> pour télécharger un fichier.</li>' +
+            '</ol>' +
+            '<p><strong>Retravailler avec une IA</strong></p>' +
+            '<ol>' +
+                '<li>Colle le plan dans ChatGPT, Claude ou un autre assistant.</li>' +
+                '<li>Demande-lui d\u2019enrichir les objectifs, d\u2019ajouter des leçons, de réorganiser les séquences\u2026</li>' +
+                '<li>L\u2019IA comprend les marqueurs <code>[Séquence]</code> et <code>[Leçon]</code> — elle les conservera dans sa réponse.</li>' +
+            '</ol>' +
+            '<p><strong>Réimporter</strong></p>' +
+            '<ol>' +
+                '<li>Retourne dans <strong>Exporter\u00a0/\u00a0Importer</strong>, onglet <strong>Importer MD</strong>.</li>' +
+                '<li>Colle le plan retravaillé dans la zone de texte.</li>' +
+                '<li>Clique <strong>Prévisualiser</strong> pour vérifier ce qui sera créé.</li>' +
+                '<li>Choisis <em>Créer une nouvelle carte</em> ou <em>Ajouter à la carte active</em>.</li>' +
+                '<li>Clique <strong>Importer</strong>.</li>' +
+            '</ol>' +
+            '<div class="planif-guide-astuce">Après l\u2019import, tu peux réorganiser les nœuds sur le canevas et relier les éléments à tes compétences et idées maîtresses.</div>'
     }
 ];
 
