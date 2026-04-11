@@ -194,6 +194,10 @@ function brancherEvenements() {
     if (btnFermer) btnFermer.addEventListener('click', fermerModaleExport);
     if (btnAnnuler) btnAnnuler.addEventListener('click', fermerModaleExport);
     if (btnTelecharger) btnTelecharger.addEventListener('click', lancerExport);
+    var btnTelechargerMD = document.getElementById('org-modale-telecharger-md');
+    var btnCopierMD = document.getElementById('org-modale-copier-md');
+    if (btnTelechargerMD) btnTelechargerMD.addEventListener('click', lancerExportMD);
+    if (btnCopierMD) btnCopierMD.addEventListener('click', copierExportMD);
 
     // Drag & drop pour les activités dans les étapes EE
     configurerDragDrop();
@@ -1357,6 +1361,56 @@ function lancerExport() {
 
     var nomFichier = nomCarte.replace(/[^a-zA-Z0-9\u00C0-\u017F _-]/g, '') + '.json';
     telechargerFichier(JSON.stringify(json, null, 2), nomFichier, 'application/json');
+    fermerModaleExport();
+}
+
+function lancerExportMD() {
+    var md = genererExportMD(false);
+    if (!md) return;
+
+    var index = window.planificationDonnees ? window.planificationDonnees.getIndex() : null;
+    var nomCarte = 'alignement';
+    if (index && index.cartes) {
+        var c = index.cartes.find(function(cc) { return cc.id === index.active; });
+        if (c) nomCarte = c.nom;
+    }
+
+    var nomFichier = nomCarte.replace(/[^a-zA-Z0-9\u00C0-\u017F _-]/g, '') + '.md';
+    telechargerFichier(md, nomFichier, 'text/markdown');
+    fermerModaleExport();
+}
+
+function copierExportMD() {
+    var md = genererExportMD(false);
+    if (!md) return;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(md).then(function() {
+            if (typeof afficherNotificationSucces === 'function') {
+                afficherNotificationSucces('Plan copié dans le presse-papiers');
+            }
+            fermerModaleExport();
+        }).catch(function() {
+            // Fallback : sélection textarea
+            copierMDFallback(md);
+        });
+    } else {
+        copierMDFallback(md);
+    }
+}
+
+function copierMDFallback(md) {
+    var ta = document.createElement('textarea');
+    ta.value = md;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces('Plan copié dans le presse-papiers');
+    }
     fermerModaleExport();
 }
 
