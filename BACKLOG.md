@@ -7,6 +7,13 @@
 
 ## A faire
 
+### Rythme Phase 5 — Raffinements (selon usage, post-AQPC)
+
+- [ ] **#240** Courbe d'apprentissage de l'evaluateur (tendance temporelle par activite)
+- [ ] **#241** Export du portrait temporel pour reflexion professionnelle
+- [ ] **#242** Drill-down par activite → detail productions/groupes
+- [ ] **#243** Planification multi-productions avec priorites
+
 ### Chantier structurel — Machine a etats pour le chargement d'evaluations
 
 - [ ] **#239** Remplacer les 5 flags globaux + setTimeout imbriques par un module eval-chargement.js

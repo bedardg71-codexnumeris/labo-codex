@@ -248,7 +248,7 @@ Logique de données :
 
 ## Le module interventions — État actuel et vision
 
-### Architecture actuelle (interventions.js, ~1590 lignes — refonte 11 avril 2026)
+### Architecture actuelle (interventions.js, ~1581 lignes — refonte 11 avril 2026)
 
 **Structure de données d'une intervention** :
 ```javascript
@@ -281,7 +281,7 @@ Logique de données :
 
 **Workflow unifié (un seul temps)** :
 1. `afficherFormulaireIntervention(da)` crée l'intervention et ouvre directement `ouvrirIntervention(id, { modeCreation: true })`
-2. Vue unique : logistique + étudiants + aperçu sous-groupe + critères ciblés + objectif + observations
+2. Vue unique : logistique (titre, niveau RàI, contexte, date, statut) → aperçu sous-groupe + étudiants → critères ciblés + objectif → observations
 3. À la complétion : section bilan avec comparaison avant/après automatique
 
 **Fonctions supprimées lors de la refonte** :
@@ -296,16 +296,16 @@ Logique de données :
 Un seul formulaire en sections progressives, guidé par les données du profil étudiant. L'enseignant ne remplit que ce que l'app ne peut pas calculer.
 
 **Section 1 — Logistique** (quand + où + comment) ✅
-Titre, date, heure, durée, contexte, niveau RàI. Gestion des absences si rattrapage.
+Titre, niveau RàI, contexte, date/heure/durée, description, statut. Gestion des absences si contexte = rattrapage.
 
 **Section 2 — Ciblage** (qui + pourquoi) ✅
-Aperçu du sous-groupe (patterns, niveaux RàI) + liste des étudiants avec checkboxes, notes individuelles et badge RàI (via `determinerNiveauRaiPedagogique`).
+Aperçu du sous-groupe (patterns, niveaux RàI, défis communs) + liste des étudiants avec checkboxes, notes individuelles et badge RàI (via `determinerNiveauRaiPedagogique`).
 
 **Section 3 — Critères ciblés et objectif** (sur quoi + vers où) ✅
 Critères pré-cochés selon les défis communs (`mettreAJourCriteresCibles`). Objectif avec suggestion automatique (`suggererObjectifIntervention`). C'est la pièce «Alignment» de Fuchs.
 
 **Section 4 — Observations** (pendant + après) ✅
-Notes individuelles par élève + observations générales.
+Observations générales (les notes individuelles sont dans la section 2, à côté de chaque étudiant).
 
 **Section 5 — Bilan** (est-ce que ça a marché ?) ✅
 Visible quand statut = complétée. Tableau comparatif avant/après automatique sur les critères ciblés. «Objectif atteint ?» (oui/partiellement/non) + suite envisagée + observations de bilan.
