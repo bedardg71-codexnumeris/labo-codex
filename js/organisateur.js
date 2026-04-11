@@ -1583,9 +1583,8 @@ function genererExportMD(estEleve) {
     }
     sequences.sort(function(a, b) { return (a.metadata && a.metadata.semaineDebut || 999) - (b.metadata && b.metadata.semaineDebut || 999); });
 
-    var md = '# Plan de cours — ' + nomCarte + '\n\n';
-    md += '*' + (estEleve ? 'Document contractuel (élève)' : 'Document pédagogique (enseignant)') + '*  \n';
-    md += 'Exporté le ' + new Date().toLocaleDateString('fr-CA') + '\n\n---\n\n';
+    var md = '# Plan de cours — ' + nomCarte + '\n';
+    md += '> Exporté le ' + new Date().toLocaleDateString('fr-CA') + '\n\n---\n\n';
 
     for (var i = 0; i < sequences.length; i++) {
         var seq = sequences[i];
@@ -1593,7 +1592,7 @@ function genererExportMD(estEleve) {
     }
 
     if (leconsOrphelines.length > 0) {
-        md += '## Séances hors séquence\n\n';
+        md += '## Séances hors séquence [Orphelines]\n\n';
         for (var p = 0; p < leconsOrphelines.length; p++) {
             md += genererLeconMD(leconsOrphelines[p], etat, seances, carte, estEleve);
         }
@@ -1603,16 +1602,18 @@ function genererExportMD(estEleve) {
 }
 
 function genererSequenceMD(seq, etat, seances, carte, estEleve) {
-    var semTxt = '';
+    var marqueur = '';
     if (seq.metadata && seq.metadata.semaineDebut) {
-        semTxt = ' (Sem. ' + seq.metadata.semaineDebut;
+        marqueur = ' [Séquence | Sem. ' + seq.metadata.semaineDebut;
         if (seq.metadata.semaineFin && seq.metadata.semaineFin !== seq.metadata.semaineDebut) {
-            semTxt += '–' + seq.metadata.semaineFin;
+            marqueur += '–' + seq.metadata.semaineFin;
         }
-        semTxt += ')';
+        marqueur += ']';
+    } else {
+        marqueur = ' [Séquence]';
     }
 
-    var md = '## ' + (seq.titre || 'Sans titre') + semTxt + '\n\n';
+    var md = '## ' + (seq.titre || 'Sans titre') + marqueur + '\n\n';
 
     var enfants = (seq.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); });
     for (var j = 0; j < enfants.length; j++) {
@@ -1626,8 +1627,10 @@ function genererSequenceMD(seq, etat, seances, carte, estEleve) {
 }
 
 function genererLeconMD(lecon, etat, seances, carte, estEleve) {
-    var dureeLecon = lecon.metadata && lecon.metadata.duree ? ' — ' + formatDuree(lecon.metadata.duree) : '';
-    var md = '### ' + (lecon.titre || 'Sans titre') + dureeLecon + '\n\n';
+    var marqueurLecon = lecon.metadata && lecon.metadata.duree
+        ? ' [Leçon | ' + formatDuree(lecon.metadata.duree) + ']'
+        : ' [Leçon]';
+    var md = '### ' + (lecon.titre || 'Sans titre') + marqueurLecon + '\n\n';
 
     var donnees = seances[lecon.id] || {};
 
@@ -1654,20 +1657,19 @@ function genererLeconMD(lecon, etat, seances, carte, estEleve) {
     var productions = carte.chargerProductions();
     var activitesData = donnees.activites || {};
     var prodsVus = {};
-    var hasProd = false;
+    var partiesEval = [];
     for (var actId in activitesData) {
         if (activitesData[actId].productionId && !prodsVus[activitesData[actId].productionId]) {
             prodsVus[activitesData[actId].productionId] = true;
             var detP = carte.afficherDetailsProduction(activitesData[actId].productionId, productions);
             if (detP) {
-                if (!hasProd) { md += '**Évaluations** :\n'; hasProd = true; }
-                md += '- ' + detP.nomProduction + ' (' + detP.ponderation + ' %)';
-                if (detP.dateEcheance) md += ' — Échéance : ' + detP.dateEcheance;
-                md += '\n';
+                var txt = detP.nomProduction + ' (' + detP.ponderation + ' %)';
+                if (detP.dateEcheance) txt += ' — Échéance : ' + detP.dateEcheance;
+                partiesEval.push(txt);
             }
         }
     }
-    if (hasProd) md += '\n';
+    if (partiesEval.length > 0) md += '**Évaluation** : ' + partiesEval.join(' ; ') + '\n\n';
 
     if (!estEleve) {
         // Enseignant : étapes EE ou activités brutes
@@ -1711,6 +1713,8 @@ function genererLeconMD(lecon, etat, seances, carte, estEleve) {
             }
         }
     }
+
+    if (donnees.notes) md += '**Notes** : ' + donnees.notes + '\n\n';
 
     md += '---\n\n';
     return md;
