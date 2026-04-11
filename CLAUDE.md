@@ -106,7 +106,8 @@ Utiliser `window.cle('nomCle')` pour obtenir la cle namespacee.
    - `SKILL_labo_codex.md` — architecture, indices A-C-P-E, pratiques de notation, workflow
    - `SKILL_Ecosysteme_classe.md` — cadre pedagogique (ELLAC, SOLO, PAN, SRPNF, IDME, cartouches)
    - `SKILL_Alignement.md` — module Alignement (carte mentale, lecons, sequences, design curriculaire)
-   Ces trois skills sont complementaires et constituent la reference metier du projet.
+   - `SKILL_RaI.md` — depistage SOLO, IPB, diagnostic croise, patterns, interventions RaI
+   Ces quatre skills sont complementaires et constituent la reference metier du projet.
 3. Consulter `BACKLOG.md` pour les taches en attente
 4. Consulter `SESSION.md` pour le contexte actuel
 5. Identifier le module concerne dans `docs/modules/`
