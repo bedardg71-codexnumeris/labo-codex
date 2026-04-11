@@ -18272,8 +18272,8 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     justify-content: space-between;
     gap: 10px;
     padding: 8px 16px;
-    border-bottom: 1px solid rgba(106, 172, 184, 0.25);
-    background: var(--planif-couleur-fond-palette, rgba(14, 36, 51, 0.9));
+    border-bottom: 1px solid var(--planif-couleur-bordure, rgba(106, 172, 184, 0.25));
+    background: var(--surface-carte, #1a3040);
     flex-shrink: 0;
 }
 .org-toolbar-gauche {
@@ -18293,7 +18293,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     border: 1px solid rgba(106, 172, 184, 0.2);
     border-radius: 6px;
     font-size: 13px;
-    background: var(--planif-couleur-fond-palette, rgba(14, 36, 51, 0.6));
+    background: var(--surface-carte, #1a3040);
     color: var(--planif-couleur-texte, #e2e8f0);
 }
 
@@ -19394,8 +19394,8 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     background: #ffffff;
 }
 .mode-clair .org-toolbar {
-    background: rgba(3, 46, 92, 0.04);
-    border-bottom-color: rgba(3, 46, 92, 0.1);
+    background: #ffffff;
+    border-bottom-color: rgba(3, 46, 92, 0.08);
 }
 .mode-clair .org-toolbar select {
     background: #ffffff;
