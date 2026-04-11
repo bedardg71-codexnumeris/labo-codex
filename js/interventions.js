@@ -76,7 +76,14 @@ function obtenirInterventions() {
  */
 function obtenirIntervention(id) {
     const interventions = obtenirInterventions();
-    return interventions.find(i => i.id === id) || null;
+    const intervention = interventions.find(i => i.id === id);
+    if (intervention) {
+        // Rétrocompatibilité : valeurs par défaut pour les champs ajoutés (Phase 3)
+        if (!intervention.criteresCibles) intervention.criteresCibles = [];
+        if (intervention.objectifVise === undefined) intervention.objectifVise = '';
+        if (intervention.bilan === undefined) intervention.bilan = null;
+    }
+    return intervention || null;
 }
 
 /**
@@ -123,6 +130,9 @@ function creerIntervention(data) {
         marquerNonParticipantsMotives: data.marquerNonParticipantsMotives || false,
         etudiants: [],
         analyse: null,
+        criteresCibles: data.criteresCibles || [],
+        objectifVise: data.objectifVise || '',
+        bilan: null,
         jamaisSauvegardee: data.jamaisSauvegardee || false,
         statut: 'planifiee',
         dateCreation: now,
@@ -728,7 +738,7 @@ function ouvrirIntervention(interventionId, options) {
             <div style="display: grid; grid-template-columns: auto 1fr 2fr auto; gap: 10px; align-items: center;
                         padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 5px;">
                 <input type="checkbox" id="etud-${etudiant.da}" value="${etudiant.da}" ${checked}
-                       data-on-change="afficherAnalyseTempsReel" data-param="${intervention.id}"
+                       data-on-change="onChangementSelectionEtudiants" data-param="${intervention.id}"
                        style="width: auto; margin: 0;">
                 <label for="etud-${etudiant.da}" style="font-weight: 500; margin: 0; cursor: pointer;">
                     ${echapperHtml(etudiant.prenom)} ${echapperHtml(etudiant.nom)}
@@ -749,6 +759,25 @@ function ouvrirIntervention(interventionId, options) {
         else if (intervention.type === 'mio') contexteExistant = 'mio';
         else if (intervention.marquerNonParticipantsMotives) contexteExistant = 'rattrapage';
         else contexteExistant = 'en-classe';
+    }
+
+    // Générer les checkboxes critères ciblés depuis la grille de dépistage
+    var grilleRef = typeof obtenirGrilleReferenceDepistage === 'function' ? obtenirGrilleReferenceDepistage() : null;
+    var criteresInitHtml = '';
+    if (grilleRef && grilleRef.criteres && grilleRef.criteres.length > 0) {
+        criteresInitHtml = grilleRef.criteres.map(function(c) {
+            var checked = intervention.criteresCibles.indexOf(c.nom) >= 0 ? 'checked' : '';
+            var niveauLabel = c.niveauSOLO === 'relationnel' ? 'relationnel' :
+                              c.niveauSOLO === 'abstrait_etendu' ? 'abstrait étendu' : 'multistructurel';
+            return '<label style="display: flex; align-items: center; gap: 8px; padding: 6px 0; cursor: pointer;">' +
+                '<input type="checkbox" class="critere-cible-cb" value="' + echapperHtml(c.nom) + '" ' + checked + ' style="width: auto; margin: 0;">' +
+                '<span>' + echapperHtml(c.nom) + '</span>' +
+                '<span class="badge-sys" style="font-size: 0.75rem; padding: 2px 6px; opacity: 0.7;">' + echapperHtml(niveauLabel) + '</span>' +
+                '<span class="critere-defi-count" style="font-size: 0.8rem; color: var(--gris-moyen);"></span>' +
+                '</label>';
+        }).join('');
+    } else {
+        criteresInitHtml = '<p class="text-muted" style="font-style: italic;">Configure une grille de référence dans Réglages pour activer le ciblage par critère.</p>';
     }
 
     container.innerHTML = `
@@ -873,6 +902,30 @@ function ouvrirIntervention(interventionId, options) {
                 </div>
             </div>
 
+            <!-- Critères ciblés et objectif visé -->
+            <div class="carte" style="margin-bottom: 20px;">
+                <h4 class="intervention-mt-0">Critères ciblés</h4>
+                <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 10px;">
+                    Sur quoi porte l'intervention ? Pré-cochés selon les défis communs du sous-groupe.
+                </p>
+                <div id="criteresCiblesContainer">
+                    ${criteresInitHtml}
+                </div>
+
+                <hr style="margin: 15px 0; border: none; border-top: 1px solid var(--bordure-claire);">
+
+                <h4 class="intervention-mt-0">Objectif visé</h4>
+                <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 10px;">
+                    Qu'espères-tu voir changer à la suite de cette intervention ?
+                </p>
+                <div style="display: flex; gap: 10px; align-items: start;">
+                    <input type="text" id="objectifVise" class="controle-form" style="flex: 1;"
+                           value="${echapperHtml(intervention.objectifVise || '')}"
+                           placeholder="Ex: Amener Structure au seuil D (65%)">
+                    <button data-action="suggererObjectifIntervention" data-param="${interventionId}" class="btn btn-secondaire" style="white-space: nowrap;">Suggérer</button>
+                </div>
+            </div>
+
             <!-- Observations générales (pleine largeur) -->
             <div class="carte" style="margin-bottom: 20px;">
                 <h4 class="intervention-mt-0">Observations générales</h4>
@@ -909,6 +962,7 @@ function ouvrirIntervention(interventionId, options) {
         var checkboxes = document.querySelectorAll('#listeEtudiantsIntervention input[type="checkbox"]:checked');
         if (checkboxes.length > 0) {
             afficherAnalyseTempsReel(interventionId);
+            mettreAJourCriteresCibles(interventionId);
         }
     }, 100);
 }
@@ -930,6 +984,140 @@ function afficherAnalyseTempsReel(interventionId) {
 
     const analyse = analyserSousGroupe(dasSelectionnes);
     analyseDiv.innerHTML = genererAffichageAnalyseCartes(analyse);
+}
+
+/**
+ * Handler combiné appelé quand l'enseignant coche/décoche un étudiant.
+ * Met à jour l'analyse du sous-groupe ET les critères ciblés.
+ * @param {string} interventionId - ID de l'intervention
+ */
+function onChangementSelectionEtudiants(interventionId) {
+    afficherAnalyseTempsReel(interventionId);
+    mettreAJourCriteresCibles(interventionId);
+}
+
+/**
+ * Met à jour les critères ciblés selon les défis communs des étudiants sélectionnés.
+ * Pré-coche les critères en défi commun et affiche le compteur par critère.
+ * @param {string} interventionId - ID de l'intervention
+ */
+function mettreAJourCriteresCibles(interventionId) {
+    var container = document.getElementById('criteresCiblesContainer');
+    if (!container) return;
+
+    var checkboxes = document.querySelectorAll('#listeEtudiantsIntervention input[type="checkbox"]:checked');
+    var dasSelectionnes = Array.from(checkboxes).map(function(cb) { return cb.value; });
+    var nbEtudiants = dasSelectionnes.length;
+
+    if (nbEtudiants === 0) {
+        // Réinitialiser les compteurs
+        var counts = container.querySelectorAll('.critere-defi-count');
+        counts.forEach(function(el) { el.textContent = ''; });
+        return;
+    }
+
+    // Récupérer le seuil de défi configurable
+    var seuilDefi = (typeof obtenirSeuil === 'function' ? obtenirSeuil('defiSpecifique') : null) || 0.70;
+
+    // Compter combien d'étudiants sont en défi pour chaque critère
+    var defisParCritere = {};
+    dasSelectionnes.forEach(function(da) {
+        var moyennes = typeof calculerMoyennesCriteres === 'function' ? calculerMoyennesCriteres(da) : null;
+        if (!moyennes) return;
+        Object.keys(moyennes).forEach(function(cle) {
+            if (typeof moyennes[cle] === 'number' && moyennes[cle] < seuilDefi) {
+                if (!defisParCritere[cle]) defisParCritere[cle] = 0;
+                defisParCritere[cle]++;
+            }
+        });
+    });
+
+    // Mettre à jour chaque checkbox critère
+    var criteresCbs = container.querySelectorAll('.critere-cible-cb');
+    criteresCbs.forEach(function(cb) {
+        var nomCritere = cb.value;
+        // Normaliser pour correspondre aux clés de calculerMoyennesCriteres
+        var cleNorm = nomCritere.toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+        if (cleNorm.startsWith('francais')) cleNorm = 'francais';
+
+        var nbEnDefi = defisParCritere[cleNorm] || 0;
+        var countSpan = cb.parentElement.querySelector('.critere-defi-count');
+        if (countSpan) {
+            countSpan.textContent = nbEnDefi > 0 ? '— ' + nbEnDefi + '/' + nbEtudiants + ' en défi' : '';
+            countSpan.style.color = nbEnDefi > nbEtudiants / 2 ? 'var(--orange-attention, #e8a838)' : 'var(--gris-moyen)';
+        }
+
+        // Pré-cocher si majorité du sous-groupe est en défi (uniquement si pas déjà sauvegardé)
+        var intervention = obtenirIntervention(interventionId);
+        if (intervention && intervention.jamaisSauvegardee) {
+            cb.checked = nbEnDefi > 0;
+        }
+    });
+}
+
+/**
+ * Génère une suggestion d'objectif basée sur les critères ciblés et le profil du sous-groupe.
+ * @param {string} interventionId - ID de l'intervention
+ */
+function suggererObjectifIntervention(interventionId) {
+    var objectifField = document.getElementById('objectifVise');
+    if (!objectifField) return;
+
+    var checkboxes = document.querySelectorAll('#listeEtudiantsIntervention input[type="checkbox"]:checked');
+    var dasSelectionnes = Array.from(checkboxes).map(function(cb) { return cb.value; });
+
+    if (dasSelectionnes.length === 0) {
+        objectifField.value = '';
+        return;
+    }
+
+    // Trouver le critère ciblé le plus faible
+    var criteresCibles = Array.from(document.querySelectorAll('.critere-cible-cb:checked')).map(function(cb) { return cb.value; });
+    if (criteresCibles.length === 0) {
+        objectifField.value = '';
+        return;
+    }
+
+    var seuilDeveloppement = (typeof obtenirSeuil === 'function' ? obtenirSeuil('idme.developpement') : null) || 0.75;
+    var seuilInsuffisant = (typeof obtenirSeuil === 'function' ? obtenirSeuil('idme.insuffisant') : null) || 0.64;
+
+    // Calculer la moyenne du sous-groupe pour chaque critère ciblé
+    var plusFaible = null;
+    var scorePlusFaible = 1;
+    criteresCibles.forEach(function(nom) {
+        var cleNorm = nom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+        if (cleNorm.startsWith('francais')) cleNorm = 'francais';
+
+        var total = 0;
+        var count = 0;
+        dasSelectionnes.forEach(function(da) {
+            var moyennes = typeof calculerMoyennesCriteres === 'function' ? calculerMoyennesCriteres(da) : null;
+            if (moyennes && typeof moyennes[cleNorm] === 'number') {
+                total += moyennes[cleNorm];
+                count++;
+            }
+        });
+        var moyenne = count > 0 ? total / count : 0;
+        if (moyenne < scorePlusFaible) {
+            scorePlusFaible = moyenne;
+            plusFaible = nom;
+        }
+    });
+
+    if (!plusFaible) return;
+
+    // Déterminer le prochain seuil atteignable
+    var suggestion = '';
+    if (scorePlusFaible < seuilInsuffisant) {
+        suggestion = 'Amener ' + plusFaible + ' au seuil D (' + Math.round(seuilInsuffisant * 100) + '%)';
+    } else if (scorePlusFaible < seuilDeveloppement) {
+        suggestion = 'Amener ' + plusFaible + ' au seuil M (' + Math.round(seuilDeveloppement * 100) + '%)';
+    } else {
+        suggestion = 'Stabiliser ' + plusFaible + ' au-dessus du seuil M (' + Math.round(seuilDeveloppement * 100) + '%)';
+    }
+
+    objectifField.value = suggestion;
 }
 
 /**
@@ -1050,6 +1238,12 @@ function sauvegarderPresencesIntervention(interventionId) {
             }
         });
         interventions[index].notesIndividuelles = notesIndividuelles;
+
+        // Sauvegarder les critères ciblés et l'objectif (Phase 3)
+        var criteresCiblesCbs = document.querySelectorAll('#criteresCiblesContainer .critere-cible-cb:checked');
+        interventions[index].criteresCibles = Array.from(criteresCiblesCbs).map(function(cb) { return cb.value; });
+        var objectifField = document.getElementById('objectifVise');
+        interventions[index].objectifVise = objectifField ? objectifField.value : '';
 
         // Effacer le flag fantôme (l'intervention est maintenant sauvegardée par l'utilisateur)
         interventions[index].jamaisSauvegardee = false;
@@ -1363,6 +1557,9 @@ window.afficherFormulaireIntervention = afficherFormulaireIntervention;
 window.gererVisibiliteContexteIntervention = gererVisibiliteContexteIntervention;
 window.annulerNouvelleIntervention = annulerNouvelleIntervention;
 window.ouvrirIntervention = ouvrirIntervention;
+window.onChangementSelectionEtudiants = onChangementSelectionEtudiants;
+window.mettreAJourCriteresCibles = mettreAJourCriteresCibles;
+window.suggererObjectifIntervention = suggererObjectifIntervention;
 window.sauvegarderPresencesIntervention = sauvegarderPresencesIntervention;
 window.terminerIntervention = terminerIntervention;
 window.rouvrirIntervention = rouvrirIntervention;
