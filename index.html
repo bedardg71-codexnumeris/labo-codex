@@ -4475,21 +4475,49 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Modale d'export -->
+                    <!-- Modale export/import -->
                     <div id="org-modale-export" class="modal-overlay">
-                        <div class="modal-contenu modal-compact">
+                        <div class="modal-contenu" style="max-width: 560px">
                             <button class="modal-fermer" id="org-modale-fermer">&times;</button>
-                            <h3 class="modal-titre">Exporter l'alignement pédagogique</h3>
-                            <div class="modal-section">
-                                <p id="org-export-resume" class="u-texte-09" style="color: var(--texte-secondaire); line-height: 1.6; margin: 0">
-                                    Exporte l'ensemble des séquences, leçons et données d'alignement dans un fichier JSON réimportable via l'alignement pédagogique.
-                                </p>
+                            <!-- Onglets -->
+                            <div class="org-modale-onglets" style="display: flex; gap: 0; margin-bottom: 1rem; border-bottom: 2px solid var(--bordure)">
+                                <button class="org-onglet actif" data-onglet="export" style="padding: 0.5rem 1.2rem; border: none; background: none; font-size: 0.95rem; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; color: var(--texte-secondaire)">Exporter</button>
+                                <button class="org-onglet" data-onglet="import" style="padding: 0.5rem 1.2rem; border: none; background: none; font-size: 0.95rem; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; color: var(--texte-secondaire)">Importer MD</button>
                             </div>
-                            <div class="modal-actions" style="flex-wrap: wrap; gap: 0.5rem">
-                                <button class="btn btn-annuler" id="org-modale-annuler">Annuler</button>
-                                <button class="btn btn-secondaire" id="org-modale-copier-md">Copier MD</button>
-                                <button class="btn btn-secondaire" id="org-modale-telecharger-md">Exporter MD</button>
-                                <button class="btn btn-confirmer" id="org-modale-telecharger">Exporter JSON</button>
+                            <!-- Panneau Export -->
+                            <div class="org-panneau-onglet" id="org-panneau-export">
+                                <div class="modal-section">
+                                    <p id="org-export-resume" class="u-texte-09" style="color: var(--texte-secondaire); line-height: 1.6; margin: 0">
+                                        Exporte l'ensemble des séquences, leçons et données d'alignement.
+                                    </p>
+                                </div>
+                                <div class="modal-actions" style="flex-wrap: wrap; gap: 0.5rem">
+                                    <button class="btn btn-annuler" id="org-modale-annuler">Annuler</button>
+                                    <button class="btn btn-secondaire" id="org-modale-copier-md">Copier MD</button>
+                                    <button class="btn btn-secondaire" id="org-modale-telecharger-md">Exporter MD</button>
+                                    <button class="btn btn-confirmer" id="org-modale-telecharger">Exporter JSON</button>
+                                </div>
+                            </div>
+                            <!-- Panneau Import -->
+                            <div class="org-panneau-onglet" id="org-panneau-import" style="display: none">
+                                <p class="u-texte-09" style="color: var(--texte-secondaire); line-height: 1.6; margin: 0 0 0.75rem">
+                                    Colle un plan de cours en format Markdown. Les séquences et leçons seront recréées sur la carte d'alignement.
+                                </p>
+                                <textarea id="org-import-md-texte" rows="10" placeholder="Coller le plan Markdown ici..." style="width: 100%; font-family: monospace; font-size: 0.85rem; resize: vertical; background: var(--fond-input); color: var(--texte); border: 1px solid var(--bordure); border-radius: var(--radius-sm); padding: 0.5rem"></textarea>
+                                <div id="org-import-resume" style="display: none; margin-top: 0.5rem; padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); background: var(--fond-surface); font-size: 0.85rem"></div>
+                                <div style="margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.35rem">
+                                    <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; cursor: pointer">
+                                        <input type="radio" name="org-import-cible" value="nouvelle" checked> Créer une nouvelle carte
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; cursor: pointer">
+                                        <input type="radio" name="org-import-cible" value="ajouter"> Ajouter à la carte active
+                                    </label>
+                                </div>
+                                <div class="modal-actions" style="margin-top: 1rem">
+                                    <button class="btn btn-annuler" id="org-import-annuler">Annuler</button>
+                                    <button class="btn btn-secondaire" id="org-import-previsualiser">Prévisualiser</button>
+                                    <button class="btn btn-confirmer" id="org-import-confirmer" disabled>Importer</button>
+                                </div>
                             </div>
                         </div>
                     </div>
