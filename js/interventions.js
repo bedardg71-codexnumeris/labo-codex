@@ -123,6 +123,7 @@ function creerIntervention(data) {
         marquerNonParticipantsMotives: data.marquerNonParticipantsMotives || false,
         etudiants: [],
         analyse: null,
+        jamaisSauvegardee: data.jamaisSauvegardee || false,
         statut: 'planifiee',
         dateCreation: now,
         dateModification: now
@@ -345,7 +346,14 @@ function afficherListeInterventions() {
         }
     }
 
-    const interventions = obtenirInterventions();
+    let interventions = obtenirInterventions();
+    // Purger les interventions fantômes (créées mais jamais sauvegardées)
+    const avantPurge = interventions.length;
+    interventions = interventions.filter(function(i) { return !i.jamaisSauvegardee; });
+    if (interventions.length !== avantPurge) {
+        sauvegarderInterventions(interventions);
+    }
+
     const container = document.getElementById('listeInterventions');
 
     if (!container) {
@@ -641,378 +649,47 @@ function gererVisibiliteContexteIntervention() {
  * @param {string} [daPreselectionne] - DA de l'étudiant à pré-cocher (depuis profil)
  */
 function afficherFormulaireIntervention(daPreselectionne) {
-    const container = document.getElementById('conteneurPrincipal');
-
+    var container = document.getElementById('conteneurPrincipal');
     if (!container) return;
 
-    // Date d'aujourd'hui par défaut
-    const aujourdhui = new Date().toISOString().split('T')[0];
-
-    // Indicateur visuel si étudiant pré-sélectionné
-    let bandeauPreselection = '';
-    if (daPreselectionne) {
-        const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
-            ? obtenirEtudiantsCoursActif()
-            : obtenirDonneesSelonMode('groupeEtudiants');
-        const etudiant = etudiants.find(e => e.da === daPreselectionne);
-        if (etudiant) {
-            bandeauPreselection = `
-                <div class="info-box info-box--info" style="margin-bottom: 15px;">
-                    Intervention pour <strong>${etudiant.prenom} ${etudiant.nom}</strong> — l'élève sera pré-coché à la prochaine étape.
-                </div>`;
-        }
+    // Déterminer le niveau RàI initial si un DA est pré-sélectionné
+    var niveauInitial = 2;
+    if (daPreselectionne && typeof determinerNiveauRaiPedagogique === 'function') {
+        var niveauRai = determinerNiveauRaiPedagogique(daPreselectionne);
+        if (niveauRai && niveauRai.niveau >= 3) niveauInitial = 3;
     }
 
-    container.innerHTML = `
-        <div class="carte">
-            <h3 class="intervention-mt-0">Planifier une intervention</h3>
-            ${bandeauPreselection}
-            <!-- Tableau explicatif des niveaux -->
-            <table class="tableau-simple" style="font-size: 0.85rem; margin-bottom: 20px;">
-                <thead>
-                    <tr>
-                        <th>Situation</th>
-                        <th>Niveau</th>
-                        <th>Lieu</th>
-                        <th>Absences non-participants</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Rattrapage cibl\u00e9 (les autres ont cong\u00e9)</td>
-                        <td>2</td>
-                        <td>En classe</td>
-                        <td>Absences motiv\u00e9es</td>
-                    </tr>
-                    <tr>
-                        <td>Petit groupe pendant le cours r\u00e9gulier</td>
-                        <td>2</td>
-                        <td>En classe</td>
-                        <td>Aucune (tous pr\u00e9sents)</td>
-                    </tr>
-                    <tr>
-                        <td>Rencontre individuelle ou de groupe</td>
-                        <td>3</td>
-                        <td>Hors classe</td>
-                        <td>Aucune</td>
-                    </tr>
-                </tbody>
-            </table>
+    // Créer l'intervention avec des valeurs par défaut
+    var aujourdhui = new Date().toISOString().split('T')[0];
+    var interventionId = creerIntervention({
+        date: aujourdhui,
+        duree: 2,
+        niveauRai: niveauInitial,
+        jamaisSauvegardee: true
+    });
 
-            <form id="form-nouvelle-intervention">
-                <input type="hidden" id="interventionDaPreselectionne" value="${daPreselectionne || ''}">
-                <!-- Layout 2 colonnes : formulaire | gestion absences -->
-                <div class="intervention-grid-1-09">
-                    <!-- Colonne gauche : Champs du formulaire -->
-                    <div>
-                        <!-- Ligne 1 : Titre + Niveau RàI -->
-                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px;">
-                            <div class="champ-formulaire u-m-0">
-                                <label for="interventionTitre" class="label-formulaire">Titre :</label>
-                                <input type="text" id="interventionTitre" class="controle-form" required
-                                       placeholder="Ex: Intervention Rigueur et Nuance">
-                            </div>
-
-                            <div class="champ-formulaire u-m-0">
-                                <label for="interventionNiveau" class="label-formulaire">Niveau R\u00e0I :</label>
-                                <select id="interventionNiveau" class="controle-form" required
-                                        data-on-change="gererVisibiliteContexteIntervention">
-                                    <option value="2">Niveau 2 (Groupe cibl\u00e9)</option>
-                                    <option value="3">Niveau 3 (Individuel)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Contexte niveau 2 (visible seulement si niveau 2) -->
-                        <div id="interventionContexteBloc" style="margin-bottom: 15px;">
-                            <div class="champ-formulaire u-m-0">
-                                <label for="interventionContexte" class="label-formulaire">Contexte de l\u2019intervention :</label>
-                                <select id="interventionContexte" class="controle-form" required
-                                        data-on-change="gererVisibiliteContexteIntervention">
-                                    <option value="rattrapage">S\u00e9ance de rattrapage \u2014 les non-participants ont cong\u00e9</option>
-                                    <option value="en-classe">Petit groupe cibl\u00e9 pendant le cours r\u00e9gulier</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Ligne 2 : Date, Heure, Durée -->
-                        <div class="intervention-grid-3col">
-                            <div class="champ-formulaire u-m-0">
-                                <label for="interventionDate" class="label-formulaire">Date :</label>
-                                <input type="date" id="interventionDate" class="controle-form" required value="${aujourdhui}">
-                            </div>
-
-                            <div class="champ-formulaire u-m-0">
-                                <label for="interventionHeure" class="label-formulaire">Heure :</label>
-                                <input type="time" id="interventionHeure" class="controle-form">
-                            </div>
-
-                            <div class="champ-formulaire u-m-0">
-                                <label for="interventionDuree" class="label-formulaire">Dur\u00e9e (p\u00e9riodes) :</label>
-                                <input type="number" id="interventionDuree" class="controle-form" min="0.5" max="4" step="0.5" value="2" required>
-                            </div>
-                        </div>
-
-                        <!-- Ligne 3 : Description -->
-                        <div class="champ-formulaire u-m-0">
-                            <label for="interventionDescription" class="label-formulaire">Description (optionnel) :</label>
-                            <textarea id="interventionDescription" class="controle-form" rows="3"
-                                      placeholder="Objectifs de l'intervention, sujets abord\u00e9s..."></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Colonne droite : Gestion des absences (visible seulement si rattrapage) -->
-                    <div id="interventionAbsencesBloc" class="carte" style="background: var(--bleu-tres-pale); padding: 15px; margin: 0; height: fit-content;">
-                        <h4 style="margin: 0 0 10px 0; color: var(--accent-primaire);" data-tooltip="interv-gestion-absences">Gestion des absences</h4>
-                        <p class="text-muted" style="margin: 0 0 15px 0; font-size: 0.9rem;">
-                            Les \u00e9l\u00e8ves non s\u00e9lectionn\u00e9s pour cette s\u00e9ance de rattrapage
-                            b\u00e9n\u00e9ficieront d\u2019un cong\u00e9 (absence motiv\u00e9e).
-                        </p>
-
-                        <div class="champ-formulaire u-m-0">
-                            <label for="interventionSeance" class="label-formulaire">S\u00e9ance concern\u00e9e :</label>
-                            <input type="date" id="interventionSeance" class="controle-form">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="intervention-flex-end">
-                    <button type="button" data-action="afficherListeInterventions" class="btn btn-secondaire">
-                        Annuler
-                    </button>
-                    <button type="submit" class="btn btn-principal">
-                        Sauvegarder
-                    </button>
-                </div>
-            </form>
-        </div>
-    `;
-
-    // Initialiser la visibilité des blocs contexte/absences
-    gererVisibiliteContexteIntervention();
+    // Ouvrir directement la vue complète (formulaire unifié)
+    ouvrirIntervention(interventionId, { modeCreation: true, daPreselectionne: daPreselectionne });
 }
 
 /**
- * Sauvegarder une nouvelle intervention
- * @param {Event} event - Événement de soumission du formulaire
+ * Annuler la création d'une intervention jamais sauvegardée
+ * @param {string} interventionId - ID de l'intervention à supprimer
  */
-function sauvegarderNouvelleIntervention(event) {
-    event.preventDefault();
-
-    var niveauRai = parseInt(document.getElementById('interventionNiveau').value);
-    var contexteEl = document.getElementById('interventionContexte');
-    var contexte = (niveauRai === 2 && contexteEl) ? contexteEl.value : 'hors-classe';
-
-    // Dériver type et marquerMotivees depuis le contexte
-    var type = 'groupe';
-    if (contexte === 'mio') type = 'mio';
-    else if (niveauRai === 3) type = 'individuel';
-
-    var marquerMotivees = false;
-    var seanceConcernee = null;
-    if (contexte === 'rattrapage') {
-        marquerMotivees = true;
-        seanceConcernee = document.getElementById('interventionSeance').value || null;
-    }
-
-    const data = {
-        titre: document.getElementById('interventionTitre').value,
-        date: document.getElementById('interventionDate').value,
-        heure: document.getElementById('interventionHeure').value,
-        duree: parseFloat(document.getElementById('interventionDuree').value) || 2,
-        niveauRai: niveauRai,
-        contexte: contexte,
-        type: type,
-        description: document.getElementById('interventionDescription').value,
-        seanceConcernee: seanceConcernee,
-        marquerNonParticipantsMotives: marquerMotivees
-    };
-
-    const interventionId = creerIntervention(data);
-
-    // Si un étudiant est pré-sélectionné, l'ajouter puis ouvrir l'intervention directement
-    const daPreselectionne = document.getElementById('interventionDaPreselectionne');
-    if (daPreselectionne && daPreselectionne.value) {
-        marquerPresences(interventionId, [daPreselectionne.value]);
-        ouvrirIntervention(interventionId);
-        afficherNotificationSucces('Intervention créée — étudiant pré-sélectionné');
-    } else {
-        // Retourner à la liste
-        afficherListeInterventions();
-        afficherNotificationSucces('Intervention planifiée avec succès');
-    }
-}
-
-/**
- * OBSOLÈTE : Cette fonction n'est plus utilisée. La modification se fait directement dans ouvrirIntervention().
- * Afficher le formulaire de modification d'une intervention
- * @param {string} interventionId - ID de l'intervention à modifier
- */
-function afficherFormulaireModification(interventionId) {
-    const intervention = obtenirIntervention(interventionId);
-
-    if (!intervention) {
-        alert('Intervention introuvable');
-        return;
-    }
-
-    const container = document.getElementById('conteneurPrincipal');
-    if (!container) return;
-
-    container.innerHTML = `
-        <div class="carte">
-            <h3 class="intervention-mt-0">Modifier l'intervention</h3>
-
-            <form id="form-modification-intervention" data-intervention-id="${interventionId}">
-                <!-- Layout 2 colonnes : formulaire | gestion absences -->
-                <div class="intervention-grid-1-09">
-                    <!-- Colonne gauche : Champs du formulaire (50%) -->
-                    <div>
-                        <!-- Ligne 1 : Titre, Niveau RàI, Type -->
-                        <div class="intervention-grid-2-1-1">
-                            <div class="champ-formulaire u-m-0">
-                                <label for="interventionTitre" class="label-formulaire">Titre :</label>
-                                <input type="text" id="interventionTitre" class="controle-form" required
-                                       value="${intervention.titre}" placeholder="Ex: Intervention Rigueur et Nuance">
-                            </div>
-
-                            <div class="champ-formulaire u-m-0">
-                                <label for="interventionNiveau" class="label-formulaire">Niveau RàI :</label>
-                                <select id="interventionNiveau" class="controle-form" required>
-                                    <option value="2" ${intervention.niveauRai === 2 ? 'selected' : ''}>Niveau 2 (Groupe ciblé)</option>
-                                    <option value="3" ${intervention.niveauRai === 3 ? 'selected' : ''}>Niveau 3 (Individuel)</option>
-                                </select>
-                            </div>
-
-                            <div class="champ-formulaire u-m-0">
-                                <label for="interventionType" class="label-formulaire">Type :</label>
-                                <select id="interventionType" class="controle-form" required>
-                                    <option value="groupe" ${intervention.type === 'groupe' ? 'selected' : ''}>Groupe (séance en classe)</option>
-                                    <option value="individuel" ${intervention.type === 'individuel' ? 'selected' : ''}>Individuel (rencontre en dispo)</option>
-                                    <option value="mio" ${intervention.type === 'mio' ? 'selected' : ''}>Message écrit (MIO) à un groupe ciblé</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Ligne 2 : Date, Heure, Durée -->
-                        <div class="intervention-grid-3col">
-                            <div class="champ-formulaire u-m-0">
-                                <label for="interventionDate" class="label-formulaire">Date :</label>
-                                <input type="date" id="interventionDate" class="controle-form" required value="${intervention.date}">
-                            </div>
-
-                            <div class="champ-formulaire u-m-0">
-                                <label for="interventionHeure" class="label-formulaire">Heure :</label>
-                                <input type="time" id="interventionHeure" class="controle-form" value="${intervention.heure || ''}">
-                            </div>
-
-                            <div class="champ-formulaire u-m-0">
-                                <label for="interventionDuree" class="label-formulaire">Dur\u00e9e (p\u00e9riodes) :</label>
-                                <input type="number" id="interventionDuree" class="controle-form" min="0.5" max="4" step="0.5" value="${intervention.duree || 2}" required>
-                            </div>
-                        </div>
-
-                        <!-- Ligne 3 : Description -->
-                        <div class="champ-formulaire u-m-0">
-                            <label for="interventionDescription" class="label-formulaire">Description (optionnel) :</label>
-                            <textarea id="interventionDescription" class="controle-form" rows="3"
-                                      placeholder="Objectifs de l'intervention, sujets abordés...">${intervention.description || ''}</textarea>
-                        </div>
-                    </div>
-
-                    <!-- Colonne droite : Gestion des absences -->
-                    <div class="carte" style="background: var(--bleu-tres-pale); padding: 15px; margin: 0; height: fit-content;">
-                        <h4 style="margin: 0 0 10px 0; color: var(--accent-primaire);" data-tooltip="interv-gestion-absences">Gestion des absences</h4>
-                        <p class="text-muted" style="margin: 0 0 15px 0; font-size: 0.9rem;">
-                            Si cette intervention correspond à une séance de cours, tu peux marquer comme motivée l'absence des non-participants.
-                        </p>
-
-                        <div class="champ-formulaire" style="margin: 0 0 15px 0;">
-                            <label for="interventionSeance" class="label-formulaire">Séance concernée :</label>
-                            <input type="date" id="interventionSeance" class="controle-form" value="${intervention.seanceConcernee || ''}">
-                        </div>
-
-                        <div class="champ-formulaire u-m-0">
-                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 5px;">
-                                <input type="checkbox" id="interventionMarquerMotivees" style="width: auto;" ${intervention.marquerNonParticipantsMotives ? 'checked' : ''}>
-                                <span class="u-texte-09">Marquer les non-participants comme absents motivés</span>
-                            </label>
-                            <small class="text-muted" style="font-size: 0.85rem;">
-                                Les élèves non sélectionnés bénéficieront d'un «congé» pour cette séance.
-                            </small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="intervention-flex-end">
-                    <button type="button" data-action="afficherListeInterventions" class="btn btn-secondaire">
-                        Annuler
-                    </button>
-                    <button type="submit" class="btn btn-principal">
-                        Enregistrer les modifications
-                    </button>
-                </div>
-            </form>
-        </div>
-    `;
-}
-
-/**
- * OBSOLÈTE : Cette fonction n'est plus utilisée. La sauvegarde se fait via sauvegarderPresencesIntervention().
- * Sauvegarder les modifications d'une intervention
- * @param {Event} event - Événement de soumission du formulaire
- * @param {string} interventionId - ID de l'intervention à modifier
- */
-function sauvegarderModificationIntervention(event, interventionId) {
-    event.preventDefault();
-
-    const interventions = obtenirInterventions();
-    const index = interventions.findIndex(i => i.id === interventionId);
-
-    if (index === -1) {
-        alert('Intervention introuvable');
-        return;
-    }
-
-    // Mettre à jour les données (OBSOLÈTE — conservé pour rétrocompatibilité)
-    var niveauObs = parseInt(document.getElementById('interventionNiveau').value);
-    var contexteObsEl = document.getElementById('interventionContexte');
-    var contexteObs = (niveauObs === 2 && contexteObsEl) ? contexteObsEl.value : 'hors-classe';
-    var typeObs = 'groupe';
-    if (contexteObs === 'mio') typeObs = 'mio';
-    else if (niveauObs === 3) typeObs = 'individuel';
-
-    interventions[index].titre = document.getElementById('interventionTitre').value;
-    interventions[index].date = document.getElementById('interventionDate').value;
-    interventions[index].heure = document.getElementById('interventionHeure').value;
-    interventions[index].duree = parseFloat(document.getElementById('interventionDuree').value) || 2;
-    interventions[index].niveauRai = niveauObs;
-    interventions[index].contexte = contexteObs;
-    interventions[index].type = typeObs;
-    interventions[index].description = document.getElementById('interventionDescription').value;
-    if (contexteObs === 'rattrapage') {
-        interventions[index].seanceConcernee = document.getElementById('interventionSeance').value || null;
-        interventions[index].marquerNonParticipantsMotives = true;
-    } else {
-        interventions[index].seanceConcernee = null;
-        interventions[index].marquerNonParticipantsMotives = false;
-    }
-    interventions[index].dateModification = Date.now();
-
-    sauvegarderInterventions(interventions);
-
-    // Retourner à la liste
+function annulerNouvelleIntervention(interventionId) {
+    supprimerIntervention(interventionId);
     afficherListeInterventions();
-
-    // Notification de succès
-    afficherNotificationSucces('Intervention modifiée avec succès');
 }
 
 /**
  * Ouvrir une intervention pour marquer les présences
  * @param {string} interventionId - ID de l'intervention
+ * @param {Object} [options] - Options d'affichage
+ * @param {boolean} [options.modeCreation] - true si on vient de créer l'intervention
+ * @param {string} [options.daPreselectionne] - DA à pré-cocher dans la liste
  */
-function ouvrirIntervention(interventionId) {
+function ouvrirIntervention(interventionId, options) {
+    options = options || {};
     const intervention = obtenirIntervention(interventionId);
 
     if (!intervention) {
@@ -1076,7 +753,7 @@ function ouvrirIntervention(interventionId) {
 
     container.innerHTML = `
         <div class="carte">
-            <h3 style="margin: 0 0 20px 0;">${intervention.titre}</h3>
+            <h3 style="margin: 0 0 20px 0;">${options.modeCreation ? 'Planifier une intervention' : echapperHtml(intervention.titre)}</h3>
 
             <!-- Section informations éditables -->
             <div class="intervention-grid-1-09">
@@ -1206,9 +883,9 @@ function ouvrirIntervention(interventionId) {
             </div>
 
             <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-                <button data-action="afficherListeInterventions" class="btn btn-secondaire">
-                    Annuler
-                </button>
+                ${intervention.jamaisSauvegardee
+                    ? '<button data-action="annulerNouvelleIntervention" data-param="' + interventionId + '" class="btn btn-secondaire">Annuler</button>'
+                    : '<button data-action="afficherListeInterventions" class="btn btn-secondaire">Annuler</button>'}
                 <button data-action="sauvegarderPresencesIntervention" data-param="${interventionId}" class="btn btn-principal">
                     Sauvegarder
                 </button>
@@ -1219,9 +896,18 @@ function ouvrirIntervention(interventionId) {
     // Initialiser la visibilité des blocs contexte/absences
     gererVisibiliteContexteIntervention();
 
-    // Afficher l'analyse initiale si des étudiants sont déjà cochés
-    setTimeout(() => {
-        if (intervention.etudiants.length > 0) {
+    // Pré-sélection et analyse initiale
+    setTimeout(function() {
+        // Pré-cocher le DA si fourni (mode création depuis le profil)
+        if (options.daPreselectionne) {
+            var cb = document.getElementById('etud-' + options.daPreselectionne);
+            if (cb && !cb.checked) {
+                cb.checked = true;
+            }
+        }
+        // Afficher l'analyse si des étudiants sont cochés
+        var checkboxes = document.querySelectorAll('#listeEtudiantsIntervention input[type="checkbox"]:checked');
+        if (checkboxes.length > 0) {
             afficherAnalyseTempsReel(interventionId);
         }
     }, 100);
@@ -1364,6 +1050,9 @@ function sauvegarderPresencesIntervention(interventionId) {
             }
         });
         interventions[index].notesIndividuelles = notesIndividuelles;
+
+        // Effacer le flag fantôme (l'intervention est maintenant sauvegardée par l'utilisateur)
+        interventions[index].jamaisSauvegardee = false;
 
         interventions[index].dateModification = Date.now();
         sauvegarderInterventions(interventions);
@@ -1657,17 +1346,8 @@ function supprimerInterventionEtRafraichir(interventionId) {
     }
 }
 
-// Delegation formulaires interventions (submit)
-document.addEventListener('submit', function(e) {
-    var form = e.target;
-    if (form.id === 'form-nouvelle-intervention') {
-        e.preventDefault();
-        sauvegarderNouvelleIntervention(e);
-    } else if (form.id === 'form-modification-intervention') {
-        e.preventDefault();
-        sauvegarderModificationIntervention(e, form.dataset.interventionId);
-    }
-});
+// Delegation formulaires interventions (submit) — les anciens formulaires ont été supprimés (Phase 2)
+// La sauvegarde passe désormais par sauvegarderPresencesIntervention() via data-action
 
 // Exporter les fonctions publiques
 window.obtenirInterventions = obtenirInterventions;
@@ -1681,7 +1361,7 @@ window.supprimerIntervention = supprimerIntervention;
 window.afficherListeInterventions = afficherListeInterventions;
 window.afficherFormulaireIntervention = afficherFormulaireIntervention;
 window.gererVisibiliteContexteIntervention = gererVisibiliteContexteIntervention;
-window.sauvegarderNouvelleIntervention = sauvegarderNouvelleIntervention;
+window.annulerNouvelleIntervention = annulerNouvelleIntervention;
 window.ouvrirIntervention = ouvrirIntervention;
 window.sauvegarderPresencesIntervention = sauvegarderPresencesIntervention;
 window.terminerIntervention = terminerIntervention;
@@ -1692,7 +1372,7 @@ window.formaterDateLisible = formaterDateLisible;
 window.genererBadgeStatut = genererBadgeStatut;
 window.obtenirAbsencesMotiveesParDate = obtenirAbsencesMotiveesParDate;
 window.supprimerInterventionEtRafraichir = supprimerInterventionEtRafraichir;
-window.sauvegarderModificationIntervention = sauvegarderModificationIntervention;
+// sauvegarderModificationIntervention supprimé (Phase 2)
 window.afficherAnalyseTempsReel = afficherAnalyseTempsReel;
 
 
