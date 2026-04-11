@@ -423,15 +423,9 @@ function afficherListeInterventions() {
                         </div>
                     </div>
                     <div class="intervention-actions">
-                        ${intervention.statut !== 'completee' ? `
-                            <button data-action="ouvrirIntervention" data-param="${intervention.id}" class="btn btn-principal">
-                                Modifier
-                            </button>
-                        ` : `
-                            <button data-action="ouvrirIntervention" data-param="${intervention.id}" class="btn btn-secondaire">
-                                Consulter
-                            </button>
-                        `}
+                        <button data-action="ouvrirIntervention" data-param="${intervention.id}" class="btn btn-principal">
+                            Ouvrir
+                        </button>
                         <button data-action="supprimerInterventionEtRafraichir" data-param="${intervention.id}" class="btn btn-supprimer">Supprimer</button>
                     </div>
                 </div>
@@ -993,7 +987,7 @@ function ouvrirIntervention(interventionId, options) {
                 }
 
                 var bilan = intervention.bilan || {};
-                return '<div class="carte" style="margin-bottom: 20px; border-left: 4px solid var(--accent-primaire);">' +
+                return '<div class="carte" style="margin-bottom: 20px;">' +
                     '<h4 class="intervention-mt-0">Bilan post-intervention</h4>' +
                     '<p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">Comparaison automatique des critères ciblés avant et après l\'intervention.</p>' +
                     bilanTableau +
