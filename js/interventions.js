@@ -901,7 +901,7 @@ function ouvrirIntervention(interventionId, options) {
 
             <!-- Critères ciblés et objectif visé -->
             <div class="carte" style="margin-bottom: 20px;">
-                <h4 class="intervention-mt-0">Critères ciblés</h4>
+                <h4 class="intervention-mt-0" data-tooltip="interv-criteres-cibles">Critères ciblés</h4>
                 <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 10px;">
                     Sur quoi porte l'intervention ? Pré-cochés selon les défis communs du sous-groupe.
                 </p>
@@ -911,7 +911,7 @@ function ouvrirIntervention(interventionId, options) {
 
                 <hr style="margin: 15px 0; border: none; border-top: 1px solid var(--bordure-claire);">
 
-                <h4 class="intervention-mt-0">Objectif visé</h4>
+                <h4 class="intervention-mt-0" data-tooltip="interv-objectif-vise">Objectif visé</h4>
                 <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 10px;">
                     Qu'espères-tu voir changer à la suite de cette intervention ?
                 </p>
@@ -988,7 +988,7 @@ function ouvrirIntervention(interventionId, options) {
 
                 var bilan = intervention.bilan || {};
                 return '<div class="carte" style="margin-bottom: 20px;">' +
-                    '<h4 class="intervention-mt-0">Bilan post-intervention</h4>' +
+                    '<h4 class="intervention-mt-0" data-tooltip="interv-bilan">Bilan post-intervention</h4>' +
                     '<p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">Comparaison automatique des critères ciblés avant et après l\'intervention.</p>' +
                     bilanTableau +
                     '<div style="margin-bottom: 15px;">' +

@@ -646,11 +646,11 @@ const AIDE_CONTEXTUELLE = {
                 type: 'liste',
                 titre: "Ce que tu peux faire depuis le profil",
                 items: [
-                    "Consulter l'historique des évaluations et la progression dans le temps.",
-                    "Identifier les patterns comportementaux (consolidation, stagnation, amélioration, régression).",
-                    "Lire les rétroactions passées pour assurer la cohérence de ton accompagnement.",
-                    "Créer une intervention RàI de niveau 2 ou 3 directement depuis le profil.",
-                    "Exporter un rapport PDF pour un suivi institutionnel ou une rencontre parent."
+                    "Voir le niveau RàI, le pattern d'apprentissage et la direction de chaque critère (↗ amélioration, ← détérioration, — plateau).",
+                    "Consulter la consolidation par critère : consolidé, fragile ou non consolidé.",
+                    "Identifier les forces et défis selon la taxonomie SOLO.",
+                    "Créer une intervention RàI directement (bouton Nouvelle intervention) — l'étudiant sera pré-coché avec les critères en défi.",
+                    "Exporter un rapport PDF pour un suivi institutionnel ou une rencontre."
                 ]
             },
             {
@@ -675,33 +675,45 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "Le module d'interventions te permet de documenter les actions que tu poses auprès des étudiants en difficulté, selon le modèle Réponse à l'Intervention (RàI) à 3 niveaux."
+                contenu: "Le module d'interventions te permet de planifier, documenter et évaluer tes actions auprès des étudiants en difficulté, selon le modèle Réponse à l'Intervention (RàI)."
             },
             {
                 type: 'liste',
                 titre: "Les 3 niveaux RàI",
                 items: [
-                    "Niveau 1 — Enseignement universel. C'est ce que tu fais pour tout le groupe : cours magistral, activités, rétroactions. Pas besoin de le documenter ici.",
-                    "Niveau 2 — Interventions préventives ciblées. Pour les étudiants qui montrent des signes de difficulté (C ou P en baisse, pattern de stagnation). Exemples : rencontre individuelle, exercices supplémentaires, tutorat par les pairs.",
-                    "Niveau 3 — Interventions intensives. Pour les étudiants en difficulté persistante malgré le niveau 2. Exemples : plan d'intervention formel, référence au centre d'aide, accommodements, suivi hebdomadaire structuré."
+                    "Niveau 1 — Enseignement universel. C'est ce que tu fais pour tout le groupe. Pas besoin de le documenter ici.",
+                    "Niveau 2 — Interventions préventives ciblées. Pour les étudiants en difficulté émergente ou en développement. Séance de rattrapage ou petit groupe en classe.",
+                    "Niveau 3 — Interventions intensives. Pour les étudiants en difficulté persistante malgré le niveau 2. Rencontre individuelle hors classe, référence aux services."
+                ]
+            },
+            {
+                type: 'liste',
+                titre: "Le formulaire unifié",
+                items: [
+                    "Logistique — Titre, niveau RàI, contexte (rattrapage ou en classe), date, durée.",
+                    "Ciblage — Coche les étudiants concernés. L'aperçu du sous-groupe (patterns, niveaux RàI) s'affiche en temps réel.",
+                    "Critères ciblés — Pré-cochés automatiquement depuis les défis communs du sous-groupe (grille de dépistage). Tu peux ajuster.",
+                    "Objectif visé — Suggestion automatique basée sur le critère le plus faible et le prochain seuil IDME. Tu peux modifier librement.",
+                    "Observations — Notes générales et individuelles par étudiant.",
+                    "Bilan — Apparaît quand tu marques l'intervention comme complétée. Comparaison automatique avant/après sur les critères ciblés."
                 ]
             },
             {
                 type: 'conseil',
-                contenu: "Documente tes interventions même brièvement. En fin de trimestre, cette trace te permettra de justifier tes décisions pédagogiques et de planifier le trimestre suivant."
+                contenu: "Tu peux créer une intervention directement depuis le profil d'un étudiant (onglet Accompagnement → Nouvelle intervention). L'étudiant sera pré-coché et le niveau RàI dérivé de son profil."
             },
             {
                 type: 'exemple',
-                titre: "Quand passer au niveau supérieur ?",
-                contenu: "Si après 2-3 semaines d'intervention de niveau 2, les indices C et P de l'étudiant ne s'améliorent pas (ou continuent de baisser), il est temps de considérer le niveau 3. Le profil étudiant te montre cette progression dans le temps."
+                titre: "Le cycle teach-test-revise-test",
+                contenu: "Tu interviens sur Structure et Rigueur (niveau 2). Après quelques artefacts, tu marques l'intervention comme complétée. Le bilan compare les scores avant et après. Si l'objectif n'est pas atteint, tu choisis la suite : reconduire, ajuster ou référer."
             },
             {
                 type: 'alerte',
                 niveau: 'attention',
-                contenu: "Les interventions de niveau 3 impliquent souvent des ressources externes (centre d'aide, API, conseiller pédagogique). Vérifie les ressources disponibles dans ton cégep avant de t'engager dans un plan intensif."
+                contenu: "Les interventions de niveau 3 impliquent souvent des ressources externes (centre d'aide, API, conseiller pédagogique). Vérifie les ressources disponibles dans ton cégep."
             }
         ],
-        voirAussi: ['profil-etudiant-indicateurs', 'profil-etudiant-accompagnement']
+        voirAussi: ['profil-etudiant-indicateurs', 'profil-etudiant-accompagnement', 'suivi-apprentissage-fondamentaux']
     },
 
     // =========================================================================
@@ -733,36 +745,7 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Configure les critères surveillés dans Structure → Grille de critères (tag SOLO). Ajuste le seuil et la fenêtre d'analyse dans Contexte → Dépistage."
             }
         ],
-        voirAussi: ['profil-etudiant-indicateurs', 'impact-artefacts-fondamentaux']
-    },
-
-    // =========================================================================
-    // IMPACT DES ARTEFACTS SUR LES FONDAMENTAUX
-    // =========================================================================
-
-    'impact-artefacts-fondamentaux': {
-        titre: "Progression des fondamentaux par activité",
-        sections: [
-            {
-                type: 'texte',
-                contenu: "Ce graphique trace la trajectoire du score multistructurel (fondations) au fil des activités d'apprentissage évaluées. Chaque point représente le score après une activité."
-            },
-            {
-                type: 'liste',
-                titre: 'Lecture du graphique',
-                items: [
-                    "La couleur de chaque point correspond au niveau IDME du score : rouge (I), orange (D), vert (M), bleu (E).",
-                    "Les triangles signalent les activités où un jeton de reprise a été appliqué.",
-                    "La ligne pointillée orange marque le seuil de maîtrise configurable.",
-                    "Le tooltip affiche le score, la variation depuis l'activité précédente, et le contexte par rapport au seuil."
-                ]
-            },
-            {
-                type: 'conseil',
-                contenu: "Ce graphique montre des corrélations, pas des causalités. Une progression observée après une activité peut être liée à l'activité elle-même, à l'enseignement, au temps qui passe, ou à d'autres facteurs. C'est un signal pour ton jugement professionnel."
-            }
-        ],
-        voirAussi: ['suivi-apprentissage-fondamentaux']
+        voirAussi: ['profil-etudiant-indicateurs']
     }
 };
 
