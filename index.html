@@ -4346,11 +4346,20 @@
 
                 <div id="structure-organisateur" class="sous-section">
                     <div class="org-conteneur">
-                        <div class="org-entete">
-                            <h2>Plan de la leçon</h2>
-                            <div class="org-actions" style="display: flex; gap: 0.5rem">
-                                <button id="org-btn-guide" class="btn btn-secondaire" style="font-size: 0.85rem">Guide</button>
-                                <button id="org-btn-export" class="btn btn-secondaire">Exporter / Importer</button>
+                        <!-- Toolbar unifiée -->
+                        <div class="org-toolbar">
+                            <div class="org-toolbar-gauche">
+                                <select id="org-select-carte"><option value="">— Carte —</option></select>
+                                <select id="org-select-sequence" data-tooltip="orga-selecteur-sequence"><option value="">— Séquence —</option></select>
+                                <select id="org-select-lecon" data-tooltip="orga-selecteur-lecon"><option value="">— Leçon —</option></select>
+                                <label class="org-checkbox-label org-ee-toggle" data-tooltip="orga-enseignement-explicite">
+                                    <input type="checkbox" id="org-ee-checkbox">
+                                    Ens. explicite
+                                </label>
+                            </div>
+                            <div class="org-toolbar-droite">
+                                <button id="org-btn-guide" class="planif-btn-carte" title="Guide d'import/export">📔</button>
+                                <button id="org-btn-export" class="planif-btn-carte">Exporter / Importer</button>
                             </div>
                         </div>
                         <div class="org-corps">
@@ -4358,16 +4367,6 @@
                             <div class="org-corps-split">
                                 <!-- Colonne gauche : plan de la leçon -->
                                 <div class="org-plan-lecon">
-                                    <!-- Sélecteurs -->
-                                    <div class="org-selecteurs">
-                                        <select id="org-select-carte"><option value="">— Carte —</option></select>
-                                        <select id="org-select-sequence" data-tooltip="orga-selecteur-sequence"><option value="">— Séquence —</option></select>
-                                        <select id="org-select-lecon" data-tooltip="orga-selecteur-lecon"><option value="">— Leçon —</option></select>
-                                        <label class="org-checkbox-label org-ee-toggle" data-tooltip="orga-enseignement-explicite">
-                                            <input type="checkbox" id="org-ee-checkbox">
-                                            Ens. explicite
-                                        </label>
-                                    </div>
                                     <!-- Séances planifiées (badges groupe-cours / date / heure / local) -->
                                     <div id="org-entete-calendrier" class="org-section" style="display:none">
                                         <div class="org-section-titre" data-tooltip="orga-entete-lecon">Séances planifiées</div>
