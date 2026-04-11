@@ -1876,6 +1876,144 @@ function parserPlanMD(texte) {
 }
 
 // ============================================================
+//  IMPORT MD → NŒUDS CARTE
+// ============================================================
+
+/**
+ * Importe un plan MD dans la carte mentale.
+ * @param {string} texte - Plan en Markdown avec marqueurs [Séquence] [Leçon]
+ * @param {boolean} nouvelleCarteMode - true = créer une nouvelle carte, false = ajouter à l'active
+ * @returns {{ sequences: number, lecons: number }} Compteurs d'éléments créés
+ */
+function importerPlanDepuisMD(texte, nouvelleCarteMode) {
+    var carte = window.planificationCarte;
+    if (!carte || !carte.etat) {
+        console.error('importerPlanDepuisMD : carte mentale non initialisée');
+        return { sequences: 0, lecons: 0 };
+    }
+
+    var parsed = parserPlanMD(texte);
+    var nbSeq = parsed.sequences.length;
+    var nbLecons = 0;
+    for (var s = 0; s < parsed.sequences.length; s++) {
+        nbLecons += parsed.sequences[s].lecons.length;
+    }
+    nbLecons += parsed.orphelines.length;
+
+    if (nbSeq === 0 && nbLecons === 0) return { sequences: 0, lecons: 0 };
+
+    // Créer nouvelle carte ou calculer l'offset vertical pour l'ajout
+    var offsetY = 0;
+    if (nouvelleCarteMode) {
+        carte.nouvelleCarte('Import MD');
+    } else {
+        // Trouver le max Y pour placer les nouveaux nœuds en dessous
+        for (var entry of carte.etat.noeuds) {
+            var nd = entry[1];
+            if (nd.y > offsetY) offsetY = nd.y;
+        }
+        if (offsetY > 0) offsetY += 300;
+    }
+
+    var noeuds = [];
+    var seancesImport = chargerSeances();
+    var compteur = carte.etat.compteur;
+    var LAYOUT_X_START = 200;
+    var LAYOUT_Y_GAP = 400;
+    var LAYOUT_X_GAP = 250;
+    var ySeq = offsetY + 100;
+
+    // Créer les séquences et leurs leçons
+    for (var si = 0; si < parsed.sequences.length; si++) {
+        var seq = parsed.sequences[si];
+        var seqId = 'planif-noeud_' + (++compteur);
+        var seqNoeud = {
+            id: seqId,
+            type: 'sequence',
+            titre: seq.titre,
+            x: LAYOUT_X_START,
+            y: ySeq,
+            parent: null,
+            enfants: [],
+            metadata: {},
+            cloneSourceId: null
+        };
+        if (seq.semaineDebut != null) seqNoeud.metadata.semaineDebut = seq.semaineDebut;
+        if (seq.semaineFin != null) seqNoeud.metadata.semaineFin = seq.semaineFin;
+
+        // Leçons de la séquence
+        for (var li = 0; li < seq.lecons.length; li++) {
+            var lecon = seq.lecons[li];
+            var leconId = 'planif-noeud_' + (++compteur);
+            var leconNoeud = {
+                id: leconId,
+                type: 'lecon',
+                titre: lecon.titre,
+                x: LAYOUT_X_START + 60 + (li * LAYOUT_X_GAP),
+                y: ySeq + 80,
+                parent: seqId,
+                enfants: [],
+                metadata: {},
+                cloneSourceId: null
+            };
+            if (lecon.dureeMin > 0) leconNoeud.metadata.duree = lecon.dureeMin;
+            seqNoeud.enfants.push(leconId);
+            noeuds.push(leconNoeud);
+
+            // Stocker l'objectif dans les données de séances
+            if (lecon.objectif) {
+                if (!seancesImport[leconId]) seancesImport[leconId] = {};
+                seancesImport[leconId].objectifPersonnalise = lecon.objectif;
+            }
+            if (lecon.notes) {
+                if (!seancesImport[leconId]) seancesImport[leconId] = {};
+                seancesImport[leconId].notes = lecon.notes;
+            }
+        }
+
+        noeuds.push(seqNoeud);
+        ySeq += LAYOUT_Y_GAP;
+    }
+
+    // Leçons orphelines
+    for (var oi = 0; oi < parsed.orphelines.length; oi++) {
+        var orp = parsed.orphelines[oi];
+        var orpId = 'planif-noeud_' + (++compteur);
+        var orpNoeud = {
+            id: orpId,
+            type: 'lecon',
+            titre: orp.titre,
+            x: LAYOUT_X_START + (oi * LAYOUT_X_GAP),
+            y: ySeq + 80,
+            parent: null,
+            enfants: [],
+            metadata: {},
+            cloneSourceId: null
+        };
+        if (orp.dureeMin > 0) orpNoeud.metadata.duree = orp.dureeMin;
+        noeuds.push(orpNoeud);
+
+        if (orp.objectif) {
+            if (!seancesImport[orpId]) seancesImport[orpId] = {};
+            seancesImport[orpId].objectifPersonnalise = orp.objectif;
+        }
+        if (orp.notes) {
+            if (!seancesImport[orpId]) seancesImport[orpId] = {};
+            seancesImport[orpId].notes = orp.notes;
+        }
+    }
+
+    // Mettre à jour le compteur et injecter
+    carte.etat.compteur = compteur;
+    carte.injecterNoeuds(noeuds);
+
+    // Sauvegarder les séances en un seul write
+    sauvegarderSeances(seancesImport);
+
+    return { sequences: nbSeq, lecons: nbLecons };
+}
+
+// ============================================================
 //  PERSISTANCE
 // ============================================================
 

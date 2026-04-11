@@ -4756,6 +4756,28 @@ function gererKeydown(e) {
 document.addEventListener('keydown', gererKeydown);
 
 // === EXPORT ===
+/**
+ * Injecte une liste de nœuds dans la carte active, reconstruit le DOM et sauvegarde.
+ * Utilisé par l'import MD de l'organisateur.
+ * @param {Array} listeNoeuds - Nœuds au format { id, type, titre, x, y, parent, enfants, metadata }
+ */
+function injecterNoeuds(listeNoeuds) {
+    for (var i = 0; i < listeNoeuds.length; i++) {
+        var n = listeNoeuds[i];
+        if (!n.enfants) n.enfants = [];
+        if (!n.parent) n.parent = null;
+        if (!n.metadata) n.metadata = {};
+        if (!('cloneSourceId' in n)) n.cloneSourceId = null;
+        etat.noeuds.set(n.id, n);
+    }
+    reconstruireDOM();
+    sauvegarder();
+    requestAnimationFrame(function() {
+        centrerVueSurContenu();
+        mettreAJourTousLesBadges();
+    });
+}
+
 window.planificationCarte = {
     initialiser: initialiser,
     activer: function() { planificationActive = true; },
@@ -4777,7 +4799,9 @@ window.planificationCarte = {
     naviguerVers: naviguerVers,
     CLE_SEANCES: CLE_SEANCES,
     zoomPleineLargeur: zoomPleineLargeur,
-    zoomPleineHauteur: zoomPleineHauteur
+    zoomPleineHauteur: zoomPleineHauteur,
+    injecterNoeuds: injecterNoeuds,
+    nouvelleCarte: nouvelleCarte
 };
 
 })();
