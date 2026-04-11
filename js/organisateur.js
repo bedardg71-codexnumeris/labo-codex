@@ -205,13 +205,17 @@ function brancherEvenements() {
         onglets[oi].addEventListener('click', basculerOnglet);
     }
 
-    // Import MD
-    var btnPrevisualiser = document.getElementById('org-import-previsualiser');
-    var btnConfirmerImport = document.getElementById('org-import-confirmer');
-    var btnAnnulerImport = document.getElementById('org-import-annuler');
-    if (btnPrevisualiser) btnPrevisualiser.addEventListener('click', previsualiserImportMD);
-    if (btnConfirmerImport) btnConfirmerImport.addEventListener('click', confirmerImportMD);
-    if (btnAnnulerImport) btnAnnulerImport.addEventListener('click', fermerModaleExport);
+    // Import MD — délégation sur le panneau import
+    var panneauImport = document.getElementById('org-panneau-import');
+    if (panneauImport) {
+        panneauImport.addEventListener('click', function(e) {
+            var btn = e.target.closest('button');
+            if (!btn) return;
+            if (btn.id === 'org-import-previsualiser') previsualiserImportMD();
+            else if (btn.id === 'org-import-confirmer') confirmerImportMD();
+            else if (btn.id === 'org-import-annuler') fermerModaleExport();
+        });
+    }
 
     // Drag & drop pour les activités dans les étapes EE
     configurerDragDrop();
