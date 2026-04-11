@@ -621,3 +621,5 @@ function _genererLigneSynthese(donnees) {
     return html;
 }
 
+window.calculerConsolidationIndividuelle = calculerConsolidationIndividuelle;
+
