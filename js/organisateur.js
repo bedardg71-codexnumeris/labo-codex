@@ -186,6 +186,14 @@ function brancherEvenements() {
         });
     }
 
+    // Guide (partagé avec la carte mentale)
+    var btnGuide = document.getElementById('org-btn-guide');
+    if (btnGuide) btnGuide.addEventListener('click', function() {
+        if (window.planificationCarte && window.planificationCarte.ouvrirGuide) {
+            window.planificationCarte.ouvrirGuide();
+        }
+    });
+
     // Export
     if (btnExport) btnExport.addEventListener('click', ouvrirModaleExport);
     var btnFermer = document.getElementById('org-modale-fermer');

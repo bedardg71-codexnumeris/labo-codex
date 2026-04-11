@@ -17600,10 +17600,10 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 
 /* === PANNEAU GUIDE FLOTTANT (#167) === */
 .planif-guide-flottante {
-    position: absolute;
-    top: 12px;
-    left: 220px;
-    z-index: 80;
+    position: fixed;
+    top: 120px;
+    left: 320px;
+    z-index: 500;
     background: var(--surface-carte, #1a3040);
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 10px;
