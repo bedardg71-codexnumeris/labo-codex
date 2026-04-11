@@ -1672,6 +1672,11 @@ function genererSectionAccompagnement(da) {
     const progression = calculerProgressionEleve(da);
     const defiSpecifique = identifierDefiSpecifique(da);
     const directionRisque = calculerDirectionRisque(da);
+    const directionsCriteres = calculerDirectionsCriteres(da);
+
+    // Compter le nombre total d'artefacts évalués (pour afficher la fiabilité des données)
+    const evaluationsDA = (obtenirDonneesSelonMode('evaluationsSauvegardees') || []).filter(e => e.etudiantDA === da && e.noteFinale != null);
+    const nbTotalArtefacts = evaluationsDA.length;
 
     // Construire le texte de progression au format du rapport (basé sur les critères)
     let texteProgression = '';
@@ -1777,7 +1782,8 @@ function genererSectionAccompagnement(da) {
                             noteExplicative = `<span class="u-texte-petit u-texte-gris-clair" style="font-weight: normal; display: block; margin-top: 2px;">Calculée sur toutes les évaluations</span>`;
                         }
 
-                        return `${niveau} ${pct.toFixed(0)}%${noteExplicative}`;
+                        const termeArtefact = nbTotalArtefacts > 1 ? obtenirTermeProduction('pluriel') : obtenirTermeProduction('singulier');
+                        return `${niveau} ${pct.toFixed(0)}% <span class="u-texte-petit u-texte-gris-clair" style="font-weight: normal;">(sur ${nbTotalArtefacts} ${termeArtefact})</span>${noteExplicative}`;
                     })()}
                 </p>
 
@@ -1786,7 +1792,11 @@ function genererSectionAccompagnement(da) {
                     ${criteres.map(c => {
                         const pct = c.valeur * 100;
                         const niveau = pct >= 85 ? 'E' : pct >= 75 ? 'M' : pct >= 65 ? 'D' : 'I';
-                        return `<li>${echapperHtml(c.nom)} : ${niveau} ${pct.toFixed(0)}%</li>`;
+                        let cleDir = c.cleNormalisee;
+                        if (cleDir.startsWith('francais')) cleDir = 'francais';
+                        const dir = directionsCriteres ? directionsCriteres[cleDir] : null;
+                        const symbDir = dir && dir.symbole ? ' ' + dir.symbole : '';
+                        return `<li>${echapperHtml(c.nom)} : ${niveau} ${pct.toFixed(0)}%${symbDir}</li>`;
                     }).join('')}
                 </ul>
 
@@ -1981,6 +1991,29 @@ function genererSectionAccompagnement(da) {
                 `;
             })()}
         </div>
+
+        ${(() => {
+            if (typeof calculerConsolidationIndividuelle !== 'function') return '';
+            const consolidation = calculerConsolidationIndividuelle(da);
+            if (!consolidation || !consolidation.resume) return '';
+            const critConsol = Object.keys(consolidation.resume);
+            if (critConsol.length === 0) return '';
+
+            const items = critConsol.map(critere => {
+                const info = consolidation.resume[critere];
+                if (info.type === 'consolide') {
+                    return '<span style="color: var(--vert-succes);">' + echapperHtml(critere) + ' consolidé (' + echapperHtml(info.artefactNom) + ')</span>';
+                } else if (info.type === 'non-consolide-avec-tentatives') {
+                    return '<span style="color: var(--orange-attention, #e8a838);">' + echapperHtml(critere) + ' fragile</span>';
+                } else {
+                    return '<span style="color: var(--gris-moyen);">' + echapperHtml(critere) + ' non consolidé</span>';
+                }
+            });
+
+            return '<div style="margin-top: 12px; padding: 10px 14px; background: var(--fond-carte, var(--fond-secondaire)); border-radius: 6px; font-size: 0.85rem; color: var(--texte-secondaire);">' +
+                '<strong style="color: var(--texte-principal);">Consolidation :</strong> ' + items.join(' · ') +
+                '</div>';
+        })()}
 
         <!-- Historique compact -->
         <div class="u-mt-15">
@@ -8748,6 +8781,7 @@ window.determinerCibleIntervention = determinerCibleIntervention; // 🔧 FIX Be
 window.calculerMoyennesCriteres = calculerMoyennesCriteres;
 window.calculerIPB = calculerIPB;
 window.obtenirGrilleReferenceDepistage = obtenirGrilleReferenceDepistage;
+window.calculerDirectionsCriteres = calculerDirectionsCriteres;
 
 /**
  * 🆕 BETA 91: Calcule et stocke les patterns + RàI pour TOUT le groupe
