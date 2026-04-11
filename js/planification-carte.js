@@ -277,7 +277,7 @@ var GUIDE_PAGES = [
             '</ol>' +
             '<p><strong>Retravailler avec une IA</strong></p>' +
             '<ol>' +
-                '<li>Colle le plan dans ChatGPT, Claude ou un autre assistant.</li>' +
+                '<li>Colle le plan dans un assistant IA de ton choix.</li>' +
                 '<li>Demande-lui d\u2019enrichir les objectifs, d\u2019ajouter des leçons, de réorganiser les séquences\u2026</li>' +
                 '<li>L\u2019IA comprend les marqueurs <code>[Séquence]</code> et <code>[Leçon]</code> — elle les conservera dans sa réponse.</li>' +
             '</ol>' +
@@ -4827,7 +4827,8 @@ window.planificationCarte = {
     zoomPleineLargeur: zoomPleineLargeur,
     zoomPleineHauteur: zoomPleineHauteur,
     injecterNoeuds: injecterNoeuds,
-    nouvelleCarte: nouvelleCarte
+    nouvelleCarte: nouvelleCarte,
+    ouvrirGuide: ouvrirGuide
 };
 
 })();

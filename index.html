@@ -4214,19 +4214,7 @@
                                     </table>
                                 </div>
                             </div>
-                            <!-- Panneau guide flottant indépendant (#167) -->
-                            <div id="planif-guide-panel" class="planif-guide-flottante" style="display: none;">
-                                <div class="planif-guide-barre">
-                                    <span class="planif-palette-titre">Guide</span>
-                                    <div class="planif-guide-barre-actions">
-                                        <button class="planif-guide-panel-replier" title="Replier le guide">−</button>
-                                        <button class="planif-guide-panel-fermer" title="Fermer le guide">&times;</button>
-                                    </div>
-                                </div>
-                                <div class="planif-guide-panel-contenu">
-                                    <!-- Rempli dynamiquement par ouvrirGuide() -->
-                                </div>
-                            </div>
+                            <!-- Panneau guide déplacé au niveau section-structure -->
                             <div id="planif-zone-travail" data-tooltip="planif-canevas">
                                 <div id="planif-espace-wrapper">
                                 <div id="planif-espace">
@@ -4342,11 +4330,26 @@
                     </div><!-- fin planif-wrapper -->
                 </div><!-- fin sous-section structure-carte -->
 
+                <!-- Panneau guide flottant — accessible depuis la carte ET l'organisateur -->
+                <div id="planif-guide-panel" class="planif-guide-flottante" style="display: none;">
+                    <div class="planif-guide-barre">
+                        <span class="planif-palette-titre">Guide</span>
+                        <div class="planif-guide-barre-actions">
+                            <button class="planif-guide-panel-replier" title="Replier le guide">−</button>
+                            <button class="planif-guide-panel-fermer" title="Fermer le guide">&times;</button>
+                        </div>
+                    </div>
+                    <div class="planif-guide-panel-contenu">
+                        <!-- Rempli dynamiquement par ouvrirGuide() -->
+                    </div>
+                </div>
+
                 <div id="structure-organisateur" class="sous-section">
                     <div class="org-conteneur">
                         <div class="org-entete">
                             <h2>Plan de la leçon</h2>
-                            <div class="org-actions">
+                            <div class="org-actions" style="display: flex; gap: 0.5rem">
+                                <button id="org-btn-guide" class="btn btn-secondaire" style="font-size: 0.85rem">Guide</button>
                                 <button id="org-btn-export" class="btn btn-secondaire">Exporter / Importer</button>
                             </div>
                         </div>
