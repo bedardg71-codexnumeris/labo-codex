@@ -1473,13 +1473,15 @@ async function chargerCartouchePourModif(cartoucheId, grilleId) {
         const echelleId = cartouche.echelleId || '';
         await populerDropdownsCartouche(grilleId, echelleId, true);
 
-        // Afficher les boutons Dupliquer, Supprimer et Export PDF (mode édition)
+        // Afficher les boutons Dupliquer, Supprimer, Export PDF et Export texte (mode édition)
         const btnDupliquer = document.getElementById('btnDupliquerCartouche');
         const btnSupprimer = document.getElementById('btnSupprimerCartouche');
         const btnExportPDFEdit = document.getElementById('btnExporterPDFCartouche');
+        const btnExportTexteEdit = document.getElementById('btnExporterTexteCartouche');
         if (btnDupliquer) btnDupliquer.classList.remove('u-hide');
         if (btnSupprimer) btnSupprimer.classList.remove('u-hide');
         if (btnExportPDFEdit) btnExportPDFEdit.classList.remove('u-hide');
+        if (btnExportTexteEdit) btnExportTexteEdit.classList.remove('u-hide');
 
         // NOUVELLE INTERFACE (Beta 80.5+): Passer les paramètres directement
         await chargerMatriceRetroaction(cartoucheId, grilleId);
@@ -1518,9 +1520,11 @@ async function chargerCartouchePourModif(cartoucheId, grilleId) {
         }
 
 
-        // Afficher le bouton export PDF dans la barre de boutons
+        // Afficher les boutons export PDF et texte dans la barre de boutons
         const btnExportPDF = document.getElementById('btnExporterPDFCartouche');
+        const btnExportTexte = document.getElementById('btnExporterTexteCartouche');
         if (btnExportPDF) btnExportPDF.classList.remove('u-hide');
+        if (btnExportTexte) btnExportTexte.classList.remove('u-hide');
 
         // Si verrouillée, afficher l'alerte de verrouillage
         const alerteVerrouillage = document.getElementById('alerteVerrouillage');
@@ -2194,6 +2198,98 @@ function importerCartoucheDepuisTxt(eventOuEl) {
     event.target.value = '';
 }
 
+/**
+ * Exporte la cartouche active en fichier texte Markdown (.md)
+ * Format compatible avec importerCartoucheDepuisTxt() pour aller-retour
+ *
+ * STRUCTURE DU FICHIER:
+ * - En-tête métadonnées (ignoré par l'import — pas de ## ni **(X)**)
+ * - Séparateur ---
+ * - Pour chaque critère : ## NOM puis **NOM (I/D/M/E)** : commentaire
+ *
+ * UTILISÉ PAR:
+ * - Bouton «Exporter en texte» dans la barre de boutons d'édition
+ */
+async function exporterCartoucheEnTexte() {
+    if (!cartoucheActuel) {
+        alert('Aucune cartouche active à exporter');
+        return;
+    }
+
+    const lignes = [];
+
+    // — En-tête métadonnées (informatif, ignoré par l'import) —
+    lignes.push('# ' + (cartoucheActuel.nom || 'Cartouche sans nom'));
+    lignes.push('');
+
+    // Récupérer le nom de la grille
+    const grilles = await db.get('grillesTemplates') || [];
+    const grille = grilles.find(g => g.id === cartoucheActuel.grilleId);
+    if (grille) {
+        lignes.push('Grille : ' + grille.nom);
+    }
+
+    const meta = cartoucheActuel.metadata_cc || {};
+    if (meta.auteur_original) {
+        lignes.push('Auteur : ' + meta.auteur_original);
+    }
+    if (cartoucheActuel.dateCreation) {
+        const date = new Date(cartoucheActuel.dateCreation);
+        lignes.push('Date : ' + date.toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' }));
+    }
+    if (cartoucheActuel.description) {
+        lignes.push('Description : ' + cartoucheActuel.description);
+    }
+    if (cartoucheActuel.contexte) {
+        lignes.push('Contexte : ' + cartoucheActuel.contexte);
+    }
+
+    lignes.push('');
+    lignes.push('---');
+    lignes.push('');
+
+    // — Matrice critères × niveaux —
+    const criteres = cartoucheActuel.criteres || [];
+    const niveaux = cartoucheActuel.niveaux || [];
+    const commentaires = cartoucheActuel.commentaires || {};
+
+    criteres.forEach((critere, index) => {
+        lignes.push('## ' + critere.nom);
+        lignes.push('');
+
+        niveaux.forEach(niveau => {
+            const cle = critere.id + '_' + niveau.code;
+            const commentaire = commentaires[cle] || '';
+            lignes.push('**' + critere.nom + ' (' + niveau.code + ')** : ' + commentaire);
+        });
+
+        // Séparateur entre critères (sauf le dernier)
+        if (index < criteres.length - 1) {
+            lignes.push('');
+            lignes.push('---');
+            lignes.push('');
+        }
+    });
+
+    // Générer et télécharger le fichier
+    const contenu = lignes.join('\n');
+    const nomFichier = (cartoucheActuel.nom || 'cartouche')
+        .replace(/[^a-zA-Z0-9àâäéèêëïîôùûüÿçÀÂÄÉÈÊËÏÎÔÙÛÜŸÇ\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .toLowerCase();
+    const blob = new Blob([contenu], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nomFichier + '.md';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    afficherNotificationSucces('Cartouche exportée en format texte');
+}
+
 /* ===============================
    📌 NOTES D'UTILISATION
    =============================== */
@@ -2216,19 +2312,21 @@ async function ajouterCartoucheAGrille(grilleId) {
         selectGrille.value = grilleId;
     }
 
-    // Masquer les boutons Dupliquer, Exporter, Importer, Supprimer et Export PDF (mode création)
+    // Masquer les boutons Dupliquer, Exporter, Importer, Supprimer, Export PDF et Export texte (mode création)
     const btnDupliquer = document.getElementById('btnDupliquerCartouche');
     const btnExporter = document.getElementById('btnExporterCartouche');
     const btnImporter = document.getElementById('btnImporterCartouche');
     const btnImporterTxt = document.getElementById('btnImporterCartoucheTxt');
     const btnSupprimer = document.getElementById('btnSupprimerCartouche');
     const btnExportPDFInit = document.getElementById('btnExporterPDFCartouche');
+    const btnExportTexteInit = document.getElementById('btnExporterTexteCartouche');
     if (btnDupliquer) btnDupliquer.classList.add('u-hide');
     if (btnExporter) btnExporter.classList.add('u-hide');
     if (btnImporter) btnImporter.classList.add('u-hide');
     if (btnImporterTxt) btnImporterTxt.classList.add('u-hide');
     if (btnSupprimer) btnSupprimer.classList.add('u-hide');
     if (btnExportPDFInit) btnExportPDFInit.classList.add('u-hide');
+    if (btnExportTexteInit) btnExportTexteInit.classList.add('u-hide');
 
     // Initialiser une nouvelle cartouche pour cette grille
     await initialiserNouveauCartouche(grilleId);
@@ -2566,6 +2664,7 @@ window.importerCartouches = importerCartouches;
 window.exporterCartoucheActive = exporterCartoucheActive;
 window.importerCartoucheJSON = importerCartoucheJSON;
 window.importerCartoucheDepuisTxt = importerCartoucheDepuisTxt;
+window.exporterCartoucheEnTexte = exporterCartoucheEnTexte;
 
 // Nouvelles fonctions Beta 90 (boutons dans formulaire)
 window.dupliquerCartoucheActive = dupliquerCartoucheActive;
@@ -2921,13 +3020,15 @@ async function creerNouvelleCartouche() {
         return;
     }
 
-    // Masquer les boutons Dupliquer, Supprimer et Export PDF (mode création)
+    // Masquer les boutons Dupliquer, Supprimer, Export PDF et Export texte (mode création)
     const btnDupliquer = document.getElementById('btnDupliquerCartouche');
     const btnSupprimer = document.getElementById('btnSupprimerCartouche');
     const btnExportPDFCreation = document.getElementById('btnExporterPDFCartouche');
+    const btnExportTexteCreation = document.getElementById('btnExporterTexteCartouche');
     if (btnDupliquer) btnDupliquer.classList.add('u-hide');
     if (btnSupprimer) btnSupprimer.classList.add('u-hide');
     if (btnExportPDFCreation) btnExportPDFCreation.classList.add('u-hide');
+    if (btnExportTexteCreation) btnExportTexteCreation.classList.add('u-hide');
 
     // Afficher le formulaire
     const messageAccueil = document.getElementById('messageAccueilCartouche');
