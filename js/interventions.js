@@ -194,10 +194,12 @@ function analyserSousGroupe(dasEtudiants) {
     dasEtudiants.forEach(da => {
         // Calculer les indices pour cet étudiant
         const indices = calculerTousLesIndices(da);
-        const cible = determinerCibleIntervention(da);
+        var niveauRaiEtud = typeof determinerNiveauRaiPedagogique === 'function'
+            ? determinerNiveauRaiPedagogique(da) : null;
+        var niveauEtud = niveauRaiEtud ? niveauRaiEtud.niveau : 1;
 
         // Compter les niveaux RàI
-        niveauxRai[cible.niveau] = (niveauxRai[cible.niveau] || 0) + 1;
+        niveauxRai[niveauEtud] = (niveauxRai[niveauEtud] || 0) + 1;
 
         // Accumuler l'engagement (E = A × C × P)
         sommeEngagement += (indices.E || 0);
@@ -207,8 +209,8 @@ function analyserSousGroupe(dasEtudiants) {
         engagementDistribution[niveauE] = (engagementDistribution[niveauE] || 0) + 1;
 
         // Compter les patterns
-        const pattern = cible.pattern;
-        patternsCommuns[pattern] = (patternsCommuns[pattern] || 0) + 1;
+        var patternEtud = niveauRaiEtud ? niveauRaiEtud.pattern : 'Données insuffisantes';
+        patternsCommuns[patternEtud] = (patternsCommuns[patternEtud] || 0) + 1;
 
         // Calculer la progression (fonction à créer ou utiliser existante)
         if (typeof calculerProgressionArtefacts === 'function') {
@@ -730,8 +732,9 @@ function ouvrirIntervention(interventionId, options) {
         if (checked) {
             nbCheckboxesCochees++;
         }
-        const indices = calculerTousLesIndices(etudiant.da);
-        const cible = determinerCibleIntervention(etudiant.da);
+        const niveauRaiEtud = typeof determinerNiveauRaiPedagogique === 'function'
+            ? determinerNiveauRaiPedagogique(etudiant.da) : null;
+        const niveauBadge = niveauRaiEtud ? niveauRaiEtud.niveau : 0;
         const noteExistante = intervention.notesIndividuelles?.[etudiant.da] || '';
 
         listeHtml += `
@@ -746,7 +749,7 @@ function ouvrirIntervention(interventionId, options) {
                 <textarea id="note-${etudiant.da}" class="controle-form" rows="1"
                           placeholder="Note individuelle..."
                           style="font-size: 0.85rem; resize: vertical;">${echapperHtml(typeof anonymiserTexteRetroaction === 'function' ? anonymiserTexteRetroaction(noteExistante, etudiant.da) : noteExistante)}</textarea>
-                <span class="badge-rai-${cible.niveau}">Niveau ${cible.niveau}</span>
+                <span class="badge-rai-${niveauBadge}">Niveau ${niveauBadge}</span>
             </div>
         `;
     });
