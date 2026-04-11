@@ -1721,6 +1721,107 @@ function genererLeconMD(lecon, etat, seances, carte, estEleve) {
 }
 
 // ============================================================
+//  PARSER MD (import aller-retour)
+// ============================================================
+
+/**
+ * Convertit "50 min", "1h15", "1h", "90 min" → nombre de minutes
+ */
+function parserDuree(texte) {
+    var matchHM = texte.match(/(\d+)\s*h\s*(\d*)/);
+    if (matchHM) return parseInt(matchHM[1]) * 60 + (matchHM[2] ? parseInt(matchHM[2]) : 0);
+    var matchMin = texte.match(/(\d+)\s*min/);
+    if (matchMin) return parseInt(matchMin[1]);
+    return 0;
+}
+
+/**
+ * Parse un plan de cours en Markdown et retourne une structure
+ * { sequences: [], orphelines: [] }
+ *
+ * Chaque séquence : { titre, semaineDebut, semaineFin, lecons: [] }
+ * Chaque leçon : { titre, dureeMin, objectif, evaluation, notes }
+ */
+function parserPlanMD(texte) {
+    var resultat = { sequences: [], orphelines: [] };
+    if (!texte || !texte.trim()) return resultat;
+
+    var sequenceCourante = null;
+    var leconCourante = null;
+    var champCourant = null;
+
+    var lignes = texte.split('\n');
+
+    for (var i = 0; i < lignes.length; i++) {
+        var ligne = lignes[i];
+
+        // Séquence : ## Titre [Séquence | Sem. X–Y]  ou  ## Titre [Séquence]
+        var matchSeq = ligne.match(/^##\s+(.+?)\s*\[Séquence(?:\s*\|\s*Sem\.\s*(\d+)(?:\s*[–-]\s*(\d+))?)?\]/);
+        if (matchSeq) {
+            sequenceCourante = {
+                titre: matchSeq[1].trim(),
+                semaineDebut: matchSeq[2] ? parseInt(matchSeq[2]) : null,
+                semaineFin: matchSeq[3] ? parseInt(matchSeq[3]) : (matchSeq[2] ? parseInt(matchSeq[2]) : null),
+                lecons: []
+            };
+            resultat.sequences.push(sequenceCourante);
+            leconCourante = null;
+            champCourant = null;
+            continue;
+        }
+
+        // Orphelines : ## ... [Orphelines]
+        if (/^##\s+.*\[Orphelines\]/.test(ligne)) {
+            sequenceCourante = null;
+            leconCourante = null;
+            champCourant = null;
+            continue;
+        }
+
+        // Leçon : ### Titre [Leçon | durée]  ou  ### Titre [Leçon]
+        var matchLecon = ligne.match(/^###\s+(.+?)\s*\[Leçon(?:\s*\|\s*(.+?))?\]/);
+        if (matchLecon) {
+            leconCourante = {
+                titre: matchLecon[1].trim(),
+                dureeMin: matchLecon[2] ? parserDuree(matchLecon[2].trim()) : 0,
+                objectif: '',
+                evaluation: '',
+                notes: ''
+            };
+            if (sequenceCourante) {
+                sequenceCourante.lecons.push(leconCourante);
+            } else {
+                resultat.orphelines.push(leconCourante);
+            }
+            champCourant = null;
+            continue;
+        }
+
+        // Champs de leçon (uniquement si on est dans une leçon)
+        if (leconCourante) {
+            var matchObj = ligne.match(/^\*\*Objectif\*\*\s*:\s*(.*)/);
+            if (matchObj) { leconCourante.objectif = matchObj[1].trim(); champCourant = 'objectif'; continue; }
+
+            var matchEval = ligne.match(/^\*\*Évaluation\*\*\s*:\s*(.*)/);
+            if (matchEval) { leconCourante.evaluation = matchEval[1].trim(); champCourant = 'evaluation'; continue; }
+
+            var matchNotes = ligne.match(/^\*\*Notes\*\*\s*:\s*(.*)/);
+            if (matchNotes) { leconCourante.notes = matchNotes[1].trim(); champCourant = 'notes'; continue; }
+
+            // Continuation multi-ligne : texte qui n'est pas un nouveau marqueur
+            if (champCourant && ligne.trim() && !(/^#{1,3}\s/.test(ligne)) && !(/^\*\*\w/.test(ligne))) {
+                leconCourante[champCourant] += '\n' + ligne.trim();
+            } else if (!ligne.trim() || /^---/.test(ligne)) {
+                // Ligne vide ou séparateur : fin du champ courant
+                champCourant = null;
+            }
+        }
+    }
+
+    return resultat;
+}
+
+// ============================================================
 //  PERSISTANCE
 // ============================================================
 
