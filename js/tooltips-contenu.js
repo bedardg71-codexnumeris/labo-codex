@@ -465,9 +465,6 @@ const TOOLTIPS = {
     'tdb-rai':
         'Niveau d\u2019intervention selon la performance globale (indice P, tous crit\u00e8res). Compl\u00e9mentaire au suivi des fondamentaux qui cible les crit\u00e8res multistructurels.',
 
-    'tdb-impact-artefacts':
-        'Observe la progression des fondamentaux au fil des activit\u00e9s. Montre combien d\u2019\u00e9tudiants progressent, stagnent ou r\u00e9gressent apr\u00e8s chaque production, avec le score m\u00e9dian du groupe.',
-
     // --- Section Développement du groupe ---
 
     'tdb-dev-groupe':
@@ -640,6 +637,15 @@ const TOOLTIPS = {
 
     'interv-presences-notes':
         'Cocher les pr\u00e9sents et documenter les observations individuelles. Le badge indique le niveau R\u00e0I.',
+
+    'interv-criteres-cibles':
+        'Crit\u00e8res de la grille de d\u00e9pistage cibl\u00e9s par l\u2019intervention. Pr\u00e9-coch\u00e9s selon les d\u00e9fis communs du sous-groupe. Le compteur montre combien d\u2019\u00e9tudiants sont en d\u00e9fi pour chaque crit\u00e8re.',
+
+    'interv-objectif-vise':
+        'Objectif mesurable de l\u2019intervention. La suggestion est bas\u00e9e sur le crit\u00e8re cibl\u00e9 le plus faible et le prochain seuil IDME atteignable.',
+
+    'interv-bilan':
+        'Bilan post-intervention. Comparaison automatique avant/apr\u00e8s sur les crit\u00e8res cibl\u00e9s. L\u2019\u00ab avant \u00bb est captur\u00e9 au moment de la premi\u00e8re sauvegarde, l\u2019\u00ab apr\u00e8s \u00bb est calcul\u00e9 en temps r\u00e9el.',
 
     // =================================================================
     // ÉVALUATIONS — Aperçu
