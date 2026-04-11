@@ -1387,108 +1387,6 @@ function sauvegarderPresencesIntervention(interventionId) {
 }
 
 /**
- * OBSOLÈTE : Cette fonction n'est plus utilisée. Le statut se gère via les boutons radio dans le formulaire.
- * Terminer une intervention (sauvegarder + marquer comme complétée)
- * @param {string} interventionId - ID de l'intervention
- */
-function terminerIntervention(interventionId) {
-    const checkboxes = document.querySelectorAll('#listeEtudiantsIntervention input[type="checkbox"]:checked');
-    const dasSelectionnes = Array.from(checkboxes).map(cb => cb.value);
-    const observationsField = document.getElementById('observationsIntervention');
-    const observations = observationsField ? observationsField.value : '';
-
-    // Marquer les présences (met à jour etudiants et analyse)
-    marquerPresences(interventionId, dasSelectionnes);
-
-    // Sauvegarder TOUTES les informations de l'intervention
-    const interventions = obtenirInterventions();
-    const index = interventions.findIndex(i => i.id === interventionId);
-
-    if (index !== -1) {
-        // Dériver contexte, type et absences depuis le formulaire
-        var niveauTerm = parseInt(document.getElementById('interventionNiveau').value);
-        var contexteElTerm = document.getElementById('interventionContexte');
-        var contexteTerm = (niveauTerm === 2 && contexteElTerm) ? contexteElTerm.value : 'hors-classe';
-        var typeTerm = 'groupe';
-        if (contexteTerm === 'mio') typeTerm = 'mio';
-        else if (niveauTerm === 3) typeTerm = 'individuel';
-
-        // Mettre à jour les informations de base
-        interventions[index].titre = document.getElementById('interventionTitre').value;
-        interventions[index].date = document.getElementById('interventionDate').value;
-        interventions[index].heure = document.getElementById('interventionHeure').value;
-        interventions[index].duree = parseFloat(document.getElementById('interventionDuree').value) || 2;
-        interventions[index].niveauRai = niveauTerm;
-        interventions[index].contexte = contexteTerm;
-        interventions[index].type = typeTerm;
-        interventions[index].description = document.getElementById('interventionDescription').value;
-        if (contexteTerm === 'rattrapage') {
-            interventions[index].seanceConcernee = document.getElementById('interventionSeance').value || null;
-            interventions[index].marquerNonParticipantsMotives = true;
-        } else {
-            interventions[index].seanceConcernee = null;
-            interventions[index].marquerNonParticipantsMotives = false;
-        }
-
-        // Mettre à jour observations
-        interventions[index].observations = observations;
-
-        // Récupérer les notes individuelles pour chaque étudiant présent
-        const notesIndividuelles = {};
-        dasSelectionnes.forEach(da => {
-            const noteField = document.getElementById(`note-${da}`);
-            if (noteField && noteField.value.trim()) {
-                notesIndividuelles[da] = noteField.value.trim();
-            }
-        });
-        interventions[index].notesIndividuelles = notesIndividuelles;
-
-        interventions[index].dateModification = Date.now();
-        sauvegarderInterventions(interventions);
-    }
-
-    // Marquer comme complétée
-    completerIntervention(interventionId);
-
-    // Transférer les présences vers le module presences.js
-    transfererPresencesVersModule(interventionId);
-
-    // Retourner à la liste
-    afficherListeInterventions();
-
-    // Notification de succès
-    afficherNotificationSucces('Intervention complétée avec succès');
-}
-
-/**
- * OBSOLÈTE : Cette fonction n'est plus utilisée. Le statut se gère via les boutons radio dans le formulaire.
- * Rouvrir une intervention complétée pour permettre des corrections
- * @param {string} interventionId - ID de l'intervention
- */
-function rouvrirIntervention(interventionId) {
-    if (!confirm('Rouvrir cette intervention ? Elle repassera au statut "En cours" et tu pourras la modifier à nouveau.')) {
-        return;
-    }
-
-    const interventions = obtenirInterventions();
-    const index = interventions.findIndex(i => i.id === interventionId);
-
-    if (index !== -1) {
-        // Changer le statut de 'completee' à 'en-cours'
-        interventions[index].statut = 'en-cours';
-        interventions[index].dateModification = Date.now();
-
-        sauvegarderInterventions(interventions);
-    }
-
-    // Recharger la page de l'intervention pour afficher le bouton "Marquer comme complétée"
-    ouvrirIntervention(interventionId);
-
-    // Notification de succès
-    afficherNotificationSucces('Intervention rouverte - Tu peux maintenant la modifier');
-}
-
-/**
  * Transférer les présences d'une intervention vers le module presences.js
  * Cette fonction crée des entrées de présences facultatives pour TOUS les étudiants,
  * qu'ils aient participé ou non à l'intervention.
@@ -1658,9 +1556,6 @@ function supprimerInterventionEtRafraichir(interventionId) {
     }
 }
 
-// Delegation formulaires interventions (submit) — les anciens formulaires ont été supprimés (Phase 2)
-// La sauvegarde passe désormais par sauvegarderPresencesIntervention() via data-action
-
 // Exporter les fonctions publiques
 window.obtenirInterventions = obtenirInterventions;
 window.obtenirIntervention = obtenirIntervention;
@@ -1679,15 +1574,13 @@ window.onChangementSelectionEtudiants = onChangementSelectionEtudiants;
 window.mettreAJourCriteresCibles = mettreAJourCriteresCibles;
 window.suggererObjectifIntervention = suggererObjectifIntervention;
 window.sauvegarderPresencesIntervention = sauvegarderPresencesIntervention;
-window.terminerIntervention = terminerIntervention;
-window.rouvrirIntervention = rouvrirIntervention;
+// terminerIntervention et rouvrirIntervention supprimés (Phase 5)
 window.transfererPresencesVersModule = transfererPresencesVersModule;
 window.initialiserModuleInterventions = initialiserModuleInterventions;
 window.formaterDateLisible = formaterDateLisible;
 window.genererBadgeStatut = genererBadgeStatut;
 window.obtenirAbsencesMotiveesParDate = obtenirAbsencesMotiveesParDate;
 window.supprimerInterventionEtRafraichir = supprimerInterventionEtRafraichir;
-// sauvegarderModificationIntervention supprimé (Phase 2)
 window.afficherAnalyseTempsReel = afficherAnalyseTempsReel;
 
 
