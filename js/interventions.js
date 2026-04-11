@@ -938,6 +938,89 @@ function ouvrirIntervention(interventionId, options) {
                 <textarea id="observationsIntervention" class="controle-form" rows="6" placeholder="Ex: Stratégie de lecture n°3...">${intervention.observations || ''}</textarea>
             </div>
 
+            ${(() => {
+                // Section Bilan — visible uniquement quand statut = complétée
+                if (intervention.statut !== 'completee') return '';
+
+                // Tableau comparatif avant/après sur les critères ciblés
+                var bilanTableau = '';
+                if (intervention.snapshotAvant && intervention.criteresCibles && intervention.criteresCibles.length > 0) {
+                    var lignes = intervention.criteresCibles.map(function(nom) {
+                        var cleNorm = nom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+                        if (cleNorm.startsWith('francais')) cleNorm = 'francais';
+
+                        // Moyenne avant (snapshot) et après (actuel) sur les DAs de l'intervention
+                        var totalAvant = 0, countAvant = 0, totalApres = 0, countApres = 0;
+                        (intervention.etudiants || []).forEach(function(da) {
+                            var snap = intervention.snapshotAvant[da];
+                            if (snap && snap.criteres && typeof snap.criteres[cleNorm] === 'number') {
+                                totalAvant += snap.criteres[cleNorm];
+                                countAvant++;
+                            }
+                            var moyActuelles = typeof calculerMoyennesCriteres === 'function' ? calculerMoyennesCriteres(da) : null;
+                            if (moyActuelles && typeof moyActuelles[cleNorm] === 'number') {
+                                totalApres += moyActuelles[cleNorm];
+                                countApres++;
+                            }
+                        });
+                        var avant = countAvant > 0 ? totalAvant / countAvant : null;
+                        var apres = countApres > 0 ? totalApres / countApres : null;
+
+                        if (avant === null && apres === null) return '';
+
+                        var niveauAvant = avant !== null ? (avant >= 0.85 ? 'E' : avant >= 0.75 ? 'M' : avant >= 0.65 ? 'D' : 'I') : '—';
+                        var niveauApres = apres !== null ? (apres >= 0.85 ? 'E' : apres >= 0.75 ? 'M' : apres >= 0.65 ? 'D' : 'I') : '—';
+                        var delta = (avant !== null && apres !== null) ? Math.round((apres - avant) * 100) : null;
+                        var deltaTexte = delta !== null ? ((delta >= 0 ? '+' : '') + delta + ' pts') : '—';
+                        var deltaFleche = delta !== null ? (delta > 0 ? ' ↗' : delta < 0 ? ' ↘' : ' →') : '';
+                        var deltaCouleur = delta !== null ? (delta > 0 ? 'var(--vert-succes)' : delta < 0 ? 'var(--orange-attention, #e8a838)' : 'var(--gris-moyen)') : 'var(--gris-moyen)';
+
+                        return '<tr>' +
+                            '<td style="padding: 6px 12px; font-weight: 500;">' + echapperHtml(nom) + '</td>' +
+                            '<td style="padding: 6px 12px; text-align: center;">' + niveauAvant + ' ' + (avant !== null ? Math.round(avant * 100) + '%' : '') + '</td>' +
+                            '<td style="padding: 6px 12px; text-align: center;">' + niveauApres + ' ' + (apres !== null ? Math.round(apres * 100) + '%' : '') + '</td>' +
+                            '<td style="padding: 6px 12px; text-align: center; color: ' + deltaCouleur + '; font-weight: 600;">' + deltaTexte + deltaFleche + '</td>' +
+                            '</tr>';
+                    }).join('');
+
+                    if (lignes) {
+                        bilanTableau = '<table class="tableau-simple" style="font-size: 0.9rem; margin-bottom: 15px; width: 100%;">' +
+                            '<thead><tr><th style="padding: 6px 12px;">Critère</th><th style="padding: 6px 12px; text-align: center;">Avant</th><th style="padding: 6px 12px; text-align: center;">Après</th><th style="padding: 6px 12px; text-align: center;">Évolution</th></tr></thead>' +
+                            '<tbody>' + lignes + '</tbody></table>';
+                    }
+                } else if (!intervention.snapshotAvant) {
+                    bilanTableau = '<p class="text-muted" style="font-style: italic; font-size: 0.9rem;">Données de référence non disponibles (intervention créée avant la mise à jour).</p>';
+                }
+
+                var bilan = intervention.bilan || {};
+                return '<div class="carte" style="margin-bottom: 20px; border-left: 4px solid var(--accent-primaire);">' +
+                    '<h4 class="intervention-mt-0">Bilan post-intervention</h4>' +
+                    '<p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">Comparaison automatique des critères ciblés avant et après l\'intervention.</p>' +
+                    bilanTableau +
+                    '<div style="margin-bottom: 15px;">' +
+                        '<label class="label-formulaire">Objectif atteint ?</label>' +
+                        '<div style="display: flex; gap: 15px; margin-top: 5px;">' +
+                            '<label style="display: flex; align-items: center; gap: 6px; cursor: pointer;"><input type="radio" name="bilanAtteint" value="oui" ' + (bilan.atteint === 'oui' ? 'checked' : '') + ' style="width: auto; margin: 0;"> Oui</label>' +
+                            '<label style="display: flex; align-items: center; gap: 6px; cursor: pointer;"><input type="radio" name="bilanAtteint" value="partiellement" ' + (bilan.atteint === 'partiellement' ? 'checked' : '') + ' style="width: auto; margin: 0;"> Partiellement</label>' +
+                            '<label style="display: flex; align-items: center; gap: 6px; cursor: pointer;"><input type="radio" name="bilanAtteint" value="non" ' + (bilan.atteint === 'non' ? 'checked' : '') + ' style="width: auto; margin: 0;"> Non</label>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div style="margin-bottom: 15px;">' +
+                        '<label class="label-formulaire">Suite envisagée</label>' +
+                        '<div style="display: flex; gap: 15px; margin-top: 5px; flex-wrap: wrap;">' +
+                            '<label style="display: flex; align-items: center; gap: 6px; cursor: pointer;"><input type="radio" name="bilanSuite" value="reconduire" ' + (bilan.suite === 'reconduire' ? 'checked' : '') + ' style="width: auto; margin: 0;"> Reconduire</label>' +
+                            '<label style="display: flex; align-items: center; gap: 6px; cursor: pointer;"><input type="radio" name="bilanSuite" value="ajuster" ' + (bilan.suite === 'ajuster' ? 'checked' : '') + ' style="width: auto; margin: 0;"> Ajuster</label>' +
+                            '<label style="display: flex; align-items: center; gap: 6px; cursor: pointer;"><input type="radio" name="bilanSuite" value="referer" ' + (bilan.suite === 'referer' ? 'checked' : '') + ' style="width: auto; margin: 0;"> Référer</label>' +
+                            '<label style="display: flex; align-items: center; gap: 6px; cursor: pointer;"><input type="radio" name="bilanSuite" value="aucune" ' + (bilan.suite === 'aucune' ? 'checked' : '') + ' style="width: auto; margin: 0;"> Aucune action</label>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div>' +
+                        '<label for="observationsBilan" class="label-formulaire">Observations de bilan</label>' +
+                        '<textarea id="observationsBilan" class="controle-form" rows="3" placeholder="Réflexions sur l\'intervention, ajustements à apporter...">' + echapperHtml(bilan.observationsBilan || '') + '</textarea>' +
+                    '</div>' +
+                '</div>';
+            })()}
+
             <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
                 ${intervention.jamaisSauvegardee
                     ? '<button data-action="annulerNouvelleIntervention" data-param="' + interventionId + '" class="btn btn-secondaire">Annuler</button>'
@@ -1242,11 +1325,43 @@ function sauvegarderPresencesIntervention(interventionId) {
         });
         interventions[index].notesIndividuelles = notesIndividuelles;
 
+        // Snapshot incrémental par étudiant (Phase 4 — PT-2 + PT-3)
+        if (!interventions[index].snapshotAvant) interventions[index].snapshotAvant = {};
+        dasSelectionnes.forEach(function(da) {
+            if (!interventions[index].snapshotAvant[da]) {
+                var indicesSnap = typeof calculerTousLesIndices === 'function' ? calculerTousLesIndices(da) : null;
+                var moyennesSnap = typeof calculerMoyennesCriteres === 'function' ? calculerMoyennesCriteres(da) : null;
+                var criteresSnap = {};
+                if (moyennesSnap) {
+                    Object.keys(moyennesSnap).forEach(function(k) {
+                        if (typeof moyennesSnap[k] === 'number') criteresSnap[k] = moyennesSnap[k];
+                    });
+                }
+                interventions[index].snapshotAvant[da] = {
+                    P: indicesSnap ? indicesSnap.P : null,
+                    criteres: criteresSnap
+                };
+            }
+        });
+
         // Sauvegarder les critères ciblés et l'objectif (Phase 3)
         var criteresCiblesCbs = document.querySelectorAll('#criteresCiblesContainer .critere-cible-cb:checked');
         interventions[index].criteresCibles = Array.from(criteresCiblesCbs).map(function(cb) { return cb.value; });
         var objectifField = document.getElementById('objectifVise');
         interventions[index].objectifVise = objectifField ? objectifField.value : '';
+
+        // Sauvegarder le bilan si l'intervention est complétée (Phase 4)
+        if (nouveauStatut === 'completee') {
+            var bilanAtteintRadio = document.querySelector('input[name="bilanAtteint"]:checked');
+            var bilanSuiteRadio = document.querySelector('input[name="bilanSuite"]:checked');
+            var observationsBilanField = document.getElementById('observationsBilan');
+            interventions[index].bilan = {
+                atteint: bilanAtteintRadio ? bilanAtteintRadio.value : null,
+                suite: bilanSuiteRadio ? bilanSuiteRadio.value : null,
+                observationsBilan: observationsBilanField ? observationsBilanField.value : '',
+                dateBilan: Date.now()
+            };
+        }
 
         // Effacer le flag fantôme (l'intervention est maintenant sauvegardée par l'utilisateur)
         interventions[index].jamaisSauvegardee = false;
