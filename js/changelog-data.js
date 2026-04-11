@@ -21,7 +21,8 @@
                 'Import optimis\u00e9\u00a0: gestion de 68+ fichiers sans crash, previews instantan\u00e9es, d\u00e9filement fluide.',
                 'Fiabilit\u00e9\u00a0: les erreurs de fran\u00e7ais et crit\u00e8res algorithmiques sont sauvegard\u00e9s imm\u00e9diatement au changement d\u2019\u00e9l\u00e8ve.',
                 'Navigation r\u00e9organis\u00e9e\u00a0: Aper\u00e7u, Structure, Contexte, Suivi, \u00c9valuations \u2014 plus intuitif.',
-                'Aide enrichie et repens\u00e9e pour les novices\u00a0: jargon technique retir\u00e9, nouveaux articles.'
+                'Aide enrichie et repens\u00e9e pour les novices\u00a0: jargon technique retir\u00e9, nouveaux articles.',
+                'Interventions R\u00e0I\u00a0: formulaire unifi\u00e9, crit\u00e8res cibl\u00e9s depuis le d\u00e9pistage, objectif mesurable, bilan avant/apr\u00e8s.'
             ]
         },
         {

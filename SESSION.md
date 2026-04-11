@@ -1,8 +1,55 @@
-# SESSION ACTIVE — BETA 99.09
+# SESSION ACTIVE — BETA 99.11
 
-**Date** : 9 avril 2026
-**Version** : Beta 99.09 (Build 0409-1510)
-**Statut** : Interface, import et fiabilité de sauvegarde
+**Date** : 11 avril 2026
+**Version** : Beta 99.11 (Build 0411-1130)
+**Statut** : Refonte module interventions (formulaire unifié + aide à la décision)
+
+---
+
+## Bilan de la session (11 avril 2026) — Refonte module interventions (5 phases)
+
+**Build** : 0411-1130, Beta 99.11
+**Fichiers modifiés** : interventions.js, profil-etudiant.js, consolidation.js, changelog-data.js, version.json, init-inline.js, SKILL_RaI.md
+
+### Phase 1 — Enrichir l'onglet Accompagnement (profil-etudiant.js)
+- Direction par critère (→←—) dans la carte RàI
+- Consolidation individuelle (consolidé/fragile/non consolidé) sous les 3 cartes
+- Nombre total d'artefacts évalués après Performance globale
+- Exports cross-modules : `calculerDirectionsCriteres`, `calculerConsolidationIndividuelle`
+
+### Phase 2 — Formulaire unifié (interventions.js, -320 lignes)
+- Fusion création + détail en un seul flux via `ouvrirIntervention(id, { modeCreation })`
+- Guard de nettoyage des interventions orphelines (`jamaisSauvegardee`)
+- Suppression de 3 fonctions obsolètes : `sauvegarderNouvelleIntervention`, `afficherFormulaireModification`, `sauvegarderModificationIntervention`
+- Pré-sélection du DA depuis le profil étudiant
+
+### Phase 3 — Critères ciblés et objectif visé (interventions.js)
+- Section critères ciblés pré-cochés depuis les défis communs du sous-groupe
+- Objectif visé avec suggestion automatique (prochain seuil IDME atteignable)
+- Handler combiné `onChangementSelectionEtudiants` (analyse + critères en temps réel)
+- Rétrocompatibilité des interventions existantes
+
+### Phase 4 — Bilan post-intervention (interventions.js)
+- Snapshot incrémental par DA à la sauvegarde (P + moyennes critères, ~120 octets/étudiant)
+- Section bilan visible quand statut = complétée
+- Tableau comparatif automatique avant/après sur les critères ciblés
+- Objectif atteint (oui/partiellement/non) + suite envisagée + observations
+
+### Phase 5 — Nettoyage
+- Suppression `terminerIntervention` et `rouvrirIntervention` (obsolètes, 0 appelants)
+- SKILL_RaI.md mis à jour (structure données, workflow, fonctions supprimées)
+
+### Fix — SSOT niveau RàI
+- `determinerCibleIntervention` remplacé par `determinerNiveauRaiPedagogique` dans `analyserSousGroupe` et la liste des étudiants
+- Élimine la contradiction Niveau 3 (profil) vs Niveau 1 (intervention)
+
+### Fix — UI
+- Bordure gauche retirée sur la carte bilan (conformité design system)
+- Boutons Modifier/Consulter fusionnés en un seul bouton Ouvrir
+
+### Bilan net
+- interventions.js : 1699 → 1587 lignes (-112) malgré 4 nouvelles fonctionnalités
+- 8 commits, zéro régression attendue
 
 ---
 
