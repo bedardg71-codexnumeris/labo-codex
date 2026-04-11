@@ -199,6 +199,20 @@ function brancherEvenements() {
     if (btnTelechargerMD) btnTelechargerMD.addEventListener('click', lancerExportMD);
     if (btnCopierMD) btnCopierMD.addEventListener('click', copierExportMD);
 
+    // Onglets export/import
+    var onglets = document.querySelectorAll('.org-onglet');
+    for (var oi = 0; oi < onglets.length; oi++) {
+        onglets[oi].addEventListener('click', basculerOnglet);
+    }
+
+    // Import MD
+    var btnPrevisualiser = document.getElementById('org-import-previsualiser');
+    var btnConfirmerImport = document.getElementById('org-import-confirmer');
+    var btnAnnulerImport = document.getElementById('org-import-annuler');
+    if (btnPrevisualiser) btnPrevisualiser.addEventListener('click', previsualiserImportMD);
+    if (btnConfirmerImport) btnConfirmerImport.addEventListener('click', confirmerImportMD);
+    if (btnAnnulerImport) btnAnnulerImport.addEventListener('click', fermerModaleExport);
+
     // Drag & drop pour les activités dans les étapes EE
     configurerDragDrop();
 }
@@ -1328,6 +1342,19 @@ function ouvrirModaleExport() {
             ' et ' + stats.noeuds + ' nœud' + (stats.noeuds > 1 ? 's' : '') +
             ' d\u2019alignement dans un fichier JSON réimportable via l\u2019alignement pédagogique.';
     }
+    // Réinitialiser sur l'onglet Export
+    var panneauExport = document.getElementById('org-panneau-export');
+    var panneauImport = document.getElementById('org-panneau-import');
+    if (panneauExport) panneauExport.style.display = '';
+    if (panneauImport) panneauImport.style.display = 'none';
+    var onglets = document.querySelectorAll('.org-onglet');
+    for (var i = 0; i < onglets.length; i++) {
+        var estExport = onglets[i].getAttribute('data-onglet') === 'export';
+        onglets[i].classList.toggle('actif', estExport);
+        onglets[i].style.borderBottomColor = estExport ? 'var(--accent)' : 'transparent';
+        onglets[i].style.color = estExport ? 'var(--texte)' : 'var(--texte-secondaire)';
+    }
+    reinitialiserImport();
     modaleExport.classList.add('actif');
 }
 
@@ -1412,6 +1439,110 @@ function copierMDFallback(md) {
         afficherNotificationSucces('Plan copié dans le presse-papiers');
     }
     fermerModaleExport();
+}
+
+// ---- Onglets export/import ----
+
+function basculerOnglet(e) {
+    var cible = e.currentTarget.getAttribute('data-onglet');
+    var onglets = document.querySelectorAll('.org-onglet');
+    for (var i = 0; i < onglets.length; i++) {
+        var estActif = onglets[i].getAttribute('data-onglet') === cible;
+        onglets[i].classList.toggle('actif', estActif);
+        onglets[i].style.borderBottomColor = estActif ? 'var(--accent)' : 'transparent';
+        onglets[i].style.color = estActif ? 'var(--texte)' : 'var(--texte-secondaire)';
+    }
+    var panneauExport = document.getElementById('org-panneau-export');
+    var panneauImport = document.getElementById('org-panneau-import');
+    if (panneauExport) panneauExport.style.display = cible === 'export' ? '' : 'none';
+    if (panneauImport) panneauImport.style.display = cible === 'import' ? '' : 'none';
+}
+
+function previsualiserImportMD() {
+    var textarea = document.getElementById('org-import-md-texte');
+    var resume = document.getElementById('org-import-resume');
+    var btnConfirmer = document.getElementById('org-import-confirmer');
+    if (!textarea || !resume || !btnConfirmer) return;
+
+    var texte = textarea.value.trim();
+    if (!texte) {
+        resume.style.display = 'block';
+        resume.innerHTML = '<span style="color: var(--danger)">Aucun texte à analyser.</span>';
+        btnConfirmer.disabled = true;
+        return;
+    }
+
+    var parsed = parserPlanMD(texte);
+    var nbSeq = parsed.sequences.length;
+    var nbLecons = 0;
+    for (var s = 0; s < parsed.sequences.length; s++) {
+        nbLecons += parsed.sequences[s].lecons.length;
+    }
+    nbLecons += parsed.orphelines.length;
+
+    if (nbSeq === 0 && nbLecons === 0) {
+        resume.style.display = 'block';
+        resume.innerHTML = '<span style="color: var(--danger)">Aucune séquence ou leçon détectée. Vérifie le format des marqueurs [Séquence] et [Leçon].</span>';
+        btnConfirmer.disabled = true;
+        return;
+    }
+
+    var html = '<strong>' + nbSeq + ' séquence' + (nbSeq > 1 ? 's' : '') + '</strong>';
+    html += ' et <strong>' + nbLecons + ' leçon' + (nbLecons > 1 ? 's' : '') + '</strong> détectées.';
+    if (parsed.orphelines.length > 0) {
+        html += '<br><span style="color: var(--texte-secondaire)">' + parsed.orphelines.length + ' leçon' + (parsed.orphelines.length > 1 ? 's' : '') + ' hors séquence.</span>';
+    }
+
+    // Détail par séquence
+    html += '<ul style="margin: 0.5rem 0 0; padding-left: 1.2rem; font-size: 0.8rem; color: var(--texte-secondaire)">';
+    for (var i = 0; i < parsed.sequences.length; i++) {
+        var sq = parsed.sequences[i];
+        html += '<li>' + echapperHtml(sq.titre);
+        if (sq.semaineDebut != null) {
+            html += ' <span style="opacity:0.6">(Sem. ' + sq.semaineDebut;
+            if (sq.semaineFin && sq.semaineFin !== sq.semaineDebut) html += '–' + sq.semaineFin;
+            html += ')</span>';
+        }
+        html += ' — ' + sq.lecons.length + ' leçon' + (sq.lecons.length > 1 ? 's' : '') + '</li>';
+    }
+    html += '</ul>';
+
+    resume.style.display = 'block';
+    resume.innerHTML = html;
+    btnConfirmer.disabled = false;
+}
+
+function confirmerImportMD() {
+    var textarea = document.getElementById('org-import-md-texte');
+    if (!textarea) return;
+
+    var texte = textarea.value.trim();
+    if (!texte) return;
+
+    var radioNouvelle = document.querySelector('input[name="org-import-cible"][value="nouvelle"]');
+    var nouvelleCarteMode = radioNouvelle ? radioNouvelle.checked : true;
+
+    var resultat = importerPlanDepuisMD(texte, nouvelleCarteMode);
+
+    fermerModaleExport();
+    reinitialiserImport();
+
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces(
+            resultat.sequences + ' séquence' + (resultat.sequences > 1 ? 's' : '') +
+            ' et ' + resultat.lecons + ' leçon' + (resultat.lecons > 1 ? 's' : '') +
+            ' importées'
+        );
+    }
+}
+
+function reinitialiserImport() {
+    var textarea = document.getElementById('org-import-md-texte');
+    var resume = document.getElementById('org-import-resume');
+    var btnConfirmer = document.getElementById('org-import-confirmer');
+    if (textarea) textarea.value = '';
+    if (resume) { resume.style.display = 'none'; resume.innerHTML = ''; }
+    if (btnConfirmer) btnConfirmer.disabled = true;
 }
 
 function genererExportJSON() {
