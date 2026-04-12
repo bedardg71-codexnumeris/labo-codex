@@ -3935,7 +3935,7 @@ function mettreAJourListeCartes() {
         if (carte.id === index.active) {
             opt.selected = true;
             var titreCarte = document.getElementById('planif-titre-carte');
-            if (titreCarte) {
+            if (titreCarte && document.activeElement !== titreCarte) {
                 titreCarte.value = carte.nom;
                 titreCarte.size = Math.max(10, carte.nom.length + 2);
             }
