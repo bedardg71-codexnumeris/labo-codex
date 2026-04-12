@@ -2377,6 +2377,7 @@ function reconstruireDOM() {
         for (var entry3 of etat.liens) {
             dessinerLien(entry3[1]);
         }
+        mettreAJourCarrousel();
     });
 }
 
@@ -2476,6 +2477,7 @@ function viderCanvas() {
 }
 
 function chargerCarte(carteId) {
+    sequenceActiveId = null;
     viderCanvas();
     var donnees = window.planificationDonnees.chargerCarte(carteId);
     if (!donnees) { centrerVueSurContenu(); return; }
@@ -3882,6 +3884,7 @@ function mettreAJourListeCartes() {
 }
 
 function nouvelleCarte(nom) {
+    sequenceActiveId = null;
     var index = window.planificationDonnees.getIndex();
     if (!index) index = { active: null, compteurCartes: 0, cartes: [] };
     var id = 'carte_' + (++index.compteurCartes);
@@ -4804,6 +4807,128 @@ function injecterNoeuds(listeNoeuds) {
     });
 }
 
+// =========== CARROUSEL SÉQUENCES ===========
+
+var sequenceActiveId = null; // null = vue globale (tout visible)
+
+function obtenirSequencesCarte() {
+    var sequences = [];
+    for (var entry of etat.noeuds) {
+        var nd = entry[1];
+        if (nd.type === 'sequence') sequences.push(nd);
+    }
+    sequences.sort(function(a, b) { return a.y - b.y; });
+    return sequences;
+}
+
+function mettreAJourCarrousel() {
+    var conteneur = document.getElementById('planif-toolbar-sequences');
+    var navZone = document.getElementById('planif-nav-seq');
+    if (!conteneur) return;
+
+    var sequences = obtenirSequencesCarte();
+    if (sequences.length === 0) {
+        conteneur.innerHTML = '';
+        if (navZone) navZone.style.display = 'none';
+        return;
+    }
+
+    if (navZone) navZone.style.display = '';
+
+    var html = '';
+    for (var i = 0; i < sequences.length; i++) {
+        var seq = sequences[i];
+        var nbLecons = (seq.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); }).length;
+        var estActif = seq.id === sequenceActiveId;
+        html += '<div class="planif-seq-badge' + (estActif ? ' actif' : '') + '"' +
+                ' data-action="planificationCarte.ouvrirSequence"' +
+                ' data-param="' + seq.id + '"' +
+                ' title="' + echapperHtml(seq.titre || 'Sans titre') + '">' +
+                '<span class="planif-seq-badge-nom">' + echapperHtml(seq.titre || 'Sans titre') + '</span>' +
+                '<span class="planif-seq-badge-pill">' + nbLecons + '</span>' +
+                '</div>';
+    }
+    conteneur.innerHTML = html;
+
+    mettreAJourCompteurSequences();
+
+    requestAnimationFrame(function() {
+        var badgeActif = conteneur.querySelector('.planif-seq-badge.actif');
+        if (badgeActif) badgeActif.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    });
+}
+
+function mettreAJourCompteurSequences() {
+    var sequences = obtenirSequencesCarte();
+    var index = sequenceActiveId ? sequences.findIndex(function(s) { return s.id === sequenceActiveId; }) : -1;
+
+    var texte = index >= 0 ? (index + 1) + ' / ' + sequences.length : '-- / ' + (sequences.length || '--');
+
+    var compteur = document.getElementById('planif-compteur-seq');
+    if (compteur) compteur.textContent = texte;
+
+    var btnPrec = document.getElementById('planif-btn-seq-prec');
+    if (btnPrec) btnPrec.disabled = (index <= 0);
+
+    var btnSuiv = document.getElementById('planif-btn-seq-suiv');
+    if (btnSuiv) btnSuiv.disabled = (index < 0 || index >= sequences.length - 1);
+}
+
+function centrerVueSurSequence(seqId) {
+    var seq = etat.noeuds.get(seqId);
+    if (!seq || !zoneTravail) return;
+
+    // Calculer le bounding box de la séquence et ses enfants
+    var minX = seq.x, maxX = seq.x, minY = seq.y, maxY = seq.y;
+    var el = document.getElementById(seq.id);
+    if (el) {
+        maxX = seq.x + (el.offsetWidth || 200);
+        maxY = seq.y + (el.offsetHeight || 100);
+    }
+    var enfants = (seq.enfants || []);
+    for (var i = 0; i < enfants.length; i++) {
+        var enfant = etat.noeuds.get(enfants[i]);
+        if (!enfant) continue;
+        var eel = document.getElementById(enfants[i]);
+        var w = eel ? (eel.offsetWidth || 140) : 140;
+        var h = eel ? (eel.offsetHeight || 50) : 50;
+        if (enfant.x < minX) minX = enfant.x;
+        if (enfant.x + w > maxX) maxX = enfant.x + w;
+        if (enfant.y < minY) minY = enfant.y;
+        if (enfant.y + h > maxY) maxY = enfant.y + h;
+    }
+
+    var cx = ((minX + maxX) / 2 + OFFSET_X) * etat.zoom;
+    var cy = ((minY + maxY) / 2 + OFFSET_Y) * etat.zoom;
+    zoneTravail.scrollTo({
+        left: cx - zoneTravail.clientWidth / 2,
+        top: cy - zoneTravail.clientHeight / 2,
+        behavior: 'smooth'
+    });
+}
+
+function ouvrirSequence(seqId) {
+    sequenceActiveId = seqId;
+    mettreAJourCarrousel();
+    requestAnimationFrame(function() {
+        centrerVueSurSequence(seqId);
+    });
+}
+
+function sequencePrecedente() {
+    var sequences = obtenirSequencesCarte();
+    var index = sequenceActiveId ? sequences.findIndex(function(s) { return s.id === sequenceActiveId; }) : -1;
+    if (index > 0) ouvrirSequence(sequences[index - 1].id);
+}
+
+function sequenceSuivante() {
+    var sequences = obtenirSequencesCarte();
+    var index = sequenceActiveId ? sequences.findIndex(function(s) { return s.id === sequenceActiveId; }) : -1;
+    if (index >= 0 && index < sequences.length - 1) ouvrirSequence(sequences[index + 1].id);
+}
+
+// =========== FIN CARROUSEL ===========
+
 window.planificationCarte = {
     initialiser: initialiser,
     activer: function() { planificationActive = true; },
@@ -4828,7 +4953,12 @@ window.planificationCarte = {
     zoomPleineHauteur: zoomPleineHauteur,
     injecterNoeuds: injecterNoeuds,
     nouvelleCarte: nouvelleCarte,
-    ouvrirGuide: ouvrirGuide
+    ouvrirGuide: ouvrirGuide,
+    // Carrousel séquences
+    ouvrirSequence: ouvrirSequence,
+    sequencePrecedente: sequencePrecedente,
+    sequenceSuivante: sequenceSuivante,
+    mettreAJourCarrousel: mettreAJourCarrousel
 };
 
 })();

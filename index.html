@@ -4097,6 +4097,13 @@
                                     <input type="file" id="planif-fichier-import" accept=".json" style="display:none">
                                 </div>
                                 <h3 class="planif-toolbar-titre"><input type="text" id="planif-titre-carte" value="Sans titre" placeholder="Titre de la carte…"></h3>
+                                <!-- Carrousel séquences -->
+                                <div class="planif-toolbar-sequences" id="planif-toolbar-sequences"></div>
+                                <div class="planif-nav-seq" id="planif-nav-seq" style="display:none">
+                                    <button id="planif-btn-seq-prec" class="planif-btn-nav-seq" disabled data-action="planificationCarte.sequencePrecedente" title="Séquence précédente">&#x2190;</button>
+                                    <span id="planif-compteur-seq" class="planif-compteur-seq">-- / --</span>
+                                    <button id="planif-btn-seq-suiv" class="planif-btn-nav-seq" disabled data-action="planificationCarte.sequenceSuivante" title="Séquence suivante">&#x2192;</button>
+                                </div>
                                 <div class="planif-toolbar-droite">
                                     <span id="planif-zoom-info-header" class="planif-zoom-info-header" data-tooltip="planif-zoom">100%</span>
                                     <button id="planif-btn-recentrer" title="Recentrer la vue sur le contenu (⌘1)">⊕ Recentrer</button>
