@@ -17063,6 +17063,24 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     font-family: inherit;
     font-size: 10px;
 }
+.planif-btn-vue {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 28px;
+    border: 1px solid var(--planif-couleur-bordure);
+    border-radius: 6px;
+    background: var(--surface-carte, #1a3040);
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--texte-secondaire, #8aa4b0);
+    transition: all 0.15s;
+}
+.planif-btn-vue:hover {
+    border-color: var(--planif-couleur-selection);
+    color: var(--planif-couleur-texte);
+}
 .planif-zoom-info-header {
     font-size: 11px;
     font-weight: 600;
@@ -19478,7 +19496,8 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     background: #ffffff;
     border-color: var(--texte-principal);
 }
-.mode-clair .planif-btn-nav-seq {
+.mode-clair .planif-btn-nav-seq,
+.mode-clair .planif-btn-vue {
     background: #ffffff;
     border-color: rgba(3, 46, 92, 0.15);
 }
