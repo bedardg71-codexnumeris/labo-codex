@@ -10,6 +10,15 @@
 
 Quand un plan de cours est importé (5-8 séquences, 15-20 leçons), tout apparaît sur le canevas d'un coup. Les nœuds se chevauchent et l'enseignant doit réorganiser manuellement avant de pouvoir travailler. Le canevas unique devient dense quand le cours est complet (compétences + idées maîtresses + séquences + leçons + activités + évaluations).
 
+**Observation terrain (11 avril)** : un cours réel de 15 séquences ne tient pas dans le canevas — seules 8 séquences sont visibles, le reste déborde. Le carrousel est indispensable pour un usage réel à cette échelle.
+
+### Spacing intra-séquence (fix court terme)
+
+Même en vue focalisée (carrousel), les leçons à l'intérieur d'une séquence se chevauchent quand les titres sont longs. Le `LAYOUT_X_GAP = 250px` entre leçons est insuffisant. À corriger en priorité (indépendamment du carrousel) :
+- Calcul dynamique du gap selon la largeur du titre le plus long
+- Ou augmentation du gap fixe à ~350-400px
+- Vérifier aussi le positionnement vertical quand une séquence contient 5+ leçons (empiler en grille plutôt qu'en ligne)
+
 ## Idée
 
 Remplacer le canevas unique par un **carrousel de séquences** dans la toolbar, inspiré du carrousel d'étudiants dans Annoter/Évaluer.
