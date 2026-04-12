@@ -83,6 +83,100 @@ C'est une refonte du modèle d'interaction de la carte, pas un ajout incrémenta
 
 ---
 
+## Briefing technique — Carrousel de référence (Annoter/Évaluer)
+
+Le carrousel d'étudiants dans Annoter/Évaluer est le pattern à reproduire. Voici sa structure pour guider l'implémentation.
+
+### Architecture existante
+
+| Aspect | Détail |
+|--------|--------|
+| **Fichier JS** | `js/travaux-ui.js` |
+| **CSS** | `styles.css` lignes 20364-20687 |
+| **Conteneur** | `.annot-toolbar` (flex row, toute la largeur) |
+| **Zone scrollable** | `.annot-toolbar-fichiers` (`flex: 1; overflow-x: auto; gap: 6px`) |
+| **Badges** | `.annot-badge` (`inline-flex; flex-shrink: 0; white-space: nowrap; cursor: pointer`) |
+| **Badge actif** | `.annot-badge.actif` (fond bleu pale, bordure accent) |
+| **Pilules statut** | `.travaux-badge-pill` + classes `.importe`, `.annote`, `.evalue`, `.en-cours` |
+| **Navigation** | `badgePrecedent()` / `badgeSuivant()` lignes 6513-6527 |
+| **Compteur** | `#travaux-compteur-badge` → « 4 / 15 » |
+| **Scroll auto** | `badgeActifEl.scrollIntoView({ behavior: 'smooth', inline: 'center' })` |
+| **Clic** | Via `data-action` dispatcher (main.js lignes 700-780) |
+
+### Pattern de navigation
+
+```javascript
+function badgeSuivant() {
+    var fichiers = obtenirFichiersNavigables();
+    var idx = fichiers.findIndex(f => f.id === fichierActifId);
+    if (idx < fichiers.length - 1) ouvrirFichier(fichiers[idx + 1].id);
+}
+```
+
+### Adaptation pour le carrousel de séquences
+
+| Carrousel étudiants | Carrousel séquences |
+|---------------------|---------------------|
+| `.annot-toolbar-fichiers` | `.planif-toolbar-sequences` (nouvelle classe) |
+| `.annot-badge` | `.planif-seq-badge` |
+| `.annot-badge.actif` | `.planif-seq-badge.actif` |
+| `ouvrirFichier(id)` | `ouvrirSequence(id)` → filtre `reconstruireDOM()` |
+| `obtenirFichiersNavigables()` | `obtenirSequencesCarte()` (filtre `etat.noeuds` par type=sequence) |
+| Pilule statut (ÉVALUÉ, etc.) | Pilule « X leçons » ou « complète/incomplète » |
+| Badge spécial — | Badge « Vue globale » (premier élément, toujours présent) |
+
+### Fichiers à modifier
+
+1. **`planification-carte.js`** — le gros du travail :
+   - `reconstruireDOM(filtre)` : accepter un filtre optionnel (séquence ID ou null = tout)
+   - Carrousel HTML + navigation dans la toolbar existante (`.planif-header-toolbar`)
+   - `ouvrirSequence(seqId)` : filtrer + centrer
+   - `ouvrirVueGlobale()` : afficher tout, séquences en blocs compacts
+   
+2. **`organisateur.js`** — mise à jour du carrousel quand on importe via MD
+   - `importerPlanDepuisMD()` : après import, activer le carrousel sur la première séquence
+
+3. **`index.html`** — zone carrousel dans `.planif-header-toolbar`
+
+4. **`styles.css`** — classes `.planif-seq-badge`, `.planif-toolbar-sequences`
+
+### État actuel des exports publics pertinents
+
+```javascript
+window.planificationCarte = {
+    etat: etat,                    // Map noeuds, liens, compteurs
+    chargerCarte: chargerCarte,    // Charge une carte par ID
+    injecterNoeuds: injecterNoeuds, // Injection en lot (ajouté session 11 avril)
+    nouvelleCarte: nouvelleCarte,  // Crée une carte vide
+    ouvrirGuide: ouvrirGuide,      // Guide 8 pages
+    // ... autres
+};
+```
+
+### Recommandation d'implémentation par phases
+
+**Phase 1 — Fix spacing** (indépendant du carrousel)
+- Augmenter `LAYOUT_X_GAP` dans `importerPlanDepuisMD()` (organisateur.js)
+- Grille au lieu de ligne quand 4+ leçons dans une séquence
+
+**Phase 2 — Carrousel toolbar** (navigation pure)
+- Ajouter la zone scrollable dans `.planif-header-toolbar`
+- Badges séquences générés depuis `etat.noeuds`
+- Navigation ← → + clic + scroll auto
+- `ouvrirSequence()` = centrer la vue sur la séquence (zoom + pan), pas encore filtrer
+
+**Phase 3 — Vue focalisée** (filtrage)
+- `reconstruireDOM(filtre)` n'affiche que les nœuds d'une séquence
+- Les liens cross-séquence sont masqués en vue focalisée
+- Badge « Vue globale » pour revenir au canevas complet
+
+**Phase 4 — Vue globale compacte**
+- Les séquences s'affichent comme blocs résumés (titre + badge leçons)
+- Double-clic → bascule en vue focalisée
+- Liens cross-séquence vers compétences/idées maîtresses visibles
+
+---
+
 ## Hors portée (à traiter séparément)
 
 - Refonte complète du modèle de données (le Map `etat.noeuds` reste)
