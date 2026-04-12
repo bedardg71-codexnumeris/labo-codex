@@ -1,8 +1,46 @@
 # SESSION ACTIVE — BETA 99.11
 
 **Date** : 11 avril 2026
-**Version** : Beta 99.11 (Build 0411-1130)
-**Statut** : Refonte module interventions (formulaire unifié + aide à la décision)
+**Version** : Beta 99.11 (Build 0411-2010)
+**Statut** : Import/export MD alignement + refonte toolbar organisateur
+
+---
+
+## Bilan de la session (11 avril 2026, soir) — Import/Export MD alignement (12 commits)
+
+**Build** : 0411-2010, Beta 99.11
+**Fichiers modifiés** : organisateur.js, planification-carte.js, index.html, styles.css, version.json, init-inline.js
+**Fichier créé** : `plans de travail/PLAN-CARROUSEL-SEQUENCES.md`
+
+### Fonctionnalité complète — Import/Export MD aller-retour (6 commits noyau)
+- **Export MD avec marqueurs parsables** : `[Séquence | Sem. X–Y]`, `[Leçon | durée]`, `[Orphelines]`
+- **Parser** `parserPlanMD()` + `parserDuree()` — 33 tests round-trip passés
+- **Boutons Export MD + Copier MD** dans la modale (workflow IA : copier → coller dans un assistant → réimporter)
+- **Import MD → nœuds carte** : `importerPlanDepuisMD()` injecte séquences et leçons dans `etat.noeuds` + `reconstruireDOM()`. Objectifs et notes stockés en un seul write IDB.
+- **`injecterNoeuds()`** exposé dans l'API publique de `planification-carte.js`
+- **Modale à onglets** Export / Importer MD avec prévisualisation détaillée (résumé parsing, compteurs, détail par séquence)
+
+### Guide utilisateur (1 commit)
+- **Page 8 du guide** : « Exporter et importer un plan » — 3 sections (exporter, retravailler avec une IA, réimporter)
+- Guide accessible depuis le Plan de la leçon (panneau déplacé au niveau section-structure, position fixed)
+- Aucune mention de LLM spécifique (« un assistant IA de ton choix »)
+
+### Refonte toolbar organisateur (2 commits)
+- Fusion en-tête + sélecteurs en **toolbar unifiée** (style carte mentale)
+- Sélecteurs + checkbox EE à gauche, 📔 Guide + Exporter/Importer à droite
+- Titre h2 « Plan de la leçon » supprimé (redondant avec l'onglet)
+- Fond aligné sur `--surface-carte` (même token que la carte mentale, modes sombre et clair)
+- CSS nettoyé : `.org-entete` + `.org-selecteurs` → `.org-toolbar`
+
+### Fix (2 commits)
+- Handlers import MD : délégation d'événements sur le panneau import (fiabilité éléments cachés)
+- Bouton « Exporter » renommé « Exporter / Importer »
+
+### Prochaine étape — Carrousel de séquences
+- **Plan documenté** : `plans de travail/PLAN-CARROUSEL-SEQUENCES.md`
+- Concept : carrousel toolbar pour naviguer entre séquences (vue focalisée), vue globale pour l'alignement final
+- Inspiré du carrousel Annoter/Évaluer (navigation entre étudiants)
+- Refonte significative du modèle d'interaction de la carte (à planifier)
 
 ---
 
