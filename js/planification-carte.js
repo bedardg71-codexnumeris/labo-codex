@@ -2301,12 +2301,29 @@ function enregistrerPourUndo() {
     pileRedo = [];
 }
 
+function _collecterDescendants(noeudId, ensemble) {
+    ensemble.add(noeudId);
+    var nd = etat.noeuds.get(noeudId);
+    if (!nd || !nd.enfants) return;
+    for (var i = 0; i < nd.enfants.length; i++) {
+        _collecterDescendants(nd.enfants[i], ensemble);
+    }
+}
+
 function reconstruireDOM() {
     if (coucheNoeuds) coucheNoeuds.innerHTML = '';
     if (coucheLiens) coucheLiens.innerHTML = '';
 
+    // Filtrage par séquence active (null = tout visible)
+    var visibles = null;
+    if (sequenceActiveId && etat.noeuds.has(sequenceActiveId)) {
+        visibles = new Set();
+        _collecterDescendants(sequenceActiveId, visibles);
+    }
+
     for (var entry of etat.noeuds) {
         var n = entry[1];
+        if (visibles && !visibles.has(n.id)) continue;
         var config = TYPES[n.type];
         if (!config) continue;
         var estConteneur = config.conteneur === true;
@@ -2363,6 +2380,7 @@ function reconstruireDOM() {
         // Répartition automatique des conteneurs au chargement
         for (var entry2 of etat.noeuds) {
             var n2 = entry2[1];
+            if (visibles && !visibles.has(n2.id)) continue;
             if (TYPES[n2.type] && TYPES[n2.type].conteneur && n2.enfants && n2.enfants.length > 0 && !n2.parent) {
                 reLayoutConteneur(n2.id);
             }
@@ -2370,12 +2388,16 @@ function reconstruireDOM() {
         // Handle containers with no children
         for (var entry2b of etat.noeuds) {
             var n2b = entry2b[1];
+            if (visibles && !visibles.has(n2b.id)) continue;
             if (TYPES[n2b.type] && TYPES[n2b.type].conteneur && (!n2b.enfants || n2b.enfants.length === 0)) {
                 mettreAJourZoneConteneur(n2b.id);
             }
         }
+        // Liens : seulement si les deux extrémités sont visibles
         for (var entry3 of etat.liens) {
-            dessinerLien(entry3[1]);
+            var l = entry3[1];
+            if (visibles && (!visibles.has(l.source) || !visibles.has(l.cible))) continue;
+            dessinerLien(l);
         }
         mettreAJourCarrousel();
     });
@@ -4835,7 +4857,13 @@ function mettreAJourCarrousel() {
 
     if (navZone) navZone.style.display = '';
 
-    var html = '';
+    // Badge Vue globale (premier élément, toujours présent)
+    var html = '<div class="planif-seq-badge planif-seq-badge-global' + (!sequenceActiveId ? ' actif' : '') + '"' +
+               ' data-action="planificationCarte.ouvrirSequence"' +
+               ' data-param=""' +
+               ' title="Afficher tous les nœuds">' +
+               '<span class="planif-seq-badge-nom">Vue globale</span>' +
+               '</div>';
     for (var i = 0; i < sequences.length; i++) {
         var seq = sequences[i];
         var nbLecons = (seq.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); }).length;
@@ -4908,10 +4936,16 @@ function centrerVueSurSequence(seqId) {
 }
 
 function ouvrirSequence(seqId) {
-    sequenceActiveId = seqId;
-    mettreAJourCarrousel();
+    var ancienId = sequenceActiveId;
+    sequenceActiveId = seqId || null; // "" ou null = vue globale
+    if (sequenceActiveId === ancienId) return;
+    reconstruireDOM();
     requestAnimationFrame(function() {
-        centrerVueSurSequence(seqId);
+        if (sequenceActiveId) {
+            centrerVueSurSequence(sequenceActiveId);
+        } else {
+            centrerVueSurContenu();
+        }
     });
 }
 
