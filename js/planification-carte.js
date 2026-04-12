@@ -2533,6 +2533,7 @@ function viderCanvas() {
 
 function chargerCarte(carteId) {
     sequenceActiveId = null;
+    leconActiveId = null;
     viderCanvas();
     var donnees = window.planificationDonnees.chargerCarte(carteId);
     if (!donnees) { centrerVueSurContenu(); return; }
@@ -4918,6 +4919,7 @@ function mettreAJourCarrousel() {
     conteneur.innerHTML = html;
 
     mettreAJourCompteurSequences();
+    mettreAJourCarrouselLecons();
 
     requestAnimationFrame(function() {
         var badgeActif = conteneur.querySelector('.planif-seq-badge.actif');
@@ -4977,6 +4979,7 @@ function centrerVueSurSequence(seqId) {
 function ouvrirSequence(seqId) {
     var ancienId = sequenceActiveId;
     sequenceActiveId = seqId || null; // "" ou null = vue globale
+    leconActiveId = null;
     if (sequenceActiveId === ancienId) return;
     reconstruireDOM();
     requestAnimationFrame(function() {
@@ -4998,6 +5001,111 @@ function sequenceSuivante() {
     var sequences = obtenirSequencesCarte();
     var index = sequenceActiveId ? sequences.findIndex(function(s) { return s.id === sequenceActiveId; }) : -1;
     if (index >= 0 && index < sequences.length - 1) ouvrirSequence(sequences[index + 1].id);
+}
+
+// =========== SOUS-CARROUSEL LEÇONS ===========
+
+var leconActiveId = null; // null = vue séquence (méso), ID = vue leçon (micro)
+
+function obtenirLeconsDeLaSequence() {
+    if (!sequenceActiveId) return [];
+    var seq = etat.noeuds.get(sequenceActiveId);
+    if (!seq || !seq.enfants) return [];
+    var lecons = [];
+    for (var i = 0; i < seq.enfants.length; i++) {
+        var nd = etat.noeuds.get(seq.enfants[i]);
+        if (nd && nd.type === 'lecon') lecons.push(nd);
+    }
+    return lecons;
+}
+
+function mettreAJourCarrouselLecons() {
+    var conteneur = document.getElementById('planif-toolbar-lecons');
+    var navZone = document.getElementById('planif-nav-lecon');
+    var sep = document.getElementById('planif-sep-lecons');
+    if (!conteneur) return;
+
+    var lecons = obtenirLeconsDeLaSequence();
+    if (lecons.length === 0) {
+        conteneur.innerHTML = '';
+        if (navZone) navZone.style.display = 'none';
+        if (sep) sep.style.display = 'none';
+        return;
+    }
+
+    if (navZone) navZone.style.display = '';
+    if (sep) sep.style.display = '';
+
+    var html = '';
+    for (var i = 0; i < lecons.length; i++) {
+        var lec = lecons[i];
+        var estActif = lec.id === leconActiveId;
+        var duree = lec.metadata && lec.metadata.duree ? lec.metadata.duree + '\u2009min' : '';
+        html += '<div class="planif-seq-badge planif-lecon-badge' + (estActif ? ' actif' : '') + '"' +
+                ' data-action="planificationCarte.ouvrirLecon"' +
+                ' data-param="' + lec.id + '"' +
+                ' title="' + echapperHtml(lec.titre || 'Sans titre') + '">' +
+                '<span class="planif-seq-badge-nom">' + echapperHtml(lec.titre || 'Sans titre') + '</span>' +
+                (duree ? '<span class="planif-seq-badge-pill planif-lecon-pill">' + duree + '</span>' : '') +
+                '</div>';
+    }
+    conteneur.innerHTML = html;
+
+    mettreAJourCompteurLecons();
+
+    requestAnimationFrame(function() {
+        var badgeActif = conteneur.querySelector('.planif-lecon-badge.actif');
+        if (badgeActif) badgeActif.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    });
+}
+
+function mettreAJourCompteurLecons() {
+    var lecons = obtenirLeconsDeLaSequence();
+    var index = leconActiveId ? lecons.findIndex(function(l) { return l.id === leconActiveId; }) : -1;
+
+    var texte = index >= 0 ? (index + 1) + ' / ' + lecons.length : '-- / ' + (lecons.length || '--');
+
+    var compteur = document.getElementById('planif-compteur-lecon');
+    if (compteur) compteur.textContent = texte;
+
+    var btnPrec = document.getElementById('planif-btn-lecon-prec');
+    if (btnPrec) btnPrec.disabled = (index <= 0);
+
+    var btnSuiv = document.getElementById('planif-btn-lecon-suiv');
+    if (btnSuiv) btnSuiv.disabled = (index < 0 || index >= lecons.length - 1);
+}
+
+function ouvrirLecon(leconId) {
+    leconActiveId = leconId || null;
+    mettreAJourCarrouselLecons();
+    if (leconActiveId) {
+        // Niveau 3 : centrer sur la leçon
+        var lec = etat.noeuds.get(leconActiveId);
+        if (lec && zoneTravail) {
+            var el = document.getElementById(leconActiveId);
+            var w = el ? (el.offsetWidth || 140) : 140;
+            var h = el ? (el.offsetHeight || 50) : 50;
+            var cx = ((lec.x + w / 2) + OFFSET_X) * etat.zoom;
+            var cy = ((lec.y + h / 2) + OFFSET_Y) * etat.zoom;
+            zoneTravail.scrollTo({
+                left: cx - zoneTravail.clientWidth / 2,
+                top: cy - zoneTravail.clientHeight / 2,
+                behavior: 'smooth'
+            });
+        }
+    }
+}
+
+function leconPrecedente() {
+    var lecons = obtenirLeconsDeLaSequence();
+    var index = leconActiveId ? lecons.findIndex(function(l) { return l.id === leconActiveId; }) : -1;
+    if (index > 0) ouvrirLecon(lecons[index - 1].id);
+}
+
+function leconSuivante() {
+    var lecons = obtenirLeconsDeLaSequence();
+    var index = leconActiveId ? lecons.findIndex(function(l) { return l.id === leconActiveId; }) : -1;
+    if (index >= 0 && index < lecons.length - 1) ouvrirLecon(lecons[index + 1].id);
 }
 
 // =========== FIN CARROUSEL ===========
@@ -5031,7 +5139,11 @@ window.planificationCarte = {
     ouvrirSequence: ouvrirSequence,
     sequencePrecedente: sequencePrecedente,
     sequenceSuivante: sequenceSuivante,
-    mettreAJourCarrousel: mettreAJourCarrousel
+    mettreAJourCarrousel: mettreAJourCarrousel,
+    // Sous-carrousel leçons
+    ouvrirLecon: ouvrirLecon,
+    leconPrecedente: leconPrecedente,
+    leconSuivante: leconSuivante
 };
 
 })();

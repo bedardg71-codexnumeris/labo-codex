@@ -4104,6 +4104,14 @@
                                     <span id="planif-compteur-seq" class="planif-compteur-seq">-- / --</span>
                                     <button id="planif-btn-seq-suiv" class="planif-btn-nav-seq" disabled data-action="planificationCarte.sequenceSuivante" title="Séquence suivante">&#x2192;</button>
                                 </div>
+                                <!-- Sous-carrousel leçons (visible quand séquence active) -->
+                                <div class="planif-sep-lecons" id="planif-sep-lecons" style="display:none"></div>
+                                <div class="planif-toolbar-lecons" id="planif-toolbar-lecons"></div>
+                                <div class="planif-nav-lecon" id="planif-nav-lecon" style="display:none">
+                                    <button id="planif-btn-lecon-prec" class="planif-btn-nav-seq" disabled data-action="planificationCarte.leconPrecedente" title="Leçon précédente">&#x2190;</button>
+                                    <span id="planif-compteur-lecon" class="planif-compteur-seq">-- / --</span>
+                                    <button id="planif-btn-lecon-suiv" class="planif-btn-nav-seq" disabled data-action="planificationCarte.leconSuivante" title="Leçon suivante">&#x2192;</button>
+                                </div>
                                 <div class="planif-toolbar-droite">
                                     <button class="planif-btn-vue" id="planif-btn-largeur" title="Ajuster à la largeur (⌘2)" data-action="planificationCarte.zoomPleineLargeur">&#x2194;</button>
                                     <button class="planif-btn-vue" id="planif-btn-hauteur" title="Ajuster à la hauteur (⌘3)" data-action="planificationCarte.zoomPleineHauteur">&#x2195;</button>
