@@ -17135,6 +17135,14 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     border-color: var(--planif-couleur-sequence);
     color: var(--planif-couleur-texte);
 }
+.planif-seq-badge-global {
+    border-style: dashed;
+}
+.planif-seq-badge-global.actif {
+    background: var(--surface-carte, #1a3040);
+    border-color: var(--planif-couleur-texte);
+    border-style: solid;
+}
 .planif-seq-badge-nom {
     max-width: 150px;
     overflow: hidden;
@@ -19439,6 +19447,10 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     background: color-mix(in srgb, var(--planif-couleur-sequence) 12%, #ffffff);
     border-color: var(--planif-couleur-sequence);
     color: var(--texte-principal);
+}
+.mode-clair .planif-seq-badge-global.actif {
+    background: #ffffff;
+    border-color: var(--texte-principal);
 }
 .mode-clair .planif-btn-nav-seq {
     background: #ffffff;
