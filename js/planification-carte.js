@@ -4980,6 +4980,10 @@ function ouvrirSequence(seqId) {
     var ancienId = sequenceActiveId;
     sequenceActiveId = seqId || null; // "" ou null = vue globale
     leconActiveId = null;
+    // Restaurer le canevas si on revient du niveau micro
+    var vueLecon = document.getElementById('planif-vue-lecon');
+    if (vueLecon) vueLecon.style.display = 'none';
+    if (zoneTravail) zoneTravail.style.display = '';
     if (sequenceActiveId === ancienId) return;
     reconstruireDOM();
     requestAnimationFrame(function() {
@@ -5078,22 +5082,102 @@ function mettreAJourCompteurLecons() {
 function ouvrirLecon(leconId) {
     leconActiveId = leconId || null;
     mettreAJourCarrouselLecons();
+
+    var vueLecon = document.getElementById('planif-vue-lecon');
     if (leconActiveId) {
-        // Niveau 3 : centrer sur la leçon
-        var lec = etat.noeuds.get(leconActiveId);
-        if (lec && zoneTravail) {
-            var el = document.getElementById(leconActiveId);
-            var w = el ? (el.offsetWidth || 140) : 140;
-            var h = el ? (el.offsetHeight || 50) : 50;
-            var cx = ((lec.x + w / 2) + OFFSET_X) * etat.zoom;
-            var cy = ((lec.y + h / 2) + OFFSET_Y) * etat.zoom;
-            zoneTravail.scrollTo({
-                left: cx - zoneTravail.clientWidth / 2,
-                top: cy - zoneTravail.clientHeight / 2,
-                behavior: 'smooth'
-            });
-        }
+        // Niveau 3 : masquer le canevas, afficher la vue leçon
+        if (zoneTravail) zoneTravail.style.display = 'none';
+        if (vueLecon) { vueLecon.style.display = ''; rendreVueLecon(leconActiveId); }
+    } else {
+        // Retour au niveau 2 : masquer la vue leçon, restaurer le canevas
+        if (vueLecon) vueLecon.style.display = 'none';
+        if (zoneTravail) zoneTravail.style.display = '';
     }
+}
+
+function rendreVueLecon(leconId) {
+    var vueLecon = document.getElementById('planif-vue-lecon');
+    if (!vueLecon) return;
+
+    var lec = etat.noeuds.get(leconId);
+    if (!lec) { vueLecon.innerHTML = ''; return; }
+
+    // Données de séances (objectif, notes, durée)
+    var seances = {};
+    try { seances = db.getSync(window.cle(CLE_SEANCES), {}); } catch(e) {}
+    var donnees = seances[leconId] || {};
+    var duree = lec.metadata && lec.metadata.duree ? lec.metadata.duree : '';
+
+    // Séquence parente
+    var seqParent = sequenceActiveId ? etat.noeuds.get(sequenceActiveId) : null;
+    var seqTitre = seqParent ? echapperHtml(seqParent.titre || '') : '';
+
+    // Activités enfants
+    var activites = (lec.enfants || []).map(function(eid) { return etat.noeuds.get(eid); }).filter(Boolean);
+
+    // Construire le HTML
+    var html = '<div class="planif-vue-lecon-inner">';
+
+    // En-tête
+    html += '<div class="planif-vue-lecon-header">';
+    html += '<div class="planif-vue-lecon-breadcrumb">';
+    if (seqTitre) html += '<span class="planif-vue-lecon-seq">' + seqTitre + '</span> <span class="planif-vue-lecon-sep">\u203A</span> ';
+    html += '<span class="planif-vue-lecon-titre-label">' + echapperHtml(lec.titre || 'Sans titre') + '</span>';
+    html += '</div>';
+    if (duree) html += '<span class="planif-vue-lecon-duree">' + duree + '\u2009min</span>';
+    html += '</div>';
+
+    // Objectif
+    html += '<div class="planif-vue-lecon-section">';
+    html += '<h4>Objectif</h4>';
+    html += '<div class="planif-vue-lecon-objectif" contenteditable="true" data-lecon-id="' + leconId + '" data-champ="objectifPersonnalise">' +
+            echapperHtml(donnees.objectifPersonnalise || '') + '</div>';
+    html += '</div>';
+
+    // Activités
+    if (activites.length > 0) {
+        html += '<div class="planif-vue-lecon-section">';
+        html += '<h4>Activit\u00e9s <span class="planif-vue-lecon-count">' + activites.length + '</span></h4>';
+        html += '<div class="planif-vue-lecon-activites">';
+        for (var i = 0; i < activites.length; i++) {
+            var act = activites[i];
+            var typeConfig = TYPES[act.type];
+            var couleur = typeConfig ? typeConfig.couleur : 'var(--texte-secondaire)';
+            var label = typeConfig ? typeConfig.label : act.type;
+            var actDuree = act.metadata && act.metadata.duree ? act.metadata.duree + '\u2009min' : '';
+            html += '<div class="planif-vue-lecon-activite">';
+            html += '<span class="planif-vue-lecon-act-type" style="color:' + couleur + '">' + label + '</span>';
+            html += '<span class="planif-vue-lecon-act-titre">' + echapperHtml(act.titre || '') + '</span>';
+            if (actDuree) html += '<span class="planif-vue-lecon-act-duree">' + actDuree + '</span>';
+            html += '</div>';
+        }
+        html += '</div>';
+        html += '</div>';
+    }
+
+    // Notes
+    html += '<div class="planif-vue-lecon-section">';
+    html += '<h4>Notes</h4>';
+    html += '<div class="planif-vue-lecon-notes" contenteditable="true" data-lecon-id="' + leconId + '" data-champ="notes">' +
+            echapperHtml(donnees.notes || '') + '</div>';
+    html += '</div>';
+
+    html += '</div>';
+    vueLecon.innerHTML = html;
+
+    // Brancher la sauvegarde sur les champs éditables
+    vueLecon.querySelectorAll('[contenteditable]').forEach(function(el) {
+        el.addEventListener('blur', function() {
+            var lid = el.dataset.leconId;
+            var champ = el.dataset.champ;
+            if (!lid || !champ) return;
+            var s = {};
+            try { s = db.getSync(window.cle(CLE_SEANCES), {}); } catch(e2) {}
+            if (!s[lid]) s[lid] = {};
+            s[lid][champ] = el.textContent.trim();
+            try { db.setSync(window.cle(CLE_SEANCES), s); } catch(e3) {}
+        });
+    });
 }
 
 function leconPrecedente() {

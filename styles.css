@@ -17269,6 +17269,134 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     white-space: nowrap;
 }
 
+/* === VUE LEÇON (niveau micro) === */
+.planif-vue-lecon {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    background: var(--surface-principale, #0f1c24);
+    z-index: 5;
+    padding: 32px;
+}
+.planif-vue-lecon-inner {
+    max-width: 720px;
+    margin: 0 auto;
+}
+.planif-vue-lecon-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--planif-couleur-bordure);
+}
+.planif-vue-lecon-breadcrumb {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--planif-couleur-texte);
+}
+.planif-vue-lecon-seq {
+    color: var(--planif-couleur-sequence);
+}
+.planif-vue-lecon-sep {
+    color: var(--texte-secondaire);
+    margin: 0 4px;
+}
+.planif-vue-lecon-duree {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--planif-couleur-lecon);
+    white-space: nowrap;
+}
+.planif-vue-lecon-section {
+    margin-bottom: 20px;
+}
+.planif-vue-lecon-section h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--texte-secondaire);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 8px 0;
+}
+.planif-vue-lecon-count {
+    font-size: 11px;
+    background: var(--planif-couleur-bordure);
+    padding: 1px 6px;
+    border-radius: 8px;
+    margin-left: 4px;
+}
+.planif-vue-lecon-objectif,
+.planif-vue-lecon-notes {
+    padding: 10px 14px;
+    border: 1px solid var(--planif-couleur-bordure);
+    border-radius: 8px;
+    background: var(--surface-carte, #1a3040);
+    color: var(--planif-couleur-texte);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 40px;
+    outline: none;
+    transition: border-color 0.15s;
+}
+.planif-vue-lecon-objectif:focus,
+.planif-vue-lecon-notes:focus {
+    border-color: var(--planif-couleur-selection);
+}
+.planif-vue-lecon-objectif:empty::before,
+.planif-vue-lecon-notes:empty::before {
+    content: attr(data-champ);
+    color: var(--texte-secondaire);
+    opacity: 0.5;
+}
+.planif-vue-lecon-objectif:empty::before { content: 'Objectif de la leçon…'; }
+.planif-vue-lecon-notes:empty::before { content: 'Notes…'; }
+.planif-vue-lecon-activites {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.planif-vue-lecon-activite {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border: 1px solid var(--planif-couleur-bordure);
+    border-radius: 8px;
+    background: var(--surface-carte, #1a3040);
+}
+.planif-vue-lecon-act-type {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+.planif-vue-lecon-act-titre {
+    flex: 1;
+    font-size: 14px;
+    color: var(--planif-couleur-texte);
+}
+.planif-vue-lecon-act-duree {
+    font-size: 12px;
+    color: var(--texte-secondaire);
+    flex-shrink: 0;
+}
+
+/* Mode clair — vue leçon */
+.mode-clair .planif-vue-lecon {
+    background: var(--surface-principale, #f8fafc);
+}
+.mode-clair .planif-vue-lecon-objectif,
+.mode-clair .planif-vue-lecon-notes {
+    background: #ffffff;
+    border-color: rgba(3, 46, 92, 0.15);
+}
+.mode-clair .planif-vue-lecon-activite {
+    background: #ffffff;
+    border-color: rgba(3, 46, 92, 0.12);
+}
+
 /* === PALETTE FLOTTANTE === */
 #planif-palette {
     position: absolute;
