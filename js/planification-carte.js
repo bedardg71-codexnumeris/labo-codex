@@ -4761,8 +4761,8 @@ function gererKeydown(e) {
         && document.activeElement.tagName !== 'INPUT'
         && document.activeElement.tagName !== 'TEXTAREA';
 
-    // Vérifier qu'on est bien dans la section planification
-    var sectionPlanif = document.getElementById('section-planification');
+    // Vérifier qu'on est bien dans la section structure (carte mentale)
+    var sectionPlanif = document.getElementById('section-structure');
     if (!sectionPlanif || !sectionPlanif.classList.contains('active')) return;
 
     if ((e.metaKey || e.ctrlKey) && e.key === 'a' && pasDansChamp) {
