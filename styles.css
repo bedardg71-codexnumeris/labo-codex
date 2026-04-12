@@ -17156,6 +17156,32 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     background: color-mix(in srgb, var(--planif-couleur-sequence) 25%, transparent);
     color: var(--planif-couleur-sequence);
 }
+/* Blocs compacts (vue globale) */
+.planif-seq-compact {
+    min-width: 140px;
+    max-width: 220px;
+    cursor: pointer;
+}
+.planif-seq-compact .planif-noeud-titre {
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+.planif-seq-compact-info {
+    padding: 4px 10px 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--planif-couleur-sequence);
+    opacity: 0.8;
+}
+.planif-seq-compact:hover {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+    transition: box-shadow 0.15s, transform 0.15s;
+}
+
 .planif-nav-seq {
     display: flex;
     align-items: center;

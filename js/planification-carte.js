@@ -2315,27 +2315,56 @@ function reconstruireDOM() {
     if (coucheLiens) coucheLiens.innerHTML = '';
 
     // Filtrage par séquence active (null = tout visible)
-    var visibles = null;
+    var visibles = null;  // Set des nœuds à afficher (vue focalisée)
+    var masques = null;   // Set des nœuds à masquer (vue globale compacte)
     if (sequenceActiveId && etat.noeuds.has(sequenceActiveId)) {
         visibles = new Set();
         _collecterDescendants(sequenceActiveId, visibles);
+    } else {
+        // Vue globale : compacter les séquences (masquer leurs descendants)
+        var seqs = obtenirSequencesCarte();
+        if (seqs.length > 0) {
+            masques = new Set();
+            for (var si = 0; si < seqs.length; si++) {
+                var enfantsSeq = seqs[si].enfants || [];
+                for (var ei = 0; ei < enfantsSeq.length; ei++) {
+                    _collecterDescendants(enfantsSeq[ei], masques);
+                }
+            }
+        }
     }
 
     for (var entry of etat.noeuds) {
         var n = entry[1];
         if (visibles && !visibles.has(n.id)) continue;
+        if (masques && masques.has(n.id)) continue;
         var config = TYPES[n.type];
         if (!config) continue;
         var estConteneur = config.conteneur === true;
+        var estCompact = masques && n.type === 'sequence';
         var el = document.createElement('div');
         el.className = (estConteneur ? 'planif-noeud planif-conteneur' : 'planif-noeud') + ' planif-type-' + n.type;
+        if (estCompact) el.classList.add('planif-seq-compact');
         if (n.parent) el.classList.add('planif-enfant-conteneur');
         el.id = n.id;
         el.style.left = n.x + 'px';
         el.style.top = n.y + 'px';
-        el.style.borderColor = (estConteneur && !(n.enfants && n.enfants.length > 0)) ? '' : obtenirCouleurNoeud(n);
+        el.style.borderColor = obtenirCouleurNoeud(n);
 
-        if (estConteneur) {
+        if (estCompact) {
+            // Vue globale compacte : bloc résumé (titre + badge leçons)
+            var nbLecons = (n.enfants || []).filter(function(eid) { return etat.noeuds.has(eid); }).length;
+            el.innerHTML =
+                '<div class="planif-noeud-entete">' +
+                    '<span class="planif-noeud-type" style="color: ' + obtenirCouleurNoeud(n) + '">' + obtenirLabelNoeud(n) + '</span>' +
+                '</div>' +
+                '<div class="planif-noeud-titre">' + echapperHtml(n.titre || '') + '</div>' +
+                '<div class="planif-seq-compact-info">' + nbLecons + ' le\u00e7on' + (nbLecons > 1 ? 's' : '') + '</div>' +
+                '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
+                '<div class="planif-noeud-port planif-port-gauche" data-dir="gauche"></div>' +
+                '<div class="planif-noeud-port planif-port-bas" data-dir="bas"></div>' +
+                '<div class="planif-noeud-port planif-port-haut" data-dir="haut"></div>';
+        } else if (estConteneur) {
             var nbEnfants = (n.enfants || []).length;
             el.innerHTML =
                 '<div class="planif-noeud-entete">' +
@@ -2377,10 +2406,12 @@ function reconstruireDOM() {
     }
 
     requestAnimationFrame(function() {
-        // Répartition automatique des conteneurs au chargement
+        // Répartition automatique des conteneurs (skip masqués et compacts)
         for (var entry2 of etat.noeuds) {
             var n2 = entry2[1];
             if (visibles && !visibles.has(n2.id)) continue;
+            if (masques && masques.has(n2.id)) continue;
+            if (masques && n2.type === 'sequence') continue; // Compact : pas de layout enfants
             if (TYPES[n2.type] && TYPES[n2.type].conteneur && n2.enfants && n2.enfants.length > 0 && !n2.parent) {
                 reLayoutConteneur(n2.id);
             }
@@ -2389,14 +2420,16 @@ function reconstruireDOM() {
         for (var entry2b of etat.noeuds) {
             var n2b = entry2b[1];
             if (visibles && !visibles.has(n2b.id)) continue;
+            if (masques && masques.has(n2b.id)) continue;
             if (TYPES[n2b.type] && TYPES[n2b.type].conteneur && (!n2b.enfants || n2b.enfants.length === 0)) {
                 mettreAJourZoneConteneur(n2b.id);
             }
         }
-        // Liens : seulement si les deux extrémités sont visibles
+        // Liens : seulement si les deux extrémités sont visibles (pas masquées)
         for (var entry3 of etat.liens) {
             var l = entry3[1];
             if (visibles && (!visibles.has(l.source) || !visibles.has(l.cible))) continue;
+            if (masques && (masques.has(l.source) || masques.has(l.cible))) continue;
             dessinerLien(l);
         }
         mettreAJourCarrousel();
@@ -3053,6 +3086,12 @@ function attacherEvenements(el, donnees) {
     // Double-clic: mode individuel pour enfants, panneau pour le reste
     el.addEventListener('dblclick', function(e) {
         if (e.target.isContentEditable) return;
+
+        // Bloc compact → ouvrir la vue focalisée
+        if (el.classList.contains('planif-seq-compact')) {
+            ouvrirSequence(id);
+            return;
+        }
 
         if (donnees.parent) {
             // Enfant → active mode individuel
