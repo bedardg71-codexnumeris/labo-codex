@@ -2062,8 +2062,11 @@ function importerPlanDepuisMD(texte, nouvelleCarteMode) {
     var seancesImport = chargerSeances();
     var compteur = carte.etat.compteur;
     var LAYOUT_X_START = 200;
-    var LAYOUT_Y_GAP = 400;
-    var LAYOUT_X_GAP = 250;
+    var LAYOUT_X_GAP = 350;
+    var LAYOUT_COLS = 4;
+    var LAYOUT_ROW_GAP = 180;
+    var LAYOUT_Y_BASE = 80;
+    var LAYOUT_Y_PADDING = 120;
     var ySeq = offsetY + 100;
 
     // Créer les séquences et leurs leçons
@@ -2084,16 +2087,18 @@ function importerPlanDepuisMD(texte, nouvelleCarteMode) {
         if (seq.semaineDebut != null) seqNoeud.metadata.semaineDebut = seq.semaineDebut;
         if (seq.semaineFin != null) seqNoeud.metadata.semaineFin = seq.semaineFin;
 
-        // Leçons de la séquence
+        // Leçons : grille (4 colonnes max) quand 5+ leçons, ligne sinon
         for (var li = 0; li < seq.lecons.length; li++) {
             var lecon = seq.lecons[li];
             var leconId = 'planif-noeud_' + (++compteur);
+            var col = seq.lecons.length >= 5 ? (li % LAYOUT_COLS) : li;
+            var row = seq.lecons.length >= 5 ? Math.floor(li / LAYOUT_COLS) : 0;
             var leconNoeud = {
                 id: leconId,
                 type: 'lecon',
                 titre: lecon.titre,
-                x: LAYOUT_X_START + 60 + (li * LAYOUT_X_GAP),
-                y: ySeq + 80,
+                x: LAYOUT_X_START + 60 + (col * LAYOUT_X_GAP),
+                y: ySeq + LAYOUT_Y_BASE + (row * LAYOUT_ROW_GAP),
                 parent: seqId,
                 enfants: [],
                 metadata: {},
@@ -2115,19 +2120,23 @@ function importerPlanDepuisMD(texte, nouvelleCarteMode) {
         }
 
         noeuds.push(seqNoeud);
-        ySeq += LAYOUT_Y_GAP;
+        var nbRows = seq.lecons.length >= 5 ? Math.ceil(seq.lecons.length / LAYOUT_COLS) : 1;
+        ySeq += LAYOUT_Y_BASE + (nbRows * LAYOUT_ROW_GAP) + LAYOUT_Y_PADDING;
     }
 
-    // Leçons orphelines
-    for (var oi = 0; oi < parsed.orphelines.length; oi++) {
+    // Leçons orphelines (même grille si 5+)
+    var nbOrph = parsed.orphelines.length;
+    for (var oi = 0; oi < nbOrph; oi++) {
         var orp = parsed.orphelines[oi];
         var orpId = 'planif-noeud_' + (++compteur);
+        var oCol = nbOrph >= 5 ? (oi % LAYOUT_COLS) : oi;
+        var oRow = nbOrph >= 5 ? Math.floor(oi / LAYOUT_COLS) : 0;
         var orpNoeud = {
             id: orpId,
             type: 'lecon',
             titre: orp.titre,
-            x: LAYOUT_X_START + (oi * LAYOUT_X_GAP),
-            y: ySeq + 80,
+            x: LAYOUT_X_START + (oCol * LAYOUT_X_GAP),
+            y: ySeq + LAYOUT_Y_BASE + (oRow * LAYOUT_ROW_GAP),
             parent: null,
             enfants: [],
             metadata: {},
