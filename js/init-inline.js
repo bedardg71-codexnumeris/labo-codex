@@ -296,6 +296,10 @@ async function chargerVersionJSON() {
         var spanBuild = document.getElementById('apropos-version-build');
         if (spanBeta) spanBeta.textContent = 'Beta ' + VERSION_MAJEURE;
         if (spanBuild) spanBuild.textContent = BUILD_ID;
+        var spanBetaAide = document.getElementById('aide-apropos-version-beta');
+        var spanBuildAide = document.getElementById('aide-apropos-version-build');
+        if (spanBetaAide) spanBetaAide.textContent = 'Beta ' + VERSION_MAJEURE;
+        if (spanBuildAide) spanBuildAide.textContent = BUILD_ID;
         return;
     }
 
@@ -313,12 +317,20 @@ async function chargerVersionJSON() {
         var spanBuild = document.getElementById('apropos-version-build');
         if (spanBeta) spanBeta.textContent = 'Beta ' + VERSION_MAJEURE;
         if (spanBuild) spanBuild.textContent = BUILD_ID;
+        var spanBetaAide = document.getElementById('aide-apropos-version-beta');
+        var spanBuildAide = document.getElementById('aide-apropos-version-build');
+        if (spanBetaAide) spanBetaAide.textContent = 'Beta ' + VERSION_MAJEURE;
+        if (spanBuildAide) spanBuildAide.textContent = BUILD_ID;
     } catch (e) {
         // Hors-ligne : on garde les valeurs fallback
         var spanBeta = document.getElementById('apropos-version-beta');
         var spanBuild = document.getElementById('apropos-version-build');
         if (spanBeta) spanBeta.textContent = 'Beta ' + VERSION_MAJEURE;
         if (spanBuild) spanBuild.textContent = BUILD_ID;
+        var spanBetaAide = document.getElementById('aide-apropos-version-beta');
+        var spanBuildAide = document.getElementById('aide-apropos-version-build');
+        if (spanBetaAide) spanBetaAide.textContent = 'Beta ' + VERSION_MAJEURE;
+        if (spanBuildAide) spanBuildAide.textContent = BUILD_ID;
     }
 }
 
