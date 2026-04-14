@@ -3,7 +3,7 @@
 **Auteur :** Grégoire Bédard
 **Projet :** Système de monitorage pédagogique (Application web)
 **Date de création :** 27 octobre 2025
-**Dernière modification :** 26 novembre 2025
+**Dernière modification :** 14 avril 2026
 
 ---
 
@@ -150,10 +150,25 @@ R : Pour protéger le projet contre l'appropriation par des entreprises qui héb
 
 ---
 
+## Avis concernant l'usage commercial
+
+Ce projet est conçu comme un **commun éducatif** — gratuit, ouvert et collaboratif. Il est le fruit
+de 30 ans d'enseignement, de 7 ans de pratique de l'enseignement explicite et de 2 ans de
+recherche-action. Il est destiné à la communauté enseignante du réseau collégial et universitaire.
+
+L'AGPL v3.0 autorise techniquement l'usage commercial du code, mais sous des conditions très
+strictes (publication intégrale du code source modifié, y compris en mode SaaS).
+
+**Toute exploitation commerciale de l'application, de ses modèles pédagogiques ou de ses contenus
+(vente, intégration dans un produit payant, hébergement commercial) nécessite une autorisation
+écrite préalable de l'auteur.**
+
+---
+
 ## Contact et contributions
 
 **Auteur :** Grégoire Bédard
-**Email :** [votre email]
+**Institution :** Cégep de Drummondville
 **Labo Codex :** https://codexnumeris.org/apropos
 
 Les contributions sont les bienvenues ! Veuillez soumettre des pull requests ou ouvrir des issues sur le dépôt GitHub.
@@ -169,5 +184,6 @@ Les contributions sont les bienvenues ! Veuillez soumettre des pull requests ou 
 - **27 octobre 2025** : GPL v3 + CC BY-SA 4.0 (versions initiales)
 - **3 novembre 2025** : AGPL v3 + CC BY-SA 4.0 (protection renforcée contre appropriation SaaS)
 - **26 novembre 2025** : AGPL v3 + CC BY-NC-SA 4.0 (protection enseignants, usage non-commercial)
+- **14 avril 2026** : Ajout de l'avis d'usage commercial et précision du statut de commun éducatif
 
-**Dernière mise à jour :** 26 novembre 2025
+**Dernière mise à jour :** 14 avril 2026
