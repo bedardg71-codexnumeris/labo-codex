@@ -283,6 +283,12 @@ function genererHtmlMois(annee, mois, calendrierComplet) {
             estCliquable = true;
         }
 
+        // Aujourd'hui ?
+        const aujourdHui = calendrierVue_formaterDate(new Date());
+        if (dateStr === aujourdHui) {
+            classeJour += ' calendrier-aujourd-hui';
+        }
+
         const numSemaine = statut.numeroSemaine || '';
         const actionAttr = estCliquable ? ' data-action="ouvrirSaisiePresence" data-param="' + dateStr + '"' : '';
 

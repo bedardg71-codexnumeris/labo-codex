@@ -211,15 +211,15 @@ function initialiserModulePratiques() {
  * FONCTIONNEMENT:
  * 1. Récupère le cours depuis listeCours
  * 2. Lit le champ pratiqueId du cours
- * 3. Si pas de pratique définie, utilise la pratique par défaut (pan-maitrise)
+ * 3. Si pas de pratique définie, utilise la pratique par défaut (pan-standards)
  * 4. Retourne l'ID de la pratique
  *
  * @param {string} coursId - ID du cours (ex: "COURS1234567890")
- * @returns {string} - ID de la pratique ('pan-maitrise' ou 'sommative')
+ * @returns {string} - ID de la pratique ('pan-standards' ou 'sommative')
  *
  * EXEMPLE:
  * const pratiqueId = getPratiqueCours('COURS1234567890');
- * // Retourne: 'pan-maitrise' ou 'sommative'
+ * // Retourne: 'pan-standards' ou 'sommative'
  */
 function getPratiqueCours(coursId) {
     // Récupérer tous les cours
@@ -277,13 +277,13 @@ function getCoursActifId() {
  * 3. Si pratiqueId correspond à la pratique active, retourne tous les cours
  * 4. Sinon, retourne les cours ayant explicitement ce pratiqueId (compatibilité)
  *
- * @param {string} pratiqueId - ID de la pratique ('pan-maitrise' ou 'sommative')
+ * @param {string} pratiqueId - ID de la pratique ('pan-standards' ou 'sommative')
  * @returns {Array} - Tableau des cours utilisant cette pratique
  */
 function getCoursUtilisantPratique(pratiqueId) {
     const cours = db.getSync('listeCours', []);
     const modalites = db.getSync('modalitesEvaluation', {});
-    const pratiqueActive = modalites.pratique || 'pan-maitrise';
+    const pratiqueActive = modalites.pratique || 'sommative';
 
     // Si cette pratique est la pratique active, tous les cours l'utilisent
     if (pratiqueId === pratiqueActive) {
@@ -332,7 +332,7 @@ function definirPratiqueParDefaut(pratiqueId) {
 /**
  * Change la pratique par défaut et met à jour l'interface
  *
- * @param {string} pratiqueId - ID de la pratique ('pan-maitrise' ou 'sommative')
+ * @param {string} pratiqueId - ID de la pratique ('pan-standards' ou 'sommative')
  */
 function changerPratiqueParDefaut(pratiqueId) {
     // Sauvegarder la nouvelle pratique par défaut
@@ -355,7 +355,7 @@ function mettreAJourUIPratiqueDefaut() {
     const btnSommative = document.getElementById('btnDefautSommative');
 
     if (btnPanMaitrise && btnSommative) {
-        if (pratiqueDefaut === 'pan-maitrise') {
+        if (pratiqueDefaut === 'pan-standards') {
             // PAN-Standards est sélectionnée - classe btn-principal
             btnPanMaitrise.className = 'btn btn-principal';
             btnSommative.className = 'btn';
@@ -537,7 +537,7 @@ function changerPratiqueNotation() {
     const selectPAN = document.getElementById('typePAN');
     const infoPAN = document.getElementById('infoPAN');
 
-    if (pratique === 'pan-maitrise') {
+    if (pratique === 'pan-standards') {
         // Afficher le menu PAN
         colonnePAN.classList.remove('u-hide');
     } else {
@@ -550,7 +550,7 @@ function changerPratiqueNotation() {
     // Sauvegarder dans modalitesEvaluation
     let modalites = db.getSync('modalitesEvaluation', {});
     modalites.pratique = pratique;
-    modalites.typePAN = pratique === 'pan-maitrise' ? modalites.typePAN : null;
+    modalites.typePAN = pratique === 'pan-standards' ? modalites.typePAN : null;
     db.setSync('modalitesEvaluation', modalites);
 
     // Gérer l'affichage des options d'affichage
@@ -620,12 +620,12 @@ function afficherOptionsAffichage() {
     const checkComparatif = document.getElementById('modeComparatif');
     const activationsExtras = document.getElementById('activationsExtras');
 
-    if (pratique === 'pan-maitrise' || pratique === 'sommative') {
+    if (pratique === 'pan-standards' || pratique === 'sommative') {
         // Afficher la section d'affichage au tableau de bord
         toggleDisplay(sectionAffichageTableauBord, true);
 
         // Afficher les checkboxes d'activation pour PAN
-        if (pratique === 'pan-maitrise' && activationsExtras) {
+        if (pratique === 'pan-standards' && activationsExtras) {
             activationsExtras.classList.remove('u-hide');
             // Initialiser l'affichage des cartes
             afficherCartesExtras();
@@ -678,8 +678,8 @@ function sauvegarderOptionsAffichage() {
                 afficherSommatif: true,
                 afficherAlternatif: false
             };
-        } else if (pratique && pratique.startsWith('pan-maitrise')) {
-            // ✅ CORRECTION (9 déc 2025) : Support des variantes pan-maitrise-json, pan-maitrise-*
+        } else if (pratique && pratique.startsWith('pan-standards')) {
+            // ✅ CORRECTION (9 déc 2025) : Support des variantes pan-standards-json, pan-standards-*
             modalites.affichageTableauBord = {
                 afficherSommatif: false,
                 afficherAlternatif: true
@@ -707,7 +707,7 @@ function afficherConfigurationPAN() {
 
     if (!configPAN) return;
 
-    if (pratique === 'pan-maitrise') {
+    if (pratique === 'pan-standards') {
         configPAN.classList.remove('u-hide');
         chargerConfigurationPAN();
     } else {
@@ -1147,14 +1147,14 @@ function sauvegarderPratiqueNotation() {
 
     // Valider typePAN uniquement si le sélecteur est VISIBLE (ancien système)
     const selecteurVisible = colonnePAN && !colonnePAN.classList.contains('u-hide');
-    if (pratique === 'pan-maitrise' && selecteurVisible && !typePAN) {
+    if (pratique === 'pan-standards' && selecteurVisible && !typePAN) {
         alert('Veuillez choisir un type de pratique alternative');
         return;
     }
 
     // Construire la configuration complète
     modalites.pratique = pratique;
-    modalites.typePAN = pratique === 'pan-maitrise' ? typePAN : null;
+    modalites.typePAN = pratique === 'pan-standards' ? typePAN : null;
     modalites.dateConfiguration = new Date().toISOString();
 
     // Sauvegarder la grille de référence pour le dépistage
@@ -1180,8 +1180,8 @@ function sauvegarderPratiqueNotation() {
                 afficherSommatif: true,
                 afficherAlternatif: false
             };
-        } else if (pratique && pratique.startsWith('pan-maitrise')) {
-            // ✅ CORRECTION (9 déc 2025) : Support des variantes pan-maitrise-json, pan-maitrise-*
+        } else if (pratique && pratique.startsWith('pan-standards')) {
+            // ✅ CORRECTION (9 déc 2025) : Support des variantes pan-standards-json, pan-standards-*
             modalites.affichageTableauBord = {
                 afficherSommatif: false,
                 afficherAlternatif: true
@@ -1272,7 +1272,7 @@ function chargerModalites() {
     selectPratique.value = modalites.pratique;
 
     // Gérer l'affichage du menu PAN
-    if (modalites.pratique === 'pan-maitrise') {
+    if (modalites.pratique === 'pan-standards') {
         colonnePAN.classList.remove('u-hide');
 
         // Charger le type de PAN si disponible
@@ -1295,7 +1295,7 @@ function chargerModalites() {
                 afficherSommatif: true,
                 afficherAlternatif: false
             };
-        } else if (modalites.pratique === 'pan-maitrise') {
+        } else if (modalites.pratique === 'pan-standards') {
             modalites.affichageTableauBord = {
                 afficherSommatif: false,
                 afficherAlternatif: true
@@ -1358,7 +1358,7 @@ function chargerModalites() {
     // Masquer la section configurationPAN au chargement
     // Elle sera affichée par le bouton "Modifier les paramètres"
     const configPAN = document.getElementById('configurationPAN');
-    if (configPAN && modalites.pratique === 'pan-maitrise') {
+    if (configPAN && modalites.pratique === 'pan-standards') {
         configPAN.classList.add('u-hide');
     }
 
@@ -1525,7 +1525,7 @@ function mettreAJourStatutModalites() {
         statutDiv.innerHTML = '<span style="color: var(--risque-critique);">✗ À configurer</span>';
     } else if (modalites.pratique === 'sommative') {
         statutDiv.innerHTML = '<span style="color: var(--vert-moyen);">✓ Sommative traditionnelle (en %)</span>';
-    } else if (modalites.pratique === 'pan-maitrise' && modalites.typePAN) {
+    } else if (modalites.pratique === 'pan-standards' && modalites.typePAN) {
         const types = {
             'maitrise': 'Maîtrise',
             'specifications': 'Spécifications',
@@ -1537,7 +1537,7 @@ function mettreAJourStatutModalites() {
                 Modifier les paramètres
             </button>
         `;
-    } else if (modalites.pratique === 'pan-maitrise' && !modalites.typePAN) {
+    } else if (modalites.pratique === 'pan-standards' && !modalites.typePAN) {
         statutDiv.innerHTML = '<span style="color: var(--orange-accent);">⚠ Choisir un type de PAN</span>';
     }
 }
@@ -1786,7 +1786,7 @@ function genererSelecteurPratiqueParDefaut() {
                         type="radio"
                         name="pratiqueDefaut"
                         value="pan-standards"
-                        ${pratiqueDefaut === 'pan-standards' || pratiqueDefaut === 'pan-maitrise' ? 'checked' : ''}
+                        ${pratiqueDefaut === 'pan-standards' || pratiqueDefaut === 'pan-standards' ? 'checked' : ''}
                         data-on-change="changerPratiqueParDefaut" data-param="pan-standards">
                     <span style="margin-left: 8px;">PAN-Standards</span>
                 </label>
@@ -2052,7 +2052,7 @@ function chargerConfigurationPratique(id) {
                     afficherSommatif: true,
                     afficherAlternatif: false
                 };
-            } else if (modalites.pratique === 'pan-maitrise') {
+            } else if (modalites.pratique === 'pan-standards') {
                 modalites.affichageTableauBord = {
                     afficherSommatif: false,
                     afficherAlternatif: true
@@ -2171,7 +2171,7 @@ function afficherSectionsSelonConfig(config) {
 async function desactiverPratique(id) {
     const pratiqueDefaut = getPratiqueParDefaut();
 
-    if (!confirm(`Désactiver cette pratique ?\n\nLa pratique par défaut (${pratiqueDefaut === 'pan-maitrise' ? 'PAN-Standards' : 'Sommative'}) sera activée à la place.`)) {
+    if (!confirm(`Désactiver cette pratique ?\n\nLa pratique par défaut (${pratiqueDefaut === 'pan-standards' ? 'PAN-Standards' : 'Sommative'}) sera activée à la place.`)) {
         return;
     }
 
@@ -4269,8 +4269,10 @@ async function afficherListePratiquesSidebar() {
     // (ils sont dans le modal "Bibliothèque de pratiques" > section "Canevas de base")
     // Les autres pratiques sont des configurations dérivées qui peuvent apparaître dans la sidebar
     const idsCanevasDeBase = [
-        'pan-maitrise',
-        'specifications',
+        'pan-standards',
+        'pan-maitrise',       // rétrocompat
+        'pan-specifications',
+        'specifications',     // rétrocompat
         'sommative'
     ];
 
@@ -4328,13 +4330,13 @@ async function ouvrirModalBibliothequePratiques() {
     // Ces IDs correspondent aux pratiques codées en JavaScript (pas aux configurations JSON)
     const canevasDeBase = [
         {
-            id: 'pan-maitrise',
+            id: 'pan-standards',
             nom: 'PAN-Standards',
             description: 'Pratique alternative basée sur les N meilleurs artefacts de portfolio avec évaluation formative selon l\'échelle IDME et la grille de critères configurée',
             type: 'canevas'
         },
         {
-            id: 'specifications',
+            id: 'pan-specifications',
             nom: 'PAN par contrat (Spécifications)',
             description: 'Pratique par contrat (Specification Grading) avec objectifs réussite/échec. Les étudiants atteignent des paliers de notes fixes en réussissant des ensembles d\'objectifs mesurables',
             type: 'canevas'

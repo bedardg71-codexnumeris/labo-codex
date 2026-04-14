@@ -884,7 +884,11 @@ function remplirFormulairePratique(pratique) {
             toggleCategoriesMat(); // Afficher/masquer les détails
         }
 
-    } else if (pratique.type === 'pan-specifications') {
+    }
+    // Note : sommative n'a pas de section ici — aucune configuration spécifique requise
+    //        (utilise uniquement les pondérations des productions)
+
+    if (pratique.type === 'pan-specifications') {
         const config = pratique.configuration || {};
 
         // Seuil

@@ -997,15 +997,44 @@ function ouvrirPanneau(id) {
     extra.innerHTML = '';
 
     if (donnees.type === 'activite' || donnees.type === 'lecon') {
+        var meta = donnees.metadata;
+        var hasDuree = meta.duree || meta.periodes || meta.minutesParPeriode;
         extra.innerHTML +=
-            '<label for="planif-panneau-duree">Durée (minutes)</label>' +
-            '<input type="number" id="planif-panneau-duree" value="' + (donnees.metadata.duree || '') + '" min="1" max="180" placeholder="50">';
-        var dureeInput = extra.querySelector('#planif-panneau-duree');
-        dureeInput.addEventListener('focus', function() { enregistrerPourUndo(); });
-        dureeInput.addEventListener('input', function(e) {
-            donnees.metadata.duree = parseInt(e.target.value) || null;
-            propagerModification(id, 'metadata', JSON.parse(JSON.stringify(donnees.metadata)));
+            '<div class="planif-duree-section" id="planif-duree-section" style="' + (hasDuree ? '' : 'display:none') + '">' +
+                '<label>Dur\u00e9e</label>' +
+                '<div class="planif-duree-calc">' +
+                    '<input type="number" id="planif-duree-per" value="' + (meta.periodes || '') + '" min="1" max="10" placeholder="P\u00e9r.">' +
+                    '<span class="planif-duree-sep">\u00d7</span>' +
+                    '<input type="number" id="planif-duree-mpp" value="' + (meta.minutesParPeriode || '') + '" min="1" max="120" placeholder="Min/p\u00e9r.">' +
+                    '<span class="planif-duree-sep">=</span>' +
+                    '<span class="planif-duree-total" id="planif-duree-total">' + (meta.duree ? meta.duree + '\u2009min' : '') + '</span>' +
+                '</div>' +
+            '</div>' +
+            '<button type="button" class="planif-duree-ajouter" id="planif-duree-ajouter" style="' + (hasDuree ? 'display:none' : '') + '">+ Dur\u00e9e</button>';
+
+        function recalcDuree() {
+            var per = parseInt(document.getElementById('planif-duree-per').value) || 0;
+            var mpp = parseInt(document.getElementById('planif-duree-mpp').value) || 0;
+            var total = per * mpp;
+            meta.periodes = per || null;
+            meta.minutesParPeriode = mpp || null;
+            meta.duree = total || null;
+            document.getElementById('planif-duree-total').textContent = total ? total + '\u2009min' : '';
+            propagerModification(id, 'metadata', JSON.parse(JSON.stringify(meta)));
             sauvegarder();
+        }
+
+        var perInput = extra.querySelector('#planif-duree-per');
+        var mppInput = extra.querySelector('#planif-duree-mpp');
+        perInput.addEventListener('focus', function() { enregistrerPourUndo(); });
+        mppInput.addEventListener('focus', function() { enregistrerPourUndo(); });
+        perInput.addEventListener('input', recalcDuree);
+        mppInput.addEventListener('input', recalcDuree);
+
+        extra.querySelector('#planif-duree-ajouter').addEventListener('click', function() {
+            document.getElementById('planif-duree-section').style.display = '';
+            this.style.display = 'none';
+            document.getElementById('planif-duree-per').focus();
         });
     }
 
@@ -2314,6 +2343,10 @@ function reconstruireDOM() {
     if (coucheNoeuds) coucheNoeuds.innerHTML = '';
     if (coucheLiens) coucheLiens.innerHTML = '';
 
+    // Charger les données de séances pour l'indicateur objectif
+    var _seancesDOM = {};
+    try { _seancesDOM = db.getSync(window.cle(CLE_SEANCES), {}); } catch(e) {}
+
     // Filtrage par séquence active (null = tout visible)
     var visibles = null;  // Set des nœuds à afficher (vue focalisée)
     var masques = null;   // Set des nœuds à masquer (vue globale compacte)
@@ -2402,6 +2435,20 @@ function reconstruireDOM() {
                 badgeC.textContent = ncObj.label;
                 el.appendChild(badgeC);
             }
+        }
+        // Indicateur 🎯 objectif personnalisé (leçons uniquement)
+        if (n.type === 'lecon' && _seancesDOM[n.id] && _seancesDOM[n.id].objectifPersonnalise) {
+            var badgeObj = document.createElement('span');
+            badgeObj.className = 'planif-badge-objectif';
+            badgeObj.textContent = '\uD83C\uDFAF';
+            badgeObj.title = 'Objectif d\u00e9fini \u2014 cliquer pour voir le d\u00e9tail';
+            badgeObj.addEventListener('click', function(leconId) {
+                return function(e) {
+                    e.stopPropagation();
+                    naviguerNiveauLecon(leconId);
+                };
+            }(n.id));
+            el.appendChild(badgeObj);
         }
     }
 
@@ -3132,6 +3179,10 @@ function attacherEvenements(el, donnees) {
         if (e.metaKey || e.ctrlKey) return;
         if (etat.multiSelection.size === 0) {
             selectionnerNoeud(id);
+            // Rafraîchir l'inspecteur si déjà ouvert
+            if (etat.panneauOuvert) {
+                ouvrirPanneau(id);
+            }
         }
     });
 }
