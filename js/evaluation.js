@@ -312,11 +312,11 @@ function chargerEchellePerformance() {
         } else {
             // Fallback: utiliser la configuration globale
             const modalites = db.getSync('modalitesEvaluation', {});
-            pratiqueId = modalites.pratique || 'pan-maitrise';
+            pratiqueId = modalites.pratique || 'sommative';
         }
 
         // Si ce n'est pas une pratique codée en dur, charger l'échelle de la pratique
-        if (pratiqueId && pratiqueId !== 'pan-maitrise' && pratiqueId !== 'sommative') {
+        if (pratiqueId && pratiqueId !== 'pan-standards' && pratiqueId !== 'pan-maitrise' && pratiqueId !== 'sommative' && pratiqueId !== 'pan-specifications') {
             const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
             const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
 

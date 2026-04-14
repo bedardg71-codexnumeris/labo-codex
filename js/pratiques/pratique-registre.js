@@ -222,8 +222,13 @@ function obtenirIdPratiqueActive() {
         if (idPratique === 'alternative' || idPratique === 'pan-maitrise') {
             console.warn(`⚠️ Pratique "${idPratique}" détectée, migration automatique vers "pan-standards"`);
             idPratique = 'pan-standards';
-            // Sauvegarder la migration
             config.pratique = 'pan-standards';
+            db.setSync('modalitesEvaluation', config);
+        }
+        if (idPratique === 'specifications') {
+            console.warn('⚠️ Pratique "specifications" détectée, migration automatique vers "pan-specifications"');
+            idPratique = 'pan-specifications';
+            config.pratique = 'pan-specifications';
             db.setSync('modalitesEvaluation', config);
         }
 

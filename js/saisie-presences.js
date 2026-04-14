@@ -502,6 +502,8 @@ function validerDateSaisie(dateStr) {
             } else {
                 return { valide: false, raison: 'pas-cours', verrouille: false };
             }
+        } else if (infoJour.statut === 'conge' && infoJour.motif) {
+            return { valide: false, raison: 'conge', motif: infoJour.motif, verrouille: false };
         } else {
             return { valide: false, raison: 'pas-cours', verrouille: false };
         }
@@ -755,6 +757,10 @@ function initialiserSaisiePresences() {
             case 'vide':
                 messageTableau = 'Veuillez sélectionner une date';
                 messageCompteur = 'Sélectionne une date';
+                break;
+            case 'conge':
+                messageTableau = '';
+                messageCompteur = validation.motif + ' \u2014 pas de cours';
                 break;
             case 'pas-cours':
                 messageTableau = ''; // Message affiché uniquement dans la carte de statistiques
