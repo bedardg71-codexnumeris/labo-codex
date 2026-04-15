@@ -6659,6 +6659,23 @@
     }
 
     /* ===============================
+       ACCÈS RAPIDE AU PROFIL ÉTUDIANT
+       =============================== */
+
+    function ouvrirProfilDepuisAnnotation() {
+        var fichier = travauxVisionneuse.getFichierActuel();
+        var da = fichier ? fichier.etudiantDA : null;
+        if (!da) {
+            console.warn('[travaux-ui] Aucun DA associé au fichier courant');
+            return;
+        }
+        if (typeof window.afficherProfilComplet === 'function') {
+            window.naviguerVers('suivi', 'profil');
+            setTimeout(function() { window.afficherProfilComplet(da); }, 200);
+        }
+    }
+
+    /* ===============================
        EXPORTS GLOBAUX
        =============================== */
 
@@ -6798,8 +6815,13 @@
         changerProductionFichierDepuisTableau: changerProductionFichierDepuisTableau,
         // Plein écran + fond canvas
         togglePleinEcran: togglePleinEcran,
-        initialiserFondCanvas: initialiserFondCanvas
+        initialiserFondCanvas: initialiserFondCanvas,
+        // Profil rapide
+        ouvrirProfilDepuisAnnotation: ouvrirProfilDepuisAnnotation
     };
+
+    // Accès direct pour data-action
+    window.ouvrirProfilDepuisAnnotation = ouvrirProfilDepuisAnnotation;
 
     // Alias pour navigation.js
     window.initialiserModuleTravaux = initialiserModuleTravaux;
