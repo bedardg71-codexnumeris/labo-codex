@@ -3551,6 +3551,25 @@
             line-height: 1;
         }
 
+        /* Bouton toggle thème clair/sombre — bandeau groupe-cours */
+        .btn-toggle-theme-header {
+            background: none;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 16px;
+            cursor: pointer;
+            color: var(--texte-principal);
+            margin-left: 8px;
+            transition: border-color 0.15s, opacity 0.15s;
+            opacity: 0.7;
+        }
+        .btn-toggle-theme-header:hover {
+            opacity: 1;
+            border-color: var(--accent-primaire);
+        }
+
         /* ===============================
            BADGES D'INTÉGRITÉ ACADÉMIQUE
            =============================== */
@@ -3803,6 +3822,7 @@
                 <div id="selecteur-mode" class="selecteur-mode-centre" data-tooltip="entete-mode-affichage">
                     <!-- Sera généré dynamiquement par 17-modes.js -->
                 </div>
+                <button id="btn-toggle-theme-nav" class="btn-toggle-theme-header" title="Mode clair / sombre" data-action="basculerTheme">&#x25D1;</button>
             </div>
         </div>
 
@@ -4116,6 +4136,24 @@
                                     <button class="planif-btn-vue" id="planif-btn-largeur" title="Ajuster à la largeur (⌘2)" data-action="planificationCarte.zoomPleineLargeur">&#x2194;</button>
                                     <button class="planif-btn-vue" id="planif-btn-hauteur" title="Ajuster à la hauteur (⌘3)" data-action="planificationCarte.zoomPleineHauteur">&#x2195;</button>
                                     <span id="planif-zoom-info-header" class="planif-zoom-info-header" data-tooltip="planif-zoom">100%</span>
+                                    <div class="planif-fond-picker" id="planif-fond-picker">
+                                        <button class="planif-btn-vue" id="planif-btn-fond" title="Couleur de fond">&#x1F3A8;</button>
+                                        <div class="planif-fond-dropdown" id="planif-fond-dropdown">
+                                            <button class="travaux-fond-swatch" data-fond="" title="D&eacute;faut" style="background:var(--surface-page, #0c1a22); border:2px solid var(--accent-primaire)"></button>
+                                            <button class="travaux-fond-swatch" data-fond="#142428" title="Oc&eacute;an" style="background:#142428"></button>
+                                            <button class="travaux-fond-swatch" data-fond="#1a2744" title="Nuit" style="background:#1a2744"></button>
+                                            <button class="travaux-fond-swatch" data-fond="#2c3e50" title="Ardoise" style="background:#2c3e50"></button>
+                                            <button class="travaux-fond-swatch" data-fond="#4a6580" title="Acier" style="background:#4a6580"></button>
+                                            <button class="travaux-fond-swatch" data-fond="#3d3d3d" title="Graphite" style="background:#3d3d3d"></button>
+                                            <button class="travaux-fond-swatch" data-fond="#4a4a3e" title="S&eacute;pia" style="background:#4a4a3e"></button>
+                                            <button class="travaux-fond-swatch" data-fond="#6b7b6e" title="Lichen" style="background:#6b7b6e"></button>
+                                            <button class="travaux-fond-swatch" data-fond="#8a9aaa" title="Brume" style="background:#8a9aaa"></button>
+                                            <button class="travaux-fond-swatch" data-fond="#c5cdd5" title="Givre" style="background:#c5cdd5"></button>
+                                            <button class="travaux-fond-swatch" data-fond="#d4cfc4" title="Parchemin" style="background:#d4cfc4"></button>
+                                            <button class="travaux-fond-swatch" data-fond="#e8e4da" title="Cr&egrave;me" style="background:#e8e4da"></button>
+                                        </div>
+                                    </div>
+                                    <button class="planif-btn-vue" id="planif-btn-plein-ecran" title="Plein &eacute;cran" data-action="planificationCarte.togglePleinEcran">&#x2922;</button>
                                 </div>
                             </div>
                         </div>

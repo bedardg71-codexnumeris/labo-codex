@@ -5278,7 +5278,64 @@ window.planificationCarte = {
     // Sous-carrousel leçons
     ouvrirLecon: ouvrirLecon,
     leconPrecedente: leconPrecedente,
-    leconSuivante: leconSuivante
+    leconSuivante: leconSuivante,
+    // Plein écran
+    togglePleinEcran: togglePleinEcranCarte
 };
+
+// === COULEUR DE FOND CANEVAS ===
+(function() {
+    var btnFond = document.getElementById('planif-btn-fond');
+    var dropdown = document.getElementById('planif-fond-dropdown');
+    if (!btnFond || !dropdown) return;
+
+    btnFond.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dropdown.classList.toggle('visible');
+    });
+
+    dropdown.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var swatch = e.target.closest('[data-fond]');
+        if (!swatch) return;
+        var couleur = swatch.dataset.fond;
+        var zone = document.getElementById('planif-zone-wrapper');
+        if (zone) zone.style.background = couleur || '';
+        db.setSync('planif-fond-canvas', couleur);
+        dropdown.classList.remove('visible');
+    });
+
+    document.addEventListener('click', function() {
+        dropdown.classList.remove('visible');
+    });
+
+    // Restaurer
+    var fondSauve = db.getSync('planif-fond-canvas', null);
+    if (fondSauve) {
+        var zone = document.getElementById('planif-zone-wrapper');
+        if (zone) zone.style.background = fondSauve;
+    }
+})();
+
+var _planifPleinEcran = false;
+
+function togglePleinEcranCarte() {
+    var zone = document.getElementById('structure-carte');
+    if (!zone) return;
+    _planifPleinEcran = !_planifPleinEcran;
+    zone.classList.toggle('planif-plein-ecran', _planifPleinEcran);
+    document.body.classList.toggle('planif-plein-ecran-actif', _planifPleinEcran);
+    var btn = document.getElementById('planif-btn-plein-ecran');
+    if (btn) {
+        btn.textContent = _planifPleinEcran ? '\u2716' : '\u2922';
+        btn.title = _planifPleinEcran ? 'Quitter le plein \u00e9cran' : 'Plein \u00e9cran';
+    }
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && _planifPleinEcran) {
+        togglePleinEcranCarte();
+    }
+});
 
 })();
