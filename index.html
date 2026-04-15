@@ -3554,7 +3554,7 @@
         /* Bouton toggle thème clair/sombre — bandeau groupe-cours */
         .btn-toggle-theme-header {
             background: none;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.4);
             border-radius: 50%;
             width: 32px;
             height: 32px;
@@ -3563,7 +3563,10 @@
             color: var(--texte-principal);
             margin-left: 8px;
             transition: border-color 0.15s, opacity 0.15s;
-            opacity: 0.7;
+            opacity: 0.8;
+        }
+        .mode-clair .btn-toggle-theme-header {
+            border-color: rgba(3,46,92,0.5);
         }
         .btn-toggle-theme-header:hover {
             opacity: 1;
