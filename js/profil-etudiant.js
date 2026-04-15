@@ -958,20 +958,38 @@ function genererSectionMobilisationEngagement(da) {
         ? obtenirStatutJetonsEtudiant(da)
         : {};
 
+    // Rang chronologique des productions (P1, P2...) basé sur la date d'échéance
+    // Universel : indépendant de la pratique et du nommage des productions
+    var _rangsProductions = {};
+    (function() {
+        var toutes = productions.filter(function(p) { return p.type !== 'portfolio'; });
+        toutes.sort(function(a, b) { return (a.dateEcheance || '9999').localeCompare(b.dateEcheance || '9999'); });
+        for (var i = 0; i < toutes.length; i++) {
+            _rangsProductions[toutes[i].id] = i + 1;
+        }
+    })();
+
+    function _rangProduction(production) {
+        if (!production) return 0;
+        return _rangsProductions[production.id] || 0;
+    }
+
     // Créer les objets avec index pour les badges
     const jetonsDelaiAvecIndex = evaluationsAvecJetonDelai.map(e => {
-        const indexOriginal = artefactsPortfolio.findIndex(p => p.id === e.productionId) + 1;
+        var prod = artefactsPortfolio.find(p => p.id === e.productionId);
+        const indexOriginal = _rangProduction(prod);
         return {
             nom: e.productionNom || 'Artefact inconnu',
-            index: indexOriginal > 0 ? `A${indexOriginal}` : '?'
+            index: indexOriginal > 0 ? `P${indexOriginal}` : '?'
         };
     });
 
     const jetonsRepriseAvecIndex = evaluationsAvecJetonReprise.map(e => {
-        const indexOriginal = artefactsPortfolio.findIndex(p => p.id === e.productionId) + 1;
+        var prod = artefactsPortfolio.find(p => p.id === e.productionId);
+        const indexOriginal = _rangProduction(prod);
         return {
             nom: e.productionNom || 'Artefact inconnu',
-            index: indexOriginal > 0 ? `A${indexOriginal}` : '?'
+            index: indexOriginal > 0 ? `P${indexOriginal}` : '?'
         };
     });
 
@@ -1129,8 +1147,8 @@ function genererSectionMobilisationEngagement(da) {
                     <div class="badges-centres u-mb-20">
                         ${artefactsRemis
                             .map(art => {
-                                // Trouver l'index ORIGINAL dans la liste définie par l'enseignant
-                                const indexOriginal = artefactsPortfolio.findIndex(p => p.id === art.id) + 1;
+                                // Numéro d'artefact depuis le titre (pas la position)
+                                const indexOriginal = _rangProduction(artefactsPortfolio.find(p => p.id === art.id));
                                 return { ...art, indexOriginal };
                             })
                             .sort((a, b) => a.indexOriginal - b.indexOriginal) // Trier par numéro croissant
@@ -1141,7 +1159,7 @@ function genererSectionMobilisationEngagement(da) {
                                         ${echapperHtml(art.description)}
                                     </span>
                                     <span class="badge-completion-numero">
-                                        A${art.indexOriginal}
+                                        P${art.indexOriginal}
                                     </span>
                                 </span>
                             `).join('')}
@@ -1160,8 +1178,8 @@ function genererSectionMobilisationEngagement(da) {
                     <div class="badges-centres u-mb-20">
                         ${artefactsNonRemis
                             .map(art => {
-                                // Trouver l'index ORIGINAL dans la liste définie par l'enseignant
-                                const indexOriginal = artefactsPortfolio.findIndex(p => p.id === art.id) + 1;
+                                // Numéro d'artefact depuis le titre (pas la position)
+                                const indexOriginal = _rangProduction(artefactsPortfolio.find(p => p.id === art.id));
                                 return { ...art, indexOriginal };
                             })
                             .sort((a, b) => a.indexOriginal - b.indexOriginal) // Trier par numéro croissant
@@ -1173,7 +1191,7 @@ function genererSectionMobilisationEngagement(da) {
                                         ${echapperHtml(art.description)}
                                     </span>
                                     <span class="badge-completion-numero">
-                                        ${art.estNonRecevable ? '⚠️' : ''} A${art.indexOriginal}
+                                        ${art.estNonRecevable ? '⚠️' : ''} P${art.indexOriginal}
                                     </span>
                                 </span>
                             `).join('')}
@@ -1253,10 +1271,11 @@ function genererSectionMobilisationEngagement(da) {
                             }
 
                             if (jetonUtilise) {
-                                // Trouver l'index de la production
-                                const indexProduction = productionsNonPortfolio.findIndex(p => p.id === evaluation.productionId);
-                                if (indexProduction !== -1) {
-                                    badges.push(`A${indexProduction + 1}`);
+                                // Rang chronologique de la production
+                                var prodJeton = productionsNonPortfolio.find(p => p.id === evaluation.productionId);
+                                var rangJeton = prodJeton ? _rangProduction(prodJeton) : 0;
+                                if (rangJeton > 0) {
+                                    badges.push(`P${rangJeton}`);
                                 }
                             }
                         });
@@ -1363,8 +1382,8 @@ function genererSectionMobilisationEngagement(da) {
                 ${artefactsRetenus.length > 0 ? `
                     <div class="badges-centres u-mb-20">
                         ${artefactsRetenus.map(art => {
-                            // Trouver l'index ORIGINAL dans la liste définie par l'enseignant
-                            const indexOriginal = artefactsPortfolio.findIndex(p => p.id === art.id) + 1;
+                            // Numéro d'artefact depuis le titre (pas la position)
+                            const indexOriginal = _rangProduction(artefactsPortfolio.find(p => p.id === art.id));
 
                             // Récupérer les couleurs depuis l'échelle configurée
                             const echelles = db.getSync('echellesTemplates', []);
@@ -1393,7 +1412,7 @@ function genererSectionMobilisationEngagement(da) {
                                      data-action="evaluerProduction" data-param="${da}" data-param2="${art.id}"
                                      title="${echapperHtml(art.description)}">
                                     <span class="badge-artefact-titre" style="color: ${couleurBadge};">
-                                        A${indexOriginal}
+                                        P${indexOriginal}
                                     </span>
                                     ${art.jetonReprise ? '<span class="profil-texte-petit" title="Jeton de reprise appliqué">⭐</span>' : ''}
                                     ${art.jetonDelai ? '<span class="profil-texte-petit" title="Jeton de délai appliqué">⭐</span>' : ''}
@@ -3738,8 +3757,9 @@ function genererSectionProductions(da) {
         return '<p class="u-text-center-gris">Étudiant non trouvé</p>';
     }
 
-    // Productions à évaluer (exclure portfolio lui-même)
-    const productionsAEvaluer = productions.filter(p => p.type !== 'portfolio');
+    // Productions à évaluer (exclure portfolio lui-même), triées par date d'échéance
+    const productionsAEvaluer = productions.filter(p => p.type !== 'portfolio')
+        .sort((a, b) => (a.dateEcheance || '9999').localeCompare(b.dateEcheance || '9999'));
 
     if (productionsAEvaluer.length === 0) {
         return `
@@ -3772,7 +3792,7 @@ function genererSectionProductions(da) {
                 evaluation = evaluationsProduction.find(e => !e.remplaceeParId);
             }
         }
-        const indexArtefact = index + 1; // A1, A2, A3, etc.
+        const indexArtefact = _rangsProductions[production.id] || (index + 1);
 
         if (evaluation) {
             // Production évaluée
@@ -3824,7 +3844,7 @@ function genererSectionProductions(da) {
                 evaluationId: evaluation.id,
                 productionId: production.id,
                 badgeType: badgeType,
-                indexArtefact: `A${indexArtefact}`
+                indexArtefact: `P${indexArtefact}`
             };
         } else {
             // Production non remise
@@ -3851,7 +3871,7 @@ function genererSectionProductions(da) {
                 evaluationId: null,
                 productionId: production.id,
                 badgeType: null,
-                indexArtefact: `A${indexArtefact}`
+                indexArtefact: `P${indexArtefact}`
             };
         }
     });

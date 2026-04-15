@@ -1369,7 +1369,8 @@
         html += '</div>';
         // Info étudiant/production (même info que palette Paramètres)
         html += '<div id="travaux-annot-identite" class="travaux-eval-identite" style="margin-top: 6px;">';
-        html += '<span class="travaux-eval-label-val" id="travaux-annot-label-etudiant" style="font-weight: 600;">--</span>';
+        html += '<div style="display:flex; align-items:center; gap:6px;"><span class="travaux-eval-label-val" id="travaux-annot-label-etudiant" style="font-weight: 600;">--</span>';
+        html += '<button class="btn-profil-rapide" id="travaux-annot-btn-profil" data-action="ouvrirProfilDepuisAnnotation" title="Voir le profil de l\u2019\u00e9l\u00e8ve">\uD83D\uDC64</button></div>';
         html += '<span class="travaux-eval-label-val travaux-eval-label-production" id="travaux-annot-label-production">--</span>';
         html += '</div>';
         html += '</div>';
