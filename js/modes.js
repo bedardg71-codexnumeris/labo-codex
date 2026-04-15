@@ -84,6 +84,8 @@ function initialiserSystemeModes() {
         if (radioClair) radioClair.checked = true;
         if (radioSombre) radioSombre.checked = false;
     }
+    // Synchroniser le bouton thème de la nav
+    _syncBtnThemeNav();
 
 }
 
@@ -929,9 +931,9 @@ function definirTheme(clair) {
     if (radioSombre) radioSombre.checked = !clair;
     document.querySelectorAll('#checkbox-mode-clair, #checkbox-mode-clair-accueil')
         .forEach(function(cb) { cb.checked = !!clair; });
-    // Notifier les modules (graphiques, etc.)
+    // Notifier les modules (graphiques, annotations, etc.)
+    // Note : ne PAS dispatcher 'modeChanged' ici — réservé au changement Normal/Anonyme/Démo
     window.dispatchEvent(new CustomEvent('themeChanged', { detail: { clair: !!clair } }));
-    window.dispatchEvent(new Event('modeChanged'));
 }
 
 /**
@@ -939,6 +941,13 @@ function definirTheme(clair) {
  */
 function basculerTheme() {
     definirTheme(!estModeClair());
+    _syncBtnThemeNav();
+}
+
+/** Synchroniser le titre du bouton thème dans la nav principale */
+function _syncBtnThemeNav() {
+    var btn = document.getElementById('btn-toggle-theme-nav');
+    if (btn) btn.title = estModeClair() ? 'Passer en mode sombre' : 'Passer en mode clair';
 }
 
 /**

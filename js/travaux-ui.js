@@ -1085,6 +1085,25 @@
                             <button class="travaux-btn-nav" data-action="travauxVisionneuse.zoomPleineLargeur" title="Ajuster à la largeur">&#x2194;</button>
                             <button class="travaux-btn-nav" data-action="travauxVisionneuse.zoomPleineHauteur" title="Ajuster à la hauteur">&#x2195;</button>
                             <button id="travaux-btn-zoom100" class="travaux-btn-zoom" data-action="travauxVisionneuse.zoom100" title="Remettre à 100%">100%</button>
+                            <span class="travaux-separateur"></span>
+                            <div class="travaux-fond-picker" id="travaux-fond-picker">
+                                <button class="travaux-btn-nav" id="travaux-btn-fond" title="Couleur de fond du canvas">\uD83C\uDFA8</button>
+                                <div class="travaux-fond-dropdown" id="travaux-fond-dropdown">
+                                    <button class="travaux-fond-swatch" data-fond="" title="D\u00e9faut (suit le th\u00e8me)" style="background:var(--surface-conteneur, #142428); border:2px solid var(--accent-primaire)"></button>
+                                    <button class="travaux-fond-swatch" data-fond="#142428" title="Oc\u00e9an" style="background:#142428"></button>
+                                    <button class="travaux-fond-swatch" data-fond="#1a2744" title="Nuit" style="background:#1a2744"></button>
+                                    <button class="travaux-fond-swatch" data-fond="#2c3e50" title="Ardoise" style="background:#2c3e50"></button>
+                                    <button class="travaux-fond-swatch" data-fond="#4a6580" title="Acier" style="background:#4a6580"></button>
+                                    <button class="travaux-fond-swatch" data-fond="#3d3d3d" title="Graphite" style="background:#3d3d3d"></button>
+                                    <button class="travaux-fond-swatch" data-fond="#4a4a3e" title="S\u00e9pia" style="background:#4a4a3e"></button>
+                                    <button class="travaux-fond-swatch" data-fond="#6b7b6e" title="Lichen" style="background:#6b7b6e"></button>
+                                    <button class="travaux-fond-swatch" data-fond="#8a9aaa" title="Brume" style="background:#8a9aaa"></button>
+                                    <button class="travaux-fond-swatch" data-fond="#c5cdd5" title="Givre" style="background:#c5cdd5"></button>
+                                    <button class="travaux-fond-swatch" data-fond="#d4cfc4" title="Parchemin" style="background:#d4cfc4"></button>
+                                    <button class="travaux-fond-swatch" data-fond="#e8e4da" title="Cr\u00e8me" style="background:#e8e4da"></button>
+                                </div>
+                            </div>
+                            <button class="travaux-btn-nav" id="travaux-btn-plein-ecran" data-action="travauxUI.togglePleinEcran" title="Plein \u00e9cran">\u2922</button>
                         </div>
                     </div>
 
@@ -1108,6 +1127,9 @@
 
         // Menu déroulant Actions
         _configurerDropdownActions();
+
+        // Couleur de fond du canvas
+        initialiserFondCanvas();
 
         // Configurer la visionneuse
         const conteneurDoc = document.getElementById('travaux-conteneur-document');
@@ -6570,6 +6592,73 @@
     }
 
     /* ===============================
+       PLEIN ÉCRAN + COULEUR DE FOND CANVAS
+       =============================== */
+
+    var _pleinEcranActif = false;
+
+    function togglePleinEcran() {
+        var zone = document.getElementById('travaux-conteneur-document');
+        if (!zone) return;
+        _pleinEcranActif = !_pleinEcranActif;
+        zone.classList.toggle('travaux-plein-ecran', _pleinEcranActif);
+        document.body.classList.toggle('travaux-plein-ecran-actif', _pleinEcranActif);
+        var btn = document.getElementById('travaux-btn-plein-ecran');
+        if (btn) {
+            btn.textContent = _pleinEcranActif ? '\u2716' : '\u2922';
+            btn.title = _pleinEcranActif ? 'Quitter le plein \u00e9cran' : 'Plein \u00e9cran';
+        }
+    }
+
+    // Échap pour quitter le plein écran
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && _pleinEcranActif) {
+            togglePleinEcran();
+        }
+    });
+
+    function initialiserFondCanvas() {
+        var btnFond = document.getElementById('travaux-btn-fond');
+        var dropdown = document.getElementById('travaux-fond-dropdown');
+        if (!btnFond || !dropdown) return;
+
+        btnFond.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdown.classList.toggle('visible');
+        });
+
+        dropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var swatch = e.target.closest('[data-fond]');
+            if (!swatch) return;
+            var couleur = swatch.dataset.fond;
+            var conteneur = document.getElementById('travaux-canvas-container');
+            if (conteneur) {
+                if (couleur) {
+                    conteneur.style.background = couleur;
+                } else {
+                    // « Défaut » : remettre sur la variable CSS du thème
+                    conteneur.style.background = '';
+                }
+            }
+            db.setSync('travaux-fond-canvas', couleur);
+            dropdown.classList.remove('visible');
+        });
+
+        // Fermer le dropdown au clic ailleurs
+        document.addEventListener('click', function() {
+            dropdown.classList.remove('visible');
+        });
+
+        // Restaurer la couleur sauvegardée
+        var fondSauve = db.getSync('travaux-fond-canvas', null);
+        if (fondSauve) {
+            var conteneur = document.getElementById('travaux-canvas-container');
+            if (conteneur) conteneur.style.background = fondSauve;
+        }
+    }
+
+    /* ===============================
        EXPORTS GLOBAUX
        =============================== */
 
@@ -6706,7 +6795,10 @@
         annulerImport: annulerImport,
         allegerFichierActuel: allegerFichierActuel,
         reimporterFichierActuel: reimporterFichierActuel,
-        changerProductionFichierDepuisTableau: changerProductionFichierDepuisTableau
+        changerProductionFichierDepuisTableau: changerProductionFichierDepuisTableau,
+        // Plein écran + fond canvas
+        togglePleinEcran: togglePleinEcran,
+        initialiserFondCanvas: initialiserFondCanvas
     };
 
     // Alias pour navigation.js

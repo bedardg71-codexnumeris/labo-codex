@@ -16074,6 +16074,99 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     touch-action: pan-x pan-y;
 }
 
+/* Plein écran canvas */
+.travaux-plein-ecran {
+    position: fixed !important;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 9999;
+    background: var(--surface-conteneur, #142428);
+}
+.travaux-plein-ecran .annot-toolbar {
+    border-radius: 0;
+}
+body.travaux-plein-ecran-actif #header,
+body.travaux-plein-ecran-actif .navigation-sous-sections,
+body.travaux-plein-ecran-actif .sous-nav {
+    display: none !important;
+}
+
+/* Sélecteur fond carte mentale */
+.planif-fond-picker {
+    position: relative;
+    display: inline-block;
+}
+.planif-fond-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 6px;
+    z-index: 100;
+    padding: 6px;
+    background: var(--surface-carte, #1a3040);
+    border: 1px solid var(--bleu-carte, rgba(106,172,184,0.2));
+    border-radius: 8px;
+    box-shadow: var(--shadow-prononce);
+    gap: 4px;
+    flex-wrap: wrap;
+    width: 152px;
+}
+.planif-fond-dropdown.visible {
+    display: flex;
+}
+
+/* Plein écran carte mentale */
+.planif-plein-ecran {
+    position: fixed !important;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 9999;
+    background: var(--surface-page, #0c1a22);
+}
+body.planif-plein-ecran-actif #header,
+body.planif-plein-ecran-actif .navigation-sous-sections,
+body.planif-plein-ecran-actif .sous-nav,
+body.planif-plein-ecran-actif .bandeau-groupe-cours {
+    display: none !important;
+}
+
+/* Sélecteur de fond canvas */
+.travaux-fond-picker {
+    position: relative;
+    display: inline-block;
+}
+.travaux-fond-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 6px;
+    z-index: 100;
+    padding: 6px;
+    background: var(--surface-carte, #1a3040);
+    border: 1px solid var(--bleu-carte, rgba(106,172,184,0.2));
+    border-radius: 8px;
+    box-shadow: var(--shadow-prononce);
+    gap: 4px;
+    flex-wrap: wrap;
+    width: 152px;
+}
+.travaux-fond-dropdown.visible {
+    display: flex;
+}
+.travaux-fond-swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.1s;
+    padding: 0;
+}
+.travaux-fond-swatch:hover {
+    border-color: var(--accent-primaire);
+    transform: scale(1.15);
+}
+
 .travaux-canvas-wrapper {
     position: relative;
     display: inline-block;
