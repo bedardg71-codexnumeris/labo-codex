@@ -5382,6 +5382,24 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     color: rgba(255, 255, 255, 0.4);
 }
 
+/* Mode clair — overlay de progression */
+.mode-clair .progression-boite {
+    background: var(--surface-carte);
+    box-shadow: 0 8px 32px rgba(3, 46, 92, 0.2);
+}
+.mode-clair .progression-titre {
+    color: var(--texte-principal);
+}
+.mode-clair .progression-detail {
+    color: var(--texte-secondaire);
+}
+.mode-clair .progression-piste {
+    background: rgba(3, 46, 92, 0.1);
+}
+.mode-clair .progression-stats {
+    color: var(--texte-muted);
+}
+
 /* ===============================
    CODEX — Bouton en-tête + menu
    =============================== */

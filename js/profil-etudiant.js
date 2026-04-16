@@ -3757,6 +3757,14 @@ function genererSectionProductions(da) {
         return '<p class="u-text-center-gris">Étudiant non trouvé</p>';
     }
 
+    // Rang chronologique des productions (P1, P2...) basé sur la date d'échéance
+    var _rangsProductions = {};
+    var _toutesProds = productions.filter(function(p) { return p.type !== 'portfolio'; });
+    _toutesProds.sort(function(a, b) { return (a.dateEcheance || '9999').localeCompare(b.dateEcheance || '9999'); });
+    for (var ri = 0; ri < _toutesProds.length; ri++) {
+        _rangsProductions[_toutesProds[ri].id] = ri + 1;
+    }
+
     // Productions à évaluer (exclure portfolio lui-même), triées par date d'échéance
     const productionsAEvaluer = productions.filter(p => p.type !== 'portfolio')
         .sort((a, b) => (a.dateEcheance || '9999').localeCompare(b.dateEcheance || '9999'));
