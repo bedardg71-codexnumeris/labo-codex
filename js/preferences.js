@@ -1,11 +1,17 @@
 /**
  * preferences.js — API centralisée pour les préférences utilisateur
  *
- * Source de vérité unique pour toutes les préférences globales de l'application.
- * Remplace la fragmentation historique en trois objets :
- *   - modalitesEvaluation (RàI, SOLO, grille, découpler P/R, fenêtre patterns, pratique)
- *   - preferencesAffichage (patterns on/off, snapshots, graphiques, chrono, animations)
- *   - seuilsInterpretation (seuils fragile/acceptable/bon, progression, risque, défi)
+ * Source de vérité unique pour les préférences globales de l'application.
+ * Regroupe ce qui était dispersé dans trois emplacements :
+ *   - 5 champs de modalitesEvaluation (RàI, SOLO, grille, découpler P/R, fenêtre patterns)
+ *   - tout preferencesAffichage (patterns on/off, snapshots, graphiques, chrono, animations)
+ *   - tout seuilsInterpretation (seuils fragile/acceptable/bon, progression, risque, défi)
+ *
+ * IMPORTANT : `modalitesEvaluation` n'est PAS absorbée en totalité. Cet objet
+ * historique contient aussi la configuration de la pratique de notation active
+ * (pratique, specifications, parObjectifs, categories, etc.) et des paramètres
+ * d'horaire (dureePeriodeMinutes). Ces champs-là restent dans
+ * `modalitesEvaluation` — ce ne sont pas des préférences utilisateur.
  *
  * API publique :
  *   obtenirPreference(cle)              → valeur (ou défaut si non définie)
@@ -66,12 +72,7 @@
         animationPoints: true,
         chronoEvaluation: false,
         sisDefaut: 'lea',
-        modeExpert: false,
-
-        // --- Pratique de notation ---
-        pratique: 'alternative',
-        afficherSommatif: false,
-        afficherAlternatif: true
+        modeExpert: false
     };
 
     // Abonnés : { cle: [callback, callback, ...] }
@@ -193,15 +194,16 @@
      * Chaque entrée décrit où lire la valeur dans l'ancien système.
      */
     const MIGRATION_MAP = [
-        // Depuis modalitesEvaluation
+        // Depuis modalitesEvaluation — UNIQUEMENT les 5 champs qui sont des préférences
+        // utilisateur. Le reste (pratique, specifications, parObjectifs, categories,
+        // dureePeriodeMinutes, afficherSommatif, afficherAlternatif) reste dans
+        // modalitesEvaluation car ce sont des paramètres de la pratique active,
+        // pas des préférences utilisateur.
         { source: 'modalitesEvaluation', champ: 'afficherDescriptionsSOLO', cible: 'afficherDescriptionsSOLO' },
         { source: 'modalitesEvaluation', champ: 'activerRai',               cible: 'activerRai' },
         { source: 'modalitesEvaluation', champ: 'grilleReferenceDepistage', cible: 'grilleReferenceDepistage' },
         { source: 'modalitesEvaluation', champ: 'decouplerPR',              cible: 'decouplerPR' },
         { source: 'modalitesEvaluation', champ: 'fenetrePatterns',          cible: 'fenetrePatterns' },
-        { source: 'modalitesEvaluation', champ: 'pratique',                 cible: 'pratique' },
-        { source: 'modalitesEvaluation', champ: 'afficherSommatif',         cible: 'afficherSommatif' },
-        { source: 'modalitesEvaluation', champ: 'afficherAlternatif',       cible: 'afficherAlternatif' },
 
         // Depuis preferencesAffichage
         { source: 'preferencesAffichage', champ: 'depistageAcp',                cible: 'depistageAcp' },
