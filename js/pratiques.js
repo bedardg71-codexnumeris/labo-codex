@@ -179,16 +179,15 @@ function initialiserModulePratiques() {
     window.addEventListener('db-ready', function() {
         chargerGrillesDisponibles();
 
-        // Restaurer les valeurs sauvegardées après rechargement des grilles
-        const modalitesDB = db.getSync('modalitesEvaluation', {});
-
-        // Restaurer la grille de référence
+        // Restaurer la grille de référence (préférence utilisateur)
         const selectGrilleRef = document.getElementById('grilleReferenceDepistage');
-        if (selectGrilleRef && modalitesDB.grilleReferenceDepistage) {
-            selectGrilleRef.value = modalitesDB.grilleReferenceDepistage;
+        const grilleRefId = obtenirPreference('grilleReferenceDepistage');
+        if (selectGrilleRef && grilleRefId) {
+            selectGrilleRef.value = grilleRefId;
         }
 
-        // Restaurer la checkbox de catégorisation des erreurs
+        // Restaurer la checkbox de catégorisation des erreurs (config de pratique)
+        const modalitesDB = db.getSync('modalitesEvaluation', {});
         const checkCategorisation = document.getElementById('activerCategorisationErreurs');
         if (checkCategorisation) {
             checkCategorisation.checked = modalitesDB.activerCategorisationErreurs === true;
@@ -1157,10 +1156,10 @@ function sauvegarderPratiqueNotation() {
     modalites.typePAN = pratique === 'pan-standards' ? typePAN : null;
     modalites.dateConfiguration = new Date().toISOString();
 
-    // Sauvegarder la grille de référence pour le dépistage
+    // Sauvegarder la grille de référence pour le dépistage (préférence utilisateur)
     const selectGrilleRef = document.getElementById('grilleReferenceDepistage');
     if (selectGrilleRef) {
-        modalites.grilleReferenceDepistage = selectGrilleRef.value || null;
+        definirPreference('grilleReferenceDepistage', selectGrilleRef.value || '');
     }
 
     // ✅ CORRECTION (9 décembre 2025) : Toujours lire l'état de la checkbox modeComparatif
@@ -1189,23 +1188,13 @@ function sauvegarderPratiqueNotation() {
         }
     }
 
-    // Sauvegarder l'option d'affichage des descriptions SOLO
+    // Sauvegarder l'option d'affichage des descriptions SOLO (préférence utilisateur)
     const checkSOLO = document.getElementById('afficherDescriptionsSOLO');
-    if (checkSOLO) {
-        modalites.afficherDescriptionsSOLO = checkSOLO.checked;
-    } else {
-        // Par défaut activé si l'élément n'existe pas (rétrocompatibilité)
-        modalites.afficherDescriptionsSOLO = true;
-    }
+    definirPreference('afficherDescriptionsSOLO', checkSOLO ? checkSOLO.checked : true);
 
-    // Sauvegarder l'option d'activation du modèle RàI et détection des patterns
+    // Sauvegarder l'option d'activation du modèle RàI (préférence utilisateur)
     const checkRai = document.getElementById('activerRai');
-    if (checkRai) {
-        modalites.activerRai = checkRai.checked;
-    } else {
-        // Par défaut activé si l'élément n'existe pas (rétrocompatibilité)
-        modalites.activerRai = true;
-    }
+    definirPreference('activerRai', checkRai ? checkRai.checked : true);
 
     // Sauvegarder l'option d'activation de la catégorisation des erreurs de français
     const checkCategorisation = document.getElementById('activerCategorisationErreurs');
@@ -1319,18 +1308,16 @@ function chargerModalites() {
         checkComparatif.checked = modeComparatif;
     }
 
-    // Charger l'option d'affichage des descriptions SOLO
+    // Charger l'option d'affichage des descriptions SOLO (préférence utilisateur)
     const checkSOLO = document.getElementById('afficherDescriptionsSOLO');
     if (checkSOLO) {
-        // Par défaut activé si non défini (rétrocompatibilité)
-        checkSOLO.checked = modalites.afficherDescriptionsSOLO !== false;
+        checkSOLO.checked = obtenirPreference('afficherDescriptionsSOLO') !== false;
     }
 
-    // Charger l'option d'activation du modèle RàI et détection des patterns
+    // Charger l'option d'activation du modèle RàI (préférence utilisateur)
     const checkRai = document.getElementById('activerRai');
     if (checkRai) {
-        // Par défaut activé si non défini (rétrocompatibilité)
-        checkRai.checked = modalites.activerRai !== false;
+        checkRai.checked = obtenirPreference('activerRai') !== false;
     }
 
     // Charger l'option d'activation de la catégorisation des erreurs de français
@@ -1348,11 +1335,12 @@ function chargerModalites() {
         chargerConfigurationPAN(modalites.configPAN);
     }
 
-    // Charger les grilles disponibles et sélectionner la grille de référence
+    // Charger les grilles disponibles et sélectionner la grille de référence (préférence utilisateur)
     chargerGrillesDisponibles();
     const selectGrilleRef = document.getElementById('grilleReferenceDepistage');
-    if (selectGrilleRef && modalites.grilleReferenceDepistage) {
-        selectGrilleRef.value = modalites.grilleReferenceDepistage;
+    const grilleRefId = obtenirPreference('grilleReferenceDepistage');
+    if (selectGrilleRef && grilleRefId) {
+        selectGrilleRef.value = grilleRefId;
     }
 
     // Masquer la section configurationPAN au chargement

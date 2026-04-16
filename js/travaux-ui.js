@@ -76,8 +76,7 @@
     }
 
     function demarrerChrono() {
-        const prefs = db.getSync('preferencesAffichage', {});
-        if (!prefs.chronoEvaluation) return;
+        if (!obtenirPreference('chronoEvaluation')) return;
         // Si en pause → reprendre automatiquement
         if (_chronoPaused) {
             reprendreChrono();

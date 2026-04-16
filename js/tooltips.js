@@ -269,19 +269,20 @@ function definirTooltips(etat) {
     if (!actif) masquer();
     // Synchroniser tous les checkboxes miroirs (Preferences + Accueil)
     document.querySelectorAll('#checkbox-tooltips, #checkbox-tooltips-accueil').forEach(cb => cb.checked = actif);
-    // Persister dans preferencesAffichage
+    // Persister via l'API de préférences
     try {
-        const prefs = window.db ? window.db.getSync('preferencesAffichage', {}) : {};
-        prefs.tooltips = actif;
-        if (window.db) window.db.setSync('preferencesAffichage', prefs);
+        if (typeof definirPreference === 'function') {
+            definirPreference('tooltips', actif);
+        }
     } catch (e) { console.warn('[Tooltips] preference save skipped:', e.message || e); }
 }
 
 // Initialisation : lire la preference et synchroniser le checkbox
 function initialiserTooltips() {
     try {
-        const prefs = window.db ? window.db.getSync('preferencesAffichage', {}) : {};
-        actif = prefs.tooltips !== false; // actif par defaut
+        actif = typeof obtenirPreference === 'function'
+            ? obtenirPreference('tooltips') !== false
+            : true;
     } catch (e) {
         actif = true;
     }

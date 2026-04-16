@@ -2,16 +2,24 @@
  * preferences.js — API centralisée pour les préférences utilisateur
  *
  * Source de vérité unique pour les préférences globales de l'application.
- * Regroupe ce qui était dispersé dans trois emplacements :
+ * Regroupe ce qui était dispersé dans deux emplacements :
  *   - 5 champs de modalitesEvaluation (RàI, SOLO, grille, découpler P/R, fenêtre patterns)
- *   - tout preferencesAffichage (patterns on/off, snapshots, graphiques, chrono, animations)
- *   - tout seuilsInterpretation (seuils fragile/acceptable/bon, progression, risque, défi)
+ *   - tout preferencesAffichage (patterns on/off, snapshots, graphiques, chrono, animations,
+ *     tour guidé, aide contextuelle, mode clair, tooltips, mode expert, etc.)
  *
- * IMPORTANT : `modalitesEvaluation` n'est PAS absorbée en totalité. Cet objet
- * historique contient aussi la configuration de la pratique de notation active
- * (pratique, specifications, parObjectifs, categories, etc.) et des paramètres
- * d'horaire (dureePeriodeMinutes). Ces champs-là restent dans
- * `modalitesEvaluation` — ce ne sont pas des préférences utilisateur.
+ * IMPORTANT : deux objets historiques NE SONT PAS absorbés.
+ *
+ * 1. `modalitesEvaluation` contient aussi la configuration de la pratique de
+ *    notation active (pratique, specifications, parObjectifs, categories, etc.)
+ *    et des paramètres d'horaire (dureePeriodeMinutes). Ces champs restent
+ *    dans modalitesEvaluation — ce ne sont pas des préférences utilisateur.
+ *
+ * 2. `seuilsInterpretation` contient une structure mixte : quelques seuils
+ *    ajustables par l'utilisateur (fragile, acceptable, bon, progression,
+ *    risque, défi), mais aussi une hiérarchie de constantes (idme.*, risque.*,
+ *    interpretation.*, nombreProductionsAnalyse) lues en bloc par plusieurs
+ *    modules via chargerSeuilsInterpretation(). Le refondre proprement demande
+ *    un chantier dédié — laissé pour plus tard.
  *
  * API publique :
  *   obtenirPreference(cle)              → valeur (ou défaut si non définie)
@@ -51,16 +59,6 @@
         decouplerPR: false,
         fenetrePatterns: 3,
 
-        // --- Seuils de détection ---
-        seuilProgressionArtefacts: 0.10,
-        seuilDirectionRisque: 0.05,
-        seuilDefiSpecifique: 0.70,
-
-        // --- Seuils d'interprétation ---
-        seuilFragile: 0.70,
-        seuilAcceptable: 0.80,
-        seuilBon: 0.85,
-
         // --- Affichage ---
         depistageAcp: true,
         afficherSnapshots: true,
@@ -72,7 +70,11 @@
         animationPoints: true,
         chronoEvaluation: false,
         sisDefaut: 'lea',
-        modeExpert: false
+        modeExpert: false,
+        tourGuide: false,
+        aideContextuelle: true,
+        modeClair: false,
+        tooltips: true
     };
 
     // Abonnés : { cle: [callback, callback, ...] }
@@ -218,14 +220,13 @@
         { source: 'preferencesAffichage', champ: 'chronoEvaluation',            cible: 'chronoEvaluation' },
         { source: 'preferencesAffichage', champ: 'sisDefaut',                   cible: 'sisDefaut' },
         { source: 'preferencesAffichage', champ: 'modeExpert',                  cible: 'modeExpert' },
+        { source: 'preferencesAffichage', champ: 'tourGuide',                   cible: 'tourGuide' },
+        { source: 'preferencesAffichage', champ: 'aideContextuelle',            cible: 'aideContextuelle' },
+        { source: 'preferencesAffichage', champ: 'modeClair',                   cible: 'modeClair' },
+        { source: 'preferencesAffichage', champ: 'tooltips',                    cible: 'tooltips' }
 
-        // Depuis seuilsInterpretation (préfixe uniformisé)
-        { source: 'seuilsInterpretation', champ: 'fragile',              cible: 'seuilFragile' },
-        { source: 'seuilsInterpretation', champ: 'acceptable',           cible: 'seuilAcceptable' },
-        { source: 'seuilsInterpretation', champ: 'bon',                  cible: 'seuilBon' },
-        { source: 'seuilsInterpretation', champ: 'progressionArtefacts', cible: 'seuilProgressionArtefacts' },
-        { source: 'seuilsInterpretation', champ: 'directionRisque',      cible: 'seuilDirectionRisque' },
-        { source: 'seuilsInterpretation', champ: 'defiSpecifique',       cible: 'seuilDefiSpecifique' }
+        // seuilsInterpretation NON migré : structure mixte (plats + imbriqués)
+        // consommée en bloc par chargerSeuilsInterpretation(). Voir en-tête.
     ];
 
     /**

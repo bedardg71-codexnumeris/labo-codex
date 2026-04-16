@@ -831,9 +831,8 @@ function afficherListeEtudiantsConsultation() {
         calculerEtStockerIndicesCP();
     }
 
-    // Vérifier si le modèle RàI est activé
-    const config = db.getSync('modalitesEvaluation', {});
-    const activerRai = config.activerRai !== false; // Par défaut true (rétrocompatibilité)
+    // Vérifier si le modèle RàI est activé (préférence utilisateur)
+    const activerRai = obtenirPreference('activerRai') !== false;
 
     // Afficher/masquer les colonnes Pattern et RàI dans les headers
     masquerColonnesRaiSiDesactive(activerRai);
