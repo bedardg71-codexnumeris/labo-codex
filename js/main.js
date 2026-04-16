@@ -413,7 +413,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Chantier 3 : Section par défaut selon contexte
-    const _modeExpert = db.getSync('preferencesAffichage', {}).modeExpert || false;
+    const _modeExpert = !!obtenirPreference('modeExpert');
     const _demoActif = db.getSync('demo-actif', null) === 'true';
     if (_demoActif) {
         afficherSection('apercu');

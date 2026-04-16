@@ -32,10 +32,9 @@ function afficherAccueilContenu(conteneur) {
     const demoChecked = enDemo || !aDesCoursReels;
 
     // Section toggle tooltips (miroir de Reglages > Preferences > Navigation)
-    const prefsAff = db.getSync('preferencesAffichage', {});
-    const tooltipsActifs = prefsAff.tooltips !== false;
-    const tourGuideActif = !!prefsAff.tourGuide;
-    const aideContextuelleActive = prefsAff.aideContextuelle !== false;
+    const tooltipsActifs = obtenirPreference('tooltips') !== false;
+    const tourGuideActif = !!obtenirPreference('tourGuide');
+    const aideContextuelleActive = obtenirPreference('aideContextuelle') !== false;
 
     const decouvrirHTML = `
         <div class="carte accordeon" id="accueil-decouvrir">
@@ -218,9 +217,7 @@ function afficherAccueilContenu(conteneur) {
  * Active ou désactive le mode expert (ouvrir direct sur tableau de bord)
  */
 function definirModeExpert(actif) {
-    const prefs = db.getSync('preferencesAffichage', {});
-    prefs.modeExpert = !!actif;
-    db.setSync('preferencesAffichage', prefs);
+    definirPreference('modeExpert', !!actif);
 }
 
 /**
@@ -231,8 +228,7 @@ function initialiserAccueil() {
     // Charger l'état du checkbox mode expert si la section réglages est présente
     const checkbox = document.getElementById('checkbox-mode-expert');
     if (checkbox) {
-        const prefs = db.getSync('preferencesAffichage', {});
-        checkbox.checked = !!prefs.modeExpert;
+        checkbox.checked = !!obtenirPreference('modeExpert');
     }
 }
 

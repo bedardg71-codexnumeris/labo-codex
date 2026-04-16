@@ -220,9 +220,8 @@ function obtenirPratiqueActuelle() {
  * @returns {Object|null} - Grille complète avec {id, nom, criteres[], ...} ou null si non configurée
  */
 function obtenirGrilleReferenceDepistage() {
-    // Lire la configuration
-    const modalites = db.getSync('modalitesEvaluation', {});
-    const grilleId = modalites.grilleReferenceDepistage;
+    // Lire la préférence utilisateur
+    const grilleId = obtenirPreference('grilleReferenceDepistage');
 
     if (!grilleId) {
         console.warn('⚠️ Aucune grille de référence configurée pour le dépistage');
@@ -1768,8 +1767,7 @@ function genererSectionAccompagnement(da) {
 
         <!-- 🆕 NOUVEAU : Trois cartes côte à côte (RàI pédagogique + Contexte + Observation SOLO) -->
         <div class="${(() => {
-            const config = db.getSync('modalitesEvaluation', {});
-            const afficherSOLO = config.afficherDescriptionsSOLO !== false;
+            const afficherSOLO = obtenirPreference('afficherDescriptionsSOLO') !== false;
             return afficherSOLO ? 'profil-grid-3col' : 'profil-grid-2col';
         })()}">
             <!-- Carte 1 : Modèle de la Réponse à l'intervention (RàI) -->
@@ -1883,8 +1881,7 @@ function genererSectionAccompagnement(da) {
 
             <!-- Carte 3 : Observation de la structure des résultats d'apprentissage (SOLO) - Optionnelle -->
             ${(() => {
-                const config = db.getSync('modalitesEvaluation', {});
-                const afficherSOLO = config.afficherDescriptionsSOLO !== false;
+                const afficherSOLO = obtenirPreference('afficherDescriptionsSOLO') !== false;
 
                 if (!afficherSOLO) {
                     return ''; // Ne rien afficher si désactivé
@@ -3436,8 +3433,8 @@ function afficherProfilComplet(daOuEl) {
     const afficherPan = affichage.afficherAlternatif === true;
     const modeComparatif = afficherSom && afficherPan;
 
-    // Vérifier si le modèle RàI est activé
-    const activerRai = config.activerRai !== false; // Par défaut true (rétrocompatibilité)
+    // Vérifier si le modèle RàI est activé (préférence utilisateur)
+    const activerRai = obtenirPreference('activerRai') !== false;
 
     // ✅ OPTIMISATION (7 déc 2025): Calculer uniquement la pratique active sauf en mode comparatif
     let indicesSOM, indicesPAN;
@@ -4259,11 +4256,7 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
  */
 function genererBandeauContexteProfil() {
     // Vérifier la préférence
-    let afficher = true;
-    try {
-        const prefs = db.getSync('preferencesAffichage') || {};
-        afficher = prefs.afficherContexteGraphiques !== false;
-    } catch (e) { console.warn('[Profil] preferencesAffichage read fallback (default: true):', e.message || e); }
+    const afficher = obtenirPreference('afficherContexteGraphiques') !== false;
     if (!afficher) return '';
 
     // Trimestre

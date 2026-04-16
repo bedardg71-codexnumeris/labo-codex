@@ -811,7 +811,7 @@
             { cle: 'modalitesEvaluation', label: 'Modalités d\'évaluation', ns: true },
             { cle: 'trimestreActif', label: 'Trimestre actif', ns: false },
             { cle: 'modeApplication', label: 'Mode de l\'application', ns: false },
-            { cle: 'preferencesAffichage', label: 'Préférences d\'affichage', ns: false },
+            { cle: 'preferencesUtilisateur', label: 'Préférences utilisateur', ns: false },
             { cle: 'seuilsInterpretation', label: 'Seuils d\'interprétation', ns: true },
             { cle: 'errfrModeSynthese', label: 'Mode synthèse erreurs FR', ns: false },
             { cle: 'pratiqueParDefaut', label: 'Pratique par défaut', ns: true },

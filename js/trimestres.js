@@ -1185,8 +1185,8 @@
                 }
             }
 
-            // 5. Obtenir la grille de référence pour SOLO
-            const grilleRefId = modalites.grilleReferenceDepistage;
+            // 5. Obtenir la grille de référence pour SOLO (préférence utilisateur)
+            const grilleRefId = obtenirPreference('grilleReferenceDepistage');
             const grilleRef = grilles.find(g => g.id === grilleRefId) || grilles[0];
 
             // 6. Construire le JSON selon les spécifications

@@ -468,11 +468,7 @@ function mettreAJourContextesSections(nbEtudiants) {
     ];
 
     // Vérifier la préférence d'affichage
-    let afficherContexte = true;
-    try {
-        const prefs = db.getSync('preferencesAffichage') || {};
-        afficherContexte = prefs.afficherContexteGraphiques !== false;
-    } catch (e) { console.warn('[TDB-Apercu] preferencesAffichage read fallback (default: true):', e.message || e); }
+    const afficherContexte = obtenirPreference('afficherContexteGraphiques') !== false;
 
     idsContexte.forEach(id => {
         const elem = document.getElementById(id);
@@ -1048,8 +1044,7 @@ function chargerTableauBordApercu() {
     }
 
     // 🆕 BETA 91: Calculer et stocker les patterns + RàI pour tout le groupe (si RàI activé)
-    const config = db.getSync('modalitesEvaluation', {});
-    const raiActive = config.activerRai !== false; // Par défaut true
+    const raiActive = obtenirPreference('activerRai') !== false;
 
     if (raiActive && typeof calculerEtStockerPatternsGroupe === 'function') {
         calculerEtStockerPatternsGroupe();
@@ -1111,8 +1106,7 @@ function chargerTableauBordApercu() {
         afficherAlertesPrioritairesCompteurs(etudiantsAvecIndices);
 
         // Afficher RàI et Patterns uniquement si activé dans les réglages
-        const config = db.getSync('modalitesEvaluation', {});
-        const activerRai = config.activerRai !== false; // Par défaut true (rétrocompatibilité)
+        const activerRai = obtenirPreference('activerRai') !== false;
 
         if (activerRai) {
             afficherPatternsApprentissage(etudiantsAvecIndices);
@@ -1752,9 +1746,8 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
     // PRIORITÉ 1: Distribution P ou diagnostic note de passage
     if (type === 'P' && (etudiantsSOM.length > 0 || etudiantsPAN.length > 0)) {
         const etudiants = afficherPan ? etudiantsPAN : etudiantsSOM;
-        const config = db.getSync('modalitesEvaluation', {});
-        const soloActive = config.afficherDescriptionsSOLO !== false; // Par défaut true
-        const raiActive = config.activerRai !== false; // Par défaut true
+        const soloActive = obtenirPreference('afficherDescriptionsSOLO') !== false;
+        const raiActive = obtenirPreference('activerRai') !== false;
 
 
         if (soloActive) {
