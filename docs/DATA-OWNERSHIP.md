@@ -71,7 +71,7 @@
 | Cle | NS/G | Proprietaire | Lecteurs principaux | Notes |
 |-----|------|-------------|---------------------|-------|
 | `profilEnseignant` | G | `cc-license.js` | export-pdf, bibliotheques | Auteur pour metadonnees CC |
-| `preferencesAffichage` | G | `preferences-v2.js` | tous les modules UI | |
+| `preferencesUtilisateur` | G | `preferences.js` | tous les modules UI (via `obtenirPreference`/`definirPreference`) | Source unique pour 23 preferences (anciens `preferencesAffichage` + 5 champs de `modalitesEvaluation`). Migration V3 + nettoyage legacy automatiques. |
 | `modeApplication` | G | `modes.js` | tous les modules (via obtenirDonneesSelonMode) | `'normal'` ou `'anonymisation'` |
 | `cours` | G | `cours.js` | large usage (lookup cours) | Cle legacy `listeCours` = fallback |
 | `enseignants` | G | `enseignants.js` | export-pdf, primo-questions | |
