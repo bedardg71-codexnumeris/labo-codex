@@ -232,8 +232,11 @@
     /**
      * Migre les 3 anciens objets vers `preferencesUtilisateur`.
      * Idempotente : protégée par le flag `migrationPrefs_v3_done`.
-     * Ne supprime PAS les anciens objets (suppression différée au commit 1.5,
-     * une fois que toutes les lectures/écritures passent par l'API).
+     *
+     * Nettoie aussi les emplacements legacy (5 champs dans modalitesEvaluation,
+     * clé preferencesAffichage entière) une fois la migration confirmée. Le
+     * nettoyage s'exécute à chaque démarrage — idempotent et robuste face aux
+     * réintroductions par import ou sortie de démo.
      *
      * @returns {Object} Rapport de migration { effectuee, champsMigres, erreurs }
      */
@@ -241,44 +244,86 @@
         const rapport = { effectuee: false, champsMigres: 0, erreurs: [] };
 
         try {
-            if (db.getSync(CLE_FLAG_MIGRATION, false) === true) {
-                return rapport;
+            if (db.getSync(CLE_FLAG_MIGRATION, false) !== true) {
+                // Lire les 3 anciennes sources
+                const sources = {
+                    modalitesEvaluation: safeGet('modalitesEvaluation'),
+                    preferencesAffichage: safeGet('preferencesAffichage'),
+                    seuilsInterpretation: safeGet('seuilsInterpretation')
+                };
+
+                // Partir de l'objet existant (peut être vide ou partiel)
+                const prefs = lireStockage();
+
+                for (const entree of MIGRATION_MAP) {
+                    const source = sources[entree.source];
+                    if (!source || !(entree.champ in source)) continue;
+
+                    const valeur = source[entree.champ];
+                    // Ne pas écraser une valeur déjà migrée (migration idempotente par design,
+                    // mais aussi : si l'utilisateur a modifié après une migration partielle)
+                    if (entree.cible in prefs) continue;
+
+                    prefs[entree.cible] = valeur;
+                    rapport.champsMigres++;
+                }
+
+                ecrireStockage(prefs);
+                db.setSync(CLE_FLAG_MIGRATION, true);
+                rapport.effectuee = true;
+
+                console.warn('[preferences] Migration V3 effectuée. Champs migrés :', rapport.champsMigres);
             }
 
-            // Lire les 3 anciennes sources
-            const sources = {
-                modalitesEvaluation: safeGet('modalitesEvaluation'),
-                preferencesAffichage: safeGet('preferencesAffichage'),
-                seuilsInterpretation: safeGet('seuilsInterpretation')
-            };
-
-            // Partir de l'objet existant (peut être vide ou partiel)
-            const prefs = lireStockage();
-
-            for (const entree of MIGRATION_MAP) {
-                const source = sources[entree.source];
-                if (!source || !(entree.champ in source)) continue;
-
-                const valeur = source[entree.champ];
-                // Ne pas écraser une valeur déjà migrée (migration idempotente par design,
-                // mais aussi : si l'utilisateur a modifié après une migration partielle)
-                if (entree.cible in prefs) continue;
-
-                prefs[entree.cible] = valeur;
-                rapport.champsMigres++;
-            }
-
-            ecrireStockage(prefs);
-            db.setSync(CLE_FLAG_MIGRATION, true);
-            rapport.effectuee = true;
-
-            console.warn('[preferences] Migration V3 effectuée. Champs migrés :', rapport.champsMigres);
+            // Nettoyage des emplacements legacy — ne s'exécute qu'après migration confirmée
+            // (les anciennes sources ne sont plus nécessaires). Idempotent.
+            nettoyerLegacy();
         } catch (e) {
             rapport.erreurs.push(e.message);
             console.error('[preferences] Erreur pendant la migration V3 :', e);
         }
 
         return rapport;
+    }
+
+    /**
+     * Supprime les emplacements legacy que la migration a absorbés :
+     *   - les 5 champs de modalitesEvaluation qui sont devenus des préférences ;
+     *   - la clé preferencesAffichage dans son ensemble.
+     * Idempotent : aucune écriture si rien à nettoyer, pas d'effet si la clé
+     * n'existe pas. Appelée à chaque démarrage (après garantie que la migration
+     * a eu lieu) pour résister aux réintroductions (import de données anciennes,
+     * restauration post-démo).
+     */
+    function nettoyerLegacy() {
+        const CHAMPS_LEGACY_MODALITES = [
+            'afficherDescriptionsSOLO',
+            'activerRai',
+            'grilleReferenceDepistage',
+            'decouplerPR',
+            'fenetrePatterns'
+        ];
+
+        try {
+            const modalites = db.getSync('modalitesEvaluation', null);
+            if (modalites && typeof modalites === 'object') {
+                let modifie = false;
+                for (const champ of CHAMPS_LEGACY_MODALITES) {
+                    if (champ in modalites) {
+                        delete modalites[champ];
+                        modifie = true;
+                    }
+                }
+                if (modifie) {
+                    db.setSync('modalitesEvaluation', modalites);
+                }
+            }
+
+            // Suppression de la clé entière (no-op si déjà absente)
+            db.removeSync('preferencesAffichage');
+        } catch (e) {
+            console.error('[preferences] Erreur pendant le nettoyage legacy :', e);
+        }
     }
 
     function safeGet(cle) {
