@@ -833,6 +833,8 @@ function afficherListeEtudiantsConsultation() {
 
     // Vérifier si le modèle RàI est activé (préférence utilisateur)
     const activerRai = obtenirPreference('activerRai') !== false;
+    // Config de pratique (utilisée plus bas pour affichageTableauBord)
+    const config = db.getSync('modalitesEvaluation', {});
 
     // Afficher/masquer les colonnes Pattern et RàI dans les headers
     masquerColonnesRaiSiDesactive(activerRai);
