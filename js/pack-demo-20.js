@@ -14257,7 +14257,6 @@ const PACK_DEMARRAGE = {
       "_migrationDate": "2026-01-22T12:18:43.928Z"
     },
     "pratique": "pan-standards",
-    "activerRai": true,
     "affichageTableauBord": {
       "afficherSommatif": false,
       "afficherAlternatif": true
@@ -14266,10 +14265,6 @@ const PACK_DEMARRAGE = {
     "approcheEvaluation": "par-artefacts",
     "afficherSommatif": false,
     "afficherAlternatif": true,
-    "afficherDescriptionsSOLO": true,
-    "grilleReferenceDepistage": "",
-    "decouplerPR": false,
-    "fenetrePatterns": 3,
     "dureePeriodeMinutes": 50
   },
   "presences": {
