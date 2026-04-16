@@ -311,4 +311,22 @@
     window.obtenirDefautsPreferences = obtenirDefauts;
     window.listerClesPreferencesConnues = listerClesConnues;
 
+    // =========================================================================
+    // AUTO-INITIALISATION : migration au démarrage
+    // =========================================================================
+
+    function lancerMigrationAuDemarrage() {
+        if (typeof db !== 'undefined' && db.isReady) {
+            migrerPreferencesV3();
+        } else {
+            document.addEventListener('db-ready', migrerPreferencesV3);
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', lancerMigrationAuDemarrage);
+    } else {
+        lancerMigrationAuDemarrage();
+    }
+
 })();
