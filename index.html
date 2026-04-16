@@ -10458,17 +10458,6 @@
                             </small>
                         </div>
 
-                        <!-- Système RàI -->
-                        <div class="form-group u-mb-15 u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
-                            <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-outils-rai">
-                                <input type="checkbox" id="v2-pref-rai" checked data-on-change="sauvegarderPreferencesV2">
-                                <strong style="margin-left: 8px;">Système RàI (Réponse à l'Intervention)</strong>
-                            </label>
-                            <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
-                                Niveaux d'intervention et recommandations personnalisées
-                            </small>
-                        </div>
-
                         <!-- Chrono évaluation -->
                         <div class="form-group u-mb-15 u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
                             <label class="u-align-center" style="cursor: pointer; display: flex">
@@ -10487,17 +10476,6 @@
                         <p class="text-muted u-mb-15 u-texte-09">
                             Choisis ce que tu veux voir dans l'interface.
                         </p>
-
-                        <!-- Analyse SOLO -->
-                        <div class="form-group u-mb-15">
-                            <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-affichage-solo">
-                                <input type="checkbox" id="v2-pref-solo" checked data-on-change="sauvegarderPreferencesV2">
-                                <strong style="margin-left: 8px;">Observation de la structure des résultats (SOLO)</strong>
-                            </label>
-                            <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
-                                Affiche une carte supplémentaire avec les descriptions détaillées basées sur la taxonomie SOLO
-                            </small>
-                        </div>
 
                         <!-- Snapshots -->
                         <div class="form-group u-mb-15">
@@ -10630,29 +10608,48 @@
                     </div>
                 </div>
 
-                <!-- Onglet 3: Dépistage -->
+                <!-- Onglet 3: Observation et dépistage -->
                 <div id="reglages-depistage" class="sous-section">
-                    <h2>Dépistage</h2>
+                    <h2>Observation et dépistage</h2>
                     <p class="text-muted">
-                        Configuration du dépistage des patterns d'apprentissage et seuils d'interprétation des indices.
+                        Outils d'observation des apprentissages et configuration du dépistage des patterns et des niveaux d'intervention.
                     </p>
 
-                    <!-- Carte : Configuration du dépistage -->
+                    <!-- Carte : Outils d'observation -->
                     <div class="carte">
-                        <h3 class="carte-titre-bleu">Configuration du dépistage</h3>
+                        <h3 class="carte-titre-bleu">Outils d'observation</h3>
                         <p class="text-muted u-mb-15 u-texte-09">
-                            Paramètres utilisés pour la détection des patterns et l'identification des forces/défis.
-                            La détection des patterns nécessite d'utiliser <strong>la même grille et la même échelle</strong> pour tous les artefacts évalués durant le trimestre.
+                            Active ou désactive les outils d'observation des productions et des apprentissages.
                         </p>
 
-                        <!-- Détection des patterns -->
-                        <div class="form-group u-mb-20">
-                            <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="depist-activer-patterns">
-                                <input type="checkbox" id="v2-pref-patterns" checked data-on-change="sauvegarderPreferencesV2">
-                                <span class="u-texte-gras" style="margin-left: 8px">Activer la détection des patterns</span>
+                        <!-- Taxonomie SOLO -->
+                        <div class="form-group u-mb-15 u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
+                            <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-affichage-solo">
+                                <input type="checkbox" id="v2-pref-solo" checked data-on-change="sauvegarderPreferencesV2">
+                                <strong style="margin-left: 8px;">Taxonomie SOLO</strong>
                             </label>
                             <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
-                                Identification des tendances récurrentes (progression, stagnation, régression)
+                                Affiche les descriptions détaillées des niveaux SOLO (unistructurel, multistructurel, relationnel, abstrait étendu) dans l'Accompagnement.
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Carte : Dépistage (RàI) -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Dépistage (RàI)</h3>
+                        <p class="text-muted u-mb-15 u-texte-09">
+                            Paramètres pour le suivi des fondamentaux et les niveaux d'intervention.
+                            Le dépistage nécessite d'utiliser <strong>la même grille et la même échelle</strong> pour tous les artefacts évalués durant le trimestre.
+                        </p>
+
+                        <!-- Système RàI (suivi des fondamentaux + niveaux d'intervention) -->
+                        <div class="form-group u-mb-20 u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
+                            <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-outils-rai">
+                                <input type="checkbox" id="v2-pref-rai" checked data-on-change="sauvegarderPreferencesV2">
+                                <span class="u-texte-gras" style="margin-left: 8px">Activer le système RàI</span>
+                            </label>
+                            <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px; line-height: 1.5">
+                                Active les deux barres de dépistage dans la sous-section Intervenir : <strong>Suivi des fondamentaux</strong> (progression stable, défi spécifique, difficulté émergente, difficulté persistante) et <strong>Niveaux d'intervention</strong> (universel, préventif, intensif).
                             </small>
                         </div>
 
