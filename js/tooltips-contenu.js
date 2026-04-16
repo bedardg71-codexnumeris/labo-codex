@@ -189,9 +189,6 @@ const TOOLTIPS = {
 
     // --- Configuration du depistage ---
 
-    'depist-activer-patterns':
-        'Activer ou d\u00e9sactiver l\u2019identification des tendances r\u00e9currentes (progression, stagnation, r\u00e9gression) dans les r\u00e9sultats.',
-
     'depist-grille':
         'Grille utilis\u00e9e pour identifier les forces et d\u00e9fis. Doit \u00eatre la m\u00eame pour tous les artefacts du trimestre.',
 

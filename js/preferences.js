@@ -54,7 +54,6 @@
 
         // --- Dépistage (RàI) ---
         activerRai: true,
-        activerPatterns: true,
         grilleReferenceDepistage: '',
         decouplerPR: false,
         fenetrePatterns: 3,
@@ -209,7 +208,6 @@
 
         // Depuis preferencesAffichage
         { source: 'preferencesAffichage', champ: 'depistageAcp',                cible: 'depistageAcp' },
-        { source: 'preferencesAffichage', champ: 'patterns',                    cible: 'activerPatterns' },
         { source: 'preferencesAffichage', champ: 'afficherSnapshots',           cible: 'afficherSnapshots' },
         { source: 'preferencesAffichage', champ: 'afficherGraphiques',          cible: 'afficherGraphiques' },
         { source: 'preferencesAffichage', champ: 'afficherSeuilsVisuels',       cible: 'afficherSeuilsVisuels' },

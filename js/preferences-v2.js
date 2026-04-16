@@ -79,11 +79,6 @@
             depistageAcp.checked = obtenirPreference('depistageAcp') !== false;
         }
 
-        const patterns = document.getElementById('v2-pref-patterns');
-        if (patterns) {
-            patterns.checked = obtenirPreference('activerPatterns') !== false;
-        }
-
         const rai = document.getElementById('v2-pref-rai');
         if (rai) {
             rai.checked = obtenirPreference('activerRai') !== false;
@@ -248,7 +243,6 @@
         definirPreference('fenetrePatterns', parseInt(document.getElementById('v2-pref-fenetre-patterns')?.value) || 3);
 
         definirPreference('depistageAcp', document.getElementById('v2-pref-depistage-acp')?.checked !== false);
-        definirPreference('activerPatterns', document.getElementById('v2-pref-patterns')?.checked !== false);
         definirPreference('afficherSnapshots', document.getElementById('v2-pref-snapshots')?.checked !== false);
         definirPreference('afficherGraphiques', document.getElementById('v2-pref-graphiques')?.checked !== false);
         definirPreference('afficherSeuilsVisuels', document.getElementById('v2-pref-seuils-visuels')?.checked !== false);
