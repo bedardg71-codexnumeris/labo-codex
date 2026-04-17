@@ -148,7 +148,7 @@ const TOOLTIPS = {
         'Outils qui s\u2019activent pendant l\u2019\u00e9valuation d\u2019une production.',
 
     'pref-outils-acp':
-        'Indices pr\u00e9dictifs Assiduit\u00e9, Compl\u00e9tion et Performance. Affich\u00e9s dans la section \u00ab Engagement \u00bb du profil individuel.',
+        'Indices pr\u00e9dictifs Assiduit\u00e9, Compl\u00e9tion et Performance. Affich\u00e9s dans la section \u00ab Engagement ACP \u00bb du profil individuel.',
 
     'pref-outils-rai':
         'Niveaux d\u2019intervention et recommandations personnalis\u00e9es. Structure le soutien aux \u00e9tudiants en trois niveaux d\u2019intensit\u00e9 (universel, cibl\u00e9, intensif).',
@@ -163,7 +163,10 @@ const TOOLTIPS = {
         'Active l\u2019observation des gestes cognitifs Rep\u00e9rage, Liaison et Ouverture via des tampons pos\u00e9s sur les productions. Alimente le profil RLO agr\u00e9g\u00e9 par \u00e9valuation et l\u2019export de recherche anonymis\u00e9.',
 
     'pref-affichage-graphiques':
-        'Graphiques Chart.js de progression dans le temps. Affich\u00e9s dans la section \u00ab Progression temporelle \u00bb du profil individuel.',
+        'Graphiques Chart.js de progression dans le temps. Affich\u00e9s dans la section \u00ab Progression temporelle ACP \u00bb du profil individuel.',
+
+    'pref-affichage-developpement':
+        'Tableau de progression des crit\u00e8res et graphiques Chart.js 0-100 %. Affich\u00e9 dans la section \u00ab D\u00e9veloppement des habilet\u00e9s \u00bb du profil individuel.',
 
     'pref-affichage-assiduite':
         'Choisir comment afficher les totaux de pr\u00e9sence et d\u2019assiduit\u00e9 (ex. : en p\u00e9riodes).',
@@ -215,7 +218,7 @@ const TOOLTIPS = {
         'Seuils de couleur pour les indices A-C-P. Fragile (rouge), Acceptable (jaune), Bon (vert). D\u00e9termine les alertes du tableau de bord.',
 
     'depist-seuils-visuels':
-        'Lignes pointill\u00e9es et \u00e9tiquettes de zones (Insuffisant / D\u00e9veloppement / Ma\u00eetrise / Excellent) sur les graphiques Chart.js de la section \u00ab Progression temporelle \u00bb du profil individuel.',
+        'Lignes pointill\u00e9es et \u00e9tiquettes de zones (Insuffisant / D\u00e9veloppement / Ma\u00eetrise / Excellent) sur les graphiques Chart.js de la section \u00ab Progression temporelle ACP \u00bb du profil individuel.',
 
     'depist-seuil-fragile':
         'Indice sous lequel la situation est consid\u00e9r\u00e9e pr\u00e9occupante (rouge). N\u00e9cessite une intervention.',

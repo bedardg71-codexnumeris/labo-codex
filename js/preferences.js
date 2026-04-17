@@ -62,6 +62,7 @@
         depistageAcp: true,
         afficherGraphiques: true,
         afficherSeuilsVisuels: true,
+        afficherDeveloppementHabiletes: true,
         afficherContexteGraphiques: true,
         uniteAffichageAssiduite: 'periodes',
         animationPoints: true,

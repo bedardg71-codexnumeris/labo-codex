@@ -112,6 +112,11 @@
             seuilsVisuels.checked = obtenirPreference('afficherSeuilsVisuels') !== false;
         }
 
+        const developpementHabiletes = document.getElementById('v2-pref-developpement-habiletes');
+        if (developpementHabiletes) {
+            developpementHabiletes.checked = obtenirPreference('afficherDeveloppementHabiletes') !== false;
+        }
+
         // 🆕 BETA 96.1 : Animation des points du tableau de bord
         const animationPoints = document.getElementById('v2-pref-animation-points');
         const animationActive = obtenirPreference('animationPoints') !== false;
@@ -241,6 +246,7 @@
         definirPreference('depistageAcp', document.getElementById('v2-pref-depistage-acp')?.checked !== false);
         definirPreference('afficherGraphiques', document.getElementById('v2-pref-graphiques')?.checked !== false);
         definirPreference('afficherSeuilsVisuels', document.getElementById('v2-pref-seuils-visuels')?.checked !== false);
+        definirPreference('afficherDeveloppementHabiletes', document.getElementById('v2-pref-developpement-habiletes')?.checked !== false);
         definirPreference('uniteAffichageAssiduite', document.getElementById('v2-pref-unite-affichage')?.value || 'periodes');
 
         const animationActive = document.getElementById('v2-pref-animation-points')?.checked !== false;
