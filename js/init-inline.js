@@ -536,7 +536,7 @@ var SYNONYMES_AIDE = [
     ['performance', 'indice p', 'note', 'artefact', 'portfolio', 'meilleurs artefacts'],
     ['assiduité', 'indice a', 'présence', 'absence', 'taux de présence'],
     ['complétion', 'indice c', 'remise', 'taux de remise'],
-    ['engagement', 'indice e', 'mobilisation', 'cube root'],
+    ['mobilisation', 'assiduité et complétion'],
     ['idme', 'insuffisant', 'en développement', 'maîtrise', 'étendu', 'échelle de performance'],
     ['srpnf', 'structure', 'rigueur', 'plausibilité', 'nuance', 'français écrit', 'critères'],
     ['cartouche', 'rétroaction', 'commentaire', 'feedback'],

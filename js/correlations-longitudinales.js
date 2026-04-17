@@ -86,8 +86,8 @@ function calculerCorrelationsLongitudinales() {
         semaines: [],
         labels: [],
         dates: [],
-        correlations: { AP: [], CP: [], EP: [] },
-        moyennes: { A: [], C: [], P: [], E: [] },
+        correlations: { AP: [], CP: [] },
+        moyennes: { A: [], C: [], P: [] },
         interventionsCourbes: [],  // [{titre, etudiants:[], moyP:[], indexDebut}] + contrôle
         n: [],
         evenementsInterventions: []
@@ -105,7 +105,7 @@ function calculerCorrelationsLongitudinales() {
         resultat.dates.push(dateRef);
 
         // Extraire valeurs A, C, P pour étudiants valides
-        var valeursA = [], valeursC = [], valeursP = [], valeursE = [], valeursInterv = [];
+        var valeursA = [], valeursC = [], valeursP = [], valeursInterv = [];
         var dasValides = [];
 
         for (var e = 0; e < etudiants.length; e++) {
@@ -116,10 +116,6 @@ function calculerCorrelationsLongitudinales() {
             valeursA.push(etu.A);
             valeursC.push(etu.C);
             valeursP.push(etu.P);
-
-            // E = (A/100 × C/100 × P/100)^(1/3) × 100
-            var engagement = Math.pow((etu.A / 100) * (etu.C / 100) * (etu.P / 100), 1 / 3) * 100;
-            valeursE.push(engagement);
 
             // Interventions cumulatives pour cet étudiant jusqu'à cette date
             var nbInterv = 0;
@@ -141,34 +137,26 @@ function calculerCorrelationsLongitudinales() {
             resultat.moyennes.A.push(snapshot.groupe.moyenneA);
             resultat.moyennes.C.push(snapshot.groupe.moyenneC);
             resultat.moyennes.P.push(snapshot.groupe.moyenneP);
-            // E moyen = moyenne géométrique des moyennes individuelles
-            var sommeE = 0;
-            for (var ei = 0; ei < valeursE.length; ei++) sommeE += valeursE[ei];
-            resultat.moyennes.E.push(n > 0 ? Math.round(sommeE / n * 10) / 10 : null);
         } else if (n > 0) {
-            var sA = 0, sC = 0, sP = 0, sE = 0;
-            for (var si2 = 0; si2 < n; si2++) { sA += valeursA[si2]; sC += valeursC[si2]; sP += valeursP[si2]; sE += valeursE[si2]; }
+            var sA = 0, sC = 0, sP = 0;
+            for (var si2 = 0; si2 < n; si2++) { sA += valeursA[si2]; sC += valeursC[si2]; sP += valeursP[si2]; }
             resultat.moyennes.A.push(Math.round(sA / n * 10) / 10);
             resultat.moyennes.C.push(Math.round(sC / n * 10) / 10);
             resultat.moyennes.P.push(Math.round(sP / n * 10) / 10);
-            resultat.moyennes.E.push(Math.round(sE / n * 10) / 10);
         } else {
             resultat.moyennes.A.push(null);
             resultat.moyennes.C.push(null);
             resultat.moyennes.P.push(null);
-            resultat.moyennes.E.push(null);
         }
 
         if (n < SEUIL_MIN_ETUDIANTS) {
             resultat.correlations.AP.push(null);
             resultat.correlations.CP.push(null);
-            resultat.correlations.EP.push(null);
             continue;
         }
 
         resultat.correlations.AP.push(calculerCorrelationPearson(valeursA, valeursP));
         resultat.correlations.CP.push(calculerCorrelationPearson(valeursC, valeursP));
-        resultat.correlations.EP.push(calculerCorrelationPearson(valeursE, valeursP));
 
         // Marquer les interventions dont la date correspond à cette séance
         for (var ii = 0; ii < interventions.length; ii++) {
@@ -437,21 +425,6 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                 pointBorderWidth: pointBorderWidths,
                 spanGaps: false
             },
-            {
-                label: 'E ↔ P',
-                data: donnees.correlations.EP,
-                borderColor: COULEURS_CORR.EP,
-                backgroundColor: COULEURS_CORR.EP,
-                borderWidth: 2.5,
-                tension: 0.25,
-                pointStyle: pointStyles,
-                pointRadius: pointRadii,
-                pointHoverRadius: 7,
-                pointBackgroundColor: bgParPoint(COULEURS_CORR.EP),
-                pointBorderColor: bordurePoint,
-                pointBorderWidth: pointBorderWidths,
-                spanGaps: false
-            },
         ];
 
         // Datasets interventions : une courbe P par intervention + contrôle
@@ -482,10 +455,10 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
             });
         }
 
-        // Datasets overlay : moyennes A, C, P, E (axe Y secondaire, masqués par défaut)
+        // Datasets overlay : moyennes A, C, P (axe Y secondaire, masqués par défaut)
         var COULEURS_MOY = COULEURS.indices;
-        var nomsIndices = { A: 'Moy. A', C: 'Moy. C', P: 'Moy. P', E: 'Moy. E' };
-        var indices = ['A', 'C', 'P', 'E'];
+        var nomsIndices = { A: 'Moy. A', C: 'Moy. C', P: 'Moy. P' };
+        var indices = ['A', 'C', 'P'];
         for (var di = 0; di < indices.length; di++) {
             var indice = indices[di];
             datasets.push({
@@ -892,7 +865,7 @@ function _majAxes() {
 function toggleCorrelation(cle, visible) {
     if (typeof visible === 'object' && visible !== null) visible = visible.checked;
     if (!graphiqueCorrLongInstance) return;
-    var labels = { AP: 'A ↔ P', CP: 'C ↔ P', EP: 'E ↔ P' };
+    var labels = { AP: 'A ↔ P', CP: 'C ↔ P' };
     var label = labels[cle];
     if (!label) return;
     toggleCorrelationByLabel(label, visible);

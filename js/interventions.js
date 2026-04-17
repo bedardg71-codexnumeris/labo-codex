@@ -34,8 +34,7 @@
  *     patternsCommuns: { 'Difficulté émergente': 5 },
  *     progressions: { 'En progression': 3, 'Plateau': 2, 'Régression': 2 },
  *     niveauxRai: { '1': 0, '2': 5, '3': 2 },
- *     engagementMoyen: 0.55,
- *     engagementDistribution: { 'Excellent': 0, 'Bon': 2, 'En développement': 3, 'Insuffisant': 2, 'Critique': 0 }
+ *     niveauxRai: { '1': 2, '2': 3, '3': 0 }
  *   },
  *   observations: 'Notes prises durant la rencontre...',
  *   notesIndividuelles: { '1234567': 'Excellente participation...', '7654321': 'A besoin de...' },
@@ -187,8 +186,6 @@ function analyserSousGroupe(dasEtudiants) {
     const patternsCommuns = {};
     const progressions = {};
     const niveauxRai = { '1': 0, '2': 0, '3': 0 };
-    const engagementDistribution = { 'Excellent': 0, 'Bon': 0, 'En développement': 0, 'Insuffisant': 0, 'Critique': 0 };
-    let sommeEngagement = 0;
     let nbEtudiants = dasEtudiants.length;
 
     dasEtudiants.forEach(da => {
@@ -200,13 +197,6 @@ function analyserSousGroupe(dasEtudiants) {
 
         // Compter les niveaux RàI
         niveauxRai[niveauEtud] = (niveauxRai[niveauEtud] || 0) + 1;
-
-        // Accumuler l'engagement (E = A × C × P)
-        sommeEngagement += (indices.E || 0);
-
-        // Distribution de l'engagement
-        const niveauE = interpreterNiveauEngagement(indices.E);
-        engagementDistribution[niveauE] = (engagementDistribution[niveauE] || 0) + 1;
 
         // Compter les patterns
         var patternEtud = niveauRaiEtud ? niveauRaiEtud.pattern : 'Données insuffisantes';
@@ -240,23 +230,8 @@ function analyserSousGroupe(dasEtudiants) {
         defisCommuns: defisCommuns,
         patternsCommuns: patternsCommuns,
         progressions: progressions,
-        niveauxRai: niveauxRai,
-        engagementMoyen: nbEtudiants > 0 ? (sommeEngagement / nbEtudiants) : 0,
-        engagementDistribution: engagementDistribution
+        niveauxRai: niveauxRai
     };
-}
-
-/**
- * Interprète le niveau d'engagement
- * @param {number} valeur - Valeur E entre 0 et 1
- * @returns {string} Niveau d'engagement
- */
-function interpreterNiveauEngagement(valeur) {
-    if (valeur >= 0.85) return 'Excellent';
-    if (valeur >= 0.75) return 'Bon';
-    if (valeur >= 0.65) return 'En développement';
-    if (valeur >= 0.40) return 'Insuffisant';
-    return 'Critique';
 }
 
 /**

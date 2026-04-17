@@ -4019,7 +4019,6 @@ function creerGraphiqueDistributionACPE(canvasId) {
         const valeursA = [];
         const valeursC = [];
         const valeursP = [];
-        const valeursE = [];
 
         etudiantsActifs.forEach(e => {
             // Indice A (Assiduité)
@@ -4032,7 +4031,7 @@ function creerGraphiqueDistributionACPE(canvasId) {
                 valeursA.push(A);
             }
 
-            // Indices C, P, E
+            // Indices C, P
             if (typeof obtenirIndicesCP === 'function') {
                 const indicesCP = obtenirIndicesCP(e.da);
                 if (indicesCP) {
@@ -4041,9 +4040,6 @@ function creerGraphiqueDistributionACPE(canvasId) {
                     }
                     if (indicesCP.P !== undefined && indicesCP.P > 0) {
                         valeursP.push(indicesCP.P / 100);
-                    }
-                    if (indicesCP.E !== undefined && indicesCP.E > 0) {
-                        valeursE.push(indicesCP.E);
                     }
                 }
             }
@@ -4054,14 +4050,12 @@ function creerGraphiqueDistributionACPE(canvasId) {
         const statsA = calculerStatistiques(valeursA);
         const statsC = calculerStatistiques(valeursC);
         const statsP = calculerStatistiques(valeursP);
-        const statsE = calculerStatistiques(valeursE);
 
         // Stocker toutes les stats et valeurs pour le plugin
         const statistiques = {
             A: { ...statsA, valeurs: valeursA },
             C: { ...statsC, valeurs: valeursC },
-            P: { ...statsP, valeurs: valeursP },
-            E: { ...statsE, valeurs: valeursE }
+            P: { ...statsP, valeurs: valeursP }
         };
 
 
@@ -4069,28 +4063,25 @@ function creerGraphiqueDistributionACPE(canvasId) {
         const courbeA = genererCourbeGauss(statsA.moyenne, statsA.ecartType);
         const courbeC = genererCourbeGauss(statsC.moyenne, statsC.ecartType);
         const courbeP = genererCourbeGauss(statsP.moyenne, statsP.ecartType);
-        const courbeE = genererCourbeGauss(statsE.moyenne, statsE.ecartType);
 
         // Créer les datasets des courbes
         const datasetsCourbes = [
             creerDatasetGauss('Assiduité (A)', courbeA, COULEURS_INDICES.A),
             creerDatasetGauss('Complétion (C)', courbeC, COULEURS_INDICES.C),
-            creerDatasetGauss('Performance (P)', courbeP, COULEURS_INDICES.P),
-            creerDatasetGauss('Engagement (E)', courbeE, COULEURS_INDICES.E)
+            creerDatasetGauss('Performance (P)', courbeP, COULEURS_INDICES.P)
         ].filter(d => d.data && d.data.length > 0);
 
         // Créer les datasets des points (étudiants individuels sur l'axe X)
         const datasetsPoints = [
             creerDatasetPoints('A', valeursA, COULEURS_INDICES.A),
             creerDatasetPoints('C', valeursC, COULEURS_INDICES.C),
-            creerDatasetPoints('P', valeursP, COULEURS_INDICES.P),
-            creerDatasetPoints('E', valeursE, COULEURS_INDICES.E)
+            creerDatasetPoints('P', valeursP, COULEURS_INDICES.P)
         ].filter(d => d.data && d.data.length > 0);
 
         // Combiner : courbes d'abord, puis points (alterner pour lier visibilité)
         // Format: [courbeA, pointsA, courbeC, pointsC, ...]
         const datasets = [];
-        const indicesLabels = ['A', 'C', 'P', 'E'];
+        const indicesLabels = ['A', 'C', 'P'];
         indicesLabels.forEach(indice => {
             const courbe = datasetsCourbes.find(d => d.label.includes(`(${indice})`));
             const points = datasetsPoints.find(d => d.label.startsWith(indice));
@@ -4099,7 +4090,7 @@ function creerGraphiqueDistributionACPE(canvasId) {
         });
 
         if (datasetsCourbes.length === 0) {
-            console.warn('[Distribution ACPE] Aucune donnée à afficher');
+            console.warn('[Distribution ACP] Aucune donnée à afficher');
             ctx.font = '14px Arial';
             ctx.fillStyle = couleurTexte();
             ctx.textAlign = 'center';
@@ -4118,8 +4109,8 @@ function creerGraphiqueDistributionACPE(canvasId) {
 
                 ctx.save();
 
-                const indices = ['A', 'C', 'P', 'E'];
-                const couleurs = [COULEURS_INDICES.A, COULEURS_INDICES.C, COULEURS_INDICES.P, COULEURS_INDICES.E];
+                const indices = ['A', 'C', 'P'];
+                const couleurs = [COULEURS_INDICES.A, COULEURS_INDICES.C, COULEURS_INDICES.P];
 
                 indices.forEach((indice, i) => {
                     const stats = statistiques[indice];
@@ -4164,8 +4155,8 @@ function creerGraphiqueDistributionACPE(canvasId) {
 
                 ctx.save();
 
-                const indices = ['A', 'C', 'P', 'E'];
-                const couleurs = [COULEURS_INDICES.A, COULEURS_INDICES.C, COULEURS_INDICES.P, COULEURS_INDICES.E];
+                const indices = ['A', 'C', 'P'];
+                const couleurs = [COULEURS_INDICES.A, COULEURS_INDICES.C, COULEURS_INDICES.P];
 
                 // Dessiner les lignes μ et σ
                 indices.forEach((indice, i) => {
