@@ -10425,23 +10425,12 @@
                         </div>
                     </div>
 
-                    <!-- Carte : Outils à exploiter -->
+                    <!-- Carte : Outils de saisie -->
                     <div class="carte">
-                        <h3 class="carte-titre-bleu" data-tooltip="pref-outils">Outils à exploiter</h3>
+                        <h3 class="carte-titre-bleu" data-tooltip="pref-outils">Outils de saisie</h3>
                         <p class="text-muted u-mb-15 u-texte-09">
-                            Active ou désactive les fonctionnalités selon tes besoins. Les outils désactivés seront masqués.
+                            Outils qui s'activent pendant l'évaluation d'une production.
                         </p>
-
-                        <!-- Micro données ACP -->
-                        <div class="form-group u-mb-15 u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
-                            <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-outils-acp">
-                                <input type="checkbox" id="v2-pref-depistage-acp" checked data-on-change="sauvegarderPreferencesV2">
-                                <strong style="margin-left: 8px;">Micro données ACP</strong>
-                            </label>
-                            <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
-                                Indices prédictifs : Assiduité, Complétion, Performance
-                            </small>
-                        </div>
 
                         <!-- Chrono évaluation -->
                         <div class="form-group u-mb-15 u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
@@ -10450,7 +10439,7 @@
                                 <strong style="margin-left: 8px;">Chrono d'évaluation</strong>
                             </label>
                             <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
-                                Affiche un chronomètre dans la barre d'annotation qui mesure le temps entre la première annotation et la sauvegarde
+                                Affiche un chronomètre dans la barre d'annotation qui mesure le temps entre la première annotation et la sauvegarde.
                             </small>
                         </div>
                     </div>
@@ -10469,7 +10458,7 @@
                                 <strong style="margin-left: 8px;">Graphiques d'évolution</strong>
                             </label>
                             <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
-                                Visualisation de la progression dans le temps (Chart.js)
+                                Graphiques Chart.js de progression dans le temps. Affichés dans la section « Progression temporelle » du profil individuel.
                             </small>
                         </div>
 
@@ -10604,6 +10593,17 @@
                             </label>
                             <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
                                 Repérage, Liaison et Ouverture — traces des gestes cognitifs dans les productions. Active la catégorie « Action » dans la palette de tampons et son agrégation dans l'évaluation.
+                            </small>
+                        </div>
+
+                        <!-- Micro données ACP -->
+                        <div class="form-group u-mb-15 u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
+                            <label class="u-align-center" style="cursor: pointer; display: flex" data-tooltip="pref-outils-acp">
+                                <input type="checkbox" id="v2-pref-depistage-acp" checked data-on-change="sauvegarderPreferencesV2">
+                                <strong style="margin-left: 8px;">Micro données ACP</strong>
+                            </label>
+                            <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
+                                Indices prédictifs Assiduité, Complétion et Performance. Affichés dans la section « Engagement » du profil individuel.
                             </small>
                         </div>
                     </div>
@@ -10755,7 +10755,7 @@
                                     <span class="u-texte-gras" style="margin-left: 8px">Indicateurs visuels des seuils</span>
                                 </label>
                                 <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
-                                    Couleurs Fragile / Acceptable / Bon selon les seuils configurés
+                                    Lignes pointillées et étiquettes Insuffisant / Développement / Maîtrise / Excellent sur les graphiques Chart.js (section « Progression temporelle » du profil individuel).
                                 </small>
                             </div>
 
@@ -12639,14 +12639,15 @@
                             <p>Les préférences te permettent d'adapter l'application à ton style de travail. Tout changement est sauvegardé automatiquement.</p>
 
                             <div class="carte-gradient-bleu">
-                                <p class="titre-11-bold-bleu-mb15">Les 5 cartes de préférences :</p>
+                                <p class="titre-11-bold-bleu-mb15">Les cartes de préférences :</p>
                                 <ol class="lh-2">
-                                    <li><strong>Outils à exploiter</strong> : Active ou désactive les micro-données A-C-P et le système RàI</li>
-                                    <li><strong>Affichage des ressources</strong> : Gère la visibilité de l'analyse SOLO, des snapshots, des graphiques d'évolution et des détails techniques</li>
+                                    <li><strong>Outils de saisie</strong> : Active le chrono d'évaluation pendant l'annotation des productions</li>
+                                    <li><strong>Affichage des ressources</strong> : Gère la visibilité des graphiques d'évolution, des indicateurs visuels de seuils et des options d'affichage de l'assiduité</li>
                                     <li><strong>Expérience visuelle</strong> : Active ou désactive l'animation 3D des points dans l'aperçu</li>
                                     <li><strong>Navigation</strong> : Lancement direct à l'aperçu, info-bulles au survol, aide contextuelle (📍), mode clair/sombre</li>
                                     <li><strong>Parcours d'apprentissage</strong> : Choisis ton mode d'accompagnement (étape par étape, par exploration, autonome)</li>
                                 </ol>
+                                <p class="u-texte-petit u-mt-10">Les outils d'observation (Taxonomie SOLO, Observation des actions, Micro données ACP) et le dépistage RàI se trouvent dans l'onglet <strong>Accompagnement</strong>.</p>
                             </div>
 
                             <p><strong>Options de thème :</strong></p>

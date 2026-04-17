@@ -79,7 +79,7 @@ const configurationsOnglets = {
     ],
     'reglages': [
         { id: 'preferences', label: 'Préférences' },
-        { id: 'depistage', label: 'Dépistage' },
+        { id: 'depistage', label: 'Accompagnement' },
         { id: 'donnees', label: 'Données' },
         { id: 'a-propos', label: 'À propos' }
     ]
