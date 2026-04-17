@@ -141,8 +141,8 @@ function capturerFinEvaluation(evaluation, dureeMs) {
             var annotationFichier = (typeof travauxStockage !== 'undefined')
                 ? travauxStockage.obtenirAnnotationFichier(fichierActuel.id) : null;
             if (annotationFichier) {
-                var statsAnnot = (typeof travauxExportPdf !== 'undefined' && travauxExportPdf.compterAnnotationsDetailees)
-                    ? travauxExportPdf.compterAnnotationsDetailees(annotationFichier) : null;
+                var statsAnnot = (typeof travauxExportPDF !== 'undefined' && travauxExportPDF.compterAnnotationsDetailees)
+                    ? travauxExportPDF.compterAnnotationsDetailees(annotationFichier) : null;
                 if (statsAnnot && (statsAnnot.totalTampons > 0 || statsAnnot.totalErreursFr > 0)) {
                     ajouterEntree(evaluation, ACTIONS.TAMPONS, {
                         tampons: statsAnnot.tampons,

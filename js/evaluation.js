@@ -2016,8 +2016,8 @@ function genererRetroaction(num) {
         const annotationFichier = (typeof travauxStockage !== 'undefined')
             ? travauxStockage.obtenirAnnotationFichier(fichierActuel.id) : null;
         if (annotationFichier) {
-            const statsAnnot = (typeof travauxExportPdf !== 'undefined' && travauxExportPdf.compterAnnotationsDetailees)
-                ? travauxExportPdf.compterAnnotationsDetailees(annotationFichier) : null;
+            const statsAnnot = (typeof travauxExportPDF !== 'undefined' && travauxExportPDF.compterAnnotationsDetailees)
+                ? travauxExportPDF.compterAnnotationsDetailees(annotationFichier) : null;
             if (statsAnnot) {
                 // Observations (tampons diagnostiques)
                 const retroObs = travauxOutils.obtenirRetroactionsObservations();
