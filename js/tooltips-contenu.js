@@ -159,6 +159,9 @@ const TOOLTIPS = {
     'pref-affichage-solo':
         'Affiche une carte avec les descriptions d\u00e9taill\u00e9es bas\u00e9es sur la taxonomie SOLO. Utile pour interpr\u00e9ter le niveau cognitif des apprentissages.',
 
+    'pref-actions-rlo':
+        'Active l\u2019observation des gestes cognitifs Rep\u00e9rage, Liaison et Ouverture via des tampons pos\u00e9s sur les productions. Alimente le profil RLO agr\u00e9g\u00e9 par \u00e9valuation et l\u2019export de recherche anonymis\u00e9.',
+
     'pref-affichage-snapshots':
         'Historique hebdomadaire des indices A-C-P. Permet de suivre l\u2019\u00e9volution dans le temps.',
 
