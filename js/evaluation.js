@@ -3592,7 +3592,8 @@ function convertirNoteEnValeur(note) {
 }
 
 /**
- * Calcule l'engagement selon la formule : E = ∛(A × C × P)
+ * Calcule un indice de risque d'échec : 1 - (A × C × P)
+ * Retourne 1 (risque maximal) si un des trois indices est à 0.
  */
 function calculerRisqueEchec(assiduite, completion, performance) {
     if (assiduite === 0 || completion === 0 || performance === 0) {

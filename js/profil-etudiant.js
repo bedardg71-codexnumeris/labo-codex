@@ -479,47 +479,6 @@ function interpreterMobilisation(A, C, statutDecrochage = false) {
 }
 
 /**
- * Interprète l'indice E (Engagement) selon les seuils IDME adaptés
- * @param {number} valeur - Valeur normalisée entre 0 et 1
- * @returns {Object} - { niveau, emoji, couleur }
- */
-function interpreterEngagement(valeur) {
-    if (valeur >= 0.85) {
-        return {
-            niveau: 'Excellent engagement',
-            emoji: '🔵',
-            couleur: '#2196F3' // Bleu
-        };
-    }
-    if (valeur >= 0.75) {
-        return {
-            niveau: 'Bon engagement',
-            emoji: '🟢',
-            couleur: '#28a745' // Vert
-        };
-    }
-    if (valeur >= 0.65) {
-        return {
-            niveau: 'En développement',
-            emoji: '🟡',
-            couleur: '#ffc107' // Jaune
-        };
-    }
-    if (valeur >= 0.40) {
-        return {
-            niveau: 'Engagement insuffisant',
-            emoji: '🟠',
-            couleur: '#ff9800' // Orange
-        };
-    }
-    return {
-        niveau: 'Engagement très faible',
-        emoji: '🔴',
-        couleur: '#dc3545' // Rouge
-    };
-}
-
-/**
  * Interprète l'indice P (Performance)
  * @param {number} valeur - Valeur en pourcentage (0-100)
  * @returns {Object} - { niveau, emoji, couleur, description }
@@ -678,7 +637,6 @@ function genererSectionMobilisationEngagement(da) {
     const indices = calculerTousLesIndices(da);
     const A = indices.A / 100;
     const C = indices.C / 100;
-    const interpE = interpreterEngagement(indices.E);
 
     // NOUVEAU (Beta 90): Calcul dual pour mode comparatif
     const config = db.getSync('modalitesEvaluation', {});
@@ -706,28 +664,16 @@ function genererSectionMobilisationEngagement(da) {
         // Assigner aux bonnes variables selon la pratique active
         if (config.pratique === 'sommative') {
             indicesSOM = indicesActifs;
-            indicesPAN = { A: indicesActifs.A, C: 0, P: 0, M: 0, E: 0 }; // Valeurs nulles pour PAN
+            indicesPAN = { A: indicesActifs.A, C: 0, P: 0, M: 0 }; // Valeurs nulles pour PAN
             directionSOM = directionActive;
             directionPAN = { direction: 'stable', emoji: '→' };
         } else {
             indicesPAN = indicesActifs;
-            indicesSOM = { A: indicesActifs.A, C: 0, P: 0, M: 0, E: 0 }; // Valeurs nulles pour SOM
+            indicesSOM = { A: indicesActifs.A, C: 0, P: 0, M: 0 }; // Valeurs nulles pour SOM
             directionPAN = directionActive;
             directionSOM = { direction: 'stable', emoji: '→' };
         }
     }
-
-    // Calculer engagement pour les deux pratiques (E = racine cubique de A × C × P)
-    const A_pct = indicesSOM.A / 100; // A est identique pour les deux pratiques
-    const C_SOM = indicesSOM.C / 100;
-    const P_SOM = indicesSOM.P / 100;
-    const E_brut_SOM = A_pct * C_SOM * P_SOM;
-    const E_SOM = Math.pow(E_brut_SOM, 1/3); // Racine cubique
-
-    const C_PAN = indicesPAN.C / 100;
-    const P_PAN = indicesPAN.P / 100;
-    const E_brut_PAN = A_pct * C_PAN * P_PAN;
-    const E_PAN = Math.pow(E_brut_PAN, 1/3); // Racine cubique
 
     // Récupérer les données pour les trois sections
     const detailsA = obtenirDetailsAssiduite(da);
@@ -1009,19 +955,6 @@ function genererSectionMobilisationEngagement(da) {
             <strong>Complétion (C) :</strong> Indice C = ${indices.C}% — ${nbRemis} ${obtenirTermeProduction('pluriel')} remis / ${nbTotal} ${obtenirTermeProduction('pluriel')} totaux
             <br><br>
             <strong>Performance (P) :</strong> Indice P = ${moyenneP}% — Moyenne des ${nbRetenus} meilleurs ${obtenirTermeProduction('pluriel')}
-            <br><br>
-            <strong>Engagement (E) :</strong> Formule E = (A × C × P)^(1/3) (racine cubique)
-            <br>
-            ${(A).toFixed(2)} × ${(C).toFixed(2)} × ${(moyenneP / 100).toFixed(2)} = ${(A * C * (moyenneP / 100)).toFixed(3)} → E = ${Math.pow(A * C * (moyenneP / 100), 1/3).toFixed(3)}
-            <br><br>
-            L'engagement combine assiduité, complétion et performance. La racine cubique compense la décroissance multiplicative.
-            <br>
-            Niveau d'engagement : <strong>${(() => {
-                const E_brut_calc = A * C * (moyenneP / 100);
-                const E_ajuste = Math.pow(E_brut_calc, 1/3);
-                const interpE_calc = interpreterEngagement(E_ajuste);
-                return `<span style="color: ${interpE_calc.couleur};">${interpE_calc.niveau}</span>`;
-            })()}</strong>
         </div>
 
         <!-- GRILLE 3 COLONNES : ASSIDUITÉ, COMPLÉTION ET PERFORMANCE -->
@@ -1433,125 +1366,6 @@ function genererSectionMobilisationEngagement(da) {
             </div>
         </div>
 
-        <!-- ÉCHELLE D'ENGAGEMENT (basée sur E = racine cubique de A × C × P) -->
-        ${(() => {
-            // 🆕 BETA 95.6 : Si aucune donnée, afficher un message approprié
-            if (aucuneDonnee) {
-                return `
-                    <div class="profil-carte u-mt-10">
-                        <div class="u-flex-between-mb15">
-                            <h3 class="profil-section-titre-seul">Niveau d'engagement</h3>
-                            <span style="color: var(--gris-clair); font-weight: 600;">—</span>
-                        </div>
-                        <div class="profil-message-vide">
-                            En attente de données
-                        </div>
-                    </div>
-                `;
-            }
-
-            // Recalculer E avec racine cubique
-            const P_reel = moyenneP / 100;
-            const E_brut_reel = A * C * P_reel;
-            const E_reel = Math.pow(E_brut_reel, 1/3); // Racine cubique
-
-            // Interpréter E
-            const interpE_reel = interpreterEngagement(E_reel);
-
-            // Texte explicatif pour le calcul de E (basé sur P)
-            const configPAN = config.configPAN?.portfolio || {};
-            const decouplerPR = configPAN.decouplerPR || false;
-            const nombreArtefacts = configPAN.nombreARetenir || 5;
-
-            let texteExplicatifE = '';
-            if (decouplerPR && !modeComparatif) {
-                texteExplicatifE = `<span class="profil-texte-normal-gris"> (P basé sur les ${nombreArtefacts} plus récent${nombreArtefacts > 1 ? 's' : ''})</span>`;
-            } else if (!decouplerPR && !modeComparatif && portfolioActif) {
-                const textesModalites = {
-                    'hybride-categories': `P basé sur les ${nombreARetenir} meilleures Sélection + Obligatoires`,
-                    'meilleurs': `P basé sur les ${nombreArtefacts} meilleur${nombreArtefacts > 1 ? 's' : ''}`,
-                    'recents': `P basé sur les ${nombreArtefacts} plus récent${nombreArtefacts > 1 ? 's' : ''}`,
-                    'recents-meilleurs': `P basé sur les ${nombreArtefacts} récent${nombreArtefacts > 1 ? 's' : ''} parmi les meilleurs`,
-                    'tous': 'P basé sur tous les artefacts'
-                };
-                const texteModalite = textesModalites[methodeSelection] || textesModalites['meilleurs'];
-                texteExplicatifE = `<span class="profil-texte-normal-gris"> (${texteModalite})</span>`;
-            }
-
-            return `
-                <div class="profil-carte u-mt-10">
-                    <div class="u-flex-between-mb15">
-                        <h3 class="profil-section-titre-seul">
-                            Niveau d'engagement${texteExplicatifE}
-                        </h3>
-                        ${genererValeursComparatives(Math.round(E_SOM * 100), Math.round(E_PAN * 100), modeComparatif)}
-                    </div>
-
-                    <div style="margin-bottom: 15px; font-size: 0.9rem; color: var(--gris-fonce);" data-tooltip="profil-formule-engagement">
-                        Formule : E = ∛(A × C × P)
-                        <span class="primo-aide" data-target="conseil-formule-engagement-mobilisation" style="margin-left: 5px; display: inline-block !important; cursor: pointer;">📍</span>
-                    </div>
-
-                    <!-- Conseil Primo: Explication de la formule d'engagement (section Mobilisation) -->
-                    <div id="conseil-formule-engagement-mobilisation" class="carte-info-toggle carte-info-conseil" style="display: none; margin-bottom: 15px;">
-                        <strong>Pourquoi la racine cubique ?</strong>
-                        <p>La racine cubique (∛) est une <strong>transformation normalisante</strong> qui préserve l'échelle d'origine tout en combinant les trois indices.</p>
-
-                        <p><strong>Exemple concret :</strong></p>
-                        <ul style="margin-left: 20px; line-height: 1.6;">
-                            <li><strong>Sans racine cubique :</strong> Un étudiant à 70% sur A, C et P aurait : 0.7 × 0.7 × 0.7 = <strong>34%</strong> d'engagement ← Trop punitif !</li>
-                            <li><strong>Avec racine cubique :</strong> Le même étudiant obtient : ∛(0.7 × 0.7 × 0.7) = <strong>70%</strong> d'engagement ← Cohérent et intuitif !</li>
-                        </ul>
-
-                        <p><strong>Pourquoi utiliser la multiplication ?</strong></p>
-                        <p>La multiplication (plutôt qu'une simple moyenne) permet de <strong>pénaliser les déséquilibres</strong>. Un étudiant qui excelle en assiduité (90%) mais échoue en performance (30%) aura un engagement plus faible qu'un étudiant équilibré à 60% partout.</p>
-
-                        <p><strong>En résumé :</strong></p>
-                        <p>La racine cubique compense la décroissance multiplicative tout en préservant l'effet punitif sur les déséquilibres importants. C'est la <strong>moyenne géométrique</strong> des trois indices A-C-P.</p>
-                    </div>
-
-                    <div class="profil-echelle-risque">
-                        <div class="profil-echelle-barre" style="background: linear-gradient(to right,
-                                    var(--orange-accent) 0%,
-                                    var(--btn-annuler) 25%,
-                                    var(--vert-succes) 50%,
-                                    var(--bleu-clair) 75%);">
-                            ${modeComparatif ? `
-                                <!-- Indicateurs duaux: symboles de direction -->
-                                ${directionSOM.symbole ? `<div style="position: absolute; left: ${Math.max(0, Math.min((E_SOM - 0.30) / 0.70 * 100, 100))}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--som-orange);" title="SOM: ${directionSOM.interpretation}">${directionSOM.symbole}</div>` : ''}
-                                ${directionPAN.symbole ? `<div style="position: absolute; left: ${Math.max(0, Math.min((E_PAN - 0.30) / 0.70 * 100, 100))}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--std-bleu);" title="PAN: ${directionPAN.interpretation}">${directionPAN.symbole}</div>` : ''}
-                                <!-- Points colorés (valeurs affichées dans l'en-tête) -->
-                                <div class="profil-echelle-point profil-echelle-point-som" style="left: ${Math.max(0, Math.min((E_SOM - 0.30) / 0.70 * 100, 100))}%;"></div>
-                                <div class="profil-echelle-point profil-echelle-point-std" style="left: ${Math.max(0, Math.min((E_PAN - 0.30) / 0.70 * 100, 100))}%;"></div>
-                            ` : `
-                                <!-- Indicateur unique pratique courante -->
-                                <div class="profil-echelle-point profil-echelle-point-unique" style="left: ${Math.max(0, Math.min((E_reel - 0.30) / 0.70 * 100, 100))}%;"></div>
-                                <div class="profil-echelle-indicateur-bas" style="left: ${Math.max(0, Math.min((E_reel - 0.30) / 0.70 * 100, 100))}%;">E = ${E_reel.toFixed(2)}</div>
-                            `}
-                        </div>
-
-                        <div class="legende-risque-container">
-                            <div class="legende-risque-item" style="left: 12.5%; color: var(--orange-accent);">
-                                <span class="legende-risque-niveau">Fragile</span>
-                                <span class="legende-risque-seuil">0.30-0.49</span>
-                            </div>
-                            <div class="legende-risque-item" style="left: 37.5%; color: var(--btn-annuler);">
-                                <span class="legende-risque-niveau">Modéré</span>
-                                <span class="legende-risque-seuil">0.50-0.64</span>
-                            </div>
-                            <div class="legende-risque-item" style="left: 62.5%; color: var(--vert-succes);">
-                                <span class="legende-risque-niveau">Favorable</span>
-                                <span class="legende-risque-seuil">0.65-0.79</span>
-                            </div>
-                            <div class="legende-risque-item" style="left: 87.5%; color: var(--bleu-clair);">
-                                <span class="legende-risque-niveau">Très favorable</span>
-                                <span class="legende-risque-seuil">≥ 0.80</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        })()}
     `;
 }
 
@@ -2230,374 +2044,6 @@ function genererSectionMobilisation(da) {
     `;
 }
 
-/**
- * Génère le HTML de la section Engagement (E) détaillée
- * @param {string} da - Numéro de DA
- * @returns {string} - HTML de la section
- */
-function genererSectionEngagement(da) {
-    const indices = calculerTousLesIndices(da);
-    const interpE = interpreterEngagement(indices.E);
-
-    // Récupérer A, C, P séparément (en proportions 0-1)
-    const A = indices.A / 100;
-    const C = indices.C / 100;
-    const P = indices.P / 100;
-
-    // Identifier le composant le plus faible (facteur limitant)
-    const composants = [
-        { nom: 'Assiduité (A)', valeur: A, pourcentage: indices.A },
-        { nom: 'Complétion (C)', valeur: C, pourcentage: indices.C },
-        { nom: 'Performance (P)', valeur: P, pourcentage: indices.P }
-    ];
-    const facteurLimitant = composants.reduce((min, comp) => comp.valeur < min.valeur ? comp : min);
-
-    // Calculer le prochain seuil
-    let prochainSeuil = '';
-    let distanceSeuil = 0;
-    if (indices.E < 0.65) {
-        prochainSeuil = '0.65 (En développement)';
-        distanceSeuil = 0.65 - indices.E;
-    } else if (indices.E < 0.75) {
-        prochainSeuil = '0.75 (Bon engagement)';
-        distanceSeuil = 0.75 - indices.E;
-    } else if (indices.E < 0.85) {
-        prochainSeuil = '0.85 (Excellent engagement)';
-        distanceSeuil = 0.85 - indices.E;
-    }
-
-    return `
-        <!-- STATISTIQUES -->
-        <div class="profil-grid-auto-200">
-            <div class="profil-carte-importante">
-                <div class="carte-metrique-header">
-                    <span class="profil-texte-detail">Assiduité (A)</span>
-                    <strong class="profil-valeur-grande-bleu">${indices.A}%</strong>
-                </div>
-            </div>
-            <div class="profil-carte-importante">
-                <div class="carte-metrique-header">
-                    <span class="profil-texte-detail">Complétion (C)</span>
-                    <strong class="profil-valeur-grande-bleu">${indices.C}%</strong>
-                </div>
-            </div>
-            <div class="profil-carte-importante">
-                <div class="carte-metrique-header">
-                    <span class="profil-texte-detail">Performance (P)</span>
-                    <strong class="profil-valeur-grande-bleu">${indices.P}%</strong>
-                </div>
-            </div>
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border: 2px solid var(--accent-primaire); border-left: 4px solid ${interpE.couleur};">
-                <div class="carte-metrique-header">
-                    <span class="profil-texte-detail">Engagement (E)</span>
-                    <strong class="profil-valeur-grande-bleu">${indices.E}</strong>
-                </div>
-                <div style="margin-top: 8px; font-size: 0.85rem; color: var(--gris-fonce);">
-                    E = ∛(A × C × P)
-                    <span class="primo-aide" data-target="conseil-formule-engagement-carte" style="margin-left: 5px; display: inline-block !important; cursor: pointer;">📍</span>
-                </div>
-                <div style="margin-top: 8px; padding: 6px 10px; background: var(--alerte-fond-attention); border-left: 3px solid var(--orange-accent); font-size: 0.8rem; color: var(--gris-fonce);">
-                    <strong>💡 Note :</strong> Indice longitudinal (historique complet depuis le début du trimestre)
-                </div>
-            </div>
-        </div>
-
-        <!-- Conseil Primo: Explication de la formule d'engagement (dans la carte) -->
-        <div id="conseil-formule-engagement-carte" class="carte-info-toggle carte-info-conseil" style="display: none; margin-top: 10px;">
-            <strong>Pourquoi la racine cubique ?</strong>
-            <p>La racine cubique (∛) est une <strong>transformation normalisante</strong> qui préserve l'échelle d'origine tout en combinant les trois indices.</p>
-
-            <p><strong>Exemple concret :</strong></p>
-            <ul style="margin-left: 20px; line-height: 1.6;">
-                <li><strong>Sans racine cubique :</strong> Un étudiant à 70% sur A, C et P aurait : 0.7 × 0.7 × 0.7 = <strong>34%</strong> d'engagement ← Trop punitif !</li>
-                <li><strong>Avec racine cubique :</strong> Le même étudiant obtient : ∛(0.7 × 0.7 × 0.7) = <strong>70%</strong> d'engagement ← Cohérent et intuitif !</li>
-            </ul>
-
-            <p><strong>Pourquoi utiliser la multiplication ?</strong></p>
-            <p>La multiplication (plutôt qu'une simple moyenne) permet de <strong>pénaliser les déséquilibres</strong>. Un étudiant qui excelle en assiduité (90%) mais échoue en performance (30%) aura un engagement plus faible qu'un étudiant équilibré à 60% partout.</p>
-
-            <p><strong>En résumé :</strong></p>
-            <p>La racine cubique compense la décroissance multiplicative tout en préservant l'effet punitif sur les déséquilibres importants. C'est la <strong>moyenne géométrique</strong> des trois indices A-C-P.</p>
-        </div>
-
-        <!-- INTERPRÉTATION QUALITATIVE -->
-        <div style="padding: 15px; background: linear-gradient(to right, ${interpE.couleur}22, ${interpE.couleur}11);
-                    border-left: 4px solid ${interpE.couleur}; margin-bottom: 15px;">
-            <div style="font-size: 1.1rem; font-weight: bold; color: ${interpE.couleur}; margin-bottom: 8px;">
-                ${interpE.emoji} ${interpE.niveau}
-            </div>
-            <div style="color: var(--gris-moyen); line-height: 1.5;">
-                ${interpE.niveau === 'Excellent engagement' ?
-                    "Cet étudiant démontre un engagement global exemplaire, combinant présence, complétion et performance de haut niveau." :
-                  interpE.niveau === 'Bon engagement' ?
-                    "Cet étudiant montre un bon engagement global. La combinaison présence-complétion-performance est satisfaisante." :
-                  interpE.niveau === 'En développement' ?
-                    "L'engagement global nécessite une attention. Un soutien ciblé sur le facteur limitant pourrait améliorer significativement l'engagement." :
-                  interpE.niveau === 'Engagement insuffisant' ?
-                    "⚠️ Engagement insuffisant. Les composantes A-C-P révèlent des faiblesses qui nécessitent une intervention de niveau 2." :
-                    "🚨 Engagement très faible. Intervention immédiate de niveau 3 requise pour éviter l'échec."}
-            </div>
-        </div>
-
-        <!-- DÉCOMPOSITION VISUELLE -->
-        <h4 class="profil-titre-bleu-compact">
-            Décomposition de l'indice E
-        </h4>
-        <div class="profil-carte-simple">
-            <div class="profil-texte-mono-centre-bleu">
-                E = ∛(A × C × P)
-                <span class="primo-aide" data-target="conseil-formule-engagement-principale" style="display: inline-block !important; cursor: pointer;">📍</span>
-            </div>
-            <div class="profil-texte-mono-centre-bleu">
-                E = ∛(${A.toFixed(2)} × ${C.toFixed(2)} × ${P.toFixed(2)}) = ${indices.E}
-            </div>
-            <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 4px; font-size: 0.9rem; color: var(--gris-fonce); line-height: 1.6;">
-                <strong>⚠️ Nature multiplicative :</strong> Si un seul composant est faible, l'engagement global chute drastiquement.
-                ${indices.E < 0.50 ? `<br><strong>Facteur limitant identifié :</strong> ${facteurLimitant.nom} (${facteurLimitant.pourcentage}%)` : ''}
-            </div>
-        </div>
-
-        <!-- Conseil Primo: Explication de la formule d'engagement -->
-        <div id="conseil-formule-engagement-principale" class="carte-info-toggle carte-info-conseil" style="display: none; margin-top: 10px;">
-            <strong>Pourquoi la racine cubique ?</strong>
-            <p>La racine cubique (∛) est une <strong>transformation normalisante</strong> qui préserve l'échelle d'origine tout en combinant les trois indices.</p>
-
-            <p><strong>Exemple concret :</strong></p>
-            <ul style="margin-left: 20px; line-height: 1.6;">
-                <li><strong>Sans racine cubique :</strong> Un étudiant à 70% sur A, C et P aurait : 0.7 × 0.7 × 0.7 = <strong>34%</strong> d'engagement ← Trop punitif !</li>
-                <li><strong>Avec racine cubique :</strong> Le même étudiant obtient : ∛(0.7 × 0.7 × 0.7) = <strong>70%</strong> d'engagement ← Cohérent et intuitif !</li>
-            </ul>
-
-            <p><strong>Pourquoi utiliser la multiplication ?</strong></p>
-            <p>La multiplication (plutôt qu'une simple moyenne) permet de <strong>pénaliser les déséquilibres</strong>. Un étudiant qui excelle en assiduité (90%) mais échoue en performance (30%) aura un engagement plus faible qu'un étudiant équilibré à 60% partout.</p>
-
-            <p><strong>En résumé :</strong></p>
-            <p>La racine cubique compense la décroissance multiplicative tout en préservant l'effet punitif sur les déséquilibres importants. C'est la <strong>moyenne géométrique</strong> des trois indices A-C-P.</p>
-        </div>
-
-        <!-- PROCHAIN SEUIL -->
-        ${prochainSeuil ? `
-            <div style="background: var(--bleu-pale); border: 1px solid var(--bleu-clair); padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-                <h4 style="color: var(--bleu-clair); margin-bottom: 10px;">🎯 Prochain objectif</h4>
-                <div style="color: var(--bleu-clair); line-height: 1.6;">
-                    <strong>Seuil à atteindre :</strong> ${prochainSeuil}<br>
-                    <strong>Distance :</strong> ${(distanceSeuil * 100).toFixed(1)} points<br>
-                    ${facteurLimitant.valeur < 0.70 ?
-                        `<strong>💡 Levier principal :</strong> Améliorer ${facteurLimitant.nom} pour un effet multiplicatif maximum` : ''}
-                </div>
-            </div>
-        ` : `
-            <div class="info-box info-box--info" style="margin-bottom: 15px;">
-                <div style="color: var(--bleu-clair); font-weight: bold;">
-                    🏆 Seuil maximum atteint ! Maintenir cet excellent engagement.
-                </div>
-            </div>
-        `}
-
-        <!-- RECOMMANDATIONS -->
-        ${indices.E < 0.75 ? `
-            <div style="background: ${indices.E < 0.40 ? '#f8d7da' : '#fff3cd'};
-                        border-left: 4px solid ${indices.E < 0.40 ? '#dc3545' : '#ffc107'};
-                        padding: 15px; border-radius: 6px;">
-                <h4 style="color: ${indices.E < 0.40 ? '#721c24' : '#856404'}; margin-bottom: 10px;">
-                    💡 Recommandations d'intervention
-                </h4>
-                <ul style="margin: 0; padding-left: 20px; color: ${indices.E < 0.40 ? '#721c24' : '#856404'}; line-height: 1.6;">
-                    ${facteurLimitant.valeur < 0.65 ?
-                        `<li><strong>Priorité absolue :</strong> ${facteurLimitant.nom} est le facteur limitant critique (${facteurLimitant.pourcentage}%)</li>` : ''}
-                    ${indices.E < 0.40 ?
-                        '<li><strong>Intervention RàI niveau 3 immédiate</strong> - Risque d\'échec très élevé</li>' : ''}
-                    ${indices.E >= 0.40 && indices.E < 0.65 ?
-                        '<li><strong>Intervention RàI niveau 2 recommandée</strong> - Soutien ciblé requis</li>' : ''}
-                    <li>Cibler le composant le plus faible pour maximiser l'effet multiplicatif</li>
-                    ${A < 0.70 || C < 0.70 ?
-                        '<li>Focus sur l\'engagement comportemental (A et C) avant la performance</li>' : ''}
-                    ${P < 0.70 && A >= 0.70 && C >= 0.70 ?
-                        '<li>Présence et remise satisfaisantes : concentrer le soutien sur la qualité des productions</li>' : ''}
-                </ul>
-            </div>
-        ` : ''}
-    `;
-}
-
-/**
- * Génère le HTML de la section Risque (R) détaillée
- * @param {string} da - Numéro de DA
- * @returns {string} - HTML de la section
- */
-function genererSectionRisque(da) {
-    const indices = calculerTousLesIndices(da);
-    const interpE = interpreterEngagement(indices.E);
-
-    // Déterminer le niveau RàI basé sur l'engagement (E)
-    let niveauRaI = 1;
-    let descriptionRaI = 'Niveau 1 - Surveillance universelle';
-    let urgence = 'Aucune action immédiate requise';
-    let couleurUrgence = '#28a745';
-
-    // Seuils basés sur l'engagement (inversé par rapport au risque)
-    if (indices.E < 0.30) {
-        niveauRaI = 3;
-        descriptionRaI = 'Niveau 3 - Intervention intensive individuelle';
-        urgence = '🚨 URGENCE MAXIMALE - Intervention immédiate requise';
-        couleurUrgence = '#dc3545';
-    } else if (indices.E < 0.50) {
-        niveauRaI = 2;
-        descriptionRaI = 'Niveau 2 - Intervention ciblée en petit groupe';
-        urgence = '⚠️ Intervention prioritaire dans les prochains jours';
-        couleurUrgence = '#ff9800';
-    } else if (indices.E < 0.65) {
-        niveauRaI = 2;
-        descriptionRaI = 'Niveau 2 - Surveillance accrue';
-        urgence = '⚡ Attention requise - Surveillance renforcée';
-        couleurUrgence = '#ffc107';
-    }
-
-    const pourcentageEngagement = (indices.E * 100).toFixed(0);
-
-    return `
-        <!-- BADGE NIVEAU ENGAGEMENT -->
-        <div class="badge" style="background-color: ${interpE.couleur}22; color: ${interpE.couleur}; border: 1px solid ${interpE.couleur};">
-            ${interpE.niveau} (${pourcentageEngagement}%)
-        </div>
-
-        <ul class="info-liste">
-            <li><strong>Niveau RàI :</strong> ${descriptionRaI}</li>
-            <li><strong>Urgence :</strong> <span style="color: ${couleurUrgence};">${urgence}</span></li>
-        </ul>
-
-        <div class="section-titre u-mt-25">Position sur l'échelle de risque</div>
-
-        <div class="profil-echelle-risque">
-            <div class="profil-echelle-barre" style="background: linear-gradient(to right,
-                        var(--bleu-clair) 0%, var(--bleu-clair) 20%,
-                        var(--vert-succes) 20%, var(--vert-succes) 35%,
-                        var(--btn-annuler) 35%, var(--btn-annuler) 50%,
-                        var(--orange-accent) 50%, var(--orange-accent) 70%,
-                        var(--rouge-erreur) 70%, var(--rouge-erreur) 100%);">
-                <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(indices.R * 100, 100)}%;">▼</div>
-                <div class="profil-echelle-indicateur-bas" style="left: ${Math.min(indices.R * 100, 100)}%;">R = ${indices.R}</div>
-            </div>
-
-            <div class="legende-risque-container">
-                <div class="legende-risque-item" style="left: 10%; color: var(--bleu-clair);">
-                    <span class="legende-risque-niveau">Minimal</span>
-                    <span class="legende-risque-seuil">0-0.19</span>
-                </div>
-                <div class="legende-risque-item" style="left: 27.5%; color: var(--vert-succes);">
-                    <span class="legende-risque-niveau">Faible</span>
-                    <span class="legende-risque-seuil">0.20-0.34</span>
-                </div>
-                <div class="legende-risque-item" style="left: 42.5%; color: var(--btn-annuler);">
-                    <span class="legende-risque-niveau">Modéré</span>
-                    <span class="legende-risque-seuil">0.35-0.49</span>
-                </div>
-                <div class="legende-risque-item" style="left: 60%; color: var(--orange-accent);">
-                    <span class="legende-risque-niveau">Élevé</span>
-                    <span class="legende-risque-seuil">0.50-0.69</span>
-                </div>
-                <div class="legende-risque-item" style="left: 85%; color: var(--rouge-erreur);">
-                    <span class="legende-risque-niveau">Critique</span>
-                    <span class="legende-risque-seuil">≥ 0.70</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="profil-formule">
-            <div class="profil-formule-code">R = 1 - E = 1 - ${indices.E} = ${indices.R}</div>
-        </div>
-
-        <div class="profil-formule-explications">
-            L'engagement mesure la <strong>mobilisation globale</strong> de l'étudiant selon la formule : E = ∛(A × C × P)
-            <span class="primo-aide" data-target="conseil-formule-engagement">📍</span>
-            <br>Engagement actuel : <strong style="color: ${interpE.couleur};">${interpE.niveau}</strong>
-        </div>
-
-        <!-- Conseil Primo: Explication de la formule d'engagement -->
-        <div id="conseil-formule-engagement" class="carte-info-toggle carte-info-conseil" style="display: none; margin-top: 10px;">
-            <strong>Pourquoi la racine cubique ?</strong>
-            <p>La racine cubique (∛) est une <strong>transformation normalisante</strong> qui préserve l'échelle d'origine tout en combinant les trois indices.</p>
-
-            <p><strong>Exemple concret :</strong></p>
-            <ul style="margin-left: 20px; line-height: 1.6;">
-                <li><strong>Sans racine cubique :</strong> Un étudiant à 70% sur A, C et P aurait : 0.7 × 0.7 × 0.7 = <strong>34%</strong> d'engagement ← Trop punitif !</li>
-                <li><strong>Avec racine cubique :</strong> Le même étudiant obtient : ∛(0.7 × 0.7 × 0.7) = <strong>70%</strong> d'engagement ← Cohérent et intuitif !</li>
-            </ul>
-
-            <p><strong>Avantages de cette approche :</strong></p>
-            <ul style="margin-left: 20px; line-height: 1.6;">
-                <li>✅ L'engagement reste sur la même échelle que A, C et P (0-100%)</li>
-                <li>✅ Un étudiant équilibré conserve son niveau moyen</li>
-                <li>✅ Les déséquilibres importants restent pénalisés (ex: A=100%, C=100%, P=0% → E=0%)</li>
-                <li>✅ Plus intuitif qu'une moyenne arithmétique qui ne pénaliserait pas assez les lacunes</li>
-            </ul>
-
-            <p style="margin-top: 10px; color: var(--gris-moyen); font-style: italic;">💡 C'est une moyenne géométrique qui mesure la mobilisation globale tout en respectant l'interdépendance des trois dimensions.</p>
-        </div>
-
-        <div class="section-titre u-mt-25">Indicateurs clés</div>
-
-        <div class="profil-grid-indicateurs">
-            <div class="profil-indicateur">
-                <div class="profil-indicateur-contenu">
-                    <span class="profil-indicateur-label">Engagement (E)</span>
-                    <strong class="profil-indicateur-valeur">${indices.E}</strong>
-                </div>
-            </div>
-            <div class="profil-indicateur profil-indicateur-accent-gauche" style="color: ${interpR.couleur};">
-                <div class="profil-indicateur-contenu">
-                    <span class="profil-indicateur-label">Risque (R)</span>
-                    <strong class="profil-indicateur-valeur">${indices.R}</strong>
-                </div>
-            </div>
-            <div class="profil-indicateur">
-                <div class="profil-indicateur-contenu">
-                    <span class="profil-indicateur-label">Niveau RàI</span>
-                    <strong class="profil-indicateur-valeur">${niveauRaI}</strong>
-                </div>
-            </div>
-        </div>
-
-        ${indices.R >= seuilMinimal ? `
-            <div class="profil-recommandations ${indices.R >= seuilEleve ? 'profil-recommandations-danger' : indices.R >= seuilModere ? 'profil-recommandations-avertissement' : 'profil-recommandations-info'} u-mt-20">
-                <h4 class="profil-recommandations-titre ${indices.R >= seuilEleve ? 'u-texte-danger' : indices.R >= seuilModere ? 'profil-texte-avertissement' : 'profil-texte-info'}">
-                    Intervention ciblée recommandée
-                </h4>
-                <ol class="profil-recommandations-liste ${indices.R >= seuilEleve ? 'u-texte-danger' : indices.R >= seuilModere ? 'profil-texte-avertissement' : 'profil-texte-info'}">
-                    ${indices.R >= seuilEleve ? `
-                        <li><strong>JOUR 1 :</strong> Rencontre individuelle urgente avec l'étudiant et conseiller pédagogique</li>
-                        <li><strong>JOUR 2-3 :</strong> Établir un plan d'intervention personnalisé (PIP) avec objectifs mesurables</li>
-                        <li><strong>SEMAINE 1 :</strong> Suivi quotidien de la présence et remise des travaux en retard</li>
-                        <li><strong>Mobiliser :</strong> Parents, aide pédagogique individuelle (API), services étudiants</li>
-                        <li><strong>Réévaluation :</strong> Rencontre de suivi hebdomadaire jusqu'à amélioration significative</li>
-                    ` : indices.R >= seuilModere ? `
-                        <li><strong>Cette semaine :</strong> Rencontre individuelle pour identifier les obstacles</li>
-                        <li><strong>Mise en place :</strong> Soutien ciblé sur le(s) composant(s) faible(s) (A, C ou P)</li>
-                        <li><strong>Suivi :</strong> Vérification bihebdomadaire des progrès</li>
-                        <li><strong>Prévention :</strong> Stratégies d'autorégulation et planification</li>
-                        <li><strong>Réévaluation :</strong> Dans 2 semaines pour ajuster l'intervention</li>
-                    ` : `
-                        <li><strong>Surveillance renforcée :</strong> Monitorer hebdomadairement les indices A-C-P</li>
-                        <li><strong>Dialogue proactif :</strong> Discussion informelle pour détecter signaux faibles</li>
-                        <li><strong>Ressources préventives :</strong> Partager outils d'organisation et de planification</li>
-                        <li><strong>Valorisation :</strong> Renforcer la motivation par rétroaction positive</li>
-                    `}
-                </ol>
-            </div>
-        ` : `
-            <div class="profil-recommandations profil-recommandations-succes u-mt-20">
-                <h4 class="profil-recommandations-titre u-texte-succes">Maintien de l'engagement</h4>
-                <ul class="profil-recommandations-liste u-texte-succes">
-                    <li>Continuer la surveillance universelle (Niveau RàI 1)</li>
-                    <li>Fournir rétroaction positive régulière</li>
-                    <li>Encourager l'autonomie et l'autorégulation</li>
-                    <li>Offrir défis stimulants pour maintenir la motivation</li>
-                </ul>
-            </div>
-        `}
-    `;
-}
-
 // calculerPerformancePAN → déplacé dans indices.js (#206)
 
 /**
@@ -3038,7 +2484,7 @@ function changerSectionProfil(section) {
     contenuContainer.innerHTML = `
         <div class="profil-contenu-header">
             <h2 class="u-flex-between-mb20">
-                <span data-tooltip="${{'productions':'profil-productions','mobilisation':'profil-engagement','progression':'profil-progression','performance':'profil-habiletes','accompagnement':'profil-accompagnement','travaux':'profil-travaux','rapport':'profil-rapport'}[section] || ''}">${titre}</span>
+                <span data-tooltip="${{'productions':'profil-productions','mobilisation':'profil-mobilisation','progression':'profil-progression','performance':'profil-habiletes','accompagnement':'profil-accompagnement','travaux':'profil-travaux','rapport':'profil-rapport'}[section] || ''}">${titre}</span>
                 ${toggleInfo}
             </h2>
         </div>
@@ -3422,7 +2868,6 @@ function afficherProfilComplet(daOuEl) {
     const A = indices.A / 100;
     const C = indices.C / 100;
     const interpM = interpreterMobilisation(A, C);
-    const interpE = interpreterEngagement(indices.E);
 
     // NOUVEAU (Beta 90): Calcul dual pour mode comparatif
     const config = db.getSync('modalitesEvaluation', {});
@@ -3592,7 +3037,7 @@ function afficherProfilComplet(daOuEl) {
                 <!-- Contenu dynamique chargé par changerSectionProfil() -->
                 <div class="profil-contenu-header">
                     <h2 class="u-flex-between-mb20">
-                        <span data-tooltip="${{'productions':'profil-productions','mobilisation':'profil-engagement','progression':'profil-progression','performance':'profil-habiletes','accompagnement':'profil-accompagnement','travaux':'profil-travaux','rapport':'profil-rapport'}[sectionAffichee] || ''}">${titreSection}</span>
+                        <span data-tooltip="${{'productions':'profil-productions','mobilisation':'profil-mobilisation','progression':'profil-progression','performance':'profil-habiletes','accompagnement':'profil-accompagnement','travaux':'profil-travaux','rapport':'profil-rapport'}[sectionAffichee] || ''}">${titreSection}</span>
                         <span class="primo-aide" data-target="details-calculs-risque-${da}">📍</span>
                     </h2>
                 </div>
@@ -4667,22 +4112,6 @@ function toggleDetailIndice(indice, da) {
                     🎯 Mobilisation détaillée
                 </h3>
                 ${genererSectionMobilisation(da)}
-            `;
-            break;
-        case 'E':
-            html = `
-                <h3 class="profil-titre-bleu-large-pr40">
-                    ⚡ Engagement détaillé
-                </h3>
-                ${genererSectionEngagement(da)}
-            `;
-            break;
-        case 'R':
-            html = `
-                <h3 class="profil-titre-bleu-large-pr40">
-                    ⚡ Engagement détaillé
-                </h3>
-                ${genererSectionRisque(da)}
             `;
             break;
     }
@@ -6151,8 +5580,7 @@ function determinerCibleIntervention(da) {
     // LOGIQUE DE DÉCISION (formule Excel traduite en JavaScript)
 
     // 1. Vérifier décrochage (priorité absolue)
-    // Note: Remplacé "risque élevé" par "engagement très faible" (< 0.3)
-    if (E === 'Décrochage' || indices.E < 0.3) {
+    if (E === 'Décrochage') {
         return {
             cible: 'Décrochage',
             pattern: M,
@@ -6311,32 +5739,7 @@ function determinerCibleIntervention(da) {
         }
     }
 
-    // 5. Stable MAIS risque élevé = plateau problématique
-    const seuilRisqueModere = obtenirSeuil('risque.modere');
-    const seuilRisqueFaible = obtenirSeuil('risque.faible');
-
-    if (M === 'Stable' && indices.R >= seuilRisqueModere) {
-        return {
-            cible: 'Plateau à risque élevé | Intervention pour sortir de la zone de risque',
-            pattern: M,
-            niveau: 2,
-            couleur: '#ff9800',
-            emoji: '🟠'
-        };
-    }
-
-    // 6. Stable avec risque modéré = attention requise
-    if (M === 'Stable' && indices.R >= seuilRisqueFaible) {
-        return {
-            cible: 'Plateau à risque modéré | Soutien préventif recommandé',
-            pattern: M,
-            niveau: 2,
-            couleur: '#ffc107',
-            emoji: '🟡'
-        };
-    }
-
-    // 7. Stable (performance satisfaisante)
+    // 5. Stable (performance satisfaisante)
     if (M === 'Stable') {
         if (N === 'Aucun' && I >= 25) {
             return {

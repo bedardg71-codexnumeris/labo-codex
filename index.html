@@ -3941,7 +3941,7 @@
 
                         <!-- Carte Note -->
                         <div id="note-indicateurs" class="carte-info-toggle carte-info-note" style="display: none;">
-                            <strong>Note :</strong> Les indices A-C-P-E mesurent l'engagement des étudiants dans l'apprentissage.
+                            <strong>Note :</strong> Les indices A-C-P mesurent l'engagement des étudiants dans l'apprentissage.
                             <br><br>
                             <strong>Assiduité (A)</strong> : Proportion des heures de présence parmi les heures de cours <strong>effectivement données jusqu'à maintenant</strong>. Calculé uniquement sur les séances passées, pas sur le total prévu pour la session.
                             <br><br>
@@ -3949,13 +3949,11 @@
                             <br><br>
                             <strong>Performance (P)</strong> : Calculé selon la pratique de notation en vigueur (Sommative : moyenne pondérée provisoire de toutes les évaluations, ou PAN-Standards : moyenne des N meilleurs artefacts selon l'échelle IDME).
                             <br><br>
-                            <strong>Engagement (E)</strong> : Racine cubique du produit des trois indices, E = ∛(A × C × P). La racine cubique normalise le résultat pour préserver l'échelle d'origine : un étudiant à 70% sur les trois indices aura un engagement de 70% (au lieu de 34% avec une multiplication directe). Cette transformation compense la décroissance multiplicative tout en pénalisant les déséquilibres importants.
-                            <br><br>
                             <em class="u-texte-09" style="color: var(--gris-moyen)">💡 Les mini-courbes de Gauss montrent la distribution du groupe. La ligne blanche = moyenne (μ), les pointillés = ±1 écart-type (σ).</em>
                         </div>
 
-                        <!-- Le contenu des indicateurs ACPE est généré dynamiquement par tableau-bord-apercu.js -->
-                        <!-- Barres de distribution avec nuages de points et courbes de Gauss pour A, C, P, E -->
+                        <!-- Le contenu des indicateurs A-C-P est généré dynamiquement par tableau-bord-apercu.js -->
+                        <!-- Barres de distribution avec nuages de points et courbes de Gauss pour A, C, P -->
                     </div>
 
                     <!-- ========== SECTION 2: INTERVENIR ========== -->
@@ -7698,7 +7696,6 @@
                             <label><input type="checkbox" data-colonne="assiduite" checked data-on-change="toggleColonneListe"> A</label>
                             <label><input type="checkbox" data-colonne="completion" checked data-on-change="toggleColonneListe"> C</label>
                             <label><input type="checkbox" data-colonne="performance" checked data-on-change="toggleColonneListe"> P</label>
-                            <label><input type="checkbox" data-colonne="engagement" checked data-on-change="toggleColonneListe"> E</label>
                             <label><input type="checkbox" data-colonne="pattern" checked data-on-change="toggleColonneListe"> Pattern</label>
                             <label><input type="checkbox" data-colonne="rai" checked data-on-change="toggleColonneListe"> RàI</label>
                             <label><input type="checkbox" data-colonne="interv" checked data-on-change="toggleColonneListe"> Interv.</label>
@@ -7739,9 +7736,6 @@
                                         <th data-action="trierTableauPar" data-param="performance" class="td-center-clickable" title="Cliquer pour trier">
                                             P<br><span class="text-xs-normal">(performance)</span><span id="tri-performance" class="ml-4">↕</span>
                                         </th>
-                                        <th data-action="trierTableauPar" data-param="engagement" class="td-center-clickable" title="Cliquer pour trier">
-                                            E<br><span class="text-xs-normal">(engagement)</span><span id="tri-engagement" class="ml-4">↕</span>
-                                        </th>
                                         <th data-action="trierTableauPar" data-param="pattern" class="td-left-140-clickable" title="Cliquer pour trier">
                                             Pattern<span id="tri-pattern" class="ml-4">↕</span>
                                         </th>
@@ -7757,7 +7751,6 @@
                                         <th id="moy-a" class="td-center entete-stat-cell">—</th>
                                         <th id="moy-c" class="td-center entete-stat-cell">—</th>
                                         <th id="moy-p" class="td-center entete-stat-cell">—</th>
-                                        <th id="moy-e" class="td-center entete-stat-cell">—</th>
                                         <th></th><th></th><th></th>
                                     </tr>
                                     <tr id="tr-entete-corr" class="entete-stats-ligne">
@@ -7765,7 +7758,6 @@
                                         <th id="corr-a" class="td-center entete-stat-cell">—</th>
                                         <th id="corr-c" class="td-center entete-stat-cell">—</th>
                                         <th class="td-center entete-stat-cell" style="opacity: 0.4;">ref</th>
-                                        <th id="corr-e" class="td-center entete-stat-cell">—</th>
                                         <th id="corr-pattern" class="td-center entete-stat-cell">—</th>
                                         <th id="corr-rai" class="td-center entete-stat-cell">—</th>
                                         <th id="corr-interv" class="td-center entete-stat-cell">—</th>
@@ -7984,12 +7976,11 @@
                                 <li><strong>Corrélations (r)</strong> — axe gauche [-1, +1] : force du lien entre un indice et P à chaque séance. Plus r est élevé, plus l'indice prédit P.</li>
                                 <li><strong>A↔P</strong> perd son pouvoir prédictif quand l'assiduité converge vers 100% (effet plafond).</li>
                                 <li><strong>C↔P</strong> gagne en force au fil du trimestre — la complétion devient le meilleur prédicteur individuel.</li>
-                                <li><strong>E↔P</strong> (engagement = moyenne géométrique A×C×P) reste le corrélat le plus stable de P.</li>
                                 <li><strong>Points carrés ■</strong> = séances avec dépôt de production. <strong>Triangles ▼</strong> = interventions de groupe.</li>
                             </ul>
                             <strong>Moyennes et interventions</strong>
                             <ul style="margin: 8px 0; padding-left: 18px; font-size: 0.85rem; line-height: 1.6;">
-                                <li><strong>Moy. A/C/P/E</strong> — axe droit (%) : moyenne du groupe entier.</li>
+                                <li><strong>Moy. A/C/P</strong> — axe droit (%) : moyenne du groupe entier.</li>
                                 <li><strong>P · [intervention]</strong> — moyenne de P des étudiants ciblés par cette intervention spécifique (groupe figé). La courbe commence à la date de l'intervention.</li>
                                 <li><strong>P contrôle</strong> — moyenne de P des étudiants n'ayant jamais reçu d'intervention. Si l'écart entre P ciblés et P contrôle se réduit après une intervention, celle-ci a eu un effet.</li>
                                 <li><strong>Moy. P</strong> inclut tous les étudiants (ciblés + contrôle). Utile comme référence globale.</li>
@@ -8005,9 +7996,6 @@
                                 <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #FF7043; font-size: 0.78rem;">
                                     <input type="checkbox" checked data-on-change="toggleCorrelation" data-param="CP"><svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="#FF7043" stroke-width="2"/></svg> C ↔ P
                                 </label>
-                                <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #AB47BC; font-size: 0.78rem;">
-                                    <input type="checkbox" checked data-on-change="toggleCorrelation" data-param="EP"><svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="#AB47BC" stroke-width="2"/></svg> E ↔ P
-                                </label>
                                 <span style="color: var(--texte-muted); margin-left: 4px;">│</span>
                                 <span id="checkboxes-interventions-corr" style="display: inline-flex; gap: 12px; flex-wrap: wrap;"></span>
                             </div>
@@ -8021,9 +8009,6 @@
                                 </label>
                                 <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #4CAF50; font-size: 0.78rem;">
                                     <input type="checkbox" data-on-change="toggleOverlayMoyenne" data-param="P"><svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="#4CAF50" stroke-width="1.5"/></svg> Moy. P
-                                </label>
-                                <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #AB47BC; font-size: 0.78rem;">
-                                    <input type="checkbox" data-on-change="toggleOverlayMoyenne" data-param="E"><svg width="16" height="2"><line x1="0" y1="1" x2="16" y2="1" stroke="#AB47BC" stroke-width="1.5"/></svg> Moy. E
                                 </label>
                             </div>
                         </div>
@@ -10129,7 +10114,7 @@
                     <div class="carte-info-toggle carte-info-conseil u-mb-20" style="display: block">
                         <strong>Système de captures :</strong>
                         <p class="u-mt-10" style="line-height: 1.6">
-                            Les captures enregistrent automatiquement l'état des indices A-C-P-E à des moments clés :
+                            Les captures enregistrent automatiquement l'état des indices A-C-P à des moments clés :
                         </p>
                         <ul class="u-mt-10" style="margin-left: 20px; line-height: 1.8">
                             <li><strong>Hebdomadaires :</strong> Chaque semaine, une capture est créée avec les indices actuels de tous les étudiants</li>
@@ -10910,7 +10895,7 @@
                             <div class="u-mt-15 u-p-15" style="background: var(--bleu-tres-pale); border-radius: var(--radius-grand)">
                                 <h4 class="u-mb-10 u-texte-bleu" data-tooltip="donnees-snapshots">Captures de progression (Snapshots)</h4>
                                 <p class="text-muted u-mb-15">
-                                    Les captures enregistrent l'état des indices A-C-P-E à des moments clés pour le suivi longitudinal.
+                                    Les captures enregistrent l'état des indices A-C-P à des moments clés pour le suivi longitudinal.
                                 </p>
 
                                 <!-- Statistiques -->
@@ -10972,7 +10957,7 @@
                                 </p>
 
                                 <div class="alerte alerte-information u-mb-15">
-                                    <strong>Données exportées :</strong> Indices A-C-P-E anonymisés, progression longitudinale, statistiques agrégées.
+                                    <strong>Données exportées :</strong> Indices A-C-P anonymisés, progression longitudinale, statistiques agrégées.
                                     <br><strong>Aucune donnée nominative n'est incluse.</strong>
                                 </div>
 
@@ -11136,7 +11121,7 @@
                                 <td class="td-bold-bleu">Contenu p&eacute;dagogique</td>
                                 <td class="ligne-separee-bleu">
                                     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a> (Creative Commons)<br>
-                                    <span class="text-muted u-texte-09">Documentation, mod&egrave;les p&eacute;dagogiques (SOLO, Ra&Igrave;, A-C-P-E, ELLAC, IDME), guides, aide int&eacute;gr&eacute;e. Tu peux copier, adapter et partager &agrave; des fins &eacute;ducatives non commerciales, avec attribution.</span>
+                                    <span class="text-muted u-texte-09">Documentation, mod&egrave;les p&eacute;dagogiques (SOLO, Ra&Igrave;, A-C-P, ELLAC, IDME), guides, aide int&eacute;gr&eacute;e. Tu peux copier, adapter et partager &agrave; des fins &eacute;ducatives non commerciales, avec attribution.</span>
                                 </td>
                             </tr>
                         </table>
@@ -11388,10 +11373,6 @@
                                 <p><strong>Qualité des productions</strong> - Mesure la maîtrise</p>
                                 <p>Évalue la qualité des travaux selon tes critères et ton échelle de notation.</p>
                                 <p class="text-muted u-mt-10 u-texte-09"><em>Le calcul dépend de ta pratique : en PAN-Standards, P = moyenne des N meilleurs artefacts (IDME). En Sommative, P = moyenne pondérée de toutes les évaluations (0-100%).</em></p>
-                            </div>
-
-                            <div class="alerte alerte-info" style="margin-top: 15px;">
-                                <p class="text-muted u-texte-09"><em>Note : Certains écrans peuvent encore afficher un indice « E » (Engagement). Cet indice composite est en cours de retrait et sera remplacé par des indicateurs plus précis dans une version future.</em></p>
                             </div>
 
                             <div class="u-mt-15 u-text-center">
@@ -14946,7 +14927,7 @@
 
                             <p><strong>Overlays optionnels</strong> (checkboxes) :</p>
                             <ul>
-                                <li><strong>Moyennes du groupe</strong> : courbes A, C, P, E en pourcentage (axe droit)</li>
+                                <li><strong>Moyennes du groupe</strong> : courbes A, C, P en pourcentage (axe droit)</li>
                                 <li><strong>Courbes d'intervention</strong> : trajectoire P des étudiants ciblés vs groupe contrôle (étudiants non ciblés)</li>
                             </ul>
 
