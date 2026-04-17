@@ -520,7 +520,7 @@ function mettreAJourTitreListeEtudiants() {
 /**
  * Met à jour les lignes moyenne et corrélation dans le thead
  */
-function mettreAJourEntetesAvecCorrelations(r_AP, r_CP, r_EP, r_PatternP, r_RaiP, r_IntervP, moyenneA, moyenneC, moyenneP, moyenneE) {
+function mettreAJourEntetesAvecCorrelations(r_AP, r_CP, r_PatternP, r_RaiP, r_IntervP, moyenneA, moyenneC, moyenneP) {
     function fmtMoy(v) {
         if (v === null || v === undefined || isNaN(v)) return '—';
         return 'moy=' + Math.round(v) + '%';
@@ -534,22 +534,18 @@ function mettreAJourEntetesAvecCorrelations(r_AP, r_CP, r_EP, r_PatternP, r_RaiP
     var moyA = document.getElementById('moy-a');
     var moyC = document.getElementById('moy-c');
     var moyP = document.getElementById('moy-p');
-    var moyE = document.getElementById('moy-e');
     if (moyA) moyA.textContent = fmtMoy(moyenneA);
     if (moyC) moyC.textContent = fmtMoy(moyenneC);
     if (moyP) moyP.textContent = fmtMoy(moyenneP);
-    if (moyE) moyE.textContent = fmtMoy(moyenneE);
 
     // Ligne corrélations avec P
     var corrA = document.getElementById('corr-a');
     var corrC = document.getElementById('corr-c');
-    var corrE = document.getElementById('corr-e');
     var corrPattern = document.getElementById('corr-pattern');
     var corrRai = document.getElementById('corr-rai');
     var corrInterv = document.getElementById('corr-interv');
     if (corrA) corrA.textContent = fmtCorr(r_AP);
     if (corrC) corrC.textContent = fmtCorr(r_CP);
-    if (corrE) corrE.textContent = fmtCorr(r_EP);
     if (corrPattern) corrPattern.textContent = fmtCorr(r_PatternP);
     if (corrRai) corrRai.textContent = fmtCorr(r_RaiP);
     if (corrInterv) corrInterv.textContent = fmtCorr(r_IntervP);
@@ -600,7 +596,6 @@ function toggleFiltreMinimum(actif) {
 
     var moyC = document.getElementById('moy-c');
     var moyP = document.getElementById('moy-p');
-    var moyE = document.getElementById('moy-e');
     if (moyC) moyC.textContent = fmtMoy(moy.C);
     if (moyP) {
         moyP.textContent = fmtMoy(moy.P);
@@ -608,7 +603,6 @@ function toggleFiltreMinimum(actif) {
             moyP.title = 'Moyenne P sur ' + window._moyennesQualifies.nb + ' élèves qualifiés (≥ minimum). ' + window._moyennesQualifies.nbInsuffisants + ' exclus.';
         }
     }
-    if (moyE) moyE.textContent = fmtMoy(moy.E);
 }
 window.toggleFiltreMinimum = toggleFiltreMinimum;
 
@@ -1011,36 +1005,20 @@ function afficherListeEtudiantsConsultation() {
     });
     const moyenneA = valeursA_avecPresences.length > 0 ? valeursA_avecPresences.reduce((sum, val) => sum + val, 0) / valeursA_avecPresences.length : null;
 
-    // 🆕 BETA 91: Calculer la moyenne de l'engagement E sur TOUS les étudiants (cohérence avec corrélations)
-    const valeursE_tous = tousIndices.map(indices => {
-        const A = indices.A / 100;
-        const C = indices.C / 100;
-        const P = indices.P / 100;
-        const E_brut = A * C * P;
-        const E = Math.pow(E_brut, 1/3);
-        return E * 100; // Retourner en pourcentage
-    });
-    const moyenneE = valeursE_tous.length > 0 ? valeursE_tous.reduce((sum, val) => sum + val, 0) / valeursE_tous.length : null;
     const moyenneC = valeursC_tous.length > 0 ? valeursC_tous.reduce((sum, val) => sum + val, 0) / valeursC_tous.length : null;
     const moyenneP = valeursP_tous.length > 0 ? valeursP_tous.reduce((sum, val) => sum + val, 0) / valeursP_tous.length : null;
-    const r_EP = calculerCorrelationPearson(valeursE_tous, valeursP_tous);
 
     // Moyennes filtrées (≥ minimum d'évaluations seulement)
     const etudiantsQualifies = etudiantsFiltres.filter(e => !e.performanceInsuffisante && (e.indicesCalcules.C > 0 || e.indicesCalcules.P > 0));
     const vP_qualifies = etudiantsQualifies.map(e => e.indicesCalcules.P);
     const vC_qualifies = etudiantsQualifies.map(e => e.indicesCalcules.C);
-    const vE_qualifies = etudiantsQualifies.map(e => {
-        const A = e.indicesCalcules.A / 100, C = e.indicesCalcules.C / 100, P = e.indicesCalcules.P / 100;
-        return Math.pow(A * C * P, 1/3) * 100;
-    });
     const moyenneP_qualifies = vP_qualifies.length > 0 ? vP_qualifies.reduce((s, v) => s + v, 0) / vP_qualifies.length : null;
     const moyenneC_qualifies = vC_qualifies.length > 0 ? vC_qualifies.reduce((s, v) => s + v, 0) / vC_qualifies.length : null;
-    const moyenneE_qualifies = vE_qualifies.length > 0 ? vE_qualifies.reduce((s, v) => s + v, 0) / vE_qualifies.length : null;
     const nbInsuffisants = etudiantsFiltres.filter(e => e.performanceInsuffisante).length;
 
     // Stocker pour le toggle
-    window._moyennesQualifies = { P: moyenneP_qualifies, C: moyenneC_qualifies, E: moyenneE_qualifies, A: moyenneA, nb: etudiantsQualifies.length, nbInsuffisants };
-    window._moyennesToutes = { P: moyenneP, C: moyenneC, E: moyenneE, A: moyenneA };
+    window._moyennesQualifies = { P: moyenneP_qualifies, C: moyenneC_qualifies, A: moyenneA, nb: etudiantsQualifies.length, nbInsuffisants };
+    window._moyennesToutes = { P: moyenneP, C: moyenneC, A: moyenneA };
 
     // Afficher le compteur à côté de la checkbox
     const badgeInsuf = document.getElementById('badge-nb-insuffisants');
@@ -1090,7 +1068,7 @@ function afficherListeEtudiantsConsultation() {
     var r_IntervP = calculerCorrelationPearson(valeursInterv, valeursP_interv);
 
     // Mettre à jour les lignes moyenne et corrélation dans le thead
-    mettreAJourEntetesAvecCorrelations(r_AP, r_CP, r_EP, r_PatternP, r_RaiP, r_IntervP, moyenneA, moyenneC, moyenneP, moyenneE);
+    mettreAJourEntetesAvecCorrelations(r_AP, r_CP, r_PatternP, r_RaiP, r_IntervP, moyenneA, moyenneC, moyenneP);
 
     // 🆕 BETA 91: Mettre à jour la carte explicative sur le calcul des indices
     mettreAJourExplicationCalculIndices();
@@ -1139,13 +1117,6 @@ function afficherListeEtudiantsConsultation() {
             case 'performance':
                 valeurA = a.indicesCalcules.P;
                 valeurB = b.indicesCalcules.P;
-                break;
-            case 'engagement':
-                // Calculer l'engagement E = (A × C × P)^(1/3)
-                const E_A = Math.pow((a.indicesCalcules.A / 100) * (a.indicesCalcules.C / 100) * (a.indicesCalcules.P / 100), 1/3);
-                const E_B = Math.pow((b.indicesCalcules.A / 100) * (b.indicesCalcules.C / 100) * (b.indicesCalcules.P / 100), 1/3);
-                valeurA = E_A;
-                valeurB = E_B;
                 break;
             case 'pattern':
                 valeurA = a.cibleCalculee.pattern;
@@ -1259,21 +1230,7 @@ function afficherListeEtudiantsConsultation() {
             html += '<td class="etud-text-center">' + tiret + '</td>';
         }
 
-        // Colonne E : afficher seulement si présences saisies ET évaluations
-        if (aPresencesSaisies && aEvaluations) {
-            // Colonne Engagement E = (A × C × P)^(1/3) en pourcentage
-            const E_brut = (indices.A / 100) * (indices.C / 100) * (indices.P / 100);
-            const E = Math.pow(E_brut, 1/3);
-            const engagementPct = Math.round(E * 100);
-            const couleurE = obtenirCouleurEngagement(engagementPct);
-            html += '<td class="etud-text-center"><strong style="color: ' + couleurE + ';">' + engagementPct + '%</strong></td>';
-        } else {
-            // Pas assez de données pour calculer E
-            html += '<td class="etud-text-center">' + tiret + '</td>';
-        }
-
         // Colonnes Pattern et RàI (affichées uniquement si RàI activé)
-        // 🆕 BETA 95.7 : Même logique que E - besoin de présences ET évaluations
         // Toujours générer les cellules pour garder nth-child cohérent avec les checkboxes colonnes
         if (activerRai) {
             if (aPresencesSaisies && aEvaluations) {
@@ -1323,10 +1280,9 @@ var listeColonneIndexMap = {
     'assiduite': 7,
     'completion': 8,
     'performance': 9,
-    'engagement': 10,
-    'pattern': 11,
-    'rai': 12,
-    'interv': 13
+    'pattern': 10,
+    'rai': 11,
+    'interv': 12
 };
 
 function toggleColonneListe(checkbox) {
@@ -1602,47 +1558,6 @@ function mettreAJourStatistiques(etudiants) {
  */
 function obtenirCouleurMobilisation(mobilisation) {
     return obtenirCouleurSelonSeuils(mobilisation * 100);
-}
-
-/**
- * Obtient la couleur appropriée pour l'engagement
- * Basé sur les seuils d'engagement : <30% insuffisant, 30-49% fragile, 50-64% modéré, 65-79% favorable, ≥80% très favorable
- * @param {number} engagementPct - Valeur de l'engagement en pourcentage (0-100)
- * @returns {string} - Code couleur hexadécimal
- */
-function obtenirCouleurEngagement(engagementPct) {
-    // Utiliser les mêmes seuils que obtenirCouleurSelonSeuils pour cohérence
-    return obtenirCouleurSelonSeuils(engagementPct);
-}
-
-/**
- * Génère un badge d'engagement avec classe CSS appropriée
- * Calcule l'engagement avec la formule E = (A × C × P)^(1/3)
- * @param {Object} indices - Objet contenant A, C et P (en pourcentages 0-100)
- * @returns {Object} - {label, classe}
- */
-function genererBadgeEngagement(indices) {
-    // Convertir les pourcentages en proportions (0-1)
-    const A = indices.A / 100;
-    const C = indices.C / 100;
-    const P = indices.P / 100;
-
-    // Calculer l'engagement avec racine cubique
-    const E_brut = A * C * P;
-    const E = Math.pow(E_brut, 1/3);
-
-    // Déterminer le niveau selon les seuils
-    if (E >= 0.80) {
-        return { label: 'Très favorable', classe: 'badge-sys badge-engagement-tres-favorable' };
-    } else if (E >= 0.65) {
-        return { label: 'Favorable', classe: 'badge-sys badge-engagement-favorable' };
-    } else if (E >= 0.50) {
-        return { label: 'Modéré', classe: 'badge-sys badge-engagement-modere' };
-    } else if (E >= 0.30) {
-        return { label: 'Fragile', classe: 'badge-sys badge-engagement-fragile' };
-    } else {
-        return { label: 'Insuffisant', classe: 'badge-sys badge-engagement-insuffisant' };
-    }
 }
 
 /**

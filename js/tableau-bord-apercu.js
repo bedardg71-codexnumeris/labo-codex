@@ -12,15 +12,13 @@
  * RÔLE:
  * Calcule et affiche les statistiques pédagogiques du tableau de bord
  * - Métriques globales du groupe (indices A-C-P)
- * - Distribution des niveaux d'engagement
- * - Alertes prioritaires (étudiants à engagement insuffisant)
+ * - Distributions A, C et P
  *
  * FONDEMENTS THÉORIQUES:
  * Basé sur le Guide de monitorage - Section ROUGE (indices primaires)
  * - Assiduité (A) : proportion de présence
  * - Complétion (C) : proportion d'artefacts remis
  * - Performance (P) : performance moyenne (3 derniers artefacts)
- * - Engagement : E = (A × C × P)^(1/3) (racine cubique pour compenser décroissance multiplicative)
  *
  * DÉPENDANCES:
  * - LocalStorage: groupeEtudiants, presences, evaluationsSauvegardees
@@ -1103,7 +1101,6 @@ function chargerTableauBordApercu() {
 
         // Afficher tout (sans noms d'étudiants dans l'aperçu)
         afficherMetriquesGlobales(etudiantsAvecIndices);
-        afficherAlertesPrioritairesCompteurs(etudiantsAvecIndices);
 
         // Afficher RàI et Patterns uniquement si activé dans les réglages
         const activerRai = obtenirPreference('activerRai') !== false;
@@ -1400,7 +1397,7 @@ function afficherMetriquesGlobales(etudiants) {
     // Seuils minimaux par indice
     // - A : 1 séance suffit
     // - C : 1 évaluation suffit
-    // - P et E : configurable via "Nb minimal d'évaluations pour calculer P et E" (minimumCompletion)
+    // - P : configurable via "Nb minimal d'évaluations pour calculer P" (minimumCompletion)
     const seuilA = 1;
     const seuilC = 1;
 
@@ -1456,10 +1453,6 @@ function afficherMetriquesGlobales(etudiants) {
     const evalsManquantesC = Math.max(0, seuilC - nbEvaluationsGroupe);
     const evalsManquantesP = Math.max(0, seuilP - nbEvaluationsGroupe);
 
-    // Pour E : besoin des deux (séances ET évaluations pour P)
-    const seancesManquantesE = seancesManquantesA;
-    const evalsManquantesE = evalsManquantesP;
-
     // Générer les textes explicites "en attente"
     const texteAttenteA = seancesManquantesA > 0
         ? `${seancesManquantesA} séance${seancesManquantesA > 1 ? 's' : ''} en attente` : '';
@@ -1467,16 +1460,6 @@ function afficherMetriquesGlobales(etudiants) {
         ? `${evalsManquantesC} évaluation${evalsManquantesC > 1 ? 's' : ''} en attente` : '';
     const texteAttenteP = evalsManquantesP > 0
         ? `${evalsManquantesP} évaluation${evalsManquantesP > 1 ? 's' : ''} en attente` : '';
-
-    // Pour E : combiner les deux manques si nécessaire
-    let texteAttenteE = '';
-    if (seancesManquantesE > 0 && evalsManquantesE > 0) {
-        texteAttenteE = `${seancesManquantesE} séance${seancesManquantesE > 1 ? 's' : ''} + ${evalsManquantesE} éval. en attente`;
-    } else if (seancesManquantesE > 0) {
-        texteAttenteE = `${seancesManquantesE} séance${seancesManquantesE > 1 ? 's' : ''} en attente`;
-    } else if (evalsManquantesE > 0) {
-        texteAttenteE = `${evalsManquantesE} évaluation${evalsManquantesE > 1 ? 's' : ''} en attente`;
-    }
 
 
     // Debug: Vérifier les indices A des étudiants
@@ -1570,32 +1553,14 @@ function afficherMetriquesGlobales(etudiants) {
         sansEvaluation: e.alternatif.completion === 0 && e.alternatif.performance === 0
     }));
 
-    const etudiantsSOM_E = etudiantsAvecDonneesSOM.map(e => ({
-        da: e.da,
-        nom: e.nom,
-        prenom: e.prenom,
-        valeur: e.sommatif.engagement
-    }));
-
-    const etudiantsPAN_E = etudiantsAvecDonneesPAN.map(e => ({
-        da: e.da,
-        nom: e.nom,
-        prenom: e.prenom,
-        valeur: e.alternatif.engagement
-    }));
-
     // 🆕 BETA 91: Calculer les corrélations A-P et C-P pour interprétation
     // Utiliser la pratique active (SOM ou PAN) pour les corrélations
     const valeursA = afficherPan ? etudiantsPAN_A.map(e => e.valeur) : etudiantsSOM_A.map(e => e.valeur);
     const valeursC = afficherPan ? etudiantsPAN_C.map(e => e.valeur) : etudiantsSOM_C.map(e => e.valeur);
     const valeursP = afficherPan ? etudiantsPAN_P.map(e => e.valeur) : etudiantsSOM_P.map(e => e.valeur);
-    const valeursE = afficherPan ? etudiantsPAN_E.map(e => e.valeur) : etudiantsSOM_E.map(e => e.valeur);
 
     const r_AP = calculerCorrelationPearson(valeursA, valeursP);
     const r_CP = calculerCorrelationPearson(valeursC, valeursP);
-
-    // Calculer la moyenne de E pour le groupe
-    const moyenneE = valeursE.length > 0 ? valeursE.reduce((sum, val) => sum + val, 0) / valeursE.length : null;
 
     // 🆕 BETA 96: Utiliser l'ID de la carte au lieu de chercher par texte
     const carteIndicateurs = document.getElementById('carte-indicateurs-acpe');
@@ -1647,10 +1612,9 @@ function afficherMetriquesGlobales(etudiants) {
     const html = `
         <div class="tb-p-20">
             ${legendeUnique}
-            ${genererBarreDistribution('Assiduité (A) — sommatif', etudiantsSOM_A, etudiantsPAN_A, 'A', afficherSom, afficherPan, r_AP, null, texteAttenteA, nbTotal)}
-            ${genererBarreDistribution('Complétion (C) — sommatif', etudiantsSOM_C, etudiantsPAN_C, 'C', afficherSom, afficherPan, r_CP, null, texteAttenteC, nbTotal)}
-            ${genererBarreDistribution('Engagement (E) — sommatif composite', etudiantsSOM_E, etudiantsPAN_E, 'E', afficherSom, afficherPan, null, moyenneE, texteAttenteE, nbTotal)}
-            ${genererBarreDistribution('Performance (P) — alternatif', etudiantsSOM_P, etudiantsPAN_P, 'P', afficherSom, afficherPan, null, null, texteAttenteP, nbTotal)}
+            ${genererBarreDistribution('Assiduité (A) — sommatif', etudiantsSOM_A, etudiantsPAN_A, 'A', afficherSom, afficherPan, r_AP, texteAttenteA, nbTotal)}
+            ${genererBarreDistribution('Complétion (C) — sommatif', etudiantsSOM_C, etudiantsPAN_C, 'C', afficherSom, afficherPan, r_CP, texteAttenteC, nbTotal)}
+            ${genererBarreDistribution('Performance (P) — alternatif', etudiantsSOM_P, etudiantsPAN_P, 'P', afficherSom, afficherPan, null, texteAttenteP, nbTotal)}
         </div>
     `;
 
@@ -1697,22 +1661,21 @@ function genererCarteMetrique(label, valeurSom, valeurPan, afficherSom, afficher
    =============================== */
 
 /**
- * Génère une barre de distribution visuelle pour A, C, P ou E
+ * Génère une barre de distribution visuelle pour A, C ou P
  * Chaque étudiant est représenté par une ligne verticale sur l'échelle
  *
  * @param {string} label - Nom de la métrique (ex: "Assiduité")
  * @param {Array} etudiantsSOM - [{da, nom, prenom, valeur}] pour SOM
  * @param {Array} etudiantsPAN - [{da, nom, prenom, valeur}] pour PAN
- * @param {string} type - Type de métrique ('A', 'C', 'P', 'E')
+ * @param {string} type - Type de métrique ('A', 'C', 'P')
  * @param {boolean} afficherSom - Afficher la couche SOM
  * @param {boolean} afficherPan - Afficher la couche PAN
  * @returns {string} HTML de la barre de distribution
  */
-function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, afficherSom, afficherPan, correlation = null, moyenneEngagement = null, texteAttente = '', nbTotal = 0) {
+function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, afficherSom, afficherPan, correlation = null, texteAttente = '', nbTotal = 0) {
 
-    // Gradient de couleurs selon les seuils d'engagement (4 zones, sans Insuffisant)
+    // Gradient de couleurs 4 zones (Fragile → Modéré → Favorable → Très favorable)
     // Orange (30-49%) → Jaune (50-64%) → Vert (65-79%) → Bleu (≥80%)
-    // Transitions douces entre les couleurs
     const gradient = `linear-gradient(to right,
         #ff9800 0%,
         #ffc107 25%,
@@ -1740,7 +1703,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
         }
     }
 
-    // 🆕 BETA 91: Générer l'interprétation de la corrélation ou de la moyenne E ou distribution P
+    // 🆕 BETA 91: Générer l'interprétation de la corrélation ou distribution P
     let interpretationHTML = '';
 
     // PRIORITÉ 1: Distribution P ou diagnostic note de passage
@@ -1820,31 +1783,6 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
             </div>
         `;
     }
-    // PRIORITÉ 3: Moyenne E
-    else if (type === 'E' && moyenneEngagement !== null && !isNaN(moyenneEngagement)) {
-        // Interprétation de la moyenne E avec qualification du niveau et impact sur contexte
-        const moyE = moyenneEngagement * 100; // Convertir en pourcentage
-        let niveauAdjectif = '';
-        let impactContexte = '';
-
-        if (moyE >= 70) {
-            niveauAdjectif = 'bon';
-            impactContexte = 'rend favorable le contexte d\'apprentissage';
-        } else if (moyE >= 55) {
-            niveauAdjectif = 'modéré';
-            impactContexte = 'offre un contexte d\'apprentissage acceptable, mais améliorable';
-        } else {
-            niveauAdjectif = 'faible';
-            impactContexte = 'fragilise le contexte d\'apprentissage et nécessite des interventions';
-        }
-
-        interpretationHTML = `
-            <div class="tb-texte-description">
-                Le ${niveauAdjectif} niveau d'engagement global du groupe (moy. ${Math.round(moyE)}%) ${impactContexte}.
-            </div>
-        `;
-    }
-
     // 🆕 BETA 96: Fonction pour interpoler la couleur du gradient selon la position
     // Gradient: orange (0%) → jaune (25%) → vert (50%) → bleu (75%+)
     function obtenirCouleurGradient(positionPourcent) {
@@ -2066,7 +2004,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
 
     return `
         <div class="distribution-container u-mb-20">
-            <h4 class="tb-titre-simple" style="margin-bottom: 4px;" data-tooltip="${{A:'tdb-assiduite',C:'tdb-completion',E:'tdb-engagement',P:'tdb-performance'}[type]}">${label}</h4>
+            <h4 class="tb-titre-simple" style="margin-bottom: 4px;" data-tooltip="${{A:'tdb-assiduite',C:'tdb-completion',P:'tdb-performance'}[type]}">${label}</h4>
             <div style="position: relative; margin-top: 20px; margin-bottom: ${interpretationFinale ? '8px' : '0'};">
                 ${moyennePositionneeHTML}
                 <div class="barre-indicateur">
@@ -2566,146 +2504,6 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
 }
 
 /**
- * Affiche les compteurs de niveaux d'engagement
- * Valeurs colorées selon la pratique (orange=SOM, bleu=PAN)
- *
- * @param {Array} etudiants - Étudiants avec indices calculés
- */
-function afficherAlertesPrioritairesCompteurs(etudiants) {
-    const config = db.getSync('modalitesEvaluation', {});
-    const affichage = config.affichageTableauBord || {};
-    const afficherSom = affichage.afficherSommatif === true;
-    const afficherPan = affichage.afficherAlternatif === true;
-    const nbTotal = etudiants.length;
-
-    // Calculer les statistiques pour SOM
-    let somTresFavorable = 0, somFavorable = 0, somModere = 0, somFragile = 0, somInsuffisant = 0;
-    etudiants.forEach(e => {
-        const niveau = e.sommatif.niveauEngagement;
-        if (niveau === 'très favorable') somTresFavorable++;
-        else if (niveau === 'favorable') somFavorable++;
-        else if (niveau === 'modéré') somModere++;
-        else if (niveau === 'fragile') somFragile++;
-        else if (niveau === 'insuffisant') somInsuffisant++;
-    });
-
-    // Calculer les statistiques pour PAN
-    let panTresFavorable = 0, panFavorable = 0, panModere = 0, panFragile = 0, panInsuffisant = 0;
-    etudiants.forEach(e => {
-        const niveau = e.alternatif.niveauEngagement;
-        if (niveau === 'très favorable') panTresFavorable++;
-        else if (niveau === 'favorable') panFavorable++;
-        else if (niveau === 'modéré') panModere++;
-        else if (niveau === 'fragile') panFragile++;
-        else if (niveau === 'insuffisant') panInsuffisant++;
-    });
-
-    // Trouver la carte Niveau d'engagement
-    const cartes = document.querySelectorAll('#apercu-contenu .carte');
-    let carteEngagement = null;
-    cartes.forEach(carte => {
-        const h3 = carte.querySelector('h3 span');
-        if (h3 && h3.textContent.includes("Niveau d'engagement")) {
-            carteEngagement = carte;
-        }
-    });
-
-    if (!carteEngagement) return;
-
-    // Conserver le header et la note toggle
-    const noteToggle = carteEngagement.querySelector('.carte-info-toggle');
-    const header = carteEngagement.querySelector('h3');
-
-    carteEngagement.innerHTML = '';
-    carteEngagement.appendChild(header);
-    if (noteToggle) carteEngagement.appendChild(noteToggle);
-
-    // Générer les cartes (ordre inversé : favorable en haut, insuffisant en bas)
-    const html = `
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-            ${genererCarteEngagement('Engagement favorable', somTresFavorable + somFavorable, panTresFavorable + panFavorable, nbTotal, afficherSom, afficherPan, 'var(--alerte-fond-succes)', 'var(--btn-confirmer)')}
-            ${genererCarteEngagement('Engagement modéré', somModere, panModere, nbTotal, afficherSom, afficherPan, 'rgba(200,160,96,0.1)', '#c8a060')}
-            ${genererCarteEngagement('Engagement fragile', somFragile, panFragile, nbTotal, afficherSom, afficherPan, 'rgba(232,64,87,0.08)', 'var(--risque-tres-eleve)')}
-            ${genererCarteEngagement('Engagement insuffisant', somInsuffisant, panInsuffisant, nbTotal, afficherSom, afficherPan, 'rgba(160,32,48,0.1)', 'var(--risque-critique)')}
-        </div>
-    `;
-
-    carteEngagement.insertAdjacentHTML('beforeend', html);
-}
-
-/**
- * Génère une carte d'engagement avec les valeurs SOM et PAN colorées
- */
-function genererCarteEngagement(label, valeurSom, valeurPan, total, afficherSom, afficherPan, bgColor, borderColor) {
-    const valeurs = [];
-
-    if (afficherSom) {
-        valeurs.push(`<strong class="tb-valeur-grande-orange">${valeurSom}</strong>`);
-    }
-
-    if (afficherPan) {
-        valeurs.push(`<strong class="tb-valeur-grande-bleu-std">${valeurPan}</strong>`);
-    }
-
-    return `
-        <div style="background: ${bgColor}; padding: 12px; border-radius: 6px; border: 2px solid ${borderColor};">
-            <div class="u-flex-between">
-                <span class="tb-texte-moyen-gris">${label}</span>
-                <div class="tb-flex-gap15-baseline">
-                    ${valeurs.join('')}
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-/**
- * Affiche la liste des étudiants à engagement insuffisant
- *
- * @param {Array} etudiants - Étudiants avec indices calculés
- * @param {boolean} afficherSommatif - Utiliser les indices sommatifs
- */
-function afficherListeEtudiantsCritiques(etudiants, afficherSommatif) {
-    const container = document.getElementById('tb-etudiants-critique');
-    if (!container) return;
-
-    const etudiantsCritiques = etudiants
-        .filter(e => {
-            const niveau = afficherSommatif ? e.sommatif.niveauEngagement : e.alternatif.niveauEngagement;
-            return niveau === 'insuffisant';
-        })
-        .sort((a, b) => {
-            const engagementA = afficherSommatif ? a.sommatif.engagement : a.alternatif.engagement;
-            const engagementB = afficherSommatif ? b.sommatif.engagement : b.alternatif.engagement;
-            return engagementA - engagementB; // Tri croissant (engagement le plus faible en premier)
-        });
-
-    container.innerHTML = etudiantsCritiques.map(e => {
-        const indices = afficherSommatif ? e.sommatif : e.alternatif;
-        return `
-            <div style="display: flex; justify-content: space-between; align-items: center;
-                        padding: 12px; background: var(--surface-conteneur, #142428); border-radius: 6px;
-                        border-left: 4px solid var(--risque-critique);">
-                <div>
-                    <strong>${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}</strong>
-                    <span style="color: var(--gris-moyen); margin-left: 10px;">(${echapperHtml(e.groupe || '—')})</span>
-                    <div style="font-size: 0.85rem; color: var(--gris-moyen); margin-top: 4px;">
-                        A: ${formatPourcentage(indices.assiduite)} |
-                        C: ${formatPourcentage(indices.completion)} |
-                        P: ${formatPourcentage(indices.performance)}
-                    </div>
-                </div>
-                <button class="btn btn-principal"
-                        data-action="tbNavigerVersProfil" data-param="${e.da}"
-                        class="tb-padding-compact">
-                    Voir profil
-                </button>
-            </div>
-        `;
-    }).join('');
-}
-
-/**
  * Génère une carte de pattern avec valeurs SOM et PAN colorées
  */
 function genererCartePattern(label, valeurSom, valeurPan, total, afficherSom, afficherPan, bgColor, borderColor) {
@@ -3070,126 +2868,6 @@ function determinerPattern(indices) {
 }
 */
 
-/**
- * Affiche les actions recommandées (Top 5)
- *
- * @param {Array} etudiants - Étudiants avec indices calculés
- */
-function afficherActionsRecommandees(etudiants) {
-    const container = document.getElementById('tb-liste-actions');
-    const messageVide = document.getElementById('tb-aucune-action');
-
-    if (!container) return;
-
-    const config = db.getSync('modalitesEvaluation', {});
-    const afficherSommatif = config.affichageTableauBord?.afficherSommatif === true;
-
-    // Filtrer étudiants à engagement faible et trier par priorité (engagement croissant)
-    const etudiantsAEngagementFaible = etudiants
-        .filter(e => {
-            const engagement = afficherSommatif ? e.sommatif.engagement : e.alternatif.engagement;
-            return engagement < 0.50; // Seuil: modéré ou moins
-        })
-        .sort((a, b) => {
-            const engagementA = afficherSommatif ? a.sommatif.engagement : a.alternatif.engagement;
-            const engagementB = afficherSommatif ? b.sommatif.engagement : b.alternatif.engagement;
-            return engagementA - engagementB; // Tri croissant (engagement le plus faible en premier)
-        })
-        .slice(0, 5); // Top 5
-
-    if (etudiantsAEngagementFaible.length === 0) {
-        container.classList.add('u-hide');
-        if (messageVide) messageVide.classList.remove('u-hide');
-        return;
-    }
-
-    container.classList.remove('u-hide');
-    if (messageVide) messageVide.classList.add('u-hide');
-
-    container.innerHTML = etudiantsAEngagementFaible.map((e, index) => {
-        const indices = afficherSommatif ? e.sommatif : e.alternatif;
-        const recommendation = genererRecommandation(indices);
-
-        return `
-            <div style="padding: 15px; background: var(--surface-conteneur, #142428); border-radius: 8px;
-                        border-left: 4px solid ${getCouleurEngagement(indices.niveauEngagement)};">
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
-                    <div>
-                        <span style="display: inline-block; width: 24px; height: 24px;
-                                     background: ${getCouleurEngagement(indices.niveauEngagement)};
-                                     color: white; border-radius: 50%; text-align: center;
-                                     line-height: 24px; font-weight: bold; margin-right: 10px;">
-                            ${index + 1}
-                        </span>
-                        <strong>${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}</strong>
-                        <span style="color: var(--gris-moyen); margin-left: 8px;">(${echapperHtml(e.groupe || '—')})</span>
-                    </div>
-                    <span class="badge-engagement engagement-${indices.niveauEngagement.replace(' ', '-')}"
-                          class="tb-texte-capitalize">
-                        ${indices.niveauEngagement}
-                    </span>
-                </div>
-                <div class="tb-texte-gris-mb10">
-                    ${recommendation}
-                </div>
-                <div style="display: flex; gap: 8px; font-size: 0.85rem;">
-                    <span>A: ${formatPourcentage(indices.assiduite)}</span> |
-                    <span>C: ${formatPourcentage(indices.completion)}</span> |
-                    <span>P: ${formatPourcentage(indices.performance)}</span>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-/**
- * Génère une recommandation d'action selon les indices
- *
- * @param {Object} indices - Indices A-C-P
- * @returns {string} Recommandation pédagogique
- */
-function genererRecommandation(indices) {
-    const {assiduite, completion, performance} = indices;
-
-    // Identifier le défi principal
-    if (assiduite < 0.65) {
-        return "<strong>Priorité: Assiduité</strong> - Contacter l'étudiant pour comprendre les absences et proposer un soutien";
-    }
-    if (completion < 0.65) {
-        return "📝 <strong>Priorité: Complétion</strong> - Rencontre pour identifier les obstacles et établir un échéancier réaliste";
-    }
-    if (performance < 0.65) {
-        return "🎯 <strong>Priorité: Performance</strong> - Offrir du soutien pédagogique et des stratégies d'apprentissage";
-    }
-    if (assiduite < 0.75) {
-        return "⚠️ <strong>Suivi: Assiduité</strong> - Surveiller l'évolution et encourager la régularité";
-    }
-    if (completion < 0.75) {
-        return "⚠️ <strong>Suivi: Complétion</strong> - Rappeler les échéances et vérifier la charge de travail";
-    }
-    if (performance < 0.75) {
-        return "⚠️ <strong>Suivi: Performance</strong> - Proposer des ressources complémentaires";
-    }
-
-    return "✓ Situation sous contrôle - Maintenir le suivi régulier";
-}
-
-/**
- * Retourne la couleur CSS selon le niveau d'engagement
- *
- * @param {string} niveau - Niveau d'engagement
- * @returns {string} Couleur CSS
- */
-function getCouleurEngagement(niveau) {
-    const couleurs = {
-        'très favorable': '#2196F3',  // Bleu - Très bon
-        'favorable': '#388e3c',        // Vert - Bon
-        'modéré': '#fbc02d',           // Jaune - Attention
-        'fragile': '#f57c00',          // Orange - Préoccupant
-        'insuffisant': '#d32f2f'       // Rouge - Critique
-    };
-    return couleurs[niveau] || '#999';
-}
 
 /**
  * Affiche la distribution des niveaux de risque
@@ -3412,14 +3090,6 @@ window.calculerEtudiantsPrioritaires = calculerEtudiantsPrioritaires;
  * - Assiduité (A) : SOMME(heures présent) / TOTAL(heures cours)
  * - Complétion (C) : NOMBRE(remis) / NOMBRE(attendus)
  * - Performance (P) : MOYENNE(3 derniers IDME) / 4
- * - Engagement : E = (A × C × P)^(1/3) (racine cubique)
- *
- * SEUILS D'ENGAGEMENT:
- * - Très favorable: ≥ 0.80
- * - Favorable: 0.65 - 0.79
- * - Modéré: 0.50 - 0.64
- * - Fragile: 0.30 - 0.49
- * - Insuffisant: < 0.30
  */
 
 })();

@@ -540,13 +540,10 @@ const TOOLTIPS = {
     'profil-col-jeton':
         'Jeton de reprise : permet \u00e0 l\u2019\u00e9tudiant de reprendre un artefact pour am\u00e9liorer son r\u00e9sultat.',
 
-    // --- Vue Engagement ---
+    // --- Vue Mobilisation ---
 
-    'profil-engagement':
-        'Trois composantes (A, C, P) et calcul de l\u2019engagement E = \u221b(A \u00d7 C \u00d7 P). Barre de positionnement dans les zones.',
-
-    'profil-formule-engagement':
-        'E = \u221b(A \u00d7 C \u00d7 P). Moyenne g\u00e9om\u00e9trique : un indice tr\u00e8s bas tire l\u2019engagement vers le bas m\u00eame si les autres sont \u00e9lev\u00e9s.',
+    'profil-mobilisation':
+        'Vue d\u2019ensemble des composantes A et C : pr\u00e9sence en classe et remise des travaux. Indique comment l\u2019\u00e9l\u00e8ve se mobilise dans le cours.',
 
     // --- Vue Progression temporelle ---
 
