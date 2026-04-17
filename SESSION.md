@@ -1,9 +1,48 @@
 # SESSION ACTIVE — BETA 99.17
 
 **Date** : 17 avril 2026
-**Version** : Beta 99.17 (Build 0417-0810)
-**Statut** : Chantier RLO étape 6 complète + refonte des préférences (onglet Accompagnement)
+**Version** : Beta 99.17 (Build 0417-0830)
+**Statut** : Chantier RLO étape 7 complète — migration rétroactive des évaluations historiques
 **Branche** : `refonte-preferences-rlo`
+
+---
+
+## Bilan de la session (17 avril 2026, matin 2) — RLO étape 7 (1 commit)
+
+**Build** : 0417-0810 → 0417-0830, Beta 99.17 (même journée)
+**Fichiers modifiés** : `js/actions-rlo.js`, `index.html` (cache-buster), `js/init-inline.js`, `version.json`
+
+### Étape 7 — Migration rétroactive
+
+- Nouvelle fonction `migrerActionsRLOEvaluations()` dans `js/actions-rlo.js`
+- Pure JS, exposée sur `window.actionsRLO.migrerActionsRLOEvaluations`
+- Parcourt `cle('evaluationsSauvegardees')` du trimestre actif
+- Appelle `agregerActionsRLO(ev)` pour chaque évaluation **sans** champ `actionsRLO`
+- Écrit `null` explicite quand pas d'annotation (distingue « pas de données » de « zéro geste »)
+- Conditionnée au toggle `activerActionsRLO` : early return sinon (pas de flag posé → re-tentera si l'utilisateur active plus tard)
+- Idempotente : flag per-trimestre `cle('migrationRLO_evals_v1_done')`
+- Hook démarrage via `db-ready` enregistré après celui de `migrerIdsActionsRLO` (ordre de chargement `travaux-outils.js` avant `actions-rlo.js` → ordre d'enregistrement des listeners → ordre d'exécution)
+
+### Architecture RLO complète après étape 7
+
+- Étape 4 : migration des IDs `contenu-*` → `action-*` (travaux-outils.js)
+- Étape 5 : toggle `activerActionsRLO` dans les préférences
+- Étape 6 : inscription automatique du champ `actionsRLO` à chaque sauvegarde
+- Étape 7 : enrichissement rétroactif des évaluations historiques
+- Invariant : toutes les évaluations du trimestre ont `'actionsRLO' in ev === true` après migration (avec le toggle actif), sans dualité « anciens / nouveaux régimes »
+
+### Tests recommandés (à valider par Grégoire)
+
+- Base contenant évaluations avant et après activation du toggle : les anciennes reçoivent `actionsRLO` (objet ou null), les nouvelles sont préservées (spread d'`evaluations[indexEval]` dans `sauvegarderEvaluationModifiee`)
+- Idempotence : `window.actionsRLO.migrerActionsRLOEvaluations()` ne change rien à la 2e exécution (flag posé)
+- Flag : après reload, `[actions-rlo] Migration rétroactive effectuée. Évaluations enrichies : 0` ne s'affiche plus (early return sur flag)
+- Toggle OFF : migration pas jouée, aucun champ ajouté
+- Toggle ON puis OFF : migration reste jouée (flag persiste), mais plus rien de nouveau ne s'écrit à la sauvegarde
+
+### Plan RLO — prochaines étapes
+
+- [ ] **Étape 8** — Section « Profil RLO » dans l'aperçu d'évaluation (visualisation in-app minimale)
+- [ ] **Étape 9** — Export `profilsRLO` dans `exporterFormatRecherche` (structure : gestes_cognitifs / gestes_en_difficulte séparés, ratios sur cognitifs uniquement)
 
 ---
 

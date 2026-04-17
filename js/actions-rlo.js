@@ -81,5 +81,74 @@
         return profil;
     }
 
-    window.actionsRLO = { agregerActionsRLO };
+    // =========================================================================
+    // MIGRATION RÉTROACTIVE — Étape 7 (avril 2026)
+    // =========================================================================
+    // Enrichit les évaluations historiques avec le champ `actionsRLO` pour
+    // éliminer la dualité « avant / après activation du toggle ». Permet à
+    // l'étape 9 (export recherche) de lire le champ sans branche de recalcul.
+    //
+    // Règles :
+    //   - Conditionnée au toggle `activerActionsRLO` : si désactivé, rien ne
+    //     bouge (pas même le flag d'idempotence). L'utilisateur n'a pas opté.
+    //   - Idempotente : flag localStorage `migrationRLO_evals_v1_done`
+    //     namespacé par trimestre (chaque semestre migre une fois).
+    //   - Ne touche QUE les évaluations sans champ `actionsRLO` : les nouvelles
+    //     évaluations inscrites à la sauvegarde (étape 6) sont préservées.
+    //   - Distingue « pas de données » (null) de « zéro geste » (compteurs à 0) :
+    //     `agregerActionsRLO` renvoie l'une ou l'autre valeur selon l'annotation.
+    //   - S'exécute au démarrage, APRÈS `migrerIdsActionsRLO` (chaîne de
+    //     migration) — garantie par l'ordre de chargement (actions-rlo.js est
+    //     chargé après travaux-outils.js) et l'ordre d'enregistrement des
+    //     listeners `db-ready`.
+
+    function migrerActionsRLOEvaluations() {
+        try {
+            if (typeof obtenirPreference !== 'function' ||
+                obtenirPreference('activerActionsRLO') !== true) {
+                return;
+            }
+            if (typeof db === 'undefined' || typeof window.cle !== 'function') return;
+
+            var cleFlag = window.cle('migrationRLO_evals_v1_done');
+            if (db.getSync(cleFlag, false) === true) return;
+
+            var cleEvals = window.cle('evaluationsSauvegardees');
+            var evaluations = db.getSync(cleEvals, []);
+            if (!Array.isArray(evaluations) || evaluations.length === 0) {
+                db.setSync(cleFlag, true);
+                return;
+            }
+
+            var enrichies = 0;
+            var avecProfil = 0;
+            for (var i = 0; i < evaluations.length; i++) {
+                var ev = evaluations[i];
+                if (!ev || typeof ev !== 'object') continue;
+                if ('actionsRLO' in ev) continue;
+                var profil = agregerActionsRLO(ev);
+                ev.actionsRLO = profil;
+                enrichies++;
+                if (profil && profil.total > 0) avecProfil++;
+            }
+
+            if (enrichies > 0) db.setSync(cleEvals, evaluations);
+            db.setSync(cleFlag, true);
+            console.warn('[actions-rlo] Migration rétroactive effectuée. Évaluations enrichies : '
+                + enrichies + ' (dont ' + avecProfil + ' avec au moins un tampon `action-*`)');
+        } catch (e) {
+            console.error('[actions-rlo] Erreur pendant la migration rétroactive :', e);
+        }
+    }
+
+    window.actionsRLO = { agregerActionsRLO, migrerActionsRLOEvaluations };
+
+    // Hook de démarrage : attendre db-ready. Cet écouteur est enregistré APRÈS
+    // celui de `migrerIdsActionsRLO` (travaux-outils.js), donc s'exécute après
+    // la migration des IDs sur le même tick.
+    if (typeof db !== 'undefined' && db.ready) {
+        migrerActionsRLOEvaluations();
+    } else {
+        window.addEventListener('db-ready', migrerActionsRLOEvaluations, { once: true });
+    }
 })();
