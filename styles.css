@@ -6407,6 +6407,110 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     margin-bottom: 20px;
 }
 
+/* ===============================
+   ONGLETS « Développement des habiletés » (avril 2026)
+   Trois vues : Critères / Forces et défis / Gestes cognitifs
+   =============================== */
+.onglets-developpement {
+    margin-top: 10px;
+}
+
+.onglets-developpement-tabs {
+    display: flex;
+    gap: 2px;
+    border-bottom: 1px solid rgba(106, 172, 184, 0.25);
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.onglet-developpement-tab {
+    background: transparent;
+    color: var(--texte-secondaire, #8aa4b0);
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 150ms ease, border-color 150ms ease, background 150ms ease;
+    border-radius: 4px 4px 0 0;
+    margin-bottom: -1px;
+}
+
+.onglet-developpement-tab:hover {
+    color: var(--texte-principal, #e0f0f5);
+    background: rgba(106, 172, 184, 0.06);
+}
+
+.onglet-developpement-tab:focus-visible {
+    outline: 2px solid var(--accent-primaire, #6aacb8);
+    outline-offset: 2px;
+}
+
+.onglet-developpement-tab.actif {
+    color: var(--accent-primaire, #6aacb8);
+    border-bottom-color: var(--accent-primaire, #6aacb8);
+    font-weight: 600;
+}
+
+.onglet-developpement-panel[hidden] {
+    display: none;
+}
+
+body.mode-clair .onglets-developpement-tabs {
+    border-bottom-color: rgba(3, 46, 92, 0.2);
+}
+body.mode-clair .onglet-developpement-tab {
+    color: #556;
+}
+body.mode-clair .onglet-developpement-tab:hover {
+    color: #223;
+    background: rgba(3, 46, 92, 0.06);
+}
+body.mode-clair .onglet-developpement-tab.actif {
+    color: #1f6f85;
+    border-bottom-color: #1f6f85;
+}
+
+/* Cibles tactiles iPad : ≥44px */
+@media (max-width: 1024px) {
+    .onglet-developpement-tab {
+        padding: 12px 18px;
+        min-height: 44px;
+    }
+}
+
+/* ===============================
+   BLOCS RLO (onglet « Gestes cognitifs »)
+   Conteneur unique contenant cumulatif + évolution + note.
+   =============================== */
+.bloc-rlo-conteneur {
+    margin-top: 0;
+}
+.bloc-rlo-conteneur .bloc-rlo-cumulatif,
+.bloc-rlo-conteneur .bloc-rlo-evolution {
+    display: block;
+}
+.bloc-rlo-separateur {
+    border: none;
+    border-top: 1px solid rgba(106, 172, 184, 0.18);
+    margin: 18px 0;
+}
+body.mode-clair .bloc-rlo-separateur {
+    border-top-color: rgba(3, 46, 92, 0.15);
+}
+
+/* Note discrète sous les blocs RLO — même ton que texte-muted, italique */
+.profil-note-rlo {
+    margin: 14px 0 0;
+    padding: 0 2px;
+    font-size: 0.8rem;
+    font-style: italic;
+    color: var(--texte-secondaire);
+    opacity: 0.85;
+    line-height: 1.4;
+}
+
 .profil-grid-auto-200 {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

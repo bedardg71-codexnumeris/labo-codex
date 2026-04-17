@@ -203,7 +203,94 @@
         return acc;
     }
 
-    window.actionsRLO = { agregerActionsRLO, migrerActionsRLOEvaluations, agregerProfilRLOEtudiant };
+    /**
+     * Série chronologique du profil RLO pour le graphique d'évolution.
+     *
+     * Étape 9 — visualisation in-app dans « Développement des habiletés ».
+     * Parcourt les évaluations du DA ordonnées par date d'évaluation, calcule
+     * les ratios cognitifs pour chaque artefact et marque les trous (artefact
+     * sans annotation RLO) pour rendu en ligne pointillée.
+     *
+     * @param {string} da
+     * @returns {Object|null}
+     *   {
+     *     artefacts: [{
+     *       idProduction,
+     *       numero,              // ordre chronologique (1-based)
+     *       titre,               // titre court de la production
+     *       dateEvaluation,      // ISO
+     *       niveauFinal,         // I|D|M|E ou null
+     *       observe,             // true si actionsRLO non null (annotation existe)
+     *       ratios: { reperage, liaison, ouverture } | null   // % sur totalCognitifs
+     *     }, ...],
+     *     nbObserves              // nb d'évaluations avec tampons action-* > 0
+     *   }
+     *   null si toggle désactivé OU aucune évaluation.
+     */
+    function obtenirEvolutionRLOEtudiant(da) {
+        if (!da) return null;
+        if (typeof obtenirPreference !== 'function' ||
+            obtenirPreference('activerActionsRLO') !== true) return null;
+        if (typeof obtenirDonneesSelonMode !== 'function') return null;
+
+        var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+        var productions = obtenirDonneesSelonMode('productions') || [];
+        var evalsDA = evaluations.filter(function(e) {
+            return e && e.etudiantDA === da && !e.remplaceeParId;
+        });
+        if (evalsDA.length === 0) return null;
+
+        // Ordre chronologique par date d'évaluation (fallback sur date d'échéance)
+        evalsDA.sort(function(a, b) {
+            var da1 = (a.dateEvaluation || '') + '';
+            var db1 = (b.dateEvaluation || '') + '';
+            return da1.localeCompare(db1);
+        });
+
+        var arrondir = function(v) { return Math.round(v * 10) / 10; };
+        var nbObserves = 0;
+        var artefacts = evalsDA.map(function(ev, idx) {
+            var prod = productions.find(function(p) { return p.id === ev.productionId; }) || {};
+            // Priorité à la lecture LIVE (même pattern que agregerProfilRLOEtudiant) :
+            // recompte les tampons actuels depuis l'annotation, et retombe sur le
+            // snapshot stocké si la résolution live échoue. Évite l'incohérence
+            // avec le bloc cumulatif quand des tampons ont été posés après la
+            // dernière sauvegarde d'évaluation.
+            var rlo = agregerActionsRLO(ev);
+            if (!rlo) rlo = ev.actionsRLO;
+            var observe = rlo !== null && rlo !== undefined;
+            var ratios = null;
+            if (observe) {
+                var totalCog = (rlo.reperage || 0) + (rlo.liaison || 0) + (rlo.ouverture || 0);
+                if (totalCog > 0) {
+                    ratios = {
+                        reperage:  arrondir(((rlo.reperage  || 0) / totalCog) * 100),
+                        liaison:   arrondir(((rlo.liaison   || 0) / totalCog) * 100),
+                        ouverture: arrondir(((rlo.ouverture || 0) / totalCog) * 100)
+                    };
+                    nbObserves++;
+                }
+            }
+            return {
+                idProduction: ev.productionId,
+                numero: idx + 1,
+                titre: prod.titre || prod.nom || ('Artefact ' + (idx + 1)),
+                dateEvaluation: ev.dateEvaluation || null,
+                niveauFinal: ev.niveauFinal || null,
+                observe: observe,
+                ratios: ratios
+            };
+        });
+
+        return { artefacts: artefacts, nbObserves: nbObserves };
+    }
+
+    window.actionsRLO = {
+        agregerActionsRLO,
+        migrerActionsRLOEvaluations,
+        agregerProfilRLOEtudiant,
+        obtenirEvolutionRLOEtudiant
+    };
 
     // Hook de démarrage : attendre db-ready. Cet écouteur est enregistré APRÈS
     // celui de `migrerIdsActionsRLO` (travaux-outils.js), donc s'exécute après
