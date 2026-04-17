@@ -7,7 +7,7 @@
  *
  * Source des décomptes : annotation du fichier résolu pour l'évaluation,
  * via la chaîne Évaluation → Fichier (travauxResolution) → Annotation
- * (travauxStockage) → comptage par autocollantId (travauxExportPdf).
+ * (travauxStockage) → comptage par autocollantId (travauxExportPDF).
  *
  * Les tampons legacy (qualité, diagnostic) sont ignorés — seuls les IDs
  * `action-*` alimentent le profil RLO.
@@ -52,7 +52,8 @@
         }
         if (typeof travauxResolution === 'undefined' ||
             typeof travauxStockage === 'undefined' ||
-            typeof travauxExportPdf === 'undefined') {
+            typeof travauxExportPDF === 'undefined' ||
+            typeof travauxExportPDF.compterAnnotationsDetailees !== 'function') {
             return null;
         }
 
@@ -62,7 +63,7 @@
         const annotation = travauxStockage.obtenirAnnotationFichier(fichier.id);
         if (!annotation) return null;
 
-        const stats = travauxExportPdf.compterAnnotationsDetailees(annotation);
+        const stats = travauxExportPDF.compterAnnotationsDetailees(annotation);
         if (!stats || !stats.tampons) return null;
 
         const profil = {

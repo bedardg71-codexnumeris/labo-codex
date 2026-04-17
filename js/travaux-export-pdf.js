@@ -2297,7 +2297,8 @@
         telechargerDepuisPreview: telechargerDepuisPreview,
         fermerPreviewPDF: fermerPreviewPDF,
         previewPDFPagePrec: previewPDFPagePrec,
-        previewPDFPageSuiv: previewPDFPageSuiv
+        previewPDFPageSuiv: previewPDFPageSuiv,
+        compterAnnotationsDetailees: compterAnnotationsDetailees
     };
 
 })();
