@@ -145,16 +145,16 @@ const TOOLTIPS = {
     // =================================================================
 
     'pref-outils':
-        'Activer ou d\u00e9sactiver les fonctionnalit\u00e9s avanc\u00e9es (indices ACP, syst\u00e8me R\u00e0I). Les outils d\u00e9sactiv\u00e9s sont masqu\u00e9s de l\u2019interface.',
+        'Outils qui s\u2019activent pendant l\u2019\u00e9valuation d\u2019une production.',
 
     'pref-outils-acp':
-        'Indices pr\u00e9dictifs Assiduit\u00e9, Compl\u00e9tion, Performance. Calcul\u00e9s sur une fen\u00eatre glissante, ils alimentent le tableau de bord et la d\u00e9tection pr\u00e9coce des difficult\u00e9s.',
+        'Indices pr\u00e9dictifs Assiduit\u00e9, Compl\u00e9tion et Performance. Affich\u00e9s dans la section \u00ab Engagement \u00bb du profil individuel.',
 
     'pref-outils-rai':
         'Niveaux d\u2019intervention et recommandations personnalis\u00e9es. Structure le soutien aux \u00e9tudiants en trois niveaux d\u2019intensit\u00e9 (universel, cibl\u00e9, intensif).',
 
     'pref-affichage':
-        'Choisir les ressources visibles dans l\u2019interface : cartes SOLO, snapshots, graphiques, d\u00e9tails techniques, mode comparatif. Adapte la densit\u00e9 d\u2019information affich\u00e9e.',
+        'Choisir les ressources visibles dans l\u2019interface : graphiques d\u2019\u00e9volution, unit\u00e9 d\u2019affichage de l\u2019assiduit\u00e9, mode comparatif.',
 
     'pref-affichage-solo':
         'Affiche une carte avec les descriptions d\u00e9taill\u00e9es bas\u00e9es sur la taxonomie SOLO. Utile pour interpr\u00e9ter le niveau cognitif des apprentissages.',
@@ -163,7 +163,7 @@ const TOOLTIPS = {
         'Active l\u2019observation des gestes cognitifs Rep\u00e9rage, Liaison et Ouverture via des tampons pos\u00e9s sur les productions. Alimente le profil RLO agr\u00e9g\u00e9 par \u00e9valuation et l\u2019export de recherche anonymis\u00e9.',
 
     'pref-affichage-graphiques':
-        'Visualisation de la progression dans le temps via Chart.js.',
+        'Graphiques Chart.js de progression dans le temps. Affich\u00e9s dans la section \u00ab Progression temporelle \u00bb du profil individuel.',
 
     'pref-affichage-assiduite':
         'Choisir comment afficher les totaux de pr\u00e9sence et d\u2019assiduit\u00e9 (ex. : en p\u00e9riodes).',
@@ -215,7 +215,7 @@ const TOOLTIPS = {
         'Seuils de couleur pour les indices A-C-P. Fragile (rouge), Acceptable (jaune), Bon (vert). D\u00e9termine les alertes du tableau de bord.',
 
     'depist-seuils-visuels':
-        'Activer ou d\u00e9sactiver l\u2019affichage des couleurs Fragile / Acceptable / Bon dans les tableaux et indicateurs.',
+        'Lignes pointill\u00e9es et \u00e9tiquettes de zones (Insuffisant / D\u00e9veloppement / Ma\u00eetrise / Excellent) sur les graphiques Chart.js de la section \u00ab Progression temporelle \u00bb du profil individuel.',
 
     'depist-seuil-fragile':
         'Indice sous lequel la situation est consid\u00e9r\u00e9e pr\u00e9occupante (rouge). N\u00e9cessite une intervention.',
@@ -1048,7 +1048,7 @@ const TOOLTIPS = {
         'Personnaliser l\u2019interface : outils actifs, ressources affich\u00e9es, effets visuels et comportement de navigation.',
 
     'nav-reg-depistage':
-        'Configurer les seuils de d\u00e9tection des patterns et d\u2019interpr\u00e9tation des indices A-C-P.',
+        'Outils d\u2019observation des apprentissages (SOLO, Actions RLO) et configuration du d\u00e9pistage RàI (seuils de d\u00e9tection et d\u2019interpr\u00e9tation).',
 
     'nav-reg-donnees':
         'Sauvegarde, restauration, snapshots A-C-P, export anonymis\u00e9, r\u00e9initialisation et maintenance.',
