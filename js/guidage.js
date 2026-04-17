@@ -264,7 +264,7 @@ function afficherMessageGuidage() {
                 font-size: 1.2rem;
                 padding: 0;
                 line-height: 1;
-            " title="Masquer">×</button>
+            " title="Masquer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
         </div>
     `;
 

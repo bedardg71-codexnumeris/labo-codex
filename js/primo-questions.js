@@ -725,7 +725,7 @@ const QUESTIONS_PRIMO = [
             },
             {
                 value: 'holistique',
-                label: '🎨 Holistique',
+                label: '<img src="icons/icon-paint-palette.svg" alt="" class="outil-svg-icon" style="width:14px;height:14px;vertical-align:middle;"> Holistique',
                 description: 'Suggestion statistique (mode, médiane, moyenne) + validation par ton jugement professionnel.'
             }
         ],

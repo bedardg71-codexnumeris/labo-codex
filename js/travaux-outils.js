@@ -51,21 +51,21 @@
         position: {
             id: 'position',
             nom: 'Position',
-            icone: '<img src="' + ICONS_DIR + 'outils-hand-100.png" alt="Position">',
+            icone: '<img src="' + ICONS_DIR + 'icon-drag.svg" alt="Position" class="outil-svg-icon">',
             curseur: 'move',
             type: 'position'
         },
         selection: {
             id: 'selection',
             nom: 'S\u00e9lection',
-            icone: '<img src="' + ICONS_DIR + 'outils-move-100.png" alt="S\u00e9lection">',
+            icone: '<img src="' + ICONS_DIR + 'icon-move-right.svg" alt="S\u00e9lection" class="outil-svg-icon">',
             curseur: 'grab',
             type: 'selection'
         },
         stylo: {
             id: 'stylo',
             nom: 'Stylo',
-            icone: '<img src="' + ICONS_DIR + 'outils-edit-pencil-100.png" alt="Stylo">',
+            icone: '<img src="' + ICONS_DIR + 'icon-pencil.svg" alt="Stylo" class="outil-svg-icon">',
             curseur: 'crosshair',
             epaisseurDefaut: 2,
             epaisseurMin: 1,
@@ -78,7 +78,7 @@
         surligneur: {
             id: 'surligneur',
             nom: 'Surligneur',
-            icone: '<img src="' + ICONS_DIR + 'outils-marker-pen-100.png" alt="Surligneur">',
+            icone: '<img src="' + ICONS_DIR + 'icon-marker-pen.svg" alt="Surligneur" class="outil-svg-icon">',
             curseur: 'crosshair',
             type: 'surligneur',
             epaisseurDefaut: 20,
@@ -90,14 +90,14 @@
         gomme: {
             id: 'gomme',
             nom: 'Gomme',
-            icone: '<img src="' + ICONS_DIR + 'outils-eraser-100.png" alt="Gomme">',
+            icone: '<img src="' + ICONS_DIR + 'icon-eraser.svg" alt="Gomme" class="outil-svg-icon">',
             curseur: 'pointer',
             mode: 'effacer-trait' // efface le trait entier au contact
         },
         texte: {
             id: 'texte',
             nom: 'Texte',
-            icone: '<img src="' + ICONS_DIR + 'outils-text-100.png" alt="Texte">',
+            icone: '<img src="' + ICONS_DIR + 'icon-text.svg" alt="Texte" class="outil-svg-icon">',
             curseur: 'text',
             tailleDefaut: 14,
             tailleMin: 10,
@@ -106,7 +106,7 @@
         cercle: {
             id: 'cercle',
             nom: 'Cercle',
-            icone: '<img src="' + ICONS_DIR + 'outils-oval-100.png" alt="Cercle">',
+            icone: '<img src="' + ICONS_DIR + 'icon-circle.svg" alt="Cercle" class="outil-svg-icon">',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2,
@@ -115,7 +115,7 @@
         fleche: {
             id: 'fleche',
             nom: 'Ligne',
-            icone: '<img src="' + ICONS_DIR + 'outils-line-filled-100.png" alt="Ligne">',
+            icone: '<img src="' + ICONS_DIR + 'icon-line.svg" alt="Ligne" class="outil-svg-icon">',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2
@@ -123,7 +123,7 @@
         rectangle: {
             id: 'rectangle',
             nom: 'Rectangle',
-            icone: '<img src="' + ICONS_DIR + 'outils-rectangular-96.png" alt="Rectangle">',
+            icone: '<img src="' + ICONS_DIR + 'icon-square.svg" alt="Rectangle" class="outil-svg-icon">',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2,
@@ -134,7 +134,7 @@
         ondule: {
             id: 'ondule',
             nom: 'Vague',
-            icone: '<img src="' + ICONS_DIR + 'outils-squiggly-line-100.png" alt="Vague">',
+            icone: '<img src="' + ICONS_DIR + 'icon-squiggly-line.svg" alt="Vague" class="outil-svg-icon">',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2
@@ -142,7 +142,7 @@
         pointille: {
             id: 'pointille',
             nom: 'Pointill\u00e9',
-            icone: '<img src="' + ICONS_DIR + 'outils-dashed-line-100.png" alt="Pointill\u00e9">',
+            icone: '<img src="' + ICONS_DIR + 'icon-dashed-line.svg" alt="Pointill\u00e9" class="outil-svg-icon">',
             curseur: 'crosshair',
             type: 'forme',
             epaisseurDefaut: 2,
@@ -361,7 +361,7 @@
 
         // Barre de titre
         let html = '<div class="palette-flottante-barre">';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroObservations" title="Personnaliser">\u2699</button>';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroObservations" title="Personnaliser"><img src="' + ICONS_DIR + 'icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button>';
         html += '<span class="palette-flottante-titre">Tampons</span>';
         html += '<div style="display:flex; gap:2px;">';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="travaux-palette-tampons" title="Disposition horizontale">\u2194</button>';
@@ -1169,7 +1169,7 @@
 
         // Barre de titre
         let html = '<div class="palette-flottante-barre">';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="Personnaliser">\u2699</button>';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="Personnaliser"><img src="' + ICONS_DIR + 'icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button>';
         html += '<span class="palette-flottante-titre">Codes <span id="travaux-errfr-total-header" style="font-weight:400; font-size:0.75rem; color:var(--texte-secondaire);"></span></span>';
         html += '<div style="display:flex; gap:2px;">';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="travaux-palette-erreurs-fr" title="Disposition horizontale">\u2194</button>';
@@ -1526,7 +1526,7 @@
         // Barre de titre (draggable + toggle)
         html += '<div class="palette-flottante-barre">';
         html += '<span class="palette-flottante-titre">Annotation</span>';
-        html += '<button class="palette-flottante-toggle" id="travaux-btn-reglages-annotation" title="Personnaliser">\u2699</button>';
+        html += '<button class="palette-flottante-toggle" id="travaux-btn-reglages-annotation" title="Personnaliser"><img src="' + ICONS_DIR + 'icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button>';
         html += '<button class="palette-flottante-toggle" id="travaux-palette-toggle" data-action="travauxOutils.togglePaletteReplie" title="Réduire la palette">&#x2212;</button>';
         html += '</div>';
 
@@ -1536,9 +1536,9 @@
         // Boutons d'action
         html += '<div class="groupe-boutons-colonne">';
         html += '<div class="groupe-boutons-ligne">';
-        html += '<button id="travaux-btn-supprimer" class="btn btn-secondaire btn-tres-compact btn-icon-compact u-flex-1" data-action="travauxAnnotation.supprimerSelection" disabled title="Supprimer la s\u00e9lection (Delete)"><img src="' + ICONS_DIR + 'outils-delete-100.png" alt="Supprimer"></button>';
-        html += '<button id="travaux-btn-undo" class="btn btn-secondaire btn-tres-compact btn-icon-compact u-flex-1" data-action="travauxAnnotation.annuler" disabled title="Annuler (Ctrl+Z)"><img src="' + ICONS_DIR + 'outils-undo-100.png" alt="Annuler"></button>';
-        html += '<button id="travaux-btn-redo" class="btn btn-secondaire btn-tres-compact btn-icon-compact u-flex-1" data-action="travauxAnnotation.retablir" disabled title="R\u00e9tablir (Ctrl+Y)"><img src="' + ICONS_DIR + 'outils-redo-100.png" alt="R\u00e9tablir"></button>';
+        html += '<button id="travaux-btn-supprimer" class="btn btn-secondaire btn-tres-compact btn-icon-compact u-flex-1" data-action="travauxAnnotation.supprimerSelection" disabled title="Supprimer la s\u00e9lection (Delete)"><img src="' + ICONS_DIR + 'icon-trash.svg" alt="Supprimer" class="outil-svg-icon"></button>';
+        html += '<button id="travaux-btn-undo" class="btn btn-secondaire btn-tres-compact btn-icon-compact u-flex-1" data-action="travauxAnnotation.annuler" disabled title="Annuler (Ctrl+Z)"><img src="' + ICONS_DIR + 'icon-undo.svg" alt="Annuler" class="outil-svg-icon"></button>';
+        html += '<button id="travaux-btn-redo" class="btn btn-secondaire btn-tres-compact btn-icon-compact u-flex-1" data-action="travauxAnnotation.retablir" disabled title="R\u00e9tablir (Ctrl+Y)"><img src="' + ICONS_DIR + 'icon-redo.svg" alt="R\u00e9tablir" class="outil-svg-icon"></button>';
         html += '</div>';
         html += '<div class="groupe-boutons-ligne">';
         html += '<button class="btn btn-supprimer btn-tres-compact u-flex-1" data-action="travauxAnnotation.effacerPage" title="Effacer toute la page">Effacer tout</button>';
@@ -1546,7 +1546,7 @@
         // Info étudiant/production (même info que palette Paramètres)
         html += '<div id="travaux-annot-identite" class="travaux-eval-identite" style="margin-top: 6px;">';
         html += '<div style="display:flex; align-items:center; gap:6px;"><span class="travaux-eval-label-val" id="travaux-annot-label-etudiant" style="font-weight: 600;">--</span>';
-        html += '<button class="btn-profil-rapide" id="travaux-annot-btn-profil" data-action="ouvrirProfilDepuisAnnotation" title="Voir le profil de l\u2019\u00e9l\u00e8ve">\uD83D\uDC64</button></div>';
+        html += '<button class="btn-profil-rapide" id="travaux-annot-btn-profil" data-action="ouvrirProfilDepuisAnnotation" title="Voir le profil de l\u2019\u00e9l\u00e8ve"><img src="' + ICONS_DIR + 'icon-profile.svg" alt="" class="outil-svg-icon"></button></div>';
         html += '<span class="travaux-eval-label-val travaux-eval-label-production" id="travaux-annot-label-production">--</span>';
         html += '</div>';
         html += '</div>';
@@ -1566,7 +1566,7 @@
             html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" data-action="travauxOutils.setOutilActif" data-param="${id}" title="${outil.nom}${raccourci ? ' [' + raccourci + ']' : ''}">${outil.icone}${raccourci ? '<span class="raccourci-badge">' + raccourci + '</span>' : ''}</button>`;
             // Bouton Dupliquer juste apres Selection
             if (id === 'selection') {
-                html += '<button class="travaux-btn-outil" id="travaux-btn-dupliquer" data-action="travauxAnnotation.dupliquerSelection" title="Dupliquer la s\u00e9lection"><img src="' + ICONS_DIR + 'outils-duplicate-100.png" alt="Dupliquer"></button>';
+                html += '<button class="travaux-btn-outil" id="travaux-btn-dupliquer" data-action="travauxAnnotation.dupliquerSelection" title="Dupliquer la s\u00e9lection"><img src="' + ICONS_DIR + 'icon-duplicate.svg" alt="Dupliquer" class="outil-svg-icon"></button>';
             }
         });
 
@@ -1623,7 +1623,7 @@
         const maxEp = outilInit.epaisseurMax || 20;
         html += '<div class="travaux-palette-section">';
         html += '<div class="travaux-epaisseur-header">';
-        html += '<img src="' + ICONS_DIR + 'outils-line-width-100.png" alt="Epaisseur" class="travaux-epaisseur-icone">';
+        html += '<img src="' + ICONS_DIR + 'icon-line-width.svg" alt="Epaisseur" class="travaux-epaisseur-icone outil-svg-icon">';
         html += '<span id="travaux-epaisseur-px" class="travaux-epaisseur-px">' + getEpaisseurReellePixels() + 'px</span>';
         html += '</div>';
         html += '<div class="travaux-epaisseur-controles">';
@@ -1637,7 +1637,7 @@
 
         // Barre d'emojis en bas
         html += '<div class="palette-flottante-bas-btns">';
-        html += '<button class="palette-flottante-aide-btn" data-action="tamponsBibliotheque.afficherBibliothequeTampons" title="Bibliothèque de tampons">📚</button>';
+        html += '<button class="palette-flottante-aide-btn" data-action="tamponsBibliotheque.afficherBibliothequeTampons" title="Bibliothèque de tampons"><img src="' + ICONS_DIR + 'icon-book-shelf.svg" alt="" class="outil-svg-icon palette-bas-icon"></button>';
         html += '<button class="palette-flottante-aide-btn" id="btn-toggle-codes" data-action="travauxOutils.togglePaletteErreursFrancais" title="Afficher/masquer les codes">🚦</button>';
         html += '<button class="palette-flottante-aide-btn" id="btn-toggle-tampons" data-action="travauxOutils.togglePaletteAutocollants" title="Afficher/masquer les tampons">🫥</button>';
         html += '<button class="palette-flottante-aide-btn" id="btn-toggle-chrono" data-action="travauxOutils.togglePaletteChrono" title="Chronomètre">⏱️</button>';
@@ -2076,7 +2076,7 @@
             var coulCat = couleursCat[catId] || '#888888';
             html += '<div class="travaux-retro-cat-draggable" style="display:flex; gap:8px; align-items:center;" data-cat-row="' + catId + '"' + (estPerso ? ' data-cat-perso-id="' + catId + '"' : '') + ' draggable="true">';
             html += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner" style="cursor:grab;">\u2630</span>';
-            html += '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerCategorieRetroObs" data-param="' + catId + '" title="Supprimer la cat\u00e9gorie" style="min-width:auto;">&times;</button>';
+            html += '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerCategorieRetroObs" data-param="' + catId + '" title="Supprimer la cat\u00e9gorie" style="min-width:auto;"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>';
             html += '<div class="travaux-retro-couleur" style="background:' + coulCat + ';" data-couleur-cat-id="' + catId + '" title="Couleur de la cat\u00e9gorie">';
             html += '<input type="color" class="travaux-retro-couleur-input" data-color-cat-id="' + catId + '" value="' + coulCat + '">';
             html += '</div>';
@@ -2089,7 +2089,7 @@
         // Helper pour generer une ligne de tampon
         function _htmlRowTampon(a, texte, imgSrc) {
             var estCustom = a.custom ? ' data-custom="true"' : '';
-            var btnSuppr = '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerTamponRetroObs" data-param="' + a.id + '" title="Supprimer">&times;</button>';
+            var btnSuppr = '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerTamponRetroObs" data-param="' + a.id + '" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>';
             var raccourci = obtenirRaccourciPourItem(a.id) || '';
             var r = '<div class="travaux-retro-row travaux-retro-draggable" data-obs-id="' + a.id + '"' + estCustom + ' draggable="true">';
             r += '<div class="travaux-retro-row-haut">';
@@ -2110,7 +2110,7 @@
         // Helper pour generer une ligne de symbole Unicode
         function _htmlRowSymbole(id, outil, texte, estCustom) {
             var couleur = outil.couleurBouton;
-            var btnSuppr = '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerSymboleRetroObs" data-param="' + id + '" title="Supprimer">&times;</button>';
+            var btnSuppr = '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerSymboleRetroObs" data-param="' + id + '" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>';
             var raccourci = obtenirRaccourciPourItem(id) || '';
             var r = '<div class="travaux-retro-row' + (estCustom ? ' travaux-retro-draggable' : '') + '" data-obs-id="' + id + '"' + (estCustom ? ' data-sym-custom="true" draggable="true"' : '') + '>';
             r += '<div class="travaux-retro-row-haut">';
@@ -2588,7 +2588,7 @@
                     '<input type="file" accept="image/*" data-file-id="' + id + '" hidden>' +
                 '</div>' +
                 '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + id + '" value="" placeholder="Nom du tampon">' +
-                '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerTamponRetroObs" data-param="' + id + '" title="Supprimer">&times;</button>' +
+                '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerTamponRetroObs" data-param="' + id + '" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>' +
             '</div>' +
             '<textarea class="travaux-retro-textarea" data-retro-id="' + id + '" rows="3"></textarea>';
 
@@ -2652,7 +2652,7 @@
                 '</div>' +
                 '<input type="text" class="travaux-retro-icone-input" data-icone-id="' + id + '" value="" placeholder="\u2605" title="Caract\u00e8re Unicode" style="color:' + couleur + ';">' +
                 '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + id + '" value="" placeholder="Nom du symbole">' +
-                '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerSymboleRetroObs" data-param="' + id + '" title="Supprimer">&times;</button>' +
+                '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerSymboleRetroObs" data-param="' + id + '" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>' +
             '</div>' +
             '<textarea class="travaux-retro-textarea" data-retro-id="' + id + '" rows="3"></textarea>';
 
@@ -2703,7 +2703,7 @@
         var coulDefaut = '#888888';
         rowDiv.innerHTML =
             '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner" style="cursor:grab;">\u2630</span>' +
-            '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerCategorieRetroObs" data-param="' + id + '" title="Supprimer la cat\u00e9gorie" style="min-width:auto;">&times;</button>' +
+            '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerCategorieRetroObs" data-param="' + id + '" title="Supprimer la cat\u00e9gorie" style="min-width:auto;"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>' +
             '<div class="travaux-retro-couleur" style="background:' + coulDefaut + ';" data-couleur-cat-id="' + id + '" title="Couleur de la cat\u00e9gorie">' +
                 '<input type="color" class="travaux-retro-couleur-input" data-color-cat-id="' + id + '" value="' + coulDefaut + '">' +
             '</div>' +

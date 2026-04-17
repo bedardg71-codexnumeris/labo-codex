@@ -1529,7 +1529,7 @@ const pluginNomEtudiantSurvolACP = {
 
         const estVerrouille = datasetVerrouilleACP >= 0;
         const nom = dataset.label || '';
-        const texteAffiche = estVerrouille ? `🔒 ${nom}` : nom;
+        const texteAffiche = estVerrouille ? `\u25C9 ${nom}` : nom;
         const x = dernierPoint.x + 10;
         const y = dernierPoint.y;
 
@@ -2312,7 +2312,7 @@ const pluginNomEtudiantSurvol = {
         // Dessiner le nom de l'étudiant à droite du dernier point
         const estVerrouille = datasetVerrouille >= 0;
         const nom = dataset.label || '';
-        const texteAffiche = estVerrouille ? `🔒 ${nom}` : nom;
+        const texteAffiche = estVerrouille ? `\u25C9 ${nom}` : nom;
         const x = dernierPoint.x + 10;
         const y = dernierPoint.y;
 

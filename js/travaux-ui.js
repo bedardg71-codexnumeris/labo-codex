@@ -893,7 +893,7 @@
                         </div>
                         <div id="travaux-drop-zone" class="travaux-drop-zone">
                             <div class="travaux-drop-zone-contenu">
-                                <div class="travaux-drop-zone-icone">&#x1F4C1;</div>
+                                <div class="travaux-drop-zone-icone"><img src="icons/icon-plus.svg" alt="" class="drop-zone-icon"></div>
                                 <p>Glisse tes fichiers ici</p>
                                 <p class="texte-muted">PDF, JPEG, PNG, HEIC — ou clique pour parcourir</p>
                             </div>
@@ -1073,20 +1073,20 @@
                         </div>
                         <div class="annot-toolbar-separateur"></div>
                         <div class="annot-toolbar-outils">
-                            <button id="travaux-btn-page-prec" class="travaux-btn-nav" data-action="travauxVisionneuse.pagePrecedente" disabled title="Page précédente">&#x2190;</button>
+                            <button id="travaux-btn-page-prec" class="travaux-btn-nav" data-action="travauxVisionneuse.pagePrecedente" disabled title="Page précédente"><img src="icons/icon-chevron-left.svg" alt="" class="nav-seq-icon"></button>
                             <span id="travaux-indicateur-page">-- / --</span>
-                            <button id="travaux-btn-page-suiv" class="travaux-btn-nav" data-action="travauxVisionneuse.pageSuivante" disabled title="Page suivante">&#x2192;</button>
+                            <button id="travaux-btn-page-suiv" class="travaux-btn-nav" data-action="travauxVisionneuse.pageSuivante" disabled title="Page suivante"><img src="icons/icon-chevron-right.svg" alt="" class="nav-seq-icon"></button>
                             <span class="travaux-separateur"></span>
-                            <button id="travaux-btn-badge-prec" class="travaux-btn-nav" data-action="travauxUI.badgePrecedent" disabled title="Fichier précédent">&#x2190;</button>
+                            <button id="travaux-btn-badge-prec" class="travaux-btn-nav" data-action="travauxUI.badgePrecedent" disabled title="Fichier précédent"><img src="icons/icon-chevron-left.svg" alt="" class="nav-seq-icon"></button>
                             <span id="travaux-compteur-badge" class="travaux-compteur-badge">-- / --</span>
-                            <button id="travaux-btn-badge-suiv" class="travaux-btn-nav" data-action="travauxUI.badgeSuivant" disabled title="Fichier suivant">&#x2192;</button>
+                            <button id="travaux-btn-badge-suiv" class="travaux-btn-nav" data-action="travauxUI.badgeSuivant" disabled title="Fichier suivant"><img src="icons/icon-chevron-right.svg" alt="" class="nav-seq-icon"></button>
                             <span class="travaux-separateur"></span>
-                            <button class="travaux-btn-nav" data-action="travauxVisionneuse.zoomPleineLargeur" title="Ajuster à la largeur">&#x2194;</button>
-                            <button class="travaux-btn-nav" data-action="travauxVisionneuse.zoomPleineHauteur" title="Ajuster à la hauteur">&#x2195;</button>
+                            <button class="travaux-btn-nav" data-action="travauxVisionneuse.zoomPleineLargeur" title="Ajuster à la largeur"><img src="icons/icon-resize-horizontal.svg" alt="" class="nav-seq-icon"></button>
+                            <button class="travaux-btn-nav" data-action="travauxVisionneuse.zoomPleineHauteur" title="Ajuster à la hauteur"><img src="icons/icon-resize-vertical.svg" alt="" class="nav-seq-icon"></button>
                             <button id="travaux-btn-zoom100" class="travaux-btn-zoom" data-action="travauxVisionneuse.zoom100" title="Remettre à 100%">100%</button>
                             <span class="travaux-separateur"></span>
                             <div class="travaux-fond-picker" id="travaux-fond-picker">
-                                <button class="travaux-btn-nav" id="travaux-btn-fond" title="Couleur de fond du canvas">\uD83C\uDFA8</button>
+                                <button class="travaux-btn-nav" id="travaux-btn-fond" title="Couleur de fond du canvas"><img src="icons/icon-paint-palette.svg" alt="" class="outil-svg-icon" style="width:16px;height:16px;"></button>
                                 <div class="travaux-fond-dropdown" id="travaux-fond-dropdown">
                                     <button class="travaux-fond-swatch" data-fond="" title="D\u00e9faut (suit le th\u00e8me)" style="background:var(--surface-conteneur, #142428); border:2px solid var(--accent-primaire)"></button>
                                     <button class="travaux-fond-swatch" data-fond="#142428" title="Oc\u00e9an" style="background:#142428"></button>
@@ -1102,7 +1102,7 @@
                                     <button class="travaux-fond-swatch" data-fond="#e8e4da" title="Cr\u00e8me" style="background:#e8e4da"></button>
                                 </div>
                             </div>
-                            <button class="travaux-btn-nav" id="travaux-btn-plein-ecran" data-action="travauxUI.togglePleinEcran" title="Plein \u00e9cran">\u2922</button>
+                            <button class="travaux-btn-nav" id="travaux-btn-plein-ecran" data-action="travauxUI.togglePleinEcran" title="Plein \u00e9cran"><img src="icons/icon-fit-to-width.svg" alt="" class="nav-seq-icon"></button>
                         </div>
                     </div>
 
@@ -1634,15 +1634,15 @@
                 colGauche += `<div class="pipeline-groupe-encadre" data-groupe-id="${echapperHtml(groupeId)}">
                     <div class="pipeline-groupe-entete">
                         <span class="pipeline-groupe-badge">${indicesGroupe.length} pages &rarr; 1 PDF</span>
-                        <button class="pipeline-groupe-defaire" data-stop data-action="travauxUI.defaireGroupePipeline" data-param="${echapperHtml(groupeId)}" title="Défaire le regroupement">&times;</button>
+                        <button class="pipeline-groupe-defaire" data-stop data-action="travauxUI.defaireGroupePipeline" data-param="${echapperHtml(groupeId)}" title="Défaire le regroupement"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
                     </div>`;
             }
 
             colGauche += `<div class="pipeline-fichier-ligne${selectionne ? ' pipeline-fichier-selectionne' : ''}${indicesGroupe ? ' pipeline-fichier-groupe' : ''}" data-action="travauxUI.selectionnerFichierPipeline" data-param="${index}">
                 <span class="pipeline-fichier-numero">${index + 1}</span>
                 <div class="pipeline-reorder-btns">
-                    <button class="pipeline-btn-reorder" data-stop data-action="travauxUI.monterFichierPipeline" data-param="${index}" ${index === 0 ? 'disabled' : ''} title="Monter">&uarr;</button>
-                    <button class="pipeline-btn-reorder" data-stop data-action="travauxUI.descendreFichierPipeline" data-param="${index}" ${index === queue.length - 1 ? 'disabled' : ''} title="Descendre">&darr;</button>
+                    <button class="pipeline-btn-reorder" data-stop data-action="travauxUI.monterFichierPipeline" data-param="${index}" ${index === 0 ? 'disabled' : ''} title="Monter"><img src="icons/icon-chevron-up.svg" alt="" class="editeur-page-icon"></button>
+                    <button class="pipeline-btn-reorder" data-stop data-action="travauxUI.descendreFichierPipeline" data-param="${index}" ${index === queue.length - 1 ? 'disabled' : ''} title="Descendre"><img src="icons/icon-chevron-down.svg" alt="" class="editeur-page-icon"></button>
                 </div>
                 <div class="pipeline-fichier-thumb-col" id="pipeline-original-${index}">
                     ${thumb ? `<img src="${thumb}" alt="">` : `<span class="pipeline-icone-placeholder">${icone}</span>`}
@@ -1652,7 +1652,7 @@
                     <span class="pipeline-meta-resolution">${resolution}</span>
                     <span class="pipeline-meta-taille">${poids}</span>
                 </div>
-                <button class="pipeline-btn-retirer" data-stop data-action="travauxUI.retirerFichierPipeline" data-param="${index}" title="Retirer ce fichier">&times;</button>
+                <button class="pipeline-btn-retirer" data-stop data-action="travauxUI.retirerFichierPipeline" data-param="${index}" title="Retirer ce fichier"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
             </div>`;
 
             // Fin d'un groupe multi-fichiers
@@ -2443,7 +2443,7 @@
             : '';
 
         const verrou = (evaluation && evaluation.verrouillee)
-            ? '<span class="travaux-badge-verrou" title="Évaluation verrouillée">\u{1F512}</span>'
+            ? '<span class="travaux-badge-verrou" title="Évaluation verrouillée"><img src="icons/icon-lock.svg" alt="" class="btn-inline-icon"></span>'
             : '';
 
         // Badge evalue/remis sur la page d'archivage → previsualisation PDF complete
@@ -2457,8 +2457,7 @@
         return `<div class="annot-badge${estSelFusion ? ' annot-badge-fusion-selectionne' : ''}${estRemplacee ? ' eval-remplacee' : ''}" data-fichier-id="${f.id}" data-etudiant-da="${f.etudiantDA || ''}" draggable="true" data-drag-data="text/fichier-id:${f.id}" data-action="${actionName}" data-param="${f.id}" title="${echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : f.nomFichier)}${estRemplacee ? ' (Remplacée par reprise)' : ''}${estReprise ? ' (Reprise)' : ''}">
         ${checkboxFusion}
         <span class="annot-badge-nom">${nomEtudiant}</span>
-        <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>${indicateurReprise}${evaluation ? `<button class="travaux-badge-retro" data-stop data-action="travauxUI.afficherRetroaction" data-param="${f.id}" title="Aperçu rétroaction">\u{1F4AC}</button>` : ''}${verrou}
-        <button class="annot-badge-supprimer" data-stop data-action="travauxUI.supprimerFichierImporte" data-param="${f.id}" title="Supprimer">&times;</button>
+        <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>${indicateurReprise}${evaluation ? `<button class="travaux-badge-retro" data-stop data-action="travauxUI.afficherRetroaction" data-param="${f.id}" title="Aperçu rétroaction"><img src="icons/icon-speech-bubble.svg" alt="" class="btn-inline-icon"></button>` : ''}${verrou}
     </div>`;
     }
 
@@ -4057,7 +4056,7 @@
 
         overlay.innerHTML = `
             <div class="modal-contenu modal-compact">
-                <button class="modal-fermer" data-action="fermerOverlayParent">&times;</button>
+                <button class="modal-fermer" data-action="fermerOverlayParent"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                 <h3 class="modal-titre">${echapperHtml(titre)}</h3>
                 ${contenuHTML}
                 <div class="modal-actions">
@@ -4319,7 +4318,7 @@
                 btnVerrou.className = 'btn btn-compact';
                 btnVerrou.title = 'Verrouiller/Déverrouiller l\'évaluation';
                 btnVerrou.style.cssText = 'font-size:12px; padding:2px 6px; margin-right:4px; display:none;';
-                btnVerrou.textContent = '\u{1F513}';
+                btnVerrou.innerHTML = '<img src="icons/icon-open-lock.svg" alt="" class="btn-inline-icon">';
                 btnVerrou.addEventListener('click', function() {
                     if (typeof basculerVerrouillageEvaluationCourante === 'function') {
                         basculerVerrouillageEvaluationCourante();
@@ -4938,11 +4937,11 @@
         conteneurTravail.innerHTML = `
             <div class="travaux-zone-document" id="travaux-split-document-container">
                 <div class="travaux-toolbar">
-                    <button id="travaux-split-btn-page-prec" class="btn-icon" data-action="travauxVisionneuse.pagePrecedente" disabled>&lt;</button>
+                    <button id="travaux-split-btn-page-prec" class="btn-icon" data-action="travauxVisionneuse.pagePrecedente" disabled><img src="icons/icon-chevron-left.svg" alt="" class="nav-seq-icon"></button>
                     <span id="travaux-indicateur-page">-- / --</span>
-                    <button id="travaux-split-btn-page-suiv" class="btn-icon" data-action="travauxVisionneuse.pageSuivante" disabled>&gt;</button>
+                    <button id="travaux-split-btn-page-suiv" class="btn-icon" data-action="travauxVisionneuse.pageSuivante" disabled><img src="icons/icon-chevron-right.svg" alt="" class="nav-seq-icon"></button>
                     <button class="btn btn-petit" data-action="travauxAnnotation.basculerAnnotation">Annoter</button>
-                    <button class="btn-icon" data-action="travauxUI.fermerVueCoteACote" title="Fermer">&times;</button>
+                    <button class="btn-icon" data-action="travauxUI.fermerVueCoteACote" title="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                 </div>
                 <div class="travaux-canvas-container">
                     <div class="travaux-canvas-wrapper">
@@ -5501,10 +5500,10 @@
                     <span class="editeur-page-num">${index + 1}</span>
                     <img class="editeur-page-thumb" src="${page.dataUrl}" alt="Page ${index + 1}">
                     <div class="editeur-page-actions">
-                        <button class="editeur-page-btn" data-stop data-action="travauxUI.monterPageEditeur" data-param="${index}" ${index === 0 ? 'disabled' : ''} title="Monter">&#x25B2;</button>
-                        <button class="editeur-page-btn" data-stop data-action="travauxUI.descendrePageEditeur" data-param="${index}" ${index === editionPages.length - 1 ? 'disabled' : ''} title="Descendre">&#x25BC;</button>
-                        <button class="editeur-page-btn" data-stop data-action="travauxUI.pivoterPageEditeur" data-param="${index}" title="Pivoter 90°">&#x21BB;</button>
-                        <button class="editeur-page-btn editeur-page-btn-supprimer" data-stop data-action="travauxUI.supprimerPageEditeur" data-param="${index}" title="Supprimer" ${editionPages.length <= 1 ? 'disabled' : ''}>&times;</button>
+                        <button class="editeur-page-btn" data-stop data-action="travauxUI.monterPageEditeur" data-param="${index}" ${index === 0 ? 'disabled' : ''} title="Monter"><img src="icons/icon-chevron-up.svg" alt="" class="editeur-page-icon"></button>
+                        <button class="editeur-page-btn" data-stop data-action="travauxUI.descendrePageEditeur" data-param="${index}" ${index === editionPages.length - 1 ? 'disabled' : ''} title="Descendre"><img src="icons/icon-chevron-down.svg" alt="" class="editeur-page-icon"></button>
+                        <button class="editeur-page-btn" data-stop data-action="travauxUI.pivoterPageEditeur" data-param="${index}" title="Pivoter 90°"><img src="icons/icon-rotate.svg" alt="" class="editeur-page-icon"></button>
+                        <button class="editeur-page-btn editeur-page-btn-supprimer" data-stop data-action="travauxUI.supprimerPageEditeur" data-param="${index}" title="Supprimer" ${editionPages.length <= 1 ? 'disabled' : ''}><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
                     </div>
                 </div>`;
         });
@@ -5868,7 +5867,7 @@
         var html = `
         <div class="modal-overlay actif" id="modal-fusion-editeur" data-close-on-bg="travauxUI.fermerModalFusionEditeur">
             <div class="modal-contenu modal-fusion-editeur-contenu">
-                <button class="modal-fermer" data-action="travauxUI.fermerModalFusionEditeur">&times;</button>
+                <button class="modal-fermer" data-action="travauxUI.fermerModalFusionEditeur"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                 <h3 class="modal-titre">Fusionner des documents</h3>
 
                 <div class="fusion-editeur-filtres">
@@ -6238,7 +6237,7 @@
         const html = `
         <div class="modal-overlay actif" id="travaux-modal-retroaction" data-close-on-bg="travauxUI.fermerModalRetroaction">
             <div class="modal-contenu" style="max-width: 620px;">
-                <button class="modal-fermer" data-action="travauxUI.fermerModalRetroaction">&times;</button>
+                <button class="modal-fermer" data-action="travauxUI.fermerModalRetroaction"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                 <h3 class="modal-titre">Rétroaction — ${nomEtudiant}</h3>
 
                 <div class="travaux-retro-entete">
@@ -6396,7 +6395,7 @@
         overlay.className = 'modal-overlay actif';
         overlay.innerHTML = `
             <div class="modal-contenu modal-compact" style="max-width: 560px;">
-                <button class="modal-fermer" data-action="fermerOverlayParent">&times;</button>
+                <button class="modal-fermer" data-action="fermerOverlayParent"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                 <h3 class="modal-titre">Transférer des fichiers</h3>
 
                 <label style="font-size: 0.85em; color: var(--texte-secondaire);">Groupe cible :</label>
@@ -6604,7 +6603,7 @@
         document.body.classList.toggle('travaux-plein-ecran-actif', _pleinEcranActif);
         var btn = document.getElementById('travaux-btn-plein-ecran');
         if (btn) {
-            btn.textContent = _pleinEcranActif ? '\u2716' : '\u2922';
+            btn.innerHTML = _pleinEcranActif ? '<img src="icons/icon-collapse.svg" alt="" class="nav-seq-icon">' : '<img src="icons/icon-fit-to-width.svg" alt="" class="nav-seq-icon">';
             btn.title = _pleinEcranActif ? 'Quitter le plein \u00e9cran' : 'Plein \u00e9cran';
         }
     }

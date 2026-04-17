@@ -1321,7 +1321,7 @@ function afficherTableauNiveaux(niveaux) {
                                   data-action="basculerVerrouillageNiveau" data-param="${index}"
                                   style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 8px;"
                                   title="${niveau.verrouille ? 'Verrouillé - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller'}">
-                                ${niveau.verrouille ? '🔒' : '🔓'}
+                                ${niveau.verrouille ? '<img src="icons/icon-lock.svg" alt="Verrouillé" class="btn-inline-icon">' : '<img src="icons/icon-open-lock.svg" alt="Modifiable" class="btn-inline-icon">'}
                             </span>
                         </td>
                     </tr>
@@ -1553,7 +1553,7 @@ async function basculerVerrouillageNiveau(index) {
     // Mettre à jour le cadenas dans le DOM immédiatement
     const cadenasElement = document.getElementById(`cadenas-niveau-${index}`);
     if (cadenasElement) {
-        cadenasElement.textContent = estVerrouille ? '🔒' : '🔓';
+        cadenasElement.innerHTML = estVerrouille ? '<img src="icons/icon-lock.svg" alt="Verrouillé" class="btn-inline-icon">' : '<img src="icons/icon-open-lock.svg" alt="Modifiable" class="btn-inline-icon">';
         cadenasElement.title = estVerrouille ? 'Verrouillé - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller';
     }
 

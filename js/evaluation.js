@@ -2591,7 +2591,7 @@ function afficherBadgesJetons() {
             <span class="statut-badge" style="background: var(--violet-jeton, #9c27b0); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
                 <span>⭐ Reprise</span>
                 <button class="btn-jeton-retirer" data-action="retirerJetonDepuisSidebar" data-param="${evaluation.id}" data-param2="reprise"
-                        title="Retirer le jeton de reprise">×</button>
+                        title="Retirer le jeton de reprise"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
             </span>
         `);
     }
@@ -2603,7 +2603,7 @@ function afficherBadgesJetons() {
             <span class="statut-badge" style="background: var(--orange-accent); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
                 <span>⭐ Délai</span>
                 <button class="btn-jeton-retirer" data-action="retirerJetonDepuisSidebar" data-param="${evaluation.id}" data-param2="delai"
-                        title="Retirer le jeton de délai">×</button>
+                        title="Retirer le jeton de délai"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
             </span>
         `);
     }
@@ -3956,7 +3956,7 @@ function genererDetailsEtudiant(etudiant) {
                     <th>Note</th>
                     <th>Date</th>
                     <th>Actions</th>
-                    <th class="eval-width-60" title="Verrouillage">🔒/🔓</th>
+                    <th class="eval-width-60" title="Verrouillage"><img src="icons/icon-lock.svg" alt="" class="btn-inline-icon">/<img src="icons/icon-open-lock.svg" alt="" class="btn-inline-icon"></th>
                 </tr>
             </thead>
             <tbody>
@@ -4005,7 +4005,7 @@ function genererDetailsEtudiant(etudiant) {
                                               data-action="basculerVerrouillageEvaluation" data-param="${item.evaluation.id}"
                                               style="font-size: 1.2rem; cursor: pointer; user-select: none;"
                                               title="${item.evaluation.verrouillee ? 'Verrouillée - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller'}">
-                                            ${item.evaluation.verrouillee ? '🔒' : '🔓'}
+                                            ${item.evaluation.verrouillee ? '<img src="icons/icon-lock.svg" alt="Verrouillée" class="btn-inline-icon">' : '<img src="icons/icon-open-lock.svg" alt="Modifiable" class="btn-inline-icon">'}
                                         </span>
                                     `}
                                 </td>
@@ -6029,7 +6029,7 @@ function sauvegarderEvaluationModifiee() {
             verrou = document.createElement('span');
             verrou.className = 'travaux-badge-verrou';
             verrou.title = 'Évaluation verrouillée';
-            verrou.textContent = '\u{1F512}';
+            verrou.innerHTML = '<img src="icons/icon-lock.svg" alt="" class="btn-inline-icon">';
             badge.appendChild(verrou);
         }
     });
@@ -6412,15 +6412,15 @@ function afficherListeBanqueEvaluations(evaluations) {
                         ${estReprise ? `
                             <div style="margin-top: 10px; padding: 8px; background: var(--violet-pale, #f3e5f5); border-radius: 4px; font-size: 0.85rem; color: var(--violet-jeton, #7b1fa2); display: flex; justify-content: space-between; align-items: center;">
                                 <span>⭐ Jeton de reprise appliqué - Remplace l'évaluation précédente</span>
-                                <button class="btn-jeton-retirer" style="font-size: 1.2rem;" data-action="retirerJeton" data-param="${evaluation.id}" data-param2="reprise"
-                                        title="Retirer le jeton de reprise">×</button>
+                                <button class="btn-jeton-retirer" data-action="retirerJeton" data-param="${evaluation.id}" data-param2="reprise"
+                                        title="Retirer le jeton de reprise"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
                             </div>
                         ` : ''}
                         ${estDelai ? `
                             <div style="margin-top: 10px; padding: 8px; background: var(--alerte-fond-attention); border-radius: 4px; font-size: 0.85rem; color: var(--orange-accent); display: flex; justify-content: space-between; align-items: center;">
                                 <span>⭐ Jeton de délai appliqué - Date limite étendue</span>
-                                <button class="btn-jeton-retirer" style="font-size: 1.2rem;" data-action="retirerJeton" data-param="${evaluation.id}" data-param2="delai"
-                                        title="Retirer le jeton de délai">×</button>
+                                <button class="btn-jeton-retirer" data-action="retirerJeton" data-param="${evaluation.id}" data-param2="delai"
+                                        title="Retirer le jeton de délai"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
                             </div>
                         ` : ''}
                     </div>
@@ -6434,7 +6434,7 @@ function afficherListeBanqueEvaluations(evaluations) {
                         <span data-action="basculerVerrouillageEvaluation" data-param="${evaluation.id}"
                               style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-right: 8px;"
                               title="${evaluation.verrouillee ? 'Verrouillée - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller'}">
-                            ${evaluation.verrouillee ? '🔒' : '🔓'}
+                            ${evaluation.verrouillee ? '<img src="icons/icon-lock.svg" alt="Verrouillée" class="btn-inline-icon">' : '<img src="icons/icon-open-lock.svg" alt="Modifiable" class="btn-inline-icon">'}
                         </span>
                         <button class="btn btn-supprimer btn-compact" data-action="supprimerEvaluationBanque" data-param="${evaluation.id}">
                             Supprimer
@@ -6581,7 +6581,7 @@ function basculerVerrouillageEvaluation(evaluationId) {
     // Mettre à jour le cadenas dans le DOM immédiatement
     const cadenasElement = document.getElementById(`cadenas-${evaluationId}`);
     if (cadenasElement) {
-        cadenasElement.textContent = estVerrouillee ? '🔒' : '🔓';
+        cadenasElement.innerHTML = estVerrouillee ? '<img src="icons/icon-lock.svg" alt="Verrouillée" class="btn-inline-icon">' : '<img src="icons/icon-open-lock.svg" alt="Modifiable" class="btn-inline-icon">';
         cadenasElement.title = estVerrouillee ? 'Verrouillée - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller';
     }
 
@@ -6800,7 +6800,7 @@ function basculerVerrouillageEvaluationCourante() {
                 const span = document.createElement('span');
                 span.className = 'travaux-badge-verrou';
                 span.title = 'Évaluation verrouillée';
-                span.textContent = '\u{1F512}';
+                span.innerHTML = '<img src="icons/icon-lock.svg" alt="" class="btn-inline-icon">';
                 if (btnSupp) badge.insertBefore(span, btnSupp);
                 else badge.appendChild(span);
             } else if (!estVerrouillee && verrouExistant) {
@@ -6818,7 +6818,7 @@ function mettreAJourBoutonVerrouillage(estVerrouillee) {
     const btnVerrouPalette = document.getElementById('btnVerrouPalette');
     if (btnVerrouPalette) {
         btnVerrouPalette.style.display = '';
-        btnVerrouPalette.textContent = estVerrouillee ? '\u{1F512}' : '\u{1F513}';
+        btnVerrouPalette.innerHTML = estVerrouillee ? '<img src="icons/icon-lock.svg" alt="" class="btn-inline-icon">' : '<img src="icons/icon-open-lock.svg" alt="" class="btn-inline-icon">';
         btnVerrouPalette.title = estVerrouillee
             ? 'Évaluation verrouillée - Clique pour déverrouiller'
             : 'Évaluation modifiable - Clique pour verrouiller';
@@ -6839,7 +6839,7 @@ function mettreAJourBoutonVerrouillage(estVerrouillee) {
                 const pill = badge.querySelector('.travaux-badge-pill');
                 if (pill) pill.after(verrou);
             }
-            verrou.textContent = '\u{1F512}';
+            verrou.innerHTML = '<img src="icons/icon-lock.svg" alt="" class="btn-inline-icon">';
             verrou.title = 'Évaluation verrouillée';
         } else {
             if (verrou) verrou.remove();

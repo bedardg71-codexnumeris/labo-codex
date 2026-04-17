@@ -763,7 +763,7 @@
                             font-size: 1.5rem;
                             cursor: pointer;
                             color: var(--gris-moyen);
-                        ">×</button>
+                        "><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                     </div>
 
                     <!-- Explications -->

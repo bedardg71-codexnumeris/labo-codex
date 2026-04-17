@@ -337,7 +337,7 @@ function ouvrirModalParamsTirage() {
             <div class="modal-contenu">
                 <div class="modal-entete">
                     <h2 id="titre-modal-params">Paramètres du tirage</h2>
-                    <button class="modal-fermer" data-action="fermerModalParamsTirage" aria-label="Fermer">×</button>
+                    <button class="modal-fermer" data-action="fermerModalParamsTirage" aria-label="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                 </div>
                 <div class="modal-corps">
 
@@ -758,7 +758,7 @@ function ouvrirModalParamsQuestions() {
             <div class="modal-contenu modal-large">
                 <div class="modal-entete">
                     <h2>Gestion des Questions Flash</h2>
-                    <button class="modal-fermer" data-action="fermerModalParamsQuestions" aria-label="Fermer">×</button>
+                    <button class="modal-fermer" data-action="fermerModalParamsQuestions" aria-label="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                 </div>
                 <div class="modal-corps">
 
@@ -780,7 +780,7 @@ function ouvrirModalParamsQuestions() {
                                 ${etatQuestions.categories.map(c => `
                                     <span class="questions-categorie-tag">
                                         ${echapperHtml(c.nom)}
-                                        <button class="questions-categorie-suppr" data-action="supprimerCategorie" data-param="${c.id}" title="Supprimer">×</button>
+                                        <button class="questions-categorie-suppr" data-action="supprimerCategorie" data-param="${c.id}" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
                                     </span>
                                 `).join('')}
                             </div>
@@ -997,7 +997,7 @@ function rafraichirListeQuestionsModal() {
         listeCategories.innerHTML = etatQuestions.categories.map(c => `
             <span class="questions-categorie-tag">
                 ${echapperHtml(c.nom)}
-                <button class="questions-categorie-suppr" data-action="supprimerCategorie" data-param="${c.id}" title="Supprimer">×</button>
+                <button class="questions-categorie-suppr" data-action="supprimerCategorie" data-param="${c.id}" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
             </span>
         `).join('');
     }

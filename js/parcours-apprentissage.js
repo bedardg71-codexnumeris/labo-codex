@@ -609,7 +609,7 @@ function afficherNotificationJalon(jalon, progression) {
         '<div class="parcours-notification-contenu">' +
             '<div style="display: flex; justify-content: space-between; align-items: start;">' +
                 '<strong>✅ Étape ' + jalon.numero + ' complétée !</strong>' +
-                '<button data-action="parcours.fermerNotificationJalon" style="background:none; border:none; color:var(--gris-clair); cursor:pointer; font-size:1.2rem; padding:0; line-height:1;">×</button>' +
+                '<button data-action="parcours.fermerNotificationJalon" style="background:none; border:none; cursor:pointer; padding:0; line-height:1;"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>' +
             '</div>' +
             '<p style="margin: 4px 0 0; color: var(--gris-moyen);">' + jalon.titre + '</p>' +
             prochainHTML +
@@ -1038,7 +1038,7 @@ function afficherSuggestionProactive(jalon, texteAction, callback) {
         contenu += '<button class="btn btn-secondaire btn-sm" data-action="parcours.naviguerSuggestionJalon" data-param="' + jalon.id + '">Y aller →</button>';
     }
 
-    contenu += '<button class="parcours-suggestion-fermer" data-action="parcours.fermerSuggestion">×</button>';
+    contenu += '<button class="parcours-suggestion-fermer" data-action="parcours.fermerSuggestion"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>';
 
     suggestion.innerHTML = contenu;
     document.body.appendChild(suggestion);
