@@ -3892,168 +3892,6 @@ function genererSectionProgression(da) {
     return html;
 }
 
-function genererSectionPerformance(da) {
-    if (typeof obtenirPreference === 'function' && obtenirPreference('afficherDeveloppementHabiletes') === false) {
-        return '';
-    }
-    // ✨ NOUVEAU (7 déc 2025) : Graphique d'évolution des critères
-    const canvasIdCriteres = `graphique-criteres-${da}`;
-    let graphiqueCriteres = '';
-
-    // 🐛 DEBUG (8 déc 2025) : Tracer exécution
-
-    // Vérifier si l'étudiant a des évaluations avec détails critères
-    if (typeof creerGraphiqueCriteres === 'function') {
-        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-
-        const evaluationsAvecCriteres = evaluations.filter(e =>
-            e.etudiantDA === da &&
-            !e.remplaceeParId &&
-            e.criteres &&
-            Array.isArray(e.criteres) &&
-            e.criteres.length > 0
-        );
-
-        if (evaluationsAvecCriteres.length > 0) {
-
-            // Extraire les critères uniques pour la légende
-            const criteresSet = new Set();
-            evaluationsAvecCriteres.forEach(e => {
-                e.criteres.forEach(c => {
-                    if (c.critereNom) criteresSet.add(c.critereNom);
-                });
-            });
-            const criteresUniques = Array.from(criteresSet).sort();
-
-            // Palette de couleurs (même que dans creerGraphiqueCriteres)
-            const COULEURS_CRITERES = [
-                '#E91E63', '#9C27B0', '#3F51B5', '#00BCD4',
-                '#4CAF50', '#FF9800', '#795548', '#607D8B'
-            ];
-
-            // Générer la légende HTML avec checkboxes
-            const legendeHTML = criteresUniques.map((critere, index) => {
-                const couleur = COULEURS_CRITERES[index % COULEURS_CRITERES.length];
-                const critereEscaped = critere.replace(/'/g, "\\'");
-                return `<label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: ${couleur}; font-size: 0.78rem;">
-                    <input type="checkbox" checked data-on-change="toggleCritereIndivHandler" data-critere="${critereEscaped}" data-da="${da}">
-                    <span style="width: 10px; height: 10px; background: ${couleur}; border-radius: 50%; display: inline-block;"></span>
-                    ${critere}
-                </label>`;
-            }).join('');
-
-            graphiqueCriteres = `
-                <div class="profil-zone-moyenne-bleu" style="margin-bottom: 20px;">
-                    <!-- Légende des critères -->
-                    <div style="background: var(--surface-conteneur, #142428); padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                        <span style="font-weight: 600; color: var(--gris-fonce);">Critères :</span>
-                        ${legendeHTML}
-                        ${genererBandeauContexteProfil()}
-                    </div>
-
-                    <!-- Canvas pour le graphique Chart.js -->
-                    <div style="background: var(--surface-conteneur, #142428); padding: 20px; border-radius: 6px; height: 450px;">
-                        <canvas id="${canvasIdCriteres}"></canvas>
-                    </div>
-                </div>
-            `;
-
-            // Utiliser setTimeout pour créer le graphique après l'insertion du DOM
-            setTimeout(() => {
-                const canvas = document.getElementById(canvasIdCriteres);
-                if (canvas) {
-                    creerGraphiqueCriteres(canvasIdCriteres, da);
-                }
-            }, 100);
-        }
-    }
-
-    // 🎯 DÉTECTION PRATIQUE MULTI-OBJECTIFS
-    const statusPratiqueMultiObjectifs = verifierPratiqueMultiObjectifs();
-
-    if (statusPratiqueMultiObjectifs.actif && typeof calculerNoteFinaleMultiObjectifs === 'function') {
-        // Pratique multi-objectifs : afficher le tableau des objectifs
-        const noteFinale = calculerNoteFinaleMultiObjectifs(da, statusPratiqueMultiObjectifs.ensembleId);
-
-        if (noteFinale && noteFinale.noteFinale !== null) {
-            return `
-                ${graphiqueCriteres}
-                <div style="padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                    ${genererTableauObjectifs(da, statusPratiqueMultiObjectifs.ensembleId, noteFinale)}
-                </div>
-            `;
-        } else {
-            return `
-                ${graphiqueCriteres}
-                <div class="profil-zone-moyenne-bleu">
-                    <p class="u-texte-gris">Pratique multi-objectifs activée avec l'ensemble «${echapperHtml(statusPratiqueMultiObjectifs.ensemble.nom)}»</p>
-                    <p class="u-texte-gris-clair u-mt-10">Aucune évaluation disponible pour le moment</p>
-                </div>
-            `;
-        }
-    }
-
-    // Pratique PAN classique : afficher les meilleurs artefacts
-    const meilleures = obtenirDetailsPerformance(da);
-
-    if (meilleures.length === 0) {
-        return `
-            ${graphiqueCriteres}
-            <div class="profil-zone-moyenne-bleu">
-                <p class="u-texte-gris">Aucune évaluation disponible pour le moment</p>
-            </div>
-        `;
-    }
-
-    const moyenne = meilleures.reduce((sum, m) => sum + m.note, 0) / meilleures.length;
-
-    return `
-        ${graphiqueCriteres}
-        <div style="padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
-            <div style="background: var(--surface-conteneur, #142428); padding: 20px; border-radius: 6px; text-align: center; margin-bottom: 20px;">
-                <div class="u-texte-09 u-texte-gris" style="margin-bottom: 5px;">
-                    Moyenne PAN (${meilleures.length} meilleur${meilleures.length > 1 ? 's' : ''} artefact${meilleures.length > 1 ? 's' : ''})
-                </div>
-                <div style="font-size: 3rem; font-weight: bold; color: ${obtenirCouleurIndice(moyenne)};">
-                    ${moyenne.toFixed(1)}/100
-                </div>
-            </div>
-
-            <h4 class="profil-section-titre-large">
-                🏆 Les ${meilleures.length} meilleur${meilleures.length > 1 ? 's' : ''} artefact${meilleures.length > 1 ? 's' : ''}
-            </h4>
-
-            ${meilleures.map((art, index) => `
-                <div style="background: var(--surface-conteneur, #142428); padding: 15px; margin-bottom: 10px; border-left: 4px solid ${obtenirCouleurIndice(art.note)};">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-                        <div style="flex: 1;">
-                            <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 5px;">
-                                #${index + 1} · ${echapperHtml(art.description)}
-                            </div>
-                            <div class="profil-texte-detail-compact">
-                                Évalué le ${formaterDate(art.dateEvaluation)}
-                            </div>
-                        </div>
-                        <div class="u-text-right">
-                            <div style="font-size: 1.8rem; font-weight: bold; color: ${obtenirCouleurIndice(art.note)};">
-                                ${art.note}/100
-                            </div>
-                            <div style="font-size: 0.9rem; color: var(--texte-secondaire); font-weight: bold;">
-                                ${art.niveau}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `).join('')}
-
-            <div style="background: var(--surface-conteneur, #142428); padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.9rem; color: var(--gris-moyen);">
-                <strong>Principe PAN :</strong> La note finale est calculée sur la moyenne des 3 meilleurs ${obtenirTermeProduction('pluriel')}
-                plutôt que sur la moyenne de tous les artefacts.
-            </div>
-        </div>
-    `;
-}
-
 /**
  * Variable globale pour suivre quel indice est actuellement affiché
  */
@@ -6422,6 +6260,96 @@ function _genererBarresSRPNF(da, graphiqueCriteres) {
     `;
 }
 
+/**
+ * Bloc « Profil RLO (actions cognitives observées) » — étape 8.
+ * Affiché dans « Développement des habiletés », conditionné au toggle
+ * `activerActionsRLO` et à la présence d'au moins une évaluation avec
+ * annotations d'actions RLO pour cet étudiant.
+ */
+function genererBlocProfilRLO(da) {
+    if (typeof actionsRLO === 'undefined' || !actionsRLO.agregerProfilRLOEtudiant) return '';
+    const profil = actionsRLO.agregerProfilRLOEtudiant(da);
+    if (!profil) return '';
+
+    const entete = `
+        <div class="u-flex-between-mb15">
+            <div>
+                <strong style="font-size:1.05rem;">Profil RLO (actions cognitives observées)</strong>
+                <div class="texte-muted" style="font-size:0.8rem; margin-top:2px;">
+                    ${profil.nbEvaluationsObservees} évaluation${profil.nbEvaluationsObservees > 1 ? 's' : ''} annotée${profil.nbEvaluationsObservees > 1 ? 's' : ''} sur ${profil.nbEvaluations}
+                </div>
+            </div>
+            ${profil.total > 0 ? `
+                <div style="text-align:right; font-size:0.85rem; color:var(--texte-secondaire);">
+                    <span>${Math.round((profil.totalCognitifs / profil.total) * 100)}% de gestes cognitifs (${profil.totalCognitifs}/${profil.total})</span>
+                </div>
+            ` : ''}
+        </div>`;
+
+    // État vide : aucune annotation `action-*` observée sur les évaluations du DA.
+    if (profil.total === 0) {
+        return `
+            <div class="profil-carte-bordure-blanche" style="margin-top: 20px;">
+                ${entete}
+                <div class="info-box info-box--info" style="margin: 0;">
+                    <div style="display: flex; gap: 10px; align-items: start;">
+                        <span style="font-size: 1.3rem;">📝</span>
+                        <div style="flex: 1;">
+                            <strong style="color: var(--alerte-texte-information); display: block; margin-bottom: 5px;">Aucune action cognitive observée</strong>
+                            <p style="margin: 0; color: var(--alerte-texte-information); font-size: 0.9rem; line-height: 1.5;">
+                                Pose des tampons <strong>Repérage</strong>, <strong>Liaison</strong> ou <strong>Ouverture</strong>
+                                (ou les tampons en difficulté) sur les travaux annotés pour alimenter ce profil.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    const ligneCognitive = [
+        { nom: 'Repérage',  n: profil.reperage },
+        { nom: 'Liaison',   n: profil.liaison },
+        { nom: 'Ouverture', n: profil.ouverture }
+    ];
+    const ligneDifficulte = [
+        { nom: 'Incertain', n: profil.incertain },
+        { nom: 'Incomplet', n: profil.incomplet },
+        { nom: 'Inexact',   n: profil.inexact }
+    ];
+
+    const maxCog = Math.max(profil.reperage, profil.liaison, profil.ouverture, 1);
+    const maxDif = Math.max(profil.incertain, profil.incomplet, profil.inexact, 1);
+
+    const rendreBarre = (items, maxVal, couleur) => items.map(i => {
+        const pct = Math.round((i.n / maxVal) * 100);
+        return `
+            <div style="display:grid; grid-template-columns: 100px 1fr 40px; gap:8px; align-items:center; margin-bottom:6px;">
+                <span style="font-size:0.85rem; color:var(--texte-secondaire);">${i.nom}</span>
+                <div style="background:var(--surface-conteneur); border-radius:4px; height:18px; position:relative; overflow:hidden;">
+                    <div style="background:${couleur}; height:100%; width:${pct}%; transition:width 300ms ease;"></div>
+                </div>
+                <span style="font-weight:600; text-align:right;">${i.n}</span>
+            </div>`;
+    }).join('');
+
+    return `
+        <div class="profil-carte-bordure-blanche" style="margin-top: 20px;">
+            ${entete}
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
+                <div>
+                    <div style="font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--texte-secondaire); margin-bottom:8px;">Gestes cognitifs</div>
+                    ${rendreBarre(ligneCognitive, maxCog, 'var(--bleu-principal, #3b82f6)')}
+                </div>
+                <div>
+                    <div style="font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--texte-secondaire); margin-bottom:8px;">Gestes en difficulté</div>
+                    ${rendreBarre(ligneDifficulte, maxDif, 'var(--orange-accent, #f59e0b)')}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 function genererSectionPerformance(da) {
     if (typeof obtenirPreference === 'function' && obtenirPreference('afficherDeveloppementHabiletes') === false) {
         return '';
@@ -6506,14 +6434,14 @@ function genererSectionPerformance(da) {
     const barresSRPNF = _genererBarresSRPNF(da, graphiqueCriteres);
 
     if (!portfolio) {
-        return barresSRPNF;
+        return barresSRPNF + genererBlocProfilRLO(da);
     }
 
     // Récupérer TOUS les artefacts créés
     const tousLesArtefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
 
     if (tousLesArtefactsPortfolio.length === 0) {
-        return barresSRPNF;
+        return barresSRPNF + genererBlocProfilRLO(da);
     }
 
     // ✅ CORRECTION : Identifier les artefacts RÉELLEMENT ÉVALUÉS
@@ -7035,6 +6963,7 @@ function genererSectionPerformance(da) {
 
 
     </div>
+    ${genererBlocProfilRLO(da)}
     `;
 }
 
