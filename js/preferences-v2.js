@@ -97,6 +97,11 @@
             solo.checked = obtenirPreference('afficherDescriptionsSOLO') !== false;
         }
 
+        const actionsRlo = document.getElementById('v2-pref-actions-rlo');
+        if (actionsRlo) {
+            actionsRlo.checked = obtenirPreference('activerActionsRLO') === true;
+        }
+
         const snapshots = document.getElementById('v2-pref-snapshots');
         if (snapshots) {
             snapshots.checked = obtenirPreference('afficherSnapshots') !== false;
@@ -238,6 +243,7 @@
         // Préférences utilisateur : via l'API centralisée
         definirPreference('activerRai', document.getElementById('v2-pref-rai')?.checked !== false);
         definirPreference('afficherDescriptionsSOLO', document.getElementById('v2-pref-solo')?.checked !== false);
+        definirPreference('activerActionsRLO', document.getElementById('v2-pref-actions-rlo')?.checked === true);
         definirPreference('grilleReferenceDepistage', document.getElementById('v2-pref-grille-reference')?.value || '');
         definirPreference('decouplerPR', document.getElementById('v2-pref-decoupler-pr')?.checked === true);
         definirPreference('fenetrePatterns', parseInt(document.getElementById('v2-pref-fenetre-patterns')?.value) || 3);
