@@ -292,7 +292,7 @@ function afficherJournal(evaluationId) {
             '<div class="journal-modal-entete">' +
                 '<h3>Journal de bord</h3>' +
                 '<span class="journal-modal-sous-titre">' + nomEtudiant + ' — ' + nomProduction + '</span>' +
-                '<button class="journal-modal-fermer" data-action="Journal.fermerJournal" title="Fermer">✕</button>' +
+                '<button class="journal-modal-fermer" data-action="Journal.fermerJournal" title="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>' +
             '</div>' +
             '<div class="journal-modal-corps">' + contenuHtml + '</div>' +
         '</div>';

@@ -5327,7 +5327,7 @@ function togglePleinEcranCarte() {
     document.body.classList.toggle('planif-plein-ecran-actif', _planifPleinEcran);
     var btn = document.getElementById('planif-btn-plein-ecran');
     if (btn) {
-        btn.textContent = _planifPleinEcran ? '\u2716' : '\u2922';
+        btn.innerHTML = _planifPleinEcran ? '<img src="icons/icon-collapse.svg" alt="" class="planif-icon">' : '<img src="icons/icon-fit-to-width.svg" alt="" class="planif-icon">';
         btn.title = _planifPleinEcran ? 'Quitter le plein \u00e9cran' : 'Plein \u00e9cran';
     }
 }

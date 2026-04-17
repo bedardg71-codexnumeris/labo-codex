@@ -998,7 +998,7 @@ function supprimerCours(id) {
     }
 
     if (coursASupprimer.verrouille) {
-        alert('Déverrouillez ce cours (🔓) avant de le supprimer');
+        alert('D\u00e9verrouillez ce cours avant de le supprimer');
         return;
     }
 

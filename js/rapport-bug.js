@@ -158,7 +158,7 @@ function ouvrirModalRapportsArchives() {
                     </div>
                     <button data-action="supprimerEtRafraichirArchive" data-param="${r.id}" style="
                         background: none; border: none; cursor: pointer; font-size: 1.2rem;
-                        color: var(--gris-clair); padding: 0;" title="Supprimer">×</button>
+                        padding: 0;" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
                 </div>
                 <p style="margin: 0 0 8px 0; font-size: 0.9rem; color: var(--gris-fonce);">
                     ${(r.description || 'Aucune description').substring(0, 100)}${r.description?.length > 100 ? '...' : ''}
@@ -172,7 +172,7 @@ function ouvrirModalRapportsArchives() {
     const modalHTML = `
         <div id="modalRapportsArchives" class="modal-overlay actif" style="z-index: 10001;">
             <div class="modal-contenu modal-compact">
-                <button class="modal-fermer" data-action="fermerModalRapportsArchives">&times;</button>
+                <button class="modal-fermer" data-action="fermerModalRapportsArchives"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                 <h3 class="modal-titre">Rapports archivés (${archives.length})</h3>
                 <div class="modal-section" id="listeRapportsArchives" style="max-height: 55vh; overflow-y: auto;">
                     ${listeHTML}
@@ -825,7 +825,7 @@ function ouvrirModalRapportBug() {
     const modalHTML = `
         <div id="modalRapportBug" class="modal-overlay actif" style="z-index: 10000;">
             <div class="modal-contenu" style="max-width: 700px;">
-                <button class="modal-fermer" data-action="fermerModalRapportBug">&times;</button>
+                <button class="modal-fermer" data-action="fermerModalRapportBug"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                 <h3 class="modal-titre">Signaler un problème</h3>
 
                 <div class="modal-section">

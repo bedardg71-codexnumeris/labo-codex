@@ -4355,7 +4355,7 @@ async function ouvrirModalBibliothequePratiques() {
                 <!-- En-tête -->
                 <div style="padding: 20px; border-bottom: 1px solid var(--gris-clair); display: flex; justify-content: space-between; align-items: center;">
                     <h2 style="margin: 0; color: var(--accent-primaire);">Bibliothèque de pratiques</h2>
-                    <button data-action="fermerModalBibliothequePratiques" class="modal-js-btn-fermer">&times;</button>
+                    <button data-action="fermerModalBibliothequePratiques" class="modal-js-btn-fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                 </div>
 
                 <!-- Corps -->
@@ -4782,7 +4782,7 @@ function ajouterTypeTravailSpec() {
     div.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
             <h5 style="margin: 0; color: var(--accent-primaire);">Type de travail ${index + 1}</h5>
-            <button type="button" class="btn-icon" data-action="retirerTypeTravailSpec" style="color: var(--rouge-erreur);">✕</button>
+            <button type="button" class="btn-icon" data-action="retirerTypeTravailSpec"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
         </div>
         <div class="groupe-form">
             <label>ID (identifiant unique)</label>
@@ -4831,7 +4831,7 @@ function ajouterPalierBundle() {
     div.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
             <h5 style="margin: 0; color: var(--accent-primaire);">Palier ${index + 1}</h5>
-            <button type="button" class="btn-icon" data-action="retirerPalierBundle" style="color: var(--rouge-erreur);">✕</button>
+            <button type="button" class="btn-icon" data-action="retirerPalierBundle"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
             <div class="groupe-form">

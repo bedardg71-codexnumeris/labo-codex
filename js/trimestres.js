@@ -1631,7 +1631,7 @@
         } else if (etat === 'success') {
             contenu = `
                 <div class="modal-contenu modal-compact">
-                    <button class="modal-fermer" data-action="fermerModalExportRecherche">&times;</button>
+                    <button class="modal-fermer" data-action="fermerModalExportRecherche"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                     <h2 class="modal-titre">Export généré avec succès</h2>
 
                     <div class="alerte alerte-succes">
@@ -1671,7 +1671,7 @@
         } else if (etat === 'error') {
             contenu = `
                 <div class="modal-contenu modal-compact">
-                    <button class="modal-fermer" data-action="fermerModalExportRecherche">&times;</button>
+                    <button class="modal-fermer" data-action="fermerModalExportRecherche"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                     <h2 class="modal-titre">Erreur lors de l'export</h2>
 
                     <div class="alerte alerte-erreur">

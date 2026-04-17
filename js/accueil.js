@@ -108,7 +108,7 @@ function afficherAccueilContenu(conteneur) {
     conteneur.innerHTML = `
         <div class="accueil-hero">
             <div id="manifeste-accueil" style="font-style: italic; font-size: 0.82rem; line-height: 1.7; color: var(--texte-muted); max-width: 700px; margin: 0 auto 1.5rem; text-align: justify; position: relative;${db.getSync('manifeste-masque', false) ? ' display: none;' : ''}">
-                <button data-action="masquerManifeste" style="position: absolute; top: -2px; right: -2px; background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--texte-muted); opacity: 0.6; padding: 4px 8px; line-height: 1;" title="Fermer">&times;</button>
+                <button data-action="masquerManifeste" style="position: absolute; top: -2px; right: -2px; background: none; border: none; cursor: pointer; opacity: 0.6; padding: 4px 8px; line-height: 1;" title="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                 <p><strong>Labo Codex</strong> permet de donner un regard \u00e0 l\u2019enseignant\u00b7e sur sa propre pratique. C\u2019est un laboratoire d\u2019observation p\u00e9dagogique. L\u2019application capte les micro-donn\u00e9es d\u00e9j\u00e0 pr\u00e9sentes dans ta classe (pr\u00e9sences, remise de travaux, d\u00e9tails des \u00e9valuations) et les rend visibles et interpr\u00e9tables. Voir les conditions de ton \u00e9cosyst\u00e8me-classe te permet de mieux planifier tes interventions.</p>
                 <p style="margin-top: 0.6rem;">Il n\u2019y a aucune intelligence artificielle dans l\u2019application. Aucune d\u00e9cision n\u2019est prise \u00e0 ta place. Ton jugement professionnel est souverain. L\u2019outil ne fait que l\u2019\u00e9clairer.</p>
                 <p style="margin-top: 0.6rem;"><strong>\u00c0 quoi sert ce labo\u00a0?</strong> \u00c0 transformer les gestes que tu fais d\u00e9j\u00e0 (observer, annoter, \u00e9valuer) en micro-donn\u00e9es qui \u00e9clairent ton jugement professionnel. L\u2019application ne remplace pas ton regard sur tes \u00e9l\u00e8ves. Elle le rend plus pr\u00e9cis, plus continu, plus partageable.</p>
@@ -139,7 +139,7 @@ function afficherAccueilContenu(conteneur) {
                         </div>
                     </div>
                     <div class="accueil-carte" data-action="naviguerVersWizard">
-                        <div class="accueil-carte-icone">\uD83C\uDFA8</div>
+                        <div class="accueil-carte-icone"><img src="icons/icon-paint-palette.svg" alt="" class="outil-svg-icon" style="width:32px;height:32px;"></div>
                         <div class="accueil-carte-titre">Configurer ta pratique de notation</div>
                         <div class="accueil-carte-desc">
                             D\u00e9finis ce que tu mesures et comment tu le fais pour cr\u00e9er ta pratique de notation.

@@ -1692,7 +1692,7 @@ function genererSectionAccompagnement(da) {
                 </p>
 
                 <button data-action="ouvrirModalConfidentiel" data-param="${da}" class="btn btn-secondaire" style="margin-top: 12px; font-size: 0.85rem;" data-tooltip="profil-confidentiel">
-                    🔒 Confidentiel ${aDesInfosConfidentielles(da) ? '<span style="color: var(--vert-principal);">●</span>' : ''}
+                    <img src="icons/icon-lock.svg" alt="" class="btn-inline-icon"> Confidentiel ${aDesInfosConfidentielles(da) ? '<span style="color: var(--vert-principal);">\u25CF</span>' : ''}
                 </button>
             </div>
 

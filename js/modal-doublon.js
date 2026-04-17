@@ -64,7 +64,7 @@
 
         modal.innerHTML = `
             <div class="modal-contenu modal-compact" style="max-width: 520px;">
-                <button class="modal-fermer" id="btnDoublonFermer">&times;</button>
+                <button class="modal-fermer" id="btnDoublonFermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
 
                 <h2 class="modal-titre" style="display: flex; align-items: center; gap: 10px;">
                     <span style="font-size: 1.5rem;">&#9888;&#65039;</span>

@@ -586,7 +586,7 @@ function mettreAJourControleVerrouillage(dateStr, estVerrouille) {
     }
 
     checkbox.checked = estVerrouille;
-    icone.textContent = estVerrouille ? '🔒' : '🔓';
+    icone.innerHTML = estVerrouille ? '<img src="icons/icon-lock.svg" alt="" class="btn-inline-icon">' : '<img src="icons/icon-open-lock.svg" alt="" class="btn-inline-icon">';
     texte.textContent = estVerrouille ? 'Verrouillée' : 'Verrouiller';
 
     conteneur.classList.remove('u-hide');
@@ -1839,7 +1839,7 @@ function restaurerCompteurPresences() {
                            style="width: 16px; height: 16px; accent-color: var(--bleu-principal, #1a73e8); cursor: pointer;"
                            data-on-change="basculerVerrouillageDateActive">
                     <label for="checkbox-verrouillage-presences" style="cursor: pointer; user-select: none; white-space: nowrap;">
-                        <span id="icone-verrouillage-presences">🔓</span>
+                        <span id="icone-verrouillage-presences"><img src="icons/icon-open-lock.svg" alt="" class="btn-inline-icon"></span>
                         <span id="texte-verrouillage-presences">Verrouiller</span>
                     </label>
                 </span>
