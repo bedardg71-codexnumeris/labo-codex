@@ -153,9 +153,6 @@ const TOOLTIPS = {
     'pref-outils-rai':
         'Niveaux d\u2019intervention et recommandations personnalis\u00e9es. Structure le soutien aux \u00e9tudiants en trois niveaux d\u2019intensit\u00e9 (universel, cibl\u00e9, intensif).',
 
-    'pref-affichage':
-        'Choisir les ressources visibles dans l\u2019interface : graphiques d\u2019\u00e9volution, unit\u00e9 d\u2019affichage de l\u2019assiduit\u00e9, mode comparatif.',
-
     'pref-affichage-solo':
         'Affiche une carte avec les descriptions d\u00e9taill\u00e9es bas\u00e9es sur la taxonomie SOLO. Utile pour interpr\u00e9ter le niveau cognitif des apprentissages.',
 
@@ -172,7 +169,7 @@ const TOOLTIPS = {
         'Choisir comment afficher les totaux de pr\u00e9sence et d\u2019assiduit\u00e9 (ex. : en p\u00e9riodes).',
 
     'pref-affichage-comparatif':
-        'Mode exp\u00e9rimental. Affiche les deux pratiques de notation (SOM et PAN) c\u00f4te \u00e0 c\u00f4te pour comparer les approches.',
+        'Mode exp\u00e9rimental. Affiche les deux pratiques de notation (Sommative et PAN) c\u00f4te \u00e0 c\u00f4te dans les aper\u00e7us et le profil individuel.',
 
     'pref-visuel':
         'Effets visuels de l\u2019interface. L\u2019animation des points du tableau de bord peut \u00eatre d\u00e9sactiv\u00e9e pour r\u00e9duire les distractions.',
