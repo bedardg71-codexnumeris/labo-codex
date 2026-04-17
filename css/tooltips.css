@@ -124,3 +124,15 @@ nav [data-tooltip],
         transition: none;
     }
 }
+
+/* --- Mode clair : texte foncé lisible sur fond clair --- */
+body.mode-clair .tooltip-bulle {
+    color: var(--texte-principal, #1a2a3a);
+    box-shadow:
+        0 8px 24px rgba(3, 46, 92, 0.18),
+        inset 0 0 12px rgba(106, 172, 184, 0.06);
+}
+
+body.mode-clair .tooltip-fleche {
+    background: var(--surface-carte, #ffffff);
+}
