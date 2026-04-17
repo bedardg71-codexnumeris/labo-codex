@@ -195,13 +195,14 @@
     const DOSSIER_AUTOCOLLANTS = 'autocollants/';
 
     const AUTOCOLLANTS = [
-        // --- Contenu et méthode (6) ---
-        { id: 'contenu-exact',       nom: 'Exact',        fichier: 'contenu-exact.png',        categorie: 'contenu' },
-        { id: 'contenu-bien',        nom: 'Bien',         fichier: 'contenu-bien.png',         categorie: 'contenu' },
-        { id: 'contenu-tres-bien',   nom: 'Tr\u00e8s bien', fichier: 'contenu-tres-bien.png',  categorie: 'contenu' },
-        { id: 'contenu-incertain',   nom: 'Incertain',    fichier: 'contenu-incertain.png',    categorie: 'contenu' },
-        { id: 'contenu-incomplet',   nom: 'Incomplet',    fichier: 'contenu-incomplet.png',    categorie: 'contenu' },
-        { id: 'contenu-inexact',     nom: 'Inexact',      fichier: 'contenu-inexact.png',      categorie: 'contenu' },
+        // --- Action (RLO) (6) ---
+        // Les fichiers PNG conservent leur nom physique `contenu-*.png` — le mapping vit ici.
+        { id: 'action-reperage',     nom: 'Rep\u00e9rage', fichier: 'contenu-exact.png',       categorie: 'action' },
+        { id: 'action-liaison',      nom: 'Liaison',      fichier: 'contenu-bien.png',         categorie: 'action' },
+        { id: 'action-ouverture',    nom: 'Ouverture',    fichier: 'contenu-tres-bien.png',    categorie: 'action' },
+        { id: 'action-incertain',    nom: 'Incertain',    fichier: 'contenu-incertain.png',    categorie: 'action' },
+        { id: 'action-incomplet',    nom: 'Incomplet',    fichier: 'contenu-incomplet.png',    categorie: 'action' },
+        { id: 'action-inexact',      nom: 'Inexact',      fichier: 'contenu-inexact.png',      categorie: 'action' },
         // --- Compréhension (4) ---
         { id: 'comp-uni',            nom: 'Uni',          fichier: 'comprehension-uni.png',         categorie: 'comprehension' },
         { id: 'comp-multi',          nom: 'Multi',        fichier: 'comprehension-multi.png',       categorie: 'comprehension' },
@@ -507,7 +508,7 @@
 
     // Noms des categories de tampons
     const NOMS_CATEGORIES_DEFAUT = {
-        contenu: 'Contenu et m\u00e9thode',
+        action: 'Action',
         comprehension: 'Compr\u00e9hension',
         observations: 'Observations'
     };
@@ -559,7 +560,7 @@
         return couleurs[autocollant.categorie] || null;
     }
 
-    var CATEGORIES_BUILTIN = ['contenu', 'comprehension', 'observations'];
+    var CATEGORIES_BUILTIN = ['action', 'comprehension', 'observations'];
 
     function obtenirOrdreCategories() {
         var ordre = db.getSync('ordreCategories', null);
@@ -591,6 +592,175 @@
             }
         }
     })();
+
+    // =========================================================================
+    // MIGRATION RLO — IDs `contenu-*` → `action-*` (chantier 4, avril 2026)
+    // =========================================================================
+    // Renomme les 6 tampons de la catégorie Contenu/méthode pour refléter la
+    // terminologie officielle (Repérage, Liaison, Ouverture + les 3 en difficulté).
+    // Parcourt toutes les annotations de tous les semestres et réécrit les
+    // `autocollantId` stockés. Renomme aussi les personnalisations de catégorie
+    // (noms, ordres, couleurs) de `contenu` vers `action`.
+    //
+    // Idempotente : protégée par le flag `migrationRLO_ids_v1_done`.
+    // S'exécute au démarrage après `db-ready` (certaines annotations volumineuses
+    // vivent dans memoryCache chargé par syncToLocalStorageCache).
+
+    const CLE_FLAG_MIGRATION_RLO = 'migrationRLO_ids_v1_done';
+
+    const MAP_IDS_RLO = {
+        'contenu-exact':     'action-reperage',
+        'contenu-bien':      'action-liaison',
+        'contenu-tres-bien': 'action-ouverture',
+        'contenu-incertain': 'action-incertain',
+        'contenu-incomplet': 'action-incomplet',
+        'contenu-inexact':   'action-inexact'
+    };
+
+    function migrerIdsActionsRLO() {
+        try {
+            if (db.getSync(CLE_FLAG_MIGRATION_RLO, false) === true) return;
+
+            var stickersMigres = 0;
+            var clesAnnotationsMigrees = 0;
+
+            // 1. Annotations : parcourir toutes les clés *annotationsTravaux
+            //    (namespacées par semestre : h2026_annotationsTravaux, a2025_..., etc.)
+            var clesStockage = new Set(Object.keys(localStorage));
+            if (db && db.memoryCache && typeof db.memoryCache.keys === 'function') {
+                var iter = db.memoryCache.keys();
+                var suivant = iter.next();
+                while (!suivant.done) {
+                    clesStockage.add(suivant.value);
+                    suivant = iter.next();
+                }
+            }
+
+            clesStockage.forEach(function(cleStockage) {
+                if (!cleStockage || cleStockage.indexOf('annotationsTravaux') === -1) return;
+                var annotations = db.getSync(cleStockage, null);
+                if (!Array.isArray(annotations)) return;
+
+                var modifiee = false;
+                annotations.forEach(function(annotation) {
+                    if (!annotation || !annotation.pages || typeof annotation.pages !== 'object') return;
+                    Object.keys(annotation.pages).forEach(function(numPage) {
+                        var page = annotation.pages[numPage];
+                        if (!page || !Array.isArray(page.stickers)) return;
+                        page.stickers.forEach(function(sticker) {
+                            if (sticker && sticker.autocollantId && MAP_IDS_RLO[sticker.autocollantId]) {
+                                sticker.autocollantId = MAP_IDS_RLO[sticker.autocollantId];
+                                modifiee = true;
+                                stickersMigres++;
+                            }
+                        });
+                    });
+                });
+
+                if (modifiee) {
+                    db.setSync(cleStockage, annotations);
+                    clesAnnotationsMigrees++;
+                }
+            });
+
+            // 2. Noms de catégories personnalisés : renommer la clé `contenu` en `action`
+            var noms = db.getSync('nomsCategoriesTampons', null);
+            if (noms && typeof noms === 'object' && 'contenu' in noms) {
+                if (!('action' in noms)) noms.action = noms.contenu;
+                delete noms.contenu;
+                db.setSync('nomsCategoriesTampons', noms);
+            }
+
+            // 3. Ordre des tampons dans la catégorie : renommer la clé + remapper les IDs
+            var ordreCat = db.getSync('ordreAutocollants_contenu', null);
+            if (Array.isArray(ordreCat)) {
+                var nouvelOrdre = ordreCat.map(function(id) { return MAP_IDS_RLO[id] || id; });
+                // Ne pas écraser un ordre déjà défini pour `action` (peu probable mais sûr)
+                if (db.getSync('ordreAutocollants_action', null) === null) {
+                    db.setSync('ordreAutocollants_action', nouvelOrdre);
+                }
+                db.removeSync('ordreAutocollants_contenu');
+            }
+
+            // 4. Couleurs de catégorie : renommer la clé interne
+            var couleurs = db.getSync('couleursCategories', null);
+            if (couleurs && typeof couleurs === 'object' && 'contenu' in couleurs) {
+                if (!('action' in couleurs)) couleurs.action = couleurs.contenu;
+                delete couleurs.contenu;
+                db.setSync('couleursCategories', couleurs);
+            }
+
+            // 5. Ordre des catégories : remplacer `contenu` par `action` dans la liste
+            var ordreCats = db.getSync('ordreCategories', null);
+            if (Array.isArray(ordreCats)) {
+                var iContenu = ordreCats.indexOf('contenu');
+                if (iContenu !== -1) {
+                    if (ordreCats.indexOf('action') === -1) {
+                        ordreCats[iContenu] = 'action';
+                    } else {
+                        ordreCats.splice(iContenu, 1);
+                    }
+                    db.setSync('ordreCategories', ordreCats);
+                }
+            }
+
+            // 6. Catégories masquées : remplacer `contenu` par `action`
+            var catsMasquees = db.getSync('categoriesMasquees', null);
+            if (Array.isArray(catsMasquees)) {
+                var iCM = catsMasquees.indexOf('contenu');
+                if (iCM !== -1) {
+                    if (catsMasquees.indexOf('action') === -1) {
+                        catsMasquees[iCM] = 'action';
+                    } else {
+                        catsMasquees.splice(iCM, 1);
+                    }
+                    db.setSync('categoriesMasquees', catsMasquees);
+                }
+            }
+
+            // 7. Éléments masqués : remapper les IDs `contenu-*` → `action-*`
+            var elemMasques = db.getSync('elementsMasques', null);
+            if (Array.isArray(elemMasques)) {
+                var elemModifie = false;
+                for (var iE = 0; iE < elemMasques.length; iE++) {
+                    if (MAP_IDS_RLO[elemMasques[iE]]) {
+                        elemMasques[iE] = MAP_IDS_RLO[elemMasques[iE]];
+                        elemModifie = true;
+                    }
+                }
+                if (elemModifie) db.setSync('elementsMasques', elemMasques);
+            }
+
+            // 8. Raccourcis clavier : renommer les clés `contenu-*` → `action-*`
+            var racc = db.getSync('raccourcisAnnotation', null);
+            if (racc && typeof racc === 'object') {
+                var raccModifie = false;
+                Object.keys(MAP_IDS_RLO).forEach(function(ancien) {
+                    if (ancien in racc) {
+                        var nouveau = MAP_IDS_RLO[ancien];
+                        if (!(nouveau in racc)) racc[nouveau] = racc[ancien];
+                        delete racc[ancien];
+                        raccModifie = true;
+                    }
+                });
+                if (raccModifie) db.setSync('raccourcisAnnotation', racc);
+            }
+
+            db.setSync(CLE_FLAG_MIGRATION_RLO, true);
+            console.warn('[travaux-outils] Migration RLO effectuée. Stickers migrés : '
+                + stickersMigres + ' (dans ' + clesAnnotationsMigrees + ' clé(s) d\'annotations)');
+        } catch (e) {
+            console.error('[travaux-outils] Erreur pendant la migration RLO :', e);
+        }
+    }
+
+    // Hook de démarrage : attendre que db soit prêt (certaines annotations peuvent
+    // vivre uniquement dans memoryCache, chargé par syncToLocalStorageCache).
+    if (typeof db !== 'undefined' && db.ready) {
+        migrerIdsActionsRLO();
+    } else {
+        window.addEventListener('db-ready', migrerIdsActionsRLO, { once: true });
+    }
 
     function obtenirOrdreAutocollants(categorie) {
         const key = 'ordreAutocollants_' + categorie;
