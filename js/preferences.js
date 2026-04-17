@@ -60,10 +60,8 @@
 
         // --- Affichage ---
         depistageAcp: true,
-        afficherSnapshots: true,
         afficherGraphiques: true,
         afficherSeuilsVisuels: true,
-        afficherDetailsTechniques: false,
         afficherContexteGraphiques: true,
         uniteAffichageAssiduite: 'periodes',
         animationPoints: true,
@@ -208,10 +206,8 @@
 
         // Depuis preferencesAffichage
         { source: 'preferencesAffichage', champ: 'depistageAcp',                cible: 'depistageAcp' },
-        { source: 'preferencesAffichage', champ: 'afficherSnapshots',           cible: 'afficherSnapshots' },
         { source: 'preferencesAffichage', champ: 'afficherGraphiques',          cible: 'afficherGraphiques' },
         { source: 'preferencesAffichage', champ: 'afficherSeuilsVisuels',       cible: 'afficherSeuilsVisuels' },
-        { source: 'preferencesAffichage', champ: 'afficherDetailsTechniques',   cible: 'afficherDetailsTechniques' },
         { source: 'preferencesAffichage', champ: 'afficherContexteGraphiques',  cible: 'afficherContexteGraphiques' },
         { source: 'preferencesAffichage', champ: 'uniteAffichageAssiduite',     cible: 'uniteAffichageAssiduite' },
         { source: 'preferencesAffichage', champ: 'animationPoints',             cible: 'animationPoints' },

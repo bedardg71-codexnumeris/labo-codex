@@ -162,14 +162,8 @@ const TOOLTIPS = {
     'pref-actions-rlo':
         'Active l\u2019observation des gestes cognitifs Rep\u00e9rage, Liaison et Ouverture via des tampons pos\u00e9s sur les productions. Alimente le profil RLO agr\u00e9g\u00e9 par \u00e9valuation et l\u2019export de recherche anonymis\u00e9.',
 
-    'pref-affichage-snapshots':
-        'Historique hebdomadaire des indices A-C-P. Permet de suivre l\u2019\u00e9volution dans le temps.',
-
     'pref-affichage-graphiques':
         'Visualisation de la progression dans le temps via Chart.js.',
-
-    'pref-affichage-details':
-        'Affiche les formules de calcul et les donn\u00e9es brutes. Destin\u00e9 aux utilisateurs souhaitant v\u00e9rifier les calculs sous-jacents.',
 
     'pref-affichage-assiduite':
         'Choisir comment afficher les totaux de pr\u00e9sence et d\u2019assiduit\u00e9 (ex. : en p\u00e9riodes).',
