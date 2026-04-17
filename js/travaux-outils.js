@@ -1080,6 +1080,11 @@
         const nomsCat = obtenirNomsCategories();
         var catsMasquees = db.getSync('categoriesMasquees', null) || [];
         var elemMasques = db.getSync('elementsMasques', null) || [];
+        // Toggle RLO : la catégorie `action` ne s'affiche dans la palette que
+        // si l'observation des actions est activée (sinon les 6 tampons RLO
+        // polluent l'espace de travail de l'enseignant).
+        var actionsRloActif = (typeof obtenirPreference === 'function')
+            && obtenirPreference('activerActionsRLO') === true;
 
         // Helper: generer une grille de tampons image
         function _htmlTamponsImage(categorie, coulCat) {
@@ -1106,6 +1111,7 @@
         var couleursCat = obtenirCouleursCategories();
         obtenirOrdreCategories().forEach(function(catId) {
             if (catsMasquees.indexOf(catId) !== -1) return;
+            if (catId === 'action' && !actionsRloActif) return;
             var nomCat = nomsCat[catId] || catId;
             var coulCat = couleursCat[catId];
             var styleCat = coulCat ? ' style="border-left:3px solid ' + coulCat + '; padding-left:6px;"' : '';
@@ -3410,6 +3416,7 @@
         // Contenu réutilisable (colonne droite + flottant)
         genererContenuErreursFr: genererContenuErreursFr,
         genererContenuTampons: genererContenuTampons,
+        rafraichirPalettesApresPersonnalisation: rafraichirPalettesApresPersonnalisation,
         // Compteurs erreurs
         compterErreursFrancais: compterErreursFrancais,
         mettreAJourCompteursErreurs: mettreAJourCompteursErreurs,
