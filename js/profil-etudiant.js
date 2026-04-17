@@ -1825,28 +1825,7 @@ function genererSectionAccompagnement(da) {
             })()}
         </div>
 
-        ${(() => {
-            if (typeof calculerConsolidationIndividuelle !== 'function') return '';
-            const consolidation = calculerConsolidationIndividuelle(da);
-            if (!consolidation || !consolidation.resume) return '';
-            const critConsol = Object.keys(consolidation.resume);
-            if (critConsol.length === 0) return '';
-
-            const items = critConsol.map(critere => {
-                const info = consolidation.resume[critere];
-                if (info.type === 'consolide') {
-                    return '<span style="color: var(--vert-succes);">' + echapperHtml(critere) + ' consolidé (' + echapperHtml(info.artefactNom) + ')</span>';
-                } else if (info.type === 'non-consolide-avec-tentatives') {
-                    return '<span style="color: var(--orange-attention, #e8a838);">' + echapperHtml(critere) + ' fragile</span>';
-                } else {
-                    return '<span style="color: var(--gris-moyen);">' + echapperHtml(critere) + ' non consolidé</span>';
-                }
-            });
-
-            return '<div style="margin-top: 12px; padding: 10px 14px; background: var(--fond-carte, var(--fond-secondaire)); border-radius: 6px; font-size: 0.85rem; color: var(--texte-secondaire);">' +
-                '<strong style="color: var(--texte-principal);">Consolidation :</strong> ' + items.join(' · ') +
-                '</div>';
-        })()}
+        <!-- Bloc Consolidation déplacé vers l'onglet « Forces et défis » de « Développement des habiletés » (17 avril 2026) -->
 
         <!-- Historique compact -->
         <div class="u-mt-15">
@@ -6063,14 +6042,14 @@ function genererDiagnosticGenerique(da, defisInfo) {
  */
 
 /**
- * Génère les barres de progression SRPNF (Forces et défis parmi les critères)
- * Indépendant du portfolio — utilise les moyennes SRPNF de l'étudiant
+ * Génère les barres de progression SRPNF (Forces et défis parmi les critères).
+ * Indépendant du portfolio — utilise les moyennes SRPNF de l'étudiant.
+ * Depuis la refonte onglets (avril 2026), le graphique critères est rendu
+ * séparément dans l'onglet « Critères » ; cette fonction ne l'inclut plus.
  * @param {string} da - Numéro DA
- * @param {string} graphiqueCriteres - HTML du graphique d'évolution (optionnel)
- * @returns {string} - HTML complet (graphique + barres + légende)
+ * @returns {string} - HTML des barres + encadré suivi des fondamentaux
  */
-function _genererBarresSRPNF(da, graphiqueCriteres) {
-    graphiqueCriteres = graphiqueCriteres || '';
+function _genererBarresSRPNF(da) {
 
     // Récupérer les couleurs depuis l'échelle configurée
     const echelles = db.getSync('echellesTemplates', []);
@@ -6176,86 +6155,14 @@ function _genererBarresSRPNF(da, graphiqueCriteres) {
         contenuBarres = barresHTML + legendeHTML;
     }
 
-    // Encadré Suivi de l'apprentissage (IPB × direction)
-    var encadreSuivi = '';
-    if (typeof diagnostiquerSuiviApprentissage === 'function') {
-        var suivi = diagnostiquerSuiviApprentissage(da);
-        if (suivi) {
-            // Pastilles par artefact — couleurs IDME de l'échelle configurée
-            // Ordre chronologique : ancien (gauche) → récent (droite)
-            var niveauxEchelle = db.getSync('niveauxEchelle', []);
-            var couleursIDME = { I: 'var(--orange-accent, #ff9800)', D: 'var(--btn-annuler, #ffc107)', M: 'var(--succes, #28a745)', E: 'var(--bleu-principal, #2196f3)' };
-            niveauxEchelle.forEach(function (n) {
-                if (n.couleur && ['I', 'D', 'M', 'E'].indexOf(n.code) >= 0) {
-                    couleursIDME[n.code] = n.couleur;
-                }
-            });
-
-            var pastilles = '';
-            var scores = suivi.scoresParArtefact || [];
-            for (var pi = 0; pi < scores.length; pi++) {
-                var s = scores[pi];
-                var couleurPastille = 'var(--gris-moyen)';
-                var codeNiveau = '?';
-                if (s !== null) {
-                    if (s >= 0.85) { couleurPastille = couleursIDME.E; codeNiveau = 'E'; }
-                    else if (s >= 0.75) { couleurPastille = couleursIDME.M; codeNiveau = 'M'; }
-                    else if (s >= 0.65) { couleurPastille = couleursIDME.D; codeNiveau = 'D'; }
-                    else { couleurPastille = couleursIDME.I; codeNiveau = 'I'; }
-                }
-                pastilles += '<span style="color:' + couleurPastille + '; font-size: 1.1rem;" title="Artefact ' + (pi + 1) + ' : ' + (s !== null ? Math.round(s * 100) + '% (' + codeNiveau + ')' : 'N/A') + '">●</span>';
-            }
-
-            // Noms des critères multistructurels surveillés
-            var nomsMulti = suivi.criteresMulti.map(function (c) {
-                return c.charAt(0).toUpperCase() + c.slice(1);
-            });
-            var labelMulti = nomsMulti.join(', ');
-
-            // Texte descriptif selon le diagnostic
-            var texteDefis = '';
-            if (suivi.criteresEnDefi.length > 0) {
-                var nomsDefis = suivi.criteresEnDefi.map(function (c) {
-                    return c.charAt(0).toUpperCase() + c.slice(1);
-                });
-                texteDefis = nomsDefis.join(', ') + ' sous le seuil de ' + Math.round(suivi.seuil * 100) + '%';
-            } else {
-                texteDefis = labelMulti + ' au-dessus du seuil de ' + Math.round(suivi.seuil * 100) + '%';
-            }
-
-            // Score actuel formaté
-            var scoreTexte = suivi.scoreActuel !== null
-                ? Math.round(suivi.scoreActuel * 100) + '% ' + suivi.direction
-                : '';
-
-            // Note pédagogique pour les plateaux
-            var notePlateau = suivi.diagnostic === 'Plateau'
-                ? '<p style="font-size: 0.8rem; color: var(--gris-moyen); margin: 8px 0 0; font-style: italic;">Un plateau peut indiquer une consolidation ou une stagnation — le jugement professionnel est essentiel.</p>'
-                : '';
-
-            encadreSuivi = '<div style="margin: 20px 0; padding: 14px 16px; border-left: 4px solid ' + suivi.couleur + '; background: linear-gradient(to right, ' + suivi.couleur + '11, transparent); border-radius: 0 6px 6px 0;">' +
-                '<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">' +
-                    '<div>' +
-                        '<div style="font-weight: 600; font-size: 0.95rem; color: var(--texte-principal);">Suivi de l\'apprentissage des fondamentaux <button class="btn-aide-contextuelle" data-aide="suivi-apprentissage-fondamentaux" aria-label="Aide : suivi de l\'apprentissage" style="font-size: 0.75rem; vertical-align: middle;">📍</button> <span style="font-weight: 400; font-size: 0.8rem; color: var(--gris-moyen);">(' + echapperHtml(labelMulti) + ')</span></div>' +
-                        '<div style="font-size: 0.9rem; margin-top: 4px; color: var(--texte-principal);">' +
-                            '<span style="font-weight: 600; color: ' + suivi.couleur + ';">' + echapperHtml(suivi.diagnostic) + '</span>' +
-                            (texteDefis ? ' — ' + echapperHtml(texteDefis) : '') +
-                        '</div>' +
-                    '</div>' +
-                    '<div style="display: flex; align-items: center; gap: 12px;">' +
-                        '<div style="letter-spacing: 3px;" title="Score multistructurel par artefact (ancien → récent). IPB : ' + suivi.ipb + ' consécutif' + (suivi.ipb > 1 ? 's' : '') + ' sous ' + Math.round(suivi.seuil * 100) + '%">' + pastilles + '</div>' +
-                        (scoreTexte ? '<div style="font-weight: 600; font-size: 0.95rem; color: var(--texte-principal);">' + scoreTexte + '</div>' : '') +
-                    '</div>' +
-                '</div>' +
-                notePlateau +
-            '</div>';
-        }
-    }
+    // Encadré « Suivi de l'apprentissage des fondamentaux » retiré (17 avril 2026)
+    // Raison : recoupement partiel avec le bloc « Consolidation » maintenant dans
+    // l'onglet Forces et défis. Consolidation couvre tous les critères sur la
+    // trajectoire complète ; le diagnostic IPB × direction peut être réinjecté
+    // dans l'onglet Accompagnement plus tard au besoin.
 
     return `
-        ${graphiqueCriteres}
-        ${encadreSuivi}
-        <div class="section-titre" style="margin-top: 20px;">Forces et défis parmi les critères</div>
+        <div class="section-titre">Forces et défis parmi les critères</div>
         <div style="margin: 20px 0;">${contenuBarres}</div>
     `;
 }
@@ -6289,7 +6196,7 @@ function genererBlocProfilRLO(da) {
     // État vide : aucune annotation `action-*` observée sur les évaluations du DA.
     if (profil.total === 0) {
         return `
-            <div class="profil-carte-bordure-blanche" style="margin-top: 20px;">
+            <section class="bloc-rlo-cumulatif">
                 ${entete}
                 <div class="info-box info-box--info" style="margin: 0;">
                     <div style="display: flex; gap: 10px; align-items: start;">
@@ -6303,7 +6210,7 @@ function genererBlocProfilRLO(da) {
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
         `;
     }
 
@@ -6324,12 +6231,12 @@ function genererBlocProfilRLO(da) {
     const rendreBarre = (items, maxVal, couleur) => items.map(i => {
         const pct = Math.round((i.n / maxVal) * 100);
         return `
-            <div style="display:grid; grid-template-columns: 100px 1fr 40px; gap:8px; align-items:center; margin-bottom:6px;">
-                <span style="font-size:0.85rem; color:var(--texte-secondaire);">${i.nom}</span>
-                <div style="background:var(--surface-conteneur); border-radius:4px; height:18px; position:relative; overflow:hidden;">
+            <div style="display:grid; grid-template-columns: 100px 1fr 40px; gap:8px; align-items:center; margin-bottom:4px;">
+                <span style="font-size:0.8rem; color:var(--texte-secondaire);">${i.nom}</span>
+                <div style="background:var(--surface-conteneur); border-radius:3px; height:10px; position:relative; overflow:hidden;">
                     <div style="background:${couleur}; height:100%; width:${pct}%; transition:width 300ms ease;"></div>
                 </div>
-                <span style="font-weight:600; text-align:right;">${i.n}</span>
+                <span style="font-size:0.9rem; font-weight:600; text-align:right;">${i.n}</span>
             </div>`;
     }).join('');
 
@@ -6337,7 +6244,7 @@ function genererBlocProfilRLO(da) {
     const pctDif = 100 - pctCog;
 
     return `
-        <div class="profil-carte-bordure-blanche" style="margin-top: 20px;">
+        <section class="bloc-rlo-cumulatif">
             ${entete}
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
                 <div>
@@ -6355,7 +6262,247 @@ function genererBlocProfilRLO(da) {
                     ${rendreBarre(ligneDifficulte, maxDif, 'var(--orange-accent, #f59e0b)')}
                 </div>
             </div>
+        </section>
+    `;
+}
+
+/**
+ * Bloc « Consolidation » — résumé des critères consolidés / fragiles / non consolidés.
+ * Déplacé depuis l'onglet Accompagnement vers l'onglet Forces et défis de
+ * « Développement des habiletés » (17 avril 2026), car il porte sur le
+ * développement des habiletés par critère, pas sur l'accompagnement RàI.
+ */
+function genererBlocConsolidation(da) {
+    if (typeof calculerConsolidationIndividuelle !== 'function') return '';
+    const consolidation = calculerConsolidationIndividuelle(da);
+    if (!consolidation || !consolidation.resume) return '';
+    const critConsol = Object.keys(consolidation.resume);
+    if (critConsol.length === 0) return '';
+
+    const items = critConsol.map(critere => {
+        const info = consolidation.resume[critere];
+        if (info.type === 'consolide') {
+            return '<span style="color: var(--vert-succes);">' + echapperHtml(critere) + ' consolidé (' + echapperHtml(info.artefactNom) + ')</span>';
+        } else if (info.type === 'non-consolide-avec-tentatives') {
+            return '<span style="color: var(--orange-attention, #e8a838);">' + echapperHtml(critere) + ' fragile</span>';
+        } else {
+            return '<span style="color: var(--gris-moyen);">' + echapperHtml(critere) + ' non consolidé</span>';
+        }
+    });
+
+    return '<div style="margin-top: 16px; padding: 10px 14px; background: var(--fond-carte, var(--fond-secondaire)); border-radius: 6px; font-size: 0.85rem; color: var(--texte-secondaire);">' +
+        '<strong style="color: var(--texte-principal);">Consolidation :</strong> ' + items.join(' · ') +
+        '</div>';
+}
+
+/**
+ * Conteneur unique des blocs RLO pour l'onglet « Gestes cognitifs ».
+ * Fusionne le cumulatif et le graphique d'évolution dans une seule carte
+ * (au lieu de deux cartes empilées), avec un séparateur visuel entre les deux
+ * blocs et la note discrète d'interprétation placée à la fin.
+ */
+function genererConteneurGestesCognitifs(da) {
+    const cumulatif = genererBlocProfilRLO(da);
+    const evolution = genererBlocEvolutionRLO(da);
+    const note      = genererNoteRLO(da);
+    if (!cumulatif && !evolution && !note) return '';
+
+    const separateur = (cumulatif && evolution)
+        ? '<hr class="bloc-rlo-separateur">'
+        : '';
+
+    return `
+        <div class="bloc-rlo-conteneur">
+            ${cumulatif}
+            ${separateur}
+            ${evolution}
+            ${note}
         </div>
+    `;
+}
+
+/**
+ * Note discrète d'interprétation des données RLO — spécification 17 avril 2026.
+ * Affichée après le dernier élément RLO visible (bloc cumulatif ou graphique).
+ * Condition : toggle actif ET ≥ 1 évaluation avec des tampons `action-*` observés.
+ */
+function genererNoteRLO(da) {
+    if (typeof actionsRLO === 'undefined' || !actionsRLO.agregerProfilRLOEtudiant) return '';
+    const profil = actionsRLO.agregerProfilRLOEtudiant(da);
+    if (!profil || profil.total === 0) return '';
+    return `
+        <p class="profil-note-rlo">
+            Ces données reflètent les observations posées lors de l'annotation. Elles ne constituent pas un relevé exhaustif des gestes cognitifs présents dans la production.
+        </p>
+    `;
+}
+
+/**
+ * Onglets « Développement des habiletés » — trois vues : Critères, Forces et défis,
+ * Gestes cognitifs. Réduit le scroll vertical en scindant les trois pavés.
+ * Persistance de l'onglet actif via localStorage (`profilOngletDeveloppementActif`).
+ * L'onglet Gestes cognitifs est omis si le toggle `activerActionsRLO` est désactivé.
+ */
+function genererOngletsDeveloppement(da, contenus) {
+    const ongletRLOActif = typeof obtenirPreference === 'function' &&
+        obtenirPreference('activerActionsRLO') === true;
+    const CLE_PERSISTANCE = 'profilOngletDeveloppementActif';
+    const onglets = [
+        { id: 'criteres',         libelle: 'Critères',          contenu: contenus.criteres || '' },
+        { id: 'forces-defis',     libelle: 'Forces et défis',   contenu: contenus.forcesDefis || '' }
+    ];
+    if (ongletRLOActif) {
+        onglets.push({ id: 'gestes-cognitifs', libelle: 'Gestes cognitifs',
+            contenu: contenus.gestesCognitifs || '' });
+    }
+
+    let actifPersiste = null;
+    try { actifPersiste = localStorage.getItem(CLE_PERSISTANCE); } catch (e) {}
+    let idActif = onglets.find(o => o.id === actifPersiste) ? actifPersiste : 'criteres';
+    if (!onglets.find(o => o.id === idActif)) idActif = 'criteres';
+
+    const boutons = onglets.map(o => {
+        const actif = o.id === idActif;
+        return `<button type="button" role="tab" class="onglet-developpement-tab${actif ? ' actif' : ''}"
+            data-action="changerOngletDeveloppement"
+            data-param="${o.id}" data-param2="${da}"
+            aria-selected="${actif}" aria-controls="panel-dev-${o.id}-${da}"
+            id="tab-dev-${o.id}-${da}">${o.libelle}</button>`;
+    }).join('');
+
+    const panels = onglets.map(o => {
+        const actif = o.id === idActif;
+        return `<div class="onglet-developpement-panel" role="tabpanel"
+            id="panel-dev-${o.id}-${da}" aria-labelledby="tab-dev-${o.id}-${da}"
+            data-panel="${o.id}"${actif ? '' : ' hidden'}>${o.contenu}</div>`;
+    }).join('');
+
+    return `
+        <div class="onglets-developpement" data-da="${da}">
+            <div class="onglets-developpement-tabs" role="tablist">${boutons}</div>
+            ${panels}
+        </div>
+    `;
+}
+
+/**
+ * Bascule l'onglet actif de « Développement des habiletés ».
+ * Persisté dans localStorage. Si le panel devenu visible contient un canvas
+ * Chart.js non encore rendu (création différée parent display:none), relance
+ * la création du graphique approprié.
+ * @param {string} idOnglet - 'criteres' | 'forces-defis' | 'gestes-cognitifs'
+ * @param {string} da
+ */
+function changerOngletDeveloppement(idOnglet, da) {
+    if (!idOnglet || !da) return;
+    const conteneur = document.querySelector('.onglets-developpement[data-da="' + da + '"]');
+    if (!conteneur) return;
+
+    conteneur.querySelectorAll('.onglet-developpement-tab').forEach(btn => {
+        const actif = btn.dataset.param === idOnglet;
+        btn.classList.toggle('actif', actif);
+        btn.setAttribute('aria-selected', actif ? 'true' : 'false');
+    });
+    conteneur.querySelectorAll('.onglet-developpement-panel').forEach(panel => {
+        const actif = panel.dataset.panel === idOnglet;
+        if (actif) panel.removeAttribute('hidden');
+        else panel.setAttribute('hidden', '');
+    });
+
+    try { localStorage.setItem('profilOngletDeveloppementActif', idOnglet); } catch (e) {}
+
+    // Chart.js ne rend pas dans un parent caché : relancer au besoin
+    setTimeout(function() {
+        if (idOnglet === 'criteres') {
+            const canvas = document.getElementById('graphique-criteres-' + da);
+            if (canvas && typeof creerGraphiqueCriteres === 'function') {
+                creerGraphiqueCriteres(canvas.id, da);
+            }
+        } else if (idOnglet === 'gestes-cognitifs') {
+            const canvas = document.getElementById('graphique-evolution-rlo-' + da);
+            if (canvas && typeof creerGraphiqueEvolutionRLO === 'function') {
+                creerGraphiqueEvolutionRLO(canvas.id, da);
+            }
+        }
+    }, 50);
+}
+window.changerOngletDeveloppement = changerOngletDeveloppement;
+
+/**
+ * Graphique d'évolution des gestes cognitifs (Repérage / Liaison / Ouverture)
+ * — spec SPEC-EXPORT-GRAPHIQUE-RLO.md, étape 9.
+ *
+ * Affiché sous le bloc cumulatif « Profil RLO » quand :
+ *   - toggle `activerActionsRLO` actif ;
+ *   - préférence `afficherGraphiques` non désactivée ;
+ *   - au moins 2 évaluations avec tampons `action-*` (ratios calculables).
+ */
+function genererBlocEvolutionRLO(da) {
+    if (typeof actionsRLO === 'undefined' || !actionsRLO.obtenirEvolutionRLOEtudiant) return '';
+    if (typeof obtenirPreference === 'function' && obtenirPreference('afficherGraphiques') === false) return '';
+
+    const donnees = actionsRLO.obtenirEvolutionRLOEtudiant(da);
+    if (!donnees || donnees.nbObserves < 2) return '';
+
+    const canvasId = 'graphique-evolution-rlo-' + da;
+    setTimeout(function() {
+        if (typeof creerGraphiqueEvolutionRLO === 'function') {
+            creerGraphiqueEvolutionRLO(canvasId, da);
+        }
+    }, 120);
+
+    // Terme dépendant des réglages de l'utilisateur (artefact / production / ...)
+    const termeSingulierMaj = typeof obtenirTermeProduction === 'function'
+        ? obtenirTermeProduction('singulier', true) : 'Artefact';
+    const termeSing = typeof obtenirTermeProduction === 'function'
+        ? obtenirTermeProduction('singulier') : 'artefact';
+    const prefixeCourt = termeSing.charAt(0).toUpperCase()
+        + termeSing.substring(1, 3).toLowerCase() + '.';
+
+    // Équivalent textuel (accessible) : tableau des ratios par production
+    const lignesAccessibles = donnees.artefacts.map(function(a) {
+        const r = a.ratios;
+        const niv = a.niveauFinal ? echapperHtml(a.niveauFinal) : '—';
+        const cellTete = `<th scope="row">${prefixeCourt} ${a.numero}</th>`;
+        if (!r) {
+            return `<tr>${cellTete}<td>${niv}</td><td colspan="3">Non observé</td></tr>`;
+        }
+        return `<tr>${cellTete}<td>${niv}</td>`
+            + `<td>${r.reperage.toFixed(1)} %</td>`
+            + `<td>${r.liaison.toFixed(1)} %</td>`
+            + `<td>${r.ouverture.toFixed(1)} %</td></tr>`;
+    }).join('');
+
+    return `
+        <section class="bloc-rlo-evolution">
+            <div class="u-flex-between-mb15">
+                <div>
+                    <strong style="font-size:1.05rem;">Évolution des gestes cognitifs</strong>
+                    <div class="texte-muted" style="font-size:0.8rem; margin-top:2px;">
+                        Ratios Repérage / Liaison / Ouverture par artefact
+                    </div>
+                </div>
+            </div>
+            <div style="background: var(--surface-conteneur, #142428); padding: 12px; border-radius: 6px; height: 260px;">
+                <canvas id="${canvasId}" aria-label="Graphique d'évolution des gestes cognitifs"></canvas>
+            </div>
+            <details style="margin-top:8px;">
+                <summary class="texte-muted" style="font-size:0.8rem; cursor:pointer;">Voir les données en tableau</summary>
+                <table style="margin-top:8px; width:100%; font-size:0.85rem; border-collapse:collapse;">
+                    <caption style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);">Ratios cognitifs par artefact</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">${termeSingulierMaj}</th>
+                            <th scope="col">IDME</th>
+                            <th scope="col">Repérage</th>
+                            <th scope="col">Liaison</th>
+                            <th scope="col">Ouverture</th>
+                        </tr>
+                    </thead>
+                    <tbody>${lignesAccessibles}</tbody>
+                </table>
+            </details>
+        </section>
     `;
 }
 
@@ -6440,17 +6587,25 @@ function genererSectionPerformance(da) {
     const portfolio = productions.find(p => p.type === 'portfolio');
 
     // Générer les barres SRPNF (indépendant du portfolio)
-    const barresSRPNF = _genererBarresSRPNF(da, graphiqueCriteres);
+    const barresSRPNF = _genererBarresSRPNF(da);
 
     if (!portfolio) {
-        return barresSRPNF + genererBlocProfilRLO(da);
+        return genererOngletsDeveloppement(da, {
+            criteres: graphiqueCriteres,
+            forcesDefis: barresSRPNF + genererBlocConsolidation(da),
+            gestesCognitifs: genererConteneurGestesCognitifs(da)
+        });
     }
 
     // Récupérer TOUS les artefacts créés
     const tousLesArtefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
 
     if (tousLesArtefactsPortfolio.length === 0) {
-        return barresSRPNF + genererBlocProfilRLO(da);
+        return genererOngletsDeveloppement(da, {
+            criteres: graphiqueCriteres,
+            forcesDefis: barresSRPNF + genererBlocConsolidation(da),
+            gestesCognitifs: genererConteneurGestesCognitifs(da)
+        });
     }
 
     // ✅ CORRECTION : Identifier les artefacts RÉELLEMENT ÉVALUÉS
@@ -6731,14 +6886,12 @@ function genererSectionPerformance(da) {
 
             <hr class="profil-separateur">
 
-            <!-- ✨ NOUVEAU (7 déc 2025) : Graphique d'évolution des critères -->
-            ${graphiqueCriteres}
-
-            <!-- Diagnostic SRPNF -->
-            <div class="section-titre">
-                Forces et défis parmi les critères
-            </div>
-            <div style="margin: 20px 0;">
+            <!-- Onglets Critères / Forces et défis / Gestes cognitifs (avril 2026) -->
+            ${genererOngletsDeveloppement(da, {
+                criteres: graphiqueCriteres,
+                forcesDefis: `
+                <div class="section-titre">Forces et défis parmi les critères</div>
+                <div style="margin: 20px 0;">
                 ${(() => {
                     // Récupérer les couleurs depuis l'échelle configurée (localStorage)
                     const echelles = db.getSync('echellesTemplates', []);
@@ -6968,11 +7121,13 @@ function genererSectionPerformance(da) {
 
                     return barresHTML + legendeHTML;
                 })()}
-            </div>
-
+                </div>
+                ${genererBlocConsolidation(da)}
+                `,
+                gestesCognitifs: genererConteneurGestesCognitifs(da)
+            })}
 
     </div>
-    ${genererBlocProfilRLO(da)}
     `;
 }
 

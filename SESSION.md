@@ -1,9 +1,93 @@
 # SESSION ACTIVE — BETA 99.17
 
 **Date** : 17 avril 2026
-**Version** : Beta 99.17 (Build 0417-0830)
-**Statut** : Chantier RLO étape 7 complète — migration rétroactive des évaluations historiques
+**Version** : Beta 99.17 (Build 0417-1207)
+**Statut** : Chantier RLO étape 9 COMPLÈTE — export profilsRLO + graphique d'évolution + onglets + compaction
 **Branche** : `refonte-preferences-rlo`
+
+---
+
+## Bilan de la session (17 avril 2026, midi) — Chantier RLO étape 9 + UX Développement des habiletés
+
+**Build** : 0417-0830 → 0417-1207, Beta 99.17 (même journée)
+**Référence** : `SPEC-EXPORT-GRAPHIQUE-RLO.md` (17 avril 2026)
+**Fichiers modifiés** : `js/trimestres.js`, `js/actions-rlo.js`, `js/graphiques-progression.js`, `js/profil-etudiant.js`, `js/changelog-data.js`, `styles.css`, `index.html`, `js/init-inline.js`, `version.json`
+
+### Étape 9 — Export recherche `profilsRLO`
+
+- Nouveau helper `construireProfilsRLO(evaluations, productions, daVersAnonyme)` dans `trimestres.js`
+- Section `profilsRLO` insérée au même niveau que `observations` et `calculs` dans `exporterFormatRecherche()`
+- Structure par évaluation : `{id_etudiant (anonymisé), id_artefact, numero_artefact (ordre chronologique par date_echeance), type_artefact (titre production), niveau_final, observe (bool), actions: {gestes_cognitifs, gestes_en_difficulte, total_general}, ratios_cognitifs}` — ratios sur `gestes_cognitifs.total` (pas `total_general`)
+- Conditionnée au toggle `activerActionsRLO` : si OFF → section omise
+- Évaluations sans champ `actionsRLO` → ignorées (cohérent avec migration rétroactive)
+- `actionsRLO: null` → `observe: false`, `actions: null`, `ratios_cognitifs: null`
+
+### Graphique d'évolution des gestes cognitifs
+
+- Nouvelle fonction `obtenirEvolutionRLOEtudiant(da)` dans `actions-rlo.js` : série chronologique, priorité lecture LIVE (matche `agregerProfilRLOEtudiant`) avec fallback snapshot
+- Nouvelle fonction `creerGraphiqueEvolutionRLO(canvasId, da)` dans `graphiques-progression.js`
+- 3 lignes (Repérage orange, Liaison bleu, Ouverture émeraude) avec pointillés sur les trous d'observation
+- Tooltip titre = titre réel de la production, body avec niveau IDME
+- Axe X + tableau accessible utilisent `obtenirTermeProduction()` (plus de « Art. » ou « Artefacts » codés en dur)
+- Recréation au changement d'onglet (Chart.js rend 0px dans un parent caché)
+- Recréation au `themeChanged`
+- Conditions : toggle ON + `afficherGraphiques` ≠ false + ≥2 évaluations avec ratios calculables (`totalCog > 0`)
+
+### Onglets « Développement des habiletés »
+
+- 3 onglets : **Critères** (graphique critères × artefacts), **Forces et défis** (barres SRPNF + Consolidation), **Gestes cognitifs** (cumulatif + évolution + note)
+- Helper `genererOngletsDeveloppement(da, {criteres, forcesDefis, gestesCognitifs})`
+- Handler global `changerOngletDeveloppement(idOnglet, da)` via dispatcher `data-action`
+- Persistance localStorage `profilOngletDeveloppementActif` (défaut `criteres`)
+- Onglet « Gestes cognitifs » masqué si toggle RLO OFF
+- CSS dans `styles.css` (`.onglets-developpement*`), cibles tactiles ≥44px sur iPad
+- Refactor `_genererBarresSRPNF(da)` : ne rend plus le graphique critères (séparation propre)
+- Path 3 (portfolio) : extraction de la section Forces et défis inline vers le helper onglets
+
+### Compaction onglet Gestes cognitifs
+
+- Fusion des 2 cartes en un conteneur `bloc-rlo-conteneur` (sans cadre, séparateur `<hr>` entre les sections)
+- Barres cumulatif amincies : `height:18px → 10px`, radius `4px → 3px`, gap `6px → 4px`, libellé `0.85rem → 0.8rem`
+- Canvas évolution réduit : `340px → 260px`
+- Note discrète d'interprétation des données RLO (`genererNoteRLO(da)`) : `var(--texte-secondaire)`, italique, opacité 0.85, modes sombre/clair
+
+### Consolidation rapatriée
+
+- Helper `genererBlocConsolidation(da)` extrait
+- Retiré de l'onglet Accompagnement (commentaire de traçabilité laissé)
+- Ajouté en fin d'onglet Forces et défis (plus pertinent — c'est du développement des habiletés)
+
+### Suivi de l'apprentissage des fondamentaux retiré
+
+- Encadré `diagnostiquerSuiviApprentissage` retiré de `_genererBarresSRPNF`
+- Raison : recoupement partiel avec Consolidation, qui est plus complet (tous les critères, trajectoire complète vs fondamentaux + fenêtre 3 artefacts)
+- La fonction `diagnostiquerSuiviApprentissage(da)` reste disponible pour réinjection future dans Accompagnement
+
+### Changelog Beta 99
+
+- Item 1 (Actions RLO) enrichi : « visualisés en courbe d'évolution... + gestes cognitifs et en difficulté avec ratios »
+- Item 2 nouveau : onglets profil + Consolidation rapatriée
+- Items 5+6 (tri productions + import dpi) consolidés en un item Travaux
+- Total : 9 items
+
+### Tests recommandés (à valider par Grégoire)
+
+- Export recherche avec toggle OFF → pas de `profilsRLO` dans le JSON
+- Export avec toggle ON sans évaluation annotée → `profilsRLO: []`
+- Graphique d'évolution en modes sombre/clair, sur iPad
+- Changement d'onglet → graphiques Chart.js recréés correctement (Critères, Gestes cognitifs)
+- Persistance onglet actif entre visites du profil
+- Onglet « Gestes cognitifs » absent quand toggle RLO OFF
+- Bloc Consolidation dans Forces et défis (pas dans Accompagnement)
+
+### Plan RLO — étapes complètes
+
+- [x] Étape 4 — Migration IDs `contenu-*` → `action-*`
+- [x] Étape 5 — Toggle `activerActionsRLO`
+- [x] Étape 6 — Inscription automatique du champ `actionsRLO`
+- [x] Étape 7 — Migration rétroactive des évaluations historiques
+- [x] Étape 8 — Bloc Profil RLO dans Développement des habiletés
+- [x] **Étape 9 — Export `profilsRLO` + graphique d'évolution + onglets + compaction**
 
 ---
 
