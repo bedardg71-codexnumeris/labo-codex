@@ -1043,7 +1043,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
         const config = {
             type: 'line',
             // 🆕 BETA 96: Utiliser le plugin gradient au lieu des annotations
-            plugins: [pluginGradientFond, pluginEtiquettesZones, pluginInterventionsIndiv],
+            plugins: [pluginGradientFond, ...(obtenirPreference('afficherSeuilsVisuels') !== false ? [pluginEtiquettesZones] : []), pluginInterventionsIndiv],
             data: {
                 labels: labels,
                 datasets: datasets
@@ -1290,7 +1290,7 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
         const config = {
             type: 'line',
             // 🆕 BETA 96: Utiliser le plugin gradient au lieu des annotations
-            plugins: [pluginGradientFond, pluginEtiquettesZones],
+            plugins: [pluginGradientFond, ...(obtenirPreference('afficherSeuilsVisuels') !== false ? [pluginEtiquettesZones] : [])],
             data: {
                 labels: labels,
                 datasets: [
@@ -1799,7 +1799,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
         const config = {
             type: 'line',
             // 🆕 BETA 96: Utiliser le plugin gradient au lieu des annotations
-            plugins: [pluginGradientFond, ...(indice === 'P' ? [pluginEtiquettesZones] : []), pluginNomEtudiantSurvolACP],
+            plugins: [pluginGradientFond, ...(indice === 'P' && obtenirPreference('afficherSeuilsVisuels') !== false ? [pluginEtiquettesZones] : []), pluginNomEtudiantSurvolACP],
             data: {
                 labels: labels,
                 datasets: datasets
@@ -2877,7 +2877,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         const config = {
             type: 'line',
             // 🆕 BETA 96: Utiliser le plugin gradient au lieu des annotations
-            plugins: [pluginGradientFond, pluginEtiquettesZones, pluginNomEtudiantSurvol, pluginTooltipsMultiples],
+            plugins: [pluginGradientFond, ...(obtenirPreference('afficherSeuilsVisuels') !== false ? [pluginEtiquettesZones] : []), pluginNomEtudiantSurvol, pluginTooltipsMultiples],
             data: {
                 labels: labels,
                 datasets: datasets
@@ -3708,7 +3708,7 @@ function creerGraphiqueCriteres(canvasId, da) {
         // Configuration du graphique
         const config = {
             type: 'line',
-            plugins: [pluginGradientFond100, pluginEtiquettesZones100, pluginInterventionsCriteres, pluginPointillesGaps],
+            plugins: [pluginGradientFond100, ...(obtenirPreference('afficherSeuilsVisuels') !== false ? [pluginEtiquettesZones100] : []), pluginInterventionsCriteres, pluginPointillesGaps],
             data: {
                 labels: donnees.labels,
                 datasets: datasets

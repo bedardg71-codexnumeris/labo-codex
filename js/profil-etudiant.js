@@ -634,6 +634,9 @@ function interpreterAssiduite(valeur) {
  * @returns {string} - HTML de la section
  */
 function genererSectionMobilisationEngagement(da) {
+    if (typeof obtenirPreference === 'function' && obtenirPreference('depistageAcp') === false) {
+        return '';
+    }
     const indices = calculerTousLesIndices(da);
     const A = indices.A / 100;
     const C = indices.C / 100;
@@ -2880,6 +2883,8 @@ function afficherProfilComplet(daOuEl) {
 
     // Vérifier si le modèle RàI est activé (préférence utilisateur)
     const activerRai = obtenirPreference('activerRai') !== false;
+    const engagementVisible = obtenirPreference('depistageAcp') !== false;
+    const progressionVisible = obtenirPreference('afficherGraphiques') !== false;
 
     // ✅ OPTIMISATION (7 déc 2025): Calculer uniquement la pratique active sauf en mode comparatif
     let indicesSOM, indicesPAN;
@@ -2920,9 +2925,17 @@ function afficherProfilComplet(daOuEl) {
     } else if (sectionAffichee === 'performance') {
         titreSection = 'Développement des habiletés et compétences';
         contenuSection = genererSectionPerformance(da);
-    } else if (sectionAffichee === 'mobilisation') {
+    } else if (sectionAffichee === 'mobilisation' && engagementVisible) {
         titreSection = 'Engagement';
         contenuSection = genererSectionMobilisationEngagement(da);
+    } else if (sectionAffichee === 'mobilisation' && !engagementVisible) {
+        // Si Micro données ACP désactivé, rediriger vers productions
+        titreSection = 'Productions et évaluations';
+        contenuSection = genererSectionProductions(da);
+    } else if (sectionAffichee === 'progression' && !progressionVisible) {
+        // Si Graphiques d'évolution désactivé, rediriger vers productions
+        titreSection = 'Productions et évaluations';
+        contenuSection = genererSectionProductions(da);
     } else if (sectionAffichee === 'rapport') {
         titreSection = 'Rapport';
         contenuSection = genererSectionRapport(da);
@@ -2998,15 +3011,19 @@ function afficherProfilComplet(daOuEl) {
                         <div class="sidebar-item-titre">Productions</div>
                     </div>
 
-                    <!-- 2. Engagement -->
+                    <!-- 2. Engagement (affiché uniquement si Micro données ACP activé) -->
+                    ${engagementVisible ? `
                     <div class="sidebar-item ${sectionAffichee === 'mobilisation' ? 'active' : ''}" data-action="changerSectionProfil" data-param="mobilisation">
                         <div class="sidebar-item-titre">Engagement</div>
                     </div>
+                    ` : ''}
 
-                    <!-- 2b. Progression temporelle -->
+                    <!-- 2b. Progression temporelle (affiché uniquement si Graphiques d'évolution activé) -->
+                    ${progressionVisible ? `
                     <div class="sidebar-item ${sectionAffichee === 'progression' ? 'active' : ''}" data-action="changerSectionProfil" data-param="progression">
                         <div class="sidebar-item-titre">Progression temporelle</div>
                     </div>
+                    ` : ''}
 
                     <!-- 3. Développement des habiletés -->
                     <div class="sidebar-item ${sectionAffichee === 'performance' ? 'active' : ''}" data-action="changerSectionProfil" data-param="performance">
@@ -3744,6 +3761,9 @@ function genererBandeauContexteProfil() {
 }
 
 function genererSectionProgression(da) {
+    if (typeof obtenirPreference === 'function' && obtenirPreference('afficherGraphiques') === false) {
+        return '';
+    }
     // Vérifier si le module de captures existe
     if (typeof obtenirSnapshotsEtudiant !== 'function') {
         return `

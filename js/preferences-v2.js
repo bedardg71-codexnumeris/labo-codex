@@ -102,11 +102,6 @@
             actionsRlo.checked = obtenirPreference('activerActionsRLO') === true;
         }
 
-        const snapshots = document.getElementById('v2-pref-snapshots');
-        if (snapshots) {
-            snapshots.checked = obtenirPreference('afficherSnapshots') !== false;
-        }
-
         const graphiques = document.getElementById('v2-pref-graphiques');
         if (graphiques) {
             graphiques.checked = obtenirPreference('afficherGraphiques') !== false;
@@ -115,11 +110,6 @@
         const seuilsVisuels = document.getElementById('v2-pref-seuils-visuels');
         if (seuilsVisuels) {
             seuilsVisuels.checked = obtenirPreference('afficherSeuilsVisuels') !== false;
-        }
-
-        const detailsTechniques = document.getElementById('v2-pref-details-techniques');
-        if (detailsTechniques) {
-            detailsTechniques.checked = obtenirPreference('afficherDetailsTechniques') === true;
         }
 
         // 🆕 BETA 96.1 : Animation des points du tableau de bord
@@ -249,10 +239,8 @@
         definirPreference('fenetrePatterns', parseInt(document.getElementById('v2-pref-fenetre-patterns')?.value) || 3);
 
         definirPreference('depistageAcp', document.getElementById('v2-pref-depistage-acp')?.checked !== false);
-        definirPreference('afficherSnapshots', document.getElementById('v2-pref-snapshots')?.checked !== false);
         definirPreference('afficherGraphiques', document.getElementById('v2-pref-graphiques')?.checked !== false);
         definirPreference('afficherSeuilsVisuels', document.getElementById('v2-pref-seuils-visuels')?.checked !== false);
-        definirPreference('afficherDetailsTechniques', document.getElementById('v2-pref-details-techniques')?.checked === true);
         definirPreference('uniteAffichageAssiduite', document.getElementById('v2-pref-unite-affichage')?.value || 'periodes');
 
         const animationActive = document.getElementById('v2-pref-animation-points')?.checked !== false;
