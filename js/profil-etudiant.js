@@ -6281,7 +6281,7 @@ function genererBlocProfilRLO(da) {
             </div>
             ${profil.total > 0 ? `
                 <div style="text-align:right; font-size:0.85rem; color:var(--texte-secondaire);">
-                    <span>${Math.round((profil.totalCognitifs / profil.total) * 100)}% de gestes cognitifs (${profil.totalCognitifs}/${profil.total})</span>
+                    <span>${profil.total} tampon${profil.total > 1 ? 's' : ''} observé${profil.total > 1 ? 's' : ''}</span>
                 </div>
             ` : ''}
         </div>`;
@@ -6333,16 +6333,25 @@ function genererBlocProfilRLO(da) {
             </div>`;
     }).join('');
 
+    const pctCog = Math.round((profil.totalCognitifs / profil.total) * 100);
+    const pctDif = 100 - pctCog;
+
     return `
         <div class="profil-carte-bordure-blanche" style="margin-top: 20px;">
             ${entete}
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
                 <div>
-                    <div style="font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--texte-secondaire); margin-bottom:8px;">Gestes cognitifs</div>
+                    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
+                        <span style="font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--texte-secondaire);">Gestes cognitifs</span>
+                        <span style="font-size:0.8rem; color:var(--texte-secondaire);">${profil.totalCognitifs} · ${pctCog}%</span>
+                    </div>
                     ${rendreBarre(ligneCognitive, maxCog, 'var(--bleu-principal, #3b82f6)')}
                 </div>
                 <div>
-                    <div style="font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--texte-secondaire); margin-bottom:8px;">Gestes en difficulté</div>
+                    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
+                        <span style="font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--texte-secondaire);">Gestes en difficulté</span>
+                        <span style="font-size:0.8rem; color:var(--texte-secondaire);">${profil.totalDifficultes} · ${pctDif}%</span>
+                    </div>
                     ${rendreBarre(ligneDifficulte, maxDif, 'var(--orange-accent, #f59e0b)')}
                 </div>
             </div>
