@@ -2441,15 +2441,15 @@ function changerSectionProfil(section) {
             contenu = genererContenuCibleIntervention(da);
             break;
         case 'progression':
-            titre = 'Progression temporelle';
+            titre = 'Progression temporelle ACP';
             contenu = genererSectionProgression(da);
             break;
         case 'performance':
-            titre = 'Développement des habiletés et compétences';
+            titre = 'Développement des habiletés';
             contenu = genererSectionPerformance(da);
             break;
         case 'mobilisation':
-            titre = 'Engagement';
+            titre = 'Engagement ACP';
             contenu = genererSectionMobilisationEngagement(da);
             break;
         case 'rapport':
@@ -2885,6 +2885,7 @@ function afficherProfilComplet(daOuEl) {
     const activerRai = obtenirPreference('activerRai') !== false;
     const engagementVisible = obtenirPreference('depistageAcp') !== false;
     const progressionVisible = obtenirPreference('afficherGraphiques') !== false;
+    const developpementVisible = obtenirPreference('afficherDeveloppementHabiletes') !== false;
 
     // ✅ OPTIMISATION (7 déc 2025): Calculer uniquement la pratique active sauf en mode comparatif
     let indicesSOM, indicesPAN;
@@ -2922,11 +2923,15 @@ function afficherProfilComplet(daOuEl) {
     if (sectionAffichee === 'productions') {
         titreSection = 'Productions et évaluations';
         contenuSection = genererSectionProductions(da);
-    } else if (sectionAffichee === 'performance') {
-        titreSection = 'Développement des habiletés et compétences';
+    } else if (sectionAffichee === 'performance' && developpementVisible) {
+        titreSection = 'Développement des habiletés';
         contenuSection = genererSectionPerformance(da);
+    } else if (sectionAffichee === 'performance' && !developpementVisible) {
+        // Si Développement des habiletés désactivé, rediriger vers productions
+        titreSection = 'Productions et évaluations';
+        contenuSection = genererSectionProductions(da);
     } else if (sectionAffichee === 'mobilisation' && engagementVisible) {
-        titreSection = 'Engagement';
+        titreSection = 'Engagement ACP';
         contenuSection = genererSectionMobilisationEngagement(da);
     } else if (sectionAffichee === 'mobilisation' && !engagementVisible) {
         // Si Micro données ACP désactivé, rediriger vers productions
@@ -3011,24 +3016,26 @@ function afficherProfilComplet(daOuEl) {
                         <div class="sidebar-item-titre">Productions</div>
                     </div>
 
-                    <!-- 2. Engagement (affiché uniquement si Micro données ACP activé) -->
+                    <!-- 2. Engagement ACP (affiché uniquement si Micro données ACP activé) -->
                     ${engagementVisible ? `
                     <div class="sidebar-item ${sectionAffichee === 'mobilisation' ? 'active' : ''}" data-action="changerSectionProfil" data-param="mobilisation">
-                        <div class="sidebar-item-titre">Engagement</div>
+                        <div class="sidebar-item-titre">Engagement ACP</div>
                     </div>
                     ` : ''}
 
-                    <!-- 2b. Progression temporelle (affiché uniquement si Graphiques d'évolution activé) -->
+                    <!-- 2b. Progression temporelle ACP (affiché uniquement si Graphiques d'évolution activé) -->
                     ${progressionVisible ? `
                     <div class="sidebar-item ${sectionAffichee === 'progression' ? 'active' : ''}" data-action="changerSectionProfil" data-param="progression">
-                        <div class="sidebar-item-titre">Progression temporelle</div>
+                        <div class="sidebar-item-titre">Progression temporelle ACP</div>
                     </div>
                     ` : ''}
 
-                    <!-- 3. Développement des habiletés -->
+                    <!-- 3. Développement des habiletés (affiché uniquement si préférence activée) -->
+                    ${developpementVisible ? `
                     <div class="sidebar-item ${sectionAffichee === 'performance' ? 'active' : ''}" data-action="changerSectionProfil" data-param="performance">
                         <div class="sidebar-item-titre">Développement des habiletés</div>
                     </div>
+                    ` : ''}
 
                     <!-- 4. Accompagnement (affiché uniquement si RàI activé) -->
                     ${activerRai ? `
@@ -3886,6 +3893,9 @@ function genererSectionProgression(da) {
 }
 
 function genererSectionPerformance(da) {
+    if (typeof obtenirPreference === 'function' && obtenirPreference('afficherDeveloppementHabiletes') === false) {
+        return '';
+    }
     // ✨ NOUVEAU (7 déc 2025) : Graphique d'évolution des critères
     const canvasIdCriteres = `graphique-criteres-${da}`;
     let graphiqueCriteres = '';
@@ -6413,6 +6423,9 @@ function _genererBarresSRPNF(da, graphiqueCriteres) {
 }
 
 function genererSectionPerformance(da) {
+    if (typeof obtenirPreference === 'function' && obtenirPreference('afficherDeveloppementHabiletes') === false) {
+        return '';
+    }
     // ✨ NOUVEAU (7 déc 2025) : Graphique d'évolution des critères
     const canvasIdCriteres = `graphique-criteres-${da}`;
     let graphiqueCriteres = '';
