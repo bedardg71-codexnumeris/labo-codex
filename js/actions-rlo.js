@@ -142,7 +142,68 @@
         }
     }
 
-    window.actionsRLO = { agregerActionsRLO, migrerActionsRLOEvaluations };
+    /**
+     * Agrège le profil RLO cumulé d'un étudiant sur toutes ses évaluations.
+     *
+     * Étape 8 — visualisation in-app dans « Développement des habiletés ».
+     * Lecture LIVE : appelle `agregerActionsRLO(ev)` sur chaque évaluation
+     * pour recompter les tampons depuis l'annotation actuelle. Évite le
+     * décalage entre les tampons posés et le snapshot `actionsRLO` stocké
+     * (qui n'est rafraîchi qu'au Sauvegarder). Fallback sur le snapshot
+     * si la résolution live échoue (fichier introuvable, annotation
+     * supprimée, etc.).
+     *
+     * @param {string} da
+     * @returns {Object|null}
+     *   {
+     *     reperage, liaison, ouverture,              // gestes cognitifs
+     *     incertain, incomplet, inexact,             // gestes en difficulté
+     *     totalCognitifs, totalDifficultes, total,
+     *     nbEvaluations,          // évaluations actives du DA
+     *     nbEvaluationsObservees  // celles avec actionsRLO résolu
+     *   }
+     *   null si toggle désactivé OU aucune évaluation du tout pour ce DA.
+     *   Si toggle ON mais 0 annotation, renvoie un objet à compteurs nuls
+     *   pour permettre un état vide informatif dans l'UI.
+     */
+    function agregerProfilRLOEtudiant(da) {
+        if (!da) return null;
+        if (typeof obtenirPreference !== 'function' ||
+            obtenirPreference('activerActionsRLO') !== true) return null;
+        if (typeof obtenirDonneesSelonMode !== 'function') return null;
+
+        var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+        var evalsDA = evaluations.filter(function(e) {
+            return e && e.etudiantDA === da && !e.remplaceeParId;
+        });
+        if (evalsDA.length === 0) return null;
+
+        var acc = {
+            reperage: 0, liaison: 0, ouverture: 0,
+            incertain: 0, incomplet: 0, inexact: 0,
+            totalCognitifs: 0, totalDifficultes: 0, total: 0,
+            nbEvaluations: evalsDA.length,
+            nbEvaluationsObservees: 0
+        };
+        for (var i = 0; i < evalsDA.length; i++) {
+            var p = agregerActionsRLO(evalsDA[i]);
+            if (!p) p = evalsDA[i].actionsRLO;
+            if (!p) continue;
+            acc.nbEvaluationsObservees++;
+            acc.reperage  += p.reperage  || 0;
+            acc.liaison   += p.liaison   || 0;
+            acc.ouverture += p.ouverture || 0;
+            acc.incertain += p.incertain || 0;
+            acc.incomplet += p.incomplet || 0;
+            acc.inexact   += p.inexact   || 0;
+        }
+        acc.totalCognitifs  = acc.reperage + acc.liaison + acc.ouverture;
+        acc.totalDifficultes = acc.incertain + acc.incomplet + acc.inexact;
+        acc.total = acc.totalCognitifs + acc.totalDifficultes;
+        return acc;
+    }
+
+    window.actionsRLO = { agregerActionsRLO, migrerActionsRLOEvaluations, agregerProfilRLOEtudiant };
 
     // Hook de démarrage : attendre db-ready. Cet écouteur est enregistré APRÈS
     // celui de `migrerIdsActionsRLO` (travaux-outils.js), donc s'exécute après
