@@ -28,7 +28,7 @@ const ETAPES_TUTORIEL = [
     {
         id: 'apercu',
         titre: '📊 Aperçu',
-        description: 'Voici ton aperçu ! Ici tu vois les indicateurs globaux (A-C-P) et le niveau d\'engagement de tes étudiants.',
+        description: 'Voici ton aperçu ! Ici tu vois les indicateurs globaux A-C-P et la distribution du groupe.',
         cible: '[data-onglet="apercu"]',
         action: () => {
             afficherSection('apercu');
@@ -49,7 +49,7 @@ const ETAPES_TUTORIEL = [
     {
         id: 'profil-etudiant',
         titre: '🎓 Profil d\'un étudiant',
-        description: 'Le profil montre tout : indices A-C-P, barres SRPNF, engagement, recommandations RàI, et liste des évaluations.',
+        description: 'Le profil montre tout : indices A-C-P, barres SRPNF, mobilisation, recommandations RàI, et liste des évaluations.',
         cible: '.ligne-etudiant:first-child', // Première ligne du tableau
         action: () => {
             // Attendre que la liste soit chargée

@@ -952,8 +952,7 @@ function afficherListeTrimestreGestion() {
         if (estArchive && t.statistiquesFinales) {
             const stats = t.statistiquesFinales;
             statsInfo = `<div class="item-trimestre-stats">
-                ${stats.nbEtudiants || 0} étudiant(s) • Engagement moyen: ${stats.moyenneEngagement || 0}%
-                ${t.dateFin ? ` • Archivé le ${t.dateFin}` : ''}
+                ${stats.nbEtudiants || 0} étudiant(s)${t.dateFin ? ` • Archivé le ${t.dateFin}` : ''}
             </div>`;
         }
 

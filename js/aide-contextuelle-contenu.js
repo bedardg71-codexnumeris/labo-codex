@@ -305,16 +305,15 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "L'aperçu offre une vue d'ensemble de la progression de ton groupe. Les indices A-C-P-E permettent d'identifier rapidement les étudiants nécessitant un suivi particulier."
+                contenu: "L'aperçu offre une vue d'ensemble de la progression de ton groupe. Les indices A-C-P permettent d'identifier rapidement les étudiants nécessitant un suivi particulier."
             },
             {
                 type: 'liste',
-                titre: "Indices de suivi (A-C-P-E)",
+                titre: "Indices de suivi (A-C-P)",
                 items: [
                     "A - Assiduité : taux de présence aux cours",
                     "C - Complétude : productions remises vs attendues",
-                    "P - Performance : niveau de réussite aux évaluations",
-                    "E - Engagement : participation et implication observées"
+                    "P - Performance : niveau de réussite aux évaluations"
                 ]
             },
             {
@@ -591,16 +590,15 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "Le profil individuel affiche quatre indices qui te permettent de cerner rapidement la situation d'un \u00e9tudiant."
+                contenu: "Le profil individuel affiche trois indices qui te permettent de cerner rapidement la situation d'un \u00e9tudiant."
             },
             {
                 type: 'liste',
-                titre: "Les 4 indices A-C-P-E",
+                titre: "Les 3 indices A-C-P",
                 items: [
                     "A (Assiduité) — Taux de présence aux cours. Calculé automatiquement depuis la saisie des présences.",
                     "C (Complétion) — Proportion d'artefacts remis par rapport aux artefacts attendus.",
-                    "P (Performance) — Résultat composite basé sur les meilleurs artefacts évalués (selon la pratique configurée).",
-                    "E (Engagement) — Cohérence entre A, C et P. Un E élevé signifie que l'étudiant est présent, remet ses travaux et performe."
+                    "P (Performance) — Résultat composite basé sur les meilleurs artefacts évalués (selon la pratique configurée)."
                 ]
             },
             {

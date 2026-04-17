@@ -655,31 +655,9 @@
             const etudiants = db.getSync(`${trimestreId}_groupeEtudiants`, []);
             const etudiantsActifs = etudiants.filter(e => !estEtudiantExclu(e));
 
-            // Indices d'engagement - lire depuis le trimestre ciblé
-            const indicesCP = db.getSync(`${trimestreId}_indicesCP`, {});
-            let totalEngagement = 0;
-            let nbAvecIndices = 0;
-
-            etudiantsActifs.forEach(e => {
-                const indices = indicesCP[e.da];
-                if (indices && indices.actuel) {
-                    const a = indices.actuel.A || 0;
-                    const c = indices.actuel.C || 0;
-                    const p = indices.actuel.P || 0;
-                    const engagement = (a * c * p) / 10000; // Normaliser
-                    totalEngagement += engagement;
-                    nbAvecIndices++;
-                }
-            });
-
-            const moyenneEngagement = nbAvecIndices > 0
-                ? Math.round((totalEngagement / nbAvecIndices) * 100)
-                : 0;
-
             return {
                 nbEtudiants: etudiantsActifs.length,
                 nbCours: coursTrimestr.length,
-                moyenneEngagement: moyenneEngagement,
                 dateCalcul: new Date().toISOString().split('T')[0]
             };
         } catch (error) {
@@ -1291,8 +1269,7 @@
                     formules: {
                         indice_A: 'Heures présentes / Heures offertes (cumulatif)',
                         indice_C: '% artefacts évalués >= Maîtrisé (M)',
-                        indice_P: 'Moyenne pondérée des N meilleurs artefacts (IDME → %)',
-                        engagement: 'A × C × P / 10000'
+                        indice_P: 'Moyenne pondérée des N meilleurs artefacts (IDME → %)'
                     },
 
                     snapshots_hebdomadaires: snapshots.map(s => ({
@@ -1317,8 +1294,7 @@
                             id_etudiant: daVersAnonyme[e.da],
                             A_final: actuel.A || 0,
                             C_final: actuel.C || 0,
-                            P_final: actuel.P || 0,
-                            engagement: Math.round((actuel.A || 0) * (actuel.C || 0) * (actuel.P || 0) / 10000)
+                            P_final: actuel.P || 0
                         };
                     }),
 

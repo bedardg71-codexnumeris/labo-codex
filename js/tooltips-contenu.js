@@ -256,7 +256,7 @@ const TOOLTIPS = {
         'Snapshots de suivi longitudinal et export anonymis\u00e9 pour la recherche en \u00e9ducation.',
 
     'donnees-snapshots':
-        'Enregistre l\u2019\u00e9tat des indices A-C-P-E \u00e0 des moments cl\u00e9s pour le suivi longitudinal.',
+        'Enregistre l\u2019\u00e9tat des indices A-C-P \u00e0 des moments cl\u00e9s pour le suivi longitudinal.',
 
     'donnees-capturer':
         'Capture manuelle imm\u00e9diate de l\u2019\u00e9tat actuel des indices.',
@@ -268,7 +268,7 @@ const TOOLTIPS = {
         'Efface toutes les captures enregistr\u00e9es. Action irr\u00e9versible.',
 
     'donnees-export-recherche':
-        'Export anonymis\u00e9 des indices A-C-P-E et statistiques agr\u00e9g\u00e9es pour la recherche. Aucune donn\u00e9e nominative incluse.',
+        'Export anonymis\u00e9 des indices A-C-P et statistiques agr\u00e9g\u00e9es pour la recherche. Aucune donn\u00e9e nominative incluse.',
 
     // --- Maintenance ---
 
@@ -434,7 +434,7 @@ const TOOLTIPS = {
     // --- Section Observer ---
 
     'tdb-observer':
-        'Indices A-C-E-P du groupe. Chaque barre positionne les \u00e9tudiants de Fragile \u00e0 Tr\u00e8s favorable.',
+        'Indices A-C-P du groupe. Chaque barre positionne les \u00e9tudiants de Fragile \u00e0 Tr\u00e8s favorable.',
 
     'tdb-zones-couleur':
         'Fragile (30-49%), Mod\u00e9r\u00e9 (50-64%), Favorable (65-79%), Tr\u00e8s favorable (\u226580%). Seuils configurables dans R\u00e9glages.',
@@ -444,9 +444,6 @@ const TOOLTIPS = {
 
     'tdb-completion':
         'Taux de remise des travaux. La corr\u00e9lation C\u00d7P indique le lien entre remise et r\u00e9sultats.',
-
-    'tdb-engagement':
-        'Niveau d\u2019engagement dans les activit\u00e9s d\u2019apprentissage. Combine plusieurs signaux comportementaux.',
 
     'tdb-performance':
         'R\u00e9sultats aux \u00e9valuations par niveaux : Incomplet, en D\u00e9veloppement, Ma\u00eetris\u00e9, \u00c9tendu.',
@@ -468,7 +465,7 @@ const TOOLTIPS = {
         '\u00c9volution d\u2019un indice dans le temps pour tout le groupe. Chaque ligne = un \u00e9tudiant.',
 
     'tdb-selecteur-indice':
-        'Choisir l\u2019indice \u00e0 visualiser : Assiduit\u00e9, Compl\u00e9tion, Engagement ou Performance.',
+        'Choisir l\u2019indice \u00e0 visualiser : Assiduit\u00e9, Compl\u00e9tion ou Performance.',
 
     'tdb-selecteur-eleve-groupe':
         'Isoler la trajectoire d\u2019un \u00e9tudiant sp\u00e9cifique sur le graphique du groupe.',
@@ -500,7 +497,7 @@ const TOOLTIPS = {
     // =================================================================
 
     'liste-titre':
-        'Liste compl\u00e8te des \u00e9tudiants avec indices A-C-E-P, patterns et niveaux R\u00e0I. Filtrable et triable.',
+        'Liste compl\u00e8te des \u00e9tudiants avec indices A-C-P, patterns et niveaux R\u00e0I. Filtrable et triable.',
 
     'liste-filtres':
         'Filtrer par groupe, programme, niveau R\u00e0I ou pattern. Le champ recherche accepte nom, pr\u00e9nom ou DA.',
@@ -530,7 +527,7 @@ const TOOLTIPS = {
         'Choisir un \u00e9tudiant. Les boutons Pr\u00e9c./Suiv. parcourent la liste s\u00e9quentiellement.',
 
     'profil-nav-observations':
-        'Sept vues d\u2019observation : productions, engagement, progression, habilet\u00e9s, accompagnement, travaux, rapport.',
+        'Sept vues d\u2019observation : productions, mobilisation, progression, habilet\u00e9s, accompagnement, travaux, rapport.',
 
     // --- Vue Productions ---
 
@@ -924,7 +921,7 @@ const TOOLTIPS = {
         'Retour \u00e0 la page d\u2019accueil du syst\u00e8me.',
 
     'nav-tableau-bord':
-        'Vue d\u2019ensemble du groupe : indices A-C-E-P, patterns d\u2019apprentissage, niveaux R\u00e0I et profils individuels.',
+        'Vue d\u2019ensemble du groupe : indices A-C-P, patterns d\u2019apprentissage, niveaux R\u00e0I et profils individuels.',
 
     'nav-presences':
         'Suivi de l\u2019assiduit\u00e9 : statistiques de pr\u00e9sence, calendrier des s\u00e9ances et saisie des pr\u00e9sences.',
@@ -955,7 +952,7 @@ const TOOLTIPS = {
     // =================================================================
 
     'nav-apercu':
-        'Observer les indices A-C-E-P, les patterns, les niveaux R\u00e0I et le d\u00e9veloppement du groupe via des graphiques.',
+        'Observer les indices A-C-P, les patterns, les niveaux R\u00e0I et le d\u00e9veloppement du groupe via des graphiques.',
 
     // =================================================================
     // SOUS-NAVIGATION — Structure (Tier 5.7)
@@ -1006,7 +1003,7 @@ const TOOLTIPS = {
         'Saisir les pr\u00e9sences et absences pour chaque s\u00e9ance du groupe.',
 
     'nav-suivi-profil':
-        'Fiche individuelle d\u2019un \u00e9tudiant : productions, engagement, progression, habilet\u00e9s, accompagnement et rapport.',
+        'Fiche individuelle d\u2019un \u00e9tudiant : productions, mobilisation, progression, habilet\u00e9s, accompagnement et rapport.',
 
     'nav-suivi-interventions':
         'Planifier et documenter les interventions R\u00e0I de niveaux 2 (pr\u00e9ventif) et 3 (intensif).',
@@ -1057,7 +1054,7 @@ const TOOLTIPS = {
         'Configurer les seuils de d\u00e9tection des patterns et d\u2019interpr\u00e9tation des indices A-C-P.',
 
     'nav-reg-donnees':
-        'Sauvegarde, restauration, snapshots A-C-P-E, export anonymis\u00e9, r\u00e9initialisation et maintenance.',
+        'Sauvegarde, restauration, snapshots A-C-P, export anonymis\u00e9, r\u00e9initialisation et maintenance.',
 
     'nav-reg-apropos':
         'Informations sur l\u2019application et sa version.'
