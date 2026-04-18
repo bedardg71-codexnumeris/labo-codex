@@ -32,8 +32,49 @@ const FLECHES_CATALOGUE = {
         message: 'Clique ici pour créer ta première pratique de notation.',
         direction: 'haut',
         priorite: 10
+    },
+    'structure-grilles-nouvelle': {
+        sectionActive: 'structure-grille-criteres',
+        cibleSelector: 'button[data-action="creerNouvelleGrille"]',
+        message: 'Clique ici pour créer ta première grille de critères.',
+        direction: 'haut',
+        priorite: 10
+    },
+    'structure-echelles-nouvelle': {
+        sectionActive: 'structure-echelle-performance',
+        cibleSelector: 'button[data-action="creerNouvelleEchelle"]',
+        message: 'Clique ici pour créer ta première échelle de performance.',
+        direction: 'haut',
+        priorite: 10
+    },
+    'structure-cartouches-nouvelle': {
+        sectionActive: 'structure-retroactions',
+        cibleSelector: 'button[data-action="creerNouvelleCartouche"]',
+        message: 'Clique ici pour créer ta première cartouche de rétroaction.',
+        direction: 'haut',
+        priorite: 10
+    },
+    'structure-productions-nouvelle': {
+        sectionActive: 'structure-productions',
+        cibleSelector: 'button[data-action="creerNouvelleProduction"]',
+        message: 'Clique ici pour créer ta première production étudiante.',
+        direction: 'haut',
+        priorite: 10
+    },
+    'suivi-presences-premiere-saisie': {
+        sectionActive: 'suivi-saisie',
+        cibleSelector: '#tbody-saisie-presences .input-periodes:first-of-type',
+        message: 'Clique dans une cellule pour saisir des périodes de présence.',
+        direction: 'haut',
+        priorite: 5
+    },
+    'evaluations-annoter-tampons': {
+        sectionActive: 'evaluations-annoter',
+        cibleSelector: '#btn-toggle-tampons',
+        message: 'Tu peux apposer des tampons pour commenter rapidement un travail.',
+        direction: 'gauche',
+        priorite: 5
     }
-    // Les autres flèches seront ajoutées en Phase 2.
 };
 
 // ============================================================================
