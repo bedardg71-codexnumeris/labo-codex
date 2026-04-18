@@ -884,8 +884,12 @@ function populerDropdownTrimestreV2() {
     const trimestreActif = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
 
     // 🆕 FIX (23 jan 2026): En mode Normal, masquer le trimestre Démonstration
+    // — mais pas quand la route démo est active (entrerEnDemo force mode=normal
+    // pour désactiver l'anonymisation, il faut donc laisser passer demo si
+    // demo-actif est true, sinon la démo tourne sans trimestre visible).
     const modeActuel = typeof window.modeActuel !== 'undefined' ? window.modeActuel : 'normal';
-    if (modeActuel === 'normal') {
+    const enDemo = typeof estEnModeDemo === 'function' && estEnModeDemo();
+    if (modeActuel === 'normal' && !enDemo) {
         trimestres = trimestres.filter(t => t.id !== 'demo');
     }
 
@@ -2438,9 +2442,16 @@ function populerDropdownGroupesV2(etudiants) {
     });
     select.innerHTML = html;
 
-    // Restaurer la sélection si elle existe encore
+    // Restaurer la sélection : en priorité la valeur actuelle du DOM (évite
+    // de casser une interaction en cours), sinon la valeur persistée par
+    // trimestre (permet à entrerEnDemo de pré-sélectionner '0demo').
     if (valeurActuelle && groupesSet.has(valeurActuelle)) {
         select.value = valeurActuelle;
+    } else {
+        const groupeSauvegarde = db.getSync(cle('groupeSelectionne'), null);
+        if (groupeSauvegarde && groupesSet.has(groupeSauvegarde)) {
+            select.value = groupeSauvegarde;
+        }
     }
 }
 
@@ -2449,6 +2460,11 @@ function populerDropdownGroupesV2(etudiants) {
  * ✅ CORRECTION (9 jan 2026): Async pour supporter chargerListeEtudiantsV2 async
  */
 async function filtrerParGroupeV2() {
+    // Persister le choix pour le retour dans la section (pré-sélection démo)
+    const select = document.getElementById('v2-selectGroupe');
+    if (select) {
+        db.setSync(cle('groupeSelectionne'), select.value || '');
+    }
     await chargerListeEtudiantsV2();
 }
 
