@@ -156,8 +156,9 @@ function sauvegarderIdentificationTrimestreV2() {
 
         db.setSync('trimestres', trimestres);
 
-        // Mettre à jour window.trimestreActif
+        // Synchroniser les miroirs window.trimestreActif + clé storage
         window.trimestreActif = id;
+        db.setSync('trimestreActif', id);
 
         // Si l'ID a changé, il faudrait migrer les données (complexe, pour l'instant on log)
         if (ancienId !== id) {
@@ -180,6 +181,7 @@ function sauvegarderIdentificationTrimestreV2() {
 
         db.setSync('trimestres', trimestres);
         window.trimestreActif = id;
+        db.setSync('trimestreActif', id);
 
     }
 
