@@ -541,79 +541,87 @@ function afficherModalMigrationLegacy(detailsLegacy) {
     const modalHTML = `
         <div id="modalMigrationLegacy" style="display: flex; position: fixed; top: 0; left: 0;
              width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10001;
-             align-items: center; justify-content: center;">
-            <div style="background: var(--surface-conteneur, #162c36); border-radius: 12px; padding: 30px; max-width: 580px;
-                 width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+             align-items: center; justify-content: center; padding: 16px; box-sizing: border-box;">
+            <div style="background: var(--surface-conteneur, #162c36); border-radius: 12px; max-width: 580px;
+                 width: 90%; max-height: 90vh; display: flex; flex-direction: column;
+                 box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
 
-                <!-- Icône et titre -->
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <div style="font-size: 3rem; margin-bottom: 10px;">🔄</div>
-                    <h2 style="margin: 0; color: var(--texte-secondaire); font-size: 1.4rem;">
-                        Mise à jour de tes données
-                    </h2>
+                <!-- Contenu scrollable -->
+                <div style="overflow-y: auto; padding: 30px; flex: 1 1 auto;">
+
+                    <!-- Icône et titre -->
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <div style="font-size: 3rem; margin-bottom: 10px;">🔄</div>
+                        <h2 style="margin: 0; color: var(--texte-secondaire); font-size: 1.4rem;">
+                            Mise à jour de tes données
+                        </h2>
+                    </div>
+
+                    <!-- Contexte : pourquoi cette migration -->
+                    <div style="background: var(--bleu-tres-pale); border-radius: 8px; padding: 18px; margin-bottom: 18px;">
+                        <p style="margin: 0; font-size: 0.95rem; line-height: 1.6; color: var(--gris-fonce);">
+                            L'application Monitorage a beaucoup évolué récemment pour mieux répondre aux
+                            besoins des enseignants. Pour profiter de toutes les nouvelles fonctionnalités,
+                            tes données doivent être réorganisées une seule fois.
+                        </p>
+                    </div>
+
+                    <!-- Ce qui change -->
+                    <div style="background: var(--bleu-pale); border-radius: 8px; padding: 18px; margin-bottom: 18px;">
+                        <p style="margin: 0 0 10px 0; font-size: 0.95rem;">
+                            <strong>Ce qui change :</strong>
+                        </p>
+                        <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                            <li>Gestion de plusieurs <strong>trimestres</strong> (archivage automatique)</li>
+                            <li>Support de plusieurs <strong>cours-groupes</strong> par trimestre</li>
+                            <li>Comptage en <strong>périodes</strong> (configurable)</li>
+                        </ul>
+                    </div>
+
+                    <!-- Ce qui va se passer -->
+                    <div style="background: var(--gris-tres-pale); border-left: 4px solid var(--bleu-moyen);
+                         padding: 15px; margin-bottom: 18px; border-radius: 0 8px 8px 0;">
+                        <p style="margin: 0 0 8px 0; font-size: 0.95rem;">
+                            <strong>📋 ${nbCles} ensemble(s) de données détecté(s)</strong>
+                        </p>
+                        <p style="margin: 0; font-size: 0.9rem; color: var(--gris-moyen);">
+                            La migration va créer un trimestre à partir de tes données actuelles.
+                            <strong>Aucune donnée ne sera perdue.</strong>
+                        </p>
+                    </div>
+
+                    <!-- Rassurant -->
+                    <div style="background: var(--alerte-fond-succes, #d4edda); border-radius: 8px; padding: 12px; margin-bottom: 18px;">
+                        <p style="margin: 0; font-size: 0.85rem; color: var(--alerte-texte-succes);">
+                            ✅ <strong>Rassure-toi :</strong> Cette opération est automatique et ne prendra
+                            que quelques secondes. C'est une opération ponctuelle qui ne devrait pas se reproduire.
+                        </p>
+                    </div>
+
+                    <!-- Avertissement export -->
+                    <div style="background: var(--alerte-fond-attention); border-radius: 8px; padding: 12px;">
+                        <p style="margin: 0; font-size: 0.85rem; color: var(--gris-fonce);">
+                            💡 <strong>Conseil :</strong> Si tu préfères, exporte d'abord tes données
+                            (Réglages → Export localStorage) avant de continuer.
+                        </p>
+                    </div>
+
                 </div>
 
-                <!-- Contexte : pourquoi cette migration -->
-                <div style="background: var(--bleu-tres-pale); border-radius: 8px; padding: 18px; margin-bottom: 18px;">
-                    <p style="margin: 0; font-size: 0.95rem; line-height: 1.6; color: var(--gris-fonce);">
-                        L'application Monitorage a beaucoup évolué récemment pour mieux répondre aux
-                        besoins des enseignants. Pour profiter de toutes les nouvelles fonctionnalités,
-                        tes données doivent être réorganisées une seule fois.
-                    </p>
-                </div>
-
-                <!-- Ce qui change -->
-                <div style="background: var(--bleu-pale); border-radius: 8px; padding: 18px; margin-bottom: 18px;">
-                    <p style="margin: 0 0 10px 0; font-size: 0.95rem;">
-                        <strong>Ce qui change :</strong>
-                    </p>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
-                        <li>Gestion de plusieurs <strong>trimestres</strong> (archivage automatique)</li>
-                        <li>Support de plusieurs <strong>cours-groupes</strong> par trimestre</li>
-                        <li>Comptage en <strong>périodes</strong> (configurable)</li>
-                    </ul>
-                </div>
-
-                <!-- Ce qui va se passer -->
-                <div style="background: var(--gris-tres-pale); border-left: 4px solid var(--bleu-moyen);
-                     padding: 15px; margin-bottom: 18px; border-radius: 0 8px 8px 0;">
-                    <p style="margin: 0 0 8px 0; font-size: 0.95rem;">
-                        <strong>📋 ${nbCles} ensemble(s) de données détecté(s)</strong>
-                    </p>
-                    <p style="margin: 0; font-size: 0.9rem; color: var(--gris-moyen);">
-                        La migration va créer un trimestre à partir de tes données actuelles.
-                        <strong>Aucune donnée ne sera perdue.</strong>
-                    </p>
-                </div>
-
-                <!-- Rassurant -->
-                <div style="background: var(--alerte-fond-succes, #d4edda); border-radius: 8px; padding: 12px; margin-bottom: 18px;">
-                    <p style="margin: 0; font-size: 0.85rem; color: var(--alerte-texte-succes);">
-                        ✅ <strong>Rassure-toi :</strong> Cette opération est automatique et ne prendra
-                        que quelques secondes. C'est une opération ponctuelle qui ne devrait pas se reproduire.
-                    </p>
-                </div>
-
-                <!-- Avertissement export -->
-                <div style="background: var(--alerte-fond-attention); border-radius: 8px; padding: 12px; margin-bottom: 22px;">
-                    <p style="margin: 0; font-size: 0.85rem; color: var(--gris-fonce);">
-                        💡 <strong>Conseil :</strong> Si tu préfères, exporte d'abord tes données
-                        (Réglages → Export localStorage) avant de continuer.
-                    </p>
-                </div>
-
-                <!-- Boutons -->
-                <div style="display: flex; gap: 12px; justify-content: center;">
+                <!-- Footer actions (toujours visible, ne scrolle pas) -->
+                <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+                     padding: 18px 30px; border-top: 1px solid var(--surface-carte, rgba(255,255,255,0.08));
+                     flex-shrink: 0;">
                     <button data-action="reporterMigrationLegacy"
                             style="padding: 12px 24px; background: var(--surface-conteneur, #162c36); color: var(--gris-fonce);
                                    border: 1px solid var(--gris-clair); border-radius: 6px;
-                                   cursor: pointer; font-size: 0.95rem;">
+                                   cursor: pointer; font-size: 0.95rem; min-height: 44px;">
                         Plus tard
                     </button>
                     <button data-action="executerMigrationLegacy"
                             style="padding: 12px 28px; background: var(--bleu-moyen); color: white;
                                    border: none; border-radius: 6px; cursor: pointer;
-                                   font-size: 1rem; font-weight: 500;">
+                                   font-size: 1rem; font-weight: 500; min-height: 44px;">
                         Migrer mes données
                     </button>
                 </div>
