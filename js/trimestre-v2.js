@@ -2423,10 +2423,18 @@ function populerDropdownGroupesV2(etudiants) {
 
     const groupesTries = Array.from(groupesSet).sort();
 
+    // Marqueur démo : un groupe est considéré démo si au moins un de ses
+    // étudiants a isDemo=true. Cohérent avec le traitement des autres
+    // sélecteurs latéraux (horaires, enseignants).
+    const estGroupeDemo = (grp) => etudiants.some(e =>
+        String(e.groupe || '').padStart(5, '0') === grp && e.isDemo === true
+    );
+
     // Reconstruire les options
     let html = '<option value="">Tous les groupes</option>';
     groupesTries.forEach(grp => {
-        html += `<option value="${grp}">${grp}</option>`;
+        const suffixeDemo = estGroupeDemo(grp) ? ' (démo)' : '';
+        html += `<option value="${grp}">${grp}${suffixeDemo}</option>`;
     });
     select.innerHTML = html;
 
@@ -3439,7 +3447,9 @@ function populerDropdownHorairesV2() {
 
     let html = '<option value="">Sélectionner...</option>';
     horaires.forEach(h => {
-        html += `<option value="${h.id}">${h.nom || 'Sans nom'}</option>`;
+        // Marqueur démo cohérent avec populerDropdownsAssemblageV2 (A.13)
+        const suffixeDemo = h.isDemo ? ' (démo)' : '';
+        html += `<option value="${h.id}">${h.nom || 'Sans nom'}${suffixeDemo}</option>`;
     });
     select.innerHTML = html;
 
@@ -5385,7 +5395,9 @@ function populerDropdownEnseignantsV2() {
     enseignants.forEach(e => {
         const nomComplet = `${e.prenom || ''} ${e.nom || ''}`.trim() || 'Sans nom';
         const selected = (e.id === enseignantEnEditionId) ? ' selected' : '';
-        html += `<option value="${e.id}"${selected}>${nomComplet}</option>`;
+        // Marqueur démo cohérent avec populerDropdownsAssemblageV2 (A.13)
+        const suffixeDemo = e.isDemo ? ' (démo)' : '';
+        html += `<option value="${e.id}"${selected}>${nomComplet}${suffixeDemo}</option>`;
     });
 
     select.innerHTML = html;
