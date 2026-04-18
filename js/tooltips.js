@@ -169,7 +169,8 @@ document.addEventListener('mouseleave', function(e) {
 // Long-press (600ms) pour afficher le tooltip. Le doigt doit rester immobile.
 // Le tooltip reste visible jusqu'au prochain tap (gere par le listener click).
 
-const DELAI_LONG_PRESS = 600;
+const DELAI_LONG_PRESS = 400;
+const TOLERANCE_MOUVEMENT = 20;
 let timerLongPress = null;
 let touchStartX = 0;
 let touchStartY = 0;
@@ -198,7 +199,7 @@ document.addEventListener('touchstart', function(e) {
 document.addEventListener('touchmove', function(e) {
     if (!timerLongPress) return;
     const touch = e.touches[0];
-    if (Math.abs(touch.clientX - touchStartX) > 10 || Math.abs(touch.clientY - touchStartY) > 10) {
+    if (Math.abs(touch.clientX - touchStartX) > TOLERANCE_MOUVEMENT || Math.abs(touch.clientY - touchStartY) > TOLERANCE_MOUVEMENT) {
         clearTimeout(timerLongPress);
         timerLongPress = null;
         cibleLongPress = null;
