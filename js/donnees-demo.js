@@ -270,6 +270,15 @@ async function entrerEnDemo() {
             console.warn('[DEMO-TRACE] step6 ⚠️ GC_DEMO absent de demo_groupesCours (len:', groupesCours.length, ')');
         }
 
+        // 6a. Pré-sélectionner HOR_DEMO dans le sélecteur latéral Horaire.
+        // chargerHorairesV2 lit db.getSync(cle('horaireSelectionne'), null) pour
+        // choisir quel horaire afficher dans la carte résumé. Sans cette clé,
+        // la section Horaire arrive vide même en mode démo.
+        if (typeof cle === 'function') {
+            db.setSync(cle('horaireSelectionne'), 'HOR_DEMO');
+            console.warn('[DEMO-TRACE] step6a', cle('horaireSelectionne'), '= HOR_DEMO');
+        }
+
         // 6b. Générer le calendrierComplet pour la démo
         // genererCalendrierComplet() lit cle('cadreCalendrier') et cle('horaireHebdo')
         // qui pointent maintenant vers demo_* grâce à changerTrimestreActif('demo')
@@ -742,9 +751,12 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
         // options (padStart(5, '0')), donc '0demo' pour étudiants avec groupe="demo".
         groupeAssocie: '0demo',
         periodesParSeance: 2,
+        // Les champs heureDebut/heureFin sont ceux lus par editerHoraireV2
+        // (les inputs v2-hor-seance-N-debut/fin). Utiliser 'debut' ferait
+        // tomber la lecture sur le fallback 08:00-10:00.
         seances: [
-            { id: 'SEANCE_DEMO_A', lettre: 'A', jour: 'Lundi', debut: '11:00', nombrePeriodes: 2, duree: 2, local: '2309' },
-            { id: 'SEANCE_DEMO_B', lettre: 'B', jour: 'Mercredi', debut: '13:00', nombrePeriodes: 2, duree: 2, local: '1709' }
+            { id: 'SEANCE_DEMO_A', lettre: 'A', jour: 'Lundi', heureDebut: '11:00', heureFin: '12:40', nombrePeriodes: 2, duree: 2, local: '2309' },
+            { id: 'SEANCE_DEMO_B', lettre: 'B', jour: 'Mercredi', heureDebut: '13:00', heureFin: '14:40', nombrePeriodes: 2, duree: 2, local: '1709' }
         ],
         isDemo: true,
         dateCreation: new Date().toISOString()
