@@ -1148,7 +1148,10 @@ function obtenirPratiqueActiveGroupeCours() {
     }
 
     // 5. Défaut : sommative
-    console.warn('[Modes] Aucune pratique définie, utilisation par défaut: sommative');
+    if (!window._avertiPratiqueParDefaut) {
+        console.warn('[Modes] Aucune pratique définie, utilisation par défaut: sommative');
+        window._avertiPratiqueParDefaut = true;
+    }
     return 'sommative';
 }
 
