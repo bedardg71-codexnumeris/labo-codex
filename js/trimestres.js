@@ -321,10 +321,10 @@
 
         db.setSync('trimestres', trimestres);
 
-        // 🆕 FIX (21 jan 2026): Mettre à jour window.trimestreActif
-        // Corrige le bug où les données A2025/Démo n'étaient pas accessibles
-        // car les modules lisaient l'ancienne valeur de window.trimestreActif
+        // Synchroniser les trois miroirs du trimestre actif
+        // (tableau .actif, window.trimestreActif, clé storage 'trimestreActif')
         window.trimestreActif = id;
+        db.setSync('trimestreActif', id);
 
         // Réinitialiser le cours actif — chargerDropdownCoursV2() re-sélectionnera le premier cours
         db.setSync('infoCours', null);
@@ -968,10 +968,11 @@
         // 🆕 FIX (21 jan 2026) : Migration horaires et groupesCours vers trimestre actif
         migrerHorairesEtGroupesCours();
 
-        if (resultatMigration.success) {
-            const actif = obtenirTrimestreActif();
-            if (actif) {
-            }
+        // Synchroniser les miroirs window.trimestreActif + clé storage avec le tableau .actif
+        const actif = obtenirTrimestreActif();
+        if (actif) {
+            window.trimestreActif = actif.id;
+            db.setSync('trimestreActif', actif.id);
         }
 
         // Mettre à jour l'affichage du bandeau d'archivage
