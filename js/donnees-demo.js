@@ -270,13 +270,16 @@ async function entrerEnDemo() {
             console.warn('[DEMO-TRACE] step6 ⚠️ GC_DEMO absent de demo_groupesCours (len:', groupesCours.length, ')');
         }
 
-        // 6a. Pré-sélectionner HOR_DEMO dans le sélecteur latéral Horaire.
-        // chargerHorairesV2 lit db.getSync(cle('horaireSelectionne'), null) pour
-        // choisir quel horaire afficher dans la carte résumé. Sans cette clé,
-        // la section Horaire arrive vide même en mode démo.
+        // 6a. Pré-sélectionner HOR_DEMO + groupe '0demo' pour que les sections
+        // latérales Horaire et Groupe d'étudiants soient alignées sur la démo
+        // dès la première visite. chargerHorairesV2 lit horaireSelectionne et
+        // populerDropdownGroupesV2 lit groupeSelectionne (depuis commit de
+        // ce jour) ; sans ces clés, les sections arrivent vides.
         if (typeof cle === 'function') {
             db.setSync(cle('horaireSelectionne'), 'HOR_DEMO');
-            console.warn('[DEMO-TRACE] step6a', cle('horaireSelectionne'), '= HOR_DEMO');
+            db.setSync(cle('groupeSelectionne'), '0demo');
+            console.warn('[DEMO-TRACE] step6a', cle('horaireSelectionne'), '= HOR_DEMO,',
+                cle('groupeSelectionne'), '= 0demo');
         }
 
         // 6b. Générer le calendrierComplet pour la démo
