@@ -20406,13 +20406,27 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     border-bottom-color: rgba(3, 46, 92, 0.08);
 }
 
-/* Titre "Découvrir" — blanc sur fond dégradé */
-.mode-clair #accueil-decouvrir .accordeon-header h3 {
+/* Titre "Parcours guidé" (ex-Découvrir) — blanc sur fond dégradé */
+.mode-clair #accueil-decouvrir .accordeon-header h3,
+.mode-clair #accueil-parcours-guide .accordeon-header h3 {
     color: white;
 }
 
-.mode-clair #accueil-decouvrir {
+.mode-clair #accueil-decouvrir,
+.mode-clair #accueil-parcours-guide {
     border-color: rgba(3, 46, 92, 0.04);
+}
+
+/* Phrase d'intention en tête de l'accordéon Parcours guidé */
+.parcours-guide-intro {
+    margin: 0 0 14px 0;
+    padding: 10px 14px;
+    background: var(--bleu-pale, rgba(3, 46, 92, 0.04));
+    border-left: 3px solid var(--accent-primaire);
+    border-radius: var(--radius-moyen, 8px);
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: var(--texte-principal);
 }
 
 /* Cartes de tâches page d'accueil — mode clair */
