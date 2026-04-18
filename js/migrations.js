@@ -482,28 +482,27 @@ function detecterDonneesLegacy() {
     // Vérifier la présence du système de trimestres
     const listeCours = db.getSync('listeCours', []);
 
-    // Clés legacy typiques (non namespacées)
-    const clesLegacy = [
+    // Clés legacy « de contenu utilisateur » : si l'utilisateur a vraiment créé
+    // des étudiants, pris des présences ou créé des productions en format ancien,
+    // il a quelque chose à migrer. Les clés de configuration seules (modalités
+    // d'évaluation, infoCours, horaireHebdo, seancesHoraire) peuvent être créées
+    // par défaut, par le mode démo ou par une session exploratoire — elles ne
+    // justifient pas à elles seules une modale de migration pour un nouvel
+    // utilisateur.
+    const clesLegacyContenu = [
         'groupeEtudiants',
         'presences',
-        'productions',
-        'seancesHoraire',
-        'horaireHebdo',
-        'modalitesEvaluation',
-        'infoCours'
+        'productions'
     ];
 
-    // Compter les clés legacy présentes avec des données
+    // Compter les clés de contenu présentes avec des données réelles
     let clesLegacyPresentes = [];
-    clesLegacy.forEach(cle => {
+    clesLegacyContenu.forEach(cle => {
         const valeur = db.getSync(cle, null);
         if (valeur !== null) {
-            // Vérifier que ce n'est pas vide
             if (Array.isArray(valeur) && valeur.length > 0) {
                 clesLegacyPresentes.push(cle);
             } else if (typeof valeur === 'object' && Object.keys(valeur).length > 0) {
-                clesLegacyPresentes.push(cle);
-            } else if (typeof valeur === 'string' && valeur.length > 0) {
                 clesLegacyPresentes.push(cle);
             }
         }
@@ -511,11 +510,13 @@ function detecterDonneesLegacy() {
 
     // Conditions pour être considéré legacy:
     // 1. Pas de trimestres OU pas de cours
-    // 2. Au moins 2 clés legacy avec des données
+    // 2. Au moins une clé de CONTENU utilisateur avec des données réelles
+    //    (plus stricte qu'avant : n'importe quelle donnée de contenu suffit,
+    //    mais les clés de config seules ne déclenchent plus)
     const pasDeSystemeTrimestres = trimestres.length === 0 || listeCours.length === 0;
-    const aDonneesLegacy = clesLegacyPresentes.length >= 2;
+    const aContenuLegacy = clesLegacyPresentes.length >= 1;
 
-    if (pasDeSystemeTrimestres && aDonneesLegacy) {
+    if (pasDeSystemeTrimestres && aContenuLegacy) {
         return {
             isLegacy: true,
             details: {

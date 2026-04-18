@@ -3894,6 +3894,8 @@ textarea {
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 16px;
+    box-sizing: border-box;
     opacity: 0;
     transition: opacity 0.3s ease;
 }
@@ -3912,6 +3914,9 @@ textarea {
     box-shadow: var(--shadow-fort);
     max-width: 480px;
     width: 90%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
     transform: scale(0.95);
     transition: transform 0.3s ease;
@@ -3926,6 +3931,7 @@ textarea {
     color: white;
     padding: 1.5rem;
     text-align: center;
+    flex-shrink: 0;
 }
 
 .modal-bienvenue-header h2 {
@@ -3944,6 +3950,9 @@ textarea {
     padding: 1.5rem;
     color: var(--gris-fonce);
     line-height: 1.6;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .modal-bienvenue-body p {
@@ -3955,6 +3964,7 @@ textarea {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    flex-shrink: 0;
 }
 
 .btn-bienvenue {
@@ -4057,6 +4067,7 @@ textarea {
     text-align: center;
     font-size: 0.85rem;
     color: var(--gris-moyen);
+    flex-shrink: 0;
 }
 
 .modal-bienvenue-footer p {
