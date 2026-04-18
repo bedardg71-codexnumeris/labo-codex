@@ -4059,7 +4059,9 @@ function populerDropdownsAssemblageV2() {
         let html = '<option value="">— Choisir un horaire —</option>';
         horaires.forEach(h => {
             const nom = h.nom || h.id || 'Sans nom';
-            html += `<option value="${h.id}">${nom}</option>`;
+            // A.13 : marqueur « démo » systématique dans l'option si isDemo
+            const suffixeDemo = h.isDemo ? ' (démo)' : '';
+            html += `<option value="${h.id}">${nom}${suffixeDemo}</option>`;
         });
         selectHoraire.innerHTML = html;
     }
@@ -4072,7 +4074,9 @@ function populerDropdownsAssemblageV2() {
         let html = '<option value="">— Choisir un enseignant —</option>';
         enseignants.forEach(e => {
             const nomComplet = `${e.prenom || ''} ${e.nom || ''}`.trim() || e.id;
-            html += `<option value="${e.id}">${nomComplet}</option>`;
+            // A.13 : marqueur « démo » systématique dans l'option si isDemo
+            const suffixeDemo = e.isDemo ? ' (démo)' : '';
+            html += `<option value="${e.id}">${nomComplet}${suffixeDemo}</option>`;
         });
         selectEnseignant.innerHTML = html;
     }
@@ -4390,6 +4394,17 @@ function nouveauGroupeCoursV2() {
     const formulaire = document.getElementById('v2-formulaireGroupeCours');
     if (etatVide) etatVide.classList.add('u-hide');
     if (formulaire) formulaire.classList.remove('u-hide');
+
+    // A.12 : afficher le message d'aide démo si mode démo actif
+    const messageAideDemo = document.getElementById('v2-messageAideDemoGC');
+    if (messageAideDemo) {
+        const enDemo = typeof estEnModeDemo === 'function' && estEnModeDemo();
+        if (enDemo) {
+            messageAideDemo.classList.remove('u-hide');
+        } else {
+            messageAideDemo.classList.add('u-hide');
+        }
+    }
 
     // Masquer le bouton Supprimer (mode création)
     const btnSupprimer = document.getElementById('v2-btnSupprimerGroupeCours');

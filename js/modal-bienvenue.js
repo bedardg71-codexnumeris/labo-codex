@@ -163,47 +163,37 @@
                         de la planification des cours jusqu'à la note finale.
                     </p>
 
-                    <div class="modal-bienvenue-reperes">
-                        <p class="modal-bienvenue-reperes-titre">Trois icônes dans l'en-tête pour t'accompagner :</p>
-                        <div class="modal-bienvenue-repere">
-                            <span class="repere-icone">✉️</span>
-                            <span class="repere-texte"><strong>Nouveautés</strong> — Corrections et nouvelles fonctionnalités</span>
-                        </div>
-                        <div class="modal-bienvenue-repere">
-                            <span class="repere-icone">🗺️</span>
-                            <span class="repere-texte"><strong>Tour guidé</strong> — Aide contextuelle et navigation générale</span>
-                        </div>
-                        <div class="modal-bienvenue-repere">
-                            <span class="repere-icone">⚠️</span>
-                            <span class="repere-texte"><strong>Rappel backup</strong> — Protection de tes données</span>
-                        </div>
-                    </div>
+                    <p style="margin-top: 1rem;">
+                        Labo Codex s'apprivoise en trois temps&nbsp;: <strong>Découvrir</strong> d'abord,
+                        <strong>Parcourir</strong> ensuite, <strong>Piloter</strong> quand tu es prêt·e à
+                        travailler avec tes vraies données.
+                    </p>
 
                     <p style="margin-top: 1rem;">
-                        <strong>Comment préfères-tu apprendre un nouvel outil ?</strong>
+                        <strong>Comment souhaites-tu commencer&nbsp;?</strong>
                     </p>
                 </div>
 
                 <div class="modal-bienvenue-actions">
-                    <button class="btn-bienvenue btn-bienvenue-principal" data-action="modalBienvenue.commencerConfiguration">
-                        <span class="btn-bienvenue-icone">🗺️</span>
+                    <button class="btn-bienvenue btn-bienvenue-principal" data-action="modalBienvenue.explorerApplication">
+                        <span class="btn-bienvenue-icone">🚸</span>
                         <span class="btn-bienvenue-texte">
-                            <strong>Étape par étape</strong>
-                            <small>Je te guide à travers chaque fonction dans l'ordre. Tu avances à ton rythme.</small>
+                            <strong>Découvrir</strong>
+                            <small>J'explore librement avec des données de démonstration pour comprendre l'application.</small>
                         </span>
                     </button>
 
-                    <button class="btn-bienvenue btn-bienvenue-secondaire" data-action="modalBienvenue.explorerApplication">
-                        <span class="btn-bienvenue-icone">🧭</span>
+                    <button class="btn-bienvenue btn-bienvenue-secondaire" data-action="modalBienvenue.commencerConfiguration">
+                        <span class="btn-bienvenue-icone">🗺️</span>
                         <span class="btn-bienvenue-texte">
-                            <strong>Par exploration</strong>
-                            <small>Tu explores librement avec des données de démo. L'aide est toujours là si tu en as besoin.</small>
+                            <strong>Parcourir</strong>
+                            <small>Je veux un guide qui me présente chaque fonction dans l'ordre.</small>
                         </span>
                     </button>
                 </div>
 
                 <div class="modal-bienvenue-footer">
-                    <p>Tu pourras changer d'avis à tout moment dans Réglages → Préférences</p>
+                    <p>Tu pourras changer d'avis à tout moment depuis la page d'accueil.</p>
                 </div>
             </div>
         `;
