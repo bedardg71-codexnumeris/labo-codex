@@ -252,9 +252,15 @@
    MODE DÉMO - CONVERSION BLEU → SARCELLE
    Palette sarcelle, activée via body.mode-demo
    (classe ajoutée/retirée par donnees-demo.js)
+
+   NB : scope à :not(.mode-clair). Les variables sarcelle et fonds sombres
+   sont conçus pour le thème sombre ; les appliquer par-dessus le mode clair
+   donne des cartes noires + titres bleu foncé illisibles. En mode clair,
+   on garde le thème clair habituel ; seuls les marqueurs « (démo) » dans
+   les sélecteurs et le bandeau « Mode démonstration » signalent le mode.
    =============================== */
 
-body.mode-demo {
+body.mode-demo:not(.mode-clair) {
     /* Mode Démo — palette sarcelle identique à la base ocean */
     --bleu-principal: var(--sarcelle-principal);
     --bleu-fonce: var(--sarcelle-fonce);
@@ -278,7 +284,7 @@ body.mode-demo {
     --vert-tres-pale-assiste: var(--sarcelle-tres-pale);
 }
 
-body.mode-demo .sous-navigation {
+body.mode-demo:not(.mode-clair) .sous-navigation {
     background: transparent !important;
 }
 
