@@ -130,7 +130,7 @@ function changerModeParcoursDelegue(el) {
 // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
 // Les valeurs ici servent de fallback si version.json n'est pas disponible
 let VERSION_MAJEURE = '99.18';
-let BUILD_ID = '0418-1854';
+let BUILD_ID = '0418-1903';
 // Snapshot du build contenu dans CE fichier script (pour détecter les scripts périmés)
 const _SCRIPT_BUILD = BUILD_ID;
 
@@ -305,7 +305,7 @@ async function chargerVersionJSON() {
 
     // === Protocole HTTP/HTTPS — fetch normal ===
     try {
-        const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
+        const r = await fetch('version.json', { cache: 'no-store' });
         if (!r.ok) return;
         const data = await r.json();
         if (data.beta) VERSION_MAJEURE = data.beta;
@@ -403,7 +403,7 @@ async function verifierMiseAJourDistante() {
     if (miseAJourDejaSignalee) return;
     if (window.location.protocol === 'file:') return; // fetch impossible en file://
     try {
-        const reponse = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
+        const reponse = await fetch('version.json', { cache: 'no-store' });
         if (!reponse.ok) return;
         const data = await reponse.json();
         if (data.build && data.build !== BUILD_ID) {
