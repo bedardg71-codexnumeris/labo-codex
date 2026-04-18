@@ -201,18 +201,25 @@
                 try {
                     const parsed = JSON.parse(value);
 
-                    // CORRECTIF CRITIQUE : Détection double stringify
-                    // Si on obtient une string après parsing, c'est probablement du double stringify
-                    // Exemple: "\"[{...}]\"" → parse → "[{...}]" (string) → reparse → [{...}] (array)
+                    // Détection double stringify — UNIQUEMENT pour objets/arrays.
+                    // Un vrai double stringify produit après re-parse un objet ou un array
+                    // (ex: '"[{...}]"' → parse → '[{...}]' string → reparse → [{...}] array).
+                    // Pour les primitifs string dont le contenu est un littéral JSON valide
+                    // (ex: setSync('demo-actif', 'true') → storage '"true"' → parse → 'true' string),
+                    // un re-parse donnerait un boolean/number/null : c'est un faux positif,
+                    // la string est la valeur légitime voulue par le call site.
                     if (typeof parsed === 'string') {
                         try {
                             const reparsed = JSON.parse(parsed);
-                            console.warn(`[DB] Double stringify détecté pour clé "${key}", correction automatique appliquée`);
-                            // Corriger immédiatement dans localStorage pour éviter le problème futur
-                            this._setLocalStorage(key, reparsed);
-                            return reparsed;
+                            if (reparsed !== null && typeof reparsed === 'object') {
+                                console.warn(`[DB] Double stringify détecté pour clé "${key}", correction automatique appliquée`);
+                                this._setLocalStorage(key, reparsed);
+                                return reparsed;
+                            }
+                            // Primitif → faux positif, on retourne la string d'origine
+                            return parsed;
                         } catch (reparseError) {
-                            // Si le re-parsing échoue, la string est légitime
+                            // Re-parse impossible → string légitime
                             return parsed;
                         }
                     }
