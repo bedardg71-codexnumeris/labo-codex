@@ -1,9 +1,14 @@
 /* ===============================
    MODULE: PAGE D'ACCUEIL
    Chantier 3 — Page d'accueil permanente
+   A.16 (18 avril 2026) — Fusion Découvrir + Parcourir → Parcours guidé
 
    Page unique pour tous les utilisateurs :
-   3 accordéons (Découvrir, Parcourir, Piloter) + utilitaires
+   2 accordéons (Parcours guidé, Piloter) + utilitaires.
+
+   « Parcours guidé » regroupe : les toggles de mode de navigation (démo,
+   tour guidé, info-bulles, aide contextuelle, flèches didactiques) et le
+   panneau de parcours d'apprentissage progressif.
 
    Exports: afficherAccueil, initialiserAccueil, definirModeExpert
    =============================== */
@@ -32,18 +37,29 @@ function afficherAccueilContenu(conteneur) {
     const enDemo = typeof estEnModeDemo === 'function' && estEnModeDemo();
     const demoChecked = enDemo;
 
-    // Section toggle tooltips (miroir de Reglages > Preferences > Navigation)
+    // Toggles de mode de navigation (miroirs de Réglages > Préférences > Navigation)
     const tooltipsActifs = obtenirPreference('tooltips') !== false;
     const tourGuideActif = !!obtenirPreference('tourGuide');
     const aideContextuelleActive = obtenirPreference('aideContextuelle') !== false;
+    const flechesActives = !window.flechesDidactiques || window.flechesDidactiques.estActif();
 
-    const decouvrirHTML = `
-        <div class="carte accordeon" id="accueil-decouvrir">
+    // Panneau de parcours d'apprentissage — intégré à Parcours guidé (A.16)
+    const parcoursHTML = (window.parcours && window.parcours.genererPanneauParcours)
+        ? window.parcours.genererPanneauParcours()
+        : '';
+
+    const parcoursGuideHTML = `
+        <div class="carte accordeon" id="accueil-parcours-guide">
             <div class="accordeon-header">
-                <h3 style="margin: 0; font-size: 1.1rem;">D\u00e9couvrir</h3>
+                <h3 style="margin: 0; font-size: 1.1rem;">Parcours guid\u00e9</h3>
                 <span class="accordeon-chevron">\u25BC</span>
             </div>
             <div class="accordeon-contenu">
+                <p class="parcours-guide-intro">
+                    Explore l\u2019application avec des donn\u00e9es de d\u00e9monstration, puis cr\u00e9e tes premi\u00e8res pi\u00e8ces de mat\u00e9riel p\u00e9dagogique.
+                    Des fl\u00e8ches contextuelles t\u2019indiquent o\u00f9 cliquer \u00e0 chaque \u00e9tape.
+                </p>
+
                 <div class="accueil-cartes-decouvrir">
 
                     <div class="accueil-carte-decouvrir">
@@ -54,6 +70,18 @@ function afficherAccueilContenu(conteneur) {
                             <div>
                                 <div class="decouvrir-titre">Donn\u00e9es de d\u00e9monstration</div>
                                 <div class="decouvrir-desc">Explorer avec des donn\u00e9es fictives</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="accueil-carte-decouvrir">
+                        <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
+                            <span style="font-size:1.5rem;">\u27A1\uFE0F</span>
+                            <input type="checkbox" id="checkbox-fleches-accueil" ${flechesActives ? 'checked' : ''}
+                                data-on-change="toggleFlechesDidactiquesHandler">
+                            <div>
+                                <div class="decouvrir-titre">Fl\u00e8ches didactiques</div>
+                                <div class="decouvrir-desc">Indiquer o\u00f9 cliquer au premier contact de chaque \u00e9cran</div>
                             </div>
                         </label>
                     </div>
@@ -95,14 +123,11 @@ function afficherAccueilContenu(conteneur) {
                     </div>
 
                 </div>
+
+                ${parcoursHTML}
             </div>
         </div>
     `;
-
-    // Panneau de parcours d'apprentissage (toujours visible : CTA ou progression)
-    const parcoursHTML = (window.parcours && window.parcours.genererPanneauParcours)
-        ? window.parcours.genererPanneauParcours()
-        : '';
 
     const heroTitre = 'Que souhaites-tu faire\u00a0?';
 
@@ -111,9 +136,7 @@ function afficherAccueilContenu(conteneur) {
             <h1>${heroTitre}</h1>
         </div>
 
-        ${decouvrirHTML}
-
-        ${parcoursHTML}
+        ${parcoursGuideHTML}
 
         <div class="carte accordeon" id="accueil-piloter">
             <div class="accordeon-header">
@@ -251,6 +274,13 @@ function toggleAideContextuelleHandler(el) {
     if (typeof definirAideContextuelle === 'function') definirAideContextuelle(el.checked);
 }
 
+/** Toggle flèches didactiques depuis checkbox (A.16) */
+function toggleFlechesDidactiquesHandler(el) {
+    if (window.flechesDidactiques && typeof window.flechesDidactiques.definirActif === 'function') {
+        window.flechesDidactiques.definirActif(el.checked);
+    }
+}
+
 /** Navigation accueil : section + sous-section avec délai */
 function naviguerAccueilCarte(sectionEtSousSection) {
     var parts = sectionEtSousSection.split('|');
@@ -281,6 +311,7 @@ window.toggleDemoHandler = toggleDemoHandler;
 window.toggleTourGuideHandler = toggleTourGuideHandler;
 window.toggleTooltipsHandler = toggleTooltipsHandler;
 window.toggleAideContextuelleHandler = toggleAideContextuelleHandler;
+window.toggleFlechesDidactiquesHandler = toggleFlechesDidactiquesHandler;
 window.naviguerAccueilCarte = naviguerAccueilCarte;
 window.naviguerVersWizard = naviguerVersWizard;
 window.ouvrirModalBackup = ouvrirModalBackup;
