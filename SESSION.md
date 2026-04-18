@@ -1,8 +1,8 @@
-# SESSION ACTIVE — BETA 99.18 (18 avril 2026, soir)
+# SESSION ACTIVE — BETA 99.18 (18 avril 2026, fin soirée)
 
 **Date** : 18 avril 2026
-**Version** : Beta 99.18 (Build 0418-1746)
-**Statut** : Chantier onboarding Phase A — démo fonctionnelle de bout en bout, trois bugs non démo restent (b, c, d)
+**Version** : Beta 99.18 (Build 0418-1944)
+**Statut** : Chantier onboarding Phase A clos côté technique. A.16 (Parcours guidé + flèches didactiques) livré en 3 phases de code + doc.
 **Branche** : `main`
 
 ---
@@ -103,19 +103,29 @@ grep -rn "demo-actif" js/ | grep -i "JSON.stringify\|setSync\|set("
 
 ---
 
-## 5. Prochaine action concrète
+## 5. Récap travaux de la soirée (18 avril, post-18h)
 
-**Au démarrage de la nouvelle session** :
+13 commits poussés sur `main` entre 0418-1816 et 0418-1944 :
 
-1. Lire ce `SESSION.md`
-2. Lire `memory/MEMORY.md` (auto-mémoire persistante)
-3. Demander à l'utilisateur par où commencer :
-   - **b)** bruit console (plus rapide, améliore la lisibilité des diagnostics futurs)
-   - **c)** cohérence `trimestreActif` (structurel, potentiellement fragile)
-   - **d)** double stringify `demo-actif` (petit mais satisfaisant)
-   - Ou attaquer le reste de la Phase A onboarding (A.5 bloquant)
+| Commit | Build | Livrable |
+|---|---|---|
+| `f62b8b4` | 0418-1816 | b) Mémoïsation 3 warnings console (Modes, grille référence × 2) |
+| `9a6c7e2` | 0418-1819 | c) Cohérence `trimestreActif` storage ↔ window ↔ `.actif` |
+| `40b8cf0` | 0418-1822 | d) Faux positif double stringify primitifs corrigé dans `db.js` |
+| `c4f666a` | 0418-1826 | A.5 Primo tooltips : délégation globale |
+| `3a128ad` | 0418-1837 | Mode démo illisible en mode clair : scope `:not(.mode-clair)` |
+| `7517c14` | 0418-1854 | A.5-bis data-tooltip iPad : `-webkit-touch-callout: none`, 600→400 ms, 10→20 px |
+| `3f78821` | 0418-1903 | A.15 : 12 img Aide manquants retirés + `?t=` retiré des fetch `version.json` |
+| `6b7c2d2` | — | Plan A.16 `PLAN-PARCOURS-GUIDE-ET-FLECHES.md` |
+| `282b834` | 0418-1938 | A.16 Phase 1 : composant flèches + pilote Pratiques |
+| `98675da` | 0418-1941 | A.16 Phase 2 : 6 flèches restantes |
+| `eb2d1ab` | 0418-1944 | A.16 Phase 3 : accueil « Parcours guidé » |
 
-Ne pas retirer l'instrumentation `[DEMO-TRACE]` sans demander — c'est utile pour le diagnostic si un autre bug démo surgit.
+## 6. Reste à faire
+
+- **Test terrain iPad** sur build ≥ 0418-1944 pour valider : info-bulles (Primo + data-tooltip), mode démo en mode clair, flèches didactiques (7 cibles), flux Parcours guidé.
+- **Instrumentation `[DEMO-TRACE]`** toujours active dans `donnees-demo.js` et `trimestre-v2.js`. À retirer quand la démo est jugée stable sur terrain.
+- **A.1 / A.6 / A.7** (plan onboarding) : correctifs secondaires non traités ce soir, à voir selon priorités.
 
 ---
 
