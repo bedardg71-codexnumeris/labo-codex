@@ -376,7 +376,7 @@ function toggleArtefactPortfolio(event, da, portfolioId, nombreARetenir) {
             calculerEtStockerIndicesCP();
         }
 
-        // Recharger TOUT le profil pour mettre à jour les indices A-C-P-M-E-R
+        // Recharger TOUT le profil pour mettre à jour les indices A-C-P-M-R
         if (typeof afficherProfilComplet === 'function') {
             afficherProfilComplet(da);
 
@@ -580,8 +580,8 @@ function convertirNiveauEnPourcentage(niveau, echelleId = null) {
 
    NOUVELLE STRUCTURE :
    indicesCP[da] = {
-     historique: [{ date, pratique, C, P, E, details }, ...],
-     actuel: { date, pratique, C, P, E, details }
+     historique: [{ date, pratique, C, P, details }, ...],
+     actuel: { date, pratique, C, P, details }
    }
    =============================== */
 
@@ -617,11 +617,6 @@ function calculerEtStockerIndicesCP() {
     const etudiantsActifs = etudiants.filter(e => !estEtudiantExclu(e));
 
     const dateCalcul = new Date().toISOString();
-    const modalites = db.getSync('modalitesEvaluation', {});
-
-    // 🆕 BETA 95.5 : Lire A depuis indicesAssiduite (une seule fois, hors boucle)
-    const cleAssiduite = cle('indicesAssiduite');
-    const indicesAssiduite = db.getSync(cleAssiduite, {});
 
     // Calculer pour chaque étudiant
     etudiantsActifs.forEach(etudiant => {
@@ -655,34 +650,11 @@ function calculerEtStockerIndicesCP() {
         const C = C_decimal !== null ? Math.round(C_decimal * 100) : 0;
         const P = P_decimal !== null ? Math.round(P_decimal * 100) : 0;
 
-
-        // ========================================
-        // CALCUL ENGAGEMENT (E) - PRINCIPE SST
-        // ========================================
-        // E = (A × C × P)^(1/3) - Racine cubique
-
-        // Extraire l'indice A pour cet étudiant
-        const assiduiteSommatif = indicesAssiduite.sommatif?.[da];
-        let A = 0;
-        if (typeof assiduiteSommatif === 'object' && assiduiteSommatif.indice !== undefined) {
-            A = assiduiteSommatif.indice; // Proportion 0-1
-        } else if (typeof assiduiteSommatif === 'number') {
-            A = assiduiteSommatif; // Ancien format, proportion 0-1
-        }
-
-        const E_brut = A * (C / 100) * (P / 100);
-        const E = Math.cbrt(E_brut); // Racine cubique (gère les valeurs négatives)
-
-        // ========================================
-        // 🆕 BETA 95.5 : NOUVELLE STRUCTURE SIMPLIFIÉE
-        // ========================================
-
         const entreeActuelle = {
             date: dateCalcul,
             pratique: pratiqueId,
             C: C,
             P: P,
-            E: parseFloat(E.toFixed(3)),
             details: {
                 calculViaPratique: true
             }
@@ -701,8 +673,7 @@ function calculerEtStockerIndicesCP() {
         const aDiffere = !dernierHistorique ||
             dernierHistorique.pratique !== pratiqueId ||
             dernierHistorique.C !== C ||
-            dernierHistorique.P !== P ||
-            dernierHistorique.E !== parseFloat(E.toFixed(3));
+            dernierHistorique.P !== P;
 
         if (aDiffere) {
             indicesCP[da].historique.push(entreeActuelle);
@@ -726,7 +697,7 @@ function calculerEtStockerIndicesCP() {
  * 🆕 BETA 95.5 : Récupère les indices C et P depuis IndexedDB (async)
  *
  * @param {string} da - Numéro DA de l'étudiant
- * @returns {Promise<Object>} - { date, pratique, C, P, E, details } ou null
+ * @returns {Promise<Object>} - { date, pratique, C, P, details } ou null
  */
 async function obtenirIndicesCPAsync(da) {
     const cleIndices = cle('indicesCP');

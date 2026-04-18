@@ -725,7 +725,7 @@ const QUESTIONS_PRIMO = [
             },
             {
                 value: 'holistique',
-                label: '🎨 Holistique',
+                label: '<img src="icons/icon-paint-palette.svg" alt="" class="outil-svg-icon" style="width:14px;height:14px;vertical-align:middle;"> Holistique',
                 description: 'Suggestion statistique (mode, médiane, moyenne) + validation par ton jugement professionnel.'
             }
         ],
@@ -2122,7 +2122,7 @@ const QUESTIONS_PRIMO = [
 
     {
         id: 'profil-individuel',
-        texte: '**Consulte un profil individuel**\n\n1️⃣ Clique sur **Liste des étudiants**\n2️⃣ Choisis n\'importe qui\n\nTu vois :\n• Son engagement (A-C-P)\n• Ses forces et défis SRPNF\n• Ses productions évaluées\n• Recommandations d\'intervention\n\nC\'est le cœur du système de suivi !\n\nTu as exploré un profil ?',
+        texte: '**Consulte un profil individuel**\n\n1️⃣ Clique sur **Liste des étudiants**\n2️⃣ Choisis n\'importe qui\n\nTu vois :\n• Ses indices A-C-P\n• Ses forces et défis SRPNF\n• Ses productions évaluées\n• Recommandations d\'intervention\n\nC\'est le cœur du système de suivi !\n\nTu as exploré un profil ?',
         type: 'radio',
         options: [
             { value: 'oui', label: 'Oui, j\'ai exploré !' },

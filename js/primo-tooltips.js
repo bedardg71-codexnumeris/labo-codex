@@ -43,7 +43,7 @@ function afficherPopupPrimo(contentHTML) {
     popup.innerHTML = `
         <div class="primo-popup-header">
             <span><span class="primo-icon">📍</span> Conseil</span>
-            <button class="primo-popup-close" data-action="fermerPopupPrimo">×</button>
+            <button class="primo-popup-close" data-action="fermerPopupPrimo"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
         </div>
         <div class="primo-popup-body">
             ${contentHTML}

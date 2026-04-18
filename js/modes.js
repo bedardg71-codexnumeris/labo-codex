@@ -852,8 +852,7 @@ function gererAffichageBoutonPrimo(mode) {
  * @returns {boolean} true si le tour guide est activé
  */
 function estTourGuideActif() {
-    const prefs = db.getSync('preferencesAffichage', {});
-    return !!prefs.tourGuide;
+    return !!obtenirPreference('tourGuide');
 }
 
 // Alias rétrocompatibles (seront retirés dans une future version)
@@ -865,9 +864,7 @@ function estModeGuide() { return estTourGuideActif(); }
  * @param {boolean} etat - true pour activer, false pour désactiver
  */
 function definirTourGuide(etat) {
-    const prefs = db.getSync('preferencesAffichage', {});
-    prefs.tourGuide = !!etat;
-    db.setSync('preferencesAffichage', prefs);
+    definirPreference('tourGuide', !!etat);
     // Synchroniser les checkboxes miroirs
     document.querySelectorAll('#checkbox-tour-guide, #checkbox-tour-guide-accueil').forEach(cb => cb.checked = !!etat);
     // Appliquer la classe CSS qui contrôle la visibilité des icônes
@@ -881,8 +878,7 @@ function definirTourGuide(etat) {
  * @returns {boolean} true si l'aide contextuelle est activée (true par défaut)
  */
 function estAideContextuelleActive() {
-    const prefs = db.getSync('preferencesAffichage', {});
-    return prefs.aideContextuelle !== false; // true par défaut
+    return obtenirPreference('aideContextuelle') !== false; // true par défaut
 }
 
 /**
@@ -890,9 +886,7 @@ function estAideContextuelleActive() {
  * @param {boolean} etat - true pour activer, false pour désactiver
  */
 function definirAideContextuelle(etat) {
-    const prefs = db.getSync('preferencesAffichage', {});
-    prefs.aideContextuelle = !!etat;
-    db.setSync('preferencesAffichage', prefs);
+    definirPreference('aideContextuelle', !!etat);
     // Synchroniser les checkboxes miroirs
     document.querySelectorAll('#checkbox-aide-contextuelle, #checkbox-aide-contextuelle-accueil')
         .forEach(cb => cb.checked = !!etat);
@@ -911,8 +905,7 @@ function definirAideContextuelle(etat) {
  * @returns {boolean} true si le mode clair est activé
  */
 function estModeClair() {
-    const prefs = db.getSync('preferencesAffichage', {});
-    return !!prefs.modeClair;
+    return !!obtenirPreference('modeClair');
 }
 
 /**
@@ -920,9 +913,7 @@ function estModeClair() {
  * @param {boolean} clair - true pour activer le mode clair, false pour le mode sombre
  */
 function definirTheme(clair) {
-    const prefs = db.getSync('preferencesAffichage', {});
-    prefs.modeClair = !!clair;
-    db.setSync('preferencesAffichage', prefs);
+    definirPreference('modeClair', !!clair);
     document.body.classList.toggle('mode-clair', !!clair);
     // Synchroniser les radio buttons et checkboxes legacy
     var radioClair = document.getElementById('radio-mode-clair');

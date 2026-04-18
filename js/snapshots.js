@@ -20,8 +20,8 @@
  * - C : PONCTUEL (taux de remise du dernier artefact dû)
  * - P : CUMULATIF (moyenne des évaluations jusqu'à cette date)
  *
- * - L'indice E (engagement) est EXCLU des snapshots (trop peu informatif en ponctuel)
- * - E reste disponible dans le profil étudiant comme indicateur LONGITUDINAL/CUMULATIF
+ * - L'indice E (engagement) a été retiré du code (avril 2026) ; les snapshots
+ *   historiques peuvent contenir un champ E qui n'est plus lu nulle part.
  *
  * Structure de données :
  * localStorage.snapshots = {

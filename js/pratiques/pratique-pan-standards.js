@@ -773,8 +773,7 @@ class PratiquePANStandards {
      * @returns {Object|null} Grille avec critères ou null si non configurée
      */
     _obtenirGrilleReference() {
-        const modalites = db.getSync('modalitesEvaluation', {});
-        const grilleId = modalites.grilleReferenceDepistage;
+        const grilleId = obtenirPreference('grilleReferenceDepistage');
 
         if (!grilleId) {
             console.warn('⚠️ [PAN-Standards] Aucune grille de référence configurée');

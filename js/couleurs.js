@@ -16,13 +16,12 @@ const COULEURS = (() => {
         return getComputedStyle(document.documentElement).getPropertyValue(prop).trim();
     }
 
-    // Indices A-C-P-E — alignés sur les variables CSS des pratiques
-    // Mapping : A→STD (bleu), C→SOM (orange), P→SPE (vert), E→DEN (violet)
+    // Indices A-C-P — alignés sur les variables CSS des pratiques
+    // Mapping : A→STD (bleu), C→SOM (orange), P→SPE (vert)
     const indices = {
         A: lireCSS('--std-bleu')   || '#0277bd',
         C: lireCSS('--som-orange') || '#ff6f00',
-        P: lireCSS('--spe-vert')   || '#22c55e',
-        E: lireCSS('--den-violet') || '#8b5cf6'
+        P: lireCSS('--spe-vert')   || '#22c55e'
     };
 
     // Pratiques de notation (SOM/STD/SPE/DEN)
@@ -63,8 +62,7 @@ const COULEURS = (() => {
     // Corrélations r(X,P) — dérivées des indices (même palette, cohérence)
     const correlations = {
         AP: indices.A,
-        CP: indices.C,
-        EP: indices.E
+        CP: indices.C
     };
 
     return Object.freeze({

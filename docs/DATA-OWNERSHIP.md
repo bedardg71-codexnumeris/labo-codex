@@ -28,6 +28,10 @@
 | `portfoliosEleves` | NS | `portfolio.js` | indices, profil-etudiant | — | < 200 Ko |
 | `interventions` | NS | `interventions.js` | evaluation, trimestres | primo-modal | < 200 Ko |
 
+### Notes de schema
+
+- `evaluationsSauvegardees[i].actionsRLO` : `{reperage, liaison, ouverture, incertain, incomplet, inexact, total} | null` — peuple par `actions-rlo.js` au moment de `sauvegarderEvaluation()` si la preference `activerActionsRLO` est active. Absent si la preference est desactivee. `null` explicite si aucune annotation n'est resolue pour l'evaluation.
+
 ---
 
 ## Structure pedagogique (templates)
@@ -71,7 +75,7 @@
 | Cle | NS/G | Proprietaire | Lecteurs principaux | Notes |
 |-----|------|-------------|---------------------|-------|
 | `profilEnseignant` | G | `cc-license.js` | export-pdf, bibliotheques | Auteur pour metadonnees CC |
-| `preferencesAffichage` | G | `preferences-v2.js` | tous les modules UI | |
+| `preferencesUtilisateur` | G | `preferences.js` | tous les modules UI (via `obtenirPreference`/`definirPreference`) | Source unique pour 23 preferences (anciens `preferencesAffichage` + 5 champs de `modalitesEvaluation`). Migration V3 + nettoyage legacy automatiques. |
 | `modeApplication` | G | `modes.js` | tous les modules (via obtenirDonneesSelonMode) | `'normal'` ou `'anonymisation'` |
 | `cours` | G | `cours.js` | large usage (lookup cours) | Cle legacy `listeCours` = fallback |
 | `enseignants` | G | `enseignants.js` | export-pdf, primo-questions | |

@@ -145,34 +145,31 @@ const TOOLTIPS = {
     // =================================================================
 
     'pref-outils':
-        'Activer ou d\u00e9sactiver les fonctionnalit\u00e9s avanc\u00e9es (indices ACP, syst\u00e8me R\u00e0I). Les outils d\u00e9sactiv\u00e9s sont masqu\u00e9s de l\u2019interface.',
+        'Outils qui s\u2019activent pendant l\u2019\u00e9valuation d\u2019une production.',
 
     'pref-outils-acp':
-        'Indices pr\u00e9dictifs Assiduit\u00e9, Compl\u00e9tion, Performance. Calcul\u00e9s sur une fen\u00eatre glissante, ils alimentent le tableau de bord et la d\u00e9tection pr\u00e9coce des difficult\u00e9s.',
+        'Indices pr\u00e9dictifs Assiduit\u00e9, Compl\u00e9tion et Performance. Affich\u00e9s dans la section \u00ab Engagement ACP \u00bb du profil individuel.',
 
     'pref-outils-rai':
         'Niveaux d\u2019intervention et recommandations personnalis\u00e9es. Structure le soutien aux \u00e9tudiants en trois niveaux d\u2019intensit\u00e9 (universel, cibl\u00e9, intensif).',
 
-    'pref-affichage':
-        'Choisir les ressources visibles dans l\u2019interface : cartes SOLO, snapshots, graphiques, d\u00e9tails techniques, mode comparatif. Adapte la densit\u00e9 d\u2019information affich\u00e9e.',
-
     'pref-affichage-solo':
         'Affiche une carte avec les descriptions d\u00e9taill\u00e9es bas\u00e9es sur la taxonomie SOLO. Utile pour interpr\u00e9ter le niveau cognitif des apprentissages.',
 
-    'pref-affichage-snapshots':
-        'Historique hebdomadaire des indices A-C-P. Permet de suivre l\u2019\u00e9volution dans le temps.',
+    'pref-actions-rlo':
+        'Active l\u2019observation des gestes cognitifs Rep\u00e9rage, Liaison et Ouverture via des tampons pos\u00e9s sur les productions. Alimente le profil RLO agr\u00e9g\u00e9 par \u00e9valuation et l\u2019export de recherche anonymis\u00e9.',
 
     'pref-affichage-graphiques':
-        'Visualisation de la progression dans le temps via Chart.js.',
+        'Graphiques Chart.js de progression dans le temps. Affich\u00e9s dans la section \u00ab Progression temporelle ACP \u00bb du profil individuel.',
 
-    'pref-affichage-details':
-        'Affiche les formules de calcul et les donn\u00e9es brutes. Destin\u00e9 aux utilisateurs souhaitant v\u00e9rifier les calculs sous-jacents.',
+    'pref-affichage-developpement':
+        'Tableau de progression des crit\u00e8res et graphiques Chart.js 0-100 %. Affich\u00e9 dans la section \u00ab D\u00e9veloppement des habilet\u00e9s \u00bb du profil individuel.',
 
     'pref-affichage-assiduite':
         'Choisir comment afficher les totaux de pr\u00e9sence et d\u2019assiduit\u00e9 (ex. : en p\u00e9riodes).',
 
     'pref-affichage-comparatif':
-        'Mode exp\u00e9rimental. Affiche les deux pratiques de notation (SOM et PAN) c\u00f4te \u00e0 c\u00f4te pour comparer les approches.',
+        'Mode exp\u00e9rimental. Affiche les deux pratiques de notation (Sommative et PAN) c\u00f4te \u00e0 c\u00f4te dans les aper\u00e7us et le profil individuel.',
 
     'pref-visuel':
         'Effets visuels de l\u2019interface. L\u2019animation des points du tableau de bord peut \u00eatre d\u00e9sactiv\u00e9e pour r\u00e9duire les distractions.',
@@ -188,9 +185,6 @@ const TOOLTIPS = {
     // =================================================================
 
     // --- Configuration du depistage ---
-
-    'depist-activer-patterns':
-        'Activer ou d\u00e9sactiver l\u2019identification des tendances r\u00e9currentes (progression, stagnation, r\u00e9gression) dans les r\u00e9sultats.',
 
     'depist-grille':
         'Grille utilis\u00e9e pour identifier les forces et d\u00e9fis. Doit \u00eatre la m\u00eame pour tous les artefacts du trimestre.',
@@ -221,7 +215,7 @@ const TOOLTIPS = {
         'Seuils de couleur pour les indices A-C-P. Fragile (rouge), Acceptable (jaune), Bon (vert). D\u00e9termine les alertes du tableau de bord.',
 
     'depist-seuils-visuels':
-        'Activer ou d\u00e9sactiver l\u2019affichage des couleurs Fragile / Acceptable / Bon dans les tableaux et indicateurs.',
+        'Lignes pointill\u00e9es et \u00e9tiquettes de zones (Insuffisant / D\u00e9veloppement / Ma\u00eetrise / Excellent) sur les graphiques Chart.js de la section \u00ab Progression temporelle ACP \u00bb du profil individuel.',
 
     'depist-seuil-fragile':
         'Indice sous lequel la situation est consid\u00e9r\u00e9e pr\u00e9occupante (rouge). N\u00e9cessite une intervention.',
@@ -259,7 +253,7 @@ const TOOLTIPS = {
         'Snapshots de suivi longitudinal et export anonymis\u00e9 pour la recherche en \u00e9ducation.',
 
     'donnees-snapshots':
-        'Enregistre l\u2019\u00e9tat des indices A-C-P-E \u00e0 des moments cl\u00e9s pour le suivi longitudinal.',
+        'Enregistre l\u2019\u00e9tat des indices A-C-P \u00e0 des moments cl\u00e9s pour le suivi longitudinal.',
 
     'donnees-capturer':
         'Capture manuelle imm\u00e9diate de l\u2019\u00e9tat actuel des indices.',
@@ -271,7 +265,7 @@ const TOOLTIPS = {
         'Efface toutes les captures enregistr\u00e9es. Action irr\u00e9versible.',
 
     'donnees-export-recherche':
-        'Export anonymis\u00e9 des indices A-C-P-E et statistiques agr\u00e9g\u00e9es pour la recherche. Aucune donn\u00e9e nominative incluse.',
+        'Export anonymis\u00e9 des indices A-C-P et statistiques agr\u00e9g\u00e9es pour la recherche. Aucune donn\u00e9e nominative incluse.',
 
     // --- Maintenance ---
 
@@ -437,7 +431,7 @@ const TOOLTIPS = {
     // --- Section Observer ---
 
     'tdb-observer':
-        'Indices A-C-E-P du groupe. Chaque barre positionne les \u00e9tudiants de Fragile \u00e0 Tr\u00e8s favorable.',
+        'Indices A-C-P du groupe. Chaque barre positionne les \u00e9tudiants de Fragile \u00e0 Tr\u00e8s favorable.',
 
     'tdb-zones-couleur':
         'Fragile (30-49%), Mod\u00e9r\u00e9 (50-64%), Favorable (65-79%), Tr\u00e8s favorable (\u226580%). Seuils configurables dans R\u00e9glages.',
@@ -447,9 +441,6 @@ const TOOLTIPS = {
 
     'tdb-completion':
         'Taux de remise des travaux. La corr\u00e9lation C\u00d7P indique le lien entre remise et r\u00e9sultats.',
-
-    'tdb-engagement':
-        'Niveau d\u2019engagement dans les activit\u00e9s d\u2019apprentissage. Combine plusieurs signaux comportementaux.',
 
     'tdb-performance':
         'R\u00e9sultats aux \u00e9valuations par niveaux : Incomplet, en D\u00e9veloppement, Ma\u00eetris\u00e9, \u00c9tendu.',
@@ -471,7 +462,7 @@ const TOOLTIPS = {
         '\u00c9volution d\u2019un indice dans le temps pour tout le groupe. Chaque ligne = un \u00e9tudiant.',
 
     'tdb-selecteur-indice':
-        'Choisir l\u2019indice \u00e0 visualiser : Assiduit\u00e9, Compl\u00e9tion, Engagement ou Performance.',
+        'Choisir l\u2019indice \u00e0 visualiser : Assiduit\u00e9, Compl\u00e9tion ou Performance.',
 
     'tdb-selecteur-eleve-groupe':
         'Isoler la trajectoire d\u2019un \u00e9tudiant sp\u00e9cifique sur le graphique du groupe.',
@@ -503,7 +494,7 @@ const TOOLTIPS = {
     // =================================================================
 
     'liste-titre':
-        'Liste compl\u00e8te des \u00e9tudiants avec indices A-C-E-P, patterns et niveaux R\u00e0I. Filtrable et triable.',
+        'Liste compl\u00e8te des \u00e9tudiants avec indices A-C-P, patterns et niveaux R\u00e0I. Filtrable et triable.',
 
     'liste-filtres':
         'Filtrer par groupe, programme, niveau R\u00e0I ou pattern. Le champ recherche accepte nom, pr\u00e9nom ou DA.',
@@ -533,7 +524,7 @@ const TOOLTIPS = {
         'Choisir un \u00e9tudiant. Les boutons Pr\u00e9c./Suiv. parcourent la liste s\u00e9quentiellement.',
 
     'profil-nav-observations':
-        'Sept vues d\u2019observation : productions, engagement, progression, habilet\u00e9s, accompagnement, travaux, rapport.',
+        'Sept vues d\u2019observation : productions, mobilisation, progression, habilet\u00e9s, accompagnement, travaux, rapport.',
 
     // --- Vue Productions ---
 
@@ -543,13 +534,10 @@ const TOOLTIPS = {
     'profil-col-jeton':
         'Jeton de reprise : permet \u00e0 l\u2019\u00e9tudiant de reprendre un artefact pour am\u00e9liorer son r\u00e9sultat.',
 
-    // --- Vue Engagement ---
+    // --- Vue Mobilisation ---
 
-    'profil-engagement':
-        'Trois composantes (A, C, P) et calcul de l\u2019engagement E = \u221b(A \u00d7 C \u00d7 P). Barre de positionnement dans les zones.',
-
-    'profil-formule-engagement':
-        'E = \u221b(A \u00d7 C \u00d7 P). Moyenne g\u00e9om\u00e9trique : un indice tr\u00e8s bas tire l\u2019engagement vers le bas m\u00eame si les autres sont \u00e9lev\u00e9s.',
+    'profil-mobilisation':
+        'Vue d\u2019ensemble des composantes A et C : pr\u00e9sence en classe et remise des travaux. Indique comment l\u2019\u00e9l\u00e8ve se mobilise dans le cours.',
 
     // --- Vue Progression temporelle ---
 
@@ -930,7 +918,7 @@ const TOOLTIPS = {
         'Retour \u00e0 la page d\u2019accueil du syst\u00e8me.',
 
     'nav-tableau-bord':
-        'Vue d\u2019ensemble du groupe : indices A-C-E-P, patterns d\u2019apprentissage, niveaux R\u00e0I et profils individuels.',
+        'Vue d\u2019ensemble du groupe : indices A-C-P, patterns d\u2019apprentissage, niveaux R\u00e0I et profils individuels.',
 
     'nav-presences':
         'Suivi de l\u2019assiduit\u00e9 : statistiques de pr\u00e9sence, calendrier des s\u00e9ances et saisie des pr\u00e9sences.',
@@ -961,7 +949,7 @@ const TOOLTIPS = {
     // =================================================================
 
     'nav-apercu':
-        'Observer les indices A-C-E-P, les patterns, les niveaux R\u00e0I et le d\u00e9veloppement du groupe via des graphiques.',
+        'Observer les indices A-C-P, les patterns, les niveaux R\u00e0I et le d\u00e9veloppement du groupe via des graphiques.',
 
     // =================================================================
     // SOUS-NAVIGATION — Structure (Tier 5.7)
@@ -1012,7 +1000,7 @@ const TOOLTIPS = {
         'Saisir les pr\u00e9sences et absences pour chaque s\u00e9ance du groupe.',
 
     'nav-suivi-profil':
-        'Fiche individuelle d\u2019un \u00e9tudiant : productions, engagement, progression, habilet\u00e9s, accompagnement et rapport.',
+        'Fiche individuelle d\u2019un \u00e9tudiant : productions, mobilisation, progression, habilet\u00e9s, accompagnement et rapport.',
 
     'nav-suivi-interventions':
         'Planifier et documenter les interventions R\u00e0I de niveaux 2 (pr\u00e9ventif) et 3 (intensif).',
@@ -1060,10 +1048,10 @@ const TOOLTIPS = {
         'Personnaliser l\u2019interface : outils actifs, ressources affich\u00e9es, effets visuels et comportement de navigation.',
 
     'nav-reg-depistage':
-        'Configurer les seuils de d\u00e9tection des patterns et d\u2019interpr\u00e9tation des indices A-C-P.',
+        'Outils d\u2019observation des apprentissages (SOLO, Actions RLO) et configuration du d\u00e9pistage RàI (seuils de d\u00e9tection et d\u2019interpr\u00e9tation).',
 
     'nav-reg-donnees':
-        'Sauvegarde, restauration, snapshots A-C-P-E, export anonymis\u00e9, r\u00e9initialisation et maintenance.',
+        'Sauvegarde, restauration, snapshots A-C-P, export anonymis\u00e9, r\u00e9initialisation et maintenance.',
 
     'nav-reg-apropos':
         'Informations sur l\u2019application et sa version.'

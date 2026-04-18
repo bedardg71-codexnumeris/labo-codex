@@ -32,10 +32,9 @@ function afficherAccueilContenu(conteneur) {
     const demoChecked = enDemo || !aDesCoursReels;
 
     // Section toggle tooltips (miroir de Reglages > Preferences > Navigation)
-    const prefsAff = db.getSync('preferencesAffichage', {});
-    const tooltipsActifs = prefsAff.tooltips !== false;
-    const tourGuideActif = !!prefsAff.tourGuide;
-    const aideContextuelleActive = prefsAff.aideContextuelle !== false;
+    const tooltipsActifs = obtenirPreference('tooltips') !== false;
+    const tourGuideActif = !!obtenirPreference('tourGuide');
+    const aideContextuelleActive = obtenirPreference('aideContextuelle') !== false;
 
     const decouvrirHTML = `
         <div class="carte accordeon" id="accueil-decouvrir">
@@ -108,16 +107,6 @@ function afficherAccueilContenu(conteneur) {
 
     conteneur.innerHTML = `
         <div class="accueil-hero">
-            <div id="manifeste-accueil" style="font-style: italic; font-size: 0.82rem; line-height: 1.7; color: var(--texte-muted); max-width: 700px; margin: 0 auto 1.5rem; text-align: justify; position: relative;${db.getSync('manifeste-masque', false) ? ' display: none;' : ''}">
-                <button data-action="masquerManifeste" style="position: absolute; top: -2px; right: -2px; background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--texte-muted); opacity: 0.6; padding: 4px 8px; line-height: 1;" title="Fermer">&times;</button>
-                <p><strong>Labo Codex</strong> permet de donner un regard \u00e0 l\u2019enseignant\u00b7e sur sa propre pratique. C\u2019est un laboratoire d\u2019observation p\u00e9dagogique. L\u2019application capte les micro-donn\u00e9es d\u00e9j\u00e0 pr\u00e9sentes dans ta classe (pr\u00e9sences, remise de travaux, d\u00e9tails des \u00e9valuations) et les rend visibles et interpr\u00e9tables. Voir les conditions de ton \u00e9cosyst\u00e8me-classe te permet de mieux planifier tes interventions.</p>
-                <p style="margin-top: 0.6rem;">Il n\u2019y a aucune intelligence artificielle dans l\u2019application. Aucune d\u00e9cision n\u2019est prise \u00e0 ta place. Ton jugement professionnel est souverain. L\u2019outil ne fait que l\u2019\u00e9clairer.</p>
-                <p style="margin-top: 0.6rem;"><strong>\u00c0 quoi sert ce labo\u00a0?</strong> \u00c0 transformer les gestes que tu fais d\u00e9j\u00e0 (observer, annoter, \u00e9valuer) en micro-donn\u00e9es qui \u00e9clairent ton jugement professionnel. L\u2019application ne remplace pas ton regard sur tes \u00e9l\u00e8ves. Elle le rend plus pr\u00e9cis, plus continu, plus partageable.</p>
-                <p style="margin-top: 0.6rem;"><strong>Qu\u2019est-ce que \u00e7a change\u00a0?</strong> Le labo rend plus visibles des patterns\u00a0: un suivi nuanc\u00e9, une difficult\u00e9 r\u00e9currente, un progr\u00e8s qu\u2019une note seule ne montre pas. La diff\u00e9rence\u00a0: chaque geste laisse une trace utile. Chaque geste peut alimenter une boucle de r\u00e9troaction, autant pour ton \u00e9l\u00e8ve que pour toi. Tu interviens plus t\u00f4t, plus justement. La relation p\u00e9dagogique y gagne.</p>
-                <p style="margin-top: 0.6rem;"><strong>Qu\u2019est-ce que \u00e7a demande\u00a0?</strong> De faire d\u2019abord dans l\u2019application ce que tu faisais d\u00e9j\u00e0 sur papier. Le flux est le m\u00eame. Si tu souhaites exp\u00e9rimenter de nouvelles pratiques, l\u2019application est l\u00e0 pour te soutenir.</p>
-                <p style="margin-top: 0.6rem;"><strong>Labo Codex est un commun \u00e0 construire.</strong> Il est gratuit, son code est ouvert et il fonctionne hors ligne. Tes donn\u00e9es restent en s\u00e9curit\u00e9 chez toi. En retour, tu peux apporter ton exp\u00e9rience\u00a0: ce qui fonctionne, ce qui manque, ce que tu d\u00e9couvres. Chaque contexte disciplinaire apporte quelque chose de nouveau. En exp\u00e9rimentant ensemble, on peut faire avancer la r\u00e9flexion, l\u2019\u00e9valuation et l\u2019accompagnement au coll\u00e9gial.</p>
-                <p style="margin-top: 0.8rem; text-align: center; font-style: normal;"><a href="#" data-action="masquerManifeste" data-nav="aide" style="color: var(--accent-primaire); font-size: 0.8rem;">Retrouver ce texte dans Aide \u203A Introduction</a></p>
-            </div>
             <h1>${heroTitre}</h1>
         </div>
 
@@ -140,7 +129,7 @@ function afficherAccueilContenu(conteneur) {
                         </div>
                     </div>
                     <div class="accueil-carte" data-action="naviguerVersWizard">
-                        <div class="accueil-carte-icone">\uD83C\uDFA8</div>
+                        <div class="accueil-carte-icone"><img src="icons/icon-paint-palette.svg" alt="" class="outil-svg-icon" style="width:32px;height:32px;"></div>
                         <div class="accueil-carte-titre">Configurer ta pratique de notation</div>
                         <div class="accueil-carte-desc">
                             D\u00e9finis ce que tu mesures et comment tu le fais pour cr\u00e9er ta pratique de notation.
@@ -218,9 +207,7 @@ function afficherAccueilContenu(conteneur) {
  * Active ou désactive le mode expert (ouvrir direct sur tableau de bord)
  */
 function definirModeExpert(actif) {
-    const prefs = db.getSync('preferencesAffichage', {});
-    prefs.modeExpert = !!actif;
-    db.setSync('preferencesAffichage', prefs);
+    definirPreference('modeExpert', !!actif);
 }
 
 /**
@@ -231,8 +218,7 @@ function initialiserAccueil() {
     // Charger l'état du checkbox mode expert si la section réglages est présente
     const checkbox = document.getElementById('checkbox-mode-expert');
     if (checkbox) {
-        const prefs = db.getSync('preferencesAffichage', {});
-        checkbox.checked = !!prefs.modeExpert;
+        checkbox.checked = !!obtenirPreference('modeExpert');
     }
 }
 
@@ -297,18 +283,5 @@ window.toggleAideContextuelleHandler = toggleAideContextuelleHandler;
 window.naviguerAccueilCarte = naviguerAccueilCarte;
 window.naviguerVersWizard = naviguerVersWizard;
 window.ouvrirModalBackup = ouvrirModalBackup;
-
-/** Masquer le manifeste d'accueil (mémorisé), avec navigation optionnelle vers l'aide */
-window.masquerManifeste = function(e) {
-    var el = document.getElementById('manifeste-accueil');
-    if (el) el.style.display = 'none';
-    db.setSync('manifeste-masque', true);
-    // Si le lien « Aide › Introduction » est cliqué, naviguer vers la section
-    if (e && e.target && e.target.dataset && e.target.dataset.nav === 'aide') {
-        if (typeof window.naviguerVers === 'function') {
-            window.naviguerVers('aide', 'introduction');
-        }
-    }
-};
 
 })();

@@ -1043,7 +1043,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
         const config = {
             type: 'line',
             // 🆕 BETA 96: Utiliser le plugin gradient au lieu des annotations
-            plugins: [pluginGradientFond, pluginEtiquettesZones, pluginInterventionsIndiv],
+            plugins: [pluginGradientFond, ...(obtenirPreference('afficherSeuilsVisuels') !== false ? [pluginEtiquettesZones] : []), pluginInterventionsIndiv],
             data: {
                 labels: labels,
                 datasets: datasets
@@ -1290,7 +1290,7 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
         const config = {
             type: 'line',
             // 🆕 BETA 96: Utiliser le plugin gradient au lieu des annotations
-            plugins: [pluginGradientFond, pluginEtiquettesZones],
+            plugins: [pluginGradientFond, ...(obtenirPreference('afficherSeuilsVisuels') !== false ? [pluginEtiquettesZones] : [])],
             data: {
                 labels: labels,
                 datasets: [
@@ -1529,7 +1529,7 @@ const pluginNomEtudiantSurvolACP = {
 
         const estVerrouille = datasetVerrouilleACP >= 0;
         const nom = dataset.label || '';
-        const texteAffiche = estVerrouille ? `🔒 ${nom}` : nom;
+        const texteAffiche = estVerrouille ? `\u25C9 ${nom}` : nom;
         const x = dernierPoint.x + 10;
         const y = dernierPoint.y;
 
@@ -1799,7 +1799,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
         const config = {
             type: 'line',
             // 🆕 BETA 96: Utiliser le plugin gradient au lieu des annotations
-            plugins: [pluginGradientFond, ...(indice === 'P' ? [pluginEtiquettesZones] : []), pluginNomEtudiantSurvolACP],
+            plugins: [pluginGradientFond, ...(indice === 'P' && obtenirPreference('afficherSeuilsVisuels') !== false ? [pluginEtiquettesZones] : []), pluginNomEtudiantSurvolACP],
             data: {
                 labels: labels,
                 datasets: datasets
@@ -2312,7 +2312,7 @@ const pluginNomEtudiantSurvol = {
         // Dessiner le nom de l'étudiant à droite du dernier point
         const estVerrouille = datasetVerrouille >= 0;
         const nom = dataset.label || '';
-        const texteAffiche = estVerrouille ? `🔒 ${nom}` : nom;
+        const texteAffiche = estVerrouille ? `\u25C9 ${nom}` : nom;
         const x = dernierPoint.x + 10;
         const y = dernierPoint.y;
 
@@ -2877,7 +2877,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
         const config = {
             type: 'line',
             // 🆕 BETA 96: Utiliser le plugin gradient au lieu des annotations
-            plugins: [pluginGradientFond, pluginEtiquettesZones, pluginNomEtudiantSurvol, pluginTooltipsMultiples],
+            plugins: [pluginGradientFond, ...(obtenirPreference('afficherSeuilsVisuels') !== false ? [pluginEtiquettesZones] : []), pluginNomEtudiantSurvol, pluginTooltipsMultiples],
             data: {
                 labels: labels,
                 datasets: datasets
@@ -3708,7 +3708,7 @@ function creerGraphiqueCriteres(canvasId, da) {
         // Configuration du graphique
         const config = {
             type: 'line',
-            plugins: [pluginGradientFond100, pluginEtiquettesZones100, pluginInterventionsCriteres, pluginPointillesGaps],
+            plugins: [pluginGradientFond100, ...(obtenirPreference('afficherSeuilsVisuels') !== false ? [pluginEtiquettesZones100] : []), pluginInterventionsCriteres, pluginPointillesGaps],
             data: {
                 labels: donnees.labels,
                 datasets: datasets
@@ -4019,7 +4019,6 @@ function creerGraphiqueDistributionACPE(canvasId) {
         const valeursA = [];
         const valeursC = [];
         const valeursP = [];
-        const valeursE = [];
 
         etudiantsActifs.forEach(e => {
             // Indice A (Assiduité)
@@ -4032,7 +4031,7 @@ function creerGraphiqueDistributionACPE(canvasId) {
                 valeursA.push(A);
             }
 
-            // Indices C, P, E
+            // Indices C, P
             if (typeof obtenirIndicesCP === 'function') {
                 const indicesCP = obtenirIndicesCP(e.da);
                 if (indicesCP) {
@@ -4041,9 +4040,6 @@ function creerGraphiqueDistributionACPE(canvasId) {
                     }
                     if (indicesCP.P !== undefined && indicesCP.P > 0) {
                         valeursP.push(indicesCP.P / 100);
-                    }
-                    if (indicesCP.E !== undefined && indicesCP.E > 0) {
-                        valeursE.push(indicesCP.E);
                     }
                 }
             }
@@ -4054,14 +4050,12 @@ function creerGraphiqueDistributionACPE(canvasId) {
         const statsA = calculerStatistiques(valeursA);
         const statsC = calculerStatistiques(valeursC);
         const statsP = calculerStatistiques(valeursP);
-        const statsE = calculerStatistiques(valeursE);
 
         // Stocker toutes les stats et valeurs pour le plugin
         const statistiques = {
             A: { ...statsA, valeurs: valeursA },
             C: { ...statsC, valeurs: valeursC },
-            P: { ...statsP, valeurs: valeursP },
-            E: { ...statsE, valeurs: valeursE }
+            P: { ...statsP, valeurs: valeursP }
         };
 
 
@@ -4069,28 +4063,25 @@ function creerGraphiqueDistributionACPE(canvasId) {
         const courbeA = genererCourbeGauss(statsA.moyenne, statsA.ecartType);
         const courbeC = genererCourbeGauss(statsC.moyenne, statsC.ecartType);
         const courbeP = genererCourbeGauss(statsP.moyenne, statsP.ecartType);
-        const courbeE = genererCourbeGauss(statsE.moyenne, statsE.ecartType);
 
         // Créer les datasets des courbes
         const datasetsCourbes = [
             creerDatasetGauss('Assiduité (A)', courbeA, COULEURS_INDICES.A),
             creerDatasetGauss('Complétion (C)', courbeC, COULEURS_INDICES.C),
-            creerDatasetGauss('Performance (P)', courbeP, COULEURS_INDICES.P),
-            creerDatasetGauss('Engagement (E)', courbeE, COULEURS_INDICES.E)
+            creerDatasetGauss('Performance (P)', courbeP, COULEURS_INDICES.P)
         ].filter(d => d.data && d.data.length > 0);
 
         // Créer les datasets des points (étudiants individuels sur l'axe X)
         const datasetsPoints = [
             creerDatasetPoints('A', valeursA, COULEURS_INDICES.A),
             creerDatasetPoints('C', valeursC, COULEURS_INDICES.C),
-            creerDatasetPoints('P', valeursP, COULEURS_INDICES.P),
-            creerDatasetPoints('E', valeursE, COULEURS_INDICES.E)
+            creerDatasetPoints('P', valeursP, COULEURS_INDICES.P)
         ].filter(d => d.data && d.data.length > 0);
 
         // Combiner : courbes d'abord, puis points (alterner pour lier visibilité)
         // Format: [courbeA, pointsA, courbeC, pointsC, ...]
         const datasets = [];
-        const indicesLabels = ['A', 'C', 'P', 'E'];
+        const indicesLabels = ['A', 'C', 'P'];
         indicesLabels.forEach(indice => {
             const courbe = datasetsCourbes.find(d => d.label.includes(`(${indice})`));
             const points = datasetsPoints.find(d => d.label.startsWith(indice));
@@ -4099,7 +4090,7 @@ function creerGraphiqueDistributionACPE(canvasId) {
         });
 
         if (datasetsCourbes.length === 0) {
-            console.warn('[Distribution ACPE] Aucune donnée à afficher');
+            console.warn('[Distribution ACP] Aucune donnée à afficher');
             ctx.font = '14px Arial';
             ctx.fillStyle = couleurTexte();
             ctx.textAlign = 'center';
@@ -4118,8 +4109,8 @@ function creerGraphiqueDistributionACPE(canvasId) {
 
                 ctx.save();
 
-                const indices = ['A', 'C', 'P', 'E'];
-                const couleurs = [COULEURS_INDICES.A, COULEURS_INDICES.C, COULEURS_INDICES.P, COULEURS_INDICES.E];
+                const indices = ['A', 'C', 'P'];
+                const couleurs = [COULEURS_INDICES.A, COULEURS_INDICES.C, COULEURS_INDICES.P];
 
                 indices.forEach((indice, i) => {
                     const stats = statistiques[indice];
@@ -4164,8 +4155,8 @@ function creerGraphiqueDistributionACPE(canvasId) {
 
                 ctx.save();
 
-                const indices = ['A', 'C', 'P', 'E'];
-                const couleurs = [COULEURS_INDICES.A, COULEURS_INDICES.C, COULEURS_INDICES.P, COULEURS_INDICES.E];
+                const indices = ['A', 'C', 'P'];
+                const couleurs = [COULEURS_INDICES.A, COULEURS_INDICES.C, COULEURS_INDICES.P];
 
                 // Dessiner les lignes μ et σ
                 indices.forEach((indice, i) => {
@@ -4506,6 +4497,219 @@ function toggleCritereIndiv(critere, visible, da) {
     if (chartEstValide(chart)) chart.update('none');
 }
 
+/* ===============================
+   GRAPHIQUE ÉVOLUTION RLO (Beta 99.17)
+   Ratios Repérage/Liaison/Ouverture par artefact — spec SPEC-EXPORT-GRAPHIQUE-RLO.md
+   =============================== */
+
+const _chartsEvolutionRLO = {};
+
+/**
+ * Graphique d'évolution des gestes cognitifs (Repérage, Liaison, Ouverture).
+ *
+ * Trois séries en % (total cognitifs = 100%), axe X = artefacts ordonnés
+ * chronologiquement. Un trou d'annotation (`ratios: null`) s'affiche comme un
+ * point absent et les segments qui enjambent le trou sont pointillés.
+ *
+ * @param {string} canvasId
+ * @param {string} da
+ * @returns {Chart|null}
+ */
+function creerGraphiqueEvolutionRLO(canvasId, da) {
+    try {
+        if (typeof actionsRLO === 'undefined' ||
+            typeof actionsRLO.obtenirEvolutionRLOEtudiant !== 'function') return null;
+        const donnees = actionsRLO.obtenirEvolutionRLOEtudiant(da);
+        if (!donnees || !Array.isArray(donnees.artefacts) || donnees.artefacts.length === 0) return null;
+
+        const canvas = document.getElementById(canvasId);
+        if (!canvas || !canvas.parentNode) return null;
+        if (!canvas.offsetParent && canvas.offsetWidth === 0 && canvas.offsetHeight === 0) return null;
+
+        if (_chartsEvolutionRLO[da]) {
+            _chartsEvolutionRLO[da].destroy();
+            delete _chartsEvolutionRLO[da];
+        }
+        const existant = Chart.getChart(canvas);
+        if (existant) existant.destroy();
+
+        const artefacts = donnees.artefacts;
+        // Terme dépendant des réglages (artefact / production / travail / etc.)
+        const termeSing = typeof obtenirTermeProduction === 'function'
+            ? obtenirTermeProduction('singulier') : 'artefact';
+        const termePlurielMaj = typeof obtenirTermeProduction === 'function'
+            ? obtenirTermeProduction('pluriel', true) : 'Artefacts';
+        // Préfixe court pour les étiquettes de l'axe X : 3 premiers caractères + point
+        const prefixeCourt = termeSing.charAt(0).toUpperCase()
+            + termeSing.substring(1, 3).toLowerCase() + '.';
+        const labels = artefacts.map(function(a) { return prefixeCourt + ' ' + a.numero; });
+        const serie = function(cle) {
+            return artefacts.map(function(a) { return a.ratios ? a.ratios[cle] : null; });
+        };
+
+        // Palette distincte et compatible daltonisme : bleu, orange, vert-émeraude
+        const COULEUR_REPERAGE  = '#f59e0b'; // orange-gold : scanner, repérer
+        const COULEUR_LIAISON   = '#3b82f6'; // bleu : relier, articuler
+        const COULEUR_OUVERTURE = '#10b981'; // émeraude : ouvrir, transférer
+
+        const bordurePt = couleurBordurePoint();
+        const construireDataset = function(label, cle, couleur) {
+            return {
+                label: label,
+                data: serie(cle),
+                borderColor: couleur,
+                backgroundColor: 'transparent',
+                borderWidth: STYLE_LIGNE_EPAISSEUR,
+                tension: STYLE_LIGNE_TENSION,
+                pointRadius: STYLE_POINT_RAYON,
+                pointHoverRadius: STYLE_POINT_RAYON_HOVER,
+                pointBackgroundColor: couleur,
+                pointBorderColor: bordurePt,
+                pointBorderWidth: STYLE_POINT_BORDURE,
+                spanGaps: false
+            };
+        };
+
+        const datasets = [
+            construireDataset('Repérage',  'reperage',  COULEUR_REPERAGE),
+            construireDataset('Liaison',   'liaison',   COULEUR_LIAISON),
+            construireDataset('Ouverture', 'ouverture', COULEUR_OUVERTURE)
+        ];
+
+        // Plugin : segments pointillés pour traverser les trous d'observation
+        const pluginPointillesTrousRLO = {
+            id: 'pointillesTrousRLO',
+            afterDatasetsDraw: function(chart) {
+                const ctx2 = chart.ctx;
+                const xScale = chart.scales.x;
+                const yScale = chart.scales.y;
+                chart.data.datasets.forEach(function(ds, di) {
+                    const meta = chart.getDatasetMeta(di);
+                    if (meta.hidden) return;
+                    const data = ds.data;
+                    let dernierIdx = -1;
+                    for (let i = 0; i < data.length; i++) {
+                        if (data[i] == null) continue;
+                        if (dernierIdx >= 0 && i - dernierIdx > 1) {
+                            const x0 = xScale.getPixelForValue(dernierIdx);
+                            const y0 = yScale.getPixelForValue(data[dernierIdx]);
+                            const x1 = xScale.getPixelForValue(i);
+                            const y1 = yScale.getPixelForValue(data[i]);
+                            ctx2.save();
+                            ctx2.strokeStyle = ds.borderColor || '#999';
+                            ctx2.lineWidth = (ds.borderWidth || 2) * 0.7;
+                            ctx2.globalAlpha = 0.5;
+                            ctx2.setLineDash([6, 4]);
+                            ctx2.beginPath();
+                            ctx2.moveTo(x0, y0);
+                            ctx2.lineTo(x1, y1);
+                            ctx2.stroke();
+                            ctx2.restore();
+                        }
+                        dernierIdx = i;
+                    }
+                });
+            }
+        };
+
+        const ctx = canvas.getContext('2d');
+        const config = {
+            type: 'line',
+            plugins: [pluginPointillesTrousRLO],
+            data: { labels: labels, datasets: datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: { padding: { right: 15 } },
+                plugins: {
+                    title: { display: false },
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: couleurTexte(),
+                            usePointStyle: true,
+                            font: { size: 12 }
+                        }
+                    },
+                    tooltip: {
+                        ...STYLE_TOOLTIP,
+                        mode: 'nearest',
+                        intersect: true,
+                        callbacks: {
+                            title: function(items) {
+                                if (!items.length) return '';
+                                const a = artefacts[items[0].dataIndex];
+                                return a ? a.titre : '';
+                            },
+                            label: function(context) {
+                                const v = context.parsed.y;
+                                return v == null
+                                    ? context.dataset.label + ': —'
+                                    : context.dataset.label + ': ' + v.toFixed(1) + '%';
+                            },
+                            afterBody: function(items) {
+                                if (!items.length) return [];
+                                const a = artefacts[items[0].dataIndex];
+                                if (!a) return [];
+                                const lignes = [];
+                                if (a.niveauFinal) lignes.push('Niveau IDME : ' + a.niveauFinal);
+                                if (!a.observe) lignes.push('Non observé');
+                                return lignes;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: termePlurielMaj,
+                            color: couleurTexte(),
+                            font: { size: 12, weight: 'bold' }
+                        },
+                        ticks: {
+                            color: couleurTexte(),
+                            callback: function(value, index) {
+                                const a = artefacts[index];
+                                if (!a) return '';
+                                const base = prefixeCourt + ' ' + a.numero;
+                                return a.niveauFinal ? (base + ' (' + a.niveauFinal + ')') : base;
+                            },
+                            font: { size: 11 }
+                        },
+                        grid: { display: true, color: couleurGrille() }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Ratio sur gestes cognitifs',
+                            color: couleurTexte(),
+                            font: { size: 12, weight: 'bold' }
+                        },
+                        min: 0,
+                        max: 100,
+                        ticks: {
+                            color: couleurTexte(),
+                            stepSize: 20,
+                            callback: function(v) { return v + '%'; }
+                        },
+                        grid: { display: true, color: couleurGrille() }
+                    }
+                },
+                interaction: { mode: 'nearest', axis: 'xy', intersect: false }
+            }
+        };
+
+        const chart = new Chart(ctx, config);
+        _chartsEvolutionRLO[da] = chart;
+        return chart;
+    } catch (error) {
+        console.error('[creerGraphiqueEvolutionRLO] Erreur :', error);
+        return null;
+    }
+}
+
 // Exporter les fonctions pour utilisation globale
 window.toggleIndiceIndiv = toggleIndiceIndiv;
 window.toggleCritereIndiv = toggleCritereIndiv;
@@ -4521,6 +4725,7 @@ window.rafraichirGraphiqueSpaghetti = rafraichirGraphiqueSpaghetti;
 window.selectionnerEtudiantSpaghetti = selectionnerEtudiantSpaghetti;
 window.creerGraphiqueCriteres = creerGraphiqueCriteres;
 window.creerGraphiqueDistributionACPE = creerGraphiqueDistributionACPE;
+window.creerGraphiqueEvolutionRLO = creerGraphiqueEvolutionRLO;
 window.detruireGraphique = detruireGraphique;
 
 // Recréer les graphiques visibles lors d'un changement de thème
@@ -4538,6 +4743,14 @@ window.addEventListener('themeChanged', function() {
     }
     if (typeof rafraichirGraphiqueSpaghetti === 'function') {
         try { rafraichirGraphiqueSpaghetti(); } catch(e) { console.warn('[Graphiques] spaghetti refresh skipped (section not visible):', e.message || e); }
+    }
+    // Graphique évolution RLO : recréer si un canvas est actuellement dans le DOM
+    if (window.profilActuelDA) {
+        var canvasRLO = document.getElementById('graphique-evolution-rlo-' + window.profilActuelDA);
+        if (canvasRLO) {
+            try { creerGraphiqueEvolutionRLO(canvasRLO.id, window.profilActuelDA); }
+            catch(e) { console.warn('[Graphiques] evolutionRLO refresh skipped:', e.message || e); }
+        }
     }
 });
 

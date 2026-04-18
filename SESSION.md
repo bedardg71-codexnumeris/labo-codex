@@ -1,8 +1,227 @@
-# SESSION ACTIVE — BETA 99.11
+# SESSION ACTIVE — BETA 99.17
 
-**Date** : 11 avril 2026
-**Version** : Beta 99.11 (Build 0411-2010)
-**Statut** : Import/export MD alignement + refonte toolbar organisateur
+**Date** : 17 avril 2026
+**Version** : Beta 99.17 (Build 0417-1207)
+**Statut** : Chantier RLO étape 9 COMPLÈTE — export profilsRLO + graphique d'évolution + onglets + compaction
+**Branche** : `refonte-preferences-rlo`
+
+---
+
+## Bilan de la session (17 avril 2026, midi) — Chantier RLO étape 9 + UX Développement des habiletés
+
+**Build** : 0417-0830 → 0417-1207, Beta 99.17 (même journée)
+**Référence** : `SPEC-EXPORT-GRAPHIQUE-RLO.md` (17 avril 2026)
+**Fichiers modifiés** : `js/trimestres.js`, `js/actions-rlo.js`, `js/graphiques-progression.js`, `js/profil-etudiant.js`, `js/changelog-data.js`, `styles.css`, `index.html`, `js/init-inline.js`, `version.json`
+
+### Étape 9 — Export recherche `profilsRLO`
+
+- Nouveau helper `construireProfilsRLO(evaluations, productions, daVersAnonyme)` dans `trimestres.js`
+- Section `profilsRLO` insérée au même niveau que `observations` et `calculs` dans `exporterFormatRecherche()`
+- Structure par évaluation : `{id_etudiant (anonymisé), id_artefact, numero_artefact (ordre chronologique par date_echeance), type_artefact (titre production), niveau_final, observe (bool), actions: {gestes_cognitifs, gestes_en_difficulte, total_general}, ratios_cognitifs}` — ratios sur `gestes_cognitifs.total` (pas `total_general`)
+- Conditionnée au toggle `activerActionsRLO` : si OFF → section omise
+- Évaluations sans champ `actionsRLO` → ignorées (cohérent avec migration rétroactive)
+- `actionsRLO: null` → `observe: false`, `actions: null`, `ratios_cognitifs: null`
+
+### Graphique d'évolution des gestes cognitifs
+
+- Nouvelle fonction `obtenirEvolutionRLOEtudiant(da)` dans `actions-rlo.js` : série chronologique, priorité lecture LIVE (matche `agregerProfilRLOEtudiant`) avec fallback snapshot
+- Nouvelle fonction `creerGraphiqueEvolutionRLO(canvasId, da)` dans `graphiques-progression.js`
+- 3 lignes (Repérage orange, Liaison bleu, Ouverture émeraude) avec pointillés sur les trous d'observation
+- Tooltip titre = titre réel de la production, body avec niveau IDME
+- Axe X + tableau accessible utilisent `obtenirTermeProduction()` (plus de « Art. » ou « Artefacts » codés en dur)
+- Recréation au changement d'onglet (Chart.js rend 0px dans un parent caché)
+- Recréation au `themeChanged`
+- Conditions : toggle ON + `afficherGraphiques` ≠ false + ≥2 évaluations avec ratios calculables (`totalCog > 0`)
+
+### Onglets « Développement des habiletés »
+
+- 3 onglets : **Critères** (graphique critères × artefacts), **Forces et défis** (barres SRPNF + Consolidation), **Gestes cognitifs** (cumulatif + évolution + note)
+- Helper `genererOngletsDeveloppement(da, {criteres, forcesDefis, gestesCognitifs})`
+- Handler global `changerOngletDeveloppement(idOnglet, da)` via dispatcher `data-action`
+- Persistance localStorage `profilOngletDeveloppementActif` (défaut `criteres`)
+- Onglet « Gestes cognitifs » masqué si toggle RLO OFF
+- CSS dans `styles.css` (`.onglets-developpement*`), cibles tactiles ≥44px sur iPad
+- Refactor `_genererBarresSRPNF(da)` : ne rend plus le graphique critères (séparation propre)
+- Path 3 (portfolio) : extraction de la section Forces et défis inline vers le helper onglets
+
+### Compaction onglet Gestes cognitifs
+
+- Fusion des 2 cartes en un conteneur `bloc-rlo-conteneur` (sans cadre, séparateur `<hr>` entre les sections)
+- Barres cumulatif amincies : `height:18px → 10px`, radius `4px → 3px`, gap `6px → 4px`, libellé `0.85rem → 0.8rem`
+- Canvas évolution réduit : `340px → 260px`
+- Note discrète d'interprétation des données RLO (`genererNoteRLO(da)`) : `var(--texte-secondaire)`, italique, opacité 0.85, modes sombre/clair
+
+### Consolidation rapatriée
+
+- Helper `genererBlocConsolidation(da)` extrait
+- Retiré de l'onglet Accompagnement (commentaire de traçabilité laissé)
+- Ajouté en fin d'onglet Forces et défis (plus pertinent — c'est du développement des habiletés)
+
+### Suivi de l'apprentissage des fondamentaux retiré
+
+- Encadré `diagnostiquerSuiviApprentissage` retiré de `_genererBarresSRPNF`
+- Raison : recoupement partiel avec Consolidation, qui est plus complet (tous les critères, trajectoire complète vs fondamentaux + fenêtre 3 artefacts)
+- La fonction `diagnostiquerSuiviApprentissage(da)` reste disponible pour réinjection future dans Accompagnement
+
+### Changelog Beta 99
+
+- Item 1 (Actions RLO) enrichi : « visualisés en courbe d'évolution... + gestes cognitifs et en difficulté avec ratios »
+- Item 2 nouveau : onglets profil + Consolidation rapatriée
+- Items 5+6 (tri productions + import dpi) consolidés en un item Travaux
+- Total : 9 items
+
+### Tests recommandés (à valider par Grégoire)
+
+- Export recherche avec toggle OFF → pas de `profilsRLO` dans le JSON
+- Export avec toggle ON sans évaluation annotée → `profilsRLO: []`
+- Graphique d'évolution en modes sombre/clair, sur iPad
+- Changement d'onglet → graphiques Chart.js recréés correctement (Critères, Gestes cognitifs)
+- Persistance onglet actif entre visites du profil
+- Onglet « Gestes cognitifs » absent quand toggle RLO OFF
+- Bloc Consolidation dans Forces et défis (pas dans Accompagnement)
+
+### Plan RLO — étapes complètes
+
+- [x] Étape 4 — Migration IDs `contenu-*` → `action-*`
+- [x] Étape 5 — Toggle `activerActionsRLO`
+- [x] Étape 6 — Inscription automatique du champ `actionsRLO`
+- [x] Étape 7 — Migration rétroactive des évaluations historiques
+- [x] Étape 8 — Bloc Profil RLO dans Développement des habiletés
+- [x] **Étape 9 — Export `profilsRLO` + graphique d'évolution + onglets + compaction**
+
+---
+
+## Bilan de la session (17 avril 2026, matin 2) — RLO étape 7 (1 commit)
+
+**Build** : 0417-0810 → 0417-0830, Beta 99.17 (même journée)
+**Fichiers modifiés** : `js/actions-rlo.js`, `index.html` (cache-buster), `js/init-inline.js`, `version.json`
+
+### Étape 7 — Migration rétroactive
+
+- Nouvelle fonction `migrerActionsRLOEvaluations()` dans `js/actions-rlo.js`
+- Pure JS, exposée sur `window.actionsRLO.migrerActionsRLOEvaluations`
+- Parcourt `cle('evaluationsSauvegardees')` du trimestre actif
+- Appelle `agregerActionsRLO(ev)` pour chaque évaluation **sans** champ `actionsRLO`
+- Écrit `null` explicite quand pas d'annotation (distingue « pas de données » de « zéro geste »)
+- Conditionnée au toggle `activerActionsRLO` : early return sinon (pas de flag posé → re-tentera si l'utilisateur active plus tard)
+- Idempotente : flag per-trimestre `cle('migrationRLO_evals_v1_done')`
+- Hook démarrage via `db-ready` enregistré après celui de `migrerIdsActionsRLO` (ordre de chargement `travaux-outils.js` avant `actions-rlo.js` → ordre d'enregistrement des listeners → ordre d'exécution)
+
+### Architecture RLO complète après étape 7
+
+- Étape 4 : migration des IDs `contenu-*` → `action-*` (travaux-outils.js)
+- Étape 5 : toggle `activerActionsRLO` dans les préférences
+- Étape 6 : inscription automatique du champ `actionsRLO` à chaque sauvegarde
+- Étape 7 : enrichissement rétroactif des évaluations historiques
+- Invariant : toutes les évaluations du trimestre ont `'actionsRLO' in ev === true` après migration (avec le toggle actif), sans dualité « anciens / nouveaux régimes »
+
+### Tests recommandés (à valider par Grégoire)
+
+- Base contenant évaluations avant et après activation du toggle : les anciennes reçoivent `actionsRLO` (objet ou null), les nouvelles sont préservées (spread d'`evaluations[indexEval]` dans `sauvegarderEvaluationModifiee`)
+- Idempotence : `window.actionsRLO.migrerActionsRLOEvaluations()` ne change rien à la 2e exécution (flag posé)
+- Flag : après reload, `[actions-rlo] Migration rétroactive effectuée. Évaluations enrichies : 0` ne s'affiche plus (early return sur flag)
+- Toggle OFF : migration pas jouée, aucun champ ajouté
+- Toggle ON puis OFF : migration reste jouée (flag persiste), mais plus rien de nouveau ne s'écrit à la sauvegarde
+
+### Plan RLO — prochaines étapes
+
+- [ ] **Étape 8** — Section « Profil RLO » dans l'aperçu d'évaluation (visualisation in-app minimale)
+- [ ] **Étape 9** — Export `profilsRLO` dans `exporterFormatRecherche` (structure : gestes_cognitifs / gestes_en_difficulte séparés, ratios sur cognitifs uniquement)
+
+---
+
+## Bilan de la session (17 avril 2026) — RLO étape 6 + refonte réglages (8 commits)
+
+**Builds** : 0416-2105 → 0417-0810, Beta 99.16 → 99.17
+**Branche** : `refonte-preferences-rlo`
+**Fichiers créés** : `js/actions-rlo.js`
+**Fichiers modifiés** : evaluation.js, preferences.js, preferences-v2.js, profil-etudiant.js, graphiques-progression.js, index.html, tooltips-contenu.js, config.js, changelog-data.js, docs/DATA-OWNERSHIP.md, version.json, init-inline.js
+
+### Commits livrés
+
+1. **`d3c5b9e`** — Chantier RLO étape 6 : `agregerActionsRLO()` + inscription dans l'évaluation
+   - Nouveau module `js/actions-rlo.js` exposant `window.actionsRLO.agregerActionsRLO(evaluation)` (pure, sans dépendance UI)
+   - Chaîne : `travauxResolution.trouverFichierPourEvaluation` → `travauxStockage.obtenirAnnotationFichier` → `travauxExportPdf.compterAnnotationsDetailees` → filtrage des 6 IDs `action-*`
+   - Champ `actionsRLO` inscrit aux deux call sites (`sauvegarderEvaluation` ~l.2284 + `sauvegarderEvaluationModifiee` ~l.5944)
+   - Sémantique : toggle OFF → champ absent ; toggle ON sans annotation → `null` ; toggle ON avec annotation sans tampon → tous les compteurs à zéro ; tampons présents → comptes filtrés
+   - Ligne schéma ajoutée dans `docs/DATA-OWNERSHIP.md` sous `evaluationsSauvegardees`
+   - Décision (a) : fonction ciblée, pas générique. Pourra être généralisée si une autre catégorie est promue
+
+2. **`82063a6`** — Branchement des préférences mortes sur les rendus réels
+   - Diagnostic : 5 préférences affichaient des cases mais aucune n'était consultée au rendu
+   - Retrait : `afficherSnapshots` (doublon de `afficherGraphiques`), `afficherDetailsTechniques` (indices obsolètes E/R)
+   - Branchements : `depistageAcp` → section Engagement + item sidebar ; `afficherGraphiques` → section Progression + item sidebar ; `afficherSeuilsVisuels` → 5 graphiques Chart.js (`pluginEtiquettesZones`/`pluginEtiquettesZones100` conditionnels)
+   - Redirects fallback vers Productions si l'onglet actif devient caché au décochage
+   - Variables locales `engagementVisible`/`progressionVisible`/`developpementVisible` (évite shadowing de `window.afficherProgression`)
+
+3. **`06c9324`** — Réorganisation onglet Accompagnement + enrichissement descriptions
+   - Sous-navigation : `Dépistage` → `Accompagnement` (`config.js`)
+   - « Micro données ACP » déplacé vers carte « Outils d'observation »
+   - « Outils à exploiter » → « Outils de saisie » (ne contient plus que le chrono d'évaluation)
+   - Descriptions enrichies pour nommer l'écran affecté (ex. « Affiché dans la section "Engagement ACP" du profil individuel »)
+   - 6 tooltips mis à jour en cohérence
+
+4. **`ea4746f`** — Nouvelle préf « Développement des habiletés » + clarification des noms ACP
+   - Sidebar profil individuel : « Engagement » → « Engagement ACP », « Progression temporelle » → « Progression temporelle ACP », « Développement des habiletés et compétences » → « Développement des habiletés » (label court)
+   - Titres h2 alignés dans les 2 points de rendu (`changerSectionProfil` + render initial)
+   - Nouvelle préf `afficherDeveloppementHabiletes` (défaut `true`) : DEFAUTS, load/save, checkbox HTML, tooltip
+   - Gate complet : early return sur `genererSectionPerformance()`, masquage item sidebar, redirect fallback
+
+5. **`b22b8fb`** — Regroupement des outils d'observation dans l'onglet Accompagnement
+   - Suppression complète de la carte « Affichage des ressources »
+   - 3 items migrés vers « Outils d'observation » avec style pilule cohérent (fond bleu-pâle) : Graphiques d'évolution, Développement des habiletés, Unité d'affichage de l'assiduité
+   - Mode comparatif SOM/PAN isolé dans nouvelle carte « Mode expérimental » en bas de l'onglet Préférences (fond jaune-attention conservé)
+   - Description de « Outils d'observation » reformulée pour couvrir les nouveaux items
+
+6. **`8b519aa`** — Imbrication « Unité d'affichage de l'assiduité » dans « Micro données ACP »
+   - Le select devient sous-option visuelle de la pilule ACP (indentation + style allégé)
+   - Libellé précisé « Unité d'affichage de l'assiduité (A) » pour rappeler l'indice concerné
+
+(+ le commit présent qui met à jour SESSION.md et le changelog)
+
+### Architecture RLO en place après étape 6
+
+- Toggle `activerActionsRLO` dans `preferencesUtilisateur` (désactivé par défaut)
+- IDs migrés `contenu-*` → `action-*` avec migration idempotente des annotations (`migrerIdsActionsRLO`, flag `migrationRLO_ids_v1_done`)
+- Module d'agrégation : `js/actions-rlo.js` (pure, réutilisable pour la migration rétroactive et l'export)
+- Inscription automatique du champ `actionsRLO` sur chaque sauvegarde d'évaluation quand le toggle est actif
+- Schéma : `{reperage, liaison, ouverture, incertain, incomplet, inexact, total} | null`
+- Documenté dans `docs/DATA-OWNERSHIP.md`
+
+### Plan RLO — prochaines étapes
+
+- [ ] **Étape 7** — Migration rétroactive des évaluations historiques
+- [ ] **Étape 8** — Section « Profil RLO » dans l'aperçu d'évaluation (visualisation in-app minimale)
+- [ ] **Étape 9** — Export `profilsRLO` dans `exporterFormatRecherche` (structure : gestes_cognitifs / gestes_en_difficulte séparés, ratios sur cognitifs uniquement)
+
+### Contexte pour la prochaine session — Étape 7
+
+**Objectif** : enrichir toutes les évaluations existantes avec le champ `actionsRLO`, pour éliminer la dualité « anciens/nouveaux régimes » de données. Permet à l'étape 9 (export) de lire directement le champ sans branche de recalcul à la volée.
+
+**Implémentation suggérée** :
+- Étendre `js/actions-rlo.js` avec une fonction `migrerActionsRLOEvaluations()` idempotente
+- Parcourt toutes les évaluations via `db.getSync(cle('evaluationsSauvegardees'), [])`
+- Pour chaque évaluation **sans** champ `actionsRLO` (ou marqué pour re-calcul), appelle `agregerActionsRLO(evaluation)` et écrit le résultat
+- Les évaluations sans annotation reçoivent `actionsRLO: null` explicite
+- Conditionner la migration au toggle : ne rien faire si `activerActionsRLO !== true` (cohérent avec l'étape 6)
+- Flag : `migrationRLO_evals_v1_done` dans localStorage (protection idempotence)
+- S'exécute au démarrage, **après** `migrerIdsActionsRLO` (chaîne de migration)
+
+**Décisions déjà tranchées** :
+- Option A+B combinée : on migre toutes les évaluations (pas seulement les nouvelles)
+- Distinction explicite « pas de données » (null) vs « zéro geste observé » (compteurs à zéro)
+- Le toggle OFF désactive complètement l'observation : ne pas polluer les évaluations si l'utilisateur n'a pas opté
+
+**Tests recommandés** :
+- Sur une base contenant évaluations avant et après activation du toggle : la migration enrichit les anciennes sans écraser les nouvelles
+- Idempotence : relancer la migration manuellement ne change rien
+- Flag : après reload, la migration ne rejoue pas
+
+### État branche
+- Branche : `refonte-preferences-rlo` (dérivée de main au 16 avril 2026)
+- 15 commits sur la branche (7 avant aujourd'hui + 8 aujourd'hui)
+- Tous testés fonctionnellement par Grégoire
+- Push prévu en fin de session
 
 ---
 

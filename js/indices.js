@@ -1,11 +1,11 @@
 /* ===============================
-   MODULE: INDICES A-C-P-E (CENTRALISÉ)
+   MODULE: INDICES A-C-P (CENTRALISÉ)
    Beta 98.4 - Refacto indice A (#224)
 
    Regroupe les fonctions de LECTURE, CALCUL et UTILITAIRES
-   des indices A-C-P-E, précédemment dispersées dans :
+   des indices A-C-P, précédemment dispersées dans :
    - profil-etudiant.js (calculerTousLesIndices, calculerPerformancePAN)
-   - apercu-contenu.js (calculerIndicesEtudiant, calculerCorrelationPearson, determinerNiveauEngagement)
+   - apercu-contenu.js (calculerIndicesEtudiant, calculerCorrelationPearson)
    - etudiants.js (calculerCorrelationPearson - doublon)
    - portfolio.js (obtenirIndicesCP, obtenirHistoriqueIndicesCP)
 
@@ -86,27 +86,6 @@ function calculerCorrelationPearson(x, y) {
 
     // Calculer r
     return numerateur / Math.sqrt(denomX * denomY);
-}
-
-/**
- * Détermine le niveau d'engagement selon les seuils
- *
- * Seuils (échelle positive, inversée par rapport au risque):
- * - Très favorable: ≥ 0.80
- * - Favorable: 0.65 - 0.79
- * - Modéré: 0.50 - 0.64
- * - Fragile: 0.30 - 0.49
- * - Insuffisant: < 0.30
- *
- * @param {number} engagement - Indice d'engagement (0-1)
- * @returns {string} Niveau d'engagement
- */
-function determinerNiveauEngagement(engagement) {
-    if (engagement >= 0.80) return 'très favorable';
-    if (engagement >= 0.65) return 'favorable';
-    if (engagement >= 0.50) return 'modéré';
-    if (engagement >= 0.30) return 'fragile';
-    return 'insuffisant';
 }
 
 /* ===============================
@@ -377,10 +356,10 @@ function calculerAssiduitePourAffichage(da, dateStr, periodesSeanceActuelle) {
  * Récupère les indices C et P actuels pour un étudiant (synchrone)
  *
  * NOUVELLE STRUCTURE (Beta 95.5) :
- * { date, pratique, C, P, E, details }
+ * { date, pratique, C, P, details }
  *
  * RÉTROCOMPATIBILITÉ : Si paramètre 'pratique' fourni (ancienne API),
- * retourne { C, P, E, details } directement.
+ * retourne { C, P, details } directement.
  *
  * @param {string} da - Numéro DA de l'étudiant
  * @param {string} pratique - (Déprécié) Ignoré en Beta 95.5
@@ -398,7 +377,6 @@ function obtenirIndicesCP(da, pratique = null) {
         return {
             C: actuel.C || 0,
             P: actuel.P || 0,
-            E: actuel.E || 0,
             details: actuel.details || {}
         };
     }
@@ -412,7 +390,7 @@ function obtenirIndicesCP(da, pratique = null) {
  *
  * @param {string} da - Numéro DA de l'étudiant
  * @param {string} pratique - (Déprécié) Ignoré en Beta 95.5
- * @returns {Array} - [{ date, pratique, C, P, E, details }, ...]
+ * @returns {Array} - [{ date, pratique, C, P, details }, ...]
  */
 function obtenirHistoriqueIndicesCP(da, pratique = null) {
     // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
@@ -425,7 +403,6 @@ function obtenirHistoriqueIndicesCP(da, pratique = null) {
             date: entree.date,
             C: entree.C || 0,
             P: entree.P || 0,
-            E: entree.E || 0,
             details: entree.details || {}
         }));
     }
@@ -500,8 +477,7 @@ function calculerPerformancePAN(da) {
  *   A: 85,              // % assiduité
  *   C: 67,              // % complétion (selon pratique)
  *   P: 72,              // % performance (selon pratique)
- *   M: 0.760,           // Mobilisation (composite)
- *   E: 0.781,           // Engagement (composite, racine cubique)
+ *   M: 0.760,           // Mobilisation (composite, (A+C)/2)
  *   pratique: 'SOM'     // Pratique utilisée pour le calcul
  * }
  */
@@ -527,17 +503,15 @@ function calculerTousLesIndices(da, pratique = null) {
         pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
     }
 
-    // INDICES C, P, E : Lire depuis indicesCP (Single Source of Truth)
+    // INDICES C, P : Lire depuis indicesCP (Single Source of Truth)
     let C = 0;
     let P = 0;
-    let E = 0;
 
     if (typeof obtenirIndicesCP === 'function') {
         const indicesCP = obtenirIndicesCP(da, pratique);
         if (indicesCP) {
             C = indicesCP.C / 100;
             P = indicesCP.P / 100;
-            E = indicesCP.E !== undefined ? indicesCP.E : 0;
         } else {
             // Fallback : calculer à la volée si pas encore généré
             console.warn(`⚠️ indicesCP non trouvé pour ${da} (${pratique}) - Calcul à la volée`);
@@ -546,8 +520,6 @@ function calculerTousLesIndices(da, pratique = null) {
                 C = taux !== null ? taux / 100 : 0;
             }
             P = calculerPerformancePAN(da);
-            const E_brut = A * C * P;
-            E = Math.cbrt(E_brut);
         }
     } else {
         // Fallback : fonctions anciennes si module pas chargé
@@ -557,8 +529,6 @@ function calculerTousLesIndices(da, pratique = null) {
             C = taux !== null ? taux / 100 : 0;
         }
         P = calculerPerformancePAN(da);
-        const E_brut = A * C * P;
-        E = Math.pow(E_brut, 1/3);
     }
 
     // INDICES COMPOSITES
@@ -569,7 +539,6 @@ function calculerTousLesIndices(da, pratique = null) {
         C: Math.round(C * 100),
         P: Math.round(P * 100),
         M: parseFloat(M.toFixed(3)),
-        E: parseFloat(E.toFixed(3)),
         pratique: pratique
     };
 }
@@ -596,7 +565,7 @@ function calculerIndicesEtudiant(da, _cacheIndicesA, _cacheIndicesCP) {
     let indicesSOM = null;
 
     if (estNouveauFormat) {
-        indicesSOM = { C: indicesCPEtudiant.C, P: indicesCPEtudiant.P, E: indicesCPEtudiant.E };
+        indicesSOM = { C: indicesCPEtudiant.C, P: indicesCPEtudiant.P };
     } else if (indicesCPEtudiant) {
         indicesSOM = indicesCPEtudiant.SOM || null;
     }
@@ -609,11 +578,9 @@ function calculerIndicesEtudiant(da, _cacheIndicesA, _cacheIndicesCP) {
         assiduite: (typeof assiduiteSommatif === 'object') ? assiduiteSommatif.indice : (assiduiteSommatif || 0),
         completion: indicesSOM ? indicesSOM.C / 100 : 0,
         performance: indicesSOM ? indicesSOM.P / 100 : 0,
-        engagement: indicesSOM && indicesSOM.E !== undefined ? indicesSOM.E : 0,
         nombreSeances: nombreSeances,
         nombreEvaluations: nombreEvals
     };
-    sommatif.niveauEngagement = determinerNiveauEngagement(sommatif.engagement);
 
     // Rétrocompat : alternatif pointe vers sommatif
     return { sommatif: sommatif, alternatif: sommatif };
@@ -623,7 +590,6 @@ function calculerIndicesEtudiant(da, _cacheIndicesA, _cacheIndicesCP) {
    EXPORTS WINDOW
    =============================== */
 window.calculerCorrelationPearson = calculerCorrelationPearson;
-window.determinerNiveauEngagement = determinerNiveauEngagement;
 window.obtenirIndicesCP = obtenirIndicesCP;
 window.obtenirHistoriqueIndicesCP = obtenirHistoriqueIndicesCP;
 window.calculerPerformancePAN = calculerPerformancePAN;
