@@ -25,11 +25,12 @@ function afficherAccueil() {
  * Contenu de la page d'accueil : 3 accordéons + utilitaires
  */
 function afficherAccueilContenu(conteneur) {
-    // Checkbox démo : activée si en mode démo, ou par défaut si aucun cours réel
+    // A.14 — La checkbox reflète strictement l'état réel du mode démo.
+    // Avant, pour un nouvel utilisateur sans cours réels, la case était
+    // cochée par défaut alors que le mode démo n'était pas activé : l'état
+    // visible ne correspondait pas au comportement de l'app.
     const enDemo = typeof estEnModeDemo === 'function' && estEnModeDemo();
-    const listeCours = db.getSync('cours', null) || db.getSync('listeCours', []);
-    const aDesCoursReels = listeCours.some(c => !c.isDemo && !c.estDemo);
-    const demoChecked = enDemo || !aDesCoursReels;
+    const demoChecked = enDemo;
 
     // Section toggle tooltips (miroir de Reglages > Preferences > Navigation)
     const tooltipsActifs = obtenirPreference('tooltips') !== false;
