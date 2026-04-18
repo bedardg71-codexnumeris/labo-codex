@@ -230,9 +230,22 @@ Explicitement **non inclus** dans ce chantier :
 
 | Phase | État | Commit | Notes |
 |---|---|---|---|
-| Phase 1 — Composant + 1 flèche pilote | À faire | — | |
-| Phase 2 — Six flèches restantes | À faire | — | |
-| Phase 3 — Refonte page d'accueil | À faire | — | |
-| Phase 4 — Documentation | À faire | — | |
+| Phase 1 — Composant + 1 flèche pilote | ✅ fait | `282b834` b0418-1938 | js/fleches-didactiques.js + css/fleches-didactiques.css + événement sectionAffichee dans navigation.js. Flèche pilote : contexte-pratiques-nouvelle. |
+| Phase 2 — Six flèches restantes | ✅ fait | `98675da` b0418-1941 | 6 entrées ajoutées au catalogue : grilles, échelles, cartouches, productions, présences première saisie, tampons (via #btn-toggle-tampons). |
+| Phase 3 — Refonte page d'accueil | ✅ fait | `eb2d1ab` b0418-1944 | Accordéon « Parcours guidé » (id #accueil-parcours-guide) : 5 toggles + panneau parcours intégré. Phrase d'intention. |
+| Phase 4 — Documentation | ✅ fait | — | SESSION.md, MEMORY.md, plan à jour. |
 
 Mise à jour : au fil des commits.
+
+## Retour terrain attendu
+
+Après livraison, valider sur iPad Safari :
+1. Page d'accueil : accordéon « Parcours guidé » visible, ouvert par défaut si c'est le comportement global des accordéons. Contenu cohérent.
+2. Activer la démo → naviguer vers Contexte → Pratiques de notation : flèche apparaît sur « Nouvelle pratique ». Tap → flèche disparaît, ne revient plus au rechargement.
+3. Répéter pour Grilles, Échelles, Cartouches, Productions → idem.
+4. Suivi → Saisie : flèche pointe le premier input de périodes si étudiants présents.
+5. Évaluations → Annoter : flèche pointe le bouton tampons.
+6. Désactiver le toggle « Flèches didactiques » dans Parcours guidé → aucune flèche n'apparaît plus. Réactivation : les flèches non encore vues reviennent.
+7. Mode clair + mode sombre : contraste et lisibilité OK.
+
+Si des sélecteurs de cible s'avèrent incorrects ou des messages sont jugés peu clairs, corriger dans le catalogue `FLECHES_CATALOGUE` en tête de `js/fleches-didactiques.js`.
