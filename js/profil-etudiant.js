@@ -224,7 +224,10 @@ function obtenirGrilleReferenceDepistage() {
     const grilleId = obtenirPreference('grilleReferenceDepistage');
 
     if (!grilleId) {
-        console.warn('⚠️ Aucune grille de référence configurée pour le dépistage');
+        if (!window._avertiGrilleAbsente) {
+            console.warn('⚠️ Aucune grille de référence configurée pour le dépistage');
+            window._avertiGrilleAbsente = true;
+        }
         return null;
     }
 
@@ -4264,7 +4267,10 @@ function calculerMoyennesCriteres(da) {
     // Lire la grille de référence configurée
     const grille = obtenirGrilleReferenceDepistage();
     if (!grille || !grille.criteres || grille.criteres.length === 0) {
-        console.warn('⚠️ Pas de grille de référence - calcul moyennes impossible');
+        if (!window._avertiGrilleMoyennes) {
+            console.warn('⚠️ Pas de grille de référence - calcul moyennes impossible');
+            window._avertiGrilleMoyennes = true;
+        }
         return null;
     }
 
