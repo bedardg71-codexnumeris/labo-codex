@@ -1,169 +1,141 @@
-# SESSION ACTIVE — BETA 99.18 (18 avril 2026)
+# SESSION ACTIVE — BETA 99.18 (18 avril 2026, soir)
 
 **Date** : 18 avril 2026
-**Version** : Beta 99.18 (Build 0418-1610)
-**Statut** : Chantier onboarding Phase A en cours — 10 sous-points livrés, 3 en attente, 1 pure investigation
-**Branche** : `main` (merge depuis `refonte-preferences-rlo` ce matin)
+**Version** : Beta 99.18 (Build 0418-1746)
+**Statut** : Chantier onboarding Phase A — démo fonctionnelle de bout en bout, trois bugs non démo restent (b, c, d)
+**Branche** : `main`
 
 ---
 
 ## 0. Contexte pour reprendre sans rien perdre
 
-**Mot d'ordre absolu de l'utilisateur** : pas de dette technique, on règle tout en profondeur, on ne repousse pas au backlog, on documente, on commit régulièrement. Reprise possible à tout moment.
+**Mot d'ordre absolu** : pas de dette technique, on règle tout en profondeur, pas de backlog différé. Tests sur iPad Safari (cas d'usage terrain enseignant). Pas de serveur local — deploy Netlify via `git push origin main`, rechargement sur l'iPad.
 
-**Plateforme prioritaire** : iPad Safari (cas d'usage terrain de l'enseignant). Mac uniquement pour dev local. L'utilisateur n'a pas de serveur local, il teste directement sur le site déployé via Netlify (push main → deploy automatique).
-
-**Workflow de test** :
+**Workflow de commit** :
 1. Fix en local
-2. Bump `version.json` (Build MMJJ-HHMM Toronto, beta reste 99.18 pour la journée)
-3. Bump `js/init-inline.js` VERSION_MAJEURE + BUILD_ID
-4. Commit avec message descriptif
+2. Bump `version.json` (build MMJJ-HHMM Toronto, beta reste 99.18 tant qu'on est le 18 avril)
+3. Bump `js/init-inline.js` ligne 132-133 (VERSION_MAJEURE + BUILD_ID)
+4. Commit descriptif avec Co-Authored-By
 5. Push origin main → Netlify déploie
-6. L'utilisateur recharge sur iPad (Safari privé recommandé pour fresh state)
-7. L'utilisateur publie observations + captures dans `Audit UX/LOG UX 18 avril.txt` + `IMG_XXXX.PNG`
 
-**Cache** : `_headers` Netlify force revalidation sur tous les JS/CSS/JSON. Plus de problème de stale cache.
+**Cache** : `_headers` Netlify force revalidation. Pas de problème stale.
 
----
-
-## 1. Le plan de travail de référence
-
-**`plans de travail/PLAN-ONBOARDING-NOUVEL-UTILISATEUR.md`** — plan modulaire en 4 phases :
-- Phase A Correctifs techniques (en cours, ci-dessous)
-- Phase B Refonte flux premier contact (pas commencée)
-- Phase C Désamorçage jargon (pas commencée)
-- Phase D Révision hubs Parcourir/Piloter (pas commencée, nécessite décision utilisateur)
-
-Le plan a un tableau de suivi en bas qu'il faut tenir à jour. Les décisions conceptuelles (A.11 détails, hubs D.2) sont à valider avec l'utilisateur avant implémentation.
+**Instrumentation active** : logs `[DEMO-TRACE]` dans `donnees-demo.js` et `trimestre-v2.js` — trace chaque étape de `entrerEnDemo` → `chargerDonneesDemo` → `fusionnerDonneesDemo` et chaque dropdown (trimestre, cours, groupe, horaire, enseignant). À retirer quand le chantier démo est verrouillé.
 
 ---
 
-## 2. Livré aujourd'hui (10 correctifs, 5 commits)
+## 1. Ce qui a été livré ce soir (5 commits, tous poussés)
 
-| Point | Description | Commit |
+| Commit | Build | Description |
 |---|---|---|
-| A.2 | Modale migration iPad : contenu scrollable + footer fixe | `ab64433` |
-| A.2-bis | Modale bienvenue : même traitement iPad (styles.css) | `80c3784` |
-| A.3 | Démo : écrire cours vers clé canonique `cours` + entité enseignant `ENS_DEMO` | `b4456fc` |
-| A.8 | Détection migration legacy resserrée aux clés de contenu utilisateur | `80c3784` |
-| A.9 | Dropdown « Choisir pour modifier » : appel complet `initialiserTrimestreV2()` depuis navigation.js | `01ceb73` |
-| A.10 | Modale bienvenue : renommage Monitorage → Labo Codex, sous-titre + intro ajustés | `2b56216` |
-| A.11 | Modale bienvenue : refonte selon décisions utilisateur (Découvrir/Parcourir, progression, émojis alignés, retrait repères) | `01ceb73` |
-| A.12 | Formulaire nouveau groupe-cours : message d'aide démo bleu | `01ceb73` |
-| A.13 | Marqueur « (démo) » sur options Horaires et Enseignants quand `isDemo` | `01ceb73` |
-| A.14 | Checkbox « Données de démonstration » reflète strictement l'état réel (plus de faux checked) | `959f945` |
+| `20d29e8` | 0418-1624 | Instrumentation [DEMO-TRACE] : logs à chaque étape du chargement démo |
+| `5d4e26b` | 0418-1717 | Fix GC_DEMO.groupeNum paddé ('0demo') + HOR_DEMO.groupeAssocie='0demo' — les dropdowns Groupe et Horaire du formulaire GC ne restaient plus vides au 1er rendu |
+| `8b5717b` | 0418-1728 | Marqueurs « (démo) » ajoutés aux sélecteurs latéraux Horaire / Enseignant / Groupe étudiants |
+| `524171e` | 0418-1738 | HOR_DEMO.seances utilisent `heureDebut`/`heureFin` (au lieu de `debut`) + `entrerEnDemo` pose `cle('horaireSelectionne')='HOR_DEMO'` |
+| `28477fc` | 0418-1746 | Trimestre Démonstration visible dans le dropdown en mode démo (filtre `mode=normal` ne s'applique plus si `estEnModeDemo()`). Groupe étudiants `0demo` pré-sélectionné via `cle('groupeSelectionne')` |
 
-**Build final du jour** : `0418-1610`, poussé sur origin/main.
+**Bilan démo** : le nouvel utilisateur qui clique **Découvrir** voit maintenant toutes les sections Contexte avec les données démo **pré-sélectionnées** et **marquées « (démo) »** sans double-clic, sans action intermédiaire.
+
+Captures de validation dans `Audit UX/` : IMG_6060 → IMG_6073.
 
 ---
 
-## 3. En cours / en attente
+## 2. Bugs non démo encore ouverts (ordre de traitement : b → c → d)
 
-### A.5 — Info-bulles intermittentes 🔴 bloquant, non démarré
+### b) 🟠 Bruit console — mémoïser les warnings en boucle
 
-Investigation profonde requise. L'utilisateur rapporte que les info-bulles fonctionnent un moment (Aperçu) puis cessent (après navigation Structure). Hypothèse : event listeners perdus au re-render.
+Le trace de session 18 avril montre ces messages loggés par centaines :
+- `[Modes] Aucune pratique définie, utilisation par défaut: sommative` (modes.js ligne 1151) — ~150 répétitions
+- `⚠️ Aucune grille de référence configurée pour le dépistage` (profil-etudiant.js ligne 227) — ~100 répétitions
+- `⚠️ Pas de grille de référence - calcul moyennes impossible` (profil-etudiant.js ligne 4267) — ~100 répétitions
 
-**Comment reprendre** : reproduire la séquence Aperçu → profil → Structure → tenter tooltip. Tracer dans `init-inline.js` ou le module tooltips (à localiser). Fix à la racine, pas de rustine polling.
+Chacun est appelé dans une boucle (probablement 1 par étudiant × évaluation). Le fix est de mémoïser : avertir une seule fois par session, puis silencer.
 
-### A.15 — Erreurs console 🟠 important, non démarré
+**Approche** : flag `window._avertiPratiqueParDefaut = false` / `window._avertiGrilleAbsente = false`, check avant `console.warn`, set à `true` au premier log.
 
-Observées au dernier log 15:55 :
-- **CSP bloque Cloudflare Insights** : `static.cloudflareinsights.com/beacon.min.js` rejeté. Cloudflare injecte ce beacon automatiquement, il faut soit l'ajouter à `script-src` CSP, soit le désactiver côté Cloudflare.
-- **Script inline bloqué à « ligne 16619 »** : en réalité c'est `</html>`. C'est probablement Cloudflare qui tente d'injecter son beacon inline. Même racine que l'erreur précédente.
-- **version.json 403** : anormal, à investiguer (peut-être une règle Cloudflare Access ou Page Rule bloque).
-- **Source maps 404** (jspdf, chart.umd) : non-critique, on peut ajouter fichiers `.map` ou désactiver source maps.
-- **Images aide 404** (plusieurs `.png` dans section Aide) : fichiers manquants du déploiement.
+### c) 🟡 Incohérence `trimestreActif` storage / `.actif=true`
 
-**Comment reprendre** : `CSP` est dans `index.html` ligne 6. Décider ajout `static.cloudflareinsights.com` ou désactivation Cloudflare Insights. version.json 403 : tester en curl, vérifier `_headers` et règles Cloudflare.
+Dans la trace, `db.getSync('trimestreActif')` renvoie `""` alors que `demo-actif=true` et que le trimestre démo a bien `actif=true` dans l'array `trimestres`. `obtenirTrimestreActif()` lit le `.actif` du tableau, ce qui marche, mais la clé directe `trimestreActif` n'est jamais synchronisée.
 
-### A.16 — Parcourir : flux inabouti 🟠 important, non démarré
+Ne casse rien aujourd'hui mais est un piège pour quiconque lit `trimestreActif` directement. À uniformiser : soit `changerTrimestreActif(id)` écrit aussi `db.setSync('trimestreActif', id)`, soit on retire toute lecture directe de cette clé.
 
-Après refonte modale bienvenue (A.11) l'utilisateur a testé « Parcourir » pour la première fois. Observation :
+Call sites à vérifier :
+```
+grep -rn "db.getSync('trimestreActif'" js/
+```
 
-> Je clique « Parcourir », la modale disparait et je ne vois pas de « Parcourir » (je découvre plus tard qu'il est en bas de la page et non entre « Découvrir » et « Piloter »).
+### d) 🟡 Double stringify `demo-actif`
 
-`commencerConfiguration()` dans `modal-bienvenue.js` appelle `afficherModalAccueil()` (Primo tour guidé) via setTimeout 300ms. L'utilisateur ne voit pas cette modale ouverte, ou la ferme sans comprendre.
+Un warning discret dans la trace :
+```
+[DB] Double stringify détecté pour clé "demo-actif", correction automatique appliquée
+```
 
-Autre observation : sur l'accueil, Parcourir est un panneau `— 0/13` entre Découvrir et Piloter mais visuellement moins marqué qu'un accordéon complet — l'utilisateur s'attendait à un accordéon équivalent.
+`db.js` corrige au vol en lecture. Mais il y a un call site qui écrit `demo-actif` avec la valeur déjà stringifiée. À localiser et corriger à la racine.
 
-**Décision conceptuelle requise** : que doit réellement faire « Parcourir » au premier clic ? Options :
-- (a) Ouvrir tour guidé Primo (comportement actuel) — si oui, vérifier pourquoi l'utilisateur ne le voit pas
-- (b) Naviguer vers l'accueil et faire défiler jusqu'au panneau Parcourir, le développer
-- (c) Lancer directement le premier jalon du parcours (13 jalons)
-- (d) Autre
-
-### A.16 bis — Layout Parcourir dans accueil
-
-L'utilisateur attend Parcourir comme un accordéon entre Découvrir et Piloter avec un contenu similaire. Aujourd'hui c'est un panneau discret généré par `window.parcours.genererPanneauParcours()`. À revoir visuellement — lié à décision Phase D.
-
----
-
-## 4. Points de décision qui attendent l'utilisateur
-
-Avant d'attaquer plus loin, clarifier :
-
-1. **A.16** : comportement attendu du clic « Parcourir » dans la modale de bienvenue (options a-d ci-dessus)
-2. **Phase D.2 — Progression des hubs Découvrir → Parcourir → Piloter** :
-   - Est-ce qu'on matérialise explicitement la progression visuellement (badges, jalons, verrouillage) ?
-   - Ou c'est juste un ordre suggéré sans contrainte ?
-3. **Phase B.1 — File de modales** : doit venir après B.0 mini-audit (non commencé).
+Recherche :
+```
+grep -rn "demo-actif" js/ | grep -i "JSON.stringify\|setSync\|set("
+```
 
 ---
 
-## 5. Gotchas découverts aujourd'hui
+## 3. Reste de la Phase A onboarding (plan `plans de travail/PLAN-ONBOARDING-NOUVEL-UTILISATEUR.md`)
 
-- **Clé `listeCours` vs `cours`** : `listeCours` est legacy, `cours` est canonique. Beaucoup de code lit l'un ou l'autre. `chargerDropdownCoursV2()` fait une migration paresseuse listeCours → cours mais pas toutes les fonctions la déclenchent. Le chargeur démo a été corrigé (A.3) pour écrire aux deux.
-
-- **`demo_groupesCours` vs timing de init** : `initialiserTrimestreV2()` tournait UNIQUEMENT au DOMContentLoaded, avant chargement démo. Quand l'utilisateur naviguait ensuite à Contexte, seul `initialiserModuleTrimestre()` (trimestre.js) tournait, et il ne synchronisait que 3 loaders V2 partiels — pas groupe-cours. Fix A.9 : appel complet `initialiserTrimestreV2()` depuis `initialiserModuleTrimestre()`.
-
-- **Détection legacy trop large** : `detecterDonneesLegacy()` considérait `modalitesEvaluation` et `infoCours` comme « données legacy ». Ces clés sont écrites par le mode démo et par d'autres modules de config. Une nouvelle installation avec démo active déclenchait la modale de migration à tort. Fix A.8 : restreindre aux clés de contenu utilisateur (`groupeEtudiants`, `presences`, `productions`).
-
-- **CSP zéro tolérance** : `script-src 'self'` strict. Pas d'inline, pas de CDN externe. Cloudflare Insights casse cette règle systématiquement.
-
-- **Migration legacy destructive** : cliquer « Migrer mes données » remplace le tableau `trimestres` et `listeCours` avec un trimestre vide `h2026`. Si mode démo était actif, la démo est détruite. C'est pour ça qu'il était critique de ne PAS déclencher la modale pour un nouvel utilisateur (A.8).
-
----
-
-## 6. Journal empirique utilisateur
-
-Tout est dans `Audit UX/LOG UX 18 avril.txt` et `Audit UX/IMG_6003.PNG` à `IMG_6059.PNG` (57 captures, 6 sessions de test dans la journée). La table des matières :
-
-- `09:44` (IMG_6003-6013) — première exploration néophyte complète
-- `13:25` (IMG_6033-6041) — après A.2/A.3, modale migration apparaît toujours
-- `13:45` (IMG_6042-6046) — après A.2-bis/A.8/A.10, retours sur rédaction + nommage
-- `15:15` (IMG_6047-6049) — dropdown GC_DEMO après création manuelle
-- `15:55` (IMG_6050-6059) — après A.9/A.11/A.12/A.13, Parcourir testé, checkbox ment, erreurs console
+| Point | Statut | Note |
+|---|---|---|
+| A.1 | à faire | Titre HTML « Système de suivi Beta 96.2 » obsolète |
+| A.5 | 🔴 bloquant | Info-bulles intermittentes — investigation event listeners |
+| A.6 | à faire | Boutons « ? » pris pour images cassées |
+| A.7 | à faire | Import étudiants : message « à gauche » trompeur |
+| A.15 | 🟠 à faire | CSP bloque Cloudflare Insights + version.json 403 + 11 PNG 404 dans Aide |
+| A.16 | 🟠 conceptuel | Flux « Parcourir » : que doit faire le clic ? (décision utilisateur requise) |
 
 ---
 
-## 7. Prochaine action concrète
+## 4. Gotchas / connaissances acquises aujourd'hui
 
-**Au prochain démarrage** :
+- **Convention padding `groupeNum`** : les `<option>` de groupes sont paddées à 5 chars via `String(e.groupe).padStart(5, '0')`. Toute entité storant un `groupeNum` (GC_*, horaire.groupeAssocie) doit utiliser le format paddé, sinon mismatch avec les options et le select reste vide.
+- **Cohérence schéma séances** : les champs canoniques sont `heureDebut` / `heureFin` / `nombrePeriodes`. Plusieurs lecteurs tombent sur fallback `debut` pour compat, mais `editerHoraireV2` n'accepte que les canoniques.
+- **`mettreAJourNomGroupeCoursV2`** : écrase la valeur de `v2-gc-horaire` selon `horaires.find(h.groupeAssocie === groupeNum)`. Si `groupeAssocie` n'existe pas sur l'horaire, la valeur est effacée — comportement non documenté, piège facile.
+- **Filtre trimestre démo** : `populerDropdownTrimestreV2` filtre le trimestre `demo` quand `mode=normal`. Mais `entrerEnDemo` force `mode=normal` pour désactiver l'anonymisation. Le filtre doit donc aussi checker `estEnModeDemo()`.
+- **Clés de persistance sidebar Contexte** : `cle('horaireSelectionne')` et désormais `cle('groupeSelectionne')`. `infoCours` pour Cours. `enseignants[0]` pour Enseignant (auto-select du premier). Pas de clé pour Trimestre (lu depuis `.actif`).
+
+---
+
+## 5. Prochaine action concrète
+
+**Au démarrage de la nouvelle session** :
 
 1. Lire ce `SESSION.md`
-2. Lire `plans de travail/PLAN-ONBOARDING-NOUVEL-UTILISATEUR.md`
-3. Lire le dernier bloc de `Audit UX/LOG UX 18 avril.txt` (à partir de la ligne 157, session 15:55)
-4. Demander à l'utilisateur si on attaque :
-   - A.5 (info-bulles intermittentes — bloquant, investigation)
-   - A.15 (erreurs console — CSP Cloudflare + version.json 403)
-   - A.16 (flux Parcourir — décision conceptuelle requise)
+2. Lire `memory/MEMORY.md` (auto-mémoire persistante)
+3. Demander à l'utilisateur par où commencer :
+   - **b)** bruit console (plus rapide, améliore la lisibilité des diagnostics futurs)
+   - **c)** cohérence `trimestreActif` (structurel, potentiellement fragile)
+   - **d)** double stringify `demo-actif` (petit mais satisfaisant)
+   - Ou attaquer le reste de la Phase A onboarding (A.5 bloquant)
 
-Ne pas commencer Phase B/C/D tant que Phase A 🔴 n'est pas verrouillée.
+Ne pas retirer l'instrumentation `[DEMO-TRACE]` sans demander — c'est utile pour le diagnostic si un autre bug démo surgit.
 
 ---
 
-## 8. Tâches ouvertes (tracker)
+## 6. Tâches ouvertes (tracker de ce tick)
 
 | # | Statut | Point |
 |---|---|---|
-| #6 | pending | A.5 Info-bulles intermittentes |
-| #15 | pending | A.15 Erreurs console Cloudflare + version.json 403 |
-| #16 | pending | A.16 Parcourir flux inabouti |
+| #7 | pending | b. Silencer bruit console Modes/grille |
+| #8 | pending | c. Cohérence trimestreActif / actif |
+| #9 | pending | d. Double stringify demo-actif |
 
-Tâches complétées aujourd'hui (10) : #4 A.2, #5 A.3, #7 A.2-bis, #8 A.9, #9 A.8, #10 A.10, #11 A.11, #12 A.12, #13 A.13, #14 A.14.
+Tâches livrées ce soir (5) : #6 a. audit Contexte + double-clic Horaire, #10 a2. marqueurs démo latéraux, #11 a3. séances Horaire démo, #12 a4. pré-sélection par toggle, #1→#5 instrumentation.
 
 ---
 
-## 9. Mémoire projet à mettre à jour
+## 7. Fichiers modifiés aujourd'hui (soir)
 
-Au prochain démarrage, mettre à jour `memory/MEMORY.md` section « Sessions récentes » avec le bilan de cette session 18 avril. Référence à créer : `project_chantier_onboarding.md` (similaire au modèle `project_chantier_rlo.md`).
+- `js/donnees-demo.js` : instrumentation + fix HOR_DEMO (groupeAssocie, seances schema) + GC_DEMO groupeNum paddé + step 6a pre-selection
+- `js/trimestre-v2.js` : instrumentation + marqueurs démo latéraux + fix filtre Trimestre démo + persistance `groupeSelectionne`
+- `js/init-inline.js` : BUILD_ID
+- `version.json` : build
+
+Rien d'autre touché.
