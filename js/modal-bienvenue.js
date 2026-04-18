@@ -153,14 +153,14 @@
         modal.innerHTML = `
             <div class="modal-bienvenue-contenu">
                 <div class="modal-bienvenue-header">
-                    <h2>Bienvenue dans Monitorage</h2>
-                    <p class="modal-bienvenue-subtitle">Ton outil de suivi pédagogique</p>
+                    <h2>Bienvenue dans Labo Codex</h2>
+                    <p class="modal-bienvenue-subtitle">Un espace numérique pour la pratique enseignante</p>
                 </div>
 
                 <div class="modal-bienvenue-body">
                     <p>
-                        Cette application t'aide à suivre la progression de tes étudiants,
-                        gérer les présences et évaluer les productions en continu.
+                        Cette application t'accompagne dans ton travail d'enseignant·e,
+                        de la planification des cours jusqu'à la note finale.
                     </p>
 
                     <div class="modal-bienvenue-reperes">
