@@ -235,8 +235,11 @@ async function entrerEnDemo() {
         }
 
         // 5. Fixer infoCours = cours demo
+        // Lire depuis la clé canonique 'cours' en priorité, fallback 'listeCours'
+        const coursCanoniques = db.getSync('cours', []);
         const listeCours = db.getSync('listeCours', []);
-        const coursDemo = listeCours.find(c => c.id === 'demo-cours');
+        const coursDemo = coursCanoniques.find(c => c.id === 'demo-cours')
+                       || listeCours.find(c => c.id === 'demo-cours');
         if (coursDemo) {
             db.setSync('infoCours', coursDemo);
         }
@@ -517,7 +520,7 @@ async function chargerDonneesDemo() {
 function fusionnerDonneesDemo(packDemo, prefixe) {
     // Helper pour construire la clé sans dépendre de cle() (évite race condition)
     const cleDemo = (nom) => prefixe ? prefixe + nom : cle(nom);
-    // 1. Fusionner listeCours
+    // 1. Fusionner listeCours (clé legacy, encore lue par plusieurs modules)
     const listeCours = db.getSync('listeCours', []);
     const coursDemo = packDemo.listeCours || [];
 
@@ -531,6 +534,31 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
         }
     }
     db.setSync('listeCours', listeCours);
+
+    // 1b. Fusionner aussi vers la clé canonique 'cours' (lue par les dropdowns
+    // d'assemblage de groupe-cours dans Contexte). Sans ça, les sélecteurs
+    // Contexte voient une liste vide même en mode démo.
+    const coursCanoniques = db.getSync('cours', []);
+    const coursMap = new Map(coursCanoniques.map(c => [c.id, c]));
+    for (const cours of coursDemo) {
+        coursMap.set(cours.id, cours);
+    }
+    db.setSync('cours', Array.from(coursMap.values()));
+
+    // 1c. Créer l'enseignant démo pour que le dropdown Enseignants de Contexte
+    // affiche une option cohérente avec le cours démo (champ "enseignant" du
+    // pack = chaîne "Primo Primavera" — il faut aussi l'entité structurée).
+    const enseignants = db.getSync('enseignants', []);
+    if (!enseignants.some(e => e.id === 'ENS_DEMO')) {
+        enseignants.push({
+            id: 'ENS_DEMO',
+            prenom: 'Primo',
+            nom: 'Primavera',
+            courriel: '',
+            isDemo: true
+        });
+        db.setSync('enseignants', enseignants);
+    }
 
     // 2. Fusionner groupeEtudiants
     const cleEtudiants = cleDemo('groupeEtudiants');
@@ -703,7 +731,7 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
             coursId: coursId,
             groupeNum: groupeNum,
             horaireId: horaireId,
-            enseignantId: 'profil',
+            enseignantId: 'ENS_DEMO',
             pratiqueId: null,
             dateCreation: new Date().toISOString(),
             actif: true,
@@ -807,6 +835,18 @@ async function supprimerDonneesGlobalesDemo() {
     const coursFiltres = listeCours.filter(c => !c.isDemo);
     db.setSync('listeCours', coursFiltres);
     await db.set('listeCours', coursFiltres);
+
+    // Cours demo dans la clé canonique 'cours' (ajoutée au chargement démo)
+    const coursCanoniques = db.getSync('cours', []);
+    const coursCanonFiltres = coursCanoniques.filter(c => !c.isDemo);
+    db.setSync('cours', coursCanonFiltres);
+    await db.set('cours', coursCanonFiltres);
+
+    // Enseignant démo (clé globale 'enseignants')
+    const enseignants = db.getSync('enseignants', []);
+    const enseignantsFiltres = enseignants.filter(e => !e.isDemo);
+    db.setSync('enseignants', enseignantsFiltres);
+    await db.set('enseignants', enseignantsFiltres);
 
     // Grilles demo (grillesTemplates est globale)
     const grilles = db.getSync('grillesTemplates', []);
