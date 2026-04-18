@@ -40,6 +40,8 @@ function afficherNotificationErreur(message, details) {
  * Appelé au chargement de la page
  */
 function initialiserTrimestreV2() {
+    console.warn('[DEMO-TRACE] initialiserTrimestreV2 → entrée (trimestreActif:',
+        db.getSync('trimestreActif', ''), ', demo-actif:', db.getSync('demo-actif', null), ')');
 
     // Charger l'identification du trimestre (nom, session, année)
     chargerIdentificationTrimestreV2();
@@ -3972,10 +3974,14 @@ window.ouvrirAideGroupeCours = ouvrirAideGroupeCours;
  */
 function populerDropdownGroupeCoursV2() {
     const select = document.getElementById('v2-selectGroupeCours');
-    if (!select) return;
+    if (!select) {
+        console.warn('[DEMO-TRACE] populerDropdownGroupeCoursV2 → #v2-selectGroupeCours absent du DOM');
+        return;
+    }
 
     const cleGC = cle('groupesCours');
     const groupesCours = db.getSync(cleGC, []);
+    console.warn('[DEMO-TRACE] populerDropdownGroupeCoursV2 → source', cleGC, '=', groupesCours.length, 'options');
 
     // Sauvegarder la valeur actuelle pour la restaurer après repopulation
     const valeurActuelle = select.value;
@@ -3997,6 +4003,9 @@ function populerDropdownGroupeCoursV2() {
  * Peuple les dropdowns du formulaire d'assemblage (5 éléments Beta 95.2)
  */
 function populerDropdownsAssemblageV2() {
+    console.warn('[DEMO-TRACE] populerDropdownsAssemblageV2 → entrée (demo-actif:',
+        db.getSync('demo-actif', null), ', trimestreActif:', db.getSync('trimestreActif', ''), ')');
+
     // Beta 95.2: Dropdown Trimestres
     const selectTrimestre = document.getElementById('v2-gc-trimestre');
     if (selectTrimestre) {
@@ -4010,6 +4019,9 @@ function populerDropdownsAssemblageV2() {
             html += `<option value="${t.id}"${selected}>${nom}</option>`;
         });
         selectTrimestre.innerHTML = html;
+        console.warn('[DEMO-TRACE] dropdown:trimestre →', trimestres.length, 'options, ids:', trimestres.map(t => t.id).join(','));
+    } else {
+        console.warn('[DEMO-TRACE] dropdown:trimestre → #v2-gc-trimestre absent du DOM');
     }
 
     // Dropdown Cours
@@ -4026,6 +4038,9 @@ function populerDropdownsAssemblageV2() {
             html += `<option value="${c.id}">${label}</option>`;
         });
         selectCours.innerHTML = html;
+        console.warn('[DEMO-TRACE] dropdown:cours →', cours.length, 'options (demo:', cours.filter(c => c.isDemo).length, ')');
+    } else {
+        console.warn('[DEMO-TRACE] dropdown:cours → #v2-gc-cours absent du DOM');
     }
 
     // Dropdown Groupes d'étudiants
@@ -4049,6 +4064,9 @@ function populerDropdownsAssemblageV2() {
             html += `<option value="${grp}">${grp} (${nbEtudiants} étud.)</option>`;
         });
         selectGroupe.innerHTML = html;
+        console.warn('[DEMO-TRACE] dropdown:groupe → source', cleEtud, '=', etudiants.length, 'étud.,', groupesTries.length, 'groupes uniques');
+    } else {
+        console.warn('[DEMO-TRACE] dropdown:groupe → #v2-gc-groupe absent du DOM');
     }
 
     // Beta 95.2: Dropdown Horaires
@@ -4064,6 +4082,9 @@ function populerDropdownsAssemblageV2() {
             html += `<option value="${h.id}">${nom}${suffixeDemo}</option>`;
         });
         selectHoraire.innerHTML = html;
+        console.warn('[DEMO-TRACE] dropdown:horaire → source', cleHoraires, '=', horaires.length, 'options (demo:', horaires.filter(h => h.isDemo).length, ')');
+    } else {
+        console.warn('[DEMO-TRACE] dropdown:horaire → #v2-gc-horaire absent du DOM');
     }
 
     // Beta 95.2: Dropdown Enseignants (maintenant depuis liste unifiée)
@@ -4079,6 +4100,9 @@ function populerDropdownsAssemblageV2() {
             html += `<option value="${e.id}">${nomComplet}${suffixeDemo}</option>`;
         });
         selectEnseignant.innerHTML = html;
+        console.warn('[DEMO-TRACE] dropdown:enseignant →', enseignants.length, 'options (demo:', enseignants.filter(e => e.isDemo).length, ')');
+    } else {
+        console.warn('[DEMO-TRACE] dropdown:enseignant → #v2-gc-enseignant absent du DOM');
     }
 
     // Beta 95.3: Dropdown Pratiques de notation (alignement Primo)
