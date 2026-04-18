@@ -737,6 +737,10 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
     const nouvelHoraire = {
         id: 'HOR_DEMO',
         nom: 'Lun-AM / Mer-PM',
+        // groupeAssocie : attendu par mettreAJourNomGroupeCoursV2 pour l'auto-fill
+        // de l'horaire quand le groupe change. Doit matcher le format paddé des
+        // options (padStart(5, '0')), donc '0demo' pour étudiants avec groupe="demo".
+        groupeAssocie: '0demo',
         periodesParSeance: 2,
         seances: [
             { id: 'SEANCE_DEMO_A', lettre: 'A', jour: 'Lundi', debut: '11:00', nombrePeriodes: 2, duree: 2, local: '2309' },
@@ -760,30 +764,40 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
     let groupesCours = db.getSync(cleGC, []);
     const gcDemo = groupesCours.find(gc => gc.id === 'GC_DEMO');
 
-    if (!gcDemo) {
-        const premierCoursDemo = packDemo.listeCours?.[0];
-        const coursId = premierCoursDemo?.id || '601-101-h2026-9999';
-        const groupeNum = premierCoursDemo?.groupe || '9999';
-        const sigle = premierCoursDemo?.sigle || '601-101';
+    const premierCoursDemo = packDemo.listeCours?.[0];
+    const coursId = premierCoursDemo?.id || '601-101-h2026-9999';
+    const sigle = premierCoursDemo?.sigle || '601-101';
+    // groupeNum : paddé à 5 chars (ex. '0demo') pour matcher le format des
+    // <option> générés par populerDropdownsAssemblageV2 (padStart). Sans
+    // padding, selectGroupe.value = 'demo' ne match aucune option → le
+    // dropdown reste vide au rendu de la fiche GC_DEMO.
+    const groupeNum = (premierCoursDemo?.groupe || '9999').toString().padStart(5, '0');
 
-        const nouveauGC = {
-            id: 'GC_DEMO',
-            nom: `DEMO-${sigle}-MQ-${groupeNum.toString().padStart(5, '0')} (Lun-AM / Mer-PM)`,
-            trimestreId: 'demo',
-            coursId: coursId,
-            groupeNum: groupeNum,
-            horaireId: horaireId,
-            enseignantId: 'ENS_DEMO',
-            pratiqueId: null,
-            dateCreation: new Date().toISOString(),
-            actif: true,
-            isDemo: true
-        };
+    const nouveauGC = {
+        id: 'GC_DEMO',
+        nom: `DEMO-${sigle}-MQ-${groupeNum} (Lun-AM / Mer-PM)`,
+        trimestreId: 'demo',
+        coursId: coursId,
+        groupeNum: groupeNum,
+        horaireId: horaireId,
+        enseignantId: 'ENS_DEMO',
+        pratiqueId: null,
+        dateCreation: gcDemo?.dateCreation || new Date().toISOString(),
+        actif: true,
+        isDemo: true
+    };
+    if (gcDemo) {
+        // Réécriture franche : on force les corrections (groupeNum paddé) même
+        // si GC_DEMO existe déjà dans le storage, sinon une démo chargée avant
+        // le fix resterait avec un groupeNum='demo' non matchable.
+        const idx = groupesCours.indexOf(gcDemo);
+        groupesCours[idx] = nouveauGC;
+        db.setSync(cleGC, groupesCours);
+        console.warn('[DEMO-TRACE] fusion:10', cleGC, '=', groupesCours.length, '(GC_DEMO remplacé, groupeNum:', groupeNum, ')');
+    } else {
         groupesCours.push(nouveauGC);
         db.setSync(cleGC, groupesCours);
-        console.warn('[DEMO-TRACE] fusion:10', cleGC, '=', groupesCours.length, '(GC_DEMO créé → coursId:', coursId, ')');
-    } else {
-        console.warn('[DEMO-TRACE] fusion:10', cleGC, '=', groupesCours.length, '(GC_DEMO déjà présent)');
+        console.warn('[DEMO-TRACE] fusion:10', cleGC, '=', groupesCours.length, '(GC_DEMO créé → coursId:', coursId, ', groupeNum:', groupeNum, ')');
     }
 
     console.warn('[DEMO-TRACE] fusionnerDonneesDemo → TERMINÉ');
