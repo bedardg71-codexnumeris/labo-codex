@@ -435,16 +435,26 @@ Inventaire technique des 11 artefacts UI (bulles, modales, toasts, bandeaux) au 
 
 | Phase | État | Commits | Notes |
 |---|---|---|---|
-| A.1 Métadonnées HTML | À faire | — | — |
-| A.2 Modale migration iPad | À faire | — | — |
-| A.3 Groupe démo Contexte | À faire | — | — |
+| A.1 Métadonnées HTML | À faire | — | Titre Safari obsolète |
+| A.2 Modale migration iPad | ✅ fait | `ab64433` | Flex column + footer fixe |
+| A.2-bis Modale bienvenue iPad | ✅ fait | `80c3784` | Même traitement CSS |
+| A.3 Groupe démo Contexte | ✅ fait | `b4456fc` | Clé canonique `cours` + ENS_DEMO |
 | A.4 Tour guidé branché | À faire | — | Peut dépendre de B |
-| A.5 Info-bulles intermittentes | À faire | — | — |
-| A.6 « ? » boutons aide | À faire | — | — |
-| A.7 Import étudiants | À faire | — | — |
+| A.5 Info-bulles intermittentes | 🔴 à investiguer | — | Event listeners perdus au re-render ? |
+| A.6 « ? » boutons aide | À faire | — | Ambiguïté visuelle |
+| A.7 Import étudiants | À faire | — | Message « à gauche » trompeur |
+| A.8 Détection migration resserrée | ✅ fait | `80c3784` | Ne déclenche plus pour nouvel utilisateur |
+| A.9 Dropdown groupe-cours refresh | ✅ fait | `01ceb73` | initialiserTrimestreV2 complet |
+| A.10 Renommage modale bienvenue | ✅ fait | `2b56216` | Labo Codex + sous-titre |
+| A.11 Refonte offre accompagnement | ✅ fait | `01ceb73` | Découvrir/Parcourir + progression |
+| A.12 Message aide démo groupe-cours | ✅ fait | `01ceb73` | Bandeau bleu dans form |
+| A.13 Marqueur (démo) sélects | ✅ fait | `01ceb73` | Horaires + Enseignants |
+| A.14 Checkbox démo état réel | ✅ fait | `959f945` | Plus de faux checked |
+| A.15 Erreurs console | 🟠 à faire | — | CSP Cloudflare Insights + version.json 403 + 404 images aide |
+| A.16 Flux Parcourir | 🟠 à faire | — | Décision conceptuelle requise |
 | B.0 Mini-audit modales | À faire | — | Préalable à B.1 |
 | B.1 File de modales | À faire | — | Dépend de B.0 |
-| B.2 Choix exploration clarifié | À faire | — | — |
+| B.2 Choix exploration clarifié | Partiel | `01ceb73` | A.11 a déjà clarifié en partie |
 | B.3 Accueil humain | À faire | — | — |
 | B.4 États vides actionnables | À faire | — | — |
 | B.5 Toast mise à jour | À faire | — | — |
@@ -458,3 +468,5 @@ Inventaire technique des 11 artefacts UI (bulles, modales, toasts, bandeaux) au 
 | D.3 Implémentation hubs | À faire | — | Dépend de D.2 |
 
 Ce tableau est mis à jour au fil du chantier.
+
+**Bilan 18 avril 2026** : 10 sous-points livrés en Phase A, 3 à traiter (A.5 bloquant, A.15 important, A.16 conceptuel), reste A.1/A.4/A.6/A.7 secondaires. Builds 0418-0923 → 0418-1610, beta 99.18 constante.
