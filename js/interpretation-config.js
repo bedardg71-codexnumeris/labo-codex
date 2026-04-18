@@ -100,11 +100,53 @@ const DESCRIPTIONS_SEUILS = {
    =============================== */
 
 /**
- * Charge les seuils depuis db.getSync ou retourne les valeurs par défaut
+ * Fusionne récursivement un objet stocké avec un modèle de valeurs par défaut.
+ * Les clés absentes côté stocké sont comblées par le défaut, les clés présentes
+ * sont préservées. Les objets imbriqués sont traités récursivement.
+ * @param {Object} stocke - Objet chargé depuis la persistance (peut être partiel)
+ * @param {Object} defauts - Objet modèle complet
+ * @returns {{ valeur: Object, complete: boolean }} valeur fusionnée + indicateur
+ *          `complete` à false si au moins une clé manquait côté stocké.
+ */
+function fusionnerAvecDefauts(stocke, defauts) {
+    const resultat = {};
+    let complete = true;
+    for (const cle in defauts) {
+        const valDefaut = defauts[cle];
+        const valStocke = stocke ? stocke[cle] : undefined;
+        const estObjet = valDefaut && typeof valDefaut === 'object' && !Array.isArray(valDefaut);
+        if (estObjet) {
+            const fusion = fusionnerAvecDefauts(valStocke || {}, valDefaut);
+            resultat[cle] = fusion.valeur;
+            if (!fusion.complete || valStocke === undefined) complete = false;
+        } else if (valStocke !== undefined) {
+            resultat[cle] = valStocke;
+        } else {
+            resultat[cle] = valDefaut;
+            complete = false;
+        }
+    }
+    return { valeur: resultat, complete: complete };
+}
+
+/**
+ * Charge les seuils depuis db.getSync, fusionne avec les défauts pour combler
+ * toute clé manquante, et persiste la version complète si une clé a été ajoutée.
+ * Garantit que l'objet retourné expose TOUTES les branches de SEUILS_PAR_DEFAUT.
  * @returns {Object} - Objet contenant tous les seuils configurés
  */
 function chargerSeuilsInterpretation() {
-    return db.getSync('seuilsInterpretation', SEUILS_PAR_DEFAUT);
+    const stocke = db.getSync('seuilsInterpretation', null);
+    if (!stocke) {
+        return JSON.parse(JSON.stringify(SEUILS_PAR_DEFAUT));
+    }
+    const fusion = fusionnerAvecDefauts(stocke, SEUILS_PAR_DEFAUT);
+    if (!fusion.complete) {
+        // Auto-guérison : l'objet stocké manquait de clés ajoutées depuis.
+        // On persiste la fusion pour éviter de refaire le merge à chaque lecture.
+        db.setSync('seuilsInterpretation', fusion.valeur);
+    }
+    return fusion.valeur;
 }
 
 /**
