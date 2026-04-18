@@ -73,32 +73,23 @@ function fermerPopupPrimo() {
 }
 
 /**
- * Gère le clic sur une icône Primo
- * @param {Event} event - Événement de clic
+ * Gère le clic sur une icône Primo (délégation globale)
+ * @param {Element} icone - Élément .primo-aide cliqué
  */
-function gererClicPrimo(event) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    const icone = event.currentTarget;
+function gererClicPrimo(icone) {
     const targetId = icone.dataset.target;
-
 
     if (!targetId) {
         console.warn('[Guide] Pas de data-target sur l\'icône', icone);
         return;
     }
 
-    // Récupérer le contenu associé
     const contenuElement = document.getElementById(targetId);
     if (!contenuElement) {
         console.warn('[Guide] Élément target non trouvé:', targetId);
-        console.warn('[Guide] IDs disponibles:', Array.from(document.querySelectorAll('[id^="conseil-"], [id^="details-calculs"]')).map(el => el.id));
         return;
     }
 
-
-    // Afficher le popup avec le contenu
     afficherPopupPrimo(contenuElement.innerHTML);
 }
 
@@ -127,30 +118,46 @@ function gererVisibilitePrimoSelonMode() {
 
 }
 
+// Flag pour n'attacher les listeners globaux qu'une seule fois
+let _listenersGlobauxAttaches = false;
+
 /**
- * Initialise le système de tooltips Primo
+ * Initialise le système de tooltips Primo.
+ *
+ * Les listeners globaux (click délégué, keydown Escape, modeChanged) sont attachés
+ * une seule fois au document/window pour couvrir tous les .primo-aide présents
+ * et futurs — y compris ceux générés par innerHTML après navigation SPA.
+ *
+ * Idempotent : peut être rappelée sans effet de bord (ex. par les modules qui
+ * re-rendent leur contenu). Le seul travail répété est de recalculer la visibilité
+ * des icônes selon le mode (tour guide / aide contextuelle).
  */
 function initialiserPrimoTooltips() {
+    if (!_listenersGlobauxAttaches) {
+        // Délégation globale : capte les clics sur .primo-aide actuels et futurs
+        document.addEventListener('click', (event) => {
+            const icone = event.target.closest('.primo-aide');
+            if (!icone) return;
+            event.preventDefault();
+            event.stopPropagation();
+            gererClicPrimo(icone);
+        });
 
-    // Attacher les événements à toutes les icônes Primo
-    const icones = document.querySelectorAll('.primo-aide');
-    icones.forEach(icone => {
-        icone.addEventListener('click', gererClicPrimo);
-    });
+        // Fermer le popup avec Échap
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                fermerPopupPrimo();
+            }
+        });
 
+        // Écouter les changements de mode (événement 'modeChanged' émis par modes.js)
+        window.addEventListener('modeChanged', gererVisibilitePrimoSelonMode);
 
-    // Fermer le popup avec Échap
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            fermerPopupPrimo();
-        }
-    });
+        _listenersGlobauxAttaches = true;
+    }
 
-    // Gérer la visibilité selon le mode
+    // Appliquer la visibilité au state courant du DOM (utile après re-render)
     gererVisibilitePrimoSelonMode();
-
-    // Écouter les changements de mode (événement 'modeChanged' émis par modes.js)
-    window.addEventListener('modeChanged', gererVisibilitePrimoSelonMode);
 }
 
 // ============================================================================
