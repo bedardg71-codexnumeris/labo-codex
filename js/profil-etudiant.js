@@ -220,9 +220,8 @@ function obtenirPratiqueActuelle() {
  * @returns {Object|null} - Grille complète avec {id, nom, criteres[], ...} ou null si non configurée
  */
 function obtenirGrilleReferenceDepistage() {
-    // Lire la configuration
-    const modalites = db.getSync('modalitesEvaluation', {});
-    const grilleId = modalites.grilleReferenceDepistage;
+    // Lire la préférence utilisateur
+    const grilleId = obtenirPreference('grilleReferenceDepistage');
 
     if (!grilleId) {
         console.warn('⚠️ Aucune grille de référence configurée pour le dépistage');
@@ -480,47 +479,6 @@ function interpreterMobilisation(A, C, statutDecrochage = false) {
 }
 
 /**
- * Interprète l'indice E (Engagement) selon les seuils IDME adaptés
- * @param {number} valeur - Valeur normalisée entre 0 et 1
- * @returns {Object} - { niveau, emoji, couleur }
- */
-function interpreterEngagement(valeur) {
-    if (valeur >= 0.85) {
-        return {
-            niveau: 'Excellent engagement',
-            emoji: '🔵',
-            couleur: '#2196F3' // Bleu
-        };
-    }
-    if (valeur >= 0.75) {
-        return {
-            niveau: 'Bon engagement',
-            emoji: '🟢',
-            couleur: '#28a745' // Vert
-        };
-    }
-    if (valeur >= 0.65) {
-        return {
-            niveau: 'En développement',
-            emoji: '🟡',
-            couleur: '#ffc107' // Jaune
-        };
-    }
-    if (valeur >= 0.40) {
-        return {
-            niveau: 'Engagement insuffisant',
-            emoji: '🟠',
-            couleur: '#ff9800' // Orange
-        };
-    }
-    return {
-        niveau: 'Engagement très faible',
-        emoji: '🔴',
-        couleur: '#dc3545' // Rouge
-    };
-}
-
-/**
  * Interprète l'indice P (Performance)
  * @param {number} valeur - Valeur en pourcentage (0-100)
  * @returns {Object} - { niveau, emoji, couleur, description }
@@ -676,10 +634,12 @@ function interpreterAssiduite(valeur) {
  * @returns {string} - HTML de la section
  */
 function genererSectionMobilisationEngagement(da) {
+    if (typeof obtenirPreference === 'function' && obtenirPreference('depistageAcp') === false) {
+        return '';
+    }
     const indices = calculerTousLesIndices(da);
     const A = indices.A / 100;
     const C = indices.C / 100;
-    const interpE = interpreterEngagement(indices.E);
 
     // NOUVEAU (Beta 90): Calcul dual pour mode comparatif
     const config = db.getSync('modalitesEvaluation', {});
@@ -707,28 +667,16 @@ function genererSectionMobilisationEngagement(da) {
         // Assigner aux bonnes variables selon la pratique active
         if (config.pratique === 'sommative') {
             indicesSOM = indicesActifs;
-            indicesPAN = { A: indicesActifs.A, C: 0, P: 0, M: 0, E: 0 }; // Valeurs nulles pour PAN
+            indicesPAN = { A: indicesActifs.A, C: 0, P: 0, M: 0 }; // Valeurs nulles pour PAN
             directionSOM = directionActive;
             directionPAN = { direction: 'stable', emoji: '→' };
         } else {
             indicesPAN = indicesActifs;
-            indicesSOM = { A: indicesActifs.A, C: 0, P: 0, M: 0, E: 0 }; // Valeurs nulles pour SOM
+            indicesSOM = { A: indicesActifs.A, C: 0, P: 0, M: 0 }; // Valeurs nulles pour SOM
             directionPAN = directionActive;
             directionSOM = { direction: 'stable', emoji: '→' };
         }
     }
-
-    // Calculer engagement pour les deux pratiques (E = racine cubique de A × C × P)
-    const A_pct = indicesSOM.A / 100; // A est identique pour les deux pratiques
-    const C_SOM = indicesSOM.C / 100;
-    const P_SOM = indicesSOM.P / 100;
-    const E_brut_SOM = A_pct * C_SOM * P_SOM;
-    const E_SOM = Math.pow(E_brut_SOM, 1/3); // Racine cubique
-
-    const C_PAN = indicesPAN.C / 100;
-    const P_PAN = indicesPAN.P / 100;
-    const E_brut_PAN = A_pct * C_PAN * P_PAN;
-    const E_PAN = Math.pow(E_brut_PAN, 1/3); // Racine cubique
 
     // Récupérer les données pour les trois sections
     const detailsA = obtenirDetailsAssiduite(da);
@@ -1010,19 +958,6 @@ function genererSectionMobilisationEngagement(da) {
             <strong>Complétion (C) :</strong> Indice C = ${indices.C}% — ${nbRemis} ${obtenirTermeProduction('pluriel')} remis / ${nbTotal} ${obtenirTermeProduction('pluriel')} totaux
             <br><br>
             <strong>Performance (P) :</strong> Indice P = ${moyenneP}% — Moyenne des ${nbRetenus} meilleurs ${obtenirTermeProduction('pluriel')}
-            <br><br>
-            <strong>Engagement (E) :</strong> Formule E = (A × C × P)^(1/3) (racine cubique)
-            <br>
-            ${(A).toFixed(2)} × ${(C).toFixed(2)} × ${(moyenneP / 100).toFixed(2)} = ${(A * C * (moyenneP / 100)).toFixed(3)} → E = ${Math.pow(A * C * (moyenneP / 100), 1/3).toFixed(3)}
-            <br><br>
-            L'engagement combine assiduité, complétion et performance. La racine cubique compense la décroissance multiplicative.
-            <br>
-            Niveau d'engagement : <strong>${(() => {
-                const E_brut_calc = A * C * (moyenneP / 100);
-                const E_ajuste = Math.pow(E_brut_calc, 1/3);
-                const interpE_calc = interpreterEngagement(E_ajuste);
-                return `<span style="color: ${interpE_calc.couleur};">${interpE_calc.niveau}</span>`;
-            })()}</strong>
         </div>
 
         <!-- GRILLE 3 COLONNES : ASSIDUITÉ, COMPLÉTION ET PERFORMANCE -->
@@ -1434,125 +1369,6 @@ function genererSectionMobilisationEngagement(da) {
             </div>
         </div>
 
-        <!-- ÉCHELLE D'ENGAGEMENT (basée sur E = racine cubique de A × C × P) -->
-        ${(() => {
-            // 🆕 BETA 95.6 : Si aucune donnée, afficher un message approprié
-            if (aucuneDonnee) {
-                return `
-                    <div class="profil-carte u-mt-10">
-                        <div class="u-flex-between-mb15">
-                            <h3 class="profil-section-titre-seul">Niveau d'engagement</h3>
-                            <span style="color: var(--gris-clair); font-weight: 600;">—</span>
-                        </div>
-                        <div class="profil-message-vide">
-                            En attente de données
-                        </div>
-                    </div>
-                `;
-            }
-
-            // Recalculer E avec racine cubique
-            const P_reel = moyenneP / 100;
-            const E_brut_reel = A * C * P_reel;
-            const E_reel = Math.pow(E_brut_reel, 1/3); // Racine cubique
-
-            // Interpréter E
-            const interpE_reel = interpreterEngagement(E_reel);
-
-            // Texte explicatif pour le calcul de E (basé sur P)
-            const configPAN = config.configPAN?.portfolio || {};
-            const decouplerPR = configPAN.decouplerPR || false;
-            const nombreArtefacts = configPAN.nombreARetenir || 5;
-
-            let texteExplicatifE = '';
-            if (decouplerPR && !modeComparatif) {
-                texteExplicatifE = `<span class="profil-texte-normal-gris"> (P basé sur les ${nombreArtefacts} plus récent${nombreArtefacts > 1 ? 's' : ''})</span>`;
-            } else if (!decouplerPR && !modeComparatif && portfolioActif) {
-                const textesModalites = {
-                    'hybride-categories': `P basé sur les ${nombreARetenir} meilleures Sélection + Obligatoires`,
-                    'meilleurs': `P basé sur les ${nombreArtefacts} meilleur${nombreArtefacts > 1 ? 's' : ''}`,
-                    'recents': `P basé sur les ${nombreArtefacts} plus récent${nombreArtefacts > 1 ? 's' : ''}`,
-                    'recents-meilleurs': `P basé sur les ${nombreArtefacts} récent${nombreArtefacts > 1 ? 's' : ''} parmi les meilleurs`,
-                    'tous': 'P basé sur tous les artefacts'
-                };
-                const texteModalite = textesModalites[methodeSelection] || textesModalites['meilleurs'];
-                texteExplicatifE = `<span class="profil-texte-normal-gris"> (${texteModalite})</span>`;
-            }
-
-            return `
-                <div class="profil-carte u-mt-10">
-                    <div class="u-flex-between-mb15">
-                        <h3 class="profil-section-titre-seul">
-                            Niveau d'engagement${texteExplicatifE}
-                        </h3>
-                        ${genererValeursComparatives(Math.round(E_SOM * 100), Math.round(E_PAN * 100), modeComparatif)}
-                    </div>
-
-                    <div style="margin-bottom: 15px; font-size: 0.9rem; color: var(--gris-fonce);" data-tooltip="profil-formule-engagement">
-                        Formule : E = ∛(A × C × P)
-                        <span class="primo-aide" data-target="conseil-formule-engagement-mobilisation" style="margin-left: 5px; display: inline-block !important; cursor: pointer;">📍</span>
-                    </div>
-
-                    <!-- Conseil Primo: Explication de la formule d'engagement (section Mobilisation) -->
-                    <div id="conseil-formule-engagement-mobilisation" class="carte-info-toggle carte-info-conseil" style="display: none; margin-bottom: 15px;">
-                        <strong>Pourquoi la racine cubique ?</strong>
-                        <p>La racine cubique (∛) est une <strong>transformation normalisante</strong> qui préserve l'échelle d'origine tout en combinant les trois indices.</p>
-
-                        <p><strong>Exemple concret :</strong></p>
-                        <ul style="margin-left: 20px; line-height: 1.6;">
-                            <li><strong>Sans racine cubique :</strong> Un étudiant à 70% sur A, C et P aurait : 0.7 × 0.7 × 0.7 = <strong>34%</strong> d'engagement ← Trop punitif !</li>
-                            <li><strong>Avec racine cubique :</strong> Le même étudiant obtient : ∛(0.7 × 0.7 × 0.7) = <strong>70%</strong> d'engagement ← Cohérent et intuitif !</li>
-                        </ul>
-
-                        <p><strong>Pourquoi utiliser la multiplication ?</strong></p>
-                        <p>La multiplication (plutôt qu'une simple moyenne) permet de <strong>pénaliser les déséquilibres</strong>. Un étudiant qui excelle en assiduité (90%) mais échoue en performance (30%) aura un engagement plus faible qu'un étudiant équilibré à 60% partout.</p>
-
-                        <p><strong>En résumé :</strong></p>
-                        <p>La racine cubique compense la décroissance multiplicative tout en préservant l'effet punitif sur les déséquilibres importants. C'est la <strong>moyenne géométrique</strong> des trois indices A-C-P.</p>
-                    </div>
-
-                    <div class="profil-echelle-risque">
-                        <div class="profil-echelle-barre" style="background: linear-gradient(to right,
-                                    var(--orange-accent) 0%,
-                                    var(--btn-annuler) 25%,
-                                    var(--vert-succes) 50%,
-                                    var(--bleu-clair) 75%);">
-                            ${modeComparatif ? `
-                                <!-- Indicateurs duaux: symboles de direction -->
-                                ${directionSOM.symbole ? `<div style="position: absolute; left: ${Math.max(0, Math.min((E_SOM - 0.30) / 0.70 * 100, 100))}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--som-orange);" title="SOM: ${directionSOM.interpretation}">${directionSOM.symbole}</div>` : ''}
-                                ${directionPAN.symbole ? `<div style="position: absolute; left: ${Math.max(0, Math.min((E_PAN - 0.30) / 0.70 * 100, 100))}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--std-bleu);" title="PAN: ${directionPAN.interpretation}">${directionPAN.symbole}</div>` : ''}
-                                <!-- Points colorés (valeurs affichées dans l'en-tête) -->
-                                <div class="profil-echelle-point profil-echelle-point-som" style="left: ${Math.max(0, Math.min((E_SOM - 0.30) / 0.70 * 100, 100))}%;"></div>
-                                <div class="profil-echelle-point profil-echelle-point-std" style="left: ${Math.max(0, Math.min((E_PAN - 0.30) / 0.70 * 100, 100))}%;"></div>
-                            ` : `
-                                <!-- Indicateur unique pratique courante -->
-                                <div class="profil-echelle-point profil-echelle-point-unique" style="left: ${Math.max(0, Math.min((E_reel - 0.30) / 0.70 * 100, 100))}%;"></div>
-                                <div class="profil-echelle-indicateur-bas" style="left: ${Math.max(0, Math.min((E_reel - 0.30) / 0.70 * 100, 100))}%;">E = ${E_reel.toFixed(2)}</div>
-                            `}
-                        </div>
-
-                        <div class="legende-risque-container">
-                            <div class="legende-risque-item" style="left: 12.5%; color: var(--orange-accent);">
-                                <span class="legende-risque-niveau">Fragile</span>
-                                <span class="legende-risque-seuil">0.30-0.49</span>
-                            </div>
-                            <div class="legende-risque-item" style="left: 37.5%; color: var(--btn-annuler);">
-                                <span class="legende-risque-niveau">Modéré</span>
-                                <span class="legende-risque-seuil">0.50-0.64</span>
-                            </div>
-                            <div class="legende-risque-item" style="left: 62.5%; color: var(--vert-succes);">
-                                <span class="legende-risque-niveau">Favorable</span>
-                                <span class="legende-risque-seuil">0.65-0.79</span>
-                            </div>
-                            <div class="legende-risque-item" style="left: 87.5%; color: var(--bleu-clair);">
-                                <span class="legende-risque-niveau">Très favorable</span>
-                                <span class="legende-risque-seuil">≥ 0.80</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        })()}
     `;
 }
 
@@ -1768,8 +1584,7 @@ function genererSectionAccompagnement(da) {
 
         <!-- 🆕 NOUVEAU : Trois cartes côte à côte (RàI pédagogique + Contexte + Observation SOLO) -->
         <div class="${(() => {
-            const config = db.getSync('modalitesEvaluation', {});
-            const afficherSOLO = config.afficherDescriptionsSOLO !== false;
+            const afficherSOLO = obtenirPreference('afficherDescriptionsSOLO') !== false;
             return afficherSOLO ? 'profil-grid-3col' : 'profil-grid-2col';
         })()}">
             <!-- Carte 1 : Modèle de la Réponse à l'intervention (RàI) -->
@@ -1877,14 +1692,13 @@ function genererSectionAccompagnement(da) {
                 </p>
 
                 <button data-action="ouvrirModalConfidentiel" data-param="${da}" class="btn btn-secondaire" style="margin-top: 12px; font-size: 0.85rem;" data-tooltip="profil-confidentiel">
-                    🔒 Confidentiel ${aDesInfosConfidentielles(da) ? '<span style="color: var(--vert-principal);">●</span>' : ''}
+                    <img src="icons/icon-lock.svg" alt="" class="btn-inline-icon"> Confidentiel ${aDesInfosConfidentielles(da) ? '<span style="color: var(--vert-principal);">\u25CF</span>' : ''}
                 </button>
             </div>
 
             <!-- Carte 3 : Observation de la structure des résultats d'apprentissage (SOLO) - Optionnelle -->
             ${(() => {
-                const config = db.getSync('modalitesEvaluation', {});
-                const afficherSOLO = config.afficherDescriptionsSOLO !== false;
+                const afficherSOLO = obtenirPreference('afficherDescriptionsSOLO') !== false;
 
                 if (!afficherSOLO) {
                     return ''; // Ne rien afficher si désactivé
@@ -2011,28 +1825,7 @@ function genererSectionAccompagnement(da) {
             })()}
         </div>
 
-        ${(() => {
-            if (typeof calculerConsolidationIndividuelle !== 'function') return '';
-            const consolidation = calculerConsolidationIndividuelle(da);
-            if (!consolidation || !consolidation.resume) return '';
-            const critConsol = Object.keys(consolidation.resume);
-            if (critConsol.length === 0) return '';
-
-            const items = critConsol.map(critere => {
-                const info = consolidation.resume[critere];
-                if (info.type === 'consolide') {
-                    return '<span style="color: var(--vert-succes);">' + echapperHtml(critere) + ' consolidé (' + echapperHtml(info.artefactNom) + ')</span>';
-                } else if (info.type === 'non-consolide-avec-tentatives') {
-                    return '<span style="color: var(--orange-attention, #e8a838);">' + echapperHtml(critere) + ' fragile</span>';
-                } else {
-                    return '<span style="color: var(--gris-moyen);">' + echapperHtml(critere) + ' non consolidé</span>';
-                }
-            });
-
-            return '<div style="margin-top: 12px; padding: 10px 14px; background: var(--fond-carte, var(--fond-secondaire)); border-radius: 6px; font-size: 0.85rem; color: var(--texte-secondaire);">' +
-                '<strong style="color: var(--texte-principal);">Consolidation :</strong> ' + items.join(' · ') +
-                '</div>';
-        })()}
+        <!-- Bloc Consolidation déplacé vers l'onglet « Forces et défis » de « Développement des habiletés » (17 avril 2026) -->
 
         <!-- Historique compact -->
         <div class="u-mt-15">
@@ -2230,374 +2023,6 @@ function genererSectionMobilisation(da) {
                 </ul>
             </div>
         ` : ''}
-    `;
-}
-
-/**
- * Génère le HTML de la section Engagement (E) détaillée
- * @param {string} da - Numéro de DA
- * @returns {string} - HTML de la section
- */
-function genererSectionEngagement(da) {
-    const indices = calculerTousLesIndices(da);
-    const interpE = interpreterEngagement(indices.E);
-
-    // Récupérer A, C, P séparément (en proportions 0-1)
-    const A = indices.A / 100;
-    const C = indices.C / 100;
-    const P = indices.P / 100;
-
-    // Identifier le composant le plus faible (facteur limitant)
-    const composants = [
-        { nom: 'Assiduité (A)', valeur: A, pourcentage: indices.A },
-        { nom: 'Complétion (C)', valeur: C, pourcentage: indices.C },
-        { nom: 'Performance (P)', valeur: P, pourcentage: indices.P }
-    ];
-    const facteurLimitant = composants.reduce((min, comp) => comp.valeur < min.valeur ? comp : min);
-
-    // Calculer le prochain seuil
-    let prochainSeuil = '';
-    let distanceSeuil = 0;
-    if (indices.E < 0.65) {
-        prochainSeuil = '0.65 (En développement)';
-        distanceSeuil = 0.65 - indices.E;
-    } else if (indices.E < 0.75) {
-        prochainSeuil = '0.75 (Bon engagement)';
-        distanceSeuil = 0.75 - indices.E;
-    } else if (indices.E < 0.85) {
-        prochainSeuil = '0.85 (Excellent engagement)';
-        distanceSeuil = 0.85 - indices.E;
-    }
-
-    return `
-        <!-- STATISTIQUES -->
-        <div class="profil-grid-auto-200">
-            <div class="profil-carte-importante">
-                <div class="carte-metrique-header">
-                    <span class="profil-texte-detail">Assiduité (A)</span>
-                    <strong class="profil-valeur-grande-bleu">${indices.A}%</strong>
-                </div>
-            </div>
-            <div class="profil-carte-importante">
-                <div class="carte-metrique-header">
-                    <span class="profil-texte-detail">Complétion (C)</span>
-                    <strong class="profil-valeur-grande-bleu">${indices.C}%</strong>
-                </div>
-            </div>
-            <div class="profil-carte-importante">
-                <div class="carte-metrique-header">
-                    <span class="profil-texte-detail">Performance (P)</span>
-                    <strong class="profil-valeur-grande-bleu">${indices.P}%</strong>
-                </div>
-            </div>
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border: 2px solid var(--accent-primaire); border-left: 4px solid ${interpE.couleur};">
-                <div class="carte-metrique-header">
-                    <span class="profil-texte-detail">Engagement (E)</span>
-                    <strong class="profil-valeur-grande-bleu">${indices.E}</strong>
-                </div>
-                <div style="margin-top: 8px; font-size: 0.85rem; color: var(--gris-fonce);">
-                    E = ∛(A × C × P)
-                    <span class="primo-aide" data-target="conseil-formule-engagement-carte" style="margin-left: 5px; display: inline-block !important; cursor: pointer;">📍</span>
-                </div>
-                <div style="margin-top: 8px; padding: 6px 10px; background: var(--alerte-fond-attention); border-left: 3px solid var(--orange-accent); font-size: 0.8rem; color: var(--gris-fonce);">
-                    <strong>💡 Note :</strong> Indice longitudinal (historique complet depuis le début du trimestre)
-                </div>
-            </div>
-        </div>
-
-        <!-- Conseil Primo: Explication de la formule d'engagement (dans la carte) -->
-        <div id="conseil-formule-engagement-carte" class="carte-info-toggle carte-info-conseil" style="display: none; margin-top: 10px;">
-            <strong>Pourquoi la racine cubique ?</strong>
-            <p>La racine cubique (∛) est une <strong>transformation normalisante</strong> qui préserve l'échelle d'origine tout en combinant les trois indices.</p>
-
-            <p><strong>Exemple concret :</strong></p>
-            <ul style="margin-left: 20px; line-height: 1.6;">
-                <li><strong>Sans racine cubique :</strong> Un étudiant à 70% sur A, C et P aurait : 0.7 × 0.7 × 0.7 = <strong>34%</strong> d'engagement ← Trop punitif !</li>
-                <li><strong>Avec racine cubique :</strong> Le même étudiant obtient : ∛(0.7 × 0.7 × 0.7) = <strong>70%</strong> d'engagement ← Cohérent et intuitif !</li>
-            </ul>
-
-            <p><strong>Pourquoi utiliser la multiplication ?</strong></p>
-            <p>La multiplication (plutôt qu'une simple moyenne) permet de <strong>pénaliser les déséquilibres</strong>. Un étudiant qui excelle en assiduité (90%) mais échoue en performance (30%) aura un engagement plus faible qu'un étudiant équilibré à 60% partout.</p>
-
-            <p><strong>En résumé :</strong></p>
-            <p>La racine cubique compense la décroissance multiplicative tout en préservant l'effet punitif sur les déséquilibres importants. C'est la <strong>moyenne géométrique</strong> des trois indices A-C-P.</p>
-        </div>
-
-        <!-- INTERPRÉTATION QUALITATIVE -->
-        <div style="padding: 15px; background: linear-gradient(to right, ${interpE.couleur}22, ${interpE.couleur}11);
-                    border-left: 4px solid ${interpE.couleur}; margin-bottom: 15px;">
-            <div style="font-size: 1.1rem; font-weight: bold; color: ${interpE.couleur}; margin-bottom: 8px;">
-                ${interpE.emoji} ${interpE.niveau}
-            </div>
-            <div style="color: var(--gris-moyen); line-height: 1.5;">
-                ${interpE.niveau === 'Excellent engagement' ?
-                    "Cet étudiant démontre un engagement global exemplaire, combinant présence, complétion et performance de haut niveau." :
-                  interpE.niveau === 'Bon engagement' ?
-                    "Cet étudiant montre un bon engagement global. La combinaison présence-complétion-performance est satisfaisante." :
-                  interpE.niveau === 'En développement' ?
-                    "L'engagement global nécessite une attention. Un soutien ciblé sur le facteur limitant pourrait améliorer significativement l'engagement." :
-                  interpE.niveau === 'Engagement insuffisant' ?
-                    "⚠️ Engagement insuffisant. Les composantes A-C-P révèlent des faiblesses qui nécessitent une intervention de niveau 2." :
-                    "🚨 Engagement très faible. Intervention immédiate de niveau 3 requise pour éviter l'échec."}
-            </div>
-        </div>
-
-        <!-- DÉCOMPOSITION VISUELLE -->
-        <h4 class="profil-titre-bleu-compact">
-            Décomposition de l'indice E
-        </h4>
-        <div class="profil-carte-simple">
-            <div class="profil-texte-mono-centre-bleu">
-                E = ∛(A × C × P)
-                <span class="primo-aide" data-target="conseil-formule-engagement-principale" style="display: inline-block !important; cursor: pointer;">📍</span>
-            </div>
-            <div class="profil-texte-mono-centre-bleu">
-                E = ∛(${A.toFixed(2)} × ${C.toFixed(2)} × ${P.toFixed(2)}) = ${indices.E}
-            </div>
-            <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 4px; font-size: 0.9rem; color: var(--gris-fonce); line-height: 1.6;">
-                <strong>⚠️ Nature multiplicative :</strong> Si un seul composant est faible, l'engagement global chute drastiquement.
-                ${indices.E < 0.50 ? `<br><strong>Facteur limitant identifié :</strong> ${facteurLimitant.nom} (${facteurLimitant.pourcentage}%)` : ''}
-            </div>
-        </div>
-
-        <!-- Conseil Primo: Explication de la formule d'engagement -->
-        <div id="conseil-formule-engagement-principale" class="carte-info-toggle carte-info-conseil" style="display: none; margin-top: 10px;">
-            <strong>Pourquoi la racine cubique ?</strong>
-            <p>La racine cubique (∛) est une <strong>transformation normalisante</strong> qui préserve l'échelle d'origine tout en combinant les trois indices.</p>
-
-            <p><strong>Exemple concret :</strong></p>
-            <ul style="margin-left: 20px; line-height: 1.6;">
-                <li><strong>Sans racine cubique :</strong> Un étudiant à 70% sur A, C et P aurait : 0.7 × 0.7 × 0.7 = <strong>34%</strong> d'engagement ← Trop punitif !</li>
-                <li><strong>Avec racine cubique :</strong> Le même étudiant obtient : ∛(0.7 × 0.7 × 0.7) = <strong>70%</strong> d'engagement ← Cohérent et intuitif !</li>
-            </ul>
-
-            <p><strong>Pourquoi utiliser la multiplication ?</strong></p>
-            <p>La multiplication (plutôt qu'une simple moyenne) permet de <strong>pénaliser les déséquilibres</strong>. Un étudiant qui excelle en assiduité (90%) mais échoue en performance (30%) aura un engagement plus faible qu'un étudiant équilibré à 60% partout.</p>
-
-            <p><strong>En résumé :</strong></p>
-            <p>La racine cubique compense la décroissance multiplicative tout en préservant l'effet punitif sur les déséquilibres importants. C'est la <strong>moyenne géométrique</strong> des trois indices A-C-P.</p>
-        </div>
-
-        <!-- PROCHAIN SEUIL -->
-        ${prochainSeuil ? `
-            <div style="background: var(--bleu-pale); border: 1px solid var(--bleu-clair); padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-                <h4 style="color: var(--bleu-clair); margin-bottom: 10px;">🎯 Prochain objectif</h4>
-                <div style="color: var(--bleu-clair); line-height: 1.6;">
-                    <strong>Seuil à atteindre :</strong> ${prochainSeuil}<br>
-                    <strong>Distance :</strong> ${(distanceSeuil * 100).toFixed(1)} points<br>
-                    ${facteurLimitant.valeur < 0.70 ?
-                        `<strong>💡 Levier principal :</strong> Améliorer ${facteurLimitant.nom} pour un effet multiplicatif maximum` : ''}
-                </div>
-            </div>
-        ` : `
-            <div class="info-box info-box--info" style="margin-bottom: 15px;">
-                <div style="color: var(--bleu-clair); font-weight: bold;">
-                    🏆 Seuil maximum atteint ! Maintenir cet excellent engagement.
-                </div>
-            </div>
-        `}
-
-        <!-- RECOMMANDATIONS -->
-        ${indices.E < 0.75 ? `
-            <div style="background: ${indices.E < 0.40 ? '#f8d7da' : '#fff3cd'};
-                        border-left: 4px solid ${indices.E < 0.40 ? '#dc3545' : '#ffc107'};
-                        padding: 15px; border-radius: 6px;">
-                <h4 style="color: ${indices.E < 0.40 ? '#721c24' : '#856404'}; margin-bottom: 10px;">
-                    💡 Recommandations d'intervention
-                </h4>
-                <ul style="margin: 0; padding-left: 20px; color: ${indices.E < 0.40 ? '#721c24' : '#856404'}; line-height: 1.6;">
-                    ${facteurLimitant.valeur < 0.65 ?
-                        `<li><strong>Priorité absolue :</strong> ${facteurLimitant.nom} est le facteur limitant critique (${facteurLimitant.pourcentage}%)</li>` : ''}
-                    ${indices.E < 0.40 ?
-                        '<li><strong>Intervention RàI niveau 3 immédiate</strong> - Risque d\'échec très élevé</li>' : ''}
-                    ${indices.E >= 0.40 && indices.E < 0.65 ?
-                        '<li><strong>Intervention RàI niveau 2 recommandée</strong> - Soutien ciblé requis</li>' : ''}
-                    <li>Cibler le composant le plus faible pour maximiser l'effet multiplicatif</li>
-                    ${A < 0.70 || C < 0.70 ?
-                        '<li>Focus sur l\'engagement comportemental (A et C) avant la performance</li>' : ''}
-                    ${P < 0.70 && A >= 0.70 && C >= 0.70 ?
-                        '<li>Présence et remise satisfaisantes : concentrer le soutien sur la qualité des productions</li>' : ''}
-                </ul>
-            </div>
-        ` : ''}
-    `;
-}
-
-/**
- * Génère le HTML de la section Risque (R) détaillée
- * @param {string} da - Numéro de DA
- * @returns {string} - HTML de la section
- */
-function genererSectionRisque(da) {
-    const indices = calculerTousLesIndices(da);
-    const interpE = interpreterEngagement(indices.E);
-
-    // Déterminer le niveau RàI basé sur l'engagement (E)
-    let niveauRaI = 1;
-    let descriptionRaI = 'Niveau 1 - Surveillance universelle';
-    let urgence = 'Aucune action immédiate requise';
-    let couleurUrgence = '#28a745';
-
-    // Seuils basés sur l'engagement (inversé par rapport au risque)
-    if (indices.E < 0.30) {
-        niveauRaI = 3;
-        descriptionRaI = 'Niveau 3 - Intervention intensive individuelle';
-        urgence = '🚨 URGENCE MAXIMALE - Intervention immédiate requise';
-        couleurUrgence = '#dc3545';
-    } else if (indices.E < 0.50) {
-        niveauRaI = 2;
-        descriptionRaI = 'Niveau 2 - Intervention ciblée en petit groupe';
-        urgence = '⚠️ Intervention prioritaire dans les prochains jours';
-        couleurUrgence = '#ff9800';
-    } else if (indices.E < 0.65) {
-        niveauRaI = 2;
-        descriptionRaI = 'Niveau 2 - Surveillance accrue';
-        urgence = '⚡ Attention requise - Surveillance renforcée';
-        couleurUrgence = '#ffc107';
-    }
-
-    const pourcentageEngagement = (indices.E * 100).toFixed(0);
-
-    return `
-        <!-- BADGE NIVEAU ENGAGEMENT -->
-        <div class="badge" style="background-color: ${interpE.couleur}22; color: ${interpE.couleur}; border: 1px solid ${interpE.couleur};">
-            ${interpE.niveau} (${pourcentageEngagement}%)
-        </div>
-
-        <ul class="info-liste">
-            <li><strong>Niveau RàI :</strong> ${descriptionRaI}</li>
-            <li><strong>Urgence :</strong> <span style="color: ${couleurUrgence};">${urgence}</span></li>
-        </ul>
-
-        <div class="section-titre u-mt-25">Position sur l'échelle de risque</div>
-
-        <div class="profil-echelle-risque">
-            <div class="profil-echelle-barre" style="background: linear-gradient(to right,
-                        var(--bleu-clair) 0%, var(--bleu-clair) 20%,
-                        var(--vert-succes) 20%, var(--vert-succes) 35%,
-                        var(--btn-annuler) 35%, var(--btn-annuler) 50%,
-                        var(--orange-accent) 50%, var(--orange-accent) 70%,
-                        var(--rouge-erreur) 70%, var(--rouge-erreur) 100%);">
-                <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(indices.R * 100, 100)}%;">▼</div>
-                <div class="profil-echelle-indicateur-bas" style="left: ${Math.min(indices.R * 100, 100)}%;">R = ${indices.R}</div>
-            </div>
-
-            <div class="legende-risque-container">
-                <div class="legende-risque-item" style="left: 10%; color: var(--bleu-clair);">
-                    <span class="legende-risque-niveau">Minimal</span>
-                    <span class="legende-risque-seuil">0-0.19</span>
-                </div>
-                <div class="legende-risque-item" style="left: 27.5%; color: var(--vert-succes);">
-                    <span class="legende-risque-niveau">Faible</span>
-                    <span class="legende-risque-seuil">0.20-0.34</span>
-                </div>
-                <div class="legende-risque-item" style="left: 42.5%; color: var(--btn-annuler);">
-                    <span class="legende-risque-niveau">Modéré</span>
-                    <span class="legende-risque-seuil">0.35-0.49</span>
-                </div>
-                <div class="legende-risque-item" style="left: 60%; color: var(--orange-accent);">
-                    <span class="legende-risque-niveau">Élevé</span>
-                    <span class="legende-risque-seuil">0.50-0.69</span>
-                </div>
-                <div class="legende-risque-item" style="left: 85%; color: var(--rouge-erreur);">
-                    <span class="legende-risque-niveau">Critique</span>
-                    <span class="legende-risque-seuil">≥ 0.70</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="profil-formule">
-            <div class="profil-formule-code">R = 1 - E = 1 - ${indices.E} = ${indices.R}</div>
-        </div>
-
-        <div class="profil-formule-explications">
-            L'engagement mesure la <strong>mobilisation globale</strong> de l'étudiant selon la formule : E = ∛(A × C × P)
-            <span class="primo-aide" data-target="conseil-formule-engagement">📍</span>
-            <br>Engagement actuel : <strong style="color: ${interpE.couleur};">${interpE.niveau}</strong>
-        </div>
-
-        <!-- Conseil Primo: Explication de la formule d'engagement -->
-        <div id="conseil-formule-engagement" class="carte-info-toggle carte-info-conseil" style="display: none; margin-top: 10px;">
-            <strong>Pourquoi la racine cubique ?</strong>
-            <p>La racine cubique (∛) est une <strong>transformation normalisante</strong> qui préserve l'échelle d'origine tout en combinant les trois indices.</p>
-
-            <p><strong>Exemple concret :</strong></p>
-            <ul style="margin-left: 20px; line-height: 1.6;">
-                <li><strong>Sans racine cubique :</strong> Un étudiant à 70% sur A, C et P aurait : 0.7 × 0.7 × 0.7 = <strong>34%</strong> d'engagement ← Trop punitif !</li>
-                <li><strong>Avec racine cubique :</strong> Le même étudiant obtient : ∛(0.7 × 0.7 × 0.7) = <strong>70%</strong> d'engagement ← Cohérent et intuitif !</li>
-            </ul>
-
-            <p><strong>Avantages de cette approche :</strong></p>
-            <ul style="margin-left: 20px; line-height: 1.6;">
-                <li>✅ L'engagement reste sur la même échelle que A, C et P (0-100%)</li>
-                <li>✅ Un étudiant équilibré conserve son niveau moyen</li>
-                <li>✅ Les déséquilibres importants restent pénalisés (ex: A=100%, C=100%, P=0% → E=0%)</li>
-                <li>✅ Plus intuitif qu'une moyenne arithmétique qui ne pénaliserait pas assez les lacunes</li>
-            </ul>
-
-            <p style="margin-top: 10px; color: var(--gris-moyen); font-style: italic;">💡 C'est une moyenne géométrique qui mesure la mobilisation globale tout en respectant l'interdépendance des trois dimensions.</p>
-        </div>
-
-        <div class="section-titre u-mt-25">Indicateurs clés</div>
-
-        <div class="profil-grid-indicateurs">
-            <div class="profil-indicateur">
-                <div class="profil-indicateur-contenu">
-                    <span class="profil-indicateur-label">Engagement (E)</span>
-                    <strong class="profil-indicateur-valeur">${indices.E}</strong>
-                </div>
-            </div>
-            <div class="profil-indicateur profil-indicateur-accent-gauche" style="color: ${interpR.couleur};">
-                <div class="profil-indicateur-contenu">
-                    <span class="profil-indicateur-label">Risque (R)</span>
-                    <strong class="profil-indicateur-valeur">${indices.R}</strong>
-                </div>
-            </div>
-            <div class="profil-indicateur">
-                <div class="profil-indicateur-contenu">
-                    <span class="profil-indicateur-label">Niveau RàI</span>
-                    <strong class="profil-indicateur-valeur">${niveauRaI}</strong>
-                </div>
-            </div>
-        </div>
-
-        ${indices.R >= seuilMinimal ? `
-            <div class="profil-recommandations ${indices.R >= seuilEleve ? 'profil-recommandations-danger' : indices.R >= seuilModere ? 'profil-recommandations-avertissement' : 'profil-recommandations-info'} u-mt-20">
-                <h4 class="profil-recommandations-titre ${indices.R >= seuilEleve ? 'u-texte-danger' : indices.R >= seuilModere ? 'profil-texte-avertissement' : 'profil-texte-info'}">
-                    Intervention ciblée recommandée
-                </h4>
-                <ol class="profil-recommandations-liste ${indices.R >= seuilEleve ? 'u-texte-danger' : indices.R >= seuilModere ? 'profil-texte-avertissement' : 'profil-texte-info'}">
-                    ${indices.R >= seuilEleve ? `
-                        <li><strong>JOUR 1 :</strong> Rencontre individuelle urgente avec l'étudiant et conseiller pédagogique</li>
-                        <li><strong>JOUR 2-3 :</strong> Établir un plan d'intervention personnalisé (PIP) avec objectifs mesurables</li>
-                        <li><strong>SEMAINE 1 :</strong> Suivi quotidien de la présence et remise des travaux en retard</li>
-                        <li><strong>Mobiliser :</strong> Parents, aide pédagogique individuelle (API), services étudiants</li>
-                        <li><strong>Réévaluation :</strong> Rencontre de suivi hebdomadaire jusqu'à amélioration significative</li>
-                    ` : indices.R >= seuilModere ? `
-                        <li><strong>Cette semaine :</strong> Rencontre individuelle pour identifier les obstacles</li>
-                        <li><strong>Mise en place :</strong> Soutien ciblé sur le(s) composant(s) faible(s) (A, C ou P)</li>
-                        <li><strong>Suivi :</strong> Vérification bihebdomadaire des progrès</li>
-                        <li><strong>Prévention :</strong> Stratégies d'autorégulation et planification</li>
-                        <li><strong>Réévaluation :</strong> Dans 2 semaines pour ajuster l'intervention</li>
-                    ` : `
-                        <li><strong>Surveillance renforcée :</strong> Monitorer hebdomadairement les indices A-C-P</li>
-                        <li><strong>Dialogue proactif :</strong> Discussion informelle pour détecter signaux faibles</li>
-                        <li><strong>Ressources préventives :</strong> Partager outils d'organisation et de planification</li>
-                        <li><strong>Valorisation :</strong> Renforcer la motivation par rétroaction positive</li>
-                    `}
-                </ol>
-            </div>
-        ` : `
-            <div class="profil-recommandations profil-recommandations-succes u-mt-20">
-                <h4 class="profil-recommandations-titre u-texte-succes">Maintien de l'engagement</h4>
-                <ul class="profil-recommandations-liste u-texte-succes">
-                    <li>Continuer la surveillance universelle (Niveau RàI 1)</li>
-                    <li>Fournir rétroaction positive régulière</li>
-                    <li>Encourager l'autonomie et l'autorégulation</li>
-                    <li>Offrir défis stimulants pour maintenir la motivation</li>
-                </ul>
-            </div>
-        `}
     `;
 }
 
@@ -2995,15 +2420,15 @@ function changerSectionProfil(section) {
             contenu = genererContenuCibleIntervention(da);
             break;
         case 'progression':
-            titre = 'Progression temporelle';
+            titre = 'Progression temporelle ACP';
             contenu = genererSectionProgression(da);
             break;
         case 'performance':
-            titre = 'Développement des habiletés et compétences';
+            titre = 'Développement des habiletés';
             contenu = genererSectionPerformance(da);
             break;
         case 'mobilisation':
-            titre = 'Engagement';
+            titre = 'Engagement ACP';
             contenu = genererSectionMobilisationEngagement(da);
             break;
         case 'rapport':
@@ -3041,7 +2466,7 @@ function changerSectionProfil(section) {
     contenuContainer.innerHTML = `
         <div class="profil-contenu-header">
             <h2 class="u-flex-between-mb20">
-                <span data-tooltip="${{'productions':'profil-productions','mobilisation':'profil-engagement','progression':'profil-progression','performance':'profil-habiletes','accompagnement':'profil-accompagnement','travaux':'profil-travaux','rapport':'profil-rapport'}[section] || ''}">${titre}</span>
+                <span data-tooltip="${{'productions':'profil-productions','mobilisation':'profil-mobilisation','progression':'profil-progression','performance':'profil-habiletes','accompagnement':'profil-accompagnement','travaux':'profil-travaux','rapport':'profil-rapport'}[section] || ''}">${titre}</span>
                 ${toggleInfo}
             </h2>
         </div>
@@ -3425,7 +2850,6 @@ function afficherProfilComplet(daOuEl) {
     const A = indices.A / 100;
     const C = indices.C / 100;
     const interpM = interpreterMobilisation(A, C);
-    const interpE = interpreterEngagement(indices.E);
 
     // NOUVEAU (Beta 90): Calcul dual pour mode comparatif
     const config = db.getSync('modalitesEvaluation', {});
@@ -3436,8 +2860,11 @@ function afficherProfilComplet(daOuEl) {
     const afficherPan = affichage.afficherAlternatif === true;
     const modeComparatif = afficherSom && afficherPan;
 
-    // Vérifier si le modèle RàI est activé
-    const activerRai = config.activerRai !== false; // Par défaut true (rétrocompatibilité)
+    // Vérifier si le modèle RàI est activé (préférence utilisateur)
+    const activerRai = obtenirPreference('activerRai') !== false;
+    const engagementVisible = obtenirPreference('depistageAcp') !== false;
+    const progressionVisible = obtenirPreference('afficherGraphiques') !== false;
+    const developpementVisible = obtenirPreference('afficherDeveloppementHabiletes') !== false;
 
     // ✅ OPTIMISATION (7 déc 2025): Calculer uniquement la pratique active sauf en mode comparatif
     let indicesSOM, indicesPAN;
@@ -3475,12 +2902,24 @@ function afficherProfilComplet(daOuEl) {
     if (sectionAffichee === 'productions') {
         titreSection = 'Productions et évaluations';
         contenuSection = genererSectionProductions(da);
-    } else if (sectionAffichee === 'performance') {
-        titreSection = 'Développement des habiletés et compétences';
+    } else if (sectionAffichee === 'performance' && developpementVisible) {
+        titreSection = 'Développement des habiletés';
         contenuSection = genererSectionPerformance(da);
-    } else if (sectionAffichee === 'mobilisation') {
-        titreSection = 'Engagement';
+    } else if (sectionAffichee === 'performance' && !developpementVisible) {
+        // Si Développement des habiletés désactivé, rediriger vers productions
+        titreSection = 'Productions et évaluations';
+        contenuSection = genererSectionProductions(da);
+    } else if (sectionAffichee === 'mobilisation' && engagementVisible) {
+        titreSection = 'Engagement ACP';
         contenuSection = genererSectionMobilisationEngagement(da);
+    } else if (sectionAffichee === 'mobilisation' && !engagementVisible) {
+        // Si Micro données ACP désactivé, rediriger vers productions
+        titreSection = 'Productions et évaluations';
+        contenuSection = genererSectionProductions(da);
+    } else if (sectionAffichee === 'progression' && !progressionVisible) {
+        // Si Graphiques d'évolution désactivé, rediriger vers productions
+        titreSection = 'Productions et évaluations';
+        contenuSection = genererSectionProductions(da);
     } else if (sectionAffichee === 'rapport') {
         titreSection = 'Rapport';
         contenuSection = genererSectionRapport(da);
@@ -3556,20 +2995,26 @@ function afficherProfilComplet(daOuEl) {
                         <div class="sidebar-item-titre">Productions</div>
                     </div>
 
-                    <!-- 2. Engagement -->
+                    <!-- 2. Engagement ACP (affiché uniquement si Micro données ACP activé) -->
+                    ${engagementVisible ? `
                     <div class="sidebar-item ${sectionAffichee === 'mobilisation' ? 'active' : ''}" data-action="changerSectionProfil" data-param="mobilisation">
-                        <div class="sidebar-item-titre">Engagement</div>
+                        <div class="sidebar-item-titre">Engagement ACP</div>
                     </div>
+                    ` : ''}
 
-                    <!-- 2b. Progression temporelle -->
+                    <!-- 2b. Progression temporelle ACP (affiché uniquement si Graphiques d'évolution activé) -->
+                    ${progressionVisible ? `
                     <div class="sidebar-item ${sectionAffichee === 'progression' ? 'active' : ''}" data-action="changerSectionProfil" data-param="progression">
-                        <div class="sidebar-item-titre">Progression temporelle</div>
+                        <div class="sidebar-item-titre">Progression temporelle ACP</div>
                     </div>
+                    ` : ''}
 
-                    <!-- 3. Développement des habiletés -->
+                    <!-- 3. Développement des habiletés (affiché uniquement si préférence activée) -->
+                    ${developpementVisible ? `
                     <div class="sidebar-item ${sectionAffichee === 'performance' ? 'active' : ''}" data-action="changerSectionProfil" data-param="performance">
                         <div class="sidebar-item-titre">Développement des habiletés</div>
                     </div>
+                    ` : ''}
 
                     <!-- 4. Accompagnement (affiché uniquement si RàI activé) -->
                     ${activerRai ? `
@@ -3595,7 +3040,7 @@ function afficherProfilComplet(daOuEl) {
                 <!-- Contenu dynamique chargé par changerSectionProfil() -->
                 <div class="profil-contenu-header">
                     <h2 class="u-flex-between-mb20">
-                        <span data-tooltip="${{'productions':'profil-productions','mobilisation':'profil-engagement','progression':'profil-progression','performance':'profil-habiletes','accompagnement':'profil-accompagnement','travaux':'profil-travaux','rapport':'profil-rapport'}[sectionAffichee] || ''}">${titreSection}</span>
+                        <span data-tooltip="${{'productions':'profil-productions','mobilisation':'profil-mobilisation','progression':'profil-progression','performance':'profil-habiletes','accompagnement':'profil-accompagnement','travaux':'profil-travaux','rapport':'profil-rapport'}[sectionAffichee] || ''}">${titreSection}</span>
                         <span class="primo-aide" data-target="details-calculs-risque-${da}">📍</span>
                     </h2>
                 </div>
@@ -4259,11 +3704,7 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
  */
 function genererBandeauContexteProfil() {
     // Vérifier la préférence
-    let afficher = true;
-    try {
-        const prefs = db.getSync('preferencesAffichage') || {};
-        afficher = prefs.afficherContexteGraphiques !== false;
-    } catch (e) { console.warn('[Profil] preferencesAffichage read fallback (default: true):', e.message || e); }
+    const afficher = obtenirPreference('afficherContexteGraphiques') !== false;
     if (!afficher) return '';
 
     // Trimestre
@@ -4306,6 +3747,9 @@ function genererBandeauContexteProfil() {
 }
 
 function genererSectionProgression(da) {
+    if (typeof obtenirPreference === 'function' && obtenirPreference('afficherGraphiques') === false) {
+        return '';
+    }
     // Vérifier si le module de captures existe
     if (typeof obtenirSnapshotsEtudiant !== 'function') {
         return `
@@ -4427,165 +3871,6 @@ function genererSectionProgression(da) {
     return html;
 }
 
-function genererSectionPerformance(da) {
-    // ✨ NOUVEAU (7 déc 2025) : Graphique d'évolution des critères
-    const canvasIdCriteres = `graphique-criteres-${da}`;
-    let graphiqueCriteres = '';
-
-    // 🐛 DEBUG (8 déc 2025) : Tracer exécution
-
-    // Vérifier si l'étudiant a des évaluations avec détails critères
-    if (typeof creerGraphiqueCriteres === 'function') {
-        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-
-        const evaluationsAvecCriteres = evaluations.filter(e =>
-            e.etudiantDA === da &&
-            !e.remplaceeParId &&
-            e.criteres &&
-            Array.isArray(e.criteres) &&
-            e.criteres.length > 0
-        );
-
-        if (evaluationsAvecCriteres.length > 0) {
-
-            // Extraire les critères uniques pour la légende
-            const criteresSet = new Set();
-            evaluationsAvecCriteres.forEach(e => {
-                e.criteres.forEach(c => {
-                    if (c.critereNom) criteresSet.add(c.critereNom);
-                });
-            });
-            const criteresUniques = Array.from(criteresSet).sort();
-
-            // Palette de couleurs (même que dans creerGraphiqueCriteres)
-            const COULEURS_CRITERES = [
-                '#E91E63', '#9C27B0', '#3F51B5', '#00BCD4',
-                '#4CAF50', '#FF9800', '#795548', '#607D8B'
-            ];
-
-            // Générer la légende HTML avec checkboxes
-            const legendeHTML = criteresUniques.map((critere, index) => {
-                const couleur = COULEURS_CRITERES[index % COULEURS_CRITERES.length];
-                const critereEscaped = critere.replace(/'/g, "\\'");
-                return `<label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: ${couleur}; font-size: 0.78rem;">
-                    <input type="checkbox" checked data-on-change="toggleCritereIndivHandler" data-critere="${critereEscaped}" data-da="${da}">
-                    <span style="width: 10px; height: 10px; background: ${couleur}; border-radius: 50%; display: inline-block;"></span>
-                    ${critere}
-                </label>`;
-            }).join('');
-
-            graphiqueCriteres = `
-                <div class="profil-zone-moyenne-bleu" style="margin-bottom: 20px;">
-                    <!-- Légende des critères -->
-                    <div style="background: var(--surface-conteneur, #142428); padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                        <span style="font-weight: 600; color: var(--gris-fonce);">Critères :</span>
-                        ${legendeHTML}
-                        ${genererBandeauContexteProfil()}
-                    </div>
-
-                    <!-- Canvas pour le graphique Chart.js -->
-                    <div style="background: var(--surface-conteneur, #142428); padding: 20px; border-radius: 6px; height: 450px;">
-                        <canvas id="${canvasIdCriteres}"></canvas>
-                    </div>
-                </div>
-            `;
-
-            // Utiliser setTimeout pour créer le graphique après l'insertion du DOM
-            setTimeout(() => {
-                const canvas = document.getElementById(canvasIdCriteres);
-                if (canvas) {
-                    creerGraphiqueCriteres(canvasIdCriteres, da);
-                }
-            }, 100);
-        }
-    }
-
-    // 🎯 DÉTECTION PRATIQUE MULTI-OBJECTIFS
-    const statusPratiqueMultiObjectifs = verifierPratiqueMultiObjectifs();
-
-    if (statusPratiqueMultiObjectifs.actif && typeof calculerNoteFinaleMultiObjectifs === 'function') {
-        // Pratique multi-objectifs : afficher le tableau des objectifs
-        const noteFinale = calculerNoteFinaleMultiObjectifs(da, statusPratiqueMultiObjectifs.ensembleId);
-
-        if (noteFinale && noteFinale.noteFinale !== null) {
-            return `
-                ${graphiqueCriteres}
-                <div style="padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                    ${genererTableauObjectifs(da, statusPratiqueMultiObjectifs.ensembleId, noteFinale)}
-                </div>
-            `;
-        } else {
-            return `
-                ${graphiqueCriteres}
-                <div class="profil-zone-moyenne-bleu">
-                    <p class="u-texte-gris">Pratique multi-objectifs activée avec l'ensemble «${echapperHtml(statusPratiqueMultiObjectifs.ensemble.nom)}»</p>
-                    <p class="u-texte-gris-clair u-mt-10">Aucune évaluation disponible pour le moment</p>
-                </div>
-            `;
-        }
-    }
-
-    // Pratique PAN classique : afficher les meilleurs artefacts
-    const meilleures = obtenirDetailsPerformance(da);
-
-    if (meilleures.length === 0) {
-        return `
-            ${graphiqueCriteres}
-            <div class="profil-zone-moyenne-bleu">
-                <p class="u-texte-gris">Aucune évaluation disponible pour le moment</p>
-            </div>
-        `;
-    }
-
-    const moyenne = meilleures.reduce((sum, m) => sum + m.note, 0) / meilleures.length;
-
-    return `
-        ${graphiqueCriteres}
-        <div style="padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
-            <div style="background: var(--surface-conteneur, #142428); padding: 20px; border-radius: 6px; text-align: center; margin-bottom: 20px;">
-                <div class="u-texte-09 u-texte-gris" style="margin-bottom: 5px;">
-                    Moyenne PAN (${meilleures.length} meilleur${meilleures.length > 1 ? 's' : ''} artefact${meilleures.length > 1 ? 's' : ''})
-                </div>
-                <div style="font-size: 3rem; font-weight: bold; color: ${obtenirCouleurIndice(moyenne)};">
-                    ${moyenne.toFixed(1)}/100
-                </div>
-            </div>
-
-            <h4 class="profil-section-titre-large">
-                🏆 Les ${meilleures.length} meilleur${meilleures.length > 1 ? 's' : ''} artefact${meilleures.length > 1 ? 's' : ''}
-            </h4>
-
-            ${meilleures.map((art, index) => `
-                <div style="background: var(--surface-conteneur, #142428); padding: 15px; margin-bottom: 10px; border-left: 4px solid ${obtenirCouleurIndice(art.note)};">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-                        <div style="flex: 1;">
-                            <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 5px;">
-                                #${index + 1} · ${echapperHtml(art.description)}
-                            </div>
-                            <div class="profil-texte-detail-compact">
-                                Évalué le ${formaterDate(art.dateEvaluation)}
-                            </div>
-                        </div>
-                        <div class="u-text-right">
-                            <div style="font-size: 1.8rem; font-weight: bold; color: ${obtenirCouleurIndice(art.note)};">
-                                ${art.note}/100
-                            </div>
-                            <div style="font-size: 0.9rem; color: var(--texte-secondaire); font-weight: bold;">
-                                ${art.niveau}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `).join('')}
-
-            <div style="background: var(--surface-conteneur, #142428); padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.9rem; color: var(--gris-moyen);">
-                <strong>Principe PAN :</strong> La note finale est calculée sur la moyenne des 3 meilleurs ${obtenirTermeProduction('pluriel')}
-                plutôt que sur la moyenne de tous les artefacts.
-            </div>
-        </div>
-    `;
-}
-
 /**
  * Variable globale pour suivre quel indice est actuellement affiché
  */
@@ -4674,22 +3959,6 @@ function toggleDetailIndice(indice, da) {
                     🎯 Mobilisation détaillée
                 </h3>
                 ${genererSectionMobilisation(da)}
-            `;
-            break;
-        case 'E':
-            html = `
-                <h3 class="profil-titre-bleu-large-pr40">
-                    ⚡ Engagement détaillé
-                </h3>
-                ${genererSectionEngagement(da)}
-            `;
-            break;
-        case 'R':
-            html = `
-                <h3 class="profil-titre-bleu-large-pr40">
-                    ⚡ Engagement détaillé
-                </h3>
-                ${genererSectionRisque(da)}
             `;
             break;
     }
@@ -6158,8 +5427,7 @@ function determinerCibleIntervention(da) {
     // LOGIQUE DE DÉCISION (formule Excel traduite en JavaScript)
 
     // 1. Vérifier décrochage (priorité absolue)
-    // Note: Remplacé "risque élevé" par "engagement très faible" (< 0.3)
-    if (E === 'Décrochage' || indices.E < 0.3) {
+    if (E === 'Décrochage') {
         return {
             cible: 'Décrochage',
             pattern: M,
@@ -6318,32 +5586,7 @@ function determinerCibleIntervention(da) {
         }
     }
 
-    // 5. Stable MAIS risque élevé = plateau problématique
-    const seuilRisqueModere = obtenirSeuil('risque.modere');
-    const seuilRisqueFaible = obtenirSeuil('risque.faible');
-
-    if (M === 'Stable' && indices.R >= seuilRisqueModere) {
-        return {
-            cible: 'Plateau à risque élevé | Intervention pour sortir de la zone de risque',
-            pattern: M,
-            niveau: 2,
-            couleur: '#ff9800',
-            emoji: '🟠'
-        };
-    }
-
-    // 6. Stable avec risque modéré = attention requise
-    if (M === 'Stable' && indices.R >= seuilRisqueFaible) {
-        return {
-            cible: 'Plateau à risque modéré | Soutien préventif recommandé',
-            pattern: M,
-            niveau: 2,
-            couleur: '#ffc107',
-            emoji: '🟡'
-        };
-    }
-
-    // 7. Stable (performance satisfaisante)
+    // 5. Stable (performance satisfaisante)
     if (M === 'Stable') {
         if (N === 'Aucun' && I >= 25) {
             return {
@@ -6799,14 +6042,14 @@ function genererDiagnosticGenerique(da, defisInfo) {
  */
 
 /**
- * Génère les barres de progression SRPNF (Forces et défis parmi les critères)
- * Indépendant du portfolio — utilise les moyennes SRPNF de l'étudiant
+ * Génère les barres de progression SRPNF (Forces et défis parmi les critères).
+ * Indépendant du portfolio — utilise les moyennes SRPNF de l'étudiant.
+ * Depuis la refonte onglets (avril 2026), le graphique critères est rendu
+ * séparément dans l'onglet « Critères » ; cette fonction ne l'inclut plus.
  * @param {string} da - Numéro DA
- * @param {string} graphiqueCriteres - HTML du graphique d'évolution (optionnel)
- * @returns {string} - HTML complet (graphique + barres + légende)
+ * @returns {string} - HTML des barres + encadré suivi des fondamentaux
  */
-function _genererBarresSRPNF(da, graphiqueCriteres) {
-    graphiqueCriteres = graphiqueCriteres || '';
+function _genererBarresSRPNF(da) {
 
     // Récupérer les couleurs depuis l'échelle configurée
     const echelles = db.getSync('echellesTemplates', []);
@@ -6912,91 +6155,361 @@ function _genererBarresSRPNF(da, graphiqueCriteres) {
         contenuBarres = barresHTML + legendeHTML;
     }
 
-    // Encadré Suivi de l'apprentissage (IPB × direction)
-    var encadreSuivi = '';
-    if (typeof diagnostiquerSuiviApprentissage === 'function') {
-        var suivi = diagnostiquerSuiviApprentissage(da);
-        if (suivi) {
-            // Pastilles par artefact — couleurs IDME de l'échelle configurée
-            // Ordre chronologique : ancien (gauche) → récent (droite)
-            var niveauxEchelle = db.getSync('niveauxEchelle', []);
-            var couleursIDME = { I: 'var(--orange-accent, #ff9800)', D: 'var(--btn-annuler, #ffc107)', M: 'var(--succes, #28a745)', E: 'var(--bleu-principal, #2196f3)' };
-            niveauxEchelle.forEach(function (n) {
-                if (n.couleur && ['I', 'D', 'M', 'E'].indexOf(n.code) >= 0) {
-                    couleursIDME[n.code] = n.couleur;
-                }
-            });
-
-            var pastilles = '';
-            var scores = suivi.scoresParArtefact || [];
-            for (var pi = 0; pi < scores.length; pi++) {
-                var s = scores[pi];
-                var couleurPastille = 'var(--gris-moyen)';
-                var codeNiveau = '?';
-                if (s !== null) {
-                    if (s >= 0.85) { couleurPastille = couleursIDME.E; codeNiveau = 'E'; }
-                    else if (s >= 0.75) { couleurPastille = couleursIDME.M; codeNiveau = 'M'; }
-                    else if (s >= 0.65) { couleurPastille = couleursIDME.D; codeNiveau = 'D'; }
-                    else { couleurPastille = couleursIDME.I; codeNiveau = 'I'; }
-                }
-                pastilles += '<span style="color:' + couleurPastille + '; font-size: 1.1rem;" title="Artefact ' + (pi + 1) + ' : ' + (s !== null ? Math.round(s * 100) + '% (' + codeNiveau + ')' : 'N/A') + '">●</span>';
-            }
-
-            // Noms des critères multistructurels surveillés
-            var nomsMulti = suivi.criteresMulti.map(function (c) {
-                return c.charAt(0).toUpperCase() + c.slice(1);
-            });
-            var labelMulti = nomsMulti.join(', ');
-
-            // Texte descriptif selon le diagnostic
-            var texteDefis = '';
-            if (suivi.criteresEnDefi.length > 0) {
-                var nomsDefis = suivi.criteresEnDefi.map(function (c) {
-                    return c.charAt(0).toUpperCase() + c.slice(1);
-                });
-                texteDefis = nomsDefis.join(', ') + ' sous le seuil de ' + Math.round(suivi.seuil * 100) + '%';
-            } else {
-                texteDefis = labelMulti + ' au-dessus du seuil de ' + Math.round(suivi.seuil * 100) + '%';
-            }
-
-            // Score actuel formaté
-            var scoreTexte = suivi.scoreActuel !== null
-                ? Math.round(suivi.scoreActuel * 100) + '% ' + suivi.direction
-                : '';
-
-            // Note pédagogique pour les plateaux
-            var notePlateau = suivi.diagnostic === 'Plateau'
-                ? '<p style="font-size: 0.8rem; color: var(--gris-moyen); margin: 8px 0 0; font-style: italic;">Un plateau peut indiquer une consolidation ou une stagnation — le jugement professionnel est essentiel.</p>'
-                : '';
-
-            encadreSuivi = '<div style="margin: 20px 0; padding: 14px 16px; border-left: 4px solid ' + suivi.couleur + '; background: linear-gradient(to right, ' + suivi.couleur + '11, transparent); border-radius: 0 6px 6px 0;">' +
-                '<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">' +
-                    '<div>' +
-                        '<div style="font-weight: 600; font-size: 0.95rem; color: var(--texte-principal);">Suivi de l\'apprentissage des fondamentaux <button class="btn-aide-contextuelle" data-aide="suivi-apprentissage-fondamentaux" aria-label="Aide : suivi de l\'apprentissage" style="font-size: 0.75rem; vertical-align: middle;">📍</button> <span style="font-weight: 400; font-size: 0.8rem; color: var(--gris-moyen);">(' + echapperHtml(labelMulti) + ')</span></div>' +
-                        '<div style="font-size: 0.9rem; margin-top: 4px; color: var(--texte-principal);">' +
-                            '<span style="font-weight: 600; color: ' + suivi.couleur + ';">' + echapperHtml(suivi.diagnostic) + '</span>' +
-                            (texteDefis ? ' — ' + echapperHtml(texteDefis) : '') +
-                        '</div>' +
-                    '</div>' +
-                    '<div style="display: flex; align-items: center; gap: 12px;">' +
-                        '<div style="letter-spacing: 3px;" title="Score multistructurel par artefact (ancien → récent). IPB : ' + suivi.ipb + ' consécutif' + (suivi.ipb > 1 ? 's' : '') + ' sous ' + Math.round(suivi.seuil * 100) + '%">' + pastilles + '</div>' +
-                        (scoreTexte ? '<div style="font-weight: 600; font-size: 0.95rem; color: var(--texte-principal);">' + scoreTexte + '</div>' : '') +
-                    '</div>' +
-                '</div>' +
-                notePlateau +
-            '</div>';
-        }
-    }
+    // Encadré « Suivi de l'apprentissage des fondamentaux » retiré (17 avril 2026)
+    // Raison : recoupement partiel avec le bloc « Consolidation » maintenant dans
+    // l'onglet Forces et défis. Consolidation couvre tous les critères sur la
+    // trajectoire complète ; le diagnostic IPB × direction peut être réinjecté
+    // dans l'onglet Accompagnement plus tard au besoin.
 
     return `
-        ${graphiqueCriteres}
-        ${encadreSuivi}
-        <div class="section-titre" style="margin-top: 20px;">Forces et défis parmi les critères</div>
+        <div class="section-titre">Forces et défis parmi les critères</div>
         <div style="margin: 20px 0;">${contenuBarres}</div>
     `;
 }
 
+/**
+ * Bloc « Profil RLO (actions cognitives observées) » — étape 8.
+ * Affiché dans « Développement des habiletés », conditionné au toggle
+ * `activerActionsRLO` et à la présence d'au moins une évaluation avec
+ * annotations d'actions RLO pour cet étudiant.
+ */
+function genererBlocProfilRLO(da) {
+    if (typeof actionsRLO === 'undefined' || !actionsRLO.agregerProfilRLOEtudiant) return '';
+    const profil = actionsRLO.agregerProfilRLOEtudiant(da);
+    if (!profil) return '';
+
+    const entete = `
+        <div class="u-flex-between-mb15">
+            <div>
+                <strong style="font-size:1.05rem;">Profil RLO (actions cognitives observées)</strong>
+                <div class="texte-muted" style="font-size:0.8rem; margin-top:2px;">
+                    ${profil.nbEvaluationsObservees} évaluation${profil.nbEvaluationsObservees > 1 ? 's' : ''} annotée${profil.nbEvaluationsObservees > 1 ? 's' : ''} sur ${profil.nbEvaluations}
+                </div>
+            </div>
+            ${profil.total > 0 ? `
+                <div style="text-align:right; font-size:0.85rem; color:var(--texte-secondaire);">
+                    <span>${profil.total} tampon${profil.total > 1 ? 's' : ''} observé${profil.total > 1 ? 's' : ''}</span>
+                </div>
+            ` : ''}
+        </div>`;
+
+    // État vide : aucune annotation `action-*` observée sur les évaluations du DA.
+    if (profil.total === 0) {
+        return `
+            <section class="bloc-rlo-cumulatif">
+                ${entete}
+                <div class="info-box info-box--info" style="margin: 0;">
+                    <div style="display: flex; gap: 10px; align-items: start;">
+                        <span style="font-size: 1.3rem;">📝</span>
+                        <div style="flex: 1;">
+                            <strong style="color: var(--alerte-texte-information); display: block; margin-bottom: 5px;">Aucune action cognitive observée</strong>
+                            <p style="margin: 0; color: var(--alerte-texte-information); font-size: 0.9rem; line-height: 1.5;">
+                                Pose des tampons <strong>Repérage</strong>, <strong>Liaison</strong> ou <strong>Ouverture</strong>
+                                (ou les tampons en difficulté) sur les travaux annotés pour alimenter ce profil.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    const ligneCognitive = [
+        { nom: 'Repérage',  n: profil.reperage },
+        { nom: 'Liaison',   n: profil.liaison },
+        { nom: 'Ouverture', n: profil.ouverture }
+    ];
+    const ligneDifficulte = [
+        { nom: 'Incertain', n: profil.incertain },
+        { nom: 'Incomplet', n: profil.incomplet },
+        { nom: 'Inexact',   n: profil.inexact }
+    ];
+
+    const maxCog = Math.max(profil.reperage, profil.liaison, profil.ouverture, 1);
+    const maxDif = Math.max(profil.incertain, profil.incomplet, profil.inexact, 1);
+
+    const rendreBarre = (items, maxVal, couleur) => items.map(i => {
+        const pct = Math.round((i.n / maxVal) * 100);
+        return `
+            <div style="display:grid; grid-template-columns: 100px 1fr 40px; gap:8px; align-items:center; margin-bottom:4px;">
+                <span style="font-size:0.8rem; color:var(--texte-secondaire);">${i.nom}</span>
+                <div style="background:var(--surface-conteneur); border-radius:3px; height:10px; position:relative; overflow:hidden;">
+                    <div style="background:${couleur}; height:100%; width:${pct}%; transition:width 300ms ease;"></div>
+                </div>
+                <span style="font-size:0.9rem; font-weight:600; text-align:right;">${i.n}</span>
+            </div>`;
+    }).join('');
+
+    const pctCog = Math.round((profil.totalCognitifs / profil.total) * 100);
+    const pctDif = 100 - pctCog;
+
+    return `
+        <section class="bloc-rlo-cumulatif">
+            ${entete}
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
+                <div>
+                    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
+                        <span style="font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--texte-secondaire);">Gestes cognitifs</span>
+                        <span style="font-size:0.8rem; color:var(--texte-secondaire);">${profil.totalCognitifs} · ${pctCog}%</span>
+                    </div>
+                    ${rendreBarre(ligneCognitive, maxCog, 'var(--bleu-principal, #3b82f6)')}
+                </div>
+                <div>
+                    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
+                        <span style="font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--texte-secondaire);">Gestes en difficulté</span>
+                        <span style="font-size:0.8rem; color:var(--texte-secondaire);">${profil.totalDifficultes} · ${pctDif}%</span>
+                    </div>
+                    ${rendreBarre(ligneDifficulte, maxDif, 'var(--orange-accent, #f59e0b)')}
+                </div>
+            </div>
+        </section>
+    `;
+}
+
+/**
+ * Bloc « Consolidation » — résumé des critères consolidés / fragiles / non consolidés.
+ * Déplacé depuis l'onglet Accompagnement vers l'onglet Forces et défis de
+ * « Développement des habiletés » (17 avril 2026), car il porte sur le
+ * développement des habiletés par critère, pas sur l'accompagnement RàI.
+ */
+function genererBlocConsolidation(da) {
+    if (typeof calculerConsolidationIndividuelle !== 'function') return '';
+    const consolidation = calculerConsolidationIndividuelle(da);
+    if (!consolidation || !consolidation.resume) return '';
+    const critConsol = Object.keys(consolidation.resume);
+    if (critConsol.length === 0) return '';
+
+    const items = critConsol.map(critere => {
+        const info = consolidation.resume[critere];
+        if (info.type === 'consolide') {
+            return '<span style="color: var(--vert-succes);">' + echapperHtml(critere) + ' consolidé (' + echapperHtml(info.artefactNom) + ')</span>';
+        } else if (info.type === 'non-consolide-avec-tentatives') {
+            return '<span style="color: var(--orange-attention, #e8a838);">' + echapperHtml(critere) + ' fragile</span>';
+        } else {
+            return '<span style="color: var(--gris-moyen);">' + echapperHtml(critere) + ' non consolidé</span>';
+        }
+    });
+
+    return '<div style="margin-top: 16px; padding: 10px 14px; background: var(--fond-carte, var(--fond-secondaire)); border-radius: 6px; font-size: 0.85rem; color: var(--texte-secondaire);">' +
+        '<strong style="color: var(--texte-principal);">Consolidation :</strong> ' + items.join(' · ') +
+        '</div>';
+}
+
+/**
+ * Conteneur unique des blocs RLO pour l'onglet « Gestes cognitifs ».
+ * Fusionne le cumulatif et le graphique d'évolution dans une seule carte
+ * (au lieu de deux cartes empilées), avec un séparateur visuel entre les deux
+ * blocs et la note discrète d'interprétation placée à la fin.
+ */
+function genererConteneurGestesCognitifs(da) {
+    const cumulatif = genererBlocProfilRLO(da);
+    const evolution = genererBlocEvolutionRLO(da);
+    const note      = genererNoteRLO(da);
+    if (!cumulatif && !evolution && !note) return '';
+
+    const separateur = (cumulatif && evolution)
+        ? '<hr class="bloc-rlo-separateur">'
+        : '';
+
+    return `
+        <div class="bloc-rlo-conteneur">
+            ${cumulatif}
+            ${separateur}
+            ${evolution}
+            ${note}
+        </div>
+    `;
+}
+
+/**
+ * Note discrète d'interprétation des données RLO — spécification 17 avril 2026.
+ * Affichée après le dernier élément RLO visible (bloc cumulatif ou graphique).
+ * Condition : toggle actif ET ≥ 1 évaluation avec des tampons `action-*` observés.
+ */
+function genererNoteRLO(da) {
+    if (typeof actionsRLO === 'undefined' || !actionsRLO.agregerProfilRLOEtudiant) return '';
+    const profil = actionsRLO.agregerProfilRLOEtudiant(da);
+    if (!profil || profil.total === 0) return '';
+    return `
+        <p class="profil-note-rlo">
+            Ces données reflètent les observations posées lors de l'annotation. Elles ne constituent pas un relevé exhaustif des gestes cognitifs présents dans la production.
+        </p>
+    `;
+}
+
+/**
+ * Onglets « Développement des habiletés » — trois vues : Critères, Forces et défis,
+ * Gestes cognitifs. Réduit le scroll vertical en scindant les trois pavés.
+ * Persistance de l'onglet actif via localStorage (`profilOngletDeveloppementActif`).
+ * L'onglet Gestes cognitifs est omis si le toggle `activerActionsRLO` est désactivé.
+ */
+function genererOngletsDeveloppement(da, contenus) {
+    const ongletRLOActif = typeof obtenirPreference === 'function' &&
+        obtenirPreference('activerActionsRLO') === true;
+    const CLE_PERSISTANCE = 'profilOngletDeveloppementActif';
+    const onglets = [
+        { id: 'criteres',         libelle: 'Critères',          contenu: contenus.criteres || '' },
+        { id: 'forces-defis',     libelle: 'Forces et défis',   contenu: contenus.forcesDefis || '' }
+    ];
+    if (ongletRLOActif) {
+        onglets.push({ id: 'gestes-cognitifs', libelle: 'Gestes cognitifs',
+            contenu: contenus.gestesCognitifs || '' });
+    }
+
+    let actifPersiste = null;
+    try { actifPersiste = localStorage.getItem(CLE_PERSISTANCE); } catch (e) {}
+    let idActif = onglets.find(o => o.id === actifPersiste) ? actifPersiste : 'criteres';
+    if (!onglets.find(o => o.id === idActif)) idActif = 'criteres';
+
+    const boutons = onglets.map(o => {
+        const actif = o.id === idActif;
+        return `<button type="button" role="tab" class="onglet-developpement-tab${actif ? ' actif' : ''}"
+            data-action="changerOngletDeveloppement"
+            data-param="${o.id}" data-param2="${da}"
+            aria-selected="${actif}" aria-controls="panel-dev-${o.id}-${da}"
+            id="tab-dev-${o.id}-${da}">${o.libelle}</button>`;
+    }).join('');
+
+    const panels = onglets.map(o => {
+        const actif = o.id === idActif;
+        return `<div class="onglet-developpement-panel" role="tabpanel"
+            id="panel-dev-${o.id}-${da}" aria-labelledby="tab-dev-${o.id}-${da}"
+            data-panel="${o.id}"${actif ? '' : ' hidden'}>${o.contenu}</div>`;
+    }).join('');
+
+    return `
+        <div class="onglets-developpement" data-da="${da}">
+            <div class="onglets-developpement-tabs" role="tablist">${boutons}</div>
+            ${panels}
+        </div>
+    `;
+}
+
+/**
+ * Bascule l'onglet actif de « Développement des habiletés ».
+ * Persisté dans localStorage. Si le panel devenu visible contient un canvas
+ * Chart.js non encore rendu (création différée parent display:none), relance
+ * la création du graphique approprié.
+ * @param {string} idOnglet - 'criteres' | 'forces-defis' | 'gestes-cognitifs'
+ * @param {string} da
+ */
+function changerOngletDeveloppement(idOnglet, da) {
+    if (!idOnglet || !da) return;
+    const conteneur = document.querySelector('.onglets-developpement[data-da="' + da + '"]');
+    if (!conteneur) return;
+
+    conteneur.querySelectorAll('.onglet-developpement-tab').forEach(btn => {
+        const actif = btn.dataset.param === idOnglet;
+        btn.classList.toggle('actif', actif);
+        btn.setAttribute('aria-selected', actif ? 'true' : 'false');
+    });
+    conteneur.querySelectorAll('.onglet-developpement-panel').forEach(panel => {
+        const actif = panel.dataset.panel === idOnglet;
+        if (actif) panel.removeAttribute('hidden');
+        else panel.setAttribute('hidden', '');
+    });
+
+    try { localStorage.setItem('profilOngletDeveloppementActif', idOnglet); } catch (e) {}
+
+    // Chart.js ne rend pas dans un parent caché : relancer au besoin
+    setTimeout(function() {
+        if (idOnglet === 'criteres') {
+            const canvas = document.getElementById('graphique-criteres-' + da);
+            if (canvas && typeof creerGraphiqueCriteres === 'function') {
+                creerGraphiqueCriteres(canvas.id, da);
+            }
+        } else if (idOnglet === 'gestes-cognitifs') {
+            const canvas = document.getElementById('graphique-evolution-rlo-' + da);
+            if (canvas && typeof creerGraphiqueEvolutionRLO === 'function') {
+                creerGraphiqueEvolutionRLO(canvas.id, da);
+            }
+        }
+    }, 50);
+}
+window.changerOngletDeveloppement = changerOngletDeveloppement;
+
+/**
+ * Graphique d'évolution des gestes cognitifs (Repérage / Liaison / Ouverture)
+ * — spec SPEC-EXPORT-GRAPHIQUE-RLO.md, étape 9.
+ *
+ * Affiché sous le bloc cumulatif « Profil RLO » quand :
+ *   - toggle `activerActionsRLO` actif ;
+ *   - préférence `afficherGraphiques` non désactivée ;
+ *   - au moins 2 évaluations avec tampons `action-*` (ratios calculables).
+ */
+function genererBlocEvolutionRLO(da) {
+    if (typeof actionsRLO === 'undefined' || !actionsRLO.obtenirEvolutionRLOEtudiant) return '';
+    if (typeof obtenirPreference === 'function' && obtenirPreference('afficherGraphiques') === false) return '';
+
+    const donnees = actionsRLO.obtenirEvolutionRLOEtudiant(da);
+    if (!donnees || donnees.nbObserves < 2) return '';
+
+    const canvasId = 'graphique-evolution-rlo-' + da;
+    setTimeout(function() {
+        if (typeof creerGraphiqueEvolutionRLO === 'function') {
+            creerGraphiqueEvolutionRLO(canvasId, da);
+        }
+    }, 120);
+
+    // Terme dépendant des réglages de l'utilisateur (artefact / production / ...)
+    const termeSingulierMaj = typeof obtenirTermeProduction === 'function'
+        ? obtenirTermeProduction('singulier', true) : 'Artefact';
+    const termeSing = typeof obtenirTermeProduction === 'function'
+        ? obtenirTermeProduction('singulier') : 'artefact';
+    const prefixeCourt = termeSing.charAt(0).toUpperCase()
+        + termeSing.substring(1, 3).toLowerCase() + '.';
+
+    // Équivalent textuel (accessible) : tableau des ratios par production
+    const lignesAccessibles = donnees.artefacts.map(function(a) {
+        const r = a.ratios;
+        const niv = a.niveauFinal ? echapperHtml(a.niveauFinal) : '—';
+        const cellTete = `<th scope="row">${prefixeCourt} ${a.numero}</th>`;
+        if (!r) {
+            return `<tr>${cellTete}<td>${niv}</td><td colspan="3">Non observé</td></tr>`;
+        }
+        return `<tr>${cellTete}<td>${niv}</td>`
+            + `<td>${r.reperage.toFixed(1)} %</td>`
+            + `<td>${r.liaison.toFixed(1)} %</td>`
+            + `<td>${r.ouverture.toFixed(1)} %</td></tr>`;
+    }).join('');
+
+    return `
+        <section class="bloc-rlo-evolution">
+            <div class="u-flex-between-mb15">
+                <div>
+                    <strong style="font-size:1.05rem;">Évolution des gestes cognitifs</strong>
+                    <div class="texte-muted" style="font-size:0.8rem; margin-top:2px;">
+                        Ratios Repérage / Liaison / Ouverture par artefact
+                    </div>
+                </div>
+            </div>
+            <div style="background: var(--surface-conteneur, #142428); padding: 12px; border-radius: 6px; height: 260px;">
+                <canvas id="${canvasId}" aria-label="Graphique d'évolution des gestes cognitifs"></canvas>
+            </div>
+            <details style="margin-top:8px;">
+                <summary class="texte-muted" style="font-size:0.8rem; cursor:pointer;">Voir les données en tableau</summary>
+                <table style="margin-top:8px; width:100%; font-size:0.85rem; border-collapse:collapse;">
+                    <caption style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);">Ratios cognitifs par artefact</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">${termeSingulierMaj}</th>
+                            <th scope="col">IDME</th>
+                            <th scope="col">Repérage</th>
+                            <th scope="col">Liaison</th>
+                            <th scope="col">Ouverture</th>
+                        </tr>
+                    </thead>
+                    <tbody>${lignesAccessibles}</tbody>
+                </table>
+            </details>
+        </section>
+    `;
+}
+
 function genererSectionPerformance(da) {
+    if (typeof obtenirPreference === 'function' && obtenirPreference('afficherDeveloppementHabiletes') === false) {
+        return '';
+    }
     // ✨ NOUVEAU (7 déc 2025) : Graphique d'évolution des critères
     const canvasIdCriteres = `graphique-criteres-${da}`;
     let graphiqueCriteres = '';
@@ -7074,17 +6587,25 @@ function genererSectionPerformance(da) {
     const portfolio = productions.find(p => p.type === 'portfolio');
 
     // Générer les barres SRPNF (indépendant du portfolio)
-    const barresSRPNF = _genererBarresSRPNF(da, graphiqueCriteres);
+    const barresSRPNF = _genererBarresSRPNF(da);
 
     if (!portfolio) {
-        return barresSRPNF;
+        return genererOngletsDeveloppement(da, {
+            criteres: graphiqueCriteres,
+            forcesDefis: barresSRPNF + genererBlocConsolidation(da),
+            gestesCognitifs: genererConteneurGestesCognitifs(da)
+        });
     }
 
     // Récupérer TOUS les artefacts créés
     const tousLesArtefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
 
     if (tousLesArtefactsPortfolio.length === 0) {
-        return barresSRPNF;
+        return genererOngletsDeveloppement(da, {
+            criteres: graphiqueCriteres,
+            forcesDefis: barresSRPNF + genererBlocConsolidation(da),
+            gestesCognitifs: genererConteneurGestesCognitifs(da)
+        });
     }
 
     // ✅ CORRECTION : Identifier les artefacts RÉELLEMENT ÉVALUÉS
@@ -7365,14 +6886,12 @@ function genererSectionPerformance(da) {
 
             <hr class="profil-separateur">
 
-            <!-- ✨ NOUVEAU (7 déc 2025) : Graphique d'évolution des critères -->
-            ${graphiqueCriteres}
-
-            <!-- Diagnostic SRPNF -->
-            <div class="section-titre">
-                Forces et défis parmi les critères
-            </div>
-            <div style="margin: 20px 0;">
+            <!-- Onglets Critères / Forces et défis / Gestes cognitifs (avril 2026) -->
+            ${genererOngletsDeveloppement(da, {
+                criteres: graphiqueCriteres,
+                forcesDefis: `
+                <div class="section-titre">Forces et défis parmi les critères</div>
+                <div style="margin: 20px 0;">
                 ${(() => {
                     // Récupérer les couleurs depuis l'échelle configurée (localStorage)
                     const echelles = db.getSync('echellesTemplates', []);
@@ -7602,8 +7121,11 @@ function genererSectionPerformance(da) {
 
                     return barresHTML + legendeHTML;
                 })()}
-            </div>
-
+                </div>
+                ${genererBlocConsolidation(da)}
+                `,
+                gestesCognitifs: genererConteneurGestesCognitifs(da)
+            })}
 
     </div>
     `;

@@ -895,7 +895,7 @@ function resetFiltreGroupe() {
 function modifierEtudiant(da) {
     const verrouille = db.getSync('groupeVerrouille', false);
     if (verrouille) {
-        alert('Déverrouillez le groupe (🔓) avant de le modifier');
+        alert('D\u00e9verrouillez le groupe avant de le modifier');
         return;
     }
 
@@ -1115,7 +1115,7 @@ function attacherEventListenersEtudiants() {
 function supprimerEtudiant(id) {
     const verrouille = db.getSync('groupeVerrouille', false);
     if (verrouille) {
-        alert('Déverrouillez le groupe (🔓) avant de supprimer');
+        alert('D\u00e9verrouillez le groupe avant de supprimer');
         return;
     }
 

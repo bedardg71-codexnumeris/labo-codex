@@ -143,7 +143,7 @@
         modal.innerHTML = `
             <div class="primo-popup-header">
                 <span id="aide-ctx-titre" class="primo-popup-titre">📍 ${aide.titre}</span>
-                <button class="primo-popup-fermer" data-action="fermerAideContextuelle" aria-label="Fermer">×</button>
+                <button class="primo-popup-fermer" data-action="fermerAideContextuelle" aria-label="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
             </div>
             <div class="primo-popup-body aide-contextuelle-body">
                 ${contenuHTML}
@@ -267,7 +267,7 @@
         bulle.className = 'bulle-decouverte bulle-decouverte--' + position;
         bulle.innerHTML =
             '<span>' + message + '</span>' +
-            '<button class="bulle-decouverte-fermer" aria-label="Fermer">×</button>';
+            '<button class="bulle-decouverte-fermer" aria-label="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>';
 
         bulle.querySelector('.bulle-decouverte-fermer').addEventListener('click', function() {
             bulle.remove();

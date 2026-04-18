@@ -224,7 +224,7 @@
         var fermerAttr = 'data-action="' + (config.onFermerAction || config.onFermer) + '"';
         var html = '<div id="' + config.modalId + '" class="modal-js-overlay" style="z-index: 10000;">' +
             '<div class="modal-js-contenu" style="max-width: 800px;">' +
-                '<button ' + fermerAttr + ' class="modal-js-btn-fermer">×</button>' +
+                '<button ' + fermerAttr + ' class="modal-js-btn-fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>' +
                 '<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">' +
                     '<h2 style="margin: 0; color: var(--accent-primaire);">' + config.titre + '</h2>' +
                     '<button class="btn-aide-contextuelle" data-aide="bibliotheque-fonctionnement" title="Comment fonctionne la bibliothèque">📍</button>' +

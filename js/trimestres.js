@@ -655,31 +655,9 @@
             const etudiants = db.getSync(`${trimestreId}_groupeEtudiants`, []);
             const etudiantsActifs = etudiants.filter(e => !estEtudiantExclu(e));
 
-            // Indices d'engagement - lire depuis le trimestre ciblé
-            const indicesCP = db.getSync(`${trimestreId}_indicesCP`, {});
-            let totalEngagement = 0;
-            let nbAvecIndices = 0;
-
-            etudiantsActifs.forEach(e => {
-                const indices = indicesCP[e.da];
-                if (indices && indices.actuel) {
-                    const a = indices.actuel.A || 0;
-                    const c = indices.actuel.C || 0;
-                    const p = indices.actuel.P || 0;
-                    const engagement = (a * c * p) / 10000; // Normaliser
-                    totalEngagement += engagement;
-                    nbAvecIndices++;
-                }
-            });
-
-            const moyenneEngagement = nbAvecIndices > 0
-                ? Math.round((totalEngagement / nbAvecIndices) * 100)
-                : 0;
-
             return {
                 nbEtudiants: etudiantsActifs.length,
                 nbCours: coursTrimestr.length,
-                moyenneEngagement: moyenneEngagement,
                 dateCalcul: new Date().toISOString().split('T')[0]
             };
         } catch (error) {
@@ -1185,8 +1163,8 @@
                 }
             }
 
-            // 5. Obtenir la grille de référence pour SOLO
-            const grilleRefId = modalites.grilleReferenceDepistage;
+            // 5. Obtenir la grille de référence pour SOLO (préférence utilisateur)
+            const grilleRefId = obtenirPreference('grilleReferenceDepistage');
             const grilleRef = grilles.find(g => g.id === grilleRefId) || grilles[0];
 
             // 6. Construire le JSON selon les spécifications
@@ -1291,8 +1269,7 @@
                     formules: {
                         indice_A: 'Heures présentes / Heures offertes (cumulatif)',
                         indice_C: '% artefacts évalués >= Maîtrisé (M)',
-                        indice_P: 'Moyenne pondérée des N meilleurs artefacts (IDME → %)',
-                        engagement: 'A × C × P / 10000'
+                        indice_P: 'Moyenne pondérée des N meilleurs artefacts (IDME → %)'
                     },
 
                     snapshots_hebdomadaires: snapshots.map(s => ({
@@ -1317,14 +1294,22 @@
                             id_etudiant: daVersAnonyme[e.da],
                             A_final: actuel.A || 0,
                             C_final: actuel.C || 0,
-                            P_final: actuel.P || 0,
-                            engagement: Math.round((actuel.A || 0) * (actuel.C || 0) * (actuel.P || 0) / 10000)
+                            P_final: actuel.P || 0
                         };
                     }),
 
                     performance_par_critere: calculerPerformanceParCritere(etudiantsActifs, evaluations, daVersAnonyme, grilleRef)
                 }
             };
+
+            // 6bis. Profils RLO — conditionnel au toggle `activerActionsRLO`
+            // (étape 9 du chantier RLO, spec SPEC-EXPORT-GRAPHIQUE-RLO.md)
+            if (typeof obtenirPreference === 'function' &&
+                obtenirPreference('activerActionsRLO') === true) {
+                exportData.profilsRLO = construireProfilsRLO(
+                    evaluations, productions, daVersAnonyme
+                );
+            }
 
             // 7. Générer et télécharger le fichier anonymisé
             const jsonAnonyme = JSON.stringify(exportData, null, 2);
@@ -1450,6 +1435,88 @@
     }
 
     /**
+     * Construit la section `profilsRLO` de l'export recherche.
+     *
+     * Produit une entrée par évaluation qui contient le champ `actionsRLO`,
+     * que celui-ci soit `null` (artefact non observé) ou peuplé. Les
+     * évaluations sans champ `actionsRLO` sont ignorées (pas de donnée
+     * disponible — on ne suppose rien).
+     *
+     * @param {Array} evaluations - Évaluations du trimestre actif
+     * @param {Array} productions - Productions du trimestre actif
+     * @param {Object} daVersAnonyme - Table DA → ID anonyme (SHA-256 tronqué)
+     * @returns {Array} Liste des profils RLO (vide si aucune évaluation qualifie)
+     */
+    function construireProfilsRLO(evaluations, productions, daVersAnonyme) {
+        // Numéro d'artefact = ordre chronologique par date d'échéance
+        const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
+        const artefactsOrdonnes = artefactsPortfolio.slice().sort((a, b) => {
+            const da = obtenirDateEcheance(a.id, productions) || '';
+            const db = obtenirDateEcheance(b.id, productions) || '';
+            return String(da).localeCompare(String(db));
+        });
+        const numeroArtefact = {};
+        artefactsOrdonnes.forEach((art, idx) => {
+            numeroArtefact[art.id] = idx + 1;
+        });
+
+        const arrondir = v => Math.round(v * 10) / 10;
+        const profils = [];
+
+        for (const e of evaluations) {
+            if (!daVersAnonyme[e.etudiantDA]) continue;
+            if (!('actionsRLO' in e)) continue;
+
+            const rlo = e.actionsRLO;
+            const prod = productions.find(p => p.id === e.productionId) || {};
+            const entry = {
+                id_etudiant: daVersAnonyme[e.etudiantDA],
+                id_artefact: e.productionId,
+                numero_artefact: numeroArtefact[e.productionId] || null,
+                type_artefact: prod.titre || prod.type || '',
+                niveau_final: e.niveauFinal || null,
+                observe: rlo !== null && rlo !== undefined,
+                actions: null,
+                ratios_cognitifs: null
+            };
+
+            if (entry.observe) {
+                const reperage  = rlo.reperage  || 0;
+                const liaison   = rlo.liaison   || 0;
+                const ouverture = rlo.ouverture || 0;
+                const incertain = rlo.incertain || 0;
+                const incomplet = rlo.incomplet || 0;
+                const inexact   = rlo.inexact   || 0;
+                const totalCog  = reperage + liaison + ouverture;
+                const totalDif  = incertain + incomplet + inexact;
+
+                entry.actions = {
+                    gestes_cognitifs: {
+                        reperage, liaison, ouverture, total: totalCog
+                    },
+                    gestes_en_difficulte: {
+                        incertain, incomplet, inexact, total: totalDif
+                    },
+                    total_general: totalCog + totalDif
+                };
+                entry.ratios_cognitifs = totalCog > 0 ? {
+                    reperage_pct:  arrondir((reperage  / totalCog) * 100),
+                    liaison_pct:   arrondir((liaison   / totalCog) * 100),
+                    ouverture_pct: arrondir((ouverture / totalCog) * 100)
+                } : {
+                    reperage_pct: 0.0,
+                    liaison_pct: 0.0,
+                    ouverture_pct: 0.0
+                };
+            }
+
+            profils.push(entry);
+        }
+
+        return profils;
+    }
+
+    /**
      * Normalise le nom d'un critère (minuscules, sans accents)
      * @param {string} nom - Nom du critère
      * @returns {string} Nom normalisé
@@ -1564,7 +1631,7 @@
         } else if (etat === 'success') {
             contenu = `
                 <div class="modal-contenu modal-compact">
-                    <button class="modal-fermer" data-action="fermerModalExportRecherche">&times;</button>
+                    <button class="modal-fermer" data-action="fermerModalExportRecherche"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                     <h2 class="modal-titre">Export généré avec succès</h2>
 
                     <div class="alerte alerte-succes">
@@ -1604,7 +1671,7 @@
         } else if (etat === 'error') {
             contenu = `
                 <div class="modal-contenu modal-compact">
-                    <button class="modal-fermer" data-action="fermerModalExportRecherche">&times;</button>
+                    <button class="modal-fermer" data-action="fermerModalExportRecherche"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                     <h2 class="modal-titre">Erreur lors de l'export</h2>
 
                     <div class="alerte alerte-erreur">

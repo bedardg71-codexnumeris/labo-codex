@@ -2331,7 +2331,7 @@ function afficherNotificationActuelle() {
 
     // Bouton fermer
     const boutonFermer = document.createElement('button');
-    boutonFermer.innerHTML = '×';
+    boutonFermer.innerHTML = '<img src="icons/icon-close-window.svg" alt="" class="modal-close-icon">';
     boutonFermer.style.cssText = `
         position: absolute;
         top: 10px;

@@ -1360,7 +1360,7 @@ function ouvrirProprieteFichier(fichierId) {
     overlay.className = 'modal-overlay actif';
     overlay.innerHTML =
         '<div class="modal-contenu modal-compact" style="max-width: 520px;">' +
-            '<button class="modal-fermer" data-action="fermerOverlayParent">&times;</button>' +
+            '<button class="modal-fermer" data-action="fermerOverlayParent"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>' +
             '<h3 class="modal-titre">Propri\u00e9t\u00e9s du fichier</h3>' +
             '<label style="font-size: 0.85em; color: var(--texte-secondaire);">Nom du document :</label>' +
             '<input type="text" id="prop-fichier-nom" class="controle-form" style="margin: 4px 0 12px 0; width: 100%;" value="' + echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(fichier.nomFichier, fichier.etudiantDA) : (fichier.nomFichier || '')) + '">' +
@@ -1467,7 +1467,7 @@ function associerProductionDepuisListe(fichierId, da) {
     overlay.className = 'modal-overlay actif';
     overlay.innerHTML = `
         <div class="modal-contenu modal-compact" style="max-width: 440px;">
-            <button class="modal-fermer" data-action="fermerOverlayParent">&times;</button>
+            <button class="modal-fermer" data-action="fermerOverlayParent"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
             <h3 class="modal-titre">${productionActuelle ? 'Réassocier' : 'Associer'} à une production</h3>
             <label style="font-size: 0.85em; color: var(--texte-secondaire);">Production :</label>
             <select id="associer-prod-select" class="controle-form" style="margin: 6px 0 16px 0; width: 100%;">
@@ -1570,7 +1570,7 @@ function confirmerSuppressionFichier(fichierId, da) {
     overlay.className = 'modal-overlay actif';
     overlay.innerHTML = `
         <div class="modal-contenu modal-compact" style="max-width: 440px;">
-            <button class="modal-fermer" data-action="fermerOverlayParent">&times;</button>
+            <button class="modal-fermer" data-action="fermerOverlayParent"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
             <h3 class="modal-titre">Déplacer à la corbeille ?</h3>
             <p style="margin: 8px 0 16px 0; font-size: 0.9em;">
                 Déplacer le fichier de <strong>${echapperHtml(nomEtudiant)}</strong> à la corbeille ?<br>
@@ -1998,7 +1998,7 @@ function toggleVerrouillerEvaluation(evaluationId) {
     // Mettre à jour le cadenas dans le DOM immédiatement
     const cadenasElement = document.getElementById(`cadenas-liste-${evaluationId}`);
     if (cadenasElement) {
-        cadenasElement.textContent = evaluation.verrouillee ? '🔒' : '🔓';
+        cadenasElement.innerHTML = evaluation.verrouillee ? '<img src="icons/icon-lock.svg" alt="Verrouillée" class="btn-inline-icon">' : '<img src="icons/icon-open-lock.svg" alt="Modifiable" class="btn-inline-icon">';
         cadenasElement.title = evaluation.verrouillee ? 'Verrouillée - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller';
     }
 
@@ -2552,7 +2552,7 @@ function supprimerFichierDefinitivement(id) {
     overlay.className = 'modal-overlay actif';
     overlay.innerHTML = `
         <div class="modal-contenu modal-compact" style="max-width: 440px;">
-            <button class="modal-fermer" data-action="fermerOverlayParent">&times;</button>
+            <button class="modal-fermer" data-action="fermerOverlayParent"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
             <h3 class="modal-titre">Supprimer définitivement ?</h3>
             <p style="margin: 8px 0 16px 0; font-size: 0.9em;">
                 Le fichier sera supprimé de façon permanente.
@@ -2626,7 +2626,7 @@ function viderTouteCorbeille() {
     overlay.className = 'modal-overlay actif';
     overlay.innerHTML = `
         <div class="modal-contenu modal-compact" style="max-width: 440px;">
-            <button class="modal-fermer" data-action="fermerOverlayParent">&times;</button>
+            <button class="modal-fermer" data-action="fermerOverlayParent"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
             <h3 class="modal-titre">Vider la corbeille ?</h3>
             <p style="margin: 8px 0 16px 0; font-size: 0.9em;">
                 Supprimer définitivement les <strong>${corbeille.length}</strong> fichier(s) de la corbeille ?

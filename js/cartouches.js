@@ -1580,7 +1580,7 @@ async function supprimerCartoucheConfirm(cartoucheId, grilleId) {
     const cartouche = cartouches.find(c => c.id === cartoucheId);
 
     if (cartouche && cartouche.verrouille) {
-        alert('Déverrouille ce cartouche (🔓) avant de le supprimer');
+        alert('D\u00e9verrouille ce cartouche avant de le supprimer');
         return;
     }
 
@@ -2823,7 +2823,7 @@ async function afficherBanqueCartouches(grilleIdFiltre = '') {
 
     html += cartouchesFiltrees.map(cart => {
         const estActive = window.cartoucheActuel?.id === cart.id;
-        const verrouIcone = cart.verrouille ? ' <span class="cartouche-texte-warning" title="Verrouillée">🔒</span>' : '';
+        const verrouIcone = cart.verrouille ? ' <span class="cartouche-texte-warning" title="Verrouillée"><img src="icons/icon-lock.svg" alt="" class="btn-inline-icon"></span>' : '';
         // Générer badges pratiques compatibles (utilise gabarits-utils.js)
         const badgesPratiques = typeof GabaritsUtils !== 'undefined'
             ? GabaritsUtils.genererBadgesPratiques(cart)

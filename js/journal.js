@@ -141,8 +141,8 @@ function capturerFinEvaluation(evaluation, dureeMs) {
             var annotationFichier = (typeof travauxStockage !== 'undefined')
                 ? travauxStockage.obtenirAnnotationFichier(fichierActuel.id) : null;
             if (annotationFichier) {
-                var statsAnnot = (typeof travauxExportPdf !== 'undefined' && travauxExportPdf.compterAnnotationsDetailees)
-                    ? travauxExportPdf.compterAnnotationsDetailees(annotationFichier) : null;
+                var statsAnnot = (typeof travauxExportPDF !== 'undefined' && travauxExportPDF.compterAnnotationsDetailees)
+                    ? travauxExportPDF.compterAnnotationsDetailees(annotationFichier) : null;
                 if (statsAnnot && (statsAnnot.totalTampons > 0 || statsAnnot.totalErreursFr > 0)) {
                     ajouterEntree(evaluation, ACTIONS.TAMPONS, {
                         tampons: statsAnnot.tampons,
@@ -292,7 +292,7 @@ function afficherJournal(evaluationId) {
             '<div class="journal-modal-entete">' +
                 '<h3>Journal de bord</h3>' +
                 '<span class="journal-modal-sous-titre">' + nomEtudiant + ' — ' + nomProduction + '</span>' +
-                '<button class="journal-modal-fermer" data-action="Journal.fermerJournal" title="Fermer">✕</button>' +
+                '<button class="journal-modal-fermer" data-action="Journal.fermerJournal" title="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>' +
             '</div>' +
             '<div class="journal-modal-corps">' + contenuHtml + '</div>' +
         '</div>';

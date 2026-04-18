@@ -387,10 +387,10 @@ function rendreEditeur() {
 
             if (etat.questionEnEdition === qp.id) {
                 html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.confirmerEdition" data-param="perso" data-param2="' + qp.id + '" title="Confirmer">\u2713</button>');
-                html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.annulerEdition" title="Annuler">\u2717</button>');
+                html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.annulerEdition" title="Annuler"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon" style="width:12px;height:12px;"></button>');
             } else {
                 html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.editerQuestion" data-param="perso" data-param2="' + qp.id + '" title="Modifier">\u270E</button>');
-                html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerQuestion" data-param="perso" data-param2="' + qp.id + '" data-confirm="Supprimer cette question ?" title="Supprimer">\u2715</button>');
+                html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerQuestion" data-param="perso" data-param2="' + qp.id + '" data-confirm="Supprimer cette question ?" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon" style="width:12px;height:12px;"></button>');
             }
 
             html.push('</div>');
@@ -451,7 +451,7 @@ function rendreBlocHTML(bloc, indexBloc) {
 
         if (etat.questionEnEdition === q.id) {
             html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.confirmerEdition" data-param="' + bloc.id + '" data-param2="' + q.id + '" title="Confirmer">\u2713</button>');
-            html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.annulerEdition" title="Annuler">\u2717</button>');
+            html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.annulerEdition" title="Annuler"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon" style="width:12px;height:12px;"></button>');
         } else {
             if (j > 0) {
                 html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.deplacerQuestion" data-param="' + bloc.id + '" data-param2="' + q.id + '" data-param3="-1" title="Monter">\u2191</button>');
@@ -460,7 +460,7 @@ function rendreBlocHTML(bloc, indexBloc) {
                 html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.deplacerQuestion" data-param="' + bloc.id + '" data-param2="' + q.id + '" data-param3="1" title="Descendre">\u2193</button>');
             }
             html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.editerQuestion" data-param="' + bloc.id + '" data-param2="' + q.id + '" title="Modifier">\u270E</button>');
-            html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerQuestion" data-param="' + bloc.id + '" data-param2="' + q.id + '" data-confirm="Supprimer cette question ?" title="Supprimer">\u2715</button>');
+            html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerQuestion" data-param="' + bloc.id + '" data-param2="' + q.id + '" data-confirm="Supprimer cette question ?" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon" style="width:12px;height:12px;"></button>');
         }
 
         html.push('</div>');
@@ -889,7 +889,7 @@ function rendreActiviteHTML(activite, index) {
         }
         html.push('</select>');
         html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.confirmerModifActivite" data-param="' + activite.id + '" title="Confirmer">\u2713</button>');
-        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.annulerModifActivite" title="Annuler">\u2717</button>');
+        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.annulerModifActivite" title="Annuler"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon" style="width:12px;height:12px;"></button>');
     } else {
         html.push('<span class="bilan-activite-titre">' + echapperHtml(activite.titre) + '</span>');
         html.push('<span class="bilan-activite-type ' + typeClasse + '">' + echapperHtml(typeLabel) + '</span>');
@@ -901,7 +901,7 @@ function rendreActiviteHTML(activite, index) {
             html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.deplacerActivite" data-param="' + activite.id + '" data-param2="1" title="Descendre">\u2193</button>');
         }
         html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.modifierActivite" data-param="' + activite.id + '" title="Modifier">\u270E</button>');
-        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerActivite" data-param="' + activite.id + '" data-confirm="Supprimer cette activit\u00e9 ?" title="Supprimer">\u2715</button>');
+        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerActivite" data-param="' + activite.id + '" data-confirm="Supprimer cette activit\u00e9 ?" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon" style="width:12px;height:12px;"></button>');
         html.push('</div>');
     }
 
@@ -932,14 +932,14 @@ function rendreQuestionParActiviteHTML(question, index, parcours) {
     if (etat.questionEnEdition === question.id) {
         html.push('<input type="text" class="bilan-edit-input" id="bilan-edit-' + question.id + '" value="' + echapperHtml(question.texte) + '">');
         html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.confirmerEditionQPA" data-param="' + question.id + '" title="Confirmer">\u2713</button>');
-        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.annulerEdition" title="Annuler">\u2717</button>');
+        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.annulerEdition" title="Annuler"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon" style="width:12px;height:12px;"></button>');
     } else {
         html.push('<span class="bilan-question-texte">' + echapperHtml(question.texte) + '</span>');
         html.push('<span class="bilan-question-type">' + echapperHtml(typeLabel) + '</span>');
         html.push('<div class="bilan-question-actions">');
         html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.editerQuestionQPA" data-param="' + question.id + '" title="Modifier">\u270E</button>');
         if (question.personnalisee) {
-            html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerQuestionParActivite" data-param="' + question.id + '" data-confirm="Supprimer cette question ?" title="Supprimer">\u2715</button>');
+            html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerQuestionParActivite" data-param="' + question.id + '" data-confirm="Supprimer cette question ?" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon" style="width:12px;height:12px;"></button>');
         }
         html.push('</div>');
     }
@@ -982,7 +982,7 @@ function rendreQuestionParActiviteHTML(question, index, parcours) {
         for (var em = 0; em < parcours.emotionsDisponibles.length; em++) {
             html.push('<span class="bilan-emotion-tag">');
             html.push(echapperHtml(parcours.emotionsDisponibles[em]));
-            html.push(' <button class="bilan-btn-mini" data-action="BilanReflexif.supprimerEmotion" data-param="' + em + '" title="Retirer">\u2715</button>');
+            html.push(' <button class="bilan-btn-mini" data-action="BilanReflexif.supprimerEmotion" data-param="' + em + '" title="Retirer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon" style="width:12px;height:12px;"></button>');
             html.push('</span>');
         }
         html.push('</div>');
@@ -1484,7 +1484,7 @@ function rendreQuestionMiroirLikertHTML(question, modeApres) {
 
     html.push('</div>');
     if (question.personnalisee) {
-        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerQuestionReflexion" data-param="blocA" data-param2="' + question.id + '" data-confirm="Supprimer ?" title="Supprimer">\u2715</button>');
+        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerQuestionReflexion" data-param="blocA" data-param2="' + question.id + '" data-confirm="Supprimer ?" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon" style="width:12px;height:12px;"></button>');
     }
     html.push('</div>');
     return html.join('');
@@ -1557,7 +1557,7 @@ function rendreQuestionSyntheseHTML(question, modeApres) {
 
     html.push('</div>');
     if (question.personnalisee) {
-        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerQuestionReflexion" data-param="blocC" data-param2="' + question.id + '" data-confirm="Supprimer ?" title="Supprimer">\u2715</button>');
+        html.push('<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerQuestionReflexion" data-param="blocC" data-param2="' + question.id + '" data-confirm="Supprimer ?" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon" style="width:12px;height:12px;"></button>');
     }
     html.push('</div>');
     return html.join('');

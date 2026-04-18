@@ -83,16 +83,16 @@
                         '</div>' +
                         '<div class="annot-toolbar-separateur"></div>' +
                         '<div class="annot-toolbar-outils">' +
-                            '<button id="model-btn-page-prec" class="travaux-btn-nav" data-action="travauxVisionneuse.pagePrecedente" disabled title="Page precedente">&#x2190;</button>' +
+                            '<button id="model-btn-page-prec" class="travaux-btn-nav" data-action="travauxVisionneuse.pagePrecedente" disabled title="Page precedente"><img src="icons/icon-chevron-left.svg" alt="" class="nav-seq-icon"></button>' +
                             '<span id="model-indicateur-page">-- / --</span>' +
-                            '<button id="model-btn-page-suiv" class="travaux-btn-nav" data-action="travauxVisionneuse.pageSuivante" disabled title="Page suivante">&#x2192;</button>' +
+                            '<button id="model-btn-page-suiv" class="travaux-btn-nav" data-action="travauxVisionneuse.pageSuivante" disabled title="Page suivante"><img src="icons/icon-chevron-right.svg" alt="" class="nav-seq-icon"></button>' +
                             '<span class="travaux-separateur"></span>' +
-                            '<button id="model-btn-fichier-prec" class="travaux-btn-nav" data-action="modelisation.fichierPrecedent" disabled title="Fichier precedent">&#x276E;</button>' +
+                            '<button id="model-btn-fichier-prec" class="travaux-btn-nav" data-action="modelisation.fichierPrecedent" disabled title="Fichier precedent"><img src="icons/icon-chevron-left.svg" alt="" class="nav-seq-icon"></button>' +
                             '<span id="model-compteur-fichiers" class="model-compteur-fichiers"></span>' +
-                            '<button id="model-btn-fichier-suiv" class="travaux-btn-nav" data-action="modelisation.fichierSuivant" disabled title="Fichier suivant">&#x276F;</button>' +
+                            '<button id="model-btn-fichier-suiv" class="travaux-btn-nav" data-action="modelisation.fichierSuivant" disabled title="Fichier suivant"><img src="icons/icon-chevron-right.svg" alt="" class="nav-seq-icon"></button>' +
                             '<span class="travaux-separateur"></span>' +
-                            '<button class="travaux-btn-zoom" data-action="travauxVisionneuse.zoomPleineLargeur" title="Ajuster a la largeur">Largeur</button>' +
-                            '<button class="travaux-btn-zoom" data-action="travauxVisionneuse.zoomPleineHauteur" title="Ajuster a la hauteur">Hauteur</button>' +
+                            '<button class="travaux-btn-nav" data-action="travauxVisionneuse.zoomPleineLargeur" title="Ajuster a la largeur"><img src="icons/icon-resize-horizontal.svg" alt="" class="nav-seq-icon"></button>' +
+                            '<button class="travaux-btn-nav" data-action="travauxVisionneuse.zoomPleineHauteur" title="Ajuster a la hauteur"><img src="icons/icon-resize-vertical.svg" alt="" class="nav-seq-icon"></button>' +
                             '<button class="travaux-btn-zoom" data-action="travauxVisionneuse.zoom100" title="Zoom 100%">100%</button>' +
                             '<span class="travaux-separateur"></span>' +
                             '<button class="travaux-btn-action" data-action="modelisation.fermerVisionneuse" title="Fermer le fichier">Fermer</button>' +
@@ -142,7 +142,7 @@
                 '<div class="annot-badge' + actif + '" data-id="' + f.id + '" data-action="modelisation.ouvrirFichier" data-param="' + f.id + '" title="' + f.nomFichier + '">' +
                     '<span class="annot-badge-nom">' + tronquerNom(f.nomFichier, 22) + '</span>' +
                     '<span class="travaux-badge-pill ' + statut.classe + '">' + statut.texte + '</span>' +
-                    '<button class="annot-badge-supprimer" data-stop data-action="modelisation.supprimerFichier" data-param="' + f.id + '" title="Supprimer">&times;</button>' +
+                    '<button class="annot-badge-supprimer" data-stop data-action="modelisation.supprimerFichier" data-param="' + f.id + '" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>' +
                 '</div>';
         });
         zone.innerHTML = html;

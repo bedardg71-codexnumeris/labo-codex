@@ -1,15 +1,16 @@
 /**
  * preferences-v2.js
- * Module de gestion de l'onglet Préférences (Beta 95)
+ * Module de gestion de l'onglet Préférences (Beta 95, refactoré Beta 99.16)
  *
- * Gère les options d'affichage et de personnalisation :
+ * Gère l'UI des préférences (checkboxes, sliders, dropdowns) :
  * - Outils à exploiter (A-C-P, patterns, RàI, mode comparatif)
  * - Affichage des ressources (SOLO, snapshots, graphiques, détails)
  * - Configuration du dépistage (grille de référence)
  * - Seuils d'interprétation (fragile, acceptable, bon)
  *
- * Ces préférences sont globales (pas par groupe-cours) et affectent
- * l'affichage dans toute l'application.
+ * Source de vérité : API preferences.js (obtenirPreference / definirPreference).
+ * Le mode comparatif SOM/PAN est une exception : il touche modalitesEvaluation
+ * (afficherSommatif / afficherAlternatif) car c'est un paramètre de pratique.
  */
 
 (function() {
@@ -69,127 +70,108 @@
     // =========================================================================
 
     /**
-     * Charge les préférences depuis le storage
+     * Charge les préférences depuis le storage via l'API centralisée.
      */
     function chargerPreferencesDepuisStorage() {
-        let modalites = {};
-        try {
-            modalites = db.getSync('modalitesEvaluation') || {};
-        } catch (e) {
-            modalites = {};
-        }
-
-        let preferences = {};
-        try {
-            preferences = db.getSync('preferencesAffichage') || {};
-        } catch (e) {
-            preferences = {};
-        }
-
         // Outils à exploiter
         const depistageAcp = document.getElementById('v2-pref-depistage-acp');
         if (depistageAcp) {
-            depistageAcp.checked = preferences.depistageAcp !== false;
-        }
-
-        const patterns = document.getElementById('v2-pref-patterns');
-        if (patterns) {
-            patterns.checked = preferences.patterns !== false;
+            depistageAcp.checked = obtenirPreference('depistageAcp') !== false;
         }
 
         const rai = document.getElementById('v2-pref-rai');
         if (rai) {
-            rai.checked = modalites.activerRai !== false;
+            rai.checked = obtenirPreference('activerRai') !== false;
         }
 
+        // Mode comparatif : dérive de modalitesEvaluation (paramètre de pratique)
         const comparatif = document.getElementById('v2-pref-comparatif');
         if (comparatif) {
-            comparatif.checked = modalites.afficherSommatif && modalites.afficherAlternatif;
+            const modalites = db.getSync('modalitesEvaluation') || {};
+            comparatif.checked = !!(modalites.afficherSommatif && modalites.afficherAlternatif);
         }
 
         // Affichage des ressources
         const solo = document.getElementById('v2-pref-solo');
         if (solo) {
-            solo.checked = modalites.afficherDescriptionsSOLO !== false;
+            solo.checked = obtenirPreference('afficherDescriptionsSOLO') !== false;
         }
 
-        const snapshots = document.getElementById('v2-pref-snapshots');
-        if (snapshots) {
-            snapshots.checked = preferences.afficherSnapshots !== false;
+        const actionsRlo = document.getElementById('v2-pref-actions-rlo');
+        if (actionsRlo) {
+            actionsRlo.checked = obtenirPreference('activerActionsRLO') === true;
         }
 
         const graphiques = document.getElementById('v2-pref-graphiques');
         if (graphiques) {
-            graphiques.checked = preferences.afficherGraphiques !== false;
+            graphiques.checked = obtenirPreference('afficherGraphiques') !== false;
         }
 
         const seuilsVisuels = document.getElementById('v2-pref-seuils-visuels');
         if (seuilsVisuels) {
-            seuilsVisuels.checked = preferences.afficherSeuilsVisuels !== false;
+            seuilsVisuels.checked = obtenirPreference('afficherSeuilsVisuels') !== false;
         }
 
-        const detailsTechniques = document.getElementById('v2-pref-details-techniques');
-        if (detailsTechniques) {
-            detailsTechniques.checked = preferences.afficherDetailsTechniques === true;
+        const developpementHabiletes = document.getElementById('v2-pref-developpement-habiletes');
+        if (developpementHabiletes) {
+            developpementHabiletes.checked = obtenirPreference('afficherDeveloppementHabiletes') !== false;
         }
 
         // 🆕 BETA 96.1 : Animation des points du tableau de bord
         const animationPoints = document.getElementById('v2-pref-animation-points');
+        const animationActive = obtenirPreference('animationPoints') !== false;
         if (animationPoints) {
-            animationPoints.checked = preferences.animationPoints !== false;
+            animationPoints.checked = animationActive;
         }
         // Appliquer immédiatement l'état de l'animation
-        appliquerAnimationPoints(preferences.animationPoints !== false);
+        appliquerAnimationPoints(animationActive);
 
         // Métadonnées contextuelles (graphiques)
         const contexteGraphiques = document.getElementById('v2-pref-contexte-graphiques');
         if (contexteGraphiques) {
-            contexteGraphiques.checked = preferences.afficherContexteGraphiques !== false;
+            contexteGraphiques.checked = obtenirPreference('afficherContexteGraphiques') !== false;
         }
 
         // Chrono évaluation
         const chronoEval = document.getElementById('v2-pref-chrono-eval');
         if (chronoEval) {
-            chronoEval.checked = preferences.chronoEvaluation === true;
+            chronoEval.checked = obtenirPreference('chronoEvaluation') === true;
         }
 
         // 🆕 BETA 95.1 : Unité d'affichage de l'assiduité (périodes/heures)
         const uniteAffichage = document.getElementById('v2-pref-unite-affichage');
         if (uniteAffichage) {
-            uniteAffichage.value = preferences.uniteAffichageAssiduite || 'periodes';
+            uniteAffichage.value = obtenirPreference('uniteAffichageAssiduite') || 'periodes';
         }
 
         // SIS par défaut
         const sisSelect = document.getElementById('v2-pref-sis');
         if (sisSelect) {
-            sisSelect.value = preferences.sisDefaut || 'lea';
+            sisSelect.value = obtenirPreference('sisDefaut') || 'lea';
         }
 
         // Grille de référence
         const grilleReference = document.getElementById('v2-pref-grille-reference');
-        if (grilleReference && modalites.grilleReferenceDepistage) {
-            grilleReference.value = modalites.grilleReferenceDepistage;
+        const grilleRefId = obtenirPreference('grilleReferenceDepistage');
+        if (grilleReference && grilleRefId) {
+            grilleReference.value = grilleRefId;
         }
 
         // Découpler Performance et Risque
         const decouplerPR = document.getElementById('v2-pref-decoupler-pr');
         if (decouplerPR) {
-            decouplerPR.checked = modalites.decouplerPR === true;
+            decouplerPR.checked = obtenirPreference('decouplerPR') === true;
         }
 
         // Fenêtre d'analyse des patterns
         const fenetrePatterns = document.getElementById('v2-pref-fenetre-patterns');
         if (fenetrePatterns) {
-            fenetrePatterns.value = modalites.fenetrePatterns || 3;
+            fenetrePatterns.value = obtenirPreference('fenetrePatterns') || 3;
         }
 
-        // Seuils d'interprétation
-        let seuils = {};
-        try {
-            seuils = db.getSync('seuilsInterpretation') || {};
-        } catch (e) {
-            seuils = {};
-        }
+        // Seuils d'interprétation — lus directement depuis seuilsInterpretation
+        // (objet à structure mixte non migré vers l'API, voir preferences.js)
+        const seuils = db.getSync('seuilsInterpretation') || {};
 
         const seuilFragile = document.getElementById('v2-seuil-fragile');
         if (seuilFragile) {
@@ -231,18 +213,12 @@
     // =========================================================================
 
     /**
-     * Sauvegarde les préférences
+     * Sauvegarde les préférences via l'API.
+     * Le mode comparatif reste traité sur modalitesEvaluation (paramètre de pratique).
      */
     function sauvegarderPreferencesV2() {
-        // Sauvegarder dans modalitesEvaluation pour compatibilité
-        let modalites = {};
-        try {
-            modalites = db.getSync('modalitesEvaluation') || {};
-        } catch (e) {
-            modalites = {};
-        }
-
-        // Mode comparatif
+        // Mode comparatif : paramètre de pratique, pas une préférence utilisateur
+        const modalites = db.getSync('modalitesEvaluation') || {};
         const comparatif = document.getElementById('v2-pref-comparatif')?.checked || false;
         if (comparatif) {
             modalites.afficherSommatif = true;
@@ -257,62 +233,45 @@
                 modalites.afficherAlternatif = true;
             }
         }
-
-        // RàI et SOLO
-        modalites.activerRai = document.getElementById('v2-pref-rai')?.checked !== false;
-        modalites.afficherDescriptionsSOLO = document.getElementById('v2-pref-solo')?.checked !== false;
-
-        // Grille de référence
-        modalites.grilleReferenceDepistage = document.getElementById('v2-pref-grille-reference')?.value || '';
-
-        // Découpler Performance et Risque
-        modalites.decouplerPR = document.getElementById('v2-pref-decoupler-pr')?.checked === true;
-
-        // Fenêtre d'analyse des patterns
-        modalites.fenetrePatterns = parseInt(document.getElementById('v2-pref-fenetre-patterns')?.value) || 3;
-
         db.setSync('modalitesEvaluation', modalites);
 
-        // Sauvegarder dans preferencesAffichage
-        let preferences = {};
-        try {
-            preferences = db.getSync('preferencesAffichage') || {};
-        } catch (e) {
-            preferences = {};
+        // Préférences utilisateur : via l'API centralisée
+        definirPreference('activerRai', document.getElementById('v2-pref-rai')?.checked !== false);
+        definirPreference('afficherDescriptionsSOLO', document.getElementById('v2-pref-solo')?.checked !== false);
+        definirPreference('activerActionsRLO', document.getElementById('v2-pref-actions-rlo')?.checked === true);
+        definirPreference('grilleReferenceDepistage', document.getElementById('v2-pref-grille-reference')?.value || '');
+        definirPreference('decouplerPR', document.getElementById('v2-pref-decoupler-pr')?.checked === true);
+        definirPreference('fenetrePatterns', parseInt(document.getElementById('v2-pref-fenetre-patterns')?.value) || 3);
+
+        definirPreference('depistageAcp', document.getElementById('v2-pref-depistage-acp')?.checked !== false);
+        definirPreference('afficherGraphiques', document.getElementById('v2-pref-graphiques')?.checked !== false);
+        definirPreference('afficherSeuilsVisuels', document.getElementById('v2-pref-seuils-visuels')?.checked !== false);
+        definirPreference('afficherDeveloppementHabiletes', document.getElementById('v2-pref-developpement-habiletes')?.checked !== false);
+        definirPreference('uniteAffichageAssiduite', document.getElementById('v2-pref-unite-affichage')?.value || 'periodes');
+
+        const animationActive = document.getElementById('v2-pref-animation-points')?.checked !== false;
+        definirPreference('animationPoints', animationActive);
+        appliquerAnimationPoints(animationActive);
+
+        definirPreference('afficherContexteGraphiques', document.getElementById('v2-pref-contexte-graphiques')?.checked !== false);
+        definirPreference('chronoEvaluation', document.getElementById('v2-pref-chrono-eval')?.checked === true);
+        definirPreference('sisDefaut', document.getElementById('v2-pref-sis')?.value || 'lea');
+
+        // Le toggle `activerActionsRLO` régit l'affichage de la catégorie `action`
+        // dans la palette de tampons. Rafraîchir la palette si elle est ouverte
+        // (no-op si la palette n'est pas rendue — DOM-safe).
+        if (typeof travauxOutils !== 'undefined' && travauxOutils.rafraichirPalettesApresPersonnalisation) {
+            travauxOutils.rafraichirPalettesApresPersonnalisation();
         }
-
-        preferences.depistageAcp = document.getElementById('v2-pref-depistage-acp')?.checked !== false;
-        preferences.patterns = document.getElementById('v2-pref-patterns')?.checked !== false;
-        preferences.afficherSnapshots = document.getElementById('v2-pref-snapshots')?.checked !== false;
-        preferences.afficherGraphiques = document.getElementById('v2-pref-graphiques')?.checked !== false;
-        preferences.afficherSeuilsVisuels = document.getElementById('v2-pref-seuils-visuels')?.checked !== false;
-        preferences.afficherDetailsTechniques = document.getElementById('v2-pref-details-techniques')?.checked === true;
-        // 🆕 BETA 95.1 : Unité d'affichage de l'assiduité
-        preferences.uniteAffichageAssiduite = document.getElementById('v2-pref-unite-affichage')?.value || 'periodes';
-        // 🆕 BETA 96.1 : Animation des points
-        preferences.animationPoints = document.getElementById('v2-pref-animation-points')?.checked !== false;
-        appliquerAnimationPoints(preferences.animationPoints);
-        // Métadonnées contextuelles (graphiques)
-        preferences.afficherContexteGraphiques = document.getElementById('v2-pref-contexte-graphiques')?.checked !== false;
-        // Chrono évaluation
-        preferences.chronoEvaluation = document.getElementById('v2-pref-chrono-eval')?.checked === true;
-        // SIS par défaut
-        preferences.sisDefaut = document.getElementById('v2-pref-sis')?.value || 'lea';
-
-        db.setSync('preferencesAffichage', preferences);
-
     }
 
     /**
-     * Sauvegarde les seuils d'interprétation
+     * Sauvegarde les seuils d'interprétation.
+     * Écrit directement dans seuilsInterpretation (non migré vers l'API)
+     * pour préserver la structure mixte (champs plats + sous-objets idme/risque/interpretation).
      */
     function sauvegarderSeuilsV2() {
-        let seuils = {};
-        try {
-            seuils = db.getSync('seuilsInterpretation') || {};
-        } catch (e) {
-            seuils = {};
-        }
+        const seuils = db.getSync('seuilsInterpretation') || {};
 
         const fragile = parseInt(document.getElementById('v2-seuil-fragile')?.value) || 70;
         const acceptable = parseInt(document.getElementById('v2-seuil-acceptable')?.value) || 80;
@@ -388,7 +347,7 @@
         }
 
         sauvegarderSeuilsV2();
-        sauvegarderPreferencesV2(); // Pour sauvegarder fenetrePatterns dans modalitesEvaluation
+        sauvegarderPreferencesV2(); // Pour sauvegarder fenetrePatterns
         afficherNotificationSuccesV2('Seuils de détection restaurés');
     }
 
@@ -434,7 +393,6 @@
             window.afficherNotificationSucces(message);
         } else if (typeof window.afficherMessage === 'function') {
             window.afficherMessage(message, 'succes');
-        } else {
         }
     }
 
@@ -447,12 +405,7 @@
      * @returns {string} - 'periodes' | 'heures' | 'les-deux'
      */
     function obtenirUniteAffichageAssiduite() {
-        try {
-            const preferences = db.getSync('preferencesAffichage') || {};
-            return preferences.uniteAffichageAssiduite || 'periodes';
-        } catch (e) {
-            return 'periodes';
-        }
+        return obtenirPreference('uniteAffichageAssiduite') || 'periodes';
     }
 
     /**

@@ -146,7 +146,7 @@
         modal.className = 'modal-contenu modal-compact';
 
         modal.innerHTML = `
-            <button class="modal-fermer" data-action="backupReminder.fermerModal">&times;</button>
+            <button class="modal-fermer" data-action="backupReminder.fermerModal"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
             <h3 class="modal-titre">Protège tes données</h3>
 
             <div class="modal-section">

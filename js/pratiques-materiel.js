@@ -1440,7 +1440,7 @@ function afficherTypesTravauxMat(typesTravaux) {
                 <td><input type="text" class="controle-form" value="${t.nom || ''}" data-on-change="modifierTypeTravailMatHandler" data-mat-index="${index}" data-champ="nom"></td>
                 <td><input type="text" class="controle-form" value="${t.description || ''}" data-on-change="modifierTypeTravailMatHandler" data-mat-index="${index}" data-champ="description"></td>
                 <td style="text-align: center;">
-                    <button data-action="supprimerTypeTravailMat" data-param="${index}" class="btn btn-supprimer btn-tres-compact">×</button>
+                    <button data-action="supprimerTypeTravailMat" data-param="${index}" class="btn btn-supprimer btn-tres-compact"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
                 </td>
             </tr>
         `;
@@ -1533,7 +1533,7 @@ function afficherForfaitsMat(forfaits, typesTravaux) {
             html += `<td><input type="number" class="controle-form" value="${quantite}" style="width: 50px;" min="0" data-on-change="modifierTravailForfaitMatHandler" data-mat-index="${index}" data-type-id="${t.id}"></td>`;
         });
 
-        html += `<td style="text-align: center;"><button data-action="supprimerForfaitMat" data-param="${index}" class="btn btn-supprimer btn-tres-compact">×</button></td></tr>`;
+        html += `<td style="text-align: center;"><button data-action="supprimerForfaitMat" data-param="${index}" class="btn btn-supprimer btn-tres-compact"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button></td></tr>`;
     });
 
     html += '</tbody></table>';
@@ -2443,7 +2443,7 @@ function afficherListeObjectifsMat(objectifs) {
         }
 
         html += `<td style="text-align: center;">
-            <button data-action="supprimerObjectifMat" data-param="${index}" class="btn btn-supprimer btn-tres-compact">×</button>
+            <button data-action="supprimerObjectifMat" data-param="${index}" class="btn btn-supprimer btn-tres-compact"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>
         </td>`;
         html += '</tr>';
     });
