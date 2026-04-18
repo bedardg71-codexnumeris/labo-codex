@@ -86,6 +86,10 @@
 /* Elements avec tooltip : curseur d'aide */
 [data-tooltip] {
     cursor: help;
+    /* iPad : désactiver le menu contextuel natif (callout) pendant le long-press.
+       Sans ça, Safari intercepte le long-press pour sélectionner du texte ou afficher
+       le menu "Copier / Partager", avant que notre timer de 400ms ne déclenche le tooltip. */
+    -webkit-touch-callout: none;
 }
 
 /* Conserver le curseur natif sur les elements interactifs */
