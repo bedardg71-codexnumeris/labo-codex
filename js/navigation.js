@@ -614,6 +614,12 @@ function afficherSousSection(idSousSection) {
     if (window.parcours && typeof window.parcours.onNavigationChange === 'function') {
         window.parcours.onNavigationChange(idSousSection);
     }
+
+    // Événement public : permet aux modules externes (ex: flèches didactiques)
+    // de réagir à un changement de sous-section sans coupler navigation.js.
+    window.dispatchEvent(new CustomEvent('sectionAffichee', {
+        detail: { idSousSection: idSousSection }
+    }));
 }
 
 /* ===============================
