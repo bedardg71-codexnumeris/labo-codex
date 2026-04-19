@@ -23014,3 +23014,220 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
         width: auto;
     }
 }
+
+/* =============================================================================
+   GLOSSAIRE (glossaire.js) — terme marqué inline + micro-popup + page dédiée
+   ============================================================================= */
+
+/* Terme marqué (soulignement pointillé discret, couleur secondaire) */
+.glossaire-terme {
+    cursor: help;
+    color: var(--accent-primaire, #2da9d7);
+    text-decoration: underline dotted;
+    text-underline-offset: 2px;
+}
+
+.glossaire-terme:hover {
+    color: var(--accent-primaire, #2da9d7);
+    filter: brightness(1.15);
+}
+
+/* Micro-popup positionné en absolu */
+.glossaire-micropopup {
+    position: absolute;
+    z-index: 1000;
+    min-width: 240px;
+    max-width: 360px;
+    padding: 12px 14px;
+    background: var(--surface-carte);
+    color: var(--texte-principal);
+    border: 1px solid var(--bordure, rgba(106, 172, 184, 0.25));
+    border-left: 3px solid var(--accent-primaire, #2da9d7);
+    border-radius: 6px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.glossaire-micropopup.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.glossaire-micropopup-titre {
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--accent-primaire, #2da9d7);
+}
+
+.glossaire-micropopup-resume {
+    margin-bottom: 10px;
+}
+
+.glossaire-micropopup-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 6px;
+    border-top: 1px solid var(--bordure, rgba(127, 127, 127, 0.15));
+    padding-top: 8px;
+}
+
+.glossaire-lien-ensavoirplus {
+    background: transparent;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: var(--accent-primaire, #2da9d7);
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.glossaire-lien-ensavoirplus:hover {
+    filter: brightness(1.15);
+}
+
+.glossaire-micropopup-fermer {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: inherit;
+    opacity: 0.55;
+    font-size: 0.95rem;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.glossaire-micropopup-fermer:hover {
+    background: rgba(127, 127, 127, 0.15);
+    opacity: 1;
+}
+
+/* iPad : micro-popup plus large et recentré */
+@media (max-width: 1024px) {
+    .glossaire-micropopup {
+        max-width: calc(100vw - 24px);
+        min-width: 280px;
+    }
+}
+
+/* Page dédiée (rendue dans Aide via window.glossaire.afficherDansConteneur) */
+.glossaire-page {
+    padding: 16px 0;
+}
+
+.glossaire-filtres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.glossaire-filtre {
+    padding: 6px 14px;
+    background: transparent;
+    border: 1px solid var(--bordure, rgba(106, 172, 184, 0.25));
+    border-radius: 999px;
+    color: var(--texte-principal);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.glossaire-filtre:hover {
+    border-color: var(--accent-primaire, #2da9d7);
+}
+
+.glossaire-filtre.actif {
+    background: var(--accent-primaire, #2da9d7);
+    border-color: var(--accent-primaire, #2da9d7);
+    color: #fff;
+}
+
+.glossaire-liste {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+.glossaire-fiche {
+    padding: 16px 20px;
+    background: var(--surface-carte);
+    border-left: 3px solid var(--accent-primaire, #2da9d7);
+    border-radius: 0 6px 6px 0;
+    transition: box-shadow 0.2s ease;
+}
+
+.glossaire-fiche-active {
+    box-shadow: 0 0 0 3px rgba(45, 169, 215, 0.3);
+}
+
+.glossaire-fiche-entete {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.glossaire-fiche-terme {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--accent-primaire, #2da9d7);
+}
+
+.glossaire-fiche-meta {
+    display: flex;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--texte-secondaire, #8aa4b0);
+}
+
+.glossaire-fiche-categorie {
+    padding: 2px 8px;
+    background: rgba(127, 127, 127, 0.08);
+    border-radius: 4px;
+}
+
+.glossaire-fiche-etape {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.glossaire-fiche-etape-numerisation { background: rgba(45, 169, 215, 0.12); color: var(--accent-primaire, #2da9d7); }
+.glossaire-fiche-etape-croisement   { background: rgba(239, 179, 50, 0.12); color: #b78300; }
+.glossaire-fiche-etape-observation  { background: rgba(34, 180, 120, 0.12); color: #138055; }
+.glossaire-fiche-etape-competence   { background: rgba(180, 100, 230, 0.12); color: #7a2dbf; }
+.glossaire-fiche-etape-transversal  { background: rgba(127, 127, 127, 0.1); color: var(--texte-secondaire, #8aa4b0); }
+.glossaire-fiche-etape-interface    { background: rgba(127, 127, 127, 0.1); color: var(--texte-secondaire, #8aa4b0); }
+
+.glossaire-fiche-definition p {
+    margin: 0 0 10px 0;
+    line-height: 1.6;
+}
+
+.glossaire-fiche-definition p:last-child {
+    margin-bottom: 0;
+}
+
+.glossaire-fiche-voir {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    color: var(--texte-secondaire, #8aa4b0);
+}
+
+.glossaire-vide {
+    color: var(--texte-secondaire, #8aa4b0);
+    font-style: italic;
+    text-align: center;
+    padding: 24px;
+}
