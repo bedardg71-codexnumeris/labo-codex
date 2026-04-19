@@ -250,32 +250,27 @@ const AIDE_CONTEXTUELLE = {
     },
 
     'tableau-bord-rai': {
-        titre: "Le framework RaI (Réponse à l'Intervention)",
+        titre: "Le mod\u00e8le R\u00e0I (R\u00e9ponse \u00e0 l'Intervention)",
         sections: [
             {
                 type: 'texte',
-                contenu: "Le modèle RaI structure les interventions pédagogiques en trois niveaux d'intensité, permettant d'adapter le soutien aux besoins de chaque étudiant."
+                contenu: "Le mod\u00e8le R\u00e0I structure les interventions p\u00e9dagogiques en trois niveaux d'intensit\u00e9. L'application s'en inspire pour cat\u00e9goriser les besoins observ\u00e9s, sans prescrire une pratique particuli\u00e8re."
             },
             {
                 type: 'liste',
-                titre: "Les trois niveaux RaI",
+                titre: "Les trois niveaux",
                 items: [
-                    "Niveau 1 (Universel) : enseignement de qualité pour tous, ~80% des étudiants",
-                    "Niveau 2 (Ciblé) : interventions en petit groupe, ~15% des étudiants",
-                    "Niveau 3 (Intensif) : soutien individualisé, ~5% des étudiants"
+                    "<strong>Niveau 1 \u2014 Universel</strong>\u00a0: enseignement de qualit\u00e9 pour tout le groupe.",
+                    "<strong>Niveau 2 \u2014 Cibl\u00e9</strong>\u00a0: interventions pr\u00e9ventives pour les \u00e9tudiant\u00b7es en difficult\u00e9 \u00e9mergente.",
+                    "<strong>Niveau 3 \u2014 Intensif</strong>\u00a0: soutien individualis\u00e9 pour les difficult\u00e9s persistantes."
                 ]
             },
             {
-                type: 'exemple',
-                titre: "Exemple d'intervention Niveau 2",
-                contenu: "Un atelier hebdomadaire de méthodologie pour les 5 étudiants ayant le plus de difficultés avec l'organisation de leurs travaux."
-            },
-            {
                 type: 'conseil',
-                contenu: "Documente tes interventions dans l'onglet dédié. Cela permet de suivre leur efficacité et d'ajuster ton approche."
+                contenu: "Les proportions d\u2019\u00e9l\u00e8ves par niveau varient selon le contexte et ta propre pratique professionnelle. L\u2019application te laisse d\u00e9finir les seuils dans R\u00e9glages \u203a D\u00e9pistage."
             }
         ],
-        voirAussi: ['apercu-contenu', 'suivi-liste']
+        voirAussi: ['interventions-planification', 'depistage-interpretation', 'suivi-liste']
     },
 
     'suivi-saisie': {
