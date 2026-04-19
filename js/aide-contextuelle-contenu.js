@@ -220,35 +220,6 @@ const AIDE_CONTEXTUELLE = {
     // PHASE 2 - HAUTE PRIORITÉ (4 aides)
     // =========================================================================
 
-    'apercu-contenu': {
-        titre: "Comprendre l'aperçu",
-        sections: [
-            {
-                type: 'texte',
-                contenu: "L'aperçu offre une vue d'ensemble de la progression de ton groupe. Les indices A-C-P permettent d'identifier rapidement les étudiants nécessitant un suivi particulier."
-            },
-            {
-                type: 'liste',
-                titre: "Indices de suivi (A-C-P)",
-                items: [
-                    "A - Assiduité : taux de présence aux cours",
-                    "C - Complétude : productions remises vs attendues",
-                    "P - Performance : niveau de réussite aux évaluations"
-                ]
-            },
-            {
-                type: 'exemple',
-                titre: "Lecture des couleurs",
-                contenu: "Vert = satisfaisant (≥75%), Jaune = à surveiller (50-75%), Rouge = préoccupant (<50%). Un étudiant avec plusieurs indicateurs rouges mérite une attention prioritaire."
-            },
-            {
-                type: 'conseil',
-                contenu: "Consulte ce tableau chaque semaine pour détecter les situations à risque avant qu'elles ne s'aggravent."
-            }
-        ],
-        voirAussi: ['tableau-bord-rai', 'suivi-saisie']
-    },
-
     'tableau-bord-rai': {
         titre: "Le mod\u00e8le R\u00e0I (R\u00e9ponse \u00e0 l'Intervention)",
         sections: [
@@ -300,7 +271,7 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Les présences sont liées à la date du cours. Vérifie que la bonne date est sélectionnée avant de saisir."
             }
         ],
-        voirAussi: ['apercu-contenu', 'contexte-calendrier']
+        voirAussi: ['tableau-bord-apercu', 'contexte-calendrier']
     },
 
     'contexte-trimestre': {
@@ -345,7 +316,7 @@ const AIDE_CONTEXTUELLE = {
                 contenu: 'Pour ajouter, modifier ou supprimer des \u00e9tudiant\u00b7es, va dans R\u00e9glages\u00a0>\u00a0Groupe. La liste ici refl\u00e8te automatiquement les changements que tu fais l\u00e0-bas.'
             },
         ],
-        voirAussi: ['contexte-groupe-etudiants', 'apercu-contenu', 'tableau-bord-rai']
+        voirAussi: ['contexte-groupe-etudiants', 'tableau-bord-apercu', 'tableau-bord-rai']
     },
 
     'contexte-calendrier': {
@@ -370,7 +341,7 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Repère les patterns : un étudiant souvent absent le lundi peut avoir un conflit d'horaire à signaler."
             }
         ],
-        voirAussi: ['suivi-saisie', 'apercu-contenu']
+        voirAussi: ['suivi-saisie', 'tableau-bord-apercu']
     },
 
     // =========================================================================
@@ -497,9 +468,9 @@ const AIDE_CONTEXTUELLE = {
                 type: 'liste',
                 titre: "Les 3 indices A-C-P",
                 items: [
-                    "A (Assiduité) — Taux de présence aux cours. Calculé automatiquement depuis la saisie des présences.",
-                    "C (Complétion) — Proportion d'artefacts remis par rapport aux artefacts attendus.",
-                    "P (Performance) — Résultat composite basé sur les meilleurs artefacts évalués (selon la pratique configurée)."
+                    "A (Assiduit\u00e9) \u2014 Mesure l\u2019exposition de l\u2019\u00e9tudiant\u00b7e aux situations d\u2019apprentissage\u00a0: sa pr\u00e9sence en classe. Ce n\u2019est pas un jugement sur la qualit\u00e9 de sa participation.",
+                    "C (Compl\u00e9tion) \u2014 Mesure la r\u00e9gularit\u00e9 de la mise en pratique\u00a0: les artefacts remis par rapport aux artefacts attendus. C\u2019est le constat d\u2019un effort, pas de sa qualit\u00e9.",
+                    "P (Performance) \u2014 Mesure la comp\u00e9tence d\u00e9montr\u00e9e au moment T, selon la pratique de notation configur\u00e9e. C\u2019est une photographie, pas un pronostic."
                 ]
             },
             {
@@ -525,6 +496,10 @@ const AIDE_CONTEXTUELLE = {
                     "Niveau 2 (jaune) — Signes de difficulté. Interventions préventives ciblées recommandées.",
                     "Niveau 3 (rouge) — Difficulté persistante. Intervention intensive et soutien individualisé nécessaires."
                 ]
+            },
+            {
+                type: 'conseil',
+                contenu: "Ces indices sont des rep\u00e8res, pas des verdicts. Un A faible peut s\u2019expliquer par un contexte personnel d\u00e9favorable sur lequel tu n\u2019as pas de contr\u00f4le. Un P plus faible en d\u00e9but de trimestre est \u00e9galement normal. C\u2019est la trajectoire qui compte, pas l\u2019\u00e9valuation isol\u00e9e."
             }
         ],
         voirAussi: ['profil-etudiant-accompagnement']
@@ -603,13 +578,13 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'exemple',
-                titre: "Le cycle teach-test-revise-test",
-                contenu: "Tu interviens sur Structure et Rigueur (niveau 2). Après quelques artefacts, tu marques l'intervention comme complétée. Le bilan compare les scores avant et après. Si l'objectif n'est pas atteint, tu choisis la suite : reconduire, ajuster ou référer."
+                titre: "Enseigner, \u00e9valuer, ajuster",
+                contenu: "Tu interviens sur les crit\u00e8res cibl\u00e9s (niveau 2). Au fil des productions suivantes, tu observes la trajectoire. Quand tu marques l\u2019intervention comme compl\u00e9t\u00e9e, le bilan compare les scores avant et apr\u00e8s sur les crit\u00e8res cibl\u00e9s. Selon le r\u00e9sultat, tu choisis\u00a0: reconduire l\u2019intervention, ajuster la cible, ou r\u00e9f\u00e9rer vers un soutien plus intensif."
             },
             {
                 type: 'alerte',
                 niveau: 'attention',
-                contenu: "Les interventions de niveau 3 impliquent souvent des ressources externes (centre d'aide, API, conseiller pédagogique). Vérifie les ressources disponibles dans ton cégep."
+                contenu: "Les interventions de niveau 3 d\u00e9passent parfois ce que l\u2019enseignant\u00b7e peut faire seul. Les services adapt\u00e9s, l\u2019aide p\u00e9dagogique individuelle (API) ou les centres d\u2019aide sont des ressources \u00e0 mobiliser."
             }
         ],
         voirAussi: ['profil-etudiant-indicateurs', 'profil-etudiant-accompagnement', 'suivi-apprentissage-fondamentaux']
