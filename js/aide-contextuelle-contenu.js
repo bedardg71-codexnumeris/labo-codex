@@ -89,101 +89,53 @@ const AIDE_CONTEXTUELLE = {
     // =========================================================================
 
     'evaluations-proceder': {
-        titre: "Évaluer une production",
+        titre: '\u00c9valuer une production',
         sections: [
             {
                 type: 'texte',
-                contenu: "Cette interface permet d'évaluer le travail d'un·e étudiant·e sur une production. L'évaluation génère automatiquement une rétroaction personnalisée basée sur tes critères."
-            },
-            {
-                type: 'alerte',
-                niveau: 'attention',
-                contenu: "Avant d'évaluer, assure-toi d'avoir créé au moins : une <strong>grille de critères</strong>, une <strong>échelle de performance</strong>, une <strong>cartouche de rétroaction</strong> et une <strong>production</strong>. Ces éléments se configurent dans la section Structure."
-            },
-            {
-                type: 'liste',
-                titre: "Étapes recommandées",
-                items: [
-                    "Sélectionne l'étudiant·e dans la liste déroulante",
-                    "Choisis la production à évaluer",
-                    "Vérifie que la grille, l'échelle et la cartouche sont bien associées",
-                    "Évalue chaque critère de la grille en cliquant sur le niveau atteint",
-                    "Vérifie et ajuste la rétroaction générée si nécessaire",
-                    "Clique sur « Sauvegarder l'évaluation »"
-                ]
+                contenu: 'Pour \u00e9valuer une production, s\u00e9lectionne d\u2019abord la grille, l\u2019\u00e9chelle et la cartouche associ\u00e9es \u2014 elles sont normalement d\u00e9j\u00e0 configur\u00e9es dans Structure. Attribue ensuite un niveau \u00e0 chaque crit\u00e8re\u00a0: la note et la r\u00e9troaction se construisent au fur et \u00e0 mesure. Tu peux pr\u00e9visualiser le commentaire complet avant de le copier dans le presse-papier.'
             },
             {
                 type: 'conseil',
-                contenu: "Le mode « Évaluation en série » (bouton en haut) permet d'enchaîner plusieurs étudiants sur la même production, idéal pour corriger un lot de travaux."
+                contenu: 'Si tu utilises des jetons, rappelle-toi qu\u2019ils offrent \u00e0 l\u2019\u00e9tudiant\u00b7e une nouvelle occasion de d\u00e9montrer sa comp\u00e9tence \u2014 pas simplement d\u2019am\u00e9liorer une note.'
             },
-            {
-                type: 'exemple',
-                titre: "Raccourci clavier",
-                contenu: "Utilise les touches 1-2-3-4-5 pour évaluer rapidement chaque critère sans utiliser la souris."
-            }
         ],
         voirAussi: ['evaluations-annoter', 'construction-grilles', 'construction-echelles', 'construction-cartouches']
     },
 
     'structure-productions': {
-        titre: "Gérer les productions étudiantes",
+        titre: 'Productions',
         sections: [
             {
                 type: 'texte',
-                contenu: "Les productions représentent les travaux évalués (examens, devoirs, projets, etc.). Chaque production est associée à une grille de critères et contribue à la note finale selon sa pondération."
-            },
-            {
-                type: 'liste',
-                titre: "Éléments clés d'une production",
-                items: [
-                    "Titre : nom affiché dans les listes et rapports",
-                    "Type : catégorie (examen, travail pratique, quiz, etc.)",
-                    "Pondération : poids dans la note finale (ex: 20%)",
-                    "Grille : critères d'évaluation associés",
-                    "Date d'échéance : pour le suivi des remises"
-                ]
-            },
-            {
-                type: 'alerte',
-                niveau: 'attention',
-                contenu: "La somme des pondérations de toutes les productions devrait totaliser 100%. Vérifie le total affiché en bas de la liste."
+                contenu: 'Assure-toi que la somme des pond\u00e9rations de tes productions totalise 100\u00a0%. Pour les portfolios, d\u00e9finis d\u2019abord le nombre d\u2019artefacts \u00e0 retenir (ex.\u00a0: les 3 meilleurs sur 9) \u2014 ce sont les N meilleures d\u00e9monstrations de comp\u00e9tence qui comptent. Les artefacts individuels n\u2019ont pas de pond\u00e9ration propre\u00a0: c\u2019est le portfolio conteneur qui porte le poids dans la note finale.'
             },
             {
                 type: 'conseil',
-                contenu: "Crée tes productions au début du trimestre pour avoir une vue d'ensemble de ton plan d'évaluation."
-            }
+                contenu: 'Pense \u00e0 verrouiller les productions une fois finalis\u00e9es pour \u00e9viter les modifications accidentelles.'
+            },
         ],
         voirAussi: ['construction-grilles', 'construction-pratiques']
     },
 
     'construction-grilles': {
-        titre: "Concevoir des grilles de critères",
+        titre: 'Grilles de crit\u00e8res',
         sections: [
             {
                 type: 'texte',
-                contenu: "Une grille définit les critères d'évaluation et leurs niveaux de performance. Elle permet une évaluation cohérente et génère automatiquement des rétroactions personnalisées."
-            },
-            {
-                type: 'liste',
-                titre: "Structure d'une grille",
-                items: [
-                    "Rubriques : grandes catégories (ex: Contenu, Forme, Langue)",
-                    "Critères : éléments spécifiques évalués dans chaque rubrique",
-                    "Échelle : niveaux de performance (ex: Insuffisant → Excellent)",
-                    "Descripteurs : description de chaque niveau pour chaque critère"
-                ]
-            },
-            {
-                type: 'exemple',
-                titre: "Exemple de rubrique",
-                contenu: "Rubrique « Argumentation » avec critères : Thèse claire, Arguments pertinents, Exemples appropriés, Structure logique."
+                contenu: 'Pour certains crit\u00e8res (ex.\u00a0: fran\u00e7ais \u00e9crit), quand une notation n\u00e9gative est appliqu\u00e9e, tu peux utiliser le type algorithmique avec la formule (nb_erreurs\u00a0/\u00a0nb_mots)\u00a0\u00d7\u00a0100. Les grilles peuvent \u00eatre dupliqu\u00e9es et modifi\u00e9es pour cr\u00e9er des variantes adapt\u00e9es \u00e0 diff\u00e9rents types de productions.'
             },
             {
                 type: 'conseil',
-                contenu: "Commence avec 3-4 rubriques maximum. Une grille trop détaillée devient difficile à utiliser en contexte réel de correction."
-            }
+                contenu: 'Nomme tes grilles de fa\u00e7on descriptive (ex.\u00a0: \u00ab\u00a0Grille analyse litt\u00e9raire\u00a0\u00bb, \u00ab\u00a0Grille laboratoire\u00a0\u00bb) \u2014 tu les retrouveras plus facilement.'
+            },
+            {
+                type: 'alerte',
+                niveau: 'attention',
+                contenu: 'La somme des pond\u00e9rations des crit\u00e8res doit totaliser 100\u00a0%.'
+            },
         ],
-        voirAussi: ['construction-echelles', 'evaluations-proceder']
+        voirAussi: ['construction-echelles', 'construction-cartouches', 'evaluations-proceder']
     },
 
     'construction-echelles': {
@@ -221,77 +173,45 @@ const AIDE_CONTEXTUELLE = {
     },
 
     'construction-cartouches': {
-        titre: "Créer des cartouches de rétroaction",
+        titre: 'Cartouches de r\u00e9troaction',
         sections: [
             {
                 type: 'texte',
-                contenu: "Les cartouches de rétroaction décrivent concrètement ce qui est atteint ou non pour chaque critère à chaque niveau de performance. C'est grâce aux cartouches que ta grille devient « descriptive » : elles expliquent à l'étudiant exactement ce qui est attendu."
+                contenu: 'Pour \u00eatre efficaces, les commentaires de r\u00e9troaction doivent \u00eatre lus et\u2026 compris\u00a0! Id\u00e9alement ils peuvent avoir entre 50 et 75 mots environ. R\u00e9dige-les de fa\u00e7on personnelle et constructive \u2014 c\u2019est ce que tes \u00e9tudiant\u00b7es liront.'
             },
             {
-                type: 'liste',
-                titre: "Rôle des cartouches",
-                items: [
-                    "Décrire les manifestations observables de chaque niveau de performance",
-                    "Générer automatiquement une rétroaction personnalisée lors de l'évaluation",
-                    "Assurer la cohérence de ton évaluation d'un étudiant à l'autre",
-                    "Communiquer clairement tes attentes aux étudiants"
-                ]
-            },
-            {
-                type: 'exemple',
-                titre: "Exemple de cartouche pour le critère « Argumentation »",
-                contenu: "Niveau « Maîtrisé » : « Ton argumentation est solide. Tu présentes une thèse claire, appuyée par des arguments pertinents et des exemples bien choisis. La structure logique facilite la compréhension de ton propos. »"
+                type: 'texte',
+                contenu: 'Chaque cellule de la matrice correspond \u00e0 un commentaire pour un niveau de performance donn\u00e9 sur un crit\u00e8re sp\u00e9cifique. Tu peux utiliser les codes de ta grille (ex.\u00a0: I, D, M, E) et le format propos\u00e9 pour structurer tes commentaires.'
             },
             {
                 type: 'conseil',
-                contenu: "Rédige tes cartouches à la deuxième personne (« tu ») pour que la rétroaction s'adresse directement à l'étudiant. Décris ce qui est observé, pas seulement ce qui manque."
+                contenu: 'Les cartouches peuvent \u00eatre verrouill\u00e9es une fois finalis\u00e9es pour \u00e9viter les modifications accidentelles.'
             },
-            {
-                type: 'alerte',
-                niveau: 'attention',
-                contenu: "Une cartouche efficace est spécifique au critère évalué. Évite les formulations génériques comme « Bon travail » ou « Insuffisant » qui n'aident pas l'étudiant à comprendre ce qu'il doit améliorer."
-            }
         ],
         voirAussi: ['construction-grilles', 'construction-echelles', 'evaluations-proceder']
     },
 
     'construction-pratiques': {
-        titre: "Choisir une pratique de notation",
+        titre: 'Pratiques de notation',
         sections: [
             {
                 type: 'texte',
-                contenu: "La pratique de notation détermine comment les résultats des évaluations sont convertis en note finale. Deux grandes familles existent : Sommative (SOM) et Progressive par atteinte de niveaux (PAN)."
+                contenu: 'Quatre pratiques sont disponibles. Choisis celle qui correspond \u00e0 ta philosophie d\u2019enseignement \u2014 tu peux toujours la changer.'
             },
             {
                 type: 'liste',
-                titre: "Pratique Sommative (SOM)",
+                titre: 'Les quatre pratiques',
                 items: [
-                    "Calcul traditionnel : moyenne pondérée des productions",
-                    "Chaque évaluation compte selon sa pondération",
-                    "Simple à comprendre pour les étudiants",
-                    "Adapté aux cours avec évaluations indépendantes"
+                    '<strong>Sommative (SOM)</strong> \u2014 calcule une moyenne pond\u00e9r\u00e9e traditionnelle.',
+                    '<strong>PAN par standards (STD)</strong> \u2014 retient les meilleures d\u00e9monstrations de comp\u00e9tence\u00a0; l\u2019\u00e9tudiant\u00b7e progresse en montrant sa ma\u00eetrise, pas en accumulant des points.',
+                    '<strong>PAN par sp\u00e9cifications (SPE)</strong> \u2014 fonctionne par contrat\u00a0: chaque production est r\u00e9ussie ou non selon des crit\u00e8res pr\u00e9d\u00e9finis\u00a0; c\u2019est l\u2019ensemble des cibles atteintes qui d\u00e9termine la note.',
+                    '<strong>D\u00e9notation (DEN)</strong> \u2014 r\u00e9duit ou \u00e9limine la notation chiffr\u00e9e au profit de la r\u00e9troaction qualitative.',
                 ]
             },
             {
-                type: 'liste',
-                titre: "Pratique Progressive (PAN)",
-                items: [
-                    "Basée sur l'atteinte de niveaux de compétence",
-                    "Les dernières performances peuvent remplacer les premières",
-                    "Utilise un système de jetons pour moduler",
-                    "Adapté à l'apprentissage progressif"
-                ]
+                type: 'conseil',
+                contenu: 'En cas de doute, commence par SOM (la plus famili\u00e8re) et fais \u00e9voluer ta pratique au fil des sessions.'
             },
-            {
-                type: 'exemple',
-                titre: "Système de jetons (PAN)",
-                contenu: "Les jetons permettent de valoriser l'engagement : présence, participation, amélioration. Ils peuvent bonifier la note ou débloquer des options."
-            },
-            {
-                type: 'alerte',
-                niveau: 'attention',
-                contenu: "Changer de pratique en cours de trimestre recalcule toutes les notes. Informe tes étudiants de la méthode choisie dès le début."
-            }
         ],
         voirAussi: ['structure-productions', 'construction-echelles']
     },
@@ -423,28 +343,14 @@ const AIDE_CONTEXTUELLE = {
     // =========================================================================
 
     'suivi-liste': {
-        titre: "La liste des étudiants",
+        titre: 'Liste des \u00e9tudiant\u00b7es',
         sections: [
             {
                 type: 'texte',
-                contenu: "Cette vue présente tous tes étudiants avec leurs indicateurs clés. Tu peux trier et filtrer pour identifier rapidement ceux nécessitant un suivi."
+                contenu: 'Pour ajouter, modifier ou supprimer des \u00e9tudiant\u00b7es, va dans R\u00e9glages\u00a0>\u00a0Groupe. La liste ici refl\u00e8te automatiquement les changements que tu fais l\u00e0-bas.'
             },
-            {
-                type: 'liste',
-                titre: "Actions disponibles",
-                items: [
-                    "Clique sur un nom pour voir le profil détaillé",
-                    "Trie par colonne (note, assiduité, etc.)",
-                    "Filtre par groupe",
-                    "Exporte la liste au format CSV"
-                ]
-            },
-            {
-                type: 'conseil',
-                contenu: "Trie par l'indice le plus problématique pour créer ta liste de suivi prioritaire."
-            }
         ],
-        voirAussi: ['apercu-contenu', 'tableau-bord-rai']
+        voirAussi: ['contexte-groupe-etudiants', 'apercu-contenu', 'tableau-bord-rai']
     },
 
     'contexte-calendrier': {
@@ -744,6 +650,148 @@ const AIDE_CONTEXTUELLE = {
             }
         ],
         voirAussi: ['profil-etudiant-indicateurs']
+    },
+
+    'tableau-bord-apercu': {
+        titre: 'Aper\u00e7u du groupe (indices A-C-P)',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'Les trois indices A-C-P r\u00e9sument le contexte d\u2019apprentissage observ\u00e9 de chaque \u00e9tudiant\u00b7e.'
+            },
+            {
+                type: 'liste',
+                titre: 'Les trois indices',
+                items: [
+                    '<strong>A \u2014 Assiduit\u00e9</strong>\u00a0: pr\u00e9sence en classe.',
+                    '<strong>C \u2014 Compl\u00e9tion</strong>\u00a0: remise des productions.',
+                    '<strong>P \u2014 Performance</strong>\u00a0: r\u00e9sultats aux \u00e9valuations.',
+                ]
+            },
+            {
+                type: 'texte',
+                contenu: 'Les zones de couleur \u2014 Fragile, Mod\u00e9r\u00e9, Favorable, Tr\u00e8s favorable \u2014 t\u2019aident \u00e0 rep\u00e9rer rapidement qui a besoin d\u2019attention.'
+            },
+            {
+                type: 'exemple',
+                titre: 'Lire les \u00e9carts',
+                contenu: 'Un\u00b7e \u00e9tudiant\u00b7e avec un C \u00e9lev\u00e9 mais un P faible fournit l\u2019effort sans obtenir les r\u00e9sultats\u00a0: c\u2019est un signal pour intervenir. Tu peux ensuite regarder plus pr\u00e9cis\u00e9ment sur quel crit\u00e8re ou habilet\u00e9 se situe la difficult\u00e9.'
+            },
+        ],
+        voirAussi: ['tableau-bord-rai', 'profil-etudiant-indicateurs', 'suivi-liste']
+    },
+
+    'contexte-cours': {
+        titre: 'Cours',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'Un seul cours peut \u00eatre actif \u00e0 la fois \u2014 c\u2019est celui qui sert de r\u00e9f\u00e9rence dans toute l\u2019application. Le code de cours suit le format habituel 000-000-XX (discipline-cours-lettres).'
+            },
+            {
+                type: 'conseil',
+                contenu: 'Tu peux dupliquer un cours pour cr\u00e9er rapidement une nouvelle session en modifiant seulement l\u2019ann\u00e9e, et verrouiller un cours termin\u00e9 pour \u00e9viter les modifications accidentelles.'
+            },
+        ],
+        voirAussi: ['contexte-trimestre', 'construction-pratiques']
+    },
+
+    'contexte-horaire': {
+        titre: 'Horaire',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'Choisis le format qui correspond \u00e0 ton horaire r\u00e9el\u00a0: 2\u00d72h (deux p\u00e9riodes s\u00e9par\u00e9es dans la semaine, ex.\u00a0: lundi et jeudi), 1\u00d74h (cours intensif en une seule p\u00e9riode continue) ou 1\u00d73h (une seule p\u00e9riode continue).'
+            },
+            {
+                type: 'exemple',
+                titre: 'Format des heures',
+                contenu: 'Les heures utilisent le format 24h (ex.\u00a0: 13:00, pas 1:00\u00a0PM). Les s\u00e9ances de reprise sont ajout\u00e9es automatiquement quand tu configures les cong\u00e9s dans la section Trimestre.'
+            },
+            {
+                type: 'alerte',
+                niveau: 'attention',
+                contenu: 'Si tu modifies le format horaire, les s\u00e9ances existantes seront recr\u00e9\u00e9es.'
+            },
+        ],
+        voirAussi: ['contexte-trimestre', 'contexte-calendrier', 'suivi-saisie']
+    },
+
+    'contexte-groupe-etudiants': {
+        titre: 'Groupe d\u2019\u00e9tudiant\u00b7es',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'Le champ Groupe permet d\u2019organiser tes \u00e9tudiant\u00b7es si tu as plusieurs groupes (ex.\u00a0: Groupe 1, Groupe 2) \u2014 utilise le filtre en haut pour afficher un groupe sp\u00e9cifique.'
+            },
+            {
+                type: 'liste',
+                titre: 'Format d\u2019import en lot (7 colonnes)',
+                items: [
+                    'DA',
+                    'Groupe',
+                    'Nom',
+                    'Pr\u00e9nom',
+                    'Programme',
+                    'Nom du programme',
+                    'SA (Services adapt\u00e9s)',
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: 'Tu peux coller directement depuis un tableur ou le syst\u00e8me de gestion institutionnel \u2014 la pr\u00e9visualisation te permet de v\u00e9rifier avant d\u2019importer. La liste configur\u00e9e ici est automatiquement disponible dans le tableau de bord.'
+            },
+            {
+                type: 'alerte',
+                niveau: 'important',
+                contenu: 'Le bouton \u00ab\u00a0R\u00e9initialiser\u00a0\u00bb supprime tous les \u00e9tudiant\u00b7es de fa\u00e7on irr\u00e9versible.'
+            },
+        ],
+        voirAussi: ['suivi-liste', 'suivi-saisie']
+    },
+
+    'depistage-interpretation': {
+        titre: 'Seuils d\u2019interpr\u00e9tation du d\u00e9pistage',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'Les seuils d\u2019interpr\u00e9tation d\u00e9terminent les couleurs et les alertes dans tout le tableau de bord. Toute modification s\u2019applique imm\u00e9diatement \u00e0 tous les calculs \u2014 diagnostics R\u00e0I, patterns et recommandations.'
+            },
+            {
+                type: 'exemple',
+                titre: 'Valeurs par d\u00e9faut',
+                contenu: 'Progression\u00a0: 5 points (%). Direction du risque\u00a0: 5 points (%). D\u00e9fi\u00a0: \u2264\u00a070\u00a0%.'
+            },
+            {
+                type: 'conseil',
+                contenu: 'En cas de doute, le bouton \u00ab\u00a0Restaurer\u00a0\u00bb remet les valeurs par d\u00e9faut.'
+            },
+        ],
+        voirAussi: ['tableau-bord-rai', 'interventions-planification']
+    },
+
+    'planification-alignement': {
+        titre: 'Alignement p\u00e9dagogique (carte mentale)',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'La carte mentale rend visible l\u2019alignement p\u00e9dagogique de ton cours\u00a0: les liens entre ce que tu vises (comp\u00e9tence, connaissances), comment tu l\u2019enseignes (activit\u00e9s, soutien) et comment tu le v\u00e9rifies (\u00e9valuations).'
+            },
+            {
+                type: 'conseil',
+                contenu: 'Tu n\u2019es pas oblig\u00e9\u00b7e de suivre un ordre lin\u00e9aire \u2014 commence par ce qui te semble naturel.'
+            },
+            {
+                type: 'exemple',
+                titre: 'Signalements d\u2019incoh\u00e9rence',
+                contenu: 'L\u2019application signale les incoh\u00e9rences\u00a0: un objectif sans production li\u00e9e, une connaissance sans \u00e9valuation pr\u00e9vue. Utilise ces alertes comme des pistes de r\u00e9flexion, pas comme des erreurs \u00e0 corriger.'
+            },
+            {
+                type: 'texte',
+                contenu: 'Les \u00e9valuations servent \u00e0 livrer une r\u00e9troaction et peuvent prendre plusieurs formes (orale, \u00e9crite, etc.).'
+            },
+        ],
+        voirAussi: ['structure-productions', 'construction-grilles']
     }
 };
 
