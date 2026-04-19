@@ -22837,23 +22837,24 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
    ============================================================================= */
 .transition-bandeau {
     position: fixed;
-    left: var(--espacement-lg, 24px);
-    right: var(--espacement-lg, 24px);
+    left: 24px;
+    right: 24px;
     bottom: -200px;
     max-width: 600px;
     margin-left: auto;
     margin-right: auto;
     padding: 16px 20px;
-    background: var(--surface-elevee, #1e3a44);
-    border: 1px solid var(--accent-primaire, #2da9d7);
-    border-radius: var(--rayon-carte, 12px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    background: var(--surface-carte);
+    color: var(--texte-principal);
+    border-left: 4px solid var(--accent-primaire, #2da9d7);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
     z-index: 950;
     transition: bottom 0.35s ease;
 }
 
 .transition-bandeau.visible {
-    bottom: var(--espacement-lg, 24px);
+    bottom: 24px;
 }
 
 .transition-bandeau-contenu {
@@ -22865,7 +22866,7 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 .transition-bandeau-contenu p {
     flex: 1;
     margin: 0;
-    color: var(--texte-principal, #e8f4f7);
+    color: inherit;
     font-size: 0.95rem;
     line-height: 1.5;
 }
@@ -22877,16 +22878,17 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     padding: 0;
     background: transparent;
     border: none;
-    color: var(--texte-secondaire, #8aa4b0);
+    color: inherit;
+    opacity: 0.55;
     font-size: 1.1rem;
     cursor: pointer;
     border-radius: 50%;
-    transition: background 0.2s ease;
+    transition: background 0.2s ease, opacity 0.2s ease;
 }
 
 .transition-bandeau-fermer:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--texte-principal, #e8f4f7);
+    background: rgba(127, 127, 127, 0.15);
+    opacity: 1;
 }
 
 /* iPad : pleine largeur */
