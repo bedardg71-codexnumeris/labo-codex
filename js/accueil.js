@@ -35,12 +35,20 @@ function genererBanniereBienvenue() {
     const enDemo = typeof estEnModeDemo === 'function' && estEnModeDemo();
     if (enDemo) return '';
 
-    // Détection : aucun groupe-cours configuré
+    // Détection : au moins un groupe-cours configuré.
+    // `groupeCoursActif` est une clé GLOBALE (pas préfixée par trimestre) qui
+    // stocke l'ID du GC actif. `cle('groupesCours')` contient le tableau des GC
+    // du trimestre actuel.
     let aGroupeCours = false;
     try {
-        if (typeof db !== 'undefined' && typeof window.cle === 'function') {
-            const gc = db.getSync(window.cle('groupeCoursActif'), null);
-            aGroupeCours = !!gc;
+        if (typeof db !== 'undefined') {
+            const gcActif = db.getSync('groupeCoursActif', null);
+            if (gcActif) {
+                aGroupeCours = true;
+            } else if (typeof window.cle === 'function') {
+                const gcList = db.getSync(window.cle('groupesCours'), []);
+                aGroupeCours = Array.isArray(gcList) && gcList.length > 0;
+            }
         }
     } catch (e) { /* ignore */ }
 

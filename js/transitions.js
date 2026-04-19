@@ -15,7 +15,8 @@
 (function() {
 'use strict';
 
-function lireCle(nomCle, parDefaut) {
+// Clé préfixée par trimestre (ex : h2026_evaluationsSauvegardees)
+function lireCleTrim(nomCle, parDefaut) {
     if (typeof db === 'undefined' || typeof window.cle !== 'function') return parDefaut;
     try {
         return db.getSync(window.cle(nomCle), parDefaut);
@@ -24,9 +25,19 @@ function lireCle(nomCle, parDefaut) {
     }
 }
 
-function nbElementsObj(nomCle) {
-    var obj = lireCle(nomCle, {});
-    return obj && typeof obj === 'object' ? Object.keys(obj).length : 0;
+// Clé globale (ex : groupeCoursActif)
+function lireCleGlobale(nomCle, parDefaut) {
+    if (typeof db === 'undefined') return parDefaut;
+    try {
+        return db.getSync(nomCle, parDefaut);
+    } catch (e) {
+        return parDefaut;
+    }
+}
+
+function nbTrim(nomCle) {
+    var arr = lireCleTrim(nomCle, []);
+    return Array.isArray(arr) ? arr.length : 0;
 }
 
 // =========================================================================
@@ -37,8 +48,8 @@ var TRANSITIONS = [
         id: 'numerisation-croisement',
         dejaVuePref: 'transition_num_crois_vue',
         condition: function() {
-            var gc = lireCle('groupeCoursActif', null);
-            return !!gc;
+            // groupeCoursActif est une clé GLOBALE (stocke l'ID du GC actif)
+            return !!lireCleGlobale('groupeCoursActif', null);
         },
         message: 'Ton espace de travail est pr\u00eat\u00a0: trimestre, cours, groupe, horaire et pratique sont configur\u00e9s. Tu peux maintenant saisir les pr\u00e9sences et \u00e9valuer les productions de tes \u00e9tudiant\u00b7es.'
     },
@@ -46,7 +57,7 @@ var TRANSITIONS = [
         id: 'croisement-observation',
         dejaVuePref: 'transition_crois_obs_vue',
         condition: function() {
-            return nbElementsObj('evaluationsSauvegardees') > 0;
+            return nbTrim('evaluationsSauvegardees') > 0;
         },
         message: 'Tes premi\u00e8res \u00e9valuations sont enregistr\u00e9es. Le tableau de bord commence \u00e0 se remplir. Les indices A-C-P et les premiers patterns d\u2019apprentissage apparaissent. Tu peux maintenant observer la progression de ton groupe.'
     },
@@ -54,9 +65,8 @@ var TRANSITIONS = [
         id: 'observation-competence',
         dejaVuePref: 'transition_obs_comp_vue',
         condition: function() {
-            // Proxy : suffisamment de données pour que le tableau de bord détecte des signaux.
-            // Seuil prudent : au moins 5 évaluations enregistrées.
-            return nbElementsObj('evaluationsSauvegardees') >= 5;
+            // Proxy : suffisamment de données pour détecter des signaux RàI.
+            return nbTrim('evaluationsSauvegardees') >= 5;
         },
         message: 'Le tableau de bord montre des signaux qui m\u00e9ritent attention. Tu peux maintenant planifier des interventions pr\u00e9ventives pour les \u00e9tudiant\u00b7es qui en ont besoin, et approfondir l\u2019alignement p\u00e9dagogique de ton cours.'
     }
