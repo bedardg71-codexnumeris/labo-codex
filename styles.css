@@ -22899,3 +22899,118 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
         max-width: none;
     }
 }
+
+/* =============================================================================
+   TOUR GUIDÉ (guidage.js) — panneau flottant 6 étapes, non bloquant
+   ============================================================================= */
+.panneau-tour-guide {
+    position: fixed;
+    bottom: -400px;
+    right: 24px;
+    width: min(420px, calc(100vw - 48px));
+    background: var(--surface-carte);
+    color: var(--texte-principal);
+    border: 1px solid var(--accent-primaire, #2da9d7);
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+    z-index: 900;
+    transition: bottom 0.35s ease;
+    overflow: hidden;
+}
+
+.panneau-tour-guide.visible {
+    bottom: 24px;
+}
+
+.panneau-tour-guide .tour-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--accent-primaire, #2da9d7);
+    color: #fff;
+}
+
+.panneau-tour-guide .tour-titre {
+    flex: 1;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.panneau-tour-guide .tour-progression {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.panneau-tour-guide .tour-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.35);
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.panneau-tour-guide .tour-dot.actif {
+    background: #fff;
+    transform: scale(1.3);
+}
+
+.panneau-tour-guide .tour-dot.vu {
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.panneau-tour-guide .tour-fermer {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: #fff;
+    opacity: 0.8;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.panneau-tour-guide .tour-fermer:hover {
+    background: rgba(255, 255, 255, 0.15);
+    opacity: 1;
+}
+
+.panneau-tour-guide .tour-corps {
+    padding: 16px 20px;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.panneau-tour-guide .tour-corps p {
+    margin: 0 0 10px 0;
+}
+
+.panneau-tour-guide .tour-corps p:last-child {
+    margin-bottom: 0;
+}
+
+.panneau-tour-guide .tour-actions {
+    display: flex;
+    gap: 10px;
+    padding: 12px 20px 16px 20px;
+    flex-wrap: wrap;
+}
+
+.panneau-tour-guide .tour-btn {
+    flex: 1 1 auto;
+    min-height: 40px;
+}
+
+/* iPad : pleine largeur en bas */
+@media (max-width: 1024px) {
+    .panneau-tour-guide {
+        right: 12px;
+        left: 12px;
+        width: auto;
+    }
+}
