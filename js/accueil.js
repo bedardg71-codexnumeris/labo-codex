@@ -60,7 +60,10 @@ function genererBanniereBienvenue() {
             <p>Labo Codex num\u00e9rise le travail que tu fais d\u00e9j\u00e0\u00a0: planifier ton cours, concevoir tes activit\u00e9s d\u2019apprentissage, \u00e9valuer les travaux, suivre la progression de tes \u00e9tudiant\u00b7es. Tu y poses les m\u00eames gestes que sur papier avec calculette ou tableur, mais dans un seul outil portable.</p>
             <p><strong>Par o\u00f9 commencer\u00a0?</strong> Configure ton trimestre, ton cours et ton groupe dans R\u00e9glages. C\u2019est la m\u00eame information que dans ton plan de cours. Tu la saisis une fois, l\u2019application s\u2019en sert partout.</p>
             <div class="banniere-bienvenue-actions">
-                <button class="btn btn-primaire" data-action="afficherSection" data-param="contexte">
+                <button class="btn btn-primaire" data-action="demarrerTourGuide">
+                    Commencer la visite guid\u00e9e
+                </button>
+                <button class="btn btn-secondaire" data-action="afficherSection" data-param="contexte">
                     Aller aux R\u00e9glages
                 </button>
                 <button class="btn btn-secondaire" data-action="entrerEnDemoHandler">
