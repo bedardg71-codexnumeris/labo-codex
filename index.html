@@ -9036,7 +9036,7 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Configuration du cours</span>
                         <span class="titre-emoji-container">
-                            <span class="primo-aide" data-target="conseil-cours">📍</span>
+                            <button class="btn-aide-contextuelle" data-aide="contexte-cours" aria-label="Aide contextuelle">📍</button>
                         </span>
                     </h2>
                     <p class="text-muted">Informations techniques du cours : code, nom, compétences, enseignant·e,
@@ -9044,21 +9044,6 @@
                         format horaire</p>
 
                     <!-- Carte Conseil pratique (masquée par défaut) -->
-                    <div id="conseil-cours" class="carte-info-toggle carte-info-conseil" style="display: none;">
-                        <strong>Conseil pratique :</strong>
-                        <ul class="m-0-pl-20-lh">
-                            <li><strong>Cours actif :</strong> Un seul cours peut être actif à la fois. Le cours
-                                actif est utilisé comme référence dans toute l'application</li>
-                            <li><strong>Verrouillage :</strong> Verrouillez un cours terminé pour éviter les
-                                modifications accidentelles</li>
-                            <li><strong>Duplication :</strong> Dupliquez un cours pour créer rapidement une
-                                nouvelle session en modifiant seulement l'année</li>
-                            <li><strong>Code de cours :</strong> Format habituel : XXX-XXX-XX
-                                (département-numéro-pondération)</li>
-                            <li><strong>Format horaire :</strong> Définit comment les heures sont réparties dans
-                                la semaine (utilisé pour le calendrier)</li>
-                        </ul>
-                    </div>
 
                     <!-- LAYOUT SIDEBAR + ZONE PRINCIPALE (conforme Design System) -->
                     <div class="layout-sidebar-2col">
@@ -9455,28 +9440,12 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Configuration de l'horaire</span>
                         <span class="titre-emoji-container">
-                            <span class="primo-aide" data-target="conseil-horaire">📍</span>
+                            <button class="btn-aide-contextuelle" data-aide="contexte-horaire" aria-label="Aide contextuelle">📍</button>
                         </span>
                     </h2>
                     <p class="text-muted">Définis le format horaire hebdomadaire de tes séances de cours</p>
 
                     <!-- Carte Conseil pratique (masquée par défaut) -->
-                    <div id="conseil-horaire" class="carte-info-toggle carte-info-conseil" style="display: none;">
-                        <strong>Conseil pratique :</strong>
-                        <ul class="m-0-pl-20-lh">
-                            <li><strong>Format 2×2h :</strong> Idéal pour deux périodes de cours séparées dans
-                                la semaine (ex: lundi et jeudi)</li>
-                            <li><strong>Format 1×4h :</strong> Convient aux cours intensifs d'une seule période
-                                continue</li>
-                            <li><strong>Heure de début/fin :</strong> Respecte le format 24h (ex: 13:00, pas
-                                1:00 PM)</li>
-                            <li><strong>Reprises :</strong> Les séances de reprise seront automatiquement
-                                ajoutées lors de la configuration des congés imprévus dans la section
-                                Trimestre</li>
-                            <li><strong>Modification :</strong> Tu peux modifier le format horaire en tout
-                                temps. Les séances existantes seront supprimées et devront être recréées</li>
-                        </ul>
-                    </div>
 
                     <!-- Sélecteur de format horaire -->
                     <!-- Configuration des séances -->
@@ -9559,7 +9528,7 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Configuration du groupe d'étudiants</span>
                         <span class="titre-emoji-container">
-                            <span class="primo-aide" data-target="conseil-groupe">📍</span>
+                            <button class="btn-aide-contextuelle" data-aide="contexte-groupe-etudiants" aria-label="Aide contextuelle">📍</button>
                         </span>
                     </h2>
                     <p class="text-muted">Liste complète des étudiants inscrits : ajout, import, modification,
@@ -9567,28 +9536,6 @@
                     </p>
 
                     <!-- Carte Conseil pratique (masquée par défaut) -->
-                    <div id="conseil-groupe" class="carte-info-toggle carte-info-conseil" style="display: none;">
-                        <strong>Conseil pratique :</strong>
-                        <ul class="m-0-pl-20-lh">
-                            <li><strong>Champ Groupe :</strong> Permet d'organiser tes étudiants si tu as
-                                plusieurs groupes (ex: Groupe 1, Groupe 2). Utilise le filtre en haut pour afficher un groupe
-                                spécifique.</li>
-                            <li><strong>Import CSV/TSV :</strong> Format attendu avec 7 colonnes : DA, Groupe,
-                                Nom, Prénom, Programme, Nom du programme, SA. Les colonnes peuvent être séparées par des virgules ou des
-                                tabulations. La colonne CAF peut être ajoutée manuellement après l'import.</li>
-                            <li><strong>Copier-coller :</strong> Tu peux copier directement depuis Excel ou
-                                Google Sheets. La prévisualisation te permet de vérifier avant d'importer.</li>
-                            <li><strong>Modification :</strong> Utilise l'icône pour modifier un·e
-                                étudiant·e, ou pour le·la supprimer.</li>
-                            <li><strong>Export :</strong> Exporte ta liste au format CSV pour backup ou partage.
-                                Le fichier peut ensuite être réimporté.</li>
-                            <li><strong>Réinitialisation :</strong> Attention ! Le bouton « Réinitialiser »
-                                supprime <strong>tous les étudiants</strong>. Cette action est irréversible.</li>
-                            <li><strong>Lien avec les autres sections :</strong> La liste configurée ici est
-                                automatiquement disponible dans l'onglet « Étudiants › Liste des individus » pour la gestion des
-                                portfolios.</li>
-                        </ul>
-                    </div>
 
                     <div class="carte">
                         <h3 class="carte-titre-bleu">Groupe d'étudiants</h3>
@@ -9828,7 +9775,7 @@
                         <span>Configuration des seuils d'interprétation</span>
                         <span class="titre-emoji-container">
                             <span class="primo-aide" data-target="note-interpretation">📍</span>
-                            <span class="primo-aide" data-target="conseil-interpretation">📍</span>
+                            <button class="btn-aide-contextuelle" data-aide="depistage-interpretation" aria-label="Aide contextuelle">📍</button>
                         </span>
                     </h2>
                     <p class="text-muted">
@@ -9867,21 +9814,6 @@
                     </div>
 
                     <!-- Conseil pratique : Informations techniques -->
-                    <div id="conseil-interpretation" class="carte-info-toggle carte-info-conseil" style="display: none;">
-                        <strong>Conseil pratique :</strong>
-                        <ul class="m-8-0-pl20-lh18">
-                            <li><strong>Stockage :</strong> Les seuils sont sauvegardés dans localStorage</li>
-                            <li><strong>Portée :</strong> Les modifications affectent tous les calculs immédiatement</li>
-                            <li><strong>Valeurs par défaut :</strong>
-                                <ul class="mt-8">
-                                    <li>Progression : 10 points (%)</li>
-                                    <li>Direction risque : 5 points (%)</li>
-                                    <li>Défi SRPNF : 71.25%</li>
-                                </ul>
-                            </li>
-                            <li><strong>Impact :</strong> Les seuils influencent les diagnostics RàI, patterns et recommandations</li>
-                        </ul>
-                    </div>
 
                     <!-- Grille 2 colonnes pour optimisation espace -->
                     <div class="u-mb-20" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px">
