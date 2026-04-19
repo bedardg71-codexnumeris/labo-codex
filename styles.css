@@ -23032,6 +23032,16 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     filter: brightness(1.15);
 }
 
+.glossaire-terme:focus {
+    outline: 2px solid var(--accent-primaire, #2da9d7);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+.glossaire-terme:focus:not(:focus-visible) {
+    outline: none;
+}
+
 /* Micro-popup positionné en absolu */
 .glossaire-micropopup {
     position: absolute;
