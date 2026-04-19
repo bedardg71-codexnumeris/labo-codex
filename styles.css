@@ -11887,38 +11887,39 @@ tr.etudiant-inactif td {
    AIDE CONTEXTUELLE - Boutons et Modal (Tour guide / Aide contextuelle)
    ============================================================================= */
 
-/* Bouton d'aide contextuelle - caché par défaut */
+/* Bouton d'aide contextuelle (📍) - caché par défaut, visuel aligné sur .primo-aide */
 .btn-aide-contextuelle {
     display: none;
     align-items: center;
     justify-content: center;
-    /* Tier 7.2 : cible tactile ≥ 44px (WCAG / iPad) */
-    width: 44px;
-    height: 44px;
+    /* Tier 7.2 : cible tactile ≥ 44px (WCAG / iPad) — conservée via min-width/height */
+    min-width: 44px;
+    min-height: 44px;
     padding: 0;
-    margin-left: 4px;
+    margin-left: 8px;
     background: transparent;
-    border: 2px solid var(--sarcelle-moyen, #1a5266);
-    border-radius: 50%;
-    /* Tier 7.8 D-AIDE-2 : "?" au lieu de "📍" pour différencier de Primo */
-    font-size: 20px;
-    font-weight: 700;
-    font-family: Georgia, serif;
-    color: var(--sarcelle-moyen, #1a5266);
+    border: none;
+    font-size: 1.2rem;
     line-height: 1;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform 0.2s ease;
     vertical-align: middle;
     flex-shrink: 0;
+    user-select: none;
 }
 
 .btn-aide-contextuelle:hover {
-    background: var(--sarcelle-tres-pale, #e8f4f7);
-    transform: scale(1.1);
+    transform: scale(1.15);
 }
+
+.btn-aide-contextuelle:active {
+    transform: scale(0.95);
+}
+
 @media (prefers-reduced-motion: reduce) {
     .btn-aide-contextuelle,
-    .btn-aide-contextuelle:hover {
+    .btn-aide-contextuelle:hover,
+    .btn-aide-contextuelle:active {
         transition: none;
         transform: none;
     }
@@ -11930,6 +11931,7 @@ tr.etudiant-inactif td {
 .btn-aide-contextuelle:focus {
     outline: 2px solid var(--sarcelle-moyen, #1a5266);
     outline-offset: 2px;
+    border-radius: 50%;
 }
 
 /* Affichage si Tour guide ou Aide contextuelle actif — avec !important pour éviter les conflits */
