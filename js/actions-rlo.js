@@ -1,5 +1,5 @@
 /**
- * actions-rlo.js — Profil RLO (Repérage / Liaison / Ouverture)
+ * actions-rlo.js — Profil ACO (Repérage / Liaison / Ouverture)
  *
  * Agrège les décomptes des tampons `action-*` posés sur l'annotation d'un
  * fichier d'évaluation, pour produire un profil structuré inscrit dans
@@ -10,7 +10,7 @@
  * (travauxStockage) → comptage par autocollantId (travauxExportPDF).
  *
  * Les tampons legacy (qualité, diagnostic) sont ignorés — seuls les IDs
- * `action-*` alimentent le profil RLO.
+ * `action-*` alimentent le profil ACO.
  *
  * API publique : window.actionsRLO = { agregerActionsRLO }
  *   - Pure : aucune dépendance à l'UI ou à une vue active
@@ -22,7 +22,7 @@
     'use strict';
 
     /**
-     * Mapping IDs internes → clés de sortie du profil RLO.
+     * Mapping IDs internes → clés de sortie du profil ACO.
      * Les noms de sortie (reperage/liaison/ouverture/...) sont la convention
      * stable utilisée par l'export anonymisé et la visualisation.
      */
@@ -143,7 +143,7 @@
     }
 
     /**
-     * Agrège le profil RLO cumulé d'un étudiant sur toutes ses évaluations.
+     * Agrège le profil ACO cumulé d'un étudiant sur toutes ses évaluations.
      *
      * Étape 8 — visualisation in-app dans « Développement des habiletés ».
      * Lecture LIVE : appelle `agregerActionsRLO(ev)` sur chaque évaluation
@@ -204,7 +204,7 @@
     }
 
     /**
-     * Série chronologique du profil RLO pour le graphique d'évolution.
+     * Série chronologique du profil ACO pour le graphique d'évolution.
      *
      * Étape 9 — visualisation in-app dans « Développement des habiletés ».
      * Parcourt les évaluations du DA ordonnées par date d'évaluation, calcule

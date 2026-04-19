@@ -116,7 +116,7 @@ const TOOLTIPS = {
     // --- Préférences ---
 
     'pref-actions-rlo':
-        'Active trois tampons ou estampes (Rep\u00e9rage, Liaison, Ouverture) que tu poses sur les copies pour observer les gestes cognitifs de tes \u00e9tudiant\u00b7es. Les r\u00e9sultats alimentent le profil RLO et l\'export de recherche anonymis\u00e9.',
+        'Active trois tampons ou estampes (Rep\u00e9rage, Liaison, Ouverture) que tu poses sur les copies pour observer les gestes cognitifs de tes \u00e9tudiant\u00b7es. Les r\u00e9sultats alimentent le profil ACO et l\'export de recherche anonymis\u00e9.',
     'pref-affichage-assiduite':
         'Choisis l\'unit\u00e9 d\'affichage des totaux de pr\u00e9sence et d\'assiduit\u00e9 (ex. : en p\u00e9riodes).',
     'pref-affichage-comparatif':
