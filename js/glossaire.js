@@ -325,7 +325,8 @@ function enrichirTermesGlossaire(html) {
         var cle = trouverCleParTerme(match);
         if (!cle || vus[cle]) return match;
         vus[cle] = true;
-        return '<span class="glossaire-terme" data-glossaire="' + cle + '">' + match + '</span>';
+        // Attributs a11y : role="button" + tabindex pour accès clavier
+        return '<span class="glossaire-terme" data-glossaire="' + cle + '" role="button" tabindex="0">' + match + '</span>';
     });
 }
 
@@ -334,6 +335,8 @@ function enrichirTermesGlossaire(html) {
 // =========================================================================
 
 var _initialise = false;
+
+var _rendu_aide_reference_fait = false;
 
 function initialiserGlossaire() {
     if (_initialise) return;
@@ -355,9 +358,34 @@ function initialiserGlossaire() {
         if (!popup) fermerMicroPopup();
     });
 
-    // Échap ferme le micro-popup
+    // Clavier : Entrée / Espace sur un terme ouvre le micro-popup ; Échap le ferme
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') fermerMicroPopup();
+        if (e.key === 'Escape') {
+            fermerMicroPopup();
+            return;
+        }
+        if (e.key === 'Enter' || e.key === ' ') {
+            var terme = e.target.closest && e.target.closest('[data-glossaire]');
+            if (terme) {
+                e.preventDefault();
+                var cle = terme.getAttribute('data-glossaire');
+                var entree = glossaire()[cle];
+                if (entree) afficherMicroPopup(entree, terme);
+            }
+        }
+    });
+
+    // Lazy render de la page dédiée dans Aide > Référence rapide
+    window.addEventListener('sectionAffichee', function(e) {
+        var id = e && e.detail && e.detail.idSousSection;
+        if (id !== 'aide-reference') return;
+        setTimeout(function() {
+            var conteneur = document.getElementById('glossaire-rendu');
+            if (conteneur && !_rendu_aide_reference_fait) {
+                afficherDansConteneur(conteneur);
+                _rendu_aide_reference_fait = true;
+            }
+        }, 150);
     });
 }
 

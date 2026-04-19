@@ -68,9 +68,20 @@
         if (!aide) return '<p>Contenu non disponible.</p>';
 
         // Rendu des sections
-        const sectionsHTML = aide.sections
+        let sectionsHTML = aide.sections
             .map(section => rendreSectionAide(section))
             .join('');
+
+        // Enrichissement glossaire (Phase 4) : marque la 1re occurrence de
+        // chaque terme connu dans les textes de sections. Les textes proviennent
+        // des données AIDE_CONTEXTUELLE (sous contrôle, pas d'entrée utilisateur).
+        if (window.glossaire && typeof window.glossaire.enrichirTermesGlossaire === 'function') {
+            try {
+                sectionsHTML = window.glossaire.enrichirTermesGlossaire(sectionsHTML);
+            } catch (e) {
+                console.warn('[AideCtx] Enrichissement glossaire non appliqué :', e);
+            }
+        }
 
         // Rendu des liens "Voir aussi"
         let voirAussiHTML = '';
