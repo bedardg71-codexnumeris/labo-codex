@@ -8,15 +8,12 @@
     z-index: 10000;
     padding: 14px 20px;
     border-radius: 20px;
-    background: var(--surface-carte, #1a3040);
-    color: #d0e0e4;
+    background: var(--acc-fond);
+    color: var(--acc-texte);
     font-size: 0.85rem;
     line-height: 1.45;
-    border: 1.5px solid var(--accent-primaire, #6aacb8);
-    box-shadow:
-        0 8px 24px rgba(0, 0, 0, 0.5),
-        inset 0 0 12px rgba(106, 172, 184, 0.08),
-        inset 0 2px 4px rgba(106, 172, 184, 0.05);
+    border: 1.5px solid var(--acc-bordure);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
     pointer-events: none;
     opacity: 0;
     transform: scale(0.97);
@@ -34,12 +31,12 @@
     display: block;
 }
 
-/* Fleche — carre tourne a 45° avec bordure sarcelle sur l'amorce */
+/* Fleche — carre tourne a 45° au ton de la bulle (fond + bordure orange) */
 .tooltip-fleche {
     position: absolute;
     width: 12px;
     height: 12px;
-    background: #162a30;
+    background: var(--acc-fond);
 }
 
 /* Bulle A DROITE de l'element -> fleche pointe vers la GAUCHE */
@@ -47,8 +44,8 @@
     left: -7px;
     top: 50%;
     transform: translateY(-50%) rotate(45deg);
-    border-left: 1.5px solid var(--accent-primaire, #6aacb8);
-    border-bottom: 1.5px solid var(--accent-primaire, #6aacb8);
+    border-left: 1.5px solid var(--acc-bordure);
+    border-bottom: 1.5px solid var(--acc-bordure);
 }
 
 /* Bulle A GAUCHE de l'element -> fleche pointe vers la DROITE */
@@ -56,8 +53,8 @@
     right: -7px;
     top: 50%;
     transform: translateY(-50%) rotate(45deg);
-    border-right: 1.5px solid var(--accent-primaire, #6aacb8);
-    border-top: 1.5px solid var(--accent-primaire, #6aacb8);
+    border-right: 1.5px solid var(--acc-bordure);
+    border-top: 1.5px solid var(--acc-bordure);
 }
 
 /* Bulle SOUS l'element -> fleche pointe vers le HAUT (fallback) */
@@ -65,8 +62,8 @@
     top: -7px;
     left: 50%;
     transform: translateX(-50%) rotate(45deg);
-    border-left: 1.5px solid var(--accent-primaire, #6aacb8);
-    border-top: 1.5px solid var(--accent-primaire, #6aacb8);
+    border-left: 1.5px solid var(--acc-bordure);
+    border-top: 1.5px solid var(--acc-bordure);
 }
 
 /* Bulle AU-DESSUS de l'element -> fleche pointe vers le BAS (fallback) */
@@ -74,8 +71,8 @@
     bottom: -7px;
     left: 50%;
     transform: translateX(-50%) rotate(45deg);
-    border-right: 1.5px solid var(--accent-primaire, #6aacb8);
-    border-bottom: 1.5px solid var(--accent-primaire, #6aacb8);
+    border-right: 1.5px solid var(--acc-bordure);
+    border-bottom: 1.5px solid var(--acc-bordure);
 }
 
 .tooltip-contenu {
@@ -129,14 +126,5 @@ nav [data-tooltip],
     }
 }
 
-/* --- Mode clair : texte foncé lisible sur fond clair --- */
-body.mode-clair .tooltip-bulle {
-    color: var(--texte-principal, #1a2a3a);
-    box-shadow:
-        0 8px 24px rgba(3, 46, 92, 0.18),
-        inset 0 0 12px rgba(106, 172, 184, 0.06);
-}
-
-body.mode-clair .tooltip-fleche {
-    background: var(--surface-carte, #ffffff);
-}
+/* La palette accompagnement (--acc-*) ne change pas entre les modes :
+   pas de redéfinition spécifique pour body.mode-clair. */

@@ -1,14 +1,17 @@
 /* ===============================
    MODULE: PAGE D'ACCUEIL
-   Chantier 3 — Page d'accueil permanente
-   A.16 (18 avril 2026) — Fusion Découvrir + Parcourir → Parcours guidé
+   19 avril 2026 — Refonte V3 (ebauches-accueil.html) :
+     - hero « Que souhaites-tu faire ? »
+     - bannière de bienvenue (si nouvel utilisateur sans groupe-cours)
+     - section « Raccourcis » : grille 4×2 de 8 cartes d'action
+     - section « Utilitaires » | « Aide » : rangée de 4 demi-cartes
+         · 2 utilitaires neutres (Sauvegarder, Nouveautés)
+         · 2 cartes orange palette accompagnement avec case à cocher
+           (Accompagnement, Données démo)
+     - pied de page
 
-   Page unique pour tous les utilisateurs :
-   2 accordéons (Parcours guidé, Piloter) + utilitaires.
-
-   « Parcours guidé » regroupe : les toggles de mode de navigation (démo,
-   tour guidé, info-bulles, aide contextuelle, flèches didactiques) et le
-   panneau de parcours d'apprentissage progressif.
+   La case « Accompagnement » pilote en bloc les 4 sous-systèmes d'aide
+   (tour guidé, info-bulles, aide contextuelle, flèches didactiques).
 
    Exports: afficherAccueil, initialiserAccueil, definirModeExpert
    =============================== */
@@ -22,6 +25,12 @@
 function afficherAccueil() {
     const conteneur = document.getElementById('accueil-contenu');
     if (!conteneur) return;
+
+    // L'accueil n'émet pas `sectionAffichee` (pas de sous-section) : une flèche
+    // didactique d'une autre section pourrait persister à l'écran. On la masque.
+    if (window.flechesDidactiques && typeof window.flechesDidactiques.masquerActive === 'function') {
+        window.flechesDidactiques.masquerActive();
+    }
 
     afficherAccueilContenu(conteneur);
 }
@@ -75,111 +84,26 @@ function genererBanniereBienvenue() {
 }
 
 /**
- * Contenu de la page d'accueil : 3 accordéons + utilitaires
+ * Contenu de la page d'accueil — V3 (19 avril 2026).
+ *
+ *   - Hero « Que souhaites-tu faire ? »
+ *   - bannière de bienvenue (nouvel utilisateur)
+ *   - Raccourcis : grille 4×2 de 8 cartes d'action
+ *   - Utilitaires (gauche) | Aide (droite) : rangée de 4 demi-cartes
+ *       · 2 utilitaires neutres (Sauvegarder, Nouveautés)
+ *       · 2 cartes orange palette accompagnement avec case
+ *         (Accompagnement, Données démo)
+ *   - pied de page
+ *
+ * Aucun style= inline — tout passe par les classes CSS de index.html.
  */
 function afficherAccueilContenu(conteneur) {
-    // A.14 — La checkbox reflète strictement l'état réel du mode démo.
-    // Avant, pour un nouvel utilisateur sans cours réels, la case était
-    // cochée par défaut alors que le mode démo n'était pas activé : l'état
-    // visible ne correspondait pas au comportement de l'app.
-    const enDemo = typeof estEnModeDemo === 'function' && estEnModeDemo();
-    const demoChecked = enDemo;
-
-    // Toggles de mode de navigation (miroirs de Réglages > Préférences > Navigation)
-    const tooltipsActifs = obtenirPreference('tooltips') !== false;
-    const tourGuideActif = !!obtenirPreference('tourGuide');
-    const aideContextuelleActive = obtenirPreference('aideContextuelle') !== false;
-    const flechesActives = !window.flechesDidactiques || window.flechesDidactiques.estActif();
-
-    // Panneau de parcours d'apprentissage — intégré à Parcours guidé (A.16)
-    const parcoursHTML = (window.parcours && window.parcours.genererPanneauParcours)
-        ? window.parcours.genererPanneauParcours()
-        : '';
-
-    const parcoursGuideHTML = `
-        <div class="carte accordeon" id="accueil-parcours-guide">
-            <div class="accordeon-header">
-                <h3 style="margin: 0; font-size: 1.1rem;">Parcours guid\u00e9</h3>
-                <span class="accordeon-chevron">\u25BC</span>
-            </div>
-            <div class="accordeon-contenu">
-                <p class="parcours-guide-intro">
-                    Explore l\u2019application avec des donn\u00e9es de d\u00e9monstration, puis cr\u00e9e tes premi\u00e8res pi\u00e8ces de mat\u00e9riel p\u00e9dagogique.
-                    Des fl\u00e8ches contextuelles t\u2019indiquent o\u00f9 cliquer \u00e0 chaque \u00e9tape.
-                </p>
-
-                <div class="accueil-cartes-decouvrir">
-
-                    <div class="accueil-carte-decouvrir">
-                        <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
-                            <span style="font-size:1.5rem;">&#x1F6B8;</span>
-                            <input type="checkbox" id="checkbox-demo-accueil" ${demoChecked ? 'checked' : ''}
-                                data-on-change="toggleDemoHandler">
-                            <div>
-                                <div class="decouvrir-titre">Donn\u00e9es de d\u00e9monstration</div>
-                                <div class="decouvrir-desc">Explorer avec des donn\u00e9es fictives</div>
-                            </div>
-                        </label>
-                    </div>
-
-                    <div class="accueil-carte-decouvrir">
-                        <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
-                            <span style="font-size:1.5rem;">\u27A1\uFE0F</span>
-                            <input type="checkbox" id="checkbox-fleches-accueil" ${flechesActives ? 'checked' : ''}
-                                data-on-change="toggleFlechesDidactiquesHandler">
-                            <div>
-                                <div class="decouvrir-titre">Fl\u00e8ches didactiques</div>
-                                <div class="decouvrir-desc">Indiquer o\u00f9 cliquer au premier contact de chaque \u00e9cran</div>
-                            </div>
-                        </label>
-                    </div>
-
-                    <div class="accueil-carte-decouvrir">
-                        <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
-                            <span style="font-size:1.5rem;">&#x1F5FA;&#xFE0F;</span>
-                            <input type="checkbox" id="checkbox-tour-guide-accueil" ${tourGuideActif ? 'checked' : ''}
-                                data-on-change="toggleTourGuideHandler">
-                            <div>
-                                <div class="decouvrir-titre">Tour guid\u00e9</div>
-                                <div class="decouvrir-desc">Afficher les conseils contextuels</div>
-                            </div>
-                        </label>
-                    </div>
-
-                    <div class="accueil-carte-decouvrir">
-                        <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
-                            <span style="font-size:1.5rem;">\uD83D\uDCAC</span>
-                            <input type="checkbox" id="checkbox-tooltips-accueil" ${tooltipsActifs ? 'checked' : ''}
-                                data-on-change="toggleTooltipsHandler">
-                            <div>
-                                <div class="decouvrir-titre">Info-bulles</div>
-                                <div class="decouvrir-desc">D\u00e9crire l\u2019interface au survol</div>
-                            </div>
-                        </label>
-                    </div>
-
-                    <div class="accueil-carte-decouvrir">
-                        <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
-                            <span style="font-size:1.5rem;">&#x2139;&#xFE0F;</span>
-                            <input type="checkbox" id="checkbox-aide-contextuelle-accueil" ${aideContextuelleActive ? 'checked' : ''}
-                                data-on-change="toggleAideContextuelleHandler">
-                            <div>
-                                <div class="decouvrir-titre">Aide contextuelle</div>
-                                <div class="decouvrir-desc">Afficher les rep\u00e8res d\u2019aide</div>
-                            </div>
-                        </label>
-                    </div>
-
-                </div>
-
-                ${parcoursHTML}
-            </div>
-        </div>
-    `;
+    // A.14 — La case « Données de démonstration » reflète strictement l'état réel.
+    const demoChecked = typeof estEnModeDemo === 'function' && estEnModeDemo();
+    // « Accompagnement » = ON uniquement si les 4 sous-systèmes sont actifs.
+    const accChecked = accompagnementEstActif();
 
     const heroTitre = 'Que souhaites-tu faire\u00a0?';
-
-    // Bannière de bienvenue : aucun groupe-cours configuré ET mode démo inactif
     const banniereBienvenueHTML = genererBanniereBienvenue();
 
     conteneur.innerHTML = `
@@ -189,94 +113,116 @@ function afficherAccueilContenu(conteneur) {
 
         ${banniereBienvenueHTML}
 
-        ${parcoursGuideHTML}
+        <div class="accueil-section-label">Raccourcis</div>
+        <div class="accueil-grille-actions">
 
-        <div class="carte accordeon" id="accueil-piloter">
-            <div class="accordeon-header">
-                <h3 style="margin: 0; font-size: 1.1rem;">Piloter</h3>
-                <span class="accordeon-chevron">\u25BC</span>
+            <div class="accueil-action" data-action="ouvrirWizardPratique">
+                <div class="accueil-action-icone">\u2699\uFE0F</div>
+                <div class="accueil-action-titre">Configurer ta pratique</div>
+                <div class="accueil-action-desc">D\u00e9finis ce que tu mesures et comment tu le fais.</div>
             </div>
-            <div class="accordeon-contenu" style="display: block;">
-                <div class="accueil-cartes accueil-cartes--8">
-                    <div class="accueil-carte" data-action="naviguerAccueilCarte" data-param="planification|structure-carte">
-                        <div class="accueil-carte-icone">\uD83E\uDDE9</div>
-                        <div class="accueil-carte-titre">Planifier ton cours</div>
-                        <div class="accueil-carte-desc">
-                            Organise tes s\u00e9quences, le\u00e7ons et activit\u00e9s pour leur alignement p\u00e9dagogique.
-                        </div>
-                    </div>
-                    <div class="accueil-carte" data-action="naviguerVersWizard">
-                        <div class="accueil-carte-icone"><img src="icons/icon-paint-palette.svg" alt="" class="outil-svg-icon" style="width:32px;height:32px;"></div>
-                        <div class="accueil-carte-titre">Configurer ta pratique de notation</div>
-                        <div class="accueil-carte-desc">
-                            D\u00e9finis ce que tu mesures et comment tu le fais pour cr\u00e9er ta pratique de notation.
-                        </div>
-                    </div>
-                    <div class="accueil-carte" data-action="afficherSection" data-param="presences">
-                        <div class="accueil-carte-icone">&#x1F4CB;</div>
-                        <div class="accueil-carte-titre">Saisir les pr\u00e9sences</div>
-                        <div class="accueil-carte-desc">
-                            Saisis les pr\u00e9sences du jour pour ton groupe et ajoute des observations.
-                        </div>
-                    </div>
-                    <div class="accueil-carte" data-action="afficherSection" data-param="tableau-bord">
-                        <div class="accueil-carte-icone">&#x1F4C8;</div>
-                        <div class="accueil-carte-titre">Voir l\u2019\u00e9tat des lieux</div>
-                        <div class="accueil-carte-desc">
-                            Suis la participation, les r\u00e9sultats et la progression de ton groupe.
-                        </div>
-                    </div>
-                    <div class="accueil-carte" data-action="naviguerAccueilCarte" data-param="evaluations|evaluations-importer">
-                        <div class="accueil-carte-icone">&#x1F4E5;</div>
-                        <div class="accueil-carte-titre">Importer des travaux</div>
-                        <div class="accueil-carte-desc">
-                            Importe les travaux de tes \u00e9tudiants (PDF, images) et pr\u00e9pare les fichiers.
-                        </div>
-                    </div>
-                    <div class="accueil-carte" data-action="naviguerAccueilCarte" data-param="evaluations|evaluations-annoter">
-                        <div class="accueil-carte-icone">&#x1F4DD;</div>
-                        <div class="accueil-carte-titre">Annoter et \u00e9valuer</div>
-                        <div class="accueil-carte-desc">
-                            Annote les travaux de tes \u00e9tudiants et \u00e9value-les selon la grille de crit\u00e8res.
-                        </div>
-                    </div>
-                    <div class="accueil-carte" data-action="naviguerAccueilCarte" data-param="tableau-bord|suivi-profil">
-                        <div class="accueil-carte-icone">\uD83D\uDC64</div>
-                        <div class="accueil-carte-titre">Consulter un profil \u00e9tudiant</div>
-                        <div class="accueil-carte-desc">
-                            Consulte le portrait d\u2019un \u00e9l\u00e8ve\u00a0: pr\u00e9sences, r\u00e9sultats et progression.
-                        </div>
-                    </div>
-                    <div class="accueil-carte" data-action="naviguerAccueilCarte" data-param="tableau-bord|suivi-interventions">
-                        <div class="accueil-carte-icone">\uD83D\uDEDF</div>
-                        <div class="accueil-carte-titre">Pr\u00e9parer des interventions</div>
-                        <div class="accueil-carte-desc">
-                            Identifie les \u00e9l\u00e8ves \u00e0 risque et planifie des interventions diff\u00e9renci\u00e9es selon leurs besoins.
-                        </div>
-                    </div>
-                </div>
+
+            <div class="accueil-action" data-action="naviguerAccueilCarte" data-param="structure|structure-carte">
+                <div class="accueil-action-icone">\uD83D\uDDFA\uFE0F</div>
+                <div class="accueil-action-titre">Planifier ton cours</div>
+                <div class="accueil-action-desc">S\u00e9quences, le\u00e7ons et alignement p\u00e9dagogique.</div>
             </div>
+
+            <div class="accueil-action" data-action="naviguerAccueilCarte" data-param="suivi|suivi-saisie">
+                <div class="accueil-action-icone">\uD83D\uDCCB</div>
+                <div class="accueil-action-titre">Saisir les pr\u00e9sences</div>
+                <div class="accueil-action-desc">Pr\u00e9sences du jour et observations.</div>
+            </div>
+
+            <div class="accueil-action" data-action="naviguerAccueilCarte" data-param="evaluations|evaluations-importer">
+                <div class="accueil-action-icone">\uD83D\uDCE5</div>
+                <div class="accueil-action-titre">Importer des travaux</div>
+                <div class="accueil-action-desc">PDF et images de tes \u00e9tudiants.</div>
+            </div>
+
+            <div class="accueil-action" data-action="naviguerAccueilCarte" data-param="evaluations|evaluations-annoter">
+                <div class="accueil-action-icone">\u270F\uFE0F</div>
+                <div class="accueil-action-titre">Annoter et \u00e9valuer</div>
+                <div class="accueil-action-desc">Annote les travaux selon ta grille.</div>
+            </div>
+
+            <div class="accueil-action" data-action="afficherSection" data-param="apercu">
+                <div class="accueil-action-icone">\uD83D\uDCCA</div>
+                <div class="accueil-action-titre">Avoir un aper\u00e7u</div>
+                <div class="accueil-action-desc">Participation, r\u00e9sultats et progression.</div>
+            </div>
+
+            <div class="accueil-action" data-action="naviguerAccueilCarte" data-param="suivi|suivi-profil">
+                <div class="accueil-action-icone">\uD83D\uDC64</div>
+                <div class="accueil-action-titre">Consulter un profil</div>
+                <div class="accueil-action-desc">Portrait d\u2019un \u00e9l\u00e8ve.</div>
+            </div>
+
+            <div class="accueil-action" data-action="naviguerAccueilCarte" data-param="suivi|suivi-interventions">
+                <div class="accueil-action-icone">\uD83C\uDFAF</div>
+                <div class="accueil-action-titre">Interventions R\u00e0I</div>
+                <div class="accueil-action-desc">\u00c9l\u00e8ves \u00e0 risque, interventions diff\u00e9renci\u00e9es.</div>
+            </div>
+
         </div>
 
-        <div class="accueil-utilitaires">
-            <button class="accueil-utilitaire" data-action="ouvrirModalBackup">
-                \uD83D\uDCBE Sauvegarder
-            </button>
-            <button class="accueil-utilitaire" data-action="afficherModalNouveautes">
-                \u2709\uFE0F<span class="pastille-nouveautes"></span> Nouvelles
-            </button>
+        <div class="accueil-grille-labels">
+            <div class="accueil-section-label">Utilitaires</div>
+            <div class="accueil-section-label">Aide</div>
+        </div>
+
+        <div class="accueil-grille-bas">
+
+            <div class="accueil-utilitaire-demi" data-action="ouvrirModalBackup">
+                <div class="accueil-utilitaire-icone">\uD83D\uDCBE</div>
+                <div>
+                    <div class="accueil-utilitaire-titre">Sauvegarder</div>
+                    <div class="accueil-utilitaire-desc">Exporter ou restaurer tes donn\u00e9es.</div>
+                </div>
+            </div>
+
+            <div class="accueil-utilitaire-demi" data-action="afficherModalNouveautes">
+                <div class="accueil-utilitaire-icone">\uD83D\uDCF0<span class="pastille-nouveautes"></span></div>
+                <div>
+                    <div class="accueil-utilitaire-titre">Nouveaut\u00e9s</div>
+                    <div class="accueil-utilitaire-desc">Derni\u00e8res mises \u00e0 jour.</div>
+                </div>
+            </div>
+
+            <label for="checkbox-accompagnement-accueil" class="accueil-aide-demi">
+                <div class="accueil-aide-icone">\uD83E\uDDED</div>
+                <div>
+                    <div class="accueil-aide-titre">Accompagnement</div>
+                    <div class="accueil-aide-desc">Tour guid\u00e9, info-bulles, aide contextuelle.</div>
+                </div>
+                <input type="checkbox" id="checkbox-accompagnement-accueil"
+                    class="accueil-aide-checkbox" ${accChecked ? 'checked' : ''}
+                    data-on-change="toggleAccompagnementHandler">
+            </label>
+
+            <label for="checkbox-demo-accueil" class="accueil-aide-demi">
+                <div class="accueil-aide-icone">\uD83D\uDD2C</div>
+                <div>
+                    <div class="accueil-aide-titre">Donn\u00e9es d\u00e9mo</div>
+                    <div class="accueil-aide-desc">Explore avec des donn\u00e9es fictives.</div>
+                </div>
+                <input type="checkbox" id="checkbox-demo-accueil"
+                    class="accueil-aide-checkbox" ${demoChecked ? 'checked' : ''}
+                    data-on-change="toggleDemoHandler">
+            </label>
+
         </div>
 
         <div class="accueil-pied">
             <a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer" class="accueil-pied-logo-link">
                 <img src="img/logo-codex-numeris.png" alt="Logo Labo Codex" class="accueil-pied-logo">
             </a>
-            <a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer" style="font-size: 0.8rem; color: var(--gris-moyen); text-decoration: none;">codexnumeris.org</a>
-            <span style="font-size: 0.75rem; color: var(--gris-clair); font-style: italic;">R\u00e9fl\u00e9chir, exp\u00e9rimenter, partager.</span>
+            <a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer" class="accueil-pied-lien-site">codexnumeris.org</a>
+            <span class="accueil-pied-tagline">R\u00e9fl\u00e9chir, exp\u00e9rimenter, partager.</span>
         </div>
     `;
 
-    // Mettre a jour la pastille des nouveautes (elle est maintenant dans le DOM)
+    // Mettre à jour la pastille des nouveautés (elle est maintenant dans le DOM)
     if (typeof mettreAJourPastille === 'function') mettreAJourPastille();
 }
 
@@ -317,26 +263,31 @@ function entrerEnDemoHandler() {
     if (typeof entrerEnDemo === 'function') entrerEnDemo();
 }
 
-/** Toggle tour guidé depuis checkbox */
-function toggleTourGuideHandler(el) {
-    if (typeof definirTourGuide === 'function') definirTourGuide(el.checked);
-}
-
-/** Toggle tooltips depuis checkbox */
-function toggleTooltipsHandler(el) {
-    if (typeof definirTooltips === 'function') definirTooltips(el.checked);
-}
-
-/** Toggle aide contextuelle depuis checkbox */
-function toggleAideContextuelleHandler(el) {
-    if (typeof definirAideContextuelle === 'function') definirAideContextuelle(el.checked);
-}
-
-/** Toggle flèches didactiques depuis checkbox (A.16) */
-function toggleFlechesDidactiquesHandler(el) {
+/**
+ * Toggle « Accompagnement » : pilote en bloc les 4 sous-systèmes d'aide
+ * (tour guidé, info-bulles, aide contextuelle, flèches didactiques).
+ * Un seul état visible côté utilisateur — case cochée = les 4 actifs.
+ */
+function toggleAccompagnementHandler(el) {
+    const actif = !!el.checked;
+    if (typeof definirTourGuide === 'function') definirTourGuide(actif);
+    if (typeof definirTooltips === 'function') definirTooltips(actif);
+    if (typeof definirAideContextuelle === 'function') definirAideContextuelle(actif);
     if (window.flechesDidactiques && typeof window.flechesDidactiques.definirActif === 'function') {
-        window.flechesDidactiques.definirActif(el.checked);
+        window.flechesDidactiques.definirActif(actif);
     }
+}
+
+/**
+ * Lit l'état agrégé : true uniquement si les 4 sous-systèmes sont actifs.
+ * Sert à initialiser la case « Accompagnement » sur la page d'accueil.
+ */
+function accompagnementEstActif() {
+    const tour = !!obtenirPreference('tourGuide');
+    const tooltips = obtenirPreference('tooltips') !== false;
+    const aide = obtenirPreference('aideContextuelle') !== false;
+    const fleches = !window.flechesDidactiques || window.flechesDidactiques.estActif();
+    return tour && tooltips && aide && fleches;
 }
 
 /** Navigation accueil : section + sous-section avec délai */
@@ -350,10 +301,9 @@ function naviguerAccueilCarte(sectionEtSousSection) {
     }
 }
 
-/** Navigation vers structure avec wizard */
-function naviguerVersWizard() {
-    afficherSection('structure');
-    setTimeout(function() { if (typeof ouvrirWizardV2 === 'function') ouvrirWizardV2(); }, 300);
+/** Ouvre le wizard de pratique de notation par-dessus l'accueil (modale, pas de navigation). */
+function ouvrirWizardPratique() {
+    if (typeof ouvrirWizardV2 === 'function') ouvrirWizardV2();
 }
 
 /** Ouvrir modal backup */
@@ -367,12 +317,9 @@ window.initialiserAccueil = initialiserAccueil;
 window.definirModeExpert = definirModeExpert;
 window.toggleDemoHandler = toggleDemoHandler;
 window.entrerEnDemoHandler = entrerEnDemoHandler;
-window.toggleTourGuideHandler = toggleTourGuideHandler;
-window.toggleTooltipsHandler = toggleTooltipsHandler;
-window.toggleAideContextuelleHandler = toggleAideContextuelleHandler;
-window.toggleFlechesDidactiquesHandler = toggleFlechesDidactiquesHandler;
+window.toggleAccompagnementHandler = toggleAccompagnementHandler;
 window.naviguerAccueilCarte = naviguerAccueilCarte;
-window.naviguerVersWizard = naviguerVersWizard;
+window.ouvrirWizardPratique = ouvrirWizardPratique;
 window.ouvrirModalBackup = ouvrirModalBackup;
 
 })();

@@ -246,6 +246,54 @@
     --texte-secondaire: #8aa4b0;
     --texte-muted: #5a7a88;
     --accent-primaire: #6aacb8;
+
+    /* ═══════════════════════════════════════════
+       PALETTE ACCOMPAGNEMENT
+       Fond orange, texte sombre — identique 2 modes
+       Base : #e8923a
+       Validée 19 avril 2026 (palette-accompagnement.md)
+       NE PAS REDÉFINIR DANS .mode-clair
+       ═══════════════════════════════════════════ */
+
+    /* Surfaces */
+    --acc-fond:            #e8923a;   /* Fond principal de tous les composants */
+    --acc-surface:         #d4822e;   /* En-têtes, zones surélevées */
+    --acc-surface-hover:   #c87828;   /* Hover sur surfaces */
+
+    /* Bordures */
+    --acc-bordure:         #b06820;   /* Bordure standard */
+    --acc-bordure-active:  #8a5018;   /* Bordure focus/active */
+
+    /* Texte */
+    --acc-texte:           #2a1404;   /* Texte principal (brun très foncé) */
+    --acc-texte-doux:      #4a2e10;   /* Texte secondaire */
+    --acc-texte-leger:     #6a4820;   /* Texte tertiaire, annotations */
+
+    /* Accent (texte foncé sur fond orange) */
+    --acc-accent:          #3a1e08;   /* Titres, liens, termes glossaire */
+    --acc-accent-vif:      #2a1404;   /* Titres principaux */
+
+    /* Bouton primaire (foncé sur orange) */
+    --acc-btn-prim:        #2a1404;
+    --acc-btn-prim-hover:  #3a1e08;
+    --acc-btn-prim-txt:    #f8e8d0;   /* Texte clair sur bouton foncé */
+
+    /* Bouton secondaire (contour foncé sur orange) */
+    --acc-btn-sec-bord:    #4a2e10;
+    --acc-btn-sec-txt:     #2a1404;
+
+    /* Blocs internes (conseil, exemple, alerte) */
+    --acc-conseil-fond:    #f0a858;   /* Orange plus clair */
+    --acc-conseil-bord:    #8a5018;
+    --acc-exemple-fond:    #eba64e;   /* Orange chaud */
+    --acc-exemple-bord:    #3a5a78;   /* Bleu discret pour différencier */
+    --acc-alerte-fond:     #e07830;   /* Orange plus foncé/rouge */
+    --acc-alerte-bord:     #8a2e10;
+
+    /* Dots progression tour guidé */
+    --acc-dot-inactif:     #c87828;
+    --acc-dot-actif:       #2a1404;
+    --acc-dot-vu:          #6a4820;
 }
 
 /* ===============================
@@ -10580,7 +10628,8 @@ label:has(+ textarea:disabled) {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: var(--surface-carte, #1a3040);
+    background: var(--acc-fond);
+    border: 1px solid var(--acc-bordure);
     border-radius: var(--radius-grand);
     box-shadow: var(--shadow-fort);
     max-width: 500px;
@@ -10608,8 +10657,8 @@ label:has(+ textarea:disabled) {
 
 /* En-tête du popup */
 .primo-popup-header {
-    background: #244858;
-    color: white;
+    background: var(--acc-surface);
+    color: var(--acc-btn-prim-txt);
     padding: 15px 20px;
     border-radius: var(--radius-grand) var(--radius-grand) 0 0;
     font-size: 1.1rem;
@@ -10628,7 +10677,7 @@ label:has(+ textarea:disabled) {
 .primo-popup-close {
     background: none;
     border: none;
-    color: white;
+    color: var(--acc-btn-prim-txt);
     font-size: 1.5rem;
     cursor: pointer;
     padding: 0;
@@ -10646,12 +10695,17 @@ label:has(+ textarea:disabled) {
     padding: 20px;
     font-size: 0.95rem;
     line-height: 1.6;
-    color: var(--texte-principal, #d0e0e4);
+    color: var(--acc-texte);
 }
 
 .primo-popup-body strong {
-    color: var(--accent-primaire);
+    color: var(--acc-accent);
 }
+
+/* Badges sémantiques utilisés dans la popup `bibliotheque-fonctionnement` */
+.primo-popup-body .badge-source-locale       { color: var(--vert-succes); }
+.primo-popup-body .badge-source-bibliotheque { color: var(--bleu-clair); }
+.primo-popup-body .badge-source-retiree      { color: var(--orange-accent); }
 
 .primo-popup-body ul {
     margin: 10px 0;
@@ -20009,7 +20063,6 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 .mode-clair .apercu-nom-groupe-cours,
 .mode-clair .info-trimestre-groupe-cours,
 .mode-clair .cartouche-gradient-bleu,
-.mode-clair .primo-popup-header,
 .mode-clair .modal-bienvenue-header,
 .mode-clair .btn-bienvenue-principal,
 .mode-clair .outil-carte-header {
@@ -20404,57 +20457,30 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     border-bottom-color: rgba(3, 46, 92, 0.08);
 }
 
-/* Titre "Parcours guidé" (ex-Découvrir) — blanc sur fond dégradé */
-.mode-clair #accueil-decouvrir .accordeon-header h3,
-.mode-clair #accueil-parcours-guide .accordeon-header h3 {
-    color: white;
-}
-
-.mode-clair #accueil-decouvrir,
-.mode-clair #accueil-parcours-guide {
-    border-color: rgba(3, 46, 92, 0.04);
-}
-
-/* Phrase d'intention en tête de l'accordéon Parcours guidé */
-.parcours-guide-intro {
-    margin: 0 0 14px 0;
-    padding: 10px 14px;
-    background: var(--bleu-pale, rgba(3, 46, 92, 0.04));
-    border-left: 3px solid var(--accent-primaire);
-    border-radius: var(--radius-moyen, 8px);
-    font-size: 0.95rem;
-    line-height: 1.45;
-    color: var(--texte-principal);
-}
-
-/* Cartes de tâches page d'accueil — mode clair */
-.mode-clair .accueil-carte {
+/* Cartes accueil V3 — mode clair (les cartes orange .accueil-aide-demi
+   ne sont pas redéfinies : la palette --acc-* est globale et identique aux 2 modes) */
+.mode-clair .accueil-action,
+.mode-clair .accueil-utilitaire-demi {
     background: #ffffff;
-    border: 1px solid rgba(3, 46, 92, 0.08);
+    border-color: rgba(3, 46, 92, 0.08);
     box-shadow: var(--shadow-normal);
 }
 
-.mode-clair .accueil-carte:hover {
+.mode-clair .accueil-action:hover,
+.mode-clair .accueil-utilitaire-demi:hover {
     border-color: var(--bleu-principal);
+    background: #ffffff;
     box-shadow: var(--shadow-prononce);
 }
 
-.mode-clair .accueil-carte-titre {
+.mode-clair .accueil-action-titre,
+.mode-clair .accueil-utilitaire-titre {
     color: var(--bleu-principal);
 }
 
-.mode-clair .accueil-carte-desc {
+.mode-clair .accueil-action-desc,
+.mode-clair .accueil-utilitaire-desc {
     color: var(--texte-secondaire);
-}
-
-/* Cartes Découvrir — même traitement */
-.mode-clair .accueil-carte-decouvrir {
-    background: #ffffff;
-    border-color: rgba(3, 46, 92, 0.08);
-}
-
-.mode-clair .accueil-carte-decouvrir--action:hover {
-    background: rgba(3, 46, 92, 0.04);
 }
 
 /* ===============================
@@ -22789,10 +22815,10 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 .etat-vide-banniere {
     padding: 16px 20px;
     margin-bottom: 20px;
-    background: var(--carte-info-note-fond, #fff9e6);
-    border-left: 4px solid var(--carte-info-note-bordure, #f0b63e);
+    background: var(--acc-fond);
+    border-left: 4px solid var(--acc-bordure);
     border-radius: 0 6px 6px 0;
-    color: var(--texte-principal, #1a2d36);
+    color: var(--acc-texte);
     font-size: 0.95rem;
     line-height: 1.6;
 }
@@ -22807,14 +22833,15 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 .banniere-bienvenue {
     padding: 24px 28px;
     margin-bottom: 20px;
-    border-left: 4px solid var(--accent-primaire, #2da9d7);
-    background: var(--surface-carte);
+    border-left: 4px solid var(--acc-bordure);
+    background: var(--acc-fond);
+    color: var(--acc-texte);
 }
 
 .banniere-bienvenue-titre {
     margin: 0 0 14px 0;
     font-size: 1.3rem;
-    color: var(--accent-primaire, #2da9d7);
+    color: var(--acc-accent-vif);
 }
 
 .banniere-bienvenue p {
@@ -22833,6 +22860,24 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 }
 
 /* =============================================================================
+   ACCUEIL — classes utilitaires (remplacent les style= inline d'accueil.js)
+   ============================================================================= */
+
+/* Pied de page — lien vers codexnumeris.org */
+.accueil-pied-lien-site {
+    font-size: 0.8rem;
+    color: var(--gris-moyen);
+    text-decoration: none;
+}
+
+/* Pied de page — slogan « Réfléchir, expérimenter, partager. » */
+.accueil-pied-tagline {
+    font-size: 0.75rem;
+    color: var(--gris-clair);
+    font-style: italic;
+}
+
+/* =============================================================================
    TRANSITIONS (transitions.js) — notification de jalon atteint dans le parcours
    ============================================================================= */
 .transition-bandeau {
@@ -22844,9 +22889,9 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     margin-left: auto;
     margin-right: auto;
     padding: 16px 20px;
-    background: var(--surface-carte);
-    color: var(--texte-principal);
-    border-left: 4px solid var(--accent-primaire, #2da9d7);
+    background: var(--acc-fond);
+    color: var(--acc-texte);
+    border-left: 4px solid var(--acc-bordure);
     border-radius: 8px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
     z-index: 950;
@@ -22887,7 +22932,7 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 }
 
 .transition-bandeau-fermer:hover {
-    background: rgba(127, 127, 127, 0.15);
+    background: rgba(0, 0, 0, 0.15);
     opacity: 1;
 }
 
@@ -22908,9 +22953,9 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     bottom: -400px;
     right: 24px;
     width: min(420px, calc(100vw - 48px));
-    background: var(--surface-carte);
-    color: var(--texte-principal);
-    border: 1px solid var(--accent-primaire, #2da9d7);
+    background: var(--acc-fond);
+    color: var(--acc-texte);
+    border: 1px solid var(--acc-bordure);
     border-radius: 10px;
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
     z-index: 900;
@@ -22927,8 +22972,8 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    background: var(--accent-primaire, #2da9d7);
-    color: #fff;
+    background: var(--acc-surface);
+    color: var(--acc-btn-prim-txt);
 }
 
 .panneau-tour-guide .tour-titre {
@@ -22946,17 +22991,17 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.35);
+    background: var(--acc-dot-inactif);
     transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .panneau-tour-guide .tour-dot.actif {
-    background: #fff;
+    background: var(--acc-dot-actif);
     transform: scale(1.3);
 }
 
 .panneau-tour-guide .tour-dot.vu {
-    background: rgba(255, 255, 255, 0.85);
+    background: var(--acc-dot-vu);
 }
 
 .panneau-tour-guide .tour-fermer {
@@ -22965,8 +23010,8 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     padding: 0;
     background: transparent;
     border: none;
-    color: #fff;
-    opacity: 0.8;
+    color: var(--acc-btn-prim-txt);
+    opacity: 0.85;
     font-size: 1rem;
     cursor: pointer;
     border-radius: 50%;
@@ -22974,7 +23019,7 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 }
 
 .panneau-tour-guide .tour-fermer:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.15);
     opacity: 1;
 }
 
@@ -23019,21 +23064,21 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
    GLOSSAIRE (glossaire.js) — terme marqué inline + micro-popup + page dédiée
    ============================================================================= */
 
-/* Terme marqué (soulignement pointillé discret, couleur secondaire) */
+/* Terme marqué (soulignement pointillé discret, couleur accompagnement) */
 .glossaire-terme {
     cursor: help;
-    color: var(--accent-primaire, #2da9d7);
+    color: var(--acc-accent);
     text-decoration: underline dotted;
     text-underline-offset: 2px;
 }
 
 .glossaire-terme:hover {
-    color: var(--accent-primaire, #2da9d7);
+    color: var(--acc-accent);
     filter: brightness(1.15);
 }
 
 .glossaire-terme:focus {
-    outline: 2px solid var(--accent-primaire, #2da9d7);
+    outline: 2px solid var(--acc-bordure-active);
     outline-offset: 2px;
     border-radius: 2px;
 }
@@ -23049,10 +23094,10 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     min-width: 240px;
     max-width: 360px;
     padding: 12px 14px;
-    background: var(--surface-carte);
-    color: var(--texte-principal);
-    border: 1px solid var(--bordure, rgba(106, 172, 184, 0.25));
-    border-left: 3px solid var(--accent-primaire, #2da9d7);
+    background: var(--acc-fond);
+    color: var(--acc-texte);
+    border: 1px solid var(--acc-bordure);
+    border-left: 3px solid var(--acc-bordure-active);
     border-radius: 6px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     opacity: 0;
@@ -23070,7 +23115,7 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 .glossaire-micropopup-titre {
     font-weight: 700;
     margin-bottom: 6px;
-    color: var(--accent-primaire, #2da9d7);
+    color: var(--acc-accent-vif);
 }
 
 .glossaire-micropopup-resume {
@@ -23092,7 +23137,7 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     border: none;
     padding: 0;
     font: inherit;
-    color: var(--accent-primaire, #2da9d7);
+    color: var(--acc-accent);
     cursor: pointer;
     text-decoration: underline;
 }
@@ -23116,7 +23161,7 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 }
 
 .glossaire-micropopup-fermer:hover {
-    background: rgba(127, 127, 127, 0.15);
+    background: rgba(0, 0, 0, 0.15);
     opacity: 1;
 }
 

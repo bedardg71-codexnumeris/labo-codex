@@ -6174,7 +6174,7 @@ function _genererBarresSRPNF(da) {
 }
 
 /**
- * Bloc « Profil RLO (actions cognitives observées) » — étape 8.
+ * Bloc « Profil ACO (actions cognitives observées) » — étape 8.
  * Affiché dans « Développement des habiletés », conditionné au toggle
  * `activerActionsRLO` et à la présence d'au moins une évaluation avec
  * annotations d'actions RLO pour cet étudiant.
@@ -6187,7 +6187,7 @@ function genererBlocProfilRLO(da) {
     const entete = `
         <div class="u-flex-between-mb15">
             <div>
-                <strong style="font-size:1.05rem;">Profil RLO (actions cognitives observées)</strong>
+                <strong style="font-size:1.05rem;">Profil ACO (actions cognitives observées)</strong>
                 <div class="texte-muted" style="font-size:0.8rem; margin-top:2px;">
                     ${profil.nbEvaluationsObservees} évaluation${profil.nbEvaluationsObservees > 1 ? 's' : ''} annotée${profil.nbEvaluationsObservees > 1 ? 's' : ''} sur ${profil.nbEvaluations}
                 </div>
@@ -6438,7 +6438,7 @@ window.changerOngletDeveloppement = changerOngletDeveloppement;
  * Graphique d'évolution des gestes cognitifs (Repérage / Liaison / Ouverture)
  * — spec SPEC-EXPORT-GRAPHIQUE-RLO.md, étape 9.
  *
- * Affiché sous le bloc cumulatif « Profil RLO » quand :
+ * Affiché sous le bloc cumulatif « Profil ACO » quand :
  *   - toggle `activerActionsRLO` actif ;
  *   - préférence `afficherGraphiques` non désactivée ;
  *   - au moins 2 évaluations avec tampons `action-*` (ratios calculables).

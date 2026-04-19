@@ -31,8 +31,9 @@
 /* --- Corps (message + fermeture) --- */
 
 .fleche-didactique-corps {
-    background: var(--accent-primaire);
-    color: #fff;
+    background: var(--acc-fond);
+    color: var(--acc-texte);
+    border: 1px solid var(--acc-bordure);
     padding: 10px 14px;
     border-radius: var(--radius-moyen, 8px);
     box-shadow: var(--shadow-fort, 0 6px 20px rgba(0, 0, 0, 0.25));
@@ -68,7 +69,7 @@
 .fleche-didactique-close:hover,
 .fleche-didactique-close:focus-visible {
     opacity: 1;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.15);
 }
 
 /* --- Pointeur (triangle + micro-oscillation) --- */
@@ -87,7 +88,7 @@
 .fleche-didactique[data-direction="haut"] .fleche-didactique-pointeur {
     border-left: 10px solid transparent;
     border-right: 10px solid transparent;
-    border-top: 12px solid var(--accent-primaire);
+    border-top: 12px solid var(--acc-fond);
     animation: fleche-oscille-y 1.6s ease-in-out infinite;
 }
 
@@ -98,7 +99,7 @@
 .fleche-didactique[data-direction="bas"] .fleche-didactique-pointeur {
     border-left: 10px solid transparent;
     border-right: 10px solid transparent;
-    border-bottom: 12px solid var(--accent-primaire);
+    border-bottom: 12px solid var(--acc-fond);
     animation: fleche-oscille-y-inv 1.6s ease-in-out infinite;
 }
 
@@ -108,7 +109,7 @@
 .fleche-didactique[data-direction="gauche"] .fleche-didactique-pointeur {
     border-top: 10px solid transparent;
     border-bottom: 10px solid transparent;
-    border-left: 12px solid var(--accent-primaire);
+    border-left: 12px solid var(--acc-fond);
     animation: fleche-oscille-x 1.6s ease-in-out infinite;
 }
 
@@ -118,7 +119,7 @@
 .fleche-didactique[data-direction="droite"] .fleche-didactique-pointeur {
     border-top: 10px solid transparent;
     border-bottom: 10px solid transparent;
-    border-right: 12px solid var(--accent-primaire);
+    border-right: 12px solid var(--acc-fond);
     animation: fleche-oscille-x-inv 1.6s ease-in-out infinite;
 }
 
@@ -151,13 +152,13 @@
 /* --- Surbrillance de la cible --- */
 
 .fleche-didactique-cible {
-    outline: 3px solid var(--accent-primaire);
+    outline: 3px solid var(--acc-bordure-active);
     outline-offset: 3px;
     border-radius: inherit;
     animation: fleche-cible-pulse 1.6s ease-in-out infinite;
 }
 
 @keyframes fleche-cible-pulse {
-    0%, 100% { outline-color: color-mix(in srgb, var(--accent-primaire) 50%, transparent); }
-    50%      { outline-color: var(--accent-primaire); }
+    0%, 100% { outline-color: color-mix(in srgb, var(--acc-bordure-active) 50%, transparent); }
+    50%      { outline-color: var(--acc-bordure-active); }
 }

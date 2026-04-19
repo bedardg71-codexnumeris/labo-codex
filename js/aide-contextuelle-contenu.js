@@ -388,9 +388,9 @@ const AIDE_CONTEXTUELLE = {
                 type: 'liste',
                 titre: "Comprendre les badges de source",
                 items: [
-                    "<strong style='color: var(--vert-succes);'>Locale</strong> : élément que tu as créé ou modifié toi-même",
-                    "<strong style='color: var(--bleu-clair);'>Bibliothèque</strong> : élément provenant de la bibliothèque partagée (gabarits)",
-                    "<strong style='color: var(--orange-accent);'>Retirée</strong> : élément retiré de la barre latérale mais conservé dans tes données"
+                    "<strong class='badge-source-locale'>Locale</strong> : élément que tu as créé ou modifié toi-même",
+                    "<strong class='badge-source-bibliotheque'>Bibliothèque</strong> : élément provenant de la bibliothèque partagée (gabarits)",
+                    "<strong class='badge-source-retiree'>Retirée</strong> : élément retiré de la barre latérale mais conservé dans tes données"
                 ]
             },
             {
@@ -624,7 +624,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "Cet encadré surveille la progression de l'étudiant sur les critères multistructurels (fondations) de ta grille de dépistage. Il croise deux informations : combien d'artefacts consécutifs sont sous le seuil (IPB) et la direction de la progression."
+                contenu: "Cet encadré surveille la progression de l'étudiant sur les critères multistructurels (fondations) de ta grille de dépistage. Il croise deux informations : le nombre d'artefacts consécutifs sous le seuil et la direction de la progression."
             },
             {
                 type: 'liste',
@@ -632,7 +632,7 @@ const AIDE_CONTEXTUELLE = {
                 items: [
                     "Chaque pastille représente un artefact évalué (ancien → récent, de gauche à droite).",
                     "La couleur correspond au niveau IDME du score multistructurel : I (insuffisant), D (développement), M (maîtrisé), E (étendu).",
-                    "L'IPB compte les pastilles consécutives sous le seuil de maîtrise, en partant du plus récent."
+                    "Le compteur de pastilles consécutives sous le seuil se calcule en partant du plus récent."
                 ]
             },
             {

@@ -2283,7 +2283,7 @@ function sauvegarderEvaluation() {
         // Phase 3 : fichierId supprimé — résolution par clé composite (DA, productionId) uniquement
     };
 
-    // Profil RLO (Actions cognitives) — uniquement si l'observation des actions est activée.
+    // Profil ACO (Actions cognitives) — uniquement si l'observation des actions est activée.
     // null explicite quand toggle activé mais pas d'annotation : distingue « pas de données »
     // de « zéro geste observé » (objet aux compteurs à zéro).
     if (typeof obtenirPreference === 'function' && obtenirPreference('activerActionsRLO') === true) {
@@ -5952,7 +5952,7 @@ function sauvegarderEvaluationModifiee() {
         // Phase 3 : fichierId supprimé — résolution par clé composite (DA, productionId) uniquement
     };
 
-    // Profil RLO — recalculer si l'observation des actions est activée.
+    // Profil ACO — recalculer si l'observation des actions est activée.
     // Si toggle désactivé, le champ existant (s'il y en a un) est préservé par le spread ci-dessus.
     if (typeof obtenirPreference === 'function' && obtenirPreference('activerActionsRLO') === true) {
         evaluations[indexEval].actionsRLO = (typeof actionsRLO !== 'undefined' && actionsRLO.agregerActionsRLO)
