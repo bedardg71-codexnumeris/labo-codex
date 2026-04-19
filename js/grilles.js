@@ -2712,7 +2712,7 @@ function afficherCriteresTemp() {
                 </div>
                 <div class="groupe-form">
                     <label data-tooltip="cn-grille-type-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Type
-                        <span class="tooltip-aide" title="Holistique : évalue l'ensemble en considérant les interrelations entre les éléments. Analytique : décompose et évalue chaque élément séparément. Algorithmique : calcul automatique basé sur une formule (ex : nombre d'erreurs en français écrit).">📍</span>
+                        <span class="primo-aide" data-target="grille-type-critere-detail">📍</span>
                     </label>
                     <select class="controle-form"
                             data-on-change="modifierTypeCritereTempHandler" data-critere-index="${index}">
@@ -2732,7 +2732,7 @@ function afficherCriteresTemp() {
                 </div>
                 <div class="groupe-form">
                     <label style="font-size: 0.85rem; color: var(--gris-moyen);">Niveau SOLO
-                        <span class="tooltip-aide" title="Niveau cognitif du critère selon la taxonomie SOLO. Les critères multistructurels (fondations) sont surveillés par le dépistage pour détecter les difficultés persistantes.">📍</span>
+                        <span class="primo-aide" data-target="grille-niveau-solo">📍</span>
                     </label>
                     <select class="controle-form"
                             data-on-change="modifierCritereTempHandler" data-critere-index="${index}" data-champ="niveauSOLO">
@@ -2979,7 +2979,7 @@ function afficherCriteresGrille(grille) {
                 </div>
                 <div class="groupe-form">
                     <label data-tooltip="cn-grille-type-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Type
-                        <span class="tooltip-aide" title="Holistique : évalue l'ensemble en considérant les interrelations entre les éléments. Analytique : décompose et évalue chaque élément séparément. Algorithmique : calcul automatique basé sur une formule (ex : nombre d'erreurs en français écrit).">📍</span>
+                        <span class="primo-aide" data-target="grille-type-critere-detail">📍</span>
                     </label>
                     <select class="controle-form"
                             data-on-change="modifierTypeCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}">
@@ -2999,7 +2999,7 @@ function afficherCriteresGrille(grille) {
                 </div>
                 <div class="groupe-form">
                     <label style="font-size: 0.85rem; color: var(--gris-moyen);">Niveau SOLO
-                        <span class="tooltip-aide" title="Niveau cognitif du critère selon la taxonomie SOLO. Les critères multistructurels (fondations) sont surveillés par le dépistage pour détecter les difficultés persistantes.">📍</span>
+                        <span class="primo-aide" data-target="grille-niveau-solo">📍</span>
                     </label>
                     <select class="controle-form"
                             data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-champ="niveauSOLO">

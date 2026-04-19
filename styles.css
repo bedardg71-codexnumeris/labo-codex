@@ -11944,10 +11944,6 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     display: inline-flex !important;
 }
 
-/* Tooltip-aide (📍) visible uniquement quand aide contextuelle active */
-.aide-contextuelle-active .tooltip-aide {
-    display: inline !important;
-}
 
 /* Bannières d'assistants guidés (🗺️) — visibles seulement si Tour guidé actif */
 .banniere-assistant-guide {

@@ -3137,7 +3137,7 @@ function afficherNiveauxNouvelleEchelle() {
                 </div>
                 <div class="groupe-form">
                     <label class="echelle-texte-detail">Min (%)
-                        <span class="tooltip-aide" title="Plage de notes définissant le degré de maîtrise. Permet d'établir des stades ou niveaux auxquels se situe l'apprenant.">📍</span>
+                        <span class="primo-aide" data-target="echelle-plage-notes">📍</span>
                     </label>
                     <input type="number"
                            class="controle-form"
@@ -3157,7 +3157,7 @@ function afficherNiveauxNouvelleEchelle() {
                 </div>
                 <div class="groupe-form">
                     <label class="echelle-texte-detail" data-tooltip="cn-echelle-valeur-ponctuelle">Valeur ponctuelle
-                        <span class="tooltip-aide" title="Valeur fixe pour le calcul des notes, la conversion d'une note lettrée en note chiffrée, la pratique sommative traditionnelle et le dépistage.">📍</span>
+                        <span class="primo-aide" data-target="echelle-valeur-ponctuelle">📍</span>
                     </label>
                     <input type="number"
                            class="controle-form"
@@ -3397,7 +3397,7 @@ function afficherNiveauxEchelle(echelle) {
                 </div>
                 <div class="groupe-form">
                     <label class="echelle-texte-detail">Min (%)
-                        <span class="tooltip-aide" title="Plage de notes définissant le degré de maîtrise. Permet d'établir des stades ou niveaux auxquels se situe l'apprenant.">📍</span>
+                        <span class="primo-aide" data-target="echelle-plage-notes">📍</span>
                     </label>
                     <input type="number"
                            class="controle-form"
@@ -3417,7 +3417,7 @@ function afficherNiveauxEchelle(echelle) {
                 </div>
                 <div class="groupe-form">
                     <label class="echelle-texte-detail" data-tooltip="cn-echelle-valeur-ponctuelle">Valeur ponctuelle
-                        <span class="tooltip-aide" title="Valeur fixe pour le calcul des notes, la conversion d'une note lettrée en note chiffrée, la pratique sommative traditionnelle et le dépistage.">📍</span>
+                        <span class="primo-aide" data-target="echelle-valeur-ponctuelle">📍</span>
                     </label>
                     <input type="number"
                            class="controle-form"
