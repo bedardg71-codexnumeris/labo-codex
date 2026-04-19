@@ -326,7 +326,7 @@ async function afficherBibliothequePratiques() {
                 </button>
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
                     <h2 style="margin: 0; color: var(--accent-primaire);">Bibliothèque de pratiques de notation</h2>
-                    <button class="btn-aide-contextuelle" data-aide="bibliotheque-fonctionnement" title="Comment fonctionne la bibliothèque">📍</button>
+                    <button class="btn-aide-contextuelle" data-aide="bibliotheque-fonctionnement" title="Comment fonctionne la bibliothèque">✴️</button>
                 </div>
                 <p style="color: var(--gris-clair); margin-bottom: 15px;">
                     Gérez les pratiques affichées dans la barre latérale.

@@ -1,6 +1,6 @@
 /**
  * aide-contextuelle.js
- * Module de gestion des aides contextuelles (📍 pins d'aide)
+ * Module de gestion des aides contextuelles (✴️ pins d'aide)
  * Utilise le système .primo-popup existant pour l'affichage
  */
 
@@ -153,7 +153,7 @@
 
         modal.innerHTML = `
             <div class="primo-popup-header">
-                <span id="aide-ctx-titre" class="primo-popup-titre">📍 ${aide.titre}</span>
+                <span id="aide-ctx-titre" class="primo-popup-titre">✴️ ${aide.titre}</span>
                 <button class="primo-popup-fermer" data-action="fermerAideContextuelle" aria-label="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
             </div>
             <div class="primo-popup-body aide-contextuelle-body">

@@ -12,9 +12,9 @@
  *   chaque étape s'affiche quand l'utilisateur entre dans la section
  *   correspondante, une seule fois (liste d'étapes vues).
  * - Panneau flottant non bloquant (bas-droit desktop, pleine largeur iPad).
- * - Coexiste avec le mode Assistance (📍) : le lancement du tour active
+ * - Coexiste avec le mode Assistance (✴️) : le lancement du tour active
  *   automatiquement tooltips + aide contextuelle + tour guidé pour exposer
- *   les aides accessibles en mode 📍.
+ *   les aides accessibles en mode ✴️.
  * - Stockage dans les préférences globales (pas préfixé par trimestre).
  *
  * Compatibilité : expose les anciens noms de fonctions (demarrerGuidageConfiguration,
