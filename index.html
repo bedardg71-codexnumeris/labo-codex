@@ -3603,18 +3603,6 @@
             border: 1px solid #bdbdbd;
         }
 
-        /* Tooltip d'aide pédagogique APC - masqué par défaut, visible via .aide-contextuelle-active */
-        .tooltip-aide {
-            cursor: help;
-            font-size: 0.85em;
-            margin-left: 4px;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-            display: none;
-        }
-        .tooltip-aide:hover {
-            opacity: 1;
-        }
     </style>
 </head>
 
@@ -4694,7 +4682,7 @@
                                     </div>
                                     <div class="groupe-form">
                                         <label data-tooltip="cn-prod-activite">Activité d'apprentissage
-                                            <span class="tooltip-aide" title="Dans une approche par compétences (APC), une activité d'évaluation est généralement centrée sur l'apprentissage plutôt que sur un comportement (ex. : participation, présence). Elle repose sur des objectifs explicites liés à la compétence du cours.">📍</span>
+                                            <span class="primo-aide" data-target="apc-activite">📍</span>
                                         </label>
                                         <input type="text" id="productionActivite" class="controle-form"
                                             placeholder="Ex: Rédaction">
@@ -4727,7 +4715,7 @@
                                     <div id="champGrille" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; align-items: start;">
                                         <div class="groupe-form" style="margin: 0;">
                                             <label data-tooltip="cn-prod-grille">Grille de critères
-                                                <span class="tooltip-aide" title="Dans une approche par compétences, l'évaluation est généralement individuelle afin de rendre compte du degré d'acquisition de chaque apprenant. Les travaux d'équipe peuvent être évalués, mais la contribution individuelle devrait idéalement être distinguée.">📍</span>
+                                                <span class="primo-aide" data-target="apc-grille-individuel">📍</span>
                                             </label>
                                             <select id="productionGrille" class="controle-form">
                                                 <option value="">Aucune</option>
@@ -4762,7 +4750,7 @@
                                 <div class="u-mb-20" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
                                     <div class="groupe-form">
                                         <label data-tooltip="cn-prod-objectif">Objectif d'apprentissage
-                                            <span class="tooltip-aide" title="Utilise des verbes actifs et observables selon la taxonomie révisée d'Anderson et Krathwohl (ex : nommer, décrire, analyser, créer, résoudre). Évite les verbes vagues comme savoir, comprendre ou connaître. La carte d'alignement (Structure → Alignement pédagogique) propose une banque de verbes par niveau cognitif.">📍</span>
+                                            <span class="primo-aide" data-target="objectif-verbes-actifs">📍</span>
                                         </label>
                                         <p class="u-texte-petit" style="color: var(--gris-moyen); margin: 0 0 6px 0">À la fin de cette activité, l'apprenant sera capable de...</p>
                                         <textarea id="productionObjectif" class="controle-form" rows="3"
@@ -4785,7 +4773,7 @@
                                     <div id="champDateEcheance" style="display: grid; grid-template-columns: 250px 1fr; gap: 20px; align-items: start;">
                                         <div class="groupe-form" style="margin: 0;">
                                             <label for="productionDateEcheance">Date d'échéance
-                                                <span class="tooltip-aide" title="Cette date fixe les indices C (Complétion) et P (Performance) pour les suivis longitudinaux.">📍</span>
+                                                <span class="primo-aide" data-target="echeance-indices">📍</span>
                                             </label>
                                             <input type="date" id="productionDateEcheance" class="controle-form"
                                                 title="Date limite de remise du travail (obligatoire)">
@@ -4797,7 +4785,7 @@
                                     <!-- 🆕 Beta 98.3 : Échéances par groupe (mode multi-groupe) -->
                                     <div id="containerEcheancesGroupes" class="u-hide">
                                         <label style="font-weight: 600; margin-bottom: 4px; display: block;">Échéances par groupe
-                                            <span class="tooltip-aide" title="Chaque groupe-cours peut avoir sa propre date d'échéance. Décochez un groupe pour indiquer que la production ne lui est pas encore assignée.">📍</span>
+                                            <span class="primo-aide" data-target="echeances-multigroupes">📍</span>
                                         </label>
                                         <p style="color: var(--gris-moyen); font-size: 0.82em; margin: 0 0 10px 0; line-height: 1.4;">Cocher = consignes transmises, production en attente de remise. Décoché = les élèves n'ont pas encore reçu le travail.</p>
                                         <div id="listeEcheancesGroupes" style="display: flex; flex-direction: column; gap: 8px;">
@@ -5421,7 +5409,7 @@
                             <div data-tooltip="cn-cartouche-selectors" class="u-flex-gap-15 u-mb-20 u-flex-wrap" style="align-items: flex-start">
                                 <div class="groupe-form" style="flex: 0 0 200px; margin: 0;">
                                     <label>Grille (critères) :
-                                        <span class="tooltip-aide" title="La rétroaction fournie à l'apprenant repose sur le croisement de deux éléments : les critères d'évaluation et les niveaux de performance. Ce croisement forme une grille descriptive qui précise : le niveau atteint, ce qui est maîtrisé, ce qui reste à travailler, et comment progresser. Une rétroaction efficace est spécifique, actionnable, utile et bienveillante. Il est préférable d'éviter le « sandwich » (positif-négatif-positif) qui n'atteint pas ces objectifs.">📍</span>
+                                        <span class="primo-aide" data-target="retroaction-grille-descriptive">📍</span>
                                     </label>
                                     <select id="selectGrilleCartouche" class="controle-form" data-on-change="onChangeSelectionCartouche">
                                         <option value="">-- Grille --</option>
@@ -7161,7 +7149,7 @@
                                                 <label class="u-flex-gap-10 u-align-center" style="cursor: pointer">
                                                     <input type="checkbox" id="mat-categories-actif" data-on-change="toggleCategoriesMat">
                                                     <span class="u-texte-gras">Activer les catégories Sélection / Obligatoires</span>
-                                                    <span class="tooltip-aide" title="Permet de distinguer des productions 'Sélection' (N meilleures retenues pour la note) et des productions 'Obligatoires' (toujours comptées, ex: examen final).">📍</span>
+                                                    <span class="primo-aide" data-target="categories-selection-obligatoires">📍</span>
                                                 </label>
                                             </div>
 

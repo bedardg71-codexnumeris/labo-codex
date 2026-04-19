@@ -792,6 +792,170 @@ const AIDE_CONTEXTUELLE = {
             },
         ],
         voirAussi: ['structure-productions', 'construction-grilles']
+    },
+
+    // =========================================================================
+    // MIGRATION tooltip-aide → primo-aide (ex-infobulles navigateur)
+    // =========================================================================
+
+    'apc-activite': {
+        titre: 'Activit\u00e9 d\u2019apprentissage dans une APC',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'Dans une approche par comp\u00e9tences (APC), une activit\u00e9 d\u2019\u00e9valuation est g\u00e9n\u00e9ralement centr\u00e9e sur l\u2019apprentissage plut\u00f4t que sur un comportement (ex.\u00a0: participation, pr\u00e9sence). Elle repose sur des objectifs explicites li\u00e9s \u00e0 la comp\u00e9tence du cours.'
+            },
+        ],
+        voirAussi: ['structure-productions', 'planification-alignement']
+    },
+    'apc-grille-individuel': {
+        titre: '\u00c9valuation individuelle en APC',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'Dans une approche par comp\u00e9tences, l\u2019\u00e9valuation est g\u00e9n\u00e9ralement individuelle afin de rendre compte du degr\u00e9 d\u2019acquisition de chaque apprenant\u00b7e.'
+            },
+            {
+                type: 'conseil',
+                contenu: 'Les travaux d\u2019\u00e9quipe peuvent \u00eatre \u00e9valu\u00e9s, mais la contribution individuelle devrait id\u00e9alement \u00eatre distingu\u00e9e.'
+            },
+        ],
+        voirAussi: ['construction-grilles', 'structure-productions']
+    },
+    'objectif-verbes-actifs': {
+        titre: 'Verbes actifs et observables (Anderson\u00a0&\u00a0Krathwohl)',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'Formule tes objectifs avec des verbes actifs et observables selon la taxonomie r\u00e9vis\u00e9e d\u2019Anderson et Krathwohl.'
+            },
+            {
+                type: 'exemple',
+                titre: 'Verbes actionnables',
+                contenu: 'nommer, d\u00e9crire, analyser, cr\u00e9er, r\u00e9soudre, comparer, justifier, concevoir\u2026'
+            },
+            {
+                type: 'conseil',
+                contenu: '\u00c9vite les verbes vagues comme <strong>savoir</strong>, <strong>comprendre</strong> ou <strong>conna\u00eetre</strong>. La carte d\u2019alignement (Structure \u2192 Alignement p\u00e9dagogique) propose une banque de verbes class\u00e9s par niveau cognitif.'
+            },
+        ],
+        voirAussi: ['planification-alignement', 'structure-productions']
+    },
+    'echeance-indices': {
+        titre: 'Date d\u2019\u00e9ch\u00e9ance et indices',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'Cette date fixe les indices C (Compl\u00e9tion) et P (Performance) pour les suivis longitudinaux. Une production non remise \u00e0 cette date sera compt\u00e9e comme manquante dans le calcul de C.'
+            },
+        ],
+        voirAussi: ['tableau-bord-apercu', 'structure-productions']
+    },
+    'echeances-multigroupes': {
+        titre: '\u00c9ch\u00e9ances multi-groupes',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'Chaque groupe-cours peut avoir sa propre date d\u2019\u00e9ch\u00e9ance. D\u00e9coche un groupe pour indiquer que la production ne lui est pas encore assign\u00e9e.'
+            },
+        ],
+        voirAussi: ['structure-productions']
+    },
+    'retroaction-grille-descriptive': {
+        titre: 'R\u00e9troaction et grille descriptive',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'La r\u00e9troaction fournie \u00e0 l\u2019apprenant\u00b7e repose sur le croisement de deux \u00e9l\u00e9ments\u00a0: les <strong>crit\u00e8res</strong> d\u2019\u00e9valuation et les <strong>niveaux</strong> de performance. Ce croisement forme une <em>grille descriptive</em>.'
+            },
+            {
+                type: 'liste',
+                titre: 'Ce qu\u2019une grille descriptive pr\u00e9cise',
+                items: [
+                    'Le niveau atteint',
+                    'Ce qui est ma\u00eetris\u00e9',
+                    'Ce qui reste \u00e0 travailler',
+                    'Comment progresser',
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: 'Une r\u00e9troaction efficace est <strong>sp\u00e9cifique</strong>, <strong>actionnable</strong>, <strong>utile</strong> et <strong>bienveillante</strong>.'
+            },
+            {
+                type: 'alerte',
+                niveau: 'attention',
+                contenu: '\u00c9vite le \u00ab\u00a0sandwich\u00a0\u00bb (positif\u2013n\u00e9gatif\u2013positif)\u00a0: il dilue le message et n\u2019atteint pas les objectifs d\u2019une r\u00e9troaction efficace.'
+            },
+        ],
+        voirAussi: ['construction-cartouches', 'construction-grilles']
+    },
+    'categories-selection-obligatoires': {
+        titre: 'Cat\u00e9gories S\u00e9lection / Obligatoires',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'Permet de distinguer deux types de productions au sein de la pratique de notation.'
+            },
+            {
+                type: 'liste',
+                titre: 'Les deux cat\u00e9gories',
+                items: [
+                    '<strong>S\u00e9lection</strong> \u2014 les N meilleures sont retenues pour la note.',
+                    '<strong>Obligatoires</strong> \u2014 toujours compt\u00e9es, par exemple un examen final ou une mise en situation r\u00e9capitulative.',
+                ]
+            },
+        ],
+        voirAussi: ['construction-pratiques', 'structure-productions']
+    },
+    'echelle-plage-notes': {
+        titre: 'Plage de notes (niveau)',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'Plage de pourcentages d\u00e9finissant le degr\u00e9 de ma\u00eetrise. Permet d\u2019\u00e9tablir les stades ou niveaux auxquels se situe l\u2019apprenant\u00b7e (ex.\u00a0: Insuffisant, en D\u00e9veloppement, Ma\u00eetris\u00e9, \u00c9tendu).'
+            },
+        ],
+        voirAussi: ['construction-echelles']
+    },
+    'echelle-valeur-ponctuelle': {
+        titre: 'Valeur ponctuelle',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'Valeur num\u00e9rique fixe attribu\u00e9e \u00e0 un niveau. Utilis\u00e9e pour\u00a0: le calcul des notes, la conversion d\u2019une note lettr\u00e9e en note chiffr\u00e9e, la pratique sommative traditionnelle et le d\u00e9pistage.'
+            },
+        ],
+        voirAussi: ['construction-echelles', 'construction-pratiques']
+    },
+    'grille-type-critere-detail': {
+        titre: 'Type de crit\u00e8re d\u2019\u00e9valuation',
+        sections: [
+            {
+                type: 'liste',
+                titre: 'Trois types disponibles',
+                items: [
+                    '<strong>Holistique</strong> \u2014 \u00e9value l\u2019ensemble en consid\u00e9rant les interrelations entre les \u00e9l\u00e9ments.',
+                    '<strong>Analytique</strong> \u2014 d\u00e9compose et \u00e9value chaque \u00e9l\u00e9ment s\u00e9par\u00e9ment.',
+                    '<strong>Algorithmique</strong> \u2014 calcul automatique bas\u00e9 sur une formule (ex.\u00a0: nombre d\u2019erreurs en fran\u00e7ais \u00e9crit).',
+                ]
+            },
+        ],
+        voirAussi: ['construction-grilles', 'evaluations-proceder']
+    },
+    'grille-niveau-solo': {
+        titre: 'Niveau cognitif SOLO',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'Niveau cognitif du crit\u00e8re selon la taxonomie SOLO (Structure of Observed Learning Outcomes) de Biggs et Collis. D\u00e9crit la complexit\u00e9 structurelle attendue dans la r\u00e9ponse de l\u2019\u00e9tudiant\u00b7e.'
+            },
+            {
+                type: 'conseil',
+                contenu: 'Les crit\u00e8res <strong>multistructurels</strong> (fondations) sont surveill\u00e9s par le d\u00e9pistage pour d\u00e9tecter les difficult\u00e9s persistantes. Identifie-les pour alimenter le suivi des fondamentaux.'
+            },
+        ],
+        voirAussi: ['depistage-interpretation', 'suivi-apprentissage-fondamentaux']
     }
 };
 
