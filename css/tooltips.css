@@ -8,11 +8,11 @@
     z-index: 10000;
     padding: 14px 20px;
     border-radius: 20px;
-    background: var(--acc-fond);
-    color: var(--acc-texte);
+    background: var(--surface-carte);
+    color: var(--texte-principal);
     font-size: 0.85rem;
     line-height: 1.45;
-    border: 1.5px solid var(--acc-bordure);
+    border: 1.5px solid var(--acc-fond);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
     pointer-events: none;
     opacity: 0;
@@ -31,12 +31,12 @@
     display: block;
 }
 
-/* Fleche — carre tourne a 45° au ton de la bulle (fond + bordure orange) */
+/* Fleche — carre tourne a 45° au ton de la bulle (fond neutre, bordure orange accent) */
 .tooltip-fleche {
     position: absolute;
     width: 12px;
     height: 12px;
-    background: var(--acc-fond);
+    background: var(--surface-carte);
 }
 
 /* Bulle A DROITE de l'element -> fleche pointe vers la GAUCHE */
@@ -44,8 +44,8 @@
     left: -7px;
     top: 50%;
     transform: translateY(-50%) rotate(45deg);
-    border-left: 1.5px solid var(--acc-bordure);
-    border-bottom: 1.5px solid var(--acc-bordure);
+    border-left: 1.5px solid var(--acc-fond);
+    border-bottom: 1.5px solid var(--acc-fond);
 }
 
 /* Bulle A GAUCHE de l'element -> fleche pointe vers la DROITE */
@@ -53,8 +53,8 @@
     right: -7px;
     top: 50%;
     transform: translateY(-50%) rotate(45deg);
-    border-right: 1.5px solid var(--acc-bordure);
-    border-top: 1.5px solid var(--acc-bordure);
+    border-right: 1.5px solid var(--acc-fond);
+    border-top: 1.5px solid var(--acc-fond);
 }
 
 /* Bulle SOUS l'element -> fleche pointe vers le HAUT (fallback) */
@@ -62,8 +62,8 @@
     top: -7px;
     left: 50%;
     transform: translateX(-50%) rotate(45deg);
-    border-left: 1.5px solid var(--acc-bordure);
-    border-top: 1.5px solid var(--acc-bordure);
+    border-left: 1.5px solid var(--acc-fond);
+    border-top: 1.5px solid var(--acc-fond);
 }
 
 /* Bulle AU-DESSUS de l'element -> fleche pointe vers le BAS (fallback) */
@@ -71,8 +71,8 @@
     bottom: -7px;
     left: 50%;
     transform: translateX(-50%) rotate(45deg);
-    border-right: 1.5px solid var(--acc-bordure);
-    border-bottom: 1.5px solid var(--acc-bordure);
+    border-right: 1.5px solid var(--acc-fond);
+    border-bottom: 1.5px solid var(--acc-fond);
 }
 
 .tooltip-contenu {

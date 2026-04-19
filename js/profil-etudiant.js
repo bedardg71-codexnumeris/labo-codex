@@ -2457,13 +2457,13 @@ function changerSectionProfil(section) {
     // Générer l'aide Primo selon la section (popup au clic)
     let toggleInfo = '';
     if (section === 'cible') {
-        toggleInfo = `<span class="primo-aide" data-target="details-calculs-risque-${da}">📍</span>`;
+        toggleInfo = `<span class="primo-aide" data-target="details-calculs-risque-${da}">✴️</span>`;
     } else if (section === 'performance') {
-        toggleInfo = `<span class="primo-aide" data-target="details-calculs-performance-${da}">📍</span>`;
+        toggleInfo = `<span class="primo-aide" data-target="details-calculs-performance-${da}">✴️</span>`;
     } else if (section === 'mobilisation') {
-        toggleInfo = `<span class="primo-aide" data-target="details-calculs-mobilisation-${da}">📍</span>`;
+        toggleInfo = `<span class="primo-aide" data-target="details-calculs-mobilisation-${da}">✴️</span>`;
     } else if (section === 'accompagnement') {
-        toggleInfo = `<span class="primo-aide" data-target="details-calculs-accompagnement-${da}">📍</span>`;
+        toggleInfo = `<span class="primo-aide" data-target="details-calculs-accompagnement-${da}">✴️</span>`;
     }
 
     contenuContainer.innerHTML = `
@@ -2489,7 +2489,7 @@ function changerSectionProfil(section) {
             reattacherEvenementsToggles();
         }
 
-        // Réinitialiser les tooltips pour les icônes 📍 dynamiques
+        // Réinitialiser les tooltips pour les icônes ✴️ dynamiques
         if (typeof initialiserPrimoTooltips === 'function') {
             initialiserPrimoTooltips();
         }
@@ -3044,7 +3044,7 @@ function afficherProfilComplet(daOuEl) {
                 <div class="profil-contenu-header">
                     <h2 class="u-flex-between-mb20">
                         <span data-tooltip="${{'productions':'profil-productions','mobilisation':'profil-mobilisation','progression':'profil-progression','performance':'profil-habiletes','accompagnement':'profil-accompagnement','travaux':'profil-travaux','rapport':'profil-rapport'}[sectionAffichee] || ''}">${titreSection}</span>
-                        <span class="primo-aide" data-target="details-calculs-risque-${da}">📍</span>
+                        <span class="primo-aide" data-target="details-calculs-risque-${da}">✴️</span>
                     </h2>
                 </div>
                 <div class="profil-contenu-body">
@@ -3060,7 +3060,7 @@ function afficherProfilComplet(daOuEl) {
             reattacherEvenementsToggles();
         }
 
-        // Réinitialiser les tooltips pour les icônes 📍 dynamiques
+        // Réinitialiser les tooltips pour les icônes ✴️ dynamiques
         if (typeof initialiserPrimoTooltips === 'function') {
             initialiserPrimoTooltips();
         }
@@ -7608,7 +7608,7 @@ function genererSectionRapport(da) {
             <div class="profil-carte">
                 <!-- En-tête minimaliste -->
                 <h3 style="margin: 0 0 20px 0; color: var(--accent-primaire); font-size: 1.1rem; border-bottom: 2px solid var(--bleu-pale); padding-bottom: 10px;">
-                    <span class="primo-aide" data-target="conseil-rapport">📍</span>
+                    <span class="primo-aide" data-target="conseil-rapport">✴️</span>
                 </h3>
 
                 <!-- Conseil Primo: Informations sur le rapport -->

@@ -862,7 +862,7 @@
 
                 <div class="travaux-import-header">
                     <h3>Préparer et importer
-                        <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle">📍</button>
+                        <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle">✴️</button>
                     </h3>
                     <div class="pipeline-stats">
                         ${queue.length > 0 ? `${queue.length} fichier(s) en file — ${travauxStockage.formaterTaille(queue.reduce((s, f) => s + f.tailleFichier, 0))}` : ''}
@@ -982,7 +982,7 @@
         if (fichiersTravaux.length === 0) {
             conteneur.innerHTML = `
                 <div class="conteneur">
-                    <h2>Annoter et évaluer <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle">📍</button></h2>
+                    <h2>Annoter et évaluer <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle">✴️</button></h2>
                     <p class="text-muted">Aucun fichier importé. Importe des travaux depuis l'onglet « Préparer et importer ».</p>
                 </div>`;
             return;
@@ -1158,7 +1158,7 @@
             : (tailleFiltree / 1024).toFixed(1) + ' Ko';
 
         conteneur.innerHTML = `
-            <h3>Archivage des travaux <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle">📍</button></h3>
+            <h3>Archivage des travaux <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle">✴️</button></h3>
             <p class="texte-muted">${fichiersTravaux.length} fichier(s) en stock (${tailleFormatee})</p>
 
             ${genererGrilleFichiers(fichiersTravaux, 'ouvrirPreviewInline')}
@@ -2642,7 +2642,7 @@
 
         return `
             <div class="conteneur" id="travaux-tableau-fichiers-conteneur">
-                <h2>Annoter et évaluer <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle">📍</button></h2>
+                <h2>Annoter et évaluer <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle">✴️</button></h2>
                 <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;">
                     <select class="controle-form controle-form-compact" id="travaux-tableau-filtre-production" data-on-change="travauxUI.filtrerTableauFichiers">
                         ${htmlFiltreProduction}

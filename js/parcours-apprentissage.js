@@ -1026,7 +1026,7 @@ function afficherSuggestionProactive(jalon, texteAction, callback) {
     suggestion.className = 'parcours-suggestion';
 
     var contenu = '<span class="parcours-suggestion-texte">' +
-        '📍 Prochaine étape : <strong>' + jalon.numero + ' ' + jalon.titre + '</strong>' +
+        '✴️ Prochaine étape : <strong>' + jalon.numero + ' ' + jalon.titre + '</strong>' +
         '</span>';
 
     if (texteAction && callback) {

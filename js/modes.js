@@ -882,7 +882,7 @@ function estAideContextuelleActive() {
 }
 
 /**
- * Active ou désactive l'aide contextuelle (📍 pins d'aide)
+ * Active ou désactive l'aide contextuelle (✴️ pins d'aide)
  * @param {boolean} etat - true pour activer, false pour désactiver
  */
 function definirAideContextuelle(etat) {

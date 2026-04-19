@@ -95,7 +95,7 @@ function genererBandeauRecommandation() {
         'margin-bottom: 15px; ' +
         'font-size: 0.9rem; ' +
         'color: var(--gris-clair);">' +
-        '📍 <strong>Recommandé</strong> : ' + recommandation +
+        '✴️ <strong>Recommandé</strong> : ' + recommandation +
         ' — ' + prochain.numero + ' ' + prochain.titre +
         '</div>';
 }
