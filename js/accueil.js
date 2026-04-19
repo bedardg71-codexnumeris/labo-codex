@@ -27,6 +27,43 @@ function afficherAccueil() {
 }
 
 /**
+ * Génère la bannière de bienvenue (nouvel utilisateur).
+ * Affichée si aucun groupe-cours n'est configuré ET mode démo inactif.
+ * Source texte : docs/refonte-textes/textes-manquants-bloc4.md (validé 19 avril 2026)
+ */
+function genererBanniereBienvenue() {
+    const enDemo = typeof estEnModeDemo === 'function' && estEnModeDemo();
+    if (enDemo) return '';
+
+    // Détection : aucun groupe-cours configuré
+    let aGroupeCours = false;
+    try {
+        if (typeof db !== 'undefined' && typeof window.cle === 'function') {
+            const gc = db.getSync(window.cle('groupeCoursActif'), null);
+            aGroupeCours = !!gc;
+        }
+    } catch (e) { /* ignore */ }
+
+    if (aGroupeCours) return '';
+
+    return `
+        <div class="banniere-bienvenue carte" id="banniere-bienvenue">
+            <h2 class="banniere-bienvenue-titre">Bienvenue dans Labo Codex</h2>
+            <p>Labo Codex num\u00e9rise le travail que tu fais d\u00e9j\u00e0\u00a0: planifier ton cours, concevoir tes activit\u00e9s d\u2019apprentissage, \u00e9valuer les travaux, suivre la progression de tes \u00e9tudiant\u00b7es. Tu y poses les m\u00eames gestes que sur papier avec calculette ou tableur, mais dans un seul outil portable.</p>
+            <p><strong>Par o\u00f9 commencer\u00a0?</strong> Configure ton trimestre, ton cours et ton groupe dans R\u00e9glages. C\u2019est la m\u00eame information que dans ton plan de cours. Tu la saisis une fois, l\u2019application s\u2019en sert partout.</p>
+            <div class="banniere-bienvenue-actions">
+                <button class="btn btn-primaire" data-action="afficherSection" data-param="contexte">
+                    Aller aux R\u00e9glages
+                </button>
+                <button class="btn btn-secondaire" data-action="entrerEnDemoHandler">
+                    Explorer avec des donn\u00e9es d\u00e9mo
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+/**
  * Contenu de la page d'accueil : 3 accordéons + utilitaires
  */
 function afficherAccueilContenu(conteneur) {
@@ -131,10 +168,15 @@ function afficherAccueilContenu(conteneur) {
 
     const heroTitre = 'Que souhaites-tu faire\u00a0?';
 
+    // Bannière de bienvenue : aucun groupe-cours configuré ET mode démo inactif
+    const banniereBienvenueHTML = genererBanniereBienvenue();
+
     conteneur.innerHTML = `
         <div class="accueil-hero">
             <h1>${heroTitre}</h1>
         </div>
+
+        ${banniereBienvenueHTML}
 
         ${parcoursGuideHTML}
 
@@ -259,6 +301,11 @@ function toggleDemoHandler(el) {
     }
 }
 
+/** Entrer en mode démo (bouton de la bannière de bienvenue) */
+function entrerEnDemoHandler() {
+    if (typeof entrerEnDemo === 'function') entrerEnDemo();
+}
+
 /** Toggle tour guidé depuis checkbox */
 function toggleTourGuideHandler(el) {
     if (typeof definirTourGuide === 'function') definirTourGuide(el.checked);
@@ -308,6 +355,7 @@ window.afficherAccueil = afficherAccueil;
 window.initialiserAccueil = initialiserAccueil;
 window.definirModeExpert = definirModeExpert;
 window.toggleDemoHandler = toggleDemoHandler;
+window.entrerEnDemoHandler = entrerEnDemoHandler;
 window.toggleTourGuideHandler = toggleTourGuideHandler;
 window.toggleTooltipsHandler = toggleTooltipsHandler;
 window.toggleAideContextuelleHandler = toggleAideContextuelleHandler;

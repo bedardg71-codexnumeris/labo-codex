@@ -22782,3 +22782,118 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
         display: none;
     }
 }
+
+/* =============================================================================
+   ÉTATS VIDES (etats-vides.js) — bannière affichée quand une section est vierge
+   ============================================================================= */
+.etat-vide-banniere {
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    background: var(--carte-info-note-fond, #fff9e6);
+    border-left: 4px solid var(--carte-info-note-bordure, #f0b63e);
+    border-radius: 0 6px 6px 0;
+    color: var(--texte-principal, #1a2d36);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.etat-vide-banniere p {
+    margin: 0;
+}
+
+/* =============================================================================
+   BANNIÈRE DE BIENVENUE (accueil.js) — nouvel utilisateur, aucun groupe-cours
+   ============================================================================= */
+.banniere-bienvenue {
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--accent-primaire, #2da9d7);
+    background: var(--surface-carte);
+}
+
+.banniere-bienvenue-titre {
+    margin: 0 0 14px 0;
+    font-size: 1.3rem;
+    color: var(--accent-primaire, #2da9d7);
+}
+
+.banniere-bienvenue p {
+    margin: 0 0 12px 0;
+    line-height: 1.6;
+}
+
+.banniere-bienvenue p:last-of-type {
+    margin-bottom: 18px;
+}
+
+.banniere-bienvenue-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* =============================================================================
+   TRANSITIONS (transitions.js) — notification de jalon atteint dans le parcours
+   ============================================================================= */
+.transition-bandeau {
+    position: fixed;
+    left: var(--espacement-lg, 24px);
+    right: var(--espacement-lg, 24px);
+    bottom: -200px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 16px 20px;
+    background: var(--surface-elevee, #1e3a44);
+    border: 1px solid var(--accent-primaire, #2da9d7);
+    border-radius: var(--rayon-carte, 12px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    z-index: 950;
+    transition: bottom 0.35s ease;
+}
+
+.transition-bandeau.visible {
+    bottom: var(--espacement-lg, 24px);
+}
+
+.transition-bandeau-contenu {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.transition-bandeau-contenu p {
+    flex: 1;
+    margin: 0;
+    color: var(--texte-principal, #e8f4f7);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.transition-bandeau-fermer {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: var(--texte-secondaire, #8aa4b0);
+    font-size: 1.1rem;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background 0.2s ease;
+}
+
+.transition-bandeau-fermer:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--texte-principal, #e8f4f7);
+}
+
+/* iPad : pleine largeur */
+@media (max-width: 1024px) {
+    .transition-bandeau {
+        left: 12px;
+        right: 12px;
+        max-width: none;
+    }
+}
