@@ -69,10 +69,8 @@
         chronoEvaluation: false,
         sisDefaut: 'lea',
         modeExpert: false,
-        tourGuide: false,
-        aideContextuelle: true,
         modeClair: false,
-        tooltips: true
+        accompagnementActif: true
     };
 
     // Abonnés : { cle: [callback, callback, ...] }
@@ -215,10 +213,9 @@
         { source: 'preferencesAffichage', champ: 'chronoEvaluation',            cible: 'chronoEvaluation' },
         { source: 'preferencesAffichage', champ: 'sisDefaut',                   cible: 'sisDefaut' },
         { source: 'preferencesAffichage', champ: 'modeExpert',                  cible: 'modeExpert' },
-        { source: 'preferencesAffichage', champ: 'tourGuide',                   cible: 'tourGuide' },
-        { source: 'preferencesAffichage', champ: 'aideContextuelle',            cible: 'aideContextuelle' },
-        { source: 'preferencesAffichage', champ: 'modeClair',                   cible: 'modeClair' },
-        { source: 'preferencesAffichage', champ: 'tooltips',                    cible: 'tooltips' }
+        { source: 'preferencesAffichage', champ: 'modeClair',                   cible: 'modeClair' }
+        // tourGuide, aideContextuelle, tooltips : retirés au profit de
+        // `accompagnementActif` (pref unique — chantier 20 avril 2026).
 
         // seuilsInterpretation NON migré : structure mixte (plats + imbriqués)
         // consommée en bloc par chargerSeuilsInterpretation(). Voir en-tête.

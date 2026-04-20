@@ -848,52 +848,39 @@ function gererAffichageBoutonPrimo(mode) {
 // ============================================
 
 /**
- * Vérifie si le Tour guide est actif (lecture de la préférence)
- * @returns {boolean} true si le tour guide est activé
+ * Les 4 sous-systèmes d'accompagnement (tour guidé, aide contextuelle,
+ * tooltips hover, flèches didactiques) sont pilotés par la pref unique
+ * `accompagnementActif` depuis le 20 avril 2026. Les fonctions ci-dessous
+ * redirigent vers window.accompagnement pour préserver la rétrocompat des
+ * appelants existants (parcours-apprentissage.js, modes.js internal usages).
  */
 function estTourGuideActif() {
-    return !!obtenirPreference('tourGuide');
+    return !!obtenirPreference('accompagnementActif');
 }
 
 // Alias rétrocompatibles (seront retirés dans une future version)
 function estModeAssiste() { return estTourGuideActif(); }
 function estModeGuide() { return estTourGuideActif(); }
 
-/**
- * Active ou désactive le Tour guide
- * @param {boolean} etat - true pour activer, false pour désactiver
- */
 function definirTourGuide(etat) {
-    definirPreference('tourGuide', !!etat);
-    // Synchroniser les checkboxes miroirs
-    document.querySelectorAll('#checkbox-tour-guide, #checkbox-tour-guide-accueil').forEach(cb => cb.checked = !!etat);
-    // Appliquer la classe CSS qui contrôle la visibilité des icônes
-    document.body.classList.toggle('tour-guide-actif', !!etat);
-    // Notifier les modules (primo-tooltips écoute cet événement)
-    window.dispatchEvent(new Event('modeChanged'));
+    if (window.accompagnement && typeof window.accompagnement.definirActif === 'function') {
+        window.accompagnement.definirActif(!!etat);
+    } else {
+        // Fallback si accompagnement.js pas encore chargé : écrit direct + synchro body
+        definirPreference('accompagnementActif', !!etat);
+        document.body.classList.toggle('tour-guide-actif', !!etat);
+        document.body.classList.toggle('aide-contextuelle-active', !!etat);
+        window.dispatchEvent(new Event('modeChanged'));
+    }
 }
 
-/**
- * Vérifie si l'aide contextuelle est active (lecture de la préférence)
- * @returns {boolean} true si l'aide contextuelle est activée (true par défaut)
- */
 function estAideContextuelleActive() {
-    return obtenirPreference('aideContextuelle') !== false; // true par défaut
+    return !!obtenirPreference('accompagnementActif');
 }
 
-/**
- * Active ou désactive l'aide contextuelle (✴️ pins d'aide)
- * @param {boolean} etat - true pour activer, false pour désactiver
- */
 function definirAideContextuelle(etat) {
-    definirPreference('aideContextuelle', !!etat);
-    // Synchroniser les checkboxes miroirs
-    document.querySelectorAll('#checkbox-aide-contextuelle, #checkbox-aide-contextuelle-accueil')
-        .forEach(cb => cb.checked = !!etat);
-    // Appliquer la classe CSS qui contrôle la visibilité des éléments d'aide
-    document.body.classList.toggle('aide-contextuelle-active', !!etat);
-    // Notifier les modules (primo-tooltips écoute cet événement)
-    window.dispatchEvent(new Event('modeChanged'));
+    // Même logique que definirTourGuide — délégué à accompagnement
+    definirTourGuide(etat);
 }
 
 // ============================================
