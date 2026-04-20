@@ -631,9 +631,9 @@ function afficherNotificationJalon(jalon, progression) {
  * Appelé lors du passage en mode autonome.
  */
 function nettoyerMecanismesActifs() {
-    // Arrêter le guidage configuration s'il est actif
-    if (typeof arreterGuidage === 'function') {
-        arreterGuidage();
+    // Arrêter le tour guidé s'il est actif
+    if (window.accompagnement && typeof window.accompagnement.quitterTour === 'function') {
+        window.accompagnement.quitterTour();
     }
 
     // Retirer la suggestion proactive
@@ -986,11 +986,11 @@ function onNavigationChange(idSousSection) {
     // et que l'utilisateur vient d'arriver dans Réglages
     if (prochain.chapitre === 'configurer' && idSousSection.indexOf('reglages') === 0) {
         var guidageDejaActif = typeof guidageActif !== 'undefined' && guidageActif;
-        if (!guidageDejaActif && typeof demarrerGuidageConfiguration === 'function') {
+        if (!guidageDejaActif && window.accompagnement && typeof window.accompagnement.demarrerTour === 'function') {
             afficherSuggestionProactive(
                 prochain,
                 'Lancer la configuration guidée ?',
-                function() { demarrerGuidageConfiguration(); }
+                function() { window.accompagnement.demarrerTour(); }
             );
         }
         return;
