@@ -1,0 +1,280 @@
+/* =================================================================
+   accompagnement.css — Système d'accompagnement unifié (Phase 1)
+
+   Fusion de :
+     - css/tooltips.css            (mode hover)
+     - css/fleches-didactiques.css (mode autoReveal)
+
+   Les styles popup (primo-popup), tour guidé (panneau-tour-guide)
+   et glossaire (glossaire-micropopup) restent dans styles.css en
+   Phase 1. Ils seront extraits ici en Phase 6 (nettoyage final).
+
+   Palette : variables --acc-* partagées, pas de redéfinition mode clair.
+   ================================================================= */
+
+/* =================================================================
+   MODE HOVER — bulle sobre au survol / long-press / focus
+   ================================================================= */
+
+.tooltip-bulle {
+    position: absolute;
+    z-index: 10000;
+    padding: 14px 20px;
+    border-radius: 20px;
+    background: var(--surface-carte);
+    color: var(--texte-principal);
+    font-size: 0.85rem;
+    line-height: 1.45;
+    border: 1.5px solid var(--acc-fond);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(0.97);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.tooltip-bulle.tooltip-visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.tooltip-bulle.tooltip-mesure {
+    opacity: 0;
+    visibility: hidden;
+    display: block;
+}
+
+.tooltip-fleche {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: var(--surface-carte);
+}
+
+.tooltip-bulle[data-position="droite"] .tooltip-fleche {
+    left: -7px;
+    top: 50%;
+    transform: translateY(-50%) rotate(45deg);
+    border-left: 1.5px solid var(--acc-fond);
+    border-bottom: 1.5px solid var(--acc-fond);
+}
+
+.tooltip-bulle[data-position="gauche"] .tooltip-fleche {
+    right: -7px;
+    top: 50%;
+    transform: translateY(-50%) rotate(45deg);
+    border-right: 1.5px solid var(--acc-fond);
+    border-top: 1.5px solid var(--acc-fond);
+}
+
+.tooltip-bulle[data-position="bas"] .tooltip-fleche {
+    top: -7px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    border-left: 1.5px solid var(--acc-fond);
+    border-top: 1.5px solid var(--acc-fond);
+}
+
+.tooltip-bulle[data-position="haut"] .tooltip-fleche {
+    bottom: -7px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    border-right: 1.5px solid var(--acc-fond);
+    border-bottom: 1.5px solid var(--acc-fond);
+}
+
+.tooltip-contenu {
+    position: relative;
+    z-index: 1;
+}
+
+[data-tooltip] {
+    cursor: help;
+    /* iPad : désactiver le menu contextuel natif (callout) pendant le long-press.
+       Sans ça, Safari intercepte le long-press pour sélectionner du texte ou afficher
+       le menu « Copier / Partager », avant que notre timer de 400 ms ne déclenche. */
+    -webkit-touch-callout: none;
+}
+
+button[data-tooltip],
+select[data-tooltip],
+a[data-tooltip],
+.accordeon-header[data-tooltip],
+nav [data-tooltip],
+.sous-navigation [data-tooltip] {
+    cursor: pointer;
+}
+
+@keyframes tooltip-pulse {
+    0%, 100% { outline-color: color-mix(in srgb, var(--accent-primaire, #6aacb8) 40%, transparent); }
+    50%      { outline-color: color-mix(in srgb, var(--accent-primaire, #6aacb8) 80%, transparent); }
+}
+
+.tooltip-cible-active {
+    outline: 4px solid var(--accent-primaire, #6aacb8);
+    outline-offset: -4px;
+    box-shadow: inset 0 0 0 9999px color-mix(in srgb, var(--accent-primaire, #6aacb8) 15%, transparent);
+    animation: tooltip-pulse 1.8s ease-in-out infinite;
+    transition: outline-color 0.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-tooltip-visible]::after,
+    [data-tooltip-visible]::before {
+        transition: none;
+    }
+    .tooltip-cible-active {
+        animation: none;
+        transition: none;
+    }
+}
+
+/* =================================================================
+   MODE AUTO-REVEAL — flèche-pointeur didactique (onboarding)
+   ================================================================= */
+
+.fleche-didactique {
+    position: fixed;
+    z-index: 9500;
+    display: flex;
+    gap: 6px;
+    max-width: 280px;
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.fleche-didactique.visible {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+}
+
+.fleche-didactique-corps {
+    background: var(--acc-fond);
+    color: var(--acc-texte);
+    border: 1px solid var(--acc-bordure);
+    padding: 10px 14px;
+    border-radius: var(--radius-moyen, 8px);
+    box-shadow: var(--shadow-fort, 0 6px 20px rgba(0, 0, 0, 0.25));
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.95rem;
+    line-height: 1.35;
+}
+
+.fleche-didactique-message {
+    margin: 0;
+    flex: 1;
+    color: inherit;
+}
+
+.fleche-didactique-close {
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+    min-width: 28px;
+    min-height: 28px;
+    border-radius: 4px;
+    opacity: 0.8;
+    transition: opacity 0.15s, background 0.15s;
+    align-self: flex-start;
+}
+
+.fleche-didactique-close:hover,
+.fleche-didactique-close:focus-visible {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.fleche-didactique-pointeur {
+    width: 0;
+    height: 0;
+    flex-shrink: 0;
+    align-self: center;
+}
+
+.fleche-didactique[data-direction="haut"] {
+    flex-direction: column-reverse;
+    align-items: center;
+}
+.fleche-didactique[data-direction="haut"] .fleche-didactique-pointeur {
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 12px solid var(--acc-fond);
+    animation: fleche-oscille-y 1.6s ease-in-out infinite;
+}
+
+.fleche-didactique[data-direction="bas"] {
+    flex-direction: column;
+    align-items: center;
+}
+.fleche-didactique[data-direction="bas"] .fleche-didactique-pointeur {
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 12px solid var(--acc-fond);
+    animation: fleche-oscille-y-inv 1.6s ease-in-out infinite;
+}
+
+.fleche-didactique[data-direction="gauche"] {
+    flex-direction: row-reverse;
+}
+.fleche-didactique[data-direction="gauche"] .fleche-didactique-pointeur {
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 12px solid var(--acc-fond);
+    animation: fleche-oscille-x 1.6s ease-in-out infinite;
+}
+
+.fleche-didactique[data-direction="droite"] {
+    flex-direction: row;
+}
+.fleche-didactique[data-direction="droite"] .fleche-didactique-pointeur {
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right: 12px solid var(--acc-fond);
+    animation: fleche-oscille-x-inv 1.6s ease-in-out infinite;
+}
+
+@keyframes fleche-oscille-y {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-3px); }
+}
+@keyframes fleche-oscille-y-inv {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(3px); }
+}
+@keyframes fleche-oscille-x {
+    0%, 100% { transform: translateX(0); }
+    50%      { transform: translateX(-3px); }
+}
+@keyframes fleche-oscille-x-inv {
+    0%, 100% { transform: translateX(0); }
+    50%      { transform: translateX(3px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fleche-didactique,
+    .fleche-didactique-pointeur {
+        animation: none !important;
+        transition: opacity 0.15s ease !important;
+    }
+}
+
+.fleche-didactique-cible {
+    outline: 3px solid var(--acc-bordure-active);
+    outline-offset: 3px;
+    border-radius: inherit;
+    animation: fleche-cible-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes fleche-cible-pulse {
+    0%, 100% { outline-color: color-mix(in srgb, var(--acc-bordure-active) 50%, transparent); }
+    50%      { outline-color: var(--acc-bordure-active); }
+}

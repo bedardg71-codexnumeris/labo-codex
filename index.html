@@ -15895,14 +15895,6 @@
     <script src="js/primo-modal.js?v=2026010603"></script> <!-- Bug Olivier: reload après parcours court -->
     <script src="js/primo-accueil.js?v=2025112809"></script>
     <script src="js/primo-validation-champs.js?v=2025112727"></script>
-    <script src="js/primo-tooltips.js?v=2025120901"></script>
-
-    <!-- AIDE CONTEXTUELLE - Modals d'aide avec boutons ✴️ (Beta 95.5) -->
-    <script src="js/aide-contextuelle-contenu.js?v=2026011901"></script>
-    <script src="js/aide-contextuelle.js?v=2026011901"></script>
-
-    <!-- GUIDAGE - Système d'assistance contextuelle (Tour guide, Beta 92) -->
-    <script src="js/guidage.js?v=2026041901"></script>
 
     <!-- TUTORIEL INTERACTIF - Guide après données démo (Beta 92) -->
     <script src="js/tutoriel-interactif.js?v=2025120102"></script>
@@ -15927,22 +15919,22 @@
     <!-- Changelog dynamique -->
     <script src="js/changelog-data.js?v=2026041701"></script> <!-- Beta 99.17 (b0417-1207) : changelog enrichi (onglets profil + RLO + Consolidation + export) -->
 
-    <!-- Tooltips au survol -->
-    <link rel="stylesheet" href="css/tooltips.css?v=2026041701">
-    <script src="js/tooltips-contenu.js?v=2026021401"></script>
-    <script src="js/tooltips.js?v=2026021301"></script>
-
-    <!-- Flèches didactiques (onboarding : pointeur contextuel au premier contact) -->
-    <link rel="stylesheet" href="css/fleches-didactiques.css?v=2026041801">
-    <script src="js/fleches-didactiques.js?v=2026041802"></script>
-
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=2026041901"></script>
     <script src="js/transitions.js?v=2026041901"></script>
 
-    <!-- Phase 4 onboarding : glossaire contextuel (48 termes) -->
+    <!-- Catalogues de contenu d'accompagnement (données, lus par accompagnement.js) -->
+    <script src="js/tooltips-contenu.js?v=2026021401"></script>
+    <script src="js/aide-contextuelle-contenu.js?v=2026011901"></script>
     <script src="js/glossaire-data.js?v=2026041901"></script>
-    <script src="js/glossaire.js?v=2026041901"></script>
+
+    <!-- SYSTÈME D'ACCOMPAGNEMENT UNIFIÉ (Beta 99.20, Phase 1) —
+         Fusionne tooltips, flèches, popups primo/aide, tour guidé, glossaire
+         en un seul moteur. Remplace : primo-tooltips.js, aide-contextuelle.js,
+         guidage.js, tooltips.js, fleches-didactiques.js, glossaire.js.
+         Les 3 fichiers de contenu ci-dessus restent lus tels quels en Phase 1. -->
+    <link rel="stylesheet" href="css/accompagnement.css?v=2026042001">
+    <script src="js/accompagnement.js?v=2026042001"></script>
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js?v=2026032600"></script>
