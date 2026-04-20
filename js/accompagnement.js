@@ -1035,6 +1035,16 @@ const ETAPES_TOUR = [
     }
 ];
 
+// Phase 4 : publier les 6 étapes dans le catalogue unifié sous mode `tour`.
+// La clé est `tour-etape-<id>`. L'orchestration continue d'utiliser le tableau
+// ETAPES_TOUR ci-dessus (accès indexé), mais le catalogue expose maintenant
+// ces entrées à `window.accompagnement.catalogue` pour cohérence.
+ETAPES_TOUR.forEach(function(etape) {
+    const obj = {};
+    obj['tour-etape-' + etape.id] = { tour: etape };
+    ajouterEntrees(obj);
+});
+
 const ID_PANNEAU_TOUR = 'panneau-tour-guide';
 
 function tourObtenirEtape() {
