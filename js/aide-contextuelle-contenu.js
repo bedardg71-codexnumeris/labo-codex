@@ -929,10 +929,27 @@ const AIDE_CONTEXTUELLE = {
     }
 };
 
-// Export pour utilisation dans aide-contextuelle.js
+// Rétro-compat : window.AIDE_CONTEXTUELLE reste lisible. Sera retiré en Phase 6.
 if (typeof window !== 'undefined') {
     window.AIDE_CONTEXTUELLE = AIDE_CONTEXTUELLE;
 }
 
+// Phase 3 : migration vers le catalogue unifié de js/accompagnement.js
+// Chaque entrée { titre, sections, voirAussi } devient { popup: {...} }.
+// Retry async car l'ordre de chargement des <script> n'est pas garanti.
+function _migrerAideVersAccompagnement() {
+    if (!window.accompagnement || typeof window.accompagnement.ajouterEntrees !== 'function') {
+        setTimeout(_migrerAideVersAccompagnement, 50);
+        return;
+    }
+    const entrees = {};
+    for (const cle in AIDE_CONTEXTUELLE) {
+        if (Object.prototype.hasOwnProperty.call(AIDE_CONTEXTUELLE, cle)) {
+            entrees[cle] = { popup: AIDE_CONTEXTUELLE[cle] };
+        }
+    }
+    window.accompagnement.ajouterEntrees(entrees);
+}
+_migrerAideVersAccompagnement();
 
 })();
