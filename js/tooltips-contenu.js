@@ -787,7 +787,28 @@ const TOOLTIPS = {
 
 };
 
-// Export global
+// Rétro-compat : window.TOOLTIPS reste lisible pour tout code qui y accèderait
+// directement (les anciens moteurs, des modules tiers, etc.). En Phase 6 ce
+// global sera retiré.
 window.TOOLTIPS = TOOLTIPS;
+
+// Phase 2 : migration vers le catalogue unifié de js/accompagnement.js
+// Chaque entrée `cle: texte` devient `cle: { hover: texte }` dans
+// CATALOGUE_ACCOMPAGNEMENT. Async retry car accompagnement.js peut être
+// chargé après ce fichier selon l'ordre des <script> dans index.html.
+function _migrerVersAccompagnement() {
+    if (!window.accompagnement || typeof window.accompagnement.ajouterEntrees !== 'function') {
+        setTimeout(_migrerVersAccompagnement, 50);
+        return;
+    }
+    const entrees = {};
+    for (const cle in TOOLTIPS) {
+        if (Object.prototype.hasOwnProperty.call(TOOLTIPS, cle)) {
+            entrees[cle] = { hover: TOOLTIPS[cle] };
+        }
+    }
+    window.accompagnement.ajouterEntrees(entrees);
+}
+_migrerVersAccompagnement();
 
 })();

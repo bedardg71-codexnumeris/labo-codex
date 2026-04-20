@@ -35,6 +35,31 @@ const CLE_VUE_ANCIEN_PREFIXE = 'fleche-vue__';
 const CLE_MIGRATION = 'accompagnement-migration-v1';
 const CLE_TOGGLE_FLECHES = 'flechesDidactiquesActives';
 
+// ---- Catalogue unifié (Phase 2+) --------------------------------------------
+// Une entrée par concept pédagogique. Chaque entrée peut porter plusieurs modes :
+//   hover      → string (bulle sobre au hover/long-press)
+//   autoReveal → { sectionActive, cibleSelector, message, direction, priorite }
+//   popup      → { titre, sections, voirAussi } (sera alimenté en Phase 3)
+//   tour       → { ordre, titre, texte, actions, correspond } (Phase 4)
+//   terme      → { resume, fiche, categorie, etape, voir } (Phase 5)
+// Les contenus externes (tooltips-contenu.js, aide-contextuelle-contenu.js,
+// glossaire-data.js) se déversent ici via ajouterEntrees().
+const CATALOGUE_ACCOMPAGNEMENT = {};
+
+function ajouterEntrees(obj) {
+    if (!obj || typeof obj !== 'object') return;
+    for (const cle in obj) {
+        if (!Object.prototype.hasOwnProperty.call(obj, cle)) continue;
+        const existante = CATALOGUE_ACCOMPAGNEMENT[cle] || {};
+        Object.assign(existante, obj[cle]);
+        CATALOGUE_ACCOMPAGNEMENT[cle] = existante;
+    }
+}
+
+function obtenirEntree(cle) {
+    return CATALOGUE_ACCOMPAGNEMENT[cle] || null;
+}
+
 function echapper(s) {
     if (typeof echapperHtml === 'function') return echapperHtml(s);
     const d = document.createElement('div');
@@ -262,9 +287,15 @@ function hoverPositionnerBulle(cible, bulle) {
 function afficherHover(cible) {
     if (!prefTooltipsActive()) return;
     const cle = cible.dataset.tooltip;
-    if (!cle || !window.TOOLTIPS || !window.TOOLTIPS[cle]) return;
+    if (!cle) return;
 
-    const texte = window.TOOLTIPS[cle];
+    // Phase 2 : lire depuis le catalogue unifié, fallback sur window.TOOLTIPS
+    // (rétro-compat le temps que tooltips-contenu.js termine sa migration async).
+    const entree = CATALOGUE_ACCOMPAGNEMENT[cle];
+    let texte = entree && entree.hover;
+    if (!texte && window.TOOLTIPS) texte = window.TOOLTIPS[cle];
+    if (!texte) return;
+
     const bulle = hoverObtenirBulle();
     const contenu = bulle.querySelector('.tooltip-contenu');
 
@@ -411,57 +442,80 @@ function definirTooltips(etat) {
 // MODE AUTO-REVEAL — flèche-pointeur sur sectionAffichee (ex-fleches-didactiques.js)
 // ============================================================================
 
-const FLECHES_CATALOGUE = {
+// Les 7 flèches didactiques : peuplées directement dans le catalogue unifié.
+// En Phase 2, `window.flechesDidactiques.catalogue` devient une vue dérivée
+// (voir exports en bas du fichier).
+ajouterEntrees({
     'contexte-pratiques-nouvelle': {
-        sectionActive: 'contexte-pratiques-notation',
-        cibleSelector: 'button[data-action="creerNouvellePratique"]',
-        message: 'Clique ici pour créer ta première pratique de notation.',
-        direction: 'haut',
-        priorite: 10
+        autoReveal: {
+            sectionActive: 'contexte-pratiques-notation',
+            cibleSelector: 'button[data-action="creerNouvellePratique"]',
+            message: 'Clique ici pour créer ta première pratique de notation.',
+            direction: 'haut',
+            priorite: 10
+        }
     },
     'structure-grilles-nouvelle': {
-        sectionActive: 'structure-grille-criteres',
-        cibleSelector: 'button[data-action="creerNouvelleGrille"]',
-        message: 'Clique ici pour créer ta première grille de critères.',
-        direction: 'haut',
-        priorite: 10
+        autoReveal: {
+            sectionActive: 'structure-grille-criteres',
+            cibleSelector: 'button[data-action="creerNouvelleGrille"]',
+            message: 'Clique ici pour créer ta première grille de critères.',
+            direction: 'haut',
+            priorite: 10
+        }
     },
     'structure-echelles-nouvelle': {
-        sectionActive: 'structure-echelle-performance',
-        cibleSelector: 'button[data-action="creerNouvelleEchelle"]',
-        message: 'Clique ici pour créer ta première échelle de performance.',
-        direction: 'haut',
-        priorite: 10
+        autoReveal: {
+            sectionActive: 'structure-echelle-performance',
+            cibleSelector: 'button[data-action="creerNouvelleEchelle"]',
+            message: 'Clique ici pour créer ta première échelle de performance.',
+            direction: 'haut',
+            priorite: 10
+        }
     },
     'structure-cartouches-nouvelle': {
-        sectionActive: 'structure-retroactions',
-        cibleSelector: 'button[data-action="creerNouvelleCartouche"]',
-        message: 'Clique ici pour créer ta première cartouche de rétroaction.',
-        direction: 'haut',
-        priorite: 10
+        autoReveal: {
+            sectionActive: 'structure-retroactions',
+            cibleSelector: 'button[data-action="creerNouvelleCartouche"]',
+            message: 'Clique ici pour créer ta première cartouche de rétroaction.',
+            direction: 'haut',
+            priorite: 10
+        }
     },
     'structure-productions-nouvelle': {
-        sectionActive: 'structure-productions',
-        cibleSelector: 'button[data-action="creerNouvelleProduction"]',
-        message: 'Clique ici pour créer ta première production étudiante.',
-        direction: 'haut',
-        priorite: 10
+        autoReveal: {
+            sectionActive: 'structure-productions',
+            cibleSelector: 'button[data-action="creerNouvelleProduction"]',
+            message: 'Clique ici pour créer ta première production étudiante.',
+            direction: 'haut',
+            priorite: 10
+        }
     },
     'suivi-presences-premiere-saisie': {
-        sectionActive: 'suivi-saisie',
-        cibleSelector: '#tbody-saisie-presences .input-periodes:first-of-type',
-        message: 'Clique dans une cellule pour saisir des périodes de présence.',
-        direction: 'haut',
-        priorite: 5
+        autoReveal: {
+            sectionActive: 'suivi-saisie',
+            cibleSelector: '#tbody-saisie-presences .input-periodes:first-of-type',
+            message: 'Clique dans une cellule pour saisir des périodes de présence.',
+            direction: 'haut',
+            priorite: 5
+        }
     },
     'evaluations-annoter-tampons': {
-        sectionActive: 'evaluations-annoter',
-        cibleSelector: '#btn-toggle-tampons',
-        message: 'Tu peux apposer des tampons pour commenter rapidement un travail.',
-        direction: 'gauche',
-        priorite: 5
+        autoReveal: {
+            sectionActive: 'evaluations-annoter',
+            cibleSelector: '#btn-toggle-tampons',
+            message: 'Tu peux apposer des tampons pour commenter rapidement un travail.',
+            direction: 'gauche',
+            priorite: 5
+        }
     }
-};
+});
+
+// Helper : obtenir la config autoReveal d'une entrée
+function obtenirAutoReveal(id) {
+    const entree = CATALOGUE_ACCOMPAGNEMENT[id];
+    return (entree && entree.autoReveal) || null;
+}
 
 const AUTO_DELAI_STABILISATION = 150;
 let autoHote = null;
@@ -517,7 +571,7 @@ function afficherAutoReveal(id, optionsExterne) {
 
     const entree = (optionsExterne && optionsExterne.sectionActive)
         ? optionsExterne
-        : FLECHES_CATALOGUE[id];
+        : obtenirAutoReveal(id);
 
     if (!entree) {
         console.warn('[Accompagnement/flèches] Entrée inconnue :', id);
@@ -568,8 +622,9 @@ function initialiserAutoReveal() {
         if (!prefFlechesActives()) return;
 
         let candidate = null;
-        for (const id in FLECHES_CATALOGUE) {
-            const entree = FLECHES_CATALOGUE[id];
+        for (const id in CATALOGUE_ACCOMPAGNEMENT) {
+            const entree = CATALOGUE_ACCOMPAGNEMENT[id].autoReveal;
+            if (!entree) continue;
             if (entree.sectionActive !== idSousSection) continue;
             if (estVue(id)) continue;
             if (!candidate || entree.priorite > candidate.entree.priorite) {
@@ -581,7 +636,8 @@ function initialiserAutoReveal() {
 
     document.addEventListener('click', function(ev) {
         if (!autoFlecheActive || !autoCibleActive) return;
-        if (ev.target.closest(FLECHES_CATALOGUE[autoFlecheActive].cibleSelector) === autoCibleActive) {
+        const entree = obtenirAutoReveal(autoFlecheActive);
+        if (entree && ev.target.closest(entree.cibleSelector) === autoCibleActive) {
             fermerEtMarquerAutoReveal();
         }
     }, true);
@@ -592,7 +648,7 @@ function initialiserAutoReveal() {
         autoRepositionnerTimer = requestAnimationFrame(function() {
             autoRepositionnerTimer = null;
             if (autoFlecheActive && autoCibleActive && document.body.contains(autoCibleActive)) {
-                const entree = FLECHES_CATALOGUE[autoFlecheActive];
+                const entree = obtenirAutoReveal(autoFlecheActive);
                 if (entree) autoPositionner(autoCibleActive, entree.direction);
             } else {
                 masquerAutoReveal();
@@ -1466,6 +1522,9 @@ window.accompagnement = {
     definirActif: definirAccompagnementActif,
     masquerTout: masquerTout,
     reinitialiserVue: reinitialiserVue,
+    ajouterEntrees: ajouterEntrees,
+    obtenirEntree: obtenirEntree,
+    catalogue: CATALOGUE_ACCOMPAGNEMENT,
 
     // Hover
     afficherHover: afficherHover,
@@ -1474,7 +1533,6 @@ window.accompagnement = {
     // Auto-reveal
     afficherFleche: afficherAutoReveal,
     masquerFleche: masquerAutoReveal,
-    catalogueFleches: FLECHES_CATALOGUE,
 
     // Popup
     afficherAide: afficherAideContextuelle,
@@ -1502,13 +1560,22 @@ window.accompagnement = {
 window.tooltips = { afficher: afficherHover, masquer: masquerHover };
 window.definirTooltips = definirTooltips;
 
+// Vue dérivée : entrées avec autoReveal uniquement (compat window.flechesDidactiques.catalogue)
+function _catalogueFlechesDerive() {
+    const vue = {};
+    for (const id in CATALOGUE_ACCOMPAGNEMENT) {
+        const ar = CATALOGUE_ACCOMPAGNEMENT[id].autoReveal;
+        if (ar) vue[id] = ar;
+    }
+    return vue;
+}
 window.flechesDidactiques = {
     afficher: afficherAutoReveal,
     masquerActive: masquerAutoReveal,
     reinitialiser: reinitialiserVue,
     estActif: prefFlechesActives,
     definirActif: definirFlechesActives,
-    catalogue: FLECHES_CATALOGUE
+    get catalogue() { return _catalogueFlechesDerive(); }
 };
 window.masquerFlecheDidactique = fermerEtMarquerAutoReveal;
 
