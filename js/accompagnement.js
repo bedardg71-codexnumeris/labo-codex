@@ -17,9 +17,14 @@
  * Les entrées mode autoReveal et tour sont déclarées directement ici.
  *
  * Rétrocompatibilité :
- *   - Les attributs HTML existants (~220 usages) fonctionnent sans modification.
- *   - Les alias window.tooltips, window.flechesDidactiques, window.glossaire,
- *     window.afficherAideContextuelle, etc. restent exportés.
+ *   - Les attributs HTML existants (~220 usages : data-tooltip, data-aide,
+ *     data-target, data-glossaire) fonctionnent sans modification.
+ *   - Globals conservés pour le dispatcher data-action de main.js :
+ *     masquerFlecheDidactique, fermerPopupPrimo, fermerAideContextuelle,
+ *     demarrerTourGuide.
+ *   - API sémantiques : window.afficherAideContextuelle (ouverture par clé)
+ *     et window.definirTooltips (toggle individuel du mode hover).
+ *   - Toute autre API passe par window.accompagnement.*
  *   - Les flags localStorage fleche-vue__* sont migrés vers accompagnement-vu__*
  *     au premier chargement, idempotent (flag accompagnement-migration-v1).
  *   - Préférence unifiée window.accompagnement.estActif() lit l'AND des 4
@@ -445,8 +450,6 @@ function definirTooltips(etat) {
 // ============================================================================
 
 // Les 7 flèches didactiques : peuplées directement dans le catalogue unifié.
-// En Phase 2, `window.flechesDidactiques.catalogue` devient une vue dérivée
-// (voir exports en bas du fichier).
 ajouterEntrees({
     'contexte-pratiques-nouvelle': {
         autoReveal: {
@@ -1560,6 +1563,8 @@ window.accompagnement = {
     fermerAide: fermerAideContextuelle,
     afficherPopupPrimo: afficherPopupPrimo,
     fermerPopupPrimo: fermerPopupPrimo,
+    afficherBulleDecouverte: afficherBulleDecouverte,
+    initialiserPopup: initialiserPopup,
 
     // Tour
     demarrerTour: demarrerTourGuide,
@@ -1576,62 +1581,20 @@ window.accompagnement = {
     listerTermesTries: listerTermesTries
 };
 
-// ---- Alias rétro-compat (Phase 1-5, retirés en Phase 6) ---------------------
-
-window.tooltips = { afficher: afficherHover, masquer: masquerHover };
-window.definirTooltips = definirTooltips;
-
-// Vue dérivée : entrées avec autoReveal uniquement (compat window.flechesDidactiques.catalogue)
-function _catalogueFlechesDerive() {
-    const vue = {};
-    for (const id in CATALOGUE_ACCOMPAGNEMENT) {
-        const ar = CATALOGUE_ACCOMPAGNEMENT[id].autoReveal;
-        if (ar) vue[id] = ar;
-    }
-    return vue;
-}
-window.flechesDidactiques = {
-    afficher: afficherAutoReveal,
-    masquerActive: masquerAutoReveal,
-    reinitialiser: reinitialiserVue,
-    estActif: prefFlechesActives,
-    definirActif: definirFlechesActives,
-    get catalogue() { return _catalogueFlechesDerive(); }
-};
+// ---- Globals nécessaires au dispatcher data-action de main.js ---------------
+// Ces 4 noms sont référencés dans des attributs HTML data-action et/ou des
+// handlers de rendu DOM. main.js:608 fait `fn = window[action]; fn()`.
 window.masquerFlecheDidactique = fermerEtMarquerAutoReveal;
-
-window.afficherPopupPrimo = afficherPopupPrimo;
 window.fermerPopupPrimo = fermerPopupPrimo;
-window.initialiserPrimoTooltips = initialiserPopup;
-window.gererVisibilitePrimoSelonMode = gererVisibilitePrimoSelonMode;
-
-window.afficherAideContextuelle = afficherAideContextuelle;
 window.fermerAideContextuelle = fermerAideContextuelle;
-window.initialiserAideContextuelle = initialiserPopup;
-window.afficherBulleDecouverte = afficherBulleDecouverte;
-
-window.glossaire = {
-    afficherTerme: afficherTermeGlossaire,
-    afficherDansConteneur: afficherDansConteneurGlossaire,
-    afficherMicroPopup: afficherMicroPopupGlossaire,
-    fermerMicroPopup: fermerMicroPopupGlossaire,
-    enrichirTermesGlossaire: enrichirTermesGlossaire,
-    listerTermesTries: listerTermesTries
-};
-
 window.demarrerTourGuide = demarrerTourGuide;
-window.relancerTourGuide = relancerTourGuide;
-window.quitterTourGuide = quitterTourGuide;
-window.terminerTour = terminerTour;
-window.demarrerGuidageConfiguration = demarrerTourGuide;   // Compat ancien wizard
-window.arreterGuidage = quitterTourGuide;
-window.etapeSuivante = avancerEtape;
-window.initialiserGuidage = initialiserTour;
-window.tourGuide = {
-    ETAPES_TOUR: ETAPES_TOUR,
-    afficherPanneauEtape: afficherPanneauEtape,
-    etapeCourante: tourEtapeCourante
-};
+
+// ---- API sémantiques conservées ---------------------------------------------
+// afficherAideContextuelle : API publique pour ouvrir une popup par clé.
+// definirTooltips : permet de toggler uniquement le mode hover (séparément
+// du toggle global accompagnement) via init-inline.js/checkbox-tooltips.
+window.afficherAideContextuelle = afficherAideContextuelle;
+window.definirTooltips = definirTooltips;
 
 // ============================================================================
 // INITIALISATION

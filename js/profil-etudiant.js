@@ -2489,9 +2489,9 @@ function changerSectionProfil(section) {
             reattacherEvenementsToggles();
         }
 
-        // Réinitialiser les tooltips pour les icônes ✴️ dynamiques
-        if (typeof initialiserPrimoTooltips === 'function') {
-            initialiserPrimoTooltips();
+        // Réinitialiser la visibilité des ✴️ dynamiques après re-render DOM
+        if (window.accompagnement && typeof window.accompagnement.initialiserPopup === 'function') {
+            window.accompagnement.initialiserPopup();
         }
 
         // Restaurer les préférences du rapport si on vient de charger cette section
@@ -3060,9 +3060,9 @@ function afficherProfilComplet(daOuEl) {
             reattacherEvenementsToggles();
         }
 
-        // Réinitialiser les tooltips pour les icônes ✴️ dynamiques
-        if (typeof initialiserPrimoTooltips === 'function') {
-            initialiserPrimoTooltips();
+        // Réinitialiser la visibilité des ✴️ dynamiques après re-render DOM
+        if (window.accompagnement && typeof window.accompagnement.initialiserPopup === 'function') {
+            window.accompagnement.initialiserPopup();
         }
 
         // Restaurer les préférences du rapport si on est sur cette section

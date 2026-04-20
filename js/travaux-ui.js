@@ -3205,8 +3205,8 @@
             if (typeof estAideContextuelleActive === 'function' && estAideContextuelleActive()
                 && !sessionStorage.getItem('travaux_bulle_annoter_vu')) {
                 setTimeout(function() {
-                    if (typeof afficherBulleDecouverte === 'function') {
-                        afficherBulleDecouverte({
+                    if (window.accompagnement && typeof window.accompagnement.afficherBulleDecouverte === 'function') {
+                        window.accompagnement.afficherBulleDecouverte({
                             cible: '#travaux-btn-annoter',
                             message: 'Clique ici pour activer les outils d\'annotation : stylo, surlignage, formes et autocollants.',
                             position: 'bas'

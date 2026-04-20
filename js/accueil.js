@@ -28,8 +28,8 @@ function afficherAccueil() {
 
     // L'accueil n'émet pas `sectionAffichee` (pas de sous-section) : une flèche
     // didactique d'une autre section pourrait persister à l'écran. On la masque.
-    if (window.flechesDidactiques && typeof window.flechesDidactiques.masquerActive === 'function') {
-        window.flechesDidactiques.masquerActive();
+    if (window.accompagnement && typeof window.accompagnement.masquerFleche === 'function') {
+        window.accompagnement.masquerFleche();
     }
 
     afficherAccueilContenu(conteneur);
@@ -103,7 +103,7 @@ function afficherAccueilContenu(conteneur) {
     // « Accompagnement » = ON uniquement si les 4 sous-systèmes sont actifs.
     const accChecked = accompagnementEstActif();
 
-    const heroTitre = 'Que souhaites-tu faire\u00a0?';
+    const heroTitre = 'Un espace de travail pour la pratique enseignante.';
     const banniereBienvenueHTML = genererBanniereBienvenue();
 
     conteneur.innerHTML = `
@@ -269,12 +269,8 @@ function entrerEnDemoHandler() {
  * Un seul état visible côté utilisateur — case cochée = les 4 actifs.
  */
 function toggleAccompagnementHandler(el) {
-    const actif = !!el.checked;
-    if (typeof definirTourGuide === 'function') definirTourGuide(actif);
-    if (typeof definirTooltips === 'function') definirTooltips(actif);
-    if (typeof definirAideContextuelle === 'function') definirAideContextuelle(actif);
-    if (window.flechesDidactiques && typeof window.flechesDidactiques.definirActif === 'function') {
-        window.flechesDidactiques.definirActif(actif);
+    if (window.accompagnement && typeof window.accompagnement.definirActif === 'function') {
+        window.accompagnement.definirActif(!!el.checked);
     }
 }
 
@@ -283,11 +279,7 @@ function toggleAccompagnementHandler(el) {
  * Sert à initialiser la case « Accompagnement » sur la page d'accueil.
  */
 function accompagnementEstActif() {
-    const tour = !!obtenirPreference('tourGuide');
-    const tooltips = obtenirPreference('tooltips') !== false;
-    const aide = obtenirPreference('aideContextuelle') !== false;
-    const fleches = !window.flechesDidactiques || window.flechesDidactiques.estActif();
-    return tour && tooltips && aide && fleches;
+    return !!(window.accompagnement && window.accompagnement.estActif());
 }
 
 /** Navigation accueil : section + sous-section avec délai */
