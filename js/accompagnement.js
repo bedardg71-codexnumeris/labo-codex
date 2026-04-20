@@ -22,14 +22,14 @@
  *   - Globals conservés pour le dispatcher data-action de main.js :
  *     masquerFlecheDidactique, fermerPopupPrimo, fermerAideContextuelle,
  *     demarrerTourGuide.
- *   - API sémantiques : window.afficherAideContextuelle (ouverture par clé)
- *     et window.definirTooltips (toggle individuel du mode hover).
+ *   - API sémantique : window.afficherAideContextuelle (ouverture par clé).
  *   - Toute autre API passe par window.accompagnement.*
  *   - Les flags localStorage fleche-vue__* sont migrés vers accompagnement-vu__*
- *     au premier chargement, idempotent (flag accompagnement-migration-v1).
- *   - Préférence unifiée window.accompagnement.estActif() lit l'AND des 4
- *     anciennes (tooltips, aideContextuelleActive, flechesDidactiquesActives
- *     localStorage, tourGuide) ; definirActif(bool) écrit les 4.
+ *     au premier chargement (flag accompagnement-migration-v1).
+ *   - Les 4 anciennes prefs (tooltips, aideContextuelle, tourGuide,
+ *     flechesDidactiquesActives) sont consolidées dans `accompagnementActif`
+ *     (flag accompagnement-pref-migration-v2). La valeur migrée reprend la
+ *     formule historique : true ssi les 4 étaient actifs.
  *
  * Plan : plans de travail/PLAN-INFOBULLES-UNIFIEES.md
  */
@@ -43,7 +43,7 @@
 const CLE_VUE_PREFIXE = 'accompagnement-vu__';
 const CLE_VUE_ANCIEN_PREFIXE = 'fleche-vue__';
 const CLE_MIGRATION = 'accompagnement-migration-v1';
-const CLE_TOGGLE_FLECHES = 'flechesDidactiquesActives';
+const CLE_MIGRATION_PREF = 'accompagnement-pref-migration-v2';
 
 // ---- Catalogue unifié (Phase 2+) --------------------------------------------
 // Une entrée par concept pédagogique. Chaque entrée peut porter plusieurs modes :
@@ -131,6 +131,36 @@ function migrerPersistance() {
     }
 }
 
+// Migration idempotente des 4 anciennes prefs (tooltips, aideContextuelle,
+// tourGuide, flechesDidactiquesActives localStorage) vers la pref unique
+// accompagnementActif. Ne s'exécute qu'une seule fois par utilisateur.
+function migrerPrefAccompagnement() {
+    try {
+        if (lireFlag(CLE_MIGRATION_PREF)) return;
+        const raw = localStorage.getItem('preferencesUtilisateur');
+        if (!raw) {
+            // Pas de prefs existantes = nouvel utilisateur. Default true via DEFAUTS.
+            ecrireFlag(CLE_MIGRATION_PREF, true);
+            return;
+        }
+        const stored = JSON.parse(raw);
+        if (!('accompagnementActif' in stored)) {
+            // Reprend la formule de l'ancien accompagnementEstActif d'accueil.js :
+            // l'accompagnement était actif uniquement si les 4 sous-systèmes l'étaient.
+            const tour = !!stored.tourGuide;
+            const tooltips = stored.tooltips !== false;
+            const aide = stored.aideContextuelle !== false;
+            let fleches = true;
+            try { fleches = localStorage.getItem('flechesDidactiquesActives') !== '0'; } catch (e) {}
+            stored.accompagnementActif = tour && tooltips && aide && fleches;
+            localStorage.setItem('preferencesUtilisateur', JSON.stringify(stored));
+        }
+        ecrireFlag(CLE_MIGRATION_PREF, true);
+    } catch (e) {
+        console.warn('[Accompagnement] migration pref v2 ignorée :', e.message || e);
+    }
+}
+
 // ---- Préférence unifiée -----------------------------------------------------
 
 function lirePref(cle, defaut) {
@@ -151,28 +181,30 @@ function ecrirePref(cle, valeur) {
     } catch (e) { /* ignore */ }
 }
 
-function prefTooltipsActive()  { return lirePref('tooltips', true) !== false; }
-function prefAideActive()      { return lirePref('aideContextuelleActive', true) !== false; }
-function prefTourActif()       { return !!lirePref('tourGuide', false); }
-function prefFlechesActives()  {
-    try { return localStorage.getItem(CLE_TOGGLE_FLECHES) !== '0'; } catch (e) { return true; }
-}
-
+// Préférence unique depuis le 20 avril 2026. Les 4 sous-systèmes (tooltips
+// hover, aide popup, flèches autoReveal, tour guidé) partagent cette pref.
 function estAccompagnementActif() {
-    // AND des 4 anciennes prefs (Phase 1 transition). Phase 6 → pref unique.
-    return prefTooltipsActive() && prefAideActive() && prefFlechesActives() && prefTourActif();
+    return lirePref('accompagnementActif', true) !== false;
 }
 
 function definirAccompagnementActif(actif) {
     const bool = !!actif;
-    ecrirePref('tooltips', bool);
-    ecrirePref('aideContextuelleActive', bool);
-    ecrirePref('tourGuide', bool);
-    try { localStorage.setItem(CLE_TOGGLE_FLECHES, bool ? '1' : '0'); } catch (e) { /* quota */ }
+    ecrirePref('accompagnementActif', bool);
+    // Classes body qui contrôlent la visibilité CSS des .btn-aide-contextuelle
+    // et .primo-aide (voir accompagnement.css).
+    document.body.classList.toggle('tour-guide-actif', bool);
+    document.body.classList.toggle('aide-contextuelle-active', bool);
     if (!bool) masquerTout();
-    // Synchroniser les checkboxes miroirs
-    document.querySelectorAll('#checkbox-tooltips, #checkbox-tooltips-accueil').forEach(cb => cb.checked = bool);
+    // Notifier les modules qui écoutent (primo visibility, etc.)
+    window.dispatchEvent(new Event('modeChanged'));
 }
+
+// Accès granulaire conservé comme alias (tous retournent l'état unifié).
+// Simplifie la conversion des call sites existants sans diff inutile.
+function prefTooltipsActive() { return estAccompagnementActif(); }
+function prefAideActive()     { return estAccompagnementActif(); }
+function prefTourActif()      { return estAccompagnementActif(); }
+function prefFlechesActives() { return estAccompagnementActif(); }
 
 // ---- Positionnement partagé (4 directions + clamp viewport) -----------------
 
@@ -438,12 +470,6 @@ function initialiserHover() {
     document.querySelectorAll('#checkbox-tooltips, #checkbox-tooltips-accueil').forEach(cb => cb.checked = actif);
 }
 
-function definirTooltips(etat) {
-    const bool = !!etat;
-    if (!bool) masquerHover();
-    document.querySelectorAll('#checkbox-tooltips, #checkbox-tooltips-accueil').forEach(cb => cb.checked = bool);
-    ecrirePref('tooltips', bool);
-}
 
 // ============================================================================
 // MODE AUTO-REVEAL — flèche-pointeur sur sectionAffichee (ex-fleches-didactiques.js)
@@ -607,12 +633,6 @@ function afficherAutoReveal(id, optionsExterne) {
             h.classList.add('visible');
         });
     }, AUTO_DELAI_STABILISATION);
-}
-
-function definirFlechesActives(actif) {
-    const bool = !!actif;
-    try { localStorage.setItem(CLE_TOGGLE_FLECHES, bool ? '1' : '0'); } catch (e) { /* quota */ }
-    if (!bool) masquerAutoReveal();
 }
 
 let _autoRevealInitialise = false;
@@ -1203,10 +1223,9 @@ function demarrerTourGuide() {
     tourMarquerComplete(false);
     ecrirePref('tourGuide_etapes_vues', []);
 
-    // Activer les couches complémentaires
-    if (typeof definirTourGuide === 'function') definirTourGuide(true);
-    definirTooltips(true);
-    if (typeof definirAideContextuelle === 'function') definirAideContextuelle(true);
+    // S'assurer que l'accompagnement est actif (sinon tooltips, popups et
+    // flèches resteront invisibles pendant le tour)
+    definirAccompagnementActif(true);
 
     afficherPanneauEtape(ETAPES_TOUR[0]);
 }
@@ -1589,12 +1608,9 @@ window.fermerPopupPrimo = fermerPopupPrimo;
 window.fermerAideContextuelle = fermerAideContextuelle;
 window.demarrerTourGuide = demarrerTourGuide;
 
-// ---- API sémantiques conservées ---------------------------------------------
+// ---- API sémantique conservée -----------------------------------------------
 // afficherAideContextuelle : API publique pour ouvrir une popup par clé.
-// definirTooltips : permet de toggler uniquement le mode hover (séparément
-// du toggle global accompagnement) via init-inline.js/checkbox-tooltips.
 window.afficherAideContextuelle = afficherAideContextuelle;
-window.definirTooltips = definirTooltips;
 
 // ============================================================================
 // INITIALISATION
@@ -1602,6 +1618,13 @@ window.definirTooltips = definirTooltips;
 
 function initialiserTout() {
     migrerPersistance();
+    migrerPrefAccompagnement();
+    // Synchroniser les body classes au démarrage pour refléter la pref
+    // (utilisées par CSS pour la visibilité des .btn-aide-contextuelle et
+    // .primo-aide).
+    const actif = estAccompagnementActif();
+    document.body.classList.toggle('tour-guide-actif', actif);
+    document.body.classList.toggle('aide-contextuelle-active', actif);
     initialiserHover();
     initialiserAutoReveal();
     initialiserPopup();

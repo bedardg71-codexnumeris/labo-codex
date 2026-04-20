@@ -100,12 +100,6 @@ function definirThemeFromRadio(el) {
 function definirModeExpertFromEl(el) {
     definirModeExpert(el.checked);
 }
-function definirTooltipsFromEl(el) {
-    definirTooltips(el.checked);
-}
-function definirAideContextuelleFromEl(el) {
-    definirAideContextuelle(el.checked);
-}
 
 // Parcours : inline avait if(window.parcours) window.parcours.changerModeParcours(this.value)
 function changerModeParcoursDelegue(el) {
@@ -130,7 +124,7 @@ function changerModeParcoursDelegue(el) {
 // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
 // Les valeurs ici servent de fallback si version.json n'est pas disponible
 let VERSION_MAJEURE = '99.20';
-let BUILD_ID = '0420-1805';
+let BUILD_ID = '0420-1830';
 // Snapshot du build contenu dans CE fichier script (pour détecter les scripts périmés)
 const _SCRIPT_BUILD = BUILD_ID;
 
