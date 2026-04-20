@@ -1255,7 +1255,21 @@ let _glossaireInitialise = false;
 let _glossaireRenduAideFait = false;
 
 function glossaireDict() {
-    return (typeof window !== 'undefined' && window.GLOSSAIRE) || {};
+    // Phase 5 : vue { cle: termeEntry } construite depuis CATALOGUE_ACCOMPAGNEMENT
+    // (entrées publiées sous clés `terme-<cle>` par glossaire-data.js).
+    // Fallback sur window.GLOSSAIRE pour rétro-compat pendant la migration async
+    // et pour tout code tiers qui alimenterait GLOSSAIRE directement.
+    const dict = {};
+    for (const k in CATALOGUE_ACCOMPAGNEMENT) {
+        const t = CATALOGUE_ACCOMPAGNEMENT[k].terme;
+        if (t && t.cle) dict[t.cle] = t;
+    }
+    if (typeof window !== 'undefined' && window.GLOSSAIRE) {
+        for (const k in window.GLOSSAIRE) {
+            if (!dict[k]) dict[k] = window.GLOSSAIRE[k];
+        }
+    }
+    return dict;
 }
 
 function resumeDefinition(definition) {

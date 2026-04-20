@@ -445,6 +445,26 @@ const GLOSSAIRE = {
 
 };
 
+// Rétro-compat : window.GLOSSAIRE reste lisible. Sera retiré en Phase 6.
 window.GLOSSAIRE = GLOSSAIRE;
+
+// Phase 5 : migration vers le catalogue unifié de js/accompagnement.js
+// Chaque terme { cle, terme, categorie, etape, definition, voir } devient
+// une entrée { terme: {...} } dans CATALOGUE_ACCOMPAGNEMENT sous la clé
+// `terme-<cle-glossaire>` pour éviter tout conflit avec d'autres modes.
+function _migrerGlossaireVersAccompagnement() {
+    if (!window.accompagnement || typeof window.accompagnement.ajouterEntrees !== 'function') {
+        setTimeout(_migrerGlossaireVersAccompagnement, 50);
+        return;
+    }
+    const entrees = {};
+    for (const cle in GLOSSAIRE) {
+        if (Object.prototype.hasOwnProperty.call(GLOSSAIRE, cle)) {
+            entrees['terme-' + cle] = { terme: GLOSSAIRE[cle] };
+        }
+    }
+    window.accompagnement.ajouterEntrees(entrees);
+}
+_migrerGlossaireVersAccompagnement();
 
 })();
