@@ -407,12 +407,16 @@ async function nettoyerResiduDemo() {
 
     console.warn('[Demo] Résidus de démo détectés au démarrage, nettoyage...');
 
+    // Désactiver le flag SYNCHRONIQUEMENT avant tout await. Sans ça,
+    // initialiserModuleDonneesDemo (appelé en parallèle) lit demo-actif=true
+    // et ré-affiche le bandeau alors que la démo est en cours de nettoyage.
+    // Le bandeau reste donc visible après refresh même si la démo est terminée.
+    db.setSync('demo-actif', null);
+    if (typeof afficherBandeauDemo === 'function') afficherBandeauDemo(false);
+
     try {
         // Décharger les données
         await dechargerDonneesDemo();
-
-        // Désactiver le flag
-        db.setSync('demo-actif', null);
 
         // Restaurer l'état précédent si disponible
         await restaurerEtatApresDemo();
@@ -421,8 +425,6 @@ async function nettoyerResiduDemo() {
 
     } catch (error) {
         console.error('[Demo] Erreur nettoyage résidus:', error);
-        // Forcer le flag off même en cas d'erreur
-        db.setSync('demo-actif', null);
         db.removeSync('demo-etat-precedent');
         return true;
     }
