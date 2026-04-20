@@ -15923,18 +15923,16 @@
     <script src="js/etats-vides.js?v=2026041901"></script>
     <script src="js/transitions.js?v=2026041901"></script>
 
-    <!-- Catalogues de contenu d'accompagnement (données, lus par accompagnement.js) -->
-    <script src="js/tooltips-contenu.js?v=2026021401"></script>
-    <script src="js/aide-contextuelle-contenu.js?v=2026011901"></script>
-    <script src="js/glossaire-data.js?v=2026041901"></script>
-
-    <!-- SYSTÈME D'ACCOMPAGNEMENT UNIFIÉ (Beta 99.20, Phase 1) —
-         Fusionne tooltips, flèches, popups primo/aide, tour guidé, glossaire
-         en un seul moteur. Remplace : primo-tooltips.js, aide-contextuelle.js,
-         guidage.js, tooltips.js, fleches-didactiques.js, glossaire.js.
-         Les 3 fichiers de contenu ci-dessus restent lus tels quels en Phase 1. -->
-    <link rel="stylesheet" href="css/accompagnement.css?v=2026042001">
-    <script src="js/accompagnement.js?v=2026042001"></script>
+    <!-- SYSTÈME D'ACCOMPAGNEMENT UNIFIÉ (Beta 99.20) —
+         Un seul moteur pour hover, flèches didactiques, popups aide contextuelle,
+         tour guidé et glossaire. API publique : window.accompagnement. -->
+    <link rel="stylesheet" href="css/accompagnement.css?v=2026042002">
+    <script src="js/accompagnement.js?v=2026042002"></script>
+    <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
+         chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
+    <script src="js/accompagnement-contenu-hover.js?v=2026042002"></script>
+    <script src="js/accompagnement-contenu-popup.js?v=2026042002"></script>
+    <script src="js/accompagnement-contenu-terme.js?v=2026042002"></script>
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js?v=2026032600"></script>

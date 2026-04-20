@@ -9,10 +9,15 @@
  *   - guidage.js                 (mode tour)
  *   - glossaire.js               (mode terme)
  *
- * Phase 1 — compatible drop-in :
+ * Catalogue central CATALOGUE_ACCOMPAGNEMENT peuplé par 3 fichiers de contenu
+ * chargés après ce moteur :
+ *   - js/accompagnement-contenu-hover.js   (~283 entrées mode hover)
+ *   - js/accompagnement-contenu-popup.js   (~40 entrées mode popup)
+ *   - js/accompagnement-contenu-terme.js   (48 entrées mode terme)
+ * Les entrées mode autoReveal et tour sont déclarées directement ici.
+ *
+ * Rétrocompatibilité :
  *   - Les attributs HTML existants (~220 usages) fonctionnent sans modification.
- *   - Les 4 catalogues existants (window.TOOLTIPS, window.AIDE_CONTEXTUELLE,
- *     window.GLOSSAIRE, ETAPES_TOUR interne) sont lus tels quels.
  *   - Les alias window.tooltips, window.flechesDidactiques, window.glossaire,
  *     window.afficherAideContextuelle, etc. restent exportés.
  *   - Les flags localStorage fleche-vue__* sont migrés vers accompagnement-vu__*
@@ -289,11 +294,8 @@ function afficherHover(cible) {
     const cle = cible.dataset.tooltip;
     if (!cle) return;
 
-    // Phase 2 : lire depuis le catalogue unifié, fallback sur window.TOOLTIPS
-    // (rétro-compat le temps que tooltips-contenu.js termine sa migration async).
     const entree = CATALOGUE_ACCOMPAGNEMENT[cle];
-    let texte = entree && entree.hover;
-    if (!texte && window.TOOLTIPS) texte = window.TOOLTIPS[cle];
+    const texte = entree && entree.hover;
     if (!texte) return;
 
     const bulle = hoverObtenirBulle();
@@ -687,14 +689,9 @@ function rendreSectionAide(section) {
     }
 }
 
-// Helper : obtenir la config popup d'une entrée (fallback sur window.AIDE_CONTEXTUELLE
-// pour rétro-compat le temps que la migration async de aide-contextuelle-contenu.js
-// se complète).
 function obtenirPopup(cle) {
     const entree = CATALOGUE_ACCOMPAGNEMENT[cle];
-    if (entree && entree.popup) return entree.popup;
-    if (window.AIDE_CONTEXTUELLE && window.AIDE_CONTEXTUELLE[cle]) return window.AIDE_CONTEXTUELLE[cle];
-    return null;
+    return (entree && entree.popup) || null;
 }
 
 function rendreContenuAide(aide) {
@@ -1255,19 +1252,12 @@ let _glossaireInitialise = false;
 let _glossaireRenduAideFait = false;
 
 function glossaireDict() {
-    // Phase 5 : vue { cle: termeEntry } construite depuis CATALOGUE_ACCOMPAGNEMENT
-    // (entrées publiées sous clés `terme-<cle>` par glossaire-data.js).
-    // Fallback sur window.GLOSSAIRE pour rétro-compat pendant la migration async
-    // et pour tout code tiers qui alimenterait GLOSSAIRE directement.
+    // Vue { cle: termeEntry } construite depuis CATALOGUE_ACCOMPAGNEMENT
+    // (entrées publiées sous clés `terme-<cle>` par accompagnement-contenu-terme.js).
     const dict = {};
     for (const k in CATALOGUE_ACCOMPAGNEMENT) {
         const t = CATALOGUE_ACCOMPAGNEMENT[k].terme;
         if (t && t.cle) dict[t.cle] = t;
-    }
-    if (typeof window !== 'undefined' && window.GLOSSAIRE) {
-        for (const k in window.GLOSSAIRE) {
-            if (!dict[k]) dict[k] = window.GLOSSAIRE[k];
-        }
     }
     return dict;
 }
