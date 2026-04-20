@@ -836,7 +836,7 @@ h1, h2, h3, h4 {
     /* Gradient 4 stops — fidèle à la maquette Ocean & Boussole */
     background: linear-gradient(135deg, #0a1820 0%, #142a38 40%, #1a3848 70%, #0e2028 100%);
     color: white;
-    padding: 36px 30px 20px;
+    padding: 18px 30px 10px;
     position: relative;
     z-index: 200;
     /* Pas de border-radius pour continuité visuelle avec la navigation */
@@ -848,7 +848,7 @@ h1, h2, h3, h4 {
 .entete-conteneur {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 8px;
 }
 
 /* === LIGNE 1 : Logo + Titre + Version + Boutons === */
@@ -859,8 +859,8 @@ h1, h2, h3, h4 {
     gap: 20px;
     justify-content: space-between;
     position: relative;
-    min-height: 48px;
-    padding-bottom: 12px;
+    min-height: 64px;
+    padding-bottom: 8px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
@@ -911,7 +911,7 @@ h1, h2, h3, h4 {
 }
 
 .titre-section h1 {
-    font-size: 1.6rem;
+    font-size: 2rem;
     font-weight: bold;
     margin: 0;
     letter-spacing: 0px;
@@ -919,19 +919,27 @@ h1, h2, h3, h4 {
     white-space: nowrap;
 }
 
-.titre-section .sous-titre-entete {
-    font-size: 0.95rem;
-    font-weight: 300;
-    color: rgba(255, 255, 255, 0.75);
-    margin: 0;
-    white-space: nowrap;
-}
-
 .titre-section .meta {
     font-size: 0.75rem;
     color: var(--bleu-meta);
-    margin: 0;
+    margin: 4px 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.titre-section .meta > .meta-version,
+.titre-section .meta > .meta-date {
     white-space: nowrap;
+}
+
+/* Boutons utilitaires alignés à droite de la ligne 2 (sous Bug/Mode) */
+.entete-ligne2-droite {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1013,36 +1021,7 @@ h1, h2, h3, h4 {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 8px 0;
-}
-
-.info-contextuelles-centre {
-    flex: 1;
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.90);
-    text-align: center;
-    line-height: 1.4;
-    overflow: visible;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-}
-
-.info-contexte-ligne {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    white-space: nowrap;
-}
-
-.info-contexte-item {
-    white-space: nowrap;
-    color: rgba(255, 255, 255, 0.90);
-    font-size: inherit;
-    font-weight: normal;
-    line-height: inherit;
+    padding: 2px 0;
 }
 
 .separateur-contexte {
@@ -1094,8 +1073,9 @@ h1, h2, h3, h4 {
     padding-right: 20px;
 }
 
-/* Bouton signaler un bug (droite) */
-.entete-controles-droite .btn-action-header {
+/* Boutons utilitaires de l'en-tête (Bug, Mode, Aide, Réglages) */
+.entete-controles-droite .btn-action-header,
+.entete-ligne2-droite .btn-action-header {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1114,7 +1094,8 @@ h1, h2, h3, h4 {
     white-space: nowrap;
 }
 
-.entete-controles-droite .btn-action-header:hover {
+.entete-controles-droite .btn-action-header:hover,
+.entete-ligne2-droite .btn-action-header:hover {
     background: rgba(255, 255, 255, 0.18);
     border-color: rgba(255, 255, 255, 0.3);
     transform: translateY(-1px);
@@ -1177,10 +1158,6 @@ h1, h2, h3, h4 {
         font-size: 1.2rem;
     }
 
-    .titre-section .sous-titre-entete {
-        font-size: 0.8rem;
-    }
-
     .titre-section .meta {
         font-size: 0.65rem;
     }
@@ -1222,11 +1199,6 @@ h1, h2, h3, h4 {
         white-space: normal;
     }
 
-    .titre-section .sous-titre-entete {
-        font-size: 0.75rem;
-        white-space: normal;
-    }
-
     .titre-section .meta {
         white-space: normal;
     }
@@ -1241,12 +1213,6 @@ h1, h2, h3, h4 {
     }
     .entete-controles-droite {
         justify-content: center;
-    }
-
-    .info-contextuelles-centre {
-        flex-direction: column;
-        gap: 5px;
-        text-align: center;
     }
 
     .separateur-contexte {
@@ -1321,7 +1287,7 @@ h1, h2, h3, h4 {
 
 .bandeau-groupe-cours {
     background: transparent;
-    padding: 10px 20px;
+    padding: 4px 20px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1383,7 +1349,7 @@ h1, h2, h3, h4 {
 
 .navigation-principale {
     background: transparent;
-    padding: 0 20px 15px 20px;
+    padding: 24px 20px 15px 20px;
     display: flex;
     justify-content: center;
     gap: 10px;
@@ -19859,14 +19825,6 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 
 .mode-clair .titre-section .meta {
     color: var(--bleu-meta);
-}
-
-.mode-clair .info-contextuelles-centre {
-    color: rgba(255, 255, 255, 0.90);
-}
-
-.mode-clair .info-contexte-item {
-    color: rgba(255, 255, 255, 0.90);
 }
 
 .mode-clair .logo-meta {

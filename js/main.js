@@ -270,90 +270,46 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // ===============================
-    // 1. GÉNÉRATION DYNAMIQUE DES BULLES D'APPRENTISSAGE
+    // 1. GÉNÉRATION DYNAMIQUE DES BULLES — VORTEX (Beta 99.19+)
+    // Rotation rigide autour d'un axe horizontal commun (top:50 %),
+    // dérive horizontale lente, densité dilatée, opacité réduite.
     // ===============================
 
-    // BETA 96.2: Durées selon taille pour effet parallaxe
-    // Grande = proche = rapide, Petite = loin = lente
-    const dureesParTaille = {
-        grande: [30, 35, 40, 45, 50],      // Rapide (proche de l'observateur)
-        moyenne: [55, 60, 65, 70, 75],     // Normal (distance moyenne)
-        petite: [80, 90, 100, 110, 120]    // Lent (loin de l'observateur)
-    };
+    const NB_BULLES_VORTEX = 18;
+    const DUREE_VORTEX = 12;   // secondes — même vitesse angulaire pour toutes
+    const DUREE_DERIVE = 75;   // secondes — dérive horizontale
 
     function creerUneBulle(tailles) {
-        // BETA 97.1: Structure imbriquée pour mouvement hélicoïdal
-        // Enveloppe = dérive horizontale (floatUp)
-        // Bulle intérieure = spin vertical + scale (bulle-helice)
-        const trajectoire = document.createElement('div');
         const taille = tailles[Math.floor(Math.random() * tailles.length)];
+        const trajectoire = document.createElement('div');
         trajectoire.className = `bulle-trajectoire ${taille}`;
 
-        // Bulle intérieure (apparence + spin hélicoïdal)
         const bulle = document.createElement('div');
         bulle.className = 'bulle';
-        // Délai négatif = chaque bulle démarre à une phase différente du spin
-        bulle.style.setProperty('--spin-delay', `-${(Math.random() * 7).toFixed(1)}s`);
         trajectoire.appendChild(bulle);
 
-        // Position de départ randomisée - PARTOUT sur l'écran
-        const left = `${Math.random() * 100}%`;
-        const bottom = `${Math.random() * 100}%`;
+        // Rayon (amplitude Y) aléatoire : près de l'axe ou loin
+        const amp = 8 + Math.random() * 52;              // 8 à 60 px
+        // Scale proportionnel au rayon — loin = plus de profondeur 3D
+        const scaleVar = 0.03 + (amp - 8) / 52 * 0.15;   // 3 % à 18 %
+        const scaleUp = (1 + scaleVar).toFixed(3);
+        const scaleDown = (1 - scaleVar).toFixed(3);
 
-        // Variables CSS pour trajectoire unique
-        const startX = `${(Math.random() - 0.5) * 60}px`;
-        const startY = `${(Math.random() - 0.5) * 60}px`;
-
-        // Pente subtile de l'axe hélicoïdal (le spin fournit le mouvement vertical)
-        const directionY = Math.random() < 0.5 ? -1 : 1;
-        const amplitudeY = 5 + Math.random() * 15; // 5-20px sur toute la traversée
-        const driftY = `${directionY * amplitudeY}px`;
-
-        // BETA 96.2: Durée selon la taille (effet parallaxe)
-        const dureesTaille = dureesParTaille[taille] || dureesParTaille.moyenne;
-        const duree = dureesTaille[Math.floor(Math.random() * dureesTaille.length)];
+        // Phase aléatoire sur le cycle complet du vortex
+        const spinDelay = (-Math.random() * DUREE_VORTEX).toFixed(2);
+        // Offset X biaisé négatif : les bulles entrent depuis juste hors-champ à
+        // gauche, de sorte que le fade-in a lieu au niveau du bouton Codex.
+        const startX = `${(-20 - Math.random() * 60).toFixed(1)}px`;
 
         trajectoire.style.cssText = `
-            left: ${left};
-            bottom: ${bottom};
             --start-x: ${startX};
-            --start-y: ${startY};
-            --drift-y: ${driftY};
-            animation-duration: ${duree}s;
-            animation-delay: 0s;
+            --spin-amp: ${amp.toFixed(1)}px;
+            --spin-duration: ${DUREE_VORTEX}s;
+            --scale-up: ${scaleUp};
+            --scale-down: ${scaleDown};
+            --spin-delay: ${spinDelay}s;
+            --drift-duration: ${DUREE_DERIVE}s;
         `;
-
-        // Régénérer à chaque itération de la dérive (ignorer les événements du spin)
-        trajectoire.addEventListener('animationiteration', function(event) {
-            if (event.animationName !== 'floatUp') return;
-
-            const newLeft = `${Math.random() * 100}%`;
-            const newBottom = `${Math.random() * 100}%`;
-            const newStartX = `${(Math.random() - 0.5) * 60}px`;
-            const newStartY = `${(Math.random() - 0.5) * 60}px`;
-            const newDirectionY = Math.random() < 0.5 ? -1 : 1;
-            const newAmplitudeY = 5 + Math.random() * 15;
-            const newDriftY = `${newDirectionY * newAmplitudeY}px`;
-
-            const tailleBulle = this.classList.contains('grande') ? 'grande' :
-                               this.classList.contains('petite') ? 'petite' : 'moyenne';
-            const dureesTaille = dureesParTaille[tailleBulle];
-            const newDuree = dureesTaille[Math.floor(Math.random() * dureesTaille.length)];
-
-            // Forcer la réinitialisation de l'animation pour avoir le fade in
-            this.style.animation = 'none';
-            this.offsetHeight; // Force reflow
-
-            this.style.left = newLeft;
-            this.style.bottom = newBottom;
-            this.style.setProperty('--start-x', newStartX);
-            this.style.setProperty('--start-y', newStartY);
-            this.style.setProperty('--drift-y', newDriftY);
-            this.style.animation = `floatUp ${newDuree}s infinite linear`;
-
-            // Désynchroniser le spin pour le prochain cycle
-            this.querySelector('.bulle').style.setProperty('--spin-delay', `-${(Math.random() * 7).toFixed(1)}s`);
-        });
 
         return trajectoire;
     }
@@ -362,29 +318,16 @@ document.addEventListener('DOMContentLoaded', function () {
         const container = document.getElementById('bulles-container');
         if (!container) return;
 
-        // Récupérer le nombre d'étudiants (groupeEtudiants est la clé correcte)
-        // ✅ NAMESPACING (Beta 95.5)
-        const listeEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
-        const nbEtudiants = listeEtudiants.length || 10; // Par défaut 10 si pas d'étudiants
-
-
-        // BETA 96.2: Toutes les bulles blanches, tailles variées pour effet parallaxe
+        container.innerHTML = '';
         const tailles = ['petite', 'moyenne', 'grande'];
 
-        // Générer les bulles - toutes présentes dès le début
-        for (let i = 0; i < nbEtudiants; i++) {
+        for (let i = 0; i < NB_BULLES_VORTEX; i++) {
             const bulle = creerUneBulle(tailles);
-
-            // Délai négatif pour que les bulles commencent à différents points de leur parcours
-            // Si durée = 30s et 30 étudiants, chaque bulle commence à -1s, -2s, -3s...
-            // Cela les place à des positions différentes dans leur animation
-            const dureeAnimation = parseFloat(bulle.style.animationDuration);
-            const delaiNegatif = -(i / nbEtudiants) * dureeAnimation;
-            bulle.style.animationDelay = `${delaiNegatif}s`;
-
+            // Délai distribué sur tout le cycle de dérive → bulles espacées horizontalement
+            const delai = (-Math.random() * DUREE_DERIVE).toFixed(2);
+            bulle.style.animationDelay = `${delai}s`;
             container.appendChild(bulle);
         }
-
     }
 
     // Générer les bulles au chargement
