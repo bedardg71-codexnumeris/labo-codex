@@ -687,6 +687,16 @@ function rendreSectionAide(section) {
     }
 }
 
+// Helper : obtenir la config popup d'une entrée (fallback sur window.AIDE_CONTEXTUELLE
+// pour rétro-compat le temps que la migration async de aide-contextuelle-contenu.js
+// se complète).
+function obtenirPopup(cle) {
+    const entree = CATALOGUE_ACCOMPAGNEMENT[cle];
+    if (entree && entree.popup) return entree.popup;
+    if (window.AIDE_CONTEXTUELLE && window.AIDE_CONTEXTUELLE[cle]) return window.AIDE_CONTEXTUELLE[cle];
+    return null;
+}
+
 function rendreContenuAide(aide) {
     if (!aide) return '<p>Contenu non disponible.</p>';
 
@@ -702,11 +712,12 @@ function rendreContenuAide(aide) {
     let voirAussiHTML = '';
     if (aide.voirAussi && aide.voirAussi.length > 0) {
         const liens = aide.voirAussi
-            .filter(cle => window.AIDE_CONTEXTUELLE && window.AIDE_CONTEXTUELLE[cle])
             .map(cle => {
-                const titreRef = window.AIDE_CONTEXTUELLE[cle].titre;
-                return `<button class="aide-lien-voir-aussi" data-aide="${cle}">${titreRef}</button>`;
+                const ref = obtenirPopup(cle);
+                if (!ref) return null;
+                return `<button class="aide-lien-voir-aussi" data-aide="${cle}">${ref.titre}</button>`;
             })
+            .filter(Boolean)
             .join('');
         if (liens) {
             voirAussiHTML = `<div class="aide-voir-aussi"><span class="aide-voir-aussi-label">Voir aussi :</span>${liens}</div>`;
@@ -717,11 +728,7 @@ function rendreContenuAide(aide) {
 }
 
 function afficherAideContextuelle(cleAide) {
-    if (!window.AIDE_CONTEXTUELLE) {
-        console.error('[Accompagnement/popup] AIDE_CONTEXTUELLE non chargé');
-        return;
-    }
-    const aide = window.AIDE_CONTEXTUELLE[cleAide];
+    const aide = obtenirPopup(cleAide);
     if (!aide) {
         console.warn(`[Accompagnement/popup] Aide non trouvée : ${cleAide}`);
         return;
