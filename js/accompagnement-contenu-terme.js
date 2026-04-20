@@ -1,10 +1,14 @@
 /**
- * glossaire-data.js
- * Glossaire contextuel de Labo Codex — 48 termes validés.
+ * accompagnement-contenu-terme.js
+ * Catalogue de contenu pour le mode `terme` (glossaire — 48 termes validés).
  * Source : docs/refonte-textes/glossaire-bloc6.md (19 avril 2026).
  *
- * Structure : window.GLOSSAIRE[cle] = { cle, terme, categorie, etape, definition, voir }
+ * Structure d'un terme : { cle, terme, categorie, etape, definition, voir }
  * Étapes : numerisation | croisement | observation | competence | transversal | interface
+ *
+ * Pousse les entrées dans CATALOGUE_ACCOMPAGNEMENT sous la clé
+ * `terme-<cle>` via window.accompagnement.ajouterEntrees(). DOIT être
+ * chargé APRÈS js/accompagnement.js.
  */
 (function() {
 'use strict';
@@ -445,26 +449,15 @@ const GLOSSAIRE = {
 
 };
 
-// Rétro-compat : window.GLOSSAIRE reste lisible. Sera retiré en Phase 6.
-window.GLOSSAIRE = GLOSSAIRE;
-
-// Phase 5 : migration vers le catalogue unifié de js/accompagnement.js
 // Chaque terme { cle, terme, categorie, etape, definition, voir } devient
 // une entrée { terme: {...} } dans CATALOGUE_ACCOMPAGNEMENT sous la clé
-// `terme-<cle-glossaire>` pour éviter tout conflit avec d'autres modes.
-function _migrerGlossaireVersAccompagnement() {
-    if (!window.accompagnement || typeof window.accompagnement.ajouterEntrees !== 'function') {
-        setTimeout(_migrerGlossaireVersAccompagnement, 50);
-        return;
+// `terme-<cle>` pour éviter tout conflit avec d'autres modes.
+const entrees = {};
+for (const cle in GLOSSAIRE) {
+    if (Object.prototype.hasOwnProperty.call(GLOSSAIRE, cle)) {
+        entrees['terme-' + cle] = { terme: GLOSSAIRE[cle] };
     }
-    const entrees = {};
-    for (const cle in GLOSSAIRE) {
-        if (Object.prototype.hasOwnProperty.call(GLOSSAIRE, cle)) {
-            entrees['terme-' + cle] = { terme: GLOSSAIRE[cle] };
-        }
-    }
-    window.accompagnement.ajouterEntrees(entrees);
 }
-_migrerGlossaireVersAccompagnement();
+window.accompagnement.ajouterEntrees(entrees);
 
 })();

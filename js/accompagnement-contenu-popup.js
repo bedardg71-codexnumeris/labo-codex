@@ -1,6 +1,6 @@
 /**
- * aide-contextuelle-contenu.js
- * Contenu des aides contextuelles (✴️ pins d'aide)
+ * accompagnement-contenu-popup.js
+ * Catalogue de contenu pour le mode `popup` (modale riche ✴️).
  *
  * Types de sections supportés :
  * - texte : paragraphe simple
@@ -9,7 +9,11 @@
  * - exemple : encadré bleu avec exemple
  * - alerte : encadré orange avec avertissement (niveau: 'attention' | 'important')
  *
- * Note : Tutoiement systématique (cohérence avec Primo)
+ * Convention : tutoiement systématique.
+ *
+ * Pousse les ~40 entrées dans CATALOGUE_ACCOMPAGNEMENT via
+ * window.accompagnement.ajouterEntrees(). DOIT être chargé APRÈS
+ * js/accompagnement.js.
  */
 
 (function() {
@@ -929,27 +933,14 @@ const AIDE_CONTEXTUELLE = {
     }
 };
 
-// Rétro-compat : window.AIDE_CONTEXTUELLE reste lisible. Sera retiré en Phase 6.
-if (typeof window !== 'undefined') {
-    window.AIDE_CONTEXTUELLE = AIDE_CONTEXTUELLE;
-}
-
-// Phase 3 : migration vers le catalogue unifié de js/accompagnement.js
-// Chaque entrée { titre, sections, voirAussi } devient { popup: {...} }.
-// Retry async car l'ordre de chargement des <script> n'est pas garanti.
-function _migrerAideVersAccompagnement() {
-    if (!window.accompagnement || typeof window.accompagnement.ajouterEntrees !== 'function') {
-        setTimeout(_migrerAideVersAccompagnement, 50);
-        return;
+// Chaque entrée { titre, sections, voirAussi } devient { popup: {...} }
+// dans CATALOGUE_ACCOMPAGNEMENT.
+const entrees = {};
+for (const cle in AIDE_CONTEXTUELLE) {
+    if (Object.prototype.hasOwnProperty.call(AIDE_CONTEXTUELLE, cle)) {
+        entrees[cle] = { popup: AIDE_CONTEXTUELLE[cle] };
     }
-    const entrees = {};
-    for (const cle in AIDE_CONTEXTUELLE) {
-        if (Object.prototype.hasOwnProperty.call(AIDE_CONTEXTUELLE, cle)) {
-            entrees[cle] = { popup: AIDE_CONTEXTUELLE[cle] };
-        }
-    }
-    window.accompagnement.ajouterEntrees(entrees);
 }
-_migrerAideVersAccompagnement();
+window.accompagnement.ajouterEntrees(entrees);
 
 })();

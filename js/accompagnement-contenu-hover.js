@@ -1,8 +1,12 @@
 /**
- * tooltips-contenu.js
- * Base de contenu des info-bulles (hover/focus).
+ * accompagnement-contenu-hover.js
+ * Catalogue de contenu pour le mode `hover` (info-bulles au survol/long-press/focus).
  * Source : docs/refonte-textes/infobulles-T1-*.md à T11-*.md (validé 19 avril 2026).
  * Convention : tutoiement, guillemets français, apostrophes typographiques.
+ *
+ * Pousse les ~283 entrées dans CATALOGUE_ACCOMPAGNEMENT via
+ * window.accompagnement.ajouterEntrees(). DOIT être chargé APRÈS
+ * js/accompagnement.js.
  */
 (function() {
 'use strict';
@@ -787,28 +791,14 @@ const TOOLTIPS = {
 
 };
 
-// Rétro-compat : window.TOOLTIPS reste lisible pour tout code qui y accèderait
-// directement (les anciens moteurs, des modules tiers, etc.). En Phase 6 ce
-// global sera retiré.
-window.TOOLTIPS = TOOLTIPS;
-
-// Phase 2 : migration vers le catalogue unifié de js/accompagnement.js
 // Chaque entrée `cle: texte` devient `cle: { hover: texte }` dans
-// CATALOGUE_ACCOMPAGNEMENT. Async retry car accompagnement.js peut être
-// chargé après ce fichier selon l'ordre des <script> dans index.html.
-function _migrerVersAccompagnement() {
-    if (!window.accompagnement || typeof window.accompagnement.ajouterEntrees !== 'function') {
-        setTimeout(_migrerVersAccompagnement, 50);
-        return;
+// CATALOGUE_ACCOMPAGNEMENT.
+const entrees = {};
+for (const cle in TOOLTIPS) {
+    if (Object.prototype.hasOwnProperty.call(TOOLTIPS, cle)) {
+        entrees[cle] = { hover: TOOLTIPS[cle] };
     }
-    const entrees = {};
-    for (const cle in TOOLTIPS) {
-        if (Object.prototype.hasOwnProperty.call(TOOLTIPS, cle)) {
-            entrees[cle] = { hover: TOOLTIPS[cle] };
-        }
-    }
-    window.accompagnement.ajouterEntrees(entrees);
 }
-_migrerVersAccompagnement();
+window.accompagnement.ajouterEntrees(entrees);
 
 })();
