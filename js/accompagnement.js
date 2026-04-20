@@ -331,8 +331,11 @@ function afficherHover(cible) {
     const cle = cible.dataset.tooltip;
     if (!cle) return;
 
+    // Multi-trigger (§7.6 du plan) : si l'entrée n'a pas de `.hover` explicite
+    // mais a un `autoReveal.message`, on l'utilise en mode hover. Permet qu'une
+    // flèche didactique déjà dismiss reste consultable au long-press / survol.
     const entree = CATALOGUE_ACCOMPAGNEMENT[cle];
-    const texte = entree && entree.hover;
+    const texte = entree && (entree.hover || (entree.autoReveal && entree.autoReveal.message));
     if (!texte) return;
 
     const bulle = hoverObtenirBulle();
@@ -635,6 +638,24 @@ function afficherAutoReveal(id, optionsExterne) {
     }, AUTO_DELAI_STABILISATION);
 }
 
+// Tagge les cibles des autoReveal de la section courante avec data-tooltip
+// pour permettre le multi-trigger (§7.6) : même après dismiss de la flèche,
+// un hover / long-press sur la cible affichera la même aide en mode bulle
+// sobre. Léger délai pour laisser le DOM se stabiliser.
+function taggerCiblesAutoReveal(idSousSection) {
+    setTimeout(function() {
+        for (const id in CATALOGUE_ACCOMPAGNEMENT) {
+            const ar = CATALOGUE_ACCOMPAGNEMENT[id].autoReveal;
+            if (!ar || ar.sectionActive !== idSousSection || !ar.cibleSelector) continue;
+            let targets;
+            try { targets = document.querySelectorAll(ar.cibleSelector); } catch (e) { continue; }
+            targets.forEach(function(t) {
+                if (!t.dataset.tooltip) t.dataset.tooltip = id;
+            });
+        }
+    }, AUTO_DELAI_STABILISATION);
+}
+
 let _autoRevealInitialise = false;
 function initialiserAutoReveal() {
     if (_autoRevealInitialise) return;
@@ -644,6 +665,11 @@ function initialiserAutoReveal() {
         if (!idSousSection) return;
 
         if (autoFlecheActive) masquerAutoReveal();
+
+        // Multi-trigger : tagguer les cibles de cette section qu'une flèche
+        // soit vue ou non, pour que l'aide reste consultable au hover.
+        taggerCiblesAutoReveal(idSousSection);
+
         if (!prefFlechesActives()) return;
 
         let candidate = null;
