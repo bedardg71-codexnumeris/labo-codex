@@ -439,13 +439,15 @@ document.addEventListener('DOMContentLoaded', function () {
         initialiserModuleContexte();
     }
 
-    // MODULE DONNÉES DEMO: Initialisation + nettoyage résidus (Chantier 2)
-    if (typeof initialiserModuleDonneesDemo === 'function') {
-        initialiserModuleDonneesDemo();
-    }
-    // Filet de sécurité : nettoyer les résidus de démo si crash pendant la démo
+    // MODULE DONNÉES DEMO : le nettoyage des résidus doit s'exécuter AVANT
+    // l'init du module. nettoyerResiduDemo efface le flag demo-actif de
+    // manière synchrone ; sinon initialiserModuleDonneesDemo lirait le flag
+    // résiduel et ré-afficherait le bandeau démo après un refresh.
     if (typeof nettoyerResiduDemo === 'function') {
         nettoyerResiduDemo();
+    }
+    if (typeof initialiserModuleDonneesDemo === 'function') {
+        initialiserModuleDonneesDemo();
     }
 
     // MODULE ACCUEIL: Page d'accueil (Chantier 3)

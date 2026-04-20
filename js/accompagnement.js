@@ -1019,7 +1019,7 @@ const ETAPES_TOUR = [
     {
         id: 1,
         titre: 'R\u00e9glages',
-        texte: "C'est ici que tu poses les fondations\u00a0: ton trimestre (dates, cong\u00e9s), ton cours (comp\u00e9tence, \u00e9l\u00e9ments), ton groupe d'\u00e9tudiant\u00b7es et ton horaire. Ce sont les m\u00eames informations que dans ton plan de cours. Tu les saisis une fois et l'application g\u00e9n\u00e8re automatiquement le calendrier de tes s\u00e9ances.\n\nLes ic\u00f4nes \ud83d\udccd t'en disent plus sur chaque section. Quand ton groupe-cours est assembl\u00e9, tu es pr\u00eat\u00b7e pour la suite.",
+        texte: "C'est ici que tu poses les fondations\u00a0: ton trimestre (dates, cong\u00e9s), ton cours (comp\u00e9tence, \u00e9l\u00e9ments), ton groupe d'\u00e9tudiant\u00b7es et ton horaire. Ce sont les m\u00eames informations que dans ton plan de cours. Tu les saisis une fois et l'application g\u00e9n\u00e8re automatiquement le calendrier de tes s\u00e9ances.\n\nLes ic\u00f4nes \u2734\ufe0f t'en disent plus sur chaque section. Quand ton groupe-cours est assembl\u00e9, tu es pr\u00eat\u00b7e pour la suite.",
         actions: [
             { label: "J'ai compris",      type: 'primaire', action: 'avancerEtape' },
             { label: 'Passer cette \u00e9tape', type: 'secondaire', action: 'passerEtape' }
