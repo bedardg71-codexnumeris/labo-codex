@@ -11733,7 +11733,11 @@ tr.etudiant-inactif td {
     }
 }
 
-@media (max-width: 850px) {
+/* Breakpoint abaissé de 850 à 767 px (20 avril, audit terrain iPad) :
+   l'iPad Air en portrait fait 820 px de large, tombait dans ce @media et
+   empilait tout alors qu'il reste largement de la place pour 3 colonnes.
+   Stacking réservé aux téléphones en portrait (<768 px). */
+@media (max-width: 767px) {
     /* Empiler les colonnes Bornes/Semaines spéciales */
     #contexte-trimestre .grille-2col {
         grid-template-columns: 1fr;
@@ -11753,6 +11757,24 @@ tr.etudiant-inactif td {
     /* Grille identification : empiler sur mobile */
     #contexte-trimestre .grille-identification {
         grid-template-columns: 1fr;
+    }
+}
+
+/* iPad portrait (768–1024 px) : la disposition biblio+formulaire à 220px
+   + 1fr laisse un formulaire trop étroit (~560 px pour 3 colonnes
+   .grille-identification 2fr/1fr/1fr). Sur iPad on empile biblio puis
+   formulaire en pleine largeur pour récupérer tout l'espace horizontal. */
+@media (max-width: 1024px) {
+    #contexte-trimestre .disposition-bibliotheque-formulaire {
+        grid-template-columns: 1fr;
+    }
+
+    #contexte-trimestre .panneau-bibliotheque {
+        order: 1;
+    }
+
+    #contexte-trimestre .panneau-formulaire {
+        order: 2;
     }
 }
 
