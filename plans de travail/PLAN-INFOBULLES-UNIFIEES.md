@@ -340,12 +340,25 @@ Aucun système d'accompagnement hors périmètre. Les seules exclusions explicit
 
 | Phase | État | Commit | Notes |
 |---|---|---|---|
-| Phase 1 — Moteur unifié drop-in | À faire | — | |
-| Phase 2 — Migration catalogue tooltips + flèches | À faire | — | |
-| Phase 3 — Migration catalogue aide contextuelle | À faire | — | |
-| Phase 4 — Migration catalogue tour guidé | À faire | — | |
-| Phase 5 — Migration catalogue glossaire | À faire | — | |
-| Phase 6 — Nettoyage anciens modules | À faire | — | |
-| Phase 7 — Documentation | À faire | — | |
+| Phase 1 — Moteur unifié drop-in | Terminée | `6fec600` (b0420-1015) | js/accompagnement.js (1275 l.) + css/accompagnement.css (280 l.). index.html mis à jour. Migration fleche-vue__* → accompagnement-vu__*. Alias window préservés. |
+| Phase 2 — Migration catalogue tooltips + flèches | Terminée | `6255a79` (b0420-1025) | CATALOGUE_ACCOMPAGNEMENT + ajouterEntrees/obtenirEntree. 279 tooltips et 7 flèches migrés. window.TOOLTIPS conservé (rétrocompat). |
+| Phase 3 — Migration catalogue aide contextuelle | Terminée | `fe2f36e` (b0420-1026) | ~40 popups migrés sous mode `popup`. Helper obtenirPopup(cle) avec fallback window.AIDE_CONTEXTUELLE. |
+| Phase 4 — Migration catalogue tour guidé | Terminée | `e5fb8dc` (b0420-1027) | 6 étapes publiées sous clés `tour-etape-0` à `tour-etape-5`, mode `tour`. Orchestration (ETAPES_TOUR tableau indexé) inchangée. |
+| Phase 5 — Migration catalogue glossaire | Terminée | `5a7d994` (b0420-1029) | 48 termes migrés sous clés `terme-<cle>`, mode `terme`. glossaireDict() lit depuis le catalogue avec fallback. |
+| Phase 6 — Nettoyage anciens modules | Terminée | `115699c` (b0420-1032) | 8 fichiers supprimés (6 JS engines + 2 CSS) = -2304 lignes. donnees-demo.js mis à jour pour lire window.accompagnement.catalogue. |
+| Phase 7 — Documentation | En cours | — | Mise à jour plan + mémoire + SESSION.md |
 
-Mise à jour : au fil des commits.
+## État final (fin Phase 6)
+
+**Architecture en place** :
+- Un seul moteur : `js/accompagnement.js` (~1580 lignes)
+- Un seul catalogue : `CATALOGUE_ACCOMPAGNEMENT` (~380 entrées, 5 modes : hover, autoReveal, popup, tour, terme)
+- Une API publique : `window.accompagnement`
+- Un toggle unique : `window.accompagnement.definirActif(bool)` écrit les 4 anciennes prefs en bloc
+- Migration persistance `fleche-vue__*` → `accompagnement-vu__*` idempotente
+
+**Reporté à un chantier ultérieur** (pas de blocage fonctionnel) :
+- Extraction des styles popup/tour/glossaire de `styles.css` vers `css/accompagnement.css`
+- Suppression des 3 fichiers de contenu (`tooltips-contenu.js`, `aide-contextuelle-contenu.js`, `glossaire-data.js`) — leur contenu pourrait être inliné dans accompagnement.js ou migré vers 3 fichiers `accompagnement-contenu-*.js`
+- Retrait des alias `window.tooltips`, `window.flechesDidactiques`, `window.glossaire`, `window.tourGuide` et des globals `window.TOOLTIPS`, `window.AIDE_CONTEXTUELLE`, `window.GLOSSAIRE`
+- Consolidation finale de la préférence : unique `accompagnementActif`, retrait des 4 anciennes (`tooltips`, `aideContextuelleActive`, `flechesDidactiquesActives`, `tourGuide`) de `preferences.js`
