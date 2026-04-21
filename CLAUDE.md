@@ -25,6 +25,50 @@ Ce document te guidera vers :
 
 ---
 
+## Principes directeurs
+
+### Stabilite zero-dette (etabli 21 avril 2026)
+
+> Dans un projet sans base d'utilisateurs, il n'y a pas de contrainte de
+> retro-compatibilite au-dela de la preservation des donnees personnelles
+> du developpeur (qui fait des backups Codex reguliers). Tout nouveau
+> chantier RETIRE ce qu'il remplace, il ne l'empile pas a cote. Si un
+> refactoring ameliore la stabilite, il est non seulement permis mais
+> ATTENDU. La stabilite prime sur la vitesse de livraison.
+
+**Consequences operationnelles** :
+
+- Quand un nouveau systeme est introduit pour remplacer un ancien, le
+  chantier n'est pas fini tant que l'ancien n'est pas retire. Pas
+  d'alias « au cas ou », pas de code mort « pour plus tard ».
+- Refactorisation permise : si un changement rend le code plus propre,
+  refactorer meme si le scope s'elargit. Mieux vaut ca qu'un patch qui
+  empile la dette.
+- Audit des regressions latentes : avant de changer un defaut de
+  preference, un flag, une signature de fonction — auditer les
+  call-sites pour detecter le code dormant qui pourrait se reveiller.
+  (Cas d'ecole : commit `51e5cdc` du 20 avril a reveille primo-accueil
+  qui restait silencieux grace au defaut tourGuide=false.)
+- Pas de report : ne pas marquer de chantiers « post-AQPC » ou
+  « a reporter ». Mieux vaut un codebase propre que des reports.
+- Preservation des donnees : la SEULE contrainte de retro-compat est
+  que les donnees personnelles de Gregoire (trimestres reels, grilles,
+  evaluations) survivent aux changements. Backups Codex reguliers en
+  filet de securite, mais on evite quand meme les migrations destructives.
+
+**Comment l'appliquer** :
+
+- Avant chaque chantier : « Est-ce que ce que je remplace est encore
+  utilise ? Si non, je supprime en meme temps. Si oui, je migre les
+  callers et je supprime ensuite. »
+- Ne jamais introduire un nouvel alias ou wrapper « pour compatibilite »
+  sans date ou phase explicite de retrait.
+- Si un audit revele du code mort, le nettoyer dans la meme session.
+- Apres chaque changement de defaut de pref ou flag, grep les callers
+  pour identifier les comportements qui vont changer.
+
+---
+
 ## Contraintes techniques
 
 - **Stack** : HTML5 / CSS3 / JavaScript ES6+ pur (aucune dependance externe sauf Chart.js)

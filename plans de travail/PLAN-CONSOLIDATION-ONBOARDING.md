@@ -219,13 +219,13 @@ Sur iPad Safari et Mac Safari, mode clair et sombre :
 
 | Phase | État | Commit | Notes |
 |---|---|---|---|
-| Phase 1 — Audit exhaustif | À faire | — | |
-| Phase 2 — Migration appels valides | À faire | — | |
-| Phase 3 — Retrait primo-accueil + primo-modal | À faire | — | |
-| Phase 4 — Retrait tutoriel-interactif | À faire | — | |
-| Phase 5 — Simplification parcours-apprentissage | À faire | — | |
-| Phase 6 — Nettoyage préfs et flags | À faire | — | |
-| Phase 7 — Nettoyage CSS orphelin | À faire | — | |
-| Phase 8 — Documentation + CLAUDE.md | À faire | — | |
+| Phase 1 — Audit exhaustif | ✅ Livré | `cfee015` (audit dans le commit Phase 3) | docs/AUDIT-ONBOARDING-21-AVRIL.md (retiré Phase 8) |
+| Phase 2 — Migration appels valides | ✅ Sans objet | — | Audit Phase 1 a établi qu'aucun caller externe ne survit (suppression atomique possible) |
+| Phase 3 — Retrait primo-* | ✅ Livré | `cfee015` | 4 fichiers (~5700 l.) + dead code main.js + db.js SSOT |
+| Phase 4 — Retrait tutoriel-interactif | ✅ Livré | `337855b` | 530 l. + bloc défensif navigation.js |
+| Phase 5A — Suppression parcours-apprentissage | ✅ Livré | `f796d93` | 1280 l. + carte Réglages + 5 call-sites |
+| Phase 6 — Nettoyage préfs et flags | ✅ Livré | `2dc86e1` | Migration silencieuse v6.21 dans main.js (db-ready) |
+| Phase 7 — Nettoyage CSS orphelin | ✅ Livré | `dbbb72e` | ~575 l. styles.css (.primo-champ, .modal-bienvenue, .parcours-*) |
+| Phase 8 — Documentation + CLAUDE.md | ✅ Livré | (ce commit) | Principe zéro-dette inscrit dans CLAUDE.md |
 
-Mise à jour : au fil des commits.
+**Total retiré** : ~5750 l. JS + ~75 l. HTML + ~575 l. CSS = **~6400 lignes**.
