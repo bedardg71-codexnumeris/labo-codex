@@ -38,10 +38,11 @@
      * (ex. « [SPE] », « [STD] ») par « [Démo] ». L'abréviation de pratique
      * étant un doublon du badge de pratique, on la remplace utilement par
      * le marqueur démo. No-op sur les items non démo.
+     * Codes : STD (Standards), SPE (Spécifications), SOM (Sommative), DEN (Dénotation, à venir).
      */
     BibliothequeUI.formaterTitreDemo = function (nom, estDemo) {
         if (!estDemo || !nom) return nom;
-        return nom.replace(/^\[(SPE|STD|SOM|PAN|PAN-S)\]\s*/, '[Démo] ');
+        return nom.replace(/^\[(STD|SPE|SOM|DEN)\]\s*/, '[Démo] ');
     };
 
     /**
