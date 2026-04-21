@@ -3739,11 +3739,6 @@
                         </div>
                     </div>
 
-                    <!-- Indicateur parcours d'apprentissage (mode explicite) -->
-                    <div id="parcours-indicateur-header" class="parcours-indicateur-header" style="display: none;">
-                        <!-- Rempli par parcours-apprentissage.js -->
-                    </div>
-
                     <!-- Boutons utilitaires (droite, alignés sous Bug/Mode de la ligne 1) -->
                     <div class="entete-ligne2-droite">
                         <button data-action="afficherSection" data-param="aide" class="btn-action-header btn-icon-header" data-tooltip="nav-aide" title="Aide"><img src="icons/icon-wordbook.svg" alt="" class="header-icon"></button>
@@ -10332,44 +10327,6 @@
                         </div>
                     </div>
 
-                    <!-- Carte : Parcours d'apprentissage -->
-                    <div class="carte" id="carte-parcours-preferences">
-                        <h3 class="carte-titre-bleu">Parcours d'apprentissage</h3>
-                        <p class="text-muted u-mb-15 u-texte-09">
-                            Choisis ton mode d'accompagnement. Tu peux changer à tout moment.
-                        </p>
-
-                        <!-- Sélecteur de mode -->
-                        <div class="groupe-form u-mb-15">
-                            <label for="select-mode-parcours" class="u-texte-gras" style="display: block; margin-bottom: 6px">
-                                Mode d'apprentissage
-                            </label>
-                            <select id="select-mode-parcours" class="controle-form" data-on-change="changerModeParcoursDelegue" style="max-width: 300px;">
-                                <option value="explicite">🗺️ Étape par étape (enseignement explicite)</option>
-                                <option value="decouverte">🧭 Par exploration (apprentissage par découverte)</option>
-                                <option value="autonome">🎓 Autonome (aide en arrière-plan)</option>
-                            </select>
-                            <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen)">
-                                Explicite = guidage proactif · Découverte = aide disponible · Autonome = navigation libre
-                            </small>
-                        </div>
-
-                        <!-- Progression actuelle -->
-                        <div id="parcours-progression-preferences" class="u-mb-15 u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
-                            <!-- Rempli dynamiquement par parcours-apprentissage.js -->
-                        </div>
-
-                        <!-- Bouton réinitialiser -->
-                        <div class="form-group">
-                            <button class="btn btn-secondaire btn-sm" data-action="reinitialiserParcoursAvecConfirm">
-                                Réinitialiser le parcours
-                            </button>
-                            <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen)">
-                                Remet la progression à zéro. Le choix du mode sera proposé au prochain démarrage.
-                            </small>
-                        </div>
-                    </div>
-
                     <!-- Carte : Système d'information scolaire (SIS) -->
                     <div class="carte">
                         <h3 class="carte-titre-bleu">Système d'information scolaire</h3>
@@ -15875,9 +15832,6 @@
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=2026032002"></script>
     <script src="js/evaluation.js?v=2026041706"></script>
-
-    <!-- PARCOURS D'APPRENTISSAGE - Orchestration des mécanismes d'aide -->
-    <script src="js/parcours-apprentissage.js?v=2026021501"></script>
 
     <!-- RAPPEL BACKUP - Avertissement perte de données (Beta 95) -->
     <script src="js/modal-backup-reminder.js?v=2025122803"></script>

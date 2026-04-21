@@ -188,16 +188,6 @@ window.ouvrirImportTxtCartouche = function() {
     var el = document.getElementById('fichier-import-txt-cartouche');
     if (el) el.click();
 };
-window.reinitialiserParcoursAvecConfirm = function() {
-    if (confirm('Réinitialiser le parcours ? La progression sera effacée.')) {
-        if (window.parcours) {
-            window.parcours.reinitialiser();
-            if (typeof window.parcours.initialiserPreferencesParcours === 'function') {
-                window.parcours.initialiserPreferencesParcours();
-            }
-        }
-    }
-};
 window.dupliquerPratiqueMaterielActive = function() {
     if (typeof dupliquerPratiqueMateriel === 'function' && typeof pratiqueEnEditionMateriel !== 'undefined') {
         dupliquerPratiqueMateriel(pratiqueEnEditionMateriel);
