@@ -21,12 +21,47 @@
     const CLE_NE_PLUS_RAPPELER = 'backupNePlusRappeler';
 
     /**
+     * Vérifie si l'utilisateur possède des données réelles.
+     * Un utilisateur vierge (fraîche install, aucun groupe-cours) n'a rien à
+     * sauvegarder — pas de raison de lui proposer un export.
+     * @returns {boolean}
+     */
+    function utilisateurADesDonnees() {
+        try {
+            if (typeof db === 'undefined') return false;
+            // Groupe-cours actif = utilisateur a configuré son contexte
+            const gcActif = db.getSync('groupeCoursActif', null);
+            if (gcActif) return true;
+            // Liste de groupes-cours non vide dans le trimestre actif
+            if (typeof window.cle === 'function') {
+                const gcList = db.getSync(window.cle('groupesCours'), []);
+                if (Array.isArray(gcList) && gcList.length > 0) return true;
+            }
+            // Liste globale de trimestres non vide (autres que le trimestre démo)
+            const trimestres = db.getSync('trimestres', []);
+            if (Array.isArray(trimestres) && trimestres.some(t => t && t.id !== 'demo')) {
+                return true;
+            }
+        } catch (e) { /* storage inaccessible */ }
+        return false;
+    }
+
+    /**
      * Vérifie si le modal doit être affiché
      * @returns {boolean}
      */
     function doitAfficherModal() {
         // Ne pas afficher si le modal bienvenue est présent (premier lancement)
         if (document.getElementById('modal-bienvenue')) {
+            return false;
+        }
+
+        // FIX 21 avril 2026 (audit terrain iPad) : ne pas proposer d'exporter
+        // des données à un utilisateur qui n'en a pas. Le modal apparaissait
+        // systématiquement au 1er démarrage même sur une fraîche installation
+        // sans groupe-cours, créant une confusion (« tes données sont stockées
+        // localement » alors qu'il n'y a rien à sauvegarder).
+        if (!utilisateurADesDonnees()) {
             return false;
         }
 
