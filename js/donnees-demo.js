@@ -187,63 +187,49 @@ async function restaurerEtatApresDemo() {
  * Appelé par le bouton "Explorer la démo"
  */
 async function entrerEnDemo() {
-    console.warn('[DEMO-TRACE] entrerEnDemo → entrée');
 
     // Guard: déjà en démo — si on est sur la page d'accueil, c'est un résidu
     if (db.getSync('demo-actif', null) === 'true') {
         // Vérifier si on est réellement en démo (bandeau visible) ou si c'est un résidu
         var bandeau = document.getElementById('bandeau-demo');
         if (bandeau && bandeau.style.display !== 'none') {
-            console.warn('[DEMO-TRACE] entrerEnDemo → déjà en démo (bandeau visible), sortie précoce');
             return;
         }
         // Résidu d'une session crashée — nettoyer et continuer
-        console.warn('[DEMO-TRACE] entrerEnDemo → résidu détecté, nettoyage des flags demo-actif/demo-chargees');
         db.setSync('demo-actif', null);
         db.setSync('demo-chargees', null);
     }
 
-
     try {
         // 1. Sauvegarder l'état actuel
         sauvegarderEtatAvantDemo();
-        console.warn('[DEMO-TRACE] step1 sauvegarderEtatAvantDemo OK');
 
         // 2. Activer le flag démo
         db.setSync('demo-actif', 'true');
-        console.warn('[DEMO-TRACE] step2 demo-actif=true');
 
         // 2b. Forcer un chargement frais (évite les flags stale après crash/refresh)
         db.setSync('demo-chargees', null);
 
         // 3. Charger les données demo (crée trimestre + merge données)
-        console.warn('[DEMO-TRACE] step3 chargerDonneesDemo...');
         const success = await chargerDonneesDemo();
         if (!success) {
-            console.error('[DEMO-TRACE] step3 ÉCHEC chargerDonneesDemo, rollback');
             db.setSync('demo-actif', null);
             db.removeSync('demo-etat-precedent');
             return;
         }
-        console.warn('[DEMO-TRACE] step3 chargerDonneesDemo OK');
 
         // 3b. Vérifier que les données sont bien chargées
         const etudiantsVerif = db.getSync('demo_groupeEtudiants', null);
         if (!etudiantsVerif || !Array.isArray(etudiantsVerif) || etudiantsVerif.length === 0) {
-            console.error('[DEMO-TRACE] step3b ❌ demo_groupeEtudiants absents/vides après chargement');
             await db.syncToLocalStorageCache();
             const etudiantsRetry = db.getSync('demo_groupeEtudiants', []);
-            console.warn('[DEMO-TRACE] step3b après syncToLocalStorageCache: demo_groupeEtudiants =', etudiantsRetry.length, 'étudiants');
         } else {
-            console.warn('[DEMO-TRACE] step3b demo_groupeEtudiants =', etudiantsVerif.length, 'étudiants');
         }
 
         // 4. Activer le trimestre demo
         if (typeof changerTrimestreActif === 'function') {
             await changerTrimestreActif('demo');
-            console.warn('[DEMO-TRACE] step4 changerTrimestreActif(demo) OK, cle("horaires")=', typeof cle === 'function' ? cle('horaires') : '?');
         } else {
-            console.warn('[DEMO-TRACE] step4 ⚠️ changerTrimestreActif indéfini');
         }
 
         // 5. Fixer infoCours = cours demo
@@ -254,9 +240,7 @@ async function entrerEnDemo() {
                        || listeCours.find(c => c.id === 'demo-cours');
         if (coursDemo) {
             db.setSync('infoCours', coursDemo);
-            console.warn('[DEMO-TRACE] step5 infoCours=', coursDemo.id, '(canoniques:', coursCanoniques.length, ', listeCours:', listeCours.length, ')');
         } else {
-            console.warn('[DEMO-TRACE] step5 ⚠️ cours demo introuvable dans cours/listeCours');
         }
 
         // 6. Fixer groupeCoursActif = GC_DEMO
@@ -265,9 +249,7 @@ async function entrerEnDemo() {
         const gcDemo = groupesCours.find(gc => gc.id === 'GC_DEMO');
         if (gcDemo) {
             db.setSync('groupeCoursActif', gcDemo);
-            console.warn('[DEMO-TRACE] step6 groupeCoursActif=GC_DEMO OK (demo_groupesCours:', groupesCours.length, ')');
         } else {
-            console.warn('[DEMO-TRACE] step6 ⚠️ GC_DEMO absent de demo_groupesCours (len:', groupesCours.length, ')');
         }
 
         // 6a. Pré-sélectionner HOR_DEMO + groupe '0demo' pour que les sections
@@ -278,8 +260,6 @@ async function entrerEnDemo() {
         if (typeof cle === 'function') {
             db.setSync(cle('horaireSelectionne'), 'HOR_DEMO');
             db.setSync(cle('groupeSelectionne'), '0demo');
-            console.warn('[DEMO-TRACE] step6a', cle('horaireSelectionne'), '= HOR_DEMO,',
-                cle('groupeSelectionne'), '= 0demo');
         }
 
         // 6b. Générer le calendrierComplet pour la démo
@@ -287,7 +267,6 @@ async function entrerEnDemo() {
         // qui pointent maintenant vers demo_* grâce à changerTrimestreActif('demo')
         if (typeof genererCalendrierComplet === 'function') {
             genererCalendrierComplet();
-            console.warn('[DEMO-TRACE] step6b genererCalendrierComplet OK');
         }
 
         // 6c. Reconstruire les snapshots pour la démo
@@ -295,9 +274,7 @@ async function entrerEnDemo() {
         if (typeof reconstruireSnapshotsHistoriques === 'function') {
             const resultat = await reconstruireSnapshotsHistoriques();
             if (resultat && resultat.succes) {
-                console.warn('[DEMO-TRACE] step6c reconstruireSnapshotsHistoriques OK');
             } else {
-                console.warn('[DEMO-TRACE] step6c ⚠️ Reconstruction snapshots échouée:', resultat?.message);
             }
         }
 
@@ -309,12 +286,10 @@ async function entrerEnDemo() {
 
         // 8. Afficher le bandeau démo
         afficherBandeauDemo(true);
-        console.warn('[DEMO-TRACE] step8 bandeau affiché');
 
         // 9. Rafraîchir le dropdown groupe-cours dans le bandeau
         if (typeof peuplerDropdownGroupeCoursActif === 'function') {
             peuplerDropdownGroupeCoursActif();
-            console.warn('[DEMO-TRACE] step9 peuplerDropdownGroupeCoursActif OK');
         }
 
         // 10. Naviguer vers le tableau de bord
@@ -327,10 +302,7 @@ async function entrerEnDemo() {
             rafraichirContenuSelonMode();
         }
 
-        console.warn('[DEMO-TRACE] entrerEnDemo → TERMINÉ');
-
     } catch (error) {
-        console.error('[DEMO-TRACE] entrerEnDemo ERREUR:', error);
         // Rollback
         db.setSync('demo-actif', null);
         await restaurerEtatApresDemo();
@@ -380,7 +352,6 @@ async function quitterDemo() {
         if (typeof rafraichirContenuSelonMode === 'function') {
             rafraichirContenuSelonMode();
         }
-
 
     } catch (error) {
         console.error('[Demo] Erreur sortie de démo:', error);
@@ -463,11 +434,9 @@ function afficherBandeauDemo(show) {
  */
 async function chargerDonneesDemo() {
     try {
-        console.warn('[DEMO-TRACE] chargerDonneesDemo → entrée');
 
         // Vérifier si déjà chargées
         if (db.getSync('demo-chargees', null) === 'true') {
-            console.warn('[DEMO-TRACE] chargerDonneesDemo → déjà chargées, sortie précoce');
             return true;
         }
 
@@ -475,9 +444,7 @@ async function chargerDonneesDemo() {
         let packDemo = null;
         if (typeof PACK_DEMARRAGE !== 'undefined' && PACK_DEMARRAGE) {
             packDemo = PACK_DEMARRAGE;
-            console.warn('[DEMO-TRACE] chargerDonneesDemo → PACK_DEMARRAGE déjà en mémoire');
         } else {
-            console.warn('[DEMO-TRACE] chargerDonneesDemo → lazy-load js/pack-demo-20.js');
             // Chargement dynamique de pack-demo-20.js
             try {
                 await new Promise((resolve, reject) => {
@@ -489,21 +456,13 @@ async function chargerDonneesDemo() {
                 });
                 if (typeof PACK_DEMARRAGE !== 'undefined' && PACK_DEMARRAGE) {
                     packDemo = PACK_DEMARRAGE;
-                    console.warn('[DEMO-TRACE] chargerDonneesDemo → pack chargé dynamiquement');
                 }
             } catch (e) {
-                console.error('[DEMO-TRACE] chargerDonneesDemo → échec chargement pack-demo-20.js:', e);
             }
             if (!packDemo) {
-                console.error('[DEMO-TRACE] chargerDonneesDemo → PACK_DEMARRAGE indisponible après lazy-load');
                 return false;
             }
         }
-
-        console.warn('[DEMO-TRACE] chargerDonneesDemo → pack OK, clés:', Object.keys(packDemo).length,
-            '| listeCours:', (packDemo.listeCours || []).length,
-            '| groupeEtudiants:', (packDemo.groupeEtudiants || []).length,
-            '| evaluationsSauvegardees:', (packDemo.evaluationsSauvegardees || packDemo.evaluations || []).length);
 
         // Créer le trimestre demo s'il n'existe pas
         const trimestres = db.getSync('trimestres', []);
@@ -523,8 +482,6 @@ async function chargerDonneesDemo() {
             trimestres.push(trimestreDemo);
         }
         db.setSync('trimestres', trimestres);
-        console.warn('[DEMO-TRACE] chargerDonneesDemo → trimestre demo',
-            indexDemo >= 0 ? 'remplacé' : 'ajouté', '| total trimestres:', trimestres.length);
 
         // Fusionner avec les données existantes (préfixe demo_ explicite)
         fusionnerDonneesDemo(packDemo, 'demo_');
@@ -547,12 +504,10 @@ async function chargerDonneesDemo() {
 
         // Marquer comme chargées
         db.setSync('demo-chargees', 'true');
-        console.warn('[DEMO-TRACE] chargerDonneesDemo → TERMINÉ (demo-chargees=true)');
 
         return true;
 
     } catch (error) {
-        console.error('[DEMO-TRACE] chargerDonneesDemo ERREUR:', error);
         return false;
     }
 }
@@ -567,7 +522,6 @@ async function chargerDonneesDemo() {
  * @param {string} prefixe - Préfixe de clé explicite (ex: 'demo_') pour éviter race condition avec cle()
  */
 function fusionnerDonneesDemo(packDemo, prefixe) {
-    console.warn('[DEMO-TRACE] fusionnerDonneesDemo → entrée (prefixe:', prefixe, ')');
     // Helper pour construire la clé sans dépendre de cle() (évite race condition)
     const cleDemo = (nom) => prefixe ? prefixe + nom : cle(nom);
     // 1. Fusionner listeCours (clé legacy, encore lue par plusieurs modules)
@@ -584,7 +538,6 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
         }
     }
     db.setSync('listeCours', listeCours);
-    console.warn('[DEMO-TRACE] fusion:1 listeCours=', listeCours.length, '(demo ajoutés:', coursDemo.length, ')');
 
     // 1b. Fusionner aussi vers la clé canonique 'cours' (lue par les dropdowns
     // d'assemblage de groupe-cours dans Contexte). Sans ça, les sélecteurs
@@ -595,7 +548,6 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
         coursMap.set(cours.id, cours);
     }
     db.setSync('cours', Array.from(coursMap.values()));
-    console.warn('[DEMO-TRACE] fusion:1b cours (canonique)=', coursMap.size);
 
     // 1c. Créer l'enseignant démo pour que le dropdown Enseignants de Contexte
     // affiche une option cohérente avec le cours démo (champ "enseignant" du
@@ -610,9 +562,7 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
             isDemo: true
         });
         db.setSync('enseignants', enseignants);
-        console.warn('[DEMO-TRACE] fusion:1c ENS_DEMO créé, enseignants=', enseignants.length);
     } else {
-        console.warn('[DEMO-TRACE] fusion:1c ENS_DEMO déjà présent, enseignants=', enseignants.length);
     }
 
     // 2. Fusionner groupeEtudiants
@@ -774,7 +724,6 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
         horaires.push(nouvelHoraire);
     }
     db.setSync(cleHoraires, horaires);
-    console.warn('[DEMO-TRACE] fusion:9', cleHoraires, '=', horaires.length, '(HOR_DEMO', horaireDemo ? 'remplacé' : 'ajouté', ')');
 
     // 10. Créer un groupe-cours demo (s'il n'existe pas)
     const cleGC = cleDemo('groupesCours');
@@ -810,14 +759,11 @@ function fusionnerDonneesDemo(packDemo, prefixe) {
         const idx = groupesCours.indexOf(gcDemo);
         groupesCours[idx] = nouveauGC;
         db.setSync(cleGC, groupesCours);
-        console.warn('[DEMO-TRACE] fusion:10', cleGC, '=', groupesCours.length, '(GC_DEMO remplacé, groupeNum:', groupeNum, ')');
     } else {
         groupesCours.push(nouveauGC);
         db.setSync(cleGC, groupesCours);
-        console.warn('[DEMO-TRACE] fusion:10', cleGC, '=', groupesCours.length, '(GC_DEMO créé → coursId:', coursId, ', groupeNum:', groupeNum, ')');
     }
 
-    console.warn('[DEMO-TRACE] fusionnerDonneesDemo → TERMINÉ');
 }
 
 // ============================================
