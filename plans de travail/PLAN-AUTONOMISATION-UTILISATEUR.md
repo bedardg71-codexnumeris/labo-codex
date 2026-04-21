@@ -308,7 +308,7 @@ Sur iPad Safari et Mac Safari, mode clair et sombre :
 
 | Phase | État | Commit | Notes |
 |---|---|---|---|
-| Phase 1 — Namespace demo_* | À faire | — | |
+| Phase 1 — Namespace demo_* | Terminée | (à valider test iPad) | b0421-0730. js/demo-namespace.js + helper cleDemo + flag demo-version-installee. Invisible en Phase 1. |
 | Phase 2 — Sélecteurs à 2 sections | À faire | — | |
 | Phase 3 — Fork et attribution | À faire | — | |
 | Phase 4 — Interdiction références mixtes | À faire | — | |
