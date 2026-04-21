@@ -2167,6 +2167,11 @@ async function preparerDonneesBibliothequeGrilles() {
     const grillesDisponibles = await obtenirToutesLesGrillesBibliotheque();
     const doublonsDetectes = detecterDoublonsGrilles(grillesDansBibliotheque, grillesDisponibles);
     const disciplines = obtenirDisciplinesDisponiblesGrilles();
+    // Section Démo (Plan 1 Phase 2.1) : grilles CC portées par demo-namespace.js.
+    // Lecture seule côté UI — bouton « Prendre comme modèle » (fork en Phase 3).
+    const grillesDemo = (typeof cleDemo === 'function')
+        ? (db.getSync(cleDemo('grillesTemplates'), []) || [])
+        : [];
 
     // Section 1 : cartes pour les grilles dans la sélection
     const cartesSection1 = grillesDansBibliotheque.map(grille => ({
@@ -2214,7 +2219,18 @@ async function preparerDonneesBibliothequeGrilles() {
         });
     });
 
-    return { cartesSection1, cartesSection2, doublonsDetectes, disciplines };
+    // Section 3 Démo : cartes lecture seule
+    const cartesSection3 = grillesDemo.map(grille => ({
+        nom: grille.nom || 'Sans titre',
+        id: grille.id,
+        badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : '',
+        metadonnees: `${grille.criteres?.length || 0} critère(s)${grille.discipline ? ' • ' + grille.discipline : ''} • par Demo Labo Codex`,
+        description: grille.description || '',
+        classeItem: 'grille-demo-item',
+        actionFork: 'forkGrilleDemo'
+    }));
+
+    return { cartesSection1, cartesSection2, cartesSection3, doublonsDetectes, disciplines };
 }
 
 async function afficherBibliothequeGrilles() {
@@ -2260,6 +2276,15 @@ async function afficherBibliothequeGrilles() {
         contenuSection2 += BibliothequeUI.renderCarteDisponible(carte);
     });
 
+    // Section 3 Démo (Plan 1 Phase 2.1) — affichée si au moins une grille démo.
+    let contenuSection3 = '';
+    if (data.cartesSection3 && data.cartesSection3.length > 0) {
+        data.cartesSection3.forEach(carte => {
+            contenuSection3 += BibliothequeUI.renderCarteDemo(carte);
+        });
+    }
+    const sectionDemoActive = contenuSection3.length > 0;
+
     BibliothequeUI.creerModal({
         modalId: 'modalBibliothequeGrilles',
         titre: 'Bibliothèque de grilles de critères',
@@ -2273,9 +2298,30 @@ async function afficherBibliothequeGrilles() {
         titreSection2: 'Grilles disponibles à ajouter à la barre latérale',
         filtresSection2: filtresHTML,
         contenuIdListe2: 'listeGrillesDisponibles',
-        contenuSection2: contenuSection2
+        contenuSection2: contenuSection2,
+        titreSection3: sectionDemoActive ? 'Démo (par Demo Labo Codex)' : null,
+        introSection3: sectionDemoActive ? 'Exemples pédagogiques fournis avec l\'application. Clique sur « Prendre comme modèle » pour créer ta propre version éditable.' : null,
+        contenuIdListe3: 'listeGrillesDemo',
+        contenuSection3: contenuSection3
     });
 }
+
+/**
+ * Fork d'une grille démo — placeholder Phase 2.1.
+ * Le fork complet (création d'une copie éditable avec métadonnée inspireDe)
+ * sera implémenté en Phase 3 du plan d'autonomisation.
+ */
+function forkGrilleDemo(id) {
+    alert(
+        'Bientôt disponible (Phase 3)\n\n' +
+        'La fonction « Prendre comme modèle » permettra de créer une copie ' +
+        'éditable de cette grille démo dans ta propre bibliothèque, avec une ' +
+        'trace d\'origine « Inspiré de Demo Labo Codex ».\n\n' +
+        'Pour l\'instant, tu peux observer la structure de cette grille ' +
+        'pour t\'en inspirer dans tes propres créations.'
+    );
+}
+window.forkGrilleDemo = forkGrilleDemo;
 
 /**
  * ✅ AJOUT (8 décembre 2025) : Ajoute une grille individuelle à la bibliothèque
