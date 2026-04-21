@@ -98,7 +98,7 @@ function peuplerNamespace(pack) {
         annee: '2025',
         actif: false,
         isDemo: true,
-        auteur: 'Demo Labo Codex'
+        auteur: 'Labo Codex'
     }]);
 
     // Enseignant démo : une entrée dans demo_enseignants.
@@ -108,7 +108,7 @@ function peuplerNamespace(pack) {
         nom: 'Primavera',
         courriel: '',
         isDemo: true,
-        auteur: 'Demo Labo Codex'
+        auteur: 'Labo Codex'
     }]);
 
     // Horaire démo.
@@ -122,7 +122,7 @@ function peuplerNamespace(pack) {
             { id: 'SEANCE_DEMO_B', lettre: 'B', jour: 'Mercredi', heureDebut: '13:00', heureFin: '14:40', nombrePeriodes: 2, duree: 2, local: '1709' }
         ],
         isDemo: true,
-        auteur: 'Demo Labo Codex',
+        auteur: 'Labo Codex',
         dateCreation: (pack._metadata && pack._metadata.date) || '2026-02-06'
     }]);
 
@@ -140,7 +140,7 @@ function peuplerNamespace(pack) {
             pratiqueId: null,
             actif: true,
             isDemo: true,
-            auteur: 'Demo Labo Codex',
+            auteur: 'Labo Codex',
             dateCreation: (pack._metadata && pack._metadata.date) || '2026-02-06'
         }]);
     }
