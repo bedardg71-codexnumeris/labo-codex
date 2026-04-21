@@ -1,9 +1,9 @@
-# SESSION ACTIVE — BETA 99.20 (20 avril 2026)
+# SESSION ACTIVE — BETA 99.21 (21 avril 2026)
 
-**Date** : 20 avril 2026
-**Dernier build** : `0420-1835` · Beta 99.20
-**Branche** : `main` (13 commits locaux du jour, non poussés)
-**Statut** : Système d'accompagnement unifié COMPLET — Phases 1→7 du plan + 4 chantiers de cleanup. Plus aucune dette technique identifiée sur le périmètre accompagnement. Test terrain iPad/Safari à faire.
+**Date** : 21 avril 2026
+**Dernier build** : `0421-0745` · Beta 99.21
+**Branche** : `main` (~20 commits locaux depuis le dernier push, non poussés)
+**Statut** : Accompagnement unifié livré (Beta 99.20, poussé 20 avril soir — en attente de test terrain iPad). Corrections audit LOG UX 20 avril (#1-#4) livrées. Plans de triptyque CC rédigés (autonomisation + partage). PLAN 1 Phase 1 (namespace demo_*) livré et invisible côté UI.
 
 ---
 
@@ -56,7 +56,20 @@ Chantiers possibles après test terrain :
 
 ---
 
-## 1. Ce qui a été livré aujourd'hui (13 commits, tous locaux)
+## 0. Travail autonome 21 avril matin (pendant absence utilisateur)
+
+- Bump Beta 99.20 → 99.21 (nouveau jour) commit `38d90a3`
+- Réécriture complète des plans : PLAN-MODE-EXERCICE.md supprimé, remplacé par PLAN-AUTONOMISATION-UTILISATEUR.md (7 phases) + PLAN-PARTAGE-RESSOURCES.md (8 phases)
+- Plan 1 Phase 1 **livrée** — commit `16e0b76` b0421-0730 :
+  - Nouveau module `js/demo-namespace.js` (fonction `initialiserDemoNamespace` + helper `cleDemo`)
+  - Pack démo chargé en permanence dans `demo_*` dès le 1er run (idempotent via flag `demo-version-installee`)
+  - Invisible côté UI — aucune modification fonctionnelle visible au test iPad
+  - Attribution « Demo Labo Codex » posée sur les entités structurantes (préparation Phase 3)
+- Petit commit de trace : ajout commentaire dans styles.css pour éviter de supprimer par erreur les classes `.modal-bienvenue-*` encore utilisées par `parcours-apprentissage.js`
+
+**Phase 2 NON démarrée** — les sélecteurs à 2 sections représentent un travail UI de 11 sélecteurs indépendants à adapter, trop risqué sans possibilité de test terrain iPad simultané. À faire à ton retour avec une approche pilote (un sélecteur d'abord, propagation après validation).
+
+## 1. Ce qui a été livré avant mon absence (13 commits + corrections + plans)
 
 | Commit | Build | Livrable |
 |---|---|---|

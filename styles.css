@@ -3901,6 +3901,9 @@ textarea {
 
 /* ===============================
    MODAL BIENVENUE (Premier lancement)
+   Réutilisées par js/parcours-apprentissage.js après la suppression de
+   js/modal-bienvenue.js (commit e8f8159, 20 avril 2026). NE PAS supprimer
+   ces styles sans vérifier parcours-apprentissage.js d'abord.
    =============================== */
 
 .modal-bienvenue-overlay {
