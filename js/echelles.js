@@ -395,7 +395,9 @@ async function dupliquerEchelle(echelleId) {
         config: JSON.parse(JSON.stringify(echelle.config || {})),
         dateCreation: new Date().toISOString(),
         dateModification: new Date().toISOString(),
-        baseSur: echelle.nom,
+        auteur: BibliothequeUI.obtenirAuteurActif(),
+        isDemo: false,
+        inspireDe: BibliothequeUI.forgerInspireDe(echelle),
         dansBibliotheque: true  // ✅ AJOUT (8 décembre 2025) - Échelle dupliquée dans bibliothèque par défaut
     };
 
@@ -2364,7 +2366,7 @@ async function preparerDonneesBibliothequeEchelles() {
 
     // Section 1
     const cartesSection1 = echellesDansBibliotheque.map(echelle => ({
-        nom: echelle.nom || 'Sans titre',
+        nom: BibliothequeUI.formaterTitreDemo(echelle.nom || 'Sans titre', BibliothequeUI.estItemDemo(echelle)),
         id: echelle.id,
         badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
         badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(echelle) : '',
@@ -2406,7 +2408,7 @@ async function preparerDonneesBibliothequeEchelles() {
             const gabaritBadge = estGabarit ? '<span style="font-size: 0.7rem; color: var(--gabarit-couleur); font-weight: 500;">(gabarit)</span>' : '';
 
             cartesSection2.push({
-                nom: (echelle.nom || 'Sans titre') + ' ' + gabaritBadge,
+                nom: BibliothequeUI.formaterTitreDemo(echelle.nom || 'Sans titre', BibliothequeUI.estItemDemo(echelle)) + ' ' + gabaritBadge,
                 id: echelle.id,
                 badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
                 badgesPratiques: badgesPratiques,
@@ -2722,11 +2724,16 @@ async function dupliquerEchelleBibliotheque(id) {
         return;
     }
 
-    // Créer une copie avec un nouvel ID
+    // Créer une copie avec un nouvel ID. La copie devient un nouvel original
+    // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY). Si la
+    // source était une démo, la copie perd le flag isDemo.
     const nouvelleEchelle = {
         ...echelle,
         id: genererIdUnique('ECH_'),
         nom: `${echelle.nom} (copie)`,
+        auteur: BibliothequeUI.obtenirAuteurActif(),
+        isDemo: false,
+        inspireDe: BibliothequeUI.forgerInspireDe(echelle),
         dansBibliotheque: true,
         dateCreation: new Date().toISOString()
     };

@@ -721,11 +721,16 @@ async function dupliquerPratiqueBibliotheque(pratiqueId) {
         return;
     }
 
-    // Créer une copie avec un nouvel ID
+    // Créer une copie avec un nouvel ID. La copie devient un nouvel original
+    // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY). Si la
+    // source était une démo, la copie perd le flag isDemo.
     const nouvellePratique = {
         ...pratique,
         id: genererIdUnique('pratique_'),
         nom: `${pratique.nom} (copie)`,
+        auteur: BibliothequeUI.obtenirAuteurActif(),
+        isDemo: false,
+        inspireDe: BibliothequeUI.forgerInspireDe(pratique),
         dansBibliotheque: true,
         dateCreation: new Date().toISOString()
     };
@@ -1763,6 +1768,9 @@ async function dupliquerPratiqueMateriel(pratiqueId) {
     const copie = JSON.parse(JSON.stringify(original));
     copie.id = genererIdUnique('pratique_');
     copie.nom = `${original.nom} (copie)`;
+    copie.auteur = BibliothequeUI.obtenirAuteurActif();
+    copie.isDemo = false;
+    copie.inspireDe = BibliothequeUI.forgerInspireDe(original);
     copie.dateCreation = new Date().toISOString();
 
     configurations.push(copie);

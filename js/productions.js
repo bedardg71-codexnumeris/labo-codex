@@ -1961,7 +1961,7 @@ async function preparerDonneesBibliothequeProductions() {
 
     // Section 1
     const cartesSection1 = productionsDansSelection.map(prod => ({
-        nom: `${prod.titre}${(prod.activiteApprentissage || prod.description) ? ' - ' + (prod.activiteApprentissage || prod.description) : ''}`,
+        nom: `${BibliothequeUI.formaterTitreDemo(prod.titre, BibliothequeUI.estItemDemo(prod))}${(prod.activiteApprentissage || prod.description) ? ' - ' + (prod.activiteApprentissage || prod.description) : ''}`,
         id: prod.id,
         badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsDansSelection),
         metadonnees: `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%${prod.objectif ? ' • Objectif: ' + prod.objectif : ''}`,
@@ -1992,7 +1992,7 @@ async function preparerDonneesBibliothequeProductions() {
     Object.keys(parDiscipline).sort().forEach(discipline => {
         parDiscipline[discipline].forEach(prod => {
             cartesSection2.push({
-                nom: `${prod.titre}${(prod.activiteApprentissage || prod.description) ? ' - ' + (prod.activiteApprentissage || prod.description) : ''}`,
+                nom: `${BibliothequeUI.formaterTitreDemo(prod.titre, BibliothequeUI.estItemDemo(prod))}${(prod.activiteApprentissage || prod.description) ? ' - ' + (prod.activiteApprentissage || prod.description) : ''}`,
                 id: prod.id,
                 badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsUtilisateur),
                 metadonnees: `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%${prod.auteur ? ' • Par ' + prod.auteur : ''}`,
@@ -2510,11 +2510,21 @@ async function dupliquerProductionBibliotheque(id) {
         return;
     }
 
-    // Créer une copie avec un nouvel ID
+    // Créer une copie avec un nouvel ID. La copie devient un nouvel original
+    // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY). Si la
+    // source était une démo, la copie perd le flag isDemo. Le champ nom de
+    // production est `titre`, donc inspireDe.nom reçoit production.titre.
     const nouvelleProduction = {
         ...production,
         id: genererIdUnique('PROD_'),
         titre: `${production.titre} (copie)`,
+        auteur: BibliothequeUI.obtenirAuteurActif(),
+        isDemo: false,
+        inspireDe: {
+            nom: production.titre || 'Inconnu',
+            auteur: production.auteur || 'Inconnu',
+            date: new Date().toISOString().slice(0, 10)
+        },
         dansBibliotheque: true,
         dateCreation: new Date().toISOString()
     };
@@ -3752,12 +3762,20 @@ async function dupliquerProduction(id) {
 
     if (!production) return;
 
-    // Créer une copie avec un nouvel ID
+    // Créer une copie avec un nouvel ID. La copie devient un nouvel original
+    // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY).
     const copie = {
         ...production,
         id: genererIdUnique('PROD_'),
         activiteApprentissage: `${production.activiteApprentissage || production.description || ''} (copie)`,
         description: `${production.activiteApprentissage || production.description || ''} (copie)`,
+        auteur: BibliothequeUI.obtenirAuteurActif(),
+        isDemo: false,
+        inspireDe: {
+            nom: production.titre || production.activiteApprentissage || 'Inconnu',
+            auteur: production.auteur || 'Inconnu',
+            date: new Date().toISOString().slice(0, 10)
+        },
         verrouille: false
     };
 

@@ -2518,11 +2518,15 @@ async function dupliquerPratique(id) {
             throw new Error('Pratique introuvable');
         }
 
-        // Créer une copie avec un nouvel ID
+        // Créer une copie avec un nouvel ID. La copie devient un nouvel original
+        // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY). Si la
+        // source était une démo, la copie perd le flag isDemo.
         const copie = {
             id: genererIdUnique('pratique_'),
             nom: nouveauNom,
-            auteur: original.auteur + ' (copie)',
+            auteur: BibliothequeUI.obtenirAuteurActif(),
+            isDemo: false,
+            inspireDe: BibliothequeUI.forgerInspireDe(original),
             description: original.description,
             config: JSON.parse(JSON.stringify(original.config)) // Deep copy
         };

@@ -1426,6 +1426,9 @@ async function dupliquerCartouche(cartoucheId, grilleId) {
             ...cartoucheOriginal,
             id: genererIdUnique('CART_'),
             nom: cartoucheOriginal.nom + ' (copie)',
+            auteur: BibliothequeUI.obtenirAuteurActif(),
+            isDemo: false,
+            inspireDe: BibliothequeUI.forgerInspireDe(cartoucheOriginal),
             verrouille: false,
             dansBibliotheque: true,  // ✅ AJOUT (8 décembre 2025) : Copie visible par défaut
             commentaires: { ...cartoucheOriginal.commentaires }
@@ -3359,7 +3362,7 @@ async function preparerDonneesBibliothequeCartouches() {
     Object.keys(cartouchesParGrilleSection1).sort().forEach(grilleNom => {
         cartouchesParGrilleSection1[grilleNom].forEach(cartouche => {
             cartesSection1.push({
-                nom: cartouche.nom || 'Sans titre',
+                nom: BibliothequeUI.formaterTitreDemo(cartouche.nom || 'Sans titre', BibliothequeUI.estItemDemo(cartouche)),
                 id: cartouche.id,
                 badgeSource: BibliothequeUI.genererBadgeSource(cartouche, cartouchesDansBibliotheque),
                 metadonnees: `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)${cartouche.auteurOriginal ? ' • ' + cartouche.auteurOriginal : ''}`,
@@ -3387,7 +3390,7 @@ async function preparerDonneesBibliothequeCartouches() {
         cartouchesParGrille[grilleNom].forEach(cartouche => {
             const dejaPresent = cartouchesDansBibliotheque.some(c => c.id === cartouche.id || c.idOriginal === cartouche.id);
             cartesSection2.push({
-                nom: cartouche.nom || 'Sans titre',
+                nom: BibliothequeUI.formaterTitreDemo(cartouche.nom || 'Sans titre', BibliothequeUI.estItemDemo(cartouche)),
                 id: cartouche.id,
                 badgeSource: BibliothequeUI.genererBadgeSource(cartouche, cartouchesDansBibliotheque),
                 metadonnees: `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)${cartouche.auteur ? ' • ' + cartouche.auteur : ''}`,
@@ -3647,11 +3650,16 @@ async function dupliquerCartoucheBibliotheque(id, grilleId) {
         return;
     }
 
-    // Créer une copie avec un nouvel ID
+    // Créer une copie avec un nouvel ID. La copie devient un nouvel original
+    // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY). Si la
+    // source était une démo, la copie perd le flag isDemo.
     const nouvelleCartouche = {
         ...cartouche,
         id: genererIdUnique('CART_'),
         nom: `${cartouche.nom} (copie)`,
+        auteur: BibliothequeUI.obtenirAuteurActif(),
+        isDemo: false,
+        inspireDe: BibliothequeUI.forgerInspireDe(cartouche),
         dansBibliotheque: true,
         dateCreation: new Date().toISOString()
     };
