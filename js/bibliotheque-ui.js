@@ -34,6 +34,30 @@
     };
 
     /**
+     * Construit la métadonnée `inspireDe` à poser sur toute copie forkée
+     * d'un item existant (respect CC BY — on trace l'origine quelle que
+     * soit la source). Retourne { nom, auteur, date } avec date au
+     * format YYYY-MM-DD.
+     */
+    BibliothequeUI.forgerInspireDe = function (itemSource) {
+        return {
+            nom: (itemSource && itemSource.nom) || 'Inconnu',
+            auteur: (itemSource && itemSource.auteur) || 'Inconnu',
+            date: new Date().toISOString().slice(0, 10)
+        };
+    };
+
+    /**
+     * Retourne l'auteur de l'utilisateur actif depuis le profil enseignant
+     * actif (cc-license.js). Fallback « Inconnu » si indisponible.
+     */
+    BibliothequeUI.obtenirAuteurActif = function () {
+        if (typeof obtenirProfilAuteurActifSync !== 'function') return 'Inconnu';
+        var profil = obtenirProfilAuteurActifSync();
+        return (profil && profil.auteur_original) || 'Inconnu';
+    };
+
+    /**
      * Pour les items démo, remplace le préfixe de pratique en tête du nom
      * (ex. « [SPE] », « [STD] ») par « [Démo] ». L'abréviation de pratique
      * étant un doublon du badge de pratique, on la remplace utilement par
