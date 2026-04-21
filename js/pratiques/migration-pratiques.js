@@ -97,7 +97,7 @@
         const pratiqueActive = config.pratique;
 
         if (!pratiqueActive) {
-            console.warn('⚠️ Aucune pratique configurée');
+            // Fraîche installation — aucune pratique à vérifier. Silent.
             return;
         }
 

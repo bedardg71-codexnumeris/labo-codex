@@ -205,7 +205,7 @@ function obtenirIdPratiqueActive() {
         const config = db.getSync('modalitesEvaluation', null);
 
         if (!config) {
-            console.warn('Aucune configuration trouvée dans modalitesEvaluation');
+            // Fraîche installation — modalitesEvaluation pas encore initialisé. Silent.
             return null;
         }
 
@@ -267,7 +267,7 @@ function obtenirPratiqueActive() {
 
     // Cache invalide, recharger
     if (!idActif) {
-        console.warn('Aucune pratique active configurée');
+        // Fraîche installation — pas de pratique active encore. Silent.
         return null;
     }
 
@@ -486,12 +486,8 @@ function initialiserRegistrePratiques() {
         for (const pratique of listerPratiquesDisponibles()) {
         }
 
-        // Afficher la pratique active
-        const active = obtenirPratiqueActive();
-        if (active) {
-        } else {
-            console.warn('⚠️ Aucune pratique active configurée');
-        }
+        // Afficher la pratique active (silent si aucune — fraîche installation)
+        obtenirPratiqueActive();
     }
 }
 
