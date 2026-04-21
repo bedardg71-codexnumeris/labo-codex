@@ -40,8 +40,6 @@ function afficherNotificationErreur(message, details) {
  * Appelé au chargement de la page
  */
 function initialiserTrimestreV2() {
-    console.warn('[DEMO-TRACE] initialiserTrimestreV2 → entrée (trimestreActif:',
-        db.getSync('trimestreActif', ''), ', demo-actif:', db.getSync('demo-actif', null), ')');
 
     // Charger l'identification du trimestre (nom, session, année)
     chargerIdentificationTrimestreV2();
@@ -397,7 +395,6 @@ function afficherStatistiquesTrimestreV2() {
     const elemJoursSidebar = document.getElementById('v2-nombreJoursCoursSidebar');
     const elemCongesReprisesSidebar = document.getElementById('v2-statsCongesReprisesSidebar');
 
-
     // Vérifier si le calendrier existe ET a des données
     if (!calendrier || typeof calendrier !== 'object' || Object.keys(calendrier).length === 0) {
         if (elemSemaines) elemSemaines.textContent = '0';
@@ -435,7 +432,6 @@ function afficherStatistiquesTrimestreV2() {
     // Utiliser le numeroSemaine du calendrier (plus précis que diviser par 5)
     // Fallback sur division par 5 si pas de numeroSemaine
     const semaines = maxSemaine > 0 ? maxSemaine : Math.ceil(joursCours / 5);
-
 
     // Remplir éléments originaux (masqués)
     if (elemSemaines) elemSemaines.textContent = semaines;
@@ -895,7 +891,6 @@ function populerDropdownTrimestreV2() {
         trimestres = trimestres.filter(t => t.id !== 'demo');
     }
 
-
     select.innerHTML = '';
 
     if (trimestres.length === 0) {
@@ -917,7 +912,6 @@ function populerDropdownTrimestreV2() {
     if (trimestreActif) {
         select.value = trimestreActif.id;
     }
-
 
     // Mettre à jour aussi la liste de gestion des trimestres
     afficherListeTrimestreGestion();
@@ -1286,7 +1280,6 @@ function chargerDropdownCoursV2() {
     const tousCours = db.getSync('cours', []);
     const coursActif = db.getSync('infoCours', null);
 
-
     // Obtenir le trimestre actif
     const trimestreActifId = typeof obtenirTrimestreId === 'function' ? obtenirTrimestreId() : '';
 
@@ -1330,7 +1323,6 @@ function chargerDropdownCoursV2() {
             return inclus;
         })
         : tousCours;
-
 
     select.innerHTML = '<option value="">Sélectionner un cours...</option>';
 
@@ -1494,7 +1486,6 @@ function supprimerCoursV2() {
         db.setSync('infoCours', null);
     }
 
-
     // Réinitialiser l'interface
     coursEnEditionV2 = null;
     chargerDropdownCoursV2();
@@ -1563,7 +1554,6 @@ function viderAffichageCoursV2() {
 function afficherDetailsCoursV2(cours) {
     const conteneur = document.getElementById('v2-apercuCours');
     if (!conteneur) return;
-
 
     // Normaliser le sigle (codeCours, sigle, code ou numero)
     // 🆕 FIX (4 fév 2026) : Priorité codeCours, ajouter code pour Primo
@@ -2893,7 +2883,6 @@ async function confirmerImportV2() {
         });
     });
 
-
     // ✅ CORRECTION (9 jan 2026): Utiliser db.set (async) pour écriture fiable
     await db.set(cleEtud, etudiants);
 
@@ -4003,13 +3992,11 @@ window.ouvrirAideGroupeCours = ouvrirAideGroupeCours;
 function populerDropdownGroupeCoursV2() {
     const select = document.getElementById('v2-selectGroupeCours');
     if (!select) {
-        console.warn('[DEMO-TRACE] populerDropdownGroupeCoursV2 → #v2-selectGroupeCours absent du DOM');
         return;
     }
 
     const cleGC = cle('groupesCours');
     const groupesCours = db.getSync(cleGC, []);
-    console.warn('[DEMO-TRACE] populerDropdownGroupeCoursV2 → source', cleGC, '=', groupesCours.length, 'options');
 
     // Sauvegarder la valeur actuelle pour la restaurer après repopulation
     const valeurActuelle = select.value;
@@ -4031,8 +4018,6 @@ function populerDropdownGroupeCoursV2() {
  * Peuple les dropdowns du formulaire d'assemblage (5 éléments Beta 95.2)
  */
 function populerDropdownsAssemblageV2() {
-    console.warn('[DEMO-TRACE] populerDropdownsAssemblageV2 → entrée (demo-actif:',
-        db.getSync('demo-actif', null), ', trimestreActif:', db.getSync('trimestreActif', ''), ')');
 
     // Beta 95.2: Dropdown Trimestres
     const selectTrimestre = document.getElementById('v2-gc-trimestre');
@@ -4047,9 +4032,7 @@ function populerDropdownsAssemblageV2() {
             html += `<option value="${t.id}"${selected}>${nom}</option>`;
         });
         selectTrimestre.innerHTML = html;
-        console.warn('[DEMO-TRACE] dropdown:trimestre →', trimestres.length, 'options, ids:', trimestres.map(t => t.id).join(','));
     } else {
-        console.warn('[DEMO-TRACE] dropdown:trimestre → #v2-gc-trimestre absent du DOM');
     }
 
     // Dropdown Cours
@@ -4066,9 +4049,7 @@ function populerDropdownsAssemblageV2() {
             html += `<option value="${c.id}">${label}</option>`;
         });
         selectCours.innerHTML = html;
-        console.warn('[DEMO-TRACE] dropdown:cours →', cours.length, 'options (demo:', cours.filter(c => c.isDemo).length, ')');
     } else {
-        console.warn('[DEMO-TRACE] dropdown:cours → #v2-gc-cours absent du DOM');
     }
 
     // Dropdown Groupes d'étudiants
@@ -4092,9 +4073,7 @@ function populerDropdownsAssemblageV2() {
             html += `<option value="${grp}">${grp} (${nbEtudiants} étud.)</option>`;
         });
         selectGroupe.innerHTML = html;
-        console.warn('[DEMO-TRACE] dropdown:groupe → source', cleEtud, '=', etudiants.length, 'étud.,', groupesTries.length, 'groupes uniques');
     } else {
-        console.warn('[DEMO-TRACE] dropdown:groupe → #v2-gc-groupe absent du DOM');
     }
 
     // Beta 95.2: Dropdown Horaires
@@ -4110,9 +4089,7 @@ function populerDropdownsAssemblageV2() {
             html += `<option value="${h.id}">${nom}${suffixeDemo}</option>`;
         });
         selectHoraire.innerHTML = html;
-        console.warn('[DEMO-TRACE] dropdown:horaire → source', cleHoraires, '=', horaires.length, 'options (demo:', horaires.filter(h => h.isDemo).length, ')');
     } else {
-        console.warn('[DEMO-TRACE] dropdown:horaire → #v2-gc-horaire absent du DOM');
     }
 
     // Beta 95.2: Dropdown Enseignants (maintenant depuis liste unifiée)
@@ -4128,9 +4105,7 @@ function populerDropdownsAssemblageV2() {
             html += `<option value="${e.id}">${nomComplet}${suffixeDemo}</option>`;
         });
         selectEnseignant.innerHTML = html;
-        console.warn('[DEMO-TRACE] dropdown:enseignant →', enseignants.length, 'options (demo:', enseignants.filter(e => e.isDemo).length, ')');
     } else {
-        console.warn('[DEMO-TRACE] dropdown:enseignant → #v2-gc-enseignant absent du DOM');
     }
 
     // Beta 95.3: Dropdown Pratiques de notation (alignement Primo)
@@ -4654,7 +4629,6 @@ function supprimerGroupeCoursV2() {
     if (gcActifId === groupeCoursEnEditionId) {
         db.setSync('groupeCoursActif', null);
     }
-
 
     // Réinitialiser l'interface
     groupeCoursEnEditionId = null;
@@ -5653,7 +5627,6 @@ async function peuplerDropdownGroupeCoursActif() {
     const trimestres = db.getSync('trimestres', []);
     const trimestreActif = trimestres.find(t => t.actif);
 
-
     if (!trimestreActif) {
         selectHeader.innerHTML = '<option value="">-- Sélectionne un trimestre --</option>';
         return;
@@ -5734,7 +5707,6 @@ async function peuplerDropdownGroupeCoursActif() {
     // Sinon un groupe masqué (dansSidebar=false) est considéré invalide et remplacé silencieusement
     const gcActif = db.getSync('groupeCoursActif', null);
     const gcActifValide = gcActif && tousGroupesCours.some(gc => gc.id === gcActif.id);
-
 
     if (!gcActifValide && groupesCours.length > 0) {
         // Sélectionner le premier groupe-cours du trimestre
@@ -5934,7 +5906,6 @@ async function changerGroupeCoursActifV2(valeur) {
         _source: 'groupe-cours',
         _groupeCoursId: gc.id  // ID du groupe-cours
     });
-
 
     const selectHeader = document.getElementById('selectGroupeCoursHeader');
     if (selectHeader) selectHeader.value = groupeCoursId || '';
@@ -6279,7 +6250,6 @@ async function activerGroupeCoursV2(groupeCoursId) {
             chargerCoursSelectV2();
         }
 
-
     } catch (err) {
         console.error('[Trimestre V2] Erreur activation groupe-cours:', err);
         alert('Erreur lors de l\'activation');
@@ -6480,6 +6450,5 @@ document.addEventListener('DOMContentLoaded', function() {
         }, { once: true });
     }
 });
-
 
 })();

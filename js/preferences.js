@@ -70,7 +70,15 @@
         sisDefaut: 'lea',
         modeExpert: false,
         modeClair: false,
-        accompagnementActif: true
+        accompagnementActif: true,
+
+        // Flags de transitions pédagogiques (js/transitions.js) — suivent
+        // la progression de l'utilisateur entre les 4 étapes du parcours
+        // Numérisation → Croisement → Observation → Compétence.
+        // `false` par défaut = la bannière de transition est encore à voir.
+        transition_num_crois_vue: false,
+        transition_crois_obs_vue: false,
+        transition_obs_comp_vue: false
     };
 
     // Abonnés : { cle: [callback, callback, ...] }
