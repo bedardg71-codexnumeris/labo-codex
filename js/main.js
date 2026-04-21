@@ -234,6 +234,15 @@ document.addEventListener('DOMContentLoaded', function () {
             verifierEtProposerMigrationLegacy();
         }
 
+        // Migration consolidation onboarding v6.21 (21 avril 2026) : nettoie
+        // les flags localStorage + IDB orphelins après retrait des modules
+        // primo-* (Phase 3) et modal-bienvenue (20 avril). Idempotent.
+        if (!db.getSync('migration_onboarding_v6_21_done', false)) {
+            try { db.removeSync('primo_accueil_vu'); } catch(e) {}
+            try { db.removeSync('bienvenue_vu'); } catch(e) {}
+            db.setSync('migration_onboarding_v6_21_done', true);
+        }
+
         // ✅ NOUVEAU (30 déc 2025): Recalculer les indices C et P si demandé (après chargement démo)
         recalculerIndicesSiDemande();
 
