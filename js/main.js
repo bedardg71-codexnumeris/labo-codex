@@ -449,6 +449,12 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof initialiserModuleDonneesDemo === 'function') {
         initialiserModuleDonneesDemo();
     }
+    // PLAN 1 Phase 1 — Initialiser le namespace demo_* permanent
+    // (idempotent via flag demo-version-installee). Invisible en Phase 1,
+    // sera exposé via les sélecteurs à 2 sections en Phase 2.
+    if (typeof initialiserDemoNamespace === 'function') {
+        initialiserDemoNamespace();
+    }
 
     // MODULE ACCUEIL: Page d'accueil (Chantier 3)
     if (typeof initialiserAccueil === 'function') {
