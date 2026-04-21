@@ -1208,7 +1208,7 @@
     // ================================================================
     db._SSOT_OWNERS = {
         // Données étudiantes
-        'groupeEtudiants':          ['trimestre-v2.js', 'primo-modal.js'],
+        'groupeEtudiants':          ['trimestre-v2.js'],
         'evaluationsSauvegardees':  ['evaluation.js'],
         'presences':                ['saisie-presences.js'],
         'fichiersTravaux':          ['travaux-stockage.js', 'travaux-import.js'],
@@ -1217,7 +1217,7 @@
         'portfoliosEleves':         ['portfolio.js'],
         'interventions':            ['interventions.js'],
         // Structure pédagogique
-        'productions':              ['productions.js', 'primo-modal.js'],
+        'productions':              ['productions.js'],
         'grillesTemplates':         ['grilles.js'],
         'echellesTemplates':        ['echelles.js'],
         'pratiquesConfigurables':   ['pratiques.js', 'wizard-pratique-v2.js'],
@@ -1230,7 +1230,7 @@
         'planification_mindmap':    ['planification-donnees.js'],
         // Configuration
         'modeApplication':          ['modes.js'],
-        'groupeCoursActif':         ['trimestre-v2.js', 'primo-modal.js']
+        'groupeCoursActif':         ['trimestre-v2.js']
     };
 
 })();

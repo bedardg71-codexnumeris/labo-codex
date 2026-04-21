@@ -213,10 +213,6 @@ window.appliquerPratiqueAuCoursActive = function() {
         appliquerPratiqueAuCours(pratiqueEnEditionMateriel);
     }
 };
-window.demarrerCreationMaterielSafe = function() {
-    if (typeof demarrerCreationMateriel === 'function') demarrerCreationMateriel();
-};
-
 document.addEventListener('DOMContentLoaded', function () {
 
     // ===============================
