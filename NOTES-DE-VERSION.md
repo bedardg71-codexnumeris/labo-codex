@@ -99,6 +99,12 @@
 
 **Assistant actif de creation de materiel pedagogique**
 
+> **OBSOLETE depuis Beta 99.21 (21 avril 2026)** — Les modules primo-* et
+> parcours-apprentissage decrits dans cette section ont ete retires lors du
+> chantier de consolidation onboarding. Seul le wizard de pratique de notation
+> a survecu (accessible via accueil V3 et Reglages > Pratique). Les notes
+> ci-dessous restent comme archive historique.
+
 *Phase 1 — Retrait persona Primo*
 - **Tour guide neutre** : Retrait du personnage de Primo. Textes reformules en vouvoiement impersonnel (« Souhaitez-vous... » au lieu de « Veux-tu... »). Emoji 🧭 conserve.
 - **Commentaires nettoyes** : En-tetes, annotations et console.log mis a jour dans les 3 fichiers (primo-accueil.js, primo-modal.js, primo-questions.js).

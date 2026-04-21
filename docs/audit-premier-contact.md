@@ -1,5 +1,10 @@
 # Audit UX — Premier Contact d'un Nouvel Utilisateur
 
+> **OBSOLETE depuis Beta 99.21 (21 avril 2026)** — Cet audit decrit le flow
+> avant la consolidation onboarding (retrait primo-* / parcours-apprentissage /
+> tutoriel-interactif / modal-bienvenue). L'accueil V3 + tour guide 6 etapes +
+> fleches didactiques sont desormais l'unique parcours d'onboarding.
+
 **Date d'audit** : 18 avril 2026  
 **Version** : Beta 99.18 (Build 0418-0655)  
 **Contexte** : localStorage vide, IndexedDB vide, navigation privée ou nouvel utilisateur absolu  
