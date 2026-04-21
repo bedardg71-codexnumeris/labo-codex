@@ -123,8 +123,8 @@ function changerModeParcoursDelegue(el) {
 // === CONFIGURATION ===
 // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
 // Les valeurs ici servent de fallback si version.json n'est pas disponible
-let VERSION_MAJEURE = '99.20';
-let BUILD_ID = '0420-1955';
+let VERSION_MAJEURE = '99.21';
+let BUILD_ID = '0421-0705';
 // Snapshot du build contenu dans CE fichier script (pour détecter les scripts périmés)
 const _SCRIPT_BUILD = BUILD_ID;
 
