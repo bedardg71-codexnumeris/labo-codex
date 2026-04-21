@@ -2992,6 +2992,40 @@ textarea {
     background: #fff3e0;
     border-color: var(--orange-accent);
 }
+/* Badge Démo (Plan 1 Phase 2.1) — violet pour signaler le matériel CC */
+.badge-source--demo {
+    color: #7b3fa1;
+    background: #f3e5f5;
+    border-color: #9c27b0;
+}
+.mode-sombre .badge-source--demo,
+body:not(.mode-clair) .badge-source--demo {
+    color: #ce93d8;
+    background: rgba(156, 39, 176, 0.18);
+    border-color: #9c27b0;
+}
+
+/* Carte Démo — bordure pointillée signalant l'exemple CC lecture seule */
+.biblio-carte--demo {
+    border: 1.5px dashed #9c27b0;
+    background: rgba(156, 39, 176, 0.04);
+}
+.mode-clair .biblio-carte--demo {
+    background: rgba(156, 39, 176, 0.06);
+}
+
+/* Titre de la section 3 Démo — accent violet cohérent avec le badge */
+.biblio-section-titre--demo {
+    border-left: 3px solid #9c27b0;
+    padding-left: 10px;
+    margin-top: 30px;
+}
+.biblio-section-intro {
+    color: var(--gris-moyen);
+    font-size: 0.9rem;
+    margin: 0 0 12px 0;
+    font-style: italic;
+}
 .badge-source--id {
     background: var(--surface-carte, #1a3a48);
     color: var(--texte-secondaire, #8aa4b0);

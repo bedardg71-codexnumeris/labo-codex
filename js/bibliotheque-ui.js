@@ -25,9 +25,15 @@
     };
 
     /**
-     * Génère le badge source HTML (Locale / Bibliothèque / Retirée)
+     * Génère le badge source HTML (Démo / Locale / Bibliothèque / Retirée)
+     * Un item démo (isDemo === true ou auteur « Demo Labo Codex ») court-circuite
+     * les autres cas — la source CC prime sur locale/partagée.
      */
     BibliothequeUI.genererBadgeSource = function (item, itemsLocaux) {
+        const estDemo = item && (item.isDemo === true || item.auteur === 'Demo Labo Codex');
+        if (estDemo) {
+            return '<span class="badge-source badge-source--demo">Démo</span>';
+        }
         const estLocale = itemsLocaux.some(function (i) { return i.id === item.id; });
         const estRetiree = item.dansBibliotheque === false;
 
@@ -172,6 +178,47 @@
     };
 
     /**
+     * Rend une carte démo (lecture seule, section « Démo »)
+     * Style « exemple CC » : badge Démo, bordure pointillée, un seul bouton
+     * d'action « Prendre comme modèle ». La carte n'offre pas d'édition directe.
+     * @param {Object} opts
+     * @param {string} opts.nom - Nom de l'item démo
+     * @param {string} opts.id - ID complet (ex: GRILLE1759243306842)
+     * @param {string} opts.metadonnees - Ligne de métadonnées
+     * @param {string} [opts.description] - Description optionnelle
+     * @param {string} [opts.badgesPratiques] - HTML des badges de pratique
+     * @param {string} [opts.actionFork] - Nom de la fonction globale de fork (défaut : forkItemDemo)
+     * @param {string} [opts.classeItem] - Classe CSS supplémentaire
+     * @param {string} [opts.dataAttrs] - Attributs data- supplémentaires
+     */
+    BibliothequeUI.renderCarteDemo = function (opts) {
+        var idCourt = BibliothequeUI.genererIdCourt(opts.id);
+        var badgesPratiques = opts.badgesPratiques || '';
+        var actionFork = opts.actionFork || 'forkItemDemo';
+        var classeItem = opts.classeItem || '';
+        var dataAttrs = opts.dataAttrs || '';
+        var badgeDemoHTML = '<span class="badge-source badge-source--demo">Démo</span>';
+
+        return '<div class="' + classeItem + ' biblio-carte biblio-carte--demo" ' + dataAttrs + '>' +
+            '<div class="biblio-carte-contenu">' +
+                '<div style="flex: 1;">' +
+                    '<div class="biblio-carte-titre">' +
+                        badgesPratiques +
+                        opts.nom +
+                        ' <span class="badge-source badge-source--id" title="ID: ' + opts.id + '">#' + idCourt + '</span>' +
+                        ' ' + badgeDemoHTML +
+                    '</div>' +
+                    '<div class="biblio-carte-meta">' + opts.metadonnees + '</div>' +
+                    (opts.description ? '<div class="biblio-carte-desc">' + opts.description + '</div>' : '') +
+                '</div>' +
+                '<div class="biblio-carte-actions biblio-carte-actions--vertical">' +
+                    '<button data-action="' + actionFork + '" data-param="' + opts.id + '" class="btn btn-principal btn-tres-compact" title="Créer une copie éditable de cet exemple">Prendre comme modèle</button>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+    };
+
+    /**
      * Génère le bloc d'avertissement doublons
      */
     BibliothequeUI.renderAvertissementDoublons = function (doublons, fnIdCourt) {
@@ -219,9 +266,23 @@
      * @param {string} config.filtresSection2 - HTML des filtres avant Section 2
      * @param {string} config.contenuSection2 - HTML du contenu de la Section 2
      * @param {string} [config.contenuIdListe2] - ID du conteneur Section 2
+     * @param {string} [config.titreSection3] - Titre de la Section 3 Démo (si absent, section omise)
+     * @param {string} [config.introSection3] - Paragraphe d'introduction de la Section 3
+     * @param {string} [config.contenuSection3] - HTML du contenu de la Section 3
+     * @param {string} [config.contenuIdListe3] - ID du conteneur Section 3
      */
     BibliothequeUI.creerModal = function (config) {
         var fermerAttr = 'data-action="' + (config.onFermerAction || config.onFermer) + '"';
+        var section3HTML = '';
+        if (config.titreSection3) {
+            section3HTML =
+                '<h3 class="biblio-section-titre biblio-section-titre--demo">' + config.titreSection3 + '</h3>' +
+                (config.introSection3 ? '<p class="biblio-section-intro">' + config.introSection3 + '</p>' : '') +
+                '<div id="' + (config.contenuIdListe3 || '') + '">' +
+                    (config.contenuSection3 || '') +
+                '</div>';
+        }
+
         var html = '<div id="' + config.modalId + '" class="modal-js-overlay" style="z-index: 10000;">' +
             '<div class="modal-js-contenu" style="max-width: 800px;">' +
                 '<button ' + fermerAttr + ' class="modal-js-btn-fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>' +
@@ -248,6 +309,8 @@
                 '<div id="' + (config.contenuIdListe2 || '') + '">' +
                     config.contenuSection2 +
                 '</div>' +
+
+                section3HTML +
 
             '</div>' +
         '</div>';
