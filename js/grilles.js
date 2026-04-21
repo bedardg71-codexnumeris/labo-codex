@@ -994,7 +994,14 @@ async function dupliquerGrille(grilleId) {
         return;
     }
 
-    // Créer la nouvelle grille
+    // Auteur de l'utilisateur actif (CC BY) ; fallback « Inconnu » si pas défini
+    const auteurActif = (typeof obtenirProfilAuteurActifSync === 'function'
+        ? obtenirProfilAuteurActifSync()?.auteur_original
+        : null) || 'Inconnu';
+
+    // Créer la nouvelle grille. Elle devient un nouvel original de l'utilisateur,
+    // avec trace d'origine `inspireDe` (respect CC BY quel que soit l'auteur source).
+    // Si la source était une démo, le nouvel item perd le flag isDemo.
     const nouvelleGrille = {
         id: genererIdUnique('GRILLE_'),
         nom: nouveauNom.trim(),
@@ -1004,7 +1011,13 @@ async function dupliquerGrille(grilleId) {
         })),
         dateCreation: new Date().toISOString(),
         dateModification: new Date().toISOString(),
-        baseSur: grilleOriginale.nom,
+        auteur: auteurActif,
+        isDemo: false,
+        inspireDe: {
+            nom: grilleOriginale.nom,
+            auteur: grilleOriginale.auteur || 'Inconnu',
+            date: new Date().toISOString().slice(0, 10)
+        },
         dansBibliotheque: true  // ✅ AJOUT (Beta 95.2 - Bug Bruno) - Grille dupliquée dans bibliothèque
     };
 
@@ -2167,15 +2180,10 @@ async function preparerDonneesBibliothequeGrilles() {
     const grillesDisponibles = await obtenirToutesLesGrillesBibliotheque();
     const doublonsDetectes = detecterDoublonsGrilles(grillesDansBibliotheque, grillesDisponibles);
     const disciplines = obtenirDisciplinesDisponiblesGrilles();
-    // Section Démo (Plan 1 Phase 2.1) : grilles CC portées par demo-namespace.js.
-    // Lecture seule côté UI — bouton « Prendre comme modèle » (fork en Phase 3).
-    const grillesDemo = (typeof cleDemo === 'function')
-        ? (db.getSync(cleDemo('grillesTemplates'), []) || [])
-        : [];
 
     // Section 1 : cartes pour les grilles dans la sélection
     const cartesSection1 = grillesDansBibliotheque.map(grille => ({
-        nom: grille.nom || 'Sans titre',
+        nom: BibliothequeUI.formaterTitreDemo(grille.nom || 'Sans titre', BibliothequeUI.estItemDemo(grille)),
         id: grille.id,
         badgeSource: BibliothequeUI.genererBadgeSource(grille, grillesDansBibliotheque),
         badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : '',
@@ -2201,7 +2209,7 @@ async function preparerDonneesBibliothequeGrilles() {
         grillesParDiscipline[discipline].forEach(grille => {
             const dejaPresent = grilles.some(g => (g.id === grille.id || g.idOriginal === grille.id) && g.dansBibliotheque !== false);
             cartesSection2.push({
-                nom: grille.nom || 'Sans titre',
+                nom: BibliothequeUI.formaterTitreDemo(grille.nom || 'Sans titre', BibliothequeUI.estItemDemo(grille)),
                 id: grille.id,
                 badgeSource: BibliothequeUI.genererBadgeSource(grille, grillesDansBibliotheque),
                 badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : '',
@@ -2219,18 +2227,7 @@ async function preparerDonneesBibliothequeGrilles() {
         });
     });
 
-    // Section 3 Démo : cartes lecture seule
-    const cartesSection3 = grillesDemo.map(grille => ({
-        nom: grille.nom || 'Sans titre',
-        id: grille.id,
-        badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : '',
-        metadonnees: `${grille.criteres?.length || 0} critère(s)${grille.discipline ? ' • ' + grille.discipline : ''} • par Demo Labo Codex`,
-        description: grille.description || '',
-        classeItem: 'grille-demo-item',
-        actionFork: 'forkGrilleDemo'
-    }));
-
-    return { cartesSection1, cartesSection2, cartesSection3, doublonsDetectes, disciplines };
+    return { cartesSection1, cartesSection2, doublonsDetectes, disciplines };
 }
 
 async function afficherBibliothequeGrilles() {
@@ -2276,15 +2273,6 @@ async function afficherBibliothequeGrilles() {
         contenuSection2 += BibliothequeUI.renderCarteDisponible(carte);
     });
 
-    // Section 3 Démo (Plan 1 Phase 2.1) — affichée si au moins une grille démo.
-    let contenuSection3 = '';
-    if (data.cartesSection3 && data.cartesSection3.length > 0) {
-        data.cartesSection3.forEach(carte => {
-            contenuSection3 += BibliothequeUI.renderCarteDemo(carte);
-        });
-    }
-    const sectionDemoActive = contenuSection3.length > 0;
-
     BibliothequeUI.creerModal({
         modalId: 'modalBibliothequeGrilles',
         titre: 'Bibliothèque de grilles de critères',
@@ -2298,30 +2286,9 @@ async function afficherBibliothequeGrilles() {
         titreSection2: 'Grilles disponibles à ajouter à la barre latérale',
         filtresSection2: filtresHTML,
         contenuIdListe2: 'listeGrillesDisponibles',
-        contenuSection2: contenuSection2,
-        titreSection3: sectionDemoActive ? 'Démo (par Demo Labo Codex)' : null,
-        introSection3: sectionDemoActive ? 'Exemples pédagogiques fournis avec l\'application. Clique sur « Prendre comme modèle » pour créer ta propre version éditable.' : null,
-        contenuIdListe3: 'listeGrillesDemo',
-        contenuSection3: contenuSection3
+        contenuSection2: contenuSection2
     });
 }
-
-/**
- * Fork d'une grille démo — placeholder Phase 2.1.
- * Le fork complet (création d'une copie éditable avec métadonnée inspireDe)
- * sera implémenté en Phase 3 du plan d'autonomisation.
- */
-function forkGrilleDemo(id) {
-    alert(
-        'Bientôt disponible (Phase 3)\n\n' +
-        'La fonction « Prendre comme modèle » permettra de créer une copie ' +
-        'éditable de cette grille démo dans ta propre bibliothèque, avec une ' +
-        'trace d\'origine « Inspiré de Demo Labo Codex ».\n\n' +
-        'Pour l\'instant, tu peux observer la structure de cette grille ' +
-        'pour t\'en inspirer dans tes propres créations.'
-    );
-}
-window.forkGrilleDemo = forkGrilleDemo;
 
 /**
  * ✅ AJOUT (8 décembre 2025) : Ajoute une grille individuelle à la bibliothèque
@@ -2546,11 +2513,25 @@ async function dupliquerGrilleBibliotheque(id) {
         return;
     }
 
-    // Créer une copie avec un nouvel ID
+    // Auteur de l'utilisateur actif (CC BY) ; fallback « Inconnu » si pas défini
+    const auteurActif = (typeof obtenirProfilAuteurActifSync === 'function'
+        ? obtenirProfilAuteurActifSync()?.auteur_original
+        : null) || 'Inconnu';
+
+    // Créer une copie avec un nouvel ID. La copie devient un nouvel original
+    // de l'utilisateur ; trace d'origine `inspireDe` (respect CC BY). Si la
+    // source était une démo, le nouvel item perd le flag isDemo.
     const nouvelleGrille = {
         ...grille,
         id: genererIdUnique('GRILLE_'),
         nom: `${grille.nom} (copie)`,
+        auteur: auteurActif,
+        isDemo: false,
+        inspireDe: {
+            nom: grille.nom,
+            auteur: grille.auteur || 'Inconnu',
+            date: new Date().toISOString().slice(0, 10)
+        },
         dansBibliotheque: true,
         dateCreation: new Date().toISOString()
     };
