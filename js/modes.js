@@ -1134,11 +1134,8 @@ function obtenirPratiqueActiveGroupeCours() {
         return modalites.pratiqueNotation;
     }
 
-    // 5. Défaut : sommative
-    if (!window._avertiPratiqueParDefaut) {
-        console.warn('[Modes] Aucune pratique définie, utilisation par défaut: sommative');
-        window._avertiPratiqueParDefaut = true;
-    }
+    // 5. Défaut : sommative (fallback silencieux — pratique par défaut attendue
+    // pour un utilisateur qui n'a pas encore configuré sa pratique de notation)
     return 'sommative';
 }
 

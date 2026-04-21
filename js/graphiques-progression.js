@@ -1599,7 +1599,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
         // Récupérer les snapshots hebdomadaires
         const snapshots = obtenirSnapshotsHebdomadaires();
         if (snapshots.length === 0) {
-            console.warn('Aucun snapshot hebdomadaire disponible');
+            // Fraîche installation — message utilisateur dans le canvas suffit, pas de warn console
             afficherMessageAttente(canvas, 'Aucune donnée disponible', 'Capturez des snapshots hebdomadaires.');
             return null;
         }
@@ -2610,7 +2610,7 @@ function creerGraphiqueGroupeSpaghetti(canvasId) {
 
 
         if (productionsArtefacts.length === 0) {
-            console.warn('Aucune production disponible pour le graphique spaghetti');
+            // Fraîche installation — message utilisateur dans le canvas suffit, pas de warn console
             afficherMessageAttente(canvas, 'Aucun artefact défini', 'Crée des productions dans Réglages › Productions');
             return null;
         }

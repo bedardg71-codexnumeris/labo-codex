@@ -224,10 +224,8 @@ function obtenirGrilleReferenceDepistage() {
     const grilleId = obtenirPreference('grilleReferenceDepistage');
 
     if (!grilleId) {
-        if (!window._avertiGrilleAbsente) {
-            console.warn('⚠️ Aucune grille de référence configurée pour le dépistage');
-            window._avertiGrilleAbsente = true;
-        }
+        // Fraîche installation ou pas de grille sélectionnée pour le dépistage.
+        // Silent : le profil étudiant affiche son fallback sans signal console.
         return null;
     }
 

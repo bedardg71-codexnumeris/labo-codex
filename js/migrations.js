@@ -28,10 +28,14 @@ function migrerEtudiantsVersCoursId() {
     // ✅ NAMESPACING (Beta 95.5) : Lire depuis cle namespacee si disponible
     const cleEtudiants = cle('groupeEtudiants');
     const etudiants = db.getSync(cleEtudiants, []);
+    // Fraîche installation — rien à migrer, silent.
+    if (!Array.isArray(etudiants) || etudiants.length === 0) return 0;
+
     const cours = db.getSync('listeCours', []);
     const coursActif = cours.find(c => c.actif) || cours[0];
 
     if (!coursActif) {
+        // Étudiants présents mais aucun cours actif — anomalie réelle, on warne.
         console.warn('⚠️ [Migration] Aucun cours actif, impossible de migrer les étudiants');
         return 0;
     }
@@ -65,10 +69,14 @@ function migrerProductionsVersCoursId() {
     // ✅ CORRECTION (Beta 95 - 2 jan 2026) : Utiliser clé namespacée
     const cleProductions = cle('productions');
     const productions = db.getSync(cleProductions, []);
+    // Fraîche installation — rien à migrer, silent.
+    if (!Array.isArray(productions) || productions.length === 0) return 0;
+
     const cours = db.getSync('listeCours', []);
     const coursActif = cours.find(c => c.actif) || cours[0];
 
     if (!coursActif) {
+        // Productions présentes mais aucun cours actif — anomalie réelle.
         console.warn('⚠️ [Migration] Aucun cours actif, impossible de migrer les productions');
         return 0;
     }
@@ -115,10 +123,18 @@ function migrerPresencesVersCoursId() {
     // ✅ CORRECTION (Beta 95 - 2 jan 2026) : Utiliser clé namespacée
     const clePresences = cle('presences');
     const presences = db.getSync(clePresences, []);
+    // Fraîche installation — rien à migrer, silent.
+    // Les présences peuvent être un objet ({date: {...}}) ou un tableau.
+    const videPresences = !presences ||
+        (Array.isArray(presences) && presences.length === 0) ||
+        (typeof presences === 'object' && !Array.isArray(presences) && Object.keys(presences).length === 0);
+    if (videPresences) return 0;
+
     const cours = db.getSync('listeCours', []);
     const coursActif = cours.find(c => c.actif) || cours[0];
 
     if (!coursActif) {
+        // Présences enregistrées mais aucun cours actif — anomalie réelle.
         console.warn('⚠️ [Migration] Aucun cours actif, impossible de migrer les présences');
         return 0;
     }
