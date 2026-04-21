@@ -539,9 +539,6 @@ function afficherSousSection(idSousSection) {
             if (typeof initialiserPreferencesV2 === 'function') {
                 setTimeout(initialiserPreferencesV2, 100);
             }
-            if (window.parcours && window.parcours.initialiserPreferencesParcours) {
-                setTimeout(window.parcours.initialiserPreferencesParcours, 150);
-            }
             break;
 
         case 'reglages-depistage':
@@ -603,11 +600,6 @@ function afficherSousSection(idSousSection) {
     // Chantier 4 : Guidage contextuel en mode démo
     if (typeof afficherGuidageDemo === 'function') {
         afficherGuidageDemo(idSousSection);
-    }
-
-    // Parcours d'apprentissage : vérifier les jalons
-    if (window.parcours && typeof window.parcours.onNavigationChange === 'function') {
-        window.parcours.onNavigationChange(idSousSection);
     }
 
     // Événement public : permet aux modules externes (ex: flèches didactiques)

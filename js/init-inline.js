@@ -101,11 +101,6 @@ function definirModeExpertFromEl(el) {
     definirModeExpert(el.checked);
 }
 
-// Parcours : inline avait if(window.parcours) window.parcours.changerModeParcours(this.value)
-function changerModeParcoursDelegue(el) {
-    if (window.parcours) window.parcours.changerModeParcours(el.value);
-}
-
 // ===============================
 // SECTION: Gestion des versions et initialisation (ex-ligne 17040)
 // ===============================
@@ -124,7 +119,7 @@ function changerModeParcoursDelegue(el) {
 // VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
 // Les valeurs ici servent de fallback si version.json n'est pas disponible
 let VERSION_MAJEURE = '99.21';
-let BUILD_ID = '0421-1431';
+let BUILD_ID = '0421-1432';
 // Snapshot du build contenu dans CE fichier script (pour détecter les scripts périmés)
 const _SCRIPT_BUILD = BUILD_ID;
 
