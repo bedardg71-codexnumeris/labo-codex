@@ -614,8 +614,18 @@ window.demarrerEvaluation = demarrerEvaluation;
 window.explorerLibrement = explorerLibrement;
 window.consulterAide = consulterAide;
 
-// Auto-initialisation
-initialiserPrimoAccueil();
+// Auto-initialisation DÉSACTIVÉE le 21 avril 2026 (audit terrain iPad) :
+// cette modale « PARCOURS MODULAIRE » (MODULE 1→6) est obsolète depuis la
+// refonte accueil V3 (commit e542749, 19 avril) et le tour guidé 6 étapes
+// (Beta 99.18). Elle apparaissait systématiquement au 1er démarrage d'un
+// utilisateur avec accompagnementActif=true (défaut) et saturait l'écran
+// iPad portrait. L'accueil V3 bannière-bienvenue + 3 CTA la remplace.
+//
+// Les fonctions du module restent exposées (reafficherAccueilPrimo,
+// demarrerWizard, etc.) pour rétro-compat au cas où un flow les appellerait.
+// Seul l'auto-trigger au chargement est retiré.
+//
+// initialiserPrimoAccueil();
 
 
 })();
