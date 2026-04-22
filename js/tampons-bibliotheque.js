@@ -93,7 +93,7 @@ async function partagerTampon(tamponId) {
         custom: tampon.custom || false,
         metadata_cc: {
             licence: 'CC BY-NC-SA 4.0',
-            auteur_original: (typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : '') || '',
+            auteur_original: obtenirIdentiteCCUtilisateur(),
             description_courte: tampon.nom
         }
     };
@@ -164,7 +164,7 @@ function exporterBibliotheque() {
         tampons: items,
         metadata_cc: {
             licence: 'CC BY-NC-SA 4.0',
-            auteur_original: (typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : '') || '',
+            auteur_original: obtenirIdentiteCCUtilisateur(),
             description_courte: 'Collection de tampons Labo Codex'
         }
     };

@@ -1630,8 +1630,8 @@ async function creerNouvellePratique() {
     // Générer un ID unique
     const nouvelId = genererIdUnique('pratique_');
 
-    // 🆕 Beta 95.4 : Définir l'auteur original
-    const enseignantActif = typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : null;
+    // Auteur CC = identité de l'utilisateur (Plan 1 §4.4)
+    const identiteUtilisateur = obtenirIdentiteCCUtilisateur();
 
     const nouvellePratique = {
         id: nouvelId,
@@ -1639,7 +1639,7 @@ async function creerNouvellePratique() {
         description: '',
         type: 'pan-standards',
         pratiques: ['STD'],
-        auteur: enseignantActif || 'Utilisateur',
+        auteur: identiteUtilisateur,
         discipline: '',
         dateCreation: new Date().toISOString(),
         dansBibliotheque: true,
@@ -1653,12 +1653,11 @@ async function creerNouvellePratique() {
                 decouplerPR: false
             }
         },
-        // 🆕 Beta 95.4 : Métadonnées CC pour traçabilité des contributeurs
-        metadata_cc: enseignantActif ? {
-            auteur_original: enseignantActif,
+        metadata_cc: {
+            auteur_original: identiteUtilisateur,
             date_creation: new Date().toISOString().split('T')[0],
             contributeurs: []
-        } : undefined
+        }
     };
 
     // 🆕 FIX v3 (20 jan 2026) : localStorage comme source principale

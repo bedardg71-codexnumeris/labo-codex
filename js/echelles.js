@@ -3923,8 +3923,8 @@ async function sauvegarderEchelleComplete() {
         const infoCours = typeof db !== 'undefined' && db.getSync ? db.getSync('infoCours', {}) : {};
         const discipline = infoCours?.discipline || '';
 
-        // 🆕 Beta 95.4 : Définir l'auteur original
-        const enseignantActif = typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : null;
+        // Auteur CC = identité de l'utilisateur (Plan 1 §4.4)
+        const identiteUtilisateur = obtenirIdentiteCCUtilisateur();
 
         // Créer la nouvelle échelle
         const nouvelleEchelle = {
@@ -3937,11 +3937,11 @@ async function sauvegarderEchelleComplete() {
             dansBibliotheque: true,
             dateCreation: new Date().toISOString(),
             dateModification: new Date().toISOString(),
-            metadata_cc: enseignantActif ? {
-                auteur_original: enseignantActif,
+            metadata_cc: {
+                auteur_original: identiteUtilisateur,
                 date_creation: new Date().toISOString().split('T')[0],
                 contributeurs: []
-            } : undefined
+            }
         };
 
         // Sauvegarder dans la base (utilise echelles déjà chargé)

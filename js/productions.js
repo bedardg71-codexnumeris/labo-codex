@@ -999,14 +999,11 @@ async function sauvegarderProduction() {
         productionData.dateCreation = new Date().toISOString();
         productionData.dateModification = new Date().toISOString();
 
-        // 🆕 Beta 95.4 : Pour nouvelle production, définir l'auteur original
-        const enseignantActif = typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : null;
-        if (enseignantActif) {
-            if (!productionData.metadata_cc) productionData.metadata_cc = {};
-            productionData.metadata_cc.auteur_original = enseignantActif;
-            productionData.metadata_cc.date_creation = new Date().toISOString().split('T')[0];
-            if (!productionData.metadata_cc.contributeurs) productionData.metadata_cc.contributeurs = [];
-        }
+        // Auteur CC = identité de l'utilisateur (Plan 1 §4.4)
+        if (!productionData.metadata_cc) productionData.metadata_cc = {};
+        productionData.metadata_cc.auteur_original = obtenirIdentiteCCUtilisateur();
+        productionData.metadata_cc.date_creation = new Date().toISOString().split('T')[0];
+        if (!productionData.metadata_cc.contributeurs) productionData.metadata_cc.contributeurs = [];
 
         evaluations.push(productionData);
     }

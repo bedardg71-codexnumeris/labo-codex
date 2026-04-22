@@ -422,16 +422,14 @@ async function initialiserNouveauCartouche(grilleId) {
         dansBibliotheque: true  // ✅ AJOUT (8 décembre 2025) : Visible dans la bibliothèque par défaut
     };
 
-    // Initialiser metadata_cc (uniforme avec grille, production, échelle)
-    const enseignantActif = typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : null;
-    if (enseignantActif) {
-        cartoucheActuel.metadata_cc = {
-            auteur_original: enseignantActif,
-            date_creation: new Date().toISOString().split('T')[0],
-            contributeurs: []
-        };
-    }
-    
+    // Auteur CC = identité de l'utilisateur (Plan 1 §4.4)
+    cartoucheActuel.metadata_cc = {
+        auteur_original: obtenirIdentiteCCUtilisateur(),
+        date_creation: new Date().toISOString().split('T')[0],
+        contributeurs: []
+    };
+
+
     // Réinitialiser les champs
     document.getElementById('nomCartouche').value = '';
     document.getElementById('descriptionCartouche').value = '';
@@ -762,14 +760,13 @@ async function sauvegarderCartouche() {
     cartoucheActuel.contexteSpecifique = (document.getElementById('contexteSpecifiqueCartouche') || {}).value ? document.getElementById('contexteSpecifiqueCartouche').value.trim() : '';
     cartoucheActuel.pratiquesCompatibles = pratiquesCompatibles;
 
-    // S'assurer que metadata_cc existe toujours (backfill pour cartouches anciennes)
+    // Backfill metadata_cc pour cartouches anciennes (Plan 1 §4.4 : auteur = identité utilisateur)
     if (!cartoucheActuel.metadata_cc) cartoucheActuel.metadata_cc = {};
-    const enseignantActif = typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : null;
     if (!cartoucheActuel.metadata_cc.date_creation) {
         cartoucheActuel.metadata_cc.date_creation = new Date().toISOString().split('T')[0];
     }
-    if (!cartoucheActuel.metadata_cc.auteur_original && enseignantActif) {
-        cartoucheActuel.metadata_cc.auteur_original = enseignantActif;
+    if (!cartoucheActuel.metadata_cc.auteur_original) {
+        cartoucheActuel.metadata_cc.auteur_original = obtenirIdentiteCCUtilisateur();
     }
     if (!cartoucheActuel.metadata_cc.contributeurs) {
         cartoucheActuel.metadata_cc.contributeurs = [];
