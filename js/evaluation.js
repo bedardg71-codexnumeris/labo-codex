@@ -2224,6 +2224,18 @@ function sauvegarderEvaluation() {
         return;
     }
 
+    // Phase 4.C : interdire les références à des items démo (Plan §3.4)
+    if (typeof BibliothequeUI !== 'undefined' && BibliothequeUI.verifierReferencesPasDemo) {
+        const violationDemo = BibliothequeUI.verifierReferencesPasDemo([
+            { id: productionId, collection: (typeof getCleProductions === 'function' ? getCleProductions() : cle('productions')), labelType: 'production' },
+            { id: grilleId, collection: 'grillesTemplates', labelType: 'grille' }
+        ]);
+        if (violationDemo) {
+            afficherNotificationErreur('Référence démo non autorisée', violationDemo.message);
+            return;
+        }
+    }
+
     // Collecter les évaluations des critères
     const criteres = [];
     if (grille && grille.criteres) {
@@ -5875,6 +5887,18 @@ function sauvegarderEvaluationModifiee() {
         afficherNotificationErreur('Grille introuvable', `La grille de critères sélectionnée n'existe plus.`);
         console.error('[Évaluation] ❌ Référence invalide: grilleId', grilleId);
         return;
+    }
+
+    // Phase 4.C : interdire les références à des items démo (Plan §3.4)
+    if (typeof BibliothequeUI !== 'undefined' && BibliothequeUI.verifierReferencesPasDemo) {
+        const violationDemo = BibliothequeUI.verifierReferencesPasDemo([
+            { id: productionId, collection: (typeof getCleProductions === 'function' ? getCleProductions() : cle('productions')), labelType: 'production' },
+            { id: grilleId, collection: 'grillesTemplates', labelType: 'grille' }
+        ]);
+        if (violationDemo) {
+            afficherNotificationErreur('Référence démo non autorisée', violationDemo.message);
+            return;
+        }
     }
 
     // Collecter les évaluations des critères

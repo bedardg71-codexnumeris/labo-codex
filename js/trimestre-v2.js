@@ -4590,6 +4590,20 @@ function sauvegarderGroupeCoursV2() {
         return;
     }
 
+    // Phase 4.C : interdire les références à des items démo (Plan §3.4)
+    if (typeof BibliothequeUI !== 'undefined' && BibliothequeUI.verifierReferencesPasDemo) {
+        const violation = BibliothequeUI.verifierReferencesPasDemo([
+            { id: coursId, collection: 'cours', labelType: 'cours' },
+            { id: horaireId, collection: cle('horaires'), labelType: 'horaire' },
+            { id: enseignantId, collection: 'enseignants', labelType: 'enseignant' },
+            { id: pratiqueId, collection: 'pratiquesConfigurables', labelType: 'pratique' }
+        ]);
+        if (violation) {
+            afficherNotificationErreur('Référence démo non autorisée', violation.message);
+            return;
+        }
+    }
+
     // Générer le nom
     const nom = genererNomGroupeCoursV2();
 

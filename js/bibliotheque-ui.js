@@ -173,6 +173,50 @@
      * @param {string} prefixeId - Préfixe d'ID (ex. 'GRILLE_')
      * @returns {Object} Copie prête à être sauvegardée
      */
+    /**
+     * Phase 4.C : vérifie qu'aucune des références ne pointe vers un item
+     * démo (matériel CC livré par Labo Codex). Empêche une entité réelle
+     * de référencer un item démo non forké (Plan 1 §3.4).
+     *
+     * Détection en 2 passes :
+     *   1. Préfixe `demo-` sur l'id (convention Phase 2 pour dropdowns natifs)
+     *   2. Lookup dans la collection + flag `isDemo` ou auteur « Labo Codex »
+     *
+     * @param {Array<{id:string, collection:string, labelType:string}>} references
+     * @returns {Object|null} { type, nom, message } si violation, null sinon
+     */
+    BibliothequeUI.verifierReferencesPasDemo = function (references) {
+        if (!references || !references.length) return null;
+        for (var i = 0; i < references.length; i++) {
+            var ref = references[i];
+            if (!ref || !ref.id) continue;
+
+            // Préfixe démo (Phase 2, option disabled dans dropdown natif)
+            if (typeof ref.id === 'string' && ref.id.indexOf('demo-') === 0) {
+                return {
+                    type: ref.labelType || 'élément',
+                    nom: '',
+                    message: 'Le ' + (ref.labelType || 'élément') + ' sélectionné est un exemple fourni par Labo Codex. Clique sur « Dupliquer » dans sa bibliothèque pour en créer ta propre version avant de l\'utiliser.'
+                };
+            }
+
+            // Lookup dans la collection
+            if (ref.collection && typeof db !== 'undefined' && db.getSync) {
+                var items = db.getSync(ref.collection, []) || [];
+                var item = items.find(function (x) { return x && x.id === ref.id; });
+                if (item && BibliothequeUI.estItemDemo(item)) {
+                    var nom = item.nom || item.titre || '';
+                    return {
+                        type: ref.labelType || 'élément',
+                        nom: nom,
+                        message: 'Le ' + (ref.labelType || 'élément') + (nom ? ' « ' + nom + ' »' : '') + ' est un exemple fourni par Labo Codex. Clique sur « Dupliquer » dans sa bibliothèque pour en créer ta propre version avant de l\'utiliser.'
+                    };
+                }
+            }
+        }
+        return null;
+    };
+
     BibliothequeUI.forkerItem = function (source, prefixeId) {
         var genererId = window.genererIdUnique || function (p) {
             return (p || 'ITEM_') + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
