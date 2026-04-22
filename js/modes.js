@@ -929,18 +929,13 @@ function _syncBtnThemeNav() {
 }
 
 /**
- * Vérifie si on est en mode Démo (route démo active)
- * @returns {boolean} true si la route démo est active
+ * État du toggle « Données démo » sur l'accueil V3 (Plan 1 Phase 5).
+ * Conservée temporairement comme alias du flag — retirée entièrement en 5.B
+ * avec l'audit de ses callers.
+ * @returns {boolean} true si la section Démo doit s'afficher dans les sélecteurs
  */
 function estEnModeDemo() {
-    // Vérifier le flag explicite
-    if (db.getSync('demo-actif', null) === 'true') return true;
-    // Fallback robuste : vérifier le trimestre actif (couvre les cas de désync)
-    if (typeof obtenirTrimestreActif === 'function') {
-        const t = obtenirTrimestreActif();
-        if (t && t.id === 'demo') return true;
-    }
-    return false;
+    return db.getSync('demo-actif', null) === 'true';
 }
 
 window.MODES = MODES;
