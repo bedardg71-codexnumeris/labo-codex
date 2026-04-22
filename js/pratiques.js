@@ -1863,6 +1863,7 @@ function genererCartePratique(pratique, estActive, modifiable) {
                 <!-- Séparateur visuel -->
                 <div style="border-top: 1px solid var(--gris-leger); margin-bottom: 12px; padding-top: 12px;">
                     ${auteur ? `<div style="margin-bottom: 6px; color: var(--gris-moyen); font-size: 0.85rem;">${auteur}</div>` : ''}
+                    ${(function(l){return l ? '<div class="biblio-carte-inspire" style="margin-bottom: 6px;">' + echapperHtml(l) + '</div>' : '';})(BibliothequeUI.formaterInspireDe(pratique))}
                     ${pratique.description ? `<p style="color: var(--gris-moyen); font-size: 0.85rem; margin: 0; line-height: 1.4;">${pratique.description}</p>` : ''}
                     ${nbCours > 0 ? `<div style="margin-top: 8px; color: var(--gris-moyen); font-size: 0.85rem;"><strong>Cours :</strong> ${coursUtilisant.map(c => c.sigle).join(', ')}</div>` : ''}
                 </div>

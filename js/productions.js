@@ -1965,6 +1965,7 @@ async function preparerDonneesBibliothequeProductions() {
         id: prod.id,
         badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsDansSelection),
         metadonnees: `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%${prod.objectif ? ' • Objectif: ' + prod.objectif : ''}`,
+        inspireDe: BibliothequeUI.formaterInspireDe(prod),
         boutons: [
             { label: 'Dupliquer', onclick: `dupliquerProductionBibliotheque('${prod.id}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
             { label: 'Exporter', onclick: `partagerProduction('${prod.id}')`, classe: 'btn-secondaire', title: 'Exporter en JSON' },
@@ -1996,6 +1997,7 @@ async function preparerDonneesBibliothequeProductions() {
                 id: prod.id,
                 badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsUtilisateur),
                 metadonnees: (function(a){return `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%${a ? ' • ' + a : ''}`;})(BibliothequeUI.formaterAttribution(prod)),
+                inspireDe: BibliothequeUI.formaterInspireDe(prod),
                 description: prod.objectif ? 'Objectif: ' + prod.objectif : '',
                 dejaPresent: false,
                 classeItem: 'production-disponible-item',

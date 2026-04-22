@@ -107,6 +107,19 @@
     };
 
     /**
+     * Formate la trace d'origine d'un item forké. Retourne
+     * « Inspiré de <nom> par <auteur> » si item.inspireDe est présent,
+     * '' sinon. Snapshot figé au moment du fork (cf. Plan 1 §4.3).
+     */
+    BibliothequeUI.formaterInspireDe = function (item) {
+        if (!item || !item.inspireDe) return '';
+        var src = item.inspireDe;
+        var nom = src.nom || 'Inconnu';
+        var auteur = src.auteur || 'Inconnu';
+        return 'Inspiré de ' + nom + ' par ' + auteur;
+    };
+
+    /**
      * Pour les items démo, remplace le préfixe de pratique en tête du nom
      * (ex. « [SPE] », « [STD] ») par « [Démo] ». L'abréviation de pratique
      * étant un doublon du badge de pratique, on la remplace utilement par
@@ -210,6 +223,10 @@
         });
         boutonsHTML += '</div>';
 
+        var ligneInspireDe = opts.inspireDe
+            ? '<div class="biblio-carte-inspire">' + echapperHtml(opts.inspireDe) + '</div>'
+            : '';
+
         return '<div class="biblio-carte biblio-carte--selection">' +
             '<div class="biblio-carte-contenu">' +
                 '<div style="flex: 1;">' +
@@ -219,6 +236,7 @@
                         ' <span class="badge-source badge-source--id" title="ID: ' + opts.id + '">#' + idCourt + '</span>' +
                         ' ' + opts.badgeSource +
                     '</div>' +
+                    ligneInspireDe +
                     '<div class="biblio-carte-meta">' + opts.metadonnees + '</div>' +
                 '</div>' +
                 boutonsHTML +
@@ -257,6 +275,10 @@
         });
         boutonsHTML += '</div>';
 
+        var ligneInspireDe = opts.inspireDe
+            ? '<div class="biblio-carte-inspire">' + echapperHtml(opts.inspireDe) + '</div>'
+            : '';
+
         return '<div class="' + classeItem + ' biblio-carte biblio-carte--disponible" ' + dataAttrs + ' style="' + opacite + styleExtra + '">' +
             '<div class="biblio-carte-contenu">' +
                 '<div style="flex: 1;">' +
@@ -266,6 +288,7 @@
                         ' <span class="badge-source badge-source--id" title="ID: ' + opts.id + '">#' + idCourt + '</span>' +
                         ' ' + opts.badgeSource +
                     '</div>' +
+                    ligneInspireDe +
                     '<div class="biblio-carte-meta">' + opts.metadonnees + '</div>' +
                     (opts.description ? '<div class="biblio-carte-desc">' + opts.description + '</div>' : '') +
                     (opts.dejaPresent ? '<div class="biblio-carte-deja">Déjà dans la barre latérale</div>' : '') +

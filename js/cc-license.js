@@ -1241,6 +1241,7 @@ function genererPanneauMetadonnees(ressource, typeRessource) {
     const discipline = Array.isArray(meta.discipline) ? meta.discipline.join(', ') : (meta.discipline || '');
     const licence = meta.licence || 'CC BY-NC-SA 4.0';
     const contributeurs = meta.contributeurs || [];
+    const inspireDe = ressource.inspireDe || meta.inspireDe || null;
 
     // Construire les lignes du panneau - ORDRE UNIFORME pour tous les types
     let lignesHTML = '';
@@ -1252,6 +1253,18 @@ function genererPanneauMetadonnees(ressource, typeRessource) {
             <span class="meta-valeur">${echapperHtmlCC(auteur)}</span>
         </div>
     `;
+
+    // 1-bis. Inspiré de (si fork d'un item existant)
+    if (inspireDe && inspireDe.nom) {
+        const inspireDateFormatee = formatDate(inspireDe.date);
+        const inspireSuffixe = inspireDateFormatee ? ` <span style="opacity: 0.7;">(${inspireDateFormatee})</span>` : '';
+        lignesHTML += `
+            <div class="meta-ligne">
+                <span class="meta-label">Inspiré de</span>
+                <span class="meta-valeur">${echapperHtmlCC(inspireDe.nom)} par ${echapperHtmlCC(inspireDe.auteur || 'Inconnu')}${inspireSuffixe}</span>
+            </div>
+        `;
+    }
 
     // 2. Date de création (toujours affichée)
     const dateCreationFormatee = formatDate(dateCreation);

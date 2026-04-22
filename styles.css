@@ -3095,6 +3095,13 @@ body:not(.mode-clair) .badge-source--demo {
     font-size: 0.9em;
     margin-bottom: 4px;
 }
+.biblio-carte-inspire {
+    color: var(--gris-clair);
+    font-size: 0.82em;
+    font-style: italic;
+    margin-bottom: 4px;
+    opacity: 0.85;
+}
 .biblio-carte-desc {
     font-size: 0.85rem;
     color: var(--gris-clair);
