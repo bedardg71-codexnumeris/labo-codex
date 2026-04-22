@@ -4014,13 +4014,13 @@ function populerDropdownGroupeCoursV2() {
         BibliothequeUI.ajouterOptgroupDemo(select, gcDemo, gc => gc.nom || gc.id, null, true);
     }
 
-    // Listener direct : la délégation data-on-change au niveau document est
-    // peu fiable sur iOS Safari après repopulation du dropdown. Double câblage
-    // pour garantir que changerGroupeCoursSelectionneV2 se déclenche.
+    // Listeners directs : iOS Safari n'émet pas toujours change sur tap
+    // d'option dans un <select> avec optgroup. On écoute change + input
+    // pour couvrir les deux cas. Flag pour éviter de double-attacher.
     if (!select.dataset.listenerDirect) {
-        select.addEventListener('change', function() {
-            changerGroupeCoursSelectionneV2(select.value);
-        });
+        const handler = function() { changerGroupeCoursSelectionneV2(select.value); };
+        select.addEventListener('change', handler);
+        select.addEventListener('input', handler);
         select.dataset.listenerDirect = '1';
     }
 
@@ -4298,9 +4298,7 @@ function mettreAJourNomGroupeCoursV2() {
  * Appelé quand on change le groupe-cours sélectionné
  */
 function changerGroupeCoursSelectionneV2(gcId) {
-    console.warn('[GC-SELECT] handler triggered, gcId=', gcId, 'type=', typeof gcId);
     if (typeof gcId === 'object' && gcId && gcId.value !== undefined) gcId = gcId.value;
-    console.warn('[GC-SELECT] after unwrap, gcId=', gcId);
     const btnSupprimer = document.getElementById('v2-btnSupprimerGroupeCours');
 
     if (!gcId) {
@@ -4314,16 +4312,11 @@ function changerGroupeCoursSelectionneV2(gcId) {
     // en lecture seule avec bouton Dupliquer (pas de suppression).
     if (typeof gcId === 'string' && gcId.indexOf('demo-') === 0 && typeof cleDemo === 'function') {
         const idReel = gcId.substring(5);
-        const liste = db.getSync(cleDemo('groupesCours'), []) || [];
-        console.warn('[GC-SELECT] demo branch, idReel=', idReel, 'liste.length=', liste.length, 'ids=', liste.map(g => g.id));
-        const gcDemo = liste.find(g => g.id === idReel);
+        const gcDemo = (db.getSync(cleDemo('groupesCours'), []) || []).find(g => g.id === idReel);
         if (gcDemo) {
-            console.warn('[GC-SELECT] demo gc found, calling editerGroupeCoursV2');
             mettreAJourCarteResumeGroupeCoursV2(gcDemo);
             editerGroupeCoursV2(gcDemo);
             if (btnSupprimer) btnSupprimer.classList.add('u-hide');
-        } else {
-            console.warn('[GC-SELECT] demo gc NOT found for idReel=', idReel);
         }
         return;
     }
@@ -4352,13 +4345,15 @@ function mettreAJourCarteResumeGroupeCoursV2(gc) {
         return;
     }
 
-    // Récupérer les infos liées
-    const cours = db.getSync('cours', []);
+    // Récupérer les infos liées. Pour un GC démo, les refs pointent vers des
+    // items dans demo_* (filtrés hors des globaux réels).
+    const cleCoursSrc = gc.isDemo && typeof cleDemo === 'function' ? cleDemo('listeCours') : 'cours';
+    const cours = db.getSync(cleCoursSrc, []);
     const coursObj = cours.find(c => c.id === gc.coursId || c.sigle === gc.coursId || c.codeCours === gc.coursId || c.code === gc.coursId);
     const coursNom = coursObj ? (coursObj.codeCours || coursObj.sigle || coursObj.code || '') + ' - ' + (coursObj.nomCours || coursObj.nom || coursObj.titre || '') : '—';
 
-    const cleHoraires = cle('horaires');
-    const horaires = db.getSync(cleHoraires, []);
+    const cleHorairesSrc = gc.isDemo && typeof cleDemo === 'function' ? cleDemo('horaires') : cle('horaires');
+    const horaires = db.getSync(cleHorairesSrc, []);
     const horaireObj = horaires.find(h => h.id === gc.horaireId);
     const horaireNom = horaireObj?.nom || '—';
 
@@ -4368,7 +4363,8 @@ function mettreAJourCarteResumeGroupeCoursV2(gc) {
         const profil = db.getSync('profilEnseignant', {});
         enseignantNom = (profil.prenom && profil.nom) ? `${profil.prenom} ${profil.nom}` : '—';
     } else if (gc.enseignantId) {
-        const enseignants = db.getSync('enseignants', []);
+        const cleEnsSrc = gc.isDemo && typeof cleDemo === 'function' ? cleDemo('enseignants') : 'enseignants';
+        const enseignants = db.getSync(cleEnsSrc, []);
         const ensObj = enseignants.find(e => e.id === gc.enseignantId);
         enseignantNom = ensObj ? `${ensObj.prenom || ''} ${ensObj.nom || ''}`.trim() : '—';
     } else {
@@ -4549,6 +4545,11 @@ function editerGroupeCoursV2(gc) {
     if (formulaire && typeof BibliothequeUI !== 'undefined' && BibliothequeUI.appliquerModeLectureSeuleDemo) {
         BibliothequeUI.appliquerModeLectureSeuleDemo(formulaire, gc, 'dupliquerEtEditerGroupeCours', 'Dupliquer pour créer mon groupe-cours');
     }
+
+    // Désactiver le bouton Enregistrer en lecture seule démo (appliquerModeLectureSeuleDemo
+    // ne touche que input/select/textarea, pas les boutons — sinon Dupliquer ne marcherait plus).
+    const btnSauvegarder = document.getElementById('v2-btnSauvegarderGroupeCours');
+    if (btnSauvegarder) btnSauvegarder.disabled = !!gc.isDemo;
 }
 
 /**
