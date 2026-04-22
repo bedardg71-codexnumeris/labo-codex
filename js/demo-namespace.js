@@ -156,19 +156,9 @@ function peuplerNamespace(pack) {
  * - Aux runs suivants : compare la version du pack au flag demo-version-installee ;
  *   refresh si différent, no-op sinon
  * - Ne touche JAMAIS les clés globales ou les namespaces trimestre réels
- * - Attend brièvement si donnees-demo.js nettoie des résidus en async (évite
- *   une race condition où dechargerDonneesDemo supprimerait nos écritures)
  */
 async function initialiserDemoNamespace() {
     try {
-        // Attente défensive : si l'ancien système a détecté un résidu (demo-actif
-        // = 'true') et est en train de le nettoyer en async, laisser 1 s pour
-        // que dechargerDonneesDemo termine avant qu'on réécrive demo_*.
-        if (typeof db !== 'undefined' && db.getSync('demo-actif', null) === 'true') {
-            console.warn('[DEMO-INIT] Résidus de l\'ancien système détectés, attente 1 s avant init');
-            await new Promise(function(r) { setTimeout(r, 1000); });
-        }
-
         let versionInstallee = null;
         try { versionInstallee = localStorage.getItem(CLE_VERSION); } catch (e) { /* storage indisponible */ }
 

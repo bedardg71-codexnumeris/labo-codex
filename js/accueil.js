@@ -75,9 +75,6 @@ function genererBanniereBienvenue() {
                 <button class="btn btn-secondaire" data-action="afficherSection" data-param="contexte">
                     Aller aux R\u00e9glages
                 </button>
-                <button class="btn btn-secondaire" data-action="entrerEnDemoHandler">
-                    Explorer avec des donn\u00e9es d\u00e9mo
-                </button>
             </div>
         </div>
     `;
@@ -260,21 +257,19 @@ function initialiserAccueil() {
 }
 
 /* ===============================
-   WRAPPERS DELEGATION (Phase 5)
+   WRAPPERS DELEGATION
    =============================== */
 
-/** Toggle mode démo depuis checkbox */
+/**
+ * Toggle « Données démo » : affiche ou masque les sections Démo dans les
+ * sélecteurs du projet (Plan 1 Phase 2). Ne charge ni décharge plus de
+ * données — le namespace demo_* reste peuplé en permanence (Plan 1 Phase 1).
+ * Rafraîchit l'accueil (la bannière de bienvenue dépend du toggle) ; les
+ * autres sélecteurs relisent le flag au prochain rendu.
+ */
 function toggleDemoHandler(el) {
-    if (el.checked) {
-        if (typeof entrerEnDemo === 'function') entrerEnDemo();
-    } else {
-        if (typeof quitterDemo === 'function') quitterDemo();
-    }
-}
-
-/** Entrer en mode démo (bouton de la bannière de bienvenue) */
-function entrerEnDemoHandler() {
-    if (typeof entrerEnDemo === 'function') entrerEnDemo();
+    db.setSync('demo-actif', el.checked ? 'true' : null);
+    afficherAccueil();
 }
 
 /**
@@ -322,7 +317,6 @@ window.afficherAccueil = afficherAccueil;
 window.initialiserAccueil = initialiserAccueil;
 window.definirModeExpert = definirModeExpert;
 window.toggleDemoHandler = toggleDemoHandler;
-window.entrerEnDemoHandler = entrerEnDemoHandler;
 window.toggleAccompagnementHandler = toggleAccompagnementHandler;
 window.naviguerAccueilCarte = naviguerAccueilCarte;
 window.ouvrirWizardPratique = ouvrirWizardPratique;

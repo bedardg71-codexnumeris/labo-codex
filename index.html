@@ -450,54 +450,6 @@
         }
 
         /* ===============================
-           BANDEAU DÉMO (Chantier 2 — route démo)
-           =============================== */
-        .bandeau-demo {
-            background: var(--vert-doux, #2d6a4f);
-            color: white;
-            padding: 8px 16px;
-            text-align: center;
-            font-size: 0.85rem;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 9998;
-            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .bandeau-demo-contenu {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .bandeau-demo-texte {
-            font-weight: 600;
-        }
-
-        .bandeau-demo-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            padding: 4px 12px;
-            border-radius: var(--radius-moyen);
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .bandeau-demo-btn:hover {
-            background: rgba(255, 255, 255, 0.35);
-            border-color: white;
-        }
-
-        body.mode-demo {
-            padding-bottom: 50px;
-        }
-
-        /* ===============================
            Page d'accueil (Chantier 3)
            Conforme au Design System :
            - Variables --bleu-*, --shadow-*, --radius-*
@@ -3770,16 +3722,6 @@
                 </label>
                 <button data-action="naviguerVersReglagesTrimestre" class="bandeau-archive-btn">
                     Trimestres
-                </button>
-            </div>
-        </div>
-
-        <!-- BANDEAU DÉMO (affiché quand la route démo est active) -->
-        <div id="bandeau-demo" class="bandeau-demo u-hide">
-            <div class="bandeau-demo-contenu">
-                <span class="bandeau-demo-texte">Mode démonstration</span>
-                <button data-action="quitterDemo" class="bandeau-demo-btn">
-                    Quitter la démo
                 </button>
             </div>
         </div>
@@ -15699,12 +15641,12 @@
     <script src="js/modes.js?v=2026041601"></script> <!-- Beta 99.16 : lectures via obtenirPreference -->
 
 
-    <!-- pack-demo-20.js : chargé à la demande par donnees-demo.js (lazy-load) -->
-    <script src="js/donnees-demo.js?v=2026040201"></script>
-    <!-- PLAN 1 — Autonomisation Phase 1 : namespace demo_* permanent
-         (parallèle à donnees-demo.js ancien système qui reste actif en attendant
-         la Phase 5 de nettoyage) -->
-    <script src="js/demo-namespace.js?v=2026042101"></script>
+    <!-- PLAN 1 — Autonomisation Phase 5 : migration silencieuse des résidus
+         du mode démo legacy au 1er démarrage post-livraison (idempotent) -->
+    <script src="js/migration-phase5.js?v=2026042201"></script>
+    <!-- PLAN 1 — Autonomisation Phase 1 : namespace demo_* permanent.
+         pack-demo-20.js est chargé à la demande par demo-namespace.js (lazy-load). -->
+    <script src="js/demo-namespace.js?v=2026042201"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestres.js?v=2026041708"></script> <!-- Beta 99.17 (b0417-1048) : + section profilsRLO dans exporterFormatRecherche (étape 9) -->
