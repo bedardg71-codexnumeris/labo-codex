@@ -58,6 +58,38 @@
     };
 
     /**
+     * Ajoute un <optgroup> « Démo » à un <select> natif. Les items démo
+     * sont ajoutés avec option.disabled = true pour signaler visuellement
+     * qu'ils sont des exemples non utilisables directement — il faut les
+     * dupliquer d'abord dans la section appropriée. Cohérent avec
+     * l'interdiction des références mixtes (Plan 1 Phase 4).
+     *
+     * No-op si selectElement introuvable ou demoItems vide.
+     *
+     * @param {HTMLSelectElement} selectElement - Le select à enrichir
+     * @param {Array} demoItems - Tableau d'items démo (avec .id et .nom ou équivalent)
+     * @param {Function} extraireTexte - Fonction (item) => string pour le label
+     * @param {string} [titreOptgroup] - Label de l'optgroup (défaut explicite)
+     */
+    BibliothequeUI.ajouterOptgroupDemo = function (selectElement, demoItems, extraireTexte, titreOptgroup) {
+        if (!selectElement || !demoItems || demoItems.length === 0) return;
+        var optgroup = document.createElement('optgroup');
+        optgroup.label = titreOptgroup || 'Démo (par Labo Codex — à dupliquer pour utiliser)';
+        demoItems.forEach(function(item) {
+            var option = document.createElement('option');
+            option.value = 'demo-' + (item.id || '');
+            option.textContent = (typeof extraireTexte === 'function')
+                ? extraireTexte(item)
+                : (item.nom || item.titre || 'Sans titre');
+            option.disabled = true;
+            option.title = 'Exemple fourni par Labo Codex. Duplique-le dans la section appropriée pour en créer ta propre version.';
+            if (item.id) option.dataset.demoId = item.id;
+            optgroup.appendChild(option);
+        });
+        selectElement.appendChild(optgroup);
+    };
+
+    /**
      * Format d'attribution « par <auteur> [+N contrib.] » pour affichage
      * dans les métadonnées de carte. Retourne '' si aucun auteur connu.
      * Lit meta.contributeurs ou item.contributeurs (respecte la licence CC BY).
