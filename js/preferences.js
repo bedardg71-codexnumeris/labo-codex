@@ -76,9 +76,14 @@
         // la progression de l'utilisateur entre les 4 étapes du parcours
         // Numérisation → Croisement → Observation → Compétence.
         // `false` par défaut = la bannière de transition est encore à voir.
+        // Option B : variantes _demo pour tracker indépendamment les bandeaux
+        // vus en mode démo vs en mode normal (messages distincts).
         transition_num_crois_vue: false,
+        transition_num_crois_vue_demo: false,
         transition_crois_obs_vue: false,
+        transition_crois_obs_vue_demo: false,
         transition_obs_comp_vue: false,
+        transition_obs_comp_vue_demo: false,
 
         // État du tour guidé 6 étapes (js/accompagnement.js)
         tourGuide_etape: null,
