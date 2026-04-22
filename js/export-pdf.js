@@ -1836,7 +1836,7 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
     // Gauche: uniquement le nom de l'enseignant (cours maintenant dans l'en-tête)
     const textePiedGauche = (options.piedEnseignant !== false && options.nomEnseignant)
         ? options.nomEnseignant : '';
-    const textePiedDroit = options.piedLicence !== false ? '<img src="licence CC/by-nc-sa-2.svg" alt="CC BY-NC-SA 4.0" style="height: 12px; vertical-align: middle;">' : '';
+    const textePiedDroit = options.piedLicence !== false ? '<img src="icons/by-nc-sa-2.svg" alt="CC BY-NC-SA 4.0" style="height: 12px; vertical-align: middle;">' : '';
 
     // Pied de page (toujours visible à la fin du contenu)
     if (textePiedGauche || textePiedDroit) {

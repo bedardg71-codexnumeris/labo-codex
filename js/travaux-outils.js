@@ -747,8 +747,11 @@
             }
 
             db.setSync(CLE_FLAG_MIGRATION_RLO, true);
-            console.warn('[travaux-outils] Migration RLO effectuée. Stickers migrés : '
-                + stickersMigres + ' (dans ' + clesAnnotationsMigrees + ' clé(s) d\'annotations)');
+            // Silencieux sur installation vierge (0 sticker à migrer).
+            if (stickersMigres > 0 || clesAnnotationsMigrees > 0) {
+                console.warn('[travaux-outils] Migration RLO effectuée. Stickers migrés : '
+                    + stickersMigres + ' (dans ' + clesAnnotationsMigrees + ' clé(s) d\'annotations)');
+            }
         } catch (e) {
             console.error('[travaux-outils] Erreur pendant la migration RLO :', e);
         }

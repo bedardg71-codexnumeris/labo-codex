@@ -92,7 +92,7 @@ function seederDemoSiNecessaire() {
         dateCreation: demo.metadata_cc.date_creation || '2026-02-07',
         dateModification: demo.metadata_cc.date_modification || '2026-02-17',
         dateAjoutBiblio: new Date().toISOString(),
-        auteur: demo.metadata_cc.auteur_original || 'Grégoire Bédard',
+        auteur: demo.metadata_cc.auteur_original || 'Labo Codex',
         dansBibliotheque: true,
         metadata_cc: JSON.parse(JSON.stringify(demo.metadata_cc)),
         donnees: JSON.parse(JSON.stringify({

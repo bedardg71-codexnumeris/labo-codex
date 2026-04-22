@@ -500,7 +500,7 @@ async function assurerEchellesPersonnalisees() {
             id: 'ECHELLE_BRUNO_CHIMIE',
             nom: 'Échelle Chimie organique',
             description: 'Échelle 4 niveaux pour standards. Seuil maîtrise: 75%.',
-            auteur: 'Grégoire Bédard',
+            auteur: 'Labo Codex',
             discipline: 'Chimie',
             niveaux: [
                 { code: 'I', nom: 'Incomplet', min: 0, max: 54, valeur: 40, couleur: '#dc3545' },
@@ -524,7 +524,7 @@ async function assurerEchellesPersonnalisees() {
             id: 'ECHELLE_XAVIER_INFO',
             nom: 'Échelle Interfaces/BD',
             description: 'Échelle 4 niveaux numériques. Niveau 3 = seuil passage, niveau 4 = bonus.',
-            auteur: 'Grégoire Bédard',
+            auteur: 'Labo Codex',
             discipline: 'Informatique',
             niveaux: [
                 { code: '1', nom: 'Non atteint', min: 0, max: 49, valeur: 40, couleur: '#dc3545' },
@@ -548,7 +548,7 @@ async function assurerEchellesPersonnalisees() {
             id: 'ECHELLE_ISABELLE_BIO',
             nom: 'Échelle Anatomie',
             description: 'Échelle IDME qualitative pour jugement global. Pas de seuils chiffrés stricts.',
-            auteur: 'Grégoire Bédard',
+            auteur: 'Labo Codex',
             discipline: 'Biologie',
             niveaux: [
                 { code: 'I', nom: 'Incomplet', min: 0, max: 49, valeur: 40, couleur: '#dc3545' },
@@ -573,7 +573,7 @@ async function assurerEchellesPersonnalisees() {
             id: 'ECHELLE_HELENE_PHILO',
             nom: 'Échelle Philosophie',
             description: 'Échelle 4 niveaux pour cours de philosophie. Seuils: 70/60/50.',
-            auteur: 'Grégoire Bédard',
+            auteur: 'Labo Codex',
             discipline: 'Philosophie',
             niveaux: [
                 { code: 'I', nom: 'Incomplet', min: 0, max: 49, valeur: 35, couleur: '#dc3545' },
@@ -597,7 +597,7 @@ async function assurerEchellesPersonnalisees() {
             id: 'ECHELLE_MARIEHELENE_LITT',
             nom: 'Échelle Littérature',
             description: 'Échelle 4 niveaux pour cours de littérature. Seuils: 75/65/55.',
-            auteur: 'Grégoire Bédard',
+            auteur: 'Labo Codex',
             discipline: 'Littérature',
             niveaux: [
                 { code: 'I', nom: 'Incomplet', min: 0, max: 54, valeur: 40, couleur: '#dc3545' },
@@ -621,7 +621,7 @@ async function assurerEchellesPersonnalisees() {
             id: 'ECHELLE_ETIENNE_ADMIN',
             nom: 'Échelle Comptabilité',
             description: 'Échelle 4 niveaux pour cours d\'administration. Seuils: 80/70/60.',
-            auteur: 'Grégoire Bédard',
+            auteur: 'Labo Codex',
             discipline: 'Administration',
             niveaux: [
                 { code: 'I', nom: 'Incomplet', min: 0, max: 59, valeur: 45, couleur: '#dc3545' },
@@ -645,7 +645,7 @@ async function assurerEchellesPersonnalisees() {
             id: 'ECHELLE_OLIVIER_GEO',
             nom: 'Échelle Géographie',
             description: 'Échelle 4 niveaux pour cours de géographie. Seuils: 70/65/55.',
-            auteur: 'Grégoire Bédard',
+            auteur: 'Labo Codex',
             discipline: 'Géographie',
             niveaux: [
                 { code: 'I', nom: 'Incomplet', min: 0, max: 54, valeur: 40, couleur: '#dc3545' },
@@ -669,7 +669,7 @@ async function assurerEchellesPersonnalisees() {
             id: 'ECHELLE_JORDAN_PHILO',
             nom: 'Échelle Philosophie 101',
             description: 'Échelle 4 niveaux pour cours de philosophie. Seuils: 80/60/50.',
-            auteur: 'Grégoire Bédard',
+            auteur: 'Labo Codex',
             discipline: 'Philosophie',
             niveaux: [
                 { code: 'I', nom: 'Incomplet', min: 0, max: 49, valeur: 35, couleur: '#dc3545' },
@@ -2370,7 +2370,7 @@ async function preparerDonneesBibliothequeEchelles() {
         id: echelle.id,
         badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
         badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(echelle) : '',
-        metadonnees: `${echelle.niveaux?.length || 0} niveau(x)${echelle.discipline ? ' • ' + echelle.discipline : ''}${echelle.auteurOriginal ? ' • ' + echelle.auteurOriginal : ''}`,
+        metadonnees: (function(a){return `${echelle.niveaux?.length || 0} niveau(x)${echelle.discipline ? ' • ' + echelle.discipline : ''}${a ? ' • ' + a : ''}`;})(BibliothequeUI.formaterAttribution(echelle)),
         boutons: [
             { label: 'Dupliquer', onclick: `dupliquerEchelleBibliotheque('${echelle.id}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
             { label: 'Exporter', onclick: `partagerEchelle('${echelle.id}')`, classe: 'btn-secondaire', title: 'Exporter en JSON' },
@@ -2412,7 +2412,7 @@ async function preparerDonneesBibliothequeEchelles() {
                 id: echelle.id,
                 badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
                 badgesPratiques: badgesPratiques,
-                metadonnees: `${echelle.niveaux?.length || 0} niveau(x)${echelle.auteur ? ' • ' + echelle.auteur : ''}`,
+                metadonnees: (function(a){return `${echelle.niveaux?.length || 0} niveau(x)${a ? ' • ' + a : ''}`;})(BibliothequeUI.formaterAttribution(echelle)),
                 description: echelle.description || '',
                 dejaPresent: dejaPresent,
                 classeItem: 'echelle-disponible-item',

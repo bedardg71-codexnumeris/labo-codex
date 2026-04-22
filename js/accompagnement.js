@@ -486,7 +486,12 @@ ajouterEntrees({
             cibleSelector: 'button[data-action="creerNouvellePratique"]',
             message: 'Clique ici pour créer ta première pratique de notation.',
             direction: 'haut',
-            priorite: 10
+            priorite: 10,
+            condition: function() {
+                var locales = (db.getSync('pratiquesConfigurables', []) || [])
+                    .filter(function(p) { return p.dansBibliotheque !== false; });
+                return locales.length === 0;
+            }
         }
     },
     'structure-grilles-nouvelle': {
@@ -495,7 +500,12 @@ ajouterEntrees({
             cibleSelector: 'button[data-action="creerNouvelleGrille"]',
             message: 'Clique ici pour créer ta première grille de critères.',
             direction: 'haut',
-            priorite: 10
+            priorite: 10,
+            condition: function() {
+                var locales = (db.getSync('grillesTemplates', []) || [])
+                    .filter(function(g) { return g.dansBibliotheque !== false; });
+                return locales.length === 0;
+            }
         }
     },
     'structure-echelles-nouvelle': {
@@ -504,7 +514,12 @@ ajouterEntrees({
             cibleSelector: 'button[data-action="creerNouvelleEchelle"]',
             message: 'Clique ici pour créer ta première échelle de performance.',
             direction: 'haut',
-            priorite: 10
+            priorite: 10,
+            condition: function() {
+                var locales = (db.getSync('echellesTemplates', []) || [])
+                    .filter(function(e) { return e.dansBibliotheque !== false; });
+                return locales.length === 0;
+            }
         }
     },
     'structure-cartouches-nouvelle': {
@@ -513,7 +528,17 @@ ajouterEntrees({
             cibleSelector: 'button[data-action="creerNouvelleCartouche"]',
             message: 'Clique ici pour créer ta première cartouche de rétroaction.',
             direction: 'haut',
-            priorite: 10
+            priorite: 10,
+            condition: function() {
+                // cartouches stockées par grille (clé `cartouches_<grilleId>`) : on teste si
+                // au moins une cartouche locale existe pour une grille quelconque
+                var grilles = db.getSync('grillesTemplates', []) || [];
+                for (var i = 0; i < grilles.length; i++) {
+                    var cs = db.getSync('cartouches_' + grilles[i].id, []) || [];
+                    if (cs.length > 0) return false;
+                }
+                return true;
+            }
         }
     },
     'structure-productions-nouvelle': {
@@ -522,7 +547,13 @@ ajouterEntrees({
             cibleSelector: 'button[data-action="creerNouvelleProduction"]',
             message: 'Clique ici pour créer ta première production étudiante.',
             direction: 'haut',
-            priorite: 10
+            priorite: 10,
+            condition: function() {
+                if (typeof cle !== 'function') return true;
+                var prods = (db.getSync(cle('productions'), []) || [])
+                    .filter(function(p) { return p.dansBibliotheque !== false; });
+                return prods.length === 0;
+            }
         }
     },
     'suivi-presences-premiere-saisie': {
@@ -610,6 +641,17 @@ function afficherAutoReveal(id, optionsExterne) {
     if (!entree) {
         console.warn('[Accompagnement/flèches] Entrée inconnue :', id);
         return;
+    }
+
+    // Condition optionnelle : la flèche ne s'affiche que si elle retourne true.
+    // Utile pour « première X » qui doit disparaître dès qu'un item existe.
+    if (typeof entree.condition === 'function') {
+        try {
+            if (!entree.condition()) return;
+        } catch (e) {
+            console.warn('[Accompagnement/flèches] Erreur condition :', id, e);
+            return;
+        }
     }
 
     if (autoTimerAffichage) clearTimeout(autoTimerAffichage);

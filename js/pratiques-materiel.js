@@ -2302,22 +2302,22 @@ async function recalculerPonderationsUnitaires() {
 const MODES_PAR_OBJECTIFS = {
     'comptage': {
         nom: 'Comptage d\'objectifs',
-        auteur: 'Grégoire Bédard',
+        auteur: 'Labo Codex',
         description: 'La note finale dépend du nombre d\'objectifs maîtrisés. Les objectifs « essentiels » doivent TOUS être maîtrisés, sinon la note est plafonnée.'
     },
     'moyenne-ponderee': {
         nom: 'Moyenne pondérée',
-        auteur: 'Grégoire Bédard',
+        auteur: 'Labo Codex',
         description: 'La note finale est la moyenne des niveaux atteints, pondérée par l\'importance de chaque objectif.'
     },
     'seuils-critiques': {
         nom: 'Seuils critiques',
-        auteur: 'Grégoire Bédard',
+        auteur: 'Labo Codex',
         description: 'Tous les objectifs doivent atteindre un niveau minimum. Bonus pour les objectifs au niveau supérieur.'
     },
     'holistique': {
         nom: 'Holistique',
-        auteur: 'Grégoire Bédard',
+        auteur: 'Labo Codex',
         description: 'Le système suggère une note basée sur une analyse statistique, mais l\'enseignant·e valide avec son jugement professionnel.'
     }
 };
