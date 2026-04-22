@@ -803,6 +803,38 @@ async function chargerPratiquePourModif(pratiqueId) {
             item.classList.add('active');
         }
     });
+
+    // Phase 4.B : mode lecture seule si item démo
+    if (conteneurEdition && typeof BibliothequeUI !== 'undefined' && BibliothequeUI.appliquerModeLectureSeuleDemo) {
+        BibliothequeUI.appliquerModeLectureSeuleDemo(conteneurEdition, pratique, 'dupliquerEtEditerPratique', 'Dupliquer pour créer ma pratique');
+    }
+}
+
+/**
+ * Phase 4.B : fork une pratique démo et charge la copie en édition.
+ */
+async function dupliquerEtEditerPratique(id) {
+    const configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
+    let pratique = configurations.find(p => p.id === id);
+    if (!pratique && typeof obtenirConfigurationPratiqueParId === 'function') {
+        pratique = await obtenirConfigurationPratiqueParId(id);
+    }
+    if (!pratique) return;
+
+    const copie = BibliothequeUI.forkerItem(pratique, 'pratique_');
+    configurations.push(copie);
+    db.setSync(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+
+    if (typeof afficherListePratiquesSidebar === 'function') {
+        await afficherListePratiquesSidebar();
+    }
+    await chargerPratiquePourModif(copie.id);
+
+    const nomField = document.getElementById('mat-pratique-nom');
+    if (nomField) {
+        nomField.focus();
+        nomField.select();
+    }
 }
 
 /**
@@ -2735,6 +2767,7 @@ window.retirerPratiqueDeBibliothequeMateriel = retirerPratiqueDeBibliothequeMate
 
 // Édition
 window.chargerPratiquePourModif = chargerPratiquePourModif;
+window.dupliquerEtEditerPratique = dupliquerEtEditerPratique;
 window.creerNouvellePratique = creerNouvellePratique;
 window.dupliquerPratiqueMateriel = dupliquerPratiqueMateriel;
 window.supprimerPratiqueMateriel = supprimerPratiqueMateriel;

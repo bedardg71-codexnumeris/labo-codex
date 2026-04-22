@@ -125,7 +125,7 @@ BibliothequeUI.creerModal({
     titreSection3Demo: 'Démo (par Demo Labo Codex)',
     contenuSection3Demo: cartesDemoLectureSeule,
     cartesDemoActions: [
-        { label: 'Prendre comme modèle', action: 'forkGrilleDemo', param: '<id>' }
+        { label: 'Dupliquer', action: 'forkGrilleDemo', param: '<id>' }
     ]
 });
 ```
@@ -198,7 +198,7 @@ de travail.
 **Critères de validation POC** :
 - [ ] Section Démo apparaît dans la modale Bibliothèque grilles avec ≥1 item.
 - [ ] Items démo affichent le badge `Démo` distinctif (couleur différente).
-- [ ] Bouton « Prendre comme modèle » visible mais non fonctionnel (Phase 3).
+- [ ] Bouton « Dupliquer » visible mais non fonctionnel (Phase 3).
 - [ ] Mes propres grilles inchangées dans Section 1.
 
 ### 5.2 Propagation Phase 2.2 — Échelle + Cartouche (BibliothequeUI)
@@ -263,7 +263,7 @@ Cas particulier (config). UI dédiée à concevoir.
 | 2 | Pour bibliothèque : 3e section dédiée ou filtre source dans Section 2 ? | **3e section dédiée** (cohérent avec le mockup du plan §3.1) |
 | 3 | Pour dropdowns : `<optgroup>` natif ou composant custom ? | **`<optgroup>`** (Option A, plus simple, zéro nouveau composant) |
 | 4 | Badge « Démo » : variante visuelle (couleur) ou texte explicite (« Demo Labo Codex ») ? | **Les deux** : couleur distincte + libellé court (« Démo ») |
-| 5 | Bouton « Prendre comme modèle » : visible mais non fonctionnel en Phase 2, ou attendre Phase 3 ? | **Visible** mais avec alert « Phase 3 à venir » — laisse tester l'UI |
+| 5 | Bouton « Dupliquer » : visible mais non fonctionnel en Phase 2, ou attendre Phase 3 ? | **Visible** mais avec alert « Phase 3 à venir » — laisse tester l'UI |
 
 ---
 

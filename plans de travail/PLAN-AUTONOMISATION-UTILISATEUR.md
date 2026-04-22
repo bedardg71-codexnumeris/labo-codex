@@ -61,7 +61,9 @@ Chaque sélecteur d'entité de l'application (Trimestre, Cours, Enseignant, Grou
 - **« Mes documents »** — les entités réelles de l'utilisateur
 - **« Démo »** — les exemples, visibles si toggle « Données démo » activé, masqués sinon
 
-L'utilisateur peut naviguer librement dans la section Démo pour **observer** la structure du matériel pédagogique. Pour utiliser un item démo comme point de départ, il clique sur un bouton explicite **« Prendre comme modèle »** qui débloque l'édition. À la première modification, l'item se **détache** de la démo : c'est désormais un nouveau document dans « Mes documents », portant une attribution d'origine visible.
+L'utilisateur peut naviguer librement dans la section Démo pour **observer** la structure du matériel pédagogique. Pour utiliser un item démo comme point de départ, il clique sur le bouton **« Dupliquer »** qui débloque l'édition en créant un fork. À la première modification, l'item se **détache** de la démo : c'est désormais un nouveau document dans « Mes documents », portant une attribution d'origine visible.
+
+**Vocabulaire UI (décision 22 avril 2026)** : « Dupliquer » partout. L'ancien wording « Prendre comme modèle » du plan initial a été abandonné — il cohabite mal avec « Dupliquer » déjà en place sur les items utilisateur, et ajoute un concept UI sans gain clair. « Dupliquer » sert autant pour les items démo (déclenche le fork CC avec `inspireDe` et retire le flag démo) que pour les items utilisateur (copie d'un travail personnel).
 
 ### 2.2 Ce que ça remplace dans l'architecture actuelle
 
@@ -101,7 +103,7 @@ Clic sur un item « Démo » → formulaire en **mode lecture** (champs désacti
 │  Grille d'analyse littéraire                     │
 │  par Demo Labo Codex · Exemple                   │
 ├──────────────────────────────────────────────────┤
-│  [ ⚙ Prendre comme modèle pour créer la mienne ] │
+│  [ Dupliquer pour créer ma propre grille ]       │
 ├──────────────────────────────────────────────────┤
 │                                                  │
 │  Critère 1 : Compréhension des thèmes            │
@@ -112,7 +114,7 @@ Clic sur un item « Démo » → formulaire en **mode lecture** (champs désacti
 └──────────────────────────────────────────────────┘
 ```
 
-### 3.2 « Prendre comme modèle »
+### 3.2 « Dupliquer » (fork démo)
 
 Clic sur le bouton → transition visible et explicite :
 - Le titre du formulaire change : `Nouveau document inspiré de « Grille d'analyse littéraire » par Demo Labo Codex`
@@ -145,7 +147,7 @@ Une entité réelle ne peut **jamais** référencer un item démo.
 
 Exemple : au moment d'assembler un groupe-cours réel, si l'utilisateur tente d'y inclure un cours démo (non forké), le système refuse avec un message clair :
 
-> « Le cours que tu as sélectionné est un exemple (Demo Labo Codex). Pour l'utiliser dans ton groupe-cours, clique sur « Prendre comme modèle » d'abord et donne-lui ton propre nom. »
+> « Le cours que tu as sélectionné est un exemple (Demo Labo Codex). Pour l'utiliser dans ton groupe-cours, clique sur « Dupliquer » d'abord et donne-lui ton propre nom. »
 
 Cohérent pédagogiquement : l'utilisateur doit reproduire chaque étape consciemment pour s'approprier la méthode.
 
@@ -238,17 +240,20 @@ Le toggle **« Données démo »** sur l'accueil V3 reste visible avec la même 
 ### Phase 2 — Sélecteurs à deux sections
 - Adaptation de chaque sélecteur d'entité (11 sélecteurs au total) pour afficher deux sections « Mes documents » et « Démo »
 - Comportement lecture seule sur les items démo sélectionnés
-- Bouton « Prendre comme modèle » visible et fonctionnel
+- Bouton « Dupliquer » visible et fonctionnel
 
 ### Phase 3 — Fork et attribution
-- Mécanisme de fork au clic sur « Prendre comme modèle »
+- Mécanisme de fork au clic sur « Dupliquer »
 - Génération de la métadonnée `inspireDe`
 - Affichage de la ligne d'attribution sur les cartes et formulaires
 - Champ auteur séparé du champ enseignant
 
-### Phase 4 — Interdiction des références mixtes
+### Phase 4 — Interdiction des références mixtes + lecture seule démo + identité CC utilisateur
 - Validation à la sauvegarde des entités assemblées (groupe-cours, pratiques, évaluations)
-- Message clair avec redirection vers « Prendre comme modèle »
+- Message clair avec redirection vers « Dupliquer »
+- **Formulaire d'édition lecture seule sur items démo** (Plan §3.1) : tout item dont `auteur_original === "Labo Codex"` ouvre les champs en disabled, avec bouton proéminent « Dupliquer » pour débloquer via fork. Interdit la modification directe du matériel CC livré.
+- **Identité CC utilisateur** (Plan §4.6) : introduire un helper `obtenirIdentiteCCUtilisateur()` qui lit Réglages › Enseignant (profil de l'utilisateur lui-même, pas le prof démo). Fallback `"Utilisateur de Labo Codex"` si non configuré. Distinct de `obtenirNomEnseignantActif()` (qui lit l'enseignant du groupe-cours actif — champ métier).
+- **Fix `ajouterContributeurSiNecessaire`** (cc-license.js:354) : utiliser `obtenirIdentiteCCUtilisateur()` au lieu de `obtenirNomEnseignantActif()`. Sinon la contribution n'est jamais tracée en contexte démo (observé test terrain 22 avril 2026 : grille démo modifiée sans groupe-cours actif → aucun contributeur ajouté). Ne pas risquer de créditer le prof démo (« Primo Primavera ») comme contributeur — ce serait exactement l'attribution muddle que le plan veut éviter.
 
 ### Phase 5 — Retrait du mode démo actuel
 - Suppression/vidage de `donnees-demo.js`
@@ -275,10 +280,10 @@ Sur iPad Safari et Mac Safari, mode clair et sombre :
 2. Chaque sélecteur d'entité affiche les deux sections « Mes documents » et « Démo » avec une séparation visuelle claire.
 3. Toggle « Données démo » décoché → section Démo disparaît partout, les données sont conservées dans le storage.
 4. Clic sur un item démo → formulaire s'ouvre en lecture seule, titre et auteur clairement identifiés.
-5. Clic sur « Prendre comme modèle » → formulaire bascule en édition, champ Nom en focus, bouton Enregistrer désactivé tant que nom vide.
-6. Clic sur « Annuler » après « Prendre comme modèle » → retour au mode lecture de l'item démo, pas d'entité créée.
+5. Clic sur « Dupliquer » → formulaire bascule en édition, champ Nom en focus, bouton Enregistrer désactivé tant que nom vide.
+6. Clic sur « Annuler » après « Dupliquer » → retour au mode lecture de l'item démo, pas d'entité créée.
 7. Save d'un nouveau document → entité dans « Mes documents » avec attribution `par [nom enseignant]` + ligne `Inspiré de [nom démo] par Demo Labo Codex`.
-8. Tentative d'assembler une entité réelle avec un composant démo non forké → erreur claire, redirection vers « Prendre comme modèle ».
+8. Tentative d'assembler une entité réelle avec un composant démo non forké → erreur claire, redirection vers « Dupliquer ».
 9. Mise à jour de la version de l'app avec un nouveau jeu démo → forks utilisateurs intacts, items démo rafraîchis.
 10. Au démarrage post-migration, aucun résidu du mode démo actuel ne subsiste (flag, bandeau, snapshot).
 
@@ -309,9 +314,9 @@ Sur iPad Safari et Mac Safari, mode clair et sombre :
 | Phase | État | Commit | Notes |
 |---|---|---|---|
 | Phase 1 — Namespace demo_* | Terminée | (à valider test iPad) | b0421-0730. js/demo-namespace.js + helper cleDemo + flag demo-version-installee. Invisible en Phase 1. |
-| Phase 2 — Sélecteurs à 2 sections | À faire | — | |
-| Phase 3 — Fork et attribution | À faire | — | |
-| Phase 4 — Interdiction références mixtes | À faire | — | |
+| Phase 2 — Sélecteurs à 2 sections | Terminée (2.0–2.5) | b0422-0738 | Reste trimestre legacy → Phase 5 |
+| Phase 3 — Fork et attribution | Livrée code | b0422-0832 | Test terrain iPad 22 avril : `inspireDe` sur cartes + panneau OK. Audit auteur/enseignant fait. |
+| Phase 4 — Interdiction réf. mixtes + lecture seule démo + identité CC | À faire | — | Scope étendu suite au test terrain : lecture-seule démo + helper `obtenirIdentiteCCUtilisateur()` + fix `ajouterContributeurSiNecessaire`. |
 | Phase 5 — Retrait mode démo actuel | À faire | — | |
 | Phase 6 — Documentation | À faire | — | |
 | Phase 7 — Préparation Plan 2 | À faire | — | |

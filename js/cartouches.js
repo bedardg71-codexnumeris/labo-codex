@@ -1519,6 +1519,11 @@ async function chargerCartouchePourModif(cartoucheId, grilleId) {
             panneauMeta.innerHTML = genererPanneauMetadonnees(cartouche, 'cartouche');
         }
 
+        // Phase 4.B : mode lecture seule si item démo
+        const conteneurCartouche = document.getElementById('infoCartouche');
+        if (conteneurCartouche && typeof BibliothequeUI !== 'undefined' && BibliothequeUI.appliquerModeLectureSeuleDemo) {
+            BibliothequeUI.appliquerModeLectureSeuleDemo(conteneurCartouche, cartouche, 'dupliquerEtEditerCartouche', 'Dupliquer pour créer ma cartouche');
+        }
 
         // Afficher les boutons export PDF et texte dans la barre de boutons
         const btnExportPDF = document.getElementById('btnExporterPDFCartouche');
@@ -3640,6 +3645,33 @@ async function supprimerCartoucheDeBibliothequePartagee(id) {
  * @param {string} id - ID de la cartouche à dupliquer
  * @param {string} grilleId - ID de la grille associée
  */
+/**
+ * Phase 4.B : fork une cartouche démo et charge la copie en édition.
+ * grilleId est lu depuis cartoucheActuel (état courant du formulaire).
+ */
+async function dupliquerEtEditerCartouche(id) {
+    const grilleId = (cartoucheActuel && cartoucheActuel.grilleId) || '';
+    if (!grilleId) {
+        alert('Grille introuvable pour cette cartouche');
+        return;
+    }
+    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+    const cartouche = cartouches.find(c => c.id === id);
+    if (!cartouche) return;
+
+    const copie = BibliothequeUI.forkerItem(cartouche, 'CART_');
+    cartouches.push(copie);
+    await db.set(`cartouches_${grilleId}`, cartouches);
+
+    await chargerCartouchePourModif(copie.id, grilleId);
+
+    const nomField = document.getElementById('nomCartouche');
+    if (nomField) {
+        nomField.focus();
+        nomField.select();
+    }
+}
+
 async function dupliquerCartoucheBibliotheque(id, grilleId) {
     const cartouches = await db.get(`cartouches_${grilleId}`) || [];
     const cartouche = cartouches.find(c => c.id === id);
@@ -3769,6 +3801,7 @@ window.filtrerCartouchesParGrille = filtrerCartouchesParGrille;
 window.fermerModalBibliothequeCartouches = fermerModalBibliothequeCartouches;
 window.ajouterCartoucheIndividuelle = ajouterCartoucheIndividuelle;
 window.dupliquerCartoucheBibliotheque = dupliquerCartoucheBibliotheque;
+window.dupliquerEtEditerCartouche = dupliquerEtEditerCartouche;
 window.partagerCartouche = partagerCartouche;
 window.supprimerCartoucheDefinitivement = supprimerCartoucheDefinitivement;
 window.supprimerCartoucheDeBibliothequePartagee = supprimerCartoucheDeBibliothequePartagee;

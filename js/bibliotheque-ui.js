@@ -120,6 +120,82 @@
     };
 
     /**
+     * Bascule un formulaire d'édition en mode lecture seule pour items démo
+     * (Plan 1 §3.1, Phase 4.B). Disable les inputs, injecte/retire un bandeau
+     * en tête du conteneur avec un bouton « Dupliquer » qui lance l'action
+     * de fork redirigeant vers l'édition de la copie.
+     *
+     * Toggle idempotent : rappel avec `estDemo = false` nettoie tout.
+     *
+     * @param {HTMLElement} conteneur - Conteneur du formulaire
+     * @param {Object} item - L'item en cours d'édition
+     * @param {string} dupliquerAction - Nom de l'action data-action du bouton
+     * @param {string} [labelBouton] - Label personnalisé du bouton (défaut
+     *        « Dupliquer pour créer ma version »)
+     * @param {string} [texteBandeau] - Texte du bandeau (défaut générique)
+     */
+    BibliothequeUI.appliquerModeLectureSeuleDemo = function (conteneur, item, dupliquerAction, labelBouton, texteBandeau) {
+        if (!conteneur) return;
+        var estDemo = BibliothequeUI.estItemDemo(item);
+
+        conteneur.classList.toggle('demo-readonly', estDemo);
+
+        var controls = conteneur.querySelectorAll('input, select, textarea');
+        controls.forEach(function (c) {
+            c.disabled = estDemo;
+        });
+
+        var banner = conteneur.querySelector('.bandeau-demo-readonly');
+        if (estDemo) {
+            var idEchappe = (typeof echapperHtml === 'function') ? echapperHtml(item.id || '') : (item.id || '');
+            var label = labelBouton || 'Dupliquer pour créer ma version';
+            var texte = texteBandeau || 'Exemple fourni par Labo Codex (lecture seule). Duplique-le pour créer ta propre version.';
+            var bannerHTML = '<span class="bandeau-demo-readonly-texte">' + ((typeof echapperHtml === 'function') ? echapperHtml(texte) : texte) + '</span>' +
+                '<button type="button" class="btn btn-confirmer bandeau-demo-readonly-btn" data-action="' + dupliquerAction + '" data-param="' + idEchappe + '">' + ((typeof echapperHtml === 'function') ? echapperHtml(label) : label) + '</button>';
+            if (!banner) {
+                banner = document.createElement('div');
+                banner.className = 'bandeau-demo-readonly';
+                conteneur.insertBefore(banner, conteneur.firstChild);
+            }
+            banner.innerHTML = bannerHTML;
+        } else if (banner) {
+            banner.remove();
+        }
+    };
+
+    /**
+     * Fork générique : crée une copie d'un item avec `inspireDe` (Plan §4.3),
+     * retire le flag `isDemo`, remplace l'auteur par l'identité CC utilisateur,
+     * et purge les métadonnées héritées (`metadata_cc`, `auteurOriginal`).
+     * Ne persiste pas : retourne la copie, c'est au caller de sauvegarder.
+     *
+     * @param {Object} source - Item à forker (grille, échelle, etc.)
+     * @param {string} prefixeId - Préfixe d'ID (ex. 'GRILLE_')
+     * @returns {Object} Copie prête à être sauvegardée
+     */
+    BibliothequeUI.forkerItem = function (source, prefixeId) {
+        var genererId = window.genererIdUnique || function (p) {
+            return (p || 'ITEM_') + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        };
+        var auteurActif = (typeof obtenirIdentiteCCUtilisateur === 'function')
+            ? obtenirIdentiteCCUtilisateur()
+            : 'Utilisateur de Labo Codex';
+        // Clone profond pour éviter tout partage de références (ex. tableaux
+        // `criteres`, `niveaux`, `commentaires`) entre la source démo et la copie.
+        var copie = JSON.parse(JSON.stringify(source));
+        copie.id = genererId(prefixeId || 'ITEM_');
+        copie.nom = (source.nom || source.titre || 'Sans titre') + ' (copie)';
+        copie.auteur = auteurActif;
+        copie.isDemo = false;
+        copie.inspireDe = BibliothequeUI.forgerInspireDe(source);
+        copie.dansBibliotheque = true;
+        copie.dateCreation = new Date().toISOString();
+        delete copie.metadata_cc;
+        delete copie.auteurOriginal;
+        return copie;
+    };
+
+    /**
      * Pour les items démo, remplace le préfixe de pratique en tête du nom
      * (ex. « [SPE] », « [STD] ») par « [Démo] ». L'abréviation de pratique
      * étant un doublon du badge de pratique, on la remplace utilement par
