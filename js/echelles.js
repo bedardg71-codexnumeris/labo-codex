@@ -3334,9 +3334,37 @@ async function chargerEchellePourModif(id) {
     // Afficher les niveaux
     afficherNiveauxEchelle(echelle);
 
+    // Phase 4.B : mode lecture seule si item démo
+    const conteneur = document.getElementById('conteneurEditionEchelle');
+    if (conteneur && typeof BibliothequeUI !== 'undefined' && BibliothequeUI.appliquerModeLectureSeuleDemo) {
+        BibliothequeUI.appliquerModeLectureSeuleDemo(conteneur, echelle, 'dupliquerEtEditerEchelle', 'Dupliquer pour créer mon échelle');
+    }
+
     // Mettre le highlight et rafraîchir la sidebar
     await definirEchelleActive(id);
     await afficherListeEchelles();
+}
+
+/**
+ * Phase 4.B : fork une échelle démo et charge la copie en édition.
+ */
+async function dupliquerEtEditerEchelle(id) {
+    const echelles = await db.get('echellesTemplates') || [];
+    const echelle = echelles.find(e => e.id === id);
+    if (!echelle) return;
+
+    const copie = BibliothequeUI.forkerItem(echelle, 'ECH_');
+    echelles.push(copie);
+    await db.set('echellesTemplates', echelles);
+
+    await afficherListeEchelles();
+    await chargerEchellePourModif(copie.id);
+
+    const nomField = document.getElementById('nomEchelleTemplate');
+    if (nomField) {
+        nomField.focus();
+        nomField.select();
+    }
 }
 
 function afficherNiveauxEchelle(echelle) {
@@ -4027,6 +4055,7 @@ window.afficherListeEchelles = afficherListeEchelles;
 window.creerNouvelleEchelle = creerNouvelleEchelle;
 window.annulerFormEchelle = annulerFormEchelle;
 window.chargerEchellePourModif = chargerEchellePourModif;
+window.dupliquerEtEditerEchelle = dupliquerEtEditerEchelle;
 window.dupliquerEchelleDepuisSidebar = dupliquerEchelleDepuisSidebar;
 window.supprimerEchelleDepuisSidebar = supprimerEchelleDepuisSidebar;
 window.dupliquerEchelleActive = dupliquerEchelleActive;

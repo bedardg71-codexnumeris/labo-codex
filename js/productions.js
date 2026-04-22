@@ -3331,6 +3331,34 @@ window.importerProductions = importerProductions;
 window.afficherListeProductions = afficherListeProductions;
 // window.filtrerListeProductions = filtrerListeProductions; // Fonction commentée (Beta 92)
 window.chargerProductionPourModif = chargerProductionPourModif;
+
+/**
+ * Phase 4.B : fork une production démo et charge la copie en édition.
+ */
+async function dupliquerEtEditerProduction(id) {
+    const cleProductions = getCleProductions();
+    const productions = await db.get(cleProductions) || [];
+    const production = productions.find(p => p.id === id);
+    if (!production) return;
+
+    const copie = BibliothequeUI.forkerItem(production, 'PROD_');
+    // Les productions utilisent `titre` plutôt que `nom`
+    if (production.titre) copie.titre = production.titre + ' (copie)';
+    productions.push(copie);
+    await db.set(cleProductions, productions);
+
+    if (typeof afficherListeProductions === 'function') {
+        await afficherListeProductions();
+    }
+    await chargerProductionPourModif(copie.id);
+
+    const titreField = document.getElementById('productionTitre');
+    if (titreField) {
+        titreField.focus();
+        titreField.select();
+    }
+}
+window.dupliquerEtEditerProduction = dupliquerEtEditerProduction;
 window.creerNouvelleProduction = creerNouvelleProduction;
 window.dupliquerProduction = dupliquerProduction;
 window.dupliquerProductionActive = dupliquerProductionActive;
@@ -3567,12 +3595,16 @@ async function chargerProductionPourModif(id) {
 
     // ✅ AJOUT (6 jan 2026) : Afficher le panneau métadonnées
     const panneauMeta = document.getElementById('panneauMetadonneesProduction');
-    if (panneauMeta && typeof genererPanneauMetadonnees === 'function') {
-        const productions = await db.get(getCleProductions()) || [];
-        const production = productions.find(p => p.id === id);
-        if (production) {
-            panneauMeta.innerHTML = genererPanneauMetadonnees(production, 'production');
-        }
+    const productions = await db.get(getCleProductions()) || [];
+    const production = productions.find(p => p.id === id);
+    if (panneauMeta && typeof genererPanneauMetadonnees === 'function' && production) {
+        panneauMeta.innerHTML = genererPanneauMetadonnees(production, 'production');
+    }
+
+    // Phase 4.B : mode lecture seule si item démo
+    const conteneurProd = document.getElementById('formulaireProduction');
+    if (conteneurProd && production && typeof BibliothequeUI !== 'undefined' && BibliothequeUI.appliquerModeLectureSeuleDemo) {
+        BibliothequeUI.appliquerModeLectureSeuleDemo(conteneurProd, production, 'dupliquerEtEditerProduction', 'Dupliquer pour créer ma production');
     }
 
     // Highlighter l'item actif

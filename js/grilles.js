@@ -2118,6 +2118,7 @@ window.filtrerGrillesParDiscipline = filtrerGrillesParDiscipline;
 window.fermerModalBibliothequeGrilles = fermerModalBibliothequeGrilles;
 window.ajouterGrilleIndividuelle = ajouterGrilleIndividuelle;
 window.dupliquerGrilleBibliotheque = dupliquerGrilleBibliotheque;
+window.dupliquerEtEditerGrille = dupliquerEtEditerGrille;
 window.partagerGrille = partagerGrille;
 window.supprimerGrilleDefinitivement = supprimerGrilleDefinitivement;
 window.supprimerGrilleDeBibliothequePartagee = supprimerGrilleDeBibliothequePartagee;
@@ -2925,7 +2926,8 @@ async function chargerGrillePourModif(id) {
     if (!grille) return;
 
     document.getElementById('accueilGrilles').classList.add('u-hide');
-    document.getElementById('conteneurEditionGrille').classList.remove('u-hide');
+    const conteneur = document.getElementById('conteneurEditionGrille');
+    conteneur.classList.remove('u-hide');
 
     // Note: Export/Import se font maintenant via la bibliothèque
 
@@ -2958,9 +2960,37 @@ async function chargerGrillePourModif(id) {
     // Afficher les critères
     afficherCriteresGrille(grille);
 
+    // Phase 4.B : mode lecture seule si item démo
+    if (typeof BibliothequeUI !== 'undefined' && BibliothequeUI.appliquerModeLectureSeuleDemo) {
+        BibliothequeUI.appliquerModeLectureSeuleDemo(conteneur, grille, 'dupliquerEtEditerGrille', 'Dupliquer pour créer ma grille');
+    }
+
     // Mettre le highlight
     definirGrilleActive(id);
 
+}
+
+/**
+ * Phase 4.B : fork une grille démo et charge la copie en édition.
+ * Déclenché depuis le bandeau du formulaire en lecture seule.
+ */
+async function dupliquerEtEditerGrille(id) {
+    const grilles = await db.get('grillesTemplates') || [];
+    const grille = grilles.find(g => g.id === id);
+    if (!grille) return;
+
+    const copie = BibliothequeUI.forkerItem(grille, 'GRILLE_');
+    grilles.push(copie);
+    await db.set('grillesTemplates', grilles);
+
+    await afficherListeGrilles();
+    await chargerGrillePourModif(copie.id);
+
+    const nomField = document.getElementById('nomGrilleTemplate');
+    if (nomField) {
+        nomField.focus();
+        nomField.select();
+    }
 }
 
 function afficherCriteresGrille(grille) {

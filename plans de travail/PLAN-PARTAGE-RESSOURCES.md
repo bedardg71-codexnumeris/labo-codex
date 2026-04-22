@@ -4,7 +4,7 @@
 **Statut** : Cadrage complet, implémentation non démarrée
 **Philosophie-clé** : étendre le modèle d'autonomisation par la démo CC (Plan 1) au partage entre utilisateurs. Un enseignant qui a construit ses propres ressources peut les partager, un autre enseignant peut les observer et les prendre comme modèle selon exactement le même protocole que pour la démo. L'écosystème entier est un tissu CC BY-NC-SA qui circule, se réplique et inspire sans jamais être corrompu.
 
-**Plan prérequis** : `PLAN-AUTONOMISATION-UTILISATEUR.md` (Plan 1) — ce plan s'inscrit en continuité stricte, réutilise les mêmes conventions (sélecteurs à sections, « Prendre comme modèle », attribution visible, interdiction des références mixtes).
+**Plan prérequis** : `PLAN-AUTONOMISATION-UTILISATEUR.md` (Plan 1) — ce plan s'inscrit en continuité stricte, réutilise les mêmes conventions (sélecteurs à sections, « Dupliquer », attribution visible, interdiction des références mixtes).
 
 ---
 
@@ -43,7 +43,7 @@ Chaque utilisateur peut **exporter** un ou plusieurs items de ses bibliothèques
 
 Un autre utilisateur reçoit ce fichier (email, clé USB, peu importe) et l'importe via **Réglages › Import/Export**. Après validation stricte de sécurité et prévisualisation, les items arrivent dans une section nouvelle appelée **« Partagés »** des sélecteurs concernés. Ils sont **en lecture seule**, exactement comme les items démo.
 
-Pour les adopter, l'utilisateur clique sur **« Prendre comme modèle »** — même mécanisme que pour la démo. Un nouveau document est créé dans « Mes documents » avec l'attribution `Inspiré de [nom original] par [nom auteur]`.
+Pour les adopter, l'utilisateur clique sur **« Dupliquer »** — même mécanisme que pour la démo. Un nouveau document est créé dans « Mes documents » avec l'attribution `Inspiré de [nom original] par [nom auteur]`.
 
 ### 2.2 Trois types de ressources coexistent dans les sélecteurs
 
@@ -67,7 +67,7 @@ Après livraison de Plan 1 + Plan 2, chaque sélecteur d'entité expose trois se
 └─────────────────────────────────────────┘
 ```
 
-Les items « Partagés » sont **traités exactement comme les items Démo** côté UX : lecture seule par défaut, bouton « Prendre comme modèle » pour débloquer l'édition, génération d'un nouveau document avec attribution préservée.
+Les items « Partagés » sont **traités exactement comme les items Démo** côté UX : lecture seule par défaut, bouton « Dupliquer » pour débloquer l'édition, génération d'un nouveau document avec attribution préservée.
 
 ### 2.3 Le parallèle CC BY-NC-SA, toujours
 
@@ -155,7 +155,7 @@ Entry point : **Réglages › Import/Export › « Importer un package partagé 
 
 Flux identique à celui de la démo (défini dans Plan 1 §3) :
 - Clic sur item partagé → formulaire en lecture seule avec attribution visible
-- Clic sur « Prendre comme modèle » → formulaire bascule en édition, saisie du nom obligatoire
+- Clic sur « Dupliquer » → formulaire bascule en édition, saisie du nom obligatoire
 - Save → nouveau document dans « Mes documents » avec attribution `Inspiré de [nom original] par Martin X.`
 - La chaîne de provenance est préservée : si Martin s'était lui-même inspiré de la démo, cette information est conservée dans la métadonnée (affichée en mode replié, développable au clic)
 
@@ -280,7 +280,7 @@ Une entité utilisateur (dans « Mes documents ») ne peut référencer :
 
 Si l'utilisateur tente d'assembler un groupe-cours avec une grille partagée non forkée, même message clair que pour la démo :
 
-> « Cette grille a été partagée par Martin X. Pour l'utiliser dans ton groupe-cours, clique sur "Prendre comme modèle" d'abord et donne-lui ton propre nom. »
+> « Cette grille a été partagée par Martin X. Pour l'utiliser dans ton groupe-cours, clique sur "Dupliquer" d'abord et donne-lui ton propre nom. »
 
 Les forks, eux, sont de l'utilisateur et peuvent être référencés normalement.
 
@@ -402,7 +402,7 @@ Les packages déjà exportés en format Beta 91 (s'il en existe chez des utilisa
 
 ### Phase 4 — Section « Partagés » dans les sélecteurs
 - Adaptation des sélecteurs des 5 entités Structure (après Plan 1 qui a ajouté la section Démo, Plan 2 ajoute la section Partagés)
-- Comportement identique à la section Démo (lecture seule, « Prendre comme modèle »)
+- Comportement identique à la section Démo (lecture seule, « Dupliquer »)
 
 ### Phase 5 — Attribution chain complète
 - Stockage et sérialisation de `chaineAttribution` dans les métadonnées
@@ -437,7 +437,7 @@ Sur iPad Safari et Mac Safari, mode clair et sombre :
 8. Un package avec un champ HTML brut dans un texte est sanitizé (pas de XSS, rendu comme texte brut).
 9. Les items importés apparaissent dans la section « Partagés » des sélecteurs concernés.
 10. Un clic sur un item partagé ouvre le formulaire en lecture seule.
-11. Un clic sur « Prendre comme modèle » débloque l'édition, exige un nom.
+11. Un clic sur « Dupliquer » débloque l'édition, exige un nom.
 12. Le save crée un nouveau document dans « Mes documents » avec attribution visible incluant la chaîne complète.
 13. Une tentative de référencer un item partagé dans un assemblage (groupe-cours, pratique) est refusée avec message clair.
 14. Le namespace `partage_*` est isolé : suppression d'items partagés sans effet sur « Mes documents » ni sur la démo.
