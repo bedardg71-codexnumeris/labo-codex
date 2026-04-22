@@ -4014,6 +4014,16 @@ function populerDropdownGroupeCoursV2() {
         BibliothequeUI.ajouterOptgroupDemo(select, gcDemo, gc => gc.nom || gc.id, null, true);
     }
 
+    // Listener direct : la délégation data-on-change au niveau document est
+    // peu fiable sur iOS Safari après repopulation du dropdown. Double câblage
+    // pour garantir que changerGroupeCoursSelectionneV2 se déclenche.
+    if (!select.dataset.listenerDirect) {
+        select.addEventListener('change', function() {
+            changerGroupeCoursSelectionneV2(select.value);
+        });
+        select.dataset.listenerDirect = '1';
+    }
+
     // Restaurer la sélection si elle existait
     if (valeurActuelle) {
         select.value = valeurActuelle;
