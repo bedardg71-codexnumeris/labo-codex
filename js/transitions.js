@@ -51,7 +51,8 @@ var TRANSITIONS = [
             // groupeCoursActif est une clé GLOBALE (stocke l'ID du GC actif)
             return !!lireCleGlobale('groupeCoursActif', null);
         },
-        message: 'Ton espace de travail est pr\u00eat\u00a0: trimestre, cours, groupe, horaire et pratique sont configur\u00e9s. Tu peux maintenant saisir les pr\u00e9sences et \u00e9valuer les productions de tes \u00e9tudiant\u00b7es.'
+        message: 'Ton espace de travail est pr\u00eat\u00a0: trimestre, cours, groupe, horaire et pratique sont configur\u00e9s. Tu peux maintenant saisir les pr\u00e9sences et \u00e9valuer les productions de tes \u00e9tudiant\u00b7es.',
+        messageDemo: 'Cet espace de travail est une d\u00e9mo. Tu peux explorer les pr\u00e9sences et \u00e9valuations avec des donn\u00e9es fictives. Pour construire ton vrai espace, quitte la d\u00e9mo et configure tes propres trimestre, cours, groupe, horaire et pratique.'
     },
     {
         id: 'croisement-observation',
@@ -87,6 +88,26 @@ function estDejaVue(pref) {
     return obtenirPreference(pref) === true;
 }
 
+// Option B : tracker séparément « vu en mode démo » vs « vu en mode normal ».
+// Le bandeau démo et le bandeau normal ont des messages distincts et doivent
+// pouvoir se ré-afficher indépendamment (ex. l'utilisateur voit le message
+// démo, sort de la démo, configure son vrai GC → le vrai bandeau s'affiche).
+function estEnModeDemoLocal() {
+    return typeof estEnModeDemo === 'function' && estEnModeDemo();
+}
+
+function prefPourMode(transition) {
+    return estEnModeDemoLocal()
+        ? transition.dejaVuePref + '_demo'
+        : transition.dejaVuePref;
+}
+
+function messagePourMode(transition) {
+    return (estEnModeDemoLocal() && transition.messageDemo)
+        ? transition.messageDemo
+        : transition.message;
+}
+
 // =========================================================================
 // Affichage
 // =========================================================================
@@ -110,7 +131,7 @@ function afficherBandeau(transition) {
     contenu.className = 'transition-bandeau-contenu';
 
     var p = document.createElement('p');
-    p.textContent = transition.message;
+    p.textContent = messagePourMode(transition);
     contenu.appendChild(p);
 
     var btn = document.createElement('button');
@@ -119,7 +140,7 @@ function afficherBandeau(transition) {
     btn.setAttribute('aria-label', 'Fermer le message');
     btn.textContent = '\u2715';
     btn.addEventListener('click', function() {
-        marquerCommeVue(transition.dejaVuePref);
+        marquerCommeVue(prefPourMode(transition));
         fermerBandeau();
     });
     contenu.appendChild(btn);
@@ -144,7 +165,7 @@ function evaluerTransitions() {
     // Parcourir dans l'ordre : afficher la première non vue + déclenchée
     for (var i = 0; i < TRANSITIONS.length; i++) {
         var t = TRANSITIONS[i];
-        if (estDejaVue(t.dejaVuePref)) continue;
+        if (estDejaVue(prefPourMode(t))) continue;
         try {
             if (t.condition()) {
                 afficherBandeau(t);
