@@ -23,67 +23,58 @@ const CC_LICENSE_DEFAULTS = {
 };
 
 // ============================================
-// 🆕 BETA 95.2: PROFIL AUTEUR DEPUIS GROUPE-COURS
+// IDENTITÉ CC DE L'UTILISATEUR (Plan 1 §4.4, §4.6)
 // ============================================
+//
+// L'auteur CC est l'utilisateur qui a créé ce document. Distinct du champ
+// métier « enseignant du groupe-cours ». Pour éviter de créditer le prof
+// démo (Primo Primavera) ou un co-enseignant comme auteur du matériel,
+// on lit l'identité uniquement depuis le profil utilisateur (Réglages ›
+// Enseignant), en excluant les entrées `isDemo: true`.
 
 /**
- * Obtient le profil auteur de l'enseignant du groupe-cours actif (synchrone)
- * Utilisé pour pré-remplir les métadonnées CC lors des exports
+ * Retourne le profil CC de l'utilisateur : l'enseignant sélectionné dans
+ * Réglages › Enseignant (le dropdown `v2-selectEnseignant`), avec fallback
+ * sur l'enseignant marqué `actif` puis le premier enseignant réel de la
+ * liste. Les entrées `isDemo: true` sont toujours exclues.
  *
- * @returns {Object|null} - Profil auteur ou null si non disponible
+ * @returns {Object|null} Profil (auteur_original, email_auteur, institution,
+ *          site_auteur, niveau, attribution) ou null si aucun profil réel.
  */
 function obtenirProfilAuteurActifSync() {
     try {
-        // Vérifier que db est disponible
         if (typeof db === 'undefined' || !db.getSync) {
             return null;
         }
 
-        // Obtenir la liste des enseignants
         const enseignants = db.getSync('enseignants', []);
-        if (!enseignants || enseignants.length === 0) {
+        const enseignantsReels = (enseignants || []).filter(e => !e.isDemo);
+        if (enseignantsReels.length === 0) {
             return null;
         }
 
         let enseignant = null;
 
-        // 🆕 Beta 95.4 : Stratégie de recherche améliorée (5 niveaux)
-
-        // 1. D'abord essayer via le groupe-cours actif
-        const trimestreActif = window.trimestreActif || db.getSync('trimestreActif', null);
-        if (trimestreActif) {
-            const cleGC = `${trimestreActif}_groupesCours`;
-            const groupesCours = db.getSync(cleGC, []);
-            const groupeActif = groupesCours.find(gc => gc.actif);
-
-            if (groupeActif && groupeActif.enseignantId) {
-                enseignant = enseignants.find(e => e.id === groupeActif.enseignantId);
-            }
+        // 1. Dropdown Réglages › Enseignant (choix explicite de l'utilisateur)
+        const selectEnseignant = document.getElementById('v2-selectEnseignant');
+        if (selectEnseignant && selectEnseignant.value) {
+            enseignant = enseignantsReels.find(e => e.id === selectEnseignant.value);
         }
 
-        // 2. Sinon, lire le dropdown du profil enseignant (si visible)
+        // 2. Enseignant marqué actif
         if (!enseignant) {
-            const selectEnseignant = document.getElementById('v2-selectEnseignant');
-            if (selectEnseignant && selectEnseignant.value) {
-                enseignant = enseignants.find(e => e.id === selectEnseignant.value);
-            }
+            enseignant = enseignantsReels.find(e => e.actif);
         }
 
-        // 3. Sinon, chercher l'enseignant marqué comme actif
+        // 3. Premier enseignant réel de la liste
         if (!enseignant) {
-            enseignant = enseignants.find(e => e.actif);
-        }
-
-        // 4. Sinon, prendre le premier enseignant de la liste
-        if (!enseignant && enseignants.length > 0) {
-            enseignant = enseignants[0];
+            enseignant = enseignantsReels[0];
         }
 
         if (!enseignant) {
             return null;
         }
 
-        // Convertir en profil auteur (format CC)
         const nomComplet = `${enseignant.prenom || ''} ${enseignant.nom || ''}`.trim();
         return {
             auteur_original: nomComplet || CC_LICENSE_DEFAULTS.auteur_original,
@@ -98,6 +89,19 @@ function obtenirProfilAuteurActifSync() {
         console.warn('[CC License] Erreur obtention profil auteur:', err);
         return null;
     }
+}
+
+/**
+ * Retourne le nom de l'identité CC de l'utilisateur (chaîne). Fallback
+ * `"Utilisateur de Labo Codex"` si aucun profil enseignant n'est configuré
+ * dans Réglages. À utiliser partout où on veut tracer « qui est l'utilisateur »
+ * pour CC BY (auteur_original, contributeurs).
+ *
+ * @returns {string} Nom complet ou fallback.
+ */
+function obtenirIdentiteCCUtilisateur() {
+    const profil = obtenirProfilAuteurActifSync();
+    return (profil && profil.auteur_original) || 'Utilisateur de Labo Codex';
 }
 
 // ============================================
@@ -344,9 +348,9 @@ function demanderAttributionModification() {
 // ============================================
 
 /**
- * Ajoute l'enseignant actif comme contributeur si nécessaire
- * Règle : Si l'utilisateur actif n'est pas l'auteur original ET n'est pas déjà contributeur,
- * on l'ajoute une seule fois comme contributeur.
+ * Ajoute l'identité CC de l'utilisateur comme contributeur si elle n'est
+ * pas déjà l'auteur original. L'identité provient de Réglages › Enseignant
+ * (voir `obtenirIdentiteCCUtilisateur`), pas du groupe-cours actif.
  *
  * @param {Object} document - Le document (production, grille, échelle, cartouche, pratique)
  * @returns {Object} - Le document avec contributeurs mis à jour si nécessaire
@@ -354,13 +358,8 @@ function demanderAttributionModification() {
 function ajouterContributeurSiNecessaire(document) {
     if (!document) return document;
 
-    // Obtenir le nom de l'enseignant actif
-    const enseignantActif = obtenirNomEnseignantActif();
-    if (!enseignantActif) {
-        return document; // Pas d'enseignant actif, rien à faire
-    }
+    const identiteUtilisateur = obtenirIdentiteCCUtilisateur();
 
-    // Initialiser metadata si inexistant
     if (!document.metadata) {
         document.metadata = {};
     }
@@ -368,31 +367,26 @@ function ajouterContributeurSiNecessaire(document) {
         document.metadata_cc = {};
     }
 
-    // Obtenir l'auteur original (plusieurs sources possibles)
     const auteurOriginal = document.metadata_cc?.auteur_original ||
                           document.metadata?.auteur_original ||
                           document.auteur ||
                           '';
 
-    // Si l'enseignant actif EST l'auteur original, rien à faire
-    if (auteurOriginal && auteurOriginal.toLowerCase() === enseignantActif.toLowerCase()) {
+    if (auteurOriginal && auteurOriginal.toLowerCase() === identiteUtilisateur.toLowerCase()) {
         return document;
     }
 
-    // Initialiser contributeurs si inexistant
     if (!document.metadata_cc.contributeurs) {
         document.metadata_cc.contributeurs = [];
     }
 
-    // Vérifier si l'enseignant est déjà contributeur
     const dejaContributeur = document.metadata_cc.contributeurs.some(
-        c => c.nom && c.nom.toLowerCase() === enseignantActif.toLowerCase()
+        c => c.nom && c.nom.toLowerCase() === identiteUtilisateur.toLowerCase()
     );
 
-    // Si pas encore contributeur, l'ajouter
     if (!dejaContributeur) {
         document.metadata_cc.contributeurs.push({
-            nom: enseignantActif,
+            nom: identiteUtilisateur,
             date: new Date().toISOString().split('T')[0]
         });
     }
@@ -401,7 +395,12 @@ function ajouterContributeurSiNecessaire(document) {
 }
 
 /**
- * Obtient le nom complet de l'enseignant actif (via groupe-cours)
+ * Retourne le nom de l'enseignant du groupe-cours actif — champ MÉTIER
+ * (qui enseigne le cours), distinct de l'identité CC de l'utilisateur.
+ * À utiliser uniquement pour les sorties liées au groupe-cours (ex. pied
+ * de page PDF de retroaction). Pour l'attribution CC, voir
+ * `obtenirIdentiteCCUtilisateur`.
+ *
  * @returns {string|null} - Nom complet ou null si non trouvé
  */
 function obtenirNomEnseignantActif() {
@@ -444,6 +443,7 @@ function obtenirNomEnseignantActif() {
 // Export global
 window.ajouterContributeurSiNecessaire = ajouterContributeurSiNecessaire;
 window.obtenirNomEnseignantActif = obtenirNomEnseignantActif;
+window.obtenirIdentiteCCUtilisateur = obtenirIdentiteCCUtilisateur;
 
 // ============================================
 // VALIDATION LICENCE

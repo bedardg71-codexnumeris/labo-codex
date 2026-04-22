@@ -3732,8 +3732,8 @@ async function creerPratiqueDepuisWizard() {
             }
         } else {
             // Mode création : Sauvegarder via PratiqueManager
-            // ✅ Les pratiques créées par l'utilisateur sont directement dans la bibliothèque
-            const enseignantActif = typeof obtenirNomEnseignantActif === 'function' ? obtenirNomEnseignantActif() : null;
+            // Les pratiques créées par l'utilisateur sont directement dans la bibliothèque.
+            // Auteur CC = identité utilisateur (Plan 1 §4.4)
             await PratiqueManager.sauvegarderPratique({
                 id: pratiqueConfig.id,
                 nom: pratiqueConfig.nom,
@@ -3742,11 +3742,11 @@ async function creerPratiqueDepuisWizard() {
                 config: pratiqueConfig,
                 dansBibliotheque: true,
                 estDeLUtilisateur: true,
-                metadata_cc: enseignantActif ? {
-                    auteur_original: enseignantActif,
+                metadata_cc: {
+                    auteur_original: obtenirIdentiteCCUtilisateur(),
                     date_creation: new Date().toISOString().split('T')[0],
                     contributeurs: []
-                } : undefined
+                }
             });
         }
 
