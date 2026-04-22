@@ -343,9 +343,10 @@ async function quitterDemo() {
             peuplerDropdownGroupeCoursActif();
         }
 
-        // 7. Naviguer vers le tableau de bord
+        // 7. Retour à l'accueil (et non l'aperçu) — cohérent avec l'accueil V3
+        //    comme entry point unique après sortie du mode démo
         if (typeof afficherSection === 'function') {
-            afficherSection('apercu');
+            afficherSection('accueil');
         }
 
         // 8. Rafraîchir le contenu
