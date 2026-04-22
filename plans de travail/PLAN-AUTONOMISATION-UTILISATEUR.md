@@ -316,7 +316,9 @@ Sur iPad Safari et Mac Safari, mode clair et sombre :
 | Phase 1 — Namespace demo_* | Terminée | (à valider test iPad) | b0421-0730. js/demo-namespace.js + helper cleDemo + flag demo-version-installee. Invisible en Phase 1. |
 | Phase 2 — Sélecteurs à 2 sections | Terminée (2.0–2.5) | b0422-0738 | Reste trimestre legacy → Phase 5 |
 | Phase 3 — Fork et attribution | Livrée code | b0422-0832 | Test terrain iPad 22 avril : `inspireDe` sur cartes + panneau OK. Audit auteur/enseignant fait. |
-| Phase 4 — Interdiction réf. mixtes + lecture seule démo + identité CC | À faire | — | Scope étendu suite au test terrain : lecture-seule démo + helper `obtenirIdentiteCCUtilisateur()` + fix `ajouterContributeurSiNecessaire`. |
+| Phase 4.A — Identité CC utilisateur | Livrée | b0422-1000 | Helper `obtenirIdentiteCCUtilisateur()` avec fallback « Utilisateur de Labo Codex ». `obtenirProfilAuteurActifSync` refactoré (filtre isDemo, priorise Réglages). 9 call-sites de création migrés. |
+| Phase 4.B — Formulaires démo en lecture seule | Livrée | b0422-1105 | 5 formulaires (grille, échelle, cartouche, production, pratique matériel) + helpers `appliquerModeLectureSeuleDemo` + `forkerItem` dans BibliothequeUI. Vocabulaire « Dupliquer » harmonisé dans doc. Test terrain OK. |
+| Phase 4.C — Interdiction références mixtes | Livrée | b0422-1135 | Helper `verifierReferencesPasDemo` + gardes aux 3 points de save : groupe-cours (trimestre-v2), évaluation (evaluation.js × 2), pratique (pratiques-materiel). |
 | Phase 5 — Retrait mode démo actuel | À faire | — | |
 | Phase 6 — Documentation | À faire | — | |
 | Phase 7 — Préparation Plan 2 | À faire | — | |

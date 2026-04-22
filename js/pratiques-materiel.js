@@ -1196,6 +1196,22 @@ async function sauvegarderConfigPratiqueMat() {
         return;
     }
 
+    // Phase 4.C : interdire références à des items démo (Plan §3.4)
+    const echelleIdCourante = getValeurChamp('mat-echelle-id');
+    if (echelleIdCourante && typeof BibliothequeUI !== 'undefined' && BibliothequeUI.verifierReferencesPasDemo) {
+        const violationDemo = BibliothequeUI.verifierReferencesPasDemo([
+            { id: echelleIdCourante, collection: 'echellesTemplates', labelType: 'échelle' }
+        ]);
+        if (violationDemo) {
+            if (typeof afficherNotificationErreur === 'function') {
+                afficherNotificationErreur('Référence démo non autorisée', violationDemo.message);
+            }
+            // Revert le champ pour que l'utilisateur ne soit pas bloqué
+            setValeurChamp('mat-echelle-id', '');
+            return;
+        }
+    }
+
     // 🆕 FIX v3 (20 jan 2026) : localStorage comme source principale
     let configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
