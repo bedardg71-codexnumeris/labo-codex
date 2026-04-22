@@ -4298,7 +4298,9 @@ function mettreAJourNomGroupeCoursV2() {
  * Appelé quand on change le groupe-cours sélectionné
  */
 function changerGroupeCoursSelectionneV2(gcId) {
+    console.warn('[GC-SELECT] handler triggered, gcId=', gcId, 'type=', typeof gcId);
     if (typeof gcId === 'object' && gcId && gcId.value !== undefined) gcId = gcId.value;
+    console.warn('[GC-SELECT] after unwrap, gcId=', gcId);
     const btnSupprimer = document.getElementById('v2-btnSupprimerGroupeCours');
 
     if (!gcId) {
@@ -4312,11 +4314,16 @@ function changerGroupeCoursSelectionneV2(gcId) {
     // en lecture seule avec bouton Dupliquer (pas de suppression).
     if (typeof gcId === 'string' && gcId.indexOf('demo-') === 0 && typeof cleDemo === 'function') {
         const idReel = gcId.substring(5);
-        const gcDemo = (db.getSync(cleDemo('groupesCours'), []) || []).find(g => g.id === idReel);
+        const liste = db.getSync(cleDemo('groupesCours'), []) || [];
+        console.warn('[GC-SELECT] demo branch, idReel=', idReel, 'liste.length=', liste.length, 'ids=', liste.map(g => g.id));
+        const gcDemo = liste.find(g => g.id === idReel);
         if (gcDemo) {
+            console.warn('[GC-SELECT] demo gc found, calling editerGroupeCoursV2');
             mettreAJourCarteResumeGroupeCoursV2(gcDemo);
             editerGroupeCoursV2(gcDemo);
             if (btnSupprimer) btnSupprimer.classList.add('u-hide');
+        } else {
+            console.warn('[GC-SELECT] demo gc NOT found for idReel=', idReel);
         }
         return;
     }
