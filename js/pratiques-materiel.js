@@ -396,6 +396,7 @@ async function afficherBibliothequePratiques() {
                                 <span class="badge-source badge-source--id" style="font-family: monospace;" title="ID: ${pratique.id}">#${idCourt}</span>
                                 ${badgeSource}
                             </div>
+                            ${(function(l){return l ? '<div class="biblio-carte-inspire">' + echapperHtml(l) + '</div>' : '';})(BibliothequeUI.formaterInspireDe(pratique))}
                             <div style="color: var(--gris-clair); font-size: 0.9em;">
                                 ${pratique.description || ''}${discipline ? ' • ' + discipline : ''}
                             </div>
@@ -532,6 +533,7 @@ async function afficherBibliothequePratiques() {
                                 ${badgeSource}
                                 ${estGabarit ? '<span class="badge-source badge-source--retiree">Gabarit</span>' : ''}
                             </div>
+                            ${(function(l){return l ? '<div class="biblio-carte-inspire">' + echapperHtml(l) + '</div>' : '';})(BibliothequeUI.formaterInspireDe(pratique))}
                             <div style="color: var(--gris-clair); font-size: 0.9em;">
                                 ${pratique.description || ''}${discipline ? ' • ' + discipline : ''}
                                 ${pratique.auteur ? ' • Par ' + pratique.auteur : ''}

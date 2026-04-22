@@ -2371,6 +2371,7 @@ async function preparerDonneesBibliothequeEchelles() {
         badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
         badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(echelle) : '',
         metadonnees: (function(a){return `${echelle.niveaux?.length || 0} niveau(x)${echelle.discipline ? ' • ' + echelle.discipline : ''}${a ? ' • ' + a : ''}`;})(BibliothequeUI.formaterAttribution(echelle)),
+        inspireDe: BibliothequeUI.formaterInspireDe(echelle),
         boutons: [
             { label: 'Dupliquer', onclick: `dupliquerEchelleBibliotheque('${echelle.id}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
             { label: 'Exporter', onclick: `partagerEchelle('${echelle.id}')`, classe: 'btn-secondaire', title: 'Exporter en JSON' },
@@ -2413,6 +2414,7 @@ async function preparerDonneesBibliothequeEchelles() {
                 badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
                 badgesPratiques: badgesPratiques,
                 metadonnees: (function(a){return `${echelle.niveaux?.length || 0} niveau(x)${a ? ' • ' + a : ''}`;})(BibliothequeUI.formaterAttribution(echelle)),
+                inspireDe: BibliothequeUI.formaterInspireDe(echelle),
                 description: echelle.description || '',
                 dejaPresent: dejaPresent,
                 classeItem: 'echelle-disponible-item',
