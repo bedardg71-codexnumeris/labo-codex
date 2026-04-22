@@ -143,7 +143,7 @@ function chargerOptionsFiltres() {
     // BETA 95 : Filtrer par cours actif pour éviter contamination entre trimestres
     const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
         ? obtenirEtudiantsCoursActif()
-        : filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants') || []);
+        : (obtenirDonneesSelonMode('groupeEtudiants') || []);
 
     // Charger les groupes
     const filtreGroupe = document.getElementById('filtre-groupe-liste');
@@ -848,7 +848,7 @@ function afficherListeEtudiantsConsultation() {
     // BETA 95 : Filtrer par cours actif pour éviter contamination entre trimestres
     const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
         ? obtenirEtudiantsCoursActif()
-        : filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants') || []);
+        : (obtenirDonneesSelonMode('groupeEtudiants') || []);
 
 
     // Appliquer les filtres

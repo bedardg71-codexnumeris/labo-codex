@@ -37,12 +37,11 @@ function afficherAccueil() {
 
 /**
  * Génère la bannière de bienvenue (nouvel utilisateur).
- * Affichée si aucun groupe-cours n'est configuré ET mode démo inactif.
+ * Affichée si aucun groupe-cours n'est configuré ET toggle « Données démo » inactif.
  * Source texte : docs/refonte-textes/textes-manquants-bloc4.md (validé 19 avril 2026)
  */
 function genererBanniereBienvenue() {
-    const enDemo = typeof estEnModeDemo === 'function' && estEnModeDemo();
-    if (enDemo) return '';
+    if (toggleDemoActif()) return '';
 
     // Détection : au moins un groupe-cours configuré.
     // `groupeCoursActif` est une clé GLOBALE (pas préfixée par trimestre) qui
@@ -96,7 +95,7 @@ function genererBanniereBienvenue() {
  */
 function afficherAccueilContenu(conteneur) {
     // A.14 — La case « Données de démonstration » reflète strictement l'état réel.
-    const demoChecked = typeof estEnModeDemo === 'function' && estEnModeDemo();
+    const demoChecked = toggleDemoActif();
     // « Accompagnement » = ON uniquement si les 4 sous-systèmes sont actifs.
     const accChecked = accompagnementEstActif();
 
@@ -247,7 +246,7 @@ function initialiserAccueil() {
     window.addEventListener('db-ready', function() {
         const cbDemo = document.getElementById('checkbox-demo-accueil');
         if (cbDemo) {
-            cbDemo.checked = typeof estEnModeDemo === 'function' && estEnModeDemo();
+            cbDemo.checked = toggleDemoActif();
         }
         const cbAcc = document.getElementById('checkbox-accompagnement-accueil');
         if (cbAcc) {
@@ -259,6 +258,11 @@ function initialiserAccueil() {
 /* ===============================
    WRAPPERS DELEGATION
    =============================== */
+
+/** État du toggle « Données démo » (flag demo-actif en localStorage). */
+function toggleDemoActif() {
+    return db.getSync('demo-actif', null) === 'true';
+}
 
 /**
  * Toggle « Données démo » : affiche ou masque les sections Démo dans les
