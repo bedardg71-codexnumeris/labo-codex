@@ -70,8 +70,12 @@
      * @param {Array} demoItems - Tableau d'items démo (avec .id et .nom ou équivalent)
      * @param {Function} extraireTexte - Fonction (item) => string pour le label
      * @param {string} [titreOptgroup] - Label de l'optgroup (défaut explicite)
+     * @param {boolean} [selectionnable] - Si true, options non disabled : permet
+     *        de les sélectionner pour ouvrir le formulaire en lecture seule +
+     *        bouton Dupliquer (cas GC, qui n'a pas de bibliothèque visuelle
+     *        séparée). Défaut false (options disabled, parcours via biblio).
      */
-    BibliothequeUI.ajouterOptgroupDemo = function (selectElement, demoItems, extraireTexte, titreOptgroup) {
+    BibliothequeUI.ajouterOptgroupDemo = function (selectElement, demoItems, extraireTexte, titreOptgroup, selectionnable) {
         if (!selectElement || !demoItems || demoItems.length === 0) return;
         var optgroup = document.createElement('optgroup');
         optgroup.label = titreOptgroup || 'Démo (par Labo Codex — à dupliquer pour utiliser)';
@@ -81,8 +85,10 @@
             option.textContent = (typeof extraireTexte === 'function')
                 ? extraireTexte(item)
                 : (item.nom || item.titre || 'Sans titre');
-            option.disabled = true;
-            option.title = 'Exemple fourni par Labo Codex. Duplique-le dans la section appropriée pour en créer ta propre version.';
+            option.disabled = !selectionnable;
+            option.title = selectionnable
+                ? 'Exemple fourni par Labo Codex. Sélectionne pour le consulter en lecture seule, puis duplique pour créer ta version.'
+                : 'Exemple fourni par Labo Codex. Duplique-le dans la section appropriée pour en créer ta propre version.';
             if (item.id) option.dataset.demoId = item.id;
             optgroup.appendChild(option);
         });
