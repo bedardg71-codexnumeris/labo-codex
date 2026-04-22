@@ -256,6 +256,16 @@ function initialiserAccueil() {
     // db-ready (l'état peut venir d'IDB qui n'est pas dispo au premier rendu).
     // Bugfix 22 avril : la case se décochait au refresh malgré mode démo actif.
     window.addEventListener('db-ready', function() {
+        // Réconciliation : si le flag demo-actif est à 'true' mais le trimestre
+        // 'demo' n'est pas virtualisé dans trimestres globaux (ex. après un
+        // nettoyage), ré-appliquer l'activation pour rester cohérent.
+        if (toggleDemoActif()) {
+            const trimestres = db.getSync('trimestres', []) || [];
+            const demoActifDansListe = trimestres.some(t => t.id === 'demo' && t.actif);
+            if (!demoActifDansListe) {
+                activerModeDemo();
+            }
+        }
         const cbDemo = document.getElementById('checkbox-demo-accueil');
         if (cbDemo) {
             cbDemo.checked = toggleDemoActif();
@@ -277,22 +287,87 @@ function toggleDemoActif() {
 }
 
 /**
- * Toggle « Données démo » : affiche ou masque les sections Démo dans les
- * sélecteurs du projet (Plan 1 Phase 2). Ne charge ni décharge plus de
- * données — le namespace demo_* reste peuplé en permanence (Plan 1 Phase 1).
- * Toggle chirurgical de la bannière de bienvenue (pas de rerender complet,
- * sinon les listeners JS sur les checkboxes seraient perdus).
+ * Active le mode démo : réintroduit virtuellement le trimestre 'demo' dans
+ * la liste globale pour que cle('X') route vers demo_X, pose les pointeurs
+ * groupeCoursActif et infoCours vers le GC démo et son cours. Snapshot des
+ * valeurs précédentes dans demo-snapshot-pointeurs pour restauration.
+ * N'écrit rien dans demo_* ni dans aucune collection de données.
+ */
+function activerModeDemo() {
+    // Snapshot des 3 pointeurs globaux
+    db.setSync('demo-snapshot-pointeurs', {
+        trimestreActif: db.getSync('trimestreActif', null),
+        groupeCoursActif: db.getSync('groupeCoursActif', null),
+        infoCours: db.getSync('infoCours', null)
+    });
+
+    // Virtualiser le trimestre démo dans la liste globale (actif=true)
+    const trimestres = (db.getSync('trimestres', []) || []).filter(t => t.id !== 'demo');
+    trimestres.forEach(t => { t.actif = false; });
+    trimestres.push({ id: 'demo', nom: 'Démonstration', session: 'D', annee: '2025', actif: true, isDemo: true });
+    db.setSync('trimestres', trimestres);
+    window.trimestreActif = 'demo';
+    db.setSync('trimestreActif', 'demo');
+
+    // Pointer vers le GC démo
+    const gcDemo = (db.getSync('demo_groupesCours', []) || []).find(g => g.id === 'GC_DEMO');
+    if (gcDemo) db.setSync('groupeCoursActif', gcDemo);
+
+    // Pointer vers le cours démo
+    const coursDemo = (db.getSync('demo_listeCours', []) || [])[0];
+    if (coursDemo) db.setSync('infoCours', coursDemo);
+}
+
+/**
+ * Désactive le mode démo : restaure les 3 pointeurs depuis le snapshot et
+ * retire le trimestre 'demo' virtuel de la liste globale.
+ */
+function desactiverModeDemo() {
+    const snap = db.getSync('demo-snapshot-pointeurs', null);
+
+    // Retirer 'demo' des trimestres globaux et restaurer actif=true sur le précédent
+    const sansDemo = (db.getSync('trimestres', []) || []).filter(t => t.id !== 'demo');
+    if (snap && snap.trimestreActif) {
+        sansDemo.forEach(t => { t.actif = (t.id === snap.trimestreActif); });
+    } else {
+        sansDemo.forEach(t => { t.actif = false; });
+    }
+    db.setSync('trimestres', sansDemo);
+
+    // Restaurer les 3 pointeurs
+    if (snap && snap.trimestreActif) {
+        window.trimestreActif = snap.trimestreActif;
+        db.setSync('trimestreActif', snap.trimestreActif);
+    } else {
+        window.trimestreActif = null;
+        db.removeSync('trimestreActif');
+    }
+    if (snap && snap.groupeCoursActif) db.setSync('groupeCoursActif', snap.groupeCoursActif);
+    else db.removeSync('groupeCoursActif');
+    if (snap && snap.infoCours) db.setSync('infoCours', snap.infoCours);
+    else db.removeSync('infoCours');
+
+    db.removeSync('demo-snapshot-pointeurs');
+}
+
+/**
+ * Toggle « Données démo » : Plan 1 Phase 5.B-ter.
+ * Active le GC démo comme GC actif (lecture seule depuis demo_*) ou
+ * restaure l'état précédent. Ne touche pas aux données elles-mêmes :
+ * seulement les 3 pointeurs (trimestreActif, groupeCoursActif, infoCours)
+ * et le trimestre 'demo' virtuel dans la liste globale.
  */
 function toggleDemoHandler(el) {
     const actif = !!(el && el.checked);
-    db.setSync('demo-actif', actif ? 'true' : null);
-    const banniere = document.getElementById('banniere-bienvenue');
-    if (banniere) {
-        banniere.style.display = actif ? 'none' : '';
-    } else if (!actif) {
-        // Bannière absente et on désactive : rerender au cas où elle doive réapparaître
-        afficherAccueil();
+    if (actif) {
+        activerModeDemo();
+    } else {
+        desactiverModeDemo();
     }
+    db.setSync('demo-actif', actif ? 'true' : null);
+    // Rafraîchir l'accueil complet : la bannière et les sections qui
+    // dépendent du GC actif doivent être re-calculées.
+    afficherAccueil();
 }
 
 /**
