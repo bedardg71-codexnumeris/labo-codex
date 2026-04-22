@@ -1384,6 +1384,12 @@ function chargerDropdownCoursV2() {
             select.appendChild(option);
         });
 
+        // Section Démo (Plan 1 Phase 2.4) : cours Labo Codex en lecture seule
+        if (typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
+            const coursDemo = db.getSync(cleDemo('listeCours'), []) || [];
+            BibliothequeUI.ajouterOptgroupDemo(select, coursDemo, obtenirTexteCours);
+        }
+
         // Si aucun cours sélectionné mais qu'il y en a, sélectionner le premier
         if (!coursSelectionne && coursAfficher.length > 0) {
             select.options[1].selected = true;
@@ -3453,12 +3459,18 @@ function populerDropdownHorairesV2() {
     const valeurActuelle = select.value;
 
     let html = '<option value="">Sélectionner...</option>';
-    horaires.forEach(h => {
-        // Marqueur démo cohérent avec populerDropdownsAssemblageV2 (A.13)
-        const suffixeDemo = h.isDemo ? ' (démo)' : '';
-        html += `<option value="${h.id}">${h.nom || 'Sans nom'}${suffixeDemo}</option>`;
+    // Filtrer les items démo (ils iront dans l'optgroup séparé Phase 2.4)
+    const reels = horaires.filter(h => !h.isDemo);
+    reels.forEach(h => {
+        html += `<option value="${h.id}">${h.nom || 'Sans nom'}</option>`;
     });
     select.innerHTML = html;
+
+    // Section Démo (Plan 1 Phase 2.4) : horaires Labo Codex en lecture seule
+    if (typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
+        const horairesDemo = db.getSync(cleDemo('horaires'), []) || [];
+        BibliothequeUI.ajouterOptgroupDemo(select, horairesDemo, h => h.nom || 'Sans nom');
+    }
 
     // Restaurer la sélection
     if (valeurActuelle) {
@@ -4002,10 +4014,18 @@ function populerDropdownGroupeCoursV2() {
     const valeurActuelle = select.value;
 
     let html = '<option value="">— Choisir pour modifier —</option>';
-    groupesCours.forEach(gc => {
+    // Filtrer les items démo (ils iront dans l'optgroup séparé Phase 2.4)
+    const reels = groupesCours.filter(gc => !gc.isDemo);
+    reels.forEach(gc => {
         html += `<option value="${gc.id}">${gc.nom || gc.id}</option>`;
     });
     select.innerHTML = html;
+
+    // Section Démo (Plan 1 Phase 2.4) : groupes-cours Labo Codex en lecture seule
+    if (typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
+        const gcDemo = db.getSync(cleDemo('groupesCours'), []) || [];
+        BibliothequeUI.ajouterOptgroupDemo(select, gcDemo, gc => gc.nom || gc.id);
+    }
 
     // Restaurer la sélection si elle existait
     if (valeurActuelle) {
@@ -5384,15 +5404,23 @@ function populerDropdownEnseignantsV2() {
     const enseignants = db.getSync('enseignants', []);
 
     let html = '<option value="">— Sélectionner —</option>';
-    enseignants.forEach(e => {
+    // Filtrer les items démo (ils iront dans l'optgroup séparé Phase 2.4)
+    const reels = enseignants.filter(e => !e.isDemo);
+    reels.forEach(e => {
         const nomComplet = `${e.prenom || ''} ${e.nom || ''}`.trim() || 'Sans nom';
         const selected = (e.id === enseignantEnEditionId) ? ' selected' : '';
-        // Marqueur démo cohérent avec populerDropdownsAssemblageV2 (A.13)
-        const suffixeDemo = e.isDemo ? ' (démo)' : '';
-        html += `<option value="${e.id}"${selected}>${nomComplet}${suffixeDemo}</option>`;
+        html += `<option value="${e.id}"${selected}>${nomComplet}</option>`;
     });
 
     select.innerHTML = html;
+
+    // Section Démo (Plan 1 Phase 2.4) : enseignants Labo Codex en lecture seule
+    if (typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
+        const enseignantsDemo = db.getSync(cleDemo('enseignants'), []) || [];
+        BibliothequeUI.ajouterOptgroupDemo(select, enseignantsDemo, e =>
+            `${e.prenom || ''} ${e.nom || ''}`.trim() || 'Sans nom'
+        );
+    }
 }
 
 /**
