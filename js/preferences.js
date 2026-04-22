@@ -78,7 +78,12 @@
         // `false` par défaut = la bannière de transition est encore à voir.
         transition_num_crois_vue: false,
         transition_crois_obs_vue: false,
-        transition_obs_comp_vue: false
+        transition_obs_comp_vue: false,
+
+        // État du tour guidé 6 étapes (js/accompagnement.js)
+        tourGuide_etape: null,
+        tourGuide_complete: false,
+        tourGuide_etapes_vues: []
     };
 
     // Abonnés : { cle: [callback, callback, ...] }
