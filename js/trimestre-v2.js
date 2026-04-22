@@ -3938,6 +3938,10 @@ window.annulerFormHoraireV2 = annulerFormHoraireV2;
 window.sauvegarderHoraireV2 = sauvegarderHoraireV2;
 window.mettreAJourSeancesHoraireV2 = mettreAJourSeancesHoraireV2;
 window.chargerHorairesV2 = chargerHorairesV2;
+// Référencée par 3 data-on-change dans index.html (v2-nomTrimestre,
+// v2-sessionTrimestre, v2-anneeTrimestre). Export manquant — warning
+// du dispatcher main.js.
+window.sauvegarderIdentificationTrimestreV2 = sauvegarderIdentificationTrimestreV2;
 
 /* ===============================
    GESTION DES GROUPE-COURS (Beta 95.2)
