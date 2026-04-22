@@ -13,8 +13,8 @@
 const PACK_DEMARRAGE = {
   "_metadata": {
     "nom": "Pack démo A2025",
-    "version": "20.1",
-    "date": "2026-04-21",
+    "version": "20.2",
+    "date": "2026-04-22",
     "description": "20 étudiants anonymisés • 11 productions • 200 évaluations • 627 présences",
     "source": "Données réelles A2025 anonymisées",
     "auteur": "Système de monitorage"
@@ -13879,7 +13879,7 @@ const PACK_DEMARRAGE = {
         "STD"
       ],
       "metadata_cc": {
-        "auteur_original": "Grégoire Bédard",
+        "auteur_original": "Labo Codex",
         "date_creation": "2026-01-08",
         "licence": "CC BY-NC-SA 4.0",
         "contributeurs": []
@@ -13935,7 +13935,7 @@ const PACK_DEMARRAGE = {
         "STD"
       ],
       "metadata_cc": {
-        "auteur_original": "Grégoire Bédard",
+        "auteur_original": "Labo Codex",
         "date_creation": "2026-01-08",
         "licence": "CC BY-NC-SA 4.0",
         "contributeurs": []
@@ -14125,7 +14125,7 @@ const PACK_DEMARRAGE = {
       ],
       "dateModification": "2026-01-21T13:34:01.878Z",
       "metadata_cc": {
-        "auteur_original": "Grégoire Bédard",
+        "auteur_original": "Labo Codex",
         "date_creation": "2026-01-08",
         "licence": "CC BY-NC-SA 4.0",
         "contributeurs": []

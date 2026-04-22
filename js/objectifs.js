@@ -876,7 +876,7 @@ function creerEnsembleCalculDiff() {
     const ensemble = {
         id: 'objectifs-michel-calcul-diff',
         nom: 'Calcul différentiel (201-NYA)',
-        auteur: 'Grégoire Bédard',
+        auteur: 'Labo Codex',
         etablissement: 'Cégep de Sainte-Foy',
         discipline: 'Mathématiques',
         description: 'Objectifs d\'apprentissage pour le cours de calcul différentiel 201-NYA-05. ' +

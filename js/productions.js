@@ -1995,7 +1995,7 @@ async function preparerDonneesBibliothequeProductions() {
                 nom: `${BibliothequeUI.formaterTitreDemo(prod.titre, BibliothequeUI.estItemDemo(prod))}${(prod.activiteApprentissage || prod.description) ? ' - ' + (prod.activiteApprentissage || prod.description) : ''}`,
                 id: prod.id,
                 badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsUtilisateur),
-                metadonnees: `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%${prod.auteur ? ' • Par ' + prod.auteur : ''}`,
+                metadonnees: (function(a){return `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%${a ? ' • ' + a : ''}`;})(BibliothequeUI.formaterAttribution(prod)),
                 description: prod.objectif ? 'Objectif: ' + prod.objectif : '',
                 dejaPresent: false,
                 classeItem: 'production-disponible-item',

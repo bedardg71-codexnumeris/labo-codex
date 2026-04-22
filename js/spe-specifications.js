@@ -104,7 +104,7 @@
             type: 'checkbox'
         })),
         dateCreation: '2026-01-02T00:00:00.000Z',
-        auteur: 'Grégoire Bédard',
+        auteur: 'Labo Codex',
         dansBibliotheque: true
     };
 
@@ -122,7 +122,7 @@
         consignes: 'Prends position de façon éclairée par rapport à un enjeu scientifique ou technologique qui traverse un métier qui t\'intéresse.',
         ponderation: 0,
         dateCreation: '2026-01-02T00:00:00.000Z',
-        auteur: 'Grégoire Bédard',
+        auteur: 'Labo Codex',
         dansBibliotheque: true
     };
 
@@ -147,25 +147,7 @@
                 { id: 'crit_4', nom: 'L\'étudiant peut expliquer ses choix lors de l\'entrevue', obligatoire: true, type: 'checkbox' }
             ],
             dateCreation: '2026-01-02T00:00:00.000Z',
-            auteur: 'Grégoire Bédard',
-            dansBibliotheque: true
-        },
-        // Grille pour Test/Quiz
-        {
-            id: 'GRILLE_SPE_GABARIT_TEST',
-            nom: '[SPE] Gabarit - Test',
-            type: 'specifications',
-            typeSPE: true,
-            estGabarit: true,
-            gabaritType: 'SPE',
-            pratiques: ['SPE'],
-            description: 'Gabarit SPE : Test avec seuil de réussite (ex: 70% des questions correctes).',
-            criteres: [
-                { id: 'crit_1', nom: 'Le seuil de réussite est atteint (ex: 70%)', obligatoire: true, type: 'checkbox' },
-                { id: 'crit_2', nom: 'Aucune question critique n\'est échouée', obligatoire: true, type: 'checkbox' }
-            ],
-            dateCreation: '2026-01-02T00:00:00.000Z',
-            auteur: 'Gabarit générique',
+            auteur: 'Labo Codex',
             dansBibliotheque: true
         },
         // Grille pour Présentation orale
@@ -185,7 +167,7 @@
                 { id: 'crit_4', nom: 'L\'étudiant peut répondre aux questions de base', obligatoire: true, type: 'checkbox' }
             ],
             dateCreation: '2026-01-02T00:00:00.000Z',
-            auteur: 'Grégoire Bédard',
+            auteur: 'Labo Codex',
             dansBibliotheque: true
         }
     ];

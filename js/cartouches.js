@@ -3365,7 +3365,7 @@ async function preparerDonneesBibliothequeCartouches() {
                 nom: BibliothequeUI.formaterTitreDemo(cartouche.nom || 'Sans titre', BibliothequeUI.estItemDemo(cartouche)),
                 id: cartouche.id,
                 badgeSource: BibliothequeUI.genererBadgeSource(cartouche, cartouchesDansBibliotheque),
-                metadonnees: `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)${cartouche.auteurOriginal ? ' • ' + cartouche.auteurOriginal : ''}`,
+                metadonnees: (function(a){return `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)${a ? ' • ' + a : ''}`;})(BibliothequeUI.formaterAttribution(cartouche)),
                 boutons: [
                     { label: 'Dupliquer', onclick: `dupliquerCartoucheBibliotheque('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
                     { label: 'Exporter', onclick: `partagerCartouche('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-secondaire', title: 'Exporter en JSON' },
@@ -3393,7 +3393,7 @@ async function preparerDonneesBibliothequeCartouches() {
                 nom: BibliothequeUI.formaterTitreDemo(cartouche.nom || 'Sans titre', BibliothequeUI.estItemDemo(cartouche)),
                 id: cartouche.id,
                 badgeSource: BibliothequeUI.genererBadgeSource(cartouche, cartouchesDansBibliotheque),
-                metadonnees: `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)${cartouche.auteur ? ' • ' + cartouche.auteur : ''}`,
+                metadonnees: (function(a){return `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)${a ? ' • ' + a : ''}`;})(BibliothequeUI.formaterAttribution(cartouche)),
                 description: cartouche.description || '',
                 dejaPresent: dejaPresent,
                 classeItem: 'cartouche-disponible-item',

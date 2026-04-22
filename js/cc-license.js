@@ -234,7 +234,7 @@ function genererBadgeCC(metadata) {
     return `
         <div class="cc-badge">
             <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">
-                <img src="licence CC/by-nc-sa-2.svg" alt="CC BY-NC-SA 4.0" style="height: 15px;">
+                <img src="icons/by-nc-sa-2.svg" alt="CC BY-NC-SA 4.0" style="height: 15px;">
             </a>
 
             <p class="cc-badge-titre">${metadata.nom || 'Matériel pédagogique'}</p>
@@ -483,7 +483,7 @@ function genererBadgeCCPermanent() {
     return `
         <div class="cc-badge">
             <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">
-                <img src="licence CC/by-nc-sa-2.svg" alt="CC BY-NC-SA 4.0" style="height: 15px;">
+                <img src="icons/by-nc-sa-2.svg" alt="CC BY-NC-SA 4.0" style="height: 15px;">
             </a>
 
             <p class="cc-badge-titre">Matériel partagé sous licence libre</p>
@@ -702,7 +702,7 @@ function creerModalMetadonneesEnrichies() {
                 <span>Metadonnees d'export</span>
                 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank"
                    class="u-texte-mini" style="color: var(--bleu-leger); text-decoration: none; display: flex; align-items: center; gap: 5px;">
-                    <img src="licence CC/by-nc-sa-2.svg"
+                    <img src="icons/by-nc-sa-2.svg"
                          alt="CC BY-NC-SA 4.0" style="height: 15px;">
                     En savoir plus
                 </a>
@@ -1324,7 +1324,7 @@ function genererPanneauMetadonnees(ressource, typeRessource) {
             <span class="meta-valeur">
                 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank"
                    style="text-decoration: none;">
-                    <img src="licence CC/by-nc-sa-2.svg" alt="${echapperHtmlCC(licence)}" style="height: 15px; vertical-align: middle;">
+                    <img src="icons/by-nc-sa-2.svg" alt="${echapperHtmlCC(licence)}" style="height: 15px; vertical-align: middle;">
                 </a>
             </span>
         </div>

@@ -58,6 +58,23 @@
     };
 
     /**
+     * Format d'attribution « par <auteur> [+N contrib.] » pour affichage
+     * dans les métadonnées de carte. Retourne '' si aucun auteur connu.
+     * Lit meta.contributeurs ou item.contributeurs (respecte la licence CC BY).
+     */
+    BibliothequeUI.formaterAttribution = function (item) {
+        if (!item) return '';
+        var meta = item.metadata_cc || item.metadata || {};
+        var auteur = meta.auteur_original || item.auteur || '';
+        if (!auteur) return '';
+        var contribs = meta.contributeurs || item.contributeurs || [];
+        var suffixe = '';
+        if (contribs.length === 1) suffixe = ' +1 contrib.';
+        else if (contribs.length > 1) suffixe = ' +' + contribs.length + ' contrib.';
+        return 'par ' + auteur + suffixe;
+    };
+
+    /**
      * Pour les items démo, remplace le préfixe de pratique en tête du nom
      * (ex. « [SPE] », « [STD] ») par « [Démo] ». L'abréviation de pratique
      * étant un doublon du badge de pratique, on la remplace utilement par
@@ -157,7 +174,7 @@
 
         var boutonsHTML = '<div class="biblio-carte-actions">';
         opts.boutons.forEach(function (btn) {
-            boutonsHTML += '<button ' + _btnAttrs(btn) + ' class="btn ' + btn.classe + ' btn-tres-compact" title="' + (btn.title || '') + '">' + btn.label + '</button>';
+            boutonsHTML += '<button ' + _btnAttrs(btn) + ' class="btn ' + btn.classe + ' btn-mini" title="' + (btn.title || '') + '">' + btn.label + '</button>';
         });
         boutonsHTML += '</div>';
 
@@ -203,7 +220,7 @@
         var boutonsHTML = '<div class="biblio-carte-actions biblio-carte-actions--vertical">';
         opts.boutons.forEach(function (btn) {
             if (!opts.dejaPresent || btn.showAlways) {
-                boutonsHTML += '<button ' + _btnAttrs(btn) + ' class="btn ' + btn.classe + ' btn-tres-compact" title="' + (btn.title || '') + '">' + btn.label + '</button>';
+                boutonsHTML += '<button ' + _btnAttrs(btn) + ' class="btn ' + btn.classe + ' btn-mini" title="' + (btn.title || '') + '">' + btn.label + '</button>';
             }
         });
         boutonsHTML += '</div>';

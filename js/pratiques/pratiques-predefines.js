@@ -22,7 +22,7 @@
 const PRATIQUE_PAN_STANDARDS_BRUNO = {
     id: 'pan-standards-bruno',
     nom: 'PAN-Standards (5 niveaux)',
-    auteur: 'Grégoire Bédard',
+    auteur: 'Labo Codex',
     etablissement: 'Cégep Laurendeau',
     description: 'Système à 5 niveaux avec reprises multiples, niveau non rétrogradable',
     discipline: 'Chimie',
@@ -157,7 +157,7 @@ const PRATIQUE_PAN_STANDARDS_BRUNO = {
 const PRATIQUE_SOMMATIVE_TRADITIONNELLE = {
     id: 'sommative-traditionnelle-mhl',
     nom: 'Sommative traditionnelle',
-    auteur: 'Grégoire Bédard',
+    auteur: 'Labo Codex',
     etablissement: 'Cégep Valleyfield',
     description: 'Moyenne pondérée traditionnelle avec critères fixes',
     discipline: 'Littérature',
@@ -263,7 +263,7 @@ const PRATIQUE_SOMMATIVE_TRADITIONNELLE = {
 const PRATIQUE_PAN_SPECIFICATIONS = {
     id: 'pan-specifications-fah',
     nom: 'PAN-Spécifications (notes fixes)',
-    auteur: 'Grégoire Bédard',
+    auteur: 'Labo Codex',
     etablissement: 'Cégep Laurendeau',
     description: 'Notes fixes (50, 60, 80, 100%) selon critères atteints',
     discipline: 'Chimie',
@@ -359,7 +359,7 @@ const PRATIQUE_PAN_SPECIFICATIONS = {
 const PRATIQUE_PAN_MAITRISE = {
     id: 'pan-maitrise-json',
     nom: 'PAN-Standards (IDME + SRPNF)',
-    auteur: 'Grégoire Bédard',
+    auteur: 'Labo Codex',
     etablissement: 'Cégep Drummond',
     description: 'Échelle IDME 4 niveaux, critères SRPNF, sélection des N meilleurs artefacts',
     discipline: 'Littérature',
@@ -474,7 +474,7 @@ const PRATIQUE_PAN_MAITRISE = {
 const PRATIQUE_PAN_OBJECTIFS_PONDERES_MICHEL = {
     id: 'pan-objectifs-ponderes-michel',
     nom: 'PAN-Objectifs pondérés',
-    auteur: 'Grégoire Bédard',
+    auteur: 'Labo Codex',
     etablissement: 'Cégep (Mathématiques)',
     description: '13 objectifs évalués en mode PAN avec pondérations variables selon importance',
     discipline: 'Mathématiques - Calcul différentiel',
@@ -593,7 +593,7 @@ const PRATIQUE_PAN_OBJECTIFS_PONDERES_MICHEL = {
 const PRATIQUE_SOMMATIVE_REMPLACEMENT_JORDAN = {
     id: 'sommative-remplacement-jordan',
     nom: 'Sommative avec remplacement',
-    auteur: 'Grégoire Bédard',
+    auteur: 'Labo Codex',
     etablissement: 'Cégep (Philosophie)',
     description: 'Évaluation finale peut remplacer mi-session si note supérieure. Valorise la progression.',
     discipline: 'Philosophie 101',
@@ -701,7 +701,7 @@ const PRATIQUE_SOMMATIVE_REMPLACEMENT_JORDAN = {
 const PRATIQUE_PAN_JUGEMENT_GLOBAL_ISABELLE = {
     id: 'pan-jugement-global-isabelle',
     nom: 'PAN-Jugement global',
-    auteur: 'Grégoire Bédard',
+    auteur: 'Labo Codex',
     etablissement: 'Cégep Champlain Lennoxville',
     description: 'Calcul mode statistique comme suggestion. Jugement professionnel de l\'enseignante requis.',
     discipline: 'Biologie - Anatomie et physiologie 3',

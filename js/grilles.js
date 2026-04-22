@@ -2187,7 +2187,7 @@ async function preparerDonneesBibliothequeGrilles() {
         id: grille.id,
         badgeSource: BibliothequeUI.genererBadgeSource(grille, grillesDansBibliotheque),
         badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : '',
-        metadonnees: `${grille.criteres?.length || 0} critère(s)${grille.discipline ? ' • ' + grille.discipline : ''}${grille.auteurOriginal ? ' • ' + grille.auteurOriginal : ''}`,
+        metadonnees: (function(a){return `${grille.criteres?.length || 0} critère(s)${grille.discipline ? ' • ' + grille.discipline : ''}${a ? ' • ' + a : ''}`;})(BibliothequeUI.formaterAttribution(grille)),
         boutons: [
             { label: 'Dupliquer', onclick: `dupliquerGrilleBibliotheque('${grille.id}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
             { label: 'Exporter', onclick: `partagerGrille('${grille.id}')`, classe: 'btn-secondaire', title: 'Exporter en JSON' },
@@ -2213,7 +2213,7 @@ async function preparerDonneesBibliothequeGrilles() {
                 id: grille.id,
                 badgeSource: BibliothequeUI.genererBadgeSource(grille, grillesDansBibliotheque),
                 badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : '',
-                metadonnees: `${grille.criteres?.length || 0} critère(s)${grille.auteur ? ' • ' + grille.auteur : ''}`,
+                metadonnees: (function(a){return `${grille.criteres?.length || 0} critère(s)${a ? ' • ' + a : ''}`;})(BibliothequeUI.formaterAttribution(grille)),
                 description: grille.description || '',
                 dejaPresent: dejaPresent,
                 classeItem: 'grille-disponible-item',
