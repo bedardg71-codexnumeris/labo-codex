@@ -4006,10 +4006,12 @@ function populerDropdownGroupeCoursV2() {
     });
     select.innerHTML = html;
 
-    // Section Démo (Plan 1 Phase 2.4)
+    // Section Démo (Plan 1 Phase 2.4 + 4.B étendue au GC) : sélectionnables
+    // pour ouvrir le formulaire en lecture seule (les GC n'ont pas de
+    // bibliothèque visuelle séparée, contrairement aux grilles/échelles/etc.).
     if (typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
         const gcDemo = db.getSync(cleDemo('groupesCours'), []) || [];
-        BibliothequeUI.ajouterOptgroupDemo(select, gcDemo, gc => gc.nom || gc.id);
+        BibliothequeUI.ajouterOptgroupDemo(select, gcDemo, gc => gc.nom || gc.id, null, true);
     }
 
     // Restaurer la sélection si elle existait
@@ -4296,6 +4298,19 @@ function changerGroupeCoursSelectionneV2(gcId) {
         return;
     }
 
+    // Item démo (Phase 2 préfixe) : lire depuis demo_groupesCours, formulaire
+    // en lecture seule avec bouton Dupliquer (pas de suppression).
+    if (typeof gcId === 'string' && gcId.indexOf('demo-') === 0 && typeof cleDemo === 'function') {
+        const idReel = gcId.substring(5);
+        const gcDemo = (db.getSync(cleDemo('groupesCours'), []) || []).find(g => g.id === idReel);
+        if (gcDemo) {
+            mettreAJourCarteResumeGroupeCoursV2(gcDemo);
+            editerGroupeCoursV2(gcDemo);
+            if (btnSupprimer) btnSupprimer.classList.add('u-hide');
+        }
+        return;
+    }
+
     const cleGC = cle('groupesCours');
     const groupesCours = db.getSync(cleGC, []);
     const gc = groupesCours.find(g => g.id === gcId);
@@ -4473,24 +4488,35 @@ function editerGroupeCoursV2(gc) {
     const selectEnseignant = document.getElementById('v2-gc-enseignant');
     const selectPratique = document.getElementById('v2-gc-pratique');  // Beta 95.3
 
+    // Pour un GC démo, les refs pointent vers les items démo (préfixés `demo-`
+    // dans les optgroups). Au fork, les refs seront remplacées par l'utilisateur.
+    const prefixeRef = gc.isDemo ? 'demo-' : '';
+
     // Trimestre: utiliser celui du groupe-cours ou le trimestre actif par défaut
     if (selectTrimestre) {
         selectTrimestre.value = gc.trimestreId || db.getSync('trimestreActif', '') || '';
     }
-    if (selectCours) selectCours.value = gc.coursId || '';
+    if (selectCours) selectCours.value = gc.coursId ? prefixeRef + gc.coursId : '';
     if (selectGroupe) selectGroupe.value = gc.groupeNum || gc.groupe || '';
-    if (selectHoraire) selectHoraire.value = gc.horaireId || '';
-    if (selectEnseignant) selectEnseignant.value = gc.enseignantId || '';
-    if (selectPratique) selectPratique.value = gc.pratiqueId || '';  // Beta 95.3
+    if (selectHoraire) selectHoraire.value = gc.horaireId ? prefixeRef + gc.horaireId : '';
+    if (selectEnseignant) selectEnseignant.value = gc.enseignantId ? prefixeRef + gc.enseignantId : '';
+    if (selectPratique) selectPratique.value = gc.pratiqueId ? prefixeRef + gc.pratiqueId : '';
 
     // Mettre à jour le titre et bouton
     const titre = document.getElementById('v2-titreFormGroupeCours');
     const btnTexte = document.getElementById('v2-btnTexteGroupeCours');
-    if (titre) titre.textContent = 'Modifier le groupe-cours';
+    if (titre) titre.textContent = gc.isDemo ? 'Groupe-cours de démonstration' : 'Modifier le groupe-cours';
     if (btnTexte) btnTexte.textContent = 'Enregistrer';
 
-    // Mettre à jour l'aperçu du nom
-    mettreAJourNomGroupeCoursV2();
+    if (gc.isDemo) {
+        // GC démo : afficher le nom stocké, ne pas recalculer (les IDs démo
+        // ne résolvent pas les refs dans les globaux réels).
+        const elem = document.getElementById('v2-nomGroupeCoursGenere');
+        if (elem) elem.textContent = gc.nom || '—';
+    } else {
+        // Mettre à jour l'aperçu du nom
+        mettreAJourNomGroupeCoursV2();
+    }
 
     // Afficher le formulaire
     const etatVide = document.getElementById('v2-groupeCoursEtatVide');
@@ -4501,6 +4527,48 @@ function editerGroupeCoursV2(gc) {
     // Afficher le bouton Supprimer (mode édition)
     const btnSupprimer = document.getElementById('v2-btnSupprimerGroupeCours');
     if (btnSupprimer) btnSupprimer.style.display = '';
+
+    // Phase 4.B étendue au GC : mode lecture seule si item démo
+    if (formulaire && typeof BibliothequeUI !== 'undefined' && BibliothequeUI.appliquerModeLectureSeuleDemo) {
+        BibliothequeUI.appliquerModeLectureSeuleDemo(formulaire, gc, 'dupliquerEtEditerGroupeCours', 'Dupliquer pour créer mon groupe-cours');
+    }
+}
+
+/**
+ * Phase 4.B étendue au GC : fork un groupe-cours démo et charge la copie
+ * en édition. Déclenché depuis le bandeau du formulaire en lecture seule.
+ */
+async function dupliquerEtEditerGroupeCours(id) {
+    if (typeof cleDemo !== 'function' || typeof BibliothequeUI === 'undefined') return;
+    const gcDemo = (db.getSync(cleDemo('groupesCours'), []) || []).find(g => g.id === id);
+    if (!gcDemo) return;
+
+    const copie = BibliothequeUI.forkerItem(gcDemo, 'GC_');
+    // Les refs démo (coursId, horaireId, etc.) ne résolvent pas dans les
+    // globaux réels. Reset pour forcer l'utilisateur à choisir ses propres
+    // composants dans le formulaire édictable (cohérent avec Phase 4.C).
+    copie.trimestreId = db.getSync('trimestreActif', '') || '';
+    copie.coursId = '';
+    copie.horaireId = '';
+    copie.enseignantId = '';
+    copie.pratiqueId = null;
+    copie.groupeNum = '';
+
+    const cleGC = cle('groupesCours');
+    const groupesCours = db.getSync(cleGC, []);
+    groupesCours.push(copie);
+    db.setSync(cleGC, groupesCours);
+    await db.set(cleGC, groupesCours);
+
+    populerDropdownGroupeCoursV2();
+    const select = document.getElementById('v2-selectGroupeCours');
+    if (select) select.value = copie.id;
+    mettreAJourCarteResumeGroupeCoursV2(copie);
+    editerGroupeCoursV2(copie);
+
+    // Focus sur le champ Cours (premier champ à configurer)
+    const selectCours = document.getElementById('v2-gc-cours');
+    if (selectCours) selectCours.focus();
 }
 
 /**
@@ -5064,6 +5132,7 @@ window.mettreAJourOptionsFormatHoraire = mettreAJourOptionsFormatHoraire;
 window.chargerGroupeCoursV2 = chargerGroupeCoursV2;
 window.nouveauGroupeCoursV2 = nouveauGroupeCoursV2;
 window.changerGroupeCoursSelectionneV2 = changerGroupeCoursSelectionneV2;
+window.dupliquerEtEditerGroupeCours = dupliquerEtEditerGroupeCours;
 window.annulerFormGroupeCoursV2 = annulerFormGroupeCoursV2;
 window.sauvegarderGroupeCoursV2 = sauvegarderGroupeCoursV2;
 window.mettreAJourNomGroupeCoursV2 = mettreAJourNomGroupeCoursV2;
