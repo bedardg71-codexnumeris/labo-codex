@@ -80,6 +80,8 @@ let tempImportData = [];
  */
 // function sauvegarderDonneesSelonMode(cle, donnees) - SUPPRIMÉE
 
+// [Chantier 1 — 6 fev 2026] filtrerEtudiantsParMode supprimee (doublon conflictuel de modes.js)
+
 /**
  * ✅ CORRECTION CRITIQUE (Beta 95 - 2 jan 2026)
  * Obtient TOUS les étudiants sans filtrage par coursId
@@ -644,7 +646,7 @@ function mettreAJourStatistiquesGroupes() {
         // BETA 95 : Filtrer par cours actif pour éviter contamination entre trimestres
         const students = typeof obtenirEtudiantsCoursActif === 'function'
             ? obtenirEtudiantsCoursActif()
-            : (obtenirDonneesSelonMode('groupeEtudiants') || []);
+            : filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants') || []);
 
         // Compteur total
         const compteurTotal = document.getElementById('nbEtudiantsTotal');
@@ -707,7 +709,7 @@ function remplirSelectFiltreGroupe() {
         // BETA 95 : Filtrer par cours actif pour éviter contamination entre trimestres
         const students = typeof obtenirEtudiantsCoursActif === 'function'
             ? obtenirEtudiantsCoursActif()
-            : (obtenirDonneesSelonMode('groupeEtudiants') || []);
+            : filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants') || []);
         const selectFiltre = document.getElementById('filtreGroupe');
 
         if (!selectFiltre) return;
@@ -755,7 +757,7 @@ function filtrerParGroupe() {
         // BETA 95 : Filtrer par cours actif pour éviter contamination entre trimestres
         const students = typeof obtenirEtudiantsCoursActif === 'function'
             ? obtenirEtudiantsCoursActif()
-            : (obtenirDonneesSelonMode('groupeEtudiants') || []);
+            : filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants') || []);
 
         const tbody = document.getElementById('students-tbody');
         const container = document.getElementById('students-list-container');

@@ -218,7 +218,9 @@ function rafraichirContenuSelonMode() {
                 // avec afficherProfilComplet() qui utilise aussi ce filtre par coursId
                 const etudiantsTries = typeof obtenirEtudiantsCoursActif === 'function'
                     ? obtenirEtudiantsCoursActif()
-                    : (obtenirDonneesSelonMode('groupeEtudiants') || []);
+                    : (typeof filtrerEtudiantsParMode === 'function'
+                        ? filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants'))
+                        : obtenirDonneesSelonMode('groupeEtudiants').filter(e => e.groupe !== '9999'));
 
                 const etudiantExiste = etudiantsTries.find(e => e.da === window.profilActuelDA);
 
@@ -926,6 +928,21 @@ function _syncBtnThemeNav() {
     if (btn) btn.title = estModeClair() ? 'Passer en mode sombre' : 'Passer en mode clair';
 }
 
+/**
+ * Vérifie si on est en mode Démo (route démo active)
+ * @returns {boolean} true si la route démo est active
+ */
+function estEnModeDemo() {
+    // Vérifier le flag explicite
+    if (db.getSync('demo-actif', null) === 'true') return true;
+    // Fallback robuste : vérifier le trimestre actif (couvre les cas de désync)
+    if (typeof obtenirTrimestreActif === 'function') {
+        const t = obtenirTrimestreActif();
+        if (t && t.id === 'demo') return true;
+    }
+    return false;
+}
+
 window.MODES = MODES;
 window.initialiserSystemeModes = initialiserSystemeModes;
 window.changerMode = changerMode;
@@ -935,6 +952,7 @@ window.estModeGuide = estModeGuide;      // alias rétrocompatible
 window.definirTourGuide = definirTourGuide;
 window.estAideContextuelleActive = estAideContextuelleActive;
 window.definirAideContextuelle = definirAideContextuelle;
+window.estEnModeDemo = estEnModeDemo;
 window.obtenirDonneesSelonMode = obtenirDonneesSelonMode;
 window.sauvegarderDonneesSelonMode = sauvegarderDonneesSelonMode;
 window.anonymiserNom = anonymiserNom;
@@ -949,6 +967,36 @@ window.estModeClair = estModeClair;
 window.definirTheme = definirTheme;
 window.basculerTheme = basculerTheme;
 
+
+// ============================================
+// FILTRAGE DES ÉTUDIANTS PAR MODE
+// ============================================
+
+/**
+ * Filtre la liste des étudiants selon le mode actuel
+ * [Chantier 2] En mode démo, tous les étudiants passent (ils sont déjà demo)
+ * Hors démo : exclure les groupes demo
+ *
+ * @param {Array} etudiants - Liste complète des étudiants
+ * @returns {Array} - Liste filtrée selon le mode
+ */
+function filtrerEtudiantsParMode(etudiants) {
+    if (!etudiants || !Array.isArray(etudiants)) {
+        return [];
+    }
+
+    // En mode démo, tous les étudiants sont des étudiants demo → pas de filtre
+    if (typeof estEnModeDemo === 'function' && estEnModeDemo()) {
+        return etudiants;
+    }
+
+    // Hors démo : exclure les groupes demo
+    const GROUPES_DEMO = ['9999', 'demo'];
+    return etudiants.filter(e => !GROUPES_DEMO.includes(e.groupe));
+}
+
+// Exporter les fonctions
+window.filtrerEtudiantsParMode = filtrerEtudiantsParMode;
 
 // ============================================
 // FILTRAGE DES ÉTUDIANTS PAR COURS/TRIMESTRE ACTIF
@@ -1017,7 +1065,13 @@ function obtenirEtudiantsCoursActif() {
         return normaliserGroupe(groupeEtudiant) === normaliserGroupe(groupeCours);
     });
 
-    return etudiantsFiltres;
+    const modeLabel = estModeCours ? 'tous groupes' : `groupe ${coursActif.groupe}`;
+
+    // DEBUG (11 jan 2026) : Afficher les groupes distincts des étudiants
+    const groupesDistincts = [...new Set(tousEtudiants.map(e => e.groupe))];
+
+    // Appliquer le filtrage par mode (exclure groupe 9999 en mode normal)
+    return filtrerEtudiantsParMode(etudiantsFiltres);
 }
 
 /**

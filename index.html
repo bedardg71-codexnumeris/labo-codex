@@ -450,6 +450,54 @@
         }
 
         /* ===============================
+           BANDEAU DÉMO (Chantier 2 — route démo)
+           =============================== */
+        .bandeau-demo {
+            background: var(--vert-doux, #2d6a4f);
+            color: white;
+            padding: 8px 16px;
+            text-align: center;
+            font-size: 0.85rem;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 9998;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .bandeau-demo-contenu {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .bandeau-demo-texte {
+            font-weight: 600;
+        }
+
+        .bandeau-demo-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 4px 12px;
+            border-radius: var(--radius-moyen);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .bandeau-demo-btn:hover {
+            background: rgba(255, 255, 255, 0.35);
+            border-color: white;
+        }
+
+        body.mode-demo {
+            padding-bottom: 50px;
+        }
+
+        /* ===============================
            Page d'accueil (Chantier 3)
            Conforme au Design System :
            - Variables --bleu-*, --shadow-*, --radius-*
@@ -3726,6 +3774,16 @@
             </div>
         </div>
 
+        <!-- BANDEAU DÉMO (affiché quand la route démo est active) -->
+        <div id="bandeau-demo" class="bandeau-demo u-hide">
+            <div class="bandeau-demo-contenu">
+                <span class="bandeau-demo-texte">Mode démonstration</span>
+                <button data-action="quitterDemo" class="bandeau-demo-btn">
+                    Quitter la démo
+                </button>
+            </div>
+        </div>
+
         <!-- NOTIFICATION VERSION / MISE À JOUR (toast chantier routier) -->
         <div id="bandeau-mise-a-jour" class="bandeau-mise-a-jour">
             <button data-action="fermerBandeauMiseAJour" class="bandeau-mise-a-jour-close" title="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
@@ -6617,6 +6675,11 @@
                                     <!-- Formulaire (caché par défaut) -->
                                     <div id="v2-formulaireGroupeCours" class="u-hide u-p-15">
                                         <h4 id="v2-titreFormGroupeCours" class="titre-formulaire">Nouveau groupe-cours</h4>
+
+                                        <!-- Message d'aide affiché en mode démo (A.12) -->
+                                        <div id="v2-messageAideDemoGC" class="u-hide alerte alerte-info u-mb-15">
+                                            💡 Tu peux utiliser les valeurs marquées <strong>« démo »</strong> dans chaque menu pour te familiariser avec le flux de création.
+                                        </div>
 
                                         <!-- Nom généré dynamiquement -->
                                         <div class="apercu-nom-groupe-cours" id="v2-apercuNomGroupeCours" data-tooltip="reglages-gc-nom-genere">
@@ -15633,20 +15696,20 @@
     <script src="js/config.js?v=2026010203"></script>
     <script src="js/navigation.js?v=2026010211"></script>
     <script src="js/preferences.js?v=2026041602"></script> <!-- Beta 99.16 : API centralisée préférences + migration V3 (doit précéder modes.js) -->
-    <script src="js/modes.js?v=2026042202"></script> <!-- Beta 99.22 : retrait estEnModeDemo + filtrerEtudiantsParMode -->
+    <script src="js/modes.js?v=2026041601"></script> <!-- Beta 99.16 : lectures via obtenirPreference -->
 
 
-    <!-- PLAN 1 — Autonomisation Phase 5 : migration silencieuse des résidus
-         du mode démo legacy au 1er démarrage post-livraison (idempotent) -->
-    <script src="js/migration-phase5.js?v=2026042201"></script>
-    <!-- PLAN 1 — Autonomisation Phase 1 : namespace demo_* permanent.
-         pack-demo-20.js est chargé à la demande par demo-namespace.js (lazy-load). -->
-    <script src="js/demo-namespace.js?v=2026042201"></script>
+    <!-- pack-demo-20.js : chargé à la demande par donnees-demo.js (lazy-load) -->
+    <script src="js/donnees-demo.js?v=2026040201"></script>
+    <!-- PLAN 1 — Autonomisation Phase 1 : namespace demo_* permanent
+         (parallèle à donnees-demo.js ancien système qui reste actif en attendant
+         la Phase 5 de nettoyage) -->
+    <script src="js/demo-namespace.js?v=2026042101"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestres.js?v=2026041708"></script> <!-- Beta 99.17 (b0417-1048) : + section profilsRLO dans exporterFormatRecherche (étape 9) -->
-    <script src="js/trimestre.js?v=2026042202"></script>
-    <script src="js/trimestre-v2.js?v=2026042202"></script> <!-- Beta 99.22 : fix GC démo lecture seule + iPad -->
+    <script src="js/trimestre.js?v=2025123109"></script>
+    <script src="js/trimestre-v2.js?v=2026022201"></script> <!-- Beta 97.6 : wrappers notifications -->
 
     <!-- ENTITÉS Beta 95.2 - Architecture modulaire groupe-cours -->
     <script src="js/entites/cours-entite.js?v=2026010601"></script>
@@ -15656,13 +15719,13 @@
 
     <script src="js/pratique-notation-v2.js?v=2026010226"></script> <!-- Beta 95 : dropdown productions + terminologie "production" -->
     <script src="js/gabarits-utils.js?v=2026010202"></script> <!-- Beta 95 : Module utilitaire gabarits + filtres pratique -->
-    <script src="js/bibliotheque-ui.js?v=2026042202"></script> <!-- Beta 99.22 : ajouterOptgroupDemo param selectionnable -->
+    <script src="js/bibliotheque-ui.js?v=2026021001"></script> <!-- Beta 97.4 : Composant générique modales bibliothèque -->
     <script src="js/spe-specifications.js?v=2026010206"></script> <!-- Beta 95 : Module PAN-Spécifications + gabarits François -->
     <script src="js/pratiques-bibliotheque.js?v=2026010401"></script> <!-- Beta 95 : Bibliothèque universelle STD + SPE -->
     <script src="js/pratiques-materiel.js?v=2026010601"></script> <!-- Beta 95 : retirerPratiqueDeBibliothequeMateriel -->
     <script src="js/preferences-v2.js?v=2026041703"></script> <!-- Beta 99.17 (b0417-0850) : rafraîchit palette tampons après toggle Actions RLO -->
-    <script src="js/donnees-v2.js?v=2026042202"></script> <!-- Beta 99.22 : label debug demo-actif -->
-    <script src="js/etudiants.js?v=2026042202"></script>
+    <script src="js/donnees-v2.js?v=2026030202"></script> <!-- Beta 95 : Onglet Données restructuré -->
+    <script src="js/etudiants.js?v=2026011107"></script>
     <script src="js/productions-bibliotheque.js?v=2026010218"></script> <!-- + import depuis trimestres -->
     <script src="js/productions.js?v=2026010601"></script> <!-- + import depuis bibliothèque corrigé -->
     <script src="js/grilles-bibliotheque.js?v=2026010220"></script> <!-- refactoring: plus de hardcodé -->
@@ -15710,8 +15773,8 @@
     <script src="js/indices.js?v=2026022801"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
-    <script src="js/tableau-bord-apercu.js?v=2026042202"></script>
-    <script src="js/profil-etudiant.js?v=2026042202"></script> <!-- Beta 99.22 : retrait filtrerEtudiantsParMode -->
+    <script src="js/tableau-bord-apercu.js?v=2026030201"></script>
+    <script src="js/profil-etudiant.js?v=2026041715"></script> <!-- Beta 99.17 (b0417-1203) : retirer encadré Suivi des fondamentaux dans Forces et défis (recoupement avec Consolidation) -->
     <script src="js/presences-apercu.js?v=2025121017"></script>
     <script src="js/evaluations-apercu.js?v=2025111026"></script>
     <script src="js/boite-outils.js?v=2026013005"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->
@@ -15749,7 +15812,7 @@
     <!-- PRIORITÉ 5: Modules fonctionnels -->
     <script src="js/calendrier-vue.js?v=2025120201"></script>
     <script src="js/horaire.js?v=2026010602"></script>
-    <script src="js/groupe.js?v=2026042202"></script>
+    <script src="js/groupe.js?v=2026032600"></script>
     <script src="js/interventions.js?v=2025122801"></script>
 
     <!-- PRIORITÉ 6: Modules avancés (Beta 91.5 - Import/Export) -->
@@ -15777,7 +15840,7 @@
     <script src="js/migrations.js?v=2025121101"></script>
 
     <!-- Page d'accueil (Chantier 3) -->
-    <script src="js/accueil.js?v=2026042203"></script> <!-- Beta 99.22 : 5.B-ter activation GC démo au toggle -->
+    <script src="js/accueil.js?v=2026041701"></script> <!-- Beta 99.17 (b0417-1940) : retrait du manifeste de la page d'accueil (texte déjà dans Aide › Introduction) -->
     <!-- Guidage contextuel démo (Chantier 4) -->
     <script src="js/guidage-demo.js?v=2026020601"></script>
 
@@ -15785,7 +15848,7 @@
     <script src="js/changelog-data.js?v=2026041701"></script> <!-- Beta 99.17 (b0417-1207) : changelog enrichi (onglets profil + RLO + Consolidation + export) -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
-    <script src="js/etats-vides.js?v=2026042202"></script>
+    <script src="js/etats-vides.js?v=2026041901"></script>
     <script src="js/transitions.js?v=2026041901"></script>
 
     <!-- SYSTÈME D'ACCOMPAGNEMENT UNIFIÉ (Beta 99.20) —
@@ -15800,7 +15863,7 @@
     <script src="js/accompagnement-contenu-terme.js?v=2026042002"></script>
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=2026042202"></script>
+    <script src="js/main.js?v=2026032600"></script>
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
     <script src="js/init-inline.js?v=2026032600"></script>

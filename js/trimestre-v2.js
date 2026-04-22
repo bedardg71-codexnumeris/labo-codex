@@ -878,8 +878,18 @@ function populerDropdownTrimestreV2() {
     if (!select) return;
 
     // Lire le registre des trimestres (de trimestres.js)
-    const trimestres = typeof obtenirTrimestres === 'function' ? obtenirTrimestres() : [];
+    let trimestres = typeof obtenirTrimestres === 'function' ? obtenirTrimestres() : [];
     const trimestreActif = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
+
+    // 🆕 FIX (23 jan 2026): En mode Normal, masquer le trimestre Démonstration
+    // — mais pas quand la route démo est active (entrerEnDemo force mode=normal
+    // pour désactiver l'anonymisation, il faut donc laisser passer demo si
+    // demo-actif est true, sinon la démo tourne sans trimestre visible).
+    const modeActuel = typeof window.modeActuel !== 'undefined' ? window.modeActuel : 'normal';
+    const enDemo = typeof estEnModeDemo === 'function' && estEnModeDemo();
+    if (modeActuel === 'normal' && !enDemo) {
+        trimestres = trimestres.filter(t => t.id !== 'demo');
+    }
 
     select.innerHTML = '';
 
@@ -1375,7 +1385,10 @@ function chargerDropdownCoursV2() {
         });
 
         // Section Démo (Plan 1 Phase 2.4) : cours Labo Codex en lecture seule.
-        if (typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
+        // Skip en mode démo legacy : les cours démo sont déjà dans la clé globale,
+        // pas de section séparée à afficher (sera retiré en Plan 1 Phase 5).
+        const enDemoLegacy = typeof estEnModeDemo === 'function' && estEnModeDemo();
+        if (!enDemoLegacy && typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
             const coursDemo = db.getSync(cleDemo('listeCours'), []) || [];
             BibliothequeUI.ajouterOptgroupDemo(select, coursDemo, obtenirTexteCours);
         }
@@ -2415,15 +2428,24 @@ function populerDropdownGroupesV2(etudiants) {
 
     const groupesTries = Array.from(groupesSet).sort();
 
+    // Marqueur démo : un groupe est considéré démo si au moins un de ses
+    // étudiants a isDemo=true. Cohérent avec le traitement des autres
+    // sélecteurs latéraux (horaires, enseignants).
+    const estGroupeDemo = (grp) => etudiants.some(e =>
+        String(e.groupe || '').padStart(5, '0') === grp && e.isDemo === true
+    );
+
     // Reconstruire les options
     let html = '<option value="">Tous les groupes</option>';
     groupesTries.forEach(grp => {
-        html += `<option value="${grp}">${grp}</option>`;
+        const suffixeDemo = estGroupeDemo(grp) ? ' (démo)' : '';
+        html += `<option value="${grp}">${grp}${suffixeDemo}</option>`;
     });
     select.innerHTML = html;
 
     // Restaurer la sélection : en priorité la valeur actuelle du DOM (évite
-    // de casser une interaction en cours), sinon la valeur persistée par trimestre.
+    // de casser une interaction en cours), sinon la valeur persistée par
+    // trimestre (permet à entrerEnDemo de pré-sélectionner '0demo').
     if (valeurActuelle && groupesSet.has(valeurActuelle)) {
         select.value = valeurActuelle;
     } else {
@@ -3439,7 +3461,9 @@ function populerDropdownHorairesV2() {
     const horaires = db.getSync(cleHoraires, []);
     const valeurActuelle = select.value;
 
-    const reels = horaires.filter(h => !h.isDemo);
+    // En mode démo legacy, pas de séparation (comportement préservé).
+    const enDemoLegacy = typeof estEnModeDemo === 'function' && estEnModeDemo();
+    const reels = enDemoLegacy ? horaires : horaires.filter(h => !h.isDemo);
 
     let html = '<option value="">Sélectionner...</option>';
     reels.forEach(h => {
@@ -3447,8 +3471,8 @@ function populerDropdownHorairesV2() {
     });
     select.innerHTML = html;
 
-    // Section Démo (Plan 1 Phase 2.4)
-    if (typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
+    // Section Démo (Plan 1 Phase 2.4) : seulement en mode normal
+    if (!enDemoLegacy && typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
         const horairesDemo = db.getSync(cleDemo('horaires'), []) || [];
         BibliothequeUI.ajouterOptgroupDemo(select, horairesDemo, h => h.nom || 'Sans nom');
     }
@@ -3998,7 +4022,9 @@ function populerDropdownGroupeCoursV2() {
     // Sauvegarder la valeur actuelle pour la restaurer après repopulation
     const valeurActuelle = select.value;
 
-    const reels = groupesCours.filter(gc => !gc.isDemo);
+    // En mode démo legacy, pas de séparation.
+    const enDemoLegacy = typeof estEnModeDemo === 'function' && estEnModeDemo();
+    const reels = enDemoLegacy ? groupesCours : groupesCours.filter(gc => !gc.isDemo);
 
     let html = '<option value="">— Choisir pour modifier —</option>';
     reels.forEach(gc => {
@@ -4006,22 +4032,10 @@ function populerDropdownGroupeCoursV2() {
     });
     select.innerHTML = html;
 
-    // Section Démo (Plan 1 Phase 2.4 + 4.B étendue au GC) : sélectionnables
-    // pour ouvrir le formulaire en lecture seule (les GC n'ont pas de
-    // bibliothèque visuelle séparée, contrairement aux grilles/échelles/etc.).
-    if (typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
+    // Section Démo (Plan 1 Phase 2.4) : seulement en mode normal
+    if (!enDemoLegacy && typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
         const gcDemo = db.getSync(cleDemo('groupesCours'), []) || [];
-        BibliothequeUI.ajouterOptgroupDemo(select, gcDemo, gc => gc.nom || gc.id, null, true);
-    }
-
-    // Listeners directs : iOS Safari n'émet pas toujours change sur tap
-    // d'option dans un <select> avec optgroup. On écoute change + input
-    // pour couvrir les deux cas. Flag pour éviter de double-attacher.
-    if (!select.dataset.listenerDirect) {
-        const handler = function() { changerGroupeCoursSelectionneV2(select.value); };
-        select.addEventListener('change', handler);
-        select.addEventListener('input', handler);
-        select.dataset.listenerDirect = '1';
+        BibliothequeUI.ajouterOptgroupDemo(select, gcDemo, gc => gc.nom || gc.id);
     }
 
     // Restaurer la sélection si elle existait
@@ -4052,11 +4066,15 @@ function populerDropdownsAssemblageV2() {
     } else {
     }
 
+    // En mode démo legacy, les items démo sont dans les clés globales ;
+    // on les affiche dans la section principale (pas d'optgroup séparé).
+    const enDemoLegacy = typeof estEnModeDemo === 'function' && estEnModeDemo();
+
     // Dropdown Cours
     const selectCours = document.getElementById('v2-gc-cours');
     if (selectCours) {
         const cours = db.getSync('cours', []);
-        const coursReels = cours.filter(c => !c.isDemo);
+        const coursReels = enDemoLegacy ? cours : cours.filter(c => !c.isDemo);
 
         const labelCours = c => {
             const code = c.codeCours || c.sigle || c.code || '';
@@ -4070,7 +4088,7 @@ function populerDropdownsAssemblageV2() {
         });
         selectCours.innerHTML = html;
 
-        if (typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
+        if (!enDemoLegacy && typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
             const coursDemo = db.getSync(cleDemo('listeCours'), []) || [];
             BibliothequeUI.ajouterOptgroupDemo(selectCours, coursDemo, labelCours);
         }
@@ -4105,7 +4123,7 @@ function populerDropdownsAssemblageV2() {
     if (selectHoraire) {
         const cleHoraires = cle('horaires');
         const horaires = db.getSync(cleHoraires, []);
-        const horairesReels = horaires.filter(h => !h.isDemo);
+        const horairesReels = enDemoLegacy ? horaires : horaires.filter(h => !h.isDemo);
 
         let html = '<option value="">— Choisir un horaire —</option>';
         horairesReels.forEach(h => {
@@ -4114,7 +4132,7 @@ function populerDropdownsAssemblageV2() {
         });
         selectHoraire.innerHTML = html;
 
-        if (typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
+        if (!enDemoLegacy && typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
             const horairesDemo = db.getSync(cleDemo('horaires'), []) || [];
             BibliothequeUI.ajouterOptgroupDemo(selectHoraire, horairesDemo, h => h.nom || h.id || 'Sans nom');
         }
@@ -4124,7 +4142,7 @@ function populerDropdownsAssemblageV2() {
     const selectEnseignant = document.getElementById('v2-gc-enseignant');
     if (selectEnseignant) {
         const enseignants = db.getSync('enseignants', []);
-        const enseignantsReels = enseignants.filter(e => !e.isDemo);
+        const enseignantsReels = enDemoLegacy ? enseignants : enseignants.filter(e => !e.isDemo);
 
         const labelEns = e => (`${e.prenom || ''} ${e.nom || ''}`.trim() || e.id);
         let html = '<option value="">— Choisir un enseignant —</option>';
@@ -4133,7 +4151,7 @@ function populerDropdownsAssemblageV2() {
         });
         selectEnseignant.innerHTML = html;
 
-        if (typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
+        if (!enDemoLegacy && typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
             const ensDemo = db.getSync(cleDemo('enseignants'), []) || [];
             BibliothequeUI.ajouterOptgroupDemo(selectEnseignant, ensDemo, labelEns);
         }
@@ -4146,7 +4164,9 @@ function populerDropdownsAssemblageV2() {
         // Les pratiques sont stockées dans 'pratiquesConfigurables' (module pratiques-materiel.js)
         const toutesPratiques = db.getSync('pratiquesConfigurables', []);
         // Filtrer pour n'afficher que les pratiques dans la sidebar
-        const pratiques = toutesPratiques.filter(p => p.dansBibliotheque !== false && !p.isDemo);
+        const pratiques = enDemoLegacy
+            ? toutesPratiques.filter(p => p.dansBibliotheque !== false)
+            : toutesPratiques.filter(p => p.dansBibliotheque !== false && !p.isDemo);
 
         let html = '<option value="">— À compléter quand configurée —</option>';
         pratiques.forEach(p => {
@@ -4155,7 +4175,7 @@ function populerDropdownsAssemblageV2() {
         });
         selectPratique.innerHTML = html;
 
-        if (typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
+        if (!enDemoLegacy && typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
             const pratiquesDemo = db.getSync(cleDemo('pratiquesConfigurables'), []) || [];
             BibliothequeUI.ajouterOptgroupDemo(selectPratique, pratiquesDemo, p => p.nom || p.id || 'Sans nom');
         }
@@ -4308,19 +4328,6 @@ function changerGroupeCoursSelectionneV2(gcId) {
         return;
     }
 
-    // Item démo (Phase 2 préfixe) : lire depuis demo_groupesCours, formulaire
-    // en lecture seule avec bouton Dupliquer (pas de suppression).
-    if (typeof gcId === 'string' && gcId.indexOf('demo-') === 0 && typeof cleDemo === 'function') {
-        const idReel = gcId.substring(5);
-        const gcDemo = (db.getSync(cleDemo('groupesCours'), []) || []).find(g => g.id === idReel);
-        if (gcDemo) {
-            mettreAJourCarteResumeGroupeCoursV2(gcDemo);
-            editerGroupeCoursV2(gcDemo);
-            if (btnSupprimer) btnSupprimer.classList.add('u-hide');
-        }
-        return;
-    }
-
     const cleGC = cle('groupesCours');
     const groupesCours = db.getSync(cleGC, []);
     const gc = groupesCours.find(g => g.id === gcId);
@@ -4345,15 +4352,13 @@ function mettreAJourCarteResumeGroupeCoursV2(gc) {
         return;
     }
 
-    // Récupérer les infos liées. Pour un GC démo, les refs pointent vers des
-    // items dans demo_* (filtrés hors des globaux réels).
-    const cleCoursSrc = gc.isDemo && typeof cleDemo === 'function' ? cleDemo('listeCours') : 'cours';
-    const cours = db.getSync(cleCoursSrc, []);
+    // Récupérer les infos liées
+    const cours = db.getSync('cours', []);
     const coursObj = cours.find(c => c.id === gc.coursId || c.sigle === gc.coursId || c.codeCours === gc.coursId || c.code === gc.coursId);
     const coursNom = coursObj ? (coursObj.codeCours || coursObj.sigle || coursObj.code || '') + ' - ' + (coursObj.nomCours || coursObj.nom || coursObj.titre || '') : '—';
 
-    const cleHorairesSrc = gc.isDemo && typeof cleDemo === 'function' ? cleDemo('horaires') : cle('horaires');
-    const horaires = db.getSync(cleHorairesSrc, []);
+    const cleHoraires = cle('horaires');
+    const horaires = db.getSync(cleHoraires, []);
     const horaireObj = horaires.find(h => h.id === gc.horaireId);
     const horaireNom = horaireObj?.nom || '—';
 
@@ -4363,8 +4368,7 @@ function mettreAJourCarteResumeGroupeCoursV2(gc) {
         const profil = db.getSync('profilEnseignant', {});
         enseignantNom = (profil.prenom && profil.nom) ? `${profil.prenom} ${profil.nom}` : '—';
     } else if (gc.enseignantId) {
-        const cleEnsSrc = gc.isDemo && typeof cleDemo === 'function' ? cleDemo('enseignants') : 'enseignants';
-        const enseignants = db.getSync(cleEnsSrc, []);
+        const enseignants = db.getSync('enseignants', []);
         const ensObj = enseignants.find(e => e.id === gc.enseignantId);
         enseignantNom = ensObj ? `${ensObj.prenom || ''} ${ensObj.nom || ''}`.trim() : '—';
     } else {
@@ -4474,6 +4478,17 @@ function nouveauGroupeCoursV2() {
     if (etatVide) etatVide.classList.add('u-hide');
     if (formulaire) formulaire.classList.remove('u-hide');
 
+    // A.12 : afficher le message d'aide démo si mode démo actif
+    const messageAideDemo = document.getElementById('v2-messageAideDemoGC');
+    if (messageAideDemo) {
+        const enDemo = typeof estEnModeDemo === 'function' && estEnModeDemo();
+        if (enDemo) {
+            messageAideDemo.classList.remove('u-hide');
+        } else {
+            messageAideDemo.classList.add('u-hide');
+        }
+    }
+
     // Masquer le bouton Supprimer (mode création)
     const btnSupprimer = document.getElementById('v2-btnSupprimerGroupeCours');
     if (btnSupprimer) btnSupprimer.classList.add('u-hide');
@@ -4501,35 +4516,24 @@ function editerGroupeCoursV2(gc) {
     const selectEnseignant = document.getElementById('v2-gc-enseignant');
     const selectPratique = document.getElementById('v2-gc-pratique');  // Beta 95.3
 
-    // Pour un GC démo, les refs pointent vers les items démo (préfixés `demo-`
-    // dans les optgroups). Au fork, les refs seront remplacées par l'utilisateur.
-    const prefixeRef = gc.isDemo ? 'demo-' : '';
-
     // Trimestre: utiliser celui du groupe-cours ou le trimestre actif par défaut
     if (selectTrimestre) {
         selectTrimestre.value = gc.trimestreId || db.getSync('trimestreActif', '') || '';
     }
-    if (selectCours) selectCours.value = gc.coursId ? prefixeRef + gc.coursId : '';
+    if (selectCours) selectCours.value = gc.coursId || '';
     if (selectGroupe) selectGroupe.value = gc.groupeNum || gc.groupe || '';
-    if (selectHoraire) selectHoraire.value = gc.horaireId ? prefixeRef + gc.horaireId : '';
-    if (selectEnseignant) selectEnseignant.value = gc.enseignantId ? prefixeRef + gc.enseignantId : '';
-    if (selectPratique) selectPratique.value = gc.pratiqueId ? prefixeRef + gc.pratiqueId : '';
+    if (selectHoraire) selectHoraire.value = gc.horaireId || '';
+    if (selectEnseignant) selectEnseignant.value = gc.enseignantId || '';
+    if (selectPratique) selectPratique.value = gc.pratiqueId || '';  // Beta 95.3
 
     // Mettre à jour le titre et bouton
     const titre = document.getElementById('v2-titreFormGroupeCours');
     const btnTexte = document.getElementById('v2-btnTexteGroupeCours');
-    if (titre) titre.textContent = gc.isDemo ? 'Groupe-cours de démonstration' : 'Modifier le groupe-cours';
+    if (titre) titre.textContent = 'Modifier le groupe-cours';
     if (btnTexte) btnTexte.textContent = 'Enregistrer';
 
-    if (gc.isDemo) {
-        // GC démo : afficher le nom stocké, ne pas recalculer (les IDs démo
-        // ne résolvent pas les refs dans les globaux réels).
-        const elem = document.getElementById('v2-nomGroupeCoursGenere');
-        if (elem) elem.textContent = gc.nom || '—';
-    } else {
-        // Mettre à jour l'aperçu du nom
-        mettreAJourNomGroupeCoursV2();
-    }
+    // Mettre à jour l'aperçu du nom
+    mettreAJourNomGroupeCoursV2();
 
     // Afficher le formulaire
     const etatVide = document.getElementById('v2-groupeCoursEtatVide');
@@ -4540,53 +4544,6 @@ function editerGroupeCoursV2(gc) {
     // Afficher le bouton Supprimer (mode édition)
     const btnSupprimer = document.getElementById('v2-btnSupprimerGroupeCours');
     if (btnSupprimer) btnSupprimer.style.display = '';
-
-    // Phase 4.B étendue au GC : mode lecture seule si item démo
-    if (formulaire && typeof BibliothequeUI !== 'undefined' && BibliothequeUI.appliquerModeLectureSeuleDemo) {
-        BibliothequeUI.appliquerModeLectureSeuleDemo(formulaire, gc, 'dupliquerEtEditerGroupeCours', 'Dupliquer pour créer mon groupe-cours');
-    }
-
-    // Désactiver le bouton Enregistrer en lecture seule démo (appliquerModeLectureSeuleDemo
-    // ne touche que input/select/textarea, pas les boutons — sinon Dupliquer ne marcherait plus).
-    const btnSauvegarder = document.getElementById('v2-btnSauvegarderGroupeCours');
-    if (btnSauvegarder) btnSauvegarder.disabled = !!gc.isDemo;
-}
-
-/**
- * Phase 4.B étendue au GC : fork un groupe-cours démo et charge la copie
- * en édition. Déclenché depuis le bandeau du formulaire en lecture seule.
- */
-async function dupliquerEtEditerGroupeCours(id) {
-    if (typeof cleDemo !== 'function' || typeof BibliothequeUI === 'undefined') return;
-    const gcDemo = (db.getSync(cleDemo('groupesCours'), []) || []).find(g => g.id === id);
-    if (!gcDemo) return;
-
-    const copie = BibliothequeUI.forkerItem(gcDemo, 'GC_');
-    // Les refs démo (coursId, horaireId, etc.) ne résolvent pas dans les
-    // globaux réels. Reset pour forcer l'utilisateur à choisir ses propres
-    // composants dans le formulaire édictable (cohérent avec Phase 4.C).
-    copie.trimestreId = db.getSync('trimestreActif', '') || '';
-    copie.coursId = '';
-    copie.horaireId = '';
-    copie.enseignantId = '';
-    copie.pratiqueId = null;
-    copie.groupeNum = '';
-
-    const cleGC = cle('groupesCours');
-    const groupesCours = db.getSync(cleGC, []);
-    groupesCours.push(copie);
-    db.setSync(cleGC, groupesCours);
-    await db.set(cleGC, groupesCours);
-
-    populerDropdownGroupeCoursV2();
-    const select = document.getElementById('v2-selectGroupeCours');
-    if (select) select.value = copie.id;
-    mettreAJourCarteResumeGroupeCoursV2(copie);
-    editerGroupeCoursV2(copie);
-
-    // Focus sur le champ Cours (premier champ à configurer)
-    const selectCours = document.getElementById('v2-gc-cours');
-    if (selectCours) selectCours.focus();
 }
 
 /**
@@ -5150,7 +5107,6 @@ window.mettreAJourOptionsFormatHoraire = mettreAJourOptionsFormatHoraire;
 window.chargerGroupeCoursV2 = chargerGroupeCoursV2;
 window.nouveauGroupeCoursV2 = nouveauGroupeCoursV2;
 window.changerGroupeCoursSelectionneV2 = changerGroupeCoursSelectionneV2;
-window.dupliquerEtEditerGroupeCours = dupliquerEtEditerGroupeCours;
 window.annulerFormGroupeCoursV2 = annulerFormGroupeCoursV2;
 window.sauvegarderGroupeCoursV2 = sauvegarderGroupeCoursV2;
 window.mettreAJourNomGroupeCoursV2 = mettreAJourNomGroupeCoursV2;
@@ -5496,7 +5452,11 @@ function populerDropdownEnseignantsV2() {
     if (!select) return;
 
     const enseignants = db.getSync('enseignants', []);
-    const reels = enseignants.filter(e => !e.isDemo);
+
+    // En mode démo legacy, les enseignants démo sont dans la clé globale ;
+    // on les affiche dans la section principale comme avant.
+    const enDemoLegacy = typeof estEnModeDemo === 'function' && estEnModeDemo();
+    const reels = enDemoLegacy ? enseignants : enseignants.filter(e => !e.isDemo);
 
     let html = '<option value="">— Sélectionner —</option>';
     reels.forEach(e => {
@@ -5507,8 +5467,8 @@ function populerDropdownEnseignantsV2() {
 
     select.innerHTML = html;
 
-    // Section Démo (Plan 1 Phase 2.4)
-    if (typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
+    // Section Démo (Plan 1 Phase 2.4) : seulement en mode normal
+    if (!enDemoLegacy && typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
         const enseignantsDemo = db.getSync(cleDemo('enseignants'), []) || [];
         BibliothequeUI.ajouterOptgroupDemo(select, enseignantsDemo, e =>
             `${e.prenom || ''} ${e.nom || ''}`.trim() || 'Sans nom'

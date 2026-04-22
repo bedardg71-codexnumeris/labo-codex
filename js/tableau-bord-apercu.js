@@ -1055,7 +1055,7 @@ function chargerTableauBordApercu() {
         // BETA 95 : Filtrer par cours actif pour éviter contamination entre trimestres
         const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
             ? obtenirEtudiantsCoursActif()
-            : (obtenirDonneesSelonMode('groupeEtudiants') || []);
+            : filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants') || []);
 
         const etudiantsActifs = etudiants.filter(e => !estEtudiantExclu(e));
 

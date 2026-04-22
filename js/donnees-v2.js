@@ -815,7 +815,7 @@
             { cle: 'seuilsInterpretation', label: 'Seuils d\'interprétation', ns: true },
             { cle: 'errfrModeSynthese', label: 'Mode synthèse erreurs FR', ns: false },
             { cle: 'pratiqueParDefaut', label: 'Pratique par défaut', ns: true },
-            { cle: 'demo-actif', label: 'Toggle Données démo actif', ns: false },
+            { cle: 'demo-actif', label: 'Mode démo actif', ns: false },
             { cle: 'indicesCP', label: 'Indices C/P', ns: true },
             { cle: 'formatHoraire', label: 'Format horaire', ns: true },
             { cle: 'datesVerrouillees', label: 'Dates verrouillées', ns: true },

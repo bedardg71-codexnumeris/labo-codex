@@ -352,7 +352,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Chantier 3 : Section par défaut selon contexte
     const _modeExpert = !!obtenirPreference('modeExpert');
-    if (_modeExpert) {
+    const _demoActif = db.getSync('demo-actif', null) === 'true';
+    if (_demoActif) {
+        afficherSection('apercu');
+    } else if (_modeExpert) {
         afficherSection('apercu');
     } else {
         afficherSection('accueil');
@@ -431,8 +434,19 @@ document.addEventListener('DOMContentLoaded', function () {
         initialiserModuleContexte();
     }
 
+    // MODULE DONNÉES DEMO : le nettoyage des résidus doit s'exécuter AVANT
+    // l'init du module. nettoyerResiduDemo efface le flag demo-actif de
+    // manière synchrone ; sinon initialiserModuleDonneesDemo lirait le flag
+    // résiduel et ré-afficherait le bandeau démo après un refresh.
+    if (typeof nettoyerResiduDemo === 'function') {
+        nettoyerResiduDemo();
+    }
+    if (typeof initialiserModuleDonneesDemo === 'function') {
+        initialiserModuleDonneesDemo();
+    }
     // PLAN 1 Phase 1 — Initialiser le namespace demo_* permanent
-    // (idempotent via flag demo-version-installee).
+    // (idempotent via flag demo-version-installee). Invisible en Phase 1,
+    // sera exposé via les sélecteurs à 2 sections en Phase 2.
     if (typeof initialiserDemoNamespace === 'function') {
         initialiserDemoNamespace();
     }
