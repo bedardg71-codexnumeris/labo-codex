@@ -220,6 +220,18 @@ function afficherAccueilContenu(conteneur) {
 
     // Mettre à jour la pastille des nouveautés (elle est maintenant dans le DOM)
     if (typeof mettreAJourPastille === 'function') mettreAJourPastille();
+
+    // Listeners directs sur les checkboxes : la délégation data-on-change sur
+    // des <input> enveloppés par <label for=""> est peu fiable sur iOS Safari
+    // (l'event change peut ne pas remonter jusqu'à document). Double câblage.
+    const cbDemo = conteneur.querySelector('#checkbox-demo-accueil');
+    if (cbDemo) {
+        cbDemo.addEventListener('change', function() { toggleDemoHandler(cbDemo); });
+    }
+    const cbAcc = conteneur.querySelector('#checkbox-accompagnement-accueil');
+    if (cbAcc) {
+        cbAcc.addEventListener('change', function() { toggleAccompagnementHandler(cbAcc); });
+    }
 }
 
 /**
@@ -268,12 +280,19 @@ function toggleDemoActif() {
  * Toggle « Données démo » : affiche ou masque les sections Démo dans les
  * sélecteurs du projet (Plan 1 Phase 2). Ne charge ni décharge plus de
  * données — le namespace demo_* reste peuplé en permanence (Plan 1 Phase 1).
- * Rafraîchit l'accueil (la bannière de bienvenue dépend du toggle) ; les
- * autres sélecteurs relisent le flag au prochain rendu.
+ * Toggle chirurgical de la bannière de bienvenue (pas de rerender complet,
+ * sinon les listeners JS sur les checkboxes seraient perdus).
  */
 function toggleDemoHandler(el) {
-    db.setSync('demo-actif', el.checked ? 'true' : null);
-    afficherAccueil();
+    const actif = !!(el && el.checked);
+    db.setSync('demo-actif', actif ? 'true' : null);
+    const banniere = document.getElementById('banniere-bienvenue');
+    if (banniere) {
+        banniere.style.display = actif ? 'none' : '';
+    } else if (!actif) {
+        // Bannière absente et on désactive : rerender au cas où elle doive réapparaître
+        afficherAccueil();
+    }
 }
 
 /**
