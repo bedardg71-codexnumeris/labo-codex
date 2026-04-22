@@ -37,11 +37,12 @@ function afficherAccueil() {
 
 /**
  * Génère la bannière de bienvenue (nouvel utilisateur).
- * Affichée si aucun groupe-cours n'est configuré ET toggle « Données démo » inactif.
+ * Affichée si aucun groupe-cours n'est configuré ET mode démo inactif.
  * Source texte : docs/refonte-textes/textes-manquants-bloc4.md (validé 19 avril 2026)
  */
 function genererBanniereBienvenue() {
-    if (toggleDemoActif()) return '';
+    const enDemo = typeof estEnModeDemo === 'function' && estEnModeDemo();
+    if (enDemo) return '';
 
     // Détection : au moins un groupe-cours configuré.
     // `groupeCoursActif` est une clé GLOBALE (pas préfixée par trimestre) qui
@@ -74,6 +75,9 @@ function genererBanniereBienvenue() {
                 <button class="btn btn-secondaire" data-action="afficherSection" data-param="contexte">
                     Aller aux R\u00e9glages
                 </button>
+                <button class="btn btn-secondaire" data-action="entrerEnDemoHandler">
+                    Explorer avec des donn\u00e9es d\u00e9mo
+                </button>
             </div>
         </div>
     `;
@@ -95,7 +99,7 @@ function genererBanniereBienvenue() {
  */
 function afficherAccueilContenu(conteneur) {
     // A.14 — La case « Données de démonstration » reflète strictement l'état réel.
-    const demoChecked = toggleDemoActif();
+    const demoChecked = typeof estEnModeDemo === 'function' && estEnModeDemo();
     // « Accompagnement » = ON uniquement si les 4 sous-systèmes sont actifs.
     const accChecked = accompagnementEstActif();
 
@@ -220,18 +224,6 @@ function afficherAccueilContenu(conteneur) {
 
     // Mettre à jour la pastille des nouveautés (elle est maintenant dans le DOM)
     if (typeof mettreAJourPastille === 'function') mettreAJourPastille();
-
-    // Listeners directs sur les checkboxes : la délégation data-on-change sur
-    // des <input> enveloppés par <label for=""> est peu fiable sur iOS Safari
-    // (l'event change peut ne pas remonter jusqu'à document). Double câblage.
-    const cbDemo = conteneur.querySelector('#checkbox-demo-accueil');
-    if (cbDemo) {
-        cbDemo.addEventListener('change', function() { toggleDemoHandler(cbDemo); });
-    }
-    const cbAcc = conteneur.querySelector('#checkbox-accompagnement-accueil');
-    if (cbAcc) {
-        cbAcc.addEventListener('change', function() { toggleAccompagnementHandler(cbAcc); });
-    }
 }
 
 /**
@@ -256,19 +248,9 @@ function initialiserAccueil() {
     // db-ready (l'état peut venir d'IDB qui n'est pas dispo au premier rendu).
     // Bugfix 22 avril : la case se décochait au refresh malgré mode démo actif.
     window.addEventListener('db-ready', function() {
-        // Réconciliation : si le flag demo-actif est à 'true' mais le trimestre
-        // 'demo' n'est pas virtualisé dans trimestres globaux (ex. après un
-        // nettoyage), ré-appliquer l'activation pour rester cohérent.
-        if (toggleDemoActif()) {
-            const trimestres = db.getSync('trimestres', []) || [];
-            const demoActifDansListe = trimestres.some(t => t.id === 'demo' && t.actif);
-            if (!demoActifDansListe) {
-                activerModeDemo();
-            }
-        }
         const cbDemo = document.getElementById('checkbox-demo-accueil');
         if (cbDemo) {
-            cbDemo.checked = toggleDemoActif();
+            cbDemo.checked = typeof estEnModeDemo === 'function' && estEnModeDemo();
         }
         const cbAcc = document.getElementById('checkbox-accompagnement-accueil');
         if (cbAcc) {
@@ -278,96 +260,21 @@ function initialiserAccueil() {
 }
 
 /* ===============================
-   WRAPPERS DELEGATION
+   WRAPPERS DELEGATION (Phase 5)
    =============================== */
 
-/** État du toggle « Données démo » (flag demo-actif en localStorage). */
-function toggleDemoActif() {
-    return db.getSync('demo-actif', null) === 'true';
-}
-
-/**
- * Active le mode démo : réintroduit virtuellement le trimestre 'demo' dans
- * la liste globale pour que cle('X') route vers demo_X, pose les pointeurs
- * groupeCoursActif et infoCours vers le GC démo et son cours. Snapshot des
- * valeurs précédentes dans demo-snapshot-pointeurs pour restauration.
- * N'écrit rien dans demo_* ni dans aucune collection de données.
- */
-function activerModeDemo() {
-    // Snapshot des 3 pointeurs globaux
-    db.setSync('demo-snapshot-pointeurs', {
-        trimestreActif: db.getSync('trimestreActif', null),
-        groupeCoursActif: db.getSync('groupeCoursActif', null),
-        infoCours: db.getSync('infoCours', null)
-    });
-
-    // Virtualiser le trimestre démo dans la liste globale (actif=true)
-    const trimestres = (db.getSync('trimestres', []) || []).filter(t => t.id !== 'demo');
-    trimestres.forEach(t => { t.actif = false; });
-    trimestres.push({ id: 'demo', nom: 'Démonstration', session: 'D', annee: '2025', actif: true, isDemo: true });
-    db.setSync('trimestres', trimestres);
-    window.trimestreActif = 'demo';
-    db.setSync('trimestreActif', 'demo');
-
-    // Pointer vers le GC démo
-    const gcDemo = (db.getSync('demo_groupesCours', []) || []).find(g => g.id === 'GC_DEMO');
-    if (gcDemo) db.setSync('groupeCoursActif', gcDemo);
-
-    // Pointer vers le cours démo
-    const coursDemo = (db.getSync('demo_listeCours', []) || [])[0];
-    if (coursDemo) db.setSync('infoCours', coursDemo);
-}
-
-/**
- * Désactive le mode démo : restaure les 3 pointeurs depuis le snapshot et
- * retire le trimestre 'demo' virtuel de la liste globale.
- */
-function desactiverModeDemo() {
-    const snap = db.getSync('demo-snapshot-pointeurs', null);
-
-    // Retirer 'demo' des trimestres globaux et restaurer actif=true sur le précédent
-    const sansDemo = (db.getSync('trimestres', []) || []).filter(t => t.id !== 'demo');
-    if (snap && snap.trimestreActif) {
-        sansDemo.forEach(t => { t.actif = (t.id === snap.trimestreActif); });
-    } else {
-        sansDemo.forEach(t => { t.actif = false; });
-    }
-    db.setSync('trimestres', sansDemo);
-
-    // Restaurer les 3 pointeurs
-    if (snap && snap.trimestreActif) {
-        window.trimestreActif = snap.trimestreActif;
-        db.setSync('trimestreActif', snap.trimestreActif);
-    } else {
-        window.trimestreActif = null;
-        db.removeSync('trimestreActif');
-    }
-    if (snap && snap.groupeCoursActif) db.setSync('groupeCoursActif', snap.groupeCoursActif);
-    else db.removeSync('groupeCoursActif');
-    if (snap && snap.infoCours) db.setSync('infoCours', snap.infoCours);
-    else db.removeSync('infoCours');
-
-    db.removeSync('demo-snapshot-pointeurs');
-}
-
-/**
- * Toggle « Données démo » : Plan 1 Phase 5.B-ter.
- * Active le GC démo comme GC actif (lecture seule depuis demo_*) ou
- * restaure l'état précédent. Ne touche pas aux données elles-mêmes :
- * seulement les 3 pointeurs (trimestreActif, groupeCoursActif, infoCours)
- * et le trimestre 'demo' virtuel dans la liste globale.
- */
+/** Toggle mode démo depuis checkbox */
 function toggleDemoHandler(el) {
-    const actif = !!(el && el.checked);
-    if (actif) {
-        activerModeDemo();
+    if (el.checked) {
+        if (typeof entrerEnDemo === 'function') entrerEnDemo();
     } else {
-        desactiverModeDemo();
+        if (typeof quitterDemo === 'function') quitterDemo();
     }
-    db.setSync('demo-actif', actif ? 'true' : null);
-    // Rafraîchir l'accueil complet : la bannière et les sections qui
-    // dépendent du GC actif doivent être re-calculées.
-    afficherAccueil();
+}
+
+/** Entrer en mode démo (bouton de la bannière de bienvenue) */
+function entrerEnDemoHandler() {
+    if (typeof entrerEnDemo === 'function') entrerEnDemo();
 }
 
 /**
@@ -415,6 +322,7 @@ window.afficherAccueil = afficherAccueil;
 window.initialiserAccueil = initialiserAccueil;
 window.definirModeExpert = definirModeExpert;
 window.toggleDemoHandler = toggleDemoHandler;
+window.entrerEnDemoHandler = entrerEnDemoHandler;
 window.toggleAccompagnementHandler = toggleAccompagnementHandler;
 window.naviguerAccueilCarte = naviguerAccueilCarte;
 window.ouvrirWizardPratique = ouvrirWizardPratique;

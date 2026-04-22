@@ -157,6 +157,10 @@ function initialiserModuleTrimestre() {
     afficherStatistiquesTrimestre();
 
     // ✅ Beta 95 : Synchroniser avec l'interface V2 (trimestre-v2.js)
+    // Beta 99.18 (A.9) : appel complet de initialiserTrimestreV2 pour que les
+    // sélecteurs groupe-cours/horaires/étudiants reflètent bien l'état courant
+    // (sinon, après entrerEnDemo, le dropdown « Choisir pour modifier » reste
+    // vide jusqu'à la première écriture dans la bibliothèque groupe-cours).
     if (typeof initialiserTrimestreV2 === 'function') {
         initialiserTrimestreV2();
     } else if (typeof chargerCadreCalendrierV2 === 'function') {

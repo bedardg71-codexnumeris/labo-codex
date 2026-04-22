@@ -26,10 +26,15 @@
  * - Écoute `sectionAffichee` émis par navigation.js
  * - Injection au sommet du conteneur #idSousSection, 300 ms après l'événement
  * - Nettoyage automatique à chaque nouvel événement
+ * - Auto-masquée en mode démo (sections peuplées)
  */
 
 (function() {
 'use strict';
+
+function estDonneesDemoActives() {
+    return typeof estEnModeDemo === 'function' && estEnModeDemo();
+}
 
 // =========================================================================
 // Détection universelle "cette section est-elle vraiment vide ?"
@@ -161,6 +166,8 @@ function creerBanniere(message) {
 
 function afficherPourSousSection(idSousSection) {
     supprimerBannieresActives();
+
+    if (estDonneesDemoActives()) return;
 
     var config = ETATS_VIDES[idSousSection];
     if (!config) return;
