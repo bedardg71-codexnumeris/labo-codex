@@ -1,9 +1,9 @@
-# SESSION — État au 22 avril 2026 matin
+# SESSION — État au 22 avril 2026 soir (post-revert Phase 5)
 
 **Date** : 22 avril 2026
-**Dernier build** : `0422-0809` · Beta 99.21
+**Dernier build** : `0422-1828` · Beta 99.22
 **Branche** : `main` (pushée)
-**Statut** : **Consolidation onboarding LIVRÉE (21 avril). Plan 1 Autonomisation — Phase 2 quasi-complète.** Prêt à démarrer **Phase 3** (affichage `inspireDe` sur les cartes) après test terrain.
+**Statut** : **Plan 1 Autonomisation — Phases 1 à 4 LIVRÉES et acquises** (`602bacf`). Phase 5 tentée l'après-midi, revert après échec terrain. Le mode démo legacy (`entrerEnDemo`/`quitterDemo`) est réactif. Prochaine tentative Phase 5 plus tard, selon les règles du post-mortem.
 
 ---
 
@@ -14,183 +14,110 @@
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
-Contexte : clear context effectué le 22 avril matin après session intense
-(18 commits aujourd'hui). Build actuel : 0422-0809, Beta 99.21, pushé
-sur origin.
+Contexte : tentative Phase 5 (retrait mode démo legacy) reverted le 22
+avril soir après 10 commits infructueux. Le mode démo legacy est réactif.
+Build actuel : 0422-1828, Beta 99.22, pushé sur main. Branche backup
+backup/phase5-tentative-22avril-2026 conserve le travail tenté.
 
 Lis dans cet ordre :
-1. SESSION.md (état complet, consigne)
-2. MEMORY.md (auto-mémoire)
-3. memory/feedback_no_debt.md (PRINCIPE DIRECTEUR : stabilité zéro-dette)
-4. memory/project_autonomisation_utilisateur.md (Plan 1, Phases 2-7)
-5. plans de travail/PLAN-AUTONOMISATION-UTILISATEUR.md (plan détaillé,
-   Phases 3+ à attaquer)
+1. SESSION.md (ce fichier, état complet)
+2. docs/POST-MORTEM-PHASE5-22-AVRIL.md (leçons tirées, règles à suivre)
+3. plans de travail/PLAN-AUTONOMISATION-UTILISATEUR.md (plan initial +
+   section « Leçons tirées de la tentative du 22 avril »)
+4. MEMORY.md (auto-mémoire, voir section Session 22 avril après-midi)
+5. memory/feedback_cache_busters.md (RÈGLE : bumper ?v= dans le même
+   commit que la modif .js, sinon Safari iPad masque le bug)
+6. memory/feedback_no_debt.md (principe directeur du projet)
+7. memory/project_autonomisation_utilisateur.md (section « Tentative
+   Phase 5 » à jour)
 
-Puis selon travail :
-6. memory/project_partage_ressources.md (Plan 2 CC, pas démarré)
-
-Principe cardinal (feedback_no_debt.md, CLAUDE.md §Principes directeurs) :
-« Tout nouveau chantier retire ce qu'il remplace, il ne l'empile pas
-  à côté. Stabilité prime sur vitesse. »
-
-Action concrète à démarrer : Plan 1 Phase 3 — affichage `inspireDe`
-sur les cartes bibliothèque (« Inspiré de X par Y » visible sur les
-items forkés). Voir §2 de ce fichier pour le détail technique.
-
-Convention de build : MMJJ-HHMM (Toronto). Demander le numéro de beta
-à Grégoire avant chaque commit. Beta fixe pour la journée, seul le
-build change entre commits.
+Si la prochaine tentative Phase 5 est programmée : adopter les 6 règles
+du post-mortem §5. Sous-phase par sous-phase. Cache-busters en premier
+réflexe. Test iPad à chaque étape. Cartographier flows démo par entité
+AVANT retrait (Phase 4.B avait oublié le GC — à corriger). Valider
+lectures namespace de bout en bout si on modifie les pointeurs.
 ```
 
 ---
 
-## 1. Travail fait aujourd'hui (22 avril 2026)
+## 1. Ce qui a été tenté aujourd'hui après-midi (revert)
 
-### Commits de la journée (11 commits)
+### Commits originaux (présents sur branche backup uniquement)
 
 | Build | SHA | Livrable |
 |---|---|---|
-| 0422-0715 | `5d5d22c` | Audit UX 22 avril : 6 corrections (attribution Labo Codex, logo CC, Gabarit Test retiré, flèche sticky, contributeurs dans cartes, btn-mini) + Migration RLO silencieuse |
-| 0422-0721 | `9d71776` | Plan 1 Phase 2.4 : 4 dropdowns natifs (Cours/Enseignant/Horaire/Groupe-cours) avec `<optgroup>` Démo |
-| 0422-0738 | `399c854` | Phase 2.5 + 2 bugfixes UX (checkbox Démo persistance + Quitter démo → accueil) |
-| 0422-0755 | `77cbec3` | Fix 8 dropdowns vidés en mode démo legacy (détection `enDemoLegacy`) |
-| 0422-0800 | `7607d91` | Console propre : export `sauvegarderIdentificationTrimestreV2` + 3 clés `tourGuide_*` dans DEFAUTS |
-| 0422-0809 | `e0c8f3b` | Bandeau transition « espace de travail prêt » démo-aware + 3 prefs `_demo` (Option B) |
+| 0422-1201 | `7c8cc8e` | 5.A — retrait donnees-demo.js + migration-phase5.js |
+| 0422-1305 | `d945d74` | 5.B — retrait estEnModeDemo + filtrerEtudiantsParMode |
+| 0422-1411 | `c66cbff` | Fix listener direct checkbox (diag erroné, workaround) |
+| 0422-1432 | `7f6685d` | 5.B-bis — flow Dupliquer GC démo |
+| 0422-1448 | `c12e720` | Fix listener direct select GC (workaround) |
+| 0422-1500 | `4f5e110` | Diag console.warn (retiré ensuite) |
+| 0422-1508 | `1c070c3` | Bump cache-buster trimestre-v2.js (vraie cause) |
+| 0422-1520 | `e57c992` | Fix bouton Enregistrer démo + carte résumé |
+| 0422-1529 | `fa85a97` | Bump cache-busters massif (11 fichiers) |
+| 0422-1541 | `253ce0d` | 5.B-ter — activation GC démo au toggle |
 
-Plus les commits du 21 avril soir (Phase 2.0-2.2) pushés ensemble :
-`cfee015` / `337855b` / `f796d93` / `2dc86e1` / `dbbb72e` / `9a2bd83`
-(Phase 3-8 consolidation) + `a959f68` / `7163457` / `8f9c786` / `739c705`
-/ `faba5e6` (Plan 1 Phase 2.0-2.2) + `7e26e09` (merge).
+### Revert (sur main)
 
-### Phase 2 du plan d'autonomisation — état
+- `76a55fb` (b0422-1828) — Doc post-mortem + leçons dans le plan
+- `7e47f4e` (b0422-1828) — Restauration 18 fichiers à 602bacf
 
-| Phase | État | Commits |
+### Ce qui a été appris
+
+Voir `docs/POST-MORTEM-PHASE5-22-AVRIL.md` pour le détail. Synthèse :
+
+1. **Cache-busters `?v=` à bumper dans le même commit qu'une modif `.js`** — règle n°1. Sans ça Safari iPad sert la cache, les nouvelles fonctions ne tournent pas, et le symptôme ressemble à un bug iOS natif.
+2. **Une sous-phase à la fois** avec validation terrain iPad+Mac entre chaque. Pas d'empilement.
+3. **Parcours utilisateur formalisé** avant retrait : écrire clic par clic le parcours attendu, valider avec Grégoire que la modélisation pédagogique est servie.
+4. **Cartographier flows démo par entité** avant retrait. Phase 4.B avait oublié le GC — il n'avait pas de bibliothèque visuelle séparée, donc les options démo `disabled=true` le rendaient inactionnable.
+5. **Tester iPad dès la première sous-phase** — les bugs de cache se révèlent d'abord sur iPad.
+6. **Valider lectures namespace de bout en bout** : si on route via pointeurs vers `demo_*`, vérifier que toutes les lectures effectives retournent les données attendues.
+
+---
+
+## 2. État acquis (Phases 1 à 4, présent dans 602bacf, intact après revert)
+
+- **Phase 1** — Namespace `demo_*` permanent via `js/demo-namespace.js` et `cleDemo()`. Flag `demo-version-installee`. Données pack démo dans demo_* dès le 1er run.
+- **Phase 2** — Sélecteurs à 2 sections (Mes documents / Démo) dans 11 dropdowns. Options démo préfixées `demo-` avec optgroup visuel.
+- **Phase 3** — Fork + attribution `inspireDe` sur cartes biblio (5 modules). Panneau métadonnées CC avec ligne « Inspiré de ».
+- **Phase 4.A** — Identité CC utilisateur (`obtenirIdentiteCCUtilisateur()`) distincte de l'enseignant métier (`obtenirNomEnseignantActif()` réservé PDF). 9 call-sites migrés.
+- **Phase 4.B** — Formulaires démo lecture seule sur 5 formulaires (grille, échelle, cartouche, production, pratique matériel) + bouton « Dupliquer pour créer ma X » + fork via `BibliothequeUI.forkerItem`.
+- **Phase 4.C** — Interdiction des références mixtes à la sauvegarde via `verifierReferencesPasDemo`. 3 points de save gardés (GC, évaluation ×2, pratique).
+
+---
+
+## 3. Ce qui reste à faire (revu)
+
+| Phase | État | Notes |
 |---|---|---|
-| 2.0 Audit 11 sélecteurs | ✅ Livré | `a959f68` |
-| 2.1 POC Grille | ✅ Livré | `7163457` + `8f9c786` (simplification post-retour) |
-| 2.2 Propagation 4 modules bibliothèque | ✅ Livré | `faba5e6` + `739c705` (fix préfixes) |
-| 2.3 Production hybride | ✅ Fusionnée avec 2.1/2.2 | — |
-| 2.4 Dropdowns natifs (4/5) | ✅ Livré | `9d71776` |
-| 2.5 Dropdowns d'assemblage (4/5) | ✅ Livré | `399c854` |
-| 2.x Fix mode démo legacy dropdowns | ✅ Livré | `77cbec3` |
-
-**Reste hors scope Phase 2** :
-- `v2-gc-trimestre` / `v2-selectTrimestreActif` — logique complexe liée au mode démo legacy (sera naturellement traité en Phase 5)
-- `v2-gc-groupe` — numéros de groupe (pas des entités)
-- `selectGroupeEval` (evaluation.js) — filtre par numéro de groupe
+| 5 — Retrait mode démo legacy | **Tentée, revert** | Règles du post-mortem à suivre pour la prochaine tentative. GC démo à inclure dans Phase 4.B-bis d'abord (flow Dupliquer pour GC). |
+| 6 — Documentation | À faire | Dépend de 5 |
+| 7 — Préparation Plan 2 | À faire | Dépend de 5 |
 
 ---
 
-## 2. À faire — Plan 1 Phase 3 — Affichage `inspireDe` sur les cartes
+## 4. Mode démo actif (legacy, depuis le revert)
 
-Objectif : respect visible de la licence CC BY — chaque copie forkée
-porte la trace de son origine, et cette trace est VISIBLE sur la carte
-/ dans les listes.
+Le mode démo fonctionne comme avant le chantier Phase 5 :
+- Cocher « Données démo » sur l'accueil → `entrerEnDemo()` charge le pack démo dans les globaux, active le trimestre démo, bandeau vert « Mode démonstration » en bas
+- Aperçu se peuple naturellement
+- Décocher → `quitterDemo()` décharge, restaure l'état précédent
 
-### Détails techniques
-
-Depuis les commits 2.1/2.2, toute duplication via `Dupliquer` enrichit
-la copie avec une métadonnée :
-```js
-inspireDe: {
-    nom: '<nom original>',
-    auteur: '<auteur original>',
-    date: '2026-04-21'
-}
-```
-
-Enrichissement présent dans 8 fonctions `dupliquer*` de grilles.js,
-echelles.js, cartouches.js, productions.js, pratiques.js,
-pratiques-materiel.js.
-
-**Phase 3 cibles** :
-
-1. **Carte bibliothèque** (Section 1 — items locaux) : afficher une
-   ligne discrète sous le titre « Inspiré de <nom> par <auteur> » si
-   `inspireDe` est présent. Exemple : « Inspiré de Checklist de
-   spécifications par Labo Codex ».
-
-2. **Carte bibliothèque** (Section 2 — items partagés) : idem, si un
-   item partagé a lui-même un `inspireDe` (chaîne CC).
-
-3. **Formulaire d'édition** : afficher `inspireDe` dans les
-   « Métadonnées sur cette X » (panneau géré par cc-license.js
-   `genererPanneauMetadonnees`). Pattern existant pour `contributeurs`,
-   à étendre pour `inspireDe`.
-
-4. **Champ auteur séparé du champ enseignant** (plan §4.4) : vérifier
-   que le champ `auteur` (métadonnée CC) est bien distinct du champ
-   `enseignant` du groupe-cours. À auditer dans les formulaires
-   d'édition de pratique/grille/etc.
-
-5. **BibliothequeUI helper** : ajouter `BibliothequeUI.formaterInspireDe(item)`
-   qui retourne « Inspiré de X par Y » (ou `''` si absent).
-
-### Architecture
-
-- Style discret dans `styles.css` : ligne italique couleur texte-secondaire
-- Les 5 modules bibliothèque consomment le helper dans leur
-  `preparerDonnees*` (comme pour `formaterAttribution` en Phase 2).
-
-### Risques
-
-- Risque zéro : `inspireDe` est un nouveau champ, pas de données legacy
-  qui pourraient générer des conflits.
-- Les items historiques (sans `inspireDe`) n'afficheront simplement
-  rien — comportement attendu.
+Code : `js/donnees-demo.js` (restauré), bandeau HTML dans `index.html`, listener `data-on-change="toggleDemoHandler"` dans `js/accueil.js`.
 
 ---
 
-## 3. Architecture actuelle (Beta 99.21)
-
-### Matériel CC
-- Tout le matériel livré attribué à « Labo Codex » (45+ items corrigés)
-- Logo CC BY-NC-SA déplacé dans `icons/by-nc-sa-2.svg` (évite espace dans chemin)
-- `inspireDe` ajouté automatiquement à chaque duplication (respect CC)
-
-### Démo
-- Namespace `demo_*` permanent (pack-demo version 20.2)
-- 4 dropdowns natifs + 4 dropdowns d'assemblage exposent les démos dans
-  `<optgroup>` avec items désactivés (option A — non sélectionnables)
-- 5 modules bibliothèque (grilles/échelles/cartouches/productions/pratiques)
-  affichent badge « Démo » violet + titre préfixé `[Démo]`
-- Bouton « Dupliquer » retire le flag démo de la copie et ajoute `inspireDe`
-- Bandeau « espace de travail prêt » démo-aware
-
-### Accompagnement
-- 5 flèches « première X » avec condition (disparaissent dès qu'un item
-  existe)
-- 3 bandeaux de transition tracking mode démo / mode normal séparément
-
-### Console
-- Silencieuse au démarrage hors violations CSP Cloudflare (attendues)
-
----
-
-## 4. Plans en cours
-
-| Plan | Statut | Priorité | Remarque |
-|---|---|---|---|
-| PLAN-CONSOLIDATION-ONBOARDING.md | ✅ Livré 21 avril | — | — |
-| PLAN-AUTONOMISATION-UTILISATEUR.md | **Phases 1+2 livrées** | **Haute** | Phase 3 à attaquer |
-| PLAN-PARTAGE-RESSOURCES.md | Cadré | Basse | Attend autonomisation Phase 6+ |
-
----
-
-## 5. Conventions opérationnelles
+## 5. Conventions opérationnelles (inchangées)
 
 - **Build** : format `MMJJ-HHMM` Toronto. Bump à chaque commit. Beta fixe journée.
+- **Cache-busters** : bumper `?v=` dans `index.html` pour chaque `.js` modifié, dans le MÊME commit. Règle post-mortem Phase 5.
 - **Demander numéro de beta** avant chaque commit ; ne jamais renuméroter auto.
 - **version.json** + fallback `js/init-inline.js` BUILD_ID à chaque commit.
 - **CSP strict** : `script-src 'self'`. Violations Cloudflare/beacon attendues.
 - **Principe zéro-dette** (CLAUDE.md §Principes directeurs) : appliquer partout.
-- **Sécurité** : `echapperHtml` sur innerHTML, `validerZipSecurite` sur imports, etc.
 
 ---
 
 ## 6. Préservation des données personnelles
 
-Grégoire fait des backups Codex réguliers. Données personnelles (trimestres
-réels H2026/A2025, grilles, évaluations, productions) **intouchables**. Les
-migrations silencieuses du chantier ne touchent que les flags et attributions
-techniques.
+Grégoire fait des backups Codex réguliers. Données personnelles (trimestres réels H2026/A2025, grilles, évaluations, productions) **intouchables**. Le revert Phase 5 a restauré le mode démo legacy donc `entrerEnDemo`/`quitterDemo` gèrent le snapshot/restore de manière robuste comme auparavant.
