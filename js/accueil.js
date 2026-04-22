@@ -243,6 +243,20 @@ function initialiserAccueil() {
     if (checkbox) {
         checkbox.checked = !!obtenirPreference('modeExpert');
     }
+
+    // Checkbox « Données démo » : re-synchroniser avec l'état réel après
+    // db-ready (l'état peut venir d'IDB qui n'est pas dispo au premier rendu).
+    // Bugfix 22 avril : la case se décochait au refresh malgré mode démo actif.
+    window.addEventListener('db-ready', function() {
+        const cbDemo = document.getElementById('checkbox-demo-accueil');
+        if (cbDemo) {
+            cbDemo.checked = typeof estEnModeDemo === 'function' && estEnModeDemo();
+        }
+        const cbAcc = document.getElementById('checkbox-accompagnement-accueil');
+        if (cbAcc) {
+            cbAcc.checked = accompagnementEstActif();
+        }
+    });
 }
 
 /* ===============================

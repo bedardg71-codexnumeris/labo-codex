@@ -4059,17 +4059,24 @@ function populerDropdownsAssemblageV2() {
     const selectCours = document.getElementById('v2-gc-cours');
     if (selectCours) {
         const cours = db.getSync('cours', []);
+        const coursReels = cours.filter(c => !c.isDemo);
 
-        let html = '<option value="">— Choisir un cours —</option>';
-        cours.forEach(c => {
+        const labelCours = c => {
             const code = c.codeCours || c.sigle || c.code || '';
             const nom = c.nomCours || c.nom || c.titre || '';
-            let label = code ? `${code}${nom ? ' - ' + nom : ''}` : nom;
-            if (!label) label = `Cours ${c.id || 'inconnu'}`;
-            html += `<option value="${c.id}">${label}</option>`;
+            const label = code ? `${code}${nom ? ' - ' + nom : ''}` : nom;
+            return label || `Cours ${c.id || 'inconnu'}`;
+        };
+        let html = '<option value="">— Choisir un cours —</option>';
+        coursReels.forEach(c => {
+            html += `<option value="${c.id}">${labelCours(c)}</option>`;
         });
         selectCours.innerHTML = html;
-    } else {
+
+        if (typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
+            const coursDemo = db.getSync(cleDemo('listeCours'), []) || [];
+            BibliothequeUI.ajouterOptgroupDemo(selectCours, coursDemo, labelCours);
+        }
     }
 
     // Dropdown Groupes d'étudiants
@@ -4101,31 +4108,38 @@ function populerDropdownsAssemblageV2() {
     if (selectHoraire) {
         const cleHoraires = cle('horaires');
         const horaires = db.getSync(cleHoraires, []);
+        const horairesReels = horaires.filter(h => !h.isDemo);
+
         let html = '<option value="">— Choisir un horaire —</option>';
-        horaires.forEach(h => {
+        horairesReels.forEach(h => {
             const nom = h.nom || h.id || 'Sans nom';
-            // A.13 : marqueur « démo » systématique dans l'option si isDemo
-            const suffixeDemo = h.isDemo ? ' (démo)' : '';
-            html += `<option value="${h.id}">${nom}${suffixeDemo}</option>`;
+            html += `<option value="${h.id}">${nom}</option>`;
         });
         selectHoraire.innerHTML = html;
-    } else {
+
+        if (typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
+            const horairesDemo = db.getSync(cleDemo('horaires'), []) || [];
+            BibliothequeUI.ajouterOptgroupDemo(selectHoraire, horairesDemo, h => h.nom || h.id || 'Sans nom');
+        }
     }
 
     // Beta 95.2: Dropdown Enseignants (maintenant depuis liste unifiée)
     const selectEnseignant = document.getElementById('v2-gc-enseignant');
     if (selectEnseignant) {
         const enseignants = db.getSync('enseignants', []);
+        const enseignantsReels = enseignants.filter(e => !e.isDemo);
 
+        const labelEns = e => (`${e.prenom || ''} ${e.nom || ''}`.trim() || e.id);
         let html = '<option value="">— Choisir un enseignant —</option>';
-        enseignants.forEach(e => {
-            const nomComplet = `${e.prenom || ''} ${e.nom || ''}`.trim() || e.id;
-            // A.13 : marqueur « démo » systématique dans l'option si isDemo
-            const suffixeDemo = e.isDemo ? ' (démo)' : '';
-            html += `<option value="${e.id}">${nomComplet}${suffixeDemo}</option>`;
+        enseignantsReels.forEach(e => {
+            html += `<option value="${e.id}">${labelEns(e)}</option>`;
         });
         selectEnseignant.innerHTML = html;
-    } else {
+
+        if (typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
+            const ensDemo = db.getSync(cleDemo('enseignants'), []) || [];
+            BibliothequeUI.ajouterOptgroupDemo(selectEnseignant, ensDemo, labelEns);
+        }
     }
 
     // Beta 95.3: Dropdown Pratiques de notation (alignement Primo)
@@ -4134,8 +4148,8 @@ function populerDropdownsAssemblageV2() {
     if (selectPratique) {
         // Les pratiques sont stockées dans 'pratiquesConfigurables' (module pratiques-materiel.js)
         const toutesPratiques = db.getSync('pratiquesConfigurables', []);
-        // Filtrer pour n'afficher que les pratiques dans la sidebar
-        const pratiques = toutesPratiques.filter(p => p.dansBibliotheque !== false);
+        // Filtrer pour n'afficher que les pratiques dans la sidebar, non démo
+        const pratiques = toutesPratiques.filter(p => p.dansBibliotheque !== false && !p.isDemo);
 
         let html = '<option value="">— À compléter quand configurée —</option>';
         pratiques.forEach(p => {
@@ -4143,6 +4157,11 @@ function populerDropdownsAssemblageV2() {
             html += `<option value="${p.id}">${nom}</option>`;
         });
         selectPratique.innerHTML = html;
+
+        if (typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
+            const pratiquesDemo = db.getSync(cleDemo('pratiquesConfigurables'), []) || [];
+            BibliothequeUI.ajouterOptgroupDemo(selectPratique, pratiquesDemo, p => p.nom || p.id || 'Sans nom');
+        }
     }
 }
 
