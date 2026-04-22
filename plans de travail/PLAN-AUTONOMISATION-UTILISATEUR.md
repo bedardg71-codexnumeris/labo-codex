@@ -319,8 +319,33 @@ Sur iPad Safari et Mac Safari, mode clair et sombre :
 | Phase 4.A — Identité CC utilisateur | Livrée | b0422-1000 | Helper `obtenirIdentiteCCUtilisateur()` avec fallback « Utilisateur de Labo Codex ». `obtenirProfilAuteurActifSync` refactoré (filtre isDemo, priorise Réglages). 9 call-sites de création migrés. |
 | Phase 4.B — Formulaires démo en lecture seule | Livrée | b0422-1105 | 5 formulaires (grille, échelle, cartouche, production, pratique matériel) + helpers `appliquerModeLectureSeuleDemo` + `forkerItem` dans BibliothequeUI. Vocabulaire « Dupliquer » harmonisé dans doc. Test terrain OK. |
 | Phase 4.C — Interdiction références mixtes | Livrée | b0422-1135 | Helper `verifierReferencesPasDemo` + gardes aux 3 points de save : groupe-cours (trimestre-v2), évaluation (evaluation.js × 2), pratique (pratiques-materiel). |
-| Phase 5 — Retrait mode démo actuel | À faire | — | |
+| Phase 5 — Retrait mode démo actuel | **Tentée et revert 22 avril 2026** | — | Voir `docs/POST-MORTEM-PHASE5-22-AVRIL.md`. Travail préservé sur branche `backup/phase5-tentative-22avril-2026`. |
 | Phase 6 — Documentation | À faire | — | |
 | Phase 7 — Préparation Plan 2 | À faire | — | |
 
 Mise à jour : au fil des commits.
+
+---
+
+## Leçons tirées de la tentative Phase 5 du 22 avril 2026
+
+Post-mortem détaillé : `docs/POST-MORTEM-PHASE5-22-AVRIL.md`. Synthèse des règles à appliquer à la prochaine tentative :
+
+1. **Cache-busters d'abord** : bumper `?v=` dans `index.html` pour chaque `.js` modifié, dans le même commit. Sans ça, Safari iPad sert la version cachée et produit de faux symptômes attribués à tort à iOS.
+2. **Une sous-phase à la fois** : ne pas enchaîner plusieurs commits majeurs sans validation terrain entre chaque.
+3. **Parcours utilisateur formalisé** : avant retrait, écrire clic par clic le parcours attendu après livraison. Valider avec Grégoire que ce parcours sert bien la modélisation pédagogique.
+4. **Cartographier les flows démo par entité** : confirmer que chaque entité (cours, horaire, enseignant, pratique, groupe-cours) a un équivalent Phase 4.B (lecture seule + Dupliquer) AVANT retrait. Sinon étendre ou accepter l'invisibilité.
+5. **Tester iPad dès la première sous-phase** : les bugs de cache se révèlent surtout sur iPad.
+6. **Valider l'activation de bout en bout** : si on change de namespace via pointeurs, vérifier que toutes les lectures (étudiants, productions, calendrier, snapshots, indices) retournent effectivement les données attendues. Pas se contenter de muter 3 clés et supposer que ça suffit.
+
+### État conservé malgré le revert
+
+Les Phases 1 à 4 restent acquises (`602bacf`) :
+- Namespace `demo_*` permanent
+- Sélecteurs à 2 sections (optgroup Démo dans les sélecteurs natifs)
+- Fork + attribution `inspireDe` sur les cartes biblio
+- Identité CC utilisateur distincte de l'enseignant métier
+- Formulaires démo lecture seule sur 5 formulaires (grille, échelle, cartouche, production, pratique)
+- Interdiction références mixtes à la sauvegarde
+
+Le mode démo legacy (`entrerEnDemo` / `quitterDemo`) reste en place tant que la Phase 5 n'est pas refaite avec succès.
