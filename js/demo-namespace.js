@@ -30,6 +30,76 @@
 
 const CLE_VERSION = 'demo-version-installee';
 
+// ============================================
+// CARTE MENTALE DÉMO (alignement pédagogique)
+// Écrite dans demo_planification_mindmap par peuplerNamespace.
+// Déplacée depuis donnees-demo.js en Phase 5.A — le legacy conserve sa
+// propre copie locale jusqu'à son retrait en 5.D.
+// ============================================
+
+const CARTE_DEMO_ALIGNEMENT = {
+    metadata_cc: {
+        licence: "CC BY-NC-SA 4.0",
+        licence_url: "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+        licence_resume: "Attribution - Pas d'utilisation commerciale - Partage dans les mêmes conditions 4.0 International",
+        auteur_original: "Grégoire Bédard",
+        email_auteur: "labo@codexnumeris.org",
+        site_auteur: "https://codexnumeris.org",
+        type: "alignement_pedagogique",
+        nom: "Écriture et littérature (démo)",
+        date_creation: "2026-02-07",
+        date_modification: "2026-02-17",
+        version: "2.0",
+        description_courte: "Carte démo d'alignement pédagogique pour le cours Écriture et littérature"
+    },
+    index: {
+        active: 'carte_1',
+        compteurCartes: 1,
+        cartes: [{ id: 'carte_1', nom: 'Écriture et littérature (démo)', dateCreation: '2026-02-07T15:18:14.105Z' }]
+    },
+    cartes: {
+        'carte_1': {
+            compteur: 26,
+            compteurLiens: 45,
+            noeuds: [
+                { id: 'planif-noeud_1', type: 'competence', titre: 'Analyser un texte littéraire', description: '', x: -1374.739362305048, y: -167.13476902957674, parent: null, enfants: [], metadata: { niveauCognitif: 'analyser' }, cloneSourceId: null },
+                { id: 'planif-noeud_2', type: 'idee-maitresse', titre: 'Mettre en œuvre une posture analytique', description: '', x: -1403.0123338130581, y: 7.585377465095772, parent: null, enfants: [], metadata: { niveauCognitif: 'appliquer' }, cloneSourceId: null },
+                { id: 'planif-noeud_19', type: 'idee-maitresse', titre: 'Appliquer différentes stratégies de lecture', description: '', x: -1039.9693420352505, y: 51.23377180784709, parent: null, enfants: [], metadata: { niveauCognitif: 'appliquer' }, cloneSourceId: null },
+                { id: 'planif-noeud_20', type: 'idee-maitresse', titre: 'Mettre en œuvre une méthode d’annotation', description: '', x: -1750.4115500096973, y: 52.816054087974415, parent: null, enfants: [], metadata: { niveauCognitif: 'appliquer' }, cloneSourceId: null },
+                { id: 'planif-noeud_11', type: 'sequence', titre: 'Semaine 1 (introduction)', description: 'description\n', x: -1626.3487399504672, y: 197.32957752851541, parent: null, enfants: ['planif-noeud_10', 'planif-noeud_9'], metadata: {}, cloneSourceId: null },
+                { id: 'planif-noeud_9', type: 'lecon', titre: 'Séance 1 (2 périodes)', description: '', x: -1596.3487399504672, y: 272.3295775285154, parent: 'planif-noeud_11', enfants: ['planif-noeud_7', 'planif-noeud_26', 'planif-noeud_17', 'planif-noeud_12', 'planif-noeud_24'], metadata: { enseignementExplicite: false }, cloneSourceId: null },
+                { id: 'planif-noeud_10', type: 'lecon', titre: 'Séance 2 (2 périodes)', description: '', x: -1284.9499182684067, y: 278.46050312184747, parent: 'planif-noeud_11', enfants: ['planif-noeud_8', 'planif-noeud_18', 'planif-noeud_3', 'planif-noeud_13', 'planif-noeud_22'], metadata: {}, cloneSourceId: null },
+                { id: 'planif-noeud_7', type: 'factuelle', titre: 'Distinguer différentes postures de lecture', description: '', x: -1566.3487399504672, y: 347.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: { prealable: true }, cloneSourceId: null },
+                { id: 'planif-noeud_26', type: 'procedurale', titre: 'Appliquer une méthode d’annotation efficace', description: '', x: -1566.3487399504672, y: 492.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: {}, cloneSourceId: null },
+                { id: 'planif-noeud_17', type: 'procedurale', titre: 'Noter ses réactions spontanées', description: '', x: -1558.3487399504672, y: 637.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: {}, cloneSourceId: null },
+                { id: 'planif-noeud_12', type: 'activite', titre: 'Analyser «Pour que nous puissions vivre»', description: '', x: -1566.3487399504672, y: 762.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: {}, cloneSourceId: null },
+                { id: 'planif-noeud_24', type: 'evaluation', titre: 'Rétroaction formative', description: '', x: -1526.8487399504672, y: 907.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: {}, cloneSourceId: null },
+                { id: 'planif-noeud_8', type: 'factuelle', titre: 'Reconnaitre différents procédés littéraires (insistance et opposition)', description: '', x: -1254.9499182684067, y: 353.46050312184747, parent: 'planif-noeud_10', enfants: [], metadata: { prealable: true }, cloneSourceId: null },
+                { id: 'planif-noeud_18', type: 'procedurale', titre: 'Observer le paratexte', description: '', x: -1215.4499182684067, y: 518.4605031218475, parent: 'planif-noeud_10', enfants: [], metadata: {}, cloneSourceId: null },
+                { id: 'planif-noeud_3', type: 'procedurale', titre: 'Observer les motifs et les contrastes', description: '', x: -1254.9499182684067, y: 643.4605031218475, parent: 'planif-noeud_10', enfants: [], metadata: {}, cloneSourceId: null },
+                { id: 'planif-noeud_13', type: 'activite', titre: 'Annoter le texte «Marine»', description: '', x: -1229.4499182684067, y: 788.4605031218475, parent: 'planif-noeud_10', enfants: [], metadata: {}, cloneSourceId: null },
+                { id: 'planif-noeud_22', type: 'evaluation', titre: 'Rétroaction formative', description: '', x: -1215.4499182684067, y: 913.4605031218475, parent: 'planif-noeud_10', enfants: [], metadata: {}, cloneSourceId: null }
+            ],
+            liens: [
+                { id: 'planif-lien_38', source: 'planif-noeud_1', cible: 'planif-noeud_2', type: 'se_decline_en' },
+                { id: 'planif-lien_18', source: 'planif-noeud_2', cible: 'planif-noeud_19', type: 's_appuie_sur' },
+                { id: 'planif-lien_41', source: 'planif-noeud_2', cible: 'planif-noeud_20', type: 's_appuie_sur' },
+                { id: 'planif-lien_28', source: 'planif-noeud_2', cible: 'planif-noeud_11', type: 'se_concretise_dans' },
+                { id: 'planif-lien_26', source: 'planif-noeud_20', cible: 'planif-noeud_9', type: 'se_concretise_dans' },
+                { id: 'planif-lien_27', source: 'planif-noeud_19', cible: 'planif-noeud_10', type: 'se_concretise_dans' },
+                { id: 'planif-lien_43', source: 'planif-noeud_7', cible: 'planif-noeud_26', type: 'complete' },
+                { id: 'planif-lien_42', source: 'planif-noeud_26', cible: 'planif-noeud_17', type: 'conduit_a' },
+                { id: 'planif-lien_32', source: 'planif-noeud_17', cible: 'planif-noeud_12', type: 's_acquiert_par' },
+                { id: 'planif-lien_33', source: 'planif-noeud_12', cible: 'planif-noeud_24', type: 'se_verifie_par' },
+                { id: 'planif-lien_45', source: 'planif-noeud_8', cible: 'planif-noeud_18', type: 'complete' },
+                { id: 'planif-lien_35', source: 'planif-noeud_18', cible: 'planif-noeud_3', type: 'complete' },
+                { id: 'planif-lien_44', source: 'planif-noeud_3', cible: 'planif-noeud_13', type: 's_acquiert_par' },
+                { id: 'planif-lien_37', source: 'planif-noeud_13', cible: 'planif-noeud_22', type: 'se_verifie_par' }
+            ]
+        }
+    }
+};
+
 /**
  * Helper : retourne une clé du namespace demo.
  * Exemple : cleDemo('groupeEtudiants') → 'demo_groupeEtudiants'.
@@ -145,9 +215,9 @@ function peuplerNamespace(pack) {
         }]);
     }
 
-    // Note : CARTE_DEMO_ALIGNEMENT (carte mentale) vit pour l'instant dans
-    // donnees-demo.js (var locale). Sa migration vers demo_planification_mindmap
-    // se fera en Phase 5, au moment du retrait complet de donnees-demo.js.
+    // Carte mentale démo (alignement pédagogique).
+    // Constante définie plus haut dans ce module depuis Phase 5.A.
+    db.setSync(cleDemo('planification_mindmap'), CARTE_DEMO_ALIGNEMENT);
 }
 
 /**
@@ -210,5 +280,6 @@ async function initialiserDemoNamespace() {
 
 window.cleDemo = cleDemo;
 window.initialiserDemoNamespace = initialiserDemoNamespace;
+window.CARTE_DEMO_ALIGNEMENT = CARTE_DEMO_ALIGNEMENT;
 
 })();
