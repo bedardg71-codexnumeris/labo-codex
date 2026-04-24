@@ -146,14 +146,17 @@ function fusionnerDemoVersGlobaux() {
     }
     db.setSync('listeCours', listeCours);
 
-    // 2. cours (clé canonique) : merge par Map
+    // 2. cours (clé canonique) : push sans remplacer (préserve les cours utilisateur
+    // qui auraient le même ID qu'un cours démo)
     var coursCanoniques = db.getSync('cours', []) || [];
-    var coursMap = new Map(coursCanoniques.map(function(c) { return [c.id, c]; }));
     for (var j = 0; j < listeCoursDemo.length; j++) {
         var cDemoCanon = listeCoursDemo[j];
-        coursMap.set(cDemoCanon.id, Object.assign({}, cDemoCanon, { isDemo: true }));
+        var existeCanon = coursCanoniques.some(function(c) { return c.id === cDemoCanon.id; });
+        if (!existeCanon) {
+            coursCanoniques.push(Object.assign({}, cDemoCanon, { isDemo: true }));
+        }
     }
-    db.setSync('cours', Array.from(coursMap.values()));
+    db.setSync('cours', coursCanoniques);
 
     // 3. enseignants
     var ensDemo = db.getSync('demo_enseignants', []) || [];
@@ -167,27 +170,30 @@ function fusionnerDemoVersGlobaux() {
     }
     db.setSync('enseignants', enseignants);
 
-    // 4. grillesTemplates : upsert avec estDemo:true
+    // 4. grillesTemplates : push sans remplacer (préserve les grilles utilisateur
+    // ayant le même ID qu'une grille démo — cas observé pour GRILLE1759529438501
+    // alias « Global-5 (FR-ALGO) H26 » de Grégoire qui partage l'ID avec une
+    // grille du pack démo).
     var grillesDemo = db.getSync('demo_grillesTemplates', []) || [];
     var grilles = db.getSync('grillesTemplates', []) || [];
     for (var g = 0; g < grillesDemo.length; g++) {
         var grilleDemo = grillesDemo[g];
-        var marquee = Object.assign({}, grilleDemo, { estDemo: true });
-        var idxGrille = grilles.findIndex(function(x) { return x.id === marquee.id; });
-        if (idxGrille >= 0) grilles[idxGrille] = marquee;
-        else grilles.push(marquee);
+        var existeGrille = grilles.some(function(x) { return x.id === grilleDemo.id; });
+        if (!existeGrille) {
+            grilles.push(Object.assign({}, grilleDemo, { estDemo: true }));
+        }
     }
     db.setSync('grillesTemplates', grilles);
 
-    // 5. echellesTemplates : upsert avec estDemo:true
+    // 5. echellesTemplates : push sans remplacer (même logique que grilles)
     var echellesDemo = db.getSync('demo_echellesTemplates', []) || [];
     var echelles = db.getSync('echellesTemplates', []) || [];
     for (var e = 0; e < echellesDemo.length; e++) {
         var echDemo = echellesDemo[e];
-        var echMarquee = Object.assign({}, echDemo, { estDemo: true });
-        var idxEch = echelles.findIndex(function(x) { return x.id === echMarquee.id; });
-        if (idxEch >= 0) echelles[idxEch] = echMarquee;
-        else echelles.push(echMarquee);
+        var existeEch = echelles.some(function(x) { return x.id === echDemo.id; });
+        if (!existeEch) {
+            echelles.push(Object.assign({}, echDemo, { estDemo: true }));
+        }
     }
     db.setSync('echellesTemplates', echelles);
 
@@ -362,41 +368,73 @@ async function activerModeDemo() {
 }
 
 /**
- * Retire les items isDemo/estDemo des clés globales polluées au toggle ON.
- * Ne touche pas à modalitesEvaluation (restaurée depuis snapshot).
+ * Retire les items injectés par le pack démo dans les clés globales.
+ *
+ * Filtrage STRICT par ID : seuls les items dont l'identifiant correspond
+ * exactement à un item présent dans PACK_DEMARRAGE sont retirés.
+ *
+ * Ce filtrage par ID protège les items utilisateur même s'ils portent par
+ * accident un flag estDemo/isDemo (héritage d'un cycle legacy ancien). Bug
+ * de l'ancienne version (filtre aveugle sur estDemo:true) qui pouvait
+ * supprimer les grilles utilisateur dans certains scénarios — corrigé ici.
  */
 function retirerItemsDemoDesGlobaux() {
-    // listeCours
-    db.setSync('listeCours', (db.getSync('listeCours', []) || []).filter(function(c) {
-        return !c.isDemo;
-    }));
-    // cours (clé canonique)
-    db.setSync('cours', (db.getSync('cours', []) || []).filter(function(c) {
-        return !c.isDemo;
-    }));
-    // enseignants
-    db.setSync('enseignants', (db.getSync('enseignants', []) || []).filter(function(e) {
-        return !e.isDemo;
-    }));
-    // grillesTemplates
-    db.setSync('grillesTemplates', (db.getSync('grillesTemplates', []) || []).filter(function(g) {
-        return !g.estDemo;
-    }));
-    // echellesTemplates
-    db.setSync('echellesTemplates', (db.getSync('echellesTemplates', []) || []).filter(function(e) {
-        return !e.estDemo;
-    }));
-    // cartouches_* : lister dynamiquement depuis le pack (corrige le bug
-    // nettoyage cartouches — le legacy hardcodait cartouches_GRILLE_DEMO
-    // alors que le pack contient cartouches_GRILLE1759* × 3).
     var pack = (typeof PACK_DEMARRAGE !== 'undefined' && PACK_DEMARRAGE) ? PACK_DEMARRAGE : null;
+
+    function idsDuPack(collection) {
+        if (!pack || !Array.isArray(pack[collection])) return new Set();
+        var ids = new Set();
+        for (var i = 0; i < pack[collection].length; i++) {
+            var item = pack[collection][i];
+            if (item && item.id) ids.add(item.id);
+        }
+        return ids;
+    }
+
+    // listeCours : retirer uniquement les cours dont l'id est dans le pack
+    var idsListeCours = idsDuPack('listeCours');
+    db.setSync('listeCours', (db.getSync('listeCours', []) || []).filter(function(c) {
+        return !idsListeCours.has(c.id);
+    }));
+
+    // cours (clé canonique) : mêmes IDs que listeCours
+    db.setSync('cours', (db.getSync('cours', []) || []).filter(function(c) {
+        return !idsListeCours.has(c.id);
+    }));
+
+    // enseignants : retirer ENS_DEMO (ID synthétique fixe défini dans Phase 1)
+    db.setSync('enseignants', (db.getSync('enseignants', []) || []).filter(function(e) {
+        return e.id !== 'ENS_DEMO';
+    }));
+
+    // grillesTemplates : filtrer par IDs du pack uniquement
+    var idsGrilles = idsDuPack('grillesTemplates');
+    db.setSync('grillesTemplates', (db.getSync('grillesTemplates', []) || []).filter(function(g) {
+        return !idsGrilles.has(g.id);
+    }));
+
+    // echellesTemplates : idem
+    var idsEchelles = idsDuPack('echellesTemplates');
+    db.setSync('echellesTemplates', (db.getSync('echellesTemplates', []) || []).filter(function(e) {
+        return !idsEchelles.has(e.id);
+    }));
+
+    // cartouches_* : lister dynamiquement les clés présentes dans le pack
+    // et retirer uniquement les cartouches dont l'id est dans le pack.
     if (pack) {
         var clesPack = Object.keys(pack);
         for (var p = 0; p < clesPack.length; p++) {
             var nom = clesPack[p];
             if (nom.indexOf('cartouches_') !== 0) continue;
+            var idsCart = new Set();
+            var cartPack = pack[nom];
+            if (Array.isArray(cartPack)) {
+                for (var k = 0; k < cartPack.length; k++) {
+                    if (cartPack[k] && cartPack[k].id) idsCart.add(cartPack[k].id);
+                }
+            }
             var cartouches = (db.getSync(nom, []) || []).filter(function(c) {
-                return !c.estDemo;
+                return !idsCart.has(c.id);
             });
             if (cartouches.length === 0) {
                 db.removeSync(nom);
