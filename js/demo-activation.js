@@ -275,10 +275,145 @@ async function activerModeDemo() {
     }
 }
 
+/**
+ * Retire les items isDemo/estDemo des clés globales polluées au toggle ON.
+ * Ne touche pas à modalitesEvaluation (restaurée depuis snapshot).
+ */
+function retirerItemsDemoDesGlobaux() {
+    // listeCours
+    db.setSync('listeCours', (db.getSync('listeCours', []) || []).filter(function(c) {
+        return !c.isDemo;
+    }));
+    // cours (clé canonique)
+    db.setSync('cours', (db.getSync('cours', []) || []).filter(function(c) {
+        return !c.isDemo;
+    }));
+    // enseignants
+    db.setSync('enseignants', (db.getSync('enseignants', []) || []).filter(function(e) {
+        return !e.isDemo;
+    }));
+    // grillesTemplates
+    db.setSync('grillesTemplates', (db.getSync('grillesTemplates', []) || []).filter(function(g) {
+        return !g.estDemo;
+    }));
+    // echellesTemplates
+    db.setSync('echellesTemplates', (db.getSync('echellesTemplates', []) || []).filter(function(e) {
+        return !e.estDemo;
+    }));
+    // cartouches_* : lister dynamiquement depuis le pack (corrige le bug
+    // nettoyage cartouches — le legacy hardcodait cartouches_GRILLE_DEMO
+    // alors que le pack contient cartouches_GRILLE1759* × 3).
+    var pack = (typeof PACK_DEMARRAGE !== 'undefined' && PACK_DEMARRAGE) ? PACK_DEMARRAGE : null;
+    if (pack) {
+        var clesPack = Object.keys(pack);
+        for (var p = 0; p < clesPack.length; p++) {
+            var nom = clesPack[p];
+            if (nom.indexOf('cartouches_') !== 0) continue;
+            var cartouches = (db.getSync(nom, []) || []).filter(function(c) {
+                return !c.estDemo;
+            });
+            if (cartouches.length === 0) {
+                db.removeSync(nom);
+            } else {
+                db.setSync(nom, cartouches);
+            }
+        }
+    }
+}
+
+/**
+ * Désactive le mode démo. Appelée par toggleDemoHandler au décochage,
+ * et par le bouton « Quitter la démo » du bandeau vert.
+ *
+ * Point clé Phase 5.C : ne supprime PAS les clés demo_* (elles sont
+ * permanentes pour Phase 1). Corrige le bug question 3 à la source.
+ */
+async function desactiverModeDemo() {
+    try {
+        var etat = db.getSync('demo-etat-precedent', null);
+
+        // 1. Filtrer les 6 globaux pour retirer items isDemo/estDemo
+        retirerItemsDemoDesGlobaux();
+
+        // 2. Retirer le trimestre 'demo' de la liste globale trimestres
+        db.setSync('trimestres', (db.getSync('trimestres', []) || []).filter(function(t) {
+            return t.id !== 'demo';
+        }));
+
+        // 3. Restaurer le trimestre actif précédent. changerTrimestreActif
+        //    régénère aussi le calendrier du trimestre restauré et reset
+        //    infoCours/groupeCoursActif à null — la restauration des pointeurs
+        //    doit donc venir APRÈS.
+        if (etat && etat.trimestreActifId && typeof changerTrimestreActif === 'function') {
+            await changerTrimestreActif(etat.trimestreActifId);
+        } else {
+            // Pas de trimestre à restaurer : laisser trimestreActif vide
+            db.removeSync('trimestreActif');
+            window.trimestreActif = '';
+        }
+
+        // 4. Restaurer les pointeurs depuis snapshot
+        if (etat) {
+            if (etat.infoCours) db.setSync('infoCours', etat.infoCours);
+            else db.removeSync('infoCours');
+
+            if (etat.groupeCoursActif) db.setSync('groupeCoursActif', etat.groupeCoursActif);
+            else db.removeSync('groupeCoursActif');
+
+            if (etat.modalitesEvaluation) {
+                db.setSync('modalitesEvaluation', etat.modalitesEvaluation);
+            }
+
+            // Force normal si valeur legacy 'simulation'
+            var mode = etat.modeApplication === 'simulation'
+                ? 'normal'
+                : (etat.modeApplication || 'normal');
+            db.setSync('modeApplication', mode);
+        }
+
+        // 5. Nettoyer flags (mais PAS les clés demo_* — elles restent permanentes)
+        db.removeSync('demo-actif');
+        db.removeSync('demo-etat-precedent');
+
+        // 6. UI : bandeau masqué
+        if (typeof afficherBandeauDemo === 'function') {
+            afficherBandeauDemo(false);
+        }
+        if (typeof retirerGuidageDemo === 'function') {
+            retirerGuidageDemo();
+        }
+
+        // 7. UI : modes + header
+        if (typeof initialiserSystemeModes === 'function') {
+            initialiserSystemeModes();
+        }
+        if (typeof peuplerDropdownGroupeCoursActif === 'function') {
+            peuplerDropdownGroupeCoursActif();
+        }
+
+        // 8. Navigate vers accueil (pas aperçu — choix Accueil V3)
+        if (typeof afficherSection === 'function') {
+            afficherSection('accueil');
+        }
+
+        // 9. Rerender
+        if (typeof rafraichirContenuSelonMode === 'function') {
+            rafraichirContenuSelonMode();
+        }
+
+    } catch (error) {
+        console.error('[Phase5.C] Erreur désactivation démo :', error);
+        // Fallback minimal : au moins masquer le bandeau et retirer le flag
+        db.removeSync('demo-actif');
+        if (typeof afficherBandeauDemo === 'function') afficherBandeauDemo(false);
+    }
+}
+
 // ============================================
 // Exports
 // ============================================
 
 window.activerModeDemo = activerModeDemo;
+window.desactiverModeDemo = desactiverModeDemo;
 
 })();
