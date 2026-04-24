@@ -134,6 +134,20 @@ async function activerModeDemo() {
             db.setSync('demo-actif', null);
         }
 
+        // Filet de sécurité : si les clés demo_* ont été effacées par un
+        // quitterDemo legacy (bug question 3 de l'audit : le cleanup générique
+        // supprime les clés Phase 1 permanentes, et le flag de version empêche
+        // le re-peuplement au boot suivant), forcer un re-peuplement via
+        // Phase 1. P3 du plan : accepté en audit, mitigé ici.
+        var sentinelle = db.getSync('demo_groupesCours', null);
+        if (!sentinelle || !Array.isArray(sentinelle) || sentinelle.length === 0) {
+            console.warn('[Phase5.B] Données demo_* absentes, re-peuplement forcé via Phase 1');
+            try { localStorage.removeItem('demo-version-installee'); } catch (e) { /* ignore */ }
+            if (typeof initialiserDemoNamespace === 'function') {
+                await initialiserDemoNamespace();
+            }
+        }
+
         // 1. Snapshot état utilisateur (restauré au toggle OFF)
         var trimestresAvant = db.getSync('trimestres', []) || [];
         var trimActifAvant = trimestresAvant.find(function(t) { return t.actif === true; });

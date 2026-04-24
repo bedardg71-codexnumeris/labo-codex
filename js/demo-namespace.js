@@ -138,7 +138,11 @@ function chargerPackDemarrage() {
 function peuplerNamespace(pack) {
     if (!pack) return;
 
-    // Collections directement issues du pack
+    // Collections directement issues du pack.
+    // Note : 'presences' est traité séparément plus bas — le pack le stocke
+    // en objet {date: {da: data}} mais tous les lecteurs (indices, aperçu)
+    // attendent un tableau [{date, da, ...}]. Le legacy fusionnerDonneesDemo
+    // convertissait ; Phase 1 doit le faire aussi.
     const collectionsDuPack = [
         'listeCours',
         'cadreCalendrier',
@@ -148,8 +152,7 @@ function peuplerNamespace(pack) {
         'evaluationsSauvegardees',
         'grillesTemplates',
         'echellesTemplates',
-        'modalitesEvaluation',
-        'presences'
+        'modalitesEvaluation'
     ];
 
     for (let i = 0; i < collectionsDuPack.length; i++) {
@@ -157,6 +160,22 @@ function peuplerNamespace(pack) {
         if (pack[nom] !== undefined) {
             db.setSync(cleDemo(nom), pack[nom]);
         }
+    }
+
+    // Présences : conversion objet → tableau (comme le legacy)
+    if (pack.presences !== undefined) {
+        let presencesArr = [];
+        if (Array.isArray(pack.presences)) {
+            presencesArr = pack.presences;
+        } else if (typeof pack.presences === 'object' && pack.presences !== null) {
+            Object.keys(pack.presences).forEach(function(date) {
+                const parDA = pack.presences[date] || {};
+                Object.keys(parDA).forEach(function(da) {
+                    presencesArr.push(Object.assign({ date: date, da: da }, parDA[da]));
+                });
+            });
+        }
+        db.setSync(cleDemo('presences'), presencesArr);
     }
 
     // Trimestre démo : une entrée dans demo_trimestres (parallèle à la liste
