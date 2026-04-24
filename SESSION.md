@@ -1,9 +1,11 @@
-# SESSION — État au 22 avril 2026 soir (post-revert Phase 5)
+# SESSION — État au 24 avril 2026 après-midi (Phase 5 Autonomisation COMPLÈTE)
 
-**Date** : 22 avril 2026
-**Dernier build** : `0422-1828` · Beta 99.22
-**Branche** : `main` (pushée)
-**Statut** : **Plan 1 Autonomisation — Phases 1 à 4 LIVRÉES et acquises** (`602bacf`). Phase 5 tentée l'après-midi, revert après échec terrain. Le mode démo legacy (`entrerEnDemo`/`quitterDemo`) est réactif. Prochaine tentative Phase 5 plus tard, selon les règles du post-mortem.
+**Date** : 24 avril 2026
+**Dernier build** : `0424-1335` · Beta 99.24
+**Branche** : `main`
+**Statut** : **Phase 5 du Plan 1 Autonomisation TERMINÉE** (sous-phases 5.A → 5.E) après l'audit complet `docs/AUDIT-PHASE5-PRE-TENTATIVE-2.md` et la livraison séquentielle testée iPad + Mac.
+
+Le legacy `js/donnees-demo.js` (1070 l.) a été **retiré**. Le mode démo est maintenant piloté exclusivement par `js/demo-activation.js` (nouveau) et `js/demo-namespace.js` (Phase 1). Bilan net de Phase 5 : environ **-800 lignes de code**.
 
 ---
 
@@ -14,110 +16,134 @@
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
-Contexte : tentative Phase 5 (retrait mode démo legacy) reverted le 22
-avril soir après 10 commits infructueux. Le mode démo legacy est réactif.
-Build actuel : 0422-1828, Beta 99.22, pushé sur main. Branche backup
-backup/phase5-tentative-22avril-2026 conserve le travail tenté.
+Contexte : Plan 1 Autonomisation COMPLET — Phases 1 à 7 livrées entre le
+21 et le 24 avril 2026. Le chantier « retrait legacy démo » a été fait
+après l'audit docs/AUDIT-PHASE5-PRE-TENTATIVE-2.md (24 avril matin).
 
-Lis dans cet ordre :
-1. SESSION.md (ce fichier, état complet)
-2. docs/POST-MORTEM-PHASE5-22-AVRIL.md (leçons tirées, règles à suivre)
-3. plans de travail/PLAN-AUTONOMISATION-UTILISATEUR.md (plan initial +
-   section « Leçons tirées de la tentative du 22 avril »)
-4. MEMORY.md (auto-mémoire, voir section Session 22 avril après-midi)
-5. memory/feedback_cache_busters.md (RÈGLE : bumper ?v= dans le même
-   commit que la modif .js, sinon Safari iPad masque le bug)
-6. memory/feedback_no_debt.md (principe directeur du projet)
-7. memory/project_autonomisation_utilisateur.md (section « Tentative
-   Phase 5 » à jour)
+Ouvre ces fichiers pour contexte :
+1. SESSION.md (ce fichier)
+2. plans de travail/PLAN-AUTONOMISATION-UTILISATEUR.md (plan source)
+3. docs/AUDIT-PHASE5-PRE-TENTATIVE-2.md (audit préalable 5.A-5.E)
+4. docs/HOOKS-PLAN2.md (cadrage Plan 2 — partage sécurisé)
+5. memory/project_autonomisation_utilisateur.md (mémoire projet)
 
-Si la prochaine tentative Phase 5 est programmée : adopter les 6 règles
-du post-mortem §5. Sous-phase par sous-phase. Cache-busters en premier
-réflexe. Test iPad à chaque étape. Cartographier flows démo par entité
-AVANT retrait (Phase 4.B avait oublié le GC — à corriger). Valider
-lectures namespace de bout en bout si on modifie les pointeurs.
+Prochain gros chantier à envisager : Plan 2 (partage CC BY-NC-SA entre
+utilisateurs). Le cadrage détaillé est dans plans de travail/
+PLAN-PARTAGE-RESSOURCES.md et les hooks techniques dans
+docs/HOOKS-PLAN2.md. Pas urgent — Plan 1 est autonome.
+
+Observations techniques encore ouvertes (hors Plan 1) :
+- Quota localStorage saturé sur Mac : warnings `[DB] Quota localStorage
+  dépassé` au boot. Plan de désaturation dans plans de travail/Plan -
+  Désaturation localStorage (analyse).md
+- Grille orpheline `grille_1772187755149_uq1oiiafa` référencée par des
+  productions H2026 mais absente de grillesTemplates — état dégradé du
+  trimestre réel, à diagnostiquer séparément.
 ```
 
 ---
 
-## 1. Ce qui a été tenté aujourd'hui après-midi (revert)
+## 1. Phase 5 livrée en 5 sous-phases (24 avril)
 
-### Commits originaux (présents sur branche backup uniquement)
+| Sous-phase | Commit | Build | Contenu |
+|---|---|---|---|
+| 5.A | `18362eb` | 0424-0830 | `demo_planification_mindmap` peuplée par Phase 1 |
+| 5.B | `4186a42` | 0424-0855 | `activerModeDemo` (bypass legacy `entrerEnDemo`) |
+| 5.B fixup | `e21310a` | 0424-0921 | Fix presences objet→tableau dans `peuplerNamespace` + filet Q3 |
+| 5.C | `f0b5562` | 0424-1245 | `desactiverModeDemo` (bypass legacy `quitterDemo`, demo_* survivent) |
+| 5.D | `6f5be72` | 0424-1321 | Retrait `donnees-demo.js` (1070 l.) + filet Q3 devenu inutile |
+| 5.E | `0f927b3` | 0424-1335 | Migration silencieuse résidus legacy (idempotent) |
 
-| Build | SHA | Livrable |
-|---|---|---|
-| 0422-1201 | `7c8cc8e` | 5.A — retrait donnees-demo.js + migration-phase5.js |
-| 0422-1305 | `d945d74` | 5.B — retrait estEnModeDemo + filtrerEtudiantsParMode |
-| 0422-1411 | `c66cbff` | Fix listener direct checkbox (diag erroné, workaround) |
-| 0422-1432 | `7f6685d` | 5.B-bis — flow Dupliquer GC démo |
-| 0422-1448 | `c12e720` | Fix listener direct select GC (workaround) |
-| 0422-1500 | `4f5e110` | Diag console.warn (retiré ensuite) |
-| 0422-1508 | `1c070c3` | Bump cache-buster trimestre-v2.js (vraie cause) |
-| 0422-1520 | `e57c992` | Fix bouton Enregistrer démo + carte résumé |
-| 0422-1529 | `fa85a97` | Bump cache-busters massif (11 fichiers) |
-| 0422-1541 | `253ce0d` | 5.B-ter — activation GC démo au toggle |
+### Architecture finale
 
-### Revert (sur main)
+```
+js/demo-namespace.js  (Phase 1, peuple demo_* en permanence)
+        └── peuplerNamespace(pack)
+              ├── 10 clés du pack (listeCours, groupeEtudiants, etc.)
+              ├── presences converti en tableau
+              ├── 4 clés synthétiques (demo_trimestres, demo_enseignants, demo_horaires, demo_groupesCours)
+              └── demo_planification_mindmap (CARTE_DEMO_ALIGNEMENT)
 
-- `76a55fb` (b0422-1828) — Doc post-mortem + leçons dans le plan
-- `7e47f4e` (b0422-1828) — Restauration 18 fichiers à 602bacf
+js/demo-activation.js (Phases 5.B/5.C/5.D/5.E, pilote le toggle)
+        ├── activerModeDemo() → toggle ON (15 étapes)
+        ├── desactiverModeDemo() → toggle OFF (9 étapes)
+        ├── afficherBandeauDemo(show) → UI bandeau vert
+        ├── initialiserBandeauDemoSiActif() → boot, ré-affiche bandeau
+        ├── migrerResidusPhase5() → boot, migration one-shot
+        └── fusionnerDemoVersGlobaux() + retirerItemsDemoDesGlobaux() (helpers)
+```
 
-### Ce qui a été appris
+### Bugs corrigés
 
-Voir `docs/POST-MORTEM-PHASE5-22-AVRIL.md` pour le détail. Synthèse :
+- **Bug question 3 (audit §2.2)** : le legacy `supprimerDonneesNamespaceesDemo` supprimait les clés `demo_*` permanentes de Phase 1, et le flag `demo-version-installee` empêchait le re-peuplement au boot suivant. Résolu à la source en 5.D par retrait du nettoyage automatique.
+- **Bug cartouches** : le legacy hardcodait `cartouches_GRILLE_DEMO` alors que le pack utilise `cartouches_GRILLE1759*` × 3. Résolu en 5.C par listing dynamique depuis `PACK_DEMARRAGE`.
+- **Bug format presences** : Phase 1 écrivait l'objet brut `{date:{da:data}}` du pack, mais tous les lecteurs attendent un tableau. Résolu en 5.B fixup par conversion dans `peuplerNamespace`.
+- **Divergence Mac/iPad sur barre A** : le legacy ne déclenchait pas `calculerEtSauvegarderIndicesAssiduite` au toggle ON, ce qui laissait la barre A vide sur certaines plateformes. Résolu en 5.B par appel explicite.
 
-1. **Cache-busters `?v=` à bumper dans le même commit qu'une modif `.js`** — règle n°1. Sans ça Safari iPad sert la cache, les nouvelles fonctions ne tournent pas, et le symptôme ressemble à un bug iOS natif.
-2. **Une sous-phase à la fois** avec validation terrain iPad+Mac entre chaque. Pas d'empilement.
-3. **Parcours utilisateur formalisé** avant retrait : écrire clic par clic le parcours attendu, valider avec Grégoire que la modélisation pédagogique est servie.
-4. **Cartographier flows démo par entité** avant retrait. Phase 4.B avait oublié le GC — il n'avait pas de bibliothèque visuelle séparée, donc les options démo `disabled=true` le rendaient inactionnable.
-5. **Tester iPad dès la première sous-phase** — les bugs de cache se révèlent d'abord sur iPad.
-6. **Valider lectures namespace de bout en bout** : si on route via pointeurs vers `demo_*`, vérifier que toutes les lectures effectives retournent les données attendues.
+### Tests d'acceptation validés
 
----
+Selon `docs/PHASE5-PARCOURS-TESTS.md` :
 
-## 2. État acquis (Phases 1 à 4, présent dans 602bacf, intact après revert)
-
-- **Phase 1** — Namespace `demo_*` permanent via `js/demo-namespace.js` et `cleDemo()`. Flag `demo-version-installee`. Données pack démo dans demo_* dès le 1er run.
-- **Phase 2** — Sélecteurs à 2 sections (Mes documents / Démo) dans 11 dropdowns. Options démo préfixées `demo-` avec optgroup visuel.
-- **Phase 3** — Fork + attribution `inspireDe` sur cartes biblio (5 modules). Panneau métadonnées CC avec ligne « Inspiré de ».
-- **Phase 4.A** — Identité CC utilisateur (`obtenirIdentiteCCUtilisateur()`) distincte de l'enseignant métier (`obtenirNomEnseignantActif()` réservé PDF). 9 call-sites migrés.
-- **Phase 4.B** — Formulaires démo lecture seule sur 5 formulaires (grille, échelle, cartouche, production, pratique matériel) + bouton « Dupliquer pour créer ma X » + fork via `BibliothequeUI.forkerItem`.
-- **Phase 4.C** — Interdiction des références mixtes à la sauvegarde via `verifierReferencesPasDemo`. 3 points de save gardés (GC, évaluation ×2, pratique).
-
----
-
-## 3. Ce qui reste à faire (revu)
-
-| Phase | État | Notes |
-|---|---|---|
-| 5 — Retrait mode démo legacy | **Tentée, revert** | Règles du post-mortem à suivre pour la prochaine tentative. GC démo à inclure dans Phase 4.B-bis d'abord (flow Dupliquer pour GC). |
-| 6 — Documentation | À faire | Dépend de 5 |
-| 7 — Préparation Plan 2 | À faire | Dépend de 5 |
+- C1–C10 (5.B) : toggle ON, aperçu peuplé 92/94/73%, 20 personnes, GC_DEMO, sidebar, bandeau.
+- C11–C16 (5.C) : toggle OFF restaure trimestre réel, globaux filtrés, `demo_*` survivent (20 étudiants + 627 présences après cycle).
+- C17 (5.B) : rechargement en démo, bandeau persiste.
+- C20 (5.D) : aucune erreur console après retrait du legacy.
+- C21 (5.E) : migration idempotente via flag.
+- C22 : cache-busters iPad.
 
 ---
 
-## 4. Mode démo actif (legacy, depuis le revert)
+## 2. État acquis (Plan 1 complet — Phases 1 à 5)
 
-Le mode démo fonctionne comme avant le chantier Phase 5 :
-- Cocher « Données démo » sur l'accueil → `entrerEnDemo()` charge le pack démo dans les globaux, active le trimestre démo, bandeau vert « Mode démonstration » en bas
-- Aperçu se peuple naturellement
-- Décocher → `quitterDemo()` décharge, restaure l'état précédent
-
-Code : `js/donnees-demo.js` (restauré), bandeau HTML dans `index.html`, listener `data-on-change="toggleDemoHandler"` dans `js/accueil.js`.
+- **Phase 1** (21 avril, b0421-0730) — Namespace `demo_*` permanent via `js/demo-namespace.js` et `cleDemo()`. Flag `demo-version-installee`.
+- **Phase 2** (22 avril, b0422-0738) — Sélecteurs à 2 sections (Mes documents / Démo) dans 11 dropdowns.
+- **Phase 3** (22 avril, b0422-0832) — Fork + attribution `inspireDe` sur cartes biblio.
+- **Phase 4.A** (22 avril, b0422-1000) — Identité CC utilisateur distincte de l'enseignant métier.
+- **Phase 4.B** (22 avril, b0422-1105) — Formulaires démo en lecture seule + bouton « Dupliquer ».
+- **Phase 4.C** (22 avril, b0422-1135) — Interdiction des références mixtes à la sauvegarde.
+- **Phase 5** (24 avril, b0424-0830 → 0424-1335) — Retrait legacy `donnees-demo.js` + refonte toggle.
 
 ---
 
-## 5. Conventions opérationnelles (inchangées)
+## 3. Phase 6 et 7 à livrer aujourd'hui
+
+- **Phase 6** — Documentation utilisateur : section Aide dans l'app (parcours modélisation → autonomie), MAJ `docs/modules/`, changelog orienté utilisateur.
+- **Phase 7** — Préparation Plan 2 : `docs/HOOKS-PLAN2.md` (points d'extension pour le partage CC BY-NC-SA entre utilisateurs).
+
+---
+
+## 4. Conventions opérationnelles (inchangées)
 
 - **Build** : format `MMJJ-HHMM` Toronto. Bump à chaque commit. Beta fixe journée.
-- **Cache-busters** : bumper `?v=` dans `index.html` pour chaque `.js` modifié, dans le MÊME commit. Règle post-mortem Phase 5.
-- **Demander numéro de beta** avant chaque commit ; ne jamais renuméroter auto.
+- **Cache-busters** : bumper `?v=` dans `index.html` pour chaque `.js` modifié, dans le MÊME commit (post-mortem Phase 5 du 22 avril). Pour Safari file:// : **Cmd+Q** pour vider le cache.
+- **Demander numéro de beta** avant chaque commit.
 - **version.json** + fallback `js/init-inline.js` BUILD_ID à chaque commit.
-- **CSP strict** : `script-src 'self'`. Violations Cloudflare/beacon attendues.
-- **Principe zéro-dette** (CLAUDE.md §Principes directeurs) : appliquer partout.
+- **Principe zéro-dette** (CLAUDE.md §Principes directeurs) : appliqué en 5.D (retrait `donnees-demo.js`) et en 5.D (retrait filet Q3 devenu inutile).
+
+---
+
+## 5. Observations à investiguer (hors Plan 1)
+
+### Quota localStorage saturé (Mac)
+
+Warnings récurrents au boot :
+```
+[DB] Quota localStorage dépassé pour "echellesTemplates"/"grillesTemplates"/"cartouches_*"/"demo_presences"/"demo_snapshots_*"...
+```
+
+Les grosses clés basculent correctement vers memoryCache + IndexedDB (`db.js` gère ça), mais la taille augmente avec le temps. Plan de désaturation déjà cadré dans `plans de travail/Plan - Désaturation localStorage (analyse).md` (extraction thumbnails de `fichiersTravaux`).
+
+### Grille orpheline dans trimestre H2026 réel
+
+Erreurs au boot :
+```
+❌ Grille de référence "grille_1772187755149_uq1oiiafa" introuvable
+```
+
+Cette grille est référencée par des productions/évaluations réelles mais absente de `grillesTemplates`. État dégradé du trimestre H2026. À diagnostiquer séparément.
 
 ---
 
 ## 6. Préservation des données personnelles
 
-Grégoire fait des backups Codex réguliers. Données personnelles (trimestres réels H2026/A2025, grilles, évaluations, productions) **intouchables**. Le revert Phase 5 a restauré le mode démo legacy donc `entrerEnDemo`/`quitterDemo` gèrent le snapshot/restore de manière robuste comme auparavant.
+Les données de Grégoire (trimestre H2026 réel, productions, évaluations) sont **préservées** après Phase 5. Les cycles toggle ON/OFF testés n'ont altéré aucune donnée réelle (vérifié en console via `JSON.stringify(db.getSync('h2026_groupeEtudiants'))` avant/après).
