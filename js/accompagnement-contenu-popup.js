@@ -930,6 +930,47 @@ const AIDE_CONTEXTUELLE = {
             },
         ],
         voirAussi: ['depistage-interpretation', 'suivi-apprentissage-fondamentaux']
+    },
+
+    // =========================================================================
+    // ACCUEIL — MODE DÉMONSTRATION & DUPLICATION CC
+    // =========================================================================
+
+    'accueil-donnees-demo': {
+        titre: "Mode démonstration & duplication CC",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Labo Codex embarque un jeu complet de données de démonstration : un cours fictif « Écriture et littérature », 20 étudiants, 11 productions, 200 évaluations, 627 présences, 3 grilles, 2 échelles et une carte mentale d'alignement pédagogique. Coche la case « Données démo » sur l'accueil pour activer ce matériel et explorer l'outil sans toucher à tes vraies données."
+            },
+            {
+                type: 'texte',
+                contenu: "Ce matériel est publié sous licence CC BY-NC-SA 4.0 (Attribution, pas d'utilisation commerciale, partage à l'identique). L'auteur est affiché partout sous le nom « Labo Codex ». Il sert de modèle et t'accompagne vers l'autonomie selon le modèle de l'enseignement explicite."
+            },
+            {
+                type: 'liste',
+                titre: "Le parcours en trois temps",
+                items: [
+                    "<strong>Modélisation</strong> — Active la démo et explore l'aperçu peuplé. Tu vois directement ce que l'outil produit avec des données réalistes.",
+                    "<strong>Pratique guidée</strong> — Ouvre une grille ou une échelle démo pour comprendre sa structure. Le formulaire est en lecture seule (aucun risque de modifier accidentellement le matériel).",
+                    "<strong>Autonomie</strong> — Clique sur « Dupliquer pour créer ma grille » (ou ta propre échelle, cartouche, production, pratique, groupe-cours) et renomme. Tu pars du modèle mais tu deviens l'auteur."
+                ]
+            },
+            {
+                type: 'exemple',
+                contenu: "Tu ouvres la grille démo « Analyse littéraire ». Tu cliques sur « Dupliquer pour créer ma grille ». Une copie apparaît dans ta bibliothèque, prête à être renommée. Dans les métadonnées de ta copie, une ligne « Inspiré de : Analyse littéraire par Labo Codex » reste visible — c'est la reconnaissance d'origine exigée par la licence CC."
+            },
+            {
+                type: 'conseil',
+                contenu: "Les sélecteurs (grilles, échelles, pratiques, groupes-cours, etc.) affichent deux sections : « Mes documents » pour tes créations, « Démo » pour le matériel original. Tu peux mélanger les deux dans les dropdowns, mais au moment d'enregistrer un item utilisateur, Labo Codex refuse les références mixtes (ex. une vraie grille qui pointerait sur une échelle démo) — duplique l'échelle démo d'abord, puis référence ta copie."
+            },
+            {
+                type: 'alerte',
+                niveau: 'attention',
+                contenu: "Les données démo vivent en permanence dans un espace séparé. Cocher/décocher la case ne touche jamais à tes vrais trimestres (H2026, A2025, etc.). Tu peux activer la démo, explorer, et décocher à tout moment — ton état réel revient intact."
+            }
+        ],
+        voirAussi: ['bibliotheque-fonctionnement', 'construction-objectifs-reflexion']
     }
 };
 
