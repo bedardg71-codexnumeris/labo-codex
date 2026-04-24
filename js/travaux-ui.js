@@ -4021,10 +4021,13 @@
                     f.pipelineStatut = 'pret';
                     f.nomFichier = f.nomFichier.replace(/\.[^.]+$/, '.pdf');
 
-                    // Regenerer la thumbnail
+                    // Regenerer la thumbnail (stockée en IndexedDB, champ métadonnées vide)
                     try {
                         const result = await travauxStockage.genererMiniaturePDF(pdfBlob);
-                        f.thumbnailDataUrl = result.thumbnail;
+                        if (result.thumbnail && typeof travauxStockage.stockerThumbnail === 'function') {
+                            travauxStockage.stockerThumbnail(f.id, result.thumbnail);
+                        }
+                        f.thumbnailDataUrl = '';
                         f.nombrePages = result.nombrePages;
                     } catch (e) { console.warn('[Travaux-UI] PDF thumbnail regeneration failed:', e.message || e); }
                 }
@@ -5727,15 +5730,16 @@
                 console.warn('[Editeur Pages] Miniature non regeneree:', e);
             }
 
-            // Mettre a jour les metadonnees — si c'etait une image, ca devient un PDF
+            // Mettre a jour les metadonnees — si c'etait une image, ca devient un PDF.
+            // La nouvelle thumbnail est stockée en IDB (pas dans les métadonnées).
             const modifications = {
                 nombrePages: editionPages.length,
                 tailleFichier: nouveauBlob.size,
                 typeMIME: 'application/pdf',
                 dateModification: new Date().toISOString()
             };
-            if (thumbnailDataUrl) {
-                modifications.thumbnailDataUrl = thumbnailDataUrl;
+            if (thumbnailDataUrl && typeof travauxStockage.stockerThumbnail === 'function') {
+                travauxStockage.stockerThumbnail(editionFichierId, thumbnailDataUrl);
             }
             // Mettre a jour le nom de fichier si c'etait une image
             if (fichier.typeMIME && fichier.typeMIME.startsWith('image/')) {
