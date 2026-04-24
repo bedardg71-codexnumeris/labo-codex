@@ -234,7 +234,14 @@ function obtenirGrilleReferenceDepistage() {
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!grille) {
-        console.error(`❌ Grille de référence "${grilleId}" introuvable`);
+        // Auto-nettoyage silencieux : la grille référencée a été supprimée
+        // (cas d'une grille utilisateur effacée puis référence non nettoyée).
+        // On retire la préférence pour éviter que le message d'erreur ne se
+        // répète à chaque rendu de l'aperçu.
+        console.warn(`[Depistage] Grille de référence "${grilleId}" introuvable — préférence auto-nettoyée`);
+        if (typeof definirPreference === 'function') {
+            definirPreference('grilleReferenceDepistage', '');
+        }
         return null;
     }
 
