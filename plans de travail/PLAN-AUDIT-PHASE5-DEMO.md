@@ -333,11 +333,67 @@ Scénarios où l'audit conclut « on laisse le legacy et on passe à autre chose
 Dans ce cas, produire à la place :
 - Un document `docs/PHASE5-ABANDON.md` qui acte la décision
 - Mise à jour de `plans de travail/PLAN-AUTONOMISATION-UTILISATEUR.md` pour marquer Phase 5 « abandonnée, mode démo legacy accepté »
-- Le reste du plan (Phases 6, 7, Plan 2) peut avancer sans Phase 5
+
+**Important** : abandonner Phase 5 n'arrête pas le chantier Autonomisation. On enchaîne immédiatement sur les Phases 6 et 7 (voir §9 ci-dessous) qui ne dépendent pas de Phase 5, puis sur le cadrage du Plan 2.
 
 ---
 
-## 9. Temps estimé total
+## 9. Après Phase 5 : la suite du plan original
+
+Le retrait du legacy (Phase 5) n'est pas la fin du chantier Autonomisation. Une fois cette étape résolue (ou abandonnée en connaissance de cause), on enchaîne avec le reste du plan original `PLAN-AUTONOMISATION-UTILISATEUR.md` §6 :
+
+### Phase 6 — Documentation utilisateur
+
+- Mise à jour de `SESSION.md`, mémoire projet, `docs/modules/`
+- Captures d'écran des sélecteurs à 2 sections dans leur état définitif
+- Nouveau guide dans la section Aide de l'application : explication du parcours d'autonomisation (modélisation → pratique guidée → autonomie) et du cycle CC BY-NC-SA (fork, attribution, partage)
+- Mise à jour du changelog Beta 99.22+ pour les utilisateurs
+
+Cette phase est légère (rédaction + screenshots), indépendante du choix fait pour Phase 5. Elle peut même démarrer si Phase 5 est abandonnée — il suffit de documenter l'état mode démo legacy comme définitif.
+
+### Phase 7 — Préparation des hooks pour Plan 2
+
+- Documentation des points d'extension dans les sélecteurs (où brancher le futur partage email)
+- Validation que le format d'export de la Configuration pédagogique Beta 91 est compatible avec Plan 2
+- Garde-fous anti-usurpation « Demo Labo Codex » bétonnés côté import
+- Tests unitaires ou scénarios de test pour `verifierReferencesPasDemo`, `forkerItem`, `estItemDemo`, `formaterInspireDe`
+
+Livrable : un document `docs/HOOKS-PLAN2.md` qui sert de point de départ pour le cadrage de Plan 2.
+
+### Plan 2 — Partage sécurisé entre utilisateurs (après Plan 1 complet)
+
+Cadrage à démarrer seulement quand Plan 1 est stable. Couvrira :
+
+- Export/import CC BY-NC-SA étendu (base déjà posée par la Configuration pédagogique Beta 91)
+- Validation stricte de schéma à l'import, sanitization, rejet de toute attribution usurpée `"Demo Labo Codex"`
+- Interface utilisateur pour échange de packages (email d'abord, bibliothèque communautaire plus tard)
+- Mécanisme de signature ou vérification d'origine (optionnel, licence CC n'impose pas d'authentification)
+
+**Continuité stricte avec Plan 1** : les sélecteurs passent à 3 sections (Mes documents / Démo / Partagés). L'attribution CC se propage correctement dans les packages partagés. Les garde-fous Phase 4.C s'étendent aux items importés.
+
+Plan détaillé (déjà cadré) : `plans de travail/PLAN-PARTAGE-RESSOURCES.md`.
+
+### Vue d'ensemble du chantier
+
+```
+Phase 1 — Namespace demo_*                     ✅ livrée
+Phase 2 — Sélecteurs à 2 sections              ✅ livrée
+Phase 3 — Fork + attribution                   ✅ livrée
+Phase 4.A — Identité CC utilisateur            ✅ livrée
+Phase 4.B — Formulaires lecture seule          ✅ livrée
+Phase 4.C — Refs mixtes interdites             ✅ livrée
+Phase 5 — Retrait legacy                       ⏸ audit en cours
+Phase 6 — Documentation                        ⏳ à faire après 5
+Phase 7 — Hooks Plan 2                         ⏳ à faire après 5
+───────────────────────────────────────────────
+Plan 2 — Partage sécurisé                      ⏳ cadrage à venir
+```
+
+L'objectif final de la séquence Plan 1 + Plan 2 : que Labo Codex devienne une plateforme d'échange pédagogique entre enseignant·es, avec une démo comme modèle de référence et un mécanisme propre de dérivation par CC BY-NC-SA. Phase 5 est une étape importante mais pas bloquante — si elle est abandonnée, Plan 1 peut quand même se clore avec le legacy comme partie accepté de l'architecture.
+
+---
+
+## 10. Temps estimé total
 
 | Étape | Durée |
 |---|---|
@@ -352,7 +408,7 @@ Dans ce cas, produire à la place :
 
 ---
 
-## 10. Suivi
+## 11. Suivi
 
 | Étape | État | Notes |
 |---|---|---|
