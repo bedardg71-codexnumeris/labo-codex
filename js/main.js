@@ -440,6 +440,12 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof initialiserBandeauDemoSiActif === 'function') {
         initialiserBandeauDemoSiActif();
     }
+    // PLAN 1 Phase 5.E — Migration silencieuse one-shot des résidus legacy
+    // (isDemo/estDemo dans globaux, trimestre demo orphelin). Idempotente
+    // via flag migration-phase5-done. Skippée si demo-actif='true'.
+    if (typeof migrerResidusPhase5 === 'function') {
+        migrerResidusPhase5();
+    }
     // PLAN 1 Phase 1 — Initialiser le namespace demo_* permanent
     // (idempotent via flag demo-version-installee).
     if (typeof initialiserDemoNamespace === 'function') {

@@ -68,6 +68,62 @@ function initialiserBandeauDemoSiActif() {
 }
 
 /**
+ * Migration silencieuse Phase 5.E — nettoyage one-shot des résidus legacy
+ * au boot. Idempotente via flag 'migration-phase5-done'.
+ *
+ * Les cycles legacy entrerEnDemo/quitterDemo pouvaient laisser, en cas de
+ * crash ou de chemin dégradé :
+ *   - Items isDemo dans listeCours, cours, enseignants
+ *   - Items estDemo dans grillesTemplates, echellesTemplates, cartouches_*
+ *   - Trimestre 'demo' orphelin (actif=false) dans la liste globale trimestres
+ *   - Flag demo-etat-precedent orphelin (sans demo-actif correspondant)
+ *
+ * Skippée si demo-actif='true' (mode démo actif : les items démo sont
+ * légitimement présents dans les globaux, ne pas les retirer). La migration
+ * s'exécutera au prochain boot hors démo.
+ */
+function migrerResidusPhase5() {
+    if (db.getSync('migration-phase5-done', null)) return;
+
+    // Skip si on est en plein mode démo : les items sont légitimes
+    if (db.getSync('demo-actif', null) === 'true') return;
+
+    var nbNettoyages = 0;
+
+    // 1. Résidus isDemo/estDemo dans les 6 globaux + cartouches_*
+    var countBefore = (db.getSync('listeCours', []) || []).filter(function(c) { return c.isDemo; }).length
+        + (db.getSync('cours', []) || []).filter(function(c) { return c.isDemo; }).length
+        + (db.getSync('enseignants', []) || []).filter(function(e) { return e.isDemo; }).length
+        + (db.getSync('grillesTemplates', []) || []).filter(function(g) { return g.estDemo; }).length
+        + (db.getSync('echellesTemplates', []) || []).filter(function(e) { return e.estDemo; }).length;
+
+    if (countBefore > 0) {
+        retirerItemsDemoDesGlobaux();
+        nbNettoyages += countBefore;
+    }
+
+    // 2. Trimestre démo orphelin
+    var trimestres = db.getSync('trimestres', []) || [];
+    if (trimestres.some(function(t) { return t.id === 'demo'; })) {
+        db.setSync('trimestres', trimestres.filter(function(t) { return t.id !== 'demo'; }));
+        nbNettoyages++;
+    }
+
+    // 3. Snapshot orphelin (demo-etat-precedent sans demo-actif correspondant)
+    if (db.getSync('demo-etat-precedent', null)) {
+        db.removeSync('demo-etat-precedent');
+        nbNettoyages++;
+    }
+
+    // Poser le flag même si rien n'a été nettoyé (évite re-exécution inutile)
+    db.setSync('migration-phase5-done', '1');
+
+    if (nbNettoyages > 0) {
+        console.warn('[Migration 5.E] ' + nbNettoyages + ' résidus legacy nettoyés');
+    }
+}
+
+/**
  * Fusionne les données démo (lues depuis demo_* peuplées par Phase 1,
  * plus PACK_DEMARRAGE pour les cartouches qui ne sont pas dans demo_*)
  * vers les 6 clés globales qui servent l'UI (dropdowns Contexte, bibliothèques).
@@ -447,5 +503,6 @@ window.activerModeDemo = activerModeDemo;
 window.desactiverModeDemo = desactiverModeDemo;
 window.afficherBandeauDemo = afficherBandeauDemo;
 window.initialiserBandeauDemoSiActif = initialiserBandeauDemoSiActif;
+window.migrerResidusPhase5 = migrerResidusPhase5;
 
 })();
