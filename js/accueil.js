@@ -263,23 +263,20 @@ function initialiserAccueil() {
    WRAPPERS DELEGATION (Phase 5)
    =============================== */
 
-/** Toggle mode démo depuis checkbox — Phases 5.B/5.C : activation via
- * activerModeDemo et désactivation via desactiverModeDemo
- * (js/demo-activation.js). Fallback legacy gardé jusqu'à 5.D. */
+/** Toggle mode démo depuis checkbox — routage vers activerModeDemo
+ * (cochage) et desactiverModeDemo (décochage) dans js/demo-activation.js.
+ * Le legacy donnees-demo.js a été retiré en Phase 5.D. */
 function toggleDemoHandler(el) {
     if (el.checked) {
         if (typeof activerModeDemo === 'function') activerModeDemo();
-        else if (typeof entrerEnDemo === 'function') entrerEnDemo();
     } else {
         if (typeof desactiverModeDemo === 'function') desactiverModeDemo();
-        else if (typeof quitterDemo === 'function') quitterDemo();
     }
 }
 
-/** Entrer en mode démo (bouton de la bannière de bienvenue) — Phase 5.B */
+/** Entrer en mode démo (bouton de la bannière de bienvenue) */
 function entrerEnDemoHandler() {
     if (typeof activerModeDemo === 'function') activerModeDemo();
-    else if (typeof entrerEnDemo === 'function') entrerEnDemo();
 }
 
 /**

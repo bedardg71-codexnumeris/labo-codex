@@ -434,19 +434,14 @@ document.addEventListener('DOMContentLoaded', function () {
         initialiserModuleContexte();
     }
 
-    // MODULE DONNÉES DEMO : le nettoyage des résidus doit s'exécuter AVANT
-    // l'init du module. nettoyerResiduDemo efface le flag demo-actif de
-    // manière synchrone ; sinon initialiserModuleDonneesDemo lirait le flag
-    // résiduel et ré-afficherait le bandeau démo après un refresh.
-    if (typeof nettoyerResiduDemo === 'function') {
-        nettoyerResiduDemo();
-    }
-    if (typeof initialiserModuleDonneesDemo === 'function') {
-        initialiserModuleDonneesDemo();
+    // MODULE DONNÉES DEMO (Phase 5.D) : si demo-actif='true' au boot,
+    // ré-afficher le bandeau. Pas de nettoyage automatique — le legacy
+    // supprimait les clés demo_* de Phase 1 (bug question 3 de l'audit).
+    if (typeof initialiserBandeauDemoSiActif === 'function') {
+        initialiserBandeauDemoSiActif();
     }
     // PLAN 1 Phase 1 — Initialiser le namespace demo_* permanent
-    // (idempotent via flag demo-version-installee). Invisible en Phase 1,
-    // sera exposé via les sélecteurs à 2 sections en Phase 2.
+    // (idempotent via flag demo-version-installee).
     if (typeof initialiserDemoNamespace === 'function') {
         initialiserDemoNamespace();
     }

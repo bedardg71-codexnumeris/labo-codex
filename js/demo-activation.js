@@ -1,27 +1,71 @@
 /**
  * demo-activation.js
- * Phase 5.B du chantier Autonomisation (PLAN-AUTONOMISATION-UTILISATEUR.md).
+ * Phases 5.B, 5.C et 5.D du chantier Autonomisation
+ * (PLAN-AUTONOMISATION-UTILISATEUR.md).
  *
- * Active le mode démo sans passer par le legacy donnees-demo.js.
- * Le toggleDemoHandler de accueil.js appelle activerModeDemo() à la place
- * de entrerEnDemo() à partir de la Beta 99.24.
+ * Seule source de vérité pour l'activation et la désactivation du mode démo
+ * depuis le retrait de js/donnees-demo.js en Phase 5.D (Beta 99.24).
  *
- * Étapes reproduites depuis l'Audit 1 Table 2 (docs/AUDIT-PHASE5-PRE-TENTATIVE-2.md) :
- *   1. Snapshot état utilisateur (pour restauration au toggle OFF)
+ * Exports :
+ *   - activerModeDemo() : appelé par toggleDemoHandler au cochage
+ *   - desactiverModeDemo() : appelé par toggleDemoHandler au décochage
+ *     et par le bouton « Quitter la démo » du bandeau vert
+ *   - afficherBandeauDemo(show) : UI du bandeau vert
+ *   - initialiserBandeauDemoSiActif() : appelée au boot pour restaurer
+ *     l'affichage du bandeau si demo-actif='true' (pas de nettoyage)
+ *
+ * Étapes d'activation (depuis Audit 1 Table 2, docs/AUDIT-PHASE5-PRE-TENTATIVE-2.md) :
+ *   1. Snapshot état utilisateur (restauré au toggle OFF)
  *   2. Flag demo-actif='true'
  *   3. Upsert trimestre 'demo' actif dans la liste globale trimestres
- *   4. Pointeurs trimestreActif, infoCours, groupeCoursActif
- *   5. Pré-sélections sidebar (horaireSelectionne, groupeSelectionne)
- *   6. Mode normal forcé
- *   7. Fusion des données démo vers les 6 clés globales polluées (P2 accepté —
- *      cf. section Décision architecturale du doc d'audit)
+ *   4. Fusion des données démo vers les 6 clés globales polluées (P2 accepté)
+ *   5. Pointeurs infoCours, groupeCoursActif
+ *   6. Pré-sélections sidebar
+ *   7. Mode normal forcé
  *   8. Calcul des 3 dérivées : calendrier, snapshots, indices
  *   9. Bandeau + navigation + rerender
- *
- * Le toggle OFF (quitterDemo) reste sur le legacy jusqu'à Phase 5.C.
  */
 (function() {
 'use strict';
+
+// ============================================
+// UI — Bandeau démo
+// ============================================
+
+/**
+ * Affiche ou masque le bandeau vert « Mode démonstration » en bas d'écran.
+ * Ajoute/retire la classe .mode-demo sur <body> pour le padding global.
+ */
+function afficherBandeauDemo(show) {
+    var bandeau = document.getElementById('bandeau-demo');
+    if (bandeau) {
+        if (typeof toggleDisplay === 'function') {
+            toggleDisplay(bandeau, show);
+        } else {
+            bandeau.style.display = show ? '' : 'none';
+        }
+    }
+    if (show) {
+        document.body.classList.add('mode-demo');
+    } else {
+        document.body.classList.remove('mode-demo');
+    }
+}
+
+/**
+ * Appelée au boot. Si demo-actif='true' (rechargement pendant la démo),
+ * ré-affiche le bandeau pour que l'utilisateur voie qu'il reste en démo.
+ * Ne fait PAS de nettoyage : la démo reste active, les demo_* intactes.
+ *
+ * Remplace le legacy nettoyerResiduDemo + initialiserModuleDonneesDemo
+ * depuis Phase 5.D. Le nettoyage automatique du legacy était la cause du
+ * bug question 3 (suppression des clés Phase 1 permanentes).
+ */
+function initialiserBandeauDemoSiActif() {
+    if (db.getSync('demo-actif', null) === 'true') {
+        afficherBandeauDemo(true);
+    }
+}
 
 /**
  * Fusionne les données démo (lues depuis demo_* peuplées par Phase 1,
@@ -132,20 +176,6 @@ async function activerModeDemo() {
                 return;
             }
             db.setSync('demo-actif', null);
-        }
-
-        // Filet de sécurité : si les clés demo_* ont été effacées par un
-        // quitterDemo legacy (bug question 3 de l'audit : le cleanup générique
-        // supprime les clés Phase 1 permanentes, et le flag de version empêche
-        // le re-peuplement au boot suivant), forcer un re-peuplement via
-        // Phase 1. P3 du plan : accepté en audit, mitigé ici.
-        var sentinelle = db.getSync('demo_groupesCours', null);
-        if (!sentinelle || !Array.isArray(sentinelle) || sentinelle.length === 0) {
-            console.warn('[Phase5.B] Données demo_* absentes, re-peuplement forcé via Phase 1');
-            try { localStorage.removeItem('demo-version-installee'); } catch (e) { /* ignore */ }
-            if (typeof initialiserDemoNamespace === 'function') {
-                await initialiserDemoNamespace();
-            }
         }
 
         // 1. Snapshot état utilisateur (restauré au toggle OFF)
@@ -415,5 +445,7 @@ async function desactiverModeDemo() {
 
 window.activerModeDemo = activerModeDemo;
 window.desactiverModeDemo = desactiverModeDemo;
+window.afficherBandeauDemo = afficherBandeauDemo;
+window.initialiserBandeauDemoSiActif = initialiserBandeauDemoSiActif;
 
 })();

@@ -9,13 +9,8 @@
  *
  * Principe : la démo vit en permanence dans demo_* dès le premier run, parallèle
  * aux namespaces trimestre réels (h2026_*, a2025_*). Le toggle « Données démo »
- * de l'accueil V3 ne fait QUE piloter l'affichage dans les sélecteurs (Phase 2).
- * Il ne charge ni ne décharge plus de données — ce rôle de snapshot/décharge
- * assuré par donnees-demo.js sera retiré en Phase 5.
- *
- * Ce module est INVISIBLE en Phase 1 : il peuple silencieusement demo_* mais
- * aucune UI ne lit encore ces clés. Les sélecteurs à 2 sections (Phase 2)
- * exposeront ces données au utilisateur.
+ * de l'accueil V3 active/désactive le mode démo via js/demo-activation.js
+ * (Phase 5.B/5.C) sans toucher aux clés demo_* permanentes.
  *
  * Contraintes respectées :
  *  - AUCUNE écriture sur les clés globales (trimestres, listeCours, cours,
@@ -33,8 +28,6 @@ const CLE_VERSION = 'demo-version-installee';
 // ============================================
 // CARTE MENTALE DÉMO (alignement pédagogique)
 // Écrite dans demo_planification_mindmap par peuplerNamespace.
-// Déplacée depuis donnees-demo.js en Phase 5.A — le legacy conserve sa
-// propre copie locale jusqu'à son retrait en 5.D.
 // ============================================
 
 const CARTE_DEMO_ALIGNEMENT = {
@@ -245,19 +238,9 @@ function peuplerNamespace(pack) {
  * - Aux runs suivants : compare la version du pack au flag demo-version-installee ;
  *   refresh si différent, no-op sinon
  * - Ne touche JAMAIS les clés globales ou les namespaces trimestre réels
- * - Attend brièvement si donnees-demo.js nettoie des résidus en async (évite
- *   une race condition où dechargerDonneesDemo supprimerait nos écritures)
  */
 async function initialiserDemoNamespace() {
     try {
-        // Attente défensive : si l'ancien système a détecté un résidu (demo-actif
-        // = 'true') et est en train de le nettoyer en async, laisser 1 s pour
-        // que dechargerDonneesDemo termine avant qu'on réécrive demo_*.
-        if (typeof db !== 'undefined' && db.getSync('demo-actif', null) === 'true') {
-            console.warn('[DEMO-INIT] Résidus de l\'ancien système détectés, attente 1 s avant init');
-            await new Promise(function(r) { setTimeout(r, 1000); });
-        }
-
         let versionInstallee = null;
         try { versionInstallee = localStorage.getItem(CLE_VERSION); } catch (e) { /* storage indisponible */ }
 
