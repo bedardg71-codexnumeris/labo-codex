@@ -15,29 +15,6 @@
 
     const EXPORT_SCALE = 2.0; // Rendu a 2x pour qualite d'impression
 
-    // Logo CC BY-NC-SA en PNG base64 (RGB, sans alpha) pour pieds de page PDF
-    const CC_LOGO_PNG = 'data:image/png;base64,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';
-    const CC_LOGO_W = 144; // largeur en mm (267:50 ratio)
-    const CC_LOGO_H = 27;  // hauteur en mm
-
-    // Config PDF reutilisee depuis export-pdf.js
-    function getCfg() {
-        return window.ExportPDF?.config || {
-            marges: { haut: 30, bas: 25.4, gauche: 25.4, droite: 25.4 },
-            couleurs: { titreSection: [3,46,92], textePrincipal: [51,51,51],
-                        texteSecondaire: [102,102,102], bordure: [204,204,204],
-                        fondEntete: [245,245,245] },
-            polices: { titrePrincipal: 20, titreSection: 15, sousTitre: 13,
-                       texteNormal: 12, textePetit: 12 }
-        };
-    }
-    const MM_TO_PX = 612 / 215.9;
-    function mm(v) { return v * MM_TO_PX; }
-
-    // Scale factor pour les pages de synthese (match la resolution des pages annotees)
-    let _synthScale = 1;
-    function smm(v) { return mm(v) * _synthScale; }
-    function sfont(pts) { return pts * _synthScale; }
 
     /* ===============================
        EXPORT PDF PRINCIPAL
@@ -64,7 +41,7 @@
             doc = await exporterDepuisImage(blob, annotation);
         }
 
-        ajouterPageSynthese(doc, fichier, productionIdOverride);
+        await ajouterPageSynthese(doc, fichier, productionIdOverride);
 
         // ✅ ANONYMISATION (Tier 0.2) : anonymiser le nom du fichier de sortie
         const nomFichierAff = typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(fichier.nomFichier, fichier.etudiantDA) : fichier.nomFichier;
@@ -614,163 +591,6 @@
      * @param {Object} infos - { etudiant, production, date }
      * @returns {number} posY apres l'en-tete
      */
-    function ajouterEnteteRetroaction(doc, titre, infos) {
-        const cfg = getCfg();
-        const pageW = doc.internal.pageSize.getWidth();
-        const margeG = smm(cfg.marges.gauche);
-        const margeD = smm(cfg.marges.droite);
-        let y = smm(cfg.marges.haut);
-
-        // Titre a gauche
-        doc.setFontSize(sfont(cfg.polices.titrePrincipal));
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(...cfg.couleurs.titreSection);
-        doc.text(titre, margeG, y);
-
-        // Infos a droite
-        doc.setFontSize(sfont(cfg.polices.textePetit));
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(...cfg.couleurs.texteSecondaire);
-        const lignesDroite = [];
-        if (infos.etudiant) lignesDroite.push('\u00c9tudiant\u00b7e : ' + infos.etudiant);
-        if (infos.date) lignesDroite.push('Date de l\'\u00e9valuation : ' + infos.date);
-        let yDroite = y - (lignesDroite.length - 1) * smm(4);
-        for (const ligne of lignesDroite) {
-            doc.text(ligne, pageW - margeD, yDroite, { align: 'right' });
-            yDroite += smm(4);
-        }
-
-        y += smm(6);
-
-        // Ligne separatrice
-        doc.setDrawColor(...cfg.couleurs.bordure);
-        doc.setLineWidth(0.5 * _synthScale);
-        doc.line(margeG, y, pageW - margeD, y);
-        y += smm(6);
-
-        return y;
-    }
-
-    /**
-     * Ajoute le pied de page sur une page de synthese
-     * @param {Object} doc - Instance jsPDF
-     * @param {number} page - Numero de page (1-indexed dans les pages de synthese)
-     * @param {number} total - Total de pages de synthese
-     */
-    function ajouterPiedPageSynthese(doc, page, total) {
-        const cfg = getCfg();
-        const pageW = doc.internal.pageSize.getWidth();
-        const pageH = doc.internal.pageSize.getHeight();
-        const margeG = smm(cfg.marges.gauche);
-        const margeD = smm(cfg.marges.droite);
-        const yPied = pageH - smm(cfg.marges.bas);
-
-        // Ligne separatrice
-        doc.setDrawColor(...cfg.couleurs.bordure);
-        doc.setLineWidth(0.5 * _synthScale);
-        doc.line(margeG, yPied - smm(3), pageW - margeD, yPied - smm(3));
-
-        doc.setFontSize(sfont(cfg.polices.textePetit));
-        doc.setTextColor(...cfg.couleurs.texteSecondaire);
-
-        // Nom enseignant a gauche
-        // Priorité : 1) obtenirNomEnseignantActif (via groupeCours), 2) select enseignant du trimestre, 3) premier de la liste enseignants
-        let nomEnseignant = '';
-        try {
-            nomEnseignant = (typeof obtenirNomEnseignantActif === 'function')
-                ? (obtenirNomEnseignantActif() || '')
-                : '';
-            // Fallback vers la liste enseignants (profil sélectionné ou premier)
-            if (!nomEnseignant && typeof db !== 'undefined' && db.getSync) {
-                const enseignants = db.getSync('enseignants', []);
-                // Essayer le select du trimestre
-                const selectEns = document.getElementById('v2-selectEnseignant');
-                const ensId = selectEns?.value;
-                const ens = ensId ? enseignants.find(e => e.id === ensId) : (enseignants[0] || null);
-                if (ens && ens.prenom && ens.nom) {
-                    nomEnseignant = ens.prenom + ' ' + ens.nom;
-                }
-            }
-        } catch(e) { console.warn('[PDF-Export] enseignant name lookup skipped:', e.message || e); }
-
-        // Cours actif pour le pied de page (via groupe-cours du trimestre)
-        let codeCoursPied = '';
-        try {
-            if (typeof db !== 'undefined' && db.getSync) {
-                const trimId = window.trimestreActif || db.getSync('trimestreActif', '');
-                if (trimId) {
-                    const groupesCours = db.getSync(trimId + '_groupesCours', []);
-                    const gcActif = groupesCours.find(gc => gc.actif);
-                    if (gcActif && gcActif.coursId) {
-                        const cours = db.getSync('cours', []);
-                        const listeCours = db.getSync('listeCours', []);
-                        const coursInfo = cours.find(c => c.id === gcActif.coursId) || listeCours.find(c => c.id === gcActif.coursId);
-                        if (coursInfo) {
-                            const sigle = coursInfo.codeCours || coursInfo.sigle || coursInfo.code || '';
-                            const titre = coursInfo.nomCours || coursInfo.titre || coursInfo.nom || '';
-                            codeCoursPied = [sigle, titre].filter(Boolean).join(' — ');
-                        }
-                    }
-                }
-            }
-        } catch(e) { console.warn('[PDF-Export] cours code lookup skipped:', e.message || e); }
-
-        // Construire le texte du pied de page gauche
-        let textePiedGauche = '';
-        if (nomEnseignant && codeCoursPied) {
-            textePiedGauche = nomEnseignant + ' — ' + codeCoursPied;
-        } else {
-            textePiedGauche = nomEnseignant || codeCoursPied;
-        }
-
-        if (textePiedGauche) {
-            doc.setFont('helvetica', 'normal');
-            doc.text(textePiedGauche, margeG, yPied);
-        }
-
-        // Pagination centre
-        if (total > 1) {
-            doc.setFont('helvetica', 'normal');
-            doc.text('Page ' + page + '/' + total, pageW / 2, yPied, { align: 'center' });
-        }
-
-        // Licence a droite (logo PNG, fallback texte si image corrompue)
-        try {
-            doc.addImage(CC_LOGO_PNG, 'PNG',
-                pageW - margeD - CC_LOGO_W,
-                yPied - CC_LOGO_H + 0.5,
-                CC_LOGO_W, CC_LOGO_H
-            );
-        } catch (e) {
-            doc.setFontSize(6);
-            doc.setFont('helvetica', 'italic');
-            doc.text('CC BY-NC-SA 4.0', pageW - margeD, yPied, { align: 'right' });
-        }
-    }
-
-    /**
-     * Finalise les pieds de page sur toutes les pages de synthese
-     * @param {Object} doc - Instance jsPDF
-     * @param {number} premierePageSynthese - Numero de la premiere page de synthese (1-indexed)
-     */
-    function finaliserPagesSynthese(doc, premierePageSynthese) {
-        const totalPages = doc.internal.getNumberOfPages();
-        const totalSynthese = totalPages - premierePageSynthese + 1;
-        for (let i = 0; i < totalSynthese; i++) {
-            doc.setPage(premierePageSynthese + i);
-            ajouterPiedPageSynthese(doc, i + 1, totalSynthese);
-        }
-    }
-
-    /* ===============================
-       COMPTAGE DETAILLE DES ANNOTATIONS
-       =============================== */
-
-    /**
-     * Compte les tampons et erreurs de francais dans les annotations
-     * @param {Object|null} annotation - Donnees d'annotation du fichier
-     * @returns {Object} { tampons: {id: count}, erreursFr: {type: count}, totalTampons, totalErreursFr }
-     */
     function compterAnnotationsDetailees(annotation) {
         const stats = { tampons: {}, erreursFr: {}, totalTampons: 0, totalErreursFr: 0 };
         if (!annotation || !annotation.pages) return stats;
@@ -799,1070 +619,111 @@
     }
 
     /* ===============================
-       PAGE DE SYNTHESE
+       PAGE DE SYNTHESE (rendu HTML rasterisé)
        =============================== */
 
+    // Largeur Letter US à 96 DPI ; la hauteur s'adapte au contenu (la page peut
+    // dépasser 11" — le PDF accepte des pages de hauteur arbitraire, l'élève
+    // scrolle sur cellulaire). Rasterisation à 2x pour qualité d'impression.
+    const SYNTH_PAGE_W = 816;
+    const SYNTH_PAGE_H_MIN = 1056;     // min Letter US 11"
+    const SYNTH_RASTER_SCALE = 2;
+
     /**
-     * Ajoute une page de synthese formatee avec tableaux et synthese visuelle
-     * @param {Object} doc - Instance jsPDF
-     * @param {Object} fichier - Metadonnees du fichier
+     * Ajoute une page de synthèse au document jsPDF en rasterisant le rendu HTML
+     * de syntheseRetroactionRendu via html2canvas. Pure refonte du rendu :
+     * aucune nouvelle donnée n'est calculée, tout vient de l'évaluation, de
+     * l'annotation et des sources existantes (cartouche, grille, échelle,
+     * historique). Si l'évaluation ou la lib html2canvas est absente, la page
+     * de synthèse est simplement omise.
+     *
+     * @param {Object} doc - Instance jsPDF (en cours d'assemblage par genererDocPDF)
+     * @param {Object} fichier - Métadonnées du fichier annoté
+     * @param {string} [productionIdOverride] - Production cible si différente du fichier
      */
-    function ajouterPageSynthese(doc, fichier, productionIdOverride) {
-        const cfg = getCfg();
-
-        // Résolution centralisée fichier → évaluation
-        // Si un productionIdOverride est fourni, construire un pseudo-fichier pour la recherche
-        const fichierRecherche = productionIdOverride
-            ? { ...fichier, productionId: productionIdOverride }
-            : fichier;
-        const evaluation = travauxResolution.trouverEvaluationPourFichier(fichierRecherche);
-
-        // Log si ambiguïté détectée (Phase 2)
-        const avert = travauxResolution.dernierAvertissement && travauxResolution.dernierAvertissement();
-        if (avert) {
-            console.warn('[Travaux-Export] Ambiguïté lors de la résolution pour la page de synthèse:', avert);
-        }
-
-        if (!evaluation) {
+    async function ajouterPageSynthese(doc, fichier, productionIdOverride) {
+        // 1. Pré-requis : modules + lib disponibles
+        if (typeof html2canvas !== 'function' ||
+            typeof syntheseRetroactionData === 'undefined' ||
+            typeof syntheseRetroactionRendu === 'undefined') {
+            console.warn('[Synthèse] Modules ou html2canvas indisponibles — page de synthèse omise.');
             return;
         }
 
-        // Matcher la resolution des pages annotees
-        doc.setPage(1);
-        const refW = doc.internal.pageSize.getWidth();
-        const refH = doc.internal.pageSize.getHeight();
-        _synthScale = refW / 612;
+        // 2. Résoudre l'évaluation pour ce fichier
+        const evaluation = trouverEvaluationPourSynthese(fichier, productionIdOverride);
+        if (!evaluation) return; // pas d'éval → pas de synthèse (cas de l'élève sans évaluation enregistrée)
 
-        const margeG = smm(cfg.marges.gauche);
-        const margeD = smm(cfg.marges.droite);
-
-        // Page de synthese aux memes dimensions que les pages annotees
-        doc.addPage([refW, refH], 'portrait');
-        const premierePageSynthese = doc.internal.getNumberOfPages();
-        const pageW = doc.internal.pageSize.getWidth();
-        const pageH = doc.internal.pageSize.getHeight();
-        const largeurContenu = pageW - margeG - margeD;
-        const seuilPage = pageH - smm(cfg.marges.bas) - smm(8);
-
-        // En-tete formate
-        const dateObj = evaluation.dateEvaluation ? new Date(evaluation.dateEvaluation) : null;
-        const dateEval = dateObj
-            ? dateObj.toLocaleDateString('fr-CA', { timeZone: 'America/Toronto' }) + ' \u00e0 ' + dateObj.toLocaleTimeString('fr-CA', { timeZone: 'America/Toronto', hour: '2-digit', minute: '2-digit' })
-            : '';
-        // --- DONNÉES FRAÎCHES (production, cours) avant l'en-tête ---
-        const opts = evaluation.optionsAffichage || {};
-        let production = null;
-        let etudiant = null;
-        let cours = null;
-        try {
-            const productions = obtenirDonneesSelonMode('productions');
-            production = productions.find(p => p.id === evaluation.productionId) || null;
-        } catch(e) { console.warn('[PDF-Export] production lookup skipped:', e.message || e); }
-        try {
-            const coursCollection = db.getSync('cours', []);
-            if (production && production.coursId) {
-                cours = coursCollection.find(c => c.id === production.coursId) || null;
-            }
-            if (!cours && coursCollection.length > 0) {
-                cours = coursCollection.find(c => c.actif) || coursCollection[0];
-            }
-        } catch(e) { console.warn('[PDF-Export] cours lookup skipped:', e.message || e); }
-
-        // Titre depuis données fraîches (production.titre reflète les renommages)
-        const titreProduction = (production ? production.titre : null) || evaluation.productionNom || '';
-        const titrePdf = titreProduction ? '\u00c9VALUATION \u2014 ' + titreProduction : '\u00c9VALUATION';
-        const nomAnonyme = typeof anonymiserNom === 'function' ? anonymiserNom(fichier.etudiantDA) : null;
-        const nomEtudiantEntete = (nomAnonyme || evaluation.etudiantNom || '') + (fichier.etudiantDA && !nomAnonyme ? ' (' + fichier.etudiantDA + ')' : '');
-        let y = ajouterEnteteRetroaction(doc, titrePdf, {
-            etudiant: nomEtudiantEntete,
-            date: dateEval
-        });
-
-        try {
-            // ✅ ANONYMISATION (Tier 0.1) : clé de base sans double namespace
-            const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-            etudiant = etudiants.find(e => e.da === fichier.etudiantDA) || null;
-        } catch(e) { console.warn('[PDF-Export] etudiant lookup skipped:', e.message || e); }
-
-        // --- LAYOUT 2 COLONNES (immédiat après l'en-tête) ---
-        const colGap = smm(3);
-        const colLargeur = (largeurContenu - colGap) / 2;
-        const colDroiteX = margeG + colLargeur + colGap;
-        const margeDroiteColG = pageW - margeG - colLargeur;
-        const yDebutColonnes = y;
-        const pageDebutColonnes = doc.internal.getCurrentPageInfo().pageNumber;
-
-        // =============== COLONNE GAUCHE : Métadonnées + Critères + Note ===============
-        let yGauche = yDebutColonnes;
-        const policeMeta = sfont(cfg.polices.textePetit - 1);
-
-        // --- Métadonnées (cours, grille, production, objectif, tâche) ---
-        if (cours && (cours.codeCours || cours.nomCours)) {
-            doc.setFontSize(policeMeta);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(...cfg.couleurs.textePrincipal);
-            let texteCours = '';
-            if (cours.codeCours) texteCours += cours.codeCours;
-            if (cours.codeCours && cours.nomCours) texteCours += ' \u2014 ';
-            if (cours.nomCours) texteCours += cours.nomCours;
-            const lignesCours = doc.splitTextToSize(texteCours, colLargeur);
-            doc.text(lignesCours, margeG, yGauche);
-            yGauche += lignesCours.length * smm(3.5);
-        }
-
-        if (evaluation.grilleNom) {
-            doc.setFontSize(policeMeta);
-            doc.setFont('helvetica', 'italic');
-            doc.setTextColor(...cfg.couleurs.texteSecondaire);
-            doc.text('Grille : ' + evaluation.grilleNom, margeG, yGauche);
-            yGauche += smm(3.5);
-        }
-
-        doc.setFontSize(policeMeta);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(...cfg.couleurs.textePrincipal);
-
-        function ajouterTexteColG(label, texte) {
-            const lignes = doc.splitTextToSize(label + texte, colLargeur);
-            for (const ligne of lignes) {
-                doc.text(ligne, margeG, yGauche);
-                yGauche += smm(3.5);
-            }
-        }
-
-        if (opts.description && production && (production.activiteApprentissage || production.description)) {
-            ajouterTexteColG('Production : ', production.activiteApprentissage || production.description);
-        }
-        if (opts.objectif && production && production.objectif) {
-            ajouterTexteColG('Objectif : ', production.objectif);
-        }
-        if (opts.tache && production && production.tache) {
-            ajouterTexteColG('Tâche : ', production.tache);
-        }
-        yGauche += smm(3);
-
-        // Charger la cartouche pour les textes de contexte
-        let cartouchePdf = null;
-        if (evaluation.cartoucheId && evaluation.grilleId) {
-            try {
-                const cartouches = db.getSync('cartouches_' + evaluation.grilleId, []);
-                cartouchePdf = cartouches.find(function(c) { return c.id === evaluation.cartoucheId; }) || null;
-            } catch(e) { console.warn('[PDF-Export] cartouche lookup skipped:', e.message || e); }
-        }
-
-        if (evaluation.criteres && evaluation.criteres.length > 0) {
-            doc.setFontSize(sfont(cfg.polices.titreSection - 2));
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(...cfg.couleurs.titreSection);
-            doc.text('R\u00e9troaction g\u00e9n\u00e9rale', margeG, yGauche);
-            yGauche += smm(3);
-
-            // Contexte de la retroaction generale (depuis la cartouche, ou rien)
-            var texteContexteGeneral = (cartouchePdf && cartouchePdf.contexte) ? cartouchePdf.contexte : '';
-            if (texteContexteGeneral) {
-                doc.setFont('helvetica', 'italic');
-                doc.setFontSize(sfont(cfg.polices.textePetit - 1));
-                doc.setTextColor(...cfg.couleurs.texteSecondaire);
-                const lignesNoteGen = doc.splitTextToSize(texteContexteGeneral, colLargeur);
-                doc.text(lignesNoteGen, margeG, yGauche);
-                yGauche += lignesNoteGen.length * smm(3.5) + smm(2);
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(...cfg.couleurs.textePrincipal);
-            }
-
-            // Chercher la grille pour les descriptions de criteres
-            let grilleDef = null;
-            try {
-                const grilles = db.getSync('grillesTemplates', []);
-                grilleDef = grilles.find(g => g.id === evaluation.grilleId) || null;
-            } catch(e) { console.warn('[PDF-Export] grille lookup skipped:', e.message || e); }
-
-            // Trier : forces (M/E) en premier, defis (I/D) ensuite
-            const ordreNiveau = { 'E': 0, 'M': 1, 'D': 2, 'I': 3 };
-            const criteresTriees = [...evaluation.criteres].sort((a, b) => {
-                const nA = ordreNiveau[a.niveauSelectionne] ?? 4;
-                const nB = ordreNiveau[b.niveauSelectionne] ?? 4;
-                return nA - nB;
-            });
-
-            const niveauxParLigne = [];
-            const donneesCriteres = criteresTriees.map(c => {
-                niveauxParLigne.push(c.niveauSelectionne || '');
-                let cellCritere = c.critereNom || '';
-                if (grilleDef && grilleDef.criteres) {
-                    const critDef = grilleDef.criteres.find(gc => gc.nom === c.critereNom || gc.id === c.critereId);
-                    if (critDef && critDef.description) {
-                        cellCritere += '\n' + critDef.description;
-                    }
-                }
-                // ✅ ANONYMISATION (Tier 0.3) : anonymiser les prénoms dans les rétroactions
-                const retroAnon = typeof anonymiserTexteRetroaction === 'function'
-                    ? anonymiserTexteRetroaction(c.retroaction || '', evaluation.etudiantDA)
-                    : (c.retroaction || '');
-                return [
-                    cellCritere,
-                    c.niveauSelectionne || '\u2014',
-                    retroAnon
-                ];
-            });
-
-            doc.autoTable({
-                startY: yGauche,
-                head: [['Crit\u00e8re', 'Niv.', 'R\u00e9troaction']],
-                body: donneesCriteres,
-                theme: 'grid',
-                headStyles: {
-                    fillColor: cfg.couleurs.titreSection,
-                    textColor: [255, 255, 255],
-                    fontStyle: 'bold',
-                    fontSize: sfont(cfg.polices.textePetit - 1)
-                },
-                bodyStyles: {
-                    fontSize: sfont(cfg.polices.textePetit - 1),
-                    textColor: cfg.couleurs.textePrincipal,
-                    cellPadding: smm(1.2)
-                },
-                columnStyles: {
-                    0: { cellWidth: colLargeur * 0.22 },
-                    1: { cellWidth: colLargeur * 0.08, halign: 'center' },
-                    2: { cellWidth: colLargeur * 0.70 }
-                },
-                margin: { left: margeG, right: margeDroiteColG },
-                willDrawCell: function(data) {
-                    if (data.section === 'body' && data.column.index === 0) {
-                        const raw = data.cell.raw || '';
-                        if (raw.includes('\n')) {
-                            data.cell.text = [''];
-                        }
-                    }
-                },
-                didParseCell: function(data) {
-                    if (data.section === 'body') {
-                        if (data.column.index === 0) {
-                            const texte = data.cell.text.join('\n');
-                            if (!texte.includes('\n')) {
-                                data.cell.styles.fontStyle = 'bold';
-                            }
-                        }
-                    }
-                },
-                didDrawCell: function(data) {
-                    if (data.section === 'body' && data.column.index === 0) {
-                        const raw = data.cell.raw || '';
-                        const parties = raw.split('\n');
-                        if (parties.length > 1) {
-                            const x = data.cell.x + data.cell.padding('left');
-                            const fontSize = data.cell.styles.fontSize;
-                            const lineH = fontSize * 0.352 * 1.15;
-                            let yCell = data.cell.y + data.cell.padding('top') + fontSize * 0.352;
-                            const maxW = data.cell.width - data.cell.padding('left') - data.cell.padding('right');
-                            doc.setFont('helvetica', 'bold');
-                            doc.setFontSize(fontSize);
-                            doc.setTextColor(...data.cell.styles.textColor);
-                            const lignesNom = doc.splitTextToSize(parties[0], maxW);
-                            doc.text(lignesNom, x, yCell);
-                            yCell += lignesNom.length * lineH + lineH * 0.5;
-                            const descFontSize = fontSize - 1;
-                            doc.setFont('helvetica', 'italic');
-                            doc.setFontSize(descFontSize);
-                            const lignesDesc = doc.splitTextToSize(parties.slice(1).join('\n'), maxW);
-                            doc.text(lignesDesc, x, yCell, { lineHeightFactor: 1.15 });
-                            doc.setFont('helvetica', 'normal');
-                            doc.setFontSize(fontSize);
-                        }
-                    }
-                }
-            });
-
-            yGauche = doc.lastAutoTable.finalY + smm(6);
-        }
-
-        // --- NOTE FINALE + NIVEAU (colonne gauche) ---
-        let modeNote = null;
-        if (opts.affichageNote) modeNote = opts.affichageNote;
-        if (!modeNote) {
-            const radioUI = document.querySelector('input[name="affichageNote1"]:checked');
-            if (radioUI) modeNote = radioUI.value;
-        }
-        if (!modeNote) {
-            try {
-                const pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
-                    ? obtenirPratiqueActiveGroupeCours() : null;
-                const configurations = db.getSync('pratiquesConfigurables', []);
-                const pratiqueActive = pratiqueId ? configurations.find(p => p.id === pratiqueId) : null;
-                if (pratiqueActive && pratiqueActive.affichageNote) modeNote = pratiqueActive.affichageNote;
-            } catch(e) { console.warn('[PDF-Export] pratique affichageNote fallback:', e.message || e); }
-        }
-        if (!modeNote) modeNote = 'complet';
-
-        if (evaluation.noteFinale != null || evaluation.niveauFinal) {
-            if (yGauche > seuilPage) {
-                doc.addPage([refW, refH], 'portrait');
-                yGauche = smm(cfg.marges.haut);
-            }
-            doc.setFontSize(policeMeta);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(...cfg.couleurs.textePrincipal);
-
-            let texteNote = '';
-            if (modeNote === 'lettre') {
-                if (evaluation.niveauFinal) texteNote = 'Niveau : ' + evaluation.niveauFinal;
-            } else {
-                if (evaluation.noteFinale != null) texteNote += 'Note : ' + evaluation.noteFinale + '%';
-                if (evaluation.noteFinale != null && evaluation.niveauFinal) texteNote += '  ';
-                if (evaluation.niveauFinal) texteNote += evaluation.niveauFinal;
-            }
-            if (texteNote) {
-                doc.text(texteNote, margeG, yGauche);
-                yGauche += smm(4);
-            }
-        }
-
-        // =============== COLONNE DROITE : Tampons + Erreurs ===============
-        doc.setPage(pageDebutColonnes);
+        // 3. Récupérer l'annotation (peut être null)
         const annotation = travauxStockage.obtenirAnnotationFichier(fichier.id);
-        const statsVisuelles = compterAnnotationsDetailees(annotation);
 
-        let yDroite = yDebutColonnes;
-        if (statsVisuelles.totalTampons > 0 || statsVisuelles.totalErreursFr > 0) {
-            yDroite = ajouterSyntheseVisuelle(doc, yDebutColonnes, statsVisuelles, seuilPage, {
-                margeG: colDroiteX,
-                margeD: margeD,
-                largeur: colLargeur,
-                contexteSpecifique: (cartouchePdf && cartouchePdf.contexteSpecifique) ? cartouchePdf.contexteSpecifique : ''
+        // 4. Construire le shape Feedback
+        const feedback = syntheseRetroactionData.construireFeedback(evaluation, fichier, annotation);
+        if (!feedback) return;
+
+        // 5. Générer le HTML
+        const html = syntheseRetroactionRendu.rendreSyntheseHTML(feedback);
+
+        // 6. Insérer hors-écran pour permettre la rasterisation
+        const conteneur = document.createElement('div');
+        conteneur.style.cssText = 'position: fixed; left: -10000px; top: 0; width: ' + SYNTH_PAGE_W + 'px; pointer-events: none;';
+        conteneur.innerHTML = html;
+        document.body.appendChild(conteneur);
+
+        try {
+            // 7. Mesurer la hauteur réelle du fragment (≥ 11" Letter US)
+            const cible = conteneur.firstElementChild;
+            if (!cible) return;
+            // Forcer le min-height à 1056 px puis mesurer ; le rendu peut dépasser
+            // si le contenu (bilan détaillé + toutes erreurs FE) est dense.
+            const hauteurReelle = Math.max(SYNTH_PAGE_H_MIN, cible.scrollHeight, cible.offsetHeight);
+
+            // 8. Rasteriser à la hauteur réelle
+            const canvas = await html2canvas(cible, {
+                scale: SYNTH_RASTER_SCALE,
+                backgroundColor: '#ffffff',
+                useCORS: true,
+                logging: false,
+                width: SYNTH_PAGE_W,
+                height: hauteurReelle
             });
-        }
 
-        // --- BILAN (colonne droite, sous tampons/erreurs) ---
-        var NOMS_NIV = { 'E': '\u00c9tendu', 'M': 'Ma\u00eetris\u00e9', 'D': 'En d\u00e9veloppement', 'I': 'Incomplet' };
-        var ORDRE_NIV = { 'E': 4, 'M': 3, 'D': 2, 'I': 1, '0': 0 };
-        var da = evaluation.etudiantDA;
-
-        // Charger l'historique de l'eleve
-        var historiqueEleve = [];
-        try {
-            // ✅ ANONYMISATION (Tier 0.1) : passer par obtenirDonneesSelonMode pour namespace + filtrage cours
-            var toutesEvals = obtenirDonneesSelonMode('evaluationsSauvegardees');
-            historiqueEleve = toutesEvals
-                .filter(function(e) { return e.etudiantDA === da && !e.remplaceeParId && e.id !== evaluation.id; })
-                .sort(function(a, b) { return new Date(b.dateEvaluation) - new Date(a.dateEvaluation); })
-                .slice(0, 5);
-        } catch(e) { console.warn('[PDF-Export] historique eleve load skipped:', e.message || e); }
-        var evalPrecedente = historiqueEleve.length > 0 ? historiqueEleve[0] : null;
-
-        // Charger la grille pour les descriptions de criteres
-        var grilleBilan = null;
-        try {
-            var grillesBilan = db.getSync('grillesTemplates', []);
-            grilleBilan = grillesBilan.find(function(g) { return g.id === evaluation.grilleId; }) || null;
-        } catch(e) { console.warn('[PDF-Export] grille bilan lookup skipped:', e.message || e); }
-
-        // Detecter les patrons recurrents (I/D sur 3 productions)
-        var nomsPatrons = [];
-        if (historiqueEleve.length >= 2 && evaluation.criteres) {
-            var cH1 = {}; var cH2 = {};
-            if (historiqueEleve[0] && historiqueEleve[0].criteres) historiqueEleve[0].criteres.forEach(function(c) { cH1[c.critereNom] = c.niveauSelectionne; });
-            if (historiqueEleve[1] && historiqueEleve[1].criteres) historiqueEleve[1].criteres.forEach(function(c) { cH2[c.critereNom] = c.niveauSelectionne; });
-            evaluation.criteres.forEach(function(c) {
-                if ((c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D') &&
-                    (cH1[c.critereNom] === 'I' || cH1[c.critereNom] === 'D') &&
-                    (cH2[c.critereNom] === 'I' || cH2[c.critereNom] === 'D')) {
-                    nomsPatrons.push(c.critereNom);
-                }
-            });
-        }
-
-        // Construire les lignes du bilan
-        var bilanLignes = [];
-        var wCol = colLargeur - smm(4);
-
-        if (evaluation.criteres && evaluation.criteres.length > 0) {
-            // Priorités (2 plus faibles avec description de la grille)
-            var defis = evaluation.criteres
-                .filter(function(c) { return c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D'; })
-                .sort(function(a, b) { return (ORDRE_NIV[a.niveauSelectionne] || 0) - (ORDRE_NIV[b.niveauSelectionne] || 0); });
-            var tousMaitrises = defis.length === 0;
-
-            if (defis.length > 0) {
-                for (var ip = 0; ip < Math.min(2, defis.length); ip++) {
-                    var d = defis[ip];
-                    var descCrit = '';
-                    if (grilleBilan && grilleBilan.criteres) {
-                        var critDef = grilleBilan.criteres.find(function(gc) { return gc.nom === d.critereNom || gc.id === d.critereId; });
-                        if (critDef && critDef.description) descCrit = critDef.description.toLowerCase();
-                    }
-                    var txtPrio = descCrit ? descCrit : d.critereNom;
-                    txtPrio += ' (' + d.critereNom + ' ' + (NOMS_NIV[d.niveauSelectionne] || '') + ')';
-                    if (nomsPatrons.indexOf(d.critereNom) !== -1) {
-                        txtPrio += '. Cet objectif est prioritaire depuis 3 productions';
-                    }
-                    bilanLignes.push({ type: 'priorite', texte: txtPrio });
-                }
-                // Ta force (en contexte, seulement si des défis existent)
-                var meilleur = null; var meilleurOrdre = 0;
-                evaluation.criteres.forEach(function(c) {
-                    var o = ORDRE_NIV[c.niveauSelectionne] || 0;
-                    if (o > meilleurOrdre) { meilleurOrdre = o; meilleur = c; }
-                });
-                if (meilleur && (meilleur.niveauSelectionne === 'M' || meilleur.niveauSelectionne === 'E')) {
-                    bilanLignes.push({ type: 'force', texte: 'Ta force : ' + meilleur.critereNom + ' (' + (NOMS_NIV[meilleur.niveauSelectionne] || '') + ')' });
-                }
-            } else if (tousMaitrises && statsVisuelles && statsVisuelles.totalErreursFr > 0) {
-                bilanLignes.push({ type: 'priorite', texte: 'Tous les crit\u00e8res sont ma\u00eetris\u00e9s. Concentre-toi sur la qualit\u00e9 du fran\u00e7ais (' + statsVisuelles.totalErreursFr + ' erreur' + (statsVisuelles.totalErreursFr > 1 ? 's' : '') + ' annot\u00e9e' + (statsVisuelles.totalErreursFr > 1 ? 's' : '') + ').' });
-            } else if (tousMaitrises) {
-                var maitriseLongtemps = evalPrecedente && evalPrecedente.criteres &&
-                    evalPrecedente.criteres.every(function(c) { return c.niveauSelectionne === 'M' || c.niveauSelectionne === 'E'; });
-                if (maitriseLongtemps) {
-                    bilanLignes.push({ type: 'force', texte: 'Tous les crit\u00e8res sont ma\u00eetris\u00e9s depuis plus d\u2019un artefact. Tu peux aider tes coll\u00e8gues \u2014 c\u2019est une excellente fa\u00e7on d\u2019\u00e9tendre tes comp\u00e9tences vers le niveau \u00c9 (transfert \u00e0 d\u2019autres contextes).' });
-                } else {
-                    bilanLignes.push({ type: 'force', texte: 'Tous les crit\u00e8res sont ma\u00eetris\u00e9s. Continue sur cette lanc\u00e9e !' });
-                }
-            }
-        }
-
-        // Tampons actionnables (top 2 + retroaction)
-        if (statsVisuelles.totalTampons > 0) {
-            var retroObsBilan = travauxOutils.obtenirRetroactionsObservations();
-            var autocollantsBilan = travauxOutils.AUTOCOLLANTS;
-            var idsTries = Object.keys(statsVisuelles.tampons).sort(function(a, b) { return statsVisuelles.tampons[b] - statsVisuelles.tampons[a]; });
-            var tampAff = 0;
-            var lignesTamp = [];
-            for (var it = 0; it < idsTries.length && tampAff < 2; it++) {
-                var tid = idsTries[it];
-                var retroT = retroObsBilan[tid] || '';
-                if (!retroT) continue;
-                var tDef = autocollantsBilan.find(function(a) { return a.id === tid; });
-                var tNom = tDef ? tDef.nom : tid;
-                var tNb = statsVisuelles.tampons[tid];
-                var retroTronq = retroT.length > 80 ? retroT.substring(0, 80) + '...' : retroT;
-                lignesTamp.push({ type: 'tampon', texte: tNom + ' (' + tNb + ' occurrence' + (tNb > 1 ? 's' : '') + ') -- ' + retroTronq });
-                tampAff++;
-            }
-            if (lignesTamp.length > 0) {
-                bilanLignes.push({ type: 'titre', texte: 'Points r\u00e9currents :' });
-                for (var lt = 0; lt < lignesTamp.length; lt++) bilanLignes.push(lignesTamp[lt]);
-            }
-        }
-
-        // Francais (total + type principal)
-        if (statsVisuelles.totalErreursFr > 0) {
-            var codesErrBilan = travauxOutils.CODES_ERREURS_FR;
-            var typesPrinc = Object.keys(statsVisuelles.erreursFr).sort(function(a, b) { return statsVisuelles.erreursFr[b] - statsVisuelles.erreursFr[a]; });
-            var nomErrPrinc = '';
-            if (typesPrinc.length > 0) {
-                var codePrinc = codesErrBilan.find(function(c) { return c.id === typesPrinc[0]; });
-                nomErrPrinc = codePrinc ? codePrinc.nom : '';
-            }
-            bilanLignes.push({ type: 'francais', texte: 'Fran\u00e7ais : ' + statsVisuelles.totalErreursFr + ' erreur' + (statsVisuelles.totalErreursFr > 1 ? 's' : '') + (nomErrPrinc ? ' (principalement : ' + nomErrPrinc + ')' : '') });
-        }
-
-        // Progression (comparaison de l'élève avec lui-même)
-        if (evalPrecedente && evaluation.niveauFinal && evalPrecedente.niveauFinal) {
-            var nivAct = evaluation.niveauFinal;
-            var nivPre = evalPrecedente.niveauFinal;
-            var ordreAct = ORDRE_NIV[nivAct] || 0;
-            var ordrePre = ORDRE_NIV[nivPre] || 0;
-            if (ordreAct >= ordrePre) {
-                var prodPrec = evalPrecedente.productionNom || 'la production pr\u00e9c\u00e9dente';
-                if (ordreAct > ordrePre) {
-                    bilanLignes.push({ type: 'progression', texte: 'Progr\u00e8s : ' + nivPre + ' \u2192 ' + nivAct + ' depuis ' + prodPrec });
-                }
-                // Parcours sur plusieurs productions
-                if (historiqueEleve.length >= 2) {
-                    var niveaux = [ordreAct];
-                    for (var ih = 0; ih < historiqueEleve.length; ih++) niveaux.push(ORDRE_NIV[historiqueEleve[ih].niveauFinal] || 0);
-                    var moitie = Math.floor(niveaux.length / 2);
-                    var moyR = 0; var moyA = 0;
-                    for (var ir = 0; ir < moitie; ir++) moyR += niveaux[ir]; moyR /= moitie;
-                    for (var ia = moitie; ia < niveaux.length; ia++) moyA += niveaux[ia]; moyA /= (niveaux.length - moitie);
-                    if (moyR >= moyA - 0.3) {
-                        var tend = moyR > moyA + 0.3 ? 'en progr\u00e8s' : 'en consolidation';
-                        bilanLignes.push({ type: 'tendance', texte: 'Parcours sur ' + niveaux.length + ' productions : ' + tend });
-                    }
-                }
-            }
-        }
-
-        // Amelioration reconnue
-        if (evalPrecedente && evaluation.criteres) {
-            var criteresPrec = {};
-            if (evalPrecedente.criteres) evalPrecedente.criteres.forEach(function(c) { criteresPrec[c.critereNom] = c.niveauSelectionne; });
-            var ameliorations = [];
-            evaluation.criteres.forEach(function(c) {
-                var nivP = criteresPrec[c.critereNom];
-                if (nivP && (nivP === 'I' || nivP === 'D') && (c.niveauSelectionne === 'M' || c.niveauSelectionne === 'E')) {
-                    ameliorations.push(c.critereNom);
-                }
-            });
-            if (ameliorations.length > 0) {
-                bilanLignes.push({ type: 'amelioration', texte: 'Tu as progress\u00e9 en ' + ameliorations.join(' et ') + '.' });
-            }
-        }
-
-        // 🔧 REFONTE (29 mars 2026) : Portrait complet des jetons utilisés
-        // Affiche un compteur global X / 2 + détail par artefact
-        if (typeof obtenirConfigJetons === 'function' && da) {
-            try {
-                var configJetons = obtenirConfigJetons();
-                if (configJetons && configJetons.actif) {
-                    var maxJetons = configJetons.reprise ? configJetons.reprise.nombre : 2;
-                    // ✅ ANONYMISATION (Tier 0.1) : clé de base sans double namespace
-                    var toutesEvals = obtenirDonneesSelonMode('evaluationsSauvegardees');
-                    var productions = obtenirDonneesSelonMode('productions') || [];
-
-                    // Collecter les jetons utilisés (évaluations actives seulement)
-                    var jetonsUtilises = [];
-                    toutesEvals.filter(function(e) {
-                        return e.etudiantDA === da && !e.remplaceeParId;
-                    }).forEach(function(e) {
-                        var prod = productions.find(function(p) { return p.id === e.productionId; });
-                        var nomProd = prod ? (prod.titre || prod.nom || e.productionId) : e.productionId;
-                        if (e.jetonDelaiApplique) {
-                            jetonsUtilises.push({ type: 'D\u00e9lai', artefact: nomProd });
-                        }
-                        if (e.jetonRepriseApplique || e.repriseDeId) {
-                            jetonsUtilises.push({ type: 'Reprise', artefact: nomProd });
-                        }
-                        if (e.jetonRepriseCibleeApplique) {
-                            jetonsUtilises.push({ type: 'Reprise cibl\u00e9e', artefact: nomProd });
-                        }
-                    });
-
-                    var nbUtilises = jetonsUtilises.length;
-                    bilanLignes.push({ type: 'jetons', texte: 'Jetons utilis\u00e9s : ' + nbUtilises + ' / ' + maxJetons });
-                    if (nbUtilises > 0) {
-                        jetonsUtilises.forEach(function(j) {
-                            bilanLignes.push({ type: 'jetons', texte: '  \u2022 ' + j.type + ' \u2014 ' + j.artefact });
-                        });
-                    }
-                }
-            } catch(e) { console.warn('[PDF-Export] jetons calculation skipped:', e.message || e); }
-        }
-
-        // --- RENDU du Bilan sous forme de tableau (même style que Rétroaction) ---
-        // Construire les 3 rangées du tableau Bilan
-        var bilanTableBody = [];
-
-        // Rangée 1 : Se concentrer sur...
-        var texteConcentrer = '';
-        var forceTexte = bilanLignes.filter(function(l) { return l.type === 'force'; }).map(function(l) { return l.texte; }).join('\n');
-        var prioTextes = bilanLignes.filter(function(l) { return l.type === 'priorite'; }).map(function(l) { return '- ' + l.texte; }).join('\n');
-        if (forceTexte) texteConcentrer += forceTexte + '\n';
-        if (prioTextes) texteConcentrer += prioTextes;
-        if (!texteConcentrer) texteConcentrer = 'Aucun d\u00e9fi identifi\u00e9.';
-        bilanTableBody.push(['Pr\u00e9sentement,\nil faut se\nconcentrer sur...', texteConcentrer.trim()]);
-
-        // Rangée 2 : Points récurrents
-        var texteRecurrents = '';
-        var tampTextes = bilanLignes.filter(function(l) { return l.type === 'tampon'; }).map(function(l) { return '- ' + l.texte; }).join('\n');
-        if (tampTextes) texteRecurrents += tampTextes;
-        var frTextes = bilanLignes.filter(function(l) { return l.type === 'francais'; }).map(function(l) { return l.texte; }).join('\n');
-        if (frTextes) texteRecurrents += (texteRecurrents ? '\n' : '') + frTextes;
-        var progTextes = bilanLignes.filter(function(l) { return l.type === 'progression' || l.type === 'tendance'; }).map(function(l) { return l.texte; }).join('\n');
-        if (progTextes) texteRecurrents += (texteRecurrents ? '\n' : '') + progTextes;
-        var amelTextes = bilanLignes.filter(function(l) { return l.type === 'amelioration'; }).map(function(l) { return l.texte; }).join('\n');
-        if (amelTextes) texteRecurrents += (texteRecurrents ? '\n' : '') + amelTextes;
-        if (!texteRecurrents) texteRecurrents = 'Aucun point r\u00e9current.';
-        bilanTableBody.push(['Points\nr\u00e9currents', texteRecurrents.trim()]);
-
-        // Rangée 3 : Jetons utilisés
-        var jetonsLignes = bilanLignes.filter(function(l) { return l.type === 'jetons'; });
-        var texteJetons = jetonsLignes.map(function(l) { return l.texte; }).join('\n');
-        if (!texteJetons) texteJetons = 'Aucun jeton utilis\u00e9.';
-        bilanTableBody.push(['Jetons\nutilis\u00e9s', texteJetons.trim()]);
-
-        // Rangée 4 : Note provisoire (SSOT : calculerDetailsNoteFinale)
-        try {
-            if (typeof calculerDetailsNoteFinale === 'function') {
-                var detailsNote = calculerDetailsNoteFinale(da);
-                if (detailsNote && detailsNote.portfolio && detailsNote.portfolio.artefactsRetenus.length > 0) {
-                    var productionsNote = obtenirDonneesSelonMode('productions') || [];
-                    var toutesEvalsNote = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-                    var artefactsPortfolio = productionsNote.filter(function(p) { return p.type === 'artefact-portfolio'; });
-                    if (artefactsPortfolio.length === 0) {
-                        artefactsPortfolio = productionsNote.filter(function(p) { return p.type !== 'portfolio'; });
-                    }
-                    var portfolio = detailsNote.portfolio;
-                    var estHybride = portfolio.methodeSelection.indexOf('hybride') !== -1;
-                    var texteNote = '';
-
-                    // Pondérations des catégories (mode hybride)
-                    var pondSelLabel = '';
-                    var pondOblLabel = '';
-                    if (estHybride) {
-                        var cfgPratNote = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null;
-                        var cfgCats = cfgPratNote && cfgPratNote.categories ? cfgPratNote.categories : null;
-                        if (!cfgCats && typeof obtenirConfigCategories === 'function') cfgCats = obtenirConfigCategories();
-                        if (cfgCats) {
-                            pondSelLabel = cfgCats.selection ? ' (' + (cfgCats.selection.ponderation || 65) + '%)' : '';
-                            pondOblLabel = cfgCats.obligatoires ? ' (' + (cfgCats.obligatoires.ponderation || 35) + '%)' : '';
-                        }
-                    }
-
-                    // Helper : activité d'apprentissage (description) d'une production
-                    function obtenirActivitePdf(productionId) {
-                        var pr = productionsNote.find(function(p) { return p.id === productionId; });
-                        return pr ? (pr.description || '') : '';
-                    }
-
-                    // Helper : échéance d'une production
-                    function obtenirEcheancePdf(prod) {
-                        if (prod.dateEcheance) return prod.dateEcheance;
-                        if (prod.echeancesParGroupe) {
-                            for (var gcId in prod.echeancesParGroupe) {
-                                var entree = prod.echeancesParGroupe[gcId];
-                                if (entree && entree.date) return entree.date;
-                            }
-                        }
-                        return null;
-                    }
-
-                    // Helper : formater une date en français
-                    function formaterDatePdf(dateStr) {
-                        var d = new Date(dateStr + 'T00:00:00');
-                        return d.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long' });
-                    }
-
-                    // === 1. Artefacts retenus ===
-                    texteNote = 'Voici les ' + portfolio.nombreRetenus + ' meilleurs artefacts que tu as produits' + pondSelLabel + ' :\n';
-                    var retenusTries = portfolio.artefactsRetenus.slice().sort(function(a, b) { return (b.note || 0) - (a.note || 0); });
-                    retenusTries.forEach(function(art) {
-                        var prod = productionsNote.find(function(p) { return p.id === art.productionId; });
-                        var label = prod ? (prod.titre || 'Artefact') : 'Artefact';
-                        var activite = obtenirActivitePdf(art.productionId);
-                        texteNote += '  \u2022 ' + label + ' (' + (art.niveau || '?') + ')';
-                        if (activite) texteNote += ' : ' + activite;
-                        texteNote += '\n';
-                    });
-
-                    // === 2. Note provisoire ===
-                    var moyenne = Math.round(portfolio.moyenne * 10) / 10;
-                    texteNote += '\nLa note chiffr\u00e9e provisoire de ton portfolio est ' + moyenne + '%. Cette note peut changer en fonction de tes prochains travaux et des jetons que tu appliques.';
-
-                    // Plafonnement
-                    if (portfolio.plafonnement && portfolio.plafonnement.actif) {
-                        if (portfolio.plafonnement.echec) {
-                            texteNote += '\nNote plafonn\u00e9e (\u00e9chec) : d\u00e9ficit de ' + portfolio.plafonnement.deficit + ' production(s).';
-                        } else {
-                            texteNote += '\nNote plafonn\u00e9e \u00e0 ' + portfolio.plafonnement.seuilMax + '% (d\u00e9ficit de ' + portfolio.plafonnement.deficit + ' production(s)).';
-                        }
-                    }
-
-                    // === 3. Artefacts à venir (sélection non évalués) ===
-                    var idsEvaluesNote = new Set();
-                    toutesEvalsNote.filter(function(e) {
-                        return e.etudiantDA === da && !e.remplaceeParId && e.noteFinale != null;
-                    }).forEach(function(e) { idsEvaluesNote.add(e.productionId); });
-
-                    var artefactsAvenir = artefactsPortfolio.filter(function(p) {
-                        if (idsEvaluesNote.has(p.id)) return false;
-                        if (estHybride && p.categorie === 'obligatoire') return false;
-                        return true;
-                    });
-
-                    if (artefactsAvenir.length > 0) {
-                        texteNote += '\n\nArtefacts \u00e0 venir :\n';
-                        artefactsAvenir.forEach(function(prod) {
-                            var label = prod.titre || 'Artefact';
-                            var activite = prod.activiteApprentissage || prod.description || '';
-                            var echeance = obtenirEcheancePdf(prod);
-                            texteNote += '  \u2022 ' + label;
-                            if (activite) {
-                                texteNote += ' : ' + activite;
-                                if (echeance) texteNote += ' (\u00e9ch\u00e9ance : ' + formaterDatePdf(echeance) + ')';
-                            } else if (echeance) {
-                                texteNote += ' (\u00e9ch\u00e9ance : ' + formaterDatePdf(echeance) + ')';
-                            } else {
-                                texteNote += ' (configuration \u00e0 venir)';
-                            }
-                            texteNote += '\n';
-                        });
-                    }
-
-                    // === 4. Artefacts obligatoires (mode hybride uniquement) ===
-                    if (estHybride) {
-                        var artefactsObligatoires = artefactsPortfolio.filter(function(p) {
-                            return p.categorie === 'obligatoire';
-                        });
-                        if (artefactsObligatoires.length > 0) {
-                            texteNote += '\nArtefacts obligatoires' + pondOblLabel + ' :\n';
-                            artefactsObligatoires.forEach(function(prod) {
-                                var label = prod.titre || 'Artefact';
-                                var activiteObl = prod.activiteApprentissage || prod.description || '';
-                                var echeanceObl = obtenirEcheancePdf(prod);
-                                var evalObl = toutesEvalsNote.find(function(e) {
-                                    return e.productionId === prod.id && e.etudiantDA === da && !e.remplaceeParId && e.noteFinale != null;
-                                });
-                                texteNote += '  \u2022 ' + label;
-                                if (evalObl) {
-                                    texteNote += ' (' + (evalObl.niveauFinal || '?') + ')';
-                                } else {
-                                    texteNote += ' (non remis)';
-                                }
-                                if (activiteObl) texteNote += ' : ' + activiteObl;
-                                if (echeanceObl) texteNote += ' (\u00e9ch\u00e9ance : ' + formaterDatePdf(echeanceObl) + ')';
-                                texteNote += '\n';
-                            });
-                        }
-                    }
-
-                    bilanTableBody.push(['Note\nprovisoire', texteNote.trim()]);
-                }
-            }
-        } catch(e) { console.warn('[PDF-Export] note provisoire calculation skipped:', e.message || e); }
-
-        if (yDroite + smm(30) > seuilPage) {
-            doc.addPage([refW, refH], 'portrait');
-            yDroite = smm(cfg.marges.haut);
-        }
-
-        // Titre de section
-        doc.setFontSize(sfont(cfg.polices.titreSection - 2));
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(...cfg.couleurs.titreSection);
-        doc.text('Bilan', colDroiteX, yDroite);
-        yDroite += smm(5);
-
-        // Description (même style que Rétroaction générale/spécifique)
-        doc.setFont('helvetica', 'italic');
-        doc.setFontSize(policeMeta);
-        doc.setTextColor(...cfg.couleurs.texteSecondaire);
-        var descBilan = 'Mes standards sont tr\u00e8s \u00e9lev\u00e9s \u00e0 ton \u00e9gard parce que je crois que tu as tout ce qu\u2019il faut pour les atteindre et j\u2019ai confiance en toi. Si tu as besoin d\u2019aide, viens me voir.\nSelon toi, quel aspect de ta production m\u00e9riterait le plus d\u2019attention ?';
-        var descRendu = doc.splitTextToSize(descBilan, colLargeur);
-        for (var idesc = 0; idesc < descRendu.length; idesc++) {
-            doc.text(descRendu[idesc], colDroiteX, yDroite);
-            yDroite += smm(3.5);
-        }
-        yDroite += smm(2);
-
-        doc.autoTable({
-            startY: yDroite,
-            head: [['Section', 'D\u00e9tail']],
-            body: bilanTableBody,
-            theme: 'grid',
-            headStyles: {
-                fillColor: cfg.couleurs.titreSection,
-                textColor: [255, 255, 255],
-                fontStyle: 'bold',
-                fontSize: sfont(cfg.polices.textePetit - 1)
-            },
-            bodyStyles: {
-                fontSize: policeMeta,
-                textColor: cfg.couleurs.textePrincipal,
-                cellPadding: smm(1.2)
-            },
-            columnStyles: {
-                0: { cellWidth: colLargeur * 0.25, fontStyle: 'bold' },
-                1: { cellWidth: colLargeur * 0.75 }
-            },
-            margin: { left: colDroiteX, right: smm(cfg.marges.droite) },
-            didParseCell: function(data) {
-                if (data.section === 'body' && data.column.index === 0) {
-                    data.cell.styles.valign = 'middle';
-                }
-            }
-        });
-
-        yDroite = doc.lastAutoTable.finalY + smm(4);
-
-        yDroite += smm(0.5);
-
-
-        // =============== SUITE (pleine largeur) ===============
-        y = Math.max(yGauche, yDroite) + smm(10);
-
-        // --- PIEDS DE PAGE ---
-        finaliserPagesSynthese(doc, premierePageSynthese);
-
-        // Reset du scale pour les appels suivants
-        _synthScale = 1;
-    }
-
-    /**
-     * Convertit l'image d'un autocollant en dataURL PNG
-     * @param {string} id - ID de l'autocollant
-     * @returns {string|null} dataURL ou null si indisponible
-     */
-    function autocollantToDataURL(id, tint) {
-        const img = travauxOutils.getImageAutocollant(id);
-        if (!img || !img.complete) return null;
-        try {
-            const c = document.createElement('canvas');
-            c.width = img.naturalWidth;
-            c.height = img.naturalHeight;
-            const ctx = c.getContext('2d');
-            ctx.drawImage(img, 0, 0);
-            if (tint) {
-                ctx.globalCompositeOperation = 'source-in';
-                ctx.fillStyle = tint;
-                ctx.fillRect(0, 0, c.width, c.height);
-            }
-            return c.toDataURL('image/png');
-        } catch(e) {
-            return null;
+            // 9. Ajouter une nouvelle page jsPDF de la même taille (rasterisée 2x)
+            const pageW = SYNTH_PAGE_W * SYNTH_RASTER_SCALE;
+            const pageH = hauteurReelle * SYNTH_RASTER_SCALE;
+            doc.addPage([pageW, pageH], 'portrait');
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+            doc.addImage(dataUrl, 'JPEG', 0, 0, pageW, pageH);
+        } catch (e) {
+            console.error('[Synthèse] Échec de rasterisation :', e);
+        } finally {
+            document.body.removeChild(conteneur);
         }
     }
 
     /**
-     * Ajoute la section de synthese visuelle (tampons + erreurs de francais)
-     * @param {Object} doc - Instance jsPDF
-     * @param {number} posY - Position Y courante
-     * @param {Object} stats - Resultat de compterAnnotationsDetailees
-     * @param {number} seuilPage - Seuil Y pour saut de page
-     * @param {Object} [zone] - Zone de rendu (layout 2 colonnes) { margeG, margeD, largeur }
-     * @returns {number} Nouvelle posY
+     * Résout l'évaluation à présenter dans la synthèse depuis le fichier annoté.
+     * Si productionIdOverride est fourni (cas réassociation), on cherche l'éval
+     * pour ce DA + cette production. Sinon on délègue à travauxResolution.
      */
-    function _hexVersRgb(hex) {
-        if (!hex) return null;
-        hex = hex.replace('#', '');
-        if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
-        return [parseInt(hex.substring(0,2),16), parseInt(hex.substring(2,4),16), parseInt(hex.substring(4,6),16)];
-    }
+    function trouverEvaluationPourSynthese(fichier, productionIdOverride) {
+        if (!fichier || !fichier.etudiantDA) return null;
+        const productionId = productionIdOverride || fichier.productionId;
 
-    function ajouterSyntheseVisuelle(doc, posY, stats, seuilPage, zone) {
-        const cfg = getCfg();
-        const pageW = doc.internal.pageSize.getWidth();
-        const pageH = doc.internal.pageSize.getHeight();
-        // Si zone fournie, utiliser ses dimensions (layout 2 colonnes)
-        const margeG = zone ? zone.margeG : smm(cfg.marges.gauche);
-        const margeD = zone ? zone.margeD : smm(cfg.marges.droite);
-        const largeurContenu = zone ? zone.largeur : (pageW - smm(cfg.marges.gauche) - smm(cfg.marges.droite));
-        let y = posY;
-
-        // --- Tampons par categorie ---
-        if (stats.totalTampons > 0) {
-            if (y > seuilPage) {
-                doc.addPage([pageW, pageH], 'portrait');
-                y = smm(cfg.marges.haut);
-            }
-
-            doc.setFontSize(sfont(cfg.polices.titreSection - 2));
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(...cfg.couleurs.titreSection);
-            doc.text('R\u00e9troaction sp\u00e9cifique', margeG, y);
-            y += smm(3);
-
-            // Contexte retroaction specifique (depuis la cartouche)
-            var texteContexteSpec = (zone && zone.contexteSpecifique) ? zone.contexteSpecifique : '';
-            if (texteContexteSpec) {
-                doc.setFont('helvetica', 'italic');
-                doc.setFontSize(sfont(cfg.polices.textePetit - 1));
-                doc.setTextColor(...cfg.couleurs.texteSecondaire);
-                var lignesSpec = doc.splitTextToSize(texteContexteSpec, largeurContenu);
-                doc.text(lignesSpec, margeG, y);
-                y += lignesSpec.length * smm(3.5) + smm(2);
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(...cfg.couleurs.textePrincipal);
-            }
-
-            const autocollantsDef = travauxOutils.AUTOCOLLANTS;
-            const retroObs = travauxOutils.obtenirRetroactionsObservations();
-            const nomsCat = travauxOutils.obtenirNomsCategories();
-            const ordreCategories = travauxOutils.obtenirOrdreCategories();
-            const imgSize = smm(4);
-
-            // Grouper les tampons utilises par categorie (exclure legacy)
-            const couleursCat = travauxOutils.obtenirCouleurCategorieAutocollant
-                ? null : null; // juste pour reference
-            const couleursParCat = {};
-            try {
-                var cc = db.getSync('couleursCategories', null) || {};
-                for (var k in cc) couleursParCat[k] = _hexVersRgb(cc[k]);
-            } catch(e) { console.warn('[PDF-Export] couleurs categories load skipped:', e.message || e); }
-
-            for (const catId of ordreCategories) {
-                const tamponsCat = autocollantsDef.filter(a => !a.legacy && a.categorie === catId);
-                const tamponsUtilises = tamponsCat.filter(a => stats.tampons[a.id]);
-                if (tamponsUtilises.length === 0) continue;
-
-                const couleurCat = couleursParCat[catId] || cfg.couleurs.texteSecondaire;
-
-                // Nom de la categorie
-                doc.setFontSize(sfont(cfg.polices.textePetit));
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(...cfg.couleurs.textePrincipal);
-                doc.text(nomsCat[catId] || catId, margeG, y);
-                y += smm(3);
-
-                const donnesCat = [];
-                const imagesCat = {};
-
-                // Couleur hex pour teinte des images
-                var hexCat = null;
-                try {
-                    var ccRaw = db.getSync('couleursCategories', null) || {};
-                    hexCat = ccRaw[catId] || null;
-                } catch(e) { console.warn('[PDF-Export] hex couleur categorie load skipped:', e.message || e); }
-
-                for (let i = 0; i < tamponsUtilises.length; i++) {
-                    const a = tamponsUtilises[i];
-                    const retroTexte = retroObs[a.id] || '';
-                    donnesCat.push([
-                        '      ' + a.nom,
-                        String(stats.tampons[a.id]),
-                        retroTexte
-                    ]);
-                    const dataUrl = autocollantToDataURL(a.id, hexCat);
-                    if (dataUrl) imagesCat[i] = dataUrl;
-                }
-
-                if (y > seuilPage) {
-                    doc.addPage([pageW, pageH], 'portrait');
-                    y = smm(cfg.marges.haut);
-                }
-
-                doc.autoTable({
-                    startY: y,
-                    head: [['Tampon', 'Nb', 'R\u00e9troaction']],
-                    body: donnesCat,
-                    theme: 'grid',
-                    headStyles: {
-                        fillColor: cfg.couleurs.titreSection,
-                        textColor: [255, 255, 255],
-                        fontStyle: 'bold',
-                        fontSize: sfont(cfg.polices.textePetit - 1)
-                    },
-                    bodyStyles: {
-                        fontSize: sfont(cfg.polices.textePetit - 1),
-                        textColor: cfg.couleurs.textePrincipal,
-                        cellPadding: smm(1),
-                        minCellHeight: imgSize + smm(0.5)
-                    },
-                    columnStyles: {
-                        0: { cellWidth: largeurContenu * 0.28 },
-                        1: { cellWidth: largeurContenu * 0.10, halign: 'center' },
-                        2: { cellWidth: largeurContenu * 0.62, fontSize: sfont(cfg.polices.textePetit - 2) }
-                    },
-                    margin: { left: margeG, right: margeD },
-                    didDrawCell: function(data) {
-                        if (data.section === 'body' && data.column.index === 0) {
-                            const dataUrl = imagesCat[data.row.index];
-                            if (dataUrl) {
-                                const cellY = data.cell.y + (data.cell.height - imgSize) / 2;
-                                doc.addImage(dataUrl, 'PNG', data.cell.x + smm(0.5), cellY, imgSize, imgSize);
-                            }
-                        }
-                    }
-                });
-
-                y = doc.lastAutoTable.finalY + smm(4);
-            }
-
-            y += smm(4);
+        let evaluations = [];
+        if (typeof obtenirDonneesSelonMode === 'function') {
+            evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+        } else {
+            const cleEff = (typeof window.cle === 'function') ? window.cle('evaluationsSauvegardees') : 'evaluationsSauvegardees';
+            evaluations = db.getSync(cleEff, []) || [];
         }
 
-        // --- Erreurs de francais (toutes, triees par frequence) ---
-        if (stats.totalErreursFr > 0) {
-            if (y > seuilPage) {
-                doc.addPage([pageW, pageH], 'portrait');
-                y = smm(cfg.marges.haut);
-            }
+        const candidates = evaluations
+            .filter(e => e.etudiantDA === fichier.etudiantDA && !e.remplaceeParId)
+            .filter(e => !productionId || e.productionId === productionId);
 
-            doc.setFontSize(sfont(cfg.polices.textePetit));
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(...cfg.couleurs.titreSection);
-            doc.text('Erreurs de fran\u00e7ais', margeG, y);
-            y += smm(4);
-
-            const retroFr = travauxOutils.obtenirRetroactionsErreursFr();
-            const ordreRecap = travauxOutils.obtenirOrdreErreursFr
-                ? travauxOutils.obtenirOrdreErreursFr() : [];
-
-            // Trier par frequence decroissante, garder les 3 plus frequentes
-            const typesErreurs = Object.keys(stats.erreursFr).sort((a, b) =>
-                stats.erreursFr[b] - stats.erreursFr[a]
-            ).slice(0, 3);
-
-            // Recuperer les couleurs des codes pour le rendu des cercles
-            const couleursErrFr = {};
-            for (const type of typesErreurs) {
-                const outil = travauxOutils.OUTILS[type];
-                couleursErrFr[type] = outil ? outil.couleurBouton : '#888888';
-            }
-
-            const donnesErreurs = [];
-            for (const type of typesErreurs) {
-                const idxNum = ordreRecap.indexOf(type);
-                const num = idxNum !== -1 ? idxNum + 1 : type.replace('errfr_', '');
-                donnesErreurs.push([
-                    num,
-                    String(stats.erreursFr[type]),
-                    retroFr[type] || '',
-                    type // garder le type pour le rendu du cercle
-                ]);
-            }
-
-            // Ligne total
-            donnesErreurs.push(['Total', String(stats.totalErreursFr), '', '']);
-
-            doc.autoTable({
-                startY: y,
-                head: [['Code', 'Nb', 'R\u00e9troaction']],
-                body: donnesErreurs.map(function(r) { return [r[0], r[1], r[2]]; }),
-                theme: 'grid',
-                headStyles: {
-                    fillColor: cfg.couleurs.titreSection,
-                    textColor: [255, 255, 255],
-                    fontStyle: 'bold',
-                    fontSize: sfont(cfg.polices.textePetit - 1)
-                },
-                bodyStyles: {
-                    fontSize: sfont(cfg.polices.textePetit - 1),
-                    textColor: cfg.couleurs.textePrincipal,
-                    cellPadding: smm(1),
-                    minCellHeight: smm(5)
-                },
-                columnStyles: {
-                    0: { cellWidth: largeurContenu * 0.10, halign: 'center' },
-                    1: { cellWidth: largeurContenu * 0.10, halign: 'center' },
-                    2: { cellWidth: largeurContenu * 0.80, fontSize: sfont(cfg.polices.textePetit - 2) }
-                },
-                margin: { left: margeG, right: margeD },
-                didParseCell: function(data) {
-                    // Seule la ligne total est en gras avec fond
-                    if (data.section === 'body' && data.row.index === donnesErreurs.length - 1) {
-                        data.cell.styles.fontStyle = 'bold';
-                        data.cell.styles.fillColor = cfg.couleurs.fondEntete;
-                    }
-                    // Masquer le texte du code (sera remplacé par un cercle)
-                    if (data.section === 'body' && data.column.index === 0 && data.row.index < donnesErreurs.length - 1) {
-                        data.cell.text = [''];
-                    }
-                },
-                didDrawCell: function(data) {
-                    // Dessiner le cercle colore avec le numero pour les lignes de code (pas Total)
-                    if (data.section === 'body' && data.column.index === 0 && data.row.index < donnesErreurs.length - 1) {
-                        var errType = donnesErreurs[data.row.index][3];
-                        var couleurHex = couleursErrFr[errType] || '#888888';
-                        var couleurRgb = _hexVersRgb(couleurHex);
-                        var rayon = Math.min(data.cell.width, data.cell.height) * 0.2;
-                        var cx = data.cell.x + data.cell.width / 2;
-                        var cy = data.cell.y + data.cell.height / 2;
-
-                        // Cercle plein
-                        doc.setFillColor(couleurRgb[0], couleurRgb[1], couleurRgb[2]);
-                        doc.circle(cx, cy, rayon, 'F');
-
-                        // Numero blanc centre
-                        doc.setTextColor(255, 255, 255);
-                        doc.setFont('helvetica', 'bold');
-                        doc.setFontSize(sfont(cfg.polices.textePetit - 2));
-                        doc.text(String(donnesErreurs[data.row.index][0]), cx, cy + rayon * 0.35, { align: 'center' });
-                    }
-                }
-            });
-
-            y = doc.lastAutoTable.finalY + smm(6);
-        } else if (stats.totalTampons > 0) {
-            // S'il y a des tampons mais aucune erreur, le mentionner
-            doc.setFontSize(sfont(cfg.polices.textePetit - 1));
-            doc.setFont('helvetica', 'italic');
-            doc.setTextColor(...cfg.couleurs.texteSecondaire);
-            doc.text('Aucune erreur de fran\u00e7ais annot\u00e9e.', margeG, y);
-            y += smm(5);
-        }
-
-        return y;
+        if (!candidates.length) return null;
+        return candidates.sort((a, b) => new Date(b.dateEvaluation || 0) - new Date(a.dateEvaluation || 0))[0];
     }
 
     /* ===============================
@@ -1907,7 +768,7 @@
             }
 
             // Ajouter la page de synthese (grille + retroaction)
-            ajouterPageSynthese(doc, fichier);
+            await ajouterPageSynthese(doc, fichier);
 
             // Telecharger
             // ✅ ANONYMISATION (Tier 0.1) : clé de base — prenom/nom sont anonymisés par obtenirDonneesSelonMode
