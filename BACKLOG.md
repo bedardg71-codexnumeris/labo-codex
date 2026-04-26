@@ -1,11 +1,80 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 30 mars 2026 (Beta 98.9, Build 0329-0930)
+> **Derniere mise a jour** : 26 avril 2026 (Beta 99.26, Build 0426-1422)
 
 ---
 
 ## A faire
+
+### Reserve — Suite du chantier ecosysteme de donnees (26 avril 2026)
+
+> **Contexte** : Le 26 avril 2026, l'architecture de l'ecosysteme de donnees a ete
+> definie en session Cowork (`docs/architecture/ECOSYSTEME-DONNEES.md`). Quatre
+> concepts separes : **Codex** (espace de travail actif), **Reserve** (archive
+> personnelle locale), **Codex data** (extrait pour la recherche), **Voute**
+> (bibliotheque partagee entre enseignants).
+>
+> Le module `js/reserve.js` v1 a ete livre le meme jour
+> (`docs/architecture/SPEC-RESERVE-V1.md`). API : `Reserve.verserGroupeCours()`,
+> `estimerVersement()`, `listerGroupesVersables()`. Le versement est un ZIP
+> structure telechargeable, decompresse manuellement dans `~/Documents/Reserve_LaboCodex/`.
+> Granularite par groupe-cours (pas par trimestre), UUID v4 par versement.
+> Acces via le menu Codex de l'en-tete uniquement (decision spec §6.3).
+
+- [ ] **#247** Refonte de Reglages > Donnees pour aligner avec l'architecture des 4 concepts
+  - **Etat actuel** : la page « Sauvegarde et restauration » presente trois
+    cartes — « Sauvegarde complete » (Exporter mes donnees), « Configuration
+    pedagogique » (Exporter ma config), « Importer un fichier ». Ce vocabulaire
+    precede l'architecture de l'ecosysteme et doit etre realigne.
+  - **Cible** :
+    - « Sauvegarde complete » → **Verser dans la reserve** (point vers
+      `Reserve.actionVerser`, retire `executerExport` ou le redirige)
+    - « Configuration pedagogique » → **Deposer dans la voute** (lorsque la
+      voute sera en place, phase ulterieure)
+    - « Importer un fichier » → garder comme entree double (Ouvrir un codex /
+      Emprunter de la voute), ou separer en deux gestes
+    - Renommer la section « Sauvegarde et restauration » → « Reserve et voute »
+    - Ajouter une carte de statut « Reserve » : nombre de versements detectes,
+      derniere date, taille (lecture d'un manifeste a importer ; v1.1 ou plus tard)
+  - **Prerequis** : versement v1 valide en usage reel (apres test terrain par
+    Gregoire). Ne pas refondre tant que des manques fonctionnels ne sont pas
+    couverts par le module reserve.
+  - **Risque a eviter** : doubler les flux (page Reglages + menu Codex pointant
+    vers le meme geste avec des libelles differents) cree de la confusion.
+    L'objectif est UN point d'entree clair par geste.
+  - **Decision en attente** : Codex data et Voute n'existent pas encore dans
+    l'application. La refonte complete attendra que ces concepts soient
+    implementes (priorites 4-7 de `ECOSYSTEME-DONNEES.md` §Priorites
+    d'implementation).
+
+- [ ] **#248** Reserve v1.1 — mise a jour automatique du `manifeste-reserve.json` global
+  - Actuellement, chaque versement inclut un `manifeste-reserve-patch.json`
+    qu'il faut fusionner manuellement (ou via un futur outil) dans le
+    manifeste global de la reserve. La spec v1 (§12) reporte cette
+    automatisation a la v1.1.
+  - **Idee** : permettre a l'application de lire le manifeste global (via
+    selection de fichier) puis de le fusionner avec les patches presents,
+    et de proposer le resultat au telechargement.
+
+- [ ] **#249** Reserve v1.1 — section dediee dans Reglages
+  - Section « Reserve » qui affiche l'etat de la reserve (versements detectes,
+    dates, tailles) en lisant un manifeste importe. Spec v1 §6.3 explicitement
+    differe a la v1.1.
+
+- [ ] **#250** Codex allege — retirer le TimeMachine du codex
+  - Priorite 1 de `ECOSYSTEME-DONNEES.md` §Priorites d'implementation. Gain
+    immediat estime : 400-800 Mo par codex. L'historique vit dans la reserve
+    (instantanes), plus dans le codex de travail.
+
+- [ ] **#251** Codex data — extraction depuis la reserve
+  - Priorite 4 de `ECOSYSTEME-DONNEES.md`. Format JSON leger (5-30 Mo), sans
+    blobs, multi-trimestres. Cle de regroupement `groupes` (UUID par
+    versement). Consomme par le Labo.
+
+- [ ] **#252** Labo autonome — sortir le Labo de la section Suivi
+  - Priorite 5 de `ECOSYSTEME-DONNEES.md`. Section dediee qui charge des
+    codex data en lecture seule sans ecraser le trimestre actif.
 
 ### Rythme Phase 5 — Raffinements (selon usage, post-AQPC)
 
