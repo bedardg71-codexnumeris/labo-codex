@@ -1,9 +1,9 @@
-# SESSION — État au 25 avril 2026 soir (Refonte synthèse de rétroaction COMPLÈTE)
+# SESSION — État au 26 avril 2026 (Réserve v1 LIVRÉE — voie de retour à concevoir)
 
-**Date** : 25 avril 2026
-**Dernier build** : `0425-1916` · Beta 99.25
-**Branche** : `main`
-**Statut** : **Refonte complète du PDF de synthèse de rétroaction LIVRÉE** — basée sur le handoff Claude Design « Direction B - Tableau de bord critères », principe « rien de neuf, tout reformatage », zéro-dette appliqué (`travaux-export-pdf.js` −1148 lignes nettes).
+**Date** : 26 avril 2026 (après-midi)
+**Dernier build** : `0426-1422` · Beta **99.26**
+**Branche** : `main` (4 commits du jour, **non poussés**)
+**Statut** : **Module `reserve.js` v1 livré et validé sur 3 versements terrain.** Trois nouveaux items au backlog issus de la discussion post-livraison (#253-255).
 
 ---
 
@@ -14,159 +14,206 @@
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
-Contexte : Refonte synthèse de rétroaction PDF LIVRÉE le 25 avril 2026.
-Architecture HTML rasterisé via html2canvas + lecture des données existantes
-(rien de nouveau). Beta 99.25, build 0425-1916.
+Contexte : Suite du chantier écosystème de données. La Réserve v1
+(versement app → ZIP) est livrée et validée le 26 avril 2026 (commits
+4788938, 46513de, 3a1805d, 59c8c41 sur main, non poussés). Il reste
+à attaquer la voie de retour Réserve → app, ou un autre item.
 
-Ouvre ces fichiers pour contexte :
-1. SESSION.md (ce fichier)
-2. memory/project_synthese_retroaction.md (mémoire projet détaillée)
-3. js/synthese-retroaction-data.js (340+ l., module data pur)
-4. js/synthese-retroaction-rendu.js (450+ l., module rendu HTML)
-5. design_handoff_synthese_B/README.md (spec de design source)
+LECTURE OBLIGATOIRE AVANT DE CODER :
+1. (auto-memory de Claude) project_reserve.md — résumé technique du module
+   reserve.js livré (API, filtrage en deux passes, bugs corrigés, points de
+   vigilance). Pointer présent dans MEMORY.md, chargé automatiquement.
+2. docs/architecture/ECOSYSTEME-DONNEES.md — document fondateur (4 concepts :
+   Codex, Réserve, Codex data, Voûte). Vocabulaire bibliothécaire.
+3. docs/architecture/SPEC-RESERVE-V1.md — spec du module livré (référence)
+4. BACKLOG.md — items #247 à #255, feuille de route post-v1
+5. CLAUDE.md — section « Architecture des données »
 
-Prochains chantiers possibles (pas démarrés) :
-- Plan 2 (partage CC BY-NC-SA entre utilisateurs) — cadrage dans
-  plans de travail/PLAN-PARTAGE-RESSOURCES.md et docs/HOOKS-PLAN2.md
-- Phase 6 du Plan 1 : doc utilisateur in-app (parcours modélisation → autonomie)
-- Désaturation localStorage : extraction thumbnails fichiersTravaux
-  (plans de travail/Plan - Désaturation localStorage (analyse).md)
+ITEMS DISPONIBLES (par ordre logique recommandé) :
 
-Observations encore ouvertes :
-- Quota localStorage saturé sur Mac (warnings au boot)
-- Grille orpheline grille_1772187755149_uq1oiiafa référencée par H2026
+  #255  Clarifier ECOSYSTEME-DONNEES.md — voie de retour Réserve → app
+        (15-30 min, doc seulement). Ajouter le verbe « réimporter » au
+        tableau, expliciter la double fonction de la Réserve (dépôt +
+        fonds consultable) dans le vocabulaire bibliothécaire.
+
+  #253  FSAPI Chrome/Edge — automatisation du versement (1-2 j, gain UX
+        énorme). Pattern à reprendre depuis _fileHandle dans codex.js.
+        Safari reste en flux manuel — décision assumée.
+
+  #254  Ouvrir un versement de la Réserve — consultation + réimport
+        sélectif de ressources (grilles, échelles, productions,
+        cartouches) vers les bibliothèques actives. Mode démo lecture
+        seule. Plus gros chantier.
+
+  #250  Codex allégé — retirer le TimeMachine (priorité 1 ECOSYSTEME,
+        gain 400-800 Mo immédiat par codex). Indépendant de la Réserve.
+
+  #251  Codex data — extraction depuis la Réserve (priorité 4). Format
+        JSON sans blobs pour le Labo. Distinct de #254 (ressources
+        pédagogiques) — celui-ci sert l'analyse longitudinale.
+
+  #252  Labo autonome — sortir de la section Suivi (priorité 5).
+
+  #247  Refonte Réglages > Données — conditionnée à validation terrain
+        de la Réserve par Grégoire. Pas urgent.
+
+  #248-249  Améliorations Réserve v1.1 (manifeste auto, section dans
+            Réglages). Mineurs.
+
+CONTRAINTES (rappel) :
+- Safari Mac + iPad cibles principales (file://)
+- Cache-busters ?v= INOPÉRANTS sur Safari file:// — Cmd+Q pour rechargement
+- console.log interdit — console.warn/error uniquement
+- echapperHtml() obligatoire sur innerHTML avec données utilisateur
+- Zéro handler inline — utiliser data-action / data-on-change (le
+  dispatcher main.js supporte la dot notation, ex. Reserve.actionVerser)
+- Variables CSS du DS, tester modes clair ET sombre
+- Bumper version.json + js/init-inline.js (PAS index.html — les fallback
+  ont migré) avant chaque commit. Demander le numéro de beta à Grégoire.
+- Stage explicite par fichier (git add fichier1 fichier2) — beaucoup
+  d'autres modifications dans le working tree non liées au chantier.
+
+OBSERVATIONS OUVERTES (hors scope) :
+- 4 commits Réserve v1 du 26 avril non poussés sur origin
+- Quota localStorage saturé sur Mac (warnings au boot, plan dans
+  « plans de travail/Plan - Désaturation localStorage (analyse).md »)
+- Grille orpheline grille_1772187755149_uq1oiiafa dans H2026 (référencée
+  mais absente de grillesTemplates)
+- Cours orphelin A2025 (COURS1766455789356 référencé par les étudiants
+  et le groupe-cours, absent de la table globale `cours`). reserve.js a
+  un fallback pour ce cas, mais d'autres parties de l'app pourraient être
+  affectées.
 ```
 
 ---
 
-## 1. Synthèse de rétroaction — refonte design B
+## 1. Ce qui a été livré le 26 avril 2026 (après-midi)
 
-### Architecture livrée
+### 4 commits sur `main` (non poussés)
 
 ```
-libs/html2canvas.min.js                  (198 Ko, MIT, zéro eval, CSP-compatible)
-js/synthese-retroaction-data.js          (340+ l., pur, 0 UI)
-js/synthese-retroaction-rendu.js         (450+ l., HTML/CSS inline, hex absolus)
-js/travaux-export-pdf.js                 (1156 l., -1148 vs ancien)
-index.html                               (3 nouveaux script tags)
+59c8c41  Backlog — voie de retour réserve → app (#253-255)
+3a1805d  Backlog — feuille de route écosystème de données (#247-252)
+46513de  Réserve v1 — intégration UI dans le menu Codex
+4788938  Réserve v1 — module reserve.js + bump 99.26 (b0426-1422)
 ```
 
-### Pipeline de génération
+### Module `js/reserve.js` (~750 l., IIFE)
 
-`ajouterPageSynthese(doc, fichier, productionIdOverride)` async :
-1. Résout l'évaluation depuis le fichier
-2. `construireFeedback()` assemble le shape Feedback depuis sources existantes
-3. `rendreSyntheseHTML()` produit du HTML/CSS inline avec polices système
-4. Injection dans un conteneur DOM off-screen (`left: -10000px`)
-5. `html2canvas(scale: 2, hauteur dynamique scrollHeight)` rastérise
-6. `doc.addPage(W·2, H·2) + addImage(JPEG, 0, 0, W·2, H·2)` ajoute au PDF
+API publique :
+- `Reserve.verserGroupeCours(trimestre, groupeCoursId)` — flux complet de versement
+- `Reserve.estimerVersement(trimestre, groupeCoursId)` — UI helper (estimation sans blobs)
+- `Reserve.listerGroupesVersables(trimestre)` — UI helper (dropdown)
+- `actionVerser` / `fermerDialogue` / `lancerDepuisDialogue` / `onChangerTrimestre` / `onChangerGroupe` — pour les `data-action`
 
-### Principe directeur appliqué
+**Filtrage en deux passes complet** :
+- Étudiants par numéro de groupe (`normaliserGroupe`, padStart 5 zéros)
+- Présences/évaluations/interventions/indicesCP/portfoliosEleves par DA
+- fichiersTravaux/corbeilleFichiers par `groupeCoursId`
+- annotationsTravaux par `fichierId` du groupe
+- snapshots_{gcId} par suffixe de clé
+- Trimestre-shared sans filtre : cadreCalendrier, evenementsPrevus/Imprevus, horaires, planification_mindmap, seancesCompletes, snapshots (legacy bare), grillesTemplates/echellesTemplates/pratiquesConfigurables (copies archivées)
 
-**« La synthèse est un reformatage, pas une production. »**
+**Détails dans** `memory/project_reserve.md`.
 
-- Aucun nouveau champ dans le modèle de données
-- Aucun calcul nouveau (la note moyenne vient de `calculerDetailsNoteFinale` SSOT)
-- Sections sans donnée → masquées automatiquement
-- Cellules de cartouche vides → laissées vides (signal à l'enseignant)
+### Intégration UI dans `index.html`
 
-### Sources réutilisées (toutes existantes)
+- Script tag `js/reserve.js?v=2026042605` après `travaux-stockage.js`, avant `codex.js`
+- Bouton « Verser dans la réserve... » dans `#codex-menu` (icône `icon-filing-cabinet.svg`)
+- Modale `#modalReserve` : selects trimestre + groupe + aperçu d'estimation + avertissement confidentialité
 
-- `evaluation` (etudiantDA, productionId, grilleId, cartoucheId, echelleId, criteres[], niveauFinal, retroactionFinale, jetons)
-- `groupeEtudiants` (DA, prenom, nom, groupe)
-- `productions` (titre, activiteApprentissage, objectif, tache, dateLimite)
-- `infoCours` (codeCours, nomCours, prenomEnseignant, nomEnseignant, session, annee)
-- `grillesTemplates` (criteres avec description et ponderation)
-- `echellesTemplates` (niveaux avec code, label, couleur — couleur **utilisateur** prioritaire, pas de constante hardcodée)
-- `cartouches_${grilleId}` (contexte, contexteSpecifique, commentaires `${critereId}_${niveau}`)
-- `compterAnnotationsDetailees(annotation)` (déjà exposé dans `travaux-export-pdf.js`)
-- `obtenirRetroactionsObservations()` / `obtenirRetroactionsErreursFr()`
-- `obtenirConfigJetons()` (3 types : delai, reprise, repriseCiblee)
-- `calculerDetailsNoteFinale(da)` SSOT portfolio (artefactsRetenus, moyenne, plafonnement)
-- `db.getSync('couleursCategories')` (palette utilisateur Action / Observations / Compréhension)
-- `travauxOutils.OUTILS[errfr_X].couleurBouton` (couleurs natives codes erreurs FE)
-- `travauxOutils.AUTOCOLLANTS` + `travauxOutils.getImageAutocollant(id)` (icônes PNG des tampons)
+### `js/import-export.js`
 
-### Décisions techniques notables
+`window.estRessourceDemo` et `window.filtrerRessourcesNonDemo` exposés sur window (zéro duplication).
 
-1. **Rasterisation HTML via html2canvas** plutôt que reproduction en jsPDF natif. Le design B est trop dense (5 zones, jauge IDME 5-crans, tableau Section/Détail) pour reproduction native. Inconvénient : texte non sélectionnable sur la page synthèse — acceptable car usage cible = consultation cellulaire.
+### Tests terrain validés (3 versements réels)
 
-2. **Hauteur de page dynamique** : `SYNTH_PAGE_W = 816` fixe (Letter US 8.5"), `SYNTH_PAGE_H_MIN = 1056`. Hauteur réelle = `Math.max(MIN, scrollHeight, offsetHeight)` mesurée après injection DOM. La page peut dépasser 11" — l'élève scrolle sur cellulaire.
+| Versement | Étudiants | Fichiers | UUID | Vérification |
+|---|---|---|---|---|
+| H2026 gr00002 | 25 | 138 (0 manquant) | `0912be53-…` | isolation parfaite ✅ |
+| H2026 gr00008 | 26 | 150 (0 manquant) | `f916f905-…` | isolation parfaite ✅ |
+| A2025 gr00001 | 30 | 0 (archivé) | `f5671c28-…` (3e version après bug fix) | isolation parfaite ✅ |
 
-3. **Couleurs en hex absolues** (pas de `var(--…)`). html2canvas ne résout pas les variables CSS sur des nœuds détachés ou contextes incertains. Le module data préserve la couleur de l'échelle utilisateur telle quelle si hex, sinon retombe sur `SCALE_FALLBACK` (palette IDME du handoff).
+**Disjonction inter-groupe** : 0 doublon de DA, 0 doublon de fichier entre les versements. Bibliothèques globales correctement partagées.
 
-4. **Polices stack système** : `-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui` + `ui-monospace, SFMono-Regular, Menlo, Consolas`. Sur Mac/iPad de Grégoire = SF + SF Mono. Pas de FOUT, pas de CDN, pas de fichiers embarqués. Comme le rendu est rasterisé chez l'enseignant, l'élève voit l'image — aucun fallback de police côté lecteur cellulaire.
+### Bugs identifiés et corrigés en cours de test
 
-5. **Encadrement « 4 retenues » TrimestreBar** : `border: 1px solid INK + box-sizing: border-box`. La 1ʳᵉ tentative `box-shadow: inset 0 0 0 2px INK` était mal rendue par html2canvas (apparaissait comme un fond noir total). Lecture des retenues via `calculerDetailsNoteFinale(da).portfolio.artefactsRetenus[]`.
-
-6. **Tampons : icônes PNG tintées** par couleur de catégorie. `canvas globalCompositeOperation: 'source-in'` + `fillRect` repeint les pixels alpha non-nuls de l'image. Reproduit le comportement de l'ancien `autocollantToDataURL(id, tint)`. Couleur lue dans `db.getSync('couleursCategories')`.
-
-7. **Erreurs FE top 2** (focus, pas relevé exhaustif). Titre explicite : « Français écrit · 2 catégories les plus fréquentes ». Total /N erreurs préservé. Couleur de pastille = `OUTILS[errfr_X].couleurBouton` (rouge/orange/bleu/violet/vert).
-
-8. **Note provisoire** : niveaux IDME en lettres uniquement + **1 seule phrase chiffrée** (« La note chiffrée provisoire de ton portfolio est X %. ») affichée **en tête** de la rangée, avant les 2 colonnes (retenus / à venir + obligatoires). Pondérations 65 %/35 % retirées de la feuille élève.
-
-9. **Jetons alignés sur la config** : 3 types lus depuis `obtenirConfigJetons()` avec leurs `nombre` respectifs. Un type est affiché **uniquement si activé** (`reprise.nombre > 0`, `repriseCiblee.actif === true`).
-
-10. **`NOMS_NIV` retiré** (anti-hardcoding) : remplacé par `libelleNiveau(echelle, code)` qui lit le label depuis l'échelle utilisateur. Si « I » est nommé « Insuffisant » dans l'échelle, c'est ça qui apparaît dans la synthèse.
-
-### Zéro-dette appliqué
-
-`js/travaux-export-pdf.js` : retraits explicites **−1148 lignes nettes** (CLAUDE.md §Principes directeurs) :
-
-- `CC_LOGO_PNG` (8 Ko base64) + `CC_LOGO_W` + `CC_LOGO_H`
-- `getCfg`, `MM_TO_PX`, `mm`, `_synthScale`, `smm`, `sfont`
-- `ajouterEnteteRetroaction`, `ajouterPiedPageSynthese`, `finaliserPagesSynthese`
-- ancien `ajouterPageSynthese` (~775 l.)
-- `ajouterSyntheseVisuelle` (~245 l.)
-- `autocollantToDataURL`, `_hexVersRgb`
-
-`compterAnnotationsDetailees` **conservé** (utilisé par `actions-rlo.js`, `evaluation.js`, `journal.js` et le nouveau module data).
-
-### Hardcoding subsistant (assumé)
-
-- Labels structurels : « BILAN », « JETONS UTILISÉS », « OBJECTIF » / « TÂCHE » / « CONTEXTE », « PROGRESSION · TRIMESTRE », « Rétroaction par critère »
-- Texte motivationnel `BILAN_INTRO` (« Mes standards sont très élevés à ton égard… ») — voix d'enseignant fixe
-- Phrases dérivées (« Tu as progressé en X. », « Cet objectif est prioritaire depuis 3 productions »)
-- Libellés des 3 types de jetons (`obtenirConfigJetons` ne stocke pas de noms)
-
-### Workflow de la session
-
-Itération rapide « build → user teste → ajustement », ~12 builds entre `0425-0838` et `0425-1916`. Pattern : user envoie capture, je lis le code, je fix ciblé, je bump build (et cache-busters dans `index.html`). Pas de plan figé en avance — laisser le user piloter le terrain a marché ici parce que les modifs étaient en surface (data + rendu, pas modèle).
+1. **11 clés trimestre non reconnues** au premier essai — règles ajoutées (cf. `project_reserve.md`)
+2. **Ordre `fichiersTravaux` vs `annotationsTravaux`** : `db.keys()` ne garantit pas l'ordre. `fichiersTravaux` désormais pré-traité avant la boucle.
+3. **Trimestres archivés** : copies archivées des bibliothèques (`a2025_grillesTemplates`, etc.) ajoutées à `CLES_SANS_FILTRE`.
+4. **Cours orphelin** (cas A2025) : `gc.coursId` ne résolvait pas dans la table globale `cours` (le cours d'origine a été remplacé par celui de H2026). Fallback regex sur `gc.nom` pour extraire `601-101`.
+5. **Regex trop permissive** : la première version attrapait `025-601` au lieu de `601-101` dans `"A2025-601-101-MQ-00001"`. Ancrage `(?:^|[^0-9])` ajouté.
 
 ---
 
-## 2. Conventions opérationnelles (inchangées)
+## 2. Décisions de la discussion post-livraison
 
-- **Build** : format `MMJJ-HHMM` Toronto. Bump à chaque commit. Beta fixe journée.
-- **Cache-busters** : bumper `?v=` dans `index.html` pour chaque `.js` modifié, dans le MÊME commit. Pour Safari file:// : **Cmd+Q** pour vider le cache.
-- **Demander numéro de beta** avant chaque commit.
-- **version.json** + fallback `js/init-inline.js` BUILD_ID à chaque commit.
-- **Principe zéro-dette** (CLAUDE.md) : appliqué intégralement dans cette session — retrait massif de l'ancien rendu jsPDF natif.
+Trois manques architecturaux identifiés, formalisés en items #253-255 (commit `59c8c41`).
 
----
+### Le constat
 
-## 3. Observations encore à investiguer (hors scope synthèse)
+La Réserve v1 est **voie d'aller seulement** : l'app écrit dans la Réserve, mais ne lit pas depuis elle. Le vocabulaire bibliothécaire (codex, bibliothèque, réserve, voûte) suggère pourtant une **double fonction** : dépôt ET fonds consultable.
 
-### Quota localStorage saturé (Mac)
+### Le scénario qui ne fonctionne pas aujourd'hui
 
-Warnings récurrents au boot :
-```
-[DB] Quota localStorage dépassé pour "echellesTemplates"/"grillesTemplates"/...
-```
+> Au fil des trimestres, Grégoire purge ses bibliothèques actives (grilles, échelles, productions, cartouches) pour ne garder que ce qui est utilisé. La Réserve devient le seul endroit où vivent les ressources retirées. Mais aujourd'hui, il ne peut pas les ré-importer ni faire une démo d'un trimestre archivé.
 
-Plan de désaturation déjà cadré dans `plans de travail/Plan - Désaturation localStorage (analyse).md` (extraction thumbnails de `fichiersTravaux`).
+### Les trois items pour combler
 
-### Grille orpheline dans trimestre H2026 réel
-
-Erreur au boot :
-```
-❌ Grille de référence "grille_1772187755149_uq1oiiafa" introuvable
-```
-
-Cette grille est référencée par des productions/évaluations réelles mais absente de `grillesTemplates`. État dégradé du trimestre H2026. À diagnostiquer séparément.
+- **#253** — FSAPI Chrome/Edge pour automatiser le versement (réponse à la friction de 5 manipulations Finder)
+- **#254** — Ouvrir un versement (lecture + réimport sélectif de ressources, mode démo en lecture seule). **Distinct de #251** (Codex data → Labo) : #254 sert le matériel pédagogique, #251 sert l'analyse longitudinale.
+- **#255** — Clarifier dans le doc fondateur que la Réserve est dépôt + fonds consultable, ajouter le verbe « réimporter ».
 
 ---
 
-## 4. Préservation des données personnelles
+## 3. État du codebase (résumé pour la reprise)
 
-Aucune donnée n'a été modifiée par cette session. Le chantier est **purement additif** (3 nouveaux modules + 1 lib) et **soustractif côté code** (retrait ancien rendu jsPDF). Le shape de données et le pipeline d'évaluation restent identiques.
+### Fichiers livrés / modifiés aujourd'hui
+
+| Fichier | Type | Notes |
+|---|---|---|
+| `js/reserve.js` | nouveau | ~750 l. IIFE, expose `window.Reserve` |
+| `js/import-export.js` | modifié | exports `estRessourceDemo` + `filtrerRessourcesNonDemo` |
+| `js/init-inline.js` | modifié | bump beta 99.26 / build 0426-1422 |
+| `version.json` | modifié | bump |
+| `index.html` | modifié | script tag + bouton menu + modale |
+| `BACKLOG.md` | modifié | items #247-255 |
+
+### Fichiers du working tree NON liés au chantier (à laisser tel quel)
+
+- `Audit UX/*` (ajouts/suppressions de captures)
+- `CLAUDE.md`, `SESSION.md` (modifs antérieures)
+- `Skills pour Claude Code/*` (ajouts non commités)
+- `docs/00-START-HERE.md`, `docs/AUDIT-TEXTES-AIDE.md`
+- `js/contexte.js` (modif antérieure non liée)
+- Nombreux untracked dans `Rapports/`, `Refactorisations/`, `docs/plans/`, etc.
+- `Sauvegarde réserve 26 avril/` (données de test, NE PAS commiter)
+- `memory/` (auto-memory de Claude, NE PAS commiter)
+
+---
+
+## 4. Conventions opérationnelles (inchangées)
+
+- **Build** : format `MMJJ-HHMM` Toronto. Bump à chaque commit.
+- **Beta** : fixée pour la journée. Demander le numéro à Grégoire avant chaque commit.
+- **Cache-busters** : bumper `?v=` dans `index.html` pour chaque `.js` modifié.
+- **Sources de vérité version** : `version.json` + `js/init-inline.js` (pas `index.html` — les fallback ont migré).
+- **Principe zéro-dette** (CLAUDE.md) : appliqué intégralement.
+
+---
+
+## 5. Observations encore à investiguer (hors scope chantier)
+
+- **Quota localStorage saturé (Mac)** — plan dans `plans de travail/Plan - Désaturation localStorage (analyse).md`
+- **Grille orpheline H2026** : `grille_1772187755149_uq1oiiafa` référencée mais absente de `grillesTemplates`. Pas urgent.
+- **Cours orphelin A2025** : `COURS1766455789356` référencé par étudiants + groupe-cours, absent de `cours`. `reserve.js` a un fallback regex, mais d'autres parties de l'app pourraient être affectées (à investiguer un jour).
+- **4 commits du 26 avril non poussés** sur origin.
+
+---
+
+## 6. Préservation des données personnelles
+
+- Données du 26 avril préservées
+- Codex récents disponibles
+- 3 versements de test dans `~/Documents/Réserve_LaboCodex/trimestres/` (les ZIPs ne sont **pas** dans le repo Git)
+- Aucune migration destructive effectuée
