@@ -76,6 +76,78 @@
   - Priorite 5 de `ECOSYSTEME-DONNEES.md`. Section dediee qui charge des
     codex data en lecture seule sans ecraser le trimestre actif.
 
+- [ ] **#253** Reserve v1.5 — automatisation du versement (FSAPI Chrome/Edge)
+  - **Probleme** : le versement v1 exige 5 manipulations Finder
+    (deplacer le ZIP depuis Telechargements, le decompresser, supprimer
+    le ZIP source, fusionner manuellement le manifeste-patch). Friction
+    bloquante pour les utilisateurs non techniques.
+  - **Solution** : File System Access API (Chrome/Edge sur Mac).
+    L'utilisateur choisit son dossier `Reserve_LaboCodex/` une seule fois
+    via `showDirectoryPicker()`, le handle est persiste en IndexedDB.
+    Versements suivants : ecriture directe + decompression in-place +
+    mise a jour du `manifeste-reserve.json` global, sans intervention
+    manuelle. Pattern reutilisable depuis `_fileHandle` dans codex.js.
+  - **Limite assumee** : Safari ne supporte pas FSAPI. Le flux manuel
+    reste pour les utilisateurs Safari. Documenter clairement « pour un
+    versement automatique, utilise Chrome ou Edge ».
+  - **Effort** : 1-2 jours. Gain UX enorme pour les Mac+desktop users.
+  - **Priorite** : Haute, conditionnee aux retours testeurs sur le flux v1.
+
+- [ ] **#254** Ouvrir un versement de la reserve — consultation et reimport selectif
+  - **Use case** : au fil des trimestres, les bibliotheques actives
+    (`grillesTemplates`, `echellesTemplates`, `productionsTemplates`,
+    `cartouches_*`, tampons) sont purgees. La reserve devient le seul
+    endroit ou vivent les ressources retirees. Quand l'utilisateur veut :
+    - Reprendre une grille A2024 pour l'adapter a H2026
+    - Faire une demo d'un trimestre passe (formation collegue, AQPC,
+      seance de labo)
+    - Recuperer un cartouche de commentaires bien redige qui n'est plus
+      dans la bibliotheque active
+    il doit pouvoir **lire la reserve depuis l'application**.
+  - **Mecanisme** :
+    - Selection d'un fichier `.reserve.zip` (ou navigation FSAPI dans
+      `Reserve_LaboCodex/` si #253 livre)
+    - Chargement en namespace temporaire (ex. `__archive_a2025_*`),
+      separe du trimestre actif, lecture seule
+    - Affichage d'un panneau « Contenu du versement » : etudiants
+      (anonymisable pour demo), productions, grilles, echelles,
+      cartouches, evaluations
+    - **Pour les ressources de bibliotheques** : selection multiple +
+      bouton « Reimporter dans mes bibliotheques actives »
+    - **Pour les donnees pedagogiques** : consultation seule, optionnel
+      mode « simuler ce trimestre » qui bascule l'app en lecture seule
+      sur ces donnees (utile demo)
+  - **Ne fait PAS** : modifier le versement original. L'archive reste
+    figee. Pour corriger des donnees historiques, c'est un autre flux
+    (eventuellement : creer un nouveau versement-correctif avec UUID
+    distinct, hors scope v1).
+  - **Distinction avec #251 (Codex data)** : codex data extrait des
+    donnees analytiques (indices, snapshots, longitudinal) pour le Labo.
+    #254 extrait du materiel pedagogique reutilisable pour les
+    bibliotheques. Complementaire, pas redondant.
+  - **Priorite** : Haute des que la base d'utilisateurs purge ses
+    bibliotheques. Pour Gregoire : pertinent des que la migration vers
+    « tout-numerique » est complete.
+
+- [ ] **#255** Clarifier le role de la reserve dans `ECOSYSTEME-DONNEES.md`
+  - **Probleme** : le document fondateur presente la reserve comme
+    « archive personnelle locale » avec verbes « verser, consulter,
+    extraire ». La voie de retour reserve → app n'est pas detaillee, et
+    « consulter » ne distingue pas l'analyse longitudinale (codex data)
+    du reimport selectif de ressources (#254).
+  - **Cible** : reformuler la reserve comme **double fonction** dans le
+    vocabulaire bibliothecaire deja en place (codex, bibliotheque,
+    reserve, voute) :
+    - **Depot** : versement d'un groupe-cours en fin de trimestre
+    - **Fonds consultable** : extraction de ressources reutilisables et
+      consultation de trimestres passes pour demo / formation /
+      reflexion professionnelle
+  - Ajouter au tableau des verbes : « reimporter » (reserve → app
+    bibliotheques) et « ouvrir un versement » (reserve → consultation
+    temporaire en namespace isole).
+  - Lier #254 (mecanisme) a cette clarification (vocabulaire).
+  - **Effort** : 1-2 heures de redaction.
+
 ### Rythme Phase 5 — Raffinements (selon usage, post-AQPC)
 
 - [ ] **#240** Courbe d'apprentissage de l'evaluateur (tendance temporelle par activite)
