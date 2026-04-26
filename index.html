@@ -3709,6 +3709,9 @@
                                 <button id="codex-menu-exporter" class="codex-menu-item" data-action="Codex.actionExporterSelection">
                                     <span class="codex-menu-icone"><img src="icons/icon-export.svg" alt=""></span> Exporter une s&eacute;lection...
                                 </button>
+                                <button id="codex-menu-verser-reserve" class="codex-menu-item" data-action="Reserve.actionVerser">
+                                    <span class="codex-menu-icone"><img src="icons/icon-filing-cabinet.svg" alt=""></span> Verser dans la r&eacute;serve...
+                                </button>
                                 <div class="codex-menu-sep"></div>
                                 <button id="codex-menu-fermer" class="codex-menu-item codex-menu-item--danger u-hide" data-action="Codex.actionFermer">
                                     <span class="codex-menu-icone"><img src="icons/icon-cancel.svg" alt=""></span> Fermer le codex
@@ -15799,6 +15802,7 @@
     <script src="libs/jszip.min.js?v=3.10.1"></script>
     <script src="libs/html2canvas.min.js?v=1.4.1"></script>
     <script src="js/travaux-stockage.js?v=2026020601"></script>
+    <script src="js/reserve.js?v=2026042605"></script>
     <script src="js/travaux-preparation.js?v=2026021801"></script>
     <script src="js/travaux-import.js?v=2026032600"></script>
     <script src="js/travaux-visionneuse.js?v=2026022601"></script>
@@ -16293,6 +16297,67 @@
                 </button>
                 <button data-action="sauvegarderConfidentiel" class="btn btn-confirmer u-texte-petit" style="padding: 6px 12px">
                     Enregistrer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         MODAL RÉSERVE — Versement d'un groupe-cours
+         (26 avril 2026 — voir docs/architecture/SPEC-RESERVE-V1.md)
+         ========================================= -->
+    <div id="modalReserve" class="modal-overlay" data-close-on-bg="Reserve.fermerDialogue">
+        <div class="modal-contenu" style="max-width: 600px; padding: 16px;">
+            <button data-action="Reserve.fermerDialogue" class="modal-fermer" title="Fermer">
+                <img src="icons/icon-close-window.svg" alt="" class="modal-close-icon">
+            </button>
+
+            <h2 class="modal-titre u-texte-11" style="margin-bottom: 4px">
+                <img src="icons/icon-filing-cabinet.svg" alt="" class="btn-inline-icon">
+                Verser dans la r&eacute;serve
+            </h2>
+            <p class="u-mb-10" style="color: var(--texte-secondaire); font-size: 0.85rem">
+                Le versement g&eacute;n&egrave;re un fichier ZIP contenant les donn&eacute;es et travaux d'un seul groupe-cours.
+                D&eacute;compresse-le ensuite dans <code>~/Documents/R&eacute;serve_LaboCodex/</code> pour compl&eacute;ter le versement.
+            </p>
+
+            <div class="u-flex-col u-flex-gap-10" style="margin-bottom: 12px;">
+                <div>
+                    <label for="reserve-select-trimestre" class="u-texte-medium" style="display: block; margin-bottom: 4px;">
+                        Trimestre
+                    </label>
+                    <select id="reserve-select-trimestre" class="controle-form" style="width: 100%;"
+                            data-on-change="Reserve.onChangerTrimestre">
+                    </select>
+                </div>
+
+                <div>
+                    <label for="reserve-select-groupe" class="u-texte-medium" style="display: block; margin-bottom: 4px;">
+                        Groupe-cours
+                    </label>
+                    <select id="reserve-select-groupe" class="controle-form" style="width: 100%;"
+                            data-on-change="Reserve.onChangerGroupe">
+                    </select>
+                </div>
+            </div>
+
+            <div id="reserve-apercu" class="u-mb-10"
+                 style="background: var(--surface-carte); padding: 8px 10px; border-radius: var(--radius-moyen); font-size: 0.85rem; line-height: 1.5;">
+                <em>S&eacute;lectionne un trimestre et un groupe-cours.</em>
+            </div>
+
+            <div class="u-mb-10" style="background: var(--bleu-tres-pale); padding: 6px 10px; border-radius: var(--radius-moyen); font-size: 0.78rem; color: var(--texte-secondaire);">
+                <img src="icons/icon-lock.svg" alt="" class="btn-inline-icon">
+                Le fichier g&eacute;n&eacute;r&eacute; contient des donn&eacute;es personnelles d'&eacute;tudiants.
+                Ne le partage pas. Conserve-le dans un emplacement s&eacute;curis&eacute;.
+            </div>
+
+            <div class="btn-groupe u-flex-gap-8" style="justify-content: flex-end;">
+                <button data-action="Reserve.fermerDialogue" class="btn btn-annuler u-texte-petit" style="padding: 6px 12px">
+                    Annuler
+                </button>
+                <button data-action="Reserve.lancerDepuisDialogue" class="btn btn-confirmer u-texte-petit" style="padding: 6px 12px">
+                    Verser ce groupe
                 </button>
             </div>
         </div>
