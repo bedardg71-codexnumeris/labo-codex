@@ -3002,4 +3002,8 @@ window.fermerModalExport = fermerModalExport;
 window.toggleToutesLesCles = toggleToutesLesCles;
 window.executerExport = executerExport;
 
+// Filtrage des données démo — réutilisé par js/reserve.js
+window.estRessourceDemo = estRessourceDemo;
+window.filtrerRessourcesNonDemo = filtrerRessourcesNonDemo;
+
 })();
