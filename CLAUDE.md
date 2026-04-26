@@ -69,6 +69,17 @@ Ce document te guidera vers :
 
 ---
 
+## Architecture des donnees
+
+**Document fondateur** : `docs/architecture/ECOSYSTEME-DONNEES.md` (26 avril 2026)
+
+Quatre concepts : **Codex** (espace de travail actif), **Reserve** (archive locale),
+**Codex data** (format recherche), **Voute** (bibliotheque partagee).
+Lire ce document AVANT de toucher a `codex.js`, `import-export.js`, `db.js`
+ou `travaux-stockage.js`.
+
+---
+
 ## Contraintes techniques
 
 - **Stack** : HTML5 / CSS3 / JavaScript ES6+ pur (aucune dependance externe sauf Chart.js)
@@ -151,7 +162,16 @@ Utiliser `window.cle('nomCle')` pour obtenir la cle namespacee.
    - `SKILL_Ecosysteme_classe.md` — cadre pedagogique (ELLAC, SOLO, PAN, SRPNF, IDME, cartouches)
    - `SKILL_Alignement.md` — module Alignement (carte mentale, lecons, sequences, design curriculaire)
    - `SKILL_RaI.md` — depistage SOLO, IPB, diagnostic croise, patterns, interventions RaI
-   Ces quatre skills sont complementaires et constituent la reference metier du projet.
+   - `SKILL_Securite_donnees.md` — securite, anonymisation, integrite, modele de menaces, Loi 25
+   - `SKILL_integrite_globaux.md` — collections globales partagees (grillesTemplates,
+     cours, enseignants, cartouches_*, etc.). Checklist 4 points + 5 anti-patterns
+     observes. **Charger en PRIORITE pour tout code qui ecrit/fusionne/filtre dans
+     ces cles** (demo-activation.js, reserve.js, import-export.js, futurs modules
+     Plan 2). Ne jamais filtrer par flag, toujours par identite de la source.
+   Ces six skills sont complementaires et constituent la reference metier du projet.
+   **Si travail sur les donnees** (codex, reserve, import/export, anonymisation) :
+   charger `SKILL_Securite_donnees.md` EN PRIORITE — les regles de la section 9
+   sont obligatoires pour tout code touchant aux donnees.
 3. Consulter `BACKLOG.md` pour les taches en attente
 4. Consulter `SESSION.md` pour le contexte actuel
 5. Identifier le module concerne dans `docs/modules/`
