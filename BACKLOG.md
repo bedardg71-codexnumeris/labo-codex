@@ -62,7 +62,7 @@
     dates, tailles) en lisant un manifeste importe. Spec v1 §6.3 explicitement
     differe a la v1.1.
 
-- [ ] **#250** Codex allege — retirer le TimeMachine du codex
+- [x] **#250** Codex allege — retirer le TimeMachine du codex (livre 28 avril 2026, b0428-1000)
   - Priorite 1 de `ECOSYSTEME-DONNEES.md` §Priorites d'implementation. Gain
     immediat estime : 400-800 Mo par codex. L'historique vit dans la reserve
     (instantanes), plus dans le codex de travail.
@@ -98,7 +98,13 @@
       - v1.1 : detection navigateur (Chrome/Edge mode navigation FSAPI via manifeste, Safari file picker avec aide Telechargements)
       - Hors scope v1 (a faire plus tard) : productions, cartouches, pratiques (references croisees a remapper) ; donnees pedagogiques ; mode consultation namespace temporaire
 
-- [ ] **#257** Ouvrir la reserve v2 — productions, cartouches, pratiques + mode consultation
+- [x] **#257 v1** Ouvrir la reserve — productions, cartouches, pratiques + auto-cochage references (livre 28 avril 2026, b0428-1115)
+      - Reimport selectif : 6 types (grilles, echelles, productions, cartouches, pratiques, tampons)
+      - Auto-cochage : production -> grille+echelle, cartouche -> grille, pratique -> echelle
+      - Annotations « ref manquante » (orange) si grille/echelle absente du payload ET des bibliotheques actives
+      - Facades nouvelles : importerProductionsExternes, importerCartouchesExternes, importerPratiquesExternes
+
+- [ ] **#257 v2** Ouvrir la reserve v2 — remapping d'IDs en mode « copie en double » + mode consultation
   - **Suite de #254 v1**. Items hors scope v1 a livrer plus tard.
   - **Use case** : au fil des trimestres, les bibliotheques actives
     (`grillesTemplates`, `echellesTemplates`, `productionsTemplates`,
