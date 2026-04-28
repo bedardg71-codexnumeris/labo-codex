@@ -27,18 +27,15 @@ const NOM_MANIFESTE = 'codex-manifeste.json';
 const NOM_MANIFESTE_ANCIEN = 'classeur-manifeste.json';
 const NOM_DONNEES = 'donnees.json';
 const DOSSIER_TRAVAUX = 'travaux';
-const DOSSIER_HISTORIQUE = 'historique';
-
-// Rotation TimeMachine
-const MAX_SNAPSHOTS = 10;
-const MAX_JOURS_HISTORIQUE = 30;
 
 // Clés de stockage (non namespacées — globales)
 // Migré de _classeur_* vers _codex_* — voir _migrerClesClasseurVersCodex()
 const CLE_ETAT_CODEX = '_codex_etat';
-const CLE_HIST_INDEX = '_codex_hist_index';
+// Snapshot de référence : utilisé par actionFusionner comme ancêtre 3-way.
+// Le TimeMachine (#250) a été retiré le 28 avril 2026, mais ce snapshot reste utile.
 const CLE_SNAPSHOT_AVANT = '_codex_snapshot_avant';
-const PREFIXE_HIST = '_codex_hist_';
+// Flag de purge unique des clés _codex_hist_* / _classeur_hist_* (ex-TimeMachine, #250)
+const CLE_PURGE_TIMEMACHINE_FAITE = '_codex_purge_timemachine_done';
 
 /* ===============================
    ÉTAT INTERNE
@@ -69,9 +66,7 @@ var _derniereAutoSave = null;          // Date ISO de la dernière auto-save ré
 
 // Anciennes clés (classeur) — pour la migration uniquement
 const CLE_ETAT_ANCIEN = '_classeur_etat';
-const CLE_HIST_INDEX_ANCIEN = '_classeur_hist_index';
 const CLE_SNAPSHOT_AVANT_ANCIEN = '_classeur_snapshot_avant';
-const PREFIXE_HIST_ANCIEN = '_classeur_hist_';
 
 // Drapeau pour ne migrer qu'une seule fois
 const CLE_MIGRATION_FAITE = '_codex_migration_classeur_done';
@@ -102,10 +97,12 @@ async function _migrerClesClasseurVersCodex() {
     var migrees = 0;
     var ignorees = 0;
 
-    // Table de correspondance pour les 3 clés fixes
+    // Table de correspondance pour les clés fixes encore migrables
+    // (la clé _classeur_hist_index et les snapshots _classeur_hist_<DATE> ne sont
+    //  plus migrés depuis le retrait du TimeMachine (#250) — ils sont purgés par
+    //  _purgerCodexHistLegacy au démarrage)
     var clesFixes = [
         { ancien: CLE_ETAT_ANCIEN,           nouveau: CLE_ETAT_CODEX },
-        { ancien: CLE_HIST_INDEX_ANCIEN,     nouveau: CLE_HIST_INDEX },
         { ancien: CLE_SNAPSHOT_AVANT_ANCIEN, nouveau: CLE_SNAPSHOT_AVANT }
     ];
 
@@ -131,32 +128,6 @@ async function _migrerClesClasseurVersCodex() {
         }
     }
 
-    // 2. Migrer les clés dynamiques _classeur_hist_<DATE>
-    //    (exclut _classeur_hist_index déjà traité ci-dessus)
-    var toutesLesCles = await db.keys();
-    for (var j = 0; j < toutesLesCles.length; j++) {
-        var cle = toutesLesCles[j];
-        if (cle.startsWith(PREFIXE_HIST_ANCIEN) && cle !== CLE_HIST_INDEX_ANCIEN) {
-            // Ex: _classeur_hist_2026-03-14 → _codex_hist_2026-03-14
-            var suffixe = cle.substring(PREFIXE_HIST_ANCIEN.length);
-            var nouvelleCle = PREFIXE_HIST + suffixe;
-            var valeurHist = await db.get(cle, null);
-            if (valeurHist !== null) {
-                await db.set(nouvelleCle, valeurHist);
-                var verifHist = await db.get(nouvelleCle, null);
-                if (verifHist !== null) {
-                    await db.remove(cle);
-                    migrees++;
-                } else {
-                    console.error('  ✗ Échec vérification pour ' + nouvelleCle + ', ancienne clé conservée');
-                    ignorees++;
-                }
-            } else {
-                ignorees++;
-            }
-        }
-    }
-
     // 3. Marquer la migration comme terminée SEULEMENT si au moins une clé a été migrée
     //    ou si aucune ancienne clé n'existait (rien à migrer)
     var clesRestantes = await db.keys();
@@ -176,6 +147,43 @@ async function _migrerClesClasseurVersCodex() {
    =============================== */
 
 /**
+ * Purge silencieuse des snapshots TimeMachine (#250 — 28 avril 2026).
+ * Le TimeMachine a été retiré : ses clés IDB (_codex_hist_*, _classeur_hist_*,
+ * et leurs index) sont obsolètes et peuvent libérer 400-800 Mo. Idempotente
+ * via le flag CLE_PURGE_TIMEMACHINE_FAITE.
+ */
+async function _purgerCodexHistLegacy() {
+    if (!db.ready) {
+        await db.init();
+    }
+    var dejaFait = await db.get(CLE_PURGE_TIMEMACHINE_FAITE, false);
+    if (dejaFait) return { purgees: 0 };
+
+    var toutes = await db.keys();
+    var aPurger = toutes.filter(function(k) {
+        return k.indexOf('_codex_hist_') === 0 ||
+               k.indexOf('_classeur_hist_') === 0;
+    });
+
+    var purgees = 0;
+    for (var i = 0; i < aPurger.length; i++) {
+        try {
+            await db.remove(aPurger[i]);
+            purgees++;
+        } catch (e) {
+            console.warn('[Codex] Purge TimeMachine : suppression échouée pour ' + aPurger[i], e.message || e);
+        }
+    }
+
+    await db.set(CLE_PURGE_TIMEMACHINE_FAITE, true);
+
+    if (purgees > 0) {
+        console.warn('[Codex] TimeMachine retiré (#250) — ' + purgees + ' clé(s) historique purgée(s).');
+    }
+    return { purgees: purgees };
+}
+
+/**
  * Restaure l'état du codex depuis le stockage (au démarrage de l'app)
  */
 function initialiserCodex() {
@@ -191,6 +199,11 @@ function initialiserCodex() {
         }
     }).catch(function(e) {
         console.error('📂 Erreur migration classeur → codex :', e);
+    });
+
+    // Purge unique des snapshots TimeMachine (#250)
+    _purgerCodexHistLegacy().catch(function(e) {
+        console.error('[Codex] Erreur purge TimeMachine :', e);
     });
 
     // CLE_ETAT_CODEX pointe maintenant vers _codex_etat
@@ -312,65 +325,14 @@ async function genererCodex(options = {}) {
         }
     }
 
-    // 3. TimeMachine — archiver le snapshot précédent + inclure l'historique
-    _prog(62, 'Archivage de l\'historique...');
-    await _yield();
-
-    var dossierHistorique = zip.folder(DOSSIER_HISTORIQUE);
-    var historiqueIndex = await db.get(CLE_HIST_INDEX, []);
-    var snapshotPrecedent = await db.get(CLE_SNAPSHOT_AVANT, null);
-    var dejaAjoutes = new Set();
-
-    // 3a. Archiver le snapshot précédent comme nouvelle entrée historique
-    if (snapshotPrecedent) {
-        var dateSnapshot = _etat.derniereSauvegarde
-            || (_etat.manifeste ? _etat.manifeste.dateDerniereModification : null)
-            || new Date().toISOString();
-
-        // Éviter les doublons (même date = même sauvegarde)
-        var dejaPresent = historiqueIndex.some(function(e) { return e.date === dateSnapshot; });
-        if (!dejaPresent) {
-            var jsonSnapshot = JSON.stringify(snapshotPrecedent);
-            var nomSnapshot = dateSnapshot.replace(/[:.]/g, '-') + '.json';
-            dossierHistorique.file(nomSnapshot, jsonSnapshot);
-            dejaAjoutes.add(nomSnapshot);
-
-            // Stocker aussi dans IDB pour la prochaine session
-            var cleSnapshot = PREFIXE_HIST + dateSnapshot.replace(/[:.]/g, '-');
-            await db.set(cleSnapshot, snapshotPrecedent);
-
-            historiqueIndex.push({
-                date: dateSnapshot,
-                appareil: (_etat.manifeste ? _etat.manifeste.appareil : null) || _identifierAppareil(),
-                taille: new Blob([jsonSnapshot]).size
-            });
-
-        }
-    }
-
-    // 3b. Rotation (purger les snapshots trop anciens ou en surplus)
-    historiqueIndex = _purgerHistorique(historiqueIndex);
-
-    // 3c. Inclure les snapshots existants dans le ZIP
-    await _ecrireHistoriqueDansZip(dossierHistorique, historiqueIndex, dejaAjoutes);
-
-    // 3d. Mettre à jour IDB : le snapshot "avant" est désormais les données courantes
+    // 3. Mettre à jour le snapshot de référence pour la fusion 3-way
+    //    (le TimeMachine a été retiré le 28 avril 2026 — #250)
     await db.set(CLE_SNAPSHOT_AVANT, donnees);
-    await db.set(CLE_HIST_INDEX, historiqueIndex);
 
     // 4. Manifeste
     const maintenant = new Date().toISOString();
     const auteur = _obtenirAuteur();
     const trimestreActif = (typeof window.trimestreActif === 'string') ? window.trimestreActif : '';
-
-    var historiqueManifeste = [];
-    for (var hm = 0; hm < historiqueIndex.length; hm++) {
-        historiqueManifeste.push({
-            date: historiqueIndex[hm].date,
-            appareil: historiqueIndex[hm].appareil,
-            taille: historiqueIndex[hm].taille
-        });
-    }
 
     const manifeste = {
         formatVersion: FORMAT_VERSION,
@@ -385,8 +347,7 @@ async function genererCodex(options = {}) {
             cles: toutesLesCles.filter(c => !c.startsWith('_codex_')),
             nombreFichiersTravaux: nbBlobs,
             tailleTotaleOctets: new Blob([json]).size + tailleTotale
-        },
-        historique: historiqueManifeste
+        }
     };
 
     zip.file(NOM_MANIFESTE, JSON.stringify(manifeste, null, 2));
@@ -415,7 +376,6 @@ async function genererCodex(options = {}) {
     _mettreAJourIndicateur();
 
     const duree = Math.round(performance.now() - debut);
-    var nbSnapshotsExport = historiqueManifeste.length;
 
     _prog(100, 'Codex prêt !', _formaterTaille(zipBlob.size));
 
@@ -466,6 +426,22 @@ async function chargerCodex(fichierZip) {
 
     const zip = validation._zip;
     const manifeste = validation._manifeste;
+
+    // Détection d'un codex legacy (#250) : dossier historique/ + champ manifeste.historique
+    // sont ignorés silencieusement depuis le retrait du TimeMachine.
+    var aHistoriqueLegacy = !!(manifeste && Array.isArray(manifeste.historique) && manifeste.historique.length > 0);
+    if (!aHistoriqueLegacy) {
+        var nomsZip = Object.keys(zip.files);
+        for (var iz = 0; iz < nomsZip.length; iz++) {
+            if (nomsZip[iz].indexOf('historique/') === 0) {
+                aHistoriqueLegacy = true;
+                break;
+            }
+        }
+    }
+    if (aHistoriqueLegacy) {
+        console.warn('[Codex] ZIP legacy : le dossier historique/ et les snapshots TimeMachine sont ignorés (#250).');
+    }
 
     // 2. Extraire et charger les données JSON
     _majProgression(15, 'Extraction des données...');
@@ -520,18 +496,9 @@ async function chargerCodex(fichierZip) {
         }
     }
 
-    // 5. TimeMachine — capturer le snapshot et charger l'historique
-    _majProgression(92, 'Chargement de l\'historique...');
-    await _yield();
-
-    // 5a. Stocker les données chargées comme snapshot de référence
-    // (servira de base pour le prochain archivage à la sauvegarde)
+    // 5. Stocker les données chargées comme snapshot de référence pour la fusion 3-way
+    //    (le TimeMachine a été retiré le 28 avril 2026 — #250)
     await db.set(CLE_SNAPSHOT_AVANT, donnees);
-
-    // 5b. Charger l'historique existant du ZIP vers IndexedDB
-    var nbSnapshots = 0;
-    var historiqueCharge = await _chargerHistoriqueDepuisZip(zip, manifeste);
-    nbSnapshots = historiqueCharge.length;
 
     // 6. Mettre à jour l'état
     _majProgression(98, 'Finalisation...');
@@ -545,7 +512,7 @@ async function chargerCodex(fichierZip) {
     _mettreAJourIndicateur();
 
     const duree = Math.round(performance.now() - debut);
-    const stats = { nbCles: nbCles, nbBlobs: nbBlobs, nbSnapshots: nbSnapshots, dureeMs: duree };
+    const stats = { nbCles: nbCles, nbBlobs: nbBlobs, dureeMs: duree };
 
     _majProgression(100, 'Codex chargé !', nbCles + ' clés, ' + nbBlobs + ' fichiers');
     await new Promise(function(r) { setTimeout(r, 800); });
@@ -755,8 +722,9 @@ function fermerCodex() {
     _fileHandle = null;
     _sauvegarderEtat();
     _mettreAJourIndicateur();
-    // Nettoyer l'historique TimeMachine de IndexedDB
-    _nettoyerHistoriqueIDB();
+    // Effacer le snapshot de référence (utilisé par la fusion 3-way) — il appartenait
+    // au codex qu'on vient de fermer
+    db.remove(CLE_SNAPSHOT_AVANT);
 }
 
 /* ===============================
@@ -915,195 +883,8 @@ var _majProgression = window.majProgression;
 var _masquerProgression = window.masquerProgression;
 
 /* ===============================
-   HISTORIQUE / TIMEMACHINE
+   UTILITAIRES DE FUSION
    =============================== */
-
-/**
- * Applique la rotation sur l'index historique :
- * - Max 10 snapshots
- * - Max 30 jours
- * Supprime les clés IndexedDB des snapshots purgés.
- * @param {Array} index - Entrées {date, appareil, taille}
- * @returns {Array} Index purgé
- */
-function _purgerHistorique(index) {
-    var limiteDate = Date.now() - (MAX_JOURS_HISTORIQUE * 24 * 60 * 60 * 1000);
-
-    // Trier par date décroissante (plus récent en premier)
-    index.sort(function(a, b) {
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
-    });
-
-    var gardes = [];
-    var supprimes = [];
-    for (var i = 0; i < index.length; i++) {
-        var dateEntry = new Date(index[i].date).getTime();
-        if (gardes.length < MAX_SNAPSHOTS && dateEntry >= limiteDate) {
-            gardes.push(index[i]);
-        } else {
-            supprimes.push(index[i]);
-        }
-    }
-
-    // Nettoyer les clés supprimées de IndexedDB (fire-and-forget)
-    for (var j = 0; j < supprimes.length; j++) {
-        var cle = PREFIXE_HIST + supprimes[j].date.replace(/[:.]/g, '-');
-        db.remove(cle);
-    }
-
-    if (supprimes.length > 0) {
-    }
-
-    return gardes;
-}
-
-/**
- * Charge les snapshots historiques depuis IndexedDB vers le ZIP.
- * @param {JSZip} dossierHist - Le dossier historique/ du ZIP
- * @param {Array} index - Index des entrées
- * @param {Set} [dejaAjoutes] - Noms de fichiers déjà dans le dossier
- * @returns {Promise<void>}
- */
-async function _ecrireHistoriqueDansZip(dossierHist, index, dejaAjoutes) {
-    for (var i = 0; i < index.length; i++) {
-        var nomFichier = index[i].date.replace(/[:.]/g, '-') + '.json';
-        if (dejaAjoutes && dejaAjoutes.has(nomFichier)) continue;
-
-        var cle = PREFIXE_HIST + index[i].date.replace(/[:.]/g, '-');
-        var donnees = await db.get(cle, null);
-        if (donnees) {
-            dossierHist.file(nomFichier, JSON.stringify(donnees));
-        }
-    }
-}
-
-/**
- * Charge l'historique depuis un ZIP vers IndexedDB.
- * @param {JSZip} zip - Le ZIP chargé
- * @param {Object} manifeste - Le manifeste du codex
- * @returns {Promise<Array>} L'index historique chargé
- */
-async function _chargerHistoriqueDepuisZip(zip, manifeste) {
-    var index = [];
-    if (!manifeste.historique || !Array.isArray(manifeste.historique)) {
-        return index;
-    }
-
-    for (var i = 0; i < manifeste.historique.length; i++) {
-        var entree = manifeste.historique[i];
-        var nomFichier = entree.date.replace(/[:.]/g, '-') + '.json';
-        var fichier = zip.file(DOSSIER_HISTORIQUE + '/' + nomFichier);
-
-        if (fichier) {
-            try {
-                var contenu = await fichier.async('string');
-                var donnees = JSON.parse(contenu);
-                var cle = PREFIXE_HIST + entree.date.replace(/[:.]/g, '-');
-                await db.set(cle, donnees);
-                index.push({
-                    date: entree.date,
-                    appareil: entree.appareil || '',
-                    taille: entree.taille || contenu.length
-                });
-            } catch (e) {
-                console.warn('📂 TimeMachine : snapshot ignoré ' + nomFichier, e.message);
-            }
-        }
-    }
-
-    await db.set(CLE_HIST_INDEX, index);
-    return index;
-}
-
-/**
- * Compare deux ensembles de données et retourne les différences.
- * @param {Object} ancien - Données du snapshot (clé → valeur)
- * @param {Object} actuel - Données actuelles (clé → valeur)
- * @returns {{ajoutees: string[], supprimees: string[], modifiees: string[]}}
- */
-function _comparerDonnees(ancien, actuel) {
-    var clesAncien = Object.keys(ancien);
-    var clesActuel = Object.keys(actuel);
-    var setAncien = new Set(clesAncien);
-    var setActuel = new Set(clesActuel);
-
-    var ajoutees = [];
-    var supprimees = [];
-    var modifiees = [];
-
-    // Clés ajoutées (dans actuel mais pas dans ancien)
-    for (var i = 0; i < clesActuel.length; i++) {
-        if (!setAncien.has(clesActuel[i])) {
-            ajoutees.push(clesActuel[i]);
-        }
-    }
-
-    // Clés supprimées (dans ancien mais pas dans actuel)
-    for (var j = 0; j < clesAncien.length; j++) {
-        if (!setActuel.has(clesAncien[j])) {
-            supprimees.push(clesAncien[j]);
-        }
-    }
-
-    // Clés modifiées (présentes des deux côtés mais valeur différente)
-    for (var k = 0; k < clesAncien.length; k++) {
-        var cle = clesAncien[k];
-        if (setActuel.has(cle)) {
-            var jsonAncien = JSON.stringify(ancien[cle]);
-            var jsonActuel = JSON.stringify(actuel[cle]);
-            if (jsonAncien !== jsonActuel) {
-                modifiees.push(cle);
-            }
-        }
-    }
-
-    return { ajoutees: ajoutees, supprimees: supprimees, modifiees: modifiees };
-}
-
-/**
- * Formate un résultat de diff pour affichage.
- * Regroupe les clés par préfixe (trimestre) pour plus de lisibilité.
- * @param {{ajoutees: string[], supprimees: string[], modifiees: string[]}} diff
- * @returns {string}
- */
-function _formaterDiff(diff) {
-    var total = diff.ajoutees.length + diff.supprimees.length + diff.modifiees.length;
-
-    if (total === 0) {
-        return 'Aucune différence détectée.';
-    }
-
-    var lignes = [];
-    lignes.push(total + ' différence(s) détectée(s) :\n');
-
-    if (diff.modifiees.length > 0) {
-        lignes.push('Modifiées (' + diff.modifiees.length + ') :');
-        var groupesM = _grouperParPrefixe(diff.modifiees);
-        for (var gm = 0; gm < groupesM.length; gm++) {
-            lignes.push('  ' + groupesM[gm]);
-        }
-        lignes.push('');
-    }
-
-    if (diff.ajoutees.length > 0) {
-        lignes.push('Ajoutées (' + diff.ajoutees.length + ') :');
-        var groupesA = _grouperParPrefixe(diff.ajoutees);
-        for (var ga = 0; ga < groupesA.length; ga++) {
-            lignes.push('  + ' + groupesA[ga]);
-        }
-        lignes.push('');
-    }
-
-    if (diff.supprimees.length > 0) {
-        lignes.push('Supprimées (' + diff.supprimees.length + ') :');
-        var groupesS = _grouperParPrefixe(diff.supprimees);
-        for (var gs = 0; gs < groupesS.length; gs++) {
-            lignes.push('  - ' + groupesS[gs]);
-        }
-    }
-
-    return lignes.join('\n');
-}
 
 /**
  * Regroupe une liste de clés par préfixe commun (ex: h2026_).
@@ -1750,19 +1531,6 @@ async function _fusionnerTravaux(zipExterne, donneesExternes, cheminsAImporter, 
     return { importes: importes, ignores: ignores, erreurs: erreurs };
 }
 
-/**
- * Nettoie toutes les données historiques de IndexedDB.
- */
-async function _nettoyerHistoriqueIDB() {
-    var index = await db.get(CLE_HIST_INDEX, []);
-    for (var i = 0; i < index.length; i++) {
-        var cle = PREFIXE_HIST + index[i].date.replace(/[:.]/g, '-');
-        await db.remove(cle);
-    }
-    await db.remove(CLE_HIST_INDEX);
-    await db.remove(CLE_SNAPSHOT_AVANT);
-}
-
 /* ===============================
    UTILITAIRES PRIVÉS
    =============================== */
@@ -2072,7 +1840,6 @@ function _actualiserMenu() {
 
     var details = document.getElementById('codex-menu-details');
     var fermerItem = document.getElementById('codex-menu-fermer');
-    var historiqueItem = document.getElementById('codex-menu-historique');
     if (details) {
         if (_etat.actif) details.classList.remove('u-hide');
         else details.classList.add('u-hide');
@@ -2080,15 +1847,6 @@ function _actualiserMenu() {
     if (fermerItem) {
         if (_etat.actif) fermerItem.classList.remove('u-hide');
         else fermerItem.classList.add('u-hide');
-    }
-    if (historiqueItem) {
-        if (_etat.actif) historiqueItem.classList.remove('u-hide');
-        else historiqueItem.classList.add('u-hide');
-    }
-    var comparerItem = document.getElementById('codex-menu-comparer');
-    if (comparerItem) {
-        if (_etat.actif) comparerItem.classList.remove('u-hide');
-        else comparerItem.classList.add('u-hide');
     }
     var fusionnerItem = document.getElementById('codex-menu-fusionner');
     if (fusionnerItem) {
@@ -2321,223 +2079,6 @@ async function actionRenommer() {
         modificationsDepuis: _etat.modificationsDepuis,
         manifeste: _etat.manifeste
     });
-}
-
-/**
- * Affiche l'historique des versions et permet de restaurer un snapshot.
- * Utilise prompt() avec une liste numérotée.
- */
-async function actionRestaurer() {
-    _fermerMenu();
-
-    // 1. Charger l'index historique depuis IDB
-    var index = await db.get(CLE_HIST_INDEX, []);
-    if (index.length === 0) {
-        alert('Aucun historique disponible.\n\nL\'historique se construit automatiquement à chaque enregistrement.\nEnregistre le codex au moins deux fois pour voir apparaitre des versions.');
-        return;
-    }
-
-    // 2. Trier par date décroissante
-    index.sort(function(a, b) {
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
-    });
-
-    // 3. Construire la liste numérotée
-    var liste = 'Historique des versions (' + index.length + ') :\n\n';
-    for (var i = 0; i < index.length; i++) {
-        var entree = index[i];
-        liste += (i + 1) + '.  ' + _formaterDateLocale(entree.date);
-        if (entree.appareil) liste += '  (' + entree.appareil + ')';
-        liste += '  — ' + _formaterTaille(entree.taille);
-        liste += '\n';
-    }
-    liste += '\nEntrer le numéro de la version à restaurer (ou Annuler) :';
-
-    // 4. Demander le choix
-    var choix = prompt(liste);
-    if (!choix) return;
-
-    var numero = parseInt(choix, 10);
-    if (isNaN(numero) || numero < 1 || numero > index.length) {
-        alert('Numéro invalide.');
-        return;
-    }
-
-    var entreeChoisie = index[numero - 1];
-
-    // 5. Confirmer
-    if (!confirm(
-        'Restaurer la version du ' + _formaterDateLocale(entreeChoisie.date) + ' ?\n\n' +
-        'Les données actuelles seront remplacées.\n' +
-        '(Un snapshot des données actuelles sera archivé automatiquement.)'
-    )) {
-        return;
-    }
-
-    // 6. Charger le snapshot depuis IDB
-    var cleSnapshot = PREFIXE_HIST + entreeChoisie.date.replace(/[:.]/g, '-');
-    var donneesSnapshot = await db.get(cleSnapshot, null);
-
-    if (!donneesSnapshot) {
-        alert('Erreur : snapshot introuvable dans le stockage local.\n\nEssaye de réouvrir le codex depuis le fichier ZIP.');
-        return;
-    }
-
-    // 7. Archiver les données actuelles avant de les écraser
-    _afficherProgression('Restauration');
-    _majProgression(0, 'Archivage des données actuelles...');
-    await _yield();
-
-    var toutesLesCles = await db.keys();
-    var clesFiltrees = toutesLesCles.filter(function(c) { return !c.startsWith('_codex_'); });
-    var donneesActuelles = {};
-    for (var j = 0; j < clesFiltrees.length; j++) {
-        var val = await db.get(clesFiltrees[j], null);
-        if (val !== null) donneesActuelles[clesFiltrees[j]] = val;
-    }
-
-    // Stocker les données actuelles comme nouveau snapshot
-    var maintenant = new Date().toISOString();
-    var cleActuel = PREFIXE_HIST + maintenant.replace(/[:.]/g, '-');
-    await db.set(cleActuel, donneesActuelles);
-    index.push({
-        date: maintenant,
-        appareil: _identifierAppareil(),
-        taille: JSON.stringify(donneesActuelles).length
-    });
-    index = _purgerHistorique(index);
-    await db.set(CLE_HIST_INDEX, index);
-
-    // 8. Restaurer le snapshot choisi dans IndexedDB
-    _majProgression(30, 'Restauration des données...');
-    await _yield();
-
-    var entreesSnapshot = Object.entries(donneesSnapshot);
-    for (var k = 0; k < entreesSnapshot.length; k++) {
-        await db.set(entreesSnapshot[k][0], entreesSnapshot[k][1]);
-        if (k % 10 === 0) {
-            _majProgression(
-                30 + Math.round((k / entreesSnapshot.length) * 50),
-                'Restauration des données...',
-                (k + 1) + '/' + entreesSnapshot.length + ' clés'
-            );
-            await _yield();
-        }
-    }
-
-    // 9. Synchroniser le cache localStorage
-    _majProgression(85, 'Synchronisation du cache...');
-    await db.syncToLocalStorageCache();
-
-    // 10. Mettre à jour le snapshot "avant" pour la prochaine sauvegarde
-    await db.set(CLE_SNAPSHOT_AVANT, donneesSnapshot);
-
-    _majProgression(95, 'Finalisation...');
-    _etat.modificationsDepuis = maintenant;
-    _sauvegarderEtat();
-    _mettreAJourIndicateur();
-
-    _majProgression(100, 'Version restaurée !');
-    await new Promise(function(r) { setTimeout(r, 800); });
-    _masquerProgression();
-
-
-    // 11. Proposer de recharger
-    if (confirm('Version restaurée avec succès !\n\nRecharger la page pour appliquer les données ?')) {
-        window.location.reload();
-    }
-}
-
-/**
- * Compare une version historique avec les données actuelles.
- * Affiche un résumé des différences (clés ajoutées, supprimées, modifiées).
- */
-async function actionComparer() {
-    _fermerMenu();
-
-    // 1. Charger l'index historique
-    var index = await db.get(CLE_HIST_INDEX, []);
-    if (index.length === 0) {
-        alert('Aucun historique disponible pour la comparaison.\n\nL\'historique se construit automatiquement à chaque enregistrement.\nEnregistre le codex au moins deux fois pour pouvoir comparer des versions.');
-        return;
-    }
-
-    // 2. Trier par date décroissante
-    index.sort(function(a, b) {
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
-    });
-
-    // 3. Construire la liste numérotée
-    var liste = 'Comparer les données actuelles avec :\n\n';
-    for (var i = 0; i < index.length; i++) {
-        var entree = index[i];
-        liste += (i + 1) + '.  ' + _formaterDateLocale(entree.date);
-        if (entree.appareil) liste += '  (' + entree.appareil + ')';
-        liste += '\n';
-    }
-    liste += '\nEntrer le numéro de la version à comparer (ou Annuler) :';
-
-    // 4. Demander le choix
-    var choix = prompt(liste);
-    if (!choix) return;
-
-    var numero = parseInt(choix, 10);
-    if (isNaN(numero) || numero < 1 || numero > index.length) {
-        alert('Numéro invalide.');
-        return;
-    }
-
-    var entreeChoisie = index[numero - 1];
-
-    // 5. Charger le snapshot
-    var cleSnapshot = PREFIXE_HIST + entreeChoisie.date.replace(/[:.]/g, '-');
-    var donneesSnapshot = await db.get(cleSnapshot, null);
-
-    if (!donneesSnapshot) {
-        alert('Erreur : snapshot introuvable dans le stockage local.\n\nEssaye de réouvrir le codex depuis le fichier ZIP.');
-        return;
-    }
-
-    // 6. Collecter les données actuelles depuis IndexedDB
-    _afficherProgression('Comparaison');
-    _majProgression(0, 'Lecture des données actuelles...');
-    await _yield();
-
-    var toutesLesCles = await db.keys();
-    var clesFiltrees = toutesLesCles.filter(function(c) { return !c.startsWith('_codex_') && !c.startsWith('_'); });
-    var donneesActuelles = {};
-    for (var j = 0; j < clesFiltrees.length; j++) {
-        var val = await db.get(clesFiltrees[j], null);
-        if (val !== null) donneesActuelles[clesFiltrees[j]] = val;
-        if (j % 10 === 0) {
-            _majProgression(Math.round((j / clesFiltrees.length) * 60), 'Lecture des données actuelles...', (j + 1) + '/' + clesFiltrees.length);
-            await _yield();
-        }
-    }
-
-    // 7. Filtrer le snapshot aussi (exclure clés internes)
-    var snapshotFiltre = {};
-    var clesSnapshot = Object.keys(donneesSnapshot);
-    for (var k = 0; k < clesSnapshot.length; k++) {
-        if (!clesSnapshot[k].startsWith('_codex_') && !clesSnapshot[k].startsWith('_')) {
-            snapshotFiltre[clesSnapshot[k]] = donneesSnapshot[clesSnapshot[k]];
-        }
-    }
-
-    // 8. Calculer le diff
-    _majProgression(70, 'Calcul des différences...');
-    await _yield();
-
-    var diff = _comparerDonnees(snapshotFiltre, donneesActuelles);
-
-    _majProgression(100, 'Terminé');
-    await new Promise(function(r) { setTimeout(r, 300); });
-    _masquerProgression();
-
-    // 9. Afficher le résultat
-    var titre = 'Comparaison : version du ' + _formaterDateLocale(entreeChoisie.date) + '\nvs données actuelles\n\n';
-    alert(titre + _formaterDiff(diff));
-
 }
 
 /**
@@ -2852,7 +2393,7 @@ async function actionExporterSelection() {
         }
     }
 
-    // 7c. Manifeste (partiel — pas de TimeMachine)
+    // 7c. Manifeste (partiel)
     var maintenant = new Date().toISOString();
     var manifeste = {
         formatVersion: FORMAT_VERSION,
@@ -2992,8 +2533,6 @@ window.Codex = {
     actionNouveau: actionNouveau,
     actionDetails: actionDetails,
     actionRenommer: actionRenommer,
-    actionRestaurer: actionRestaurer,
-    actionComparer: actionComparer,
     actionFusionner: actionFusionner,
     actionExporterSelection: actionExporterSelection,
     actionFermer: actionFermer,

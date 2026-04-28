@@ -3696,12 +3696,6 @@
                                 <button id="codex-menu-details" class="codex-menu-item u-hide" data-action="Codex.actionDetails">
                                     <span class="codex-menu-icone"><img src="icons/icon-info.svg" alt=""></span> D&eacute;tails du codex
                                 </button>
-                                <button id="codex-menu-historique" class="codex-menu-item u-hide" data-action="Codex.actionRestaurer">
-                                    <span class="codex-menu-icone"><img src="icons/icon-time-machine.svg" alt=""></span> Historique des versions...
-                                </button>
-                                <button id="codex-menu-comparer" class="codex-menu-item u-hide" data-action="Codex.actionComparer">
-                                    <span class="codex-menu-icone"><img src="icons/icon-compare.svg" alt=""></span> Comparer avec une version...
-                                </button>
                                 <div class="codex-menu-sep"></div>
                                 <button id="codex-menu-fusionner" class="codex-menu-item u-hide" data-action="Codex.actionFusionner">
                                     <span class="codex-menu-icone"><img src="icons/icon-query-inner-join.svg" alt=""></span> Fusionner avec un codex...
@@ -15476,9 +15470,11 @@
                                 <ul class="lh-2">
                                     <li><strong>Toutes tes données</strong> : étudiants, présences, évaluations, indices A-C-P, configurations</li>
                                     <li><strong>Les fichiers de travaux</strong> : les PDF et documents associés aux évaluations</li>
-                                    <li><strong>Un historique des versions</strong> : les 10 dernières sauvegardes (TimeMachine), pour revenir en arrière si nécessaire</li>
                                     <li><strong>Un manifeste</strong> : métadonnées du codex (date, appareil, version de l'app)</li>
                                 </ul>
+                                <p style="margin-top: 10px; font-size: 0.9rem; color: var(--texte-secondaire);">
+                                    <em>Pour archiver l'historique d'un trimestre terminé, utilise plutôt la <strong>Réserve</strong> (menu Codex → « Verser dans la réserve »).</em>
+                                </p>
                             </div>
 
                             <p class="titre-11-bold-bleu-mb15" style="margin-top: 15px;">Flux de travail typique</p>
@@ -15495,8 +15491,8 @@
                                 <li><strong>Enregistrer le codex</strong> : Sauvegarde vers le même emplacement (Chrome/Edge : sans dialogue grâce à l'auto-save)</li>
                                 <li><strong>Enregistrer sous</strong> : Sauvegarde vers un nouvel emplacement</li>
                                 <li><strong>Nouveau codex</strong> : Crée un codex à partir des données actuelles en mémoire</li>
-                                <li><strong>Historique des versions</strong> : Consulte et restaure une version antérieure (TimeMachine)</li>
-                                <li><strong>Comparer avec une version</strong> : Visualise les différences entre le codex actuel et une version précédente</li>
+                                <li><strong>Verser dans la réserve</strong> : Archive le groupe-cours d'un trimestre terminé dans ta réserve locale</li>
+                                <li><strong>Ouvrir la réserve</strong> : Récupère des grilles, échelles ou tampons d'un versement archivé</li>
                                 <li><strong>Fusionner avec un codex</strong> : Combine les données de deux codex (utile quand deux enseignants travaillent sur des groupes différents)</li>
                                 <li><strong>Exporter une sélection</strong> : Exporte un sous-ensemble du codex par trimestre</li>
                                 <li><strong>Fermer le codex</strong> : Détache le codex sans supprimer les données en mémoire</li>
@@ -15526,12 +15522,12 @@
                                     </tr>
                                     <tr style="border-bottom: 1px solid var(--gris-pale);">
                                         <td style="padding: 6px 8px; font-weight: 600;">Contenu</td>
-                                        <td style="padding: 6px 8px;">Données + fichiers de travaux + historique</td>
+                                        <td style="padding: 6px 8px;">Données + fichiers de travaux</td>
                                         <td style="padding: 6px 8px;">Données seulement (pas de fichiers)</td>
                                     </tr>
                                     <tr style="border-bottom: 1px solid var(--gris-pale);">
-                                        <td style="padding: 6px 8px; font-weight: 600;">Historique</td>
-                                        <td style="padding: 6px 8px;">Oui (10 versions, TimeMachine)</td>
+                                        <td style="padding: 6px 8px; font-weight: 600;">Archivage long terme</td>
+                                        <td style="padding: 6px 8px;">Via la Réserve (menu Codex → Verser)</td>
                                         <td style="padding: 6px 8px;">Non (un seul instantané)</td>
                                     </tr>
                                     <tr style="border-bottom: 1px solid var(--gris-pale);">
@@ -15831,7 +15827,7 @@
     <!-- PRIORITÉ 6: Modules avancés (Beta 91.5 - Import/Export) -->
     <script src="js/progression.js?v=2026031401"></script>
     <script src="js/import-export.js?v=2026032600"></script>
-    <script src="js/codex.js?v=2026032600"></script>
+    <script src="js/codex.js?v=2026042803"></script>
     <script src="js/statistiques.js?v=2025121001"></script>
     <script src="js/liste-evaluations.js?v=2026032002"></script>
     <script src="js/journal.js?v=2026041706"></script>
