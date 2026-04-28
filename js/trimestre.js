@@ -97,13 +97,20 @@ function migrerEvenementsAvecIDs() {
     let nbMigres = 0;
 
     evenementsPrevus = evenementsPrevus.map((evt, index) => {
+        let modifie = false;
+        let nouveauEvt = evt;
         // Vérifier si l'ID est manquant ou invalide
         if (!evt.id || evt.id === 'undefined' || evt.id === 'null' || evt.id === '') {
-            nbMigres++;
-            const nouvelId = genererIdUnique('EVT_');
-            return { ...evt, id: nouvelId };
+            nouveauEvt = { ...nouveauEvt, id: genererIdUnique('EVT_') };
+            modifie = true;
         }
-        return evt;
+        // Migration categorie : tout événement existant sans champ devient 'institutionnel'
+        if (!nouveauEvt.categorie) {
+            nouveauEvt = { ...nouveauEvt, categorie: 'institutionnel' };
+            modifie = true;
+        }
+        if (modifie) nbMigres++;
+        return nouveauEvt;
     });
 
     if (nbMigres > 0) {
@@ -115,13 +122,18 @@ function migrerEvenementsAvecIDs() {
     nbMigres = 0;
 
     evenementsImprevus = evenementsImprevus.map((evt, index) => {
-        // Vérifier si l'ID est manquant ou invalide
+        let modifie = false;
+        let nouveauEvt = evt;
         if (!evt.id || evt.id === 'undefined' || evt.id === 'null' || evt.id === '') {
-            nbMigres++;
-            const nouvelId = genererIdUnique('EVT_');
-            return { ...evt, id: nouvelId };
+            nouveauEvt = { ...nouveauEvt, id: genererIdUnique('EVT_') };
+            modifie = true;
         }
-        return evt;
+        if (!nouveauEvt.categorie) {
+            nouveauEvt = { ...nouveauEvt, categorie: 'institutionnel' };
+            modifie = true;
+        }
+        if (modifie) nbMigres++;
+        return nouveauEvt;
     });
 
     if (nbMigres > 0) {
@@ -255,10 +267,14 @@ function chargerEvenementsPrevus() {
  * Génère le HTML d'une carte événement prévu (mode lecture)
  */
 function genererCarteEvenementPrevu(evt) {
+    const cat = evt.categorie || 'institutionnel';
+    const badgeCat = cat === 'personnel'
+        ? '<span class="badge-categorie-evenement badge-personnel" title="Absence personnelle — n\'affecte pas la numérotation des semaines du collège">Personnel</span>'
+        : '<span class="badge-categorie-evenement badge-institutionnel" title="Événement collège — affecte la numérotation des semaines">Institutionnel</span>';
     return `
 <div class="item-carte" id="carte-prevu-${evt.id}">
     <div class="item-carte-header">
-        <strong class="item-carte-titre">${evt.description}</strong>
+        <strong class="item-carte-titre">${evt.description} ${badgeCat}</strong>
         <div class="item-carte-actions">
             <button data-action="modifierEvenementEnPlace" data-param="${evt.id}" data-param2="prevus"
                     class="btn btn-modifier btn-sm"
@@ -294,6 +310,8 @@ function genererCarteEvenementPrevu(evt) {
  * Génère le HTML d'une carte événement prévu en mode édition
  */
 function genererCarteEvenementPrevuEdition(evt) {
+    const cat = evt.categorie || 'institutionnel';
+    const afficheReprise = (cat === 'institutionnel');
     return `
 <div class="item-carte" id="carte-prevu-${evt.id}">
     <div class="item-carte-header">
@@ -307,14 +325,22 @@ function genererCarteEvenementPrevuEdition(evt) {
                     style="padding: 5px 10px; font-size: 0.85rem;">Sauvegarder</button>
         </div>
     </div>
-    <div class="item-carte-grille ${evt.dateReprise ? 'item-carte-grille-custom' : ''}">
+    <div class="item-carte-champ" style="margin-bottom: 8px;">
+        <label class="item-carte-label">Type d'événement</label>
+        <select class="controle-form" id="edit-categorie-${evt.id}"
+                data-on-change="majAffichageRepriseEditionEnPlace" data-param="${evt.id}" data-param2="prevus"
+                style="padding: 4px 8px; font-size: 0.9rem;">
+            <option value="institutionnel" ${cat === 'institutionnel' ? 'selected' : ''}>Institutionnel (collège)</option>
+            <option value="personnel" ${cat === 'personnel' ? 'selected' : ''}>Personnel (vous seulement)</option>
+        </select>
+    </div>
+    <div class="item-carte-grille ${afficheReprise && evt.dateReprise ? 'item-carte-grille-custom' : ''}">
         <div class="item-carte-champ">
             <label class="item-carte-label">Date de l'événement</label>
             <input type="date" class="controle-form" id="edit-date-${evt.id}" value="${evt.dateEvenement}"
                    style="padding: 4px 8px; font-size: 0.9rem;">
         </div>
-        ${evt.dateReprise || evt.horaireReprise ? `
-        <div class="item-carte-champ">
+        <div class="item-carte-champ" id="edit-groupe-horaire-${evt.id}" style="${afficheReprise ? '' : 'display:none;'}">
             <label class="item-carte-label">Horaire remplacé</label>
             <select class="controle-form" id="edit-horaire-${evt.id}"
                     style="padding: 4px 8px; font-size: 0.9rem;">
@@ -326,12 +352,11 @@ function genererCarteEvenementPrevuEdition(evt) {
                 <option value="Horaire du vendredi" ${evt.horaireReprise === 'Horaire du vendredi' ? 'selected' : ''}>Horaire du vendredi</option>
             </select>
         </div>
-        <div class="item-carte-champ">
+        <div class="item-carte-champ" id="edit-groupe-reprise-${evt.id}" style="${afficheReprise ? '' : 'display:none;'}">
             <label class="item-carte-label">Date de reprise</label>
             <input type="date" class="controle-form" id="edit-reprise-${evt.id}" value="${evt.dateReprise || ''}"
                    style="padding: 4px 8px; font-size: 0.9rem;">
         </div>
-        ` : ''}
     </div>
     <input type="hidden" id="edit-desc-${evt.id}" value="${evt.description}">
 </div>
@@ -341,8 +366,15 @@ function genererCarteEvenementPrevuEdition(evt) {
 function confirmerAjoutEvenement() {
     const dateEvenement = document.getElementById('dateEvenementPrevu')?.value;
     const description = document.getElementById('descriptionEvenementPrevu')?.value;
-    const horaireReprise = document.getElementById('horaireReprisePrevu')?.value;
-    const dateReprise = document.getElementById('dateReprisePrevu')?.value;
+    const categorie = document.getElementById('categorieEvenementPrevu')?.value || 'institutionnel';
+    let horaireReprise = document.getElementById('horaireReprisePrevu')?.value || '';
+    let dateReprise = document.getElementById('dateReprisePrevu')?.value || '';
+
+    // Convention §3.0 : pas de reprise sur événement personnel
+    if (categorie === 'personnel') {
+        horaireReprise = '';
+        dateReprise = '';
+    }
 
     const form = document.getElementById('formEvenementPrevu');
     const editId = form.getAttribute('data-edit-id');
@@ -367,8 +399,9 @@ function confirmerAjoutEvenement() {
                 id: editId,
                 dateEvenement,
                 description,
-                horaireReprise: horaireReprise || '',
-                dateReprise: dateReprise || ''
+                categorie,
+                horaireReprise,
+                dateReprise
             };
         }
         form.removeAttribute('data-edit-id');
@@ -378,8 +411,9 @@ function confirmerAjoutEvenement() {
             id: genererIdUnique('EVT_'),
             dateEvenement,
             description,
-            horaireReprise: horaireReprise || '',
-            dateReprise: dateReprise || ''
+            categorie,
+            horaireReprise,
+            dateReprise
         });
     }
 
@@ -458,8 +492,15 @@ function annulerEditionEnPlace(id, type) {
 function sauvegarderEditionEnPlace(id, type) {
     const dateEvenement = document.getElementById(`edit-date-${id}`)?.value;
     const description = document.getElementById(`edit-desc-${id}`)?.value;
-    const horaireReprise = document.getElementById(`edit-horaire-${id}`)?.value;
-    const dateReprise = document.getElementById(`edit-reprise-${id}`)?.value;
+    const categorie = document.getElementById(`edit-categorie-${id}`)?.value || 'institutionnel';
+    let horaireReprise = document.getElementById(`edit-horaire-${id}`)?.value || '';
+    let dateReprise = document.getElementById(`edit-reprise-${id}`)?.value || '';
+
+    // Convention §3.0 : pas de reprise sur événement personnel
+    if (categorie === 'personnel') {
+        horaireReprise = '';
+        dateReprise = '';
+    }
 
     if (!dateEvenement || !description) {
         alert('Veuillez remplir tous les champs obligatoires');
@@ -480,8 +521,9 @@ function sauvegarderEditionEnPlace(id, type) {
             id: id,
             dateEvenement,
             description,
-            horaireReprise: horaireReprise || '',
-            dateReprise: dateReprise || ''
+            categorie,
+            horaireReprise,
+            dateReprise
         };
         db.setSync(cleEvt, evenements);
 
@@ -529,10 +571,14 @@ function chargerEvenementsImprevus() {
  * Génère le HTML d'une carte événement imprévu (mode lecture)
  */
 function genererCarteEvenementImprevu(evt) {
+    const cat = evt.categorie || 'institutionnel';
+    const badgeCat = cat === 'personnel'
+        ? '<span class="badge-categorie-evenement badge-personnel" title="Absence personnelle — n\'affecte pas la numérotation des semaines du collège">Personnel</span>'
+        : '<span class="badge-categorie-evenement badge-institutionnel" title="Événement collège — affecte la numérotation des semaines">Institutionnel</span>';
     return `
 <div class="item-carte" id="carte-imprevu-${evt.id}">
     <div class="item-carte-header">
-        <strong class="item-carte-titre">${evt.description}</strong>
+        <strong class="item-carte-titre">${evt.description} ${badgeCat}</strong>
         <div class="item-carte-actions">
             <button data-action="modifierEvenementEnPlace" data-param="${evt.id}" data-param2="imprevus"
                     class="btn btn-modifier btn-sm"
@@ -568,6 +614,8 @@ function genererCarteEvenementImprevu(evt) {
  * Génère le HTML d'une carte événement imprévu en mode édition
  */
 function genererCarteEvenementImprevuEdition(evt) {
+    const cat = evt.categorie || 'institutionnel';
+    const afficheReprise = (cat === 'institutionnel');
     return `
 <div class="item-carte" id="carte-imprevu-${evt.id}">
     <div class="item-carte-header">
@@ -581,14 +629,22 @@ function genererCarteEvenementImprevuEdition(evt) {
                     style="padding: 5px 10px; font-size: 0.85rem;">Sauvegarder</button>
         </div>
     </div>
-    <div class="item-carte-grille ${evt.dateReprise ? 'item-carte-grille-custom' : ''}">
+    <div class="item-carte-champ" style="margin-bottom: 8px;">
+        <label class="item-carte-label">Type d'événement</label>
+        <select class="controle-form" id="edit-categorie-${evt.id}"
+                data-on-change="majAffichageRepriseEditionEnPlace" data-param="${evt.id}" data-param2="imprevus"
+                style="padding: 4px 8px; font-size: 0.9rem;">
+            <option value="institutionnel" ${cat === 'institutionnel' ? 'selected' : ''}>Institutionnel (collège)</option>
+            <option value="personnel" ${cat === 'personnel' ? 'selected' : ''}>Personnel (vous seulement)</option>
+        </select>
+    </div>
+    <div class="item-carte-grille ${afficheReprise && evt.dateReprise ? 'item-carte-grille-custom' : ''}">
         <div class="item-carte-champ">
             <label class="item-carte-label">Date de l'événement</label>
             <input type="date" class="controle-form" id="edit-date-${evt.id}" value="${evt.dateEvenement}"
                    style="padding: 4px 8px; font-size: 0.9rem;">
         </div>
-        ${evt.dateReprise || evt.horaireReprise ? `
-        <div class="item-carte-champ">
+        <div class="item-carte-champ" id="edit-groupe-horaire-${evt.id}" style="${afficheReprise ? '' : 'display:none;'}">
             <label class="item-carte-label">Horaire remplacé</label>
             <select class="controle-form" id="edit-horaire-${evt.id}"
                     style="padding: 4px 8px; font-size: 0.9rem;">
@@ -600,12 +656,11 @@ function genererCarteEvenementImprevuEdition(evt) {
                 <option value="Horaire du vendredi" ${evt.horaireReprise === 'Horaire du vendredi' ? 'selected' : ''}>Horaire du vendredi</option>
             </select>
         </div>
-        <div class="item-carte-champ">
+        <div class="item-carte-champ" id="edit-groupe-reprise-${evt.id}" style="${afficheReprise ? '' : 'display:none;'}">
             <label class="item-carte-label">Date de reprise</label>
             <input type="date" class="controle-form" id="edit-reprise-${evt.id}" value="${evt.dateReprise || ''}"
                    style="padding: 4px 8px; font-size: 0.9rem;">
         </div>
-        ` : ''}
     </div>
     <input type="hidden" id="edit-desc-${evt.id}" value="${evt.description}">
 </div>
@@ -615,8 +670,15 @@ function genererCarteEvenementImprevuEdition(evt) {
 function confirmerAjoutEvenementImprevu() {
     const dateEvenement = document.getElementById('dateEvenementImprevu')?.value;
     const description = document.getElementById('descriptionEvenementImprevu')?.value;
-    const horaireReprise = document.getElementById('horaireRepriseImprevu')?.value;
-    const dateReprise = document.getElementById('dateRepriseImprevu')?.value;
+    const categorie = document.getElementById('categorieEvenementImprevu')?.value || 'institutionnel';
+    let horaireReprise = document.getElementById('horaireRepriseImprevu')?.value || '';
+    let dateReprise = document.getElementById('dateRepriseImprevu')?.value || '';
+
+    // Convention §3.0 : pas de reprise sur événement personnel
+    if (categorie === 'personnel') {
+        horaireReprise = '';
+        dateReprise = '';
+    }
 
     if (!dateEvenement || !description) {
         alert('Veuillez remplir tous les champs obligatoires');
@@ -641,8 +703,9 @@ function confirmerAjoutEvenementImprevu() {
                 id: editId,
                 dateEvenement,
                 description,
-                horaireReprise: horaireReprise || '',
-                dateReprise: dateReprise || ''
+                categorie,
+                horaireReprise,
+                dateReprise
             };
         }
         form.removeAttribute('data-edit-id');
@@ -652,8 +715,9 @@ function confirmerAjoutEvenementImprevu() {
             id: genererIdUnique('EVT_'),
             dateEvenement,
             description,
-            horaireReprise: horaireReprise || '',
-            dateReprise: dateReprise || ''
+            categorie,
+            horaireReprise,
+            dateReprise
         });
     }
 
@@ -710,133 +774,154 @@ function genererCalendrierComplet() {
         }
     }
 
-    // ✅ CORRECTION (31 déc 2025): Utiliser horaireHebdo pour déterminer les jours de cours
-    // Si horaireHebdo est défini, seuls les jours avec des séances sont des jours de cours
-    // Sinon, tous les jours ouvrables sont considérés comme jours de cours (comportement legacy)
     const horaireHebdo = db.getSync(cle('horaireHebdo'), null);
-    let joursAvecCours = null; // null = tous les jours ouvrables
+    let joursAvecCours = null;
     if (horaireHebdo && Array.isArray(horaireHebdo) && horaireHebdo.length > 0) {
-        // Extraire les jours qui ont des séances
         joursAvecCours = new Set(horaireHebdo.map(s => s.jour.toLowerCase()));
-    } else {
     }
 
-    // Valeurs par défaut si rien n'est configuré
     const dateDebut = cadre.dateDebut || cadre.debutTrimestre || '2025-08-21';
     const finCours = cadre.finCours || '2025-12-12';
     const finTrimestre = cadre.finTrimestre || '2025-12-22';
 
-    // VALIDATION : vérifier que les dates sont valides
     if (!dateDebut || !finCours || !finTrimestre) {
         console.warn('⚠️ Dates du trimestre manquantes, calendrier non généré');
         return {};
     }
 
-    // Fusionner tous les événements
+    // Construction des maps. Convention §3.0 : un événement personnel n'a pas de reprise.
+    // Si une dateReprise est saisie sur un événement personnel, on l'ignore et on warn.
     const tousEvenements = [...evenementsPrevus, ...evenementsImprevus];
-
-    // Créer un dictionnaire date -> événement
     const mapConges = {};
     const mapReprises = {};
-
     tousEvenements.forEach(evt => {
         mapConges[evt.dateEvenement] = evt;
+        const cat = evt.categorie || 'institutionnel';
         if (evt.dateReprise) {
-            mapReprises[evt.dateReprise] = evt;
+            if (cat === 'personnel') {
+                console.warn('Événement personnel "' + evt.description + '" (' + evt.dateEvenement + ') a une dateReprise — ignorée par convention §3.0');
+            } else {
+                mapReprises[evt.dateReprise] = evt;
+            }
         }
     });
 
-    // Générer le calendrier complet
+    // ============================================================
+    // PASSE 1 — Séquence des jours pédagogiques avec rôle effectif
+    // ============================================================
+    // Pour chaque jour entre dateDebut et finCours, déterminer si c'est un jour
+    // pédagogique du collège et quel rôle (Lundi/Mardi/...) il joue.
+    // Le n-ième jour d'un rôle reçoit numeroSemaine = n (cf. plan §3.2 passe 2).
+    //
+    // Règles :
+    //  - Weekend / semaine planif / semaine examens → ignoré
+    //  - Férié institutionnel sans reprise → ignoré (jour pédagogique perdu)
+    //  - Férié institutionnel avec reprise → ignoré ici (la date de reprise prend le rôle)
+    //  - Férié personnel → inclus, rôle = jour calendaire (le collège n'a rien annulé)
+    //  - Jour de reprise institutionnelle → rôle = jour cible
+    //  - Jour normal → rôle = jour calendaire
+    const compteursRoles = { Lundi: 0, Mardi: 0, Mercredi: 0, Jeudi: 0, Vendredi: 0 };
+    const numSemParDate = {};
+    const roleParDate = {};
+
+    let curseur = creerDateLocale(dateDebut);
+    const finCoursDate = creerDateLocale(finCours);
+    let limitePasse1 = 0;
+    while (curseur <= finCoursDate && limitePasse1 < 1000) {
+        limitePasse1++;
+        const dateStr = formaterDateTrimestreYMD(curseur);
+        const jourCalendaire = obtenirNomJour(curseur);
+
+        let roleEffectif = null;
+
+        if (estWeekend(curseur)) {
+            // ignoré
+        } else if (estDansPlage(dateStr, cadre.semainePlanificationDebut, cadre.semainePlanificationFin)
+                || estDansPlage(dateStr, cadre.semaineExamensDebut, cadre.semaineExamensFin)) {
+            // ignoré
+        } else if (mapConges[dateStr]) {
+            const evt = mapConges[dateStr];
+            const cat = evt.categorie || 'institutionnel';
+            if (cat === 'personnel') {
+                roleEffectif = jourCalendaire;
+            }
+            // institutionnel : ignoré (la reprise éventuelle prendra le rôle ailleurs)
+        } else if (mapReprises[dateStr]) {
+            const evt = mapReprises[dateStr];
+            const jourRemplace = (evt.horaireReprise || '').replace('Horaire du ', '');
+            roleEffectif = jourRemplace.charAt(0).toUpperCase() + jourRemplace.slice(1);
+        } else {
+            roleEffectif = jourCalendaire;
+        }
+
+        if (roleEffectif && Object.prototype.hasOwnProperty.call(compteursRoles, roleEffectif)) {
+            compteursRoles[roleEffectif]++;
+            numSemParDate[dateStr] = compteursRoles[roleEffectif];
+            roleParDate[dateStr] = roleEffectif;
+        }
+
+        curseur.setDate(curseur.getDate() + 1);
+    }
+
+    // ============================================================
+    // PASSE 2 — Construction du calendrier complet
+    // ============================================================
     const calendrier = {};
     let dateActuelle = creerDateLocale(dateDebut);
     const dateFin = creerDateLocale(finTrimestre);
-
     let compteurJoursCours = 0;
-    let numeroSemaine = 0;
-    let joursDeCoursMemeSemaine = 0;
-    let compteurBoucle = 0; // Pour éviter boucle infinie
+    let limitePasse2 = 0;
 
-    while (dateActuelle <= dateFin && compteurBoucle < 200) {
-        compteurBoucle++;
+    while (dateActuelle <= dateFin && limitePasse2 < 1000) {
+        limitePasse2++;
         const dateStr = formaterDateTrimestreYMD(dateActuelle);
         const jourSemaine = obtenirNomJour(dateActuelle);
 
-        // Déterminer le statut du jour
         let infosJour = { jourSemaine };
 
-        // 1. Weekend
         if (estWeekend(dateActuelle)) {
             infosJour.statut = 'weekend';
-        }
-        // 2. Semaine de planification
-        else if (estDansPlage(dateStr, cadre.semainePlanificationDebut, cadre.semainePlanificationFin)) {
+        } else if (estDansPlage(dateStr, cadre.semainePlanificationDebut, cadre.semainePlanificationFin)) {
             infosJour.statut = 'semaine-planification';
-        }
-        // 3. Semaine d'examens
-        else if (estDansPlage(dateStr, cadre.semaineExamensDebut, cadre.semaineExamensFin)) {
+        } else if (estDansPlage(dateStr, cadre.semaineExamensDebut, cadre.semaineExamensFin)) {
             infosJour.statut = 'semaine-examens';
-        }
-        // 4. Congé
-        else if (mapConges[dateStr]) {
+        } else if (mapConges[dateStr]) {
+            const evt = mapConges[dateStr];
+            const cat = evt.categorie || 'institutionnel';
             infosJour.statut = 'conge';
-            infosJour.motif = mapConges[dateStr].description;
-        }
-        // 5. Reprise
-        else if (mapReprises[dateStr]) {
+            infosJour.motif = evt.description;
+            infosJour.categorieEvenement = cat;
+            // Personnel : afficher le numéro de semaine (le rôle compte normalement)
+            if (cat === 'personnel' && numSemParDate[dateStr]) {
+                infosJour.numeroSemaine = numSemParDate[dateStr];
+            }
+        } else if (mapReprises[dateStr]) {
             infosJour.statut = 'reprise';
+            const evt = mapReprises[dateStr];
+            if (evt && evt.horaireReprise) {
+                const jourRemplace = evt.horaireReprise.replace('Horaire du ', '');
+                infosJour.jourRemplace = jourRemplace.charAt(0).toUpperCase() + jourRemplace.slice(1);
+            }
+            if (numSemParDate[dateStr]) {
+                infosJour.numeroSemaine = numSemParDate[dateStr];
+            }
             compteurJoursCours++;
-            joursDeCoursMemeSemaine++;
-
-            // Nouvelle semaine tous les 5 jours de cours
-            if (joursDeCoursMemeSemaine === 1) {
-                numeroSemaine++;
-            }
-
             infosJour.numeroJour = compteurJoursCours;
-            infosJour.numeroSemaine = numeroSemaine;
-
-            // Ajouter l'info du jour remplacé (ex: "Horaire du lundi")
-            const evenementRepris = mapReprises[dateStr];
-            if (evenementRepris && evenementRepris.horaireReprise) {
-                // Extraire le jour depuis "Horaire du lundi" → "Lundi"
-                const jourRemplace = evenementRepris.horaireReprise.replace('Horaire du ', '');
-                const jourCapitalise = jourRemplace.charAt(0).toUpperCase() + jourRemplace.slice(1);
-                infosJour.jourRemplace = jourCapitalise;
-            }
-
-            // Réinitialiser après 5 jours de cours
-            if (joursDeCoursMemeSemaine >= 5) {
-                joursDeCoursMemeSemaine = 0;
-            }
-        }
-        // 6. Jour de cours normal (avant fin des cours seulement)
-        // ✅ CORRECTION (31 déc 2025): Vérifier que ce jour a des cours selon horaireHebdo
-        // ✅ FIX: Comparer en minuscules (joursAvecCours contient "lundi", jourSemaine = "Lundi")
-        else if (dateStr <= finCours && (joursAvecCours === null || joursAvecCours.has(jourSemaine.toLowerCase()))) {
+        } else if (dateStr <= finCours && (joursAvecCours === null || joursAvecCours.has(jourSemaine.toLowerCase()))) {
             infosJour.statut = 'cours';
+            if (numSemParDate[dateStr]) {
+                infosJour.numeroSemaine = numSemParDate[dateStr];
+            }
             compteurJoursCours++;
-            joursDeCoursMemeSemaine++;
-
-            // Nouvelle semaine tous les N jours de cours (N = nb jours avec cours par semaine)
-            const joursParSemaine = joursAvecCours ? joursAvecCours.size : 5;
-            if (joursDeCoursMemeSemaine === 1) {
-                numeroSemaine++;
-            }
-
             infosJour.numeroJour = compteurJoursCours;
-            infosJour.numeroSemaine = numeroSemaine;
-
-            // Réinitialiser après N jours de cours
-            if (joursDeCoursMemeSemaine >= joursParSemaine) {
-                joursDeCoursMemeSemaine = 0;
-            }
-        }
-        // 6b. Jour ouvrable sans cours (pas dans l'horaire hebdo)
-        else if (dateStr <= finCours) {
+        } else if (dateStr <= finCours) {
+            // Jour ouvrable hors horaire du groupe : afficher quand même le numéro de semaine
+            // du collège (plan §3.4) pour les utilisateurs avec horaire 3 jours/sem.
             infosJour.statut = 'jour-ouvrable';
-        }
-        // 7. Après fin des cours (avant fin trimestre)
-        else {
+            if (numSemParDate[dateStr]) {
+                infosJour.numeroSemaine = numSemParDate[dateStr];
+            }
+        } else {
             infosJour.statut = 'hors-cours';
         }
 
@@ -846,7 +931,6 @@ function genererCalendrierComplet() {
 
     // STOCKER dans localStorage - LA SOURCE UNIQUE
     db.setSync(cle('calendrierComplet'), calendrier);
-
 
     return calendrier;
 }
@@ -975,8 +1059,11 @@ function annulerFormEvenement() {
         form.removeAttribute('data-edit-id');
         document.getElementById('dateEvenementPrevu').value = '';
         document.getElementById('descriptionEvenementPrevu').value = '';
+        const cat = document.getElementById('categorieEvenementPrevu');
+        if (cat) cat.value = 'institutionnel';
         document.getElementById('horaireReprisePrevu').value = '';
         document.getElementById('dateReprisePrevu').value = '';
+        majAffichageRepriseFormPrevu();
 
         // Réinitialiser le titre et le bouton en mode création
         document.getElementById('texteFormPrevu').textContent = 'Nouvel événement prévu';
@@ -1003,8 +1090,11 @@ function annulerFormEvenementImprevu() {
         form.removeAttribute('data-edit-id');
         document.getElementById('dateEvenementImprevu').value = '';
         document.getElementById('descriptionEvenementImprevu').value = '';
+        const cat = document.getElementById('categorieEvenementImprevu');
+        if (cat) cat.value = 'institutionnel';
         document.getElementById('horaireRepriseImprevu').value = '';
         document.getElementById('dateRepriseImprevu').value = '';
+        majAffichageRepriseFormImprevu();
 
         // Réinitialiser le titre et le bouton en mode création
         document.getElementById('texteFormImprevu').textContent = 'Nouvel événement imprévu';
@@ -1027,8 +1117,11 @@ function modifierEvenement(id, type) {
         // Pré-remplir le formulaire
         document.getElementById('dateEvenementPrevu').value = evt.dateEvenement;
         document.getElementById('descriptionEvenementPrevu').value = evt.description;
+        const catSel = document.getElementById('categorieEvenementPrevu');
+        if (catSel) catSel.value = evt.categorie || 'institutionnel';
         document.getElementById('horaireReprisePrevu').value = evt.horaireReprise || '';
         document.getElementById('dateReprisePrevu').value = evt.dateReprise || '';
+        majAffichageRepriseFormPrevu();
 
         // Stocker l'ID en mode édition
         const form = document.getElementById('formEvenementPrevu');
@@ -1044,8 +1137,11 @@ function modifierEvenement(id, type) {
         // Pré-remplir le formulaire
         document.getElementById('dateEvenementImprevu').value = evt.dateEvenement;
         document.getElementById('descriptionEvenementImprevu').value = evt.description;
+        const catSel = document.getElementById('categorieEvenementImprevu');
+        if (catSel) catSel.value = evt.categorie || 'institutionnel';
         document.getElementById('horaireRepriseImprevu').value = evt.horaireReprise || '';
         document.getElementById('dateRepriseImprevu').value = evt.dateReprise || '';
+        majAffichageRepriseFormImprevu();
 
         // Stocker l'ID en mode édition
         const form = document.getElementById('formEvenementImprevu');
@@ -1095,6 +1191,38 @@ function obtenirInfosJour(date) {
    =============================== */
 
 /* ===============================
+   🔁 TOGGLE AFFICHAGE REPRISE SELON CATÉGORIE
+   =============================== */
+
+function _toggleGroupesReprise(idHoraire, idDateReprise, afficher) {
+    const gh = document.getElementById(idHoraire);
+    const gd = document.getElementById(idDateReprise);
+    if (gh) gh.style.display = afficher ? '' : 'none';
+    if (gd) gd.style.display = afficher ? '' : 'none';
+    if (!afficher) {
+        const horaireSelect = gh ? gh.querySelector('select') : null;
+        const dateInput = gd ? gd.querySelector('input') : null;
+        if (horaireSelect) horaireSelect.value = '';
+        if (dateInput) dateInput.value = '';
+    }
+}
+
+function majAffichageRepriseFormPrevu() {
+    const cat = document.getElementById('categorieEvenementPrevu')?.value || 'institutionnel';
+    _toggleGroupesReprise('groupeHoraireReprisePrevu', 'groupeDateReprisePrevu', cat === 'institutionnel');
+}
+
+function majAffichageRepriseFormImprevu() {
+    const cat = document.getElementById('categorieEvenementImprevu')?.value || 'institutionnel';
+    _toggleGroupesReprise('groupeHoraireRepriseImprevu', 'groupeDateRepriseImprevu', cat === 'institutionnel');
+}
+
+function majAffichageRepriseEditionEnPlace(id) {
+    const cat = document.getElementById(`edit-categorie-${id}`)?.value || 'institutionnel';
+    _toggleGroupesReprise(`edit-groupe-horaire-${id}`, `edit-groupe-reprise-${id}`, cat === 'institutionnel');
+}
+
+/* ===============================
    🌐 EXPORTS GLOBAUX
    =============================== */
 
@@ -1124,6 +1252,11 @@ window.afficherFormEvenement = afficherFormEvenement;
 window.annulerFormEvenement = annulerFormEvenement;
 window.afficherFormEvenementImprevu = afficherFormEvenementImprevu;
 window.annulerFormEvenementImprevu = annulerFormEvenementImprevu;
+
+// Exports toggle catégorie (utilisés par data-on-change dans formulaires)
+window.majAffichageRepriseFormPrevu = majAffichageRepriseFormPrevu;
+window.majAffichageRepriseFormImprevu = majAffichageRepriseFormImprevu;
+window.majAffichageRepriseEditionEnPlace = majAffichageRepriseEditionEnPlace;
 
 // Exports utilitaires (utilisés par d'autres modules)
 window.afficherNotification = afficherNotification;

@@ -2369,6 +2369,26 @@ input[type="number"].controle-form {
     font-weight: 500;
 }
 
+/* === BADGES CATÉGORIE D'ÉVÉNEMENT (institutionnel/personnel) === */
+.badge-categorie-evenement {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: var(--radius-petit);
+    font-size: 0.72rem;
+    font-weight: 500;
+    margin-left: 6px;
+    vertical-align: middle;
+    letter-spacing: 0.02em;
+}
+.badge-categorie-evenement.badge-institutionnel {
+    background: rgba(106, 172, 184, 0.15);
+    color: var(--bleu-clair);
+}
+.badge-categorie-evenement.badge-personnel {
+    background: rgba(255, 193, 7, 0.15);
+    color: var(--risque-modere);
+}
+
 /* === BADGES DE RISQUE (sans émojis) - OBSOLÈTE - Gardé pour compatibilité === */
 .badge-risque-minimal {
     background: rgba(106, 172, 184, 0.12);
@@ -5634,6 +5654,14 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     color: var(--calendrier-conge-texte);
     border: 2px solid var(--calendrier-conge-bordure);
     font-weight: 600;
+}
+
+/* Congé personnel — visuellement distinct du congé institutionnel.
+   Le numéro de semaine reste affiché (le rôle pédagogique compte normalement). */
+.calendrier-jour-conge.calendrier-jour-conge-personnel {
+    background: rgba(255, 193, 7, 0.10);
+    border: 2px dashed var(--risque-modere);
+    color: var(--texte-principal);
 }
 
 /* Reprise */

@@ -7,7 +7,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=2026041702">
+    <link rel="stylesheet" href="styles.css?v=2026042819">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -5775,7 +5775,14 @@
                                                         <input type="text" id="v2-descriptionPrevu" class="controle-form controle-form-compact" placeholder="Ex: Fête du travail">
                                                     </div>
                                                 </div>
-                                                <div class="u-mb-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+                                                <div class="u-mb-8 groupe-form">
+                                                    <label class="u-texte-medium">Type d'événement</label>
+                                                    <select id="v2-categorieEvenementPrevu" class="controle-form controle-form-compact" data-on-change="majAffichageRepriseV2Prevu">
+                                                        <option value="institutionnel">Institutionnel (collège)</option>
+                                                        <option value="personnel">Personnel (vous seulement)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="u-mb-8" id="v2-blocReprisePrevu" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
                                                     <div class="groupe-form">
                                                         <label class="u-texte-medium">Horaire de reprise</label>
                                                         <select id="v2-horaireReprisePrevu" class="controle-form controle-form-compact">
@@ -5823,7 +5830,14 @@
                                                         <input type="text" id="v2-descriptionImprevu" class="controle-form controle-form-compact" placeholder="Ex: Tempête">
                                                     </div>
                                                 </div>
-                                                <div class="u-mb-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+                                                <div class="u-mb-8 groupe-form">
+                                                    <label class="u-texte-medium">Type d'événement</label>
+                                                    <select id="v2-categorieEvenementImprevu" class="controle-form controle-form-compact" data-on-change="majAffichageRepriseV2Imprevu">
+                                                        <option value="institutionnel">Institutionnel (collège)</option>
+                                                        <option value="personnel">Personnel (vous seulement)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="u-mb-8" id="v2-blocRepriseImprevu" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
                                                     <div class="groupe-form">
                                                         <label class="u-texte-medium">Horaire de reprise</label>
                                                         <select id="v2-horaireRepriseImprevu" class="controle-form controle-form-compact">
@@ -8993,6 +9007,14 @@
                                             <span id="texteFormPrevu">Nouvel événement prévu</span>
                                         </strong>
                                     </div>
+                                    <div class="groupe-form" style="margin-bottom: 12px;">
+                                        <label>Type d'événement</label>
+                                        <select class="controle-form controle-form-compact" id="categorieEvenementPrevu" data-on-change="majAffichageRepriseFormPrevu">
+                                            <option value="institutionnel">Institutionnel (collège)</option>
+                                            <option value="personnel">Personnel (vous seulement)</option>
+                                        </select>
+                                        <small class="text-muted" style="display:block;margin-top:4px;font-size:0.8rem;">Institutionnel = le collège a annulé/déplacé ces cours pour tout le monde. Personnel = vous étiez absent, le collège a continué normalement.</small>
+                                    </div>
                                     <div class="grille-4col-form">
                                         <div class="groupe-form">
                                             <label>Date événement</label>
@@ -9009,7 +9031,7 @@
                                                 <option>Lundi de Pâques (férié)</option>
                                             </select>
                                         </div>
-                                        <div class="groupe-form">
+                                        <div class="groupe-form" id="groupeHoraireReprisePrevu">
                                             <label>Reprise prévue</label>
                                             <select class="controle-form controle-form-compact" id="horaireReprisePrevu">
                                                 <option value="">Pas de reprise</option>
@@ -9020,7 +9042,7 @@
                                                 <option value="Horaire du vendredi">Horaire du vendredi</option>
                                             </select>
                                         </div>
-                                        <div class="groupe-form">
+                                        <div class="groupe-form" id="groupeDateReprisePrevu">
                                             <label>Date reprise</label>
                                             <input type="date" class="controle-form controle-form-compact" id="dateReprisePrevu">
                                         </div>
@@ -9059,6 +9081,14 @@
                                             <span id="texteFormImprevu">Nouvel événement imprévu</span>
                                         </strong>
                                     </div>
+                                    <div class="groupe-form" style="margin-bottom: 12px;">
+                                        <label>Type d'événement</label>
+                                        <select class="controle-form controle-form-compact" id="categorieEvenementImprevu" data-on-change="majAffichageRepriseFormImprevu">
+                                            <option value="institutionnel">Institutionnel (collège)</option>
+                                            <option value="personnel">Personnel (vous seulement)</option>
+                                        </select>
+                                        <small class="text-muted" style="display:block;margin-top:4px;font-size:0.8rem;">Institutionnel = le collège a annulé/déplacé ces cours pour tout le monde (grève, tempête, urgence collégiale). Personnel = vous étiez absent, le collège a continué normalement.</small>
+                                    </div>
                                     <div class="grille-4col-form">
                                         <div class="groupe-form">
                                             <label>Date événement</label>
@@ -9074,7 +9104,7 @@
                                                 <option>Autre</option>
                                             </select>
                                         </div>
-                                        <div class="groupe-form">
+                                        <div class="groupe-form" id="groupeHoraireRepriseImprevu">
                                             <label>Reprise optionnelle</label>
                                             <select class="controle-form controle-form-compact" id="horaireRepriseImprevu">
                                                 <option value="">Pas de reprise</option>
@@ -9085,7 +9115,7 @@
                                                 <option value="Horaire du vendredi">Horaire du vendredi</option>
                                             </select>
                                         </div>
-                                        <div class="groupe-form">
+                                        <div class="groupe-form" id="groupeDateRepriseImprevu">
                                             <label>Date reprise</label>
                                             <input type="date" class="controle-form controle-form-compact" id="dateRepriseImprevu">
                                         </div>
@@ -15764,8 +15794,8 @@
 
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestres.js?v=2026041708"></script> <!-- Beta 99.17 (b0417-1048) : + section profilsRLO dans exporterFormatRecherche (étape 9) -->
-    <script src="js/trimestre.js?v=2025123109"></script>
-    <script src="js/trimestre-v2.js?v=2026022201"></script> <!-- Beta 97.6 : wrappers notifications -->
+    <script src="js/trimestre.js?v=2026042819"></script> <!-- Beta 99.28 b0428-1915 : champ categorie + algo deux passes pour numérotation des semaines DÉ -->
+    <script src="js/trimestre-v2.js?v=2026042819"></script> <!-- Beta 99.28 b0428-1915 : champ categorie événements + cartes badge -->
 
     <!-- ENTITÉS Beta 95.2 - Architecture modulaire groupe-cours -->
     <script src="js/entites/cours-entite.js?v=2026010601"></script>
@@ -15871,7 +15901,7 @@
     <script src="js/actions-rlo.js?v=2026041709"></script> <!-- Beta 99.17 (b0417-1100) : fix lecture LIVE prioritaire dans obtenirEvolutionRLOEtudiant -->
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
-    <script src="js/calendrier-vue.js?v=2025120201"></script>
+    <script src="js/calendrier-vue.js?v=2026042819"></script> <!-- Beta 99.28 b0428-1915 : congés personnels affichent indice de sem -->
     <script src="js/horaire.js?v=2026010602"></script>
     <script src="js/groupe.js?v=2026032600"></script>
     <script src="js/interventions.js?v=2025122801"></script>
@@ -15906,7 +15936,7 @@
     <script src="js/guidage-demo.js?v=2026020601"></script>
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=2026042401"></script> <!-- Beta 99.24 : items mode démo refondu + duplication CC -->
+    <script src="js/changelog-data.js?v=2026042819"></script> <!-- Beta 99.28 b0428-1915 : item numérotation semaines DÉ -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=2026041901"></script>

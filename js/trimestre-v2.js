@@ -525,12 +525,18 @@ function genererCarteEvenementV2(evt, type) {
             → Reprise <strong>${evt.horaireReprise || ''}</strong> le <strong>${evt.dateReprise}</strong>
         </div>` : '';
 
+    const cat = evt.categorie || 'institutionnel';
+    const badgeCat = cat === 'personnel'
+        ? '<span class="badge-categorie-evenement badge-personnel">Personnel</span>'
+        : '<span class="badge-categorie-evenement badge-institutionnel">Institutionnel</span>';
+
     return `
     <div class="item-carte-compact" style="margin-bottom: 12px; padding: 12px 15px; background: var(--bleu-tres-pale); border-radius: 8px; border-left: 4px solid var(--accent-primaire);">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 15px;">
             <div style="flex: 1; min-width: 0;">
                 <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                     <strong style="font-size: 1rem;">${evt.description}</strong>
+                    ${badgeCat}
                     <span style="color: var(--accent-primaire); font-weight: 500;">${evt.dateEvenement}</span>
                 </div>
                 ${repriseInfo}
@@ -561,8 +567,10 @@ function afficherFormEvenementV2(type) {
             // Réinitialiser les champs
             setValue('v2-dateEvenementPrevu', '');
             setValue('v2-descriptionPrevu', '');
+            setValue('v2-categorieEvenementPrevu', 'institutionnel');
             setValue('v2-horaireReprisePrevu', '');
             setValue('v2-dateReprisePrevu', '');
+            majAffichageRepriseV2Prevu();
 
             if (titre) titre.textContent = 'Nouvel événement prévu';
             if (btn) btn.textContent = 'Ajouter';
@@ -580,8 +588,10 @@ function afficherFormEvenementV2(type) {
             // Réinitialiser les champs
             setValue('v2-dateEvenementImprevu', '');
             setValue('v2-descriptionImprevu', '');
+            setValue('v2-categorieEvenementImprevu', 'institutionnel');
             setValue('v2-horaireRepriseImprevu', '');
             setValue('v2-dateRepriseImprevu', '');
+            majAffichageRepriseV2Imprevu();
 
             if (titre) titre.textContent = 'Nouvel événement imprévu';
             if (btn) btn.textContent = 'Ajouter';
@@ -589,6 +599,32 @@ function afficherFormEvenementV2(type) {
             form.classList.remove('u-hide');
             // Ne pas faire défiler la page
         }
+    }
+}
+
+function majAffichageRepriseV2Prevu() {
+    const cat = document.getElementById('v2-categorieEvenementPrevu')?.value || 'institutionnel';
+    const bloc = document.getElementById('v2-blocReprisePrevu');
+    if (!bloc) return;
+    if (cat === 'personnel') {
+        bloc.style.display = 'none';
+        setValue('v2-horaireReprisePrevu', '');
+        setValue('v2-dateReprisePrevu', '');
+    } else {
+        bloc.style.display = 'grid';
+    }
+}
+
+function majAffichageRepriseV2Imprevu() {
+    const cat = document.getElementById('v2-categorieEvenementImprevu')?.value || 'institutionnel';
+    const bloc = document.getElementById('v2-blocRepriseImprevu');
+    if (!bloc) return;
+    if (cat === 'personnel') {
+        bloc.style.display = 'none';
+        setValue('v2-horaireRepriseImprevu', '');
+        setValue('v2-dateRepriseImprevu', '');
+    } else {
+        bloc.style.display = 'grid';
     }
 }
 
@@ -658,8 +694,10 @@ function modifierEvenementV2(id, type) {
         if (form) {
             setValue('v2-dateEvenementPrevu', evt.dateEvenement || '');
             setValue('v2-descriptionPrevu', evt.description || '');
+            setValue('v2-categorieEvenementPrevu', evt.categorie || 'institutionnel');
             setValue('v2-horaireReprisePrevu', evt.horaireReprise || '');
             setValue('v2-dateReprisePrevu', evt.dateReprise || '');
+            majAffichageRepriseV2Prevu();
 
             if (titre) titre.textContent = 'Modifier l\'événement';
             if (btn) btn.textContent = 'Sauvegarder';
@@ -676,8 +714,10 @@ function modifierEvenementV2(id, type) {
         if (form) {
             setValue('v2-dateEvenementImprevu', evt.dateEvenement || '');
             setValue('v2-descriptionImprevu', evt.description || '');
+            setValue('v2-categorieEvenementImprevu', evt.categorie || 'institutionnel');
             setValue('v2-horaireRepriseImprevu', evt.horaireReprise || '');
             setValue('v2-dateRepriseImprevu', evt.dateReprise || '');
+            majAffichageRepriseV2Imprevu();
 
             if (titre) titre.textContent = 'Modifier l\'événement';
             if (btn) btn.textContent = 'Sauvegarder';
@@ -694,8 +734,15 @@ function modifierEvenementV2(id, type) {
 function confirmerEvenementPrevuV2() {
     const dateEvenement = document.getElementById('v2-dateEvenementPrevu')?.value;
     const description = document.getElementById('v2-descriptionPrevu')?.value?.trim();
-    const horaireReprise = document.getElementById('v2-horaireReprisePrevu')?.value;
-    const dateReprise = document.getElementById('v2-dateReprisePrevu')?.value;
+    const categorie = document.getElementById('v2-categorieEvenementPrevu')?.value || 'institutionnel';
+    let horaireReprise = document.getElementById('v2-horaireReprisePrevu')?.value || '';
+    let dateReprise = document.getElementById('v2-dateReprisePrevu')?.value || '';
+
+    // Convention §3.0 : pas de reprise sur événement personnel
+    if (categorie === 'personnel') {
+        horaireReprise = '';
+        dateReprise = '';
+    }
 
     if (!dateEvenement || !description) {
         alert('Veuillez remplir la date et la description.');
@@ -717,8 +764,9 @@ function confirmerEvenementPrevuV2() {
                 id: evenementPrevuEnEditionV2,
                 dateEvenement,
                 description,
-                horaireReprise: horaireReprise || '',
-                dateReprise: dateReprise || ''
+                categorie,
+                horaireReprise,
+                dateReprise
             };
         }
     } else {
@@ -727,8 +775,9 @@ function confirmerEvenementPrevuV2() {
             id: genererIdUnique('EVT_'),
             dateEvenement,
             description,
-            horaireReprise: horaireReprise || '',
-            dateReprise: dateReprise || ''
+            categorie,
+            horaireReprise,
+            dateReprise
         });
     }
 
@@ -767,8 +816,15 @@ function annulerFormEvenementPrevuV2() {
 function confirmerEvenementImprevuV2() {
     const dateEvenement = document.getElementById('v2-dateEvenementImprevu')?.value;
     const description = document.getElementById('v2-descriptionImprevu')?.value?.trim();
-    const horaireReprise = document.getElementById('v2-horaireRepriseImprevu')?.value;
-    const dateReprise = document.getElementById('v2-dateRepriseImprevu')?.value;
+    const categorie = document.getElementById('v2-categorieEvenementImprevu')?.value || 'institutionnel';
+    let horaireReprise = document.getElementById('v2-horaireRepriseImprevu')?.value || '';
+    let dateReprise = document.getElementById('v2-dateRepriseImprevu')?.value || '';
+
+    // Convention §3.0 : pas de reprise sur événement personnel
+    if (categorie === 'personnel') {
+        horaireReprise = '';
+        dateReprise = '';
+    }
 
     if (!dateEvenement || !description) {
         alert('Veuillez remplir la date et la description.');
@@ -790,8 +846,9 @@ function confirmerEvenementImprevuV2() {
                 id: evenementImprevuEnEditionV2,
                 dateEvenement,
                 description,
-                horaireReprise: horaireReprise || '',
-                dateReprise: dateReprise || ''
+                categorie,
+                horaireReprise,
+                dateReprise
             };
         }
     } else {
@@ -800,8 +857,9 @@ function confirmerEvenementImprevuV2() {
             id: genererIdUnique('EVT_'),
             dateEvenement,
             description,
-            horaireReprise: horaireReprise || '',
-            dateReprise: dateReprise || ''
+            categorie,
+            horaireReprise,
+            dateReprise
         });
     }
 
@@ -5232,6 +5290,8 @@ window.confirmerEvenementPrevuV2 = confirmerEvenementPrevuV2;
 window.annulerFormEvenementPrevuV2 = annulerFormEvenementPrevuV2;
 window.confirmerEvenementImprevuV2 = confirmerEvenementImprevuV2;
 window.annulerFormEvenementImprevuV2 = annulerFormEvenementImprevuV2;
+window.majAffichageRepriseV2Prevu = majAffichageRepriseV2Prevu;
+window.majAffichageRepriseV2Imprevu = majAffichageRepriseV2Imprevu;
 window.retournerVueV2 = retournerVueV2;
 window.populerDropdownTrimestreV2 = populerDropdownTrimestreV2;
 window.changerTrimestreActifV2 = changerTrimestreActifV2;
