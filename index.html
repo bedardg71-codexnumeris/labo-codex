@@ -3712,6 +3712,9 @@
                                 <button id="codex-menu-verser-reserve" class="codex-menu-item" data-action="Reserve.actionVerser">
                                     <span class="codex-menu-icone"><img src="icons/icon-filing-cabinet.svg" alt=""></span> Verser dans la r&eacute;serve...
                                 </button>
+                                <button id="codex-menu-ouvrir-versement" class="codex-menu-item" data-action="ReserveOuvrir.actionOuvrir">
+                                    <span class="codex-menu-icone"><img src="icons/icon-import.svg" alt=""></span> Ouvrir la r&eacute;serve...
+                                </button>
                                 <div class="codex-menu-sep"></div>
                                 <button id="codex-menu-fermer" class="codex-menu-item codex-menu-item--danger u-hide" data-action="Codex.actionFermer">
                                     <span class="codex-menu-icone"><img src="icons/icon-cancel.svg" alt=""></span> Fermer le codex
@@ -15802,7 +15805,8 @@
     <script src="libs/jszip.min.js?v=3.10.1"></script>
     <script src="libs/html2canvas.min.js?v=1.4.1"></script>
     <script src="js/travaux-stockage.js?v=2026020601"></script>
-    <script src="js/reserve.js?v=2026042605"></script>
+    <script src="js/reserve.js?v=2026042802"></script>
+    <script src="js/reserve-ouvrir.js?v=2026042802"></script>
     <script src="js/travaux-preparation.js?v=2026021801"></script>
     <script src="js/travaux-import.js?v=2026032600"></script>
     <script src="js/travaux-visionneuse.js?v=2026022601"></script>
@@ -16362,6 +16366,64 @@
                 </button>
                 <button data-action="Reserve.lancerDepuisDialogue" class="btn btn-confirmer u-texte-petit" style="padding: 6px 12px">
                     Verser ce groupe
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         MODAL OUVRIR LA RÉSERVE — Consultation et réimport sélectif
+         (28 avril 2026 — BACKLOG #254 v1.1)
+         ========================================= -->
+    <div id="modalOuvrirVersement" class="modal-overlay" data-close-on-bg="ReserveOuvrir.fermerDialogue">
+        <div class="modal-contenu" style="max-width: 720px; max-height: 85vh; padding: 16px; display: flex; flex-direction: column;">
+            <button data-action="ReserveOuvrir.fermerDialogue" class="modal-fermer" title="Fermer">
+                <img src="icons/icon-close-window.svg" alt="" class="modal-close-icon">
+            </button>
+
+            <h2 class="modal-titre u-texte-11" style="margin-bottom: 4px">
+                <img src="icons/icon-filing-cabinet.svg" alt="" class="btn-inline-icon">
+                Ouvrir la r&eacute;serve
+            </h2>
+            <p class="u-mb-10" style="color: var(--texte-secondaire); font-size: 0.85rem">
+                Consulte tes versements archiv&eacute;s pour r&eacute;importer des grilles,
+                &eacute;chelles ou tampons dans tes biblioth&egrave;ques actives.
+            </p>
+
+            <!-- Étape 1 : peuplée dynamiquement (mode navigation, choix dossier, ou file picker) -->
+            <div id="reserve-ouvrir-etape-fichier"></div>
+
+            <!-- Étape 2 : récap + sélection (rempli dynamiquement) -->
+            <div id="reserve-ouvrir-etape-selection" style="display: none; flex: 1; min-height: 0; overflow-y: auto;">
+                <div id="reserve-ouvrir-meta" class="u-mb-10"
+                     style="background: var(--surface-carte); padding: 8px 10px; border-radius: var(--radius-moyen); font-size: 0.85rem; line-height: 1.5;">
+                </div>
+
+                <div id="reserve-ouvrir-sections"></div>
+
+                <div class="u-mb-10" style="margin-top: 12px; padding: 8px 10px; background: var(--bleu-tres-pale); border-radius: var(--radius-moyen);">
+                    <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.82rem; cursor: pointer;">
+                        <input type="checkbox" id="reserve-ouvrir-toggle-copie"
+                               data-on-change="ReserveOuvrir.onChangerToggleCopie"
+                               style="margin-top: 3px;">
+                        <span>
+                            <strong>Recopier en double si d&eacute;j&agrave; pr&eacute;sent</strong>
+                            &mdash; l'&eacute;l&eacute;ment re&ccedil;oit un nouvel ID et son nom est suffix&eacute;
+                            &laquo;&nbsp;&mdash; copie&nbsp;&raquo;.
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <div id="reserve-ouvrir-actions" class="btn-groupe u-flex-gap-8"
+                 style="justify-content: flex-end; margin-top: 8px;">
+                <button data-action="ReserveOuvrir.fermerDialogue" class="btn btn-annuler u-texte-petit"
+                        style="padding: 6px 12px">Annuler</button>
+                <button data-action="ReserveOuvrir.appliquerReimport"
+                        id="reserve-ouvrir-bouton-reimporter"
+                        class="btn btn-confirmer u-texte-petit"
+                        style="padding: 6px 12px; display: none">
+                    R&eacute;importer <span id="reserve-ouvrir-compteur">0</span> &eacute;l&eacute;ment(s)
                 </button>
             </div>
         </div>
