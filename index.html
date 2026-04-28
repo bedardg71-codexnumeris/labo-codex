@@ -3992,14 +3992,17 @@
                     <div class="carte" id="carte-evolution-temporelle" style="margin-top: 2rem;">
                         <h3 class="carte-titre-bleu u-flex-col" style="display: flex; gap: 0.5rem">
                             <div class="u-flex-between u-w-100 u-flex-wrap" style="gap: 0.5rem">
-                                <span data-tooltip="tdb-dev-groupe">Développement du groupe</span>
+                                <span data-tooltip="tdb-dev-groupe">Développement du groupe — par semaine</span>
                                 <div id="contexte-evolution-temporelle" class="carte-contexte-ligne u-align-center" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; gap: 0.75rem">
                                     <!-- Trimestre | Cours | Badge - rempli par JS -->
                                 </div>
                             </div>
+                            <div class="entete-sous-titre u-texte-09" style="font-weight: normal; opacity: 0.85;">
+                                Indices A·C·P sur les snapshots hebdomadaires
+                            </div>
                             <div class="u-texte-09 u-flex-wrap u-align-center" style="display: flex; gap: 1rem; font-weight: normal">
                                 <div class="u-align-center" style="display: flex; gap: 0.5rem">
-                                    <label style="color: rgba(255,255,255,0.8);" data-tooltip="tdb-selecteur-indice">Indice :</label>
+                                    <label style="color: rgba(255,255,255,0.8);" data-tooltip="tdb-selecteur-indice">Mesure :</label>
                                     <select id="selecteur-indice-acp" data-on-change="rafraichirGraphiqueSpaghettiACP" class="controle-form-header">
                                         <option value="A" selected style="color: var(--gris-fonce);">Assiduité (A)</option>
                                         <option value="C" style="color: var(--gris-fonce);">Complétion (C)</option>
@@ -4007,10 +4010,11 @@
                                     </select>
                                 </div>
                                 <div class="u-align-center" style="display: flex; gap: 0.5rem">
-                                    <label style="color: rgba(255,255,255,0.8);" data-tooltip="tdb-selecteur-eleve-groupe">Élève :</label>
+                                    <label style="color: rgba(255,255,255,0.8);" data-tooltip="tdb-selecteur-eleve-groupe">Élève en relief :</label>
                                     <select id="selecteur-etudiant-acp" data-on-change="selectionnerEtudiantACP" class="controle-form-header">
                                         <option value="" style="color: var(--gris-fonce);">-- Sélectionner --</option>
                                     </select>
+                                    <button type="button" id="btn-profil-acp" class="btn-voir-profil" data-action="ouvrirProfilEleveACP" title="Voir le profil de l'élève sélectionné" aria-label="Voir le profil de l'élève sélectionné" style="display: none;">👤</button>
                                 </div>
                             </div>
                         </h3>
@@ -4024,57 +4028,80 @@
                         </p>
                     </div>
 
-                    <!-- ========== SECTION 4: TRAJECTOIRE D'APPRENTISSAGE ========== -->
-                    <div class="carte" id="carte-trajectoire-apprentissage" style="margin-top: 2rem;">
+                    <!-- ========== SECTION 4: TRAJECTOIRES PAR PRODUCTION (note finale ou habiletés) ========== -->
+                    <div class="carte" id="carte-trajectoires-production" style="margin-top: 2rem;">
                         <h3 class="carte-titre-bleu u-flex-col" style="display: flex; gap: 0.5rem">
                             <div class="u-flex-between u-w-100 u-flex-wrap" style="gap: 0.5rem">
-                                <div class="u-align-center" style="display: flex; gap: 0.5rem" data-tooltip="tdb-dev-individuel">
-                                    <span>Développement individuel</span>
+                                <div class="u-align-center" style="display: flex; gap: 0.5rem" data-tooltip="tdb-trajectoires">
+                                    <span>Trajectoires par <span id="trajectoires-titre-terme">production</span></span>
                                     <span class="emoji-container">
-                                        <span class="primo-aide" data-target="note-spaghetti">✴️</span>
+                                        <span class="primo-aide" data-target="note-trajectoires">✴️</span>
                                     </span>
                                 </div>
-                                <div id="contexte-trajectoire-apprentissage" class="carte-contexte-ligne u-align-center" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; gap: 0.75rem">
+                                <div id="contexte-trajectoires-production" class="carte-contexte-ligne u-align-center" style="font-size: 0.8rem; font-weight: normal; opacity: 0.9; display: flex; gap: 0.75rem">
                                     <!-- Trimestre | Cours | Badge - rempli par JS -->
                                 </div>
                             </div>
-                            <div class="u-texte-09 u-align-center" style="display: flex; gap: 0.5rem; font-weight: normal">
-                                <label style="color: rgba(255,255,255,0.8);" data-tooltip="tdb-selecteur-eleve-indiv">Élève :</label>
-                                <select id="selecteur-etudiant-spaghetti" data-on-change="selectionnerEtudiantSpaghetti" class="controle-form-header">
-                                    <option value="" style="color: var(--gris-fonce);">-- Sélectionner --</option>
-                                </select>
+                            <div class="entete-sous-titre u-texte-09" id="trajectoires-sous-titre" style="font-weight: normal;">
+                                Note finale par production, dans l'ordre chronologique
+                            </div>
+                            <div class="u-texte-09 u-flex-wrap u-align-center" style="display: flex; gap: 1rem; font-weight: normal">
+                                <div class="u-align-center" style="display: flex; gap: 0.5rem">
+                                    <label style="color: rgba(255,255,255,0.8);" for="selecteur-mesure-trajectoires">Mesure :</label>
+                                    <select id="selecteur-mesure-trajectoires" data-on-change="changerMesureTrajectoires" class="controle-form-header">
+                                        <option value="noteFinale" selected style="color: var(--gris-fonce);">Note finale</option>
+                                        <option value="habiletes" style="color: var(--gris-fonce);">Habiletés</option>
+                                    </select>
+                                </div>
+                                <div class="u-align-center" style="display: flex; gap: 0.5rem">
+                                    <label style="color: rgba(255,255,255,0.8);" for="selecteur-etudiant-trajectoires">Élève en relief :</label>
+                                    <select id="selecteur-etudiant-trajectoires" data-on-change="selectionnerEtudiantTrajectoires" class="controle-form-header">
+                                        <option value="" style="color: var(--gris-fonce);">-- Sélectionner --</option>
+                                    </select>
+                                    <button type="button" id="btn-profil-trajectoires" class="btn-voir-profil" data-action="ouvrirProfilEleveTrajectoires" title="Voir le profil de l'élève sélectionné" aria-label="Voir le profil de l'élève sélectionné" style="display: none;">👤</button>
+                                </div>
+                                <label class="u-align-center habiletes-toggle-mediane-label" style="display: flex; gap: 0.4rem; cursor: pointer; color: rgba(255,255,255,0.85);" for="trajectoires-toggle-mediane">
+                                    <input type="checkbox" id="trajectoires-toggle-mediane" data-on-change="rafraichirGraphiqueTrajectoires">
+                                    <span>Médiane du groupe</span>
+                                </label>
                             </div>
                         </h3>
 
-                        <!-- Carte Note -->
-                        <div id="note-spaghetti" class="carte-info-toggle carte-info-note" style="display: none;">
-                            <strong>Graphique « spaghetti » :</strong> Chaque ligne représente la trajectoire d'un étudiant à travers les <strong>artefacts</strong>.
+                        <!-- Carte Note (info) -->
+                        <div id="note-trajectoires" class="carte-info-toggle carte-info-note" style="display: none;">
+                            <strong>Trajectoires par production :</strong> chaque ligne représente la trajectoire d'un élève à travers les productions évaluables, dans l'ordre des échéances.
                             <br><br>
-                            <strong>Pourquoi les résultats bruts ?</strong> Contrairement à l'indice P (moyenne des meilleures notes), ce graphique montre le <strong>résultat réel de chaque évaluation</strong>. Cela permet de voir :
-                            <ul style="margin: 10px 0; padding-left: 20px;">
-                                <li>La <strong>volatilité</strong> naturelle de l'apprentissage (hauts et bas)</li>
-                                <li>La <strong>non-linéarité</strong> du développement des compétences</li>
-                                <li>Les <strong>artefacts difficiles</strong> pour le groupe (zones de convergence vers le bas)</li>
-                                <li>La <strong>résilience</strong> des étudiants (rebonds après des difficultés)</li>
+                            Choisis la <strong>mesure</strong> à afficher :
+                            <ul style="margin: 8px 0; padding-left: 20px;">
+                                <li><strong>Note finale</strong> — la note globale par production (champ <em>Note chiffrée</em> de l'évaluation, /100).</li>
+                                <li><strong>Habiletés</strong> — moyenne des critères cochés (niveaux IDME convertis en %). Coche un seul critère pour isoler une habileté, combine-les pour une vue d'ensemble.</li>
                             </ul>
-                            Les <strong>zones colorées</strong> en arrière-plan correspondent aux niveaux IDME :
-                            <ul style="margin: 10px 0; padding-left: 20px;">
-                                <li><span style="color: var(--idme-etendu);">Bleu</span> : Étendu ou enrichi (85-100%)</li>
-                                <li><span style="color: var(--idme-maitrise);">Vert</span> : Maîtrisé (75-85%)</li>
-                                <li><span style="color: var(--idme-developpement);">Jaune</span> : En développement (65-75%)</li>
-                                <li><span style="color: var(--idme-reussite);">Orange</span> : Réussite (40-65%)</li>
-                                <li><span style="color: var(--idme-insuffisant);">Rouge</span> : Insuffisant (0-40%)</li>
+                            Les <strong>lignes pointillées</strong> aux seuils 65 % (D), 75 % (M), 85 % (E) viennent de l'échelle de notation utilisée. Les zones colorées en arrière-plan correspondent aux niveaux IDME (ou personnalisés).
+                            <br><br>
+                            Active <strong>« Médiane du groupe »</strong> pour superposer deux repères statistiques :
+                            <ul style="margin: 8px 0; padding-left: 20px;">
+                                <li>La <strong>ligne foncée avec losanges</strong> = score <strong>médian</strong> du groupe par production (50 % des élèves au-dessus, 50 % en-dessous).</li>
+                                <li>La <strong>bande grise</strong> = <strong>écart inter-quartile</strong> (Q25 à Q75) : couvre les 50 % d'élèves au centre. Plus la bande est étroite, plus le groupe est homogène.</li>
                             </ul>
-                            <em class="u-texte-09" style="color: var(--gris-moyen)">💡 Survole un point pour voir le nom de l'étudiant et sa note sur cet artefact.</em>
+                            Les élèves marqués <em>inactifs / abandon</em> sont retirés du calcul de la médiane et de la bande.
+                            <br><br>
+                            Sélectionne un élève pour mettre sa courbe en relief, puis clique sur <strong>👤</strong> pour ouvrir son profil.
                         </div>
 
-                        <div class="u-w-100" style="position: relative; height: 550px" data-tooltip="tdb-graphique-individuel">
-                            <canvas id="graphique-groupe-spaghetti"></canvas>
+                        <!-- Barre de contrôle des critères (visible uniquement en mode Habiletés) -->
+                        <div id="trajectoires-controles-criteres" class="habiletes-controles" style="display: none;">
+                            <span class="habiletes-controles-label">Critères :</span>
+                            <div id="trajectoires-criteres-checkboxes" class="habiletes-criteres-liste" role="group" aria-label="Critères de la grille à afficher">
+                                <span class="habiletes-criteres-attente">Chargement des critères de la grille…</span>
+                            </div>
+                        </div>
+
+                        <div class="u-w-100" style="position: relative; height: 550px" data-tooltip="tdb-graphique-trajectoires">
+                            <canvas id="graphique-trajectoires-production"></canvas>
                         </div>
 
                         <p class="text-muted u-mt-16 u-texte-petit u-texte-italic">
-                            💡 Chaque point représente le résultat d'un étudiant sur un artefact.
-                            Les zones denses révèlent les tendances du groupe ; les trajectoires isolées méritent attention.
+                            💡 Clique sur une courbe ou un nom pour la verrouiller. Bascule la mesure pour voir la note finale ou explorer les habiletés une par une.
                         </p>
                     </div>
 
@@ -7674,6 +7701,31 @@
                             <label><input type="checkbox" id="chk-entete-corr" checked data-on-change="toggleLigneEntete" data-param="corr"> r↔P</label>
                             <label title="Griser les élèves sous le minimum d'évaluations et recalculer les moyennes"><input type="checkbox" id="chk-filtre-minimum" data-on-change="toggleFiltreMinimum"> ≥ Min. <span id="badge-nb-insuffisants" style="color: var(--gris-moyen); font-size: 0.75rem;"></span></label>
                         </div>
+
+                        <!-- Note explicative : transparence sur le calcul des moyennes et corrélations -->
+                        <details class="u-mb-8" style="font-size: 0.85rem; color: var(--texte-muted);">
+                            <summary style="cursor: pointer; user-select: none;"><strong>Comment lire l'en-tête (moyennes et corrélations)</strong></summary>
+                            <div class="u-mt-8" style="line-height: 1.5;">
+                                <p class="u-mb-8"><strong>Population utilisée pour les statistiques.</strong> Les <strong>moy=</strong> et les corrélations <strong>r↔P</strong> sont calculées sur les étudiants <strong>actifs</strong> uniquement. Les abandons et inactifs (statuts « abandon », « inactif », « décrochage ») sont toujours <em>affichés</em> dans le tableau pour consultation, mais <em>exclus</em> des statistiques : un étudiant qui a quitté la classe ne fait plus partie de la population pédagogique observée. Cocher <strong>≥ Min.</strong> exclut en plus les étudiants sous le seuil d'évaluations requis pour qu'un P soit jugé fiable.</p>
+                                <p class="u-mb-8"><strong>Que veulent dire les <code>r=</code> ?</strong> Ce sont des coefficients de corrélation de Pearson : ils mesurent à quel point un indicateur (A, C, pattern, niveau RàI, nombre d'interventions) <em>varie en parallèle</em> avec la performance P. Échelle :</p>
+                                <ul class="u-mb-8" style="margin-left: 18px; padding-left: 4px;">
+                                    <li><code>r ≈ +1</code> → lien positif fort (quand l'un monte, l'autre monte)</li>
+                                    <li><code>r ≈ 0</code> → aucun lien observable</li>
+                                    <li><code>r ≈ −1</code> → lien inverse fort (quand l'un monte, l'autre descend)</li>
+                                </ul>
+                                <p class="u-mb-8">Repères usuels d'intensité : |r| &lt; 0,3 = faible · 0,3–0,5 = modérée · 0,5–0,7 = forte · &gt; 0,7 = très forte. Pour <strong>RàI</strong> et <strong>Interv.</strong>, un r négatif est <em>attendu</em> (un niveau RàI plus élevé ou plus d'interventions signalent un élève en difficulté, donc une P généralement plus basse).</p>
+                                <p class="u-mb-8"><strong>Comment interpréter une corrélation faible (|r| &lt; 0,3) ?</strong> Une r faible ne veut pas dire que l'indicateur est sans valeur. Plusieurs lectures sont possibles :</p>
+                                <ul class="u-mb-8" style="margin-left: 18px; padding-left: 4px;">
+                                    <li><strong>Groupe homogène</strong> sur cet indicateur : si presque tout le monde est à A=90-100%, mathématiquement r doit être petit, même si l'absentéisme ferait chuter P. Vérifier en regardant la dispersion des points dans la barre Aperçu.</li>
+                                    <li><strong>Effet plafond / plancher</strong> : si la majorité atteint le même palier (ex. P groupée autour de la note de passage), Pearson capte mal le lien.</li>
+                                    <li><strong>Le levier dominant est ailleurs</strong> : si <code>r(A↔P)</code> est faible mais <code>r(C↔P)</code> élevé, c'est la <em>mobilisation</em> (remettre les travaux) qui prédit P, pas la simple présence en classe.</li>
+                                    <li><strong>Paradoxe du succès</strong> : une stratégie pédagogique qui ramène dans le rang les élèves à risque (reprises, acceptation des travaux en retard) <em>réduit la variance</em> de A et C, ce qui fait <em>chuter r mécaniquement</em>, même si le lien sous-jacent est inchangé. Une r en baisse d'une session à l'autre peut donc être le signe que votre intervention <em>fonctionne</em> — l'effet préventif fait disparaître le signal qu'il neutralise.</li>
+                                    <li><strong>Données encore peu nombreuses</strong> : avec peu d'évaluations ou peu d'étudiants actifs, r est instable. Attendre quelques productions de plus avant d'interpréter.</li>
+                                    <li><strong>Vrai lien faible</strong> dans ce groupe à ce moment : information actionnable, à comparer aux autres r pour repérer le levier réel.</li>
+                                </ul>
+                                <p><strong>Limite à garder en tête.</strong> Une corrélation décrit ce qu'on observe dans le groupe ; elle ne prouve pas une cause à effet. Avec moins de ~10 étudiants, le coefficient devient instable. Survoler une cellule <strong>moy=</strong> ou <strong>r=</strong> pour voir l'interprétation et le dénominateur exacts.</p>
+                            </div>
+                        </details>
 
                         <!-- TABLEAU DES ÉTUDIANTS -->
                         <div id="tableEtudiantsListe"
@@ -15491,7 +15543,7 @@
                                 <li><strong>Enregistrer le codex</strong> : Sauvegarde vers le même emplacement (Chrome/Edge : sans dialogue grâce à l'auto-save)</li>
                                 <li><strong>Enregistrer sous</strong> : Sauvegarde vers un nouvel emplacement</li>
                                 <li><strong>Nouveau codex</strong> : Crée un codex à partir des données actuelles en mémoire</li>
-                                <li><strong>Verser dans la réserve</strong> : Archive le groupe-cours d'un trimestre terminé dans ta réserve locale</li>
+                                <li><strong>Verser dans la réserve</strong> : Archive le groupe-cours d'un trimestre terminé dans ta réserve locale (voir l'onglet Réserve)</li>
                                 <li><strong>Ouvrir la réserve</strong> : Récupère des grilles, échelles ou tampons d'un versement archivé</li>
                                 <li><strong>Fusionner avec un codex</strong> : Combine les données de deux codex (utile quand deux enseignants travaillent sur des groupes différents)</li>
                                 <li><strong>Exporter une sélection</strong> : Exporte un sous-ensemble du codex par trimestre</li>
@@ -15729,7 +15781,7 @@
     <script src="js/pratiques-materiel.js?v=2026010601"></script> <!-- Beta 95 : retirerPratiqueDeBibliothequeMateriel -->
     <script src="js/preferences-v2.js?v=2026041703"></script> <!-- Beta 99.17 (b0417-0850) : rafraîchit palette tampons après toggle Actions RLO -->
     <script src="js/donnees-v2.js?v=2026030202"></script> <!-- Beta 95 : Onglet Données restructuré -->
-    <script src="js/etudiants.js?v=2026011107"></script>
+    <script src="js/etudiants.js?v=2026042708"></script>
     <script src="js/productions-bibliotheque.js?v=2026010218"></script> <!-- + import depuis trimestres -->
     <script src="js/productions.js?v=2026042804"></script> <!-- + import depuis bibliothèque corrigé -->
     <script src="js/grilles-bibliotheque.js?v=2026010220"></script> <!-- refactoring: plus de hardcodé -->
@@ -15875,7 +15927,7 @@
     <script src="js/main.js?v=2026042402"></script>
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=2026032600"></script>
+    <script src="js/init-inline.js?v=2026042707"></script>
 
     <!-- Wrappers pour délégation data-on-change (Phase 5b) — externalisé dans init-inline.js -->
 
@@ -16315,19 +16367,23 @@
             <h2 class="modal-titre u-texte-11" style="margin-bottom: 4px">
                 <img src="icons/icon-filing-cabinet.svg" alt="" class="btn-inline-icon">
                 Verser dans la r&eacute;serve
+                <button class="btn-aide-contextuelle" data-aide="reserve-versement" aria-label="Aide : verser dans la r&eacute;serve">&#x2734;&#xFE0F;</button>
             </h2>
             <p class="u-mb-10" style="color: var(--texte-secondaire); font-size: 0.85rem">
                 Versement d'un groupe-cours dans la r&eacute;serve.
             </p>
 
             <div id="reserve-statut" class="u-mb-10"
-                 style="background: var(--surface-carte); padding: 8px 10px; border-radius: var(--radius-moyen); font-size: 0.82rem; line-height: 1.5;">
+                 style="background: var(--surface-carte); padding: 8px 10px; border-radius: var(--radius-moyen); font-size: 0.82rem; line-height: 1.5; position: relative;">
+                <button class="btn-aide-contextuelle" data-aide="reserve-fsapi" aria-label="Aide : mode automatique ou mode manuel"
+                        style="position: absolute; top: 6px; right: 6px;">&#x2734;&#xFE0F;</button>
                 <em>D&eacute;tection du mode de versement...</em>
             </div>
 
             <div class="u-flex-col u-flex-gap-10" style="margin-bottom: 12px;">
                 <div>
-                    <label for="reserve-select-trimestre" class="u-texte-medium" style="display: block; margin-bottom: 4px;">
+                    <label for="reserve-select-trimestre" class="u-texte-medium" style="display: block; margin-bottom: 4px;"
+                           data-tooltip="reserve-select-trimestre">
                         Trimestre
                     </label>
                     <select id="reserve-select-trimestre" class="controle-form" style="width: 100%;"
@@ -16336,7 +16392,8 @@
                 </div>
 
                 <div>
-                    <label for="reserve-select-groupe" class="u-texte-medium" style="display: block; margin-bottom: 4px;">
+                    <label for="reserve-select-groupe" class="u-texte-medium" style="display: block; margin-bottom: 4px;"
+                           data-tooltip="reserve-select-groupe">
                         Groupe-cours
                     </label>
                     <select id="reserve-select-groupe" class="controle-form" style="width: 100%;"
@@ -16360,7 +16417,8 @@
                 <button data-action="Reserve.fermerDialogue" class="btn btn-annuler u-texte-petit" style="padding: 6px 12px">
                     Annuler
                 </button>
-                <button data-action="Reserve.lancerDepuisDialogue" class="btn btn-confirmer u-texte-petit" style="padding: 6px 12px">
+                <button data-action="Reserve.lancerDepuisDialogue" class="btn btn-confirmer u-texte-petit" style="padding: 6px 12px"
+                        data-tooltip="reserve-bouton-verser">
                     Verser ce groupe
                 </button>
             </div>
@@ -16380,6 +16438,7 @@
             <h2 class="modal-titre u-texte-11" style="margin-bottom: 4px">
                 <img src="icons/icon-filing-cabinet.svg" alt="" class="btn-inline-icon">
                 Ouvrir la r&eacute;serve
+                <button class="btn-aide-contextuelle" data-aide="reserve-ouvrir-versement" aria-label="Aide : ouvrir la r&eacute;serve">&#x2734;&#xFE0F;</button>
             </h2>
             <p class="u-mb-10" style="color: var(--texte-secondaire); font-size: 0.85rem">
                 Consulte tes versements archiv&eacute;s pour r&eacute;importer des grilles,
@@ -16391,6 +16450,11 @@
 
             <!-- Étape 2 : récap + sélection (rempli dynamiquement) -->
             <div id="reserve-ouvrir-etape-selection" style="display: none; flex: 1; min-height: 0; overflow-y: auto;">
+                <h3 class="u-texte-medium" style="margin: 0 0 6px 0; font-size: 0.95rem;">
+                    S&eacute;lectionne ce que tu veux r&eacute;importer
+                    <button class="btn-aide-contextuelle" data-aide="reserve-types-ressources" aria-label="Aide : types de ressources r&eacute;importables">&#x2734;&#xFE0F;</button>
+                </h3>
+
                 <div id="reserve-ouvrir-meta" class="u-mb-10"
                      style="background: var(--surface-carte); padding: 8px 10px; border-radius: var(--radius-moyen); font-size: 0.85rem; line-height: 1.5;">
                 </div>
@@ -16398,7 +16462,8 @@
                 <div id="reserve-ouvrir-sections"></div>
 
                 <div class="u-mb-10" style="margin-top: 12px; padding: 8px 10px; background: var(--bleu-tres-pale); border-radius: var(--radius-moyen);">
-                    <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.82rem; cursor: pointer;">
+                    <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.82rem; cursor: pointer;"
+                           data-tooltip="reserve-ouvrir-toggle-copie">
                         <input type="checkbox" id="reserve-ouvrir-toggle-copie"
                                data-on-change="ReserveOuvrir.onChangerToggleCopie"
                                style="margin-top: 3px;">
@@ -16406,6 +16471,7 @@
                             <strong>Recopier en double si d&eacute;j&agrave; pr&eacute;sent</strong>
                             &mdash; l'&eacute;l&eacute;ment re&ccedil;oit un nouvel ID et son nom est suffix&eacute;
                             &laquo;&nbsp;&mdash; copie&nbsp;&raquo;.
+                            <button class="btn-aide-contextuelle" data-aide="reserve-copie-double" aria-label="Aide : recopier en double" style="margin-left: 4px;">&#x2734;&#xFE0F;</button>
                         </span>
                     </label>
                 </div>
@@ -16418,7 +16484,8 @@
                 <button data-action="ReserveOuvrir.appliquerReimport"
                         id="reserve-ouvrir-bouton-reimporter"
                         class="btn btn-confirmer u-texte-petit"
-                        style="padding: 6px 12px; display: none">
+                        style="padding: 6px 12px; display: none"
+                        data-tooltip="reserve-ouvrir-bouton-reimporter">
                     R&eacute;importer <span id="reserve-ouvrir-compteur">0</span> &eacute;l&eacute;ment(s)
                 </button>
             </div>
