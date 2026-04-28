@@ -113,6 +113,170 @@ var CLES_FILTRER_PAR_GC = [
 ];
 
 /* ===============================
+   FSAPI — File System Access API (Chrome/Edge)
+   ===============================
+   Mode automatique pour Chrome/Edge sur Mac : ecriture directe dans un
+   dossier choisi par l'utilisateur (~/Documents/Reserve_LaboCodex/ ou
+   ailleurs) sans telechargement de ZIP a chaque versement, et fusion
+   automatique du manifeste-reserve.json global.
+
+   Persistence : les FileSystemDirectoryHandle ne sont pas JSON-serialisables
+   mais sont structuredClone-compatibles (donc compatibles IDB direct).
+   db.set() passe aussi par localStorage qui ferait JSON.stringify et
+   perdrait le handle silencieusement — on utilise un objectStore IDB dedie.
+
+   Permissions : un handle persiste necessite re-verification a chaque
+   session via queryPermission, et requestPermission doit s'executer dans
+   un user gesture. Le clic « Verser ce groupe » satisfait cette contrainte.
+
+   Safari et iPad ne supportent pas FSAPI : _supporteFSAPI() retourne false
+   et le flux ZIP v1 prend le relais (zero regression).
+*/
+
+var FSAPI_DB_NAME = 'reserve_fsapi';
+var FSAPI_DB_VERSION = 1;
+var FSAPI_STORE = 'handles';
+var FSAPI_KEY_RACINE = 'dossierRacine';
+
+function _supporteFSAPI() {
+    return typeof window.showDirectoryPicker === 'function';
+}
+
+function _ouvrirStoreHandles() {
+    return new Promise(function(resolve, reject) {
+        var req = indexedDB.open(FSAPI_DB_NAME, FSAPI_DB_VERSION);
+        req.onupgradeneeded = function(e) {
+            var idb = e.target.result;
+            if (!idb.objectStoreNames.contains(FSAPI_STORE)) {
+                idb.createObjectStore(FSAPI_STORE);
+            }
+        };
+        req.onsuccess = function() { resolve(req.result); };
+        req.onerror = function() { reject(req.error); };
+    });
+}
+
+function _lireHandlePersiste() {
+    return _ouvrirStoreHandles().then(function(idb) {
+        return new Promise(function(resolve, reject) {
+            var tx = idb.transaction(FSAPI_STORE, 'readonly');
+            var store = tx.objectStore(FSAPI_STORE);
+            var r = store.get(FSAPI_KEY_RACINE);
+            r.onsuccess = function() { resolve(r.result || null); };
+            r.onerror = function() { reject(r.error); };
+        });
+    }).catch(function(e) {
+        console.warn('[Reserve] Lecture handle persiste echouee', e.message || e);
+        return null;
+    });
+}
+
+function _ecrireHandlePersiste(handle) {
+    return _ouvrirStoreHandles().then(function(idb) {
+        return new Promise(function(resolve, reject) {
+            var tx = idb.transaction(FSAPI_STORE, 'readwrite');
+            var store = tx.objectStore(FSAPI_STORE);
+            var r = store.put(handle, FSAPI_KEY_RACINE);
+            r.onsuccess = function() { resolve(); };
+            r.onerror = function() { reject(r.error); };
+        });
+    });
+}
+
+function _supprimerHandlePersiste() {
+    return _ouvrirStoreHandles().then(function(idb) {
+        return new Promise(function(resolve, reject) {
+            var tx = idb.transaction(FSAPI_STORE, 'readwrite');
+            var store = tx.objectStore(FSAPI_STORE);
+            var r = store.delete(FSAPI_KEY_RACINE);
+            r.onsuccess = function() { resolve(); };
+            r.onerror = function() { reject(r.error); };
+        });
+    }).catch(function(e) {
+        console.warn('[Reserve] Suppression handle persiste echouee', e.message || e);
+    });
+}
+
+/**
+ * Verifie ou redemande la permission readwrite sur un handle.
+ * Doit etre appelee dans un user gesture (clic) si la permission est 'prompt'.
+ * @returns {Promise<boolean>} true si permission accordee
+ */
+async function _verifierPermissionHandle(handle) {
+    if (!handle || typeof handle.queryPermission !== 'function') return false;
+    try {
+        var perm = await handle.queryPermission({ mode: 'readwrite' });
+        if (perm === 'granted') return true;
+        if (perm === 'prompt') {
+            var demande = await handle.requestPermission({ mode: 'readwrite' });
+            return demande === 'granted';
+        }
+        return false;
+    } catch (e) {
+        console.warn('[Reserve] Verification permission echouee', e.message || e);
+        return false;
+    }
+}
+
+/**
+ * Obtient un handle de repertoire utilisable (reutilise persiste ou demande).
+ *
+ * @param {Object} [opts]
+ * @param {boolean} [opts.forcer=false] - Force le picker meme si un handle est persiste
+ * @returns {Promise<FileSystemDirectoryHandle|null>} null si non supporte ou annule
+ */
+async function _obtenirHandleReserve(opts) {
+    if (!_supporteFSAPI()) return null;
+    var forcer = !!(opts && opts.forcer);
+
+    if (!forcer) {
+        var persiste = await _lireHandlePersiste();
+        if (persiste) {
+            var ok = await _verifierPermissionHandle(persiste);
+            if (ok) return persiste;
+            await _supprimerHandlePersiste();
+        }
+    }
+
+    try {
+        var nouveau = await window.showDirectoryPicker({
+            id: 'reserve-labo-codex',
+            mode: 'readwrite',
+            startIn: 'documents'
+        });
+        await _ecrireHandlePersiste(nouveau);
+        return nouveau;
+    } catch (e) {
+        if (e.name === 'AbortError') return null;
+        console.warn('[Reserve] showDirectoryPicker echoue', e.message || e);
+        return null;
+    }
+}
+
+/**
+ * Inspecte l'etat du handle persiste sans demander de permission interactive.
+ * Utilise par l'UI pour afficher un statut.
+ *
+ * @returns {Promise<{supporte: boolean, persiste: boolean, nom: string, permission: string}>}
+ */
+async function _statutHandleReserve() {
+    var statut = { supporte: _supporteFSAPI(), persiste: false, nom: '', permission: 'inconnu' };
+    if (!statut.supporte) return statut;
+    var h = await _lireHandlePersiste();
+    if (!h) return statut;
+    statut.persiste = true;
+    statut.nom = h.name || '';
+    if (typeof h.queryPermission === 'function') {
+        try {
+            statut.permission = await h.queryPermission({ mode: 'readwrite' });
+        } catch (e) {
+            statut.permission = 'erreur';
+        }
+    }
+    return statut;
+}
+
+/* ===============================
    UTILITAIRES
    =============================== */
 
@@ -649,18 +813,113 @@ function listerGroupesVersables(trimestre) {
 }
 
 /* ===============================
+   ECRITURE DIRECTE FSAPI (Chrome/Edge)
+   =============================== */
+
+async function _ecrireFichierTexte(dossierHandle, nomFichier, contenu) {
+    var fh = await dossierHandle.getFileHandle(nomFichier, { create: true });
+    var w = await fh.createWritable();
+    try {
+        await w.write(contenu);
+        await w.close();
+    } catch (e) {
+        try { await w.abort(); } catch (_) { /* ignore */ }
+        throw e;
+    }
+}
+
+async function _ecrireFichierBlob(dossierHandle, nomFichier, blob) {
+    var fh = await dossierHandle.getFileHandle(nomFichier, { create: true });
+    var w = await fh.createWritable();
+    try {
+        await w.write(blob);
+        await w.close();
+    } catch (e) {
+        try { await w.abort(); } catch (_) { /* ignore */ }
+        throw e;
+    }
+}
+
+/**
+ * Ecrit un versement complet directement dans le dossier reserve.
+ *
+ * Atomicite partielle (acceptee, voir BACKLOG #253) : si l'ecriture est
+ * interrompue, le versement sur disque peut etre incomplet. Pour permettre
+ * la detection, meta.json est ecrit en DERNIER (sentinelle de completude) :
+ * sa presence garantit que les autres fichiers du dossier sont
+ * entierement ecrits. Le manifeste global est fusionne ensuite (voir
+ * _fusionnerManifesteGlobal). Les blobs orphelins (un fichier supprime
+ * entre versements) restent en place et doivent etre purges manuellement.
+ */
+async function _ecrireVersementDirect(handleRacine, dossier, donnees, meta, patch, blobs, onProg) {
+    var dossierTrim = await handleRacine.getDirectoryHandle('trimestres', { create: true });
+    var dossierVersement = await dossierTrim.getDirectoryHandle(dossier, { create: true });
+    var dossierTravaux = await dossierVersement.getDirectoryHandle('travaux', { create: true });
+
+    onProg(73, 'Ecriture donnees.json...', dossier);
+    await _ecrireFichierTexte(dossierVersement, 'donnees.json', JSON.stringify(donnees, null, 0));
+
+    for (var i = 0; i < blobs.length; i++) {
+        var entree = blobs[i];
+        await _ecrireFichierBlob(dossierTravaux, entree.id + '.' + entree.ext, entree.blob);
+        if (i % 5 === 0 || i === blobs.length - 1) {
+            var p = 75 + Math.round((i / Math.max(blobs.length, 1)) * 18);
+            onProg(p, 'Ecriture des travaux...', (i + 1) + ' / ' + blobs.length);
+            await _yield();
+        }
+    }
+
+    onProg(94, 'Ecriture du patch manifeste...', '');
+    await _ecrireFichierTexte(dossierVersement, 'manifeste-reserve-patch.json', JSON.stringify(patch, null, 2));
+
+    // Sentinelle de completude : meta.json en dernier
+    onProg(96, 'Ecriture meta.json (sentinelle)...', '');
+    await _ecrireFichierTexte(dossierVersement, 'meta.json', JSON.stringify(meta, null, 2));
+
+    return { cheminDossier: 'trimestres/' + dossier + '/' };
+}
+
+/**
+ * Lit, met a jour et reecrit manifeste-reserve.json a la racine du dossier
+ * reserve. Cree le manifeste si absent. Idempotent : un re-versement du meme
+ * groupe-cours ecrase l'entree precedente (nouveau UUID, nouvelle date).
+ */
+async function _fusionnerManifesteGlobal(handleRacine, dossier, patchEntry) {
+    var manifeste = {
+        format: 'manifeste-reserve',
+        version: 1,
+        versements: {},
+        derniere_mise_a_jour: null
+    };
+
+    try {
+        var fhLecture = await handleRacine.getFileHandle('manifeste-reserve.json');
+        var fichier = await fhLecture.getFile();
+        var texte = await fichier.text();
+        var existant = JSON.parse(texte);
+        if (existant && typeof existant === 'object') {
+            manifeste = Object.assign(manifeste, existant);
+            if (!manifeste.versements || typeof manifeste.versements !== 'object') {
+                manifeste.versements = {};
+            }
+        }
+    } catch (e) {
+        if (e.name !== 'NotFoundError') {
+            console.warn('[Reserve] Lecture manifeste-reserve.json echouee, recreation', e.message || e);
+        }
+    }
+
+    manifeste.versements[dossier] = patchEntry;
+    manifeste.derniere_mise_a_jour = new Date().toISOString();
+
+    await _ecrireFichierTexte(handleRacine, 'manifeste-reserve.json', JSON.stringify(manifeste, null, 2));
+}
+
+/* ===============================
    API : VERSEMENT
    =============================== */
 
 async function verserGroupeCours(trimestre, groupeCoursId) {
-    if (typeof JSZip === 'undefined') {
-        var msg = 'Bibliothèque de compression non chargée.';
-        if (typeof window.afficherNotificationErreur === 'function') {
-            window.afficherNotificationErreur('Erreur', msg);
-        }
-        throw new Error(msg);
-    }
-
     var gc = _resoudreGroupeCours(trimestre, groupeCoursId);
     if (!gc) {
         var m = 'Groupe-cours introuvable pour le trimestre ' + trimestre + '.';
@@ -673,8 +932,21 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
     var dossier = _nomDossier(trimestre, gc);
     var uuid = _genererUUIDv4();
 
+    // Detection du mode FSAPI : appel TOT pour preserver le user gesture du clic.
+    // Retourne null si non supporte (Safari) ou si l'utilisateur annule le picker.
+    var handleReserve = await _obtenirHandleReserve();
+    var modeFSAPI = !!handleReserve;
+
+    if (!modeFSAPI && typeof JSZip === 'undefined') {
+        var msgZip = 'Bibliotheque de compression non chargee.';
+        if (typeof window.afficherNotificationErreur === 'function') {
+            window.afficherNotificationErreur('Erreur', msgZip);
+        }
+        throw new Error(msgZip);
+    }
+
     _progShow('Versement dans la réserve');
-    _prog(0, 'Préparation...', dossier);
+    _prog(0, modeFSAPI ? 'Mode automatique...' : 'Préparation...', dossier);
     await _yield();
 
     try {
@@ -704,22 +976,8 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
         await _yield();
         var collecteBlobs = await _collecterBlobs(donnees, trimestre, _prog);
 
-        // 3. Construction du ZIP
-        _prog(72, 'Construction du ZIP...', dossier);
-        await _yield();
-
-        var zip = new JSZip();
-        var dossierBase = zip.folder('trimestres').folder(dossier);
-
-        dossierBase.file('donnees.json', JSON.stringify(donnees, null, 0));
-
-        var dossierTravaux = dossierBase.folder('travaux');
-        for (var b = 0; b < collecteBlobs.blobs.length; b++) {
-            var entree = collecteBlobs.blobs[b];
-            dossierTravaux.file(entree.id + '.' + entree.ext, entree.blob);
-        }
-
-        // 4. meta.json
+        // 3. Construction de meta.json et du patch (commun aux deux modes)
+        var dateVersement = new Date().toISOString();
         var meta = {
             uuid: uuid,
             trimestre: trimestre,
@@ -728,7 +986,8 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
             dossier: dossier,
             statut: 'verse',
             source: 'application (IndexedDB)',
-            date_versement: new Date().toISOString(),
+            mode_versement: modeFSAPI ? 'fsapi' : 'zip',
+            date_versement: dateVersement,
             appareil: _identifierAppareil(),
             application_version: _versionApp(),
             contenu: {
@@ -743,9 +1002,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
             },
             notes: 'Versement automatique depuis l\'application.'
         };
-        dossierBase.file('meta.json', JSON.stringify(meta, null, 2));
 
-        // 5. patch manifeste
         var patch = {
             dossier: dossier,
             patch: {
@@ -755,16 +1012,82 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
                 groupe: gc.groupe,
                 statut: 'verse',
                 source: 'application (IndexedDB)',
-                date_versement: meta.date_versement,
+                mode_versement: meta.mode_versement,
+                date_versement: dateVersement,
                 donnees: true,
                 travaux: collecteBlobs.trouves > 0,
                 nombre_etudiants: statsDonnees.nombreEtudiants,
                 notes: 'Versement du ' + _dateAujourdhui() + '.'
             }
         };
+
+        // 4. Branche selon le mode
+        if (modeFSAPI) {
+            // === MODE FSAPI : écriture directe ===
+            _prog(72, 'Écriture sur disque...', dossier);
+            await _yield();
+
+            var ecriture = await _ecrireVersementDirect(
+                handleReserve, dossier, donnees, meta, patch,
+                collecteBlobs.blobs, _prog
+            );
+
+            _prog(98, 'Mise à jour du manifeste global...', '');
+            await _yield();
+            try {
+                await _fusionnerManifesteGlobal(handleReserve, dossier, patch.patch);
+            } catch (eFusion) {
+                console.warn('[Réserve] Fusion manifeste-reserve.json échouée, le versement reste valide :', eFusion.message || eFusion);
+            }
+
+            _prog(100, 'Versement enregistré !', ecriture.cheminDossier);
+            await new Promise(function(r) { setTimeout(r, 600); });
+            _progHide();
+
+            if (typeof window.afficherNotificationSucces === 'function') {
+                var nomDossierRacine = handleReserve.name || 'Réserve';
+                window.afficherNotificationSucces(
+                    'Versement enregistré',
+                    statsDonnees.nombreEtudiants + ' étudiant(s), ' +
+                    collecteBlobs.trouves + ' fichier(s) — ' +
+                    nomDossierRacine + '/' + ecriture.cheminDossier
+                );
+            }
+
+            return {
+                succes: true,
+                uuid: uuid,
+                dossier: dossier,
+                mode: 'fsapi',
+                cheminDossier: ecriture.cheminDossier,
+                stats: {
+                    etudiants: statsDonnees.nombreEtudiants,
+                    cles: statsDonnees.nombreCles,
+                    fichiersTrouves: collecteBlobs.trouves,
+                    fichiersManquants: collecteBlobs.manquants,
+                    tailleTravaux: collecteBlobs.tailleTotale
+                }
+            };
+        }
+
+        // === MODE ZIP : flux v1 (téléchargement manuel) ===
+        _prog(72, 'Construction du ZIP...', dossier);
+        await _yield();
+
+        var zip = new JSZip();
+        var dossierBase = zip.folder('trimestres').folder(dossier);
+
+        dossierBase.file('donnees.json', JSON.stringify(donnees, null, 0));
+
+        var dossierTravaux = dossierBase.folder('travaux');
+        for (var b = 0; b < collecteBlobs.blobs.length; b++) {
+            var entree2 = collecteBlobs.blobs[b];
+            dossierTravaux.file(entree2.id + '.' + entree2.ext, entree2.blob);
+        }
+
+        dossierBase.file('meta.json', JSON.stringify(meta, null, 2));
         dossierBase.file('manifeste-reserve-patch.json', JSON.stringify(patch, null, 2));
 
-        // 6. Compression
         _prog(80, 'Compression du ZIP...', '');
         await _yield();
         var zipBlob = await zip.generateAsync(
@@ -776,7 +1099,6 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
             }
         );
 
-        // 7. Téléchargement
         var nomFichier = 'CONFIDENTIEL-versement-' + dossier + '-' + _dateAujourdhui() + EXTENSION_RESERVE;
         _prog(99, 'Téléchargement...', nomFichier);
 
@@ -793,7 +1115,6 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
         await new Promise(function(r) { setTimeout(r, 600); });
         _progHide();
 
-        // Notification finale
         if (typeof window.afficherNotificationSucces === 'function') {
             window.afficherNotificationSucces(
                 'Versement téléchargé',
@@ -807,6 +1128,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
             uuid: uuid,
             dossier: dossier,
             nomFichier: nomFichier,
+            mode: 'zip',
             stats: {
                 etudiants: statsDonnees.nombreEtudiants,
                 cles: statsDonnees.nombreCles,
@@ -959,8 +1281,73 @@ function actionVerser() {
 
     _peuplerTrimestres(trimestreActuel, groupeActifId);
     _afficherEstimation();
+    _majBandeauStatut();  // fire-and-forget : met à jour le bandeau quand prêt
 
     modal.classList.add('actif');
+}
+
+/**
+ * Met à jour le bandeau de statut FSAPI dans la modale.
+ * Affiche le mode (auto/manuel), l'emplacement du dossier réserve, et un
+ * bouton « Changer le dossier » si applicable.
+ */
+async function _majBandeauStatut() {
+    var modal = document.getElementById('modalReserve');
+    if (!modal) return;
+    var bandeau = modal.querySelector('#reserve-statut');
+    if (!bandeau) return;
+
+    var statut;
+    try {
+        statut = await _statutHandleReserve();
+    } catch (e) {
+        console.warn('[Réserve] Statut handle échoué', e.message || e);
+        statut = { supporte: false, persiste: false, nom: '', permission: 'erreur' };
+    }
+
+    var html = '';
+
+    if (!statut.supporte) {
+        html =
+            '<strong>Mode manuel</strong> (Safari) — un fichier ZIP sera téléchargé. ' +
+            'Décompresse-le ensuite dans <code>~/Documents/Réserve_LaboCodex/</code> ' +
+            'pour compléter le versement.';
+    } else if (!statut.persiste) {
+        html =
+            '<strong>Mode automatique</strong> (Chrome/Edge) — au premier versement, ' +
+            'choisis le dossier <em>Réserve</em> où enregistrer. ' +
+            'Les versements suivants iront automatiquement au même endroit.';
+    } else if (statut.permission === 'granted' || statut.permission === 'prompt') {
+        html =
+            '<strong>Mode automatique</strong> — dossier réserve&nbsp;: <code>' +
+            _echapper(statut.nom) + '</code>' +
+            '<button data-action="Reserve.actionChangerDossier" ' +
+            'class="btn btn-secondaire u-texte-petit" ' +
+            'style="margin-left: 10px; padding: 2px 8px;">' +
+            'Changer le dossier...</button>';
+    } else {
+        html =
+            '<strong>Accès au dossier refusé</strong> — versement par ZIP en attendant. ' +
+            '<button data-action="Reserve.actionChangerDossier" ' +
+            'class="btn btn-secondaire u-texte-petit" ' +
+            'style="margin-left: 10px; padding: 2px 8px;">' +
+            'Réessayer</button>';
+    }
+
+    bandeau.innerHTML = html;
+}
+
+/**
+ * Action utilisateur : oublier le handle persisté et redemander un dossier.
+ * Doit être déclenchée par un clic (user gesture requis pour showDirectoryPicker).
+ */
+async function actionChangerDossier() {
+    await _supprimerHandlePersiste();
+    var nouveau = await _obtenirHandleReserve();
+    await _majBandeauStatut();
+    if (nouveau && typeof window.afficherNotificationSucces === 'function') {
+        window.afficherNotificationSucces('Dossier réserve mis à jour', nouveau.name || '');
+    }
 }
 
 function fermerDialogue() {
@@ -1003,10 +1390,15 @@ window.Reserve = {
     estimerVersement: estimerVersement,
     listerGroupesVersables: listerGroupesVersables,
     actionVerser: actionVerser,
+    actionChangerDossier: actionChangerDossier,
     fermerDialogue: fermerDialogue,
     lancerDepuisDialogue: lancerDepuisDialogue,
     onChangerTrimestre: _onChangerTrimestre,
-    onChangerGroupe: _onChangerGroupe
+    onChangerGroupe: _onChangerGroupe,
+    // FSAPI — exposés pour les modules qui consomment la réserve (ex. reserve-ouvrir.js)
+    obtenirHandle: _obtenirHandleReserve,
+    statutHandle: _statutHandleReserve,
+    supporteFSAPI: _supporteFSAPI
 };
 
 })();
