@@ -148,8 +148,13 @@ function obtenirStatutJour(dateStr, calendrierComplet) {
 
     // 🆕 BETA 95 : Afficher le nom de l'événement pour les congés/reprises
     if (infosJour.statut === 'conge' && infosJour.motif) {
-        // Afficher le nom du congé (ex: "Vendredi saint", "EUF")
-        label = infosJour.motif;
+        // Congé personnel : afficher motif + numéro de sem (le rôle compte normalement)
+        // Congé institutionnel : afficher motif seul (pas d'indice de sem par définition)
+        if (infosJour.categorieEvenement === 'personnel' && infosJour.numeroSemaine) {
+            label = 'S' + infosJour.numeroSemaine + ' · ' + infosJour.motif;
+        } else {
+            label = infosJour.motif;
+        }
     } else if (infosJour.statut === 'reprise' && infosJour.jourRemplace) {
         // Afficher "Reprise" ou le jour remplacé
         label = 'Reprise ' + infosJour.jourRemplace;
@@ -201,7 +206,8 @@ function obtenirStatutJour(dateStr, calendrierComplet) {
         type: typeFinal,
         classe: 'cal-' + typeFinal,
         label: label,
-        numeroSemaine: infosJour.numeroSemaine || null
+        numeroSemaine: infosJour.numeroSemaine || null,
+        categorieEvenement: infosJour.categorieEvenement || null
     };
 }
 
@@ -268,6 +274,9 @@ function genererHtmlMois(annee, mois, calendrierComplet) {
             classeJour += ' calendrier-jour-planification';
         } else if (statut.type === 'conge') {
             classeJour += ' calendrier-jour-conge';
+            if (statut.categorieEvenement === 'personnel') {
+                classeJour += ' calendrier-jour-conge-personnel';
+            }
         } else if (statut.type === 'reprise') {
             classeJour += ' calendrier-jour-reprise';
         } else if (statut.type === 'cours-reel') {
