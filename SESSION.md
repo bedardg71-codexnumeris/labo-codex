@@ -1,9 +1,11 @@
-# SESSION — État au 28 avril 2026 (voie de retour Réserve LIVRÉE)
+# SESSION — État au 28 avril 2026 (Réserve étendue — finition UX + remapping IDs)
 
 **Date** : 28 avril 2026
-**Dernier build** : `0428-1115` · Beta **99.28**
+**Dernier build** : `0428-1245` · Beta **99.28**
 **Branche** : `main` (poussée sur origin)
-**Statut** : **5 chantiers de la voie de retour livrés et validés terrain en une journée** — #255 (doc), #253 (FSAPI), #254 v1+v1.1 (Ouvrir la réserve), #250 (Codex allégé sans TimeMachine), #257 v1 (productions/cartouches/pratiques + auto-cochage). Tous poussés sur origin.
+**Statut** : **7 chantiers Réserve livrés en une journée**, tous poussés sur origin.
+- Matin/midi : #255 (doc), #253 (FSAPI), #254 v1+v1.1 (Ouvrir la réserve), #250 (Codex allégé sans TimeMachine), #257 v1 (productions/cartouches/pratiques + auto-cochage).
+- Après-midi : **#256** (aide aux modales Réserve : 7 popups + 6 infobulles + correction `entete-codex` anti-cloud) et **#257 v2.A** (remapping IDs en mode « copie en double » : productions/cartouches/pratiques rebranchées sur les nouvelles copies de grilles/échelles).
 
 ---
 
@@ -107,6 +109,8 @@ OBSERVATIONS OUVERTES (hors scope) :
 | `82bf640` | #254 v1+v1.1 | feat(reserve): ouvrir la réserve, réimport sélectif (grilles, échelles, tampons). Détection navigateur (3 vues étape 1). |
 | `5472403` | #250 | refactor(codex): retirer le TimeMachine, codex allégé (−461 lignes). Purge silencieuse au boot. Sentinelle CLE_PURGE_TIMEMACHINE_FAITE. |
 | `50d8860` | #257 v1 | feat(reserve): productions/cartouches/pratiques + auto-cochage références. 3 nouvelles façades d'import. |
+| `95adf24` | #256 | feat(aide): étendre l'aide aux modales Réserve. 7 popups + 6 infobulles. Correction `entete-codex` (retrait métaphore « cloud personnel »). |
+| `4949b2e` | #257 v2.A | fix(reserve): remapping IDs en mode « copie en double ». Productions/cartouches/pratiques pointent sur les nouvelles copies de grilles/échelles. Compteur `refsRemappees` au rapport. |
 
 **Architecture** :
 - `js/reserve.js` (1404 l.) — versement (verserGroupeCours), API publique étendue : obtenirHandle, statutHandle, supporteFSAPI.
@@ -120,9 +124,20 @@ OBSERVATIONS OUVERTES (hors scope) :
 
 ## Prochaine session — décision à prendre
 
-Choisir entre :
-- **#256** (infobulles modales) — léger, novice-first, attendu
-- **#257 v2** (remapping IDs + mode consultation) — suite technique de la voie de retour
-- **#247** (refonte Réglages > Données) — alignement vocabulaire 4 concepts
+**Réserve : fonctionnellement complète pour l'usage quotidien** (versement + réimport + remapping IDs). Reste de la finition + chantiers connexes.
 
-Mon instinct : **#256** d'abord (UX novice avant tout, rapide, capitalise sur le momentum), puis **#257 v2** quand tu as un cas d'usage concret de copie en double.
+**Items Réserve** :
+- **#249** — Section dédiée Réserve dans Réglages (état : versements, dates, tailles). 3-4 h. Recommandé avant #247.
+- **#247** — Refonte Réglages > Données (vocabulaire 4 concepts). ~1 j. Plus cohérent après #249.
+- **#257 v2.B** — Mode consultation namespace `__archive_*` (lecture seule, démo/formation). 5-6 h. À froid dans une session dédiée — pas en enchaînement.
+- **#248** — Manifeste-réserve auto-fusionné Safari (Chrome le fait déjà via FSAPI). 2-3 h. Basse priorité.
+
+**Items hors Réserve** (priorités 4-5 ECOSYSTEME, gros) :
+- **#251** — Codex data, extraction depuis la Réserve.
+- **#252** — Labo autonome.
+
+**Audit en attente** : `AUDIT-VOCABULAIRE-2026-04-28.md` à la racine — 11 occurrences de copy à corriger (`Mac`, `iPad`, `cloud`, `synchronisation`) suite aux nouveaux feedbacks établis en session. Effort estimé : 30-45 min en une passe.
+
+**Feedbacks nouveaux (mémoire Claude)** :
+- `feedback_metaphore_cloud_interdite.md` — pas de cloud/synchro dans le copy. Tout est manuel et local.
+- `feedback_vocabulaire_appareils_generique.md` — préférer « ordinateur / tablette / appareil » à « Mac / iPad ».

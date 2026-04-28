@@ -104,8 +104,15 @@
       - Annotations « ref manquante » (orange) si grille/echelle absente du payload ET des bibliotheques actives
       - Facades nouvelles : importerProductionsExternes, importerCartouchesExternes, importerPratiquesExternes
 
-- [ ] **#257 v2** Ouvrir la reserve v2 — remapping d'IDs en mode « copie en double » + mode consultation
-  - **Suite de #254 v1**. Items hors scope v1 a livrer plus tard.
+- [x] **#257 v2.A** Ouvrir la reserve v2.A — remapping d'IDs en mode « copie en double » (livre 28 avril 2026, b0428-1245)
+      - Tables `remapGrilles` / `remapEchelles` (oldId -> newId) peuplees au moment de la copie en double.
+      - `_patcherReferences` patche `production.grilleId/echelleId`, `cartouche.grilleId`, `pratique.config.echelleId`.
+      - Compteur `refsRemappees` dans le rapport et la notification finale.
+      - Aide popup `reserve-copie-double` enrichie : section « Et les references entre items ? ».
+
+- [ ] **#257 v2.B** Ouvrir la reserve v2.B — mode consultation namespace temporaire
+  - **Suite de #257 v2.A**. Decouple en sous-chantier dedie (5-6 h) car
+    impact architectural sur le namespacing (`__archive_*`).
   - **Use case** : au fil des trimestres, les bibliotheques actives
     (`grillesTemplates`, `echellesTemplates`, `productionsTemplates`,
     `cartouches_*`, tampons) sont purgees. La reserve devient le seul
@@ -160,7 +167,14 @@
   - Lier #254 (mecanisme) a cette clarification (vocabulaire).
   - **Effort** : 1-2 heures de redaction.
 
-- [ ] **#256** Etendre le systeme d'aide aux modales (infobulles, primo-aide, parcours guide)
+- [x] **#256** Aide aux modales Reserve (livre 28 avril 2026, b0428-1155)
+      - 7 popups d'aide riches : `reserve-versement`, `reserve-fsapi`, `reserve-ouvrir-versement`, `reserve-types-ressources`, `reserve-deja-present`, `reserve-copie-double`, `reserve-ref-manquante`.
+      - 6 infobulles courtes sur les controles (selects, boutons, label).
+      - 5 boutons aide ✴️ + 5 `data-tooltip` injectes dans #modalReserve et #modalOuvrirVersement.
+      - Correction `entete-codex` : retrait de la metaphore « cloud personnel » (contredit l'architecture manuelle/locale).
+      - Hors scope (a venir si validation terrain le demande) : aide dynamique par section/item dans `reserve-ouvrir-sections`, et 8 autres modales.
+
+- [ ] **#256-bis** Aide aux 8 autres modales (Nouveautes, Reparation, Wizard pratique, ApercuPDF, Confidentiel, Export, Import, Suppression ressource)
   - **Probleme** : les modales (`#modalOuvrirVersement`, `#modalReserve`, autres) ne
     beneficient pas du systeme d'aide existant. Un novice qui ouvre « Ouvrir la reserve »
     ne sait pas ce qu'est un versement, pourquoi cocher « copie en double », ou pourquoi
