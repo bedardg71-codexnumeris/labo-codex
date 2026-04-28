@@ -138,30 +138,119 @@ async function chargerDepuisFichier(file) {
 
 /**
  * Extrait les ressources réimportables et marque les doublons par ID.
- * Les bibliothèques actives sont lues depuis db.getSync.
+ * Annote chaque production/cartouche/pratique avec ses références croisées
+ * (grille/échelle) et un flag _ref*Manquante si la référence n'est ni dans
+ * le payload ni dans les bibliothèques actives.
  */
 function _extraireRessources(donnees) {
     var grillesActives = (window.db && db.getSync('grillesTemplates', [])) || [];
     var echellesActives = (window.db && db.getSync('echellesTemplates', [])) || [];
     var tamponsActifs = (window.db && db.getSync('tamponsPersonnalises', [])) || [];
 
+    var cleProdActive = (typeof window.cle === 'function') ? cle('productions') : 'productions';
+    var productionsActives = (window.db && db.getSync(cleProdActive, [])) || [];
+    if (!Array.isArray(productionsActives)) productionsActives = [];
+
+    var pratiquesActives = (window.db && db.getSync('pratiquesConfigurables', [])) || [];
+    if (!Array.isArray(pratiquesActives)) pratiquesActives = [];
+
     var idsGrillesActives = new Set(grillesActives.map(function(g) { return g.id; }));
     var idsEchellesActives = new Set(echellesActives.map(function(e) { return e.id; }));
     var idsTamponsActifs = new Set(tamponsActifs.map(function(t) { return t.id; }));
+    var idsProductionsActives = new Set(productionsActives.map(function(p) { return p.id; }));
+    var idsPratiquesActives = new Set(pratiquesActives.map(function(p) { return p.id; }));
 
+    // Grilles (clé globale)
     var grilles = (Array.isArray(donnees.grillesTemplates) ? donnees.grillesTemplates : [])
         .filter(function(g) { return g && g.id && g.nom; })
         .map(function(g) { return Object.assign({}, g, { _doublon: idsGrillesActives.has(g.id) }); });
 
+    // Échelles (clé globale)
     var echelles = (Array.isArray(donnees.echellesTemplates) ? donnees.echellesTemplates : [])
         .filter(function(e) { return e && e.id && e.nom; })
         .map(function(e) { return Object.assign({}, e, { _doublon: idsEchellesActives.has(e.id) }); });
 
+    // Tampons (clé globale)
     var tampons = (Array.isArray(donnees.tamponsPersonnalises) ? donnees.tamponsPersonnalises : [])
         .filter(function(t) { return t && t.id; })
         .map(function(t) { return Object.assign({}, t, { _doublon: idsTamponsActifs.has(t.id) }); });
 
-    return { grilles: grilles, echelles: echelles, tampons: tampons };
+    // Productions : scanner toutes les clés *_productions du payload et flatten
+    var productions = [];
+    Object.keys(donnees).forEach(function(k) {
+        if (k === 'productions' || /_productions$/.test(k)) {
+            var arr = donnees[k];
+            if (!Array.isArray(arr)) return;
+            arr.forEach(function(p) {
+                if (!p || !p.id || !p.titre) return;
+                productions.push(Object.assign({}, p, { _doublon: idsProductionsActives.has(p.id) }));
+            });
+        }
+    });
+
+    // Cartouches : scanner toutes les clés cartouches_* et flatten (avec grilleId préservé)
+    var cartouches = [];
+    var idsCartouchesParGrille = {};
+    Object.keys(donnees).forEach(function(k) {
+        if (k.indexOf('cartouches_') !== 0) return;
+        var grilleId = k.substring('cartouches_'.length);
+        var arr = donnees[k];
+        if (!Array.isArray(arr)) return;
+        if (!idsCartouchesParGrille[grilleId]) {
+            var actuels = (window.db && db.getSync(k, [])) || [];
+            if (!Array.isArray(actuels)) actuels = [];
+            idsCartouchesParGrille[grilleId] = new Set(actuels.map(function(c) { return c.id; }));
+        }
+        var idsActuels = idsCartouchesParGrille[grilleId];
+        arr.forEach(function(c) {
+            if (!c || !c.id) return;
+            var clone = Object.assign({}, c);
+            if (!clone.grilleId) clone.grilleId = grilleId;
+            clone._doublon = idsActuels.has(c.id);
+            cartouches.push(clone);
+        });
+    });
+
+    // Pratiques (clé globale)
+    var pratiques = (Array.isArray(donnees.pratiquesConfigurables) ? donnees.pratiquesConfigurables : [])
+        .filter(function(p) { return p && p.id && p.nom; })
+        .map(function(p) { return Object.assign({}, p, { _doublon: idsPratiquesActives.has(p.id) }); });
+
+    // Annotations des références croisées
+    var idsGrillesDispo = new Set();
+    grilles.forEach(function(g) { idsGrillesDispo.add(g.id); });
+    idsGrillesActives.forEach(function(id) { idsGrillesDispo.add(id); });
+
+    var idsEchellesDispo = new Set();
+    echelles.forEach(function(e) { idsEchellesDispo.add(e.id); });
+    idsEchellesActives.forEach(function(id) { idsEchellesDispo.add(id); });
+
+    productions.forEach(function(p) {
+        p._refGrille = p.grilleId || null;
+        p._refEchelle = p.echelleId || null;
+        p._refGrilleManquante = !!(p._refGrille && !idsGrillesDispo.has(p._refGrille));
+        p._refEchelleManquante = !!(p._refEchelle && !idsEchellesDispo.has(p._refEchelle));
+    });
+
+    cartouches.forEach(function(c) {
+        c._refGrille = c.grilleId || null;
+        c._refGrilleManquante = !!(c._refGrille && !idsGrillesDispo.has(c._refGrille));
+    });
+
+    pratiques.forEach(function(p) {
+        var echelleId = (p.config && p.config.echelleId) ? p.config.echelleId : null;
+        p._refEchelle = echelleId;
+        p._refEchelleManquante = !!(echelleId && !idsEchellesDispo.has(echelleId));
+    });
+
+    return {
+        grilles: grilles,
+        echelles: echelles,
+        tampons: tampons,
+        productions: productions,
+        cartouches: cartouches,
+        pratiques: pratiques
+    };
 }
 
 /* ===============================
@@ -467,6 +556,9 @@ function _afficherEtapeSelection(payload) {
         var htmlSec = '';
         htmlSec += _construireSection('grilles', 'Grilles d\'évaluation', payload.ressources.grilles);
         htmlSec += _construireSection('echelles', 'Échelles de performance', payload.ressources.echelles);
+        htmlSec += _construireSection('productions', 'Productions', payload.ressources.productions);
+        htmlSec += _construireSection('cartouches', 'Cartouches de rétroaction', payload.ressources.cartouches);
+        htmlSec += _construireSection('pratiques', 'Pratiques de notation', payload.ressources.pratiques);
         htmlSec += _construireSection('tampons', 'Tampons personnalisés', payload.ressources.tampons);
         elSections.innerHTML = htmlSec;
     }
@@ -480,12 +572,16 @@ function _construireSection(typeRessource, libelle, items) {
     }
 
     var nbDoublons = items.filter(function(it) { return it._doublon; }).length;
+    var nbRefManquantes = items.filter(function(it) {
+        return it._refGrilleManquante || it._refEchelleManquante;
+    }).length;
 
     var html = '<div class="u-mb-10" style="border: 1px solid var(--bordure-douce); border-radius: var(--radius-moyen); overflow: hidden;">';
     html += '<div style="background: var(--surface-carte); padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 0.85rem;">';
     html += '<strong>' + _echapper(libelle) + '</strong>';
     html += '<span style="color: var(--texte-secondaire); font-size: 0.78rem;">' + items.length + ' &eacute;l&eacute;ment(s)';
     if (nbDoublons > 0) html += ' &middot; ' + nbDoublons + ' d&eacute;j&agrave; pr&eacute;sent(s)';
+    if (nbRefManquantes > 0) html += ' &middot; <span style="color: var(--orange, #d68910);">' + nbRefManquantes + ' r&eacute;f. manquante(s)</span>';
     html += '</span>';
     html += '<span class="u-flex-gap-4">';
     html += '<button class="btn btn-secondaire u-texte-petit" data-action="ReserveOuvrir.onCheckTout" data-param="' + typeRessource + ':1" style="padding: 2px 6px;">Tout</button>';
@@ -493,14 +589,37 @@ function _construireSection(typeRessource, libelle, items) {
     html += '</span>';
     html += '</div>';
 
-    html += '<ul style="margin: 0; padding: 6px 10px; list-style: none; max-height: 180px; overflow-y: auto;">';
+    html += '<ul style="margin: 0; padding: 6px 10px; list-style: none;">';
     items.forEach(function(item, idx) {
         var doublon = !!item._doublon;
+        var refManquante = !!(item._refGrilleManquante || item._refEchelleManquante);
+        var libelleItem = item.nom || item.titre || item.id;
+
+        // Construire les data-attributes pour les références (utilisés en Phase D auto-cochage)
+        var attrsRef = '';
+        if (item._refGrille) attrsRef += ' data-ref-grille="' + _echapper(item._refGrille) + '"';
+        if (item._refEchelle) attrsRef += ' data-ref-echelle="' + _echapper(item._refEchelle) + '"';
+
         html += '<li style="padding: 3px 0; font-size: 0.85rem; ' + (doublon ? 'opacity: 0.55;' : '') + '">';
-        html += '<label class="reserve-ouvrir-item" style="display: flex; align-items: center; gap: 6px; cursor: pointer;" data-type="' + typeRessource + '" data-idx="' + idx + '" data-doublon="' + (doublon ? '1' : '0') + '">';
+        html += '<label class="reserve-ouvrir-item" style="display: flex; align-items: center; gap: 6px; cursor: pointer;" ' +
+                'data-type="' + typeRessource + '" data-idx="' + idx + '" ' +
+                'data-doublon="' + (doublon ? '1' : '0') + '"' + attrsRef + '>';
         html += '<input type="checkbox" class="reserve-ouvrir-checkbox" data-on-change="ReserveOuvrir.onChangerSelection"' + (doublon ? ' disabled' : '') + '>';
-        html += '<span>' + _echapper(item.nom || item.id) + '</span>';
-        if (doublon) html += '<span style="font-size: 0.72rem; color: var(--texte-secondaire); margin-left: auto;">d&eacute;j&agrave; pr&eacute;sent</span>';
+        html += '<span>' + _echapper(libelleItem) + '</span>';
+
+        var infos = [];
+        if (doublon) {
+            infos.push('<span style="color: var(--texte-secondaire);">d&eacute;j&agrave; pr&eacute;sent</span>');
+        }
+        if (refManquante) {
+            var refs = [];
+            if (item._refGrilleManquante) refs.push('grille manquante');
+            if (item._refEchelleManquante) refs.push('&eacute;chelle manquante');
+            infos.push('<span style="color: var(--orange, #d68910);">' + refs.join(', ') + '</span>');
+        }
+        if (infos.length > 0) {
+            html += '<span style="font-size: 0.72rem; margin-left: auto;">' + infos.join(' &middot; ') + '</span>';
+        }
         html += '</label>';
         html += '</li>';
     });
@@ -519,8 +638,41 @@ function _majCompteur() {
     if (bouton) bouton.disabled = (n === 0);
 }
 
-function onChangerSelection() {
+function onChangerSelection(el) {
+    if (el && el.checked) {
+        _autoCocherReferences(el);
+    }
     _majCompteur();
+}
+
+/**
+ * Quand l'utilisateur coche un item avec des références croisées
+ * (production→grille+échelle, cartouche→grille, pratique→échelle), auto-coche
+ * les références dans le payload (si présentes). N'auto-décoche jamais.
+ */
+function _autoCocherReferences(input) {
+    var label = input.closest && input.closest('label.reserve-ouvrir-item');
+    if (!label) return;
+
+    var refGrille = label.getAttribute('data-ref-grille');
+    var refEchelle = label.getAttribute('data-ref-echelle');
+
+    if (refGrille) _cocherSiPresent('grilles', refGrille);
+    if (refEchelle) _cocherSiPresent('echelles', refEchelle);
+}
+
+function _cocherSiPresent(typeRessource, idCible) {
+    if (!_payloadCourant || !_payloadCourant.ressources || !_payloadCourant.ressources[typeRessource]) return;
+    var idx = _payloadCourant.ressources[typeRessource].findIndex(function(it) { return it.id === idCible; });
+    if (idx < 0) return;
+
+    var modal = document.getElementById('modalOuvrirVersement');
+    if (!modal) return;
+    var label = modal.querySelector('label.reserve-ouvrir-item[data-type="' + typeRessource + '"][data-idx="' + idx + '"]');
+    if (!label) return;
+    var inp = label.querySelector('input.reserve-ouvrir-checkbox');
+    if (!inp || inp.disabled || inp.checked) return;
+    inp.checked = true;
 }
 
 function onCheckTout(param) {
@@ -579,7 +731,10 @@ function _collecterSelection() {
     var modal = document.getElementById('modalOuvrirVersement');
     if (!modal || !_payloadCourant) return null;
 
-    var sel = { grilles: [], echelles: [], tampons: [] };
+    var sel = {
+        grilles: [], echelles: [], tampons: [],
+        productions: [], cartouches: [], pratiques: []
+    };
     var ressources = _payloadCourant.ressources;
 
     modal.querySelectorAll('label.reserve-ouvrir-item').forEach(function(label) {
@@ -588,7 +743,7 @@ function _collecterSelection() {
         var type = label.getAttribute('data-type');
         var idx = parseInt(label.getAttribute('data-idx'), 10);
         var item = (ressources[type] || [])[idx];
-        if (item) sel[type].push(item);
+        if (item && sel[type]) sel[type].push(item);
     });
 
     return sel;
@@ -603,37 +758,53 @@ async function appliquerReimport() {
         return;
     }
 
-    var total = selection.grilles.length + selection.echelles.length + selection.tampons.length;
+    var total = selection.grilles.length + selection.echelles.length + selection.tampons.length +
+                selection.productions.length + selection.cartouches.length + selection.pratiques.length;
     if (total === 0) return;
 
     var toggleCopie = document.getElementById('reserve-ouvrir-toggle-copie');
     var copieEnDouble = !!(toggleCopie && toggleCopie.checked);
 
-    var rapport = { grilles: 0, echelles: 0, tampons: 0, copies: 0 };
+    var rapport = {
+        grilles: 0, echelles: 0, tampons: 0,
+        productions: 0, cartouches: 0, pratiques: 0,
+        copies: 0
+    };
+
+    function _preparerLot(items, prefix) {
+        return items.map(function(item) {
+            if (copieEnDouble && item._doublon) {
+                rapport.copies++;
+                return _faireCopie(item, prefix);
+            }
+            return _nettoyerMarqueurs(item);
+        });
+    }
 
     try {
         // Grilles
         if (selection.grilles.length > 0 && typeof window.importerGrillesExternes === 'function') {
-            var grillesAImporter = selection.grilles.map(function(g) {
-                if (copieEnDouble && g._doublon) {
-                    rapport.copies++;
-                    return _faireCopie(g, 'GRILLE');
-                }
-                return _nettoyerMarqueurs(g);
-            });
-            rapport.grilles = window.importerGrillesExternes(grillesAImporter, { remplacer: false }) || 0;
+            rapport.grilles = window.importerGrillesExternes(_preparerLot(selection.grilles, 'GRILLE'), { remplacer: false }) || 0;
         }
 
         // Échelles
         if (selection.echelles.length > 0 && typeof window.importerEchellesExternes === 'function') {
-            var echellesAImporter = selection.echelles.map(function(e) {
-                if (copieEnDouble && e._doublon) {
-                    rapport.copies++;
-                    return _faireCopie(e, 'ECH');
-                }
-                return _nettoyerMarqueurs(e);
-            });
-            rapport.echelles = window.importerEchellesExternes(echellesAImporter, { remplacer: false }) || 0;
+            rapport.echelles = window.importerEchellesExternes(_preparerLot(selection.echelles, 'ECH'), { remplacer: false }) || 0;
+        }
+
+        // Productions
+        if (selection.productions.length > 0 && typeof window.importerProductionsExternes === 'function') {
+            rapport.productions = window.importerProductionsExternes(_preparerLot(selection.productions, 'PROD'), { remplacer: false }) || 0;
+        }
+
+        // Cartouches
+        if (selection.cartouches.length > 0 && typeof window.importerCartouchesExternes === 'function') {
+            rapport.cartouches = window.importerCartouchesExternes(_preparerLot(selection.cartouches, 'CART'), { remplacer: false }) || 0;
+        }
+
+        // Pratiques
+        if (selection.pratiques.length > 0 && typeof window.importerPratiquesExternes === 'function') {
+            rapport.pratiques = window.importerPratiquesExternes(_preparerLot(selection.pratiques, 'PRAT'), { remplacer: false }) || 0;
         }
 
         // Tampons : fusion manuelle (pas d'API publique dédiée)
@@ -658,10 +829,14 @@ async function appliquerReimport() {
             await db.set('tamponsPersonnalises', actuels);
         }
 
-        var totalAjoutes = rapport.grilles + rapport.echelles + rapport.tampons;
+        var totalAjoutes = rapport.grilles + rapport.echelles + rapport.tampons +
+                           rapport.productions + rapport.cartouches + rapport.pratiques;
         var details = [];
         if (rapport.grilles > 0) details.push(rapport.grilles + ' grille(s)');
         if (rapport.echelles > 0) details.push(rapport.echelles + ' échelle(s)');
+        if (rapport.productions > 0) details.push(rapport.productions + ' production(s)');
+        if (rapport.cartouches > 0) details.push(rapport.cartouches + ' cartouche(s)');
+        if (rapport.pratiques > 0) details.push(rapport.pratiques + ' pratique(s)');
         if (rapport.tampons > 0) details.push(rapport.tampons + ' tampon(s)');
         var detailStr = details.join(', ') || 'rien à importer (tout existait déjà)';
         if (rapport.copies > 0) detailStr += ' · ' + rapport.copies + ' copie(s) en double';

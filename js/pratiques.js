@@ -5410,4 +5410,49 @@ window.onEchelleConformiteChange = onEchelleConformiteChange;
 window.getReglesConformiteConfig = getReglesConformiteConfig;
 window.chargerReglesConformiteConfig = chargerReglesConformiteConfig;
 
+/**
+ * Importe une liste de pratiques de notation externes (réserve, voûte, etc.).
+ * Pattern symétrique à importerGrillesExternes / importerEchellesExternes.
+ *
+ * @param {Array} nouvellesPratiques - Pratiques à importer
+ * @param {Object} [options]
+ * @param {boolean} [options.remplacer=false] - Remplacer si même ID
+ * @param {boolean} [options.silencieux=false] - Ne pas rafraîchir l'UI
+ * @returns {number} nombre de pratiques ajoutées/mises à jour
+ */
+window.importerPratiquesExternes = function(nouvellesPratiques, options) {
+    if (!nouvellesPratiques || nouvellesPratiques.length === 0) return 0;
+    options = options || {};
+
+    var pratiques = db.getSync('pratiquesConfigurables', []) || [];
+    if (!Array.isArray(pratiques)) pratiques = [];
+    var compteur = 0;
+
+    for (var i = 0; i < nouvellesPratiques.length; i++) {
+        var p = nouvellesPratiques[i];
+        if (!p || !p.id) continue;
+        var index = pratiques.findIndex(function(x) { return x.id === p.id; });
+
+        if (index >= 0) {
+            if (options.remplacer) {
+                pratiques[index] = p;
+                compteur++;
+            }
+        } else {
+            pratiques.push(p);
+            compteur++;
+        }
+    }
+
+    if (compteur > 0) {
+        db.setSync('pratiquesConfigurables', pratiques);
+
+        if (!options.silencieux) {
+            if (typeof afficherListePratiques === 'function') afficherListePratiques();
+        }
+    }
+
+    return compteur;
+};
+
 })();
