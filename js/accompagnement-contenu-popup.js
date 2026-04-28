@@ -971,6 +971,183 @@ const AIDE_CONTEXTUELLE = {
             }
         ],
         voirAussi: ['bibliotheque-fonctionnement', 'construction-objectifs-reflexion']
+    },
+
+    // =========================================================================
+    // RÉSERVE — VERSEMENT (modale #modalReserve)
+    // =========================================================================
+
+    'reserve-versement': {
+        titre: "Verser dans la réserve",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Verser, c'est déposer une copie d'un groupe-cours terminé dans ta réserve personnelle locale. C'est un geste manuel que tu déclenches en fin de trimestre."
+            },
+            {
+                type: 'liste',
+                titre: "Ce qui est versé",
+                items: [
+                    "Les étudiant·es du groupe (liste, présences, évaluations sauvegardées)",
+                    "Les fichiers travaux importés pour ce groupe (photos, PDF)",
+                    "Les bibliothèques actives au moment du versement (grilles, échelles, cartouches, productions, pratiques, tampons)",
+                    "Les snapshots et les données de planification du trimestre"
+                ]
+            },
+            {
+                type: 'texte',
+                contenu: "Ta réserve vit sur ton ordinateur (ou sur un disque externe), dans le dossier <code>Réserve_LaboCodex/</code>. Elle n'est jamais purgée. Si tu re-verses le même groupe-cours, le versement précédent est remplacé."
+            },
+            {
+                type: 'conseil',
+                contenu: "Verser ne supprime rien dans ton codex de travail — c'est une <strong>copie</strong>, pas un déplacement. Tu peux verser autant de fois que tu veux."
+            },
+            {
+                type: 'alerte',
+                niveau: 'attention',
+                contenu: "Le fichier généré contient des données personnelles d'étudiant·es. Conserve-le dans un emplacement sécurisé et ne le partage pas."
+            }
+        ],
+        voirAussi: ['reserve-fsapi', 'reserve-ouvrir-versement']
+    },
+
+    'reserve-fsapi': {
+        titre: "Mode automatique ou mode manuel ?",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Le mode dépend de ton navigateur, pas de ton appareil."
+            },
+            {
+                type: 'liste',
+                titre: "Selon ton navigateur",
+                items: [
+                    "<strong>Chrome ou Edge</strong> — tu choisis ton dossier réserve une seule fois, l'application y écrit directement à chaque versement. Aucune manipulation de fichier de ton côté.",
+                    "<strong>Safari</strong> — l'application produit un fichier ZIP que tu téléchargeras puis décompresseras toi-même dans ton dossier <code>Réserve_LaboCodex/</code>. Plus d'étapes, mais le résultat est identique."
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: "Tu peux changer de navigateur d'un versement à l'autre — la réserve est compatible avec les deux flux. Si tu utilises principalement une tablette, le flux ZIP de Safari est ton chemin."
+            }
+        ],
+        voirAussi: ['reserve-versement']
+    },
+
+    // =========================================================================
+    // RÉSERVE — OUVRIR UN VERSEMENT (modale #modalOuvrirVersement)
+    // =========================================================================
+
+    'reserve-ouvrir-versement': {
+        titre: "Ouvrir la réserve",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Ouvrir la réserve, c'est consulter un versement archivé pour réimporter une ou plusieurs ressources dans tes bibliothèques actives. C'est un geste manuel et sélectif : tu choisis ce que tu reprends."
+            },
+            {
+                type: 'liste',
+                titre: "Ce qui est réimportable",
+                items: [
+                    "Grilles, échelles, productions, cartouches de rétroaction, pratiques de notation, tampons personnalisés",
+                    "Les données pédagogiques (étudiant·es, présences, évaluations) ne sont pas réimportables — elles restent dans le versement, figées"
+                ]
+            },
+            {
+                type: 'liste',
+                titre: "Selon ton navigateur",
+                items: [
+                    "<strong>Chrome ou Edge</strong> avec un dossier réserve configuré : tu vois la liste de tes versements, tu en choisis un.",
+                    "<strong>Safari</strong> : tu sélectionnes le fichier <code>.reserve.zip</code> de ton choix. Si tu viens de verser depuis Safari, ton fichier est dans ton dossier Téléchargements."
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: "Le versement original n'est jamais modifié. Réimporter, c'est faire une copie."
+            }
+        ],
+        voirAussi: ['reserve-types-ressources', 'reserve-copie-double', 'reserve-versement']
+    },
+
+    'reserve-types-ressources': {
+        titre: "Les six types de ressources réimportables",
+        sections: [
+            {
+                type: 'liste',
+                titre: "Types disponibles",
+                items: [
+                    "<strong>Grilles</strong> — critères d'évaluation",
+                    "<strong>Échelles</strong> — niveaux de performance (lettres, pourcentages…)",
+                    "<strong>Productions</strong> — gabarits de travaux à évaluer",
+                    "<strong>Cartouches de rétroaction</strong> — banques de commentaires par grille",
+                    "<strong>Pratiques de notation</strong> — méthodes de calcul de la note finale",
+                    "<strong>Tampons personnalisés</strong> — annotations visuelles"
+                ]
+            },
+            {
+                type: 'texte',
+                contenu: "Les références croisées sont préservées si tu coches les ressources liées : production → grille + échelle, cartouche → grille, pratique → échelle. L'auto-cochage s'occupe de ces liens automatiquement quand tu coches l'item parent."
+            },
+            {
+                type: 'alerte',
+                niveau: 'attention',
+                contenu: "Si une référence est absente du versement et de tes bibliothèques actives, l'item est marqué « référence manquante » en orange. Tu peux quand même le réimporter, mais sa référence sera cassée."
+            }
+        ],
+        voirAussi: ['reserve-deja-present', 'reserve-copie-double', 'reserve-ref-manquante']
+    },
+
+    'reserve-deja-present': {
+        titre: "Item déjà présent",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Cet item porte le même identifiant qu'un item déjà dans ta bibliothèque active. Par défaut, il est grisé pour éviter d'écraser ta version actuelle."
+            },
+            {
+                type: 'texte',
+                contenu: "Si tu veux quand même le récupérer : coche « Recopier en double » en bas de la modale. L'item sera réimporté avec un nouvel identifiant et le suffixe « — copie » dans le nom. Tu auras alors les deux versions côte à côte dans ta bibliothèque, libre de les comparer ou de supprimer l'une des deux."
+            }
+        ],
+        voirAussi: ['reserve-copie-double', 'reserve-types-ressources']
+    },
+
+    'reserve-copie-double': {
+        titre: "Recopier en double",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Quand un item du versement est déjà présent dans ta bibliothèque active (même identifiant), il est grisé par défaut pour éviter d'écraser ta version actuelle."
+            },
+            {
+                type: 'texte',
+                contenu: "Si tu coches « Recopier en double », ces items sont réactivés : ils seront recopiés avec un nouvel identifiant et le suffixe « — copie » dans le nom. Tu auras alors les deux versions côte à côte dans ta bibliothèque, libre de les comparer ou de supprimer l'une des deux."
+            },
+            {
+                type: 'conseil',
+                contenu: "Utile quand tu veux comparer une grille passée et sa version actuelle, ou récupérer une cartouche de rétroaction d'un trimestre antérieur sans toucher à celle que tu utilises maintenant."
+            }
+        ],
+        voirAussi: ['reserve-deja-present']
+    },
+
+    'reserve-ref-manquante': {
+        titre: "Référence manquante",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Cet item référence une autre ressource (par exemple une production référence une grille) qui n'est ni dans le versement, ni dans ta bibliothèque active. Si tu réimportes l'item tel quel, sa référence sera cassée."
+            },
+            {
+                type: 'liste',
+                titre: "Que faire ?",
+                items: [
+                    "Si la ressource manquante est dans un autre versement, ouvre-le d'abord pour la réimporter, puis reviens ouvrir celui-ci.",
+                    "Sinon, accepte la cassure : l'item s'affichera dans ta bibliothèque mais sans sa grille ou son échelle associée. Tu pourras la rebrancher plus tard."
+                ]
+            }
+        ],
+        voirAussi: ['reserve-types-ressources']
     }
 };
 
