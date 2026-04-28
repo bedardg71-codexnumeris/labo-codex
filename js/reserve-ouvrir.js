@@ -768,43 +768,97 @@ async function appliquerReimport() {
     var rapport = {
         grilles: 0, echelles: 0, tampons: 0,
         productions: 0, cartouches: 0, pratiques: 0,
-        copies: 0
+        copies: 0, refsRemappees: 0
     };
 
-    function _preparerLot(items, prefix) {
+    // Tables de remapping (ancienId -> nouveauId) pour les ressources référencées
+    // par d'autres : seules les grilles et échelles ont des références entrantes
+    // (productions.grilleId/echelleId, cartouches.grilleId, pratiques.config.echelleId).
+    // Peuplées uniquement quand l'item est copié en double ; sinon l'ID reste stable.
+    var remapGrilles = {};
+    var remapEchelles = {};
+
+    function _preparerEtCollecter(items, prefix, table) {
         return items.map(function(item) {
             if (copieEnDouble && item._doublon) {
                 rapport.copies++;
-                return _faireCopie(item, prefix);
+                var copie = _faireCopie(item, prefix);
+                if (table && item.id) table[item.id] = copie.id;
+                return copie;
             }
             return _nettoyerMarqueurs(item);
         });
     }
 
+    function _patcherReferences(item, type) {
+        if (type === 'production') {
+            if (item.grilleId && remapGrilles[item.grilleId]) {
+                item.grilleId = remapGrilles[item.grilleId];
+                rapport.refsRemappees++;
+            }
+            if (item.echelleId && remapEchelles[item.echelleId]) {
+                item.echelleId = remapEchelles[item.echelleId];
+                rapport.refsRemappees++;
+            }
+        } else if (type === 'cartouche') {
+            if (item.grilleId && remapGrilles[item.grilleId]) {
+                item.grilleId = remapGrilles[item.grilleId];
+                rapport.refsRemappees++;
+            }
+        } else if (type === 'pratique') {
+            if (item.config && item.config.echelleId && remapEchelles[item.config.echelleId]) {
+                item.config.echelleId = remapEchelles[item.config.echelleId];
+                rapport.refsRemappees++;
+            }
+        }
+        return item;
+    }
+
+    function _preparerEtPatcher(items, prefix, type) {
+        return items.map(function(item) {
+            var prepared;
+            if (copieEnDouble && item._doublon) {
+                rapport.copies++;
+                prepared = _faireCopie(item, prefix);
+            } else {
+                prepared = _nettoyerMarqueurs(item);
+            }
+            return _patcherReferences(prepared, type);
+        });
+    }
+
+    // Préparation préalable : grilles et échelles d'abord (sources des remaps),
+    // puis productions/cartouches/pratiques (qui peuvent dépendre des remaps).
+    var grillesPretes = _preparerEtCollecter(selection.grilles, 'GRILLE', remapGrilles);
+    var echellesPretes = _preparerEtCollecter(selection.echelles, 'ECH', remapEchelles);
+    var productionsPretes = _preparerEtPatcher(selection.productions, 'PROD', 'production');
+    var cartouchesPretes = _preparerEtPatcher(selection.cartouches, 'CART', 'cartouche');
+    var pratiquesPretes = _preparerEtPatcher(selection.pratiques, 'PRAT', 'pratique');
+
     try {
         // Grilles
-        if (selection.grilles.length > 0 && typeof window.importerGrillesExternes === 'function') {
-            rapport.grilles = window.importerGrillesExternes(_preparerLot(selection.grilles, 'GRILLE'), { remplacer: false }) || 0;
+        if (grillesPretes.length > 0 && typeof window.importerGrillesExternes === 'function') {
+            rapport.grilles = window.importerGrillesExternes(grillesPretes, { remplacer: false }) || 0;
         }
 
         // Échelles
-        if (selection.echelles.length > 0 && typeof window.importerEchellesExternes === 'function') {
-            rapport.echelles = window.importerEchellesExternes(_preparerLot(selection.echelles, 'ECH'), { remplacer: false }) || 0;
+        if (echellesPretes.length > 0 && typeof window.importerEchellesExternes === 'function') {
+            rapport.echelles = window.importerEchellesExternes(echellesPretes, { remplacer: false }) || 0;
         }
 
         // Productions
-        if (selection.productions.length > 0 && typeof window.importerProductionsExternes === 'function') {
-            rapport.productions = window.importerProductionsExternes(_preparerLot(selection.productions, 'PROD'), { remplacer: false }) || 0;
+        if (productionsPretes.length > 0 && typeof window.importerProductionsExternes === 'function') {
+            rapport.productions = window.importerProductionsExternes(productionsPretes, { remplacer: false }) || 0;
         }
 
         // Cartouches
-        if (selection.cartouches.length > 0 && typeof window.importerCartouchesExternes === 'function') {
-            rapport.cartouches = window.importerCartouchesExternes(_preparerLot(selection.cartouches, 'CART'), { remplacer: false }) || 0;
+        if (cartouchesPretes.length > 0 && typeof window.importerCartouchesExternes === 'function') {
+            rapport.cartouches = window.importerCartouchesExternes(cartouchesPretes, { remplacer: false }) || 0;
         }
 
         // Pratiques
-        if (selection.pratiques.length > 0 && typeof window.importerPratiquesExternes === 'function') {
-            rapport.pratiques = window.importerPratiquesExternes(_preparerLot(selection.pratiques, 'PRAT'), { remplacer: false }) || 0;
+        if (pratiquesPretes.length > 0 && typeof window.importerPratiquesExternes === 'function') {
+            rapport.pratiques = window.importerPratiquesExternes(pratiquesPretes, { remplacer: false }) || 0;
         }
 
         // Tampons : fusion manuelle (pas d'API publique dédiée)
@@ -840,6 +894,7 @@ async function appliquerReimport() {
         if (rapport.tampons > 0) details.push(rapport.tampons + ' tampon(s)');
         var detailStr = details.join(', ') || 'rien à importer (tout existait déjà)';
         if (rapport.copies > 0) detailStr += ' · ' + rapport.copies + ' copie(s) en double';
+        if (rapport.refsRemappees > 0) detailStr += ' · ' + rapport.refsRemappees + ' référence(s) rebranchée(s) sur les copies';
 
         if (typeof window.afficherNotificationSucces === 'function') {
             window.afficherNotificationSucces(
