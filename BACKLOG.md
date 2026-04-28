@@ -76,7 +76,7 @@
   - Priorite 5 de `ECOSYSTEME-DONNEES.md`. Section dediee qui charge des
     codex data en lecture seule sans ecraser le trimestre actif.
 
-- [ ] **#253** Reserve v1.5 — automatisation du versement (FSAPI Chrome/Edge)
+- [x] **#253** Reserve v1.5 — automatisation du versement (FSAPI Chrome/Edge) (livre 28 avril 2026, b0428-0810)
   - **Probleme** : le versement v1 exige 5 manipulations Finder
     (deplacer le ZIP depuis Telechargements, le decompresser, supprimer
     le ZIP source, fusionner manuellement le manifeste-patch). Friction
@@ -93,7 +93,13 @@
   - **Effort** : 1-2 jours. Gain UX enorme pour les Mac+desktop users.
   - **Priorite** : Haute, conditionnee aux retours testeurs sur le flux v1.
 
-- [ ] **#254** Ouvrir un versement de la reserve — consultation et reimport selectif
+- [x] **#254 v1** Ouvrir la reserve — reimport selectif (livre 28 avril 2026, b0428-0905)
+      - v1 : grilles + echelles + tampons personnalises ; toggle global « copie en double »
+      - v1.1 : detection navigateur (Chrome/Edge mode navigation FSAPI via manifeste, Safari file picker avec aide Telechargements)
+      - Hors scope v1 (a faire plus tard) : productions, cartouches, pratiques (references croisees a remapper) ; donnees pedagogiques ; mode consultation namespace temporaire
+
+- [ ] **#257** Ouvrir la reserve v2 — productions, cartouches, pratiques + mode consultation
+  - **Suite de #254 v1**. Items hors scope v1 a livrer plus tard.
   - **Use case** : au fil des trimestres, les bibliotheques actives
     (`grillesTemplates`, `echellesTemplates`, `productionsTemplates`,
     `cartouches_*`, tampons) sont purgees. La reserve devient le seul
@@ -129,7 +135,7 @@
     bibliotheques. Pour Gregoire : pertinent des que la migration vers
     « tout-numerique » est complete.
 
-- [ ] **#255** Clarifier le role de la reserve dans `ECOSYSTEME-DONNEES.md`
+- [x] **#255** Clarifier le role de la reserve dans `ECOSYSTEME-DONNEES.md` (livre 26 avril 2026, b0426-1512)
   - **Probleme** : le document fondateur presente la reserve comme
     « archive personnelle locale » avec verbes « verser, consulter,
     extraire ». La voie de retour reserve → app n'est pas detaillee, et
@@ -147,6 +153,20 @@
     temporaire en namespace isole).
   - Lier #254 (mecanisme) a cette clarification (vocabulaire).
   - **Effort** : 1-2 heures de redaction.
+
+- [ ] **#256** Etendre le systeme d'aide aux modales (infobulles, primo-aide, parcours guide)
+  - **Probleme** : les modales (`#modalOuvrirVersement`, `#modalReserve`, autres) ne
+    beneficient pas du systeme d'aide existant. Un novice qui ouvre « Ouvrir la reserve »
+    ne sait pas ce qu'est un versement, pourquoi cocher « copie en double », ou pourquoi
+    des items sont grises (« deja present »).
+  - **Cible** : etendre `data-aide` / infobulles / primo-aide pour qu'elles fonctionnent
+    a l'interieur des modales (overlay), avec une UX coherente avec le reste de l'app.
+  - **Risques** : le z-index des tooltips doit depasser celui des modales sans masquer
+    les boutons d'action. Les fleches didactiques (parcours guide) peuvent etre
+    incompatibles avec un overlay.
+  - **Effort estime** : 1 jour (audit du systeme d'aide existant + etoffement).
+  - **Priorite** : Moyenne. Pas bloquant pour la livraison v1, mais attendu pour la
+    version « novice-friendly ».
 
 ### Rythme Phase 5 — Raffinements (selon usage, post-AQPC)
 
