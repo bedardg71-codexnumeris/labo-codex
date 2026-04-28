@@ -16,57 +16,72 @@
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
-Contexte : 5 chantiers de la voie de retour Réserve livrés le 28 avril
-2026 (commits 8dbfda1, 24490f4, 82bf640, 5472403, 50d8860 sur main,
-poussés). La Réserve est maintenant fonctionnelle dans les deux sens :
-versement (codex → réserve) avec mode FSAPI Chrome/Edge, et réimport
-sélectif (réserve → bibliothèques actives) pour 6 types de ressources.
-Le TimeMachine est retiré du codex (priorité 1 ECOSYSTEME). Reste à
-attaquer #257 v2 (remapping IDs + mode consultation), #256 (infobulles
-modales), ou un autre item.
+Contexte : 7 chantiers Réserve livrés le 28 avril 2026 (commits sur main,
+tous poussés). La Réserve est fonctionnellement complète pour l'usage
+quotidien : versement (FSAPI Chrome/Edge ou ZIP Safari), réimport sélectif
+(6 types de ressources avec auto-cochage des références croisées),
+remapping d'IDs en mode copie en double, aide contextuelle dans les
+2 modales Réserve.
+
+Période sensible : Grégoire est en fin de trimestre avec ses élèves +
+colloque dans 1 mois. Priorité aux tâches qui réduisent la dette
+technique sans engager de chantiers larges. Privilégier les livrables
+courts, sécurisés, vérifiables, atomiques (1 commit par sous-chantier).
+
+ÉTAT À CONNAÎTRE :
+1. Audit en attente : AUDIT-VOCABULAIRE-2026-04-28.md à la racine
+   (untracked). 11 occurrences de copy à corriger (Mac/iPad/cloud/
+   synchronisation) suite aux 2 nouveaux feedbacks. ~30-45 min en une
+   passe. Voir le rapport pour la liste exacte et les reformulations
+   suggérées.
+2. Nouveaux feedbacks (mémoire Claude, déjà chargés via MEMORY.md) :
+   - feedback_metaphore_cloud_interdite.md — pas de cloud/synchro dans
+     le copy utilisateur, tout est manuel et local.
+   - feedback_vocabulaire_appareils_generique.md — copy : « ordinateur
+     / tablette / appareil » plutôt que « Mac / iPad ». Quand on doit
+     distinguer FSAPI vs ZIP, parler du navigateur (Chrome/Edge vs
+     Safari), pas de la marque d'appareil.
+3. project_reserve.md (mémoire Claude) — sections complètes pour les
+   chantiers Réserve, dont #256 (aide) et #257 v2.A (remapping).
 
 LECTURE OBLIGATOIRE AVANT DE CODER :
-1. (auto-memory de Claude) project_reserve.md — résumé technique des
-   modules reserve.js (versement v1+v1.5 FSAPI) et reserve-ouvrir.js
-   (réimport v1). Pointer présent dans MEMORY.md, chargé automatiquement.
+1. (auto-memory de Claude) project_reserve.md — état technique de
+   reserve.js, reserve-ouvrir.js, et de l'aide aux modales.
 2. docs/architecture/ECOSYSTEME-DONNEES.md — document fondateur 4
    concepts (Codex, Réserve, Codex data, Voûte). Vocabulaire
-   bibliothécaire. Section « Voie de retour : réimport et consultation »
-   livrée le 26 avril (#255).
-3. BACKLOG.md — items #247-249, #251-252, #256-257v2 — feuille de route
-   restante.
+   bibliothécaire. Section « Voie de retour ».
+3. BACKLOG.md — feuille de route restante.
 4. CLAUDE.md — section « Architecture des données » et règles de
-   sécurité (innerHTML/echapperHtml, data-action, console.warn/error).
+   sécurité (innerHTML/echapperHtml, data-action, console.warn/error,
+   pas de eval/CSP, etc.).
 
 ITEMS DISPONIBLES (par ordre logique recommandé) :
 
-  #257 v2  Ouvrir la réserve v2 — remapping d'IDs en mode « copie en
-           double » + mode consultation namespace temporaire (~5-6 h
-           pour le mode consultation seul ; remapping ~3-4 h).
-           Suite naturelle de #257 v1.
+  Audit copy   Appliquer AUDIT-VOCABULAIRE-2026-04-28.md (11 occurrences,
+               ~30-45 min, faible risque, atomique).
 
-  #256     Étendre le système d'aide aux modales (infobulles, primo-aide,
-           parcours guide). Léger (~1 j) mais important pour le novice.
-           Tu as souligné toi-même le besoin pendant les tests #254.
+  #249         Section dédiée Réserve dans Réglages — affiche état
+               (versements détectés, dates, tailles). ~3-4 h. Apporte un
+               bloc concret affichable AVANT de refondre Réglages globaux.
 
-  #247     Refonte Réglages > Données pour aligner avec l'architecture
-           des 4 concepts. Maintenant débloqué (Réserve v1 validée).
-           ~1 j.
+  #247         Refonte Réglages > Données pour aligner avec l'architecture
+               des 4 concepts. ~1 j. Plus cohérent APRÈS #249.
 
-  #248     Réserve v1.1 — mise à jour automatique du manifeste-reserve
-           pour les utilisateurs Safari (manifeste-reserve-patch.json à
-           fusionner via UI). FSAPI le fait déjà automatiquement. ~2-3 h.
+  #257 v2.B    Mode consultation namespace `__archive_*` (lecture seule,
+               démo/formation). ~5-6 h. À FROID dans une session dédiée
+               — pas en enchaînement. Plan détaillé à écrire avant de
+               coder. Touche le namespacing trimestre (sensible).
 
-  #249     Section dédiée Réserve dans Réglages — affiche état
-           (versements détectés, dates, tailles). ~3-4 h.
+  #256-bis     Aide aux 8 autres modales de l'app (Nouveautés, Réparation,
+               Wizard pratique, ApercuPDF, Confidentiel, Export, Import,
+               Suppression ressource). Reproduire le pattern de #256.
 
-  #251     Codex data — extraction depuis la Réserve (priorité 4
-           ECOSYSTEME). Format JSON sans blobs pour le Labo. Distinct
-           de #254 (matériel pédagogique) — celui-ci sert l'analyse
-           longitudinale.
+  #248         Réserve v1.1 — manifeste auto-fusionné Safari (Chrome le
+               fait déjà via FSAPI). ~2-3 h. Basse priorité tant que la
+               friction Safari n'est pas concrète.
 
-  #252     Labo autonome — sortir le Labo de la section Suivi
-           (priorité 5 ECOSYSTEME).
+  #251 / #252  Codex data + Labo autonome (priorités 4-5 ECOSYSTEME, gros).
+               À garder pour quand l'usage de recherche existera.
 
 CONTRAINTES (rappel) :
 - Safari Mac + iPad cibles principales (file://)
@@ -80,8 +95,6 @@ CONTRAINTES (rappel) :
   ont migré) avant chaque commit. Demander le numéro de beta à Grégoire.
 - Stage explicite par fichier (git add fichier1 fichier2) — beaucoup
   d'autres modifications dans le working tree non liées au chantier.
-  Pour index.html splitté entre commits : sauvegarder, checkout HEAD,
-  ré-appliquer les modifs ciblées, commit, restaurer working tree.
 
 OBSERVATIONS OUVERTES (hors scope) :
 - Working tree : encore beaucoup de modifs non commit (CLAUDE.md,
@@ -96,6 +109,11 @@ OBSERVATIONS OUVERTES (hors scope) :
   et le groupe-cours, absent de la table globale `cours`). reserve.js a
   un fallback regex pour ce cas, mais d'autres parties de l'app pourraient
   être affectées.
+- Code mort identifié (à nettoyer dans une session zéro-dette) :
+  - Wizard pratique V1 (`modalWizardPratique` dans pratiques.js:2261+,
+    remplacé par V2 — mentionné dans SESSION 22 avril).
+  - Instrumentation `[DEMO-TRACE]` (présente depuis 18 avril, à retirer
+    quand la démo est verrouillée stable).
 ```
 
 ---
