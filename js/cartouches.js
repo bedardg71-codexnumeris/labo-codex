@@ -3806,5 +3806,65 @@ window.partagerCartouche = partagerCartouche;
 window.supprimerCartoucheDefinitivement = supprimerCartoucheDefinitivement;
 window.supprimerCartoucheDeBibliothequePartagee = supprimerCartoucheDeBibliothequePartagee;
 
+/**
+ * Importe une liste de cartouches externes (réserve, voûte, etc.).
+ * Les cartouches sont distribués dans cartouches_{grilleId} selon leur grilleId.
+ *
+ * @param {Array} nouveauxCartouches - Cartouches à importer (chacun doit avoir grilleId)
+ * @param {Object} [options]
+ * @param {boolean} [options.remplacer=false] - Remplacer si même ID
+ * @param {boolean} [options.silencieux=false] - Ne pas rafraîchir l'UI
+ * @returns {number} nombre de cartouches ajoutés/mis à jour
+ */
+window.importerCartouchesExternes = function(nouveauxCartouches, options) {
+    if (!nouveauxCartouches || nouveauxCartouches.length === 0) return 0;
+    options = options || {};
+
+    var parGrille = {};
+    for (var i = 0; i < nouveauxCartouches.length; i++) {
+        var c = nouveauxCartouches[i];
+        if (!c || !c.id || !c.grilleId) continue;
+        if (!parGrille[c.grilleId]) parGrille[c.grilleId] = [];
+        parGrille[c.grilleId].push(c);
+    }
+
+    var compteur = 0;
+    var grillesIds = Object.keys(parGrille);
+
+    for (var gi = 0; gi < grillesIds.length; gi++) {
+        var grilleId = grillesIds[gi];
+        var cleStockage = 'cartouches_' + grilleId;
+        var existants = db.getSync(cleStockage, []) || [];
+        if (!Array.isArray(existants)) existants = [];
+
+        var nouveaux = parGrille[grilleId];
+        var modifie = false;
+        for (var j = 0; j < nouveaux.length; j++) {
+            var cart = nouveaux[j];
+            var idx = existants.findIndex(function(e) { return e.id === cart.id; });
+            if (idx >= 0) {
+                if (options.remplacer) {
+                    existants[idx] = cart;
+                    compteur++;
+                    modifie = true;
+                }
+            } else {
+                existants.push(cart);
+                compteur++;
+                modifie = true;
+            }
+        }
+
+        if (modifie) {
+            db.setSync(cleStockage, existants);
+        }
+    }
+
+    if (compteur > 0 && !options.silencieux) {
+        if (typeof afficherListeBibliothequeCartouches === 'function') afficherListeBibliothequeCartouches();
+    }
+
+    return compteur;
+};
 
 })();

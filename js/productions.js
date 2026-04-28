@@ -3964,4 +3964,53 @@ window.supprimerProduction = async function(id) {
     alert('Production supprimée');
 };
 
+/**
+ * Importe une liste de productions externes (réserve, voûte, etc.).
+ * Pattern symétrique à importerGrillesExternes / importerEchellesExternes.
+ *
+ * @param {Array} nouvellesProductions - Productions à importer
+ * @param {Object} [options]
+ * @param {boolean} [options.remplacer=false] - Remplacer si même ID
+ * @param {boolean} [options.silencieux=false] - Ne pas rafraîchir l'UI
+ * @returns {number} nombre de productions ajoutées/mises à jour
+ */
+window.importerProductionsExternes = function(nouvellesProductions, options) {
+    if (!nouvellesProductions || nouvellesProductions.length === 0) return 0;
+    options = options || {};
+
+    var cleProductions = (typeof getCleProductions === 'function')
+        ? getCleProductions()
+        : (typeof cle === 'function' ? cle('productions') : 'productions');
+
+    var productions = db.getSync(cleProductions, []) || [];
+    if (!Array.isArray(productions)) productions = [];
+    var compteur = 0;
+
+    for (var i = 0; i < nouvellesProductions.length; i++) {
+        var prod = nouvellesProductions[i];
+        if (!prod || !prod.id) continue;
+        var index = productions.findIndex(function(p) { return p.id === prod.id; });
+
+        if (index >= 0) {
+            if (options.remplacer) {
+                productions[index] = prod;
+                compteur++;
+            }
+        } else {
+            productions.push(prod);
+            compteur++;
+        }
+    }
+
+    if (compteur > 0) {
+        db.setSync(cleProductions, productions);
+
+        if (!options.silencieux) {
+            if (typeof afficherListeProductions === 'function') afficherListeProductions();
+        }
+    }
+
+    return compteur;
+};
+
 })();
