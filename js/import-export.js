@@ -587,7 +587,11 @@ async function executerExport() {
             }
         }
 
-        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const zipBlob = await zip.generateAsync({
+            type: 'blob',
+            compression: 'DEFLATE',
+            compressionOptions: { level: 6 }
+        });
         const nomFichier = auteurNettoye
             ? `sauvegarde-${prefixeConfidentiel}${auteurNettoye}-${dateStr}.zip`
             : `sauvegarde-${prefixeConfidentiel}monitorage-${dateStr}.zip`;
