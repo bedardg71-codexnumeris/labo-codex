@@ -1124,6 +1124,11 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Si tu coches « Recopier en double », ces items sont réactivés : ils seront recopiés avec un nouvel identifiant et le suffixe « — copie » dans le nom. Tu auras alors les deux versions côte à côte dans ta bibliothèque, libre de les comparer ou de supprimer l'une des deux."
             },
             {
+                type: 'exemple',
+                titre: "Et les références entre items ?",
+                contenu: "Si tu réimportes en double une grille avec une production qui la référence, la production pointera automatiquement sur la nouvelle copie de la grille — pas sur la grille existante. Le rebranchement se fait à condition que les deux items soient cochés dans le même import. Même principe pour cartouche → grille et pratique → échelle."
+            },
+            {
                 type: 'conseil',
                 contenu: "Utile quand tu veux comparer une grille passée et sa version actuelle, ou récupérer une cartouche de rétroaction d'un trimestre antérieur sans toucher à celle que tu utilises maintenant."
             }
