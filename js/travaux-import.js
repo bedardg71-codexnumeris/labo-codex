@@ -30,11 +30,13 @@
     /**
      * Vérifie les magic bytes d'un fichier pour confirmer son type réel.
      * @param {File|Blob} fichier - Le fichier à vérifier
-     * @returns {Promise<boolean>} true si les magic bytes correspondent au type déclaré
+     * @returns {Promise<boolean>} true si les magic bytes correspondent à un format image/PDF supporte
      */
     async function validerMagicBytes(fichier) {
         try {
-            var slice = fichier.slice(0, 8);
+            // Lire 16 octets : suffisant pour PDF/PNG/JPEG (4) + WebP signature
+            // a l'offset 8-11 + HEIF ftyp + brand a l'offset 8-11.
+            var slice = fichier.slice(0, 16);
             var buffer = await slice.arrayBuffer();
             var bytes = new Uint8Array(buffer);
             if (bytes.length < 4) return false;
@@ -46,15 +48,30 @@
             // JPEG : FF D8 FF
             if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) return true;
             // WebP : RIFF....WEBP (52 49 46 46 xx xx xx xx 57 45 42 50)
-            if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 && bytes.length >= 12 &&
+            // Necessite 12 octets minimum (offset 8-11). Le slice precedent
+            // ne lisait que 8 octets, donc cette branche n'etait JAMAIS prise.
+            if (bytes.length >= 12 && bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
                 bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) return true;
-            // HEIC/HEIF : ftyp (xx xx xx xx 66 74 79 70) — offset 4
-            if (bytes.length >= 8 && bytes[4] === 0x66 && bytes[5] === 0x74 && bytes[6] === 0x79 && bytes[7] === 0x70) return true;
+            // HEIC/HEIF : ftyp a l'offset 4-7 + brand a l'offset 8-11.
+            // Verifier le brand evite d'accepter MP4/MOV/3GP qui ont aussi ftyp.
+            // Brands d'image legitimes : heic, heix, mif1, msf1, heim, heis, hevc,
+            // hevx, avif (HEIF derive). Source : ISO/IEC 14496-12, ISO/IEC 23008-12.
+            if (bytes.length >= 12 && bytes[4] === 0x66 && bytes[5] === 0x74 && bytes[6] === 0x79 && bytes[7] === 0x70) {
+                var brand = String.fromCharCode(bytes[8], bytes[9], bytes[10], bytes[11]);
+                var brandsImage = ['heic', 'heix', 'mif1', 'msf1', 'heim', 'heis', 'hevc', 'hevx', 'avif'];
+                if (brandsImage.indexOf(brand) !== -1) return true;
+                // Sinon : c'est un autre conteneur ISO BMFF (MP4, MOV, etc.) -> rejeter
+                return false;
+            }
 
             return false;
         } catch (e) {
             console.warn('[Travaux-Import] Impossible de lire les magic bytes:', e);
-            return true; // En cas d'erreur, accepter par défaut (fallback gracieux)
+            // Sur erreur de lecture : refuser plutot qu'accepter. Le fallback
+            // "accepter par defaut" defait completement le check de securite :
+            // un attaquant pouvait fabriquer un fichier qui erreur a la lecture
+            // pour bypasser la validation.
+            return false;
         }
     }
 
@@ -1040,6 +1057,16 @@
             const nouveauFichier = input.files[0];
             if (!estTypeAccepte(nouveauFichier)) {
                 alert('Type de fichier non accepte.');
+                return;
+            }
+
+            // Symetrie avec ajouterFichiersEnAttente : verifier les magic bytes
+            // pour s'assurer que le contenu correspond au MIME declare. Sans ce
+            // check, un attaquant pouvait reimporter un fichier malveillant
+            // deguise (ex: HTML renomme en .pdf) sur un fichier deja accepte.
+            const magicOk = await validerMagicBytes(nouveauFichier);
+            if (!magicOk) {
+                alert('Le contenu du fichier ne correspond pas a son extension. Reimport refuse.');
                 return;
             }
 
