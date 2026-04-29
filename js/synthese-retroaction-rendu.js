@@ -623,7 +623,7 @@
     function formaterDateCourte(iso) {
         if (!iso) return '';
         try {
-            const d = new Date(iso);
+            const d = new Date(String(iso).indexOf('T') >= 0 ? iso : iso + 'T00:00:00');
             if (isNaN(d.getTime())) return iso;
             return d.toLocaleDateString('fr-CA', { day: 'numeric', month: 'short' }).replace('.', '');
         } catch (e) {
