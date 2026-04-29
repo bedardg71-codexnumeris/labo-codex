@@ -2115,7 +2115,7 @@ async function actionRenommer() {
 
     _etat.nom = nouveauNom;
     if (_etat.manifeste) _etat.manifeste.nom = nouveauNom;
-    _marquerModification();
+    marquerModification();
     _actualiserMenu();
     _sauvegarderEtat();
     // ✅ CORRIGÉ (16 mars 2026) : forcer l'écriture IDB pour que syncToLocalStorageCache
