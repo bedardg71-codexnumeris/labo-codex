@@ -4,10 +4,11 @@
 
 ---
 
-## Lecture obligatoire (5 min)
+## Lecture obligatoire (8 min)
 
 1. **01-MEMORY-PINS.md** (2 min) - Decisions critiques a ne JAMAIS oublier
 2. **02-ARCHITECTURE-OVERVIEW.md** (3 min) - Structure globale du systeme
+3. **architecture/ECOSYSTEME-DONNEES.md** (3 min) - Codex, Reserve, Voute : les 4 concepts de gestion des donnees
 
 ---
 
@@ -31,6 +32,11 @@ Avant de commencer, identifie ce sur quoi tu travailles :
 - Lis : `operations/migration-checklist.md`
 - Execute : `operations/validation-architecture.js`
 - Consulte : `DATA-OWNERSHIP.md` (registre de propriete des cles de stockage)
+
+### Je travaille sur le CODEX, l'IMPORT/EXPORT ou les DONNEES
+- Lis : `architecture/ECOSYSTEME-DONNEES.md` (document fondateur — Codex, Reserve, Voute)
+- Lis : `DATA-OWNERSHIP.md` (registre de propriete des cles de stockage)
+- Code : `js/codex.js`, `js/import-export.js`, `js/travaux-stockage.js`, `js/db.js`
 
 ### Je travaille sur ETUDIANTS/GROUPES
 - Lis : `modules/etudiants-groupes.md`
