@@ -8,22 +8,26 @@ description: >
   indices, travaux, annotation), ou demande une réflexion sur l'application.
   Pour le cadre théorique (ELLAC, SOLO, PAN, cartouches), voir
   SKILL_Ecosysteme_classe.md. Pour le module Alignement (planification, carte
-  mentale, leçons), voir SKILL_Alignement.md.
+  mentale, leçons), voir SKILL_Alignement.md. Pour le dépistage et le modèle
+  RàI, voir SKILL_RaI.md. Pour la sécurité et l'anonymisation des données,
+  voir SKILL_Securite_donnees.md.
 ---
 
 # SKILL : Labo Codex — Application et développement
 
+> **Dernière mise à jour** : 26 avril 2026 (Beta 99.25)
+
 ## 1. CONTEXTE DU PROJET
 
-**Labo Codex** (anciennement «Monitorage Pédagogique») est une application web SPA
+**Labo Codex** (anciennement « Monitorage Pédagogique ») est une application web SPA
 de suivi des apprentissages développée par Grégoire Bédard, enseignant de
 littérature au Cégep de Drummondville. Elle soutient sa pratique et, à terme,
 celle d'enseignants du réseau collégial québécois dans plusieurs disciplines.
 
-**État actuel** : Beta 98.3 (build 0228-2100) — phase de tests réseau janv.-mai 2026  
-**Objectif** : Version 1.0 open-source (AGPL v3), présentation AQPC juin 2026  
-**Déploiement** : Netlify + Cloudflare Access — app.codexnumeris.org (max 50 utilisateurs)  
-**Dépôt** : GitHub (commits fréquents, peu de branches, déploiement continu)
+**État actuel** : Beta 99.25 (build 0425-1916) — phase de nettoyage complet (Phase 6)
+**Objectif** : Version 1.0 open-source (AGPL v3), présentation AQPC juin 2026
+**Dépôt** : GitHub (commits fréquents, peu de branches)
+**Fonctionnement** : 100 % hors-ligne, pas de serveur requis
 
 ---
 
@@ -31,10 +35,15 @@ celle d'enseignants du réseau collégial québécois dans plusieurs disciplines
 
 ### Stack
 - HTML5 / CSS3 / JavaScript ES6+ pur — aucun framework
-- Seule dépendance externe : Chart.js (graphiques)
-- 100% hors-ligne : IndexedDB (persistant, plusieurs GB) + localStorage (cache synchrone)
-- Orchestration stockage : `db.js`
-- SPA monolithique : `index.html` (~18 000 l.), `styles.css` (~21 000 l.), 107 modules JS (~169 000 l. au total)
+- Dépendances externes (toutes dans `libs/`) :
+  - Chart.js + chartjs-plugin-annotation (graphiques)
+  - jsPDF + jspdf-autotable (génération PDF)
+  - html2canvas (rasterisation HTML → image pour synthèse de rétroaction)
+  - JSZip (codex, export, réserve)
+  - pdf.js + pdf.worker (lecture de PDF dans le navigateur)
+- 100 % hors-ligne : IndexedDB (persistant, plusieurs GB) + localStorage (cache synchrone)
+- Orchestration stockage : `db.js` (abstraction hybride localStorage / IndexedDB / memoryCache)
+- SPA monolithique : `index.html` (~16 500 l.), `styles.css` (~22 000 l.), 102 modules JS (~176 000 l.)
 
 ### Principes architecturaux — INVIOLABLES
 
@@ -45,67 +54,110 @@ celle d'enseignants du réseau collégial québécois dans plusieurs disciplines
 | **Communication indirecte** | Les modules ne se parlent JAMAIS directement. Uniquement via localStorage/IndexedDB. |
 | **Délégation aux pratiques** | Le calcul des indices dépend de la pratique configurée (interface `IPratique`). |
 | **Bibliothèque + Assemblage** | Entités réutilisables (non namespacées) assemblées pour un contexte précis. |
+| **Stabilité zéro-dette** | Tout nouveau chantier RETIRE ce qu'il remplace. Pas d'alias « au cas où », pas de code mort. Voir CLAUDE.md pour les détails. |
 
 ### Hiérarchie conceptuelle (sacrée)
 ```
 TRIMESTRE (A2025, H2026)
   └── COURS (601-101, 601-102)
-       └── GROUPE (01, 02, 9999-démo)
+       └── GROUPE-COURS (gr00001, gr00002, 9999-démo)
             └── ÉTUDIANTS + PRODUCTIONS + ÉVALUATIONS
 ```
 
+### Pattern des modules
+
+Tous les modules utilisent le pattern IIFE :
+```javascript
+(function() {
+'use strict';
+// ... code du module ...
+window.NomModule = { ... };
+})();
+```
+
+Les modules ne s'importent pas entre eux — ils communiquent via `window.*` et `db.getSync()`.
+
 ### Modules principaux
 
-| Groupe | Fichiers clés | Taille |
-|--------|---------------|--------|
-| Suivi apprentissages | `profil-etudiant.js`, `indices.js`, `graphiques-progression.js`, `tableau-bord-apercu.js`, `saisie-presences.js`, `portfolio.js` | ~20 000 l. |
-| Travaux / Annotation / Évaluation | `travaux-ui.js`, `travaux-annotation.js`, `evaluation.js`, `export-pdf.js` | ~28 000 l. |
-| Trimestre / Cours / Groupes | `trimestre-v2.js`, `cours.js`, `horaire.js`, `groupe.js` | — |
-| Planification | `planification-carte.js`, `planification.js`, `organisateur.js` | — |
-| Pratiques de notation | `pratiques.js`, `pratique-notation-v2.js`, `pratiques-materiel.js` | ~5 500 l. |
-| Modélisation | `modelisation.js` | — |
-| Infrastructure | `db.js`, `config.js`, `navigation.js`, `main.js` | — |
-
-**Nouveauté Beta 98.3** : `indices.js` — module centralisé pour les indices A-C-P-E
-(consolidation d'une logique auparavant dispersée; ne jamais recalculer les indices ailleurs).
+| Groupe | Fichiers clés | Description |
+|--------|---------------|-------------|
+| Infrastructure | `db.js`, `config.js`, `navigation.js`, `main.js`, `init-inline.js` | Stockage, config navigation, dispatcher d'actions |
+| Indices A-C-P | `indices.js` | Module centralisé unique — ne JAMAIS recalculer les indices ailleurs |
+| Suivi apprentissages | `profil-etudiant.js`, `graphiques-progression.js`, `tableau-bord-apercu.js`, `saisie-presences.js`, `portfolio.js` | Portrait étudiant, visualisation, assiduité, sélection portfolio |
+| Travaux / Annotation | `travaux-ui.js`, `travaux-annotation.js`, `travaux-import.js`, `travaux-stockage.js`, `travaux-export-pdf.js`, `travaux-visionneuse.js` | Import, stockage, annotation, visualisation des productions |
+| Évaluation | `evaluation.js`, `evaluation-jetons.js`, `liste-evaluations.js` | Saisie des niveaux IDME, jetons, gestion des évaluations |
+| Synthèse rétroaction | `synthese-retroaction-data.js`, `synthese-retroaction-rendu.js` | Pipeline HTML rasterisé via html2canvas (Beta 99, avril 2026) |
+| Données | `codex.js`, `import-export.js`, `reserve.js` | Codex (ZIP portable), import/export, réserve (archivage) |
+| Trimestre / Cours | `trimestre-v2.js`, `trimestres.js`, `cours.js`, `horaire.js`, `groupe.js` | Gestion de la session, des cours et des groupes |
+| Planification | `planification-carte.js`, `planification.js`, `planification-donnees.js`, `organisateur.js` | Carte mentale, séquences, organisateur de leçons |
+| Pratiques de notation | `pratiques.js`, `pratique-notation-v2.js`, 12 modules dans `js/pratiques/` | Configuration et calcul selon la pratique choisie |
+| Dépistage / RàI | `snapshots.js`, `interventions.js`, `correlations-longitudinales.js` | Snapshots de progression, interventions RàI, analyse longitudinale |
+| Bibliothèques | `grilles-bibliotheque.js`, `echelles-bibliotheque.js`, `productions-bibliotheque.js`, `cartouches-bibliotheque.js`, `tampons-bibliotheque.js`, `pratiques-bibliotheque.js`, `planification-bibliotheque.js` | Gestion des entités réutilisables |
 
 ---
 
-## 3. CADRE PÉDAGOGIQUE DANS L'APPLICATION
+## 3. ÉCOSYSTÈME DES DONNÉES
+
+> **Document fondateur** : `docs/architecture/ECOSYSTEME-DONNEES.md` (26 avril 2026)
+
+Quatre concepts distincts avec des vocations, formats et cycles de vie propres :
+
+| Concept | Vocation | Format | Portée |
+|---------|----------|--------|--------|
+| **Codex** | Espace de travail actif | `.codex.zip` (DEFLATE) | 1 trimestre |
+| **Réserve** | Archive personnelle locale (jamais purgée) | Répertoire sur disque | Tous les trimestres, par groupe-cours |
+| **Codex data** | Format léger pour la recherche | `.codex-data.json` | 1 ou N groupes combinés |
+| **Voûte** | Bibliothèque partagée entre enseignants | À définir | Multi-utilisateurs |
+
+**Verbes** : ouvrir/enregistrer (codex), verser (→ réserve), extraire (→ codex data),
+charger (→ Labo), anonymiser, déposer (→ voûte), emprunter (← voûte).
+
+**Granularité** : la Réserve est organisée par **groupe-cours**, pas par trimestre.
+Convention de nommage : `{trimestre}-{cours}-gr{groupe}` (ex. `a2025-601-101-gr00001`).
+Chaque versement porte un UUID v4 unique.
+
+> **Spécification technique** : `docs/architecture/SPEC-RESERVE-V1.md`
+> **Sécurité des données** : `Skills pour Claude Code/SKILL_Securite_donnees.md`
+
+---
+
+## 4. CADRE PÉDAGOGIQUE DANS L'APPLICATION
 
 > **Cadre théorique complet** : voir `SKILL_Ecosysteme_classe.md` pour les fondements
 > (ELLAC, SOLO, PAN), les cartouches de rétroaction et le manuel élève.
+> **Dépistage et intervention** : voir `SKILL_RaI.md`.
 
 ### Flux de données pédagogiques
 ```
 1. CONFIGURATION → Trimestre + Cours + Groupe + Productions
-2. SUIVI         → Présences (indice A), Évaluation productions (notes IDME)
+2. SUIVI         → Présences (indice A), Évaluation productions (niveaux IDME)
 3. CALCUL AUTO   → Indices C (complétion), P (performance)
-4. DIAGNOSTIC    → A + C + P → Engagement (E), patterns de risque RàI
-5. INTERVENTION  → Prof consulte, agit (niveaux 1-2-3)
+4. DIAGNOSTIC    → A + C + P → Patterns de risque, IPB, portraits dynamiques
+5. INTERVENTION  → Prof consulte, agit (paliers RàI 1-2-3)
 ```
 
-### Indices A-C-P-E
+### Indices A-C-P
 
-Tous les indices sont calculés dans `indices.js` (module centralisé, Beta 98.3+).
-Ne jamais recalculer les indices ailleurs.
+Tous les indices sont calculés dans `indices.js` (module centralisé).
+**Ne jamais recalculer les indices ailleurs.**
 
 | Indice | Nom | Source | Description |
 |--------|-----|--------|-------------|
 | A | Assiduité | `saisie-presences.js` → `indices.js` | Taux de présence aux cours |
 | C | Complétion | `portfolio.js` → `indices.js` | Taux de remise des artefacts |
-| P | Performance | Pratique configurée → `indices.js` | Voir détail ci-dessous |
-| E | Engagement | Corrélation Pearson A-C-P → `indices.js` | Cohérence entre assiduité, complétion et performance |
+| P | Performance | Pratique configurée → `indices.js` | Note composite selon la pratique active |
 
-**Calcul de P (pratique actuelle de Grégoire, H2026)** :
-- Portfolio de 10 artefacts : A1 à A10
-- P = note composite basée sur les **4 meilleurs résultats parmi A1-A8** + **A9 et A10** (obligatoires, terminaux)
-- Chaque artefact retenu pèse ~16-17% de la note finale
-- **En cours de trimestre**, P est un indicateur temporaire de la performance actuelle
-- **En fin de trimestre**, P est transposée en note chiffrée certificative
+**Note historique** : l'indice E (Engagement, corrélation Pearson A-C-P) a été retiré.
+La fonction `calculerCorrelationPearson` reste disponible dans `indices.js` comme
+utilitaire, mais ne produit plus d'indice affiché.
 
-**Note** : Ce calcul dépend de la pratique de notation configurée (ici PAN-Standards
-avec sélection portfolio). D'autres pratiques calculent P différemment. Voir section 4.
+**Calcul de P** :
+P dépend de la pratique de notation configurée. Pour la pratique de Grégoire
+(PAN-Standards avec portfolio) :
+- Portfolio configurable : nombre d'artefacts à retenir, mode de sélection
+  (`meilleurs`, `recents`, `recents-meilleurs`, `tous`)
+- Artefacts obligatoires (terminaux) configurables
+- La configuration se fait via `modalitesEvaluation.configPAN.portfolio`
 
 ### Suivi des apprentissages sur les fondamentaux (S, R, F)
 
@@ -145,66 +197,42 @@ mauvais jour et une difficulté réelle.
 verdict négatif — un D stable peut être une consolidation avant un bond vers M.
 L'enseignant interprète le portrait avec son jugement professionnel.
 
-**Note historique** : Le concept de « blocage » dans le tableur originel (A2024-A2025)
-utilisait les codes ordinaux I=1, D=2, M=3, E=4 avec des seuils à 1.5/2.0/2.5.
-L'application utilise les valeurs IDME normalisées (I=0.40, D=0.65, M=0.75, E=1.00)
-avec le seuil M=0.75 comme ancrage empirique validé (données 101→102).
-
-### Logique d'interprétation des patterns
-
-**Premier tour — Contexte comportemental (A-C-P)** :
-- P stable + A/C maintenus → Consolidation (engagement soutenu)
-- P stable + A/C en baisse → Stagnation (désengagement progressif)
-- P en hausse + A/C maintenus/hausse → Amélioration (mobilisation croissante)
-- P en baisse + A/C en baisse → Régression (décrochage)
-
-**Second tour — Dynamique cognitive (SRPNF)** :
-Diagnostic par artefact sur les N derniers (fenêtre glissante, configurable) :
-IPB (persistance sous le seuil 0.75), direction (↗→↘), forces récurrentes (≥ 0.75),
-défis récurrents (< 0.75), déplacements entre artefacts.
-
-### Workflow enseignant dans l'application
-
-1. **Collecter** artefacts (via LÉA)
-2. **Évaluer** chaque critère SRPNF (expertise professionnelle → niveaux IDME)
-3. **Saisir** dans Labo Codex (clic sur niveaux I/D/M/E)
-4. **Assembler** rétroaction (cartouche automatique, personnalisable)
-5. **Consulter** indices A-C-P-E et portrait dynamique des fondamentaux
-6. **Identifier** élèves en difficulté (IPB ≥ 2 sur les fondamentaux S-R-F)
-7. **Intervenir** de façon ciblée (niveaux RàI 1-2-3)
-8. **Diffuser** rétroaction vers plateforme LÉA
-
-**Actions selon le portrait dynamique** :
-- **Difficulté persistante** (IPB ≥ 3) : Rencontre individuelle, plan d'intervention, référence services
-- **Difficulté constante** (IPB = 2, ↘) : Intervention ciblée, remédiation sur le défi identifié
-- **Plateau** (IPB = 2, →) : Observer — consolidation ou stagnation ? Jugement professionnel
-- **Progression** (IPB = 2, ↗) : Encourager, maintenir la dynamique
-- **Difficulté résolue** (IPB = 1, ↗) : Renforcement positif, surveiller la stabilité
-- **Maîtrise acquise** (IPB = 0) : Valorisation, défis supplémentaires si souhaité
-
 ### Échelle IDME et critères SRPNF (résumé)
 
 **IDME** : I (0.01–0.64), D (0.65–0.74), M (0.75–0.84), E (0.85–1.00) — alignés SOLO.
-Seuil critique : 0.75 garantit ≥60% au cours suivant.
+Seuil critique : 0.75 garantit ≥60 % au cours suivant.
 
 **SRPNF** : Structure, Rigueur, Plausibilité, Nuance, Français.
 S/R/F = fondations multistructurelles ; P = relationnel ; N = abstrait étendu.
 
-> **Définitions complètes et validation empirique** : voir `SKILL_Ecosysteme_classe.md`, Partie 1.
+> **Définitions complètes et validation empirique** : voir `SKILL_Ecosysteme_classe.md`.
+
+### Workflow enseignant dans l'application
+
+1. **Collecter** artefacts (via LÉA/Omnivox)
+2. **Évaluer** chaque critère SRPNF (expertise professionnelle → niveaux IDME)
+3. **Saisir** dans Labo Codex (clic sur niveaux I/D/M/E)
+4. **Assembler** rétroaction (cartouche automatique, personnalisable)
+5. **Consulter** indices A-C-P et portrait dynamique des fondamentaux
+6. **Identifier** élèves en difficulté (IPB ≥ 2 sur les fondamentaux S-R-F)
+7. **Intervenir** de façon ciblée (paliers RàI 1-2-3)
+8. **Diffuser** rétroaction vers plateforme LÉA (synthèse PDF rasterisée)
 
 ---
 
-## 4. PRATIQUES DE NOTATION SUPPORTÉES
+## 5. PRATIQUES DE NOTATION SUPPORTÉES
 
 L'application supporte 4 familles. Les identifiants techniques sont stables.
+12 modules dans `js/pratiques/` (~7 200 lignes au total).
 
-### 4.1 Sommative (traditionnelle)
+### 5.1 Sommative (traditionnelle)
 - **Identifiant** : `sommative`
 - **Calcul** : Moyenne pondérée de toutes les évaluations
-- **Usage** : Point de comparaison; incluse pour faciliter la transition vers les PAN
+- **Usage** : Point de comparaison ; incluse pour faciliter la transition vers les PAN
+- **Fichier** : `js/pratiques/pratique-sommative.js`
 
-### 4.2 PAN-Standards
-- **Identifiant** : `pan-standards` (ex: `pan-maitrise`, `alternative` → migration automatique)
+### 5.2 PAN-Standards
+- **Identifiant** : `pan-standards`
 - **Échelle** : Niveaux de maîtrise discrets (ex: IDME)
 - **Calcul** : Conversion du profil de niveaux en % — 4 modes configurables :
   - **Comptage** (Bruno V.) : grille nb objectifs maîtrisés → note
@@ -212,29 +240,33 @@ L'application supporte 4 familles. Les identifiants techniques sont stables.
   - **Seuils critiques** (Xavier C.-T.) : tous objectifs ≥ niveau 3
   - **Holistique** (Isabelle M.) : suggestion statistique + jugement professionnel
 - **Variante par-objectifs** : standards évalués individuellement, meilleur résultat retenu
+- **Portfolio** : configurable (nombre à retenir, mode de sélection, artefacts obligatoires)
 - **Reprises** : Multiples, niveau non-rétrogradable
-- **Pratique de Grégoire** : Sélection automatique des N meilleurs artefacts (portfolio)
+- **Fichiers** : `js/pratiques/pratique-pan-standards.js`, `js/pratiques/pratique-pan-objectifs.js`
 
-### 4.3 PAN-Spécifications
+### 5.3 PAN-Spécifications
 - **Identifiant** : `pan-specifications`
+- **État** : **Complet** (V2.0, décembre 2025)
 - **Échelle** : Dichotomique (Conforme / Non-conforme)
 - **Calcul** : Note fixe selon forfait complété (ex: C=60%, B=80%, A=100%)
 - **Reprises** : Illimitées jusqu'à conformité
 - **Référence terrain** : François A.-H., Chimie, Cégep André-Laurendeau
+- **Fichier** : `js/pratiques/pratique-pan-specifications.js`
 
-### 4.4 PAN-Dénotation
+### 5.4 PAN-Dénotation
 - **Identifiant** : `pan-denotation`
-- **État** : À implémenter (`js/pratiques/pratique-pan-denotation.js` à créer)
-- **Principe** : Rétroaction qualitative uniquement; jugement global en fin de cours
+- **État** : **Non implémenté** (aucun fichier créé)
+- **Principe** : Rétroaction qualitative uniquement ; jugement global en fin de cours
 - **Références** : Blum (2020), Stommel (2023)
 
-### Fichiers pratiques
+### Fichiers pratiques (infrastructure)
 ```
-js/pratiques/pratique-sommative.js
-js/pratiques/pratique-pan-standards.js   ← inclut les 4 modes par-objectifs
-js/pratique-notation-v2.js               ← interface de configuration
-js/pratiques/pratique-pan-specifications.js  ← à compléter
-js/pratiques/pratique-pan-denotation.js     ← à créer
+js/pratiques/pratique-interface.js          # Interface commune IPratique
+js/pratiques/pratique-configurable.js       # Configuration générique
+js/pratiques/pratique-registre.js           # Registre des pratiques disponibles
+js/pratiques/pratique-manager.js            # Gestion de la pratique active
+js/pratique-notation-v2.js                  # Interface de configuration (UI)
+js/wizard-pratique-v2.js                    # Assistant de configuration
 ```
 
 **Principe de conception** : L'application ne doit pas imposer une pratique. Elle offre
@@ -243,29 +275,57 @@ professionnel prime toujours sur l'algorithme.
 
 ---
 
-## 5. WORKFLOW DE DÉVELOPPEMENT
+## 6. SYNTHÈSE DE RÉTROACTION (Beta 99, avril 2026)
+
+Pipeline de génération du PDF de rétroaction pour les étudiants.
+
+**Architecture** :
+```
+synthese-retroaction-data.js  (module data pur, ~340 l.)
+  → construireFeedback() assemble le shape Feedback depuis les sources existantes
+synthese-retroaction-rendu.js (module rendu HTML, ~450 l.)
+  → rendreSyntheseHTML() produit du HTML/CSS inline
+travaux-export-pdf.js
+  → ajouterPageSynthese() rastérise via html2canvas, ajoute au PDF
+```
+
+**Principe** : « La synthèse est un reformatage, pas une production. » Aucun nouveau
+champ dans le modèle de données, aucun calcul nouveau. Sections sans donnée masquées
+automatiquement.
+
+**Choix technique** : HTML rasterisé via html2canvas plutôt que reproduction en jsPDF
+natif. Le design est trop dense pour du PDF natif. Inconvénient : texte non
+sélectionnable — acceptable car usage cible = consultation sur cellulaire.
+
+---
+
+## 7. WORKFLOW DE DÉVELOPPEMENT
 
 ### Comment Grégoire travaille
-- **Claude Code** : modifications directes dans le code, commits Git
-- **CoWork (ce contexte)** : conception, validation, planification, rédaction
-- **Échanges possibles** : plans produits ici sont envoyés à Claude Code pour exécution; analyses de code de Claude Code peuvent être apportées ici pour révision
-- **VS Code** : consultation du code; édition manuelle rare depuis Claude Code
+- **Claude Code (terminal)** : modifications directes dans le code, commits Git
+- **Cowork (ce contexte)** : conception, validation, planification, rédaction
+- **Échanges** : plans produits en Cowork sont envoyés à Claude Code via SESSION.md ;
+  analyses de code de Claude Code peuvent être apportées en Cowork pour révision
+- **VS Code** : consultation du code ; édition manuelle rare
 
 ### Workflow Git
-- Peu de branches, commits fréquents, push → déploiement Netlify
-- **Local** : données réelles de classe (présences, évaluations) — backups réguliers
-- **En ligne** : expérimentation; IndexedDB effacée librement
+- Peu de branches, commits fréquents, main uniquement
+- **Local** : données réelles de classe (présences, évaluations) — backups manuels (USB + iCloud)
+- **version.json** : source de vérité pour la version (`{"build":"MMJJ-HHMM","beta":"XX.X"}`)
+- **Cache-busters** : bumper `?v=` dans `index.html` pour chaque `.js` modifié
 
 ### Exigences qualité du code
 1. **Efficacité et performance** — résultats corrects et rapides
 2. **Lisibilité** — code navigable par un non-développeur accompagné
 3. **Maintenabilité** — modules cohérents, sans duplication
 4. **SSOT strict** — aucun doublon de fonctions ni de données
-5. **Dette technique** — résolue au fur et à mesure, pas accumulée
+5. **Stabilité zéro-dette** — tout nouveau chantier retire ce qu'il remplace.
+   Pas d'alias « au cas où », pas de code mort « pour plus tard ».
+   Refactoring permis si ça rend le code plus propre.
 
 ---
 
-## 6. RÔLE DE L'AGENT DANS CE CONTEXTE (CoWork)
+## 8. RÔLE DE L'AGENT DANS CE CONTEXTE (Cowork)
 
 ### Ce que Grégoire vient chercher ici
 - **Conception** : architecture de nouvelles fonctionnalités, intégration de modules
@@ -295,29 +355,43 @@ ne pas extrapoler sans le signaler.
 
 ---
 
-## 7. RÉFÉRENCES DOCUMENTAIRES
+## 9. RÉFÉRENCE VISUELLE
 
-| Document | Contenu | Emplacement |
-|----------|---------|-------------|
-| `Description_de_LaboCodex` | Architecture, modules, historique, état Beta 98.3 | Banque de connaissances |
-| `SKILL_101.md` | Cadre pédagogique 601-101-MQ, ELLAC, SRPNF, IDME | Banque de connaissances |
-| `DESC-Taxonomie des quatre familles...` | Taxonomy PAN complète avec exemples terrain | Banque de connaissances |
-| `Voisardetal37224.pdf` | Article Pédagogie collégiale sur les PAN | Banque de connaissances |
-| Chroniques Codex Numeris | Expérimentations pédagogiques publiées | codexnumeris.org |
+**`design-system.html`** (racine du projet) est la source de vérité pour :
+- Palette de couleurs (modes sombre et clair)
+- Surfaces, ombres, border-radius
+- Boutons, formulaires, cartes, en-têtes, tableaux, alertes, badges
 
-**Chercheurs clés** : Clark & Talbert (2023), Nilson (2015), Blum (2020),
-V., Cormier & A.-H. (2024), Steve Bissonnette (enseignement explicite)
+**Règles** : utiliser les variables CSS de `styles.css`, ne jamais inventer de couleurs
+en dur, vérifier la conformité dans les deux modes. Voir CLAUDE.md pour les détails.
 
 ---
 
-## 8. COORDINATION AVEC LES AUTRES SKILLS
+## 10. COORDINATION AVEC LES AUTRES SKILLS
 
 | Skill | Rôle | Quand le consulter |
 |-------|------|--------------------|
 | `SKILL_Ecosysteme_classe.md` | Cadre pédagogique : ELLAC, SOLO, PAN, cartouches SRPNF×IDME, manuel élève | Rédaction de cartouches, validation pédagogique, conception d'artefacts |
 | `SKILL_Alignement.md` | Module Alignement : carte mentale, leçons, séquences, design curriculaire | Travail sur le module Planification, cohérence objectifs-activités-évaluations |
+| `SKILL_RaI.md` | Dépistage SOLO, IPB, diagnostic croisé, patterns, interventions RàI | Travail sur les indices, les portraits dynamiques, les interventions |
+| `SKILL_Securite_donnees.md` | Sécurité, anonymisation, intégrité, modèle de menaces, Loi 25 | Tout travail sur les données (codex, réserve, import/export, anonymisation) |
 
 **Plugin Productivité** : Les skills `memory-management` et `task-management` gèrent
 le glossaire et les tâches de développement. Le vocabulaire pédagogique du glossaire
 provient de `SKILL_Ecosysteme_classe.md` ; les étiquettes de modules dans les tâches
 correspondent aux modules décrits dans ce skill (section 2).
+
+**Documents d'architecture** :
+- `docs/architecture/ECOSYSTEME-DONNEES.md` — les 4 concepts de données
+- `docs/architecture/SPEC-RESERVE-V1.md` — spécification technique de reserve.js
+- `docs/00-START-HERE.md` — point d'entrée obligatoire pour Claude Code
+- `docs/DATA-OWNERSHIP.md` — registre de propriété des clés de stockage
+
+---
+
+## HISTORIQUE
+
+| Date       | Changement |
+|------------|------------|
+| 2026-02-28 | Création (Beta 98.3) |
+| 2026-04-26 | Refonte complète. Retrait indice E, mise à jour version (99.25), ajout écosystème de données (Codex/Réserve/Codex data/Voûte), PAN-Spécifications marqué complet, portfolio configurable, ajout synthèse de rétroaction, principe zéro-dette, 8 libs documentées, 102 modules / ~176 000 lignes, références croisées aux 5 skills, section design system. |

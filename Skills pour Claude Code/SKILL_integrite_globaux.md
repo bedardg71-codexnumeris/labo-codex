@@ -11,8 +11,14 @@ description: >
   masse sur des familles de clés (db.keys().forEach...).
 ---
 
-# SKILL : Intégrité des collections globales
+# SKILL : Intégrité des collections globales (Labo Codex)
 
+> **Instanciation concrète** de `SKILL_hygiene_donnees_partagees.md` pour
+> le projet Labo Codex. Le skill parent définit les 5 principes abstraits
+> et les 5 anti-patterns génériques. Ce skill-ci les applique aux
+> collections globales spécifiques de l'application, avec les incidents
+> réels, les modules concernés et les commits de référence.
+>
 > **Document fondateur** — 26 avril 2026, après l'incident du 24 avril où
 > 3 grilles d'évaluation ont disparu silencieusement du trimestre H2026.
 > La cause racine n'était pas un bug ponctuel mais un **pattern d'erreur
@@ -398,6 +404,8 @@ Avant de coder le pipeline d'import, appliquer §2 :
   IA, complémentaire à ce skill projet).
 
 ---
+
+**Skill parent** : `SKILL_hygiene_donnees_partagees.md` (principes abstraits, agnostique au projet)
 
 **Date de création** : 26 avril 2026, suite à l'incident du 24 avril.
 **Révision attendue** : à chaque ajout d'une nouvelle source dans les

@@ -158,7 +158,7 @@ Utiliser `window.cle('nomCle')` pour obtenir la cle namespacee.
 
 1. Lire `docs/00-START-HERE.md`
 2. **Charger les skills du projet** dans `Skills pour Claude Code/` :
-   - `SKILL_labo_codex.md` — architecture, indices A-C-P-E, pratiques de notation, workflow
+   - `SKILL_labo_codex.md` — architecture, indices A-C-P, pratiques de notation, workflow
    - `SKILL_Ecosysteme_classe.md` — cadre pedagogique (ELLAC, SOLO, PAN, SRPNF, IDME, cartouches)
    - `SKILL_Alignement.md` — module Alignement (carte mentale, lecons, sequences, design curriculaire)
    - `SKILL_RaI.md` — depistage SOLO, IPB, diagnostic croise, patterns, interventions RaI
@@ -168,7 +168,12 @@ Utiliser `window.cle('nomCle')` pour obtenir la cle namespacee.
      observes. **Charger en PRIORITE pour tout code qui ecrit/fusionne/filtre dans
      ces cles** (demo-activation.js, reserve.js, import-export.js, futurs modules
      Plan 2). Ne jamais filtrer par flag, toujours par identite de la source.
-   Ces six skills sont complementaires et constituent la reference metier du projet.
+   - `SKILL_hygiene_donnees_partagees.md` — principes abstraits d'hygiene des
+     donnees partagees (observer avant de transformer, transformer explicitement,
+     filtrer par identite). Skill parent de `SKILL_integrite_globaux.md`, applicable
+     a tout projet. **Charger pour tout nouveau projet ou module manipulant des
+     donnees de sources heterogenes.**
+   Ces sept skills sont complementaires et constituent la reference metier du projet.
    **Si travail sur les donnees** (codex, reserve, import/export, anonymisation) :
    charger `SKILL_Securite_donnees.md` EN PRIORITE — les regles de la section 9
    sont obligatoires pour tout code touchant aux donnees.
@@ -267,7 +272,7 @@ Points blancs dans les barres graduees de l'apercu :
 L'interface est dense par necessite (tableaux de bord, listes d'etudiants, graphiques). Regles pour maintenir la lisibilite :
 
 - **Un seul element d'attention primaire par ecran** — le regard doit savoir ou aller
-- **Les indices A-C-P-E utilisent un code couleur coherent** partout dans l'app (voir `design-system.html`)
+- **Les indices A-C-P utilisent un code couleur coherent** partout dans l'app (voir `design-system.html`)
 - **Les alertes RaI (niveaux 1-2-3) sont visuellement distinctes** — ne jamais les confondre avec des alertes systeme
 - **Les graphiques Chart.js respectent la palette** definie dans les variables CSS
 
@@ -275,7 +280,7 @@ L'interface est dense par necessite (tableaux de bord, listes d'etudiants, graph
 
 - **Langue** : francais quebecois, vouvoiement evite (l'enseignant tutoie l'app)
 - **Ton** : professionnel mais accessible — outil d'enseignant, pas logiciel d'entreprise
-- **Vocabulaire pedagogique** : utiliser les termes exacts du projet (indices A-C-P-E, artefact, pratique de notation, IDME, RaI). Consulter `SKILL_Ecosysteme_classe.md` en cas de doute
+- **Vocabulaire pedagogique** : utiliser les termes exacts du projet (indices A-C-P, artefact, pratique de notation, IDME, RaI). Consulter `SKILL_Ecosysteme_classe.md` en cas de doute
 - **Messages d'erreur** : dire ce qui s'est passe, pourquoi, et quoi faire — en une phrase si possible
 - **Etats vides** : guider l'enseignant vers l'action suivante (pas juste « aucune donnee »)
 
