@@ -1307,6 +1307,7 @@
         parserNomFichierLea: parserNomFichierLea,
         // Validation
         estTypeAccepte: estTypeAccepte,
+        validerMagicBytes: validerMagicBytes,
         // File d'attente
         ajouterFichiersEnAttente: ajouterFichiersEnAttente,
         obtenirFileDAttente: obtenirFileDAttente,
