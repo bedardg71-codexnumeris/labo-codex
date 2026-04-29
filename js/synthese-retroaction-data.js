@@ -688,13 +688,19 @@
             const pr = productions.find(p => p.id === productionId);
             return pr ? (pr.activiteApprentissage || pr.description || '') : '';
         };
+        // Resolution de l'echeance par groupe-cours actif (eleve), pas par
+        // ordre d'insertion arbitraire dans echeancesParGroupe.
+        const infoCoursActif = db.getSync('infoCours', null);
+        const gcIdEleve = infoCoursActif ? (infoCoursActif._groupeCoursId || infoCoursActif.id || null) : null;
         const obtenirEcheance = (prod) => {
+            if (typeof obtenirEcheanceEffective === 'function') {
+                const r = obtenirEcheanceEffective(prod, gcIdEleve);
+                return (r && r.date) || null;
+            }
             if (prod.dateEcheance) return prod.dateEcheance;
-            if (prod.echeancesParGroupe) {
-                for (const gcId in prod.echeancesParGroupe) {
-                    const entree = prod.echeancesParGroupe[gcId];
-                    if (entree && entree.date) return entree.date;
-                }
+            if (prod.echeancesParGroupe && gcIdEleve) {
+                const entree = prod.echeancesParGroupe[gcIdEleve];
+                return (entree && entree.date) || null;
             }
             return null;
         };
