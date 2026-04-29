@@ -22005,3 +22005,168 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     }
 }
 
+/* ===============================
+   DÉVELOPPEMENT DU GROUPE PAR HABILETÉS
+   (Aperçu › carte-developpement-habiletes)
+   =============================== */
+
+.habiletes-controles {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    padding: 0.75rem 1rem;
+    margin: 0 0 1rem 0;
+    background: var(--bordure-claire);
+    border-radius: var(--radius-moyen, 8px);
+}
+
+.habiletes-controles-label {
+    font-weight: 600;
+    color: var(--texte-secondaire);
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.habiletes-criteres-liste {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.6rem;
+    flex: 1 1 auto;
+}
+
+.habiletes-criteres-attente {
+    color: var(--texte-secondaire);
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+.habiletes-critere-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--bordure-claire);
+    background: var(--surface-carte);
+    transition: background 0.15s ease, border-color 0.15s ease;
+    user-select: none;
+    min-height: 32px;
+}
+
+.habiletes-critere-checkbox:hover {
+    border-color: var(--bordure-moyenne);
+}
+
+.habiletes-critere-checkbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    cursor: pointer;
+    accent-color: var(--critere-couleur, var(--std-bleu));
+    flex-shrink: 0;
+}
+
+.habiletes-critere-pastille {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--critere-couleur, var(--std-bleu));
+    flex-shrink: 0;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.habiletes-critere-libelle {
+    font-size: 0.88rem;
+    color: var(--texte-principal);
+    line-height: 1.2;
+}
+
+/* État coché : fond légèrement teinté avec la couleur du critère */
+.habiletes-critere-checkbox.actif {
+    border-color: var(--critere-couleur, var(--std-bleu));
+    background: color-mix(in srgb, var(--critere-couleur, var(--std-bleu)) 12%, var(--surface-carte));
+}
+
+/* Toggle médiane dans l'en-tête bleu — alignement vertical de l'input */
+.habiletes-toggle-mediane-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    cursor: pointer;
+    accent-color: white;
+}
+
+/* iPad / tactile : cibles plus larges */
+@media (pointer: coarse) {
+    .habiletes-critere-checkbox {
+        min-height: 44px;
+        padding: 0.55rem 0.9rem;
+    }
+
+    .habiletes-critere-checkbox input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+    }
+
+    .habiletes-toggle-mediane-label input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+/* ===============================
+   BOUTON 👤 « VOIR LE PROFIL »
+   Apparaît dans les en-têtes de graphiques d'évolution quand
+   un élève est sélectionné dans le menu « Élève en relief ».
+   =============================== */
+
+.btn-voir-profil {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    flex-shrink: 0;
+}
+
+.btn-voir-profil:hover {
+    background: rgba(255, 255, 255, 0.28);
+    border-color: rgba(255, 255, 255, 0.55);
+}
+
+.btn-voir-profil:active {
+    transform: scale(0.94);
+}
+
+.btn-voir-profil:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+
+/* iPad : cible tactile élargie */
+@media (pointer: coarse) {
+    .btn-voir-profil {
+        width: 44px;
+        height: 44px;
+        font-size: 1.2rem;
+    }
+}
+
+/* Sous-titre dans les en-têtes de cartes d'évolution */
+.entete-sous-titre {
+    color: rgba(255, 255, 255, 0.78);
+    font-style: italic;
+}
+
