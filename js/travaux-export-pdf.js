@@ -822,7 +822,13 @@
                         <p><strong>Traits :</strong> ${stats.traits} | <strong>Formes :</strong> ${stats.formes} | <strong>Textes :</strong> ${stats.textes}</p>`;
 
         if (stats.autocollants > 0) {
-            html += `<p><strong>Autocollants :</strong> ${stats.autocollants} (${stats.autoQualite} qualite, ${stats.autoDiagnostic} diagnostic)</p>`;
+            // Ne pas ventiler par categorie : les anciennes categories
+            // 'qualite'/'diagnostic' sont legacy (cf. synthese-retroaction-data.js
+            // commentaire « legacy -> ignoree »). La nouvelle taxonomie est
+            // action / observations / comprehension. Le PDF lui-meme passe
+            // par compterAnnotationsDetailees (voie correcte). Le modal de
+            // revision n'a pas besoin du detail. (nit1)
+            html += `<p><strong>Autocollants :</strong> ${stats.autocollants}</p>`;
         }
 
         html += '</div>';
@@ -1128,6 +1134,17 @@
         if (overlay) {
             if (overlay._onKeyDown) document.removeEventListener('keydown', overlay._onKeyDown);
             overlay.remove();
+        }
+        // Liberer les ressources PDF.js cote worker. Sans destroy(), le
+        // worker maintient le document en memoire (table d'annotations,
+        // polices decodees, ArrayBuffer transfere). Une session de correction
+        // de 30 PDF accumulait plusieurs centaines de Mo. (nit2)
+        if (window._previewPDFState && window._previewPDFState.pdfDoc) {
+            try {
+                window._previewPDFState.pdfDoc.destroy().catch(function() {});
+            } catch (e) {
+                // destroy() peut throw si deja detruit -- ignorer
+            }
         }
         window._previewPDFState = null;
     }
