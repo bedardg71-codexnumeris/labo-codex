@@ -786,8 +786,18 @@
                     el.src = url;
                     el.style.display = '';
                 } else {
-                    // Conteneur div : creer une img a l'interieur
-                    el.innerHTML = '<img src="' + url + '" alt="" style="max-width:100%;max-height:100%;">';
+                    // Conteneur div : creer une img a l'interieur via DOM API
+                    // plutot que innerHTML pour eviter une injection XSS si
+                    // l'URL d'un thumbnail importe contenait des guillemets et
+                    // un attribut event-handler. element.src = url assigne la
+                    // chaine telle quelle sans la parser comme HTML.
+                    el.textContent = '';
+                    var img = document.createElement('img');
+                    img.src = url;
+                    img.alt = '';
+                    img.style.maxWidth = '100%';
+                    img.style.maxHeight = '100%';
+                    el.appendChild(img);
                 }
                 // Masquer le placeholder frere
                 var placeholder = el.nextElementSibling;
