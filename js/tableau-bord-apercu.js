@@ -1123,11 +1123,9 @@ function chargerTableauBordApercu() {
             console.warn('⚠️ creerGraphiqueGroupeSpaghettiACP non disponible - Module graphiques-progression.js non chargé ?');
         }
 
-        // 🆕 BETA 96: Afficher le graphique spaghetti (trajectoires par artefact)
-        if (typeof creerGraphiqueGroupeSpaghetti === 'function') {
-            creerGraphiqueGroupeSpaghetti('graphique-groupe-spaghetti');
-        } else {
-            console.warn('⚠️ creerGraphiqueGroupeSpaghetti non disponible - Module graphiques-progression.js non chargé ?');
+        // Trajectoires par production (note finale ou habiletés selon Mesure choisie)
+        if (typeof initialiserCarteTrajectoiresProduction === 'function') {
+            initialiserCarteTrajectoiresProduction();
         }
 
         // 🆕 Graphique corrélations longitudinales (dynamique des corrélations semaine par semaine)
@@ -3029,16 +3027,147 @@ function setBarre(id, pourcentage) {
 }
 
 /**
- * Wrapper de navigation : ouvre la sous-section profil et charge le profil.
+ * Wrapper de navigation : bascule l'onglet Suivi puis ouvre la sous-section
+ * profil et charge le profil de l'élève.
  * Utilisé par data-action="tbNavigerVersProfil" data-param="<da>"
  * @param {string} da - Le DA de l'étudiant
  */
 function tbNavigerVersProfil(da) {
+    if (typeof afficherSection === 'function') {
+        afficherSection('suivi');
+    }
     if (typeof afficherSousSection === 'function') {
         afficherSousSection('suivi-profil');
     }
     if (typeof afficherProfilComplet === 'function') {
         afficherProfilComplet(da);
+    }
+}
+
+/* ===============================
+   GRAPHIQUE GROUPE PAR HABILETÉS — CÂBLAGE UI
+   =============================== */
+
+/**
+ * Sous-titres dynamiques selon la mesure choisie.
+ */
+function _sousTitreTrajectoires(mesure, termeSingulier) {
+    if (mesure === 'habiletes') {
+        return 'Moyenne des critères cochés par ' + termeSingulier + ', dans l\'ordre chronologique';
+    }
+    return 'Note finale par ' + termeSingulier + ', dans l\'ordre chronologique';
+}
+
+/**
+ * Initialise la carte « Trajectoires par {production} ».
+ * - Respecte la préférence afficherDeveloppementHabiletes (cache la carte si désactivée)
+ * - Injecte le terme dynamique (artefact / production / etc.) dans le titre et le sous-titre
+ * - Peuple les checkboxes critères (visibles seulement en mode Habiletés)
+ * - Lance le rendu initial en mode « Note finale »
+ */
+function initialiserCarteTrajectoiresProduction() {
+    try {
+        const carte = document.getElementById('carte-trajectoires-production');
+        if (!carte) return;
+
+        const visible = (typeof obtenirPreference === 'function')
+            ? obtenirPreference('afficherDeveloppementHabiletes') !== false
+            : true;
+        if (!visible) {
+            carte.style.display = 'none';
+            return;
+        }
+        carte.style.display = '';
+
+        // Injection du terme dynamique (titre + sous-titre)
+        const termeSing = (typeof obtenirTermeProduction === 'function')
+            ? obtenirTermeProduction('singulier')
+            : 'production';
+        const spanTerme = document.getElementById('trajectoires-titre-terme');
+        if (spanTerme) spanTerme.textContent = termeSing;
+
+        // Lecture de l'état initial des contrôles
+        const selMesure = document.getElementById('selecteur-mesure-trajectoires');
+        const mesure = (selMesure && selMesure.value === 'habiletes') ? 'habiletes' : 'noteFinale';
+
+        const sousTitre = document.getElementById('trajectoires-sous-titre');
+        if (sousTitre) sousTitre.textContent = _sousTitreTrajectoires(mesure, termeSing);
+
+        // Barre critères : visible seulement en mode Habiletés
+        const barreCriteres = document.getElementById('trajectoires-controles-criteres');
+        if (barreCriteres) barreCriteres.style.display = (mesure === 'habiletes') ? 'flex' : 'none';
+
+        // Peuplement des pills critères (toujours, pour être prêt si l'utilisateur switche)
+        const conteneur = document.getElementById('trajectoires-criteres-checkboxes');
+        if (conteneur && typeof listerCriteresHabiletes === 'function') {
+            const criteres = listerCriteresHabiletes();
+            if (criteres.length === 0) {
+                conteneur.innerHTML = '<span class="habiletes-criteres-attente">Aucun critère détaillé dans les évaluations enregistrées.</span>';
+            } else {
+                let html = '';
+                criteres.forEach((c, idx) => {
+                    const id = 'traj-cb-crit-' + idx;
+                    const nomEsc = echapperHtml(c.nom);
+                    const couleurEsc = echapperHtml(c.couleur);
+                    html += '<label class="habiletes-critere-checkbox actif" for="' + id + '" style="--critere-couleur: ' + couleurEsc + ';">' +
+                            '<input type="checkbox" id="' + id + '" data-on-change="togglerCritereTrajectoires" data-critere-nom="' + nomEsc + '" checked>' +
+                            '<span class="habiletes-critere-pastille"></span>' +
+                            '<span class="habiletes-critere-libelle">' + nomEsc + '</span>' +
+                            '</label>';
+                });
+                conteneur.innerHTML = html;
+            }
+        }
+
+        // Rendu initial du graphique
+        if (typeof creerGraphiqueTrajectoiresProduction === 'function') {
+            creerGraphiqueTrajectoiresProduction('graphique-trajectoires-production', {
+                mesure: mesure,
+                afficherMediane: false
+            });
+        }
+    } catch (e) {
+        console.error('[Trajectoires] initialiserCarteTrajectoiresProduction :', e);
+    }
+}
+
+/**
+ * Réagit au changement du sélecteur Mesure (Note finale ↔ Habiletés).
+ * Affiche/masque la barre critères, met à jour le sous-titre, rafraîchit le graphique.
+ */
+function changerMesureTrajectoires() {
+    const selMesure = document.getElementById('selecteur-mesure-trajectoires');
+    const mesure = (selMesure && selMesure.value === 'habiletes') ? 'habiletes' : 'noteFinale';
+
+    const barreCriteres = document.getElementById('trajectoires-controles-criteres');
+    if (barreCriteres) barreCriteres.style.display = (mesure === 'habiletes') ? 'flex' : 'none';
+
+    const termeSing = (typeof obtenirTermeProduction === 'function')
+        ? obtenirTermeProduction('singulier')
+        : 'production';
+    const sousTitre = document.getElementById('trajectoires-sous-titre');
+    if (sousTitre) sousTitre.textContent = _sousTitreTrajectoires(mesure, termeSing);
+
+    if (typeof rafraichirGraphiqueTrajectoires === 'function') {
+        rafraichirGraphiqueTrajectoires();
+    }
+}
+
+/**
+ * Bascule l'état d'un critère (coché/décoché) et rafraîchit le graphique.
+ * Appelé via data-on-change depuis les checkboxes critères.
+ */
+function togglerCritereTrajectoires(el) {
+    if (!el) return;
+    const cb = (el.tagName === 'INPUT') ? el : el.querySelector('input[type="checkbox"]');
+    if (!cb) return;
+    const label = cb.closest('.habiletes-critere-checkbox');
+    if (label) {
+        if (cb.checked) label.classList.add('actif');
+        else label.classList.remove('actif');
+    }
+    if (typeof rafraichirGraphiqueTrajectoires === 'function') {
+        rafraichirGraphiqueTrajectoires();
     }
 }
 
@@ -3053,6 +3182,9 @@ window.initialiserModuleTableauBordApercu = initialiserModuleTableauBordApercu;
 window.appliquerCouleursEtudiantsSuivis = appliquerCouleursEtudiantsSuivis;
 window.appliquerCouleursPrioritaires = appliquerCouleursPrioritaires;
 window.calculerEtudiantsPrioritaires = calculerEtudiantsPrioritaires;
+window.initialiserCarteTrajectoiresProduction = initialiserCarteTrajectoiresProduction;
+window.togglerCritereTrajectoires = togglerCritereTrajectoires;
+window.changerMesureTrajectoires = changerMesureTrajectoires;
 
 /* ===============================
    📌 NOTES D'UTILISATION

@@ -8813,5 +8813,6 @@ window.togglePSansReprisesIndivHandler = togglePSansReprisesIndivHandler;
 window.toggleIndiceIndivHandler = toggleIndiceIndivHandler;
 window.toggleCritereIndivHandler = toggleCritereIndivHandler;
 window.lancerExportEtudiantAnnotes = lancerExportEtudiantAnnotes;
+window.obtenirTermeProduction = obtenirTermeProduction;
 
 })();

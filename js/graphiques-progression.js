@@ -21,6 +21,18 @@
    CONFIGURATION GLOBALE
    =============================== */
 
+// Désactivation globale des animations Chart.js : le redessin instantané
+// prime sur l'effet visuel — sans ça, les changements de paramètres
+// (critères, indice, surbrillance) se voient avec délai. S'applique à
+// tous les graphiques de l'app (Aperçu, profil individuel, etc.).
+if (typeof Chart !== 'undefined' && Chart.defaults) {
+    Chart.defaults.animation = false;
+    Chart.defaults.animations = { colors: false, x: false, y: false };
+    Chart.defaults.transitions = Chart.defaults.transitions || {};
+    Chart.defaults.transitions.active = { animation: { duration: 0 } };
+    Chart.defaults.transitions.resize = { animation: { duration: 0 } };
+}
+
 // Couleurs indices A-C-P-E : centralisées dans js/couleurs.js (COULEURS.indices)
 const COULEURS_INDICES = COULEURS.indices;
 
@@ -1956,6 +1968,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                 });
                 if (selecteur) selecteur.value = indexDataset;
             }
+            _majBoutonProfilACP();
             if (chartEstValide(chart)) chart.update('none');
         }
 
@@ -2031,6 +2044,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                 selecteurEtudiant.appendChild(option);
             });
         }
+        _majBoutonProfilACP();
 
         return chart;
 
@@ -2057,6 +2071,7 @@ function selectionnerEtudiantACP() {
     if (!selecteur || !graphiqueSpaghettiACPInstance) return;
 
     const indexStr = selecteur.value;
+    _majBoutonProfilACP();
     // Déterminer l'indice ACP actif via le sélecteur
     const selecteurIndice = document.getElementById('selecteur-indice-acp');
     const indiceActif = selecteurIndice ? selecteurIndice.value : 'A';
@@ -2089,6 +2104,33 @@ function selectionnerEtudiantACP() {
         }
     });
     if (chartEstValide(chart)) chart.update('none');
+}
+
+/**
+ * Ouvre le profil de l'élève actuellement en relief dans le graphique ACP.
+ * Lit l'index depuis #selecteur-etudiant-acp et la DA depuis dataset.da.
+ */
+function ouvrirProfilEleveACP() {
+    if (!graphiqueSpaghettiACPInstance) return;
+    const select = document.getElementById('selecteur-etudiant-acp');
+    if (!select || !select.value) return;
+    const idx = parseInt(select.value, 10);
+    if (isNaN(idx)) return;
+    const ds = graphiqueSpaghettiACPInstance.data.datasets[idx];
+    if (ds && ds.da && typeof tbNavigerVersProfil === 'function') {
+        tbNavigerVersProfil(ds.da);
+    }
+}
+
+/**
+ * Met à jour la visibilité du bouton 👤 « Voir le profil » selon
+ * la sélection courante du dropdown élève ACP.
+ */
+function _majBoutonProfilACP() {
+    const btn = document.getElementById('btn-profil-acp');
+    const select = document.getElementById('selecteur-etudiant-acp');
+    if (!btn || !select) return;
+    btn.style.display = (select.value && select.value !== '') ? 'inline-flex' : 'none';
 }
 
 /* ===============================
@@ -2249,1048 +2291,6 @@ const pluginEtiquettesZones100 = {
     }
 };
 
-/**
- * Variables pour suivre le dernier survol (évite les mises à jour inutiles)
- */
-let dernierDatasetSurvole = -1;
-let dernierPointSurvole = -1;
-
-/**
- * Variable pour le verrouillage d'une courbe (clic sur le nom)
- * -1 = pas de verrouillage, sinon index du dataset verrouillé
- */
-let datasetVerrouille = -1;
-
-/**
- * Données partagées pour les tooltips multiples (initialisées dans creerGraphiqueGroupeSpaghetti)
- */
-let donneesSpaghettiGlobales = {
-    memesActivites: {},
-    labels: [],
-    evaluationsIndex: {},
-    productionsArtefacts: [],
-    noteVersIDME: null
-};
-
-/**
- * Stockage des zones cliquables des noms d'étudiants
- */
-let zonesNomsEtudiants = [];
-
-/**
- * Plugin pour afficher le nom de l'étudiant au bout de la courbe survolée/verrouillée
- */
-const pluginNomEtudiantSurvol = {
-    id: 'nomEtudiantSurvol',
-    afterDraw(chart) {
-        // Afficher le nom pour le dataset actif (survolé ou verrouillé)
-        const datasetIndexActif = datasetVerrouille >= 0 ? datasetVerrouille : dernierDatasetSurvole;
-        if (datasetIndexActif === -1) {
-            zonesNomsEtudiants = [];
-            return;
-        }
-
-        const ctx = chart.ctx;
-        const dataset = chart.data.datasets[datasetIndexActif];
-        if (!dataset) return;
-
-        const meta = chart.getDatasetMeta(datasetIndexActif);
-        if (!meta || !meta.data || meta.data.length === 0) return;
-
-        // Trouver le dernier point visible (non-null) de la courbe
-        let dernierPoint = null;
-        for (let i = meta.data.length - 1; i >= 0; i--) {
-            const point = meta.data[i];
-            if (point && dataset.data[i] !== null) {
-                dernierPoint = point;
-                break;
-            }
-        }
-
-        if (!dernierPoint) return;
-
-        // Dessiner le nom de l'étudiant à droite du dernier point
-        const estVerrouille = datasetVerrouille >= 0;
-        const nom = dataset.label || '';
-        const texteAffiche = estVerrouille ? `\u25C9 ${nom}` : nom;
-        const x = dernierPoint.x + 10;
-        const y = dernierPoint.y;
-
-        ctx.save();
-        ctx.font = 'bold 12px Arial';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-
-        // Fond blanc semi-transparent pour lisibilité
-        const textWidth = ctx.measureText(texteAffiche).width;
-        const rectX = x - 3;
-        const rectY = y - 10;
-        const rectW = textWidth + 10;
-        const rectH = 20;
-
-        ctx.fillStyle = estVerrouille ? 'rgba(233, 30, 99, 0.15)' : 'rgba(255, 255, 255, 0.9)';
-        ctx.fillRect(rectX, rectY, rectW, rectH);
-
-        // Bordure si verrouillé
-        if (estVerrouille) {
-            ctx.strokeStyle = '#E91E63';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(rectX, rectY, rectW, rectH);
-        }
-
-        // Texte
-        ctx.fillStyle = estVerrouille ? '#C2185B' : '#1976D2';
-        ctx.fillText(texteAffiche, x, y);
-        ctx.restore();
-
-        // Stocker la zone cliquable pour ce nom
-        zonesNomsEtudiants = [{
-            datasetIndex: datasetIndexActif,
-            x: rectX,
-            y: rectY,
-            width: rectW,
-            height: rectH
-        }];
-    }
-};
-
-/**
- * Plugin pour afficher les tooltips de toutes les activités similaires
- * Permet de comparer les résultats sur une même activité pratiquée plusieurs fois
- */
-const pluginTooltipsMultiples = {
-    id: 'tooltipsMultiples',
-    afterDraw(chart) {
-        // Vérifier qu'on a un point survolé et les données nécessaires
-        if (dernierPointSurvole === -1) return;
-        const datasetActif = datasetVerrouille >= 0 ? datasetVerrouille : dernierDatasetSurvole;
-        if (datasetActif === -1) return;
-
-        const { memesActivites, labels, evaluationsIndex, productionsArtefacts, noteVersIDME } = donneesSpaghettiGlobales;
-        if (!memesActivites || !labels || !noteVersIDME) return;
-
-        // Obtenir tous les indices de même activité
-        const indicesMemeActivite = memesActivites[dernierPointSurvole] || [];
-        if (indicesMemeActivite.length <= 1) return; // Pas d'autres activités similaires
-
-        const ctx = chart.ctx;
-        const dataset = chart.data.datasets[datasetActif];
-        if (!dataset) return;
-
-        const meta = chart.getDatasetMeta(datasetActif);
-        if (!meta || !meta.data) return;
-
-        const da = dataset.da;
-
-        // Dessiner un tooltip pour chaque AUTRE point de même activité (pas le survolé)
-        // Le point survolé a déjà le tooltip natif de Chart.js
-        indicesMemeActivite.forEach(pointIndex => {
-            // Exclure le point directement survolé (déjà géré par tooltip natif)
-            if (pointIndex === dernierPointSurvole) return;
-
-            const point = meta.data[pointIndex];
-            const valeur = dataset.data[pointIndex];
-            if (!point || valeur === null) return;
-
-            // Obtenir les infos de l'évaluation
-            const production = productionsArtefacts[pointIndex];
-            const evaluation = production && da ? evaluationsIndex[da]?.[production.id] : null;
-
-            // Construire le texte du tooltip
-            const label = labels[pointIndex] || `Point ${pointIndex + 1}`;
-            const codeIDME = noteVersIDME(valeur);
-            const pourcent = (valeur * 100).toFixed(0);
-
-            // Collecter les statuts
-            const statuts = [];
-            if (evaluation) {
-                if (evaluation.repriseDeId || evaluation.jetonReprise || evaluation.jetonDelai || evaluation.avecJeton) {
-                    statuts.push('Jeton');
-                }
-                if (evaluation.statutIntegrite === 'plagiat') statuts.push('Plagiat');
-                else if (evaluation.statutIntegrite === 'ia') statuts.push('IA');
-                if (evaluation.statutRemise === 'non-remis') statuts.push('Non remis');
-                else if (evaluation.statutRemise === 'retard') statuts.push('Retard');
-            }
-
-            let ligne2 = `${codeIDME} (${pourcent}%)`;
-            if (statuts.length > 0) ligne2 += ' - ' + statuts.join(' - ');
-
-            // Position du tooltip (au-dessus ou en-dessous du point selon l'espace)
-            const x = point.x;
-            const y = point.y;
-            const estEnHaut = y > chart.chartArea.top + 60;
-
-            ctx.save();
-            ctx.font = '11px Arial';
-
-            // Mesurer les textes
-            const largeurLabel = ctx.measureText(label).width;
-            const largeurLigne2 = ctx.measureText(ligne2).width;
-            const largeurMax = Math.max(largeurLabel, largeurLigne2);
-
-            const padding = 6;
-            const hauteur = 36;
-            const rectX = x - largeurMax / 2 - padding;
-            const rectY = estEnHaut ? y - hauteur - 12 : y + 12;
-            const rectW = largeurMax + padding * 2;
-
-            // Fond du tooltip
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
-            ctx.beginPath();
-            ctx.roundRect(rectX, rectY, rectW, hauteur, 4);
-            ctx.fill();
-
-            // Flèche vers le point
-            ctx.beginPath();
-            if (estEnHaut) {
-                ctx.moveTo(x - 6, rectY + hauteur);
-                ctx.lineTo(x, rectY + hauteur + 6);
-                ctx.lineTo(x + 6, rectY + hauteur);
-            } else {
-                ctx.moveTo(x - 6, rectY);
-                ctx.lineTo(x, rectY - 6);
-                ctx.lineTo(x + 6, rectY);
-            }
-            ctx.fill();
-
-            // Texte
-            ctx.fillStyle = '#fff';
-            ctx.textAlign = 'center';
-            ctx.font = 'bold 11px Arial';
-            ctx.fillText(label, x, rectY + 14);
-            ctx.font = '11px Arial';
-            ctx.fillText(ligne2, x, rectY + 28);
-
-            ctx.restore();
-        });
-    }
-};
-
-/**
- * Gère le survol du graphique spaghetti - met en évidence la courbe survolée
- * @param {Event} event - Événement de survol
- * @param {Array} activeElements - Éléments actifs (points survolés)
- * @param {Chart} chart - Instance du graphique
- */
-function gererSurvolSpaghetti(event, activeElements, chart) {
-    if (!chart || !chart.data || !chart.data.datasets) return;
-
-    let datasetIndex = -1;
-
-    // Détecter quel dataset est survolé
-    if (activeElements && activeElements.length > 0) {
-        datasetIndex = activeElements[0].datasetIndex;
-    }
-
-    // Si pas de changement, ne rien faire
-    if (datasetIndex === dernierDatasetSurvole) return;
-
-    dernierDatasetSurvole = datasetIndex;
-
-    var couleurP = COULEURS_INDICES.P;
-    chart.data.datasets.forEach((dataset, index) => {
-        if (datasetIndex === -1) {
-            appliquerStyleSpaghetti(dataset, 'defaut', couleurP);
-        } else if (index === datasetIndex) {
-            appliquerStyleSpaghetti(dataset, 'actif', couleurP);
-        } else {
-            appliquerStyleSpaghetti(dataset, 'inactif', couleurP);
-        }
-    });
-
-    if (chartEstValide(chart)) chart.update('none'); // Update sans animation pour fluidité
-}
-
-/**
- * Réinitialise les styles du graphique spaghetti (au mouseout)
- * @param {Chart} chart - Instance du graphique
- */
-function reinitialiserStylesSpaghetti(chart) {
-    if (!chart || !chart.data || !chart.data.datasets) return;
-
-    dernierDatasetSurvole = -1;
-
-    var couleurP = COULEURS_INDICES.P;
-    chart.data.datasets.forEach(dataset => {
-        appliquerStyleSpaghetti(dataset, 'defaut', couleurP);
-    });
-
-    if (chartEstValide(chart)) chart.update('none');
-}
-
-/**
- * Crée un graphique "spaghetti" montrant les RÉSULTATS BRUTS par artefact
- *
- * IMPORTANT (Beta 96) : Ce graphique montre les notes réelles de chaque évaluation,
- * PAS l'indice P agrégé. Cela permet de voir :
- * - La volatilité réelle de l'apprentissage
- * - Les hauts et les bas (non-linéarité)
- * - Les patterns de difficulté par artefact
- * - La résilience des étudiants (rebonds après difficultés)
- *
- * @param {string} canvasId - ID de l'élément canvas
- * @returns {Chart|null} - Instance Chart.js ou null si erreur
- */
-function creerGraphiqueGroupeSpaghetti(canvasId) {
-    try {
-        // Détruire le graphique existant si présent
-        const canvas = document.getElementById(canvasId);
-        if (canvas) {
-            const existingChart = Chart.getChart(canvas);
-            if (existingChart) {
-                existingChart.destroy();
-            }
-        }
-
-        // Récupérer les productions (artefacts) du cours actif
-        // IMPORTANT: Utiliser 'productions' pour les IDs (correspondance avec évaluations)
-        // mais enrichir les descriptions depuis 'productionsPedagogiques' (formulaire)
-        let productions = [];
-
-        if (typeof obtenirDonneesSelonMode === 'function') {
-            productions = obtenirDonneesSelonMode('productions') || [];
-        } else {
-            const cleProductions = cle('productions');
-            productions = db.getSync(cleProductions, []);
-        }
-
-        // Récupérer aussi productionsPedagogiques pour les descriptions mises à jour
-        let productionsPedago = [];
-        if (typeof obtenirDonneesSelonMode === 'function') {
-            productionsPedago = obtenirDonneesSelonMode('productions') || [];
-        } else {
-            const clePedago = cle('productions');
-            productionsPedago = db.getSync(clePedago, []);
-        }
-
-        // Créer un mapping titre → description depuis productionsPedagogiques
-        const descriptionsParTitre = {};
-        productionsPedago.forEach(p => {
-            if (p.titre && p.description) {
-                descriptionsParTitre[p.titre] = p.description;
-            }
-        });
-
-        // Enrichir les productions avec les descriptions mises à jour
-        productions = productions.map(p => ({
-            ...p,
-            description: descriptionsParTitre[p.titre] || p.description
-        }));
-
-
-        // Filtrer les productions : garder les artefacts évaluables + évaluation terminale
-        // Exclure uniquement : Portfolio (conteneur vide), Analyse finale (réflexion non comparable)
-        const productionsVues = new Set();
-        const productionsArtefacts = productions.filter(p => {
-            const titreLower = (p.titre || '').toLowerCase();
-
-            // Exclure le Portfolio (c'est un conteneur, pas une production évaluable)
-            if (titreLower === 'portfolio' || titreLower.startsWith('portfolio ') ||
-                p.type === 'portfolio' || p.categorie === 'portfolio') {
-                return false;
-            }
-
-            // Exclure uniquement "Analyse finale" (réflexion métacognitive, pas comparable aux artefacts)
-            // MAIS garder "Évaluation terminale" car c'est une rédaction comparable
-            if (titreLower.includes('analyse finale') ||
-                p.type === 'analyseFinale' ||
-                p.categorie === 'analyseFinale') {
-                return false;
-            }
-
-            // Dédupliquer par ID
-            if (productionsVues.has(p.id)) {
-                console.warn(`📊 [Spaghetti] Production dupliquée ignorée: ${p.id}`);
-                return false;
-            }
-            productionsVues.add(p.id);
-            return true;
-        });
-
-
-        if (productionsArtefacts.length === 0) {
-            // Fraîche installation — message utilisateur dans le canvas suffit, pas de warn console
-            afficherMessageAttente(canvas, 'Aucun artefact défini', 'Crée des productions dans Réglages › Productions');
-            return null;
-        }
-
-        // 🆕 Beta 99.08 : Trier les productions par date d'échéance (progression chronologique)
-        const infoCoursSort = db.getSync('infoCours', null);
-        const gcIdSort = infoCoursSort ? (infoCoursSort._groupeCoursId || infoCoursSort.id || null) : null;
-        productionsArtefacts.sort((a, b) => {
-            const dateA = (typeof obtenirEcheanceEffective === 'function')
-                ? (obtenirEcheanceEffective(a, gcIdSort).date || '9999')
-                : (a.dateEcheance || '9999');
-            const dateB = (typeof obtenirEcheanceEffective === 'function')
-                ? (obtenirEcheanceEffective(b, gcIdSort).date || '9999')
-                : (b.dateEcheance || '9999');
-            return dateA.localeCompare(dateB);
-        });
-
-        // Récupérer les évaluations
-        let evaluationsBrutes = [];
-
-        if (typeof obtenirDonneesSelonMode === 'function') {
-            evaluationsBrutes = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-        } else {
-            const cleEvaluations = cle('evaluationsSauvegardees');
-            evaluationsBrutes = db.getSync(cleEvaluations, []);
-        }
-
-        // IMPORTANT: Filtrer les doublons - garder seulement la plus récente par étudiant/production
-        // Cela évite d'afficher plusieurs points pour le même artefact
-        const evaluationsMap = new Map();
-        evaluationsBrutes.forEach(evalItem => {
-            const cle = `${evalItem.etudiantDA}_${evalItem.productionId}`;
-            const existante = evaluationsMap.get(cle);
-
-            // Garder l'évaluation la plus récente (ou la première si pas de date)
-            if (!existante) {
-                evaluationsMap.set(cle, evalItem);
-            } else {
-                const dateExistante = existante.dateEvaluation || existante.date || '';
-                const dateNouvelle = evalItem.dateEvaluation || evalItem.date || '';
-                if (dateNouvelle > dateExistante) {
-                    evaluationsMap.set(cle, evalItem);
-                }
-            }
-        });
-
-        const evaluations = Array.from(evaluationsMap.values());
-
-        // Créer un index rapide pour le tooltip : [da][productionId] → évaluation
-        const evaluationsIndex = {};
-        evaluations.forEach(evalItem => {
-            if (!evaluationsIndex[evalItem.etudiantDA]) {
-                evaluationsIndex[evalItem.etudiantDA] = {};
-            }
-            evaluationsIndex[evalItem.etudiantDA][evalItem.productionId] = evalItem;
-        });
-
-        if (evaluations.length === 0) {
-            console.warn('Aucune évaluation disponible pour le graphique spaghetti');
-            afficherMessageAttente(canvas, 'En attente d\'évaluations', 'Les trajectoires apparaîtront après les premières évaluations.');
-            return null;
-        }
-
-        // Récupérer la liste des étudiants du groupe actif
-        let etudiants = [];
-        if (typeof obtenirEtudiantsCoursActif === 'function') {
-            etudiants = obtenirEtudiantsCoursActif();
-        } else if (typeof obtenirDonneesSelonMode === 'function') {
-            etudiants = obtenirDonneesSelonMode('groupeEtudiants') || [];
-        } else {
-            const cleEtudiants = cle('groupeEtudiants');
-            etudiants = db.getSync(cleEtudiants, []);
-        }
-
-
-        if (etudiants.length === 0) {
-            console.warn('Aucun étudiant disponible');
-            afficherMessageAttente(canvas, 'Aucun étudiant', 'Ajoute des étudiants dans Réglages › Groupe');
-            return null;
-        }
-
-        // Diagnostic: Vérifier la correspondance entre évaluations et productions
-        const prodIds = new Set(productionsArtefacts.map(p => p.id));
-        const evalProdIds = [...new Set(evaluations.map(e => e.productionId))];
-        const correspondances = evalProdIds.filter(id => prodIds.has(id));
-
-
-        // Créer un index productionId → position pour le tri
-        const indexProductions = {};
-        productionsArtefacts.forEach((prod, index) => {
-            indexProductions[prod.id] = index;
-        });
-
-        // Préparer les labels - utiliser le champ "description" qui contient l'activité d'apprentissage
-        // Ex: titre="Artefact 1", description="Portrait de lecteur" → "Portrait de lecteur"
-        const labels = productionsArtefacts.map((prod, index) => {
-            // Priorité : activiteApprentissage > description (activité) > titre > fallback
-            if (prod.activiteApprentissage && prod.activiteApprentissage.trim()) {
-                return prod.activiteApprentissage.trim();
-            }
-            if (prod.description && prod.description.trim()) {
-                return prod.description.trim();
-            }
-            // Si pas de description, utiliser le titre
-            return prod.titre || `Production ${index + 1}`;
-        });
-
-        // Créer un mapping activité → indices des productions (pour surbrillance des mêmes activités)
-        // Normaliser les noms pour regrouper les variantes
-        // Ex: "Carte mentale" et "Carte mentale (2)" → même activité
-        // Ex: "Formuler 10 HOC" et "Formuler 5 HOC" → même activité
-        const normaliserActivite = (label) => {
-            return label.toLowerCase()
-                .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Enlever accents
-                .replace(/\s*\(\d+\)\s*$/, '') // Enlever suffixes (2), (3), etc.
-                .replace(/\s*\d+\s*$/, '') // Enlever numéros en fin
-                .replace(/\s+\d+\s+/g, ' ') // Enlever numéros au milieu (ex: "Formuler 10 HOC" → "Formuler HOC")
-                .replace(/\s+/g, ' ').trim();
-        };
-
-        const activitesMap = {};
-        labels.forEach((label, index) => {
-            const normalise = normaliserActivite(label);
-            if (!activitesMap[normalise]) {
-                activitesMap[normalise] = [];
-            }
-            activitesMap[normalise].push(index);
-        });
-
-        // Index inverse : pour chaque position, TOUS les indices de la même activité (y compris le courant)
-        const memesActivites = {};
-        labels.forEach((label, index) => {
-            const normalise = normaliserActivite(label);
-            // TOUS les indices de cette activité (y compris l'index courant pour mise en relief complète)
-            memesActivites[index] = activitesMap[normalise];
-        });
-
-        // Debug: afficher les activités regroupées
-
-        // Fonction pour convertir une note (0-1) en code selon l'échelle utilisateur
-        const zonesEchelle = genererZonesDepuisEchelle();
-        const noteVersIDME = (note) => {
-            if (note === null || note === undefined) return '—';
-            const notePourcent = note * 100;
-            // Parcourir les zones du plus haut au plus bas
-            const zonesTries = [...zonesEchelle].sort((a, b) => b.yMin - a.yMin);
-            for (const zone of zonesTries) {
-                if (notePourcent >= zone.yMin * 100) {
-                    return zone.code || zone.label.charAt(0).toUpperCase();
-                }
-            }
-            // Fallback: première zone (la plus basse)
-            const zoneBasse = zonesEchelle[0];
-            return zoneBasse?.code || 'I';
-        };
-
-        // Stocker les données pour les plugins (tooltips multiples)
-        donneesSpaghettiGlobales = {
-            memesActivites,
-            labels,
-            evaluationsIndex,
-            productionsArtefacts,
-            noteVersIDME
-        };
-
-        // Créer un dataset par étudiant
-        const datasets = etudiants.map(etudiant => {
-            const da = etudiant.da;
-
-            // Pour chaque production, trouver l'évaluation de cet étudiant
-            const donnees = productionsArtefacts.map(prod => {
-                // Trouver l'évaluation pour cet étudiant et cette production
-                const evaluation = evaluations.find(e =>
-                    e.etudiantDA === da && e.productionId === prod.id
-                );
-
-                // Pas d'évaluation → trou dans la trajectoire
-                if (!evaluation) return null;
-
-                // Vérifier si le travail a été reçu
-                if (evaluation.statutRemise === 'non-remis' || evaluation.statutRemise === 'retard') {
-                    return null; // Trou pour travail non reçu
-                }
-
-                // Utiliser noteFinale (0-100) converti en 0-1
-                const note = evaluation.noteFinale;
-                if (note === null || note === undefined) return null;
-
-                // Convertir en décimal (0-1) pour cohérence avec les zones IDME
-                return note / 100;
-            });
-
-            // Vérifier si l'étudiant a au moins une évaluation
-            const aDonnees = donnees.some(v => v !== null);
-
-            // 🆕 BETA 96 (FIX): Obtenir le nom en respectant le mode anonymisation
-            // Si anonymiserNom retourne une valeur, on est en mode anonymisation
-            const nomAnonyme = typeof anonymiserNom === 'function' ? anonymiserNom(da) : null;
-            const nom = nomAnonyme
-                ? nomAnonyme
-                : (etudiant.prenom && etudiant.nom
-                    ? `${etudiant.prenom} ${etudiant.nom}`
-                    : etudiant.nom || `DA ${da}`);
-
-            // 🆕 BETA 98.9: Inclure les élèves sans données dans le dropdown
-            // Ils apparaissent avec un message au lieu d'une trajectoire
-            if (!aDonnees) {
-                return {
-                    label: nom,
-                    da: da,
-                    data: donnees,
-                    sansDonnees: true,
-                    borderColor: 'transparent',
-                    backgroundColor: 'transparent',
-                    borderWidth: 0,
-                    pointRadius: 0,
-                    pointHoverRadius: 0,
-                    hidden: true // Masquer par défaut dans le graphique
-                };
-            }
-
-            // ✨ #240: Couleur P à 40% par défaut
-            return {
-                label: nom,
-                da: da,
-                data: donnees,
-                borderColor: hexVersRgba(COULEURS_INDICES.P, 0.4),
-                backgroundColor: 'transparent',
-                borderWidth: STYLE_LIGNE_EPAISSEUR,
-                tension: STYLE_LIGNE_TENSION,
-                pointRadius: STYLE_POINT_RAYON,
-                pointHoverRadius: STYLE_POINT_RAYON_HOVER,
-                pointStyle: 'circle',
-                pointBackgroundColor: hexVersRgba(COULEURS_INDICES.P, 0.4),
-                pointBorderColor: couleurBordurePoint(),
-                pointBorderWidth: STYLE_POINT_BORDURE,
-                spanGaps: false
-            };
-        }).filter(d => d !== null);
-
-        if (datasets.length === 0) {
-            console.warn('Aucune donnée valide pour le graphique spaghetti');
-            afficherMessageAttente(canvas, 'Aucune trajectoire disponible', 'Les évaluations ne correspondent pas aux productions définies.');
-            return null;
-        }
-
-        // Obtenir le canvas
-        if (!canvas || !canvas.parentNode || !canvas.ownerDocument) {
-            console.error(`Canvas ${canvasId} introuvable ou détaché du DOM`);
-            return null;
-        }
-        // Vérifier que le canvas est visible (Chart.js échoue sur display:none)
-        // offsetParent === null quand un parent a display:none
-        if (!canvas.offsetParent && canvas.offsetWidth === 0 && canvas.offsetHeight === 0) {
-            console.warn(`Canvas ${canvasId} non visible (parent display:none) — graphique différé`);
-            return null;
-        }
-        const ctx = canvas.getContext('2d');
-
-        // Calculer les bornes Y dynamiques
-        const bornesY = calculerBornesYDynamiques(datasets);
-
-        // Configuration du graphique
-        const config = {
-            type: 'line',
-            // 🆕 BETA 96: Utiliser le plugin gradient au lieu des annotations
-            plugins: [pluginGradientFond, ...(obtenirPreference('afficherSeuilsVisuels') !== false ? [pluginEtiquettesZones] : []), pluginNomEtudiantSurvol, pluginTooltipsMultiples],
-            data: {
-                labels: labels,
-                datasets: datasets
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                layout: {
-                    padding: {
-                        right: 120 // Espace pour les étiquettes de zones
-                    }
-                },
-                plugins: {
-                    title: {
-                        display: false  // 🆕 BETA 96: Titre dans l'en-tête de section
-                    },
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        enabled: true,
-                        mode: 'point', // Un seul point exact (évite les doublons)
-                        intersect: true,
-                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        titleFont: { size: 12, weight: 'bold' },
-                        bodyFont: { size: 11 },
-                        padding: 10,
-                        cornerRadius: 6,
-                        displayColors: false,
-                        // Filtrer pour ne garder qu'un seul élément (évite doublons)
-                        filter: function(tooltipItem, index) {
-                            return index === 0; // Garder seulement le premier
-                        },
-                        callbacks: {
-                            title: function(tooltipItems) {
-                                if (!tooltipItems || tooltipItems.length === 0) return '';
-                                const item = tooltipItems[0];
-                                const dataIndex = item.dataIndex;
-                                const production = productionsArtefacts[dataIndex];
-                                // Titre : activité d'apprentissage (description) ou titre
-                                // Note: le nom de l'élève est déjà affiché à droite de la courbe
-                                return production?.activiteApprentissage || production?.description || production?.titre || `Production ${dataIndex + 1}`;
-                            },
-                            label: function(context) {
-                                const lignes = [];
-                                const da = context.dataset.da;
-                                const dataIndex = context.dataIndex;
-                                const production = productionsArtefacts[dataIndex];
-
-                                // Récupérer l'évaluation complète depuis l'index
-                                const evaluation = production && da
-                                    ? evaluationsIndex[da]?.[production.id]
-                                    : null;
-
-                                // Construire une ligne compacte : "M (75%) - Jeton - Plagiat"
-                                const noteDecimale = context.parsed.y;
-                                const notePourcent = noteDecimale !== null
-                                    ? (noteDecimale * 100).toFixed(0)
-                                    : '—';
-                                const codeIDME = noteVersIDME(noteDecimale);
-
-                                // Collecter les statuts
-                                const statuts = [];
-
-                                if (evaluation) {
-                                    // Jeton utilisé
-                                    const jetonUtilise = evaluation.repriseDeId ||
-                                                        evaluation.jetonReprise ||
-                                                        evaluation.jetonDelai ||
-                                                        evaluation.avecJeton;
-                                    if (jetonUtilise) {
-                                        statuts.push('Jeton');
-                                    }
-
-                                    // Intégrité académique
-                                    const statutIntegrite = evaluation.statutIntegrite;
-                                    if (statutIntegrite === 'plagiat') {
-                                        statuts.push('Plagiat');
-                                    } else if (statutIntegrite === 'ia') {
-                                        statuts.push('IA');
-                                    }
-
-                                    // Statut de remise
-                                    const statutRemise = evaluation.statutRemise;
-                                    if (statutRemise === 'non-remis') {
-                                        statuts.push('Non remis');
-                                    } else if (statutRemise === 'retard') {
-                                        statuts.push('Retard');
-                                    }
-                                }
-
-                                // Formater sur une ligne : "M (75%)" ou "M (75%) - Jeton - Plagiat"
-                                let ligne = `${codeIDME} (${notePourcent}%)`;
-                                if (statuts.length > 0) {
-                                    ligne += ' - ' + statuts.join(' - ');
-                                }
-
-                                return ligne;
-                            }
-                        }
-                    }
-
-                },
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Activités d\'apprentissage',
-                            color: couleurTexte(),
-                            font: { size: 12, weight: 'bold' }
-                        },
-                        ticks: {
-                            color: couleurTexte(),
-                            maxRotation: 45,
-                            minRotation: 45,
-                            font: { size: 11 }
-                        },
-                        grid: {
-                            display: true,
-                            color: couleurGrille()
-                        }
-                    },
-                    y: {
-                        min: bornesY.min,
-                        max: bornesY.max,
-                        title: {
-                            display: true,
-                            text: 'Résultat',
-                            color: couleurTexte(),
-                            font: { size: 12, weight: 'bold' }
-                        },
-                        ticks: {
-                            color: couleurTexte(),
-                            callback: function(value) {
-                                return value.toFixed(2).replace('.', ',');
-                            },
-                            stepSize: 0.05,
-                            font: { size: 11 }
-                        },
-                        grid: {
-                            display: true,
-                            color: couleurGrille()
-                        }
-                    }
-                },
-                interaction: {
-                    mode: 'nearest',
-                    axis: 'xy',
-                    intersect: false // Permet de détecter le survol près de la ligne
-                },
-                // Gestion du survol pour mise en évidence + mêmes activités + verrouillage
-                onHover: function(event, activeElements, chart) {
-                    if (!chart || !chart.data || !chart.data.datasets) return;
-
-                    let datasetIndex = -1;
-                    let dataIndex = -1;
-
-                    // Détecter quel point est survolé
-                    if (activeElements && activeElements.length > 0) {
-                        datasetIndex = activeElements[0].datasetIndex;
-                        dataIndex = activeElements[0].index;
-                    }
-
-                    // Si une courbe est verrouillée, forcer le datasetIndex
-                    const datasetActif = datasetVerrouille >= 0 ? datasetVerrouille : datasetIndex;
-
-                    // Si pas de changement, ne rien faire
-                    if (datasetActif === dernierDatasetSurvole && dataIndex === dernierPointSurvole) return;
-
-                    dernierDatasetSurvole = datasetActif;
-                    dernierPointSurvole = dataIndex;
-
-                    // TOUS les indices de la même activité (y compris le point survolé)
-                    const indicesMemesActivites = dataIndex >= 0 ? (memesActivites[dataIndex] || []) : [];
-
-                    var couleurP = COULEURS_INDICES.P;
-                    chart.data.datasets.forEach((dataset, idx) => {
-                        var nbPoints = dataset.data.length;
-
-                        if (datasetActif === -1) {
-                            appliquerStyleSpaghetti(dataset, 'defaut', couleurP);
-                        } else if (idx === datasetActif) {
-                            appliquerStyleSpaghetti(dataset, 'actif', couleurP);
-
-                            if (datasetVerrouille < 0) {
-                                // Mettre en évidence TOUS les points de même activité (orange)
-                                if (indicesMemesActivites.length > 1) {
-                                    indicesMemesActivites.forEach(i => {
-                                        if (i >= 0 && i < nbPoints && dataset.data[i] !== null) {
-                                            dataset.pointRadius[i] = 8;
-                                            dataset.pointBackgroundColor[i] = '#FF9800';
-                                        }
-                                    });
-                                }
-                                // Le point directement survolé est plus gros
-                                if (dataIndex >= 0 && dataIndex < nbPoints && dataset.data[dataIndex] !== null) {
-                                    dataset.pointRadius[dataIndex] = 10;
-                                }
-                            }
-                        } else {
-                            appliquerStyleSpaghetti(dataset, 'inactif', couleurP);
-                            dataset.pointHoverRadius = datasetVerrouille >= 0 ? 2 : STYLE_POINT_RAYON_HOVER;
-                        }
-                    });
-
-                    if (chartEstValide(chart)) chart.update('none');
-                }
-            }
-        };
-
-        // Créer le graphique
-        const chart = new Chart(ctx, config);
-        graphiqueSpaghettiInstance = chart;
-
-        // Ajouter un listener pour réinitialiser au mouseout du canvas
-        // Sauf si une courbe est verrouillée
-        canvas.addEventListener('mouseleave', function() {
-            // Si verrouillé, garder la courbe active affichée
-            var couleurP = COULEURS_INDICES.P;
-            if (datasetVerrouille >= 0) {
-                dernierDatasetSurvole = datasetVerrouille;
-                dernierPointSurvole = -1;
-                chart.data.datasets.forEach((dataset, idx) => {
-                    if (idx === datasetVerrouille) {
-                        appliquerStyleSpaghetti(dataset, 'actif', couleurP);
-                    } else {
-                        appliquerStyleSpaghetti(dataset, 'inactif', couleurP);
-                        dataset.pointHoverRadius = 2;
-                    }
-                });
-            } else {
-                dernierDatasetSurvole = -1;
-                dernierPointSurvole = -1;
-                chart.data.datasets.forEach(dataset => {
-                    appliquerStyleSpaghetti(dataset, 'defaut', couleurP);
-                });
-            }
-            if (chartEstValide(chart)) chart.update('none');
-        });
-
-        function toggleVerrouillage(indexDataset) {
-            const selecteur = document.getElementById('selecteur-etudiant-spaghetti');
-            var couleurP = COULEURS_INDICES.P;
-
-            if (datasetVerrouille === indexDataset) {
-                // Déverrouiller
-                datasetVerrouille = -1;
-                dernierDatasetSurvole = -1;
-                dernierPointSurvole = -1;
-                chart.data.datasets.forEach(dataset => {
-                    appliquerStyleSpaghetti(dataset, 'defaut', couleurP);
-                });
-                if (selecteur) selecteur.value = '';
-            } else {
-                // Verrouiller
-                datasetVerrouille = indexDataset;
-                dernierDatasetSurvole = indexDataset;
-                chart.data.datasets.forEach((dataset, idx) => {
-                    if (idx === indexDataset) {
-                        appliquerStyleSpaghetti(dataset, 'actif', couleurP);
-                    } else {
-                        appliquerStyleSpaghetti(dataset, 'inactif', couleurP);
-                        dataset.pointHoverRadius = 2;
-                    }
-                });
-                if (selecteur) selecteur.value = indexDataset;
-            }
-            if (chartEstValide(chart)) chart.update('none');
-        }
-
-        // Gestionnaire de clic pour verrouiller/déverrouiller une courbe
-        canvas.addEventListener('click', function(event) {
-            const rect = canvas.getBoundingClientRect();
-            const clickX = event.clientX - rect.left;
-            const clickY = event.clientY - rect.top;
-
-            // 1. Vérifier si le clic est sur un nom d'étudiant
-            for (const zone of zonesNomsEtudiants) {
-                if (clickX >= zone.x && clickX <= zone.x + zone.width &&
-                    clickY >= zone.y && clickY <= zone.y + zone.height) {
-                    toggleVerrouillage(zone.datasetIndex);
-                    return;
-                }
-            }
-
-            // 2. Vérifier si le clic est sur un point de la courbe
-            const elements = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
-            if (elements.length > 0) {
-                const clickedDatasetIndex = elements[0].datasetIndex;
-                toggleVerrouillage(clickedDatasetIndex);
-                return;
-            }
-
-            // 3. Si clic ailleurs et une courbe est verrouillée, déverrouiller
-            if (datasetVerrouille >= 0) {
-                toggleVerrouillage(datasetVerrouille);
-            }
-        });
-
-        // Changer le curseur au survol des noms ou des points
-        canvas.addEventListener('mousemove', function(event) {
-            if (!canvas.isConnected) return;
-
-            const rect = canvas.getBoundingClientRect();
-            const mouseX = event.clientX - rect.left;
-            const mouseY = event.clientY - rect.top;
-
-            // Vérifier si sur un nom
-            let surElement = false;
-            for (const zone of zonesNomsEtudiants) {
-                if (mouseX >= zone.x && mouseX <= zone.x + zone.width &&
-                    mouseY >= zone.y && mouseY <= zone.y + zone.height) {
-                    surElement = true;
-                    break;
-                }
-            }
-
-            // Vérifier si sur un point de courbe
-            if (!surElement && chart.canvas) {
-                try {
-                    const elements = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
-                    surElement = elements.length > 0;
-                } catch (_) { return; }
-            }
-
-            canvas.style.cursor = surElement ? 'pointer' : 'default';
-        });
-
-        // Peupler le dropdown des étudiants
-        const selecteurEtudiant = document.getElementById('selecteur-etudiant-spaghetti');
-        if (selecteurEtudiant) {
-            selecteurEtudiant.innerHTML = '<option value="">-- Sélectionner --</option>';
-            datasets.forEach((dataset, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                // 🆕 BETA 98.9: Marquer les élèves sans données dans le dropdown
-                option.textContent = dataset.sansDonnees
-                    ? `${dataset.label} (aucune évaluation)`
-                    : dataset.label;
-                selecteurEtudiant.appendChild(option);
-            });
-        }
-
-        return chart;
-
-    } catch (error) {
-        console.error('❌ Erreur création graphique spaghetti:', error);
-        return null;
-    }
-}
-
-/**
- * Sélectionne un étudiant dans le graphique spaghetti productions via le dropdown
- */
-// 🆕 BETA 96: Verrouillé = noir
-function selectionnerEtudiantSpaghetti() {
-    const selecteur = document.getElementById('selecteur-etudiant-spaghetti');
-    if (!selecteur || !graphiqueSpaghettiInstance) return;
-
-    const indexStr = selecteur.value;
-    var couleurP = COULEURS_INDICES.P;
-    if (indexStr === '') {
-        if (datasetVerrouille >= 0) {
-            datasetVerrouille = -1;
-            dernierDatasetSurvole = -1;
-            dernierPointSurvole = -1;
-            graphiqueSpaghettiInstance.data.datasets.forEach(dataset => {
-                appliquerStyleSpaghetti(dataset, 'defaut', couleurP);
-            });
-            graphiqueSpaghettiInstance.update('none');
-        }
-        return;
-    }
-
-    const index = parseInt(indexStr);
-
-    const chart = graphiqueSpaghettiInstance;
-
-    // 🆕 BETA 98.9: Gérer les élèves sans données
-    const datasetSelectionne = chart.data.datasets[index];
-    const messageSansDonnees = document.getElementById('message-spaghetti-sans-donnees');
-    if (messageSansDonnees) messageSansDonnees.remove();
-
-    if (datasetSelectionne && datasetSelectionne.sansDonnees) {
-        // Afficher un message au-dessus du canvas
-        const canvas = document.getElementById('graphique-groupe-spaghetti');
-        if (canvas && canvas.parentNode) {
-            const msg = document.createElement('div');
-            msg.id = 'message-spaghetti-sans-donnees';
-            msg.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20; background: rgba(0,0,0,0.75); color: #ccc; padding: 12px 20px; border-radius: 8px; text-align: center; font-size: 0.9rem; pointer-events: none;';
-            msg.textContent = 'Aucun artefact évalué — aucune trajectoire à tracer';
-            canvas.parentNode.style.position = 'relative';
-            canvas.parentNode.appendChild(msg);
-        }
-        datasetVerrouille = -1;
-        return;
-    }
-
-    datasetVerrouille = index;
-    dernierDatasetSurvole = index;
-
-    chart.data.datasets.forEach((dataset, idx) => {
-        if (idx === index) {
-            appliquerStyleSpaghetti(dataset, 'actif', couleurP);
-        } else {
-            appliquerStyleSpaghetti(dataset, 'inactif', couleurP);
-            dataset.pointHoverRadius = 2;
-        }
-    });
-    if (chartEstValide(chart)) chart.update('none');
-}
 
 /**
  * Affiche un message d'attente dans le canvas
@@ -3318,13 +2318,6 @@ function afficherMessageAttente(canvas, titre, details) {
     }
 }
 
-/**
- * Rafraîchit le graphique spaghetti
- * Note: Le paramètre indice n'est plus utilisé (Beta 96 - résultats bruts)
- */
-function rafraichirGraphiqueSpaghetti() {
-    creerGraphiqueGroupeSpaghetti('graphique-groupe-spaghetti');
-}
 
 /**
  * Crée les annotations pour les zones colorées (version dynamique)
@@ -4710,6 +3703,706 @@ function creerGraphiqueEvolutionRLO(canvasId, da) {
     }
 }
 
+/* ===============================
+   GRAPHIQUE GROUPE PAR HABILETÉS
+   Spaghetti par artefact ; axe Y = moyenne des critères sélectionnés.
+   Pédagogie : explorer la trajectoire d'une habileté à travers les artefacts.
+   =============================== */
+
+/**
+ * État partagé du graphique habiletés (mis à jour par les contrôles UI).
+ * criteresActifs = null signifie « pas encore initialisé » → on prend tout.
+ */
+let etatTrajectoires = {
+    mesure: 'noteFinale',
+    criteresActifs: null,
+    daSurbrillance: '',
+    afficherMediane: false
+};
+
+let graphiqueTrajectoiresInstance = null;
+
+/**
+ * Palette pour ~24 étudiants — luminances variées pour rester distinguables
+ * en mode clair et sombre.
+ */
+const COULEURS_ETUDIANTS_TRAJECTOIRES = [
+    '#1976D2', '#FF6B35', '#4CAF50', '#9C27B0',
+    '#F44336', '#00BCD4', '#FFC107', '#795548',
+    '#3F51B5', '#E91E63', '#009688', '#FF9800',
+    '#673AB7', '#8BC34A', '#FF5722', '#607D8B',
+    '#2196F3', '#CDDC39', '#FF4081', '#03A9F4',
+    '#A1887F', '#26A69A', '#7E57C2', '#66BB6A'
+];
+
+function couleurEtudiantTrajectoires(index) {
+    return COULEURS_ETUDIANTS_TRAJECTOIRES[index % COULEURS_ETUDIANTS_TRAJECTOIRES.length];
+}
+
+/**
+ * Quantile par interpolation linéaire (méthode 7 de R, type par défaut de NumPy).
+ * @param {Array<number>} trieesAsc - Valeurs triées par ordre croissant
+ * @param {number} p - Probabilité [0, 1]
+ * @returns {number|null}
+ */
+function quantileHabiletes(trieesAsc, p) {
+    const n = trieesAsc.length;
+    if (n === 0) return null;
+    if (n === 1) return trieesAsc[0];
+    const idx = p * (n - 1);
+    const lo = Math.floor(idx);
+    const hi = Math.ceil(idx);
+    if (lo === hi) return trieesAsc[lo];
+    return trieesAsc[lo] + (idx - lo) * (trieesAsc[hi] - trieesAsc[lo]);
+}
+
+/**
+ * Convertit un niveauSelectionne (lettre IDME, échelle /4 ou %) en valeur 0-1.
+ * Aligné sur la logique de obtenirDonneesCriteres().
+ * @param {string|number} niveauSelectionne
+ * @returns {number|null}
+ */
+function niveauHabiletesVersDecimal(niveauSelectionne) {
+    if (niveauSelectionne === null || niveauSelectionne === undefined || niveauSelectionne === '') return null;
+
+    if (typeof niveauSelectionne === 'string') {
+        const u = niveauSelectionne.trim().toUpperCase();
+        if (u === '0') return 0;
+        if (u === 'I') return 0.40;
+        if (u === 'D') return 0.65;
+        if (u === 'M') return 0.75;
+        if (u === 'E') return 1.00;
+    }
+
+    const num = parseFloat(niveauSelectionne);
+    if (isNaN(num)) return null;
+    if (num <= 4) return num / 4;
+    if (num <= 100) return num / 100;
+    return Math.min(1, num / 100);
+}
+
+/**
+ * Moyenne arithmétique des niveaux des critères actifs pour une évaluation.
+ * TODO : remplacer par moyenne pondérée via critere.ponderation depuis la grille.
+ * @param {Object} evaluation - Objet evaluation avec un array .criteres
+ * @param {Set<string>} criteresActifs - Noms de critères à inclure
+ * @returns {number|null} - Moyenne décimale 0-1 (null si aucun critère évaluable)
+ */
+function moyenneCriteresHabiletes(evaluation, criteresActifs) {
+    if (!evaluation || !Array.isArray(evaluation.criteres) || evaluation.criteres.length === 0) {
+        return null;
+    }
+    const valeurs = [];
+    for (let i = 0; i < evaluation.criteres.length; i++) {
+        const c = evaluation.criteres[i];
+        if (!c || !c.critereNom) continue;
+        if (criteresActifs && !criteresActifs.has(c.critereNom)) continue;
+        const v = niveauHabiletesVersDecimal(c.niveauSelectionne);
+        if (v !== null) valeurs.push(v);
+    }
+    if (valeurs.length === 0) return null;
+    let s = 0;
+    for (let i = 0; i < valeurs.length; i++) s += valeurs[i];
+    return s / valeurs.length;
+}
+
+/**
+ * Liste les critères présents dans les évaluations actives, ordonnés selon
+ * l'ordre des grilles (premier match gagne) et coloriés par palette cyclique.
+ * @returns {Array<{nom: string, couleur: string}>}
+ */
+function listerCriteresHabiletes() {
+    try {
+        const evaluations = (typeof obtenirDonneesSelonMode === 'function')
+            ? (obtenirDonneesSelonMode('evaluationsSauvegardees') || [])
+            : [];
+        const grilles = db.getSync('grillesTemplates', []) || [];
+
+        const nomsUtilises = new Set();
+        for (let i = 0; i < evaluations.length; i++) {
+            const e = evaluations[i];
+            if (e && Array.isArray(e.criteres)) {
+                for (let j = 0; j < e.criteres.length; j++) {
+                    const c = e.criteres[j];
+                    if (c && c.critereNom) nomsUtilises.add(c.critereNom);
+                }
+            }
+        }
+
+        if (nomsUtilises.size === 0) return [];
+
+        const ordre = [];
+        const dejaAjoutes = new Set();
+        for (let i = 0; i < grilles.length; i++) {
+            const g = grilles[i];
+            if (!g || !Array.isArray(g.criteres)) continue;
+            for (let j = 0; j < g.criteres.length; j++) {
+                const c = g.criteres[j];
+                if (c && c.nom && nomsUtilises.has(c.nom) && !dejaAjoutes.has(c.nom)) {
+                    ordre.push(c.nom);
+                    dejaAjoutes.add(c.nom);
+                }
+            }
+        }
+        nomsUtilises.forEach(nom => {
+            if (!dejaAjoutes.has(nom)) {
+                ordre.push(nom);
+                dejaAjoutes.add(nom);
+            }
+        });
+
+        const PALETTE = [
+            '#E91E63', '#9C27B0', '#3F51B5', '#00BCD4',
+            '#4CAF50', '#FF9800', '#795548', '#607D8B'
+        ];
+        return ordre.map((nom, index) => ({
+            nom: nom,
+            couleur: PALETTE[index % PALETTE.length]
+        }));
+    } catch (e) {
+        console.warn('[Trajectoires] listerCriteresHabiletes:', e.message || e);
+        return [];
+    }
+}
+
+/**
+ * Charge les artefacts (productions évaluables) du cours actif, déduplique,
+ * filtre Portfolio et Analyse finale, trie par date d'échéance effective.
+ * @returns {Array} productions triées
+ */
+function chargerProductionsTrajectoires() {
+    let productions = (typeof obtenirDonneesSelonMode === 'function')
+        ? (obtenirDonneesSelonMode('productions') || [])
+        : (db.getSync(cle('productions'), []) || []);
+
+    const vues = new Set();
+    const artefacts = productions.filter(p => {
+        if (!p || !p.id) return false;
+        const titreLower = (p.titre || '').toLowerCase();
+        if (titreLower === 'portfolio' || titreLower.startsWith('portfolio ') ||
+            p.type === 'portfolio' || p.categorie === 'portfolio') return false;
+        if (titreLower.includes('analyse finale') ||
+            p.type === 'analyseFinale' || p.categorie === 'analyseFinale') return false;
+        if (vues.has(p.id)) return false;
+        vues.add(p.id);
+        return true;
+    });
+
+    const infoCours = db.getSync('infoCours', null);
+    const gcId = infoCours ? (infoCours._groupeCoursId || infoCours.id || null) : null;
+    artefacts.sort((a, b) => {
+        const dA = (typeof obtenirEcheanceEffective === 'function')
+            ? (obtenirEcheanceEffective(a, gcId).date || '9999')
+            : (a.dateEcheance || '9999');
+        const dB = (typeof obtenirEcheanceEffective === 'function')
+            ? (obtenirEcheanceEffective(b, gcId).date || '9999')
+            : (b.dateEcheance || '9999');
+        return dA.localeCompare(dB);
+    });
+
+    return artefacts;
+}
+
+/**
+ * Crée le graphique « Trajectoires par production ».
+ *
+ * Chaque ligne = trajectoire d'un étudiant à travers les productions.
+ * Chaque point = note décimale (0-1) selon le mode de mesure :
+ *   - mode 'noteFinale' : evaluation.noteFinale / 100
+ *   - mode 'habiletes'  : moyenne des critères cochés (niveauSelectionne)
+ *
+ * Trous (null) si pas d'évaluation, travail non remis/retard, note absente,
+ * ou (en mode habiletés) aucun critère évalué.
+ *
+ * @param {string} canvasId - ID de l'élément canvas
+ * @param {Object} [options]
+ * @param {'noteFinale'|'habiletes'} [options.mesure='noteFinale'] - Mesure à afficher
+ * @param {Set<string>} [options.criteresActifs] - Critères à agréger (mode habiletés ; défaut : tous)
+ * @param {string} [options.daSurbrillance] - DA de l'étudiant à mettre en relief
+ * @param {boolean} [options.afficherMediane] - Afficher médiane + bande Q25-Q75
+ * @returns {Chart|null}
+ */
+function creerGraphiqueTrajectoiresProduction(canvasId, options) {
+    options = options || {};
+    const mode = (options.mesure === 'habiletes') ? 'habiletes' : 'noteFinale';
+
+    try {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) {
+            console.warn('[Trajectoires] Canvas introuvable :', canvasId);
+            return null;
+        }
+        const existing = Chart.getChart(canvas);
+        if (existing) existing.destroy();
+
+        // 1. Critères disponibles (mode habiletés uniquement)
+        let criteresInfo = [];
+        let criteresActifs = null;
+        if (mode === 'habiletes') {
+            criteresInfo = listerCriteresHabiletes();
+            if (criteresInfo.length === 0) {
+                afficherMessageAttente(canvas, 'Aucune habileté à afficher',
+                    'Les évaluations enregistrées ne contiennent pas encore de critères détaillés.');
+                return null;
+            }
+            criteresActifs = (options.criteresActifs instanceof Set && options.criteresActifs.size > 0)
+                ? options.criteresActifs
+                : new Set(criteresInfo.map(c => c.nom));
+        }
+
+        // 2. Productions / artefacts
+        const artefacts = chargerProductionsTrajectoires();
+        const termePluriel = (typeof obtenirTermeProduction === 'function')
+            ? obtenirTermeProduction('pluriel', true)
+            : 'Productions';
+        if (artefacts.length === 0) {
+            const termeSing = (typeof obtenirTermeProduction === 'function')
+                ? obtenirTermeProduction('singulier')
+                : 'production';
+            afficherMessageAttente(canvas, 'Aucun ' + termeSing + ' défini',
+                'Crée des productions dans Réglages › Productions.');
+            return null;
+        }
+
+        // 3. Étudiants
+        const etudiants = (typeof obtenirEtudiantsCoursActif === 'function')
+            ? obtenirEtudiantsCoursActif()
+            : ((typeof obtenirDonneesSelonMode === 'function')
+                ? (obtenirDonneesSelonMode('groupeEtudiants') || [])
+                : (db.getSync(cle('groupeEtudiants'), []) || []));
+        if (etudiants.length === 0) {
+            afficherMessageAttente(canvas, 'Aucun étudiant',
+                'Sélectionne un groupe pour voir les données.');
+            return null;
+        }
+
+        // 4. Évaluations dédupliquées (la plus récente par DA × productionId)
+        const evaluationsBrutes = (typeof obtenirDonneesSelonMode === 'function')
+            ? (obtenirDonneesSelonMode('evaluationsSauvegardees') || [])
+            : (db.getSync(cle('evaluationsSauvegardees'), []) || []);
+        const evalIndex = new Map();
+        for (let i = 0; i < evaluationsBrutes.length; i++) {
+            const e = evaluationsBrutes[i];
+            if (!e || e.remplaceeParId) continue;
+            const k = e.etudiantDA + '_' + e.productionId;
+            const ex = evalIndex.get(k);
+            if (!ex) {
+                evalIndex.set(k, e);
+            } else {
+                const dE = ex.dateEvaluation || ex.date || '';
+                const dN = e.dateEvaluation || e.date || '';
+                if (dN > dE) evalIndex.set(k, e);
+            }
+        }
+
+        // 5. Labels de l'axe X (activité d'apprentissage > description > titre)
+        const labels = artefacts.map(a => {
+            if (a.activiteApprentissage && a.activiteApprentissage.trim()) return a.activiteApprentissage.trim();
+            if (a.description && a.description.trim()) return a.description.trim();
+            return a.titre || '';
+        });
+
+        // 6. Datasets — un par étudiant
+        const datasets = etudiants.map((etudiant, index) => {
+            const da = etudiant.da;
+            const data = artefacts.map(art => {
+                const ev = evalIndex.get(da + '_' + art.id);
+                if (!ev) return null;
+                if (ev.statutRemise === 'non-remis' || ev.statutRemise === 'retard') return null;
+                if (mode === 'habiletes') {
+                    return moyenneCriteresHabiletes(ev, criteresActifs);
+                }
+                // mode === 'noteFinale'
+                const note = ev.noteFinale;
+                if (note === null || note === undefined) return null;
+                return note / 100;
+            });
+            if (data.every(v => v === null)) return null;
+
+            const couleur = couleurEtudiantTrajectoires(index);
+            const exclu = (typeof estEtudiantExclu === 'function') && estEtudiantExclu(etudiant);
+            const nomAnonyme = (typeof anonymiserNom === 'function') ? anonymiserNom(da) : null;
+            const nom = nomAnonyme || (etudiant.prenom && etudiant.nom
+                ? (etudiant.prenom + ' ' + etudiant.nom)
+                : (etudiant.nom || ('DA ' + da)));
+
+            return {
+                label: nom,
+                da: da,
+                _couleurBase: couleur,
+                exclu: exclu,
+                data: data,
+                borderColor: exclu ? 'rgba(150,150,150,0.35)' : hexVersRgba(couleur, 0.4),
+                backgroundColor: 'transparent',
+                borderWidth: exclu ? 1.5 : STYLE_LIGNE_EPAISSEUR,
+                borderDash: exclu ? [6, 4] : [],
+                tension: STYLE_LIGNE_TENSION,
+                pointRadius: exclu ? 2 : STYLE_POINT_RAYON,
+                pointHoverRadius: exclu ? 3 : STYLE_POINT_RAYON_HOVER,
+                pointStyle: 'circle',
+                pointBackgroundColor: exclu ? 'rgba(150,150,150,0.35)' : hexVersRgba(couleur, 0.4),
+                pointBorderColor: exclu ? 'transparent' : couleurBordurePoint(),
+                pointBorderWidth: exclu ? 0 : STYLE_POINT_BORDURE,
+                spanGaps: false
+            };
+        }).filter(d => d !== null);
+
+        if (datasets.length === 0) {
+            afficherMessageAttente(canvas, 'Aucune trajectoire disponible',
+                mode === 'habiletes'
+                    ? 'Aucune évaluation ne correspond aux critères sélectionnés.'
+                    : 'Aucune note finale enregistrée pour les évaluations actives.');
+            return null;
+        }
+
+        // 6.bis — Médiane et bande quartiles (étudiants exclus retirés du calcul)
+        if (options.afficherMediane === true) {
+            const mediane = [];
+            const q25 = [];
+            const q75 = [];
+            for (let i = 0; i < artefacts.length; i++) {
+                const valeurs = [];
+                for (let j = 0; j < datasets.length; j++) {
+                    const ds = datasets[j];
+                    if (ds.exclu) continue;
+                    const v = ds.data[i];
+                    if (v !== null && v !== undefined) valeurs.push(v);
+                }
+                if (valeurs.length === 0) {
+                    mediane.push(null); q25.push(null); q75.push(null);
+                } else {
+                    valeurs.sort(function(a, b) { return a - b; });
+                    mediane.push(quantileHabiletes(valeurs, 0.5));
+                    q25.push(quantileHabiletes(valeurs, 0.25));
+                    q75.push(quantileHabiletes(valeurs, 0.75));
+                }
+            }
+
+            const estClair = document.body.classList.contains('mode-clair');
+            const couleurMed = estClair ? '#1a1a2e' : '#e6e9ec';
+            const couleurBande = estClair ? 'rgba(26, 26, 46, 0.10)' : 'rgba(230, 233, 236, 0.10)';
+
+            // Q25 — borne basse, remplit jusqu'au dataset suivant (Q75)
+            datasets.push({
+                label: 'Quartile 25 %',
+                data: q25,
+                _isStat: true,
+                _legendText: 'Bande inter-quartile (Q25–Q75)',
+                _legendFill: couleurBande.replace(/[\d.]+\)$/, '0.35)'),
+                _legendStroke: 'transparent',
+                borderColor: 'transparent',
+                backgroundColor: couleurBande,
+                fill: '+1',
+                pointRadius: 0,
+                pointHoverRadius: 0,
+                tension: STYLE_LIGNE_TENSION,
+                order: 10,
+                spanGaps: false
+            });
+            datasets.push({
+                label: 'Quartile 75 %',
+                data: q75,
+                _isStat: true,
+                _hideFromLegend: true,
+                borderColor: 'transparent',
+                backgroundColor: 'transparent',
+                fill: false,
+                pointRadius: 0,
+                pointHoverRadius: 0,
+                tension: STYLE_LIGNE_TENSION,
+                order: 10,
+                spanGaps: false
+            });
+            // Médiane — order négatif pour passer au-dessus de tout
+            datasets.push({
+                label: 'Médiane du groupe',
+                data: mediane,
+                _isStat: true,
+                _legendText: 'Médiane du groupe',
+                _legendFill: couleurMed,
+                _legendStroke: couleurMed,
+                _legendLineWidth: 3,
+                borderColor: couleurMed,
+                backgroundColor: 'transparent',
+                borderWidth: 3,
+                tension: STYLE_LIGNE_TENSION,
+                pointRadius: 5,
+                pointHoverRadius: 8,
+                pointStyle: 'rectRot',
+                pointBackgroundColor: couleurMed,
+                pointBorderColor: couleurBordurePoint(),
+                pointBorderWidth: 2,
+                order: -10,
+                spanGaps: false
+            });
+        }
+
+        // 7. Validations canvas (visible, attaché)
+        if (!canvas.parentNode || !canvas.ownerDocument) {
+            console.warn('[Trajectoires] Canvas détaché du DOM');
+            return null;
+        }
+        if (!canvas.offsetParent && canvas.offsetWidth === 0 && canvas.offsetHeight === 0) {
+            console.warn('[Trajectoires] Canvas non visible — graphique différé');
+            return null;
+        }
+
+        const ctx = canvas.getContext('2d');
+        const bornesY = calculerBornesYDynamiques(datasets);
+
+        // 8. Titre dynamique de l'axe Y
+        let titreY;
+        if (mode === 'noteFinale') {
+            titreY = 'Note finale';
+        } else {
+            titreY = (criteresActifs.size === 1)
+                ? Array.from(criteresActifs)[0]
+                : (criteresActifs.size === criteresInfo.length
+                    ? 'Toutes les habiletés (moyenne)'
+                    : criteresActifs.size + ' habiletés (moyenne)');
+        }
+
+        const config = {
+            type: 'line',
+            // Plugins partagés avec les autres graphiques 0-1 : seuils visibles via pluginEtiquettesZones
+            plugins: [pluginGradientFond, ...((typeof obtenirPreference === 'function' && obtenirPreference('afficherSeuilsVisuels') !== false) ? [pluginEtiquettesZones] : [])],
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: { padding: { right: 120 } },
+                plugins: {
+                    title: { display: false },
+                    legend: {
+                        display: options.afficherMediane === true,
+                        position: 'bottom',
+                        align: 'start',
+                        onClick: function() { /* désactivé : la médiane et la bande ne sont pas masquables */ },
+                        labels: {
+                            color: couleurTexte(),
+                            font: { size: 11 },
+                            boxWidth: 28,
+                            boxHeight: 12,
+                            padding: 14,
+                            generateLabels: function(chart) {
+                                const items = [];
+                                const couleurTxt = couleurTexte();
+                                chart.data.datasets.forEach(function(ds, idx) {
+                                    if (!ds._isStat || ds._hideFromLegend) return;
+                                    items.push({
+                                        text: ds._legendText || ds.label,
+                                        fillStyle: ds._legendFill || ds.backgroundColor || ds.borderColor,
+                                        strokeStyle: ds._legendStroke || ds.borderColor || 'transparent',
+                                        lineWidth: ds._legendLineWidth || 1,
+                                        fontColor: couleurTxt,
+                                        hidden: false,
+                                        datasetIndex: idx
+                                    });
+                                });
+                                return items;
+                            }
+                        }
+                    },
+                    tooltip: {
+                        ...STYLE_TOOLTIP,
+                        enabled: true,
+                        mode: 'point',
+                        intersect: true,
+                        displayColors: false,
+                        callbacks: {
+                            title: function(items) {
+                                if (!items || items.length === 0) return '';
+                                const it = items[0];
+                                const ds = it.dataset;
+                                return (ds && ds.label ? ds.label + ' — ' : '') + it.label;
+                            },
+                            label: function(ctxItem) {
+                                const v = ctxItem.parsed.y;
+                                if (v === null || v === undefined) return '';
+                                return (v * 100).toFixed(0) + '%';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: termePluriel,
+                            color: couleurTexte(),
+                            font: { size: 12, weight: 'bold' }
+                        },
+                        ticks: {
+                            color: couleurTexte(),
+                            font: { size: 10 },
+                            maxRotation: 45,
+                            minRotation: 30
+                        },
+                        grid: { display: true, color: couleurGrille() }
+                    },
+                    y: {
+                        min: bornesY.min,
+                        max: bornesY.max,
+                        title: {
+                            display: true,
+                            text: titreY,
+                            color: couleurTexte(),
+                            font: { size: 12, weight: 'bold' }
+                        },
+                        ticks: {
+                            color: couleurTexte(),
+                            callback: v => (v * 100).toFixed(0) + '%',
+                            stepSize: 0.05
+                        },
+                        grid: { display: true, color: couleurGrille() }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'xy',
+                    intersect: false
+                }
+            }
+        };
+
+        const chart = new Chart(ctx, config);
+        graphiqueTrajectoiresInstance = chart;
+
+        // Peupler le sélecteur d'élève (skip les datasets stats, textContent XSS-safe)
+        const selecteur = document.getElementById('selecteur-etudiant-trajectoires');
+        if (selecteur) {
+            selecteur.innerHTML = '';
+            const optDefaut = document.createElement('option');
+            optDefaut.value = '';
+            optDefaut.textContent = '-- Sélectionner --';
+            selecteur.appendChild(optDefaut);
+            datasets.forEach((ds, idx) => {
+                if (ds._isStat) return;
+                const opt = document.createElement('option');
+                opt.value = String(idx);
+                opt.textContent = ds.exclu ? (ds.label + ' (inactif)') : ds.label;
+                selecteur.appendChild(opt);
+            });
+        }
+
+        return chart;
+
+    } catch (error) {
+        console.error('[Trajectoires] Erreur création graphique :', error);
+        return null;
+    }
+}
+
+/**
+ * Rafraîchit le graphique trajectoires en lisant l'état actuel des contrôles
+ * (mesure + checkboxes critères + toggle médiane). La surbrillance étudiant
+ * est gérée séparément par selectionnerEtudiantTrajectoires() pour éviter un
+ * rebuild complet.
+ */
+function rafraichirGraphiqueTrajectoires() {
+    const selMesure = document.getElementById('selecteur-mesure-trajectoires');
+    const mesure = (selMesure && selMesure.value === 'habiletes') ? 'habiletes' : 'noteFinale';
+
+    const checkboxes = document.querySelectorAll('#trajectoires-criteres-checkboxes input[type="checkbox"]');
+    const actifs = new Set();
+    checkboxes.forEach(function(cb) {
+        const nom = cb.dataset.critereNom;
+        if (cb.checked && nom) actifs.add(nom);
+    });
+
+    const toggleMediane = document.getElementById('trajectoires-toggle-mediane');
+    const afficherMediane = !!(toggleMediane && toggleMediane.checked);
+
+    // Conserver la sélection élève à travers le rebuild
+    const selecteur = document.getElementById('selecteur-etudiant-trajectoires');
+    const indexAvant = selecteur ? selecteur.value : '';
+
+    etatTrajectoires.mesure = mesure;
+    etatTrajectoires.criteresActifs = actifs.size > 0 ? actifs : null;
+    etatTrajectoires.afficherMediane = afficherMediane;
+
+    creerGraphiqueTrajectoiresProduction('graphique-trajectoires-production', {
+        mesure: mesure,
+        criteresActifs: etatTrajectoires.criteresActifs,
+        afficherMediane: etatTrajectoires.afficherMediane
+    });
+
+    // Restaurer la surbrillance si l'index est encore valide
+    if (selecteur && indexAvant !== '') {
+        selecteur.value = indexAvant;
+        if (selecteur.value !== '') selectionnerEtudiantTrajectoires();
+    }
+    _majBoutonProfilTrajectoires();
+}
+
+/**
+ * Ouvre le profil de l'élève actuellement en relief dans le graphique Trajectoires.
+ */
+function ouvrirProfilEleveTrajectoires() {
+    if (!graphiqueTrajectoiresInstance) return;
+    const select = document.getElementById('selecteur-etudiant-trajectoires');
+    if (!select || !select.value) return;
+    const idx = parseInt(select.value, 10);
+    if (isNaN(idx)) return;
+    const ds = graphiqueTrajectoiresInstance.data.datasets[idx];
+    if (ds && ds.da && typeof tbNavigerVersProfil === 'function') {
+        tbNavigerVersProfil(ds.da);
+    }
+}
+
+/**
+ * Met à jour la visibilité du bouton 👤 selon la sélection courante du
+ * dropdown élève Trajectoires.
+ */
+function _majBoutonProfilTrajectoires() {
+    const btn = document.getElementById('btn-profil-trajectoires');
+    const select = document.getElementById('selecteur-etudiant-trajectoires');
+    if (!btn || !select) return;
+    btn.style.display = (select.value && select.value !== '') ? 'inline-flex' : 'none';
+}
+
+/**
+ * Met en relief la courbe de l'étudiant sélectionné dans le dropdown.
+ * Mise à jour en place (sans rebuild) via appliquerStyleSpaghetti.
+ */
+function selectionnerEtudiantTrajectoires() {
+    const chart = graphiqueTrajectoiresInstance;
+    if (!chartEstValide(chart)) return;
+
+    const selecteur = document.getElementById('selecteur-etudiant-trajectoires');
+    if (!selecteur) return;
+
+    const indexStr = selecteur.value;
+    const datasets = chart.data.datasets;
+
+    if (indexStr === '') {
+        datasets.forEach(function(ds) {
+            if (ds._isStat) return;
+            const couleur = ds._couleurBase || '#888';
+            appliquerStyleSpaghetti(ds, 'defaut', couleur);
+        });
+        etatTrajectoires.daSurbrillance = '';
+    } else {
+        const indexActif = parseInt(indexStr, 10);
+        datasets.forEach(function(ds, idx) {
+            if (ds._isStat) return;
+            const couleur = ds._couleurBase || '#888';
+            if (idx === indexActif) {
+                appliquerStyleSpaghetti(ds, 'actif', couleur);
+                etatTrajectoires.daSurbrillance = ds.da || '';
+            } else {
+                appliquerStyleSpaghetti(ds, 'inactif', couleur);
+            }
+        });
+    }
+
+    _majBoutonProfilTrajectoires();
+    chart.update('none');
+}
+
 // Exporter les fonctions pour utilisation globale
 window.toggleIndiceIndiv = toggleIndiceIndiv;
 window.toggleCritereIndiv = toggleCritereIndiv;
@@ -4720,12 +4413,15 @@ window.creerGraphiqueGroupeMoyennes = creerGraphiqueGroupeMoyennes;
 window.creerGraphiqueGroupeSpaghettiACP = creerGraphiqueGroupeSpaghettiACP;
 window.rafraichirGraphiqueSpaghettiACP = rafraichirGraphiqueSpaghettiACP;
 window.selectionnerEtudiantACP = selectionnerEtudiantACP;
-window.creerGraphiqueGroupeSpaghetti = creerGraphiqueGroupeSpaghetti;
-window.rafraichirGraphiqueSpaghetti = rafraichirGraphiqueSpaghetti;
-window.selectionnerEtudiantSpaghetti = selectionnerEtudiantSpaghetti;
+window.ouvrirProfilEleveACP = ouvrirProfilEleveACP;
 window.creerGraphiqueCriteres = creerGraphiqueCriteres;
 window.creerGraphiqueDistributionACPE = creerGraphiqueDistributionACPE;
 window.creerGraphiqueEvolutionRLO = creerGraphiqueEvolutionRLO;
+window.creerGraphiqueTrajectoiresProduction = creerGraphiqueTrajectoiresProduction;
+window.rafraichirGraphiqueTrajectoires = rafraichirGraphiqueTrajectoires;
+window.selectionnerEtudiantTrajectoires = selectionnerEtudiantTrajectoires;
+window.ouvrirProfilEleveTrajectoires = ouvrirProfilEleveTrajectoires;
+window.listerCriteresHabiletes = listerCriteresHabiletes;
 window.detruireGraphique = detruireGraphique;
 
 // Recréer les graphiques visibles lors d'un changement de thème
@@ -4741,8 +4437,8 @@ window.addEventListener('themeChanged', function() {
     if (typeof rafraichirGraphiqueSpaghettiACP === 'function') {
         try { rafraichirGraphiqueSpaghettiACP(); } catch(e) { console.warn('[Graphiques] spaghettiACP refresh skipped (section not visible):', e.message || e); }
     }
-    if (typeof rafraichirGraphiqueSpaghetti === 'function') {
-        try { rafraichirGraphiqueSpaghetti(); } catch(e) { console.warn('[Graphiques] spaghetti refresh skipped (section not visible):', e.message || e); }
+    if (typeof rafraichirGraphiqueTrajectoires === 'function' && document.getElementById('graphique-trajectoires-production')) {
+        try { rafraichirGraphiqueTrajectoires(); } catch(e) { console.warn('[Graphiques] trajectoires refresh skipped:', e.message || e); }
     }
     // Graphique évolution RLO : recréer si un canvas est actuellement dans le DOM
     if (window.profilActuelDA) {
