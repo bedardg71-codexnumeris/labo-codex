@@ -90,16 +90,26 @@ function migrerResidusPhase5() {
 
     var nbNettoyages = 0;
 
+    // Helper : compte les items portant le flag isDemo/estDemo dans les 5 globaux
+    function compterResidusFlag() {
+        return (db.getSync('listeCours', []) || []).filter(function(c) { return c.isDemo; }).length
+            + (db.getSync('cours', []) || []).filter(function(c) { return c.isDemo; }).length
+            + (db.getSync('enseignants', []) || []).filter(function(e) { return e.isDemo; }).length
+            + (db.getSync('grillesTemplates', []) || []).filter(function(g) { return g.estDemo; }).length
+            + (db.getSync('echellesTemplates', []) || []).filter(function(e) { return e.estDemo; }).length;
+    }
+
     // 1. Résidus isDemo/estDemo dans les 6 globaux + cartouches_*
-    var countBefore = (db.getSync('listeCours', []) || []).filter(function(c) { return c.isDemo; }).length
-        + (db.getSync('cours', []) || []).filter(function(c) { return c.isDemo; }).length
-        + (db.getSync('enseignants', []) || []).filter(function(e) { return e.isDemo; }).length
-        + (db.getSync('grillesTemplates', []) || []).filter(function(g) { return g.estDemo; }).length
-        + (db.getSync('echellesTemplates', []) || []).filter(function(e) { return e.estDemo; }).length;
+    var countBefore = compterResidusFlag();
 
     if (countBefore > 0) {
         retirerItemsDemoDesGlobaux();
-        nbNettoyages += countBefore;
+        // Recompte apres nettoyage : retirerItemsDemoDesGlobaux filtre par
+        // ID-dans-pack ET flag, donc les residus legacy avec un ID non-prefixe
+        // (anterieur au commit 40393ad) NE SONT PAS retires meme s'ils portent
+        // le flag. Le delta reel = countBefore - countAfter.
+        var countAfter = compterResidusFlag();
+        nbNettoyages += (countBefore - countAfter);
     }
 
     // 2. Trimestre démo orphelin
@@ -115,8 +125,16 @@ function migrerResidusPhase5() {
         nbNettoyages++;
     }
 
-    // Poser le flag même si rien n'a été nettoyé (évite re-exécution inutile)
-    db.setSync('migration-phase5-done', '1');
+    // Ne poser le flag QUE si vraiment rien ne reste a nettoyer. Si countAfter
+    // > 0, il reste des residus legacy non couverts par retirerItemsDemoDesGlobaux
+    // (ID non-prefixe). Laisser la migration retenter au prochain boot, dans
+    // l'espoir qu'une future version sache les nettoyer.
+    var residusRestants = compterResidusFlag();
+    if (residusRestants === 0) {
+        db.setSync('migration-phase5-done', '1');
+    } else {
+        console.warn('[Migration 5.E] ' + residusRestants + ' residus legacy NON nettoyes (ID non-prefixe). Migration NON marquee done, retry au prochain boot.');
+    }
 
     if (nbNettoyages > 0) {
         console.warn('[Migration 5.E] ' + nbNettoyages + ' résidus legacy nettoyés');
@@ -391,36 +409,49 @@ function retirerItemsDemoDesGlobaux() {
         return ids;
     }
 
-    // listeCours : retirer uniquement les cours dont l'id est dans le pack
+    // Symetrie avec fusionnerDemoVersGlobaux (cf. l. 173-176 commentant la
+    // preservation des items utilisateur sur collision d'ID, fix incident du
+    // 24 avril 2026). Cleanup-side : retirer un item SEULEMENT si son ID est
+    // dans le pack ET qu'il porte un flag demo. Sans le flag, c'est un item
+    // utilisateur qui a juste un ID en collision (cas observe pour
+    // listeCours.id='demo-cours' qu'un utilisateur peut creer legitimement).
+    function estItemDemo(item) {
+        return !!(item && (item.isDemo === true || item.estDemo === true));
+    }
+
+    // listeCours : ID dans le pack ET flag isDemo
     var idsListeCours = idsDuPack('listeCours');
     db.setSync('listeCours', (db.getSync('listeCours', []) || []).filter(function(c) {
-        return !idsListeCours.has(c.id);
+        return !(idsListeCours.has(c.id) && estItemDemo(c));
     }));
 
     // cours (clé canonique) : mêmes IDs que listeCours
     db.setSync('cours', (db.getSync('cours', []) || []).filter(function(c) {
-        return !idsListeCours.has(c.id);
+        return !(idsListeCours.has(c.id) && estItemDemo(c));
     }));
 
-    // enseignants : retirer ENS_DEMO (ID synthétique fixe défini dans Phase 1)
+    // enseignants : retirer ENS_DEMO (ID synthétique fixe defini dans Phase 1).
+    // Pas de risque de collision : ENS_DEMO est un ID systeme, pas un pattern
+    // qu'un utilisateur creerait spontanement.
     db.setSync('enseignants', (db.getSync('enseignants', []) || []).filter(function(e) {
         return e.id !== 'ENS_DEMO';
     }));
 
-    // grillesTemplates : filtrer par IDs du pack uniquement
+    // grillesTemplates : ID dans le pack ET flag estDemo
     var idsGrilles = idsDuPack('grillesTemplates');
     db.setSync('grillesTemplates', (db.getSync('grillesTemplates', []) || []).filter(function(g) {
-        return !idsGrilles.has(g.id);
+        return !(idsGrilles.has(g.id) && estItemDemo(g));
     }));
 
     // echellesTemplates : idem
     var idsEchelles = idsDuPack('echellesTemplates');
     db.setSync('echellesTemplates', (db.getSync('echellesTemplates', []) || []).filter(function(e) {
-        return !idsEchelles.has(e.id);
+        return !(idsEchelles.has(e.id) && estItemDemo(e));
     }));
 
     // cartouches_* : lister dynamiquement les clés présentes dans le pack
-    // et retirer uniquement les cartouches dont l'id est dans le pack.
+    // et retirer uniquement les cartouches dont l'id est dans le pack ET
+    // qui portent le flag estDemo.
     if (pack) {
         var clesPack = Object.keys(pack);
         for (var p = 0; p < clesPack.length; p++) {
@@ -434,7 +465,7 @@ function retirerItemsDemoDesGlobaux() {
                 }
             }
             var cartouches = (db.getSync(nom, []) || []).filter(function(c) {
-                return !idsCart.has(c.id);
+                return !(idsCart.has(c.id) && estItemDemo(c));
             });
             if (cartouches.length === 0) {
                 db.removeSync(nom);
