@@ -449,7 +449,10 @@
             .sort((a, b) => (ORDRE_NIV[a.niveauSelectionne] || 0) - (ORDRE_NIV[b.niveauSelectionne] || 0));
 
         const patrons = identifierPatrons(criteres, historique);
-        const tousMaitrises = defis.length === 0;
+        // Vérification explicite M/E sur tous les critères : un travail Non recevable
+        // (niveau '0') ou sans critères ne doit JAMAIS déclencher « tous maîtrisés ».
+        const tousMaitrises = criteres.length > 0 &&
+            criteres.every(c => c.niveauSelectionne === 'M' || c.niveauSelectionne === 'E');
 
         let messageGlobal = '';
         if (tousMaitrises) {
@@ -457,7 +460,9 @@
             if (totErr > 0) {
                 messageGlobal = `Tous les critères sont maîtrisés. Concentre-toi sur la qualité du français (${totErr} erreur${totErr > 1 ? 's' : ''} annotée${totErr > 1 ? 's' : ''}).`;
             } else {
+                // Garde length > 0 : .every() retourne true sur tableau vide (vacuité JS).
                 const maitriseLongtemps = historique[0] && Array.isArray(historique[0].criteres) &&
+                    historique[0].criteres.length > 0 &&
                     historique[0].criteres.every(c => c.niveauSelectionne === 'M' || c.niveauSelectionne === 'E');
                 messageGlobal = maitriseLongtemps
                     ? "Tous les critères sont maîtrisés depuis plus d'un artefact. Tu peux aider tes collègues — c'est une excellente façon d'étendre tes compétences vers le niveau É (transfert à d'autres contextes)."
