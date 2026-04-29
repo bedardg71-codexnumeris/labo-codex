@@ -190,6 +190,16 @@
             } catch (e) { /* silencieux : la marque retenu disparaît */ }
         }
 
+        // gcId de l'ELEVE pour resoudre echeancesParGroupe sur la TrimestreBar
+        const gcIdEleve = obtenirGcIdEleve(da);
+        const obtenirDue = (prod) => {
+            if (typeof obtenirEcheanceEffective === 'function') {
+                const r = obtenirEcheanceEffective(prod, gcIdEleve);
+                if (r && r.date) return r.date;
+            }
+            return prod.dateLimite || prod.dateRemise || null;
+        };
+
         return ordonnees.map(production => {
             const evalProduction = evalsEleve.find(e => e.productionId === production.id);
             const estEnCours = production.id === evaluation.productionId;
@@ -211,7 +221,7 @@
                 code:        code,
                 obligatoire: !!production.obligatoire,
                 retenu:      idsRetenus.has(production.id),
-                due:         status === 'todo' ? (production.dateLimite || production.dateRemise || null) : null
+                due:         status === 'todo' ? obtenirDue(production) : null
             };
         });
     }
@@ -688,10 +698,9 @@
             const pr = productions.find(p => p.id === productionId);
             return pr ? (pr.activiteApprentissage || pr.description || '') : '';
         };
-        // Resolution de l'echeance par groupe-cours actif (eleve), pas par
-        // ordre d'insertion arbitraire dans echeancesParGroupe.
-        const infoCoursActif = db.getSync('infoCours', null);
-        const gcIdEleve = infoCoursActif ? (infoCoursActif._groupeCoursId || infoCoursActif.id || null) : null;
+        // Resolution de l'echeance par groupe de l'ELEVE (pas par contexte
+        // UI actif, qui peut differer si le dropdown a change entre temps).
+        const gcIdEleve = obtenirGcIdEleve(da);
         const obtenirEcheance = (prod) => {
             if (typeof obtenirEcheanceEffective === 'function') {
                 const r = obtenirEcheanceEffective(prod, gcIdEleve);
@@ -804,6 +813,32 @@
         const cleEffective = (typeof window.cle === 'function') ? window.cle(cleBase) : cleBase;
         const donnees = db.getSync(cleEffective, []);
         return Array.isArray(donnees) ? donnees : [];
+    }
+
+    // Resoud le groupe-cours id pour un eleve (par son DA) plutot que par
+    // le contexte UI actif. Necessaire pour echeancesParGroupe : la PDF
+    // doit afficher la date du groupe de l'ELEVE, pas celle du groupe
+    // affiche dans le dropdown au moment de l'export.
+    function obtenirGcIdEleve(da) {
+        if (!da) return null;
+        const eleves = lireDonneesNamespace('groupeEtudiants');
+        const eleve = eleves.find(e => e.da === da);
+        if (!eleve || !eleve.groupe) return null;
+
+        const gcs = lireDonneesNamespace('groupesCours');
+        const infoCoursActif = db.getSync('infoCours', null);
+        const coursIdActif = infoCoursActif ? (infoCoursActif.coursId || infoCoursActif.id) : null;
+
+        // Match par numero de groupe + coursId actif (cas multi-cours)
+        if (coursIdActif) {
+            const gcExact = gcs.find(g => (g.groupeNum === eleve.groupe || g.groupe === eleve.groupe) && g.coursId === coursIdActif);
+            if (gcExact) return gcExact.id;
+        }
+        // Fallback : juste par numero de groupe (un seul cours)
+        const gcParGroupe = gcs.find(g => g.groupeNum === eleve.groupe || g.groupe === eleve.groupe);
+        if (gcParGroupe) return gcParGroupe.id;
+
+        return null;
     }
 
     function lireGrille(grilleId) {
