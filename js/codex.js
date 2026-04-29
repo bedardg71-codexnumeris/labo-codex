@@ -296,17 +296,31 @@ async function genererCodex(options = {}) {
     // 2b. Blobs des travaux
     let nbBlobs = 0;
     let tailleTotale = 0;
-    const cleFT = toutesLesCles.find(function(c) { return c.includes('fichiersTravaux'); });
+    // Capturer TOUTES les cles fichiersTravaux : un codex peut contenir
+    // plusieurs trimestres (h2026_fichiersTravaux + a2025_fichiersTravaux,
+    // etc.). find() ne retournait que la premiere, les blobs des autres
+    // trimestres etaient ignores. (H5)
+    const clesFT = toutesLesCles.filter(function(c) { return c.includes('fichiersTravaux'); });
     const dossier = zip.folder(DOSSIER_TRAVAUX);
 
-    if (cleFT && donnees[cleFT] && Array.isArray(donnees[cleFT]) && typeof travauxStockage !== 'undefined') {
-        const fichiers = donnees[cleFT];
+    if (clesFT.length > 0 && typeof travauxStockage !== 'undefined') {
+        // Aplatir tous les fichiersTravaux des differents trimestres
+        var fichiers = [];
+        clesFT.forEach(function(cle) {
+            if (Array.isArray(donnees[cle])) {
+                fichiers = fichiers.concat(donnees[cle]);
+            }
+        });
         for (var j = 0; j < fichiers.length; j++) {
             var f = fichiers[j];
             try {
                 var blob = await travauxStockage.recupererBlob(f.id);
                 if (blob) {
-                    var ext = (f.nomFichier || 'bin').split('.').pop();
+                    // Extension : si nomFichier ne contient pas de point,
+                    // 'bin' (sinon split('.').pop() retourne le nom complet,
+                    // produisant FT_abc.monfichier au lieu de FT_abc.bin). (M3)
+                    var nf = f.nomFichier || '';
+                    var ext = (nf.indexOf('.') !== -1) ? nf.split('.').pop() : 'bin';
                     dossier.file(f.id + '.' + ext, blob);
                     nbBlobs++;
                     tailleTotale += blob.size || 0;
@@ -469,9 +483,16 @@ async function chargerCodex(fichierZip) {
 
     // 4. Restaurer les blobs
     let nbBlobs = 0;
-    const cleFT = Object.keys(donnees).find(function(c) { return c.includes('fichiersTravaux'); });
-    if (cleFT && donnees[cleFT] && Array.isArray(donnees[cleFT]) && typeof travauxStockage !== 'undefined') {
-        var fichiers = donnees[cleFT];
+    // Memes raisons que cote export (genererCodex) : un codex peut contenir
+    // plusieurs trimestres, on doit toutes les capturer. (H5)
+    const clesFTImport = Object.keys(donnees).filter(function(c) { return c.includes('fichiersTravaux'); });
+    if (clesFTImport.length > 0 && typeof travauxStockage !== 'undefined') {
+        var fichiers = [];
+        clesFTImport.forEach(function(cle) {
+            if (Array.isArray(donnees[cle])) {
+                fichiers = fichiers.concat(donnees[cle]);
+            }
+        });
         for (var j = 0; j < fichiers.length; j++) {
             var f = fichiers[j];
             try {
@@ -1534,17 +1555,24 @@ async function _fusionnerTravaux(zipExterne, donneesExternes, cheminsAImporter, 
         var listeLocale = await db.get(cleFT, []);
         var idsLocaux = new Set(listeLocale.map(function(f) { return f.id; }));
 
+        // Set d'IDs reellement importes : on extrait l'id depuis chaque chemin
+        // avec la meme logique que dans la boucle d'import (lastIndexOf('.')).
+        // Plus sur que l'ancien `ch.indexOf(f.id) !== -1` qui acceptait toute
+        // sous-chaine -- ex: f.id = 'FT_abc' matchait faussement chemin
+        // 'travaux/FT_abc_extended.pdf'. (H4)
+        var idsImportes = new Set();
+        cheminsAImporter.forEach(function(ch) {
+            var nom = ch.replace(DOSSIER_TRAVAUX + '/', '');
+            var pi = nom.lastIndexOf('.');
+            var id = pi > 0 ? nom.substring(0, pi) : nom;
+            idsImportes.add(id);
+        });
+
         var ajoutees = 0;
         donneesExternes[cleFT].forEach(function(f) {
-            if (!idsLocaux.has(f.id)) {
-                // Vérifier que ce fichier fait partie de ceux importés
-                var importé = cheminsAImporter.some(function(ch) {
-                    return ch.indexOf(f.id) !== -1;
-                });
-                if (importé) {
-                    listeLocale.push(f);
-                    ajoutees++;
-                }
+            if (!idsLocaux.has(f.id) && idsImportes.has(f.id)) {
+                listeLocale.push(f);
+                ajoutees++;
             }
         });
 
