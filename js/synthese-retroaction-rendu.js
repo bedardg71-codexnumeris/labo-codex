@@ -80,7 +80,16 @@
        ===================================================================== */
 
     function esc(s) {
-        return (typeof echapperHtml === 'function') ? echapperHtml(String(s ?? '')) : String(s ?? '');
+        if (typeof echapperHtml === 'function') return echapperHtml(String(s ?? ''));
+        // Fallback : echapper a minima plutot que retourner la chaine brute.
+        // L'ancienne implementation retournait String(s) sans echappement,
+        // desactivant silencieusement la sanitization si echapperHtml n'etait
+        // pas charge. Defense en profondeur : la synthese rend dans un DOM
+        // live (offscreen mais live) avant rasterisation html2canvas, donc
+        // un attribut event-handler dans le HTML s'executerait. (nit3)
+        return String(s ?? '').replace(/[&<>"']/g, function(c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
     }
 
     function styleMonoLabel() {
@@ -184,7 +193,12 @@
                 ? `<div style="font-family: ${FONT_MONO}; font-size: 6px; color: ${MUTED}; letter-spacing: 0.2px; line-height: 1;">${esc(formaterDateCourte(t.due))}</div>`
                 : '';
 
-            const numero = t.n != null
+            // Ne pas afficher la legende numero pour les cases todo : la boite
+            // 22x22 montre deja t.n (contenu fallback). Sinon doublon visuel
+            // « 3 / 3 » pour chaque artefact non encore evalue. La legende
+            // sert a complementer les cases active/done qui montrent le code
+            // IDME dans la boite. (nit5)
+            const numero = (t.n != null && !todo)
                 ? `<div style="font-family: ${FONT_MONO}; font-size: 6.5px; color: ${active ? INK : MUTED}; font-weight: ${active ? 700 : 400};">${esc(t.n)}</div>`
                 : '';
 
