@@ -862,12 +862,22 @@
     }
 
     /**
-     * Migration ponctuelle : clés non namespacées vers A2025
-     * Les anciennes données non namespacées datent de A2025
+     * Migration ponctuelle : clés globales (non namespacées) vers le bon trimestre.
+     *
+     * 🔒 ZERO-DETTE (29 avr 2026, fix P1 ultrareview Lot 2) :
+     * L'ancienne version hardcodait `a2025_*` comme destination, ce qui
+     * pouvait reclasser des donnees H2025 sous a2025_* et les rendre
+     * inaccessibles. Correctif : deriver la destination depuis cadreCalendrier
+     * (meme logique que migrerVersMultiTrimestres) ; fallback sur le trimestre
+     * actif. Si aucun signal -> ne pas migrer (ne pas inventer une destination).
+     *
+     * Idempotente via flag `migration-cles-globales-done`.
      */
     function migrerClesVersA2025() {
-        // Liste des clés à migrer vers a2025_*
-        // ✅ CORRECTION (31 déc 2025): Ajouter TOUTES les clés namespacées manquantes
+        // Idempotence : ne s'execute qu'une fois
+        if (db.getSync('migration-cles-globales-done', null)) return;
+
+        // Liste des clés à migrer
         const clesAMigrer = [
             // Données étudiants et évaluations (critiques!)
             'groupeEtudiants',
@@ -887,8 +897,40 @@
             'indicesCP',
             'snapshots'
         ];
-        let clesMigrees = 0;
 
+        // Determiner le trimestre cible : meme logique que migrerVersMultiTrimestres
+        // (cadreCalendrier.session/annee ou deduction depuis dateDebut), fallback
+        // sur le trimestre actif si dispo.
+        let prefixe = '';
+        const cadreCalendrier = db.getSync('cadreCalendrier', null);
+        if (cadreCalendrier) {
+            let session = cadreCalendrier.session || '';
+            let annee = cadreCalendrier.annee || '';
+            if ((!session || !annee) && cadreCalendrier.dateDebut) {
+                const date = new Date(cadreCalendrier.dateDebut);
+                annee = date.getFullYear().toString();
+                const mois = date.getMonth() + 1;
+                session = (mois >= 1 && mois <= 6) ? 'H' : 'A';
+            }
+            if (session && annee) {
+                prefixe = `${session.toLowerCase()}${annee}_`;
+            }
+        }
+        if (!prefixe) {
+            const trimestreActif = obtenirTrimestreActif();
+            if (trimestreActif && trimestreActif.id) {
+                prefixe = trimestreActif.id + '_';
+            }
+        }
+        if (!prefixe) {
+            // Aucun signal -> ne pas inventer une destination. Marquer fait
+            // pour ne pas retenter en boucle, mais ne pas migrer.
+            console.warn('[Trimestres] migrerClesVersA2025 : aucun trimestre derivable, migration sautee');
+            db.setSync('migration-cles-globales-done', '1');
+            return;
+        }
+
+        let clesMigrees = 0;
         clesAMigrer.forEach(nomCle => {
             const donneesAnciennes = db.getSync(nomCle, null);
 
@@ -900,12 +942,12 @@
                     : (typeof donneesAnciennes === 'object' && Object.keys(donneesAnciennes).length === 0);
 
                 if (!estVide) {
-                    const cleA2025 = `a2025_${nomCle}`;
-                    const existantes = db.getSync(cleA2025, null);
+                    const cleNouvelle = prefixe + nomCle;
+                    const existantes = db.getSync(cleNouvelle, null);
 
-                    // Ne migrer que si la clé a2025_* n'existe pas déjà
+                    // Ne migrer que si la clé namespacée n'existe pas déjà
                     if (existantes === null) {
-                        db.setSync(cleA2025, donneesAnciennes);
+                        db.setSync(cleNouvelle, donneesAnciennes);
                         clesMigrees++;
                     }
 
@@ -917,7 +959,9 @@
         });
 
         if (clesMigrees > 0) {
+            console.warn('[Trimestres] migrerClesVersA2025 : ' + clesMigrees + ' cles migrees vers ' + prefixe);
         }
+        db.setSync('migration-cles-globales-done', '1');
     }
 
     /**
