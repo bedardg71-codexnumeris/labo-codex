@@ -3390,7 +3390,10 @@ function genererRetroactionBilan() {
     var defis = criteres
         .filter(function(c) { return c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D'; })
         .sort(function(a, b) { return (ORDRE_NIV[a.niveauSelectionne] || 0) - (ORDRE_NIV[b.niveauSelectionne] || 0); });
-    var tousMaitrises = defis.length === 0 && criteres.length > 0;
+    // Verification explicite M/E : un travail Non recevable (niveau '0') ne doit
+    // JAMAIS declencher « tous maitrises » via defis.length === 0 (defis exclut '0').
+    var tousMaitrises = criteres.length > 0 &&
+        criteres.every(function(c) { return c.niveauSelectionne === 'M' || c.niveauSelectionne === 'E'; });
 
     // Vérifier si le français écrit est une faiblesse majeure
     // Source 1 : donneesAlgorithmiques (si le calcul a eu lieu)
@@ -3436,8 +3439,10 @@ function genererRetroactionBilan() {
     } else if (tousMaitrises && totalErreursFr > 0) {
         html += '<p>Tous les crit\u00e8res sont ma\u00eetris\u00e9s. Concentre-toi sur la qualit\u00e9 du fran\u00e7ais (' + totalErreursFr + ' erreur' + (totalErreursFr > 1 ? 's' : '') + ' annot\u00e9e' + (totalErreursFr > 1 ? 's' : '') + ').</p>';
     } else if (tousMaitrises) {
-        // Vérifier si maîtrisé depuis 2+ artefacts
-        var maitriseLongtemps = evalPrecedente && evalPrecedente.criteres &&
+        // Verifier si maitrise depuis 2+ artefacts (garde length > 0 :
+        // .every() retourne true sur tableau vide via vacuite JS).
+        var maitriseLongtemps = evalPrecedente && Array.isArray(evalPrecedente.criteres) &&
+            evalPrecedente.criteres.length > 0 &&
             evalPrecedente.criteres.every(function(c) { return c.niveauSelectionne === 'M' || c.niveauSelectionne === 'E'; });
         if (maitriseLongtemps) {
             html += '<p class="retro-force">Tous les crit\u00e8res sont ma\u00eetris\u00e9s depuis plus d\u2019un artefact. Tu peux aider tes coll\u00e8gues \u2014 c\u2019est une excellente fa\u00e7on d\u2019\u00e9tendre tes comp\u00e9tences vers le niveau \u00c9 (transfert \u00e0 d\u2019autres contextes).</p>';
