@@ -529,6 +529,27 @@ function mettreAJourEntetesAvecCorrelations(r_AP, r_CP, r_PatternP, r_RaiP, r_In
         if (r === null || r === undefined || isNaN(r)) return '—';
         return 'r=' + r.toFixed(2);
     }
+    // Interprétation textuelle de l'intensité d'un coefficient de Pearson
+    function intensiteCorr(r) {
+        if (r === null || r === undefined || isNaN(r)) return null;
+        var abs = Math.abs(r);
+        var sens = r >= 0 ? 'positive' : 'négative';
+        if (abs < 0.1) return 'lien quasi nul';
+        if (abs < 0.3) return 'corrélation ' + sens + ' faible';
+        if (abs < 0.5) return 'corrélation ' + sens + ' modérée';
+        if (abs < 0.7) return 'corrélation ' + sens + ' forte';
+        return 'corrélation ' + sens + ' très forte';
+    }
+    // Tooltip standard pour une cellule de corrélation
+    function tooltipCorr(r, sujet, sensAttendu) {
+        var base = 'Coefficient de Pearson entre ' + sujet + ' et P.\n';
+        base += 'Échelle : −1 (lien inverse parfait) → 0 (aucun lien) → +1 (lien parfait).\n';
+        if (sensAttendu) base += sensAttendu + '\n';
+        var interp = intensiteCorr(r);
+        if (interp) base += 'Ici : ' + interp + '.';
+        else base += 'Ici : pas assez de données pour calculer r.';
+        return base;
+    }
 
     // Ligne moyennes
     var moyA = document.getElementById('moy-a');
@@ -544,11 +565,26 @@ function mettreAJourEntetesAvecCorrelations(r_AP, r_CP, r_PatternP, r_RaiP, r_In
     var corrPattern = document.getElementById('corr-pattern');
     var corrRai = document.getElementById('corr-rai');
     var corrInterv = document.getElementById('corr-interv');
-    if (corrA) corrA.textContent = fmtCorr(r_AP);
-    if (corrC) corrC.textContent = fmtCorr(r_CP);
-    if (corrPattern) corrPattern.textContent = fmtCorr(r_PatternP);
-    if (corrRai) corrRai.textContent = fmtCorr(r_RaiP);
-    if (corrInterv) corrInterv.textContent = fmtCorr(r_IntervP);
+    if (corrA) {
+        corrA.textContent = fmtCorr(r_AP);
+        corrA.title = tooltipCorr(r_AP, 'Assiduité (A)', 'Sens attendu : positif (être présent → mieux performer).');
+    }
+    if (corrC) {
+        corrC.textContent = fmtCorr(r_CP);
+        corrC.title = tooltipCorr(r_CP, 'Complétion (C)', 'Sens attendu : positif (remettre les travaux → mieux performer).');
+    }
+    if (corrPattern) {
+        corrPattern.textContent = fmtCorr(r_PatternP);
+        corrPattern.title = tooltipCorr(r_PatternP, 'le pattern d\'apprentissage', 'Sens attendu : positif (Stable → P plus haute, Difficulté persistante → P plus basse).');
+    }
+    if (corrRai) {
+        corrRai.textContent = fmtCorr(r_RaiP);
+        corrRai.title = tooltipCorr(r_RaiP, 'le niveau RàI', 'Sens attendu : négatif (niveau RàI plus élevé = besoin d\'accompagnement = P plus basse).');
+    }
+    if (corrInterv) {
+        corrInterv.textContent = fmtCorr(r_IntervP);
+        corrInterv.title = tooltipCorr(r_IntervP, 'le nombre d\'interventions', 'Sens attendu : négatif (plus d\'interventions = élève en plus grande difficulté).');
+    }
 
 }
 
@@ -908,8 +944,9 @@ function afficherListeEtudiantsConsultation() {
         tableContainer.classList.remove('u-hide');
     }
 
-    // 🆕 BETA 91: Calculer les corrélations A-P et C-P sur TOUS les étudiants (avant filtrage)
-    // Ceci assure la cohérence avec le tableau de bord qui calcule sur tous les étudiants
+    // Corrélations A-P et C-P calculées sur la population pédagogiquement pertinente :
+    // les étudiants ACTIFS uniquement. Inclure les abandons/inactifs introduit un cluster
+    // faible-A / faible-P qui gonfle artificiellement r sans signification pédagogique.
     // IMPORTANT: Utiliser la même pratique que le tableau de bord (SOM ou PAN selon config)
     // Réutiliser la variable config déjà chargée à la ligne 847
     const affichage = config.affichageTableauBord || {};
@@ -936,8 +973,16 @@ function afficherListeEtudiantsConsultation() {
     const valeursC_tous = tousIndices.map(indices => indices.C);
     const valeursP_tous = tousIndices.map(indices => indices.P);
 
-    const r_AP = calculerCorrelationPearson(valeursA_tous, valeursP_tous);
-    const r_CP = calculerCorrelationPearson(valeursC_tous, valeursP_tous);
+    // Identifier les étudiants actifs (≠ abandon/inactif/décrochage). Règle métier : main.js:60.
+    const estExclu = typeof estEtudiantExclu === 'function' ? estEtudiantExclu : () => false;
+    const indexActifs = etudiants.map((e, i) => estExclu(e) ? -1 : i).filter(i => i >= 0);
+    const nbExclusInactifs = etudiants.length - indexActifs.length;
+    const valeursA_actifsCorr = indexActifs.map(i => valeursA_tous[i]);
+    const valeursC_actifsCorr = indexActifs.map(i => valeursC_tous[i]);
+    const valeursP_actifsCorr = indexActifs.map(i => valeursP_tous[i]);
+
+    const r_AP = calculerCorrelationPearson(valeursA_actifsCorr, valeursP_actifsCorr);
+    const r_CP = calculerCorrelationPearson(valeursC_actifsCorr, valeursP_actifsCorr);
 
     // NOUVEAU: Enrichir les données pour le tri (sans assigner les numéros encore)
     etudiantsFiltres = etudiantsFiltres.map((e) => {
@@ -996,25 +1041,33 @@ function afficherListeEtudiantsConsultation() {
     const dasPresences = [...new Set(presencesCours.map(p => p.da))];
     const dasEtudiants = etudiants.slice(0, 5).map(e => e.da); // 5 premiers pour debug
 
-    const valeursA_avecPresences = [];
-    etudiants.forEach((etudiant, index) => {
-        const aDesPresences = presencesCours.some(p => p.da === etudiant.da);
+    // Moyenne A : actifs avec présences saisies dans le cours
+    const valeursA_actifs = [];
+    indexActifs.forEach(i => {
+        const aDesPresences = presencesCours.some(p => p.da === etudiants[i].da);
         if (aDesPresences) {
-            valeursA_avecPresences.push(valeursA_tous[index]);
+            valeursA_actifs.push(valeursA_tous[i]);
         }
     });
-    const moyenneA = valeursA_avecPresences.length > 0 ? valeursA_avecPresences.reduce((sum, val) => sum + val, 0) / valeursA_avecPresences.length : null;
+    const moyenneA = valeursA_actifs.length > 0 ? valeursA_actifs.reduce((s, v) => s + v, 0) / valeursA_actifs.length : null;
 
-    const moyenneC = valeursC_tous.length > 0 ? valeursC_tous.reduce((sum, val) => sum + val, 0) / valeursC_tous.length : null;
-    const moyenneP = valeursP_tous.length > 0 ? valeursP_tous.reduce((sum, val) => sum + val, 0) / valeursP_tous.length : null;
+    // Moyenne C : tous les actifs (les 0% comptent)
+    const valeursC_actifs = indexActifs.map(i => valeursC_tous[i]);
+    const moyenneC = valeursC_actifs.length > 0 ? valeursC_actifs.reduce((s, v) => s + v, 0) / valeursC_actifs.length : null;
 
-    // Moyennes filtrées (≥ minimum d'évaluations seulement)
-    const etudiantsQualifies = etudiantsFiltres.filter(e => !e.performanceInsuffisante && (e.indicesCalcules.C > 0 || e.indicesCalcules.P > 0));
+    // Moyenne P : actifs ayant au moins une évaluation (C>0 OU P>0), comme l'Aperçu
+    const indexActifsAvecEval = indexActifs.filter(i => valeursC_tous[i] > 0 || valeursP_tous[i] > 0);
+    const valeursP_actifsAvecEval = indexActifsAvecEval.map(i => valeursP_tous[i]);
+    const nbActifsSansEval = indexActifs.length - indexActifsAvecEval.length;
+    const moyenneP = valeursP_actifsAvecEval.length > 0 ? valeursP_actifsAvecEval.reduce((s, v) => s + v, 0) / valeursP_actifsAvecEval.length : null;
+
+    // Moyennes filtrées (≥ minimum d'évaluations seulement, parmi actifs)
+    const etudiantsQualifies = etudiantsFiltres.filter(e => !estExclu(e) && !e.performanceInsuffisante && (e.indicesCalcules.C > 0 || e.indicesCalcules.P > 0));
     const vP_qualifies = etudiantsQualifies.map(e => e.indicesCalcules.P);
     const vC_qualifies = etudiantsQualifies.map(e => e.indicesCalcules.C);
     const moyenneP_qualifies = vP_qualifies.length > 0 ? vP_qualifies.reduce((s, v) => s + v, 0) / vP_qualifies.length : null;
     const moyenneC_qualifies = vC_qualifies.length > 0 ? vC_qualifies.reduce((s, v) => s + v, 0) / vC_qualifies.length : null;
-    const nbInsuffisants = etudiantsFiltres.filter(e => e.performanceInsuffisante).length;
+    const nbInsuffisants = etudiantsFiltres.filter(e => !estExclu(e) && e.performanceInsuffisante).length;
 
     // Stocker pour le toggle
     window._moyennesQualifies = { P: moyenneP_qualifies, C: moyenneC_qualifies, A: moyenneA, nb: etudiantsQualifies.length, nbInsuffisants };
@@ -1024,12 +1077,20 @@ function afficherListeEtudiantsConsultation() {
     const badgeInsuf = document.getElementById('badge-nb-insuffisants');
     if (badgeInsuf) badgeInsuf.textContent = nbInsuffisants > 0 ? '(' + nbInsuffisants + ')' : '';
 
-    // Info-bulles sur les moyennes P (Liste)
+    // Info-bulles : expliciter le dénominateur de chaque moyenne
+    const suffixeExclus = nbExclusInactifs > 0 ? ' · ' + nbExclusInactifs + ' exclus (abandon/inactif)' : '';
+    const moyACell = document.getElementById('moy-a');
+    if (moyACell) {
+        moyACell.title = 'Moyenne A sur ' + valeursA_actifs.length + ' actifs avec présences saisies' + suffixeExclus + '.';
+    }
+    const moyCCell = document.getElementById('moy-c');
+    if (moyCCell) {
+        moyCCell.title = 'Moyenne C sur ' + valeursC_actifs.length + ' actifs (les 0% comptent)' + suffixeExclus + '.';
+    }
     const moyPCell = document.getElementById('moy-p');
     if (moyPCell) {
-        const nbTotalPour = valeursP_tous.length;
-        const nbAvecP0 = valeursP_tous.filter(v => v === 0).length;
-        moyPCell.title = 'Moyenne P sur ' + nbTotalPour + ' élèves (tous inclus, ' + nbAvecP0 + ' à 0%). L\'aperçu exclut les élèves sans évaluation.';
+        const suffixeSansEval = nbActifsSansEval > 0 ? ' · ' + nbActifsSansEval + ' actifs sans évaluation' : '';
+        moyPCell.title = 'Moyenne P sur ' + valeursP_actifsAvecEval.length + ' actifs avec évaluations' + suffixeExclus + suffixeSansEval + '. Aligné avec l\'Aperçu.';
     }
 
     // Corrélations Pattern↔P, RàI↔P, Interventions↔P
@@ -1042,6 +1103,8 @@ function afficherListeEtudiantsConsultation() {
     var valeursP_interv = [];
 
     etudiants.forEach(function(e, idx) {
+        // Exclure les inactifs/abandons des corrélations (cohérence avec moyennes et Aperçu)
+        if (estExclu(e)) return;
         var rai = typeof determinerNiveauRaiPedagogique === 'function' ? determinerNiveauRaiPedagogique(e.da) : null;
         var pVal = valeursP_tous[idx];
 
