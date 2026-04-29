@@ -332,6 +332,28 @@ function _genererUUIDv4() {
     return s;
 }
 
+/**
+ * Calcule le hash SHA-256 d'une chaine JSON, en hexadecimal.
+ * Cf. SKILL_Securite_donnees §4.3 : chaque versement Reserve doit inclure
+ * un hash SHA-256 de donnees.json dans meta.json pour permettre la detection
+ * de corruption (disque, transfert, modification accidentelle).
+ * @param {string} jsonStr - La chaine a hasher
+ * @returns {Promise<string|null>} hex string ou null si crypto.subtle indispo
+ */
+async function _calculerSHA256(jsonStr) {
+    if (typeof crypto === 'undefined' || !crypto.subtle) return null;
+    try {
+        var encoder = new TextEncoder();
+        var data = encoder.encode(jsonStr);
+        var hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        var hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+    } catch (e) {
+        console.warn('[Réserve] Calcul SHA-256 échoué :', e.message || e);
+        return null;
+    }
+}
+
 function _codeCoursCourt(codeCours) {
     // Extrait le préfixe numérique (ex. "601-101" depuis "601-101-MQ")
     var m = String(codeCours || '').match(/^(\d{3}-\d{3})/);
@@ -508,9 +530,21 @@ async function _collecterDonnees(trimestre, gc, onProg) {
     }
 
     // 3) Itérer les autres clés du trimestre
-    var idx = 0;
     for (var i = 0; i < clesTrimestre.length; i++) {
         var cleComplete = clesTrimestre[i];
+
+        // Reporter le progres a chaque iteration (avant les `continue` dans
+        // les branches connues). Avant : le bloc onProg etait dans la branche
+        // « cle inconnue » uniquement, donc seules les cles inconnues
+        // declenchaient le callback. Pour un trimestre avec 0 cle inconnue,
+        // l'utilisateur voyait la barre figee. (M4)
+        if (i % 5 === 0) {
+            onProg(15 + Math.round((i / clesTrimestre.length) * 15),
+                'Lecture des données...',
+                (i + 1) + ' / ' + clesTrimestre.length + ' clés');
+            await _yield();
+        }
+
         if (cleComplete === cleEtudiants) continue; // déjà traité (étape 1)
         if (cleComplete === cleFichiers) continue;  // déjà traité (étape 2)
 
@@ -609,14 +643,6 @@ async function _collecterDonnees(trimestre, gc, onProg) {
         // Inconnue : inclure sans filtre + warning
         donnees[cleComplete] = valeur;
         clesInconnues.push(nomCourt);
-
-        if (idx % 5 === 0) {
-            onProg(15 + Math.round((i / clesTrimestre.length) * 15),
-                'Lecture des données...',
-                (i + 1) + ' / ' + clesTrimestre.length + ' clés');
-            await _yield();
-        }
-        idx++;
     }
 
     if (clesInconnues.length > 0) {
@@ -965,11 +991,16 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
         }
 
         var tailleJsonDonnees = 0;
+        var donneesJsonStr = '';
         try {
-            tailleJsonDonnees = new Blob([JSON.stringify(donnees)]).size;
+            donneesJsonStr = JSON.stringify(donnees);
+            tailleJsonDonnees = new Blob([donneesJsonStr]).size;
         } catch (eMes) {
-            console.warn('[Réserve] Mesure taille JSON échouée:', eMes.message || eMes);
+            console.warn('[Réserve] Sérialisation JSON échouée:', eMes.message || eMes);
         }
+
+        // Hash SHA-256 du JSON (integrite, cf. SKILL_Securite_donnees §4.3)
+        var donneesSha256 = donneesJsonStr ? await _calculerSHA256(donneesJsonStr) : null;
 
         // 2. Collecte des blobs
         _prog(40, 'Collecte des fichiers travaux...', '');
@@ -990,6 +1021,11 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
             date_versement: dateVersement,
             appareil: _identifierAppareil(),
             application_version: _versionApp(),
+            integrite: {
+                donnees_json_sha256: donneesSha256,
+                algorithme: donneesSha256 ? 'SHA-256' : null,
+                date_calcul: donneesSha256 ? dateVersement : null
+            },
             contenu: {
                 donnees: true,
                 travaux: collecteBlobs.trouves > 0,
