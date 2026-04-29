@@ -191,11 +191,16 @@
         // Limite de sécurité : 20 MB par blob (IndexedDB ~50 MB par origin)
         const LIMITE_BLOB_MB = 20;
         if (blob.size > LIMITE_BLOB_MB * 1024 * 1024) {
-            console.error(`[Travaux-Stockage] Blob trop volumineux: ${(blob.size / 1024 / 1024).toFixed(1)} MB (limite: ${LIMITE_BLOB_MB} MB)`);
+            const tailleMB = (blob.size / 1024 / 1024).toFixed(1);
+            const msg = `Blob trop volumineux: ${tailleMB} MB (limite: ${LIMITE_BLOB_MB} MB)`;
+            console.error(`[Travaux-Stockage] ${msg}`);
             if (typeof afficherNotificationErreur === 'function') {
                 afficherNotificationErreur('Fichier trop volumineux', `Le fichier dépasse la limite de ${LIMITE_BLOB_MB} MB.`);
             }
-            return;
+            // Throw plutot que return silencieux : sinon le caller croit que le
+            // blob est stocke alors qu'il ne l'est pas, et la metadata associee
+            // (entree dans fichiersTravaux) devient orpheline.
+            throw new Error(msg);
         }
 
         // FSAPI: fichier sur disque
