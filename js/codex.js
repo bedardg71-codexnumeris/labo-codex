@@ -479,6 +479,17 @@ async function chargerCodex(fichierZip) {
                 var entries = zip.file(pattern);
                 if (entries && entries.length > 0) {
                     var blobData = await entries[0].async('blob');
+                    // Verifier les magic bytes : un codex compromis peut contenir
+                    // un blob malveillant deguise en image/PDF. Sans ce check,
+                    // chargerCodex stocke n'importe quel contenu dans le blob
+                    // store, qui sera ensuite servi par travaux-visionneuse.
+                    if (window.travauxImport && typeof window.travauxImport.validerMagicBytes === 'function') {
+                        var magicOk = await window.travauxImport.validerMagicBytes(blobData);
+                        if (!magicOk) {
+                            console.warn('📂 Codex : blob refuse (magic bytes invalides) pour ' + f.id);
+                            continue;
+                        }
+                    }
                     await travauxStockage.stockerBlob(f.id, blobData, f.etudiantDA, f.productionId);
                     nbBlobs++;
                 }
@@ -593,10 +604,16 @@ async function validerCodex(fichierZip) {
         erreurs.push(`Format trop récent (v${manifeste.formatVersion}), cette version supporte v${FORMAT_VERSION}`);
     }
 
-    // 6. Vérifier que les données JSON sont lisibles
+    // 6. Vérifier que les données JSON sont lisibles ET respectent le schema
+    // attendu : un objet (pas null, pas un tableau, pas un primitif). Schema
+    // validation minimale -- validerCodex est l'unique frontiere avant que
+    // les donnees touchent le storage de l'app. Cf. SKILL_Securite_donnees §9.1.2.
     try {
         const jsonStr = await entreeDonnees.async('string');
-        JSON.parse(jsonStr);
+        const donnees = JSON.parse(jsonStr);
+        if (donnees === null || typeof donnees !== 'object' || Array.isArray(donnees)) {
+            erreurs.push('Données JSON invalides : objet attendu, recu ' + (Array.isArray(donnees) ? 'tableau' : typeof donnees));
+        }
     } catch (e) {
         erreurs.push('Données JSON illisibles : ' + e.message);
     }
@@ -617,6 +634,15 @@ async function validerCodex(fichierZip) {
 async function lireManifeste(fichierZip) {
     const buffer = await _lireCommeArrayBuffer(fichierZip);
     const zip = await JSZip.loadAsync(buffer);
+    // Validation securite : verifier la taille decompressee et les chemins
+    // (path traversal). API publique, doit etre defendue meme si le caller
+    // est interne -- le ZIP vient toujours d'un fichier externe.
+    if (typeof validerZipSecurite === 'function') {
+        var securite = validerZipSecurite(zip);
+        if (!securite.valide) {
+            throw new Error('ZIP refuse : ' + securite.erreur);
+        }
+    }
     var entree = zip.file(NOM_MANIFESTE) || zip.file(NOM_MANIFESTE_ANCIEN);
     if (!entree) {
         throw new Error('Ce fichier ne contient pas de manifeste de codex.');
