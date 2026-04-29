@@ -1040,9 +1040,14 @@
         // Déjà migrée ?
         if (db.getSync('_migration_fichiers_done', false)) return;
 
+        let oldDB = null;
+        let copieEnCours = false;
+        let recordsCopies = 0;
+        let recordsTotal = 0;
+
         try {
             // Tenter d'ouvrir l'ancienne base
-            const oldDB = await new Promise((resolve, reject) => {
+            oldDB = await new Promise((resolve, reject) => {
                 const req = indexedDB.open('MonitorageFichiers');
                 req.onsuccess = (e) => resolve(e.target.result);
                 req.onerror = () => reject(req.error);
@@ -1065,12 +1070,18 @@
                 req.onsuccess = () => resolve(req.result || []);
                 req.onerror = () => reject(req.error);
             });
+            recordsTotal = records.length;
 
-
-            // Copier vers le nouveau store
+            // Copier vers le nouveau store. Si une copie echoue (quota, etc.)
+            // on PRESERVE l'ancienne base et on NE pose PAS le flag : la
+            // migration sera retentee au prochain boot. Les copies deja
+            // faites sont idempotentes (storeBlob keys par record.id).
+            copieEnCours = true;
             for (const record of records) {
                 await db.storeBlob(record);
+                recordsCopies++;
             }
+            copieEnCours = false;
 
             // Fermer et supprimer l'ancienne base
             oldDB.close();
@@ -1079,8 +1090,20 @@
             // Marquer la migration complète
             db.setSync('_migration_fichiers_done', true);
         } catch (e) {
-            // Si l'ancienne base n'existe pas, l'ouverture crée une base vide v1
-            // On la supprime simplement
+            if (oldDB) { try { oldDB.close(); } catch (_) {} }
+
+            // Echec PENDANT la copie : ne PAS supprimer l'ancienne base, ne PAS
+            // marquer fait. Les blobs originaux sont preserves pour retry au
+            // prochain boot. Les blobs deja copies dans le nouveau store
+            // restent (storeBlob est idempotent par id : pas de doublons au retry).
+            if (copieEnCours) {
+                console.error('[DB] Migration MonitorageFichiers interrompue : ' + recordsCopies + '/' + recordsTotal + ' fichiers copies. L\'ancienne base est PRESERVEE pour retry au prochain boot. Erreur :', e);
+                return;
+            }
+
+            // Echec AVANT la copie (ouverture / lecture) : pas de donnees
+            // migrees, on peut nettoyer la base vide creee par open() et
+            // marquer fait.
             try { indexedDB.deleteDatabase('MonitorageFichiers'); } catch (ex) { console.warn('[DB] deleteDatabase skipped:', ex.message || ex); }
             db.setSync('_migration_fichiers_done', true);
         }
