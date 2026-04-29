@@ -709,6 +709,10 @@
     function trouverEvaluationPourSynthese(fichier, productionIdOverride) {
         if (!fichier || !fichier.etudiantDA) return null;
         const productionId = productionIdOverride || fichier.productionId;
+        // Sans productionId resolu, on ne peut pas garantir que l'evaluation
+        // retournee correspond au fichier => abandon plutot que mode permissif
+        // qui retourne la derniere eval de l'eleve toutes productions confondues.
+        if (!productionId) return null;
 
         let evaluations = [];
         if (typeof obtenirDonneesSelonMode === 'function') {
@@ -720,7 +724,7 @@
 
         const candidates = evaluations
             .filter(e => e.etudiantDA === fichier.etudiantDA && !e.remplaceeParId)
-            .filter(e => !productionId || e.productionId === productionId);
+            .filter(e => e.productionId === productionId);
 
         if (!candidates.length) return null;
         return candidates.sort((a, b) => new Date(b.dateEvaluation || 0) - new Date(a.dateEvaluation || 0))[0];
@@ -768,7 +772,7 @@
             }
 
             // Ajouter la page de synthese (grille + retroaction)
-            await ajouterPageSynthese(doc, fichier);
+            await ajouterPageSynthese(doc, fichier, productionId);
 
             // Telecharger
             // ✅ ANONYMISATION (Tier 0.1) : clé de base — prenom/nom sont anonymisés par obtenirDonneesSelonMode
