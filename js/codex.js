@@ -1691,6 +1691,13 @@ async function _executerAutoSave() {
 
     _autoSaveEnCours = true;
 
+    // Capture du marqueur AVANT que genererCodex ne le mette a null en interne
+    // (cf. _etat.modificationsDepuis = null dans genererCodex). Si l'ecriture
+    // FSAPI echoue ensuite, il faut restaurer le marqueur sinon les modifs
+    // apparaissent comme « sauvees » alors que le fichier disque ne les a pas
+    // (data loss invisible pour l'utilisateur).
+    var marqueurModifsAvant = _etat.modificationsDepuis;
+
     try {
         var resultat = await genererCodex({ silencieux: true });
         // Ré-écriture directe via le handle (pas de dialogue)
@@ -1706,6 +1713,15 @@ async function _executerAutoSave() {
         }
     } catch (e) {
         console.warn('📂 Auto-save échoué :', e.message);
+        // Restaurer le marqueur de modifications : genererCodex a deja mis
+        // modificationsDepuis a null en interne, mais l'ecriture FSAPI a
+        // echoue donc les modifs sont en realite toujours non sauvees.
+        // L'indicateur d'en-tete reste « modifie » et l'utilisateur sait.
+        if (_etat.modificationsDepuis === null && marqueurModifsAvant) {
+            _etat.modificationsDepuis = marqueurModifsAvant;
+            _sauvegarderEtat();
+            _mettreAJourIndicateur();
+        }
         // Handle devenu invalide — arrêter l'auto-save
         if (e.name === 'NotAllowedError' || e.name === 'NotFoundError' || e.name === 'InvalidStateError') {
             _fileHandle = null;
