@@ -89,8 +89,16 @@
         let nom = e.nom || '';
         if ((!prenom || !nom) && evaluation.etudiantNom) {
             const parts = String(evaluation.etudiantNom).trim().split(/\s+/);
-            prenom = prenom || parts.slice(0, -1).join(' ') || parts[0] || '';
-            nom = nom || parts.slice(-1)[0] || '';
+            // Nom mononyme (ex: « Madonna ») : assigner uniquement au nom de
+            // famille pour eviter le doublon « Madonna Madonna » dans le
+            // header PDF (l'ancien `prenom || parts[0]` retombait sur le seul
+            // token, qui etait deja affecte a `nom`). (nit4)
+            if (parts.length === 1) {
+                nom = nom || parts[0] || '';
+            } else {
+                prenom = prenom || parts.slice(0, -1).join(' ') || '';
+                nom = nom || parts.slice(-1)[0] || '';
+            }
         }
 
         return {
