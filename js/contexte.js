@@ -16,143 +16,16 @@
  * ✅ BETA 95.2 : Support groupe-cours entities + fallback legacy
  */
 function mettreAJourContexteEntete() {
-    const conteneur = document.getElementById('info-contextuelles-centre');
-    if (!conteneur) return;
+    const elDate = document.getElementById('entete-date');
+    if (!elDate) return;
 
     try {
-        // Obtenir les trimestres pour filtrer les cours
-        const trimestres = db.getSync('trimestres', []);
-        const trimestreActif = trimestres.find(t => t.actif);
-        const trimestreActifId = trimestreActif ? trimestreActif.id : null;
-
-        // 🆕 BETA 95.2 : Essayer d'abord les groupe-cours entities
-        let groupesCours = [];
-        let coursActif = null;
-        let utilisationGroupeCours = false;
-
-        if (trimestreActifId) {
-            const cleGC = `${trimestreActifId.toLowerCase()}_groupesCours`;
-            groupesCours = db.getSync(cleGC, []);
-
-            if (groupesCours.length > 0) {
-                utilisationGroupeCours = true;
-
-                // Hydrater les groupe-cours avec les entités
-                const cours = db.getSync('cours', []);
-                const enseignants = db.getSync('enseignants', []);
-
-                groupesCours = groupesCours.map(gc => {
-                    const coursInfo = cours.find(c => c.id === gc.coursId) || {};
-                    const enseignant = enseignants.find(e => e.id === gc.enseignantId) || {};
-                    return {
-                        ...gc,
-                        sigle: coursInfo.codeCours || '',
-                        nomCours: coursInfo.nomCours || '',
-                        prenom: enseignant.prenom || '',
-                        nom: enseignant.nom || '',
-                        pratiqueId: gc.pratiqueId
-                    };
-                });
-
-                // Trouver le groupe-cours actif
-                const gcActif = db.getSync('groupeCoursActif', null);
-                coursActif = gcActif ? groupesCours.find(gc => gc.id === gcActif.id) : groupesCours.find(gc => gc.actif) || groupesCours[0];
-            }
-        }
-
-        // Fallback : utiliser listeCours (format legacy)
-        if (!utilisationGroupeCours) {
-            const listeCours = db.getSync('listeCours', []);
-            const coursTrimestreActif = trimestreActifId
-                ? listeCours.filter(c => c.trimestreId === trimestreActifId)
-                : listeCours;
-
-            // 🆕 FIX (4 fév 2026) : Priorité codeCours, ajouter code pour Primo
-            groupesCours = coursTrimestreActif.map(c => ({
-                id: c.id,
-                sigle: c.codeCours || c.sigle || c.code || '',
-                nomCours: c.nomCours || c.titre || '',
-                groupe: c.groupe || '',
-                pratiqueId: c.pratiqueId,
-                actif: c.actif
-            }));
-
-            // Obtenir le cours actif (depuis infoCours ou le premier cours actif)
-            const infoCours = db.getSync('infoCours', null);
-            coursActif = infoCours ? groupesCours.find(gc => gc.id === infoCours.id) : groupesCours.find(gc => gc.actif) || groupesCours[0];
-
-        }
-
-
-        // Obtenir la pratique du cours actif
-        let pratiqueName = '';
-        if (coursActif && coursActif.pratiqueId) {
-            const pratiquesCodées = {
-                'pan-standards': 'PAN-Standards',
-                'pan-maitrise': 'PAN-Standards', // Rétrocompatibilité
-                'pan-specifications': 'PAN-Spécifications',
-                'pan-denotation': 'PAN-Dénotation',
-                'sommative': 'Sommative'
-            };
-            // D'abord vérifier les pratiques codées
-            if (pratiquesCodées[coursActif.pratiqueId]) {
-                pratiqueName = pratiquesCodées[coursActif.pratiqueId];
-            } else {
-                // Sinon chercher dans les pratiques configurables pour obtenir le nom
-                // 🆕 FIX (22 jan 2026) : Utiliser db.get() async car getSync peut retourner [] si pas encore synchronisé
-                const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
-                const pratiqueTrouvee = pratiquesConfigurables.find(p => p.id === coursActif.pratiqueId);
-
-                if (pratiqueTrouvee) {
-                    pratiqueName = pratiqueTrouvee.nom;
-                } else {
-                    // Fallback : afficher l'ID pour l'instant, puis charger async et mettre à jour
-                    pratiqueName = coursActif.pratiqueId;
-
-                    // Charger async depuis IndexedDB et mettre à jour si trouvé
-                    const pratiqueIdCapture = coursActif.pratiqueId;
-                    db.get('pratiquesConfigurables').then(pratiques => {
-                        if (pratiques && Array.isArray(pratiques)) {
-                            const pratique = pratiques.find(p => p.id === pratiqueIdCapture);
-                            if (pratique && pratique.nom) {
-                                const spanPratique = document.getElementById('contexte-pratique-nom');
-                                if (spanPratique) {
-                                    spanPratique.textContent = `Pratique : ${pratique.nom}`;
-                                }
-                            }
-                        }
-                    }).catch(function(e) {
-                        console.warn('[Contexte] Erreur lecture async pratiquesConfigurables:', e);
-                    });
-                }
-            }
-        }
-
-        // Obtenir la date actuelle
         const aujourdhui = new Date();
         const dateStr = `${aujourdhui.getFullYear()}-${String(aujourdhui.getMonth() + 1).padStart(2, '0')}-${String(aujourdhui.getDate()).padStart(2, '0')}`;
-
-        // Obtenir les informations du calendrier
         const calendrier = db.getSync(cle('calendrierComplet'), {});
         const infoJour = calendrier[dateStr];
 
-        // ========================================
-        // LIGNE 1 : Pratique seulement (le dropdown groupe-cours est dans le bandeau dédié)
-        // ========================================
-        let htmlLigne1 = '';
-
-        // Ajouter la pratique
-        if (pratiqueName) {
-            if (htmlLigne1) {
-                htmlLigne1 += '<span class="separateur-contexte">•</span>';
-            }
-            htmlLigne1 += `<span class="info-contexte-item" id="contexte-pratique-nom" data-tooltip="entete-pratique">Pratique : ${echapperHtml(pratiqueName)}</span>`;
-        }
-
-        // ========================================
-        // LIGNE 2 : Date et semaine
-        // ========================================
-        let htmlLigne2 = '';
+        let dateTexte = '';
 
         if (infoJour && (infoJour.statut === 'cours' || infoJour.statut === 'reprise')) {
             const mois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
@@ -165,44 +38,31 @@ function mettreAJourContexteEntete() {
             const annee = aujourdhui.getFullYear();
             const jourSemainenom = joursComplets[jourSemaineNum];
 
-            let dateComplete = '';
             const numeroSemaine = infoJour.numeroSemaine;
             const dansTrimestre = numeroSemaine >= 1 && numeroSemaine <= 15;
 
             if (dansTrimestre) {
-                dateComplete = `Semaine ${numeroSemaine} · ${jourSemainenom} ${jour} ${moisNom} ${annee}`;
+                dateTexte = `Semaine ${numeroSemaine} · ${jourSemainenom} ${jour} ${moisNom} ${annee}`;
             } else {
-                dateComplete = `${jourSemainenom} ${jour} ${moisNom} ${annee}`;
+                dateTexte = `${jourSemainenom} ${jour} ${moisNom} ${annee}`;
             }
 
-            // Rang de la séance
             if (typeof obtenirRangSeanceDansSemaine === 'function') {
                 const rangSeance = obtenirRangSeanceDansSemaine(dateStr);
                 if (rangSeance && rangSeance.numero > 0) {
-                    dateComplete += ` · ${rangSeance.ordinal} séance`;
+                    dateTexte += ` · ${rangSeance.ordinal} séance`;
                 }
             }
-
-            htmlLigne2 = `<span class="info-contexte-item">${dateComplete}</span>`;
         } else {
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const dateFr = aujourdhui.toLocaleDateString('fr-CA', options);
-            htmlLigne2 = `<span class="info-contexte-item">${dateFr}</span>`;
+            dateTexte = aujourdhui.toLocaleDateString('fr-CA', options);
         }
 
-        // ========================================
-        // Assembler le HTML final
-        // ========================================
-        const htmlFinal = `
-            <div class="info-contexte-ligne">${htmlLigne1}</div>
-            <div class="info-contexte-ligne" data-tooltip="entete-semaine">${htmlLigne2}</div>
-        `;
-
-        conteneur.innerHTML = htmlFinal;
+        elDate.textContent = dateTexte;
 
     } catch (error) {
         console.warn('⚠️ Erreur mise à jour contexte en-tête:', error);
-        conteneur.innerHTML = '';
+        elDate.textContent = '';
     }
 }
 
