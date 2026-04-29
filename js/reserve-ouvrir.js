@@ -420,7 +420,10 @@ async function _afficherListeVersements() {
                 '<strong>' + _echapper(v.dossier) + '</strong>';
             var details = [];
             if (p.date_versement) details.push(_echapper(_formaterDate(p.date_versement)));
-            if (p.nombre_etudiants) details.push(p.nombre_etudiants + ' &eacute;tudiant(s)');
+            // p.nombre_etudiants vient du manifeste-reserve.json importe ; un
+            // manifeste compromis pourrait y mettre du HTML. Echapper avant
+            // concatenation dans innerHTML.
+            if (p.nombre_etudiants) details.push(_echapper(p.nombre_etudiants) + ' &eacute;tudiant(s)');
             if (p.mode_versement === 'fsapi') details.push('FSAPI');
             else if (p.mode_versement === 'zip') details.push('ZIP');
             if (details.length > 0) {
