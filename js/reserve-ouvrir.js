@@ -712,7 +712,16 @@ function onChangerToggleCopie(el) {
 
 function _nettoyerMarqueurs(item) {
     var clone = JSON.parse(JSON.stringify(item));
+    // Marqueurs internes au flux d'import qui ne doivent JAMAIS persister
+    // dans les bibliotheques actives apres reimport. _doublon est pose par
+    // la detection des collisions ; _refGrille / _refEchelle / _refXxxManquante
+    // sont poses par l'auto-cochage des references croisees (#257 v1) pour
+    // signaler des dependances manquantes a l'utilisateur. (M1)
     delete clone._doublon;
+    delete clone._refGrille;
+    delete clone._refEchelle;
+    delete clone._refGrilleManquante;
+    delete clone._refEchelleManquante;
     return clone;
 }
 
