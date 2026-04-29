@@ -1832,6 +1832,12 @@ function _actualiserMenu() {
             var modifie = !!_etat.modificationsDepuis;
             var classePastille = modifie ? 'codex-statut-pastille--orange' : 'codex-statut-pastille--vert';
             var texteEtat = modifie ? 'Modifications non enregistrées' : 'Tout est enregistré';
+            // _etat.nom est saisi par l'utilisateur (renommage codex). echapper
+            // pour eviter qu'un nom contenant <script> ou des attributs event-handler
+            // ne soit injecte dans le DOM via innerHTML (XSS).
+            var esc = (typeof window.echapperHtml === 'function')
+                ? window.echapperHtml
+                : function(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); };
             // Ligne d'info : dernier fichier enregistré
             var ligneInfo = '';
             if (_etat.derniereSauvegarde) {
@@ -1841,10 +1847,10 @@ function _actualiserMenu() {
                 var heureStr = pad(d.getHours()) + 'h' + pad(d.getMinutes());
                 var nomNettoye = (_etat.nom || 'codex').replace(/[^a-zA-Z0-9àâéèêëïîôùûüçÀÂÉÈÊËÏÎÔÙÛÜÇ _-]/g, '').trim().replace(/\s+/g, '-');
                 var nomFichierAffiche = 'codex-' + nomNettoye + '-' + dateStr + '-' + heureStr + EXTENSION_CODEX;
-                ligneInfo = '<div class="codex-statut-fichier">Dernier fichier\u00a0: ' + nomFichierAffiche + '</div>';
+                ligneInfo = '<div class="codex-statut-fichier">Dernier fichier\u00a0: ' + esc(nomFichierAffiche) + '</div>';
             }
             statutHaut.innerHTML =
-                '<div class="codex-statut-nom" data-action="Codex.actionRenommer" title="Cliquer pour renommer">' + (_etat.nom || 'Codex') + '</div>' +
+                '<div class="codex-statut-nom" data-action="Codex.actionRenommer" title="Cliquer pour renommer">' + esc(_etat.nom || 'Codex') + '</div>' +
                 '<div class="codex-statut-etat"><span class="codex-statut-pastille ' + classePastille + '">\u25C9</span> ' + texteEtat + '</div>' +
                 ligneInfo;
             statutHaut.classList.remove('u-hide');
