@@ -1401,6 +1401,28 @@
     }
 
     /**
+     * Beta 99.30 : Détecte les fichiers de la file d'attente dont le nom ne
+     * contient aucun DA. Sans DA, l'association à l'étudiant n'est pas fiable
+     * et le regroupement multi-pages ne fonctionne pas.
+     *
+     * @returns {Array<Object>} Les fichiers concernés (entrées de la queue)
+     */
+    function detecterFichiersSansDA() {
+        try {
+            const queue = obtenirFileDAttente();
+            if (!queue || queue.length === 0) return [];
+            return queue.filter(function(f) {
+                if (!f) return false;
+                const da = (f.parseLea && f.parseLea.da) || f.daDetecte;
+                return !da;
+            });
+        } catch (e) {
+            console.warn('[Travaux-Import] Erreur detecterFichiersSansDA:', e);
+            return [];
+        }
+    }
+
+    /**
      * Beta 99.30 : Détecte les fichiers de la file d'attente qui dupliquent un
      * fichier déjà importé dans le GC actif (même couple etudiantDA + productionId)
      * ou un autre fichier de la file. Une entrée par fichier "nouveau" en doublon.
@@ -1426,8 +1448,13 @@
                 const dejaStockes = fichiersStockes.filter(function(fS) {
                     return fS && fS.etudiantDA === da && fS.productionId === prodId;
                 });
+                // Beta 99.30 : les fichiers de la file qui partagent un même
+                // groupeDocumentId non vide sont des pages d'un même document
+                // (assemblage multi-pages automatique) — pas un doublon.
                 const dansQueue = queue.slice(0, idxNouveau).filter(function(fA) {
-                    return fA && fA.etudiantDA === da && fA.productionId === prodId;
+                    if (!fA || fA.etudiantDA !== da || fA.productionId !== prodId) return false;
+                    if (fNouveau.groupeDocumentId && fA.groupeDocumentId === fNouveau.groupeDocumentId) return false;
+                    return true;
                 });
                 if (dejaStockes.length > 0 || dansQueue.length > 0) {
                     doublons.push({
@@ -1470,6 +1497,7 @@
         detecterDA: detecterDA,
         trouverEtudiantParDA: trouverEtudiantParDA,
         detecterFichiersAutreGC: detecterFichiersAutreGC,
+        detecterFichiersSansDA: detecterFichiersSansDA,
         detecterDoublonsStockage: detecterDoublonsStockage,
         reevaluerAssociationsQueue: reevaluerAssociationsQueue,
         // Parser Lea

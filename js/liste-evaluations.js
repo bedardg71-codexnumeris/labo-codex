@@ -1179,6 +1179,11 @@ function genererDropdownActions(ligne) {
         options.push(`<option value="editer|${fichierId}">Éditer</option>`);
     }
 
+    // Beta 99.30 : Renommer — si fichier importé, sauf remplacée/non-recevable
+    if (fichierId && ligne.statut !== 'remplacee' && ligne.statut !== 'non-recevable') {
+        options.push(`<option value="renommer|${fichierId}">Renommer</option>`);
+    }
+
     // Transférer — si fichier importé, sauf remplacée/non-recevable
     if (fichierId && ligne.statut !== 'remplacee' && ligne.statut !== 'non-recevable') {
         options.push(`<option value="transferer">Transférer</option>`);
@@ -1250,6 +1255,9 @@ function executerActionEval(select) {
         case 'editer':
             ouvrirEditeurDepuisListe(parts[1]);
             break;
+        case 'renommer':
+            renommerFichierDepuisListe(parts[1]);
+            break;
         case 'transferer':
             if (typeof travauxUI !== 'undefined') {
                 travauxUI.ouvrirModalTransfert();
@@ -1309,6 +1317,39 @@ function ouvrirAnnotationDepuisListe(fichierId, productionId) {
             travauxUI.ouvrirFichier(fichierId);
         }
     }, 200);
+}
+
+/**
+ * Beta 99.30 : Renomme un fichier depuis le menu Actions de la liste des
+ * évaluations. Préserve l'extension d'origine si l'utilisateur l'omet.
+ */
+function renommerFichierDepuisListe(fichierId) {
+    if (typeof travauxStockage === 'undefined') return;
+    const fichier = travauxStockage.obtenirFichierParId
+        ? travauxStockage.obtenirFichierParId(fichierId)
+        : null;
+    if (!fichier) {
+        alert('Fichier introuvable.');
+        return;
+    }
+    const ancien = fichier.nomFichier || '';
+    const matchExt = ancien.match(/\.[^.]+$/);
+    const ext = matchExt ? matchExt[0] : '';
+    const saisie = prompt('Nouveau nom du fichier :', ancien);
+    if (saisie === null) return;
+    let nouveau = saisie.trim();
+    if (!nouveau || nouveau === ancien) return;
+    if (ext && !nouveau.toLowerCase().endsWith(ext.toLowerCase())) {
+        nouveau += ext;
+    }
+    travauxStockage.mettreAJourFichier(fichierId, { nomFichier: nouveau });
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces('Fichier renommé : ' + nouveau);
+    }
+    // Rafraîchir la liste pour refléter le nouveau nom (notamment dans la modale Propriétés)
+    if (typeof initialiserListeEvaluations === 'function') {
+        initialiserListeEvaluations();
+    }
 }
 
 /**
