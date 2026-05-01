@@ -4009,6 +4009,10 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
                 const ev = evalIndex.get(da + '_' + art.id);
                 if (!ev) return null;
                 if (ev.statutRemise === 'non-remis' || ev.statutRemise === 'retard') return null;
+                // Beta 99.30 : évaluation enregistrée sans critère noté (ex.
+                // jeton de délai seul) = pas encore évaluée. On omet le point
+                // au lieu de tracer 0% (cohérent avec le badge ÉVALUÉ).
+                if (!Array.isArray(ev.criteres) || ev.criteres.length === 0) return null;
                 if (mode === 'habiletes') {
                     return moyenneCriteresHabiletes(ev, criteresActifs);
                 }
