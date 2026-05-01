@@ -919,9 +919,13 @@ function chargerTableauPresences(dateStr, estVerrouille) {
     const groupeFiltre = selectGroupe ? selectGroupe.value : '';
 
     // 🆕 BETA 95.7 (23 jan) : Utiliser UNIQUEMENT les étudiants du groupe-cours actif
-    const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+    let etudiants = typeof obtenirEtudiantsCoursActif === 'function'
         ? obtenirEtudiantsCoursActif()
         : obtenirDonneesSelonMode('groupeEtudiants');
+    // Garde null (99.30) : install fraiche / cours sans etudiants -> sort()
+    // crash. Parite avec sauvegarderPresencesSansValidation:616 et obtenir
+    // DonneesSelonMode pattern dans le reste du module.
+    etudiants = etudiants || [];
     // ✅ CORRIGÉ (8 janvier 2026) : Utiliser obtenirDonneesSelonMode pour filtrer par coursId
     // ✅ CORRIGÉ (22 janvier 2026) : S'assurer que presences est un tableau
     let presences = obtenirDonneesSelonMode('presences') || [];
@@ -1268,9 +1272,11 @@ function enregistrerPresences() {
     const groupeFiltre = selectGroupe ? selectGroupe.value : '';
 
     // 🆕 BETA 95.7 (23 jan) : Utiliser UNIQUEMENT les étudiants du groupe-cours actif
-    const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+    let etudiants = typeof obtenirEtudiantsCoursActif === 'function'
         ? obtenirEtudiantsCoursActif()
         : obtenirDonneesSelonMode('groupeEtudiants');
+    // Garde null (99.30) : evite crash filter() si install fraiche.
+    etudiants = etudiants || [];
     // ✅ CORRIGÉ (22 janvier 2026) : Utiliser la clé namespacée pour le trimestre actif
     const clePresences = cle('presences');
     let presences = db.getSync(clePresences, []);
@@ -1934,16 +1940,29 @@ document.addEventListener('DOMContentLoaded', function() {
  * @param {string} da - DA de l'étudiant
  * @param {string} date - Date de la séance (format ISO)
  * @param {string} notes - Nouvelles notes
+ * @param {string} [coursId] - ID du cours (optionnel, defaut = cours actif).
+ *   Empeche les fuites de notes confidentielles entre cours dans setups
+ *   multi-cours (un meme etudiant peut etre enrole dans plusieurs cours
+ *   le meme jour ; sans coursId, la 1ere entree (da, date) etait ecrasee
+ *   au lieu de celle du cours en cours de consultation).
  * @returns {boolean} true si modifié
  */
-window.modifierNotesPresence = function(da, date, notes) {
+window.modifierNotesPresence = function(da, date, notes, coursId) {
+    if (coursId === undefined && typeof obtenirCoursActifId === 'function') {
+        coursId = obtenirCoursActifId();
+    }
     var clePresences = cle('presences');
     var presences = db.getSync(clePresences, []);
     var modifie = false;
 
     for (var i = 0; i < presences.length; i++) {
-        if (presences[i].da === da && presences[i].date === date) {
-            presences[i].notes = notes;
+        // Match (da, date) ET coursId si dispos. Pattern aligne sur les autres
+        // writers (enregistrerPresences, sauvegarderPresencesSansValidation,
+        // ajouterPresencesIntervention) qui filtrent tous par coursId.
+        var p = presences[i];
+        var matchCoursId = !coursId || !p.coursId || p.coursId === coursId;
+        if (p.da === da && p.date === date && matchCoursId) {
+            p.notes = notes;
             modifie = true;
             break;
         }
