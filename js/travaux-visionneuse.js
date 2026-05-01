@@ -121,11 +121,24 @@
             return;
         }
 
-        const arrayBuffer = await blob.arrayBuffer();
-        pdfDocument = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        nombrePagesTotal = pdfDocument.numPages;
-
-        await rendrePage(1);
+        // try/catch pour gerer les rejets de pdfjsLib.getDocument :
+        // PDF corrompu (InvalidPDFException), chiffre (PasswordException),
+        // worker non charge (MissingPDFException). Sans ce catch, la rejection
+        // remontait dans ouvrirFichier qui avait deja mis fichierActuel et
+        // efface pdfDocument -> etat incoherent (claim un fichier ouvert avec
+        // pdfDocument === null) sans erreur visible. Symetrie avec ouvrirImage
+        // qui gere son img.onerror via afficherErreur.
+        try {
+            const arrayBuffer = await blob.arrayBuffer();
+            pdfDocument = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            nombrePagesTotal = pdfDocument.numPages;
+            await rendrePage(1);
+        } catch (e) {
+            console.error('[Travaux-Visionneuse] Erreur ouverture PDF:', e);
+            pdfDocument = null;
+            fichierActuel = null;
+            afficherErreur('Erreur ouverture PDF');
+        }
     }
 
     /**
@@ -441,11 +454,22 @@
             indicateur.textContent = `${pageActuelle} / ${nombrePagesTotal}`;
         }
 
-        const btnPrec = document.getElementById('travaux-btn-page-prec');
-        const btnSuiv = document.getElementById('travaux-btn-page-suiv');
+        // Toolbar standard ET toolbar split-view (vue cote-a-cote). Ces 2
+        // toolbars utilisent des IDs differents -- avant 99.30, seuls les
+        // boutons standard etaient mis a jour, laissant les boutons split
+        // disabled a perpetuite, rendant la navigation multi-pages impossible
+        // dans la vue cote-a-cote.
+        const btnsPrec = [
+            document.getElementById('travaux-btn-page-prec'),
+            document.getElementById('travaux-split-btn-page-prec')
+        ].filter(Boolean);
+        const btnsSuiv = [
+            document.getElementById('travaux-btn-page-suiv'),
+            document.getElementById('travaux-split-btn-page-suiv')
+        ].filter(Boolean);
 
-        if (btnPrec) btnPrec.disabled = pageActuelle <= 1;
-        if (btnSuiv) btnSuiv.disabled = pageActuelle >= nombrePagesTotal;
+        btnsPrec.forEach(b => { b.disabled = pageActuelle <= 1; });
+        btnsSuiv.forEach(b => { b.disabled = pageActuelle >= nombrePagesTotal; });
 
         // Zoom — mettre à jour le bouton zoom100 avec le pourcentage réel
         var btnZoom100 = document.getElementById('travaux-btn-zoom100');
@@ -469,15 +493,23 @@
             await reRendrePageActuelle();
             return;
         }
-        // Point focal = centre de la vue en coordonnées du contenu
-        var cX = conteneurGestesZoom.scrollLeft + conteneurGestesZoom.clientWidth / 2;
-        var cY = conteneurGestesZoom.scrollTop + conteneurGestesZoom.clientHeight / 2;
+        // Point focal = centre de la vue en coordonnees du contenu.
+        // Symetrie (99.30) : appliquer la meme formule margin-aware que
+        // finaliserPinchZoom (l. 803) et onWheelZoom -- la marge CSS du wrapper
+        // ne scale pas avec le zoom, donc traiter cX*ratio comme uniformement
+        // scale over-shifte le scroll de margin*(ratio-1) par clic. Sur 10
+        // clics +/-, drift cumule ~100px du focal point.
+        var viewX = conteneurGestesZoom.clientWidth / 2;
+        var viewY = conteneurGestesZoom.clientHeight / 2;
+        var contentX = conteneurGestesZoom.scrollLeft + viewX;
+        var contentY = conteneurGestesZoom.scrollTop + viewY;
+        var margin = getMarginWrapper();
         var ratio = ancienZoom > 0 ? zoomActuel / ancienZoom : 1;
 
         await reRendrePageActuelle();
 
-        conteneurGestesZoom.scrollLeft = cX * ratio - conteneurGestesZoom.clientWidth / 2;
-        conteneurGestesZoom.scrollTop = cY * ratio - conteneurGestesZoom.clientHeight / 2;
+        conteneurGestesZoom.scrollLeft = (contentX - margin.left) * ratio + margin.left - viewX;
+        conteneurGestesZoom.scrollTop = (contentY - margin.top) * ratio + margin.top - viewY;
     }
 
     async function zoomAvant() {
