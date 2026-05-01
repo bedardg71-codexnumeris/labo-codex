@@ -336,9 +336,12 @@ function obtenirHeuresSeance(dateStr) {
         // Si format inconnu mais jour de cours valide
         else {
             console.warn('⚠️ Format de séance non reconnu:', seance);
-            // Utiliser une valeur par défaut
+            // Utiliser une valeur par defaut, mais ACCUMULER (+=) plutot que
+            // d'ECRASER (=). L'ancien `=` wipait silencieusement le total des
+            // seances precedentes -- comportement order-dependent et incoherent
+            // avec les 2 branches reconnues ci-dessus qui utilisent `+=`.
             const formatHoraire = db.getSync('formatHoraire', null);
-            totalHeures = formatHoraire === '1x4' ? 4 : 2;
+            totalHeures += formatHoraire === '1x4' ? 4 : 2;
         }
     });
 
@@ -415,19 +418,26 @@ function obtenirNombrePeriodesSeance(dateStr) {
         seancesCompletes = db.getSync(cleCours, {});
     }
 
+    // Garde null : obtenirSeancesCompletes peut retourner null/undefined.
+    // Parite avec obtenirToutesDatesCours et calculerNombreSeances qui
+    // verifient deja avec `if (seancesCompletes && Object.keys(...).length > 0)`.
+    seancesCompletes = seancesCompletes || {};
     const seancesDuJour = seancesCompletes[dateStr];
 
     if (seancesDuJour && seancesDuJour.length > 0) {
-        // Prendre le nombre de périodes de la première séance du jour
-        const seance = seancesDuJour[0];
-        if (seance.nombrePeriodes) {
-            return seance.nombrePeriodes;
-        }
-        // Rétrocompatibilité : convertir la durée en périodes
-        if (seance.duree) {
-            const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
-            return Math.round((seance.duree * 60) / dureePeriode);
-        }
+        // Agreger toutes les seances du jour. obtenirDureeMaxSeance() cap chaque
+        // seance a 2 periodes -- un horaire 1x4 (4 periodes) est donc forcement
+        // stocke en >=2 seances. Symetrie avec obtenirHeuresSeance qui agrege
+        // deja avec forEach. Avant : seul seancesDuJour[0].nombrePeriodes etait
+        // retourne, sous-comptant les jours multi-seances et polluant l'indice
+        // d'assiduite.
+        const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : 55;
+        const total = seancesDuJour.reduce((acc, s) => {
+            if (s.nombrePeriodes) return acc + s.nombrePeriodes;
+            if (s.duree) return acc + Math.round((s.duree * 60) / dureePeriode);
+            return acc;
+        }, 0);
+        if (total > 0) return total;
     }
 
     // Fallback : 2 périodes par défaut
@@ -995,6 +1005,9 @@ function chargerTableauPresences(dateStr, estVerrouille) {
         }
 
         // 🆕 BETA 95.7 : Input numérique pour périodes (permet fractions comme 1.5)
+        // data-facultatif (99.30) : permet a appliquerCodeCouleurPeriodes
+        // (live update) de re-appliquer 'saisie-absence-motivee' (jaune R∂I)
+        // au lieu de degrader vers 'saisie-absence' (rouge) sur edition utilisateur.
         const inputPeriodesHTML = `
             <input type="number"
                    class="controle-form input-periodes ${obtenirClasseSaisiePeriodes(periodesPresence, nombrePeriodesSeance, estFacultatif)}"
@@ -1005,6 +1018,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
                    step="0.5"
                    style="width: 70px; text-align: center;"
                    ${estVerrouille ? 'disabled' : ''}
+                   data-facultatif="${estFacultatif ? 'true' : 'false'}"
                    data-on-change="mettreAJourLignePeriodesHandler" data-da="${etudiant.da}" data-date-str="${dateStr}" data-nb-periodes="${nombrePeriodesSeance}"
             >/<span class="max-periodes">${nombrePeriodesSeance}</span>`;
 
@@ -1119,12 +1133,17 @@ function appliquerCodeCouleurPeriodes(inputPeriodes, periodesMax) {
     // parseFloat pour supporter les fractions
     const valeur = parseFloat(inputPeriodes.value) || 0;
 
+    // Lire le flag estFacultatif persiste sur le DOM par chargerTableauPresences.
+    // Sans ce flag, l'edition live d'une absence motivee (jaune R∂I) la
+    // degraderait silencieusement en absence simple (rouge).
+    const estFacultatif = inputPeriodes.dataset.facultatif === 'true';
+
     // Retirer toutes les classes
     inputPeriodes.classList.remove('saisie-absence', 'saisie-absence-motivee', 'saisie-retard', 'saisie-present', 'saisie-vide');
 
     // Appliquer la bonne classe
     if (valeur === 0) {
-        inputPeriodes.classList.add('saisie-absence');
+        inputPeriodes.classList.add(estFacultatif ? 'saisie-absence-motivee' : 'saisie-absence');
     } else if (valeur < periodesMax) {
         inputPeriodes.classList.add('saisie-retard');
     } else {
