@@ -3583,6 +3583,27 @@
             });
         }
 
+        // Beta 99.30 : Fichiers sans DA détectable dans le nom — l'association
+        // à un étudiant n'est pas fiable et le regroupement multi-pages ne
+        // fonctionnera pas. Avertissement non bloquant.
+        const fichiersSansDA = (typeof travauxImport.detecterFichiersSansDA === 'function')
+            ? travauxImport.detecterFichiersSansDA()
+            : [];
+        let bandeauSansDA = '';
+        if (fichiersSansDA.length > 0) {
+            const lignesND = fichiersSansDA.map(function(f) {
+                const nomAff = typeof anonymiserNomFichier === 'function'
+                    ? anonymiserNomFichier(f.nomFichier, f.etudiantDA)
+                    : f.nomFichier;
+                return '<li>' + echapperHtml(nomAff) + '</li>';
+            }).join('');
+            bandeauSansDA = '<div class="travaux-bandeau-sans-da">'
+                + '<p><strong>Fichier' + (fichiersSansDA.length > 1 ? 's' : '') + ' sans DA détectable :</strong></p>'
+                + '<ul>' + lignesND + '</ul>'
+                + '<p class="texte-muted u-texte-petit">Le numéro DA (7 chiffres) doit apparaître dans le nom de fichier pour permettre l\'association automatique à un étudiant et le regroupement multi-pages. Tu peux importer quand même, mais l\'association devra être faite manuellement.</p>'
+                + '</div>';
+        }
+
         // Beta 99.30 : Détection des doublons (fichiers déjà importés ou présents
         // plusieurs fois dans la file pour le même couple étudiant + production).
         const doublonsDetectes = (typeof travauxImport.detecterDoublonsStockage === 'function')
@@ -3631,7 +3652,7 @@
         }
 
         afficherModalePipeline('Confirmer l\u2019import',
-            bandeauAutreGC + bandeauDoublons + `<p>${nbFichiers} fichier(s) seront importés ${msgGroupe} et ${msgProduction}.</p>
+            bandeauAutreGC + bandeauSansDA + bandeauDoublons + `<p>${nbFichiers} fichier(s) seront importés ${msgGroupe} et ${msgProduction}.</p>
             <p>Confirmer l\u2019importation ?</p>`,
             [
                 { label: 'Oui, importer', classe: 'btn-principal', action: () => executerImportPipeline() },

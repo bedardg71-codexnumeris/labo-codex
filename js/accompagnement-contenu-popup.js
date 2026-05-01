@@ -416,12 +416,16 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: 'Nomme tes fichiers avec le DA de l\'étudiant (ex: 1234567_travail1.pdf) pour que l\'association soit automatique. Sinon, tu pourras associer manuellement chaque fichier à un étudiant.'
+                contenu: 'Le DA de l\'étudiant (7 chiffres) doit minimalement apparaître dans le nom du fichier pour que l\'association et le regroupement multi-pages soient automatiques. Le format LEA complet (NOM_DA_Production_Remis_le_AAAA-MM-JJ_HHhMMmSSs) est reconnu directement.'
             },
             {
                 type: 'exemple',
                 titre: 'Formats de noms reconnus',
-                contenu: '« 1234567_essai.pdf », « DA1234567_travail.jpg », « Dupont_Marie_1234567.pdf »'
+                contenu: '« 1234567_essai.pdf », « DA1234567_travail.jpg », « Dupont_Marie_1234567.pdf », « Tremblay_1234567_Artefact-8a.jpeg » (multi-pages : a, b, c…)'
+            },
+            {
+                type: 'conseil',
+                contenu: 'Pour un travail multi-pages, nomme chaque page avec le même DA et la même production (ex: « Tremblay_1234567_Artefact-8a.jpeg », « ...8b.jpeg »). Les pages seront automatiquement assemblées en un seul PDF dans l\'ordre alphabétique du nom de fichier.'
             },
             {
                 type: 'liste',
