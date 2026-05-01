@@ -1021,6 +1021,13 @@
      * Ferme le fichier actuel
      */
     function fermerFichier() {
+        // destroy() libere completement le document cote worker PDF.js (canal,
+        // ArrayBuffer transfere, polices decodees). Sans cet appel, le worker
+        // maintient le document en memoire jusqu'a ce que le GC collecte le
+        // proxy (non-deterministe). Sur sessions longues : leak cumulatif.
+        if (pdfDocument) {
+            try { pdfDocument.destroy(); } catch (_) { /* deja detruit, ignorer */ }
+        }
         fichierActuel = null;
         pdfDocument = null;
         pageActuelle = 1;
@@ -1079,6 +1086,15 @@
      * @returns {Promise<boolean>} true si ouvert avec succes
      */
     async function ouvrirDepuisBlob(blob, metadata) {
+        // Nettoyage symetrique de ouvrirFichier (fix 5 mars 2026) : sans cleanup
+        // ici, switcher entre documents via Modelisation laisse l'ancien
+        // pdfDocument en memoire cote worker, et cachePages (key par numPage
+        // seul) peut servir une page de l'ancien document si le zoom matche.
+        if (pdfDocument) {
+            try { pdfDocument.cleanup(); } catch (_) { /* noop */ }
+            pdfDocument = null;
+        }
+        cachePages.clear();
         fichierActuel = metadata;
         pageActuelle = 1;
         modeZoom = ZOOM_FIT;

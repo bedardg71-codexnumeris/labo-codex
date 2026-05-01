@@ -1806,10 +1806,12 @@ function afficherMessageCompteurPresences(message) {
     compteur.style.borderLeftColor = 'var(--jaune-principal, #f0ad4e)';
     compteur.style.background = 'var(--jaune-tres-pale, #fff8e1)';
 
-    // Remplacer le contenu par le message (sans le contrôle de verrouillage)
+    // Le message peut contenir validation.motif (texte libre saisi par
+    // l'utilisateur en config calendrier). echapperHtml() obligatoire avant
+    // injection dans innerHTML pour eviter XSS via motif crafte.
     compteur.innerHTML = `
         <span style="color: var(--texte-secondaire); font-style: italic;">
-            ${message}
+            ${echapperHtml(message)}
         </span>
     `;
 }
