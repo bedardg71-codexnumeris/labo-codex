@@ -1364,7 +1364,7 @@
         const source = f.fichier || null;
         var imgThumb = f.thumbnailDataUrl || await travauxStockage.obtenirThumbnail(f.id);
         if (!source && !imgThumb) {
-            conteneur.innerHTML = '<span class="pipeline-icone-placeholder">&#x1F5BC;</span>';
+            conteneur.innerHTML = '<span class="pipeline-icone-placeholder"><img class="pipeline-icone-placeholder-img" src="icons/icon-image.svg" alt=""></span>';
             return;
         }
 
@@ -1443,7 +1443,7 @@
             conteneur.appendChild(imgResult);
         } catch (e) {
             console.warn('[Pipeline] Erreur preview thumbnail:', f.nomFichier, e);
-            conteneur.innerHTML = '<span class="pipeline-icone-placeholder">&#x1F5BC;</span>';
+            conteneur.innerHTML = '<span class="pipeline-icone-placeholder"><img class="pipeline-icone-placeholder-img" src="icons/icon-image.svg" alt=""></span>';
         } finally {
             if (blobUrl) URL.revokeObjectURL(blobUrl);
         }
@@ -1502,6 +1502,20 @@
         // Cache : réutiliser la thumbnail déjà générée (évite de re-décoder le blob)
         if (f._cachedOriginalThumb) {
             conteneur.innerHTML = `<img src="${f._cachedOriginalThumb}" alt="">`;
+            return;
+        }
+
+        // PDF : réutiliser la miniature pré-rendue par pdf.js. Passer un blob PDF à
+        // <img> donne un canvas 0x0 sur Safari, qui rend un fond uni (presque noir
+        // en mode sombre via --gris-tres-pale).
+        if (f.estPDF) {
+            const pdfThumb = f.thumbnailDataUrl || await travauxStockage.obtenirThumbnail(f.id);
+            if (pdfThumb) {
+                f._cachedOriginalThumb = pdfThumb;
+                conteneur.innerHTML = `<img src="${pdfThumb}" alt="">`;
+            } else {
+                conteneur.innerHTML = '<span class="pipeline-icone-placeholder">&#x1F4C4;</span>';
+            }
             return;
         }
 
@@ -1615,7 +1629,7 @@
 
         queue.forEach((f, index) => {
             const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
-            const icone = f.estPDF ? '&#x1F4C4;' : '&#x1F5BC;';
+            const icone = f.estPDF ? '&#x1F4C4;' : '<img class="pipeline-icone-placeholder-img" src="icons/icon-image.svg" alt="">';
             // ✅ ANONYMISATION (Tier 0.2) : anonymiser les noms de fichiers affichés
             const nomFichierAff = typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : f.nomFichier;
             const nomLeaAff = typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.parseLea.nom, f.etudiantDA) : f.parseLea.nom;
@@ -1695,9 +1709,6 @@
 
         colCentre += '<ul class="pipeline-checklist">';
         colCentre += `<li><label>Uniformisation <select id="pipeline-opt-dpi" data-on-change="travauxUI.mettreAJourPreviewsPipeline" class="controle-form-compact" style="width:auto;display:inline-block;font-size:inherit;padding:2px 4px;"><option value="0">désactivée</option><option value="200">200 dpi</option><option value="250" selected>250 dpi</option><option value="300">300 dpi</option></select></label></li>`;
-        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-balance" checked data-on-change="travauxUI.mettreAJourPreviewsPipeline"> Balance des blancs</label></li>`;
-        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-doublons" checked> D\u00e9tection doublons (manuel)</label></li>`;
-        colCentre += `<li><label><input type="checkbox" id="pipeline-opt-assemblage" checked> Assemblage automatique (par nom / production)</label></li>`;
         colCentre += '</ul>';
 
         // Alerte globale : blobs manquants après restauration session
@@ -1728,7 +1739,7 @@
 
             // Grande preview
             colCentre += `<div class="pipeline-preview-centre" id="pipeline-preview-centre">
-                <span class="pipeline-icone-placeholder">&#x1F5BC;</span>
+                <span class="pipeline-icone-placeholder"><img class="pipeline-icone-placeholder-img" src="icons/icon-image.svg" alt=""></span>
             </div>`;
 
             // Metadata du fichier
@@ -1796,7 +1807,7 @@
         } else {
             // Placeholder
             colCentre += `<div class="pipeline-preview-placeholder">
-                <span style="font-size:2rem;opacity:0.3;">&#x1F5BC;</span>
+                <span style="font-size:2rem;opacity:0.3;"><img class="pipeline-icone-placeholder-img" src="icons/icon-image.svg" alt=""></span>
                 <p class="texte-muted">Clique sur un fichier \u00e0 gauche pour le pr\u00e9visualiser</p>
             </div>`;
         }
@@ -1825,7 +1836,7 @@
             colDroite += `<div class="pipeline-fichier-colonne">
                 <span class="pipeline-fichier-numero">${index + 1}</span>
                 <div class="pipeline-fichier-thumb-col" id="pipeline-preview-${index}">
-                    ${thumb ? `<img src="${thumb}" alt="">` : `<img data-thumbnail-id="${f.id}" src="" alt="" style="display:none"><span class="pipeline-icone-placeholder">${f.estPDF ? '&#x1F4C4;' : '&#x1F5BC;'}</span>`}
+                    ${thumb ? `<img src="${thumb}" alt="">` : `<img data-thumbnail-id="${f.id}" src="" alt="" style="display:none"><span class="pipeline-icone-placeholder">${f.estPDF ? '&#x1F4C4;' : '<img class="pipeline-icone-placeholder-img" src="icons/icon-image.svg" alt="">'}</span>`}
                 </div>
                 <div class="pipeline-fichier-meta-col">
                     ${badgeSpecifique}
@@ -2084,7 +2095,7 @@
         const source = f.fichier || null;
         var centreThumbImg = f.thumbnailDataUrl || await travauxStockage.obtenirThumbnail(f.id);
         if (!source && !centreThumbImg) {
-            conteneur.innerHTML = '<span class="pipeline-icone-placeholder" style="font-size:3rem;">&#x1F5BC;</span>';
+            conteneur.innerHTML = '<span class="pipeline-icone-placeholder" style="font-size:3rem;"><img class="pipeline-icone-placeholder-img" src="icons/icon-image.svg" alt=""></span>';
             return;
         }
 
@@ -2164,7 +2175,7 @@
             conteneur.appendChild(imgResult);
         } catch (e) {
             console.warn('[Pipeline] Erreur preview centre:', f.nomFichier, e);
-            conteneur.innerHTML = '<span class="pipeline-icone-placeholder" style="font-size:3rem;">&#x1F5BC;</span>';
+            conteneur.innerHTML = '<span class="pipeline-icone-placeholder" style="font-size:3rem;"><img class="pipeline-icone-placeholder-img" src="icons/icon-image.svg" alt=""></span>';
         } finally {
             if (blobUrl) URL.revokeObjectURL(blobUrl);
         }
@@ -2254,10 +2265,15 @@
 
         const queue = travauxImport.obtenirFileDAttente();
         queue.forEach(f => {
-            // Écraser sauf si identifié automatiquement par le parseur LEA
-            if (!f.productionIdParLea) {
+            // Sélecteur global explicite : prime sur parseLea (intention utilisateur forte).
+            // Si productionId vide, on désélectionne et on laisse parseLea reprendre la main.
+            if (productionId) {
                 f.productionId = productionId;
+                f.productionIdParLea = false;
                 f.estReprise = false; // retour au mode normal
+            } else if (!f.productionIdParLea) {
+                f.productionId = '';
+                f.estReprise = false;
             }
         });
         travauxImport.setProductionGlobale(productionId);
@@ -2424,7 +2440,13 @@
         }
 
         const evaluation = travauxResolution.trouverEvaluationPourFichier(f);
-        if (evaluation) {
+        // Beta 99.30 : ne marquer "Évalué" que si au moins un critère a été noté.
+        // Une évaluation sauvegardée sans critère (ex. juste un jeton de délai
+        // appliqué) ne doit pas écraser l'état Annoté/Importé.
+        const evaluationNotee = evaluation
+            && Array.isArray(evaluation.criteres)
+            && evaluation.criteres.length > 0;
+        if (evaluationNotee) {
             statutTexte = 'Évalué';
             statutClasse = 'evalue';
         }
@@ -2848,7 +2870,7 @@
         let html = '';
         fichiers.forEach(f => {
             const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
-            const icone = f.typeMIME === 'application/pdf' ? '&#x1F4C4;' : '&#x1F5BC;';
+            const icone = f.typeMIME === 'application/pdf' ? '&#x1F4C4;' : '<img class="pipeline-icone-placeholder-img" src="icons/icon-image.svg" alt="">';
             const actif = travauxVisionneuse.getFichierActuel()?.id === f.id ? ' actif' : '';
 
             // Badge cycle de vie
@@ -2911,7 +2933,7 @@
         for (let i = indexDebut; i < indexFin; i++) {
             const f = fichiersPourScroll[i];
             const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
-            const icone = f.typeMIME === 'application/pdf' ? '&#x1F4C4;' : '&#x1F5BC;';
+            const icone = f.typeMIME === 'application/pdf' ? '&#x1F4C4;' : '<img class="pipeline-icone-placeholder-img" src="icons/icon-image.svg" alt="">';
             const actif = travauxVisionneuse.getFichierActuel()?.id === f.id ? ' actif' : '';
             const top = i * HAUTEUR_MINIATURE;
 
@@ -3532,31 +3554,119 @@
             ? `dans le groupe <strong>${echapperHtml(nomGroupe)}</strong>`
             : '';
 
+        // Beta 99.30 : D\u00e9tecter les fichiers qui correspondent \u00e0 des \u00e9tudiants
+        // d'un autre groupe-cours et alerter l'utilisateur dans la modale.
+        const autreGC = (typeof travauxImport.detecterFichiersAutreGC === 'function')
+            ? travauxImport.detecterFichiersAutreGC()
+            : [];
+        let bandeauAutreGC = '';
+        const boutonsBascule = [];
+        if (autreGC.length > 0) {
+            const totalAutre = autreGC.reduce(function(s, g) { return s + g.count; }, 0);
+            const lignes = autreGC.map(function(g) {
+                const labelGr = 'gr. ' + String(g.groupe || '?').padStart(5, '0');
+                return '<li>' + echapperHtml(labelGr) + ' \u2014 ' + g.count + ' fichier' + (g.count > 1 ? 's' : '') + '</li>';
+            }).join('');
+            bandeauAutreGC = '<div class="travaux-bandeau-autre-gc">'
+                + '<p><strong>Attention\u00a0:</strong> ' + totalAutre + ' fichier' + (totalAutre > 1 ? 's correspondent' : ' correspond')
+                + ' \u00e0 des \u00e9tudiants d\u2019un autre groupe-cours\u00a0:</p>'
+                + '<ul>' + lignes + '</ul>'
+                + '<p class="texte-muted u-texte-petit">Tu peux importer quand m\u00eame (les fichiers seront non identifi\u00e9s) ou basculer ci-dessous.</p>'
+                + '</div>';
+            autreGC.forEach(function(g) {
+                const labelGr = 'gr. ' + String(g.groupe || '?').padStart(5, '0');
+                boutonsBascule.push({
+                    label: 'Basculer vers ' + labelGr,
+                    classe: 'btn-secondaire',
+                    action: function() { basculerVersGCDepuisModale(g.gcId); }
+                });
+            });
+        }
+
+        // Beta 99.30 : Détection des doublons (fichiers déjà importés ou présents
+        // plusieurs fois dans la file pour le même couple étudiant + production).
+        const doublonsDetectes = (typeof travauxImport.detecterDoublonsStockage === 'function')
+            ? travauxImport.detecterDoublonsStockage()
+            : [];
+        let bandeauDoublons = '';
+        if (doublonsDetectes.length > 0) {
+            const productions = obtenirDonneesSelonMode('productions');
+            function _nomProd(prodId) {
+                const p = productions.find(function(x) { return x && x.id === prodId; });
+                return p ? (p.titre || p.nom || prodId) : (prodId || '?');
+            }
+            function _nomEtudiant(d) {
+                if (d.nouveau && d.nouveau.etudiantAssocie) {
+                    return (d.nouveau.etudiantAssocie.nom || '') + ', ' + (d.nouveau.etudiantAssocie.prenom || '');
+                }
+                return d.nouveau && d.nouveau.etudiantDA ? d.nouveau.etudiantDA : 'Étudiant inconnu';
+            }
+            function _formatDate(iso) {
+                if (!iso) return '';
+                try {
+                    const dt = new Date(iso);
+                    return dt.toLocaleString('fr-CA', { dateStyle: 'short', timeStyle: 'short' });
+                } catch (e) { return ''; }
+            }
+            const lignesD = doublonsDetectes.map(function(d) {
+                const nomEt = echapperHtml(_nomEtudiant(d));
+                const titreProd = echapperHtml(_nomProd(d.nouveau.productionId));
+                let detail = '';
+                if (d.stockes.length > 0) {
+                    const datesStockes = d.stockes
+                        .map(function(fS) { return _formatDate(fS.dateImport); })
+                        .filter(Boolean)
+                        .join(', ');
+                    detail = ' (déjà importé' + (d.stockes.length > 1 ? 's' : '') + (datesStockes ? ' le ' + echapperHtml(datesStockes) : '') + ')';
+                } else if (d.queue.length > 0) {
+                    detail = ' (présent ' + (d.queue.length + 1) + ' fois dans la file)';
+                }
+                return '<li><strong>' + nomEt + '</strong> — ' + titreProd + detail + '</li>';
+            }).join('');
+            bandeauDoublons = '<div class="travaux-bandeau-doublon">'
+                + '<p><strong>Doublon' + (doublonsDetectes.length > 1 ? 's' : '') + ' détecté' + (doublonsDetectes.length > 1 ? 's' : '') + ' :</strong></p>'
+                + '<ul>' + lignesD + '</ul>'
+                + '<p class="texte-muted u-texte-petit">Tu peux importer quand même (un second fichier sera créé) ou annuler pour gérer manuellement le fichier existant.</p>'
+                + '</div>';
+        }
+
         afficherModalePipeline('Confirmer l\u2019import',
-            `<p>${nbFichiers} fichier(s) seront importés ${msgGroupe} et ${msgProduction}.</p>
+            bandeauAutreGC + bandeauDoublons + `<p>${nbFichiers} fichier(s) seront importés ${msgGroupe} et ${msgProduction}.</p>
             <p>Confirmer l\u2019importation ?</p>`,
             [
                 { label: 'Oui, importer', classe: 'btn-principal', action: () => executerImportPipeline() },
                 { label: 'Revenir aux réglages', classe: 'btn-secondaire', action: () => {} }
-            ]);
+            ].concat(boutonsBascule));
+    }
+
+    /**
+     * Beta 99.30 : Bascule le groupe-cours actif depuis la modale d'import et
+     * ré-évalue les associations étudiant des fichiers en file d'attente.
+     */
+    async function basculerVersGCDepuisModale(gcId) {
+        if (!gcId) return;
+        try {
+            if (typeof changerGroupeCoursDepuisHeader === 'function') {
+                await changerGroupeCoursDepuisHeader(gcId);
+            }
+            if (travauxImport && typeof travauxImport.reevaluerAssociationsQueue === 'function') {
+                travauxImport.reevaluerAssociationsQueue();
+            }
+            afficherImport();
+        } catch (e) {
+            console.warn('[Travaux-UI] Erreur bascule GC depuis modale:', e);
+        }
     }
 
     async function executerImportPipeline() {
         const queue = travauxImport.obtenirFileDAttente();
 
         const dpiCible = parseInt(document.getElementById('pipeline-opt-dpi')?.value) || 0;
-        const optBalance = document.getElementById('pipeline-opt-balance')?.checked;
-        const optDoublons = document.getElementById('pipeline-opt-doublons')?.checked;
-        const optAssemblage = document.getElementById('pipeline-opt-assemblage')?.checked;
-
-        // Si doublons cochee, detecter les vrais doublons et afficher la modale
-        if (optDoublons) {
-            const doublons = detecterDoublons(queue);
-            if (doublons.length > 0) {
-                afficherModaleDoublonsEtImporter(queue, doublons);
-                return;
-            }
-        }
+        // Beta 99.30 : balance des blancs et assemblage automatique appliqués
+        // par défaut (les checkbox UI ont été retirées pour simplifier le pipeline).
+        // Documenté via le tooltip de l'étape Optimisation et la section Aide.
+        const optBalance = true;
+        const optAssemblage = true;
 
         // === Traitement batch (images a-optimiser) ===
         const images = queue.filter(f => f.pipelineStatut === 'a-optimiser');
@@ -3861,66 +3971,6 @@
         }
 
         return compteur;
-    }
-
-    /**
-     * Detecte les vrais doublons dans la queue
-     * Compare les noms de fichiers exacts (seule l'extension est ignoree)
-     * Deux fichiers avec des horodatages differents = deux remises distinctes
-     * @param {Array} queue - File d'attente
-     * @returns {Array} Groupes de doublons [{cle, fichiers}]
-     */
-    function detecterDoublons(queue) {
-        const groupes = new Map();
-
-        queue.forEach(f => {
-            // Comparer sans extension uniquement (nom exact sinon)
-            const cle = f.nomFichier.replace(/\.[^.]+$/, '');
-
-            if (!groupes.has(cle)) groupes.set(cle, []);
-            groupes.get(cle).push(f);
-        });
-
-        return Array.from(groupes.entries())
-            .filter(([, fichiers]) => fichiers.length > 1)
-            .map(([cle, fichiers]) => ({ cle, fichiers }));
-    }
-
-    /**
-     * Modale doublons adaptee pour appliquerEtImporter
-     * Apres resolution des doublons, relance appliquerEtImporter
-     * @param {Array} queue - File d'attente
-     * @param {Array} doublons - Groupes de doublons detectes
-     */
-    function afficherModaleDoublonsEtImporter(queue, doublons) {
-        let html = '<div class="modal-section"><p>Coche les fichiers à supprimer :</p>';
-        doublons.forEach(({ cle: cleGroupe, fichiers }) => {
-            html += `<div class="pipeline-doublon-groupe"><strong>${echapperHtml(cleGroupe)}</strong>`;
-            fichiers.forEach((f) => {
-                const idx = queue.indexOf(f);
-                html += `<div class="pipeline-doublon-item"><label><input type="checkbox" class="doublon-check" data-index="${idx}"> ${echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : f.nomFichier)} (${travauxStockage.formaterTaille(f.tailleFichier)})</label></div>`;
-            });
-            html += '</div>';
-        });
-        html += '</div>';
-
-        afficherModalePipeline(
-            'Detection de doublons',
-            html,
-            [
-                { label: 'Supprimer et continuer', classe: 'btn-principal', action: (overlay) => {
-                    const checks = overlay.querySelectorAll('.doublon-check:checked');
-                    const indices = Array.from(checks).map(c => parseInt(c.dataset.index)).sort((a, b) => b - a);
-                    indices.forEach(idx => travauxImport.retirerFichier(idx));
-                    document.getElementById('pipeline-opt-doublons').checked = false;
-                    appliquerEtImporter();
-                }},
-                { label: 'Annuler', classe: 'btn-secondaire', action: () => {
-                    document.getElementById('pipeline-opt-doublons').checked = false;
-                    appliquerEtImporter();
-                }}
-            ]
-        );
     }
 
     /**

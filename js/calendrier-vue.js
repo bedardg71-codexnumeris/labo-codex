@@ -212,14 +212,58 @@ function obtenirStatutJour(dateStr, calendrierComplet) {
 }
 
 /**
+ * Beta 99.30 : Construit une Map<date, Array<{titre, id}>> des échéances de
+ * production pour le groupe-cours actif. Ne garde que les échéances assignées
+ * (case "consignes transmises" cochée). Retourne une Map vide si pas de GC actif.
+ */
+function construireMapEcheancesProductions() {
+    const map = new Map();
+    try {
+        // Source fiable du GC actif : flag `actif` dans la collection namespacée
+        // (le raccourci global `groupeCoursActif` peut être obsolète).
+        const groupesCours = db.getSync(cle('groupesCours'), []) || [];
+        const gcActif = Array.isArray(groupesCours) ? groupesCours.find(function(gc) { return gc && gc.actif; }) : null;
+        const gcId = gcActif && gcActif.id;
+        if (!gcId) return map;
+
+        const productions = db.getSync(cle('productions'), []) || [];
+        if (!Array.isArray(productions)) return map;
+
+        productions.forEach(function(p) {
+            if (!p) return;
+            // Lecture stricte : on n'utilise pas le fallback `production.dateEcheance`
+            // legacy quand `echeancesParGroupe` existe (sinon une date d'un autre
+            // groupe pourrait fuiter pour un GC sans entrée explicite).
+            let date = null;
+            let assignee = false;
+            if (p.echeancesParGroupe && p.echeancesParGroupe[gcId]) {
+                const entree = p.echeancesParGroupe[gcId];
+                date = entree.date || null;
+                assignee = entree.assignee !== false;
+            } else if (!p.echeancesParGroupe && p.dateEcheance) {
+                date = p.dateEcheance;
+                assignee = true;
+            }
+            if (!date || !assignee) return;
+            const liste = map.get(date) || [];
+            liste.push({ titre: p.titre || p.nom || p.id || '(sans titre)', id: p.id });
+            map.set(date, liste);
+        });
+    } catch (e) {
+        console.warn('[Calendrier-Vue] Erreur construction échéances:', e);
+    }
+    return map;
+}
+
+/**
  * Génère le HTML d'un mois de calendrier
  * @param {number} annee - Année
  * @param {number} mois - Mois (1-12)
- * @param {Object} config - Configuration du calendrier
- * @param {Object} mapSemaines - Map date -> numéro de semaine
+ * @param {Object} calendrierComplet - Calendrier complet (source unique)
+ * @param {Map} [mapEcheances] - Map<date YYYY-MM-DD, Array<{titre,id}>> des échéances
  * @returns {string} - HTML du calendrier mensuel
  */
-function genererHtmlMois(annee, mois, calendrierComplet) {
+function genererHtmlMois(annee, mois, calendrierComplet, mapEcheances) {
     const nomsJours = ['DIM', 'LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM'];
     const nomsMois = ['', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
         'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
@@ -301,16 +345,36 @@ function genererHtmlMois(annee, mois, calendrierComplet) {
         const numSemaine = statut.numeroSemaine || '';
         const actionAttr = estCliquable ? ' data-action="ouvrirSaisiePresence" data-param="' + dateStr + '"' : '';
 
+        // Beta 99.30 : préparer infos du badge d'échéance (groupe-cours actif)
+        // Le tooltip est posé sur le <td> entier pour que le hover sur le coin
+        // (zone du badge, qui est en pointer-events:none) fonctionne aussi.
+        let badgeHtml = '';
+        let titleAttr = '';
+        if (mapEcheances && mapEcheances.has(dateStr)) {
+            const liste = mapEcheances.get(dateStr);
+            const titres = liste.map(function(e) { return e.titre; });
+            const tooltip = liste.length === 1
+                ? 'Échéance : ' + titres[0]
+                : liste.length + ' productions à remettre · ' + titres.join(' · ');
+            const dataCount = liste.length > 1 ? ' data-count="' + liste.length + '"' : '';
+            const contenu = liste.length > 1 ? String(liste.length) : '';
+            badgeHtml = '<span class="cal-echeance-badge"' + dataCount + '>' + contenu + '</span>';
+            titleAttr = ' title="' + echapperHtml(tooltip) + '"';
+        }
+
         html += '<td class="' + classeJour + '" ';
         html += 'data-date="' + dateStr + '" ';
         html += 'data-semaine="' + numSemaine + '" ';
         html += 'data-type="' + statut.type + '"';
+        html += titleAttr;
         html += actionAttr + '>';
         html += '<div class="cal-texte-moyen">' + jour + '</div>';
 
         if (statut.label) {
             html += '<div class="cal-texte-mini-fade">' + statut.label + '</div>';
         }
+
+        html += badgeHtml;
 
         html += '</td>';
 
@@ -435,6 +499,9 @@ function afficherCalendrierScolaire() {
     // Utiliser le calendrier complet (source unique)
     const calendrierComplet = obtenirCalendrierComplet();
 
+    // Beta 99.30 : construire la carte des échéances pour le groupe-cours actif
+    const mapEcheances = construireMapEcheancesProductions();
+
     // Déterminer les mois à afficher selon la session
     // Déduire la session à partir du mois de début (janvier-mai = Hiver, août-décembre = Automne)
     const dateDebut = cadreCalendrier.dateDebut || '2025-08-21';
@@ -448,7 +515,7 @@ function afficherCalendrierScolaire() {
 
     // Générer les mois
     for (let i = 0; i < moisAAfficher.length; i++) {
-        htmlCalendrier += genererHtmlMois(annee, moisAAfficher[i], calendrierComplet);
+        htmlCalendrier += genererHtmlMois(annee, moisAAfficher[i], calendrierComplet, mapEcheances);
     }
 
     // Ajouter la légende comme dernier élément de la grille (6ème position)
@@ -489,6 +556,12 @@ function afficherCalendrierScolaire() {
     htmlCalendrier += '<div class="calendrier-legende-item">';
     htmlCalendrier += '<div class="calendrier-legende-badge" style="background: var(--planification-bg); border: 2px solid #ba68c8;"></div>';
     htmlCalendrier += '<span class="calendrier-legende-label">Semaine de planification</span>';
+    htmlCalendrier += '</div>';
+
+    // Beta 99.30 : entrée légende pour les échéances de production
+    htmlCalendrier += '<div class="calendrier-legende-item">';
+    htmlCalendrier += '<div class="calendrier-legende-badge calendrier-legende-badge-echeance"><span class="cal-echeance-badge cal-echeance-badge-legende"></span></div>';
+    htmlCalendrier += '<span class="calendrier-legende-label">Échéance de production</span>';
     htmlCalendrier += '</div>';
 
     htmlCalendrier += '</div>';

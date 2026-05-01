@@ -422,6 +422,18 @@ const AIDE_CONTEXTUELLE = {
                 type: 'exemple',
                 titre: 'Formats de noms reconnus',
                 contenu: '« 1234567_essai.pdf », « DA1234567_travail.jpg », « Dupont_Marie_1234567.pdf »'
+            },
+            {
+                type: 'liste',
+                titre: 'Traitements automatiques à l\'import',
+                items: [
+                    'Balance des blancs : correction colorimétrique des photos prises en classe',
+                    'Uniformisation DPI : 250 dpi par défaut, ajustable dans le pipeline (200, 250 ou 300)',
+                    'Compression JPEG des images pour limiter le stockage',
+                    'Assemblage multi-pages : les fichiers d\'un même étudiant pour une même production sont regroupés',
+                    'Détection des doublons : avertissement si un fichier identique (même étudiant + même production) existe déjà',
+                    'Les PDF sont importés tels quels, sans modification'
+                ]
             }
         ],
         voirAussi: ['evaluations-proceder', 'evaluations-liste']

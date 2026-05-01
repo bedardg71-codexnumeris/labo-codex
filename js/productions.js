@@ -340,8 +340,11 @@ function peuplerEcheancesParGroupe(production) {
         const entree = echeancesParGroupe[gc.id];
         const estAssigne = entree ? (entree.assignee !== false) : false;
         const dateVal = entree ? (entree.date || '') : '';
-        // Extraire un label court (ex: "gr. 00002")
-        const numGroupe = gc.groupeNum || '?';
+        // Extraire un label court (ex: "gr. 00002").
+        // gc.groupe est la source de vérité partout dans l'app (sélecteur d'en-tête,
+        // changerGroupeCoursActifV2). gc.groupeNum sert de fallback pour les anciens
+        // enregistrements ; les deux peuvent diverger après import/migration.
+        const numGroupe = gc.groupe || gc.groupeNum || '?';
         const labelGroupe = `gr. ${String(numGroupe).padStart(5, '0')}`;
 
         return `<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;" data-gc-id="${gc.id}">
@@ -869,7 +872,7 @@ async function sauvegarderProduction() {
                     const horsMax = dateMaxTri && entree.date > dateMaxTri;
                     if (horsMin || horsMax) {
                         const gc = groupesCours.find(g => g.id === gcId);
-                        const numGroupe = gc ? (gc.groupeNum || '?') : '?';
+                        const numGroupe = gc ? (gc.groupe || gc.groupeNum || '?') : '?';
                         const label = `gr. ${String(numGroupe).padStart(5, '0')}`;
                         horsLimites.push(`${label} (${entree.date})`);
                     }

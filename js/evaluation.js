@@ -2412,7 +2412,7 @@ function sauvegarderEvaluation() {
     }
 
     // Mettre à jour les badges (pills) dans la barre de fichiers
-    majBadgesApresEvaluation();
+    majBadgesApresEvaluation(evaluation);
 
     // 🔄 Recalculer les indices C et P après sauvegarde
     if (typeof calculerEtStockerIndicesCP === 'function') {
@@ -2427,12 +2427,22 @@ function sauvegarderEvaluation() {
 
 /**
  * Met à jour les badges (pills) du fichier actif après sauvegarde d'évaluation.
- * Passe la pill de "IMPORTÉ"/"ANNOTÉ"/"EN COURS" à "ÉVALUÉ" (vert).
+ * Passe la pill à "ÉVALUÉ" (vert) UNIQUEMENT si l'évaluation contient au moins
+ * un critère noté. Une sauvegarde sans critère (ex. application d'un jeton de
+ * délai uniquement) ne doit pas marquer le fichier comme évalué.
+ *
+ * @param {Object} [evaluation] - L'évaluation qui vient d'être sauvegardée.
+ *   Si omis, on laisse la pill telle quelle.
  */
-function majBadgesApresEvaluation() {
+function majBadgesApresEvaluation(evaluation) {
     const fichier = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
         ? travauxVisionneuse.getFichierActuel() : null;
     if (!fichier) return;
+
+    const evaluationNotee = evaluation
+        && Array.isArray(evaluation.criteres)
+        && evaluation.criteres.length > 0;
+    if (!evaluationNotee) return;
 
     document.querySelectorAll(`.annot-badge[data-fichier-id="${fichier.id}"]`).forEach(badge => {
         const pill = badge.querySelector('.travaux-badge-pill');
@@ -6046,7 +6056,7 @@ function sauvegarderEvaluationModifiee() {
     }
 
     // Mettre à jour les badges (pills) dans la barre de fichiers
-    majBadgesApresEvaluation();
+    majBadgesApresEvaluation(evaluations[indexEval]);
 
     // Ajouter le cadenas sur les badges (auto-verrouillage après modification)
     [   document.querySelector('.annot-badge.actif'),
