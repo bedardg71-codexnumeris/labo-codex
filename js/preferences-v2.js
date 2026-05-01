@@ -497,20 +497,21 @@
     // INITIALISATION AU CHARGEMENT
     // =========================================================================
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof db !== 'undefined' && db.isReady) {
-                initialiserPreferencesV2();
-            } else {
-                document.addEventListener('db-ready', initialiserPreferencesV2);
-            }
-        });
-    } else {
-        if (typeof db !== 'undefined' && db.isReady) {
+    // Beta 99.30 : db-ready est dispatché sur window (db.js), pas sur document.
+    // Et le flag global est window.dbReady (pas db.isReady). Sans ce fix,
+    // initialiserPreferencesV2 n'était jamais appelée au démarrage et la pref
+    // animationPoints=false n'était pas appliquée jusqu'à l'ouverture du panneau.
+    function _initSiPret() {
+        if (window.dbReady) {
             initialiserPreferencesV2();
         } else {
-            document.addEventListener('db-ready', initialiserPreferencesV2);
+            window.addEventListener('db-ready', initialiserPreferencesV2, { once: true });
         }
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', _initSiPret);
+    } else {
+        _initSiPret();
     }
 
 

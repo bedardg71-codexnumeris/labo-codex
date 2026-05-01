@@ -213,6 +213,97 @@
     }
 
     /**
+     * Beta 99.30 : Recense les fichiers de la file d'attente dont le DA détecté
+     * appartient à un étudiant d'UN AUTRE groupe-cours du trimestre actif (ou
+     * dont le coursId n'est pas celui du GC actif). Permet d'avertir l'utilisateur
+     * qu'il importe potentiellement dans le mauvais contexte.
+     *
+     * @returns {Array<{gcId: string, groupe: string, gc: Object, count: number, das: string[]}>}
+     *   Une entrée par GC concerné, ou [] si rien à signaler.
+     */
+    function detecterFichiersAutreGC() {
+        try {
+            const queue = obtenirFileDAttente();
+            if (!queue || queue.length === 0) return [];
+
+            // Lire la collection brute (non filtrée par GC actif)
+            const tousEtudiants = (typeof db !== 'undefined' && typeof cle === 'function')
+                ? (db.getSync(cle('groupeEtudiants'), []) || [])
+                : [];
+            const groupesCours = (typeof db !== 'undefined' && typeof cle === 'function')
+                ? (db.getSync(cle('groupesCours'), []) || [])
+                : [];
+            if (!Array.isArray(tousEtudiants) || !Array.isArray(groupesCours)) return [];
+
+            const gcActif = groupesCours.find(function(gc) { return gc && gc.actif; });
+            const gcActifId = gcActif && gcActif.id;
+            const normaliser = function(g) { return String(g || '').padStart(5, '0'); };
+
+            // Recherche par nom dans la collection brute (logique alignée avec
+            // trouverEtudiantParNom mais sans filtrage par GC actif).
+            function chercherParNomEtendu(nomFichier) {
+                if (!nomFichier) return null;
+                const nomLower = nomFichier.toLowerCase().replace(/[_\-]/g, ' ');
+                for (let i = 0; i < tousEtudiants.length; i++) {
+                    const e = tousEtudiants[i];
+                    if (!e) continue;
+                    const nom = (e.nom || '').toLowerCase();
+                    const prenom = (e.prenom || '').toLowerCase();
+                    if (nom && prenom && nomLower.indexOf(nom) !== -1 && nomLower.indexOf(prenom) !== -1) return e;
+                    if (nom && nom.length > 3 && nomLower.indexOf(nom) !== -1) return e;
+                }
+                return null;
+            }
+
+            const repartition = Object.create(null);
+            queue.forEach(function(f) {
+                if (!f) return;
+                // Identifier l'étudiant probable. On NE se fie PAS à f.etudiantAssocie
+                // pour décider si l'étudiant est du bon GC : obtenirDonneesSelonMode
+                // filtre par coursId mais pas systématiquement par groupe, donc
+                // f.etudiantAssocie peut pointer vers un étudiant d'un autre GC du
+                // même cours. On revérifie ici via la collection brute.
+                let etu = null;
+                if (f.etudiantAssocie && f.etudiantAssocie.da) {
+                    etu = tousEtudiants.find(function(e) { return e && e.da === f.etudiantAssocie.da; }) || f.etudiantAssocie;
+                }
+                if (!etu) {
+                    const da = (f.parseLea && f.parseLea.da) || f.etudiantDA || f.daDetecte;
+                    if (da) etu = tousEtudiants.find(function(e) { return e && e.da === da; });
+                }
+                if (!etu) etu = chercherParNomEtendu(f.nomFichier);
+                if (!etu) return;
+                // Retrouver le GC d'appartenance via coursId + groupe
+                const groupeEtu = etu.groupe || etu.groupeReel;
+                const gcCible = groupesCours.find(function(gc) {
+                    return gc
+                        && gc.coursId === etu.coursId
+                        && normaliser(gc.groupe || gc.groupeNum) === normaliser(groupeEtu);
+                });
+                if (!gcCible || gcCible.id === gcActifId) return;
+                if (!repartition[gcCible.id]) {
+                    repartition[gcCible.id] = {
+                        gcId: gcCible.id,
+                        groupe: gcCible.groupe || gcCible.groupeNum || '?',
+                        gc: gcCible,
+                        count: 0,
+                        das: []
+                    };
+                }
+                repartition[gcCible.id].count++;
+                if (etu.da && repartition[gcCible.id].das.indexOf(etu.da) === -1) {
+                    repartition[gcCible.id].das.push(etu.da);
+                }
+            });
+
+            return Object.keys(repartition).map(function(k) { return repartition[k]; });
+        } catch (e) {
+            console.warn('[Travaux-Import] Erreur detecterFichiersAutreGC:', e);
+            return [];
+        }
+    }
+
+    /**
      * Tente de jumeler par nom dans le fichier
      * @param {string} nomFichier - Le nom du fichier
      * @returns {Object|null} L'etudiant trouve ou null
@@ -416,9 +507,23 @@
             if (estTypeAccepte(fichier)) {
                 const prepare = preparerFichier(fichier);
                 detecterFormatEtRouter(prepare);
-                // Tenter le matching par nom LEA si parseLea a identifié une production
-                // (plus fiable que le sélecteur global qui applique aveuglément)
-                if (!prepare.productionId && prepare.parseLea && prepare.parseLea.nomProduction) {
+                // Mode jeton de reprise : marquer les fichiers ajoutés pendant que le mode est actif
+                if (productionSelectionnee === '__jeton_reprise__') {
+                    prepare.estReprise = true;
+                    prepare.productionIdParLea = false;
+                    // Le productionId sera défini par le sous-sélecteur de jeton
+                    var jetonProd = (typeof sessionStorage !== 'undefined') ? sessionStorage.getItem('travaux-jeton-production') : '';
+                    if (jetonProd) {
+                        prepare.productionId = jetonProd;
+                    }
+                }
+                // Sélecteur global explicite : prime sur parseLea (intention utilisateur forte)
+                else if (productionSelectionnee) {
+                    prepare.productionId = productionSelectionnee;
+                    prepare.productionIdParLea = false;
+                }
+                // Pas de sélecteur global : matching par nom LEA si disponible
+                else if (!prepare.productionId && prepare.parseLea && prepare.parseLea.nomProduction) {
                     const productions = obtenirDonneesSelonMode('productions');
                     const nomNorm = normaliserNomProduction(prepare.parseLea.nomProduction);
                     if (nomNorm && productions.length) {
@@ -434,20 +539,6 @@
                             prepare.productionIdParLea = true;
                         }
                     }
-                }
-                // Mode jeton de reprise : marquer les fichiers ajoutés pendant que le mode est actif
-                if (productionSelectionnee === '__jeton_reprise__') {
-                    prepare.estReprise = true;
-                    prepare.productionIdParLea = false;
-                    // Le productionId sera défini par le sous-sélecteur de jeton
-                    var jetonProd = (typeof sessionStorage !== 'undefined') ? sessionStorage.getItem('travaux-jeton-production') : '';
-                    if (jetonProd) {
-                        prepare.productionId = jetonProd;
-                    }
-                }
-                // Fallback final : production globale selectionnee (mode normal)
-                else if (productionSelectionnee && !prepare.productionId) {
-                    prepare.productionId = productionSelectionnee;
                 }
                 fichiersEnAttente.push(prepare);
                 acceptes.push(prepare);
@@ -756,16 +847,26 @@
             fichierPrepare.pipelineStatut = 'pret';
             // Si parseLea a reussi et on trouve un etudiant, passer en identifie
             if (fichierPrepare.parseLea.da && fichierPrepare.etudiantAssocie) {
-                const productions = obtenirDonneesSelonMode('productions');
-                const prodTrouvee = productions.find(p => {
-                    const titre = normaliserNomProduction(p.titre || p.nom || '');
-                    const nomProd = normaliserNomProduction(fichierPrepare.parseLea.nomProduction);
-                    return nomProd && titre && (correspondanceProduction(titre, nomProd) || correspondanceProduction(nomProd, titre));
-                });
-                if (prodTrouvee) {
-                    fichierPrepare.productionId = prodTrouvee.id;
-                    fichierPrepare.productionIdParLea = true;
+                // Si un sélecteur global explicite est actif (hors jeton), il primera —
+                // ne pas matcher par parseLea ici. Le pipeline est marqué identifié quand
+                // même puisque l'étudiant est connu ; productionId sera assigné par
+                // ajouterFichiersEnAttente.
+                const selecteurGlobalActif = productionSelectionnee
+                    && productionSelectionnee !== '__jeton_reprise__';
+                if (selecteurGlobalActif) {
                     fichierPrepare.pipelineStatut = 'identifie';
+                } else {
+                    const productions = obtenirDonneesSelonMode('productions');
+                    const prodTrouvee = productions.find(p => {
+                        const titre = normaliserNomProduction(p.titre || p.nom || '');
+                        const nomProd = normaliserNomProduction(fichierPrepare.parseLea.nomProduction);
+                        return nomProd && titre && (correspondanceProduction(titre, nomProd) || correspondanceProduction(nomProd, titre));
+                    });
+                    if (prodTrouvee) {
+                        fichierPrepare.productionId = prodTrouvee.id;
+                        fichierPrepare.productionIdParLea = true;
+                        fichierPrepare.pipelineStatut = 'identifie';
+                    }
                 }
             }
         } else if (fichierPrepare.estImage) {
@@ -1299,10 +1400,78 @@
         return doc.output('blob');
     }
 
+    /**
+     * Beta 99.30 : Détecte les fichiers de la file d'attente qui dupliquent un
+     * fichier déjà importé dans le GC actif (même couple etudiantDA + productionId)
+     * ou un autre fichier de la file. Une entrée par fichier "nouveau" en doublon.
+     *
+     * @returns {Array<{nouveau: Object, idxNouveau: number, stockes: Array, queue: Array}>}
+     */
+    function detecterDoublonsStockage() {
+        try {
+            const queue = obtenirFileDAttente();
+            if (!queue || queue.length === 0) return [];
+
+            const fichiersStockes = (typeof travauxStockage !== 'undefined'
+                && typeof travauxStockage.obtenirFichiersGroupeActif === 'function')
+                ? (travauxStockage.obtenirFichiersGroupeActif() || [])
+                : [];
+
+            const doublons = [];
+            queue.forEach(function(fNouveau, idxNouveau) {
+                if (!fNouveau) return;
+                const da = fNouveau.etudiantDA;
+                const prodId = fNouveau.productionId;
+                if (!da || !prodId) return;
+                const dejaStockes = fichiersStockes.filter(function(fS) {
+                    return fS && fS.etudiantDA === da && fS.productionId === prodId;
+                });
+                const dansQueue = queue.slice(0, idxNouveau).filter(function(fA) {
+                    return fA && fA.etudiantDA === da && fA.productionId === prodId;
+                });
+                if (dejaStockes.length > 0 || dansQueue.length > 0) {
+                    doublons.push({
+                        nouveau: fNouveau,
+                        idxNouveau: idxNouveau,
+                        stockes: dejaStockes,
+                        queue: dansQueue
+                    });
+                }
+            });
+            return doublons;
+        } catch (e) {
+            console.warn('[Travaux-Import] Erreur detecterDoublonsStockage:', e);
+            return [];
+        }
+    }
+
+    /**
+     * Beta 99.30 : Réévalue les associations DA→étudiant pour tous les fichiers
+     * en file d'attente. Appelé après un changement de groupe-cours actif pour
+     * que les fichiers parseLea reconnus s'associent correctement aux étudiants
+     * du nouveau contexte.
+     */
+    function reevaluerAssociationsQueue() {
+        if (!fichiersEnAttente || fichiersEnAttente.length === 0) return;
+        fichiersEnAttente.forEach(function(f) {
+            if (!f) return;
+            const da = f.parseLea && f.parseLea.da ? f.parseLea.da : f.daDetecte;
+            const etu = da ? trouverEtudiantParDA(da) : null;
+            const fallback = !etu && f.nomFichier ? trouverEtudiantParNom(f.nomFichier) : null;
+            const choisi = etu || fallback || null;
+            f.etudiantAssocie = choisi;
+            f.etudiantDA = choisi ? choisi.da : (da || '');
+        });
+        persisterFileDAttente();
+    }
+
     window.travauxImport = {
         // Detection
         detecterDA: detecterDA,
         trouverEtudiantParDA: trouverEtudiantParDA,
+        detecterFichiersAutreGC: detecterFichiersAutreGC,
+        detecterDoublonsStockage: detecterDoublonsStockage,
+        reevaluerAssociationsQueue: reevaluerAssociationsQueue,
         // Parser Lea
         parserNomFichierLea: parserNomFichierLea,
         // Validation

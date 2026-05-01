@@ -20,8 +20,18 @@
  * @returns {string} Le statut workflow
  */
 function calculerStatutWorkflow(ligne) {
-    // Si évalué (ou remplacée/non-recevable)
-    if (ligne.statut === 'evalue' || ligne.statut === 'remplacee' || ligne.statut === 'non-recevable') return 'evalue';
+    // Beta 99.30 : une évaluation sans critère noté (ex. uniquement un jeton de
+    // délai appliqué) ne doit pas être traitée comme évaluée. On retombe alors
+    // sur le calcul normal (importé / annoté / reçu) basé sur le fichier.
+    const evaluationVide = ligne.statut === 'evalue'
+        && ligne.evaluationId
+        && ligne.evaluationNotee === false;
+
+    // Si évalué (ou remplacée/non-recevable), sauf le cas d'évaluation vide ci-dessus
+    if (!evaluationVide
+        && (ligne.statut === 'evalue' || ligne.statut === 'remplacee' || ligne.statut === 'non-recevable')) {
+        return 'evalue';
+    }
 
     // Vérifier si un fichier importé existe et s'il a des annotations
     if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersTravaux === 'function') {
@@ -59,6 +69,11 @@ function calculerStatutWorkflow(ligne) {
         );
         if (fichierAutreProduction) {
             ligne.fichierAutreProduction = true;
+            const productions = obtenirDonneesSelonMode('productions');
+            const prodReelle = productions.find(p => p.id === fichierAutreProduction.productionId);
+            ligne.fichierAutreProductionNom = prodReelle
+                ? (prodReelle.titre || prodReelle.nom || '')
+                : '';
         }
     }
 
@@ -689,6 +704,11 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                         }
                     }
 
+                    // Beta 99.30 : flag pour distinguer une évaluation réellement notée
+                    // d'une évaluation enregistrée sans critère (ex. application
+                    // d'un jeton de délai seul, sans note).
+                    const evaluationNotee = Array.isArray(evaluation.criteres) && evaluation.criteres.length > 0;
+
                     lignes.push({
                         da: etudiant.da,
                         daAffichage: etudiant.daAffichage || etudiant.da,
@@ -707,6 +727,7 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                         statutIntegrite: statutIntegrite,
                         statutRemise: evaluation.statutRemise || 'non-remis',  // ✅ Ajout statut de remise
                         evaluationId: evaluation.id,
+                        evaluationNotee: evaluationNotee,
                         verrouille: evaluation.verrouillee || false,
                         remplacee: estOriginaleRemplacee,
                         badgeType: badgeType,
@@ -1067,7 +1088,7 @@ function genererLigneHTML(ligne) {
                     ? `<span style="color: var(--rouge-danger); font-size: 0.85em;" title="Doublon : ce fichier est déjà associé à ${echapperHtml(ligne.diagnosticDoublon || '')}. Suppression sécuritaire.">⚠ Doublon</span>`
                     : `<span style="color: var(--attention); font-size: 0.85em;">⚠ Non associé</span>`}`
                 : ligne.fichierAutreProduction
-                    ? `${echapperHtml(ligne.productionNom)} <span style="color: var(--attention); font-size: 0.85em;">⚠ Fichier sous autre production</span>`
+                    ? `${echapperHtml(ligne.productionNom)} <span style="color: var(--attention); font-size: 0.85em;">⚠ Fichier sous ${ligne.fichierAutreProductionNom ? echapperHtml(ligne.fichierAutreProductionNom) : 'autre production'}</span>`
                     : echapperHtml(ligne.productionNom)}</td>
             <td class="td-center">${badgeJeton}</td>
             <td class="td-center">${affichageNiveau}</td>

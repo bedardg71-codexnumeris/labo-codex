@@ -394,7 +394,7 @@ const TOOLTIPS = {
     'travaux-production':
         'S\u00e9lectionne la production (travail, examen) que tu es en train d\'\u00e9valuer. Les fichiers import\u00e9s seront associ\u00e9s \u00e0 cette production.',
     'travaux-pipeline-optimisation':
-        'Les images sont optimis\u00e9es automatiquement (r\u00e9solution DPI uniformis\u00e9e, compression JPEG). Les PDF sont import\u00e9s tels quels.',
+        'Traitements automatiques appliqu\u00e9s aux images : balance des blancs, uniformisation DPI selon le s\u00e9lecteur, compression JPEG. Les fichiers d\'un m\u00eame \u00e9tudiant pour une m\u00eame production sont regroup\u00e9s (multi-pages). Les PDF sont import\u00e9s tels quels.',
     'travaux-fsapi-config':
         'Stocke les fichiers import\u00e9s directement sur le disque local au lieu d\'IndexedDB. Recommand\u00e9 sur ordinateur pour \u00e9viter les limites de stockage du navigateur.',
 

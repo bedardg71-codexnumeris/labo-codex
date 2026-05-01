@@ -1866,7 +1866,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 const classesSansEval = e.sansEvaluation ? ' barre-etudiant-sans-eval' : '';
                 const tooltipValeur = e.sansEvaluation ? 'aucune production évaluée' : `${Math.round(e.valeur * 100)}%`;
                                 lignesSOM += `<div class="barre-etudiant barre-etudiant-som${classesSansEval}"
-                    style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
+                    style="left: ${positionFinale}%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --jitterV: ${jitterV.toFixed(1)}px; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
                     data-da="${e.da}"
                     data-nom="${echapperHtml(nomAffiche)}"
                     data-valeur="${e.sansEvaluation ? '' : Math.round(e.valeur * 100) + '%'}"
@@ -1925,7 +1925,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 const classesSansEval = e.sansEvaluation ? ' barre-etudiant-sans-eval' : '';
                 const tooltipValeur = e.sansEvaluation ? 'aucune production évaluée' : `${Math.round(e.valeur * 100)}%`;
                                 lignesPAN += `<div class="barre-etudiant barre-etudiant-std${classesSansEval}"
-                    style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
+                    style="left: ${positionFinale}%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --jitterV: ${jitterV.toFixed(1)}px; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
                     data-da="${e.da}"
                     data-nom="${echapperHtml(nomAffiche)}"
                     data-valeur="${e.sansEvaluation ? '' : Math.round(e.valeur * 100) + '%'}"
@@ -2121,7 +2121,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
             const scaleDown = (1 - scaleVar).toFixed(2);
             const duration = (8 - (ampNum - 8) * 0.4).toFixed(1); // 8s à 4s selon amplitude
             lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
+                style="left: ${positionFinale}%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --jitterV: ${jitterV.toFixed(1)}px; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(nomAffiche)}"
                 data-pattern="${pattern}"
@@ -2166,7 +2166,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
             const scaleDown = (1 - scaleVar).toFixed(2);
             const duration = (8 - (ampNum - 8) * 0.4).toFixed(1); // 8s à 4s selon amplitude
             lignesPAN += `<div class="barre-etudiant barre-etudiant-std"
-                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
+                style="left: ${positionFinale}%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --jitterV: ${jitterV.toFixed(1)}px; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(nomAffiche)}"
                 data-pattern="${pattern}"
@@ -2347,7 +2347,7 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
             const scaleDown = (1 - scaleVar).toFixed(2);
             const duration = (8 - (ampNum - 8) * 0.4).toFixed(1); // 8s à 4s selon amplitude
             lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
+                style="left: ${positionFinale}%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --jitterV: ${jitterV.toFixed(1)}px; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(nomAffiche)}"
                 data-niveau="${niveau}"
@@ -2392,7 +2392,7 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
             const scaleDown = (1 - scaleVar).toFixed(2);
             const duration = (8 - (ampNum - 8) * 0.4).toFixed(1); // 8s à 4s selon amplitude
             lignesPAN += `<div class="barre-etudiant barre-etudiant-std"
-                style="left: ${positionFinale}%; top: 50%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
+                style="left: ${positionFinale}%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --jitterV: ${jitterV.toFixed(1)}px; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(nomAffiche)}"
                 data-niveau="${niveau}"

@@ -7,7 +7,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=2026042819">
+    <link rel="stylesheet" href="styles.css?v=2026050126">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -15809,11 +15809,11 @@
     <script src="js/spe-specifications.js?v=2026010206"></script> <!-- Beta 95 : Module PAN-Spécifications + gabarits François -->
     <script src="js/pratiques-bibliotheque.js?v=2026010401"></script> <!-- Beta 95 : Bibliothèque universelle STD + SPE -->
     <script src="js/pratiques-materiel.js?v=2026010601"></script> <!-- Beta 95 : retirerPratiqueDeBibliothequeMateriel -->
-    <script src="js/preferences-v2.js?v=2026041703"></script> <!-- Beta 99.17 (b0417-0850) : rafraîchit palette tampons après toggle Actions RLO -->
+    <script src="js/preferences-v2.js?v=2026050104"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
     <script src="js/donnees-v2.js?v=2026030202"></script> <!-- Beta 95 : Onglet Données restructuré -->
     <script src="js/etudiants.js?v=2026042708"></script>
     <script src="js/productions-bibliotheque.js?v=2026010218"></script> <!-- + import depuis trimestres -->
-    <script src="js/productions.js?v=2026042804"></script> <!-- + import depuis bibliothèque corrigé -->
+    <script src="js/productions.js?v=2026050109"></script> <!-- Beta 99.30 b0501-0735 : labels d'échéances par groupe lisent gc.groupe (avec fallback gc.groupeNum) — fix divergence après import/migration -->
     <script src="js/grilles-bibliotheque.js?v=2026010220"></script> <!-- refactoring: plus de hardcodé -->
     <script src="js/grilles.js?v=2026010603"></script> <!-- Bug Bruno: sauvegarde nouvelles grilles -->
     <script src="js/echelles-bibliotheque.js?v=2026010220"></script> <!-- refactoring: plus de hardcodé -->
@@ -15859,7 +15859,7 @@
     <script src="js/indices.js?v=2026022801"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
-    <script src="js/tableau-bord-apercu.js?v=2026030201"></script>
+    <script src="js/tableau-bord-apercu.js?v=2026050103"></script> <!-- Beta 99.30 b0501-0735 : jitter vertical appliqué quand animation des billes désactivée (retrait du top:50% inline qui empêchait l'override CSS) -->
     <script src="js/profil-etudiant.js?v=2026042401"></script> <!-- Beta 99.24 : auto-nettoyage préférence grilleReferenceDepistage si grille introuvable -->
     <script src="js/presences-apercu.js?v=2025121017"></script>
     <script src="js/evaluations-apercu.js?v=2025111026"></script>
@@ -15886,7 +15886,7 @@
     <script src="js/reserve.js?v=2026042802"></script>
     <script src="js/reserve-ouvrir.js?v=2026042805"></script>
     <script src="js/travaux-preparation.js?v=2026021801"></script>
-    <script src="js/travaux-import.js?v=2026032600"></script>
+    <script src="js/travaux-import.js?v=2026050120"></script> <!-- Beta 99.30 b0501-0735 : detecterDoublonsStockage (même DA + productionId, queue + storage) -->
     <script src="js/travaux-visionneuse.js?v=2026022601"></script>
     <script src="js/travaux-outils.js?v=2026041703"></script>
     <script src="js/tampons-bibliotheque.js?v=2026032001"></script>
@@ -15897,11 +15897,11 @@
     <script src="js/travaux-export-pdf.js?v=2026042502"></script>
     <script src="js/travaux-resolution.js?v=2026030602"></script>
     <script src="js/migration-diagnostic.js?v=2026030601"></script>
-    <script src="js/travaux-ui.js?v=2026042401"></script> <!-- Beta 99.24 : Phase 1a désaturation localStorage — thumbnails routées via stockerThumbnail -->
+    <script src="js/travaux-ui.js?v=2026050125"></script> <!-- Beta 99.30 b0501-0735 : emoji 🖼️ remplacé par icons/icon-image.svg (style icons8) -->
     <script src="js/actions-rlo.js?v=2026041709"></script> <!-- Beta 99.17 (b0417-1100) : fix lecture LIVE prioritaire dans obtenirEvolutionRLOEtudiant -->
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
-    <script src="js/calendrier-vue.js?v=2026042819"></script> <!-- Beta 99.28 b0428-1915 : congés personnels affichent indice de sem -->
+    <script src="js/calendrier-vue.js?v=2026050111"></script> <!-- Beta 99.30 b0501-0735 : tooltip d'échéance déplacé sur le <td> (le pointer-events:none du badge bloquait le hover natif) -->
     <script src="js/horaire.js?v=2026010602"></script>
     <script src="js/groupe.js?v=2026032600"></script>
     <script src="js/interventions.js?v=2025122801"></script>
@@ -15911,7 +15911,7 @@
     <script src="js/import-export.js?v=2026032600"></script>
     <script src="js/codex.js?v=2026042803"></script>
     <script src="js/statistiques.js?v=2025121001"></script>
-    <script src="js/liste-evaluations.js?v=2026032002"></script>
+    <script src="js/liste-evaluations.js?v=2026050119"></script> <!-- Beta 99.30 b0501-0735 : statut "évalué" exige criteres.length > 0 (jeton de délai seul ne suffit pas) -->
     <script src="js/journal.js?v=2026041706"></script>
     <script src="js/snapshots.js?v=2026030201"></script>
     <script src="js/couleurs.js?v=2026040201"></script>
@@ -15922,7 +15922,7 @@
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=2026032002"></script>
-    <script src="js/evaluation.js?v=2026041706"></script>
+    <script src="js/evaluation.js?v=2026050117"></script> <!-- Beta 99.30 b0501-0735 : badge ÉVALUÉ uniquement si au moins un critère noté (jeton seul ne suffit plus) -->
 
     <!-- RAPPEL BACKUP - Avertissement perte de données (Beta 95) -->
     <script src="js/modal-backup-reminder.js?v=2025122803"></script>
@@ -15949,8 +15949,8 @@
     <script src="js/accompagnement.js?v=2026042002"></script>
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=2026042002"></script>
-    <script src="js/accompagnement-contenu-popup.js?v=2026042401"></script>
+    <script src="js/accompagnement-contenu-hover.js?v=2026050123"></script>
+    <script src="js/accompagnement-contenu-popup.js?v=2026050123"></script>
     <script src="js/accompagnement-contenu-terme.js?v=2026042002"></script>
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
