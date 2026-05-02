@@ -1172,15 +1172,15 @@ const AIDE_CONTEXTUELLE = {
     },
 
     // =========================================================================
-    // DOUBLONS DE FICHIERS — modale Examiner les doublons (Phase 7 #3)
+    // PLUSIEURS FICHIERS PAR ÉTUDIANT — modale (Phase 7 #3)
     // =========================================================================
 
-    'doublons-examiner': {
-        titre: "Examiner les doublons de fichiers",
+    'fichiers-multiples-examiner': {
+        titre: "Plusieurs fichiers par étudiant",
         sections: [
             {
                 type: 'texte',
-                contenu: "Quand un même étudiant·e a plusieurs fichiers pour une même production, l'application en garde un comme « actif » (le plus récent) mais conserve tous les autres en stock. Cette modale te permet de décider, cas par cas, ce qui reste et ce qui passe à la corbeille."
+                contenu: "Quand un même étudiant·e a plus d'un fichier pour une même production, l'application les regroupe ici pour que tu décides ce qui reste actif et ce qui passe à la corbeille. Aucun fichier n'est supprimé sans ton geste."
             },
             {
                 type: 'liste',
@@ -1193,34 +1193,43 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: "Rien n'est jamais supprimé définitivement depuis cette modale. La corbeille te laisse 30 jours pour revenir en arrière."
+                contenu: "Plusieurs fichiers pour un même cas n'est pas forcément un problème : l'élève peut avoir soumis un livrable en plusieurs morceaux (image + PDF), une reprise via jeton, ou simplement deux versions distinctes. À toi de juger en consultant les noms et les dates."
             }
         ],
-        voirAussi: ['doublons-patterns']
+        voirAussi: ['fichiers-multiples-familles']
     },
 
-    'doublons-patterns': {
-        titre: "Trois familles de doublons",
+    'fichiers-multiples-familles': {
+        titre: "Familles détectées et tags d'information",
         sections: [
             {
                 type: 'texte',
-                contenu: "L'application reconnaît trois familles de doublons et te suggère une action par défaut quand elle en est sûre. Tu peux toujours changer la suggestion."
+                contenu: "L'application ne fait qu'une seule présomption sûre : la reprise via jeton (suffixe <code>_-_Jeton_</code>, qui est une convention que tu choisis d'utiliser à l'import). Tout le reste est laissé à ta décision, avec des tags pour t'aider à comprendre le contexte."
             },
             {
                 type: 'liste',
-                titre: "Familles détectées",
+                titre: "Deux familles",
                 items: [
-                    "<strong>🟢 Reprise avec jeton</strong> — un fichier porte le suffixe <code>_-_Jeton_</code> dans son nom : c'est une reprise légitime. Suggestion : garder les deux (l'original et la reprise).",
-                    "<strong>🟡 Mixte PDF + image</strong> — un PDF coexiste avec une ou plusieurs images. C'est typiquement le résultat d'une fusion de pages. Suggestion : garder le PDF, mettre les images à la corbeille.",
-                    "<strong>🟠 Re-import modifié</strong> — deux fichiers du même nom mais de tailles différentes : l'élève a re-importé une version modifiée. Aucune suggestion automatique — c'est à toi de décider laquelle garder en consultant la date et le statut."
+                    "<strong>🟢 Reprise via jeton</strong> — un fichier porte le suffixe <code>_-_Jeton_</code> : suggestion garder les deux (l'original et la reprise).",
+                    "<strong>🔵 Plusieurs fichiers</strong> — tout autre cas : aucune suggestion automatique. Examine les noms, dates et formats avant de décider."
+                ]
+            },
+            {
+                type: 'liste',
+                titre: "Tags informatifs (sans recommandation)",
+                items: [
+                    "<strong>📄 PDF + image</strong> — formats différents. Peut être un livrable composite (image iPad + texte Word), pas forcément un doublon.",
+                    "<strong>🔁 mêmes noms</strong> — fichiers de noms identiques mais tailles différentes : re-import probable d'une version modifiée.",
+                    "<strong>⏱ dates proches</strong> — moins de 5 minutes entre deux imports : signe d'un glitch (double-clic involontaire, par exemple).",
+                    "<strong>📝 statuts mixtes</strong> — un fichier annoté coexiste avec un fichier importé non annoté."
                 ]
             },
             {
                 type: 'conseil',
-                contenu: "Pour les cas « Re-import modifié », ouvre les deux fichiers (depuis la liste des évaluations, action « Éditer ») avant de décider lequel met à la corbeille."
+                contenu: "Si un cas semble venir d'une mauvaise association de production (artefact importé sur la mauvaise production), utilise plutôt l'action « Réassocier » du sélect Actions de la ligne — c'est plus précis que de mettre à la corbeille."
             }
         ],
-        voirAussi: ['doublons-examiner']
+        voirAussi: ['fichiers-multiples-examiner']
     }
 };
 

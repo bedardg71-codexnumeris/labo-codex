@@ -22319,8 +22319,23 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     margin-bottom: 8px;
 }
 .td-carte[data-pattern="jeton"]              { border-left-color: var(--vert-leger); }
-.td-carte[data-pattern="mixte-pdf-image"]    { border-left-color: var(--orange-accent); }
-.td-carte[data-pattern="re-import-modifie"]  { border-left-color: var(--orange-accent); }
+.td-carte[data-pattern="plusieurs-fichiers"] { border-left-color: var(--accent-primaire); }
+
+.td-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+.td-tag-info {
+    display: inline-block;
+    padding: 2px 8px;
+    background: rgba(0, 0, 0, 0.10);
+    border-radius: 10px;
+    font-size: 0.75rem;
+    color: var(--texte-secondaire);
+}
+.mode-clair .td-tag-info { background: rgba(0, 0, 0, 0.05); }
 
 .td-carte-entete {
     display: flex;

@@ -1222,11 +1222,11 @@ function genererDropdownActions(ligne) {
         options.push(`<option value="supprimer-eval|${evalId}">Supprimer l'évaluation</option>`);
     }
 
-    // Phase 7 #3 : Examiner les doublons — visible si ce (DA × production) a 2+ fichiers
+    // Phase 7 #3 : Voir les fichiers multiples — visible si ce (DA × production) a 2+ fichiers
     if (typeof travauxDoublonsUI !== 'undefined' &&
         typeof travauxDoublonsUI.aDoublonPourCas === 'function' &&
         travauxDoublonsUI.aDoublonPourCas(da, prodId)) {
-        options.push(`<option value="examiner-doublons|${da}|${prodId}">Examiner les doublons</option>`);
+        options.push(`<option value="examiner-doublons|${da}|${prodId}">Voir les fichiers multiples</option>`);
     }
 
     if (options.length === 0) {
