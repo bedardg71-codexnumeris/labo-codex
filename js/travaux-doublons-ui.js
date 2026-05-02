@@ -245,11 +245,16 @@
             prod.etudiantsAvecDoublons.forEach(function(d) {
                 if (!_correspondAuFiltre(d)) return;
                 var nbGardes = 0;
+                var nbCorbeilleCas = 0;
                 d.fichiers.forEach(function(f) {
                     if (_decisions[f.id] === 'garder') nbGardes++;
-                    else if (_decisions[f.id] === 'corbeille') nbCorbeille++;
+                    else if (_decisions[f.id] === 'corbeille') {
+                        nbCorbeille++;
+                        nbCorbeilleCas++;
+                    }
                 });
-                if (nbGardes === 0) casOrphelin++;
+                // Orphelin uniquement si l'utilisateur demande corbeille sans garder
+                if (nbCorbeilleCas > 0 && nbGardes === 0) casOrphelin++;
             });
         });
 
@@ -259,9 +264,10 @@
             statut.textContent = casOrphelin + ' cas sans fichier gardé — corrige avant d\'appliquer.';
             statut.classList.add('td-footer-statut-erreur');
         } else if (nbCorbeille === 0) {
-            btn.disabled = true;
-            btn.textContent = 'Aucune action sélectionnée';
-            statut.textContent = 'Choisis « Corbeille » sur les fichiers à retirer.';
+            // Aucune action de corbeille sélectionnée → bouton actif comme « Fermer »
+            btn.disabled = false;
+            btn.textContent = 'Fermer (aucune action)';
+            statut.textContent = 'Aucun fichier à mettre à la corbeille — tu peux fermer la modale.';
             statut.classList.remove('td-footer-statut-erreur');
         } else {
             btn.disabled = false;
@@ -283,16 +289,21 @@
     }
 
     function appliquerActions() {
+        var aCorbeille = Object.keys(_decisions).filter(function(fid) {
+            return _decisions[fid] === 'corbeille';
+        });
+
+        // Mode « Fermer (aucune action) » : pas de corbeille demandée → fermer la modale
+        if (aCorbeille.length === 0) {
+            fermerDialogue();
+            return;
+        }
+
         if (typeof travauxStockage === 'undefined' ||
             typeof travauxStockage.deplacerEnCorbeille !== 'function') {
             console.error('[Fichiers multiples] travauxStockage.deplacerEnCorbeille indisponible');
             return;
         }
-
-        var aCorbeille = Object.keys(_decisions).filter(function(fid) {
-            return _decisions[fid] === 'corbeille';
-        });
-        if (aCorbeille.length === 0) return;
 
         var traites = 0, echecs = 0;
         for (var i = 0; i < aCorbeille.length; i++) {
