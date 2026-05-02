@@ -188,6 +188,59 @@
   - **Priorite** : Moyenne. Pas bloquant pour la livraison v1, mais attendu pour la
     version « novice-friendly ».
 
+### Vocabulaire — Simplification ecosysteme de donnees (2 mai 2026)
+
+- [ ] **#259** Renommer « Reserve / verser / versement » → « Archives / archiver / archive »
+  - **Contexte** : retour testeur le 2 mai 2026 — le vocabulaire bibliothecaire
+    (codex, reserve, versement) est ressenti comme esoterique. L'utilisateur
+    perd le fil entre les concepts. Le vocabulaire archive/archiver est plus
+    direct et universel.
+  - **Renommages cibles** :
+    - **Reserve** → Archives (ou « mes archives »)
+    - **Verser dans la reserve** → Archiver
+    - **Ouvrir la reserve / un versement** → Ouvrir une archive
+    - **Versement** (le ZIP, l'entree) → Archive
+  - **Restent inchanges** : Codex (identite produit), Manifeste (devient
+    « Index des archives » ou « Liste des archives » dans l'UI seulement, le
+    code peut garder « manifeste »).
+  - **Perimetre du chantier** :
+    - 3 modules JS (`js/reserve.js`, `js/reserve-ouvrir.js`,
+      `js/reserve-reglages.js`) — strings UI, console.warn, commentaires.
+      Garder les noms internes des modules (eviter rename de fichier pour
+      ne pas casser l'historique git).
+    - ~13 entrees d'aide popup et tooltips (`accompagnement-contenu-popup.js`,
+      `accompagnement-contenu-hover.js`).
+    - Modale `#modalReserve` et `#modalOuvrirVersement` : labels, titres,
+      messages. Les IDs DOM peuvent rester (pour limiter le diff).
+    - Carte « Reserve » dans Reglages > Donnees → « Archives » + popup
+      `reglages-reserve` (le contenu du popup).
+    - Menu Codex : entrees « Verser dans la reserve... » et « Ouvrir la
+      reserve... ».
+    - `BACKLOG.md`, memoires Claude (`project_reserve.md`,
+      `project_phase7_doublons.md` si reference, etc.).
+    - `docs/architecture/ECOSYSTEME-DONNEES.md` : revoir le tableau des
+      verbes et la presentation des 4 concepts.
+  - **Effort** : 2-3 heures (gros find/replace + relecture pour eviter les
+    confusions, validation terrain).
+  - **Priorite** : Haute pour la prochaine session (decision 2 mai 2026).
+
+### UX — En-tete (2 mai 2026)
+
+- [ ] **#258** Remplacer le selecteur Normal/Anonymise par un bouton-icone dans l'en-tete
+  - **Etat actuel** : `#selecteur-mode` (genere par `js/modes.js`) est un select
+    Normal / Anonymise place au centre de la ligne 2 de l'en-tete
+    (classe `selecteur-mode-centre`, `index.html:3736`).
+  - **Cible** : retirer le select et le remplacer par un bouton-icone dans la
+    rangee de droite de la ligne 1, **a cote** de `#btn-toggle-theme-nav`
+    (Mode clair/sombre, `index.html:3723`). Comportement toggle au clic.
+  - **Icone** : `icons/icons8-anonymous-mask.svg`. Etat actif/inactif
+    visualise (par analogie avec le bouton clair/sombre, ou via une variante
+    visuelle cohérente avec le design system).
+  - **Effort** : ~1 h (HTML en-tete + handler + retrait du selecteur central +
+    nettoyage CSS `selecteur-mode-centre` si inutilise ailleurs).
+  - **Priorite** : Moyenne — UX raffinement, ameliore la coherence des controles
+    utilitaires (tous a droite).
+
 ### Rythme Phase 5 — Raffinements (selon usage, post-AQPC)
 
 - [ ] **#240** Courbe d'apprentissage de l'evaluateur (tendance temporelle par activite)
