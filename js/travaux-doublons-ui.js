@@ -43,19 +43,33 @@
         });
     }
 
-    function _marquerCasValide(d) {
+    function _persisterValidation(da, productionId, fichierIds) {
         var validations = _obtenirValidations();
         // Retirer les anciennes entrées pour ce (da, productionId) — on remplace
         validations = validations.filter(function(v) {
-            return !(v.da === d.da && v.productionId === d.productionId);
+            return !(v.da === da && v.productionId === productionId);
         });
         validations.push({
-            da: d.da,
-            productionId: d.productionId,
-            fichierIds: d.fichiers.map(function(f) { return f.id; }).sort(),
+            da: da,
+            productionId: productionId,
+            fichierIds: fichierIds.slice().sort(),
             dateValidation: new Date().toISOString()
         });
         _enregistrerValidations(validations);
+    }
+
+    function _marquerCasValide(d) {
+        _persisterValidation(d.da, d.productionId, d.fichiers.map(function(f) { return f.id; }));
+    }
+
+    /**
+     * API publique pour persister une validation depuis l'extérieur
+     * (utilisée par la modale d'import quand l'utilisateur choisit
+     * « Livrable additionnel »).
+     */
+    function marquerLivrableAdditionnel(da, productionId, fichierIds) {
+        if (!da || !productionId || !Array.isArray(fichierIds) || fichierIds.length === 0) return;
+        _persisterValidation(da, productionId, fichierIds);
     }
 
     // =========================================================================
@@ -584,7 +598,8 @@
         appliquerActions: appliquerActions,
         mettreAJourBandeau: mettreAJourBandeau,
         aDoublonPourCas: aDoublonPourCas,
-        compterAvecValidations: compterAvecValidations
+        compterAvecValidations: compterAvecValidations,
+        marquerLivrableAdditionnel: marquerLivrableAdditionnel
     };
 
 })();

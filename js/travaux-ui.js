@@ -3845,6 +3845,9 @@
                             '<button class="btn btn-principal" data-choix="remplacer">Remplacer l\u2019existant' +
                                 '<span style="display:block;font-size:11px;font-weight:400;opacity:0.8;">L\u2019ancien fichier est envoy\u00e9 \u00e0 la corbeille. Le nouveau prend sa place.</span>' +
                             '</button>' +
+                            '<button class="btn btn-secondaire" data-choix="additionnel">Livrable additionnel (les deux conserv\u00e9s)' +
+                                '<span style="display:block;font-size:11px;font-weight:400;opacity:0.8;">Le nouveau fichier coexiste avec l\u2019existant comme deuxi\u00e8me livrable l\u00e9gitime (image + PDF, version compl\u00e9mentaire, etc.). Le cas est marqu\u00e9 comme valid\u00e9 et n\u2019appara\u00eetra pas dans le bandeau.</span>' +
+                            '</button>' +
                             '<button class="btn btn-secondaire" data-choix="garder">Garder l\u2019existant' +
                                 '<span style="display:block;font-size:11px;font-weight:400;opacity:0.8;">Le nouveau fichier est ignor\u00e9. Rien ne change.</span>' +
                             '</button>' +
@@ -3899,6 +3902,25 @@
                     await travauxImport.importerFichier(d.fichierPrepare, d.productionId);
                 } catch (e) {
                     console.error('[Travaux-UI] Erreur import remplacement:', e);
+                }
+            } else if (choix === 'additionnel') {
+                // Livrable additionnel : importer sans déclencher la détection
+                // de doublon, puis marquer le cas comme validé pour qu'il
+                // n'apparaisse pas dans le bandeau Plusieurs fichiers.
+                d.fichierPrepare.livrableAdditionnel = true;
+                try {
+                    var fichierAdd = await travauxImport.importerFichier(d.fichierPrepare, d.productionId);
+                    if (fichierAdd && fichierAdd.id &&
+                        typeof travauxDoublonsUI !== 'undefined' &&
+                        typeof travauxDoublonsUI.marquerLivrableAdditionnel === 'function') {
+                        travauxDoublonsUI.marquerLivrableAdditionnel(
+                            d.fichierExistant.etudiantDA,
+                            d.productionId,
+                            [d.fichierExistant.id, fichierAdd.id]
+                        );
+                    }
+                } catch (e) {
+                    console.error('[Travaux-UI] Erreur import livrable additionnel:', e);
                 }
             } else if (choix === 'orphelin') {
                 try {
