@@ -1,11 +1,9 @@
-# SESSION — État au 28 avril 2026 (Réserve étendue — finition UX + remapping IDs)
+# SESSION — État au 2 mai 2026 (audits ultrareview + remédiations + outils diagnostic doublons)
 
-**Date** : 28 avril 2026
-**Dernier build** : `0428-1245` · Beta **99.28**
+**Date** : 2 mai 2026
+**Dernier build** : `0502-0705` · Beta **99.30**
 **Branche** : `main` (poussée sur origin)
-**Statut** : **7 chantiers Réserve livrés en une journée**, tous poussés sur origin.
-- Matin/midi : #255 (doc), #253 (FSAPI), #254 v1+v1.1 (Ouvrir la réserve), #250 (Codex allégé sans TimeMachine), #257 v1 (productions/cartouches/pratiques + auto-cochage).
-- Après-midi : **#256** (aide aux modales Réserve : 7 popups + 6 infobulles + correction `entete-codex` anti-cloud) et **#257 v2.A** (remapping IDs en mode « copie en double » : productions/cartouches/pratiques rebranchées sur les nouvelles copies de grilles/échelles).
+**Statut** : ~~5 lots `/ultrareview` audités, 6 phases de remédiation livrées (42+ bugs corrigés). 8 doublons exacts d'Artefact 8 nettoyés (suppression définitive avant ajout du mode corbeille).~~ Phase 7 #2 livrée (outils console diagnostic doublons + nettoyage avec corbeille). Prochaine étape : Phase 7 #1 (déduplication compteur dans carrousel/liste).
 
 ---
 
@@ -16,146 +14,159 @@
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
-Contexte : 7 chantiers Réserve livrés le 28 avril 2026 (commits sur main,
-tous poussés). La Réserve est fonctionnellement complète pour l'usage
-quotidien : versement (FSAPI Chrome/Edge ou ZIP Safari), réimport sélectif
-(6 types de ressources avec auto-cochage des références croisées),
-remapping d'IDs en mode copie en double, aide contextuelle dans les
-2 modales Réserve.
+Contexte : Session du 1-2 mai consacrée aux audits /ultrareview payants
+(2 lots audités : Lot 4a évaluation 11 findings + Lot 6 travaux+saisie
+10 findings, rapports dans Rapports/), aux remédiations Phase 6 (10 bugs
+Lot 6 corrigés en 4 commits), et au chantier Phase 7 doublons :
+- #2 livré : outils console diagnostiquerDoublons() et
+  nettoyerDoublonsExacts() dans travaux-resolution.js
+- 8 doublons exacts d'Artefact 8 supprimés via dry-run + execution
+- Outil corrige depuis : utilise la corbeille par defaut (restaurable
+  30 j) au lieu du hard delete
 
-Période sensible : Grégoire est en fin de trimestre avec ses élèves +
-colloque dans 1 mois. Priorité aux tâches qui réduisent la dette
-technique sans engager de chantiers larges. Privilégier les livrables
-courts, sécurisés, vérifiables, atomiques (1 commit par sous-chantier).
+PROCHAINE ÉTAPE : Phase 7 #1 — Déduplication du compteur dans le
+carrousel Annoter/Évaluer et la liste des évaluations. Le compteur
+« Artefact 8 (15) » doit refléter le nombre d'étudiants distincts
+ayant au moins 1 fichier (1 par DA), pas le nombre de fichiers
+physiques. Aujourd'hui l'écart 15 vs 14 vient de Handfield qui a 2
+fichiers (PDF + JPEG) — 14 étudiants × 1 fichier + Handfield × 2.
 
-ÉTAT À CONNAÎTRE :
-1. Audit en attente : AUDIT-VOCABULAIRE-2026-04-28.md à la racine
-   (untracked). 11 occurrences de copy à corriger (Mac/iPad/cloud/
-   synchronisation) suite aux 2 nouveaux feedbacks. ~30-45 min en une
-   passe. Voir le rapport pour la liste exacte et les reformulations
-   suggérées.
-2. Nouveaux feedbacks (mémoire Claude, déjà chargés via MEMORY.md) :
-   - feedback_metaphore_cloud_interdite.md — pas de cloud/synchro dans
-     le copy utilisateur, tout est manuel et local.
-   - feedback_vocabulaire_appareils_generique.md — copy : « ordinateur
-     / tablette / appareil » plutôt que « Mac / iPad ». Quand on doit
-     distinguer FSAPI vs ZIP, parler du navigateur (Chrome/Edge vs
-     Safari), pas de la marque d'appareil.
-3. project_reserve.md (mémoire Claude) — sections complètes pour les
-   chantiers Réserve, dont #256 (aide) et #257 v2.A (remapping).
+Inventaire des doublons restants (à traiter via Phase 7 #3 plus tard) :
+14 cas (2 Artefact 3 + 9 Artefact 5 + 2 Artefact 6 + 1 Artefact 8)
+- 11 reprises légitimes avec jeton (suffixe _-_Jeton_ dans le nom)
+- 3 re-imports avec contenu modifié
 
 LECTURE OBLIGATOIRE AVANT DE CODER :
-1. (auto-memory de Claude) project_reserve.md — état technique de
-   reserve.js, reserve-ouvrir.js, et de l'aide aux modales.
-2. docs/architecture/ECOSYSTEME-DONNEES.md — document fondateur 4
-   concepts (Codex, Réserve, Codex data, Voûte). Vocabulaire
-   bibliothécaire. Section « Voie de retour ».
-3. BACKLOG.md — feuille de route restante.
-4. CLAUDE.md — section « Architecture des données » et règles de
-   sécurité (innerHTML/echapperHtml, data-action, console.warn/error,
-   pas de eval/CSP, etc.).
+1. Rapports/ultrareview-lot-6-travaux-saisie.md — état des findings
+   du Lot 6 et le pattern « asymétries internes au module »
+2. Le code à toucher :
+   - js/travaux-ui.js:2552-2614 (genererGrilleFichiers + dropdown
+     filtre production avec compteur (N))
+   - js/travaux-resolution.js (helper trouverFichierPourEvaluation
+     déjà en place pour la résolution par étudiant)
 
-ITEMS DISPONIBLES (par ordre logique recommandé) :
+API CONSOLE DEJA EN PLACE (utiles pour debug Phase 7 #1) :
+  travauxResolution.diagnostiquer('Benjamin')
+    -> Diagnostic d'un étudiant (fichiers + évaluations + cohérence)
 
-  Audit copy   Appliquer AUDIT-VOCABULAIRE-2026-04-28.md (11 occurrences,
-               ~30-45 min, faible risque, atomique).
+  travauxResolution.diagnostiquerDoublons()
+    -> Liste tous les doublons du groupe-cours actif
 
-  #249         Section dédiée Réserve dans Réglages — affiche état
-               (versements détectés, dates, tailles). ~3-4 h. Apporte un
-               bloc concret affichable AVANT de refondre Réglages globaux.
+  travauxResolution.diagnostiquerDoublons('Artefact 8')
+    -> Filtre par titre partiel ou ID exact
 
-  #247         Refonte Réglages > Données pour aligner avec l'architecture
-               des 4 concepts. ~1 j. Plus cohérent APRÈS #249.
+  travauxResolution.nettoyerDoublonsExacts()
+    -> Dry-run, ne touche que les vrais doublons (mêmes octets)
+    -> Mode corbeille par défaut (restaurable 30 j)
+    -> Pour exec : { dryRun: false }
+    -> Pour hard delete : { dryRun: false, definitive: true }
 
-  #257 v2.B    Mode consultation namespace `__archive_*` (lecture seule,
-               démo/formation). ~5-6 h. À FROID dans une session dédiée
-               — pas en enchaînement. Plan détaillé à écrire avant de
-               coder. Touche le namespacing trimestre (sensible).
+PLAN PHASE 7 (3 étapes) :
+  ✅ #2 — Outils console diagnostic + nettoyage doublons exacts
+  🔜 #1 — Déduplication compteur carrousel/liste (1 entrée/étudiant)
+  ⏳ #3 — UI nettoyage interactif des 14 doublons mixtes restants
+         (modale avec recommandations par pattern, badges Reprise
+         après jeton / Mixte PDF-image / Re-import modifié)
 
-  #256-bis     Aide aux 8 autres modales de l'app (Nouveautés, Réparation,
-               Wizard pratique, ApercuPDF, Confidentiel, Export, Import,
-               Suppression ressource). Reproduire le pattern de #256.
-
-  #248         Réserve v1.1 — manifeste auto-fusionné Safari (Chrome le
-               fait déjà via FSAPI). ~2-3 h. Basse priorité tant que la
-               friction Safari n'est pas concrète.
-
-  #251 / #252  Codex data + Labo autonome (priorités 4-5 ECOSYSTEME, gros).
-               À garder pour quand l'usage de recherche existera.
-
-CONTRAINTES (rappel) :
-- Safari Mac + iPad cibles principales (file://)
-- Cache-busters ?v= INOPÉRANTS sur Safari file:// — Cmd+Q pour rechargement
-- console.log interdit — console.warn/error uniquement
+CONTRAINTES (rappel CLAUDE.md) :
+- Demander le numéro de beta à Grégoire avant chaque commit
+- Bumper version.json + js/init-inline.js (pas index.html, fallback
+  a migré). Cache-buster du fichier modifié dans index.html.
+- Safari Mac/iPad cibles ; Cmd+Q + rouvrir pour rechargement
 - echapperHtml() obligatoire sur innerHTML avec données utilisateur
-- Zéro handler inline — utiliser data-action / data-on-change (le
-  dispatcher main.js supporte la dot notation, ex. Reserve.actionVerser)
+- Zéro handler inline -> data-action / data-on-change
+- console.warn / console.error uniquement
 - Variables CSS du DS, tester modes clair ET sombre
-- Bumper version.json + js/init-inline.js (PAS index.html — les fallback
-  ont migré) avant chaque commit. Demander le numéro de beta à Grégoire.
-- Stage explicite par fichier (git add fichier1 fichier2) — beaucoup
-  d'autres modifications dans le working tree non liées au chantier.
 
-OBSERVATIONS OUVERTES (hors scope) :
-- Working tree : encore beaucoup de modifs non commit (CLAUDE.md,
-  Skills, docs/, plusieurs js hors-Réserve, styles.css, suppressions
-  Audit UX) + beaucoup de fichiers untracked (logs, rapports, plans,
-  ebauches). À trier par Grégoire selon priorité.
+OBSERVATIONS OUVERTES (hors scope immédiat) :
+- 14 doublons restants (Artefact 3, 5, 6, 8) à traiter Phase 7 #3
+- Phase 7 du plan de remédiation Lot 4a (11 findings dans
+  evaluation-jetons.js) -- à faire dans une autre session, demande
+  du contexte métier sur les jetons
+- Lots 4b (pratiques) et 3 (indices, candidats à trier) non encore
+  remédiés (audits faits, rapports dans Rapports/)
 - Quota localStorage saturé sur Mac (warnings au boot, plan dans
-  « plans de travail/Plan - Désaturation localStorage (analyse).md »).
-- Grille orpheline grille_1772187755149_uq1oiiafa dans H2026 (référencée
-  mais absente de grillesTemplates).
-- Cours orphelin A2025 (COURS1766455789356 référencé par les étudiants
-  et le groupe-cours, absent de la table globale `cours`). reserve.js a
-  un fallback regex pour ce cas, mais d'autres parties de l'app pourraient
-  être affectées.
-- Code mort identifié (à nettoyer dans une session zéro-dette) :
-  - Wizard pratique V1 (`modalWizardPratique` dans pratiques.js:2261+,
-    remplacé par V2 — mentionné dans SESSION 22 avril).
-  - Instrumentation `[DEMO-TRACE]` (présente depuis 18 avril, à retirer
-    quand la démo est verrouillée stable).
+  « plans de travail/Plan - Désaturation localStorage (analyse).md »)
 ```
 
 ---
 
-## Récapitulatif des livrables 28 avril 2026
+## Récapitulatif des livrables 1-2 mai 2026
 
-| Commit | Item | Description |
-|---|---|---|
-| `8dbfda1` | #255 | docs(reserve): clarifier la double fonction (Dépôt + Fonds consultable). Verbes « réimporter » et « ouvrir un versement ». |
-| `24490f4` | #253 | feat(reserve): automatisation FSAPI Chrome/Edge. Pattern handle persisté en IDB direct (bypass db.js). Sentinelle de complétude meta.json. |
-| `82bf640` | #254 v1+v1.1 | feat(reserve): ouvrir la réserve, réimport sélectif (grilles, échelles, tampons). Détection navigateur (3 vues étape 1). |
-| `5472403` | #250 | refactor(codex): retirer le TimeMachine, codex allégé (−461 lignes). Purge silencieuse au boot. Sentinelle CLE_PURGE_TIMEMACHINE_FAITE. |
-| `50d8860` | #257 v1 | feat(reserve): productions/cartouches/pratiques + auto-cochage références. 3 nouvelles façades d'import. |
-| `95adf24` | #256 | feat(aide): étendre l'aide aux modales Réserve. 7 popups + 6 infobulles. Correction `entete-codex` (retrait métaphore « cloud personnel »). |
-| `4949b2e` | #257 v2.A | fix(reserve): remapping IDs en mode « copie en double ». Productions/cartouches/pratiques pointent sur les nouvelles copies de grilles/échelles. Compteur `refsRemappees` au rapport. |
+### Audits /ultrareview payants (2 lots auditeés sur 7)
 
-**Architecture** :
-- `js/reserve.js` (1404 l.) — versement (verserGroupeCours), API publique étendue : obtenirHandle, statutHandle, supporteFSAPI.
-- `js/reserve-ouvrir.js` (878 l.) — réimport (actionOuvrir, chargerDepuisFichier, appliquerReimport).
-- `js/codex.js` (2556 l.) — espace de travail allégé (sans TimeMachine).
+| Lot | PR | Findings | Pipeline | Rapport |
+|---|---|---|---|---|
+| Lot 4a Évaluation cœur | #6 | 11 (8 normal + 3 élevés) | Crash Déduplication | `Rapports/ultrareview-lot-4a-evaluation.md` |
+| Lot 6 Travaux+saisie | #9 | 10 (7 normal + 3 nit) | ✅ Complet (1ère fois sur >15k l.) | `Rapports/ultrareview-lot-6-travaux-saisie.md` |
 
-**Pattern clé FSAPI à retenir** :
-`FileSystemDirectoryHandle` est structuredClone-compatible mais **pas JSON-sérialisable**. `db.set()` passe par localStorage qui ferait `JSON.stringify` et perdrait le handle silencieusement. Solution : objectStore IDB dédié (`reserve_fsapi.handles`). Permission re-vérifiée à chaque session via `queryPermission` / `requestPermission` (user gesture requis pour le second).
+**Lot 4b (pratiques notation)** : run lancé, crashé probablement par épuisement crédits offerts par Anthropic. Audit non remédiable. Branche `review/lot-4b-pratiques` toujours en place sur origin si on y revient avec d'autres crédits.
+
+### Remédiations Phase 6 (Lot 6 — 10 bugs corrigés en 4 commits)
+
+```
+35efeee fix(visionneuse): split nav + zoom margin-aware + ouvrirPDF try/catch (N7+nit1+nit2)
+e3c7bd7 fix(saisie): null guards etudiants + modifierNotesPresence respecte coursId (N4+N5)
+d856c36 fix(saisie): bugs assiduite multi-seances + saisie-absence-motivee preservee (N1+N2+N3)
+1f384bc fix: XSS via motif de conge + symetrie cleanup PDF.js (N6 + nit3)
+```
+
+### Beta 99.30 — fonctionnalités jour (commit antérieur, intégré)
+
+```
+bc6c759 feat: action Renommer + detection fichiers sans DA + fix doublons multi-pages (99.30)
+```
+
+### Phase 7 #2 — Outils diagnostic doublons (3 commits, 1-2 mai)
+
+```
+00770ce fix(travaux-resolution): nettoyerDoublonsExacts utilise corbeille par defaut
+b5929e6 feat(travaux-resolution): nettoyerDoublonsExacts avec dry-run par defaut
+ef7bbca feat(travaux-resolution): outil console diagnostiquerDoublons + fix diagnostiquer
+```
+
+**Diagnostic confirmé sur ce groupe-cours (h2026)** : 22 doublons sur 4 productions :
+- Artefact 3 (2 cas) — Pattern 3 : re-imports avec contenu modifié (tailles différentes)
+- Artefact 5 (9 cas) — Pattern 2 : reprises légitimes avec jeton (suffixe `_-_Jeton_`)
+- Artefact 6 (2 cas) — Pattern 2 : idem
+- Artefact 8 (9 cas dont 8 vrais doublons + 1 mixte PDF/image Handfield)
+
+**Nettoyage effectué** : 8 vrais doublons exacts d'Artefact 8 supprimés (suppression définitive faite avant le fix corbeille — irrécupérables sauf via codex backup). 14 cas mixtes restent à traiter via UI nettoyage (Phase 7 #3).
 
 ---
 
-## Prochaine session — décision à prendre
+## État global du projet (post 2 mai)
 
-**Réserve : fonctionnellement complète pour l'usage quotidien** (versement + réimport + remapping IDs). Reste de la finition + chantiers connexes.
+### Audits ultrareview livrés cette session de travail (cumulé)
 
-**Items Réserve** :
-- **#249** — Section dédiée Réserve dans Réglages (état : versements, dates, tailles). 3-4 h. Recommandé avant #247.
-- **#247** — Refonte Réglages > Données (vocabulaire 4 concepts). ~1 j. Plus cohérent après #249.
-- **#257 v2.B** — Mode consultation namespace `__archive_*` (lecture seule, démo/formation). 5-6 h. À froid dans une session dédiée — pas en enchaînement.
-- **#248** — Manifeste-réserve auto-fusionné Safari (Chrome le fait déjà via FSAPI). 2-3 h. Basse priorité.
+| Lot | Findings | Statut |
+|---|---|---|
+| Lot 1 Sécurité E/S | 20 (gratuit) | ✅ Audité, ✅ Remédié (Phases 2-3-5) |
+| Lot 2 Démo+globaux | 6 (gratuit) | ✅ Audité, ✅ Remédié (Phases 2-5) |
+| Lot 3 Indices | 20 candidats non vérifiés (gratuit) | ✅ Audité, ⏳ Triage manuel à faire |
+| Lot 4a Évaluation | 11 (payant) | ✅ Audité, ⏳ Phase 7 du plan remédiation |
+| Lot 4b Pratiques | — | ⚠️ Crashé, jamais remédié |
+| Lot 5 Synthèse PDF | 9 (gratuit) | ✅ Audité, ✅ Remédié (Phases 1-5) |
+| Lot 6 Travaux+saisie | 10 (payant) | ✅ Audité, ✅ Remédié (Phase 6) |
 
-**Items hors Réserve** (priorités 4-5 ECOSYSTEME, gros) :
-- **#251** — Codex data, extraction depuis la Réserve.
-- **#252** — Labo autonome.
+**Total findings vérifiés** : 56 (+ 20 candidats Lot 3 à trier)
+**Total bugs corrigés cette session de travail** : ~52
 
-**Audit en attente** : `AUDIT-VOCABULAIRE-2026-04-28.md` à la racine — 11 occurrences de copy à corriger (`Mac`, `iPad`, `cloud`, `synchronisation`) suite aux nouveaux feedbacks établis en session. Effort estimé : 30-45 min en une passe.
+### Plan d'ensemble Phase 7
 
-**Feedbacks nouveaux (mémoire Claude)** :
-- `feedback_metaphore_cloud_interdite.md` — pas de cloud/synchro dans le copy. Tout est manuel et local.
-- `feedback_vocabulaire_appareils_generique.md` — préférer « ordinateur / tablette / appareil » à « Mac / iPad ».
+| # | Sujet | Statut | Estimation |
+|---|---|---|---|
+| 7.1 | Déduplication compteur carrousel/liste | 🔜 Prochaine session | 1h |
+| 7.2 | Outils console diagnostic + nettoyage doublons exacts | ✅ Livré (00770ce) | — |
+| 7.3 | UI nettoyage interactif des 14 doublons mixtes | ⏳ À faire après #1 | 2-3h |
+
+---
+
+## Prochaine session — décision à prendre en démarrage
+
+**Phase 7 #1 prioritaire** : déduplication compteur dans le carrousel Annoter/Évaluer et la liste.
+
+Suite probable de cette session :
+- Phase 7 #3 (UI nettoyage des 14 cas mixtes) si contexte le permet
+- Sinon, traiter en parallèle/après : Phase de remédiation Lot 4a (jetons, voir `Rapports/ultrareview-lot-4a-evaluation.md`)
+- Ou Phase 4 (triage manuel des 20 candidats Lot 3 indices)
