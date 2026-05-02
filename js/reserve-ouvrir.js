@@ -91,19 +91,23 @@ async function chargerDepuisFichier(file) {
         }
     }
 
-    // Localiser le dossier de versement (premier trimestres/{dossier}/donnees.json)
+    // Localiser le dossier de versement et les fichiers manifestes
     var fichierDonnees = null;
     var fichierMeta = null;
+    var fichierPatch = null;
+    var fichierManifesteGlobal = zip.files['manifeste-reserve.json'] || null;
     var dossierVersement = null;
 
     Object.keys(zip.files).forEach(function(chemin) {
-        var m = chemin.match(/^trimestres\/([^\/]+)\/(donnees|meta)\.json$/);
+        var m = chemin.match(/^trimestres\/([^\/]+)\/(donnees|meta|manifeste-reserve-patch)\.json$/);
         if (!m) return;
         if (m[2] === 'donnees' && !fichierDonnees) {
             fichierDonnees = zip.files[chemin];
             dossierVersement = m[1];
         } else if (m[2] === 'meta' && !fichierMeta) {
             fichierMeta = zip.files[chemin];
+        } else if (m[2] === 'manifeste-reserve-patch' && !fichierPatch) {
+            fichierPatch = zip.files[chemin];
         }
     });
 
@@ -126,6 +130,11 @@ async function chargerDepuisFichier(file) {
         }
     }
 
+    // Auto-hydration du manifeste local (#248). Le simple fait d'ouvrir un
+    // ZIP enregistre le versement dans l'historique de l'app, peu importe
+    // s'il a été créé avant ou après #248.
+    await _hydrateManifesteDepuisZip(zip, dossierVersement, fichierPatch, fichierManifesteGlobal, meta);
+
     var ressources = _extraireRessources(donnees);
 
     return {
@@ -134,6 +143,67 @@ async function chargerDepuisFichier(file) {
         donnees: donnees,
         ressources: ressources
     };
+}
+
+/**
+ * Auto-hydration du manifeste local quand un ZIP est ouvert.
+ * Stratégie en cascade :
+ *   1. manifeste-reserve.json à la racine (ZIPs récents) → fusion complète
+ *   2. manifeste-reserve-patch.json dans le dossier → upsert de l'entrée
+ *   3. fallback : entrée minimum reconstruite depuis meta.json
+ * Silencieux : aucun affichage si rien ne change ou si Reserve n'est pas chargé.
+ */
+async function _hydrateManifesteDepuisZip(zip, dossierVersement, fichierPatch, fichierManifesteGlobal, meta) {
+    if (!window.Reserve) return;
+
+    try {
+        if (fichierManifesteGlobal && typeof window.Reserve.fusionnerManifesteRecu === 'function') {
+            var manifesteTexte = await fichierManifesteGlobal.async('text');
+            var manifeste = JSON.parse(manifesteTexte);
+            window.Reserve.fusionnerManifesteRecu(manifeste);
+            return;
+        }
+    } catch (e) {
+        console.warn('[ReserveOuvrir] manifeste-reserve.json racine illisible, fallback patch', e.message || e);
+    }
+
+    if (typeof window.Reserve.upsertEntreeManifeste !== 'function') return;
+    if (!dossierVersement) return;
+
+    try {
+        if (fichierPatch) {
+            var patchTexte = await fichierPatch.async('text');
+            var patchObj = JSON.parse(patchTexte);
+            var entree = patchObj && patchObj.patch ? patchObj.patch : patchObj;
+            if (entree && typeof entree === 'object') {
+                window.Reserve.upsertEntreeManifeste(dossierVersement, entree);
+                return;
+            }
+        }
+    } catch (e) {
+        console.warn('[ReserveOuvrir] manifeste-reserve-patch.json illisible, fallback meta', e.message || e);
+    }
+
+    // Fallback : reconstruire une entrée minimum depuis meta.json
+    if (!meta) return;
+    var entreeFallback = {
+        uuid: meta.uuid,
+        trimestre: meta.trimestre,
+        cours: meta.cours,
+        nom_cours: meta.nom_cours || '',
+        groupe: meta.groupe,
+        statut: meta.statut || 'verse',
+        source: meta.source || 'application (IndexedDB)',
+        mode_versement: meta.mode_versement || 'zip',
+        date_versement: meta.date_versement,
+        donnees: !!(meta.contenu && meta.contenu.donnees),
+        travaux: !!(meta.contenu && meta.contenu.nombre_fichiers_travaux > 0),
+        nombre_etudiants: meta.contenu && meta.contenu.nombre_etudiants,
+        nombre_fichiers_travaux: meta.contenu && meta.contenu.nombre_fichiers_travaux,
+        taille_travaux_totale: meta.contenu && meta.contenu.taille_travaux_totale,
+        notes: 'Hydraté depuis l\'ouverture du ZIP.'
+    };
+    window.Reserve.upsertEntreeManifeste(dossierVersement, entreeFallback);
 }
 
 /**
