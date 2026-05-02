@@ -1172,6 +1172,41 @@ const AIDE_CONTEXTUELLE = {
     },
 
     // =========================================================================
+    // RÉSERVE — PANNEAU CONTENU DU VERSEMENT (#257 v2.B-α)
+    // =========================================================================
+
+    'reserve-contenu-versement': {
+        titre: "Contenu du versement",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Ce panneau te montre <strong>ce qui se trouve dans ce versement</strong> avant que tu décides ce que tu veux réimporter. C'est une vue de lecture seule, en mémoire seulement — rien n'est ajouté à ton application tant que tu n'as pas coché et cliqué <em>Réimporter</em>."
+            },
+            {
+                type: 'liste',
+                titre: "Ce que tu vois",
+                items: [
+                    "<strong>Étudiant·es</strong> : nombre et liste détaillée. Le toggle <em>Anonymiser les noms</em> remplace les vrais noms par <code>Élève 1, 2, 3…</code> — utile pour une démo ou un partage d'écran.",
+                    "<strong>Productions distinctes</strong> : nombre de titres uniques de production présents dans le versement.",
+                    "<strong>Évaluations</strong> : nombre total d'évaluations sauvegardées.",
+                    "<strong>Fichiers travaux</strong> : photos et PDF déposés par les étudiant·es.",
+                    "<strong>Présences, snapshots, interventions</strong> : autres traces pédagogiques."
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: "Les compteurs reflètent l'état du groupe-cours <strong>au moment du versement</strong>. Le versement est figé : si tu corriges des données dans ton trimestre actif, ces corrections ne sont pas répercutées dans le ZIP."
+            },
+            {
+                type: 'texte',
+                titre: "Pourquoi consulter avant de réimporter ?",
+                contenu: "Pour t'assurer que tu ouvres le bon versement (bon trimestre, bon groupe), pour estimer ce que tu vas chercher, ou pour faire une démo d'un trimestre passé sans modifier tes bibliothèques actives."
+            }
+        ],
+        voirAussi: ['reserve-ouvrir-versement', 'reserve-types-ressources', 'reglages-reserve']
+    },
+
+    // =========================================================================
     // RÉSERVE — CARTE DANS RÉGLAGES > DONNÉES (#249)
     // =========================================================================
 

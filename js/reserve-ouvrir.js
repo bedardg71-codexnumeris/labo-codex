@@ -324,6 +324,106 @@ function _extraireRessources(donnees) {
 }
 
 /* ===============================
+   EXTRACTION DU CONTENU PÉDAGOGIQUE (#257 v2.B-α)
+   ===============================
+   Lecture seule, en mémoire, à partir du donnees.json déjà parsé.
+   N'écrit nulle part. Utilisé par le panneau « Contenu du versement »
+   qui s'affiche au-dessus des sections de réimport.
+*/
+
+function _extraireContenuVersement(donnees, meta) {
+    if (!donnees || typeof donnees !== 'object') donnees = {};
+    if (!meta) meta = {};
+
+    // Helper : matche une clé qui se termine par `suffixe` ou est égale au
+    // bare. Utile car donnees.json contient les clés namespacées par
+    // trimestre (h2026_groupeEtudiants, etc.) plutôt que les clés brutes.
+    function _matchSuffixe(cle, suffixe) {
+        return cle === suffixe || cle.endsWith('_' + suffixe);
+    }
+
+    // Helper : compte les entrées d'une valeur qui peut être array ou objet
+    // { [da]: value | [...values] }
+    function _compterEntreesParDa(v) {
+        if (Array.isArray(v)) return v.length;
+        if (v && typeof v === 'object') {
+            var n = 0;
+            Object.keys(v).forEach(function(k) {
+                var sous = v[k];
+                if (Array.isArray(sous)) n += sous.length;
+                else if (sous && typeof sous === 'object') n += 1;
+            });
+            return n;
+        }
+        return 0;
+    }
+
+    // Scan unique des clés du payload
+    var etudiantsRaw = [];
+    var nbEvaluations = 0;
+    var nbFichiersTravaux = 0;
+    var nbPresencesEntrees = 0;
+    var nbInterventions = 0;
+    var nbSnapshots = 0;
+    var titresProductions = new Set();
+
+    Object.keys(donnees).forEach(function(k) {
+        var v = donnees[k];
+
+        if (_matchSuffixe(k, 'groupeEtudiants') && Array.isArray(v)) {
+            v.forEach(function(e) { if (e && e.da) etudiantsRaw.push(e); });
+        } else if (_matchSuffixe(k, 'evaluationsSauvegardees')) {
+            nbEvaluations += _compterEntreesParDa(v);
+        } else if (_matchSuffixe(k, 'fichiersTravaux') && Array.isArray(v)) {
+            nbFichiersTravaux += v.length;
+        } else if (_matchSuffixe(k, 'presences')) {
+            nbPresencesEntrees += _compterEntreesParDa(v);
+        } else if (_matchSuffixe(k, 'interventions')) {
+            nbInterventions += _compterEntreesParDa(v);
+        } else if (k === 'snapshots' || k.indexOf('snapshots_') === 0 || /_snapshots(_|$)/.test(k)) {
+            if (Array.isArray(v)) nbSnapshots += v.length;
+        } else if (k === 'productions' || /_productions$/.test(k)) {
+            if (Array.isArray(v)) {
+                v.forEach(function(p) { if (p && p.titre) titresProductions.add(p.titre); });
+            }
+        }
+    });
+
+    var etudiants = etudiantsRaw
+        .filter(function(e) { return e.groupe !== '9999'; })
+        .map(function(e, idx) {
+            return {
+                da: String(e.da),
+                prenom: e.prenom || '',
+                nom: e.nom || '',
+                numeroAnonyme: idx + 1
+            };
+        });
+
+    return {
+        identification: {
+            trimestre: meta.trimestre || '',
+            cours: meta.cours || '',
+            nom_cours: meta.nom_cours || '',
+            groupe: meta.groupe || '',
+            date_versement: meta.date_versement || '',
+            appareil: meta.appareil || '',
+            application_version: meta.application_version || ''
+        },
+        statistiques: {
+            nbEtudiants: etudiants.length,
+            nbEvaluations: nbEvaluations,
+            nbFichiersTravaux: nbFichiersTravaux,
+            nbPresencesEntrees: nbPresencesEntrees,
+            nbSnapshots: nbSnapshots,
+            nbInterventions: nbInterventions,
+            nbProductionsDistinctes: titresProductions.size
+        },
+        etudiants: etudiants
+    };
+}
+
+/* ===============================
    ACTIONS UTILISATEUR — modale
    =============================== */
 
@@ -624,6 +724,16 @@ function _afficherEtapeSelection(payload) {
         elMeta.innerHTML = htmlMeta;
     }
 
+    // Panneau « Contenu du versement » (#257 v2.B-α)
+    var elContenu = document.getElementById('reserve-ouvrir-contenu');
+    if (elContenu) {
+        var contenu = _extraireContenuVersement(payload.donnees, payload.meta);
+        // Cache le contenu sur le payload pour le toggle d'anonymisation
+        payload._contenuVersement = contenu;
+        payload._etudiantsAnonymises = false;
+        elContenu.innerHTML = _construirePanneauContenu(contenu, false);
+    }
+
     var elSections = document.getElementById('reserve-ouvrir-sections');
     if (elSections) {
         var htmlSec = '';
@@ -637,6 +747,84 @@ function _afficherEtapeSelection(payload) {
     }
 
     _majCompteur();
+}
+
+/**
+ * Construit le panneau « Contenu du versement » (#257 v2.B-α).
+ * Carte pliable affichant les statistiques et la liste anonymisable des
+ * étudiant·es. Lecture seule, en mémoire.
+ */
+function _construirePanneauContenu(contenu, anonymiser) {
+    if (!contenu) return '';
+    var stats = contenu.statistiques || {};
+
+    var lignesStats = [
+        { libelle: 'Étudiant·es', valeur: stats.nbEtudiants },
+        { libelle: 'Productions distinctes', valeur: stats.nbProductionsDistinctes },
+        { libelle: 'Évaluations', valeur: stats.nbEvaluations },
+        { libelle: 'Fichiers travaux', valeur: stats.nbFichiersTravaux },
+        { libelle: 'Présences', valeur: stats.nbPresencesEntrees },
+        { libelle: 'Snapshots', valeur: stats.nbSnapshots },
+        { libelle: 'Interventions', valeur: stats.nbInterventions }
+    ].filter(function(s) { return s.valeur > 0; });
+
+    var htmlStats = lignesStats.map(function(s) {
+        return '<div style="display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border-bottom: 1px solid var(--bordure-douce);">' +
+                    '<span>' + _echapper(s.libelle) + '</span>' +
+                    '<strong>' + s.valeur + '</strong>' +
+                '</div>';
+    }).join('');
+
+    var htmlListeEtudiants = '';
+    var nbEtud = (contenu.etudiants || []).length;
+    if (nbEtud > 0) {
+        var lignes = contenu.etudiants.map(function(e) {
+            var libelle = anonymiser
+                ? 'Élève ' + e.numeroAnonyme
+                : (e.prenom + ' ' + e.nom).trim() || ('DA ' + e.da);
+            return '<li style="padding: 2px 0;">' + _echapper(libelle) + '</li>';
+        }).join('');
+        htmlListeEtudiants =
+            '<details style="margin-top: 10px;">' +
+                '<summary style="cursor: pointer; font-size: 0.85rem; user-select: none;">' +
+                    'Voir la liste des ' + nbEtud + ' étudiant·es' +
+                '</summary>' +
+                '<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 8px;">' +
+                    '<label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.82rem;">' +
+                        '<input type="checkbox" ' + (anonymiser ? 'checked ' : '') +
+                              'data-on-change="ReserveOuvrir.onChangerAnonymisationContenu">' +
+                        'Anonymiser les noms' +
+                    '</label>' +
+                '</div>' +
+                '<ul style="margin: 8px 0 0 0; padding-left: 18px; max-height: 180px; overflow-y: auto; font-size: 0.85rem; line-height: 1.5;">' +
+                    lignes +
+                '</ul>' +
+            '</details>';
+    }
+
+    return '' +
+        '<div style="border: 1px solid var(--bordure-douce); border-radius: var(--radius-moyen); padding: 10px 12px; background: var(--bleu-tres-pale);">' +
+            '<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px;">' +
+                '<strong style="font-size: 0.9rem;">Contenu du versement</strong>' +
+                '<button class="btn-aide-contextuelle" data-aide="reserve-contenu-versement" data-stop aria-label="Aide : contenu du versement">&#x2734;&#xFE0F;</button>' +
+            '</div>' +
+            '<div style="font-size: 0.85rem;">' + htmlStats + '</div>' +
+            htmlListeEtudiants +
+        '</div>';
+}
+
+/**
+ * Toggle anonymisation des étudiants dans le panneau de contenu.
+ * Re-rend le panneau à partir du payload courant.
+ */
+function onChangerAnonymisationContenu(el) {
+    if (!_payloadCourant || !_payloadCourant._contenuVersement) return;
+    var anonymiser = el ? !!el.checked : !_payloadCourant._etudiantsAnonymises;
+    _payloadCourant._etudiantsAnonymises = anonymiser;
+    var elContenu = document.getElementById('reserve-ouvrir-contenu');
+    if (elContenu) {
+        elContenu.innerHTML = _construirePanneauContenu(_payloadCourant._contenuVersement, anonymiser);
+    }
 }
 
 function _construireSection(typeRessource, libelle, items) {
@@ -1009,7 +1197,8 @@ window.ReserveOuvrir = {
     onChangerToggleCopie: onChangerToggleCopie,
     appliquerReimport: appliquerReimport,
     actionChoisirDossier: actionChoisirDossier,
-    onChoisirVersement: onChoisirVersement
+    onChoisirVersement: onChoisirVersement,
+    onChangerAnonymisationContenu: onChangerAnonymisationContenu
 };
 
 })();
