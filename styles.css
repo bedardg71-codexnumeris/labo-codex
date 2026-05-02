@@ -22346,6 +22346,23 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     font-size: 0.78rem;
     padding: 3px 10px;
 }
+.td-btn-valider:disabled {
+    opacity: 0.85;
+    cursor: default;
+    background: var(--vert-pale);
+    color: var(--vert-leger);
+    border-color: var(--vert-leger);
+}
+
+/* Carte marquée pour validation (en attente d'application) */
+.td-carte.td-carte-validee {
+    border-left-width: 4px;
+    border-left-color: var(--vert-leger);
+    background: linear-gradient(to right, rgba(58, 170, 138, 0.08), transparent 200px);
+}
+.mode-clair .td-carte.td-carte-validee {
+    background: linear-gradient(to right, rgba(67, 160, 71, 0.08), transparent 200px);
+}
 
 .td-carte-entete {
     display: flex;

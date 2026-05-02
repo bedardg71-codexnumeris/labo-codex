@@ -58,6 +58,28 @@
         _enregistrerValidations(validations);
     }
 
+    /**
+     * Persiste plusieurs validations en un seul write — évite la course
+     * read/write si db.set est asynchrone (write-behind).
+     */
+    function _persisterValidationsLot(casList) {
+        if (!casList || casList.length === 0) return;
+        var validations = _obtenirValidations();
+        var nowIso = new Date().toISOString();
+        casList.forEach(function(d) {
+            validations = validations.filter(function(v) {
+                return !(v.da === d.da && v.productionId === d.productionId);
+            });
+            validations.push({
+                da: d.da,
+                productionId: d.productionId,
+                fichierIds: d.fichiers.map(function(f) { return f.id; }).sort(),
+                dateValidation: nowIso
+            });
+        });
+        _enregistrerValidations(validations);
+    }
+
     function _marquerCasValide(d) {
         _persisterValidation(d.da, d.productionId, d.fichiers.map(function(f) { return f.id; }));
     }
@@ -402,14 +424,21 @@
                 trouve = true;
                 d.fichiers.forEach(function(f) {
                     _decisions[f.id] = 'garder';
-                    // Mettre à jour visuellement les radios
                     var radioGarder = document.querySelector(
                         'input[type="radio"][name="td-' + f.id + '"][value="garder"]');
                     if (radioGarder) radioGarder.checked = true;
                 });
             });
         });
-        if (trouve) _miseAJourFooter();
+        if (!trouve) return;
+
+        // Signal visuel : carte marquée en attente d'application + bouton désactivé
+        var carte = elemBouton.closest('.td-carte');
+        if (carte) carte.classList.add('td-carte-validee');
+        elemBouton.disabled = true;
+        elemBouton.textContent = '✓ Validé (en attente)';
+
+        _miseAJourFooter();
     }
 
     function appliquerActions() {
@@ -440,8 +469,9 @@
             return;
         }
 
-        // Marquer les cas validés (synchrone, sans dépendance externe)
-        casAvalider.forEach(_marquerCasValide);
+        // Marquer les cas validés en lot (1 seul write pour éviter
+        // les courses read/write si db.set est async)
+        _persisterValidationsLot(casAvalider);
 
         // Si pas de corbeille à appliquer, on s'arrête ici
         if (aCorbeille.length === 0) {
