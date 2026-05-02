@@ -22429,3 +22429,28 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 .td-footer-statut { font-size: 0.82rem; }
 .td-footer-statut-erreur { color: var(--orange-accent); font-weight: 500; }
 
+/* ===============================
+   BADGES — Mode versement Réserve (#249)
+   =============================== */
+.badge-mode-fsapi,
+.badge-mode-zip,
+.badge-mode-inconnu {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+.badge-mode-fsapi {
+    background: var(--vert-pale);
+    color: var(--vert-leger);
+}
+.badge-mode-zip {
+    background: rgba(255, 143, 0, 0.18);
+    color: var(--orange-accent);
+}
+.badge-mode-inconnu {
+    background: var(--gris-pale, rgba(138, 164, 176, 0.15));
+    color: var(--texte-secondaire);
+}
+

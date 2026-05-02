@@ -1172,6 +1172,48 @@ const AIDE_CONTEXTUELLE = {
     },
 
     // =========================================================================
+    // RÉSERVE — CARTE DANS RÉGLAGES > DONNÉES (#249)
+    // =========================================================================
+
+    'reglages-reserve': {
+        titre: "Réserve (versements archivés)",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Cette section est l'<strong>index local</strong> de tes versements de réserve. Elle te montre ce que ton application sait de ton historique de versements — peu importe où les fichiers ZIP eux-mêmes vivent sur ton disque."
+            },
+            {
+                type: 'liste',
+                titre: "Comment l'index s'alimente",
+                items: [
+                    "À chaque versement (Codex › Verser dans la réserve…), une nouvelle ligne s'ajoute automatiquement.",
+                    "À chaque ouverture d'un fichier ZIP via Ouvrir un versement…, le versement est ajouté à l'index s'il n'y figure pas déjà.",
+                    "Sur Chrome ou Edge, si un dossier réserve est lié, le bouton <em>Vérifier le dossier</em> synchronise l'index avec le manifeste central du dossier."
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: "<strong>Retirer</strong> une ligne de l'index ne supprime <strong>aucun fichier</strong> sur disque. C'est juste un nettoyage de l'index. Pour vraiment supprimer un versement, supprime le ZIP toi-même dans le Finder."
+            },
+            {
+                type: 'texte',
+                titre: "Où sont les données pédagogiques d'un trimestre archivé ?",
+                contenu: "Verser n'a <strong>rien supprimé</strong> dans ton codex. Les étudiant·es, présences, évaluations et fichiers du trimestre que tu as versé sont toujours dans ton application. Pour les consulter, change le <strong>trimestre actif</strong> dans le sélecteur du haut. Le versement, lui, est une copie de sécurité figée."
+            },
+            {
+                type: 'liste',
+                titre: "Lecture des colonnes",
+                items: [
+                    "<strong>Mode</strong> indique comment le versement a été produit. <em>Disque (FSAPI)</em> = écriture directe par Chrome/Edge dans ton dossier réserve. <em>ZIP</em> = fichier téléchargé par Safari.",
+                    "<strong>Étud.</strong> et <strong>Fich.</strong> sont les compteurs au moment du versement.",
+                    "<strong>Taille</strong> est la taille des fichiers travaux (photos, PDF) seulement, pas du ZIP complet."
+                ]
+            }
+        ],
+        voirAussi: ['reserve-versement', 'reserve-ouvrir-versement', 'reserve-fsapi']
+    },
+
+    // =========================================================================
     // PLUSIEURS FICHIERS PAR ÉTUDIANT — modale (Phase 7 #3)
     // =========================================================================
 
