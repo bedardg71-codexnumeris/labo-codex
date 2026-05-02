@@ -30,7 +30,10 @@
 
     function _enregistrerValidations(liste) {
         if (typeof db === 'undefined' || typeof cle !== 'function') return;
-        db.set(cle(CLE_VALIDATIONS), liste);
+        // setSync écrit localStorage immédiatement + IDB en arrière-plan.
+        // Indispensable pour que mettreAJourBandeau (db.getSync) voie la
+        // nouvelle valeur juste après l'application des validations.
+        db.setSync(cle(CLE_VALIDATIONS), liste);
     }
 
     function _estCasValide(d) {
