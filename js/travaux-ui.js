@@ -2563,6 +2563,14 @@
             groupes[pid].push(f);
         });
 
+        // Compteur "(N)" si N étudiants distincts == N fichiers,
+        // sinon "(N él. · M fich.)" pour signaler un doublon par étudiant.
+        const compteurEtudiantsFichiers = (lst) => {
+            const nbF = lst.length;
+            const nbE = new Set(lst.map(f => f.etudiantDA).filter(Boolean)).size;
+            return (nbF === nbE) ? `(${nbE})` : `(${nbE} él. · ${nbF} fich.)`;
+        };
+
         // Dropdown filtre de production (toutes les productions, même sans fichier)
         let htmlDropdown = '';
         if (productions.length >= 1) {
@@ -2571,9 +2579,10 @@
                 htmlDropdown += '<option value="">Toutes les productions</option>';
             }
             productions.forEach(p => {
-                const nb = (groupes[p.id] && groupes[p.id].length) || 0;
+                const lst = groupes[p.id] || [];
+                const compteur = lst.length === 0 ? '(0)' : compteurEtudiantsFichiers(lst);
                 const sel = (productionFiltreActive === p.id) ? ' selected' : '';
-                htmlDropdown += `<option value="${p.id}"${sel}>${echapperHtml(p.titre || p.nom || p.id)} (${nb})</option>`;
+                htmlDropdown += `<option value="${p.id}"${sel}>${echapperHtml(p.titre || p.nom || p.id)} ${compteur}</option>`;
             });
             htmlDropdown += '</select>';
         }
@@ -2611,7 +2620,8 @@
             const g = groupes[p.id];
             if (!g || g.length === 0) return;
             const resume = genererResumeStatuts(g, evaluations);
-            html += `<h5 class="travaux-groupe-production-titre">${echapperHtml(p.titre || p.nom || p.id)} (${g.length}) <span class="travaux-compteurs-groupe">${resume}</span></h5>`;
+            const compteur = compteurEtudiantsFichiers(g);
+            html += `<h5 class="travaux-groupe-production-titre">${echapperHtml(p.titre || p.nom || p.id)} ${compteur} <span class="travaux-compteurs-groupe">${resume}</span></h5>`;
             html += `<div class="travaux-badges-groupe" data-production-id="${p.id}">`;
             g.forEach(f => { html += genererBadgeFichierImporte(f, action); });
             html += '</div>';
