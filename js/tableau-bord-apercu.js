@@ -3049,13 +3049,44 @@ function tbNavigerVersProfil(da) {
    =============================== */
 
 /**
- * Sous-titres dynamiques selon la mesure choisie.
+ * Sous-titres dynamiques selon la mesure choisie et la sélection d'élève.
+ * - Habiletés sans élève → médiane du groupe par habileté
+ * - Habiletés avec élève → habiletés de cet élève
+ * - Note finale → libellé adapté à la pratique (« Note chiffrée » en PAN)
  */
 function _sousTitreTrajectoires(mesure, termeSingulier) {
     if (mesure === 'habiletes') {
-        return 'Moyenne des critères cochés par ' + termeSingulier + ', dans l\'ordre chronologique';
+        const selecteur = document.getElementById('selecteur-etudiant-trajectoires');
+        const val = selecteur ? selecteur.value : '';
+        if (val === 'TOUS') {
+            return 'Toutes les courbes du groupe par habileté, par ' + termeSingulier;
+        }
+        if (val !== '') {
+            const opt = selecteur.options[selecteur.selectedIndex];
+            const nom = opt ? opt.textContent.replace(/\s*\(inactif\)\s*$/, '') : 'l\'élève';
+            return 'Habiletés de ' + nom + ', par ' + termeSingulier;
+        }
+        return 'Médiane du groupe par habileté, par ' + termeSingulier;
     }
-    return 'Note finale par ' + termeSingulier + ', dans l\'ordre chronologique';
+    const labelNote = (typeof obtenirLabelNoteFinale === 'function')
+        ? obtenirLabelNoteFinale()
+        : 'Note chiffrée';
+    return labelNote + ' par ' + termeSingulier + ', dans l\'ordre chronologique';
+}
+
+/**
+ * Met à jour le sous-titre de la carte Trajectoires en lisant l'état des contrôles.
+ * Appelé depuis graphiques-progression.js après un rebuild ou une sélection d'élève.
+ */
+function _majSousTitreTrajectoires() {
+    const sousTitre = document.getElementById('trajectoires-sous-titre');
+    if (!sousTitre) return;
+    const selMesure = document.getElementById('selecteur-mesure-trajectoires');
+    const mesure = (selMesure && selMesure.value === 'habiletes') ? 'habiletes' : 'noteFinale';
+    const termeSing = (typeof obtenirTermeProduction === 'function')
+        ? obtenirTermeProduction('singulier')
+        : 'production';
+    sousTitre.textContent = _sousTitreTrajectoires(mesure, termeSing);
 }
 
 /**
@@ -3085,6 +3116,12 @@ function initialiserCarteTrajectoiresProduction() {
             : 'production';
         const spanTerme = document.getElementById('trajectoires-titre-terme');
         if (spanTerme) spanTerme.textContent = termeSing;
+
+        // Étiquette du sélecteur Mesure adaptée à la pratique
+        const optNoteFinale = document.querySelector('#selecteur-mesure-trajectoires option[value="noteFinale"]');
+        if (optNoteFinale && typeof obtenirLabelNoteFinale === 'function') {
+            optNoteFinale.textContent = obtenirLabelNoteFinale();
+        }
 
         // Lecture de l'état initial des contrôles
         const selMesure = document.getElementById('selecteur-mesure-trajectoires');
@@ -3133,7 +3170,11 @@ function initialiserCarteTrajectoiresProduction() {
 
 /**
  * Réagit au changement du sélecteur Mesure (Note finale ↔ Habiletés).
- * Affiche/masque la barre critères, met à jour le sous-titre, rafraîchit le graphique.
+ * - Affiche/masque la barre critères (visible seulement en mode Habiletés)
+ * - Affiche/masque le toggle Médiane (caché en mode Habiletés : la médiane
+ *   est implicite — c'est déjà ce que représente chaque courbe)
+ * - Met à jour le sous-titre
+ * - Rafraîchit le graphique
  */
 function changerMesureTrajectoires() {
     const selMesure = document.getElementById('selecteur-mesure-trajectoires');
@@ -3141,6 +3182,17 @@ function changerMesureTrajectoires() {
 
     const barreCriteres = document.getElementById('trajectoires-controles-criteres');
     if (barreCriteres) barreCriteres.style.display = (mesure === 'habiletes') ? 'flex' : 'none';
+
+    // Toggle Médiane visible seulement en mode Note finale
+    const toggleMedianeLabel = document.querySelector('.habiletes-toggle-mediane-label');
+    if (toggleMedianeLabel) {
+        toggleMedianeLabel.style.display = (mesure === 'habiletes') ? 'none' : 'flex';
+    }
+    if (mesure === 'habiletes') {
+        // Forcer le toggle off pour cohérence avec la masquage
+        const cb = document.getElementById('trajectoires-toggle-mediane');
+        if (cb) cb.checked = false;
+    }
 
     const termeSing = (typeof obtenirTermeProduction === 'function')
         ? obtenirTermeProduction('singulier')
@@ -3185,6 +3237,7 @@ window.calculerEtudiantsPrioritaires = calculerEtudiantsPrioritaires;
 window.initialiserCarteTrajectoiresProduction = initialiserCarteTrajectoiresProduction;
 window.togglerCritereTrajectoires = togglerCritereTrajectoires;
 window.changerMesureTrajectoires = changerMesureTrajectoires;
+window._majSousTitreTrajectoires = _majSousTitreTrajectoires;
 
 /* ===============================
    📌 NOTES D'UTILISATION
