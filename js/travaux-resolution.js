@@ -419,10 +419,15 @@
     /**
      * Nettoie les doublons EXACTS du groupe-cours actif : couples (DA × productionId)
      * où plusieurs fichiers ont le MÊME nom ET la MÊME taille (= mêmes octets,
-     * re-import du même contenu). Garde le plus récent, supprime les anciens.
+     * re-import du même contenu). Garde le plus récent, déplace les anciens
+     * vers la corbeille (réversible 30 jours).
      *
      * Mode DRY-RUN par défaut (n'agit pas, retourne la liste des actions prévues).
      * Pour exécuter réellement : passer { dryRun: false }.
+     *
+     * Par défaut, les fichiers vont dans la CORBEILLE (cohérent avec l'UI normale,
+     * restaurable). Pour suppression définitive immédiate (irréversible) :
+     * passer { definitive: true }.
      *
      * NE TOUCHE PAS les doublons à contenu différent (tailles différentes,
      * noms différents, formats mixtes) — ceux-ci nécessitent une décision
@@ -431,21 +436,24 @@
      * Usage console :
      *   travauxResolution.nettoyerDoublonsExacts()                    // dry-run, tous
      *   travauxResolution.nettoyerDoublonsExacts({ filtre: 'Artefact 8' })  // dry-run, filtré
-     *   travauxResolution.nettoyerDoublonsExacts({ dryRun: false })   // exécution réelle
-     *   travauxResolution.nettoyerDoublonsExacts({ dryRun: false, filtre: 'Artefact 8' })
+     *   travauxResolution.nettoyerDoublonsExacts({ dryRun: false })   // execution -> corbeille
+     *   travauxResolution.nettoyerDoublonsExacts({ dryRun: false, definitive: true })
+     *                                                                  // execution -> hard delete (irreversible)
      *
      * @param {Object} [opts]
-     * @param {boolean} [opts.dryRun=true] - true = simulation, false = suppression réelle
+     * @param {boolean} [opts.dryRun=true] - true = simulation, false = action réelle
+     * @param {boolean} [opts.definitive=false] - true = hard delete (irréversible). false = corbeille (défaut, restaurable 30 j)
      * @param {string} [opts.filtre] - Titre partiel ou ID exact d'une production
-     * @returns {Promise<{dryRun, total, supprimes, conserves, actions}>}
+     * @returns {Promise<{dryRun, definitive, total, traites, conserves, actions}>}
      */
     async function nettoyerDoublonsExacts(opts) {
         opts = opts || {};
         const dryRun = opts.dryRun !== false; // par défaut true
+        const definitive = opts.definitive === true; // par défaut false (corbeille)
         const diagnostic = diagnostiquerDoublons(opts.filtre);
         if (!diagnostic || diagnostic.totalDoublons === 0) {
             console.log('[Nettoyage] Rien à nettoyer.');
-            return { dryRun: dryRun, total: 0, supprimes: 0, conserves: 0, actions: [] };
+            return { dryRun: dryRun, definitive: definitive, total: 0, traites: 0, conserves: 0, actions: [] };
         }
 
         // Recouper avec les fichiers complets (le diagnostic ne porte que les
@@ -496,17 +504,18 @@
             });
         });
 
-        // Affichage console
-        const verbe = dryRun ? 'simulerait' : 'a supprimé';
+        // Affichage console — adapter le verbe au mode
+        const modeTxt = definitive ? 'suppression DEFINITIVE' : 'corbeille';
         const titre = dryRun
-            ? `[Nettoyage DRY-RUN] ${actions.length} cas avec mêmes octets — aucun fichier supprimé`
-            : `[Nettoyage] ${actions.length} cas traités, suppression en cours...`;
+            ? `[Nettoyage DRY-RUN ${modeTxt}] ${actions.length} cas avec mêmes octets — aucune action`
+            : `[Nettoyage ${modeTxt}] ${actions.length} cas en cours...`;
         console.group(titre);
         actions.forEach(a => {
             console.log(`👤 ${a.etudiant} — ${a.production}`);
             console.log(`   ✅ Garde : ${a.aGarder} (${a.aGarderNom}, ${new Date(a.aGarderDate).toLocaleString('fr-CA')})`);
+            const icone = definitive ? '🔥' : '🗑 ';
             a.aSupprimer.forEach(id => {
-                console.log(`   🗑  Supprime : ${id}`);
+                console.log(`   ${icone} ${definitive ? 'Supprime def.' : 'Vers corbeille'} : ${id}`);
             });
         });
         console.groupEnd();
@@ -519,37 +528,55 @@
         }
 
         if (dryRun) {
-            console.log('💡 Pour exécuter réellement : travauxResolution.nettoyerDoublonsExacts({ dryRun: false })');
-            return { dryRun: true, total: actions.length, supprimes: 0, conserves: 0, actions: actions };
+            const exemple = definitive
+                ? 'travauxResolution.nettoyerDoublonsExacts({ dryRun: false, definitive: true })'
+                : 'travauxResolution.nettoyerDoublonsExacts({ dryRun: false })';
+            console.log(`💡 Pour exécuter réellement (${modeTxt}) : ${exemple}`);
+            if (!definitive) {
+                console.log('💡 Pour suppression définitive (irréversible) : ajouter { definitive: true }');
+            }
+            return { dryRun: true, definitive: definitive, total: actions.length, traites: 0, conserves: 0, actions: actions };
         }
 
-        // Exécution réelle : supprimer un par un, compter les succès
-        let supprimes = 0;
+        // Exécution réelle : corbeille (soft delete) ou suppression définitive
+        let traites = 0;
         let echecs = 0;
         for (const a of actions) {
             for (const id of a.aSupprimer) {
                 try {
-                    const ok = await travauxStockage.supprimerFichierTravail(id);
-                    if (ok) supprimes++;
+                    let ok;
+                    if (definitive) {
+                        ok = await travauxStockage.supprimerFichierTravail(id);
+                    } else {
+                        // deplacerEnCorbeille est synchrone (pas async) -- mais on
+                        // l'await quand meme par sécurité (si l'API évolue).
+                        ok = travauxStockage.deplacerEnCorbeille(id);
+                    }
+                    if (ok) traites++;
                     else echecs++;
                 } catch (e) {
-                    console.error(`[Nettoyage] Erreur suppression ${id} :`, e);
+                    console.error(`[Nettoyage] Erreur ${definitive ? 'suppression' : 'mise en corbeille'} ${id} :`, e);
                     echecs++;
                 }
             }
         }
 
-        const msg = `[Nettoyage] Terminé : ${supprimes} fichier(s) supprimé(s)`
+        const verbeFinal = definitive ? 'supprimé(s) définitivement' : 'mis en corbeille';
+        const msg = `[Nettoyage] Terminé : ${traites} fichier(s) ${verbeFinal}`
             + (echecs > 0 ? `, ${echecs} échec(s)` : '');
         console.log(msg);
+        if (!definitive && traites > 0) {
+            console.log('💡 Restauration possible 30 jours via la corbeille (bouton « Corbeille » dans la liste des évaluations).');
+        }
         if (echecs === 0) {
             console.log('💡 Recharge la page (Cmd+Q Safari + rouvrir) pour voir le carrousel à jour.');
         }
 
         return {
             dryRun: false,
+            definitive: definitive,
             total: actions.length,
-            supprimes: supprimes,
+            traites: traites,
             echecs: echecs,
             conserves: actions.length,
             actions: actions
