@@ -22337,6 +22337,16 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 }
 .mode-clair .td-tag-info { background: rgba(0, 0, 0, 0.05); }
 
+.td-carte-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 6px;
+}
+.td-btn-valider {
+    font-size: 0.78rem;
+    padding: 3px 10px;
+}
+
 .td-carte-entete {
     display: flex;
     justify-content: space-between;

@@ -2564,10 +2564,20 @@
         });
 
         // Compteur "(N)" si N étudiants distincts == N fichiers,
-        // sinon "(N él. · M fich.)" pour signaler un doublon par étudiant.
-        const compteurEtudiantsFichiers = (lst) => {
-            const nbF = lst.length;
-            const nbE = new Set(lst.map(f => f.etudiantDA).filter(Boolean)).size;
+        // sinon "(N él. · M fich.)" pour signaler une asymétrie. Les cas
+        // marqués comme validés (travauxDoublonsUI) sont ramenés à 1 fichier
+        // compté par étudiant (ils ne signalent plus une asymétrie suspecte).
+        const compteurEtudiantsFichiers = (lst, prodId) => {
+            let nbE, nbF;
+            if (typeof travauxDoublonsUI !== 'undefined' &&
+                typeof travauxDoublonsUI.compterAvecValidations === 'function') {
+                const infos = travauxDoublonsUI.compterAvecValidations(lst, prodId);
+                nbE = infos.nbE;
+                nbF = infos.nbF;
+            } else {
+                nbF = lst.length;
+                nbE = new Set(lst.map(f => f.etudiantDA).filter(Boolean)).size;
+            }
             return (nbF === nbE) ? `(${nbE})` : `(${nbE} él. · ${nbF} fich.)`;
         };
 
@@ -2580,7 +2590,7 @@
             }
             productions.forEach(p => {
                 const lst = groupes[p.id] || [];
-                const compteur = lst.length === 0 ? '(0)' : compteurEtudiantsFichiers(lst);
+                const compteur = lst.length === 0 ? '(0)' : compteurEtudiantsFichiers(lst, p.id);
                 const sel = (productionFiltreActive === p.id) ? ' selected' : '';
                 htmlDropdown += `<option value="${p.id}"${sel}>${echapperHtml(p.titre || p.nom || p.id)} ${compteur}</option>`;
             });
@@ -2620,7 +2630,7 @@
             const g = groupes[p.id];
             if (!g || g.length === 0) return;
             const resume = genererResumeStatuts(g, evaluations);
-            const compteur = compteurEtudiantsFichiers(g);
+            const compteur = compteurEtudiantsFichiers(g, p.id);
             html += `<h5 class="travaux-groupe-production-titre">${echapperHtml(p.titre || p.nom || p.id)} ${compteur} <span class="travaux-compteurs-groupe">${resume}</span></h5>`;
             html += `<div class="travaux-badges-groupe" data-production-id="${p.id}">`;
             g.forEach(f => { html += genererBadgeFichierImporte(f, action); });

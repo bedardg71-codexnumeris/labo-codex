@@ -9,6 +9,55 @@
     var _decisions = {};       // { fichierId: 'garder' | 'corbeille' | null }
     var _filtreCas = null;     // { da, productionId } ou null
 
+    var CLE_VALIDATIONS = 'cas_fichiers_multiples_valides';
+
+    // =========================================================================
+    // VALIDATIONS PERSISTÉES
+    //
+    // Chaque entrée : { da, productionId, fichierIds: [trié], dateValidation }
+    // La signature (fichierIds triés) change si un nouveau fichier rejoint le
+    // groupe → la validation expire automatiquement et le cas réapparaît.
+    // =========================================================================
+
+    function _signatureFichiers(fichiers) {
+        return fichiers.map(function(f) { return f.id; }).sort().join('|');
+    }
+
+    function _obtenirValidations() {
+        if (typeof db === 'undefined' || typeof cle !== 'function') return [];
+        return db.getSync(cle(CLE_VALIDATIONS), []) || [];
+    }
+
+    function _enregistrerValidations(liste) {
+        if (typeof db === 'undefined' || typeof cle !== 'function') return;
+        db.set(cle(CLE_VALIDATIONS), liste);
+    }
+
+    function _estCasValide(d) {
+        var sig = _signatureFichiers(d.fichiers);
+        var validations = _obtenirValidations();
+        return validations.some(function(v) {
+            return v.da === d.da &&
+                   v.productionId === d.productionId &&
+                   (v.fichierIds || []).slice().sort().join('|') === sig;
+        });
+    }
+
+    function _marquerCasValide(d) {
+        var validations = _obtenirValidations();
+        // Retirer les anciennes entrées pour ce (da, productionId) — on remplace
+        validations = validations.filter(function(v) {
+            return !(v.da === d.da && v.productionId === d.productionId);
+        });
+        validations.push({
+            da: d.da,
+            productionId: d.productionId,
+            fichierIds: d.fichiers.map(function(f) { return f.id; }).sort(),
+            dateValidation: new Date().toISOString()
+        });
+        _enregistrerValidations(validations);
+    }
+
     // =========================================================================
     // PATTERNS ET RECOMMANDATIONS
     //
@@ -78,16 +127,12 @@
     // =========================================================================
 
     function ouvrirModale(filtre) {
-        if (typeof travauxResolution === 'undefined' ||
-            typeof travauxResolution.diagnostiquerDoublons !== 'function') {
-            console.error('[Fichiers multiples] travauxResolution.diagnostiquerDoublons indisponible');
-            return;
-        }
-
-        _payload = travauxResolution.diagnostiquerDoublons();
+        // Utilise le diagnostic filtré (cas validés exclus). Si l'utilisateur
+        // ouvre via le bandeau, il ne verra que les cas non encore validés.
+        _payload = _diagnosticNonValide();
         if (!_payload || _payload.totalDoublons === 0) {
             if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces('Aucun cas à examiner', 'Chaque étudiant n\'a qu\'un seul fichier par production.');
+                afficherNotificationSucces('Aucun cas à examiner', 'Tous les cas avec plusieurs fichiers ont été traités ou validés.');
             }
             return;
         }
@@ -172,6 +217,14 @@
             tagsHtml += '<span class="td-tag-info">' + tag.icone + ' ' + echapperHtml(tag.texte) + '</span>';
         });
 
+        // Bouton « Valider ce cas » : raccourci pour cocher Garder sur tous les fichiers
+        var boutonValider = '<button class="btn btn-secondaire btn-petit td-btn-valider"' +
+            ' data-action="travauxDoublonsUI.validerCas"' +
+            ' data-da="' + echapperHtml(d.da) + '"' +
+            ' data-production-id="' + echapperHtml(d.productionId) + '"' +
+            ' title="Marque ce cas comme validé : tous les fichiers restent actifs et le cas n\'apparaîtra plus dans le bandeau">' +
+            '✓ Valider ce cas</button>';
+
         var html = '<div class="td-carte" data-pattern="' + pattern + '">';
         html += '<div class="td-carte-entete">';
         html += '<strong>' + echapperHtml(nomComplet) + '</strong>';
@@ -179,6 +232,7 @@
                 lib.icone + ' ' + echapperHtml(lib.texte) + '</span>';
         html += '</div>';
         if (tagsHtml) html += '<div class="td-tags">' + tagsHtml + '</div>';
+        html += '<div class="td-carte-actions">' + boutonValider + '</div>';
         html += '<div class="td-fichiers">';
         d.fichiers.forEach(function(f) { html += _genererLigneFichier(f); });
         html += '</div>';
@@ -231,15 +285,17 @@
     // FOOTER ET VALIDATION
     // =========================================================================
 
-    function _miseAJourFooter() {
-        var modal = document.getElementById('modalTravauxDoublons');
-        if (!modal) return;
-        var btn = modal.querySelector('.td-btn-appliquer');
-        var statut = modal.querySelector('.td-footer-statut');
-        if (!btn || !statut) return;
-
+    /**
+     * Compte les actions sélectionnées par l'utilisateur :
+     *   - corbeille : nombre de fichiers à mettre à la corbeille
+     *   - validation : nombre de cas où tous les fichiers sont cochés Garder
+     *                  (et aucun en corbeille) — sera marqué validé
+     *   - orphelin : cas avec corbeille demandée sans aucun garder
+     */
+    function _compterActions() {
         var nbCorbeille = 0;
-        var casOrphelin = 0;
+        var nbValidations = 0;
+        var nbOrphelins = 0;
 
         _payload.productionsAffectees.forEach(function(prod) {
             prod.etudiantsAvecDoublons.forEach(function(d) {
@@ -253,26 +309,52 @@
                         nbCorbeilleCas++;
                     }
                 });
-                // Orphelin uniquement si l'utilisateur demande corbeille sans garder
-                if (nbCorbeilleCas > 0 && nbGardes === 0) casOrphelin++;
+                if (nbCorbeilleCas > 0 && nbGardes === 0) {
+                    nbOrphelins++;
+                } else if (nbCorbeilleCas === 0 && nbGardes === d.fichiers.length) {
+                    // Tous les fichiers sont cochés Garder → cas à valider
+                    nbValidations++;
+                }
             });
         });
 
-        if (casOrphelin > 0) {
+        return { nbCorbeille: nbCorbeille, nbValidations: nbValidations, nbOrphelins: nbOrphelins };
+    }
+
+    function _miseAJourFooter() {
+        var modal = document.getElementById('modalTravauxDoublons');
+        if (!modal) return;
+        var btn = modal.querySelector('.td-btn-appliquer');
+        var statut = modal.querySelector('.td-footer-statut');
+        if (!btn || !statut) return;
+
+        var c = _compterActions();
+
+        if (c.nbOrphelins > 0) {
             btn.disabled = true;
             btn.textContent = 'Au moins 1 fichier à garder par étudiant';
-            statut.textContent = casOrphelin + ' cas sans fichier gardé — corrige avant d\'appliquer.';
+            statut.textContent = c.nbOrphelins + ' cas sans fichier gardé — corrige avant d\'appliquer.';
             statut.classList.add('td-footer-statut-erreur');
-        } else if (nbCorbeille === 0) {
-            // Aucune action de corbeille sélectionnée → bouton actif comme « Fermer »
+        } else if (c.nbCorbeille === 0 && c.nbValidations === 0) {
+            // Aucune décision → fermer
             btn.disabled = false;
             btn.textContent = 'Fermer (aucune action)';
-            statut.textContent = 'Aucun fichier à mettre à la corbeille — tu peux fermer la modale.';
+            statut.textContent = 'Aucune décision sélectionnée — tu peux fermer la modale.';
+            statut.classList.remove('td-footer-statut-erreur');
+        } else if (c.nbCorbeille > 0 && c.nbValidations === 0) {
+            btn.disabled = false;
+            btn.textContent = 'Mettre ' + c.nbCorbeille + ' fichier(s) à la corbeille';
+            statut.textContent = 'Restaurable 30 jours depuis la corbeille.';
+            statut.classList.remove('td-footer-statut-erreur');
+        } else if (c.nbCorbeille === 0 && c.nbValidations > 0) {
+            btn.disabled = false;
+            btn.textContent = 'Marquer ' + c.nbValidations + ' cas comme validés';
+            statut.textContent = 'Les cas validés ne réapparaîtront plus tant qu\'aucun nouveau fichier ne s\'y ajoute.';
             statut.classList.remove('td-footer-statut-erreur');
         } else {
             btn.disabled = false;
-            btn.textContent = 'Mettre ' + nbCorbeille + ' fichier(s) à la corbeille';
-            statut.textContent = 'Restaurable 30 jours depuis la corbeille.';
+            btn.textContent = 'Appliquer (' + c.nbCorbeille + ' corbeille · ' + c.nbValidations + ' validation' + (c.nbValidations > 1 ? 's' : '') + ')';
+            statut.textContent = 'Corbeille restaurable 30 jours · validations annulables en re-modifiant un fichier.';
             statut.classList.remove('td-footer-statut-erreur');
         }
     }
@@ -288,14 +370,77 @@
         _miseAJourFooter();
     }
 
+    /**
+     * Coche « Garder » sur tous les fichiers d'un cas (raccourci de validation).
+     * Appelé depuis le bouton « ✓ Valider ce cas » dans chaque carte.
+     */
+    function validerCas(elemBouton) {
+        if (!elemBouton || !elemBouton.getAttribute) return;
+        var da = elemBouton.getAttribute('data-da');
+        var productionId = elemBouton.getAttribute('data-production-id');
+        if (!da || !productionId || !_payload) return;
+
+        var trouve = false;
+        _payload.productionsAffectees.forEach(function(prod) {
+            if (prod.productionId !== productionId) return;
+            prod.etudiantsAvecDoublons.forEach(function(d) {
+                if (d.da !== da) return;
+                trouve = true;
+                d.fichiers.forEach(function(f) {
+                    _decisions[f.id] = 'garder';
+                    // Mettre à jour visuellement les radios
+                    var radioGarder = document.querySelector(
+                        'input[type="radio"][name="td-' + f.id + '"][value="garder"]');
+                    if (radioGarder) radioGarder.checked = true;
+                });
+            });
+        });
+        if (trouve) _miseAJourFooter();
+    }
+
     function appliquerActions() {
         var aCorbeille = Object.keys(_decisions).filter(function(fid) {
             return _decisions[fid] === 'corbeille';
         });
 
-        // Mode « Fermer (aucune action) » : pas de corbeille demandée → fermer la modale
-        if (aCorbeille.length === 0) {
+        // Détecter les cas à marquer comme validés (tous Garder, pas de Corbeille)
+        var casAvalider = [];
+        _payload.productionsAffectees.forEach(function(prod) {
+            prod.etudiantsAvecDoublons.forEach(function(d) {
+                if (!_correspondAuFiltre(d)) return;
+                var nbGardes = 0;
+                var nbCorbeilleCas = 0;
+                d.fichiers.forEach(function(f) {
+                    if (_decisions[f.id] === 'garder') nbGardes++;
+                    else if (_decisions[f.id] === 'corbeille') nbCorbeilleCas++;
+                });
+                if (nbCorbeilleCas === 0 && nbGardes === d.fichiers.length) {
+                    casAvalider.push(d);
+                }
+            });
+        });
+
+        // Mode « Fermer (aucune action) » : ni corbeille ni validation → fermer
+        if (aCorbeille.length === 0 && casAvalider.length === 0) {
             fermerDialogue();
+            return;
+        }
+
+        // Marquer les cas validés (synchrone, sans dépendance externe)
+        casAvalider.forEach(_marquerCasValide);
+
+        // Si pas de corbeille à appliquer, on s'arrête ici
+        if (aCorbeille.length === 0) {
+            if (typeof afficherNotificationSucces === 'function') {
+                afficherNotificationSucces(
+                    casAvalider.length + ' cas marqué(s) comme validé(s)',
+                    'Ces cas n\'apparaîtront plus dans le bandeau.'
+                );
+            }
+            fermerDialogue();
+            if (typeof appliquerFiltres === 'function') {
+                try { appliquerFiltres(); } catch (e) { console.warn('[Fichiers multiples] Recharge liste évaluations', e); }
+            }
             return;
         }
 
@@ -317,10 +462,11 @@
         }
 
         if (typeof afficherNotificationSucces === 'function' && echecs === 0) {
-            afficherNotificationSucces(
-                traites + ' fichier(s) mis à la corbeille',
-                'Restauration possible 30 jours via la corbeille.'
-            );
+            var msg = traites + ' fichier(s) mis à la corbeille';
+            if (casAvalider.length > 0) {
+                msg += ' · ' + casAvalider.length + ' cas validé(s)';
+            }
+            afficherNotificationSucces(msg, 'Restauration possible 30 jours via la corbeille.');
         } else if (typeof afficherNotificationErreur === 'function' && echecs > 0) {
             afficherNotificationErreur(
                 traites + ' traités, ' + echecs + ' échecs',
@@ -340,17 +486,35 @@
     // BANDEAU INFORMATIF (haut de la liste des évaluations)
     // =========================================================================
 
+    function _diagnosticNonValide() {
+        if (typeof travauxResolution === 'undefined' ||
+            typeof travauxResolution.diagnostiquerDoublons !== 'function') return null;
+        var diag = travauxResolution.diagnostiquerDoublons(undefined, { silencieux: true });
+        if (!diag) return null;
+        // Filtrer les cas validés
+        var prodsFiltrees = [];
+        var totalNonValide = 0;
+        diag.productionsAffectees.forEach(function(prod) {
+            var nonValides = prod.etudiantsAvecDoublons.filter(function(d) {
+                return !_estCasValide(d);
+            });
+            if (nonValides.length > 0) {
+                prodsFiltrees.push({
+                    productionId: prod.productionId,
+                    productionTitre: prod.productionTitre,
+                    etudiantsAvecDoublons: nonValides
+                });
+                totalNonValide += nonValides.length;
+            }
+        });
+        return { totalDoublons: totalNonValide, productionsAffectees: prodsFiltrees };
+    }
+
     function mettreAJourBandeau() {
         var bandeau = document.getElementById('bandeau-doublons-evaluations');
         if (!bandeau) return;
 
-        if (typeof travauxResolution === 'undefined' ||
-            typeof travauxResolution.diagnostiquerDoublons !== 'function') {
-            bandeau.classList.add('u-hide');
-            return;
-        }
-
-        var diag = travauxResolution.diagnostiquerDoublons(undefined, { silencieux: true });
+        var diag = _diagnosticNonValide();
         var n = diag ? diag.totalDoublons : 0;
 
         if (n === 0) {
@@ -367,14 +531,45 @@
 
     function aDoublonPourCas(da, productionId) {
         if (!da || !productionId) return false;
-        if (typeof travauxResolution === 'undefined' ||
-            typeof travauxResolution.diagnostiquerDoublons !== 'function') return false;
-        var diag = travauxResolution.diagnostiquerDoublons(undefined, { silencieux: true });
+        var diag = _diagnosticNonValide();
         if (!diag) return false;
         return diag.productionsAffectees.some(function(prod) {
             if (prod.productionId !== productionId) return false;
             return prod.etudiantsAvecDoublons.some(function(d) { return d.da === da; });
         });
+    }
+
+    /**
+     * Pour le compteur du carrousel (travaux-ui.js) : ramène à 1 fichier
+     * compté par étudiant pour les cas validés. Les cas non validés gardent
+     * leur compte exact (asymétrie visible).
+     */
+    function compterAvecValidations(fichiers, productionId) {
+        if (!fichiers || fichiers.length === 0) {
+            return { nbE: 0, nbF: 0 };
+        }
+        var validations = _obtenirValidations();
+        // Index des cas validés pour cette production : { da: Set<fichierId> }
+        var validesParDA = {};
+        validations.forEach(function(v) {
+            if (v.productionId !== productionId) return;
+            validesParDA[v.da] = new Set(v.fichierIds || []);
+        });
+
+        var dasVus = {};
+        var lstAffichee = fichiers.filter(function(f) {
+            var fichiersValides = validesParDA[f.etudiantDA];
+            if (!fichiersValides || !fichiersValides.has(f.id)) return true; // pas validé → garder
+            // Validé : ne garder qu'1 fichier par DA (les autres sont des extras validés)
+            if (dasVus[f.etudiantDA]) return false;
+            dasVus[f.etudiantDA] = true;
+            return true;
+        });
+
+        return {
+            nbF: lstAffichee.length,
+            nbE: new Set(lstAffichee.map(function(f) { return f.etudiantDA; }).filter(Boolean)).size
+        };
     }
 
     // =========================================================================
@@ -385,9 +580,11 @@
         ouvrirModale: ouvrirModale,
         fermerDialogue: fermerDialogue,
         onDecision: onDecision,
+        validerCas: validerCas,
         appliquerActions: appliquerActions,
         mettreAJourBandeau: mettreAJourBandeau,
-        aDoublonPourCas: aDoublonPourCas
+        aDoublonPourCas: aDoublonPourCas,
+        compterAvecValidations: compterAvecValidations
     };
 
 })();
