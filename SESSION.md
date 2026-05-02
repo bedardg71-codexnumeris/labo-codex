@@ -1,9 +1,9 @@
-# SESSION — État au 2 mai 2026 (audits ultrareview + remédiations + outils diagnostic doublons)
+# SESSION — État au 2 mai 2026 (Phase 7 complète : compteur dédupliqué + UI fichiers multiples)
 
 **Date** : 2 mai 2026
-**Dernier build** : `0502-0705` · Beta **99.30**
+**Dernier build** : `0502-0945` · Beta **99.32**
 **Branche** : `main` (poussée sur origin)
-**Statut** : ~~5 lots `/ultrareview` audités, 6 phases de remédiation livrées (42+ bugs corrigés). 8 doublons exacts d'Artefact 8 nettoyés (suppression définitive avant ajout du mode corbeille).~~ Phase 7 #2 livrée (outils console diagnostic doublons + nettoyage avec corbeille). Prochaine étape : Phase 7 #1 (déduplication compteur dans carrousel/liste).
+**Statut** : Phase 7 complète (#1 + #2 + #3 livrés). Compteur du carrousel dédupliqué par étudiant, modale interactive « Plusieurs fichiers par étudiant » avec 2 familles + tags informatifs + persistence des cas validés, et 6e bouton « Livrable additionnel » dans la modale d'import. ~~5 lots `/ultrareview` audités, 6 phases de remédiation livrées (42+ bugs corrigés).~~
 
 ---
 
@@ -14,59 +14,58 @@
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
-Contexte : Session du 1-2 mai consacrée aux audits /ultrareview payants
-(2 lots audités : Lot 4a évaluation 11 findings + Lot 6 travaux+saisie
-10 findings, rapports dans Rapports/), aux remédiations Phase 6 (10 bugs
-Lot 6 corrigés en 4 commits), et au chantier Phase 7 doublons :
-- #2 livré : outils console diagnostiquerDoublons() et
-  nettoyerDoublonsExacts() dans travaux-resolution.js
-- 8 doublons exacts d'Artefact 8 supprimés via dry-run + execution
-- Outil corrige depuis : utilise la corbeille par defaut (restaurable
-  30 j) au lieu du hard delete
-
-PROCHAINE ÉTAPE : Phase 7 #1 — Déduplication du compteur dans le
-carrousel Annoter/Évaluer et la liste des évaluations. Le compteur
-« Artefact 8 (15) » doit refléter le nombre d'étudiants distincts
-ayant au moins 1 fichier (1 par DA), pas le nombre de fichiers
-physiques. Aujourd'hui l'écart 15 vs 14 vient de Handfield qui a 2
-fichiers (PDF + JPEG) — 14 étudiants × 1 fichier + Handfield × 2.
-
-Inventaire des doublons restants (à traiter via Phase 7 #3 plus tard) :
-14 cas (2 Artefact 3 + 9 Artefact 5 + 2 Artefact 6 + 1 Artefact 8)
-- 11 reprises légitimes avec jeton (suffixe _-_Jeton_ dans le nom)
-- 3 re-imports avec contenu modifié
+Contexte : Phase 7 doublons COMPLÈTE (Beta 99.32 b0502-0945, poussée).
+Trois paliers livrés en cascade le 2 mai matin :
+- Phase 7 #1 : compteur carrousel dédupliqué par étudiant
+  Artefact 8 « (15) » → « (14 él · 15 fich) » quand nb fichiers
+  diffère du nb d'étudiants. Format universel pour signaler les
+  asymétries.
+- Phase 7 #2 (livré 1 mai) : outils console diagnostiquerDoublons()
+  et nettoyerDoublonsExacts() dans travaux-resolution.js + corbeille
+  par défaut (restaurable 30 j).
+- Phase 7 #3 : modale interactive « Plusieurs fichiers par étudiant »
+  (js/travaux-doublons-ui.js, ~440 l.). 2 familles seulement (jeton
+  Codex / Plusieurs fichiers) + 4 tags informatifs (PDF+image, mêmes
+  noms, dates proches, statuts mixtes). Bouton « Valider ce cas »
+  qui marque légitime sans rien supprimer + persistence (clé
+  cas_fichiers_multiples_valides via db.setSync). 6e bouton dans
+  la modale d'import (« Livrable additionnel ») qui marque le cas
+  validé immédiatement.
 
 LECTURE OBLIGATOIRE AVANT DE CODER :
-1. Rapports/ultrareview-lot-6-travaux-saisie.md — état des findings
-   du Lot 6 et le pattern « asymétries internes au module »
-2. Le code à toucher :
-   - js/travaux-ui.js:2552-2614 (genererGrilleFichiers + dropdown
-     filtre production avec compteur (N))
-   - js/travaux-resolution.js (helper trouverFichierPourEvaluation
-     déjà en place pour la résolution par étudiant)
+1. (auto-memory de Claude) project_phase7_doublons.md — référence
+   technique du module + patterns + persistence
+2. project_reserve.md — module Réserve (versement v1.5 FSAPI +
+   réimport v1) si on revient aux items #247-249, #257 v2.B
+3. CLAUDE.md — règles de sécurité + zones protégées
 
-API CONSOLE DEJA EN PLACE (utiles pour debug Phase 7 #1) :
-  travauxResolution.diagnostiquer('Benjamin')
-    -> Diagnostic d'un étudiant (fichiers + évaluations + cohérence)
+PROCHAINE ÉTAPE — choisir parmi les items du backlog Réserve/écosystème
+qui restent ouverts depuis fin avril (les 3 paliers Phase 7 ont été
+priorisés sur cette session, pas la voie de retour Réserve) :
 
-  travauxResolution.diagnostiquerDoublons()
-    -> Liste tous les doublons du groupe-cours actif
+  #257 v2.B Mode consultation namespace temporaire (~5-6 h)
+            Suite de #257 v2.A (remapping IDs déjà livré). Ouvre un
+            versement réserve en lecture seule dans un namespace
+            __archive_*, utile pour démos/formation.
 
-  travauxResolution.diagnostiquerDoublons('Artefact 8')
-    -> Filtre par titre partiel ou ID exact
+  #256-bis Aide aux 8 autres modales de l'app (~1 j). Pattern de
+           #256 (modales Réserve) à reproduire pour Nouveautés,
+           Réparation, Wizard pratique, etc.
 
-  travauxResolution.nettoyerDoublonsExacts()
-    -> Dry-run, ne touche que les vrais doublons (mêmes octets)
-    -> Mode corbeille par défaut (restaurable 30 j)
-    -> Pour exec : { dryRun: false }
-    -> Pour hard delete : { dryRun: false, definitive: true }
+  #247 Refonte Réglages > Données — alignement vocabulaire écosystème
+       (Codex/Réserve/Voûte). ~1 j. Conditionné aux retours terrain
+       sur la voie de retour Réserve.
 
-PLAN PHASE 7 (3 étapes) :
-  ✅ #2 — Outils console diagnostic + nettoyage doublons exacts
-  🔜 #1 — Déduplication compteur carrousel/liste (1 entrée/étudiant)
-  ⏳ #3 — UI nettoyage interactif des 14 doublons mixtes restants
-         (modale avec recommandations par pattern, badges Reprise
-         après jeton / Mixte PDF-image / Re-import modifié)
+  #248 Réserve v1.1 manifeste-reserve.json fusion auto pour Safari.
+       ~2-3 h. FSAPI Chrome/Edge le fait déjà.
+
+  #249 Section Réserve dédiée dans Réglages (état des versements).
+       ~3-4 h. Dépend de #248.
+
+  #251 Codex data — extraction depuis la Réserve. Format JSON sans
+       blobs pour le Labo. Priorité 4 ECOSYSTEME. ~1-2 j.
+
+  #252 Labo autonome — sortir de Suivi. Priorité 5 ECOSYSTEME. ~1 j.
 
 CONTRAINTES (rappel CLAUDE.md) :
 - Demander le numéro de beta à Grégoire avant chaque commit
@@ -77,9 +76,15 @@ CONTRAINTES (rappel CLAUDE.md) :
 - Zéro handler inline -> data-action / data-on-change
 - console.warn / console.error uniquement
 - Variables CSS du DS, tester modes clair ET sombre
+- Modales : classList.add('actif') (PAS 'visible'). Convention
+  styles.css:3499. Vérifier sur les autres modules avant d'inventer.
+- Petites métadonnées persistées : utiliser db.setSync (PAS db.set
+  qui est async sans await → getSync immédiat lit valeur stale).
 
 OBSERVATIONS OUVERTES (hors scope immédiat) :
-- 14 doublons restants (Artefact 3, 5, 6, 8) à traiter Phase 7 #3
+- Warnings console [Résolution] AMBIGUÏTÉ : N fichiers pour (DA, )
+  — productionId vide. Probablement déclenché par genererDropdownActions
+  qui itère sur les évaluations. Bruit, pas critique.
 - Phase 7 du plan de remédiation Lot 4a (11 findings dans
   evaluation-jetons.js) -- à faire dans une autre session, demande
   du contexte métier sur les jetons
@@ -152,21 +157,25 @@ ef7bbca feat(travaux-resolution): outil console diagnostiquerDoublons + fix diag
 **Total findings vérifiés** : 56 (+ 20 candidats Lot 3 à trier)
 **Total bugs corrigés cette session de travail** : ~52
 
-### Plan d'ensemble Phase 7
+### Plan d'ensemble Phase 7 — COMPLÈTE
 
-| # | Sujet | Statut | Estimation |
+| # | Sujet | Statut | Commit |
 |---|---|---|---|
-| 7.1 | Déduplication compteur carrousel/liste | 🔜 Prochaine session | 1h |
-| 7.2 | Outils console diagnostic + nettoyage doublons exacts | ✅ Livré (00770ce) | — |
-| 7.3 | UI nettoyage interactif des 14 doublons mixtes | ⏳ À faire après #1 | 2-3h |
+| 7.1 | Compteur carrousel dédupliqué par étudiant (`(N él · M fich)` quand asymétrie) | ✅ Livré 2 mai b0502-0725 | `cf251bc` |
+| 7.2 | Outils console diagnostiquerDoublons + nettoyerDoublonsExacts (corbeille) | ✅ Livré 1-2 mai | `00770ce` `b5929e6` `ef7bbca` |
+| 7.3 | UI interactive « Plusieurs fichiers par étudiant » (3 paliers) | ✅ Livré 2 mai b0502-0940 | `b175970` `b4fb12b` `7c295e1` `d298863` `6050f41` `896931d` `467cff9` `298ccc3` |
+
+**Phase 7 #3 — détail des 3 paliers** (tous livrés 2 mai matin) :
+1. **Modale interactive + 2 entrées** (bandeau + sélect Actions par ligne) avec 4 familles initialement → réduit à 2 (jeton Codex / Plusieurs fichiers) + 4 tags informatifs (PDF+image, mêmes noms, dates proches, statuts mixtes)
+2. **Persistence des cas validés** (clé `cas_fichiers_multiples_valides`, signature triée des fichierIds, auto-invalidation si nouveau fichier rejoint le groupe). Bandeau et compteur carrousel filtrent les cas validés.
+3. **6e bouton « Livrable additionnel »** dans `traiterDoublonsImport` (modale d'import existante), qui marque le cas comme validé immédiatement.
+
+**Bugs corrigés en cours de session** : modale invisible (`classList.add('actif')` vs `'visible'`), orphelin précis (corbeille requise), persistence en lot (1 seul write au lieu de N), `db.setSync` au lieu de `db.set` pour lecture immédiate.
 
 ---
 
-## Prochaine session — décision à prendre en démarrage
+## Prochaine session — items prioritaires
 
-**Phase 7 #1 prioritaire** : déduplication compteur dans le carrousel Annoter/Évaluer et la liste.
+Le travail Phase 7 a été priorisé sur cette session ; les items du backlog Réserve/écosystème ouverts depuis fin avril restent à attaquer. Voir la consigne de démarrage ci-dessus pour la liste complète (#247, #248, #249, #251, #252, #257 v2.B, #256-bis).
 
-Suite probable de cette session :
-- Phase 7 #3 (UI nettoyage des 14 cas mixtes) si contexte le permet
-- Sinon, traiter en parallèle/après : Phase de remédiation Lot 4a (jetons, voir `Rapports/ultrareview-lot-4a-evaluation.md`)
-- Ou Phase 4 (triage manuel des 20 candidats Lot 3 indices)
+Alternative non-Réserve : Phase de remédiation Lot 4a (jetons, voir `Rapports/ultrareview-lot-4a-evaluation.md`) ou triage manuel des 20 candidats Lot 3 indices.
