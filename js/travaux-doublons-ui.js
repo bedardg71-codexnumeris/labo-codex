@@ -93,7 +93,7 @@
 
     function fermerDialogue() {
         var modal = document.getElementById('modalTravauxDoublons');
-        if (modal) modal.classList.remove('visible');
+        if (modal) modal.classList.remove('actif');
         _payload = null;
         _decisions = {};
         _filtreCas = null;
@@ -111,7 +111,7 @@
         }
         var corps = modal.querySelector('.td-corps');
         if (corps) corps.innerHTML = _genererCorpsHtml();
-        modal.classList.add('visible');
+        modal.classList.add('actif');
         _miseAJourFooter();
     }
 
