@@ -11,6 +11,15 @@
 
     // =========================================================================
     // PATTERNS ET RECOMMANDATIONS
+    //
+    // Deux familles seulement, pour ne pas pré-juger des cas que l'app ne peut
+    // pas trancher avec certitude :
+    //   - jeton : suffixe « _-_Jeton_ » dans le nom (convention reconnue de
+    //     reprise) → recommandé garder les deux
+    //   - plusieurs-fichiers : tout le reste → décision manuelle
+    //
+    // Les autres signaux (PDF + image, mêmes noms, dates proches, statuts
+    // mixtes) sont affichés comme tags informatifs, sans recommandation.
     // =========================================================================
 
     function _detecterPattern(d) {
@@ -18,33 +27,30 @@
             return (f.nomFichier || '').indexOf('_-_Jeton_') !== -1;
         });
         if (nomsAvecJeton) return 'jeton';
-
-        var indices = d.indicesCause || [];
-        if (indices.indexOf('mixte-pdf-image') !== -1) return 'mixte-pdf-image';
-
-        return 're-import-modifie';
+        return 'plusieurs-fichiers';
     }
 
     function _libellePattern(pattern) {
         if (pattern === 'jeton') {
-            return { icone: '🟢', texte: 'Reprise avec jeton — recommandé : garder les deux' };
+            return { icone: '🟢', texte: 'Reprise via jeton — recommandé : garder les deux' };
         }
-        if (pattern === 'mixte-pdf-image') {
-            return { icone: '🟡', texte: 'Mixte PDF + image — recommandé : garder le PDF' };
-        }
-        return { icone: '🟠', texte: 'Re-import modifié — décision manuelle requise' };
+        return { icone: '🔵', texte: 'Plusieurs fichiers — décision manuelle' };
+    }
+
+    function _libelleTagInformatif(indice) {
+        if (indice === 'mixte-pdf-image') return { icone: '📄', texte: 'PDF + image' };
+        if (indice === 'memes-noms')      return { icone: '🔁', texte: 'mêmes noms' };
+        if (indice === 'dates-proches')   return { icone: '⏱', texte: 'dates proches (< 5 min)' };
+        if (indice === 'statuts-mixtes')  return { icone: '📝', texte: 'statuts mixtes' };
+        return null;
     }
 
     function _recommandation(d, pattern) {
         var rec = {};
         if (pattern === 'jeton') {
             d.fichiers.forEach(function(f) { rec[f.id] = 'garder'; });
-        } else if (pattern === 'mixte-pdf-image') {
-            d.fichiers.forEach(function(f) {
-                rec[f.id] = (f.typeMIME === 'application/pdf') ? 'garder' : 'corbeille';
-            });
         } else {
-            // re-import modifié : pas de pré-sélection (décision manuelle)
+            // plusieurs-fichiers : pas de pré-sélection (décision manuelle)
             d.fichiers.forEach(function(f) { rec[f.id] = null; });
         }
         return rec;
@@ -74,14 +80,14 @@
     function ouvrirModale(filtre) {
         if (typeof travauxResolution === 'undefined' ||
             typeof travauxResolution.diagnostiquerDoublons !== 'function') {
-            console.error('[Doublons UI] travauxResolution.diagnostiquerDoublons indisponible');
+            console.error('[Fichiers multiples] travauxResolution.diagnostiquerDoublons indisponible');
             return;
         }
 
         _payload = travauxResolution.diagnostiquerDoublons();
         if (!_payload || _payload.totalDoublons === 0) {
             if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces('Aucun doublon à examiner', 'Tous les fichiers sont uniques par étudiant et production.');
+                afficherNotificationSucces('Aucun cas à examiner', 'Chaque étudiant n\'a qu\'un seul fichier par production.');
             }
             return;
         }
@@ -106,7 +112,7 @@
     function _afficherModale() {
         var modal = document.getElementById('modalTravauxDoublons');
         if (!modal) {
-            console.error('[Doublons UI] #modalTravauxDoublons absente du DOM');
+            console.error('[Fichiers multiples] #modalTravauxDoublons absente du DOM');
             return;
         }
         var corps = modal.querySelector('.td-corps');
@@ -116,7 +122,7 @@
     }
 
     function _genererCorpsHtml() {
-        var compteurs = { jeton: 0, 'mixte-pdf-image': 0, 're-import-modifie': 0 };
+        var compteurs = { 'jeton': 0, 'plusieurs-fichiers': 0 };
         var totalAffiche = 0;
         var prodsAvecCas = [];
 
@@ -129,13 +135,12 @@
         });
 
         if (totalAffiche === 0) {
-            return '<p class="texte-muted">Aucun doublon ne correspond au filtre.</p>';
+            return '<p class="texte-muted">Aucun cas ne correspond au filtre.</p>';
         }
 
         var recapParts = [];
-        if (compteurs.jeton) recapParts.push(compteurs.jeton + ' reprise(s) avec jeton');
-        if (compteurs['re-import-modifie']) recapParts.push(compteurs['re-import-modifie'] + ' re-import(s) modifié(s)');
-        if (compteurs['mixte-pdf-image']) recapParts.push(compteurs['mixte-pdf-image'] + ' mixte(s) PDF + image');
+        if (compteurs.jeton)               recapParts.push(compteurs.jeton + ' reprise(s) via jeton');
+        if (compteurs['plusieurs-fichiers']) recapParts.push(compteurs['plusieurs-fichiers'] + ' à clarifier');
 
         var html = '<div class="td-recap">' +
                    '<strong>' + totalAffiche + ' cas à examiner</strong>' +
@@ -159,12 +164,21 @@
         var lib = _libellePattern(pattern);
         var nomComplet = ((d.prenom || '') + ' ' + (d.nom || '')).trim() || ('DA ' + d.da);
 
+        // Tags informatifs (PDF + image, mêmes noms, dates proches, statuts mixtes)
+        var tagsHtml = '';
+        (d.indicesCause || []).forEach(function(indice) {
+            var tag = _libelleTagInformatif(indice);
+            if (!tag) return;
+            tagsHtml += '<span class="td-tag-info">' + tag.icone + ' ' + echapperHtml(tag.texte) + '</span>';
+        });
+
         var html = '<div class="td-carte" data-pattern="' + pattern + '">';
         html += '<div class="td-carte-entete">';
         html += '<strong>' + echapperHtml(nomComplet) + '</strong>';
         html += '<span class="td-pattern-badge td-pattern-' + pattern + '">' +
                 lib.icone + ' ' + echapperHtml(lib.texte) + '</span>';
         html += '</div>';
+        if (tagsHtml) html += '<div class="td-tags">' + tagsHtml + '</div>';
         html += '<div class="td-fichiers">';
         d.fichiers.forEach(function(f) { html += _genererLigneFichier(f); });
         html += '</div>';
@@ -271,7 +285,7 @@
     function appliquerActions() {
         if (typeof travauxStockage === 'undefined' ||
             typeof travauxStockage.deplacerEnCorbeille !== 'function') {
-            console.error('[Doublons UI] travauxStockage.deplacerEnCorbeille indisponible');
+            console.error('[Fichiers multiples] travauxStockage.deplacerEnCorbeille indisponible');
             return;
         }
 
@@ -286,7 +300,7 @@
                 if (travauxStockage.deplacerEnCorbeille(aCorbeille[i])) traites++;
                 else echecs++;
             } catch (e) {
-                console.error('[Doublons UI] Erreur corbeille ' + aCorbeille[i], e);
+                console.error('[Fichiers multiples] Erreur corbeille ' + aCorbeille[i], e);
                 echecs++;
             }
         }
@@ -307,7 +321,7 @@
 
         // Recharger la liste des évaluations si elle est ouverte
         if (typeof appliquerFiltres === 'function') {
-            try { appliquerFiltres(); } catch (e) { console.warn('[Doublons UI] Recharge liste évaluations', e); }
+            try { appliquerFiltres(); } catch (e) { console.warn('[Fichiers multiples] Recharge liste évaluations', e); }
         }
     }
 
@@ -336,8 +350,7 @@
         bandeau.classList.remove('u-hide');
         var compteurEl = bandeau.querySelector('.bandeau-doublons-compteur');
         if (compteurEl) {
-            compteurEl.textContent = n + ' fichier' + (n > 1 ? 's' : '') +
-                ' en doublon dans ce groupe-cours';
+            compteurEl.textContent = n + ' cas avec plusieurs fichiers dans ce groupe-cours';
         }
     }
 
