@@ -7,7 +7,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=2026050131">
+    <link rel="stylesheet" href="styles.css?v=2026050210">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -8214,6 +8214,15 @@
                         <label><input type="checkbox" data-colonne="note" checked data-on-change="toggleColonneEval"> Note %</label>
                     </div>
 
+                    <!-- Bandeau doublons (Phase 7 #3) — visible si diagnostiquerDoublons > 0 -->
+                    <div id="bandeau-doublons-evaluations" class="u-hide bandeau-doublons-evaluations">
+                        <span class="bandeau-doublons-icone" aria-hidden="true">&#x26A0;&#xFE0F;</span>
+                        <span class="bandeau-doublons-compteur"></span>
+                        <button class="btn btn-secondaire btn-petit" data-action="travauxDoublonsUI.ouvrirModale">
+                            Examiner les doublons
+                        </button>
+                    </div>
+
                     <!-- Zone de chargement -->
                     <div id="zone-chargement-evaluations" class="u-text-center" style="padding: 40px">
                         <p style="color: var(--gris-moyen);">Chargement des évaluations...</p>
@@ -15895,7 +15904,8 @@
     <script src="js/synthese-retroaction-data.js?v=2026042512"></script>
     <script src="js/synthese-retroaction-rendu.js?v=2026042515"></script>
     <script src="js/travaux-export-pdf.js?v=2026042502"></script>
-    <script src="js/travaux-resolution.js?v=2026050203"></script> <!-- Beta 99.30 b0502-0705 : nettoyerDoublonsExacts utilise corbeille par défaut, option { definitive: true } pour hard delete -->
+    <script src="js/travaux-resolution.js?v=2026050206"></script> <!-- Beta 99.31 b0502-0745 : flag { silencieux: true } sur diagnostiquerDoublons (pour bandeau) -->
+    <script src="js/travaux-doublons-ui.js?v=2026050207"></script> <!-- Beta 99.31 b0502-0745 : Phase 7 #3 — UI nettoyage interactif des doublons mixtes -->
     <script src="js/migration-diagnostic.js?v=2026030601"></script>
     <script src="js/travaux-ui.js?v=2026050204"></script> <!-- Beta 99.31 b0502-0725 : compteur dédupliqué (étudiants distincts) dans carrousel Annoter/Évaluer -->
     <script src="js/actions-rlo.js?v=2026041709"></script> <!-- Beta 99.17 (b0417-1100) : fix lecture LIVE prioritaire dans obtenirEvolutionRLOEtudiant -->
@@ -15911,7 +15921,7 @@
     <script src="js/import-export.js?v=2026032600"></script>
     <script src="js/codex.js?v=2026042803"></script>
     <script src="js/statistiques.js?v=2025121001"></script>
-    <script src="js/liste-evaluations.js?v=2026050135"></script> <!-- Beta 99.30 b0501-0735 : action Renommer dans le menu Actions de la liste -->
+    <script src="js/liste-evaluations.js?v=2026050208"></script> <!-- Beta 99.31 b0502-0745 : Phase 7 #3 — bandeau doublons + option « Examiner les doublons » dans le sélect Actions -->
     <script src="js/journal.js?v=2026041706"></script>
     <script src="js/snapshots.js?v=2026030201"></script>
     <script src="js/couleurs.js?v=2026040201"></script>
@@ -15950,7 +15960,7 @@
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
     <script src="js/accompagnement-contenu-hover.js?v=2026050123"></script>
-    <script src="js/accompagnement-contenu-popup.js?v=2026050132"></script>
+    <script src="js/accompagnement-contenu-popup.js?v=2026050209"></script> <!-- Beta 99.31 b0502-0745 : popups doublons-examiner + doublons-patterns (Phase 7 #3) -->
     <script src="js/accompagnement-contenu-terme.js?v=2026042002"></script>
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
@@ -16518,6 +16528,44 @@
                         data-tooltip="reserve-ouvrir-bouton-reimporter">
                     R&eacute;importer <span id="reserve-ouvrir-compteur">0</span> &eacute;l&eacute;ment(s)
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         MODAL EXAMINER LES DOUBLONS DE FICHIERS
+         (2 mai 2026 — Phase 7 #3, BACKLOG #2 doublons mixtes)
+         ========================================= -->
+    <div id="modalTravauxDoublons" class="modal-overlay" data-close-on-bg="travauxDoublonsUI.fermerDialogue">
+        <div class="modal-contenu" style="max-width: 760px; max-height: 85vh; padding: 16px; display: flex; flex-direction: column;">
+            <button data-action="travauxDoublonsUI.fermerDialogue" class="modal-fermer" title="Fermer">
+                <img src="icons/icon-close-window.svg" alt="" class="modal-close-icon">
+            </button>
+
+            <h2 class="modal-titre u-texte-11" style="margin-bottom: 4px">
+                <img src="icons/icon-files.svg" alt="" class="btn-inline-icon">
+                Examiner les doublons de fichiers
+                <button class="btn-aide-contextuelle" data-aide="doublons-examiner" aria-label="Aide : examiner les doublons">&#x2734;&#xFE0F;</button>
+            </h2>
+            <p class="u-mb-10" style="color: var(--texte-secondaire); font-size: 0.85rem">
+                Plusieurs fichiers coexistent pour un m&ecirc;me &eacute;tudiant et une m&ecirc;me production. Choisis ce qui reste actif et ce qui passe &agrave; la corbeille.
+                <button class="btn-aide-contextuelle" data-aide="doublons-patterns" aria-label="Aide : patterns de doublons" style="vertical-align: middle;">&#x2734;&#xFE0F;</button>
+            </p>
+
+            <div class="td-corps" style="overflow-y: auto; flex: 1; padding-right: 4px;">
+                <p class="texte-muted">Chargement...</p>
+            </div>
+
+            <div style="border-top: 1px solid var(--bordure); padding-top: 10px; margin-top: 10px;">
+                <p class="td-footer-statut texte-muted u-mb-10" style="font-size: 0.82rem; margin: 0 0 8px 0;"></p>
+                <div class="btn-groupe u-flex-gap-8" style="justify-content: flex-end;">
+                    <button data-action="travauxDoublonsUI.fermerDialogue" class="btn btn-annuler u-texte-petit" style="padding: 6px 12px">
+                        Annuler
+                    </button>
+                    <button data-action="travauxDoublonsUI.appliquerActions" class="btn btn-confirmer u-texte-petit td-btn-appliquer" style="padding: 6px 12px" disabled>
+                        Aucune action s&eacute;lectionn&eacute;e
+                    </button>
+                </div>
             </div>
         </div>
     </div>

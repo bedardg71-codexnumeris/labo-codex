@@ -22273,3 +22273,117 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     font-style: italic;
 }
 
+/* =========================================================================
+   PHASE 7 #3 — UI examiner les doublons de fichiers
+   Bandeau (au-dessus du tableau) + modale (#modalTravauxDoublons)
+   ========================================================================= */
+
+.bandeau-doublons-evaluations {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    margin: 0 0 12px 0;
+    background: var(--surface-carte);
+    border-left: 3px solid var(--orange-accent);
+    border-radius: var(--radius-moyen, 6px);
+    font-size: 0.85rem;
+}
+.bandeau-doublons-evaluations .bandeau-doublons-icone { font-size: 1rem; }
+.bandeau-doublons-evaluations .bandeau-doublons-compteur {
+    flex: 1;
+    color: var(--texte-secondaire);
+}
+
+.td-recap {
+    background: var(--surface-carte);
+    padding: 8px 10px;
+    border-radius: var(--radius-moyen, 6px);
+    font-size: 0.85rem;
+    color: var(--texte-secondaire);
+    margin-bottom: 12px;
+}
+
+.td-section { margin-bottom: 16px; }
+.td-section-titre {
+    margin: 0 0 8px 0;
+    font-size: 0.95rem;
+    color: var(--texte-principal);
+}
+
+.td-carte {
+    background: var(--surface-carte);
+    border-left: 3px solid var(--bordure-moyenne);
+    border-radius: var(--radius-moyen, 6px);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+}
+.td-carte[data-pattern="jeton"]              { border-left-color: var(--vert-leger); }
+.td-carte[data-pattern="mixte-pdf-image"]    { border-left-color: var(--orange-accent); }
+.td-carte[data-pattern="re-import-modifie"]  { border-left-color: var(--orange-accent); }
+
+.td-carte-entete {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.td-pattern-badge {
+    font-size: 0.78rem;
+    color: var(--texte-secondaire);
+    font-style: italic;
+}
+
+.td-fichiers { display: flex; flex-direction: column; gap: 6px; }
+.td-fichier {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 10px;
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: var(--radius-petit, 4px);
+}
+.mode-clair .td-fichier { background: rgba(0, 0, 0, 0.03); }
+
+.td-fichier-radios {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 110px;
+    flex-shrink: 0;
+}
+.td-radio {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+.td-radio input { margin: 0; }
+
+.td-fichier-info { flex: 1; min-width: 0; }
+.td-fichier-nom {
+    font-weight: 500;
+    word-break: break-all;
+    margin-bottom: 2px;
+}
+.td-fichier-meta {
+    font-size: 0.78rem;
+    color: var(--texte-secondaire);
+}
+.td-badge-recent {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 6px;
+    background: var(--vert-pale);
+    color: var(--vert-leger);
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-weight: 500;
+}
+
+.td-footer-statut { font-size: 0.82rem; }
+.td-footer-statut-erreur { color: var(--orange-accent); font-weight: 500; }
+

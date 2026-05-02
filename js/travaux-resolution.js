@@ -224,17 +224,19 @@
      *   - Retour : { totalDoublons, productionsAffectees: [...] } exploitable
      *
      * @param {string} [filtre] - Titre partiel ou ID exact d'une production
+     * @param {Object} [opts] - { silencieux: true } pour ne pas écrire dans la console
      * @returns {{totalDoublons: number, productionsAffectees: Array}|null}
      */
-    function diagnostiquerDoublons(filtre) {
+    function diagnostiquerDoublons(filtre, opts) {
+        const silencieux = !!(opts && opts.silencieux);
         if (typeof travauxStockage === 'undefined' || typeof travauxStockage.obtenirFichiersGroupeActif !== 'function') {
-            console.error('[Doublons] travauxStockage non disponible');
+            if (!silencieux) console.error('[Doublons] travauxStockage non disponible');
             return null;
         }
 
         const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
         if (fichiers.length === 0) {
-            console.warn('[Doublons] Aucun fichier dans le groupe-cours actif');
+            if (!silencieux) console.warn('[Doublons] Aucun fichier dans le groupe-cours actif');
             return { totalDoublons: 0, productionsAffectees: [] };
         }
 
@@ -255,7 +257,7 @@
                 ((p.titre || p.nom || '').toLowerCase().indexOf(filtreNorm) !== -1)
             );
             if (match.length === 0) {
-                console.warn(`[Doublons] Aucune production ne correspond à "${filtre}"`);
+                if (!silencieux) console.warn(`[Doublons] Aucune production ne correspond à "${filtre}"`);
                 return { totalDoublons: 0, productionsAffectees: [] };
             }
             prodIdsCibles = new Set(match.map(p => p.id));
@@ -322,8 +324,10 @@
         });
         const productionsAffectees = Object.values(parProduction);
 
-        // Affichage console structuré
-        _afficherDoublonsConsole(productionsAffectees, doublons.length, filtre);
+        // Affichage console structuré (sauf si silencieux)
+        if (!silencieux) {
+            _afficherDoublonsConsole(productionsAffectees, doublons.length, filtre);
+        }
 
         return {
             totalDoublons: doublons.length,
