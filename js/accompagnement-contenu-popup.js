@@ -1169,6 +1169,58 @@ const AIDE_CONTEXTUELLE = {
             }
         ],
         voirAussi: ['reserve-types-ressources']
+    },
+
+    // =========================================================================
+    // DOUBLONS DE FICHIERS — modale Examiner les doublons (Phase 7 #3)
+    // =========================================================================
+
+    'doublons-examiner': {
+        titre: "Examiner les doublons de fichiers",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Quand un même étudiant·e a plusieurs fichiers pour une même production, l'application en garde un comme « actif » (le plus récent) mais conserve tous les autres en stock. Cette modale te permet de décider, cas par cas, ce qui reste et ce qui passe à la corbeille."
+            },
+            {
+                type: 'liste',
+                titre: "Comment ça fonctionne",
+                items: [
+                    "Chaque cas regroupe les fichiers d'un même étudiant pour une même production.",
+                    "Pour chaque fichier, choisis « Garder » (reste actif) ou « Corbeille » (mis de côté, restaurable 30 jours).",
+                    "Au moins un fichier doit être gardé par cas — sinon l'évaluation se retrouverait sans pièce justificative."
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: "Rien n'est jamais supprimé définitivement depuis cette modale. La corbeille te laisse 30 jours pour revenir en arrière."
+            }
+        ],
+        voirAussi: ['doublons-patterns']
+    },
+
+    'doublons-patterns': {
+        titre: "Trois familles de doublons",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "L'application reconnaît trois familles de doublons et te suggère une action par défaut quand elle en est sûre. Tu peux toujours changer la suggestion."
+            },
+            {
+                type: 'liste',
+                titre: "Familles détectées",
+                items: [
+                    "<strong>🟢 Reprise avec jeton</strong> — un fichier porte le suffixe <code>_-_Jeton_</code> dans son nom : c'est une reprise légitime. Suggestion : garder les deux (l'original et la reprise).",
+                    "<strong>🟡 Mixte PDF + image</strong> — un PDF coexiste avec une ou plusieurs images. C'est typiquement le résultat d'une fusion de pages. Suggestion : garder le PDF, mettre les images à la corbeille.",
+                    "<strong>🟠 Re-import modifié</strong> — deux fichiers du même nom mais de tailles différentes : l'élève a re-importé une version modifiée. Aucune suggestion automatique — c'est à toi de décider laquelle garder en consultant la date et le statut."
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: "Pour les cas « Re-import modifié », ouvre les deux fichiers (depuis la liste des évaluations, action « Éditer ») avant de décider lequel met à la corbeille."
+            }
+        ],
+        voirAussi: ['doublons-examiner']
     }
 };
 

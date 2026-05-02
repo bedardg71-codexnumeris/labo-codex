@@ -610,6 +610,12 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
 
         const logMoyenne = moyenneAffichee !== null ? ` | Moyenne: ${moyenneAffichee.toFixed(1)}%` : '';
     }
+
+    // Bandeau Phase 7 #3 : signaler la présence de doublons (au-dessus du tableau)
+    if (typeof travauxDoublonsUI !== 'undefined' &&
+        typeof travauxDoublonsUI.mettreAJourBandeau === 'function') {
+        travauxDoublonsUI.mettreAJourBandeau();
+    }
 }
 
 /**
@@ -1216,6 +1222,13 @@ function genererDropdownActions(ligne) {
         options.push(`<option value="supprimer-eval|${evalId}">Supprimer l'évaluation</option>`);
     }
 
+    // Phase 7 #3 : Examiner les doublons — visible si ce (DA × production) a 2+ fichiers
+    if (typeof travauxDoublonsUI !== 'undefined' &&
+        typeof travauxDoublonsUI.aDoublonPourCas === 'function' &&
+        travauxDoublonsUI.aDoublonPourCas(da, prodId)) {
+        options.push(`<option value="examiner-doublons|${da}|${prodId}">Examiner les doublons</option>`);
+    }
+
     if (options.length === 0) {
         return '<span class="texte-muted">-</span>';
     }
@@ -1279,6 +1292,12 @@ function executerActionEval(select) {
             break;
         case 'modifier-remplacee':
             modifierEvaluationRemplacee(parts[1]);
+            break;
+        case 'examiner-doublons':
+            if (typeof travauxDoublonsUI !== 'undefined' &&
+                typeof travauxDoublonsUI.ouvrirModale === 'function') {
+                travauxDoublonsUI.ouvrirModale({ da: parts[1], productionId: parts[2] });
+            }
             break;
     }
 }
