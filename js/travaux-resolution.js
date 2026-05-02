@@ -130,8 +130,8 @@
     /**
      * Diagnostic : affiche toutes les associations fichier↔évaluation pour un étudiant.
      * Usage console : travauxResolution.diagnostiquer('DA_ICI')
-     * ou : travauxResolution.diagnostiquer() pour chercher par prénom
-     * @param {string} [daOuPrenom] - DA de l'étudiant ou début de prénom
+     * ou : travauxResolution.diagnostiquer('Benjamin') pour chercher par prénom/nom
+     * @param {string} [daOuPrenom] - DA de l'étudiant ou début de prénom/nom
      */
     function diagnostiquer(daOuPrenom) {
         // ACCÈS DIRECT INTENTIONNEL — outil diagnostic console, doit lire TOUS les étudiants
@@ -160,27 +160,260 @@
         const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
         const productions = db.getSync(cle('productions'), []);
         const fichiers = travauxStockage.obtenirFichiersEtudiant(da);
+        const eleve = etudiants.find(e => e.da === da) || {};
 
         // Nom des productions
         const prodNom = {};
         productions.forEach(p => { prodNom[p.id] = p.titre || p.nom || p.id; });
 
-        fichiers.forEach(f => {
-        });
+        const nomComplet = `${eleve.prenom || ''} ${eleve.nom || ''}`.trim() || `(DA ${da})`;
+        console.group(`[Diagnostic] ${nomComplet} — ${fichiers.length} fichier(s), ${evaluations.filter(e => e.etudiantDA === da).length} évaluation(s)`);
 
+        // 1. Lister les fichiers
+        console.group(`📄 Fichiers (${fichiers.length})`);
+        fichiers.forEach(f => {
+            const titreProd = prodNom[f.productionId] || `(id inconnu : ${f.productionId})`;
+            console.log(`  ${f.id} → [${titreProd}] ${f.nomFichier || '?'} (${f.typeMIME || '?'})`);
+        });
+        console.groupEnd();
+
+        // 2. Lister les évaluations actives et leur résolution fichier
         const evalsDA = evaluations.filter(e => e.etudiantDA === da && !e.remplaceeParId);
+        console.group(`📋 Évaluations actives (${evalsDA.length})`);
         evalsDA.forEach(e => {
             const fichierResolu = trouverFichierPourEvaluation(e);
+            const titreProd = prodNom[e.productionId] || `(id inconnu : ${e.productionId})`;
+            const fichierTxt = fichierResolu
+                ? `→ fichier ${fichierResolu.id} (${fichierResolu.nomFichier || '?'})`
+                : '→ AUCUN FICHIER';
+            console.log(`  ${e.id} [${titreProd}] ${fichierTxt}`);
         });
+        console.groupEnd();
 
+        // 3. Détecter les incohérences éval → fichier (productionId divergent)
+        const incoherences = [];
         evalsDA.forEach(e => {
             const fichierResolu = trouverFichierPourEvaluation(e);
             if (fichierResolu && fichierResolu.productionId !== e.productionId) {
+                incoherences.push({ eval: e, fichier: fichierResolu });
                 console.warn(
                     `  INCOHÉRENCE : éval ${e.id} [${prodNom[e.productionId]}] → fichier ${fichierResolu.id} dont productionId=${fichierResolu.productionId} [${prodNom[fichierResolu.productionId] || '?'}]`
                 );
             }
         });
+        if (incoherences.length === 0) {
+            console.log('✅ Aucune incohérence éval → fichier');
+        }
+
+        console.groupEnd();
+        return { da: da, fichiers: fichiers, evaluations: evalsDA, incoherences: incoherences };
+    }
+
+    /**
+     * Diagnostic des doublons : liste tous les couples (étudiant × production)
+     * pour lesquels 2+ fichiers coexistent dans le groupe-cours actif.
+     *
+     * Usage console :
+     *   travauxResolution.diagnostiquerDoublons()                  // tous les doublons
+     *   travauxResolution.diagnostiquerDoublons('Artefact 8')      // filtre par titre
+     *   travauxResolution.diagnostiquerDoublons('prod_xyz_abc')    // filtre par ID exact
+     *
+     * Sortie :
+     *   - Console (lecture humaine) : groupes par production puis par étudiant,
+     *     avec table comparant les fichiers, indices de cause détectés
+     *   - Retour : { totalDoublons, productionsAffectees: [...] } exploitable
+     *
+     * @param {string} [filtre] - Titre partiel ou ID exact d'une production
+     * @returns {{totalDoublons: number, productionsAffectees: Array}|null}
+     */
+    function diagnostiquerDoublons(filtre) {
+        if (typeof travauxStockage === 'undefined' || typeof travauxStockage.obtenirFichiersGroupeActif !== 'function') {
+            console.error('[Doublons] travauxStockage non disponible');
+            return null;
+        }
+
+        const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
+        if (fichiers.length === 0) {
+            console.warn('[Doublons] Aucun fichier dans le groupe-cours actif');
+            return { totalDoublons: 0, productionsAffectees: [] };
+        }
+
+        // Références
+        const productions = db.getSync(cle('productions'), []) || [];
+        const etudiants = db.getSync(cle('groupeEtudiants'), []) || [];
+        const prodById = {};
+        productions.forEach(p => { prodById[p.id] = p; });
+        const etByDa = {};
+        etudiants.forEach(e => { etByDa[e.da] = e; });
+
+        // Filtrage par production si demandé (match ID exact OU titre partiel insensible casse)
+        let prodIdsCibles = null;
+        if (filtre) {
+            const filtreNorm = String(filtre).toLowerCase();
+            const match = productions.filter(p =>
+                p.id === filtre ||
+                ((p.titre || p.nom || '').toLowerCase().indexOf(filtreNorm) !== -1)
+            );
+            if (match.length === 0) {
+                console.warn(`[Doublons] Aucune production ne correspond à "${filtre}"`);
+                return { totalDoublons: 0, productionsAffectees: [] };
+            }
+            prodIdsCibles = new Set(match.map(p => p.id));
+        }
+
+        // Grouper par (DA × productionId)
+        const groupes = {};
+        fichiers.forEach(f => {
+            if (!f.etudiantDA || !f.productionId) return;
+            if (prodIdsCibles && !prodIdsCibles.has(f.productionId)) return;
+            const k = f.etudiantDA + '||' + f.productionId;
+            if (!groupes[k]) groupes[k] = [];
+            groupes[k].push(f);
+        });
+
+        // Filtrer ceux >= 2 fichiers
+        const doublons = [];
+        Object.keys(groupes).forEach(k => {
+            const lot = groupes[k];
+            if (lot.length < 2) return;
+
+            // Trier par date décroissante (plus récent en premier)
+            lot.sort((a, b) =>
+                new Date(b.dateModification || b.dateAjout || 0) -
+                new Date(a.dateModification || a.dateAjout || 0)
+            );
+
+            const da = lot[0].etudiantDA;
+            const prodId = lot[0].productionId;
+            const eleve = etByDa[da] || {};
+            const prod = prodById[prodId] || {};
+
+            doublons.push({
+                da: da,
+                prenom: eleve.prenom || '',
+                nom: eleve.nom || '',
+                productionId: prodId,
+                productionTitre: prod.titre || prod.nom || prodId,
+                fichiers: lot.map((f, i) => ({
+                    id: f.id,
+                    nomFichier: f.nomFichier || '?',
+                    typeMIME: f.typeMIME || '?',
+                    tailleKo: f.tailleFichier ? Math.round(f.tailleFichier / 1024) : null,
+                    dateAjout: f.dateAjout || null,
+                    dateModification: f.dateModification || null,
+                    statutWorkflow: f.statutWorkflow || (f.estAnnote ? 'annote' : 'importe'),
+                    plusRecent: i === 0
+                })),
+                indicesCause: _analyserCauseDoublons(lot)
+            });
+        });
+
+        // Regrouper par production pour la sortie hiérarchique
+        const parProduction = {};
+        doublons.forEach(d => {
+            if (!parProduction[d.productionId]) {
+                parProduction[d.productionId] = {
+                    productionId: d.productionId,
+                    productionTitre: d.productionTitre,
+                    etudiantsAvecDoublons: []
+                };
+            }
+            parProduction[d.productionId].etudiantsAvecDoublons.push(d);
+        });
+        const productionsAffectees = Object.values(parProduction);
+
+        // Affichage console structuré
+        _afficherDoublonsConsole(productionsAffectees, doublons.length, filtre);
+
+        return {
+            totalDoublons: doublons.length,
+            productionsAffectees: productionsAffectees
+        };
+    }
+
+    /**
+     * Détecte des indices sur la cause d'un doublon (pour aider l'utilisateur).
+     * @param {Array} fichiers - Lot de 2+ fichiers pour le même (DA × productionId)
+     * @returns {Array<string>} Liste de tags d'indices
+     */
+    function _analyserCauseDoublons(fichiers) {
+        const indices = [];
+        if (fichiers.length < 2) return indices;
+
+        // Mêmes noms : re-import du même fichier (détection de doublons à l'import a échoué)
+        const noms = new Set(fichiers.map(f => f.nomFichier || ''));
+        if (noms.size === 1 && !noms.has('')) indices.push('memes-noms');
+
+        // Dates proches : < 5 min entre les 2 plus récents → glitch d'import
+        const dates = fichiers
+            .map(f => new Date(f.dateModification || f.dateAjout || 0).getTime())
+            .filter(t => t > 0)
+            .sort((a, b) => b - a);
+        if (dates.length >= 2 && (dates[0] - dates[1]) < 5 * 60 * 1000) {
+            indices.push('dates-proches');
+        }
+
+        // Mixte PDF + image → fusion entamée mais sources non supprimées
+        const hasPdf = fichiers.some(f => f.typeMIME === 'application/pdf');
+        const hasImage = fichiers.some(f => (f.typeMIME || '').indexOf('image/') === 0);
+        if (hasPdf && hasImage) indices.push('mixte-pdf-image');
+
+        // Statuts workflow différents : ré-import sur fichier existant
+        const statuts = new Set(fichiers.map(f => f.statutWorkflow || (f.estAnnote ? 'annote' : 'importe')));
+        if (statuts.size > 1) indices.push('statuts-mixtes');
+
+        return indices;
+    }
+
+    /**
+     * Affiche le rapport de doublons dans la console (console.group + console.table).
+     * @param {Array} productionsAffectees
+     * @param {number} totalDoublons
+     * @param {string} [filtre]
+     */
+    function _afficherDoublonsConsole(productionsAffectees, totalDoublons, filtre) {
+        if (totalDoublons === 0) {
+            const suffixe = filtre ? ` (filtre : "${filtre}")` : '';
+            console.log(`[Doublons] Aucun doublon détecté ✅${suffixe}`);
+            return;
+        }
+
+        const titreFiltre = filtre ? ` (filtre : "${filtre}")` : '';
+        console.group(`[Doublons] ${totalDoublons} doublon(s) sur ${productionsAffectees.length} production(s)${titreFiltre}`);
+
+        productionsAffectees.forEach(prod => {
+            console.group(`📋 ${prod.productionTitre} — ${prod.etudiantsAvecDoublons.length} étudiant(s) en doublon`);
+            prod.etudiantsAvecDoublons.forEach(d => {
+                const nomComplet = `${d.prenom} ${d.nom}`.trim() || `(DA ${d.da})`;
+                const indicesTxt = d.indicesCause.length ? ` [${d.indicesCause.join(', ')}]` : '';
+                console.group(`👤 ${nomComplet} — ${d.fichiers.length} fichiers${indicesTxt}`);
+                console.table(d.fichiers.map(f => ({
+                    id: f.id,
+                    nomFichier: f.nomFichier,
+                    type: f.typeMIME,
+                    tailleKo: f.tailleKo,
+                    dateAjout: f.dateAjout ? new Date(f.dateAjout).toLocaleString('fr-CA') : '?',
+                    dateModif: f.dateModification ? new Date(f.dateModification).toLocaleString('fr-CA') : '?',
+                    statut: f.statutWorkflow,
+                    'plus récent (utilisé)': f.plusRecent ? '✅' : ''
+                })));
+                console.groupEnd();
+            });
+            console.groupEnd();
+        });
+
+        console.group('💡 Légende des indices de cause');
+        console.log("• memes-noms       : nom de fichier identique → re-import du même fichier");
+        console.log("• dates-proches    : < 5 min entre imports → glitch ou interruption d'import");
+        console.log("• mixte-pdf-image  : PDF + image coexistent → fusion entamée mais sources non supprimées");
+        console.log("• statuts-mixtes   : un fichier annoté coexiste avec un non-annoté → ré-import sur fichier existant");
+        console.groupEnd();
+
+        console.log('\n💾 Le fichier marqué « plus récent (utilisé) » est celui que la résolution choisit pour l\'évaluation.');
+        console.log('🔧 Pour nettoyer manuellement : ouvrir la grille des fichiers et supprimer les doublons un par un.');
+        console.log('📊 Pour le détail brut : utiliser la valeur de retour ↑');
+
+        console.groupEnd();
     }
 
     // API publique
@@ -188,7 +421,8 @@
         trouverEvaluationPourFichier,
         trouverFichierPourEvaluation,
         dernierAvertissement,
-        diagnostiquer
+        diagnostiquer,
+        diagnostiquerDoublons
     };
 
 })();
