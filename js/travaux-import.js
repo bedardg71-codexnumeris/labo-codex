@@ -599,8 +599,10 @@
         }
 
         // Phase 4 : vérifier s'il existe déjà un fichier actif avec (etudiantDA, productionId)
-        // Les fichiers de reprise (jeton) ne sont pas des doublons — ils coexistent avec l'original
-        if (fichierPrepare.etudiantDA && productionId && !fichierPrepare.estReprise) {
+        // Les fichiers de reprise (jeton) et les livrables additionnels assumés
+        // ne sont pas des doublons — ils coexistent avec l'original
+        if (fichierPrepare.etudiantDA && productionId &&
+            !fichierPrepare.estReprise && !fichierPrepare.livrableAdditionnel) {
             const existants = travauxStockage.obtenirFichiersGroupeActif()
                 .filter(f => f.etudiantDA === fichierPrepare.etudiantDA && f.productionId === productionId);
             if (existants.length > 0) {
@@ -636,7 +638,9 @@
             format11x17: fichierPrepare.format11x17 || false,
             // Jeton de reprise
             evaluationId: fichierPrepare.evaluationId || '',
-            estReprise: fichierPrepare.estReprise || false
+            estReprise: fichierPrepare.estReprise || false,
+            // Livrable additionnel assumé (PDF + image, plusieurs versions, etc.)
+            livrableAdditionnel: fichierPrepare.livrableAdditionnel || false
         };
 
         // Ajouter les metadonnees
