@@ -416,13 +416,154 @@
         console.groupEnd();
     }
 
+    /**
+     * Nettoie les doublons EXACTS du groupe-cours actif : couples (DA × productionId)
+     * où plusieurs fichiers ont le MÊME nom ET la MÊME taille (= mêmes octets,
+     * re-import du même contenu). Garde le plus récent, supprime les anciens.
+     *
+     * Mode DRY-RUN par défaut (n'agit pas, retourne la liste des actions prévues).
+     * Pour exécuter réellement : passer { dryRun: false }.
+     *
+     * NE TOUCHE PAS les doublons à contenu différent (tailles différentes,
+     * noms différents, formats mixtes) — ceux-ci nécessitent une décision
+     * manuelle (voir UI de nettoyage à venir).
+     *
+     * Usage console :
+     *   travauxResolution.nettoyerDoublonsExacts()                    // dry-run, tous
+     *   travauxResolution.nettoyerDoublonsExacts({ filtre: 'Artefact 8' })  // dry-run, filtré
+     *   travauxResolution.nettoyerDoublonsExacts({ dryRun: false })   // exécution réelle
+     *   travauxResolution.nettoyerDoublonsExacts({ dryRun: false, filtre: 'Artefact 8' })
+     *
+     * @param {Object} [opts]
+     * @param {boolean} [opts.dryRun=true] - true = simulation, false = suppression réelle
+     * @param {string} [opts.filtre] - Titre partiel ou ID exact d'une production
+     * @returns {Promise<{dryRun, total, supprimes, conserves, actions}>}
+     */
+    async function nettoyerDoublonsExacts(opts) {
+        opts = opts || {};
+        const dryRun = opts.dryRun !== false; // par défaut true
+        const diagnostic = diagnostiquerDoublons(opts.filtre);
+        if (!diagnostic || diagnostic.totalDoublons === 0) {
+            console.log('[Nettoyage] Rien à nettoyer.');
+            return { dryRun: dryRun, total: 0, supprimes: 0, conserves: 0, actions: [] };
+        }
+
+        // Recouper avec les fichiers complets (le diagnostic ne porte que les
+        // champs résumés). On a besoin de tailleFichier pour matcher les
+        // « doublons exacts » (mêmes octets).
+        const fichiersComplets = travauxStockage.obtenirFichiersGroupeActif() || [];
+        const fichierById = {};
+        fichiersComplets.forEach(f => { fichierById[f.id] = f; });
+
+        const actions = []; // { aGarder: id, aSupprimer: [id...], etudiant, production, raison }
+
+        diagnostic.productionsAffectees.forEach(prod => {
+            prod.etudiantsAvecDoublons.forEach(d => {
+                // d.fichiers triés par date décroissante (plus récent en premier)
+                if (d.fichiers.length < 2) return;
+
+                // Critère STRICT : tous les fichiers doivent avoir le MÊME nom
+                // ET la MÊME taille (à l'octet près) que le plus récent (gardé).
+                // Sinon on ne touche pas (cas reprise jeton, format change, etc.)
+                const garde = fichierById[d.fichiers[0].id];
+                if (!garde) return; // sécurité
+                const refNom = garde.nomFichier || '';
+                const refTaille = garde.tailleFichier || 0;
+                if (!refNom || !refTaille) return; // sans repère, on ne touche pas
+
+                const aSupprimer = [];
+                let safe = true;
+                for (let i = 1; i < d.fichiers.length; i++) {
+                    const candidat = fichierById[d.fichiers[i].id];
+                    if (!candidat) { safe = false; break; }
+                    const memesOctets = (candidat.nomFichier === refNom) &&
+                        (candidat.tailleFichier === refTaille);
+                    if (!memesOctets) { safe = false; break; }
+                    aSupprimer.push(candidat.id);
+                }
+                if (!safe || aSupprimer.length === 0) return;
+
+                actions.push({
+                    etudiant: `${d.prenom} ${d.nom}`.trim() || `(DA ${d.da})`,
+                    da: d.da,
+                    production: d.productionTitre,
+                    aGarder: garde.id,
+                    aGarderNom: garde.nomFichier,
+                    aGarderDate: garde.dateModification || garde.dateAjout,
+                    aSupprimer: aSupprimer,
+                    raison: 'memes-octets (nom + taille identiques)'
+                });
+            });
+        });
+
+        // Affichage console
+        const verbe = dryRun ? 'simulerait' : 'a supprimé';
+        const titre = dryRun
+            ? `[Nettoyage DRY-RUN] ${actions.length} cas avec mêmes octets — aucun fichier supprimé`
+            : `[Nettoyage] ${actions.length} cas traités, suppression en cours...`;
+        console.group(titre);
+        actions.forEach(a => {
+            console.log(`👤 ${a.etudiant} — ${a.production}`);
+            console.log(`   ✅ Garde : ${a.aGarder} (${a.aGarderNom}, ${new Date(a.aGarderDate).toLocaleString('fr-CA')})`);
+            a.aSupprimer.forEach(id => {
+                console.log(`   🗑  Supprime : ${id}`);
+            });
+        });
+        console.groupEnd();
+
+        // Cas non touchés (pour info)
+        const totalCasInitiaux = diagnostic.totalDoublons;
+        const intacts = totalCasInitiaux - actions.length;
+        if (intacts > 0) {
+            console.warn(`[Nettoyage] ${intacts} cas NON touchés : noms ou tailles différents (reprises avec jeton, formats mixtes, contenu modifié...). Outil UI à venir pour ces cas.`);
+        }
+
+        if (dryRun) {
+            console.log('💡 Pour exécuter réellement : travauxResolution.nettoyerDoublonsExacts({ dryRun: false })');
+            return { dryRun: true, total: actions.length, supprimes: 0, conserves: 0, actions: actions };
+        }
+
+        // Exécution réelle : supprimer un par un, compter les succès
+        let supprimes = 0;
+        let echecs = 0;
+        for (const a of actions) {
+            for (const id of a.aSupprimer) {
+                try {
+                    const ok = await travauxStockage.supprimerFichierTravail(id);
+                    if (ok) supprimes++;
+                    else echecs++;
+                } catch (e) {
+                    console.error(`[Nettoyage] Erreur suppression ${id} :`, e);
+                    echecs++;
+                }
+            }
+        }
+
+        const msg = `[Nettoyage] Terminé : ${supprimes} fichier(s) supprimé(s)`
+            + (echecs > 0 ? `, ${echecs} échec(s)` : '');
+        console.log(msg);
+        if (echecs === 0) {
+            console.log('💡 Recharge la page (Cmd+Q Safari + rouvrir) pour voir le carrousel à jour.');
+        }
+
+        return {
+            dryRun: false,
+            total: actions.length,
+            supprimes: supprimes,
+            echecs: echecs,
+            conserves: actions.length,
+            actions: actions
+        };
+    }
+
     // API publique
     window.travauxResolution = {
         trouverEvaluationPourFichier,
         trouverFichierPourEvaluation,
         dernierAvertissement,
         diagnostiquer,
-        diagnostiquerDoublons
+        diagnostiquerDoublons,
+        nettoyerDoublonsExacts
     };
 
 })();
