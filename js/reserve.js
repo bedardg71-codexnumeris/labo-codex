@@ -40,6 +40,10 @@
 
 var EXTENSION_RESERVE = '.reserve.zip';
 
+// Clé db non namespacée du manifeste local (cross-trimestre).
+// Préfixe `_` → exclue automatiquement des versements (cf. PREFIXES_EXCLUS).
+var CLE_MANIFESTE_LOCAL = '_manifesteReserve';
+
 // Préfixes de clés à exclure du versement
 var PREFIXES_EXCLUS = ['_codex_', '_'];
 
@@ -942,6 +946,126 @@ async function _fusionnerManifesteGlobal(handleRacine, dossier, patchEntry) {
 }
 
 /* ===============================
+   MANIFESTE LOCAL (cross-mode FSAPI + ZIP Safari)
+   ===============================
+   Une seule clé db non namespacée (`_manifesteReserve`) qui agrège
+   l'historique de TOUS les versements faits depuis cette installation,
+   peu importe le mode (FSAPI ou ZIP). Hydratable depuis le manifeste
+   FSAPI quand un dossier est lié.
+*/
+
+function _manifesteSkeleton() {
+    return {
+        format: 'manifeste-reserve-local',
+        version: 1,
+        versements: {},
+        derniere_mise_a_jour: null
+    };
+}
+
+function _lireManifesteLocal() {
+    if (typeof window.db === 'undefined' || typeof window.db.getSync !== 'function') {
+        return _manifesteSkeleton();
+    }
+    var brut = window.db.getSync(CLE_MANIFESTE_LOCAL, null);
+    if (!brut || typeof brut !== 'object') return _manifesteSkeleton();
+    var m = Object.assign(_manifesteSkeleton(), brut);
+    if (!m.versements || typeof m.versements !== 'object') m.versements = {};
+    return m;
+}
+
+function _ecrireManifesteLocal(manifeste) {
+    if (typeof window.db === 'undefined' || typeof window.db.setSync !== 'function') return;
+    window.db.setSync(CLE_MANIFESTE_LOCAL, manifeste);
+}
+
+function _upsertEntreeManifesteLocal(dossier, patchEntry) {
+    var m = _lireManifesteLocal();
+    m.versements[dossier] = patchEntry;
+    m.derniere_mise_a_jour = new Date().toISOString();
+    _ecrireManifesteLocal(m);
+    _notifierReglagesSiPresent();
+    return m;
+}
+
+function _notifierReglagesSiPresent() {
+    if (window.ReserveReglages && typeof window.ReserveReglages.rafraichir === 'function') {
+        try { window.ReserveReglages.rafraichir(); } catch (e) { /* silent */ }
+    }
+}
+
+function _purgerEntreeManifesteLocal(dossier) {
+    var m = _lireManifesteLocal();
+    if (!m.versements[dossier]) return m;
+    delete m.versements[dossier];
+    m.derniere_mise_a_jour = new Date().toISOString();
+    _ecrireManifesteLocal(m);
+    _notifierReglagesSiPresent();
+    return m;
+}
+
+/**
+ * Fusionne un manifeste reçu (objet { versements: { dossier: entry } })
+ * dans le manifeste local. Garde l'entrée la plus récente par
+ * `date_versement`. Idempotent.
+ *
+ * @returns {{ ajoutes: number, mis_a_jour: number, total: number }}
+ */
+function _fusionnerManifesteRecu(recu) {
+    var stats = { ajoutes: 0, mis_a_jour: 0, total: 0 };
+    if (!recu || !recu.versements || typeof recu.versements !== 'object') return stats;
+
+    var m = _lireManifesteLocal();
+    Object.keys(recu.versements).forEach(function(dossier) {
+        var entreeRecue = recu.versements[dossier];
+        var entreeLocale = m.versements[dossier];
+        stats.total++;
+        if (!entreeLocale) {
+            m.versements[dossier] = entreeRecue;
+            stats.ajoutes++;
+        } else {
+            var dRecue = entreeRecue && entreeRecue.date_versement;
+            var dLocale = entreeLocale && entreeLocale.date_versement;
+            if (dRecue && (!dLocale || dRecue > dLocale)) {
+                m.versements[dossier] = entreeRecue;
+                stats.mis_a_jour++;
+            }
+        }
+    });
+
+    if (stats.ajoutes || stats.mis_a_jour) {
+        m.derniere_mise_a_jour = new Date().toISOString();
+        _ecrireManifesteLocal(m);
+        _notifierReglagesSiPresent();
+    }
+    return stats;
+}
+
+/**
+ * Hydrate le manifeste local depuis le manifeste-reserve.json du dossier
+ * FSAPI lié. Idempotent.
+ */
+async function _hydrateManifesteDepuisFSAPI(handleRacine) {
+    var stats = { ajoutes: 0, mis_a_jour: 0, total: 0 };
+    if (!handleRacine) return stats;
+
+    var existant = null;
+    try {
+        var fh = await handleRacine.getFileHandle('manifeste-reserve.json');
+        var fichier = await fh.getFile();
+        var texte = await fichier.text();
+        existant = JSON.parse(texte);
+    } catch (e) {
+        if (e && e.name !== 'NotFoundError') {
+            console.warn('[Reserve] Hydratation manifeste FSAPI : lecture échouée', e.message || e);
+        }
+        return stats;
+    }
+
+    return _fusionnerManifesteRecu(existant);
+}
+
+/* ===============================
    API : VERSEMENT
    =============================== */
 
@@ -1045,6 +1169,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
                 uuid: uuid,
                 trimestre: trimestre,
                 cours: gc.codeCours || '',
+                nom_cours: gc.nomCours || '',
                 groupe: gc.groupe,
                 statut: 'verse',
                 source: 'application (IndexedDB)',
@@ -1053,6 +1178,8 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
                 donnees: true,
                 travaux: collecteBlobs.trouves > 0,
                 nombre_etudiants: statsDonnees.nombreEtudiants,
+                nombre_fichiers_travaux: collecteBlobs.trouves,
+                taille_travaux_totale: collecteBlobs.tailleTotale,
                 notes: 'Versement du ' + _dateAujourdhui() + '.'
             }
         };
@@ -1075,6 +1202,10 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
             } catch (eFusion) {
                 console.warn('[Réserve] Fusion manifeste-reserve.json échouée, le versement reste valide :', eFusion.message || eFusion);
             }
+
+            // Manifeste local : toujours mis à jour, même si la fusion FSAPI a échoué
+            try { _upsertEntreeManifesteLocal(dossier, patch.patch); }
+            catch (eLoc) { console.warn('[Réserve] Upsert manifeste local échoué', eLoc.message || eLoc); }
 
             _prog(100, 'Versement enregistré !', ecriture.cheminDossier);
             await new Promise(function(r) { setTimeout(r, 600); });
@@ -1110,6 +1241,12 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
         _prog(72, 'Construction du ZIP...', dossier);
         await _yield();
 
+        // Manifeste local : upsert AVANT la construction du ZIP pour
+        // inclure le snapshot complet de l'historique (cf. #248).
+        var manifesteLocal = _manifesteSkeleton();
+        try { manifesteLocal = _upsertEntreeManifesteLocal(dossier, patch.patch); }
+        catch (eLoc) { console.warn('[Réserve] Upsert manifeste local échoué', eLoc.message || eLoc); }
+
         var zip = new JSZip();
         var dossierBase = zip.folder('trimestres').folder(dossier);
 
@@ -1123,6 +1260,11 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
 
         dossierBase.file('meta.json', JSON.stringify(meta, null, 2));
         dossierBase.file('manifeste-reserve-patch.json', JSON.stringify(patch, null, 2));
+
+        // Manifeste local agrégé à la racine du ZIP (sous le nom canonique).
+        // Permet à l'utilisateur de retrouver l'historique de tous ses
+        // versements précédents dans n'importe quel ZIP récent.
+        zip.file('manifeste-reserve.json', JSON.stringify(manifesteLocal, null, 2));
 
         _prog(80, 'Compression du ZIP...', '');
         await _yield();
@@ -1421,6 +1563,39 @@ async function lancerDepuisDialogue() {
    EXPORTS
    =============================== */
 
+/* ===============================
+   INIT : hydratation auto au démarrage
+   =============================== */
+
+/**
+ * Au boot du module, si un handle FSAPI est persisté avec permission
+ * encore accordée (sans prompt), hydrate le manifeste local depuis le
+ * manifeste-reserve.json du dossier. Idempotent et silencieux : aucun
+ * effet si le handle est absent, refusé, ou si le manifeste FSAPI est
+ * inaccessible.
+ */
+async function _initHydratationAuto() {
+    try {
+        if (!_supporteFSAPI()) return;
+        var handle = await _lireHandlePersiste();
+        if (!handle || typeof handle.queryPermission !== 'function') return;
+        var perm = await handle.queryPermission({ mode: 'read' });
+        if (perm !== 'granted') return;
+        await _hydrateManifesteDepuisFSAPI(handle);
+    } catch (e) {
+        console.warn('[Reserve] Hydratation auto échouée', e.message || e);
+    }
+}
+
+// Différé après le boot pour ne pas bloquer le démarrage
+if (typeof window !== 'undefined') {
+    if (document.readyState === 'complete') {
+        setTimeout(_initHydratationAuto, 100);
+    } else {
+        window.addEventListener('load', function() { setTimeout(_initHydratationAuto, 100); });
+    }
+}
+
 window.Reserve = {
     verserGroupeCours: verserGroupeCours,
     estimerVersement: estimerVersement,
@@ -1434,7 +1609,15 @@ window.Reserve = {
     // FSAPI — exposés pour les modules qui consomment la réserve (ex. reserve-ouvrir.js)
     obtenirHandle: _obtenirHandleReserve,
     statutHandle: _statutHandleReserve,
-    supporteFSAPI: _supporteFSAPI
+    supporteFSAPI: _supporteFSAPI,
+    effacerLiaisonFSAPI: _supprimerHandlePersiste,
+    // Manifeste local (#248) — consommé par la section Réglages (#249) et
+    // par reserve-ouvrir.js pour l'auto-hydration au chargement d'un ZIP.
+    lireManifesteLocal: _lireManifesteLocal,
+    upsertEntreeManifeste: _upsertEntreeManifesteLocal,
+    fusionnerManifesteRecu: _fusionnerManifesteRecu,
+    purgerEntreeManifeste: _purgerEntreeManifesteLocal,
+    hydrateDepuisFSAPI: _hydrateManifesteDepuisFSAPI
 };
 
 })();
