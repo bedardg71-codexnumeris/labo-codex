@@ -3783,7 +3783,9 @@ function niveauHabiletesVersDecimal(niveauSelectionne) {
 
 /**
  * Moyenne arithmétique des niveaux des critères actifs pour une évaluation.
- * TODO : remplacer par moyenne pondérée via critere.ponderation depuis la grille.
+ * En mode Habiletés (1 courbe par habileté), cette fonction est appelée avec
+ * un seul critère à la fois — la pondération est donc non pertinente.
+ * En mode Note finale, la pondération est déjà appliquée par evaluation.noteFinale.
  * @param {Object} evaluation - Objet evaluation avec un array .criteres
  * @param {Set<string>} criteresActifs - Noms de critères à inclure
  * @returns {number|null} - Moyenne décimale 0-1 (null si aucun critère évaluable)
@@ -4002,143 +4004,309 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
             return a.titre || '';
         });
 
-        // 6. Datasets — un par étudiant
-        const datasets = etudiants.map((etudiant, index) => {
-            const da = etudiant.da;
-            const data = artefacts.map(art => {
-                const ev = evalIndex.get(da + '_' + art.id);
-                if (!ev) return null;
-                if (ev.statutRemise === 'non-remis' || ev.statutRemise === 'retard') return null;
-                // Beta 99.30 : évaluation enregistrée sans critère noté (ex.
-                // jeton de délai seul) = pas encore évaluée. On omet le point
-                // au lieu de tracer 0% (cohérent avec le badge ÉVALUÉ).
-                if (!Array.isArray(ev.criteres) || ev.criteres.length === 0) return null;
-                if (mode === 'habiletes') {
-                    return moyenneCriteresHabiletes(ev, criteresActifs);
+        // Helper : valeur d'une éval pour UN critère donné (0-1, ou null)
+        function _valeurEvalCritere(ev, nomCritere) {
+            if (!ev) return null;
+            if (ev.statutRemise === 'non-remis' || ev.statutRemise === 'retard') return null;
+            if (!Array.isArray(ev.criteres) || ev.criteres.length === 0) return null;
+            return moyenneCriteresHabiletes(ev, new Set([nomCritere]));
+        }
+
+        // 6. Datasets — selon le mode
+        let datasets;
+        const daSurbrillance = options.daSurbrillance || '';
+
+        if (mode === 'habiletes') {
+            // === MODE HABILETÉS — une courbe par critère coché, couleur de la pill ===
+            const criteresArr = criteresInfo.filter(c => criteresActifs.has(c.nom));
+
+            // Helper : médiane du groupe pour un critère donné, par artefact
+            function _medianeCritere(c) {
+                return artefacts.map(art => {
+                    const valeurs = [];
+                    for (let i = 0; i < etudiants.length; i++) {
+                        const etu = etudiants[i];
+                        if (typeof estEtudiantExclu === 'function' && estEtudiantExclu(etu)) continue;
+                        const ev = evalIndex.get(etu.da + '_' + art.id);
+                        const v = _valeurEvalCritere(ev, c.nom);
+                        if (v !== null && v !== undefined) valeurs.push(v);
+                    }
+                    if (valeurs.length === 0) return null;
+                    valeurs.sort((a, b) => a - b);
+                    return quantileHabiletes(valeurs, 0.5);
+                });
+            }
+
+            if (daSurbrillance === 'TOUS') {
+                // === TOUS — N élèves × M habiletés en courbes fines + médiane par habileté ===
+                datasets = [];
+                criteresArr.forEach(c => {
+                    // 1) Une courbe fine par étudiant pour ce critère (couleur de la pill, faible opacité)
+                    etudiants.forEach(etu => {
+                        if (typeof estEtudiantExclu === 'function' && estEtudiantExclu(etu)) return;
+                        const data = artefacts.map(art => {
+                            const ev = evalIndex.get(etu.da + '_' + art.id);
+                            return _valeurEvalCritere(ev, c.nom);
+                        });
+                        if (data.every(v => v === null)) return;
+                        const nomAnon = (typeof anonymiserNom === 'function') ? anonymiserNom(etu.da) : null;
+                        const nom = nomAnon || (etu.prenom && etu.nom
+                            ? (etu.prenom + ' ' + etu.nom)
+                            : (etu.nom || ('DA ' + etu.da)));
+                        datasets.push({
+                            label: c.nom + ' — ' + nom,
+                            da: etu.da,
+                            _critereNom: c.nom,
+                            _critereCouleur: c.couleur,
+                            _isStudentCritere: true,
+                            data: data,
+                            borderColor: hexVersRgba(c.couleur, 0.22),
+                            backgroundColor: 'transparent',
+                            borderWidth: 1.5,
+                            tension: STYLE_LIGNE_TENSION,
+                            pointRadius: 2,
+                            pointHoverRadius: 5,
+                            pointStyle: 'circle',
+                            pointBackgroundColor: hexVersRgba(c.couleur, 0.22),
+                            pointBorderColor: 'transparent',
+                            pointBorderWidth: 0,
+                            spanGaps: false,
+                            order: 5
+                        });
+                    });
+                    // 2) Médiane de l'habileté par-dessus (gras, losanges)
+                    const med = _medianeCritere(c);
+                    if (!med.every(v => v === null)) {
+                        datasets.push({
+                            label: c.nom + ' (médiane)',
+                            _critereNom: c.nom,
+                            _critereCouleur: c.couleur,
+                            data: med,
+                            borderColor: c.couleur,
+                            backgroundColor: 'transparent',
+                            borderWidth: 3,
+                            tension: STYLE_LIGNE_TENSION,
+                            pointRadius: 5,
+                            pointHoverRadius: 8,
+                            pointStyle: 'rectRot',
+                            pointBackgroundColor: c.couleur,
+                            pointBorderColor: couleurBordurePoint(),
+                            pointBorderWidth: 2,
+                            spanGaps: false,
+                            order: -10
+                        });
+                    }
+                });
+            } else {
+                // === Single élève (daSurbrillance) OU aucun (médiane seule) ===
+                datasets = criteresArr.map(c => {
+                    const data = daSurbrillance
+                        ? artefacts.map(art => _valeurEvalCritere(evalIndex.get(daSurbrillance + '_' + art.id), c.nom))
+                        : _medianeCritere(c);
+                    if (data.every(v => v === null)) return null;
+                    return {
+                        label: c.nom,
+                        _critereNom: c.nom,
+                        _critereCouleur: c.couleur,
+                        data: data,
+                        borderColor: c.couleur,
+                        backgroundColor: 'transparent',
+                        borderWidth: 2.5,
+                        tension: STYLE_LIGNE_TENSION,
+                        pointRadius: STYLE_POINT_RAYON,
+                        pointHoverRadius: STYLE_POINT_RAYON_HOVER,
+                        pointStyle: 'circle',
+                        pointBackgroundColor: c.couleur,
+                        pointBorderColor: couleurBordurePoint(),
+                        pointBorderWidth: STYLE_POINT_BORDURE,
+                        spanGaps: false
+                    };
+                }).filter(d => d !== null);
+
+                // Bandes Q25-Q75 par critère (vue groupe seulement, pas pour un seul élève)
+                if (!daSurbrillance) {
+                    criteresArr.forEach(c => {
+                        const q25 = [];
+                        const q75 = [];
+                        artefacts.forEach(art => {
+                            const valeurs = [];
+                            etudiants.forEach(etu => {
+                                if (typeof estEtudiantExclu === 'function' && estEtudiantExclu(etu)) return;
+                                const ev = evalIndex.get(etu.da + '_' + art.id);
+                                const v = _valeurEvalCritere(ev, c.nom);
+                                if (v !== null && v !== undefined) valeurs.push(v);
+                            });
+                            if (valeurs.length === 0) {
+                                q25.push(null); q75.push(null);
+                            } else {
+                                valeurs.sort((a, b) => a - b);
+                                q25.push(quantileHabiletes(valeurs, 0.25));
+                                q75.push(quantileHabiletes(valeurs, 0.75));
+                            }
+                        });
+                        datasets.push({
+                            label: c.nom + ' Q25',
+                            _isStat: true,
+                            _hideFromLegend: true,
+                            data: q25,
+                            borderColor: 'transparent',
+                            backgroundColor: hexVersRgba(c.couleur, 0.12),
+                            fill: '+1',
+                            pointRadius: 0,
+                            pointHoverRadius: 0,
+                            tension: STYLE_LIGNE_TENSION,
+                            order: 10,
+                            spanGaps: false
+                        });
+                        datasets.push({
+                            label: c.nom + ' Q75',
+                            _isStat: true,
+                            _hideFromLegend: true,
+                            data: q75,
+                            borderColor: 'transparent',
+                            backgroundColor: 'transparent',
+                            fill: false,
+                            pointRadius: 0,
+                            pointHoverRadius: 0,
+                            tension: STYLE_LIGNE_TENSION,
+                            order: 10,
+                            spanGaps: false
+                        });
+                    });
                 }
-                // mode === 'noteFinale'
-                const note = ev.noteFinale;
-                if (note === null || note === undefined) return null;
-                return note / 100;
-            });
-            if (data.every(v => v === null)) return null;
+            }
+        } else {
+            // === MODE NOTE FINALE — une courbe par étudiant, toutes même couleur ===
+            // Volontairement uniforme : la lecture est une « nuage » de trajectoires,
+            // pas une identification individuelle. La sélection met en relief.
+            const couleurNoteFinale = COULEURS_INDICES.P;
+            datasets = etudiants.map((etudiant, index) => {
+                const da = etudiant.da;
+                const data = artefacts.map(art => {
+                    const ev = evalIndex.get(da + '_' + art.id);
+                    if (!ev) return null;
+                    if (ev.statutRemise === 'non-remis' || ev.statutRemise === 'retard') return null;
+                    if (!Array.isArray(ev.criteres) || ev.criteres.length === 0) return null;
+                    const note = ev.noteFinale;
+                    if (note === null || note === undefined) return null;
+                    return note / 100;
+                });
+                if (data.every(v => v === null)) return null;
 
-            const couleur = couleurEtudiantTrajectoires(index);
-            const exclu = (typeof estEtudiantExclu === 'function') && estEtudiantExclu(etudiant);
-            const nomAnonyme = (typeof anonymiserNom === 'function') ? anonymiserNom(da) : null;
-            const nom = nomAnonyme || (etudiant.prenom && etudiant.nom
-                ? (etudiant.prenom + ' ' + etudiant.nom)
-                : (etudiant.nom || ('DA ' + da)));
+                const couleur = couleurNoteFinale;
+                const exclu = (typeof estEtudiantExclu === 'function') && estEtudiantExclu(etudiant);
+                const nomAnonyme = (typeof anonymiserNom === 'function') ? anonymiserNom(da) : null;
+                const nom = nomAnonyme || (etudiant.prenom && etudiant.nom
+                    ? (etudiant.prenom + ' ' + etudiant.nom)
+                    : (etudiant.nom || ('DA ' + da)));
 
-            return {
-                label: nom,
-                da: da,
-                _couleurBase: couleur,
-                exclu: exclu,
-                data: data,
-                borderColor: exclu ? 'rgba(150,150,150,0.35)' : hexVersRgba(couleur, 0.4),
-                backgroundColor: 'transparent',
-                borderWidth: exclu ? 1.5 : STYLE_LIGNE_EPAISSEUR,
-                borderDash: exclu ? [6, 4] : [],
-                tension: STYLE_LIGNE_TENSION,
-                pointRadius: exclu ? 2 : STYLE_POINT_RAYON,
-                pointHoverRadius: exclu ? 3 : STYLE_POINT_RAYON_HOVER,
-                pointStyle: 'circle',
-                pointBackgroundColor: exclu ? 'rgba(150,150,150,0.35)' : hexVersRgba(couleur, 0.4),
-                pointBorderColor: exclu ? 'transparent' : couleurBordurePoint(),
-                pointBorderWidth: exclu ? 0 : STYLE_POINT_BORDURE,
-                spanGaps: false
-            };
-        }).filter(d => d !== null);
+                return {
+                    label: nom,
+                    da: da,
+                    _couleurBase: couleur,
+                    exclu: exclu,
+                    data: data,
+                    borderColor: exclu ? 'rgba(150,150,150,0.35)' : hexVersRgba(couleur, 0.4),
+                    backgroundColor: 'transparent',
+                    borderWidth: exclu ? 1.5 : STYLE_LIGNE_EPAISSEUR,
+                    borderDash: exclu ? [6, 4] : [],
+                    tension: STYLE_LIGNE_TENSION,
+                    pointRadius: exclu ? 2 : STYLE_POINT_RAYON,
+                    pointHoverRadius: exclu ? 3 : STYLE_POINT_RAYON_HOVER,
+                    pointStyle: 'circle',
+                    pointBackgroundColor: exclu ? 'rgba(150,150,150,0.35)' : hexVersRgba(couleur, 0.4),
+                    pointBorderColor: exclu ? 'transparent' : couleurBordurePoint(),
+                    pointBorderWidth: exclu ? 0 : STYLE_POINT_BORDURE,
+                    spanGaps: false
+                };
+            }).filter(d => d !== null);
 
-        if (datasets.length === 0) {
+            // Médiane + bande globale (mode noteFinale uniquement)
+            if (options.afficherMediane === true && datasets.length > 0) {
+                const mediane = [];
+                const q25 = [];
+                const q75 = [];
+                for (let i = 0; i < artefacts.length; i++) {
+                    const valeurs = [];
+                    for (let j = 0; j < datasets.length; j++) {
+                        const ds = datasets[j];
+                        if (ds.exclu) continue;
+                        const v = ds.data[i];
+                        if (v !== null && v !== undefined) valeurs.push(v);
+                    }
+                    if (valeurs.length === 0) {
+                        mediane.push(null); q25.push(null); q75.push(null);
+                    } else {
+                        valeurs.sort((a, b) => a - b);
+                        mediane.push(quantileHabiletes(valeurs, 0.5));
+                        q25.push(quantileHabiletes(valeurs, 0.25));
+                        q75.push(quantileHabiletes(valeurs, 0.75));
+                    }
+                }
+                const estClair = document.body.classList.contains('mode-clair');
+                const couleurMed = estClair ? '#1a1a2e' : '#e6e9ec';
+                const couleurBande = estClair ? 'rgba(26, 26, 46, 0.10)' : 'rgba(230, 233, 236, 0.10)';
+
+                datasets.push({
+                    label: 'Quartile 25 %',
+                    data: q25,
+                    _isStat: true,
+                    _legendText: 'Bande inter-quartile (Q25–Q75)',
+                    _legendFill: couleurBande.replace(/[\d.]+\)$/, '0.35)'),
+                    _legendStroke: 'transparent',
+                    borderColor: 'transparent',
+                    backgroundColor: couleurBande,
+                    fill: '+1',
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    tension: STYLE_LIGNE_TENSION,
+                    order: 10,
+                    spanGaps: false
+                });
+                datasets.push({
+                    label: 'Quartile 75 %',
+                    data: q75,
+                    _isStat: true,
+                    _hideFromLegend: true,
+                    borderColor: 'transparent',
+                    backgroundColor: 'transparent',
+                    fill: false,
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    tension: STYLE_LIGNE_TENSION,
+                    order: 10,
+                    spanGaps: false
+                });
+                datasets.push({
+                    label: 'Médiane du groupe',
+                    data: mediane,
+                    _isStat: true,
+                    _legendText: 'Médiane du groupe',
+                    _legendFill: couleurMed,
+                    _legendStroke: couleurMed,
+                    _legendLineWidth: 3,
+                    borderColor: couleurMed,
+                    backgroundColor: 'transparent',
+                    borderWidth: 3,
+                    tension: STYLE_LIGNE_TENSION,
+                    pointRadius: 5,
+                    pointHoverRadius: 8,
+                    pointStyle: 'rectRot',
+                    pointBackgroundColor: couleurMed,
+                    pointBorderColor: couleurBordurePoint(),
+                    pointBorderWidth: 2,
+                    order: -10,
+                    spanGaps: false
+                });
+            }
+        }
+
+        if (datasets.length === 0 || datasets.every(d => d._isStat)) {
             afficherMessageAttente(canvas, 'Aucune trajectoire disponible',
                 mode === 'habiletes'
                     ? 'Aucune évaluation ne correspond aux critères sélectionnés.'
-                    : 'Aucune note finale enregistrée pour les évaluations actives.');
+                    : 'Aucune note enregistrée pour les évaluations actives.');
             return null;
-        }
-
-        // 6.bis — Médiane et bande quartiles (étudiants exclus retirés du calcul)
-        if (options.afficherMediane === true) {
-            const mediane = [];
-            const q25 = [];
-            const q75 = [];
-            for (let i = 0; i < artefacts.length; i++) {
-                const valeurs = [];
-                for (let j = 0; j < datasets.length; j++) {
-                    const ds = datasets[j];
-                    if (ds.exclu) continue;
-                    const v = ds.data[i];
-                    if (v !== null && v !== undefined) valeurs.push(v);
-                }
-                if (valeurs.length === 0) {
-                    mediane.push(null); q25.push(null); q75.push(null);
-                } else {
-                    valeurs.sort(function(a, b) { return a - b; });
-                    mediane.push(quantileHabiletes(valeurs, 0.5));
-                    q25.push(quantileHabiletes(valeurs, 0.25));
-                    q75.push(quantileHabiletes(valeurs, 0.75));
-                }
-            }
-
-            const estClair = document.body.classList.contains('mode-clair');
-            const couleurMed = estClair ? '#1a1a2e' : '#e6e9ec';
-            const couleurBande = estClair ? 'rgba(26, 26, 46, 0.10)' : 'rgba(230, 233, 236, 0.10)';
-
-            // Q25 — borne basse, remplit jusqu'au dataset suivant (Q75)
-            datasets.push({
-                label: 'Quartile 25 %',
-                data: q25,
-                _isStat: true,
-                _legendText: 'Bande inter-quartile (Q25–Q75)',
-                _legendFill: couleurBande.replace(/[\d.]+\)$/, '0.35)'),
-                _legendStroke: 'transparent',
-                borderColor: 'transparent',
-                backgroundColor: couleurBande,
-                fill: '+1',
-                pointRadius: 0,
-                pointHoverRadius: 0,
-                tension: STYLE_LIGNE_TENSION,
-                order: 10,
-                spanGaps: false
-            });
-            datasets.push({
-                label: 'Quartile 75 %',
-                data: q75,
-                _isStat: true,
-                _hideFromLegend: true,
-                borderColor: 'transparent',
-                backgroundColor: 'transparent',
-                fill: false,
-                pointRadius: 0,
-                pointHoverRadius: 0,
-                tension: STYLE_LIGNE_TENSION,
-                order: 10,
-                spanGaps: false
-            });
-            // Médiane — order négatif pour passer au-dessus de tout
-            datasets.push({
-                label: 'Médiane du groupe',
-                data: mediane,
-                _isStat: true,
-                _legendText: 'Médiane du groupe',
-                _legendFill: couleurMed,
-                _legendStroke: couleurMed,
-                _legendLineWidth: 3,
-                borderColor: couleurMed,
-                backgroundColor: 'transparent',
-                borderWidth: 3,
-                tension: STYLE_LIGNE_TENSION,
-                pointRadius: 5,
-                pointHoverRadius: 8,
-                pointStyle: 'rectRot',
-                pointBackgroundColor: couleurMed,
-                pointBorderColor: couleurBordurePoint(),
-                pointBorderWidth: 2,
-                order: -10,
-                spanGaps: false
-            });
         }
 
         // 7. Validations canvas (visible, attaché)
@@ -4155,20 +4323,93 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
         const bornesY = calculerBornesYDynamiques(datasets);
 
         // 8. Titre dynamique de l'axe Y
+        const labelNote = obtenirLabelNoteFinale();
         let titreY;
         if (mode === 'noteFinale') {
-            titreY = 'Note finale';
+            titreY = labelNote;
+        } else if (daSurbrillance === 'TOUS') {
+            titreY = (criteresActifs.size === 1)
+                ? 'Toutes les courbes — ' + Array.from(criteresActifs)[0]
+                : 'Toutes les courbes par habileté';
+        } else if (daSurbrillance) {
+            const eleve = etudiants.find(e => e.da === daSurbrillance);
+            const nomAnon = (typeof anonymiserNom === 'function') ? anonymiserNom(daSurbrillance) : null;
+            const nom = nomAnon || (eleve && eleve.prenom && eleve.nom
+                ? (eleve.prenom + ' ' + eleve.nom).trim()
+                : (eleve && eleve.nom ? eleve.nom : 'l\'élève'));
+            titreY = 'Habiletés de ' + nom;
         } else {
             titreY = (criteresActifs.size === 1)
-                ? Array.from(criteresActifs)[0]
-                : (criteresActifs.size === criteresInfo.length
-                    ? 'Toutes les habiletés (moyenne)'
-                    : criteresActifs.size + ' habiletés (moyenne)');
+                ? 'Médiane du groupe — ' + Array.from(criteresActifs)[0]
+                : 'Médiane du groupe par habileté';
+        }
+
+        // Légende : visible seulement en mode noteFinale avec médiane active.
+        // En mode habiletés, les pills critères jouent déjà ce rôle (évite la redondance).
+        const afficherLegende = (mode === 'noteFinale' && options.afficherMediane === true);
+
+        // Tooltip mode-aware
+        let tooltipConfig;
+        if (mode === 'noteFinale') {
+            tooltipConfig = {
+                ...STYLE_TOOLTIP,
+                enabled: true,
+                mode: 'point',
+                intersect: true,
+                displayColors: false,
+                callbacks: {
+                    title: function(items) {
+                        if (!items || items.length === 0) return '';
+                        const it = items[0];
+                        const ds = it.dataset;
+                        return (ds && ds.label ? ds.label + ' — ' : '') + it.label;
+                    },
+                    label: function(ctxItem) {
+                        const v = ctxItem.parsed.y;
+                        if (v === null || v === undefined) return '';
+                        return (v * 100).toFixed(0) + '%';
+                    }
+                }
+            };
+        } else if (daSurbrillance === 'TOUS') {
+            // TOUS : trop de courbes pour 'index', on reste en 'point' / intersect
+            tooltipConfig = {
+                ...STYLE_TOOLTIP,
+                enabled: true,
+                mode: 'point',
+                intersect: true,
+                displayColors: true,
+                callbacks: {
+                    title: function(items) { return (items && items[0]) ? items[0].label : ''; },
+                    label: function(ctxItem) {
+                        const v = ctxItem.parsed.y;
+                        if (v === null || v === undefined) return '';
+                        return (ctxItem.dataset.label || '') + ' — ' + (v * 100).toFixed(0) + '%';
+                    }
+                }
+            };
+        } else {
+            // Habiletés (single élève ou médiane) : 'index' montre toutes les habiletés au même x
+            tooltipConfig = {
+                ...STYLE_TOOLTIP,
+                enabled: true,
+                mode: 'index',
+                intersect: false,
+                displayColors: true,
+                filter: function(ti) { return !ti.dataset || !ti.dataset._isStat; },
+                callbacks: {
+                    title: function(items) { return (items && items[0]) ? items[0].label : ''; },
+                    label: function(ctxItem) {
+                        const v = ctxItem.parsed.y;
+                        if (v === null || v === undefined) return '';
+                        return (ctxItem.dataset.label || '') + ' — ' + (v * 100).toFixed(0) + '%';
+                    }
+                }
+            };
         }
 
         const config = {
             type: 'line',
-            // Plugins partagés avec les autres graphiques 0-1 : seuils visibles via pluginEtiquettesZones
             plugins: [pluginGradientFond, ...((typeof obtenirPreference === 'function' && obtenirPreference('afficherSeuilsVisuels') !== false) ? [pluginEtiquettesZones] : [])],
             data: {
                 labels: labels,
@@ -4181,10 +4422,10 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
                 plugins: {
                     title: { display: false },
                     legend: {
-                        display: options.afficherMediane === true,
+                        display: afficherLegende,
                         position: 'bottom',
                         align: 'start',
-                        onClick: function() { /* désactivé : la médiane et la bande ne sont pas masquables */ },
+                        onClick: function() { /* désactivé */ },
                         labels: {
                             color: couleurTexte(),
                             font: { size: 11 },
@@ -4195,41 +4436,36 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
                                 const items = [];
                                 const couleurTxt = couleurTexte();
                                 chart.data.datasets.forEach(function(ds, idx) {
-                                    if (!ds._isStat || ds._hideFromLegend) return;
-                                    items.push({
-                                        text: ds._legendText || ds.label,
-                                        fillStyle: ds._legendFill || ds.backgroundColor || ds.borderColor,
-                                        strokeStyle: ds._legendStroke || ds.borderColor || 'transparent',
-                                        lineWidth: ds._legendLineWidth || 1,
-                                        fontColor: couleurTxt,
-                                        hidden: false,
-                                        datasetIndex: idx
-                                    });
+                                    if (ds._hideFromLegend) return;
+                                    if (mode === 'habiletes') {
+                                        if (ds._isStat) return;
+                                        items.push({
+                                            text: ds.label,
+                                            fillStyle: ds.borderColor || ds.backgroundColor,
+                                            strokeStyle: ds.borderColor || 'transparent',
+                                            lineWidth: 2,
+                                            fontColor: couleurTxt,
+                                            hidden: false,
+                                            datasetIndex: idx
+                                        });
+                                    } else {
+                                        if (!ds._isStat) return;
+                                        items.push({
+                                            text: ds._legendText || ds.label,
+                                            fillStyle: ds._legendFill || ds.backgroundColor || ds.borderColor,
+                                            strokeStyle: ds._legendStroke || ds.borderColor || 'transparent',
+                                            lineWidth: ds._legendLineWidth || 1,
+                                            fontColor: couleurTxt,
+                                            hidden: false,
+                                            datasetIndex: idx
+                                        });
+                                    }
                                 });
                                 return items;
                             }
                         }
                     },
-                    tooltip: {
-                        ...STYLE_TOOLTIP,
-                        enabled: true,
-                        mode: 'point',
-                        intersect: true,
-                        displayColors: false,
-                        callbacks: {
-                            title: function(items) {
-                                if (!items || items.length === 0) return '';
-                                const it = items[0];
-                                const ds = it.dataset;
-                                return (ds && ds.label ? ds.label + ' — ' : '') + it.label;
-                            },
-                            label: function(ctxItem) {
-                                const v = ctxItem.parsed.y;
-                                if (v === null || v === undefined) return '';
-                                return (v * 100).toFixed(0) + '%';
-                            }
-                        }
-                    }
+                    tooltip: tooltipConfig
                 },
                 scales: {
                     x: {
@@ -4275,21 +4511,38 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
         const chart = new Chart(ctx, config);
         graphiqueTrajectoiresInstance = chart;
 
-        // Peupler le sélecteur d'élève (skip les datasets stats, textContent XSS-safe)
+        // Peupler le sélecteur d'élève
+        // - Mode noteFinale : -- Sélectionner -- + élèves (par DA)
+        // - Mode habiletés  : -- Sélectionner -- + Tous les élèves (TOUS) + élèves
         const selecteur = document.getElementById('selecteur-etudiant-trajectoires');
         if (selecteur) {
+            const valeurAvant = selecteur.value;
             selecteur.innerHTML = '';
             const optDefaut = document.createElement('option');
             optDefaut.value = '';
             optDefaut.textContent = '-- Sélectionner --';
             selecteur.appendChild(optDefaut);
-            datasets.forEach((ds, idx) => {
-                if (ds._isStat) return;
+            if (mode === 'habiletes') {
+                const optTous = document.createElement('option');
+                optTous.value = 'TOUS';
+                optTous.textContent = 'Tous les élèves';
+                selecteur.appendChild(optTous);
+            }
+            etudiants.forEach(etu => {
+                const da = etu.da;
+                const exclu = (typeof estEtudiantExclu === 'function') && estEtudiantExclu(etu);
+                const nomAnon = (typeof anonymiserNom === 'function') ? anonymiserNom(da) : null;
+                const nom = nomAnon || (etu.prenom && etu.nom
+                    ? (etu.prenom + ' ' + etu.nom)
+                    : (etu.nom || ('DA ' + da)));
                 const opt = document.createElement('option');
-                opt.value = String(idx);
-                opt.textContent = ds.exclu ? (ds.label + ' (inactif)') : ds.label;
+                opt.value = String(da);
+                opt.textContent = exclu ? (nom + ' (inactif)') : nom;
                 selecteur.appendChild(opt);
             });
+            if (valeurAvant && Array.from(selecteur.options).some(o => o.value === valeurAvant)) {
+                selecteur.value = valeurAvant;
+            }
         }
 
         return chart;
@@ -4297,6 +4550,21 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
     } catch (error) {
         console.error('[Trajectoires] Erreur création graphique :', error);
         return null;
+    }
+}
+
+/**
+ * Retourne le libellé de la note finale selon la pratique active.
+ * - PAN-Maîtrise : « Note chiffrée » (vocabulaire du formulaire d'évaluation)
+ * - Sommative ou autre : « Note finale »
+ */
+function obtenirLabelNoteFinale() {
+    try {
+        const config = db.getSync('modalitesEvaluation', {});
+        const pratique = config.pratique || 'pan-maitrise';
+        return (pratique === 'pan-maitrise') ? 'Note chiffrée' : 'Note finale';
+    } catch (e) {
+        return 'Note chiffrée';
     }
 }
 
@@ -4320,69 +4588,82 @@ function rafraichirGraphiqueTrajectoires() {
     const toggleMediane = document.getElementById('trajectoires-toggle-mediane');
     const afficherMediane = !!(toggleMediane && toggleMediane.checked);
 
-    // Conserver la sélection élève à travers le rebuild
     const selecteur = document.getElementById('selecteur-etudiant-trajectoires');
-    const indexAvant = selecteur ? selecteur.value : '';
+    const daAvant = selecteur ? selecteur.value : '';
 
     etatTrajectoires.mesure = mesure;
     etatTrajectoires.criteresActifs = actifs.size > 0 ? actifs : null;
     etatTrajectoires.afficherMediane = afficherMediane;
+    etatTrajectoires.daSurbrillance = daAvant;
 
     creerGraphiqueTrajectoiresProduction('graphique-trajectoires-production', {
         mesure: mesure,
         criteresActifs: etatTrajectoires.criteresActifs,
-        afficherMediane: etatTrajectoires.afficherMediane
+        afficherMediane: etatTrajectoires.afficherMediane,
+        daSurbrillance: daAvant
     });
 
-    // Restaurer la surbrillance si l'index est encore valide
-    if (selecteur && indexAvant !== '') {
-        selecteur.value = indexAvant;
-        if (selecteur.value !== '') selectionnerEtudiantTrajectoires();
+    // En mode noteFinale, restituer la surbrillance par restyle in-place
+    // (en mode habiletés, le rebuild a déjà rendu les valeurs de l'élève)
+    if (mesure === 'noteFinale' && daAvant !== '') {
+        selectionnerEtudiantTrajectoires();
     }
     _majBoutonProfilTrajectoires();
+    if (typeof _majSousTitreTrajectoires === 'function') {
+        _majSousTitreTrajectoires();
+    }
 }
 
 /**
  * Ouvre le profil de l'élève actuellement en relief dans le graphique Trajectoires.
+ * Le sélecteur stocke le DA dans option.value. La valeur 'TOUS' est ignorée.
  */
 function ouvrirProfilEleveTrajectoires() {
-    if (!graphiqueTrajectoiresInstance) return;
     const select = document.getElementById('selecteur-etudiant-trajectoires');
-    if (!select || !select.value) return;
-    const idx = parseInt(select.value, 10);
-    if (isNaN(idx)) return;
-    const ds = graphiqueTrajectoiresInstance.data.datasets[idx];
-    if (ds && ds.da && typeof tbNavigerVersProfil === 'function') {
-        tbNavigerVersProfil(ds.da);
+    if (!select || !select.value || select.value === 'TOUS') return;
+    if (typeof tbNavigerVersProfil === 'function') {
+        tbNavigerVersProfil(select.value);
     }
 }
 
 /**
- * Met à jour la visibilité du bouton 👤 selon la sélection courante du
- * dropdown élève Trajectoires.
+ * Met à jour la visibilité du bouton 👤 selon la sélection courante.
+ * Visible seulement quand un élève réel est sélectionné (pas TOUS, pas vide).
  */
 function _majBoutonProfilTrajectoires() {
     const btn = document.getElementById('btn-profil-trajectoires');
     const select = document.getElementById('selecteur-etudiant-trajectoires');
     if (!btn || !select) return;
-    btn.style.display = (select.value && select.value !== '') ? 'inline-flex' : 'none';
+    const isReelEleve = select.value && select.value !== '' && select.value !== 'TOUS';
+    btn.style.display = isReelEleve ? 'inline-flex' : 'none';
 }
 
 /**
- * Met en relief la courbe de l'étudiant sélectionné dans le dropdown.
- * Mise à jour en place (sans rebuild) via appliquerStyleSpaghetti.
+ * Met en relief la courbe de l'étudiant sélectionné.
+ * - Mode Note finale : restyle in-place via appliquerStyleSpaghetti (rapide).
+ * - Mode Habiletés : rebuild complet, car la source des données change
+ *   (médiane du groupe → valeurs de l'élève).
  */
 function selectionnerEtudiantTrajectoires() {
+    const selMesure = document.getElementById('selecteur-mesure-trajectoires');
+    const mesure = (selMesure && selMesure.value === 'habiletes') ? 'habiletes' : 'noteFinale';
+
+    if (mesure === 'habiletes') {
+        rafraichirGraphiqueTrajectoires();
+        return;
+    }
+
+    // Mode Note finale — restyle in-place
     const chart = graphiqueTrajectoiresInstance;
     if (!chartEstValide(chart)) return;
 
     const selecteur = document.getElementById('selecteur-etudiant-trajectoires');
     if (!selecteur) return;
 
-    const indexStr = selecteur.value;
+    const da = selecteur.value;
     const datasets = chart.data.datasets;
 
-    if (indexStr === '') {
+    if (da === '') {
         datasets.forEach(function(ds) {
             if (ds._isStat) return;
             const couleur = ds._couleurBase || '#888';
@@ -4390,13 +4671,12 @@ function selectionnerEtudiantTrajectoires() {
         });
         etatTrajectoires.daSurbrillance = '';
     } else {
-        const indexActif = parseInt(indexStr, 10);
-        datasets.forEach(function(ds, idx) {
+        datasets.forEach(function(ds) {
             if (ds._isStat) return;
             const couleur = ds._couleurBase || '#888';
-            if (idx === indexActif) {
+            if (ds.da === da) {
                 appliquerStyleSpaghetti(ds, 'actif', couleur);
-                etatTrajectoires.daSurbrillance = ds.da || '';
+                etatTrajectoires.daSurbrillance = da;
             } else {
                 appliquerStyleSpaghetti(ds, 'inactif', couleur);
             }
@@ -4426,7 +4706,24 @@ window.rafraichirGraphiqueTrajectoires = rafraichirGraphiqueTrajectoires;
 window.selectionnerEtudiantTrajectoires = selectionnerEtudiantTrajectoires;
 window.ouvrirProfilEleveTrajectoires = ouvrirProfilEleveTrajectoires;
 window.listerCriteresHabiletes = listerCriteresHabiletes;
+window.obtenirLabelNoteFinale = obtenirLabelNoteFinale;
 window.detruireGraphique = detruireGraphique;
+
+// Recréer les graphiques visibles lors d'un changement de mode (Normal / Anonymisation / Démo)
+window.addEventListener('modeChanged', function() {
+    if (typeof rafraichirGraphiqueSpaghettiACP === 'function' && document.getElementById('graphique-groupe-moyennes')) {
+        try { rafraichirGraphiqueSpaghettiACP(); } catch(e) { console.warn('[Graphiques] spaghettiACP mode refresh skipped:', e.message || e); }
+    }
+    if (typeof rafraichirGraphiqueTrajectoires === 'function' && document.getElementById('graphique-trajectoires-production')) {
+        try { rafraichirGraphiqueTrajectoires(); } catch(e) { console.warn('[Graphiques] trajectoires mode refresh skipped:', e.message || e); }
+    }
+    if (typeof rafraichirGraphiqueIndividuel === 'function' && window.profilActuelDA) {
+        var canvasIdMode = 'graphique-progression-' + window.profilActuelDA;
+        if (document.getElementById(canvasIdMode)) {
+            try { rafraichirGraphiqueIndividuel(window.profilActuelDA); } catch(e) { console.warn('[Graphiques] individuel mode refresh skipped:', e.message || e); }
+        }
+    }
+});
 
 // Recréer les graphiques visibles lors d'un changement de thème
 window.addEventListener('themeChanged', function() {
