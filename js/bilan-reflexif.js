@@ -30,8 +30,25 @@ function injecterStyles() {
         '.bilan-actions{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}',
 
         /* Titre du questionnaire */
-        '.bilan-titre-input{width:100%;padding:10px 14px;font-size:16px;font-weight:600;border:1px solid rgba(106,172,184,.15);border-radius:var(--radius-moyen,6px);background:var(--bleu-tres-pale,#142428);color:var(--texte-principal,#d0e0e4);font-family:inherit;margin-bottom:16px}',
+        '.bilan-titre-input{width:100%;padding:10px 14px;font-size:16px;font-weight:600;border:1px solid rgba(106,172,184,.15);border-radius:var(--radius-moyen,6px);background:var(--bleu-tres-pale,#142428);color:var(--texte-principal,#d0e0e4);font-family:inherit;margin-bottom:8px}',
         '.bilan-titre-input:focus{outline:none;border-color:var(--bleu-clair,#6aacb8)}',
+        '.bilan-preambule-input{width:100%;padding:10px 14px;font-size:13px;border:1px solid rgba(106,172,184,.15);border-radius:var(--radius-moyen,6px);background:var(--bleu-tres-pale,#142428);color:var(--texte-principal,#d0e0e4);font-family:inherit;margin-bottom:16px;line-height:1.5;resize:vertical;min-height:48px}',
+        '.bilan-preambule-input:focus{outline:none;border-color:var(--bleu-clair,#6aacb8)}',
+        '.bilan-preambule-input::placeholder{color:var(--texte-secondaire,#8aa4b0);font-style:italic}',
+        '.bilan-bloc-description-zone{padding:8px 16px 0;border-top:1px solid rgba(106,172,184,.05)}',
+        '.bilan-bloc-description-input{width:100%;padding:6px 10px;font-size:12px;border:1px solid rgba(106,172,184,.1);border-radius:var(--radius-petit,5px);background:var(--bleu-tres-pale,#142428);color:var(--texte-secondaire,#8aa4b0);font-family:inherit;line-height:1.4;resize:vertical;min-height:28px;font-style:italic}',
+        '.bilan-bloc-description-input:focus{outline:none;border-color:var(--bleu-clair,#6aacb8);color:var(--texte-principal,#d0e0e4);font-style:normal}',
+        '.bilan-bloc-description-input::placeholder{color:var(--texte-secondaire,#8aa4b0);opacity:.5}',
+        '.bilan-question-details{padding:6px 0 10px 28px;font-size:12px;color:var(--texte-secondaire,#8aa4b0);border-bottom:1px solid rgba(106,172,184,.08)}',
+        '.bilan-question-consigne{font-style:italic;margin-bottom:6px;color:var(--orange-accent,#c8a060);font-size:11px}',
+        '.bilan-question-options{list-style:none;margin:0;padding:0}',
+        '.bilan-question-options li{padding:2px 0;color:var(--texte-principal,#d0e0e4)}',
+        '.bilan-question-options li em{color:var(--texte-secondaire,#8aa4b0);font-style:italic;font-size:11px;margin-left:4px}',
+        '.bilan-question-options-limite{font-size:11px;color:var(--bleu-clair,#6aacb8);margin-top:4px;font-style:italic}',
+        '.bilan-question-enonces{list-style:none;margin:0;padding:0}',
+        '.bilan-question-enonces li{padding:2px 0 2px 14px;position:relative;color:var(--texte-principal,#d0e0e4)}',
+        '.bilan-question-enonces li::before{content:"—";position:absolute;left:0;color:var(--bleu-clair,#6aacb8)}',
+        '.bilan-question-na-badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:var(--radius-pill,20px);background:rgba(106,172,184,.15);color:var(--bleu-clair,#6aacb8);margin-left:4px;font-style:italic}',
 
         /* Bloc thématique */
         '.bilan-bloc{margin-bottom:12px;border:1px solid rgba(106,172,184,.15);border-radius:var(--radius-grand,12px);overflow:hidden;transition:opacity .2s}',
@@ -356,6 +373,10 @@ function rendreEditeur() {
     // Titre du questionnaire
     html.push('<input type="text" class="bilan-titre-input" id="bilan-titre" value="' + echapperHtml(q.titre) + '" data-on-change="BilanReflexif.modifierTitre" placeholder="Titre du questionnaire">');
 
+    // Préambule (multi-lignes, optionnel) — affiché aux élèves dans le formulaire en ligne
+    var preambuleVal = q.preambule ? String(q.preambule) : '';
+    html.push('<textarea class="bilan-preambule-input" id="bilan-preambule" data-on-change="BilanReflexif.modifierPreambule" placeholder="Préambule (optionnel) — texte d’introduction affiché aux élèves dans le formulaire en ligne…" rows="2">' + echapperHtml(preambuleVal) + '</textarea>');
+
     // Barre d'actions
     html.push('<div class="bilan-actions">');
     html.push('<button class="bilan-btn bilan-btn-principal" data-action="BilanReflexif.exporterTexte">Copier les questions</button>');
@@ -411,6 +432,7 @@ function rendreEditeur() {
 
             html.push('</div>');
             html.push('</div>');
+            html.push(rendreDetailsQuestion(qp));
         }
     }
     html.push('<div class="bilan-ajout-form">');
@@ -426,15 +448,54 @@ function rendreEditeur() {
     vue.innerHTML = html.join('');
 }
 
+function rendreDetailsQuestion(q) {
+    if (!q) return '';
+    var parts = [];
+
+    if (q.consigneConditionnelle && String(q.consigneConditionnelle).trim() !== '') {
+        parts.push('<div class="bilan-question-consigne">« ' + echapperHtml(String(q.consigneConditionnelle).trim()) + ' »</div>');
+    }
+
+    if ((q.type === 'choix_unique' || q.type === 'choix_multiple') && q.options && q.options.length > 0) {
+        var optsHtml = ['<ul class="bilan-question-options">'];
+        for (var oi = 0; oi < q.options.length; oi++) {
+            var opt = q.options[oi];
+            var lettre = (opt.lettre || String.fromCharCode(97 + oi)).toLowerCase();
+            var marque = opt.autreAvecChamp ? ' <em>(+ champ libre)</em>' : '';
+            optsHtml.push('<li>' + lettre + '. ' + echapperHtml(opt.texte || '') + marque + '</li>');
+        }
+        optsHtml.push('</ul>');
+        if (q.type === 'choix_multiple' && (q.minSelection != null || q.maxSelection != null)) {
+            var lim = [];
+            if (q.minSelection != null) lim.push('min ' + q.minSelection);
+            if (q.maxSelection != null) lim.push('max ' + q.maxSelection);
+            optsHtml.push('<div class="bilan-question-options-limite">Limite : ' + lim.join(', ') + '</div>');
+        }
+        parts.push(optsHtml.join(''));
+    }
+
+    if (q.type === 'matrix' && q.enonces && q.enonces.length > 0) {
+        var enonHtml = ['<ul class="bilan-question-enonces">'];
+        for (var ei = 0; ei < q.enonces.length; ei++) {
+            enonHtml.push('<li>' + echapperHtml(q.enonces[ei].texte || '') + '</li>');
+        }
+        enonHtml.push('</ul>');
+        parts.push(enonHtml.join(''));
+    }
+
+    if (q.type === 'likert4' && q.inclureNA) {
+        parts.push('<span class="bilan-question-na-badge">+ option « Non applicable »</span>');
+    }
+
+    if (parts.length === 0) return '';
+    return '<div class="bilan-question-details">' + parts.join('') + '</div>';
+}
+
 function rendreBlocHTML(bloc, indexBloc) {
     var estOuvert = etat.blocOuvert === bloc.id;
     var nbQuestions = bloc.questions.length;
-    var nbLikert = 0;
-    var nbOuvert = 0;
-    for (var i = 0; i < nbQuestions; i++) {
-        if (bloc.questions[i].type === 'likert4') nbLikert++;
-        else nbOuvert++;
-    }
+    // Compteur générique : N questions
+    // (le détail par type apparaît sur les badges individuels des questions)
 
     var html = [];
     html.push('<div class="bilan-bloc' + (bloc.actif ? '' : ' inactif') + (estOuvert ? ' ouvert' : '') + '" data-bloc="' + bloc.id + '">');
@@ -444,13 +505,19 @@ function rendreBlocHTML(bloc, indexBloc) {
     html.push('<div class="bilan-bloc-gauche" data-action="BilanReflexif.toggleOuverture" data-param="' + bloc.id + '">');
     html.push('<span style="font-size:12px;color:var(--texte-secondaire)">' + (estOuvert ? '\u25BC' : '\u25B6') + '</span>');
     html.push('<span class="bilan-bloc-titre">' + echapperHtml(bloc.titre) + '</span>');
-    html.push('<span class="bilan-bloc-badge">' + nbLikert + ' Likert' + (nbOuvert > 0 ? ' + ' + nbOuvert + ' ouverte' + (nbOuvert > 1 ? 's' : '') : '') + '</span>');
+    html.push('<span class="bilan-bloc-badge">' + nbQuestions + ' question' + (nbQuestions > 1 ? 's' : '') + '</span>');
     html.push('</div>');
     html.push('<button class="bilan-toggle' + (bloc.actif ? ' actif' : '') + '" data-action="BilanReflexif.toggleBloc" data-param="' + bloc.id + '" title="' + (bloc.actif ? 'D\u00e9sactiver' : 'Activer') + '"></button>');
     html.push('</div>');
 
     // Body (questions)
     html.push('<div class="bilan-bloc-body">');
+
+    // Description du bloc (optionnelle, multi-lignes courte)
+    var descVal = bloc.description ? String(bloc.description) : '';
+    html.push('<div class="bilan-bloc-description-zone">');
+    html.push('<textarea class="bilan-bloc-description-input" id="bilan-desc-' + bloc.id + '" data-on-change="BilanReflexif.modifierDescriptionBloc" data-param="' + bloc.id + '" placeholder="Description du bloc (optionnelle) — affichée aux élèves comme cadrage de la section…" rows="1">' + echapperHtml(descVal) + '</textarea>');
+    html.push('</div>');
     for (var j = 0; j < bloc.questions.length; j++) {
         var q = bloc.questions[j];
         html.push('<div class="bilan-question">');
@@ -481,6 +548,9 @@ function rendreBlocHTML(bloc, indexBloc) {
 
         html.push('</div>');
         html.push('</div>');
+
+        // Détails read-only : options, énoncés, consigne, NA
+        html.push(rendreDetailsQuestion(q));
     }
 
     // Bouton ajouter une question au bloc
@@ -500,6 +570,27 @@ function rendreBlocHTML(bloc, indexBloc) {
 }
 
 // === Actions éditeur ===
+
+function modifierPreambule() {
+    var ta = document.getElementById('bilan-preambule');
+    if (ta && etat.questionnaire) {
+        var val = ta.value;
+        etat.questionnaire.preambule = val.trim() === '' ? null : val;
+        etat.questionnaire.dateModification = new Date().toISOString();
+        sauvegarderQuestionnaire();
+    }
+}
+
+function modifierDescriptionBloc(blocId, elem) {
+    var bloc = trouverBloc(blocId);
+    if (!bloc) return;
+    var ta = elem || document.getElementById('bilan-desc-' + blocId);
+    if (!ta) return;
+    var val = (ta.value || '').trim();
+    bloc.description = val === '' ? null : val;
+    etat.questionnaire.dateModification = new Date().toISOString();
+    sauvegarderQuestionnaire();
+}
 
 function modifierTitre() {
     var input = document.getElementById('bilan-titre');
@@ -3662,6 +3753,8 @@ window.BilanReflexif = {
     afficherVue: afficherVue,
     // Éditeur Likert
     modifierTitre: modifierTitre,
+    modifierPreambule: modifierPreambule,
+    modifierDescriptionBloc: modifierDescriptionBloc,
     toggleBloc: toggleBloc,
     toggleOuverture: toggleOuverture,
     editerQuestion: editerQuestion,
