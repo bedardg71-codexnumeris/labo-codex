@@ -358,14 +358,14 @@ function afficherToast(message) {
 
 function libelleTypeQuestion(type, q) {
     switch (type) {
-        case 'likert4': return (q && q.inclureNA) ? 'Likert+NA' : 'Likert';
+        case 'likert4': return 'Likert (1 énoncé)' + ((q && q.inclureNA) ? ' + NA' : '');
         case 'choix_unique': return 'Choix unique';
         case 'choix_multiple':
             var maxStr = (q && q.maxSelection) ? ' max ' + q.maxSelection : '';
             return 'Choix multiple' + maxStr;
         case 'matrix':
             var nb = (q && q.enonces && q.enonces.length) ? q.enonces.length : 0;
-            return 'Matrice (' + nb + ')';
+            return 'Likert matriciel (' + nb + ' énoncé' + (nb > 1 ? 's' : '') + ')';
         case 'ouvert': return 'Ouvert';
         default: return type || 'Type inconnu';
     }
@@ -415,6 +415,7 @@ function rendreEditeur() {
         '<li><strong>Distribue le lien</strong> \u2014 Partage le lien du formulaire \u00e0 tes \u00e9tudiants.</li>' +
         '<li><strong>Exporte les r\u00e9sultats en CSV</strong> \u2014 Une fois les r\u00e9ponses collect\u00e9es, exporte-les au format CSV depuis ton outil. Tu pourras ensuite les importer dans l\u2019onglet \u00ab\u00a0Importer les r\u00e9sultats\u00a0\u00bb.</li>' +
         '</ol>' +
+        '<div class="bilan-aide-astuce"><strong>Vocabulaire \u2014 attention :</strong> certaines applications de formulaire en ligne appellent \u00ab\u00a0Likert\u00a0\u00bb une question \u00e0 plusieurs \u00e9nonc\u00e9s partageant la m\u00eame \u00e9chelle, ce qui correspond \u00e0 notre <strong>Likert matriciel</strong>. Une \u00ab\u00a0Likert (1 \u00e9nonc\u00e9)\u00a0\u00bb dans Labo Codex devient g\u00e9n\u00e9ralement un type \u00ab\u00a0Choix\u00a0\u00bb \u00e0 4 options dans ces applications.</div>' +
         '<div class="bilan-aide-astuce">Certains outils de formulaire permettent d\u2019importer les questions directement depuis un document structur\u00e9. V\u00e9rifie si ton outil offre cette option \u2014 \u00e7a peut t\u2019\u00e9conomiser la saisie manuelle.</div>'
     ));
 
@@ -457,10 +458,10 @@ function rendreEditeur() {
     html.push('<div class="bilan-ajout-form">');
     html.push('<input type="text" class="bilan-ajout-input" id="bilan-perso-input" placeholder="Ajouter une question personnalis\u00e9e\u2026">');
     html.push('<select class="bilan-ajout-select" id="bilan-perso-type">');
-    html.push('<option value="likert4">Likert 4 niveaux</option>');
+    html.push('<option value="likert4">Likert (1 énoncé)</option>');
     html.push('<option value="choix_unique">Choix unique</option>');
     html.push('<option value="choix_multiple">Choix multiple</option>');
-    html.push('<option value="matrix">Matrice</option>');
+    html.push('<option value="matrix">Likert matriciel</option>');
     html.push('<option value="ouvert">R\u00e9ponse ouverte</option>');
     html.push('</select>');
     html.push('<button class="bilan-btn bilan-btn-secondaire" data-action="BilanReflexif.ajouterPerso">Ajouter</button>');
@@ -647,10 +648,10 @@ function rendreBlocHTML(bloc, indexBloc) {
     html.push('<div class="bilan-ajout-form">');
     html.push('<input type="text" class="bilan-ajout-input" id="bilan-ajout-' + bloc.id + '" placeholder="Ajouter une question\u2026">');
     html.push('<select class="bilan-ajout-select" id="bilan-ajout-type-' + bloc.id + '">');
-    html.push('<option value="likert4">Likert</option>');
+    html.push('<option value="likert4">Likert (1 énoncé)</option>');
     html.push('<option value="choix_unique">Choix unique</option>');
     html.push('<option value="choix_multiple">Choix multiple</option>');
-    html.push('<option value="matrix">Matrice</option>');
+    html.push('<option value="matrix">Likert matriciel</option>');
     html.push('<option value="ouvert">Ouvert</option>');
     html.push('</select>');
     html.push('<button class="bilan-btn bilan-btn-secondaire" data-action="BilanReflexif.ajouterQuestionBloc" data-param="' + bloc.id + '">Ajouter</button>');
@@ -1662,7 +1663,7 @@ function telechargerModele() {
     }
 }
 
-var PROMPT_IA_BILAN = `Tu m’aides à créer un questionnaire de bilan réflexif de fin de trimestre, à importer dans Labo Codex puis à recréer manuellement dans Microsoft Forms. Produis UNIQUEMENT du texte respectant le format suivant, sans aucune autre prose autour.
+var PROMPT_IA_BILAN = `Tu m’aides à créer un questionnaire de bilan réflexif de fin de trimestre, à importer dans Labo Codex puis à recréer dans une application de formulaire en ligne. Produis UNIQUEMENT du texte respectant le format suivant, sans aucune autre prose autour.
 
 == FORMAT ==
 
@@ -1840,10 +1841,10 @@ function injecterModaleImport() {
             '5. Question conditionnelle\n' +
             '</pre>' +
             '<ul>' +
-            '<li><strong>Likert 4</strong> : pas de balise, identifié par les 4 choix <code>a-d</code>. Ajouter <code>e. Non applicable</code> pour la 5e branche.</li>' +
+            '<li><strong>Likert (1 énoncé)</strong> : pas de balise, identifié par les 4 choix <code>a-d</code>. Ajouter <code>e. Non applicable</code> pour la 5e branche.</li>' +
             '<li><strong>[RADIO]</strong> : choix unique non-Likert (parcours, fréquence par paliers).</li>' +
             '<li><strong>[CHECKBOX]</strong> : choix multiples. Limites optionnelles : <code>[CHECKBOX max=3]</code>, <code>[CHECKBOX min=1 max=5]</code>.</li>' +
-            '<li><strong>[MATRIX]</strong> : groupe Likert 4 partagé. Énoncés en puces <code>-</code>.</li>' +
+            '<li><strong>[MATRIX]</strong> (= Likert matriciel) : groupe Likert 4 partagé. Énoncés en puces <code>-</code>. Équivalent du « Likert » multi-énoncés de certaines applications de formulaire.</li>' +
             '<li><strong>[OUVERT]</strong> : texte libre.</li>' +
             '<li>Option <code>Autre : ___</code> (3 underscores ou plus) pour un champ libre supplémentaire.</li>' +
             '<li>Consigne conditionnelle : ligne en <em>*italique*</em> sur sa propre ligne, AU-DESSUS du numéro de question.</li>' +
