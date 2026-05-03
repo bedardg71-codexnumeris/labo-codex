@@ -49,6 +49,25 @@ function injecterStyles() {
         '.bilan-question-enonces li{padding:2px 0 2px 14px;position:relative;color:var(--texte-principal,#d0e0e4)}',
         '.bilan-question-enonces li::before{content:"—";position:absolute;left:0;color:var(--bleu-clair,#6aacb8)}',
         '.bilan-question-na-badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:var(--radius-pill,20px);background:rgba(106,172,184,.15);color:var(--bleu-clair,#6aacb8);margin-left:4px;font-style:italic}',
+        '.bilan-question-meta{margin-bottom:8px}',
+        '.bilan-question-consigne-input{width:100%;padding:5px 9px;font-size:11px;border:1px dashed rgba(200,160,96,.3);border-radius:var(--radius-petit,5px);background:transparent;color:var(--orange-accent,#c8a060);font-family:inherit;font-style:italic}',
+        '.bilan-question-consigne-input:focus{outline:none;border-color:var(--orange-accent,#c8a060);border-style:solid}',
+        '.bilan-question-consigne-input::placeholder{color:var(--texte-secondaire,#8aa4b0);opacity:.5;font-style:italic}',
+        '.bilan-question-na-toggle{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--texte-secondaire,#8aa4b0);cursor:pointer;margin-top:4px}',
+        '.bilan-question-na-toggle input{margin:0}',
+        '.bilan-question-limites{display:flex;gap:14px;font-size:11px;color:var(--texte-secondaire,#8aa4b0);margin-bottom:8px;align-items:center}',
+        '.bilan-question-limites label{display:inline-flex;align-items:center;gap:4px}',
+        '.bilan-mini-num{width:48px;padding:3px 6px;font-size:11px;border:1px solid rgba(106,172,184,.15);border-radius:var(--radius-petit,5px);background:var(--bleu-tres-pale,#142428);color:var(--texte-principal,#d0e0e4);font-family:inherit;text-align:center}',
+        '.bilan-mini-num:focus{outline:none;border-color:var(--bleu-clair,#6aacb8)}',
+        '.bilan-question-options-list,.bilan-question-enonces-list{margin:0;padding:0}',
+        '.bilan-option-row,.bilan-enonce-row{display:flex;align-items:center;gap:6px;padding:3px 0}',
+        '.bilan-option-lettre{font-size:12px;color:var(--texte-secondaire,#8aa4b0);min-width:18px;font-weight:600}',
+        '.bilan-enonce-puce{color:var(--bleu-clair,#6aacb8);min-width:14px}',
+        '.bilan-option-input,.bilan-enonce-input{flex:1;padding:4px 8px;font-size:12px;border:1px solid rgba(106,172,184,.1);border-radius:var(--radius-petit,5px);background:var(--bleu-tres-pale,#142428);color:var(--texte-principal,#d0e0e4);font-family:inherit}',
+        '.bilan-option-input:focus,.bilan-enonce-input:focus{outline:none;border-color:var(--bleu-clair,#6aacb8)}',
+        '.bilan-option-autre{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--texte-secondaire,#8aa4b0);cursor:pointer;white-space:nowrap}',
+        '.bilan-option-autre input{margin:0}',
+        '.bilan-add-mini{padding:3px 10px;font-size:11px;margin-top:4px}',
 
         /* Bloc thématique */
         '.bilan-bloc{margin-bottom:12px;border:1px solid rgba(106,172,184,.15);border-radius:var(--radius-grand,12px);overflow:hidden;transition:opacity .2s}',
@@ -432,13 +451,16 @@ function rendreEditeur() {
 
             html.push('</div>');
             html.push('</div>');
-            html.push(rendreDetailsQuestion(qp));
+            html.push(rendreDetailsQuestion(qp, 'perso'));
         }
     }
     html.push('<div class="bilan-ajout-form">');
     html.push('<input type="text" class="bilan-ajout-input" id="bilan-perso-input" placeholder="Ajouter une question personnalis\u00e9e\u2026">');
     html.push('<select class="bilan-ajout-select" id="bilan-perso-type">');
     html.push('<option value="likert4">Likert 4 niveaux</option>');
+    html.push('<option value="choix_unique">Choix unique</option>');
+    html.push('<option value="choix_multiple">Choix multiple</option>');
+    html.push('<option value="matrix">Matrice</option>');
     html.push('<option value="ouvert">R\u00e9ponse ouverte</option>');
     html.push('</select>');
     html.push('<button class="bilan-btn bilan-btn-secondaire" data-action="BilanReflexif.ajouterPerso">Ajouter</button>');
@@ -448,46 +470,114 @@ function rendreEditeur() {
     vue.innerHTML = html.join('');
 }
 
-function rendreDetailsQuestion(q) {
+function rendreDetailsQuestion(q, blocId) {
     if (!q) return '';
+    var bId = blocId || 'perso';
     var parts = [];
 
-    if (q.consigneConditionnelle && String(q.consigneConditionnelle).trim() !== '') {
-        parts.push('<div class="bilan-question-consigne">« ' + echapperHtml(String(q.consigneConditionnelle).trim()) + ' »</div>');
+    // Consigne conditionnelle (toujours affichée comme champ optionnel)
+    var consigne = q.consigneConditionnelle || '';
+    parts.push(
+        '<div class="bilan-question-meta">' +
+        '<input type="text" class="bilan-question-consigne-input" ' +
+        'placeholder="Consigne conditionnelle (italique au-dessus dans le formulaire — ex. « Si tu as répondu Oui : »)…" ' +
+        'value="' + echapperHtml(consigne) + '" ' +
+        'data-on-change="BilanReflexif.modifierConsigneConditionnelle" ' +
+        'data-bloc="' + bId + '" data-question="' + q.id + '">' +
+        '</div>'
+    );
+
+    // Likert + NA toggle
+    if (q.type === 'likert4') {
+        parts.push(
+            '<label class="bilan-question-na-toggle">' +
+            '<input type="checkbox" ' + (q.inclureNA ? 'checked' : '') + ' ' +
+            'data-on-change="BilanReflexif.toggleNA" ' +
+            'data-bloc="' + bId + '" data-question="' + q.id + '"> ' +
+            'Inclure une 5e option « Non applicable »' +
+            '</label>'
+        );
     }
 
-    if ((q.type === 'choix_unique' || q.type === 'choix_multiple') && q.options && q.options.length > 0) {
-        var optsHtml = ['<ul class="bilan-question-options">'];
-        for (var oi = 0; oi < q.options.length; oi++) {
-            var opt = q.options[oi];
-            var lettre = (opt.lettre || String.fromCharCode(97 + oi)).toLowerCase();
-            var marque = opt.autreAvecChamp ? ' <em>(+ champ libre)</em>' : '';
-            optsHtml.push('<li>' + lettre + '. ' + echapperHtml(opt.texte || '') + marque + '</li>');
+    // Options Radio/Checkbox
+    if (q.type === 'choix_unique' || q.type === 'choix_multiple') {
+        if (q.type === 'choix_multiple') {
+            var minV = (q.minSelection != null) ? q.minSelection : '';
+            var maxV = (q.maxSelection != null) ? q.maxSelection : '';
+            parts.push(
+                '<div class="bilan-question-limites">' +
+                '<label>Min : <input type="number" min="0" max="20" class="bilan-mini-num" value="' + minV + '" placeholder="—" ' +
+                'data-on-change="BilanReflexif.modifierLimite" data-bloc="' + bId + '" data-question="' + q.id + '" data-champ="min"></label>' +
+                '<label>Max : <input type="number" min="0" max="20" class="bilan-mini-num" value="' + maxV + '" placeholder="—" ' +
+                'data-on-change="BilanReflexif.modifierLimite" data-bloc="' + bId + '" data-question="' + q.id + '" data-champ="max"></label>' +
+                '<span style="opacity:.6">(laisser vide = pas de limite)</span>' +
+                '</div>'
+            );
         }
-        optsHtml.push('</ul>');
-        if (q.type === 'choix_multiple' && (q.minSelection != null || q.maxSelection != null)) {
-            var lim = [];
-            if (q.minSelection != null) lim.push('min ' + q.minSelection);
-            if (q.maxSelection != null) lim.push('max ' + q.maxSelection);
-            optsHtml.push('<div class="bilan-question-options-limite">Limite : ' + lim.join(', ') + '</div>');
+        var opts = q.options || [];
+        var optsHtml = ['<div class="bilan-question-options-list">'];
+        for (var oi = 0; oi < opts.length; oi++) {
+            var opt = opts[oi];
+            var lettre = String.fromCharCode(97 + oi);
+            var row = '<div class="bilan-option-row">' +
+                '<span class="bilan-option-lettre">' + lettre + '.</span>' +
+                '<input type="text" class="bilan-option-input" value="' + echapperHtml(opt.texte || '') + '" ' +
+                'data-on-change="BilanReflexif.modifierOption" ' +
+                'data-bloc="' + bId + '" data-question="' + q.id + '" data-option="' + opt.id + '" ' +
+                'placeholder="Texte de l’option…">' +
+                '<label class="bilan-option-autre">' +
+                '<input type="checkbox" ' + (opt.autreAvecChamp ? 'checked' : '') + ' ' +
+                'data-on-change="BilanReflexif.toggleAutreChamp" ' +
+                'data-bloc="' + bId + '" data-question="' + q.id + '" data-option="' + opt.id + '"> Autre' +
+                '</label>';
+            if (oi > 0) {
+                row += '<button class="bilan-btn-mini" data-action="BilanReflexif.deplacerOption" data-bloc="' + bId + '" data-question="' + q.id + '" data-option="' + opt.id + '" data-direction="-1" title="Monter">↑</button>';
+            }
+            if (oi < opts.length - 1) {
+                row += '<button class="bilan-btn-mini" data-action="BilanReflexif.deplacerOption" data-bloc="' + bId + '" data-question="' + q.id + '" data-option="' + opt.id + '" data-direction="1" title="Descendre">↓</button>';
+            }
+            row += '<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerOption" data-bloc="' + bId + '" data-question="' + q.id + '" data-option="' + opt.id + '" data-confirm="Supprimer cette option ?" title="Supprimer">×</button>' +
+                '</div>';
+            optsHtml.push(row);
         }
+        optsHtml.push(
+            '<button class="bilan-btn bilan-btn-secondaire bilan-add-mini" ' +
+            'data-action="BilanReflexif.ajouterOption" data-bloc="' + bId + '" data-question="' + q.id + '">+ Ajouter une option</button>'
+        );
+        optsHtml.push('</div>');
         parts.push(optsHtml.join(''));
     }
 
-    if (q.type === 'matrix' && q.enonces && q.enonces.length > 0) {
-        var enonHtml = ['<ul class="bilan-question-enonces">'];
-        for (var ei = 0; ei < q.enonces.length; ei++) {
-            enonHtml.push('<li>' + echapperHtml(q.enonces[ei].texte || '') + '</li>');
+    // Énoncés Matrix
+    if (q.type === 'matrix') {
+        var enonces = q.enonces || [];
+        var enonHtml = ['<div class="bilan-question-enonces-list">'];
+        for (var ei = 0; ei < enonces.length; ei++) {
+            var en = enonces[ei];
+            var rowE = '<div class="bilan-enonce-row">' +
+                '<span class="bilan-enonce-puce">—</span>' +
+                '<input type="text" class="bilan-enonce-input" value="' + echapperHtml(en.texte || '') + '" ' +
+                'data-on-change="BilanReflexif.modifierEnonce" ' +
+                'data-bloc="' + bId + '" data-question="' + q.id + '" data-enonce="' + en.id + '" ' +
+                'placeholder="Texte de l’énoncé…">';
+            if (ei > 0) {
+                rowE += '<button class="bilan-btn-mini" data-action="BilanReflexif.deplacerEnonce" data-bloc="' + bId + '" data-question="' + q.id + '" data-enonce="' + en.id + '" data-direction="-1" title="Monter">↑</button>';
+            }
+            if (ei < enonces.length - 1) {
+                rowE += '<button class="bilan-btn-mini" data-action="BilanReflexif.deplacerEnonce" data-bloc="' + bId + '" data-question="' + q.id + '" data-enonce="' + en.id + '" data-direction="1" title="Descendre">↓</button>';
+            }
+            rowE += '<button class="bilan-btn-mini" data-action="BilanReflexif.supprimerEnonce" data-bloc="' + bId + '" data-question="' + q.id + '" data-enonce="' + en.id + '" data-confirm="Supprimer cet énoncé ?" title="Supprimer">×</button>' +
+                '</div>';
+            enonHtml.push(rowE);
         }
-        enonHtml.push('</ul>');
+        enonHtml.push(
+            '<button class="bilan-btn bilan-btn-secondaire bilan-add-mini" ' +
+            'data-action="BilanReflexif.ajouterEnonce" data-bloc="' + bId + '" data-question="' + q.id + '">+ Ajouter un énoncé</button>'
+        );
+        enonHtml.push('</div>');
         parts.push(enonHtml.join(''));
     }
 
-    if (q.type === 'likert4' && q.inclureNA) {
-        parts.push('<span class="bilan-question-na-badge">+ option « Non applicable »</span>');
-    }
-
-    if (parts.length === 0) return '';
     return '<div class="bilan-question-details">' + parts.join('') + '</div>';
 }
 
@@ -550,7 +640,7 @@ function rendreBlocHTML(bloc, indexBloc) {
         html.push('</div>');
 
         // Détails read-only : options, énoncés, consigne, NA
-        html.push(rendreDetailsQuestion(q));
+        html.push(rendreDetailsQuestion(q, bloc.id));
     }
 
     // Bouton ajouter une question au bloc
@@ -558,6 +648,9 @@ function rendreBlocHTML(bloc, indexBloc) {
     html.push('<input type="text" class="bilan-ajout-input" id="bilan-ajout-' + bloc.id + '" placeholder="Ajouter une question\u2026">');
     html.push('<select class="bilan-ajout-select" id="bilan-ajout-type-' + bloc.id + '">');
     html.push('<option value="likert4">Likert</option>');
+    html.push('<option value="choix_unique">Choix unique</option>');
+    html.push('<option value="choix_multiple">Choix multiple</option>');
+    html.push('<option value="matrix">Matrice</option>');
     html.push('<option value="ouvert">Ouvert</option>');
     html.push('</select>');
     html.push('<button class="bilan-btn bilan-btn-secondaire" data-action="BilanReflexif.ajouterQuestionBloc" data-param="' + bloc.id + '">Ajouter</button>');
@@ -710,13 +803,33 @@ function ajouterQuestionBloc(blocId) {
     var bloc = trouverBloc(blocId);
     if (!bloc) return;
 
-    bloc.questions.push({
+    var type = typeSelect ? typeSelect.value : 'likert4';
+    var nouvelle = {
         id: 'q_' + genId(),
         texte: input.value.trim(),
-        type: typeSelect ? typeSelect.value : 'likert4',
+        type: type,
         obligatoire: false,
         personnalisee: true
-    });
+    };
+    if (type === 'likert4') nouvelle.inclureNA = false;
+    if (type === 'choix_unique' || type === 'choix_multiple') {
+        nouvelle.options = [
+            { id: 'opt_' + genId(), lettre: 'a', texte: '', autreAvecChamp: false },
+            { id: 'opt_' + genId(), lettre: 'b', texte: '', autreAvecChamp: false }
+        ];
+    }
+    if (type === 'choix_multiple') {
+        nouvelle.minSelection = null;
+        nouvelle.maxSelection = null;
+    }
+    if (type === 'matrix') {
+        nouvelle.enonces = [
+            { id: 'enon_' + genId(), texte: '' },
+            { id: 'enon_' + genId(), texte: '' }
+        ];
+    }
+
+    bloc.questions.push(nouvelle);
 
     etat.questionnaire.dateModification = new Date().toISOString();
     sauvegarderQuestionnaire();
@@ -732,16 +845,267 @@ function ajouterPerso() {
         etat.questionnaire.questionsPersonnalisees = [];
     }
 
-    etat.questionnaire.questionsPersonnalisees.push({
+    var type = typeSelect ? typeSelect.value : 'likert4';
+    var nouvelle = {
         id: 'q_perso_' + genId(),
         texte: input.value.trim(),
-        type: typeSelect ? typeSelect.value : 'likert4',
+        type: type,
+        obligatoire: false,
+        personnalisee: true,
         bloc: null
-    });
+    };
+    if (type === 'likert4') nouvelle.inclureNA = false;
+    if (type === 'choix_unique' || type === 'choix_multiple') {
+        nouvelle.options = [
+            { id: 'opt_' + genId(), lettre: 'a', texte: '', autreAvecChamp: false },
+            { id: 'opt_' + genId(), lettre: 'b', texte: '', autreAvecChamp: false }
+        ];
+    }
+    if (type === 'choix_multiple') {
+        nouvelle.minSelection = null;
+        nouvelle.maxSelection = null;
+    }
+    if (type === 'matrix') {
+        nouvelle.enonces = [
+            { id: 'enon_' + genId(), texte: '' },
+            { id: 'enon_' + genId(), texte: '' }
+        ];
+    }
+
+    etat.questionnaire.questionsPersonnalisees.push(nouvelle);
 
     etat.questionnaire.dateModification = new Date().toISOString();
     sauvegarderQuestionnaire();
     rendreEditeur();
+}
+
+
+function trouverQuestionUniverselle(blocId, questionId) {
+    if (!blocId || blocId === 'perso') {
+        return trouverQuestionPerso(questionId);
+    }
+    return trouverQuestion(blocId, questionId);
+}
+
+function trouverOption(question, optionId) {
+    if (!question || !question.options) return null;
+    for (var i = 0; i < question.options.length; i++) {
+        if (question.options[i].id === optionId) return question.options[i];
+    }
+    return null;
+}
+
+function indexOption(question, optionId) {
+    if (!question || !question.options) return -1;
+    for (var i = 0; i < question.options.length; i++) {
+        if (question.options[i].id === optionId) return i;
+    }
+    return -1;
+}
+
+function trouverEnonce(question, enonceId) {
+    if (!question || !question.enonces) return null;
+    for (var i = 0; i < question.enonces.length; i++) {
+        if (question.enonces[i].id === enonceId) return question.enonces[i];
+    }
+    return null;
+}
+
+function indexEnonce(question, enonceId) {
+    if (!question || !question.enonces) return -1;
+    for (var i = 0; i < question.enonces.length; i++) {
+        if (question.enonces[i].id === enonceId) return i;
+    }
+    return -1;
+}
+
+function _toucher() {
+    if (etat.questionnaire) etat.questionnaire.dateModification = new Date().toISOString();
+}
+
+function ajouterOption(elem) {
+    var blocId = elem.dataset.bloc;
+    var questionId = elem.dataset.question;
+    var q = trouverQuestionUniverselle(blocId, questionId);
+    if (!q) return;
+    if (!q.options) q.options = [];
+    if (q.options.length >= 8) {
+        afficherToast('Limite : 8 options max');
+        return;
+    }
+    q.options.push({
+        id: 'opt_' + genId(),
+        lettre: String.fromCharCode(97 + q.options.length),
+        texte: '',
+        autreAvecChamp: false
+    });
+    _toucher();
+    sauvegarderQuestionnaire();
+    rendreEditeur();
+}
+
+function supprimerOption(elem) {
+    var blocId = elem.dataset.bloc;
+    var questionId = elem.dataset.question;
+    var optionId = elem.dataset.option;
+    var q = trouverQuestionUniverselle(blocId, questionId);
+    if (!q || !q.options) return;
+    if (q.options.length <= 2) {
+        afficherToast('Minimum : 2 options');
+        return;
+    }
+    q.options = q.options.filter(function(o) { return o.id !== optionId; });
+    // Réajuster les lettres
+    for (var i = 0; i < q.options.length; i++) {
+        q.options[i].lettre = String.fromCharCode(97 + i);
+    }
+    _toucher();
+    sauvegarderQuestionnaire();
+    rendreEditeur();
+}
+
+function deplacerOption(elem) {
+    var blocId = elem.dataset.bloc;
+    var questionId = elem.dataset.question;
+    var optionId = elem.dataset.option;
+    var direction = parseInt(elem.dataset.direction, 10);
+    var q = trouverQuestionUniverselle(blocId, questionId);
+    if (!q || !q.options) return;
+    var idx = indexOption(q, optionId);
+    var newIdx = idx + direction;
+    if (idx < 0 || newIdx < 0 || newIdx >= q.options.length) return;
+    var tmp = q.options[idx];
+    q.options[idx] = q.options[newIdx];
+    q.options[newIdx] = tmp;
+    for (var i = 0; i < q.options.length; i++) {
+        q.options[i].lettre = String.fromCharCode(97 + i);
+    }
+    _toucher();
+    sauvegarderQuestionnaire();
+    rendreEditeur();
+}
+
+function modifierOption(elem) {
+    var blocId = elem.dataset.bloc;
+    var questionId = elem.dataset.question;
+    var optionId = elem.dataset.option;
+    var q = trouverQuestionUniverselle(blocId, questionId);
+    if (!q) return;
+    var opt = trouverOption(q, optionId);
+    if (!opt) return;
+    opt.texte = elem.value;
+    _toucher();
+    sauvegarderQuestionnaire();
+    // Pas de re-render : l'utilisateur tape encore
+}
+
+function toggleAutreChamp(elem) {
+    var blocId = elem.dataset.bloc;
+    var questionId = elem.dataset.question;
+    var optionId = elem.dataset.option;
+    var q = trouverQuestionUniverselle(blocId, questionId);
+    if (!q) return;
+    var opt = trouverOption(q, optionId);
+    if (!opt) return;
+    opt.autreAvecChamp = !!elem.checked;
+    _toucher();
+    sauvegarderQuestionnaire();
+    // Pas de re-render : la case à cocher reflète déjà l'état
+}
+
+function modifierLimite(elem) {
+    var blocId = elem.dataset.bloc;
+    var questionId = elem.dataset.question;
+    var champ = elem.dataset.champ; // "min" ou "max"
+    var q = trouverQuestionUniverselle(blocId, questionId);
+    if (!q) return;
+    var v = elem.value;
+    var n = v === '' ? null : parseInt(v, 10);
+    if (n != null && (isNaN(n) || n < 0)) n = null;
+    if (champ === 'min') q.minSelection = n;
+    if (champ === 'max') q.maxSelection = n;
+    _toucher();
+    sauvegarderQuestionnaire();
+}
+
+function ajouterEnonce(elem) {
+    var blocId = elem.dataset.bloc;
+    var questionId = elem.dataset.question;
+    var q = trouverQuestionUniverselle(blocId, questionId);
+    if (!q) return;
+    if (!q.enonces) q.enonces = [];
+    q.enonces.push({ id: 'enon_' + genId(), texte: '' });
+    _toucher();
+    sauvegarderQuestionnaire();
+    rendreEditeur();
+}
+
+function supprimerEnonce(elem) {
+    var blocId = elem.dataset.bloc;
+    var questionId = elem.dataset.question;
+    var enonceId = elem.dataset.enonce;
+    var q = trouverQuestionUniverselle(blocId, questionId);
+    if (!q || !q.enonces) return;
+    if (q.enonces.length <= 1) {
+        afficherToast('Au moins 1 énoncé requis');
+        return;
+    }
+    q.enonces = q.enonces.filter(function(e) { return e.id !== enonceId; });
+    _toucher();
+    sauvegarderQuestionnaire();
+    rendreEditeur();
+}
+
+function deplacerEnonce(elem) {
+    var blocId = elem.dataset.bloc;
+    var questionId = elem.dataset.question;
+    var enonceId = elem.dataset.enonce;
+    var direction = parseInt(elem.dataset.direction, 10);
+    var q = trouverQuestionUniverselle(blocId, questionId);
+    if (!q || !q.enonces) return;
+    var idx = indexEnonce(q, enonceId);
+    var newIdx = idx + direction;
+    if (idx < 0 || newIdx < 0 || newIdx >= q.enonces.length) return;
+    var tmp = q.enonces[idx];
+    q.enonces[idx] = q.enonces[newIdx];
+    q.enonces[newIdx] = tmp;
+    _toucher();
+    sauvegarderQuestionnaire();
+    rendreEditeur();
+}
+
+function modifierEnonce(elem) {
+    var blocId = elem.dataset.bloc;
+    var questionId = elem.dataset.question;
+    var enonceId = elem.dataset.enonce;
+    var q = trouverQuestionUniverselle(blocId, questionId);
+    if (!q) return;
+    var en = trouverEnonce(q, enonceId);
+    if (!en) return;
+    en.texte = elem.value;
+    _toucher();
+    sauvegarderQuestionnaire();
+}
+
+function toggleNA(elem) {
+    var blocId = elem.dataset.bloc;
+    var questionId = elem.dataset.question;
+    var q = trouverQuestionUniverselle(blocId, questionId);
+    if (!q || q.type !== 'likert4') return;
+    q.inclureNA = !!elem.checked;
+    _toucher();
+    sauvegarderQuestionnaire();
+}
+
+function modifierConsigneConditionnelle(elem) {
+    var blocId = elem.dataset.bloc;
+    var questionId = elem.dataset.question;
+    var q = trouverQuestionUniverselle(blocId, questionId);
+    if (!q) return;
+    var v = (elem.value || '').trim();
+    q.consigneConditionnelle = v === '' ? null : v;
+    _toucher();
+    sauvegarderQuestionnaire();
 }
 
 function reinitialiserDemo() {
@@ -3765,6 +4129,19 @@ window.BilanReflexif = {
     deplacerQuestion: deplacerQuestion,
     ajouterQuestionBloc: ajouterQuestionBloc,
     ajouterPerso: ajouterPerso,
+    // Édition des nouveaux types de questions (Phase B)
+    ajouterOption: ajouterOption,
+    supprimerOption: supprimerOption,
+    deplacerOption: deplacerOption,
+    modifierOption: modifierOption,
+    toggleAutreChamp: toggleAutreChamp,
+    modifierLimite: modifierLimite,
+    ajouterEnonce: ajouterEnonce,
+    supprimerEnonce: supprimerEnonce,
+    deplacerEnonce: deplacerEnonce,
+    modifierEnonce: modifierEnonce,
+    toggleNA: toggleNA,
+    modifierConsigneConditionnelle: modifierConsigneConditionnelle,
     reinitialiserDemo: reinitialiserDemo,
     exporterTexte: exporterTexte,
     // Import du questionnaire (texte)
