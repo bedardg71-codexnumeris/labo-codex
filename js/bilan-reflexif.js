@@ -68,6 +68,35 @@ function injecterStyles() {
         '.bilan-option-autre{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--texte-secondaire,#8aa4b0);cursor:pointer;white-space:nowrap}',
         '.bilan-option-autre input{margin:0}',
         '.bilan-add-mini{padding:3px 10px;font-size:11px;margin-top:4px}',
+        /* Rapport — rendus par type */
+        '.bilan-question-rep{margin:14px 0 18px;padding:10px 12px;background:var(--bleu-tres-pale,#142428);border-radius:var(--radius-moyen,6px);border-left:3px solid var(--bleu-clair,#6aacb8)}',
+        '.bilan-rep-titre{font-size:13px;font-weight:600;color:var(--texte-principal,#d0e0e4);margin-bottom:8px;display:flex;justify-content:space-between;align-items:baseline;gap:10px}',
+        '.bilan-rep-meta{font-size:11px;font-weight:400;color:var(--texte-secondaire,#8aa4b0);font-style:italic;flex-shrink:0}',
+        '.bilan-rep-na{font-size:11px;color:var(--texte-secondaire,#8aa4b0);font-style:italic;margin-bottom:6px}',
+        '.bilan-rep-likert-bar{display:flex;height:20px;border-radius:4px;overflow:hidden;margin:4px 0}',
+        '.bilan-rep-likert-bar > div{transition:width .3s;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:600;text-shadow:0 1px 1px rgba(0,0,0,.3)}',
+        '.bilan-rep-likert-segment-4{background:var(--vert-succes,#34c759)}',
+        '.bilan-rep-likert-segment-3{background:var(--vert-leger,#3aaa8a)}',
+        '.bilan-rep-likert-segment-2{background:var(--orange-accent,#c8a060)}',
+        '.bilan-rep-likert-segment-1{background:var(--rouge-erreur,#e84057)}',
+        '.bilan-rep-likert-legende{font-size:10px;color:var(--texte-secondaire,#8aa4b0);margin-top:4px}',
+        '.bilan-rep-options{margin-top:6px}',
+        '.bilan-rep-row{display:flex;align-items:center;gap:8px;margin:3px 0;font-size:12px}',
+        '.bilan-rep-label{flex:0 0 220px;color:var(--texte-principal,#d0e0e4);font-size:11px}',
+        '.bilan-rep-bar{flex:1;height:10px;background:rgba(106,172,184,.1);border-radius:5px;overflow:hidden;min-width:60px}',
+        '.bilan-rep-bar > div{height:100%;background:var(--bleu-clair,#6aacb8);transition:width .3s}',
+        '.bilan-rep-bar.dominante > div{background:var(--vert-succes,#34c759)}',
+        '.bilan-rep-pct{flex:0 0 60px;text-align:right;color:var(--texte-secondaire,#8aa4b0);font-size:11px;font-weight:600}',
+        '.bilan-rep-pct strong{color:var(--texte-principal,#d0e0e4)}',
+        '.bilan-rep-matrix{width:100%;border-collapse:collapse;font-size:11px;margin-top:6px}',
+        '.bilan-rep-matrix th{padding:4px 6px;text-align:left;color:var(--texte-secondaire,#8aa4b0);font-weight:600;text-transform:uppercase;font-size:10px;border-bottom:1px solid rgba(106,172,184,.15)}',
+        '.bilan-rep-matrix td{padding:6px;border-bottom:1px solid rgba(106,172,184,.06);vertical-align:middle;color:var(--texte-principal,#d0e0e4)}',
+        '.bilan-rep-matrix td:first-child{font-size:11px;max-width:300px;line-height:1.3}',
+        '.bilan-rep-matrix td:last-child{text-align:right;font-weight:600;width:42px}',
+        '.bilan-rep-autres{margin-top:10px;padding-top:8px;border-top:1px dashed rgba(106,172,184,.15)}',
+        '.bilan-rep-autres-titre{font-size:11px;color:var(--texte-secondaire,#8aa4b0);font-style:italic;margin-bottom:4px}',
+        '.bilan-rep-vide{font-size:11px;color:var(--texte-secondaire,#8aa4b0);font-style:italic}',
+        '.bilan-rep-limite{font-size:10px;color:var(--bleu-clair,#6aacb8);margin-left:6px}',
 
         /* Bloc thématique */
         '.bilan-bloc{margin-bottom:12px;border:1px solid rgba(106,172,184,.15);border-radius:var(--radius-grand,12px);overflow:hidden;transition:opacity .2s}',
@@ -3723,49 +3752,46 @@ function rendreRapport() {
         var bloc = q.blocs[i];
         if (!bloc.actif) continue;
 
-        var questionsLikert = [];
-        var questionsOuvertes = [];
+        // Filtrer les questions avec réponses
+        var qsAvecRep = [];
         for (var j = 0; j < bloc.questions.length; j++) {
-            var qb = bloc.questions[j];
-            if (res.reponses[qb.id]) {
-                if (qb.type === 'likert4') questionsLikert.push(qb);
-                else if (qb.type === 'ouvert') questionsOuvertes.push(qb);
-            }
+            if (res.reponses[bloc.questions[j].id]) qsAvecRep.push(bloc.questions[j]);
         }
-
-        if (questionsLikert.length === 0 && questionsOuvertes.length === 0) continue;
+        if (qsAvecRep.length === 0) continue;
 
         html.push('<div class="bilan-rapport-section">');
         html.push('<div class="bilan-rapport-titre">' + echapperHtml(bloc.titre));
 
-        // Score moyen du bloc
-        if (questionsLikert.length > 0) {
-            var scoreBloc = calculerScoreBloc(questionsLikert, res);
+        var scoreBloc = calculerScoreBloc(qsAvecRep, res);
+        if (scoreBloc.nb > 0) {
             html.push(' <span style="font-size:14px;font-weight:400;color:var(--texte-secondaire)">\u2014 ' + scoreBloc.moyenne.toFixed(2) + ' / 4</span>');
         }
         html.push('</div>');
 
-        // Signaux
-        if (questionsLikert.length > 0) {
-            var signaux = calculerSignaux(questionsLikert, res);
-            if (signaux.fort) html.push('<span class="bilan-signal bilan-signal-fort">\u2713 Signal fort \u2014 ' + signaux.tauxFavorable + '% favorables</span>');
-            if (signaux.faible) html.push('<span class="bilan-signal bilan-signal-faible">\u26A0 Signal faible \u2014 ' + signaux.tauxDefavorable + '% d\u00e9favorables</span>');
+        var signaux = calculerSignaux(qsAvecRep, res);
+        if (signaux.fort) html.push('<span class="bilan-signal bilan-signal-fort">\u2713 Signal fort \u2014 ' + signaux.tauxFavorable + '% favorables</span>');
+        if (signaux.faible) html.push('<span class="bilan-signal bilan-signal-faible">\u26A0 Signal faible \u2014 ' + signaux.tauxDefavorable + '% d\u00e9favorables</span>');
 
-            // Graphique barres empilées
-            var canvasId = 'bilan-chart-' + bloc.id;
-            var hauteur = Math.max(questionsLikert.length * 35, 80);
-            html.push('<div class="bilan-canvas-wrapper"><canvas id="' + canvasId + '" height="' + hauteur + '"></canvas></div>');
-        }
-
-        // Réponses ouvertes
-        for (var ro = 0; ro < questionsOuvertes.length; ro++) {
-            var qOuv = questionsOuvertes[ro];
-            var repOuv = res.reponses[qOuv.id];
-            if (!repOuv || !repOuv.reponses || repOuv.reponses.length === 0) continue;
-
-            html.push('<div style="margin-top:12px"><strong style="font-size:13px;color:var(--texte-secondaire)">' + echapperHtml(qOuv.texte) + ' (' + repOuv.nbReponses + ' r\u00e9ponses)</strong></div>');
-            for (var rr = 0; rr < repOuv.reponses.length; rr++) {
-                html.push('<div class="bilan-reponse-ouverte">' + echapperHtml(repOuv.reponses[rr]) + '</div>');
+        // Rendu de chaque question selon son type
+        for (var k = 0; k < qsAvecRep.length; k++) {
+            var qb = qsAvecRep[k];
+            var rep = res.reponses[qb.id];
+            switch (qb.type) {
+                case 'likert4':
+                    html.push(rendreReponseLikert(qb, rep));
+                    break;
+                case 'choix_unique':
+                    html.push(rendreReponseChoixUnique(qb, rep));
+                    break;
+                case 'choix_multiple':
+                    html.push(rendreReponseChoixMultiple(qb, rep));
+                    break;
+                case 'matrix':
+                    html.push(rendreReponseMatrix(qb, rep));
+                    break;
+                case 'ouvert':
+                    html.push(rendreReponseOuvert(qb, rep));
+                    break;
             }
         }
 
@@ -3781,27 +3807,228 @@ function rendreRapport() {
     setTimeout(function() { creerGraphiques(q, res); }, 100);
 }
 
+function _rendreBarreLikert(distribution, totalRep) {
+    if (!distribution || totalRep <= 0) return '';
+    var labels = BILAN_REFLEXIF_DATA.ECHELLE_LIKERT4;
+    var html = ['<div class="bilan-rep-likert-bar">'];
+    var segs = ['', '', '', ''];
+    var pcts = [0, 0, 0, 0];
+    for (var i = 0; i < labels.length; i++) {
+        var n = distribution[labels[i].label] || 0;
+        var pct = totalRep > 0 ? Math.round((n / totalRep) * 100) : 0;
+        pcts[i] = pct;
+        if (pct > 0) {
+            html.push('<div class="bilan-rep-likert-segment-' + labels[i].valeur + '" style="width:' + pct + '%" title="' + labels[i].label + ' : ' + pct + '%">' + (pct >= 8 ? pct + '%' : '') + '</div>');
+        }
+    }
+    html.push('</div>');
+    var leg = [
+        pcts[0] + '% Tout à fait',
+        pcts[1] + '% Plutôt',
+        pcts[2] + '% Plutôt en désaccord',
+        pcts[3] + '% Pas du tout'
+    ];
+    html.push('<div class="bilan-rep-likert-legende">' + leg.join(' · ') + '</div>');
+    return html.join('');
+}
+
+function _rendreBarrePct(label, pct, dominante) {
+    return '<div class="bilan-rep-row">' +
+        '<span class="bilan-rep-label">' + echapperHtml(label) + '</span>' +
+        '<div class="bilan-rep-bar' + (dominante ? ' dominante' : '') + '"><div style="width:' + pct + '%"></div></div>' +
+        '<span class="bilan-rep-pct"><strong>' + pct + '%</strong></span>' +
+        '</div>';
+}
+
+function _rendreReponsesAutres(rep) {
+    if (!rep || !rep.autres || rep.autres.length === 0) return '';
+    var html = ['<div class="bilan-rep-autres">'];
+    html.push('<div class="bilan-rep-autres-titre">Réponses libres « Autre » (' + rep.autres.length + ')</div>');
+    for (var i = 0; i < rep.autres.length; i++) {
+        html.push('<div class="bilan-reponse-ouverte">' + echapperHtml(rep.autres[i]) + '</div>');
+    }
+    html.push('</div>');
+    return html.join('');
+}
+
+function rendreReponseLikert(question, rep) {
+    var html = ['<div class="bilan-question-rep">'];
+    html.push('<div class="bilan-rep-titre">' + echapperHtml(question.texte));
+    var meta = '';
+    if (rep.scoreMoyen != null) meta = rep.scoreMoyen.toFixed(2) + ' / 4';
+    if (rep.nbReponses != null) meta += (meta ? ' · ' : '') + rep.nbReponses + ' réponses';
+    if (meta) html.push('<span class="bilan-rep-meta">' + meta + '</span>');
+    html.push('</div>');
+    if (rep.inclureNA && rep.nbNA > 0) {
+        var totAvecNA = rep.nbReponses + rep.nbNA;
+        var pctNA = totAvecNA > 0 ? Math.round((rep.nbNA / totAvecNA) * 100) : 0;
+        html.push('<div class="bilan-rep-na">⊘ Non applicable : ' + rep.nbNA + ' réponse' + (rep.nbNA > 1 ? 's' : '') + ' (' + pctNA + '%)</div>');
+    }
+    html.push(_rendreBarreLikert(rep.distribution, rep.nbReponses));
+    html.push('</div>');
+    return html.join('');
+}
+
+function rendreReponseChoixUnique(question, rep) {
+    var html = ['<div class="bilan-question-rep">'];
+    html.push('<div class="bilan-rep-titre">' + echapperHtml(question.texte));
+    if (rep.nbReponses != null) html.push('<span class="bilan-rep-meta">' + rep.nbReponses + ' réponses</span>');
+    html.push('</div>');
+
+    if (rep.nbReponses === 0) {
+        html.push('<div class="bilan-rep-vide">Aucune réponse</div>');
+    } else {
+        // Trouver l'option dominante (>=60% ou max simple)
+        var pctMax = 0, idMax = null;
+        for (var oid in rep.distribution) {
+            if (!rep.distribution.hasOwnProperty(oid)) continue;
+            var pct = rep.nbReponses > 0 ? Math.round((rep.distribution[oid] / rep.nbReponses) * 100) : 0;
+            if (pct > pctMax) { pctMax = pct; idMax = oid; }
+        }
+        html.push('<div class="bilan-rep-options">');
+        if (question.options) {
+            for (var oi = 0; oi < question.options.length; oi++) {
+                var opt = question.options[oi];
+                var n = rep.distribution[opt.id] || 0;
+                var pctOpt = rep.nbReponses > 0 ? Math.round((n / rep.nbReponses) * 100) : 0;
+                var dom = (opt.id === idMax && pctMax >= 60);
+                html.push(_rendreBarrePct(opt.texte || ('Option ' + (oi + 1)), pctOpt, dom));
+            }
+        }
+        html.push('</div>');
+    }
+
+    html.push(_rendreReponsesAutres(rep));
+    html.push('</div>');
+    return html.join('');
+}
+
+function rendreReponseChoixMultiple(question, rep) {
+    var html = ['<div class="bilan-question-rep">'];
+    html.push('<div class="bilan-rep-titre">' + echapperHtml(question.texte));
+    var meta = (rep.nbReponses != null) ? rep.nbReponses + ' réponses' : '';
+    if (question.maxSelection) meta += (meta ? ' · ' : '') + 'max ' + question.maxSelection;
+    if (meta) html.push('<span class="bilan-rep-meta">' + meta + '</span>');
+    html.push('</div>');
+
+    if (rep.nbReponses === 0) {
+        html.push('<div class="bilan-rep-vide">Aucune réponse</div>');
+    } else {
+        // Calculer max pct pour normaliser la barre (un % > 100 cumulé fait peu de sens)
+        // Ici on affiche le taux de sélection : nbSelec / nbReponses
+        html.push('<div class="bilan-rep-options">');
+        if (question.options) {
+            // Trier par fréquence décroissante pour mettre en avant les top
+            var sorted = question.options.slice().sort(function(a, b) {
+                return (rep.distribution[b.id] || 0) - (rep.distribution[a.id] || 0);
+            });
+            for (var oi = 0; oi < sorted.length; oi++) {
+                var opt = sorted[oi];
+                var n = rep.distribution[opt.id] || 0;
+                var pctOpt = rep.nbReponses > 0 ? Math.round((n / rep.nbReponses) * 100) : 0;
+                var top3 = (oi < 3 && n > 0);
+                html.push(_rendreBarrePct(opt.texte || ('Option ' + (oi + 1)), pctOpt, top3));
+            }
+        }
+        html.push('</div>');
+    }
+
+    html.push(_rendreReponsesAutres(rep));
+    html.push('</div>');
+    return html.join('');
+}
+
+function rendreReponseMatrix(question, rep) {
+    var html = ['<div class="bilan-question-rep">'];
+    html.push('<div class="bilan-rep-titre">' + echapperHtml(question.texte));
+    var nbE = (question.enonces || []).length;
+    var meta = nbE + ' énoncé' + (nbE > 1 ? 's' : '');
+    if (rep.nbReponses != null) meta += ' · ' + rep.nbReponses + ' réponses max';
+    html.push('<span class="bilan-rep-meta">' + meta + '</span>');
+    html.push('</div>');
+
+    if (!rep.parEnonce || nbE === 0) {
+        html.push('<div class="bilan-rep-vide">Aucune réponse</div>');
+    } else {
+        html.push('<table class="bilan-rep-matrix">');
+        html.push('<thead><tr><th>Énoncé</th><th>Distribution</th><th>Moy.</th></tr></thead>');
+        html.push('<tbody>');
+        for (var ei = 0; ei < question.enonces.length; ei++) {
+            var en = question.enonces[ei];
+            var repE = rep.parEnonce[en.id];
+            html.push('<tr>');
+            html.push('<td>' + echapperHtml(en.texte || ('Énoncé ' + (ei + 1))) + '</td>');
+            html.push('<td>');
+            if (repE && repE.nbReponses > 0) {
+                html.push(_rendreBarreLikert(repE.distribution, repE.nbReponses));
+            } else {
+                html.push('<span class="bilan-rep-vide">—</span>');
+            }
+            html.push('</td>');
+            html.push('<td>' + (repE && repE.scoreMoyen != null ? repE.scoreMoyen.toFixed(2) : '—') + '</td>');
+            html.push('</tr>');
+        }
+        html.push('</tbody></table>');
+    }
+    html.push('</div>');
+    return html.join('');
+}
+
+function rendreReponseOuvert(question, rep) {
+    var html = ['<div class="bilan-question-rep">'];
+    html.push('<div class="bilan-rep-titre">' + echapperHtml(question.texte));
+    if (rep.nbReponses != null) html.push('<span class="bilan-rep-meta">' + rep.nbReponses + ' réponses</span>');
+    html.push('</div>');
+
+    if (!rep.reponses || rep.reponses.length === 0) {
+        html.push('<div class="bilan-rep-vide">Aucune réponse</div>');
+    } else {
+        for (var i = 0; i < rep.reponses.length; i++) {
+            html.push('<div class="bilan-reponse-ouverte">' + echapperHtml(rep.reponses[i]) + '</div>');
+        }
+    }
+    html.push('</div>');
+    return html.join('');
+}
+
 function calculerVueEnsemble(res, q) {
     var sommeScores = 0;
     var nbScores = 0;
     var totalFavorable = 0;
     var totalReponses = 0;
 
+    function _ajouterDistrib(distrib) {
+        for (var lbl in distrib) {
+            if (!distrib.hasOwnProperty(lbl)) continue;
+            var n = distrib[lbl];
+            totalReponses += n;
+            var v = labelVersValeur(lbl);
+            if (v >= 3) totalFavorable += n;
+        }
+    }
+
     for (var qId in res.reponses) {
         if (!res.reponses.hasOwnProperty(qId)) continue;
         var rep = res.reponses[qId];
-        if (rep.type !== 'likert4') continue;
 
-        sommeScores += rep.scoreMoyen;
-        nbScores++;
-
-        var dist = rep.distribution;
-        for (var label in dist) {
-            if (!dist.hasOwnProperty(label)) continue;
-            totalReponses += dist[label];
-            // Niveaux 3 et 4 = favorables
-            var valeur = labelVersValeur(label);
-            if (valeur >= 3) totalFavorable += dist[label];
+        if (rep.type === 'likert4') {
+            if (rep.nbReponses > 0) {
+                sommeScores += rep.scoreMoyen;
+                nbScores++;
+            }
+            _ajouterDistrib(rep.distribution || {});
+        } else if (rep.type === 'matrix') {
+            if (rep.parEnonce) {
+                for (var enid in rep.parEnonce) {
+                    if (!rep.parEnonce.hasOwnProperty(enid)) continue;
+                    var repE = rep.parEnonce[enid];
+                    if (repE.nbReponses > 0) {
+                        sommeScores += repE.scoreMoyen;
+                        nbScores++;
+                    }
+                    _ajouterDistrib(repE.distribution || {});
+                }
+            }
         }
     }
 
@@ -3812,40 +4039,60 @@ function calculerVueEnsemble(res, q) {
     };
 }
 
-function calculerScoreBloc(questionsLikert, res) {
+function calculerScoreBloc(questionsBloc, res) {
     var somme = 0;
     var nb = 0;
-    for (var i = 0; i < questionsLikert.length; i++) {
-        var rep = res.reponses[questionsLikert[i].id];
-        if (rep && rep.scoreMoyen) {
+    for (var i = 0; i < questionsBloc.length; i++) {
+        var qb = questionsBloc[i];
+        var rep = res.reponses[qb.id];
+        if (!rep) continue;
+        if (qb.type === 'likert4' && rep.nbReponses > 0) {
             somme += rep.scoreMoyen;
             nb++;
+        } else if (qb.type === 'matrix' && rep.parEnonce) {
+            for (var enid in rep.parEnonce) {
+                if (!rep.parEnonce.hasOwnProperty(enid)) continue;
+                var repE = rep.parEnonce[enid];
+                if (repE.nbReponses > 0) {
+                    somme += repE.scoreMoyen;
+                    nb++;
+                }
+            }
         }
     }
     return { moyenne: nb > 0 ? somme / nb : 0, nb: nb };
 }
 
-function calculerSignaux(questionsLikert, res) {
-    var totalFav = 0;
-    var totalDefav = 0;
-    var totalRep = 0;
+function calculerSignaux(questionsBloc, res) {
+    var totalFav = 0, totalDefav = 0, totalRep = 0;
 
-    for (var i = 0; i < questionsLikert.length; i++) {
-        var rep = res.reponses[questionsLikert[i].id];
-        if (!rep || !rep.distribution) continue;
-        for (var label in rep.distribution) {
-            if (!rep.distribution.hasOwnProperty(label)) continue;
-            var n = rep.distribution[label];
-            var v = labelVersValeur(label);
+    function _addDistrib(distrib) {
+        for (var lbl in distrib) {
+            if (!distrib.hasOwnProperty(lbl)) continue;
+            var n = distrib[lbl];
+            var v = labelVersValeur(lbl);
             totalRep += n;
             if (v >= 3) totalFav += n;
             if (v <= 2) totalDefav += n;
         }
     }
 
+    for (var i = 0; i < questionsBloc.length; i++) {
+        var qb = questionsBloc[i];
+        var rep = res.reponses[qb.id];
+        if (!rep) continue;
+        if (qb.type === 'likert4' && rep.distribution) {
+            _addDistrib(rep.distribution);
+        } else if (qb.type === 'matrix' && rep.parEnonce) {
+            for (var enid in rep.parEnonce) {
+                if (!rep.parEnonce.hasOwnProperty(enid)) continue;
+                _addDistrib(rep.parEnonce[enid].distribution || {});
+            }
+        }
+    }
+
     var tauxFav = totalRep > 0 ? Math.round((totalFav / totalRep) * 100) : 0;
     var tauxDefav = totalRep > 0 ? Math.round((totalDefav / totalRep) * 100) : 0;
-
     return {
         fort: tauxFav >= 80,
         faible: tauxDefav >= 30,
@@ -3874,16 +4121,15 @@ function rendreSynthese(q, res) {
         var bloc = q.blocs[i];
         if (!bloc.actif) continue;
 
-        var questionsLikert = [];
+        var qsAvecRep = [];
         for (var j = 0; j < bloc.questions.length; j++) {
-            if (bloc.questions[j].type === 'likert4' && res.reponses[bloc.questions[j].id]) {
-                questionsLikert.push(bloc.questions[j]);
-            }
+            if (res.reponses[bloc.questions[j].id]) qsAvecRep.push(bloc.questions[j]);
         }
-        if (questionsLikert.length === 0) continue;
+        if (qsAvecRep.length === 0) continue;
 
-        var scoreBloc = calculerScoreBloc(questionsLikert, res);
-        var signaux = calculerSignaux(questionsLikert, res);
+        var scoreBloc = calculerScoreBloc(qsAvecRep, res);
+        var signaux = calculerSignaux(qsAvecRep, res);
+        if (scoreBloc.nb === 0) continue;
 
         if (scoreBloc.moyenne >= 3.2) {
             forces.push({ titre: bloc.titre, score: scoreBloc.moyenne, tauxFav: signaux.tauxFavorable });
@@ -3926,24 +4172,9 @@ function rendreSynthese(q, res) {
 // === Graphiques Chart.js ===
 
 function creerGraphiques(q, res) {
-    // Graphique global
+    // Seul le graphique global Chart.js subsiste ; les rendus par question
+    // utilisent désormais des barres HTML (plus simple, plus rapide).
     creerGraphiqueGlobal(res);
-
-    // Graphiques par bloc
-    for (var i = 0; i < q.blocs.length; i++) {
-        var bloc = q.blocs[i];
-        if (!bloc.actif) continue;
-
-        var questionsLikert = [];
-        for (var j = 0; j < bloc.questions.length; j++) {
-            if (bloc.questions[j].type === 'likert4' && res.reponses[bloc.questions[j].id]) {
-                questionsLikert.push(bloc.questions[j]);
-            }
-        }
-        if (questionsLikert.length === 0) continue;
-
-        creerGraphiqueBloc('bilan-chart-' + bloc.id, questionsLikert, res);
-    }
 }
 
 function creerGraphiqueGlobal(res) {
