@@ -111,7 +111,7 @@ var ETATS_VIDES = {
     'structure-retroactions': {
         message: 'Aucune cartouche de r\u00e9troaction. Les cartouches sont des gabarits de commentaires g\u00e9n\u00e9raux que tu pr\u00e9pares une fois\u00a0: un commentaire par combinaison crit\u00e8re\u00a0\u00d7\u00a0niveau. Lors de l\u2019\u00e9valuation, l\u2019application assemble automatiquement une r\u00e9troaction personnalis\u00e9e.'
     },
-    'contexte-pratiques-notation': {
+    'structure-pratiques-notation': {
         message: 'Aucune pratique de notation configur\u00e9e. La pratique, c\u2019est ta recette compl\u00e8te\u00a0: type de notation (SOM, STD, SPE ou DEN), \u00e9chelle, structure des \u00e9valuations et jetons. C\u2019est elle qui d\u00e9termine comment la note se construit.'
     },
     'evaluations-liste': {

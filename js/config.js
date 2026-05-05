@@ -43,20 +43,18 @@ const configurationsOnglets = {
         { id: 'productions', label: 'Productions étudiantes' },
         { id: 'grille-criteres', label: 'Grilles de critères' },
         { id: 'echelle-performance', label: 'Échelles de performance' },
+        { id: 'pratiques-notation', label: 'Pratiques de notation' },
         { id: 'retroactions', label: 'Cartouches de rétroaction' }
     ],
     'contexte': [
         { id: 'trimestre', label: 'Trimestre' },
-        { id: 'calendrier', label: 'Vue calendaire' },
-        { id: 'pratiques-notation', label: 'Pratiques de notation' },
-        { id: 'bilan', label: 'Bilan réflexif' }
+        { id: 'calendrier', label: 'Vue calendaire' }
     ],
     'suivi': [
         { id: 'liste', label: 'Liste des élèves' },
         { id: 'saisie', label: 'Saisie des présences' },
         { id: 'profil', label: 'Profils individuels' },
-        { id: 'interventions', label: 'Interventions' },
-        { id: 'labo', label: 'Labo' }
+        { id: 'interventions', label: 'Interventions' }
     ],
     'evaluations': [
         { id: 'importer', label: 'Préparer et importer' },
@@ -67,7 +65,9 @@ const configurationsOnglets = {
     'boite-outils': [
         { id: 'tirage', label: 'Tirage au sort' },
         { id: 'modelisation', label: 'Modélisation' },
-        { id: 'rythme', label: 'Rythme de travail' }
+        { id: 'rythme', label: 'Rythme de travail' },
+        { id: 'etudes', label: 'Études' },
+        { id: 'bilan', label: 'Bilan réflexif' }
     ],
     'aide': [
         { id: 'introduction', label: 'Introduction' },

@@ -508,8 +508,8 @@ async function afficherPratiqueEnLectureSeule() {
  * Appelée par le bouton "Modifier la pratique de notation"
  */
 function naviguerVersPratiqueNotation() {
-    // Naviguer vers Construction → Pratiques de notation
-    afficherSousSection('contexte-pratiques-notation');
+    // Naviguer vers Conception → Pratiques de notation
+    afficherSousSection('structure-pratiques-notation');
 }
 
 /**

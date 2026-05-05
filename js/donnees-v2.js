@@ -1295,9 +1295,9 @@
         // Ensuite afficher la bonne sous-section
         setTimeout(() => {
             if (type === 'pratique') {
-                // Naviguer vers Contexte > Pratiques de notation
+                // Naviguer vers Conception > Pratiques de notation
                 if (typeof afficherSousSection === 'function') {
-                    afficherSousSection('contexte-pratiques-notation');
+                    afficherSousSection('structure-pratiques-notation');
                 }
             } else if (type === 'grille') {
                 // Naviguer vers Construction de la note > Grilles de critères
