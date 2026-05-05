@@ -10,7 +10,7 @@
     "sections": [
       "section-accueil",
       "section-apercu",
-      "section-structure",
+      "section-conception",
       "section-contexte",
       "section-suivi",
       "section-evaluations",
@@ -22,13 +22,13 @@
       "accueil-decouvrir",
       "accueil-parcourir",
       "accueil-piloter",
-      "structure-carte",
-      "structure-organisateur",
-      "structure-productions",
-      "structure-grille-criteres",
-      "structure-echelle-performance",
-      "structure-pratiques-notation",
-      "structure-retroactions",
+      "conception-carte",
+      "conception-organisateur",
+      "conception-productions",
+      "conception-grille-criteres",
+      "conception-echelle-performance",
+      "conception-pratiques-notation",
+      "conception-retroactions",
       "contexte-trimestre",
       "contexte-calendrier",
       "suivi-liste",
@@ -87,7 +87,7 @@
     ]
   },
   "classes_css": {
-    "structure": [
+    "conception": [
       "conteneur",
       "entete",
       "contenu",

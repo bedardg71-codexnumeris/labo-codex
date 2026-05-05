@@ -37,7 +37,7 @@ const configurationsOnglets = {
     // Sections créées: apercu (plate), structure, contexte, suivi
     'accueil': [],
     'apercu': [],
-    'structure': [
+    'conception': [
         { id: 'carte', label: 'Alignement pédagogique' },
         { id: 'organisateur', label: 'Plan de la leçon' },
         { id: 'productions', label: 'Productions étudiantes' },
@@ -93,7 +93,7 @@ const configurationsOnglets = {
 
 /**
  * Section actuellement affichée
- * Valeurs possibles: 'accueil' | 'apercu' | 'structure' | 'contexte' | 'suivi' | 'evaluations' | 'labo' | 'aide' | 'reglages'
+ * Valeurs possibles: 'accueil' | 'apercu' | 'conception' | 'contexte' | 'suivi' | 'evaluations' | 'labo' | 'aide' | 'reglages'
  *
  * UTILISÉ PAR:
  * - afficherSection() pour mettre à jour l'état

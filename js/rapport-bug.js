@@ -513,7 +513,7 @@ function obtenirContexteSection() {
                 contexte.horaireActif = db.getSync('horaireActif', 'non défini');
                 break;
 
-            case 'structure':
+            case 'conception':
                 if (sousSection === 'productions') {
                     contexte.nbProductions = (db.getSync(cle('productions'), []) || []).length;
                 }

@@ -709,13 +709,13 @@ const TOOLTIPS = {
 
     'nav-construction':
         'Configuration de l\'\u00e9valuation : productions, grilles, \u00e9chelles, cartouches et pratiques de notation.',
-    'nav-str-productions':
+    'nav-conception-productions':
         'D\u00e9finis les productions de tes \u00e9tudiant\u00b7es : portfolios, artefacts et travaux avec pond\u00e9rations et \u00e9ch\u00e9ances.',
-    'nav-str-grilles':
+    'nav-conception-grilles':
         'Cr\u00e9e des grilles r\u00e9utilisables avec crit\u00e8res nomm\u00e9s, typ\u00e9s et pond\u00e9r\u00e9s.',
-    'nav-str-echelles':
+    'nav-conception-echelles':
         'Configure les \u00e9chelles de performance : seuils, valeurs ponctuelles, couleurs et aper\u00e7u visuel.',
-    'nav-str-cartouches':
+    'nav-conception-cartouches':
         'Cr\u00e9e des matrices de commentaires automatiques (crit\u00e8res \u00d7 niveaux) pour la r\u00e9troaction diff\u00e9renci\u00e9e.',
 
     // --- Évaluations et travaux ---
@@ -761,9 +761,9 @@ const TOOLTIPS = {
 
     'nav-planification':
         'Planification p\u00e9dagogique : alignement objectifs-activit\u00e9s-\u00e9valuations et organisation des le\u00e7ons.',
-    'nav-str-alignement':
+    'nav-conception-alignement':
         'Carte mentale interactive : visualise l\'alignement objectifs \u2192 activit\u00e9s \u2192 \u00e9valuations.',
-    'nav-str-organisateur':
+    'nav-conception-organisateur':
         'Calendrier des s\u00e9quences sur 15 semaines et plans de le\u00e7ons avec option d\'enseignement explicite en 5 phases.',
 
     // --- Labo ---
@@ -781,7 +781,7 @@ const TOOLTIPS = {
 
     // --- Onglets principaux (navigation) ---
 
-    'nav-structure':
+    'nav-conception':
         'L\'onglet \u00ab\u00a0Structure\u00a0\u00bb regroupe la conception de tes outils d\'\u00e9valuation : productions, grilles, \u00e9chelles, cartouches et pratiques de notation.',
     'nav-contexte':
         'L\'onglet \u00ab\u00a0Contexte\u00a0\u00bb regroupe la configuration de ton espace de travail : trimestre, cours, profil, \u00e9tudiant\u00b7es, horaire et assemblage du groupe-cours.',

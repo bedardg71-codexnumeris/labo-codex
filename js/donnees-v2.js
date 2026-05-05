@@ -1289,7 +1289,7 @@
     function naviguerVersRessource(type, id) {
         // Afficher la section appropriée selon le type de ressource
         if (typeof afficherSection === 'function') {
-            afficherSection(type === 'pratique' ? 'contexte' : 'structure');
+            afficherSection(type === 'pratique' ? 'contexte' : 'conception');
         }
 
         // Ensuite afficher la bonne sous-section
@@ -1297,27 +1297,27 @@
             if (type === 'pratique') {
                 // Naviguer vers Conception > Pratiques de notation
                 if (typeof afficherSousSection === 'function') {
-                    afficherSousSection('structure-pratiques-notation');
+                    afficherSousSection('conception-pratiques-notation');
                 }
             } else if (type === 'grille') {
                 // Naviguer vers Construction de la note > Grilles de critères
                 if (typeof afficherSousSection === 'function') {
-                    afficherSousSection('structure-grille-criteres');
+                    afficherSousSection('conception-grille-criteres');
                 }
             } else if (type === 'cartouche') {
                 // Naviguer vers Construction de la note > Rétroactions (Cartouches)
                 if (typeof afficherSousSection === 'function') {
-                    afficherSousSection('structure-retroactions');
+                    afficherSousSection('conception-retroactions');
                 }
             } else if (type === 'echelle') {
                 // Naviguer vers Construction de la note > Échelles de performance
                 if (typeof afficherSousSection === 'function') {
-                    afficherSousSection('structure-echelle-performance');
+                    afficherSousSection('conception-echelle-performance');
                 }
             } else if (type === 'production') {
                 // Naviguer vers Construction de la note > Productions
                 if (typeof afficherSousSection === 'function') {
-                    afficherSousSection('structure-productions');
+                    afficherSousSection('conception-productions');
                 }
             }
         }, 100);
