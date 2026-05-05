@@ -10759,40 +10759,40 @@
                 <div id="reglages-donnees" class="sous-section">
                     <h2>Données</h2>
                     <p class="text-muted">
-                        Sauvegarde, restauration, gestion des ressources pédagogiques et maintenance.
+                        Quatre concepts : <strong>Codex</strong> (espace de travail actif), <strong>Archives</strong> (dépôt local), <strong>Codex data</strong> (extrait pour la recherche), <strong>Voûte</strong> (bibliothèque partagée). Plus la maintenance.
                     </p>
 
                     <!-- ========================================
-                         CARTE 1 : SAUVEGARDE ET RESTAURATION
+                         CARTE 1 : CODEX (espace de travail actif)
                          ======================================== -->
                     <div class="carte">
-                        <h3 class="carte-titre-bleu" data-tooltip="donnees-sauvegarde">Sauvegarde et restauration</h3>
+                        <h3 class="carte-titre-bleu" data-tooltip="donnees-codex">Codex (espace de travail actif)</h3>
                         <p class="text-muted u-mb-20">
-                            Exporte tes données pour les sauvegarder ou les partager, ou importe un fichier existant.
+                            Le Codex est ton espace de travail trimestriel. Exporte-le pour le transporter sur clé USB, ouvre-en un existant, ou exporte ta configuration pédagogique pour la partager.
                         </p>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
-                            <!-- Export sauvegarde -->
+                            <!-- Exporter le Codex -->
                             <div class="carte-bleu-pale-p15">
-                                <h4 class="u-mb-10 u-texte-bleu" data-tooltip="donnees-export-complet">
-                                    Sauvegarde complète
+                                <h4 class="u-mb-10 u-texte-bleu" data-tooltip="donnees-codex-export">
+                                    Exporter le Codex
                                 </h4>
                                 <p class="u-mb-15 u-texte-09" style="color: var(--gris-moyen)">
-                                    Toutes tes données : cours, étudiants, présences, évaluations, etc.
-                                    <br><em class="u-texte-gris">Pour restaurer sur cet appareil ou un autre.</em>
+                                    ZIP complet du trimestre actif : données, bibliothèques et fichiers étudiants.
+                                    <br><em class="u-texte-gris">Pour transporter sur clé USB ou restaurer ailleurs.</em>
                                 </p>
                                 <button class="btn btn-principal" data-action="ouvrirModalExport">
-                                    Exporter mes données
+                                    Exporter le Codex
                                 </button>
                             </div>
 
-                            <!-- Export config pédagogique -->
+                            <!-- Exporter ma config -->
                             <div class="carte-bleu-pale-p15">
-                                <h4 class="u-mb-10 u-texte-bleu" data-tooltip="donnees-export-config">
-                                    Configuration pédagogique
+                                <h4 class="u-mb-10 u-texte-bleu" data-tooltip="donnees-config-export">
+                                    Exporter ma config
                                 </h4>
                                 <p class="u-mb-15 u-texte-09" style="color: var(--gris-moyen)">
-                                    Uniquement les outils : grilles, échelles, productions, cartouches.
+                                    ZIP léger sans données étudiants : grilles, échelles, productions, cartouches.
                                     <br><em class="u-texte-gris">Pour partager avec des collègues (CC BY-NC-SA).</em>
                                 </p>
                                 <button class="btn btn-principal" data-action="exporterConfigurationComplete">
@@ -10800,29 +10800,29 @@
                                 </button>
                             </div>
 
-                            <!-- Importer -->
+                            <!-- Ouvrir un Codex -->
                             <div class="carte-bleu-pale-p15">
-                                <h4 class="u-mb-10 u-texte-bleu" data-tooltip="donnees-import">
-                                    Importer un fichier
+                                <h4 class="u-mb-10 u-texte-bleu" data-tooltip="donnees-codex-ouvrir">
+                                    Ouvrir un Codex
                                 </h4>
                                 <p class="u-mb-15 u-texte-09" style="color: var(--gris-moyen)">
-                                    Sauvegarde personnelle ou configuration d'un collègue.
-                                    <br><em class="u-texte-gris">Le type sera détecté automatiquement.</em>
+                                    Importe un Codex complet ou une configuration partagée.
+                                    <br><em class="u-texte-gris">Le type est détecté automatiquement.</em>
                                 </p>
                                 <button class="btn btn-principal" data-action="ouvrirModalImport">
-                                    Choisir un fichier...
+                                    Ouvrir un Codex...
                                 </button>
                             </div>
                         </div>
                     </div>
 
                     <!-- ========================================
-                         CARTE 2 : RÉSERVE (Accordéon)
+                         CARTE 2 : ARCHIVES (Accordéon, diagnostic-only)
                          ======================================== -->
                     <div class="carte accordeon ferme" id="accordeon-reserve">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
-                                Archives stockées
+                                Archives (dépôt local)
                                 <button class="btn-aide-contextuelle" data-aide="reglages-reserve" data-stop aria-label="Aide : carte Archives">✴️</button>
                             </h3>
                             <span class="accordeon-chevron">▼</span>
@@ -10832,6 +10832,11 @@
                                 Historique de tes archives (codex → archives). Chaque archive
                                 contient un instantané d'un groupe-cours : étudiants, fichiers, configuration.
                             </p>
+
+                            <!-- Note diagnostic-only : les actions sont au menu Codex -->
+                            <div class="alerte alerte-information u-mb-15">
+                                Pour <strong>archiver</strong> un groupe-cours, utilise le <strong>menu Codex</strong> en haut de l'écran → <em>Archiver dans la réserve…</em>. Cette section affiche le statut de tes archives existantes.
+                            </div>
 
                             <!-- Bandeau dossier FSAPI -->
                             <div id="reserve-reglages-dossier" class="u-mt-15 u-p-15" style="background: var(--bleu-tres-pale); border-radius: var(--radius-grand)">
@@ -10865,7 +10870,35 @@
                     </div>
 
                     <!-- ========================================
-                         CARTE 3 : CAPTURES ET RECHERCHE (Accordéon)
+                         CARTE 3 : CODEX DATA (placeholder « à venir »)
+                         ======================================== -->
+                    <div class="carte" style="opacity: 0.65;">
+                        <h3 class="carte-titre-bleu" style="display: flex; align-items: center; justify-content: space-between;" data-tooltip="donnees-codex-data">
+                            <span>Codex data <em style="font-weight: 400; font-size: 0.85em; color: var(--gris-moyen)">(extrait pour la recherche)</em></span>
+                            <span class="badge-archive" style="font-weight: 400;">À venir</span>
+                        </h3>
+                        <p class="text-muted u-mb-0">
+                            Format léger sans blobs (5–30 Mo), multi-trimestres, pour la recherche longitudinale au Labo. Sera extrait depuis tes Archives.
+                            <br><em class="u-texte-gris u-texte-09">Disponible dans une prochaine version (cf. ECOSYSTEME-DONNEES.md, priorité 4).</em>
+                        </p>
+                    </div>
+
+                    <!-- ========================================
+                         CARTE 4 : VOÛTE (placeholder « à venir »)
+                         ======================================== -->
+                    <div class="carte" style="opacity: 0.65;">
+                        <h3 class="carte-titre-bleu" style="display: flex; align-items: center; justify-content: space-between;" data-tooltip="donnees-voute">
+                            <span>Voûte <em style="font-weight: 400; font-size: 0.85em; color: var(--gris-moyen)">(bibliothèque partagée)</em></span>
+                            <span class="badge-archive" style="font-weight: 400;">À venir</span>
+                        </h3>
+                        <p class="text-muted u-mb-0">
+                            Bibliothèque partagée entre enseignants pour mutualiser grilles, échelles, productions et cartouches. Tu pourras y déposer ta config et y emprunter celle de collègues (CC BY-NC-SA).
+                            <br><em class="u-texte-gris u-texte-09">Disponible dans une prochaine version (cf. ECOSYSTEME-DONNEES.md, priorité 6).</em>
+                        </p>
+                    </div>
+
+                    <!-- ========================================
+                         CARTE 5 : CAPTURES ET RECHERCHE (Accordéon)
                          ======================================== -->
                     <div class="carte accordeon ferme" id="accordeon-captures-recherche">
                         <div class="accordeon-header" data-tooltip="donnees-captures">
@@ -10951,7 +10984,7 @@
                     </div>
 
                     <!-- ========================================
-                         CARTE 4 : MAINTENANCE (Zone danger)
+                         CARTE 6 : MAINTENANCE (Zone danger)
                          ======================================== -->
                     <div class="carte accordeon ferme" id="accordeon-maintenance">
                         <div class="accordeon-header zone-danger-header" data-tooltip="donnees-maintenance">
@@ -16009,7 +16042,7 @@
     <script src="js/accompagnement.js?v=2026050539"></script> <!-- Refonte nav SP5 : section calendrier -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=2026050560"></script> <!-- #259 : tooltips Archives + label section Labo -->
+    <script src="js/accompagnement-contenu-hover.js?v=2026050563"></script> <!-- #247 : tooltips donnees-codex / donnees-codex-data / donnees-voute -->
     <script src="js/accompagnement-contenu-popup.js?v=2026050561"></script> <!-- #259 : popups Archives, titre carte « Archives stockées » -->
     <script src="js/accompagnement-contenu-terme.js?v=2026050528"></script>
 
@@ -16017,7 +16050,7 @@
     <script src="js/main.js?v=2026050543"></script> <!-- Refonte nav SP5 : naviguerVers calendrier-trimestre -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=2026050562"></script> <!-- Beta 99.35 b0505-0940 : #259 Réserve → Archives -->
+    <script src="js/init-inline.js?v=2026050564"></script> <!-- Beta 99.35 b0505-1220 : #247 Réglages > Données refonte 6 cartes -->
 
     <!-- Wrappers pour délégation data-on-change (Phase 5b) — externalisé dans init-inline.js -->
 

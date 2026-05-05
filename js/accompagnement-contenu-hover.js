@@ -179,16 +179,22 @@ const TOOLTIPS = {
         'Capture imm\u00e9diate de l\'\u00e9tat actuel des indices A-C-P. Comme prendre une photo de la situation de ton groupe \u00e0 cet instant.',
     'donnees-captures':
         'Tes captures de suivi longitudinal et l\'export anonymis\u00e9 pour la recherche en \u00e9ducation.',
-    'donnees-export-complet':
-        'Toutes tes donn\u00e9es : cours, \u00e9tudiant\u00b7es, pr\u00e9sences, \u00e9valuations. Pour restaurer sur cet appareil ou un autre.',
-    'donnees-export-config':
-        'Uniquement tes outils (grilles, \u00e9chelles, productions, cartouches). Pour partager avec un\u00b7e coll\u00e8gue (CC BY-NC-SA).',
+    'donnees-codex':
+        'Le Codex est ton espace de travail trimestriel. Exporte-le, ouvre un Codex existant, ou exporte ta configuration p\u00e9dagogique pour la partager.',
+    'donnees-codex-export':
+        'ZIP complet de ton trimestre actif : donn\u00e9es, biblioth\u00e8ques et fichiers \u00e9tudiants. Pour transporter sur cl\u00e9 USB ou restaurer ailleurs.',
+    'donnees-codex-ouvrir':
+        'Importe un Codex complet ou une configuration partag\u00e9e. Le type est d\u00e9tect\u00e9 automatiquement.',
+    'donnees-codex-data':
+        'Format l\u00e9ger sans blobs (5\u201330 Mo), multi-trimestres, pour la recherche longitudinale au Labo. \u00c0 venir : extraction depuis tes Archives.',
+    'donnees-voute':
+        'Biblioth\u00e8que partag\u00e9e entre enseignants pour mutualiser grilles, \u00e9chelles, productions et cartouches. \u00c0 venir.',
+    'donnees-config-export':
+        'ZIP l\u00e9ger sans donn\u00e9es \u00e9tudiants : grilles, \u00e9chelles, productions, cartouches. Pour partager avec un\u00b7e coll\u00e8gue (CC BY-NC-SA).',
     'donnees-export-recherche':
         'Export anonymis\u00e9 des indices A-C-P et statistiques agr\u00e9g\u00e9es pour la recherche. Aucune donn\u00e9e nominative incluse.',
     'donnees-gestion-ressources':
         'Audite et nettoie les ressources p\u00e9dagogiques accumul\u00e9es. S\u00e9lectionne un type pour afficher la liste.',
-    'donnees-import':
-        'Charge une sauvegarde personnelle ou la configuration d\'un\u00b7e coll\u00e8gue. Le type est d\u00e9tect\u00e9 automatiquement.',
     'donnees-info-techniques':
         'Tes donn\u00e9es restent sur ton appareil (stockage local). Aucune donn\u00e9e n\'est envoy\u00e9e sur internet.',
     'donnees-maintenance':
@@ -197,8 +203,6 @@ const TOOLTIPS = {
         'Recalcule l\'historique des captures depuis le d\u00e9but. Utile apr\u00e8s un changement de param\u00e8tres de d\u00e9pistage.',
     'donnees-reinitialiser':
         'Efface toutes les donn\u00e9es et revient \u00e0 l\'\u00e9tat initial. Triple confirmation et mot de passe requis. Irr\u00e9versible.',
-    'donnees-sauvegarde':
-        'Exporte tes donn\u00e9es (sauvegarde compl\u00e8te ou configuration p\u00e9dagogique seule) ou importe un fichier existant.',
     'donnees-snapshots':
         'Enregistre l\'\u00e9tat des indices A-C-P \u00e0 des moments cl\u00e9s pour suivre l\'\u00e9volution de ton groupe dans le temps.',
     'donnees-supprimer-captures':
