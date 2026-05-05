@@ -3807,7 +3807,7 @@ window.supprimerCartoucheDefinitivement = supprimerCartoucheDefinitivement;
 window.supprimerCartoucheDeBibliothequePartagee = supprimerCartoucheDeBibliothequePartagee;
 
 /**
- * Importe une liste de cartouches externes (réserve, voûte, etc.).
+ * Importe une liste de cartouches externes (archives, voûte, etc.).
  * Les cartouches sont distribués dans cartouches_{grilleId} selon leur grilleId.
  *
  * @param {Array} nouveauxCartouches - Cartouches à importer (chacun doit avoir grilleId)

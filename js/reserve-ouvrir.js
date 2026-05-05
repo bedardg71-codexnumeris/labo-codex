@@ -1,5 +1,5 @@
 /* ===============================
-   MODULE : RÉSERVE OUVRIR — Réimport sélectif d'un versement
+   MODULE : ARCHIVES OUVRIR — Réimport sélectif d'une archive
    Date : 28 avril 2026
    Backlog : #254
    Architecture : docs/architecture/ECOSYSTEME-DONNEES.md (voie de retour)
@@ -34,10 +34,10 @@
    ÉTAT INTERNE
    =============================== */
 
-// Payload du versement courant (source pour appliquerReimport)
+// Payload de l’archive courant (source pour appliquerReimport)
 var _payloadCourant = null;
 
-// Mode navigation FSAPI : liste des versements détectés + handle racine
+// Mode navigation FSAPI : liste des archives détectés + handle racine
 var _versementsListes = null;
 var _handleReserveCourant = null;
 
@@ -91,28 +91,28 @@ async function chargerDepuisFichier(file) {
         }
     }
 
-    // Localiser le dossier de versement et les fichiers manifestes
+    // Localiser le dossier d’archive et les fichiers manifestes
     var fichierDonnees = null;
     var fichierMeta = null;
     var fichierPatch = null;
-    var fichierManifesteGlobal = zip.files['manifeste-reserve.json'] || null;
+    var fichierManifesteGlobal = zip.files['manifeste-archives.json'] || null;
     var dossierVersement = null;
 
     Object.keys(zip.files).forEach(function(chemin) {
-        var m = chemin.match(/^trimestres\/([^\/]+)\/(donnees|meta|manifeste-reserve-patch)\.json$/);
+        var m = chemin.match(/^trimestres\/([^\/]+)\/(donnees|meta|manifeste-archives-patch)\.json$/);
         if (!m) return;
         if (m[2] === 'donnees' && !fichierDonnees) {
             fichierDonnees = zip.files[chemin];
             dossierVersement = m[1];
         } else if (m[2] === 'meta' && !fichierMeta) {
             fichierMeta = zip.files[chemin];
-        } else if (m[2] === 'manifeste-reserve-patch' && !fichierPatch) {
+        } else if (m[2] === 'manifeste-archives-patch' && !fichierPatch) {
             fichierPatch = zip.files[chemin];
         }
     });
 
     if (!fichierDonnees) {
-        throw new Error('Le ZIP ne contient pas de versement reconnaissable (trimestres/.../donnees.json absent).');
+        throw new Error('Le ZIP ne contient pas de archive reconnaissable (trimestres/.../donnees.json absent).');
     }
 
     var donnees, meta = null;
@@ -131,7 +131,7 @@ async function chargerDepuisFichier(file) {
     }
 
     // Auto-hydration du manifeste local (#248). Le simple fait d'ouvrir un
-    // ZIP enregistre le versement dans l'historique de l'app, peu importe
+    // ZIP enregistre l’archive dans l'historique de l'app, peu importe
     // s'il a été créé avant ou après #248.
     await _hydrateManifesteDepuisZip(zip, dossierVersement, fichierPatch, fichierManifesteGlobal, meta);
 
@@ -148,8 +148,8 @@ async function chargerDepuisFichier(file) {
 /**
  * Auto-hydration du manifeste local quand un ZIP est ouvert.
  * Stratégie en cascade :
- *   1. manifeste-reserve.json à la racine (ZIPs récents) → fusion complète
- *   2. manifeste-reserve-patch.json dans le dossier → upsert de l'entrée
+ *   1. manifeste-archives.json à la racine (ZIPs récents) → fusion complète
+ *   2. manifeste-archives-patch.json dans le dossier → upsert de l'entrée
  *   3. fallback : entrée minimum reconstruite depuis meta.json
  * Silencieux : aucun affichage si rien ne change ou si Reserve n'est pas chargé.
  */
@@ -164,7 +164,7 @@ async function _hydrateManifesteDepuisZip(zip, dossierVersement, fichierPatch, f
             return;
         }
     } catch (e) {
-        console.warn('[ReserveOuvrir] manifeste-reserve.json racine illisible, fallback patch', e.message || e);
+        console.warn('[ReserveOuvrir] manifeste-archives.json racine illisible, fallback patch', e.message || e);
     }
 
     if (typeof window.Reserve.upsertEntreeManifeste !== 'function') return;
@@ -181,7 +181,7 @@ async function _hydrateManifesteDepuisZip(zip, dossierVersement, fichierPatch, f
             }
         }
     } catch (e) {
-        console.warn('[ReserveOuvrir] manifeste-reserve-patch.json illisible, fallback meta', e.message || e);
+        console.warn('[ReserveOuvrir] manifeste-archives-patch.json illisible, fallback meta', e.message || e);
     }
 
     // Fallback : reconstruire une entrée minimum depuis meta.json
@@ -194,8 +194,8 @@ async function _hydrateManifesteDepuisZip(zip, dossierVersement, fichierPatch, f
         groupe: meta.groupe,
         statut: meta.statut || 'verse',
         source: meta.source || 'application (IndexedDB)',
-        mode_versement: meta.mode_versement || 'zip',
-        date_versement: meta.date_versement,
+        mode_archive: meta.mode_archive || 'zip',
+        date_archive: meta.date_archive,
         donnees: !!(meta.contenu && meta.contenu.donnees),
         travaux: !!(meta.contenu && meta.contenu.nombre_fichiers_travaux > 0),
         nombre_etudiants: meta.contenu && meta.contenu.nombre_etudiants,
@@ -327,7 +327,7 @@ function _extraireRessources(donnees) {
    EXTRACTION DU CONTENU PÉDAGOGIQUE (#257 v2.B-α)
    ===============================
    Lecture seule, en mémoire, à partir du donnees.json déjà parsé.
-   N'écrit nulle part. Utilisé par le panneau « Contenu du versement »
+   N'écrit nulle part. Utilisé par le panneau « Contenu de l’archive »
    qui s'affiche au-dessus des sections de réimport.
 */
 
@@ -406,7 +406,7 @@ function _extraireContenuVersement(donnees, meta) {
             cours: meta.cours || '',
             nom_cours: meta.nom_cours || '',
             groupe: meta.groupe || '',
-            date_versement: meta.date_versement || '',
+            date_archive: meta.date_archive || '',
             appareil: meta.appareil || '',
             application_version: meta.application_version || ''
         },
@@ -516,7 +516,7 @@ function _afficherChoixFichier() {
         '<img src="icons/icon-import.svg" alt="" class="btn-inline-icon">' +
         'Choisir un fichier .reserve.zip&hellip;</button>' +
         '<p style="margin-top: 14px; font-size: 0.82rem; color: var(--texte-secondaire); line-height: 1.5;">' +
-        'Si tu viens de verser depuis Safari, ton fichier ZIP est dans ton dossier ' +
+        'Si tu viens d’archiver depuis Safari, ton fichier ZIP est dans ton dossier ' +
         '<strong>T&eacute;l&eacute;chargements</strong> (<code>~/Downloads/</code>).' +
         '</p>' +
         '</div>';
@@ -531,7 +531,7 @@ function _afficherChoixDossier() {
         '<div style="text-align: center; padding: 24px 16px;">' +
         '<button data-action="ReserveOuvrir.actionChoisirDossier" class="btn btn-confirmer">' +
         '<img src="icons/icon-filing-cabinet.svg" alt="" class="btn-inline-icon">' +
-        'Choisir le dossier de ma r&eacute;serve&hellip;</button>' +
+        'Choisir le dossier de ma archives&hellip;</button>' +
         '<p style="margin-top: 12px; font-size: 0.82rem; color: var(--texte-secondaire); line-height: 1.5;">' +
         'Pas encore de dossier configur&eacute; sur ce navigateur.' +
         '</p>' +
@@ -546,7 +546,7 @@ async function _afficherListeVersements() {
     var elEtape = document.getElementById('reserve-ouvrir-etape-fichier');
     if (!elEtape) return;
 
-    elEtape.innerHTML = '<div style="text-align: center; padding: 24px;"><em>Chargement de la r&eacute;serve&hellip;</em></div>';
+    elEtape.innerHTML = '<div style="text-align: center; padding: 24px;"><em>Chargement de les archives&hellip;</em></div>';
 
     var handle = null;
     try {
@@ -564,21 +564,21 @@ async function _afficherListeVersements() {
 
     var versements;
     try {
-        versements = await _listerVersementsDansHandle(handle);
+        archives = await _listerVersementsDansHandle(handle);
     } catch (e) {
-        console.error('[ReserveOuvrir] Listage versements échoué', e);
-        versements = [];
+        console.error('[ReserveOuvrir] Listage archives échoué', e);
+        archives = [];
     }
     _versementsListes = versements;
 
     var html = '<div style="padding: 0 0 4px;">';
     html += '<div style="font-size: 0.82rem; color: var(--texte-secondaire); margin-bottom: 8px;">' +
-        'Dossier r&eacute;serve&nbsp;: <code>' + _echapper(handle.name) + '</code></div>';
+        'Dossier d’archives&nbsp;: <code>' + _echapper(handle.name) + '</code></div>';
 
     if (versements.length === 0) {
         html += '<div style="padding: 12px 14px; background: var(--surface-carte); border-radius: var(--radius-moyen); font-size: 0.85rem; color: var(--texte-secondaire);">' +
-            'Aucun versement d&eacute;tect&eacute; dans ce dossier.<br>' +
-            '<span style="font-size: 0.78rem;">(<code>manifeste-reserve.json</code> absent ou vide)</span>' +
+            'Aucune archive d&eacute;tect&eacute; dans ce dossier.<br>' +
+            '<span style="font-size: 0.78rem;">(<code>manifeste-archives.json</code> absent ou vide)</span>' +
             '</div>';
     } else {
         html += '<ul style="list-style: none; padding: 0; margin: 0; max-height: 320px; overflow-y: auto;">';
@@ -589,13 +589,13 @@ async function _afficherListeVersements() {
                 'style="padding: 8px 10px; border: 1px solid var(--bordure-douce); border-radius: var(--radius-moyen); margin-bottom: 6px; cursor: pointer; font-size: 0.85rem;">' +
                 '<strong>' + _echapper(v.dossier) + '</strong>';
             var details = [];
-            if (p.date_versement) details.push(_echapper(_formaterDate(p.date_versement)));
-            // p.nombre_etudiants vient du manifeste-reserve.json importe ; un
+            if (p.date_archive) details.push(_echapper(_formaterDate(p.date_archive)));
+            // p.nombre_etudiants vient du manifeste-archives.json importe ; un
             // manifeste compromis pourrait y mettre du HTML. Echapper avant
             // concatenation dans innerHTML.
             if (p.nombre_etudiants) details.push(_echapper(p.nombre_etudiants) + ' &eacute;tudiant(s)');
-            if (p.mode_versement === 'fsapi') details.push('FSAPI');
-            else if (p.mode_versement === 'zip') details.push('ZIP');
+            if (p.mode_archive === 'fsapi') details.push('FSAPI');
+            else if (p.mode_archive === 'zip') details.push('ZIP');
             if (details.length > 0) {
                 html += '<div style="margin-top: 2px; color: var(--texte-secondaire); font-size: 0.78rem;">' +
                     details.join(' &middot; ') + '</div>';
@@ -620,20 +620,20 @@ async function _afficherListeVersements() {
 
 async function _listerVersementsDansHandle(handle) {
     try {
-        var fhManif = await handle.getFileHandle('manifeste-reserve.json');
+        var fhManif = await handle.getFileHandle('manifeste-archives.json');
         var f = await fhManif.getFile();
         var manif = JSON.parse(await f.text());
-        if (!manif || !manif.versements) return [];
-        return Object.keys(manif.versements).map(function(d) {
-            return { dossier: d, patch: manif.versements[d] };
+        if (!manif || !manif.archives) return [];
+        return Object.keys(manif.archives).map(function(d) {
+            return { dossier: d, patch: manif.archives[d] };
         }).sort(function(a, b) {
-            var da = (a.patch && a.patch.date_versement) || '';
-            var dbDate = (b.patch && b.patch.date_versement) || '';
+            var da = (a.patch && a.patch.date_archive) || '';
+            var dbDate = (b.patch && b.patch.date_archive) || '';
             return dbDate.localeCompare(da);
         });
     } catch (e) {
         if (e.name === 'NotFoundError') return [];
-        console.warn('[ReserveOuvrir] Lecture manifeste-reserve.json échouée', e.message || e);
+        console.warn('[ReserveOuvrir] Lecture manifeste-archives.json échouée', e.message || e);
         return [];
     }
 }
@@ -684,7 +684,7 @@ async function onChoisirVersement(idx) {
     var versement = _versementsListes[i];
     if (!_handleReserveCourant) {
         if (typeof window.afficherNotificationErreur === 'function') {
-            window.afficherNotificationErreur('Erreur', 'Dossier réserve non disponible.');
+            window.afficherNotificationErreur('Erreur', 'Dossier d’archives non disponible.');
         }
         return;
     }
@@ -694,7 +694,7 @@ async function onChoisirVersement(idx) {
         _payloadCourant = payload;
         _afficherEtapeSelection(payload);
     } catch (e) {
-        console.error('[ReserveOuvrir] Chargement versement échoué', e);
+        console.error('[ReserveOuvrir] Chargement de l’archive échoué', e);
         if (typeof window.afficherNotificationErreur === 'function') {
             window.afficherNotificationErreur('Lecture impossible', e.message || String(e));
         }
@@ -716,15 +716,15 @@ function _afficherEtapeSelection(payload) {
     var elMeta = document.getElementById('reserve-ouvrir-meta');
     if (elMeta) {
         var m = payload.meta || {};
-        var htmlMeta = '<strong>Versement</strong> : <code>' + _echapper(payload.dossier) + '</code>';
+        var htmlMeta = '<strong>Archive</strong> : <code>' + _echapper(payload.dossier) + '</code>';
         if (m.uuid) htmlMeta += '<br><strong>UUID</strong> : <code style="font-size: 0.78rem;">' + _echapper(m.uuid) + '</code>';
-        if (m.date_versement) htmlMeta += '<br><strong>Date</strong> : ' + _echapper(_formaterDate(m.date_versement));
+        if (m.date_archive) htmlMeta += '<br><strong>Date</strong> : ' + _echapper(_formaterDate(m.date_archive));
         if (m.appareil) htmlMeta += ' &middot; <strong>Appareil</strong> : ' + _echapper(m.appareil);
         if (m.application_version) htmlMeta += ' &middot; Beta ' + _echapper(m.application_version);
         elMeta.innerHTML = htmlMeta;
     }
 
-    // Panneau « Contenu du versement » (#257 v2.B-α)
+    // Panneau « Contenu de l’archive » (#257 v2.B-α)
     var elContenu = document.getElementById('reserve-ouvrir-contenu');
     if (elContenu) {
         var contenu = _extraireContenuVersement(payload.donnees, payload.meta);
@@ -750,7 +750,7 @@ function _afficherEtapeSelection(payload) {
 }
 
 /**
- * Construit le panneau « Contenu du versement » (#257 v2.B-α).
+ * Construit le panneau « Contenu de l’archive » (#257 v2.B-α).
  * Carte pliable affichant les statistiques et la liste anonymisable des
  * étudiant·es. Lecture seule, en mémoire.
  */
@@ -805,8 +805,8 @@ function _construirePanneauContenu(contenu, anonymiser) {
     return '' +
         '<div style="border: 1px solid var(--bordure-douce); border-radius: var(--radius-moyen); padding: 10px 12px; background: var(--bleu-tres-pale);">' +
             '<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px;">' +
-                '<strong style="font-size: 0.9rem;">Contenu du versement</strong>' +
-                '<button class="btn-aide-contextuelle" data-aide="reserve-contenu-versement" data-stop aria-label="Aide : contenu du versement">&#x2734;&#xFE0F;</button>' +
+                '<strong style="font-size: 0.9rem;">Contenu de l’archive</strong>' +
+                '<button class="btn-aide-contextuelle" data-aide="reserve-contenu-versement" data-stop aria-label="Aide : contenu de l’archive">&#x2734;&#xFE0F;</button>' +
             '</div>' +
             '<div style="font-size: 0.85rem;">' + htmlStats + '</div>' +
             htmlListeEtudiants +

@@ -1,5 +1,5 @@
 /* ===============================
-   MODULE : RÉSERVE — VERSEMENT D'UN GROUPE-COURS
+   MODULE : ARCHIVES — VERSEMENT D'UN GROUPE-COURS
    Date : 26 avril 2026
    Spec : docs/architecture/SPEC-RESERVE-V1.md
    Architecture : docs/architecture/ECOSYSTEME-DONNEES.md
@@ -7,12 +7,12 @@
    Vocation
      Génère un ZIP structuré contenant les données et travaux d'UN
      groupe-cours d'un trimestre. Le ZIP est téléchargé via le navigateur ;
-     l'utilisateur le décompresse dans ~/Documents/Réserve_LaboCodex/
-     pour compléter le versement.
+     l'utilisateur le décompresse dans ~/Documents/Archives_LaboCodex/
+     pour compléter l’archive.
 
    Granularité
-     Un versement = un groupe-cours. Plusieurs groupes du même trimestre
-     produisent plusieurs versements indépendants, chacun avec son UUID v4.
+     Une archive = un groupe-cours. Plusieurs groupes du même trimestre
+     produisent plusieurs archives indépendants, chacun avec son UUID v4.
 
    Filtrage en deux passes
      1. Préfixe « {trimestre}_ » sur les clés IndexedDB
@@ -41,13 +41,13 @@
 var EXTENSION_RESERVE = '.reserve.zip';
 
 // Clé db non namespacée du manifeste local (cross-trimestre).
-// Préfixe `_` → exclue automatiquement des versements (cf. PREFIXES_EXCLUS).
+// Préfixe `_` → exclue automatiquement des archives (cf. PREFIXES_EXCLUS).
 var CLE_MANIFESTE_LOCAL = '_manifesteReserve';
 
-// Préfixes de clés à exclure du versement
+// Préfixes de clés à exclure de l’archive
 var PREFIXES_EXCLUS = ['_codex_', '_'];
 
-// Clés globales (non namespacées) à inclure dans le versement
+// Clés globales (non namespacées) à inclure dans l’archive
 var CLES_GLOBALES_INCLUSES = [
     'listeCours',
     'cours',
@@ -105,7 +105,7 @@ var CLES_SANS_FILTRE = [
     // Copies archivées des bibliothèques (trimestres archivés — Beta 95.6+).
     // Voir CLES_TEMPLATES_ARCHIVES dans trimestres.js. Quand un trimestre est
     // archivé, ces templates sont copiés vers `{trimestre}_grillesTemplates`,
-    // etc. — incluons-les sans filtre pour préserver l'état archivé.
+    // etc. — incluons-les sans filtre pour préserver l’état archivé.
     'grillesTemplates',
     'echellesTemplates',
     'pratiquesConfigurables'
@@ -120,9 +120,9 @@ var CLES_FILTRER_PAR_GC = [
    FSAPI — File System Access API (Chrome/Edge)
    ===============================
    Mode automatique pour Chrome/Edge sur Mac : ecriture directe dans un
-   dossier choisi par l'utilisateur (~/Documents/Reserve_LaboCodex/ ou
-   ailleurs) sans telechargement de ZIP a chaque versement, et fusion
-   automatique du manifeste-reserve.json global.
+   dossier choisi par l'utilisateur (~/Documents/Archives_LaboCodex/ ou
+   ailleurs) sans telechargement de ZIP a chaque archivage, et fusion
+   automatique du manifeste-archives.json global.
 
    Persistence : les FileSystemDirectoryHandle ne sont pas JSON-serialisables
    mais sont structuredClone-compatibles (donc compatibles IDB direct).
@@ -131,7 +131,7 @@ var CLES_FILTRER_PAR_GC = [
 
    Permissions : un handle persiste necessite re-verification a chaque
    session via queryPermission, et requestPermission doit s'executer dans
-   un user gesture. Le clic « Verser ce groupe » satisfait cette contrainte.
+   un user gesture. Le clic « Archiver ce groupe » satisfait cette contrainte.
 
    Safari et iPad ne supportent pas FSAPI : _supporteFSAPI() retourne false
    et le flux ZIP v1 prend le relais (zero regression).
@@ -338,7 +338,7 @@ function _genererUUIDv4() {
 
 /**
  * Calcule le hash SHA-256 d'une chaine JSON, en hexadecimal.
- * Cf. SKILL_Securite_donnees §4.3 : chaque versement Reserve doit inclure
+ * Cf. SKILL_Securite_donnees §4.3 : chaque archive Archives doit inclure
  * un hash SHA-256 de donnees.json dans meta.json pour permettre la detection
  * de corruption (disque, transfert, modification accidentelle).
  * @param {string} jsonStr - La chaine a hasher
@@ -353,7 +353,7 @@ async function _calculerSHA256(jsonStr) {
         var hashArray = Array.from(new Uint8Array(hashBuffer));
         return hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
     } catch (e) {
-        console.warn('[Réserve] Calcul SHA-256 échoué :', e.message || e);
+        console.warn('[Archives] Calcul SHA-256 échoué :', e.message || e);
         return null;
     }
 }
@@ -474,7 +474,7 @@ function _nomDossier(trimestre, gc) {
    =============================== */
 
 /**
- * Collecte les clés et données nécessaires au versement.
+ * Collecte les clés et données nécessaires à l’archive.
  * Renvoie un objet { donnees, fichiers, stats }.
  *
  * @param {string} trimestre
@@ -592,7 +592,7 @@ async function _collecterDonnees(trimestre, gc, onProg) {
                         donnees[cleComplete] = annotationsFiltrees;
                     }
                 }
-                // Si aucun fichier dans le groupe → aucune annotation à verser
+                // Si aucun fichier dans le groupe → aucune annotation à archiver
             }
             continue;
         }
@@ -650,7 +650,7 @@ async function _collecterDonnees(trimestre, gc, onProg) {
     }
 
     if (clesInconnues.length > 0) {
-        console.warn('[Réserve] Clés trimestre non reconnues, incluses sans filtrage :',
+        console.warn('[Archives] Clés trimestre non reconnues, incluses sans filtrage :',
             clesInconnues.join(', '));
     }
 
@@ -707,7 +707,7 @@ async function _collecterBlobs(donnees, trimestre, onProg) {
 
     if (typeof window.travauxStockage === 'undefined' ||
         typeof window.travauxStockage.recupererBlob !== 'function') {
-        console.warn('[Réserve] travauxStockage indisponible — aucun blob versé');
+        console.warn('[Archives] travauxStockage indisponible — aucun blob versé');
         return { blobs: [], trouves: 0, manquants: fichiers.length, tailleTotale: 0 };
     }
 
@@ -725,11 +725,11 @@ async function _collecterBlobs(donnees, trimestre, onProg) {
                 tailleTotale += blob.size || 0;
             } else {
                 manquants++;
-                console.warn('[Réserve] Blob introuvable pour ' + f.id);
+                console.warn('[Archives] Blob introuvable pour ' + f.id);
             }
         } catch (e) {
             manquants++;
-            console.warn('[Réserve] Erreur récupération blob ' + f.id, e.message || e);
+            console.warn('[Archives] Erreur récupération blob ' + f.id, e.message || e);
         }
 
         if (j % 5 === 0) {
@@ -871,15 +871,15 @@ async function _ecrireFichierBlob(dossierHandle, nomFichier, blob) {
 }
 
 /**
- * Ecrit un versement complet directement dans le dossier reserve.
+ * Ecrit une archive complet directement dans le dossier reserve.
  *
  * Atomicite partielle (acceptee, voir BACKLOG #253) : si l'ecriture est
- * interrompue, le versement sur disque peut etre incomplet. Pour permettre
+ * interrompue, l’archive sur disque peut etre incomplet. Pour permettre
  * la detection, meta.json est ecrit en DERNIER (sentinelle de completude) :
  * sa presence garantit que les autres fichiers du dossier sont
  * entierement ecrits. Le manifeste global est fusionne ensuite (voir
  * _fusionnerManifesteGlobal). Les blobs orphelins (un fichier supprime
- * entre versements) restent en place et doivent etre purges manuellement.
+ * entre archives) restent en place et doivent etre purges manuellement.
  */
 async function _ecrireVersementDirect(handleRacine, dossier, donnees, meta, patch, blobs, onProg) {
     var dossierTrim = await handleRacine.getDirectoryHandle('trimestres', { create: true });
@@ -900,7 +900,7 @@ async function _ecrireVersementDirect(handleRacine, dossier, donnees, meta, patc
     }
 
     onProg(94, 'Ecriture du patch manifeste...', '');
-    await _ecrireFichierTexte(dossierVersement, 'manifeste-reserve-patch.json', JSON.stringify(patch, null, 2));
+    await _ecrireFichierTexte(dossierVersement, 'manifeste-archives-patch.json', JSON.stringify(patch, null, 2));
 
     // Sentinelle de completude : meta.json en dernier
     onProg(96, 'Ecriture meta.json (sentinelle)...', '');
@@ -910,55 +910,55 @@ async function _ecrireVersementDirect(handleRacine, dossier, donnees, meta, patc
 }
 
 /**
- * Lit, met a jour et reecrit manifeste-reserve.json a la racine du dossier
- * reserve. Cree le manifeste si absent. Idempotent : un re-versement du meme
+ * Lit, met a jour et reecrit manifeste-archives.json a la racine du dossier
+ * reserve. Cree le manifeste si absent. Idempotent : un re-archivage du meme
  * groupe-cours ecrase l'entree precedente (nouveau UUID, nouvelle date).
  */
 async function _fusionnerManifesteGlobal(handleRacine, dossier, patchEntry) {
     var manifeste = {
-        format: 'manifeste-reserve',
+        format: 'manifeste-archives',
         version: 1,
-        versements: {},
+        archives: {},
         derniere_mise_a_jour: null
     };
 
     try {
-        var fhLecture = await handleRacine.getFileHandle('manifeste-reserve.json');
+        var fhLecture = await handleRacine.getFileHandle('manifeste-archives.json');
         var fichier = await fhLecture.getFile();
         var texte = await fichier.text();
         var existant = JSON.parse(texte);
         if (existant && typeof existant === 'object') {
             manifeste = Object.assign(manifeste, existant);
-            if (!manifeste.versements || typeof manifeste.versements !== 'object') {
-                manifeste.versements = {};
+            if (!manifeste.archives || typeof manifeste.archives !== 'object') {
+                manifeste.archives = {};
             }
         }
     } catch (e) {
         if (e.name !== 'NotFoundError') {
-            console.warn('[Reserve] Lecture manifeste-reserve.json echouee, recreation', e.message || e);
+            console.warn('[Reserve] Lecture manifeste-archives.json echouee, recreation', e.message || e);
         }
     }
 
-    manifeste.versements[dossier] = patchEntry;
+    manifeste.archives[dossier] = patchEntry;
     manifeste.derniere_mise_a_jour = new Date().toISOString();
 
-    await _ecrireFichierTexte(handleRacine, 'manifeste-reserve.json', JSON.stringify(manifeste, null, 2));
+    await _ecrireFichierTexte(handleRacine, 'manifeste-archives.json', JSON.stringify(manifeste, null, 2));
 }
 
 /* ===============================
    MANIFESTE LOCAL (cross-mode FSAPI + ZIP Safari)
    ===============================
    Une seule clé db non namespacée (`_manifesteReserve`) qui agrège
-   l'historique de TOUS les versements faits depuis cette installation,
+   l'historique de TOUS les archives faits depuis cette installation,
    peu importe le mode (FSAPI ou ZIP). Hydratable depuis le manifeste
    FSAPI quand un dossier est lié.
 */
 
 function _manifesteSkeleton() {
     return {
-        format: 'manifeste-reserve-local',
+        format: 'manifeste-archives-local',
         version: 1,
-        versements: {},
+        archives: {},
         derniere_mise_a_jour: null
     };
 }
@@ -970,7 +970,7 @@ function _lireManifesteLocal() {
     var brut = window.db.getSync(CLE_MANIFESTE_LOCAL, null);
     if (!brut || typeof brut !== 'object') return _manifesteSkeleton();
     var m = Object.assign(_manifesteSkeleton(), brut);
-    if (!m.versements || typeof m.versements !== 'object') m.versements = {};
+    if (!m.archives || typeof m.archives !== 'object') m.archives = {};
     return m;
 }
 
@@ -981,7 +981,7 @@ function _ecrireManifesteLocal(manifeste) {
 
 function _upsertEntreeManifesteLocal(dossier, patchEntry) {
     var m = _lireManifesteLocal();
-    m.versements[dossier] = patchEntry;
+    m.archives[dossier] = patchEntry;
     m.derniere_mise_a_jour = new Date().toISOString();
     _ecrireManifesteLocal(m);
     _notifierReglagesSiPresent();
@@ -996,8 +996,8 @@ function _notifierReglagesSiPresent() {
 
 function _purgerEntreeManifesteLocal(dossier) {
     var m = _lireManifesteLocal();
-    if (!m.versements[dossier]) return m;
-    delete m.versements[dossier];
+    if (!m.archives[dossier]) return m;
+    delete m.archives[dossier];
     m.derniere_mise_a_jour = new Date().toISOString();
     _ecrireManifesteLocal(m);
     _notifierReglagesSiPresent();
@@ -1005,29 +1005,29 @@ function _purgerEntreeManifesteLocal(dossier) {
 }
 
 /**
- * Fusionne un manifeste reçu (objet { versements: { dossier: entry } })
+ * Fusionne un manifeste reçu (objet { archives: { dossier: entry } })
  * dans le manifeste local. Garde l'entrée la plus récente par
- * `date_versement`. Idempotent.
+ * `date_archive`. Idempotent.
  *
  * @returns {{ ajoutes: number, mis_a_jour: number, total: number }}
  */
 function _fusionnerManifesteRecu(recu) {
     var stats = { ajoutes: 0, mis_a_jour: 0, total: 0 };
-    if (!recu || !recu.versements || typeof recu.versements !== 'object') return stats;
+    if (!recu || !recu.archives || typeof recu.archives !== 'object') return stats;
 
     var m = _lireManifesteLocal();
-    Object.keys(recu.versements).forEach(function(dossier) {
-        var entreeRecue = recu.versements[dossier];
-        var entreeLocale = m.versements[dossier];
+    Object.keys(recu.archives).forEach(function(dossier) {
+        var entreeRecue = recu.archives[dossier];
+        var entreeLocale = m.archives[dossier];
         stats.total++;
         if (!entreeLocale) {
-            m.versements[dossier] = entreeRecue;
+            m.archives[dossier] = entreeRecue;
             stats.ajoutes++;
         } else {
-            var dRecue = entreeRecue && entreeRecue.date_versement;
-            var dLocale = entreeLocale && entreeLocale.date_versement;
+            var dRecue = entreeRecue && entreeRecue.date_archive;
+            var dLocale = entreeLocale && entreeLocale.date_archive;
             if (dRecue && (!dLocale || dRecue > dLocale)) {
-                m.versements[dossier] = entreeRecue;
+                m.archives[dossier] = entreeRecue;
                 stats.mis_a_jour++;
             }
         }
@@ -1042,7 +1042,7 @@ function _fusionnerManifesteRecu(recu) {
 }
 
 /**
- * Hydrate le manifeste local depuis le manifeste-reserve.json du dossier
+ * Hydrate le manifeste local depuis le manifeste-archives.json du dossier
  * FSAPI lié. Idempotent.
  */
 async function _hydrateManifesteDepuisFSAPI(handleRacine) {
@@ -1051,7 +1051,7 @@ async function _hydrateManifesteDepuisFSAPI(handleRacine) {
 
     var existant = null;
     try {
-        var fh = await handleRacine.getFileHandle('manifeste-reserve.json');
+        var fh = await handleRacine.getFileHandle('manifeste-archives.json');
         var fichier = await fh.getFile();
         var texte = await fichier.text();
         existant = JSON.parse(texte);
@@ -1074,7 +1074,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
     if (!gc) {
         var m = 'Groupe-cours introuvable pour le trimestre ' + trimestre + '.';
         if (typeof window.afficherNotificationErreur === 'function') {
-            window.afficherNotificationErreur('Versement impossible', m);
+            window.afficherNotificationErreur('Archivage impossible', m);
         }
         throw new Error(m);
     }
@@ -1095,7 +1095,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
         throw new Error(msgZip);
     }
 
-    _progShow('Versement dans la réserve');
+    _progShow('Création de l’archive');
     _prog(0, modeFSAPI ? 'Mode automatique...' : 'Préparation...', dossier);
     await _yield();
 
@@ -1109,7 +1109,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
             _progHide();
             var msgVide = 'Aucune donnée trouvée pour ce groupe-cours dans ' + trimestre + '.';
             if (typeof window.afficherNotificationErreur === 'function') {
-                window.afficherNotificationErreur('Versement vide', msgVide);
+                window.afficherNotificationErreur('Archivage vide', msgVide);
             }
             throw new Error(msgVide);
         }
@@ -1120,7 +1120,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
             donneesJsonStr = JSON.stringify(donnees);
             tailleJsonDonnees = new Blob([donneesJsonStr]).size;
         } catch (eMes) {
-            console.warn('[Réserve] Sérialisation JSON échouée:', eMes.message || eMes);
+            console.warn('[Archives] Sérialisation JSON échouée:', eMes.message || eMes);
         }
 
         // Hash SHA-256 du JSON (integrite, cf. SKILL_Securite_donnees §4.3)
@@ -1132,7 +1132,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
         var collecteBlobs = await _collecterBlobs(donnees, trimestre, _prog);
 
         // 3. Construction de meta.json et du patch (commun aux deux modes)
-        var dateVersement = new Date().toISOString();
+        var dateArchive = new Date().toISOString();
         var meta = {
             uuid: uuid,
             trimestre: trimestre,
@@ -1141,14 +1141,14 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
             dossier: dossier,
             statut: 'verse',
             source: 'application (IndexedDB)',
-            mode_versement: modeFSAPI ? 'fsapi' : 'zip',
-            date_versement: dateVersement,
+            mode_archive: modeFSAPI ? 'fsapi' : 'zip',
+            date_archive: dateArchive,
             appareil: _identifierAppareil(),
             application_version: _versionApp(),
             integrite: {
                 donnees_json_sha256: donneesSha256,
                 algorithme: donneesSha256 ? 'SHA-256' : null,
-                date_calcul: donneesSha256 ? dateVersement : null
+                date_calcul: donneesSha256 ? dateArchive : null
             },
             contenu: {
                 donnees: true,
@@ -1160,7 +1160,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
                 taille_donnees_json: tailleJsonDonnees,
                 taille_travaux_totale: collecteBlobs.tailleTotale
             },
-            notes: 'Versement automatique depuis l\'application.'
+            notes: 'Archivage automatique depuis l’application.'
         };
 
         var patch = {
@@ -1173,14 +1173,14 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
                 groupe: gc.groupe,
                 statut: 'verse',
                 source: 'application (IndexedDB)',
-                mode_versement: meta.mode_versement,
-                date_versement: dateVersement,
+                mode_archive: meta.mode_archive,
+                date_archive: dateArchive,
                 donnees: true,
                 travaux: collecteBlobs.trouves > 0,
                 nombre_etudiants: statsDonnees.nombreEtudiants,
                 nombre_fichiers_travaux: collecteBlobs.trouves,
                 taille_travaux_totale: collecteBlobs.tailleTotale,
-                notes: 'Versement du ' + _dateAujourdhui() + '.'
+                notes: 'Archivage du ' + _dateAujourdhui() + '.'
             }
         };
 
@@ -1200,21 +1200,21 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
             try {
                 await _fusionnerManifesteGlobal(handleReserve, dossier, patch.patch);
             } catch (eFusion) {
-                console.warn('[Réserve] Fusion manifeste-reserve.json échouée, le versement reste valide :', eFusion.message || eFusion);
+                console.warn('[Archives] Fusion manifeste-archives.json échouée, l’archive reste valide :', eFusion.message || eFusion);
             }
 
             // Manifeste local : toujours mis à jour, même si la fusion FSAPI a échoué
             try { _upsertEntreeManifesteLocal(dossier, patch.patch); }
-            catch (eLoc) { console.warn('[Réserve] Upsert manifeste local échoué', eLoc.message || eLoc); }
+            catch (eLoc) { console.warn('[Archives] Upsert manifeste local échoué', eLoc.message || eLoc); }
 
-            _prog(100, 'Versement enregistré !', ecriture.cheminDossier);
+            _prog(100, 'Archivage réussi !', ecriture.cheminDossier);
             await new Promise(function(r) { setTimeout(r, 600); });
             _progHide();
 
             if (typeof window.afficherNotificationSucces === 'function') {
-                var nomDossierRacine = handleReserve.name || 'Réserve';
+                var nomDossierRacine = handleReserve.name || 'Archives';
                 window.afficherNotificationSucces(
-                    'Versement enregistré',
+                    'Archive enregistrée',
                     statsDonnees.nombreEtudiants + ' étudiant(s), ' +
                     collecteBlobs.trouves + ' fichier(s) — ' +
                     nomDossierRacine + '/' + ecriture.cheminDossier
@@ -1245,7 +1245,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
         // inclure le snapshot complet de l'historique (cf. #248).
         var manifesteLocal = _manifesteSkeleton();
         try { manifesteLocal = _upsertEntreeManifesteLocal(dossier, patch.patch); }
-        catch (eLoc) { console.warn('[Réserve] Upsert manifeste local échoué', eLoc.message || eLoc); }
+        catch (eLoc) { console.warn('[Archives] Upsert manifeste local échoué', eLoc.message || eLoc); }
 
         var zip = new JSZip();
         var dossierBase = zip.folder('trimestres').folder(dossier);
@@ -1259,12 +1259,12 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
         }
 
         dossierBase.file('meta.json', JSON.stringify(meta, null, 2));
-        dossierBase.file('manifeste-reserve-patch.json', JSON.stringify(patch, null, 2));
+        dossierBase.file('manifeste-archives-patch.json', JSON.stringify(patch, null, 2));
 
         // Manifeste local agrégé à la racine du ZIP (sous le nom canonique).
         // Permet à l'utilisateur de retrouver l'historique de tous ses
-        // versements précédents dans n'importe quel ZIP récent.
-        zip.file('manifeste-reserve.json', JSON.stringify(manifesteLocal, null, 2));
+        // archives précédents dans n'importe quel ZIP récent.
+        zip.file('manifeste-archives.json', JSON.stringify(manifesteLocal, null, 2));
 
         _prog(80, 'Compression du ZIP...', '');
         await _yield();
@@ -1277,7 +1277,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
             }
         );
 
-        var nomFichier = 'CONFIDENTIEL-versement-' + dossier + '-' + _dateAujourdhui() + EXTENSION_RESERVE;
+        var nomFichier = 'CONFIDENTIEL-archive-' + dossier + '-' + _dateAujourdhui() + EXTENSION_RESERVE;
         _prog(99, 'Téléchargement...', nomFichier);
 
         var url = URL.createObjectURL(zipBlob);
@@ -1289,13 +1289,13 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        _prog(100, 'Versement prêt !', _formaterTaille(zipBlob.size));
+        _prog(100, 'Archive prête !', _formaterTaille(zipBlob.size));
         await new Promise(function(r) { setTimeout(r, 600); });
         _progHide();
 
         if (typeof window.afficherNotificationSucces === 'function') {
             window.afficherNotificationSucces(
-                'Versement téléchargé',
+                'Archive téléchargée',
                 statsDonnees.nombreEtudiants + ' étudiant(s), ' +
                 collecteBlobs.trouves + ' fichier(s) (' + _formaterTaille(zipBlob.size) + ')'
             );
@@ -1319,9 +1319,9 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
 
     } catch (err) {
         _progHide();
-        console.error('[Réserve] Erreur versement:', err);
+        console.error('[Archives] Erreur d’archivage:', err);
         if (typeof window.afficherNotificationErreur === 'function') {
-            window.afficherNotificationErreur('Erreur de versement', err.message || String(err));
+            window.afficherNotificationErreur('Erreur de archive', err.message || String(err));
         }
         throw err;
     }
@@ -1400,7 +1400,7 @@ async function _afficherEstimation() {
             '<div><strong>Fichiers travaux :</strong> ' + est.nombreFichiers +
                 ' (~' + _echapper(_formaterTaille(est.tailleEstimee)) + ')</div>';
     } catch (e) {
-        console.warn('[Réserve] Erreur estimation:', e);
+        console.warn('[Archives] Erreur estimation:', e);
         apercu.innerHTML = '<span style="color: var(--rouge);">Erreur : ' + _echapper(e.message || e) + '</span>';
     }
 }
@@ -1445,7 +1445,7 @@ function actionVerser() {
 
     var modal = document.getElementById('modalReserve');
     if (!modal) {
-        console.error('[Réserve] Modale #modalReserve introuvable dans le DOM');
+        console.error('[Archives] Modale #modalReserve introuvable dans le DOM');
         return;
     }
 
@@ -1466,7 +1466,7 @@ function actionVerser() {
 
 /**
  * Met à jour le bandeau de statut FSAPI dans la modale.
- * Affiche le mode (auto/manuel), l'emplacement du dossier réserve, et un
+ * Affiche le mode (auto/manuel), l'emplacement du dossier d’archives, et un
  * bouton « Changer le dossier » si applicable.
  */
 async function _majBandeauStatut() {
@@ -1479,7 +1479,7 @@ async function _majBandeauStatut() {
     try {
         statut = await _statutHandleReserve();
     } catch (e) {
-        console.warn('[Réserve] Statut handle échoué', e.message || e);
+        console.warn('[Archives] Statut handle échoué', e.message || e);
         statut = { supporte: false, persiste: false, nom: '', permission: 'erreur' };
     }
 
@@ -1488,16 +1488,16 @@ async function _majBandeauStatut() {
     if (!statut.supporte) {
         html =
             '<strong>Mode manuel</strong> (Safari) — un fichier ZIP sera téléchargé. ' +
-            'Décompresse-le ensuite dans <code>~/Documents/Réserve_LaboCodex/</code> ' +
-            'pour compléter le versement.';
+            'Décompresse-le ensuite dans <code>~/Documents/Archives_LaboCodex/</code> ' +
+            'pour compléter l’archive.';
     } else if (!statut.persiste) {
         html =
-            '<strong>Mode automatique</strong> (Chrome/Edge) — au premier versement, ' +
-            'choisis le dossier <em>Réserve</em> où enregistrer. ' +
-            'Les versements suivants iront automatiquement au même endroit.';
+            '<strong>Mode automatique</strong> (Chrome/Edge) — au premier archivage, ' +
+            'choisis le dossier <em>Archives</em> où enregistrer. ' +
+            'Les archives suivants iront automatiquement au même endroit.';
     } else if (statut.permission === 'granted' || statut.permission === 'prompt') {
         html =
-            '<strong>Mode automatique</strong> — dossier réserve&nbsp;: <code>' +
+            '<strong>Mode automatique</strong> — dossier d’archives&nbsp;: <code>' +
             _echapper(statut.nom) + '</code>' +
             '<button data-action="Reserve.actionChangerDossier" ' +
             'class="btn btn-secondaire u-texte-petit" ' +
@@ -1505,7 +1505,7 @@ async function _majBandeauStatut() {
             'Changer le dossier...</button>';
     } else {
         html =
-            '<strong>Accès au dossier refusé</strong> — versement par ZIP en attendant. ' +
+            '<strong>Accès au dossier refusé</strong> — archivage par ZIP en attendant. ' +
             '<button data-action="Reserve.actionChangerDossier" ' +
             'class="btn btn-secondaire u-texte-petit" ' +
             'style="margin-left: 10px; padding: 2px 8px;">' +
@@ -1524,7 +1524,7 @@ async function actionChangerDossier() {
     var nouveau = await _obtenirHandleReserve();
     await _majBandeauStatut();
     if (nouveau && typeof window.afficherNotificationSucces === 'function') {
-        window.afficherNotificationSucces('Dossier réserve mis à jour', nouveau.name || '');
+        window.afficherNotificationSucces('Dossier d’archives mis à jour', nouveau.name || '');
     }
 }
 
@@ -1570,7 +1570,7 @@ async function lancerDepuisDialogue() {
 /**
  * Au boot du module, si un handle FSAPI est persisté avec permission
  * encore accordée (sans prompt), hydrate le manifeste local depuis le
- * manifeste-reserve.json du dossier. Idempotent et silencieux : aucun
+ * manifeste-archives.json du dossier. Idempotent et silencieux : aucun
  * effet si le handle est absent, refusé, ou si le manifeste FSAPI est
  * inaccessible.
  */
@@ -1606,7 +1606,7 @@ window.Reserve = {
     lancerDepuisDialogue: lancerDepuisDialogue,
     onChangerTrimestre: _onChangerTrimestre,
     onChangerGroupe: _onChangerGroupe,
-    // FSAPI — exposés pour les modules qui consomment la réserve (ex. reserve-ouvrir.js)
+    // FSAPI — exposés pour les modules qui consomment les archives (ex. reserve-ouvrir.js)
     obtenirHandle: _obtenirHandleReserve,
     statutHandle: _statutHandleReserve,
     supporteFSAPI: _supporteFSAPI,

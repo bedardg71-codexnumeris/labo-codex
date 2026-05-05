@@ -994,11 +994,11 @@ const AIDE_CONTEXTUELLE = {
     // =========================================================================
 
     'reserve-versement': {
-        titre: "Verser dans la réserve",
+        titre: "Archiver",
         sections: [
             {
                 type: 'texte',
-                contenu: "Verser, c'est déposer une copie d'un groupe-cours terminé dans ta réserve personnelle locale. C'est un geste manuel que tu déclenches en fin de trimestre."
+                contenu: "Archiver, c'est déposer une copie d'un groupe-cours terminé dans tes archives personnelle locale. C'est un geste manuel que tu déclenches en fin de trimestre."
             },
             {
                 type: 'liste',
@@ -1006,17 +1006,17 @@ const AIDE_CONTEXTUELLE = {
                 items: [
                     "Les étudiant·es du groupe (liste, présences, évaluations sauvegardées)",
                     "Les fichiers travaux importés pour ce groupe (photos, PDF)",
-                    "Les bibliothèques actives au moment du versement (grilles, échelles, cartouches, productions, pratiques, tampons)",
+                    "Les bibliothèques actives au moment de l’archive (grilles, échelles, cartouches, productions, pratiques, tampons)",
                     "Les snapshots et les données de planification du trimestre"
                 ]
             },
             {
                 type: 'texte',
-                contenu: "Ta réserve vit sur ton ordinateur (ou sur un disque externe), dans le dossier <code>Réserve_LaboCodex/</code>. Elle n'est jamais purgée. Si tu re-verses le même groupe-cours, le versement précédent est remplacé."
+                contenu: "Tes archives vit sur ton ordinateur (ou sur un disque externe), dans le dossier <code>Archives_LaboCodex/</code>. Elle n'est jamais purgée. Si tu re-verses le même groupe-cours, l’archive précédent est remplacé."
             },
             {
                 type: 'conseil',
-                contenu: "Verser ne supprime rien dans ton codex de travail — c'est une <strong>copie</strong>, pas un déplacement. Tu peux verser autant de fois que tu veux."
+                contenu: "Archiver ne supprime rien dans ton codex de travail — c'est une <strong>copie</strong>, pas un déplacement. Tu peux archiver autant de fois que tu veux."
             },
             {
                 type: 'alerte',
@@ -1038,48 +1038,48 @@ const AIDE_CONTEXTUELLE = {
                 type: 'liste',
                 titre: "Selon ton navigateur",
                 items: [
-                    "<strong>Chrome ou Edge</strong> — tu choisis ton dossier réserve une seule fois, l'application y écrit directement à chaque versement. Aucune manipulation de fichier de ton côté.",
-                    "<strong>Safari</strong> — l'application produit un fichier ZIP que tu téléchargeras puis décompresseras toi-même dans ton dossier <code>Réserve_LaboCodex/</code>. Plus d'étapes, mais le résultat est identique."
+                    "<strong>Chrome ou Edge</strong> — tu choisis ton dossier d’archives une seule fois, l'application y écrit directement à chaque archivage. Aucune manipulation de fichier de ton côté.",
+                    "<strong>Safari</strong> — l'application produit un fichier ZIP que tu téléchargeras puis décompresseras toi-même dans ton dossier <code>Archives_LaboCodex/</code>. Plus d'étapes, mais le résultat est identique."
                 ]
             },
             {
                 type: 'conseil',
-                contenu: "Tu peux changer de navigateur d'un versement à l'autre — la réserve est compatible avec les deux flux. Si tu utilises principalement une tablette, le flux ZIP de Safari est ton chemin."
+                contenu: "Tu peux changer de navigateur d'une archive à l'autre — les archives est compatible avec les deux flux. Si tu utilises principalement une tablette, le flux ZIP de Safari est ton chemin."
             }
         ],
         voirAussi: ['reserve-versement']
     },
 
     // =========================================================================
-    // RÉSERVE — OUVRIR UN VERSEMENT (modale #modalOuvrirVersement)
+    // ARCHIVES — OUVRIR UNE ARCHIVE (modale #modalOuvrirVersement)
     // =========================================================================
 
     'reserve-ouvrir-versement': {
-        titre: "Ouvrir la réserve",
+        titre: "Ouvrir une archive",
         sections: [
             {
                 type: 'texte',
-                contenu: "Ouvrir la réserve, c'est consulter un versement archivé pour réimporter une ou plusieurs ressources dans tes bibliothèques actives. C'est un geste manuel et sélectif : tu choisis ce que tu reprends."
+                contenu: "Ouvrir une archive, c'est consulter un archive archivée pour réimporter une ou plusieurs ressources dans tes bibliothèques actives. C'est un geste manuel et sélectif : tu choisis ce que tu reprends."
             },
             {
                 type: 'liste',
                 titre: "Ce qui est réimportable",
                 items: [
                     "Grilles, échelles, productions, cartouches de rétroaction, pratiques de notation, tampons personnalisés",
-                    "Les données pédagogiques (étudiant·es, présences, évaluations) ne sont pas réimportables — elles restent dans le versement, figées"
+                    "Les données pédagogiques (étudiant·es, présences, évaluations) ne sont pas réimportables — elles restent dans l’archive, figées"
                 ]
             },
             {
                 type: 'liste',
                 titre: "Selon ton navigateur",
                 items: [
-                    "<strong>Chrome ou Edge</strong> avec un dossier réserve configuré : tu vois la liste de tes versements, tu en choisis un.",
-                    "<strong>Safari</strong> : tu sélectionnes le fichier <code>.reserve.zip</code> de ton choix. Si tu viens de verser depuis Safari, ton fichier est dans ton dossier Téléchargements."
+                    "<strong>Chrome ou Edge</strong> avec un dossier d’archives configuré : tu vois la liste de tes archives, tu en choisis un.",
+                    "<strong>Safari</strong> : tu sélectionnes le fichier <code>.reserve.zip</code> de ton choix. Si tu viens d’archiver depuis Safari, ton fichier est dans ton dossier Téléchargements."
                 ]
             },
             {
                 type: 'conseil',
-                contenu: "Le versement original n'est jamais modifié. Réimporter, c'est faire une copie."
+                contenu: "L’archive original n'est jamais modifié. Réimporter, c'est faire une copie."
             }
         ],
         voirAussi: ['reserve-types-ressources', 'reserve-copie-double', 'reserve-versement']
@@ -1107,7 +1107,7 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'alerte',
                 niveau: 'attention',
-                contenu: "Si une référence est absente du versement et de tes bibliothèques actives, l'item est marqué « référence manquante » en orange. Tu peux quand même le réimporter, mais sa référence sera cassée."
+                contenu: "Si une référence est absente de l’archive et de tes bibliothèques actives, l'item est marqué « référence manquante » en orange. Tu peux quand même le réimporter, mais sa référence sera cassée."
             }
         ],
         voirAussi: ['reserve-deja-present', 'reserve-copie-double', 'reserve-ref-manquante']
@@ -1133,7 +1133,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "Quand un item du versement est déjà présent dans ta bibliothèque active (même identifiant), il est grisé par défaut pour éviter d'écraser ta version actuelle."
+                contenu: "Quand un item de l’archive est déjà présent dans ta bibliothèque active (même identifiant), il est grisé par défaut pour éviter d'écraser ta version actuelle."
             },
             {
                 type: 'texte',
@@ -1157,13 +1157,13 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "Cet item référence une autre ressource (par exemple une production référence une grille) qui n'est ni dans le versement, ni dans ta bibliothèque active. Si tu réimportes l'item tel quel, sa référence sera cassée."
+                contenu: "Cet item référence une autre ressource (par exemple une production référence une grille) qui n'est ni dans l’archive, ni dans ta bibliothèque active. Si tu réimportes l'item tel quel, sa référence sera cassée."
             },
             {
                 type: 'liste',
                 titre: "Que faire ?",
                 items: [
-                    "Si la ressource manquante est dans un autre versement, ouvre-le d'abord pour la réimporter, puis reviens ouvrir celui-ci.",
+                    "Si la ressource manquante est dans une autre archive, ouvre-la d'abord pour la réimporter, puis reviens ouvrir celui-ci.",
                     "Sinon, accepte la cassure : l'item s'affichera dans ta bibliothèque mais sans sa grille ou son échelle associée. Tu pourras la rebrancher plus tard."
                 ]
             }
@@ -1176,18 +1176,18 @@ const AIDE_CONTEXTUELLE = {
     // =========================================================================
 
     'reserve-contenu-versement': {
-        titre: "Contenu du versement",
+        titre: "Contenu de l’archive",
         sections: [
             {
                 type: 'texte',
-                contenu: "Ce panneau te montre <strong>ce qui se trouve dans ce versement</strong> avant que tu décides ce que tu veux réimporter. C'est une vue de lecture seule, en mémoire seulement — rien n'est ajouté à ton application tant que tu n'as pas coché et cliqué <em>Réimporter</em>."
+                contenu: "Ce panneau te montre <strong>ce qui se trouve dans cette archive</strong> avant que tu décides ce que tu veux réimporter. C'est une vue de lecture seule, en mémoire seulement — rien n'est ajouté à ton application tant que tu n'as pas coché et cliqué <em>Réimporter</em>."
             },
             {
                 type: 'liste',
                 titre: "Ce que tu vois",
                 items: [
                     "<strong>Étudiant·es</strong> : nombre et liste détaillée. Le toggle <em>Anonymiser les noms</em> remplace les vrais noms par <code>Élève 1, 2, 3…</code> — utile pour une démo ou un partage d'écran.",
-                    "<strong>Productions distinctes</strong> : nombre de titres uniques de production présents dans le versement.",
+                    "<strong>Productions distinctes</strong> : nombre de titres uniques de production présents dans l’archive.",
                     "<strong>Évaluations</strong> : nombre total d'évaluations sauvegardées.",
                     "<strong>Fichiers travaux</strong> : photos et PDF déposés par les étudiant·es.",
                     "<strong>Présences, snapshots, interventions</strong> : autres traces pédagogiques."
@@ -1195,12 +1195,12 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: "Les compteurs reflètent l'état du groupe-cours <strong>au moment du versement</strong>. Le versement est figé : si tu corriges des données dans ton trimestre actif, ces corrections ne sont pas répercutées dans le ZIP."
+                contenu: "Les compteurs reflètent l'état du groupe-cours <strong>au moment de l’archive</strong>. L’archive est figé : si tu corriges des données dans ton trimestre actif, ces corrections ne sont pas répercutées dans le ZIP."
             },
             {
                 type: 'texte',
                 titre: "Pourquoi consulter avant de réimporter ?",
-                contenu: "Pour t'assurer que tu ouvres le bon versement (bon trimestre, bon groupe), pour estimer ce que tu vas chercher, ou pour faire une démo d'un trimestre passé sans modifier tes bibliothèques actives."
+                contenu: "Pour t'assurer que tu ouvres la bonne archive (bon trimestre, bon groupe), pour estimer ce que tu vas chercher, ou pour faire une démo d'un trimestre passé sans modifier tes bibliothèques actives."
             }
         ],
         voirAussi: ['reserve-ouvrir-versement', 'reserve-types-ressources', 'reglages-reserve']
@@ -1211,36 +1211,36 @@ const AIDE_CONTEXTUELLE = {
     // =========================================================================
 
     'reglages-reserve': {
-        titre: "Réserve (versements archivés)",
+        titre: "Archives stockées",
         sections: [
             {
                 type: 'texte',
-                contenu: "Cette section est l'<strong>index local</strong> de tes versements de réserve. Elle te montre ce que ton application sait de ton historique de versements — peu importe où les fichiers ZIP eux-mêmes vivent sur ton disque."
+                contenu: "Cette section est l’<strong>index local</strong> de tes archives. Elle te montre ce que ton application sait de ton historique d’archives — peu importe où les fichiers ZIP eux-mêmes vivent sur ton disque."
             },
             {
                 type: 'liste',
                 titre: "Comment l'index s'alimente",
                 items: [
-                    "À chaque versement (Codex › Verser dans la réserve…), une nouvelle ligne s'ajoute automatiquement.",
-                    "À chaque ouverture d'un fichier ZIP via Ouvrir un versement…, le versement est ajouté à l'index s'il n'y figure pas déjà.",
-                    "Sur Chrome ou Edge, si un dossier réserve est lié, le bouton <em>Vérifier le dossier</em> synchronise l'index avec le manifeste central du dossier."
+                    "À chaque archivage (Codex › Archiver…), une nouvelle ligne s'ajoute automatiquement.",
+                    "À chaque ouverture d'un fichier ZIP via Ouvrir une archive…, l’archive est ajouté à l'index s'il n'y figure pas déjà.",
+                    "Sur Chrome ou Edge, si un dossier d’archives est lié, le bouton <em>Vérifier le dossier</em> synchronise l'index avec le manifeste central du dossier."
                 ]
             },
             {
                 type: 'conseil',
-                contenu: "<strong>Retirer</strong> une ligne de l'index ne supprime <strong>aucun fichier</strong> sur disque. C'est juste un nettoyage de l'index. Pour vraiment supprimer un versement, supprime le ZIP toi-même dans le Finder."
+                contenu: "<strong>Retirer</strong> une ligne de l'index ne supprime <strong>aucun fichier</strong> sur disque. C'est juste un nettoyage de l'index. Pour vraiment supprimer une archive, supprime le ZIP toi-même dans le Finder."
             },
             {
                 type: 'texte',
                 titre: "Où sont les données pédagogiques d'un trimestre archivé ?",
-                contenu: "Verser n'a <strong>rien supprimé</strong> dans ton codex. Les étudiant·es, présences, évaluations et fichiers du trimestre que tu as versé sont toujours dans ton application. Pour les consulter, change le <strong>trimestre actif</strong> dans le sélecteur du haut. Le versement, lui, est une copie de sécurité figée."
+                contenu: "Archiver n'a <strong>rien supprimé</strong> dans ton codex. Les étudiant·es, présences, évaluations et fichiers du trimestre que tu as versé sont toujours dans ton application. Pour les consulter, change le <strong>trimestre actif</strong> dans le sélecteur du haut. L’archive, lui, est une copie de sécurité figée."
             },
             {
                 type: 'liste',
                 titre: "Lecture des colonnes",
                 items: [
-                    "<strong>Mode</strong> indique comment le versement a été produit. <em>Disque (FSAPI)</em> = écriture directe par Chrome/Edge dans ton dossier réserve. <em>ZIP</em> = fichier téléchargé par Safari.",
-                    "<strong>Étud.</strong> et <strong>Fich.</strong> sont les compteurs au moment du versement.",
+                    "<strong>Mode</strong> indique comment l’archive a été produit. <em>Disque (FSAPI)</em> = écriture directe par Chrome/Edge dans ton dossier d’archives. <em>ZIP</em> = fichier téléchargé par Safari.",
+                    "<strong>Étud.</strong> et <strong>Fich.</strong> sont les compteurs au moment de l’archive.",
                     "<strong>Taille</strong> est la taille des fichiers travaux (photos, PDF) seulement, pas du ZIP complet."
                 ]
             }

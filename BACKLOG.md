@@ -17,8 +17,8 @@
 >
 > Le module `js/reserve.js` v1 a ete livre le meme jour
 > (`docs/architecture/SPEC-RESERVE-V1.md`). API : `Reserve.verserGroupeCours()`,
-> `estimerVersement()`, `listerGroupesVersables()`. Le versement est un ZIP
-> structure telechargeable, decompresse manuellement dans `~/Documents/Reserve_LaboCodex/`.
+> `estimerVersement()`, `listerGroupesVersables()`. L’archive est un ZIP
+> structure telechargeable, decompresse manuellement dans `~/Documents/Archives_LaboCodex/`.
 > Granularite par groupe-cours (pas par trimestre), UUID v4 par versement.
 > Acces via le menu Codex de l'en-tete uniquement (decision spec §6.3).
 
@@ -35,7 +35,7 @@
     - « Importer un fichier » → garder comme entree double (Ouvrir un codex /
       Emprunter de la voute), ou separer en deux gestes
     - Renommer la section « Sauvegarde et restauration » → « Reserve et voute »
-    - Ajouter une carte de statut « Reserve » : nombre de versements detectes,
+    - Ajouter une carte de statut « Reserve » : nombre de archives detectes,
       derniere date, taille (lecture d'un manifeste a importer ; v1.1 ou plus tard)
   - **Prerequis** : versement v1 valide en usage reel (apres test terrain par
     Gregoire). Ne pas refondre tant que des manques fonctionnels ne sont pas
@@ -48,8 +48,8 @@
     implementes (priorites 4-7 de `ECOSYSTEME-DONNEES.md` §Priorites
     d'implementation).
 
-- [ ] **#248** Reserve v1.1 — mise a jour automatique du `manifeste-reserve.json` global
-  - Actuellement, chaque versement inclut un `manifeste-reserve-patch.json`
+- [ ] **#248** Reserve v1.1 — mise a jour automatique du `manifeste-archives.json` global
+  - Actuellement, chaque versement inclut un `manifeste-archives-patch.json`
     qu'il faut fusionner manuellement (ou via un futur outil) dans le
     manifeste global de la reserve. La spec v1 (§12) reporte cette
     automatisation a la v1.1.
@@ -76,16 +76,16 @@
   - Priorite 5 de `ECOSYSTEME-DONNEES.md`. Section dediee qui charge des
     codex data en lecture seule sans ecraser le trimestre actif.
 
-- [x] **#253** Reserve v1.5 — automatisation du versement (FSAPI Chrome/Edge) (livre 28 avril 2026, b0428-0810)
-  - **Probleme** : le versement v1 exige 5 manipulations Finder
+- [x] **#253** Reserve v1.5 — automatisation de l’archive (FSAPI Chrome/Edge) (livre 28 avril 2026, b0428-0810)
+  - **Probleme** : l’archive v1 exige 5 manipulations Finder
     (deplacer le ZIP depuis Telechargements, le decompresser, supprimer
     le ZIP source, fusionner manuellement le manifeste-patch). Friction
     bloquante pour les utilisateurs non techniques.
   - **Solution** : File System Access API (Chrome/Edge sur Mac).
-    L'utilisateur choisit son dossier `Reserve_LaboCodex/` une seule fois
+    L'utilisateur choisit son dossier `Archives_LaboCodex/` une seule fois
     via `showDirectoryPicker()`, le handle est persiste en IndexedDB.
     Versements suivants : ecriture directe + decompression in-place +
-    mise a jour du `manifeste-reserve.json` global, sans intervention
+    mise a jour du `manifeste-archives.json` global, sans intervention
     manuelle. Pattern reutilisable depuis `_fileHandle` dans codex.js.
   - **Limite assumee** : Safari ne supporte pas FSAPI. Le flux manuel
     reste pour les utilisateurs Safari. Documenter clairement « pour un
@@ -125,10 +125,10 @@
     il doit pouvoir **lire la reserve depuis l'application**.
   - **Mecanisme** :
     - Selection d'un fichier `.reserve.zip` (ou navigation FSAPI dans
-      `Reserve_LaboCodex/` si #253 livre)
+      `Archives_LaboCodex/` si #253 livre)
     - Chargement en namespace temporaire (ex. `__archive_a2025_*`),
       separe du trimestre actif, lecture seule
-    - Affichage d'un panneau « Contenu du versement » : etudiants
+    - Affichage d'un panneau « Contenu de l’archive » : etudiants
       (anonymisable pour demo), productions, grilles, echelles,
       cartouches, evaluations
     - **Pour les ressources de bibliotheques** : selection multiple +
@@ -136,9 +136,9 @@
     - **Pour les donnees pedagogiques** : consultation seule, optionnel
       mode « simuler ce trimestre » qui bascule l'app en lecture seule
       sur ces donnees (utile demo)
-  - **Ne fait PAS** : modifier le versement original. L'archive reste
+  - **Ne fait PAS** : modifier l’archive original. L'archive reste
     figee. Pour corriger des donnees historiques, c'est un autre flux
-    (eventuellement : creer un nouveau versement-correctif avec UUID
+    (eventuellement : creer un nouvelle archive-correctif avec UUID
     distinct, hors scope v1).
   - **Distinction avec #251 (Codex data)** : codex data extrait des
     donnees analytiques (indices, snapshots, longitudinal) pour le Labo.
@@ -162,7 +162,7 @@
       consultation de trimestres passes pour demo / formation /
       reflexion professionnelle
   - Ajouter au tableau des verbes : « reimporter » (reserve → app
-    bibliotheques) et « ouvrir un versement » (reserve → consultation
+    bibliotheques) et « ouvrir une archive » (reserve → consultation
     temporaire en namespace isole).
   - Lier #254 (mecanisme) a cette clarification (vocabulaire).
   - **Effort** : 1-2 heures de redaction.
@@ -177,7 +177,7 @@
 - [ ] **#256-bis** Aide aux 8 autres modales (Nouveautes, Reparation, Wizard pratique, ApercuPDF, Confidentiel, Export, Import, Suppression ressource)
   - **Probleme** : les modales (`#modalOuvrirVersement`, `#modalReserve`, autres) ne
     beneficient pas du systeme d'aide existant. Un novice qui ouvre « Ouvrir la reserve »
-    ne sait pas ce qu'est un versement, pourquoi cocher « copie en double », ou pourquoi
+    ne sait pas ce qu'est une archive, pourquoi cocher « copie en double », ou pourquoi
     des items sont grises (« deja present »).
   - **Cible** : etendre `data-aide` / infobulles / primo-aide pour qu'elles fonctionnent
     a l'interieur des modales (overlay), avec une UX coherente avec le reste de l'app.
@@ -190,39 +190,47 @@
 
 ### Vocabulaire — Simplification ecosysteme de donnees (2 mai 2026)
 
-- [ ] **#259** Renommer « Reserve / verser / versement » → « Archives / archiver / archive »
-  - **Contexte** : retour testeur le 2 mai 2026 — le vocabulaire bibliothecaire
-    (codex, reserve, versement) est ressenti comme esoterique. L'utilisateur
-    perd le fil entre les concepts. Le vocabulaire archive/archiver est plus
-    direct et universel.
-  - **Renommages cibles** :
-    - **Reserve** → Archives (ou « mes archives »)
-    - **Verser dans la reserve** → Archiver
-    - **Ouvrir la reserve / un versement** → Ouvrir une archive
-    - **Versement** (le ZIP, l'entree) → Archive
-  - **Restent inchanges** : Codex (identite produit), Manifeste (devient
-    « Index des archives » ou « Liste des archives » dans l'UI seulement, le
-    code peut garder « manifeste »).
-  - **Perimetre du chantier** :
-    - 3 modules JS (`js/reserve.js`, `js/reserve-ouvrir.js`,
-      `js/reserve-reglages.js`) — strings UI, console.warn, commentaires.
-      Garder les noms internes des modules (eviter rename de fichier pour
-      ne pas casser l'historique git).
-    - ~13 entrees d'aide popup et tooltips (`accompagnement-contenu-popup.js`,
-      `accompagnement-contenu-hover.js`).
-    - Modale `#modalReserve` et `#modalOuvrirVersement` : labels, titres,
-      messages. Les IDs DOM peuvent rester (pour limiter le diff).
-    - Carte « Reserve » dans Reglages > Donnees → « Archives » + popup
-      `reglages-reserve` (le contenu du popup).
-    - Menu Codex : entrees « Verser dans la reserve... » et « Ouvrir la
-      reserve... ».
-    - `BACKLOG.md`, memoires Claude (`project_reserve.md`,
-      `project_phase7_doublons.md` si reference, etc.).
-    - `docs/architecture/ECOSYSTEME-DONNEES.md` : revoir le tableau des
-      verbes et la presentation des 4 concepts.
-  - **Effort** : 2-3 heures (gros find/replace + relecture pour eviter les
-    confusions, validation terrain).
-  - **Priorite** : Haute pour la prochaine session (decision 2 mai 2026).
+- [x] **#259** Renommer « Reserve / verser / versement » → « Archives / archiver / archive »
+  - **Statut** : RESOLU le 5 mai 2026 (Beta XX.XX, decision « zero dette technique »).
+  - **Périmetre couvert** :
+    - Strings UI dans 3 modules JS (`reserve.js`, `reserve-ouvrir.js`,
+      `reserve-reglages.js`) : titres, labels, console.warn `[Archives]`,
+      commentaires JSDoc/headers. ~178 remplacements.
+    - `index.html` : modales, menu Codex, carte Reglages > Donnees,
+      textes UI explicatifs. ~30 remplacements.
+    - `accompagnement-contenu-popup.js` + `accompagnement-contenu-hover.js` :
+      ~50 remplacements dans les textes des popups et tooltips.
+    - 2 commentaires JSDoc dans `cartouches.js` et `productions.js`.
+    - `docs/architecture/ECOSYSTEME-DONNEES.md` : ~80 remplacements
+      (titres de section, accords, verbes pédagogiques).
+    - `BACKLOG.md` : ~16 remplacements dans les anciennes notes.
+  - **Préservés (volontaire)** :
+    - Noms de fichiers `js/reserve*.js`, classe `window.Reserve`,
+      methodes (`verserGroupeCours`, `actionVerser`, `estimerVersement`,
+      etc.) — APIs internes stables.
+    - IDs DOM (`#modalReserve`, `#modalOuvrirVersement`,
+      `id="codex-menu-verser-reserve"`).
+    - Cles d'aide popup (`'reserve-versement'`, `'reserve-ouvrir-versement'`,
+      `'reglages-reserve'`, etc.) et leur cross-refs `voirAussi`.
+    - Variables locales (`dossierVersement`, `_versementsListes`,
+      `versements`, `_contenuVersement`).
+    - Constantes (`EXTENSION_RESERVE`, `_payloadCourant`).
+    - Le mot « versement » dans le BACKLOG quand il fait reference a
+      l'historique du chantier, pas a une UI courante.
+  - **Migration data** : script bash `migrer-reserve-vers-archives.sh`
+    fourni à la racine. Renomme :
+    - `~/Documents/Reserve_LaboCodex/` → `~/Documents/Archives_LaboCodex/`
+    - `manifeste-reserve.json` → `manifeste-archives.json`
+    - `manifeste-reserve-patch.json` → `manifeste-archives-patch.json`
+    - JSON keys : `"versements"` → `"archives"`, `"date_versement"` →
+      `"date_archive"`, `"mode_versement"` → `"mode_archive"`.
+    A executer une fois après upgrade. Idempotent.
+  - **Approche** : script Python ciblé (`/tmp/sp259_rename.py`) avec
+    patterns littéraux (jamais de regex `\b...\b` qui aurait touché
+    les identifiants JS et les cles DOM). Patterns triés par longueur
+    décroissante pour gérer correctement les accords français
+    (« versements existants » → « archives existantes » avant
+    « versements » → « archives » seul).
 
 ### Donnees — Cartes mentales perdues localement (5 mai 2026)
 
