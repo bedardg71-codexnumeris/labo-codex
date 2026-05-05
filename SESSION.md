@@ -1,9 +1,9 @@
-# SESSION — État au 5 mai 2026 (Refonte nav + #261 + #259 Réserve→Archives livrés)
+# SESSION — État au 5 mai 2026 (Refonte nav + #261 + #259 + #247 livrés)
 
 **Date** : 5 mai 2026
-**Dernier build** : `0505-0940` · Beta **99.35** (poussée sur origin/main)
+**Dernier build** : `0505-1220` · Beta **99.35** (poussée sur origin/main)
 **Branche** : `main` (à jour avec origin)
-**Statut** : 3 chantiers majeurs livrés aujourd'hui : refonte nav (Conception/Calendrier/Labo), #261 (cartes mentales restaurées + fix préventif), #259 (Réserve→Archives, refactor zéro dette technique sur ~700 occurrences). Backlog écosystème reste ouvert mais déblayé.
+**Statut** : 4 chantiers livrés aujourd'hui — refonte nav (Conception/Calendrier/Labo), #261 (cartes mentales), #259 (Réserve→Archives, ~700 occ.), #247 (Réglages > Données refonte 6 cartes alignées sur l'écosystème). Backlog écosystème quasi déblayé.
 
 ---
 
@@ -14,35 +14,28 @@
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
-Contexte : 5 mai 2026, journée intense — 3 chantiers majeurs livrés et
-poussés sur main :
+Contexte : 5 mai 2026, journée très intense — 4 chantiers majeurs
+livrés et poussés sur main :
 
 1. Refonte nav principale (Beta 99.35 b0505-0735, merge 311c8d9) :
    Conception (ex-Structure) · Calendrier (ex-Contexte) · Labo (ex-Outils)
    avec déplacements (Pratiques→Conception, Bilan/Études→Labo).
 
 2. #261 cartes mentales perdues (fix 76144bc) : 5 cartes restaurées
-   depuis backup 18 avril + patch préventif planification-donnees.js
-   (fallback automatique si index.active pointe sur carte inexistante).
+   depuis backup 18 avril + patch préventif planification-donnees.js.
 
 3. #259 Réserve→Archives (Beta 99.35 b0505-0940, PR #10 mergée 86b597d) :
-   refactor zéro dette technique. Renommage UI + console + JSDoc + path
-   physique disque + JSON keys storage + headers de modules. Migration
-   data via script bash one-shot fourni. Faux amis SRPNF/préserver/
-   inverser/identifiants JS internes (verserGroupeCours, dossierVersement,
-   etc.) tous préservés. Review manuelle ciblée : 19 doublons </script>
-   nettoyés au passage (cumulés pendant SP3-SP5).
+   refactor zéro dette technique. ~700 occurrences. Migration data via
+   script bash one-shot fourni. Identifiants JS internes préservés.
+   19 doublons </script> nettoyés au passage.
 
-PROCHAINE ÉTAPE — choisir parmi les items du backlog Réserve/écosystème
-qui restent ouverts depuis fin avril (mon avis : #247 maintenant que
-#259 a établi le vocabulaire « Archives ») :
+4. #247 Refonte Réglages > Données (Beta 99.35 b0505-1220, PR #11
+   mergée cc1d219) : structure 6 cartes alignée sur l'écosystème.
+   Codex / Archives (diagnostic-only) / Codex data placeholder /
+   Voûte placeholder / Captures / Maintenance.
 
-  [HAUTE] #247 Refonte Réglages > Données — alignement vocabulaire
-    écosystème (~1 j). Refonte complète de la section Données dans
-    Réglages pour refléter les 4 concepts (Codex / Archives / Codex
-    data / Voûte). Carte de statut, sous-sections par concept. Le
-    vocabulaire « Archives » est maintenant établi grâce à #259, donc
-    on peut imprimer la nouvelle structure avec confiance.
+PROCHAINE ÉTAPE — choisir parmi les items du backlog encore ouverts
+(par priorité décroissante suggérée) :
 
   [MOYENNE] #257 v2.B Mode consultation namespace temporaire (~5-6 h)
     Suite de #257 v2.A. Ouvre une archive en lecture seule dans un
@@ -139,6 +132,28 @@ Approche zéro dette technique. ~700 remplacements dans 13 fichiers.
 
 **Review manuelle** : `/ultrareview` cloud avait crashé. Review ciblée à la main : identifiants internes ✓, storage keys ✓, voirAussi cross-refs ✓, faux amis ✓, syntaxe JS ✓. **1 bug trouvé et corrigé** : 19 doublons `</script>` dans index.html (cumulés pendant SP3-SP5).
 
+### Refonte #247 Réglages > Données — 6 cartes alignées sur l'écosystème (PR #11 mergée, commit `cc1d219`)
+
+Refonte partielle (Codex data + Voûte n'existent pas encore — placeholders).
+
+**6 cartes cibles** :
+1. **Codex** (espace de travail actif) — 3 sous-cartes : Exporter le Codex / Exporter ma config / Ouvrir un Codex
+2. **Archives** (dépôt local) — note diagnostic-only ajoutée, actions au menu Codex
+3. **Codex data** — placeholder désaturé, badge « À venir »
+4. **Voûte** — placeholder désaturé, badge « À venir »
+5. **Captures et recherche** — inchangé (accordéon)
+6. **Maintenance** — inchangé (accordéon, zone danger)
+
+**Tooltips renommés** (cohérence) : `donnees-sauvegarde`→`donnees-codex`, `donnees-export-complet`→`donnees-codex-export`, `donnees-export-config`→`donnees-config-export`, `donnees-import`→`donnees-codex-ouvrir`. **Ajoutés** : `donnees-codex-data`, `donnees-voute`.
+
+**Décisions actées** (Q1-Q4) :
+- Q1 : refonte partielle (vocabulaire + réorganisation, garder JS existant)
+- Q2 : par concept (4 concepts + 2 cartes métier)
+- Q3 : Archives diagnostic-only — actions au menu Codex pour éviter les flux doublés
+- Q4 : « Sauvegarde complète » → « Exporter le Codex » (clarifie ≠ Archiver)
+
+Aucun impact sur `donnees-v2.js` (logique métier inchangée).
+
 ---
 
 ## État global du projet (post 5 mai)
@@ -156,7 +171,7 @@ Approche zéro dette technique. ~700 remplacements dans 13 fichiers.
 |---|---|---|
 | #259 | Renommage Réserve → Archives | ✅ livré 5 mai (PR #10 mergée) |
 | #261 | Cartes mentales perdues | ✅ livré 5 mai |
-| #247 | Refonte Réglages > Données | ⏳ Haute priorité (suite logique de #259) |
+| #247 | Refonte Réglages > Données | ✅ livré 5 mai (PR #11 mergée) |
 | #257 v2.B | Mode consultation namespace temporaire | ⏳ Moyenne |
 | #248 | Manifeste fusion auto Safari | ⏳ Moyenne |
 | #251 | Codex data — extraction depuis les Archives | ⏳ Moyenne |
