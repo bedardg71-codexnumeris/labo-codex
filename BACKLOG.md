@@ -224,6 +224,21 @@
     confusions, validation terrain).
   - **Priorite** : Haute pour la prochaine session (decision 2 mai 2026).
 
+### Credits — A propos (3 mai 2026)
+
+- [ ] **#260** Ajouter le credit Icons8 dans Reglages > A propos > Technologies
+  - **Lieu** : `index.html:11161` (carte « Technologies » dans la section
+    Aide > A propos), tableau `class="table-collapse"`. Ajouter une nouvelle
+    ligne `<tr>` apres « Developpement ».
+  - **Contenu** :
+    - Libelle : « Icones »
+    - Valeur : « Icons8 — <a href="https://icons8.com" target="_blank" rel="noopener noreferrer">icons8.com</a> »
+    - Sous-texte gris (`text-muted u-texte-09`) optionnel : « Bibliotheque
+      d'icones libres ».
+  - **Effort** : ~15 min (HTML uniquement, pas de logique).
+  - **Priorite** : Basse, mais a faire avant de partager publiquement
+    l'application (obligation morale de credit).
+
 ### UX — En-tete (2 mai 2026)
 
 - [ ] **#258** Remplacer le selecteur Normal/Anonymise par un bouton-icone dans l'en-tete

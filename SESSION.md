@@ -1,9 +1,9 @@
-# SESSION — État au 2 mai 2026 (Phase 7 complète : compteur dédupliqué + UI fichiers multiples)
+# SESSION — État au 3 mai 2026 (Bilan réflexif Phases A→D livrées)
 
-**Date** : 2 mai 2026
-**Dernier build** : `0502-0945` · Beta **99.32**
+**Date** : 3 mai 2026 (soir)
+**Dernier build** : `0503-1645` · Beta **99.33**
 **Branche** : `main` (poussée sur origin)
-**Statut** : Phase 7 complète (#1 + #2 + #3 livrés). Compteur du carrousel dédupliqué par étudiant, modale interactive « Plusieurs fichiers par étudiant » avec 2 familles + tags informatifs + persistence des cas validés, et 6e bouton « Livrable additionnel » dans la modale d'import. ~~5 lots `/ultrareview` audités, 6 phases de remédiation livrées (42+ bugs corrigés).~~
+**Statut** : Bilan réflexif refondu en 4 phases (A : format texte étendu / B : éditeur UI / C : import CSV / D : rapport étendu). Le module gère désormais 5 types de questions (Likert, Likert+NA, Choix unique, Choix multiple, Matrice) avec préambule, descriptions de bloc, options personnalisées, limites min/max, consignes conditionnelles, champs « Autre : ___ ». Pipeline complet upstream/downstream prêt pour ses premiers résultats réels (attendus 4 mai).
 
 ---
 
@@ -14,168 +14,196 @@
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
-Contexte : Phase 7 doublons COMPLÈTE (Beta 99.32 b0502-0945, poussée).
-Trois paliers livrés en cascade le 2 mai matin :
-- Phase 7 #1 : compteur carrousel dédupliqué par étudiant
-  Artefact 8 « (15) » → « (14 él · 15 fich) » quand nb fichiers
-  diffère du nb d'étudiants. Format universel pour signaler les
-  asymétries.
-- Phase 7 #2 (livré 1 mai) : outils console diagnostiquerDoublons()
-  et nettoyerDoublonsExacts() dans travaux-resolution.js + corbeille
-  par défaut (restaurable 30 j).
-- Phase 7 #3 : modale interactive « Plusieurs fichiers par étudiant »
-  (js/travaux-doublons-ui.js, ~440 l.). 2 familles seulement (jeton
-  Codex / Plusieurs fichiers) + 4 tags informatifs (PDF+image, mêmes
-  noms, dates proches, statuts mixtes). Bouton « Valider ce cas »
-  qui marque légitime sans rien supprimer + persistence (clé
-  cas_fichiers_multiples_valides via db.setSync). 6e bouton dans
-  la modale d'import (« Livrable additionnel ») qui marque le cas
-  validé immédiatement.
+Contexte : aujourd'hui (3 mai), Bilan réflexif Phases A→D livrées et
+poussées (commits 96a552b → 7574943, beta 99.33 b0503-1645). Pipeline
+complet : composer un questionnaire dans l'app, exporter en texte vers
+une appli de formulaire externe (MS Forms typiquement), importer le CSV
+des résultats, générer le rapport. Round-trip identité validé sur le
+questionnaire de référence (20 questions, 8 sections, 7 matrices).
+
+PROCHAINE ÉTAPE — refonte de la navigation principale (chantier
+préparé hier soir, plan complet dans :
+`plans de travail/PLAN-REFONTE-NAV.md`)
+
+Vision en une ligne : renommer Structure → Conception, Contexte →
+Calendrier, Outils → Labo, et déplacer Pratiques de notation, Bilan
+réflexif et Labo (sous-onglet) vers leurs sections respectives. Le
+sous-onglet « Labo » devient « Études » dans la nouvelle section Labo.
 
 LECTURE OBLIGATOIRE AVANT DE CODER :
-1. (auto-memory de Claude) project_phase7_doublons.md — référence
-   technique du module + patterns + persistence
-2. project_reserve.md — module Réserve (versement v1.5 FSAPI +
-   réimport v1) si on revient aux items #247-249, #257 v2.B
-3. CLAUDE.md — règles de sécurité + zones protégées
+1. `plans de travail/PLAN-REFONTE-NAV.md` (plan en 6 sous-phases avec
+   audit complet, faux amis identifiés, risques mitigés)
+2. CLAUDE.md — règles de sécurité + zones protégées (`js/config.js` et
+   `js/navigation.js` sont protégés mais à modifier dans cette refonte
+   avec autorisation de Grégoire)
+3. NOMS_STABLES.json — fichier protégé qui liste les IDs HTML stables ;
+   ~17 entrées à renommer cette session, mettre à jour version + date
 
-PROCHAINE ÉTAPE — choisir parmi les items du backlog Réserve/écosystème
-qui restent ouverts depuis fin avril (les 3 paliers Phase 7 ont été
-priorisés sur cette session, pas la voie de retour Réserve) :
+STRATÉGIE ACTÉE : Strategy B (renommage complet — IDs internes ET
+labels visibles). Aligné avec le principe « stabilité zéro-dette » de
+CLAUDE.md. Pas de demi-mesure « labels seulement » qui créerait une
+incohérence permanente entre le code et l'UI.
 
-  #257 v2.B Mode consultation namespace temporaire (~5-6 h)
-            Suite de #257 v2.A (remapping IDs déjà livré). Ouvre un
-            versement réserve en lecture seule dans un namespace
-            __archive_*, utile pour démos/formation.
+DÉCOMPOSITION EN 6 SOUS-PHASES (commitables indépendamment, ~3-4 h) :
+  SP1 — Refactor préventif de navigation.js (switch → table-driven)
+  SP2 — Mouvements de sous-onglets (sans renommage de section)
+  SP3 — Renommage boite-outils → labo (le moins risqué, ~20 occ.)
+  SP4 — Renommage structure → conception (~40 occ.)
+  SP5 — Renommage contexte → calendrier (~50 occ. + faux amis)
+  SP6 — Documentation et finalisation
 
-  #256-bis Aide aux 8 autres modales de l'app (~1 j). Pattern de
-           #256 (modales Réserve) à reproduire pour Nouveautés,
-           Réparation, Wizard pratique, etc.
+⚠️ FAUX AMIS À NE PAS TOUCHER (cartes écosystème-classe du tableau de
+   bord, dans tableau-bord-apercu.js et styles.css) :
+   - contexte-indicateurs-acpe, contexte-indicateurs-apprentissage
+   - contexte-evolution-temporelle, contexte-trajectoires-production
+   - contexte-correlations, contexte-impact-jetons, contexte-consolidation
+   - Classes CSS .carte-contexte-*
+   Plus le mot « Structure » quand il désigne le critère SRPNF (S de
+   Structure dans la grille d'évaluation). Filtrer les recherches.
 
-  #247 Refonte Réglages > Données — alignement vocabulaire écosystème
-       (Codex/Réserve/Voûte). ~1 j. Conditionné aux retours terrain
-       sur la voie de retour Réserve.
-
-  #248 Réserve v1.1 manifeste-reserve.json fusion auto pour Safari.
-       ~2-3 h. FSAPI Chrome/Edge le fait déjà.
-
-  #249 Section Réserve dédiée dans Réglages (état des versements).
-       ~3-4 h. Dépend de #248.
-
-  #251 Codex data — extraction depuis la Réserve. Format JSON sans
-       blobs pour le Labo. Priorité 4 ECOSYSTEME. ~1-2 j.
-
-  #252 Labo autonome — sortir de Suivi. Priorité 5 ECOSYSTEME. ~1 j.
+⚠️ RISQUE CRITIQUE : navigation.js contient 12 cases switch hardcodés
+   (case 'structure-carte', case 'contexte-trimestre', etc.). Si on
+   renomme les IDs sans mettre à jour ces cases, plus aucune section
+   ne charge. La sous-phase 1 (refactor table-driven) est OBLIGATOIRE
+   AVANT toute modification d'ID. Ne pas court-circuiter.
 
 CONTRAINTES (rappel CLAUDE.md) :
-- Demander le numéro de beta à Grégoire avant chaque commit
-- Bumper version.json + js/init-inline.js (pas index.html, fallback
-  a migré). Cache-buster du fichier modifié dans index.html.
-- Safari Mac/iPad cibles ; Cmd+Q + rouvrir pour rechargement
+- Demander le numéro de beta à Grégoire avant le commit final
+- Bumper version.json + js/init-inline.js à la dernière sous-phase
+- Cache-buster dans index.html pour chaque fichier JS modifié
+- Safari Mac/iPad cibles ; Cmd+Q + rouvrir entre chaque sous-phase
+  pour tester
 - echapperHtml() obligatoire sur innerHTML avec données utilisateur
 - Zéro handler inline -> data-action / data-on-change
 - console.warn / console.error uniquement
 - Variables CSS du DS, tester modes clair ET sombre
-- Modales : classList.add('actif') (PAS 'visible'). Convention
-  styles.css:3499. Vérifier sur les autres modules avant d'inventer.
-- Petites métadonnées persistées : utiliser db.setSync (PAS db.set
-  qui est async sans await → getSync immédiat lit valeur stale).
+- Modales : classList.add('actif') (PAS 'visible')
+- Petites métadonnées persistées : db.setSync (PAS db.set qui est
+  async sans await → getSync immédiat lit valeur stale)
 
-OBSERVATIONS OUVERTES (hors scope immédiat) :
-- Warnings console [Résolution] AMBIGUÏTÉ : N fichiers pour (DA, )
-  — productionId vide. Probablement déclenché par genererDropdownActions
-  qui itère sur les évaluations. Bruit, pas critique.
-- Phase 7 du plan de remédiation Lot 4a (11 findings dans
-  evaluation-jetons.js) -- à faire dans une autre session, demande
-  du contexte métier sur les jetons
-- Lots 4b (pratiques) et 3 (indices, candidats à trier) non encore
-  remédiés (audits faits, rapports dans Rapports/)
-- Quota localStorage saturé sur Mac (warnings au boot, plan dans
-  « plans de travail/Plan - Désaturation localStorage (analyse).md »)
+CRITÈRES D'ACCEPTATION GLOBAUX (après les 6 sous-phases) :
+1. Nav principale affiche : Accueil / Aperçu / Conception / Calendrier
+   / Suivi / Évaluation / Labo / Aide / Réglages
+2. Conception : 7 sous-onglets dont Pratiques de notation
+3. Calendrier : 2 sous-onglets (Trimestre, Vue calendaire)
+4. Suivi : 4 sous-onglets (Labo retiré)
+5. Labo : 5 sous-onglets (Tirage, Modélisation, Rythme, Études,
+   Bilan réflexif)
+6. Tableau de bord : cartes écosystème-classe TOUJOURS fonctionnelles
+   (les contexte-* du dashboard NON renommés)
+7. Aide contextuelle : bulles « Structure → X » deviennent
+   « Conception → X », idem pour Contexte → Calendrier
+8. Bilan réflexif : import / export / éditeur fonctionnent après
+   le déplacement vers Labo
+
+OBSERVATIONS OUVERTES (hors scope refonte nav) :
+- Premier import CSV réel du Bilan réflexif attendu — valider Phase C
+  (mapping auto + colonnes sœurs MS Forms) avec les données terrain
+- Backlog Réserve/écosystème ouvert depuis fin avril (#247-249, #251,
+  #252, #257 v2.B, #256-bis) — non priorisé tant que la nav n'est pas
+  rénovée
+- BACKLOG #260 (crédit Icons8 dans Réglages > À propos) — basse
+  priorité, à faire avant partage public
 ```
 
 ---
 
-## Récapitulatif des livrables 1-2 mai 2026
+## Récapitulatif des livrables 3 mai 2026
 
-### Audits /ultrareview payants (2 lots auditeés sur 7)
+### Bilan réflexif — Refonte complète en 4 phases
 
-| Lot | PR | Findings | Pipeline | Rapport |
-|---|---|---|---|---|
-| Lot 4a Évaluation cœur | #6 | 11 (8 normal + 3 élevés) | Crash Déduplication | `Rapports/ultrareview-lot-4a-evaluation.md` |
-| Lot 6 Travaux+saisie | #9 | 10 (7 normal + 3 nit) | ✅ Complet (1ère fois sur >15k l.) | `Rapports/ultrareview-lot-6-travaux-saisie.md` |
+Pipeline upstream/downstream pour collecter et analyser des questionnaires de fin de trimestre via une application de formulaire en ligne (Microsoft Forms ciblé). 5 types de questions supportés au lieu de 2.
 
-**Lot 4b (pratiques notation)** : run lancé, crashé probablement par épuisement crédits offerts par Anthropic. Audit non remédiable. Branche `review/lot-4b-pratiques` toujours en place sur origin si on y revient avec d'autres crédits.
+**Phase A — Format texte + parser étendus** (`96a552b`)
+- 5 types : `likert4` (avec option `inclureNA`), `choix_unique` ([RADIO]), `choix_multiple` ([CHECKBOX] avec `min/maxSelection`), `matrix` ([MATRIX] avec énoncés en puces), `ouvert` ([OUVERT])
+- Préambule + description de bloc dans le modèle de données
+- Option « Autre : ___ » avec flag `autreAvecChamp`
+- Consigne conditionnelle italique sur ligne séparée
+- `PROMPT_IA_BILAN` v3, modèle téléchargeable showcasant les 5 types
+- Test phare : round-trip identité sur questionnaire de référence (20 questions, 7 matrices, 39 énoncés)
 
-### Remédiations Phase 6 (Lot 6 — 10 bugs corrigés en 4 commits)
+**Phase B — Éditeur UI étendue** (`a1ee004` puis `42b51ee`)
+- Préambule éditable sous le titre + description par bloc
+- Sélecteur de type étendu (5 options)
+- Édition inline complète : options Radio/Checkbox (texte + Autre + monter/descendre/supprimer), énoncés Matrix, min/max Checkbox, toggle Likert+NA, consigne conditionnelle
+- Garde-fous : min 2 / max 8 options, min 1 énoncé matrix
+- Helper `libelleTypeQuestion` pour les badges des 5 types
 
-```
-35efeee fix(visionneuse): split nav + zoom margin-aware + ouvrirPDF try/catch (N7+nit1+nit2)
-e3c7bd7 fix(saisie): null guards etudiants + modifierNotesPresence respecte coursId (N4+N5)
-d856c36 fix(saisie): bugs assiduite multi-seances + saisie-absence-motivee preservee (N1+N2+N3)
-1f384bc fix: XSS via motif de conge + symetrie cleanup PDF.js (N6 + nit3)
-```
+**Renommage UI Likert/Matrice + suppression mentions Microsoft** (`f08aa51`)
+- « Likert » → « Likert (1 énoncé) », « Matrice » → « Likert matriciel (N énoncés) »
+- Astuce sur le mapping vocabulaire avec applications de formulaire
+- Mentions Microsoft remplacées par formulations génériques (« certaines applications »)
 
-### Beta 99.30 — fonctionnalités jour (commit antérieur, intégré)
+**Phase C — Import CSV étendu** (`a9a9782`)
+- Mapping étendu pour reconnaître les colonnes sœurs des matrices et les colonnes « Autres : <Q> »
+- Helpers `obtenirCiblesMapping`, `_tenterMappingAutres`, `_tenterMappingMatrice`
+- Agrégation par type dans `confirmerImport` (refonte) : likert4+NA, choix_unique avec mapping cellule→option, choix_multiple split sur `;`, matrix par énoncé, autres collectés
+- Smoke test : 8/8 colonnes correctement mappées sur CSV synthétique
 
-```
-bc6c759 feat: action Renommer + detection fichiers sans DA + fix doublons multi-pages (99.30)
-```
+**Phase D — Rapport étendu** (`7574943`)
+- Rendu HTML par type : barre stackée Likert (4 segments colorés), barres % par option (Radio/Checkbox), tableau matriciel pour Matrix
+- Calculs (vue d'ensemble, score bloc, signaux Fort/Faible) intègrent les énoncés de matrice
+- Bandeau NA pour les Likert+NA, indicateur max pour les Checkbox, top-3 en vert
+- Listes « Réponses libres Autre » sous les questions concernées
+- Plus de Chart.js par bloc (HTML/CSS pur sauf le graphique global)
 
-### Phase 7 #2 — Outils diagnostic doublons (3 commits, 1-2 mai)
+### Plan refonte navigation préparé (3 mai soir)
 
-```
-00770ce fix(travaux-resolution): nettoyerDoublonsExacts utilise corbeille par defaut
-b5929e6 feat(travaux-resolution): nettoyerDoublonsExacts avec dry-run par defaut
-ef7bbca feat(travaux-resolution): outil console diagnostiquerDoublons + fix diagnostiquer
-```
+`plans de travail/PLAN-REFONTE-NAV.md` — plan complet 6 sous-phases prêt à attaquer demain. Audit exhaustif fait par subagent (~125 occurrences cumulées, faux amis identifiés, risques mitigés). À ne PAS empiler sur la session Bilan : chantier dédié.
 
-**Diagnostic confirmé sur ce groupe-cours (h2026)** : 22 doublons sur 4 productions :
-- Artefact 3 (2 cas) — Pattern 3 : re-imports avec contenu modifié (tailles différentes)
-- Artefact 5 (9 cas) — Pattern 2 : reprises légitimes avec jeton (suffixe `_-_Jeton_`)
-- Artefact 6 (2 cas) — Pattern 2 : idem
-- Artefact 8 (9 cas dont 8 vrais doublons + 1 mixte PDF/image Handfield)
+### Documents de référence à ce jour
 
-**Nettoyage effectué** : 8 vrais doublons exacts d'Artefact 8 supprimés (suppression définitive faite avant le fix corbeille — irrécupérables sauf via codex backup). 14 cas mixtes restent à traiter via UI nettoyage (Phase 7 #3).
+- `Bilan-fin-de-trimestre-questionnaire.md` (composition Cowork)
+- `Bilan-fin-de-trimestre-questionnaire-format-app.txt` (test phare format Labo Codex)
+- `Spec - Prompt et parser questionnaires Labo Codex.md` (spec Cowork v2 du format)
+- `plans de travail/PLAN-BILAN-REFLEXIF-V2.md` (plan v09 du Bilan réflexif, livré complet)
+- `plans de travail/PLAN-REFONTE-NAV.md` (plan refonte nav, à attaquer demain)
 
 ---
 
-## État global du projet (post 2 mai)
+## État global du projet (post 3 mai)
 
-### Audits ultrareview livrés cette session de travail (cumulé)
+### Bilan réflexif — Statut Phases A→F
 
-| Lot | Findings | Statut |
+| Phase | Statut | Commits |
 |---|---|---|
-| Lot 1 Sécurité E/S | 20 (gratuit) | ✅ Audité, ✅ Remédié (Phases 2-3-5) |
-| Lot 2 Démo+globaux | 6 (gratuit) | ✅ Audité, ✅ Remédié (Phases 2-5) |
-| Lot 3 Indices | 20 candidats non vérifiés (gratuit) | ✅ Audité, ⏳ Triage manuel à faire |
-| Lot 4a Évaluation | 11 (payant) | ✅ Audité, ⏳ Phase 7 du plan remédiation |
-| Lot 4b Pratiques | — | ⚠️ Crashé, jamais remédié |
-| Lot 5 Synthèse PDF | 9 (gratuit) | ✅ Audité, ✅ Remédié (Phases 1-5) |
-| Lot 6 Travaux+saisie | 10 (payant) | ✅ Audité, ✅ Remédié (Phase 6) |
+| A — Format texte + parser | ✅ livrée et testée terrain | 96a552b |
+| B — UI éditeur étendue | ✅ livrée et testée terrain | a1ee004, 42b51ee |
+| Renommage UI + générique | ✅ livré | f08aa51 |
+| C — Import CSV MS Forms | ✅ livrée, smoke test 100% | a9a9782 |
+| D — Rapport étendu | ✅ livrée | 7574943 |
+| E — Génération auto depuis réglages | ⏸️ abandonnée pour l'instant | — |
+| F — Bibliothèque questions canoniques | ⏸️ reportée | — |
 
-**Total findings vérifiés** : 56 (+ 20 candidats Lot 3 à trier)
-**Total bugs corrigés cette session de travail** : ~52
+### Refonte navigation principale
 
-### Plan d'ensemble Phase 7 — COMPLÈTE
+| Sous-phase | Statut |
+|---|---|
+| Plan complet rédigé | ✅ `plans de travail/PLAN-REFONTE-NAV.md` |
+| SP1 Refactor `navigation.js` table-driven | ⏳ À faire (session 4 mai) |
+| SP2 Mouvements de sous-onglets | ⏳ |
+| SP3 Renommage `boite-outils` → `labo` | ⏳ |
+| SP4 Renommage `structure` → `conception` | ⏳ |
+| SP5 Renommage `contexte` → `calendrier` | ⏳ |
+| SP6 Documentation finale | ⏳ |
 
-| # | Sujet | Statut | Commit |
-|---|---|---|---|
-| 7.1 | Compteur carrousel dédupliqué par étudiant (`(N él · M fich)` quand asymétrie) | ✅ Livré 2 mai b0502-0725 | `cf251bc` |
-| 7.2 | Outils console diagnostiquerDoublons + nettoyerDoublonsExacts (corbeille) | ✅ Livré 1-2 mai | `00770ce` `b5929e6` `ef7bbca` |
-| 7.3 | UI interactive « Plusieurs fichiers par étudiant » (3 paliers) | ✅ Livré 2 mai b0502-0940 | `b175970` `b4fb12b` `7c295e1` `d298863` `6050f41` `896931d` `467cff9` `298ccc3` |
+### Backlog ouvert depuis fin avril (priorité basse jusqu'à refonte nav)
 
-**Phase 7 #3 — détail des 3 paliers** (tous livrés 2 mai matin) :
-1. **Modale interactive + 2 entrées** (bandeau + sélect Actions par ligne) avec 4 familles initialement → réduit à 2 (jeton Codex / Plusieurs fichiers) + 4 tags informatifs (PDF+image, mêmes noms, dates proches, statuts mixtes)
-2. **Persistence des cas validés** (clé `cas_fichiers_multiples_valides`, signature triée des fichierIds, auto-invalidation si nouveau fichier rejoint le groupe). Bandeau et compteur carrousel filtrent les cas validés.
-3. **6e bouton « Livrable additionnel »** dans `traiterDoublonsImport` (modale d'import existante), qui marque le cas comme validé immédiatement.
+- #247 Refonte Réglages > Données — alignement vocabulaire écosystème
+- #248 Réserve v1.1 manifeste-reserve.json fusion auto Safari (résolu partiellement)
+- #249 Section Réserve dédiée dans Réglages
+- #251 Codex data — extraction depuis la Réserve
+- #252 Labo autonome — sortir de Suivi (couvert par la refonte nav qui le déplace dans une section dédiée)
+- #257 v2.B Mode consultation namespace temporaire
+- #256-bis Aide aux 8 autres modales de l'app
+- #260 Crédit Icons8 dans Réglages > À propos (15 min)
 
-**Bugs corrigés en cours de session** : modale invisible (`classList.add('actif')` vs `'visible'`), orphelin précis (corbeille requise), persistence en lot (1 seul write au lieu de N), `db.setSync` au lieu de `db.set` pour lecture immédiate.
+### Phase 7 (doublons) — clôturée
+
+Tous les paliers livrés le 2 mai et validés terrain. Voir SESSION.md précédente si retour en arrière nécessaire (préservée dans l'historique git).
 
 ---
 
-## Prochaine session — items prioritaires
+## Prochaine session — Refonte navigation
 
-Le travail Phase 7 a été priorisé sur cette session ; les items du backlog Réserve/écosystème ouverts depuis fin avril restent à attaquer. Voir la consigne de démarrage ci-dessus pour la liste complète (#247, #248, #249, #251, #252, #257 v2.B, #256-bis).
-
-Alternative non-Réserve : Phase de remédiation Lot 4a (jetons, voir `Rapports/ultrareview-lot-4a-evaluation.md`) ou triage manuel des 20 candidats Lot 3 indices.
+Voir consigne de démarrage ci-dessus. Plan détaillé dans `plans de travail/PLAN-REFONTE-NAV.md`. Effort estimé : 3-4 h de session focalisée. Critères d'acceptation explicites. Faux amis listés. Pas de demi-mesure : Strategy B (renommage complet IDs + labels) confirmée par Grégoire.
