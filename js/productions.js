@@ -3968,7 +3968,7 @@ window.supprimerProduction = async function(id) {
 };
 
 /**
- * Importe une liste de productions externes (réserve, voûte, etc.).
+ * Importe une liste de productions externes (archives, voûte, etc.).
  * Pattern symétrique à importerGrillesExternes / importerEchellesExternes.
  *
  * @param {Array} nouvellesProductions - Productions à importer

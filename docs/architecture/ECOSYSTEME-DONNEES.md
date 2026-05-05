@@ -1,4 +1,4 @@
-# Écosystème des données — Codex, Réserve, Voûte
+# Écosystème des données — Codex, Archives, Voûte
 
 > **Document fondateur** — 26 avril 2026
 > Décrit l'architecture cible pour la gestion des données dans Labo Codex.
@@ -45,7 +45,7 @@ ses fichiers travaux (photos, PDF) et un manifeste.
 | Taille attendue   | 400–800 Mo (selon le volume de travaux)     |
 | Fréquence         | 1×/semaine (après saisie des présences ou import des travaux) |
 | Destination       | Clé USB, Mac, iPad (à terme)               |
-| Historique        | Non (retiré du codex — vit dans la réserve) |
+| Historique        | Non (retiré du codex — vit dans les archives) |
 
 **Verbes** : *ouvrir, enregistrer, enregistrer sous*.
 
@@ -56,30 +56,30 @@ ses fichiers travaux (photos, PDF) et un manifeste.
 
 ---
 
-### 2. Réserve
+### 2. Archives
 
 **Vocation** : archive personnelle locale. Rien n'y est jamais détruit.
 
-La réserve est le coffre-fort de l'enseignant. Elle accumule les données
+Les archives est le coffre-fort de l'enseignant. Elle accumule les données
 trimestre après trimestre. C'est la source de vérité absolue, celle qui
 permet de reconstruire n'importe quoi dans le futur.
 
 **Double fonction** — dans le vocabulaire bibliothécaire (codex,
-bibliothèque, réserve, voûte), la réserve joue deux rôles distincts :
+bibliothèque, archives, voûte), les archives joue deux rôles distincts :
 
-1. **Dépôt** — geste de versement en fin de trimestre. Le groupe-cours
-   terminé entre dans la réserve une fois pour toutes. C'est ce que fait
+1. **Dépôt** — geste d'archivage en fin de trimestre. Le groupe-cours
+   terminé entre dans les archives une fois pour toutes. C'est ce que fait
    `Reserve.verserGroupeCours()` (v1, livré).
-2. **Fonds consultable** — la réserve n'est pas un cimetière. C'est un
+2. **Fonds consultable** — les archives n'est pas un cimetière. C'est un
    fonds que l'enseignant peut interroger : *réimporter* une grille
-   d'un trimestre passé pour l'adapter, *ouvrir un versement* en lecture
+   d'un trimestre passé pour l'adapter, *ouvrir une archive* en lecture
    seule pour une démo ou une formation, *extraire* un codex data pour
    l'analyse longitudinale au Labo.
 
-La voie de retour réserve → application est aussi importante que la voie
-d'aller. Sans elle, la réserve ne serait qu'un cimetière de ZIP. Les
+La voie de retour archives → application est aussi importante que la voie
+d'aller. Sans elle, les archives ne serait qu'un cimetière de ZIP. Les
 mécanismes de cette voie de retour sont décrits dans les items #254
-(réimport sélectif et ouverture d'un versement) et #251 (extraction
+(réimport sélectif et ouverture d'une archive) et #251 (extraction
 codex data) du backlog.
 
 | Propriété         | Valeur                                      |
@@ -88,21 +88,21 @@ codex data) du backlog.
 | Contenu           | Données + travaux + bibliothèques + instantanés |
 | Format            | Répertoire structuré sur disque (pas un ZIP) |
 | Taille attendue   | 2–5 Go au fil des trimestres (croissante)   |
-| Fréquence         | Versement en fin de trimestre + sauvegardes ponctuelles |
+| Fréquence         | Archivage en fin de trimestre + sauvegardes ponctuelles |
 | Destination       | Mac, disque externe, iCloud                 |
 
 **Verbes** :
-- *verser* (codex → réserve, dépôt en fin de trimestre)
-- *réimporter* (réserve → bibliothèques actives, copie d'une ressource)
-- *ouvrir un versement* (réserve → namespace temporaire en lecture seule)
-- *extraire* (réserve → codex data, pour le Labo)
+- *archiver* (codex → archives, dépôt en fin de trimestre)
+- *réimporter* (archives → bibliothèques actives, copie d'une ressource)
+- *ouvrir une archive* (archives → namespace temporaire en lecture seule)
+- *extraire* (archives → codex data, pour le Labo)
 
-**Granularité** : la réserve est organisée par **groupe-cours**, pas par trimestre.
+**Granularité** : les archives sont organisées par **groupe-cours**, pas par trimestre.
 Un même trimestre peut contenir plusieurs groupes (ex. gr00002 et gr00008 en H2026),
 et un utilisateur pourrait vouloir comparer un groupe PAN et un groupe témoin.
-Chaque dossier de versement isole un seul groupe-cours.
+Chaque dossier d’archive isole un seul groupe-cours.
 
-**Identité et UUID** : chaque versement reçoit un UUID v4 unique (champ `uuid`
+**Identité et UUID** : chaque archive reçoit un UUID v4 unique (champ `uuid`
 dans `meta.json`). Cet identifiant prévient les collisions lorsque des données
 de plusieurs utilisateurs ou institutions convergent vers la Voûte. Le
 nommage `a2025` ou le numéro de groupe `00001` n'est pas unique à l'échelle
@@ -111,15 +111,15 @@ du réseau — l'UUID l'est.
 **Structure sur disque** :
 
 ```
-Réserve_LaboCodex/
-├── manifeste-reserve.json          # Index global (versements, dates, tailles)
+Archives_LaboCodex/
+├── manifeste-archives.json          # Index global (archives, dates, tailles)
 ├── trimestres/
 │   ├── a2025-601-101-gr00001/      # {trimestre}-{cours}-gr{groupe}
 │   │   ├── donnees.json            # Clés du trimestre filtrées pour CE groupe
 │   │   ├── travaux/                # Blobs (photos, PDF) de CE groupe
 │   │   │   ├── abc123.jpg
 │   │   │   └── def456.pdf
-│   │   └── meta.json               # UUID, date de versement, appareil, version app
+│   │   └── meta.json               # UUID, date d’archivage, appareil, version app
 │   ├── h2026-601-101-gr00002/
 │   │   ├── donnees.json
 │   │   ├── travaux/
@@ -162,23 +162,23 @@ trimestres/
 (H2025 absent : pas d'enseignement ce trimestre.)
 
 **Principes** :
-- La réserve est un répertoire, pas un ZIP. On peut y naviguer, vérifier
+- Les archives sont un répertoire, pas un ZIP. On peut y naviguer, vérifier
   ce qu'elle contient, copier un fichier isolé si besoin.
 - Les instantanés (ex-TimeMachine) y vivent s'ils sont activés.
   Ils ne gonflent plus le codex de travail.
-- Le manifeste global (`manifeste-reserve.json`) permet à l'application
-  de lister les versements disponibles, leurs tailles, leurs dates.
-- La réserve sert aussi de backup pour le développement — elle contient
+- Le manifeste global (`manifeste-archives.json`) permet à l'application
+  de lister les archives disponibles, leurs tailles, leurs dates.
+- Les archives sert aussi de backup pour le développement — elle contient
   l'intégralité des données.
 - Chaque `meta.json` porte un UUID v4 unique. Cet UUID identifie le
-  versement de façon non ambiguë, même si le nommage du dossier
+  archive de façon non ambiguë, même si le nommage du dossier
   (trimestre + cours + groupe) pourrait être identique chez un autre
   utilisateur. C'est l'UUID qui servira de clé primaire dans la Voûte.
 
 **Ce qui change par rapport à l'existant** :
 - Remplace « Exporter les données » (sauvegarde sélective des Réglages).
 - Devient un objet explicite dans l'application — pas juste un export ponctuel.
-- L'application sait lire la réserve, y verser un trimestre, en extraire
+- L'application sait lire les archives, y archiver un trimestre, en extraire
   des données.
 
 ---
@@ -187,7 +187,7 @@ trimestres/
 
 **Vocation** : format léger pour la recherche et l'analyse longitudinale.
 
-Le codex data est un extrait de la réserve, sans blobs, destiné au Labo.
+Le codex data est un extrait de les archives, sans blobs, destiné au Labo.
 Il peut combiner plusieurs trimestres, être anonymisé, être partagé.
 
 | Propriété         | Valeur                                      |
@@ -199,7 +199,7 @@ Il peut combiner plusieurs trimestres, être anonymisé, être partagé.
 | Fréquence         | En fin de trimestre, ou sur demande         |
 | Destination       | Labo (lecture seule), voûte (si anonymisé)  |
 
-**Verbes** : *extraire* (réserve → codex data), *charger* (codex data → Labo),
+**Verbes** : *extraire* (archives → codex data), *charger* (codex data → Labo),
 *anonymiser* (optionnel, avant partage).
 
 **Structure du fichier** :
@@ -211,7 +211,7 @@ Il peut combiner plusieurs trimestres, être anonymisé, être partagé.
   "metadata": {
     "auteur": "Grégoire",
     "date_extraction": "2026-04-26",
-    "versements": [
+    "archives": [
       { "uuid": "f47ac10b-...", "dossier": "a2025-601-101-gr00001" },
       { "uuid": "7c9e6679-...", "dossier": "h2026-601-101-gr00002" }
     ],
@@ -244,8 +244,8 @@ Il peut combiner plusieurs trimestres, être anonymisé, être partagé.
 ```
 
 Note : la clé de regroupement est passée de `trimestres` à `groupes` pour
-refléter la granularité réelle. Chaque entrée correspond à un versement
-de la réserve (un groupe-cours d'un trimestre), identifié par son UUID.
+refléter la granularité réelle. Chaque entrée correspond à une archive
+de les archives (un groupe-cours d'un trimestre), identifié par son UUID.
 ```
 
 **Anonymisation** :
@@ -253,7 +253,7 @@ de la réserve (un groupe-cours d'un trimestre), identifié par son UUID.
 - Retrait des DA (numéros d'admission)
 - Conservation des indices, résultats, présences (données de recherche)
 - L'anonymisation est irréversible — elle se fait sur la copie, jamais
-  sur la réserve
+  sur les archives
 
 **Ce qui change par rapport à l'existant** :
 - Concept nouveau. N'existe pas encore dans l'application.
@@ -278,7 +278,7 @@ le partage.
 | Format            | À définir (fichiers JSON + métadonnées)     |
 | Hébergement       | À terme : serveur institutionnel. Pour l'instant : échange de fichiers |
 
-**Verbes** : *déposer* (réserve → voûte), *emprunter* (voûte → réserve ou Labo).
+**Verbes** : *déposer* (archives → voûte), *emprunter* (voûte → archives ou Labo).
 
 **Ce qu'on peut déposer dans la voûte** :
 
@@ -334,36 +334,36 @@ USB une fois par semaine.
 ### Fin de trimestre
 
 ```
-Codex  →  Réserve (versement)
+Codex  →  Archives (archivage)
               │
               ├→  Codex data (extraction)  →  Labo (chargement)
               │
               └→  Voûte (dépôt, si partage souhaité)
 ```
 
-1. **Verser** le trimestre terminé dans la réserve (données + travaux).
+1. **Archiver** le trimestre terminé dans les archives (données + travaux).
 2. **Extraire** un codex data si on veut faire de la recherche.
 3. **Déposer** dans la voûte si on veut partager (configuration ou données anonymisées).
 4. Le codex peut être purgé des données du trimestre terminé — les originaux
-   sont dans la réserve.
+   sont dans les archives.
 
 ### Voie de retour : réimport et consultation
 
 ```
-Réserve  →  Application (bibliothèques actives)  [réimport sélectif]
-Réserve  →  Application (namespace temporaire)   [ouvrir un versement, lecture seule]
+Archives  →  Application (bibliothèques actives)  [réimport sélectif]
+Archives  →  Application (namespace temporaire)   [ouvrir une archive, lecture seule]
 ```
 
-L'enseignant ouvre un versement archivé pour :
+L'enseignant ouvre un archive archivée pour :
 
 1. **Réimporter une ressource** : récupérer une grille, une échelle, une
    production ou un cartouche d'un trimestre passé pour la réutiliser
    ou l'adapter dans le trimestre actif. Sélection multiple, copie vers
-   les bibliothèques actives. Le versement original reste figé.
-2. **Consulter en lecture seule** : ouvrir un versement (ex. pour une
+   les bibliothèques actives. L’archive original reste figé.
+2. **Consulter en lecture seule** : ouvrir une archive (ex. pour une
    démo, une formation collègue, une séance AQPC, un retour réflexif).
    Les données chargées vivent dans un namespace isolé (ex.
-   `__archive_a2025_*`), aucune écriture vers la réserve ou le trimestre
+   `__archive_a2025_*`), aucune écriture vers les archives ou le trimestre
    actif n'est possible.
 
 Mécanisme détaillé : item #254 du backlog.
@@ -371,22 +371,22 @@ Mécanisme détaillé : item #254 du backlog.
 ### Recherche (Labo)
 
 ```
-Réserve  →  Codex data  →  Labo (lecture seule)
+Archives  →  Codex data  →  Labo (lecture seule)
 Voûte    →  Codex data  →  Labo (lecture seule)
 ```
 
-Le Labo charge un ou plusieurs codex data — issus de la réserve personnelle
+Le Labo charge un ou plusieurs codex data — issus de les archives personnelle
 ou empruntés de la voûte — sans écraser le trimestre courant dans l'application.
 
 ### Emprunt depuis la voûte
 
 ```
-Voûte  →  Réserve locale (copie)
+Voûte  →  Archives locales (copie)
        →  Labo (chargement direct)
 ```
 
 Un collègue emprunte une configuration pédagogique ou un codex data anonymisé.
-La copie arrive dans sa réserve ou directement dans son Labo.
+La copie arrive dans ses archives ou directement dans son Labo.
 
 ---
 
@@ -395,7 +395,7 @@ La copie arrive dans sa réserve ou directement dans son Labo.
 | Concept       | Définition                                                    |
 |---------------|---------------------------------------------------------------|
 | **Codex**     | Espace de travail actif d'un trimestre. Portable (clé USB).   |
-| **Réserve**   | Archive personnelle locale, à double fonction : **dépôt** (versement en fin de trimestre) et **fonds consultable** (réimport de ressources, ouverture d'un versement, extraction codex data). Jamais purgée. |
+| **Archives**   | Archive personnelle locale, à double fonction : **dépôt** (archivage en fin de trimestre) et **fonds consultable** (réimport de ressources, ouverture d'une archive, extraction codex data). Jamais purgée. |
 | **Codex data**| Extrait léger (sans blobs) pour la recherche. Multi-trimestres. |
 | **Voûte**     | Bibliothèque partagée entre enseignants.                      |
 | **Labo**      | Espace de recherche dans l'application. Charge des codex data. |
@@ -404,14 +404,14 @@ La copie arrive dans sa réserve ou directement dans son Labo.
 |---------------|---------------------------------------------------------------|
 | **Ouvrir**    | Charger un codex dans l'application pour travailler.          |
 | **Enregistrer** | Sauvegarder le codex sur la clé USB.                       |
-| **Verser**    | Archiver un groupe-cours dans la réserve (fin de trimestre, dépôt). |
-| **Réimporter**| Recopier une ressource d'un versement (grille, échelle, production, cartouche, tampon) vers les bibliothèques actives de l'application. |
-| **Ouvrir un versement** | Charger un versement de la réserve en namespace temporaire (lecture seule) pour démo, formation ou consultation, sans toucher au trimestre actif. |
-| **Extraire**  | Créer un codex data à partir d'un ou plusieurs versements de la réserve. |
+| **Archiver**    | Archiver un groupe-cours dans les archives (fin de trimestre, dépôt). |
+| **Réimporter**| Recopier une ressource d'une archive (grille, échelle, production, cartouche, tampon) vers les bibliothèques actives de l'application. |
+| **Ouvrir une archive** | Charger une archive de les archives en namespace temporaire (lecture seule) pour démo, formation ou consultation, sans toucher au trimestre actif. |
+| **Extraire**  | Créer un codex data à partir d'un ou plusieurs archives de les archives. |
 | **Charger**   | Importer un codex data dans le Labo (lecture seule).          |
 | **Anonymiser**| Retirer les données personnelles d'un codex data avant partage. |
 | **Déposer**   | Publier dans la voûte (configuration ou codex data anonymisé). |
-| **Emprunter** | Copier depuis la voûte vers sa réserve ou son Labo.           |
+| **Emprunter** | Copier depuis la voûte vers ses archives ou son Labo.           |
 
 **Terme retiré** : « sauvegarde ». Trop ambigu — remplacé par les verbes
 spécifiques ci-dessus.
@@ -422,11 +422,11 @@ spécifiques ci-dessus.
 
 | Ancien terme                       | Nouveau terme / statut              |
 |------------------------------------|-------------------------------------|
-| « Exporter les données »           | → **Verser** dans la réserve        |
+| « Exporter les données »           | → **Archiver** dans les archives      |
 | « Importer des données »           | → **Ouvrir** un codex ou **charger** un codex data |
-| « Sauvegarde et restauration »     | → Section **Réserve** dans les Réglages |
+| « Sauvegarde et restauration »     | → Section **Archives** dans les Réglages |
 | « Configuration pédagogique complète » | → **Dépôt** dans la voûte (type : configuration) |
-| « TimeMachine / Historique des versions » | → **Instantanés** dans la réserve |
+| « TimeMachine / Historique des versions » | → **Instantanés** dans les archives |
 | « Labo » (sous-section de Suivi)   | → **Labo** (section dédiée, autonome) |
 
 ---
@@ -439,9 +439,9 @@ spécifiques ci-dessus.
 - **Blobs incompressibles** : les photos (JPEG) et PDF sont déjà compressés.
   DEFLATE n'y gagne rien. Le poids des travaux est incompressible.
 - **JSON très compressible** : les données structurées se compressent
-  en 5:1 à 10:1 avec DEFLATE. Important pour la réserve et les sauvegardes.
+  en 5:1 à 10:1 avec DEFLATE. Important pour les archives et les sauvegardes.
 - **File System Access API** : disponible sur Mac (Chrome/Edge), pas sur
-  Safari/iPad. La réserve comme répertoire sur disque nécessite soit FSAPI,
+  Safari/iPad. Les archives comme répertoire sur disque nécessite soit FSAPI,
   soit un mécanisme d'export/import par fichier.
 - **Fonctionnement hors-ligne** : tout reste local. La voûte (serveur)
   est le seul composant qui nécessitera éventuellement une connexion.
@@ -453,8 +453,8 @@ spécifiques ci-dessus.
 1. **Codex allégé** — retirer le TimeMachine du codex. Gain immédiat.
 2. **Compression de l'export données** — ajouter DEFLATE à `executerExport()`.
    Correctif technique simple (une ligne).
-3. **Réserve** — structure de répertoire, versement, consultation.
-4. **Codex data** — extraction depuis la réserve, format JSON.
+3. **Archives** — structure de répertoire, archivage, consultation.
+4. **Codex data** — extraction depuis les archives, format JSON.
 5. **Labo autonome** — sortir le Labo de la section Suivi, lui permettre
    de charger des codex data.
 6. **Anonymisation** — dans le flux d'extraction du codex data.
@@ -467,6 +467,6 @@ spécifiques ci-dessus.
 
 | Date       | Changement                                      |
 |------------|--------------------------------------------------|
-| 2026-04-26 | Création. Définition des 4 concepts, vocabulaire, flux, structure réserve. |
-| 2026-04-26 | Ajout granularité par groupe-cours, UUID par versement, convention de nommage `{trimestre}-{cours}-gr{groupe}`. Codex data : clé `groupes` remplace `trimestres`. |
-| 2026-04-26 | Clarification de la double fonction de la Réserve (dépôt + fonds consultable). Ajout des verbes *réimporter* et *ouvrir un versement* au tableau de référence. Nouveau sous-flux « Voie de retour » liant ces verbes aux items #254 (mécanisme) et #251 (codex data). |
+| 2026-04-26 | Création. Définition des 4 concepts, vocabulaire, flux, structure archives. |
+| 2026-04-26 | Ajout granularité par groupe-cours, UUID par archive, convention de nommage `{trimestre}-{cours}-gr{groupe}`. Codex data : clé `groupes` remplace `trimestres`. |
+| 2026-04-26 | Clarification de la double fonction de les Archives (dépôt + fonds consultable). Ajout des verbes *réimporter* et *ouvrir une archive* au tableau de référence. Nouveau sous-flux « Voie de retour » liant ces verbes aux items #254 (mécanisme) et #251 (codex data). |
