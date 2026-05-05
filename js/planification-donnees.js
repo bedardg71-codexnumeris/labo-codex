@@ -115,6 +115,23 @@ function initialiserSiNecessaire() {
         setDonnees(donnees);
         return index;
     }
+
+    // Garde-fou contre l'incohérence index.active vs cartes existantes : si la
+    // carte active a disparu (corruption quota localStorage, reset partiel,
+    // import incomplet…), fallback silencieux sur la première carte de l'index
+    // au lieu d'afficher une UI vide « Sans titre » trompeuse (cf #261, 5 mai 2026).
+    var idsValides = donnees.index.cartes.map(function(c) { return c.id; });
+    if (idsValides.indexOf(donnees.index.active) === -1) {
+        var nouvelleActive = idsValides[0];
+        console.warn(
+            '[Planification] index.active="' + donnees.index.active +
+            '" introuvable dans les ' + idsValides.length + ' cartes de l\'index. ' +
+            'Fallback sur "' + nouvelleActive + '".'
+        );
+        donnees.index.active = nouvelleActive;
+        setDonnees(donnees);
+    }
+
     return donnees.index;
 }
 
