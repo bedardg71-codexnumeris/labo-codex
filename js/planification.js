@@ -15,7 +15,7 @@ var dejaInitialise = false;
 
 /**
  * Initialise le module Planification.
- * Appelé par navigation.js lors de l'affichage de la sous-section structure-carte.
+ * Appelé par navigation.js lors de l'affichage de la sous-section conception-carte.
  */
 function initialiserModulePlanification() {
 
@@ -59,7 +59,7 @@ var _originalAfficherSection = window.afficherSection;
 if (typeof _originalAfficherSection === 'function') {
     window.afficherSection = function(nomSection) {
         // Désactiver la planification si on quitte cette section
-        if (nomSection !== 'structure') {
+        if (nomSection !== 'conception') {
             desactiverPlanification();
         }
         return _originalAfficherSection.call(this, nomSection);
@@ -71,11 +71,11 @@ var _originalAfficherSousSection = window.afficherSousSection;
 if (typeof _originalAfficherSousSection === 'function') {
     window.afficherSousSection = function(idSousSection) {
         // Désactiver les raccourcis carte quand on passe à l'Organisateur
-        if (idSousSection === 'structure-organisateur') {
+        if (idSousSection === 'conception-organisateur') {
             desactiverPlanification();
         }
         // Réactiver les raccourcis carte quand on revient à la carte
-        if (idSousSection === 'structure-carte' && dejaInitialise) {
+        if (idSousSection === 'conception-carte' && dejaInitialise) {
             if (window.planificationCarte) {
                 window.planificationCarte.activer();
             }

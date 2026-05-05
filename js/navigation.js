@@ -43,7 +43,7 @@
  * Affiche une section principale et met à jour la navigation
  * 
  * @param {string} nomSection - Identifiant de la section à afficher
- *                             Valeurs: 'accueil' | 'apercu' | 'structure' | 'contexte' |
+ *                             Valeurs: 'accueil' | 'apercu' | 'conception' | 'contexte' |
  *                                     'suivi' | 'evaluations' | 'labo' | 'aide' | 'reglages'
  * 
  * UTILISÉ PAR:
@@ -113,7 +113,7 @@ function afficherSection(nomSection) {
  * Affiche la sous-navigation pour une section donnée
  * 
  * @param {string} nomOnglet - Identifiant de la section parent
- *                            Valeurs: 'accueil' | 'apercu' | 'structure' | 'contexte' |
+ *                            Valeurs: 'accueil' | 'apercu' | 'conception' | 'contexte' |
  *                                    'suivi' | 'evaluations' | 'labo' | 'aide' | 'reglages'
  * 
  * UTILISÉ PAR:
@@ -148,13 +148,13 @@ const TOOLTIPS_SOUS_NAV = {
     // Accueil : section plate (toggles gérés par accueil.js)
     // Aperçu : section plate, pas de sous-nav
     // Structure
-    'structure-carte': 'nav-str-alignement',
-    'structure-organisateur': 'nav-str-organisateur',
-    'structure-productions': 'nav-str-productions',
-    'structure-grille-criteres': 'nav-str-grilles',
-    'structure-echelle-performance': 'nav-str-echelles',
-    'structure-pratiques-notation': 'nav-ctx-pratiques',
-    'structure-retroactions': 'nav-str-cartouches',
+    'conception-carte': 'nav-conception-alignement',
+    'conception-organisateur': 'nav-conception-organisateur',
+    'conception-productions': 'nav-conception-productions',
+    'conception-grille-criteres': 'nav-conception-grilles',
+    'conception-echelle-performance': 'nav-conception-echelles',
+    'conception-pratiques-notation': 'nav-ctx-pratiques',
+    'conception-retroactions': 'nav-conception-cartouches',
     // Contexte
     'contexte-trimestre': 'nav-ctx-trimestre',
     'contexte-calendrier': 'nav-ctx-calendrier',
@@ -201,43 +201,43 @@ const TOOLTIPS_SOUS_NAV = {
    =============================== */
 const INITIALISATEURS_SOUS_SECTION = {
     // === STRUCTURE ===
-    'structure-carte': function () {
+    'conception-carte': function () {
         if (typeof initialiserModulePlanification === 'function') {
             setTimeout(initialiserModulePlanification, 100);
         }
     },
-    'structure-organisateur': function () {
+    'conception-organisateur': function () {
         if (typeof initialiserModuleOrganisateur === 'function') {
             setTimeout(initialiserModuleOrganisateur, 100);
         }
     },
-    'structure-productions': function () {
+    'conception-productions': function () {
         if (typeof initialiserModuleProductions === 'function') {
             initialiserModuleProductions();
         }
     },
-    'structure-grille-criteres': function () {
+    'conception-grille-criteres': function () {
         if (typeof initialiserModuleGrilles === 'function') {
             setTimeout(async () => {
                 await initialiserModuleGrilles();
             }, 100);
         }
     },
-    'structure-echelle-performance': function () {
+    'conception-echelle-performance': function () {
         if (typeof initialiserModuleEchelles === 'function') {
             setTimeout(async () => {
                 await initialiserModuleEchelles();
             }, 100);
         }
     },
-    'structure-pratiques-notation': function () {
+    'conception-pratiques-notation': function () {
         if (typeof initialiserModulePratiquesMateriel === 'function') {
             setTimeout(async () => {
                 await initialiserModulePratiquesMateriel();
             }, 100);
         }
     },
-    'structure-retroactions': function () {
+    'conception-retroactions': function () {
         if (typeof initialiserModuleCartouches === 'function') {
             setTimeout(async () => {
                 await initialiserModuleCartouches();
@@ -411,7 +411,7 @@ function afficherSousNavigation(nomOnglet) {
  * @param {string} idSousSection - Identifiant complet de la sous-section
  *                                Format: '{section}-{sous-section}'
  *                                Exemples: 'suivi-liste', 'suivi-profil',
- *                                         'structure-productions'
+ *                                         'conception-productions'
  * 
  * UTILISÉ PAR:
  * - afficherSousNavigation() pour la sous-section par défaut

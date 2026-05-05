@@ -51,14 +51,14 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Si ton devis indique « Repérer et classer des thèmes », tu pourrais te demander : « Comment je sais qu'un étudiant repère bien les thèmes ? » Tes réponses deviennent tes critères : identification des thèmes, précision du vocabulaire, organisation du classement, etc."
             }
         ],
-        voirAussi: ['construction-grilles', 'construction-echelles', 'structure-apercu-legacy']
+        voirAussi: ['construction-grilles', 'construction-echelles', 'conception-apercu-legacy']
     },
 
     // =========================================================================
     // CONSTRUCTION - APERÇU
     // =========================================================================
 
-    'structure-apercu-legacy': {
+    'conception-apercu-legacy': {
         titre: "Vue d'ensemble du matériel pédagogique",
         sections: [
             {
@@ -85,7 +85,7 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Prendre le temps de réfléchir à tes objectifs d'apprentissage avant de configurer ton matériel peut t'aider à créer des grilles plus cohérentes. Clique sur le bouton ✴️ « Réfléchir à tes objectifs » si tu veux des pistes de réflexion."
             }
         ],
-        voirAussi: ['construction-objectifs-reflexion', 'structure-productions', 'construction-grilles', 'construction-pratiques']
+        voirAussi: ['construction-objectifs-reflexion', 'conception-productions', 'construction-grilles', 'construction-pratiques']
     },
 
     // =========================================================================
@@ -107,7 +107,7 @@ const AIDE_CONTEXTUELLE = {
         voirAussi: ['evaluations-annoter', 'construction-grilles', 'construction-echelles', 'construction-cartouches']
     },
 
-    'structure-productions': {
+    'conception-productions': {
         titre: 'Productions',
         sections: [
             {
@@ -217,7 +217,7 @@ const AIDE_CONTEXTUELLE = {
                 contenu: 'En cas de doute, commence par SOM (la plus famili\u00e8re) et fais \u00e9voluer ta pratique au fil des sessions.'
             },
         ],
-        voirAussi: ['structure-productions', 'construction-echelles']
+        voirAussi: ['conception-productions', 'construction-echelles']
     },
 
     // =========================================================================
@@ -470,7 +470,7 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Exporte les résultats filtrés en CSV pour les importer dans ton système de notes officiel."
             }
         ],
-        voirAussi: ['evaluations-proceder', 'structure-productions']
+        voirAussi: ['evaluations-proceder', 'conception-productions']
     },
 
     // =========================================================================
@@ -636,7 +636,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'texte',
-                contenu: "Configure les critères surveillés dans Structure → Grille de critères (tag SOLO). Ajuste le seuil et la fenêtre d'analyse dans Contexte → Dépistage."
+                contenu: "Configure les critères surveillés dans Conception → Grille de critères (tag SOLO). Ajuste le seuil et la fenêtre d'analyse dans Contexte → Dépistage."
             }
         ],
         voirAussi: ['profil-etudiant-indicateurs']
@@ -781,7 +781,7 @@ const AIDE_CONTEXTUELLE = {
                 contenu: 'Les \u00e9valuations servent \u00e0 livrer une r\u00e9troaction et peuvent prendre plusieurs formes (orale, \u00e9crite, etc.).'
             },
         ],
-        voirAussi: ['structure-productions', 'construction-grilles']
+        voirAussi: ['conception-productions', 'construction-grilles']
     },
 
     // =========================================================================
@@ -796,7 +796,7 @@ const AIDE_CONTEXTUELLE = {
                 contenu: 'Dans une approche par comp\u00e9tences (APC), une activit\u00e9 d\u2019\u00e9valuation est g\u00e9n\u00e9ralement centr\u00e9e sur l\u2019apprentissage plut\u00f4t que sur un comportement (ex.\u00a0: participation, pr\u00e9sence). Elle repose sur des objectifs explicites li\u00e9s \u00e0 la comp\u00e9tence du cours.'
             },
         ],
-        voirAussi: ['structure-productions', 'planification-alignement']
+        voirAussi: ['conception-productions', 'planification-alignement']
     },
     'apc-grille-individuel': {
         titre: '\u00c9valuation individuelle en APC',
@@ -810,7 +810,7 @@ const AIDE_CONTEXTUELLE = {
                 contenu: 'Les travaux d\u2019\u00e9quipe peuvent \u00eatre \u00e9valu\u00e9s, mais la contribution individuelle devrait id\u00e9alement \u00eatre distingu\u00e9e.'
             },
         ],
-        voirAussi: ['construction-grilles', 'structure-productions']
+        voirAussi: ['construction-grilles', 'conception-productions']
     },
     'objectif-verbes-actifs': {
         titre: 'Verbes actifs et observables (Anderson\u00a0&\u00a0Krathwohl)',
@@ -829,7 +829,7 @@ const AIDE_CONTEXTUELLE = {
                 contenu: '\u00c9vite les verbes vagues comme <strong>savoir</strong>, <strong>comprendre</strong> ou <strong>conna\u00eetre</strong>. La carte d\u2019alignement (Structure \u2192 Alignement p\u00e9dagogique) propose une banque de verbes class\u00e9s par niveau cognitif.'
             },
         ],
-        voirAussi: ['planification-alignement', 'structure-productions']
+        voirAussi: ['planification-alignement', 'conception-productions']
     },
     'echeance-indices': {
         titre: 'Date d\u2019\u00e9ch\u00e9ance et indices',
@@ -839,7 +839,7 @@ const AIDE_CONTEXTUELLE = {
                 contenu: 'Cette date fixe les indices C (Compl\u00e9tion) et P (Performance) pour les suivis longitudinaux. Une production non remise \u00e0 cette date sera compt\u00e9e comme manquante dans le calcul de C.'
             },
         ],
-        voirAussi: ['tableau-bord-apercu', 'structure-productions']
+        voirAussi: ['tableau-bord-apercu', 'conception-productions']
     },
     'echeances-multigroupes': {
         titre: '\u00c9ch\u00e9ances multi-groupes',
@@ -849,7 +849,7 @@ const AIDE_CONTEXTUELLE = {
                 contenu: 'Chaque groupe-cours peut avoir sa propre date d\u2019\u00e9ch\u00e9ance. D\u00e9coche un groupe pour indiquer que la production ne lui est pas encore assign\u00e9e.'
             },
         ],
-        voirAussi: ['structure-productions']
+        voirAussi: ['conception-productions']
     },
     'retroaction-grille-descriptive': {
         titre: 'R\u00e9troaction et grille descriptive',
@@ -896,7 +896,7 @@ const AIDE_CONTEXTUELLE = {
                 ]
             },
         ],
-        voirAussi: ['construction-pratiques', 'structure-productions']
+        voirAussi: ['construction-pratiques', 'conception-productions']
     },
     'echelle-plage-notes': {
         titre: 'Plage de notes (niveau)',
