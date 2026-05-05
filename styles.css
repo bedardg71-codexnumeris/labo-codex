@@ -3762,7 +3762,7 @@ body:not(.mode-clair) .badge-source--demo {
 }
 
 /* ===============================
-   BARRE DE CONVERGENCE (Contexte > Trimestre)
+   BARRE DE CONVERGENCE (Calendrier > Trimestre)
    6 étapes → Groupe-cours
    =============================== */
 
@@ -11264,63 +11264,63 @@ label:has(+ textarea:disabled) {
    =============================== */
 
 /* Réduire l'espacement entre accordéons */
-#contexte-trimestre .carte.accordeon {
+#calendrier-trimestre .carte.accordeon {
     margin-top: 12px;
 }
 
-#contexte-trimestre .carte.accordeon:first-of-type {
+#calendrier-trimestre .carte.accordeon:first-of-type {
     margin-top: 0;
 }
 
 /* Compacter le contenu des accordéons */
-#contexte-trimestre .accordeon-contenu {
+#calendrier-trimestre .accordeon-contenu {
     padding: 12px 0 0 0;
 }
 
 /* Compacter la disposition bibliothèque/formulaire */
-#contexte-trimestre .disposition-bibliotheque-formulaire {
+#calendrier-trimestre .disposition-bibliotheque-formulaire {
     gap: 12px;
 }
 
 /* Compacter le panneau formulaire */
-#contexte-trimestre .panneau-formulaire {
+#calendrier-trimestre .panneau-formulaire {
     padding: 12px;
     min-height: auto;
 }
 
 /* Compacter les blocs section */
-#contexte-trimestre .bloc-section {
+#calendrier-trimestre .bloc-section {
     padding: 10px 12px;
     margin-bottom: 10px;
 }
 
-#contexte-trimestre .bloc-section--compact {
+#calendrier-trimestre .bloc-section--compact {
     padding: 8px 10px;
 }
 
 /* Compacter les sous-titres */
-#contexte-trimestre .sous-titre-section {
+#calendrier-trimestre .sous-titre-section {
     font-size: 0.85rem;
     margin-bottom: 8px;
 }
 
 /* Compacter les groupes de formulaire */
-#contexte-trimestre .groupe-form {
+#calendrier-trimestre .groupe-form {
     margin-bottom: 8px;
 }
 
-#contexte-trimestre .groupe-form label {
+#calendrier-trimestre .groupe-form label {
     font-size: 0.75rem;
     margin-bottom: 3px;
 }
 
 /* Compacter les inputs */
-#contexte-trimestre .controle-form {
+#calendrier-trimestre .controle-form {
     padding: 6px 10px;
     font-size: 0.85rem;
 }
 
-#contexte-trimestre .controle-form-compact {
+#calendrier-trimestre .controle-form-compact {
     padding: 5px 8px;
     font-size: 0.8rem;
 }
@@ -11346,37 +11346,37 @@ tr.etudiant-inactif td {
 }
 
 /* Compacter les grilles */
-#contexte-trimestre .grille-2col {
+#calendrier-trimestre .grille-2col {
     gap: 10px;
 }
 
-#contexte-trimestre .grille-2col-gap15 {
+#calendrier-trimestre .grille-2col-gap15 {
     gap: 8px;
 }
 
-#contexte-trimestre .grille-form-2col {
+#calendrier-trimestre .grille-form-2col {
     gap: 10px;
     margin-bottom: 10px;
 }
 
 /* Compacter les textes d'aide */
-#contexte-trimestre .texte-aide {
+#calendrier-trimestre .texte-aide {
     font-size: 0.75rem;
     margin-top: 6px;
 }
 
 /* Compacter le panneau bibliothèque */
-#contexte-trimestre .panneau-bibliotheque {
+#calendrier-trimestre .panneau-bibliotheque {
     padding: 10px;
 }
 
-#contexte-trimestre .panneau-bibliotheque .btn {
+#calendrier-trimestre .panneau-bibliotheque .btn {
     padding: 6px 10px;
     font-size: 0.8rem;
 }
 
 /* Compacter l'aperçu sidebar */
-#contexte-trimestre .apercu-trimestre-sidebar {
+#calendrier-trimestre .apercu-trimestre-sidebar {
     padding: 10px;
     margin-top: 12px;
     font-size: 0.8rem;
@@ -11385,7 +11385,7 @@ tr.etudiant-inactif td {
 }
 
 /* ========== SYNTHÈSES SIDEBAR (Beta 95.3) ========== */
-#contexte-trimestre .apercu-sidebar {
+#calendrier-trimestre .apercu-sidebar {
     padding: 10px;
     margin-top: 12px;
     font-size: 0.8rem;
@@ -11393,27 +11393,27 @@ tr.etudiant-inactif td {
     border-radius: var(--radius-grand);
 }
 
-#contexte-trimestre .apercu-titre {
+#calendrier-trimestre .apercu-titre {
     font-weight: 600;
     font-size: 0.85rem;
     margin-bottom: 2px;
     color: var(--texte-fonce);
 }
 
-#contexte-trimestre .apercu-code {
+#calendrier-trimestre .apercu-code {
     font-size: 0.75rem;
     color: var(--texte-secondaire, #8aa4b0);
     margin-bottom: 8px;
 }
 
-#contexte-trimestre .apercu-detail {
+#calendrier-trimestre .apercu-detail {
     font-size: 0.75rem;
     color: var(--texte-secondaire, #8aa4b0);
     line-height: 1.4;
 }
 
 /* Score de complétude groupe-cours */
-#contexte-trimestre .score-completude {
+#calendrier-trimestre .score-completude {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -11423,55 +11423,55 @@ tr.etudiant-inactif td {
     font-size: 0.75rem;
 }
 
-#contexte-trimestre .score-completude .score-valeur {
+#calendrier-trimestre .score-completude .score-valeur {
     font-weight: 600;
 }
 
-#contexte-trimestre .score-completude.complet .score-valeur {
+#calendrier-trimestre .score-completude.complet .score-valeur {
     color: var(--vert-fonce);
 }
 
-#contexte-trimestre .score-completude.incomplet .score-valeur {
+#calendrier-trimestre .score-completude.incomplet .score-valeur {
     color: #d97706;
 }
 
 /* Top programmes groupe étudiants */
-#contexte-trimestre .top-programmes {
+#calendrier-trimestre .top-programmes {
     margin-top: 8px;
     padding-top: 8px;
     border-top: 1px solid rgba(0,0,0,0.1);
     font-size: 0.75rem;
 }
 
-#contexte-trimestre .top-programmes .label-top {
+#calendrier-trimestre .top-programmes .label-top {
     font-weight: 500;
     color: var(--texte-secondaire, #8aa4b0);
     margin-bottom: 4px;
 }
 
-#contexte-trimestre .top-programmes .programme-item {
+#calendrier-trimestre .top-programmes .programme-item {
     display: flex;
     justify-content: space-between;
     color: var(--texte-secondaire, #8aa4b0);
 }
 
 /* Compacter les états vides */
-#contexte-trimestre .etat-vide-formulaire {
+#calendrier-trimestre .etat-vide-formulaire {
     padding: 15px;
 }
 
 /* Compacter les actions formulaire */
-#contexte-trimestre .actions-formulaire {
+#calendrier-trimestre .actions-formulaire {
     margin-top: 12px;
     padding-top: 10px;
 }
 
 /* Réduire hauteur du titre h2 */
-#contexte-trimestre > h2 {
+#calendrier-trimestre > h2 {
     margin-bottom: 8px;
 }
 
-#contexte-trimestre > p.text-muted {
+#calendrier-trimestre > p.text-muted {
     margin-bottom: 12px;
     font-size: 0.85rem;
 }
@@ -11483,16 +11483,16 @@ tr.etudiant-inactif td {
 
 /* --- Suppression arrondis bordures gauches --- */
 /* Les éléments avec bordure gauche doivent avoir coins carrés à gauche */
-#contexte-trimestre .alerte,
-#contexte-trimestre .modal-info,
-#contexte-trimestre .carte-info-toggle {
+#calendrier-trimestre .alerte,
+#calendrier-trimestre .modal-info,
+#calendrier-trimestre .carte-info-toggle {
     border-radius: 0 var(--radius-moyen) var(--radius-moyen) 0;
 }
 
 /* --- Uniformisation tailles de police labels --- */
 /* Tous les labels de formulaire : 0.8rem uniforme */
-#contexte-trimestre .groupe-form label,
-#contexte-trimestre .panneau-formulaire label {
+#calendrier-trimestre .groupe-form label,
+#calendrier-trimestre .panneau-formulaire label {
     font-size: 0.8rem;
     font-weight: 500;
     color: var(--gris-fonce);
@@ -11500,12 +11500,12 @@ tr.etudiant-inactif td {
 }
 
 /* Sous-labels (Du:/Au:) : 0.7rem */
-#contexte-trimestre .d-flex-gap-10-center label {
+#calendrier-trimestre .d-flex-gap-10-center label {
     font-size: 0.7rem;
 }
 
 /* --- Uniformisation sous-titres sections --- */
-#contexte-trimestre .sous-titre-section {
+#calendrier-trimestre .sous-titre-section {
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--accent-primaire);
@@ -11513,14 +11513,14 @@ tr.etudiant-inactif td {
 }
 
 /* --- Uniformisation textes d'aide --- */
-#contexte-trimestre .texte-aide {
+#calendrier-trimestre .texte-aide {
     font-size: 0.75rem;
     color: var(--gris-moyen);
 }
 
 /* --- Uniformisation boutons --- */
 /* Boutons primaires/secondaires dans la page */
-#contexte-trimestre .btn {
+#calendrier-trimestre .btn {
     font-size: 0.8rem;
     padding: 8px 14px;
     border-radius: var(--radius-moyen);
@@ -11528,20 +11528,20 @@ tr.etudiant-inactif td {
 }
 
 /* Boutons compacts */
-#contexte-trimestre .btn-tres-compact,
-#contexte-trimestre .btn-compact {
+#calendrier-trimestre .btn-tres-compact,
+#calendrier-trimestre .btn-compact {
     padding: 5px 10px;
     font-size: 0.75rem;
 }
 
 /* Boutons bibliothèque */
-#contexte-trimestre .btn-bibliotheque {
+#calendrier-trimestre .btn-bibliotheque {
     width: 100%;
     margin-bottom: 10px;
 }
 
 /* Boutons dans les actions formulaire - Supprimer à gauche, Annuler/Enregistrer à droite */
-#contexte-trimestre .actions-formulaire {
+#calendrier-trimestre .actions-formulaire {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -11552,30 +11552,30 @@ tr.etudiant-inactif td {
 }
 
 /* Quand pas de bouton Supprimer, aligner à droite */
-#contexte-trimestre .actions-formulaire > div:only-child {
+#calendrier-trimestre .actions-formulaire > div:only-child {
     margin-left: auto;
 }
 
 /* Boutons de réinitialisation dans les blocs */
-#contexte-trimestre .btn-reset-bloc {
+#calendrier-trimestre .btn-reset-bloc {
     font-size: 1rem;
     opacity: 0.6;
 }
 
-#contexte-trimestre .btn-reset-bloc:hover {
+#calendrier-trimestre .btn-reset-bloc:hover {
     opacity: 1;
 }
 
 /* --- Uniformisation encadrés --- */
 /* Tous les blocs-section en bleu pâle uniforme */
-#contexte-trimestre .bloc-section {
+#calendrier-trimestre .bloc-section {
     background: var(--bleu-pale);
     border: none;
     border-radius: var(--radius-grand);
 }
 
 /* Formulaires internes */
-#contexte-trimestre .formulaire-interne {
+#calendrier-trimestre .formulaire-interne {
     background: var(--bleu-tres-pale);
     border-radius: var(--radius-moyen);
     padding: 10px;
@@ -11584,38 +11584,38 @@ tr.etudiant-inactif td {
 }
 
 /* --- Uniformisation selects et inputs --- */
-#contexte-trimestre .controle-form,
-#contexte-trimestre select,
-#contexte-trimestre input[type="text"],
-#contexte-trimestre input[type="number"],
-#contexte-trimestre input[type="date"] {
+#calendrier-trimestre .controle-form,
+#calendrier-trimestre select,
+#calendrier-trimestre input[type="text"],
+#calendrier-trimestre input[type="number"],
+#calendrier-trimestre input[type="date"] {
     font-size: 0.85rem;
     padding: 6px 10px;
     border: 1px solid var(--gris-clair);
     border-radius: var(--radius-moyen);
 }
 
-#contexte-trimestre .controle-form:focus,
-#contexte-trimestre select:focus,
-#contexte-trimestre input:focus {
+#calendrier-trimestre .controle-form:focus,
+#calendrier-trimestre select:focus,
+#calendrier-trimestre input:focus {
     border-color: var(--accent-primaire);
     outline: none;
     box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.15);
 }
 
 /* Boutons pleine largeur */
-#contexte-trimestre .btn-block {
+#calendrier-trimestre .btn-block {
     width: 100%;
     margin-top: 8px;
 }
 
-#contexte-trimestre .btn-block:first-of-type {
+#calendrier-trimestre .btn-block:first-of-type {
     margin-top: 0;
 }
 
 /* Boutons - Utilisation des variables Design System */
-#contexte-trimestre .btn-supprimer,
-#contexte-trimestre .btn-danger {
+#calendrier-trimestre .btn-supprimer,
+#calendrier-trimestre .btn-danger {
     background: var(--btn-supprimer);
     color: white;
     border: none;
@@ -11624,40 +11624,40 @@ tr.etudiant-inactif td {
     border-radius: var(--radius-moyen);
 }
 
-#contexte-trimestre .btn-supprimer:hover,
-#contexte-trimestre .btn-danger:hover {
+#calendrier-trimestre .btn-supprimer:hover,
+#calendrier-trimestre .btn-danger:hover {
     background: var(--btn-supprimer-hover);
 }
 
-#contexte-trimestre .btn-annuler {
+#calendrier-trimestre .btn-annuler {
     background: var(--btn-annuler);
     color: white;
     border: none;
 }
 
-#contexte-trimestre .btn-annuler:hover {
+#calendrier-trimestre .btn-annuler:hover {
     background: var(--btn-annuler-hover);
 }
 
-#contexte-trimestre .btn-confirmer {
+#calendrier-trimestre .btn-confirmer {
     background: var(--btn-confirmer);
     color: white;
     border: none;
 }
 
-#contexte-trimestre .btn-confirmer:hover {
+#calendrier-trimestre .btn-confirmer:hover {
     background: var(--btn-confirmer-hover);
 }
 
 /* Espacement uniforme entre boutons côte à côte */
-#contexte-trimestre .btn-groupe,
-#contexte-trimestre .actions-formulaire div {
+#calendrier-trimestre .btn-groupe,
+#calendrier-trimestre .actions-formulaire div {
     display: flex;
     gap: 8px;
 }
 
 /* Badges compteurs dans les en-têtes accordéon */
-#contexte-trimestre .badge-compteur {
+#calendrier-trimestre .badge-compteur {
     font-size: 0.75rem;
     padding: 3px 8px;
     background: var(--bleu-tres-pale);
@@ -11668,27 +11668,27 @@ tr.etudiant-inactif td {
 /* 🆕 FIX (1er fév 2026) : Responsive iPad pour section Trimestre */
 /* Corrige le contenu tronqué à droite signalé par Gregoire */
 @media (max-width: 1024px) {
-    #contexte-trimestre .zone-principale {
+    #calendrier-trimestre .zone-principale {
         overflow-x: auto;
         min-width: 0;
     }
 
-    #contexte-trimestre .grille-2col {
+    #calendrier-trimestre .grille-2col {
         gap: 12px;
     }
 
-    #contexte-trimestre .d-flex-gap-10-center {
+    #calendrier-trimestre .d-flex-gap-10-center {
         flex-wrap: wrap;
         gap: 8px;
     }
 
     /* Réduire padding des blocs section */
-    #contexte-trimestre .bloc-section {
+    #calendrier-trimestre .bloc-section {
         padding: 10px;
     }
 
     /* Inputs date plus compacts */
-    #contexte-trimestre input[type="date"] {
+    #calendrier-trimestre input[type="date"] {
         padding: 5px 8px;
         font-size: 0.8rem;
     }
@@ -11700,23 +11700,23 @@ tr.etudiant-inactif td {
    Stacking réservé aux téléphones en portrait (<768 px). */
 @media (max-width: 767px) {
     /* Empiler les colonnes Bornes/Semaines spéciales */
-    #contexte-trimestre .grille-2col {
+    #calendrier-trimestre .grille-2col {
         grid-template-columns: 1fr;
     }
 
     /* Empiler les dates Du/Au */
-    #contexte-trimestre .d-flex-gap-10-center {
+    #calendrier-trimestre .d-flex-gap-10-center {
         flex-direction: column;
         align-items: stretch;
     }
 
-    #contexte-trimestre .d-flex-gap-10-center span {
+    #calendrier-trimestre .d-flex-gap-10-center span {
         text-align: center;
         padding: 5px 0;
     }
 
     /* Grille identification : empiler sur mobile */
-    #contexte-trimestre .grille-identification {
+    #calendrier-trimestre .grille-identification {
         grid-template-columns: 1fr;
     }
 }
@@ -11726,15 +11726,15 @@ tr.etudiant-inactif td {
    .grille-identification 2fr/1fr/1fr). Sur iPad on empile biblio puis
    formulaire en pleine largeur pour récupérer tout l'espace horizontal. */
 @media (max-width: 1024px) {
-    #contexte-trimestre .disposition-bibliotheque-formulaire {
+    #calendrier-trimestre .disposition-bibliotheque-formulaire {
         grid-template-columns: 1fr;
     }
 
-    #contexte-trimestre .panneau-bibliotheque {
+    #calendrier-trimestre .panneau-bibliotheque {
         order: 1;
     }
 
-    #contexte-trimestre .panneau-formulaire {
+    #calendrier-trimestre .panneau-formulaire {
         order: 2;
     }
 }

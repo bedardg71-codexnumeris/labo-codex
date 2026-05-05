@@ -72,7 +72,7 @@ function genererBanniereBienvenue() {
                 <button class="btn btn-primaire" data-action="demarrerTourGuide">
                     Commencer la visite guid\u00e9e
                 </button>
-                <button class="btn btn-secondaire" data-action="afficherSection" data-param="contexte">
+                <button class="btn btn-secondaire" data-action="afficherSection" data-param="calendrier">
                     Aller aux R\u00e9glages
                 </button>
                 <button class="btn btn-secondaire" data-action="entrerEnDemoHandler">

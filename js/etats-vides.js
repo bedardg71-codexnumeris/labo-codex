@@ -96,7 +96,7 @@ function paraitVide(container) {
 // =========================================================================
 
 var ETATS_VIDES = {
-    'contexte-trimestre': {
+    'calendrier-trimestre': {
         message: 'Aucun\u00b7e \u00e9tudiant\u00b7e pour le moment. Ajoute-les s\u00e9par\u00e9ment ou importe ta liste depuis un tableur ou le syst\u00e8me de gestion institutionnel. Le format attendu est affich\u00e9 dans le panneau d\u2019import.'
     },
     'conception-productions': {

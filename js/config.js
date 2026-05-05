@@ -46,7 +46,7 @@ const configurationsOnglets = {
         { id: 'pratiques-notation', label: 'Pratiques de notation' },
         { id: 'retroactions', label: 'Cartouches de rétroaction' }
     ],
-    'contexte': [
+    'calendrier': [
         { id: 'trimestre', label: 'Trimestre' },
         { id: 'calendrier', label: 'Vue calendaire' }
     ],
@@ -93,7 +93,7 @@ const configurationsOnglets = {
 
 /**
  * Section actuellement affichée
- * Valeurs possibles: 'accueil' | 'apercu' | 'conception' | 'contexte' | 'suivi' | 'evaluations' | 'labo' | 'aide' | 'reglages'
+ * Valeurs possibles: 'accueil' | 'apercu' | 'conception' | 'calendrier' | 'suivi' | 'evaluations' | 'labo' | 'aide' | 'reglages'
  *
  * UTILISÉ PAR:
  * - afficherSection() pour mettre à jour l'état

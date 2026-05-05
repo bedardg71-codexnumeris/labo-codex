@@ -1289,7 +1289,7 @@
     function naviguerVersRessource(type, id) {
         // Afficher la section appropriée selon le type de ressource
         if (typeof afficherSection === 'function') {
-            afficherSection(type === 'pratique' ? 'contexte' : 'conception');
+            afficherSection(type === 'pratique' ? 'calendrier' : 'conception');
         }
 
         // Ensuite afficher la bonne sous-section

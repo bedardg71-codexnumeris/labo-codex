@@ -1053,7 +1053,7 @@ const ETAPES_TOUR = [
         titre: 'Bienvenue',
         texte: "Labo Codex num\u00e9rise le travail que tu fais d\u00e9j\u00e0. Ce parcours te guide \u00e0 travers les \u00e9tapes essentielles. Tu peux le quitter \u00e0 tout moment et y revenir depuis les Pr\u00e9f\u00e9rences. Commence par configurer ton espace de travail dans R\u00e9glages.",
         actions: [
-            { label: 'Aller aux R\u00e9glages', type: 'primaire', action: 'naviguerVers', param: 'contexte' },
+            { label: 'Aller aux R\u00e9glages', type: 'primaire', action: 'naviguerVers', param: 'calendrier' },
             { label: 'Explorer seul\u00b7e',     type: 'secondaire', action: 'passerEtape' }
         ],
         correspond: function(idSousSection) { return !idSousSection || idSousSection === 'accueil'; }

@@ -275,10 +275,10 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Les présences sont liées à la date du cours. Vérifie que la bonne date est sélectionnée avant de saisir."
             }
         ],
-        voirAussi: ['tableau-bord-apercu', 'contexte-calendrier']
+        voirAussi: ['tableau-bord-apercu', 'calendrier-vue']
     },
 
-    'contexte-trimestre': {
+    'calendrier-trimestre': {
         titre: "Configurer le trimestre",
         sections: [
             {
@@ -323,7 +323,7 @@ const AIDE_CONTEXTUELLE = {
         voirAussi: ['contexte-groupe-etudiants', 'tableau-bord-apercu', 'tableau-bord-rai']
     },
 
-    'contexte-calendrier': {
+    'calendrier-vue': {
         titre: "Le calendrier des présences",
         sections: [
             {
@@ -636,7 +636,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'texte',
-                contenu: "Configure les critères surveillés dans Conception → Grille de critères (tag SOLO). Ajuste le seuil et la fenêtre d'analyse dans Contexte → Dépistage."
+                contenu: "Configure les critères surveillés dans Conception → Grille de critères (tag SOLO). Ajuste le seuil et la fenêtre d'analyse dans Calendrier → Dépistage."
             }
         ],
         voirAussi: ['profil-etudiant-indicateurs']
@@ -683,7 +683,7 @@ const AIDE_CONTEXTUELLE = {
                 contenu: 'Tu peux dupliquer un cours pour cr\u00e9er rapidement une nouvelle session en modifiant seulement l\u2019ann\u00e9e, et verrouiller un cours termin\u00e9 pour \u00e9viter les modifications accidentelles.'
             },
         ],
-        voirAussi: ['contexte-trimestre', 'construction-pratiques']
+        voirAussi: ['calendrier-trimestre', 'construction-pratiques']
     },
 
     'contexte-horaire': {
@@ -704,7 +704,7 @@ const AIDE_CONTEXTUELLE = {
                 contenu: 'Si tu modifies le format horaire, les s\u00e9ances existantes seront recr\u00e9\u00e9es.'
             },
         ],
-        voirAussi: ['contexte-trimestre', 'contexte-calendrier', 'suivi-saisie']
+        voirAussi: ['calendrier-trimestre', 'calendrier-vue', 'suivi-saisie']
     },
 
     'contexte-groupe-etudiants': {

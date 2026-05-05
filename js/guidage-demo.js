@@ -32,7 +32,7 @@ const GUIDAGE_TEXTES = {
         titre: 'Pr\u00e9sences \u2014 Aper\u00e7u',
         texte: 'Vue synth\u00e9tique de l\u2019assiduit\u00e9 du groupe\u00a0: taux de pr\u00e9sence global, tendances hebdomadaires et \u00e9tudiants \u00e0 surveiller. Les 627\u00a0pr\u00e9sences de la d\u00e9mo couvrent une session compl\u00e8te.'
     },
-    'contexte-calendrier': {
+    'calendrier-vue': {
         titre: 'Vue calendaire',
         texte: 'Le calendrier affiche chaque s\u00e9ance avec un code couleur par \u00e9tudiant. Rep\u00e8re les patterns d\u2019absence pour intervenir au bon moment.'
     },

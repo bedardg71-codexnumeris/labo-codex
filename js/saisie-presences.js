@@ -1704,7 +1704,7 @@ function obtenirDerniereDataSaisie(da = null) {
 
 function naviguerVersReglagesTrimestre(el) {
     if (typeof afficherSection === 'function') afficherSection('reglages');
-    if (typeof afficherSousSection === 'function') afficherSousSection('contexte-trimestre');
+    if (typeof afficherSousSection === 'function') afficherSousSection('calendrier-trimestre');
 }
 
 function mettreAJourLignePeriodesHandler(el) {
