@@ -486,7 +486,7 @@ function obtenirContexteSection() {
         // Contexte selon la section
         switch (section) {
             case 'reglages':
-                if (sousSection === 'trimestre' || sousSection === 'contexte-trimestre') {
+                if (sousSection === 'trimestre' || sousSection === 'calendrier-trimestre') {
                     contexte.trimestreActif = db.getSync('trimestreActif', 'non défini');
                     contexte.infoCours = db.getSync('infoCours', {});
                 }

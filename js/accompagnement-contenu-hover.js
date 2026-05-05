@@ -688,14 +688,12 @@ const TOOLTIPS = {
 
     // --- Réglages ---
 
-    'nav-ctx-trimestre':
+    'nav-calendrier-trimestre':
         'Configuration du trimestre, du cours, de ton profil, du groupe d\'\u00e9tudiant\u00b7es, de l\'horaire et du groupe-cours.',
-    'nav-ctx-calendrier':
+    'nav-calendrier-vue':
         'Calendrier du trimestre : tableau des mois, jours de cours, cong\u00e9s et reprises.',
-    'nav-ctx-pratiques':
+    'nav-conception-pratiques':
         'Assemble ta pratique de notation compl\u00e8te (SOM, STD, SPE, DEN) en associant \u00e9chelle, structure et jetons.',
-    'nav-ctx-bilan':
-        'Bilan r\u00e9flexif de ta d\u00e9marche p\u00e9dagogique : forces, d\u00e9fis et pistes d\'am\u00e9lioration.',
     'nav-reg-preferences':
         'Personnalise ton interface : outils actifs, ressources affich\u00e9es, effets visuels et comportement de navigation.',
     'nav-reg-depistage':
@@ -783,7 +781,7 @@ const TOOLTIPS = {
 
     'nav-conception':
         'L\'onglet \u00ab\u00a0Structure\u00a0\u00bb regroupe la conception de tes outils d\'\u00e9valuation : productions, grilles, \u00e9chelles, cartouches et pratiques de notation.',
-    'nav-contexte':
+    'nav-calendrier':
         'L\'onglet \u00ab\u00a0Contexte\u00a0\u00bb regroupe la configuration de ton espace de travail : trimestre, cours, profil, \u00e9tudiant\u00b7es, horaire et assemblage du groupe-cours.',
     'nav-suivi':
         'L\'onglet \u00ab\u00a0Suivi\u00a0\u00bb regroupe le portrait du groupe : liste des individus, profil \u00e9tudiant\u00b7e, interventions R\u00e0I et laboratoire d\'analyse.',

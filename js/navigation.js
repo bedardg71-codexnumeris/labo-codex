@@ -43,7 +43,7 @@
  * Affiche une section principale et met à jour la navigation
  * 
  * @param {string} nomSection - Identifiant de la section à afficher
- *                             Valeurs: 'accueil' | 'apercu' | 'conception' | 'contexte' |
+ *                             Valeurs: 'accueil' | 'apercu' | 'conception' | 'calendrier' |
  *                                     'suivi' | 'evaluations' | 'labo' | 'aide' | 'reglages'
  * 
  * UTILISÉ PAR:
@@ -113,7 +113,7 @@ function afficherSection(nomSection) {
  * Affiche la sous-navigation pour une section donnée
  * 
  * @param {string} nomOnglet - Identifiant de la section parent
- *                            Valeurs: 'accueil' | 'apercu' | 'conception' | 'contexte' |
+ *                            Valeurs: 'accueil' | 'apercu' | 'conception' | 'calendrier' |
  *                                    'suivi' | 'evaluations' | 'labo' | 'aide' | 'reglages'
  * 
  * UTILISÉ PAR:
@@ -153,11 +153,11 @@ const TOOLTIPS_SOUS_NAV = {
     'conception-productions': 'nav-conception-productions',
     'conception-grille-criteres': 'nav-conception-grilles',
     'conception-echelle-performance': 'nav-conception-echelles',
-    'conception-pratiques-notation': 'nav-ctx-pratiques',
+    'conception-pratiques-notation': 'nav-conception-pratiques',
     'conception-retroactions': 'nav-conception-cartouches',
     // Contexte
-    'contexte-trimestre': 'nav-ctx-trimestre',
-    'contexte-calendrier': 'nav-ctx-calendrier',
+    'calendrier-trimestre': 'nav-calendrier-trimestre',
+    'calendrier-vue': 'nav-calendrier-vue',
     // Suivi
     'suivi-liste': 'nav-suivi-liste',
     'suivi-saisie': 'nav-suivi-saisie',
@@ -246,12 +246,12 @@ const INITIALISATEURS_SOUS_SECTION = {
     },
 
     // === CONTEXTE ===
-    'contexte-trimestre': function () {
+    'calendrier-trimestre': function () {
         if (typeof initialiserModuleTrimestre === 'function') {
             initialiserModuleTrimestre();
         }
     },
-    'contexte-calendrier': function () {
+    'calendrier-vue': function () {
         if (typeof afficherCalendrierScolaire === 'function') {
             afficherCalendrierScolaire();
         }

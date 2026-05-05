@@ -7,7 +7,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=2026050529"> <!-- Refonte nav SP4-fix : scope CSS section-conception, #conception-carte -->
+    <link rel="stylesheet" href="styles.css?v=2026050534"> <!-- Refonte nav SP5 : scope CSS section-calendrier, calendrier-trimestre, calendrier-vue -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -3838,8 +3838,8 @@
                 <button data-onglet="conception" data-tooltip="nav-conception">
                     <img src="icons/icon-genealogy.svg" alt="" class="nav-icon"><span class="nav-label">Conception</span>
                 </button>
-                <button data-onglet="contexte" data-tooltip="nav-contexte">
-                    <img src="icons/icon-calendar.svg" alt="" class="nav-icon"><span class="nav-label">Contexte</span>
+                <button data-onglet="calendrier" data-tooltip="nav-calendrier">
+                    <img src="icons/icon-calendar.svg" alt="" class="nav-icon"><span class="nav-label">Calendrier</span>
                 </button>
                 <button data-onglet="suivi" data-tooltip="nav-suivi">
                     <img src="icons/icon-profile.svg" alt="" class="nav-icon"><span class="nav-label">Suivi</span>
@@ -6343,16 +6343,16 @@
             </section><!-- fin section-conception -->
 
             <!-- ===================================
-     SECTION: CONTEXTE
+     SECTION: CALENDRIER
      Trimestre, calendrier, pratiques de notation, bilan
      =================================== -->
-            <section id="section-contexte" class="section">
+            <section id="section-calendrier" class="section">
 
-                <div id="contexte-trimestre" class="sous-section">
+                <div id="calendrier-trimestre" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Trimestre</span>
                         <span class="titre-emoji-container">
-                            <button class="btn-aide-contextuelle" data-aide="contexte-trimestre" aria-label="Aide contextuelle">✴️</button>
+                            <button class="btn-aide-contextuelle" data-aide="calendrier-trimestre" aria-label="Aide contextuelle">✴️</button>
                         </span>
                     </h2>
 
@@ -7592,11 +7592,11 @@
 
                 </div>
 
-                <div id="contexte-calendrier" class="sous-section">
+                <div id="calendrier-vue" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Calendrier des présences</span>
                         <span class="titre-emoji-container">
-                            <button class="btn-aide-contextuelle" data-aide="contexte-calendrier" aria-label="Aide contextuelle">✴️</button>
+                            <button class="btn-aide-contextuelle" data-aide="calendrier-vue" aria-label="Aide contextuelle">✴️</button>
                         </span>
                     </h2>
                     <div class="carte">
@@ -7607,7 +7607,7 @@
                     </div>
                 </div>
 
-            </section><!-- fin section-contexte -->
+            </section><!-- fin section-calendrier -->
 
             <!-- ===================================
      SECTION: SUIVI
@@ -8851,7 +8851,7 @@
                     <!-- fin grille cartes métriques -->
 
                     <!-- ✅ Carte groupe démo supprimée (Beta 93.5) -->
-                    <!-- Le groupe démo est maintenant géré via checkbox dans Contexte → Trimestre -->
+                    <!-- Le groupe démo est maintenant géré via checkbox dans Calendrier → Trimestre -->
 
                     <!-- Carte informations légales -->
                     <div class="carte u-mt-25">
@@ -9461,7 +9461,7 @@
                                     <!-- Options générées dynamiquement par cours.js -->
                                 </select>
                                 <small class="u-mt-5" style="display: block; color: var(--gris-moyen)">
-                                    Chaque cours doit être associé à un trimestre configuré dans Contexte → Trimestre
+                                    Chaque cours doit être associé à un trimestre configuré dans Calendrier → Trimestre
                                 </small>
                             </div>
 
@@ -11496,8 +11496,8 @@
                             <p class="mt-10"><strong>Comment configurer&nbsp;?</strong></p>
                             <ul class="u-mt-5">
                                 <li><strong>Conception → Grille de critères</strong>&nbsp;: étiquette chaque critère avec son niveau SOLO (multistructurel, relationnel ou abstrait étendu).</li>
-                                <li><strong>Contexte → Dépistage → Seuil de défi</strong>&nbsp;: ajuste selon ton exigence (75% par défaut).</li>
-                                <li><strong>Contexte → Dépistage → Fenêtre d'analyse</strong>&nbsp;: nombre de productions récentes à observer (4 par défaut).</li>
+                                <li><strong>Calendrier → Dépistage → Seuil de défi</strong>&nbsp;: ajuste selon ton exigence (75% par défaut).</li>
+                                <li><strong>Calendrier → Dépistage → Fenêtre d'analyse</strong>&nbsp;: nombre de productions récentes à observer (4 par défaut).</li>
                             </ul>
 
                             <p class="mt-10"><strong>Comment interpréter les diagnostics&nbsp;?</strong></p>
@@ -11805,7 +11805,7 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p>La configuration se fait principalement dans <strong>Contexte → Trimestre</strong> qui centralise toutes les étapes :</p>
+                            <p>La configuration se fait principalement dans <strong>Calendrier → Trimestre</strong> qui centralise toutes les étapes :</p>
 
                             <div class="carte-gradient-bleu">
                                 <p class="titre-11-bold-bleu-mb15">Workflow recommandé :</p>
@@ -11900,7 +11900,7 @@
                             </ul>
 
                             <div class="alerte alerte-attention">
-                                <strong>Navigation libre :</strong> Tu peux quitter Primo à tout moment pour naviguer librement dans l'application. Les données saisies via Primo sont sauvegardées normalement et modifiables depuis <strong>Contexte → Trimestre</strong> (les 6 accordéons).
+                                <strong>Navigation libre :</strong> Tu peux quitter Primo à tout moment pour naviguer librement dans l'application. Les données saisies via Primo sont sauvegardées normalement et modifiables depuis <strong>Calendrier → Trimestre</strong> (les 6 accordéons).
                             </div>
 
                             <div class="alerte alerte-succes">
@@ -11917,7 +11917,7 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Contexte → Trimestre → Cours</p>
+                            <p><strong>Navigation :</strong> Calendrier → Trimestre → Cours</p>
 
                             <p><strong>Informations à saisir :</strong></p>
                             <ul>
@@ -11942,7 +11942,7 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Contexte → Trimestre</p>
+                            <p><strong>Navigation :</strong> Calendrier → Trimestre</p>
                             <p class="text-succes-bold">Centre de configuration complet avec 6 accordéons</p>
 
                             <div class="carte-gradient-bleu">
@@ -11994,14 +11994,14 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Contexte → Trimestre → Section «Données de démonstration»</p>
+                            <p><strong>Navigation :</strong> Calendrier → Trimestre → Section «Données de démonstration»</p>
 
                             <p>Pour explorer l'application avec des données réalistes <strong>avant de configurer tes propres données</strong>, activez le groupe de démonstration.</p>
 
                             <div class="carte-gradient-bleu">
                                 <p class="titre-11-bold-bleu-mb15">Activation :</p>
                                 <ol class="lh-2">
-                                    <li>Va dans <strong>Contexte → Trimestre</strong></li>
+                                    <li>Va dans <strong>Calendrier → Trimestre</strong></li>
                                     <li>Descends à la section «Données de démonstration»</li>
                                     <li>Coche la case «Utiliser les données de démonstration (groupe 9999)»</li>
                                     <li>Le groupe demo est immédiatement chargé dans l'application</li>
@@ -12033,7 +12033,7 @@
 
                             <p><strong>Désactivation :</strong></p>
                             <ul>
-                                <li>Décoche la case dans Contexte → Trimestre</li>
+                                <li>Décoche la case dans Calendrier → Trimestre</li>
                                 <li>Toutes les données du groupe 9999 sont supprimées automatiquement</li>
                                 <li>Tes données personnelles (si présentes) restent intactes</li>
                             </ul>
@@ -12106,7 +12106,7 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Contexte → Trimestre → Groupe d'étudiants</p>
+                            <p><strong>Navigation :</strong> Calendrier → Trimestre → Groupe d'étudiants</p>
 
                             <p><strong>Informations à saisir pour chaque étudiant :</strong></p>
                             <ul>
@@ -12133,7 +12133,7 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Contexte → Trimestre → Horaire</p>
+                            <p><strong>Navigation :</strong> Calendrier → Trimestre → Horaire</p>
 
                             <p><strong>Fonctionnalités :</strong></p>
                             <ul>
@@ -12153,7 +12153,7 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Contexte → Pratiques de notation</p>
+                            <p><strong>Navigation :</strong> Calendrier → Pratiques de notation</p>
 
                             <p>Le système supporte différentes pratiques pédagogiques. Choisis celle qui correspond à ton approche :</p>
 
@@ -12352,7 +12352,7 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Contexte → Pratiques de notation (section «Grille de critères pour le dépistage»)</p>
+                            <p><strong>Navigation :</strong> Calendrier → Pratiques de notation (section «Grille de critères pour le dépistage»)</p>
 
                             <p><strong>Pourquoi configurer une grille de référence ?</strong></p>
                             <p>Le système de dépistage identifie automatiquement les <strong>forces et défis</strong> de chaque étudiant en analysant leurs performances sur tes critères d'évaluation. Pour fonctionner, il doit savoir quels critères tu utilises dans ta discipline.</p>
@@ -12376,7 +12376,7 @@
 
                             <p><strong>Étape 2 : Définir la grille comme référence</strong></p>
                             <ol>
-                                <li>Retourner dans <strong>Contexte → Pratiques de notation</strong></li>
+                                <li>Retourner dans <strong>Calendrier → Pratiques de notation</strong></li>
                                 <li>Section «Grille de critères pour le dépistage»</li>
                                 <li>Sélectionner ta grille dans le menu déroulant</li>
                                 <li>Cliquer sur «Sauvegarder les réglages»</li>
@@ -12513,7 +12513,7 @@
                             </ol>
 
                             <div class="alerte alerte-attention">
-                                <strong>Mode simple disponible :</strong> Si tu ne souhaites pas catégoriser les erreurs, désactivez l'option «Activer la catégorisation des erreurs de français» dans <strong>Contexte → Pratiques de notation</strong>. Tu pourras alors simplement saisir le nombre total d'erreurs sans codes.
+                                <strong>Mode simple disponible :</strong> Si tu ne souhaites pas catégoriser les erreurs, désactivez l'option «Activer la catégorisation des erreurs de français» dans <strong>Calendrier → Pratiques de notation</strong>. Tu pourras alors simplement saisir le nombre total d'erreurs sans codes.
                             </div>
 
                             <p><strong>Avantages pédagogiques</strong></p>
@@ -12783,7 +12783,7 @@
                             <h4 class="text-success-dark-mb10">Test 1 : Vérifier l'interface</h4>
                             <p><strong>Étapes :</strong></p>
                             <ol class="lh-relaxed">
-                                <li>Aller dans <strong>Contexte → Pratiques de notation</strong></li>
+                                <li>Aller dans <strong>Calendrier → Pratiques de notation</strong></li>
                                 <li>Localiser la section «Grille de critères pour le dépistage»</li>
                                 <li>Vérifier que le menu déroulant affiche tes grilles créées</li>
                                 <li>Vérifier que le message d'aide s'affiche correctement</li>
@@ -12815,7 +12815,7 @@
                             <h4 class="titre-orange-mb10">Test 3 : Définir comme grille de référence</h4>
                             <p><strong>Étapes :</strong></p>
                             <ol class="lh-relaxed">
-                                <li>Retourner dans <strong>Contexte → Pratiques de notation</strong></li>
+                                <li>Retourner dans <strong>Calendrier → Pratiques de notation</strong></li>
                                 <li>Section «Grille de critères pour le dépistage»</li>
                                 <li>Sélectionner ta grille dans le menu déroulant</li>
                                 <li>Cliquer sur «Sauvegarder les réglages»</li>
@@ -12830,7 +12830,7 @@
                             <p><strong>Prérequis :</strong> Avoir des étudiants avec au moins une évaluation</p>
                             <p><strong>Étapes :</strong></p>
                             <ol class="lh-relaxed">
-                                <li>Change ta grille de référence dans <strong>Contexte → Pratiques de notation</strong></li>
+                                <li>Change ta grille de référence dans <strong>Calendrier → Pratiques de notation</strong></li>
                                 <li>Sauvegarde les réglages</li>
                                 <li>Recharge la page</li>
                                 <li>Ouvre le profil d'un étudiant évalué</li>
@@ -12862,7 +12862,7 @@
                         </div>
 
                         <div class="alerte alerte-succes" style="margin-top: 15px;">
-                                <strong>💡 Conseil :</strong> Si un test ne donne pas le résultat attendu, vérifie que ta grille est correctement sélectionnée dans Contexte → Pratiques de notation, puis recharge la page.
+                                <strong>💡 Conseil :</strong> Si un test ne donne pas le résultat attendu, vérifie que ta grille est correctement sélectionnée dans Calendrier → Pratiques de notation, puis recharge la page.
                             </div>
                         </div>
                     </div>
@@ -12905,7 +12905,7 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Contexte → Trimestre → Groupe d'étudiants</p>
+                            <p><strong>Navigation :</strong> Calendrier → Trimestre → Groupe d'étudiants</p>
 
                             <p>L'accordéon <strong>Groupe d'étudiants</strong> dans la section Trimestre te permet de constituer et gérer ta liste de classe.</p>
 
@@ -14062,7 +14062,7 @@
                             </ul>
 
                             <div class="alerte alerte-succes">
-                                <strong>Configuration :</strong> Le nombre de jetons, les types disponibles et le traitement de l'originale (archiver ou supprimer) se configurent dans <strong>Contexte → Pratiques de notation → Système de jetons</strong>.
+                                <strong>Configuration :</strong> Le nombre de jetons, les types disponibles et le traitement de l'originale (archiver ou supprimer) se configurent dans <strong>Calendrier → Pratiques de notation → Système de jetons</strong>.
                             </div>
                         </div>
                     </div>
@@ -14168,7 +14168,7 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Contexte → Vue calendaire</p>
+                            <p><strong>Navigation :</strong> Calendrier → Vue calendaire</p>
 
                             <p>Le calendrier offre une vue mensuelle de l'assiduité avec des codes couleur par jour.</p>
 
@@ -14299,7 +14299,7 @@
 
                         <div class="alerte alerte-info u-mt-15">
                             <h4 class="u-mb-10 u-texte-bleu">Option 1 : Détection des patterns et RàI</h4>
-                            <p><strong>Activation :</strong> Contexte → Pratiques de notation → Cocher «Activer RàI et détection des patterns»</p>
+                            <p><strong>Activation :</strong> Calendrier → Pratiques de notation → Cocher «Activer RàI et détection des patterns»</p>
                             <p><strong>Fonction :</strong> Identifie automatiquement 4 patterns d'apprentissage (Stable, Défi spécifique, Difficulté émergente, Difficulté persistante) et recommande des niveaux d'intervention selon le cadre Réponse à l'Intervention (RàI).</p>
                             <p><strong>Utilisation recommandée :</strong></p>
                             <ul class="u-mt-5">
@@ -14310,7 +14310,7 @@
 
                         <div class="alerte alerte-info u-mt-15">
                             <h4 class="u-mb-10 u-texte-bleu">Option 2 : Observation de la structure SOLO</h4>
-                            <p><strong>Activation :</strong> Contexte → Pratiques de notation → Cocher «Afficher l'observation de la structure des résultats d'apprentissage (SOLO)»</p>
+                            <p><strong>Activation :</strong> Calendrier → Pratiques de notation → Cocher «Afficher l'observation de la structure des résultats d'apprentissage (SOLO)»</p>
                             <p><strong>Fonction :</strong> Affiche une carte dans le profil étudiant (section Accompagnement) avec les forces et défis identifiés selon les 4 niveaux IDME (Insuffisant, Développement, Maîtrisé, Étendu) basés sur la taxonomie SOLO de Biggs & Collis.</p>
                             <p><strong>Utilisation recommandée :</strong></p>
                             <ul class="u-mt-5">
@@ -14894,7 +14894,7 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Contexte → Bilan réflexif</p>
+                            <p><strong>Navigation :</strong> Calendrier → Bilan réflexif</p>
 
                             <p>Le bilan réflexif sert à recueillir des informations <strong>qualitatives et subjectives</strong> sur l'expérience vécue — par l'apprenant et par l'enseignant. Ces données ne se trouvent pas dans les indices A, C ou P : sentiment d'efficacité personnelle, motivation, perception du cours, obstacles vécus. Les réponses étudiantes sont <strong>anonymes</strong>, ce qui permet de dégager un portrait du groupe en toute franchise.</p>
 
@@ -15125,7 +15125,7 @@
                         <div class="alerte-info-grise">
                             <h4 style="color: var(--bleu-principal)">Calendrier vide après rechargement</h4>
                             <p><strong>Cause :</strong> Le calendrier n'a pas été créé ou est endommagé</p>
-                            <p><strong>Solution :</strong> Aller dans Contexte → Trimestre → Régénérer le calendrier</p>
+                            <p><strong>Solution :</strong> Aller dans Calendrier → Trimestre → Régénérer le calendrier</p>
                         </div>
 
                         <div class="alerte-info-grise">
@@ -15142,7 +15142,7 @@
                         <div class="alerte-info-grise">
                             <h4 style="color: var(--bleu-principal)">« Invalid Date » dans le calendrier</h4>
                             <p><strong>Cause :</strong> Bug connu lié à un conflit interne</p>
-                            <p><strong>Solution :</strong> Recharger la page devrait corriger le problème. Si le problème persiste, régénère le calendrier dans Contexte → Trimestre.</p>
+                            <p><strong>Solution :</strong> Recharger la page devrait corriger le problème. Si le problème persiste, régénère le calendrier dans Calendrier → Trimestre.</p>
                         </div>
 
                         <div class="alerte-info-grise">
@@ -15236,7 +15236,7 @@
                                         <li><strong>Niveau 2 - Préventif :</strong> Interventions de groupe pour étudiants fragiles ou à risque (15% des étudiants)</li>
                                         <li><strong>Niveau 3 - Intensif :</strong> Soutien individualisé pour étudiants en situation critique (&lt; 5% des étudiants)</li>
                                     </ul>
-                                    <p class="mt-10"><strong>Dans l'application :</strong> Si l'option RàI est activée (Contexte → Pratiques de notation), le profil étudiant suggère automatiquement le niveau RàI selon l'indice R et fournit des recommandations d'intervention adaptées.</p>
+                                    <p class="mt-10"><strong>Dans l'application :</strong> Si l'option RàI est activée (Calendrier → Pratiques de notation), le profil étudiant suggère automatiquement le niveau RàI selon l'indice R et fournit des recommandations d'intervention adaptées.</p>
                                 </div>
                             </details>
                         </div>
@@ -15292,11 +15292,11 @@
                                     <p><strong>Cause probable :</strong> Le calendrier n'a pas été généré ou a été corrompu.</p>
                                     <p class="mt-10"><strong>Solution :</strong></p>
                                     <ol>
-                                        <li>Aller dans Contexte → Trimestre</li>
+                                        <li>Aller dans Calendrier → Trimestre</li>
                                         <li>Remplir les champs (date début, date fin, nb semaines)</li>
                                         <li>Cliquer sur «Générer le calendrier complet»</li>
                                         <li>Vérifier que le message de succès apparaît</li>
-                                        <li>Retourner dans Contexte → Vue calendaire pour confirmer</li>
+                                        <li>Retourner dans Calendrier → Vue calendaire pour confirmer</li>
                                     </ol>
                                 </div>
                             </details>
@@ -15310,7 +15310,7 @@
                                 <div class="mt-10-pl-10">
                                     <p><strong>Ordre recommandé :</strong></p>
                                     <ol>
-                                        <li><strong>Contexte → Trimestre :</strong> Configuration centralisée — trimestre (dates, calendrier), cours, enseignant·e, groupe d'étudiants et horaire</li>
+                                        <li><strong>Calendrier → Trimestre :</strong> Configuration centralisée — trimestre (dates, calendrier), cours, enseignant·e, groupe d'étudiants et horaire</li>
                                         <li><strong>Conception → Grilles de critères :</strong> Créer tes grilles SRPNF</li>
                                         <li><strong>Conception → Échelle de performance :</strong> Personnaliser l'échelle IDME si nécessaire</li>
                                         <li><strong>Conception → Productions étudiantes :</strong> Définir toutes les évaluations du cours</li>
@@ -15326,7 +15326,7 @@
                                 <summary class="titre-cliquable">Comment gérer un étudiant qui abandonne en cours de session ?</summary>
                                 <div class="mt-10-pl-10">
                                     <ol>
-                                        <li>Aller dans Contexte → Trimestre → Groupe d'étudiants</li>
+                                        <li>Aller dans Calendrier → Trimestre → Groupe d'étudiants</li>
                                         <li>Trouver l'étudiant dans la liste</li>
                                         <li>Changer son statut de «Actif» à «Inactif» ou «Abandon»</li>
                                         <li>L'étudiant disparaîtra des aperçus actifs mais ses données seront conservées</li>
@@ -15355,7 +15355,7 @@
                                 <div class="mt-10-pl-10">
                                     <p><strong>Actuellement :</strong> Les seuils sont harmonisés à 70% (Acceptable), 80% (Confortable), 85% (Maîtrisé) et ne sont pas modifiables dans l'interface.</p>
                                     <p class="mt-10"><strong>Pourquoi ?</strong> Ces seuils sont basés sur la recherche pédagogique et garantissent la cohérence des prédictions de risque.</p>
-                                    <p class="mt-10"><strong>Personnalisation future :</strong> Une version avancée pourrait permettre de personnaliser ces seuils dans Contexte → Pratiques de notation.</p>
+                                    <p class="mt-10"><strong>Personnalisation future :</strong> Une version avancée pourrait permettre de personnaliser ces seuils dans Calendrier → Pratiques de notation.</p>
                                 </div>
                             </details>
                         </div>
@@ -15418,7 +15418,7 @@
 
                             <dl class="ml-10">
                                 <dt class="titre-section-aide">Échelle IDME</dt>
-                                <dd class="ml-20-mb-10">Échelle de performance à 4 niveaux : <strong>I</strong>nsuffisant (&lt; 64%), <strong>D</strong>éveloppement (65-74%), <strong>M</strong>aîtrisé (75-84%), <strong>E</strong>tendu (≥ 85%). Basée sur la taxonomie SOLO de Biggs & Collis. Utilisée dans la pratique PAN-Standards pour interpréter les scores des critères d'évaluation. <em>(Optionnel - voir Contexte → Pratiques de notation)</em></dd>
+                                <dd class="ml-20-mb-10">Échelle de performance à 4 niveaux : <strong>I</strong>nsuffisant (&lt; 64%), <strong>D</strong>éveloppement (65-74%), <strong>M</strong>aîtrisé (75-84%), <strong>E</strong>tendu (≥ 85%). Basée sur la taxonomie SOLO de Biggs & Collis. Utilisée dans la pratique PAN-Standards pour interpréter les scores des critères d'évaluation. <em>(Optionnel - voir Calendrier → Pratiques de notation)</em></dd>
 
                                 <dt class="titre-section-aide">ELLAC</dt>
                                 <dd class="ml-20-mb-10">Enseignement de la Lecture Litt&eacute;raire Au Coll&eacute;gial. Approche p&eacute;dagogique qui structure l'enseignement de la lecture litt&eacute;raire au coll&eacute;gial. L'application s'en inspire pour l'organisation des activit&eacute;s et des s&eacute;quences dans le module Alignement p&eacute;dagogique.</dd>
@@ -15438,14 +15438,14 @@
                                 <dd class="ml-20-mb-10">Indice composite prédisant le risque d'échec. Formule : R = (2×A + C + P) / 4. Combine assiduité, complétion et performance en un seul score. 6 niveaux d'interprétation : Excellent (≥85%), Bon (70-84%), Fragile (60-69%), À risque (50-59%), Critique (40-49%), Échec probable (&lt;40%).</dd>
 
                                 <dt class="titre-section-aide">Indice RàI</dt>
-                                <dd class="ml-20-mb-10">Score déterminant le niveau d'intervention selon le cadre Réponse à l'Intervention. Calculé à partir de l'indice R. Trois niveaux : Universel (≥70%), Préventif (40-69%), Intensif (&lt;40%). <em>(Optionnel - voir Contexte → Pratiques de notation → Activer RàI et détection des patterns)</em></dd>
+                                <dd class="ml-20-mb-10">Score déterminant le niveau d'intervention selon le cadre Réponse à l'Intervention. Calculé à partir de l'indice R. Trois niveaux : Universel (≥70%), Préventif (40-69%), Intensif (&lt;40%). <em>(Optionnel - voir Calendrier → Pratiques de notation → Activer RàI et détection des patterns)</em></dd>
                             </dl>
 
                             <h4 class="titre-section-principal">J</h4>
 
                             <dl class="ml-10">
                                 <dt class="titre-section-aide">Jetons</dt>
-                                <dd class="ml-20-mb-10">Ressources limitées que l'apprenant·e peut utiliser pour adapter son parcours d'apprentissage. Chaque élève reçoit un nombre fixe de jetons par trimestre qu'il peut choisir d'utiliser selon ses besoins. Trois types de jetons sont disponibles : délai, reprise, et reprise ciblée. <em>(Configuration : Contexte → Pratiques de notation → Système de jetons)</em></dd>
+                                <dd class="ml-20-mb-10">Ressources limitées que l'apprenant·e peut utiliser pour adapter son parcours d'apprentissage. Chaque élève reçoit un nombre fixe de jetons par trimestre qu'il peut choisir d'utiliser selon ses besoins. Trois types de jetons sont disponibles : délai, reprise, et reprise ciblée. <em>(Configuration : Calendrier → Pratiques de notation → Système de jetons)</em></dd>
 
                                 <dt class="titre-section-aide">Jetons de délai</dt>
                                 <dd class="ml-20-mb-10">Permettent de prolonger l'échéance d'une évaluation d'un nombre de jours configuré (par défaut : 7 jours). L'étudiant·e utilise un jeton pour obtenir un délai supplémentaire sans pénalité. La nouvelle échéance est calculée automatiquement et visible dans son profil.</dd>
@@ -15823,7 +15823,7 @@
     <script src="js/db.js?v=2025121203"></script>
 
     <!-- Rapport de bug pour testeurs (Beta 94) - Chargé tôt pour capturer les erreurs -->
-    <script src="js/rapport-bug.js?v=2026050515"></script> <!-- Refonte nav SP4 : case 'conception' dans collecte contexte bug --></script>
+    <script src="js/rapport-bug.js?v=2026050547"></script> <!-- Refonte nav SP5 : case 'calendrier' --></script> <!-- Refonte nav SP4 : case 'conception' dans collecte contexte bug --></script>
 
     <!-- Bibliothèque externe: Chart.js pour graphiques progression (Beta 93) -->
     <script src="libs/chart.min.js"></script>
@@ -15834,10 +15834,10 @@
     <script src="libs/jspdf-autotable.min.js"></script>
 
     <!-- PRIORITÉ 1: Fondations -->
-    <script src="js/config.js?v=2026050516"></script> <!-- Refonte nav SP4 : section 'structure' → 'conception' --></script> <!-- Refonte nav SP3 : section 'boite-outils' → 'labo' -->
-    <script src="js/navigation.js?v=2026050517"></script> <!-- Refonte nav SP4 : tables migrées vers conception-* + nav-conception-* --></script> <!-- Refonte nav SP3 : tables migrées vers IDs labo-* -->
+    <script src="js/config.js?v=2026050535"></script> <!-- Refonte nav SP5 : section 'contexte' → 'calendrier' --></script> <!-- Refonte nav SP4 : section 'structure' → 'conception' --></script> <!-- Refonte nav SP3 : section 'boite-outils' → 'labo' -->
+    <script src="js/navigation.js?v=2026050536"></script> <!-- Refonte nav SP5 : tables migrées calendrier-* + nav-calendrier-* --></script> <!-- Refonte nav SP4 : tables migrées vers conception-* + nav-conception-* --></script> <!-- Refonte nav SP3 : tables migrées vers IDs labo-* -->
     <script src="js/preferences.js?v=2026041602"></script> <!-- Beta 99.16 : API centralisée préférences + migration V3 (doit précéder modes.js) -->
-    <script src="js/modes.js?v=2026041601"></script> <!-- Beta 99.16 : lectures via obtenirPreference -->
+    <script src="js/modes.js?v=2026050544"></script> <!-- Refonte nav SP5 : commentaire et clé calendrier-trimestre --></script> <!-- Beta 99.16 : lectures via obtenirPreference -->
 
 
     <!-- PLAN 1 — Autonomisation Phase 1 : namespace demo_* permanent
@@ -15852,7 +15852,7 @@
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestres.js?v=2026041708"></script> <!-- Beta 99.17 (b0417-1048) : + section profilsRLO dans exporterFormatRecherche (étape 9) -->
     <script src="js/trimestre.js?v=2026042819"></script> <!-- Beta 99.28 b0428-1915 : champ categorie + algo deux passes pour numérotation des semaines DÉ -->
-    <script src="js/trimestre-v2.js?v=2026042819"></script> <!-- Beta 99.28 b0428-1915 : champ categorie événements + cartes badge -->
+    <script src="js/trimestre-v2.js?v=2026050549"></script> <!-- Refonte nav SP5 : ID calendrier-trimestre --></script> <!-- Beta 99.28 b0428-1915 : champ categorie événements + cartes badge -->
 
     <!-- ENTITÉS Beta 95.2 - Architecture modulaire groupe-cours -->
     <script src="js/entites/cours-entite.js?v=2026010601"></script>
@@ -15867,7 +15867,7 @@
     <script src="js/pratiques-bibliotheque.js?v=2026010401"></script> <!-- Beta 95 : Bibliothèque universelle STD + SPE -->
     <script src="js/pratiques-materiel.js?v=2026050530"></script> <!-- Refonte nav SP4-fix : commentaire conception-pratiques-notation -->
     <script src="js/preferences-v2.js?v=2026050104"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
-    <script src="js/donnees-v2.js?v=2026050518"></script> <!-- Refonte nav SP4 : naviguerVers conception-* (5 cibles) --></script> <!-- Refonte nav SP2 : naviguerVers conception-pratiques-notation -->
+    <script src="js/donnees-v2.js?v=2026050538"></script> <!-- Refonte nav SP5 : afficherSection calendrier --></script> <!-- Refonte nav SP4 : naviguerVers conception-* (5 cibles) --></script> <!-- Refonte nav SP2 : naviguerVers conception-pratiques-notation -->
     <script src="js/etudiants.js?v=2026042708"></script>
     <script src="js/productions-bibliotheque.js?v=2026010218"></script> <!-- + import depuis trimestres -->
     <script src="js/productions.js?v=2026050531"></script> <!-- Refonte nav SP4-fix : querySelector #conception-productions -->
@@ -15912,11 +15912,11 @@
     <script src="js/objectifs.js?v=2025120124"></script>
 
     <script src="js/portfolio.js?v=2025122901"></script>
-    <script src="js/saisie-presences.js?v=2026050103"></script> <!-- Beta 99.30 b0501-1830 : XSS motif + bugs assiduite + null guards + modifierNotesPresence(coursId) -->
+    <script src="js/saisie-presences.js?v=2026050548"></script> <!-- Refonte nav SP5 : naviguerVers calendrier --></script> <!-- Beta 99.30 b0501-1830 : XSS motif + bugs assiduite + null guards + modifierNotesPresence(coursId) -->
     <script src="js/indices.js?v=2026022801"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
-    <script src="js/tableau-bord-apercu.js?v=2026050103"></script> <!-- Beta 99.30 b0501-0735 : jitter vertical appliqué quand animation des billes désactivée (retrait du top:50% inline qui empêchait l'override CSS) -->
+    <script src="js/tableau-bord-apercu.js?v=2026050550"></script> <!-- Refonte nav SP5 : faux ami CSS class préservée --></script> <!-- Beta 99.30 b0501-0735 : jitter vertical appliqué quand animation des billes désactivée (retrait du top:50% inline qui empêchait l'override CSS) -->
     <script src="js/profil-etudiant.js?v=2026042401"></script> <!-- Beta 99.24 : auto-nettoyage préférence grilleReferenceDepistage si grille introuvable -->
     <script src="js/presences-apercu.js?v=2025121017"></script>
     <script src="js/evaluations-apercu.js?v=2025111026"></script>
@@ -15960,7 +15960,7 @@
     <script src="js/actions-rlo.js?v=2026041709"></script> <!-- Beta 99.17 (b0417-1100) : fix lecture LIVE prioritaire dans obtenirEvolutionRLOEtudiant -->
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
-    <script src="js/calendrier-vue.js?v=2026050111"></script> <!-- Beta 99.30 b0501-0735 : tooltip d'échéance déplacé sur le <td> (le pointer-events:none du badge bloquait le hover natif) -->
+    <script src="js/calendrier-vue.js?v=2026050545"></script> <!-- Refonte nav SP5 : section calendrier --></script> <!-- Beta 99.30 b0501-0735 : tooltip d'échéance déplacé sur le <td> (le pointer-events:none du badge bloquait le hover natif) -->
     <script src="js/horaire.js?v=2026010602"></script>
     <script src="js/groupe.js?v=2026032600"></script>
     <script src="js/interventions.js?v=2025122801"></script>
@@ -15990,30 +15990,30 @@
     <script src="js/migrations.js?v=2025121101"></script>
 
     <!-- Page d'accueil (Chantier 3) -->
-    <script src="js/accueil.js?v=2026050533"></script> <!-- Refonte nav SP4-fix : data-param conception|conception-carte -->
+    <script src="js/accueil.js?v=2026050542"></script> <!-- Refonte nav SP5 : data-param calendrier --></script> <!-- Refonte nav SP4-fix : data-param conception|conception-carte -->
     <!-- Guidage contextuel démo (Chantier 4) -->
-    <script src="js/guidage-demo.js?v=2026050523"></script> <!-- Refonte nav SP4 : 7 clés conception-* + titres « Conception » --></script> <!-- Refonte nav SP3 : clés labo-tirage, labo-modelisation -->
+    <script src="js/guidage-demo.js?v=2026050546"></script> <!-- Refonte nav SP5 : clé calendrier-vue --></script> <!-- Refonte nav SP4 : 7 clés conception-* + titres « Conception » --></script> <!-- Refonte nav SP3 : clés labo-tirage, labo-modelisation -->
 
     <!-- Changelog dynamique -->
     <script src="js/changelog-data.js?v=2026042819"></script> <!-- Beta 99.28 b0428-1915 : item numérotation semaines DÉ -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
-    <script src="js/etats-vides.js?v=2026050524"></script> <!-- Refonte nav SP4 : 7 clés conception-* --></script> <!-- Refonte nav SP2 : clé conception-pratiques-notation -->
+    <script src="js/etats-vides.js?v=2026050537"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre --></script> <!-- Refonte nav SP4 : 7 clés conception-* --></script> <!-- Refonte nav SP2 : clé conception-pratiques-notation -->
     <script src="js/transitions.js?v=2026041901"></script>
 
     <!-- SYSTÈME D'ACCOMPAGNEMENT UNIFIÉ (Beta 99.20) —
          Un seul moteur pour hover, flèches didactiques, popups aide contextuelle,
          tour guidé et glossaire. API publique : window.accompagnement. -->
     <link rel="stylesheet" href="css/accompagnement.css?v=2026042002">
-    <script src="js/accompagnement.js?v=2026050525"></script> <!-- Refonte nav SP4 : sectionActive et flèches didactiques conception-* --></script> <!-- Refonte nav SP2 : sectionActive pointe vers conception-pratiques-notation -->
+    <script src="js/accompagnement.js?v=2026050539"></script> <!-- Refonte nav SP5 : section calendrier --></script> <!-- Refonte nav SP4 : sectionActive et flèches didactiques conception-* --></script> <!-- Refonte nav SP2 : sectionActive pointe vers conception-pratiques-notation -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=2026050526"></script> <!-- Refonte nav SP4 : nav-conception-* (6 clés) --></script> <!-- Refonte nav SP3 : nav-labo-* (5 clés) -->
-    <script src="js/accompagnement-contenu-popup.js?v=2026050527"></script> <!-- Refonte nav SP4 : 14 clés/voirAussi conception-* --></script> <!-- Beta 99.32 b0502-1430 : popup reserve-contenu-versement (#257 v2.B-α) -->
+    <script src="js/accompagnement-contenu-hover.js?v=2026050541"></script> <!-- Refonte nav SP5 : nav-calendrier-* + cleanup orphan nav-ctx-bilan --></script> <!-- Refonte nav SP4 : nav-conception-* (6 clés) --></script> <!-- Refonte nav SP3 : nav-labo-* (5 clés) -->
+    <script src="js/accompagnement-contenu-popup.js?v=2026050540"></script> <!-- Refonte nav SP5 : 7 références Calendrier --></script> <!-- Refonte nav SP4 : 14 clés/voirAussi conception-* --></script> <!-- Beta 99.32 b0502-1430 : popup reserve-contenu-versement (#257 v2.B-α) -->
     <script src="js/accompagnement-contenu-terme.js?v=2026050528"></script> <!-- Refonte nav SP4 : 14 chemins « Conception > X » --></script>
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=2026042402"></script>
+    <script src="js/main.js?v=2026050543"></script> <!-- Refonte nav SP5 : naviguerVers calendrier-trimestre --></script>
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
     <script src="js/init-inline.js?v=2026050227"></script>

@@ -652,7 +652,7 @@ function ajouterBoutonRetourV2(sectionLegacy) {
  */
 function retournerVueV2() {
     const sectionLegacy = document.getElementById('contexte-trimestre-legacy');
-    const sectionV2 = document.getElementById('contexte-trimestre');
+    const sectionV2 = document.getElementById('calendrier-trimestre');
     const btnRetour = document.getElementById('btnRetourV2');
 
     if (sectionLegacy) {
@@ -6450,12 +6450,12 @@ async function mettreAJourApercuGroupeCours() {
 function accederCalendrierRapide() {
     // Naviguer vers la section Contexte (calendrier)
     if (typeof afficherSection === 'function') {
-        afficherSection('contexte');
+        afficherSection('calendrier');
     }
     // Puis vers la sous-section Calendrier (avec délai pour laisser le DOM se mettre à jour)
     setTimeout(() => {
         if (typeof afficherSousSection === 'function') {
-            afficherSousSection('contexte-calendrier');
+            afficherSousSection('calendrier-vue');
         }
     }, 100);
 }

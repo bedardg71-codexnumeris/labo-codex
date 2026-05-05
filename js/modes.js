@@ -194,7 +194,7 @@ function rafraichirContenuSelonMode() {
         // Identifier quel module doit se rafraîchir
         const mappingModules = {
             // NOTE: reglages-groupe supprimé (Beta 95), consolidé dans contexte-trimestre
-            'contexte-trimestre': 'initialiserTrimestreV2',  // 🆕 FIX (20 jan 2026): Rafraîchir section Trimestre
+            'calendrier-trimestre': 'initialiserTrimestreV2',  // 🆕 FIX (20 jan 2026): Rafraîchir section Trimestre
             'etudiants-liste': 'afficherListeEtudiantsConsultation',
             'etudiants-profil': 'afficherProfilEtudiant',
             'evaluations-liste-evaluations': 'chargerListeEvaluationsRefonte',
