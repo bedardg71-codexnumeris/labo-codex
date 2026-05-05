@@ -1,9 +1,9 @@
-# SESSION — État au 5 mai 2026 (Refonte navigation principale livrée)
+# SESSION — État au 5 mai 2026 (Refonte nav + fix cartes mentales livrés, attaque backlog Réserve)
 
 **Date** : 5 mai 2026
-**Dernier build** : à bumper en SP6 (numéro à confirmer Grégoire)
-**Branche** : `refactor/nav-rename` (à merger sur main après validation finale)
-**Statut** : Refonte de la nav principale livrée en 6 sous-phases (10 commits + 2 fix-ups). Strategy B (renommage complet IDs + labels). La nav cible est en place : Accueil / Aperçu / **Conception** / **Calendrier** / Suivi / Évaluation / **Labo** / Aide / Réglages.
+**Dernier build** : `0505-0735` · Beta **99.35** (poussée sur origin/main)
+**Branche** : `main` (à jour avec origin)
+**Statut** : Refonte de la nav principale livrée + #261 (cartes mentales perdues) résolu. Prochaine étape : reprendre le backlog Réserve/écosystème ouvert depuis fin avril.
 
 ---
 
@@ -14,132 +14,152 @@
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
-Contexte : la refonte de la navigation principale est livrée sur la
-branche refactor/nav-rename (10 commits + 2 fix-ups, du 5 mai 2026).
-Strategy B (renommage complet IDs + labels). Validée localement sur
-Safari Mac. Reste à valider iPad et merger sur main.
+Contexte : 5 mai 2026, refonte de la nav principale livrée et poussée
+(merge commit 311c8d9, beta 99.35 b0505-0735). #261 (cartes mentales
+perdues localement) résolu : 5 cartes restaurées depuis backup 18 avril
++ patch préventif dans planification-donnees.js (fix 76144bc).
 
-NAV CIBLE en place :
-  Accueil · Aperçu · Conception (ex-Structure) · Calendrier (ex-Contexte)
-  · Suivi · Évaluation · Labo (ex-Outils) · Aide · Réglages
+PROCHAINE ÉTAPE — Backlog Réserve/écosystème (ouvert depuis fin avril).
+7 items priorisés. Ordre suggéré ci-dessous (à confirmer avec Grégoire).
 
-  Conception : 7 sous-onglets (carte, organisateur, productions, grilles,
-    échelles, pratiques de notation [arrivée], cartouches)
-  Calendrier : 2 sous-onglets (trimestre, vue calendaire avec id 'vue')
-  Labo : 5 sous-onglets (tirage, modélisation, rythme, études [ex-Labo
-    de Suivi], bilan réflexif [arrivé])
+LECTURE OBLIGATOIRE AVANT DE CODER :
+1. `docs/architecture/ECOSYSTEME-DONNEES.md` (4 concepts : Codex, Réserve,
+   Codex data, Voûte). Document fondateur du 26 avril.
+2. (memory) `project_reserve.md` — référence technique du module Réserve
+   v1.5 FSAPI + réimport v1.
+3. CLAUDE.md (zones protégées, règles sécurité, db.setSync vs db.set).
 
-PROCHAINE ÉTAPE — choisir entre :
+ITEMS DU BACKLOG À CHOISIR (par priorité décroissante suggérée) :
 
-  A) Validation finale + merge refactor/nav-rename → main + push
-     - Test iPad (le mode tactile, l'aide contextuelle, etc.)
-     - Test mode clair (passer du sombre au clair sur les sections
-       renommées + leurs sous-onglets)
-     - Vérifier que le mode démo n'a pas de régression (les sections
-       Conception et Labo doivent montrer les bonnes données démo)
-     - Si tout OK : git checkout main && git merge refactor/nav-rename
-       puis git push origin main (et supprimer la branche locale + remote)
+  [HAUTE] #259 Renommage « Réserve » → « Archives » (~2-3 h)
+    Vocabulaire bibliothécaire ressenti ésotérique par testeurs le 2 mai.
+    À FAIRE EN PREMIER si on prévoit aussi #247, sinon on imprime le mauvais
+    vocabulaire qu'il faudra changer après. Périmètre : 3 modules JS, 13
+    entrées d'aide, modales, BACKLOG, mémoires, ECOSYSTEME-DONNEES.md.
 
-  B) #261 Cartes mentales perdues localement (données utilisateur)
-     Index pointe sur carte_3 inexistant ; 4 cartes perdues entre 19
-     avril et 5 mai. Voir BACKLOG.md #261 pour le plan détaillé :
-     1) Restaurer depuis backup 838 Mo (script jq + injection console)
-     2) Patcher planification-donnees.js : fallback automatique quand
-        index.active pointe sur carte inexistante
-     3) Auditer divergence db.getSync('planification_mindmap') vs
-        localStorage.getItem('h2026_planification_mindmap')
+  [HAUTE] #247 Refonte Réglages > Données — alignement vocabulaire écosystème
+    (~1 j) Conditionné aux retours terrain sur la voie de retour Réserve.
+    Refonte complète de la section Données dans Réglages pour refléter les
+    4 concepts (Codex / Réserve→Archives / Codex data / Voûte). Carte de
+    statut, sous-sections par concept.
 
-  C) Reprendre le backlog Réserve/écosystème (#247-249, #251, #252,
-     #257 v2.B, #256-bis) qui attend depuis fin avril
+  [MOYENNE] #257 v2.B Mode consultation namespace temporaire (~5-6 h)
+    Suite de #257 v2.A (remapping IDs déjà livré le 28 avril). Ouvre une
+    archive en lecture seule dans un namespace `__archive_*`, utile pour
+    démos / formation / consultation rétrospective.
+
+  [MOYENNE] #248 Réserve v1.1 manifeste fusion auto Safari (~2-3 h)
+    FSAPI Chrome/Edge le fait déjà. Côté Safari (ZIP), le manifeste-reserve.json
+    n'est pas fusionné automatiquement à l'import — l'utilisateur doit faire
+    une action manuelle. À automatiser pour parité.
+
+  [MOYENNE] #251 Codex data — extraction depuis la Réserve (~3-4 h)
+    Ouvrir une archive et en extraire un sous-ensemble (cours / groupes
+    spécifiques) pour générer un Codex data (format de recherche).
+
+  [MOYENNE] #256-bis Aide aux 8 autres modales (~1 j)
+    Pattern de #256 (modales Réserve, livré 28 avril) à reproduire pour
+    Nouveautés, Réparation, Wizard pratique, ApercuPDF, Confidentiel,
+    Export, Import, Suppression ressource.
+
+  [BASSE] #260 Crédit Icons8 dans Réglages > À propos (~15 min)
+    Ajout d'une ligne HTML dans la carte Technologies. À faire avant tout
+    partage public de l'app.
 
 CONTRAINTES (rappel CLAUDE.md) :
-- NE PAS pousser refactor/nav-rename avant validation iPad complète
-- Si bug d'apparence : vérifier d'abord styles.css (la SP4 a oublié les
-  scopes #section-structure → #section-conception, fix dans 6789d3e)
-- echapperHtml(), pas de handlers inline, console.warn/error uniquement
+- Demander le numéro de beta à Grégoire avant le commit final
+- Bumper version.json + js/init-inline.js
+- Cache-buster dans index.html pour chaque fichier JS modifié
+- Safari Mac/iPad cibles ; Cmd+Q + rouvrir entre chaque sous-phase
+- echapperHtml() obligatoire sur innerHTML avec données utilisateur
+- Zéro handler inline → data-action / data-on-change
+- console.warn / console.error uniquement
+- Variables CSS du DS, tester modes clair ET sombre
 - Modales : classList.add('actif') (PAS 'visible')
-- db.setSync pour petites métadonnées (PAS db.set async)
+- Petites métadonnées persistées : db.setSync (PAS db.set async)
+- Charger SKILL_integrite_globaux.md si on touche aux clés globales partagées
 
-OBSERVATIONS OUVERTES (à la fin de la refonte nav) :
-- Aide contextuelle : la clé tooltip 'nav-conception-pratiques' est
-  cohérente, mais le fichier de référence 'data-aide="conception-...'
-  n'a pas toujours de popup correspondante (orphelin antérieur, pas
-  un blocage)
-- js/boite-outils.js : nom de fichier non renommé volontairement (cf
-  commit message SP3 ccf573b). Renommer en js/labo.js si on veut une
-  cohérence totale, à voir avec Grégoire.
-- Les commentaires de section dans navigation.js portent encore les
-  anciens noms (« === STRUCTURE === », « === CONTEXTE === ») — j'ai
-  oublié de les mettre à jour, mais c'est cosmétique.
+OBSERVATIONS OUVERTES :
+- Test iPad de la refonte nav (Mac OK, iPad non testé) — à faire à
+  l'occasion, pas bloquant pour le backlog Réserve.
+- BACKLOG.md contient #258 (bouton anonymisation en-tête) hors écosystème
+  Réserve — peut être glissé entre deux items si l'envie.
 ```
 
 ---
 
 ## Récapitulatif des livrables 5 mai 2026
 
-### Refonte navigation principale — 6 sous-phases livrées
+### Refonte navigation principale — 6 sous-phases livrées (commits `f983cc4` → `2e8bd82`, merge `311c8d9`)
 
-Pipeline : `git log refactor/nav-rename ^main`
+Nav cible : Accueil · Aperçu · **Conception** (ex-Structure) · **Calendrier** (ex-Contexte) · Suivi · Évaluation · **Labo** (ex-Outils) · Aide · Réglages.
 
 | Phase | Commit | Description |
 |---|---|---|
-| Préparation | `f983cc4` | Fix bug rythme (Beta 99.34 b0504-0710) avant refonte |
-| SP0 | (préparation) | Branche refactor/nav-rename + export Codex |
-| SP1 | `6973750` | Refactor navigation.js : table-driven dispatcher (INITIALISATEURS_SOUS_SECTION) |
-| SP2 | `89f9c0d` | Mouvements pratiques→Conception, bilan→Labo, Labo-de-Suivi→Études dans Labo |
-| SP3 | `ccf573b` | Renommage boite-outils → labo (40 occurrences) |
-| SP4 | `18b492f` | Renommage structure → conception (173 occurrences) |
-| SP4-fix | `6789d3e` | Rattrapage fichiers oubliés en SP4 (styles.css, accueil, productions, etc.) — sinon canvas carte mentale invisible |
-| SP5 | `3bfeed7` | Renommage contexte → calendrier (177 occurrences, faux amis dashboard préservés) |
-| SP5-fix | `57c3223` | sous-onglet calendrier id court 'vue' (au lieu de 'calendrier') pour éviter calendrier-calendrier |
-| SP6 | (en cours) | Documentation finale + bump version |
+| Pré | `f983cc4` | fix(rythme) bump Beta 99.34 b0504-0710 avant refonte |
+| SP1 | `6973750` | refactor navigation.js : table-driven dispatcher |
+| SP2 | `89f9c0d` | mouvements pratiques→Conception, bilan→Labo, Études dans Labo |
+| SP3 | `ccf573b` | renommage boite-outils → labo (40 occ.) |
+| SP4 | `18b492f` + `6789d3e` | renommage structure → conception (173 occ.) + fix CSS |
+| SP5 | `3bfeed7` + `57c3223` | renommage contexte → calendrier (177 occ.) + fix sous-onglet 'vue' |
+| SP6 | `2e8bd82` | bump Beta 99.35 b0505-0735, finalisation, NOMS_STABLES, SESSION.md |
+| Merge | `311c8d9` | Merge --no-ff sur main, branche supprimée |
 
-### Bug découvert pendant la refonte (#261)
+**Faux amis préservés** : critère SRPNF (`'structure'` dans `'rigueur'` etc.), 7 IDs `contexte-*` du dashboard, classes CSS `.carte-contexte-*`, 200 champs `"contexte": true` dans pack-demo-20.
 
-Cartes mentales : l'index pointe vers `carte_3` (« Écriture et littérature H26 » selon mémoire 19 avril) mais localStorage ne contient plus que `carte_1` « Sans titre ». 4 cartes perdues entre le 19 avril et le 5 mai. **Indépendant de la refonte nav** — découvert pendant les tests SP1 puis re-vu en SP4. Plan détaillé dans BACKLOG.md #261.
+### Fix #261 cartes mentales perdues (commit `76144bc`)
 
-### Faux amis préservés (intacts par filtrage explicite)
+- 5 cartes restaurées depuis `backup 18 avril/donnees.json` (script de console one-shot, supprimé après usage).
+- `js/planification-donnees.js` patché : `initialiserSiNecessaire()` vérifie maintenant que `index.active` pointe vers une carte qui existe dans `index.cartes`, fallback silencieux sur la première carte sinon.
 
-Pour SP4 (« Structure » → « Conception ») :
-- `js/trimestres.js`, `init-inline.js`, `profil-etudiant.js` : critère SRPNF
-- `js/pratiques.js:2733` : grille SRPNF par défaut
+### Documents de référence à ce jour
 
-Pour SP5 (« Contexte » → « Calendrier ») :
-- 7 IDs de cartes écosystème dans `tableau-bord-apercu.js` (`contexte-indicateurs-acpe`, etc.)
-- 5 classes CSS `.carte-contexte-*`, `.contexte-trimestre`, `.contexte-cours`, etc.
-- 200 champs `"contexte": true` dans `pack-demo-20.js` (champs `optionsAffichage`)
+- `docs/architecture/ECOSYSTEME-DONNEES.md` — 4 concepts (Codex/Réserve/Codex data/Voûte)
+- `plans de travail/PLAN-REFONTE-NAV.md` — plan refonte nav (livré le 5 mai)
+- (memory) `project_reserve.md` — module Réserve v1.5 FSAPI + réimport v1
+- (memory) `project_phase7_doublons.md` — module doublons (livré 2 mai)
+- `BACKLOG.md` — 7 items Réserve/écosystème ouverts + 4 items hors-écosystème
 
 ---
 
 ## État global du projet (post 5 mai)
 
-### Refonte navigation — Statut SP1→SP6
+### Refonte navigation — Statut
 
 | Sous-phase | Statut |
 |---|---|
-| SP1 Refactor `navigation.js` table-driven | ✅ |
-| SP2 Mouvements de sous-onglets | ✅ |
-| SP3 Renommage `boite-outils` → `labo` | ✅ |
-| SP4 Renommage `structure` → `conception` | ✅ + fix |
-| SP5 Renommage `contexte` → `calendrier` | ✅ + fix |
-| SP6 Documentation finale + bump version | ✅ |
+| SP1 → SP6 | ✅ livré + mergé sur main |
+| Test iPad | ⏳ à faire à l'occasion |
 
-### Backlog ouvert (priorité après refonte nav validée et mergée)
+### Backlog Réserve/écosystème — Statut
 
-- **#261** Cartes mentales perdues (priorité haute, vraies données utilisateur)
-- #247 Refonte Réglages > Données — vocabulaire écosystème
-- #248 Réserve v1.1 manifeste-reserve.json fusion auto Safari
-- #249 Section Réserve dédiée dans Réglages (livrée partiellement le 2 mai)
-- #251 Codex data — extraction depuis la Réserve
-- #252 Labo autonome (couvert par la refonte nav qui place Labo en section dédiée)
-- #257 v2.B Mode consultation namespace temporaire
-- #256-bis Aide aux 8 autres modales de l'app
-- #258 Bouton anonymisation dans l'en-tête
-- #259 Renommage Réserve → Archives (vocabulaire universel)
-- #260 Crédit Icons8 dans Réglages > À propos
+| # | Description | Effort | Priorité |
+|---|---|---|---|
+| #259 | Renommage Réserve → Archives | 2-3 h | **Haute** (à faire avant #247) |
+| #247 | Refonte Réglages > Données | 1 j | **Haute** |
+| #257 v2.B | Mode consultation namespace temporaire | 5-6 h | Moyenne |
+| #248 | Réserve v1.1 manifeste fusion auto Safari | 2-3 h | Moyenne |
+| #251 | Codex data — extraction depuis la Réserve | 3-4 h | Moyenne |
+| #256-bis | Aide aux 8 autres modales | 1 j | Moyenne |
+| #260 | Crédit Icons8 (Réglages > À propos) | 15 min | Basse |
+
+### Hors écosystème (autres items ouverts)
+
+- #258 Bouton anonymisation dans l'en-tête (UX, ~30 min)
+- Test iPad de la refonte nav (~30 min)
+
+### Phase 7 (doublons) — clôturée le 2 mai
+
+Tous les paliers livrés et validés terrain.
+
+### Bilan réflexif — phases A→D livrées le 3 mai
+
+Phase E (génération auto) et F (bibliothèque questions canoniques) abandonnées/reportées.
 
 ---
 
-## Prochaine session — Validation iPad et merge
+## Prochaine session — Décision à prendre
 
-Voir consigne de démarrage ci-dessus. Les vérifications iPad et mode clair sont les seules choses qui restent avant de merger `refactor/nav-rename` sur `main`.
+Voir consigne de démarrage ci-dessus. Mon avis (Claude) : **commencer par #259** parce que faire #247 d'abord imprimerait le vocabulaire « Réserve / verser / versement » dans la nouvelle structure de Réglages, qu'il faudrait ensuite changer en « Archives / archiver / archive ». #259 d'abord = base propre pour #247 ensuite.
+
+À confirmer avec Grégoire.
