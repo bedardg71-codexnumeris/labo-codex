@@ -224,6 +224,31 @@
     confusions, validation terrain).
   - **Priorite** : Haute pour la prochaine session (decision 2 mai 2026).
 
+### Donnees — Cartes mentales perdues localement (5 mai 2026)
+
+- [ ] **#261** Cartes mentales : index pointe sur une carte inexistante + 4 cartes perdues
+  - **Symptome** (decouvert pendant SP1 refonte nav, 5 mai 2026) :
+    `JSON.parse(localStorage.getItem('h2026_planification_mindmap'))` ne
+    contient plus que `carte_1` "Sans titre", mais `index.active === 'carte_3'`.
+    Le module Alignement pedagogique affiche "Sans titre" car il essaie
+    de charger une carte qui n'existe plus.
+  - **Contexte** : la session du 19 avril 2026 avait restaure 5 cartes depuis
+    le backup 838 Mo (cf MEMORY.md). Entre cette restauration et le 5 mai,
+    4 cartes ont disparu localement. Cause exacte non identifiee (corruption
+    quota localStorage probable, ecrasement par import Codex possible).
+  - **A faire** :
+    1. Restaurer les 5 cartes depuis le backup 838 Mo de fin avril (script
+       `.js` deja documente dans MEMORY.md, pattern jq + injection console).
+    2. Patcher `js/planification-donnees.js` : quand `index.active` pointe
+       vers une carte inexistante, fallback automatique sur la premiere
+       carte disponible (au lieu d'afficher "Sans titre" silencieusement).
+    3. Auditer pourquoi `db.getSync('planification_mindmap')` retourne null
+       alors que `localStorage.getItem('h2026_planification_mindmap')` a
+       des donnees (incoherence entre couches db.js).
+  - **Effort** : 1h (restauration + fix fallback + audit db.js).
+  - **Priorite** : Haute apres la refonte nav (donnees perdues, mais pas
+    bloquant pour la refonte qui reste valable independamment).
+
 ### Credits — A propos (3 mai 2026)
 
 - [ ] **#260** Ajouter le credit Icons8 dans Reglages > A propos > Technologies
