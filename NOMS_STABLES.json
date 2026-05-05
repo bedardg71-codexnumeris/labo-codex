@@ -1,6 +1,6 @@
 {
-  "version": "99.03 — 2026-04-03",
-  "date_mise_a_jour": "2026-04-03",
+  "version": "99.35 — 2026-05-05",
+  "date_mise_a_jour": "2026-05-05",
   "ids_html": {
     "navigation": [
       "navigation-principale",
@@ -10,11 +10,11 @@
     "sections": [
       "section-accueil",
       "section-apercu",
-      "section-structure",
-      "section-contexte",
+      "section-conception",
+      "section-calendrier",
       "section-suivi",
       "section-evaluations",
-      "section-boite-outils",
+      "section-labo",
       "section-aide",
       "section-reglages"
     ],
@@ -22,16 +22,15 @@
       "accueil-decouvrir",
       "accueil-parcourir",
       "accueil-piloter",
-      "structure-carte",
-      "structure-organisateur",
-      "structure-productions",
-      "structure-grille-criteres",
-      "structure-echelle-performance",
-      "structure-retroactions",
-      "contexte-trimestre",
-      "contexte-calendrier",
-      "contexte-pratiques-notation",
-      "contexte-bilan",
+      "conception-carte",
+      "conception-organisateur",
+      "conception-productions",
+      "conception-grille-criteres",
+      "conception-echelle-performance",
+      "conception-pratiques-notation",
+      "conception-retroactions",
+      "calendrier-trimestre",
+      "calendrier-vue",
       "suivi-liste",
       "suivi-saisie",
       "suivi-profil",
@@ -40,8 +39,10 @@
       "evaluations-liste",
       "evaluations-annoter",
       "evaluations-exporter",
-      "boite-outils-tirage",
-      "boite-outils-modelisation",
+      "labo-tirage",
+      "labo-modelisation",
+      "labo-etudes",
+      "labo-bilan",
       "reglages-preferences",
       "reglages-depistage",
       "reglages-donnees",
@@ -86,7 +87,7 @@
     ]
   },
   "classes_css": {
-    "structure": [
+    "conception": [
       "conteneur",
       "entete",
       "contenu",

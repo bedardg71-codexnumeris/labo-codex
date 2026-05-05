@@ -170,14 +170,14 @@ window.genererBadgePratique = function(type, compact = false) {
 // WRAPPERS — Fonctions extraites des onclick complexes (Phase 4)
 // ===============================
 window.naviguerVersReglagesTrimestre = function() {
-    window.location.href = '#contexte-trimestre';
+    window.location.href = '#calendrier-trimestre';
     if (typeof afficherSousSectionActuelle === 'function') {
         afficherSousSectionActuelle('sous-section-trimestre');
     }
 };
 window.naviguerVersReglagesTrimestreDepuisPresences = function() {
     if (typeof afficherSection === 'function') afficherSection('reglages');
-    if (typeof afficherSousSection === 'function') afficherSousSection('contexte-trimestre');
+    if (typeof afficherSousSection === 'function') afficherSousSection('calendrier-trimestre');
 };
 window.rechargerPage = function() { window.location.reload(); };
 window.ouvrirImportEchellesLocal = function() {

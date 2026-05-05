@@ -486,7 +486,7 @@ function obtenirContexteSection() {
         // Contexte selon la section
         switch (section) {
             case 'reglages':
-                if (sousSection === 'trimestre' || sousSection === 'contexte-trimestre') {
+                if (sousSection === 'trimestre' || sousSection === 'calendrier-trimestre') {
                     contexte.trimestreActif = db.getSync('trimestreActif', 'non défini');
                     contexte.infoCours = db.getSync('infoCours', {});
                 }
@@ -513,7 +513,7 @@ function obtenirContexteSection() {
                 contexte.horaireActif = db.getSync('horaireActif', 'non défini');
                 break;
 
-            case 'structure':
+            case 'conception':
                 if (sousSection === 'productions') {
                     contexte.nbProductions = (db.getSync(cle('productions'), []) || []).length;
                 }

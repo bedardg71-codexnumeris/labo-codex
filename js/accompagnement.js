@@ -482,7 +482,7 @@ function initialiserHover() {
 ajouterEntrees({
     'contexte-pratiques-nouvelle': {
         autoReveal: {
-            sectionActive: 'contexte-pratiques-notation',
+            sectionActive: 'conception-pratiques-notation',
             cibleSelector: 'button[data-action="creerNouvellePratique"]',
             message: 'Clique ici pour créer ta première pratique de notation.',
             direction: 'haut',
@@ -494,9 +494,9 @@ ajouterEntrees({
             }
         }
     },
-    'structure-grilles-nouvelle': {
+    'conception-grilles-nouvelle': {
         autoReveal: {
-            sectionActive: 'structure-grille-criteres',
+            sectionActive: 'conception-grille-criteres',
             cibleSelector: 'button[data-action="creerNouvelleGrille"]',
             message: 'Clique ici pour créer ta première grille de critères.',
             direction: 'haut',
@@ -508,9 +508,9 @@ ajouterEntrees({
             }
         }
     },
-    'structure-echelles-nouvelle': {
+    'conception-echelles-nouvelle': {
         autoReveal: {
-            sectionActive: 'structure-echelle-performance',
+            sectionActive: 'conception-echelle-performance',
             cibleSelector: 'button[data-action="creerNouvelleEchelle"]',
             message: 'Clique ici pour créer ta première échelle de performance.',
             direction: 'haut',
@@ -522,9 +522,9 @@ ajouterEntrees({
             }
         }
     },
-    'structure-cartouches-nouvelle': {
+    'conception-cartouches-nouvelle': {
         autoReveal: {
-            sectionActive: 'structure-retroactions',
+            sectionActive: 'conception-retroactions',
             cibleSelector: 'button[data-action="creerNouvelleCartouche"]',
             message: 'Clique ici pour créer ta première cartouche de rétroaction.',
             direction: 'haut',
@@ -541,9 +541,9 @@ ajouterEntrees({
             }
         }
     },
-    'structure-productions-nouvelle': {
+    'conception-productions-nouvelle': {
         autoReveal: {
-            sectionActive: 'structure-productions',
+            sectionActive: 'conception-productions',
             cibleSelector: 'button[data-action="creerNouvelleProduction"]',
             message: 'Clique ici pour créer ta première production étudiante.',
             direction: 'haut',
@@ -1053,7 +1053,7 @@ const ETAPES_TOUR = [
         titre: 'Bienvenue',
         texte: "Labo Codex num\u00e9rise le travail que tu fais d\u00e9j\u00e0. Ce parcours te guide \u00e0 travers les \u00e9tapes essentielles. Tu peux le quitter \u00e0 tout moment et y revenir depuis les Pr\u00e9f\u00e9rences. Commence par configurer ton espace de travail dans R\u00e9glages.",
         actions: [
-            { label: 'Aller aux R\u00e9glages', type: 'primaire', action: 'naviguerVers', param: 'contexte' },
+            { label: 'Aller aux R\u00e9glages', type: 'primaire', action: 'naviguerVers', param: 'calendrier' },
             { label: 'Explorer seul\u00b7e',     type: 'secondaire', action: 'passerEtape' }
         ],
         correspond: function(idSousSection) { return !idSousSection || idSousSection === 'accueil'; }
@@ -1080,7 +1080,7 @@ const ETAPES_TOUR = [
         ],
         correspond: function(idSousSection) {
             if (typeof idSousSection !== 'string') return false;
-            const structureConception = ['structure-productions', 'structure-grille-criteres', 'structure-echelle-performance', 'structure-retroactions'];
+            const structureConception = ['conception-productions', 'conception-grille-criteres', 'conception-echelle-performance', 'conception-retroactions'];
             return structureConception.indexOf(idSousSection) !== -1;
         }
     },
@@ -1118,7 +1118,7 @@ const ETAPES_TOUR = [
             { label: 'Relancer plus tard',   type: 'secondaire', action: 'terminerTour' }
         ],
         correspond: function(idSousSection) {
-            return idSousSection === 'structure-carte' || idSousSection === 'structure-organisateur';
+            return idSousSection === 'conception-carte' || idSousSection === 'conception-organisateur';
         }
     }
 ];
