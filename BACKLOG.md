@@ -226,28 +226,28 @@
 
 ### Donnees — Cartes mentales perdues localement (5 mai 2026)
 
-- [ ] **#261** Cartes mentales : index pointe sur une carte inexistante + 4 cartes perdues
-  - **Symptome** (decouvert pendant SP1 refonte nav, 5 mai 2026) :
-    `JSON.parse(localStorage.getItem('h2026_planification_mindmap'))` ne
-    contient plus que `carte_1` "Sans titre", mais `index.active === 'carte_3'`.
-    Le module Alignement pedagogique affiche "Sans titre" car il essaie
-    de charger une carte qui n'existe plus.
-  - **Contexte** : la session du 19 avril 2026 avait restaure 5 cartes depuis
-    le backup 838 Mo (cf MEMORY.md). Entre cette restauration et le 5 mai,
-    4 cartes ont disparu localement. Cause exacte non identifiee (corruption
-    quota localStorage probable, ecrasement par import Codex possible).
-  - **A faire** :
-    1. Restaurer les 5 cartes depuis le backup 838 Mo de fin avril (script
-       `.js` deja documente dans MEMORY.md, pattern jq + injection console).
-    2. Patcher `js/planification-donnees.js` : quand `index.active` pointe
-       vers une carte inexistante, fallback automatique sur la premiere
-       carte disponible (au lieu d'afficher "Sans titre" silencieusement).
-    3. Auditer pourquoi `db.getSync('planification_mindmap')` retourne null
-       alors que `localStorage.getItem('h2026_planification_mindmap')` a
-       des donnees (incoherence entre couches db.js).
-  - **Effort** : 1h (restauration + fix fallback + audit db.js).
-  - **Priorite** : Haute apres la refonte nav (donnees perdues, mais pas
-    bloquant pour la refonte qui reste valable independamment).
+- [x] **#261** Cartes mentales : index pointe sur une carte inexistante + 4 cartes perdues
+  - **Statut** : RESOLU le 5 mai 2026.
+  - **Action 1 (restauration)** : 5 cartes restaurees depuis `backup 18 avril/donnees.json`
+    via un script `restaurer-cartes-261.js` colle en console Safari.
+    Cartes : carte_2 (Ecriture et litterature demo), carte_3 (H26),
+    carte_4 (Test import), carte_5 (Alignement-101-H26), carte_6 (Test2).
+  - **Action 2 (preventif)** : `js/planification-donnees.js`
+    `initialiserSiNecessaire()` verifie maintenant que `index.active`
+    pointe vers une carte qui existe dans `index.cartes`, fallback silencieux
+    sur la premiere carte disponible si non. Evite que ce bug se reproduise.
+  - **Note Action 3** : la divergence apparente entre
+    `db.getSync('planification_mindmap')` (null) et
+    `localStorage.getItem('h2026_planification_mindmap')` (donnees) etait
+    une mauvaise lecture de ma part — la premiere forme manquait le namespace
+    `h2026_`, donc db.getSync retournait null. Pas un bug. Le module utilise
+    `db.getSync(cle('planification_mindmap'))` correctement.
+  - **Cause racine non determinee** : 4 cartes perdues entre 19 avril et 5 mai.
+    Probable corruption au moment d'un dépassement de quota localStorage —
+    le quota a ete saturé pendant la tentative de restauration du 5 mai
+    (`QuotaExceededError` lors d'un `localStorage.setItem` direct), confirmant
+    l'hypothese. La session du 19 avril ecrivait peut-etre directement en
+    localStorage au lieu de passer par db.setSync.
 
 ### Credits — A propos (3 mai 2026)
 
