@@ -688,14 +688,12 @@ const TOOLTIPS = {
 
     // --- Réglages ---
 
-    'nav-ctx-trimestre':
+    'nav-calendrier-trimestre':
         'Configuration du trimestre, du cours, de ton profil, du groupe d\'\u00e9tudiant\u00b7es, de l\'horaire et du groupe-cours.',
-    'nav-ctx-calendrier':
+    'nav-calendrier-vue':
         'Calendrier du trimestre : tableau des mois, jours de cours, cong\u00e9s et reprises.',
-    'nav-ctx-pratiques':
+    'nav-conception-pratiques':
         'Assemble ta pratique de notation compl\u00e8te (SOM, STD, SPE, DEN) en associant \u00e9chelle, structure et jetons.',
-    'nav-ctx-bilan':
-        'Bilan r\u00e9flexif de ta d\u00e9marche p\u00e9dagogique : forces, d\u00e9fis et pistes d\'am\u00e9lioration.',
     'nav-reg-preferences':
         'Personnalise ton interface : outils actifs, ressources affich\u00e9es, effets visuels et comportement de navigation.',
     'nav-reg-depistage':
@@ -709,13 +707,13 @@ const TOOLTIPS = {
 
     'nav-construction':
         'Configuration de l\'\u00e9valuation : productions, grilles, \u00e9chelles, cartouches et pratiques de notation.',
-    'nav-str-productions':
+    'nav-conception-productions':
         'D\u00e9finis les productions de tes \u00e9tudiant\u00b7es : portfolios, artefacts et travaux avec pond\u00e9rations et \u00e9ch\u00e9ances.',
-    'nav-str-grilles':
+    'nav-conception-grilles':
         'Cr\u00e9e des grilles r\u00e9utilisables avec crit\u00e8res nomm\u00e9s, typ\u00e9s et pond\u00e9r\u00e9s.',
-    'nav-str-echelles':
+    'nav-conception-echelles':
         'Configure les \u00e9chelles de performance : seuils, valeurs ponctuelles, couleurs et aper\u00e7u visuel.',
-    'nav-str-cartouches':
+    'nav-conception-cartouches':
         'Cr\u00e9e des matrices de commentaires automatiques (crit\u00e8res \u00d7 niveaux) pour la r\u00e9troaction diff\u00e9renci\u00e9e.',
 
     // --- Évaluations et travaux ---
@@ -750,25 +748,29 @@ const TOOLTIPS = {
         'Fiche individuelle d\'un\u00b7e \u00e9tudiant\u00b7e : productions, mobilisation, progression, habilet\u00e9s, accompagnement et rapport.',
     'nav-suivi-interventions':
         'Planifie et documente les interventions R\u00e0I de niveaux 2 (pr\u00e9ventif) et 3 (intensif).',
-    'nav-suivi-labo':
+    'nav-labo-etudes':
         'Analyse les r\u00e9sultats de ta d\u00e9marche p\u00e9dagogique : graphiques de progression, corr\u00e9lations et trajectoires.',
+    'nav-labo-rythme':
+        'Rythme des \u00e9valuations : portrait des copies impos\u00e9es vs restantes par \u00e9tudiant et par production.',
+    'nav-labo-bilan':
+        'Composer et exploiter un bilan r\u00e9flexif de fin de trimestre aupr\u00e8s des \u00e9tudiants.',
 
     // --- Planification ---
 
     'nav-planification':
         'Planification p\u00e9dagogique : alignement objectifs-activit\u00e9s-\u00e9valuations et organisation des le\u00e7ons.',
-    'nav-str-alignement':
+    'nav-conception-alignement':
         'Carte mentale interactive : visualise l\'alignement objectifs \u2192 activit\u00e9s \u2192 \u00e9valuations.',
-    'nav-str-organisateur':
+    'nav-conception-organisateur':
         'Calendrier des s\u00e9quences sur 15 semaines et plans de le\u00e7ons avec option d\'enseignement explicite en 5 phases.',
 
-    // --- Boîte à outils ---
+    // --- Labo ---
 
-    'nav-boite-outils':
+    'nav-labo':
         'Utilitaires compl\u00e9mentaires pour l\'enseignement en classe.',
-    'nav-bao-modelisation':
+    'nav-labo-modelisation':
         'D\u00e9monstrations interactives et mod\u00e9lisations visuelles pour illustrer des concepts en classe.',
-    'nav-bao-tirage':
+    'nav-labo-tirage':
         'Tirage au sort al\u00e9atoire et questions flash pour l\'animation en classe.',
 
     // =================================================================
@@ -777,9 +779,9 @@ const TOOLTIPS = {
 
     // --- Onglets principaux (navigation) ---
 
-    'nav-structure':
+    'nav-conception':
         'L\'onglet \u00ab\u00a0Structure\u00a0\u00bb regroupe la conception de tes outils d\'\u00e9valuation : productions, grilles, \u00e9chelles, cartouches et pratiques de notation.',
-    'nav-contexte':
+    'nav-calendrier':
         'L\'onglet \u00ab\u00a0Contexte\u00a0\u00bb regroupe la configuration de ton espace de travail : trimestre, cours, profil, \u00e9tudiant\u00b7es, horaire et assemblage du groupe-cours.',
     'nav-suivi':
         'L\'onglet \u00ab\u00a0Suivi\u00a0\u00bb regroupe le portrait du groupe : liste des individus, profil \u00e9tudiant\u00b7e, interventions R\u00e0I et laboratoire d\'analyse.',

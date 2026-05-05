@@ -96,22 +96,22 @@ function paraitVide(container) {
 // =========================================================================
 
 var ETATS_VIDES = {
-    'contexte-trimestre': {
+    'calendrier-trimestre': {
         message: 'Aucun\u00b7e \u00e9tudiant\u00b7e pour le moment. Ajoute-les s\u00e9par\u00e9ment ou importe ta liste depuis un tableur ou le syst\u00e8me de gestion institutionnel. Le format attendu est affich\u00e9 dans le panneau d\u2019import.'
     },
-    'structure-productions': {
+    'conception-productions': {
         message: 'Aucune production d\u00e9finie. Une production, c\u2019est une occasion pour tes \u00e9tudiant\u00b7es de mettre en pratique ce qu\u2019ils et elles apprennent \u2014 un exercice, un travail, un examen. Commence par cr\u00e9er tes productions avec leurs pond\u00e9rations et \u00e9ch\u00e9ances.'
     },
-    'structure-grille-criteres': {
+    'conception-grille-criteres': {
         message: 'Aucune grille de crit\u00e8res. Cr\u00e9e ta premi\u00e8re grille comme tu le ferais sur papier\u00a0: nomme tes crit\u00e8res, choisis leur type (holistique, analytique ou algorithmique) et r\u00e9partis les pond\u00e9rations pour totaliser 100\u00a0%.'
     },
-    'structure-echelle-performance': {
+    'conception-echelle-performance': {
         message: 'Aucune \u00e9chelle de performance. L\u2019\u00e9chelle \u00e9tablit le niveau de performance du crit\u00e8re ou de l\u2019habilet\u00e9 \u00e9valu\u00e9e (ex.\u00a0: Insuffisant, D\u00e9veloppement, Ma\u00eetrise, \u00c9tendu). Configure les seuils et les couleurs qui correspondent \u00e0 ton jugement professionnel.'
     },
-    'structure-retroactions': {
+    'conception-retroactions': {
         message: 'Aucune cartouche de r\u00e9troaction. Les cartouches sont des gabarits de commentaires g\u00e9n\u00e9raux que tu pr\u00e9pares une fois\u00a0: un commentaire par combinaison crit\u00e8re\u00a0\u00d7\u00a0niveau. Lors de l\u2019\u00e9valuation, l\u2019application assemble automatiquement une r\u00e9troaction personnalis\u00e9e.'
     },
-    'contexte-pratiques-notation': {
+    'conception-pratiques-notation': {
         message: 'Aucune pratique de notation configur\u00e9e. La pratique, c\u2019est ta recette compl\u00e8te\u00a0: type de notation (SOM, STD, SPE ou DEN), \u00e9chelle, structure des \u00e9valuations et jetons. C\u2019est elle qui d\u00e9termine comment la note se construit.'
     },
     'evaluations-liste': {
@@ -129,10 +129,10 @@ var ETATS_VIDES = {
     'suivi-interventions': {
         message: 'Aucune intervention planifi\u00e9e. Les interventions R\u00e0I de niveaux 2 (pr\u00e9ventif) et 3 (intensif) se cr\u00e9ent \u00e0 partir des signaux du tableau de bord. Quand un\u00b7e \u00e9tudiant\u00b7e ou un sous-groupe montre des difficult\u00e9s \u00e9mergentes ou persistantes, c\u2019est le moment d\u2019intervenir.'
     },
-    'structure-carte': {
+    'conception-carte': {
         message: 'Ta carte mentale est vide. Commence par glisser un n\u0153ud depuis la palette. La comp\u00e9tence du devis minist\u00e9riel ou du plan-cadre de ton cours est un bon point de d\u00e9part. Relie ensuite tes connaissances requises, tes activit\u00e9s d\u2019apprentissage et tes \u00e9valuations pour rendre visible l\u2019alignement p\u00e9dagogique.'
     },
-    'structure-organisateur': {
+    'conception-organisateur': {
         message: 'Aucune s\u00e9quence d\u00e9finie. Les s\u00e9quences organisent tes le\u00e7ons sur les 15 semaines du trimestre. Une s\u00e9quence peut contenir plusieurs le\u00e7ons. Cr\u00e9e ta premi\u00e8re s\u00e9quence, puis ajoute des le\u00e7ons avec l\u2019option d\u2019enseignement explicite en 5 phases.'
     }
 

@@ -43,8 +43,8 @@
  * Affiche une section principale et met à jour la navigation
  * 
  * @param {string} nomSection - Identifiant de la section à afficher
- *                             Valeurs: 'accueil' | 'apercu' | 'structure' | 'contexte' |
- *                                     'suivi' | 'evaluations' | 'boite-outils' | 'aide' | 'reglages'
+ *                             Valeurs: 'accueil' | 'apercu' | 'conception' | 'calendrier' |
+ *                                     'suivi' | 'evaluations' | 'labo' | 'aide' | 'reglages'
  * 
  * UTILISÉ PAR:
  * - Événements click sur les boutons de navigation principale
@@ -113,8 +113,8 @@ function afficherSection(nomSection) {
  * Affiche la sous-navigation pour une section donnée
  * 
  * @param {string} nomOnglet - Identifiant de la section parent
- *                            Valeurs: 'accueil' | 'apercu' | 'structure' | 'contexte' |
- *                                    'suivi' | 'evaluations' | 'boite-outils' | 'aide' | 'reglages'
+ *                            Valeurs: 'accueil' | 'apercu' | 'conception' | 'calendrier' |
+ *                                    'suivi' | 'evaluations' | 'labo' | 'aide' | 'reglages'
  * 
  * UTILISÉ PAR:
  * - afficherSection() après un changement de section
@@ -148,38 +148,210 @@ const TOOLTIPS_SOUS_NAV = {
     // Accueil : section plate (toggles gérés par accueil.js)
     // Aperçu : section plate, pas de sous-nav
     // Structure
-    'structure-carte': 'nav-str-alignement',
-    'structure-organisateur': 'nav-str-organisateur',
-    'structure-productions': 'nav-str-productions',
-    'structure-grille-criteres': 'nav-str-grilles',
-    'structure-echelle-performance': 'nav-str-echelles',
-    'structure-retroactions': 'nav-str-cartouches',
+    'conception-carte': 'nav-conception-alignement',
+    'conception-organisateur': 'nav-conception-organisateur',
+    'conception-productions': 'nav-conception-productions',
+    'conception-grille-criteres': 'nav-conception-grilles',
+    'conception-echelle-performance': 'nav-conception-echelles',
+    'conception-pratiques-notation': 'nav-conception-pratiques',
+    'conception-retroactions': 'nav-conception-cartouches',
     // Contexte
-    'contexte-trimestre': 'nav-ctx-trimestre',
-    'contexte-calendrier': 'nav-ctx-calendrier',
-    'contexte-pratiques-notation': 'nav-ctx-pratiques',
-    'contexte-bilan': 'nav-ctx-bilan',
+    'calendrier-trimestre': 'nav-calendrier-trimestre',
+    'calendrier-vue': 'nav-calendrier-vue',
     // Suivi
     'suivi-liste': 'nav-suivi-liste',
     'suivi-saisie': 'nav-suivi-saisie',
     'suivi-profil': 'nav-suivi-profil',
     'suivi-interventions': 'nav-suivi-interventions',
-    'suivi-labo': 'nav-suivi-labo',
     // Évaluations
     'evaluations-importer': 'nav-eval-importer',
     'evaluations-liste': 'nav-eval-liste',
     'evaluations-annoter': 'nav-eval-annoter',
     'evaluations-exporter': 'nav-eval-exporter',
     // Boîte à outils
-    'boite-outils-tirage': 'nav-bao-tirage',
-    'boite-outils-modelisation': 'nav-bao-modelisation',
-    'boite-outils-rythme': 'nav-bao-rythme',
+    'labo-tirage': 'nav-labo-tirage',
+    'labo-modelisation': 'nav-labo-modelisation',
+    'labo-rythme': 'nav-labo-rythme',
+    'labo-etudes': 'nav-labo-etudes',
+    'labo-bilan': 'nav-labo-bilan',
     // Aide (tooltips gérés séparément si existants)
     // Réglages
     'reglages-preferences': 'nav-reg-preferences',
     'reglages-depistage': 'nav-reg-depistage',
     'reglages-donnees': 'nav-reg-donnees',
     'reglages-a-propos': 'nav-reg-apropos'
+};
+
+/* ===============================
+   📋 INITIALISATEURS DE SOUS-SECTIONS (dispatcher table-driven)
+
+   Chaque entrée mappe l'ID complet d'une sous-section (`section-id`) à une
+   fonction d'initialisation appelée par afficherSousSection() au moment de
+   l'affichage. L'ordre suit configurationsOnglets pour la lisibilité.
+
+   Les fonctions sont résolues au runtime (typeof === 'function') car
+   certains initialisateurs sont définis dans des modules chargés après
+   navigation.js. Une sous-section sans entrée ici (ex: suivi-saisie,
+   labo-rythme, accueil-*, apercu-*, aide-*, reglages-a-propos)
+   n'a pas de hook d'initialisation à l'affichage.
+
+   Pour ajouter/déplacer/renommer une sous-section :
+   1. Mettre à jour configurationsOnglets dans config.js
+   2. Mettre à jour cette table avec la nouvelle clé
+   =============================== */
+const INITIALISATEURS_SOUS_SECTION = {
+    // === STRUCTURE ===
+    'conception-carte': function () {
+        if (typeof initialiserModulePlanification === 'function') {
+            setTimeout(initialiserModulePlanification, 100);
+        }
+    },
+    'conception-organisateur': function () {
+        if (typeof initialiserModuleOrganisateur === 'function') {
+            setTimeout(initialiserModuleOrganisateur, 100);
+        }
+    },
+    'conception-productions': function () {
+        if (typeof initialiserModuleProductions === 'function') {
+            initialiserModuleProductions();
+        }
+    },
+    'conception-grille-criteres': function () {
+        if (typeof initialiserModuleGrilles === 'function') {
+            setTimeout(async () => {
+                await initialiserModuleGrilles();
+            }, 100);
+        }
+    },
+    'conception-echelle-performance': function () {
+        if (typeof initialiserModuleEchelles === 'function') {
+            setTimeout(async () => {
+                await initialiserModuleEchelles();
+            }, 100);
+        }
+    },
+    'conception-pratiques-notation': function () {
+        if (typeof initialiserModulePratiquesMateriel === 'function') {
+            setTimeout(async () => {
+                await initialiserModulePratiquesMateriel();
+            }, 100);
+        }
+    },
+    'conception-retroactions': function () {
+        if (typeof initialiserModuleCartouches === 'function') {
+            setTimeout(async () => {
+                await initialiserModuleCartouches();
+            }, 100);
+        }
+    },
+
+    // === CONTEXTE ===
+    'calendrier-trimestre': function () {
+        if (typeof initialiserModuleTrimestre === 'function') {
+            initialiserModuleTrimestre();
+        }
+    },
+    'calendrier-vue': function () {
+        if (typeof afficherCalendrierScolaire === 'function') {
+            afficherCalendrierScolaire();
+        }
+    },
+
+    // === SUIVI ===
+    'suivi-liste': function () {
+        if (typeof rechargerListeEtudiants === 'function') {
+            setTimeout(rechargerListeEtudiants, 100);
+        }
+    },
+    // suivi-saisie : pas d'initialisation spécifique requise
+
+    // === ÉVALUATIONS ===
+    'evaluations-importer': function () {
+        if (typeof initialiserModuleTravaux === 'function') {
+            setTimeout(() => {
+                initialiserModuleTravaux();
+                if (typeof travauxUI !== 'undefined') {
+                    travauxUI.afficherImport();
+                }
+            }, 100);
+        }
+    },
+    'evaluations-liste': function () {
+        if (typeof initialiserListeEvaluations === 'function') {
+            setTimeout(() => {
+                initialiserListeEvaluations();
+            }, 100);
+        } else {
+            console.error('   ❌ initialiserListeEvaluations n\'est pas une fonction!');
+        }
+    },
+    'evaluations-annoter': function () {
+        if (typeof initialiserModuleTravaux === 'function') {
+            setTimeout(() => {
+                initialiserModuleTravaux();
+            }, 100);
+        }
+    },
+    'evaluations-exporter': function () {
+        if (typeof initialiserModuleTravaux === 'function') {
+            setTimeout(() => {
+                initialiserModuleTravaux();
+                if (typeof travauxUI !== 'undefined') {
+                    travauxUI.afficherArchivage();
+                }
+            }, 100);
+        }
+    },
+
+    // === BOÎTE À OUTILS ===
+    'labo-tirage': function () {
+        if (typeof initialiserTirage === 'function') {
+            setTimeout(initialiserTirage, 100);
+        }
+        if (typeof initialiserQuestions === 'function') {
+            setTimeout(initialiserQuestions, 100);
+        }
+    },
+    'labo-modelisation': function () {
+        if (typeof initialiserModelisation === 'function') {
+            setTimeout(initialiserModelisation, 100);
+        }
+    },
+    'labo-etudes': function () {
+        // Graphiques déplacés depuis l'Aperçu (ancien suivi-labo)
+        if (typeof creerGraphiqueCorrelationsLongitudinales === 'function') {
+            setTimeout(() => creerGraphiqueCorrelationsLongitudinales('graphique-correlations-longitudinales'), 100);
+        }
+        if (typeof creerGraphiqueImpactJetons === 'function') {
+            setTimeout(() => creerGraphiqueImpactJetons('graphique-impact-jetons'), 100);
+        }
+        // Matrice de consolidation des apprentissages
+        if (typeof afficherMatriceConsolidation === 'function') {
+            setTimeout(() => afficherMatriceConsolidation(), 150);
+        }
+    },
+    'labo-bilan': function () {
+        if (typeof initialiserBilanReflexif === 'function') {
+            setTimeout(initialiserBilanReflexif, 100);
+        }
+    },
+
+    // === RÉGLAGES ===
+    'reglages-preferences': function () {
+        if (typeof initialiserPreferencesV2 === 'function') {
+            setTimeout(initialiserPreferencesV2, 100);
+        }
+    },
+    'reglages-depistage': function () {
+        if (typeof initialiserPreferencesV2 === 'function') {
+            setTimeout(initialiserPreferencesV2, 100);
+        }
+    },
+    'reglages-donnees': function () {
+        if (typeof chargerVueDonnees === 'function') {
+            setTimeout(chargerVueDonnees, 100);
+        }
+    }
 };
 
 function afficherSousNavigation(nomOnglet) {
@@ -239,7 +411,7 @@ function afficherSousNavigation(nomOnglet) {
  * @param {string} idSousSection - Identifiant complet de la sous-section
  *                                Format: '{section}-{sous-section}'
  *                                Exemples: 'suivi-liste', 'suivi-profil',
- *                                         'structure-productions'
+ *                                         'conception-productions'
  * 
  * UTILISÉ PAR:
  * - afficherSousNavigation() pour la sous-section par défaut
@@ -339,7 +511,7 @@ function afficherSousSection(idSousSection) {
     // ============================================
 
     // Nettoyer la Modelisation quand on la quitte
-    if (sousSectionActive === 'boite-outils-modelisation' && idSousSection !== 'boite-outils-modelisation') {
+    if (sousSectionActive === 'labo-modelisation' && idSousSection !== 'labo-modelisation') {
         if (typeof window.modelisation !== 'undefined') {
             window.modelisation.nettoyer();
         }
@@ -350,7 +522,7 @@ function afficherSousSection(idSousSection) {
     let section = null;
     for (const sectionId of Object.keys(configurationsOnglets)) {
         if (idSousSection.startsWith(sectionId + '-')) {
-            // Prendre le match le plus long (ex: 'boite-outils' > 'boite')
+            // Prendre le match le plus long (ex: 'reglages' > 'reg')
             if (!section || sectionId.length > section.length) {
                 section = sectionId;
             }
@@ -393,181 +565,12 @@ function afficherSousSection(idSousSection) {
 
     // ============================================
     // RAFRAÎCHISSEMENT DES MODULES PAR SOUS-SECTION
+    // (dispatcher table-driven : voir INITIALISATEURS_SOUS_SECTION en tête de module)
     // ============================================
 
-    // ✨ RÉORGANISATION NAVIGATION (3 avril 2026, Tier 5.7)
-    switch (idSousSection) {
-
-        // === SUIVI ===
-        case 'suivi-liste':
-            if (typeof rechargerListeEtudiants === 'function') {
-                setTimeout(rechargerListeEtudiants, 100);
-            }
-            break;
-
-        case 'suivi-saisie':
-            // Pas d'initialisation spécifique requise
-            break;
-
-        case 'suivi-labo':
-            // Graphiques déplacés depuis l'Aperçu
-            if (typeof creerGraphiqueCorrelationsLongitudinales === 'function') {
-                setTimeout(() => creerGraphiqueCorrelationsLongitudinales('graphique-correlations-longitudinales'), 100);
-            }
-            if (typeof creerGraphiqueImpactJetons === 'function') {
-                setTimeout(() => creerGraphiqueImpactJetons('graphique-impact-jetons'), 100);
-            }
-            // Matrice de consolidation des apprentissages
-            if (typeof afficherMatriceConsolidation === 'function') {
-                setTimeout(() => afficherMatriceConsolidation(), 150);
-            }
-            break;
-
-        // === CONTEXTE ===
-        case 'contexte-calendrier':
-            if (typeof afficherCalendrierScolaire === 'function') {
-                afficherCalendrierScolaire();
-            }
-            break;
-
-        case 'contexte-trimestre':
-            if (typeof initialiserModuleTrimestre === 'function') {
-                initialiserModuleTrimestre();
-            }
-            break;
-
-        case 'contexte-pratiques-notation':
-            if (typeof initialiserModulePratiquesMateriel === 'function') {
-                setTimeout(async () => {
-                    await initialiserModulePratiquesMateriel();
-                }, 100);
-            }
-            break;
-
-        case 'contexte-bilan':
-            if (typeof initialiserBilanReflexif === 'function') {
-                setTimeout(initialiserBilanReflexif, 100);
-            }
-            break;
-
-        // === STRUCTURE ===
-        case 'structure-productions':
-            if (typeof initialiserModuleProductions === 'function') {
-                initialiserModuleProductions();
-            }
-            break;
-
-        case 'structure-grille-criteres':
-            if (typeof initialiserModuleGrilles === 'function') {
-                setTimeout(async () => {
-                    await initialiserModuleGrilles();
-                }, 100);
-            }
-            break;
-
-        case 'structure-echelle-performance':
-            if (typeof initialiserModuleEchelles === 'function') {
-                setTimeout(async () => {
-                    await initialiserModuleEchelles();
-                }, 100);
-            }
-            break;
-
-        case 'structure-retroactions':
-            if (typeof initialiserModuleCartouches === 'function') {
-                setTimeout(async () => {
-                    await initialiserModuleCartouches();
-                }, 100);
-            }
-            break;
-
-        case 'structure-carte':
-            if (typeof initialiserModulePlanification === 'function') {
-                setTimeout(initialiserModulePlanification, 100);
-            }
-            break;
-
-        case 'structure-organisateur':
-            if (typeof initialiserModuleOrganisateur === 'function') {
-                setTimeout(initialiserModuleOrganisateur, 100);
-            }
-            break;
-
-        // === ÉVALUATIONS ===
-        case 'evaluations-liste':
-            if (typeof initialiserListeEvaluations === 'function') {
-                setTimeout(() => {
-                    initialiserListeEvaluations();
-                }, 100);
-            } else {
-                console.error('   ❌ initialiserListeEvaluations n\'est pas une fonction!');
-            }
-            break;
-
-        case 'evaluations-importer':
-            if (typeof initialiserModuleTravaux === 'function') {
-                setTimeout(() => {
-                    initialiserModuleTravaux();
-                    if (typeof travauxUI !== 'undefined') {
-                        travauxUI.afficherImport();
-                    }
-                }, 100);
-            }
-            break;
-
-        case 'evaluations-annoter':
-            if (typeof initialiserModuleTravaux === 'function') {
-                setTimeout(() => {
-                    initialiserModuleTravaux();
-                }, 100);
-            }
-            break;
-
-        case 'evaluations-exporter':
-            if (typeof initialiserModuleTravaux === 'function') {
-                setTimeout(() => {
-                    initialiserModuleTravaux();
-                    if (typeof travauxUI !== 'undefined') {
-                        travauxUI.afficherArchivage();
-                    }
-                }, 100);
-            }
-            break;
-
-        // === RÉGLAGES ===
-        case 'reglages-preferences':
-            if (typeof initialiserPreferencesV2 === 'function') {
-                setTimeout(initialiserPreferencesV2, 100);
-            }
-            break;
-
-        case 'reglages-depistage':
-            if (typeof initialiserPreferencesV2 === 'function') {
-                setTimeout(initialiserPreferencesV2, 100);
-            }
-            break;
-
-        case 'reglages-donnees':
-            if (typeof chargerVueDonnees === 'function') {
-                setTimeout(chargerVueDonnees, 100);
-            }
-            break;
-
-        // === BOÎTE À OUTILS ===
-        case 'boite-outils-tirage':
-            if (typeof initialiserTirage === 'function') {
-                setTimeout(initialiserTirage, 100);
-            }
-            if (typeof initialiserQuestions === 'function') {
-                setTimeout(initialiserQuestions, 100);
-            }
-            break;
-
-        case 'boite-outils-modelisation':
-            if (typeof initialiserModelisation === 'function') {
-                setTimeout(initialiserModelisation, 100);
-            }
-            break;
+    const initialiserSousSection = INITIALISATEURS_SOUS_SECTION[idSousSection];
+    if (typeof initialiserSousSection === 'function') {
+        initialiserSousSection();
     }
 
     // Charger le profil étudiant (suivi-profil, anciennement tableau-bord-profil)

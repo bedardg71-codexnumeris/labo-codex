@@ -66,7 +66,7 @@ const GLOSSAIRE = {
         categorie: 'Structure',
         etape: 'numerisation',
         definition: 'Une occasion pour tes \u00e9tudiant\u00b7es de mettre en pratique ce qu\'ils et elles apprennent \u2014 un exercice, un travail, un examen. Chaque production a une pond\u00e9ration et une \u00e9ch\u00e9ance. L\'ensemble des productions totalise 100 % de la note finale. Dans le module Planification, les productions sont d\'abord des mises en pratique li\u00e9es aux objectifs d\'apprentissage.',
-        voir: 'Structure > Productions'
+        voir: 'Conception > Productions'
     },
 
     'portfolio': {
@@ -75,7 +75,7 @@ const GLOSSAIRE = {
         categorie: 'Structure',
         etape: 'numerisation',
         definition: 'Un type de production qui regroupe plusieurs artefacts. Tu d\u00e9finis combien d\'artefacts seront retenus (ex. : les 3 meilleurs sur 9) \u2014 ce sont les N meilleures d\u00e9monstrations de comp\u00e9tence qui comptent. Les artefacts individuels n\'ont pas de pond\u00e9ration propre : c\'est le portfolio conteneur qui porte le poids dans la note finale.',
-        voir: 'Structure > Productions'
+        voir: 'Conception > Productions'
     },
 
     'artefact': {
@@ -84,7 +84,7 @@ const GLOSSAIRE = {
         categorie: 'Structure',
         etape: 'numerisation',
         definition: 'Une pi\u00e8ce individuelle \u00e0 l\'int\u00e9rieur d\'un portfolio \u2014 un travail, un exercice, une d\u00e9monstration. Plusieurs artefacts composent un portfolio, mais seuls les meilleurs sont retenus pour la note.',
-        voir: 'Structure > Productions'
+        voir: 'Conception > Productions'
     },
 
     'grille-de-criteres': {
@@ -93,7 +93,7 @@ const GLOSSAIRE = {
         categorie: 'Structure',
         etape: 'numerisation',
         definition: 'L\'outil qui d\u00e9finit comment tu \u00e9values une production. Tu nommes tes crit\u00e8res, tu choisis leur type (holistique, analytique ou algorithmique) et tu r\u00e9partis les pond\u00e9rations pour totaliser 100 %. C\'est le m\u00eame principe qu\'une grille papier, mais r\u00e9utilisable d\'une production \u00e0 l\'autre.',
-        voir: 'Structure > Grilles'
+        voir: 'Conception > Grilles'
     },
 
     'type-de-critere': {
@@ -102,7 +102,7 @@ const GLOSSAIRE = {
         categorie: 'Structure',
         etape: 'numerisation',
         definition: 'La m\u00e9thode d\'\u00e9valuation d\'un crit\u00e8re dans une grille. Trois types sont disponibles : holistique (tu attribues un niveau global), analytique (tu attribues des points par \u00e9l\u00e9ment ou micro-t\u00e2che) et algorithmique (calcul automatique selon une formule, ex. : nombre d\'erreurs / nombre de mots \u00d7 100 pour le fran\u00e7ais \u00e9crit).',
-        voir: 'Structure > Grilles'
+        voir: 'Conception > Grilles'
     },
 
     'echelle-de-performance': {
@@ -111,7 +111,7 @@ const GLOSSAIRE = {
         categorie: 'Structure',
         etape: 'numerisation',
         definition: 'Les niveaux que tu attribues \u00e0 chaque crit\u00e8re lors de l\'\u00e9valuation. Par d\u00e9faut, quatre niveaux align\u00e9s sur IDME : Insuffisant, D\u00e9veloppement, Ma\u00eetrise, \u00c9tendu. Tu configures les seuils, les valeurs ponctuelles et les couleurs selon ton jugement professionnel.',
-        voir: 'Structure > \u00c9chelles'
+        voir: 'Conception > \u00c9chelles'
     },
 
     'cartouche-de-retroaction': {
@@ -120,7 +120,7 @@ const GLOSSAIRE = {
         categorie: 'Structure',
         etape: 'numerisation',
         definition: 'Matrice de commentaires g\u00e9n\u00e9raux automatiques que tu pr\u00e9pares une fois : un commentaire par combinaison crit\u00e8re \u00d7 niveau de performance. Lors de l\'\u00e9valuation, l\'application assemble automatiquement une r\u00e9troaction personnalis\u00e9e \u00e0 partir de ces commentaires. Pour \u00eatre efficaces, les commentaires doivent \u00eatre lus et compris \u2014 id\u00e9alement entre 50 et 75 mots.',
-        voir: 'Structure > Cartouches'
+        voir: 'Conception > Cartouches'
     },
 
     'pratique-de-notation': {
@@ -129,7 +129,7 @@ const GLOSSAIRE = {
         categorie: 'Structure',
         etape: 'numerisation',
         definition: 'Ta recette compl\u00e8te pour construire la note. Quatre pratiques sont disponibles : sommative (SOM), PAN par standards (STD), PAN par sp\u00e9cifications (SPE) et d\u00e9notation (DEN). La pratique d\u00e9termine comment les r\u00e9sultats de tes \u00e9valuations se transforment en note finale. Tu peux toujours la changer.',
-        voir: 'Structure > Pratiques / R\u00e9glages > Pratiques'
+        voir: 'Conception > Pratiques / R\u00e9glages > Pratiques'
     },
 
     'evaluation': {
@@ -264,7 +264,7 @@ const GLOSSAIRE = {
         categorie: 'Structure / Tableau de bord',
         etape: 'observation',
         definition: 'Quatre niveaux de performance align\u00e9s sur la taxonomie SOLO : Insuffisant, D\u00e9veloppement, Ma\u00eetrise, \u00c9tendu. Ces niveaux servent de r\u00e9f\u00e9rence dans les \u00e9chelles, les grilles et les cartouches. Ils d\u00e9crivent la qualit\u00e9 de la d\u00e9monstration de comp\u00e9tence \u00e0 un moment donn\u00e9.',
-        voir: 'Structure > \u00c9chelles'
+        voir: 'Conception > \u00c9chelles'
     },
 
     'solo': {
@@ -372,7 +372,7 @@ const GLOSSAIRE = {
         categorie: 'Pratiques de notation',
         etape: 'transversal',
         definition: 'Pratique de notation traditionnelle qui calcule une moyenne pond\u00e9r\u00e9e des r\u00e9sultats. Chaque production contribue \u00e0 la note finale selon sa pond\u00e9ration.',
-        voir: 'Structure > Pratiques'
+        voir: 'Conception > Pratiques'
     },
 
     'std-pan-par-standards': {
@@ -381,7 +381,7 @@ const GLOSSAIRE = {
         categorie: 'Pratiques de notation',
         etape: 'transversal',
         definition: 'Pratique alternative de notation qui retient les meilleures d\u00e9monstrations de comp\u00e9tence. L\'\u00e9tudiant\u00b7e progresse en montrant sa ma\u00eetrise, pas en accumulant des points. Le r\u00e9sultat le plus r\u00e9cent ou le meilleur peut remplacer les pr\u00e9c\u00e9dents, selon la configuration.',
-        voir: 'Structure > Pratiques'
+        voir: 'Conception > Pratiques'
     },
 
     'spe-pan-par-specifications': {
@@ -390,7 +390,7 @@ const GLOSSAIRE = {
         categorie: 'Pratiques de notation',
         etape: 'transversal',
         definition: 'Pratique alternative de notation qui fonctionne par contrat : chaque production est r\u00e9ussie ou non selon des crit\u00e8res pr\u00e9d\u00e9finis. C\'est l\'ensemble des cibles atteintes qui d\u00e9termine la note finale, pas une moyenne.',
-        voir: 'Structure > Pratiques'
+        voir: 'Conception > Pratiques'
     },
 
     'den-denotation': {
@@ -399,7 +399,7 @@ const GLOSSAIRE = {
         categorie: 'Pratiques de notation',
         etape: 'transversal',
         definition: 'Pratique qui r\u00e9duit ou \u00e9limine la notation chiffr\u00e9e au profit de la r\u00e9troaction qualitative. L\'accent est mis sur le commentaire et l\'accompagnement plut\u00f4t que sur le score.',
-        voir: 'Structure > Pratiques'
+        voir: 'Conception > Pratiques'
     },
 
     'pan-pratique-alternative-de-notation': {
@@ -408,7 +408,7 @@ const GLOSSAIRE = {
         categorie: 'Pratiques de notation',
         etape: 'transversal',
         definition: 'Terme g\u00e9n\u00e9rique qui regroupe les pratiques STD, SPE et DEN \u2014 toutes les approches qui s\'\u00e9loignent de la sommative traditionnelle. Dans le contexte PAN, les productions sont d\'abord des occasions d\'apprentissage et de mise en pratique, pas des \u00e9preuves \u00e9valuatives.',
-        voir: 'Structure > Pratiques'
+        voir: 'Conception > Pratiques'
     },
 
     'mode-assistance-icones': {

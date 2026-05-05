@@ -32,7 +32,7 @@ const GUIDAGE_TEXTES = {
         titre: 'Pr\u00e9sences \u2014 Aper\u00e7u',
         texte: 'Vue synth\u00e9tique de l\u2019assiduit\u00e9 du groupe\u00a0: taux de pr\u00e9sence global, tendances hebdomadaires et \u00e9tudiants \u00e0 surveiller. Les 627\u00a0pr\u00e9sences de la d\u00e9mo couvrent une session compl\u00e8te.'
     },
-    'contexte-calendrier': {
+    'calendrier-vue': {
         titre: 'Vue calendaire',
         texte: 'Le calendrier affiche chaque s\u00e9ance avec un code couleur par \u00e9tudiant. Rep\u00e8re les patterns d\u2019absence pour intervenir au bon moment.'
     },
@@ -60,40 +60,40 @@ const GUIDAGE_TEXTES = {
         titre: 'Exporter et archiver',
         texte: 'Exporter les PDF annotés aux étudiants, archiver le semestre et alléger le stockage.'
     },
-    'structure-apercu-legacy': {
+    'conception-apercu-legacy': {
         titre: 'Construction de la note \u2014 Aper\u00e7u',
         texte: 'Ici se construit ton dispositif d\u2019\u00e9valuation\u00a0: productions \u00e9tudiantes, grilles de crit\u00e8res, \u00e9chelles de performance et cartouches de r\u00e9troaction. La d\u00e9mo inclut 11\u00a0productions et 3\u00a0grilles configur\u00e9es.'
     },
-    'structure-grille-criteres': {
+    'conception-grille-criteres': {
         titre: 'Grilles de crit\u00e8res',
         texte: 'Les grilles d\u00e9finissent les crit\u00e8res d\u2019\u00e9valuation et leur pond\u00e9ration. La d\u00e9mo inclut 3\u00a0grilles pr\u00eates \u00e0 l\u2019emploi que tu peux explorer et dupliquer.'
     },
-    'structure-echelle-performance': {
+    'conception-echelle-performance': {
         titre: '\u00c9chelles de performance',
         texte: 'Les \u00e9chelles d\u00e9finissent les niveaux de r\u00e9ussite (ex.\u00a0: A, B, C ou Excellent \u00e0 Insuffisant). Elles sont associ\u00e9es aux grilles pour convertir les cotes en notes.'
     },
-    'structure-retroactions': {
+    'conception-retroactions': {
         titre: 'Cartouches de r\u00e9troaction',
         texte: 'Les cartouches sont des banques de commentaires pr\u00e9r\u00e9dig\u00e9s associ\u00e9s aux niveaux de ta grille. Elles acc\u00e9l\u00e8rent la r\u00e9troaction \u00e9crite lors de l\u2019\u00e9valuation.'
     },
-    'structure-productions': {
+    'conception-productions': {
         titre: 'Productions \u00e9tudiantes',
         texte: 'Les productions sont les travaux que tes \u00e9tudiants doivent remettre (dissertations, examens, projets). La d\u00e9mo en contient 11, chacune associ\u00e9e \u00e0 une grille de crit\u00e8res.'
     },
-    'boite-outils-tirage': {
-        titre: 'Bo\u00eete \u00e0 outils',
+    'labo-tirage': {
+        titre: 'Labo',
         texte: 'Outils interactifs pour l\u2019animation en classe\u00a0: tirage au sort d\u2019\u00e9tudiants pour les mises en situation, les pr\u00e9sentations ou les exercices collaboratifs.'
     },
-    'structure-carte': {
+    'conception-carte': {
         titre: 'Planification \u2014 Carte mentale',
         texte: 'La carte mentale te permet de visualiser l\u2019alignement p\u00e9dagogique de ton cours. La d\u00e9mo inclut une carte compl\u00e8te \u00ab\u00a0\u00c9criture et litt\u00e9rature\u00a0\u00bb avec 26\u00a0n\u0153uds et 45\u00a0liens. Explore les s\u00e9quences, le\u00e7ons et activit\u00e9s pour voir comment les \u00e9l\u00e9ments se relient.'
     },
-    'structure-organisateur': {
+    'conception-organisateur': {
         titre: 'Planification \u2014 Plan de le\u00e7on',
         texte: 'L\u2019organisateur transforme ta carte mentale en plans de le\u00e7on structur\u00e9s. S\u00e9lectionne une carte, une s\u00e9quence et une le\u00e7on pour voir les sections auto-d\u00e9riv\u00e9es (objectif, pr\u00e9requis, productions).'
     },
-    'boite-outils-modelisation': {
-        titre: 'Bo\u00eete \u00e0 outils \u2014 Mod\u00e9lisation',
+    'labo-modelisation': {
+        titre: 'Labo \u2014 Mod\u00e9lisation',
         texte: 'La mod\u00e9lisation te permet d\u2019ouvrir un PDF pour l\u2019annoter en direct lors d\u2019une projection en classe. Ouvre un fichier depuis ton ordinateur pour tester les outils d\u2019annotation.'
     }
 };

@@ -37,26 +37,24 @@ const configurationsOnglets = {
     // Sections créées: apercu (plate), structure, contexte, suivi
     'accueil': [],
     'apercu': [],
-    'structure': [
+    'conception': [
         { id: 'carte', label: 'Alignement pédagogique' },
         { id: 'organisateur', label: 'Plan de la leçon' },
         { id: 'productions', label: 'Productions étudiantes' },
         { id: 'grille-criteres', label: 'Grilles de critères' },
         { id: 'echelle-performance', label: 'Échelles de performance' },
+        { id: 'pratiques-notation', label: 'Pratiques de notation' },
         { id: 'retroactions', label: 'Cartouches de rétroaction' }
     ],
-    'contexte': [
+    'calendrier': [
         { id: 'trimestre', label: 'Trimestre' },
-        { id: 'calendrier', label: 'Vue calendaire' },
-        { id: 'pratiques-notation', label: 'Pratiques de notation' },
-        { id: 'bilan', label: 'Bilan réflexif' }
+        { id: 'vue', label: 'Vue calendaire' }
     ],
     'suivi': [
         { id: 'liste', label: 'Liste des élèves' },
         { id: 'saisie', label: 'Saisie des présences' },
         { id: 'profil', label: 'Profils individuels' },
-        { id: 'interventions', label: 'Interventions' },
-        { id: 'labo', label: 'Labo' }
+        { id: 'interventions', label: 'Interventions' }
     ],
     'evaluations': [
         { id: 'importer', label: 'Préparer et importer' },
@@ -64,10 +62,12 @@ const configurationsOnglets = {
         { id: 'annoter', label: 'Annoter et évaluer' },
         { id: 'exporter', label: 'Exporter et archiver' }
     ],
-    'boite-outils': [
+    'labo': [
         { id: 'tirage', label: 'Tirage au sort' },
         { id: 'modelisation', label: 'Modélisation' },
-        { id: 'rythme', label: 'Rythme de travail' }
+        { id: 'rythme', label: 'Rythme de travail' },
+        { id: 'etudes', label: 'Études' },
+        { id: 'bilan', label: 'Bilan réflexif' }
     ],
     'aide': [
         { id: 'introduction', label: 'Introduction' },
@@ -93,7 +93,7 @@ const configurationsOnglets = {
 
 /**
  * Section actuellement affichée
- * Valeurs possibles: 'accueil' | 'apercu' | 'structure' | 'contexte' | 'suivi' | 'evaluations' | 'boite-outils' | 'aide' | 'reglages'
+ * Valeurs possibles: 'accueil' | 'apercu' | 'conception' | 'calendrier' | 'suivi' | 'evaluations' | 'labo' | 'aide' | 'reglages'
  *
  * UTILISÉ PAR:
  * - afficherSection() pour mettre à jour l'état

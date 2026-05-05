@@ -4712,10 +4712,10 @@ function initialiser() {
         if (typeof window.organisateur !== 'undefined' && leconId) {
             window.organisateur.naviguerVersLecon(leconId);
         } else if (typeof afficherSousSection === 'function') {
-            afficherSousSection('structure-organisateur');
+            afficherSousSection('conception-organisateur');
             var boutons = document.querySelectorAll('.sous-navigation button');
             boutons.forEach(function(btn) {
-                btn.classList.toggle('actif', btn.getAttribute('data-sous-onglet') === 'structure-organisateur');
+                btn.classList.toggle('actif', btn.getAttribute('data-sous-onglet') === 'conception-organisateur');
             });
         }
     });
@@ -4814,7 +4814,7 @@ function gererKeydown(e) {
         && document.activeElement.tagName !== 'TEXTAREA';
 
     // Vérifier qu'on est bien dans la section structure (carte mentale)
-    var sectionPlanif = document.getElementById('section-structure');
+    var sectionPlanif = document.getElementById('section-conception');
     if (!sectionPlanif || !sectionPlanif.classList.contains('active')) return;
 
     if ((e.metaKey || e.ctrlKey) && e.key === 'a' && pasDansChamp) {
@@ -5320,7 +5320,7 @@ window.planificationCarte = {
 var _planifPleinEcran = false;
 
 function togglePleinEcranCarte() {
-    var zone = document.getElementById('structure-carte');
+    var zone = document.getElementById('conception-carte');
     if (!zone) return;
     _planifPleinEcran = !_planifPleinEcran;
     zone.classList.toggle('planif-plein-ecran', _planifPleinEcran);

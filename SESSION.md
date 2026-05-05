@@ -1,9 +1,9 @@
-# SESSION — État au 3 mai 2026 (Bilan réflexif Phases A→D livrées)
+# SESSION — État au 5 mai 2026 (Refonte navigation principale livrée)
 
-**Date** : 3 mai 2026 (soir)
-**Dernier build** : `0503-1645` · Beta **99.33**
-**Branche** : `main` (poussée sur origin)
-**Statut** : Bilan réflexif refondu en 4 phases (A : format texte étendu / B : éditeur UI / C : import CSV / D : rapport étendu). Le module gère désormais 5 types de questions (Likert, Likert+NA, Choix unique, Choix multiple, Matrice) avec préambule, descriptions de bloc, options personnalisées, limites min/max, consignes conditionnelles, champs « Autre : ___ ». Pipeline complet upstream/downstream prêt pour ses premiers résultats réels (attendus 4 mai).
+**Date** : 5 mai 2026
+**Dernier build** : à bumper en SP6 (numéro à confirmer Grégoire)
+**Branche** : `refactor/nav-rename` (à merger sur main après validation finale)
+**Statut** : Refonte de la nav principale livrée en 6 sous-phases (10 commits + 2 fix-ups). Strategy B (renommage complet IDs + labels). La nav cible est en place : Accueil / Aperçu / **Conception** / **Calendrier** / Suivi / Évaluation / **Labo** / Aide / Réglages.
 
 ---
 
@@ -14,196 +14,132 @@
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
-Contexte : aujourd'hui (3 mai), Bilan réflexif Phases A→D livrées et
-poussées (commits 96a552b → 7574943, beta 99.33 b0503-1645). Pipeline
-complet : composer un questionnaire dans l'app, exporter en texte vers
-une appli de formulaire externe (MS Forms typiquement), importer le CSV
-des résultats, générer le rapport. Round-trip identité validé sur le
-questionnaire de référence (20 questions, 8 sections, 7 matrices).
+Contexte : la refonte de la navigation principale est livrée sur la
+branche refactor/nav-rename (10 commits + 2 fix-ups, du 5 mai 2026).
+Strategy B (renommage complet IDs + labels). Validée localement sur
+Safari Mac. Reste à valider iPad et merger sur main.
 
-PROCHAINE ÉTAPE — refonte de la navigation principale (chantier
-préparé hier soir, plan complet dans :
-`plans de travail/PLAN-REFONTE-NAV.md`)
+NAV CIBLE en place :
+  Accueil · Aperçu · Conception (ex-Structure) · Calendrier (ex-Contexte)
+  · Suivi · Évaluation · Labo (ex-Outils) · Aide · Réglages
 
-Vision en une ligne : renommer Structure → Conception, Contexte →
-Calendrier, Outils → Labo, et déplacer Pratiques de notation, Bilan
-réflexif et Labo (sous-onglet) vers leurs sections respectives. Le
-sous-onglet « Labo » devient « Études » dans la nouvelle section Labo.
+  Conception : 7 sous-onglets (carte, organisateur, productions, grilles,
+    échelles, pratiques de notation [arrivée], cartouches)
+  Calendrier : 2 sous-onglets (trimestre, vue calendaire avec id 'vue')
+  Labo : 5 sous-onglets (tirage, modélisation, rythme, études [ex-Labo
+    de Suivi], bilan réflexif [arrivé])
 
-LECTURE OBLIGATOIRE AVANT DE CODER :
-1. `plans de travail/PLAN-REFONTE-NAV.md` (plan en 6 sous-phases avec
-   audit complet, faux amis identifiés, risques mitigés)
-2. CLAUDE.md — règles de sécurité + zones protégées (`js/config.js` et
-   `js/navigation.js` sont protégés mais à modifier dans cette refonte
-   avec autorisation de Grégoire)
-3. NOMS_STABLES.json — fichier protégé qui liste les IDs HTML stables ;
-   ~17 entrées à renommer cette session, mettre à jour version + date
+PROCHAINE ÉTAPE — choisir entre :
 
-STRATÉGIE ACTÉE : Strategy B (renommage complet — IDs internes ET
-labels visibles). Aligné avec le principe « stabilité zéro-dette » de
-CLAUDE.md. Pas de demi-mesure « labels seulement » qui créerait une
-incohérence permanente entre le code et l'UI.
+  A) Validation finale + merge refactor/nav-rename → main + push
+     - Test iPad (le mode tactile, l'aide contextuelle, etc.)
+     - Test mode clair (passer du sombre au clair sur les sections
+       renommées + leurs sous-onglets)
+     - Vérifier que le mode démo n'a pas de régression (les sections
+       Conception et Labo doivent montrer les bonnes données démo)
+     - Si tout OK : git checkout main && git merge refactor/nav-rename
+       puis git push origin main (et supprimer la branche locale + remote)
 
-DÉCOMPOSITION EN 6 SOUS-PHASES (commitables indépendamment, ~3-4 h) :
-  SP1 — Refactor préventif de navigation.js (switch → table-driven)
-  SP2 — Mouvements de sous-onglets (sans renommage de section)
-  SP3 — Renommage boite-outils → labo (le moins risqué, ~20 occ.)
-  SP4 — Renommage structure → conception (~40 occ.)
-  SP5 — Renommage contexte → calendrier (~50 occ. + faux amis)
-  SP6 — Documentation et finalisation
+  B) #261 Cartes mentales perdues localement (données utilisateur)
+     Index pointe sur carte_3 inexistant ; 4 cartes perdues entre 19
+     avril et 5 mai. Voir BACKLOG.md #261 pour le plan détaillé :
+     1) Restaurer depuis backup 838 Mo (script jq + injection console)
+     2) Patcher planification-donnees.js : fallback automatique quand
+        index.active pointe sur carte inexistante
+     3) Auditer divergence db.getSync('planification_mindmap') vs
+        localStorage.getItem('h2026_planification_mindmap')
 
-⚠️ FAUX AMIS À NE PAS TOUCHER (cartes écosystème-classe du tableau de
-   bord, dans tableau-bord-apercu.js et styles.css) :
-   - contexte-indicateurs-acpe, contexte-indicateurs-apprentissage
-   - contexte-evolution-temporelle, contexte-trajectoires-production
-   - contexte-correlations, contexte-impact-jetons, contexte-consolidation
-   - Classes CSS .carte-contexte-*
-   Plus le mot « Structure » quand il désigne le critère SRPNF (S de
-   Structure dans la grille d'évaluation). Filtrer les recherches.
-
-⚠️ RISQUE CRITIQUE : navigation.js contient 12 cases switch hardcodés
-   (case 'structure-carte', case 'contexte-trimestre', etc.). Si on
-   renomme les IDs sans mettre à jour ces cases, plus aucune section
-   ne charge. La sous-phase 1 (refactor table-driven) est OBLIGATOIRE
-   AVANT toute modification d'ID. Ne pas court-circuiter.
+  C) Reprendre le backlog Réserve/écosystème (#247-249, #251, #252,
+     #257 v2.B, #256-bis) qui attend depuis fin avril
 
 CONTRAINTES (rappel CLAUDE.md) :
-- Demander le numéro de beta à Grégoire avant le commit final
-- Bumper version.json + js/init-inline.js à la dernière sous-phase
-- Cache-buster dans index.html pour chaque fichier JS modifié
-- Safari Mac/iPad cibles ; Cmd+Q + rouvrir entre chaque sous-phase
-  pour tester
-- echapperHtml() obligatoire sur innerHTML avec données utilisateur
-- Zéro handler inline -> data-action / data-on-change
-- console.warn / console.error uniquement
-- Variables CSS du DS, tester modes clair ET sombre
+- NE PAS pousser refactor/nav-rename avant validation iPad complète
+- Si bug d'apparence : vérifier d'abord styles.css (la SP4 a oublié les
+  scopes #section-structure → #section-conception, fix dans 6789d3e)
+- echapperHtml(), pas de handlers inline, console.warn/error uniquement
 - Modales : classList.add('actif') (PAS 'visible')
-- Petites métadonnées persistées : db.setSync (PAS db.set qui est
-  async sans await → getSync immédiat lit valeur stale)
+- db.setSync pour petites métadonnées (PAS db.set async)
 
-CRITÈRES D'ACCEPTATION GLOBAUX (après les 6 sous-phases) :
-1. Nav principale affiche : Accueil / Aperçu / Conception / Calendrier
-   / Suivi / Évaluation / Labo / Aide / Réglages
-2. Conception : 7 sous-onglets dont Pratiques de notation
-3. Calendrier : 2 sous-onglets (Trimestre, Vue calendaire)
-4. Suivi : 4 sous-onglets (Labo retiré)
-5. Labo : 5 sous-onglets (Tirage, Modélisation, Rythme, Études,
-   Bilan réflexif)
-6. Tableau de bord : cartes écosystème-classe TOUJOURS fonctionnelles
-   (les contexte-* du dashboard NON renommés)
-7. Aide contextuelle : bulles « Structure → X » deviennent
-   « Conception → X », idem pour Contexte → Calendrier
-8. Bilan réflexif : import / export / éditeur fonctionnent après
-   le déplacement vers Labo
-
-OBSERVATIONS OUVERTES (hors scope refonte nav) :
-- Premier import CSV réel du Bilan réflexif attendu — valider Phase C
-  (mapping auto + colonnes sœurs MS Forms) avec les données terrain
-- Backlog Réserve/écosystème ouvert depuis fin avril (#247-249, #251,
-  #252, #257 v2.B, #256-bis) — non priorisé tant que la nav n'est pas
-  rénovée
-- BACKLOG #260 (crédit Icons8 dans Réglages > À propos) — basse
-  priorité, à faire avant partage public
+OBSERVATIONS OUVERTES (à la fin de la refonte nav) :
+- Aide contextuelle : la clé tooltip 'nav-conception-pratiques' est
+  cohérente, mais le fichier de référence 'data-aide="conception-...'
+  n'a pas toujours de popup correspondante (orphelin antérieur, pas
+  un blocage)
+- js/boite-outils.js : nom de fichier non renommé volontairement (cf
+  commit message SP3 ccf573b). Renommer en js/labo.js si on veut une
+  cohérence totale, à voir avec Grégoire.
+- Les commentaires de section dans navigation.js portent encore les
+  anciens noms (« === STRUCTURE === », « === CONTEXTE === ») — j'ai
+  oublié de les mettre à jour, mais c'est cosmétique.
 ```
 
 ---
 
-## Récapitulatif des livrables 3 mai 2026
+## Récapitulatif des livrables 5 mai 2026
 
-### Bilan réflexif — Refonte complète en 4 phases
+### Refonte navigation principale — 6 sous-phases livrées
 
-Pipeline upstream/downstream pour collecter et analyser des questionnaires de fin de trimestre via une application de formulaire en ligne (Microsoft Forms ciblé). 5 types de questions supportés au lieu de 2.
+Pipeline : `git log refactor/nav-rename ^main`
 
-**Phase A — Format texte + parser étendus** (`96a552b`)
-- 5 types : `likert4` (avec option `inclureNA`), `choix_unique` ([RADIO]), `choix_multiple` ([CHECKBOX] avec `min/maxSelection`), `matrix` ([MATRIX] avec énoncés en puces), `ouvert` ([OUVERT])
-- Préambule + description de bloc dans le modèle de données
-- Option « Autre : ___ » avec flag `autreAvecChamp`
-- Consigne conditionnelle italique sur ligne séparée
-- `PROMPT_IA_BILAN` v3, modèle téléchargeable showcasant les 5 types
-- Test phare : round-trip identité sur questionnaire de référence (20 questions, 7 matrices, 39 énoncés)
+| Phase | Commit | Description |
+|---|---|---|
+| Préparation | `f983cc4` | Fix bug rythme (Beta 99.34 b0504-0710) avant refonte |
+| SP0 | (préparation) | Branche refactor/nav-rename + export Codex |
+| SP1 | `6973750` | Refactor navigation.js : table-driven dispatcher (INITIALISATEURS_SOUS_SECTION) |
+| SP2 | `89f9c0d` | Mouvements pratiques→Conception, bilan→Labo, Labo-de-Suivi→Études dans Labo |
+| SP3 | `ccf573b` | Renommage boite-outils → labo (40 occurrences) |
+| SP4 | `18b492f` | Renommage structure → conception (173 occurrences) |
+| SP4-fix | `6789d3e` | Rattrapage fichiers oubliés en SP4 (styles.css, accueil, productions, etc.) — sinon canvas carte mentale invisible |
+| SP5 | `3bfeed7` | Renommage contexte → calendrier (177 occurrences, faux amis dashboard préservés) |
+| SP5-fix | `57c3223` | sous-onglet calendrier id court 'vue' (au lieu de 'calendrier') pour éviter calendrier-calendrier |
+| SP6 | (en cours) | Documentation finale + bump version |
 
-**Phase B — Éditeur UI étendue** (`a1ee004` puis `42b51ee`)
-- Préambule éditable sous le titre + description par bloc
-- Sélecteur de type étendu (5 options)
-- Édition inline complète : options Radio/Checkbox (texte + Autre + monter/descendre/supprimer), énoncés Matrix, min/max Checkbox, toggle Likert+NA, consigne conditionnelle
-- Garde-fous : min 2 / max 8 options, min 1 énoncé matrix
-- Helper `libelleTypeQuestion` pour les badges des 5 types
+### Bug découvert pendant la refonte (#261)
 
-**Renommage UI Likert/Matrice + suppression mentions Microsoft** (`f08aa51`)
-- « Likert » → « Likert (1 énoncé) », « Matrice » → « Likert matriciel (N énoncés) »
-- Astuce sur le mapping vocabulaire avec applications de formulaire
-- Mentions Microsoft remplacées par formulations génériques (« certaines applications »)
+Cartes mentales : l'index pointe vers `carte_3` (« Écriture et littérature H26 » selon mémoire 19 avril) mais localStorage ne contient plus que `carte_1` « Sans titre ». 4 cartes perdues entre le 19 avril et le 5 mai. **Indépendant de la refonte nav** — découvert pendant les tests SP1 puis re-vu en SP4. Plan détaillé dans BACKLOG.md #261.
 
-**Phase C — Import CSV étendu** (`a9a9782`)
-- Mapping étendu pour reconnaître les colonnes sœurs des matrices et les colonnes « Autres : <Q> »
-- Helpers `obtenirCiblesMapping`, `_tenterMappingAutres`, `_tenterMappingMatrice`
-- Agrégation par type dans `confirmerImport` (refonte) : likert4+NA, choix_unique avec mapping cellule→option, choix_multiple split sur `;`, matrix par énoncé, autres collectés
-- Smoke test : 8/8 colonnes correctement mappées sur CSV synthétique
+### Faux amis préservés (intacts par filtrage explicite)
 
-**Phase D — Rapport étendu** (`7574943`)
-- Rendu HTML par type : barre stackée Likert (4 segments colorés), barres % par option (Radio/Checkbox), tableau matriciel pour Matrix
-- Calculs (vue d'ensemble, score bloc, signaux Fort/Faible) intègrent les énoncés de matrice
-- Bandeau NA pour les Likert+NA, indicateur max pour les Checkbox, top-3 en vert
-- Listes « Réponses libres Autre » sous les questions concernées
-- Plus de Chart.js par bloc (HTML/CSS pur sauf le graphique global)
+Pour SP4 (« Structure » → « Conception ») :
+- `js/trimestres.js`, `init-inline.js`, `profil-etudiant.js` : critère SRPNF
+- `js/pratiques.js:2733` : grille SRPNF par défaut
 
-### Plan refonte navigation préparé (3 mai soir)
-
-`plans de travail/PLAN-REFONTE-NAV.md` — plan complet 6 sous-phases prêt à attaquer demain. Audit exhaustif fait par subagent (~125 occurrences cumulées, faux amis identifiés, risques mitigés). À ne PAS empiler sur la session Bilan : chantier dédié.
-
-### Documents de référence à ce jour
-
-- `Bilan-fin-de-trimestre-questionnaire.md` (composition Cowork)
-- `Bilan-fin-de-trimestre-questionnaire-format-app.txt` (test phare format Labo Codex)
-- `Spec - Prompt et parser questionnaires Labo Codex.md` (spec Cowork v2 du format)
-- `plans de travail/PLAN-BILAN-REFLEXIF-V2.md` (plan v09 du Bilan réflexif, livré complet)
-- `plans de travail/PLAN-REFONTE-NAV.md` (plan refonte nav, à attaquer demain)
+Pour SP5 (« Contexte » → « Calendrier ») :
+- 7 IDs de cartes écosystème dans `tableau-bord-apercu.js` (`contexte-indicateurs-acpe`, etc.)
+- 5 classes CSS `.carte-contexte-*`, `.contexte-trimestre`, `.contexte-cours`, etc.
+- 200 champs `"contexte": true` dans `pack-demo-20.js` (champs `optionsAffichage`)
 
 ---
 
-## État global du projet (post 3 mai)
+## État global du projet (post 5 mai)
 
-### Bilan réflexif — Statut Phases A→F
-
-| Phase | Statut | Commits |
-|---|---|---|
-| A — Format texte + parser | ✅ livrée et testée terrain | 96a552b |
-| B — UI éditeur étendue | ✅ livrée et testée terrain | a1ee004, 42b51ee |
-| Renommage UI + générique | ✅ livré | f08aa51 |
-| C — Import CSV MS Forms | ✅ livrée, smoke test 100% | a9a9782 |
-| D — Rapport étendu | ✅ livrée | 7574943 |
-| E — Génération auto depuis réglages | ⏸️ abandonnée pour l'instant | — |
-| F — Bibliothèque questions canoniques | ⏸️ reportée | — |
-
-### Refonte navigation principale
+### Refonte navigation — Statut SP1→SP6
 
 | Sous-phase | Statut |
 |---|---|
-| Plan complet rédigé | ✅ `plans de travail/PLAN-REFONTE-NAV.md` |
-| SP1 Refactor `navigation.js` table-driven | ⏳ À faire (session 4 mai) |
-| SP2 Mouvements de sous-onglets | ⏳ |
-| SP3 Renommage `boite-outils` → `labo` | ⏳ |
-| SP4 Renommage `structure` → `conception` | ⏳ |
-| SP5 Renommage `contexte` → `calendrier` | ⏳ |
-| SP6 Documentation finale | ⏳ |
+| SP1 Refactor `navigation.js` table-driven | ✅ |
+| SP2 Mouvements de sous-onglets | ✅ |
+| SP3 Renommage `boite-outils` → `labo` | ✅ |
+| SP4 Renommage `structure` → `conception` | ✅ + fix |
+| SP5 Renommage `contexte` → `calendrier` | ✅ + fix |
+| SP6 Documentation finale + bump version | ✅ |
 
-### Backlog ouvert depuis fin avril (priorité basse jusqu'à refonte nav)
+### Backlog ouvert (priorité après refonte nav validée et mergée)
 
-- #247 Refonte Réglages > Données — alignement vocabulaire écosystème
-- #248 Réserve v1.1 manifeste-reserve.json fusion auto Safari (résolu partiellement)
-- #249 Section Réserve dédiée dans Réglages
+- **#261** Cartes mentales perdues (priorité haute, vraies données utilisateur)
+- #247 Refonte Réglages > Données — vocabulaire écosystème
+- #248 Réserve v1.1 manifeste-reserve.json fusion auto Safari
+- #249 Section Réserve dédiée dans Réglages (livrée partiellement le 2 mai)
 - #251 Codex data — extraction depuis la Réserve
-- #252 Labo autonome — sortir de Suivi (couvert par la refonte nav qui le déplace dans une section dédiée)
+- #252 Labo autonome (couvert par la refonte nav qui place Labo en section dédiée)
 - #257 v2.B Mode consultation namespace temporaire
 - #256-bis Aide aux 8 autres modales de l'app
-- #260 Crédit Icons8 dans Réglages > À propos (15 min)
-
-### Phase 7 (doublons) — clôturée
-
-Tous les paliers livrés le 2 mai et validés terrain. Voir SESSION.md précédente si retour en arrière nécessaire (préservée dans l'historique git).
+- #258 Bouton anonymisation dans l'en-tête
+- #259 Renommage Réserve → Archives (vocabulaire universel)
+- #260 Crédit Icons8 dans Réglages > À propos
 
 ---
 
-## Prochaine session — Refonte navigation
+## Prochaine session — Validation iPad et merge
 
-Voir consigne de démarrage ci-dessus. Plan détaillé dans `plans de travail/PLAN-REFONTE-NAV.md`. Effort estimé : 3-4 h de session focalisée. Critères d'acceptation explicites. Faux amis listés. Pas de demi-mesure : Strategy B (renommage complet IDs + labels) confirmée par Grégoire.
+Voir consigne de démarrage ci-dessus. Les vérifications iPad et mode clair sont les seules choses qui restent avant de merger `refactor/nav-rename` sur `main`.
