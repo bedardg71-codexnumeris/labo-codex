@@ -16994,8 +16994,8 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 /* ===============================
    MODULE: PLANIFICATION — CARTE MENTALE
    Préfixe : planif-
-   Scopé sous #section-structure (anciennement #section-planification)
-   Les overrides plein écran ciblent #structure-carte (la sous-section)
+   Scopé sous #section-conception (anciennement #section-planification)
+   Les overrides plein écran ciblent #conception-carte (la sous-section)
    =============================== */
 
 /* === TOKENS COULEUR NŒUDS (ajoutés au :root existant) === */
@@ -17028,17 +17028,17 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 
 /* === LAYOUT PRINCIPAL === */
 /* Overrides plein écran scopés à la sous-section carte mentale */
-#structure-carte {
+#conception-carte {
     padding: 0;
     margin: 0;
     background: none;
     border-radius: 0;
 }
 /* Retirer le padding du conteneur parent quand la carte mentale est visible */
-.contenu:has(#structure-carte:not([style*="display: none"])) {
+.contenu:has(#conception-carte:not([style*="display: none"])) {
     padding: 0;
 }
-#section-structure .planif-wrapper {
+#section-conception .planif-wrapper {
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -17048,7 +17048,7 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 }
 
 /* === BARRE SUPÉRIEURE === */
-#section-structure .planif-header {
+#section-conception .planif-header {
     display: flex;
     padding: 4px 12px;
     background: var(--surface-carte, #1a3040);
@@ -17172,7 +17172,7 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     text-align: right;
 }
 
-#section-structure .planif-header h3 span { color: var(--texte-secondaire, #8aa4b0); font-weight: 400; }
+#section-conception .planif-header h3 span { color: var(--texte-secondaire, #8aa4b0); font-weight: 400; }
 
 #planif-titre-carte {
     font-size: 16px;
@@ -19222,7 +19222,7 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 #planif-menu-lien button.actif { background: rgba(106, 172, 184, 0.1); color: var(--planif-couleur-selection); font-weight: 600; }
 
 /* === BARRE D'ÉTAT === */
-#section-structure .planif-footer {
+#section-conception .planif-footer {
     display: flex;
     align-items: center;
     gap: 16px;
@@ -19234,7 +19234,7 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     flex-shrink: 0;
 }
 
-#section-structure .planif-footer kbd {
+#section-conception .planif-footer kbd {
     padding: 1px 5px;
     background: rgba(106, 172, 184, 0.06);
     border: 1px solid var(--planif-couleur-bordure);
@@ -19693,11 +19693,11 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 }
 
 /* Carte mentale (planification) — fond blanc, palette bleu pâle */
-.mode-clair #section-structure .planif-wrapper {
+.mode-clair #section-conception .planif-wrapper {
     background: #ffffff;
 }
 
-.mode-clair #section-structure .planif-header {
+.mode-clair #section-conception .planif-header {
     background: #ffffff;
     border-bottom-color: rgba(3, 46, 92, 0.08);
 }

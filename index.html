@@ -7,7 +7,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=2026050226">
+    <link rel="stylesheet" href="styles.css?v=2026050529"> <!-- Refonte nav SP4-fix : scope CSS section-conception, #conception-carte -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -15865,12 +15865,12 @@
     <script src="js/bibliotheque-ui.js?v=2026021001"></script> <!-- Beta 97.4 : Composant générique modales bibliothèque -->
     <script src="js/spe-specifications.js?v=2026010206"></script> <!-- Beta 95 : Module PAN-Spécifications + gabarits François -->
     <script src="js/pratiques-bibliotheque.js?v=2026010401"></script> <!-- Beta 95 : Bibliothèque universelle STD + SPE -->
-    <script src="js/pratiques-materiel.js?v=2026050503"></script> <!-- Refonte nav SP2 : commentaire d'init mis à jour -->
+    <script src="js/pratiques-materiel.js?v=2026050530"></script> <!-- Refonte nav SP4-fix : commentaire conception-pratiques-notation -->
     <script src="js/preferences-v2.js?v=2026050104"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
     <script src="js/donnees-v2.js?v=2026050518"></script> <!-- Refonte nav SP4 : naviguerVers conception-* (5 cibles) --></script> <!-- Refonte nav SP2 : naviguerVers conception-pratiques-notation -->
     <script src="js/etudiants.js?v=2026042708"></script>
     <script src="js/productions-bibliotheque.js?v=2026010218"></script> <!-- + import depuis trimestres -->
-    <script src="js/productions.js?v=2026050109"></script> <!-- Beta 99.30 b0501-0735 : labels d'échéances par groupe lisent gc.groupe (avec fallback gc.groupeNum) — fix divergence après import/migration -->
+    <script src="js/productions.js?v=2026050531"></script> <!-- Refonte nav SP4-fix : querySelector #conception-productions -->
     <script src="js/grilles-bibliotheque.js?v=2026010220"></script> <!-- refactoring: plus de hardcodé -->
     <script src="js/grilles.js?v=2026010603"></script> <!-- Bug Bruno: sauvegarde nouvelles grilles -->
     <script src="js/echelles-bibliotheque.js?v=2026010220"></script> <!-- refactoring: plus de hardcodé -->
@@ -15930,7 +15930,7 @@
 
     <!-- Module Planification (Carte mentale) -->
     <script src="js/planification-donnees.js?v=2026020701"></script>
-    <script src="js/planification-bibliotheque.js?v=2026022601"></script>
+    <script src="js/planification-bibliotheque.js?v=2026050532"></script> <!-- Refonte nav SP4-fix : commentaire conception-carte -->
     <script src="js/planification-carte.js?v=2026050520"></script> <!-- Refonte nav SP4 : section-conception, conception-organisateur, conception-carte --></script>
     <script src="js/organisateur.js?v=2026050521"></script> <!-- Refonte nav SP4 : id conception-organisateur (3 occ.) --></script>
     <script src="js/planification.js?v=2026050522"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* --></script>
@@ -15990,7 +15990,7 @@
     <script src="js/migrations.js?v=2025121101"></script>
 
     <!-- Page d'accueil (Chantier 3) -->
-    <script src="js/accueil.js?v=2026042403"></script> <!-- Beta 99.24 : Phase 5.D — retrait des fallbacks legacy dans toggleDemoHandler -->
+    <script src="js/accueil.js?v=2026050533"></script> <!-- Refonte nav SP4-fix : data-param conception|conception-carte -->
     <!-- Guidage contextuel démo (Chantier 4) -->
     <script src="js/guidage-demo.js?v=2026050523"></script> <!-- Refonte nav SP4 : 7 clés conception-* + titres « Conception » --></script> <!-- Refonte nav SP3 : clés labo-tirage, labo-modelisation -->
 
