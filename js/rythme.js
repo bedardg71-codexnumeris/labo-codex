@@ -1243,7 +1243,7 @@
     // Rafraîchir quand on navigue vers l'onglet
     document.addEventListener('click', function (e) {
         var btn = e.target.closest('[data-sous-section="rythme"]');
-        if (btn && btn.closest('[data-section="boite-outils"]')) {
+        if (btn && btn.closest('[data-section="labo"]')) {
             setTimeout(afficherRythme, 50);
         }
     });
@@ -1251,12 +1251,12 @@
     // Rafraîchir aussi quand la sous-section devient visible
     var _observerRythme = new MutationObserver(function (mutations) {
         mutations.forEach(function (m) {
-            if (m.target.id === 'boite-outils-rythme' && m.target.classList.contains('active')) {
+            if (m.target.id === 'labo-rythme' && m.target.classList.contains('active')) {
                 afficherRythme();
             }
         });
     });
-    var _cibleRythme = document.getElementById('boite-outils-rythme');
+    var _cibleRythme = document.getElementById('labo-rythme');
     if (_cibleRythme) {
         _observerRythme.observe(_cibleRythme, { attributes: true, attributeFilter: ['class'] });
     }

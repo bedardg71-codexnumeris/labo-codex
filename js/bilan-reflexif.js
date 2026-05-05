@@ -4592,14 +4592,14 @@ function tronquer(texte, max) {
    =============================== */
 
 // Auto-enregistrement dans la config (résilience si config.js est en cache)
-if (window.configurationsOnglets && window.configurationsOnglets['boite-outils']) {
-    var _boite = window.configurationsOnglets['boite-outils'];
+if (window.configurationsOnglets && window.configurationsOnglets['labo']) {
+    var _labo = window.configurationsOnglets['labo'];
     var _hasBilan = false;
-    for (var _b = 0; _b < _boite.length; _b++) {
-        if (_boite[_b].id === 'bilan') { _hasBilan = true; break; }
+    for (var _b = 0; _b < _labo.length; _b++) {
+        if (_labo[_b].id === 'bilan') { _hasBilan = true; break; }
     }
     if (!_hasBilan) {
-        _boite.push({ id: 'bilan', label: 'Bilan r\u00e9flexif' });
+        _labo.push({ id: 'bilan', label: 'Bilan r\u00e9flexif' });
     }
 }
 
@@ -4608,7 +4608,7 @@ var _originalAfficherSousSection = window.afficherSousSection;
 if (typeof _originalAfficherSousSection === 'function') {
     window.afficherSousSection = function(idSousSection) {
         var resultat = _originalAfficherSousSection.apply(this, arguments);
-        if (idSousSection === 'boite-outils-bilan') {
+        if (idSousSection === 'labo-bilan') {
             try { initialiserBilanReflexif(); } catch (e) { console.error('[BilanReflexif] Erreur init:', e); }
         }
         return resultat;
@@ -4619,7 +4619,7 @@ if (typeof _originalAfficherSousSection === 'function') {
 var _originalAfficherSection = window.afficherSection;
 if (typeof _originalAfficherSection === 'function') {
     window.afficherSection = function(nomSection) {
-        if (nomSection !== 'boite-outils') {
+        if (nomSection !== 'labo') {
             try { detruireGraphiques(); } catch (e) { console.error('[BilanReflexif] Erreur detruireGraphiques:', e); }
         }
         return _originalAfficherSection.apply(this, arguments);

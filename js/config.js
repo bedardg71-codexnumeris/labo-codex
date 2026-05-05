@@ -62,7 +62,7 @@ const configurationsOnglets = {
         { id: 'annoter', label: 'Annoter et évaluer' },
         { id: 'exporter', label: 'Exporter et archiver' }
     ],
-    'boite-outils': [
+    'labo': [
         { id: 'tirage', label: 'Tirage au sort' },
         { id: 'modelisation', label: 'Modélisation' },
         { id: 'rythme', label: 'Rythme de travail' },
@@ -93,7 +93,7 @@ const configurationsOnglets = {
 
 /**
  * Section actuellement affichée
- * Valeurs possibles: 'accueil' | 'apercu' | 'structure' | 'contexte' | 'suivi' | 'evaluations' | 'boite-outils' | 'aide' | 'reglages'
+ * Valeurs possibles: 'accueil' | 'apercu' | 'structure' | 'contexte' | 'suivi' | 'evaluations' | 'labo' | 'aide' | 'reglages'
  *
  * UTILISÉ PAR:
  * - afficherSection() pour mettre à jour l'état

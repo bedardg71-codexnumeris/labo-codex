@@ -44,7 +44,7 @@
  * 
  * @param {string} nomSection - Identifiant de la section à afficher
  *                             Valeurs: 'accueil' | 'apercu' | 'structure' | 'contexte' |
- *                                     'suivi' | 'evaluations' | 'boite-outils' | 'aide' | 'reglages'
+ *                                     'suivi' | 'evaluations' | 'labo' | 'aide' | 'reglages'
  * 
  * UTILISÉ PAR:
  * - Événements click sur les boutons de navigation principale
@@ -114,7 +114,7 @@ function afficherSection(nomSection) {
  * 
  * @param {string} nomOnglet - Identifiant de la section parent
  *                            Valeurs: 'accueil' | 'apercu' | 'structure' | 'contexte' |
- *                                    'suivi' | 'evaluations' | 'boite-outils' | 'aide' | 'reglages'
+ *                                    'suivi' | 'evaluations' | 'labo' | 'aide' | 'reglages'
  * 
  * UTILISÉ PAR:
  * - afficherSection() après un changement de section
@@ -169,11 +169,11 @@ const TOOLTIPS_SOUS_NAV = {
     'evaluations-annoter': 'nav-eval-annoter',
     'evaluations-exporter': 'nav-eval-exporter',
     // Boîte à outils
-    'boite-outils-tirage': 'nav-bao-tirage',
-    'boite-outils-modelisation': 'nav-bao-modelisation',
-    'boite-outils-rythme': 'nav-bao-rythme',
-    'boite-outils-etudes': 'nav-suivi-labo',
-    'boite-outils-bilan': 'nav-ctx-bilan',
+    'labo-tirage': 'nav-labo-tirage',
+    'labo-modelisation': 'nav-labo-modelisation',
+    'labo-rythme': 'nav-labo-rythme',
+    'labo-etudes': 'nav-labo-etudes',
+    'labo-bilan': 'nav-labo-bilan',
     // Aide (tooltips gérés séparément si existants)
     // Réglages
     'reglages-preferences': 'nav-reg-preferences',
@@ -192,7 +192,7 @@ const TOOLTIPS_SOUS_NAV = {
    Les fonctions sont résolues au runtime (typeof === 'function') car
    certains initialisateurs sont définis dans des modules chargés après
    navigation.js. Une sous-section sans entrée ici (ex: suivi-saisie,
-   boite-outils-rythme, accueil-*, apercu-*, aide-*, reglages-a-propos)
+   labo-rythme, accueil-*, apercu-*, aide-*, reglages-a-propos)
    n'a pas de hook d'initialisation à l'affichage.
 
    Pour ajouter/déplacer/renommer une sous-section :
@@ -304,7 +304,7 @@ const INITIALISATEURS_SOUS_SECTION = {
     },
 
     // === BOÎTE À OUTILS ===
-    'boite-outils-tirage': function () {
+    'labo-tirage': function () {
         if (typeof initialiserTirage === 'function') {
             setTimeout(initialiserTirage, 100);
         }
@@ -312,12 +312,12 @@ const INITIALISATEURS_SOUS_SECTION = {
             setTimeout(initialiserQuestions, 100);
         }
     },
-    'boite-outils-modelisation': function () {
+    'labo-modelisation': function () {
         if (typeof initialiserModelisation === 'function') {
             setTimeout(initialiserModelisation, 100);
         }
     },
-    'boite-outils-etudes': function () {
+    'labo-etudes': function () {
         // Graphiques déplacés depuis l'Aperçu (ancien suivi-labo)
         if (typeof creerGraphiqueCorrelationsLongitudinales === 'function') {
             setTimeout(() => creerGraphiqueCorrelationsLongitudinales('graphique-correlations-longitudinales'), 100);
@@ -330,7 +330,7 @@ const INITIALISATEURS_SOUS_SECTION = {
             setTimeout(() => afficherMatriceConsolidation(), 150);
         }
     },
-    'boite-outils-bilan': function () {
+    'labo-bilan': function () {
         if (typeof initialiserBilanReflexif === 'function') {
             setTimeout(initialiserBilanReflexif, 100);
         }
@@ -511,7 +511,7 @@ function afficherSousSection(idSousSection) {
     // ============================================
 
     // Nettoyer la Modelisation quand on la quitte
-    if (sousSectionActive === 'boite-outils-modelisation' && idSousSection !== 'boite-outils-modelisation') {
+    if (sousSectionActive === 'labo-modelisation' && idSousSection !== 'labo-modelisation') {
         if (typeof window.modelisation !== 'undefined') {
             window.modelisation.nettoyer();
         }
@@ -522,7 +522,7 @@ function afficherSousSection(idSousSection) {
     let section = null;
     for (const sectionId of Object.keys(configurationsOnglets)) {
         if (idSousSection.startsWith(sectionId + '-')) {
-            // Prendre le match le plus long (ex: 'boite-outils' > 'boite')
+            // Prendre le match le plus long (ex: 'reglages' > 'reg')
             if (!section || sectionId.length > section.length) {
                 section = sectionId;
             }
