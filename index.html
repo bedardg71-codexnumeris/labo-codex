@@ -3704,10 +3704,10 @@
                                     <span class="codex-menu-icone"><img src="icons/icon-export.svg" alt=""></span> Exporter une s&eacute;lection...
                                 </button>
                                 <button id="codex-menu-verser-reserve" class="codex-menu-item" data-action="Reserve.actionVerser">
-                                    <span class="codex-menu-icone"><img src="icons/icon-filing-cabinet.svg" alt=""></span> Verser dans la r&eacute;serve...
+                                    <span class="codex-menu-icone"><img src="icons/icon-filing-cabinet.svg" alt=""></span> Archiver...
                                 </button>
                                 <button id="codex-menu-ouvrir-versement" class="codex-menu-item" data-action="ReserveOuvrir.actionOuvrir">
-                                    <span class="codex-menu-icone"><img src="icons/icon-import.svg" alt=""></span> Ouvrir la r&eacute;serve...
+                                    <span class="codex-menu-icone"><img src="icons/icon-import.svg" alt=""></span> Ouvrir une archive...
                                 </button>
                                 <div class="codex-menu-sep"></div>
                                 <button id="codex-menu-fermer" class="codex-menu-item codex-menu-item--danger u-hide" data-action="Codex.actionFermer">
@@ -10822,14 +10822,14 @@
                     <div class="carte accordeon ferme" id="accordeon-reserve">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
-                                Réserve (versements archivés)
-                                <button class="btn-aide-contextuelle" data-aide="reglages-reserve" data-stop aria-label="Aide : carte Réserve">✴️</button>
+                                Archives stockées
+                                <button class="btn-aide-contextuelle" data-aide="reglages-reserve" data-stop aria-label="Aide : carte Archives">✴️</button>
                             </h3>
                             <span class="accordeon-chevron">▼</span>
                         </div>
                         <div class="accordeon-contenu">
                             <p class="text-muted u-mt-15 u-mb-15">
-                                Historique de tes versements archivés (codex → réserve). Chaque versement
+                                Historique de tes archives (codex → archives). Chaque archive
                                 contient un instantané d'un groupe-cours : étudiants, fichiers, configuration.
                             </p>
 
@@ -10841,10 +10841,10 @@
                                 </div>
                             </div>
 
-                            <!-- Tableau des versements -->
+                            <!-- Tableau des archives -->
                             <div class="u-mt-20">
                                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;">
-                                    <h4 class="u-mb-0 u-texte-bleu">Versements enregistrés</h4>
+                                    <h4 class="u-mb-0 u-texte-bleu">Archives enregistrées</h4>
                                     <span id="reserve-reglages-resume" class="text-muted u-texte-petit"></span>
                                 </div>
                                 <div id="reserve-reglages-table-conteneur" class="table-ressources-container" style="min-height: 80px;">
@@ -10855,7 +10855,7 @@
                             <!-- Actions globales -->
                             <div class="u-mt-20" style="display: flex; gap: 12px; flex-wrap: wrap;">
                                 <button class="btn btn-principal" data-action="ReserveOuvrir.actionOuvrir">
-                                    Ouvrir un versement…
+                                    Ouvrir une archive…
                                 </button>
                                 <button class="btn btn-secondaire" data-action="ReserveReglages.rafraichir">
                                     Rafraîchir la liste
@@ -15612,7 +15612,7 @@
                                     <li><strong>Un manifeste</strong> : métadonnées du codex (date, appareil, version de l'app)</li>
                                 </ul>
                                 <p style="margin-top: 10px; font-size: 0.9rem; color: var(--texte-secondaire);">
-                                    <em>Pour archiver l'historique d'un trimestre terminé, utilise plutôt la <strong>Réserve</strong> (menu Codex → « Verser dans la réserve »).</em>
+                                    <em>Pour archiver l'historique d'un trimestre terminé, utilise plutôt les <strong>Archives</strong> (menu Codex → « Archiver »).</em>
                                 </p>
                             </div>
 
@@ -15630,8 +15630,8 @@
                                 <li><strong>Enregistrer le codex</strong> : Sauvegarde vers le même emplacement (Chrome/Edge : sans dialogue grâce à l'auto-save)</li>
                                 <li><strong>Enregistrer sous</strong> : Sauvegarde vers un nouvel emplacement</li>
                                 <li><strong>Nouveau codex</strong> : Crée un codex à partir des données actuelles en mémoire</li>
-                                <li><strong>Verser dans la réserve</strong> : Archive le groupe-cours d'un trimestre terminé dans ta réserve locale (voir l'onglet Réserve)</li>
-                                <li><strong>Ouvrir la réserve</strong> : Récupère des grilles, échelles ou tampons d'un versement archivé</li>
+                                <li><strong>Archiver</strong> : Archive le groupe-cours d'un trimestre terminé dans tes archives locale (voir l'onglet Archives)</li>
+                                <li><strong>Ouvrir une archive</strong> : Récupère des grilles, échelles ou tampons d'un archive archivée</li>
                                 <li><strong>Fusionner avec un codex</strong> : Combine les données de deux codex (utile quand deux enseignants travaillent sur des groupes différents)</li>
                                 <li><strong>Exporter une sélection</strong> : Exporte un sous-ensemble du codex par trimestre</li>
                                 <li><strong>Fermer le codex</strong> : Détache le codex sans supprimer les données en mémoire</li>
@@ -15666,7 +15666,7 @@
                                     </tr>
                                     <tr style="border-bottom: 1px solid var(--gris-pale);">
                                         <td style="padding: 6px 8px; font-weight: 600;">Archivage long terme</td>
-                                        <td style="padding: 6px 8px;">Via la Réserve (menu Codex → Verser)</td>
+                                        <td style="padding: 6px 8px;">Via les Archives (menu Codex → Archiver)</td>
                                         <td style="padding: 6px 8px;">Non (un seul instantané)</td>
                                     </tr>
                                     <tr style="border-bottom: 1px solid var(--gris-pale);">
@@ -15870,13 +15870,13 @@
     <script src="js/donnees-v2.js?v=2026050538"></script> <!-- Refonte nav SP5 : afficherSection calendrier --></script> <!-- Refonte nav SP4 : naviguerVers conception-* (5 cibles) --></script> <!-- Refonte nav SP2 : naviguerVers conception-pratiques-notation -->
     <script src="js/etudiants.js?v=2026042708"></script>
     <script src="js/productions-bibliotheque.js?v=2026010218"></script> <!-- + import depuis trimestres -->
-    <script src="js/productions.js?v=2026050531"></script> <!-- Refonte nav SP4-fix : querySelector #conception-productions -->
+    <script src="js/productions.js?v=2026050555"></script> <!-- #259 : commentaire JSDoc archives/voûte -->
     <script src="js/grilles-bibliotheque.js?v=2026010220"></script> <!-- refactoring: plus de hardcodé -->
     <script src="js/grilles.js?v=2026010603"></script> <!-- Bug Bruno: sauvegarde nouvelles grilles -->
     <script src="js/echelles-bibliotheque.js?v=2026010220"></script> <!-- refactoring: plus de hardcodé -->
     <script src="js/echelles.js?v=2026010601"></script>
     <script src="js/cartouches-bibliotheque.js?v=2026010220"></script> <!-- refactoring: plus de hardcodé -->
-    <script src="js/cartouches.js?v=2026042804"></script>
+    <script src="js/cartouches.js?v=2026050556"></script> <!-- #259 : commentaire JSDoc archives/voûte -->
     <script src="js/export-pdf.js?v=2026021202"></script> <!-- Beta 95.7 #30 : Export PDF -->
     <script src="js/cours.js?v=2026050519"></script> <!-- Refonte nav SP4 : naviguerVersPratiqueNotation → conception-pratiques-notation --></script> <!-- Refonte nav SP2 : naviguerVersPratiqueNotation pointe vers Conception -->
     <script src="js/contexte.js?v=2026013001"></script> <!-- Beta 95.2 : Support groupe-cours -->
@@ -15941,9 +15941,9 @@
     <script src="libs/jszip.min.js?v=3.10.1"></script>
     <script src="libs/html2canvas.min.js?v=1.4.1"></script>
     <script src="js/travaux-stockage.js?v=2026020601"></script>
-    <script src="js/reserve.js?v=2026050202"></script>
-    <script src="js/reserve-ouvrir.js?v=2026050204"></script>
-    <script src="js/reserve-reglages.js?v=2026050201"></script>
+    <script src="js/reserve.js?v=2026050557"></script> <!-- #259 : strings UI Réserve → Archives -->
+    <script src="js/reserve-ouvrir.js?v=2026050558"></script> <!-- #259 : strings UI Réserve → Archives -->
+    <script src="js/reserve-reglages.js?v=2026050559"></script> <!-- #259 : strings UI Réserve → Archives -->
     <script src="js/travaux-preparation.js?v=2026021801"></script>
     <script src="js/travaux-import.js?v=2026050220"></script> <!-- Beta 99.31 b0502-0907 : flag livrableAdditionnel pour skip détection doublon (palier 3) -->
     <script src="js/travaux-visionneuse.js?v=2026050102"></script> <!-- Beta 99.30 b0501-1830 : cleanup PDF.js + ouvrirPDF try/catch + zoom margin-aware + split nav buttons -->
@@ -16009,15 +16009,15 @@
     <script src="js/accompagnement.js?v=2026050539"></script> <!-- Refonte nav SP5 : section calendrier --></script> <!-- Refonte nav SP4 : sectionActive et flèches didactiques conception-* --></script> <!-- Refonte nav SP2 : sectionActive pointe vers conception-pratiques-notation -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=2026050541"></script> <!-- Refonte nav SP5 : nav-calendrier-* + cleanup orphan nav-ctx-bilan --></script> <!-- Refonte nav SP4 : nav-conception-* (6 clés) --></script> <!-- Refonte nav SP3 : nav-labo-* (5 clés) -->
-    <script src="js/accompagnement-contenu-popup.js?v=2026050540"></script> <!-- Refonte nav SP5 : 7 références Calendrier --></script> <!-- Refonte nav SP4 : 14 clés/voirAussi conception-* --></script> <!-- Beta 99.32 b0502-1430 : popup reserve-contenu-versement (#257 v2.B-α) -->
+    <script src="js/accompagnement-contenu-hover.js?v=2026050560"></script> <!-- #259 : tooltips Archives + label section Labo -->
+    <script src="js/accompagnement-contenu-popup.js?v=2026050561"></script> <!-- #259 : popups Archives, titre carte « Archives stockées » -->
     <script src="js/accompagnement-contenu-terme.js?v=2026050528"></script> <!-- Refonte nav SP4 : 14 chemins « Conception > X » --></script>
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js?v=2026050543"></script> <!-- Refonte nav SP5 : naviguerVers calendrier-trimestre --></script>
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=2026050553"></script> <!-- Beta 99.35 b0505-0735 : bump final refonte nav avant merge -->
+    <script src="js/init-inline.js?v=2026050562"></script> <!-- Beta 99.35 b0505-0940 : #259 Réserve → Archives -->
 
     <!-- Wrappers pour délégation data-on-change (Phase 5b) — externalisé dans init-inline.js -->
 
@@ -16445,7 +16445,7 @@
     </div>
 
     <!-- =========================================
-         MODAL RÉSERVE — Versement d'un groupe-cours
+         MODAL ARCHIVES — Archive d'un groupe-cours
          (26 avril 2026 — voir docs/architecture/SPEC-RESERVE-V1.md)
          ========================================= -->
     <div id="modalReserve" class="modal-overlay" data-close-on-bg="Reserve.fermerDialogue">
@@ -16456,18 +16456,18 @@
 
             <h2 class="modal-titre u-texte-11" style="margin-bottom: 4px">
                 <img src="icons/icon-filing-cabinet.svg" alt="" class="btn-inline-icon">
-                Verser dans la r&eacute;serve
-                <button class="btn-aide-contextuelle" data-aide="reserve-versement" aria-label="Aide : verser dans la r&eacute;serve">&#x2734;&#xFE0F;</button>
+                Archiver
+                <button class="btn-aide-contextuelle" data-aide="reserve-versement" aria-label="Aide : archiver">&#x2734;&#xFE0F;</button>
             </h2>
             <p class="u-mb-10" style="color: var(--texte-secondaire); font-size: 0.85rem">
-                Versement d'un groupe-cours dans la r&eacute;serve.
+                Archive d'un groupe-cours.
             </p>
 
             <div id="reserve-statut" class="u-mb-10"
                  style="background: var(--surface-carte); padding: 8px 10px; border-radius: var(--radius-moyen); font-size: 0.82rem; line-height: 1.5; position: relative;">
                 <button class="btn-aide-contextuelle" data-aide="reserve-fsapi" aria-label="Aide : mode automatique ou mode manuel"
                         style="position: absolute; top: 6px; right: 6px;">&#x2734;&#xFE0F;</button>
-                <em>D&eacute;tection du mode de versement...</em>
+                <em>D&eacute;tection du mode d’archivage...</em>
             </div>
 
             <div class="u-flex-col u-flex-gap-10" style="margin-bottom: 12px;">
@@ -16509,7 +16509,7 @@
                 </button>
                 <button data-action="Reserve.lancerDepuisDialogue" class="btn btn-confirmer u-texte-petit" style="padding: 6px 12px"
                         data-tooltip="reserve-bouton-verser">
-                    Verser ce groupe
+                    Archiver ce groupe
                 </button>
             </div>
         </div>
@@ -16527,11 +16527,11 @@
 
             <h2 class="modal-titre u-texte-11" style="margin-bottom: 4px">
                 <img src="icons/icon-filing-cabinet.svg" alt="" class="btn-inline-icon">
-                Ouvrir la r&eacute;serve
-                <button class="btn-aide-contextuelle" data-aide="reserve-ouvrir-versement" aria-label="Aide : ouvrir la r&eacute;serve">&#x2734;&#xFE0F;</button>
+                Ouvrir une archive
+                <button class="btn-aide-contextuelle" data-aide="reserve-ouvrir-versement" aria-label="Aide : ouvrir les archives">&#x2734;&#xFE0F;</button>
             </h2>
             <p class="u-mb-10" style="color: var(--texte-secondaire); font-size: 0.85rem">
-                Consulte tes versements archiv&eacute;s pour r&eacute;importer des grilles,
+                Consulte tes archives archiv&eacute;s pour r&eacute;importer des grilles,
                 &eacute;chelles ou tampons dans tes biblioth&egrave;ques actives.
             </p>
 
@@ -16549,7 +16549,7 @@
                      style="background: var(--surface-carte); padding: 8px 10px; border-radius: var(--radius-moyen); font-size: 0.85rem; line-height: 1.5;">
                 </div>
 
-                <!-- Panneau « Contenu du versement » (#257 v2.B-α) -->
+                <!-- Panneau « Contenu de l’archive » (#257 v2.B-α) -->
                 <div id="reserve-ouvrir-contenu" class="u-mb-10"></div>
 
                 <div id="reserve-ouvrir-sections"></div>
