@@ -80,8 +80,8 @@ const GUIDAGE_TEXTES = {
         titre: 'Productions \u00e9tudiantes',
         texte: 'Les productions sont les travaux que tes \u00e9tudiants doivent remettre (dissertations, examens, projets). La d\u00e9mo en contient 11, chacune associ\u00e9e \u00e0 une grille de crit\u00e8res.'
     },
-    'boite-outils-tirage': {
-        titre: 'Bo\u00eete \u00e0 outils',
+    'labo-tirage': {
+        titre: 'Labo',
         texte: 'Outils interactifs pour l\u2019animation en classe\u00a0: tirage au sort d\u2019\u00e9tudiants pour les mises en situation, les pr\u00e9sentations ou les exercices collaboratifs.'
     },
     'structure-carte': {
@@ -92,8 +92,8 @@ const GUIDAGE_TEXTES = {
         titre: 'Planification \u2014 Plan de le\u00e7on',
         texte: 'L\u2019organisateur transforme ta carte mentale en plans de le\u00e7on structur\u00e9s. S\u00e9lectionne une carte, une s\u00e9quence et une le\u00e7on pour voir les sections auto-d\u00e9riv\u00e9es (objectif, pr\u00e9requis, productions).'
     },
-    'boite-outils-modelisation': {
-        titre: 'Bo\u00eete \u00e0 outils \u2014 Mod\u00e9lisation',
+    'labo-modelisation': {
+        titre: 'Labo \u2014 Mod\u00e9lisation',
         texte: 'La mod\u00e9lisation te permet d\u2019ouvrir un PDF pour l\u2019annoter en direct lors d\u2019une projection en classe. Ouvre un fichier depuis ton ordinateur pour tester les outils d\u2019annotation.'
     }
 };

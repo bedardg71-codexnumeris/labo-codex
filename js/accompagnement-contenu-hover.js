@@ -750,8 +750,12 @@ const TOOLTIPS = {
         'Fiche individuelle d\'un\u00b7e \u00e9tudiant\u00b7e : productions, mobilisation, progression, habilet\u00e9s, accompagnement et rapport.',
     'nav-suivi-interventions':
         'Planifie et documente les interventions R\u00e0I de niveaux 2 (pr\u00e9ventif) et 3 (intensif).',
-    'nav-suivi-labo':
+    'nav-labo-etudes':
         'Analyse les r\u00e9sultats de ta d\u00e9marche p\u00e9dagogique : graphiques de progression, corr\u00e9lations et trajectoires.',
+    'nav-labo-rythme':
+        'Rythme des \u00e9valuations : portrait des copies impos\u00e9es vs restantes par \u00e9tudiant et par production.',
+    'nav-labo-bilan':
+        'Composer et exploiter un bilan r\u00e9flexif de fin de trimestre aupr\u00e8s des \u00e9tudiants.',
 
     // --- Planification ---
 
@@ -762,13 +766,13 @@ const TOOLTIPS = {
     'nav-str-organisateur':
         'Calendrier des s\u00e9quences sur 15 semaines et plans de le\u00e7ons avec option d\'enseignement explicite en 5 phases.',
 
-    // --- Boîte à outils ---
+    // --- Labo ---
 
-    'nav-boite-outils':
+    'nav-labo':
         'Utilitaires compl\u00e9mentaires pour l\'enseignement en classe.',
-    'nav-bao-modelisation':
+    'nav-labo-modelisation':
         'D\u00e9monstrations interactives et mod\u00e9lisations visuelles pour illustrer des concepts en classe.',
-    'nav-bao-tirage':
+    'nav-labo-tirage':
         'Tirage au sort al\u00e9atoire et questions flash pour l\'animation en classe.',
 
     // =================================================================

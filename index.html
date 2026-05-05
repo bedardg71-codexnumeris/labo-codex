@@ -3847,8 +3847,8 @@
                 <button data-onglet="evaluations" data-tooltip="nav-evaluations">
                     <img src="icons/icon-pulse.svg" alt="" class="nav-icon"><span class="nav-label">&Eacute;valuation</span>
                 </button>
-                <button data-onglet="boite-outils" data-tooltip="nav-boite-outils">
-                    <img src="icons/icon-juggler.svg" alt="" class="nav-icon"><span class="nav-label">Outils</span>
+                <button data-onglet="labo" data-tooltip="nav-labo">
+                    <img src="icons/icon-juggler.svg" alt="" class="nav-icon"><span class="nav-label">Labo</span>
                 </button>
             </div>
         </nav>
@@ -8416,10 +8416,10 @@
      SECTION: BOÎTE À OUTILS
      Mini-applications pédagogiques pour l'animation en classe
      =================================== -->
-            <section id="section-boite-outils" class="section">
+            <section id="section-labo" class="section">
 
                 <!-- Sous-section: Outils interactifs -->
-                <div id="boite-outils-tirage" class="sous-section">
+                <div id="labo-tirage" class="sous-section">
 
                     <!-- Container flex pour les deux cartes -->
                     <div class="outils-grid">
@@ -8508,14 +8508,14 @@
 
 
                 <!-- Sous-section: Modélisation (annotation en projection) -->
-                <div id="boite-outils-modelisation" class="sous-section">
+                <div id="labo-modelisation" class="sous-section">
                     <div id="model-conteneur-principal">
                         <!-- Rempli dynamiquement par modelisation.js -->
                     </div>
                 </div><!-- fin sous-section modelisation -->
 
                 <!-- Sous-section: Rythme de travail -->
-                <div id="boite-outils-rythme" class="sous-section">
+                <div id="labo-rythme" class="sous-section">
                     <div class="carte">
                         <h2>Rythme de travail</h2>
                         <p class="u-texte-secondaire">Durées d'évaluation par activité d'apprentissage — mesurées par le chronomètre et les évaluations sauvegardées.</p>
@@ -8645,11 +8645,11 @@
                 </div><!-- fin sous-section rythme -->
 
                 <!-- Sous-section: Études (analyse de la démarche pédagogique) -->
-                <div id="boite-outils-etudes" class="sous-section">
+                <div id="labo-etudes" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Études</span>
                         <span class="titre-emoji-container">
-                            <button class="btn-aide-contextuelle" data-aide="boite-outils-etudes" aria-label="Aide : analyser les résultats">✴️</button>
+                            <button class="btn-aide-contextuelle" data-aide="labo-etudes" aria-label="Aide : analyser les résultats">✴️</button>
                         </span>
                     </h2>
                     <p class="text-muted">Analyse des résultats de la démarche pédagogique en cours</p>
@@ -8790,15 +8790,15 @@
                     </div>
 
                     </div><!-- fin labo-conteneur -->
-                </div><!-- FIN sous-section boite-outils-etudes -->
+                </div><!-- FIN sous-section labo-etudes -->
 
-                <div id="boite-outils-bilan" class="sous-section">
+                <div id="labo-bilan" class="sous-section">
                     <div id="bilan-conteneur-principal">
                         <!-- Rempli dynamiquement par bilan-reflexif.js -->
                     </div>
                 </div><!-- fin sous-section bilan -->
 
-            </section><!-- fin section-boite-outils -->
+            </section><!-- fin section-labo -->
 
             <!-- SECTION TRAVAUX : migrée sous Évaluations (sous-onglets evaluations-travaux et evaluations-archivage) -->
 
@@ -15834,8 +15834,8 @@
     <script src="libs/jspdf-autotable.min.js"></script>
 
     <!-- PRIORITÉ 1: Fondations -->
-    <script src="js/config.js?v=2026050501"></script> <!-- Refonte nav SP2 : configurationsOnglets — Pratiques→Conception, Bilan/Études→Labo -->
-    <script src="js/navigation.js?v=2026050502"></script> <!-- Refonte nav SP2 : table TOOLTIPS + INITIALISATEURS suit les déplacements -->
+    <script src="js/config.js?v=2026050509"></script> <!-- Refonte nav SP3 : section 'boite-outils' → 'labo' -->
+    <script src="js/navigation.js?v=2026050510"></script> <!-- Refonte nav SP3 : tables migrées vers IDs labo-* -->
     <script src="js/preferences.js?v=2026041602"></script> <!-- Beta 99.16 : API centralisée préférences + migration V3 (doit précéder modes.js) -->
     <script src="js/modes.js?v=2026041601"></script> <!-- Beta 99.16 : lectures via obtenirPreference -->
 
@@ -15922,11 +15922,11 @@
     <script src="js/evaluations-apercu.js?v=2025111026"></script>
     <script src="js/boite-outils.js?v=2026013005"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->
     <script src="js/modelisation.js?v=2026022201"></script> <!-- Modélisation : annotation en projection -->
-    <script src="js/rythme.js?v=2026050407"></script> <!-- Beta 99.34 b0504-0710 : Restantes exclut les évaluations vides (jeton délai seul) — alignement sur le statut workflow 'importe' -->
+    <script src="js/rythme.js?v=2026050511"></script> <!-- Refonte nav SP3 : ID labo-rythme + data-section labo -->
 
     <!-- Module Bilan réflexif -->
     <script src="js/bilan-reflexif-data.js?v=2026032801"></script>
-    <script src="js/bilan-reflexif.js?v=2026050506"></script> <!-- Refonte nav SP2 : hook idSousSection sur boite-outils-bilan -->
+    <script src="js/bilan-reflexif.js?v=2026050512"></script> <!-- Refonte nav SP3 : auto-enregistrement sur configurationsOnglets['labo'] + hook labo-bilan -->
 
     <!-- Module Planification (Carte mentale) -->
     <script src="js/planification-donnees.js?v=2026020701"></script>
@@ -15992,7 +15992,7 @@
     <!-- Page d'accueil (Chantier 3) -->
     <script src="js/accueil.js?v=2026042403"></script> <!-- Beta 99.24 : Phase 5.D — retrait des fallbacks legacy dans toggleDemoHandler -->
     <!-- Guidage contextuel démo (Chantier 4) -->
-    <script src="js/guidage-demo.js?v=2026020601"></script>
+    <script src="js/guidage-demo.js?v=2026050513"></script> <!-- Refonte nav SP3 : clés labo-tirage, labo-modelisation -->
 
     <!-- Changelog dynamique -->
     <script src="js/changelog-data.js?v=2026042819"></script> <!-- Beta 99.28 b0428-1915 : item numérotation semaines DÉ -->
@@ -16008,7 +16008,7 @@
     <script src="js/accompagnement.js?v=2026050508"></script> <!-- Refonte nav SP2 : sectionActive pointe vers structure-pratiques-notation -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=2026050123"></script>
+    <script src="js/accompagnement-contenu-hover.js?v=2026050514"></script> <!-- Refonte nav SP3 : nav-labo-* (5 clés) -->
     <script src="js/accompagnement-contenu-popup.js?v=2026050216"></script> <!-- Beta 99.32 b0502-1430 : popup reserve-contenu-versement (#257 v2.B-α) -->
     <script src="js/accompagnement-contenu-terme.js?v=2026042002"></script>
 

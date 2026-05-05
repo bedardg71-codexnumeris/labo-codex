@@ -1,5 +1,5 @@
 {
-  "version": "99.34-SP2 — 2026-05-05",
+  "version": "99.34-SP3 — 2026-05-05",
   "date_mise_a_jour": "2026-05-05",
   "ids_html": {
     "navigation": [
@@ -14,7 +14,7 @@
       "section-contexte",
       "section-suivi",
       "section-evaluations",
-      "section-boite-outils",
+      "section-labo",
       "section-aide",
       "section-reglages"
     ],
@@ -39,10 +39,10 @@
       "evaluations-liste",
       "evaluations-annoter",
       "evaluations-exporter",
-      "boite-outils-tirage",
-      "boite-outils-modelisation",
-      "boite-outils-etudes",
-      "boite-outils-bilan",
+      "labo-tirage",
+      "labo-modelisation",
+      "labo-etudes",
+      "labo-bilan",
       "reglages-preferences",
       "reglages-depistage",
       "reglages-donnees",
