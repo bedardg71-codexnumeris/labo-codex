@@ -14,69 +14,106 @@
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
-Contexte : 5 mai 2026, journée très intense — 4 chantiers majeurs
-livrés et poussés sur main :
+Contexte : suite de la journée du 5 mai 2026, où 4 chantiers majeurs
+ont été livrés et poussés sur main (Beta 99.35 b0505-1220) :
 
-1. Refonte nav principale (Beta 99.35 b0505-0735, merge 311c8d9) :
-   Conception (ex-Structure) · Calendrier (ex-Contexte) · Labo (ex-Outils)
-   avec déplacements (Pratiques→Conception, Bilan/Études→Labo).
+  1. Refonte nav (Conception/Calendrier/Labo) — merge 311c8d9
+  2. #261 cartes mentales restaurées + patch préventif — 76144bc
+  3. #259 Réserve→Archives (refactor zéro dette, ~700 occ.) — PR #10 → 86b597d
+  4. #247 Réglages > Données — 6 cartes alignées écosystème — PR #11 → cc1d219
 
-2. #261 cartes mentales perdues (fix 76144bc) : 5 cartes restaurées
-   depuis backup 18 avril + patch préventif planification-donnees.js.
+État actuel : main propre et à jour avec origin. Prêt pour le prochain
+chantier.
 
-3. #259 Réserve→Archives (Beta 99.35 b0505-0940, PR #10 mergée 86b597d) :
-   refactor zéro dette technique. ~700 occurrences. Migration data via
-   script bash one-shot fourni. Identifiants JS internes préservés.
-   19 doublons </script> nettoyés au passage.
+LECTURE OBLIGATOIRE (5 min) avant de coder :
+1. SESSION.md (ce fichier) — détails complets des livrables 5 mai
+2. CLAUDE.md — conventions, zones protégées, règles sécurité
+3. docs/architecture/ECOSYSTEME-DONNEES.md — 4 concepts (Codex /
+   Archives / Codex data / Voûte). Document fondateur.
+4. BACKLOG.md — items ouverts avec leurs détails techniques
 
-4. #247 Refonte Réglages > Données (Beta 99.35 b0505-1220, PR #11
-   mergée cc1d219) : structure 6 cartes alignée sur l'écosystème.
-   Codex / Archives (diagnostic-only) / Codex data placeholder /
-   Voûte placeholder / Captures / Maintenance.
-
-PROCHAINE ÉTAPE — choisir parmi les items du backlog encore ouverts
-(par priorité décroissante suggérée) :
+PROCHAINE ÉTAPE — choisir parmi les items du backlog ouverts
+(par priorité descendante suggérée) :
 
   [MOYENNE] #257 v2.B Mode consultation namespace temporaire (~5-6 h)
-    Suite de #257 v2.A. Ouvre une archive en lecture seule dans un
-    namespace `__archive_*`, utile pour démos / formation /
-    consultation rétrospective.
+    Suite de #257 v2.A (livré 28 avril). Ouvre une archive en lecture
+    seule dans un namespace `__archive_*`, utile pour démos / formation /
+    consultation rétrospective sans modifier les bibliothèques actives.
+    Voir BACKLOG.md ligne ~113 pour le détail.
 
   [MOYENNE] #248 Manifeste fusion auto Safari (~2-3 h)
     FSAPI Chrome/Edge le fait déjà. Côté Safari (ZIP), le
     manifeste-archives.json n'est pas fusionné automatiquement à
     l'import — l'utilisateur doit faire une action manuelle. À
-    automatiser pour parité.
+    automatiser pour parité Mac/Safari ↔ Chrome.
 
   [MOYENNE] #251 Codex data — extraction depuis les Archives (~3-4 h)
-    Ouvrir une archive et en extraire un sous-ensemble (cours / groupes
-    spécifiques) pour générer un Codex data (format de recherche).
+    Format JSON léger (5-30 Mo) sans blobs, multi-trimestres. Consommé
+    par le Labo. Concrétisera la carte 3 « Codex data » (placeholder
+    actuel) dans Réglages > Données.
 
-  [MOYENNE] #256-bis Aide aux 8 autres modales (~1 j). Pattern de #256
-    (modales Réserve/Archives, livré 28 avril) à reproduire pour
+  [MOYENNE] #256-bis Aide aux 8 autres modales (~1 j)
+    Pattern de #256 (modales Archives, livré 28 avril) à reproduire pour
     Nouveautés, Réparation, Wizard pratique, ApercuPDF, Confidentiel,
     Export, Import, Suppression ressource.
 
-  [BASSE] #260 Crédit Icons8 (~15 min). À faire avant tout partage public.
+  [BASSE] #260 Crédit Icons8 (~15 min)
+    Ajouter une ligne HTML dans Réglages > Aide > À propos > carte
+    Technologies. À faire avant tout partage public.
 
-CONTRAINTES (rappel CLAUDE.md) :
-- Demander le numéro de beta à Grégoire avant le commit final
-- db.setSync (PAS db.set async)
+  [HORS ÉCOSYSTÈME] #258 Bouton anonymisation dans l'en-tête (~30 min)
+    Remplace le sélecteur Normal/Anonymisé par un bouton-icône à droite,
+    à côté de Mode clair/sombre.
+
+WORKFLOW DE CHANTIER (rappel) :
+1. Discuter approche AVANT de coder (sauf si trivial). Présenter un
+   plan en sous-phases si > 1h de travail.
+2. Créer une branche feature (ex: `refactor/258-bouton-anonymisation`)
+   pour les chantiers > 30 min.
+3. Implémenter par sous-phases commitables, avec tests visuels entre
+   chaque (Cmd+Option+R sur Safari Mac).
+4. Demander le numéro de beta à Grégoire avant le commit final
+   (format : « beta XX.XX build MMJJ-HHMM »).
+5. Bumper version.json + js/init-inline.js + cache-buster init-inline
+   dans index.html.
+6. Push branche + créer PR (gh pr create).
+7. Optionnel : `/ultrareview <PR#>` (facturé) ou review manuelle ciblée.
+8. Merge avec --merge (préserve l'historique des commits).
+9. Mettre à jour SESSION.md à la fin du chantier ou de la session.
+
+CONTRAINTES TECHNIQUES (rappel CLAUDE.md) :
 - echapperHtml() obligatoire sur innerHTML avec données utilisateur
+- Zéro handler inline → data-action / data-on-change / data-on-input
+- console.warn / console.error uniquement (pas console.log en prod)
 - Modales : classList.add('actif') (PAS 'visible')
-- Charger SKILL_integrite_globaux.md si on touche aux clés globales partagées
+- db.setSync pour petites métadonnées (PAS db.set async)
+- Variables CSS du DS, tester modes clair ET sombre
+- Safari Mac/iPad cibles ; Cmd+Q + rouvrir entre les sous-phases
+- Charger SKILL_integrite_globaux.md si on touche aux clés globales
+  partagées (grillesTemplates, cours, enseignants, cartouches_*, etc.)
 
-OBSERVATIONS OUVERTES :
-- /ultrareview avait crashé sur la PR #259 (cloud bug) — review manuelle
-  ciblée a été faite à la place. Pour #247, retenter /ultrareview
-  pourrait valoir le coup une fois le chantier fini.
-- Test iPad de la refonte nav (Mac OK, iPad non testé) — à faire à
-  l'occasion, pas bloquant.
-- Migration data #259 : si l'utilisateur a un dossier
+GOTCHAS FRÉQUENTS :
+- Cache-busters : Safari file:// est têtu. `?v=` cache-bust marche
+  mais Cmd+Option+R force-reload est plus fiable.
+- Apostrophes typographiques (’ U+2019) plutôt que ASCII (') dans
+  les strings JS — évite les conflits de délimitation.
+- Faux amis dashboard : `contexte-indicateurs-*`, classes CSS
+  `.carte-contexte-*` sont des cartes d'écosystème dashboard, NE PAS
+  toucher si refactor « contexte/calendrier ».
+- SRPNF : le mot « structure » dans `['structure', 'rigueur', ...]`
+  est le critère S de SRPNF (grille SRPNF), à préserver.
+- Variables locales JS comme `dossierVersement`, `_versementsListes`
+  : conserver (BACKLOG #259 explicite).
+
+OBSERVATIONS OUVERTES (à régler à l'occasion) :
+- Test iPad de la refonte nav (Mac OK, iPad non testé). Pas bloquant.
+- /ultrareview avait crashé sur la PR #259 (cloud bug) — review
+  manuelle ciblée a fonctionné. Pour les futurs chantiers, retenter
+  /ultrareview vaut le coup avant un fallback manuel.
+- Migration data #259 : si quelqu'un a un dossier
   `~/Documents/Reserve_LaboCodex/`, il doit lancer une fois
-  `bash migrer-reserve-vers-archives.sh` avant que l'app ne le voie.
-  Test en local 5 mai : aucun dossier détecté (probablement Safari ZIP
-  uniquement).
+  `bash migrer-reserve-vers-archives.sh` à la racine du repo. Test en
+  local 5 mai : aucun dossier détecté (probablement Safari ZIP only).
 ```
 
 ---
@@ -191,4 +228,4 @@ Aucun impact sur `donnees-v2.js` (logique métier inchangée).
 
 ## Prochaine session — Décision à prendre
 
-Voir consigne de démarrage ci-dessus. **Mon avis (Claude)** : enchaîner avec **#247 Refonte Réglages > Données** maintenant que #259 a stabilisé le vocabulaire « Archives ». Le chantier est environ 1 jour mais établira la structure de la section Données alignée sur les 4 concepts (Codex / Archives / Codex data / Voûte).
+Voir consigne de démarrage ci-dessus. Items priorisés moyenne/basse (les hauts du backlog écosystème ont tous été livrés le 5 mai). **Mon avis (Claude)** : sans urgence particulière, **#258** (bouton anonymisation, ~30 min) ou **#260** (crédit Icons8, ~15 min) sont des warm-ups rapides. Pour un vrai chantier, **#251** (Codex data) concrétiserait le placeholder de la carte 3 dans Réglages > Données.
