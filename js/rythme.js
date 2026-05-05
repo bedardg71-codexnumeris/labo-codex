@@ -226,11 +226,16 @@
             dasImportes[f.etudiantDA] = true;
         });
 
-        // DAs qui ont déjà une évaluation (statut ÉVALUÉ)
+        // DAs qui ont déjà une évaluation NOTÉE (statut ÉVALUÉ)
+        // Une évaluation sans critères (ex. uniquement un jeton de délai appliqué)
+        // est considérée « vide » par calculerStatutWorkflow (liste-evaluations.js:22-34)
+        // et reste au statut « Importé ». On applique la même règle ici pour que
+        // copiesRestantes corresponde exactement au filtre « Importé » de la liste.
         var dasEvalues = {};
         evaluations.forEach(function (ev) {
             if (ev.productionId !== prod.id || !ev.etudiantDA || ev.remplaceeParId) return;
             if (gcId && ev.groupeCoursId !== gcId) return;
+            if (!Array.isArray(ev.criteres) || ev.criteres.length === 0) return;
             dasEvalues[ev.etudiantDA] = true;
         });
 
