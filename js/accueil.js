@@ -122,7 +122,7 @@ function afficherAccueilContenu(conteneur) {
                 <div class="accueil-action-desc">D\u00e9finis ce que tu mesures et comment tu le fais.</div>
             </div>
 
-            <div class="accueil-action" data-action="naviguerAccueilCarte" data-param="structure|structure-carte">
+            <div class="accueil-action" data-action="naviguerAccueilCarte" data-param="structure|conception-carte">
                 <div class="accueil-action-icone">\uD83D\uDDFA\uFE0F</div>
                 <div class="accueil-action-titre">Planifier ton cours</div>
                 <div class="accueil-action-desc">S\u00e9quences, le\u00e7ons et alignement p\u00e9dagogique.</div>

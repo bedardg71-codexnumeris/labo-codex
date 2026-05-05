@@ -95,7 +95,7 @@ function genererIdCourtPratique(id) {
    =============================== */
 
 /**
- * Point d'entrée appelé par navigation.js quand on navigue vers structure-pratiques-notation
+ * Point d'entrée appelé par navigation.js quand on navigue vers conception-pratiques-notation
  * Note: Renommé en "Materiel" pour éviter conflit avec pratiques.js
  */
 async function initialiserModulePratiquesMateriel() {

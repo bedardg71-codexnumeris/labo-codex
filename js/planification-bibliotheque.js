@@ -441,7 +441,7 @@ function importerAlignementFichier(event) {
                 return;
             }
 
-            // Sinon → import direct dans le trimestre (comportement existant via structure-carte)
+            // Sinon → import direct dans le trimestre (comportement existant via conception-carte)
             // Déclencher l'import classique en simulant l'input file
             var inputClassique = document.getElementById('planif-fichier-import');
             if (inputClassique) {
