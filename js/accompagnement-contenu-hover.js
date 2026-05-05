@@ -792,11 +792,11 @@ const TOOLTIPS = {
         'Bascule entre le mode clair et le mode sombre selon tes pr\u00e9f\u00e9rences visuelles et l\'environnement d\'utilisation.',
 
     // =================================================================
-    // R\u00c9SERVE \u2014 Versement et ouverture (modales R\u00e9serve)
+    // ARCHIVES \u2014 Création et ouverture (modales R\u00e9serve)
     // =================================================================
 
     'reserve-select-trimestre':
-        'Trimestre du groupe-cours \u00e0 verser dans la r\u00e9serve.',
+        'Trimestre du groupe-cours à archiver.',
     'reserve-select-groupe':
         'Groupe-cours qui sera vers\u00e9 dans la r\u00e9serve. Tous les groupes que tu as enseign\u00e9s peuvent \u00eatre vers\u00e9s.',
     'reserve-bouton-verser':
@@ -806,7 +806,7 @@ const TOOLTIPS = {
     'reserve-ouvrir-toggle-copie':
         'Active la recopie des items d\u00e9j\u00e0 pr\u00e9sents dans ta biblioth\u00e8que active : ils recevront un nouvel identifiant et le suffixe \u00ab\u00a0\u2014 copie\u00a0\u00bb.',
     'reserve-ouvrir-bouton-reimporter':
-        'Recopie les items coch\u00e9s dans tes biblioth\u00e8ques actives. Le versement d\'origine reste fig\u00e9.'
+        'Recopie les items coch\u00e9s dans tes biblioth\u00e8ques actives. L’archive d\'origine reste fig\u00e9.'
 
 };
 

@@ -1,11 +1,11 @@
 /* ===============================
-   MODULE : RÉSERVE RÉGLAGES — Affichage du manifeste local
+   MODULE : ARCHIVES RÉGLAGES — Affichage du manifeste local
    Date : 2 mai 2026
    Backlog : #249 (dépend de #248)
    Architecture : docs/architecture/ECOSYSTEME-DONNEES.md
 
    Vocation
-     Affiche dans Réglages > Données la liste des versements archivés
+     Affiche dans Réglages > Données la liste des archives archivées
      (manifeste local maintenu par reserve.js #248) et le statut du
      dossier FSAPI lié.
 
@@ -72,7 +72,7 @@ async function _rendreBandeauDossier() {
 
     var Reserve = window.Reserve;
     if (!Reserve || typeof Reserve.supporteFSAPI !== 'function') {
-        conteneur.innerHTML = '<p class="text-muted u-texte-petit" style="margin: 0">Module Réserve non chargé.</p>';
+        conteneur.innerHTML = '<p class="text-muted u-texte-petit" style="margin: 0">Module Archives non chargé.</p>';
         return;
     }
 
@@ -80,8 +80,8 @@ async function _rendreBandeauDossier() {
         conteneur.innerHTML =
             '<p class="u-mb-10" style="margin: 0 0 8px 0;">' +
                 'Ton navigateur ne supporte pas l\'écriture directe sur disque. ' +
-                'Les versements sont téléchargés sous forme de ZIP que tu déposes dans ' +
-                '<code>~/Documents/Réserve_LaboCodex/</code> manuellement.' +
+                'Les archives sont téléchargés sous forme de ZIP que tu déposes dans ' +
+                '<code>~/Documents/Archives_LaboCodex/</code> manuellement.' +
             '</p>' +
             '<p class="text-muted u-texte-petit" style="margin: 0">' +
                 'Disponible dans Chrome ou Edge sur Mac.' +
@@ -99,7 +99,7 @@ async function _rendreBandeauDossier() {
     if (!statut || !statut.handle) {
         conteneur.innerHTML =
             '<p class="u-mb-10" style="margin: 0 0 12px 0;">' +
-                'Aucun dossier réserve n\'est actuellement lié. ' +
+                'Aucun dossier d’archives n\'est actuellement lié. ' +
                 'Lie un dossier pour activer l\'écriture directe et la fusion automatique du manifeste.' +
             '</p>' +
             '<button class="btn btn-principal" data-action="ReserveReglages.actionLierDossier">' +
@@ -108,14 +108,14 @@ async function _rendreBandeauDossier() {
         return;
     }
 
-    var nom = _echapper(statut.handle.name || 'Réserve');
+    var nom = _echapper(statut.handle.name || 'Archives');
     var permTxt = '';
     var permClasse = '';
     if (statut.permission === 'granted') {
         permTxt = 'Permission accordée';
         permClasse = 'color: #2e7d32;';
     } else if (statut.permission === 'prompt') {
-        permTxt = 'Permission à confirmer au prochain versement';
+        permTxt = 'Permission à confirmer au prochain archivage';
         permClasse = 'color: #e65100;';
     } else {
         permTxt = 'Permission refusée';
@@ -137,7 +137,7 @@ async function _rendreBandeauDossier() {
                 'Changer le dossier…' +
             '</button>' +
             '<button class="btn btn-secondaire" data-action="ReserveReglages.actionEffacerLiaison" ' +
-                'data-confirm="Effacer la liaison vers ce dossier ? Les versements existants ne sont pas supprimés.">' +
+                'data-confirm="Effacer la liaison vers ce dossier ? Les archives existantes ne sont pas supprimées.">' +
                 'Effacer la liaison' +
             '</button>' +
         '</div>';
@@ -154,14 +154,14 @@ function _rendreTableau() {
 
     var Reserve = window.Reserve;
     if (!Reserve || typeof Reserve.lireManifesteLocal !== 'function') {
-        conteneur.innerHTML = '<p class="text-muted text-center" style="padding: 24px;">Module Réserve non chargé.</p>';
+        conteneur.innerHTML = '<p class="text-muted text-center" style="padding: 24px;">Module Archives non chargé.</p>';
         if (resume) resume.textContent = '';
         return;
     }
 
     var manifeste = Reserve.lireManifesteLocal();
-    var entrees = Object.keys(manifeste.versements || {}).map(function(dossier) {
-        var e = manifeste.versements[dossier] || {};
+    var entrees = Object.keys(manifeste.archives || {}).map(function(dossier) {
+        var e = manifeste.archives[dossier] || {};
         return Object.assign({ _dossier: dossier }, e);
     });
 
@@ -170,7 +170,7 @@ function _rendreTableau() {
             resume.textContent = '';
         } else {
             var maj = manifeste.derniere_mise_a_jour;
-            resume.textContent = entrees.length + ' versement' + (entrees.length > 1 ? 's' : '') +
+            resume.textContent = entrees.length + ' archive' + (entrees.length > 1 ? 's' : '') +
                 (maj ? ' · dernière maj ' + _formaterDate(maj) : '');
         }
     }
@@ -178,7 +178,7 @@ function _rendreTableau() {
     if (entrees.length === 0) {
         conteneur.innerHTML =
             '<p class="text-muted text-center" style="padding: 24px;">' +
-                'Aucun versement enregistré. Utilise <strong>Codex › Verser dans la réserve…</strong> ' +
+                'Aucune archive enregistrée. Utilise <strong>Codex › Archiver…</strong> ' +
                 'pour archiver un groupe-cours.' +
             '</p>';
         return;
@@ -186,8 +186,8 @@ function _rendreTableau() {
 
     // Tri : plus récent d'abord
     entrees.sort(function(a, b) {
-        var da = a.date_versement || '';
-        var db_ = b.date_versement || '';
+        var da = a.date_archive || '';
+        var db_ = b.date_archive || '';
         return da < db_ ? 1 : (da > db_ ? -1 : 0);
     });
 
@@ -206,11 +206,11 @@ function _rendreTableau() {
                 '<td>' + _echapper(e.trimestre || '—') + '</td>' +
                 '<td>' + libelleCours + '</td>' +
                 '<td>' + libelleGroupe + '</td>' +
-                '<td>' + _formaterDate(e.date_versement) + '</td>' +
+                '<td>' + _formaterDate(e.date_archive) + '</td>' +
                 '<td class="u-text-right">' + libelleEtud + '</td>' +
                 '<td class="u-text-right">' + libelleFich + '</td>' +
                 '<td class="u-text-right">' + _echapper(taille) + '</td>' +
-                '<td>' + _badgeMode(e.mode_versement) + '</td>' +
+                '<td>' + _badgeMode(e.mode_archive) + '</td>' +
                 '<td class="u-text-center">' +
                     '<button class="btn btn-secondaire btn-compact" ' +
                         'data-action="ReserveReglages.actionPurgerEntree" ' +
@@ -231,7 +231,7 @@ function _rendreTableau() {
                         '<th>Trimestre</th>' +
                         '<th>Cours</th>' +
                         '<th>Groupe</th>' +
-                        '<th>Date du versement</th>' +
+                        '<th>Date d’archivage</th>' +
                         '<th class="u-text-right">Étud.</th>' +
                         '<th class="u-text-right">Fich.</th>' +
                         '<th class="u-text-right">Taille</th>' +
@@ -267,7 +267,7 @@ async function actionLierDossier() {
     try {
         var handle = await Reserve.obtenirHandle({ forcer: true });
         if (handle && typeof window.afficherNotificationSucces === 'function') {
-            window.afficherNotificationSucces('Dossier réserve lié', handle.name || '');
+            window.afficherNotificationSucces('Dossier d’archives lié', handle.name || '');
         }
         if (handle && typeof Reserve.hydrateDepuisFSAPI === 'function') {
             try { await Reserve.hydrateDepuisFSAPI(handle); }
@@ -285,7 +285,7 @@ async function actionEffacerLiaison() {
     try {
         await Reserve.effacerLiaisonFSAPI();
         if (typeof window.afficherNotificationSucces === 'function') {
-            window.afficherNotificationSucces('Liaison effacée', 'Le dossier réserve n\'est plus lié.');
+            window.afficherNotificationSucces('Liaison effacée', 'Le dossier d’archives n\'est plus lié.');
         }
     } catch (e) {
         console.warn('[ReserveReglages] Effacement liaison échoué', e.message || e);
@@ -300,13 +300,13 @@ async function actionVerifierDossier() {
         var handle = await Reserve.obtenirHandle();
         if (!handle) {
             if (typeof window.afficherNotificationErreur === 'function') {
-                window.afficherNotificationErreur('Aucun dossier lié', 'Lie d\'abord un dossier réserve.');
+                window.afficherNotificationErreur('Aucun dossier lié', 'Lie d\'abord un dossier d’archives.');
             }
             return;
         }
         var stats = await Reserve.hydrateDepuisFSAPI(handle);
         if (typeof window.afficherNotificationSucces === 'function') {
-            var msg = stats.total + ' versement(s) dans le manifeste FSAPI';
+            var msg = stats.total + ' archive(s) dans le manifeste FSAPI';
             if (stats.ajoutes) msg += ' · ' + stats.ajoutes + ' ajouté(s) localement';
             if (stats.mis_a_jour) msg += ' · ' + stats.mis_a_jour + ' mis à jour';
             window.afficherNotificationSucces('Dossier vérifié', msg);
@@ -343,7 +343,7 @@ function _init() {
     // Rendu initial différé pour laisser reserve.js terminer son hydratation auto.
     setTimeout(rafraichir, 250);
 
-    // Re-rendu au clic sur l'accordéon (évite un état périmé après versement)
+    // Re-rendu au clic sur l'accordéon (évite un état périmé après archivage)
     var accordeon = document.getElementById('accordeon-reserve');
     if (accordeon) {
         var header = accordeon.querySelector('.accordeon-header');
