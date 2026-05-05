@@ -4608,7 +4608,7 @@ var _originalAfficherSousSection = window.afficherSousSection;
 if (typeof _originalAfficherSousSection === 'function') {
     window.afficherSousSection = function(idSousSection) {
         var resultat = _originalAfficherSousSection.apply(this, arguments);
-        if (idSousSection === 'contexte-bilan') {
+        if (idSousSection === 'boite-outils-bilan') {
             try { initialiserBilanReflexif(); } catch (e) { console.error('[BilanReflexif] Erreur init:', e); }
         }
         return resultat;

@@ -153,18 +153,16 @@ const TOOLTIPS_SOUS_NAV = {
     'structure-productions': 'nav-str-productions',
     'structure-grille-criteres': 'nav-str-grilles',
     'structure-echelle-performance': 'nav-str-echelles',
+    'structure-pratiques-notation': 'nav-ctx-pratiques',
     'structure-retroactions': 'nav-str-cartouches',
     // Contexte
     'contexte-trimestre': 'nav-ctx-trimestre',
     'contexte-calendrier': 'nav-ctx-calendrier',
-    'contexte-pratiques-notation': 'nav-ctx-pratiques',
-    'contexte-bilan': 'nav-ctx-bilan',
     // Suivi
     'suivi-liste': 'nav-suivi-liste',
     'suivi-saisie': 'nav-suivi-saisie',
     'suivi-profil': 'nav-suivi-profil',
     'suivi-interventions': 'nav-suivi-interventions',
-    'suivi-labo': 'nav-suivi-labo',
     // Évaluations
     'evaluations-importer': 'nav-eval-importer',
     'evaluations-liste': 'nav-eval-liste',
@@ -174,6 +172,8 @@ const TOOLTIPS_SOUS_NAV = {
     'boite-outils-tirage': 'nav-bao-tirage',
     'boite-outils-modelisation': 'nav-bao-modelisation',
     'boite-outils-rythme': 'nav-bao-rythme',
+    'boite-outils-etudes': 'nav-suivi-labo',
+    'boite-outils-bilan': 'nav-ctx-bilan',
     // Aide (tooltips gérés séparément si existants)
     // Réglages
     'reglages-preferences': 'nav-reg-preferences',
@@ -230,6 +230,13 @@ const INITIALISATEURS_SOUS_SECTION = {
             }, 100);
         }
     },
+    'structure-pratiques-notation': function () {
+        if (typeof initialiserModulePratiquesMateriel === 'function') {
+            setTimeout(async () => {
+                await initialiserModulePratiquesMateriel();
+            }, 100);
+        }
+    },
     'structure-retroactions': function () {
         if (typeof initialiserModuleCartouches === 'function') {
             setTimeout(async () => {
@@ -249,18 +256,6 @@ const INITIALISATEURS_SOUS_SECTION = {
             afficherCalendrierScolaire();
         }
     },
-    'contexte-pratiques-notation': function () {
-        if (typeof initialiserModulePratiquesMateriel === 'function') {
-            setTimeout(async () => {
-                await initialiserModulePratiquesMateriel();
-            }, 100);
-        }
-    },
-    'contexte-bilan': function () {
-        if (typeof initialiserBilanReflexif === 'function') {
-            setTimeout(initialiserBilanReflexif, 100);
-        }
-    },
 
     // === SUIVI ===
     'suivi-liste': function () {
@@ -269,19 +264,6 @@ const INITIALISATEURS_SOUS_SECTION = {
         }
     },
     // suivi-saisie : pas d'initialisation spécifique requise
-    'suivi-labo': function () {
-        // Graphiques déplacés depuis l'Aperçu
-        if (typeof creerGraphiqueCorrelationsLongitudinales === 'function') {
-            setTimeout(() => creerGraphiqueCorrelationsLongitudinales('graphique-correlations-longitudinales'), 100);
-        }
-        if (typeof creerGraphiqueImpactJetons === 'function') {
-            setTimeout(() => creerGraphiqueImpactJetons('graphique-impact-jetons'), 100);
-        }
-        // Matrice de consolidation des apprentissages
-        if (typeof afficherMatriceConsolidation === 'function') {
-            setTimeout(() => afficherMatriceConsolidation(), 150);
-        }
-    },
 
     // === ÉVALUATIONS ===
     'evaluations-importer': function () {
@@ -333,6 +315,24 @@ const INITIALISATEURS_SOUS_SECTION = {
     'boite-outils-modelisation': function () {
         if (typeof initialiserModelisation === 'function') {
             setTimeout(initialiserModelisation, 100);
+        }
+    },
+    'boite-outils-etudes': function () {
+        // Graphiques déplacés depuis l'Aperçu (ancien suivi-labo)
+        if (typeof creerGraphiqueCorrelationsLongitudinales === 'function') {
+            setTimeout(() => creerGraphiqueCorrelationsLongitudinales('graphique-correlations-longitudinales'), 100);
+        }
+        if (typeof creerGraphiqueImpactJetons === 'function') {
+            setTimeout(() => creerGraphiqueImpactJetons('graphique-impact-jetons'), 100);
+        }
+        // Matrice de consolidation des apprentissages
+        if (typeof afficherMatriceConsolidation === 'function') {
+            setTimeout(() => afficherMatriceConsolidation(), 150);
+        }
+    },
+    'boite-outils-bilan': function () {
+        if (typeof initialiserBilanReflexif === 'function') {
+            setTimeout(initialiserBilanReflexif, 100);
         }
     },
 

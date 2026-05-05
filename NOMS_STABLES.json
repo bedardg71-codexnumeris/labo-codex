@@ -1,6 +1,6 @@
 {
-  "version": "99.03 — 2026-04-03",
-  "date_mise_a_jour": "2026-04-03",
+  "version": "99.34-SP2 — 2026-05-05",
+  "date_mise_a_jour": "2026-05-05",
   "ids_html": {
     "navigation": [
       "navigation-principale",
@@ -27,11 +27,10 @@
       "structure-productions",
       "structure-grille-criteres",
       "structure-echelle-performance",
+      "structure-pratiques-notation",
       "structure-retroactions",
       "contexte-trimestre",
       "contexte-calendrier",
-      "contexte-pratiques-notation",
-      "contexte-bilan",
       "suivi-liste",
       "suivi-saisie",
       "suivi-profil",
@@ -42,6 +41,8 @@
       "evaluations-exporter",
       "boite-outils-tirage",
       "boite-outils-modelisation",
+      "boite-outils-etudes",
+      "boite-outils-bilan",
       "reglages-preferences",
       "reglages-depistage",
       "reglages-donnees",

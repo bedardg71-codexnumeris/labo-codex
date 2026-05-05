@@ -482,7 +482,7 @@ function initialiserHover() {
 ajouterEntrees({
     'contexte-pratiques-nouvelle': {
         autoReveal: {
-            sectionActive: 'contexte-pratiques-notation',
+            sectionActive: 'structure-pratiques-notation',
             cibleSelector: 'button[data-action="creerNouvellePratique"]',
             message: 'Clique ici pour créer ta première pratique de notation.',
             direction: 'haut',
