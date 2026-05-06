@@ -17,19 +17,6 @@ const MODES = {
     ANONYMISATION: 'anonymisation'
 };
 
-const THEMES = {
-    normal: {
-        couleur: '#1a4a5e', // Bleu principal ocean (var(--bleu-principal))
-        nom: 'Mode Normal',
-        icone: ''
-    },
-    anonymisation: {
-        couleur: '#0c1a22', // Ocean profond (var(--bleu-fonce))
-        nom: 'Mode Anonymisation',
-        icone: ''
-    }
-};
-
 // ============================================
 // ÉTAT GLOBAL
 // ============================================
@@ -57,8 +44,8 @@ function initialiserSystemeModes() {
     // Appliquer le thème
     appliquerTheme(modeActuel);
 
-    // Créer le sélecteur de mode
-    creerSelecteurMode();
+    // Synchroniser le bouton anonymisation de la nav
+    _syncBtnAnonymisationNav();
 
     // Gérer l'affichage des boutons selon le mode
     gererAffichageBoutonPrimo(modeActuel);
@@ -90,57 +77,29 @@ function initialiserSystemeModes() {
 }
 
 // ============================================
-// SÉLECTEUR DE MODE
+// BOUTON ANONYMISATION DE L'EN-TÊTE
 // ============================================
 
 /**
- * Crée le sélecteur de mode dans l'en-tête
+ * Bascule entre le mode normal et le mode anonymisation
  */
-function creerSelecteurMode() {
-    const conteneur = document.getElementById('selecteur-mode');
-    if (!conteneur) {
-        console.warn('⚠️ Élément #selecteur-mode introuvable');
-        return;
-    }
+function basculerModeAnonymisation() {
+    const nouveauMode = modeActuel === MODES.ANONYMISATION
+        ? MODES.NORMAL
+        : MODES.ANONYMISATION;
+    changerMode(nouveauMode);
+}
 
-    // Vider le conteneur
-    conteneur.innerHTML = '';
-
-    // Créer le select
-    const select = document.createElement('select');
-    select.id = 'select-mode';
-    select.className = 'select-mode';
-
-    // Créer les options pour chaque mode
-    const labels = {
-        'normal': 'Normal',
-        'anonymisation': 'Anonymisé'
-    };
-
-    // Ordre souhaité : Normal → Anonymisé
-    const ordreAffichage = [
-        MODES.NORMAL,
-        MODES.ANONYMISATION
-    ];
-
-    ordreAffichage.forEach(mode => {
-        const option = document.createElement('option');
-        option.value = mode;
-        option.textContent = labels[mode];
-
-        // Sélectionner l'option si c'est le mode actuel
-        if (mode === modeActuel) {
-            option.selected = true;
-        }
-
-        select.appendChild(option);
-    });
-
-    // Ajouter l'événement change
-    select.addEventListener('change', (e) => changerMode(e.target.value));
-
-    // Ajouter au conteneur
-    conteneur.appendChild(select);
+/**
+ * Synchronise le bouton anonymisation de l'en-tête (titre + classe .actif)
+ */
+function _syncBtnAnonymisationNav() {
+    const btn = document.getElementById('btn-toggle-anonymisation-nav');
+    if (!btn) return;
+    const estAnonyme = modeActuel === MODES.ANONYMISATION;
+    btn.classList.toggle('actif', estAnonyme);
+    btn.title = estAnonyme ? 'Repasser en mode normal' : 'Passer en mode anonymisé';
+    btn.setAttribute('aria-pressed', estAnonyme ? 'true' : 'false');
 }
 
 // ============================================
@@ -162,8 +121,8 @@ async function changerMode(nouveauMode) {
     // Appliquer le thème
     appliquerTheme(nouveauMode);
 
-    // Mettre à jour le sélecteur de mode
-    creerSelecteurMode();
+    // Mettre à jour le bouton anonymisation de l'en-tête
+    _syncBtnAnonymisationNav();
 
     // Afficher/masquer le bouton Assistance Primo selon le mode
     gererAffichageBoutonPrimo(nouveauMode);
@@ -279,46 +238,15 @@ function appliquerTheme(mode) {
         document.body.classList.add('mode-normal');
     }
 
-    const couleur = THEMES[mode].couleur;
-
-    // Ajouter un bandeau si pas en mode normal
-    let bandeau = document.getElementById('bandeau-mode');
-    if (bandeau) bandeau.remove();
-
-    if (mode !== MODES.NORMAL) {
-        bandeau = document.createElement('div');
-        bandeau.id = 'bandeau-mode';
-
-        // Texte du bandeau
-        let texte = `${THEMES[mode].icone} ${THEMES[mode].nom.toUpperCase()} - Les identités affichées sont anonymisées`;
-
-        // Ajouter contrôle DA seulement en mode anonymisation
+    // Toggler le bandeau anonymisation (HTML statique dans index.html)
+    const bandeau = document.getElementById('bandeau-mode');
+    if (bandeau) {
+        bandeau.classList.toggle('u-hide', mode !== MODES.ANONYMISATION);
+        // Synchroniser le checkbox « Afficher DA réels » avec la préférence courante
         if (mode === MODES.ANONYMISATION) {
-            const afficherDAReel = obtenirOptionAffichageDA();
-            texte += ` | DA: <label style="cursor: pointer; margin-left: 10px;">
-                <input type="checkbox" id="checkbox-da-anonyme" ${afficherDAReel ? 'checked' : ''}
-                       data-on-change="definirOptionAffichageDADepuisCheckbox"
-                       style="margin-right: 5px; cursor: pointer;">
-                Afficher DA réels
-            </label>`;
+            const checkbox = document.getElementById('checkbox-da-anonyme');
+            if (checkbox) checkbox.checked = obtenirOptionAffichageDA();
         }
-
-        bandeau.innerHTML = texte;
-        bandeau.style.cssText = `
-            background: ${couleur};
-            color: white;
-            padding: 10px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 0.9rem;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 9999;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-        `;
-        document.body.appendChild(bandeau);
     }
 }
 
@@ -966,6 +894,7 @@ window.obtenirDAAffichage = obtenirDAAffichage;
 window.estModeClair = estModeClair;
 window.definirTheme = definirTheme;
 window.basculerTheme = basculerTheme;
+window.basculerModeAnonymisation = basculerModeAnonymisation;
 
 
 // ============================================

@@ -498,6 +498,51 @@
         }
 
         /* ===============================
+           BANDEAU ANONYMISATION (mode anonymisé) — aligné sur bandeau-demo
+           =============================== */
+        .bandeau-anonymisation {
+            background: var(--bleu-principal, #1a4a5e);
+            color: white;
+            padding: 8px 16px;
+            text-align: center;
+            font-size: 0.85rem;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 9998;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .bandeau-anonymisation-contenu {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .bandeau-anonymisation-texte {
+            font-weight: 600;
+        }
+
+        .bandeau-anonymisation-texte strong {
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .bandeau-anonymisation-label {
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: normal;
+        }
+
+        body.mode-anonymise {
+            padding-bottom: 40px;
+        }
+
+        /* ===============================
            Page d'accueil (Chantier 3)
            Conforme au Design System :
            - Variables --bleu-*, --shadow-*, --radius-*
@@ -862,7 +907,7 @@
 
         body.mode-archive:not(.mode-ecriture-temp) input:not([type="search"]):not([id^="recherche-"]):not([id^="inclure-"]):not([id^="checkbox-"]):not([id^="v2-"]),
         body.mode-archive:not(.mode-ecriture-temp) textarea:not([id^="textarea-rapport-"]),
-        body.mode-archive:not(.mode-ecriture-temp) select:not(#selectTrimestreActif):not(#select-mode):not([id^="filtre-"]):not([id^="v2-"]):not(#select-rappel-backup):not([id^="selecteur"]):not([id^="selectTri"]):not(.eval-actions-select) {
+        body.mode-archive:not(.mode-ecriture-temp) select:not(#selectTrimestreActif):not([id^="filtre-"]):not([id^="v2-"]):not(#select-rappel-backup):not([id^="selecteur"]):not([id^="selectTri"]):not(.eval-actions-select) {
             pointer-events: none;
             opacity: 0.7;
             background-color: var(--surface-carte, #1a3a48);
@@ -3574,16 +3619,6 @@
             justify-content: center;
         }
 
-        /* Sélecteur de mode — inline dans le bandeau groupe-cours */
-        .selecteur-mode-centre {
-            display: inline-flex;
-            align-items: center;
-            margin: 0;
-            padding: 0;
-            line-height: 1;
-        }
-
-
         /* ===============================
            BADGES D'INTÉGRITÉ ACADÉMIQUE
            =============================== */
@@ -3717,25 +3752,23 @@
                         </div>
                     </div>
 
-                    <!-- Contrôle droite : bug + thème -->
+                    <!-- Contrôle droite : bug + anonymisation + thème -->
                     <div class="entete-controles-droite">
                         <button data-action="ouvrirModalRapportBug" class="btn-action-header btn-icon-header" data-tooltip="entete-signaler-bug" title="Signaler un bug"><img src="icons/icon-bug.svg" alt="" class="header-icon"></button>
+                        <button id="btn-toggle-anonymisation-nav" class="btn-action-header btn-icon-header" data-tooltip="entete-mode-affichage" title="Mode normal / anonymisé" data-action="basculerModeAnonymisation"><img src="icons/icons8-anonymous-mask.svg" alt="" class="header-icon"></button>
                         <button id="btn-toggle-theme-nav" class="btn-action-header btn-icon-header" title="Mode clair / sombre" data-action="basculerTheme"><img src="icons/icon-black-and-white.svg" alt="" class="header-icon"></button>
                     </div>
                 </div>
 
                 <!-- LIGNE 2 : Informations contextuelles -->
                 <div class="entete-ligne2">
-                    <!-- Sélecteur groupe-cours actif + mode (centre, sous le séparateur) -->
+                    <!-- Sélecteur groupe-cours actif (centre, sous le séparateur) -->
                     <div id="bandeau-groupe-cours" class="bandeau-groupe-cours">
                         <div class="bandeau-groupe-cours-contenu">
                             <label>Groupe-cours actif :</label>
                             <select id="selectGroupeCoursHeader" class="dropdown-groupe-cours-header" data-on-change="changerGroupeCoursDepuisHeader" data-tooltip="entete-groupe-cours">
                                 <option value="">-- Aucun groupe-cours --</option>
                             </select>
-                            <div id="selecteur-mode" class="selecteur-mode-centre" data-tooltip="entete-mode-affichage">
-                                <!-- Sera généré dynamiquement par 17-modes.js -->
-                            </div>
                         </div>
                     </div>
 
@@ -3781,6 +3814,19 @@
                 <button data-action="desactiverModeDemo" class="bandeau-demo-btn">
                     Quitter la démo
                 </button>
+            </div>
+        </div>
+
+        <!-- BANDEAU ANONYMISATION (affiché en mode anonymisé) -->
+        <div id="bandeau-mode" class="bandeau-anonymisation u-hide">
+            <div class="bandeau-anonymisation-contenu">
+                <span class="bandeau-anonymisation-texte">
+                    <strong>MODE ANONYMISATION</strong> &mdash; Les identit&eacute;s affich&eacute;es sont anonymis&eacute;es
+                </span>
+                <label class="bandeau-anonymisation-label">
+                    <input type="checkbox" id="checkbox-da-anonyme" data-on-change="definirOptionAffichageDADepuisCheckbox">
+                    Afficher DA r&eacute;els
+                </label>
             </div>
         </div>
 
@@ -11206,6 +11252,12 @@
                                 </td>
                             </tr>
                             <tr>
+                                <td class="td-bold-bleu">Ic&ocirc;nes</td>
+                                <td class="ligne-separee-bleu">Icons8 &mdash; <a href="https://icons8.com" target="_blank" rel="noopener noreferrer">icons8.com</a><br>
+                                    <span class="text-muted u-texte-09">Biblioth&egrave;que d&rsquo;ic&ocirc;nes libres</span>
+                                </td>
+                            </tr>
+                            <tr>
                                 <td class="td-bold">D&eacute;veloppement</td>
                                 <td class="p-10">Assist&eacute; par Claude&nbsp;Code et Claude&nbsp;Cowork (Anthropic)<br>
                                     <span class="text-muted u-texte-09">L&rsquo;expertise p&eacute;dagogique et les d&eacute;cisions de conception sont enti&egrave;rement humaines</span>
@@ -16050,7 +16102,7 @@
     <script src="js/main.js?v=2026050543"></script> <!-- Refonte nav SP5 : naviguerVers calendrier-trimestre -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=2026050564"></script> <!-- Beta 99.35 b0505-1220 : #247 Réglages > Données refonte 6 cartes -->
+    <script src="js/init-inline.js?v=2026050601"></script> <!-- Beta 99.36 b0506-0515 : #258 bouton anonymisation + #260 crédit Icons8 -->
 
     <!-- Wrappers pour délégation data-on-change (Phase 5b) — externalisé dans init-inline.js -->
 
