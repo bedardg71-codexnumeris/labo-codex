@@ -160,7 +160,18 @@ function _ouvrirStoreHandles() {
     });
 }
 
+function _persistanceFSAPIActive() {
+    // Défense D — cf. MODELE-MENACES.md §D-03 : par défaut, on ne persiste
+    // pas les handles FSAPI entre sessions. L'utilisateur peut activer
+    // la persistance dans Réglages > Préférences > Sécurité.
+    if (window.db && typeof window.db.getFSAPIPersistance === 'function') {
+        return window.db.getFSAPIPersistance();
+    }
+    return localStorage.getItem('fsapi_persistance_handles') === 'true';
+}
+
 function _lireHandlePersiste() {
+    if (!_persistanceFSAPIActive()) return Promise.resolve(null);
     return _ouvrirStoreHandles().then(function(idb) {
         return new Promise(function(resolve, reject) {
             var tx = idb.transaction(FSAPI_STORE, 'readonly');
@@ -176,6 +187,7 @@ function _lireHandlePersiste() {
 }
 
 function _ecrireHandlePersiste(handle) {
+    if (!_persistanceFSAPIActive()) return Promise.resolve();
     return _ouvrirStoreHandles().then(function(idb) {
         return new Promise(function(resolve, reject) {
             var tx = idb.transaction(FSAPI_STORE, 'readwrite');

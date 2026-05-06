@@ -10634,6 +10634,26 @@
                         </div>
                     </div>
 
+                    <!-- Carte : Sécurité (Défense D — MODELE-MENACES.md §D-03) -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Sécurité</h3>
+                        <p class="text-muted u-mb-15 u-texte-09">
+                            Réglages qui contrôlent l'accès de Labo Codex à ton disque.
+                        </p>
+
+                        <div class="form-group u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
+                            <label class="u-align-center" style="cursor: pointer; display: flex">
+                                <input type="checkbox" id="pref-fsapi-persistance" data-on-change="togglerPersistanceFSAPI">
+                                <strong style="margin-left: 8px;">Mémoriser le dossier Travaux et la Réserve entre les sessions</strong>
+                            </label>
+                            <small class="u-mt-5 u-texte-petit" style="display: block; color: var(--gris-moyen); margin-left: 28px">
+                                <strong>Désactivé (recommandé)</strong> : tu redemandes l'accès au dossier à chaque démarrage de Labo Codex. Plus sécurisé — un script malveillant qui s'exécute pendant une session ne peut pas atteindre tes fichiers depuis une session future.
+                                <br><br>
+                                <strong>Activé</strong> : Labo Codex retient le dossier d'une session à l'autre. Plus pratique, mais moins sécurisé. À activer seulement si tu travailles dans un environnement de confiance et que la friction du choix répété te pèse.
+                            </small>
+                        </div>
+                    </div>
+
                     <!-- Bouton sauvegarder -->
                     <div class="u-mt-20">
                         <button class="btn btn-confirmer u-w-100" data-action="sauvegarderToutesPreferencesV2">
@@ -16036,7 +16056,7 @@
      =================================== -->
 
     <!-- PRIORITÉ 0: Couche de stockage (Migration IndexedDB - Beta 91.5) -->
-    <script src="js/db.js?v=2025121203"></script>
+    <script src="js/db.js?v=2026050613"></script> <!-- Beta 99.36 b0506-1335 : Défense D — préférence persistance FSAPI -->
 
     <!-- Rapport de bug pour testeurs (Beta 94) - Chargé tôt pour capturer les erreurs -->
     <script src="js/rapport-bug.js?v=2026050547"></script> <!-- Refonte nav SP5 : case 'calendrier' -->
@@ -16157,9 +16177,10 @@
     <script src="libs/jszip.min.js?v=3.10.1"></script>
     <script src="libs/html2canvas.min.js?v=1.4.1"></script>
     <script src="js/travaux-stockage.js?v=2026020601"></script>
-    <script src="js/reserve.js?v=2026050557"></script> <!-- #259 : strings UI Réserve → Archives -->
+    <script src="js/reserve.js?v=2026050613"></script> <!-- Beta 99.36 b0506-1335 : Défense D — pref persistance FSAPI sur _lire/_ecrireHandlePersiste -->
     <script src="js/reserve-ouvrir.js?v=2026050558"></script> <!-- #259 : strings UI Réserve → Archives -->
     <script src="js/reserve-reglages.js?v=2026050559"></script> <!-- #259 : strings UI Réserve → Archives -->
+    <script src="js/securite-prefs.js?v=2026050613"></script> <!-- Beta 99.36 b0506-1335 : Défense D — toggle persistance FSAPI -->
     <script src="js/codex-data.js?v=2026050603"></script> <!-- #251 : extraction et format codex data -->
     <script src="js/codex-data-ui.js?v=2026050603"></script> <!-- #251 : UI Réglages > Données carte 3 -->
     <script src="js/labo-codex-data.js?v=2026050603"></script> <!-- #252 : loader codex data dans le Labo -->
@@ -16236,7 +16257,7 @@
     <script src="js/main.js?v=2026050543"></script> <!-- Refonte nav SP5 : naviguerVers calendrier-trimestre -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=2026050613"></script> <!-- Beta 99.36 b0506-1300 : Défense B-α sécurité -->
+    <script src="js/init-inline.js?v=2026050613"></script> <!-- Beta 99.36 b0506-1335 : Défense D — toggle persistance FSAPI -->
 
     <!-- Wrappers pour délégation data-on-change (Phase 5b) — externalisé dans init-inline.js -->
 
