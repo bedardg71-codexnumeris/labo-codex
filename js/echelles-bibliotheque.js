@@ -75,18 +75,23 @@ function obtenirDisciplinesDisponiblesEchelles() {
  * @returns {Promise<boolean>} true si ajoutée, false si déjà existante
  */
 async function ajouterEchelleALaBibliotheque(echelle) {
+    // B-β — passage obligé par assainirObjet.
+    const echelleSafe = (typeof window.assainirObjet === 'function' && window.SCHEMAS_IMPORT && window.SCHEMAS_IMPORT.echelle)
+        ? window.assainirObjet(echelle, window.SCHEMAS_IMPORT.echelle)
+        : echelle;
+
     let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_ECHELLES) || [];
 
-    const existe = bibliotheque.some(e => e.id === echelle.id);
+    const existe = bibliotheque.some(e => e.id === echelleSafe.id);
     if (existe) {
         return false;
     }
 
     // 🆕 Beta 95.4 : Obtenir l'auteur depuis le profil enseignant si non défini
-    const auteur = echelle.auteur || (typeof obtenirProfilAuteurActifSync === 'function' ? obtenirProfilAuteurActifSync()?.auteur_original : null) || 'Inconnu';
+    const auteur = echelleSafe.auteur || (typeof obtenirProfilAuteurActifSync === 'function' ? obtenirProfilAuteurActifSync()?.auteur_original : null) || 'Inconnu';
 
     const echelleBiblio = {
-        ...echelle,
+        ...echelleSafe,
         dansBibliotheque: true,
         dateAjoutBiblio: new Date().toISOString(),
         auteur: auteur

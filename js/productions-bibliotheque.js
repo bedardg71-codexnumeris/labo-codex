@@ -76,16 +76,21 @@ function obtenirDisciplinesDisponibles() {
  * @returns {Promise<boolean>} true si ajoutée, false si déjà existante
  */
 async function ajouterALaBibliotheque(production) {
+    // B-β — passage obligé par assainirObjet.
+    const productionSafe = (typeof window.assainirObjet === 'function' && window.SCHEMAS_IMPORT && window.SCHEMAS_IMPORT.production)
+        ? window.assainirObjet(production, window.SCHEMAS_IMPORT.production)
+        : production;
+
     let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_PRODUCTIONS) || [];
 
     // Vérifier si déjà présente (par ID)
-    const existe = bibliotheque.some(p => p.id === production.id);
+    const existe = bibliotheque.some(p => p.id === productionSafe.id);
     if (existe) {
         return false;
     }
 
     // 🆕 Beta 95.4 : Obtenir l'auteur depuis le profil enseignant si non défini
-    let auteur = production.auteur;
+    let auteur = productionSafe.auteur;
     if (!auteur && typeof obtenirProfilAuteurActifSync === 'function') {
         const profil = obtenirProfilAuteurActifSync();
         auteur = profil?.auteur_original || 'Inconnu';
@@ -94,7 +99,7 @@ async function ajouterALaBibliotheque(production) {
 
     // Marquer comme partagée et ajouter métadonnées
     const productionBiblio = {
-        ...production,
+        ...productionSafe,
         dansBibliotheque: true,
         dateAjoutBiblio: new Date().toISOString(),
         auteur: auteur

@@ -685,18 +685,26 @@ async function obtenirConfigurationPratiqueParId(configId) {
  * @returns {Promise<boolean>} true si ajoutée, false si déjà existante
  */
 async function ajouterPratiqueALaBibliotheque(configuration) {
+    // B-β — passage obligé par assainirObjet. Le schéma pratique inclut
+    // `configuration` en type 'object' brut pour préserver la structure
+    // riche (typesTravaux, forfaits, portfolio, parObjectifs) sans devoir
+    // la modéliser exhaustivement.
+    const configSafe = (typeof window.assainirObjet === 'function' && window.SCHEMAS_IMPORT && window.SCHEMAS_IMPORT.pratique)
+        ? window.assainirObjet(configuration, window.SCHEMAS_IMPORT.pratique)
+        : configuration;
+
     let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_PRATIQUES) || [];
 
-    const existe = bibliotheque.some(p => p.id === configuration.id);
+    const existe = bibliotheque.some(p => p.id === configSafe.id);
     if (existe) {
         return false;
     }
 
     // 🆕 Beta 95.4 : Obtenir l'auteur depuis le profil enseignant si non défini
-    const auteur = configuration.auteur || (typeof obtenirProfilAuteurActifSync === 'function' ? obtenirProfilAuteurActifSync()?.auteur_original : null) || 'Inconnu';
+    const auteur = configSafe.auteur || (typeof obtenirProfilAuteurActifSync === 'function' ? obtenirProfilAuteurActifSync()?.auteur_original : null) || 'Inconnu';
 
     const configBiblio = {
-        ...configuration,
+        ...configSafe,
         dansBibliotheque: true,
         dateAjoutBiblio: new Date().toISOString(),
         auteur: auteur

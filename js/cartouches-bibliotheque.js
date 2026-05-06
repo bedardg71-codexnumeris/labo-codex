@@ -75,18 +75,23 @@ function obtenirDisciplinesDisponiblesCartouches() {
  * @returns {Promise<boolean>} true si ajoutée, false si déjà existante
  */
 async function ajouterCartoucheALaBibliotheque(cartouche) {
+    // B-β — passage obligé par assainirObjet.
+    const cartoucheSafe = (typeof window.assainirObjet === 'function' && window.SCHEMAS_IMPORT && window.SCHEMAS_IMPORT.cartouche)
+        ? window.assainirObjet(cartouche, window.SCHEMAS_IMPORT.cartouche)
+        : cartouche;
+
     let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_CARTOUCHES) || [];
 
-    const existe = bibliotheque.some(c => c.id === cartouche.id);
+    const existe = bibliotheque.some(c => c.id === cartoucheSafe.id);
     if (existe) {
         return false;
     }
 
     // 🆕 Beta 95.4 : Obtenir l'auteur depuis le profil enseignant si non défini
-    const auteur = cartouche.auteur || (typeof obtenirProfilAuteurActifSync === 'function' ? obtenirProfilAuteurActifSync()?.auteur_original : null) || 'Inconnu';
+    const auteur = cartoucheSafe.auteur || (typeof obtenirProfilAuteurActifSync === 'function' ? obtenirProfilAuteurActifSync()?.auteur_original : null) || 'Inconnu';
 
     const cartoucheBiblio = {
-        ...cartouche,
+        ...cartoucheSafe,
         dansBibliotheque: true,
         dateAjoutBiblio: new Date().toISOString(),
         auteur: auteur

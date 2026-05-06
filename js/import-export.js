@@ -410,6 +410,7 @@ const SCHEMAS_IMPORT = {
         dateModification: { type: 'string', maxLen: 50 },
         estDemo: { type: 'boolean' },
         isDemo: { type: 'boolean' },
+        estGabarit: { type: 'boolean' },
         criteres: {
             type: 'array',
             schema: {
@@ -420,12 +421,20 @@ const SCHEMAS_IMPORT = {
                 ponderation: { type: 'number' }
             }
         },
-        // NOTE — `configuration` (object riche : seuilAcceptable, typesTravaux,
-        // forfaits, portfolio, etc.) n'est pas modélisé dans Défense B-α.
-        // Conséquence : ce champ est aujourd'hui retiré par `assainirObjet`
-        // sur le pipeline import. Bug latéral à traiter en B-β / suivi.
+        // `pratiques` : array de codes courts (ex: ['SPE'], ['STD']) qui
+        // identifient les modalités d'évaluation. Sub-schema string scalar.
+        pratiques: { type: 'array' },
+        // `configuration` : object riche, hétérogène selon le type de pratique
+        // (pan-specifications, pan-standards, par-objectifs, etc.).
+        // Modélisation exhaustive trop coûteuse pour le bénéfice — copié brut.
+        // Trade-off accepté : le contenu est de la donnée structurelle
+        // (numbers, codes courts), peu exposé au risque XSS direct.
+        configuration: { type: 'object' },
         ponderation: { type: 'object' },
         seuilReussite: { type: 'number' },
+        // `seuils` : { vaBien, difficulte, grandeDifficulte } — pratiques perso.
+        seuils: { type: 'object' },
+        echelleId: { type: 'string', maxLen: 100 },
         discipline: { type: 'string', maxLen: 100 },
         dansBibliotheque: { type: 'boolean' },
         dateAjoutBiblio: { type: 'string', maxLen: 50 },

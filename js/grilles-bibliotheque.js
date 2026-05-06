@@ -74,19 +74,33 @@ function obtenirDisciplinesDisponiblesGrilles() {
  * @param {Object} grille - La grille à ajouter
  * @returns {Promise<boolean>} true si ajoutée, false si déjà existante
  */
+// B-β — helper de sanitisation locale. Passage obligé pour rendre la
+// fonction d'ajout indépendante de la discipline du call-site (tout call-site
+// qui appelle ajouterGrilleALaBibliotheque profite de la sanitisation, sans
+// dépendre du pipeline d'import). Fallback safe si SCHEMAS_IMPORT non chargé.
+function _assainirGrilleSafe(g) {
+    if (typeof window.assainirObjet === 'function' && window.SCHEMAS_IMPORT && window.SCHEMAS_IMPORT.grille) {
+        return window.assainirObjet(g, window.SCHEMAS_IMPORT.grille);
+    }
+    return g;
+}
+
 async function ajouterGrilleALaBibliotheque(grille) {
+    // B-β — passage obligé par assainirObjet (whitelist + débalisage).
+    const grilleSafe = _assainirGrilleSafe(grille);
+
     let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_GRILLES) || [];
 
-    const existe = bibliotheque.some(g => g.id === grille.id);
+    const existe = bibliotheque.some(g => g.id === grilleSafe.id);
     if (existe) {
         return false;
     }
 
     // 🆕 Beta 95.4 : Obtenir l'auteur depuis le profil enseignant si non défini
-    const auteur = grille.auteur || (typeof obtenirProfilAuteurActifSync === 'function' ? obtenirProfilAuteurActifSync()?.auteur_original : null) || 'Inconnu';
+    const auteur = grilleSafe.auteur || (typeof obtenirProfilAuteurActifSync === 'function' ? obtenirProfilAuteurActifSync()?.auteur_original : null) || 'Inconnu';
 
     const grilleBiblio = {
-        ...grille,
+        ...grilleSafe,
         dansBibliotheque: true,
         dateAjoutBiblio: new Date().toISOString(),
         auteur: auteur
