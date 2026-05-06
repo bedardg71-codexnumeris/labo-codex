@@ -48,14 +48,17 @@
     implementes (priorites 4-7 de `ECOSYSTEME-DONNEES.md` §Priorites
     d'implementation).
 
-- [ ] **#248** Reserve v1.1 — mise a jour automatique du `manifeste-archives.json` global
-  - Actuellement, chaque versement inclut un `manifeste-archives-patch.json`
-    qu'il faut fusionner manuellement (ou via un futur outil) dans le
-    manifeste global de la reserve. La spec v1 (§12) reporte cette
-    automatisation a la v1.1.
-  - **Idee** : permettre a l'application de lire le manifeste global (via
-    selection de fichier) puis de le fusionner avec les patches presents,
-    et de proposer le resultat au telechargement.
+- [x] **#248** Reserve v1.1 — mise a jour automatique du `manifeste-archives.json` global (livre 2 mai 2026, b0502-1335, commit 5ceee80)
+  - Manifeste local cross-mode (FSAPI + ZIP Safari) avec auto-hydration au boot
+    et a chaque ouverture d'un ZIP. Le ZIP Safari inclut a la racine le
+    manifeste local cumulatif, donc l'extraction met a jour automatiquement le
+    `manifeste-archives.json` du dossier sur disque. Cross-appareils par fusion
+    successive : ouvrir un ZIP iPad sur Mac fusionne les manifestes locaux,
+    le prochain archivage Mac integre l'historique consolide.
+  - Helpers : `_lireManifesteLocal`, `_upsertEntreeManifesteLocal`,
+    `_fusionnerManifesteRecu`, `_hydrateManifesteDepuisFSAPI`,
+    `_hydrateManifesteDepuisZip` (reserve-ouvrir.js).
+  - Cle db `_manifesteReserve` (prefixe `_` exclu des versements).
 
 - [ ] **#249** Reserve v1.1 — section dediee dans Reglages
   - Section « Reserve » qui affiche l'etat de la reserve (versements detectes,
