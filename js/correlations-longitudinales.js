@@ -38,7 +38,9 @@ var SEUIL_MIN_ETUDIANTS = 5;
 function calculerCorrelationsLongitudinales() {
     var snapshots = [];
     try {
-        snapshots = obtenirSnapshotsHebdomadaires();
+        snapshots = (window.LaboCodexData && typeof window.LaboCodexData.lireSnapshotsHebdomadaires === 'function')
+            ? window.LaboCodexData.lireSnapshotsHebdomadaires()
+            : obtenirSnapshotsHebdomadaires();
     } catch (e) {
         console.warn('⚠️ Corrélations longitudinales : snapshots non disponibles', e);
         return null;
@@ -57,7 +59,9 @@ function calculerCorrelationsLongitudinales() {
     // Charger les interventions et pré-construire une Map(da → [{date}])
     var interventions = [];
     try {
-        interventions = obtenirInterventions() || [];
+        interventions = (window.LaboCodexData && typeof window.LaboCodexData.lireInterventions === 'function')
+            ? window.LaboCodexData.lireInterventions() || []
+            : obtenirInterventions() || [];
     } catch (e) {
         console.warn('⚠️ Interventions non disponibles pour corrélations', e);
     }
@@ -251,15 +255,26 @@ function calculerCorrelationsLongitudinales() {
     // Clé = index de la séance dans resultat (pas numéro de semaine)
     resultat.artefactsParSeance = {};
     try {
-        var productions = (typeof obtenirDonneesSelonMode === 'function')
-            ? obtenirDonneesSelonMode('productions') || []
-            : [];
-        var infoCours = db.getSync('infoCours', null);
+        var productions;
+        var infoCours;
+        var cadre;
+        if (window.LaboCodexData && typeof window.LaboCodexData.lireDonneesNamespacees === 'function') {
+            productions = window.LaboCodexData.lireDonneesNamespacees('productions') || [];
+            infoCours = window.LaboCodexData.lireInfoCours();
+            cadre = window.LaboCodexData.lireDonneesNamespacees('cadreCalendrier') || {};
+            // lireDonneesNamespacees peut renvoyer un tableau si plusieurs groupes ; ici on attend un objet.
+            if (Array.isArray(cadre)) cadre = cadre[0] || {};
+        } else {
+            productions = (typeof obtenirDonneesSelonMode === 'function')
+                ? obtenirDonneesSelonMode('productions') || []
+                : [];
+            infoCours = db.getSync('infoCours', null);
+            cadre = db.getSync(cle('cadreCalendrier'), {});
+        }
         var gcId = infoCours ? (infoCours._groupeCoursId || infoCours.id || null) : null;
 
         // Borne inférieure du semestre
-        var cadre = db.getSync(cle('cadreCalendrier'), {});
-        var dateDebutSem = cadre.dateDebut || '';
+        var dateDebutSem = (cadre && cadre.dateDebut) || '';
 
         var prodFiltrees = productions.filter(function(p) {
             if (p.facultatif || p.type === 'portfolio') return false;
@@ -344,6 +359,16 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
         }
         var existant = Chart.getChart(canvas);
         if (existant) existant.destroy();
+
+        // Codex data en mode « tous fusionnés » : pas pertinent pour les corrélations longitudinales
+        if (window.LaboCodexData && window.LaboCodexData.modeConsultation() === 'codex-data-tous') {
+            if (typeof afficherMessageAttente === 'function') {
+                afficherMessageAttente(canvas,
+                    'Sélectionne un groupe-cours',
+                    'Les corrélations longitudinales se calculent par groupe-cours (calendriers et cohortes différents).');
+            }
+            return;
+        }
 
         // Calculer les données
         var donnees = calculerCorrelationsLongitudinales();

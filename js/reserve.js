@@ -992,6 +992,10 @@ function _notifierReglagesSiPresent() {
     if (window.ReserveReglages && typeof window.ReserveReglages.rafraichir === 'function') {
         try { window.ReserveReglages.rafraichir(); } catch (e) { /* silent */ }
     }
+    // #251 : notifier la carte « Codex data » pour rafraîchir le compteur d'archives
+    try {
+        window.dispatchEvent(new CustomEvent('codex-data-manifeste-change'));
+    } catch (e) { /* silent */ }
 }
 
 function _purgerEntreeManifesteLocal(dossier) {

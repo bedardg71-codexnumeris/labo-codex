@@ -45,12 +45,21 @@ var _ctx = null; // cache du contexte chargé
  *   grilles        — Map<da, grille[]> — grille par étudiant
  */
 function _chargerContexte() {
+    // Source unifiée : codex data (Labo) si actif, sinon trimestre actif
+    var hasLCD = window.LaboCodexData && typeof window.LaboCodexData.lireDonneesNamespacees === 'function';
+
     // Invalider le cache à chaque appel pour refléter les données actuelles
-    var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    var productions = obtenirDonneesSelonMode('productions') || [];
+    var evaluations = hasLCD
+        ? window.LaboCodexData.lireDonneesNamespacees('evaluationsSauvegardees') || []
+        : obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    var productions = hasLCD
+        ? window.LaboCodexData.lireDonneesNamespacees('productions') || []
+        : obtenirDonneesSelonMode('productions') || [];
 
     // Filtrer par groupe actif (cohérent avec le bandeau contextuel)
-    var infoCours = db.getSync('infoCours', null);
+    var infoCours = hasLCD
+        ? window.LaboCodexData.lireInfoCours()
+        : db.getSync('infoCours', null);
     if (infoCours && !infoCours._modeCours && infoCours.groupe) {
         var groupeNorm = String(infoCours.groupe).padStart(5, '0');
         evaluations = evaluations.filter(function(ev) {
@@ -165,8 +174,10 @@ function _detecterEchelle(productions) {
 
     if (!meilleurId) return null;
 
-    // Charger depuis echellesTemplates (non namespacé)
-    var echelles = db.getSync('echellesTemplates', []);
+    // Charger depuis echellesTemplates (non namespacé) ou depuis le codex data en mode Labo
+    var echelles = (window.LaboCodexData && typeof window.LaboCodexData.lireBibliothequeGlobale === 'function')
+        ? window.LaboCodexData.lireBibliothequeGlobale('echellesTemplates') || []
+        : db.getSync('echellesTemplates', []);
     return echelles.find(function(e) { return e.id === meilleurId; }) || null;
 }
 
@@ -502,6 +513,16 @@ function afficherMatriceConsolidation() {
     var conteneur = document.getElementById('conteneur-matrice-consolidation');
     var synthese = document.getElementById('consolidation-synthese');
     if (!conteneur) return;
+
+    // Codex data en mode \u00ab tous fusionn\u00e9s \u00bb : message explicite (calendriers et cohortes diff\u00e9rents)
+    if (window.LaboCodexData && window.LaboCodexData.modeConsultation() === 'codex-data-tous') {
+        conteneur.innerHTML = '<p class="text-muted">' +
+            'S\u00e9lectionne un groupe-cours dans le bandeau Codex data en haut pour afficher la matrice. ' +
+            'La consolidation se calcule par groupe-cours (cohortes diff\u00e9rentes).' +
+            '</p>';
+        if (synthese) synthese.innerHTML = '';
+        return;
+    }
 
     var donnees = calculerMatriceConsolidation();
     if (!donnees || !donnees.matrice || donnees.matrice.length === 0) {
