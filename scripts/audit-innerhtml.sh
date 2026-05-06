@@ -6,7 +6,7 @@
 # Pour chaque fichier .js du projet, classifie les `.innerHTML = ` et
 # `.innerHTML += ` en quatre catégories :
 #
-#   - secure    : utilise echapperHtml() sur la même ligne (sain)
+#   - secure    : utilise echapperHtml() ou escapeHtml() sur la même ligne (sain)
 #   - static    : pas d'interpolation détectée (sain — contenu littéral)
 #   - suspect   : interpolation détectée SANS echapperHtml (à auditer
 #                 manuellement — peut être un faux positif si la variable
@@ -58,11 +58,20 @@ audit_fichier() {
         local contenu=$(printf '%s' "$ligne" | cut -d: -f2-)
         total=$((total + 1))
 
+        # Bloc de contexte : la ligne courante + 4 lignes suivantes
+        # (le template literal qui suit `.innerHTML = '...' +` peut contenir
+        # echapperHtml/escapeHtml sur les lignes suivantes).
+        local extrait
+        extrait=$(sed -n "${n},$((n + 4))p" "$f")
+
         local a_interp=0
         local a_echappe=0
 
-        if printf '%s' "$contenu" | grep -qE "$PATTERN_INTERP"; then a_interp=1; fi
-        if printf '%s' "$contenu" | grep -q 'echapperHtml'; then a_echappe=1; fi
+        if printf '%s' "$extrait" | grep -qE "$PATTERN_INTERP"; then a_interp=1; fi
+        # Détecter les deux variantes : echapperHtml (français) et escapeHtml
+        # (anglaise, dans export-pdf.js et donnees-v2.js — implémentation
+        # équivalente via createElement+textContent).
+        if printf '%s' "$extrait" | grep -qE 'echapperHtml|escapeHtml'; then a_echappe=1; fi
 
         if [ $a_echappe -eq 1 ]; then
             secure=$((secure + 1))
@@ -121,11 +130,11 @@ if [ $MODE_MD -eq 1 ]; then
 
 Pour chaque fichier \`js/*.js\`, recense les \`.innerHTML = \` et \`.innerHTML += \`. Classifie chaque ligne en :
 
-- **secure** : contient \`echapperHtml\` sur la même ligne.
+- **secure** : contient \`echapperHtml\` ou \`escapeHtml\` sur la ligne courante OU dans les 4 lignes suivantes (template literal multi-ligne). Deux fonctions équivalentes coexistent dans le code, créées via \`createElement+textContent\`.
 - **static** : pas de pattern d'interpolation détecté (\`\${...}\`, \`' +\`, \`" +\`, \`+ '\`, \`+ "\`).
-- **suspect** : interpolation détectée SANS \`echapperHtml\` — à auditer manuellement.
+- **suspect** : interpolation détectée SANS échappement (ni \`echapperHtml\` ni \`escapeHtml\`) — à auditer manuellement.
 
-**Limite** : heuristique sur une seule ligne. Un \`innerHTML\` construit via une variable intermédiaire passe en « static » à tort. Un \`innerHTML\` qui interpole une variable déjà sûre par construction est marqué « suspect » (faux positif).
+**Limites** : (1) heuristique sur 5 lignes (la ligne courante + 4 suivantes) — un \`innerHTML\` dont le payload est construit via une variable assainie BIEN AVANT est marqué « suspect » à tort. (2) Un \`innerHTML\` qui interpole une variable sûre par construction (URL blob, ID interne, nombre calculé) est aussi marqué « suspect » — faux positif.
 
 ## Synthèse globale
 
