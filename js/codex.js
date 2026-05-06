@@ -366,6 +366,13 @@ async function genererCodex(options = {}) {
 
     zip.file(NOM_MANIFESTE, JSON.stringify(manifeste, null, 2));
 
+    // Défense K — valider que le ZIP ne contient que les entrées attendues
+    // avant de le sérialiser. Si un payload a tenté d'ajouter un fichier
+    // annexe (cf. MODELE-MENACES.md §X-02), l'export est bloqué ici.
+    if (window.SecuriteExportValidation && typeof window.SecuriteExportValidation.validerExportCodex === 'function') {
+        window.SecuriteExportValidation.validerExportCodex(zip);
+    }
+
     // 5. Générer le blob ZIP
     _prog(70, 'Compression du ZIP...', nbBlobs + ' fichier(s), ' + _formaterTaille(tailleTotale));
     const zipBlob = await zip.generateAsync(
