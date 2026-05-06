@@ -336,22 +336,24 @@ Quatre profils sont modélisés. Chacun a une motivation, une capacité techniqu
 
 Vue synthétique des 14 scénarios couverts dans ce document. Tri par priorité (impact × probabilité, pondéré par la facilité de défense).
 
+Statut défense **mis à jour le 6 mai 2026** après livraison Phase 0 (cf. §8.2). Les notes B-α / J / D / P-α / H / K renvoient aux défenses livrées.
+
 | Code | Titre | Vecteur | Profil dominant | Impact | Probabilité | Statut défense | Format |
 |---|---|---|---|---|---|---|---|
-| **D-01** | Bombe à retardement dans la Voûte | Bibliothèque partagée | Externe + IA | CATASTROPHIQUE | Moyen-Élevé | Insuffisant | Complet |
-| **D-02** | Corruption silencieuse des bibliothèques partagées | Bibliothèque partagée | Collègue + IA | Critique | Moyen | Insuffisant | Complet |
-| **D-03** | Effacement disque ciblé via FSAPI rémanent | Toute exécution dans le contexte | Tous profils | CATASTROPHIQUE | Faible-Moyen | Insuffisant | Complet |
+| **D-01** | Bombe à retardement dans la Voûte | Bibliothèque partagée | Externe + IA | CATASTROPHIQUE | Moyen-Élevé | Partiel (B-α sanitisation imports + J hook pré-commit ; manque sandbox iframe Phase 1) | Complet |
+| **D-02** | Corruption silencieuse des bibliothèques partagées | Bibliothèque partagée | Collègue + IA | Critique | Moyen | Partiel (H sceau SHA-256 détecte les altérations en transit ; signature ECDSA en Phase 2 pour la manipulation intentionnelle) | Complet |
+| **D-03** | Effacement disque ciblé via FSAPI rémanent | Toute exécution dans le contexte | Tous profils | CATASTROPHIQUE | Faible-Moyen | Bon (D révocation FSAPI par défaut + opt-in ; toggle UI dans Réglages > Préférences > Sécurité) | Complet |
 | **D-04** | ZIP bomb / ZIP slip dans un import codex | Import ZIP | Externe + IA | Élevé | Faible | Partiel (validerZipSecurite) | Court |
-| **X-01** | Vol ciblé des informations enseignant + étudiants | Bibliothèque + Import | Tous profils | Critique (Loi 25) | Moyen-Élevé | Insuffisant (CSP partielle) | Complet |
-| **X-02** | Exfiltration via export piégé distribué par la victime | Bibliothèque + Export | Externe + IA | Critique | Moyen | Aucun | Court |
-| **I-01** | XSS stocké via critère importé | Bibliothèque + Import | Tous profils | Critique | Élevé | Partiel | Complet |
+| **X-01** | Vol ciblé des informations enseignant + étudiants | Bibliothèque + Import | Tous profils | Critique (Loi 25) | Moyen-Élevé | Partiel (CSP + B-α sanitisation + K whitelist export bloque l'injection de champs annexes ; manque sandbox iframe Phase 1) | Complet |
+| **X-02** | Exfiltration via export piégé distribué par la victime | Bibliothèque + Export | Externe + IA | Critique | Moyen | Bon (K whitelist structure ZIP/JSON sortants) | Court |
+| **I-01** | XSS stocké via critère importé | Bibliothèque + Import | Tous profils | Critique | Élevé | Partiel (B-α schémas profonds + J hook pré-commit ; sandbox iframe Phase 1 pour neutraliser la mécanique) | Complet |
 | **I-02** | Polyglotte image+JS dans un blob de travail | Import images / PDF | Externe + IA | Élevé | Faible | Partiel (validerMagicBytes) | Court |
 | **I-03** | Path traversal dans une archive importée | Import ZIP | Externe + IA | Élevé | Très faible | Bon (validerZipSecurite) | Court |
-| **U-01** | Grille publiée sous identité d'un enseignant respecté | Bibliothèque partagée (Voûte) | Collègue + Externe | Élevé | Élevé (Voûte ouverte) | Aucun (signature ECDSA non implémentée) | Complet |
-| **U-02** | Faux pack démarrage maquillé en version officielle | Distribution pack démo | Externe | Élevé | Faible | Partiel (préfixage IDs `*_DEMO_*`) | Court |
-| **U-03** | Métadonnées CC truquées | Bibliothèque + Voûte | Tous profils | Moyen | Moyen | Aucun | Court |
-| **C-01** | Régression silencieuse de sécurité dans un commit | Code source | Interne | Critique | Élevé (sans contrôles) | Partiel (CLAUDE.md, skills) | Complet |
-| **C-02** | IA générant du code qui contourne assainirObjet | Code source | Interne (IA assistée) | Critique | Élevé | Insuffisant | Court |
+| **U-01** | Grille publiée sous identité d'un enseignant respecté | Bibliothèque partagée (Voûte) | Collègue + Externe | Élevé | Élevé (Voûte ouverte) | Aucun (signature ECDSA Phase 2) | Complet |
+| **U-02** | Faux pack démarrage maquillé en version officielle | Distribution pack démo | Externe | Élevé | Faible | Partiel (préfixage IDs `*_DEMO_*` + H sceau SHA-256 sur les exports) | Court |
+| **U-03** | Métadonnées CC truquées | Bibliothèque + Voûte | Tous profils | Moyen | Moyen | Aucun (signature institutionnelle Phase 2) | Court |
+| **C-01** | Régression silencieuse de sécurité dans un commit | Code source | Interne | Critique | Élevé (sans contrôles) | Partiel (CLAUDE.md + J hook pré-commit innerHTML/clés sensibles ; tests automatisés en Phase 1) | Complet |
+| **C-02** | IA générant du code qui contourne assainirObjet | Code source | Interne (IA assistée) | Critique | Élevé | Partiel (J hook pré-commit + skills sécurité chargés en début de session) | Court |
 
 **Légende impact** : CATASTROPHIQUE (perte irréversible massive, atteinte à la viabilité du projet), Critique (perte ou compromission majeure d'un compte), Élevé (perte ou compromission limitée à des données spécifiques), Moyen (atteinte à la confiance ou à la cohérence sans perte directe).
 
@@ -1469,18 +1471,25 @@ Cette section consolide les défenses identifiées dans les 14 scénarios. Plusi
 
 Quatre phases, du plus rapide et plus rentable au plus structurel.
 
-#### Phase 0 — Quick wins (1-2 semaines de travail effectif)
+#### Phase 0 — Quick wins — **LIVRÉE le 6 mai 2026**
 
-Défenses qui peuvent être implémentées rapidement, sans refonte d'architecture, et qui apportent un gain de sécurité immédiat.
+Défenses livrées en une seule journée (toutes commitées sur `main`, beta 99.36, builds 0506-1300 → 0506-1430). Effort réel ~5 h, nettement sous l'estimation initiale de 12-18 j. Justification de cet écart : scope α systématique (livrer le 80 % de la valeur sans le 20 % long-tail) et arbitrages explicites sur les sous-actions reportées (B-β, K-β).
 
-1. **Défense B** — Compléter `SCHEMAS_IMPORT` sur les 6 bibliothèques (cf. §3.1.bis) : sous-schémas pour `grille.criteres`, `echelle.niveaux`, `pratique.criteres`, `pratique.ponderation` ; ajout des entrées manquantes `cartouche` et `tampon` ; branchement d'`assainirObjet` sur les pipelines cartouches (`import-export.js:1936`) et tampons (`tampons-bibliotheque.js:187`). Faire des 6 fonctions `ajouter*ALaBibliotheque` un passage obligé qui appelle `assainirObjet` localement. Auditer les call-sites identifiés (`spe-specifications.js:905`, `grilles.js:2489`, et leurs équivalents pour échelles/pratiques/productions). **Effort : 1-2 jours.**
-2. **Défense H** — Calcul SHA-256 et inclusion dans les exports. Comparaison à l'import. Web Crypto API natif. **Effort : 1 jour.**
-3. **Défense J** — Script `scripts/audit-innerhtml.sh` qui grep les `innerHTML` du diff git et alerte. À installer comme hook `pre-commit`. **Effort : 1-2 jours.**
-4. **Défense D** — Révocation par défaut des handles FSAPI persistés ou opt-in explicite. **Effort : 1-2 jours + ajustement UX.**
-5. **Défense K** — Whitelist de structure des ZIPs sortants pour les 6 pipelines d'export par type + exports codex/réserve. Affichage du contenu du ZIP avant téléchargement. **Effort : 3-4 jours.**
-6. **Défense P** — Unification du pipeline d'import tampons sur le pipeline ZIP commun. Suppression du canal isolé `tampons-bibliotheque.js:187`. **Effort : 2-3 jours.** Logiquement à enchaîner avec Défense B pour bénéficier du schéma `tampon` ajouté dans `SCHEMAS_IMPORT`.
+1. ✅ **Défense B-α** — Sanitisation profonde des imports (commit `f9f6865`). Sous-schémas pour `grille.criteres`, `echelle.niveaux`, `pratique.criteres`. Ajout des entrées manquantes `cartouche` (avec `commentaires` en `mapStrings`) et `tampon` dans `SCHEMAS_IMPORT`. Sous-schémas réutilisables `metadata_cc` et `inspireDe` sur les 6 schémas. Extension de `assainirObjet` avec deux nouveaux types (`mapStrings`, `stringOrNumber`). Branchement d'`assainirObjet` sur les 2 pipelines cartouches (`import-export.js:2118` configuration-complète + `import-export.js:2750` import sélectif). **Reste en B-β** : faire des 6 fonctions `ajouter*ALaBibliotheque` un passage obligé (nécessite d'abord modéliser exhaustivement `pratique.configuration`).
 
-**Bilan Phase 0** : couvre déjà partiellement D-01, D-02, D-03, X-01, X-02, I-01, U-02, C-01, C-02. Pas une défense complète mais un saut de surface significatif. Les 6 bibliothèques sont mises à parité de protection à l'ingestion (cf. §3.1.bis).
+2. ✅ **Défense J** — Hook pré-commit (commit `48c1a2d`). Script `scripts/hooks/pre-commit` (bash, ~165 lignes) qui scanne le diff staged sur `.js` + `.html`, bloque les nouveaux `innerHTML` avec interpolation sans `echapperHtml`, avertit sur les écritures `db.set`/`localStorage.setItem` sur clés sensibles sans `assainirObjet` à proximité. Bypass légitime via commentaire `// security-ok: <raison>`. Installateur `scripts/install-hooks.sh` (configure `core.hooksPath`). Documentation `docs/securite/HOOKS-PRE-COMMIT.md`.
+
+3. ✅ **Défense D** — Révocation FSAPI par défaut + opt-in (commit `d0a0903`). Préférence `fsapi_persistance_handles` (defaut `false`, secure-by-default) avec helpers `db.getFSAPIPersistance` / `db.setFSAPIPersistance` / `db.removeFSAPIHandle`. Pipelines `db.storeFSAPIHandle`/`getFSAPIHandle` et `reserve._lire/_ecrireHandlePersiste` deviennent no-op silencieux si pref désactivée. Module `js/securite-prefs.js` orchestre la migration silencieuse au boot et l'hydratation du toggle UI. Carte « Sécurité » dans Réglages > Préférences avec toggle « Mémoriser le dossier Travaux et la Réserve entre les sessions ».
+
+4. ✅ **Défense P-α** — Sanitisation tampons (commit `a9eadae`). Exposition publique de `assainirObjet` / `assainirChaine` / `SCHEMAS_IMPORT` sur `window`. `tampons-bibliotheque.js:importerDansBibliotheque` passe chaque tampon par `assainirObjet(t, SCHEMAS_IMPORT.tampon)` avant push. `tampons-bibliotheque.js:importerFichier` impose des limites de surface (5 Mo fichier max, 200 tampons par import) — équivalent JSON de `validerZipSecurite`. **Décision de scope** : pas de migration vers le format ZIP (le format JSON reste pour les utilisateurs — le scope §8.1 « unifier sur le pipeline ZIP commun » a été révisé en accord avec Grégoire pour éviter du churn pour zéro gain sécurité après B-α).
+
+5. ✅ **Défense H** — Sceau SHA-256 sur les exports (commit `404b924`). Module `js/securite-hash.js` (~190 l.) avec API `sceller`, `verifier`, `scellerLot`, `verifierLot` via Web Crypto. Canonicalisation par tri récursif des clés et exclusion des champs volatiles (`_hash_v1`, `dateImport`, `dateAjoutBiblio`, `dansBibliotheque`). Scellage à l'export config-complète et tampons. Vérification AVANT assainissement à l'import, accumulation des anomalies, message de succès enrichi. Dégradation gracieuse si Web Crypto indisponible.
+
+6. ✅ **Défense K** — Whitelist de structure des exports (commit `0218d07`). Module `js/securite-export-validation.js` (~155 l.) avec 4 whitelists (codex, reserve, configurationComplete, tampons) + helpers `validerStructureZip` (regex) et `validerClesObjet` (clés). Branché sur les 4 pipelines : `codex.js` (avant `generateAsync`), `reserve.js` (avant compression), `import-export.js:exporterConfigurationComplete` (avant download), `tampons-bibliotheque.js:exporterBibliotheque` (avant download). Erreur → alerte + abort. **Reste en K-β** : preview UI du contenu d'un export avant download (suite UX, à la demande).
+
+7. ✅ **Audit a priori baseline** (`docs/securite/audits/AUDIT-2026-05-06.md`). Script `scripts/audit-bibliotheques-securite.js` (lecture seule, 13 patterns testés). Résultat sur la base de Grégoire au 6 mai 2026 : 11 clés scannées, 0 trouvaille suspecte. Sert de baseline pour les audits trimestriels (cf. §A.3).
+
+**Bilan Phase 0** : 7 défenses livrées, 6 commits sécurité sur `main` (b0506-1300 → b0506-1430). Couvre partiellement D-01, D-02, D-03, X-01, X-02, I-01, U-02, C-01, C-02. Les 6 bibliothèques sont à parité de protection à l'ingestion. Reste à compléter en B-β (passage obligé `ajouter*`) et K-β (preview UI). La couverture complète passe par Phase 1 (sandbox iframe, audit `innerHTML`, tests automatisés, wrapper destructif).
 
 #### Phase 1 — Chantiers structurels (3-6 semaines)
 
@@ -1522,17 +1531,27 @@ Recalibré le 6 mai 2026 après audit des 6 bibliothèques (§3.1.bis) et ajout 
 
 **Total Phase 0+1+2** : environ 4-6 mois calendaires si Grégoire est seul à coder, à raison d'un effort de 2-3 jours/semaine sur la sécurité (le reste sur les autres chantiers du projet). L'extension aux 6 bibliothèques n'allonge pas significativement le total parce que le travail est concentré en Phase 0 (où Défense B + P sont quand même contenus dans la fenêtre 1-2 semaines de calendrier).
 
-### 8.4 Ordre suggéré pour démarrer dès cette semaine
+### 8.4 État du chantier au 6 mai 2026
 
-Si tu veux commencer immédiatement, voici un ordre concret pour les premières actions, du plus court au plus long, du plus à risque au moins :
+Phase 0 livrée intégralement (cf. §8.2 ci-dessus). Les actions ci-dessous reflètent les suites possibles, classées par priorité.
 
-1. **Aujourd'hui** : auditer manuellement les 6 bibliothèques actuelles — `bibliothequeGrilles`, `bibliothequeEchelles`, `cartouches_*` (toutes les clés préfixées), `pratiquesConfigurables`, `productions` (clé bibliothèque), `bibliothequeTampons` — pour vérifier qu'aucun item ne contient déjà un payload (`<script`, `<img`, `<svg`, `onerror=`, `onload=`, `javascript:` dans les champs textuels et leurs sous-tableaux). Détection a priori avant que les défenses soient en place. Voir §A.1 pour la procédure DevTools détaillée.
-2. **Cette semaine** : implémenter Défense B étendue aux 6 bibliothèques (sous-schémas pour grille/échelle/pratique + ajout des schémas cartouche et tampon dans `SCHEMAS_IMPORT` + branchement d'`assainirObjet` sur les pipelines cartouches et tampons + 6 fonctions `ajouter*` comme passages obligés). 1-2 jours. Le gain est immédiat sur D-01, D-02, X-01, I-01.
-3. **Cette semaine** : installer le hook pré-commit (Défense J). 1-2 jours. Bloque les régressions futures.
-4. **Semaine prochaine** : Défense P (unification du pipeline tampons sur le ZIP commun). 2-3 jours. Enchaîner après Défense B pour profiter du schéma `tampon` ajouté. Coupe le canal isolé de tampons-bibliotheque.js:187.
-5. **Semaine prochaine** : Défense D (révocation FSAPI). 1-2 jours. Coupe une partie de D-03.
-6. **Dans le mois** : commencer Défense E (audit `innerHTML`) — étape 1 (audit scripté) en priorité pour quantifier la dette résiduelle réelle sur les modules d'aperçu/wizard non encore audités. C'est le plus laborieux mais structurel.
-7. **Avant ouverture Voûte** : Défense F (signature) en chantier parallèle.
+**Suites courtes (1-2 jours chaque)** :
+
+1. **B-β** — Faire des 6 fonctions `ajouter*ALaBibliotheque` un passage obligé qui appelle `assainirObjet` localement. Pré-requis : modéliser exhaustivement les champs légitimes — notamment `pratique.configuration` (typesTravaux, forfaits, portfolio, etc.) — pour éviter une régression silencieuse sur les créations locales. Bug latéral connu : `pratique.configuration` n'est pas dans `SCHEMAS_IMPORT.pratique` aujourd'hui, donc une pratique passée par le pipeline ZIP perd ce champ silencieusement. À traiter dans le même chantier.
+
+2. **K-β** — Preview UI du contenu d'un export avant download. « Votre export contient les fichiers suivants : [...]. Continuer ? ». Suite UX de Défense K. Faible coût technique, valeur surtout pédagogique (l'utilisateur prend conscience de ce qui voyage).
+
+**Suites structurelles (Phase 1, à planifier en chantiers dédiés)** :
+
+3. **Défense E (audit `innerHTML`)** — étape 1 (audit scripté, 1-2 j) en priorité pour quantifier la dette résiduelle réelle sur les modules d'aperçu/wizard non encore audités. Étape 2 (migration vers `textContent` ou construction DOM, 1-2 semaines selon le résultat de l'étape 1).
+
+4. **Défense A (sandbox iframe)** — neutralise techniquement la mécanique I-01 sous-jacente à D-01 / X-01 / U-01. Effort 1 semaine.
+
+5. **Défense I (tests sécurité automatisés)** — choix du framework (Vitest/Playwright) à arbitrer en début de chantier compte tenu de la stack vanilla JS + `file://`. Effort 1 semaine + maintenance.
+
+6. **Défense C (wrapper destructif)** — couche de garde sur `localStorage.clear`, `indexedDB.deleteDatabase`, `removeEntry` FSAPI. Effort 1-2 semaines.
+
+**Suites long terme (Phase 2)** : Défense F (signature ECDSA + annuaire) avant ouverture multi-cégep de la Voûte. Nécessite des décisions de gouvernance.
 
 ---
 
@@ -1759,6 +1778,7 @@ Ajouter le scénario au tableau récapitulatif §6 avec une ligne formatée comm
 |---|---|---|
 | 2026-05-06 | 1.0 | Création. Périmètre : vecteurs prioritaires Voûte/grilles + Import codex/data/archives. 14 scénarios (7 complets + 7 courts). Plan de défense priorisé en 3 phases. Annexes complètes. |
 | 2026-05-06 | 1.1 | Corrections post-revue : (1) précision sur le call-site `grilles.js:2489` (D-01 §3 et §C2) — il appelle `importerGrillesDansBibliotheque`, pas `ajouterGrilleALaBibliotheque`. (2) Nuance sur l'ampleur de la dette `innerHTML` legacy (D-01 §C4 et I-01 §C1) — audit ciblé montre une dette résiduelle faible (< 5 %) sur les modules sensibles principaux, mais non quantifiée sur les aperçus/wizards. (3) Extension de l'audit aux 6 bibliothèques partagées (nouveau §3.1.bis) — découverte que cartouches et tampons n'ont pas d'entrée dans `SCHEMAS_IMPORT` ; tampons ont en plus un canal d'import isolé. (4) Plan de défense réajusté en conséquence : Défense B passe de 4-6 h à 1-2 j et couvre les 6 types ; nouvelle Défense P (unification du pipeline d'import tampons) ; Défenses E/H/K/M étendues aux 6 types ; Phase 0 recalibrée à 12-18 j ; §6 et §A.1 actualisés pour mentionner les 6 bibliothèques. |
+| 2026-05-06 | 1.2 | **Phase 0 livrée intégralement** en une journée (beta 99.36, builds 0506-1300 → 0506-1430). 7 défenses, 6 commits sécurité sur `main` : audit a priori baseline (`AUDIT-2026-05-06.md`), B-α sanitisation profonde (`f9f6865`), J hook pré-commit (`48c1a2d`), D révocation FSAPI (`d0a0903`), P-α sanitisation tampons (`a9eadae`), H sceau SHA-256 (`404b924`), K whitelist exports (`0218d07`). Effort réel ~5 h vs estimation 12-18 j — écart justifié par le scope α systématique (80 % de la valeur sans le 20 % long-tail). §8.2 mis à jour pour refléter l'état livré ; §8.4 remplace l'ordre suggéré par un état + suites possibles ; §6 reflète le nouveau statut défense par scénario. Reste : B-β (passage obligé `ajouter*`), K-β (preview UI export), Phase 1 (sandbox iframe, audit `innerHTML`, tests automatisés, wrapper destructif), Phase 2 (signature ECDSA + gouvernance). |
 
 À mettre à jour à chaque révision.
 
