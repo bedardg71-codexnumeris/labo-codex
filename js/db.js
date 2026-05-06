@@ -759,11 +759,45 @@
         }
 
         /**
-         * Persiste un FileSystemDirectoryHandle dans keyvalue
+         * Préférence de persistance des handles FSAPI entre sessions.
+         * Source : localStorage (pas IndexedDB, pour pouvoir lire la pref de
+         * façon synchrone dès le boot avant l'init IDB).
+         *
+         * Défaut : false (sécurité par défaut, cf. MODELE-MENACES.md §D-03).
+         * @returns {boolean}
+         */
+        getFSAPIPersistance() {
+            return localStorage.getItem('fsapi_persistance_handles') === 'true';
+        }
+
+        /**
+         * Bascule la préférence de persistance. Quand on désactive, on prend
+         * soin de supprimer les handles déjà persistés pour qu'aucune session
+         * future ne les réutilise (cf. MODELE-MENACES.md §D-03 P1).
+         * @param {boolean} actif
+         * @returns {Promise<void>}
+         */
+        async setFSAPIPersistance(actif) {
+            if (actif) {
+                localStorage.setItem('fsapi_persistance_handles', 'true');
+            } else {
+                localStorage.setItem('fsapi_persistance_handles', 'false');
+                await this.removeFSAPIHandle();
+                if (window.Reserve && typeof window.Reserve.effacerLiaisonFSAPI === 'function') {
+                    try { await window.Reserve.effacerLiaisonFSAPI(); } catch (e) { /* silent */ }
+                }
+            }
+        }
+
+        /**
+         * Persiste un FileSystemDirectoryHandle dans keyvalue.
+         * No-op silencieux si la préférence de persistance est désactivée
+         * (Défense D — cf. MODELE-MENACES.md §D-03).
          * @param {FileSystemDirectoryHandle} handle
          * @returns {Promise<void>}
          */
         async storeFSAPIHandle(handle) {
+            if (!this.getFSAPIPersistance()) return;
             if (!this.ready) await this.init();
             if (!this.useIndexedDB || !this.db) return;
             return new Promise((resolve, reject) => {
@@ -782,10 +816,12 @@
         }
 
         /**
-         * Récupère le FileSystemDirectoryHandle
+         * Récupère le FileSystemDirectoryHandle. Retourne null si la
+         * préférence de persistance est désactivée (Défense D).
          * @returns {Promise<FileSystemDirectoryHandle|null>}
          */
         async getFSAPIHandle() {
+            if (!this.getFSAPIPersistance()) return null;
             if (!this.ready) await this.init();
             if (!this.useIndexedDB || !this.db) return null;
             return new Promise((resolve) => {
@@ -796,6 +832,23 @@
                     resolve(request.result ? request.result.value : null);
                 };
                 request.onerror = () => resolve(null);
+            });
+        }
+
+        /**
+         * Supprime le handle FSAPI persisté. Idempotent.
+         * Utilisé par setFSAPIPersistance(false) et lors de la migration.
+         * @returns {Promise<void>}
+         */
+        async removeFSAPIHandle() {
+            if (!this.ready) await this.init();
+            if (!this.useIndexedDB || !this.db) return;
+            return new Promise((resolve) => {
+                const tx = this.db.transaction(['keyvalue'], 'readwrite');
+                const store = tx.objectStore('keyvalue');
+                const request = store.delete('travaux_fsapi_handle');
+                request.onsuccess = () => resolve();
+                request.onerror = () => resolve();
             });
         }
 
