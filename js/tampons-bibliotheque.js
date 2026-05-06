@@ -56,7 +56,16 @@ async function importerDansBibliotheque(tampons) {
     var items = await obtenirTous();
     var idsExistants = new Set(items.map(function(t) { return t.id; }));
     var ajoutes = 0;
-    tampons.forEach(function(t) {
+    // Défense P (cf. MODELE-MENACES.md §3.1.bis) : chaque tampon importé est
+    // sanitisé via le schéma défini en B-α. Tout champ hors schéma est retiré
+    // (whitelist), et les chaînes sont tronquées + débalisées.
+    var schema = (typeof SCHEMAS_IMPORT !== 'undefined' && SCHEMAS_IMPORT && SCHEMAS_IMPORT.tampon) ? SCHEMAS_IMPORT.tampon : null;
+    var sanitiser = (typeof assainirObjet === 'function' && schema)
+        ? function(t) { return Object.assign({}, assainirObjet(t, schema)); }
+        : function(t) { return t; };
+    tampons.forEach(function(brut) {
+        var t = sanitiser(brut);
+        if (!t.id) return; // tampon sans id après sanitisation : refusé
         if (!idsExistants.has(t.id)) {
             t.dansBibliotheque = true;
             t.dateAjoutBiblio = new Date().toISOString();
@@ -184,11 +193,26 @@ function exporterBibliotheque() {
     }
 }
 
+// Limites de surface — équivalent JSON de validerZipSecurite pour le canal
+// isolé d'import des tampons (Défense P, cf. MODELE-MENACES.md §3.1.bis).
+// Les valeurs sont calibrées pour un usage légitime large (200 tampons
+// d'une catégorie complète, 5 Mo couvre des PNG en base64 raisonnables).
+var TAMPONS_FICHIER_TAILLE_MAX_OCTETS = 5 * 1024 * 1024;
+var TAMPONS_NOMBRE_MAX_PAR_IMPORT = 200;
+
 async function importerFichier(event) {
     var file = event.target.files && event.target.files[0];
     if (!file) return;
 
     try {
+        if (file.size > TAMPONS_FICHIER_TAILLE_MAX_OCTETS) {
+            if (typeof afficherNotificationErreur === 'function') {
+                afficherNotificationErreur('Fichier trop volumineux', 'Limite : ' + Math.round(TAMPONS_FICHIER_TAILLE_MAX_OCTETS / (1024 * 1024)) + ' Mo.');
+            }
+            event.target.value = '';
+            return;
+        }
+
         var texte = await file.text();
         var data = JSON.parse(texte);
 
@@ -196,6 +220,15 @@ async function importerFichier(event) {
             if (typeof afficherNotificationErreur === 'function') {
                 afficherNotificationErreur('Format invalide', 'Ce fichier n\'est pas une collection de tampons Labo Codex');
             }
+            event.target.value = '';
+            return;
+        }
+
+        if (data.tampons.length > TAMPONS_NOMBRE_MAX_PAR_IMPORT) {
+            if (typeof afficherNotificationErreur === 'function') {
+                afficherNotificationErreur('Trop de tampons', 'Limite : ' + TAMPONS_NOMBRE_MAX_PAR_IMPORT + ' tampons par import.');
+            }
+            event.target.value = '';
             return;
         }
 
