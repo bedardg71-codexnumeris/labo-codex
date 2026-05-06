@@ -215,7 +215,10 @@ function assainirChaine(str, maxLen = 500) {
 /**
  * Assainit un objet importé selon un schéma (whitelist de propriétés)
  * @param {Object} obj - Objet à assainir
- * @param {Object} schema - Schéma { nomProp: { type: 'string'|'array'|'number'|'boolean'|'object', maxLen?: number, schema?: Object } }
+ * @param {Object} schema - Schéma { nomProp: { type, maxLen?, schema? } }
+ *   Types reconnus : 'string', 'number', 'boolean', 'array', 'object',
+ *                    'mapStrings' (object à clés dynamiques, valeurs assainies en strings),
+ *                    'stringOrNumber' (id qui peut arriver soit en string soit en number).
  * @returns {Object} Objet nettoyé (seules les clés du schéma sont conservées)
  */
 function assainirObjet(obj, schema) {
@@ -238,6 +241,17 @@ function assainirObjet(obj, schema) {
                 break;
             case 'boolean':
                 resultat[cle] = !!valeur;
+                break;
+            case 'stringOrNumber':
+                // Accepte une string (assainie) ou un number (laissé tel quel).
+                // Utile pour les id qui peuvent arriver dans les deux formes
+                // (ex. critères de pratique : id numérique dans les modèles
+                // prédéfinis, id 'CR_xxx' string ailleurs).
+                if (typeof valeur === 'number') {
+                    resultat[cle] = valeur;
+                } else {
+                    resultat[cle] = assainirChaine(valeur, spec.maxLen || 100);
+                }
                 break;
             case 'array':
                 if (Array.isArray(valeur)) {
@@ -262,6 +276,27 @@ function assainirObjet(obj, schema) {
                     resultat[cle] = valeur;
                 }
                 break;
+            case 'mapStrings':
+                // Object à clés dynamiques dont toutes les valeurs doivent être
+                // des strings assainies. Ex. cartouche.commentaires :
+                // { 'CR_<id>_<niveau>': 'texte de rétroaction', ... }
+                if (typeof valeur === 'object' && valeur !== null && !Array.isArray(valeur)) {
+                    const map = {};
+                    for (const k in valeur) {
+                        if (Object.prototype.hasOwnProperty.call(valeur, k)) {
+                            // La clé elle-même est assainie (longueur courte) pour
+                            // bloquer une injection dans le nom de la clé.
+                            const cleAssainie = assainirChaine(k, 200);
+                            if (cleAssainie) {
+                                map[cleAssainie] = assainirChaine(valeur[k], spec.maxLen || 1000);
+                            }
+                        }
+                    }
+                    resultat[cle] = map;
+                } else {
+                    resultat[cle] = {};
+                }
+                break;
             default:
                 // Type inconnu : copier tel quel (fallback safe)
                 resultat[cle] = valeur;
@@ -271,48 +306,131 @@ function assainirObjet(obj, schema) {
     return resultat;
 }
 
+/** Sous-schéma `metadata_cc` réutilisé sur tous les types partageables. */
+const SCHEMA_METADATA_CC = {
+    type: 'object',
+    schema: {
+        licence: { type: 'string', maxLen: 100 },
+        auteur_original: { type: 'string', maxLen: 100 },
+        description_courte: { type: 'string', maxLen: 500 },
+        contributeurs: {
+            type: 'array',
+            schema: {
+                nom: { type: 'string', maxLen: 100 },
+                date: { type: 'string', maxLen: 50 }
+            }
+        }
+    }
+};
+
+/** Sous-schéma `inspireDe` (filiation Plan §4.3) réutilisé sur tous les types. */
+const SCHEMA_INSPIRE_DE = {
+    type: 'object',
+    schema: {
+        nom: { type: 'string', maxLen: 200 },
+        auteur: { type: 'string', maxLen: 100 },
+        date: { type: 'string', maxLen: 50 }
+    }
+};
+
 /** Schémas de validation pour les ressources partageables */
 const SCHEMAS_IMPORT = {
     grille: {
         id: { type: 'string', maxLen: 100 },
         nom: { type: 'string', maxLen: 200 },
-        criteres: { type: 'array' },
+        criteres: {
+            type: 'array',
+            schema: {
+                id: { type: 'string', maxLen: 100 },
+                nom: { type: 'string', maxLen: 200 },
+                description: { type: 'string', maxLen: 500 },
+                ponderation: { type: 'number' },
+                type: { type: 'string', maxLen: 50 },
+                formule: { type: 'string', maxLen: 200 },
+                niveauSOLO: { type: 'string', maxLen: 50 },
+                verrouille: { type: 'boolean' },
+                obligatoire: { type: 'boolean' }
+            }
+        },
+        auteur: { type: 'string', maxLen: 100 },
         auteurOriginal: { type: 'string', maxLen: 100 },
         dateImport: { type: 'string', maxLen: 50 },
         dateCreation: { type: 'string', maxLen: 50 },
         dateModification: { type: 'string', maxLen: 50 },
         estDemo: { type: 'boolean' },
         isDemo: { type: 'boolean' },
+        type: { type: 'string', maxLen: 50 },
+        typeSPE: { type: 'boolean' },
+        typeProductionId: { type: 'string', maxLen: 100 },
         description: { type: 'string', maxLen: 500 },
-        metadata_cc: { type: 'object' }
+        dansBibliotheque: { type: 'boolean' },
+        dateAjoutBiblio: { type: 'string', maxLen: 50 },
+        metadata_cc: SCHEMA_METADATA_CC,
+        inspireDe: SCHEMA_INSPIRE_DE
     },
     echelle: {
         id: { type: 'string', maxLen: 100 },
         nom: { type: 'string', maxLen: 200 },
-        niveaux: { type: 'array' },
+        niveaux: {
+            type: 'array',
+            schema: {
+                code: { type: 'string', maxLen: 20 },
+                nom: { type: 'string', maxLen: 100 },
+                description: { type: 'string', maxLen: 500 },
+                min: { type: 'number' },
+                max: { type: 'number' },
+                valeur: { type: 'number' },
+                couleur: { type: 'string', maxLen: 30 }
+            }
+        },
+        auteur: { type: 'string', maxLen: 100 },
         auteurOriginal: { type: 'string', maxLen: 100 },
         dateImport: { type: 'string', maxLen: 50 },
         dateCreation: { type: 'string', maxLen: 50 },
         dateModification: { type: 'string', maxLen: 50 },
         estDemo: { type: 'boolean' },
         isDemo: { type: 'boolean' },
+        discipline: { type: 'string', maxLen: 100 },
         description: { type: 'string', maxLen: 500 },
-        metadata_cc: { type: 'object' }
+        verrouille: { type: 'boolean' },
+        dansBibliotheque: { type: 'boolean' },
+        dateAjoutBiblio: { type: 'string', maxLen: 50 },
+        metadata_cc: SCHEMA_METADATA_CC,
+        inspireDe: SCHEMA_INSPIRE_DE
     },
     pratique: {
         id: { type: 'string', maxLen: 100 },
         nom: { type: 'string', maxLen: 200 },
         type: { type: 'string', maxLen: 100 },
         description: { type: 'string', maxLen: 500 },
+        auteur: { type: 'string', maxLen: 100 },
         auteurOriginal: { type: 'string', maxLen: 100 },
         dateImport: { type: 'string', maxLen: 50 },
+        dateCreation: { type: 'string', maxLen: 50 },
         dateModification: { type: 'string', maxLen: 50 },
         estDemo: { type: 'boolean' },
         isDemo: { type: 'boolean' },
-        criteres: { type: 'array' },
+        criteres: {
+            type: 'array',
+            schema: {
+                id: { type: 'stringOrNumber', maxLen: 100 },
+                nom: { type: 'string', maxLen: 200 },
+                description: { type: 'string', maxLen: 500 },
+                essentiel: { type: 'boolean' },
+                ponderation: { type: 'number' }
+            }
+        },
+        // NOTE — `configuration` (object riche : seuilAcceptable, typesTravaux,
+        // forfaits, portfolio, etc.) n'est pas modélisé dans Défense B-α.
+        // Conséquence : ce champ est aujourd'hui retiré par `assainirObjet`
+        // sur le pipeline import. Bug latéral à traiter en B-β / suivi.
         ponderation: { type: 'object' },
         seuilReussite: { type: 'number' },
-        metadata_cc: { type: 'object' }
+        discipline: { type: 'string', maxLen: 100 },
+        dansBibliotheque: { type: 'boolean' },
+        dateAjoutBiblio: { type: 'string', maxLen: 50 },
+        metadata_cc: SCHEMA_METADATA_CC,
+        inspireDe: SCHEMA_INSPIRE_DE
     },
     production: {
         id: { type: 'string', maxLen: 100 },
@@ -321,6 +439,7 @@ const SCHEMAS_IMPORT = {
         type: { type: 'string', maxLen: 100 },
         activiteApprentissage: { type: 'string', maxLen: 500 },
         description: { type: 'string', maxLen: 500 },
+        auteur: { type: 'string', maxLen: 100 },
         auteurOriginal: { type: 'string', maxLen: 100 },
         dateImport: { type: 'string', maxLen: 50 },
         dateCreation: { type: 'string', maxLen: 50 },
@@ -332,7 +451,70 @@ const SCHEMAS_IMPORT = {
         grilleId: { type: 'string', maxLen: 100 },
         echelleId: { type: 'string', maxLen: 100 },
         pratiqueId: { type: 'string', maxLen: 100 },
-        metadata_cc: { type: 'object' }
+        dansBibliotheque: { type: 'boolean' },
+        dateAjoutBiblio: { type: 'string', maxLen: 50 },
+        metadata_cc: SCHEMA_METADATA_CC,
+        inspireDe: SCHEMA_INSPIRE_DE
+    },
+    cartouche: {
+        id: { type: 'string', maxLen: 100 },
+        nom: { type: 'string', maxLen: 200 },
+        grilleId: { type: 'string', maxLen: 100 },
+        echelleId: { type: 'string', maxLen: 100 },
+        contexte: { type: 'string', maxLen: 1000 },
+        criteres: {
+            type: 'array',
+            schema: {
+                id: { type: 'string', maxLen: 100 },
+                nom: { type: 'string', maxLen: 200 }
+            }
+        },
+        niveaux: {
+            type: 'array',
+            schema: {
+                code: { type: 'string', maxLen: 20 },
+                nom: { type: 'string', maxLen: 100 }
+            }
+        },
+        // Clés dynamiques de la forme `<critereId>_<niveauCode>` → texte de
+        // rétroaction. Vecteur principal d'injection sur les cartouches : tous
+        // les commentaires sont assainis par `mapStrings`.
+        commentaires: { type: 'mapStrings', maxLen: 1000 },
+        verrouille: { type: 'boolean' },
+        auteur: { type: 'string', maxLen: 100 },
+        auteurOriginal: { type: 'string', maxLen: 100 },
+        dateImport: { type: 'string', maxLen: 50 },
+        dateCreation: { type: 'string', maxLen: 50 },
+        dateModification: { type: 'string', maxLen: 50 },
+        estDemo: { type: 'boolean' },
+        isDemo: { type: 'boolean' },
+        dansBibliotheque: { type: 'boolean' },
+        dateAjoutBiblio: { type: 'string', maxLen: 50 },
+        metadata_cc: SCHEMA_METADATA_CC,
+        inspireDe: SCHEMA_INSPIRE_DE
+    },
+    tampon: {
+        id: { type: 'string', maxLen: 100 },
+        nom: { type: 'string', maxLen: 200 },
+        fichier: { type: 'string', maxLen: 200 },
+        // imageBase64 : data URI d'une PNG. Limite haute (10 Mo en base64
+        // ~= 7.5 Mo binaire) — l'audit textuel ignore ce champ (cf. modèle
+        // de menaces §A.1) ; le risque polyglotte image+JS est traité par
+        // la Défense O (re-encodage canvas).
+        imageBase64: { type: 'string', maxLen: 10000000 },
+        categorie: { type: 'string', maxLen: 100 },
+        custom: { type: 'boolean' },
+        auteur: { type: 'string', maxLen: 100 },
+        auteurOriginal: { type: 'string', maxLen: 100 },
+        dateImport: { type: 'string', maxLen: 50 },
+        dateCreation: { type: 'string', maxLen: 50 },
+        dateModification: { type: 'string', maxLen: 50 },
+        estDemo: { type: 'boolean' },
+        isDemo: { type: 'boolean' },
+        dansBibliotheque: { type: 'boolean' },
+        dateAjoutBiblio: { type: 'string', maxLen: 50 },
+        metadata_cc: SCHEMA_METADATA_CC,
+        inspireDe: SCHEMA_INSPIRE_DE
     }
 };
 
@@ -1932,11 +2114,16 @@ async function executerImportConfigComplete() {
                 // Récupérer les cartouches existantes pour cette grille
                 const cartouchesExistantes = db.getSync(`cartouches_${grilleIdFinal}`, []);
 
+                // Sanitiser chaque cartouche reçu avant fusion. Les commentaires
+                // (clés dynamiques `<critereId>_<niveauCode>`) sont assainis via
+                // le type `mapStrings`. Voir MODELE-MENACES.md §3.1.bis (D-01).
+                const cartouchesAssainis = cartouchesGrille.map(c => assainirObjet(c, SCHEMAS_IMPORT.cartouche));
+
                 // Fusionner (ajouter les nouvelles cartouches)
-                const cartouchesFusionnees = verifierUniciteIds([...cartouchesExistantes, ...cartouchesGrille], 'cartouches');
+                const cartouchesFusionnees = verifierUniciteIds([...cartouchesExistantes, ...cartouchesAssainis], 'cartouches');
                 db.setSync(`cartouches_${grilleIdFinal}`, cartouchesFusionnees);
 
-                nbCartouchesTotal += cartouchesGrille.length;
+                nbCartouchesTotal += cartouchesAssainis.length;
             });
 
         }
@@ -2562,21 +2749,16 @@ async function executerImportSelectif() {
                     const cartouches = parseValeur(donnees[cle]);
                     if (Array.isArray(cartouches) && cartouches.length > 0) {
                         const cartouchesExistantes = db.getSync(cle, []);
-                        // Filtrer par sélection et ajouter auteurOriginal
+                        // Filtrer par sélection et assainir via SCHEMAS_IMPORT.cartouche
+                        // (descend dans criteres, niveaux, commentaires — voir
+                        // MODELE-MENACES.md §3.1.bis).
                         const cartouchesSelectionnees = cartouches
                             .filter(c => selectedIds.includes(c.id) || selectedIds.includes(c.nom))
-                            .map(c => {
-                                // Assainir les champs string des cartouches
-                                const assaini = { ...c };
-                                for (const [k, v] of Object.entries(assaini)) {
-                                    if (typeof v === 'string') assaini[k] = assainirChaine(v, 500);
-                                }
-                                return {
-                                    ...assaini,
-                                    dateImport: new Date().toISOString(),
-                                    auteurOriginal: assainirChaine(auteurSource || c.auteurOriginal || '', 100)
-                                };
-                            });
+                            .map(c => ({
+                                ...assainirObjet(c, SCHEMAS_IMPORT.cartouche),
+                                dateImport: new Date().toISOString(),
+                                auteurOriginal: assainirChaine(auteurSource || c.auteurOriginal || '', 100)
+                            }));
                         if (cartouchesSelectionnees.length > 0) {
                             const cartouchesFusionnees = verifierUniciteIds([...cartouchesExistantes, ...cartouchesSelectionnees], 'cartouches');
                             db.setSync(cle, cartouchesFusionnees);
