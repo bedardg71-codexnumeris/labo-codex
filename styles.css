@@ -1102,6 +1102,13 @@ h1, h2, h3, h4 {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
+.entete-controles-droite .btn-action-header.actif,
+.entete-ligne2-droite .btn-action-header.actif {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
 /* === Icônes SVG en-tête === */
 .header-icon {
     width: 16px;
@@ -1136,14 +1143,6 @@ h1, h2, h3, h4 {
 .mode-clair .btn-secondaire .btn-inline-icon,
 .mode-clair .btn-supprimer .btn-inline-icon {
     filter: brightness(0) invert(0.85);
-}
-
-/* === SÉLECTEUR DE MODE === */
-
-#selecteur-mode {
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 /* === RESPONSIVE === */
@@ -1484,20 +1483,6 @@ h1, h2, h3, h4 {
 
 .en-tete {
     position: relative;
-}
-
-#selecteur-mode {
-    animation: fadeIn 0.3s;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
 }
 
 /* ===============================
@@ -5253,53 +5238,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 .carte-metrique-standard.carte-metrique-critique .valeur {
     color: var(--risque-critique);
-}
-
-/* ===============================================
-   SELECT MODE D'AFFICHAGE
-   Menu déroulant pour changer de mode
-   =============================================== */
-
-#selecteur-mode {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.select-mode {
-    background-color: rgba(106, 172, 184, 0.12);
-    border: 1px solid rgba(106, 172, 184, 0.25);
-    border-radius: var(--radius-moyen);
-    color: white;
-    font-size: 0.9rem;
-    height: 34px;
-    padding: 0 28px 0 12px;
-    cursor: pointer;
-    outline: none;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.select-mode:hover {
-    background-color: rgba(106, 172, 184, 0.22);
-    border-color: rgba(106, 172, 184, 0.4);
-}
-
-.select-mode:focus {
-    background-color: rgba(106, 172, 184, 0.28);
-    border-color: rgba(106, 172, 184, 0.5);
-    box-shadow: 0 0 0 3px rgba(106, 172, 184, 0.2);
-}
-
-.select-mode option {
-    background: var(--bleu-principal);
-    color: white;
-    padding: 10px;
 }
 
 /* ===============================
@@ -19480,22 +19418,6 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     background: var(--bleu-fonce);
 }
 
-/* Select mode — même apparence que groupe-cours en mode clair */
-.mode-clair .select-mode {
-    background-color: rgba(3, 46, 92, 0.6);
-    border-color: rgba(255, 255, 255, 0.15);
-    color: white;
-}
-.mode-clair .select-mode:hover {
-    background-color: rgba(3, 46, 92, 0.75);
-    border-color: rgba(255, 255, 255, 0.3);
-}
-.mode-clair .select-mode:focus {
-    background-color: rgba(3, 46, 92, 0.75);
-    border-color: rgba(255, 255, 255, 0.3);
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
-}
-
 /* Navigation principale — bleu principal solide */
 .mode-clair .navigation-principale button {
     background: #032e5c;
@@ -19564,12 +19486,6 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 .mode-clair small,
 .mode-clair .info-texte {
     color: var(--texte-secondaire);
-}
-
-/* Select mode option — lisible sur fond clair */
-.mode-clair .select-mode option {
-    color: #1a1a2e;
-    background: white;
 }
 
 /* Scrollbar — couleurs claires */
@@ -20249,7 +20165,8 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 
     .navigation-principale,
     .sous-navigation,
-    .bandeau-mode,
+    .bandeau-anonymisation,
+    .bandeau-demo,
     .btn,
     .statut-sauvegarde {
         display: none !important;
