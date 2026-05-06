@@ -32,16 +32,26 @@ async function sauvegarder(items) {
 }
 
 async function ajouterALaBibliotheque(tampon) {
+    // B-β — passage obligé par assainirObjet. La fonction muait en place
+    // l'objet reçu, ce qui n'est plus possible après sanitisation (l'objet
+    // safe est une copie). On construit donc explicitement l'entrée pour
+    // éviter de dépendre de la mutation in-place du callsite.
+    var tamponSafe = (typeof window.assainirObjet === 'function' && window.SCHEMAS_IMPORT && window.SCHEMAS_IMPORT.tampon)
+        ? window.assainirObjet(tampon, window.SCHEMAS_IMPORT.tampon)
+        : tampon;
+    if (!tamponSafe.id) return false;
     var items = await obtenirTous();
-    if (items.find(function(t) { return t.id === tampon.id; })) {
+    if (items.find(function(t) { return t.id === tamponSafe.id; })) {
         if (typeof afficherNotificationErreur === 'function') {
             afficherNotificationErreur('Doublon', 'Ce tampon est déjà dans la bibliothèque');
         }
         return false;
     }
-    tampon.dansBibliotheque = true;
-    tampon.dateAjoutBiblio = new Date().toISOString();
-    items.push(tampon);
+    var entree = Object.assign({}, tamponSafe, {
+        dansBibliotheque: true,
+        dateAjoutBiblio: new Date().toISOString()
+    });
+    items.push(entree);
     await sauvegarder(items);
     return true;
 }
