@@ -224,6 +224,14 @@ async function exporterBibliotheque() {
         }
     }
 
+    // K-β — preview UI : montrer les champs racine et demander confirmation.
+    if (window.SecuriteExportPreview && typeof window.SecuriteExportPreview.previewJsonEtConfirmer === 'function') {
+        var okPreview = await window.SecuriteExportPreview.previewJsonEtConfirmer(payload, 'bibliothèque tampons');
+        if (!okPreview) {
+            return;
+        }
+    }
+
     var jsonStr = JSON.stringify(payload, null, 2);
     var blob = new Blob([jsonStr], { type: 'application/json' });
     var a = document.createElement('a');

@@ -373,6 +373,19 @@ async function genererCodex(options = {}) {
         window.SecuriteExportValidation.validerExportCodex(zip);
     }
 
+    // K-β — preview UI : montrer la liste des fichiers à l'utilisateur
+    // avant compression et téléchargement. L'utilisateur peut annuler.
+    // Sautée si silencieux (auto-save) ou si le module preview n'est pas
+    // chargé (dégradation gracieuse).
+    if (!silencieux && window.SecuriteExportPreview && typeof window.SecuriteExportPreview.previewZipEtConfirmer === 'function') {
+        _progMasquer();
+        const ok = await window.SecuriteExportPreview.previewZipEtConfirmer(zip, 'codex');
+        if (!ok) {
+            return null;
+        }
+        _prog(70, 'Compression du ZIP...', nbBlobs + ' fichier(s), ' + _formaterTaille(tailleTotale));
+    }
+
     // 5. Générer le blob ZIP
     _prog(70, 'Compression du ZIP...', nbBlobs + ' fichier(s), ' + _formaterTaille(tailleTotale));
     const zipBlob = await zip.generateAsync(

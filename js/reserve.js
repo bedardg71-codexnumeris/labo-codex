@@ -1290,6 +1290,15 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
             window.SecuriteExportValidation.validerExportReserve(zip);
         }
 
+        // K-β — preview UI avant compression. L'utilisateur peut annuler.
+        if (window.SecuriteExportPreview && typeof window.SecuriteExportPreview.previewZipEtConfirmer === 'function') {
+            var okPreview = await window.SecuriteExportPreview.previewZipEtConfirmer(zip, 'archive');
+            if (!okPreview) {
+                if (typeof _progHide === 'function') _progHide();
+                return null;
+            }
+        }
+
         _prog(80, 'Compression du ZIP...', '');
         await _yield();
         var zipBlob = await zip.generateAsync(
