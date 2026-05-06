@@ -1282,6 +1282,14 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
         // archives précédents dans n'importe quel ZIP récent.
         zip.file('manifeste-archives.json', JSON.stringify(manifesteLocal, null, 2));
 
+        // Défense K — valider la structure du ZIP avant compression. Si un
+        // payload a tenté d'ajouter une entrée annexe transportant des
+        // données identifiantes (cf. MODELE-MENACES.md §X-02), l'export
+        // est bloqué ici et l'utilisateur reçoit une alerte claire.
+        if (window.SecuriteExportValidation && typeof window.SecuriteExportValidation.validerExportReserve === 'function') {
+            window.SecuriteExportValidation.validerExportReserve(zip);
+        }
+
         _prog(80, 'Compression du ZIP...', '');
         await _yield();
         var zipBlob = await zip.generateAsync(

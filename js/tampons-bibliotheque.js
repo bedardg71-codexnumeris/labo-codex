@@ -200,6 +200,20 @@ async function exporterBibliotheque() {
         }
     };
 
+    // Défense K — valider la structure du payload JSON avant download.
+    // Bloque l'export si un payload a injecté un champ annexe à la racine.
+    if (window.SecuriteExportValidation && typeof window.SecuriteExportValidation.validerExportTampons === 'function') {
+        try {
+            window.SecuriteExportValidation.validerExportTampons(payload);
+        } catch (e) {
+            console.error(e);
+            if (typeof afficherNotificationErreur === 'function') {
+                afficherNotificationErreur('Export bloqué', e.message);
+            }
+            return;
+        }
+    }
+
     var jsonStr = JSON.stringify(payload, null, 2);
     var blob = new Blob([jsonStr], { type: 'application/json' });
     var a = document.createElement('a');

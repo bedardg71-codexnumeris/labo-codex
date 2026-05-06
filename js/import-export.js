@@ -3193,6 +3193,20 @@ async function exporterConfigurationComplete() {
         }
     };
 
+    // Défense K — valider la structure de l'objet exporté avant
+    // sérialisation et téléchargement. Si un payload a tenté d'ajouter un
+    // champ annexe (cf. MODELE-MENACES.md §X-01, §X-02), l'export est
+    // bloqué ici.
+    if (window.SecuriteExportValidation && typeof window.SecuriteExportValidation.validerExportConfigurationComplete === 'function') {
+        try {
+            window.SecuriteExportValidation.validerExportConfigurationComplete(configComplete);
+        } catch (e) {
+            console.error(e);
+            alert('Export bloqué pour des raisons de sécurité.\n\n' + e.message + '\n\nL\'export contient des champs inattendus. Vérifie l\'intégrité de l\'application avant de réessayer.');
+            return;
+        }
+    }
+
     // 4. Générer nom de fichier
     const nomAuteurSimple = metaEnrichies.auteur.replace(/[^a-z0-9]/gi, '-');
     const dateStr = new Date().toISOString().split('T')[0];
