@@ -543,6 +543,97 @@
         }
 
         /* ===============================
+           BANDEAU CODEX DATA (#252) — contextuel à la section Labo
+           =============================== */
+        .bandeau-labo-codex-data {
+            background: #5b4fa8;
+            color: white;
+            padding: 8px 14px;
+            border-radius: var(--radius-moyen);
+            margin: 0 0 12px 0;
+            font-size: 0.85rem;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .bandeau-labo-codex-data-contenu {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .bandeau-labo-codex-data-titre {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .bandeau-labo-codex-data-titre strong {
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .bandeau-labo-codex-data-resume {
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: normal;
+            font-size: 0.82rem;
+        }
+
+        .bandeau-labo-codex-data-controles {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .bandeau-labo-codex-data-select {
+            background: rgba(255, 255, 255, 0.18);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: var(--radius-petit);
+            padding: 3px 8px;
+            font-size: 0.82rem;
+            cursor: pointer;
+        }
+
+        .bandeau-labo-codex-data-select option {
+            background: #5b4fa8;
+            color: white;
+        }
+
+        .bandeau-labo-codex-data-fermer {
+            background: rgba(255, 255, 255, 0.18);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: var(--radius-petit);
+            padding: 3px 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            transition: background 0.2s ease;
+        }
+
+        .bandeau-labo-codex-data-fermer:hover {
+            background: rgba(255, 255, 255, 0.32);
+        }
+
+        .bandeau-labo-codex-data-fermer img {
+            width: 14px;
+            height: 14px;
+            filter: brightness(0) invert(1);
+        }
+
+        /* Barre d'actions Labo (bouton « Charger un codex data ») */
+        .labo-actions-globales {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 12px;
+        }
+
+        /* ===============================
            Page d'accueil (Chantier 3)
            Conforme au Design System :
            - Variables --bleu-*, --shadow-*, --radius-*
@@ -8459,10 +8550,45 @@
             </section><!-- fin section-evaluations -->
 
             <!-- ===================================
-     SECTION: BOÎTE À OUTILS
+     SECTION: LABO
      Mini-applications pédagogiques pour l'animation en classe
+     + analyse longitudinale (codex data, #252)
      =================================== -->
             <section id="section-labo" class="section">
+
+                <!-- Bandeau Codex data chargé (#252) — affiché quand un fichier est actif -->
+                <div id="bandeau-labo-codex-data" class="bandeau-labo-codex-data u-hide">
+                    <div class="bandeau-labo-codex-data-contenu">
+                        <span class="bandeau-labo-codex-data-titre">
+                            <img src="icons/icon-export.svg" alt="" class="btn-inline-icon">
+                            <strong>Codex data charg&eacute;</strong>
+                            <span id="bandeau-labo-codex-data-resume" class="bandeau-labo-codex-data-resume"></span>
+                        </span>
+                        <span class="bandeau-labo-codex-data-controles">
+                            <label for="select-codex-data-groupe" class="u-texte-petit" style="margin: 0;">Voir&nbsp;:</label>
+                            <select id="select-codex-data-groupe" class="bandeau-labo-codex-data-select"
+                                    data-on-change="LaboCodexData.onChangerGroupe">
+                                <option value="tous">tous fusionn&eacute;s</option>
+                            </select>
+                            <button data-action="LaboCodexData.actionDecharger"
+                                    class="bandeau-labo-codex-data-fermer" title="D&eacute;charger le codex data">
+                                <img src="icons/icon-close-window.svg" alt="" class="modal-close-icon">
+                            </button>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Barre d'actions Labo : charger un codex data (#252) -->
+                <div id="labo-actions-globales" class="labo-actions-globales">
+                    <button data-action="LaboCodexData.actionOuvrirChargement"
+                            class="btn-secondaire u-texte-petit"
+                            data-tooltip="labo-charger-codex-data">
+                        <img src="icons/icon-import.svg" alt="" class="btn-inline-icon">
+                        Charger un codex data&hellip;
+                    </button>
+                    <input type="file" id="labo-codex-data-input" accept=".json" class="u-hide"
+                           data-on-change="LaboCodexData.onFichierSelectionne">
+                </div>
 
                 <!-- Sous-section: Outils interactifs -->
                 <div id="labo-tirage" class="sous-section">
@@ -10916,16 +11042,21 @@
                     </div>
 
                     <!-- ========================================
-                         CARTE 3 : CODEX DATA (placeholder « à venir »)
+                         CARTE 3 : CODEX DATA
                          ======================================== -->
-                    <div class="carte" style="opacity: 0.65;">
-                        <h3 class="carte-titre-bleu" style="display: flex; align-items: center; justify-content: space-between;" data-tooltip="donnees-codex-data">
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu" data-tooltip="donnees-codex-data">
                             <span>Codex data <em style="font-weight: 400; font-size: 0.85em; color: var(--gris-moyen)">(extrait pour la recherche)</em></span>
-                            <span class="badge-archive" style="font-weight: 400;">À venir</span>
                         </h3>
-                        <p class="text-muted u-mb-0">
-                            Format léger sans blobs (5–30 Mo), multi-trimestres, pour la recherche longitudinale au Labo. Sera extrait depuis tes Archives.
-                            <br><em class="u-texte-gris u-texte-09">Disponible dans une prochaine version (cf. ECOSYSTEME-DONNEES.md, priorité 4).</em>
+                        <p class="text-muted u-mb-15">
+                            Format l&eacute;ger sans blobs (5&ndash;30&nbsp;Mo), multi-trimestres, destin&eacute; &agrave; la recherche longitudinale au Labo. Extrait depuis une ou plusieurs archives.
+                        </p>
+                        <div id="codex-data-stats" class="text-muted u-texte-petit u-mb-10" style="margin: 0 0 10px 0;"></div>
+                        <button class="btn btn-principal" data-action="CodexDataUI.actionOuvrirExtraction">
+                            Extraire un codex data&hellip;
+                        </button>
+                        <p class="text-muted u-texte-petit u-mt-10" style="margin: 10px 0 0 0;">
+                            Le fichier produit (<code>.codex-data.json</code>) se charge ensuite dans le Labo (section &Eacute;tudes).
                         </p>
                     </div>
 
@@ -16029,6 +16160,9 @@
     <script src="js/reserve.js?v=2026050557"></script> <!-- #259 : strings UI Réserve → Archives -->
     <script src="js/reserve-ouvrir.js?v=2026050558"></script> <!-- #259 : strings UI Réserve → Archives -->
     <script src="js/reserve-reglages.js?v=2026050559"></script> <!-- #259 : strings UI Réserve → Archives -->
+    <script src="js/codex-data.js?v=2026050603"></script> <!-- #251 : extraction et format codex data -->
+    <script src="js/codex-data-ui.js?v=2026050603"></script> <!-- #251 : UI Réglages > Données carte 3 -->
+    <script src="js/labo-codex-data.js?v=2026050603"></script> <!-- #252 : loader codex data dans le Labo -->
     <script src="js/travaux-preparation.js?v=2026021801"></script>
     <script src="js/travaux-import.js?v=2026050220"></script> <!-- Beta 99.31 b0502-0907 : flag livrableAdditionnel pour skip détection doublon (palier 3) -->
     <script src="js/travaux-visionneuse.js?v=2026050102"></script> <!-- Beta 99.30 b0501-1830 : cleanup PDF.js + ouvrirPDF try/catch + zoom margin-aware + split nav buttons -->
@@ -16102,7 +16236,7 @@
     <script src="js/main.js?v=2026050543"></script> <!-- Refonte nav SP5 : naviguerVers calendrier-trimestre -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=2026050601"></script> <!-- Beta 99.36 b0506-0515 : #258 bouton anonymisation + #260 crédit Icons8 -->
+    <script src="js/init-inline.js?v=2026050603"></script> <!-- Beta 99.36 b0506-0650 : #251 + #252 codex data -->
 
     <!-- Wrappers pour délégation data-on-change (Phase 5b) — externalisé dans init-inline.js -->
 
@@ -16666,6 +16800,103 @@
                         data-tooltip="reserve-ouvrir-bouton-reimporter">
                     R&eacute;importer <span id="reserve-ouvrir-compteur">0</span> &eacute;l&eacute;ment(s)
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         MODAL EXTRAIRE UN CODEX DATA — #251 (6 mai 2026)
+         ========================================= -->
+    <div id="modalCodexData" class="modal-overlay" data-close-on-bg="CodexDataUI.fermerDialogue">
+        <div class="modal-contenu" style="max-width: 680px; max-height: 85vh; padding: 14px; display: flex; flex-direction: column;">
+            <button data-action="CodexDataUI.fermerDialogue" class="modal-fermer" title="Fermer">
+                <img src="icons/icon-close-window.svg" alt="" class="modal-close-icon">
+            </button>
+
+            <!-- Header (toujours visible) -->
+            <h2 class="modal-titre u-texte-11" style="margin: 0 0 2px 0">
+                <img src="icons/icon-export.svg" alt="" class="btn-inline-icon">
+                Extraire un codex data
+            </h2>
+            <p style="color: var(--texte-secondaire); font-size: 0.8rem; margin: 0 0 8px 0;">
+                Format l&eacute;ger sans blobs (5&ndash;30&nbsp;Mo) destin&eacute; &agrave; la recherche au Labo.
+            </p>
+
+            <!-- Body scrollable -->
+            <div style="flex: 1; min-height: 0; overflow-y: auto; padding-right: 4px;">
+                <div id="codex-data-mode"
+                     style="background: var(--surface-carte); padding: 6px 10px; border-radius: var(--radius-moyen); font-size: 0.8rem; line-height: 1.4; margin-bottom: 8px;">
+                    <em>D&eacute;tection du mode...</em>
+                </div>
+
+                <!-- Mode FSAPI : liste des archives depuis le manifeste local -->
+                <div id="codex-data-source-fsapi" class="u-hide"
+                     style="background: var(--bleu-tres-pale); padding: 8px 10px; border-radius: var(--radius-moyen); margin-bottom: 8px;">
+                    <p class="u-texte-medium" style="margin: 0 0 6px 0; font-size: 0.85rem;">
+                        S&eacute;lectionne les archives &agrave; inclure&nbsp;:
+                    </p>
+                    <div id="codex-data-liste-archives"></div>
+                </div>
+
+                <!-- Mode fichiers : sélection de dossier OU de fichiers ZIP individuels -->
+                <div id="codex-data-source-zip" class="u-hide"
+                     style="background: var(--bleu-tres-pale); padding: 8px 10px; border-radius: var(--radius-moyen); margin-bottom: 8px;">
+
+                    <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px;">
+                        <strong style="font-size: 0.85rem;">Option 1</strong>
+                        <span class="text-muted u-texte-petit">— s&eacute;lectionne le dossier <code>~/Documents/Archives_LaboCodex/</code>, l&rsquo;app d&eacute;tectera les archives.</span>
+                    </div>
+                    <button class="btn btn-secondaire u-texte-petit" data-action="CodexDataUI.declencherSelectionDossier"
+                            style="padding: 3px 10px; font-size: 0.82rem;">
+                        S&eacute;lectionner le dossier&hellip;
+                    </button>
+                    <input type="file" id="codex-data-input-dossier" webkitdirectory class="u-hide"
+                           data-on-change="CodexDataUI.onChangerDossier">
+
+                    <div style="display: flex; align-items: baseline; gap: 8px; margin: 8px 0 4px 0;">
+                        <strong style="font-size: 0.85rem;">Option 2</strong>
+                        <span class="text-muted u-texte-petit">— ou choisis un ou plusieurs fichiers ZIP (<code>.reserve.zip</code>).</span>
+                    </div>
+                    <input type="file" id="codex-data-input-zip" accept=".zip" multiple
+                           data-on-change="CodexDataUI.onChangerFichiersZIP" style="font-size: 0.8rem;">
+
+                    <div id="codex-data-source-resume" class="text-muted u-texte-petit"
+                         style="margin-top: 8px;"></div>
+
+                    <!-- Liste des archives détectées dans le dossier (avec checkboxes) -->
+                    <div id="codex-data-liste-archives-dossier" style="margin-top: 6px;"></div>
+                </div>
+
+                <div style="margin-bottom: 8px;">
+                    <label for="codex-data-description" class="u-texte-medium" style="display: block; margin-bottom: 2px; font-size: 0.85rem;">
+                        Description (optionnel)
+                    </label>
+                    <textarea id="codex-data-description" rows="1"
+                              class="controle-form" style="width: 100%; resize: vertical; font-size: 0.85rem; min-height: 30px;"
+                              placeholder="Ex : Cohorte H2026 vs A2025 &mdash; comparaison longitudinale"></textarea>
+                </div>
+
+                <div style="background: var(--bleu-tres-pale); padding: 4px 10px; border-radius: var(--radius-moyen); font-size: 0.75rem; color: var(--texte-secondaire);">
+                    <img src="icons/icon-lock.svg" alt="" class="btn-inline-icon">
+                    Le fichier produit contient des donn&eacute;es personnelles d'&eacute;tudiant&middot;es. Ne le partage pas tel quel.
+                </div>
+            </div>
+
+            <!-- Footer (toujours visible) -->
+            <div class="btn-groupe u-flex-gap-8" style="justify-content: space-between; margin-top: 10px;">
+                <button id="codex-data-btn-bascule-mode" data-action="CodexDataUI.basculerMode"
+                        class="btn btn-annuler u-texte-petit u-hide" style="padding: 4px 10px">
+                    Utiliser des fichiers d&rsquo;archive &agrave; la place
+                </button>
+                <div class="u-flex-gap-8" style="display: flex; gap: 8px; margin-left: auto;">
+                    <button data-action="CodexDataUI.fermerDialogue" class="btn btn-annuler u-texte-petit" style="padding: 4px 12px">
+                        Annuler
+                    </button>
+                    <button id="codex-data-btn-extraire" data-action="CodexDataUI.lancerExtraction"
+                            class="btn btn-confirmer u-texte-petit" style="padding: 4px 12px" disabled>
+                        Extraire
+                    </button>
+                </div>
             </div>
         </div>
     </div>
