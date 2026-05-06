@@ -1,0 +1,174 @@
+#!/usr/bin/env bash
+#
+# Hook pré-commit Labo Codex — Défense J du modèle de menaces.
+#
+# Bloque les régressions de sécurité courantes avant qu'elles n'entrent
+# dans l'historique git. Référence : docs/securite/MODELE-MENACES.md §C-01,
+# §8.1 défense J.
+#
+# Deux contrôles :
+#   1. innerHTML avec interpolation sans echapperHtml (BLOQUANT)
+#   2. db.set/setSync/localStorage.setItem sur clés sensibles (WARNING)
+#
+# Bypass légitime : ajouter `// security-ok: <raison>` sur la même ligne ou
+# une ligne adjacente. Le bypass doit être motivé — il est conservé dans le
+# diff et peut être audité par grep ultérieurement.
+#
+# Désactivation totale (déconseillée) : `git commit --no-verify`. CLAUDE.md
+# interdit cette pratique sauf circonstance exceptionnelle.
+
+set -u
+
+ROUGE='\033[0;31m'
+JAUNE='\033[0;33m'
+VERT='\033[0;32m'
+GRIS='\033[0;90m'
+RAZ='\033[0m'
+
+# Diff staged côté ajouts uniquement, sur les fichiers JS et HTML.
+DIFF=$(git diff --cached --unified=2 --diff-filter=AM -- '*.js' '*.html' 2>/dev/null || echo '')
+
+if [ -z "$DIFF" ]; then
+    exit 0
+fi
+
+# Fichier temporaire pour stocker les trouvailles.
+TMP_BLOQUANT=$(mktemp -t labo-codex-precommit-bloquant.XXXXXX)
+TMP_WARNING=$(mktemp -t labo-codex-precommit-warning.XXXXXX)
+trap 'rm -f "$TMP_BLOQUANT" "$TMP_WARNING"' EXIT
+
+# Clés sensibles à surveiller. Les noms ici sont matchés en littéral (entre
+# quotes) ou via les constantes CLE_BIBLIOTHEQUE_*.
+CLES_SENSIBLES_LITTERAL='bibliothequeGrilles|bibliothequeEchelles|bibliothequeCartouches|bibliothequePratiques|bibliothequeProductions|bibliothequeTampons|cartouches_|groupeEtudiants|journal|enseignants|infoCours|grillesTemplates|echellesTemplates|pratiquesConfigurables|productions'
+CLES_SENSIBLES_CONSTANTES='CLE_BIBLIOTHEQUE_|CLE_BIBLIO\b|cle\('
+
+# Parcours du diff ligne par ligne.
+fichier_courant=""
+ligne_n=0
+ligne_precedente_1=""
+ligne_precedente_2=""
+
+while IFS= read -r ligne; do
+    case "$ligne" in
+        # En-tête de fichier diff.
+        diff\ --git*)
+            fichier_courant=$(printf '%s' "$ligne" | sed -E 's|^diff --git a/(.+) b/.*|\1|')
+            ligne_n=0
+            ligne_precedente_1=""
+            ligne_precedente_2=""
+            continue
+            ;;
+        # En-tête de hunk : @@ -1,3 +5,7 @@
+        @@*)
+            ligne_n=$(printf '%s' "$ligne" | sed -E 's|^@@ -[0-9,]+ \+([0-9]+).*|\1|')
+            ligne_n=$((ligne_n - 1))
+            ligne_precedente_1=""
+            ligne_precedente_2=""
+            continue
+            ;;
+        # Lignes de contexte (non modifiées).
+        \ *)
+            ligne_n=$((ligne_n + 1))
+            ligne_precedente_2="$ligne_precedente_1"
+            ligne_precedente_1="${ligne# }"
+            continue
+            ;;
+        # Lignes supprimées : on les saute pour l'incrément (numéro côté
+        # destination), mais on actualise la fenêtre de contexte.
+        -*)
+            continue
+            ;;
+        # Lignes ajoutées (préfixe '+', mais pas '+++' qui est un en-tête).
+        +++*)
+            continue
+            ;;
+        +*)
+            ligne_n=$((ligne_n + 1))
+            contenu="${ligne#+}"
+            ;;
+        *)
+            continue
+            ;;
+    esac
+
+    # À ce stade, on traite une ligne ajoutée. Le contenu est dans $contenu.
+
+    # Bypass légitime : si la ligne ou les voisines portent `// security-ok:`,
+    # on la considère revue et acceptée.
+    bypass=0
+    if printf '%s' "$contenu" | grep -qE '//\s*security-ok\s*:'; then bypass=1; fi
+    if [ $bypass -eq 0 ] && printf '%s' "$ligne_precedente_1" | grep -qE '//\s*security-ok\s*:'; then bypass=1; fi
+    if [ $bypass -eq 0 ] && printf '%s' "$ligne_precedente_2" | grep -qE '//\s*security-ok\s*:'; then bypass=1; fi
+
+    # === Contrôle 1 : innerHTML avec interpolation ===
+    # Pattern dangereux : .innerHTML = ou .innerHTML += suivi/contenant une
+    # interpolation (`${`, `' +`, `" +`, `+ '`, `+ "`) sans echapperHtml.
+    if printf '%s' "$contenu" | grep -qE '\.innerHTML\s*[+]?='; then
+        if printf '%s' "$contenu" | grep -qE '\$\{|'\''\s*\+|"\s*\+|\+\s*'\''|\+\s*"'; then
+            if ! printf '%s' "$contenu" | grep -q 'echapperHtml'; then
+                if [ $bypass -eq 0 ]; then
+                    printf '%s\t%d\t%s\n' "$fichier_courant" "$ligne_n" "$contenu" >> "$TMP_BLOQUANT"
+                fi
+            fi
+        fi
+    fi
+
+    # === Contrôle 2 : écriture sur clé sensible ===
+    if printf '%s' "$contenu" | grep -qE '(db\.set|db\.setSync|localStorage\.setItem)\s*\('; then
+        # Match sur clés littérales OU sur constantes/cle()
+        if printf '%s' "$contenu" | grep -qE "$CLES_SENSIBLES_LITTERAL|$CLES_SENSIBLES_CONSTANTES"; then
+            if ! printf '%s' "$contenu" | grep -q 'assainirObjet'; then
+                if [ $bypass -eq 0 ]; then
+                    printf '%s\t%d\t%s\n' "$fichier_courant" "$ligne_n" "$contenu" >> "$TMP_WARNING"
+                fi
+            fi
+        fi
+    fi
+
+    ligne_precedente_2="$ligne_precedente_1"
+    ligne_precedente_1="$contenu"
+
+done < <(printf '%s\n' "$DIFF")
+
+bloquant_n=$(wc -l < "$TMP_BLOQUANT" | tr -d ' ')
+warning_n=$(wc -l < "$TMP_WARNING" | tr -d ' ')
+
+if [ "$bloquant_n" -eq 0 ] && [ "$warning_n" -eq 0 ]; then
+    exit 0
+fi
+
+printf '\n'
+printf "${GRIS}=== Hook pré-commit Labo Codex (Défense J) ===${RAZ}\n"
+printf "${GRIS}Référence : docs/securite/MODELE-MENACES.md §C-01${RAZ}\n\n"
+
+if [ "$bloquant_n" -gt 0 ]; then
+    printf "${ROUGE}✗ %d innerHTML avec interpolation non échappée (BLOQUANT)${RAZ}\n" "$bloquant_n"
+    printf "${GRIS}Toute interpolation de variable dans innerHTML doit passer par echapperHtml().${RAZ}\n"
+    printf "${GRIS}Voir CLAUDE.md §Règles de sécurité.${RAZ}\n\n"
+    while IFS=$'\t' read -r f n l; do
+        printf "  ${ROUGE}%s:%s${RAZ}\n" "$f" "$n"
+        printf "    %s\n" "$l"
+    done < "$TMP_BLOQUANT"
+    printf '\n'
+fi
+
+if [ "$warning_n" -gt 0 ]; then
+    printf "${JAUNE}⚠ %d écriture(s) sur clé sensible sans assainirObjet à proximité (warning)${RAZ}\n" "$warning_n"
+    printf "${GRIS}Vérifier que les données écrites sont sanitisées si elles viennent d'une source externe.${RAZ}\n"
+    printf "${GRIS}Si la donnée est déjà sûre (création locale, écriture indirecte), ajouter un commentaire${RAZ}\n"
+    printf "${GRIS}\`// security-ok: <raison>\` sur la ligne pour acquitter.${RAZ}\n\n"
+    while IFS=$'\t' read -r f n l; do
+        printf "  ${JAUNE}%s:%s${RAZ}\n" "$f" "$n"
+        printf "    %s\n" "$l"
+    done < "$TMP_WARNING"
+    printf '\n'
+fi
+
+if [ "$bloquant_n" -gt 0 ]; then
+    printf "${ROUGE}Commit refusé.${RAZ} Corriger les innerHTML signalés ou ajouter \`// security-ok: <raison>\` si justifié.\n"
+    printf "${GRIS}Bypass total (déconseillé) : git commit --no-verify${RAZ}\n\n"
+    exit 1
+fi
+
+printf "${VERT}✓ Avertissements seulement, commit autorisé.${RAZ}\n\n"
+exit 0
