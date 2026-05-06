@@ -276,6 +276,46 @@
     l'hypothese. La session du 19 avril ecrivait peut-etre directement en
     localStorage au lieu de passer par db.setSync.
 
+### Exports — Clarifier le nommage et le périmètre (6 mai 2026)
+
+- [ ] **#262** Clarifier la convention de nommage et le périmètre des fichiers exportés
+  - **Contexte** : un même dossier de téléchargement peut contenir des sorties
+    Labo Codex aux noms et préfixes hétérogènes — pour un novice, la distinction
+    entre les types d'export n'est pas évidente, et certains préfixes semblent
+    appartenir à un schéma obsolète.
+  - **Échantillon observé (6 mai 2026)** :
+    - `codex-data-3gc-2026-05-06.codex-data.json`
+    - `LISEZMOI-Gr-goire-2026-05-06.txt`
+    - `PRATIQUE-COMPLETE-Gr-goire-2026-05-06.json`
+    - `sauvegarde-CONFIDENTIEL-monitorage-2026-05-06-12-56-07.zip`
+    - `codex-Codex-Écriture-et-littérature-H26-avril-2026-05-05-06h03.codex.zip`
+    - `CONFIDENTIEL-archive-h2026-601-101-gr00002-2026-05-05.reserve.zip`
+    - `CONFIDENTIEL-archive-h2026-601-101-gr00008-2026-05-05.reserve.zip`
+  - **Problèmes identifiés** :
+    - Préfixes inégaux (`codex-data`, `LISEZMOI`, `PRATIQUE-COMPLETE`,
+      `sauvegarde-CONFIDENTIEL-monitorage`, `codex`, `CONFIDENTIEL-archive`).
+    - Casse incohérente — certains tout en majuscules (`LISEZMOI`,
+      `PRATIQUE-COMPLETE`, `CONFIDENTIEL`), d'autres en minuscules.
+    - Encodage cassé sur certains noms (`Gr-goire` au lieu de `Grégoire`).
+    - Vocabulaire mixte « reserve » (suffixe `.reserve.zip`) et « archive »
+      (préfixe `archive`) qui résiste au renommage #259.
+    - Extensions composées (`.codex-data.json`, `.codex.zip`, `.reserve.zip`)
+      dont la signification n'est pas explicitée pour le novice.
+    - Noms qui semblent appartenir à des schémas obsolètes
+      (`sauvegarde-CONFIDENTIEL-monitorage-…`) coexistant avec les schémas
+      actuels.
+  - **Cible** : une convention unifiée et lisible par un novice. Au minimum,
+    pour chaque type d'export : préfixe stable lié au concept de
+    `ECOSYSTEME-DONNEES.md` (codex / archive / codex data / configuration),
+    casse cohérente, accents préservés (ou translittérés proprement, pas
+    troncqués), extension unique compréhensible.
+  - **À cartographier** : recenser tous les `download` / `saveAs` / `genererZip`
+    de l'app pour avoir l'inventaire exhaustif des conventions actuelles avant
+    de proposer la nouvelle.
+  - **Lien** : suite du chantier #259 (vocabulaire Réserve → Archives) — celui-ci
+    s'est arrêté à l'UI/code interne, le nommage des fichiers téléchargés n'a
+    pas suivi.
+
 ### Credits — A propos (3 mai 2026)
 
 - [x] **#260** Ajouter le credit Icons8 dans Reglages > A propos > Technologies (livre 6 mai 2026, b0506-0515)
