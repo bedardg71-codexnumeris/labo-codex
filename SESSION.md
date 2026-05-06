@@ -1,9 +1,9 @@
-# SESSION — État au 6 mai 2026 (#258 + #260 + #251 + #252 livrés + #248 confirmé)
+# SESSION — État au 6 mai 2026 (chantier sécurité — Phase 0 + B-β + K-β + E)
 
-**Date** : 6 mai 2026
-**Dernier build** : `0506-0650` · Beta **99.36** (poussée sur origin/main)
-**Branche** : `main` (à jour avec origin)
-**Statut** : 4 chantiers livrés aujourd'hui — #258 (bouton anonymisation, PR #12), #260 (crédit Icons8, PR #12), #251 + #252 (codex data complet, PR #13). #248 confirmé livré le 2 mai (oubli de cocher BACKLOG). Veille du 5 mai : refonte nav, #261, #259 Archives, #247.
+**Date** : 6 mai 2026 (après-midi)
+**Dernier build** : `0506-1530` · Beta **99.36**
+**Branche** : `main`, **13 commits sécurité en avance sur origin** (à pousser)
+**Statut** : Phase 0 du modèle de menaces livrée intégralement en une journée + suites β. 1 vrai vecteur D-01 critique attrapé et corrigé en cours de route (`genererBadgeCC`).
 
 ---
 
@@ -14,295 +14,160 @@
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
-Contexte : journée du 6 mai 2026, 2 PR mergées (Beta 99.36 b0506-0650) :
+Contexte : journée du 6 mai 2026 — chantier sécurité massif suite au
+modèle de menaces préparé par Cowork. Phase 0 livrée intégralement +
+B-β + K-β + Défense E (étapes 1+2). 13 commits sur main, beta 99.36,
+builds 0506-1300 → 0506-1530.
 
-  PR #12 (b0506-0515) :
-    - #258 Bouton anonymisation dans l'en-tête (icône à droite)
-    - #260 Crédit Icons8 dans Réglages > Aide > À propos
-    - Bonus : bandeau anonymisation HTML statique uniformisé
+État sécurité — défenses livrées (cf. docs/securite/MODELE-MENACES.md
+§8.2 Phase 0) :
 
-  PR #13 (b0506-0650) — chantier majeur écosystème :
-    - #251 Production codex data (.codex-data.json) — format
-      auto-descriptif, versionné, SHA-256, 3 sources d'extraction
-      (FSAPI, dossier webkitdirectory, fichiers ZIP)
-    - #252 Consommation par le Labo — module volatile, bandeau
-      contextuel indigo, sélecteur multi-archives, 3 fonctions
-      du Labo adaptées (corrélations, impact jetons, matrice)
-    - 6 bugs trouvés par /ultrareview et corrigés avant merge
+  Phase 0 nominale (7 défenses) :
+    - Audit a priori baseline (0 trouvaille suspecte sur 11 clés)
+    - B-α  Sanitisation profonde + schémas cartouche/tampon
+    - J    Hook pré-commit innerHTML + clés sensibles
+    - D    Révocation FSAPI par défaut + opt-in (Réglages > Préférences > Sécurité)
+    - P-α  Sanitisation tampons + limites de surface
+    - H    Sceau SHA-256 sur les exports + vérification à l'import
+    - K    Whitelist de structure des exports (ZIP + JSON)
 
-  #248 confirmé livré le 2 mai 2026 (commit 5ceee80, oubli de cocher).
+  Suites α livrées dans la même journée :
+    - B-β  Passage obligé par assainirObjet dans les 6 fonctions ajouter*
+    - K-β  Preview UI avant download des exports
+    - E-α  Audit innerHTML scripté + rapport baseline (scripts/audit-innerhtml.sh)
+    - E-β  Examen ciblé + fix d'un vrai vecteur D-01 dans cc-license.js
+            (genererBadgeCC interpolait 5 champs metadata sans échappement)
 
-Veille (5 mai) : refonte nav, #261 cartes mentales, #259 Réserve→Archives,
-#247 Réglages > Données 6 cartes.
-
-État actuel : main propre et à jour avec origin. Prêt pour le prochain
-chantier.
+État actuel : main propre, 13 commits non poussés (le user pousse lui-même).
+Pas de chantier en attente, prêt pour décider du prochain.
 
 LECTURE OBLIGATOIRE (5 min) avant de coder :
-1. SESSION.md (ce fichier) — détails complets des livrables récents
+1. SESSION.md (ce fichier) — récap des livrables sécurité
 2. CLAUDE.md — conventions, zones protégées, règles sécurité
-3. docs/architecture/ECOSYSTEME-DONNEES.md — 4 concepts (Codex /
-   Archives / Codex data / Voûte). Document fondateur.
-4. BACKLOG.md — items ouverts avec leurs détails techniques
+3. docs/securite/MODELE-MENACES.md v1.3 — modèle de menaces complet
+4. docs/architecture/ECOSYSTEME-DONNEES.md — 4 concepts
+5. BACKLOG.md — items ouverts
 
-PROCHAINE ÉTAPE — choisir parmi les items du backlog ouverts :
+PROCHAINES ÉTAPES POSSIBLES (à arbitrer avec Grégoire) :
 
-  [MOYENNE] #257 v2.B Mode consultation namespace temporaire (~5-6 h)
-    Suite de #257 v2.A (livré 28 avril). Ouvre une archive en lecture
-    seule dans un namespace `__archive_*`, utile pour démos / formation /
-    consultation rétrospective sans modifier les bibliothèques actives.
-    Voir BACKLOG.md ligne ~113 pour le détail.
+  [SÉCURITÉ — PHASE 1] Défense A — Sandbox iframe
+    Recommandation principale du rapport E-β findings : neutralise
+    techniquement la mécanique I-01 sous-jacente, plus rentable que
+    migrer 103 cas innerHTML un par un. ~1 semaine.
+    Voir docs/securite/audits/AUDIT-INNERHTML-FINDINGS-2026-05-06.md.
 
-  [MOYENNE] #256-bis Aide aux 8 autres modales (~1 j)
-    Pattern de #256 (modales Archives, livré 28 avril) à reproduire pour
-    Nouveautés, Réparation, Wizard pratique, ApercuPDF, Confidentiel,
-    Export, Import, Suppression ressource.
+  [SÉCURITÉ — PHASE 1] Défense I — Tests automatisés
+    Suite Vitest/Playwright pour vérifier qu'un payload XSS dans une
+    grille importée ne s'exécute pas. ~1 semaine + maintenance.
 
-  [BASSE] Test iPad de la refonte nav + nouveaux modules codex data
-    (~30 min) — non bloquant.
+  [SÉCURITÉ — PHASE 1] Défense C — Wrapper destructif
+    Couche de garde sur localStorage.clear, indexedDB.deleteDatabase,
+    removeEntry FSAPI. ~1-2 semaines.
 
-  [À surveiller] Retours terrain sur le codex data (#251 + #252) — c'est
-    un chantier nouveau, attendre les retours d'usage avant d'enchaîner
-    avec d'autres extensions du Labo.
+  [BACKLOG] #257 v2.B Mode consultation namespace temporaire (~5-6 h)
+    Ouvre une archive en lecture seule dans un namespace `__archive_*`.
+
+  [BACKLOG] #256-bis Aide aux 8 autres modales (~1 j)
+    Pattern de #256 (livré 28 avril) à reproduire.
+
+  [BACKLOG] #262 Clarifier le nommage des fichiers exportés
+    Ajouté en cours de session sécurité — convention unifiée pour
+    codex/archive/codex-data/configuration. Suite du chantier #259.
+
+  [À surveiller] Retours terrain sur les défenses livrées :
+    - Toggle FSAPI dans Réglages > Préférences > Sécurité (UX)
+    - Preview avant download (frottement utilisateur ?)
+    - Migration silencieuse Défense D (handles supprimés au premier boot)
+    - Sceaux SHA-256 visibles dans la notification de succès d'import
 
 WORKFLOW DE CHANTIER (rappel) :
-1. Discuter approche AVANT de coder (sauf si trivial). Présenter un
-   plan en sous-phases si > 1h de travail.
-2. Créer une branche feature (ex: `refactor/258-bouton-anonymisation`)
-   pour les chantiers > 30 min.
-3. Implémenter par sous-phases commitables, avec tests visuels entre
-   chaque (Cmd+Option+R sur Safari Mac).
-4. Demander le numéro de beta à Grégoire avant le commit final
-   (format : « beta XX.XX build MMJJ-HHMM »).
-5. Bumper version.json + js/init-inline.js + cache-buster init-inline
-   dans index.html.
-6. Push branche + créer PR (gh pr create).
-7. Optionnel : `/ultrareview <PR#>` (facturé) ou review manuelle ciblée.
-8. Merge avec --merge (préserve l'historique des commits).
-9. Mettre à jour SESSION.md à la fin du chantier ou de la session.
+1. Discuter approche AVANT de coder (sauf si trivial). Plan en
+   sous-phases si > 1h de travail.
+2. Branche feature pour les chantiers > 30 min.
+3. Implémenter par sous-phases commitables, validation visuelle entre
+   chaque (Cmd+Q sur Safari Mac, file:// ignore les cache busters).
+4. Demander le numéro de beta à Grégoire avant le commit final.
+5. Bumper version.json + js/init-inline.js + cache-busters dans index.html.
+6. Push + PR si chantier > 1 commit.
+7. Le hook pré-commit (Défense J) bloque les nouveaux innerHTML non
+   échappés et avertit sur les écritures vers les clés sensibles.
 
-CONTRAINTES TECHNIQUES (rappel CLAUDE.md) :
-- echapperHtml() obligatoire sur innerHTML avec données utilisateur
-- Zéro handler inline → data-action / data-on-change / data-on-input
-- console.warn / console.error uniquement (pas console.log en prod)
-- Modales : classList.add('actif') (PAS 'visible')
-- db.setSync pour petites métadonnées (PAS db.set async)
-- Variables CSS du DS, tester modes clair ET sombre
-- Safari Mac/iPad cibles ; Cmd+Q + rouvrir entre les sous-phases
-- Charger SKILL_integrite_globaux.md si on touche aux clés globales
-  partagées (grillesTemplates, cours, enseignants, cartouches_*, etc.)
-
-GOTCHAS FRÉQUENTS :
-- Cache-busters : Safari file:// est têtu. `?v=` cache-bust marche
-  mais Cmd+Option+R force-reload est plus fiable.
-- Apostrophes typographiques (’ U+2019) plutôt que ASCII (') dans
-  les strings JS — évite les conflits de délimitation.
-- Faux amis dashboard : `contexte-indicateurs-*`, classes CSS
-  `.carte-contexte-*` sont des cartes d'écosystème dashboard, NE PAS
-  toucher si refactor « contexte/calendrier ».
-- SRPNF : le mot « structure » dans `['structure', 'rigueur', ...]`
-  est le critère S de SRPNF (grille SRPNF), à préserver.
-- Variables locales JS comme `dossierVersement`, `_versementsListes`
-  : conserver (BACKLOG #259 explicite).
-
-OBSERVATIONS OUVERTES (à régler à l'occasion) :
-- Test iPad de la refonte nav (Mac OK, iPad non testé). Pas bloquant.
-- /ultrareview avait crashé sur la PR #259 (cloud bug) — review
-  manuelle ciblée a fonctionné. Pour les futurs chantiers, retenter
-  /ultrareview vaut le coup avant un fallback manuel.
-- Migration data #259 : si quelqu'un a un dossier
-  `~/Documents/Reserve_LaboCodex/`, il doit lancer une fois
-  `bash migrer-reserve-vers-archives.sh` à la racine du repo. Test en
-  local 5 mai : aucun dossier détecté (probablement Safari ZIP only).
+PROCHAINE TÂCHE OPÉRATIONNELLE :
+Pousser les 13 commits sur origin :
+  git push origin main
 ```
 
 ---
 
-## Récapitulatif des livrables 6 mai 2026
+## Récap détaillé de la session du 6 mai 2026 (après-midi)
 
-### Chantier écosystème — #251 + #252 codex data (PR #13 mergée, beta 99.36 b0506-0650)
+### 13 commits livrés (b0506-1300 → b0506-1530)
 
-**3 nouveaux modules** (~1900 lignes nettes) :
+| # | Commit | Chantier | Build |
+|---|---|---|---|
+| 1 | `f9f6865` | Audit baseline + B-α sanitisation profonde | 0506-1300 |
+| 2 | `f27180a` | Backlog #262 — clarifier nommage exports | — |
+| 3 | `48c1a2d` | Défense J — hook pré-commit | — |
+| 4 | `d0a0903` | Défense D — révocation FSAPI | 0506-1335 |
+| 5 | `a9eadae` | Défense P-α — sanitisation tampons | 0506-1345 |
+| 6 | `404b924` | Défense H — sceau SHA-256 | 0506-1400 |
+| 7 | `0218d07` | Défense K — whitelist exports | 0506-1430 |
+| 8 | `eb636f5` | MODELE-MENACES v1.2 (Phase 0 livrée) | — |
+| 9 | `c431ae4` | B-β — passage obligé `ajouter*` | 0506-1450 |
+| 10 | `d0a00e3` | K-β — preview UI export | 0506-1505 |
+| 11 | `0628129` | E-α — script audit innerHTML | — |
+| 12 | `cef2fbc` | E-α correctif (escapeHtml + multi-ligne) | — |
+| 13 | `d9bc49c` | **E-β — fix critique XSS dans `genererBadgeCC`** | 0506-1530 |
 
-- **`js/codex-data.js`** (~770 l.) — Format auto-descriptif, versionné, SHA-256 vérifiable, conforme SKILL_Securite_donnees §4. 3 sources d'extraction : FSAPI (lecture directe du dossier lié), sélection dossier (`webkitdirectory` — détection automatique des archives via parsing des `meta.json`), fichiers ZIP individuels (fallback iPad). Limite 100 Mo, validation stricte à la lecture, extraction et reconstruction de bibliothèques globales (grilles, échelles, productions, **pratiques** — ajouté dans le fix post-/ultrareview, productionsTemplates et cartouches dynamiques).
-- **`js/codex-data-ui.js`** (~570 l.) — Modale dans Réglages > Données carte 3 (placeholder remplacé). Body scrollable + footer fixe pour boutons Annuler/Extraire toujours accessibles. Détection auto FSAPI/ZIP, basculement manuel possible. Liste à cocher avec pré-sélection des archives détectées dans le dossier.
-- **`js/labo-codex-data.js`** (~570 l.) — Loader volatile (`window._codexDataCharge` en mémoire seulement, jamais d'écrit IDB ni localStorage). Bandeau contextuel indigo en haut de la section Labo (réutilise le pattern uniformisé `bandeau-anonymisation` / `bandeau-demo`). Sélecteur multi-archives (« tous fusionnés » ou un dossier précis). API source unifiée : `lireSnapshotsHebdomadaires`, `lireInterventions`, `lireDonneesNamespacees`, `lireBibliothequeGlobale`, `lireInfoCours`. **Guard `_estDansLabo`** : les helpers ne redirigent vers le codex data que dans une sous-section `labo-*` — zéro pollution Aperçu/Suivi/Évaluation.
+### Trouvaille majeure
 
-**3 fonctions du Labo adaptées** (~14 call-sites) :
+L'audit `innerHTML` (E-β) a permis d'attraper un vrai vecteur D-01 critique caché dans `cc-license.js:genererBadgeCC` — fonction qui ne fait pas d'`innerHTML` elle-même mais dont le retour est interpolé par les modals d'aperçu d'import des 4 types pédagogiques (grilles, échelles, cartouches, productions). 5 champs metadata interpolés sans échappement. Un attaquant qui fabriquait un export avec un payload dans `metadata.auteur_original` déclenchait son code dès l'aperçu, avant même que l'utilisateur clique « Importer ». Fix unique sur `genererBadgeCC` couvre les 4 modals simultanément.
 
-- `correlations-longitudinales.js`
-- `impact-jetons.js`
-- `consolidation.js`
+### Décisions de scope
 
-Pattern : `(window.LaboCodexData ? LaboCodexData.lire*(...) : original())`. En mode « tous fusionnés », chaque graphique affiche le message « Sélectionne un groupe-cours » (calendriers et cohortes différents).
+- **B-α scope α** : ajout des sous-schémas et ingestion centralisée pour les 6 bibliothèques. Renvoi de B-β au même jour pour ne pas laisser de dette.
+- **B-β** : `pratique.configuration` modélisé en `{ type: 'object' }` brut (pas exhaustivement modélisé — trade-off accepté car contenu structurel, peu exposé au XSS direct).
+- **P-α scope révisé** : pas de migration vers le format ZIP (le scope §8.1 « unifier sur le pipeline ZIP commun » a été simplifié — sanitisation au canal isolé directement, format JSON préservé pour l'utilisateur).
+- **K-β** : modale construite via `createElement` + `textContent` (pas d'`innerHTML` interpolé, CSP-compatible).
+- **E** : audit programmatique a généré 125 cas suspects mais l'examen ciblé a montré que la dette `innerHTML` réelle est faible — la majorité des suspects sont des faux positifs (interpolations sûres par construction). Recommandation : prioriser Défense A (sandbox iframe) en Phase 1 plutôt que migrer 103 cas un par un.
 
-**Bonus** : `reserve.js` dispatche désormais l'événement `codex-data-manifeste-change` à chaque archivage → la carte 3 « Codex data » se rafraîchit automatiquement.
+### Fichiers nouveaux (artifacts de session)
 
-**Review /ultrareview — 6 bugs trouvés et corrigés avant merge** (commit `89e22da`) :
+- `docs/securite/MODELE-MENACES.md` v1.3 — modèle de menaces complet
+- `docs/securite/HOOKS-PRE-COMMIT.md` — usage du hook
+- `docs/securite/audits/AUDIT-2026-05-06.md` — baseline a priori (0 trouvaille)
+- `docs/securite/audits/AUDIT-INNERHTML-2026-05-06.md` — rapport audit programmatique
+- `docs/securite/audits/AUDIT-INNERHTML-FINDINGS-2026-05-06.md` — examen ciblé + fix critique
+- `js/securite-prefs.js` — orchestrateur préférence FSAPI
+- `js/securite-hash.js` — Web Crypto SHA-256 sur les exports
+- `js/securite-export-validation.js` — whitelist structure
+- `js/securite-export-preview.js` — preview UI avant download
+- `scripts/audit-bibliotheques-securite.js` — audit a priori
+- `scripts/audit-innerhtml.sh` — audit dette innerHTML (ré-exécutable)
+- `scripts/hooks/pre-commit` — hook installé via `core.hooksPath`
+- `scripts/install-hooks.sh` — installateur de hooks
 
-1. **Critique** : `pratiquesConfigurables` silencieusement perdu (retiré du groupe par `_retirerBibliothequesDuGroupe` mais jamais ajouté à `bibliotheques`). Fix : ajout du champ `pratiques` au format + mapping étendu dans `lireBibliothequeGlobale`.
-2. **Critique** : `Object.assign({uuid, cours, ...}, donneesNet)` — la clé globale `cours` (liste de tous les cours du trimestre) écrasait la métadonnée `cours` (code-cours du groupe). Fix : inverser l'ordre — `donneesNet` d'abord, métadonnées en dernier.
-3. `var db` shadows `window.db` dans le sort callback de `_peuplerSelectGroupe`. Fix : renommé `dA`/`dB`.
-4. `Array.isArray ? [] : []` (pattern bidon — `Array.isArray` est toujours truthy). Fix : simplifié en `[]`.
-5. Redundant ternary `estTableau ? resultats : resultats` + wrap des objets en mode 'tous' qui cassait les consommateurs. Fix : retour direct `resultats`, et pour les objets : retour de la première valeur trouvée (cohérent avec primitives).
-6. Commentaire « dernière valeur » incorrect (le code retourne la première). Fix : aligné le commentaire sur le comportement réel.
+### Fichiers modifiés (significatifs)
 
-**Décisions UX** :
-- Mode B (Labo seulement) au lieu de Mode A (immersif) : isolation stricte, le reste de l'app reste sur le trimestre actif réel.
-- Volatile (mémoire seule) en v1 : pas de cache IDB, force l'utilisateur à recharger après refresh — évite la pollution du quota.
-- Pas d'anonymisation explicite à l'extraction en v1 : le mode anonymisation actif de l'app s'applique aux noms affichés dans le Labo automatiquement.
-
-**Découverte clé en cours de chantier** : #248 « Manifeste fusion auto Safari » a déjà été livré le 2 mai 2026 (commit `5ceee80`). Le mécanisme actuel (manifeste local cumulatif inclus dans chaque ZIP + auto-hydration à l'ouverture) couvre les flux normaux, y compris cross-appareils par fusion successive. Item marqué `[x]` dans BACKLOG.md.
-
----
-
-### Chantier UX en-tête — #258 + #260 (PR #12 mergée, beta 99.36 b0506-0515)
-
-**#258 — Bouton anonymisation dans l'en-tête** (commit `5ebaf18`)
-
-- Retrait du `<select>` Normal/Anonymisé (ex-`#selecteur-mode`, centré ligne 2 du bandeau groupe-cours).
-- Nouveau bouton-icône `#btn-toggle-anonymisation-nav` dans `.entete-controles-droite`, entre le bouton bug et le bouton thème. Toujours visible.
-- Icône : `icons/icons8-anonymous-mask.svg` (ajoutée).
-- État actif via `.btn-action-header.actif` (pattern cohérent avec `.navigation-principale button.actif`), avec `aria-pressed`.
-- Refactor `js/modes.js` : retrait de `creerSelecteurMode()` et de la constante `THEMES` (mortes après le refactor du bandeau). Ajout de `basculerModeAnonymisation()` + `_syncBtnAnonymisationNav()` (analogues à `basculerTheme` / `_syncBtnThemeNav`).
-- Tooltip `data-tooltip="entete-mode-affichage"` (clé existante, contenu déjà parfait — fix `33557fa` après review manuelle, j'avais initialement nommé `entete-mode-anonymisation` qui n'existait pas).
-
-**Bonus livré dans le même commit — Uniformisation des bandeaux applicatifs**
-
-- Bandeau `#bandeau-mode` (anonymisation) converti de **génération dynamique inline** (innerHTML + cssText) vers **HTML statique** dans `index.html`, aligné sur le pattern `.bandeau-demo`.
-- Style aligné : padding 8px 16px (au lieu de 10px), font-size 0.85rem (au lieu de 0.9rem), couleur `var(--bleu-principal)` pour distinguer de la démo (vert).
-- Toggle via `classList.toggle('u-hide', ...)` plutôt que création/destruction du DOM.
-- Le checkbox « Afficher DA réels » est maintenant statique, état synchronisé au passage en mode anonymisé.
-- `body.mode-anonymise { padding-bottom: 40px }` (un peu moins que démo qui est à 50px, cohérent avec le bandeau aminci).
-
-**#260 — Crédit Icons8** (même commit)
-
-- Ligne `<tr>` ajoutée dans la carte Technologies de Réglages > Aide > À propos, entre Stockage et Développement.
-- Lien `https://icons8.com` avec `rel="noopener noreferrer"`, sous-texte « Bibliothèque d'icônes libres ».
-
-**Bilan zéro dette** : −101 lignes nettes. Suppression complète :
-- Bloc `#selecteur-mode` (3 endroits) et `.selecteur-mode-centre` dans `index.html` + `styles.css`
-- Bloc `.select-mode` + variantes `:hover`, `:focus`, `option`, mode clair (~50 l. CSS)
-- `@keyframes fadeIn` dupliquée (la déclaration ligne 1493, doublon avec ligne 3987 conservée)
-- Référence morte au `#select-mode` dans le sélecteur d'exclusion `body.mode-archive` (ligne 865)
-- Constante `THEMES`, fonction `creerSelecteurMode()` (~50 l. JS)
-- Référence à `.bandeau-mode` dans `@media print` → remplacée par `.bandeau-anonymisation` + `.bandeau-demo`
-
-**Review manuelle** : audit cross-fichiers OK (aucune référence morte, modules protégés non touchés, sécurité OK, pas d'innerHTML avec données utilisateur, handlers via `data-action`). 1 bug trouvé (clé tooltip inexistante) et corrigé avant merge.
-
-**Validation terrain** : confirmée par Grégoire le 6 mai 2026.
+- `js/db.js` — préférence FSAPI + helpers
+- `js/import-export.js` — schémas enrichis + sceau + validation export
+- `js/codex.js` — validation + preview avant compression ZIP
+- `js/reserve.js` — préférence FSAPI + validation + preview
+- `js/cc-license.js` — fix critique `genererBadgeCC`
+- `js/grilles-bibliotheque.js` — passage obligé B-β
+- `js/echelles-bibliotheque.js` — passage obligé B-β
+- `js/cartouches-bibliotheque.js` — passage obligé B-β
+- `js/pratiques-bibliotheque.js` — passage obligé B-β
+- `js/productions-bibliotheque.js` — passage obligé B-β
+- `js/tampons-bibliotheque.js` — passage obligé B-β + sanitisation + preview
+- `js/changelog-data.js` — entrée Beta 99 enrichie sécurité
+- `BACKLOG.md` — entrée #262 ajoutée
 
 ---
 
-## Récapitulatif des livrables 5 mai 2026
+## Notes pour la prochaine session
 
-### Refonte navigation principale — 6 sous-phases livrées (commits `f983cc4` → `2e8bd82`, merge `311c8d9`)
-
-Nav cible : Accueil · Aperçu · **Conception** · **Calendrier** · Suivi · Évaluation · **Labo** · Aide · Réglages.
-
-| Phase | Commit | Description |
-|---|---|---|
-| Pré | `f983cc4` | fix(rythme) bump Beta 99.34 b0504-0710 avant refonte |
-| SP1 | `6973750` | refactor navigation.js : table-driven dispatcher |
-| SP2 | `89f9c0d` | mouvements pratiques→Conception, bilan→Labo, Études dans Labo |
-| SP3 | `ccf573b` | renommage boite-outils → labo (40 occ.) |
-| SP4 | `18b492f` + `6789d3e` | renommage structure → conception (173 occ.) + fix CSS |
-| SP5 | `3bfeed7` + `57c3223` | renommage contexte → calendrier (177 occ.) + fix sous-onglet 'vue' |
-| SP6 | `2e8bd82` | bump Beta 99.35 b0505-0735, finalisation, NOMS_STABLES, SESSION.md |
-| Merge | `311c8d9` | Merge --no-ff sur main, branche supprimée |
-
-### Fix #261 cartes mentales perdues (commit `76144bc`)
-
-- 5 cartes restaurées depuis `backup 18 avril/donnees.json` (script de console one-shot, supprimé après usage).
-- `js/planification-donnees.js` patché : `initialiserSiNecessaire()` vérifie maintenant que `index.active` pointe vers une carte qui existe dans `index.cartes`, fallback silencieux sur la première carte sinon.
-
-### Refactor #259 Réserve → Archives (PR #10 mergée, commits `2f16485` + `a90f12a`, merge `86b597d`)
-
-Approche zéro dette technique. ~700 remplacements dans 13 fichiers.
-
-**Strings UI renommées** :
-- 3 modules JS Reserve : titres, labels, console.warn `[Archives]`, headers JSDoc, variables locales `dateArchive`
-- index.html : modales, menu Codex, carte Réglages > Données « Archives stockées »
-- accompagnement-contenu-popup.js + hover.js : ~50 textes de popups et tooltips
-- 2 commentaires JSDoc périphériques (cartouches.js, productions.js)
-- ECOSYSTEME-DONNEES.md : titres, accords français, verbes pédagogiques
-- BACKLOG.md : ~16 mentions historiques
-
-**Path physique + JSON keys storage** :
-- `~/Documents/Reserve_LaboCodex/` → `~/Documents/Archives_LaboCodex/`
-- `manifeste-reserve.json` → `manifeste-archives.json`
-- `manifeste-reserve-patch.json` → `manifeste-archives-patch.json`
-- JSON keys : `versements`/`date_versement`/`mode_versement` → `archives`/`date_archive`/`mode_archive`
-
-**Préservé (volontaire)** :
-- Noms de fichiers `js/reserve*.js`, classe `window.Reserve`, méthodes (`verserGroupeCours`, `actionVerser`, `_extraireContenuVersement`, etc.)
-- IDs DOM `#modalReserve`, `#modalOuvrirVersement`, `id="codex-menu-verser-reserve"`
-- Clés popup `'reserve-versement'`, `'reserve-ouvrir-versement'`, `'reglages-reserve'` + leurs cross-refs `voirAussi`
-- Variables locales (`dossierVersement`, `_versementsListes`)
-- Faux amis : `préserver`, `inverser`, `Inversement`, critère SRPNF
-
-**Migration data** : script bash `migrer-reserve-vers-archives.sh` à la racine du repo. Idempotent. Renomme dossier + fichiers manifestes + sed les keys JSON internes.
-
-**Review manuelle** : `/ultrareview` cloud avait crashé. Review ciblée à la main : identifiants internes ✓, storage keys ✓, voirAussi cross-refs ✓, faux amis ✓, syntaxe JS ✓. **1 bug trouvé et corrigé** : 19 doublons `</script>` dans index.html (cumulés pendant SP3-SP5).
-
-### Refonte #247 Réglages > Données — 6 cartes alignées sur l'écosystème (PR #11 mergée, commit `cc1d219`)
-
-Refonte partielle (Codex data + Voûte n'existent pas encore — placeholders).
-
-**6 cartes cibles** :
-1. **Codex** (espace de travail actif) — 3 sous-cartes : Exporter le Codex / Exporter ma config / Ouvrir un Codex
-2. **Archives** (dépôt local) — note diagnostic-only ajoutée, actions au menu Codex
-3. **Codex data** — placeholder désaturé, badge « À venir »
-4. **Voûte** — placeholder désaturé, badge « À venir »
-5. **Captures et recherche** — inchangé (accordéon)
-6. **Maintenance** — inchangé (accordéon, zone danger)
-
-**Tooltips renommés** (cohérence) : `donnees-sauvegarde`→`donnees-codex`, `donnees-export-complet`→`donnees-codex-export`, `donnees-export-config`→`donnees-config-export`, `donnees-import`→`donnees-codex-ouvrir`. **Ajoutés** : `donnees-codex-data`, `donnees-voute`.
-
-**Décisions actées** (Q1-Q4) :
-- Q1 : refonte partielle (vocabulaire + réorganisation, garder JS existant)
-- Q2 : par concept (4 concepts + 2 cartes métier)
-- Q3 : Archives diagnostic-only — actions au menu Codex pour éviter les flux doublés
-- Q4 : « Sauvegarde complète » → « Exporter le Codex » (clarifie ≠ Archiver)
-
-Aucun impact sur `donnees-v2.js` (logique métier inchangée).
-
----
-
-## État global du projet (post 5 mai)
-
-### Refonte navigation — Statut
-
-| Sous-phase | Statut |
-|---|---|
-| SP1 → SP6 | ✅ livré + mergé sur main |
-| Test iPad | ⏳ à faire à l'occasion |
-
-### Backlog Réserve/écosystème — Statut mis à jour
-
-| # | Description | Statut |
-|---|---|---|
-| #251 | Codex data — extraction depuis les Archives | ✅ livré 6 mai (PR #13 mergée) |
-| #252 | Labo autonome — chargement codex data | ✅ livré 6 mai (PR #13 mergée) |
-| #258 | Bouton anonymisation dans l'en-tête | ✅ livré 6 mai (PR #12 mergée) |
-| #260 | Crédit Icons8 (Réglages > À propos) | ✅ livré 6 mai (PR #12 mergée) |
-| #248 | Manifeste fusion auto Safari | ✅ livré 2 mai (commit 5ceee80) |
-| #259 | Renommage Réserve → Archives | ✅ livré 5 mai (PR #10 mergée) |
-| #261 | Cartes mentales perdues | ✅ livré 5 mai |
-| #247 | Refonte Réglages > Données | ✅ livré 5 mai (PR #11 mergée) |
-| #257 v2.B | Mode consultation namespace temporaire | ⏳ Moyenne |
-| #256-bis | Aide aux 8 autres modales | ⏳ Moyenne |
-
-### Hors écosystème (autres items ouverts)
-
-- Test iPad de la refonte nav (~30 min) — non bloquant
-
-### Phase 7 (doublons) — clôturée le 2 mai
-
-### Bilan réflexif — phases A→D livrées le 3 mai
-
----
-
-## Prochaine session — Décision à prendre
-
-Voir consigne de démarrage ci-dessus. **Le backlog écosystème de données est complètement déblayé** (Codex / Archives / Codex data / Voûte — la Voûte étant un horizon, pas un item ouvert). Items restants : **#257 v2.B** (consultation namespace temporaire, ~5-6 h, pertinent quand les bibliothèques actives sont purgées), **#256-bis** (aide aux 8 autres modales, ~1 j, version « novice-friendly »). Test iPad de la refonte nav et des nouveaux modules codex data reste à faire à l'occasion. Surveiller les retours terrain sur le codex data avant d'enchaîner avec d'autres extensions du Labo.
+- **Validation à l'usage** : plusieurs modifications attendent une validation terrain (test fonctionnel d'import round-trip pour B-α, comportement de la migration FSAPI au boot, preview UI utilisable, etc.). Aucune ne devrait casser le flux normal — fallbacks safes partout.
+- **iPad** : non testé cette session. Le toggle FSAPI dans Réglages > Préférences > Sécurité doit être visible et fonctionnel. La preview UI doit s'afficher correctement.
+- **MODELE-MENACES.md v1.3** : reflète l'état post-session. Les statuts défense par scénario sont à jour (D-03 à Bon, X-02 à Bon, autres à Partiel).
+- **Pas de chantier en attente actif**. Le prochain choix dépend de tes priorités — voir « PROCHAINES ÉTAPES POSSIBLES » ci-dessus.
