@@ -259,35 +259,28 @@
 
 ### Credits — A propos (3 mai 2026)
 
-- [ ] **#260** Ajouter le credit Icons8 dans Reglages > A propos > Technologies
-  - **Lieu** : `index.html:11161` (carte « Technologies » dans la section
-    Aide > A propos), tableau `class="table-collapse"`. Ajouter une nouvelle
-    ligne `<tr>` apres « Developpement ».
-  - **Contenu** :
-    - Libelle : « Icones »
-    - Valeur : « Icons8 — <a href="https://icons8.com" target="_blank" rel="noopener noreferrer">icons8.com</a> »
-    - Sous-texte gris (`text-muted u-texte-09`) optionnel : « Bibliotheque
-      d'icones libres ».
-  - **Effort** : ~15 min (HTML uniquement, pas de logique).
-  - **Priorite** : Basse, mais a faire avant de partager publiquement
-    l'application (obligation morale de credit).
+- [x] **#260** Ajouter le credit Icons8 dans Reglages > A propos > Technologies (livre 6 mai 2026, b0506-0515)
+  - Ligne `<tr>` ajoutee dans la carte Technologies, entre Stockage et Developpement.
+  - Libelle « Icones », valeur « Icons8 — icons8.com » avec lien `rel="noopener noreferrer"`,
+    sous-texte « Bibliotheque d'icones libres ».
 
 ### UX — En-tete (2 mai 2026)
 
-- [ ] **#258** Remplacer le selecteur Normal/Anonymise par un bouton-icone dans l'en-tete
-  - **Etat actuel** : `#selecteur-mode` (genere par `js/modes.js`) est un select
-    Normal / Anonymise place au centre de la ligne 2 de l'en-tete
-    (classe `selecteur-mode-centre`, `index.html:3736`).
-  - **Cible** : retirer le select et le remplacer par un bouton-icone dans la
-    rangee de droite de la ligne 1, **a cote** de `#btn-toggle-theme-nav`
-    (Mode clair/sombre, `index.html:3723`). Comportement toggle au clic.
-  - **Icone** : `icons/icons8-anonymous-mask.svg`. Etat actif/inactif
-    visualise (par analogie avec le bouton clair/sombre, ou via une variante
-    visuelle cohérente avec le design system).
-  - **Effort** : ~1 h (HTML en-tete + handler + retrait du selecteur central +
-    nettoyage CSS `selecteur-mode-centre` si inutilise ailleurs).
-  - **Priorite** : Moyenne — UX raffinement, ameliore la coherence des controles
-    utilitaires (tous a droite).
+- [x] **#258** Remplacer le selecteur Normal/Anonymise par un bouton-icone dans l'en-tete (livre 6 mai 2026, b0506-0515)
+  - Bouton `#btn-toggle-anonymisation-nav` ajoute a `.entete-controles-droite`,
+    a cote de `#btn-toggle-theme-nav`. Toujours visible. Etat actif via
+    `.btn-action-header.actif` (pattern coherent DS), `aria-pressed` synchronise.
+  - Refactor `js/modes.js` : retrait de `creerSelecteurMode()` et de la
+    constante `THEMES` (mortes). Ajout de `basculerModeAnonymisation()` +
+    `_syncBtnAnonymisationNav()` (analogues a `basculerTheme` / `_syncBtnThemeNav`).
+  - **Bonus livre dans le meme commit** : bandeau « Mode anonymisation » converti
+    de generation dynamique inline en HTML statique aligne sur `.bandeau-demo`
+    (padding 8px 16px, font-size 0.85rem, couleur `--bleu-principal`).
+    Uniformisation des bandeaux applicatifs + economie de pixels en capture.
+  - **Bilan zero dette** : -101 lignes nettes. Retrait de blocs CSS
+    `.select-mode*`, `#selecteur-mode`, `.selecteur-mode-centre`, et keyframes
+    `fadeIn` dupliquee.
+  - PR #12 mergee, beta 99.36 b0506-0515.
 
 ### Rythme Phase 5 — Raffinements (selon usage, post-AQPC)
 

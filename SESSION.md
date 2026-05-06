@@ -1,9 +1,9 @@
-# SESSION — État au 5 mai 2026 (Refonte nav + #261 + #259 + #247 livrés)
+# SESSION — État au 6 mai 2026 (#258 + #260 livrés)
 
-**Date** : 5 mai 2026
-**Dernier build** : `0505-1220` · Beta **99.35** (poussée sur origin/main)
+**Date** : 6 mai 2026
+**Dernier build** : `0506-0515` · Beta **99.36** (poussée sur origin/main)
 **Branche** : `main` (à jour avec origin)
-**Statut** : 4 chantiers livrés aujourd'hui — refonte nav (Conception/Calendrier/Labo), #261 (cartes mentales), #259 (Réserve→Archives, ~700 occ.), #247 (Réglages > Données refonte 6 cartes alignées sur l'écosystème). Backlog écosystème quasi déblayé.
+**Statut** : Chantier UX livré — #258 (bouton anonymisation dans l'en-tête + uniformisation bandeaux) + #260 (crédit Icons8). PR #12 mergée. Veille du 5 mai : 4 chantiers majeurs (refonte nav, #261, #259 Archives, #247).
 
 ---
 
@@ -14,19 +14,24 @@
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
-Contexte : suite de la journée du 5 mai 2026, où 4 chantiers majeurs
-ont été livrés et poussés sur main (Beta 99.35 b0505-1220) :
+Contexte : journée du 6 mai 2026, chantier UX livré (Beta 99.36
+b0506-0515, PR #12 mergée) :
 
-  1. Refonte nav (Conception/Calendrier/Labo) — merge 311c8d9
-  2. #261 cartes mentales restaurées + patch préventif — 76144bc
-  3. #259 Réserve→Archives (refactor zéro dette, ~700 occ.) — PR #10 → 86b597d
-  4. #247 Réglages > Données — 6 cartes alignées écosystème — PR #11 → cc1d219
+  - #258 Bouton anonymisation dans l'en-tête (icône à droite, à côté
+    du bouton thème). Refactor zéro dette : -101 lignes nettes.
+  - #260 Crédit Icons8 dans Réglages > Aide > À propos > Technologies.
+  - Bonus : bandeau anonymisation converti en HTML statique, uniformisé
+    sur le pattern .bandeau-demo (padding 8px 16px, couleur bleu-principal).
+
+Veille (5 mai) : 4 chantiers livrés sur main — refonte nav (Conception/
+Calendrier/Labo), #261 cartes mentales, #259 Réserve→Archives, #247
+Réglages > Données 6 cartes.
 
 État actuel : main propre et à jour avec origin. Prêt pour le prochain
 chantier.
 
 LECTURE OBLIGATOIRE (5 min) avant de coder :
-1. SESSION.md (ce fichier) — détails complets des livrables 5 mai
+1. SESSION.md (ce fichier) — détails complets des livrables récents
 2. CLAUDE.md — conventions, zones protégées, règles sécurité
 3. docs/architecture/ECOSYSTEME-DONNEES.md — 4 concepts (Codex /
    Archives / Codex data / Voûte). Document fondateur.
@@ -35,35 +40,29 @@ LECTURE OBLIGATOIRE (5 min) avant de coder :
 PROCHAINE ÉTAPE — choisir parmi les items du backlog ouverts
 (par priorité descendante suggérée) :
 
+  [MOYENNE] #248 Manifeste fusion auto Safari (~2-3 h)
+    FSAPI Chrome/Edge le fait déjà. Côté Safari (ZIP), le
+    manifeste-archives.json n'est pas fusionné automatiquement à
+    l'import — l'utilisateur doit faire une action manuelle. À
+    automatiser pour parité Mac/Safari ↔ Chrome. Te sert directement
+    sur iPad.
+
+  [MOYENNE] #251 Codex data — extraction depuis les Archives (~3-4 h)
+    Format JSON léger (5-30 Mo) sans blobs, multi-trimestres. Consommé
+    par le Labo. Concrétisera la carte 3 « Codex data » (placeholder
+    actuel) dans Réglages > Données. À envisager après #252 (Labo
+    autonome) sinon le format n'a pas de consommateur.
+
   [MOYENNE] #257 v2.B Mode consultation namespace temporaire (~5-6 h)
     Suite de #257 v2.A (livré 28 avril). Ouvre une archive en lecture
     seule dans un namespace `__archive_*`, utile pour démos / formation /
     consultation rétrospective sans modifier les bibliothèques actives.
     Voir BACKLOG.md ligne ~113 pour le détail.
 
-  [MOYENNE] #248 Manifeste fusion auto Safari (~2-3 h)
-    FSAPI Chrome/Edge le fait déjà. Côté Safari (ZIP), le
-    manifeste-archives.json n'est pas fusionné automatiquement à
-    l'import — l'utilisateur doit faire une action manuelle. À
-    automatiser pour parité Mac/Safari ↔ Chrome.
-
-  [MOYENNE] #251 Codex data — extraction depuis les Archives (~3-4 h)
-    Format JSON léger (5-30 Mo) sans blobs, multi-trimestres. Consommé
-    par le Labo. Concrétisera la carte 3 « Codex data » (placeholder
-    actuel) dans Réglages > Données.
-
   [MOYENNE] #256-bis Aide aux 8 autres modales (~1 j)
     Pattern de #256 (modales Archives, livré 28 avril) à reproduire pour
     Nouveautés, Réparation, Wizard pratique, ApercuPDF, Confidentiel,
     Export, Import, Suppression ressource.
-
-  [BASSE] #260 Crédit Icons8 (~15 min)
-    Ajouter une ligne HTML dans Réglages > Aide > À propos > carte
-    Technologies. À faire avant tout partage public.
-
-  [HORS ÉCOSYSTÈME] #258 Bouton anonymisation dans l'en-tête (~30 min)
-    Remplace le sélecteur Normal/Anonymisé par un bouton-icône à droite,
-    à côté de Mode clair/sombre.
 
 WORKFLOW DE CHANTIER (rappel) :
 1. Discuter approche AVANT de coder (sauf si trivial). Présenter un
@@ -115,6 +114,46 @@ OBSERVATIONS OUVERTES (à régler à l'occasion) :
   `bash migrer-reserve-vers-archives.sh` à la racine du repo. Test en
   local 5 mai : aucun dossier détecté (probablement Safari ZIP only).
 ```
+
+---
+
+## Récapitulatif des livrables 6 mai 2026
+
+### Chantier UX en-tête — #258 + #260 (PR #12 mergée, beta 99.36 b0506-0515)
+
+**#258 — Bouton anonymisation dans l'en-tête** (commit `5ebaf18`)
+
+- Retrait du `<select>` Normal/Anonymisé (ex-`#selecteur-mode`, centré ligne 2 du bandeau groupe-cours).
+- Nouveau bouton-icône `#btn-toggle-anonymisation-nav` dans `.entete-controles-droite`, entre le bouton bug et le bouton thème. Toujours visible.
+- Icône : `icons/icons8-anonymous-mask.svg` (ajoutée).
+- État actif via `.btn-action-header.actif` (pattern cohérent avec `.navigation-principale button.actif`), avec `aria-pressed`.
+- Refactor `js/modes.js` : retrait de `creerSelecteurMode()` et de la constante `THEMES` (mortes après le refactor du bandeau). Ajout de `basculerModeAnonymisation()` + `_syncBtnAnonymisationNav()` (analogues à `basculerTheme` / `_syncBtnThemeNav`).
+- Tooltip `data-tooltip="entete-mode-affichage"` (clé existante, contenu déjà parfait — fix `33557fa` après review manuelle, j'avais initialement nommé `entete-mode-anonymisation` qui n'existait pas).
+
+**Bonus livré dans le même commit — Uniformisation des bandeaux applicatifs**
+
+- Bandeau `#bandeau-mode` (anonymisation) converti de **génération dynamique inline** (innerHTML + cssText) vers **HTML statique** dans `index.html`, aligné sur le pattern `.bandeau-demo`.
+- Style aligné : padding 8px 16px (au lieu de 10px), font-size 0.85rem (au lieu de 0.9rem), couleur `var(--bleu-principal)` pour distinguer de la démo (vert).
+- Toggle via `classList.toggle('u-hide', ...)` plutôt que création/destruction du DOM.
+- Le checkbox « Afficher DA réels » est maintenant statique, état synchronisé au passage en mode anonymisé.
+- `body.mode-anonymise { padding-bottom: 40px }` (un peu moins que démo qui est à 50px, cohérent avec le bandeau aminci).
+
+**#260 — Crédit Icons8** (même commit)
+
+- Ligne `<tr>` ajoutée dans la carte Technologies de Réglages > Aide > À propos, entre Stockage et Développement.
+- Lien `https://icons8.com` avec `rel="noopener noreferrer"`, sous-texte « Bibliothèque d'icônes libres ».
+
+**Bilan zéro dette** : −101 lignes nettes. Suppression complète :
+- Bloc `#selecteur-mode` (3 endroits) et `.selecteur-mode-centre` dans `index.html` + `styles.css`
+- Bloc `.select-mode` + variantes `:hover`, `:focus`, `option`, mode clair (~50 l. CSS)
+- `@keyframes fadeIn` dupliquée (la déclaration ligne 1493, doublon avec ligne 3987 conservée)
+- Référence morte au `#select-mode` dans le sélecteur d'exclusion `body.mode-archive` (ligne 865)
+- Constante `THEMES`, fonction `creerSelecteurMode()` (~50 l. JS)
+- Référence à `.bandeau-mode` dans `@media print` → remplacée par `.bandeau-anonymisation` + `.bandeau-demo`
+
+**Review manuelle** : audit cross-fichiers OK (aucune référence morte, modules protégés non touchés, sécurité OK, pas d'innerHTML avec données utilisateur, handlers via `data-action`). 1 bug trouvé (clé tooltip inexistante) et corrigé avant merge.
+
+**Validation terrain** : confirmée par Grégoire le 6 mai 2026.
 
 ---
 
@@ -206,19 +245,19 @@ Aucun impact sur `donnees-v2.js` (logique métier inchangée).
 
 | # | Description | Statut |
 |---|---|---|
+| #258 | Bouton anonymisation dans l'en-tête | ✅ livré 6 mai (PR #12 mergée) |
+| #260 | Crédit Icons8 (Réglages > À propos) | ✅ livré 6 mai (PR #12 mergée) |
 | #259 | Renommage Réserve → Archives | ✅ livré 5 mai (PR #10 mergée) |
 | #261 | Cartes mentales perdues | ✅ livré 5 mai |
 | #247 | Refonte Réglages > Données | ✅ livré 5 mai (PR #11 mergée) |
-| #257 v2.B | Mode consultation namespace temporaire | ⏳ Moyenne |
 | #248 | Manifeste fusion auto Safari | ⏳ Moyenne |
 | #251 | Codex data — extraction depuis les Archives | ⏳ Moyenne |
+| #257 v2.B | Mode consultation namespace temporaire | ⏳ Moyenne |
 | #256-bis | Aide aux 8 autres modales | ⏳ Moyenne |
-| #260 | Crédit Icons8 (Réglages > À propos) | ⏳ Basse |
 
 ### Hors écosystème (autres items ouverts)
 
-- #258 Bouton anonymisation dans l'en-tête (UX, ~30 min)
-- Test iPad de la refonte nav (~30 min)
+- Test iPad de la refonte nav (~30 min) — non bloquant
 
 ### Phase 7 (doublons) — clôturée le 2 mai
 
@@ -228,4 +267,4 @@ Aucun impact sur `donnees-v2.js` (logique métier inchangée).
 
 ## Prochaine session — Décision à prendre
 
-Voir consigne de démarrage ci-dessus. Items priorisés moyenne/basse (les hauts du backlog écosystème ont tous été livrés le 5 mai). **Mon avis (Claude)** : sans urgence particulière, **#258** (bouton anonymisation, ~30 min) ou **#260** (crédit Icons8, ~15 min) sont des warm-ups rapides. Pour un vrai chantier, **#251** (Codex data) concrétiserait le placeholder de la carte 3 dans Réglages > Données.
+Voir consigne de démarrage ci-dessus. Tous les items haute/basse priorité du backlog écosystème ont été livrés (5-6 mai). Items restants sont moyenne priorité. **Mon avis (Claude)** : **#248** (manifeste fusion auto Safari, ~2-3 h) a le meilleur ratio impact/effort — te sert directement sur iPad et bouche le seul trou de parité Safari/Chrome. **#251** (Codex data) reste en attente de #252 (Labo autonome) sinon le format n'a pas de consommateur immédiat.
