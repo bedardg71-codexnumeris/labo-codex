@@ -211,13 +211,14 @@ function _peuplerSelectGroupe() {
 
     var dossiers = Object.keys(_codexDataCharge.groupes);
 
-    // Tri par date_archive desc, puis par dossier
+    // Tri par date_archive desc, puis par dossier.
+    // dA/dB plutôt que da/db pour ne pas masquer le module global `db`.
     dossiers.sort(function(a, b) {
         var ga = _codexDataCharge.groupes[a] || {};
         var gb = _codexDataCharge.groupes[b] || {};
-        var da = ga.date_archive || '';
-        var db = gb.date_archive || '';
-        if (da !== db) return db.localeCompare(da);
+        var dA = ga.date_archive || '';
+        var dB = gb.date_archive || '';
+        if (dA !== dB) return dB.localeCompare(dA);
         return a.localeCompare(b);
     });
 
@@ -344,20 +345,21 @@ function obtenirDonneesParCle(cleBase) {
             }
             trouve = true;
         } else if (typeof valeur === 'object') {
-            // Objet : si plusieurs groupes, on retourne sous forme indexée par dossier
-            // pour ne pas perdre l'attribution. Si un seul groupe, on retourne tel quel.
-            if (dossiers.length === 1) return valeur;
-            estTableau = false;
-            resultats.push({ _dossier: dossier, _uuid: g.uuid, contenu: valeur });
-            trouve = true;
+            // Objet : on retourne tel quel pour le groupe sélectionné (un seul).
+            // En mode 'tous fusionnés', on ne sait pas fusionner deux objets de
+            // structure inconnue de manière sûre — on prend le premier non-null
+            // (ce qui correspond à l'ordre des dossiers dans le codex data).
+            return valeur;
         } else {
-            // Primitive : conserver la dernière valeur trouvée
+            // Primitive : retourner la première valeur trouvée. Les consommateurs
+            // qui chargent une clé primitive depuis le codex data en mode 'tous'
+            // récupèrent ainsi la valeur du premier groupe rencontré.
             return valeur;
         }
     }
 
     if (!trouve) return null;
-    return estTableau ? resultats : resultats;
+    return resultats;
 }
 
 /**
@@ -433,7 +435,7 @@ function lireDonneesNamespacees(cleBase) {
 function lireBibliothequeGlobale(cleBase) {
     if (modeConsultation() === 'app') {
         if (window.db && typeof window.db.getSync === 'function') {
-            return window.db.getSync(cleBase, Array.isArray ? [] : []);
+            return window.db.getSync(cleBase, []);
         }
         return [];
     }
@@ -441,7 +443,8 @@ function lireBibliothequeGlobale(cleBase) {
     var mapping = {
         'grillesTemplates': 'grilles',
         'echellesTemplates': 'echelles',
-        'productionsTemplates': 'productions'
+        'productionsTemplates': 'productions',
+        'pratiquesConfigurables': 'pratiques'
     };
     if (mapping[cleBase] && Array.isArray(biblio[mapping[cleBase]])) {
         return biblio[mapping[cleBase]];

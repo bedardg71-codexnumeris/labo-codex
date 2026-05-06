@@ -218,7 +218,7 @@ async function _lireArchiveZIP(file) {
  * @returns {{grilles, echelles, productions, cartouches}}
  */
 function _extraireBibliotheques(lectures) {
-    var biblio = { grilles: [], echelles: [], productions: [], cartouches: {} };
+    var biblio = { grilles: [], echelles: [], productions: [], pratiques: [], cartouches: {} };
     if (lectures.length === 0) return biblio;
 
     var plusRecent = lectures.reduce(function(acc, l) {
@@ -232,6 +232,7 @@ function _extraireBibliotheques(lectures) {
     if (Array.isArray(d.grillesTemplates)) biblio.grilles = d.grillesTemplates;
     if (Array.isArray(d.echellesTemplates)) biblio.echelles = d.echellesTemplates;
     if (Array.isArray(d.productionsTemplates)) biblio.productions = d.productionsTemplates;
+    if (Array.isArray(d.pratiquesConfigurables)) biblio.pratiques = d.pratiquesConfigurables;
 
     Object.keys(d).forEach(function(k) {
         if (k.indexOf('cartouches_') === 0) {
@@ -299,13 +300,17 @@ async function _construireCodexData(lectures, options) {
         dossiersVus[l.dossier] = true;
 
         var donneesNet = _retirerBibliothequesDuGroupe(l.donnees || {});
-        groupes[l.dossier] = Object.assign({
+        // Métadonnées en DERNIER pour qu'elles ne soient pas écrasées par
+        // d'éventuelles clés globales du groupe (ex. `cours` = liste globale
+        // de tous les cours du trimestre, qui écraserait `cours` = code-cours
+        // du groupe).
+        groupes[l.dossier] = Object.assign({}, donneesNet, {
             uuid: l.meta.uuid || null,
             trimestre: l.meta.trimestre || null,
             cours: l.meta.cours || null,
             groupe: l.meta.groupe || null,
             date_archive: l.meta.date_archive || null
-        }, donneesNet);
+        });
 
         archivesMeta.push({
             uuid: l.meta.uuid || null,
