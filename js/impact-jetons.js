@@ -36,7 +36,9 @@ var COULEUR_SANS_JETONS = '#4FC3F7';   // Bleu clair — groupe sans jetons
 function calculerImpactJetons() {
     var snapshots = [];
     try {
-        snapshots = obtenirSnapshotsHebdomadaires();
+        snapshots = (window.LaboCodexData && typeof window.LaboCodexData.lireSnapshotsHebdomadaires === 'function')
+            ? window.LaboCodexData.lireSnapshotsHebdomadaires()
+            : obtenirSnapshotsHebdomadaires();
     } catch (e) {
         console.warn('⚠️ Impact jetons : snapshots non disponibles', e);
         return null;
@@ -48,9 +50,11 @@ function calculerImpactJetons() {
 
     var evaluations = [];
     try {
-        evaluations = (typeof obtenirDonneesSelonMode === 'function')
-            ? obtenirDonneesSelonMode('evaluationsSauvegardees') || []
-            : [];
+        evaluations = (window.LaboCodexData && typeof window.LaboCodexData.lireDonneesNamespacees === 'function')
+            ? window.LaboCodexData.lireDonneesNamespacees('evaluationsSauvegardees') || []
+            : (typeof obtenirDonneesSelonMode === 'function'
+                ? obtenirDonneesSelonMode('evaluationsSauvegardees') || []
+                : []);
     } catch (e) {
         return null;
     }
@@ -77,13 +81,18 @@ function calculerImpactJetons() {
         var origId = ev.repriseDeId || ev.repriseDeIdCiblee;
         var originale = origId ? evaluations.find(function(e) { return e.id === origId; }) : null;
 
-        var productions = (typeof obtenirDonneesSelonMode === 'function')
-            ? obtenirDonneesSelonMode('productions') || [] : [];
+        var productions = (window.LaboCodexData && typeof window.LaboCodexData.lireDonneesNamespacees === 'function')
+            ? window.LaboCodexData.lireDonneesNamespacees('productions') || []
+            : (typeof obtenirDonneesSelonMode === 'function'
+                ? obtenirDonneesSelonMode('productions') || []
+                : []);
         var prod = productions.find(function(p) { return p.id === ev.productionId; });
         var dateEcheance = '';
         if (prod) {
             if (typeof obtenirEcheanceEffective === 'function') {
-                var infoCours = db.getSync('infoCours', null);
+                var infoCours = (window.LaboCodexData && typeof window.LaboCodexData.lireInfoCours === 'function')
+                    ? window.LaboCodexData.lireInfoCours()
+                    : db.getSync('infoCours', null);
                 var gcId = infoCours ? (infoCours._groupeCoursId || infoCours.id || null) : null;
                 dateEcheance = obtenirEcheanceEffective(prod, gcId).date || '';
             } else {
@@ -286,6 +295,16 @@ function creerGraphiqueImpactJetons(canvasId) {
         }
         var existant = Chart.getChart(canvas);
         if (existant) existant.destroy();
+
+        // Codex data en mode « tous fusionnés » : pas pertinent (calendriers différents)
+        if (window.LaboCodexData && window.LaboCodexData.modeConsultation() === 'codex-data-tous') {
+            if (typeof afficherMessageAttente === 'function') {
+                afficherMessageAttente(canvas,
+                    'Sélectionne un groupe-cours',
+                    'L’impact des jetons se calcule par groupe-cours (calendriers et cohortes différents).');
+            }
+            return;
+        }
 
         var donnees = calculerImpactJetons();
         if (!donnees || donnees.labels.length < 2) {
