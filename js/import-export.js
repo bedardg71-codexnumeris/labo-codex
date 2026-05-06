@@ -1997,6 +1997,46 @@ async function executerImportConfigComplete() {
     // Format configuration-complete (Beta 91+)
     const contenu = config.contenu;
 
+    // Défense H — vérifier les sceaux SHA-256 des ressources reçues AVANT
+    // tout traitement. Le sceau a été calculé par l'auteur sur le contenu
+    // canonicalisé ; toute altération en transit (même un caractère) est
+    // détectée. N'altère pas le flux d'import : on accumule les anomalies
+    // pour les remonter à l'utilisateur en fin d'import.
+    let resumeSceauGlobal = null;
+    if (window.SecuriteHash && typeof window.SecuriteHash.verifierLot === 'function') {
+        resumeSceauGlobal = { valide: 0, altere: 0, sansSceau: 0, indisponible: 0, total: 0, alteres: [] };
+        const lots = [];
+        if (Array.isArray(contenu.echelles)) lots.push({ libelle: 'échelles', items: contenu.echelles });
+        if (Array.isArray(contenu.grilles)) lots.push({ libelle: 'grilles', items: contenu.grilles });
+        if (Array.isArray(contenu.productions)) lots.push({ libelle: 'productions', items: contenu.productions });
+        if (contenu.cartouches && typeof contenu.cartouches === 'object') {
+            const grilleIdsC = Object.keys(contenu.cartouches);
+            for (let gi = 0; gi < grilleIdsC.length; gi++) {
+                const arr = contenu.cartouches[grilleIdsC[gi]];
+                if (Array.isArray(arr)) lots.push({ libelle: 'cartouches', items: arr });
+            }
+        }
+        for (let li = 0; li < lots.length; li++) {
+            const r = await window.SecuriteHash.verifierLot(lots[li].items);
+            resumeSceauGlobal.valide += r.valide;
+            resumeSceauGlobal.altere += r.altere;
+            resumeSceauGlobal.sansSceau += r.sansSceau;
+            resumeSceauGlobal.indisponible += r.indisponible;
+            resumeSceauGlobal.total += r.total;
+            for (let ai = 0; ai < r.alteres.length; ai++) {
+                resumeSceauGlobal.alteres.push({
+                    type: lots[li].libelle,
+                    index: r.alteres[ai].index,
+                    hashAttendu: r.alteres[ai].hashAttendu,
+                    hashCalcule: r.alteres[ai].hashCalcule
+                });
+            }
+        }
+        if (resumeSceauGlobal.altere > 0) {
+            console.warn('[Sécurité H] ' + resumeSceauGlobal.altere + ' ressource(s) avec sceau invalide :', resumeSceauGlobal.alteres);
+        }
+    }
+
     try {
         // Table de remapping: oldId → newId
         const remapEchelles = {};
@@ -2160,6 +2200,20 @@ async function executerImportConfigComplete() {
         let messageSucces = `Configuration «${config.metadata.nom}» importée avec succès!`;
         if (nbRemapEchelles > 0 || nbRemapGrilles > 0) {
             messageSucces += `\n\n${nbRemapEchelles + nbRemapGrilles} conflit(s) d'ID résolu(s) automatiquement.`;
+        }
+
+        // Défense H — message d'alerte si des sceaux ont échoué.
+        if (resumeSceauGlobal && resumeSceauGlobal.altere > 0) {
+            messageSucces += `\n\n⚠ ${resumeSceauGlobal.altere} ressource(s) avec sceau invalide ` +
+                             `(modifiée(s) après l'export). Vérifie le contenu avant utilisation.`;
+        } else if (resumeSceauGlobal && resumeSceauGlobal.valide > 0 && resumeSceauGlobal.altere === 0) {
+            const tauxValide = Math.round((resumeSceauGlobal.valide / resumeSceauGlobal.total) * 100);
+            if (tauxValide === 100) {
+                messageSucces += `\n\n✓ Sceaux SHA-256 valides sur les ${resumeSceauGlobal.total} ressources vérifiables.`;
+            } else {
+                messageSucces += `\n\n${resumeSceauGlobal.valide}/${resumeSceauGlobal.total} ressources avec sceau valide ` +
+                                 `(${resumeSceauGlobal.sansSceau} sans sceau, export antérieur à Défense H).`;
+            }
         }
 
         if (typeof afficherNotificationSucces === 'function') {
@@ -3093,6 +3147,25 @@ async function exporterConfigurationComplete() {
         return;
     }
 
+    // Défense H — sceller chaque ressource avant export. Le sceau est
+    // calculé sur le contenu canonicalisé (cf. js/securite-hash.js) et
+    // permettra à l'import de détecter une altération en transit.
+    let echellesScellees = echelles;
+    let grillesScellees = grilles;
+    let productionsScellees = productions;
+    let cartouchesScellees = cartouches;
+    if (window.SecuriteHash && typeof window.SecuriteHash.scellerLot === 'function') {
+        echellesScellees = await window.SecuriteHash.scellerLot(echelles);
+        grillesScellees = await window.SecuriteHash.scellerLot(grilles);
+        productionsScellees = await window.SecuriteHash.scellerLot(productions);
+        cartouchesScellees = {};
+        const grilleIdsCart = Object.keys(cartouches);
+        for (let gci = 0; gci < grilleIdsCart.length; gci++) {
+            const gId = grilleIdsCart[gci];
+            cartouchesScellees[gId] = await window.SecuriteHash.scellerLot(cartouches[gId]);
+        }
+    }
+
     // 3. Construire l'objet de configuration complète
     const configComplete = {
         metadata: {
@@ -3112,10 +3185,10 @@ async function exporterConfigurationComplete() {
             site_auteur: metaEnrichies.site || ""
         },
         contenu: {
-            echelles: echelles,
-            grilles: grilles,
-            productions: productions,
-            cartouches: cartouches,
+            echelles: echellesScellees,
+            grilles: grillesScellees,
+            productions: productionsScellees,
+            cartouches: cartouchesScellees,
             parametres: parametres
         }
     };

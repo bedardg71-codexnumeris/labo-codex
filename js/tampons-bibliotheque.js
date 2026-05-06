@@ -56,6 +56,16 @@ async function importerDansBibliotheque(tampons) {
     var items = await obtenirTous();
     var idsExistants = new Set(items.map(function(t) { return t.id; }));
     var ajoutes = 0;
+    // Défense H — vérifier les sceaux SHA-256 avant sanitisation. La
+    // sanitisation retire des champs et invaliderait le sceau, donc l'ordre
+    // est important : vérifier le sceau sur l'objet brut, puis assainir.
+    var resumeSceau = null;
+    if (window.SecuriteHash && typeof window.SecuriteHash.verifierLot === 'function') {
+        resumeSceau = await window.SecuriteHash.verifierLot(tampons);
+        if (resumeSceau.altere > 0) {
+            console.warn('[Sécurité H] ' + resumeSceau.altere + ' tampon(s) avec sceau invalide :', resumeSceau.alteres);
+        }
+    }
     // Défense P (cf. MODELE-MENACES.md §3.1.bis) : chaque tampon importé est
     // sanitisé via le schéma défini en B-α. Tout champ hors schéma est retiré
     // (whitelist), et les chaînes sont tronquées + débalisées.
@@ -74,6 +84,12 @@ async function importerDansBibliotheque(tampons) {
         }
     });
     await sauvegarder(items);
+    // Retourne soit juste le nombre (compat ancienne API), soit un object
+    // si des informations de sceau sont disponibles (callers peuvent les
+    // utiliser pour enrichir l'UI).
+    if (resumeSceau && resumeSceau.altere > 0) {
+        return { ajoutes: ajoutes, sceauAltere: resumeSceau.altere };
+    }
     return ajoutes;
 }
 
@@ -157,7 +173,7 @@ async function ajouterDepuisBibliotheque(tamponId) {
 // EXPORT / IMPORT JSON
 // ============================================
 
-function exporterBibliotheque() {
+async function exporterBibliotheque() {
     var items = obtenirTousSync();
     if (!items || items.length === 0) {
         if (typeof afficherNotificationErreur === 'function') {
@@ -166,11 +182,17 @@ function exporterBibliotheque() {
         return;
     }
 
+    // Défense H — sceller chaque tampon avant export.
+    var tamponsScelles = items;
+    if (window.SecuriteHash && typeof window.SecuriteHash.scellerLot === 'function') {
+        tamponsScelles = await window.SecuriteHash.scellerLot(items);
+    }
+
     var payload = {
         type: 'monitorage-tampons',
         version: 1,
         dateExport: new Date().toISOString(),
-        tampons: items,
+        tampons: tamponsScelles,
         metadata_cc: {
             licence: 'CC BY-NC-SA 4.0',
             auteur_original: obtenirIdentiteCCUtilisateur(),
@@ -232,9 +254,15 @@ async function importerFichier(event) {
             return;
         }
 
-        var ajoutes = await importerDansBibliotheque(data.tampons);
+        var resultat = await importerDansBibliotheque(data.tampons);
+        var ajoutes = (typeof resultat === 'object' && resultat !== null) ? resultat.ajoutes : resultat;
+        var sceauAltere = (typeof resultat === 'object' && resultat !== null) ? resultat.sceauAltere : 0;
         if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces(ajoutes + ' tampon(s) importé(s) dans la bibliothèque');
+            var msg = ajoutes + ' tampon(s) importé(s) dans la bibliothèque';
+            if (sceauAltere > 0) {
+                msg += '\n\n⚠ ' + sceauAltere + ' tampon(s) avec sceau invalide (modifié(s) après l\'export). Vérifie avant utilisation.';
+            }
+            afficherNotificationSucces(msg);
         }
         rafraichirModal();
     } catch (e) {
