@@ -1,9 +1,9 @@
-# SESSION — État au 6 mai 2026 (#258 + #260 livrés)
+# SESSION — État au 6 mai 2026 (#258 + #260 + #251 + #252 livrés + #248 confirmé)
 
 **Date** : 6 mai 2026
-**Dernier build** : `0506-0515` · Beta **99.36** (poussée sur origin/main)
+**Dernier build** : `0506-0650` · Beta **99.36** (poussée sur origin/main)
 **Branche** : `main` (à jour avec origin)
-**Statut** : Chantier UX livré — #258 (bouton anonymisation dans l'en-tête + uniformisation bandeaux) + #260 (crédit Icons8). PR #12 mergée. Veille du 5 mai : 4 chantiers majeurs (refonte nav, #261, #259 Archives, #247).
+**Statut** : 4 chantiers livrés aujourd'hui — #258 (bouton anonymisation, PR #12), #260 (crédit Icons8, PR #12), #251 + #252 (codex data complet, PR #13). #248 confirmé livré le 2 mai (oubli de cocher BACKLOG). Veille du 5 mai : refonte nav, #261, #259 Archives, #247.
 
 ---
 
@@ -14,18 +14,26 @@
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
-Contexte : journée du 6 mai 2026, chantier UX livré (Beta 99.36
-b0506-0515, PR #12 mergée) :
+Contexte : journée du 6 mai 2026, 2 PR mergées (Beta 99.36 b0506-0650) :
 
-  - #258 Bouton anonymisation dans l'en-tête (icône à droite, à côté
-    du bouton thème). Refactor zéro dette : -101 lignes nettes.
-  - #260 Crédit Icons8 dans Réglages > Aide > À propos > Technologies.
-  - Bonus : bandeau anonymisation converti en HTML statique, uniformisé
-    sur le pattern .bandeau-demo (padding 8px 16px, couleur bleu-principal).
+  PR #12 (b0506-0515) :
+    - #258 Bouton anonymisation dans l'en-tête (icône à droite)
+    - #260 Crédit Icons8 dans Réglages > Aide > À propos
+    - Bonus : bandeau anonymisation HTML statique uniformisé
 
-Veille (5 mai) : 4 chantiers livrés sur main — refonte nav (Conception/
-Calendrier/Labo), #261 cartes mentales, #259 Réserve→Archives, #247
-Réglages > Données 6 cartes.
+  PR #13 (b0506-0650) — chantier majeur écosystème :
+    - #251 Production codex data (.codex-data.json) — format
+      auto-descriptif, versionné, SHA-256, 3 sources d'extraction
+      (FSAPI, dossier webkitdirectory, fichiers ZIP)
+    - #252 Consommation par le Labo — module volatile, bandeau
+      contextuel indigo, sélecteur multi-archives, 3 fonctions
+      du Labo adaptées (corrélations, impact jetons, matrice)
+    - 6 bugs trouvés par /ultrareview et corrigés avant merge
+
+  #248 confirmé livré le 2 mai 2026 (commit 5ceee80, oubli de cocher).
+
+Veille (5 mai) : refonte nav, #261 cartes mentales, #259 Réserve→Archives,
+#247 Réglages > Données 6 cartes.
 
 État actuel : main propre et à jour avec origin. Prêt pour le prochain
 chantier.
@@ -37,21 +45,7 @@ LECTURE OBLIGATOIRE (5 min) avant de coder :
    Archives / Codex data / Voûte). Document fondateur.
 4. BACKLOG.md — items ouverts avec leurs détails techniques
 
-PROCHAINE ÉTAPE — choisir parmi les items du backlog ouverts
-(par priorité descendante suggérée) :
-
-  [MOYENNE] #248 Manifeste fusion auto Safari (~2-3 h)
-    FSAPI Chrome/Edge le fait déjà. Côté Safari (ZIP), le
-    manifeste-archives.json n'est pas fusionné automatiquement à
-    l'import — l'utilisateur doit faire une action manuelle. À
-    automatiser pour parité Mac/Safari ↔ Chrome. Te sert directement
-    sur iPad.
-
-  [MOYENNE] #251 Codex data — extraction depuis les Archives (~3-4 h)
-    Format JSON léger (5-30 Mo) sans blobs, multi-trimestres. Consommé
-    par le Labo. Concrétisera la carte 3 « Codex data » (placeholder
-    actuel) dans Réglages > Données. À envisager après #252 (Labo
-    autonome) sinon le format n'a pas de consommateur.
+PROCHAINE ÉTAPE — choisir parmi les items du backlog ouverts :
 
   [MOYENNE] #257 v2.B Mode consultation namespace temporaire (~5-6 h)
     Suite de #257 v2.A (livré 28 avril). Ouvre une archive en lecture
@@ -63,6 +57,13 @@ PROCHAINE ÉTAPE — choisir parmi les items du backlog ouverts
     Pattern de #256 (modales Archives, livré 28 avril) à reproduire pour
     Nouveautés, Réparation, Wizard pratique, ApercuPDF, Confidentiel,
     Export, Import, Suppression ressource.
+
+  [BASSE] Test iPad de la refonte nav + nouveaux modules codex data
+    (~30 min) — non bloquant.
+
+  [À surveiller] Retours terrain sur le codex data (#251 + #252) — c'est
+    un chantier nouveau, attendre les retours d'usage avant d'enchaîner
+    avec d'autres extensions du Labo.
 
 WORKFLOW DE CHANTIER (rappel) :
 1. Discuter approche AVANT de coder (sauf si trivial). Présenter un
@@ -118,6 +119,42 @@ OBSERVATIONS OUVERTES (à régler à l'occasion) :
 ---
 
 ## Récapitulatif des livrables 6 mai 2026
+
+### Chantier écosystème — #251 + #252 codex data (PR #13 mergée, beta 99.36 b0506-0650)
+
+**3 nouveaux modules** (~1900 lignes nettes) :
+
+- **`js/codex-data.js`** (~770 l.) — Format auto-descriptif, versionné, SHA-256 vérifiable, conforme SKILL_Securite_donnees §4. 3 sources d'extraction : FSAPI (lecture directe du dossier lié), sélection dossier (`webkitdirectory` — détection automatique des archives via parsing des `meta.json`), fichiers ZIP individuels (fallback iPad). Limite 100 Mo, validation stricte à la lecture, extraction et reconstruction de bibliothèques globales (grilles, échelles, productions, **pratiques** — ajouté dans le fix post-/ultrareview, productionsTemplates et cartouches dynamiques).
+- **`js/codex-data-ui.js`** (~570 l.) — Modale dans Réglages > Données carte 3 (placeholder remplacé). Body scrollable + footer fixe pour boutons Annuler/Extraire toujours accessibles. Détection auto FSAPI/ZIP, basculement manuel possible. Liste à cocher avec pré-sélection des archives détectées dans le dossier.
+- **`js/labo-codex-data.js`** (~570 l.) — Loader volatile (`window._codexDataCharge` en mémoire seulement, jamais d'écrit IDB ni localStorage). Bandeau contextuel indigo en haut de la section Labo (réutilise le pattern uniformisé `bandeau-anonymisation` / `bandeau-demo`). Sélecteur multi-archives (« tous fusionnés » ou un dossier précis). API source unifiée : `lireSnapshotsHebdomadaires`, `lireInterventions`, `lireDonneesNamespacees`, `lireBibliothequeGlobale`, `lireInfoCours`. **Guard `_estDansLabo`** : les helpers ne redirigent vers le codex data que dans une sous-section `labo-*` — zéro pollution Aperçu/Suivi/Évaluation.
+
+**3 fonctions du Labo adaptées** (~14 call-sites) :
+
+- `correlations-longitudinales.js`
+- `impact-jetons.js`
+- `consolidation.js`
+
+Pattern : `(window.LaboCodexData ? LaboCodexData.lire*(...) : original())`. En mode « tous fusionnés », chaque graphique affiche le message « Sélectionne un groupe-cours » (calendriers et cohortes différents).
+
+**Bonus** : `reserve.js` dispatche désormais l'événement `codex-data-manifeste-change` à chaque archivage → la carte 3 « Codex data » se rafraîchit automatiquement.
+
+**Review /ultrareview — 6 bugs trouvés et corrigés avant merge** (commit `89e22da`) :
+
+1. **Critique** : `pratiquesConfigurables` silencieusement perdu (retiré du groupe par `_retirerBibliothequesDuGroupe` mais jamais ajouté à `bibliotheques`). Fix : ajout du champ `pratiques` au format + mapping étendu dans `lireBibliothequeGlobale`.
+2. **Critique** : `Object.assign({uuid, cours, ...}, donneesNet)` — la clé globale `cours` (liste de tous les cours du trimestre) écrasait la métadonnée `cours` (code-cours du groupe). Fix : inverser l'ordre — `donneesNet` d'abord, métadonnées en dernier.
+3. `var db` shadows `window.db` dans le sort callback de `_peuplerSelectGroupe`. Fix : renommé `dA`/`dB`.
+4. `Array.isArray ? [] : []` (pattern bidon — `Array.isArray` est toujours truthy). Fix : simplifié en `[]`.
+5. Redundant ternary `estTableau ? resultats : resultats` + wrap des objets en mode 'tous' qui cassait les consommateurs. Fix : retour direct `resultats`, et pour les objets : retour de la première valeur trouvée (cohérent avec primitives).
+6. Commentaire « dernière valeur » incorrect (le code retourne la première). Fix : aligné le commentaire sur le comportement réel.
+
+**Décisions UX** :
+- Mode B (Labo seulement) au lieu de Mode A (immersif) : isolation stricte, le reste de l'app reste sur le trimestre actif réel.
+- Volatile (mémoire seule) en v1 : pas de cache IDB, force l'utilisateur à recharger après refresh — évite la pollution du quota.
+- Pas d'anonymisation explicite à l'extraction en v1 : le mode anonymisation actif de l'app s'applique aux noms affichés dans le Labo automatiquement.
+
+**Découverte clé en cours de chantier** : #248 « Manifeste fusion auto Safari » a déjà été livré le 2 mai 2026 (commit `5ceee80`). Le mécanisme actuel (manifeste local cumulatif inclus dans chaque ZIP + auto-hydration à l'ouverture) couvre les flux normaux, y compris cross-appareils par fusion successive. Item marqué `[x]` dans BACKLOG.md.
+
+---
 
 ### Chantier UX en-tête — #258 + #260 (PR #12 mergée, beta 99.36 b0506-0515)
 
@@ -245,13 +282,14 @@ Aucun impact sur `donnees-v2.js` (logique métier inchangée).
 
 | # | Description | Statut |
 |---|---|---|
+| #251 | Codex data — extraction depuis les Archives | ✅ livré 6 mai (PR #13 mergée) |
+| #252 | Labo autonome — chargement codex data | ✅ livré 6 mai (PR #13 mergée) |
 | #258 | Bouton anonymisation dans l'en-tête | ✅ livré 6 mai (PR #12 mergée) |
 | #260 | Crédit Icons8 (Réglages > À propos) | ✅ livré 6 mai (PR #12 mergée) |
+| #248 | Manifeste fusion auto Safari | ✅ livré 2 mai (commit 5ceee80) |
 | #259 | Renommage Réserve → Archives | ✅ livré 5 mai (PR #10 mergée) |
 | #261 | Cartes mentales perdues | ✅ livré 5 mai |
 | #247 | Refonte Réglages > Données | ✅ livré 5 mai (PR #11 mergée) |
-| #248 | Manifeste fusion auto Safari | ⏳ Moyenne |
-| #251 | Codex data — extraction depuis les Archives | ⏳ Moyenne |
 | #257 v2.B | Mode consultation namespace temporaire | ⏳ Moyenne |
 | #256-bis | Aide aux 8 autres modales | ⏳ Moyenne |
 
@@ -267,4 +305,4 @@ Aucun impact sur `donnees-v2.js` (logique métier inchangée).
 
 ## Prochaine session — Décision à prendre
 
-Voir consigne de démarrage ci-dessus. Tous les items haute/basse priorité du backlog écosystème ont été livrés (5-6 mai). Items restants sont moyenne priorité. **Mon avis (Claude)** : **#248** (manifeste fusion auto Safari, ~2-3 h) a le meilleur ratio impact/effort — te sert directement sur iPad et bouche le seul trou de parité Safari/Chrome. **#251** (Codex data) reste en attente de #252 (Labo autonome) sinon le format n'a pas de consommateur immédiat.
+Voir consigne de démarrage ci-dessus. **Le backlog écosystème de données est complètement déblayé** (Codex / Archives / Codex data / Voûte — la Voûte étant un horizon, pas un item ouvert). Items restants : **#257 v2.B** (consultation namespace temporaire, ~5-6 h, pertinent quand les bibliothèques actives sont purgées), **#256-bis** (aide aux 8 autres modales, ~1 j, version « novice-friendly »). Test iPad de la refonte nav et des nouveaux modules codex data reste à faire à l'occasion. Surveiller les retours terrain sur le codex data avant d'enchaîner avec d'autres extensions du Labo.

@@ -70,14 +70,30 @@
     immediat estime : 400-800 Mo par codex. L'historique vit dans la reserve
     (instantanes), plus dans le codex de travail.
 
-- [ ] **#251** Codex data — extraction depuis la reserve
-  - Priorite 4 de `ECOSYSTEME-DONNEES.md`. Format JSON leger (5-30 Mo), sans
-    blobs, multi-trimestres. Cle de regroupement `groupes` (UUID par
-    versement). Consomme par le Labo.
+- [x] **#251** Codex data — extraction depuis les Archives (livre 6 mai 2026, b0506-0650, PR #13)
+  - Module `js/codex-data.js` : format auto-descriptif (.codex-data.json),
+    versionne, hash SHA-256 verifiable, conforme SKILL_Securite_donnees §4.
+  - 3 sources d'extraction : FSAPI, selection dossier (webkitdirectory),
+    fichiers ZIP individuels. Limite 100 Mo, validation stricte.
+  - Module `js/codex-data-ui.js` : modale dans Reglages > Donnees carte 3
+    (placeholder remplace), body scrollable + footer fixe, detection auto.
+  - Reserve dispatche desormais l'evenement `codex-data-manifeste-change`
+    a chaque archivage → carte 3 reactive.
 
-- [ ] **#252** Labo autonome — sortir le Labo de la section Suivi
-  - Priorite 5 de `ECOSYSTEME-DONNEES.md`. Section dediee qui charge des
-    codex data en lecture seule sans ecraser le trimestre actif.
+- [x] **#252** Labo autonome — sortir le Labo de la section Suivi (livre 5+6 mai 2026)
+  - Partie A (section Labo autonome) : livree le 5 mai dans la refonte nav
+    (5 sous-sections : tirage, modelisation, rythme, etudes, bilan).
+  - Partie B (chargement codex data) : livree le 6 mai 2026 (PR #13).
+    Module `js/labo-codex-data.js` : loader volatile (memoire seulement,
+    jamais d'ecrit IDB ni localStorage), bandeau contextuel indigo,
+    selecteur multi-archives, helpers source unifiee (lireSnapshots,
+    lireInterventions, lireDonneesNamespacees, etc.). Guard `_estDansLabo`
+    : zero pollution Apercu/Suivi/Evaluation.
+  - 3 fonctions du Labo adaptees : correlations-longitudinales, impact-jetons,
+    consolidation. En mode « tous fusionnes » : message « Selectionne un
+    groupe-cours » (calendriers et cohortes differents).
+  - 6 bugs trouves par /ultrareview corriges avant merge (pratiquesConfigurables
+    perdu, Object.assign clobber, var db shadowing, etc.).
 
 - [x] **#253** Reserve v1.5 — automatisation de l’archive (FSAPI Chrome/Edge) (livre 28 avril 2026, b0428-0810)
   - **Probleme** : l’archive v1 exige 5 manipulations Finder
