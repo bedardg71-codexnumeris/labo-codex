@@ -226,11 +226,17 @@ function genererBadgeCC(metadata) {
         return ''; // Pas de licence CC
     }
 
+    // E-β fix : échapper les champs metadata interpolés. Cette fonction est
+    // appelée dans les modals d'aperçu d'import (grilles, échelles, cartouches,
+    // productions) AVANT que le pipeline d'import sanitise le contenu via
+    // SCHEMAS_IMPORT — un payload XSS dans metadata.auteur_original ou
+    // contrib.modifications s'exécutait directement au rendu de la modal
+    // (vecteur D-01). Cf. MODELE-MENACES.md §I-01 et docs/securite/audits/.
     let contributeurs_html = '';
     if (metadata.contributeurs && metadata.contributeurs.length > 0) {
         contributeurs_html = '<ul class="cc-badge-contributeurs">';
         metadata.contributeurs.forEach(contrib => {
-            contributeurs_html += `<li>${contrib.nom} (${contrib.date}) : ${contrib.modifications}</li>`;
+            contributeurs_html += `<li>${echapperHtmlCC(contrib.nom)} (${echapperHtmlCC(contrib.date)}) : ${echapperHtmlCC(contrib.modifications)}</li>`;
         });
         contributeurs_html += '</ul>';
     }
@@ -241,10 +247,10 @@ function genererBadgeCC(metadata) {
                 <img src="icons/by-nc-sa-2.svg" alt="CC BY-NC-SA 4.0" style="height: 15px;">
             </a>
 
-            <p class="cc-badge-titre">${metadata.nom || 'Matériel pédagogique'}</p>
+            <p class="cc-badge-titre">${echapperHtmlCC(metadata.nom || 'Matériel pédagogique')}</p>
 
             <p class="cc-badge-auteur">
-                <strong>Créé par :</strong> ${metadata.auteur_original}
+                <strong>Créé par :</strong> ${echapperHtmlCC(metadata.auteur_original)}
             </p>
 
             ${contributeurs_html}
