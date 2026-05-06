@@ -3216,6 +3216,15 @@ async function exporterConfigurationComplete() {
         }
     }
 
+    // K-β — preview UI : montrer les champs racine du JSON et demander
+    // confirmation avant le téléchargement.
+    if (window.SecuriteExportPreview && typeof window.SecuriteExportPreview.previewJsonEtConfirmer === 'function') {
+        const okPreview = await window.SecuriteExportPreview.previewJsonEtConfirmer(configComplete, 'configuration pédagogique');
+        if (!okPreview) {
+            return;
+        }
+    }
+
     // 4. Générer nom de fichier
     const nomAuteurSimple = metaEnrichies.auteur.replace(/[^a-z0-9]/gi, '-');
     const dateStr = new Date().toISOString().split('T')[0];
