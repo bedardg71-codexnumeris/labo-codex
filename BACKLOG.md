@@ -22,31 +22,16 @@
 > Granularite par groupe-cours (pas par trimestre), UUID v4 par versement.
 > Acces via le menu Codex de l'en-tete uniquement (decision spec §6.3).
 
-- [ ] **#247** Refonte de Reglages > Donnees pour aligner avec l'architecture des 4 concepts
-  - **Etat actuel** : la page « Sauvegarde et restauration » presente trois
-    cartes — « Sauvegarde complete » (Exporter mes donnees), « Configuration
-    pedagogique » (Exporter ma config), « Importer un fichier ». Ce vocabulaire
-    precede l'architecture de l'ecosysteme et doit etre realigne.
-  - **Cible** :
-    - « Sauvegarde complete » → **Verser dans la reserve** (point vers
-      `Reserve.actionVerser`, retire `executerExport` ou le redirige)
-    - « Configuration pedagogique » → **Deposer dans la voute** (lorsque la
-      voute sera en place, phase ulterieure)
-    - « Importer un fichier » → garder comme entree double (Ouvrir un codex /
-      Emprunter de la voute), ou separer en deux gestes
-    - Renommer la section « Sauvegarde et restauration » → « Reserve et voute »
-    - Ajouter une carte de statut « Reserve » : nombre de archives detectes,
-      derniere date, taille (lecture d'un manifeste a importer ; v1.1 ou plus tard)
-  - **Prerequis** : versement v1 valide en usage reel (apres test terrain par
-    Gregoire). Ne pas refondre tant que des manques fonctionnels ne sont pas
-    couverts par le module reserve.
-  - **Risque a eviter** : doubler les flux (page Reglages + menu Codex pointant
-    vers le meme geste avec des libelles differents) cree de la confusion.
-    L'objectif est UN point d'entree clair par geste.
-  - **Decision en attente** : Codex data et Voute n'existent pas encore dans
-    l'application. La refonte complete attendra que ces concepts soient
-    implementes (priorites 4-7 de `ECOSYSTEME-DONNEES.md` §Priorites
-    d'implementation).
+- [x] **#247** Refonte de Reglages > Donnees alignée sur l'architecture des 4 concepts (livré 5 mai 2026, commit fa6a238, PR #11)
+  - **Livré** : structure 6 cartes en place dans Réglages > Données.
+    - Carte 1 « Codex » (ex « Sauvegarde et restauration ») — 3 sous-cartes : Exporter le Codex / Exporter ma config / Ouvrir un Codex.
+    - Carte 2 « Archives » — note diagnostic-only (« Pour archiver un groupe-cours, utilise le menu Codex en haut »). Les actions (Archiver / Ouvrir une archive) restent au menu Codex pour éviter le doublage.
+    - Carte 3 « Codex data » — placeholder désaturé, badge « À venir ».
+    - Carte 4 « Voûte » — placeholder désaturé, badge « À venir ».
+    - Carte 5 « Captures et recherche » — inchangé (accordéon).
+    - Carte 6 « Maintenance » — inchangé (accordéon, zone danger).
+  - **Décisions actées** : refonte partielle (vocabulaire + réorganisation, actions JS existantes préservées) ; structure par concept (4 concepts + 2 cartes métier) ; Archives en diagnostic-only pour éviter doublage menu Codex ↔ Réglages.
+  - **Hors scope (futurs cycles)** : implémentation effective des concepts Codex data et Voûte (priorités 4-7 de `ECOSYSTEME-DONNEES.md`) — les placeholders attendent.
 
 - [x] **#248** Reserve v1.1 — mise a jour automatique du `manifeste-archives.json` global (livre 2 mai 2026, b0502-1335, commit 5ceee80)
   - Manifeste local cross-mode (FSAPI + ZIP Safari) avec auto-hydration au boot
