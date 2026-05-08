@@ -1291,12 +1291,17 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
         }
 
         // K-β — preview UI avant compression. L'utilisateur peut annuler.
+        // On masque l'overlay avant la modale (sinon double affichage)
+        // puis on le réaffiche après le clic Télécharger pour montrer la
+        // compression. Sans réaffichage, l'utilisateur attend dans le
+        // noir pendant generateAsync.
         if (window.SecuriteExportPreview && typeof window.SecuriteExportPreview.previewZipEtConfirmer === 'function') {
+            _progHide();
             var okPreview = await window.SecuriteExportPreview.previewZipEtConfirmer(zip, 'archive');
             if (!okPreview) {
-                if (typeof _progHide === 'function') _progHide();
                 return null;
             }
+            _progShow('Génération de l\'archive');
         }
 
         _prog(80, 'Compression du ZIP...', '');
