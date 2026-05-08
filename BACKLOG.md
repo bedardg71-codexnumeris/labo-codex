@@ -316,53 +316,38 @@
     s'est arrêté à l'UI/code interne, le nommage des fichiers téléchargés n'a
     pas suivi.
 
+- [ ] **#264** Barre de progression sur tous les exports (8 mai 2026)
+  - **Contexte** : certains exports sont courts (1-2 s), d'autres très longs
+    (versement Réserve d'un trimestre complet, codex avec beaucoup de
+    fichiers Travaux, etc.) et l'utilisateur n'a aucun retour pendant
+    le traitement — il ne sait pas si l'app a planté, si elle réfléchit,
+    ou si ça progresse.
+  - **Cible** : un indicateur de progression unifié sur tous les flux
+    d'export. Au minimum un état « en cours » (spinner ou message), idéalement
+    une vraie barre avec étapes nommées (« Compression des fichiers… »,
+    « Génération du manifeste… », « Préparation du téléchargement… »).
+  - **À cartographier** : tous les flux export — codex (`codex.js`),
+    archive/Réserve (`reserve.js`), config complète (`import-export.js`),
+    bibliothèque tampons (`tampons-bibliotheque.js`), bibliothèques
+    grilles/échelles/cartouches/productions/pratiques (modules dédiés),
+    plan d'alignement (`planification-bibliotheque.js`), PDF de rétroaction
+    (`travaux-export-pdf.js`), synthèse PDF (`synthese-retroaction-rendu.js`).
+    Repérer ceux qui ont déjà un retour (notification, modale K-β preview)
+    et ceux qui n'en ont aucun.
+  - **Lien** : la modale K-β preview (`securite-export-preview.js`) montre
+    déjà la liste des fichiers AVANT le téléchargement — la barre de
+    progression couvrirait la phase entre le clic « Télécharger » et le
+    déclenchement effectif du download (compression ZIP, sérialisation
+    JSON, hash SHA-256 Défense H, etc.).
+
 ### Sécurité — UI à aligner sur le design system (8 mai 2026)
 
-- [ ] **#263** Aligner les modales et carte sécurité sur `design-system.html`
-  - **Contexte** : les défenses livrées le 6 mai (B-α/J/D/P-α/H/K + B-β/K-β/E)
-    ont introduit plusieurs éléments UI construits par script (modales et
-    cartes) avec des styles **inline** plutôt que les variables CSS et classes
-    du design system du projet. Validation à l'usage du 8 mai : ça fonctionne,
-    mais l'esthétique est en décalage avec le reste de l'app.
-  - **Éléments concernés** :
-    - Modale K-β preview (`js/securite-export-preview.js`) — overlay + boîte
-      construits via `createElement` + styles inline (`position: fixed`,
-      `background: rgba(0,0,0,0.65)`, etc.). À refaire avec les classes
-      `.modal-js-overlay` / `.modal-js-contenu` ou équivalentes du DS.
-    - Boutons « Annuler » / « Télécharger » de la modale — styles inline
-      à remplacer par `.btn .btn-annuler` / `.btn .btn-confirmer`.
-    - **Modale `demanderMetadonneesConfigComplete`** (`js/cc-license.js:842`,
-      titre « Partager ma pratique complète ») — précède l'export config.
-      Constatée le 8 mai 2026 (capture #9 du backlog) : placeholders peu
-      lisibles sur fond foncé, contraste du textarea description en
-      décalage, plusieurs typos sans accents (« complete », « pratique »
-      titres et boutons, « Litterature », « Gregoire Bedard », « caracteres »).
-      Vérifier l'alignement DS et passer un coup d'accents.
-    - **Modale `modalMetadonneesEnrichies`** (`js/cc-license.js:700`,
-      titre « Metadonnees d'export ») — précède l'export d'une grille,
-      échelle, cartouche, production, pratique de notation, tampons.
-      Constatée le 8 mai 2026 pendant la validation Défense A SP2 :
-      couleurs et espacements inline (`background-color: rgba(0,0,0,0.6)`,
-      `var(--bleu-leger)` pour les titres, `var(--gris-leger)` pour le
-      texte d'introduction) à remplacer par les variables/classes du DS.
-      Plusieurs typos sans accents (« Metadonnees », « personnelles »
-      sans é, « caracteres » sans è). Le titre `<h2>` mélange le titre
-      et le lien CC dans un même flex — à découper en pattern DS
-      standard. Tester en mode clair/sombre, sur les 6 types de matériel.
-    - Carte « Sécurité » dans Réglages > Préférences (déjà en HTML statique,
-      utilise les classes du projet — vérifier la cohérence visuelle avec
-      les autres cartes de la page).
-    - Notification de succès enrichie de Défense H (sceau SHA-256) — vérifier
-      le rendu dans `afficherNotificationSucces`, possible que les retours
-      à la ligne soient mal gérés.
-  - **Cible** : utiliser exclusivement les variables CSS et classes existantes
-    du `styles.css`. Tester en mode clair ET sombre. Pas d'inline `style="..."`
-    avec des couleurs en dur.
-  - **Lien** : modèle de menaces §K-β. Le hook pré-commit Défense J devrait
-    aussi être respecté pendant la migration (pas de nouveaux innerHTML non
-    échappés introduits).
-  - **Effort estimé** : 2-3 h (refonte modale K-β) + 30 min (vérif notification
-    + carte Sécurité).
+- [x] **#263** Aligner les modales et carte sécurité sur `design-system.html` (livré 8 mai 2026, b0508-1255, commits 4576735 + c51966d)
+  - **Livré** : 4 modales construites par script alignées DS, ~22 références mortes `.cc-modal-*` nettoyées, 2 bugs latents corrigés (option `Collegial` sans accent ne matchait pas la valeur posée par le JS · inputs `email`/`url` sombres en mode clair dans `modal-js-contenu`), ~20 typos sans accents corrigées.
+  - **Modales touchées** : `creerModalMetadonneesEnrichies`, `creerModalConfigComplete`, `creerModalEditionMetadonnees` (cc-license.js, partagées par grilles/échelles/cartouches/productions/pratiques/tampons + cours/objectifs/planification/pratiques-materiel) · `_afficherModale` (securite-export-preview.js, K-β preview ZIP/JSON).
+  - **Carte « Sécurité »** : déjà cohérente avec ses sœurs SOLO/Actions RLO/ACP/Graphiques sur la page Réglages > Préférences — vérification, aucun changement requis.
+  - **Hors scope (à reprendre dans une suite)** : notification de succès enrichie de Défense H (sceau SHA-256) — rendu de `afficherNotificationSucces` à vérifier séparément.
+  - **Effort réel** : ~2 h (vs estimation 2-3 h).
 
 ### Credits — A propos (3 mai 2026)
 
