@@ -1,7 +1,7 @@
 # Tests sécurité automatisés — Défense I
 
 > **Chantier** : Phase 1 sécurité, Défense I (cf. `MODELE-MENACES.md` §7 C-01 + §8.2 Phase 1 + §8.4 Suite 5).
-> **Statut** : v1 livrée 8 mai 2026 — 28 tests verts en ~12 s.
+> **Statut** : v1 livrée 8 mai 2026 — 29 tests verts en ~12 s.
 > **Branche** : `feature/securite-defense-i-tests`.
 
 ---

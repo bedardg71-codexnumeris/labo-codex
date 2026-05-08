@@ -131,52 +131,62 @@ test.describe('Défense A · sandbox isolation', () => {
     // A.4 — Filtrage strict du postMessage côté parent. Le seul effet
     // atteignable est `iframe.style.height` à une valeur numérique
     // clampée. Tout payload mal formé doit être ignoré silencieusement.
-    test('A.4 · postMessage avec valeur non numérique est ignoré', async ({ page }) => {
+    //
+    // Subtilité (finding ultrareview) : si on poste les messages depuis
+    // le PARENT (`window.postMessage({...}, '*')`), `event.source` côté
+    // listener vaut `window` — pas une iframe — donc le filtre « instance
+    // trouvée » (boucle ligne ~71-78 de securite-apercu-sandbox.js) rejette
+    // tous les messages avant même les filtres source/type/numérique/signe.
+    // Pour exercer RÉELLEMENT ces 4 filtres, il faut que les messages
+    // proviennent d'une iframe enregistrée dans `instances[]` — donc on
+    // injecte le payload dans `htmlContenu` pour qu'il s'exécute dans la
+    // sandbox et poste vers `parent`.
+    test('A.4 · postMessage filtré · 4 messages malformés depuis l\'iframe rejetés', async ({ page }) => {
         await page.goto(harnessSansCsp);
 
-        // Ouvre une sandbox avec un contenu prévisible et attend que le
-        // messenger ait posé sa hauteur initiale.
-        await page.evaluate(() => {
+        // Payload exécuté DANS l'iframe sandbox. Les 4 messages testent
+        // chacun un filtre côté listener du parent ; les valeurs 998/999
+        // dépassent hauteurMax — si elles passaient, la hauteur clampée
+        // serait 600 (preuve d'échec d'un filtre).
+        const payloadMalformes = [
+            '<p style="height: 30px; margin: 0;">A.4 malformés</p>',
+            '<scr' + 'ipt>',
+            '  parent.postMessage({source: "autre-marque", type: "hauteur", valeur: 999}, "*");',         // filtre source
+            '  parent.postMessage({source: "apercu-sandbox", type: "autre-type", valeur: 998}, "*");',    // filtre type
+            '  parent.postMessage({source: "apercu-sandbox", type: "hauteur", valeur: "pas-un-nombre"}, "*");', // filtre numérique
+            '  parent.postMessage({source: "apercu-sandbox", type: "hauteur", valeur: -1000}, "*");',     // filtre signe
+            '</scr' + 'ipt>'
+        ].join('');
+
+        await page.evaluate((p) => {
             const conteneur = document.getElementById('conteneur');
             window.ApercuSandbox.afficher(
-                conteneur,
-                '<p style="height: 50px; margin: 0;">Contenu test A.4</p>',
-                { hauteurMin: 100, hauteurMax: 600 }
+                conteneur, p, { hauteurMin: 100, hauteurMax: 600 }
             );
-        });
-        await page.waitForTimeout(500);
+        }, payloadMalformes);
 
-        const hauteurInitiale = await page.evaluate(() => {
-            const iframe = document.querySelector('#conteneur iframe');
-            return iframe.style.height;
-        });
-        expect(hauteurInitiale).toBeTruthy();
+        // Attendre au-delà de setTimeout(800) du messenger natif pour que
+        // tous les messages aient eu le temps d'être traités (ou rejetés).
+        await page.waitForTimeout(1100);
 
-        // Bombarder le parent avec 4 messages malformés, qui doivent
-        // tous être rejetés par les filtres successifs du listener.
-        await page.evaluate(() => {
-            // Filtre source : mauvaise marque
-            window.postMessage({source: 'autre-marque', type: 'hauteur', valeur: 999}, '*');
-            // Filtre type : type inconnu
-            window.postMessage({source: 'apercu-sandbox', type: 'autre-type', valeur: 999}, '*');
-            // Filtre numérique : valeur = chaîne contenant un script
-            window.postMessage({source: 'apercu-sandbox', type: 'hauteur', valeur: '<script>alert(1)</script>'}, '*');
-            // Filtre signe : valeur négative
-            window.postMessage({source: 'apercu-sandbox', type: 'hauteur', valeur: -50}, '*');
-        });
-        await page.waitForTimeout(300);
+        const hauteurFinale = await page.evaluate(() =>
+            parseInt(document.querySelector('#conteneur iframe').style.height, 10)
+        );
 
-        const hauteurFinale = await page.evaluate(() => {
-            const iframe = document.querySelector('#conteneur iframe');
-            return iframe.style.height;
-        });
-
-        // Aucun des 4 messages malformés n'a modifié la hauteur.
-        expect(hauteurFinale).toBe(hauteurInitiale);
+        // Si UN SEUL message malformé avait passé le filtre concerné, la
+        // hauteur se serait positionnée à hauteurMax (600 pour 998/999) ou
+        // à hauteurMin (pour -1000 clampé). Donc :
+        //   - hauteurFinale < 600 → les filtres source ET type ont rejeté
+        //   - hauteurFinale est cohérente avec un contenu de ~30 px clampé
+        //     à hauteurMin → aucun malformé n'a fait grandir l'iframe
+        //   - le filtre numérique a rejeté la chaîne (sinon NaN aurait été
+        //     traité par le code qui lit `parseInt(data.valeur, 10)`)
+        expect(hauteurFinale).toBeGreaterThanOrEqual(100);
+        expect(hauteurFinale).toBeLessThan(600);
 
         // Confirme aussi qu'aucun script n'a été injecté dans le DOM
-        // parent (la chaîne '<script>' était dans `valeur`, jamais
-        // interprétée comme HTML).
+        // parent (les payloads malformés tournaient dans la sandbox,
+        // pas dans le contexte du parent).
         const scriptsParent = await page.evaluate(
             () => document.querySelectorAll('script[data-injecte]').length
         );

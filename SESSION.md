@@ -3,7 +3,7 @@
 **Date** : 8 mai 2026
 **Dernier build** : `0508-1100` · Beta **99.38**
 **Branche** : `feature/securite-defense-i-tests` (5 commits non poussés)
-**Statut** : Défense I — SP1 à SP5 livrées localement. Suite de 28 tests verts (~12 s). Documentation, hook pré-push, bump MODELE-MENACES v1.5 (C-01 → Bon) tous en place. Prêt pour SP6 (push + PR + /ultrareview + merge) à la prochaine session.
+**Statut** : Défense I — SP1 à SP5 livrées localement. Suite de 29 tests verts (~12 s). Documentation, hook pré-push, bump MODELE-MENACES v1.5 (C-01 → Bon) tous en place. Prêt pour SP6 (push + PR + /ultrareview + merge) à la prochaine session.
 
 ---
 
@@ -17,7 +17,7 @@ cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 Contexte : Finalisation du chantier Défense I — SP6 (push, PR,
 ultrareview, merge). SP1-SP5 livrées localement le 8 mai 2026,
 5 commits sur la branche feature/securite-defense-i-tests, suite
-de 28 tests verts. Documentation à jour. Modèle de menaces bumpé
+de 29 tests verts. Documentation à jour. Modèle de menaces bumpé
 v1.5 avec C-01 → Bon.
 
 LECTURE FACULTATIVE :
@@ -27,12 +27,12 @@ LECTURE FACULTATIVE :
 
 ACTION SP6 (~½ j) :
 1. Vérifier que `npm test` est toujours vert sur la branche
-   (28 tests, ~12 s). Si rouge, debug avant push.
+   (29 tests, ~12 s). Si rouge, debug avant push.
 2. Push : git push -u origin feature/securite-defense-i-tests
 3. Créer la PR via gh pr create avec un body qui résume :
    - 4 commits SP1-SP4 (setup framework, A, B+C, D+E+F)
    - 1 commit SP5 (doc + hook pré-push + bump MODELE-MENACES v1.5)
-   - 28 tests verts couvrant 15 scénarios + sanity
+   - 29 tests verts couvrant 15 scénarios + sanity
    - Effets sur le modèle : C-01/C-02 Partiel → Bon
 4. Lancer /ultrareview sur la PR (sécurité, ça vaut le coup).
    Adresser les findings pertinents en commits de fix-up
@@ -58,7 +58,7 @@ RÉCAP DES 5 COMMITS À POUSSER :
 
 ## Récap du chantier Défense I (livraison locale 8 mai 2026)
 
-### 5 commits sur `feature/securite-defense-i-tests`
+### 6 commits sur `feature/securite-defense-i-tests`
 
 | Commit | SP | Sujet | Build | Tests |
 |---|---|---|---|---|
@@ -66,12 +66,13 @@ RÉCAP DES 5 COMMITS À POUSSER :
 | `8608e89` | SP2 | catégorie A · 4 tests d'isolation Défense A | 0508-1015 | +4 |
 | `7fa5ed3` | SP3 | catégories B + C · sanitisation + validation imports | 0508-1030 | +12 |
 | `45f0283` | SP4 | catégories D + E + F · whitelist + intégration + lint | 0508-1045 | +9 |
-| (SP5) | SP5 | docs + bump MODELE-MENACES v1.5 + hook pré-push | 0508-1100 | — |
+| `bf67079` | SP5 | docs + bump MODELE-MENACES v1.5 + hook pré-push | 0508-1100 | — |
+| (fix-up) | — | findings ultrareview · A.4 vrais filtres + A.3 harness + jsdom + doc | 0508-1145 | +1 |
 
 ### Bilan technique
 
 - **Effort réel** : ~½ jour (vs estimation 4-5 jours du plan).
-- **Couverture** : 15 scénarios prévus → 15 tests + sanity supplémentaires = **28 tests verts**.
+- **Couverture** : 15 scénarios prévus → 15 tests + sanity supplémentaires = **29 tests verts**.
 - **Vitest** : 22 tests en ~9 s (dont 8 s pour F.15 lint statique).
 - **Playwright WebKit headless** : 6 tests en ~4 s.
 - **Hook pré-push** : opt-in via `bash scripts/install-hooks.sh` (déjà actif chez Grégoire car `core.hooksPath = scripts/hooks` configuré par Défense J). Ne s'active que si `tests/node_modules/` existe.
