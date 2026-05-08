@@ -24,10 +24,12 @@
      * nom de la clé racine du JSON.
      */
     var WHITELISTS = {
-        // Codex (ZIP) — cf. js/codex.js, fonction _genererZip
+        // Codex (ZIP) — cf. js/codex.js, constantes NOM_DONNEES,
+        // NOM_MANIFESTE, NOM_MANIFESTE_ANCIEN, DOSSIER_TRAVAUX.
         codex: [
             /^donnees\.json$/,
-            /^manifeste\.json$/,
+            /^codex-manifeste\.json$/,
+            /^classeur-manifeste\.json$/,  // legacy, encore lu à la lecture
             /^travaux\/[A-Za-z0-9_\-]+\.[A-Za-z0-9]+$/,
             /^travaux\/$/  // dossier seul, parfois listé selon JSZip
         ],
