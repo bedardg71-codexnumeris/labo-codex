@@ -1,9 +1,9 @@
-# SESSION — État au 6 mai 2026 (chantier sécurité — Phase 0 + B-β + K-β + E)
+# SESSION — État au 8 mai 2026 (Défense A — sandbox iframe planifiée, prête à démarrer)
 
-**Date** : 6 mai 2026 (après-midi)
-**Dernier build** : `0506-1530` · Beta **99.36**
-**Branche** : `main`, **13 commits sécurité en avance sur origin** (à pousser)
-**Statut** : Phase 0 du modèle de menaces livrée intégralement en une journée + suites β. 1 vrai vecteur D-01 critique attrapé et corrigé en cours de route (`genererBadgeCC`).
+**Date** : 8 mai 2026
+**Dernier build** : `0506-1530` · Beta **99.36** (poussée sur origin/main)
+**Branche** : `main` (à jour avec origin)
+**Statut** : Plan Défense A (Phase 1 sécurité) validé et sauvegardé. Prêt à démarrer SP1 du chantier.
 
 ---
 
@@ -14,87 +14,86 @@
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
-Contexte : journée du 6 mai 2026 — chantier sécurité massif suite au
-modèle de menaces préparé par Cowork. Phase 0 livrée intégralement +
-B-β + K-β + Défense E (étapes 1+2). 13 commits sur main, beta 99.36,
-builds 0506-1300 → 0506-1530.
+Contexte : Démarrage du chantier Défense A — Sandbox iframe pour
+l'aperçu d'objets importés (Phase 1 sécurité, recommandation
+principale du rapport E-β du 6 mai). Plan complet validé par
+Grégoire le 8 mai 2026.
 
-État sécurité — défenses livrées (cf. docs/securite/MODELE-MENACES.md
-§8.2 Phase 0) :
+LECTURE OBLIGATOIRE AVANT DE CODER :
 
-  Phase 0 nominale (7 défenses) :
-    - Audit a priori baseline (0 trouvaille suspecte sur 11 clés)
-    - B-α  Sanitisation profonde + schémas cartouche/tampon
-    - J    Hook pré-commit innerHTML + clés sensibles
-    - D    Révocation FSAPI par défaut + opt-in (Réglages > Préférences > Sécurité)
-    - P-α  Sanitisation tampons + limites de surface
-    - H    Sceau SHA-256 sur les exports + vérification à l'import
-    - K    Whitelist de structure des exports (ZIP + JSON)
+1. plans de travail/PLAN-DEFENSE-A-SANDBOX-IFRAME.md
+   ← Plan complet, autonome, déjà validé (4 décisions UX/archi
+   prises). Contient l'API du composant, le srcdoc minimal, le
+   filtrage postMessage, les 5 sous-phases détaillées, les critères
+   de réussite. C'EST LE DOCUMENT DE RÉFÉRENCE PRINCIPAL.
 
-  Suites α livrées dans la même journée :
-    - B-β  Passage obligé par assainirObjet dans les 6 fonctions ajouter*
-    - K-β  Preview UI avant download des exports
-    - E-α  Audit innerHTML scripté + rapport baseline (scripts/audit-innerhtml.sh)
-    - E-β  Examen ciblé + fix d'un vrai vecteur D-01 dans cc-license.js
-            (genererBadgeCC interpolait 5 champs metadata sans échappement)
+2. docs/securite/MODELE-MENACES.md §7 D-01 (défense P1) + §8.2 Phase 1
 
-État actuel : main propre, 13 commits non poussés (le user pousse lui-même).
-Pas de chantier en attente, prêt pour décider du prochain.
+3. docs/securite/audits/AUDIT-INNERHTML-FINDINGS-2026-05-06.md
+   (recommandation E-β qui justifie ce chantier)
 
-LECTURE OBLIGATOIRE (5 min) avant de coder :
-1. SESSION.md (ce fichier) — récap des livrables sécurité
-2. CLAUDE.md — conventions, zones protégées, règles sécurité
-3. docs/securite/MODELE-MENACES.md v1.3 — modèle de menaces complet
-4. docs/architecture/ECOSYSTEME-DONNEES.md — 4 concepts
-5. BACKLOG.md — items ouverts
+4. CLAUDE.md — conventions, règles sécurité (echapperHtml, data-action,
+   classList.add('actif'), db.setSync, Safari file://)
 
-PROCHAINES ÉTAPES POSSIBLES (à arbitrer avec Grégoire) :
+5. SESSION.md — ce fichier
 
-  [SÉCURITÉ — PHASE 1] Défense A — Sandbox iframe
-    Recommandation principale du rapport E-β findings : neutralise
-    techniquement la mécanique I-01 sous-jacente, plus rentable que
-    migrer 103 cas innerHTML un par un. ~1 semaine.
-    Voir docs/securite/audits/AUDIT-INNERHTML-FINDINGS-2026-05-06.md.
+DÉCISIONS DÉJÀ VALIDÉES (cf. PLAN §3) :
+  1. Périmètre v1 = 6 modals d'aperçu d'import (grilles, échelles,
+     productions, cartouches, pratiques, tampons). Aperçus internes
+     (evaluation.js, wizard-pratique-v2.js) hors scope v1.
+  2. Mécanisme = iframe srcdoc (HTML inline, pas de blob:).
+  3. echapperHtmlCC dans genererBadgeCC du 6 mai conservé (défense
+     en profondeur).
+  4. Style iframe = variables CSS du DS injectées dans le srcdoc.
 
-  [SÉCURITÉ — PHASE 1] Défense I — Tests automatisés
-    Suite Vitest/Playwright pour vérifier qu'un payload XSS dans une
-    grille importée ne s'exécute pas. ~1 semaine + maintenance.
+ACTION IMMÉDIATE — DÉMARRER SP1 :
+  - Créer la branche : git checkout -b feature/securite-defense-a-sandbox
+  - Créer js/securite-apercu-sandbox.js (composant complet, ~200-300 l.)
+  - Créer prototype-apercu-sandbox.html à la racine (démo + test
+    payload XSS)
+  - Ajouter le tag <script> dans index.html (après init-inline)
+  - Test manuel : injecter <img src=x onerror=...> et vérifier
+    qu'aucun effet ne touche le parent
+  - Validation visuelle Safari Mac (Cmd+Q + rouvrir)
 
-  [SÉCURITÉ — PHASE 1] Défense C — Wrapper destructif
-    Couche de garde sur localStorage.clear, indexedDB.deleteDatabase,
-    removeEntry FSAPI. ~1-2 semaines.
-
-  [BACKLOG] #257 v2.B Mode consultation namespace temporaire (~5-6 h)
-    Ouvre une archive en lecture seule dans un namespace `__archive_*`.
-
-  [BACKLOG] #256-bis Aide aux 8 autres modales (~1 j)
-    Pattern de #256 (livré 28 avril) à reproduire.
-
-  [BACKLOG] #262 Clarifier le nommage des fichiers exportés
-    Ajouté en cours de session sécurité — convention unifiée pour
-    codex/archive/codex-data/configuration. Suite du chantier #259.
-
-  [À surveiller] Retours terrain sur les défenses livrées :
-    - Toggle FSAPI dans Réglages > Préférences > Sécurité (UX)
-    - Preview avant download (frottement utilisateur ?)
-    - Migration silencieuse Défense D (handles supprimés au premier boot)
-    - Sceaux SHA-256 visibles dans la notification de succès d'import
+SP2 (intégration 6 modals) après validation SP1.
+SP3-SP5 (tests sécurité, doc, PR) après SP2.
 
 WORKFLOW DE CHANTIER (rappel) :
-1. Discuter approche AVANT de coder (sauf si trivial). Plan en
-   sous-phases si > 1h de travail.
-2. Branche feature pour les chantiers > 30 min.
-3. Implémenter par sous-phases commitables, validation visuelle entre
-   chaque (Cmd+Q sur Safari Mac, file:// ignore les cache busters).
-4. Demander le numéro de beta à Grégoire avant le commit final.
-5. Bumper version.json + js/init-inline.js + cache-busters dans index.html.
-6. Push + PR si chantier > 1 commit.
-7. Le hook pré-commit (Défense J) bloque les nouveaux innerHTML non
-   échappés et avertit sur les écritures vers les clés sensibles.
+1. SP1 = composant autonome livrable seul. Demander beta + commit
+   après validation visuelle.
+2. SP2 = un fichier à la fois, validation visuelle entre chaque,
+   commit par fichier ou par lot de 2-3.
+3. SP3 = tests sécurité documentés dans docs/securite/audits/
+4. SP4 = MODELE-MENACES v1.4 (D-01/X-01/I-01 → Bon ou Complet)
+5. SP5 = PR + /ultrareview (vaut le coup pour un chantier sécurité)
+       + merge --merge --delete-branch.
 
-PROCHAINE TÂCHE OPÉRATIONNELLE :
-Pousser les 13 commits sur origin :
-  git push origin main
+À chaque commit final :
+  - Bumper version.json + js/init-inline.js + cache-buster init-inline
+  - Ajouter le tag pour js/securite-apercu-sandbox.js dans index.html
+    (la première fois seulement)
+  - Le hook pré-commit (Défense J) bloque les innerHTML non échappés
+    et avertit sur les écritures vers les clés sensibles. ATTENTION :
+    le composant sandbox utilise innerHTML/srcdoc avec contenu
+    contrôlé — préparer une justification pour le hook si nécessaire.
+
+CONTRAINTES TECHNIQUES (rappel CLAUDE.md) :
+- echapperHtml() obligatoire sur innerHTML avec données utilisateur
+  (mais l'iframe sandbox neutralise ce besoin pour son contenu)
+- Zéro handler inline → data-action / data-on-change / data-on-input
+- console.warn / console.error uniquement (pas console.log en prod)
+- Modales : classList.add('actif') (PAS 'visible')
+- db.setSync pour petites métadonnées (PAS db.set async)
+- Variables CSS du DS, tester modes clair ET sombre
+- Safari Mac/iPad cibles ; Cmd+Q + rouvrir entre les sous-phases
+
+ÉTAT BACKLOG (autres items en attente, ne pas confondre avec ce chantier) :
+  - #257 v2.B Mode consultation namespace temporaire (~5-6 h)
+  - #256-bis Aide aux 8 autres modales (~1 j)
+  - #262 Clarifier le nommage des exports
+  - Défense I (tests automatisés) et C (wrapper destructif) Phase 1
+  - Test iPad refonte nav + nouveaux modules codex data
 ```
 
 ---
@@ -167,7 +166,7 @@ L'audit `innerHTML` (E-β) a permis d'attraper un vrai vecteur D-01 critique cac
 
 ## Notes pour la prochaine session
 
-- **Validation à l'usage** : plusieurs modifications attendent une validation terrain (test fonctionnel d'import round-trip pour B-α, comportement de la migration FSAPI au boot, preview UI utilisable, etc.). Aucune ne devrait casser le flux normal — fallbacks safes partout.
-- **iPad** : non testé cette session. Le toggle FSAPI dans Réglages > Préférences > Sécurité doit être visible et fonctionnel. La preview UI doit s'afficher correctement.
-- **MODELE-MENACES.md v1.3** : reflète l'état post-session. Les statuts défense par scénario sont à jour (D-03 à Bon, X-02 à Bon, autres à Partiel).
-- **Pas de chantier en attente actif**. Le prochain choix dépend de tes priorités — voir « PROCHAINES ÉTAPES POSSIBLES » ci-dessus.
+- **Chantier suivant validé** : Défense A — Sandbox iframe (Phase 1 sécurité). Plan complet dans `plans de travail/PLAN-DEFENSE-A-SANDBOX-IFRAME.md`. 4 décisions UX/archi déjà prises. Action immédiate : SP1 (composant `js/securite-apercu-sandbox.js` + démo + tag script).
+- **Validation à l'usage** (chantier sécurité du 6 mai) : plusieurs modifications attendent une validation terrain (test fonctionnel d'import round-trip pour B-α, comportement de la migration FSAPI au boot, preview UI utilisable, etc.). Aucune ne devrait casser le flux normal — fallbacks safes partout.
+- **iPad** : non testé. Le toggle FSAPI dans Réglages > Préférences > Sécurité doit être visible et fonctionnel. La preview UI doit s'afficher correctement.
+- **MODELE-MENACES.md v1.3** : reflète l'état post-session du 6 mai. Les statuts défense par scénario sont à jour (D-03 à Bon, X-02 à Bon, autres à Partiel). Sera bumpé à v1.4 après livraison Défense A (D-01/X-01/I-01 → Bon ou Complet).
