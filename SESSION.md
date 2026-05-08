@@ -1,15 +1,115 @@
-# SESSION — État au 8 mai 2026 (Défense A mergée, Défense I prête à démarrer)
+# SESSION — État au 8 mai 2026 (Défense I SP1-SP5 livrées, prête à PR)
 
 **Date** : 8 mai 2026
-**Dernier build** : `0508-0910` · Beta **99.38** (mergé sur main, commit de merge `ca43692`)
-**Branche** : `main` (à jour avec origin)
-**Statut** : Défense A 100 % livrée (PR #14 mergée, branche supprimée). Plan Défense I rédigé et sauvegardé. Prêt à démarrer SP1 du chantier Défense I à la prochaine session.
+**Dernier build** : `0508-1100` · Beta **99.38**
+**Branche** : `feature/securite-defense-i-tests` (5 commits non poussés)
+**Statut** : Défense I — SP1 à SP5 livrées localement. Suite de 28 tests verts (~12 s). Documentation, hook pré-push, bump MODELE-MENACES v1.5 (C-01 → Bon) tous en place. Prêt pour SP6 (push + PR + /ultrareview + merge) à la prochaine session.
 
 ---
 
-## 🚀 Consigne de démarrage pour la prochaine session
+## 🚀 Consigne de démarrage pour la prochaine session (SP6)
 
 À copier-coller au début de la prochaine session :
+
+```
+cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
+
+Contexte : Finalisation du chantier Défense I — SP6 (push, PR,
+ultrareview, merge). SP1-SP5 livrées localement le 8 mai 2026,
+5 commits sur la branche feature/securite-defense-i-tests, suite
+de 28 tests verts. Documentation à jour. Modèle de menaces bumpé
+v1.5 avec C-01 → Bon.
+
+LECTURE FACULTATIVE :
+1. SESSION.md — bilan complet ci-dessous
+2. docs/securite/TESTS-AUTOMATISES.md — référence utilisateur
+3. plans de travail/PLAN-DEFENSE-I-TESTS-AUTOMATISES.md — pour le contexte historique
+
+ACTION SP6 (~½ j) :
+1. Vérifier que `npm test` est toujours vert sur la branche
+   (28 tests, ~12 s). Si rouge, debug avant push.
+2. Push : git push -u origin feature/securite-defense-i-tests
+3. Créer la PR via gh pr create avec un body qui résume :
+   - 4 commits SP1-SP4 (setup framework, A, B+C, D+E+F)
+   - 1 commit SP5 (doc + hook pré-push + bump MODELE-MENACES v1.5)
+   - 28 tests verts couvrant 15 scénarios + sanity
+   - Effets sur le modèle : C-01/C-02 Partiel → Bon
+4. Lancer /ultrareview sur la PR (sécurité, ça vaut le coup).
+   Adresser les findings pertinents en commits de fix-up
+   (pas d'amend — règle CLAUDE.md).
+5. Merge --merge --delete-branch.
+6. Mettre à jour SESSION.md post-merge.
+
+CONTRAINTES :
+- /ultrareview n'est pas lançable depuis Claude Code — c'est Grégoire
+  qui le déclenche depuis l'UI claude.ai. Claude attend, lit le rapport,
+  propose des fix-ups.
+- Pas de --no-verify sur le push (le hook pré-push s'exécute, doit passer).
+
+RÉCAP DES 5 COMMITS À POUSSER :
+- 65d0afe SP1 setup framework Vitest + Playwright (b0508-0940)
+- 8608e89 SP2 catégorie A — 4 tests d'isolation Défense A (b0508-1015)
+- 7fa5ed3 SP3 catégories B + C — sanitisation + validation imports (b0508-1030)
+- 45f0283 SP4 catégories D + E + F — whitelist + intégration + lint (b0508-1045)
+- (SP5) docs(securite) — TESTS-AUTOMATISES + bump v1.5 + hook pré-push + CLAUDE.md
+```
+
+---
+
+## Récap du chantier Défense I (livraison locale 8 mai 2026)
+
+### 5 commits sur `feature/securite-defense-i-tests`
+
+| Commit | SP | Sujet | Build | Tests |
+|---|---|---|---|---|
+| `65d0afe` | SP1 | setup framework Vitest + Playwright | 0508-0940 | +3 (canaris) |
+| `8608e89` | SP2 | catégorie A · 4 tests d'isolation Défense A | 0508-1015 | +4 |
+| `7fa5ed3` | SP3 | catégories B + C · sanitisation + validation imports | 0508-1030 | +12 |
+| `45f0283` | SP4 | catégories D + E + F · whitelist + intégration + lint | 0508-1045 | +9 |
+| (SP5) | SP5 | docs + bump MODELE-MENACES v1.5 + hook pré-push | 0508-1100 | — |
+
+### Bilan technique
+
+- **Effort réel** : ~½ jour (vs estimation 4-5 jours du plan).
+- **Couverture** : 15 scénarios prévus → 15 tests + sanity supplémentaires = **28 tests verts**.
+- **Vitest** : 22 tests en ~9 s (dont 8 s pour F.15 lint statique).
+- **Playwright WebKit headless** : 6 tests en ~4 s.
+- **Hook pré-push** : opt-in via `bash scripts/install-hooks.sh` (déjà actif chez Grégoire car `core.hooksPath = scripts/hooks` configuré par Défense J). Ne s'active que si `tests/node_modules/` existe.
+
+### Modifications hors-tests sur la branche (3 fichiers)
+
+- `js/travaux-import.js` : +4 lignes pour exposer `window.validerMagicBytes` (utile au test C.10, pattern projet).
+- `js/securite-apercu-sandbox.js` : +5 lignes pour ajouter le probe `__nbInstances()` à l'API publique (utile au test E.14, préfixe `__` = zone tests/interne).
+- `index.html` + fallback dans `js/init-inline.js` : bumps de build à chaque sous-phase.
+
+Aucune modification de logique runtime de l'app. Les tests valident l'existant.
+
+### Effet sur le modèle de menaces
+
+| Scénario | Avant Défense I | Après Défense I |
+|---|---|---|
+| **C-01** Régression silencieuse de sécurité dans un commit | Partiel | **Bon** |
+| **C-02** IA générant du code qui contourne `assainirObjet` | Partiel | **Bon** |
+
+`MODELE-MENACES.md` v1.4 → v1.5 (8 mai 2026, Défense I livrée).
+
+### Décisions structurantes du chantier
+
+1. **`tests/package.json` séparé** de la racine — l'app de production reste vanilla JS sans dépendance npm runtime.
+2. **Vitest pour fonctions pures + Playwright WebKit pour browser-real** — chacun fait ce qu'il fait bien, ~12 s consolidés.
+3. **Helper `chargerScript`** plutôt que `module.exports` intrusifs dans la prod — IIFE projet chargée dans un sandbox Node via `Function('window', ...)` avec stubs minimaux.
+4. **Baseline lint figée à 120 cas suspects** dans F.15 (vs 125 au 6 mai après E-α/E-β). Procédure de bumping vers le bas documentée dans le test.
+5. **Hash CSP dupliqué** entre `index.html:10` et `tests/integration/harness/sandbox-harness-csp.html:13` — A.3 attrape la divergence côté `index.html` ; le harness se met à jour visuellement (faisable dans la même session si MESSENGER_SCRIPT change).
+
+### Notes pour SP6
+
+- Le hook pré-push s'exécutera lors du `git push`. Suite Vitest ~9 s. Si rouge, push bloqué (volontaire).
+- `/ultrareview` est lançable seulement par Grégoire depuis claude.ai — pas par Claude Code. Coût engagé.
+- Branche prête à pousser. Aucune fixture binaire volumineuse (tous les ZIP sont fabriqués à la volée par jszip dans les tests).
+
+---
+
+## Anciennes consignes archivées (à ignorer si on est en SP6)
 
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
