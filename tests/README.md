@@ -41,11 +41,15 @@ npm run test:debug   # Playwright mode debug interactif
 tests/
 ├── unit/           ← tests Vitest (fonctions pures)
 ├── integration/    ← tests Playwright (browser-real)
-├── fixtures/       ← payloads de test (XSS, ZIP slip, ZIP bomb, etc.)
+│   └── harness/    ← pages HTML autonomes pour les tests d'isolation
 ├── package.json
 ├── vitest.config.js
 └── playwright.config.js
 ```
+
+Les payloads de test (grilles XSS, ZIP slip, ZIP bomb, polyglottes) sont
+fabriqués à la volée dans les fichiers `*.test.js` / `*.spec.js`
+(via `jszip` ou `Blob`), pas stockés en fixtures statiques.
 
 ## Convention « ajouter un test sécurité »
 

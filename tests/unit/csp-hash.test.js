@@ -14,26 +14,47 @@ const racineProjet = path.resolve(__dirname, '..', '..');
 // sandbox fonctionne toujours mais l'UX se dégrade sans erreur visible
 // côté code. Ce test prévient activement la régression.
 describe('Défense A · A.3 · hash CSP synchronisé avec MESSENGER_SCRIPT', () => {
-    it('le hash sha256 du messenger match la directive script-src de index.html', () => {
+    // Calcul du hash de référence — partagé entre les deux assertions.
+    function calculerHashAttendu() {
         const composantSrc = readFileSync(
             path.join(racineProjet, 'js/securite-apercu-sandbox.js'),
             'utf8'
         );
         const m = composantSrc.match(/var MESSENGER_SCRIPT = '([^']+)';/);
-        expect(m, 'MESSENGER_SCRIPT introuvable dans securite-apercu-sandbox.js').not.toBeNull();
-        const messenger = m[1];
+        if (!m) throw new Error('MESSENGER_SCRIPT introuvable dans securite-apercu-sandbox.js');
+        const hashCalcule = createHash('sha256').update(m[1]).digest('base64');
+        return `'sha256-${hashCalcule}'`;
+    }
 
-        const hashCalcule = createHash('sha256').update(messenger).digest('base64');
-        const directiveAttendue = `'sha256-${hashCalcule}'`;
-
+    it('le hash sha256 du messenger match la directive script-src de index.html', () => {
+        const directiveAttendue = calculerHashAttendu();
         const indexSrc = readFileSync(path.join(racineProjet, 'index.html'), 'utf8');
         const cspMatch = indexSrc.match(/Content-Security-Policy"\s+content="([^"]+)"/);
         expect(cspMatch, 'Meta CSP introuvable dans index.html').not.toBeNull();
-        const csp = cspMatch[1];
 
         expect(
-            csp,
-            `Hash CSP désynchronisé. Attendu : ${directiveAttendue}. Procédure : recalculer le hash et mettre à jour script-src dans index.html ligne 10.`
+            cspMatch[1],
+            `Hash CSP désynchronisé dans index.html. Attendu : ${directiveAttendue}. Procédure : recalculer le hash et mettre à jour script-src dans index.html ligne 10.`
+        ).toContain(directiveAttendue);
+    });
+
+    it('le hash sha256 du messenger match aussi le harness CSP des tests', () => {
+        // Le harness duplique la CSP de prod ; sans cette assertion, une
+        // évolution de MESSENGER_SCRIPT ferait passer A.3 (côté index.html
+        // bumpé) tout en laissant le harness pointer vers un hash périmé,
+        // et le test A.2 (CSP rejette scripts inline) deviendrait silen-
+        // cieusement non représentatif.
+        const directiveAttendue = calculerHashAttendu();
+        const harnessSrc = readFileSync(
+            path.join(racineProjet, 'tests/integration/harness/sandbox-harness-csp.html'),
+            'utf8'
+        );
+        const cspMatch = harnessSrc.match(/Content-Security-Policy"\s+content="([^"]+)"/);
+        expect(cspMatch, 'Meta CSP introuvable dans sandbox-harness-csp.html').not.toBeNull();
+
+        expect(
+            cspMatch[1],
+            `Hash CSP désynchronisé dans le harness. Attendu : ${directiveAttendue}. Procédure : mettre à jour script-src dans tests/integration/harness/sandbox-harness-csp.html ligne 13.`
         ).toContain(directiveAttendue);
     });
 });
