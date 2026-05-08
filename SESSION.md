@@ -1,9 +1,9 @@
-# SESSION — État au 8 mai 2026 (Défense A livrée intégralement, PR à ouvrir)
+# SESSION — État au 8 mai 2026 (Défense A mergée, Défense I prête à démarrer)
 
 **Date** : 8 mai 2026
-**Dernier build** : `0508-0830` · Beta **99.38** (branche `feature/securite-defense-a-sandbox` poussée sur origin)
-**Branche** : `feature/securite-defense-a-sandbox` (6 commits, prête pour PR)
-**Statut** : SP1 → SP4 livrées. SP5 (PR + `/ultrareview` + merge) reste à exécuter.
+**Dernier build** : `0508-0910` · Beta **99.38** (mergé sur main, commit de merge `ca43692`)
+**Branche** : `main` (à jour avec origin)
+**Statut** : Défense A 100 % livrée (PR #14 mergée, branche supprimée). Plan Défense I rédigé et sauvegardé. Prêt à démarrer SP1 du chantier Défense I à la prochaine session.
 
 ---
 
@@ -14,123 +14,131 @@
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
-Contexte : Défense A — sandbox iframe pour l'aperçu d'objets importés —
-livrée intégralement le 8 mai 2026 (SP1 à SP4). Reste **SP5** : ouvrir
-la PR sur la branche feature/securite-defense-a-sandbox, lancer
-/ultrareview pour revue cloud (chantier sécurité, ça vaut le coup),
-appliquer les corrections éventuelles, puis merger avec --merge --delete-branch.
+Contexte : Démarrage du chantier Défense I — suite de tests sécurité
+automatisés (Phase 1 sécurité, suite logique de Défense A livrée le
+8 mai). Plan complet rédigé le 8 mai par Grégoire + Claude, à valider
+avant SP1.
 
-LECTURE OBLIGATOIRE AVANT D'AGIR :
+LECTURE OBLIGATOIRE AVANT DE CODER :
 
-1. plans de travail/PLAN-DEFENSE-A-SANDBOX-IFRAME.md
-   ← plan complet déjà validé. SP5 décrit en §5.
+1. plans de travail/PLAN-DEFENSE-I-TESTS-AUTOMATISES.md
+   ← Plan complet, autonome. Contient les 12-15 tests prioritaires,
+   le choix de framework à arbitrer (4 décisions §3), l'architecture
+   répertoires (§4), les sous-phases (§5), les critères de réussite,
+   les risques. C'EST LE DOCUMENT DE RÉFÉRENCE PRINCIPAL.
 
-2. docs/securite/audits/TESTS-DEFENSE-A-2026-05-08.md
-   ← rapport sécurité complet (9 vecteurs testés, 6 modules
-   couverts, verdicts D-01/X-01/I-01 → Bon).
+2. docs/securite/MODELE-MENACES.md v1.4
+   - §6 tableau récap (statut C-01 actuellement Partiel, cible : Bon)
+   - §7 C-01 « Régression silencieuse de sécurité dans un commit »
+   - §8.2 Phase 1 défense I (description originale)
+   - §8.4 Suite 5 (positionnement chantier)
 
-3. docs/securite/MODELE-MENACES.md v1.4 (mis à jour 8 mai)
-   ← §6 tableau récap + §7 D-01 P1 + §8.2 Phase 1 reflètent la livraison.
+3. docs/securite/audits/TESTS-DEFENSE-A-2026-05-08.md
+   ← Point de comparaison : ce que Défense A a démontré, ce que les
+   tests automatisés doivent maintenant **prévenir comme régression**.
 
-4. CLAUDE.md — règles de sécurité, conventions, hook pré-commit.
+4. CLAUDE.md — conventions, hook pré-commit Défense J (à compléter par
+   un hook pré-push optionnel), règles de sécurité.
 
-ÉTAT BRANCHE :
-  - 6 commits sur feature/securite-defense-a-sandbox poussés sur origin :
-    * 16befc4  SP1 composant + prototype
-    * f97397c  SP2 grilles + résolution CSP / theme / routage
-    * 004a754  fix bibliotheque-ui creerModal idempotente
-    * 4db694a  SP2 lot 1 echelles + productions
-    * 8f591d7  SP2 lot 2 cartouches + pratiques + tampons + fixes UI
-    * (commit SP4 doc à venir, build 0508-0830)
-  - Beta 99.38, dernier build 0508-0830.
-  - Validation à l'usage 6/6 modules passée par Grégoire.
+5. SESSION.md — ce fichier.
 
-ACTION IMMÉDIATE — SP5 :
-  1. git push (si commit SP4 doc local pas encore poussé)
-  2. gh pr create --title "feat(securite): Défense A — sandbox iframe pour
-     l'aperçu d'objets importés" avec body qui pointe vers le rapport
-     TESTS-DEFENSE-A-2026-05-08.md
-  3. /ultrareview <PR#>  ← cloud, facturé, vaut le coup pour sécurité
-  4. Review manuelle ciblée en parallèle (composant + CSP + un
-     site d'intégration au hasard)
-  5. Corrections selon findings ultrareview
-  6. Merge --merge --delete-branch
-  7. Mettre à jour SESSION.md avec nouvelle consigne (chantier suivant
-     à choisir : Défense I tests automatisés, Défense C wrapper destructif,
-     ou un retour testeur du backlog)
+DÉCISIONS À VALIDER AVANT SP1 (cf. PLAN §3) :
+  1. Choix du framework — recommandation : Playwright + Vitest
+     (browser-real pour sandbox/CSP + unitaire pour fonctions pures)
+  2. CI ou local-only — recommandation : local-only en v1
+  3. Bloquant ou avertissement — recommandation : bloquant pour les
+     chemins sécurité (`js/securite-*`, `import-export.js`, etc.),
+     avertissement ailleurs
+  4. Périmètre v1 — recommandation : 12-15 tests d'un coup (cf. §2)
 
-CHOIX DU CHANTIER SUIVANT (après merge) :
-  - Défense I (tests sécurité automatisés Phase 1) — Vitest/Playwright,
-    test headless qui injecte XSS et confirme canari intact. ~1 semaine.
-  - Défense C (wrapper destructif Phase 1) — couche sur localStorage.clear,
-    indexedDB.deleteDatabase, FSAPI.removeEntry. ~1-2 semaines.
-  - #263 alignement DS modales sécurité (~2-3 h, quick win).
-  - #257 v2.B Mode consultation namespace temporaire (~5-6 h).
-  - Test iPad refonte nav + nouveaux modules codex data.
+ACTION IMMÉDIATE — DÉMARRER SP1 (~½ j) :
+  - Créer la branche : git checkout -b feature/securite-defense-i-tests
+  - npm init dans `tests/` (pas à la racine — séparation app/tests)
+  - Installer Vitest + @playwright/test
+  - playwright install --with-deps webkit
+  - Créer `tests/README.md` avec commandes
+  - Premier test trivial Vitest + premier test trivial Playwright
+    pour valider le setup
+  - Bumper version + commit : `feat(tests): setup framework`
 
-  Cf. backlog complet dans BACKLOG.md.
+SP2 (tests A — sandbox isolation + hash CSP) après validation SP1.
+SP3-SP6 (sanitisation, validation imports, whitelist, intégration,
+lint, doc, PR) après SP2.
+
+WORKFLOW DE CHANTIER (rappel, identique à Défense A) :
+1. SP1 = setup framework livrable seul. Demander beta + commit
+   après validation visuelle (un test passe).
+2. SP2 = par catégorie de test, validation visuelle entre chaque,
+   commit par catégorie.
+3. SP5 = doc + bump MODELE-MENACES v1.5 (C-01 → Bon)
+4. SP6 = PR + /ultrareview + merge --merge --delete-branch
+
+CONTRAINTES TECHNIQUES :
+- `tests/package.json` séparé de la racine — l'app de production reste
+  vanilla JS sans dépendance npm runtime
+- Playwright cible WebKit (Safari) en headless — c'est notre cible prod
+- Les fonctions pures (echapperHtml, assainirObjet, validerZipSecurite,
+  etc.) doivent être exposées via `module.exports` conditionnel pour
+  Vitest. Pattern non intrusif : `if (typeof module !== 'undefined')`
+- Tests indépendants du chantier en cours — ne pas casser un test
+  pour livrer une feature, fixer le test ou accepter le déraillement
+
+ÉTAT BACKLOG (autres items en attente, ne pas confondre avec ce chantier) :
+  - Défense C (wrapper destructif Phase 1) — ~1-2 sem
+  - #263 alignement DS modales sécurité — ~2-3 h, quick win
+  - #257 v2.B Mode consultation namespace temporaire — ~5-6 h
+  - Test iPad — refonte nav + nouveaux modules codex data
+  - Retours testeurs en attente (`Retours des testeurs/SUIVI-BUGS.md`)
 ```
 
 ---
 
-## Récap détaillé de la session du 8 mai 2026
+## Récap du chantier Défense A (livré 8 mai 2026)
 
-### Matin (avant Défense A)
-- Validation à l'usage des défenses du 6 mai (étapes 1-3) : 100 % passée.
-- 2 fixes terrain : whitelist `codex-manifeste.json` (`ba2e897`), overlay K-β (`ca53aba`).
-- Backlog #263 ajouté + étendu (modales sécurité à aligner DS).
-- Build de départ : `0508-0615` beta 99.36 sur main.
+### 7 commits + 1 commit de merge sur main
 
-### Chantier Défense A (8 mai matin → midi)
+| Commit | Sujet | Build |
+|---|---|---|
+| `16befc4` | SP1 composant + prototype | 0508-0640 |
+| `f97397c` | SP2 grilles + résolution CSP / theme / routage | 0508-0730 |
+| `004a754` | creerModal idempotente — fix bug 2-click X | 0508-0745 |
+| `4db694a` | SP2 lot 1 echelles + productions | 0508-0755 |
+| `8f591d7` | SP2 lot 2 cartouches + pratiques + tampons + fixes UI | 0508-0825 |
+| `35a394f` | SP3+SP4 doc | 0508-0830 |
+| `a23c204` | fix-up findings ultrareview | 0508-0910 |
+| `ca43692` | Merge pull request #14 | — |
 
-#### SP1 — Composant + prototype (commit `16befc4`, b0508-0640)
-- `js/securite-apercu-sandbox.js` (≈300 l.) : API `ApercuSandbox.afficher / fermer`
-- `prototype-apercu-sandbox.html` : démo + 9 vecteurs d'évasion testés
-- Tag `<script>` ajouté dans `index.html` après `init-inline.js`
-- Beta 99.38
+### Bilan technique
 
-#### SP2 — Intégration dans les 6 modales (commits `f97397c`, `4db694a`, `8f591d7`)
-- **grilles.js (cobaye)** + résolution de 3 problèmes critiques découverts à la validation :
-  1. Bug pré-existant `fermerModalImportGrilles().parentElement.remove()` qui effaçait `<body>` (cause : `querySelector('.modal-js-overlay')` ambigu, body est le parent direct des bibliothèques) → fix par classe dédiée `modal-import-grilles` + `.remove()` direct.
-  2. CSP du parent inhérité dans srcdoc en Safari (intersection des CSPs, plus restrictive gagne) → mon meta CSP interne neutralisé → messenger bloqué → iframe à 120px (truncation visible). Fix : hash SHA-256 figé dans `script-src` du parent + `file:` ajouté à `img-src` + retrait du meta CSP interne.
-  3. `getComputedStyle(document.documentElement)` ne lit pas les overrides de `.mode-clair` (la classe est sur `<body>`) → mode clair non propagé. Fix : lecture sur `document.body`.
-- **commit `004a754`** : `BibliothequeUI.creerModal` rendue idempotente (pré-existant ; bibliothèque s'empilait après import → 2-click X). Fix une ligne, couvre les 6 bibliothèques qui utilisent creerModal.
-- **lot 1 (echelles + productions)** : pattern strictement identique à grilles.
-- **lot 2 (cartouches + pratiques + tampons)** : trois variantes mineures :
-  - cartouches : modale d'import alignée sur les classes DS (était en styles inline, largeur incohérente)
-  - pratiques : `afficherBibliothequePratiques` rendue idempotente (DIY hors creerModal)
-  - tampons : restructuration pour séparer le badge CC (sandboxé) des stats numériques (`textContent`, pas innerHTML)
-- **fix UI** : `.notification-succes` z-index 9999 → 11000 (était cachée derrière la bibliothèque rafraîchie)
+- **Effort réel** : ~10 h (SP1 ~4 h + SP2 ~6 h + SP3-SP4 ~1 h + SP5 fix-up ~30 min) vs estimation 4-5 jours du plan.
+- **Qualité** : 9 vecteurs d'évasion testés (6 par origine opaque, 3 architecturalement par CSP), 6 modules validés à l'usage, 4 findings ultrareview tous traités, aucun trou sécurité identifié.
+- **Effet sur le modèle** : D-01, X-01, I-01 → Bon (Partiel auparavant). Documenté dans `MODELE-MENACES.md` v1.4 historique.
 
-#### SP3 — Tests sécurité documentés (`docs/securite/audits/TESTS-DEFENSE-A-2026-05-08.md`)
-- Méthodologie : option (a) — vérification architecturale + tests d'isolation déjà exécutés via le prototype SP1.
-- 9 vecteurs d'évasion : 9/9 bloqués.
-- Validation à l'usage 6/6 modules par Grégoire.
-- Verdicts : D-01, X-01, I-01 → **Bon** (Partiel auparavant).
+### Bugs latéraux corrigés en cours de route (préexistants à Défense A)
 
-#### SP4 — Doc (ce commit, build 0508-0830)
-- `docs/securite/MODELE-MENACES.md` v1.3 → v1.4 (§6 tableau, §7 D-01 P1 marqué livré, §8.2 Phase 1 défense A marquée livrée, §8.4 mise à jour, historique étendu).
-- `SESSION.md` (ce fichier) : récap chantier + nouvelle consigne de démarrage pour SP5.
-
-#### SP5 — PR + ultrareview + merge (à exécuter prochaine session)
-Voir consigne de démarrage ci-dessus.
-
----
-
-## Bilan technique du chantier
-
-**Effort réel** : ~4 h (SP1) + ~3 h (SP2 lot grilles cobaye + diagnostic CSP/theme/routage) + ~1 h (lot 1) + ~1.5 h (lot 2) + ~30 min (rapport SP3) + ~30 min (doc SP4) ≈ **10 h** (vs estimation 4-5 jours dans le plan). L'écart est justifié par : (1) la sandbox neutralise la mécanique au lieu de la migrer, donc pas de migration `innerHTML` unitaire — confirmation du pari E-β du 6 mai. (2) Le pattern d'intégration s'est révélé strictement identique pour les 6 modules, donc le travail s'est concentré sur la résolution des 3 problèmes critiques découverts à la validation (CSP héritée, theme propagation, parentElement.remove). (3) Les bugs pré-existants (creerModal non idempotente, querySelector ambigu) ont été corrigés au passage parce qu'ils masquaient la validation de Défense A.
-
-**Qualité** : 9 vecteurs d'évasion testés et bloqués, 6 modules validés à l'usage, aucune régression observée, hook pré-commit Défense J passé sans warning sur tous les commits.
-
-**Dette résiduelle** : aperçus internes (`evaluation.js`, `wizard-pratique-v2.js`) hors scope v1 — risque secondaire (matériel sanitisé à l'import). À traiter en v2 si jugé prioritaire.
+1. `fermerModalImport*().parentElement.remove()` qui effaçait `<body>` quand la bibliothèque était ouverte (5 modules fixés, classes dédiées `modal-import-{nom}`).
+2. `BibliothequeUI.creerModal` rendue idempotente (anti 2-click X). Couvre les 6 bibliothèques.
+3. `afficherBibliothequePratiques` rendue idempotente (DIY hors creerModal).
+4. `.notification-succes` z-index 9999 → 11000.
+5. Format de la modale d'import cartouches aligné sur les classes DS.
+6. `fermerModalImportProductions` aligné avec les 5 autres (delete window._...).
 
 ---
 
 ## Notes pour la prochaine session
 
-- **Avant de fusionner** : passer `/ultrareview` sur la PR. C'est un chantier sécurité, ça vaut largement le coût.
-- **Test iPad** : la branche n'a pas été testée sur iPad. Le composant utilise des APIs standard (`postMessage`, `ResizeObserver`, `getComputedStyle`) supportées partout, mais Safari iPad peut avoir des surprises (notamment sur les `iframe srcdoc` en `file://`). À valider avant ou après merge selon préférence.
-- **Hook pré-commit** : si `MESSENGER_SCRIPT` est jamais modifié, ne pas oublier de recalculer le hash SHA-256 et de mettre à jour la CSP de `index.html` (ligne 6). Procédure documentée dans le commentaire au-dessus de la constante dans `js/securite-apercu-sandbox.js`.
-- **Backlog #263** : alignement DS des modales sécurité (`modalMetadonneesEnrichies`, `demanderMetadonneesConfigComplete`, K-β preview). 2-3 h. Bon quick win après ce chantier.
-- **MODELE-MENACES.md v1.4** : reflète l'état post-livraison Défense A. Phase 1 reste : Défense I (tests automatisés), Défense C (wrapper destructif).
+- **Le test A.3 (hash CSP synchronisé)** est le plus critique et le plus simple : ~10 lignes, ultra rapide, prévient une catégorie entière de régression silencieuse. À prioriser dans SP2.
+- **Hook pré-push** (optionnel SP5) : on l'a évoqué mais pas tranché. La proposition est d'exécuter `npm run test:unit` (rapide, < 5 s) avant chaque push. Si ça ralentit l'expérience, le rendre opt-in via `scripts/install-hooks.sh`.
+- **Test iPad** : pas couvert par Défense I. À faire séparément, en validation manuelle ou via Playwright iOS Simulator (lourdeur potentielle).
+- **MESSENGER_SCRIPT figé** : si jamais on doit le modifier (par ex. pour ajouter un canal de communication), procédure documentée dans le commentaire au-dessus de la constante. Le test A.3 sécurise le pattern.
+- **Backlog #263** (alignement DS modales sécurité) reste le quick win le plus rentable post-Défense I. ~2-3 h, gros gain visuel.
+
+---
+
+## Récap matinées du 8 mai 2026 (avant le chantier Défense A)
+
+(Conservé pour référence — voir aussi `MODELE-MENACES.md` historique v1.3 pour le détail de la session du 6 mai.)
+
+- Validation à l'usage des défenses du 6 mai (B-α/J/D/P-α/H/K + B-β/K-β/E) : 100 % passée.
+- 2 fixes terrain : whitelist `codex-manifeste.json` (`ba2e897`), overlay K-β (`ca53aba`).
+- Backlog #263 ajouté + étendu (modales sécurité à aligner DS).
