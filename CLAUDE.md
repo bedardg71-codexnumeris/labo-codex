@@ -114,6 +114,17 @@ Tout import de fichier image ou PDF **DOIT** passer par `validerMagicBytes(blob)
 ### console.log
 Nouveau code = `console.warn` / `console.error` uniquement. Les `console.log` de debug doivent etre retires avant commit.
 
+### Tests securite automatises (Defense I, livree 8 mai 2026)
+Suite de 29 tests dans `tests/` (Vitest pour fonctions pures + Playwright WebKit pour sandbox/CSP). Couvre A.3 hash CSP, B sanitisation profonde, C validation imports, D whitelist exports, E integration sandbox, F lint statique baseline innerHTML.
+
+**Tout chantier securite Phase 1+ DOIT ajouter au minimum 1 test** qui couvre la defense livree :
+- Modification d'une fonction pure → test Vitest dans `tests/unit/` (utiliser `chargerScript()` du helper si la fonction est dans une IIFE)
+- Modification d'un comportement browser → test Playwright dans `tests/integration/`
+
+Documentation : `docs/securite/TESTS-AUTOMATISES.md`.
+
+Avant un commit qui touche un module sensible (`js/securite-*.js`, `js/import-export.js`, `js/cc-license.js`, `index.html` CSP) : `cd tests && npm test`. Hook pre-push optionnel : `bash scripts/install-hooks.sh`.
+
 ---
 
 ## Zones protegees

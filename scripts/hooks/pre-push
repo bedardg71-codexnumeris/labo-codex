@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+#
+# Hook pré-push Labo Codex — Défense I du modèle de menaces.
+#
+# Exécute la suite de tests unit (Vitest) avant chaque push. Bloque le
+# push si un test rouge — c'est la dernière ligne de défense avant que
+# du code régressé atteigne origin.
+#
+# La suite Playwright (intégration browser-real) n'est PAS dans ce hook
+# parce qu'elle prend ~4 s et que la suite unit (~9 s) couvre déjà le
+# cœur des régressions sécurité (sanitisation, validation imports,
+# whitelist exports, hash CSP, lint statique).
+#
+# Pré-requis : `tests/node_modules/` installé. Si absent, le hook le
+# détecte et passe (fail-open) — un développeur qui n'a pas installé
+# les deps de test peut quand même pousser.
+#
+# Référence : docs/securite/TESTS-AUTOMATISES.md §7
+# Désactivation totale (déconseillée) : `git push --no-verify`
+
+set -u
+
+ROUGE='\033[0;31m'
+VERT='\033[0;32m'
+JAUNE='\033[0;33m'
+RAZ='\033[0m'
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+TESTS_DIR="$REPO_ROOT/tests"
+
+# Si la suite n'est pas installée, on n'ennuie pas le développeur. Le hook
+# pré-commit J reste actif, et la branche passera /ultrareview avant merge.
+if [ ! -d "$TESTS_DIR/node_modules" ]; then
+    printf "${JAUNE}⚠ Hook pré-push : tests/node_modules/ absent — suite Vitest skippée.${RAZ}\n"
+    printf "  Pour activer : ${VERT}cd tests && npm install${RAZ}\n"
+    exit 0
+fi
+
+printf "${VERT}→ Hook pré-push : exécution de la suite Vitest...${RAZ}\n"
+
+# Exécution silencieuse sauf en cas d'échec.
+SORTIE=$(cd "$TESTS_DIR" && npm run test:unit --silent 2>&1)
+CODE=$?
+
+if [ $CODE -ne 0 ]; then
+    printf "\n${ROUGE}✗ Hook pré-push : la suite Vitest a échoué — push bloqué.${RAZ}\n\n"
+    printf '%s\n' "$SORTIE"
+    printf "\n${ROUGE}Corrige les tests rouges avant de pousser.${RAZ}\n"
+    printf "Bypass d'urgence (déconseillé) : ${JAUNE}git push --no-verify${RAZ}\n"
+    exit 1
+fi
+
+printf "${VERT}✓ Hook pré-push : suite Vitest verte.${RAZ}\n"
+exit 0
