@@ -1,9 +1,43 @@
 # SESSION — État au 8 mai 2026 (Défense A — sandbox iframe planifiée, prête à démarrer)
 
 **Date** : 8 mai 2026
-**Dernier build** : `0506-1530` · Beta **99.36** (poussée sur origin/main)
+**Dernier build** : `0508-0615` · Beta **99.36** (poussée sur origin/main)
 **Branche** : `main` (à jour avec origin)
-**Statut** : Plan Défense A (Phase 1 sécurité) validé et sauvegardé. Prêt à démarrer SP1 du chantier.
+**Statut** : Plan Défense A (Phase 1 sécurité) validé et sauvegardé. Prêt à démarrer SP1 du chantier. Validation à l'usage des défenses du 6 mai 100 % passée le matin du 8 mai (2 fixes terrain en route).
+
+---
+
+## ⚙️ Mises à jour matinales du 8 mai 2026 (avant le démarrage Défense A)
+
+Trois activités intercalées avant l'ouverture du chantier sandbox iframe :
+
+### 1. Validation à l'usage des défenses du 6 mai (étapes 1, 2, 3) — 100 % passée
+
+- ✅ **Étape 1 — Backup Codex** (filet de sécurité avant tests). 318 fichiers, ZIP téléchargé. 2 bugs trouvés et corrigés en route (voir #2 et #3 ci-dessous).
+- ✅ **Étape 2.1 — Toggle FSAPI** dans Réglages > Préférences > Sécurité. Visible et fonctionnel.
+- ✅ **Étape 2.2 — Modale K-β preview** (cliquer Annuler) : ferme proprement, aucune création.
+- ✅ **Étape 2.3 — Migration FSAPI silencieuse** : passée au premier boot (8 mai), pas d'accroc.
+- ✅ **Étape 3 — Round-trip import config** : fonctionne, mais l'UI n'est pas alignée sur le design system → #263 ajouté au backlog.
+
+### 2. Bug terrain Défense K — whitelist `codex-manifeste.json` (commit `ba2e897`, b0508-0605)
+
+L'export Codex normal était bloqué : ma whitelist du 6 mai supposait `manifeste.json` mais la constante `NOM_MANIFESTE` dans `codex.js:25` est `codex-manifeste.json` (lecture du code en surface au lieu de vérifier la valeur de la constante). Whitelist étendue à `codex-manifeste.json` + `classeur-manifeste.json` (legacy). **Leçon enregistrée** dans `feedback_securite_tests.md` : pour toute whitelist/schéma/validation de structure, tester un vrai usage avant commit.
+
+### 3. Bug UX K-β — overlay progression non réaffiché (commit `ca53aba`, b0508-0615)
+
+Après le clic « Télécharger » sur la modale K-β preview, l'overlay de progression était masqué et jamais ré-affiché → utilisateur attend dans le noir pendant la compression du ZIP (peut-être plusieurs minutes avec 318 fichiers). Fix appliquée sur `codex.js` et `reserve.js` : appel à `_afficherProgression(...)` après confirmation pour montrer la compression jusqu'au téléchargement.
+
+### 4. Backlog #263 ajouté + étendu (commits `6c82c55` + `551b1af`)
+
+Aligner l'UI des modales sécurité sur `design-system.html`. Couvre 3 modales + 1 notification :
+- K-β preview (`js/securite-export-preview.js`) — overlay + boutons à classer.
+- `demanderMetadonneesConfigComplete` (`js/cc-license.js:842`, « Partager ma pratique complète ») — placeholders peu lisibles, contraste textarea, accents manquants (« complete », « pratique », etc.).
+- Carte Sécurité dans Réglages > Préférences — vérifier cohérence.
+- Notification de succès enrichie sceau SHA-256 — vérifier rendu.
+
+Effort estimé 2-3 h. Hors scope Défense A — à traiter séparément.
+
+---
 
 ---
 
