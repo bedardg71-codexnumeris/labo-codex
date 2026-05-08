@@ -1,0 +1,19 @@
+{
+    "name": "monitorage-tests",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "description": "Tests sécurité automatisés (Défense I) — séparé de l'app vanilla JS de production.",
+    "scripts": {
+        "test:unit": "vitest run",
+        "test:int": "playwright test",
+        "test": "npm run test:unit && npm run test:int",
+        "test:watch": "vitest",
+        "test:debug": "playwright test --debug"
+    },
+    "devDependencies": {
+        "@playwright/test": "^1.45.0",
+        "jsdom": "^24.0.0",
+        "vitest": "^2.0.0"
+    }
+}
