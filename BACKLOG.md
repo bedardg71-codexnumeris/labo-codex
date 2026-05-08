@@ -359,6 +359,12 @@
     `fadeIn` dupliquee.
   - PR #12 mergee, beta 99.36 b0506-0515.
 
+- [ ] **#265** Mode clair — texte « Groupe-cours actif : » noir sur fond bleu (8 mai 2026)
+  - **Contexte** : sur la ligne 2 de l'en-tête (`#bandeau-groupe-cours`), le label `<label>Groupe-cours actif :</label>` (`index.html:3863`) hérite de la couleur de texte par défaut en mode clair (foncé/noir), alors que le fond du bandeau reste le bleu principal (`var(--bleu-principal)` ou similaire). Contraste insuffisant, lecture pénible.
+  - **Reproduction** : bascule en mode clair via le bouton thème dans l'en-tête, observer le label à gauche du sélecteur de groupe-cours.
+  - **Cible** : le label doit rester lisible en mode clair (texte clair sur fond bleu, comme « Beta 99.38 » et « vendredi 8 mai 2026 » qui sont dans le même bandeau et lisibles).
+  - **À investiguer** : règle CSS `.bandeau-groupe-cours label`, scope mode-clair (`styles.css:19478` `.mode-clair label` ou bloc dédié à `bandeau-groupe-cours` à ajouter). Vérifier que la correction n'affecte pas les labels en mode sombre.
+
 ### Rythme Phase 5 — Raffinements (selon usage, post-AQPC)
 
 - [ ] **#240** Courbe d'apprentissage de l'evaluateur (tendance temporelle par activite)
