@@ -316,6 +316,36 @@
     s'est arrêté à l'UI/code interne, le nommage des fichiers téléchargés n'a
     pas suivi.
 
+### Sécurité — UI à aligner sur le design system (8 mai 2026)
+
+- [ ] **#263** Aligner les modales et carte sécurité sur `design-system.html`
+  - **Contexte** : les défenses livrées le 6 mai (B-α/J/D/P-α/H/K + B-β/K-β/E)
+    ont introduit plusieurs éléments UI construits par script (modales et
+    cartes) avec des styles **inline** plutôt que les variables CSS et classes
+    du design system du projet. Validation à l'usage du 8 mai : ça fonctionne,
+    mais l'esthétique est en décalage avec le reste de l'app.
+  - **Éléments concernés** :
+    - Modale K-β preview (`js/securite-export-preview.js`) — overlay + boîte
+      construits via `createElement` + styles inline (`position: fixed`,
+      `background: rgba(0,0,0,0.65)`, etc.). À refaire avec les classes
+      `.modal-js-overlay` / `.modal-js-contenu` ou équivalentes du DS.
+    - Boutons « Annuler » / « Télécharger » de la modale — styles inline
+      à remplacer par `.btn .btn-annuler` / `.btn .btn-confirmer`.
+    - Carte « Sécurité » dans Réglages > Préférences (déjà en HTML statique,
+      utilise les classes du projet — vérifier la cohérence visuelle avec
+      les autres cartes de la page).
+    - Notification de succès enrichie de Défense H (sceau SHA-256) — vérifier
+      le rendu dans `afficherNotificationSucces`, possible que les retours
+      à la ligne soient mal gérés.
+  - **Cible** : utiliser exclusivement les variables CSS et classes existantes
+    du `styles.css`. Tester en mode clair ET sombre. Pas d'inline `style="..."`
+    avec des couleurs en dur.
+  - **Lien** : modèle de menaces §K-β. Le hook pré-commit Défense J devrait
+    aussi être respecté pendant la migration (pas de nouveaux innerHTML non
+    échappés introduits).
+  - **Effort estimé** : 2-3 h (refonte modale K-β) + 30 min (vérif notification
+    + carte Sécurité).
+
 ### Credits — A propos (3 mai 2026)
 
 - [x] **#260** Ajouter le credit Icons8 dans Reglages > A propos > Technologies (livre 6 mai 2026, b0506-0515)
