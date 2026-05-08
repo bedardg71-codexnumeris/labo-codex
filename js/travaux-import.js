@@ -1548,4 +1548,9 @@
         travauxImport.changerEtudiant(Number(index), el.value);
     };
 
+    // Validation magic bytes — exposée pour la suite de tests automatisés
+    // (Défense I, scénario I-02 polyglotte image+JS). Le check est utilisé
+    // en interne par travaux-import, mais le test l'invoque directement.
+    window.validerMagicBytes = validerMagicBytes;
+
 })();

@@ -14,6 +14,7 @@
     "devDependencies": {
         "@playwright/test": "^1.45.0",
         "jsdom": "^24.0.0",
+        "jszip": "^3.10.1",
         "vitest": "^2.0.0"
     }
 }
