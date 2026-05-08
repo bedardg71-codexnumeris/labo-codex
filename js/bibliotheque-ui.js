@@ -468,6 +468,14 @@
      * @param {string} [config.contenuIdListe2] - ID du conteneur Section 2
      */
     BibliothequeUI.creerModal = function (config) {
+        // Idempotence : si une instance avec ce modalId existe déjà (cas typique
+        // d'un rafraîchissement après import), la retirer avant d'en créer une
+        // nouvelle. Sinon `insertAdjacentHTML('beforeend', …)` empile deux
+        // modales partageant le même id, ce qui double le backdrop et oblige
+        // à fermer 2 fois pour que la modale disparaisse.
+        var existant = document.getElementById(config.modalId);
+        if (existant) existant.remove();
+
         var fermerAttr = 'data-action="' + (config.onFermerAction || config.onFermer) + '"';
         var html = '<div id="' + config.modalId + '" class="modal-js-overlay" style="z-index: 10000;">' +
             '<div class="modal-js-contenu" style="max-width: 800px;">' +
