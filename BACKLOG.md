@@ -301,6 +301,22 @@
     s'est arrêté à l'UI/code interne, le nommage des fichiers téléchargés n'a
     pas suivi.
 
+- [ ] **#266** Renommer `js/pratiques-materiel.js` → nom reflétant son rôle actuel (8 mai 2026)
+  - **Contexte** : le fichier `js/pratiques-materiel.js` gère la sidebar +
+    édition + bibliothèque dans la section Conception > Pratiques de notation
+    (DOM `#sidebarListePratiques`). Le suffixe `-materiel` est un legacy de
+    l'époque où la section UI s'appelait « Matériel pédagogique ». Aujourd'hui
+    la section UI dit « Pratiques de notation ». Le suffixe distingue aussi
+    historiquement de `pratiques.js` (le module avec le wizard V1, nettoyé
+    le 8 mai 2026). Le nom actuel ne reflète plus son rôle.
+  - **Cible** : renommer en `js/pratiques-sidebar.js` (ou autre nom plus
+    parlant — `pratiques-ui.js` ? `pratiques-bibliotheque-ui.js` ?). Mettre
+    à jour le tag `<script src="...">` dans index.html, les commentaires
+    `[pratiques-materiel]` dans les console.log/error, et les éventuelles
+    références croisées.
+  - **Lien avec #262** : #262 corrige le NOM des fichiers EXPORTÉS (`pratiques-pratiques-notation-...json` → `pratiques-CC-BY-SA-...json`) ; #266 corrige le NOM du fichier SOURCE JS. Indépendants mais même esprit (faire correspondre les noms à l'UI actuelle).
+  - **Effort estimé** : ~30 min (1 git mv + recherche/remplacement des références).
+
 - [ ] **#264** Barre de progression sur tous les exports (8 mai 2026)
   - **Contexte** : certains exports sont courts (1-2 s), d'autres très longs
     (versement Réserve d'un trimestre complet, codex avec beaucoup de
