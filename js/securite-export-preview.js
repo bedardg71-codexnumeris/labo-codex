@@ -70,61 +70,41 @@
             var overlay = document.createElement('div');
             overlay.setAttribute('role', 'dialog');
             overlay.setAttribute('aria-modal', 'true');
-            overlay.style.cssText = [
-                'position: fixed', 'top: 0', 'left: 0', 'right: 0', 'bottom: 0',
-                'background: rgba(0, 0, 0, 0.65)',
-                'z-index: 99999',
-                'display: flex', 'align-items: center', 'justify-content: center',
-                'padding: 20px'
-            ].join('; ');
+            overlay.className = 'modal-js-overlay';
+            // z-index custom = 99999 : la modale d'export-preview doit
+            // passer au-dessus de tout (biblios 10000, métadonnées 10001,
+            // notification-succes 11000) — c'est la dernière barrière
+            // avant le téléchargement effectif.
+            overlay.style.zIndex = '99999';
 
             var modal = document.createElement('div');
-            modal.style.cssText = [
-                'background: var(--surface-carte, #1a2730)',
-                'color: var(--texte-principal, #ffffff)',
-                'border: 1px solid var(--bordure-claire, #2a3942)',
-                'border-radius: 12px',
-                'padding: 24px',
-                'max-width: 640px', 'width: 100%',
-                'max-height: 80vh',
-                'display: flex', 'flex-direction: column',
-                'box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5)',
-                'font-family: inherit'
-            ].join('; ');
+            modal.className = 'modal-js-contenu export-preview-modal';
 
             var titre = document.createElement('h2');
-            titre.style.cssText = 'margin: 0 0 6px 0; font-size: 1.2em; color: var(--accent-primaire, #4a9eff);';
+            titre.className = 'modal-titre';
             titre.textContent = opts.titre || 'Confirmer l\'export';
             modal.appendChild(titre);
 
             if (opts.sousTitre) {
                 var sousTitre = document.createElement('p');
-                sousTitre.style.cssText = 'margin: 0 0 16px 0; font-size: 0.9em; color: var(--gris-moyen, #a0adb6);';
+                sousTitre.className = 'export-preview-soustitre';
                 sousTitre.textContent = opts.sousTitre;
                 modal.appendChild(sousTitre);
             }
 
             var conteneurListe = document.createElement('div');
-            conteneurListe.style.cssText = [
-                'flex: 1', 'overflow-y: auto',
-                'background: var(--surface-conteneur, #142028)',
-                'border: 1px solid var(--bordure-claire, #2a3942)',
-                'border-radius: 8px',
-                'padding: 12px',
-                'margin-bottom: 16px',
-                'min-height: 80px'
-            ].join('; ');
+            conteneurListe.className = 'export-preview-liste';
 
             var lignes = opts.lignes || [];
             var maxAffiche = 100;
             for (var i = 0; i < Math.min(lignes.length, maxAffiche); i++) {
                 var ligne = document.createElement('div');
-                ligne.style.cssText = 'display: flex; justify-content: space-between; padding: 4px 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85em; border-bottom: 1px solid var(--bordure-tres-claire, #1f2c34);';
+                ligne.className = 'export-preview-ligne';
                 var pri = document.createElement('span');
-                pri.style.cssText = 'overflow-wrap: anywhere;';
+                pri.className = 'export-preview-ligne-pri';
                 pri.textContent = lignes[i].principal;
                 var sec = document.createElement('span');
-                sec.style.cssText = 'color: var(--gris-moyen, #a0adb6); margin-left: 12px; flex-shrink: 0;';
+                sec.className = 'export-preview-ligne-sec';
                 sec.textContent = lignes[i].secondaire || '';
                 ligne.appendChild(pri);
                 ligne.appendChild(sec);
@@ -132,13 +112,13 @@
             }
             if (lignes.length > maxAffiche) {
                 var resteLigne = document.createElement('div');
-                resteLigne.style.cssText = 'padding: 8px 0; font-size: 0.85em; color: var(--gris-moyen, #a0adb6); font-style: italic;';
+                resteLigne.className = 'export-preview-reste';
                 resteLigne.textContent = '… et ' + (lignes.length - maxAffiche) + ' entrée(s) supplémentaire(s) non affichée(s).';
                 conteneurListe.appendChild(resteLigne);
             }
             if (lignes.length === 0) {
                 var vide = document.createElement('div');
-                vide.style.cssText = 'padding: 16px; text-align: center; color: var(--gris-moyen, #a0adb6);';
+                vide.className = 'export-preview-vide';
                 vide.textContent = 'Aucun élément à inclure.';
                 conteneurListe.appendChild(vide);
             }
@@ -146,23 +126,23 @@
 
             if (opts.note) {
                 var note = document.createElement('p');
-                note.style.cssText = 'margin: 0 0 16px 0; font-size: 0.85em; color: var(--gris-moyen, #a0adb6);';
+                note.className = 'export-preview-note';
                 note.textContent = opts.note;
                 modal.appendChild(note);
             }
 
             var actions = document.createElement('div');
-            actions.style.cssText = 'display: flex; justify-content: flex-end; gap: 10px;';
+            actions.className = 'modal-actions';
 
             var btnAnnuler = document.createElement('button');
             btnAnnuler.type = 'button';
+            btnAnnuler.className = 'btn btn-annuler';
             btnAnnuler.textContent = 'Annuler';
-            btnAnnuler.style.cssText = 'padding: 8px 16px; border-radius: 6px; border: 1px solid var(--bordure-claire, #2a3942); background: transparent; color: var(--texte-principal, #fff); cursor: pointer; font-family: inherit; font-size: 0.9em;';
 
             var btnConfirmer = document.createElement('button');
             btnConfirmer.type = 'button';
+            btnConfirmer.className = 'btn btn-confirmer';
             btnConfirmer.textContent = 'Télécharger';
-            btnConfirmer.style.cssText = 'padding: 8px 16px; border-radius: 6px; border: none; background: var(--accent-primaire, #4a9eff); color: #fff; cursor: pointer; font-family: inherit; font-size: 0.9em; font-weight: 600;';
 
             actions.appendChild(btnAnnuler);
             actions.appendChild(btnConfirmer);

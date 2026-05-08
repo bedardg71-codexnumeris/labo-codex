@@ -3216,6 +3216,72 @@ body:not(.mode-clair) .badge-source--demo {
     height: 18px;
 }
 
+/* ============================================
+   Preview UI des exports — Défense K-β (#263)
+   js/securite-export-preview.js — modale de confirmation avant
+   téléchargement (zip ou json). Construite via createElement +
+   classList (pas d'innerHTML). Le `.modal-js-contenu` est rendu
+   en flex column pour laisser scroller la liste interne tout en
+   gardant titre/sous-titre/note/actions fixes.
+   ============================================ */
+.export-preview-modal {
+    display: flex;
+    flex-direction: column;
+    max-width: 640px;
+    max-height: 80vh;
+    overflow: hidden;
+}
+.export-preview-soustitre {
+    margin: 0 0 16px 0;
+    color: var(--texte-secondaire);
+    font-size: 0.9rem;
+}
+.export-preview-liste {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--surface-conteneur);
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-moyen);
+    padding: 12px;
+    margin-bottom: 16px;
+    min-height: 80px;
+}
+.export-preview-ligne {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--bordure-claire);
+}
+.export-preview-ligne:last-child {
+    border-bottom: none;
+}
+.export-preview-ligne-pri {
+    overflow-wrap: anywhere;
+}
+.export-preview-ligne-sec {
+    color: var(--texte-secondaire);
+    margin-left: 12px;
+    flex-shrink: 0;
+}
+.export-preview-reste {
+    padding: 8px 0;
+    font-size: 0.85rem;
+    color: var(--texte-secondaire);
+    font-style: italic;
+}
+.export-preview-vide {
+    padding: 16px;
+    text-align: center;
+    color: var(--texte-secondaire);
+}
+.export-preview-note {
+    margin: 0 0 16px 0;
+    font-size: 0.85rem;
+    color: var(--texte-secondaire);
+}
+
 /* BibliothequeUI — Composant cartes bibliothèque */
 .biblio-section-titre {
     color: var(--bleu-clair);
