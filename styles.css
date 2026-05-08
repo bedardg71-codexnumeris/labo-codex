@@ -3061,6 +3061,161 @@ body:not(.mode-clair) .badge-source--demo {
     color: var(--gris-fonce);
 }
 
+/* ============================================
+   Modales métadonnées CC (cc-license.js) — alignement DS #263
+   Utilitaires propres aux modales `demanderMetadonneesEnrichies`
+   et `demanderMetadonneesConfigComplete`. Pour les patterns courants
+   (titre, intro, actions, formulaire vertical) on réutilise les classes
+   du DS : .modal-titre, .modal-actions, .groupe-form, .controle-form.
+   ============================================ */
+.cc-meta-intro {
+    margin: 0 0 20px 0;
+    color: var(--texte-secondaire);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+.cc-meta-intro strong {
+    color: var(--texte-principal);
+}
+.cc-meta-intro--encadre {
+    background: var(--surface-conteneur);
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-moyen);
+    padding: 14px 16px;
+}
+.cc-meta-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent-primaire);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: normal;
+    margin-bottom: 16px;
+}
+.cc-meta-link:hover {
+    text-decoration: underline;
+}
+.cc-meta-link img {
+    height: 15px;
+}
+.cc-meta-section-titre {
+    margin: 24px 0 12px 0;
+    color: var(--accent-primaire);
+    font-size: 1rem;
+    font-weight: 600;
+    border-bottom: 1px solid var(--bordure-claire);
+    padding-bottom: 6px;
+}
+.cc-meta-section-titre:first-of-type {
+    margin-top: 0;
+}
+.cc-meta-ligne {
+    display: grid;
+    grid-template-columns: auto minmax(110px, max-content) 1fr;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.cc-meta-ligne label {
+    color: var(--texte-principal);
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin: 0;
+    cursor: pointer;
+}
+.cc-meta-ligne input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    margin: 0;
+}
+.cc-meta-ligne input[type="text"],
+.cc-meta-ligne input[type="email"],
+.cc-meta-ligne input[type="url"],
+.cc-meta-ligne select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--bleu-leger);
+    border-radius: var(--radius-moyen);
+    font-size: 0.95rem;
+    background: var(--surface-conteneur);
+    color: var(--texte-principal);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-height: 36px;
+}
+.cc-meta-ligne input:focus,
+.cc-meta-ligne select:focus {
+    outline: none;
+    border-color: var(--bleu-clair);
+    box-shadow: 0 0 0 3px rgba(106, 172, 184, 0.2);
+}
+.cc-meta-radio {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
+.cc-meta-radio:last-child {
+    margin-bottom: 0;
+}
+.cc-meta-radio input[type="radio"] {
+    margin-top: 4px;
+    flex-shrink: 0;
+}
+.cc-meta-required {
+    color: var(--rouge-erreur);
+    font-weight: 600;
+}
+.cc-meta-optionnel {
+    color: var(--texte-secondaire);
+    font-weight: normal;
+    font-size: 0.85rem;
+}
+.cc-meta-compteur {
+    display: block;
+    color: var(--texte-secondaire);
+    font-size: 0.8rem;
+    margin-top: 5px;
+}
+.cc-meta-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--bleu-leger);
+    border-radius: var(--radius-moyen);
+    font-size: 0.95rem;
+    font-family: inherit;
+    line-height: 1.5;
+    resize: vertical;
+    background: var(--surface-conteneur);
+    color: var(--texte-principal);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-height: 80px;
+}
+.cc-meta-textarea:focus {
+    outline: none;
+    border-color: var(--bleu-clair);
+    box-shadow: 0 0 0 3px rgba(106, 172, 184, 0.2);
+}
+.cc-meta-textarea--grand {
+    min-height: 120px;
+}
+.cc-meta-licence-cgv {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    line-height: 1.5;
+}
+.cc-meta-licence-cgv input[type="checkbox"] {
+    margin-top: 4px;
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+}
+
 /* BibliothequeUI — Composant cartes bibliothèque */
 .biblio-section-titre {
     color: var(--bleu-clair);
@@ -19593,8 +19748,28 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 .mode-clair .contenu select,
 .mode-clair .modal-js-contenu input[type="text"],
 .mode-clair .modal-js-contenu input[type="number"],
+.mode-clair .modal-js-contenu input[type="email"],
+.mode-clair .modal-js-contenu input[type="url"],
 .mode-clair .modal-js-contenu textarea,
 .mode-clair .modal-js-contenu select {
+    background: white;
+    color: var(--texte-principal);
+    border-color: rgba(3, 46, 92, 0.2);
+}
+
+/* Modales métadonnées CC — adaptations mode clair (#263) */
+.mode-clair .cc-meta-intro--encadre {
+    background: var(--surface-conteneur);
+    border-color: rgba(3, 46, 92, 0.1);
+}
+.mode-clair .cc-meta-section-titre {
+    border-bottom-color: rgba(3, 46, 92, 0.1);
+}
+.mode-clair .cc-meta-ligne input[type="text"],
+.mode-clair .cc-meta-ligne input[type="email"],
+.mode-clair .cc-meta-ligne input[type="url"],
+.mode-clair .cc-meta-ligne select,
+.mode-clair .cc-meta-textarea {
     background: white;
     color: var(--texte-principal);
     border-color: rgba(3, 46, 92, 0.2);
