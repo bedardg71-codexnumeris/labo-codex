@@ -1954,18 +1954,17 @@ async function importerGrilles(eventOuEl) {
             // Vérifier licence CC et afficher badge
             const estCC = verifierLicenceCC(donnees);
 
-            let message = estCC ?
-                '<div class="u-mb-15">' + genererBadgeCC(donnees.metadata) + '</div>' :
-                '';
-
-            message += '<p><strong>Veux-tu importer ces grilles ?</strong></p>';
-
-            // Créer modal avec badge CC
+            // Défense A : badge CC rendu dans une iframe sandbox isolée.
+            // Voir js/securite-apercu-sandbox.js et MODELE-MENACES.md §D-01.
+            // La classe `modal-import-grilles` cible la fermeture sans
+            // impacter la bibliothèque ouverte en arrière-plan.
             const modal = document.createElement('div');
+            modal.classList.add('modal-import-grilles');
             modal.innerHTML = `
                 <div class="modal-js-overlay" style="z-index: 10001;">
                     <div class="modal-js-contenu" style="max-width: 600px;">
-                        ${message}
+                        <div data-apercu-cc-slot class="u-mb-15"></div>
+                        <p><strong>Veux-tu importer ces grilles ?</strong></p>
                         <div class="u-flex-gap-10" style="margin-top: 15px; justify-content: flex-end;">
                             <button class="btn btn-annuler" data-action="fermerModalImportGrilles">Annuler</button>
                             <button class="btn btn-confirmer" data-action="confirmerEtFermerImportGrilles">Importer</button>
@@ -1975,8 +1974,15 @@ async function importerGrilles(eventOuEl) {
             `;
             document.body.appendChild(modal);
 
-            // Avertir si pas de licence CC
-            if (!estCC) {
+            if (estCC && window.ApercuSandbox) {
+                const slot = modal.querySelector('[data-apercu-cc-slot]');
+                if (slot) {
+                    window.ApercuSandbox.afficher(slot, genererBadgeCC(donnees.metadata), {
+                        hauteurMin: 120,
+                        hauteurMax: 500
+                    });
+                }
+            } else if (!estCC) {
                 avertirSansLicence(donnees);
             }
 
@@ -3917,8 +3923,11 @@ function modifierPonderationCritereTempHandler(el) {
 
 /** Annuler import grilles */
 function fermerModalImportGrilles() {
-    var overlay = document.querySelector('.modal-js-overlay');
-    if (overlay && overlay.parentElement) overlay.parentElement.remove();
+    // Cibler le wrapper d'import par sa classe dédiée (pas `.modal-js-overlay`,
+    // qui matche aussi la bibliothèque ouverte en arrière-plan dont le parent
+    // est `<body>` → `.remove()` effacerait toute l'application).
+    var wrapper = document.querySelector('.modal-import-grilles');
+    if (wrapper) wrapper.remove();
     delete window._grillesImportEnAttente;
 }
 

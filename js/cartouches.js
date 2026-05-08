@@ -1781,20 +1781,18 @@ async function importerCartouches(eventOuEl) {
             // Vérifier licence CC et afficher badge
             const estCC = verifierLicenceCC(donnees);
 
-            let message = estCC ?
-                '<div style="margin-bottom: 15px;">' + genererBadgeCC(donnees.metadata) + '</div>' :
-                '';
-
-            message += '<p><strong>Veux-tu importer ces cartouches ?</strong></p>';
-
-            // Créer modal avec badge CC
-            // z-index: 10001 pour passer au-dessus des modaux de bibliothèque (10000)
+            // Défense A : badge CC rendu dans une iframe sandbox isolée.
+            // Voir js/securite-apercu-sandbox.js et MODELE-MENACES.md §D-01.
+            // Format aligné sur les autres modales d'import (modal-js-overlay /
+            // modal-js-contenu du DS). z-index: 10001 pour passer au-dessus
+            // des bibliothèques (10000).
             const modal = document.createElement('div');
             modal.classList.add('modal-import-cartouches');
             modal.innerHTML = `
-                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10001; display: flex; align-items: center; justify-content: center;">
-                    <div style="background: var(--surface-conteneur, #162c36); padding: 20px; border-radius: 8px; max-width: 600px; max-height: 80vh; overflow-y: auto;">
-                        ${message}
+                <div class="modal-js-overlay" style="z-index: 10001;">
+                    <div class="modal-js-contenu" style="max-width: 600px; padding: 20px;">
+                        <div data-apercu-cc-slot style="margin-bottom: 15px;"></div>
+                        <p><strong>Veux-tu importer ces cartouches ?</strong></p>
                         <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
                             <button class="btn btn-annuler" data-action="fermerModalImportCartouches">Annuler</button>
                             <button class="btn btn-confirmer" data-action="confirmerEtFermerImportCartouches">Importer</button>
@@ -1804,8 +1802,15 @@ async function importerCartouches(eventOuEl) {
             `;
             document.body.appendChild(modal);
 
-            // Avertir si pas de licence CC
-            if (!estCC) {
+            if (estCC && window.ApercuSandbox) {
+                const slot = modal.querySelector('[data-apercu-cc-slot]');
+                if (slot) {
+                    window.ApercuSandbox.afficher(slot, genererBadgeCC(donnees.metadata), {
+                        hauteurMin: 120,
+                        hauteurMax: 500
+                    });
+                }
+            } else if (!estCC) {
                 avertirSansLicence(donnees);
             }
 
