@@ -340,14 +340,15 @@
       Vérifier l'alignement DS et passer un coup d'accents.
     - **Modale `modalMetadonneesEnrichies`** (`js/cc-license.js:700`,
       titre « Metadonnees d'export ») — précède l'export d'une grille,
-      échelle, cartouche, production, pratique. Constatée le 8 mai 2026
-      pendant la validation Défense A SP2 : couleurs et espacements
-      inline (`background-color: rgba(0,0,0,0.6)`, `var(--bleu-leger)`
-      pour les titres, `var(--gris-leger)` pour le texte d'introduction)
-      à remplacer par les variables/classes du DS. Plusieurs typos
-      sans accents (« Metadonnees », « personnelles » sans é). Le
-      titre `<h2>` mélange le titre et le lien CC dans un même flex —
-      à découper en pattern DS standard. Tester en mode clair/sombre.
+      échelle, cartouche, production, pratique de notation, tampons.
+      Constatée le 8 mai 2026 pendant la validation Défense A SP2 :
+      couleurs et espacements inline (`background-color: rgba(0,0,0,0.6)`,
+      `var(--bleu-leger)` pour les titres, `var(--gris-leger)` pour le
+      texte d'introduction) à remplacer par les variables/classes du DS.
+      Plusieurs typos sans accents (« Metadonnees », « personnelles »
+      sans é, « caracteres » sans è). Le titre `<h2>` mélange le titre
+      et le lien CC dans un même flex — à découper en pattern DS
+      standard. Tester en mode clair/sombre, sur les 6 types de matériel.
     - Carte « Sécurité » dans Réglages > Préférences (déjà en HTML statique,
       utilise les classes du projet — vérifier la cohérence visuelle avec
       les autres cartes de la page).

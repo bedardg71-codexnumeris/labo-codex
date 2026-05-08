@@ -2913,27 +2913,29 @@
                 window._tamponsImportEnAttente = donnees;
 
                 var estCC = typeof verifierLicenceCC === 'function' && verifierLicenceCC(donnees);
-                var message = estCC
-                    ? '<div style="margin-bottom:12px;">' + genererBadgeCC(donnees.metadata) + '</div>'
-                    : '';
 
                 var contenu = donnees.contenu || donnees;
                 var nbTampons = (contenu.tampons || []).length;
                 var nbSymPerso = (contenu.symbolesPerso || []).length;
                 var nbCats = (contenu.categories || []).length;
 
-                message += '<p><strong>Importer cette biblioth\u00e8que de tampons ?</strong></p>';
-                message += '<p style="color:var(--texte-secondaire);font-size:0.85rem;">';
-                message += nbTampons + ' tampon(s), ' + nbCats + ' cat\u00e9gorie(s)';
-                if (nbSymPerso > 0) message += ', ' + nbSymPerso + ' symbole(s) Unicode';
-                message += '</p>';
-                message += '<p style="color:var(--texte-secondaire);font-size:0.85rem;">Les tampons actuels seront remplac\u00e9s.</p>';
+                // Stats p\u00e9dagogiques (chiffres d\u00e9riv\u00e9s des tableaux, s\u00fbrs par construction)
+                var stats = nbTampons + ' tampon(s), ' + nbCats + ' cat\u00e9gorie(s)';
+                if (nbSymPerso > 0) stats += ', ' + nbSymPerso + ' symbole(s) Unicode';
 
+                // D\u00e9fense A : badge CC rendu dans une iframe sandbox isol\u00e9e.
+                // Voir js/securite-apercu-sandbox.js et MODELE-MENACES.md \u00a7D-01.
+                // La classe `modal-import-tampons` cible la fermeture sans
+                // impacter la biblioth\u00e8que ouverte en arri\u00e8re-plan.
                 var modal = document.createElement('div');
+                modal.classList.add('modal-import-tampons');
                 modal.innerHTML =
                     '<div class="modal-js-overlay" style="z-index: 10001;">' +
                         '<div class="modal-js-contenu" style="max-width: 500px;">' +
-                            message +
+                            '<div data-apercu-cc-slot style="margin-bottom:12px;"></div>' +
+                            '<p><strong>Importer cette biblioth\u00e8que de tampons ?</strong></p>' +
+                            '<p style="color:var(--texte-secondaire);font-size:0.85rem;" data-tampons-stats></p>' +
+                            '<p style="color:var(--texte-secondaire);font-size:0.85rem;">Les tampons actuels seront remplac\u00e9s.</p>' +
                             '<div style="display:flex; gap:8px; margin-top:15px; justify-content:flex-end;">' +
                                 '<button class="btn btn-secondaire" data-action="travauxOutils.fermerModalImportTampons">Annuler</button>' +
                                 '<button class="btn btn-principal" data-action="travauxOutils.confirmerEtFermerImportTampons">Importer</button>' +
@@ -2941,6 +2943,20 @@
                         '</div>' +
                     '</div>';
                 document.body.appendChild(modal);
+
+                // textContent : pas d'interpolation HTML pour les stats num\u00e9riques.
+                var spanStats = modal.querySelector('[data-tampons-stats]');
+                if (spanStats) spanStats.textContent = stats;
+
+                if (estCC && window.ApercuSandbox && typeof genererBadgeCC === 'function') {
+                    var slot = modal.querySelector('[data-apercu-cc-slot]');
+                    if (slot) {
+                        window.ApercuSandbox.afficher(slot, genererBadgeCC(donnees.metadata), {
+                            hauteurMin: 120,
+                            hauteurMax: 500
+                        });
+                    }
+                }
 
             } catch (err) {
                 console.error('[Tampons] Erreur import:', err);
@@ -3351,8 +3367,11 @@
 
     /** Fermer modal import tampons */
     function fermerModalImportTampons() {
-        var overlay = document.querySelector('.modal-js-overlay');
-        if (overlay && overlay.parentElement) overlay.parentElement.remove();
+        // Cibler le wrapper d'import par sa classe dédiée (pas `.modal-js-overlay`,
+        // qui matche aussi la bibliothèque ouverte en arrière-plan dont le parent
+        // est `<body>` → `.remove()` effacerait toute l'application).
+        var wrapper = document.querySelector('.modal-import-tampons');
+        if (wrapper) wrapper.remove();
         delete window._tamponsImportEnAttente;
     }
 

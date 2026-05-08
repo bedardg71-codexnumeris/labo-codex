@@ -557,6 +557,13 @@ async function afficherBibliothequePratiques() {
         </div>
     `;
 
+    // Idempotence : retirer une instance précédente avant d'en injecter une
+    // nouvelle. Sinon `appendChild` empile deux modales partageant le même
+    // `id`, ce qui double le backdrop et oblige à fermer 2 fois pour que la
+    // modale disparaisse. (Cas typique : rafraîchissement après import.)
+    var ancien = document.getElementById('modalContainerPratiques');
+    if (ancien) ancien.remove();
+
     // Injecter le modal dans le DOM
     const modalContainer = document.createElement('div');
     modalContainer.id = 'modalContainerPratiques';
@@ -2020,18 +2027,17 @@ async function importerPratiquesUtilisateur(eventOuEl) {
             // Vérifier licence CC et afficher badge
             const estCC = typeof verifierLicenceCC === 'function' && verifierLicenceCC(donnees);
 
-            let message = estCC && typeof genererBadgeCC === 'function' ?
-                '<div style="margin-bottom: 15px;">' + genererBadgeCC(donnees.metadata) + '</div>' :
-                '';
-
-            message += '<p><strong>Veux-tu importer ces pratiques de notation ?</strong></p>';
-
-            // Créer modal avec badge CC
+            // Défense A : badge CC rendu dans une iframe sandbox isolée.
+            // Voir js/securite-apercu-sandbox.js et MODELE-MENACES.md §D-01.
+            // La classe `modal-import-pratiques` cible la fermeture sans
+            // impacter la bibliothèque ouverte en arrière-plan.
             const modal = document.createElement('div');
+            modal.classList.add('modal-import-pratiques');
             modal.innerHTML = `
                 <div class="modal-js-overlay" style="z-index: 10001;">
                     <div class="modal-js-contenu" style="max-width: 600px; padding: 20px;">
-                        ${message}
+                        <div data-apercu-cc-slot style="margin-bottom: 15px;"></div>
+                        <p><strong>Veux-tu importer ces pratiques de notation ?</strong></p>
                         <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
                             <button class="btn btn-annuler" data-action="fermerModalImportPratiques">Annuler</button>
                             <button class="btn btn-confirmer" data-action="confirmerEtFermerImportPratiques">Importer</button>
@@ -2041,8 +2047,15 @@ async function importerPratiquesUtilisateur(eventOuEl) {
             `;
             document.body.appendChild(modal);
 
-            // Avertir si pas de licence CC
-            if (!estCC && typeof avertirSansLicence === 'function') {
+            if (estCC && window.ApercuSandbox && typeof genererBadgeCC === 'function') {
+                const slot = modal.querySelector('[data-apercu-cc-slot]');
+                if (slot) {
+                    window.ApercuSandbox.afficher(slot, genererBadgeCC(donnees.metadata), {
+                        hauteurMin: 120,
+                        hauteurMax: 500
+                    });
+                }
+            } else if (!estCC && typeof avertirSansLicence === 'function') {
                 avertirSansLicence(donnees);
             }
 
@@ -2756,8 +2769,11 @@ function ouvrirFilePickerImportPratiques() {
 
 /** Fermer modal import pratiques */
 function fermerModalImportPratiques() {
-    var overlay = document.querySelector('.modal-js-overlay');
-    if (overlay && overlay.parentElement) overlay.parentElement.remove();
+    // Cibler le wrapper d'import par sa classe dédiée (pas `.modal-js-overlay`,
+    // qui matche aussi la bibliothèque ouverte en arrière-plan dont le parent
+    // est `<body>` → `.remove()` effacerait toute l'application).
+    var wrapper = document.querySelector('.modal-import-pratiques');
+    if (wrapper) wrapper.remove();
     delete window._pratiquesImportEnAttente;
 }
 

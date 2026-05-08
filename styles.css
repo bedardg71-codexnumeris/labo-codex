@@ -4160,7 +4160,9 @@ body:not(.mode-clair) .badge-source--demo {
     color: white;
     border-radius: var(--radius-grand);
     box-shadow: var(--shadow-prononce);
-    z-index: 9999;
+    /* Au-dessus de toutes les modales (modal-js-overlay 10000, import 10001) — sinon
+       la notification de succès apparaît derrière la bibliothèque rafraîchie après import. */
+    z-index: 11000;
     animation: slideIn 0.3s ease;
 }
 
