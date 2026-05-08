@@ -8,7 +8,7 @@
 *ignorés*/
 
 # Calendriers institutionnels (fichiers locaux)
->DE_*.pdf
+DE_*.pdf
 
 # Archives (conservées localement, pas dans git)
 Archives/
@@ -43,3 +43,32 @@ plans de travail pour Claude Cowork/
 _à retirer/
 *(_à retirer)*/
 *(à retirer)*/
+
+# ============================================================
+# Patterns de prévention — Phase 3 du ménage du root (8 mai 2026)
+# Voir plans de travail/PLAN-MENAGE-ROOT-2026-05-08.md
+# ============================================================
+
+# Documents personnels Grégoire (bilans, questionnaires perso)
+Bilan*.md
+Bilan*.docx
+Bilan*.txt
+BILAN*.md
+BILAN*.docx
+BILAN*.txt
+
+# Données pédagogiques anonymisées (PDFs d'élèves importés temporairement)
+Claude Design/
+Inconnu_*_Artefact-*.pdf
+
+# Sauvegardes terrain (versements, archives, snapshots locaux)
+Sauvegarde *réserve*/
+Sauvegarde *archive*/
+Sauvegarde *Archives*/
+
+# Brouillons et copies de travail en root
+*- copie.txt
+* - copie.*
+
+# Guides utilisateur lourds en root (PDFs)
+/Guide de monitorage*.pdf
