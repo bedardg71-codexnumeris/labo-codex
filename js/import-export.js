@@ -750,13 +750,16 @@ async function executerExport() {
     const now = new Date();
     const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}`;
 
-    // Inclure le nom de l'utilisateur dans le fichier
-    // ✅ CORRECTION (Beta 95.5) : Vérifier que auteur est une chaîne
+    // Convention #262 : préfixe `sauvegarde-{auteur}-{date}` (sans
+    // « CONFIDENTIEL- » ni « monitorage », accents préservés).
+    // contientDonneesPerso reste consommé par le dialog de confirmation au-dessus.
     const infoCours = db.getSync ? db.getSync('infoCours', {}) : {};
     const auteurBrut = infoCours?.enseignant;
     const auteur = (typeof auteurBrut === 'string') ? auteurBrut : '';
-    const auteurNettoye = auteur ? auteur.replace(/[^a-z0-9]/gi, '-').toLowerCase() : '';
-    const prefixeConfidentiel = contientDonneesPerso ? 'CONFIDENTIEL-' : '';
+    const auteurNettoye = auteur
+        ? auteur.replace(/[^a-z0-9àâäéèêëïîôùûüç]/gi, '-').replace(/-+/g, '-').toLowerCase()
+        : '';
+    const partieAuteur = auteurNettoye ? `-${auteurNettoye}` : '';
 
     // 🆕 Export ZIP si fichiersTravaux est sélectionné (inclut les blobs)
     const cleFT = clesSelectionnees.find(c => c.includes('fichiersTravaux'));
@@ -783,9 +786,7 @@ async function executerExport() {
             compression: 'DEFLATE',
             compressionOptions: { level: 6 }
         });
-        const nomFichier = auteurNettoye
-            ? `sauvegarde-${prefixeConfidentiel}${auteurNettoye}-${dateStr}.zip`
-            : `sauvegarde-${prefixeConfidentiel}monitorage-${dateStr}.zip`;
+        const nomFichier = `sauvegarde${partieAuteur}-${dateStr}.zip`;
         const a = document.createElement('a');
         a.href = URL.createObjectURL(zipBlob);
         a.download = nomFichier;
@@ -795,9 +796,7 @@ async function executerExport() {
         // Export JSON classique (sans fichiersTravaux)
         const blob = new Blob([json], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
-        const nomFichier = auteurNettoye
-            ? `sauvegarde-${prefixeConfidentiel}${auteurNettoye}-${dateStr}.json`
-            : `sauvegarde-${prefixeConfidentiel}monitorage-${dateStr}.json`;
+        const nomFichier = `sauvegarde${partieAuteur}-${dateStr}.json`;
         const a = document.createElement('a');
         a.href = url;
         a.download = nomFichier;
