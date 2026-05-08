@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <!--
+        CSP IDENTIQUE à index.html ligne 10 (hash sha256 figé du
+        MESSENGER_SCRIPT). Si MESSENGER_SCRIPT change dans
+        js/securite-apercu-sandbox.js, le test A.3 (csp-hash.test.js)
+        attrape la désynchronisation côté index.html — il faudra alors
+        aussi mettre à jour ce hash pour que le harness reste cohérent
+        avec la prod.
+    -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-1tomo64F3gr/x4SLsGiKrU+vB3+2ULQdooxMT0v8oNQ='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: file:; worker-src 'self' blob:;">
+    <title>Harness Défense I — sandbox isolation (avec CSP de prod)</title>
+</head>
+<body>
+    <div id="conteneur" style="width: 800px;"></div>
+    <script src="../../../js/securite-apercu-sandbox.js"></script>
+</body>
+</html>
