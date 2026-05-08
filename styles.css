@@ -1305,6 +1305,12 @@ h1, h2, h3, h4 {
     white-space: nowrap;
 }
 
+/* Mode clair : l'en-tête reste bleu (cf .mode-clair .entete), donc on
+   restaure la couleur claire du label que .mode-clair label écraserait. */
+.mode-clair .bandeau-groupe-cours label {
+    color: rgba(255, 255, 255, 0.9);
+}
+
 .dropdown-groupe-cours-header {
     background-color: rgba(106, 172, 184, 0.12);
     border: 1px solid rgba(106, 172, 184, 0.25);
