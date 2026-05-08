@@ -1002,7 +1002,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'liste',
-                titre: "Ce qui est versé",
+                titre: "Ce qui est archivé",
                 items: [
                     "Les étudiant·es du groupe (liste, présences, évaluations sauvegardées)",
                     "Les fichiers travaux importés pour ce groupe (photos, PDF)",
@@ -1233,7 +1233,7 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'texte',
                 titre: "Où sont les données pédagogiques d'un trimestre archivé ?",
-                contenu: "Archiver n'a <strong>rien supprimé</strong> dans ton codex. Les étudiant·es, présences, évaluations et fichiers du trimestre que tu as versé sont toujours dans ton application. Pour les consulter, change le <strong>trimestre actif</strong> dans le sélecteur du haut. L’archive, lui, est une copie de sécurité figée."
+                contenu: "Archiver n'a <strong>rien supprimé</strong> dans ton codex. Les étudiant·es, présences, évaluations et fichiers du trimestre que tu as archivé sont toujours dans ton application. Pour les consulter, change le <strong>trimestre actif</strong> dans le sélecteur du haut. L’archive, elle, est une copie de sécurité figée."
             },
             {
                 type: 'liste',

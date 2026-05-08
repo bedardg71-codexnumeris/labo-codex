@@ -802,11 +802,11 @@ const TOOLTIPS = {
     'reserve-select-trimestre':
         'Trimestre du groupe-cours à archiver.',
     'reserve-select-groupe':
-        'Groupe-cours qui sera vers\u00e9 dans la r\u00e9serve. Tous les groupes que tu as enseign\u00e9s peuvent \u00eatre vers\u00e9s.',
+        'Groupe-cours qui sera archiv\u00e9. Tous les groupes que tu as enseign\u00e9s peuvent \u00eatre archiv\u00e9s.',
     'reserve-bouton-verser':
-        'Cr\u00e9e une copie du groupe-cours dans ta r\u00e9serve. Geste manuel, ne supprime rien dans ton codex de travail.',
+        'Cr\u00e9e une copie du groupe-cours dans tes archives. Geste manuel, ne supprime rien dans ton codex de travail.',
     'reserve-bouton-changer-dossier':
-        'Change le dossier r\u00e9serve s\u00e9lectionn\u00e9 (Chrome et Edge seulement).',
+        'Change le dossier d\'archives s\u00e9lectionn\u00e9 (Chrome et Edge seulement).',
     'reserve-ouvrir-toggle-copie':
         'Active la recopie des items d\u00e9j\u00e0 pr\u00e9sents dans ta biblioth\u00e8que active : ils recevront un nouvel identifiant et le suffixe \u00ab\u00a0\u2014 copie\u00a0\u00bb.',
     'reserve-ouvrir-bouton-reimporter':

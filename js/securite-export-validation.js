@@ -150,12 +150,12 @@
     }
 
     /**
-     * Valide la structure d'un export réserve (ZIP).
+     * Valide la structure d'un export archive (ZIP).
      * @param {JSZip} zip
      * @throws {Error}
      */
     function validerExportReserve(zip) {
-        validerStructureZip(zip, WHITELISTS.reserve, 'archive (réserve)');
+        validerStructureZip(zip, WHITELISTS.reserve, 'archive');
     }
 
     // API publique

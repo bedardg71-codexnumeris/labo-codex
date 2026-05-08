@@ -38,7 +38,7 @@ describe('Défense I · D · whitelist export (Défense K)', () => {
             .toThrow(/codex bloqué.*hors whitelist/s);
     });
 
-    it('D.12 · export réserve · ZIP légitime accepté', () => {
+    it('D.12 · export archive · ZIP légitime accepté', () => {
         const zip = new JSZip();
         zip.file('manifeste-archives.json', '{}');
         zip.file('trimestres/h2026/donnees.json', '{}');
@@ -48,14 +48,14 @@ describe('Défense I · D · whitelist export (Défense K)', () => {
         expect(() => win.SecuriteExportValidation.validerExportReserve(zip)).not.toThrow();
     });
 
-    it('D.12 · export réserve · ZIP avec chemin hors whitelist rejeté', () => {
+    it('D.12 · export archive · ZIP avec chemin hors whitelist rejeté', () => {
         const zip = new JSZip();
         zip.file('manifeste-archives.json', '{}');
         // Tentative d'inclure des données hors de l'arbo trimestres/
         zip.file('secret/identifiants.json', 'a=b');
 
         expect(() => win.SecuriteExportValidation.validerExportReserve(zip))
-            .toThrow(/réserve.*hors whitelist/s);
+            .toThrow(/archive.*hors whitelist/s);
     });
 
     it('D · validerClesObjet · clé pirate à la racine rejetée', () => {
