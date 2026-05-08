@@ -1049,7 +1049,7 @@ Cartouches de rétroaction : ${stats.nbCartouches}
 COMMENT UTILISER CETTE CONFIGURATION
 -------------------------------------------
 
-1. Téléchargez le fichier PRATIQUE-COMPLETE-xxx.json
+1. Téléchargez le fichier config-xxx.json
 2. Dans l'application, allez dans Paramètres > Import/Export
 3. Clique sur "Importer une configuration complète"
 4. Sélectionne le fichier téléchargé
@@ -1553,20 +1553,37 @@ async function sauvegarderMetadonnees() {
 // ============================================
 
 /**
- * Génère un nom de fichier export standardisé
- * Format: type-cours-discipline-date.json
+ * Génère un nom de fichier export standardisé selon la convention #262.
+ * Format : `type-{nom}-{cours}-{discipline}-{CC-BY-SA}-{date[-heure]}.{ext}`.
+ * - séparateur tiret partout (pas d'underscore)
+ * - accents préservés dans `nom` (regex Unicode-aware)
+ * - extension simple sans double point (.zip, .json, .pdf, .txt, .md, .csv)
+ * - type minuscule
  *
- * @param {string} type - Type de ressource (echelle, grille, production, etc.)
- * @param {Object} options - Options de nommage
- * @param {string} [options.nom] - Nom de l'élément
- * @param {string} [options.cours] - Code du cours
- * @param {string} [options.discipline] - Discipline
- * @param {boolean} [options.inclureLicence] - Ajouter CC-BY-SA au nom
- * @returns {string} Nom de fichier formaté
+ * @param {string} type - Type de ressource. Préfixes officiels :
+ *   codex, archive, codex-data, config, lisezmoi, grille, echelle, cartouche,
+ *   production, pratique, tampons, objectifs, alignement, bilan-reflexif,
+ *   cours, etudiants, evaluation, synthese.
+ * @param {Object} options - Options de nommage.
+ * @param {string} [options.nom] - Nom de l'élément (sera sanitisé, accents préservés).
+ * @param {string} [options.cours] - Code du cours.
+ * @param {string} [options.discipline] - Discipline.
+ * @param {boolean} [options.inclureLicence] - Ajouter `CC-BY-SA` au nom.
+ * @param {string} [options.extension='.json'] - Extension du fichier (avec point).
+ * @param {string} [options.precisionDate='jour'] - 'jour' (YYYY-MM-DD) ou
+ *   'minute' (YYYY-MM-DD-HHhMM).
+ * @returns {string} Nom de fichier formaté.
  */
 function genererNomFichierExport(type, options = {}) {
     const nettoyer = (str) => (str || '').replace(/[^a-z0-9àâäéèêëïîôùûüç]/gi, '-').replace(/-+/g, '-').toLowerCase();
-    const date = new Date().toISOString().split('T')[0];
+
+    // Horodatage selon précision demandée
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const dateJour = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    const horodatage = options.precisionDate === 'minute'
+        ? `${dateJour}-${pad(now.getHours())}h${pad(now.getMinutes())}`
+        : dateJour;
 
     // Récupérer infos du cours actif si non fournies
     let cours = options.cours;
@@ -1579,16 +1596,17 @@ function genererNomFichierExport(type, options = {}) {
     }
 
     // Construire le nom
-    const parties = [type];
+    const parties = [String(type).toLowerCase()];
 
     if (options.nom) parties.push(nettoyer(options.nom));
     if (cours) parties.push(nettoyer(cours));
     if (discipline) parties.push(nettoyer(discipline));
     if (options.inclureLicence) parties.push('CC-BY-SA');
 
-    parties.push(date);
+    parties.push(horodatage);
 
-    return parties.join('-') + '.json';
+    const extension = options.extension || '.json';
+    return parties.join('-') + extension;
 }
 
 // ============================================

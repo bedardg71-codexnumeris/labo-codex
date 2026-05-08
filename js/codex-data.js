@@ -49,7 +49,9 @@
 
 var FORMAT = 'codex-data';
 var VERSION_SCHEMA = 1;
-var EXTENSION = '.codex-data.json';
+// Convention #262 — extension simple. L'ancien `.codex-data.json` reste
+// lisible (input file accepte `.json` génériquement).
+var EXTENSION = '.json';
 
 // Limite de sécurité : un codex data ne devrait jamais dépasser 100 Mo.
 // Au-delà, c'est probablement une corruption ou une tentative d'abus.
@@ -606,7 +608,8 @@ function _genererNomFichier(codexData) {
     var dateCourt = date.split('T')[0]; // YYYY-MM-DD
     var nbArchives = (codexData.metadata && codexData.metadata.archives) ?
         codexData.metadata.archives.length : 0;
-    return 'codex-data-' + nbArchives + 'gc-' + dateCourt + EXTENSION;
+    // Convention #262 : `codex-data-{N}-groupes-{date}.json` (au lieu de `{N}gc`).
+    return 'codex-data-' + nbArchives + '-groupes-' + dateCourt + EXTENSION;
 }
 
 /* ===============================

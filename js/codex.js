@@ -21,7 +21,9 @@
    =============================== */
 
 const FORMAT_VERSION = 1;
-const EXTENSION_CODEX = '.codex.zip';
+// Convention #262 — extension simple (pas de double point). L'ancien
+// `.codex.zip` reste lisible (le filtre input file accepte `.zip`).
+const EXTENSION_CODEX = '.zip';
 const NOM_MANIFESTE = 'codex-manifeste.json';
 // Rétrocompatibilité : accepter aussi l'ancien nom de manifeste à l'import
 const NOM_MANIFESTE_ANCIEN = 'classeur-manifeste.json';

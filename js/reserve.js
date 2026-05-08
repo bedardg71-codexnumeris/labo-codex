@@ -38,7 +38,9 @@
    CONSTANTES
    =============================== */
 
-var EXTENSION_RESERVE = '.reserve.zip';
+// Convention #262 — extension simple (pas de double point). L'ancienne
+// extension `.reserve.zip` reste lisible par reserve-ouvrir.js (rétro-compat).
+var EXTENSION_ARCHIVE = '.zip';
 
 // Clé db non namespacée du manifeste local (cross-trimestre).
 // Préfixe `_` → exclue automatiquement des archives (cf. PREFIXES_EXCLUS).
@@ -1315,7 +1317,9 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
             }
         );
 
-        var nomFichier = 'CONFIDENTIEL-archive-' + dossier + '-' + _dateAujourdhui() + EXTENSION_RESERVE;
+        // Convention #262 : préfixe `archive-` + dossier + date + extension simple.
+        // CONFIDENTIEL- retiré (l'archive est implicitement personnelle).
+        var nomFichier = 'archive-' + dossier + '-' + _dateAujourdhui() + EXTENSION_ARCHIVE;
         _prog(99, 'Téléchargement...', nomFichier);
 
         var url = URL.createObjectURL(zipBlob);
