@@ -698,130 +698,106 @@ function demanderMetadonneesEnrichies(typeContenu, nomContenu) {
 function creerModalMetadonneesEnrichies() {
     const modal = document.createElement('div');
     modal.id = 'modalMetadonneesEnrichies';
-    modal.className = 'modal u-hide';
-    // z-index: 10001 pour passer au-dessus des modaux de bibliothèque (10000)
-    modal.style.cssText = 'display: flex; position: fixed; z-index: 10001; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center;';
+    // .modal-js-overlay = pattern DS standard. z-index custom = 10001
+    // pour passer au-dessus des modaux de bibliothèque (10000).
+    modal.className = 'modal-js-overlay u-hide';
+    modal.style.zIndex = '10001';
 
     modal.innerHTML = `
-        <div class="modal-content modal-js-contenu" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
-            <h2 style="margin-top: 0; color: var(--bleu-leger); display: flex; align-items: center; justify-content: space-between;">
-                <span>Metadonnees d'export</span>
-                <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank"
-                   class="u-texte-mini" style="color: var(--bleu-leger); text-decoration: none; display: flex; align-items: center; gap: 5px;">
-                    <img src="icons/by-nc-sa-2.svg"
-                         alt="CC BY-NC-SA 4.0" style="height: 15px;">
-                    En savoir plus
-                </a>
-            </h2>
+        <div class="modal-js-contenu">
+            <h2 class="modal-titre">Métadonnées d'export</h2>
 
-            <p class="u-mb-20" style="color: var(--gris-leger);">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" class="cc-meta-link">
+                <img src="icons/by-nc-sa-2.svg" alt="CC BY-NC-SA 4.0">
+                En savoir plus sur la licence
+            </a>
+
+            <p class="cc-meta-intro">
                 Tu exportes : <strong id="metaTypeContenu"></strong><br>
                 <span class="u-texte-09" id="metaNomContenu"></span>
             </p>
 
-            <!-- Section 1: Informations personnelles -->
-            <h3 class="cc-modal-section-titre">
-                Informations personnelles
-            </h3>
+            <h3 class="cc-meta-section-titre">Informations personnelles</h3>
 
-            <div class="cc-modal-ligne-champ u-mb-10">
-                <input type="checkbox" id="checkPartagerNom" checked class="cc-modal-checkbox">
-                <label for="checkPartagerNom" class="cc-modal-label">Nom</label>
-                <input type="text" id="metaNomAuteur" class="cc-modal-input">
+            <div class="cc-meta-ligne">
+                <input type="checkbox" id="checkPartagerNom" checked>
+                <label for="checkPartagerNom">Nom</label>
+                <input type="text" id="metaNomAuteur">
             </div>
 
-            <div class="cc-modal-ligne-champ u-mb-10">
-                <input type="checkbox" id="checkPartagerCourriel" checked class="cc-modal-checkbox">
-                <label for="checkPartagerCourriel" class="cc-modal-label">Courriel</label>
-                <input type="email" id="metaCourriel" class="cc-modal-input">
+            <div class="cc-meta-ligne">
+                <input type="checkbox" id="checkPartagerCourriel" checked>
+                <label for="checkPartagerCourriel">Courriel</label>
+                <input type="email" id="metaCourriel">
             </div>
 
-            <div class="cc-modal-ligne-champ u-mb-15">
-                <input type="checkbox" id="checkPartagerSiteWeb" checked class="cc-modal-checkbox">
-                <label for="checkPartagerSiteWeb" class="cc-modal-label">Site web</label>
-                <input type="url" id="metaSiteWeb" class="cc-modal-input">
+            <div class="cc-meta-ligne">
+                <input type="checkbox" id="checkPartagerSiteWeb" checked>
+                <label for="checkPartagerSiteWeb">Site web</label>
+                <input type="url" id="metaSiteWeb">
             </div>
 
-            <!-- Zone de clarification (cachée par défaut) -->
-            <div id="zoneClarification" class="info-box info-box--attention u-mb-20" style="display: none;">
-                <p class="u-mb-15" style="margin-top: 0; font-weight: 600; color: var(--gris-fonce);">
-                    Clarification necessaire
-                </p>
-                <p class="u-mb-15 u-texte-09" style="margin-top: 0; color: var(--gris-fonce);">
-                    Pourquoi ne veux-tu pas partager ton nom ?
-                </p>
-                <label class="cc-modal-radio-label u-mb-10">
-                    <input type="radio" name="intentionPartage" value="anonyme" style="margin-right: 10px; margin-top: 3px;">
-                    <span class="u-texte-09" style="line-height: 1.5;">
+            <div id="zoneClarification" class="info-box info-box--attention u-mb-20 u-hide">
+                <p class="u-mb-10" style="font-weight: 600;">Clarification nécessaire</p>
+                <p class="u-mb-15 u-texte-09">Pourquoi ne veux-tu pas partager ton nom ?</p>
+                <label class="cc-meta-radio">
+                    <input type="radio" name="intentionPartage" value="anonyme">
+                    <span class="u-texte-09">
                         <strong>Je veux partager anonymement</strong><br>
-                        <small style="color: var(--gris-leger);">Le materiel sera sous licence CC BY-NC-SA mais marque "Auteur anonyme"</small>
+                        <small class="u-texte-gris">Le matériel sera sous licence CC BY-NC-SA mais marqué « Auteur anonyme »</small>
                     </span>
                 </label>
-                <label class="cc-modal-radio-label">
-                    <input type="radio" name="intentionPartage" value="prive" style="margin-right: 10px; margin-top: 3px;">
-                    <span class="u-texte-09" style="line-height: 1.5;">
-                        <strong>Je ne veux pas partager ce materiel</strong><br>
-                        <small style="color: var(--gris-leger);">Usage prive/personnel uniquement (annule l'export)</small>
+                <label class="cc-meta-radio">
+                    <input type="radio" name="intentionPartage" value="prive">
+                    <span class="u-texte-09">
+                        <strong>Je ne veux pas partager ce matériel</strong><br>
+                        <small class="u-texte-gris">Usage privé/personnel uniquement (annule l'export)</small>
                     </span>
                 </label>
             </div>
 
-            <!-- Section 2: Informations contextuelles -->
-            <h3 class="cc-modal-section-titre">
-                Informations contextuelles
-            </h3>
+            <h3 class="cc-meta-section-titre">Informations contextuelles</h3>
 
-            <div class="cc-modal-ligne-champ u-mb-10">
-                <input type="checkbox" id="checkPartagerDiscipline" checked class="cc-modal-checkbox">
-                <label for="checkPartagerDiscipline" class="cc-modal-label">Discipline(s)</label>
-                <input type="text" id="metaDisciplines"
-                       placeholder="Ex: Litterature, Philosophie"
-                       class="cc-modal-input">
+            <div class="cc-meta-ligne">
+                <input type="checkbox" id="checkPartagerDiscipline" checked>
+                <label for="checkPartagerDiscipline">Discipline(s)</label>
+                <input type="text" id="metaDisciplines" placeholder="Ex : Littérature, Philosophie">
             </div>
 
-            <div class="cc-modal-ligne-champ u-mb-10">
-                <input type="checkbox" id="checkPartagerInstitution" class="cc-modal-checkbox">
-                <label for="checkPartagerInstitution" class="cc-modal-label">Institution</label>
-                <input type="text" id="metaInstitution"
-                       placeholder="Ex: Cegep de Drummondville"
-                       class="cc-modal-input">
+            <div class="cc-meta-ligne">
+                <input type="checkbox" id="checkPartagerInstitution">
+                <label for="checkPartagerInstitution">Institution</label>
+                <input type="text" id="metaInstitution" placeholder="Ex : Cégep de Drummondville">
             </div>
 
-            <div class="cc-modal-ligne-champ u-mb-15">
-                <input type="checkbox" id="checkPartagerNiveau" checked class="cc-modal-checkbox">
-                <label for="checkPartagerNiveau" class="cc-modal-label">Niveau</label>
-                <select id="metaNiveau" class="cc-modal-input">
-                    <option value="">-- Non specifie --</option>
-                    <option value="Collegial" selected>Collegial</option>
+            <div class="cc-meta-ligne">
+                <input type="checkbox" id="checkPartagerNiveau" checked>
+                <label for="checkPartagerNiveau">Niveau</label>
+                <select id="metaNiveau">
+                    <option value="">-- Non spécifié --</option>
+                    <option value="Collégial" selected>Collégial</option>
                     <option value="Universitaire">Universitaire</option>
                     <option value="Secondaire">Secondaire</option>
                 </select>
             </div>
 
-            <!-- Section 3: Description (obligatoire) -->
-            <h3 class="cc-modal-section-titre u-mb-15">
-                Description du contenu <span style="color: var(--rouge-erreur);">*</span>
+            <h3 class="cc-meta-section-titre">
+                Description du contenu <span class="cc-meta-required">*</span>
             </h3>
 
-            <div style="margin-bottom: 25px;">
+            <div class="u-mb-20">
                 <textarea id="metaDescription"
-                          placeholder="Decrivez brievement ce contenu pedagogique..."
-                          maxlength="200"
-                          class="cc-modal-textarea"></textarea>
-                <small style="color: var(--gris-leger); display: block; margin-top: 5px;">
-                    <span id="metaDescriptionCompteur">0/200</span> caracteres
+                          class="cc-meta-textarea"
+                          placeholder="Décris brièvement ce contenu pédagogique…"
+                          maxlength="200"></textarea>
+                <small class="cc-meta-compteur">
+                    <span id="metaDescriptionCompteur">0/200</span> caractères
                 </small>
             </div>
 
-            <div class="u-flex-gap-10" style="justify-content: flex-end;">
-                <button id="btnAnnulerMeta"
-                        class="btn btn-annuler">
-                    Annuler
-                </button>
-                <button id="btnValiderMeta"
-                        class="btn btn-principal">
-                    Valider et exporter
-                </button>
+            <div class="modal-actions">
+                <button id="btnAnnulerMeta" class="btn btn-annuler">Annuler</button>
+                <button id="btnValiderMeta" class="btn btn-confirmer">Valider et exporter</button>
             </div>
         </div>
     `;
@@ -932,116 +908,100 @@ function demanderMetadonneesConfigComplete(nbRessources) {
 function creerModalConfigComplete() {
     const modal = document.createElement('div');
     modal.id = 'modalConfigComplete';
-    modal.className = 'modal u-hide';
-    modal.style.cssText = 'display: flex; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; overflow-y: auto; padding: 20px 0;';
+    // .modal-js-overlay = pattern DS standard.
+    modal.className = 'modal-js-overlay u-hide';
 
     modal.innerHTML = `
-        <div class="modal-content modal-js-contenu" style="max-width: 700px; margin: auto;">
-            <h2 style="margin-top: 0; color: var(--bleu-leger);">
-                Partager ma pratique complete
-            </h2>
+        <div class="modal-js-contenu">
+            <h2 class="modal-titre">Partager ma pratique complète</h2>
 
-            <p class="u-mb-20" style="color: var(--gris-leger); background: var(--bleu-tres-pale); padding: 15px; border-radius: 4px;">
-                Tu es sur le point d'exporter <strong id="configNbRessources"></strong> ressource(s) pedagogique(s).<br>
-                Ces ressources seront partagees avec d'autres enseignant-es.
+            <p class="cc-meta-intro cc-meta-intro--encadre">
+                Tu es sur le point d'exporter <strong id="configNbRessources"></strong> ressource(s) pédagogique(s).<br>
+                Ces ressources seront partagées avec d'autres enseignant-es.
             </p>
 
-            <div class="cc-modal-groupe-form u-mb-20">
-                <label class="cc-modal-form-label">
-                    Nom de ta pratique <span style="color: var(--rouge-erreur);">*</span>
+            <div class="groupe-form">
+                <label for="configNom">
+                    Nom de ta pratique <span class="cc-meta-required">*</span>
                 </label>
-                <input type="text"
-                       id="configNom"
-                       placeholder="Ex: PAN avec evaluation par competences"
-                       class="cc-modal-input-full">
+                <input type="text" id="configNom" class="controle-form"
+                       placeholder="Ex : PAN avec évaluation par compétences">
             </div>
 
-            <div class="cc-modal-groupe-form u-mb-20">
-                <label class="cc-modal-form-label">
-                    Ton nom <span style="color: var(--rouge-erreur);">*</span>
+            <div class="groupe-form">
+                <label for="configAuteur">
+                    Ton nom <span class="cc-meta-required">*</span>
                 </label>
-                <input type="text"
-                       id="configAuteur"
-                       placeholder="Ex: Gregoire Bedard"
-                       class="cc-modal-input-full">
+                <input type="text" id="configAuteur" class="controle-form"
+                       placeholder="Ex : Grégoire Bédard">
             </div>
 
-            <div class="cc-modal-groupe-form u-mb-20">
-                <label class="cc-modal-form-label">
-                    Discipline(s) <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span>
+            <div class="groupe-form">
+                <label for="configDisciplines">
+                    Discipline(s) <span class="cc-meta-optionnel">(optionnel)</span>
                 </label>
-                <input type="text"
-                       id="configDisciplines"
-                       placeholder="Ex: Litterature, Philosophie"
-                       class="cc-modal-input-full">
+                <input type="text" id="configDisciplines" class="controle-form"
+                       placeholder="Ex : Littérature, Philosophie">
             </div>
 
-            <div class="cc-modal-groupe-form u-mb-20">
-                <label class="cc-modal-form-label">
-                    Niveau <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span>
+            <div class="groupe-form">
+                <label for="configNiveau">
+                    Niveau <span class="cc-meta-optionnel">(optionnel)</span>
                 </label>
-                <select id="configNiveau" class="cc-modal-input-full">
-                    <option value="">-- Non specifie --</option>
-                    <option value="Collegial" selected>Collegial</option>
+                <select id="configNiveau" class="controle-form">
+                    <option value="">-- Non spécifié --</option>
+                    <option value="Collégial" selected>Collégial</option>
                     <option value="Universitaire">Universitaire</option>
                     <option value="Secondaire">Secondaire</option>
                 </select>
             </div>
 
-            <div class="cc-modal-groupe-form u-mb-20">
-                <label class="cc-modal-form-label">
-                    Description de ta pratique <span style="color: var(--rouge-erreur);">*</span>
+            <div class="groupe-form">
+                <label for="configDescription">
+                    Description de ta pratique <span class="cc-meta-required">*</span>
                 </label>
                 <textarea id="configDescription"
-                          placeholder="Decris ton approche pedagogique, tes principes d'evaluation, les objectifs vises..."
-                          maxlength="500"
-                          class="cc-modal-textarea" style="height: 120px;"></textarea>
-                <small style="color: var(--gris-leger); display: block; margin-top: 5px;">
-                    <span id="configDescriptionCompteur">0/500</span> caracteres
+                          class="cc-meta-textarea cc-meta-textarea--grand"
+                          placeholder="Décris ton approche pédagogique, tes principes d'évaluation, les objectifs visés…"
+                          maxlength="500"></textarea>
+                <small class="cc-meta-compteur">
+                    <span id="configDescriptionCompteur">0/500</span> caractères
                 </small>
             </div>
 
-            <div class="cc-modal-groupe-form u-mb-20">
-                <label class="cc-modal-form-label">
-                    Ton courriel <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span>
+            <div class="groupe-form">
+                <label for="configEmail">
+                    Ton courriel <span class="cc-meta-optionnel">(optionnel)</span>
                 </label>
-                <input type="email"
-                       id="configEmail"
-                       placeholder="Ex: nom@cegep.qc.ca"
-                       class="cc-modal-input-full">
+                <input type="email" id="configEmail" class="controle-form"
+                       placeholder="Ex : nom@cegep.qc.ca">
             </div>
 
-            <div class="cc-modal-groupe-form" style="margin-bottom: 25px;">
-                <label class="cc-modal-form-label">
-                    Ton site web <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span>
+            <div class="groupe-form u-mb-20">
+                <label for="configSite">
+                    Ton site web <span class="cc-meta-optionnel">(optionnel)</span>
                 </label>
-                <input type="url"
-                       id="configSite"
-                       placeholder="Ex: https://monsite.com"
-                       class="cc-modal-input-full">
+                <input type="url" id="configSite" class="controle-form"
+                       placeholder="Ex : https://monsite.com">
             </div>
 
             <div class="info-box info-box--attention u-mb-20">
-                <label style="display: flex; align-items: start; cursor: pointer;">
-                    <input type="checkbox" id="configLicenceAccept" style="margin-right: 10px; margin-top: 4px; transform: scale(1.3);">
-                    <span class="u-texte-09" style="line-height: 1.5;">
+                <label class="cc-meta-licence-cgv">
+                    <input type="checkbox" id="configLicenceAccept">
+                    <span class="u-texte-09">
                         <strong>J'accepte de partager cette configuration sous licence CC BY-NC-SA 4.0</strong><br>
-                        <small style="color: var(--gris-leger);">
+                        <small>
                             Cela signifie que d'autres enseignant-es pourront utiliser, modifier et partager ton travail,
-                            a condition de t'attribuer la paternite, de ne pas en faire usage commercial,
-                            et de partager sous la meme licence.
+                            à condition de t'attribuer la paternité, de ne pas en faire usage commercial,
+                            et de partager sous la même licence.
                         </small>
                     </span>
                 </label>
             </div>
 
-            <div class="u-flex-gap-10" style="justify-content: flex-end;">
-                <button id="btnAnnulerConfig" class="btn btn-annuler">
-                    Annuler
-                </button>
-                <button id="btnValiderConfig" class="btn btn-confirmer">
-                    Exporter la pratique
-                </button>
+            <div class="modal-actions">
+                <button id="btnAnnulerConfig" class="btn btn-annuler">Annuler</button>
+                <button id="btnValiderConfig" class="btn btn-confirmer">Exporter la pratique</button>
             </div>
         </div>
     `;
@@ -1463,48 +1423,43 @@ async function afficherModalEditionMetadonnees(typeRessource, ressourceId) {
 function creerModalEditionMetadonnees() {
     const modal = document.createElement('div');
     modal.id = 'modalEditionMetadonnees';
-    modal.className = 'modal u-hide';
-    // z-index: 10001 pour passer au-dessus des modaux de bibliothèque (10000)
-    modal.style.cssText = 'display: flex; position: fixed; z-index: 10001; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center;';
+    // .modal-js-overlay = pattern DS standard. z-index custom = 10001
+    // pour passer au-dessus des modaux de bibliothèque (10000).
+    modal.className = 'modal-js-overlay u-hide';
+    modal.style.zIndex = '10001';
 
     modal.innerHTML = `
-        <div class="modal-content modal-js-contenu" style="max-width: 550px;">
-            <h2 id="editMetaTitre" style="margin-top: 0; color: var(--bleu-fonce); font-size: 1.2rem;">
-                Métadonnées
-            </h2>
+        <div class="modal-js-contenu" style="max-width: 550px;">
+            <h2 id="editMetaTitre" class="modal-titre">Métadonnées</h2>
 
-            <p class="u-texte-09 u-texte-gris u-mb-20">
+            <p class="cc-meta-intro">
                 Ces informations sont affichées dans la bibliothèque et incluses lors de l'export.
             </p>
 
             <div class="groupe-form u-mb-15">
-                <label for="editMetaAuteur" class="cc-modal-form-label">Auteur</label>
+                <label for="editMetaAuteur">Auteur</label>
                 <input type="text" id="editMetaAuteur" class="controle-form" placeholder="Prénom Nom">
             </div>
 
             <div class="groupe-form u-mb-15">
-                <label for="editMetaInstitution" class="cc-modal-form-label">Institution</label>
-                <input type="text" id="editMetaInstitution" class="controle-form" placeholder="Ex: Cégep de Drummondville">
+                <label for="editMetaInstitution">Institution</label>
+                <input type="text" id="editMetaInstitution" class="controle-form" placeholder="Ex : Cégep de Drummondville">
             </div>
 
             <div class="groupe-form u-mb-15">
-                <label for="editMetaDiscipline" class="cc-modal-form-label">Discipline(s)</label>
-                <input type="text" id="editMetaDiscipline" class="controle-form" placeholder="Ex: Littérature, Philosophie">
-                <small class="u-texte-gris">Séparez plusieurs disciplines par des virgules</small>
+                <label for="editMetaDiscipline">Discipline(s)</label>
+                <input type="text" id="editMetaDiscipline" class="controle-form" placeholder="Ex : Littérature, Philosophie">
+                <small class="u-texte-gris">Sépare plusieurs disciplines par des virgules.</small>
             </div>
 
             <div class="groupe-form u-mb-20">
-                <label for="editMetaDescription" class="cc-modal-form-label">Description</label>
-                <textarea id="editMetaDescription" class="controle-form" rows="3" placeholder="Brève description de cette ressource..." style="resize: vertical;"></textarea>
+                <label for="editMetaDescription">Description</label>
+                <textarea id="editMetaDescription" class="cc-meta-textarea" rows="3" placeholder="Brève description de cette ressource…"></textarea>
             </div>
 
-            <div class="u-flex-gap-10" style="justify-content: flex-end;">
-                <button type="button" class="btn btn-annuler" data-action="fermerModalEditionMetadonnees">
-                    Annuler
-                </button>
-                <button type="button" class="btn btn-confirmer" data-action="sauvegarderMetadonnees">
-                    Sauvegarder
-                </button>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-annuler" data-action="fermerModalEditionMetadonnees">Annuler</button>
+                <button type="button" class="btn btn-confirmer" data-action="sauvegarderMetadonnees">Sauvegarder</button>
             </div>
         </div>
     `;
