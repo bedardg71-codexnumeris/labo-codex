@@ -3296,12 +3296,12 @@ function fermerModalImportProductions() {
     // est `<body>` → `.remove()` effacerait toute l'application).
     var wrapper = document.querySelector('.modal-import-productions');
     if (wrapper) wrapper.remove();
+    delete window._productionsImportEnAttente;
 }
 
 /** Confirmer import + fermer modal */
 function confirmerEtFermerImportProductions() {
     window.confirmerImportProductions(window._productionsImportEnAttente);
-    delete window._productionsImportEnAttente;
     fermerModalImportProductions();
 }
 

@@ -47,8 +47,13 @@
        peut changer de référence entre l'attachement DOM et le chargement
        du srcdoc — la pré-inscription dans une WeakMap loupe alors les
        messages postés depuis le second contentWindow. On itère ici à la
-       réception et on compare la référence courante. */
-    var instances = []; // [{ conteneur, iframe, hauteurMin, hauteurMax }]
+       réception et on compare la référence courante.
+
+       Auto-cleanup : un MutationObserver attaché au body splice l'instance
+       quand l'iframe est détachée du DOM (cas typique : un call-site qui
+       retire son wrapper sans rappeler `ApercuSandbox.fermer()`). Évite la
+       croissance non bornée du tableau au fil des imports. */
+    var instances = []; // [{ conteneur, iframe, hauteurMin, hauteurMax, observer }]
 
     /* ---------------- Listener postMessage global ---------------- */
     var listenerInstalle = false;
@@ -247,9 +252,26 @@
             conteneur: conteneur,
             iframe: iframe,
             hauteurMin: hauteurMin,
-            hauteurMax: hauteurMax
+            hauteurMax: hauteurMax,
+            observer: null
         };
         instances.push(instance);
+
+        // Auto-cleanup : si l'iframe est détachée du DOM (cas typique : le
+        // call-site retire son wrapper via `wrapper.remove()` sans rappeler
+        // `ApercuSandbox.fermer()`), splicer l'entrée du tableau pour libérer
+        // la référence au DOM détaché et permettre le GC.
+        if (typeof MutationObserver !== 'undefined') {
+            instance.observer = new MutationObserver(function() {
+                if (!iframe.isConnected) {
+                    var idx = instances.indexOf(instance);
+                    if (idx !== -1) instances.splice(idx, 1);
+                    instance.observer.disconnect();
+                    instance.observer = null;
+                }
+            });
+            instance.observer.observe(document.body, { childList: true, subtree: true });
+        }
 
         return iframe;
     }
@@ -263,6 +285,10 @@
         if (idx === -1) return;
         var instance = instances[idx];
         instances.splice(idx, 1);
+        if (instance.observer) {
+            instance.observer.disconnect();
+            instance.observer = null;
+        }
         try {
             if (instance.iframe.parentNode === conteneur) {
                 conteneur.removeChild(instance.iframe);
