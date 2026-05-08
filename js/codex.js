@@ -377,12 +377,20 @@ async function genererCodex(options = {}) {
     // avant compression et téléchargement. L'utilisateur peut annuler.
     // Sautée si silencieux (auto-save) ou si le module preview n'est pas
     // chargé (dégradation gracieuse).
+    //
+    // Important UX : on masque l'overlay de progression avant la modale
+    // (sinon double affichage), puis on le RÉAFFICHE après le clic
+    // Télécharger pour montrer la compression (qui peut prendre plusieurs
+    // minutes avec beaucoup de fichiers). Sans réaffichage, l'utilisateur
+    // attend dans le noir pendant generateAsync.
     if (!silencieux && window.SecuriteExportPreview && typeof window.SecuriteExportPreview.previewZipEtConfirmer === 'function') {
         _progMasquer();
         const ok = await window.SecuriteExportPreview.previewZipEtConfirmer(zip, 'codex');
         if (!ok) {
             return null;
         }
+        // Recréer l'overlay pour la phase compression (peut être longue).
+        _afficherProgression('Génération du codex');
         _prog(70, 'Compression du ZIP...', nbBlobs + ' fichier(s), ' + _formaterTaille(tailleTotale));
     }
 
