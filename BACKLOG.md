@@ -331,6 +331,13 @@
       `.modal-js-overlay` / `.modal-js-contenu` ou équivalentes du DS.
     - Boutons « Annuler » / « Télécharger » de la modale — styles inline
       à remplacer par `.btn .btn-annuler` / `.btn .btn-confirmer`.
+    - **Modale `demanderMetadonneesConfigComplete`** (`js/cc-license.js:842`,
+      titre « Partager ma pratique complète ») — précède l'export config.
+      Constatée le 8 mai 2026 (capture #9 du backlog) : placeholders peu
+      lisibles sur fond foncé, contraste du textarea description en
+      décalage, plusieurs typos sans accents (« complete », « pratique »
+      titres et boutons, « Litterature », « Gregoire Bedard », « caracteres »).
+      Vérifier l'alignement DS et passer un coup d'accents.
     - Carte « Sécurité » dans Réglages > Préférences (déjà en HTML statique,
       utilise les classes du projet — vérifier la cohérence visuelle avec
       les autres cartes de la page).
