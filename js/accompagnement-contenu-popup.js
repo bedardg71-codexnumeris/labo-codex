@@ -1074,7 +1074,7 @@ const AIDE_CONTEXTUELLE = {
                 titre: "Selon ton navigateur",
                 items: [
                     "<strong>Chrome ou Edge</strong> avec un dossier d’archives configuré : tu vois la liste de tes archives, tu en choisis un.",
-                    "<strong>Safari</strong> : tu sélectionnes le fichier <code>.reserve.zip</code> de ton choix. Si tu viens d’archiver depuis Safari, ton fichier est dans ton dossier Téléchargements."
+                    "<strong>Safari</strong> : tu sélectionnes le fichier d'archive (<code>.zip</code>) de ton choix. Si tu viens d’archiver depuis Safari, ton fichier est dans ton dossier Téléchargements."
                 ]
             },
             {

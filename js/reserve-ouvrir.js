@@ -514,7 +514,7 @@ function _afficherChoixFichier() {
         '<div style="text-align: center; padding: 24px 16px;">' +
         '<button data-action="ReserveOuvrir.declencherInput" class="btn btn-confirmer">' +
         '<img src="icons/icon-import.svg" alt="" class="btn-inline-icon">' +
-        'Choisir un fichier .reserve.zip&hellip;</button>' +
+        'Choisir un fichier .zip d\'archive&hellip;</button>' +
         '<p style="margin-top: 14px; font-size: 0.82rem; color: var(--texte-secondaire); line-height: 1.5;">' +
         'Si tu viens d’archiver depuis Safari, ton fichier ZIP est dans ton dossier ' +
         '<strong>T&eacute;l&eacute;chargements</strong> (<code>~/Downloads/</code>).' +

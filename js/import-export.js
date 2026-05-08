@@ -3225,11 +3225,13 @@ async function exporterConfigurationComplete() {
         }
     }
 
-    // 4. Générer nom de fichier
-    const nomAuteurSimple = metaEnrichies.auteur.replace(/[^a-z0-9]/gi, '-');
-    const dateStr = new Date().toISOString().split('T')[0];
-    const nomFichierJSON = `PRATIQUE-COMPLETE-${nomAuteurSimple}-${dateStr}.json`;
-    const nomFichierTXT = `LISEZMOI-${nomAuteurSimple}-${dateStr}.txt`;
+    // 4. Générer nom de fichier (convention #262 — accents préservés via helper)
+    const nomFichierJSON = typeof genererNomFichierExport === 'function'
+        ? genererNomFichierExport('config', { nom: metaEnrichies.auteur, extension: '.json', inclureLicence: true })
+        : `config-${metaEnrichies.auteur.replace(/[^a-z0-9àâäéèêëïîôùûüç]/gi, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.json`;
+    const nomFichierTXT = typeof genererNomFichierExport === 'function'
+        ? genererNomFichierExport('lisezmoi', { nom: metaEnrichies.auteur, extension: '.txt' })
+        : `lisezmoi-${metaEnrichies.auteur.replace(/[^a-z0-9àâäéèêëïîôùûüç]/gi, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.txt`;
 
     // 5. Générer le fichier LISEZMOI.txt
     const contenuLISEZMOI = genererFichierLISEZMOI(configComplete.metadata, {
