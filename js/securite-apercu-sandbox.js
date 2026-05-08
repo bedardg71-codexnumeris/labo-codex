@@ -42,12 +42,13 @@
     ];
 
     /* ---------------- Suivi des instances ---------------- */
-    /* WeakMap conteneur → { iframe, hauteurMin, hauteurMax } */
-    var instances = new WeakMap();
-    /* Map contentWindow → conteneur, pour router postMessage. WeakMap
-       refuse certaines clés exotiques mais fonctionne avec WindowProxy
-       sur tous les browsers cibles (Safari Mac/iPad, Chrome, Edge). */
-    var iframeAuConteneur = new WeakMap();
+    /* Liste des instances actives. On utilise un tableau plutôt qu'une
+       WeakMap pour éviter une race : sur Safari, `iframe.contentWindow`
+       peut changer de référence entre l'attachement DOM et le chargement
+       du srcdoc — la pré-inscription dans une WeakMap loupe alors les
+       messages postés depuis le second contentWindow. On itère ici à la
+       réception et on compare la référence courante. */
+    var instances = []; // [{ conteneur, iframe, hauteurMin, hauteurMax }]
 
     /* ---------------- Listener postMessage global ---------------- */
     var listenerInstalle = false;
@@ -62,9 +63,13 @@
             if (data.source !== 'apercu-sandbox') return;
             if (data.type !== 'hauteur') return;
 
-            var conteneur = iframeAuConteneur.get(event.source);
-            if (!conteneur) return;
-            var instance = instances.get(conteneur);
+            var instance = null;
+            for (var i = 0; i < instances.length; i++) {
+                if (instances[i].iframe.contentWindow === event.source) {
+                    instance = instances[i];
+                    break;
+                }
+            }
             if (!instance) return;
 
             var hauteur = parseInt(data.valeur, 10);
@@ -76,7 +81,11 @@
 
     /* ---------------- Construction du srcdoc ---------------- */
     function lireVariablesDS() {
-        var styles = window.getComputedStyle(document.documentElement);
+        // Important : la classe `mode-clair` est posée sur <body>, pas sur
+        // <html>. Lire les variables sur :root retournerait les valeurs
+        // sombres même en thème clair → on lit sur body en priorité.
+        var source = document.body || document.documentElement;
+        var styles = window.getComputedStyle(source);
         var declarations = [];
         VARIABLES_DS.forEach(function(nom) {
             var v = styles.getPropertyValue('--' + nom);
@@ -98,8 +107,8 @@
             - contenu pédagogique : <table>, <ul>, <p>, <h3>
            Repris/adapté de styles.css §3999-4088. */
         return [
-            'html,body{margin:0;padding:0;}',
-            'body{padding:14px;font-family:-apple-system,BlinkMacSystemFont,"SF Pro","Segoe UI",sans-serif;color:var(--texte-principal,#d0e0e4);background:transparent;line-height:1.5;font-size:14px;}',
+            'html,body{margin:0;padding:0;background:transparent;}',
+            'body{padding:14px;font-family:-apple-system,BlinkMacSystemFont,"SF Pro","Segoe UI",sans-serif;color:var(--texte-principal,#d0e0e4);line-height:1.5;font-size:14px;min-height:0;}',
             '*{box-sizing:border-box;}',
             'p{margin:6px 0;}',
             'h1,h2,h3,h4,h5{color:var(--accent-primaire,#6aacb8);margin:10px 0 6px 0;}',
@@ -135,55 +144,48 @@
         ].join('');
     }
 
+    /* MESSENGER FIGÉ — toute modification CHANGE le hash SHA-256 ; il
+       faut alors mettre à jour `script-src 'sha256-…'` dans le CSP de
+       index.html (ligne 6). Le composant n'a pas de moyen de calculer
+       le hash dynamiquement (crypto.subtle est asynchrone, le srcdoc
+       est construit synchroniquement) ; on accepte le couplage. */
+    var MESSENGER_SCRIPT = '(function(){function h(){return Math.max((document.body&&document.body.scrollHeight)||0,(document.documentElement&&document.documentElement.scrollHeight)||0);}function envoyer(){try{parent.postMessage({source:"apercu-sandbox",type:"hauteur",valeur:h()},"*");}catch(e){}}envoyer();try{var ro=new ResizeObserver(envoyer);if(document.body)ro.observe(document.body);}catch(e){}window.addEventListener("load",envoyer);window.addEventListener("resize",envoyer);document.addEventListener("DOMContentLoaded",function(){var imgs=document.querySelectorAll("img");for(var i=0;i<imgs.length;i++){imgs[i].addEventListener("load",envoyer);imgs[i].addEventListener("error",envoyer);}envoyer();});setTimeout(envoyer,50);setTimeout(envoyer,250);setTimeout(envoyer,800);})();';
+
     function construireSrcdoc(htmlContenu, opts) {
         var theme = opts && opts.themeClair ? 'mode-clair' : '';
         var baseURI = String(document.baseURI || '').replace(/["<>]/g, '');
         var variables = lireVariablesDS();
         var styles = styleDeBase();
 
-        /* CSP interne à l'iframe :
-            - default-src 'none' bloque connect-src par fallback (pas de
-              fetch, XHR, WebSocket, EventSource → exfiltration neutralisée)
-            - img-src * data: laisse charger l'icône CC + autres médias
-              du contenu pédagogique
-            - style-src 'unsafe-inline' permet notre <style> et les
-              attributs style="" du contenu
-            - script-src 'unsafe-inline' laisse tourner notre messenger
-              de hauteur. Les payloads XSS éventuels tournent aussi mais
-              dans une origine opaque sans accès aux ressources parent.
-        */
-        var csp = "default-src 'none'; img-src * data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; font-src data: *;";
+        /* Pas de meta CSP ici : Safari merge le CSP de l'iframe avec celui
+           du parent (intersection, le plus restrictif gagne) — ajouter une
+           CSP plus permissive ici n'a aucun effet, ajouter une plus stricte
+           bloquerait notre propre messenger. La CSP du parent (index.html
+           ligne 6) sert déjà de défense en profondeur :
+            - default-src 'self' bloque fetch/XHR/WebSocket depuis l'iframe
+              (qui est en origine opaque, jamais 'self')
+            - script-src 'self' 'sha256-…' autorise UNIQUEMENT le messenger
+              de hauteur (figé, hash codé en dur dans la CSP) ; tout payload
+              XSS injecté est rejeté
+            - img-src 'self' file: data: laisse charger les SVG du badge CC
+              (icons/by-nc-sa-2.svg) en file:// */
 
-        /* Le messenger de hauteur est placé en TÊTE de body, AVANT
-           htmlContenu — comme ça même si le contenu utilisateur contient
-           un `<script>` non terminé (qui consommerait le reste du body
-           jusqu'au prochain `</script>`), notre script a déjà été parsé
-           et exécuté. */
-        var messenger =
-            '(function(){' +
-                'function envoyer(){try{parent.postMessage({source:"apercu-sandbox",type:"hauteur",valeur:document.documentElement.scrollHeight},"*");}catch(e){}}' +
-                'envoyer();' +
-                'try{new ResizeObserver(envoyer).observe(document.documentElement);}catch(e){}' +
-                'window.addEventListener("load",envoyer);' +
-                'window.addEventListener("resize",envoyer);' +
-                'document.addEventListener("DOMContentLoaded",function(){' +
-                    'var imgs=document.querySelectorAll("img");' +
-                    'for(var i=0;i<imgs.length;i++){imgs[i].addEventListener("load",envoyer);imgs[i].addEventListener("error",envoyer);}' +
-                    'envoyer();' +
-                '});' +
-            '})();';
+        /* Messenger placé en TÊTE de body, AVANT htmlContenu — pour
+           résister à un `<script>` non terminé dans le contenu utilisateur.
+           ResizeObserver observe `document.body` (auto-dimensionné au contenu)
+           plutôt que documentElement (contraint par la hauteur de l'iframe). */
 
         // security-ok: srcdoc construit avec contenu utilisateur intentionnellement —
         // c'est le rôle de la sandbox de neutraliser tout payload XSS qu'il contient.
         return '<!DOCTYPE html>'
              + '<html lang="fr"><head>'
              + '<meta charset="UTF-8">'
-             + '<meta http-equiv="Content-Security-Policy" content="' + csp + '">'
+             + '<meta name="color-scheme" content="' + (theme === 'mode-clair' ? 'light' : 'dark') + '">'
              + '<base href="' + baseURI + '">'
-             + '<style>:root{' + variables + '}' + styles + '</style>'
+             + '<style>:root{color-scheme:' + (theme === 'mode-clair' ? 'light' : 'dark') + ';' + variables + '}' + styles + '</style>'
              + '</head>'
              + '<body class="' + theme + '">'
-             + '<script>' + messenger + '</' + 'script>'
+             + '<script>' + MESSENGER_SCRIPT + '</' + 'script>'
              + '<div id="apercu-contenu">' + htmlContenu + '</div>'
              + '</body></html>';
     }
@@ -224,6 +226,10 @@
         iframe.style.border = 'none';
         iframe.style.display = 'block';
         iframe.style.background = 'transparent';
+        // Aligne la couleur de canevas par défaut de l'iframe sur le thème
+        // actif — sinon Safari rend un fond blanc derrière le contenu
+        // transparent, visible en mode sombre comme un cadre parasite.
+        iframe.style.colorScheme = themeClair ? 'light' : 'dark';
         iframe.style.minHeight = hauteurMin + 'px';
         iframe.style.maxHeight = hauteurMax + 'px';
         iframe.style.height = hauteurMin + 'px';
@@ -237,39 +243,33 @@
         while (conteneur.firstChild) conteneur.removeChild(conteneur.firstChild);
         conteneur.appendChild(iframe);
 
-        var instance = { iframe: iframe, hauteurMin: hauteurMin, hauteurMax: hauteurMax };
-        instances.set(conteneur, instance);
-
-        // contentWindow disponible immédiatement après attachement DOM.
-        if (iframe.contentWindow) {
-            iframeAuConteneur.set(iframe.contentWindow, conteneur);
-        } else {
-            // Garde-fou : certains environnements créent contentWindow au tick suivant.
-            requestAnimationFrame(function() {
-                if (iframe.contentWindow) {
-                    iframeAuConteneur.set(iframe.contentWindow, conteneur);
-                }
-            });
-        }
+        var instance = {
+            conteneur: conteneur,
+            iframe: iframe,
+            hauteurMin: hauteurMin,
+            hauteurMax: hauteurMax
+        };
+        instances.push(instance);
 
         return iframe;
     }
 
     function fermer(conteneur) {
         if (!conteneur) return;
-        var instance = instances.get(conteneur);
-        if (!instance) return;
+        var idx = -1;
+        for (var i = 0; i < instances.length; i++) {
+            if (instances[i].conteneur === conteneur) { idx = i; break; }
+        }
+        if (idx === -1) return;
+        var instance = instances[idx];
+        instances.splice(idx, 1);
         try {
-            if (instance.iframe.contentWindow) {
-                iframeAuConteneur.delete(instance.iframe.contentWindow);
-            }
             if (instance.iframe.parentNode === conteneur) {
                 conteneur.removeChild(instance.iframe);
             }
         } catch (e) {
             console.warn('[ApercuSandbox] erreur fermeture', e);
         }
-        instances.delete(conteneur);
     }
 
     window.ApercuSandbox = {
