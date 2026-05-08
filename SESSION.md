@@ -1,160 +1,281 @@
-# SESSION — État au 8 mai 2026 (Défense I mergée, #263 prête à démarrer)
+# SESSION — État au 8 mai 2026 fin de journée
 
-**Date** : 8 mai 2026
-**Dernier build** : `0508-1200` · Beta **99.38** (mergé sur main, commit de merge `0aaa83a`)
+**Date** : 8 mai 2026 (clôture en fin d'après-midi)
+**Dernier build** : `0508-1510` · Beta **99.38**
 **Branche** : `main` (à jour avec origin)
-**Statut** : Défense I 100 % livrée (PR #15 mergée, branche supprimée). Backlog #263 (alignement DS modales sécurité) prêt à démarrer — quick win ~2-3 h.
+**Statut** : journée très productive — Défense A + Défense I + #263 + ménage du root + Wizard V1 cleanup + #262 Phase 1 + follow-up #259. Tous commits poussés, hooks Vitest verts à chaque push (29 tests).
 
 ---
 
-## 🚀 Consigne de démarrage pour la prochaine session (#263)
+## 🚀 Consigne de démarrage pour la prochaine session
 
 À copier-coller au début de la prochaine session :
 
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
-Contexte : Backlog #263 — alignement DS des modales de métadonnées CC.
-Quick win post-Défense I, ~2-3 h. Identifié pendant la validation
-de Défense A le 8 mai matin : les modales de saisie de métadonnées
-CC enrichies divergent du Design System sur les 6 types de matériel
-partageable.
+Lecture obligatoire :
+1. SESSION.md — bilan du 8 mai + cette consigne
+2. BACKLOG.md — items `[ ]` actifs (notamment #265 récent)
+3. Si chantier sécurité : docs/securite/MODELE-MENACES.md v1.5
 
-LECTURE OBLIGATOIRE AVANT DE CODER :
+Plusieurs chantiers ouverts au choix (par taille croissante) :
 
-1. BACKLOG.md — entrée #263 (formulation détaillée)
-2. design-system.html (racine du projet) — référence visuelle
-   officielle des modales standardisées
-3. SESSION.md — bilan Défense I + cette consigne
+A. #265 — fix CSS rapide (~15 min)
+   Mode clair : label « Groupe-cours actif : » noir sur fond bleu
+   dans l'en-tête. Régler le scope `.bandeau-groupe-cours label`
+   en mode clair (texte clair sur fond bleu). Vérifier mode sombre.
 
-LECTURE FACULTATIVE :
+B. #262 Phase 2 — convention nommage exports, suite (~2-3 h)
+   Migrer 8 callers de `genererNomFichierCC` legacy vers
+   `genererNomFichierExport` (le helper unifié).
+   Modules : grilles.js, echelles.js, cartouches.js (×2),
+   productions.js, pratiques-materiel.js, objectifs.js,
+   travaux-outils.js (tampons).
+   Bugs corrigés : duplication `grilles-grilles-criteres` →
+   `grilles-CC-BY-SA-{date}.json` (ou avec `nom` non redondant) ;
+   accents préservés (`pédagogiques` au lieu de `pedagogiques`).
+   Une fois fait : retirer `genererNomFichierCC` de cc-license.js
+   (zero-dette).
 
-4. docs/securite/audits/TESTS-DEFENSE-A-2026-05-08.md §5 « Bugs détectés »
-   point 5 — la modale d'import cartouches a été alignée le 8 mai
-   pendant Défense A SP2 lot 2 (commit 8f591d7). #263 étend ce
-   travail aux 2 modales de métadonnées CC sur les 6 modules.
+C. Lot 4a ultrareview — jetons (~4 h)
+   Plan détaillé dans Rapports/ultrareview-lot-4a-evaluation.md.
+   4 axes : symétrie original↔reprise / validation / config canonique
+   / SSOT. Touche evaluation-jetons.js.
 
-PÉRIMÈTRE #263 :
-- modalMetadonneesEnrichies (modale qui collecte auteur, description,
-  contributeurs CC au moment de la création/import d'un matériel)
-- demanderMetadonneesConfigComplete (modale équivalente pour
-  exports/imports configuration-complète)
-- 6 modules concernés : grilles.js, echelles.js, cartouches.js,
-  pratiques.js, productions.js, tampons-bibliotheque.js
+D. Lot 3 ultrareview — indices (~3-5 h)
+   Triage manuel des 20 candidats (~14-16 vrais bugs attendus).
+   Plan dans Rapports/ultrareview-lot-3-indices.md.
 
-ACTION IMMÉDIATE :
-1. git checkout -b feature/263-alignement-ds-modales-securite
-2. grep -rn "modalMetadonneesEnrichies\|demanderMetadonneesConfigComplete" js/
-   pour repérer les call-sites et la définition
-3. Ouvrir une de ces modales dans l'app pour voir l'état visuel actuel
-4. Comparer aux modales DS-alignées (référence : modale d'import
-   cartouches alignée dans commit 8f591d7) — chercher .modal-js-overlay,
-   .modal-js-contenu, padding, header, footer, boutons
-5. Lister les divergences (styles inline, classes ad-hoc, couleurs en dur,
-   espacements arbitraires)
-6. Migrer module par module
+E. #264 — barre de progression sur tous les exports (~3-4 h)
+   Touche ~10 modules. Mieux après #262 Phase 2 pour avoir une
+   convention de nommage stable.
 
-WORKFLOW DE CHANTIER (rappel, identique à Défense A/I) :
-1. Petits commits par module : refactor(<module>): aligner DS modales
-   métadonnées CC
-2. Validation visuelle dans Safari après chaque module — IMPÉRATIVEMENT
-   tester mode sombre ET mode clair
-3. Tester l'import/export effectif sur 1 ou 2 fichiers réels par module
-4. Bumper version + commit après chaque module validé (demander beta)
-5. PR en fin de chantier (seulement si volume justifie ; sinon commits
-   directs sur main acceptables pour ce type de refacto UX)
+F. Phase 5 Démo (~1 j) — chantier important reverté le 22 avril.
+   Lecture préalable : plans de travail/PLAN-AUDIT-PHASE5-DEMO.md
+   + plans de travail/PLAN-AUTONOMISATION-UTILISATEUR.md.
 
-CONTRAINTES TECHNIQUES :
-- design-system.html à la racine = source de vérité visuelle
-- Variables CSS dans styles.css (--bleu-principal, --surface-carte,
-  --texte-principal, --bordure-claire, etc.) — JAMAIS de couleurs en dur
-- Pas de styles inline (utiliser les classes du DS)
-- WCAG AA contraste 4.5:1 minimum
-- Cibles tactiles ≥ 44 px (iPad)
-- Tests Défense I (29 verts) ne couvrent PAS le visuel — la validation
-  est manuelle pour ce chantier UX
+Conventions actées le 8 mai (#262) :
+- Tirets `-` partout dans les noms de fichiers (pas d'underscore)
+- Extensions simples : `.zip`, `.json`, `.pdf`, `.txt`, `.md`, `.csv`
+  (pas de double point comme `.codex.zip`, `.reserve.zip`,
+  `.codex-data.json`)
+- Pas de préfixe `CONFIDENTIEL-` (l'archive est implicitement perso ;
+  le dialog de confirmation au-dessus avertit l'utilisateur)
+- Minuscules partout pour les préfixes type
+- Helper unique : `window.genererNomFichierExport(type, options)`
+  dans cc-license.js (extension paramétrable + précisionDate)
 
-ÉTAT DU MODÈLE DE MENACES (post-Défense I) :
-- Phase 0 livrée (B-α, J, D, P-α, H, K) — 6 mai 2026
-- Phase 1 partiellement livrée :
-  • Défense A sandbox iframe (PR #14 mergée 8 mai matin)
-  • Défense I tests automatisés (PR #15 mergée 8 mai après-midi)
-- Reste Phase 1 :
-  • Défense E migration innerHTML → textContent (~1-2 sem)
-  • Défense C wrapper destructif localStorage/IDB/FSAPI (~1-2 sem)
-- Suites courtes :
-  • B-β passage obligé ajouter*ALaBibliotheque (1-2 j)
-  • K-β preview UI exports (peut-être déjà livré le 6 mai, à vérifier)
-
-ÉTAT BACKLOG (autres items en attente, à ne pas confondre) :
-  - #259 renommage Réserve → Archives — priorité haute, ~3-5 h
-  - #258 bouton-icône anonymisation à droite à côté Mode clair/sombre — ~1 h
-  - #257 v2.B mode consultation namespace temporaire — ~5-6 h
-  - Test iPad — refonte nav + nouveaux modules codex data
-  - Retours testeurs en attente (Retours des testeurs/SUIVI-BUGS.md)
+Workflow de chantier (rappel) :
+- Petits commits ciblés
+- Demander le numéro de beta avant chaque commit
+- Bumper version.json + fallback init-inline.js + cache buster du
+  fichier modifié dans index.html
+- Tester en Safari après chaque changement (rappel cache busters
+  inopérants sur file://, Cmd+Q pour forcer rechargement)
+- Hook pré-push Vitest exécuté automatiquement (29 tests, ~12 s)
 ```
 
 ---
 
-## Récap du chantier Défense I (livré 8 mai 2026)
+## Bilan complet de la journée — 8 mai 2026
 
-### 6 commits + 1 commit de merge sur `main`
+**~25 commits poussés sur main**, beta `99.38`, du build `0508-0640` au build `0508-1510`. Hook pré-push Vitest vert à chaque push.
 
-| Commit | SP | Sujet | Build | Tests |
-|---|---|---|---|---|
-| `65d0afe` | SP1 | setup framework Vitest + Playwright | 0508-0940 | +3 (canaris) |
-| `8608e89` | SP2 | catégorie A · 4 tests d'isolation Défense A | 0508-1015 | +4 |
-| `7fa5ed3` | SP3 | catégories B + C · sanitisation + validation imports | 0508-1030 | +12 |
-| `45f0283` | SP4 | catégories D + E + F · whitelist + intégration + lint | 0508-1045 | +9 |
-| `bf67079` | SP5 | docs + bump MODELE-MENACES v1.5 + hook pré-push | 0508-1100 | — |
-| `f86104c` | fix-up | findings ultrareview · A.4 vrais filtres + A.3 harness + jsdom + doc | 0508-1145 | +1 |
-| `0aaa83a` | merge | Merge pull request #15 | — | — |
+### Chantiers livrés (par ordre chronologique)
 
-### Bilan technique
+#### Matin
 
-- **Effort réel** : ~½ jour (vs estimation 4-5 jours du plan).
-- **Couverture** : 15 scénarios prévus → 15 tests + sanity supplémentaires = **29 tests verts**.
-- **Vitest** : 23 tests en ~9 s (dont 8 s pour F.15 lint statique).
-- **Playwright WebKit headless** : 6 tests en ~4 s.
-- **Hook pré-push** : opt-in via `bash scripts/install-hooks.sh` (déjà actif chez Grégoire car `core.hooksPath = scripts/hooks` configuré par Défense J). Ne s'active que si `tests/node_modules/` existe.
+1. **Défense A — sandbox iframe pour aperçus d'imports** (PR #14 mergée, commit `ca43692`)
+   - SP1 (`16befc4`) : composant `ApercuSandbox` + prototype + intégration grilles
+   - SP2 lot 1 (`4db694a`) : échelles + productions
+   - SP2 lot 2 (`8f591d7`) : cartouches + pratiques + tampons + fixes UI
+   - SP3+SP4 (`35a394f`) : rapport tests + MODELE-MENACES v1.4
+   - Fix-up findings ultrareview (`a23c204`)
+   - Effet menaces : C-08 IA injection HTML par data corrompue → **Bon**
 
-### Modifications hors-tests sur la branche
+2. **Défense I — tests sécurité automatisés** (PR #15 mergée, commit `0aaa83a`)
+   - 6 commits SP1-SP5 + fix-up findings ultrareview
+   - 29 tests verts (23 Vitest + 6 Playwright WebKit), ~12 s
+   - Hook pré-push opt-in via `core.hooksPath = scripts/hooks`
+   - C-01 + C-02 → **Bon** dans modèle de menaces v1.5
 
-- `js/travaux-import.js` : +4 lignes pour exposer `window.validerMagicBytes` (utile au test C.10, pattern projet).
-- `js/securite-apercu-sandbox.js` : +5 lignes pour ajouter le probe `__nbInstances()` à l'API publique (utile au test E.14, préfixe `__` = zone tests/interne).
-- `index.html` + fallback dans `js/init-inline.js` : bumps de build à chaque sous-phase.
+#### Début après-midi
 
-Aucune modification de logique runtime de l'app. Les tests valident l'existant.
+3. **#263 — alignement DS modales métadonnées CC** (commits `4576735` + `c51966d`, builds 1205 + 1255)
+   - 3 modales partagées dans `cc-license.js` alignées DS
+   - 22 références mortes `.cc-modal-*` nettoyées
+   - 2 bugs latents corrigés : `Collegial` sans accent (mismatch JS) + inputs email/url sombres mode clair
+   - ~20 typos sans accents corrigées
+   - Modale K-β preview (`securite-export-preview.js`) alignée DS aussi
+   - Carte Sécurité Réglages → cohérence vérifiée
 
-### Effet sur le modèle de menaces
+4. **Icône onglet Conception → mind-map** (commit `d0bd12a`, build 1320)
+   - `icons/icon-genealogy.svg` → `icons/icons8-mind-map.svg`
 
-| Scénario | Avant Défense I | Après Défense I |
-|---|---|---|
-| **C-01** Régression silencieuse de sécurité dans un commit | Partiel | **Bon** |
-| **C-02** IA générant du code qui contourne `assainirObjet` | Partiel | **Bon** |
+5. **#247 — Refonte Réglages > Données** (commit `cb74e63`)
+   - Marqué `[x]` dans BACKLOG (était `[ ]` mais livré 5 mai PR #11)
 
-`MODELE-MENACES.md` v1.4 → v1.5 (8 mai 2026, Défense I livrée).
+6. **Ménage du root** (10 commits, builds 1330-1500)
+   - Plan complet : `plans de travail/PLAN-MENAGE-ROOT-2026-05-08.md`
+   - **Phase 2 + Lot 7** : 15 fichiers retirés du root (`obsolètes/`)
+     - 4 fichiers tracked supprimés : doublon `NOMS_STABLES.json`, script
+       migration `migrer-reserve-vers-archives.sh`, `PLAN-DEFENSE-A-SANDBOX-IFRAME.md`,
+       `PLAN-DEFENSE-I-TESTS-AUTOMATISES.md`
+     - 7 fichiers untracked déplacés
+     - 5 plans archivés après revue case-par-case (PLAN-Apres-Phase7-Doublons,
+       PLAN-INFOBULLES-UNIFIEES, PLAN-NUMEROTATION-SEMAINES-PEDAGOGIQUES,
+       PLAN-UNIFORMISATION-ENTETES-GRAPHIQUES, AUDIT-COHERENCE-LABO)
+   - **Promotions vers `docs/architecture/`** : 2 specs livrées
+     - SPEC-CONSOLIDATION-APPRENTISSAGES.md (livré 8 avril, `js/consolidation.js` 646 l.)
+     - Spec - Prompt et parser questionnaires Labo Codex.md (substantiellement
+       livrée via `js/bilan-reflexif*.js` 5194 l.)
+   - **PLAN-NETTOYAGE-WIZARD-V1** rangé dans `plans de travail/` (plan actif)
+   - **Phase 3 .gitignore** : 6 patterns de prévention ajoutés (Bilan*,
+     prototype-*.html, ebauches-*, Claude Design/, copies de travail).
+     Bug latent fixé : `>DE_*.pdf` → `DE_*.pdf` (le `>` parasite empêchait
+     le pattern de matcher).
 
-### Décisions structurantes du chantier
+#### Fin après-midi
 
-1. **`tests/package.json` séparé** de la racine — l'app de production reste vanilla JS sans dépendance npm runtime.
-2. **Vitest pour fonctions pures + Playwright WebKit pour browser-real** — chacun fait ce qu'il fait bien, ~12 s consolidés.
-3. **Helper `chargerScript`** plutôt que `module.exports` intrusifs dans la prod — IIFE projet chargée dans un sandbox Node via `Function('window', ...)` avec stubs minimaux.
-4. **Baseline lint figée à 120 cas suspects** dans F.15 (vs 125 au 6 mai après E-α/E-β). Procédure de bumping vers le bas documentée dans le test.
-5. **Hash CSP dupliqué** entre `index.html:10` et `tests/integration/harness/sandbox-harness-csp.html:13` — A.3 vérifie les deux endroits depuis le fix-up findings ultrareview.
+7. **PLAN-NETTOYAGE-WIZARD-V1 exécuté** (commit `b70861b`, build 1425)
+   - **5458 → 3686 lignes** dans `pratiques.js` (-1772 l., -32 %)
+   - 33 fonctions V1 supprimées (28 listées dans le plan + 5 helpers
+     oubliés découverts en cours d'exécution)
+   - 3 vars globales (`wizardEtapeActuelle`, etc.) + 24 exports
+     `window.*` retirés
+   - **Bug latent corrigé** : bouton « Éditer » dans bibliothèque pratiques
+     était silencieusement cassé (`editerPratique` appelait V1 brisé).
+     Migré vers `ouvrirWizardV2(true, id)`.
+   - **Fragilité éliminée** : plus de double export
+     `window.ouvrirWizardPratique` (V1/V2)
+   - 4 fonctions non-V1 préservées via Edits ciblés (dupliquerPratique,
+     supprimerPratique, exporterPratiqueVersJSON, creerNouvellePratique)
 
-### Notes ultrareview
+8. **#262 Phase 1 — convention nommage exports** (commits `11d19d6` + `96cad63`,
+   builds 1440 + 1455)
+   - Helper `genererNomFichierExport` dans cc-license.js étendu :
+     options `extension` et `precisionDate`, type forcé minuscule
+   - 4 modules pilotes migrés :
+     - **import-export.js** : fix bug accents critique (`Gr-goire` →
+       `grégoire-bédard`), `PRATIQUE-COMPLETE`/`LISEZMOI` → `config`/`lisezmoi`
+     - **reserve.js** : `CONFIDENTIEL-archive-...reserve.zip` → `archive-...zip`
+     - **codex.js** : extension `.codex.zip` → `.zip`
+     - **codex-data.js** : extension `.codex-data.json` → `.json`,
+       `gc` → `groupes`
+   - **Fix exécuter export sauvegarde** (build 1455) : retrait
+     `CONFIDENTIEL-` + retrait fallback `monitorage` + accents préservés.
+     Découvert pendant validation terrain (capture Grégoire).
 
-- 3 crashes consécutifs avant production de findings — comportement structurel sur cette PR (pas un transient).
-- 4e tentative a produit le rapport : 5 findings confirmés + 1 réfuté (probe `__nbInstances` accepté).
-- Les 5 findings ont été fixés en 1 commit `f86104c` et ne nécessitaient pas de re-run ultrareview avant merge.
+9. **#259 follow-up — 7 strings UI Réserve/versé manquées** (commit `387fe5a`,
+   build 1445)
+   - Tooltips `accompagnement-contenu-hover.js` (3 strings)
+   - Popups `accompagnement-contenu-popup.js` (2 strings + correction
+     grammaticale « L'archive, lui » → « elle »)
+   - Label sécurité `securite-export-validation.js` (1 + 1 JSDoc)
+   - Test `whitelist-export.test.js` D.12 mis à jour (regex assertion
+     `/réserve/` → `/archive/`)
+   - Internals préservés volontaire (IDs DOM, classes CSS, clés popup,
+     variables internes)
+
+### Backlog ajouts
+
+- **#264** : barre de progression sur tous les exports (signalé par Grégoire,
+  certains exports longs sans retour)
+- **#265** : mode clair — label « Groupe-cours actif : » noir sur fond bleu
+  (signalé par Grégoire en fin de journée, capture)
+
+### Backlog marqués `[x]`
+
+- **#247** : Refonte Réglages > Données (livré 5 mai PR #11, annotation
+  ajoutée aujourd'hui)
+- **#258** : déjà `[x]` (rien à faire)
+- **#259** : déjà `[x]` (mais 7 strings manquées rectifiées en follow-up)
+- **#263** : alignement DS modales sécurité (livré aujourd'hui)
 
 ---
 
-## Documentation produite ce jour (référence pour les prochaines sessions)
+## Reste actif au backlog (priorité décroissante)
 
-- `docs/securite/TESTS-AUTOMATISES.md` — référence utilisateur de la suite (mapping scénario→test, conventions, maintenance, troubleshooting)
-- `docs/securite/MODELE-MENACES.md` v1.5 — §6 statuts C-01/C-02, §8.2 Défense I marquée LIVRÉE
-- `CLAUDE.md` — sous-section « Tests sécurité automatisés » avec convention obligatoire d'ajout d'un test par chantier sécurité Phase 1+
-- `tests/README.md` — quick start utilisateur
-- `scripts/hooks/pre-push` — hook opt-in qui exécute Vitest avant chaque push
+### Backlog #262 Phase 2 (suite directe, prioritaire)
+
+8 callers de `genererNomFichierCC` legacy à migrer vers le helper unifié :
+- `js/grilles.js:1715` — produit `grilles-grilles-criteres-...json`
+- `js/echelles.js:1922` — produit `echelles-echelles-performance-...json`
+- `js/cartouches.js:1724` — produit `cartouches-cartouches-retroaction-...json`
+- `js/cartouches.js:2420` — export cartouche individuelle
+- `js/productions.js:2705` — produit `productions-productions-pedagogiques-...json`
+- `js/pratiques-materiel.js:1988` — produit `pratiques-pratiques-notation-...json`
+- `js/objectifs.js:729` — export ensemble objectifs
+- `js/travaux-outils.js:2884` — produit `tampons-tampons-observation-...json`
+
+Bugs partagés :
+1. Duplication type+nom (`grilles-grilles-...`)
+2. Accents strippés (`pedagogiques` au lieu de `pédagogiques`)
+
+Une fois Phase 2 terminée : retirer `genererNomFichierCC` de cc-license.js
+(zéro-dette).
+
+### Items du backlog par taille
+
+- **#265** mode clair label CSS — ~15 min
+- **Lot 4a** ultrareview jetons — ~4 h, plan dans `Rapports/`
+- **Lot 3** ultrareview indices — ~3-5 h
+- **#264** barre progression exports — ~3-4 h, après #262 Phase 2
+- **#249** Réserve v1.1 — section Réglages dédiée
+- **#256-bis** aide aux 8 modales restantes
+- **#257 v2.B** mode consultation namespace temporaire
+- **PLAN-AUTONOMISATION** Phase 5 Démo — ~1 j (préalable lecture
+  PLAN-AUDIT-PHASE5-DEMO)
+- **#239** machine à états chargement évaluation — ~1 j
+- **#207** unifier travaux-stockage.js dans db.js — ~1-2 j
+
+### Modèle de menaces (post-Défense I)
+
+- Phase 0 livrée (B-α/J/D/P-α/H/K) — 6 mai
+- Phase 1 partielle :
+  - Défense A sandbox iframe ✓ (PR #14, 8 mai matin)
+  - Défense I tests automatisés ✓ (PR #15, 8 mai après-midi)
+- Reste Phase 1 :
+  - Défense E migration innerHTML → textContent (~1-2 sem)
+  - Défense C wrapper destructif localStorage/IDB/FSAPI (~1-2 sem)
+
+---
+
+## Conventions actées le 8 mai
+
+### Convention nommage exports (#262 Phase 1)
+
+- Format : `{type}-{nom?}-{cours?}-{discipline?}-{licence?}-{date[-heure]}.{ext}`
+- Tirets `-` partout (pas d'underscore)
+- Extension simple (`.zip`, `.json`, etc.)
+- Minuscules partout pour préfixes type
+- Accents préservés via helper sanitize (`/[^a-z0-9àâäéèêëïîôùûüç]/gi`)
+- Pas de `CONFIDENTIEL-` (le dialog de confirmation reste pour
+  données perso)
+- Helper unique : `window.genererNomFichierExport(type, options)` dans
+  cc-license.js
+- Préfixes officiels : `codex`, `archive`, `codex-data`, `config`,
+  `lisezmoi`, `grille`, `echelle`, `cartouche`, `production`, `pratique`,
+  `tampons`, `objectifs`, `alignement`, `bilan-reflexif`, `cours`,
+  `etudiants`, `evaluation`, `synthese`, `sauvegarde`
+
+### Mémoires Claude créées/mises à jour aujourd'hui
+
+- `feedback_questions_minimales.md` — pour un « petit changement », garder
+  les questions au strict minimum (incident swap d'icône)
+- `MEMORY.md` — Last ID bumped à #265
+
+---
+
+## Références utiles
+
+- **Plan ménage du root** : `plans de travail/PLAN-MENAGE-ROOT-2026-05-08.md`
+- **Plan nettoyage Wizard V1** : `plans de travail/PLAN-NETTOYAGE-WIZARD-V1-2026-04-28.md` (LIVRÉ aujourd'hui)
+- **Convention nommage exports** : section « Conventions actées » de ce SESSION.md
+- **Modèle de menaces** : `docs/securite/MODELE-MENACES.md` v1.5
+- **Tests sécurité** : `docs/securite/TESTS-AUTOMATISES.md`
+- **Architecture données** : `docs/architecture/ECOSYSTEME-DONNEES.md`
+- **Specs livrées** : `docs/architecture/SPEC-RESERVE-V1.md`,
+  `SPEC-CONSOLIDATION-APPRENTISSAGES.md`, `Spec - Prompt et parser
+  questionnaires Labo Codex.md`
