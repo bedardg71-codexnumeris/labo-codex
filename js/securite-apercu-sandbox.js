@@ -300,6 +300,11 @@
 
     window.ApercuSandbox = {
         afficher: afficher,
-        fermer: fermer
+        fermer: fermer,
+        // Probe interne pour la suite de tests Défense I — pas d'usage UI.
+        // Permet de vérifier que l'auto-cleanup MutationObserver libère
+        // bien les entrées du tableau `instances` quand un wrapper est
+        // détaché du DOM par son call-site (cf. SP4 E.14).
+        __nbInstances: function () { return instances.length; }
     };
 })();
