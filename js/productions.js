@@ -2962,19 +2962,18 @@ function importerProductions(eventOuEl) {
             // Vérifier licence CC et afficher badge
             const estCC = verifierLicenceCC(donnees);
 
-            let message = estCC ?
-                '<div style="margin-bottom: 15px;">' + genererBadgeCC(donnees.metadata) + '</div>' :
-                '';
-
-            message += '<p><strong>Veux-tu importer ces productions ?</strong></p>';
-
-            // Créer modal avec badge CC
+            // Défense A : badge CC rendu dans une iframe sandbox isolée.
+            // Voir js/securite-apercu-sandbox.js et MODELE-MENACES.md §D-01.
+            // La classe `modal-import-productions` cible la fermeture sans
+            // impacter la bibliothèque ouverte en arrière-plan.
             // z-index: 10001 pour passer au-dessus des modaux de bibliothèque (10000)
             const modal = document.createElement('div');
+            modal.classList.add('modal-import-productions');
             modal.innerHTML = `
                 <div class="modal-js-overlay" style="z-index: 10001;">
                     <div class="modal-js-contenu" style="max-width: 600px; padding: 20px;">
-                        ${message}
+                        <div data-apercu-cc-slot style="margin-bottom: 15px;"></div>
+                        <p><strong>Veux-tu importer ces productions ?</strong></p>
                         <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
                             <button class="btn btn-annuler" data-action="fermerModalImportProductions">Annuler</button>
                             <button class="btn btn-confirmer" data-action="confirmerEtFermerImportProductions">Importer</button>
@@ -2986,8 +2985,15 @@ function importerProductions(eventOuEl) {
             window._productionsImportEnAttente = donnees;
             document.body.appendChild(modal);
 
-            // Avertir si pas de licence CC
-            if (!estCC) {
+            if (estCC && window.ApercuSandbox) {
+                const slot = modal.querySelector('[data-apercu-cc-slot]');
+                if (slot) {
+                    window.ApercuSandbox.afficher(slot, genererBadgeCC(donnees.metadata), {
+                        hauteurMin: 120,
+                        hauteurMax: 500
+                    });
+                }
+            } else if (!estCC) {
                 avertirSansLicence(donnees);
             }
 
@@ -3285,14 +3291,17 @@ async function sauvegarderMigrationCategories() {
 
 /** Fermer le modal d'import productions (bouton Annuler) */
 function fermerModalImportProductions() {
-    var overlay = document.querySelector('.modal-js-overlay');
-    if (overlay && overlay.parentElement) overlay.parentElement.remove();
+    // Cibler le wrapper d'import par sa classe dédiée (pas `.modal-js-overlay`,
+    // qui matche aussi la bibliothèque ouverte en arrière-plan dont le parent
+    // est `<body>` → `.remove()` effacerait toute l'application).
+    var wrapper = document.querySelector('.modal-import-productions');
+    if (wrapper) wrapper.remove();
+    delete window._productionsImportEnAttente;
 }
 
 /** Confirmer import + fermer modal */
 function confirmerEtFermerImportProductions() {
     window.confirmerImportProductions(window._productionsImportEnAttente);
-    delete window._productionsImportEnAttente;
     fermerModalImportProductions();
 }
 
