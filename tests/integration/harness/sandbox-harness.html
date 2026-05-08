@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Harness Défense I — sandbox isolation (sans CSP)</title>
+    <!--
+        Harness MINIMALISTE pour les tests d'isolation Défense A.
+        Pas de CSP : on teste l'origine opaque (mécanisme indépendant de
+        la CSP, garanti par la spec sandbox sans `allow-same-origin`)
+        et le filtrage postMessage. Les payloads injectés s'exécutent
+        bien à l'intérieur de la sandbox, mais doivent rester confinés.
+        Pour le test A.2 (CSP rejette les scripts inline), utiliser
+        sandbox-harness-csp.html.
+    -->
+</head>
+<body>
+    <div id="conteneur" style="width: 800px;"></div>
+    <script src="../../../js/securite-apercu-sandbox.js"></script>
+</body>
+</html>
