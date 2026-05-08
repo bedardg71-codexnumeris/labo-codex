@@ -1,7 +1,228 @@
 # Notes de version — Monitorage pedagogique
 
 > Document de gestion locale. Historique complet avec dates.
-> Derniere mise a jour : 4 mars 2026
+> Derniere mise a jour : 8 mai 2026
+
+---
+
+## Beta 99.38 (5-8 mai 2026)
+
+**Securite automatisee, alignement DS et conventions exports**
+
+*Defense A — sandbox iframe pour apercus d'imports (PR #14)*
+- **Composant `ApercuSandbox`** : tous les apercus d'imports (grilles, echelles, productions, cartouches, pratiques, tampons) passent par une iframe `sandbox="allow-same-origin"` sans script, sans top-navigation, sans formulaires.
+- **Effet sur le modele de menaces** : C-08 (injection HTML par data corrompue) passe a **Bon**.
+
+*Defense I — tests securite automatises (PR #15)*
+- **29 tests verts** en ~12 s : 23 Vitest (fonctions pures) + 6 Playwright WebKit (sandbox/CSP).
+- **Couverture** : A.3 hash CSP, B sanitisation profonde, C validation imports, D whitelist exports, E integration sandbox, F lint statique baseline `innerHTML`.
+- **Hook pre-push optionnel** active via `core.hooksPath = scripts/hooks` (Defense J du modele de menaces). C-01 et C-02 passent a **Bon**.
+- **Doc utilisateur** : `docs/securite/TESTS-AUTOMATISES.md`.
+
+*#263 — alignement design system des modales metadonnees CC*
+- 3 modales partagees dans `cc-license.js` + modale K-beta preview (`securite-export-preview.js`) alignees au DS.
+- ~22 references mortes `.cc-modal-*` nettoyees, 2 bugs latents corriges (`Collegial` sans accent, inputs email/url sombres en mode clair).
+
+*#262 Phase 1 — convention nommage exports*
+- Helper `genererNomFichierExport` etendu (extension parametrable, precisionDate). 4 modules pilotes migres : `import-export.js` (fix bug accents critique), `reserve.js`, `codex.js`, `codex-data.js`.
+- **Conventions actees** : tirets partout, extensions simples (`.zip`, `.json`...), retrait du prefixe `CONFIDENTIEL-`, minuscules.
+
+*Wizard V1 fantome retire*
+- `pratiques.js` : 5458 → 3686 lignes (−1772, −32 %). 33 fonctions V1 supprimees, double export `window.ouvrirWizardPratique` elimine. Bouton « Editer » bibliotheque pratiques (silencieusement casse) corrige.
+
+*Menage du root et de docs/*
+- 15 fichiers retires du root (`obsoletes/`), 2 specs promues vers `docs/architecture/` (SPEC-CONSOLIDATION-APPRENTISSAGES, Spec - Prompt et parser questionnaires).
+- `docs/` top-level passe de ~50 a 16 fichiers ; brouillons obsoletes archives, plans actifs deplaces vers `plans de travail/`.
+
+*Correctifs UI*
+- **#265** mode clair : label « Groupe-cours actif : » devenait noir sur fond bleu (`.mode-clair label` ecrasait la couleur claire). Override scope `.mode-clair .bandeau-groupe-cours label`.
+- **Icone onglet Conception** : `icon-genealogy` → `icons8-mind-map`.
+- **#258** selecteur Normal/Anonymise transforme en bouton-icone dans l'en-tete (livre 6 mai).
+- **#260** credit Icons8 ajoute dans Reglages > A propos (livre 6 mai).
+
+*Refonte Reglages > Donnees (#247, livre 5 mai PR #11)*
+- Architecture des 4 concepts (Codex, Reserve, Codex data, Voute) appliquee a la section Donnees ; flux d'import/export simplifies.
+- **#251** Codex data : extraction depuis les Archives (livre 6 mai PR #13).
+- **#252** Labo autonome : sortie de la section Suivi (livre 5-6 mai).
+
+---
+
+## Beta 99.32 (2 mai 2026)
+
+**Phase 7 doublons, Reserve v1.1 et panneau Contenu du versement**
+
+*Phase 7 — Plusieurs fichiers par etudiant*
+- **Module nouveau `js/travaux-doublons-ui.js`** (~440 l.) : modale « Plusieurs fichiers par etudiant », bandeau dans la liste des evaluations, option « Voir les fichiers multiples » dans Actions, bouton « Livrable additionnel » dans la modale d'import.
+- **2 familles** : 🟢 jeton (`_-_Jeton_`) / 🔵 plusieurs fichiers + 4 tags informatifs (PDF+image, memes noms, dates proches, statuts mixtes).
+- **Validation par carte** : bouton « ✓ Valider ce cas » avec persistence (`cas_fichiers_multiples_valides`).
+- **Compteur carrousel dedup** : format `(N el · M fich)` quand asymetrie etudiants/fichiers, sinon `(N)`.
+
+*Reserve v1.1 — Manifeste local cross-mode et hydratation*
+- **#248** : auto-mise-a-jour du `manifeste-archives.json` global a chaque versement, en mode FSAPI ET ZIP. Hydratation au boot si handle FSAPI persiste avec permission `granted`.
+- **#249** : carte « Reserve » dans Reglages > Donnees avec bandeau dossier FSAPI + tableau des versements, badges de mode (vert FSAPI, orange ZIP).
+
+*#257 v2.B-α — Panneau « Contenu du versement »*
+- Modale Ouvrir un versement enrichie : compteurs filtres (>0 seulement), liste expandable des etudiants avec toggle anonymisation (`Eleve 1, 2, 3…`).
+- Helper `_extraireContenuVersement` qui matche les cles namespacees (`h2026_*`, `a2025_*`).
+
+*Renommage #259 — « Reserve / verser / versement » → « Archives / archiver / archive »*
+- Vocabulaire universel pour le novice. Codex et manifeste preserves dans le code.
+- Modules JS, ~13 entrees d'aide, modales, BACKLOG, memoires, ECOSYSTEME-DONNEES.md mis a jour.
+
+---
+
+## Beta 99.26 → 99.30 (26-28 avril 2026)
+
+**Voie de retour Reserve complete**
+
+*Reserve v1 (#251, 26 avril)*
+- **Module `js/reserve.js`** (~750 l.) : API `verserGroupeCours`, `estimerVersement`, `listerGroupesVersables`. Filtrage en deux passes, UUID v4, ZIP structure telechargeable.
+- Bouton « Verser dans la reserve... » dans `#codex-menu`, modale `#modalReserve`.
+- **5 bugs corriges** en validation terrain : 11 cles trimestre non reconnues, ordre fichiersTravaux/annotationsTravaux, copies archivees des bibliotheques, cours orphelin A2025, regex trop permissive.
+
+*Reserve v1.5 — Automatisation FSAPI (#253, 28 avril)*
+- Versement automatique Chrome/Edge via `FileSystemDirectoryHandle` persiste en IndexedDB (`reserve_fsapi.handles`).
+- Helpers FSAPI, ecriture directe, fusion globale du manifeste, branchement (FSAPI vs ZIP). Safari = flux ZIP inchange.
+- **Sentinelle** : `meta.json` ecrit en dernier dans le dossier versement → sa presence garantit que les autres fichiers sont complets.
+
+*Ouvrir la reserve v1+v1.1 (#254, 28 avril)*
+- **Module `js/reserve-ouvrir.js`** (703 l.) : reimport selectif grilles/echelles/tampons, toggle « copie en double ».
+- **3 vues etape 1** selon le navigateur (Chrome+handle = liste via manifeste, Chrome sans handle = picker dossier, Safari = file picker + mention `~/Downloads/`).
+
+*Productions, cartouches, pratiques (#257 v1, 28 avril)*
+- Reimport etendu : 3 nouvelles facades dans `productions.js`, `cartouches.js`, `pratiques.js` (pattern `importerXxxExternes`).
+- **Auto-cochage des references croisees** : production → grille+echelle, cartouche → grille, pratique → echelle (n'auto-decoche jamais). Annotations « ref. manquante » (orange).
+
+*Codex allege (#250, 28 avril)*
+- **TimeMachine retire du codex** : `js/codex.js` 3017 → 2556 lignes (−461). Purge silencieuse au boot via flag idempotent. CLE_SNAPSHOT_AVANT conserve (utilise par actionFusionner).
+
+*Aide aux modales Reserve (#256, 28 avril)*
+- Boutons d'aide ✴️ ajoutes dans toutes les modales du flux Reserve avec popups dediees.
+
+*Documentation*
+- **#255** clarification de `ECOSYSTEME-DONNEES.md` (26 avril) : double fonction Reserve (Depot + Fonds consultable) + nouveau sous-flux « Voie de retour ».
+
+---
+
+## Beta 99.25 (25 avril 2026)
+
+**Refonte synthese de retroaction PDF**
+
+*Architecture — 3 nouveaux modules + 1 lib + zero-dette*
+- **`js/synthese-retroaction-data.js`** (340+ l.) : module pur, `construireFeedback()` assemble la shape depuis les sources existantes.
+- **`js/synthese-retroaction-rendu.js`** (450+ l.) : `rendreSyntheseHTML()` HTML/CSS inline, polices stack systeme, hex absolus.
+- **`libs/html2canvas.min.js`** (198 Ko, MIT, zero eval, CSP-compatible).
+- **`js/travaux-export-pdf.js`** : 2304 → 1156 lignes (**−1148 nettes**, zero-dette).
+- **Pipeline async** : `ajouterPageSynthese()` = `construireFeedback` → `rendreSyntheseHTML` → DOM off-screen → `html2canvas` scale 2x → `addPage` jsPDF (hauteur dynamique `scrollHeight`).
+
+*Principe directeur — « reformatage, pas production »*
+- Aucun nouveau champ, aucun calcul nouveau. Tout vient du modele existant. Sections sans donnee → invisibles.
+- Sources reutilisees : `evaluation`, `groupeEtudiants`, `productions`, `infoCours`, `trimestres`, `grillesTemplates`, `echellesTemplates`, `cartouches_${grilleId}`, `compterAnnotationsDetailees`, `obtenirRetroactionsObservations`, `obtenirRetroactionsErreursFr`, `obtenirConfigJetons`, `calculerDetailsNoteFinale`, `couleursCategories`, `OUTILS[errfr_X].couleurBouton`.
+
+*Decisions cles*
+- **Rasterisation HTML** via html2canvas (pas reproduction jsPDF natif — design B trop dense).
+- **Hauteur de page dynamique** (≥ 11" Letter US, depasse si contenu dense — l'eleve scrolle sur cellulaire).
+- **Couleurs en hex absolus** (`var(--…)` non resolu par html2canvas hors DOM live).
+- **Polices stack systeme** (Mac/iPad SF + SF Mono ; image rasterisee donc indifferent au lecteur cellulaire).
+- **Tampons** : icones PNG **tintees** par couleur de categorie (`canvas globalCompositeOperation: 'source-in'`).
+- **Erreurs FE top 2** (focus, pas releve exhaustif) avec couleur native depuis `OUTILS[id].couleurBouton`.
+- **Note provisoire** : niveaux lettres + 1 phrase chiffree unique en tete + 2 colonnes (retenus / a venir + obligatoires).
+- **Jetons** : 1 compteur par type active dans la config (Delai, Reprise, Reprise ciblee).
+- **`NOMS_NIV` retire** → `libelleNiveau(echelle, code)` lit depuis l'echelle utilisateur (anti-hardcoding).
+
+---
+
+## Beta 99.21 → 99.22 (21-24 avril 2026)
+
+**Autonomisation Phases 3-4 livrees + Phase 5 demo tentee puis revertee**
+
+*Phase 3 — Affichage `inspireDe` sur cartes biblio (22 avril, b0422-0832)*
+- Helpers `BibliothequeUI.formaterInspireDe` + champ `opts.inspireDe` rendu en ligne italique gris-clair sur 5 modules (grilles, echelles, productions, cartouches, pratiques).
+- `genererPanneauMetadonnees` etendu avec ligne « Inspire de » entre Auteur et Cree le.
+
+*Phase 4 — Autonomisation utilisateur (22 avril, b0422-1135)*
+- Cartographie des flows demo par entite, validation iPad de bout en bout des lectures namespacees.
+
+*Phase 5 demo — Tentative puis revert (22 avril, b0422-1828)*
+- 5 sous-phases tentees (5.A retrait `donnees-demo.js`, 5.B retrait flags, 5.B-bis flow Dupliquer GC demo, 5.B-ter activation au toggle, 4 fixes intermediaires). 12 commits sur 10 heures.
+- **Echec terrain iPad** : toggle ne persistait pas, apercu vide.
+- **Cause racine** : cache-busters `?v=` des `.js` modifies non bumpes (datant de fevrier-mars). Safari iPad servait les anciennes versions → fonctions jamais executees → diagnostics errones (« bug iOS Safari label/change »).
+- **Revert** : 18 fichiers restaures a 602bacf, `js/migration-phase5.js` supprime, `js/donnees-demo.js` restaure. Mode demo legacy reactif.
+- **Branche backup** `backup/phase5-tentative-22avril-2026` conservee. Post-mortem + lecons dans `docs/POST-MORTEM-PHASE5-22-AVRIL.md`.
+- **Regle retenue** : bumper `?v=` systematiquement, ne jamais conclure a un bug iOS sans verifier le cache d'abord.
+
+*Phase 5 pre-tentative-2 (24 avril)*
+- 6 tables reverse-engineering `donnees-demo.js` legacy (1070 lignes). Cible : prochaine tentative avec cartographie complete des flows demo.
+
+---
+
+## Beta 99.0x → 99.20 (mi-mars → mi-avril 2026)
+
+**Architecture stockage, jetons de reprise et migrations massives**
+
+*Storage — Quota Safari file:// (Phase 1a-c, 2a-c, 3a-c)*
+- **Phase 1a** : extraction thumbnails de `fichiersTravaux` vers IndexedDB (gain ~3.3 Mo). Commit `233fdfc`.
+- **Phase 2a** : seuil IDB-first 200 Ko dans `setSync` (grosses cles → memoryCache + IDB). Commit `a329f81`.
+- **Phase 1b** : flush `beforeunload` (ecritures IDB trackees, dialogue si Cmd+Q). Commit `a329f81`.
+- **Phase 2c** : fusion de `_prechargerDepuisIDB` dans `syncToLocalStorageCache`. Commit `51d7176`.
+- **Phase 3a** : diagnostic storage (`window._storageStats` + integration rapport-bug). Commit `f25f12c`.
+- **Phase 3c** : test de resistance (`window._testResistanceStorage()` — SUCCES).
+- **Resultat** : `h2026_fichiersTravaux` (3.8 Mo) et `h2026_evaluationsSauvegardees` (1.2 Mo) ne saturent plus localStorage Safari file://.
+
+*Jetons de reprise avec fichiers (27 mars 2026)*
+- Champ `evaluationId` sur fichiers pour distinguer original vs reprise. Flag `estReprise: true` sur fichiers importes comme reprises.
+- **Resolution** `trouverFichierPourEvaluation()` : chemin prioritaire par `evaluationId`.
+- **Import** : option « Jeton de reprise » dans selecteur production + sous-selecteur cible.
+- **Modale doublon** : bouton « Appliquer comme jeton de reprise ».
+- **Reassociation** : option « Jeton de reprise » dans le selecteur.
+- **Badge « A reevaluer »** (orange) pour reprises non encore re-sauvegardees.
+- **Badge « Reprise (etait X · Y%) »** avec scores originaux dans la liste.
+- **Filtrage** `!remplaceeParId` dans profil, dashboard, graphiques.
+
+*Migration handlers inline → delegation (Phases 0-6)*
+- ~1302 handlers inline migres vers data-action / data-on-change. 18 commits.
+- `index.html` : 0 `onclick` inline. CSP `script-src 'self'` active sans exception.
+- Dispatcher operationnel dans `main.js`. `fermerOverlayParent()` generique pour modales (commit `68af8d4`).
+
+*Bug fixes et raffinements*
+- **#220 / #224** (3 mars) : calcul d'assiduite errone dans le profil etudiant — fonction canonique unique pour l'indice A.
+- **#214** (16 mars) : Gestion avancee des ressources — suppression non persistante.
+- **#217** (27 mars) : gestion des jetons investiguee.
+- **#234** : reintegrer l'import TXT pour les cartouches de retroaction.
+- **#235** : uniformiser « Note chiffree » / « Code du niveau de performance ».
+- **#236** : retirer les emojis 🔶 clignotants dans la section Aide.
+- **#237** : ameliorer le moteur de recherche dans la section Aide.
+- **#238** : audit et amelioration du calcul des blocages et niveaux RaI.
+
+---
+
+## Beta 98.5 → 98.9 (14 mars 2026)
+
+**Codex — flux USB multi-appareil**
+
+*Module nouveau `js/codex.js`*
+- Charge apres `import-export.js`. Plan detaille dans `docs/plan-codex.md`.
+
+*Phase 1 — Generation/restauration ZIP (#225, commit 8f1fc57)*
+- Ouvrir et sauvegarder un codex ZIP portable (Mac + iPad). Format `.codex.zip` (ulterieurement migre vers `.zip` simple en mai).
+
+*Phase 2 — TimeMachine (#226)*
+- Historique des versions dans le codex. (Retire en avril #250 : trop lourd pour l'usage reel.)
+
+*Phase 3 — Multi-codex et fusion (#227)*
+- Plusieurs codex ouverts en parallele, action `actionFusionner` pour merger les contenus.
+
+*Phase 4 — Auto-save FSAPI cle USB (#228)*
+- Ecriture automatique vers une cle USB via `FileSystemDirectoryHandle`. Detection de la cle, persistence du handle.
+
+*Design et UX (#229, #230, #231)*
+- **Overlay de progression du Codex** adopte comme norme dans toute l'app.
+- Documentation utilisateur du concept Codex.
+- Auteur non defini dans les details : corrige.
+
+*Limites Safari documentees*
+- `navigator.share` ne supporte PAS les fichiers sur Safari Mac (iOS/iPadOS seulement).
+- Console Safari : pas de arrow functions, pas de `const` redeclaree, coller en une ligne.
 
 ---
 
