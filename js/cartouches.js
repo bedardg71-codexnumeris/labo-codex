@@ -3374,6 +3374,7 @@ async function preparerDonneesBibliothequeCartouches() {
                 id: cartouche.id,
                 badgeSource: BibliothequeUI.genererBadgeSource(cartouche, cartouchesDansBibliotheque),
                 metadonnees: (function(a){return `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)${a ? ' • ' + a : ''}`;})(BibliothequeUI.formaterAttribution(cartouche)),
+                description: cartouche.description || '',
                 inspireDe: BibliothequeUI.formaterInspireDe(cartouche),
                 boutons: [
                     { label: 'Dupliquer', onclick: `dupliquerCartoucheBibliotheque('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-confirmer', title: 'Créer une copie' },

@@ -374,6 +374,7 @@
                     '</div>' +
                     ligneInspireDe +
                     '<div class="biblio-carte-meta">' + opts.metadonnees + '</div>' +
+                    (opts.description ? '<div class="biblio-carte-desc">' + opts.description + '</div>' : '') +
                 '</div>' +
                 boutonsHTML +
             '</div>' +
