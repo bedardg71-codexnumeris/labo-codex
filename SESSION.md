@@ -1,9 +1,9 @@
-# SESSION — État au 8 mai 2026 fin de journée
+# SESSION — État au 8 mai 2026 fin de soirée
 
-**Date** : 8 mai 2026 (clôture en fin d'après-midi)
-**Dernier build** : `0508-1510` · Beta **99.38**
-**Branche** : `main` (à jour avec origin)
-**Statut** : journée très productive — Défense A + Défense I + #263 + ménage du root + Wizard V1 cleanup + #262 Phase 1 + follow-up #259. Tous commits poussés, hooks Vitest verts à chaque push (29 tests).
+**Date** : 8 mai 2026 (clôture en soirée)
+**Dernier build** : `0508-2040` · Beta **99.38**
+**Branche** : `main` (à jour avec origin, 9 commits supplémentaires en soirée)
+**Statut** : journée massive — matin Défense A + Défense I (sécurité), après-midi #263 DS + Wizard V1 cleanup + #262 Phase 1 + follow-up #259, soirée #265 fix CSS + grand ménage `docs/` + NOTES-DE-VERSION rattrapée + ménage zone tampon. Tous commits poussés, hooks Vitest verts à chaque push (29 tests).
 
 ---
 
@@ -16,17 +16,12 @@ cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
 Lecture obligatoire :
 1. SESSION.md — bilan du 8 mai + cette consigne
-2. BACKLOG.md — items `[ ]` actifs (notamment #265 récent)
+2. BACKLOG.md — items `[ ]` actifs (#262 Phase 2 prioritaire)
 3. Si chantier sécurité : docs/securite/MODELE-MENACES.md v1.5
 
 Plusieurs chantiers ouverts au choix (par taille croissante) :
 
-A. #265 — fix CSS rapide (~15 min)
-   Mode clair : label « Groupe-cours actif : » noir sur fond bleu
-   dans l'en-tête. Régler le scope `.bandeau-groupe-cours label`
-   en mode clair (texte clair sur fond bleu). Vérifier mode sombre.
-
-B. #262 Phase 2 — convention nommage exports, suite (~2-3 h)
+A. #262 Phase 2 — convention nommage exports, suite (~2-3 h)
    Migrer 8 callers de `genererNomFichierCC` legacy vers
    `genererNomFichierExport` (le helper unifié).
    Modules : grilles.js, echelles.js, cartouches.js (×2),
@@ -38,20 +33,20 @@ B. #262 Phase 2 — convention nommage exports, suite (~2-3 h)
    Une fois fait : retirer `genererNomFichierCC` de cc-license.js
    (zero-dette).
 
-C. Lot 4a ultrareview — jetons (~4 h)
+B. Lot 4a ultrareview — jetons (~4 h)
    Plan détaillé dans Rapports/ultrareview-lot-4a-evaluation.md.
    4 axes : symétrie original↔reprise / validation / config canonique
    / SSOT. Touche evaluation-jetons.js.
 
-D. Lot 3 ultrareview — indices (~3-5 h)
+C. Lot 3 ultrareview — indices (~3-5 h)
    Triage manuel des 20 candidats (~14-16 vrais bugs attendus).
    Plan dans Rapports/ultrareview-lot-3-indices.md.
 
-E. #264 — barre de progression sur tous les exports (~3-4 h)
+D. #264 — barre de progression sur tous les exports (~3-4 h)
    Touche ~10 modules. Mieux après #262 Phase 2 pour avoir une
    convention de nommage stable.
 
-F. Phase 5 Démo (~1 j) — chantier important reverté le 22 avril.
+E. Phase 5 Démo (~1 j) — chantier important reverté le 22 avril.
    Lecture préalable : plans de travail/PLAN-AUDIT-PHASE5-DEMO.md
    + plans de travail/PLAN-AUTONOMISATION-UTILISATEUR.md.
 
@@ -178,6 +173,103 @@ Workflow de chantier (rappel) :
    - Internals préservés volontaire (IDs DOM, classes CSS, clés popup,
      variables internes)
 
+#### Soirée — Grand ménage (9 commits, builds 1655 → 2040)
+
+10. **#265 — fix CSS mode clair** (commits `c78e008` + `55d4c44`, build 1655)
+    - Label « Groupe-cours actif : » devenait noir sur fond bleu en mode
+      clair. Cause : `.mode-clair label` (styles.css:19700) écrasait le
+      blanc du label avec `var(--texte-principal)`, alors que `.entete`
+      reste bleu en mode clair (styles.css:19578).
+    - Fix : `.mode-clair .bandeau-groupe-cours label { color: rgba(255,
+      255, 255, 0.9); }` ajouté juste après la règle de base. Mode sombre
+      inchangé.
+    - Backlog #265 marqué `[x]`.
+
+11. **Ménage docs/ phase 1** (commit `7d52724`, build 1715)
+    - Promotion : `docs/PLAN2-PHASE1-SPEC.md` → `docs/architecture/`
+      (spec complète format `.codex-share.zip`, comparable à
+      SPEC-RESERVE-V1.md).
+    - 13 brouillons untracked du 18 avril → `obsolètes/` (PLAN-VERBES-*,
+      PLAN-BADGES-PALETTE-LIENS, PLAN-CLONAGE, PLAN-PARCOURS-APPRENTISSAGE,
+      PLAN-EVALUATIONS, PLAN-PANNEAU-SEANCES, Documentation_CarteMentale,
+      DOSSIER-INTEGRATION-PLANIFICATION, LISTE-ICONES-ICONS8,
+      choix-icones.html, Plan - Accueil et demo, Plan - Module Travaux).
+
+12. **Ménage docs/ phase 2** (commit `2c2aff6`, build 1735) — **50 mouvements**
+    - Doublon supprimé : `aide-contextuelle-contenu-revue (Cowork).md`
+      (0 ligne de diff avec la version sans suffixe).
+    - Vers `obsolètes/` (15) : 9 audits ponctuels avril/mai (DS7,
+      anonymisation, css, pratiques, contact, qualité, securite-imports,
+      sélecteurs-21-avril, textes-aide), 6 .txt de Plan d'audit/
+      (Phase 1-3 audits + Plan-Module-indices-206 + 2 desc Labo Codex
+      28 fév).
+    - Vers `plans de travail/` (4) : PLAN-IMPORT-EXPORT.md,
+      PLAN-ORGANISATEUR-LAYOUT.md, HOOKS-PLAN2.md, plan-codex.md
+      (cohérence d'organisation : tous les plans directeurs au même
+      endroit).
+    - Vers `docs/archive/` (5 fichiers + 3 sous-dossiers historiques) :
+      ROADMAP_H2026.md, ANALYSE-FONCTIONNALITES.md, ARCHITECTURE.md
+      (doublon de 02-ARCHITECTURE-OVERVIEW), rapport-demo + revue
+      (2026-02-06), utilisateur/Plans/ → archive/Plans-utilisateur/,
+      utilisateur/Rapports/ → archive/Rapports-utilisateur/,
+      utilisateur/Changelogs/ → archive/Changelogs-utilisateur/,
+      HISTORIQUE_PRE_GIT.md, ROADMAP_V2_2025-11-11_ARCHIVE.txt.
+    - Conservés actifs : triplet Phase 5 (POST-MORTEM + PARCOURS-TESTS +
+      PRE-TENTATIVE-2), PLAN-VERIFICATION-AUDIT-98.3.md, refs métier
+      (101-00-*, impact des jetons.txt), CHOIX-ICONES-DEFINITIFS,
+      DATA-OWNERSHIP, debug-guide, MESSAGES_ENSEIGNANTS_H2026.
+    - Sous-dossier vide supprimé : `docs/plans/`.
+    - **Bilan : `docs/` top-level 35 → 16 fichiers**.
+
+13. **NOTES-DE-VERSION.md rattrapée mars-mai 2026** (commit `bc8ac1f`,
+    build 1745)
+    - Le doc s'arrêtait à Beta 98.4 (4 mars). 7 nouvelles entrées
+      thématiques : 99.38 (5-8 mai sécurité Défenses A+I), 99.32 (2 mai
+      Phase 7 doublons + Réserve v1.1), 99.26→99.30 (26-28 avril voie
+      de retour Réserve), 99.25 (25 avril synthèse PDF), 99.21→99.22
+      (21-24 avril Autonomisation 3-4 + Phase 5 reverted),
+      99.0x→99.20 (mi-mars→mi-avril storage + jetons reprise),
+      98.5→98.9 (14 mars Codex multi-appareil).
+    - Source : BACKLOG `[x]` + MEMORY sessions (pas git log).
+    - Style ASCII French du doc préservé (aucun accent).
+    - 220 lignes ajoutées (426 → 646).
+
+14. **38 suppressions périmées committées** (commit `75a0f4f`, build 1905)
+    - 35 PNG `Audit UX/IMG_6019-6059` + LOG UX 18 avril.txt
+    - Bilan-fin-de-trimestre-questionnaire-format-app.txt
+    - prototype-apercu-sandbox.html (prototype Défense A, livré PR #14)
+
+15. **Top-level untracked → tracking** (commit `aab749f`, build 2035)
+    - `.gitignore` enrichi : `Refactorisations/`, `memory/`,
+      `Retours des testeurs/andree-anne/` (cohérence avec les 6 autres
+      testeurs).
+    - Suppression : `licence CC/` (5 fichiers redondants ; les SVG/PNG
+      des badges CC sont déjà dans `icons/by-nc-sa-2.*` utilisés par
+      cc-license.js, export-pdf.js).
+    - Ajoutés au tracking (27 fichiers) : `Skills pour Claude Code/`
+      (5 nouveaux + 5 déjà trackés), `design_handoff_synthese_B/` (4),
+      `Rapports/` (13 : 6 ultrareview-lot-*.md + 4 narratifs labo +
+      audit-developpement + 2 PDF + 1 HTML), `références tableur/` (3
+      pédagogiques).
+
+16. **docs/ untracked résiduels** (commit `ef05ac7`, build 2040) — 29 fichiers
+    - 4 références vivantes (101-00-Descriptions, 101-00-Observations,
+      CHOIX-ICONES-DEFINITIFS, impact des jetons).
+    - 3 oubliés : `architecture/SPEC-RESERVE-V1.md` (spec livrée
+      26 avril), `archive/description-beta-98b.txt`,
+      `modules/depistage-et-suivi.md`.
+    - Chantier `docs/refonte-textes/` (20 fichiers) : audits, infobulles
+      T1-T11, popups d'aide contextuelle, tour guide, glossaire bloc6,
+      palette accompagnement.
+
+17. **obsolètes/ retiré du root** (commit `4c858fc`)
+    - Le dossier obsolètes/ supprimé filesystem par l'utilisateur.
+    - 15 fichiers étaient trackés (gitignore ne s'applique pas aux
+      fichiers déjà trackés). Suppressions définitives commitées :
+      9 audits ponctuels + 6 .txt Plan d'audit/ qu'on avait classés
+      obsolètes en phase 2.
+    - −4159 lignes nettes.
+
 ### Backlog ajouts
 
 - **#264** : barre de progression sur tous les exports (signalé par Grégoire,
@@ -192,6 +284,7 @@ Workflow de chantier (rappel) :
 - **#258** : déjà `[x]` (rien à faire)
 - **#259** : déjà `[x]` (mais 7 strings manquées rectifiées en follow-up)
 - **#263** : alignement DS modales sécurité (livré aujourd'hui)
+- **#265** : mode clair label bandeau groupe-cours (livré en soirée)
 
 ---
 
@@ -218,7 +311,6 @@ Une fois Phase 2 terminée : retirer `genererNomFichierCC` de cc-license.js
 
 ### Items du backlog par taille
 
-- **#265** mode clair label CSS — ~15 min
 - **Lot 4a** ultrareview jetons — ~4 h, plan dans `Rapports/`
 - **Lot 3** ultrareview indices — ~3-5 h
 - **#264** barre progression exports — ~3-4 h, après #262 Phase 2
