@@ -68,12 +68,16 @@ function detecterDoublonsPratiques(pratiquesLocales, pratiquesBibliotheque) {
  * @returns {string} HTML du badge
  */
 function genererBadgeSourcePratique(pratique /*, pratiquesLocales */) {
-    // Beta 99.39 (A.2 + A.4 + retrait Locale) : aligné sur BibliothequeUI.
-    // Ne reste que `Retirée` (état distinct).
+    // Beta 99.39 Phase B : Retirée + Gabarit (spécifique pratiques, signal qu'il
+    // s'agit d'un modèle livré avec l'app vs une pratique éditable).
+    const parts = [];
     if (pratique && pratique.dansBibliotheque === false) {
-        return '<span class="badge-source badge-source--retiree" style="margin-left: 6px;">Retirée</span>';
+        parts.push('<span class="badge-source badge-source--retiree" style="margin-left: 6px;">Retirée</span>');
     }
-    return '';
+    if (pratique && pratique.estGabarit) {
+        parts.push('<span class="badge-source badge-source--retiree" style="margin-left: 6px;">Gabarit</span>');
+    }
+    return parts.join(' ');
 }
 
 /**
@@ -295,7 +299,7 @@ function genererBadgeTypePratique(pratique) {
  * Section 2: Pratiques disponibles avec filtres
  */
 async function afficherBibliothequePratiques() {
-    // 🆕 FIX v3 (20 jan 2026) : localStorage comme source principale (toujours à jour)
+    // Beta 99.39 Phase B : migration vers BibliothequeUI (sortir de l'outlier).
     const configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
 
     // Beta 99.39 (A.0) : masque les items démo en mode normal
@@ -303,280 +307,151 @@ async function afficherBibliothequePratiques() {
         configurations.filter(p => p.dansBibliotheque !== false)
     );
 
-    // Charger toutes les pratiques disponibles (gabarits + bibliothèque)
     let pratiquesDisponibles = [];
     if (typeof obtenirToutesLesPratiquesBibliotheque === 'function') {
         pratiquesDisponibles = await obtenirToutesLesPratiquesBibliotheque();
     }
     pratiquesDisponibles = BibliothequeUI.filtrerParModeDemo(pratiquesDisponibles);
 
-    // ✅ AJOUT (28 janvier 2026) : Détecter les doublons
     const doublonsDetectes = detecterDoublonsPratiques(pratiquesDansBibliotheque, pratiquesDisponibles);
 
-    // Obtenir les disciplines disponibles
     let disciplines = [];
     if (typeof obtenirDisciplinesDisponiblesPratiques === 'function') {
         disciplines = await obtenirDisciplinesDisponiblesPratiques();
     }
 
-    // Construire le HTML du modal
-    let html = `
-        <div id="modalBibliothequePratiques" class="modal-js-overlay">
-            <div class="modal-js-contenu" style="max-width: 800px;">
-                <!-- Bouton X sticky -->
-                <button data-action="fermerModalBibliothequePratiques" class="modal-js-fermer">
-                    ×
-                </button>
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                    <h2 style="margin: 0; color: var(--accent-primaire);">Bibliothèque de pratiques de notation</h2>
-                    <button class="btn-aide-contextuelle" data-aide="bibliotheque-fonctionnement" title="Comment fonctionne la bibliothèque">✴️</button>
-                </div>
-                <p style="color: var(--gris-clair); margin-bottom: 15px;">
-                    Gérez les pratiques affichées dans la barre latérale.
-                </p>
-    `;
-
-    // ✅ AJOUT (28 janvier 2026) : Afficher avertissement doublons
-    if (doublonsDetectes.length > 0) {
-        html += `
-                <div class="info-box info-box--attention" style="margin-bottom: 20px;">
-                    <div style="font-weight: bold; color: var(--gris-fonce); margin-bottom: 8px;">
-                        ⚠️ ${doublonsDetectes.length} doublon(s) potentiel(s) détecté(s)
-                    </div>
-                    <p style="color: var(--gris-fonce); font-size: 0.9em; margin: 0 0 10px 0;">
-                        Des pratiques avec des noms similaires existent en plusieurs exemplaires.
-                    </p>
-                    <details style="color: var(--gris-fonce); font-size: 0.85em;">
-                        <summary style="cursor: pointer; font-weight: 500;">Voir les détails</summary>
-                        <ul style="margin: 10px 0 0 0; padding-left: 20px;">
-                            ${doublonsDetectes.map(d => `<li><strong>${d.nom}</strong> : ${d.count} exemplaires (IDs: ${d.ids.map(id => '#' + genererIdCourtPratique(id)).join(', ')})</li>`).join('')}
-                        </ul>
-                    </details>
-                </div>
-        `;
+    // Construire metadonnees standardisée : discipline · auteur
+    function buildMeta(pratique) {
+        const parts = [];
+        if (pratique.discipline) parts.push(pratique.discipline);
+        const att = BibliothequeUI.formaterAttribution(pratique);
+        if (att) parts.push(att);
+        else if (pratique.auteur) parts.push('par ' + pratique.auteur);
+        return parts.join(' • ');
     }
 
-    html += `
-                <!-- 🆕 Beta 95.7 : Message aide édition -->
-                <div style="background: var(--bleu-tres-pale, #e8f4f8); border-left: 3px solid var(--bleu-clair, #5dade2); padding: 10px 15px; margin-bottom: 20px; border-radius: 0 6px 6px 0;">
-                    <p style="margin: 0; font-size: 0.9rem; color: var(--texte-secondaire, #555);">
-                        💡 <strong>Pour éditer une pratique</strong>, transférez-la d'abord dans la barre latérale en cliquant sur « Ajouter », puis cliquez dessus pour l'ouvrir en mode édition.
-                    </p>
-                </div>
-
-                <!-- Section 1 : Pratiques dans ta sélection -->
-                <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
-                    Pratiques dans la barre latérale
-                </h3>
-                <div style="margin-bottom: 30px;">
-                    <div id="listePratiquesDansBibliotheque">
-    `;
-
+    // Section 1 : pratiques dans la sélection
+    let contenuSection1 = '';
     if (pratiquesDansBibliotheque.length === 0) {
-        html += '<p style="color: var(--gris-clair); font-style: italic;">Aucune pratique dans la barre latérale</p>';
+        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune pratique dans la barre latérale</p>';
     } else {
         pratiquesDansBibliotheque.forEach(pratique => {
-            const badge = genererBadgeTypePratique(pratique);
-            // Beta 99.39 (A.3) : strippe les préfixes [STD]/[SPE]/etc. du titre
-            const nomPratique = BibliothequeUI.formaterTitre(pratique.nom || 'Sans titre');
-            const discipline = pratique.discipline || '';
-            // Beta 99.39 (A.2 + A.4) : badge source minimal (Locale/Retirée), pas de Bibliothèque ni Démo
-            const badgeSource = genererBadgeSourcePratique(pratique, pratiquesDansBibliotheque);
-
-            html += `
-                <div style="
-                    border: 1px solid var(--bleu-clair);
-                    border-radius: 6px;
-                    padding: 15px;
-                    margin-bottom: 10px;
-                    background: var(--bleu-tres-pale);
-                ">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div style="flex: 1;">
-                            <div style="font-weight: bold; color: var(--accent-primaire); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                                ${badge}
-                                ${nomPratique}
-                                ${badgeSource}
-                            </div>
-                            ${(function(l){return l ? '<div class="biblio-carte-inspire">' + echapperHtml(l) + '</div>' : '';})(BibliothequeUI.formaterInspireDe(pratique))}
-                            ${(function(meta){return meta ? '<div class="biblio-carte-meta">' + meta + '</div>' : '';})((function(a){const parts=[]; if(discipline) parts.push(discipline); if(a) parts.push(a); return parts.join(' • ');})(BibliothequeUI.formaterAttribution(pratique)))}
-                            ${pratique.description ? '<div class="biblio-carte-desc">' + pratique.description + '</div>' : ''}
-                        </div>
-                        <div style="display: flex; gap: 8px; margin-left: 10px;">
-                            <button
-                                data-action="dupliquerPratiqueBibliotheque" data-param="${pratique.id}"
-                                class="btn btn-confirmer btn-tres-compact"
-                                title="Créer une copie">
-                                Dupliquer
-                            </button>
-                            <button
-                                data-action="partagerPratiqueMateriel" data-param="${pratique.id}"
-                                class="btn btn-secondaire btn-tres-compact"
-                                title="Exporter en JSON">
-                                Exporter
-                            </button>
-                            <button
-                                data-action="retirerPratiqueDeBibliothequeMateriel" data-param="${pratique.id}"
-                                class="btn btn-secondaire btn-tres-compact"
-                                title="Retirer de la barre latérale (données conservées)">
-                                Retirer
-                            </button>
-                            <button
-                                data-action="supprimerPratiqueDefinitivement" data-param="${pratique.id}"
-                                class="btn btn-supprimer btn-tres-compact"
-                                title="Supprimer définitivement">
-                                Supprimer
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
+            contenuSection1 += BibliothequeUI.renderCarteSelection({
+                nom: BibliothequeUI.formaterTitre(pratique.nom || 'Sans titre'),
+                id: pratique.id,
+                badgesPratiques: genererBadgeTypePratique(pratique),
+                badgeSource: genererBadgeSourcePratique(pratique, pratiquesDansBibliotheque),
+                metadonnees: buildMeta(pratique),
+                description: pratique.description || '',
+                inspireDe: BibliothequeUI.formaterInspireDe(pratique),
+                boutons: [
+                    { label: 'Dupliquer', action: 'dupliquerPratiqueBibliotheque', param: pratique.id, classe: 'btn-confirmer', title: 'Créer une copie' },
+                    { label: 'Exporter', action: 'partagerPratiqueMateriel', param: pratique.id, classe: 'btn-secondaire', title: 'Exporter en JSON' },
+                    { label: 'Retirer', action: 'retirerPratiqueDeBibliothequeMateriel', param: pratique.id, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
+                    { label: 'Supprimer', action: 'supprimerPratiqueDefinitivement', param: pratique.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
+                ]
+            });
         });
     }
 
-    html += `
-                    </div>
+    // Message d'aide intégré au début de Section 1
+    const messageAide = '<div style="background: var(--bleu-tres-pale, #e8f4f8); border-left: 3px solid var(--bleu-clair, #5dade2); padding: 10px 15px; margin-bottom: 20px; border-radius: 0 6px 6px 0;">' +
+        '<p style="margin: 0; font-size: 0.9rem; color: var(--texte-secondaire, #555);">' +
+            '💡 <strong>Pour éditer une pratique</strong>, transférez-la d\'abord dans la barre latérale en cliquant sur « Ajouter », puis cliquez dessus pour l\'ouvrir en mode édition.' +
+        '</p>' +
+    '</div>';
+    contenuSection1 = messageAide + contenuSection1;
 
-                    <!-- Boutons Import/Export après la Section 1 -->
-                    <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
-                        <button data-action="exporterPratiquesUtilisateur" class="btn btn-secondaire">
-                            Exporter toutes mes pratiques
-                        </button>
-                        <button data-action="ouvrirFilePickerImportPratiques" class="btn btn-secondaire">
-                            Importer des pratiques
-                        </button>
-                        <input type="file" id="fichier-import-pratiques-modal" accept=".json" style="display: none;" data-on-change="importerPratiquesUtilisateur">
-                    </div>
-                </div>
-
-                <!-- Section 2 : Pratiques disponibles -->
-                <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
-                    Pratiques disponibles à ajouter à la barre latérale
-                </h3>
-
-                <!-- Filtres -->
-                <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
-                    <!-- Filtre par type -->
-                    <div style="flex: 1; min-width: 200px;">
-                        <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">
-                            Filtrer par type :
-                        </label>
-                        <select id="filtreTypePratiques"
-                                class="controle-form"
-                                data-on-change="filtrerPratiquesBibliotheque"
-                                style="max-width: 300px;">
-                            <option value="">Tous les types</option>
-                            <option value="pan-standards">PAN-Standards (STD)</option>
-                            <option value="pan-specifications">PAN-Spécifications (SPE)</option>
-                            <option value="sommative">Sommative (SOM)</option>
-                            <option value="denombrement">Dénombrement (DEN)</option>
-                        </select>
-                    </div>
-
-                    <!-- Filtre par discipline -->
-                    <div style="flex: 1; min-width: 200px;">
-                        <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">
-                            Filtrer par discipline :
-                        </label>
-                        <select id="filtreDisciplinePratiques"
-                                class="controle-form"
-                                data-on-change="filtrerPratiquesBibliotheque"
-                                style="max-width: 300px;">
-                            <option value="">Toutes les disciplines</option>
+    // Boutons import/export après Section 1
+    const boutonsApresSection1 = `
+        <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
+            <button data-action="exporterPratiquesUtilisateur" class="btn btn-secondaire btn-mini">
+                Exporter toutes mes pratiques
+            </button>
+            <button data-action="ouvrirFilePickerImportPratiques" class="btn btn-secondaire btn-mini">
+                Importer des pratiques
+            </button>
+            <input type="file" id="fichier-import-pratiques-modal" accept=".json" style="display: none;" data-on-change="importerPratiquesUtilisateur">
+        </div>
     `;
 
-    disciplines.forEach(discipline => {
-        html += `<option value="${discipline}">${discipline}</option>`;
-    });
-
-    html += `
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Liste des pratiques disponibles -->
-                <div id="listePratiquesDisponibles">
-    `;
-
-    // Filtrer pour ne pas afficher celles déjà dans la sélection
-    const idsDejaPresents = new Set(pratiquesDansBibliotheque.map(p => p.id));
-    const pratiquesAAfficher = pratiquesDisponibles.filter(p => !idsDejaPresents.has(p.id));
-
-    if (pratiquesAAfficher.length === 0) {
-        html += '<p style="color: var(--gris-clair); font-style: italic;">Toutes les pratiques sont déjà dans ta sélection</p>';
-    } else {
-        pratiquesAAfficher.forEach(pratique => {
-            const badge = genererBadgeTypePratique(pratique);
-            // Beta 99.39 (A.3) : strippe les préfixes [STD]/[SPE]/etc. du titre
-            const nomPratique = BibliothequeUI.formaterTitre(pratique.nom || 'Sans titre');
-            const estGabarit = pratique.estGabarit;
-            const discipline = pratique.discipline || '';
-            // Beta 99.39 (A.2 + A.4) : badge source minimal (Locale/Retirée), pas de Bibliothèque ni Démo
-            const badgeSource = genererBadgeSourcePratique(pratique, pratiquesDansBibliotheque);
-
-            html += `
-                <div class="pratique-dispo-item"
-                     data-type="${pratique.type || ''}"
-                     data-discipline="${discipline}"
-                     style="
-                        border: 1px solid var(--bordure-claire);
-                        border-radius: 6px;
-                        padding: 15px;
-                        margin-bottom: 10px;
-                        background: ${estGabarit ? 'var(--gris-tres-pale)' : 'white'};
-                     ">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div style="flex: 1;">
-                            <div style="font-weight: bold; color: var(--accent-primaire); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                                ${badge}
-                                ${nomPratique}
-                                ${badgeSource}
-                                ${estGabarit ? '<span class="badge-source badge-source--retiree">Gabarit</span>' : ''}
-                            </div>
-                            ${(function(l){return l ? '<div class="biblio-carte-inspire">' + echapperHtml(l) + '</div>' : '';})(BibliothequeUI.formaterInspireDe(pratique))}
-                            ${(function(meta){return meta ? '<div class="biblio-carte-meta">' + meta + '</div>' : '';})((function(){const parts=[]; if(discipline) parts.push(discipline); if(pratique.auteur) parts.push('par ' + pratique.auteur); return parts.join(' • ');})())}
-                            ${pratique.description ? '<div class="biblio-carte-desc">' + pratique.description + '</div>' : ''}
-                        </div>
-                        <button
-                            data-action="ajouterPratiqueALaSelection" data-param="${pratique.id}"
-                            class="btn btn-principal btn-tres-compact"
-                            title="Ajouter à ta sélection">
-                            Ajouter
-                        </button>
-                    </div>
-                </div>
-            `;
-        });
-    }
-
-    html += `
-                </div>
+    // Filtres Section 2 : type + discipline (spécifique pratiques)
+    const filtresHTML = `
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
+            <div style="flex: 1; min-width: 200px;">
+                <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">
+                    Filtrer par type :
+                </label>
+                <select id="filtreTypePratiques" class="controle-form" data-on-change="filtrerPratiquesBibliotheque" style="max-width: 300px;">
+                    <option value="">Tous les types</option>
+                    <option value="pan-standards">PAN-Standards (STD)</option>
+                    <option value="pan-specifications">PAN-Spécifications (SPE)</option>
+                    <option value="sommative">Sommative (SOM)</option>
+                    <option value="denombrement">Dénombrement (DEN)</option>
+                </select>
+            </div>
+            <div style="flex: 1; min-width: 200px;">
+                <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">
+                    Filtrer par discipline :
+                </label>
+                <select id="filtreDisciplinePratiques" class="controle-form" data-on-change="filtrerPratiquesBibliotheque" style="max-width: 300px;">
+                    <option value="">Toutes les disciplines</option>
+                    ${disciplines.map(d => `<option value="${d}">${d}</option>`).join('')}
+                </select>
             </div>
         </div>
     `;
 
-    // Idempotence : retirer une instance précédente avant d'en injecter une
-    // nouvelle. Sinon `appendChild` empile deux modales partageant le même
-    // `id`, ce qui double le backdrop et oblige à fermer 2 fois pour que la
-    // modale disparaisse. (Cas typique : rafraîchissement après import.)
-    var ancien = document.getElementById('modalContainerPratiques');
-    if (ancien) ancien.remove();
+    // Section 2 : pool (pratiques disponibles à ajouter)
+    const idsDejaPresents = new Set(pratiquesDansBibliotheque.map(p => p.id));
+    const pratiquesAAfficher = pratiquesDisponibles.filter(p => !idsDejaPresents.has(p.id));
 
-    // Injecter le modal dans le DOM
-    const modalContainer = document.createElement('div');
-    modalContainer.id = 'modalContainerPratiques';
-    modalContainer.innerHTML = html;
-    document.body.appendChild(modalContainer);
+    let contenuSection2 = '';
+    if (pratiquesAAfficher.length === 0) {
+        contenuSection2 = '<p style="color: var(--gris-clair); font-style: italic;">Toutes les pratiques sont déjà dans ta sélection</p>';
+    } else {
+        pratiquesAAfficher.forEach(pratique => {
+            const estGabarit = pratique.estGabarit;
+            contenuSection2 += BibliothequeUI.renderCarteDisponible({
+                nom: BibliothequeUI.formaterTitre(pratique.nom || 'Sans titre'),
+                id: pratique.id,
+                badgesPratiques: genererBadgeTypePratique(pratique),
+                badgeSource: genererBadgeSourcePratique(pratique, pratiquesDansBibliotheque),
+                metadonnees: buildMeta(pratique),
+                description: pratique.description || '',
+                inspireDe: BibliothequeUI.formaterInspireDe(pratique),
+                classeItem: 'pratique-dispo-item',
+                dataAttrs: `data-type="${pratique.type || ''}" data-discipline="${pratique.discipline || ''}"`,
+                styleExtra: estGabarit ? 'background: var(--gris-tres-pale);' : '',
+                boutons: [
+                    { label: 'Ajouter', action: 'ajouterPratiqueALaSelection', param: pratique.id, classe: 'btn-principal', title: 'Ajouter à ta sélection' }
+                ]
+            });
+        });
+    }
+
+    BibliothequeUI.creerModal({
+        modalId: 'modalBibliothequePratiques',
+        titre: 'Bibliothèque de pratiques de notation',
+        sousTitre: 'Gérez les pratiques affichées dans la barre latérale.',
+        onFermer: 'fermerModalBibliothequePratiques',
+        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(doublonsDetectes),
+        titreSection1: 'Pratiques dans la barre latérale',
+        contenuIdListe1: 'listePratiquesDansBibliotheque',
+        contenuSection1: contenuSection1,
+        boutonsApresSection1: boutonsApresSection1,
+        titreSection2: 'Pratiques disponibles à ajouter à la barre latérale',
+        filtresSection2: filtresHTML,
+        contenuIdListe2: 'listePratiquesDisponibles',
+        contenuSection2: contenuSection2
+    });
 }
 
 /**
  * Ferme le modal de bibliothèque
  */
 function fermerModalBibliothequePratiques() {
-    const modal = document.getElementById('modalContainerPratiques');
-    if (modal) {
-        modal.remove();
-    }
+    BibliothequeUI.fermerModal('modalBibliothequePratiques');
 }
 
 /**

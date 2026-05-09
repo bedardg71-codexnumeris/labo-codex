@@ -2461,9 +2461,9 @@ async function afficherBibliothequeEchelles() {
 
     const boutonsApresSection1 = `
         <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-            <button data-action="ajouterMesEchellesALaBibliotheque" class="btn btn-principal">Ajouter mes échelles à la bibliothèque</button>
-            <button data-action="exporterEchelles" class="btn btn-secondaire">Exporter toutes mes échelles</button>
-            <button data-action="ouvrirFilePickerImportEchelles" class="btn btn-secondaire">Importer des échelles</button>
+            <button data-action="ajouterMesEchellesALaBibliotheque" class="btn btn-principal btn-mini">Ajouter mes échelles à la bibliothèque</button>
+            <button data-action="exporterEchelles" class="btn btn-secondaire btn-mini">Exporter toutes mes échelles</button>
+            <button data-action="ouvrirFilePickerImportEchelles" class="btn btn-secondaire btn-mini">Importer des échelles</button>
             <input type="file" id="fichier-import-echelles-modal" accept=".json" style="display: none;" data-on-change="importerEchelles">
         </div>`;
 
