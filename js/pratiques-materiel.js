@@ -67,17 +67,13 @@ function detecterDoublonsPratiques(pratiquesLocales, pratiquesBibliotheque) {
  * @param {Array} pratiquesLocales - Pratiques locales pour vérifier la source
  * @returns {string} HTML du badge
  */
-function genererBadgeSourcePratique(pratique, pratiquesLocales) {
-    const estLocale = pratiquesLocales.some(p => p.id === pratique.id);
-    const estRetiree = pratique.dansBibliotheque === false;
-
-    if (estRetiree) {
+function genererBadgeSourcePratique(pratique /*, pratiquesLocales */) {
+    // Beta 99.39 (A.2 + A.4 + retrait Locale) : aligné sur BibliothequeUI.
+    // Ne reste que `Retirée` (état distinct).
+    if (pratique && pratique.dansBibliotheque === false) {
         return '<span class="badge-source badge-source--retiree" style="margin-left: 6px;">Retirée</span>';
-    } else if (estLocale) {
-        return '<span class="badge-source badge-source--locale" style="margin-left: 6px;">Locale</span>';
-    } else {
-        return '<span class="badge-source badge-source--bibliotheque" style="margin-left: 6px;">Bibliothèque</span>';
     }
+    return '';
 }
 
 /**
@@ -134,7 +130,10 @@ async function afficherListePratiquesMateriel() {
     const configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
 
     // Filtrer les pratiques dans la bibliothèque (affichées dans la sidebar)
-    const pratiquesDansBibliotheque = configurations.filter(p => p.dansBibliotheque !== false);
+    // Beta 99.39 (A.0) : masque les items démo en mode normal
+    const pratiquesDansBibliotheque = BibliothequeUI.filtrerParModeDemo(
+        configurations.filter(p => p.dansBibliotheque !== false)
+    );
 
 
     // Si aucune pratique, afficher message
@@ -299,13 +298,17 @@ async function afficherBibliothequePratiques() {
     // 🆕 FIX v3 (20 jan 2026) : localStorage comme source principale (toujours à jour)
     const configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
 
-    const pratiquesDansBibliotheque = configurations.filter(p => p.dansBibliotheque !== false);
+    // Beta 99.39 (A.0) : masque les items démo en mode normal
+    const pratiquesDansBibliotheque = BibliothequeUI.filtrerParModeDemo(
+        configurations.filter(p => p.dansBibliotheque !== false)
+    );
 
     // Charger toutes les pratiques disponibles (gabarits + bibliothèque)
     let pratiquesDisponibles = [];
     if (typeof obtenirToutesLesPratiquesBibliotheque === 'function') {
         pratiquesDisponibles = await obtenirToutesLesPratiquesBibliotheque();
     }
+    pratiquesDisponibles = BibliothequeUI.filtrerParModeDemo(pratiquesDisponibles);
 
     // ✅ AJOUT (28 janvier 2026) : Détecter les doublons
     const doublonsDetectes = detecterDoublonsPratiques(pratiquesDansBibliotheque, pratiquesDisponibles);
@@ -374,10 +377,10 @@ async function afficherBibliothequePratiques() {
     } else {
         pratiquesDansBibliotheque.forEach(pratique => {
             const badge = genererBadgeTypePratique(pratique);
-            const nomPratique = pratique.nom || 'Sans titre';
+            // Beta 99.39 (A.3) : strippe les préfixes [STD]/[SPE]/etc. du titre
+            const nomPratique = BibliothequeUI.formaterTitre(pratique.nom || 'Sans titre');
             const discipline = pratique.discipline || '';
-            const idCourt = genererIdCourtPratique(pratique.id);
-            // ✅ AJOUT (28 janvier 2026) : Badge source
+            // Beta 99.39 (A.2 + A.4) : badge source minimal (Locale/Retirée), pas de Bibliothèque ni Démo
             const badgeSource = genererBadgeSourcePratique(pratique, pratiquesDansBibliotheque);
 
             html += `
@@ -393,7 +396,6 @@ async function afficherBibliothequePratiques() {
                             <div style="font-weight: bold; color: var(--accent-primaire); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
                                 ${badge}
                                 ${nomPratique}
-                                <span class="badge-source badge-source--id" style="font-family: monospace;" title="ID: ${pratique.id}">#${idCourt}</span>
                                 ${badgeSource}
                             </div>
                             ${(function(l){return l ? '<div class="biblio-carte-inspire">' + echapperHtml(l) + '</div>' : '';})(BibliothequeUI.formaterInspireDe(pratique))}
@@ -506,11 +508,11 @@ async function afficherBibliothequePratiques() {
     } else {
         pratiquesAAfficher.forEach(pratique => {
             const badge = genererBadgeTypePratique(pratique);
-            const nomPratique = pratique.nom || 'Sans titre';
+            // Beta 99.39 (A.3) : strippe les préfixes [STD]/[SPE]/etc. du titre
+            const nomPratique = BibliothequeUI.formaterTitre(pratique.nom || 'Sans titre');
             const estGabarit = pratique.estGabarit;
             const discipline = pratique.discipline || '';
-            const idCourt = genererIdCourtPratique(pratique.id);
-            // ✅ AJOUT (28 janvier 2026) : Badge source (pratiques disponibles = bibliothèque)
+            // Beta 99.39 (A.2 + A.4) : badge source minimal (Locale/Retirée), pas de Bibliothèque ni Démo
             const badgeSource = genererBadgeSourcePratique(pratique, pratiquesDansBibliotheque);
 
             html += `
@@ -529,7 +531,6 @@ async function afficherBibliothequePratiques() {
                             <div style="font-weight: bold; color: var(--accent-primaire); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
                                 ${badge}
                                 ${nomPratique}
-                                <span class="badge-source badge-source--id" style="font-family: monospace;" title="ID: ${pratique.id}">#${idCourt}</span>
                                 ${badgeSource}
                                 ${estGabarit ? '<span class="badge-source badge-source--retiree">Gabarit</span>' : ''}
                             </div>

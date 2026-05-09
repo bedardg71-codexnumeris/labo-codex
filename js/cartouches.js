@@ -2795,7 +2795,10 @@ async function afficherBanqueCartouches(grilleIdFiltre = '') {
     }
 
     // ✅ AJOUT (8 décembre 2025) : Filtrer uniquement les cartouches dans la bibliothèque
-    const cartouchesDansBibliotheque = toutesLesCartouches.filter(c => c.dansBibliotheque !== false);
+    // Beta 99.39 (A.0) : masque les items démo en mode normal
+    const cartouchesDansBibliotheque = BibliothequeUI.filtrerParModeDemo(
+        toutesLesCartouches.filter(c => c.dansBibliotheque !== false)
+    );
 
     // Filtrer si nécessaire
     let cartouchesFiltrees = cartouchesDansBibliotheque;
@@ -3339,13 +3342,17 @@ async function preparerDonneesBibliothequeCartouches() {
         });
     }
 
-    const cartouchesDansBibliotheque = cartouchesLocales.filter(c => c.dansBibliotheque !== false);
+    // Beta 99.39 (A.0) : masque les items démo en mode normal
+    const cartouchesDansBibliotheque = BibliothequeUI.filtrerParModeDemo(
+        cartouchesLocales.filter(c => c.dansBibliotheque !== false)
+    );
 
     let cartouchesDisponibles = cartouchesLocales.filter(c => c.dansBibliotheque === false);
     if (window.CARTOUCHES_BIBLIOTHEQUE) {
         const cartouchesBibliothequePartagee = await obtenirToutesLesCartouchesBibliotheque();
         cartouchesDisponibles = [...cartouchesDisponibles, ...cartouchesBibliothequePartagee];
     }
+    cartouchesDisponibles = BibliothequeUI.filtrerParModeDemo(cartouchesDisponibles);
 
     const doublonsDetectes = detecterDoublonsCartouches(cartouchesDansBibliotheque, cartouchesDisponibles);
     const toutesLesGrilleNoms = [...cartouchesLocales, ...cartouchesDisponibles].map(c => c.grilleNom || 'Autre');
@@ -3536,7 +3543,6 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
     }
 }
 
-/**
 async function retirerCartoucheDeBibliotheque(id, grilleId) {
     const cartouches = await db.get(`cartouches_${grilleId}`) || [];
     const cartouche = cartouches.find(c => c.id === id);

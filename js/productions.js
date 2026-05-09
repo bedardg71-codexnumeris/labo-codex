@@ -1953,10 +1953,14 @@ async function preparerDonneesBibliothequeProductions() {
         return null;
     }
 
-    const productionsUtilisateur = await db.get(getCleProductions()) || [];
+    const productionsUtilisateurBrut = await db.get(getCleProductions()) || [];
+    // Beta 99.39 (A.0) : masque les items démo en mode normal
+    const productionsUtilisateur = BibliothequeUI.filtrerParModeDemo(productionsUtilisateurBrut);
     const productionsDansSelection = productionsUtilisateur.filter(p => p.dansBibliotheque !== false);
     const productionsRetirees = productionsUtilisateur.filter(p => p.dansBibliotheque === false);
-    const toutesProductionsBiblio = await obtenirToutesLesProductionsBibliotheque();
+    const toutesProductionsBiblio = BibliothequeUI.filtrerParModeDemo(
+        await obtenirToutesLesProductionsBibliotheque()
+    );
     const doublonsDetectes = detecterDoublonsProductions(productionsUtilisateur, toutesProductionsBiblio);
 
     // Section 1
@@ -3443,7 +3447,10 @@ async function afficherListeProductions(filtreType = '') {
     }
 
     // ✅ AJOUT (8 décembre 2025) : Filtrer uniquement les productions dans la bibliothèque
-    const productionsDansBibliotheque = productions.filter(p => p.dansBibliotheque !== false);
+    // Beta 99.39 (A.0) : masque les items démo en mode normal
+    const productionsDansBibliotheque = BibliothequeUI.filtrerParModeDemo(
+        productions.filter(p => p.dansBibliotheque !== false)
+    );
 
     // Filtrer selon le type si nécessaire
     let productionsFiltrees = productionsDansBibliotheque;
