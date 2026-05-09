@@ -2198,6 +2198,7 @@ async function preparerDonneesBibliothequeGrilles() {
         badgeSource: BibliothequeUI.genererBadgeSource(grille, grillesDansBibliotheque),
         badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : '',
         metadonnees: (function(a){return `${grille.criteres?.length || 0} critère(s)${grille.discipline ? ' • ' + grille.discipline : ''}${a ? ' • ' + a : ''}`;})(BibliothequeUI.formaterAttribution(grille)),
+        description: grille.description || '',
         inspireDe: BibliothequeUI.formaterInspireDe(grille),
         boutons: [
             { label: 'Dupliquer', onclick: `dupliquerGrilleBibliotheque('${grille.id}')`, classe: 'btn-confirmer', title: 'Créer une copie' },

@@ -2381,6 +2381,7 @@ async function preparerDonneesBibliothequeEchelles() {
         badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
         badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(echelle) : '',
         metadonnees: (function(a){return `${echelle.niveaux?.length || 0} niveau(x)${echelle.discipline ? ' • ' + echelle.discipline : ''}${a ? ' • ' + a : ''}`;})(BibliothequeUI.formaterAttribution(echelle)),
+        description: echelle.description || '',
         inspireDe: BibliothequeUI.formaterInspireDe(echelle),
         boutons: [
             { label: 'Dupliquer', onclick: `dupliquerEchelleBibliotheque('${echelle.id}')`, classe: 'btn-confirmer', title: 'Créer une copie' },

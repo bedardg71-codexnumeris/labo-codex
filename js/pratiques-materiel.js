@@ -399,9 +399,8 @@ async function afficherBibliothequePratiques() {
                                 ${badgeSource}
                             </div>
                             ${(function(l){return l ? '<div class="biblio-carte-inspire">' + echapperHtml(l) + '</div>' : '';})(BibliothequeUI.formaterInspireDe(pratique))}
-                            <div style="color: var(--gris-clair); font-size: 0.9em;">
-                                ${pratique.description || ''}${discipline ? ' • ' + discipline : ''}
-                            </div>
+                            ${(function(meta){return meta ? '<div class="biblio-carte-meta">' + meta + '</div>' : '';})((function(a){const parts=[]; if(discipline) parts.push(discipline); if(a) parts.push(a); return parts.join(' • ');})(BibliothequeUI.formaterAttribution(pratique)))}
+                            ${pratique.description ? '<div class="biblio-carte-desc">' + pratique.description + '</div>' : ''}
                         </div>
                         <div style="display: flex; gap: 8px; margin-left: 10px;">
                             <button
@@ -535,10 +534,8 @@ async function afficherBibliothequePratiques() {
                                 ${estGabarit ? '<span class="badge-source badge-source--retiree">Gabarit</span>' : ''}
                             </div>
                             ${(function(l){return l ? '<div class="biblio-carte-inspire">' + echapperHtml(l) + '</div>' : '';})(BibliothequeUI.formaterInspireDe(pratique))}
-                            <div style="color: var(--gris-clair); font-size: 0.9em;">
-                                ${pratique.description || ''}${discipline ? ' • ' + discipline : ''}
-                                ${pratique.auteur ? ' • Par ' + pratique.auteur : ''}
-                            </div>
+                            ${(function(meta){return meta ? '<div class="biblio-carte-meta">' + meta + '</div>' : '';})((function(){const parts=[]; if(discipline) parts.push(discipline); if(pratique.auteur) parts.push('par ' + pratique.auteur); return parts.join(' • ');})())}
+                            ${pratique.description ? '<div class="biblio-carte-desc">' + pratique.description + '</div>' : ''}
                         </div>
                         <button
                             data-action="ajouterPratiqueALaSelection" data-param="${pratique.id}"
