@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audit de développement — Labo Codex avec Claude</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bleu-principal: #1a4a5e;
+    --bleu-fonce: #0c1a22;
+    --bleu-moyen: #244858;
+    --bleu-clair: #6aacb8;
+    --bleu-leger: #4a8a94;
+    --bleu-carte: #1a3a48;
+    --bleu-pale: #1a3040;
+    --fond-page: #0e1e28;
+    --texte: #d0e8f0;
+    --texte-secondaire: #8ab4c0;
+    --accent-vert: #4ecdc4;
+    --accent-orange: #f0a050;
+    --accent-rose: #e06080;
+    --accent-violet: #a070d0;
+    --shadow-normal: 0 2px 8px rgba(10, 30, 40, 0.4);
+    --shadow-prononce: 0 4px 14px rgba(10, 30, 40, 0.5);
+    --radius-grand: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--fond-page);
+    color: var(--texte);
+    line-height: 1.75;
+    padding: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    padding: 3rem 2rem;
+    margin-bottom: 3rem;
+    background: linear-gradient(135deg, var(--bleu-fonce), var(--bleu-moyen));
+    border-radius: var(--radius-grand);
+    box-shadow: var(--shadow-prononce);
+    border: 1px solid rgba(106, 172, 184, 0.15);
+  }
+
+  header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.5rem;
+  }
+
+  header .subtitle {
+    font-size: 1.05rem;
+    color: var(--bleu-clair);
+    font-weight: 400;
+  }
+
+  header .meta {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: var(--texte-secondaire);
+  }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+
+  .kpi {
+    background: var(--bleu-carte);
+    border-radius: var(--radius-grand);
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: var(--shadow-normal);
+    border: 1px solid rgba(106, 172, 184, 0.1);
+  }
+
+  .kpi .value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-vert);
+  }
+
+  .kpi .label {
+    font-size: 0.85rem;
+    color: var(--texte-secondaire);
+    margin-top: 0.3rem;
+  }
+
+  section {
+    margin-bottom: 3rem;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--bleu-clair);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(106, 172, 184, 0.2);
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--texte);
+    margin: 1.5rem 0 0.75rem;
+  }
+
+  p {
+    margin-bottom: 1rem;
+    color: var(--texte);
+    font-size: 0.95rem;
+  }
+
+  .chart-container {
+    background: var(--bleu-carte);
+    border-radius: var(--radius-grand);
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    box-shadow: var(--shadow-normal);
+    border: 1px solid rgba(106, 172, 184, 0.1);
+    position: relative;
+  }
+
+  .chart-container canvas {
+    max-height: 400px;
+  }
+
+  .chart-container.tall canvas {
+    max-height: 500px;
+  }
+
+  .two-charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+  }
+
+  @media (max-width: 768px) {
+    .two-charts { grid-template-columns: 1fr; }
+    body { padding: 1rem; }
+    header h1 { font-size: 1.5rem; }
+  }
+
+  .phase-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.9rem;
+  }
+
+  .phase-table th {
+    background: var(--bleu-moyen);
+    color: var(--bleu-clair);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 500;
+  }
+
+  .phase-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(106, 172, 184, 0.1);
+  }
+
+  .phase-table tr:hover td {
+    background: rgba(106, 172, 184, 0.05);
+  }
+
+  .highlight {
+    color: var(--accent-vert);
+    font-weight: 600;
+  }
+
+  .highlight-orange {
+    color: var(--accent-orange);
+    font-weight: 600;
+  }
+
+  footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--texte-secondaire);
+    font-size: 0.85rem;
+    border-top: 1px solid rgba(106, 172, 184, 0.15);
+    margin-top: 3rem;
+  }
+
+  .prose { max-width: 80ch; }
+
+  .heatmap-container {
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+
+  .heatmap-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 700px;
+  }
+
+  .heatmap-row {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .heatmap-label {
+    width: 30px;
+    font-size: 0.7rem;
+    color: var(--texte-secondaire);
+    text-align: right;
+    padding-right: 4px;
+    flex-shrink: 0;
+  }
+
+  .heatmap-cell {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .heatmap-months {
+    display: flex;
+    gap: 3px;
+    padding-left: 33px;
+    margin-bottom: 6px;
+  }
+
+  .heatmap-month-label {
+    font-size: 0.7rem;
+    color: var(--texte-secondaire);
+  }
+
+  .legend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    padding-left: 33px;
+    font-size: 0.7rem;
+    color: var(--texte-secondaire);
+  }
+
+  .legend-cell {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Audit de développement — Labo Codex</h1>
+  <div class="subtitle">175 jours de développement assisté par Claude</div>
+  <div class="meta">Période : 20 octobre 2025 → 12 avril 2026 &middot; Généré le 14 avril 2026</div>
+</header>
+
+<!-- KPI -->
+<div class="kpi-grid">
+  <div class="kpi"><div class="value">634 h</div><div class="label">Heures de développement</div></div>
+  <div class="kpi"><div class="value">2 347</div><div class="label">Commits</div></div>
+  <div class="kpi"><div class="value">314</div><div class="label">Sessions de travail</div></div>
+  <div class="kpi"><div class="value">82,9 %</div><div class="label">Jours actifs (145/175)</div></div>
+  <div class="kpi"><div class="value">16,2</div><div class="label">Commits / jour actif</div></div>
+</div>
+
+<!-- 1. TEXTE D'INTRODUCTION -->
+<section>
+  <h2>Vue d'ensemble</h2>
+  <div class="prose">
+    <p>
+      En 175 jours de développement, Labo Codex est passé d'un squelette HTML à une application SPA complète comptant environ 35 modules JavaScript, avec un rythme soutenu de 16,2 commits par jour actif. Le projet a mobilisé environ 634 heures réparties en 314 sessions, sur 145 jours actifs — ce qui représente un taux d'occupation de 83 % du calendrier. La moyenne de 4,4 heures par jour actif traduit un engagement quotidien substantiel, combinant sessions longues de développement et micro-sessions de correction.
+    </p>
+    <p>
+      La méthode d'estimation retenue regroupe les commits en sessions lorsque l'écart entre deux commits consécutifs ne dépasse pas deux heures, avec un ajout forfaitaire de 15 minutes en fin de chaque session. Cette approche, bien qu'imparfaite (elle ne capture ni le temps de réflexion ni les tests non suivis de commits), offre un ordre de grandeur fiable.
+    </p>
+  </div>
+</section>
+
+<!-- 2. HEURES PAR MOIS -->
+<section>
+  <h2>Évolution mensuelle</h2>
+  <div class="prose">
+    <p>
+      Le développement a suivi une trajectoire en cloche avec un pic marqué en février 2026. Les premiers mois (octobre-décembre 2025) ont posé les fondations : architecture SPA, premiers modules fonctionnels, puis un vaste chantier de refactoring qui a éliminé 1,2 million de lignes de code legacy. À partir de janvier, le rythme s'est intensifié avec l'arrivée des modules métier les plus complexes — pratiques de notation, Codex, indices A-C-P, import-export ZIP.
+    </p>
+    <p>
+      Février 2026 constitue le mois record avec <span class="highlight">178 heures</span> en 62 sessions, soit une moyenne de près de 6,4 heures par jour actif. C'est durant cette période que les fonctionnalités les plus structurantes ont été développées : le module RàI (Réponse à l'Intervention), le dépistage SOLO, la carte mentale de planification et les profils dynamiques. Ce pic d'intensité est cohérent avec la convergence de plusieurs chantiers majeurs arrivant à maturité simultanément.
+    </p>
+    <p>
+      Mars et avril marquent une phase de consolidation : le rythme redescend autour de 100 heures par mois, avec un travail orienté vers l'audit de qualité (Tiers 0 à 7), la réorganisation de la navigation et les ajustements d'interface. La donnée d'avril (56 heures) ne couvre que 12 jours au moment de l'audit.
+    </p>
+  </div>
+  <div class="chart-container">
+    <canvas id="chartHeuresMois"></canvas>
+  </div>
+</section>
+
+<!-- 3. PHASES DE DÉVELOPPEMENT -->
+<section>
+  <h2>Les sept phases du projet</h2>
+  <div class="prose">
+    <p>
+      Rétrospectivement, le développement se découpe en sept phases distinctes, chacune avec un objectif dominant. La phase de fondation (octobre) a été marquée par un marathon de 77 commits le 25 octobre — le jour le plus intense du projet —, posant l'architecture initiale de l'application monopage. La phase de construction (novembre) a érigé le cœur fonctionnel : évaluations, travaux, productions, profils étudiants.
+    </p>
+    <p>
+      Décembre a été consacré à un refactoring massif, éliminant le code hérité des versions précédentes. Janvier a accéléré avec les modules d'évaluation avancés. Février a concentré les développements les plus complexes du projet. Mars a consolidé l'ensemble via un audit systématique. Avril poursuit l'enrichissement avec le carrousel de séquences et les améliorations d'import-export.
+    </p>
+  </div>
+  <table class="phase-table">
+    <thead>
+      <tr><th>Phase</th><th>Période</th><th>Heures</th><th>Commits</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Fondation</td><td>Oct 2025</td><td>37 h</td><td>171</td><td>Architecture SPA, structure HTML, premiers modules</td></tr>
+      <tr><td>Construction</td><td>Nov 2025</td><td>79 h</td><td>343</td><td>Modules évaluations, travaux, productions, profils</td></tr>
+      <tr><td>Refactoring</td><td>Déc 2025</td><td>74 h</td><td>285</td><td>1,2M lignes supprimées, modularisation</td></tr>
+      <tr><td>Accélération</td><td>Jan 2026</td><td>105 h</td><td>432</td><td>Pratiques de notation, Codex, indices A-C-P</td></tr>
+      <tr><td style="color: var(--accent-vert); font-weight:600;">Pic d'intensité</td><td>Fév 2026</td><td style="color: var(--accent-vert); font-weight:600;">178 h</td><td>582</td><td>RàI, dépistage SOLO, carte mentale, profils dynamiques</td></tr>
+      <tr><td>Consolidation</td><td>Mars 2026</td><td>105 h</td><td>308</td><td>Audit Tiers 0-7, CSS, SSOT, navigation</td></tr>
+      <tr><td>Enrichissement</td><td>Avr 2026*</td><td>56 h</td><td>226</td><td>Carrousel, import/export MD, interventions</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 4. COURBE D'INTENSITÉ HEBDOMADAIRE -->
+<section>
+  <h2>Courbe d'intensité hebdomadaire</h2>
+  <div class="prose">
+    <p>
+      La vue hebdomadaire révèle un rythme oscillant entre 35 et 175 commits par semaine, avec des creux correspondant aux pauses identifiées (mi-janvier, relâche de mars) et des pics liés aux sprints de développement. Les semaines les plus intenses — la dernière de décembre 2025 (175 commits) et la troisième de février 2026 (175 commits) — correspondent à des moments de convergence où plusieurs fonctionnalités étaient finalisées simultanément.
+    </p>
+    <p>
+      Le graphique met en évidence un pattern récurrent : après chaque pause, le retour au travail s'accompagne d'une montée progressive sur une à deux semaines, suivie d'un plateau d'intensité élevée, puis d'un creux naturel. Ce rythme, probablement non planifié consciemment, a le mérite de prévenir l'épuisement tout en maintenant une cadence élevée.
+    </p>
+  </div>
+  <div class="chart-container">
+    <canvas id="chartCommitsSemaine"></canvas>
+  </div>
+</section>
+
+<!-- 5. HEATMAP -->
+<section>
+  <h2>Carte de chaleur des commits quotidiens</h2>
+  <div class="prose">
+    <p>
+      La heatmap ci-dessous représente chaque jour de la période couverte, coloré selon le nombre de commits. Les zones les plus denses apparaissent en janvier-février 2026, confirmant la concentration de l'effort durant cette période. Les zones vides correspondent aux pauses identifiées. On note que même durant la «&nbsp;pause de Noël&nbsp;», des commits ont été enregistrés le 25 décembre (17 commits) — signe d'un projet qui ne quittait pas tout à fait l'esprit de son développeur.
+    </p>
+  </div>
+  <div class="chart-container">
+    <div id="heatmapContainer" class="heatmap-container"></div>
+  </div>
+</section>
+
+<!-- 6. RÉPARTITION PAR MODULE -->
+<section>
+  <h2>Répartition par module</h2>
+  <div class="prose">
+    <p>
+      Le fichier <code>index.html</code>, cœur de l'application SPA, concentre à lui seul 772 commits — un tiers du total. C'est le prix d'une architecture monopage où chaque modification de section touche le fichier principal. Le CSS (<code>styles.css</code>) suit avec 487 commits et un solde net de +22 190 lignes, ce qui en fait le module le plus «&nbsp;additif&nbsp;» du projet : le design s'est construit par couches successives avec peu de réécriture.
+    </p>
+    <p>
+      Parmi les modules métier, Travaux/Productions arrive en tête avec 532 commits, reflétant la complexité du flux d'import de fichiers (images, PDF) et les multiples itérations nécessaires pour répondre aux retours terrain. Les modules Documentation (484 commits) et Évaluations (295 commits) complètent le trio de tête. À l'inverse, DB/Storage (36 commits) et Design System (15 commits) sont les modules les plus stables — leur rôle de fondation technique ou de référence justifie cette stabilité.
+    </p>
+  </div>
+  <div class="two-charts">
+    <div class="chart-container">
+      <canvas id="chartModulesCommits"></canvas>
+    </div>
+    <div class="chart-container">
+      <canvas id="chartModulesNet"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- 7. TAUX DE RÉÉCRITURE -->
+<section>
+  <h2>Analyse de réécriture (churn)</h2>
+  <div class="prose">
+    <p>
+      Le taux de réécriture — calculé comme le ratio min(insertions, suppressions) / insertions — mesure la proportion de code qui a été écrit puis remplacé. Un taux élevé signale un module fortement itéré, ce qui peut refléter autant une démarche d'amélioration continue que des difficultés de conception initiale.
+    </p>
+    <p>
+      Trois modules affichent un taux de réécriture de 49 % : Profils étudiants, Tableau de bord et Présences. Pour les Profils, cela s'explique par les multiples révisions du portrait dynamique de l'étudiant, un composant qui cristallise des données de plusieurs sources et dont la présentation a évolué avec les retours des testeurs. Le Tableau de bord, vitrine de l'application, a naturellement subi de nombreux ajustements visuels. Les Présences ont été affinées au fil des retours terrain sur l'ergonomie de saisie.
+    </p>
+    <p>
+      À l'autre extrémité, le Design System (16 %) et le CSS (21 %) affichent des taux bas, confirmant leur rôle de socle stable. Les Graphiques (36 %) et la Planification/Carte mentale (35 %) sont des modules plus récents, encore majoritairement en phase d'ajout de code.
+    </p>
+  </div>
+  <div class="chart-container">
+    <canvas id="chartChurn"></canvas>
+  </div>
+</section>
+
+<!-- 8. ÉVOLUTION PAR MODULE PAR MOIS -->
+<section>
+  <h2>Évolution par module</h2>
+  <div class="prose">
+    <p>
+      Le graphique en aires empilées illustre comment l'attention s'est déplacée entre les modules au fil des mois. En octobre-novembre 2025, les Évaluations et les Profils étudiants dominaient — le cœur fonctionnel se construisait. En décembre, index.html prend le devant avec la refonte de la structure HTML. Janvier voit l'émergence de Trimestre/Calendrier et de Navigation/Config, tandis que février concentre l'effort sur Travaux/Productions (238 commits), styles.css (191 commits) et index.html (286 commits).
+    </p>
+    <p>
+      Cette vue met en évidence la nature parallèle du développement : à aucun moment un seul module ne monopolise toute l'activité. Même durant les phases les plus intenses, cinq à huit modules sont touchés simultanément, ce qui traduit un développement de type intégrateur plutôt que séquentiel.
+    </p>
+  </div>
+  <div class="chart-container tall">
+    <canvas id="chartModulesMois"></canvas>
+  </div>
+</section>
+
+<!-- 9. RYTHME DE TRAVAIL -->
+<section>
+  <h2>Rythme de travail</h2>
+  <div class="prose">
+    <p>
+      La distribution horaire des commits dessine un profil de travailleur matinal avec reprise vespérale. L'activité démarre vers 5h (38 commits cumulés), monte rapidement pour atteindre un plateau entre 8h et 13h (autour de 170-245 commits par tranche horaire), puis décroît en après-midi avec un creux marqué entre 17h et 18h — probablement le souper et la transition de fin de journée. Une reprise notable s'observe entre 19h et 20h (110-119 commits), avant l'extinction progressive après 21h.
+    </p>
+    <p>
+      Sur la semaine, le travail est distribué sur les sept jours, mais vendredi et samedi se détachent nettement avec 438-439 commits chacun — près de 50 % de plus que le lundi (280 commits). Cette répartition est cohérente avec un projet personnel mené en parallèle d'une activité professionnelle : les jours de fin de semaine offrent des plages plus longues.
+    </p>
+  </div>
+  <div class="two-charts">
+    <div class="chart-container">
+      <canvas id="chartHeures"></canvas>
+    </div>
+    <div class="chart-container">
+      <canvas id="chartJours"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- 10. DURÉE DES SESSIONS -->
+<section>
+  <h2>Distribution des sessions</h2>
+  <div class="prose">
+    <p>
+      Un tiers des 314 sessions (105 exactement) durent moins de 30 minutes. Ce sont des micro-sessions de correction — un bug repéré, un ajustement CSS, une coquille dans un libellé — qui contribuent à la qualité incrémentale du produit sans nécessiter une immersion longue. À l'opposé, 42 sessions dépassent les 4 heures : ce sont les marathons de développement de fonctionnalités majeures, comme le dépistage SOLO ou la carte mentale.
+    </p>
+    <p>
+      La tranche intermédiaire (1 à 3 heures) totalise 104 sessions et représente le mode de travail dominant pour les développements structurés : assez longues pour avancer substantiellement, assez courtes pour maintenir la concentration. La tranche 30-60 minutes (36 sessions) est la moins fréquente, ce qui suggère que lorsqu'une session dépasse la demi-heure, elle tend à se prolonger au-delà de l'heure.
+    </p>
+  </div>
+  <div class="chart-container">
+    <canvas id="chartSessions"></canvas>
+  </div>
+</section>
+
+<!-- 11. JALONS CLÉS -->
+<section>
+  <h2>Les dix journées les plus intenses</h2>
+  <div class="prose">
+    <p>
+      Le 25 octobre 2025, avec 77 commits en une seule journée, reste le record absolu du projet : c'est le marathon de fondation qui a posé l'architecture initiale. Cinq des dix journées les plus intenses se situent en janvier-février 2026, confirmant cette période comme le cœur battant du développement. Le 2 avril 2026, avec 50 commits consacrés à la consolidation Tiers 0-7, marque l'entrée dans la phase de maturité du projet.
+    </p>
+  </div>
+  <div class="chart-container">
+    <canvas id="chartJalons"></canvas>
+  </div>
+</section>
+
+<!-- 12. PROJECTIONS -->
+<section>
+  <h2>Projections jusqu'au lancement</h2>
+  <div class="prose">
+    <p>
+      En maintenant le rythme observé en mars-avril (~80 heures par mois) sur les deux mois restants avant le lancement prévu en juin 2026, le projet totaliserait environ <span class="highlight">885 heures</span> de développement, ~3 250 commits et ~435 sessions. Ce rythme intègre un ralentissement naturel pré-lancement, l'effort se déplaçant progressivement du développement de fonctionnalités vers les tests, la documentation et le polish.
+    </p>
+    <p>
+      Il faut noter que ces projections reposent sur l'hypothèse d'un rythme constant, ce qui est une simplification : les dernières semaines avant un lancement tendent à alterner entre des sprints de correction intense et des plateaux de stabilisation. Le total réel dépendra également de l'ampleur des retours de la phase de bêta-test en cours.
+    </p>
+  </div>
+  <div class="chart-container">
+    <canvas id="chartProjection"></canvas>
+  </div>
+</section>
+
+<!-- 13. ÉQUIPE ÉQUIVALENTE -->
+<section>
+  <h2>Équipe équivalente</h2>
+  <div class="prose">
+    <p>
+      Le développement de Labo Codex a mobilisé six fonctions distinctes, toutes assumées par un seul développeur assisté de Claude (Cowork pour la réflexion et la planification, Code pour l'exécution et les audits). En croisant les modules touchés avec la nature des tâches, on peut estimer la répartition suivante des 634 heures effectives :
+    </p>
+    <p>
+      Le <strong>développement frontend</strong> constitue le gros du volume avec environ 300 heures (47 %) : les 35 modules JavaScript, les flux d'import de fichiers, les interfaces de saisie, les tableaux de bord. C'est le travail d'un développeur frontend senior. L'<strong>architecture logicielle</strong> — conception SPA, stockage hybride, namespacing, politique CSP, pattern SSOT — représente environ 60 heures (10 %), un travail qui relèverait normalement d'un architecte ou d'un lead technique. Le <strong>design UI/UX</strong> pèse quelque 90 heures (14 %) : le design system, les 22 000 lignes nettes de CSS, les deux modes sombre/clair, l'adaptation iPad. L'<strong>expertise métier pédagogique</strong>, la dimension la plus irremplaçable du projet, a orienté environ 65 heures (10 %) de spécifications et de validation dans le cadre de ce développement — mais ces 65 heures s'appuient sur 30 ans d'enseignement, 7 ans de pratique de l'enseignement explicite et 2 ans de recherche-action (d'abord au tableur, puis dans l'application). C'est cette trajectoire qui a produit les indices A-C-P-E, le dépistage SOLO, le modèle RàI, les pratiques de notation. L'<strong>assurance qualité</strong> (audit Tiers 0-7, tests iPad/Mac, suivi des bugs testeurs) et la <strong>documentation/gestion de projet</strong> (484 commits de docs, BACKLOG, SESSION, skills) se partagent les 119 heures restantes à parts quasi égales.
+    </p>
+    <p>
+      Projeté sur une équipe traditionnelle sans assistance IA, le même périmètre fonctionnel nécessiterait environ 2 à 2,5 personnes à temps plein sur 6 mois — soit 1,5 à 2 ETP-année —, sans compter le surcoût de coordination (typiquement 20 à 30 % du temps en réunions, revues de code, allers-retours de spécifications). L'avantage du workflow avec Claude n'est pas tant la «&nbsp;multiplication&nbsp;» brute de la force de travail que l'élimination de cette friction inter-rôles : l'intention, l'expertise métier et la décision restent dans une seule tête, et l'exécution suit sans délai de communication.
+    </p>
+  </div>
+  <div class="two-charts">
+    <div class="chart-container">
+      <canvas id="chartRolesRepartition"></canvas>
+    </div>
+    <div class="chart-container">
+      <canvas id="chartRolesHeures"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- 14. VALORISATION FINANCIÈRE -->
+<section>
+  <h2>Valorisation financière</h2>
+  <div class="prose">
+    <p>
+      L'exercice de valorisation qui suit vise à mettre en perspective le coût réel du projet avec ce qu'il aurait coûté en faisant appel à des professionnels. Les taux horaires utilisés sont ceux du marché canadien pour des pigistes ou consultants indépendants, basés sur les fourchettes observées en 2025-2026. Trois scénarios sont proposés pour refléter l'incertitude : un scénario conservateur (taux de juniors ou de petits marchés), un scénario médian (taux courants pour des profils seniors au Québec), et un scénario élevé (taux d'agence ou de consultants spécialisés en grande ville).
+    </p>
+  </div>
+
+  <table class="phase-table">
+    <thead>
+      <tr><th>Rôle</th><th>Heures</th><th>Taux bas</th><th>Taux médian</th><th>Taux élevé</th><th>Coût médian</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Développeur frontend senior</td><td>300 h</td>
+        <td>90 $/h</td><td>120 $/h</td><td>155 $/h</td>
+        <td class="highlight">36 000 $</td>
+      </tr>
+      <tr>
+        <td>Architecte logiciel</td><td>60 h</td>
+        <td>120 $/h</td><td>155 $/h</td><td>200 $/h</td>
+        <td class="highlight">9 300 $</td>
+      </tr>
+      <tr>
+        <td>Designer UI/UX</td><td>90 h</td>
+        <td>85 $/h</td><td>115 $/h</td><td>140 $/h</td>
+        <td class="highlight">10 350 $</td>
+      </tr>
+      <tr>
+        <td>Expert métier / Product Owner</td><td>65 h</td>
+        <td>95 $/h</td><td>125 $/h</td><td>150 $/h</td>
+        <td class="highlight">8 125 $</td>
+      </tr>
+      <tr>
+        <td>Spécialiste QA</td><td>60 h</td>
+        <td>75 $/h</td><td>95 $/h</td><td>120 $/h</td>
+        <td class="highlight">5 700 $</td>
+      </tr>
+      <tr>
+        <td>Rédacteur technique / PM</td><td>59 h</td>
+        <td>80 $/h</td><td>100 $/h</td><td>120 $/h</td>
+        <td class="highlight">5 900 $</td>
+      </tr>
+      <tr style="border-top: 2px solid rgba(106, 172, 184, 0.3);">
+        <td><strong>Total</strong></td><td><strong>634 h</strong></td>
+        <td><strong>57 245 $</strong></td><td><strong>75 375 $</strong></td><td><strong>95 130 $</strong></td>
+        <td class="highlight" style="font-size: 1.1rem;"><strong>75 375 $</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="prose" style="margin-top: 1.5rem;">
+    <p>
+      L'estimation médiane situe la valeur du travail réalisé à environ <span class="highlight">75 000 $ CAD</span>, dans une fourchette de 57 000 $ à 95 000 $. En projetant jusqu'au lancement de juin 2026 (environ 885 heures au total), l'estimation médiane atteindrait environ <span class="highlight">105 000 $ CAD</span>.
+    </p>
+
+    <h3>Coût réel du projet</h3>
+    <p>
+      Dans les faits, les coûts d'outillage se résument à deux lignes : le forfait Claude Max à 160 $ US/mois et le compte Netlify à 20 $ US/mois. Cloudflare et GitHub sont gratuits. Sur 7 mois (octobre 2025 à avril 2026), cela donne :
+    </p>
+  </div>
+
+  <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+    <div class="kpi">
+      <div class="value" style="font-size: 1.5rem;">1 120 $ US</div>
+      <div class="label">Claude Max (7 × 160 $)</div>
+    </div>
+    <div class="kpi">
+      <div class="value" style="font-size: 1.5rem;">140 $ US</div>
+      <div class="label">Netlify (7 × 20 $)</div>
+    </div>
+    <div class="kpi">
+      <div class="value" style="font-size: 1.5rem;">0 $</div>
+      <div class="label">GitHub + Cloudflare</div>
+    </div>
+    <div class="kpi" style="border: 1px solid rgba(78, 205, 196, 0.3);">
+      <div class="value" style="font-size: 1.5rem; color: var(--accent-vert);">1 260 $ US</div>
+      <div class="label">Total réel (~1 725 $ CAD)</div>
+    </div>
+  </div>
+
+  <div class="prose" style="margin-top: 1.5rem;">
+    <p>
+      Le ratio est frappant : pour chaque dollar investi en outillage, le projet a généré l'équivalent d'environ <span class="highlight-orange">44 $</span> de valeur de développement professionnel (estimation médiane). Autrement dit, le coût réel représente <strong>2,3 %</strong> de ce qu'aurait coûté une équipe de professionnels pour le même travail.
+    </p>
+
+    <h3>Limites de cette estimation</h3>
+    <p>
+      Plusieurs facteurs nuancent ce ratio. D'abord, l'estimation ne valorise pas le temps personnel investi — les 634 heures de travail effectif ne sont pas «&nbsp;gratuites&nbsp;»&nbsp;; elles ont un coût d'opportunité. Ensuite, une équipe professionnelle apporterait une expertise spécialisée (tests automatisés, CI/CD, performance, sécurité avancée) qui n'est pas dans le périmètre actuel. Enfin, les taux horaires du marché incluent des frais généraux (assurances, locaux, gestion) que cette comparaison ignore par construction.
+    </p>
+    <p>
+      Ce que la comparaison montre avec plus de fiabilité, c'est que le modèle «&nbsp;un expert métier + Claude&nbsp;» rend économiquement viable des projets logiciels qui, à ce niveau de complexité, seraient inaccessibles à un individu seul sans financement externe.
+    </p>
+  </div>
+
+  <div class="two-charts">
+    <div class="chart-container">
+      <canvas id="chartCoutComparaison"></canvas>
+    </div>
+    <div class="chart-container">
+      <canvas id="chartCoutCumule"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- 15. VALEUR MARCHANDE -->
+<section>
+  <h2>Valeur marchande estimée</h2>
+  <div class="prose">
+    <p>
+      L'estimation de la valeur marchande d'un logiciel éducatif est un exercice délicat — les variables déterminantes sont souvent non techniques. Pour cadrer l'analyse, trois angles complémentaires sont proposés, chacun avec ses forces et ses limites.
+    </p>
+
+    <h3>Angle 1 — Coût de remplacement</h3>
+    <p>
+      Le coût de remplacement répond à la question : «&nbsp;combien coûterait-il de recréer Labo Codex de zéro ?&nbsp;» On a estimé l'effort de développement technique à 75 375 $ CAD (médian). Mais ce chiffre est un plancher. Une équipe partant de zéro devrait en plus acquérir l'expertise métier pédagogique — les modèles SOLO, RàI, ELLAC, les indices A-C-P-E, les pratiques de notation québécoises —, ce qui représente des années de pratique enseignante impossibles à sous-traiter à un développeur. En ajoutant les itérations de design guidées par les retours de testeurs en situation réelle, et la connaissance tacite accumulée sur 99 versions beta, un coût de remplacement réaliste se situe entre <span class="highlight">120 000 $ et 180 000 $ CAD</span>.
+    </p>
+
+    <h3>Angle 2 — Comparaison avec le marché EdTech postsecondaire</h3>
+    <p style="background: rgba(106, 172, 184, 0.1); border-left: 3px solid var(--bleu-clair); padding: 0.75rem 1rem; border-radius: 0 6px 6px 0; font-size: 0.88rem; margin-bottom: 1rem;">
+      <strong>Note — ARR (Annual Recurring Revenue)</strong> : le revenu annuel récurrent est le montant total des abonnements qu'une entreprise peut prévoir de recevoir chaque année, en supposant que sa base de clients reste stable. C'est la métrique standard pour valoriser les entreprises SaaS (logiciel par abonnement). Un «&nbsp;multiple de 8× l'ARR&nbsp;» signifie qu'un investisseur paierait 8 $ pour chaque dollar de revenu annuel récurrent — soit 8 ans de revenus.
+    </p>
+    <p>
+      Le marché canadien de l'EdTech est évalué à 8,78 milliards $ US en 2025, avec une croissance projetée de 12,7 % par an jusqu'en 2034 (source : The Report Cubes). Les plateformes d'analytique d'apprentissage et les systèmes de gestion pédagogique constituent le segment dominant, et le logiciel représente environ 42 % de la part de marché.
+    </p>
+    <p>
+      Les multiples de valorisation observés en 2025 pour les entreprises EdTech SaaS varient selon le segment. L'enseignement supérieur (<em>Higher Education</em>) affiche des multiples de <span class="highlight-orange">8× à 10× les revenus annuels récurrents</span> (ARR), un peu en dessous des plateformes SaaS & Infrastructure (11,5× à 20×) mais au-dessus du K-12 qui s'est normalisé à 7× (sources : Finro, Finerva). Le segment postsecondaire bénéficie de tickets moyens plus élevés par institution et d'une meilleure rétention que le marché individuel.
+    </p>
+    <p>
+      Le marché adressable de Labo Codex se situe au niveau de l'enseignement supérieur québécois : les <strong>48 cégeps</strong> de la Fédération des cégeps et, potentiellement, les <strong>19 universités</strong> québécoises (dont les 10 établissements du réseau de l'Université du Québec). C'est un marché de 67 institutions au total. Pour une entreprise EdTech, ces établissements représentent des clients institutionnels avec des budgets dédiés à la technologie pédagogique et des processus d'acquisition structurés.
+    </p>
+    <p>
+      Voici trois scénarios hypothétiques de commercialisation, avec un multiple conservateur de 8× l'ARR (bas de la fourchette pour l'enseignement supérieur) :
+    </p>
+  </div>
+
+  <table class="phase-table">
+    <thead>
+      <tr><th>Scénario</th><th>Modèle</th><th>Hypothèse</th><th>ARR</th><th>Valeur (8× ARR)</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Conservateur</td><td>Licence institutionnelle</td>
+        <td>5 cégeps × 8 000 $/an</td>
+        <td>40 000 $</td>
+        <td class="highlight">320 000 $</td>
+      </tr>
+      <tr>
+        <td>Modéré</td><td>Licence institutionnelle</td>
+        <td>12 cégeps × 10 000 $ + 3 universités × 15 000 $</td>
+        <td>165 000 $</td>
+        <td class="highlight">1 320 000 $</td>
+      </tr>
+      <tr>
+        <td>Ambitieux</td><td>Licence instit. + individuel</td>
+        <td>25 cégeps × 12 000 $ + 8 universités × 18 000 $ + 300 enseignants × 12 $/mois</td>
+        <td>487 200 $</td>
+        <td class="highlight">3 897 600 $</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="prose" style="margin-top: 1.5rem;">
+    <p>
+      Ces chiffres sont des ordres de grandeur, pas des prédictions. Le scénario conservateur (5 cégeps, licence modeste) est le plus plausible pour un lancement initial ; il produit déjà une valorisation de 320 000 $ — soit plus de <strong>185 fois</strong> le coût d'outillage du projet. Le scénario modéré (15 institutions postsecondaires) donne un aperçu du potentiel si le produit trouvait une traction significative dans le réseau collégial. Le scénario ambitieux illustre ce qui se passe avec une pénétration de la moitié des cégeps et un début de présence universitaire — on dépasse les 3,8 millions.
+    </p>
+    <p>
+      Il faut noter que ces scénarios supposent un produit commercialisé avec support, mises à jour et formation — des coûts opérationnels non négligeables qui ne sont pas dans le périmètre actuel de Labo Codex. Le modèle 100 % hors-ligne, s'il est un atout majeur pour la confidentialité des données des étudiants (un enjeu particulièrement sensible au postsecondaire), réduit le levier de revenus récurrents liés à l'hébergement. En revanche, il facilite l'adoption institutionnelle : aucune infrastructure serveur à provisionner, aucune donnée étudiante dans le cloud, conformité simplifiée.
+    </p>
+    <p>
+      Le ticket moyen par institution est aussi plus élevé au postsecondaire qu'au primaire-secondaire : un cégep avec 20 à 60 départements et des centaines d'enseignants justifie un contrat annuel plus substantiel qu'une école primaire. Les universités, avec leurs facultés multiples et leurs besoins en analytique d'apprentissage, représentent des contrats encore plus importants.
+    </p>
+
+    <h3>Angle 3 — Valeur pour un acquéreur stratégique</h3>
+    <p>
+      Si un éditeur de logiciels d'enseignement supérieur (ou un acteur anglophone cherchant à pénétrer le marché francophone québécois) voulait acquérir les fonctionnalités de Labo Codex, il évaluerait non seulement le code, mais surtout l'expertise métier encodée dans l'application. Le modèle de dépistage SOLO, les grilles d'évaluation par compétences alignées sur le cadre collégial québécois, le workflow RàI à trois niveaux, le système d'indices A-C-P-E — tout cela constitue un avantage concurrentiel qu'il serait très coûteux de reproduire sans un praticien du milieu collégial.
+    </p>
+    <p>
+      L'accès direct à un réseau de 48 cégeps francophones, un marché de niche difficile à pénétrer de l'extérieur, ajoute une prime stratégique significative. Dans ce scénario d'acquisition, la valeur pourrait se situer entre <span class="highlight">300 000 $ et 750 000 $ CAD</span>, selon l'urgence et le contexte de la négociation — voire davantage si l'acquéreur y voit une porte d'entrée vers l'ensemble du marché postsecondaire francophone.
+    </p>
+  </div>
+
+  <div class="chart-container">
+    <canvas id="chartValorisation"></canvas>
+  </div>
+
+  <div class="prose" style="margin-top: 1.5rem;">
+    <h3>Synthèse de la valorisation</h3>
+    <p>
+      En croisant les trois angles, la valeur marchande de Labo Codex dans son état actuel se situe vraisemblablement entre <span class="highlight">200 000 $ et 1 300 000 $ CAD</span>, selon le scénario retenu. Le bas de la fourchette correspond au coût de remplacement enrichi de l'expertise métier ; le haut correspond à une valorisation par les revenus dans un scénario de pénétration modérée du marché postsecondaire québécois (12 cégeps + 3 universités). Ces chiffres sont à mettre en regard du coût réel d'outillage de 1 725 $ CAD — un rapport de <strong>115:1 à 765:1</strong>.
+    </p>
+    <p>
+      Ce qui rend ces chiffres particulièrement frappants, c'est qu'ils décrivent la valeur marchande d'un outil qui sera offert gratuitement, en code ouvert, comme contribution au commun éducatif.
+    </p>
+  </div>
+</section>
+
+<!-- 15b. LE PARADOXE DU VIBE CODING -->
+<section>
+  <h2>Le paradoxe du vibe coding</h2>
+  <div class="prose">
+    <p>
+      L'analyse de valorisation qui précède repose sur des modèles traditionnels — coût de remplacement, multiples de revenus, valeur d'acquisition. Or, ces modèles présupposent que le code est difficile et coûteux à produire. Le vibe coding bouleverse cette prémisse.
+    </p>
+
+    <h3>Ce que le vibe coding change</h3>
+    <p>
+      Le marché mondial du vibe coding est estimé à 2,96 milliards $ US en 2025, avec une projection de 12,3 milliards en 2027 (source : Market Clarity). La valorisation combinée des principales plateformes (Cursor, Lovable, Replit, Vercel, Cognition) a bondi de 350 % en un an, passant de ~8 milliards à plus de 36 milliards $ en 2025. Le message est clair : le coût de production du code s'effondre.
+    </p>
+    <p>
+      Concrètement, cela signifie que le premier angle de valorisation — le coût de remplacement technique de 75 000 $ à 180 000 $ — est déjà en train de se comprimer. Un développeur expérimenté avec Claude Code ou Cursor pourrait, en théorie, reproduire la <em>structure technique</em> de Labo Codex en une fraction du temps et du coût estimés. C'est un fait qu'il serait malhonnête d'ignorer dans cette analyse.
+    </p>
+    <p>
+      En 2026, comme le résume un article de Stack Overflow, «&nbsp;le code est en train de devenir une commodité — ce qui a de la valeur, c'est l'expertise de domaine&nbsp;». HarbourVest, un fonds d'investissement, enfonce le clou : «&nbsp;si ta différenciation repose surtout sur l'interface et l'automatisation, ce n'est plus suffisant&nbsp;». Et les investisseurs en capital-risque le confirment : ils réallouent leur capital vers les entreprises qui possèdent des <em>workflows</em>, des <em>données</em> et de l'<em>expertise de domaine</em>, pas du code.
+    </p>
+
+    <h3>Ce que le vibe coding ne peut pas reproduire</h3>
+    <p>
+      Mais ce constat a un corollaire important : si le code perd de la valeur, ce qui n'est <em>pas</em> du code en gagne. Et Labo Codex est précisément un projet où la valeur réside dans ce qui précède le code.
+    </p>
+    <p>
+      Derrière chaque décision de conception de l'application, il y a <strong>30 ans d'enseignement</strong>, dont environ <strong>7 ans de pratique de l'enseignement explicite</strong> — une approche pédagogique structurée qui a façonné la façon dont l'outil observe, mesure et rend compte de l'apprentissage. Et surtout, il y a <strong>2 ans de recherche-action</strong> : d'abord un travail de modélisation dans un tableur (où les modèles de dépistage, les indices et les seuils d'alerte ont été forgés empiriquement, cohorte après cohorte), puis la transposition dans l'application actuelle.
+    </p>
+    <p>
+      C'est cette trajectoire — 30 + 7 + 2 ans — qui constitue le vrai capital de Labo Codex. Un vibe coder peut reproduire une interface en quelques jours. Il ne peut pas reproduire le jugement professionnel qui a déterminé qu'un indice de compétence doit croiser quatre dimensions (A-C-P-E), que le dépistage SOLO fonctionne mieux avec cinq niveaux qu'avec trois, ou qu'une alerte RàI de niveau 2 doit se déclencher selon tel pattern plutôt que tel autre. Ces décisions ne sont documentées nulle part en dehors de l'application elle-même — elles sont le produit d'une expertise incarnée, pas d'une recherche Google.
+    </p>
+  </div>
+
+  <table class="phase-table">
+    <thead>
+      <tr><th style="width:35%">Reproductible par vibe coding</th><th style="width:35%">Non reproductible par vibe coding</th><th style="width:30%">Pourquoi</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Structure SPA, navigation, formulaires</td>
+        <td style="color: var(--accent-vert);">Modèle de dépistage SOLO à 5 niveaux</td>
+        <td>7 ans d'enseignement explicite + 2 ans de recherche-action</td>
+      </tr>
+      <tr>
+        <td>Graphiques Chart.js, tableaux de bord</td>
+        <td style="color: var(--accent-vert);">Indices A-C-P-E et leur calibration</td>
+        <td>Calibrés empiriquement sur des cohortes réelles, tableur puis application</td>
+      </tr>
+      <tr>
+        <td>Import/export de fichiers, stockage IndexedDB</td>
+        <td style="color: var(--accent-vert);">Workflow RàI à 3 niveaux adapté au collégial</td>
+        <td>Transposition d'un cadre théorique en outil opérationnel vérifié terrain</td>
+      </tr>
+      <tr>
+        <td>Design system, modes sombre/clair</td>
+        <td style="color: var(--accent-vert);">Grilles d'évaluation par compétences (ELLAC, IDME)</td>
+        <td>Alignement sur le cadre pédagogique québécois — 30 ans de pratique</td>
+      </tr>
+      <tr>
+        <td>Architecture de modules, routage</td>
+        <td style="color: var(--accent-vert);">99 itérations guidées par des testeurs en situation réelle</td>
+        <td>Connaissance tacite accumulée — impossible à prompter</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="prose" style="margin-top: 1.5rem;">
+    <p>
+      Quelqu'un pourrait demander à Claude Code de «&nbsp;créer une application de suivi pédagogique pour les cégeps&nbsp;» et obtenir une coquille fonctionnelle en quelques jours. Mais cette coquille ne contiendrait pas les règles non écrites du métier : quand déclencher une alerte RàI de niveau 2, comment pondérer un indice de compétence lorsque les données sont incomplètes, pourquoi le portrait d'un étudiant doit croiser les présences avec la progression des artefacts, comment un enseignant pense réellement quand il évalue. Ce sont des décisions de conception pédagogique, pas des décisions de code.
+    </p>
+    <p>
+      C'est exactement ce que Palantir illustre à grande échelle : leur avantage concurrentiel n'est pas leur code (techniquement reproductible), mais leur «&nbsp;connaissance approfondie des workflows de renseignement, des patterns d'intégration de données et des exigences gouvernementales, acquise péniblement par l'expérience terrain&nbsp;». Labo Codex opère à une échelle différente, mais le mécanisme est identique : la valeur est dans l'expertise de domaine encodée dans les décisions de conception.
+    </p>
+
+    <h3>Les vraies protections</h3>
+    <p>
+      Dans ce contexte, la protection de Labo Codex contre la réplication ne passe pas principalement par la protection du code (qui peut être reproduit), mais par un ensemble de barrières cumulatives :
+    </p>
+  </div>
+
+  <table class="phase-table">
+    <thead>
+      <tr><th>Barrière</th><th>Nature</th><th>Force</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Expertise métier encodée</strong></td>
+        <td>Les modèles pédagogiques (SOLO, RàI, A-C-P-E, ELLAC) ne sont pas dans les données d'entraînement des LLM — ils sont trop spécifiques au contexte collégial québécois</td>
+        <td style="color: var(--accent-vert); font-weight: 600;">Forte</td>
+      </tr>
+      <tr>
+        <td><strong>Connaissance tacite des 99 betas</strong></td>
+        <td>Chaque décision UX a été testée, corrigée, retestée avec des enseignants réels. Ce savoir n'existe nulle part sous forme promptable</td>
+        <td style="color: var(--accent-vert); font-weight: 600;">Forte</td>
+      </tr>
+      <tr>
+        <td><strong>Communauté et confiance</strong></td>
+        <td>Un outil créé par un enseignant pour des enseignants, validé par des pairs, présenté à l'AQPC — crédibilité impossible à fabriquer</td>
+        <td style="color: var(--accent-vert); font-weight: 600;">Forte</td>
+      </tr>
+      <tr>
+        <td><strong>Vitesse d'itération</strong></td>
+        <td>Le même workflow Claude Code + expertise métier qui a créé Labo Codex peut le faire évoluer plus vite que quiconque ne pourrait le rattraper</td>
+        <td style="color: var(--accent-orange); font-weight: 600;">Moyenne</td>
+      </tr>
+      <tr>
+        <td><strong>Licence AGPL v3.0 + avis non-commercial</strong></td>
+        <td>Copyleft fort (code ouvert obligatoire, même en SaaS) + intention non-commerciale explicite</td>
+        <td style="color: var(--accent-orange); font-weight: 600;">Moyenne</td>
+      </tr>
+      <tr>
+        <td><strong>Obfuscation du code</strong></td>
+        <td>Rendre le JavaScript difficile à lire — protection technique faible, facilement contournable</td>
+        <td style="color: var(--accent-rose); font-weight: 600;">Faible</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="prose" style="margin-top: 1.5rem;">
+    <h3>Impact sur la valorisation</h3>
+    <p>
+      Le vibe coding impose un ajustement à la baisse de l'angle «&nbsp;coût de remplacement&nbsp;» — un clone technique pourrait être produit pour peut-être 15 000 $ à 30 000 $ aujourd'hui au lieu de 75 000 $ à 180 000 $. Mais il impose simultanément un ajustement à la hausse de la <em>prime d'expertise de domaine</em>. Dans un monde où tout le monde peut coder, ceux qui savent <em>quoi</em> coder ont plus de valeur, pas moins.
+    </p>
+    <p>
+      La fourchette de valorisation par les revenus (320 000 $ à 1,3 M$) est moins affectée, parce qu'elle mesure ce que le marché paierait pour la <em>solution</em>, pas pour le <em>code</em>. Un cégep qui achèterait une licence ne paie pas pour du JavaScript — il paie pour un système de dépistage SOLO opérationnel, testé, et aligné sur son cadre pédagogique. Que ce code ait été écrit en 634 heures ou en 63 heures ne change pas sa valeur d'usage.
+    </p>
+    <p>
+      C'est peut-être là le message le plus percutant pour le Colloque de l'AQPC : le vibe coding est une menace pour les entreprises qui vendent du code, mais c'est une <strong>opportunité</strong> pour les experts de domaine. Un enseignant qui maîtrise sa discipline et comprend les besoins du terrain peut désormais produire un outil logiciel de qualité professionnelle — et cette expertise, aucune IA ne peut la prompter à sa place.
+    </p>
+  </div>
+</section>
+
+<!-- 16. PROTECTION DU CODE -->
+<section>
+  <h2>Protection du code : licences et commun éducatif</h2>
+  <div class="prose">
+    <p>
+      Labo Codex est construit sur des principes clairs : gratuité, fonctionnement hors-ligne, code ouvert, contribution au commun éducatif. Ces principes ne sont pas incompatibles avec la protection du code contre une exploitation commerciale — il existe des mécanismes juridiques précisément conçus pour cette situation.
+    </p>
+
+    <h3>Les options de licence</h3>
+    <p>
+      Quatre familles de licences méritent d'être considérées, chacune avec un positionnement différent sur l'axe ouverture-protection :
+    </p>
+  </div>
+
+  <table class="phase-table">
+    <thead>
+      <tr><th>Licence</th><th>Code visible</th><th>Modifiable</th><th>Usage commercial</th><th>Reconnue OSI</th><th>Adapté à Labo Codex</th></tr>
+    </thead>
+    <tbody>
+      <tr style="background: rgba(78, 205, 196, 0.08);">
+        <td><strong>AGPL-3.0 + avis non-commercial ✓</strong></td><td style="color: var(--accent-vert);">Oui</td><td style="color: var(--accent-vert);">Oui</td>
+        <td style="color: var(--accent-orange);">Autorisé sous conditions très strictes + avis dissuasif</td>
+        <td style="color: var(--accent-vert);">Oui</td>
+        <td style="color: var(--accent-vert);">Retenu</td>
+      </tr>
+      <tr>
+        <td><strong>AGPL-3.0 + Commons Clause</strong></td><td style="color: var(--accent-vert);">Oui</td><td style="color: var(--accent-vert);">Oui</td>
+        <td style="color: var(--accent-vert);">Interdit (vente bloquée)</td>
+        <td style="color: var(--accent-rose);">Non</td>
+        <td>Fort mais non OSI</td>
+      </tr>
+      <tr>
+        <td><strong>CC-BY-NC-SA 4.0</strong></td><td style="color: var(--accent-vert);">Oui</td><td style="color: var(--accent-vert);">Oui (partage identique)</td>
+        <td style="color: var(--accent-vert);">Interdit</td>
+        <td style="color: var(--accent-rose);">Non (conçu pour le contenu)</td>
+        <td style="color: var(--accent-orange);">Pour les docs/contenus péda.</td>
+      </tr>
+      <tr>
+        <td><strong>BSL 1.1</strong> (Business Source License)</td><td style="color: var(--accent-vert);">Oui</td><td style="color: var(--accent-vert);">Oui</td>
+        <td style="color: var(--accent-vert);">Interdit pendant N ans, puis ouvert</td>
+        <td style="color: var(--accent-rose);">Non</td>
+        <td style="color: var(--accent-orange);">Possible</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="prose" style="margin-top: 1.5rem;">
+    <h3>Choix retenu : double licence + avis non-commercial</h3>
+    <p>
+      L'approche retenue pour Labo Codex combine une <strong>double licence</strong> reconnue avec un <strong>avis explicite d'intention non-commerciale</strong> :
+    </p>
+    <p>
+      Pour le <strong>code source</strong> (JavaScript, HTML, CSS) : la licence <strong>AGPL-3.0</strong>, le copyleft le plus fort reconnu par l'Open Source Initiative. Quiconque modifie le code et le distribue — y compris via un service réseau ou SaaS — doit publier ses modifications sous la même licence et rendre le code source accessible. C'est une barrière très efficace contre l'appropriation commerciale : une entreprise qui voudrait intégrer Labo Codex dans un produit fermé ne le pourrait pas sans ouvrir tout son propre code.
+    </p>
+    <p>
+      Pour le <strong>contenu pédagogique</strong> (documentation, modèles SOLO, grilles RàI, descripteurs d'indices A-C-P-E, ELLAC, IDME) : la licence <strong>CC-BY-NC-SA 4.0</strong> (Creative Commons Attribution – Pas d'utilisation commerciale – Partage dans les mêmes conditions). Cette licence est largement comprise dans le milieu éducatif, disponible en français, et protège explicitement contre l'utilisation commerciale du contenu tout en permettant le partage et l'adaptation à des fins éducatives.
+    </p>
+    <p>
+      En complément, un <strong>avis non-commercial</strong> est intégré à l'application (section «&nbsp;À propos&nbsp;» des Réglages) et au fichier LICENSE.md : toute exploitation commerciale de l'application, de ses modèles pédagogiques ou de ses contenus nécessite une autorisation écrite préalable de l'auteur. Cet avis n'a pas la force d'une clause de licence, mais il pose clairement l'intention et constitue un signal fort pour quiconque envisagerait une utilisation commerciale.
+    </p>
+    <p>
+      Cette combinaison envoie un message clair : Labo Codex est un <strong>commun éducatif</strong> — libre d'accès, libre de modification, libre de partage entre enseignants et institutions —, mais il n'est pas libre d'appropriation commerciale. Le code est authentiquement open source (reconnu OSI), le contenu est protégé par Creative Commons, et l'intention non-commerciale est explicite. C'est un positionnement qui résonne particulièrement bien dans le réseau collégial québécois et qui constitue un argument fort pour une présentation au Colloque de l'AQPC.
+    </p>
+  </div>
+</section>
+
+<!-- 17. RÉCAPITULATIF POUR L'AQPC -->
+<section>
+  <h2>Chiffres clés pour le Colloque de l'AQPC</h2>
+  <div class="prose">
+    <p>
+      Les données qui suivent constituent un résumé des éléments les plus communicables de cet audit, calibrés pour une présentation au Colloque de l'AQPC. Ils illustrent ce qu'un enseignant peut accomplir aujourd'hui en s'appuyant sur l'IA comme partenaire de développement, et la valeur que cela représente pour le commun éducatif.
+    </p>
+  </div>
+
+  <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+    <div class="kpi">
+      <div class="value" style="font-size: 1.4rem;">634 h</div>
+      <div class="label">Heures de développement effectif</div>
+    </div>
+    <div class="kpi">
+      <div class="value" style="font-size: 1.4rem;">2 347</div>
+      <div class="label">Commits en 175 jours</div>
+    </div>
+    <div class="kpi">
+      <div class="value" style="font-size: 1.4rem;">30 + 7 + 2 ans</div>
+      <div class="label">Enseignement, explicite, recherche-action</div>
+    </div>
+    <div class="kpi">
+      <div class="value" style="font-size: 1.4rem;">75 000 $</div>
+      <div class="label">Valeur en développement professionnel</div>
+    </div>
+    <div class="kpi">
+      <div class="value" style="font-size: 1.4rem;">200k – 1,3M $</div>
+      <div class="label">Valeur marchande estimée</div>
+    </div>
+    <div class="kpi">
+      <div class="value" style="font-size: 1.4rem; color: var(--accent-vert);">1 725 $</div>
+      <div class="label">Coût réel d'outillage (7 mois)</div>
+    </div>
+    <div class="kpi" style="border: 1px solid rgba(78, 205, 196, 0.3);">
+      <div class="value" style="font-size: 1.4rem; color: var(--accent-orange);">44 : 1</div>
+      <div class="label">Ratio valeur / investissement</div>
+    </div>
+    <div class="kpi" style="border: 1px solid rgba(78, 205, 196, 0.3);">
+      <div class="value" style="font-size: 1.4rem; color: var(--accent-vert);">0 $</div>
+      <div class="label">Prix pour les enseignants<br><small style="color: var(--accent-vert);">Commun éducatif, hors-ligne, source disponible</small></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Labo Codex — Audit de développement &middot; Document généré le 14 avril 2026<br>
+  Données extraites de l'historique Git (2 347 commits) &middot; Estimations horaires basées sur le regroupement des commits en sessions<br>
+  Valorisation financière basée sur les taux horaires du marché canadien (pigistes/consultants, 2025-2026)<br>
+  Multiples EdTech : Finro FCA, Finerva (Q4 2025) &middot; Marché canadien : The Report Cubes (2025)
+</footer>
+
+<script>
+// Palette cohérente
+const PALETTE = {
+  vert: '#4ecdc4',
+  vertClair: 'rgba(78, 205, 196, 0.3)',
+  bleu: '#6aacb8',
+  bleuClair: 'rgba(106, 172, 184, 0.3)',
+  orange: '#f0a050',
+  orangeClair: 'rgba(240, 160, 80, 0.3)',
+  rose: '#e06080',
+  roseClair: 'rgba(224, 96, 128, 0.3)',
+  violet: '#a070d0',
+  violetClair: 'rgba(160, 112, 208, 0.3)',
+  blanc: '#d0e8f0',
+  gris: '#8ab4c0',
+  fond: '#1a3a48',
+  grille: 'rgba(106, 172, 184, 0.1)',
+};
+
+const moduleColors = [
+  '#4ecdc4', '#6aacb8', '#f0a050', '#e06080', '#a070d0',
+  '#50b8a0', '#d0a060', '#8090e0', '#c07090', '#70c0d0',
+  '#90b060', '#e0c050', '#6090c0', '#d08070', '#80d0a0',
+  '#b0a0d0', '#a0c080'
+];
+
+Chart.defaults.color = PALETTE.gris;
+Chart.defaults.borderColor = PALETTE.grille;
+Chart.defaults.font.family = "'Inter', sans-serif";
+
+// 1. Heures par mois
+new Chart(document.getElementById('chartHeuresMois'), {
+  type: 'bar',
+  data: {
+    labels: ['Oct 2025', 'Nov 2025', 'Déc 2025', 'Jan 2026', 'Fév 2026', 'Mars 2026', 'Avr 2026*'],
+    datasets: [
+      {
+        label: 'Heures',
+        data: [37.3, 79.1, 74.1, 104.6, 178.0, 104.8, 56.1],
+        backgroundColor: [PALETTE.bleuClair, PALETTE.bleuClair, PALETTE.bleuClair, PALETTE.vertClair, PALETTE.vert, PALETTE.bleuClair, PALETTE.orangeClair],
+        borderColor: [PALETTE.bleu, PALETTE.bleu, PALETTE.bleu, PALETTE.vert, PALETTE.vert, PALETTE.bleu, PALETTE.orange],
+        borderWidth: 2,
+        borderRadius: 6,
+      },
+      {
+        label: 'Commits (÷10)',
+        data: [17.1, 34.3, 28.5, 43.2, 58.2, 30.8, 22.6],
+        type: 'line',
+        borderColor: PALETTE.orange,
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        pointRadius: 4,
+        pointBackgroundColor: PALETTE.orange,
+        tension: 0.3,
+        yAxisID: 'y',
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      title: { display: true, text: 'Heures et commits par mois', color: PALETTE.blanc, font: { size: 14, weight: 500 }},
+      legend: { labels: { usePointStyle: true, padding: 15 }},
+      tooltip: {
+        callbacks: {
+          label: function(ctx) {
+            if (ctx.dataset.label === 'Commits (÷10)') return 'Commits : ' + Math.round(ctx.raw * 10);
+            return ctx.dataset.label + ' : ' + ctx.raw;
+          }
+        }
+      }
+    },
+    scales: {
+      y: { beginAtZero: true, title: { display: true, text: 'Heures / Commits÷10' }, grid: { color: PALETTE.grille }}
+    }
+  }
+});
+
+// 2. Commits par semaine
+new Chart(document.getElementById('chartCommitsSemaine'), {
+  type: 'line',
+  data: {
+    labels: ['20/10','27/10','03/11','10/11','17/11','24/11','01/12','08/12','15/12','22/12','29/12','05/01','12/01','19/01','26/01','02/02','09/02','16/02','23/02','02/03','09/03','16/03','23/03','30/03','06/04'],
+    datasets: [{
+      label: 'Commits par semaine',
+      data: [121,68,45,101,59,120,48,49,34,83,175,132,5,102,105,120,110,175,170,64,35,75,84,166,101],
+      fill: true,
+      backgroundColor: 'rgba(78, 205, 196, 0.15)',
+      borderColor: PALETTE.vert,
+      borderWidth: 2.5,
+      pointRadius: 3,
+      pointBackgroundColor: PALETTE.vert,
+      tension: 0.3,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      title: { display: true, text: 'Intensité hebdomadaire (commits)', color: PALETTE.blanc, font: { size: 14, weight: 500 }},
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          title: function(ctx) { return 'Semaine du ' + ctx[0].label; }
+        }
+      }
+    },
+    scales: {
+      y: { beginAtZero: true, grid: { color: PALETTE.grille }},
+      x: { ticks: { maxRotation: 45 }, grid: { display: false }}
+    }
+  }
+});
+
+// 3. Heatmap (custom HTML/CSS)
+(function() {
+  const rawData = {
+    '2025-10-20':5,'2025-10-21':2,'2025-10-23':9,'2025-10-24':24,'2025-10-25':77,'2025-10-26':4,'2025-10-27':18,'2025-10-28':6,'2025-10-29':11,'2025-10-30':15,
+    '2025-11-01':10,'2025-11-02':8,'2025-11-03':5,'2025-11-04':14,'2025-11-05':17,'2025-11-07':1,'2025-11-08':5,'2025-11-09':3,'2025-11-10':25,'2025-11-12':16,'2025-11-13':5,'2025-11-14':26,'2025-11-15':13,'2025-11-16':16,'2025-11-17':4,'2025-11-18':26,'2025-11-19':5,'2025-11-20':8,'2025-11-21':15,'2025-11-23':1,'2025-11-24':17,'2025-11-25':14,'2025-11-26':1,'2025-11-27':34,'2025-11-28':45,'2025-11-29':9,
+    '2025-12-01':3,'2025-12-02':11,'2025-12-03':3,'2025-12-05':1,'2025-12-06':22,'2025-12-07':8,'2025-12-08':25,'2025-12-09':10,'2025-12-10':4,'2025-12-11':1,'2025-12-12':9,'2025-12-15':4,'2025-12-16':6,'2025-12-17':11,'2025-12-18':8,'2025-12-19':4,'2025-12-21':1,'2025-12-22':14,'2025-12-25':17,'2025-12-26':9,'2025-12-27':21,'2025-12-28':22,'2025-12-29':15,'2025-12-30':28,'2025-12-31':28,
+    '2026-01-01':7,'2026-01-02':42,'2026-01-03':41,'2026-01-04':14,'2026-01-05':11,'2026-01-06':24,'2026-01-08':24,'2026-01-09':39,'2026-01-10':29,'2026-01-11':5,'2026-01-18':5,'2026-01-19':13,'2026-01-20':17,'2026-01-21':8,'2026-01-22':5,'2026-01-23':11,'2026-01-24':11,'2026-01-25':37,'2026-01-26':2,'2026-01-28':34,'2026-01-29':8,'2026-01-30':31,'2026-01-31':14,
+    '2026-02-01':16,'2026-02-03':1,'2026-02-04':6,'2026-02-05':3,'2026-02-06':42,'2026-02-07':21,'2026-02-08':47,'2026-02-09':9,'2026-02-10':12,'2026-02-11':23,'2026-02-12':14,'2026-02-13':10,'2026-02-14':10,'2026-02-15':32,'2026-02-16':27,'2026-02-17':26,'2026-02-18':22,'2026-02-19':3,'2026-02-20':31,'2026-02-21':38,'2026-02-22':28,'2026-02-23':27,'2026-02-24':31,'2026-02-25':12,'2026-02-26':25,'2026-02-27':43,'2026-02-28':23,
+    '2026-03-01':9,'2026-03-02':16,'2026-03-03':7,'2026-03-04':19,'2026-03-05':19,'2026-03-06':3,'2026-03-14':25,'2026-03-15':10,'2026-03-16':13,'2026-03-17':2,'2026-03-18':33,'2026-03-19':4,'2026-03-20':5,'2026-03-21':16,'2026-03-22':2,'2026-03-24':8,'2026-03-25':23,'2026-03-26':16,'2026-03-27':20,'2026-03-28':13,'2026-03-29':4,'2026-03-30':4,'2026-03-31':37,
+    '2026-04-01':23,'2026-04-02':50,'2026-04-03':28,'2026-04-04':16,'2026-04-05':8,'2026-04-06':23,'2026-04-07':22,'2026-04-08':4,'2026-04-09':19,'2026-04-11':24,'2026-04-12':9
+  };
+
+  function getColor(count) {
+    if (count === 0) return 'rgba(106, 172, 184, 0.06)';
+    if (count <= 5) return 'rgba(78, 205, 196, 0.25)';
+    if (count <= 15) return 'rgba(78, 205, 196, 0.45)';
+    if (count <= 30) return 'rgba(78, 205, 196, 0.65)';
+    if (count <= 50) return 'rgba(78, 205, 196, 0.85)';
+    return '#4ecdc4';
+  }
+
+  const startDate = new Date(2025, 9, 20); // Oct 20
+  const endDate = new Date(2026, 3, 12);   // Apr 12
+  const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+
+  // Build weeks
+  const weeks = [];
+  let current = new Date(startDate);
+  // Align to Sunday
+  while (current.getDay() !== 0) current.setDate(current.getDate() - 1);
+
+  while (current <= endDate) {
+    const week = [];
+    for (let d = 0; d < 7; d++) {
+      const dateStr = current.toISOString().slice(0, 10);
+      const inRange = current >= startDate && current <= endDate;
+      week.push({
+        date: dateStr,
+        count: rawData[dateStr] || 0,
+        inRange: inRange,
+        month: current.getMonth(),
+        year: current.getFullYear()
+      });
+      current.setDate(current.getDate() + 1);
+    }
+    weeks.push(week);
+  }
+
+  const container = document.getElementById('heatmapContainer');
+  let html = '<div class="heatmap-grid">';
+
+  // Month labels
+  html += '<div class="heatmap-months">';
+  const months = ['Oct', 'Nov', 'Déc', 'Jan', 'Fév', 'Mars', 'Avr'];
+  let monthStarts = [];
+  let lastMonth = -1;
+  weeks.forEach((week, i) => {
+    const m = week[0].month;
+    if (m !== lastMonth) {
+      monthStarts.push({ idx: i, label: months[monthStarts.length] || '' });
+      lastMonth = m;
+    }
+  });
+  let wi = 0;
+  monthStarts.forEach((ms, i) => {
+    const nextIdx = i < monthStarts.length - 1 ? monthStarts[i + 1].idx : weeks.length;
+    const span = nextIdx - ms.idx;
+    html += `<span class="heatmap-month-label" style="width:${span * 17}px">${ms.label}</span>`;
+  });
+  html += '</div>';
+
+  // Rows (one per day of week)
+  for (let dow = 0; dow < 7; dow++) {
+    html += '<div class="heatmap-row">';
+    html += `<span class="heatmap-label">${dow % 2 === 1 ? dayNames[dow] : ''}</span>`;
+    weeks.forEach(week => {
+      const day = week[dow];
+      if (!day.inRange) {
+        html += '<div class="heatmap-cell" style="background:transparent"></div>';
+      } else {
+        html += `<div class="heatmap-cell" style="background:${getColor(day.count)}" title="${day.date}: ${day.count} commits"></div>`;
+      }
+    });
+    html += '</div>';
+  }
+
+  // Legend
+  html += '</div>';
+  html += '<div class="legend">';
+  html += '<span>Moins</span>';
+  [0, 5, 15, 30, 50, 77].forEach(v => {
+    html += `<div class="legend-cell" style="background:${getColor(v)}"></div>`;
+  });
+  html += '<span>Plus</span>';
+  html += '</div>';
+
+  container.innerHTML = html;
+})();
+
+// 4. Modules - commits (horizontal bar)
+new Chart(document.getElementById('chartModulesCommits'), {
+  type: 'bar',
+  data: {
+    labels: ['index.html','Travaux/Prod.','styles.css','Documentation','Évaluations','Profils','Trimestre/Cal.','Navigation','Tableau bord','Aide','RàI/Interv.','Présences','Codex/I-E','Graphiques','Planif./Carte','Indices A-C-P','DB/Storage','Design Sys.'],
+    datasets: [{
+      label: 'Commits',
+      data: [772,532,487,484,295,229,200,152,146,126,116,99,98,97,96,81,36,15],
+      backgroundColor: moduleColors.slice(0, 18).map(c => c + '80'),
+      borderColor: moduleColors.slice(0, 18),
+      borderWidth: 1.5,
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: {
+      title: { display: true, text: 'Commits par module', color: PALETTE.blanc, font: { size: 13, weight: 500 }},
+      legend: { display: false }
+    },
+    scales: {
+      x: { beginAtZero: true, grid: { color: PALETTE.grille }},
+      y: { grid: { display: false }, ticks: { font: { size: 11 }}}
+    }
+  }
+});
+
+// 5. Modules - lignes nettes
+new Chart(document.getElementById('chartModulesNet'), {
+  type: 'bar',
+  data: {
+    labels: ['Documentation','Travaux/Prod.','styles.css','Évaluations','Trimestre/Cal.','Codex/I-E','Profils','index.html','Planif./Carte','Graphiques','RàI/Interv.','Navigation','Indices A-C-P','Tableau bord','Aide','Présences','Design Sys.','DB/Storage'],
+    datasets: [{
+      label: 'Lignes nettes',
+      data: [42233,27755,22190,11834,10162,10602,9256,7069,6268,4573,4411,3924,3676,3432,2848,2357,1638,1229],
+      backgroundColor: 'rgba(78, 205, 196, 0.5)',
+      borderColor: PALETTE.vert,
+      borderWidth: 1.5,
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: {
+      title: { display: true, text: 'Lignes nettes ajoutées', color: PALETTE.blanc, font: { size: 13, weight: 500 }},
+      legend: { display: false }
+    },
+    scales: {
+      x: { beginAtZero: true, grid: { color: PALETTE.grille }},
+      y: { grid: { display: false }, ticks: { font: { size: 11 }}}
+    }
+  }
+});
+
+// 6. Churn
+new Chart(document.getElementById('chartChurn'), {
+  type: 'bar',
+  data: {
+    labels: ['Profils','Tableau bord','Présences','RàI/Interv.','Navigation','Évaluations','Indices A-C-P','index.html','DB/Storage','Trimestre/Cal.','Aide','Travaux/Prod.','Documentation','Codex/I-E','Graphiques','Planif./Carte','styles.css','Design Sys.'],
+    datasets: [{
+      label: 'Taux de réécriture (%)',
+      data: [49,49,49,48,48,48,47,46,46,45,45,41,41,40,36,35,21,16],
+      backgroundColor: function(ctx) {
+        const v = ctx.raw;
+        if (v >= 48) return 'rgba(224, 96, 128, 0.6)';
+        if (v >= 44) return 'rgba(240, 160, 80, 0.6)';
+        if (v >= 35) return 'rgba(106, 172, 184, 0.5)';
+        return 'rgba(78, 205, 196, 0.5)';
+      },
+      borderColor: function(ctx) {
+        const v = ctx.raw;
+        if (v >= 48) return PALETTE.rose;
+        if (v >= 44) return PALETTE.orange;
+        if (v >= 35) return PALETTE.bleu;
+        return PALETTE.vert;
+      },
+      borderWidth: 1.5,
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: {
+      title: { display: true, text: 'Taux de réécriture par module (%)', color: PALETTE.blanc, font: { size: 14, weight: 500 }},
+      legend: { display: false }
+    },
+    scales: {
+      x: { beginAtZero: true, max: 55, grid: { color: PALETTE.grille }, ticks: { callback: v => v + '%' }},
+      y: { grid: { display: false }, ticks: { font: { size: 11 }}}
+    }
+  }
+});
+
+// 7. Modules par mois (stacked area)
+(function(){
+  const mois = ['Oct 25', 'Nov 25', 'Déc 25', 'Jan 26', 'Fév 26', 'Mars 26', 'Avr 26'];
+  const modules = [
+    { label: 'index.html', data: [0,0,125,231,286,80,50] },
+    { label: 'styles.css', data: [23,65,15,75,191,62,56] },
+    { label: 'Travaux/Prod.', data: [16,30,18,41,238,117,72] },
+    { label: 'Évaluations', data: [32,65,28,9,60,67,34] },
+    { label: 'Profils', data: [32,69,33,18,27,27,23] },
+    { label: 'Trimestre/Cal.', data: [13,18,59,62,28,13,7] },
+    { label: 'Navigation', data: [15,32,23,14,37,21,10] },
+    { label: 'Tableau bord', data: [19,44,9,31,19,14,10] },
+    { label: 'Aide', data: [6,1,3,10,68,19,19] },
+    { label: 'RàI/Interv.', data: [9,37,14,13,22,8,13] },
+    { label: 'Autres', data: [37+19, 23+15+24+10+0+1+55, 15+8+18+11+7+2+58, 14+25+35+9+4+2+3+151, 21+19+11+68+11+2+123, 7+18+24+6+9+11+0+47, 4+4+9+17+4+2+1+31] }
+  ];
+
+  new Chart(document.getElementById('chartModulesMois'), {
+    type: 'bar',
+    data: {
+      labels: mois,
+      datasets: modules.map((m, i) => ({
+        label: m.label,
+        data: m.data,
+        backgroundColor: (moduleColors[i] || '#888') + '90',
+        borderColor: moduleColors[i] || '#888',
+        borderWidth: 1,
+      }))
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: { display: true, text: 'Commits par module par mois', color: PALETTE.blanc, font: { size: 14, weight: 500 }},
+        legend: { labels: { usePointStyle: true, padding: 10, font: { size: 10 }}},
+      },
+      scales: {
+        x: { stacked: true, grid: { display: false }},
+        y: { stacked: true, beginAtZero: true, grid: { color: PALETTE.grille }, title: { display: true, text: 'Commits' }}
+      }
+    }
+  });
+})();
+
+// 8. Heures du jour
+new Chart(document.getElementById('chartHeures'), {
+  type: 'bar',
+  data: {
+    labels: ['0h','1h','2h','3h','4h','5h','6h','7h','8h','9h','10h','11h','12h','13h','14h','15h','16h','17h','18h','19h','20h','21h','22h','23h'],
+    datasets: [{
+      label: 'Commits',
+      data: [5,2,3,3,6,38,116,181,221,245,164,172,173,176,142,144,109,70,67,110,119,48,11,22],
+      backgroundColor: function(ctx) {
+        const h = ctx.dataIndex;
+        if (h >= 5 && h <= 14) return 'rgba(78, 205, 196, 0.6)';
+        if (h >= 19 && h <= 20) return 'rgba(160, 112, 208, 0.6)';
+        return 'rgba(106, 172, 184, 0.3)';
+      },
+      borderColor: function(ctx) {
+        const h = ctx.dataIndex;
+        if (h >= 5 && h <= 14) return PALETTE.vert;
+        if (h >= 19 && h <= 20) return PALETTE.violet;
+        return PALETTE.bleu;
+      },
+      borderWidth: 1,
+      borderRadius: 3,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      title: { display: true, text: 'Commits par heure (ET)', color: PALETTE.blanc, font: { size: 13, weight: 500 }},
+      legend: { display: false }
+    },
+    scales: {
+      y: { beginAtZero: true, grid: { color: PALETTE.grille }},
+      x: { grid: { display: false }}
+    }
+  }
+});
+
+// 9. Jours de la semaine
+new Chart(document.getElementById('chartJours'), {
+  type: 'bar',
+  data: {
+    labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+    datasets: [{
+      label: 'Commits',
+      data: [280, 304, 303, 294, 439, 438, 289],
+      backgroundColor: [PALETTE.bleuClair, PALETTE.bleuClair, PALETTE.bleuClair, PALETTE.bleuClair, PALETTE.vertClair, PALETTE.vertClair, PALETTE.bleuClair],
+      borderColor: [PALETTE.bleu, PALETTE.bleu, PALETTE.bleu, PALETTE.bleu, PALETTE.vert, PALETTE.vert, PALETTE.bleu],
+      borderWidth: 2,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      title: { display: true, text: 'Commits par jour de la semaine', color: PALETTE.blanc, font: { size: 13, weight: 500 }},
+      legend: { display: false }
+    },
+    scales: {
+      y: { beginAtZero: true, grid: { color: PALETTE.grille }},
+      x: { grid: { display: false }}
+    }
+  }
+});
+
+// 10. Sessions par durée (donut)
+new Chart(document.getElementById('chartSessions'), {
+  type: 'doughnut',
+  data: {
+    labels: ['< 30 min (105)', '30-60 min (36)', '1-2h (63)', '2-3h (41)', '3-4h (27)', '4h+ (42)'],
+    datasets: [{
+      data: [105, 36, 63, 41, 27, 42],
+      backgroundColor: [
+        'rgba(106, 172, 184, 0.5)',
+        'rgba(78, 205, 196, 0.5)',
+        'rgba(80, 184, 160, 0.6)',
+        'rgba(240, 160, 80, 0.6)',
+        'rgba(224, 96, 128, 0.6)',
+        'rgba(160, 112, 208, 0.6)'
+      ],
+      borderColor: [PALETTE.bleu, PALETTE.vert, '#50b8a0', PALETTE.orange, PALETTE.rose, PALETTE.violet],
+      borderWidth: 2,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      title: { display: true, text: 'Distribution des durées de session', color: PALETTE.blanc, font: { size: 14, weight: 500 }},
+      legend: { position: 'bottom', labels: { usePointStyle: true, padding: 12 }}
+    }
+  }
+});
+
+// 11. Jalons clés
+new Chart(document.getElementById('chartJalons'), {
+  type: 'bar',
+  data: {
+    labels: ['25 oct.\nFondation', '2 avr.\nConsolidation', '8 fév.\nRàI/SOLO', '27 fév.\nProfils dyn.', '2 jan.\nNotation', '6 fév.\nCarte mentale', '3 jan.\nCodex/A-C-P', '9 jan.\nImport ZIP', '21 fév.\nGraphiques', '25 jan.\nPratiques'],
+    datasets: [{
+      label: 'Commits',
+      data: [77, 50, 47, 43, 42, 42, 41, 39, 38, 37],
+      backgroundColor: [
+        'rgba(240, 160, 80, 0.7)',
+        'rgba(78, 205, 196, 0.7)',
+        'rgba(224, 96, 128, 0.7)',
+        'rgba(160, 112, 208, 0.7)',
+        'rgba(106, 172, 184, 0.7)',
+        'rgba(78, 205, 196, 0.6)',
+        'rgba(106, 172, 184, 0.6)',
+        'rgba(240, 160, 80, 0.6)',
+        'rgba(160, 112, 208, 0.6)',
+        'rgba(224, 96, 128, 0.6)',
+      ],
+      borderColor: [PALETTE.orange, PALETTE.vert, PALETTE.rose, PALETTE.violet, PALETTE.bleu, PALETTE.vert, PALETTE.bleu, PALETTE.orange, PALETTE.violet, PALETTE.rose],
+      borderWidth: 2,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      title: { display: true, text: 'Les 10 journées les plus intenses', color: PALETTE.blanc, font: { size: 14, weight: 500 }},
+      legend: { display: false }
+    },
+    scales: {
+      y: { beginAtZero: true, grid: { color: PALETTE.grille }},
+      x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 0 }}
+    }
+  }
+});
+
+// 12. Projection
+new Chart(document.getElementById('chartProjection'), {
+  type: 'bar',
+  data: {
+    labels: ['Oct', 'Nov', 'Déc', 'Jan', 'Fév', 'Mars', 'Avr*', 'Mai (proj.)', 'Juin (proj.)'],
+    datasets: [{
+      label: 'Heures réalisées',
+      data: [37.3, 79.1, 74.1, 104.6, 178.0, 104.8, 56.1, null, null],
+      backgroundColor: 'rgba(78, 205, 196, 0.5)',
+      borderColor: PALETTE.vert,
+      borderWidth: 2,
+      borderRadius: 6,
+    },{
+      label: 'Heures projetées',
+      data: [null, null, null, null, null, null, null, 80, 80],
+      backgroundColor: 'rgba(240, 160, 80, 0.35)',
+      borderColor: PALETTE.orange,
+      borderWidth: 2,
+      borderDash: [5, 3],
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      title: { display: true, text: 'Projection jusqu\'au lancement (juin 2026)', color: PALETTE.blanc, font: { size: 14, weight: 500 }},
+      legend: { labels: { usePointStyle: true, padding: 15 }},
+      annotation: {}
+    },
+    scales: {
+      y: { beginAtZero: true, grid: { color: PALETTE.grille }, title: { display: true, text: 'Heures' }},
+      x: { grid: { display: false }}
+    }
+  }
+});
+
+// 13. Répartition par rôle (donut)
+new Chart(document.getElementById('chartRolesRepartition'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Frontend (300h)', 'UI/UX Design (90h)', 'Expertise métier (65h)', 'Architecture (60h)', 'QA (60h)', 'Doc / PM (59h)'],
+    datasets: [{
+      data: [300, 90, 65, 60, 60, 59],
+      backgroundColor: [
+        'rgba(78, 205, 196, 0.6)',
+        'rgba(160, 112, 208, 0.6)',
+        'rgba(240, 160, 80, 0.6)',
+        'rgba(106, 172, 184, 0.6)',
+        'rgba(224, 96, 128, 0.6)',
+        'rgba(80, 184, 160, 0.6)'
+      ],
+      borderColor: [PALETTE.vert, PALETTE.violet, PALETTE.orange, PALETTE.bleu, PALETTE.rose, '#50b8a0'],
+      borderWidth: 2,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      title: { display: true, text: 'Répartition des heures par rôle', color: PALETTE.blanc, font: { size: 13, weight: 500 }},
+      legend: { position: 'bottom', labels: { usePointStyle: true, padding: 10, font: { size: 10 }}}
+    }
+  }
+});
+
+// 14. Heures par rôle (horizontal bar)
+new Chart(document.getElementById('chartRolesHeures'), {
+  type: 'bar',
+  data: {
+    labels: ['Dév. frontend senior', 'Designer UI/UX', 'Expert métier / PO', 'Architecte logiciel', 'Spécialiste QA', 'Rédacteur tech. / PM'],
+    datasets: [{
+      label: 'Heures',
+      data: [300, 90, 65, 60, 60, 59],
+      backgroundColor: [
+        'rgba(78, 205, 196, 0.5)',
+        'rgba(160, 112, 208, 0.5)',
+        'rgba(240, 160, 80, 0.5)',
+        'rgba(106, 172, 184, 0.5)',
+        'rgba(224, 96, 128, 0.5)',
+        'rgba(80, 184, 160, 0.5)'
+      ],
+      borderColor: [PALETTE.vert, PALETTE.violet, PALETTE.orange, PALETTE.bleu, PALETTE.rose, '#50b8a0'],
+      borderWidth: 2,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: {
+      title: { display: true, text: 'Heures par rôle professionnel', color: PALETTE.blanc, font: { size: 13, weight: 500 }},
+      legend: { display: false }
+    },
+    scales: {
+      x: { beginAtZero: true, grid: { color: PALETTE.grille }, title: { display: true, text: 'Heures' }},
+      y: { grid: { display: false }}
+    }
+  }
+});
+
+// 15. Comparaison coût réel vs estimé
+new Chart(document.getElementById('chartCoutComparaison'), {
+  type: 'bar',
+  data: {
+    labels: ['Coût réel\n(outillage)', 'Scénario bas\n(juniors)', 'Scénario médian\n(seniors)', 'Scénario élevé\n(agence)'],
+    datasets: [{
+      label: 'Coût ($ CAD)',
+      data: [1725, 57245, 75375, 95130],
+      backgroundColor: [
+        'rgba(78, 205, 196, 0.7)',
+        'rgba(106, 172, 184, 0.4)',
+        'rgba(240, 160, 80, 0.5)',
+        'rgba(224, 96, 128, 0.5)',
+      ],
+      borderColor: [PALETTE.vert, PALETTE.bleu, PALETTE.orange, PALETTE.rose],
+      borderWidth: 2,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      title: { display: true, text: 'Coût réel vs équipe professionnelle (CAD)', color: PALETTE.blanc, font: { size: 13, weight: 500 }},
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: function(ctx) {
+            return ctx.raw.toLocaleString('fr-CA') + ' $';
+          }
+        }
+      }
+    },
+    scales: {
+      y: { beginAtZero: true, grid: { color: PALETTE.grille }, ticks: { callback: function(v) { return (v/1000) + 'k $'; }}},
+      x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 0 }}
+    }
+  }
+});
+
+// 16. Coût cumulé mois par mois (réel vs estimé)
+(function(){
+  const mois = ['Oct', 'Nov', 'Déc', 'Jan', 'Fév', 'Mars', 'Avr'];
+  const heuresMois = [37.3, 79.1, 74.1, 104.6, 178.0, 104.8, 56.1];
+  const tauxMedianMoyen = 119; // pondéré par les heures et taux de chaque rôle: 75375/634
+  const coutReel = 246; // ~180 USD/mois × 1.37 CAD
+
+  let cumEstime = 0;
+  let cumReel = 0;
+  const dataEstime = [];
+  const dataReel = [];
+
+  heuresMois.forEach((h, i) => {
+    cumEstime += h * tauxMedianMoyen;
+    cumReel += coutReel;
+    dataEstime.push(Math.round(cumEstime));
+    dataReel.push(Math.round(cumReel));
+  });
+
+  new Chart(document.getElementById('chartCoutCumule'), {
+    type: 'line',
+    data: {
+      labels: mois,
+      datasets: [
+        {
+          label: 'Valeur estimée (médian)',
+          data: dataEstime,
+          borderColor: PALETTE.orange,
+          backgroundColor: 'rgba(240, 160, 80, 0.1)',
+          fill: true,
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: PALETTE.orange,
+          tension: 0.3,
+        },
+        {
+          label: 'Coût réel (outillage)',
+          data: dataReel,
+          borderColor: PALETTE.vert,
+          backgroundColor: 'rgba(78, 205, 196, 0.15)',
+          fill: true,
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: PALETTE.vert,
+          tension: 0.3,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: { display: true, text: 'Coûts cumulés : réel vs valeur estimée', color: PALETTE.blanc, font: { size: 13, weight: 500 }},
+        legend: { labels: { usePointStyle: true, padding: 12 }},
+        tooltip: {
+          callbacks: {
+            label: function(ctx) { return ctx.dataset.label + ' : ' + ctx.raw.toLocaleString('fr-CA') + ' $'; }
+          }
+        }
+      },
+      scales: {
+        y: { beginAtZero: true, grid: { color: PALETTE.grille }, ticks: { callback: function(v) { return (v/1000) + 'k $'; }}},
+        x: { grid: { display: false }}
+      }
+    }
+  });
+})();
+
+// 17. Valorisation marchande (grouped bar)
+new Chart(document.getElementById('chartValorisation'), {
+  type: 'bar',
+  data: {
+    labels: ['Coût outillage\nréel', 'Remplacement\n(bas)', 'Remplacement\n(haut)', 'Marché\n5 cégeps', 'Marché\n12 cégeps\n+ 3 univ.', 'Acquisition\nstratégique\n(bas)', 'Acquisition\nstratégique\n(haut)'],
+    datasets: [{
+      label: 'Valeur ($ CAD)',
+      data: [1725, 120000, 180000, 320000, 1320000, 300000, 750000],
+      backgroundColor: [
+        'rgba(78, 205, 196, 0.8)',
+        'rgba(106, 172, 184, 0.5)',
+        'rgba(106, 172, 184, 0.7)',
+        'rgba(240, 160, 80, 0.5)',
+        'rgba(240, 160, 80, 0.7)',
+        'rgba(160, 112, 208, 0.5)',
+        'rgba(160, 112, 208, 0.7)',
+      ],
+      borderColor: [
+        PALETTE.vert,
+        PALETTE.bleu, PALETTE.bleu,
+        PALETTE.orange, PALETTE.orange,
+        PALETTE.violet, PALETTE.violet,
+      ],
+      borderWidth: 2,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      title: { display: true, text: 'Valorisation de Labo Codex — trois angles ($ CAD)', color: PALETTE.blanc, font: { size: 14, weight: 500 }},
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: function(ctx) { return ctx.raw.toLocaleString('fr-CA') + ' $'; }
+        }
+      }
+    },
+    scales: {
+      y: { beginAtZero: true, grid: { color: PALETTE.grille }, ticks: { callback: function(v) { return (v >= 1000) ? (v/1000) + 'k $' : v + ' $'; }}},
+      x: { grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 0 }}
+    }
+  }
+});
+</script>
+
+</body>
+</html>
