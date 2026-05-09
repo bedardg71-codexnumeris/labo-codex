@@ -3391,6 +3391,20 @@ body:not(.mode-clair) .badge-source--demo {
     align-items: flex-end;
 }
 
+/* Beta 99.39 (#267 Phase B) — uniformisation taille des boutons dans tous les
+   biblios. Cible TOUS les .btn dans les modaux dont l'id commence par
+   "modalBibliotheque" (5 ressources : grilles, échelles, cartouches,
+   productions, pratiques). !important pour court-circuiter toute autre
+   règle (.btn, .btn-mini, .btn-tres-compact) peu importe l'ordre source. */
+[id^="modalBibliotheque"] .btn,
+[id^="modalBibliotheque"] .btn-mini,
+[id^="modalBibliotheque"] .btn-tres-compact {
+    padding: 4px 10px !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+}
+
 /* Changelog entries — remplace inline style="background: linear-gradient(...); border-left: 3px solid ..." */
 .changelog-entry {
     border-left: 3px solid;
