@@ -1,0 +1,19 @@
+Observations :
+
+Bon lien : Bonne relation entre deux idées
+
+Manque de lien : Manque de relation logique entre deux idées
+
+Confusion : Plusieurs idées sont présentées dans une même phrase ou un même passage sans qu'elles ne soient clairement définies.
+
+Répétitif : Les mêmes mots ou les mêmes idées reviennent à plusieurs reprises dans une même phrase ou un même passage sans être approfondi. Parfois l'explique peut être tautologique.
+
+Preuve absente : L'idée ou l'argument présenté n'est pas étayé par une citation probante.
+
+Citation : L'intégration de la citation dans l'explication n'est pas fluide sur le plan syntaxique ou grammatical. Ce sont deux blocs distincts qui ne sont pas intégrés.
+
+Approfondir : La méthode, l'idée ou l'argument exprimé a un potentiel, mais l'utilisation ou l'explication reste en surface. Des idées plus riches pourraient émerger avec un peu plus de travail.
+
+Procédés : Les procédés ou les mécanismes littéraires ne sont pas identifiés.
+
+Attention : L'idée est une généralisation hâtive, un préjugé, une idée sans fondement.

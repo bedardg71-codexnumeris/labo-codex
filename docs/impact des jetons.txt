@@ -1,0 +1,10 @@
+Observation lors de la création des graphiques dans le tableau de bord et le profil individuel.
+
+Les étudiants qui utilisent les jetons sont un groupe
+  auto-sélectionné — ils sont suffisamment mobilisés pour refaire un
+  travail, ce qui indique déjà un engagement plus élevé. Leur P est souvent
+  plus élevé avant même le jeton. Le jeton donne un boost incrémental sur
+  une base déjà supérieure. C'est un biais de sélection, pas nécessairement
+  l'effet du jeton.
+
+21 mars 2026
