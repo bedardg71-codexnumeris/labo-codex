@@ -1968,7 +1968,6 @@ async function preparerDonneesBibliothequeProductions() {
         inspireDe: BibliothequeUI.formaterInspireDe(prod),
         boutons: [
             { label: 'Dupliquer', onclick: `dupliquerProductionBibliotheque('${prod.id}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
-            { label: 'Exporter', onclick: `partagerProduction('${prod.id}')`, classe: 'btn-secondaire', title: 'Exporter en JSON' },
             { label: 'Retirer', onclick: `retirerProductionDeBibliotheque('${prod.id}')`, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
             { label: 'Supprimer', onclick: `supprimerProductionDefinitivement('${prod.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
         ]
@@ -2378,47 +2377,6 @@ async function importerUneProductionTrimestre(cleTrimestre, productionId) {
 }
 
 /**
- * Partage une production avec la communauté
- * Demande les métadonnées CC enrichies et marque la production comme partagée
- */
-async function partagerProduction(id) {
-    try {
-        const productions = await db.get(getCleProductions()) || [];
-        const prod = productions.find(p => p.id === id);
-
-        if (!prod) {
-            alert('Production introuvable');
-            return;
-        }
-
-        // Demander métadonnées CC enrichies
-        const metadata = await demanderMetadonneesEnrichies('production', prod.titre);
-        if (!metadata) {
-            return; // Annulé par l'utilisateur
-        }
-
-        // Marquer comme partagée (retirer de ma sélection)
-        prod.dansBibliotheque = false;
-
-        // Ajouter métadonnées CC
-        prod.metadata_cc = metadata;
-
-        // Sauvegarder
-        await db.set(getCleProductions(), productions);
-
-        // Rafraîchir modal et sidebar
-        fermerModalBibliothequeProductions();
-        await afficherListeProductions();
-        await afficherBibliothequeProductions();
-
-        alert('Production partagée avec succès !\n\nElle est maintenant disponible dans la section "Productions disponibles à ajouter".');
-    } catch (error) {
-        console.error('Erreur lors du partage:', error);
-        alert('Erreur lors du partage de la production');
-    }
-}
-
-/**
  * Retire une production de la bibliothèque (soft delete)
  */
 async function retirerProductionDeBibliotheque(id) {
@@ -2701,12 +2659,8 @@ async function exporterProductions() {
         metaEnrichies
     );
 
-    // Générer nom de fichier avec watermark CC
-    const nomFichier = genererNomFichierCC(
-        'productions',
-        'Productions-pedagogiques',
-        donnees.metadata.version
-    );
+    // Beta 95.3 : Nommage standardisé via helper unifié (horodaté pour éviter écrasement)
+    const nomFichier = genererNomFichierExport('productions', { inclureLicence: true, precisionDate: 'minute' });
 
     // Télécharger
     const blob = new Blob([JSON.stringify(donnees, null, 2)], { type: 'application/json' });
@@ -3384,7 +3338,6 @@ window.ajouterProductionsABibliotheque = ajouterProductionsABibliotheque;
 window.filtrerProductionsParDiscipline = filtrerProductionsParDiscipline;
 window.fermerModalBibliothequeProductions = fermerModalBibliothequeProductions;
 window.ajouterProductionIndividuelle = ajouterProductionIndividuelle;
-window.partagerProduction = partagerProduction;
 window.ajouterMesProductionsALaBibliotheque = ajouterMesProductionsALaBibliotheque;
 window.afficherProductionsTrimestreModal = afficherProductionsTrimestreModal;
 window.importerToutTrimestreModal = importerToutTrimestreModal;

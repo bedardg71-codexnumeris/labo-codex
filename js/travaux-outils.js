@@ -2881,7 +2881,8 @@
         if (!metaEnrichies) return; // Annule
 
         var donnees = ajouterMetadonn\u00e9esCC(contenu, 'tampons', 'Tampons d\u2019observation', metaEnrichies);
-        var nomFichier = genererNomFichierCC('tampons', 'Tampons-observation', donnees.metadata.version);
+        // Beta 95.3 : Nommage standardisé via helper unifié (horodaté pour éviter écrasement)
+        var nomFichier = genererNomFichierExport('tampons', { inclureLicence: true, precisionDate: 'minute' });
 
         var blob = new Blob([JSON.stringify(donnees, null, 2)], { type: 'application/json' });
         var url = URL.createObjectURL(blob);

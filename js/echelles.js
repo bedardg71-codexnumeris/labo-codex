@@ -1918,12 +1918,8 @@ async function exporterEchelles() {
         metaEnrichies
     );
 
-    // Générer nom de fichier avec watermark CC
-    const nomFichier = genererNomFichierCC(
-        'echelles',
-        'Echelles-performance',
-        donnees.metadata.version
-    );
+    // Beta 95.3 : Nommage standardisé via helper unifié (horodaté pour éviter écrasement)
+    const nomFichier = genererNomFichierExport('echelles', { inclureLicence: true, precisionDate: 'minute' });
 
     // Télécharger
     const blob = new Blob([JSON.stringify(donnees, null, 2)], { type: 'application/json' });
@@ -2380,7 +2376,6 @@ async function preparerDonneesBibliothequeEchelles() {
         inspireDe: BibliothequeUI.formaterInspireDe(echelle),
         boutons: [
             { label: 'Dupliquer', onclick: `dupliquerEchelleBibliotheque('${echelle.id}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
-            { label: 'Exporter', onclick: `partagerEchelle('${echelle.id}')`, classe: 'btn-secondaire', title: 'Exporter en JSON' },
             { label: 'Retirer', onclick: `retirerEchelleDeBibliotheque('${echelle.id}')`, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
             { label: 'Supprimer', onclick: `supprimerEchelleDefinitivement('${echelle.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
         ]
@@ -2579,37 +2574,6 @@ async function ajouterEchelleIndividuelle(id) {
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
         alert('Erreur lors de l\'ajout de l\'échelle');
-    }
-}
-
-/**
- * ✅ AJOUT (8 décembre 2025) : Partage une échelle avec la communauté
- */
-async function partagerEchelle(id) {
-    try {
-        const echelles = await db.get('echellesTemplates') || [];
-        const echelle = echelles.find(e => e.id === id);
-
-        if (!echelle) {
-            alert('Échelle introuvable');
-            return;
-        }
-
-        const metadata = await demanderMetadonneesEnrichies('echelle', echelle.nom);
-        if (!metadata) return;
-
-        echelle.dansBibliotheque = false;
-        echelle.metadata_cc = metadata;
-
-        await db.set('echellesTemplates', echelles);
-        fermerModalBibliothequeEchelles();
-        await afficherListeEchelles();
-        await afficherBibliothequeEchelles();
-
-        alert('Échelle partagée avec succès !\n\nElle est maintenant disponible dans la section "Échelles disponibles à ajouter".');
-    } catch (error) {
-        console.error('Erreur lors du partage:', error);
-        alert('Erreur lors du partage de l\'échelle');
     }
 }
 
@@ -4098,7 +4062,6 @@ window.filtrerEchellesBibliotheque = filtrerEchellesBibliotheque;
 window.fermerModalBibliothequeEchelles = fermerModalBibliothequeEchelles;
 window.ajouterEchelleIndividuelle = ajouterEchelleIndividuelle;
 window.dupliquerEchelleBibliotheque = dupliquerEchelleBibliotheque;
-window.partagerEchelle = partagerEchelle;
 window.supprimerEchelleDefinitivement = supprimerEchelleDefinitivement;
 window.supprimerEchelleDeBibliothequePartagee = supprimerEchelleDeBibliothequePartagee;
 window.ajouterMesEchellesALaBibliotheque = ajouterMesEchellesALaBibliotheque;

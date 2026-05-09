@@ -1720,12 +1720,8 @@ async function exporterCartouches() {
         metaEnrichies
     );
 
-    // Générer nom de fichier avec watermark CC
-    const nomFichier = genererNomFichierCC(
-        'cartouches',
-        'Cartouches-retroaction',
-        donnees.metadata.version
-    );
+    // Beta 95.3 : Nommage standardisé via helper unifié (horodaté pour éviter écrasement)
+    const nomFichier = genererNomFichierExport('cartouches', { inclureLicence: true, precisionDate: 'minute' });
 
     const blob = new Blob([JSON.stringify(donnees, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -2414,14 +2410,12 @@ async function exporterCartoucheActive() {
         metaEnrichies
     );
 
-    // Générer nom de fichier avec watermark CC
-    // Beta 93: Nom de fichier basé sur cartouche.nom au lieu de critere-niveau
-    const nomFichierBase = (cartouche.nom || 'Cartouche').replace(/\s+/g, '-');
-    const nomFichier = genererNomFichierCC(
-        'cartouche',
-        nomFichierBase,
-        exportAvecCC.metadata.version
-    );
+    // Beta 95.3 : Nommage standardisé via helper unifié (accents préservés, horodaté)
+    const nomFichier = genererNomFichierExport('cartouche', {
+        nom: cartouche.nom || 'cartouche',
+        inclureLicence: true,
+        precisionDate: 'minute'
+    });
 
     const json = JSON.stringify(exportAvecCC, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
@@ -3376,7 +3370,6 @@ async function preparerDonneesBibliothequeCartouches() {
                 inspireDe: BibliothequeUI.formaterInspireDe(cartouche),
                 boutons: [
                     { label: 'Dupliquer', onclick: `dupliquerCartoucheBibliotheque('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
-                    { label: 'Exporter', onclick: `partagerCartouche('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-secondaire', title: 'Exporter en JSON' },
                     { label: 'Retirer', onclick: `retirerCartoucheDeBibliotheque('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
                     { label: 'Supprimer', onclick: `supprimerCartoucheDefinitivement('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
                 ],
@@ -3544,36 +3537,6 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
 }
 
 /**
- * ✅ AJOUT (8 décembre 2025) : Partage une cartouche avec la communauté
- */
-async function partagerCartouche(id, grilleId) {
-    try {
-        const cartouches = await db.get(`cartouches_${grilleId}`) || [];
-        const cartouche = cartouches.find(c => c.id === id);
-
-        if (!cartouche) {
-            alert('Cartouche introuvable');
-            return;
-        }
-
-        const metadata = await demanderMetadonneesEnrichies('cartouche', cartouche.nom);
-        if (!metadata) return;
-
-        cartouche.dansBibliotheque = false;
-        cartouche.metadata_cc = metadata;
-
-        await db.set(`cartouches_${grilleId}`, cartouches);
-        fermerModalBibliothequeCartouches();
-        await afficherListeCartouches();
-        await afficherBibliothequeCartouches();
-
-        alert('Cartouche partagée avec succès !\n\nElle est maintenant disponible dans la section "Cartouches disponibles à ajouter".');
-    } catch (error) {
-        console.error('Erreur lors du partage:', error);
-        alert('Erreur lors du partage de la cartouche');
-    }
-}
-
 async function retirerCartoucheDeBibliotheque(id, grilleId) {
     const cartouches = await db.get(`cartouches_${grilleId}`) || [];
     const cartouche = cartouches.find(c => c.id === id);
@@ -3807,7 +3770,6 @@ window.fermerModalBibliothequeCartouches = fermerModalBibliothequeCartouches;
 window.ajouterCartoucheIndividuelle = ajouterCartoucheIndividuelle;
 window.dupliquerCartoucheBibliotheque = dupliquerCartoucheBibliotheque;
 window.dupliquerEtEditerCartouche = dupliquerEtEditerCartouche;
-window.partagerCartouche = partagerCartouche;
 window.supprimerCartoucheDefinitivement = supprimerCartoucheDefinitivement;
 window.supprimerCartoucheDeBibliothequePartagee = supprimerCartoucheDeBibliothequePartagee;
 

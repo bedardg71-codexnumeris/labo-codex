@@ -1711,12 +1711,8 @@ async function exporterGrilles() {
         metaEnrichies
     );
 
-    // Générer nom de fichier avec watermark CC
-    const nomFichier = genererNomFichierCC(
-        'grilles',
-        'Grilles-criteres',
-        donnees.metadata.version
-    );
+    // Beta 95.3 : Nommage standardisé via helper unifié (horodaté pour éviter écrasement)
+    const nomFichier = genererNomFichierExport('grilles', { inclureLicence: true, precisionDate: 'minute' });
 
     // Télécharger
     const blob = new Blob([JSON.stringify(donnees, null, 2)], { type: 'application/json' });
@@ -2125,7 +2121,6 @@ window.fermerModalBibliothequeGrilles = fermerModalBibliothequeGrilles;
 window.ajouterGrilleIndividuelle = ajouterGrilleIndividuelle;
 window.dupliquerGrilleBibliotheque = dupliquerGrilleBibliotheque;
 window.dupliquerEtEditerGrille = dupliquerEtEditerGrille;
-window.partagerGrille = partagerGrille;
 window.supprimerGrilleDefinitivement = supprimerGrilleDefinitivement;
 window.supprimerGrilleDeBibliothequePartagee = supprimerGrilleDeBibliothequePartagee;
 window.ajouterMesGrillesALaBibliotheque = ajouterMesGrillesALaBibliotheque;
@@ -2198,7 +2193,6 @@ async function preparerDonneesBibliothequeGrilles() {
         inspireDe: BibliothequeUI.formaterInspireDe(grille),
         boutons: [
             { label: 'Dupliquer', onclick: `dupliquerGrilleBibliotheque('${grille.id}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
-            { label: 'Exporter', onclick: `partagerGrille('${grille.id}')`, classe: 'btn-secondaire', title: 'Exporter en JSON' },
             { label: 'Retirer', onclick: `retirerGrilleDeBibliotheque('${grille.id}')`, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
             { label: 'Supprimer', onclick: `supprimerGrilleDefinitivement('${grille.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
         ]
@@ -2350,47 +2344,6 @@ async function ajouterGrilleIndividuelle(id) {
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
         alert('Erreur lors de l\'ajout de la grille');
-    }
-}
-
-/**
- * ✅ AJOUT (8 décembre 2025) : Partage une grille avec la communauté
- * @param {string} id - ID de la grille à partager
- */
-async function partagerGrille(id) {
-    try {
-        const grilles = await db.get('grillesTemplates') || [];
-        const grille = grilles.find(g => g.id === id);
-
-        if (!grille) {
-            alert('Grille introuvable');
-            return;
-        }
-
-        // Demander métadonnées CC enrichies
-        const metadata = await demanderMetadonneesEnrichies('grille', grille.nom);
-        if (!metadata) {
-            return; // Annulé par l'utilisateur
-        }
-
-        // Marquer comme partagée (retirer de ma sélection)
-        grille.dansBibliotheque = false;
-
-        // Ajouter métadonnées CC
-        grille.metadata_cc = metadata;
-
-        // Sauvegarder
-        await db.set('grillesTemplates', grilles);
-
-        // Rafraîchir modal et sidebar
-        fermerModalBibliothequeGrilles();
-        await afficherListeGrilles();
-        await afficherBibliothequeGrilles();
-
-        alert('Grille partagée avec succès !\n\nElle est maintenant disponible dans la section "Grilles disponibles à ajouter".');
-    } catch (error) {
-        console.error('Erreur lors du partage:', error);
-        alert('Erreur lors du partage de la grille');
     }
 }
 
