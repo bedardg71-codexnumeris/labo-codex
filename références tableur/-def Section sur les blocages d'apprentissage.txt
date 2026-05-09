@@ -1,0 +1,154 @@
+# ⚠️ DOCUMENT OBSOLÈTE — Ne pas utiliser comme référence de développement
+#
+# Remplacé par : Skills pour Claude Code/SKILL_RaI.md (avril 2026)
+#
+# Ce document contient :
+# - L'ancienne formule IB = 0.35×NS + 0.35×NF + 0.30×NR (supprimée du code)
+# - La terminologie « blocage » (remplacée par « patterns d'apprentissage » et
+#   « diagnostic croisé IPB × direction »)
+# - Des critères SRPNF spécifiques au 601-101 (maintenant génériques via SOLO)
+# - Des références à des élèves fictifs et des statistiques illustratives
+#
+# Le code actuel utilise calculerIPB() + diagnostiquerSuiviApprentissage()
+# dans profil-etudiant.js, basés sur les critères niveauSOLO === 'multistructurel'.
+#
+# Conservé comme archive historique du concept initial.
+# ⚠️
+
+# Le blocage : un concept émergent du monitorage
+
+L'utilisation systématique du monitorage a permis d'identifier un phénomène particulier dans la progression des apprentissages : le blocage. Un blocage se produit lorsque trois éléments fondamentaux de l'analyse littéraire (la structure, le français et la rigueur) ne progressent pas harmonieusement, créant une situation où l'apprentissage semble stagner malgré les efforts de l'élève et de l'enseignant.
+
+## Anatomie d'un blocage
+
+Le blocage peut être compris comme un nœud dans le processus d'apprentissage. Il se manifeste à travers plusieurs dimensions mesurables :
+
+### L'indice de blocage (IB)
+```
+IB = (0.35×NS + 0.35×NF + 0.30×NR)
+où :
+NS = Niveau Structure
+NF = Niveau Français
+NR = Niveau Rigueur
+
+Seuils significatifs :
+< 1.5 : Blocage critique
+1.5-2.0 : Risque de blocage
+2.0-2.5 : Progression possible
+≥ 2.5 : Progression normale
+```
+
+### La persistance du blocage
+L'indice de persistance (IPB) mesure le nombre d'artefacts consécutifs où le blocage est présent. C'est un indicateur crucial pour l'intervention :
+- IPB = 1 : Signal d'alerte
+- IPB = 2 : Nécessite une intervention
+- IPB ≥ 3 : Situation critique
+
+## Types de blocages observés
+
+L'analyse des données de monitorage révèle trois types principaux de blocages :
+
+### 1. Blocage structurel
+```
+Caractéristiques :
+- Difficulté fondamentale d'organisation
+- Problèmes de base en expression
+- Cercle vicieux : structure faible → expression confuse → démotivation
+
+Observable chez environ 15% des élèves
+Exemple : Élève #7 (IB = 1.600, persistance = 3 artefacts)
+```
+
+### 2. Blocage méthodologique
+```
+Caractéristiques :
+- Confusion dans la méthode d'analyse
+- Difficulté à hiérarchiser l'information
+- Pattern : rigueur insuffisante → plausibilité faible
+
+Observable chez environ 20% des élèves
+Exemple : Élève #42 (IB = 2.043, oscillation I→D)
+```
+
+### 3. Blocage de progression
+```
+Caractéristiques :
+- Stagnation au niveau D
+- Difficulté à atteindre la maîtrise
+- Pattern : amélioration suivie de régression
+
+Observable chez environ 25% des élèves
+Exemple : Élève #46 (pattern M→I→D)
+```
+
+## Mécanismes d'intervention
+
+Face à ces blocages, le monitorage suggère des interventions différenciées :
+
+### Pour les blocages critiques (IB < 1.5)
+```
+1. Retour aux fondamentaux
+   - Micro-tâches structurées
+   - Focus sur un seul mécanisme
+   - Validation étape par étape
+
+2. Suivi intensif
+   - Rétroaction immédiate
+   - Reprise possible des tâches
+   - Accompagnement personnalisé
+```
+
+### Pour les risques de blocage (1.5 ≤ IB < 2.0)
+```
+1. Renforcement ciblé
+   - Pratique guidée intensive
+   - Exercices spécifiques
+   - Rétroaction détaillée
+
+2. Suivi régulier
+   - Vérifications fréquentes
+   - Ajustements rapides
+   - Documentation des progrès
+```
+
+## Impact sur l'apprentissage
+
+L'identification des blocages a des implications importantes pour l'enseignement :
+
+1. **Prévention**
+   - Repérage précoce des difficultés
+   - Intervention avant cristallisation
+   - Maintien de la motivation
+
+2. **Intervention**
+   - Approche systématique
+   - Actions ciblées et mesurables
+   - Suivi de l'impact
+
+3. **Accompagnement**
+   - Support adapté au type de blocage
+   - Reconstruction de la confiance
+   - Progression graduelle
+
+## Implications pédagogiques
+
+La compréhension des blocages transforme notre approche de l'enseignement :
+
+1. **Pour l'enseignement universel (niveau 1)**
+   - Attention aux signes précurseurs
+   - Prévention active
+   - Vérifications régulières
+
+2. **Pour les interventions ciblées (niveau 2)**
+   - Focus sur les mécanismes spécifiques
+   - Travail en petits groupes homogènes
+   - Progression structurée
+
+3. **Pour le soutien intensif (niveau 3)**
+   - Intervention immédiate sur les blocages
+   - Plan personnalisé
+   - Suivi serré des progrès
+
+## Conclusion
+
+Le concept de blocage, révélé par le monitorage systématique, offre une nouvelle perspective sur les difficultés d'apprentissage. Plus qu'un simple obstacle, le blocage apparaît comme un phénomène mesurable et actionnable, permettant des interventions ciblées et efficaces. Cette compréhension enrichit significativement notre capacité à soutenir la réussite des élèves dans un cours défi comme le 601-101.

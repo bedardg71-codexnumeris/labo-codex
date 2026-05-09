@@ -1,0 +1,206 @@
+# ⚠️ DOCUMENT OBSOLÈTE — Ne pas utiliser comme référence de développement
+#
+# Remplacé par : Skills pour Claude Code/SKILL_RaI.md (avril 2026)
+#
+# Ce document contient :
+# - L'ancienne formule IB (remplacée par l'IPB sur critères multistructurels SOLO)
+# - Des critères SRPNF codés en dur (maintenant configurables par l'enseignant)
+# - Des paramètres d'intervention irréalistes pour le contexte collégial
+#   (3-5x/semaine, 8-15 semaines — copiés du modèle canonique primaire/secondaire)
+# - La terminologie « blocage » (remplacée par « patterns d'apprentissage »)
+#
+# Conservé comme archive historique du concept initial.
+# ⚠️
+
+# Guide d'intervention basé sur le monitorage
+*Approche multiniveau pour le soutien à la réussite en littératie*
+
+## 1. IDENTIFICATION DES DIFFICULTÉS
+
+### 1.1 Blocage critique (IB < 1.5)
+**Structure + Français** (cas le plus fréquent)
+```
+Indicateurs :
+- Difficulté fondamentale d'organisation des idées
+- Problèmes de base en expression écrite
+- Cercle vicieux : faible structure → expression confuse → démotivation
+
+Profil type :
+- Contexte défavorable
+- IPB ≥ 2
+- Risque sommatif > 0.7
+```
+
+**Structure isolée**
+```
+Indicateurs :
+- Difficulté à organiser logiquement les idées
+- Confusion dans la hiérarchisation des arguments
+- Manque de méthode systématique
+
+Profil type :
+- Contexte fragile
+- IPB ≥ 1
+- Risque sommatif > 0.5
+```
+
+### 1.2 Risque de blocage (1.5 ≤ IB < 2.0)
+
+**Rigueur + Plausibilité**
+```
+Indicateurs :
+- Arguments insuffisamment développés
+- Preuves mal intégrées ou peu pertinentes 
+- Manque de profondeur analytique
+
+Profil type :
+- Contexte favorable mais fragile
+- IPB = 1
+- Risque sommatif 0.4-0.5
+```
+
+**Français + Structure oscillants**
+```
+Indicateurs :
+- Performance instable
+- Acquis fragiles
+- Manque de constance méthodologique
+
+Profil type :
+- Contexte variable
+- Pattern instable
+- Risque sommatif 0.3-0.5
+```
+
+## 2. NIVEAUX D'INTERVENTION
+
+### 2.1 Niveau 1 : Intervention universelle
+*Pour tous les élèves - En classe*
+
+**Modalités :**
+- Durée de base : 90 minutes par jour
+- Fréquence : À chaque cours
+- Format : En grand groupe
+
+**Actions clés :**
+1. Enseigner explicitement :
+   - Stratégies de lecture active
+   - Méthodes de planification
+   - Techniques de révision
+   - Processus de correction
+
+2. Fournir des outils :
+   - Guides méthodologiques
+   - Grilles d'autoévaluation
+   - Ressources numériques
+   - Documents modèles
+
+3. Favoriser la pratique guidée :
+   - Exercices structurés
+   - Rétroaction immédiate
+   - Modelage fréquent
+   - Ajustements continus
+
+### 2.2 Niveau 2 : Intervention ciblée
+*Pour les élèves à risque - En sous-groupe*
+
+**Modalités :**
+- Durée : 20-45 minutes
+- Fréquence : 3-5 fois/semaine
+- Format : Sous-groupes de 2-5 élèves
+- Cycle : 8-15 semaines
+
+**Actions clés :**
+1. Intensifier l'enseignement :
+   - Plus de démonstrations
+   - Explications détaillées
+   - Pratique additionnelle
+   - Rétroaction fréquente
+
+2. Focaliser sur les besoins spécifiques :
+   - Structure de texte
+   - Expression écrite
+   - Méthodes d'analyse
+   - Stratégies de révision
+
+3. Assurer un suivi serré :
+   - Objectifs hebdomadaires
+   - Évaluation continue
+   - Ajustements rapides
+   - Documentation des progrès
+
+### 2.3 Niveau 3 : Intervention intensive
+*Pour les élèves en difficulté persistante - Individualisé*
+
+**Modalités :**
+- Durée : 20-45 minutes
+- Fréquence : 4-5 fois/semaine
+- Format : Individuel ou très petit groupe (1-3)
+- Cycle : 8-15 semaines
+
+**Actions clés :**
+1. Personnaliser totalement :
+   - Diagnostic approfondi
+   - Plan d'intervention spécifique
+   - Suivi quotidien
+   - Adaptation continue
+
+2. Développer l'autonomie :
+   - Stratégies métacognitives
+   - Autorégulation
+   - Méthodes compensatoires
+   - Outils d'aide
+
+3. Coordonner les ressources :
+   - Services adaptés
+   - Centre d'aide en français
+   - Tutorat par les pairs
+   - Soutien technologique
+
+## 3. MISE EN ŒUVRE DES INTERVENTIONS
+
+### 3.1 Stratégies universelles (Niveau 1)
+```
+Pour les indices de risque < 0.3 :
+- Enseignement explicite standard
+- Pratique guidée en classe
+- Rétroaction régulière
+- Suivi du monitorage de base
+```
+
+### 3.2 Stratégies ciblées (Niveau 2)
+```
+Pour les indices de risque 0.3-0.5 :
+- Ateliers en sous-groupe
+- Exercices supplémentaires
+- Rétroaction augmentée
+- Suivi hebdomadaire rapproché
+```
+
+### 3.3 Stratégies intensives (Niveau 3)
+```
+Pour les indices de risque > 0.5 :
+- Accompagnement individuel
+- Plan d'intervention personnalisé
+- Rétroaction quotidienne
+- Suivi constant et documenté
+```
+
+## 4. DOCUMENTATION ET SUIVI
+
+### 4.1 Documentation des interventions
+- Date et durée
+- Type d'intervention
+- Objectifs visés
+- Résultats observés
+- Ajustements planifiés
+
+### 4.2 Suivi des progrès
+- Indices de monitorage
+- Performance aux artefacts
+- Évolution du pattern
+- Impact des interventions
+- Décisions d'ajustement
+
+## Note importante
+Ce système d'intervention gradué doit rester flexible et s'adapter aux besoins spécifiques de chaque élève. Le jugement professionnel demeure primordial dans le choix et l'ajustement des interventions.

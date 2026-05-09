@@ -19,12 +19,17 @@ js/*.bak
 js/pratiques/*.bak
 
 # Retours testeurs (sauf SUIVI-BUGS.md)
+Retours des testeurs/andree-anne/
 Retours des testeurs/bruno/
 Retours des testeurs/elise/
 Retours des testeurs/gregoire/
 Retours des testeurs/jordan/
 Retours des testeurs/olivier/
 Retours des testeurs/stephane/
+
+# Notes de travail personnelles (non versionnées)
+Refactorisations/
+memory/
 
 # PDFs volumineux dans docs
 docs/**/*.pdf
