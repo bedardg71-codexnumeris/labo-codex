@@ -201,9 +201,16 @@ Utiliser `window.cle('nomCle')` pour obtenir la cle namespacee.
 **Quand un testeur signale un bug ou un besoin, on interrompt le plan en cours.**
 Les retours utilisateurs passent AVANT le backlog prevu.
 
-**Tracker** : `Retours des testeurs/SUIVI-BUGS.md`
-- Consulter AVANT de corriger un bug (evite le travail en double)
-- Bugs ouverts vs corriges avec date/build
+**Trackers** :
+- `Retours des testeurs/SUIVI-BUGS.md` — bugs ouverts vs corriges avec date/build.
+  Consulter AVANT de corriger un bug (evite le travail en double).
+- `Retours des testeurs/USAGE-FORMATS.md` — journal d'observation sur l'usage
+  des formats par les testeurs (frictions, besoins de partage, detournements
+  creatifs, questions recurrentes). Ne pas le laisser dormant : si une
+  observation pertinente sur les formats emerge dans une session, l'y noter
+  en moins de 30 secondes (date + initiales + 1-3 lignes). Bilans periodiques
+  prevus (juillet 2026, octobre 2026, fevrier 2027, mai 2027 = decision
+  formats). Compagnon de l'exploration `Rapports/exploration-obsidian/`.
 
 ---
 
