@@ -221,16 +221,18 @@ const itemsAffichables = items.filter(item =>
 
 ---
 
-## 8. Décisions à valider avec Grégoire
+## 8. Décisions actées (9 mai 2026)
 
-| # | Question | Statut |
-|---|----------|--------|
-| 1 | Filtrage des items démo en mode normal (§6.5) | ✅ **Validé** 9 mai 2026 |
-| 2 | Suppression `#identifiant` | À confirmer |
-| 3 | Suppression préfixes `[Démo]/[Multi]/[SPE]` dans titres | À confirmer |
-| 4 | Bouton primaire + menu secondaire `⋮` (vs 3-4 boutons en ligne) | À confirmer |
-| 5 | Pratiques : 3 boutons unifiés (Exporter dans menu) ou 4 boutons distincts | À confirmer |
-| 6 | Badge `Bibliothèque` (suppression confirmée ?) | À confirmer |
+| # | Question | Décision |
+|---|----------|----------|
+| 1 | Filtrage des items démo en mode normal (§6.5) | ✅ **Filtrer** — items `isDemo` masqués quand `demo-actif !== 'true'` |
+| 2 | Affichage `#identifiant` | ✅ **Supprimer complètement** — bug `#YTIQUE` + non-actionnable |
+| 3 | Préfixes `[Démo]/[Multi]/[SPE]/[STD]` dans titres | ✅ **Supprimer tous** — couverts par badges + filtrage |
+| 4 | Layout des boutons d'action | ✅ **Action principale + menu `⋮`** — un primaire visible, autres dans menu |
+| 5 | Pratiques : 3 vs 4 boutons | ✅ **Résolu par Q4** — `Exporter` part dans le menu `⋮` comme les autres actions secondaires |
+| 6 | Badge `Bibliothèque` | ✅ **Supprimer** — bruit visuel contextuel |
+
+**Conséquences combinées** : la carte cible se réduit à `[badge type] · titre nu · subtitle (qty · auteur · discipline) · description (1 ligne) · bouton principal · menu ⋮`. Les bibliothèques en mode normal perdent ~50% de leur bruit visuel actuel.
 
 ---
 
