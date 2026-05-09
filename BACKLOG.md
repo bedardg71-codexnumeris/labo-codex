@@ -263,7 +263,7 @@
 
 ### Exports — Clarifier le nommage et le périmètre (6 mai 2026)
 
-- [ ] **#262** Clarifier la convention de nommage et le périmètre des fichiers exportés
+- [x] **#262** Clarifier la convention de nommage et le périmètre des fichiers exportés (Phase 1 livrée 8 mai · Phase 2 livrée 9 mai 2026, b0509-0739)
   - **Contexte** : un même dossier de téléchargement peut contenir des sorties
     Labo Codex aux noms et préfixes hétérogènes — pour un novice, la distinction
     entre les types d'export n'est pas évidente, et certains préfixes semblent
@@ -300,6 +300,11 @@
   - **Lien** : suite du chantier #259 (vocabulaire Réserve → Archives) — celui-ci
     s'est arrêté à l'UI/code interne, le nommage des fichiers téléchargés n'a
     pas suivi.
+
+- [ ] **#267** Apparence du matériel dans les bibliothèques (9 mai 2026)
+  - **Contexte** : après le ménage des boutons "Exporter" doublons (livré dans #262 Phase 2), les modales bibliothèques (grilles, échelles, cartouches, productions, pratiques) sont fonctionnellement cohérentes mais leur apparence reste à revoir : densité, hiérarchie visuelle, alignement, espacement entre les boutons d'action, traitement des badges (Locale, STD, #identifiant), uniformisation des tailles.
+  - **À cartographier** : capturer l'état actuel des 5 modales bibliothèques + comparer avec `design-system.html`.
+  - **Lien** : suite logique de #262 Phase 2 (qui s'est arrêté au comportement, pas à l'esthétique).
 
 - [ ] **#266** Renommer `js/pratiques-materiel.js` → nom reflétant son rôle actuel (8 mai 2026)
   - **Contexte** : le fichier `js/pratiques-materiel.js` gère la sidebar +

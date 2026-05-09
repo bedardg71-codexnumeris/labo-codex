@@ -182,36 +182,6 @@ function ajouterMetadonnéesCC(contenu, type, nom, metaEnrichies = {}) {
     };
 }
 
-/**
- * Génère le nom de fichier avec métadonnées CC
- * @param {string} type - Type de contenu
- * @param {string} nom - Nom du contenu
- * @param {string} version - Version
- * @param {string} [auteur] - Auteur (optionnel, sinon récupéré depuis infoCours)
- * @returns {string} - Nom de fichier formaté
- */
-function genererNomFichierCC(type, nom, version, auteur) {
-    const nomNettoye = nom.replace(/[^a-z0-9]/gi, '-').toLowerCase();
-    const date = new Date().toISOString().split('T')[0];
-
-    // Récupérer l'auteur depuis infoCours si non fourni
-    let auteurNettoye = '';
-    if (!auteur && typeof db !== 'undefined') {
-        const infoCours = db.getSync ? db.getSync('infoCours', {}) : {};
-        auteur = infoCours?.enseignant || '';
-    }
-    if (auteur && typeof auteur === 'string') {
-        auteurNettoye = auteur.replace(/[^a-z0-9]/gi, '-').toLowerCase();
-    }
-
-    // Format: type-nom-auteur-date.json (sans CC-BY-SA pour simplifier)
-    const parties = [type, nomNettoye];
-    if (auteurNettoye) parties.push(auteurNettoye);
-    parties.push(date);
-
-    return parties.join('-') + '.json';
-}
-
 // ============================================
 // AFFICHAGE BADGE CC
 // ============================================
@@ -1575,7 +1545,13 @@ async function sauvegarderMetadonnees() {
  * @returns {string} Nom de fichier formaté.
  */
 function genererNomFichierExport(type, options = {}) {
-    const nettoyer = (str) => (str || '').replace(/[^a-z0-9àâäéèêëïîôùûüç]/gi, '-').replace(/-+/g, '-').toLowerCase();
+    // Normalise vers un string non vide ; gère Array (discipline peut être [] ou ['Littérature'])
+    const nettoyer = (val) => {
+        if (val === null || val === undefined) return '';
+        let str = Array.isArray(val) ? val.filter(Boolean).join('-') : String(val);
+        if (!str) return '';
+        return str.replace(/[^a-z0-9àâäéèêëïîôùûüç]/gi, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').toLowerCase();
+    };
 
     // Horodatage selon précision demandée
     const now = new Date();
@@ -1595,12 +1571,16 @@ function genererNomFichierExport(type, options = {}) {
         if (!discipline) discipline = infoCours?.discipline || '';
     }
 
-    // Construire le nom
+    // Construire le nom — skip les parties qui se nettoient en chaîne vide
     const parties = [String(type).toLowerCase()];
+    const ajouter = (val) => {
+        const propre = nettoyer(val);
+        if (propre) parties.push(propre);
+    };
 
-    if (options.nom) parties.push(nettoyer(options.nom));
-    if (cours) parties.push(nettoyer(cours));
-    if (discipline) parties.push(nettoyer(discipline));
+    if (options.nom) ajouter(options.nom);
+    if (cours) ajouter(cours);
+    if (discipline) ajouter(discipline);
     if (options.inclureLicence) parties.push('CC-BY-SA');
 
     parties.push(horodatage);
@@ -1614,8 +1594,7 @@ function genererNomFichierExport(type, options = {}) {
 // ============================================
 
 window.ajouterMetadonnéesCC = ajouterMetadonnéesCC;
-window.genererNomFichierCC = genererNomFichierCC;
-window.genererNomFichierExport = genererNomFichierExport; // 🆕 Beta 95.3
+window.genererNomFichierExport = genererNomFichierExport;
 window.genererBadgeCC = genererBadgeCC;
 window.enregistrerModificationCC = enregistrerModificationCC;
 window.demanderAttributionModification = demanderAttributionModification;

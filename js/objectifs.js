@@ -725,12 +725,12 @@ async function exporterEnsembleObjectifs(ensembleId) {
         metaEnrichies
     );
 
-    // Générer nom de fichier avec watermark CC
-    const nomFichier = genererNomFichierCC(
-        'objectifs',
-        ensemble.nom.replace(/[^a-z0-9]/gi, '-'),
-        exportAvecCC.metadata.version
-    );
+    // Beta 95.3 : Nommage standardisé via helper unifié (accents préservés, horodaté)
+    const nomFichier = genererNomFichierExport('objectifs', {
+        nom: ensemble.nom,
+        inclureLicence: true,
+        precisionDate: 'minute'
+    });
 
     const json = JSON.stringify(exportAvecCC, null, 2);
     const blob = new Blob([json], { type: 'application/json' });

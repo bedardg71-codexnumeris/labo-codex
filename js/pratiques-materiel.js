@@ -1924,12 +1924,18 @@ async function partagerPratiqueMateriel(pratiqueId) {
         configuration: pratique
     };
 
-    // Créer et télécharger le fichier JSON
+    // Beta 99.39 : Nommage standardisé via helper unifié (#262 Phase 2)
+    const nomFichier = genererNomFichierExport('pratique', {
+        nom: pratique.nom,
+        inclureLicence: true,
+        precisionDate: 'minute'
+    });
+
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `pratique-${pratique.nom.replace(/\s+/g, '-').toLowerCase()}.json`;
+    a.download = nomFichier;
     a.click();
     URL.revokeObjectURL(url);
 
@@ -1984,12 +1990,8 @@ async function exporterPratiquesUtilisateur() {
         metaEnrichies
     );
 
-    // Générer nom de fichier avec watermark CC
-    const nomFichier = genererNomFichierCC(
-        'pratiques',
-        'Pratiques-notation',
-        donnees.metadata.version
-    );
+    // Beta 95.3 : Nommage standardisé via helper unifié (horodaté pour éviter écrasement)
+    const nomFichier = genererNomFichierExport('pratiques', { inclureLicence: true, precisionDate: 'minute' });
 
     const blob = new Blob([JSON.stringify(donnees, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
