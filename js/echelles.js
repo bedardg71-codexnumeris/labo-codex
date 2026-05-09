@@ -2318,7 +2318,10 @@ async function afficherListeEchelles() {
     }
 
     // ✅ AJOUT (8 décembre 2025) : Filtrer uniquement les échelles dans la bibliothèque
-    const echellesDansBibliotheque = echelles.filter(e => e.dansBibliotheque !== false);
+    // Beta 99.39 (A.0) : masque les items démo en mode normal
+    const echellesDansBibliotheque = BibliothequeUI.filtrerParModeDemo(
+        echelles.filter(e => e.dansBibliotheque !== false)
+    );
 
     // ✅ AJOUT (8 décembre 2025) : Bouton "Consulter la bibliothèque" en en-tête
     let html = `
@@ -2361,8 +2364,13 @@ async function afficherListeEchelles() {
  */
 async function preparerDonneesBibliothequeEchelles() {
     const echelles = await db.get('echellesTemplates') || [];
-    const echellesDansBibliotheque = echelles.filter(e => e.dansBibliotheque !== false);
-    const echellesDisponibles = await obtenirToutesLesEchellesBibliotheque();
+    // Beta 99.39 (A.0) : masque les items démo en mode normal
+    const echellesDansBibliotheque = BibliothequeUI.filtrerParModeDemo(
+        echelles.filter(e => e.dansBibliotheque !== false)
+    );
+    const echellesDisponibles = BibliothequeUI.filtrerParModeDemo(
+        await obtenirToutesLesEchellesBibliotheque()
+    );
     const doublonsDetectes = detecterDoublonsEchelles(echellesDansBibliotheque, echellesDisponibles);
     const disciplines = obtenirDisciplinesDisponiblesEchelles();
 

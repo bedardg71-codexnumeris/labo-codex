@@ -2136,7 +2136,10 @@ async function afficherListeGrilles() {
     if (!container) return;
 
     // ✅ AJOUT (8 décembre 2025) : Filtrer uniquement les grilles dans la bibliothèque
-    const grillesDansBibliotheque = grilles.filter(g => g.dansBibliotheque !== false);
+    // Beta 99.39 (A.0) : masque les items démo en mode normal
+    const grillesDansBibliotheque = BibliothequeUI.filtrerParModeDemo(
+        grilles.filter(g => g.dansBibliotheque !== false)
+    );
 
     // ✅ AJOUT (8 décembre 2025) : Bouton "Consulter la bibliothèque" en en-tête
     let html = `
@@ -2178,8 +2181,13 @@ async function afficherListeGrilles() {
  */
 async function preparerDonneesBibliothequeGrilles() {
     const grilles = await db.get('grillesTemplates') || [];
-    const grillesDansBibliotheque = grilles.filter(g => g.dansBibliotheque !== false);
-    const grillesDisponibles = await obtenirToutesLesGrillesBibliotheque();
+    // Beta 99.39 (A.0) : masque les items démo en mode normal
+    const grillesDansBibliotheque = BibliothequeUI.filtrerParModeDemo(
+        grilles.filter(g => g.dansBibliotheque !== false)
+    );
+    const grillesDisponibles = BibliothequeUI.filtrerParModeDemo(
+        await obtenirToutesLesGrillesBibliotheque()
+    );
     const doublonsDetectes = detecterDoublonsGrilles(grillesDansBibliotheque, grillesDisponibles);
     const disciplines = obtenirDisciplinesDisponiblesGrilles();
 

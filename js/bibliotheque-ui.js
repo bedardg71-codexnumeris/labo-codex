@@ -34,6 +34,27 @@
     };
 
     /**
+     * Phase A.0 — Mode démo actif (Beta 99.39, audit biblios 2026-05-09).
+     * Source de vérité : flag `demo-actif` géré par js/demo-activation.js.
+     */
+    BibliothequeUI.modeDemoActif = function () {
+        if (typeof db === 'undefined' || !db.getSync) return false;
+        return db.getSync('demo-actif', null) === 'true';
+    };
+
+    /**
+     * Phase A.0 — Filtre une collection : retire les items démo lorsque le
+     * mode démo est OFF. Préserve l'ordre. À appeler avant tout rendu de
+     * carte (sidebar ou pool). Les items démo ne sont PAS supprimés du
+     * stockage — juste masqués pour l'utilisateur en mode normal.
+     */
+    BibliothequeUI.filtrerParModeDemo = function (items) {
+        if (!Array.isArray(items)) return items;
+        if (BibliothequeUI.modeDemoActif()) return items;
+        return items.filter(function (item) { return !BibliothequeUI.estItemDemo(item); });
+    };
+
+    /**
      * Construit la métadonnée `inspireDe` à poser sur toute copie forkée
      * d'un item existant (respect CC BY — on trace l'origine quelle que
      * soit la source). Retourne { nom, auteur, date } avec date au
@@ -240,41 +261,38 @@
     };
 
     /**
-     * Pour les items démo, remplace le préfixe de pratique en tête du nom
-     * (ex. « [SPE] », « [STD] ») par « [Démo] ». L'abréviation de pratique
-     * étant un doublon du badge de pratique, on la remplace utilement par
-     * le marqueur démo. No-op sur les items non démo.
-     * Codes : STD (Standards), SPE (Spécifications), SOM (Sommative), DEN (Dénotation, à venir).
+     * Phase A.3 (audit biblios 2026-05-09) — Strippe les préfixes type
+     * en tête de titre : `[STD]`, `[SPE]`, `[SOM]`, `[DEN]`, `[Multi]`,
+     * `[MULTI]`, `[Démo]`, etc. La typologie est déjà communiquée par les
+     * badges de pratique colorés à gauche du titre (ou supprimée par le
+     * filtrage démo en mode normal). Préfixe de titre = bruit redondant.
+     *
+     * Conserve l'ancien nom `formaterTitreDemo` comme alias pour
+     * compatibilité avec les callers existants (le 2e argument est ignoré).
      */
-    BibliothequeUI.formaterTitreDemo = function (nom, estDemo) {
-        if (!estDemo || !nom) return nom;
-        return nom.replace(/^\[(STD|SPE|SOM|DEN)\]\s*/, '[Démo] ');
+    BibliothequeUI.formaterTitre = function (nom) {
+        if (!nom) return nom;
+        return String(nom).replace(/^\[[^\]]+\]\s*/, '');
+    };
+
+    BibliothequeUI.formaterTitreDemo = function (nom /*, estDemo */) {
+        return BibliothequeUI.formaterTitre(nom);
     };
 
     /**
-     * Génère le ou les badges source HTML.
-     * Badge principal : Locale / Bibliothèque / Retirée.
-     * Badge additionnel « Démo » si l'item provient du matériel CC Labo Codex.
+     * Génère le badge source HTML. Phase A.2 + A.4 (audit biblios 2026-05-09) :
+     * - Plus de badge `Bibliothèque` (no-op contextuel — la modale s'appelle déjà ainsi)
+     * - Plus de badge violet `Démo` (items démo filtrés par A.0 en mode normal)
+     * - Plus de badge `Locale` (redondant : Section 1 par définition tous locaux ;
+     *   Section 2 a déjà un message « Déjà dans la barre latérale » quand applicable)
+     * Ne reste que `Retirée` (état distinct, signal d'action utile).
+     * Le 2e argument `itemsLocaux` est conservé pour compatibilité API.
      */
-    BibliothequeUI.genererBadgeSource = function (item, itemsLocaux) {
-        const estLocale = itemsLocaux.some(function (i) { return i.id === item.id; });
-        const estRetiree = item.dansBibliotheque === false;
-        const estDemo = BibliothequeUI.estItemDemo(item);
-
-        let html;
-        if (estRetiree) {
-            html = '<span class="badge-source badge-source--retiree">Retirée</span>';
-        } else if (estLocale) {
-            html = '<span class="badge-source badge-source--locale">Locale</span>';
-        } else {
-            html = '<span class="badge-source badge-source--bibliotheque">Bibliothèque</span>';
+    BibliothequeUI.genererBadgeSource = function (item /*, itemsLocaux */) {
+        if (item && item.dansBibliotheque === false) {
+            return '<span class="badge-source badge-source--retiree">Retirée</span>';
         }
-
-        if (estDemo) {
-            html += ' <span class="badge-source badge-source--demo">Démo</span>';
-        }
-
-        return html;
+        return '';
     };
 
     /**
@@ -334,7 +352,6 @@
      * @param {Array} opts.boutons - [{label, onclick, classe}]
      */
     BibliothequeUI.renderCarteSelection = function (opts) {
-        var idCourt = BibliothequeUI.genererIdCourt(opts.id);
         var badgesPratiques = opts.badgesPratiques || '';
 
         var boutonsHTML = '<div class="biblio-carte-actions">';
@@ -353,7 +370,6 @@
                     '<div class="biblio-carte-titre">' +
                         badgesPratiques +
                         opts.nom +
-                        ' <span class="badge-source badge-source--id" title="ID: ' + opts.id + '">#' + idCourt + '</span>' +
                         ' ' + opts.badgeSource +
                     '</div>' +
                     ligneInspireDe +
@@ -380,7 +396,6 @@
      * @param {Array} opts.boutons - [{label, onclick, classe, showAlways}]
      */
     BibliothequeUI.renderCarteDisponible = function (opts) {
-        var idCourt = BibliothequeUI.genererIdCourt(opts.id);
         var badgesPratiques = opts.badgesPratiques || '';
         var opacite = opts.dejaPresent ? 'opacity: 0.5;' : '';
         var styleExtra = opts.styleExtra || '';
@@ -405,7 +420,6 @@
                     '<div class="biblio-carte-titre">' +
                         badgesPratiques +
                         opts.nom +
-                        ' <span class="badge-source badge-source--id" title="ID: ' + opts.id + '">#' + idCourt + '</span>' +
                         ' ' + opts.badgeSource +
                     '</div>' +
                     ligneInspireDe +
