@@ -351,8 +351,8 @@ function afficherBibliothequeTampons() {
                     ? '<span class="badge-source badge-source--locale">Personnalisé</span>'
                     : '<span class="badge-source badge-source--id">Intégré</span>',
                 metadonnees: nomCat,
-                boutons: [
-                    { label: 'Partager', action: 'tamponsBibliotheque.partagerTampon', param: t.id, classe: 'btn-confirmer', title: 'Ajouter à la bibliothèque partagée' },
+                boutonPrincipal: { label: 'Partager', action: 'tamponsBibliotheque.partagerTampon', param: t.id, classe: 'btn-confirmer', title: 'Ajouter à la bibliothèque partagée' },
+                actionsMenu: [
                     { label: 'Exporter', action: 'tamponsBibliotheque.exporterUnTampon', param: t.id, classe: 'btn-secondaire', title: 'Télécharger en JSON' }
                 ]
             });
@@ -395,8 +395,8 @@ function afficherBibliothequeTampons() {
                 metadonnees: meta,
                 description: (item.metadata_cc && item.metadata_cc.description_courte) || '',
                 dejaPresent: dejaPresent,
-                boutons: [
-                    { label: 'Ajouter', action: 'tamponsBibliotheque.ajouterDepuisBibliotheque', param: item.id, classe: 'btn-confirmer', title: 'Copier dans ta palette de tampons' },
+                boutonPrincipal: { label: 'Ajouter', action: 'tamponsBibliotheque.ajouterDepuisBibliotheque', param: item.id, classe: 'btn-confirmer', title: 'Copier dans ta palette de tampons' },
+                actionsMenu: [
                     { label: 'Supprimer', action: 'tamponsBibliotheque.supprimerDeBibliotheque', param: item.id, classe: 'btn-supprimer', title: 'Retirer de la bibliothèque', showAlways: true }
                 ]
             });

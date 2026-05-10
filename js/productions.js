@@ -1973,10 +1973,10 @@ async function preparerDonneesBibliothequeProductions() {
         }),
         description: prod.objectif ? 'Objectif: ' + prod.objectif : '',
         inspireDe: BibliothequeUI.formaterInspireDe(prod),
-        boutons: [
-            { label: 'Dupliquer', onclick: `dupliquerProductionBibliotheque('${prod.id}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
-            { label: 'Retirer', onclick: `retirerProductionDeBibliotheque('${prod.id}')`, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
-            { label: 'Supprimer', onclick: `supprimerProductionDefinitivement('${prod.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
+        boutonPrincipal: { label: 'Dupliquer', action: 'dupliquerProductionBibliotheque', param: prod.id, classe: 'btn-confirmer', title: 'Créer une copie' },
+        actionsMenu: [
+            { label: 'Retirer', action: 'retirerProductionDeBibliotheque', param: prod.id, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
+            { label: 'Supprimer', action: 'supprimerProductionDefinitivement', param: prod.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
         ]
     }));
 
@@ -2010,9 +2010,9 @@ async function preparerDonneesBibliothequeProductions() {
                 dejaPresent: false,
                 classeItem: 'production-disponible-item',
                 dataAttrs: `data-discipline="${prod.discipline || 'Autres'}"`,
-                boutons: [
-                    { label: 'Ajouter à ma sélection', onclick: `ajouterProductionIndividuelle('${prod.id}')`, classe: 'btn-confirmer', title: 'Ajouter cette production à ta sélection' },
-                    { label: 'Supprimer', onclick: `supprimerProductionDeBibliothequePartagee('${prod.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
+                boutonPrincipal: { label: 'Ajouter à ma sélection', action: 'ajouterProductionIndividuelle', param: prod.id, classe: 'btn-confirmer', title: 'Ajouter cette production à ta sélection' },
+                actionsMenu: [
+                    { label: 'Supprimer', action: 'supprimerProductionDeBibliothequePartagee', param: prod.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
                 ],
                 groupe: discipline
             });

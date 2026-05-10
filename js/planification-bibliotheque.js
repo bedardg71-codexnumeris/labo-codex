@@ -186,9 +186,9 @@ async function afficherBibliothequeAlignements() {
                 id: carte.id,
                 badgeSource: '<span class="badge-source badge-source--locale">Trimestre actif</span>',
                 metadonnees: nbNoeuds + ' noeud(s) \u00b7 ' + nbLiens + ' lien(s)',
-                boutons: [
-                    { label: 'Partager', onclick: "partagerAlignement('" + carte.id + "')", classe: 'btn-confirmer', title: 'Ajouter à la bibliothèque partagée' },
-                    { label: 'Exporter', onclick: "exporterAlignementJSON('" + carte.id + "')", classe: 'btn-secondaire', title: 'Télécharger en JSON' }
+                boutonPrincipal: { label: 'Partager', action: 'partagerAlignement', param: carte.id, classe: 'btn-confirmer', title: 'Ajouter à la bibliothèque partagée' },
+                actionsMenu: [
+                    { label: 'Exporter', action: 'exporterAlignementJSON', param: carte.id, classe: 'btn-secondaire', title: 'Télécharger en JSON' }
                 ]
             });
         });
@@ -215,9 +215,9 @@ async function afficherBibliothequeAlignements() {
                 metadonnees: meta,
                 description: (item.metadata_cc && item.metadata_cc.description_courte) || '',
                 dejaPresent: false,
-                boutons: [
-                    { label: 'Ajouter', onclick: "ajouterAlignementDepuisBibliotheque('" + item.id + "')", classe: 'btn-confirmer', title: 'Copier dans le trimestre actif' },
-                    { label: 'Supprimer', onclick: "supprimerAlignementDeBibliotheque('" + item.id + "')", classe: 'btn-supprimer', title: 'Retirer de la bibliothèque', showAlways: true }
+                boutonPrincipal: { label: 'Ajouter', action: 'ajouterAlignementDepuisBibliotheque', param: item.id, classe: 'btn-confirmer', title: 'Copier dans le trimestre actif' },
+                actionsMenu: [
+                    { label: 'Supprimer', action: 'supprimerAlignementDeBibliotheque', param: item.id, classe: 'btn-supprimer', title: 'Retirer de la bibliothèque', showAlways: true }
                 ]
             });
         });

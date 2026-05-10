@@ -1185,188 +1185,79 @@ async function ouvrirModalBibliothequeCours() {
     const coursDansBibliotheque = tousLesCours.filter(c => c.dansBibliotheque === true);
     const coursDisponibles = tousLesCours.filter(c => c.dansBibliotheque === false);
 
-    let modalHTML = `
-        <div id="modalBibliothequeCours" style="
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-        ">
-            <div style="
-                background: var(--surface-conteneur, #162c36);
-                border-radius: 12px;
-                width: 90%;
-                max-width: 800px;
-                max-height: 85vh;
-                overflow-y: auto;
-                padding: 30px;
-                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-                position: relative;
-            ">
-                <!-- Bouton X sticky -->
-                <button data-action="fermerModalBibliothequeCours" style="
-                    position: sticky;
-                    top: 0;
-                    right: 0;
-                    float: right;
-                    background: transparent;
-                    border: none;
-                    font-size: 28px;
-                    color: var(--gris-clair);
-                    cursor: pointer;
-                    padding: 0;
-                    width: 30px;
-                    height: 30px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 1;
-                " class="hover-couleur-fonce">
-                    ×
-                </button>
-                <h2 style="margin-top: 0; color: var(--accent-primaire);">Bibliothèque de cours</h2>
-                <p class="text-muted">Gère tes configurations de cours</p>
-
-                <!-- SECTION 1 : Ma sélection -->
-                <h3 style="color: var(--bleu-clair); font-size: 1.1rem;">
-                    Cours dans ta sélection (${coursDansBibliotheque.length})
-                </h3>
-                <div style="margin-bottom: 30px;">
-    `;
-
+    // Phase C #267 — migration vers BibliothequeUI (carte + menu ⋮)
+    let contenuSection1 = '';
     if (coursDansBibliotheque.length === 0) {
-        modalHTML += `<p class="text-muted" style="font-style: italic; padding: 20px 0;">Aucun cours dans ta sélection</p>`;
+        contenuSection1 = '<p class="text-muted" style="font-style: italic; padding: 20px 0;">Aucun cours dans ta sélection</p>';
     } else {
         coursDansBibliotheque.forEach(cours => {
             const actifBadge = cours.actif ? '<span class="badge-info" style="margin-left: 10px;">Actif</span>' : '';
-
-            modalHTML += `
-                <div style="
-                    border: 1px solid var(--bleu-clair);
-                    border-radius: 6px;
-                    padding: 15px;
-                    margin-bottom: 10px;
-                    background: var(--bleu-tres-pale);">
-                    <div style="display: flex; justify-content: space-between;">
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600; color: var(--accent-primaire); margin-bottom: 5px;">
-                                ${echapperHtml(cours.codeCours)} - ${echapperHtml(cours.nomCours)}${actifBadge}
-                            </div>
-                            <div style="font-size: 0.9rem; color: var(--gris-moyen); margin-bottom: 3px;">
-                                ${echapperHtml(cours.competence || '')}
-                            </div>
-                            <div style="font-size: 0.85rem; color: var(--gris-moyen);">
-                                ${echapperHtml(cours.prenomEnseignant)} ${echapperHtml(cours.nomEnseignant)} • ${echapperHtml(cours.session)}${echapperHtml(cours.annee)}
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            <button data-action="dupliquerCoursPourTrimestreActif" data-param="${cours.id}"
-                                    class="btn btn-confirmer btn-tres-compact"
-                                    title="Créer une copie de ce cours pour le trimestre actif">
-                                Dupliquer
-                            </button>
-                            <button data-action="partagerCours" data-param="${cours.id}"
-                                    class="btn btn-secondaire btn-tres-compact"
-                                    title="Exporter ce cours en JSON pour le partager">
-                                Exporter
-                            </button>
-                            <button data-action="retirerCoursDeBibliotheque" data-param="${cours.id}"
-                                    class="btn btn-supprimer btn-tres-compact"
-                                    title="Retirer de ta sélection">
-                                Retirer
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
+            const titre = echapperHtml(cours.codeCours) + ' - ' + echapperHtml(cours.nomCours) + actifBadge;
+            const ens = (echapperHtml(cours.prenomEnseignant || '') + ' ' + echapperHtml(cours.nomEnseignant || '')).trim();
+            const sess = echapperHtml((cours.session || '') + (cours.annee || ''));
+            const meta = [ens, sess].filter(Boolean).join(' • ');
+            contenuSection1 += BibliothequeUI.renderCarteSelection({
+                nom: titre,
+                id: cours.id,
+                badgeSource: '',
+                metadonnees: meta,
+                description: cours.competence || '',
+                boutonPrincipal: { label: 'Dupliquer', action: 'dupliquerCoursPourTrimestreActif', param: cours.id, classe: 'btn-confirmer', title: 'Créer une copie de ce cours pour le trimestre actif' },
+                actionsMenu: [
+                    { label: 'Exporter', action: 'partagerCours', param: cours.id, classe: 'btn-secondaire', title: 'Exporter ce cours en JSON pour le partager' },
+                    { label: 'Retirer', action: 'retirerCoursDeBibliotheque', param: cours.id, classe: 'btn-supprimer', title: 'Retirer de ta sélection' }
+                ]
+            });
         });
     }
 
-    modalHTML += `
-                </div>
-                <div style="text-align: center; margin-top: 15px;">
-                    <button data-action="partagerTousLesCours" class="btn btn-secondaire" title="Exporter tous tes cours en un seul fichier JSON">
-                        Exporter tous mes cours
-                    </button>
-                </div>
-    `;
+    const boutonsApresSection1 = '<div style="text-align: center; margin-top: 15px;">' +
+        '<button data-action="partagerTousLesCours" class="btn btn-secondaire" title="Exporter tous tes cours en un seul fichier JSON">Exporter tous mes cours</button>' +
+        '</div>';
 
-    // SECTION 2 : Disponibles à ajouter
-    modalHTML += `
-                <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px;">
-                    Cours disponibles à ajouter
-                </h3>
-    `;
-
+    let contenuSection2 = '';
     if (coursDisponibles.length === 0) {
-        modalHTML += `<p class="text-muted" style="font-style: italic; padding: 20px 0;">Aucun cours disponible</p>`;
+        contenuSection2 = '<p class="text-muted" style="font-style: italic; padding: 20px 0;">Aucun cours disponible</p>';
     } else {
         coursDisponibles.forEach(cours => {
-            modalHTML += `
-                <div style="
-                    border: 1px solid var(--bordure-claire);
-                    border-radius: 6px;
-                    padding: 15px;
-                    margin-bottom: 10px;
-                    background: var(--surface-conteneur, #162c36);">
-                    <div style="display: flex; justify-content: space-between;">
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600; color: var(--accent-primaire); margin-bottom: 5px;">
-                                ${echapperHtml(cours.codeCours)} - ${echapperHtml(cours.nomCours)}
-                            </div>
-                            <div style="font-size: 0.9rem; color: var(--gris-moyen); margin-bottom: 3px;">
-                                ${echapperHtml(cours.competence || '')}
-                            </div>
-                            <div style="font-size: 0.85rem; color: var(--gris-moyen);">
-                                ${echapperHtml(cours.session)}${echapperHtml(cours.annee)}
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button data-action="ajouterCoursIndividuel" data-param="${cours.id}"
-                                    class="btn btn-confirmer btn-tres-compact"
-                                    title="Ajouter ce cours à ta sélection">
-                                Ajouter à ma sélection
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
+            const titre = echapperHtml(cours.codeCours) + ' - ' + echapperHtml(cours.nomCours);
+            const sess = echapperHtml((cours.session || '') + (cours.annee || ''));
+            contenuSection2 += BibliothequeUI.renderCarteDisponible({
+                nom: titre,
+                id: cours.id,
+                badgeSource: '',
+                metadonnees: sess,
+                description: cours.competence || '',
+                dejaPresent: false,
+                boutonPrincipal: { label: 'Ajouter à ma sélection', action: 'ajouterCoursIndividuel', param: cours.id, classe: 'btn-confirmer', title: 'Ajouter ce cours à ta sélection' }
+            });
         });
+        contenuSection2 += '<div style="text-align: center; margin-top: 15px;">' +
+            '<button data-action="ouvrirFilePickerImportCours" class="btn btn-confirmer" title="Importer des cours depuis un fichier JSON">Importer des cours</button>' +
+            '<input type="file" id="fichier-import-cours-modal" accept=".json" style="display: none;" data-on-change="importerCoursSimple">' +
+            '</div>';
     }
 
-    modalHTML += `
-                <div style="text-align: center; margin-top: 15px;">
-                    <button data-action="ouvrirFilePickerImportCours"
-                            class="btn btn-confirmer" title="Importer des cours depuis un fichier JSON">
-                        Importer des cours
-                    </button>
-                    <input type="file" id="fichier-import-cours-modal" accept=".json"
-                           style="display: none;" data-on-change="importerCoursSimple">
-                </div>
-            </div>
-        </div>
-    `;
-
-    // Insérer le modal dans le body
-    const modalContainer = document.createElement('div');
-    modalContainer.innerHTML = modalHTML;
-    document.body.appendChild(modalContainer);
+    BibliothequeUI.creerModal({
+        modalId: 'modalBibliothequeCours',
+        titre: 'Bibliothèque de cours',
+        sousTitre: 'Gère tes configurations de cours',
+        onFermerAction: 'fermerModalBibliothequeCours',
+        doublonsHTML: '',
+        titreSection1: 'Cours dans ta sélection (' + coursDansBibliotheque.length + ')',
+        contenuSection1: contenuSection1,
+        boutonsApresSection1: boutonsApresSection1,
+        titreSection2: 'Cours disponibles à ajouter',
+        filtresSection2: '',
+        contenuSection2: contenuSection2
+    });
 }
 
 /**
- * Ferme le modal de la bibliothèque
+ * Ferme le modal de la bibliothèque (Phase C #267 — passe par BibliothequeUI)
  */
 function fermerModalBibliothequeCours() {
-    const modal = document.getElementById('modalBibliothequeCours');
-    if (modal && modal.parentElement) {
-        modal.parentElement.remove();
-    }
+    BibliothequeUI.fermerModal('modalBibliothequeCours');
 }
 
 /**

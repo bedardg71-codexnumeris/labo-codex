@@ -393,24 +393,127 @@
         return '';
     }
 
+    // ============================================================
+    // Phase C #267 (audit biblios) — Menu d'actions secondaires ⋮
+    // Trigger ⋮ → popover absolute. Une seule instance ouverte à la
+    // fois. Click ailleurs ou ESC ferme. Click sur item → action via
+    // dispatcher data-action puis fermeture.
+    // ============================================================
+
+    var _menuOuvertCourant = null;
+    var _menuCompteur = 0;
+
+    function _genererMenuId() {
+        _menuCompteur += 1;
+        return 'biblio-menu-' + Date.now().toString(36) + '-' + _menuCompteur;
+    }
+
+    BibliothequeUI.fermerTousLesMenus = function () {
+        var menus = document.querySelectorAll('.biblio-menu-popover.actif');
+        for (var i = 0; i < menus.length; i++) menus[i].classList.remove('actif');
+        var triggers = document.querySelectorAll('.biblio-menu-trigger[aria-expanded="true"]');
+        for (var j = 0; j < triggers.length; j++) triggers[j].setAttribute('aria-expanded', 'false');
+        _menuOuvertCourant = null;
+    };
+
+    BibliothequeUI.toggleMenuActions = function (menuId) {
+        if (typeof menuId !== 'string') return;
+        var popover = document.getElementById(menuId);
+        if (!popover) return;
+        var dejaOuvert = popover.classList.contains('actif');
+        BibliothequeUI.fermerTousLesMenus();
+        if (!dejaOuvert) {
+            popover.classList.add('actif');
+            var trigger = document.querySelector('.biblio-menu-trigger[data-param="' + menuId + '"]');
+            if (trigger) trigger.setAttribute('aria-expanded', 'true');
+            _menuOuvertCourant = menuId;
+        }
+    };
+
     /**
-     * Rend une carte d'item en Section 1 (dans la sélection)
+     * Rend le bloc trigger + popover. Renvoie '' si actions vide.
+     * @param {Array} actions - [{label, action, param, classe?, title?}]
+     * @param {string} [contextId] - ID stable optionnel (sinon généré)
+     */
+    BibliothequeUI.renderMenuActions = function (actions, contextId) {
+        if (!actions || actions.length === 0) return '';
+        var menuId = contextId ? 'biblio-menu-' + contextId : _genererMenuId();
+        var itemsHTML = '';
+        for (var i = 0; i < actions.length; i++) {
+            var a = actions[i];
+            var classeExtra = a.classe === 'btn-supprimer' ? ' biblio-menu-item--danger' : '';
+            itemsHTML += '<button type="button" ' + _btnAttrs(a) +
+                ' class="biblio-menu-item' + classeExtra + '"' +
+                (a.title ? ' title="' + echapperHtml(a.title) + '"' : '') +
+                ' role="menuitem">' +
+                echapperHtml(a.label) + '</button>';
+        }
+        return '<span class="biblio-menu-wrapper">' +
+            '<button type="button" class="biblio-menu-trigger btn btn-mini"' +
+            ' data-action="BibliothequeUI.toggleMenuActions"' +
+            ' data-param="' + menuId + '"' +
+            ' aria-haspopup="menu" aria-expanded="false"' +
+            ' aria-label="Plus d\'actions" title="Plus d\'actions">⋮</button>' +
+            '<div id="' + menuId + '" class="biblio-menu-popover" role="menu">' +
+                itemsHTML +
+            '</div>' +
+        '</span>';
+    };
+
+    // Listeners globaux : click ailleurs / ESC ferment ; click sur un item ferme aussi
+    if (typeof document !== 'undefined') {
+        document.addEventListener('click', function (e) {
+            // Click sur le trigger : laisse le dispatcher gérer (toggle)
+            if (e.target.closest('.biblio-menu-trigger')) return;
+            // Click sur un item : ferme (le dispatcher exécutera l'action en bubble)
+            if (e.target.closest('.biblio-menu-item')) {
+                BibliothequeUI.fermerTousLesMenus();
+                return;
+            }
+            // Click ailleurs : ferme si un menu est ouvert
+            if (_menuOuvertCourant) BibliothequeUI.fermerTousLesMenus();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && _menuOuvertCourant) {
+                BibliothequeUI.fermerTousLesMenus();
+            }
+        });
+    }
+
+    /**
+     * Phase C #267 (audit biblios) — Rend la HTML d'un bouton primaire de
+     * carte. Échappe le label et le title (sécurité — texte utilisateur).
+     */
+    function _renderBoutonPrincipal(p) {
+        if (!p) return '';
+        return '<button type="button" ' + _btnAttrs(p) +
+            ' class="btn ' + (p.classe || 'btn-confirmer') + ' btn-mini"' +
+            (p.title ? ' title="' + echapperHtml(p.title) + '"' : '') + '>' +
+            echapperHtml(p.label) + '</button>';
+    }
+
+    /**
+     * Rend une carte d'item en Section 1 (dans la sélection).
+     * Phase C #267 — API : bouton principal + menu d'actions secondaires.
+     *
      * @param {Object} opts
-     * @param {string} opts.nom - Nom de l'item
-     * @param {string} opts.id - ID complet
+     * @param {string} opts.nom - Nom de l'item (HTML autorisé : badges)
+     * @param {string} opts.id - ID complet (sert de contextId pour le menu)
      * @param {string} opts.badgeSource - HTML du badge source
-     * @param {string} opts.metadonnees - Ligne de métadonnées (ex: "3 critères • Français")
+     * @param {string} opts.metadonnees - Ligne de métadonnées
+     * @param {string} [opts.description] - Description (auto-tronquée + échappée)
+     * @param {string} [opts.inspireDe] - Trace d'origine
      * @param {string} [opts.badgesPratiques] - HTML des badges de pratique
-     * @param {Array} opts.boutons - [{label, onclick, classe}]
+     * @param {Object} [opts.boutonPrincipal] - {label, action, param, classe, title}
+     * @param {Array}  [opts.actionsMenu] - [{label, action, param, classe, title}]
      */
     BibliothequeUI.renderCarteSelection = function (opts) {
         var badgesPratiques = opts.badgesPratiques || '';
 
-        var boutonsHTML = '<div class="biblio-carte-actions">';
-        opts.boutons.forEach(function (btn) {
-            boutonsHTML += '<button ' + _btnAttrs(btn) + ' class="btn ' + btn.classe + ' btn-mini" title="' + (btn.title || '') + '">' + btn.label + '</button>';
-        });
-        boutonsHTML += '</div>';
+        var actionsHTML = '<div class="biblio-carte-actions">' +
+            _renderBoutonPrincipal(opts.boutonPrincipal) +
+            BibliothequeUI.renderMenuActions(opts.actionsMenu, opts.id) +
+            '</div>';
 
         var ligneInspireDe = opts.inspireDe
             ? '<div class="biblio-carte-inspire">' + echapperHtml(opts.inspireDe) + '</div>'
@@ -433,25 +536,31 @@
                     '<div class="biblio-carte-meta">' + opts.metadonnees + '</div>' +
                     descHTML +
                 '</div>' +
-                boutonsHTML +
+                actionsHTML +
             '</div>' +
         '</div>';
     };
 
     /**
-     * Rend une carte d'item en Section 2 (disponible à ajouter)
+     * Rend une carte d'item en Section 2 (disponible à ajouter).
+     * Phase C #267 — API : bouton principal + menu d'actions secondaires.
+     *
      * @param {Object} opts
-     * @param {string} opts.nom - Nom de l'item
-     * @param {string} opts.id - ID complet
+     * @param {string} opts.nom - Nom de l'item (HTML autorisé : badges)
+     * @param {string} opts.id - ID complet (sert de contextId pour le menu)
      * @param {string} opts.badgeSource - HTML du badge source
      * @param {string} opts.metadonnees - Ligne de métadonnées
-     * @param {string} [opts.description] - Description optionnelle
+     * @param {string} [opts.description] - Description (auto-tronquée + échappée)
+     * @param {string} [opts.inspireDe] - Trace d'origine
      * @param {boolean} opts.dejaPresent - true si déjà dans la sélection
      * @param {string} [opts.badgesPratiques] - HTML des badges de pratique
      * @param {string} [opts.styleExtra] - Style CSS supplémentaire
      * @param {string} [opts.dataAttrs] - Attributs data- supplémentaires
      * @param {string} [opts.classeItem] - Classe CSS pour l'item (filtrage)
-     * @param {Array} opts.boutons - [{label, onclick, classe, showAlways}]
+     * @param {Object} [opts.boutonPrincipal] - {label, action, param, classe, title, showAlways}.
+     *        Si dejaPresent et !showAlways, primaire masqué.
+     * @param {Array}  [opts.actionsMenu] - [{label, action, param, classe, title, showAlways}].
+     *        Si dejaPresent, items sans showAlways filtrés.
      */
     BibliothequeUI.renderCarteDisponible = function (opts) {
         var badgesPratiques = opts.badgesPratiques || '';
@@ -460,13 +569,18 @@
         var dataAttrs = opts.dataAttrs || '';
         var classeItem = opts.classeItem || '';
 
-        var boutonsHTML = '<div class="biblio-carte-actions biblio-carte-actions--vertical">';
-        opts.boutons.forEach(function (btn) {
-            if (!opts.dejaPresent || btn.showAlways) {
-                boutonsHTML += '<button ' + _btnAttrs(btn) + ' class="btn ' + btn.classe + ' btn-mini" title="' + (btn.title || '') + '">' + btn.label + '</button>';
-            }
-        });
-        boutonsHTML += '</div>';
+        var primaire = opts.boutonPrincipal;
+        if (opts.dejaPresent && primaire && !primaire.showAlways) primaire = null;
+
+        var actionsMenu = opts.actionsMenu;
+        if (opts.dejaPresent && Array.isArray(actionsMenu)) {
+            actionsMenu = actionsMenu.filter(function (a) { return a && a.showAlways; });
+        }
+
+        var actionsHTML = '<div class="biblio-carte-actions">' +
+            _renderBoutonPrincipal(primaire) +
+            BibliothequeUI.renderMenuActions(actionsMenu, opts.id) +
+            '</div>';
 
         var ligneInspireDe = opts.inspireDe
             ? '<div class="biblio-carte-inspire">' + echapperHtml(opts.inspireDe) + '</div>'
@@ -490,7 +604,7 @@
                     descHTML +
                     (opts.dejaPresent ? '<div class="biblio-carte-deja">Déjà dans la barre latérale</div>' : '') +
                 '</div>' +
-                boutonsHTML +
+                actionsHTML +
             '</div>' +
         '</div>';
     };

@@ -2077,22 +2077,27 @@
             if (catsMasquees.indexOf(catId) !== -1) return;
             var estPerso = !!catPersoMap[catId];
             var coulCat = couleursCat[catId] || '#888888';
+            var menuCatHTML = BibliothequeUI.renderMenuActions([
+                { label: 'Supprimer la cat\u00e9gorie', action: 'travauxOutils.supprimerCategorieRetroObs', param: catId, classe: 'btn-supprimer', title: 'Supprimer cette cat\u00e9gorie' }
+            ], 'cat-' + catId);
             html += '<div class="travaux-retro-cat-draggable" style="display:flex; gap:8px; align-items:center;" data-cat-row="' + catId + '"' + (estPerso ? ' data-cat-perso-id="' + catId + '"' : '') + ' draggable="true">';
             html += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner" style="cursor:grab;">\u2630</span>';
-            html += '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerCategorieRetroObs" data-param="' + catId + '" title="Supprimer la cat\u00e9gorie" style="min-width:auto;"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>';
             html += '<div class="travaux-retro-couleur" style="background:' + coulCat + ';" data-couleur-cat-id="' + catId + '" title="Couleur de la cat\u00e9gorie">';
             html += '<input type="color" class="travaux-retro-couleur-input" data-color-cat-id="' + catId + '" value="' + coulCat + '">';
             html += '</div>';
             html += '<input type="text" class="travaux-retro-nom-input" data-cat-id="' + catId + '"' + (estPerso ? ' data-cat-perso-id="' + catId + '"' : '') + ' value="' + (nomsCat[catId] || '') + '">';
+            html += menuCatHTML;
             html += '</div>';
         });
         html += '<button class="btn btn-secondaire" data-action="travauxOutils.ajouterCategorieRetroObs" style="margin-top:4px;font-size:0.8rem;align-self:flex-start;">+ Ajouter une cat\u00e9gorie</button>';
         html += '</div>';
 
-        // Helper pour generer une ligne de tampon
+        // Helper pour generer une ligne de tampon (Phase C #267 \u2014 menu \u22ee remplace \ud83d\uddd1)
         function _htmlRowTampon(a, texte, imgSrc) {
             var estCustom = a.custom ? ' data-custom="true"' : '';
-            var btnSuppr = '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerTamponRetroObs" data-param="' + a.id + '" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>';
+            var menuHTML = BibliothequeUI.renderMenuActions([
+                { label: 'Supprimer', action: 'travauxOutils.supprimerTamponRetroObs', param: a.id, classe: 'btn-supprimer', title: 'Supprimer cette ligne' }
+            ], 'tampon-' + a.id);
             var raccourci = obtenirRaccourciPourItem(a.id) || '';
             var r = '<div class="travaux-retro-row travaux-retro-draggable" data-obs-id="' + a.id + '"' + estCustom + ' draggable="true">';
             r += '<div class="travaux-retro-row-haut">';
@@ -2103,17 +2108,21 @@
             r += '</div>';
             r += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + a.id + '" value="' + a.nom + '"' + (a.custom ? ' placeholder="Nom du tampon"' : '') + '>';
             r += '<input type="text" class="travaux-retro-raccourci-input" data-raccourci-id="' + a.id + '" value="' + raccourci + '" maxlength="1" placeholder="\u2328" title="Raccourci clavier (1 touche)">';
-            r += btnSuppr;
+            r += menuHTML;
             r += '</div>';
             r += '<textarea class="travaux-retro-textarea" data-retro-id="' + a.id + '" rows="3">' + texte + '</textarea>';
             r += '</div>';
             return r;
         }
 
-        // Helper pour generer une ligne de symbole Unicode
+        // Helper pour generer une ligne de symbole Unicode (Phase C #267 \u2014 menu \u22ee remplace \ud83d\uddd1)
         function _htmlRowSymbole(id, outil, texte, estCustom) {
             var couleur = outil.couleurBouton;
-            var btnSuppr = '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerSymboleRetroObs" data-param="' + id + '" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>';
+            var menuHTML = estCustom
+                ? BibliothequeUI.renderMenuActions([
+                    { label: 'Supprimer', action: 'travauxOutils.supprimerSymboleRetroObs', param: id, classe: 'btn-supprimer', title: 'Supprimer ce symbole' }
+                ], 'sym-' + id)
+                : '';
             var raccourci = obtenirRaccourciPourItem(id) || '';
             var r = '<div class="travaux-retro-row' + (estCustom ? ' travaux-retro-draggable' : '') + '" data-obs-id="' + id + '"' + (estCustom ? ' data-sym-custom="true" draggable="true"' : '') + '>';
             r += '<div class="travaux-retro-row-haut">';
@@ -2124,7 +2133,7 @@
             r += '<input type="text" class="travaux-retro-icone-input" data-icone-id="' + id + '" value="' + outil.icone + '" title="Caract\u00e8re Unicode" style="color:' + couleur + ';">';
             r += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + id + '" value="' + outil.nom + '"' + (estCustom ? ' placeholder="Nom du symbole"' : '') + '>';
             r += '<input type="text" class="travaux-retro-raccourci-input" data-raccourci-id="' + id + '" value="' + raccourci + '" maxlength="1" placeholder="\u2328" title="Raccourci clavier (1 touche)">';
-            r += btnSuppr;
+            r += menuHTML;
             r += '</div>';
             r += '<textarea class="travaux-retro-textarea" data-retro-id="' + id + '" rows="3">' + texte + '</textarea>';
             r += '</div>';
@@ -2583,6 +2592,10 @@
         div.dataset.custom = 'true';
         div.setAttribute('draggable', 'true');
 
+        var menuTamponHTML = BibliothequeUI.renderMenuActions([
+            { label: 'Supprimer', action: 'travauxOutils.supprimerTamponRetroObs', param: id, classe: 'btn-supprimer', title: 'Supprimer ce tampon' }
+        ], 'tampon-' + id);
+
         div.innerHTML =
             '<div class="travaux-retro-row-haut">' +
                 '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>' +
@@ -2591,7 +2604,7 @@
                     '<input type="file" accept="image/*" data-file-id="' + id + '" hidden>' +
                 '</div>' +
                 '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + id + '" value="" placeholder="Nom du tampon">' +
-                '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerTamponRetroObs" data-param="' + id + '" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>' +
+                menuTamponHTML +
             '</div>' +
             '<textarea class="travaux-retro-textarea" data-retro-id="' + id + '" rows="3"></textarea>';
 
@@ -2647,6 +2660,10 @@
         div.dataset.symCustom = 'true';
         div.setAttribute('draggable', 'true');
 
+        var menuSymHTML = BibliothequeUI.renderMenuActions([
+            { label: 'Supprimer', action: 'travauxOutils.supprimerSymboleRetroObs', param: id, classe: 'btn-supprimer', title: 'Supprimer ce symbole' }
+        ], 'sym-' + id);
+
         div.innerHTML =
             '<div class="travaux-retro-row-haut">' +
                 '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>' +
@@ -2655,7 +2672,7 @@
                 '</div>' +
                 '<input type="text" class="travaux-retro-icone-input" data-icone-id="' + id + '" value="" placeholder="\u2605" title="Caract\u00e8re Unicode" style="color:' + couleur + ';">' +
                 '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + id + '" value="" placeholder="Nom du symbole">' +
-                '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerSymboleRetroObs" data-param="' + id + '" title="Supprimer"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>' +
+                menuSymHTML +
             '</div>' +
             '<textarea class="travaux-retro-textarea" data-retro-id="' + id + '" rows="3"></textarea>';
 
@@ -2704,13 +2721,16 @@
         rowDiv.dataset.catPersoId = id;
         rowDiv.setAttribute('draggable', 'true');
         var coulDefaut = '#888888';
+        var menuNouveauCatHTML = BibliothequeUI.renderMenuActions([
+            { label: 'Supprimer la cat\u00e9gorie', action: 'travauxOutils.supprimerCategorieRetroObs', param: id, classe: 'btn-supprimer', title: 'Supprimer cette cat\u00e9gorie' }
+        ], 'cat-' + id);
         rowDiv.innerHTML =
             '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner" style="cursor:grab;">\u2630</span>' +
-            '<button class="travaux-retro-btn-supprimer" data-action="travauxOutils.supprimerCategorieRetroObs" data-param="' + id + '" title="Supprimer la cat\u00e9gorie" style="min-width:auto;"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>' +
             '<div class="travaux-retro-couleur" style="background:' + coulDefaut + ';" data-couleur-cat-id="' + id + '" title="Couleur de la cat\u00e9gorie">' +
                 '<input type="color" class="travaux-retro-couleur-input" data-color-cat-id="' + id + '" value="' + coulDefaut + '">' +
             '</div>' +
-            '<input type="text" class="travaux-retro-nom-input" data-cat-id="' + id + '" data-cat-perso-id="' + id + '" value="' + nom + '">';
+            '<input type="text" class="travaux-retro-nom-input" data-cat-id="' + id + '" data-cat-perso-id="' + id + '" value="' + nom + '">' +
+            menuNouveauCatHTML;
         catContainer.insertBefore(rowDiv, btnAjouter);
 
         // Brancher le color picker de la nouvelle categorie
@@ -3092,6 +3112,9 @@
         codesOrdonnes.forEach((c, idx) => {
             const outil = OUTILS[c.id];
             const texte = retroActuelles[c.id] || '';
+            const menuErrHTML = BibliothequeUI.renderMenuActions([
+                { label: 'R\u00e9initialiser au d\u00e9faut', action: 'travauxOutils.reinitialiserCodeErrFr', param: c.id, classe: 'btn-secondaire', title: 'Restaurer le nom et la couleur d\u2019origine' }
+            ], 'errfr-' + c.id);
             html += '<div class="travaux-retro-row travaux-retro-draggable" data-err-id="' + c.id + '" draggable="true">';
             html += '<div class="travaux-retro-row-haut">';
             html += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>';
@@ -3102,6 +3125,7 @@
             var raccourci = obtenirRaccourciPourItem(c.id) || '';
             html += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + c.id + '" value="' + c.nom + '">';
             html += '<input type="text" class="travaux-retro-raccourci-input" data-raccourci-id="' + c.id + '" value="' + raccourci + '" maxlength="1" placeholder="\u2328" title="Raccourci clavier (1 touche)">';
+            html += menuErrHTML;
             html += '</div>';
             html += '<textarea class="travaux-retro-textarea" data-retro-id="' + c.id + '" rows="3">' + texte + '</textarea>';
             html += '</div>';
@@ -3248,6 +3272,24 @@
         appliquerPersonnalisations();
         // Rouvrir le modal pour refleter l'ordre et les valeurs par defaut
         ouvrirEditionRetroErreursFr();
+    }
+
+    /**
+     * Phase C #267 \u2014 R\u00e9initialise un seul code d'erreur (nom + couleur) \u00e0
+     * sa valeur par d\u00e9faut, dans la modale ouverte. La r\u00e9troaction et le
+     * raccourci sont conserv\u00e9s. Persistance au prochain \u00ab Enregistrer \u00bb.
+     */
+    function reinitialiserCodeErrFr(id) {
+        var modal = document.getElementById('modal-retro-erreurs-fr');
+        if (!modal) return;
+        var nomDef = _defautsNomsErrFr[id];
+        var coulDef = _defautsCouleursErrFr[id];
+        var nomInput = modal.querySelector('input[data-nom-id="' + id + '"]');
+        if (nomInput && nomDef !== undefined) nomInput.value = nomDef;
+        var colorInput = modal.querySelector('input[data-color-id="' + id + '"]');
+        if (colorInput && coulDef) colorInput.value = coulDef;
+        var pastille = modal.querySelector('span[data-pastille-id="' + id + '"]');
+        if (pastille && coulDef) pastille.style.background = coulDef;
     }
 
     /* ===============================
@@ -3451,6 +3493,7 @@
         enregistrerRetroObservations: enregistrerRetroObservations,
         enregistrerRetroErreursFr: enregistrerRetroErreursFr,
         reinitialiserRetroObservations: reinitialiserRetroObservations,
+        reinitialiserCodeErrFr: reinitialiserCodeErrFr,
         ajouterTamponRetroObs: ajouterTamponRetroObs,
         supprimerTamponRetroObs: supprimerTamponRetroObs,
         ajouterSymboleRetroObs: ajouterSymboleRetroObs,
