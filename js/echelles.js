@@ -2380,7 +2380,10 @@ async function preparerDonneesBibliothequeEchelles() {
         id: echelle.id,
         badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
         badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(echelle) : '',
-        metadonnees: (function(a){return `${echelle.niveaux?.length || 0} niveau(x)${echelle.discipline ? ' • ' + echelle.discipline : ''}${a ? ' • ' + a : ''}`;})(BibliothequeUI.formaterAttribution(echelle)),
+        metadonnees: BibliothequeUI.formaterMetadonnees(echelle, {
+            quantite: `${echelle.niveaux?.length || 0} niveau(x)`,
+            discipline: true
+        }),
         description: echelle.description || '',
         inspireDe: BibliothequeUI.formaterInspireDe(echelle),
         boutons: [
@@ -2423,7 +2426,10 @@ async function preparerDonneesBibliothequeEchelles() {
                 id: echelle.id,
                 badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
                 badgesPratiques: badgesPratiques,
-                metadonnees: (function(a){return `${echelle.niveaux?.length || 0} niveau(x)${a ? ' • ' + a : ''}`;})(BibliothequeUI.formaterAttribution(echelle)),
+                metadonnees: BibliothequeUI.formaterMetadonnees(echelle, {
+                    quantite: `${echelle.niveaux?.length || 0} niveau(x)`,
+                    discipline: true
+                }),
                 inspireDe: BibliothequeUI.formaterInspireDe(echelle),
                 description: echelle.description || '',
                 dejaPresent: dejaPresent,

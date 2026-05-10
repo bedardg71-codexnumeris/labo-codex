@@ -1968,7 +1968,10 @@ async function preparerDonneesBibliothequeProductions() {
         nom: `${BibliothequeUI.formaterTitreDemo(prod.titre, BibliothequeUI.estItemDemo(prod))}${(prod.activiteApprentissage || prod.description) ? ' - ' + (prod.activiteApprentissage || prod.description) : ''}`,
         id: prod.id,
         badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsDansSelection),
-        metadonnees: `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%${prod.objectif ? ' • Objectif: ' + prod.objectif : ''}`,
+        metadonnees: BibliothequeUI.formaterMetadonnees(prod, {
+            quantite: `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%`
+        }),
+        description: prod.objectif ? 'Objectif: ' + prod.objectif : '',
         inspireDe: BibliothequeUI.formaterInspireDe(prod),
         boutons: [
             { label: 'Dupliquer', onclick: `dupliquerProductionBibliotheque('${prod.id}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
@@ -1999,7 +2002,9 @@ async function preparerDonneesBibliothequeProductions() {
                 nom: `${BibliothequeUI.formaterTitreDemo(prod.titre, BibliothequeUI.estItemDemo(prod))}${(prod.activiteApprentissage || prod.description) ? ' - ' + (prod.activiteApprentissage || prod.description) : ''}`,
                 id: prod.id,
                 badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsUtilisateur),
-                metadonnees: (function(a){return `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%${a ? ' • ' + a : ''}`;})(BibliothequeUI.formaterAttribution(prod)),
+                metadonnees: BibliothequeUI.formaterMetadonnees(prod, {
+                    quantite: `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%`
+                }),
                 inspireDe: BibliothequeUI.formaterInspireDe(prod),
                 description: prod.objectif ? 'Objectif: ' + prod.objectif : '',
                 dejaPresent: false,
