@@ -2317,6 +2317,85 @@
     </div>
 </section>
 
+<section class="guide-section">
+    <h2 class="guide-section-title">24. Carte bibliothèque</h2>
+    <p class="guide-section-intro">Composant utilisé dans les modales bibliothèque des 7 ressources : grilles, échelles, cartouches, productions, pratiques, planification, tampons. Cible Phase C #267 (audit biblios 9 mai 2026) : action principale visible + menu ⋮ pour les actions secondaires. Une seule instance ⋮ ouverte à la fois ; clic ailleurs ou ESC ferme.</p>
+
+    <div class="guide-component">
+        <h3 class="guide-component-title">Anatomie de la carte</h3>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre — Section 1 (sidebar)</div>
+                <div class="biblio-carte biblio-carte--selection">
+                    <div class="biblio-carte-contenu">
+                        <div style="flex: 1;">
+                            <div class="biblio-carte-titre">
+                                <span class="badge-pratique-compact std">STD</span>
+                                Évaluation analytique de production écrite
+                            </div>
+                            <div class="biblio-carte-meta">3 critère(s) · par Grégoire Bédard · Français</div>
+                            <div class="biblio-carte-desc">Évaluation détaillée de la qualité de l'écriture selon les critères de cohérence, clarté et richesse…</div>
+                        </div>
+                        <div class="biblio-carte-actions">
+                            <button type="button" class="btn btn-confirmer btn-mini">Dupliquer</button>
+                            <span class="biblio-menu-wrapper">
+                                <button type="button" class="biblio-menu-trigger btn btn-mini" aria-haspopup="menu" aria-expanded="false" aria-label="Plus d'actions" title="Plus d'actions">⋮</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair — Section 2 (pool)</div>
+                <div class="biblio-carte biblio-carte--disponible">
+                    <div class="biblio-carte-contenu">
+                        <div style="flex: 1;">
+                            <div class="biblio-carte-titre">
+                                <span class="badge-pratique-compact spe">SPE</span>
+                                Échelle d'autonomie en lecture
+                            </div>
+                            <div class="biblio-carte-meta">5 niveau(x) · par Labo Codex · Français</div>
+                            <div class="biblio-carte-desc">Niveaux d'autonomie progressifs pour la lecture, du déchiffrage au transfert critique…</div>
+                        </div>
+                        <div class="biblio-carte-actions">
+                            <button type="button" class="btn btn-confirmer btn-mini">Ajouter à ma sélection</button>
+                            <span class="biblio-menu-wrapper">
+                                <button type="button" class="biblio-menu-trigger btn btn-mini" aria-haspopup="menu" aria-expanded="false" aria-label="Plus d'actions" title="Plus d'actions">⋮</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="guide-specs-title">Specs structurelles</div>
+        <ul>
+            <li><strong>Conteneur</strong> : <code>.biblio-carte</code> + variant <code>.biblio-carte--selection</code> (Section 1) ou <code>.biblio-carte--disponible</code> (Section 2). Padding 15px, border-radius 6px.</li>
+            <li><strong>Titre</strong> : <code>.biblio-carte-titre</code> — badges pratiques inline (STD/SPE/SOM/DEN/Multi) puis nom nu (préfixes <code>[…]</code> strippés via <code>BibliothequeUI.formaterTitre</code>).</li>
+            <li><strong>Métadonnées</strong> : <code>.biblio-carte-meta</code> — ordre fixe <em>quantité · auteur · discipline</em> via <code>BibliothequeUI.formaterMetadonnees(item, {quantite, discipline})</code>.</li>
+            <li><strong>Description</strong> : <code>.biblio-carte-desc</code> — auto-tronquée à 120 car. via <code>BibliothequeUI.tronquerDescription(desc)</code>, échappée HTML par le helper de rendu.</li>
+            <li><strong>Actions</strong> : <code>.biblio-carte-actions</code> — flex horizontal aligné centre, bouton primaire visible + menu ⋮.</li>
+            <li><strong>Bouton primaire</strong> : action constructive (Dupliquer en sidebar, Ajouter en pool). Classe <code>.btn-confirmer</code> ou <code>.btn-principal</code>.</li>
+            <li><strong>Menu ⋮</strong> : <code>.biblio-menu-wrapper</code> + <code>.biblio-menu-trigger</code> + <code>.biblio-menu-popover</code>. Toggle au clic, ferme au clic ailleurs ou ESC. Items <code>.biblio-menu-item</code>, variant <code>.biblio-menu-item--danger</code> pour actions destructives (Supprimer).</li>
+        </ul>
+
+        <div class="guide-specs-title">API JavaScript (BibliothequeUI)</div>
+        <ul>
+            <li><code>renderCarteSelection({nom, id, badgeSource, metadonnees, description, boutonPrincipal, actionsMenu})</code> — Section 1.</li>
+            <li><code>renderCarteDisponible({nom, id, badgeSource, metadonnees, description, dejaPresent, boutonPrincipal, actionsMenu, classeItem, dataAttrs, styleExtra})</code> — Section 2. Filtre <code>boutonPrincipal</code> et <code>actionsMenu</code> selon <code>showAlways</code> quand <code>dejaPresent</code>.</li>
+            <li><code>renderMenuActions(actions, contextId)</code> — composant menu ⋮ standalone.</li>
+            <li><code>toggleMenuActions(menuId)</code> · <code>fermerTousLesMenus()</code> — contrôle programmatique.</li>
+        </ul>
+
+        <div class="guide-specs-title">Action principale par contexte</div>
+        <ul>
+            <li><strong>Sidebar (Section 1)</strong> : <em>Dupliquer</em> (la plupart) — action constructive pour créer une copie éditable. Pratiques/tampons/planification : <em>Partager</em> ou <em>Dupliquer</em> selon le module.</li>
+            <li><strong>Pool (Section 2)</strong> : <em>Ajouter à ma sélection</em> — toujours.</li>
+            <li><strong>Menu ⋮ partout</strong> (cohérence visuelle) — même quand une seule action secondaire (typiquement Supprimer en pool).</li>
+        </ul>
+    </div>
+</section>
+
 </div><!-- /guide-container -->
 </body>
 </html>

@@ -334,8 +334,8 @@ async function afficherBibliothequePratiques() {
                 metadonnees: BibliothequeUI.formaterMetadonnees(pratique, { discipline: true }),
                 description: pratique.description || '',
                 inspireDe: BibliothequeUI.formaterInspireDe(pratique),
-                boutons: [
-                    { label: 'Dupliquer', action: 'dupliquerPratiqueBibliotheque', param: pratique.id, classe: 'btn-confirmer', title: 'Créer une copie' },
+                boutonPrincipal: { label: 'Dupliquer', action: 'dupliquerPratiqueBibliotheque', param: pratique.id, classe: 'btn-confirmer', title: 'Créer une copie' },
+                actionsMenu: [
                     { label: 'Exporter', action: 'partagerPratiqueMateriel', param: pratique.id, classe: 'btn-secondaire', title: 'Exporter en JSON' },
                     { label: 'Retirer', action: 'retirerPratiqueDeBibliothequeMateriel', param: pratique.id, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
                     { label: 'Supprimer', action: 'supprimerPratiqueDefinitivement', param: pratique.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
@@ -413,9 +413,7 @@ async function afficherBibliothequePratiques() {
                 classeItem: 'pratique-dispo-item',
                 dataAttrs: `data-type="${pratique.type || ''}" data-discipline="${pratique.discipline || ''}"`,
                 styleExtra: estGabarit ? 'background: var(--gris-tres-pale);' : '',
-                boutons: [
-                    { label: 'Ajouter', action: 'ajouterPratiqueALaSelection', param: pratique.id, classe: 'btn-principal', title: 'Ajouter à ta sélection' }
-                ]
+                boutonPrincipal: { label: 'Ajouter', action: 'ajouterPratiqueALaSelection', param: pratique.id, classe: 'btn-principal', title: 'Ajouter à ta sélection' }
             });
         });
     }

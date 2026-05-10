@@ -3378,10 +3378,10 @@ async function preparerDonneesBibliothequeCartouches() {
                 }),
                 description: cartouche.description || '',
                 inspireDe: BibliothequeUI.formaterInspireDe(cartouche),
-                boutons: [
-                    { label: 'Dupliquer', onclick: `dupliquerCartoucheBibliotheque('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
-                    { label: 'Retirer', onclick: `retirerCartoucheDeBibliotheque('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
-                    { label: 'Supprimer', onclick: `supprimerCartoucheDefinitivement('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
+                boutonPrincipal: { label: 'Dupliquer', action: 'dupliquerCartoucheBibliotheque', param: cartouche.id, param2: cartouche.grilleId, classe: 'btn-confirmer', title: 'Créer une copie' },
+                actionsMenu: [
+                    { label: 'Retirer', action: 'retirerCartoucheDeBibliotheque', param: cartouche.id, param2: cartouche.grilleId, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
+                    { label: 'Supprimer', action: 'supprimerCartoucheDefinitivement', param: cartouche.id, param2: cartouche.grilleId, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
                 ],
                 groupe: grilleNom
             });
@@ -3412,9 +3412,9 @@ async function preparerDonneesBibliothequeCartouches() {
                 dejaPresent: dejaPresent,
                 classeItem: 'cartouche-disponible-item',
                 dataAttrs: `data-grille="${grilleNom}"`,
-                boutons: [
-                    { label: 'Ajouter à ma sélection', onclick: `ajouterCartoucheIndividuelle('${cartouche.id}', '${cartouche.grilleId}')`, classe: 'btn-confirmer', title: 'Ajouter cette cartouche à ta sélection' },
-                    { label: 'Supprimer', onclick: `supprimerCartoucheDeBibliothequePartagee('${cartouche.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
+                boutonPrincipal: { label: 'Ajouter à ma sélection', action: 'ajouterCartoucheIndividuelle', param: cartouche.id, param2: cartouche.grilleId, classe: 'btn-confirmer', title: 'Ajouter cette cartouche à ta sélection' },
+                actionsMenu: [
+                    { label: 'Supprimer', action: 'supprimerCartoucheDeBibliothequePartagee', param: cartouche.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
                 ],
                 groupe: grilleNom
             });

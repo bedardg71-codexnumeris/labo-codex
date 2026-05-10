@@ -2386,10 +2386,10 @@ async function preparerDonneesBibliothequeEchelles() {
         }),
         description: echelle.description || '',
         inspireDe: BibliothequeUI.formaterInspireDe(echelle),
-        boutons: [
-            { label: 'Dupliquer', onclick: `dupliquerEchelleBibliotheque('${echelle.id}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
-            { label: 'Retirer', onclick: `retirerEchelleDeBibliotheque('${echelle.id}')`, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
-            { label: 'Supprimer', onclick: `supprimerEchelleDefinitivement('${echelle.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
+        boutonPrincipal: { label: 'Dupliquer', action: 'dupliquerEchelleBibliotheque', param: echelle.id, classe: 'btn-confirmer', title: 'Créer une copie' },
+        actionsMenu: [
+            { label: 'Retirer', action: 'retirerEchelleDeBibliotheque', param: echelle.id, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
+            { label: 'Supprimer', action: 'supprimerEchelleDefinitivement', param: echelle.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
         ]
     }));
 
@@ -2436,9 +2436,9 @@ async function preparerDonneesBibliothequeEchelles() {
                 classeItem: 'echelle-disponible-item',
                 dataAttrs: `data-discipline="${discipline}" data-pratiques="${pratiques.join(',')}"`,
                 styleExtra: styleGabarit,
-                boutons: [
-                    { label: 'Ajouter à ma sélection', onclick: `ajouterEchelleIndividuelle('${echelle.id}')`, classe: 'btn-confirmer', title: 'Ajouter cette échelle à ta sélection' },
-                    { label: 'Supprimer', onclick: `supprimerEchelleDeBibliothequePartagee('${echelle.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
+                boutonPrincipal: { label: 'Ajouter à ma sélection', action: 'ajouterEchelleIndividuelle', param: echelle.id, classe: 'btn-confirmer', title: 'Ajouter cette échelle à ta sélection' },
+                actionsMenu: [
+                    { label: 'Supprimer', action: 'supprimerEchelleDeBibliothequePartagee', param: echelle.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
                 ],
                 groupe: discipline
             });

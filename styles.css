@@ -3379,16 +3379,95 @@ body:not(.mode-clair) .badge-source--demo {
 }
 .biblio-carte-actions {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     margin-left: 10px;
     border-top: 1px solid var(--bordure-claire);
     padding-top: 8px;
     margin-top: 8px;
-    flex-wrap: wrap;
+    align-items: center;
+    flex-shrink: 0;
 }
+/* Phase C #267 — variant vertical retiré : nouveau layout = primaire + ⋮ horizontal partout */
 .biblio-carte-actions--vertical {
     flex-direction: column;
     align-items: flex-end;
+}
+
+/* ============================================================
+   Phase C #267 — Menu d'actions secondaires ⋮ (kebab)
+   ============================================================ */
+.biblio-menu-wrapper {
+    position: relative;
+    display: inline-block;
+}
+.biblio-menu-trigger {
+    background: transparent !important;
+    color: var(--texte-primaire);
+    border: 1px solid var(--bordure-claire);
+    padding: 4px 10px !important;
+    font-size: 1rem !important;
+    line-height: 1 !important;
+    min-width: 28px;
+}
+.biblio-menu-trigger:hover {
+    background: var(--surface-conteneur, rgba(255, 255, 255, 0.05)) !important;
+    border-color: var(--bleu-clair);
+}
+.biblio-menu-trigger[aria-expanded="true"] {
+    background: var(--bleu-tres-pale) !important;
+    border-color: var(--bleu-clair);
+    color: var(--accent-primaire);
+}
+.biblio-menu-popover {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    min-width: 160px;
+    background: var(--surface-carte, #1a3040);
+    border: 1px solid var(--bordure-claire);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    padding: 4px;
+    z-index: 10001;
+    display: none;
+}
+.biblio-menu-popover.actif {
+    display: block;
+}
+.biblio-menu-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: transparent;
+    padding: 8px 12px;
+    cursor: pointer;
+    color: var(--texte-primaire);
+    font-size: 0.85rem;
+    border-radius: 4px;
+}
+.biblio-menu-item:hover {
+    background: var(--bleu-tres-pale);
+    color: var(--accent-primaire);
+}
+.biblio-menu-item--danger {
+    color: var(--rouge-erreur, #e74c3c);
+}
+.biblio-menu-item--danger:hover {
+    background: rgba(231, 76, 60, 0.12);
+    color: var(--rouge-erreur, #e74c3c);
+}
+/* Mode clair */
+.mode-clair .biblio-menu-popover {
+    background: #ffffff;
+    border-color: var(--bordure-claire);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.mode-clair .biblio-menu-trigger {
+    color: var(--texte-primaire);
+}
+.mode-clair .biblio-menu-trigger[aria-expanded="true"] {
+    background: var(--bleu-tres-pale) !important;
 }
 
 /* Beta 99.39 (#267 Phase B) — uniformisation taille des boutons dans tous les

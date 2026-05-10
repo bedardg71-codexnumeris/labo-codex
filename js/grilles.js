@@ -2203,10 +2203,10 @@ async function preparerDonneesBibliothequeGrilles() {
         }),
         description: grille.description || '',
         inspireDe: BibliothequeUI.formaterInspireDe(grille),
-        boutons: [
-            { label: 'Dupliquer', onclick: `dupliquerGrilleBibliotheque('${grille.id}')`, classe: 'btn-confirmer', title: 'Créer une copie' },
-            { label: 'Retirer', onclick: `retirerGrilleDeBibliotheque('${grille.id}')`, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
-            { label: 'Supprimer', onclick: `supprimerGrilleDefinitivement('${grille.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
+        boutonPrincipal: { label: 'Dupliquer', action: 'dupliquerGrilleBibliotheque', param: grille.id, classe: 'btn-confirmer', title: 'Créer une copie' },
+        actionsMenu: [
+            { label: 'Retirer', action: 'retirerGrilleDeBibliotheque', param: grille.id, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
+            { label: 'Supprimer', action: 'supprimerGrilleDefinitivement', param: grille.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
         ]
     }));
 
@@ -2236,9 +2236,9 @@ async function preparerDonneesBibliothequeGrilles() {
                 dejaPresent: dejaPresent,
                 classeItem: 'grille-disponible-item',
                 dataAttrs: `data-discipline="${discipline}"`,
-                boutons: [
-                    { label: 'Ajouter à ma sélection', onclick: `ajouterGrilleIndividuelle('${grille.id}')`, classe: 'btn-confirmer', title: 'Ajouter cette grille à ta sélection' },
-                    { label: 'Supprimer', onclick: `supprimerGrilleDeBibliothequePartagee('${grille.id}')`, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
+                boutonPrincipal: { label: 'Ajouter à ma sélection', action: 'ajouterGrilleIndividuelle', param: grille.id, classe: 'btn-confirmer', title: 'Ajouter cette grille à ta sélection' },
+                actionsMenu: [
+                    { label: 'Supprimer', action: 'supprimerGrilleDeBibliothequePartagee', param: grille.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
                 ],
                 groupe: discipline
             });

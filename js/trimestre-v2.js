@@ -1149,8 +1149,6 @@ function afficherFormulaireTrimestreActif() {
  * 🆕 BETA 95.2
  */
 function ouvrirBibliothequeTrimestreV2() {
-    // Pour l'instant, afficher une alerte informative
-    // À terme : ouvrir un modal avec la liste complète des trimestres
     const trimestres = typeof obtenirTrimestres === 'function' ? obtenirTrimestres() : [];
 
     if (trimestres.length === 0) {
@@ -1158,15 +1156,77 @@ function ouvrirBibliothequeTrimestreV2() {
         return;
     }
 
-    // Liste simple pour l'instant
-    let message = 'Trimestres disponibles :\n\n';
-    trimestres.forEach(t => {
-        const etat = t.archive ? '📦 Archivé' : (t.actif ? '✅ Actif' : '');
-        message += `• ${t.nom} ${etat}\n`;
-    });
-    message += '\nUtilisez le dropdown "Trimestre actif" pour changer de trimestre.';
+    // Phase C #267 — modale BibliothequeUI avec carte + menu ⋮
+    const trimestresActifs = trimestres.filter(t => !t.archive);
+    const trimestresArchives = trimestres.filter(t => t.archive);
 
-    alert(message);
+    function genererCarteTrim(t, estArchive) {
+        const estActif = !!t.actif;
+        const badgeActif = estActif ? '<span style="background: var(--vert-principal); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 10px;">Actif</span>' : '';
+        const meta = estArchive ? 'Archivé' : (estActif ? 'Trimestre actuellement actif' : 'Disponible');
+
+        let primaire = null;
+        const actions = [];
+        if (estArchive) {
+            primaire = { label: 'Désarchiver', action: 'desarchiverTrimestre', param: t.id, classe: 'btn-confirmer', title: 'Restaurer ce trimestre comme actif' };
+        } else if (!estActif) {
+            primaire = { label: 'Activer', action: 'changerTrimestreActifV2', param: t.id, classe: 'btn-confirmer', title: 'Définir comme trimestre actif' };
+            actions.push({ label: 'Archiver', action: 'confirmerArchivage', param: t.id, classe: 'btn-secondaire', title: 'Conserver en lecture seule' });
+        } else {
+            // Actif courant : aucune action primaire (déjà actif). Menu : archiver pour basculer ailleurs avant.
+            actions.push({ label: 'Archiver', action: 'confirmerArchivage', param: t.id, classe: 'btn-secondaire', title: 'Conserver en lecture seule' });
+        }
+
+        return BibliothequeUI.renderCarteSelection({
+            nom: echapperHtml(t.nom || t.id) + badgeActif,
+            id: t.id,
+            badgeSource: '',
+            metadonnees: meta,
+            description: '',
+            boutonPrincipal: primaire,
+            actionsMenu: actions
+        });
+    }
+
+    let contenuSection1 = '';
+    if (trimestresActifs.length === 0) {
+        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucun trimestre actif</p>';
+    } else {
+        trimestresActifs.forEach(t => { contenuSection1 += genererCarteTrim(t, false); });
+    }
+
+    let contenuSection2 = '';
+    let titreSection2 = '';
+    if (trimestresArchives.length > 0) {
+        titreSection2 = 'Trimestres archivés';
+        trimestresArchives.forEach(t => { contenuSection2 += genererCarteTrim(t, true); });
+    }
+
+    BibliothequeUI.creerModal({
+        modalId: 'modalBibliothequeTrimestres',
+        titre: '📚 Bibliothèque des trimestres',
+        sousTitre: 'Activez, archivez ou restaurez vos trimestres.',
+        onFermerAction: 'fermerModalBibliothequeTrimestres',
+        doublonsHTML: '',
+        titreSection1: 'Trimestres disponibles',
+        contenuSection1: contenuSection1,
+        boutonsApresSection1: '',
+        titreSection2: titreSection2,
+        filtresSection2: '',
+        contenuSection2: contenuSection2
+    });
+
+    if (!titreSection2) {
+        const modalEl = document.getElementById('modalBibliothequeTrimestres');
+        if (modalEl) {
+            const h3s = modalEl.querySelectorAll('.biblio-section-titre');
+            if (h3s.length >= 2 && !h3s[1].textContent.trim()) h3s[1].style.display = 'none';
+        }
+    }
+}
+
+function fermerModalBibliothequeTrimestres() {
+    BibliothequeUI.fermerModal('modalBibliothequeTrimestres');
 }
 
 /**
@@ -4799,7 +4859,7 @@ function ouvrirModalBibliothequeGroupeCours() {
     const gcVisibles = groupesCours.filter(gc => gc.dansSidebar !== false);
     const gcMasques = groupesCours.filter(gc => gc.dansSidebar === false);
 
-    // Helper pour générer une carte groupe-cours
+    // Phase C #267 — migration vers BibliothequeUI (carte + menu ⋮)
     function genererCarteGC(gc, estMasque) {
         const coursInfo = cours.find(c => c.id === gc.coursId);
         const ens = enseignants.find(e => e.id === gc.enseignantId);
@@ -4807,171 +4867,87 @@ function ouvrirModalBibliothequeGroupeCours() {
 
         const codeCours = coursInfo?.codeCours || coursInfo?.sigle || null;
         const groupe = gc.groupe || gc.groupeNum || '00001';
-        const titre = codeCours ? `${codeCours} — Groupe ${groupe}` : `Groupe ${groupe}`;
+        const titreNu = codeCours ? `${codeCours} — Groupe ${groupe}` : `Groupe ${groupe}`;
         const nomEns = ens ? `${ens.prenom || ''} ${ens.nom || ''}`.trim() : '';
         const nomHor = hor?.nom || '';
-
         const estActif = gcActif && gc.id === gcActif.id;
         const badgeActif = estActif ? '<span style="background: var(--vert-principal); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 10px;">Actif</span>' : '';
+        const sousInfo = [nomEns, nomHor].filter(Boolean).join(' • ');
 
-        const borderColor = estActif ? 'var(--vert-principal)' : (estMasque ? '#ccc' : 'var(--bleu-clair)');
-        const bgColor = estActif ? 'rgba(76, 175, 80, 0.05)' : (estMasque ? '#f9f9f9' : 'var(--bleu-tres-pale)');
+        // Bouton primaire :
+        // - Masqué : Afficher
+        // - Visible non-actif : Activer
+        // - Visible actif : pas de primaire (déjà actif)
+        let primaire = null;
+        if (estMasque) {
+            primaire = { label: 'Afficher', action: 'afficherGroupeCoursDepuisBibliotheque', param: gc.id, classe: 'btn-confirmer', title: 'Afficher dans le dropdown' };
+        } else if (!estActif) {
+            primaire = { label: 'Activer', action: 'activerGroupeCoursDepuisBibliotheque', param: gc.id, classe: 'btn-confirmer', title: 'Activer ce groupe-cours' };
+        }
 
-        let sousInfo = [];
-        if (nomEns) sousInfo.push(nomEns);
-        if (nomHor) sousInfo.push(nomHor);
+        // Menu ⋮ : Masquer (si visible) ou Afficher déjà en primaire si masqué.
+        // Supprimer toujours présent (rouge).
+        const actions = [];
+        if (!estMasque) {
+            actions.push({ label: 'Masquer', action: 'masquerGroupeCoursDepuisBibliotheque', param: gc.id, classe: 'btn-secondaire', title: 'Masquer du dropdown' });
+        }
+        actions.push({ label: 'Supprimer', action: 'supprimerGroupeCoursDepuisBibliotheque', param: gc.id, param2: titreNu, classe: 'btn-supprimer', title: 'Supprimer définitivement' });
 
-        return `
-            <div style="
-                border: 1px solid ${borderColor};
-                border-radius: 8px;
-                padding: 15px;
-                margin-bottom: 10px;
-                background: ${bgColor};
-            ">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                    <div style="flex: 1; min-width: 200px;">
-                        <div style="font-weight: 600; color: var(--accent-primaire);">
-                            ${titre}${badgeActif}
-                        </div>
-                        ${sousInfo.length > 0 ? `
-                            <div style="font-size: 0.85rem; color: var(--gris-moyen); margin-top: 3px;">
-                                ${sousInfo.join(' • ')}
-                            </div>
-                        ` : ''}
-                    </div>
-                    <div style="display: flex; gap: 8px;">
-                        ${estMasque ? `
-                            <button data-action="afficherGroupeCoursDepuisBibliotheque" data-param="${gc.id}"
-                                    class="btn btn-confirmer btn-sm"
-                                    title="Afficher dans le dropdown">
-                                Afficher
-                            </button>
-                        ` : `
-                            ${!estActif ? `
-                                <button data-action="activerGroupeCoursDepuisBibliotheque" data-param="${gc.id}"
-                                        class="btn btn-confirmer btn-sm"
-                                        title="Activer ce groupe-cours">
-                                    Activer
-                                </button>
-                            ` : ''}
-                            <button data-action="masquerGroupeCoursDepuisBibliotheque" data-param="${gc.id}"
-                                    class="btn btn-secondaire btn-sm"
-                                    title="Masquer du dropdown">
-                                Masquer
-                            </button>
-                        `}
-                        <button data-action="supprimerGroupeCoursDepuisBibliotheque" data-param="${gc.id}" data-param2="${echapperHtml(titre)}"
-                                class="btn btn-supprimer btn-sm"
-                                title="Supprimer définitivement">
-                                Supprimer
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
+        return BibliothequeUI.renderCarteSelection({
+            nom: echapperHtml(titreNu) + badgeActif,
+            id: gc.id,
+            badgeSource: '',
+            metadonnees: sousInfo,
+            description: '',
+            boutonPrincipal: primaire,
+            actionsMenu: actions
+        });
     }
 
-    let modalHTML = `
-        <div id="modalBibliothequeGroupeCours" style="
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-        ">
-            <div style="
-                background: var(--surface-conteneur, #162c36);
-                border-radius: 12px;
-                width: 90%;
-                max-width: 800px;
-                max-height: 85vh;
-                overflow-y: auto;
-                padding: 30px;
-                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-                position: relative;
-            ">
-                <button data-action="fermerModalBibliothequeGroupeCours" style="
-                    position: sticky;
-                    top: 0;
-                    right: 0;
-                    float: right;
-                    background: transparent;
-                    border: none;
-                    font-size: 28px;
-                    color: #999;
-                    cursor: pointer;
-                    padding: 0;
-                    width: 30px;
-                    height: 30px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 1;
-                " class="hover-couleur-fonce">
-                    ×
-                </button>
-                <h2 style="margin-top: 0; color: var(--accent-primaire);">📚 Bibliothèque groupe-cours</h2>
-                <p class="text-muted">Gérez les groupe-cours affichés dans le dropdown de l'en-tête.</p>
-    `;
+    let contenuSection1 = '';
+    let titreSection2 = '';
+    let contenuSection2 = '';
 
     if (groupesCours.length === 0) {
-        modalHTML += `
-            <div style="text-align: center; padding: 40px; color: var(--gris-moyen);">
-                <p style="font-size: 1.1rem;">Aucun groupe-cours configuré</p>
-                <p>Clique sur « + Nouveau groupe-cours » dans l'accordéon pour en créer un.</p>
-            </div>
-        `;
+        contenuSection1 = '<div style="text-align: center; padding: 40px; color: var(--gris-moyen);">' +
+            '<p style="font-size: 1.1rem;">Aucun groupe-cours configuré</p>' +
+            '<p>Clique sur « + Nouveau groupe-cours » dans l\'accordéon pour en créer un.</p>' +
+            '</div>';
     } else {
-        // Section 1 : Groupe-cours dans le dropdown
-        modalHTML += `
-            <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
-                Groupe-cours dans le dropdown
-            </h3>
-            <div style="margin-bottom: 30px;">
-        `;
-
         if (gcVisibles.length === 0) {
-            modalHTML += `<p style="color: var(--gris-clair); font-style: italic;">Aucun groupe-cours visible dans le dropdown</p>`;
+            contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucun groupe-cours visible dans le dropdown</p>';
         } else {
-            gcVisibles.forEach(gc => {
-                modalHTML += genererCarteGC(gc, false);
-            });
+            gcVisibles.forEach(gc => { contenuSection1 += genererCarteGC(gc, false); });
         }
-
-        modalHTML += `</div>`;
-
-        // Section 2 : Groupe-cours masqués
         if (gcMasques.length > 0) {
-            modalHTML += `
-                <h3 style="color: #888; font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
-                    Groupe-cours masqués
-                </h3>
-                <div style="margin-bottom: 20px;">
-            `;
-
-            gcMasques.forEach(gc => {
-                modalHTML += genererCarteGC(gc, true);
-            });
-
-            modalHTML += `</div>`;
+            titreSection2 = 'Groupe-cours masqués';
+            gcMasques.forEach(gc => { contenuSection2 += genererCarteGC(gc, true); });
         }
     }
 
-    modalHTML += `
-            </div>
-        </div>
-    `;
+    BibliothequeUI.creerModal({
+        modalId: 'modalBibliothequeGroupeCours',
+        titre: '📚 Bibliothèque groupe-cours',
+        sousTitre: 'Gérez les groupe-cours affichés dans le dropdown de l\'en-tête.',
+        onFermerAction: 'fermerModalBibliothequeGroupeCours',
+        doublonsHTML: '',
+        titreSection1: 'Groupe-cours dans le dropdown',
+        contenuSection1: contenuSection1,
+        boutonsApresSection1: '',
+        titreSection2: titreSection2,
+        filtresSection2: '',
+        contenuSection2: contenuSection2
+    });
 
-    // Insérer dans le DOM
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    // Si pas de section 2, masquer son titre vide (creerModal rend toujours h3)
+    if (!titreSection2) {
+        const modalEl = document.getElementById('modalBibliothequeGroupeCours');
+        if (modalEl) {
+            const h3s = modalEl.querySelectorAll('.biblio-section-titre');
+            if (h3s.length >= 2 && !h3s[1].textContent.trim()) h3s[1].style.display = 'none';
+        }
+    }
 
-    // Fermer avec Escape
     document.addEventListener('keydown', fermerModalBibliothequeGroupeCoursEscape);
 }
 
@@ -4982,8 +4958,7 @@ function fermerModalBibliothequeGroupeCoursEscape(e) {
 }
 
 function fermerModalBibliothequeGroupeCours() {
-    const modal = document.getElementById('modalBibliothequeGroupeCours');
-    if (modal) modal.remove();
+    BibliothequeUI.fermerModal('modalBibliothequeGroupeCours');
     document.removeEventListener('keydown', fermerModalBibliothequeGroupeCoursEscape);
 }
 
@@ -5301,6 +5276,7 @@ window.confirmerArchivage = confirmerArchivage;
 window.confirmerDesarchivage = confirmerDesarchivage;
 window.afficherFormulaireTrimestreActif = afficherFormulaireTrimestreActif;
 window.ouvrirBibliothequeTrimestreV2 = ouvrirBibliothequeTrimestreV2;
+window.fermerModalBibliothequeTrimestres = fermerModalBibliothequeTrimestres;
 window.archiverTrimestreActif = archiverTrimestreActif;
 window.supprimerTrimestreActif = supprimerTrimestreActif;
 window.chargerDropdownCoursV2 = chargerDropdownCoursV2;
