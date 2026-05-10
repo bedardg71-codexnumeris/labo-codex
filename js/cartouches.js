@@ -3373,7 +3373,9 @@ async function preparerDonneesBibliothequeCartouches() {
                 nom: BibliothequeUI.formaterTitreDemo(cartouche.nom || 'Sans titre', BibliothequeUI.estItemDemo(cartouche)),
                 id: cartouche.id,
                 badgeSource: BibliothequeUI.genererBadgeSource(cartouche, cartouchesDansBibliotheque),
-                metadonnees: (function(a){return `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)${a ? ' • ' + a : ''}`;})(BibliothequeUI.formaterAttribution(cartouche)),
+                metadonnees: BibliothequeUI.formaterMetadonnees(cartouche, {
+                    quantite: `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)`
+                }),
                 description: cartouche.description || '',
                 inspireDe: BibliothequeUI.formaterInspireDe(cartouche),
                 boutons: [
@@ -3402,7 +3404,9 @@ async function preparerDonneesBibliothequeCartouches() {
                 nom: BibliothequeUI.formaterTitreDemo(cartouche.nom || 'Sans titre', BibliothequeUI.estItemDemo(cartouche)),
                 id: cartouche.id,
                 badgeSource: BibliothequeUI.genererBadgeSource(cartouche, cartouchesDansBibliotheque),
-                metadonnees: (function(a){return `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)${a ? ' • ' + a : ''}`;})(BibliothequeUI.formaterAttribution(cartouche)),
+                metadonnees: BibliothequeUI.formaterMetadonnees(cartouche, {
+                    quantite: `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)`
+                }),
                 inspireDe: BibliothequeUI.formaterInspireDe(cartouche),
                 description: cartouche.description || '',
                 dejaPresent: dejaPresent,

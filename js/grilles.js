@@ -2197,7 +2197,10 @@ async function preparerDonneesBibliothequeGrilles() {
         id: grille.id,
         badgeSource: BibliothequeUI.genererBadgeSource(grille, grillesDansBibliotheque),
         badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : '',
-        metadonnees: (function(a){return `${grille.criteres?.length || 0} critère(s)${grille.discipline ? ' • ' + grille.discipline : ''}${a ? ' • ' + a : ''}`;})(BibliothequeUI.formaterAttribution(grille)),
+        metadonnees: BibliothequeUI.formaterMetadonnees(grille, {
+            quantite: `${grille.criteres?.length || 0} critère(s)`,
+            discipline: true
+        }),
         description: grille.description || '',
         inspireDe: BibliothequeUI.formaterInspireDe(grille),
         boutons: [
@@ -2224,7 +2227,10 @@ async function preparerDonneesBibliothequeGrilles() {
                 id: grille.id,
                 badgeSource: BibliothequeUI.genererBadgeSource(grille, grillesDansBibliotheque),
                 badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : '',
-                metadonnees: (function(a){return `${grille.criteres?.length || 0} critère(s)${a ? ' • ' + a : ''}`;})(BibliothequeUI.formaterAttribution(grille)),
+                metadonnees: BibliothequeUI.formaterMetadonnees(grille, {
+                    quantite: `${grille.criteres?.length || 0} critère(s)`,
+                    discipline: true
+                }),
                 inspireDe: BibliothequeUI.formaterInspireDe(grille),
                 description: grille.description || '',
                 dejaPresent: dejaPresent,

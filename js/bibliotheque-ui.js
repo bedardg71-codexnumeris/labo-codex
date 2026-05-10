@@ -280,6 +280,58 @@
     };
 
     /**
+     * Phase D (audit biblios 2026-05-09) — Construit la ligne de
+     * métadonnées d'une carte biblio dans un ordre fixe :
+     *   quantité · auteur · discipline
+     *
+     * @param {Object} item - L'item rendu (grille, échelle, cartouche…)
+     * @param {Object} [opts]
+     * @param {string|Function} [opts.quantite] - Texte de quantité
+     *        (ex. "3 critère(s)"). Si Function, appelée avec (item).
+     * @param {boolean|string} [opts.discipline] - true pour utiliser
+     *        item.discipline ; string pour valeur explicite ; falsy
+     *        pour ne pas afficher.
+     * @returns {string} Métadonnées jointes par ' • ' (vide si rien).
+     */
+    BibliothequeUI.formaterMetadonnees = function (item, opts) {
+        opts = opts || {};
+        var parts = [];
+
+        var qte = (typeof opts.quantite === 'function')
+            ? opts.quantite(item)
+            : opts.quantite;
+        if (qte) parts.push(qte);
+
+        var att = BibliothequeUI.formaterAttribution(item);
+        if (att) parts.push(att);
+        else if (item && item.auteur) parts.push('par ' + item.auteur);
+
+        var disc = null;
+        if (opts.discipline === true && item) disc = item.discipline;
+        else if (typeof opts.discipline === 'string') disc = opts.discipline;
+        if (disc) parts.push(disc);
+
+        return parts.join(' • ');
+    };
+
+    /**
+     * Phase D (audit biblios 2026-05-09) — Tronque une description pour
+     * affichage compact en carte biblio. Coupe au dernier espace si la
+     * coupure tombe au-delà de 70% de la longueur cible (sinon coupe net).
+     * Ajoute « … » quand tronqué.
+     */
+    BibliothequeUI.tronquerDescription = function (desc, max) {
+        if (!desc) return '';
+        var s = String(desc);
+        var n = max || 120;
+        if (s.length <= n) return s;
+        var coupe = s.slice(0, n);
+        var lastSpace = coupe.lastIndexOf(' ');
+        if (lastSpace > n * 0.7) coupe = coupe.slice(0, lastSpace);
+        return coupe.replace(/\s+$/, '') + '…';
+    };
+
+    /**
      * Génère le badge source HTML. Phase A.2 + A.4 (audit biblios 2026-05-09) :
      * - Plus de badge `Bibliothèque` (no-op contextuel — la modale s'appelle déjà ainsi)
      * - Plus de badge violet `Démo` (items démo filtrés par A.0 en mode normal)
@@ -364,6 +416,11 @@
             ? '<div class="biblio-carte-inspire">' + echapperHtml(opts.inspireDe) + '</div>'
             : '';
 
+        var descTronquee = BibliothequeUI.tronquerDescription(opts.description);
+        var descHTML = descTronquee
+            ? '<div class="biblio-carte-desc">' + echapperHtml(descTronquee) + '</div>'
+            : '';
+
         return '<div class="biblio-carte biblio-carte--selection">' +
             '<div class="biblio-carte-contenu">' +
                 '<div style="flex: 1;">' +
@@ -374,7 +431,7 @@
                     '</div>' +
                     ligneInspireDe +
                     '<div class="biblio-carte-meta">' + opts.metadonnees + '</div>' +
-                    (opts.description ? '<div class="biblio-carte-desc">' + opts.description + '</div>' : '') +
+                    descHTML +
                 '</div>' +
                 boutonsHTML +
             '</div>' +
@@ -415,6 +472,11 @@
             ? '<div class="biblio-carte-inspire">' + echapperHtml(opts.inspireDe) + '</div>'
             : '';
 
+        var descTronquee = BibliothequeUI.tronquerDescription(opts.description);
+        var descHTML = descTronquee
+            ? '<div class="biblio-carte-desc">' + echapperHtml(descTronquee) + '</div>'
+            : '';
+
         return '<div class="' + classeItem + ' biblio-carte biblio-carte--disponible" ' + dataAttrs + ' style="' + opacite + styleExtra + '">' +
             '<div class="biblio-carte-contenu">' +
                 '<div style="flex: 1;">' +
@@ -425,7 +487,7 @@
                     '</div>' +
                     ligneInspireDe +
                     '<div class="biblio-carte-meta">' + opts.metadonnees + '</div>' +
-                    (opts.description ? '<div class="biblio-carte-desc">' + opts.description + '</div>' : '') +
+                    descHTML +
                     (opts.dejaPresent ? '<div class="biblio-carte-deja">Déjà dans la barre latérale</div>' : '') +
                 '</div>' +
                 boutonsHTML +

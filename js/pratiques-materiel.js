@@ -320,16 +320,6 @@ async function afficherBibliothequePratiques() {
         disciplines = await obtenirDisciplinesDisponiblesPratiques();
     }
 
-    // Construire metadonnees standardisée : discipline · auteur
-    function buildMeta(pratique) {
-        const parts = [];
-        if (pratique.discipline) parts.push(pratique.discipline);
-        const att = BibliothequeUI.formaterAttribution(pratique);
-        if (att) parts.push(att);
-        else if (pratique.auteur) parts.push('par ' + pratique.auteur);
-        return parts.join(' • ');
-    }
-
     // Section 1 : pratiques dans la sélection
     let contenuSection1 = '';
     if (pratiquesDansBibliotheque.length === 0) {
@@ -341,7 +331,7 @@ async function afficherBibliothequePratiques() {
                 id: pratique.id,
                 badgesPratiques: genererBadgeTypePratique(pratique),
                 badgeSource: genererBadgeSourcePratique(pratique, pratiquesDansBibliotheque),
-                metadonnees: buildMeta(pratique),
+                metadonnees: BibliothequeUI.formaterMetadonnees(pratique, { discipline: true }),
                 description: pratique.description || '',
                 inspireDe: BibliothequeUI.formaterInspireDe(pratique),
                 boutons: [
@@ -417,7 +407,7 @@ async function afficherBibliothequePratiques() {
                 id: pratique.id,
                 badgesPratiques: genererBadgeTypePratique(pratique),
                 badgeSource: genererBadgeSourcePratique(pratique, pratiquesDansBibliotheque),
-                metadonnees: buildMeta(pratique),
+                metadonnees: BibliothequeUI.formaterMetadonnees(pratique, { discipline: true }),
                 description: pratique.description || '',
                 inspireDe: BibliothequeUI.formaterInspireDe(pratique),
                 classeItem: 'pratique-dispo-item',
