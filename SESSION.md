@@ -1,9 +1,9 @@
-# SESSION — État au 9 mai 2026
+# SESSION — État au 10 mai 2026
 
-**Date** : 9 mai 2026
-**Dernier build** : `0509-0919` · Beta **99.39**
-**Branche** : `main` (à jour avec `origin/main`, 6 commits poussés)
-**Statut** : matinée focalisée sur deux chantiers — #262 Phase 2 (convention nommage exports, livré) et #267 audit + Phases A & B des bibliothèques (épure visuelle, migration pratiques vers `BibliothequeUI`, uniformisation des boutons). Tous commits poussés, Vitest vert à chaque push (29 tests).
+**Date** : 10 mai 2026
+**Dernier build** : `0510-1500` · Beta **99.40**
+**Branche** : `main` (à jour avec `origin/main`, 3 commits poussés)
+**Statut** : journée focalisée sur la **clôture complète de l'audit biblios #267** — Phase D (métadonnées) puis Phase C (refonte carte avec bouton primaire + menu ⋮) avec extensions au-delà du périmètre initial : modales Personnaliser tampons + codes erreurs FR dans Annoter, et 3 biblios de la page Trimestre (trimestres, cours, groupe-cours). #267 marqué `[x]` dans le backlog.
 
 ---
 
@@ -15,44 +15,52 @@
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
 Lecture obligatoire :
-1. SESSION.md — bilan du 9 mai + cette consigne
-2. BACKLOG.md — items `[ ]` actifs (#267 Phases C/D restantes)
-3. Rapports/AUDIT-BIBLIOS-2026-05-09.md — plan d'audit avec décisions actées §8
+1. SESSION.md — bilan du 10 mai + cette consigne
+2. BACKLOG.md — items `[ ]` actifs (audit biblios #267 maintenant clos)
+3. design-system.html section 24 (carte bibliothèque) si tu touches une biblio
 
-Plusieurs chantiers ouverts au choix (par taille croissante) :
+Chantiers ouverts au choix (par taille croissante) :
 
-A. #267 Phase D — standardisation métadonnées biblios (~2 h)
-   Helper formaterMetadonnees(item, ressource) dans BibliothequeUI.
-   Ordre fixe : quantité · auteur · discipline. Tronquer description.
-   Petit chantier qui clôt l'audit biblios avant la Phase C.
-
-B. Lot 4a ultrareview — jetons (~4 h)
+A. Lot 4a ultrareview — jetons (~4 h)
    Plan détaillé dans Rapports/ultrareview-lot-4a-evaluation.md.
    4 axes : symétrie original↔reprise / validation / config canonique
    / SSOT. Touche evaluation-jetons.js.
 
-C. Lot 3 ultrareview — indices (~3-5 h)
+B. Lot 3 ultrareview — indices (~3-5 h)
    Triage manuel des 20 candidats (~14-16 vrais bugs attendus).
    Plan dans Rapports/ultrareview-lot-3-indices.md.
 
-D. #264 — barre de progression sur tous les exports (~3-4 h)
+C. #264 — barre de progression sur tous les exports (~3-4 h)
    Touche ~10 modules. La convention de nommage est stable maintenant
-   (#262 livré).
+   (#262 livré 9 mai).
 
-E. #267 Phase C — refonte carte unifiée (~1 j)
-   Bouton primaire + menu `⋮` secondaire. Spec à dessiner dans
-   design-system.html. Plus gros chantier visuel.
-
-F. Phase 5 Démo (~1 j) — chantier important reverté le 22 avril.
+D. Phase 5 Démo (~1 j) — chantier important reverté le 22 avril.
    Lecture préalable : plans de travail/PLAN-AUDIT-PHASE5-DEMO.md
    + plans de travail/PLAN-AUTONOMISATION-UTILISATEUR.md.
 
+E. Défense E (Phase 1 modèle de menaces, ~1-2 sem)
+   Migration innerHTML → textContent dans les modules sensibles.
+   Voir docs/securite/MODELE-MENACES.md v1.5.
+
+F. #207 — unifier travaux-stockage.js dans db.js (~1-2 j)
+   Créer une API blob dans db.js au lieu d'ouvrir une base IndexedDB
+   parallèle (`MonitorageFichiers`). Plus structurant.
+
+G. #239 — machine à états chargement évaluation (~1 j)
+   Remplacer les 5 flags globaux + setTimeout imbriqués par un module
+   eval-chargement.js. Réduit la dette technique.
+
+H. #256-bis — aide aux 8 modales restantes
+   Plus petit, peut s'enchaîner avec un autre.
+
 Conventions actées récemment :
-- Convention nommage exports (#262 Phase 2 livrée 9 mai)
-- Filtrage par mode démo dans biblios (filtrerParModeDemo, livré 9 mai)
-- Carte biblio cible : badge type · titre nu · subtitle · description ·
-  bouton primaire + menu ⋮ (Phases C/D restantes pour bouton primaire)
-- Helper unique : window.genererNomFichierExport(type, options)
+- Pattern carte biblio : titre nu · meta · description tronquée ·
+  bouton primaire + menu ⋮ (Phase C livrée 10 mai)
+- Helper menu ⋮ : BibliothequeUI.renderMenuActions(actions, contextId)
+- API renderCarte* : {boutonPrincipal, actionsMenu} (plus de `boutons:[]`)
+- Filtrage par mode démo : BibliothequeUI.filtrerParModeDemo(items)
+- Convention nommage exports : window.genererNomFichierExport(type, opts)
+- Spec carte biblio : design-system.html section 24
 
 Workflow de chantier (rappel) :
 - Petits commits ciblés
@@ -66,77 +74,67 @@ Workflow de chantier (rappel) :
 
 ---
 
-## Bilan complet — 9 mai 2026
+## Bilan complet — 10 mai 2026
 
-**6 commits poussés sur `origin/main`**, beta `99.39`, du build `0509-0653` au build `0509-0919`. Hook pré-push Vitest vert à chaque push.
+**3 commits poussés sur `origin/main`**, beta `99.40`, du build `0510-1425` au build `0510-1500`. Hook pré-push Vitest vert à chaque push.
 
 ### Chantiers livrés (par ordre chronologique)
 
-#### Matinée — #262 Phase 2 (convention nommage exports)
+#### #267 Phase D — standardisation métadonnées biblios (`83eb626`, b0510-1425)
 
-1. **#262 Phase 2** (`8d1fb7b`, build 0509-0739)
-   - **8 callers `genererNomFichierCC` migrés** vers le helper unifié `genererNomFichierExport` (cc-license.js) :
-     - grilles.js (biblio), echelles.js (biblio), cartouches.js (biblio + individuel), productions.js (biblio), pratiques-materiel.js (biblio), objectifs.js, travaux-outils.js (tampons)
-   - **Helper legacy `genererNomFichierCC` retiré** de cc-license.js (zéro-dette)
-   - **Bug latent corrigé dans `nettoyer()`** : crashait silencieusement sur Array (`infoCours.discipline = []`) — désormais défensif (Array → join filtré, skip empty), évite l'erreur silencieuse sur les exports biblio
-   - **Ménage UI** : bouton "Exporter" + fonctions `partager*()` retirés dans biblio grilles/échelles/cartouches/productions (doublon du bouton "Retirer" voisin)
-   - Le bouton "Exporter" de pratiques-materiel.js est conservé (il télécharge réellement) avec son filename migré
-   - **Convention `precisionDate:'minute'`** appliquée aux 8 biblio exports — évite l'écrasement silencieux quand plusieurs exports sont faits le même jour
-   - **Backlog `[x]`** : #262
+**Helpers centralisés dans `BibliothequeUI` :**
+- `formaterMetadonnees(item, {quantite, discipline})` — ordre fixe `quantité · auteur · discipline`. Auteur via `formaterAttribution` avec fallback `par item.auteur` (utile pour pratiques).
+- `tronquerDescription(desc, max=120)` — coupe au dernier espace si > 70 % de la limite. Ajoute `…` quand tronqué.
+- `renderCarteSelection` / `renderCarteDisponible` : auto-tronquent ET échappent désormais la description (XSS pré-existant fixé au passage — la description, texte utilisateur, n'était pas échappée).
 
-#### Matinée → après-midi — #267 Audit biblios
+**Migrations 10 sites (sidebar+pool des 5 ressources audit) :**
+- Grilles + Échelles : discipline ajoutée en pool (symétrie sidebar↔pool — incohérence détectée pendant la migration)
+- Cartouches : pas de discipline (champ inexistant)
+- Productions sidebar : objectif déplacé en description (cohérence avec pool), **auteur ajouté** (bug — pool l'affichait, sidebar l'oubliait via `formaterAttribution` manquant)
+- Pratiques : helper local `buildMeta` supprimé (centralisé)
 
-2. **Audit rédigé** (`b4ef62b`, build 0509-0739)
-   - **Document** : `Rapports/AUDIT-BIBLIOS-2026-05-09.md` (~244 l. à la rédaction initiale, étendu ensuite)
-   - **Inventaire** : 5 ressources × 2 modales (sidebar + pool) = 10 modales
-   - **Constats** : 4/5 ressources passent par `BibliothequeUI` (module partagé) ; pratiques contournait avec rendu inline
-   - **Bug confirmé `#YTIQUE`/`#ECTIFS`** : `bibliotheque-ui.js:24` faisait `id.slice(-6)` qui produisait des suffixes hex inoffensifs sur UUIDs mais des troncations absurdes sur les IDs friendly des démos (ex. `GRILLE_analytique` → `ytique`)
-   - **Plan en 4 phases** : A (quick wins), B (migration pratiques), C (refonte carte), D (métadonnées)
+#### #267 Phase C — refonte carte unifiée bouton primaire + menu ⋮ (`be2ebb9`, b0510-1500)
 
-3. **Décisions §8 actées** (`3196e29`, build inchangé)
-   - 6 questions tranchées : filtrage démo (Q1), suppression `#identifiant` (Q2), suppression préfixes `[Démo]/[Multi]/[SPE]/[STD]` (Q3), action principale + menu `⋮` (Q4), pratiques 3 boutons unifiés (Q5 résolu par Q4), suppression badge `Bibliothèque` (Q6)
+**Composant menu ⋮ générique dans `BibliothequeUI` :**
+- `renderMenuActions(actions, contextId)` — popover absolute, CSP-compliant via `data-action`. Filtre `showAlways` items quand carte `dejaPresent`.
+- `toggleMenuActions(menuId)` + `fermerTousLesMenus()` — état singleton (1 menu ouvert max).
+- Listeners globaux : clic ailleurs / ESC ferment, clic sur item ferme + dispatcher exécute l'action.
+- ARIA : `aria-haspopup="menu"`, `aria-expanded` synchronisé.
 
-4. **Phase A — épure visuelle** (`9c6d29f`, build 0509-0826)
-   - **A.0** : Helpers `BibliothequeUI.modeDemoActif()` + `filtrerParModeDemo()` ajoutés. Appliqués aux 5 ressources (sidebar + pool, 9 sites de filtrage). Items `isDemo` masqués quand `demo-actif !== 'true'`.
-   - **A.1** : Retrait du badge `#identifiant` de `renderCarteSelection`, `renderCarteDisponible`, et 2 sites pratiques.
-   - **A.2 + A.4** : `genererBadgeSource` ne retourne plus que `Retirée` (suppression de `Bibliothèque` + `Démo` + ultérieurement `Locale`).
-   - **A.3** : `formaterTitreDemo` → `formaterTitre` (alias conservé pour compat). Strippe maintenant tous les préfixes entre crochets en tête de titre.
-   - **Fix bonus — bug `/**` orphelin dans cartouches.js** : commit `feat(#262)` avait retiré `partagerCartouche` mais laissé un `/**` orphelin (ouverture JSDoc sans body) qui avalait `retirerCartoucheDeBibliotheque` dans un commentaire géant fermé par le `*/` du JSDoc suivant. À l'exécution, `window.retirerCartoucheDeBibliotheque = retirerCartoucheDeBibliotheque` throwait `ReferenceError` et haltait l'IIFE → `window.fermerModalBibliothequeCartouches` jamais assigné → bouton X de la modale cartouches inopérant.
+**Refactor `renderCarteSelection` / `renderCarteDisponible` :**
+- Nouvelle API : `{boutonPrincipal, actionsMenu}` remplace `{boutons:[...]}`.
+- `showAlways` géré sur `boutonPrincipal` ET items `actionsMenu` quand `dejaPresent`.
+- Échappement HTML labels et titles (sécurité).
 
-5. **Description riche en Section 1** (`3f76b18`, build 0509-0835)
-   - `renderCarteSelection` rend désormais `opts.description` dans `<div class="biblio-carte-desc">` après les métadonnées (comme `renderCarteDisponible`). Helper skip si vide.
-   - 4 callers mis à jour (grilles, échelles, cartouches, pratiques) pour passer `item.description`
-   - Pratiques sidebar restructuré : ligne mélangée `description • discipline` séparée en `biblio-carte-meta` + `biblio-carte-desc` distinctes
+**CSS** (`styles.css:3380-`) :
+- `.biblio-menu-wrapper` / `.biblio-menu-trigger` / `.biblio-menu-popover` / `.biblio-menu-item`
+- Variant `.biblio-menu-item--danger` (rouge) pour Supprimer
+- Mode clair géré explicitement
 
-#### Après-midi — #267 Phase B (migration pratiques + uniformisation boutons)
+**Migration 7 callers existants (14 sites)** : grilles, échelles, cartouches, productions, pratiques, **planification-bibliotheque** et **tampons-bibliotheque** (les 2 derniers n'étaient pas dans l'audit initial mais utilisent aussi `BibliothequeUI`).
 
-6. **Phase B — migration pratiques + uniformisation taille boutons** (`8a2e93c`, build 0509-0919)
-   - **Migration pratiques-materiel.js → BibliothequeUI** :
-     - `afficherBibliothequePratiques` réécrit en utilisant `BibliothequeUI.creerModal` + `renderCarteSelection` + `renderCarteDisponible`. Plus de rendu HTML manuel.
-     - `pratiques-materiel.js` : 2886 → 2634 lignes (**−252 nettes**)
-     - `genererBadgeSourcePratique` étendu pour inclure le badge `Gabarit` (Section 1 + 2 cohérentes maintenant)
-     - `fermerModalBibliothequePratiques` utilise `BibliothequeUI.fermerModal`
-     - Plus de wrapper `modalContainerPratiques` ; X bouton standardisé via `creerModal`
-     - Filtres type+discipline conservés via `filtresSection2` (HTML brut)
-     - Boutons Import/Export conservés via `boutonsApresSection1`
-     - Message d'aide intégré au début de Section 1
-     - Background gabarit (`var(--gris-tres-pale)`) préservé via `styleExtra`
-   - **Uniformisation taille des boutons (5 biblios)** :
-     - Constat : malgré `BibliothequeUI` ajoutant `btn-mini`, les sizes apparaissaient variables entre cards (Section 1), bottom (Import/Export), et pool (Section 2) selon les modaux.
-     - Solution : règle CSS unique avec `!important` sur les 3 variants de taille, ciblée par sélecteur d'attribut `[id^="modalBibliotheque"]` (couvre les 5 biblios automatiquement) — voir `styles.css:3399`.
-     - Tous les boutons (Dupliquer/Retirer/Supprimer/Exporter/Ajouter/Importer/etc.) ont maintenant la même taille partout, peu importe leur variant (btn-confirmer/secondaire/supprimer/principal).
-     - Cache buster `styles.css` passé en format texte (`20260509a`) pour forcer Safari à recharger sur file://.
+**Extensions au-delà du périmètre audit :**
+
+1. **Annoter — modales Personnaliser** (`js/travaux-outils.js`) :
+   - Modale tampons : `🗑` → `⋮ [Supprimer]` sur lignes catégories, tampons (custom + built-in), symboles custom. Touche 5 sites (helper `_htmlRowTampon`, helper `_htmlRowSymbole`, ajouterTamponRetroObs, ajouterSymboleRetroObs, ajouterCategorieRetroObs).
+   - Modale codes erreurs FR : `⋮ [Réinitialiser au défaut]` ajouté sur chaque ligne (nouvelle fonction `reinitialiserCodeErrFr` qui revert nom + couleur depuis `_defautsNomsErrFr` / `_defautsCouleursErrFr`).
+
+2. **Page Trimestre — 3 biblios** (`js/cours.js`, `js/trimestre-v2.js`) :
+   - **Cours** : `ouvrirModalBibliothequeCours` réécrit. Inline → `BibliothequeUI.creerModal`. Sidebar : Dupliquer (primaire) + ⋮ [Exporter, Retirer]. Pool : Ajouter (primaire).
+   - **Groupe-cours** : `ouvrirModalBibliothequeGroupeCours` réécrit. Section visibles + section masqués. Primaire Activer/Afficher selon état. Menu Masquer (visible) + Supprimer.
+   - **Trimestres** : `ouvrirBibliothequeTrimestreV2` transformé d'un simple `alert()` en vraie modale `BibliothequeUI`. Sections Disponibles + Archivés. Primaire Activer/Désarchiver. Menu Archiver.
+
+**Spec dans `design-system.html` section 24** : carte biblio cible avec maquette mode sombre + clair, specs structurelles, API JS, action principale par contexte.
+
+#### Backlog (`bb012c2`)
+
+- **#267 marqué `[x]`** : Phases A+B+C+D livrées + extensions Annoter + Trimestre. Audit complètement clos.
 
 ---
 
 ## Reste actif au backlog (priorité décroissante)
 
-### #267 Audit biblios — Phases restantes
-
-- **Phase C** (~1 j) — refonte carte unifiée : bouton primaire + menu `⋮` secondaire. Spec dans `design-system.html` à dessiner. Phase la plus visible UX.
-- **Phase D** (~2 h) — standardisation métadonnées : `formaterMetadonnees(item, ressource)` dans `BibliothequeUI`. Ordre fixe : quantité · auteur · discipline. Tronquer description à N caractères.
-
-### Items du backlog par taille
+Plus aucun item lié à l'audit biblios #267. Items hauts du backlog :
 
 - **Lot 4a** ultrareview jetons — ~4 h, plan dans `Rapports/`
 - **Lot 3** ultrareview indices — ~3-5 h, plan dans `Rapports/`
@@ -161,61 +159,55 @@ Workflow de chantier (rappel) :
 
 ---
 
-## Conventions actées le 9 mai
+## Conventions actées le 10 mai
 
-### Convention nommage exports (#262 Phase 2)
+### Pattern carte biblio (Phase C)
 
-- Helper unique `window.genererNomFichierExport(type, options)` dans cc-license.js
-- Format : `{type}-{nom?}-{cours?}-{discipline?}-{licence?}-{date[-heure]}.{ext}`
-- Tirets `-` partout (pas d'underscore), extension simple, minuscules
-- Accents préservés via helper `nettoyer` (regex `/[^a-z0-9àâäéèêëïîôùûüç]/gi`)
-- Helper défensif : gère Array (discipline `[]` ou peuplée), null/undefined, skip empty
-- `precisionDate: 'minute'` recommandée pour exports répétables (biblio) ; sinon `'jour'`
-- `inclureLicence: true` ajoute `CC-BY-SA` au nom
+- **Anatomie** : `[badge type] · titre nu · meta · description (tronquée 120c) · bouton primaire + menu ⋮`
+- **API renderCarte\*** : `{boutonPrincipal, actionsMenu}` (plus de `boutons:[]`)
+- **Action primaire par contexte** :
+  - Sidebar : Dupliquer (la plupart) ; Partager (planification, tampons)
+  - Pool : Ajouter à ma sélection (toujours)
+- **Menu ⋮ partout** (cohérence visuelle) — même quand une seule action secondaire (typiquement Supprimer en pool)
+- **Extensions** : pattern aussi appliqué aux modales Personnaliser (Annoter) et aux biblios Trimestre/cours/groupe-cours
 
-### Architecture biblios (#267)
+### Composant menu ⋮ (réutilisable)
 
-- **5 ressources** : grilles, échelles, cartouches, productions, pratiques
-- **2 sections par modale** : Section 1 (sidebar = `dansBibliotheque`) + Section 2 (pool = `disponibles à ajouter`)
-- **Module partagé** : `js/bibliotheque-ui.js` (`BibliothequeUI`)
-- **Filtrage par mode démo** : `BibliothequeUI.filtrerParModeDemo(items)` — masque items `isDemo` quand `db.getSync('demo-actif') !== 'true'`
-- **Format titre nu** : `formaterTitre(nom)` strippe préfixes `[…]` en tête
-- **Badges minimaux** : `genererBadgeSource` ne retourne que `Retirée` (Locale/Bibliothèque/Démo retirés)
-- **Description riche** : helper rend `opts.description` dans `<div class="biblio-carte-desc">` après metadonnees (Section 1 + Section 2)
+- `BibliothequeUI.renderMenuActions(actions, contextId)` retourne le HTML du wrapper trigger + popover
+- Items via `data-action` (CSP-compliant) avec `param`/`param2`/`param3`
+- Variant `.biblio-menu-item--danger` (rouge) pour actions destructives
+- Singleton : un seul menu ouvert à la fois (clic ailleurs / ESC ferme)
+- ARIA : `aria-haspopup="menu"`, `aria-expanded` synchronisé
 
-### Uniformisation taille boutons biblios
+### Formatage métadonnées (Phase D)
 
-- Règle CSS unique dans `styles.css:3399` :
-  ```css
-  [id^="modalBibliotheque"] .btn,
-  [id^="modalBibliotheque"] .btn-mini,
-  [id^="modalBibliotheque"] .btn-tres-compact {
-      padding: 4px 10px !important;
-      font-size: 0.8rem !important;
-      font-weight: 600 !important;
-      line-height: 1.4 !important;
-  }
-  ```
-- Couvre automatiquement les 5 biblios (modalIds commencent tous par `modalBibliotheque`)
-- `!important` court-circuite toute règle `.btn` / `.btn-mini` / `.btn-tres-compact`
+- `BibliothequeUI.formaterMetadonnees(item, {quantite, discipline})` — ordre fixe `quantité · auteur · discipline`
+- `BibliothequeUI.tronquerDescription(desc, max=120)` — coupe au dernier espace si > 70 %
+- Description auto-tronquée + auto-échappée par `renderCarte*`
 
 ---
 
 ## Insights / patterns notables
 
-### Bug `/**` orphelin (cartouches.js)
+### Migration inline → BibliothequeUI
 
-Quand on retire une fonction précédée d'un JSDoc `/** ... */`, on doit retirer ENTIÈREMENT le bloc JSDoc (ouverture `/**` ET fermeture `*/`). Si on laisse l'ouverture orpheline, elle "avale" le code suivant jusqu'au prochain `*/`, transformant des fonctions en commentaire. L'effet est silencieux à `node --check` (commentaires sont valides syntaxiquement) mais devient un `ReferenceError` à l'exécution quand on tente d'exporter la fonction commentée → halt de l'IIFE → tous les exports suivants perdus.
+Pour les biblios qui avaient leur HTML inline (cours, groupe-cours, trimestres), la migration vers `BibliothequeUI.creerModal` :
+1. Réduit la duplication CSS (modal-overlay réinventé à chaque fois)
+2. Bénéficie automatiquement de la modale standardisée (header X, sections, helper d'aide)
+3. Bénéficie automatiquement du pattern carte (titre, meta, description tronquée, primaire + ⋮)
+4. **Attention au `fermerModal*`** : l'ancien pattern wrapper-container ne s'applique plus. `BibliothequeUI.fermerModal(id)` cherche directement `#id`. Adapter les fonctions de fermeture.
 
-**Procédure de prévention** : après suppression d'une fonction, grep le fichier pour `^/\*\*\s*$` immédiatement suivi de `^async function\|^function`, et vérifier qu'il y a bien un `*/` entre les deux.
+### Pattern « kebab pas que pour les biblios »
 
-### Filtrer plutôt que nettoyer (mode démo)
+Le menu `⋮` est utile partout où une ligne a plusieurs actions secondaires :
+- Modales Personnaliser (Annoter) : `🗑` discret remplacé par `⋮ [Supprimer]` (libère de l'espace horizontal)
+- Codes erreurs FR : ⋮ ajouté pour exposer une nouvelle action (`Réinitialiser au défaut`) sans encombrer la ligne
 
-Le mécanisme legacy `migrer-residus-phase5` nettoyait destructivement les items démo au boot. Plus simple et plus sûr : **filtrer à l'affichage** dans les biblios. Les items démo restent en stockage (réutilisables si on réactive le mode), invisibles en mode normal. Pattern : `BibliothequeUI.filtrerParModeDemo(items)` au point d'iteration.
+Le composant est CSP-compliant et utilise le dispatcher `data-action` global. Pas de listener à attacher manuellement par caller.
 
-### CSS uniformisation par sélecteur d'attribut
+### Échappement HTML systématique des descriptions
 
-Pour uniformiser un comportement à travers plusieurs modaux nommés selon un pattern, le sélecteur `[id^="prefix"]` est très puissant. Spécificité (0,1,0) qui peut se combiner avec d'autres classes pour atteindre (0,2,0+). Couvre futurs modaux ajoutés au pattern automatiquement.
+En centralisant la troncation de description dans `renderCarte*`, j'en ai profité pour ajouter `echapperHtml()` au rendu — corrigeant un XSS pré-existant (les callers passaient `item.description` brute au helper, qui l'injectait raw). Pattern : **quand on consolide un helper, en profiter pour appliquer les règles de sécurité de CLAUDE.md**.
 
 ---
 
@@ -227,12 +219,10 @@ Pour uniformiser un comportement à travers plusieurs modaux nommés selon un pa
 
 ## Références utiles
 
-- **Rapport audit** : `Rapports/AUDIT-BIBLIOS-2026-05-09.md` (244+ l., décisions §8 actées)
-- **Module partagé biblios** : `js/bibliotheque-ui.js`
+- **Module partagé biblios** : `js/bibliotheque-ui.js` (~620 l. après Phase C)
 - **Helper exports** : `js/cc-license.js` (`genererNomFichierExport`)
+- **Spec carte biblio** : `design-system.html` section 24
 - **Modèle de menaces** : `docs/securite/MODELE-MENACES.md` v1.5
 - **Tests sécurité** : `docs/securite/TESTS-AUTOMATISES.md`
 - **Architecture données** : `docs/architecture/ECOSYSTEME-DONNEES.md`
-- **Specs livrées** : `docs/architecture/SPEC-RESERVE-V1.md`,
-  `SPEC-CONSOLIDATION-APPRENTISSAGES.md`, `Spec - Prompt et parser
-  questionnaires Labo Codex.md`
+- **Rapport audit biblios** : `Rapports/AUDIT-BIBLIOS-2026-05-09.md` (historique)
