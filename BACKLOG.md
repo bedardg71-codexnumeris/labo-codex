@@ -301,7 +301,7 @@
     s'est arrêté à l'UI/code interne, le nommage des fichiers téléchargés n'a
     pas suivi.
 
-- [ ] **#267** Apparence du matériel dans les bibliothèques (9 mai 2026)
+- [x] **#267** Apparence du matériel dans les bibliothèques (9 mai 2026) — livré 10 mai 2026 (Phases A+B+C+D, beta 99.40 b0510-1500)
   - **Contexte** : après le ménage des boutons "Exporter" doublons (livré dans #262 Phase 2), les modales bibliothèques (grilles, échelles, cartouches, productions, pratiques) sont fonctionnellement cohérentes mais leur apparence reste à revoir : densité, hiérarchie visuelle, alignement, espacement entre les boutons d'action, traitement des badges (Locale, STD, #identifiant), uniformisation des tailles.
   - **À cartographier** : capturer l'état actuel des 5 modales bibliothèques + comparer avec `design-system.html`.
   - **Lien** : suite logique de #262 Phase 2 (qui s'est arrêté au comportement, pas à l'esthétique).
