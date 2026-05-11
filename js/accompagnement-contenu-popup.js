@@ -1307,6 +1307,227 @@ const AIDE_CONTEXTUELLE = {
             }
         ],
         voirAussi: ['fichiers-multiples-examiner']
+    },
+
+    // =========================================================================
+    // MODALES SYSTÈME (#256-bis) — aide contextuelle dans les overlays
+    // =========================================================================
+
+    'modal-nouveautes': {
+        titre: "Nouveautés et numéro de version",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Cette fenêtre affiche les ajouts et correctifs récents de Labo Codex, regroupés par version majeure. Une pastille rouge sur l'icône d'accueil signale qu'il y a quelque chose de nouveau depuis ta dernière visite."
+            },
+            {
+                type: 'liste',
+                titre: "Comment lire le numéro",
+                items: [
+                    "<strong>Beta 99.41</strong> — version majeure. Change quand une fonctionnalité notable est livrée.",
+                    "<strong>Build 0511-1234</strong> — date et heure de compilation (MMJJ-HHMM, heure Toronto). Change à chaque commit, même pour un correctif mineur.",
+                    "Les détails complets sont dans <strong>Réglages > À propos</strong>."
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: "Si la pastille reste rouge après lecture, fais défiler la modale jusqu'au bas — il faut atteindre le bouton « Fermer » pour marquer le build comme vu."
+            }
+        ]
+    },
+
+    'modal-reparation': {
+        titre: "Réparation automatique des évaluations",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Cette fonction reconstruit le tableau des critères d'une évaluation à partir des niveaux (I, D, M, E) trouvés dans la rétroaction finale. Utile uniquement quand un bug a fait perdre les critères individuels mais que la note finale et la rétroaction sont intacts."
+            },
+            {
+                type: 'alerte',
+                niveau: 'attention',
+                contenu: "À utiliser seulement si tu observes des évaluations avec une note finale mais des critères vides. Si tes évaluations sont complètes, n'y touche pas — la réparation ne corrige pas de vrais bugs de notation, elle extrait depuis la rétroaction."
+            },
+            {
+                type: 'liste',
+                titre: "Ce que la fonction fait",
+                items: [
+                    "Parcourt les évaluations sauvegardées du trimestre actif.",
+                    "Détecte les patterns « critère = niveau » dans le texte de la rétroaction.",
+                    "Reconstitue le tableau des critères avec leurs niveaux.",
+                    "Recalcule la note (qui devrait correspondre à celle déjà stockée)."
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: "Fais une sauvegarde Codex avant. Si les niveaux extraits ne correspondent pas à ce que tu attends, ferme sans valider."
+            }
+        ]
+    },
+
+    'modal-wizard-pratique': {
+        titre: "Wizard de configuration — Pratique de notation",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Le wizard te guide en 8 étapes pour configurer une pratique de notation alignée avec tes intentions pédagogiques : type d'évaluation, sommative ou portfolio, règles de reprise, jetons, calcul de la note finale."
+            },
+            {
+                type: 'liste',
+                titre: "Les 8 étapes",
+                items: [
+                    "<strong>1. Informations de base</strong> — nom et description de la pratique.",
+                    "<strong>2. Type d'évaluation</strong> — sommative classique, portfolio de progression, ou variante.",
+                    "<strong>3. Règles de remplacement</strong> — comment les nouvelles évaluations affectent les anciennes.",
+                    "<strong>4. Système de jetons</strong> — délai, reprise, reprise ciblée (optionnel).",
+                    "<strong>5. Échelle de performance</strong> — niveaux et leur poids dans la note.",
+                    "<strong>6. Critères</strong> — modèle de grille par défaut.",
+                    "<strong>7. Rétroaction</strong> — modèle de cartouche par défaut.",
+                    "<strong>8. Récapitulatif</strong> — relecture avant sauvegarde."
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: "Tu peux quitter le wizard à tout moment avec la croix — rien n'est sauvegardé tant que tu n'as pas atteint la dernière étape. Une pratique créée peut être éditée plus tard sans repasser par le wizard."
+            }
+        ],
+        voirAussi: ['construction-pratiques']
+    },
+
+    'modal-apercu-pdf': {
+        titre: "Aperçu et options du document PDF",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Cette fenêtre montre à quoi ressemblera le PDF qui sera téléchargé. Les changements d'options se reflètent en temps réel dans l'aperçu."
+            },
+            {
+                type: 'liste',
+                titre: "Options de mise en page",
+                items: [
+                    "<strong>Orientation</strong> — portrait pour du texte, paysage pour des tableaux larges ou des images.",
+                    "<strong>Entête</strong> — ce qui apparaît en haut de chaque page (logo, nom, date).",
+                    "<strong>Marges</strong> — sur certains documents seulement, pour ajuster la densité."
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: "Si l'aperçu semble figé, ferme et rouvre la modale. Pour une image annotée trop dense, choisis paysage — le contenu sera mieux réparti."
+            }
+        ]
+    },
+
+    'modal-confidentiel': {
+        titre: "Informations confidentielles d'un·e étudiant·e",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Cette fiche stocke des informations sensibles localement, dans ton navigateur uniquement. Elles ne sont jamais envoyées à un serveur, jamais incluses dans les exports partageables (matériel pédagogique, codex data anonymisé), et anonymisées en mode anonymisation."
+            },
+            {
+                type: 'liste',
+                titre: "Ce que tu peux noter",
+                items: [
+                    "<strong>Parcours</strong> — EPGC, redoublement, plan d'accommodement.",
+                    "<strong>Notes ponctuelles</strong> — observations qui n'ont pas leur place dans une rétroaction.",
+                    "<strong>Portrait</strong> — éléments contextuels (langue maternelle, situation particulière, contacts)."
+                ]
+            },
+            {
+                type: 'alerte',
+                niveau: 'important',
+                contenu: "Cette information voyage avec ton Codex (la sauvegarde complète). Si tu partages un Codex avec quelqu'un, vérifie d'abord que ces données ne doivent pas y être."
+            },
+            {
+                type: 'conseil',
+                contenu: "Limite-toi à ce qui est utile à ta pratique. Évite les jugements personnels — la fiche peut être consultée par toi plus tard, dans un contexte différent."
+            }
+        ]
+    },
+
+    'modal-export': {
+        titre: "Exporter une sauvegarde sélective",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Cette modale permet de choisir précisément quelles clés de stockage exporter dans un fichier JSON (ou ZIP si tu inclus les fichiers travaux). Pour une sauvegarde complète, préfère le Codex (Réglages > Données)."
+            },
+            {
+                type: 'liste',
+                titre: "Quelques clés courantes",
+                items: [
+                    "<strong>groupeEtudiants</strong> — liste nominale des étudiants du cours.",
+                    "<strong>evaluationsSauvegardees</strong> — toutes les évaluations, critères et rétroactions.",
+                    "<strong>fichiersTravaux</strong> — métadonnées des fichiers (cocher déclenche un ZIP avec les blobs).",
+                    "<strong>grillesTemplates / echellesTemplates / productions</strong> — matériel pédagogique."
+                ]
+            },
+            {
+                type: 'alerte',
+                niveau: 'attention',
+                contenu: "Si tu sélectionnes groupeEtudiants, evaluationsSauvegardees, presences ou snapshots, le fichier contient des données nominales d'étudiants. Une boîte de dialogue te le rappellera. Ne le partage pas."
+            },
+            {
+                type: 'conseil',
+                contenu: "Pour partager du matériel pédagogique propre (sans données étudiantes), utilise plutôt les exports de bibliothèque (grilles, échelles, etc.) qui filtrent automatiquement les champs personnels."
+            }
+        ]
+    },
+
+    'modal-import': {
+        titre: "Importer des données dans Labo Codex",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Cette modale accepte des fichiers JSON ou ZIP générés par Labo Codex. L'import écrase les clés correspondantes — utilise-le pour restaurer une sauvegarde ou migrer un trimestre d'un appareil à l'autre."
+            },
+            {
+                type: 'alerte',
+                niveau: 'important',
+                contenu: "L'importation remplace définitivement les données existantes pour les clés importées. Pour une fusion intelligente (3-way merge), passe par le Codex (Réglages > Données > Ouvrir un codex)."
+            },
+            {
+                type: 'liste',
+                titre: "Formats acceptés",
+                items: [
+                    "<strong>.json</strong> — sauvegarde sélective sans fichiers travaux.",
+                    "<strong>.zip</strong> — sauvegarde sélective avec fichiers travaux, ou export configuration complète.",
+                    "<strong>.codex.zip</strong> — fichier Codex complet (passer plutôt par Réglages > Données)."
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: "Fais toujours un Codex de sauvegarde avant un import — c'est ton filet de sécurité si l'import écrase des données que tu voulais garder."
+            }
+        ]
+    },
+
+    'modal-suppression-ressource': {
+        titre: "Supprimer une ressource définitivement",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Cette modale gère la suppression d'une ressource (grille, échelle, cartouche, production, pratique). Elle vérifie les dépendances avant de te laisser confirmer."
+            },
+            {
+                type: 'liste',
+                titre: "Trois cas possibles",
+                items: [
+                    "<strong>Dépendances bloquantes</strong> (rouge) — la suppression est impossible. Exemple : une grille référencée par des évaluations existantes. Tu dois d'abord supprimer ce qui dépend de la ressource.",
+                    "<strong>Avertissements</strong> (orange) — la suppression est possible mais aura des conséquences. Exemple : une grille présente dans la bibliothèque sera retirée de la liste partageable.",
+                    "<strong>Aucune dépendance</strong> (vert) — suppression sécuritaire."
+                ]
+            },
+            {
+                type: 'alerte',
+                niveau: 'important',
+                contenu: "La confirmation par saisie du nom est volontaire — c'est un garde-fou contre les clics rapides. Tape le nom exact (accents, espaces, majuscules) pour activer le bouton de confirmation."
+            },
+            {
+                type: 'conseil',
+                contenu: "Une suppression est irréversible côté app. Si tu as un Codex récent, tu pourras toujours restaurer la ressource depuis là. Sinon, c'est définitif."
+            }
+        ]
     }
 };
 
