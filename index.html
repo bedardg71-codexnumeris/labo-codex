@@ -3950,7 +3950,7 @@
                 <button data-action="fermerModalNouveautes" class="modal-fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
 
                 <!-- Titre principal -->
-                <h2 class="modal-titre">Nouveautés</h2>
+                <h2 class="modal-titre">Nouveautés <button class="btn-aide-contextuelle" data-aide="modal-nouveautes" aria-label="Aide : nouveautés et numéro de version">&#x2734;&#xFE0F;</button></h2>
 
                 <!-- Contenu changelog généré dynamiquement par js/changelog-data.js -->
                 <div id="changelog-contenu"></div>
@@ -8500,7 +8500,7 @@
                 <div class="modal-contenu modal-compact">
                     <button data-action="fermerModalReparationEvaluations" class="modal-fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
 
-                    <h2 class="modal-titre">Réparation des évaluations</h2>
+                    <h2 class="modal-titre">Réparation des évaluations <button class="btn-aide-contextuelle" data-aide="modal-reparation" aria-label="Aide : réparation des évaluations">&#x2734;&#xFE0F;</button></h2>
 
                     <div class="mb-25">
                         <h3 class="u-mb-10 u-texte-bleu" style="font-size: 1rem">Qu'est-ce que cette fonction ?</h3>
@@ -11258,7 +11258,7 @@
                 <div id="modal-suppression-ressource" class="modal-overlay">
                     <div class="modal-contenu" style="max-width: 500px;">
                         <div class="modal-header zone-danger-header">
-                            <h3>Supprimer définitivement</h3>
+                            <h3>Supprimer définitivement <button class="btn-aide-contextuelle" data-aide="modal-suppression-ressource" aria-label="Aide : suppression de ressource">&#x2734;&#xFE0F;</button></h3>
                             <button class="modal-fermer" data-action="fermerModalSuppressionRessource"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
                         </div>
                         <div class="modal-body">
@@ -16257,14 +16257,14 @@
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
     <script src="js/accompagnement-contenu-hover.js?v=2026050824"></script> <!-- Beta 99.38 b0508-1445 : #259 follow-up — tooltips Réserve → Archives -->
-    <script src="js/accompagnement-contenu-popup.js?v=2026050824"></script> <!-- Beta 99.38 b0508-1445 : #259 follow-up — popups « versé » → « archivé » -->
+    <script src="js/accompagnement-contenu-popup.js?v=20260511d"></script> <!-- Beta 99.41 : #256-bis aide aux 8 modales système -->
     <script src="js/accompagnement-contenu-terme.js?v=2026050528"></script>
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js?v=2026050543"></script> <!-- Refonte nav SP5 : naviguerVers calendrier-trimestre -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260511c"></script> <!-- Beta 99.41 b0511-0909 : bump fallback BUILD_ID -->
+    <script src="js/init-inline.js?v=20260511d"></script> <!-- Beta 99.41 b0511-0917 : bump fallback BUILD_ID -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
@@ -16289,7 +16289,7 @@
      background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center;">
         <div
             class="modal-content-scroll">
-            <h3 class="titre-bleu-mb-20">Exporter les données</h3>
+            <h3 class="titre-bleu-mb-20">Exporter les données <button class="btn-aide-contextuelle" data-aide="modal-export" aria-label="Aide : export sélectif">&#x2734;&#xFE0F;</button></h3>
 
             <div class="mb-20">
                 <label
@@ -16316,7 +16316,7 @@
     <div id="modalImport" class="u-hide" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
      background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center;">
         <div class="modal-content-small">
-            <h3 class="titre-bleu-mb-20">Importer les données</h3>
+            <h3 class="titre-bleu-mb-20">Importer les données <button class="btn-aide-contextuelle" data-aide="modal-import" aria-label="Aide : import de données">&#x2734;&#xFE0F;</button></h3>
 
             <div
                 class="carte-mb20-orange">
@@ -16363,6 +16363,7 @@
             <div class="wizard-v2-header">
                 <div class="wizard-v2-primo-avatar">🗺️</div>
                 <div class="wizard-v2-header-texte">
+                    <button class="btn-aide-contextuelle" data-aide="modal-wizard-pratique" aria-label="Aide : wizard pratique de notation" style="float: right;">&#x2734;&#xFE0F;</button>
                     <h2 id="wizard-v2-titre">Informations de base</h2>
                     <p id="wizard-v2-description">Donnez un nom à ta pratique de notation</p>
                     <div class="wizard-v2-progression">
@@ -16412,7 +16413,7 @@
         <div class="modal-contenu u-p-20" style="max-width: 95vw; width: auto">
             <button data-action="fermerModalApercuPDF" class="modal-fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
 
-            <h2 class="modal-titre"><img src="icons/icon-pdf.svg" alt="" class="btn-inline-icon"> Aper&ccedil;u du document</h2>
+            <h2 class="modal-titre"><img src="icons/icon-pdf.svg" alt="" class="btn-inline-icon"> Aper&ccedil;u du document <button class="btn-aide-contextuelle" data-aide="modal-apercu-pdf" aria-label="Aide : aperçu et options PDF">&#x2734;&#xFE0F;</button></h2>
 
             <!-- Options de mise en page sur une ligne -->
             <div class="u-mb-12 u-texte-petit u-align-center" style="display: grid; grid-template-columns: auto 1fr 1fr; gap: 15px; padding: 10px 15px; background: var(--gris-tres-clair, #f5f5f5); border-radius: var(--radius-moyen)">
@@ -16509,7 +16510,7 @@
         <div class="modal-contenu" style="max-width: 750px; padding: 16px;">
             <button data-action="fermerModalConfidentiel" class="modal-fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
 
-            <h2 class="modal-titre u-texte-11" style="margin-bottom: 4px"><img src="icons/icon-lock.svg" alt="" class="btn-inline-icon"> Informations confidentielles</h2>
+            <h2 class="modal-titre u-texte-11" style="margin-bottom: 4px"><img src="icons/icon-lock.svg" alt="" class="btn-inline-icon"> Informations confidentielles <button class="btn-aide-contextuelle" data-aide="modal-confidentiel" aria-label="Aide : fiche confidentielle">&#x2734;&#xFE0F;</button></h2>
             <p class="u-mb-10" style="color: var(--texte-secondaire); font-size: 0.8rem">
                 Ces informations sont stockées localement et ne sont jamais partagées.
             </p>
