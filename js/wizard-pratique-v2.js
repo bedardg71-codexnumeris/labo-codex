@@ -2259,7 +2259,7 @@ async function creerPratiqueV2() {
 
             pratique.configuration.portfolio = {
                 utiliser: r.utiliserPortfolio !== false,
-                // Noms standardisés (cohérents avec pratiques-materiel.js)
+                // Noms standardisés (cohérents avec pratiques-gestion.js)
                 nombreTotal: nbSoumis,
                 nombreARetenir: nbRetenus,
                 methodeSelection: estHybride ? 'meilleurs' : (modeSelection === 'n_meilleurs' ? 'meilleurs' : modeSelection),

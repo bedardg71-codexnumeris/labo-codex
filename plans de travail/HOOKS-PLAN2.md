@@ -69,7 +69,7 @@ Il ne pose **aucun code**. C'est un document de référence pour la session de c
 
 **Fichier** : `js/bibliotheque-ui.js`.
 
-**Logique actuelle** : avant un `save`, vérifie qu'aucune référence sortante ne pointe vers un item `isDemo`. Appelée en 3 points : trimestre-v2 (GC), evaluation.js (×2), pratiques-materiel.
+**Logique actuelle** : avant un `save`, vérifie qu'aucune référence sortante ne pointe vers un item `isDemo`. Appelée en 3 points : trimestre-v2 (GC), evaluation.js (×2), pratiques-gestion.
 
 **Extension Plan 2** :
 
