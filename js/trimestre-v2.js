@@ -4279,7 +4279,7 @@ function populerDropdownsAssemblageV2() {
     // ✅ FIX (10 jan 2026) : N'affiche que les pratiques dans la sidebar (dansBibliotheque !== false)
     const selectPratique = document.getElementById('v2-gc-pratique');
     if (selectPratique) {
-        // Les pratiques sont stockées dans 'pratiquesConfigurables' (module pratiques-materiel.js)
+        // Les pratiques sont stockées dans 'pratiquesConfigurables' (module pratiques-gestion.js)
         const toutesPratiques = db.getSync('pratiquesConfigurables', []);
         // Filtrer pour n'afficher que les pratiques dans la sidebar
         const pratiques = enDemoLegacy

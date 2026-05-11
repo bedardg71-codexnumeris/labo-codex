@@ -1,9 +1,15 @@
 /* ===============================
-   MODULE : PRATIQUES DE NOTATION (Section Construction)
+   MODULE : PRATIQUES DE NOTATION — Gestion UI (Section Construction)
    (c) 2 janvier 2026 - Beta 95
+   Renommé pratiques-materiel.js → pratiques-gestion.js le 11 mai 2026 (#266)
 
-   Interface sidebar + bibliothèque pour les pratiques de notation.
-   Suit le même pattern que echelles.js (sidebar gauche, zone principale, modal bibliothèque)
+   Interface sidebar + bibliothèque + édition pour les pratiques de notation.
+   Suit le même pattern que echelles.js (sidebar gauche, zone principale, modal bibliothèque).
+
+   Distinction avec les autres modules « pratique » :
+   - pratiques.js — configuration globale du cours (quelle pratique appliquer)
+   - pratique-notation-v2.js — wizard V2 (création initiale)
+   - pratiques-bibliotheque.js — gabarits et fonctions de bibliothèque
 
    Dépendances:
    - pratiques-bibliotheque.js (gabarits et fonctions de bibliothèque)
@@ -125,7 +131,7 @@ async function afficherListePratiquesMateriel() {
 
     const container = document.getElementById('sidebarListePratiques');
     if (!container) {
-        console.warn('[pratiques-materiel] ⚠️ Élément sidebarListePratiques introuvable');
+        console.warn('[pratiques-gestion] ⚠️ Élément sidebarListePratiques introuvable');
         return;
     }
 
@@ -478,7 +484,7 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
     }
 
     if (!configSource) {
-        console.error('[pratiques-materiel] Configuration introuvable:', pratiqueId);
+        console.error('[pratiques-gestion] Configuration introuvable:', pratiqueId);
         return;
     }
 
@@ -646,7 +652,7 @@ async function chargerPratiquePourModif(pratiqueId) {
     }
 
     if (!pratique) {
-        console.error('[pratiques-materiel] Pratique introuvable:', pratiqueId);
+        console.error('[pratiques-gestion] Pratique introuvable:', pratiqueId);
         return;
     }
 
@@ -1085,7 +1091,7 @@ async function sauvegarderConfigPratiqueMat() {
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
 
     if (index === -1) {
-        console.warn('[pratiques-materiel] ⚠️ Pratique en édition introuvable:', pratiqueEnEditionMateriel);
+        console.warn('[pratiques-gestion] ⚠️ Pratique en édition introuvable:', pratiqueEnEditionMateriel);
         return;
     }
 
@@ -1196,7 +1202,7 @@ async function sauvegarderConfigPratiqueMat() {
     try {
         await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
     } catch (e) {
-        console.warn('[pratiques-materiel] Erreur db.set, fallback setSync:', e);
+        console.warn('[pratiques-gestion] Erreur db.set, fallback setSync:', e);
         db.setSync(CLE_PRATIQUES_CONFIGURATIONS, configurations);
     }
 }
@@ -1223,7 +1229,7 @@ async function sauvegarderPratiqueMaterielComplet() {
             throw new Error('Pratique introuvable après sauvegarde');
         }
     } catch (erreur) {
-        console.error('[pratiques-materiel] ❌ Erreur sauvegarde complète:', erreur);
+        console.error('[pratiques-gestion] ❌ Erreur sauvegarde complète:', erreur);
         if (typeof afficherNotificationErreur === 'function') {
             afficherNotificationErreur('Erreur lors de la sauvegarde. Vérifie la console.');
         } else {
@@ -1591,7 +1597,7 @@ async function creerNouvellePratique() {
 
         if (!pratiqueTrouvee) {
             // Sauvegarde échouée - essayer localStorage directement
-            console.error('[pratiques-materiel] ❌ Vérification échouée, tentative localStorage...');
+            console.error('[pratiques-gestion] ❌ Vérification échouée, tentative localStorage...');
             db.setSync(CLE_PRATIQUES_CONFIGURATIONS, configurations);
 
             // Re-vérifier
@@ -1610,7 +1616,7 @@ async function creerNouvellePratique() {
             afficherNotificationSucces('Nouvelle pratique créée et sauvegardée');
         }
     } catch (erreur) {
-        console.error('[pratiques-materiel] ❌ Erreur sauvegarde pratique:', erreur);
+        console.error('[pratiques-gestion] ❌ Erreur sauvegarde pratique:', erreur);
         if (typeof afficherNotificationErreur === 'function') {
             afficherNotificationErreur('Erreur : la pratique n\'a pas pu être sauvegardée. Veuillez réessayer.');
         } else {
@@ -1678,7 +1684,7 @@ async function dupliquerPratiqueMateriel(pratiqueId) {
     const original = configurations.find(p => p.id === pratiqueId);
 
     if (!original) {
-        console.error('[pratiques-materiel] Pratique à dupliquer introuvable:', pratiqueId);
+        console.error('[pratiques-gestion] Pratique à dupliquer introuvable:', pratiqueId);
         return;
     }
 
@@ -1753,7 +1759,7 @@ async function appliquerPratiqueAuCours(pratiqueId) {
  */
 async function sauvegarderPratiqueMateriel() {
     if (!pratiqueEnEditionMateriel) {
-        console.warn('[pratiques-materiel] Aucune pratique en édition');
+        console.warn('[pratiques-gestion] Aucune pratique en édition');
         return;
     }
 
@@ -1774,7 +1780,7 @@ async function partagerPratiqueMateriel(pratiqueId) {
     const pratique = configurations.find(p => p.id === pratiqueId);
 
     if (!pratique) {
-        console.error('[pratiques-materiel] Pratique à partager introuvable');
+        console.error('[pratiques-gestion] Pratique à partager introuvable');
         return;
     }
 

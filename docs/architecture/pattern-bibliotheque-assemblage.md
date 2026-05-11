@@ -120,7 +120,7 @@ async function hydrater(gc) {
 ### Fichiers principaux
 
 - `js/pratiques-bibliotheque.js` - CRUD bibliothèque + gabarits
-- `js/pratiques-materiel.js` - Sidebar + assemblage + édition
+- `js/pratiques-gestion.js` - Sidebar + assemblage + édition
 - `js/pratiques.js` - Logique métier
 
 ### Clés de stockage

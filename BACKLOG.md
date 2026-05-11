@@ -306,21 +306,20 @@
   - **À cartographier** : capturer l'état actuel des 5 modales bibliothèques + comparer avec `design-system.html`.
   - **Lien** : suite logique de #262 Phase 2 (qui s'est arrêté au comportement, pas à l'esthétique).
 
-- [ ] **#266** Renommer `js/pratiques-materiel.js` → nom reflétant son rôle actuel (8 mai 2026)
-  - **Contexte** : le fichier `js/pratiques-materiel.js` gère la sidebar +
-    édition + bibliothèque dans la section Conception > Pratiques de notation
-    (DOM `#sidebarListePratiques`). Le suffixe `-materiel` est un legacy de
-    l'époque où la section UI s'appelait « Matériel pédagogique ». Aujourd'hui
-    la section UI dit « Pratiques de notation ». Le suffixe distingue aussi
-    historiquement de `pratiques.js` (le module avec le wizard V1, nettoyé
-    le 8 mai 2026). Le nom actuel ne reflète plus son rôle.
-  - **Cible** : renommer en `js/pratiques-sidebar.js` (ou autre nom plus
-    parlant — `pratiques-ui.js` ? `pratiques-bibliotheque-ui.js` ?). Mettre
-    à jour le tag `<script src="...">` dans index.html, les commentaires
-    `[pratiques-materiel]` dans les console.log/error, et les éventuelles
-    références croisées.
-  - **Lien avec #262** : #262 corrige le NOM des fichiers EXPORTÉS (`pratiques-pratiques-notation-...json` → `pratiques-CC-BY-SA-...json`) ; #266 corrige le NOM du fichier SOURCE JS. Indépendants mais même esprit (faire correspondre les noms à l'UI actuelle).
-  - **Effort estimé** : ~30 min (1 git mv + recherche/remplacement des références).
+- [x] **#266** Renommer `js/pratiques-materiel.js` → `js/pratiques-gestion.js` (livré 11 mai 2026, Beta 99.41 b0511-1145)
+  - `git mv js/pratiques-materiel.js js/pratiques-gestion.js`. En-tête du fichier mis à jour
+    (mention « Renommé pratiques-materiel.js → pratiques-gestion.js le 11 mai 2026 (#266) »).
+  - Tag `<script src>` mis à jour dans index.html avec nouveau cache buster `?v=2026051121`.
+  - 11 console.log/warn/error : `[pratiques-materiel]` → `[pratiques-gestion]`.
+  - 2 commentaires JS mis à jour : `wizard-pratique-v2.js`, `trimestre-v2.js`.
+  - 5 références docs mises à jour : `MODELE-MENACES.md`, `AUDIT-ETAT-REFLEXION-2026-05-11.md`,
+    `pattern-bibliotheque-assemblage.md`, `HOOKS-PLAN2.md`, `CALENDRIER.md`.
+  - **Fonctions exportées avec suffixe `Materiel` conservées** (8 fonctions) — collision
+    confirmée avec `pratiques.js` (déjà `dupliquerPratique`, `supprimerPratique`,
+    `partagerPratique`). Suffixe garde la distinction logique entre les 2 modules.
+  - **Audits historiques laissés intacts** : `TESTS-DEFENSE-A-2026-05-08.md`,
+    `AUDIT-INNERHTML-FINDINGS-2026-05-06.md`, `PLAN-AUTONOMISATION-UTILISATEUR.md`
+    (traces datées de l'état au moment de l'audit).
 
 - [x] **#264** Barre de progression sur tous les exports (livré 11 mai 2026, b0511-0901 + b0511-0909, commits 72d4533 + 0e70935)
   - **Livré** : tous les exports longs branchés sur `window.afficherProgression/majProgression/masquerProgression` (module `progression.js` issue #229, qui n'était utilisé que par codex/reserve).
