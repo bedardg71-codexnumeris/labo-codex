@@ -535,10 +535,12 @@
   - Afficher toutes les differences d'un coup (pas un detail a la fois)
   - **Module** : `js/codex.js` (fonction `actionComparer` ou equivalent)
 
-- [ ] **#244** Codex : Identifier le navigateur source dans le manifeste
-  - Ajouter `navigateur` (ex: "Chrome 146 / macOS") et `userAgent` au manifeste du codex
-  - Facilite le diagnostic quand un codex Safari et un codex Chrome divergent
-  - **Module** : `js/codex.js` (fonction `genererCodex`)
+- [x] **#244** Codex : Identifier le navigateur source dans le manifeste ✅ LIVRÉ (11 mai 2026)
+  - Nouvelle fonction `_identifierNavigateur()` dans `js/codex.js` après `_identifierAppareil()`. Parse nom/version/OS depuis `navigator.userAgent`. Gère iOS WebKit re-brandé (CriOS, EdgiOS, FxiOS). Format : `Chrome 146 / macOS`, `Safari 17 / iPadOS`, etc.
+  - 2 champs ajoutés au manifeste : `navigateur` (string lisible) + `userAgent` (string complète pour diagnostic).
+  - Branchement aux 2 sites de construction du manifeste : `genererCodex` (codex complet, ~L353) + export sélectif (~L2504).
+  - Champ `appareil` conservé pour rétrocompatibilité des codex existants.
+  - **Effort réel** : ~30 min (vs estimation 30 min).
 
 ### Simplification UX Codex
 

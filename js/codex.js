@@ -358,6 +358,8 @@ async function genererCodex(options = {}) {
         dateCreation: _etat.manifeste?.dateCreation || maintenant,
         dateDerniereModification: maintenant,
         appareil: _identifierAppareil(),
+        navigateur: _identifierNavigateur(),        // #244 (11 mai 2026)
+        userAgent: navigator.userAgent,             // #244 (string complète pour diagnostic)
         trimestre: trimestreActif,
         contenu: {
             cles: toutesLesCles.filter(c => !c.startsWith('_codex_')),
@@ -1699,6 +1701,40 @@ function _identifierAppareil() {
 }
 
 /**
+ * Identifie le navigateur + version + OS (pour le diagnostic codex Safari ↔ Chrome).
+ * Format : "Chrome 146 / macOS", "Safari 17 / iPadOS", etc.
+ * Gère les variantes iOS (CriOS, EdgiOS, FxiOS) qui sont du WebKit re-brandé.
+ * (#244)
+ */
+function _identifierNavigateur() {
+    const ua = navigator.userAgent;
+    let nom = 'Inconnu';
+    let version = '';
+    let m;
+
+    // iOS browsers (forcés WebKit par Apple, UA différent)
+    if ((m = ua.match(/CriOS\/(\d+)/))) { nom = 'Chrome'; version = m[1]; }
+    else if ((m = ua.match(/EdgiOS\/(\d+)/))) { nom = 'Edge'; version = m[1]; }
+    else if ((m = ua.match(/FxiOS\/(\d+)/))) { nom = 'Firefox'; version = m[1]; }
+    // Desktop browsers — Edge avant Chrome (Edge contient "Chrome" dans son UA)
+    else if ((m = ua.match(/Edg\/(\d+)/))) { nom = 'Edge'; version = m[1]; }
+    else if (!/Edg/.test(ua) && (m = ua.match(/Chrome\/(\d+)/))) { nom = 'Chrome'; version = m[1]; }
+    else if ((m = ua.match(/Firefox\/(\d+)/))) { nom = 'Firefox'; version = m[1]; }
+    // Safari en dernier (Chrome contient aussi "Safari" dans son UA)
+    else if ((m = ua.match(/Version\/(\d+).*Safari/))) { nom = 'Safari'; version = m[1]; }
+
+    let os = 'Inconnu';
+    if (/iPad/.test(ua) || (/Macintosh/.test(ua) && 'ontouchend' in document)) os = 'iPadOS';
+    else if (/iPhone|iPod/.test(ua)) os = 'iOS';
+    else if (/Macintosh|Mac OS X/.test(ua)) os = 'macOS';
+    else if (/Windows/.test(ua)) os = 'Windows';
+    else if (/Android/.test(ua)) os = 'Android';
+    else if (/Linux/.test(ua)) os = 'Linux';
+
+    return version ? `${nom} ${version} / ${os}` : `${nom} / ${os}`;
+}
+
+/**
  * Obtient la version de l'application
  */
 function _obtenirVersionApp() {
@@ -2509,6 +2545,8 @@ async function actionExporterSelection() {
         dateCreation: maintenant,
         dateDerniereModification: maintenant,
         appareil: _identifierAppareil(),
+        navigateur: _identifierNavigateur(),        // #244 (11 mai 2026)
+        userAgent: navigator.userAgent,             // #244 (string complète pour diagnostic)
         trimestre: trimestresChoisis.join(', '),
         exportSelectif: true,
         trimestresInclus: trimestresChoisis,
