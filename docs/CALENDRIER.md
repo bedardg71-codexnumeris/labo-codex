@@ -134,7 +134,7 @@ Ces six démarches sont à **initier cette semaine** (pas à conclure). Délais 
 - Lot 3 ultrareview indices (~3-5 h, plan dans `Rapports/ultrareview-lot-3-indices.md`)
 - Phase 5 Démo (~1 j, déjà reverté le 22 avril)
 - #207 unifier `travaux-stockage.js` dans `db.js` (~1-2 j)
-- #239 machine à états chargement évaluation (~1 j)
+- #272 machine à états chargement évaluation (~1 j, anciennement #239)
 - Défense E migration EXHAUSTIVE (~1-2 sem) — considérée post-colloque seulement si pertinente. La fermeture pragmatique de mai devrait suffire.
 
 ### Semaine du 18 au 24 mai

@@ -103,7 +103,7 @@ C. Reportés post-trimestre (semaine 25 mai+) :
    - Lot 3 indices ultrareview (~3-5 h)
    - Phase 5 Démo (~1 j, déjà reverté 22 avril)
    - #207 unifier travaux-stockage.js dans db.js (~1-2 j)
-   - #239 machine à états chargement éval (~1 j)
+   - #272 machine à états chargement éval (~1 j)
 
 Conventions actées le 11 mai :
 - Module progression.js (issue #229) couvre désormais 8 modules. Pattern
@@ -213,7 +213,7 @@ Rapport : `docs/securite/audits/AUDIT-INNERHTML-FINDINGS-2026-05-11.md`.
 - **#249** Réserve v1.1 — section Réglages dédiée
 - **#257 v2.B** mode consultation namespace temporaire
 - **Phase 5 Démo** — ~1 j, post-trimestre
-- **#239** machine à états chargement éval — ~1 j, post-trimestre
+- **#272** machine à états chargement éval — ~1 j, post-trimestre (anciennement #239)
 - **#207** unifier travaux-stockage.js dans db.js — ~1-2 j, post-trimestre
 - **Défense E migration complète** — ~1-2 sem, post-colloque
 

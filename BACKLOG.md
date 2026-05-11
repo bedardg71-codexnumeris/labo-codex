@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 26 avril 2026 (Beta 99.26, Build 0426-1422)
+> **Derniere mise a jour** : 11 mai 2026 (Beta 99.41, Build 0511-1105) — ménage A+B+C : 8 items clos, 5 collisions renumérotées, 2 reformulés
 
 ---
 
@@ -45,10 +45,12 @@
     `_hydrateManifesteDepuisZip` (reserve-ouvrir.js).
   - Cle db `_manifesteReserve` (prefixe `_` exclu des versements).
 
-- [ ] **#249** Reserve v1.1 — section dediee dans Reglages
-  - Section « Reserve » qui affiche l'etat de la reserve (versements detectes,
-    dates, tailles) en lisant un manifeste importe. Spec v1 §6.3 explicitement
-    differe a la v1.1.
+- [x] **#249** Reserve v1.1 — section dediee dans Reglages (livré 2 mai 2026, b0502-1335, commit fda662d)
+  - Module `js/reserve-reglages.js` (~290 l.) : carte « Réserve » dans Réglages > Données.
+    Bandeau dossier FSAPI + tableau des versements (trimestre, cours, groupe, date, étud.,
+    fich., taille, badge mode FSAPI/ZIP). Bouton ✴️ aide + popup `reglages-reserve`.
+  - Classes CSS `.badge-mode-fsapi` (vert), `.badge-mode-zip` (orange) ajoutées à styles.css.
+  - Spec v1 §6.3 fermée.
 
 - [x] **#250** Codex allege — retirer le TimeMachine du codex (livre 28 avril 2026, b0428-1000)
   - Priorite 1 de `ECOSYSTEME-DONNEES.md` §Priorites d'implementation. Gain
@@ -178,19 +180,17 @@
       - Correction `entete-codex` : retrait de la metaphore « cloud personnel » (contredit l'architecture manuelle/locale).
       - Hors scope (a venir si validation terrain le demande) : aide dynamique par section/item dans `reserve-ouvrir-sections`, et 8 autres modales.
 
-- [ ] **#256-bis** Aide aux 8 autres modales (Nouveautes, Reparation, Wizard pratique, ApercuPDF, Confidentiel, Export, Import, Suppression ressource)
-  - **Probleme** : les modales (`#modalOuvrirVersement`, `#modalReserve`, autres) ne
-    beneficient pas du systeme d'aide existant. Un novice qui ouvre « Ouvrir la reserve »
-    ne sait pas ce qu'est une archive, pourquoi cocher « copie en double », ou pourquoi
-    des items sont grises (« deja present »).
-  - **Cible** : etendre `data-aide` / infobulles / primo-aide pour qu'elles fonctionnent
-    a l'interieur des modales (overlay), avec une UX coherente avec le reste de l'app.
-  - **Risques** : le z-index des tooltips doit depasser celui des modales sans masquer
-    les boutons d'action. Les fleches didactiques (parcours guide) peuvent etre
-    incompatibles avec un overlay.
-  - **Effort estime** : 1 jour (audit du systeme d'aide existant + etoffement).
-  - **Priorite** : Moyenne. Pas bloquant pour la livraison v1, mais attendu pour la
-    version « novice-friendly ».
+- [x] **#256-bis** Aide aux 10 modales système (livré 11 mai 2026, b0511-0931, commits 853c1a0 + b101b56 — validation Safari à faire)
+  - 10 entrées popup ajoutées dans `accompagnement-contenu-popup.js` : `modal-nouveautes`,
+    `modal-reparation`, `modal-wizard-pratique`, `modal-apercu-pdf`, `modal-confidentiel`,
+    `modal-export`, `modal-import`, `modal-suppression-ressource`, `modal-codex-data`,
+    `modal-export-preview` (générique K-β preview partagé par tous les exports).
+  - Boutons ✴️ `data-aide` injectés dans chaque header. Wizard : bouton sibling (titre
+    réécrit dynamiquement par textContent) avec classe CSS `.wizard-v2-header-texte
+    .btn-aide-contextuelle`. K-β preview : injection dynamique via DOM dans
+    `securite-export-preview.js`.
+  - **Validation terrain Safari** à effectuer (popups, z-index, contenu) avant de retirer
+    cette mention.
 
 ### Vocabulaire — Simplification ecosysteme de donnees (2 mai 2026)
 
@@ -375,14 +375,14 @@
 
 ### Rythme Phase 5 — Raffinements (selon usage, post-AQPC)
 
-- [ ] **#240** Courbe d'apprentissage de l'evaluateur (tendance temporelle par activite)
-- [ ] **#241** Export du portrait temporel pour reflexion professionnelle
-- [ ] **#242** Drill-down par activite → detail productions/groupes
-- [ ] **#243** Planification multi-productions avec priorites
+- [ ] **#268** Courbe d'apprentissage de l'evaluateur (tendance temporelle par activite)
+- [ ] **#269** Export du portrait temporel pour reflexion professionnelle
+- [ ] **#270** Drill-down par activite → detail productions/groupes
+- [ ] **#271** Planification multi-productions avec priorites
 
 ### Chantier structurel — Machine a etats pour le chargement d'evaluations
 
-- [ ] **#239** Remplacer les 5 flags globaux + setTimeout imbriques par un module eval-chargement.js
+- [ ] **#272** Remplacer les 5 flags globaux + setTimeout imbriques par un module eval-chargement.js (anciennement #239, renuméroté 11 mai 2026)
   - **Contexte** : Le systeme actuel coordonne l'ouverture de fichiers et le chargement
     d'evaluations avec 5 flags booleens globaux (`_modifierEvaluationEnCours`,
     `_apresOuvertureFichier`, `_resterEnModeAnnoter`, `_forceStandaloneEval`,
@@ -695,17 +695,27 @@
 
 - [ ] **Retroactions visuelles enrichies dans la synthese** : Les retroactions remises a l'eleve (synthese PDF et zone de retroaction) ne contiennent actuellement que les courts descriptifs des niveaux de la palette (quelques mots par critere). Ce n'est pas suffisant pour une retroaction pedagogique significative. Il faudrait developper des retroactions plus etoffees : phrases completes par critere/niveau, pistes d'amelioration, forces observees, liens avec les objectifs. Explorer les options : commentaires editables par critere dans la cartouche, champs de retroaction detaillee par niveau, ou generation assistee a partir du contexte de la production.
 
-- [ ] **Evaluations demo** : Produire quelques evaluations de demonstration pour les modules d'annotation et d'evaluation qui ont ete remanies. Permettra de valider le flux complet et de servir d'exemples pour les nouveaux utilisateurs.
+- [ ] **#273** Évaluations démo basées sur de vrais travaux d'élèves anonymisés (besoin identifié 21 fév 2026, reformulé 11 mai 2026)
+  - **Contexte** : les modules d'annotation et d'évaluation ont été remaniés (Phases #109 à #185, Beta 96.3 → 98.x). Aucun exemple complet n'est livré en mode démo.
+  - **Sources** : Grégoire a obtenu le consentement d'élèves H2026 (plusieurs « oui ») pour utiliser leurs travaux à des fins de démonstration. Travaux à anonymiser avant intégration au pack démo.
+  - **Périmètre** : 2-3 dossiers complets couvrant annotation Apple Pencil + évaluation par grille + rétroaction structurée. Visée double : (1) valider le flux complet de bout en bout, (2) servir d'exemples concrets aux nouveaux utilisateurs (et démo AQPC 3 juin).
+  - **Anonymisation** : remplacer DA + prénom/nom par identifiants démo (`Élève_DEMO_01`, etc.), retirer toute mention nominative dans les fichiers PDF/images, vérifier l'absence de métadonnées EXIF compromettantes.
+  - **Intégration** : verser dans le pack démo (groupe 9999) via `donnees-demo.js`, avec préfixe `PROD_DEMO_` (rappel #86 : ne JAMAIS utiliser `PROD_` seul, qui matche les vraies productions).
+  - **Fichiers** : `js/donnees-demo.js`, `autocollants/` éventuellement enrichi, pack travaux dans `MonitorageFichiers` (IndexedDB).
 
 - [ ] **Evaluation sans travaux importes** : S'assurer que le module d'evaluation fonctionne meme si aucun travail n'est charge (importe). Contexte : jusqu'a present, l'evaluation se faisait dans GoodNotes ; desormais elle se fera directement dans l'application. Le flux doit supporter l'evaluation manuelle sans fichier PDF/image importe.
 
 - [x] **Info-bulles et pratique guidee (Annotation/Evaluation)** ✅ COMPLÉTÉ (22 fév 2026) : 25 info-bulles ajoutées couvrant les cartes métriques, checkboxes rétroaction, boutons d'action, barre d'outils annotation, pipeline d'import et zone d'archivage.
 
-### Priorite haute - Cartes mentales et Calendrier (21 fev 2026)
+### Priorite haute - Cartes mentales (21 fev 2026)
 
-- [ ] **Terminer le travail sur les cartes mentales** : Finaliser les fonctionnalites en cours du module de planification par carte mentale.
-
-- [ ] **Terminer le travail sur le calendrier** : Finaliser les fonctionnalites en cours du module calendrier.
+- [ ] **#274** Produire des cartes mentales démo pour le matériel pédagogique (été 2026)
+  - **Contexte** : alimenter le mode démo avec des exemples concrets de cartes mentales d'alignement (taxonomie Anderson, objectifs/savoirs/activités/évaluations).
+  - **Usage prévu** : matériel pédagogique de la cohorte CoP. Particulièrement utile pour la Rencontre 5 « Aligner sa pratique » (janvier 2027), première bascule pédagogique du cycle.
+  - **Période cible** : été 2026 (préparation pendant la phase expérimentateurs juin-août).
+  - **Périmètre** : 2-3 cartes complètes couvrant différentes disciplines/cours, intégrées au pack démo via `js/donnees-demo.js`. Charger automatiquement quand le mode démo est actif.
+  - **Lien** : la complétion du module Alignement lui-même (fonctionnalités du code) est planifiée à l'automne 2026 — référence CALENDRIER §7 (Rencontre 5, hiver 2027).
+  - **Fichiers** : `js/donnees-demo.js`, `js/planification-bibliotheque.js` (déjà alimenté par #188 avec « Écriture et littérature »).
 
 ### Priorite haute - Module Travaux / Visionneuse (20 fev 2026)
 
@@ -1452,9 +1462,7 @@
 
 - [x] **#13** ~~Outil verification integrite donnees~~ ✅ REMPLACÉ (27 mars 2026) — `window._storageStats` + `window._testResistanceStorage()` dans db.js
 
-- [ ] **#15** Consolidation wizard vs pratiques-materiel
-  - Code duplique pour creation de pratiques
-  - Factoriser logique commune
+- [x] **#15** Consolidation wizard vs pratiques-materiel ✅ OBSOLÈTE (11 mai 2026) — Remplacé par #29 (retrait du wizard V1 le 8 mai 2026, commit b70861b). Le wizard V2 est maintenant seul, plus de duplication à factoriser.
 
 - [x] **#16** Systeme changelog automatise ✅ COMPLÉTÉ (10 fev 2026)
   - changelog-data.js structure, script update-version.sh, changelogs markdown par beta
@@ -1471,10 +1479,12 @@
 - [x] **#28** Ajouter mode edition a Wizard V2 ✅ FAIT
   - `ouvrirWizardV2(modeEdition, pratiqueId)` complet dans `js/wizard-pratique-v2.js`
 
-- [ ] **#29** Retirer wizard legacy (post #28)
-  - Supprimer modalWizardPratique (~600 lignes HTML)
-  - Supprimer fonctions legacy dans pratiques.js
-  - Prerequis : #28 complete
+- [x] **#29** Retirer wizard legacy (livré 8 mai 2026, b0508-1430, commit b70861b)
+  - `modalWizardPratique` retiré d'index.html (0 occurrence).
+  - `pratiques.js` 5458 → 3686 lignes (-1772 l., -32 %). 33 fonctions V1 supprimées
+    (28 prévues + 5 oubliés découverts).
+  - Bug latent corrigé : bouton « Éditer » bibliothèque pratiques était silencieusement cassé.
+  - Fragilité éliminée : double export `window.ouvrirWizardPratique` V1/V2.
 
 ### Bibliotheques
 
@@ -1553,10 +1563,19 @@
   - **Action** : Extrait `preparerDonneesBibliothequeX()` dans chaque module — le rendu ne fait que consommer des donnees pre-formatees
   - **Fichiers** : `js/grilles.js`, `js/echelles.js`, `js/productions.js`, `js/cartouches.js`
 
-- [ ] **#160** UX : Alleger l'apparence des bibliotheques (boutons et badges)
-  - **Symptome** : Les modales de bibliotheques sont visuellement lourdes — trop de boutons visibles simultanement et badges trop proeminents
-  - **Action** : Reduire la taille/densite des boutons d'action (icones ou boutons compacts), alleger les badges (plus discrets, moins de couleurs saturees)
-  - **Fichiers** : `js/bibliotheque-ui.js`, `styles.css`
+- [x] **#160** UX : Alleger l'apparence des bibliotheques (livré via #267 Phases A+B+C+D, 9-10 mai 2026, beta 99.39-99.40)
+  - Phase A (épure visuelle) : filtrage par mode démo, retrait `#identifiant`, retrait badge
+    « Bibliothèque », retrait préfixes `[STD]/[SPE]/[SOM]/[DEN]/[Multi]/[Démo]` dans titres,
+    retrait badge violet « Démo » — commit `9c6d29f`.
+  - Phase B (migration pratiques + uniformisation boutons) : règle CSS unique avec
+    `!important` ciblant `[id^="modalBibliotheque"] .btn` dans `styles.css:3399`. Tailles
+    boutons uniformes partout — commit `8a2e93c`.
+  - Phase C (refonte cartes biblios) : composant menu `⋮` générique, API
+    `{boutonPrincipal, actionsMenu}` (remplace l'ancien `boutons:[]`) — commit `be2ebb9`.
+  - Phase D (standardisation métadonnées) : helpers `formaterMetadonnees` (ordre fixe
+    quantité · auteur · discipline) et `tronquerDescription` (coupe au dernier espace,
+    max 120 c) — commit `83eb626`.
+  - Audit : `Rapports/AUDIT-BIBLIOS-2026-05-09.md`. Spec design : `design-system.html` §24.
 
 - [ ] **#159** UX : Previsualisation cartouche sous le gabarit ou navigation gabarit/previsualisation
   - **Symptome** : L'editeur de cartouche (gabarit + matrice) et la previsualisation sont empiles verticalement, forcant un long scroll
@@ -1593,22 +1612,17 @@
   - Référence APA : Anderson, L. W. (2026). UNESCO IBE. Hyperlien intégré
   - **Fichiers** : `js/planification-carte.js`, `index.html`, `styles.css`
 
-- [ ] **#163** Verifier l'implementation de l'accompagnement de creation de materiel pedagogique
-  - Valider que l'assistant conversationnel (demarrerCreationMateriel) fonctionne correctement depuis les nouveaux points d'entree (section Decouvrir sur l'accueil + banniere dans Construction > Apercu)
-  - Tester la creation d'echelle, grille, production et cartouches sans activer le tour guide
+- [x] **#163** Verifier l'implementation de l'accompagnement de creation de materiel pedagogique ✅ OBSOLÈTE (11 mai 2026) — La fonction `demarrerCreationMateriel` faisait partie des 4 modules `primo-*` retirés le 21 avril 2026 (Phase 3 consolidation onboarding, commit cfee015, -5700 l.). L'onboarding est désormais consolidé dans `accompagnement.js` (tour guidé 6 étapes + flèches didactiques A.16). Périmètre original disparu.
 
 ### Parcours d'apprentissage — Verification et guide
 
-- [ ] **#164** Verifier le parcours complet d'initiation de l'utilisateur
-  - Tester le flux complet depuis un localStorage vierge : panneau CTA → choix de mode → progression des 12 jalons → certification d'autonomie
-  - Valider le modal de bienvenue, le panneau CTA sur l'accueil, le hero adaptatif, les notifications de jalon, les suggestions proactives
-  - Verifier la reinitialisation (Reglages → Preferences), l'export/import de la progression, le responsive (600px, 900px, 1300px)
-  - S'assurer que tous les mecanismes d'aide (guidage configuration, tutoriel presences, tour guide, tooltips) s'orchestrent correctement selon le mode choisi
+- [x] **#164** Verifier le parcours complet d'initiation de l'utilisateur ✅ OBSOLÈTE (11 mai 2026) — Le périmètre original (modal de bienvenue, panneau CTA, 12 jalons, hero adaptatif, suggestions proactives, certification d'autonomie) reposait sur `parcours-apprentissage.js` (retiré 21 avril, Phase 5A, commit f796d93, -1335 l.) et les modules `primo-*` (retirés 21 avril, Phase 3, commit cfee015, -5700 l.). L'onboarding est désormais consolidé dans `accompagnement.js` (tour guidé 6 étapes + flèches didactiques A.16). Périmètre original disparu.
 
-- [ ] **#165** Revoir le format du guide dans l'alignement pedagogique (Anderson)
-  - Revoir la mise en page et le contenu du guide integre (7 pages) dans le module Carte mentale
-  - Verifier la coherence avec la taxonomie d'Anderson (types de connaissances, niveaux cognitifs, verbes)
-  - **Fichiers** : `js/planification-carte.js`, `styles.css`
+- [x] **#165** Revoir le format du guide dans l'alignement pedagogique (Anderson) ✅ LIVRÉ (11 avril 2026, Beta 99.11 b0411-2010, commits 55b8668 + 3482deb + fb5d632)
+  - Guide étendu de 7 à 8 pages (ajout page 8 « exporter et importer un plan », workflow IA).
+  - Guide rendu accessible depuis le Plan de la leçon. Mention ChatGPT retirée.
+  - Panneau au niveau `section-structure` (position fixed) — voir MEMORY.md « Module Planification ».
+  - Cycle aller-retour import/export MD (marqueurs `[Séquence | Sem. X–Y]`, `[Leçon | durée]`) avec modale à onglets Export/Import.
 
 ### Coherence visuelle et design system (16 fevrier 2026)
 
