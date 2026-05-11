@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260510b"> <!-- Beta 99.40 b0510-1500 : Phase C #267 menu ⋮ kebab -->
+    <link rel="stylesheet" href="styles.css?v=20260511e"> <!-- Beta 99.41 : .wizard-v2-header-texte .btn-aide-contextuelle float -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -16063,7 +16063,7 @@
     <script src="js/db.js?v=2026050613"></script> <!-- Beta 99.36 b0506-1335 : Défense D — préférence persistance FSAPI -->
     <script src="js/securite-hash.js?v=2026050615"></script> <!-- Beta 99.36 b0506-1400 : Défense H — sceau SHA-256 sur ressources partagées -->
     <script src="js/securite-export-validation.js?v=2026050824"></script> <!-- Beta 99.38 b0508-1445 : #259 follow-up — label « archive » (sans « réserve ») -->
-    <script src="js/securite-export-preview.js?v=2026050819"></script> <!-- Beta 99.38 b0508-1255 : #263 K-β preview alignée DS (modal-js-overlay/contenu, btn-confirmer/annuler) -->
+    <script src="js/securite-export-preview.js?v=20260511e"></script> <!-- Beta 99.41 : #256-bis bouton ✴️ data-aide=modal-export-preview -->
 
     <!-- Rapport de bug pour testeurs (Beta 94) - Chargé tôt pour capturer les erreurs -->
     <script src="js/rapport-bug.js?v=2026050547"></script> <!-- Refonte nav SP5 : case 'calendrier' -->
@@ -16257,14 +16257,14 @@
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
     <script src="js/accompagnement-contenu-hover.js?v=2026050824"></script> <!-- Beta 99.38 b0508-1445 : #259 follow-up — tooltips Réserve → Archives -->
-    <script src="js/accompagnement-contenu-popup.js?v=20260511d"></script> <!-- Beta 99.41 : #256-bis aide aux 8 modales système -->
+    <script src="js/accompagnement-contenu-popup.js?v=20260511e"></script> <!-- Beta 99.41 : #256-bis +2 entrées modal-codex-data + modal-export-preview -->
     <script src="js/accompagnement-contenu-terme.js?v=2026050528"></script>
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js?v=2026050543"></script> <!-- Refonte nav SP5 : naviguerVers calendrier-trimestre -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260511d"></script> <!-- Beta 99.41 b0511-0917 : bump fallback BUILD_ID -->
+    <script src="js/init-inline.js?v=20260511e"></script> <!-- Beta 99.41 b0511-0928 : bump fallback BUILD_ID -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
@@ -16363,7 +16363,7 @@
             <div class="wizard-v2-header">
                 <div class="wizard-v2-primo-avatar">🗺️</div>
                 <div class="wizard-v2-header-texte">
-                    <button class="btn-aide-contextuelle" data-aide="modal-wizard-pratique" aria-label="Aide : wizard pratique de notation" style="float: right;">&#x2734;&#xFE0F;</button>
+                    <button class="btn-aide-contextuelle" data-aide="modal-wizard-pratique" aria-label="Aide : wizard pratique de notation">&#x2734;&#xFE0F;</button>
                     <h2 id="wizard-v2-titre">Informations de base</h2>
                     <p id="wizard-v2-description">Donnez un nom à ta pratique de notation</p>
                     <div class="wizard-v2-progression">
@@ -16849,6 +16849,7 @@
             <h2 class="modal-titre u-texte-11" style="margin: 0 0 2px 0">
                 <img src="icons/icon-export.svg" alt="" class="btn-inline-icon">
                 Extraire un codex data
+                <button class="btn-aide-contextuelle" data-aide="modal-codex-data" aria-label="Aide : extraction codex data">&#x2734;&#xFE0F;</button>
             </h2>
             <p style="color: var(--texte-secondaire); font-size: 0.8rem; margin: 0 0 8px 0;">
                 Format l&eacute;ger sans blobs (5&ndash;30&nbsp;Mo) destin&eacute; &agrave; la recherche au Labo.
