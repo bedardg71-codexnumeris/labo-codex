@@ -2592,7 +2592,7 @@
                 const lst = groupes[p.id] || [];
                 const compteur = lst.length === 0 ? '(0)' : compteurEtudiantsFichiers(lst, p.id);
                 const sel = (productionFiltreActive === p.id) ? ' selected' : '';
-                htmlDropdown += `<option value="${p.id}"${sel}>${echapperHtml(p.titre || p.nom || p.id)} ${compteur}</option>`;
+                htmlDropdown += `<option value="${echapperHtml(p.id)}"${sel}>${echapperHtml(p.titre || p.nom || p.id)} ${compteur}</option>`;
             });
             htmlDropdown += '</select>';
         }
