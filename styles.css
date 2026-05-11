@@ -2883,6 +2883,13 @@ input[type="number"].controle-form {
     font-size: 0.9rem;
 }
 
+/* Indicateur visuel pour les champs obligatoires (#215) */
+.champ-requis {
+    color: var(--rouge-erreur);
+    font-weight: 700;
+    margin: 0 2px;
+}
+
 .controle-form {
     width: 100%;
     padding: 8px 12px;

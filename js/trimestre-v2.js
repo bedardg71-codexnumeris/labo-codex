@@ -268,9 +268,22 @@ function sauvegarderCadreCalendrierV2() {
         semaineExamensFin: document.getElementById('v2-semaineExamensFin')?.value || ''
     };
 
-    // Validation
-    if (!cadre.dateDebut || !cadre.finCours || !cadre.finTrimestre) {
-        alert('Veuillez renseigner au minimum : début du trimestre, fin des cours et fin du trimestre');
+    // Validation #215 : dateDebut + finCours + finTrimestre sont obligatoires.
+    // Sans ces dates, les fonctions de semaine, échéances et snapshots cassent.
+    const manquants = [];
+    if (!cadre.dateDebut) manquants.push({ id: 'v2-debutTrimestre', label: 'Début du trimestre' });
+    if (!cadre.finCours) manquants.push({ id: 'v2-finCours', label: 'Fin des cours réguliers' });
+    if (!cadre.finTrimestre) manquants.push({ id: 'v2-finTrimestre', label: 'Fin du trimestre' });
+
+    if (manquants.length > 0) {
+        const details = manquants.map(c => '• ' + c.label).join('\n');
+        afficherNotificationErreur(
+            'Dates obligatoires manquantes',
+            'Renseigne ces champs avant de continuer :\n' + details
+        );
+        // Focus sur le premier champ vide
+        const premier = document.getElementById(manquants[0].id);
+        if (premier) premier.focus();
         return;
     }
 
