@@ -276,10 +276,13 @@ function _retirerBibliothequesDuGroupe(donnees) {
  */
 async function _construireCodexData(lectures, options) {
     options = options || {};
+    var _hasProg = typeof window.majProgression === 'function';
 
     if (!Array.isArray(lectures) || lectures.length === 0) {
         throw new Error('Aucune archive à extraire');
     }
+
+    if (_hasProg) window.majProgression(70, 'Construction du document...', lectures.length + ' archives');
 
     // Bibliothèques globales (version la plus récente)
     var bibliotheques = _extraireBibliotheques(lectures.map(function(l) {
@@ -338,6 +341,8 @@ async function _construireCodexData(lectures, options) {
         bibliotheques: bibliotheques
     };
 
+    if (_hasProg) window.majProgression(85, 'Sérialisation...');
+
     // Hash d'intégrité (calculé AVANT ajout du champ integrite)
     var jsonAvantIntegrite = JSON.stringify(codexData, null, 2);
 
@@ -349,6 +354,7 @@ async function _construireCodexData(lectures, options) {
             (TAILLE_MAX_OCTETS / 1024 / 1024) + ' Mo.');
     }
 
+    if (_hasProg) window.majProgression(95, 'Calcul du hash d\'intégrité...', (tailleOctets / 1024 / 1024).toFixed(1) + ' Mo');
     var hash = await _calculerSHA256(jsonAvantIntegrite);
 
     codexData.integrite = {
@@ -420,14 +426,24 @@ async function extraireDepuisArchivesFSAPI(uuids, options) {
         throw new Error('UUID(s) absent(s) du manifeste local : ' + uuidsAbsents.join(', '));
     }
 
-    var lectures = [];
-    for (var i = 0; i < aLire.length; i++) {
-        var lue = await _lireArchiveFSAPI(handle, aLire[i]);
-        lectures.push(lue);
-        await _yield();
-    }
+    var _hasProg = typeof window.afficherProgression === 'function';
+    if (_hasProg) window.afficherProgression('Extraction codex data');
+    try {
+        var lectures = [];
+        for (var i = 0; i < aLire.length; i++) {
+            if (_hasProg) {
+                var pct = Math.round((i / aLire.length) * 65);
+                window.majProgression(pct, 'Lecture des archives...', (i + 1) + '/' + aLire.length);
+            }
+            var lue = await _lireArchiveFSAPI(handle, aLire[i]);
+            lectures.push(lue);
+            await _yield();
+        }
 
-    return _construireCodexData(lectures, options);
+        return await _construireCodexData(lectures, options);
+    } finally {
+        if (_hasProg) window.masquerProgression();
+    }
 }
 
 /**
@@ -443,14 +459,24 @@ async function extraireDepuisFichiersZIP(files, options) {
         throw new Error('Aucun fichier ZIP fourni');
     }
 
-    var lectures = [];
-    for (var i = 0; i < files.length; i++) {
-        var lue = await _lireArchiveZIP(files[i]);
-        lectures.push(lue);
-        await _yield();
-    }
+    var _hasProg = typeof window.afficherProgression === 'function';
+    if (_hasProg) window.afficherProgression('Extraction codex data');
+    try {
+        var lectures = [];
+        for (var i = 0; i < files.length; i++) {
+            if (_hasProg) {
+                var pct = Math.round((i / files.length) * 65);
+                window.majProgression(pct, 'Lecture des fichiers ZIP...', (i + 1) + '/' + files.length);
+            }
+            var lue = await _lireArchiveZIP(files[i]);
+            lectures.push(lue);
+            await _yield();
+        }
 
-    return _construireCodexData(lectures, options);
+        return await _construireCodexData(lectures, options);
+    } finally {
+        if (_hasProg) window.masquerProgression();
+    }
 }
 
 /* ===============================
@@ -550,29 +576,39 @@ async function extraireDepuisDossier(archivesAvecRefs, options) {
         throw new Error('Aucune archive sélectionnée');
     }
 
-    var lectures = [];
-    for (var i = 0; i < archivesAvecRefs.length; i++) {
-        var a = archivesAvecRefs[i];
-        if (!a._meta || !a._donneesFile) {
-            throw new Error('Référence d\'archive invalide pour ' + (a.dossier || '?'));
+    var _hasProg = typeof window.afficherProgression === 'function';
+    if (_hasProg) window.afficherProgression('Extraction codex data');
+    try {
+        var lectures = [];
+        for (var i = 0; i < archivesAvecRefs.length; i++) {
+            if (_hasProg) {
+                var pct = Math.round((i / archivesAvecRefs.length) * 65);
+                window.majProgression(pct, 'Lecture du dossier...', (i + 1) + '/' + archivesAvecRefs.length);
+            }
+            var a = archivesAvecRefs[i];
+            if (!a._meta || !a._donneesFile) {
+                throw new Error('Référence d\'archive invalide pour ' + (a.dossier || '?'));
+            }
+            var texteDonnees;
+            try {
+                texteDonnees = await a._donneesFile.text();
+            } catch (e) {
+                throw new Error('Lecture de donnees.json échouée pour ' + a.dossier + ' : ' + (e.message || e));
+            }
+            var donnees;
+            try {
+                donnees = JSON.parse(texteDonnees);
+            } catch (e) {
+                throw new Error('donnees.json corrompu pour ' + a.dossier + ' : ' + (e.message || e));
+            }
+            lectures.push({ meta: a._meta, donnees: donnees, dossier: a.dossier });
+            await _yield();
         }
-        var texteDonnees;
-        try {
-            texteDonnees = await a._donneesFile.text();
-        } catch (e) {
-            throw new Error('Lecture de donnees.json échouée pour ' + a.dossier + ' : ' + (e.message || e));
-        }
-        var donnees;
-        try {
-            donnees = JSON.parse(texteDonnees);
-        } catch (e) {
-            throw new Error('donnees.json corrompu pour ' + a.dossier + ' : ' + (e.message || e));
-        }
-        lectures.push({ meta: a._meta, donnees: donnees, dossier: a.dossier });
-        await _yield();
-    }
 
-    return _construireCodexData(lectures, options);
+        return await _construireCodexData(lectures, options);
+    } finally {
+        if (_hasProg) window.masquerProgression();
+    }
 }
 
 /* ===============================

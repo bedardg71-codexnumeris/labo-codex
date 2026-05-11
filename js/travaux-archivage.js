@@ -463,6 +463,11 @@
      * @param {Object} options - Options
      */
     async function lancerExportEtudiant(da, options = {}) {
+        const _hasProg = typeof window.afficherProgression === 'function';
+        if (_hasProg) {
+            window.afficherProgression('Export des travaux');
+            window.majProgression(20, 'Compression de l\'archive...');
+        }
         try {
             const zip = await exporterParEtudiant(da, options);
             const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
@@ -476,6 +481,8 @@
         } catch (e) {
             console.error('[Travaux-Archivage] Erreur export etudiant:', e);
             alert('Erreur lors de l\'export: ' + e.message);
+        } finally {
+            if (_hasProg) window.masquerProgression();
         }
     }
 
@@ -485,6 +492,11 @@
      * @param {Object} options - Options
      */
     async function lancerExportProduction(productionId, options = {}) {
+        const _hasProg = typeof window.afficherProgression === 'function';
+        if (_hasProg) {
+            window.afficherProgression('Export des travaux');
+            window.majProgression(20, 'Compression de l\'archive...');
+        }
         try {
             const zip = await exporterParProduction(productionId, options);
             telechargerBlob(zip, `travaux_production_${productionId}.zip`);
@@ -495,6 +507,8 @@
         } catch (e) {
             console.error('[Travaux-Archivage] Erreur export production:', e);
             alert('Erreur lors de l\'export: ' + e.message);
+        } finally {
+            if (_hasProg) window.masquerProgression();
         }
     }
 
@@ -504,6 +518,11 @@
      * @param {string|null} productionId - ID de la production (null = toutes)
      */
     async function lancerExport(da, productionId) {
+        const _hasProg = typeof window.afficherProgression === 'function';
+        if (_hasProg) {
+            window.afficherProgression('Export des travaux');
+            window.majProgression(20, 'Compression de l\'archive...');
+        }
         try {
             const zip = await exporterTravaux(da, productionId);
 
@@ -530,6 +549,8 @@
         } catch (e) {
             console.error('[Travaux-Archivage] Erreur export:', e);
             alert('Erreur lors de l\'export: ' + e.message);
+        } finally {
+            if (_hasProg) window.masquerProgression();
         }
     }
 
