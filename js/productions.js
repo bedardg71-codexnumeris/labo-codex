@@ -354,6 +354,7 @@ function peuplerEcheancesParGroupe(production) {
                 <span>${labelGroupe}</span>
             </label>
             <input type="date" class="controle-form echeance-gc-date" data-gc-id="${gc.id}"
+                data-tooltip="cn-prod-echeance-mg"
                 value="${dateVal}" style="width: 180px;"
                 ${dateMinTrimestre ? `min="${dateMinTrimestre}"` : ''}
                 ${dateMaxTrimestre ? `max="${dateMaxTrimestre}"` : ''}

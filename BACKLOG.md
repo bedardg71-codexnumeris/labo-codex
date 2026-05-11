@@ -580,11 +580,14 @@
   - Sans ces dates, les fonctions de semaine, echeances et snapshots ne fonctionnent pas
   - **Fichiers** : `js/trimestres.js`, assistant de configuration
 
-- [ ] **#216** Tooltips sur la date d'echeance des productions
-  - S'assurer que des info-bulles expliquent le role de la date d'echeance
-  - Contexte : la date d'echeance conditionne les snapshots, le calcul de completion (C) et la gestion des travaux remis/non remis
-  - Couvrir le champ simple (`#productionDateEcheance`) et le mode multi-groupe
-  - **Fichier** : `js/tooltips-contenu.js`, `js/productions.js`
+- [x] **#216** Tooltips sur la date d'echeance des productions ✅ LIVRÉ (11 mai 2026)
+  - 2 entrées hover ajoutées dans `js/accompagnement-contenu-hover.js` section Productions :
+    - `cn-prod-echeance` (mode simple) : explique snapshots, C, P, gestion remis/non remis.
+    - `cn-prod-echeance-mg` (mode multi-groupe) : explique le sens du décochage par groupe.
+  - `data-tooltip="cn-prod-echeance"` ajouté sur `#productionDateEcheance` dans index.html (remplace l'attribut `title=` natif redondant).
+  - `data-tooltip="cn-prod-echeance-mg"` ajouté sur les champs date dynamiques générés par `productions.js` (classe `.echeance-gc-date`).
+  - Renvoient explicitement vers les popups ✴️ existantes (`echeance-indices`, `echeances-multigroupes`) pour les détails étendus.
+  - **Note** : le fichier référence dans la description originale (`js/tooltips-contenu.js`) n'existe plus — l'infra hover est maintenant dans `js/accompagnement-contenu-hover.js` (consolidation onboarding du 21 avril 2026).
 
 - [x] **#217** Gestion des jetons — a investiguer ✅ FAIT (27 mars 2026)
   - Module jetons de reprise avec fichiers numeriques livre (8 commits)
