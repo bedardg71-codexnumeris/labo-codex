@@ -241,6 +241,10 @@ const TOOLTIPS = {
         'Ce qui est demand\u00e9 concr\u00e8tement \u00e0 l\'\u00e9tudiant\u00b7e. Appara\u00eet dans le dossier PDF de r\u00e9troaction.',
     'cn-prod-ponderation':
         'Poids dans la note finale. L\'ensemble des productions se partage le 100 %.',
+    'cn-prod-echeance':
+        'Date limite de remise. Conditionne la génération des snapshots, le calcul de C (complétion) et P (performance), et la gestion des travaux remis ou non remis. Clique sur ✴️ pour plus de détails.',
+    'cn-prod-echeance-mg':
+        'Date limite propre à ce groupe-cours. Décoche la case pour signaler que ce groupe n\'a pas encore reçu la production (échéance neutralisée). Clique sur ✴️ pour plus de détails.',
 
     // --- Grilles de critères ---
 
