@@ -322,29 +322,16 @@
   - **Lien avec #262** : #262 corrige le NOM des fichiers EXPORTÉS (`pratiques-pratiques-notation-...json` → `pratiques-CC-BY-SA-...json`) ; #266 corrige le NOM du fichier SOURCE JS. Indépendants mais même esprit (faire correspondre les noms à l'UI actuelle).
   - **Effort estimé** : ~30 min (1 git mv + recherche/remplacement des références).
 
-- [ ] **#264** Barre de progression sur tous les exports (8 mai 2026)
-  - **Contexte** : certains exports sont courts (1-2 s), d'autres très longs
-    (versement Réserve d'un trimestre complet, codex avec beaucoup de
-    fichiers Travaux, etc.) et l'utilisateur n'a aucun retour pendant
-    le traitement — il ne sait pas si l'app a planté, si elle réfléchit,
-    ou si ça progresse.
-  - **Cible** : un indicateur de progression unifié sur tous les flux
-    d'export. Au minimum un état « en cours » (spinner ou message), idéalement
-    une vraie barre avec étapes nommées (« Compression des fichiers… »,
-    « Génération du manifeste… », « Préparation du téléchargement… »).
-  - **À cartographier** : tous les flux export — codex (`codex.js`),
-    archive/Réserve (`reserve.js`), config complète (`import-export.js`),
-    bibliothèque tampons (`tampons-bibliotheque.js`), bibliothèques
-    grilles/échelles/cartouches/productions/pratiques (modules dédiés),
-    plan d'alignement (`planification-bibliotheque.js`), PDF de rétroaction
-    (`travaux-export-pdf.js`), synthèse PDF (`synthese-retroaction-rendu.js`).
-    Repérer ceux qui ont déjà un retour (notification, modale K-β preview)
-    et ceux qui n'en ont aucun.
-  - **Lien** : la modale K-β preview (`securite-export-preview.js`) montre
-    déjà la liste des fichiers AVANT le téléchargement — la barre de
-    progression couvrirait la phase entre le clic « Télécharger » et le
-    déclenchement effectif du download (compression ZIP, sérialisation
-    JSON, hash SHA-256 Défense H, etc.).
+- [x] **#264** Barre de progression sur tous les exports (livré 11 mai 2026, b0511-0901 + b0511-0909, commits 72d4533 + 0e70935)
+  - **Livré** : tous les exports longs branchés sur `window.afficherProgression/majProgression/masquerProgression` (module `progression.js` issue #229, qui n'était utilisé que par codex/reserve).
+    - `import-export.js` : `exporterConfigurationComplete` (scellement SHA-256) + `executerExport` (lecture clés + ZIP/JSON).
+    - `codex-data.js` : 3 entrées (FSAPI/ZIP/Dossier) + `_construireCodexData` partagé.
+    - `travaux-archivage.js` : `lancerExportEtudiant/Production/lancerExport`. Les 2 autres lanceurs (Semestre, Lea) ont déjà des barres inline dans le panneau Travaux et restent inchangés.
+    - `travaux-export-pdf.js` : `exporterPDF` + `exporterDossierComplet`.
+    - `tampons-bibliotheque.js` : `exporterBibliotheque` (scellement).
+  - **Pattern** : try/finally avec `masquerProgression` garanti même sur erreur. Garde-fou `_hasProg = typeof window.afficherProgression === 'function'` pour rester silencieux si progression.js n'est pas chargé.
+  - **Hors scope (décision)** : bibliothèques sans scellement (grilles, échelles, cartouches, productions, pratiques, pratiques-materiel, planification, cours, objectifs, journal). Exports sub-seconde — l'overlay flasherait sans valeur UX. Notification de succès suffit.
+  - **Hors scope** : `synthese-retroaction-rendu.js` est un helper interne sans entrée d'export propre, couvert via `travaux-export-pdf.js`.
 
 ### Sécurité — UI à aligner sur le design system (8 mai 2026)
 
