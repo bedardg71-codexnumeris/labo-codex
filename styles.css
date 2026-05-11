@@ -10987,6 +10987,11 @@ label:has(+ textarea:disabled) {
     color: var(--accent-primaire);
 }
 
+/* Bouton d'aide ✴️ : flotté pour ne pas être effacé par textContent sur h2 */
+.wizard-v2-header-texte .btn-aide-contextuelle {
+    float: right;
+}
+
 .wizard-v2-header-texte p {
     margin: 0 0 8px 0;
     color: var(--gris-moyen);

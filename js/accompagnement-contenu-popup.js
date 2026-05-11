@@ -1502,6 +1502,54 @@ const AIDE_CONTEXTUELLE = {
         ]
     },
 
+    'modal-codex-data': {
+        titre: "Extraire un codex data",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Un codex data est un format léger (5–30 Mo) qui contient les métadonnées et les évaluations d'un ou plusieurs trimestres, mais SANS les fichiers blobs (PDF, images). Il est destiné à être consommé par le Labo de Codex Numéris pour la recherche, ou pour comparer des trimestres."
+            },
+            {
+                type: 'liste',
+                titre: "Trois modes de source",
+                items: [
+                    "<strong>FSAPI</strong> — depuis ton dossier Archives lié (Chrome/Edge). L'app détecte automatiquement les trimestres archivés.",
+                    "<strong>Dossier</strong> — sélectionne ton dossier Archives_LaboCodex/ ; l'app détecte les sous-dossiers d'archives.",
+                    "<strong>Fichiers ZIP</strong> — sélectionne un ou plusieurs fichiers .reserve.zip (Safari, iPad ou Chrome sans handle)."
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: "Le hash SHA-256 calculé en bas du fichier permet de détecter une altération entre l'extraction et la lecture au Labo. C'est un sceau d'intégrité, pas un chiffrement — le contenu reste lisible."
+            }
+        ],
+        voirAussi: ['modal-export-preview']
+    },
+
+    'modal-export-preview': {
+        titre: "Aperçu avant téléchargement (Défense K-β)",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Cette fenêtre te montre la liste des fichiers (ou la liste des champs racine pour un JSON) qui composent l'export, AVANT qu'il soit téléchargé. C'est la dernière barrière de sécurité — tu peux annuler si quelque chose paraît inattendu."
+            },
+            {
+                type: 'liste',
+                titre: "Ce que tu dois vérifier",
+                items: [
+                    "Les noms de fichiers correspondent à ce que tu exportes (pas de chemins suspects, pas de fichiers cachés).",
+                    "Pour un JSON, les champs racine sont ceux attendus (pas de clé ajoutée par un payload tiers).",
+                    "Le nombre de fichiers ou champs est cohérent avec ce que tu as configuré."
+                ]
+            },
+            {
+                type: 'alerte',
+                niveau: 'attention',
+                contenu: "Si tu vois un nom de fichier que tu ne reconnais pas, ou un champ JSON suspect, clique « Annuler » et signale-le. C'est exactement le scénario que cette défense est conçue pour intercepter (cf. MODELE-MENACES.md)."
+            }
+        ]
+    },
+
     'modal-suppression-ressource': {
         titre: "Supprimer une ressource définitivement",
         sections: [
