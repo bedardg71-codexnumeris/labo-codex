@@ -192,11 +192,19 @@ async function exporterBibliotheque() {
         return;
     }
 
+    var _hasProg = typeof window.afficherProgression === 'function';
+    if (_hasProg) {
+        window.afficherProgression('Export bibliothèque tampons');
+        window.majProgression(20, 'Scellement des tampons...', items.length + ' tampons');
+    }
+
     // Défense H — sceller chaque tampon avant export.
     var tamponsScelles = items;
     if (window.SecuriteHash && typeof window.SecuriteHash.scellerLot === 'function') {
         tamponsScelles = await window.SecuriteHash.scellerLot(items);
     }
+
+    if (_hasProg) window.majProgression(70, 'Validation...');
 
     var payload = {
         type: 'monitorage-tampons',
@@ -225,11 +233,15 @@ async function exporterBibliotheque() {
     }
 
     // K-β — preview UI : montrer les champs racine et demander confirmation.
+    // Masquer la progression pendant la modale de preview (sinon superposition).
     if (window.SecuriteExportPreview && typeof window.SecuriteExportPreview.previewJsonEtConfirmer === 'function') {
+        if (_hasProg) window.masquerProgression();
         var okPreview = await window.SecuriteExportPreview.previewJsonEtConfirmer(payload, 'bibliothèque tampons');
         if (!okPreview) {
             return;
         }
+    } else if (_hasProg) {
+        window.masquerProgression();
     }
 
     var jsonStr = JSON.stringify(payload, null, 2);

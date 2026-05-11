@@ -619,12 +619,27 @@ async function executerExport() {
         if (!continuer) return;
     }
 
+    const _hasProg = typeof window.afficherProgression === 'function';
+    if (_hasProg) {
+        window.afficherProgression('Export sélectif');
+        window.majProgression(0, 'Lecture des clés...', clesSelectionnees.length + ' clés');
+        await new Promise(r => setTimeout(r, 0));
+    }
+
+    try {
+
     const donnees = {};
     let nbDemoExclus = 0;
+    let _iCle = 0;
 
     // 🆕 Beta 96.2 : Utiliser db.get() pour lire depuis IndexedDB (pas seulement localStorage)
     for (const cle of clesSelectionnees) {
         let valeur = null;
+        if (_hasProg) {
+            const pct = Math.round((_iCle / clesSelectionnees.length) * 50);
+            window.majProgression(pct, 'Lecture des clés...', (_iCle + 1) + '/' + clesSelectionnees.length + ' · ' + cle);
+        }
+        _iCle++;
 
         try {
             // Récupérer la valeur depuis IndexedDB (ou localStorage en fallback)
@@ -744,6 +759,7 @@ async function executerExport() {
     if (nbDemoExclus > 0) {
     }
 
+    if (_hasProg) window.majProgression(55, 'Sérialisation JSON...');
     const json = JSON.stringify(donnees, null, 2);
 
     // 🆕 FIX #56 (1er fév 2026) : Horodatage complet pour éviter confusion entre exports
@@ -764,6 +780,7 @@ async function executerExport() {
     // 🆕 Export ZIP si fichiersTravaux est sélectionné (inclut les blobs)
     const cleFT = clesSelectionnees.find(c => c.includes('fichiersTravaux'));
     if (cleFT && typeof JSZip !== 'undefined' && typeof travauxStockage !== 'undefined') {
+        if (_hasProg) window.majProgression(65, 'Préparation du ZIP...');
         const zip = new JSZip();
         zip.file('donnees.json', json);
 
@@ -771,7 +788,13 @@ async function executerExport() {
         if (Array.isArray(metadonnees)) {
             const dossier = zip.folder('travaux');
             let nbBlobs = 0;
+            let _iBlob = 0;
             for (const f of metadonnees) {
+                if (_hasProg && _iBlob % 5 === 0) {
+                    const pct = 65 + Math.round((_iBlob / Math.max(1, metadonnees.length)) * 10);
+                    window.majProgression(pct, 'Ajout des fichiers travaux...', nbBlobs + '/' + metadonnees.length);
+                }
+                _iBlob++;
                 const blobTravail = await travauxStockage.recupererBlob(f.id);
                 if (blobTravail) {
                     const ext = (f.nomFichier || 'bin').split('.').pop();
@@ -785,6 +808,11 @@ async function executerExport() {
             type: 'blob',
             compression: 'DEFLATE',
             compressionOptions: { level: 6 }
+        }, function(meta) {
+            if (_hasProg) {
+                const pct = 75 + Math.round(meta.percent * 0.23);
+                window.majProgression(pct, 'Compression du ZIP...', Math.round(meta.percent) + '%');
+            }
         });
         const nomFichier = `sauvegarde${partieAuteur}-${dateStr}.zip`;
         const a = document.createElement('a');
@@ -794,6 +822,7 @@ async function executerExport() {
         URL.revokeObjectURL(a.href);
     } else {
         // Export JSON classique (sans fichiersTravaux)
+        if (_hasProg) window.majProgression(90, 'Préparation du téléchargement...');
         const blob = new Blob([json], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const nomFichier = `sauvegarde${partieAuteur}-${dateStr}.json`;
@@ -809,6 +838,10 @@ async function executerExport() {
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces(`Export réussi : ${clesSelectionnees.length} clé(s) exportée(s)`);
     } else {
+    }
+
+    } finally {
+        if (_hasProg) window.masquerProgression();
     }
 }
 

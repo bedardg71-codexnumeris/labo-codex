@@ -59,13 +59,22 @@
             return;
         }
 
+        const _hasProg = typeof window.afficherProgression === 'function';
+        if (_hasProg) {
+            window.afficherProgression('Export PDF');
+            window.majProgression(20, 'Rendu des pages annotées...');
+        }
+
         try {
             const { doc, nomSortie } = await genererDocPDF(fichierId);
+            if (_hasProg) window.majProgression(90, 'Téléchargement...');
             doc.save(nomSortie);
             travauxStockage.marquerExporte(fichierId);
         } catch (e) {
             console.error('[Travaux-Export] Erreur export PDF:', e);
             alert('Erreur lors de l\'export PDF. Voir la console.');
+        } finally {
+            if (_hasProg) window.masquerProgression();
         }
     }
 
@@ -763,6 +772,12 @@
 
         const annotation = travauxStockage.obtenirAnnotationFichier(fichier.id);
 
+        const _hasProg = typeof window.afficherProgression === 'function';
+        if (_hasProg) {
+            window.afficherProgression('Export dossier complet');
+            window.majProgression(15, 'Rendu des pages annotées...');
+        }
+
         try {
             let doc;
             if (fichier.typeMIME === 'application/pdf') {
@@ -771,8 +786,12 @@
                 doc = await exporterDepuisImage(blob, annotation);
             }
 
+            if (_hasProg) window.majProgression(70, 'Ajout de la page de synthèse...');
+
             // Ajouter la page de synthese (grille + retroaction)
             await ajouterPageSynthese(doc, fichier, productionId);
+
+            if (_hasProg) window.majProgression(90, 'Téléchargement...');
 
             // Telecharger
             // ✅ ANONYMISATION (Tier 0.1) : clé de base — prenom/nom sont anonymisés par obtenirDonneesSelonMode
@@ -787,6 +806,8 @@
         } catch (e) {
             console.error('[Travaux-Export] Erreur export dossier complet:', e);
             alert('Erreur lors de l\'export du dossier. Voir la console.');
+        } finally {
+            if (_hasProg) window.masquerProgression();
         }
     }
 
