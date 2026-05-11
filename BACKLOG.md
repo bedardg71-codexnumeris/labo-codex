@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 11 mai 2026 (Beta 99.41, Build 0511-1105) — ménage A+B+C : 8 items clos, 5 collisions renumérotées, 2 reformulés
+> **Derniere mise a jour** : 11 mai 2026 (Beta 99.41, Build 0511-1205) — ménage complet A+B+C+E : 51 → 37 items ouverts (-14 net), 5 collisions renumérotées, 8 reformulés/enrichis
 
 ---
 
@@ -692,7 +692,7 @@
 
 ### Priorite haute - Annotation et Evaluation (21 fev 2026)
 
-- [ ] **Retroactions visuelles enrichies dans la synthese** : Les retroactions remises a l'eleve (synthese PDF et zone de retroaction) ne contiennent actuellement que les courts descriptifs des niveaux de la palette (quelques mots par critere). Ce n'est pas suffisant pour une retroaction pedagogique significative. Il faudrait developper des retroactions plus etoffees : phrases completes par critere/niveau, pistes d'amelioration, forces observees, liens avec les objectifs. Explorer les options : commentaires editables par critere dans la cartouche, champs de retroaction detaillee par niveau, ou generation assistee a partir du contexte de la production.
+- [ ] **#275** Retroactions visuelles enrichies dans la synthese (numéroté 11 mai 2026, besoin identifié 21 fév 2026) : Les retroactions remises a l'eleve (synthese PDF et zone de retroaction) ne contiennent actuellement que les courts descriptifs des niveaux de la palette (quelques mots par critere). Ce n'est pas suffisant pour une retroaction pedagogique significative. Il faudrait developper des retroactions plus etoffees : phrases completes par critere/niveau, pistes d'amelioration, forces observees, liens avec les objectifs. Explorer les options : commentaires editables par critere dans la cartouche, champs de retroaction detaillee par niveau, ou generation assistee a partir du contexte de la production.
 
 - [ ] **#273** Évaluations démo basées sur de vrais travaux d'élèves anonymisés (besoin identifié 21 fév 2026, reformulé 11 mai 2026)
   - **Contexte** : les modules d'annotation et d'évaluation ont été remaniés (Phases #109 à #185, Beta 96.3 → 98.x). Aucun exemple complet n'est livré en mode démo.
@@ -702,7 +702,7 @@
   - **Intégration** : verser dans le pack démo (groupe 9999) via `donnees-demo.js`, avec préfixe `PROD_DEMO_` (rappel #86 : ne JAMAIS utiliser `PROD_` seul, qui matche les vraies productions).
   - **Fichiers** : `js/donnees-demo.js`, `autocollants/` éventuellement enrichi, pack travaux dans `MonitorageFichiers` (IndexedDB).
 
-- [ ] **Evaluation sans travaux importes** : S'assurer que le module d'evaluation fonctionne meme si aucun travail n'est charge (importe). Contexte : jusqu'a present, l'evaluation se faisait dans GoodNotes ; desormais elle se fera directement dans l'application. Le flux doit supporter l'evaluation manuelle sans fichier PDF/image importe.
+- [ ] **#276** Evaluation sans travaux importes (numéroté 11 mai 2026, besoin identifié 21 fév 2026) : S'assurer que le module d'evaluation fonctionne meme si aucun travail n'est charge (importe). Contexte : jusqu'a present, l'evaluation se faisait dans GoodNotes ; desormais elle se fera directement dans l'application. Le flux doit supporter l'evaluation manuelle sans fichier PDF/image importe.
 
 - [x] **Info-bulles et pratique guidee (Annotation/Evaluation)** ✅ COMPLÉTÉ (22 fév 2026) : 25 info-bulles ajoutées couvrant les cartes métriques, checkboxes rétroaction, boutons d'action, barre d'outils annotation, pipeline d'import et zone d'archivage.
 
@@ -1272,10 +1272,11 @@
 
 ### Documentation / Aide
 
-- [ ] **#2** Guide PDF pour utilisateurs (10-15 pages)
-  - Version imprimable du contenu de la section Aide
-  - Workflow de configuration pas-à-pas
-  - Captures d'écran annotées
+- [ ] **#2** Guide PDF pour utilisateurs — reformulé 11 mai 2026
+  - **Périmètre original** (jan 2026, avant le projet de cohorte) : guide générique 10-15 pages, version imprimable de la section Aide.
+  - **Périmètre actuel** : à fusionner avec le matériel pédagogique de la cohorte CoP — chaque rencontre (8 au total, sept 2026 → avril 2027) produit son propre document d'accompagnement. Voir `docs/CALENDRIER.md` §8.3 « Documentation à produire ».
+  - **Décision** : ne pas produire un guide générique monolithique. Le matériel pédagogique par rencontre est plus utile et a un public cible défini.
+  - **Hors scope** : la version « papier » pour AQPC peut être dérivée de `docs/securite/SECURITE-POUR-ENSEIGNANTS.md` (à écrire post-Défense E) plutôt que d'un guide complet.
 
 - [x] **#10** Mettre a jour section AIDE ✅ FAIT (26 jan 2026)
   - Notes de version Beta 96 ajoutées
@@ -1377,14 +1378,14 @@
   - **Reference** : `js/correlations-longitudinales.js` comme modele de style
 
 - [ ] **#241** Analyser l'impact des jetons de reprise sur P dans les courbes d'intervention
+  - **Contexte** : Quand un étudiant utilise un jeton de reprise, P change rétroactivement. Cela peut masquer l'effet réel d'une intervention pédagogique.
+  - **Objectif** : Marquer les séances où des jetons ont été utilisés et/ou calculer un P « sans reprises » pour isoler l'effet net.
+  - **Prérequis** : Comprendre la mécanique de recalcul de P après utilisation d'un jeton.
 
 - [ ] **#242** Ajouter la documentation du graphique « Dynamique des correlations » dans les info-bulles
-  - **Contexte** : La note 📍 documente la lecture du graphique, mais l'aide contextuelle (info-bulles) devrait aussi couvrir ce graphique
-  - **Objectif** : Integrer la documentation dans le systeme d'info-bulles existant (tooltips data-tooltip)
-  - **Contenu** : Explication des correlations, des courbes d'intervention, des points carres, des triangles
-  - **Contexte** : Quand un etudiant utilise un jeton de reprise, P change retroactivement. Cela peut masquer l'effet reel d'une intervention pedagogique
-  - **Objectif** : Marquer les seances ou des jetons ont ete utilises et/ou calculer un P « sans reprises » pour isoler l'effet net
-  - **Prerequis** : Comprendre la mecanique de recalcul de P apres utilisation d'un jeton
+  - **Contexte** : La note 📍 documente la lecture du graphique, mais l'aide contextuelle (info-bulles) devrait aussi couvrir ce graphique.
+  - **Objectif** : Intégrer la documentation dans le système d'info-bulles existant (`data-tooltip`).
+  - **Contenu** : Explication des correlations, des courbes d'intervention, des points carrés, des triangles.
 
 ### Planification pedagogique
 
@@ -1403,8 +1404,9 @@
   - **Solution** : Colonne gauche (vue d'ensemble leçon) + panneau droit (détail contextuel)
   - **Panneau droit** : 3 modes — Détail activité, Enseignement explicite, Vue calendrier
   - **Responsive** : Empilage vertical sous 900px
-  - **Plan complet** : `docs/PLAN-ORGANISATEUR-LAYOUT.md`
+  - **Plan complet** : `plans de travail/PLAN-ORGANISATEUR-LAYOUT.md` (déplacé depuis docs/ le 8 mai 2026)
   - **Prérequis** : Résoudre les bugs en cours d'abord
+  - **Horizon** (note 11 mai 2026) : à inclure dans la complétion du module Alignement à l'automne 2026, pour présentation en Rencontre 5 « Aligner sa pratique » (janvier 2027). Voir `docs/CALENDRIER.md` §7.
 
 ### Mode simplifie
 
@@ -1446,6 +1448,7 @@
     - Sauvegarde sur cloud ou clé USB
     - Protection contre accès non autorisé au fichier JSON
   - **Prerequis** : Documenter la logique de chiffrement avant codage
+  - **Dépendance** (note ajoutée 11 mai 2026) : couvre la **protection au repos** (fichier exporté en local), différente de la **signature ECDSA** prévue dans le chantier Voûte (Défense F, juillet 2026) qui couvre l'**authenticité** des partages publiés. Décision D3 (`docs/securite/DECISIONS-ARCHITECTURALES-2026-05-11.md`) actait que le chiffrement au repos n'est PAS retenu pour la Voûte. Cet item #47 reste pertinent pour les sauvegardes **personnelles** sur cloud/USB, où le risque d'accès non autorisé existe. À reconsidérer après Voûte Phase 1 — si la signature + sceau SHA-256 suffisent au sentiment de sécurité, #47 devient secondaire.
 
 ### Fiabilite / Maintenance
 
@@ -1467,9 +1470,7 @@
   - changelog-data.js structure, script update-version.sh, changelogs markdown par beta
   - Generation manuelle jugee suffisante pour le volume actuel
 
-- [ ] **#17** Checklist tests de regression
-  - Documenter verifications manuelles apres chaque build
-  - Creer pratique, evaluer, sauvegarder, recharger, etc.
+- [x] **#17** Checklist tests de regression ✅ OBSOLÈTE (11 mai 2026) — Absorbé par Défense I (PR #15, 8 mai 2026) : 29 tests automatisés (23 Vitest + 6 Playwright WebKit, ~12 s), hook pré-push opt-in. Couvre A.3 hash CSP, B sanitisation profonde, C validation imports, D whitelist exports, E sandbox, F lint innerHTML. Documentation : `docs/securite/TESTS-AUTOMATISES.md`. La checklist manuelle envisagée à l'origine est absorbée par l'infra automatisée.
 
 - [ ] **#27** Documenter conventions nommage champs
   - nArtefactsPAN vs nbArtefactsSoumis vs nombreTotal
@@ -2027,9 +2028,10 @@
 
 ## Reporte (Post-AQPC ou V1.1)
 
-- [ ] PAN-Objectifs ponderes (Michel B.)
-- [ ] Remplacement progression (Jordan R.)
-- [ ] PAN-Jugement global (config JSON)
+- [x] PAN-Objectifs ponderes (Michel B.) ✅ OBSOLÈTE (11 mai 2026)
+- [x] Remplacement progression (Jordan R.) ✅ OBSOLÈTE (11 mai 2026)
+- [x] PAN-Jugement global (config JSON) ✅ OBSOLÈTE (11 mai 2026)
+- **Note commune** : ces 3 schémas hypothétiques avaient été déduits d'un sondage auprès d'enseignants utilisateurs de PAN (novembre 2025). Le wizard V2 livré depuis couvre ces cas d'usage de manière générique. Pas besoin d'implémenter des PAN spécifiques.
 
 ---
 
