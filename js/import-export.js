@@ -3155,6 +3155,16 @@ async function exporterConfigurationComplete() {
         return;
     }
 
+    // Afficher l'overlay de progression (#264) — masqué avant la preview K-β
+    // (interaction utilisateur) puis pas réaffiché : les étapes restantes
+    // (sérialisation, écriture du fichier) sont rapides comparées au scellement.
+    const _hasProg = typeof window.afficherProgression === 'function';
+    if (_hasProg) {
+        window.afficherProgression('Export de la configuration');
+        window.majProgression(5, 'Préparation...', nbRessources + ' ressources');
+        await new Promise(r => setTimeout(r, 0));
+    }
+
     // Défense H — sceller chaque ressource avant export. Le sceau est
     // calculé sur le contenu canonicalisé (cf. js/securite-hash.js) et
     // permettra à l'import de détecter une altération en transit.
@@ -3163,16 +3173,24 @@ async function exporterConfigurationComplete() {
     let productionsScellees = productions;
     let cartouchesScellees = cartouches;
     if (window.SecuriteHash && typeof window.SecuriteHash.scellerLot === 'function') {
+        if (_hasProg) window.majProgression(15, 'Scellement des échelles...', echelles.length + ' éch.');
         echellesScellees = await window.SecuriteHash.scellerLot(echelles);
+        if (_hasProg) window.majProgression(30, 'Scellement des grilles...', grilles.length + ' gri.');
         grillesScellees = await window.SecuriteHash.scellerLot(grilles);
+        if (_hasProg) window.majProgression(50, 'Scellement des productions...', productions.length + ' prod.');
         productionsScellees = await window.SecuriteHash.scellerLot(productions);
         cartouchesScellees = {};
         const grilleIdsCart = Object.keys(cartouches);
         for (let gci = 0; gci < grilleIdsCart.length; gci++) {
             const gId = grilleIdsCart[gci];
             cartouchesScellees[gId] = await window.SecuriteHash.scellerLot(cartouches[gId]);
+            if (_hasProg) {
+                const pct = 60 + Math.round((gci / Math.max(1, grilleIdsCart.length)) * 15);
+                window.majProgression(pct, 'Scellement des cartouches...', (gci + 1) + '/' + grilleIdsCart.length + ' grilles');
+            }
         }
     }
+    if (_hasProg) window.majProgression(80, 'Validation et structure...');
 
     // 3. Construire l'objet de configuration complète
     const configComplete = {
@@ -3216,12 +3234,17 @@ async function exporterConfigurationComplete() {
     }
 
     // K-β — preview UI : montrer les champs racine du JSON et demander
-    // confirmation avant le téléchargement.
+    // confirmation avant le téléchargement. Masquer la progression pour ne
+    // pas superposer deux modales — la preview ouvre sa propre fenêtre.
     if (window.SecuriteExportPreview && typeof window.SecuriteExportPreview.previewJsonEtConfirmer === 'function') {
+        if (_hasProg) window.masquerProgression();
         const okPreview = await window.SecuriteExportPreview.previewJsonEtConfirmer(configComplete, 'configuration pédagogique');
         if (!okPreview) {
             return;
         }
+    } else if (_hasProg) {
+        // Pas de preview module : masquer la progression avant le téléchargement
+        window.masquerProgression();
     }
 
     // 4. Générer nom de fichier (convention #262 — accents préservés via helper)
