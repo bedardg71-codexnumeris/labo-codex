@@ -599,9 +599,10 @@
   - Import, association, badges, filtrage, annoter depuis la liste
   - **Fichier** : `js/evaluation-jetons.js`, `js/travaux-import.js`, `js/liste-evaluations.js`
 
-- [ ] **#218** Apercu des annotations texte et soulignements vagues
-  - Verifier que les annotations texte et les soulignements ondules s'affichent correctement dans l'apercu/synthese
-  - **Fichiers** : `js/travaux-annotation.js`, `js/travaux-export-pdf.js`
+- [x] **#218** Apercu des annotations texte et soulignements ondulés ✅ VÉRIFIÉ (11 mai 2026, analyse de code, aucun bug constaté)
+  - **Annotations texte** : `dessinerTexte` (`travaux-annotation.js:2727`) et la boucle texte de l'export PDF (`travaux-export-pdf.js:267-299`) utilisent le **même algorithme** — word-wrap via `wrapLigne`, `fontSize × ratioResolution`, interligne `1.3`.
+  - **Soulignements ondulés** : `case 'ondule'` in-app (`travaux-annotation.js:2453`) et `case 'ondule'` PDF (`travaux-export-pdf.js:429`) — algorithmes **identiques** (amplitude/wavelength × ratioResolution, gestion des pointes via `normaliserPointes`, même boucle sinusoïdale).
+  - Aucune divergence visible entre rendu in-app et export PDF. Item ajouté au BACKLOG le 3 mars 2026, fonctionnement validé par analyse de code 11 mai 2026.
 
 - [x] **#219** Revoir la preparation des interventions RaI — formulaire en deux etapes inutile ✅ LIVRÉ (11 avril 2026, commit 4ec86fa)
   - Refactor « formulaire unifié interventions » (Phase 2 — refonte interventions).
