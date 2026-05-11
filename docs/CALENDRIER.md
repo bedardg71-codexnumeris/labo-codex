@@ -93,6 +93,44 @@
 **Priorités** : stabilité, sécurité (intégration décisions 11 mai), ergonomie, on-boarding, ultrareviews.
 **Objectif** : présenter une app solide au colloque AQPC.
 
+### Stratégie ultrareviews pré-colloque (plan acté 11 mai 2026, fin de journée)
+
+**Constat** : le Lot 4a sur `evaluation-jetons.js` (11 findings réels, 1-2 j de fix) est représentatif. Un ultrareview = 1-2 jours de fix derrière. Cibler 2 modules max avant colloque pour rester focus sur Défense E + présentation AQPC.
+
+**Critères de sélection** :
+1. Modules **démontrés au colloque** (forte exposition publique)
+2. Modules **récemment refactorés** ou **jamais audités**
+3. **Safe-trimestre** : audit n'impacte pas les notes actives (sinon reporter post-trimestre)
+
+**2 ultrareviews planifiés pré-colloque** :
+
+| Module | Lignes | Pourquoi | Semaine |
+|---|---|---|---|
+| `js/codex.js` | 2662 | Démo Codex au colloque, jamais audité, format auto-descriptif crucial pour Voûte | 12-17 mai |
+| `js/travaux-export-pdf.js` + `js/travaux-annotation.js` | 1207 + 3144 | Démo annotation/PDF AQPC, pipeline fragile, jamais audité ensemble | 18-24 mai |
+
+**Reporté post-trimestre** (touchent notes en cours, risque de bloquer l'utilisateur) :
+- `js/indices.js` (Lot 3 déjà planifié — `Rapports/ultrareview-lot-3-indices.md`)
+- `js/evaluation.js` (~3000 l., module central des notes)
+- `js/pratiques-gestion.js` (refactorisé 11 mai, laisser décanter)
+- `js/interventions.js` (refonte 11 avril, peut être audité plus tard sans urgence)
+
+**Pratique organisationnelle pour chaque ultrareview** :
+1. **Lancer lundi/mardi** — laisse 3-4 jours pour fixer dans la semaine.
+2. **Toujours sur branche dédiée** (`feature/ultrareview-<module>-<date>`) — pattern Lot 4a.
+3. **Rapport dans `Rapports/ultrareview-<module>-<date>.md`** — findings classés Critical / High / Medium / Low / Nit.
+4. **Trier les findings selon risque trimestre** :
+   - **Fixe maintenant** : échappement HTML, code mort, refactors sans changement de comportement, garde-fous null, console.log de debug.
+   - **Diffère après trimestre** : changements d'algorithme, enforcement de quota nouveau, modification de format de stockage.
+5. **Merger seulement après bac à sable** si fix de comportement.
+6. **Ajouter un test automatisé** pour chaque vrai bug trouvé — Défense I (29 tests) n'attrape pas tout. Convention : `tests/unit/<module>.test.js`.
+
+**Garde-fous** :
+- **N'aborder qu'1 ultrareview à la fois** — sinon les branches divergent.
+- **Pas d'ultrareview semaine 25-31 mai** — gel des développements lourds avant colloque, concentration sur bac à sable Lot 4a + finalisation présentation.
+- **`/ultrareview` est payant et user-triggered** — Grégoire le lance depuis son terminal, vérifie le coût/budget avant d'engager 2 audits.
+- **Validation Safari post-merge** — tester en Safari Cmd+Q chaque ultrareview mergé sur main avant de passer au suivant.
+
 ### Semaine du 11 au 17 mai (semaine en cours)
 
 #### Décisions architecturales et documentation
@@ -118,7 +156,7 @@ Ces six démarches sont à **initier cette semaine** (pas à conclure). Délais 
 
 #### Développement applicatif (priorité Grégoire)
 
-- [ ] **Ultrareviews Claude Code** — lancement de la commande `/ultrareview` pour audit multi-agents du code. Orientera les corrections de la fin mai.
+- [ ] **Ultrareview 1 : `js/codex.js`** — démo Codex au colloque, jamais audité, format auto-descriptif crucial. Branche `feature/ultrareview-codex-<date>`. Rapport `Rapports/ultrareview-codex-<date>.md`. Voir « Stratégie ultrareviews pré-colloque » ci-dessus pour la méthode complète.
 - [x] **Lot 4a ultrareview jetons** (11 mai) — 11 findings corrigés sur 4 axes (symétrie, validation, config canonique, SSOT) + migration namespace `jetonsEtudiants`. Travail isolé sur branche `feature/lot-4a-jetons` (commit `e4c348d`). **Pas mergé sur main** : le fix N1 (enforcement quota reprise ciblée) deviendrait soudain bloquant si le quota a été dépassé sur le trimestre actif. Test bac à sable prévu semaine 25-31 mai.
 - [x] **Chantier C — #264 barre de progression sur tous les exports** (livré 11 mai, commits `72d4533` + `0e70935` + `d9bc666`). Module `progression.js` (#229) branché sur 6 nouveaux modules.
 - [x] **Chantier H — #256-bis aide aux 10 modales** (livré 11 mai, commits `853c1a0` + `b101b56`). 10 popups. Validation Safari à faire avant de marquer `[x]` au BACKLOG.
@@ -141,7 +179,7 @@ Ces six démarches sont à **initier cette semaine** (pas à conclure). Délais 
 
 - [ ] **Audit fallbacks Safari** — confirmer que `travaux-stockage.js` et `reserve.js` ont des fallbacks fonctionnels sur Safari (décision D6). Si cassé, corriger.
 - [ ] **Suivi démarches G1-G6** — relances éventuelles. Centraliser les réponses reçues.
-- [ ] **Suite des ultrareviews et corrections**.
+- [ ] **Ultrareview 2 : `js/travaux-export-pdf.js` + `js/travaux-annotation.js`** — démo annotation/PDF AQPC, pipeline fragile, jamais audité ensemble. Branche `feature/ultrareview-travaux-export-<date>`. Voir « Stratégie ultrareviews pré-colloque » §3 pour la méthode.
 - [ ] **Poursuite Défense E pragmatique** (substitution mécanique `value="${X.id}"` + audit cas restants) — viser fermeture « Phase 1 close » avant le colloque.
 - [ ] **Page Sécurité-pour-enseignants** (1-2 pages accessibles) si Défense E close.
 - [ ] **Préparation présentation AQPC** — diapositives, démo, scénario de l'atelier. Effort : 1-2 jours.
@@ -150,6 +188,7 @@ Ces six démarches sont à **initier cette semaine** (pas à conclure). Délais 
 
 - [ ] **Bac à sable Lot 4a jetons** (post-remise notes) — créer un trimestre "Bac à sable" via Réglages, 3-4 élèves fictifs, une PAN, quelques évaluations. Checkout `feature/lot-4a-jetons`, dérouler la checklist de tests (jetons délai, reprise archive/supprime, reprise ciblée quota, retire reprise garde/restaure, mode anonymisation). Si vert : merge sur main + push. Si rouge : debug avant le 3 juin.
 - [ ] **Gel des développements lourds** vers le milieu de semaine pour éviter d'introduire des bugs juste avant le colloque.
+- [ ] **PAS d'ultrareview cette semaine** — concentration sur stabilité, bac à sable, présentation. Les ultrareviews #1 et #2 doivent être mergés au plus tard le 24 mai.
 - [ ] **Tests finaux** sur Safari et Chrome (cross-browser D6).
 - [ ] **Finalisation présentation AQPC**.
 - [ ] **Préparation de l'infrastructure publique** pour la phase expérimentateurs (Cloudflare ou Netlify — à choisir). Déploiement à finaliser dans la semaine post-colloque ou pendant le colloque.
@@ -588,6 +627,7 @@ Quand Grégoire reprend Labo Codex après une coupure (vacances, autre projet) :
 | 2026-05-11 | 1.1 | Ajout Lot 4a ultrareview jetons livré sur branche `feature/lot-4a-jetons` (commit `e4c348d`) — non mergé pour ne pas perturber le trimestre actif. Inscription chantiers C, E, H (safes trimestre actif) en semaine 11-17 et 18-24 mai. Bac à sable Lot 4a planifié semaine 25-31 mai. Liste des chantiers reportés post-trimestre actualisée (B, D, F, G). |
 | 2026-05-11 | 1.2 | Mise à jour fin de journée : #264 (C) et #256-bis (H) livrés. Défense E démarrage (commit `dc8e3e3`). **Décision actée** : Défense E approche pragmatique « lecture A » (substitution mécanique `value="${X.id}"`, ~5-8 h cumulé) pour atteindre une « Phase 1 close » défendable avant le colloque du 3 juin. Migration exhaustive innerHTML → textContent REPORTÉE post-colloque. Ajout chantier « Page Sécurité-pour-enseignants » + liste d'items modulaires « au fil de l'eau » + tâche de ménage backlog en début de prochaine session. |
 | 2026-05-11 | 1.2 | Trois ajouts de cohérence sécurité/Voûte suite à analyse de couverture. (1) §8.2 enrichi avec tableau des 8 défenses livrées (A, B-α, D, H partielle, I, J, K, P-α) + tableau des défenses non priorisées Phase 1 (G, M, N, O) avec conditions de réévaluation. Inscription B-β, finalisation Défense H et Défense E dans le tableau des chantiers code restants. (2) Jalons d'ouverture Voûte ajoutés : pilote restreinte fin août 2026 (2-3 collègues, signature+TOFU+WoT+modération en cas réel) ; multi-cégep conditionné par D1+G4+G6 ; codex data anonymisé conditionné par G1+G2. Nouvelle catégorie 🟪 « jalon conditionné ». (3) Rencontre 6 (février 2027) enrichie comme première utilisation pédagogique Voûte par la cohorte. Rencontre 8 (avril 2027) enrichie comme bilan d'usage Voûte. Section dédiée pilote Voûte en §6 août avec checklist de tests. Défense B-β et finalisation H inscrites en juillet (timeline mensuelle). |
+| 2026-05-11 | 1.3 | Stratégie ultrareviews pré-colloque actée en fin de journée. Nouvelle sous-section au début du §3 « Mai 2026 » qui (1) limite à **2 ultrareviews max** avant colloque (`codex.js` semaine 12-17, `travaux-export-pdf.js`+`travaux-annotation.js` semaine 18-24), (2) reporte 4 modules post-trimestre (`indices.js` Lot 3, `evaluation.js`, `pratiques-gestion.js` qui vient d'être refactoré, `interventions.js`), (3) documente la pratique organisationnelle (branche dédiée, rapport `Rapports/ultrareview-<module>-<date>.md`, tri findings selon risque trimestre, validation Safari post-merge), (4) interdit explicitement les ultrareviews semaine 25-31 mai (gel). Inscription concrète dans les 3 semaines actives. Remplace la mention vague « Ultrareviews Claude Code » L121 par référence au plan §3. |
 
 ---
 
