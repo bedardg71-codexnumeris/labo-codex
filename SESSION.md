@@ -1,10 +1,10 @@
-# SESSION — État au 11 mai 2026
+# SESSION — État au 11 mai 2026 (fin de journée)
 
 **Date** : 11 mai 2026
-**Dernier build** : `0511-0948` · Beta **99.41**
-**Branche `main`** : +6 vs `origin/main` (à pousser quand tu veux)
-**Branche `feature/lot-4a-jetons`** : +1 vs `main` (Lot 4a préservé, **non mergé** — à tester en bac à sable après remise notes)
-**Statut** : grosse journée. 4 chantiers touchés : Lot 4a ultrareview jetons (isolé sur branche), #264 barre de progression (clos), #256-bis aide aux modales système (livré, à valider terrain), Défense E innerHTML (démarrage + audit suite + 3 correctifs ponctuels).
+**Dernier build** : `0511-1220` · Beta **99.41**
+**Branche `main`** : **+17 vs `origin/main`** (à pousser depuis la maison — réseau école bloque GitHub)
+**Branche `feature/lot-4a-jetons`** : +1 vs `main` (Lot 4a préservé, **non mergé** — bac à sable prévu semaine 25-31 mai)
+**Statut** : journée massive. Matinée = bilan + ménage planifié. Après-midi = audit complet du backlog (A+B+C+E) + 6 features livrées + 4 items « déjà livrés » détectés et fermés.
 
 ---
 
@@ -16,124 +16,130 @@
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
 Lecture obligatoire :
-1. SESSION.md — bilan du 11 mai + cette consigne
-2. BACKLOG.md — items `[ ]` actifs (à dépoussiérer en début de session,
-   plusieurs sont déjà livrés mais pas marqués `[x]` — ex. #160)
-3. docs/CALENDRIER.md — planning hebdomadaire
+1. SESSION.md — bilan complet du 11 mai (matinée + après-midi)
+2. BACKLOG.md — 32 items `[ ]` actifs (audit complet fait le 11 mai)
+3. docs/CALENDRIER.md — planning hebdomadaire (semaine 11-17 mai active)
 
 État git à connaître :
-- main est +7 vs origin/main. À pousser quand prêt.
+- main est à +17 vs origin/main (sauf si déjà poussé entretemps).
 - feature/lot-4a-jetons (commit e4c348d) contient le Lot 4a ultrareview
-  jetons. NON MERGÉ EXPRÈS — le fix de quota reprise ciblée pourrait
-  bloquer Grégoire si son trimestre actif a dépassé le quota. Test
-  bac à sable prévu semaine 25-31 mai (après remise des notes).
+  jetons. NON MERGÉ EXPRÈS — bac à sable prévu semaine 25-31 mai.
 
-## PLAN DE TRAVAIL CONVENU (valide 11 mai, fin de session)
+## CHANTIERS ACTIFS (suite naturelle de la session 11 mai)
 
-Trois axes pour la prochaine session, dans cet ordre :
+### 1. Validation terrain Safari (à faire AVANT d'autres dev)
 
-### 1. Ménage du backlog (15-30 min)
+Tester en Safari les 6 features livrées le 11 mai après-midi :
+- **#266** : module `js/pratiques-gestion.js` (renommé depuis `pratiques-materiel.js`).
+  Ouvrir Construction > Pratiques de notation. Sidebar charge ? Créer/éditer/
+  dupliquer/retirer une pratique fonctionne ?
+- **#244** : sauvegarder un Codex, ouvrir `codex-manifeste.json`, vérifier les
+  champs `navigateur` (ex. "Safari 17 / macOS") et `userAgent`.
+- **#216** : Construction > Productions, formulaire production. Survol des
+  champs date d'échéance (simple + multi-groupe) → tooltip s'affiche ?
+- **#215** : Réglages > Trimestre, panneau « Bornes du trimestre ». Astérisque
+  rouge dans les 3 labels ? Effacer une date et cliquer ailleurs →
+  notification d'erreur + focus auto sur le champ vide ?
+- **#256-bis** : popups ✴️ sur les 10 modales système (Nouveautés, Réparation,
+  Wizard pratique, ApercuPDF, Confidentiel, Export, Import, Suppression
+  ressource, modalCodexData, K-β preview).
+- **#264** : barres de progression sur les exports longs (config-complète,
+  codex-data, executerExport, travaux-archivage, travaux-export-pdf, tampons).
 
-Plusieurs items sont déjà livrés mais marqués `[ ]`. Grégoire mentionne
-explicitement #160 (UX biblios) comme exemple. Approche :
-- Parcourir BACKLOG.md systématiquement.
-- Grégoire confirme item par item « livré / actif / à archiver ».
-- Marquer `[x]` avec date + commit de référence si retrouvable, ou
-  juste `[x]` + note « confirmé livré le 11 mai 2026 ».
-- Objectif : avoir une vue propre avant de piocher dans les modulaires.
+Si tout OK : aucune action particulière, juste continuer.
+Si bug : créer un commit fix ciblé avant de pousser.
 
-### 2. Items modulaires (à piocher selon temps disponible)
+### 2. Items modulaires restants (au choix selon temps)
 
-Liste de candidats « faisables au fil de l'eau » (Grégoire choisit) :
-- #266 renommer pratiques-materiel.js → nom reflétant son rôle actuel
-- #240 tampon visuel pour jetons sur travaux annotés
-- #243 Codex : rapport de comparaison en texte exportable (pas alert())
-- #244 identifier le navigateur source dans le manifeste Codex
-- #233 UX simplifier le flux Codex pour utilisateur lambda
-- #215 dates début/fin trimestre obligatoires
-- #216 tooltips sur date d'échéance productions
+Parmi les 32 items ouverts, les plus petits/clairs à attaquer en priorité :
+- **#243** Codex : rapport de comparaison en texte exportable (pas alert()) — ~1-2 h
+- **#244 a été fait** ✓
+- **#233** UX : simplifier le flux Codex pour utilisateur lambda — vague,
+  effort variable selon le périmètre choisi
+- **#239** (le numérotage récent, pas l'ancien) Menu Codex adapter selon
+  navigateur (FSAPI vs Safari) — ~1 h
+- **#240** Tampon visuel pour jetons sur travaux annotés — ~2-3 h (gros)
 
-### 3. Défense E pragmatique (à étaler sur 2-3 sessions, ~5-8 h cumulé)
+### 3. Défense E pragmatique (priorité haute pré-colloque)
 
-OBJECTIF : Défense E « réglée avant colloque » au sens d'une position
-défendable, PAS d'une migration exhaustive.
+Objectif : « Défense E réglée avant colloque » au sens d'une position
+défendable, PAS d'une migration exhaustive (décision actée 11 mai).
 
-Décision actée le 11 mai : on prend la **lecture A pragmatique** :
 - Substitution mécanique `value="${X.id}"` → `value="${echapperHtml(X.id)}"`
   sur les ~20 occurrences (travaux-ui.js majoritairement) — 3-5 h.
-- Examiner les ~100 cas suspects pas encore audités dans modules
-  secondaires — 1-2 h, majorité faux positifs prévisibles.
+- Examiner les ~100 cas suspects pas encore audités — 1-2 h.
 - Fixer les vrais bugs trouvés en route (0-3 cas attendus) — ~1 h.
-- Ajouter un test automatisé (sentinelle de non-régression) qui regrep
-  et fail si nouveau `value="${...id}"` non échappé apparaît.
-- Document court `docs/securite/DEFENSE-E-CLOSE.md` listant ce qui a
-  été fait + position défendue : tous les cas examinés, tous les vrais
-  XSS fixés, dette résiduelle couverte par sandbox iframe (Défense A).
+- Ajouter un test automatisé (sentinelle de non-régression).
+- Document `docs/securite/DEFENSE-E-CLOSE.md` listant ce qui a été fait.
 - Marquer Défense E « Phase 1 close » dans MODELE-MENACES.md.
 
-NB : la migration EXHAUSTIVE innerHTML → textContent (lecture B,
-~1-2 sem) est REJETÉE pour le pré-colloque — vole trop de temps à des
-chantiers plus impactants (démo, infrastructure, matériel AQPC). À
-considérer post-colloque si pertinent.
+Migration EXHAUSTIVE innerHTML → textContent (~1-2 sem) reste REJETÉE pour
+le pré-colloque.
 
-### 4. Bonus marketing pour le colloque (si temps)
+### 4. Bonus marketing colloque (si temps)
 
 Une fois Défense E close, créer `docs/securite/SECURITE-POUR-ENSEIGNANTS.md`
-(1-2 pages, langage accessible) qui présente en français les défenses
-livrées (sceau SHA-256 visible, aperçu K-β, sandbox iframe). Peut être
-intégré dans Réglages > À propos ou imprimé pour le colloque.
+(1-2 pages accessibles) qui présente sceau SHA-256 visible + aperçu K-β +
+sandbox iframe. Intégration potentielle dans Réglages > À propos.
 
-Au colloque, montrer les fonctionnalités VISIBLES (sceau + aperçu +
-sandbox) plutôt que parler d'audits internes.
+## Chantiers reportés (post-trimestre, semaine 25 mai+)
 
-## Autres chantiers (à séquencer plus tard)
+- Bac à sable Lot 4a jetons (25-31 mai)
+- Lot 3 indices ultrareview (~3-5 h)
+- Phase 5 Démo (~1 j, déjà reverté 22 avril)
+- #207 unifier travaux-stockage.js dans db.js (~1-2 j)
+- #272 (anciennement #239) machine à états chargement éval (~1 j)
+- Défense E migration EXHAUSTIVE — post-colloque seulement si pertinente
 
-A. Validation terrain en Safari de ce qui a été livré le 11 mai :
-   - Popups d'aide ✴️ sur les 10 modales système + K-β preview
-   - Overlays de progression sur exports longs
-   Si OK : marquer #256-bis [x] dans BACKLOG.md.
+## Conventions encore en vigueur
 
-B. Bac à sable Lot 4a (semaine 25-31 mai, après remise notes) :
-   - Créer trimestre « Bac à sable », 3-4 élèves fictifs, une PAN
-   - git checkout feature/lot-4a-jetons
-   - Dérouler checklist tests (cf. mémoire 11 mai)
-   - Si vert : merge sur main + push
-
-C. Reportés post-trimestre (semaine 25 mai+) :
-   - Lot 3 indices ultrareview (~3-5 h)
-   - Phase 5 Démo (~1 j, déjà reverté 22 avril)
-   - #207 unifier travaux-stockage.js dans db.js (~1-2 j)
-   - #272 machine à états chargement éval (~1 j)
-
-Conventions actées le 11 mai :
-- Module progression.js (issue #229) couvre désormais 8 modules. Pattern
-  try/finally avec masquerProgression garanti même sur erreur. Garde-fou
+- Module progression.js (#229) couvre 8 modules. Pattern try/finally avec
+  masquerProgression garanti même sur erreur. Garde-fou
   `_hasProg = typeof window.afficherProgression === 'function'`.
-- Aide ✴️ : ajouter un bouton `<button class="btn-aide-contextuelle"
-  data-aide="cle">✴️</button>` dans le header d'une modale + entrée
-  popup dans js/accompagnement-contenu-popup.js. Si le titre est mis
-  à jour par textContent dynamique (ex. wizard), mettre le bouton en
-  sibling et le styler via classe CSS dédiée.
-- Défense E (innerHTML) : audit programmable via
-  scripts/audit-innerhtml.sh. 120 suspects au 11 mai, majoritairement
-  faux positifs. Pattern réel : `value="${id}"` brut dans attributs.
+- Aide ✴️ : bouton `<button class="btn-aide-contextuelle" data-aide="cle">✴️</button>`
+  dans header de modale + entrée popup dans
+  js/accompagnement-contenu-popup.js. Si titre dynamique (wizard) :
+  bouton en sibling + styler via classe CSS dédiée.
+- Tooltips au survol : data-tooltip="cle" + entrée dans
+  js/accompagnement-contenu-hover.js (PAS dans l'ancien tooltips-contenu.js
+  qui n'existe plus).
+- Défense E : audit programmable via scripts/audit-innerhtml.sh. Pattern
+  réel : `value="${id}"` brut dans attributs.
 
-Workflow rappel :
-- Petits commits ciblés
-- Demander le numéro de beta avant chaque commit
-- Bumper version.json + fallback init-inline.js + cache buster
-  du fichier modifié dans index.html
-- Tester Safari après chaque changement (Cmd+Q pour forcer)
-- Hook pré-push Vitest auto (23 tests, ~8 s)
+## Workflow rappel
+
+- Petits commits ciblés.
+- Demander le numéro de beta + build avant chaque commit.
+- Bumper version.json + fallback init-inline.js + cache busters des
+  fichiers modifiés dans index.html.
+- Tester Safari après chaque changement (Cmd+Q pour forcer rechargement).
+- Hook pré-push Vitest auto (29 tests, ~8 s).
+
+## Audit BACKLOG fait le 11 mai
+
+L'audit complet du BACKLOG a été fait dans la session du 11 mai après-midi.
+Les 51 items `[ ]` du départ ont été examinés. État final : 32 items ouverts.
+Chaque item ouvert a une description claire. Pas de doublon, pas de
+collision de numéros. Pas la peine de refaire d'audit avant un certain
+temps.
+
+Catégorie E (~30 items anciens) entièrement examinée le 11 mai —
+aucun item E « inconnu » à traiter.
+
+Pour piocher un item modulaire : la section §2 ci-dessus liste les
+candidats. Pour chacun, demander à Grégoire son choix avec une question
+courte.
 ```
 
 ---
 
 ## Bilan complet — 11 mai 2026
 
-**7 commits sur main**, du build `0511-0748` au build `0511-0948`. Beta 99.41 partout. Hook pré-push Vitest vert. **Non poussés** — Grégoire poussera quand il sera prêt.
+**Total : 17 commits sur main**, du build `0511-0748` au build `0511-1220` (puis 4 commits docs sans bump). Beta 99.41 partout. Hook pré-push Vitest vert sur chaque commit. **Non poussés** — Grégoire pousse depuis la maison (réseau école bloque GitHub:22).
 
-### Commit 1 : Lot 4a ultrareview jetons (`e4c348d`, b0511-0748) — sur branche `feature/lot-4a-jetons`
+### Partie 1 — Matinée (commits 1-7, builds 0511-0748 → 0511-0948)
+
+#### Commit 1 : Lot 4a ultrareview jetons (`e4c348d`, b0511-0748) — sur branche `feature/lot-4a-jetons`
 
 **11 findings ultrareview corrigés** dans `js/evaluation-jetons.js`. 4 axes :
 
@@ -146,93 +152,132 @@ Workflow rappel :
 
 Plan d'audit source : `Rapports/ultrareview-lot-4a-evaluation.md`.
 
-### Commit 2 : #264 progression exporterConfigurationComplete (`72d4533`, b0511-0901)
+#### Commits 2-4 : #264 progression sur les exports (`72d4533`, `0e70935`, `d9bc666`)
 
-Branchement du module `progression.js` (existant issue #229) sur `exporterConfigurationComplete` (`import-export.js`). Étapes : 5% Préparation, 15-75% Scellement SHA-256 des ressources, 80% Validation. Masquage avant la modale K-β preview.
+Module progression.js (#229) branché sur 6 modules d'export :
+- `import-export.js` : `exporterConfigurationComplete` + `executerExport`
+- `codex-data.js` : 3 entrées (FSAPI/ZIP/Dossier) + `_construireCodexData`
+- `travaux-archivage.js` : `lancerExportEtudiant/Production/lancerExport`
+- `travaux-export-pdf.js` : `exporterPDF` + `exporterDossierComplet`
+- `tampons-bibliotheque.js` : `exporterBibliotheque`
 
-### Commit 3 : #264 progression sur 5 modules longs (`0e70935`, b0511-0909)
+Pattern try/finally avec `masquerProgression` garanti même sur erreur. Garde-fou `_hasProg = typeof window.afficherProgression === 'function'`.
 
-- `codex-data.js` : 3 entrées (extraireDepuisArchivesFSAPI/ZIP/Dossier) + `_construireCodexData`. Lecture + hash.
-- `import-export.js executerExport` : sauvegarde sélective (lecture clés, sérialisation JSON, compression ZIP avec fichiers travaux).
-- `travaux-archivage.js` : `lancerExportEtudiant/Production/lancerExport`. Les 2 lanceurs Semestre/Lea ont déjà des barres inline et restent inchangés.
-- `travaux-export-pdf.js` : `exporterPDF` + `exporterDossierComplet`. Rendu/Synthèse/Téléchargement.
-- `tampons-bibliotheque.js exporterBibliotheque` : scellement SHA-256.
+#### Commits 5-6 : #256-bis aide aux modales système (`853c1a0`, `b101b56`)
 
-**Pattern** : try/finally avec masquerProgression garanti même sur erreur. Garde-fou `_hasProg = typeof window.afficherProgression === 'function'`.
+10 entrées popup d'aide ajoutées dans `accompagnement-contenu-popup.js` :
+modal-nouveautes, modal-reparation, modal-wizard-pratique, modal-apercu-pdf, modal-confidentiel, modal-export, modal-import, modal-suppression-ressource, modal-codex-data, modal-export-preview (K-β générique).
 
-**Hors scope (décision)** : bibliothèques sans scellement (grilles/échelles/cartouches/productions/pratiques/pratiques-materiel/planification/cours/objectifs/journal) — exports sub-seconde, valeur UX nulle. `synthese-retroaction-rendu.js` est un helper interne couvert via `travaux-export-pdf.js`.
+Boutons ✴️ data-aide dans chaque header. Wizard : bouton sibling avec classe CSS dédiée (titre réécrit dynamiquement). K-β preview : injection dynamique via DOM.
 
-### Commit 4 : #264 marqué `[x]` (`d9bc666`)
+#### Commit 7 : Défense E correctifs ponctuels (`dc8e3e3`)
 
-Récap dans BACKLOG.md avec liste des modules couverts et hors scope.
+3 correctifs `value="${X.id}"` non échappé :
+- `liste-evaluations.js:264` — `error.message` échappé
+- `liste-evaluations.js:1536` — `p.id` échappé
+- `travaux-ui.js:2595` — même pattern
 
-### Commit 5 : #256-bis aide ✴️ aux 8 modales système (`853c1a0`)
-
-8 nouvelles entrées popup dans `accompagnement-contenu-popup.js` :
-- modal-nouveautes, modal-reparation, modal-wizard-pratique, modal-apercu-pdf, modal-confidentiel, modal-export, modal-import, modal-suppression-ressource.
-
-Boutons ✴️ data-aide ajoutés dans chaque header. Wizard : bouton en sibling du h2 (float right) car titre réécrit dynamiquement par textContent.
-
-### Commit 6 : #256-bis extension modalCodexData + K-β preview + nettoyage CSS (`b101b56`)
-
-- 2 entrées d'aide supplémentaires : `modal-codex-data` + `modal-export-preview` (générique pour la modale K-β partagée par tous les exports).
-- Bouton ✴️ injecté dynamiquement dans `securite-export-preview.js` (append après textContent du titre).
-- `float: right` du wizard sorti du style inline → classe `.wizard-v2-header-texte .btn-aide-contextuelle` dans styles.css.
-
-### Commit 7 : Défense E — 3 correctifs ponctuels + audit suite (`dc8e3e3`)
-
-Audit `scripts/audit-innerhtml.sh` re-exécuté (120 suspects, vs 125 le 6 mai, -22 innerHTML totaux). Cas examinés : 4 pratiques.js + 1 bibliotheque-ui (laissés en mai), reserve-reglages (5), codex-data-ui (5), liste-evaluations (4), échantillon travaux-ui (6).
-
-**3 correctifs ponctuels** :
-- `liste-evaluations.js:264` — `error.message` échappé.
-- `liste-evaluations.js:1536` — `p.id` échappé dans `value="..."`.
-- `travaux-ui.js:2595` — même pattern dans dropdown filtre production.
-
-**Pattern systémique identifié** : 20+ occurrences de `value="${item.id}"` non échappé dans `travaux-ui.js`. Risque réel LOW (IDs internes sanitisés), mais défense en profondeur manquante. À traiter dans un chantier dédié (~3-5 h).
+Audit suite : 120 suspects au 11 mai matin. Pattern systémique identifié (~20 occurrences `value="${X.id}"` non échappé dans `travaux-ui.js`).
 
 Rapport : `docs/securite/audits/AUDIT-INNERHTML-FINDINGS-2026-05-11.md`.
 
-### Aussi mis à jour le 11 mai (non commités encore)
+### Partie 2 — Après-midi (commits 8-17, builds 0511-1105 → 0511-1220)
 
-- `docs/CALENDRIER.md` (untracked) : ajout Lot 4a sur branche, chantiers C/E/H inscrits sur semaines 11-17 + 18-24, bac à sable Lot 4a planifié 25-31 mai, liste des chantiers reportés post-trimestre. Historique v1.1.
+#### Commit 8 : version bump 0511-1105 (`07e4e6b`)
+
+Préparation au push (qui n'a pas pu se faire — réseau école).
+
+#### Commit 9 : Ménage BACKLOG A+B+C (`4968bcd`)
+
+Audit par catégories :
+- **A** (4 fermés vérifiés) : #29, #160, #249, #256-bis
+- **B** (5 collisions) : anciens #239-#243 renumérotés en #268-#272 (références propagées dans SESSION + CALENDRIER avec note « anciennement #N »)
+- **C** : 4 fermés (#15, #163, #164, #165), 2 reformulés (#273 démos, #274 cartes mentales), 1 supprimé (Calendrier flou)
+
+Bilan : 51 → 42 items.
+
+#### Commit 10 : #266 renommage `pratiques-materiel.js` → `pratiques-gestion.js` (`a6f84f5`, b0511-1145)
+
+- `git mv` (98 % préservé)
+- En-tête fichier réécrit avec mention historique et distinction d'avec les autres modules `pratique*`
+- 11 console.log/warn/error : `[pratiques-materiel]` → `[pratiques-gestion]`
+- Tag `<script src>` + cache buster `?v=2026051121`
+- 2 commentaires JS (wizard-pratique-v2.js, trimestre-v2.js)
+- 5 docs vivantes mises à jour
+- Audits historiques intacts
+- **Fonctions exportées `*Materiel` conservées** — collision confirmée avec `pratiques.js` qui a déjà `dupliquerPratique`, `supprimerPratique`, `partagerPratique`
+
+#### Commit 11 : Ménage BACKLOG E (`2f65c8c`, b0511-1205)
+
+Catégorie E (~30 items anciens) auditée par sous-groupes :
+- 4 fermés : #17 obsolète (Défense I a absorbé), 3 reporté V1.1 obsolètes
+- 4 reformulés/enrichis : #2 (matériel cohorte), #47 (note Voûte), #140 (horizon automne), #241+#242 (fix description bug)
+- 2 numérotés : #275 (rétroactions enrichies), #276 (eval sans travaux)
+
+Bilan : 42 → 37 items.
+
+#### Commit 12 : #244 navigateur source dans manifeste Codex (`62c1737`, b0511-1210)
+
+Nouvelle fonction `_identifierNavigateur()` dans `js/codex.js`. Parse nom/version/OS depuis `navigator.userAgent`. Gère iOS WebKit re-brandé (CriOS, EdgiOS, FxiOS). Format : « Chrome 146 / macOS », « Safari 17 / iPadOS ».
+
+2 champs ajoutés au manifeste : `navigateur` (string lisible) + `userAgent` (string complète). Branchement aux 2 sites de construction (`genererCodex` + export sélectif). Champ `appareil` conservé pour rétrocompatibilité.
+
+#### Commit 13 : #216 tooltips date d'échéance productions (`06512f0`, b0511-1215)
+
+2 entrées hover dans `accompagnement-contenu-hover.js` :
+- `cn-prod-echeance` (mode simple)
+- `cn-prod-echeance-mg` (mode multi-groupe)
+
+`data-tooltip` sur `#productionDateEcheance` (remplace `title=`) et sur les `.echeance-gc-date` dynamiques générés par `productions.js`.
+
+Note : ancienne référence `js/tooltips-contenu.js` du BACKLOG était obsolète (infra hover consolidée dans `accompagnement-contenu-hover.js` le 21 avril 2026).
+
+#### Commit 14 : #215 dates trimestre obligatoires (`61ba43e`, b0511-1220)
+
+3 dates obligatoires (dateDebut, finCours, finTrimestre) :
+- Astérisque rouge `*` dans 3 labels (nouvelle classe CSS `.champ-requis` dans styles.css)
+- Attribut HTML `required` sur les 3 inputs
+- Validation améliorée : `alert()` → `afficherNotificationErreur` avec liste des champs manquants + focus auto sur le premier vide
+
+Note : l'« assistant de configuration » référencé dans la description originale a été retiré le 21 avril 2026 (Phase 3 consolidation onboarding).
+
+#### Commit 15 : #219 marqué [x] — déjà livré (`4160034`)
+
+Détecté lors du ménage modulaire : le « formulaire en deux étapes » mentionné dans #219 (3 mars 2026) a été refondu en formulaire unifié dans le commit `4ec86fa` (11 avril 2026 — Phase 2 refonte interventions). Fusion création + détail en un seul flux via `ouvrirIntervention()`. 3 fonctions obsolètes supprimées (-320 lignes). Jamais marqué `[x]` jusqu'à aujourd'hui.
+
+#### Commit 16 : #218 marqué [x] — vérifié par analyse de code (`8c8c241`)
+
+Analyse croisée entre rendu in-app et export PDF :
+- **Annotations texte** : `dessinerTexte` (travaux-annotation.js:2727) et boucle texte de l'export PDF (travaux-export-pdf.js:267-299) utilisent le **même algorithme** (word-wrap, fontSize × ratioResolution, interligne 1.3)
+- **Soulignements ondulés** : `case 'ondule'` in-app (L2453) et PDF (L429) — algorithmes **identiques**
+
+Aucune divergence visible, aucun bug constaté côté utilisateur. Item ajouté au BACKLOG le 3 mars 2026, fonctionnement validé par analyse de code 11 mai.
+
+#### Commit 17 : ce SESSION.md (à venir)
+
+Documentation de fin de journée + consigne de démarrage pour la prochaine session.
 
 ---
 
-## Mémoires Claude créées/mises à jour le 11 mai
+## Récap des compteurs
 
-(à compléter avec ce qui a été appris en cours de session)
-
----
-
-## Reste actif au backlog (priorité décroissante)
-
-- **#256-bis** — à valider terrain en Safari (popups d'aide, z-index, contenu)
-- **Pattern `value="${X.id}"` systémique** — chantier ~3-5 h dédié (suite Défense E)
-- **Bac à sable Lot 4a** — semaine 25-31 mai
-- **Lot 3 indices ultrareview** — ~3-5 h, post-trimestre
-- **#249** Réserve v1.1 — section Réglages dédiée
-- **#257 v2.B** mode consultation namespace temporaire
-- **Phase 5 Démo** — ~1 j, post-trimestre
-- **#272** machine à états chargement éval — ~1 j, post-trimestre (anciennement #239)
-- **#207** unifier travaux-stockage.js dans db.js — ~1-2 j, post-trimestre
-- **Défense E migration complète** — ~1-2 sem, post-colloque
-
-### Modèle de menaces (post-Défense I)
-
-- Phase 0 livrée (B-α/J/D/P-α/H/K) — 6 mai
-- Phase 1 partielle :
-  - Défense A sandbox iframe ✓ (PR #14, 8 mai)
-  - Défense I tests automatisés ✓ (PR #15, 8 mai)
-  - Défense E correctifs ponctuels (11 mai, 6 cas réels fixés cumulatif sur 6+11 mai)
-- Reste Phase 1 :
-  - Défense E migration `innerHTML` → `textContent` complète (~1-2 sem)
-  - Défense C wrapper destructif localStorage/IDB/FSAPI (~1-2 sem)
+| Métrique | Valeur |
+|---|---|
+| Commits non poussés sur main | **17** |
+| Items BACKLOG ouverts | 51 → **32** (-19 net) |
+| Items fermés `[x]` aujourd'hui | **19** |
+| Features/refactors livrés | **6** (#264, #256-bis, #266, #244, #216, #215) |
+| Items « déjà livrés » détectés | **5** (#29, #160, #249, #15, #17, #163, #164, #165, #219, #218 — total : 10 incluant les obsolètes par retrait d'infra) |
+| Items reformulés/numérotés | **9** (#2, #47, #140, #241+#242, #273, #274, #275, #276) |
+| Collisions de numéros résolues | **5** (anciens #239-#243 → #268-#272) |
+| Modules renommés | **1** (pratiques-materiel → pratiques-gestion) |
+| Versions parcourues | 99.41 b0511-0748 → b0511-1220 |
 
 ---
 
 ## Insights / patterns notables du 11 mai
 
-### Pattern : try/finally pour les overlays de progression
+### Pattern : try/finally pour les overlays de progression (#264)
 
 Toutes les fonctions d'export longues respectent maintenant :
 
@@ -263,12 +308,6 @@ Si le titre est mis à jour par `textContent = ...` (cas du wizard), le bouton �
 </div>
 ```
 
-```css
-.wizard-v2-header-texte .btn-aide-contextuelle {
-    float: right;
-}
-```
-
 ### Pattern : injection ✴️ dans modale DOM-construite
 
 Pour `securite-export-preview.js` (modale K-β construite dynamiquement) :
@@ -284,23 +323,42 @@ titre.appendChild(document.createTextNode(' '));
 titre.appendChild(btnAide);
 ```
 
-### Pattern : `value="${X.id}"` non échappé
+### Pattern : `value="${X.id}"` non échappé (Défense E)
 
-Même si l'ID est généré en interne et "safe par construction", l'échappement défensif via `echapperHtml(X.id)` est obligatoire pour défense en profondeur. Le risque devient critique si une migration ratée ou un canal contourne SCHEMAS_IMPORT.
+Même si l'ID est généré en interne et "safe par construction", l'échappement défensif via `echapperHtml(X.id)` est obligatoire pour défense en profondeur. Pattern systémique à traiter (chantier de 3-5 h).
+
+### Pattern : tooltip au survol = `data-tooltip="cle"`
+
+L'infra hover vit dans `js/accompagnement-contenu-hover.js` (consolidation onboarding 21 avril 2026). L'ancien `js/tooltips-contenu.js` n'existe plus. Quand la description d'un item parle de « tooltips », vérifier ce fichier-là.
+
+### Pattern : champ obligatoire = label + astérisque rouge
+
+Classe CSS `.champ-requis` dans `styles.css` (couleur `var(--rouge-erreur)`, font-weight 700). Utilisée dans labels via `<span class="champ-requis" title="Champ obligatoire">*</span>`. Validation JS centralisée dans la fonction `sauvegarder*` correspondante.
 
 ### Insight : ne pas merger un fix de quota pendant un trimestre actif
 
-Un fix qui enforce un quota précédemment ignoré peut soudain BLOQUER l'utilisateur s'il a dépassé ce quota. Pattern : isoler sur une feature branch, tester en bac à sable après que le trimestre soit terminé. Voir Lot 4a (jetons reprise ciblée).
+Un fix qui enforce un quota précédemment ignoré peut soudain BLOQUER l'utilisateur s'il a dépassé ce quota. Pattern : isoler sur feature branch, tester en bac à sable après que le trimestre soit terminé. Voir Lot 4a (jetons reprise ciblée).
+
+### Insight : retrait d'infrastructure ne signifie pas « livré »
+
+Plusieurs items du BACKLOG (#163, #164) ciblaient des fonctionnalités qui ont été RETIRÉES (modules primo, parcours-apprentissage) plutôt que livrées. Pattern de fermeture : `[x] OBSOLÈTE — Le périmètre original reposait sur X (retiré le DATE). Onboarding est désormais consolidé dans Y. Périmètre original disparu.`
+
+### Insight : audit code = fermeture légitime
+
+Pour les items « Vérifier que X fonctionne » (#218), l'analyse de code croisée entre 2 fonctions équivalentes (rendu in-app vs export PDF) peut servir de fermeture si aucune divergence n'est visible et aucun bug n'est constaté côté utilisateur. Pattern : `[x] VÉRIFIÉ (DATE, analyse de code, aucun bug constaté) — Algorithmes identiques entre A et B. Références : fichier:ligne.`
 
 ---
 
 ## Références utiles
 
 - **Module progression** : `js/progression.js` (#229)
-- **Module aide unifié** : `js/accompagnement.js` + `js/accompagnement-contenu-popup.js`
+- **Module aide unifié** : `js/accompagnement.js` + `js/accompagnement-contenu-popup.js` + `js/accompagnement-contenu-hover.js`
+- **Module Codex** : `js/codex.js` (manifeste avec navigateur/userAgent depuis #244)
+- **Module Trimestre** : `js/trimestre-v2.js` (validation dates obligatoires depuis #215)
+- **Module Pratiques (UI)** : `js/pratiques-gestion.js` (anciennement pratiques-materiel.js)
 - **Script audit innerHTML** : `scripts/audit-innerhtml.sh`
 - **Modèle de menaces** : `docs/securite/MODELE-MENACES.md` v1.5
 - **Tests sécurité** : `docs/securite/TESTS-AUTOMATISES.md`
-- **Calendrier** : `docs/CALENDRIER.md` (untracked, à committer avec le paquet de docs)
+- **Calendrier** : `docs/CALENDRIER.md`
 - **Plan ultrareview Lot 4a** : `Rapports/ultrareview-lot-4a-evaluation.md`
 - **Findings audit innerHTML 11 mai** : `docs/securite/audits/AUDIT-INNERHTML-FINDINGS-2026-05-11.md`
