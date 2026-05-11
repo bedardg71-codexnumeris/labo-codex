@@ -603,10 +603,12 @@
   - Verifier que les annotations texte et les soulignements ondules s'affichent correctement dans l'apercu/synthese
   - **Fichiers** : `js/travaux-annotation.js`, `js/travaux-export-pdf.js`
 
-- [ ] **#219** Revoir la preparation des interventions RaI — formulaire en deux etapes inutile
-  - Le formulaire de preparation d'intervention est actuellement en deux etapes, ce qui ne fait pas de sens sur le plan pratique
-  - Simplifier en un seul formulaire ou reorganiser le flux pour qu'il soit plus naturel
-  - **Fichier** : `js/interventions.js`
+- [x] **#219** Revoir la preparation des interventions RaI — formulaire en deux etapes inutile ✅ LIVRÉ (11 avril 2026, commit 4ec86fa)
+  - Refactor « formulaire unifié interventions » (Phase 2 — refonte interventions).
+  - Fusion création + détail en un seul flux via `ouvrirIntervention()`. `afficherFormulaireIntervention()` crée l'intervention vide puis ouvre directement la vue complète (voir commentaire `js/interventions.js:652` « formulaire unifié »).
+  - Guard de nettoyage des interventions orphelines (`jamaisSauvegardee`). 3 fonctions obsolètes supprimées (-320 lignes).
+  - Pré-sélection DA depuis le profil étudiant.
+  - Item ajouté au BACKLOG le 3 mars 2026, livré le 11 avril, jamais marqué `[x]` jusqu'à aujourd'hui.
 
 - [x] **#220** Bug : Calcul de l'assiduite errone dans le profil etudiant ✅ CORRIGE (3 mars 2026, #224)
   - Le pourcentage d'assiduite affiche dans le profil etudiant est incorrect
