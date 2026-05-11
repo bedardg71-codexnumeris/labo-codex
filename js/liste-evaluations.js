@@ -259,12 +259,15 @@ function initialiserListeEvaluations() {
         console.error('Stack trace:', error.stack);
 
         // Afficher un message d'erreur à l'utilisateur
+        // Échappement défensif sur error.message : si une erreur applicative
+        // contient une chaîne utilisateur (ex. nom de fichier), elle ne doit
+        // pas être interprétée comme HTML.
         const conteneur = document.getElementById('zone-chargement-evaluations');
         if (conteneur) {
             conteneur.innerHTML = `
                 <p style="color: var(--rouge-erreur);">
                     <strong>Erreur de chargement</strong><br>
-                    ${error.message}<br>
+                    ${echapperHtml(error.message || '')}<br>
                     <small>Consultez la console pour plus de détails.</small>
                 </p>
             `;
@@ -1533,7 +1536,7 @@ function associerProductionDepuisListe(fichierId, da) {
 
     var optionsHTML = productions.map(function(p) {
         var label = p.description ? (p.titre + ' - ' + p.description) : p.titre;
-        return '<option value="' + p.id + '" ' + (p.id === productionActuelle ? 'selected' : '') + '>' + echapperHtml(label) + '</option>';
+        return '<option value="' + echapperHtml(p.id) + '" ' + (p.id === productionActuelle ? 'selected' : '') + '>' + echapperHtml(label) + '</option>';
     }).join('');
     if (jetonsActifs) {
         optionsHTML += '<option value="__jeton_reprise__">Jeton de reprise</option>';
