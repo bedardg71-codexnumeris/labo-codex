@@ -574,11 +574,16 @@
   - Les fonctions `assurer*()` re-injectaient les gabarits hardcodes a chaque init
   - Corrige : cle IDB `ressourcesSupprimees` consultee avant reinjection (main.js, echelles.js, grilles.js, cartouches.js, donnees-v2.js)
 
-- [ ] **#215** Dates debut/fin de trimestre obligatoires dans le formulaire de reglages
-  - `cadreCalendrier.dateDebut` et `cadreCalendrier.finCours` doivent etre obligatoires
-  - Valider dans le formulaire manuel ET dans l'assistant de configuration
-  - Sans ces dates, les fonctions de semaine, echeances et snapshots ne fonctionnent pas
-  - **Fichiers** : `js/trimestres.js`, assistant de configuration
+- [x] **#215** Dates debut/fin de trimestre obligatoires dans le formulaire de reglages ✅ LIVRÉ (11 mai 2026)
+  - **3 champs obligatoires** : `cadreCalendrier.dateDebut` + `finCours` + `finTrimestre`. Sans eux, les fonctions de semaine, échéances et snapshots cassent.
+  - **Indicateur visuel** : astérisque rouge `*` ajouté dans chaque label (3 spans `class="champ-requis"`). Nouvelle classe CSS `.champ-requis` dans `styles.css` (couleur `var(--rouge-erreur)`, font-weight 700).
+  - **Attribut HTML `required`** ajouté sur les 3 inputs (sémantique + comportement navigateur cohérent).
+  - **Validation améliorée** dans `sauvegarderCadreCalendrierV2()` :
+    - `alert()` remplacé par `afficherNotificationErreur` (titre + détail des champs manquants).
+    - Liste précisément les champs manquants en bullet points (au lieu d'un message générique).
+    - **Focus auto** sur le premier champ vide → guide l'utilisateur directement.
+  - **Note** : l'« assistant de configuration » référencé dans la description originale (primo wizard) a été retiré le 21 avril 2026 (Phase 3 consolidation onboarding). Le formulaire `v2-` est désormais le seul point d'entrée — validation centralisée à un seul endroit.
+  - **Fichiers** : `js/trimestre-v2.js`, `index.html`, `styles.css`.
 
 - [x] **#216** Tooltips sur la date d'echeance des productions ✅ LIVRÉ (11 mai 2026)
   - 2 entrées hover ajoutées dans `js/accompagnement-contenu-hover.js` section Productions :
