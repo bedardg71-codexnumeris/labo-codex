@@ -17,55 +17,97 @@ cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
 Lecture obligatoire :
 1. SESSION.md — bilan du 11 mai + cette consigne
-2. BACKLOG.md — items `[ ]` actifs
-3. docs/CALENDRIER.md — planning hebdomadaire (zone semaine du 11 mai actuelle)
+2. BACKLOG.md — items `[ ]` actifs (à dépoussiérer en début de session,
+   plusieurs sont déjà livrés mais pas marqués `[x]` — ex. #160)
+3. docs/CALENDRIER.md — planning hebdomadaire
 
 État git à connaître :
-- main est +6 vs origin/main. À pousser quand prêt.
+- main est +7 vs origin/main. À pousser quand prêt.
 - feature/lot-4a-jetons (commit e4c348d) contient le Lot 4a ultrareview
   jetons. NON MERGÉ EXPRÈS — le fix de quota reprise ciblée pourrait
   bloquer Grégoire si son trimestre actif a dépassé le quota. Test
   bac à sable prévu semaine 25-31 mai (après remise des notes).
 
-Chantiers ouverts (par priorité descendante) :
+## PLAN DE TRAVAIL CONVENU (valide 11 mai, fin de session)
+
+Trois axes pour la prochaine session, dans cet ordre :
+
+### 1. Ménage du backlog (15-30 min)
+
+Plusieurs items sont déjà livrés mais marqués `[ ]`. Grégoire mentionne
+explicitement #160 (UX biblios) comme exemple. Approche :
+- Parcourir BACKLOG.md systématiquement.
+- Grégoire confirme item par item « livré / actif / à archiver ».
+- Marquer `[x]` avec date + commit de référence si retrouvable, ou
+  juste `[x]` + note « confirmé livré le 11 mai 2026 ».
+- Objectif : avoir une vue propre avant de piocher dans les modulaires.
+
+### 2. Items modulaires (à piocher selon temps disponible)
+
+Liste de candidats « faisables au fil de l'eau » (Grégoire choisit) :
+- #266 renommer pratiques-materiel.js → nom reflétant son rôle actuel
+- #240 tampon visuel pour jetons sur travaux annotés
+- #243 Codex : rapport de comparaison en texte exportable (pas alert())
+- #244 identifier le navigateur source dans le manifeste Codex
+- #233 UX simplifier le flux Codex pour utilisateur lambda
+- #215 dates début/fin trimestre obligatoires
+- #216 tooltips sur date d'échéance productions
+
+### 3. Défense E pragmatique (à étaler sur 2-3 sessions, ~5-8 h cumulé)
+
+OBJECTIF : Défense E « réglée avant colloque » au sens d'une position
+défendable, PAS d'une migration exhaustive.
+
+Décision actée le 11 mai : on prend la **lecture A pragmatique** :
+- Substitution mécanique `value="${X.id}"` → `value="${echapperHtml(X.id)}"`
+  sur les ~20 occurrences (travaux-ui.js majoritairement) — 3-5 h.
+- Examiner les ~100 cas suspects pas encore audités dans modules
+  secondaires — 1-2 h, majorité faux positifs prévisibles.
+- Fixer les vrais bugs trouvés en route (0-3 cas attendus) — ~1 h.
+- Ajouter un test automatisé (sentinelle de non-régression) qui regrep
+  et fail si nouveau `value="${...id}"` non échappé apparaît.
+- Document court `docs/securite/DEFENSE-E-CLOSE.md` listant ce qui a
+  été fait + position défendue : tous les cas examinés, tous les vrais
+  XSS fixés, dette résiduelle couverte par sandbox iframe (Défense A).
+- Marquer Défense E « Phase 1 close » dans MODELE-MENACES.md.
+
+NB : la migration EXHAUSTIVE innerHTML → textContent (lecture B,
+~1-2 sem) est REJETÉE pour le pré-colloque — vole trop de temps à des
+chantiers plus impactants (démo, infrastructure, matériel AQPC). À
+considérer post-colloque si pertinent.
+
+### 4. Bonus marketing pour le colloque (si temps)
+
+Une fois Défense E close, créer `docs/securite/SECURITE-POUR-ENSEIGNANTS.md`
+(1-2 pages, langage accessible) qui présente en français les défenses
+livrées (sceau SHA-256 visible, aperçu K-β, sandbox iframe). Peut être
+intégré dans Réglages > À propos ou imprimé pour le colloque.
+
+Au colloque, montrer les fonctionnalités VISIBLES (sceau + aperçu +
+sandbox) plutôt que parler d'audits internes.
+
+## Autres chantiers (à séquencer plus tard)
 
 A. Validation terrain en Safari de ce qui a été livré le 11 mai :
    - Popups d'aide ✴️ sur les 10 modales système + K-β preview
-     (clic, contenu, fermeture, z-index)
-   - Overlays de progression sur exports longs (codex-data,
-     configuration complète, executerExport, archivage travaux,
-     PDF rétroaction, tampons-bibliotheque)
-   Si OK : marquer #256-bis [x] dans BACKLOG.md
-   Si bug : me le dire, je fixe.
+   - Overlays de progression sur exports longs
+   Si OK : marquer #256-bis [x] dans BACKLOG.md.
 
-B. Substitution mécanique `value="${X.id}"` → `value="${echapperHtml(X.id)}"`
-   (~3-5 h). Pattern systémique identifié dans
-   docs/securite/audits/AUDIT-INNERHTML-FINDINGS-2026-05-11.md.
-   ~20 occurrences à fixer dans travaux-ui.js + ailleurs. Suite
-   directe de Défense E. Safe trimestre actif (pas de changement
-   fonctionnel).
-
-C. Bac à sable Lot 4a (à faire après remise notes, semaine 25-31 mai) :
-   - Créer trimestre "Bac à sable" via Réglages, 3-4 élèves fictifs,
-     une PAN
+B. Bac à sable Lot 4a (semaine 25-31 mai, après remise notes) :
+   - Créer trimestre « Bac à sable », 3-4 élèves fictifs, une PAN
    - git checkout feature/lot-4a-jetons
-   - Dérouler checklist tests (voir mémoire du 11 mai ou demander)
+   - Dérouler checklist tests (cf. mémoire 11 mai)
    - Si vert : merge sur main + push
-   - Si rouge : debug
 
-D. Suite Défense E complète (1-2 sem, post-colloque AQPC) — voir
-   docs/securite/MODELE-MENACES.md §8.2.
-
-E. Reportés post-trimestre (semaine 25 mai+) :
-   - B. Lot 3 indices ultrareview (~3-5 h)
-   - D. Phase 5 Démo (~1 j, déjà reverté le 22 avril)
-   - F. #207 unifier travaux-stockage.js dans db.js (~1-2 j)
-   - G. #239 machine à états chargement éval (~1 j)
+C. Reportés post-trimestre (semaine 25 mai+) :
+   - Lot 3 indices ultrareview (~3-5 h)
+   - Phase 5 Démo (~1 j, déjà reverté 22 avril)
+   - #207 unifier travaux-stockage.js dans db.js (~1-2 j)
+   - #239 machine à états chargement éval (~1 j)
 
 Conventions actées le 11 mai :
-- Module progression.js (issue #229) couvre désormais 8 modules
-  (codex/reserve historiques + 6 nouveaux). Pattern try/finally avec
-  masquerProgression garanti même sur erreur. Garde-fou
+- Module progression.js (issue #229) couvre désormais 8 modules. Pattern
+  try/finally avec masquerProgression garanti même sur erreur. Garde-fou
   `_hasProg = typeof window.afficherProgression === 'function'`.
 - Aide ✴️ : ajouter un bouton `<button class="btn-aide-contextuelle"
   data-aide="cle">✴️</button>` dans le header d'une modale + entrée
@@ -73,9 +115,8 @@ Conventions actées le 11 mai :
   à jour par textContent dynamique (ex. wizard), mettre le bouton en
   sibling et le styler via classe CSS dédiée.
 - Défense E (innerHTML) : audit programmable via
-  scripts/audit-innerhtml.sh. Reste 120 cas suspects, majoritairement
-  faux positifs. Pattern réel à fixer : `value="${id}"` brut dans
-  attributs.
+  scripts/audit-innerhtml.sh. 120 suspects au 11 mai, majoritairement
+  faux positifs. Pattern réel : `value="${id}"` brut dans attributs.
 
 Workflow rappel :
 - Petits commits ciblés
