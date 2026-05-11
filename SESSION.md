@@ -1,9 +1,10 @@
-# SESSION — État au 10 mai 2026
+# SESSION — État au 11 mai 2026
 
-**Date** : 10 mai 2026
-**Dernier build** : `0510-1500` · Beta **99.40**
-**Branche** : `main` (à jour avec `origin/main`, 3 commits poussés)
-**Statut** : journée focalisée sur la **clôture complète de l'audit biblios #267** — Phase D (métadonnées) puis Phase C (refonte carte avec bouton primaire + menu ⋮) avec extensions au-delà du périmètre initial : modales Personnaliser tampons + codes erreurs FR dans Annoter, et 3 biblios de la page Trimestre (trimestres, cours, groupe-cours). #267 marqué `[x]` dans le backlog.
+**Date** : 11 mai 2026
+**Dernier build** : `0511-0948` · Beta **99.41**
+**Branche `main`** : +6 vs `origin/main` (à pousser quand tu veux)
+**Branche `feature/lot-4a-jetons`** : +1 vs `main` (Lot 4a préservé, **non mergé** — à tester en bac à sable après remise notes)
+**Statut** : grosse journée. 4 chantiers touchés : Lot 4a ultrareview jetons (isolé sur branche), #264 barre de progression (clos), #256-bis aide aux modales système (livré, à valider terrain), Défense E innerHTML (démarrage + audit suite + 3 correctifs ponctuels).
 
 ---
 
@@ -15,137 +16,165 @@
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
 Lecture obligatoire :
-1. SESSION.md — bilan du 10 mai + cette consigne
-2. BACKLOG.md — items `[ ]` actifs (audit biblios #267 maintenant clos)
-3. design-system.html section 24 (carte bibliothèque) si tu touches une biblio
+1. SESSION.md — bilan du 11 mai + cette consigne
+2. BACKLOG.md — items `[ ]` actifs
+3. docs/CALENDRIER.md — planning hebdomadaire (zone semaine du 11 mai actuelle)
 
-Chantiers ouverts au choix (par taille croissante) :
+État git à connaître :
+- main est +6 vs origin/main. À pousser quand prêt.
+- feature/lot-4a-jetons (commit e4c348d) contient le Lot 4a ultrareview
+  jetons. NON MERGÉ EXPRÈS — le fix de quota reprise ciblée pourrait
+  bloquer Grégoire si son trimestre actif a dépassé le quota. Test
+  bac à sable prévu semaine 25-31 mai (après remise des notes).
 
-A. Lot 4a ultrareview — jetons (~4 h)
-   Plan détaillé dans Rapports/ultrareview-lot-4a-evaluation.md.
-   4 axes : symétrie original↔reprise / validation / config canonique
-   / SSOT. Touche evaluation-jetons.js.
+Chantiers ouverts (par priorité descendante) :
 
-B. Lot 3 ultrareview — indices (~3-5 h)
-   Triage manuel des 20 candidats (~14-16 vrais bugs attendus).
-   Plan dans Rapports/ultrareview-lot-3-indices.md.
+A. Validation terrain en Safari de ce qui a été livré le 11 mai :
+   - Popups d'aide ✴️ sur les 10 modales système + K-β preview
+     (clic, contenu, fermeture, z-index)
+   - Overlays de progression sur exports longs (codex-data,
+     configuration complète, executerExport, archivage travaux,
+     PDF rétroaction, tampons-bibliotheque)
+   Si OK : marquer #256-bis [x] dans BACKLOG.md
+   Si bug : me le dire, je fixe.
 
-C. #264 — barre de progression sur tous les exports (~3-4 h)
-   Touche ~10 modules. La convention de nommage est stable maintenant
-   (#262 livré 9 mai).
+B. Substitution mécanique `value="${X.id}"` → `value="${echapperHtml(X.id)}"`
+   (~3-5 h). Pattern systémique identifié dans
+   docs/securite/audits/AUDIT-INNERHTML-FINDINGS-2026-05-11.md.
+   ~20 occurrences à fixer dans travaux-ui.js + ailleurs. Suite
+   directe de Défense E. Safe trimestre actif (pas de changement
+   fonctionnel).
 
-D. Phase 5 Démo (~1 j) — chantier important reverté le 22 avril.
-   Lecture préalable : plans de travail/PLAN-AUDIT-PHASE5-DEMO.md
-   + plans de travail/PLAN-AUTONOMISATION-UTILISATEUR.md.
+C. Bac à sable Lot 4a (à faire après remise notes, semaine 25-31 mai) :
+   - Créer trimestre "Bac à sable" via Réglages, 3-4 élèves fictifs,
+     une PAN
+   - git checkout feature/lot-4a-jetons
+   - Dérouler checklist tests (voir mémoire du 11 mai ou demander)
+   - Si vert : merge sur main + push
+   - Si rouge : debug
 
-E. Défense E (Phase 1 modèle de menaces, ~1-2 sem)
-   Migration innerHTML → textContent dans les modules sensibles.
-   Voir docs/securite/MODELE-MENACES.md v1.5.
+D. Suite Défense E complète (1-2 sem, post-colloque AQPC) — voir
+   docs/securite/MODELE-MENACES.md §8.2.
 
-F. #207 — unifier travaux-stockage.js dans db.js (~1-2 j)
-   Créer une API blob dans db.js au lieu d'ouvrir une base IndexedDB
-   parallèle (`MonitorageFichiers`). Plus structurant.
+E. Reportés post-trimestre (semaine 25 mai+) :
+   - B. Lot 3 indices ultrareview (~3-5 h)
+   - D. Phase 5 Démo (~1 j, déjà reverté le 22 avril)
+   - F. #207 unifier travaux-stockage.js dans db.js (~1-2 j)
+   - G. #239 machine à états chargement éval (~1 j)
 
-G. #239 — machine à états chargement évaluation (~1 j)
-   Remplacer les 5 flags globaux + setTimeout imbriqués par un module
-   eval-chargement.js. Réduit la dette technique.
+Conventions actées le 11 mai :
+- Module progression.js (issue #229) couvre désormais 8 modules
+  (codex/reserve historiques + 6 nouveaux). Pattern try/finally avec
+  masquerProgression garanti même sur erreur. Garde-fou
+  `_hasProg = typeof window.afficherProgression === 'function'`.
+- Aide ✴️ : ajouter un bouton `<button class="btn-aide-contextuelle"
+  data-aide="cle">✴️</button>` dans le header d'une modale + entrée
+  popup dans js/accompagnement-contenu-popup.js. Si le titre est mis
+  à jour par textContent dynamique (ex. wizard), mettre le bouton en
+  sibling et le styler via classe CSS dédiée.
+- Défense E (innerHTML) : audit programmable via
+  scripts/audit-innerhtml.sh. Reste 120 cas suspects, majoritairement
+  faux positifs. Pattern réel à fixer : `value="${id}"` brut dans
+  attributs.
 
-H. #256-bis — aide aux 8 modales restantes
-   Plus petit, peut s'enchaîner avec un autre.
-
-Conventions actées récemment :
-- Pattern carte biblio : titre nu · meta · description tronquée ·
-  bouton primaire + menu ⋮ (Phase C livrée 10 mai)
-- Helper menu ⋮ : BibliothequeUI.renderMenuActions(actions, contextId)
-- API renderCarte* : {boutonPrincipal, actionsMenu} (plus de `boutons:[]`)
-- Filtrage par mode démo : BibliothequeUI.filtrerParModeDemo(items)
-- Convention nommage exports : window.genererNomFichierExport(type, opts)
-- Spec carte biblio : design-system.html section 24
-
-Workflow de chantier (rappel) :
+Workflow rappel :
 - Petits commits ciblés
 - Demander le numéro de beta avant chaque commit
-- Bumper version.json + fallback init-inline.js + cache buster du
-  fichier modifié dans index.html
-- Tester en Safari après chaque changement (Cmd+Q pour forcer
-  rechargement ; cache busters Safari file:// peu fiables)
-- Hook pré-push Vitest exécuté automatiquement (29 tests, ~12 s)
+- Bumper version.json + fallback init-inline.js + cache buster
+  du fichier modifié dans index.html
+- Tester Safari après chaque changement (Cmd+Q pour forcer)
+- Hook pré-push Vitest auto (23 tests, ~8 s)
 ```
 
 ---
 
-## Bilan complet — 10 mai 2026
+## Bilan complet — 11 mai 2026
 
-**3 commits poussés sur `origin/main`**, beta `99.40`, du build `0510-1425` au build `0510-1500`. Hook pré-push Vitest vert à chaque push.
+**7 commits sur main**, du build `0511-0748` au build `0511-0948`. Beta 99.41 partout. Hook pré-push Vitest vert. **Non poussés** — Grégoire poussera quand il sera prêt.
 
-### Chantiers livrés (par ordre chronologique)
+### Commit 1 : Lot 4a ultrareview jetons (`e4c348d`, b0511-0748) — sur branche `feature/lot-4a-jetons`
 
-#### #267 Phase D — standardisation métadonnées biblios (`83eb626`, b0510-1425)
+**11 findings ultrareview corrigés** dans `js/evaluation-jetons.js`. 4 axes :
 
-**Helpers centralisés dans `BibliothequeUI` :**
-- `formaterMetadonnees(item, {quantite, discipline})` — ordre fixe `quantité · auteur · discipline`. Auteur via `formaterAttribution` avec fallback `par item.auteur` (utile pour pratiques).
-- `tronquerDescription(desc, max=120)` — coupe au dernier espace si > 70 % de la limite. Ajoute `…` quand tronqué.
-- `renderCarteSelection` / `renderCarteDisponible` : auto-tronquent ET échappent désormais la description (XSS pré-existant fixé au passage — la description, texte utilisateur, n'était pas échappée).
+1. **Symétrie original↔reprise (N2, N3, N5, N8)** : reprise n'hérite plus des flags délai/archivage/reprise ciblée. `repriseDeId` nettoyé si `archiverOriginale=false`. `remplaceeParId` retiré quand on garde la reprise.
+2. **Validation (N1, H2)** : quota enforcé sur reprise ciblée. Notifications après save dans `retirerJetonReprise` avec gestion mode anonymisation/quota.
+3. **Config canonique (N4, H1)** : `appliquerJetonRepriseCiblee` passe par `obtenirConfigJetons`. `nombreParEleve` propagé sur les 3 chemins de config.
+4. **SSOT (N6, N7, H3)** : side-effect supprimé de `obtenirStatutJetonsEtudiant` (fonction `initialiserJetonsEtudiant` retirée). `jetonsEtudiants` routé via `obtenirDonneesSelonMode/sauvegarderDonneesSelonMode` → namespacé par trimestre. Migration one-shot au boot avec garde-fou `window.cle`. Early return prédéfinis dans `attribuerJetonPersonnalise`.
 
-**Migrations 10 sites (sidebar+pool des 5 ressources audit) :**
-- Grilles + Échelles : discipline ajoutée en pool (symétrie sidebar↔pool — incohérence détectée pendant la migration)
-- Cartouches : pas de discipline (champ inexistant)
-- Productions sidebar : objectif déplacé en description (cohérence avec pool), **auteur ajouté** (bug — pool l'affichait, sidebar l'oubliait via `formaterAttribution` manquant)
-- Pratiques : helper local `buildMeta` supprimé (centralisé)
+**Pourquoi sur branche, pas main** : le fix N1 (enforcement quota reprise ciblée) deviendrait soudain bloquant si Grégoire a dépassé le quota dans son trimestre actif. Test bac à sable obligatoire avant merge.
 
-#### #267 Phase C — refonte carte unifiée bouton primaire + menu ⋮ (`be2ebb9`, b0510-1500)
+Plan d'audit source : `Rapports/ultrareview-lot-4a-evaluation.md`.
 
-**Composant menu ⋮ générique dans `BibliothequeUI` :**
-- `renderMenuActions(actions, contextId)` — popover absolute, CSP-compliant via `data-action`. Filtre `showAlways` items quand carte `dejaPresent`.
-- `toggleMenuActions(menuId)` + `fermerTousLesMenus()` — état singleton (1 menu ouvert max).
-- Listeners globaux : clic ailleurs / ESC ferment, clic sur item ferme + dispatcher exécute l'action.
-- ARIA : `aria-haspopup="menu"`, `aria-expanded` synchronisé.
+### Commit 2 : #264 progression exporterConfigurationComplete (`72d4533`, b0511-0901)
 
-**Refactor `renderCarteSelection` / `renderCarteDisponible` :**
-- Nouvelle API : `{boutonPrincipal, actionsMenu}` remplace `{boutons:[...]}`.
-- `showAlways` géré sur `boutonPrincipal` ET items `actionsMenu` quand `dejaPresent`.
-- Échappement HTML labels et titles (sécurité).
+Branchement du module `progression.js` (existant issue #229) sur `exporterConfigurationComplete` (`import-export.js`). Étapes : 5% Préparation, 15-75% Scellement SHA-256 des ressources, 80% Validation. Masquage avant la modale K-β preview.
 
-**CSS** (`styles.css:3380-`) :
-- `.biblio-menu-wrapper` / `.biblio-menu-trigger` / `.biblio-menu-popover` / `.biblio-menu-item`
-- Variant `.biblio-menu-item--danger` (rouge) pour Supprimer
-- Mode clair géré explicitement
+### Commit 3 : #264 progression sur 5 modules longs (`0e70935`, b0511-0909)
 
-**Migration 7 callers existants (14 sites)** : grilles, échelles, cartouches, productions, pratiques, **planification-bibliotheque** et **tampons-bibliotheque** (les 2 derniers n'étaient pas dans l'audit initial mais utilisent aussi `BibliothequeUI`).
+- `codex-data.js` : 3 entrées (extraireDepuisArchivesFSAPI/ZIP/Dossier) + `_construireCodexData`. Lecture + hash.
+- `import-export.js executerExport` : sauvegarde sélective (lecture clés, sérialisation JSON, compression ZIP avec fichiers travaux).
+- `travaux-archivage.js` : `lancerExportEtudiant/Production/lancerExport`. Les 2 lanceurs Semestre/Lea ont déjà des barres inline et restent inchangés.
+- `travaux-export-pdf.js` : `exporterPDF` + `exporterDossierComplet`. Rendu/Synthèse/Téléchargement.
+- `tampons-bibliotheque.js exporterBibliotheque` : scellement SHA-256.
 
-**Extensions au-delà du périmètre audit :**
+**Pattern** : try/finally avec masquerProgression garanti même sur erreur. Garde-fou `_hasProg = typeof window.afficherProgression === 'function'`.
 
-1. **Annoter — modales Personnaliser** (`js/travaux-outils.js`) :
-   - Modale tampons : `🗑` → `⋮ [Supprimer]` sur lignes catégories, tampons (custom + built-in), symboles custom. Touche 5 sites (helper `_htmlRowTampon`, helper `_htmlRowSymbole`, ajouterTamponRetroObs, ajouterSymboleRetroObs, ajouterCategorieRetroObs).
-   - Modale codes erreurs FR : `⋮ [Réinitialiser au défaut]` ajouté sur chaque ligne (nouvelle fonction `reinitialiserCodeErrFr` qui revert nom + couleur depuis `_defautsNomsErrFr` / `_defautsCouleursErrFr`).
+**Hors scope (décision)** : bibliothèques sans scellement (grilles/échelles/cartouches/productions/pratiques/pratiques-materiel/planification/cours/objectifs/journal) — exports sub-seconde, valeur UX nulle. `synthese-retroaction-rendu.js` est un helper interne couvert via `travaux-export-pdf.js`.
 
-2. **Page Trimestre — 3 biblios** (`js/cours.js`, `js/trimestre-v2.js`) :
-   - **Cours** : `ouvrirModalBibliothequeCours` réécrit. Inline → `BibliothequeUI.creerModal`. Sidebar : Dupliquer (primaire) + ⋮ [Exporter, Retirer]. Pool : Ajouter (primaire).
-   - **Groupe-cours** : `ouvrirModalBibliothequeGroupeCours` réécrit. Section visibles + section masqués. Primaire Activer/Afficher selon état. Menu Masquer (visible) + Supprimer.
-   - **Trimestres** : `ouvrirBibliothequeTrimestreV2` transformé d'un simple `alert()` en vraie modale `BibliothequeUI`. Sections Disponibles + Archivés. Primaire Activer/Désarchiver. Menu Archiver.
+### Commit 4 : #264 marqué `[x]` (`d9bc666`)
 
-**Spec dans `design-system.html` section 24** : carte biblio cible avec maquette mode sombre + clair, specs structurelles, API JS, action principale par contexte.
+Récap dans BACKLOG.md avec liste des modules couverts et hors scope.
 
-#### Backlog (`bb012c2`)
+### Commit 5 : #256-bis aide ✴️ aux 8 modales système (`853c1a0`)
 
-- **#267 marqué `[x]`** : Phases A+B+C+D livrées + extensions Annoter + Trimestre. Audit complètement clos.
+8 nouvelles entrées popup dans `accompagnement-contenu-popup.js` :
+- modal-nouveautes, modal-reparation, modal-wizard-pratique, modal-apercu-pdf, modal-confidentiel, modal-export, modal-import, modal-suppression-ressource.
+
+Boutons ✴️ data-aide ajoutés dans chaque header. Wizard : bouton en sibling du h2 (float right) car titre réécrit dynamiquement par textContent.
+
+### Commit 6 : #256-bis extension modalCodexData + K-β preview + nettoyage CSS (`b101b56`)
+
+- 2 entrées d'aide supplémentaires : `modal-codex-data` + `modal-export-preview` (générique pour la modale K-β partagée par tous les exports).
+- Bouton ✴️ injecté dynamiquement dans `securite-export-preview.js` (append après textContent du titre).
+- `float: right` du wizard sorti du style inline → classe `.wizard-v2-header-texte .btn-aide-contextuelle` dans styles.css.
+
+### Commit 7 : Défense E — 3 correctifs ponctuels + audit suite (`dc8e3e3`)
+
+Audit `scripts/audit-innerhtml.sh` re-exécuté (120 suspects, vs 125 le 6 mai, -22 innerHTML totaux). Cas examinés : 4 pratiques.js + 1 bibliotheque-ui (laissés en mai), reserve-reglages (5), codex-data-ui (5), liste-evaluations (4), échantillon travaux-ui (6).
+
+**3 correctifs ponctuels** :
+- `liste-evaluations.js:264` — `error.message` échappé.
+- `liste-evaluations.js:1536` — `p.id` échappé dans `value="..."`.
+- `travaux-ui.js:2595` — même pattern dans dropdown filtre production.
+
+**Pattern systémique identifié** : 20+ occurrences de `value="${item.id}"` non échappé dans `travaux-ui.js`. Risque réel LOW (IDs internes sanitisés), mais défense en profondeur manquante. À traiter dans un chantier dédié (~3-5 h).
+
+Rapport : `docs/securite/audits/AUDIT-INNERHTML-FINDINGS-2026-05-11.md`.
+
+### Aussi mis à jour le 11 mai (non commités encore)
+
+- `docs/CALENDRIER.md` (untracked) : ajout Lot 4a sur branche, chantiers C/E/H inscrits sur semaines 11-17 + 18-24, bac à sable Lot 4a planifié 25-31 mai, liste des chantiers reportés post-trimestre. Historique v1.1.
+
+---
+
+## Mémoires Claude créées/mises à jour le 11 mai
+
+(à compléter avec ce qui a été appris en cours de session)
 
 ---
 
 ## Reste actif au backlog (priorité décroissante)
 
-Plus aucun item lié à l'audit biblios #267. Items hauts du backlog :
-
-- **Lot 4a** ultrareview jetons — ~4 h, plan dans `Rapports/`
-- **Lot 3** ultrareview indices — ~3-5 h, plan dans `Rapports/`
-- **#264** barre progression exports — ~3-4 h
+- **#256-bis** — à valider terrain en Safari (popups d'aide, z-index, contenu)
+- **Pattern `value="${X.id}"` systémique** — chantier ~3-5 h dédié (suite Défense E)
+- **Bac à sable Lot 4a** — semaine 25-31 mai
+- **Lot 3 indices ultrareview** — ~3-5 h, post-trimestre
 - **#249** Réserve v1.1 — section Réglages dédiée
-- **#256-bis** aide aux 8 modales restantes
 - **#257 v2.B** mode consultation namespace temporaire
-- **PLAN-AUTONOMISATION** Phase 5 Démo — ~1 j (préalable lecture
-  PLAN-AUDIT-PHASE5-DEMO)
-- **#239** machine à états chargement évaluation — ~1 j
-- **#207** unifier travaux-stockage.js dans db.js — ~1-2 j
+- **Phase 5 Démo** — ~1 j, post-trimestre
+- **#239** machine à états chargement éval — ~1 j, post-trimestre
+- **#207** unifier travaux-stockage.js dans db.js — ~1-2 j, post-trimestre
+- **Défense E migration complète** — ~1-2 sem, post-colloque
 
 ### Modèle de menaces (post-Défense I)
 
@@ -153,76 +182,84 @@ Plus aucun item lié à l'audit biblios #267. Items hauts du backlog :
 - Phase 1 partielle :
   - Défense A sandbox iframe ✓ (PR #14, 8 mai)
   - Défense I tests automatisés ✓ (PR #15, 8 mai)
+  - Défense E correctifs ponctuels (11 mai, 6 cas réels fixés cumulatif sur 6+11 mai)
 - Reste Phase 1 :
-  - Défense E migration innerHTML → textContent (~1-2 sem)
+  - Défense E migration `innerHTML` → `textContent` complète (~1-2 sem)
   - Défense C wrapper destructif localStorage/IDB/FSAPI (~1-2 sem)
 
 ---
 
-## Conventions actées le 10 mai
+## Insights / patterns notables du 11 mai
 
-### Pattern carte biblio (Phase C)
+### Pattern : try/finally pour les overlays de progression
 
-- **Anatomie** : `[badge type] · titre nu · meta · description (tronquée 120c) · bouton primaire + menu ⋮`
-- **API renderCarte\*** : `{boutonPrincipal, actionsMenu}` (plus de `boutons:[]`)
-- **Action primaire par contexte** :
-  - Sidebar : Dupliquer (la plupart) ; Partager (planification, tampons)
-  - Pool : Ajouter à ma sélection (toujours)
-- **Menu ⋮ partout** (cohérence visuelle) — même quand une seule action secondaire (typiquement Supprimer en pool)
-- **Extensions** : pattern aussi appliqué aux modales Personnaliser (Annoter) et aux biblios Trimestre/cours/groupe-cours
+Toutes les fonctions d'export longues respectent maintenant :
 
-### Composant menu ⋮ (réutilisable)
+```javascript
+const _hasProg = typeof window.afficherProgression === 'function';
+if (_hasProg) {
+    window.afficherProgression('Titre');
+    window.majProgression(X, 'Message', 'stats');
+}
+try {
+    // travail long
+    return ...;
+} finally {
+    if (_hasProg) window.masquerProgression();
+}
+```
 
-- `BibliothequeUI.renderMenuActions(actions, contextId)` retourne le HTML du wrapper trigger + popover
-- Items via `data-action` (CSP-compliant) avec `param`/`param2`/`param3`
-- Variant `.biblio-menu-item--danger` (rouge) pour actions destructives
-- Singleton : un seul menu ouvert à la fois (clic ailleurs / ESC ferme)
-- ARIA : `aria-haspopup="menu"`, `aria-expanded` synchronisé
+Garantit que l'overlay ne reste pas affiché en cas d'erreur.
 
-### Formatage métadonnées (Phase D)
+### Pattern : aide ✴️ dans modale dont le titre est réécrit dynamiquement
 
-- `BibliothequeUI.formaterMetadonnees(item, {quantite, discipline})` — ordre fixe `quantité · auteur · discipline`
-- `BibliothequeUI.tronquerDescription(desc, max=120)` — coupe au dernier espace si > 70 %
-- Description auto-tronquée + auto-échappée par `renderCarte*`
+Si le titre est mis à jour par `textContent = ...` (cas du wizard), le bouton ✴️ DOIT être un sibling, pas un enfant — sinon il est effacé. Pattern utilisé pour le wizard :
 
----
+```html
+<div class="wizard-v2-header-texte">
+    <button class="btn-aide-contextuelle" data-aide="...">✴️</button>
+    <h2 id="wizard-v2-titre">Titre dynamique</h2>
+</div>
+```
 
-## Insights / patterns notables
+```css
+.wizard-v2-header-texte .btn-aide-contextuelle {
+    float: right;
+}
+```
 
-### Migration inline → BibliothequeUI
+### Pattern : injection ✴️ dans modale DOM-construite
 
-Pour les biblios qui avaient leur HTML inline (cours, groupe-cours, trimestres), la migration vers `BibliothequeUI.creerModal` :
-1. Réduit la duplication CSS (modal-overlay réinventé à chaque fois)
-2. Bénéficie automatiquement de la modale standardisée (header X, sections, helper d'aide)
-3. Bénéficie automatiquement du pattern carte (titre, meta, description tronquée, primaire + ⋮)
-4. **Attention au `fermerModal*`** : l'ancien pattern wrapper-container ne s'applique plus. `BibliothequeUI.fermerModal(id)` cherche directement `#id`. Adapter les fonctions de fermeture.
+Pour `securite-export-preview.js` (modale K-β construite dynamiquement) :
 
-### Pattern « kebab pas que pour les biblios »
+```javascript
+var titre = document.createElement('h2');
+titre.textContent = opts.titre;
+var btnAide = document.createElement('button');
+btnAide.className = 'btn-aide-contextuelle';
+btnAide.setAttribute('data-aide', 'modal-export-preview');
+btnAide.textContent = '✴️';
+titre.appendChild(document.createTextNode(' '));
+titre.appendChild(btnAide);
+```
 
-Le menu `⋮` est utile partout où une ligne a plusieurs actions secondaires :
-- Modales Personnaliser (Annoter) : `🗑` discret remplacé par `⋮ [Supprimer]` (libère de l'espace horizontal)
-- Codes erreurs FR : ⋮ ajouté pour exposer une nouvelle action (`Réinitialiser au défaut`) sans encombrer la ligne
+### Pattern : `value="${X.id}"` non échappé
 
-Le composant est CSP-compliant et utilise le dispatcher `data-action` global. Pas de listener à attacher manuellement par caller.
+Même si l'ID est généré en interne et "safe par construction", l'échappement défensif via `echapperHtml(X.id)` est obligatoire pour défense en profondeur. Le risque devient critique si une migration ratée ou un canal contourne SCHEMAS_IMPORT.
 
-### Échappement HTML systématique des descriptions
+### Insight : ne pas merger un fix de quota pendant un trimestre actif
 
-En centralisant la troncation de description dans `renderCarte*`, j'en ai profité pour ajouter `echapperHtml()` au rendu — corrigeant un XSS pré-existant (les callers passaient `item.description` brute au helper, qui l'injectait raw). Pattern : **quand on consolide un helper, en profiter pour appliquer les règles de sécurité de CLAUDE.md**.
-
----
-
-## Mémoires Claude créées/mises à jour aujourd'hui
-
-(à compléter selon ce qui a été appris pendant la session)
+Un fix qui enforce un quota précédemment ignoré peut soudain BLOQUER l'utilisateur s'il a dépassé ce quota. Pattern : isoler sur une feature branch, tester en bac à sable après que le trimestre soit terminé. Voir Lot 4a (jetons reprise ciblée).
 
 ---
 
 ## Références utiles
 
-- **Module partagé biblios** : `js/bibliotheque-ui.js` (~620 l. après Phase C)
-- **Helper exports** : `js/cc-license.js` (`genererNomFichierExport`)
-- **Spec carte biblio** : `design-system.html` section 24
+- **Module progression** : `js/progression.js` (#229)
+- **Module aide unifié** : `js/accompagnement.js` + `js/accompagnement-contenu-popup.js`
+- **Script audit innerHTML** : `scripts/audit-innerhtml.sh`
 - **Modèle de menaces** : `docs/securite/MODELE-MENACES.md` v1.5
 - **Tests sécurité** : `docs/securite/TESTS-AUTOMATISES.md`
-- **Architecture données** : `docs/architecture/ECOSYSTEME-DONNEES.md`
-- **Rapport audit biblios** : `Rapports/AUDIT-BIBLIOS-2026-05-09.md` (historique)
+- **Calendrier** : `docs/CALENDRIER.md` (untracked, à committer avec le paquet de docs)
+- **Plan ultrareview Lot 4a** : `Rapports/ultrareview-lot-4a-evaluation.md`
+- **Findings audit innerHTML 11 mai** : `docs/securite/audits/AUDIT-INNERHTML-FINDINGS-2026-05-11.md`
