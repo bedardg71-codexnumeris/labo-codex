@@ -709,7 +709,7 @@ function ouvrirIntervention(interventionId, options) {
         listeHtml += `
             <div style="display: grid; grid-template-columns: auto 1fr 2fr auto; gap: 10px; align-items: center;
                         padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 5px;">
-                <input type="checkbox" id="etud-${etudiant.da}" value="${etudiant.da}" ${checked}
+                <input type="checkbox" id="etud-${etudiant.da}" value="${echapperHtml(etudiant.da)}" ${checked}
                        data-on-change="onChangementSelectionEtudiants" data-param="${intervention.id}"
                        style="width: auto; margin: 0;">
                 <label for="etud-${etudiant.da}" style="font-weight: 500; margin: 0; cursor: pointer;">
@@ -765,7 +765,7 @@ function ouvrirIntervention(interventionId, options) {
                         <div class="champ-formulaire u-m-0">
                             <label for="interventionTitre" class="label-formulaire">Titre :</label>
                             <input type="text" id="interventionTitre" class="controle-form" required
-                                   value="${intervention.titre}" placeholder="Ex: Intervention Rigueur et Nuance">
+                                   value="${echapperHtml(intervention.titre)}" placeholder="Ex: Intervention Rigueur et Nuance">
                         </div>
 
                         <div class="champ-formulaire u-m-0">
@@ -794,7 +794,7 @@ function ouvrirIntervention(interventionId, options) {
                     <div class="intervention-grid-3col">
                         <div class="champ-formulaire u-m-0">
                             <label for="interventionDate" class="label-formulaire">Date :</label>
-                            <input type="date" id="interventionDate" class="controle-form" required value="${intervention.date}">
+                            <input type="date" id="interventionDate" class="controle-form" required value="${echapperHtml(intervention.date)}">
                         </div>
 
                         <div class="champ-formulaire u-m-0">
