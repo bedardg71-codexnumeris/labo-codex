@@ -40,10 +40,6 @@ const GUIDAGE_TEXTES = {
         titre: 'Saisie des pr\u00e9sences',
         texte: 'C\u2019est ici que tu prends les pr\u00e9sences au quotidien. S\u00e9lectionne la date, coche les pr\u00e9sents, note les retards. En d\u00e9mo, tu peux tester la saisie sans cons\u00e9quence.'
     },
-    'evaluations-apercu': {
-        titre: '\u00c9valuations \u2014 Aper\u00e7u',
-        texte: 'Synth\u00e8se des 200\u00a0\u00e9valuations de la d\u00e9mo\u00a0: progression du groupe, r\u00e9partition des r\u00e9sultats par production et indicateurs de compl\u00e9tion.'
-    },
     'evaluations-liste': {
         titre: 'Liste des \u00e9valuations',
         texte: 'Toutes les \u00e9valuations enregistr\u00e9es, filtrables par production et par groupe. Clique sur une \u00e9valuation pour voir le d\u00e9tail crit\u00e9ri\u00e9.'

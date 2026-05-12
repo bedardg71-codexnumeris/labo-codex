@@ -3784,6 +3784,68 @@ window.dupliquerEtEditerCartouche = dupliquerEtEditerCartouche;
 window.supprimerCartoucheDefinitivement = supprimerCartoucheDefinitivement;
 window.supprimerCartoucheDeBibliothequePartagee = supprimerCartoucheDeBibliothequePartagee;
 
+/* ===============================
+   ONGLETS ÉDITION / APERÇU (#159)
+   Évite le long scroll vertical de l'éditeur de cartouche.
+   La barre d'onglets se synchronise sur la visibilité de #matriceRetroaction
+   via un MutationObserver — pas de modification des 12 sites show/hide.
+   =============================== */
+
+function basculerOngletCartouche(event) {
+    var bouton = event && (event.currentTarget || event.target);
+    if (!bouton) return;
+    var ongletCible = bouton.dataset.onglet;
+    if (!ongletCible) return;
+
+    var zone = document.getElementById('cartoucheZonePrincipale');
+    if (!zone) return;
+    zone.dataset.ongletActif = ongletCible;
+
+    var boutons = document.querySelectorAll('#ongletsCartouche .onglet-cartouche-tab');
+    boutons.forEach(function(b) {
+        var actif = b.dataset.onglet === ongletCible;
+        b.classList.toggle('actif', actif);
+        b.setAttribute('aria-selected', actif ? 'true' : 'false');
+    });
+
+    // Auto-régénérer l'aperçu quand on passe en mode Aperçu pour refléter les édits récents
+    if (ongletCible === 'apercu' && typeof window.genererApercuAleatoire === 'function') {
+        try { window.genererApercuAleatoire(); } catch (e) { console.warn('[Cartouches] genererApercuAleatoire :', e); }
+    }
+}
+window.basculerOngletCartouche = basculerOngletCartouche;
+
+// Observer la visibilité de #matriceRetroaction pour afficher/masquer la barre d'onglets
+(function() {
+    function sync() {
+        var matrice = document.getElementById('matriceRetroaction');
+        var onglets = document.getElementById('ongletsCartouche');
+        if (!matrice || !onglets) return;
+        var matriceVisible = !matrice.classList.contains('u-hide');
+        onglets.classList.toggle('u-hide', !matriceVisible);
+        // Si la matrice se masque, revenir au mode Édition pour la prochaine fois
+        if (!matriceVisible) {
+            var zone = document.getElementById('cartoucheZonePrincipale');
+            if (zone) zone.dataset.ongletActif = 'edition';
+            var btnEdition = document.querySelector('#ongletsCartouche .onglet-cartouche-tab[data-onglet="edition"]');
+            var btnApercu  = document.querySelector('#ongletsCartouche .onglet-cartouche-tab[data-onglet="apercu"]');
+            if (btnEdition) { btnEdition.classList.add('actif'); btnEdition.setAttribute('aria-selected','true'); }
+            if (btnApercu)  { btnApercu.classList.remove('actif'); btnApercu.setAttribute('aria-selected','false'); }
+        }
+    }
+    function installer() {
+        var matrice = document.getElementById('matriceRetroaction');
+        if (!matrice) { setTimeout(installer, 200); return; }
+        sync();
+        new MutationObserver(sync).observe(matrice, { attributes: true, attributeFilter: ['class'] });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', installer);
+    } else {
+        installer();
+    }
+})();
+
 /**
  * Importe une liste de cartouches externes (archives, voûte, etc.).
  * Les cartouches sont distribués dans cartouches_{grilleId} selon leur grilleId.

@@ -4021,7 +4021,7 @@ function genererDetailsEtudiant(etudiant) {
                                         <button class="btn btn-modifier btn-compact" data-action="modifierEvaluation" data-param="${item.evaluation.id}">
                                             Consulter
                                         </button>
-                                        <button class="btn btn-supprimer btn-compact" data-action="supprimerEvaluation" data-param="${item.evaluation.id}" ${item.evaluation.verrouillee ? 'disabled title="Déverrouillez d\'abord pour supprimer"' : ''}>
+                                        <button class="btn btn-supprimer btn-compact" data-tooltip="eval-btn-supprimer" data-action="supprimerEvaluation" data-param="${item.evaluation.id}" ${item.evaluation.verrouillee ? 'disabled title="Déverrouillez d\'abord pour supprimer"' : ''}>
                                             Supprimer
                                         </button>
                                     `}
