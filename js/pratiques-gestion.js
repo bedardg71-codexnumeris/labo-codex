@@ -1261,7 +1261,7 @@ async function chargerDropdownEchellesMat() {
 
     let html = '<option value="">-- Sélectionner une échelle --</option>';
     echelles.forEach(e => {
-        html += `<option value="${e.id}">${e.nom || 'Sans nom'}</option>`;
+        html += `<option value="${echapperHtml(e.id)}">${echapperHtml(e.nom || 'Sans nom')}</option>`;
     });
 
     select.innerHTML = html;
@@ -2520,7 +2520,7 @@ function afficherGrilleConversionMat(grille) {
     grille.forEach((ligne, index) => {
         html += `<tr>
             <td>${ligne.nbObjectifs} objectif(s)</td>
-            <td><input type="number" class="controle-form" value="${ligne.note}"
+            <td><input type="number" class="controle-form" value="${echapperHtml(ligne.note)}"
                     min="0" max="100" style="width: 80px;"
                     data-on-change="modifierGrilleConversionMatHandler" data-mat-index="${index}">%</td>
         </tr>`;
