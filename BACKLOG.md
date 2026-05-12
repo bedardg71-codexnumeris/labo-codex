@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 13 mai 2026 (Beta 99.42, Build 0512-0738) — sprint 6 items modulaires : 33 → 27 items ouverts (-6 livrés : #277, #22, #242, #239, #243, #246)
+> **Derniere mise a jour** : 13 mai 2026 (Beta 99.42, Build 0512-0738) — sprint 6 items modulaires + audit reality-check : 33 → 25 items ouverts (-8 net : 6 livrés sprint + 2 déjà résolus mais case oubliée #207, #276)
 
 ---
 
@@ -678,10 +678,12 @@
 - [x] **#206** Creer module `indices.js` centralise : regrouper les 7 fonctions de calcul d'indices A-C-P-E dupliquees entre profil-etudiant.js, portfolio.js, tableau-bord-apercu.js et saisie-presences.js
   - **Ref audit** : SUI-01, voir tableau de centralisation dans AUDIT-QUALITE.md
 
-- [ ] **#207** Integrer travaux-stockage.js dans db.js : creer une API blob dans db.js au lieu d'ouvrir une base IndexedDB parallele (`MonitorageFichiers`)
-  - **Fichier** : `js/travaux-stockage.js:51`
+- [x] **#207** Intégrer travaux-stockage.js dans db.js — API blob unifiée ✅ LIVRÉ (audit 13 mai 2026)
   - **Ref audit** : ARC-01
-  - **Avancement** : Migration MonitorageFichiers → MonitoragePedagogique.fichiers FAITE (Beta 95). API blob dans db.js en place (storeBlob/getBlob/deleteBlob). Thumbnails migrees vers IDB keyvalue (Beta 98.9). Reste : fusionner les modules si pertinent.
+  - **Migration FAITE** (Beta 95) : MonitorageFichiers → MonitoragePedagogique.fichiers. `js/travaux-stockage.js` (1451 l.) n'a plus aucune référence `MonitorageFichiers` / `indexedDB.open` / DB parallèle.
+  - **API blob en place** dans `js/db.js:683` : `storeBlob`, `getBlob`, `deleteBlob`, `listBlobsByStudent`.
+  - **Thumbnails migrées** vers IDB keyvalue (Beta 98.9).
+  - **Fusion des modules NON pertinente** : travaux-stockage.js gère FSAPI (showDirectoryPicker), génération thumbnails, gestion quota — concerns distincts de db.js. La séparation est saine architecturalement.
 
 #### Reste a faire — CSS
 
@@ -709,7 +711,11 @@
   - **Intégration** : verser dans le pack démo (groupe 9999) via `donnees-demo.js`, avec préfixe `PROD_DEMO_` (rappel #86 : ne JAMAIS utiliser `PROD_` seul, qui matche les vraies productions).
   - **Fichiers** : `js/donnees-demo.js`, `autocollants/` éventuellement enrichi, pack travaux dans `MonitorageFichiers` (IndexedDB).
 
-- [ ] **#276** Evaluation sans travaux importes (numéroté 11 mai 2026, besoin identifié 21 fév 2026) : S'assurer que le module d'evaluation fonctionne meme si aucun travail n'est charge (importe). Contexte : jusqu'a present, l'evaluation se faisait dans GoodNotes ; desormais elle se fera directement dans l'application. Le flux doit supporter l'evaluation manuelle sans fichier PDF/image importe.
+- [x] **#276** Évaluation sans travaux importés ✅ LIVRÉ (audit 13 mai 2026)
+  - Mode standalone explicite à `evaluation.js:5327` : « Sinon (standalone, sans fichier), afficher le formulaire directement »
+  - Branchement `enModeEvaluer = !!document.getElementById('travaux-palette-eval-gauche')` → si pas en mode visionneuse, le formulaire d'évaluation s'affiche seul
+  - Multiples fixes de mars 2026 sur ce code path (`_forceStandaloneEval` 20 mars, `_resterEnModeAnnoter` 29 mars) → flux activement utilisé et stable
+  - Le contexte « évaluation directement dans l'app » (non plus GoodNotes) est donc déjà supporté.
 
 - [x] **#277** Modale Réparation des évaluations — point d'accès UI manquant ✅ LIVRÉ (13 mai 2026, option b)
   - Décision actée 12 mai : option (b) suppression complète. Modale jamais ouverte depuis l'UI, fonction `reparer_evaluations_criteres_manquants` callable uniquement via modale → chaîne entièrement morte.
