@@ -132,7 +132,7 @@ async function chargerListeGrillesTemplates() {
 
     select.innerHTML = '<option value="">-- Nouvelle grille --</option>' +
         '<option value="new">➕ Créer une nouvelle grille</option>' +
-        grilles.map(grille => `<option value="${grille.id}">${echapperHtml(grille.nom)}</option>`).join('');
+        grilles.map(grille => `<option value="${echapperHtml(grille.id)}">${echapperHtml(grille.nom)}</option>`).join('');
 }
 
 /* ===============================
@@ -2729,7 +2729,7 @@ function afficherCriteresTemp() {
                     <label style="font-size: 0.85rem; color: var(--gris-moyen);">Pond. (%)</label>
                     <input type="number"
                            class="controle-form"
-                           value="${critere.ponderation}"
+                           value="${echapperHtml(critere.ponderation)}"
                            min="0"
                            max="100"
                            data-on-change="modifierPonderationCritereTempHandler" data-critere-index="${index}">
@@ -3025,7 +3025,7 @@ function afficherCriteresGrille(grille) {
                     <label style="font-size: 0.85rem; color: var(--gris-moyen);">Pond. (%)</label>
                     <input type="number"
                            class="controle-form"
-                           value="${critere.ponderation}"
+                           value="${echapperHtml(critere.ponderation)}"
                            min="0"
                            max="100"
                            data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-champ="ponderation" data-parse-int>
