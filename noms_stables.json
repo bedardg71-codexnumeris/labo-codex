@@ -1,0 +1,72 @@
+{
+  "_commentaire": "Registre des identifiants protégés référencés par des marqueurs '⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json' dans le code. Source de vérité pour les noms de fonctions et variables globales dont le renommage casserait la navigation, le rendu des productions, ou la gestion des grilles. Mis à jour le 13 mai 2026 (Beta 99.42).",
+  "_regle": "Avant de renommer un de ces identifiants : (1) vérifier qu'aucun appelant n'utilise le nom historique, (2) mettre à jour ce fichier ET le marqueur dans le code, (3) tester le module concerné en Safari.",
+  "_derniere_maj": "2026-05-13",
+  "_version_codebase": "Beta 99.42 b0512-0708",
+  "identifiants": {
+    "js/config.js": {
+      "description": "Configuration globale de la navigation + données partagées",
+      "noms": [
+        { "nom": "configurationsOnglets", "type": "const", "ligne": 32, "role": "Définition des sections et sous-sections de l'app (carte de la navigation)" },
+        { "nom": "sectionActive", "type": "let", "ligne": 104, "role": "Variable globale : section principale actuellement affichée" },
+        { "nom": "sousSectionActive", "type": "let", "ligne": 117, "role": "Variable globale : sous-section actuellement affichée" },
+        { "nom": "listeEtudiants", "type": "const", "ligne": 218, "role": "Liste partagée des étudiants (lue par plusieurs modules)" }
+      ]
+    },
+    "js/navigation.js": {
+      "description": "Logique de navigation principale et sous-navigation",
+      "noms": [
+        { "nom": "afficherSection", "type": "function", "ligne": 68, "role": "Change la section principale active et déclenche le rendu de sa sous-navigation" },
+        { "nom": "afficherSousNavigation", "type": "function", "ligne": 357, "role": "Génère et affiche les boutons de sous-navigation pour une section" },
+        { "nom": "afficherSousSection", "type": "function", "ligne": 442, "role": "Affiche une sous-section spécifique et met à jour les boutons actifs" }
+      ]
+    },
+    "js/productions.js": {
+      "description": "Module Productions (CRUD + tableau + portfolio + verrouillage)",
+      "noms": [
+        { "nom": "afficherTableauProductions", "type": "async function", "ligne": 177, "role": "Rend le tableau principal des productions" },
+        { "nom": "peuplerEcheancesParGroupe", "type": "function", "ligne": 268, "role": "Peuple les champs d'échéance par groupe-cours" },
+        { "nom": "sauvegarderProduction", "type": "async function", "ligne": 805, "role": "Persiste une production (création ou modification)" },
+        { "nom": "annulerFormProduction", "type": "function", "ligne": 1075, "role": "Annule le formulaire de production et réinitialise l'état" },
+        { "nom": "modifierProduction", "type": "async function", "ligne": 1108, "role": "Ouvre une production existante en édition" },
+        { "nom": "supprimerProduction", "type": "async function", "ligne": 1134, "role": "Supprime une production après confirmation" },
+        { "nom": "verrouillerEvaluation", "type": "async function", "ligne": 1172, "role": "Verrouille ou déverrouille une évaluation rattachée à une production" },
+        { "nom": "monterEvaluation", "type": "async function", "ligne": 1229, "role": "Réordonne (monter) une évaluation dans la liste" },
+        { "nom": "descendreEvaluation", "type": "async function", "ligne": 1262, "role": "Réordonne (descendre) une évaluation dans la liste" },
+        { "nom": "gererChangementTypeProduction", "type": "function", "ligne": 1298, "role": "Adapte le formulaire selon le type de production sélectionné" },
+        { "nom": "chargerArtefactsDisponibles", "type": "async function", "ligne": 1488, "role": "Charge les artefacts disponibles dans le sélecteur" },
+        { "nom": "mettreAJourPonderationTotale", "type": "async function", "ligne": 1534, "role": "Recalcule la somme des pondérations et l'affiche" },
+        { "nom": "mettreAJourResumeTypes", "type": "function", "ligne": 1576, "role": "Met à jour le résumé visuel des types d'évaluation" },
+        { "nom": "getTypeLabel", "type": "function", "ligne": 1614, "role": "Retourne le libellé d'un type de production" },
+        { "nom": "gererPortfolio", "type": "function", "ligne": 1641, "role": "Gère l'affichage et la logique du portfolio attaché à une production" }
+      ]
+    },
+    "js/grilles.js": {
+      "description": "Module Grilles (templates de critères, sauvegarde, duplication)",
+      "noms": [
+        { "nom": "chargerListeGrillesTemplates", "type": "async function", "ligne": 127, "role": "Charge la liste des grilles dans le sélecteur" },
+        { "nom": "chargerGrilleTemplate", "type": "async function", "ligne": 162, "role": "Charge une grille spécifique pour édition" },
+        { "nom": "afficherFormCritere", "type": "function", "ligne": 247, "role": "Affiche le formulaire d'ajout/modification d'un critère" },
+        { "nom": "sauvegarderCritere", "type": "async function", "ligne": 312, "role": "Enregistre un critère dans la grille en cours" },
+        { "nom": "sauvegarderEtFermer", "type": "async function", "ligne": 414, "role": "Sauvegarde le critère puis ferme le formulaire" },
+        { "nom": "annulerAjoutCritere", "type": "function", "ligne": 439, "role": "Annule l'ajout/modification de critère" },
+        { "nom": "modifierCritere", "type": "function", "ligne": 468, "role": "Lance la modification d'un critère existant" },
+        { "nom": "supprimerCritere", "type": "async function", "ligne": 499, "role": "Supprime un critère après confirmation" },
+        { "nom": "afficherListeCriteres", "type": "function", "ligne": 539, "role": "Affiche tous les critères d'une grille" },
+        { "nom": "afficherChampFormule", "type": "function", "ligne": 606, "role": "Gère l'affichage conditionnel du champ formule" },
+        { "nom": "sauvegarderGrilleTemplate", "type": "async function", "ligne": 639, "role": "Enregistre la grille complète" },
+        { "nom": "sauvegarderNomGrille", "type": "function", "ligne": 767, "role": "Sauvegarde automatique du nom de la grille" },
+        { "nom": "afficherGrillesCriteres", "type": "async function", "ligne": 791, "role": "Affiche le modal des grilles existantes" },
+        { "nom": "fermerModalGrilles", "type": "function", "ligne": 869, "role": "Ferme le modal des grilles" },
+        { "nom": "chargerGrilleEnEdition", "type": "async function", "ligne": 894, "role": "Charge une grille depuis le modal pour édition" },
+        { "nom": "supprimerGrille", "type": "async function", "ligne": 926, "role": "Supprime une grille après confirmation" },
+        { "nom": "dupliquerGrille", "type": "async function", "ligne": 978, "role": "Duplique une grille depuis le modal" },
+        { "nom": "dupliquerGrilleActuelle", "type": "async function", "ligne": 1058, "role": "Duplique la grille en cours d'édition" },
+        { "nom": "basculerVerrouillageCritere", "type": "async function", "ligne": 1132, "role": "Verrouille ou déverrouille un critère" },
+        { "nom": "getTypeCritereLabel", "type": "function", "ligne": 1185, "role": "Retourne le libellé d'un type de critère" },
+        { "nom": "calculerTotalPonderationCriteres", "type": "function", "ligne": 1216, "role": "Calcule et affiche le total des pondérations" },
+        { "nom": "enregistrerCommeGrille", "type": "function", "ligne": 1252, "role": "Alias de sauvegarde (compatibilité)" }
+      ]
+    }
+  }
+}
