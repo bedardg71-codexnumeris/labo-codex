@@ -563,7 +563,7 @@ function mettreAJourDropdownCategories() {
     let html = '<option value="">Toutes les catégories</option>';
     etatQuestions.categories.forEach(cat => {
         const count = etatQuestions.questions.filter(q => q.categorieId === cat.id).length;
-        html += `<option value="${cat.id}">${cat.nom} (${count})</option>`;
+        html += `<option value="${echapperHtml(cat.id)}">${echapperHtml(cat.nom)} (${count})</option>`;
     });
 
     // Ajouter "Sans catégorie" si des questions n'ont pas de catégorie
@@ -802,7 +802,7 @@ function ouvrirModalParamsQuestions() {
                                 <select id="categorie-nouvelle-question" class="form-select">
                                     <option value="">Sans catégorie</option>
                                     ${etatQuestions.categories.map(c => `
-                                        <option value="${c.id}">${echapperHtml(c.nom)}</option>
+                                        <option value="${echapperHtml(c.id)}">${echapperHtml(c.nom)}</option>
                                     `).join('')}
                                 </select>
                                 <button class="btn btn-principal" data-action="ajouterQuestion">Ajouter</button>
@@ -879,7 +879,7 @@ function genererHTMLQuestionFlash(question) {
     // Générer les options de catégorie
     let optionsCategorie = `<option value="" ${!question.categorieId ? 'selected' : ''}>Sans catégorie</option>`;
     etatQuestions.categories.forEach(cat => {
-        optionsCategorie += `<option value="${cat.id}" ${question.categorieId === cat.id ? 'selected' : ''}>${cat.nom}</option>`;
+        optionsCategorie += `<option value="${echapperHtml(cat.id)}" ${question.categorieId === cat.id ? 'selected' : ''}>${echapperHtml(cat.nom)}</option>`;
     });
 
     return `
@@ -986,7 +986,7 @@ function rafraichirListeQuestionsModal() {
         selectCategorie.innerHTML = `
             <option value="">Sans catégorie</option>
             ${etatQuestions.categories.map(c => `
-                <option value="${c.id}" ${c.id === valeurActuelle ? 'selected' : ''}>${echapperHtml(c.nom)}</option>
+                <option value="${echapperHtml(c.id)}" ${c.id === valeurActuelle ? 'selected' : ''}>${echapperHtml(c.nom)}</option>
             `).join('')}
         `;
     }
