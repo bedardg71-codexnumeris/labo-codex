@@ -1339,7 +1339,7 @@ function genererChampToggle(champ) {
 function genererChampSelect(champ) {
     let options = champ.options.map(opt => {
         const selected = opt.value === champ.default ? 'selected' : '';
-        return `<option value="${opt.value}" ${selected}>${opt.label}</option>`;
+        return `<option value="${echapperHtml(opt.value)}" ${selected}>${opt.label}</option>`;
     }).join('');
 
     return `
@@ -1439,7 +1439,7 @@ function genererRadioCards(champ) {
             <label class="wizard-v2-radio-card ${disabledClass}">
                 <input type="radio"
                        name="${champ.id}"
-                       value="${opt.value}"
+                       value="${echapperHtml(opt.value)}"
                        ${disabled}>
                 <div class="wizard-v2-card-content">
                     <div class="wizard-v2-card-title">${opt.label}</div>
@@ -1468,7 +1468,7 @@ function genererCheckboxCards(champ) {
             <label class="wizard-v2-radio-card wizard-v2-checkbox-card">
                 <input type="checkbox"
                        name="${champ.id}"
-                       value="${opt.value}"
+                       value="${echapperHtml(opt.value)}"
                        ${exclusiveAttr}
                        data-action="wizardV2GererExclusionCheckbox">
                 <div class="wizard-v2-card-content">
@@ -1509,7 +1509,7 @@ function genererSelectEchelle(champ) {
 
     let options = echelles.map(e => {
         const niveaux = e.niveaux ? e.niveaux.length : 0;
-        return `<option value="${e.id}">${e.nom || 'Sans nom'} (${niveaux} niveaux)</option>`;
+        return `<option value="${echapperHtml(e.id)}">${e.nom || 'Sans nom'} (${niveaux} niveaux)</option>`;
     }).join('');
 
     return `
@@ -1554,7 +1554,7 @@ function genererSelectGrille(champ) {
 
     let options = grilles.map(g => {
         const criteres = g.criteres ? g.criteres.length : 0;
-        return `<option value="${g.id}">${g.nom || 'Sans nom'} (${criteres} critères)</option>`;
+        return `<option value="${echapperHtml(g.id)}">${g.nom || 'Sans nom'} (${criteres} critères)</option>`;
     }).join('');
 
     return `
