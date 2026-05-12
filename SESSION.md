@@ -1,10 +1,10 @@
-# SESSION — État au 13 mai 2026 (fin de journée)
+# SESSION — État au 12 mai 2026 (fin de journée)
 
-**Date** : 13 mai 2026
-**Dernier build** : `0512-0840` · Beta **99.42**
-**Branche `main`** : poussée sur origin (sprint + audit + quick wins + cleanup).
+**Date** : 12 mai 2026
+**Dernier build** : `0512-1012` · Beta **99.42**
+**Branche `main`** : 7 commits du sprint matinal **poussés** sur origin. Itérations #159 de l'après-midi (3 fixes puis retrait complet) **encore locales**.
 **Branche `feature/lot-4a-jetons`** : inchangée depuis le 11 mai (Lot 4a préservé, **non mergé** — bac à sable prévu semaine 25-31 mai).
-**Statut** : journée très productive — sprint 6 items + audit reality-check (2 items fermés) + 3 quick wins + cleanup module mort. **BACKLOG 33 → 23 items ouverts (-10).**
+**Statut** : journée très productive — sprint 6 items + audit reality-check (2 items fermés) + 3 quick wins + cleanup module mort + retrait zéro-dette de #159 après retour terrain. **BACKLOG 33 → 23 items ouverts (-10).**
 
 **Ultrareview `js/codex.js` complétée le 12 mai 2026** — pipeline 4/4 phases ✓, **0 finding**. Skeleton de tests + rapport ajoutés (commits `443b626` + `e0122ee`). Procédure SESSION.md §44-117 corrigée suite aux tâtonnements (orphan `review-base` + draft PR + CLI locale). Voir `Rapports/ultrareview-codex-2026-05-12.md`.
 
@@ -12,7 +12,7 @@
 
 ---
 
-## 🚀 Consigne de démarrage pour la prochaine session
+## Consigne de démarrage pour la prochaine session
 
 À copier-coller au début de la prochaine session (semaine **18-24 mai 2026**) :
 
@@ -20,20 +20,25 @@
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
 Lecture obligatoire :
-1. SESSION.md — statut + procédure ultrareview corrigée ci-dessous
-2. BACKLOG.md — 23 items `[ ]` actifs
+1. SESSION.md — statut + procédure ultrareview détaillée ci-dessous
+2. BACKLOG.md — 23 items [ ] actifs
 3. docs/CALENDRIER.md §96-132 — « Stratégie ultrareviews pré-colloque »
 4. memory : feedback_ultrareview_workflow.md (pattern orphan + draft PR + CLI locale)
 
-État git :
-- main synchronisé avec origin/main (3 commits ajoutés le 12 mai
-  post-ultrareview codex : 443b626 skeleton+rapport, e0122ee
-  procédure SESSION corrigée).
+État git attendu en début de session :
+- main : 10 commits du 12 mai poussés sur origin (sprint matinal
+  06035b8 → 947ac1d + post-ultrareview codex 443b626 + e0122ee +
+  retrait #159 zéro-dette à committer avant départ — si pas déjà fait).
 - feature/lot-4a-jetons (commit e4c348d) inchangée, bac à sable
   prévu semaine 25-31 mai.
 - review/codex-2026-05-12 conservée sur origin (archive du bundle,
   draft PR #16 OPEN). feature/ultrareview-codex-2026-05-12 supprimée
   localement (merge fast-forward terminé).
+
+Vérification rapide à l'ouverture de session :
+  git status                            # rien d'inattendu
+  git log --oneline origin/main..HEAD   # rien (tout déjà poussé)
+  cd tests && npm test                  # 30 verts (baseline)
 
 ## OBJECTIF DE LA SESSION : Ultrareview 2
 
@@ -57,8 +62,10 @@ sur gel pré-colloque).
 ### Préparation (étapes 1-2 de la procédure ci-dessous)
 
 Cibler le bundle : `js/travaux-export-pdf.js` + `js/travaux-annotation.js`.
-Nomenclature : `review/travaux-export-annotation-YYYY-MM-DD` (bundle)
-+ `feature/ultrareview-travaux-export-annotation-YYYY-MM-DD` (fixes).
+Nomenclature (remplacer `<DATE>` par la date du jour de session, p.ex. `2026-05-19`) :
+- bundle : `review/travaux-export-annotation-<DATE>`
+- branche fixes : `feature/ultrareview-travaux-export-annotation-<DATE>`
+
 Draft PR vers `review-base`. Lancer `/ultrareview <PR#>` **depuis une
 session CLI locale** (pas web/desktop).
 
@@ -79,27 +86,40 @@ du 12 mai) utilise **deux branches** :
 `review-base` orpheline, `git merge-base` ne trouve aucun diff et
 `/ultrareview` échoue avec « Could not find merge-base with main ».
 
+Commandes prêtes-à-coller (remplacer `<DATE>` partout) :
+
 ```bash
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 git checkout main && git pull
 
+DATE=<DATE>   # p.ex. 2026-05-19
+
 # Branche de fixes (depuis main, vide au départ)
-git checkout -b feature/ultrareview-<cible>-YYYY-MM-DD
+git checkout -b feature/ultrareview-travaux-export-annotation-$DATE
 
 # Bundle pour le reviewer (depuis review-base, orpheline)
 git checkout review-base
-git checkout -b review/<cible>-YYYY-MM-DD
-git checkout main -- <chemins/des/fichiers/à/auditer>
-git commit -m "review: bundle <cible> pour ultrareview (YYYY-MM-DD)"
-git push -u origin review/<cible>-YYYY-MM-DD
+git checkout -b review/travaux-export-annotation-$DATE
+git checkout main -- js/travaux-export-pdf.js js/travaux-annotation.js
+git commit -m "review: bundle travaux-export-pdf + travaux-annotation pour ultrareview ($DATE)"
+git push -u origin review/travaux-export-annotation-$DATE
 ```
 
 Ouvrir une **draft PR** ciblant `review-base` (pas main !) :
 
 ```bash
-gh pr create --base review-base --head review/<cible>-YYYY-MM-DD --draft \
-  --title "Ultrareview — <cible> (YYYY-MM-DD)" \
-  --body "..."   # contexte, scope, attentes pour le reviewer
+gh pr create --base review-base --head review/travaux-export-annotation-$DATE --draft \
+  --title "Ultrareview — travaux-export-pdf + travaux-annotation ($DATE)" \
+  --body "Bundle de review pour les deux modules d'export PDF et d'annotation des travaux.
+
+Cibles :
+- js/travaux-export-pdf.js (1207 l.) — pipeline PDF (refonte design B Beta 95+)
+- js/travaux-annotation.js (3144 l.) — édition annotations sur travaux
+
+Attentes : vérifier injection XSS éventuelle, gestion mémoire/blobs, fuites
+de listeners sur ouverture/fermeture répétée, robustesse parsing PDF.
+Le format de stockage des annotations est figé (rétrocompat) — différer
+toute modification de format manifestée par les findings."
 ```
 
 Noter le **numéro de PR** généré — il sera l'argument de `/ultrareview`.
@@ -157,11 +177,15 @@ Findings classés Critical / High / Medium / Low / Nit. Pour chaque :
      refactors sans changement de comportement, garde-fous null, console.log
      de debug, JSDoc.
    - **Différer après trimestre** : changements d'algorithme, modification
-     de format de stockage (manifeste codex !), comportement sauvegarde.
+     de format de stockage (format annotations !), comportement sauvegarde.
 
-⚠️ **Codex.js sérialise des manifestes persistés dans des .zip de codex
-existants**. Tout changement de format est rétrocompat-breaking. Différer
-ces changements sans plan de migration.
+⚠️ **`travaux-annotation.js` sérialise les annotations dans `fichiersTravaux`
+par travail**. Tout changement de schéma casse les travaux annotés existants.
+Différer ces changements sans plan de migration.
+
+⚠️ **`travaux-export-pdf.js` produit des PDF servis directement à l'enseignant**.
+Les fixes sur le pipeline d'export doivent être validés visuellement sur
+plusieurs travaux annotés réels (matrice, signature, rétroaction, jetons).
 
 **Étape 4 — Appliquer les fixes** (~1-2 j selon volume, étalé sur la semaine)
 
@@ -179,9 +203,15 @@ Conventions :
 
 - Cmd+Q Safari → relancer pour forcer rechargement (cache busters
   inopérants sur file://).
-- Tester les chemins critiques touchés : Ouvrir un codex, Enregistrer,
-  Fusionner, Comparer, Exporter une sélection, Versement Réserve.
-- Tester en Chrome aussi si les fixes touchent FSAPI.
+- Chemins critiques à tester pour Ultrareview 2 :
+  - Ouvrir un travail annoté, modifier une annotation, sauvegarder.
+  - Réouvrir le même travail : annotations préservées (format intact).
+  - Ajouter/retirer jetons visuels, changer couleur, déplacer ligne pointillée.
+  - Exporter le travail en PDF (vérifier rendu visuel : matrice, signature,
+    rétroaction, jetons, fond d'image).
+  - Exporter en lot (sélection multiple) : pas de fuite mémoire, ordre
+    cohérent, progression visible (#264).
+- Tester en Chrome aussi si les fixes touchent FSAPI ou Blob/URL.
 
 **Étape 6 — Bac à sable + merge** (semaine 25-31 mai si fix de comportement)
 
@@ -216,7 +246,7 @@ Précédent établi (Lot 1-6 + codex au 12 mai) :
 
 ## Validation terrain prioritaire (Safari, si pas encore fait)
 
-Le sprint du 13 mai (6 items modulaires + 3 quick wins) n'a pas été
+Le sprint du 12 mai (6 items modulaires + 3 quick wins) n'a pas été
 testé exhaustivement en Safari avant push. Si pas déjà validé :
 
 1. **#277** Évaluations s'ouvre normalement (modale Réparation retirée)
@@ -227,8 +257,8 @@ testé exhaustivement en Safari avant push. Si pas déjà validé :
 4. **#246** Tooltips noirs (fond rgba 0,0,0,0.85, cornerRadius 6) sur
    les 4-5 graphiques Chart.js. Mode clair ET sombre.
 5. **#242** Tooltip sur le graphique Dynamique des corrélations.
-6. **#159** Cartouches de rétroaction : onglets « ✏️ Édition / 👁 Aperçu »
-   au-dessus de la zone. Bascule fluide, aperçu se régénère.
+6. **#159** retiré (zéro-dette) : Conception → Cartouches → sélectionner une
+   cartouche. La matrice s'affiche seule, plus d'onglets ni de zone d'aperçu.
 7. **#18** Tooltips au survol des 5 nouveaux éléments dans le formulaire
    d'évaluation : Sauvegarder, bouton profil rapide, Régénérer rétroaction,
    radios Note chiffrée/Niveau, bouton Supprimer dans la liste.
@@ -251,7 +281,7 @@ testé exhaustivement en Safari avant push. Si pas déjà validé :
   + entrée popup dans `js/accompagnement-contenu-popup.js`.
 - Tooltips survol : `data-tooltip="cle"` + entrée dans
   `js/accompagnement-contenu-hover.js`. **Zone Évaluations couverte
-  au 13 mai.** Restantes : Planification, Présences, Construction note,
+  au 12 mai.** Restantes : Planification, Présences, Construction note,
   Tableau de bord, Boîte à outils, Aide.
 - **Défense E** : sentinelle F.16 bloque tout nouveau `value="${X.Y}"`
   non échappé. Utiliser `echapperHtml()`.
@@ -260,14 +290,16 @@ testé exhaustivement en Safari avant push. Si pas déjà validé :
   Helper thème-aware `STYLE_GRAPHIQUE.couleurs()` pour axes/grille.
 - **Conventions nommage** : `nb` canonique (pas `n` ni `nombre`). Voir
   `docs/architecture/CONVENTIONS-NOMMAGE.md`.
-- **BACKLOG.md** : 23 items ouverts au 13 mai (fin de journée).
+- **BACKLOG.md** : 23 items ouverts au 12 mai (fin de journée).
 ```
 
 ---
 
-## Bilan complet — 13 mai 2026
+## Bilan complet — 12 mai 2026
 
-**Total : 7 commits sur main**, tous poussés sur origin. Beta 99.42 conservée. Builds `0512-0708` → `0512-0840`.
+**Sprint matinal** : 7 commits poussés sur origin. Beta 99.42 conservée. Builds `0512-0708` → `0512-0840`.
+
+**Après-midi** : 3 itérations locales sur #159 (builds `0512-1000` → `0512-1012`), aboutissant au retrait zéro-dette de la fonctionnalité. À committer en 1 commit avant la prochaine session.
 
 ### Sprint 1 : 6 items modulaires courts (4 commits)
 
@@ -320,10 +352,9 @@ testé exhaustivement en Safari avant push. Si pas déjà validé :
 
 - **#27** : `docs/architecture/CONVENTIONS-NOMMAGE.md` créé (préfixe `nb`
   canonique, recommandations par concept, cas rétrocompat à préserver)
-- **#159** : onglets « ✏️ Édition / 👁 Aperçu » sur l'éditeur de cartouche.
-  Bascule via `data-onglet-actif` + CSS. MutationObserver sur la classe
-  `u-hide` de `#matriceRetroaction` → barre d'onglets synchronisée sans
-  modifier les 12 sites show/hide. Auto-régénération aperçu au clic.
+- **#159** : onglets « ✏️ Édition / 👁 Aperçu » sur l'éditeur de cartouche
+  (matinal). **Retiré l'après-midi après retour terrain** — voir section
+  « Itérations #159 » ci-dessous.
 - **#18 zone Évaluations** : 1 câblage orphelin (`eval-btn-supprimer`) +
   4 nouvelles clés câblées (`eval-btn-sauvegarder`, `eval-profil-rapide`,
   `eval-btn-regenerer-retro`, `eval-affichage-note-choix`).
@@ -331,23 +362,48 @@ testé exhaustivement en Safari avant push. Si pas déjà validé :
   (jamais appelé, IDs `ea-*` jamais en DOM). 7 clés tooltips orphelines
   retirées. Entrée `'evaluations-apercu'` dans `guidage-demo.js` retirée.
 
+### Itérations #159 (après-midi, 3 modifications locales non commitées)
+
+Validation Safari du sprint a révélé que les onglets #159 ne réagissaient
+pas au clic. Trois itérations successives :
+
+1. **Build `0512-1000`** — fix dispatcher : signature `basculerOngletCartouche(event)`
+   → `basculerOngletCartouche(bouton)`. Cause racine : le dispatcher `data-action`
+   de `main.js:639` passe l'élément, pas un event ; `event.currentTarget` était
+   `undefined` → `return` silencieux. Émojis ✏️ et 👁 retirés des libellés.
+2. **Build `0512-1005`** — fix aperçu : retirer `u-hide` (`display:none !important`)
+   sur `#apercuRetroaction` au passage en mode Aperçu. Le legacy gardait le
+   conteneur masqué en attendant un clic sur « Générer un aperçu aléatoire ».
+3. **Build `0512-1012`** — **retrait zéro-dette complet** après retour terrain :
+   « l'aperçu de rétroaction ne sert à rien quand la matrice est déjà visible
+   en édition ». Suppression : onglets HTML (12 l.), conteneur `#apercuRetroaction`
+   (12 l.), `genererApercuAleatoire()` + JSDoc (~50 l.), `basculerOngletCartouche`
+   + MutationObserver (~65 l.), CSS `.onglets-cartouche` (~75 l.), attribut
+   `data-onglet-actif`, 6 sites `apercuRetroaction.classList.add/remove`, 2 lignes
+   JSDoc d'en-tête, 2 exports `window.*`. BACKLOG #159 statut `[x] RETIRÉ`.
+
+**À faire avant Ultrareview 2** : décider du commit (1 commit final
+« refactor(#159) retire onglets + aperçu legacy » ou amender le sprint —
+plutôt commit séparé, l'itération est documentée), push, validation Safari.
+
 ---
 
 ## Récap des compteurs
 
 | Métrique | Valeur |
 |---|---|
-| Commits poussés sur main | **7** (06035b8 → 947ac1d) |
+| Commits poussés sur main | **7** (sprint matinal 06035b8 → 947ac1d) |
+| Modifs locales non commitées | **3 itérations #159** (build 1000, 1005, 1012) |
 | Items BACKLOG ouverts | 33 → **23** (-10) |
-| Items fermés `[x]` aujourd'hui | **10** : #277, #22, #242, #239, #243, #246, #207, #276, #27, #159 |
+| Items fermés `[x]` aujourd'hui | **10** : #277, #22, #242, #239, #243, #246, #207, #276, #27, #159 (#159 livré puis retiré, reste fermé) |
 | Item enrichi | #18 (zone Évaluations livrée, 6 zones restantes) |
 | Tests | 30 verts (24 Vitest + 6 Playwright WebKit) |
-| Lignes nettes | +358 / -201 sur le dernier commit ; ~+830 / -270 sur la journée |
-| Versions | 99.42 b0512-0708 → 99.42 b0512-0840 |
+| Lignes nettes | sprint : ~+830 / -270 ; retrait #159 : ~+5 / -220 |
+| Versions | 99.42 b0512-0708 → 99.42 b0512-1012 |
 
 ---
 
-## Insights / patterns notables du 13 mai
+## Insights / patterns notables du 12 mai
 
 ### Pattern : 4 commits groupés vs 6 commits stricts
 
@@ -368,17 +424,27 @@ utilisateur.
 
 ### Pattern : MutationObserver pour synchroniser un UI subordonné
 
-Pour #159, plutôt que de modifier les 12 sites JS qui montrent/cachent
-`#matriceRetroaction`, un MutationObserver sur sa classe `u-hide` synchronise
+Pour #159 (matinal), plutôt que de modifier les 12 sites JS qui montrent/cachent
+`#matriceRetroaction`, un MutationObserver sur sa classe `u-hide` synchronisait
 automatiquement la visibilité de la barre d'onglets. Pattern réutilisable
-quand on ajoute un UI subordonné à un état existant sans avoir à
-toucher tous les contrôleurs.
+quand on ajoute un UI subordonné à un état existant sans avoir à toucher
+tous les contrôleurs — même si le code a été retiré l'après-midi, l'insight
+reste valable pour de futurs ajouts UI subordonnés.
+
+### Insight : valider l'utilité de la fonctionnalité avant de polir la mécanique
+
+Pour #159, deux fixes successifs (dispatcher + `u-hide`) ont été tentés avant
+de constater que la fonctionnalité elle-même n'apportait rien : l'aperçu
+aléatoire ne sert à rien quand la matrice complète est déjà visible en
+édition. Coût payé : 3 itérations Safari du testeur. Leçon : la validation
+Safari d'une feature UX doit inclure une question d'utilité au testeur,
+pas seulement « est-ce que ça marche ».
 
 ### Insight : `awk NR` vs `FNR`
 
 Pour extraire des line numbers per-file dans un scan multi-fichiers,
 utiliser `FNR` (line number relative au fichier). `NR` est cumulatif
-global et donne des numéros aberrants. Documenté dans memory du 13 mai.
+global et donne des numéros aberrants. Documenté dans memory du 12 mai.
 
 ### Insight : « zéro-dette » étendu au-delà du prompt utilisateur
 

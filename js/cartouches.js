@@ -36,8 +36,6 @@
    - #contexteCartouche : Textarea pour le contexte
    - #matriceContainer : Conteneur de la matrice
    - #matriceRetroaction : Conteneur global de la matrice
-   - #apercuRetroaction : Conteneur de l'aperçu
-   - #exempleRetroaction : Zone d'affichage de l'aperçu
    - #listeCartouchesExistants : Conteneur liste
    - #listeCartouchesContainer : Liste des cartouches
    - #zoneImportCommentaires : Zone d'import
@@ -312,7 +310,6 @@ async function chargerCartouchesRetroaction() {
         document.getElementById('aucuneEvalRetroaction').classList.remove('u-hide');
         document.getElementById('infoCartouche').classList.add('u-hide');
         document.getElementById('matriceRetroaction').classList.add('u-hide');
-        document.getElementById('apercuRetroaction').classList.add('u-hide');
         document.getElementById('listeCartouchesExistants').classList.add('u-hide');
         return;
     }
@@ -437,11 +434,9 @@ async function initialiserNouveauCartouche(grilleId) {
     var specClear = document.getElementById('contexteSpecifiqueCartouche');
     if (specClear) specClear.value = '';
 
-    // Afficher la matrice et l'aperçu
     await afficherMatriceRetroaction();
     mettreAJourMetriques();
     document.getElementById('matriceRetroaction').classList.remove('u-hide');
-    document.getElementById('apercuRetroaction').classList.remove('u-hide');
 }
 
 /**
@@ -513,7 +508,6 @@ async function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam 
         await calculerPourcentageComplete();
 
         document.getElementById('matriceRetroaction').classList.remove('u-hide');
-        document.getElementById('apercuRetroaction').classList.remove('u-hide');
 
     } else {
         console.warn('❌ cartoucheActuel non trouvé');
@@ -942,64 +936,6 @@ async function importerCommentaires() {
         console.error('Erreur d\'import:', error);
         alert('Erreur lors de l\'import. Vérifie le format de tes données.');
     }
-}
-
-/* ===============================
-   GÉNÉRATION D'APERÇU
-   =============================== */
-
-/**
- * Génère un aperçu aléatoire de rétroaction
- * Choisit un niveau aléatoire pour chaque critère
- * 
- * FONCTIONNEMENT:
- * 1. Pour chaque critère:
- *    - Tire un niveau aléatoire
- *    - Récupère le commentaire correspondant
- *    - Affiche dans une zone stylisée
- * 2. Simule ce que verrait un·e étudiant·e
- * 
- * UTILISÉ PAR:
- * - Bouton «Générer un aperçu aléatoire»
- * 
- * AFFICHAGE:
- * - Nom du critère en gras
- * - Niveau atteint
- * - Commentaire correspondant
- * - Style différencié par bloc
- * 
- * UTILITÉ:
- * - Tester visuellement les commentaires
- * - Vérifier la cohérence
- * - Prévisualiser le rendu final
- */
-function genererApercuAleatoire() {
-    if (!cartoucheActuel) return;
-    
-    let html = '<h6 class="u-texte-bleu-mb15">Rétroaction générée automatiquement :</h6>';
-    
-    cartoucheActuel.criteres.forEach(critere => {
-        // Choisir un niveau aléatoire
-        const niveauIndex = Math.floor(Math.random() * cartoucheActuel.niveaux.length);
-        const niveau = cartoucheActuel.niveaux[niveauIndex];
-        const key = `${critere.id}_${niveau.code}`;
-        const commentaire = cartoucheActuel.commentaires[key] || '[Commentaire non défini]';
-        
-        const nomCritereEchappe = echapperHtml(critere.nom);
-        const nomNiveauEchappe = echapperHtml(niveau.nom);
-        const codeNiveauEchappe = echapperHtml(niveau.code);
-        const commentaireEchappe = echapperHtml(commentaire);
-        
-        html += `
-            <div style="margin-bottom: 15px; padding: 10px; background: var(--bleu-tres-pale); 
-                 border-left: 3px solid var(--bleu-moyen);">
-                <strong>${nomCritereEchappe}</strong> - Niveau : ${nomNiveauEchappe} (${codeNiveauEchappe})
-                <p class="cartouche-mt5-mb0">${commentaireEchappe}</p>
-            </div>
-        `;
-    });
-    
-    document.getElementById('exempleRetroaction').innerHTML = html;
 }
 
 /* ===============================
@@ -2677,7 +2613,6 @@ window.importerDansCartoucheActive = importerDansCartoucheActive;
 window.supprimerCartoucheActive = supprimerCartoucheActive;
 window.annulerFormCartouche = annulerFormCartouche;
 window.sauvegarderCartoucheComplete = sauvegarderCartoucheComplete;
-window.genererApercuAleatoire = genererApercuAleatoire;
 
 // Wrappers délégation (Phase 5)
 window.fermerModalImportCartouches = fermerModalImportCartouches;
@@ -2998,7 +2933,6 @@ async function initialiserNouveauCartoucheAvecEchelle(grilleId, echelleId) {
     await afficherMatriceRetroaction();
     mettreAJourMetriques();
     document.getElementById('matriceRetroaction').classList.remove('u-hide');
-    document.getElementById('apercuRetroaction').classList.remove('u-hide');
 }
 
 /**
@@ -3059,9 +2993,7 @@ async function creerNouvelleCartouche() {
 
     // Masquer la matrice jusqu'à sélection des deux
     const matriceRetroaction = document.getElementById('matriceRetroaction');
-    const apercuRetroaction = document.getElementById('apercuRetroaction');
     if (matriceRetroaction) matriceRetroaction.classList.add('u-hide');
-    if (apercuRetroaction) apercuRetroaction.classList.add('u-hide');
 
     // Si une seule grille ET une seule échelle, les sélectionner automatiquement
     if (grilles.length === 1 && echelles.length === 1) {
@@ -3783,68 +3715,6 @@ window.dupliquerCartoucheBibliotheque = dupliquerCartoucheBibliotheque;
 window.dupliquerEtEditerCartouche = dupliquerEtEditerCartouche;
 window.supprimerCartoucheDefinitivement = supprimerCartoucheDefinitivement;
 window.supprimerCartoucheDeBibliothequePartagee = supprimerCartoucheDeBibliothequePartagee;
-
-/* ===============================
-   ONGLETS ÉDITION / APERÇU (#159)
-   Évite le long scroll vertical de l'éditeur de cartouche.
-   La barre d'onglets se synchronise sur la visibilité de #matriceRetroaction
-   via un MutationObserver — pas de modification des 12 sites show/hide.
-   =============================== */
-
-function basculerOngletCartouche(event) {
-    var bouton = event && (event.currentTarget || event.target);
-    if (!bouton) return;
-    var ongletCible = bouton.dataset.onglet;
-    if (!ongletCible) return;
-
-    var zone = document.getElementById('cartoucheZonePrincipale');
-    if (!zone) return;
-    zone.dataset.ongletActif = ongletCible;
-
-    var boutons = document.querySelectorAll('#ongletsCartouche .onglet-cartouche-tab');
-    boutons.forEach(function(b) {
-        var actif = b.dataset.onglet === ongletCible;
-        b.classList.toggle('actif', actif);
-        b.setAttribute('aria-selected', actif ? 'true' : 'false');
-    });
-
-    // Auto-régénérer l'aperçu quand on passe en mode Aperçu pour refléter les édits récents
-    if (ongletCible === 'apercu' && typeof window.genererApercuAleatoire === 'function') {
-        try { window.genererApercuAleatoire(); } catch (e) { console.warn('[Cartouches] genererApercuAleatoire :', e); }
-    }
-}
-window.basculerOngletCartouche = basculerOngletCartouche;
-
-// Observer la visibilité de #matriceRetroaction pour afficher/masquer la barre d'onglets
-(function() {
-    function sync() {
-        var matrice = document.getElementById('matriceRetroaction');
-        var onglets = document.getElementById('ongletsCartouche');
-        if (!matrice || !onglets) return;
-        var matriceVisible = !matrice.classList.contains('u-hide');
-        onglets.classList.toggle('u-hide', !matriceVisible);
-        // Si la matrice se masque, revenir au mode Édition pour la prochaine fois
-        if (!matriceVisible) {
-            var zone = document.getElementById('cartoucheZonePrincipale');
-            if (zone) zone.dataset.ongletActif = 'edition';
-            var btnEdition = document.querySelector('#ongletsCartouche .onglet-cartouche-tab[data-onglet="edition"]');
-            var btnApercu  = document.querySelector('#ongletsCartouche .onglet-cartouche-tab[data-onglet="apercu"]');
-            if (btnEdition) { btnEdition.classList.add('actif'); btnEdition.setAttribute('aria-selected','true'); }
-            if (btnApercu)  { btnApercu.classList.remove('actif'); btnApercu.setAttribute('aria-selected','false'); }
-        }
-    }
-    function installer() {
-        var matrice = document.getElementById('matriceRetroaction');
-        if (!matrice) { setTimeout(installer, 200); return; }
-        sync();
-        new MutationObserver(sync).observe(matrice, { attributes: true, attributeFilter: ['class'] });
-    }
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', installer);
-    } else {
-        installer();
-    }
-})();
 
 /**
  * Importe une liste de cartouches externes (archives, voûte, etc.).

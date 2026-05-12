@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260512d"> <!-- Beta 99.42 b0512-0840 : #159 CSS onglets cartouche Édition/Aperçu -->
+    <link rel="stylesheet" href="styles.css?v=20260512g"> <!-- Beta 99.42 b0512-1012 : #159 retiré (zéro-dette) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -5533,7 +5533,7 @@
                             </div>
 
                             <!-- ZONE PRINCIPALE (centrale, scroll) -->
-                            <div class="zone-principale" id="cartoucheZonePrincipale" data-onglet-actif="edition">
+                            <div class="zone-principale" id="cartoucheZonePrincipale">
 
                                 <!-- Boutons actions en haut à droite -->
                                 <div class="u-flex-gap-10 u-mb-20 u-text-right" style="justify-content: flex-end">
@@ -5548,20 +5548,6 @@
                                 <!-- Message d'accueil initial -->
                                 <div class="zone-principale-accueil" id="messageAccueilCartouche">
                                     <p>Sélectionne une cartouche dans la barre latérale ou crée une nouvelle cartouche</p>
-                                </div>
-
-                                <!-- Onglets Édition / Aperçu (#159) — visibles uniquement quand une cartouche est éditée -->
-                                <div class="onglets-cartouche u-hide" id="ongletsCartouche" role="tablist" aria-label="Vue de la cartouche">
-                                    <button type="button" class="onglet-cartouche-tab actif"
-                                            data-action="basculerOngletCartouche" data-onglet="edition"
-                                            role="tab" aria-selected="true">
-                                        ✏️ Édition
-                                    </button>
-                                    <button type="button" class="onglet-cartouche-tab"
-                                            data-action="basculerOngletCartouche" data-onglet="apercu"
-                                            role="tab" aria-selected="false">
-                                        👁 Aperçu
-                                    </button>
                                 </div>
 
                                 <!-- ANCIEN SYSTÈME (Caché, gardé pour compatibilité interne) -->
@@ -5656,20 +5642,6 @@
                                 </button>
                                 <input type="file" id="fichier-import-txt-cartouche" accept=".txt,.md,.text" style="display: none;" data-on-change="importerCartoucheDepuisTxt">
                             </div>
-                                </div>
-
-                                <!-- APERÇU DE RÉTROACTION -->
-                                <div id="apercuRetroaction" class="u-hide u-mt-20 u-p-15" style="background: var(--vert-pale); border-radius: 6px; border: 1px solid var(--vert-leger)">
-                                    <h5 class="text-vert-leger-mb10">
-                                        Aperçu d'une rétroaction générée
-                                    </h5>
-                                    <div id="exempleRetroaction" style="padding: 15px; background: var(--surface-carte, #1a3040);
-                 border-radius: var(--radius-moyen); font-size: 0.9rem; line-height: 1.6;">
-                                        <!-- L'aperçu sera généré ici par genererApercuAleatoire() -->
-                                    </div>
-                                    <button class="btn btn-principal mt-2" data-action="genererApercuAleatoire">
-                                        Générer un aperçu aléatoire
-                                    </button>
                                 </div>
 
                                     </div><!-- /.panneau-formulaire -->
@@ -16080,7 +16052,7 @@
     <script src="js/echelles-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/echelles.js?v=20260512b"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
     <script src="js/cartouches-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/cartouches.js?v=20260512d"></script> <!-- Beta 99.42 b0512-0840 : #159 onglets Édition/Aperçu -->
+    <script src="js/cartouches.js?v=20260512g"></script> <!-- Beta 99.42 b0512-1012 : #159 retiré (onglets + aperçu legacy supprimés) -->
     <script src="js/export-pdf.js?v=20260512b"></script> <!-- Beta 95.7 #30 : Export PDF -->
     <script src="js/cours.js?v=2026051031"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 biblio cours migrée vers BibliothequeUI -->
     <script src="js/contexte.js?v=2026013001"></script> <!-- Beta 95.2 : Support groupe-cours -->
@@ -16224,7 +16196,7 @@
     <script src="js/main.js?v=2026050543"></script> <!-- Refonte nav SP5 : naviguerVers calendrier-trimestre -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260512d"></script> <!-- Beta 99.42 b0512-0840 : bump fallback BUILD_ID (3 quick wins + cleanup) -->
+    <script src="js/init-inline.js?v=20260512g"></script> <!-- Beta 99.42 b0512-1012 : bump fallback BUILD_ID (#159 retiré) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
