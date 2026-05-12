@@ -45,7 +45,9 @@ const STYLE_LIGNE_TENSION = 0.25;
 const STYLE_POINT_RAYON = 4;
 const STYLE_POINT_RAYON_HOVER = 7;
 const STYLE_POINT_BORDURE = 2;
-const STYLE_TOOLTIP = {
+// Style tooltip unifié (#246) — source : STYLE_GRAPHIQUE.tooltip (js/couleurs.js).
+// Préserve les ~10 sites de spread `...STYLE_TOOLTIP` déjà en place.
+const STYLE_TOOLTIP = (window.STYLE_GRAPHIQUE && window.STYLE_GRAPHIQUE.tooltip) || {
     backgroundColor: 'rgba(0, 0, 0, 0.85)',
     titleColor: '#fff',
     bodyColor: '#fff',

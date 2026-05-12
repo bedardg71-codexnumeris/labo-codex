@@ -781,6 +781,11 @@ const TOOLTIPS = {
     'nav-labo-tirage':
         'Tirage au sort al\u00e9atoire et questions flash pour l\'animation en classe.',
 
+    // --- Labo > \u00c9tudes ---
+
+    'labo-correlations-longitudinales':
+        'Corr\u00e9lation de Pearson (r, axe gauche) entre A\u2194P et C\u2194P par s\u00e9ance \u2014 plus r est \u00e9lev\u00e9, plus l\'indice pr\u00e9dit P. \u25a0 = s\u00e9ance avec d\u00e9p\u00f4t de production, \u25bc = intervention de groupe. Les courbes P\u00b7[intervention] (axe droit, %) suivent la moyenne P des \u00e9tudiant\u00b7es cibl\u00e9\u00b7es \u2014 compare-les \u00e0 P contr\u00f4le pour estimer l\'effet de l\'intervention.',
+
     // =================================================================
     // COMPLÉMENT — clés présentes dans index.html, non couvertes par T1-T11
     // =================================================================

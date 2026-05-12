@@ -610,15 +610,16 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                     legend: {
                         display: false
                     },
-                    tooltip: {
+                    tooltip: Object.assign({}, (window.STYLE_GRAPHIQUE && window.STYLE_GRAPHIQUE.tooltip) || {
                         enabled: true,
-                        mode: 'nearest',
-                        intersect: true,
                         backgroundColor: 'rgba(0, 0, 0, 0.85)',
                         titleColor: '#fff',
                         bodyColor: '#fff',
                         cornerRadius: 6,
-                        padding: 10,
+                        padding: 10
+                    }, {
+                        mode: 'nearest',
+                        intersect: true,
                         callbacks: {
                             title: function(tooltipItems) {
                                 var idx = tooltipItems[0].dataIndex;
@@ -678,7 +679,7 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                                 return lignes;
                             }
                         }
-                    }
+                    })
                 },
                 scales: {
                     x: {
