@@ -41,16 +41,47 @@ docs/CALENDRIER.md §96-132 pour la stratégie complète.
 
 ### Procédure pas à pas
 
-**Étape 1 — Préparer la branche dédiée** (5 min, en début de session)
+**Étape 1 — Préparer le bundle de review** (~10 min, en début de session)
+
+Le pattern (confirmé par les 7 ultrareviews Lot 1-6 du 29 avril + codex
+du 12 mai) utilise **deux branches** :
+
+- `review/<cible>-<date>` (basée sur la branche **orpheline** `review-base`)
+  — bundle figé du code à auditer. Un seul commit qui copie les fichiers
+  cibles depuis main. C'est le diff que `/ultrareview` analysera.
+- `feature/ultrareview-<cible>-<date>` (basée sur main) — branche de
+  travail où les fixes seront appliqués après lecture du rapport.
+
+⚠️ **Ne PAS brancher depuis main pour le bundle** — sans le détour par
+`review-base` orpheline, `git merge-base` ne trouve aucun diff et
+`/ultrareview` échoue avec « Could not find merge-base with main ».
 
 ```bash
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 git checkout main && git pull
-git checkout -b feature/ultrareview-codex-YYYY-MM-DD   # ex. 2026-05-14
+
+# Branche de fixes (depuis main, vide au départ)
+git checkout -b feature/ultrareview-<cible>-YYYY-MM-DD
+
+# Bundle pour le reviewer (depuis review-base, orpheline)
+git checkout review-base
+git checkout -b review/<cible>-YYYY-MM-DD
+git checkout main -- <chemins/des/fichiers/à/auditer>
+git commit -m "review: bundle <cible> pour ultrareview (YYYY-MM-DD)"
+git push -u origin review/<cible>-YYYY-MM-DD
 ```
 
-Vérifier que la suite Vitest passe avant l'ultrareview pour avoir une
-base verte de comparaison :
+Ouvrir une **draft PR** ciblant `review-base` (pas main !) :
+
+```bash
+gh pr create --base review-base --head review/<cible>-YYYY-MM-DD --draft \
+  --title "Ultrareview — <cible> (YYYY-MM-DD)" \
+  --body "..."   # contexte, scope, attentes pour le reviewer
+```
+
+Noter le **numéro de PR** généré — il sera l'argument de `/ultrareview`.
+
+Vérifier que la suite Vitest est verte (baseline de comparaison) :
 
 ```bash
 cd tests && npm test
@@ -58,12 +89,40 @@ cd tests && npm test
 
 **Étape 2 — Lancer /ultrareview** (Grégoire seulement)
 
-- `/ultrareview` est payant et user-triggered (cf. CLAUDE.md).
-- Grégoire le lance depuis son terminal sur la branche
-  `feature/ultrareview-codex-<date>`. Avec ou sans argument selon
-  la syntaxe préférée — la forme sans argument bundle la branche locale.
-- Durée typique : 30 min à 2 h selon complexité.
-- Le rapport apparaît dans `Rapports/ultrareview-codex-<date>.md`.
+- ⚠️ **Depuis une session CLI locale dans le terminal**, **pas** depuis
+  l'app web/desktop Claude Code. L'app web rejette la commande avec :
+  *« /ultrareview est uniquement disponible dans une session Claude
+  Code locale. »*
+- Syntaxe : `/ultrareview <PR#>` (numéro de la draft PR créée à l'étape 1).
+  La forme sans argument ne marche que si la branche courante a un diff
+  contre main — ce qui n'est pas le cas dans ce workflow puisque le
+  diff réel vit sur la branche `review/<cible>-<date>` orpheline.
+- Payant (billed as Extra Usage, cf. CLAUDE.md).
+- Durée typique : 5-30 min. Pipeline en 4 phases (Configuration,
+  Rechercher, Vérifier, Déduplication).
+- **Sortie locale** : task-notification CLI avec `findings: [...]`.
+- **Sortie web** : session cloud apparaît dans la sidebar Recents
+  Claude Code (web/desktop) comme `ultrareview: <repo>#<PR#>`. C'est
+  le canal de vérité en cas de doute (cf. précédent Lot 4a : pipeline
+  crashé mais findings récupérables depuis la web UI).
+- Le rapport final est **rédigé manuellement** dans
+  `Rapports/ultrareview-<cible>-<date>.md` à partir des findings
+  retournés + observation de la session web. Aucun fichier n'apparaît
+  automatiquement sur disque.
+
+**0 finding sur un module entier n'est pas anormal** dans ce pipeline.
+Précédents :
+
+- Lot 4a (1er mai) : 0 finding sur `evaluation.js` (~7460 l.) +
+  `liste-evaluations.js` (~2770 l.). Les 11 findings concentrés sur
+  `evaluation-jetons.js`.
+- Ultrareview codex (12 mai) : 0 finding sur `codex.js` (~2936 l.),
+  pipeline complet 4 phases.
+
+Le reviewer sélectionne ses cibles dans la phase *Rechercher* via
+heuristiques. Si rien ne déclenche, peu/aucun candidat passe à
+*Vérifier*. Conserver un skeleton de tests comme garde-fou minimal
+de régression dans tous les cas.
 
 **Étape 3 — Lecture critique du rapport** (~30-45 min)
 
@@ -84,12 +143,14 @@ ces changements sans plan de migration.
 **Étape 4 — Appliquer les fixes** (~1-2 j selon volume, étalé sur la semaine)
 
 Conventions :
-- 1 commit par finding majeur (ou par axe cohérent comme Lot 4a)
+- Travailler sur la branche `feature/ultrareview-<cible>-<date>`
+  créée à l'étape 1 (basée sur main, vide au départ).
+- 1 commit par finding majeur (ou par axe cohérent comme Lot 4a).
 - Pour chaque vrai bug fixé : **ajouter un test Vitest** dans
-  `tests/unit/codex.test.js` (créer si pas existant). Convention : couvrir
-  le comportement attendu, pas le bug spécifique.
+  `tests/unit/<cible>.test.js` (créer si pas existant). Convention :
+  couvrir le comportement attendu, pas le bug spécifique.
 - Hook pré-push Vitest doit rester vert à chaque push.
-- Bumper version.json + cache buster `js/codex.js` à chaque push.
+- Bumper version.json + cache buster du fichier modifié à chaque push.
 
 **Étape 5 — Validation Safari** (avant merge sur main)
 
@@ -106,6 +167,20 @@ Conventions :
   semaine 25-31 mai (gel des dév lourds).
 - Si tous les fixes sont triviaux (escape, dead code, refactor pur),
   merger directement.
+
+### Pattern d'archivage
+
+Précédent établi (Lot 1-6 + codex au 12 mai) :
+
+- Les **draft PR** ciblant `review-base` restent **OUVERTES en
+  permanence** (cf. PR #3-9 Lot 1-6 + PR #16 codex). Ce sont des
+  archives vivantes du bundle audité. **Ne pas les fermer.**
+- Les **branches `review/<cible>-<date>` restent sur origin**
+  indéfiniment (cf. `origin/review/lot-1-securite` … `lot-6-travaux-saisie`).
+- La **branche locale `feature/ultrareview-<cible>-<date>` peut être
+  supprimée après merge** si elle est devenue un alias de main (cas
+  0 finding, ou tous les fixes mergés). Hygiène git standard
+  post-merge.
 
 ### Garde-fous (résumé CALENDRIER §128-132)
 
