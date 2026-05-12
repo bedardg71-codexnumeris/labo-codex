@@ -2186,7 +2186,7 @@ async function chargerDropdownPratiquesCours() {
         pratiques.forEach(p => {
             const badge = p.pratiques?.[0] || p.type || '';
             const badgeHtml = badge ? `[${badge}] ` : '';
-            html += `<option value="${p.id}">${badgeHtml}${p.nom || 'Sans titre'}</option>`;
+            html += `<option value="${echapperHtml(p.id)}">${badgeHtml}${p.nom || 'Sans titre'}</option>`;
         });
     } else {
         html += '<option value="" disabled>Aucune pratique configurée</option>';
@@ -3598,7 +3598,7 @@ function populerDropdownHorairesV2() {
 
     let html = '<option value="">Sélectionner...</option>';
     reels.forEach(h => {
-        html += `<option value="${h.id}">${h.nom || 'Sans nom'}</option>`;
+        html += `<option value="${echapperHtml(h.id)}">${h.nom || 'Sans nom'}</option>`;
     });
     select.innerHTML = html;
 
@@ -4159,7 +4159,7 @@ function populerDropdownGroupeCoursV2() {
 
     let html = '<option value="">— Choisir pour modifier —</option>';
     reels.forEach(gc => {
-        html += `<option value="${gc.id}">${gc.nom || gc.id}</option>`;
+        html += `<option value="${echapperHtml(gc.id)}">${gc.nom || gc.id}</option>`;
     });
     select.innerHTML = html;
 
@@ -4191,7 +4191,7 @@ function populerDropdownsAssemblageV2() {
         trimestres.forEach(t => {
             const nom = t.nom || t.id || 'Sans nom';
             const selected = (t.id === trimestreActif) ? ' selected' : '';
-            html += `<option value="${t.id}"${selected}>${nom}</option>`;
+            html += `<option value="${echapperHtml(t.id)}"${selected}>${nom}</option>`;
         });
         selectTrimestre.innerHTML = html;
     } else {
@@ -4215,7 +4215,7 @@ function populerDropdownsAssemblageV2() {
         };
         let html = '<option value="">— Choisir un cours —</option>';
         coursReels.forEach(c => {
-            html += `<option value="${c.id}">${labelCours(c)}</option>`;
+            html += `<option value="${echapperHtml(c.id)}">${labelCours(c)}</option>`;
         });
         selectCours.innerHTML = html;
 
@@ -4259,7 +4259,7 @@ function populerDropdownsAssemblageV2() {
         let html = '<option value="">— Choisir un horaire —</option>';
         horairesReels.forEach(h => {
             const nom = h.nom || h.id || 'Sans nom';
-            html += `<option value="${h.id}">${nom}</option>`;
+            html += `<option value="${echapperHtml(h.id)}">${nom}</option>`;
         });
         selectHoraire.innerHTML = html;
 
@@ -4278,7 +4278,7 @@ function populerDropdownsAssemblageV2() {
         const labelEns = e => (`${e.prenom || ''} ${e.nom || ''}`.trim() || e.id);
         let html = '<option value="">— Choisir un enseignant —</option>';
         enseignantsReels.forEach(e => {
-            html += `<option value="${e.id}">${labelEns(e)}</option>`;
+            html += `<option value="${echapperHtml(e.id)}">${labelEns(e)}</option>`;
         });
         selectEnseignant.innerHTML = html;
 
@@ -4302,7 +4302,7 @@ function populerDropdownsAssemblageV2() {
         let html = '<option value="">— À compléter quand configurée —</option>';
         pratiques.forEach(p => {
             const nom = p.nom || p.id || 'Sans nom';
-            html += `<option value="${p.id}">${nom}</option>`;
+            html += `<option value="${echapperHtml(p.id)}">${nom}</option>`;
         });
         selectPratique.innerHTML = html;
 
@@ -5511,7 +5511,7 @@ function populerDropdownEnseignantsV2() {
     reels.forEach(e => {
         const nomComplet = `${e.prenom || ''} ${e.nom || ''}`.trim() || 'Sans nom';
         const selected = (e.id === enseignantEnEditionId) ? ' selected' : '';
-        html += `<option value="${e.id}"${selected}>${nomComplet}</option>`;
+        html += `<option value="${echapperHtml(e.id)}"${selected}>${nomComplet}</option>`;
     });
 
     select.innerHTML = html;
@@ -5807,7 +5807,7 @@ async function peuplerDropdownGroupeCoursActif() {
             if (nomHor) label += ` (${nomHor})`;
 
             const selected = gcActif && !gcActif.modeCours && gc.id === gcActif.id ? ' selected' : '';
-            options += `<option value="${gc.id}"${selected}>${label}</option>`;
+            options += `<option value="${echapperHtml(gc.id)}"${selected}>${label}</option>`;
         });
         options += '</optgroup>';
 
@@ -6162,7 +6162,7 @@ async function peuplerDropdownEnseignants() {
         const libelle = typeof EnseignantsEntite !== 'undefined'
             ? EnseignantsEntite.genererLibelle(ens)
             : `${ens.prenom} ${ens.nom}`;
-        options += `<option value="${ens.id}">${libelle}</option>`;
+        options += `<option value="${echapperHtml(ens.id)}">${libelle}</option>`;
     });
 
     select.innerHTML = options;
