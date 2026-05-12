@@ -8,13 +8,13 @@
 
 **Ultrareview `js/codex.js` complétée le 12 mai 2026** — pipeline 4/4 phases ✓, **0 finding**. Skeleton de tests + rapport ajoutés (commits `443b626` + `e0122ee`). Procédure SESSION.md §44-117 corrigée suite aux tâtonnements (orphan `review-base` + draft PR + CLI locale). Voir `Rapports/ultrareview-codex-2026-05-12.md`.
 
-**Prochain chantier** : **Ultrareview 2** (`js/travaux-export-pdf.js` + `js/travaux-annotation.js`) — semaine **18-24 mai**.
+**Prochain chantier** : **Ultrareview 2** (`js/travaux-export-pdf.js` + `js/travaux-annotation.js`) — **démarre maintenant** (avance sur le calendrier CALENDRIER §128 qui prévoyait semaine 18-24 mai ; Ultrareview 1 codex étant clos avec 0 finding, on enchaîne).
 
 ---
 
 ## Consigne de démarrage pour la prochaine session
 
-À copier-coller au début de la prochaine session (semaine **18-24 mai 2026**) :
+À copier-coller au début de la prochaine session (Ultrareview 2, démarrage immédiat — avance sur calendrier) :
 
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
@@ -26,9 +26,9 @@ Lecture obligatoire :
 4. memory : feedback_ultrareview_workflow.md (pattern orphan + draft PR + CLI locale)
 
 État git attendu en début de session :
-- main : 10 commits du 12 mai poussés sur origin (sprint matinal
+- main : 11 commits du 12 mai poussés sur origin (sprint matinal
   06035b8 → 947ac1d + post-ultrareview codex 443b626 + e0122ee +
-  retrait #159 zéro-dette à committer avant départ — si pas déjà fait).
+  consigne Ultrareview 2 de24c32 + retrait #159 f8cf504).
 - feature/lot-4a-jetons (commit e4c348d) inchangée, bac à sable
   prévu semaine 25-31 mai.
 - review/codex-2026-05-12 conservée sur origin (archive du bundle,
@@ -62,7 +62,7 @@ sur gel pré-colloque).
 ### Préparation (étapes 1-2 de la procédure ci-dessous)
 
 Cibler le bundle : `js/travaux-export-pdf.js` + `js/travaux-annotation.js`.
-Nomenclature (remplacer `<DATE>` par la date du jour de session, p.ex. `2026-05-19`) :
+Nomenclature (utiliser la date du jour, p.ex. `2026-05-12` si démarrage immédiat) :
 - bundle : `review/travaux-export-annotation-<DATE>`
 - branche fixes : `feature/ultrareview-travaux-export-annotation-<DATE>`
 
@@ -92,7 +92,7 @@ Commandes prêtes-à-coller (remplacer `<DATE>` partout) :
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 git checkout main && git pull
 
-DATE=<DATE>   # p.ex. 2026-05-19
+DATE=<DATE>   # p.ex. 2026-05-12 si démarrage immédiat
 
 # Branche de fixes (depuis main, vide au départ)
 git checkout -b feature/ultrareview-travaux-export-annotation-$DATE
@@ -237,9 +237,11 @@ Précédent établi (Lot 1-6 + codex au 12 mai) :
 
 ### Garde-fous (résumé CALENDRIER §128-132)
 
-- **1 ultrareview à la fois** — Ultrareview 2 (`travaux-export-pdf.js` +
-  `travaux-annotation.js`) prévu **semaine 18-24 mai** uniquement après
-  fin de l'ultrareview 1.
+- **1 ultrareview à la fois** — Ultrareview 1 (codex) clôt avec 0 finding,
+  on enchaîne donc Ultrareview 2 (`travaux-export-pdf.js` +
+  `travaux-annotation.js`) en avance sur le calendrier original (qui
+  prévoyait semaine 18-24 mai). Pas d'autre ultrareview tant que celle-ci
+  n'est pas close.
 - **Pas d'ultrareview semaine 25-31 mai** (gel pré-colloque).
 - **Coût** : Grégoire vérifie budget avant de lancer (audit ~$X
   pour ~2700 l. selon Lot 4a).
@@ -267,7 +269,7 @@ testé exhaustivement en Safari avant push. Si pas déjà validé :
 
 - **Bac à sable Lot 4a jetons** (25-31 mai)
 - **Ultrareview 2** : `travaux-export-pdf.js` + `travaux-annotation.js`
-  (semaine 18-24 mai, après ultrareview 1)
+  (démarrage immédiat — avance sur calendrier ; était prévue 18-24 mai)
 - **Lot 3 indices ultrareview** (post-trimestre, touche notes actives)
 - **Phase 5 Démo** (~1 j, déjà reverté 22 avril)
 - **#272** machine à états chargement éval (~1 j)
