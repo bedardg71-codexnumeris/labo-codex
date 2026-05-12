@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 11 mai 2026 (Beta 99.41, Build 0511-1205) — ménage complet A+B+C+E : 51 → 37 items ouverts (-14 net), 5 collisions renumérotées, 8 reformulés/enrichis
+> **Derniere mise a jour** : 13 mai 2026 (Beta 99.42, Build 0512-0738) — sprint 6 items modulaires : 33 → 27 items ouverts (-6 livrés : #277, #22, #242, #239, #243, #246)
 
 ---
 
@@ -529,11 +529,11 @@
 
 ### Codex — Comparaison et portabilite (26 mars 2026)
 
-- [ ] **#243** Codex : Rapport de comparaison en texte exportable (pas alert())
-  - Actuellement la comparaison affiche un `alert()` non copiable et tronque
-  - Remplacer par une modale avec texte selectionnable + bouton Copier/Exporter
-  - Afficher toutes les differences d'un coup (pas un detail a la fois)
-  - **Module** : `js/codex.js` (fonction `actionComparer` ou equivalent)
+- [x] **#243** Codex : Rapport de comparaison en texte exportable ✅ LIVRÉ (13 mai 2026)
+  - Nouvelle action « Comparer avec un codex... » ajoutée au menu Codex (indépendante de Fusionner)
+  - Modale modalCodexComparer avec textarea copiable + Copier (clipboard API + fallback) + Télécharger .txt (Blob)
+  - `actionComparer` → `_construireRapportComparaison` : rapport détaillé listant chaque clé par catégorie (présent uniquement local/externe, modifié, supprimé, conflits) + travaux externes
+  - Diagnostic pur — n'applique aucune modification au codex local
 
 - [x] **#244** Codex : Identifier le navigateur source dans le manifeste ✅ LIVRÉ (11 mai 2026)
   - Nouvelle fonction `_identifierNavigateur()` dans `js/codex.js` après `_identifierAppareil()`. Parse nom/version/OS depuis `navigator.userAgent`. Gère iOS WebKit re-brandé (CriOS, EdgiOS, FxiOS). Format : `Chrome 146 / macOS`, `Safari 17 / iPadOS`, etc.
@@ -555,18 +555,12 @@
     - Messages contextuels clairs a chaque etape (sauvegarde, transfert, ouverture sur l'autre appareil)
   - **Module** : `js/codex.js`
 
-- [ ] **#239** Menu Codex : adapter l'interface selon le navigateur (FSAPI)
-  - Chrome/Edge (FSAPI disponible) : "Enregistrer" ecrit directement sur le fichier ouvert (cle USB), auto-save possible
-  - Safari Mac (pas de FSAPI) : "Enregistrer" = telecharger un nouveau fichier, l'utilisateur doit manuellement remplacer sur la cle USB
-  - iPad (WebKit impose, pas de FSAPI) : meme comportement que Safari Mac
-  - Actuellement le menu affiche les memes options et le meme sous-texte peu importe le navigateur — confusant
-  - A faire :
-    - Detecter `window.showSaveFilePicker` (FSAPI) au chargement
-    - Si FSAPI absent : masquer/griser "Enregistrer le codex" (inutile sans handle), renommer en "Telecharger le codex"
-    - Adapter le sous-texte ("Vers le meme emplacement" → "Telecharge un nouveau fichier")
-    - Adapter la ligne de statut auto-save (masquer si FSAPI absent)
-    - Ajouter une note explicative dans "Details du codex" selon le navigateur
-  - **Module** : `js/codex.js`, fonctions `_construireMenu()`, `actionEnregistrer()`
+- [x] **#239** Menu Codex : adapter l'interface selon le navigateur (FSAPI) ✅ LIVRÉ (13 mai 2026)
+  - Détection `typeof window.showSaveFilePicker === 'function'` dans `_actualiserMenu`
+  - Sans FSAPI (Safari/iPad) : « Enregistrer le codex » → « Télécharger le codex » + sous-texte « Télécharge un nouveau fichier »
+  - Avec FSAPI + handle (Chrome/Edge) : libellé d'origine + sous-texte « Vers le même emplacement »
+  - `actionDetails` enrichi d'une note expliquant le mode de sauvegarde selon le navigateur courant
+  - Auto-save status reste naturellement masqué sans FSAPI (timer jamais démarré)
 
 ### Retours testeur — 3 mars 2026
 
@@ -717,7 +711,10 @@
 
 - [ ] **#276** Evaluation sans travaux importes (numéroté 11 mai 2026, besoin identifié 21 fév 2026) : S'assurer que le module d'evaluation fonctionne meme si aucun travail n'est charge (importe). Contexte : jusqu'a present, l'evaluation se faisait dans GoodNotes ; desormais elle se fera directement dans l'application. Le flux doit supporter l'evaluation manuelle sans fichier PDF/image importe.
 
-- [ ] **#277** Modale Reparation des evaluations — point d'acces UI manquant (decouvert 12 mai 2026 par validation Safari de #256-bis) : la modale `modalReparationEvaluations` (index.html L8499) et la fonction `afficherModalReparationEvaluations` (evaluation.js L5142) existent toujours, mais la fonction n'est appelee NULLE PART dans le code. Aucun bouton/menu n'ouvre cette modale. Verifier si la fonctionnalite est encore necessaire (3 options) : (a) restaurer un point d'acces (ex. Reglages > Donnees, ou menu contextuel sur une evaluation cassee), (b) si obsolete, retirer modale + fonction + entree popup `modal-reparation` dans accompagnement-contenu-popup.js, (c) si seulement utile en debug, garder mais ne pas exposer dans l'UI. Le contenu d'aide `modal-reparation` reste accessible si la modale est ouverte (test verifie : popup ✴️ fonctionne).
+- [x] **#277** Modale Réparation des évaluations — point d'accès UI manquant ✅ LIVRÉ (13 mai 2026, option b)
+  - Décision actée 12 mai : option (b) suppression complète. Modale jamais ouverte depuis l'UI, fonction `reparer_evaluations_criteres_manquants` callable uniquement via modale → chaîne entièrement morte.
+  - Retraits : modale HTML (index.html, 54 lignes), 4 fonctions evaluation.js (afficher/fermer/lancer + reparer), 2 exports `window.*`, entrée popup `modal-reparation` dans accompagnement-contenu-popup.js
+  - `extraireNiveauxDepuisRetroaction` conservé — toujours utilisé comme fallback au chargement des évaluations sans tableau criteres (L5469)
 
 - [x] **Info-bulles et pratique guidee (Annotation/Evaluation)** ✅ COMPLÉTÉ (22 fév 2026) : 25 info-bulles ajoutées couvrant les cartes métriques, checkboxes rétroaction, boutons d'action, barre d'outils annotation, pipeline d'import et zone d'archivage.
 
@@ -1386,21 +1383,24 @@
   - **Approche** : Marqueur sur la courbe P individuelle + delta P avant/apres
   - **Prerequis** : Graphique de progression individuel existant dans le profil etudiant
 
-- [ ] **#246** Uniformiser le style de tous les graphiques Chart.js
-  - **Contexte** : Le style du graphique « Dynamique des correlations » (fond neutre, grille subtile, points blancs, tooltips noirs) est prefere par l'enseignant
-  - **Objectif** : Etendre ce style a tous les graphiques : Developpement du groupe, Developpement individuel, graphiques spaghetti, etc.
-  - **Elements a uniformiser** : couleurs de grille, fond, tooltips, epaisseur de lignes, pointStyles, padding, axes
-  - **Reference** : `js/correlations-longitudinales.js` comme modele de style
+- [x] **#246** Uniformiser le style de tous les graphiques Chart.js ✅ LIVRÉ (13 mai 2026)
+  - `STYLE_GRAPHIQUE` global ajouté à `js/couleurs.js` : tooltip standardisé + helper `couleurs()` retournant `{texte, grille, grilleForte}` thème-aware (mode clair/sombre)
+  - 4 modules de chart alignés via `Object.assign({}, window.STYLE_GRAPHIQUE.tooltip || fallback, overrides)` :
+    - graphiques-progression.js : STYLE_TOOLTIP local délégué (préserve les ~10 spreads `...STYLE_TOOLTIP`)
+    - correlations-longitudinales.js : tooltip refactorisé
+    - impact-jetons.js : idem
+    - bilan-reflexif.js : tooltips standardisés (2 sites, avant aucun style — fond Chart.js default blanc/gris)
+  - Fallback inline préservé si STYLE_GRAPHIQUE absent (résilience ordre de chargement)
 
 - [ ] **#241** Analyser l'impact des jetons de reprise sur P dans les courbes d'intervention
   - **Contexte** : Quand un étudiant utilise un jeton de reprise, P change rétroactivement. Cela peut masquer l'effet réel d'une intervention pédagogique.
   - **Objectif** : Marquer les séances où des jetons ont été utilisés et/ou calculer un P « sans reprises » pour isoler l'effet net.
   - **Prérequis** : Comprendre la mécanique de recalcul de P après utilisation d'un jeton.
 
-- [ ] **#242** Ajouter la documentation du graphique « Dynamique des correlations » dans les info-bulles
-  - **Contexte** : La note 📍 documente la lecture du graphique, mais l'aide contextuelle (info-bulles) devrait aussi couvrir ce graphique.
-  - **Objectif** : Intégrer la documentation dans le système d'info-bulles existant (`data-tooltip`).
-  - **Contenu** : Explication des correlations, des courbes d'intervention, des points carrés, des triangles.
+- [x] **#242** Ajouter la documentation du graphique « Dynamique des correlations » dans les info-bulles ✅ LIVRÉ (13 mai 2026)
+  - Nouvelle entrée `labo-correlations-longitudinales` dans accompagnement-contenu-hover.js (section Labo > Études)
+  - Tooltip couvre : corrélation Pearson (r, axe gauche), points carrés ■ (séances avec dépôt), triangles ▼ (interventions), courbes P·[intervention] / P contrôle (axe droit %)
+  - `data-tooltip` ajouté sur le wrapper canvas (index.html L8833)
 
 ### Planification pedagogique
 
@@ -1607,9 +1607,10 @@
 
 ### Configuration
 
-- [ ] **#22** Mettre a jour fichier noms_stables.json
-  - Verifier que tous les identifiants critiques sont documentes
-  - Ajouter les nouveaux noms proteges
+- [x] **#22** Mettre à jour fichier noms_stables.json ✅ LIVRÉ (13 mai 2026)
+  - Fichier n'existait pas sur disque (signalé par audit Obsidian 11 mai). Créé depuis zéro.
+  - 44 identifiants protégés inventoriés via scan automatisé : 4 dans config.js, 3 dans navigation.js, 15 dans productions.js, 22 dans grilles.js
+  - Chaque entrée : nom, type, ligne actuelle, rôle. Métadonnées avec date de dernière maj + version codebase.
 
 ### Carte mentale — Taxonomie d'Anderson et guide integre
 
