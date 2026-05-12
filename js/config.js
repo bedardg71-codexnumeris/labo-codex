@@ -254,9 +254,9 @@ const listeEtudiants = [
  * ⚠️ NE PAS MODIFIER - Fonction de sécurité critique
  */
 function echapperHtml(texte) {
-    if (!texte) return '';
+    if (texte == null) return '';
     const div = document.createElement('div');
-    div.textContent = texte;
+    div.textContent = String(texte);
     return div.innerHTML;
 }
 
