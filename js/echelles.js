@@ -749,7 +749,7 @@ async function chargerEchellesTemplates() {
 
     echelles.forEach(echelle => {
         const nomEchappe = echapperHtml(echelle.nom);
-        options += `<option value="${echelle.id}">${nomEchappe}</option>`;
+        options += `<option value="${echapperHtml(echelle.id)}">${nomEchappe}</option>`;
     });
 
     select.innerHTML = options;
@@ -1274,7 +1274,7 @@ function afficherTableauNiveaux(niveaux) {
                         </td>
                         <td>
                             <input type="number"
-                                   value="${niveau.min}"
+                                   value="${echapperHtml(niveau.min)}"
                                    data-on-change="modifierNiveauHandler" data-niveau-index="${index}" data-champ="min"
                                    class="controle-form"
                                    class="echelle-w-60-p4"
@@ -1283,7 +1283,7 @@ function afficherTableauNiveaux(niveaux) {
                         </td>
 <td>
     <input type="number"
-           value="${niveau.max}"
+           value="${echapperHtml(niveau.max)}"
            data-on-change="modifierNiveauHandler" data-niveau-index="${index}" data-champ="max"
            class="echelle-w-60" min="0" max="100"
            >
@@ -1301,7 +1301,7 @@ function afficherTableauNiveaux(niveaux) {
             class="echelle-input-full"
             >
         ${paletteCouleurs.map(c => `
-            <option value="${c.valeur}" ${niveau.couleur === c.valeur ? 'selected' : ''}>
+            <option value="${echapperHtml(c.valeur)}" ${niveau.couleur === c.valeur ? 'selected' : ''}>
                 ${c.nom}
             </option>
         `).join('')}
@@ -1770,7 +1770,7 @@ async function chargerEchellePerformance() {
     if (!selectEchelle) return;
 
     selectEchelle.innerHTML = '<option value="">-- Choisir une échelle --</option>' +
-        echelles.map(echelle => `<option value="${echelle.id}">${echapperHtml(echelle.nom || 'Échelle sans nom')}</option>`).join('');
+        echelles.map(echelle => `<option value="${echapperHtml(echelle.id)}">${echapperHtml(echelle.nom || 'Échelle sans nom')}</option>`).join('');
 }
 
 /**
@@ -2483,7 +2483,7 @@ async function afficherBibliothequeEchelles() {
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                     <select id="selectTrimestreImportEchelles" class="controle-form" style="flex: 1; min-width: 200px;">
                         <option value="">-- Choisir un trimestre --</option>
-                        ${trimestres.map(t => `<option value="${t.cle}">${t.nom} (${t.nombre} échelle${t.nombre > 1 ? 's' : ''})</option>`).join('')}
+                        ${trimestres.map(t => `<option value="${echapperHtml(t.cle)}">${t.nom} (${t.nombre} échelle${t.nombre > 1 ? 's' : ''})</option>`).join('')}
                     </select>
                     <button data-action="afficherEchellesTrimestreModal" class="btn btn-secondaire btn-compact">Voir les échelles</button>
                     <button data-action="importerToutEchellesTrimestreModal" class="btn btn-principal btn-compact">Tout importer</button>
@@ -3135,7 +3135,7 @@ function afficherNiveauxNouvelleEchelle() {
                     </label>
                     <input type="number"
                            class="controle-form"
-                           value="${niveau.min}"
+                           value="${echapperHtml(niveau.min)}"
                            min="0"
                            max="100"
                            data-on-change="modifierNiveauTempHandler" data-niveau-index="${index}" data-champ="min" data-parse-float>
@@ -3144,7 +3144,7 @@ function afficherNiveauxNouvelleEchelle() {
                     <label class="echelle-texte-detail">Max (%)</label>
                     <input type="number"
                            class="controle-form"
-                           value="${niveau.max}"
+                           value="${echapperHtml(niveau.max)}"
                            min="0"
                            max="100"
                            data-on-change="modifierNiveauTempHandler" data-niveau-index="${index}" data-champ="max" data-parse-float>
@@ -3155,7 +3155,7 @@ function afficherNiveauxNouvelleEchelle() {
                     </label>
                     <input type="number"
                            class="controle-form"
-                           value="${niveau.valeurCalcul}"
+                           value="${echapperHtml(niveau.valeurCalcul)}"
                            min="0"
                            max="100"
                            step="0.01"
@@ -3165,7 +3165,7 @@ function afficherNiveauxNouvelleEchelle() {
                     <label class="echelle-texte-detail">Couleur</label>
                     <input type="color"
                            class="controle-form"
-                           value="${niveau.couleur}"
+                           value="${echapperHtml(niveau.couleur)}"
                            data-on-change="modifierNiveauTempHandler" data-niveau-index="${index}" data-champ="couleur"
                            style="height: 38px; cursor: pointer;">
                 </div>
@@ -3423,7 +3423,7 @@ function afficherNiveauxEchelle(echelle) {
                     </label>
                     <input type="number"
                            class="controle-form"
-                           value="${niveau.min}"
+                           value="${echapperHtml(niveau.min)}"
                            min="0"
                            max="100"
                            data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}" data-champ="min" data-parse-float>
@@ -3432,7 +3432,7 @@ function afficherNiveauxEchelle(echelle) {
                     <label class="echelle-texte-detail">Max (%)</label>
                     <input type="number"
                            class="controle-form"
-                           value="${niveau.max}"
+                           value="${echapperHtml(niveau.max)}"
                            min="0"
                            max="100"
                            data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}" data-champ="max" data-parse-float>
@@ -3443,7 +3443,7 @@ function afficherNiveauxEchelle(echelle) {
                     </label>
                     <input type="number"
                            class="controle-form"
-                           value="${niveau.valeurCalcul}"
+                           value="${echapperHtml(niveau.valeurCalcul)}"
                            min="0"
                            max="100"
                            step="0.01"
@@ -3453,7 +3453,7 @@ function afficherNiveauxEchelle(echelle) {
                     <label class="echelle-texte-detail">Couleur</label>
                     <input type="color"
                            class="controle-form"
-                           value="${niveau.couleur}"
+                           value="${echapperHtml(niveau.couleur)}"
                            data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}" data-champ="couleur"
                            style="height: 38px; cursor: pointer;">
                 </div>
