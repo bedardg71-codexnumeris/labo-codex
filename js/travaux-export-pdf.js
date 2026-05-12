@@ -380,6 +380,21 @@
     }
 
     /**
+     * Dessine un symbole Unicode (crochet, croix, interrogation, sym-*) au PDF
+     * Miroir de dessinerSymboleUnicode dans travaux-annotation.js.
+     */
+    function dessinerSymboleUnicodePDF(ctx, x1, y1, x2, y2, color, icone) {
+        const mx = (x1 + x2) / 2;
+        const my = (y1 + y2) / 2;
+        const size = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1));
+        ctx.fillStyle = color || '#888888';
+        ctx.font = 'bold ' + size + 'px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(icone || '?', mx, my);
+    }
+
+    /**
      * Dessine une pointe de fleche (triangle plein) pour l'export PDF
      */
     function drawArrowhead(ctx, tipX, tipY, angle, headLen, headAngle) {
@@ -468,6 +483,15 @@
                 if (pdOnd) drawArrowhead(ctx, x1, y1, angleOnd + Math.PI, headLenOnd, headAngleOnd);
                 break;
             }
+            case 'pointille': {
+                // Ligne pointillee : on configure le dash pattern et on
+                // tombe en fallthrough vers le rendu fleche/ligne, qui
+                // dessinera la trajectoire avec ce dash actif. ctx.restore()
+                // en fin de fonction remet setLineDash a la valeur sauvee. (ultrareview 2)
+                const epP = (forme.lineWidth || 2) * ratioResolution;
+                ctx.setLineDash([epP * 3, epP * 2]);
+            }
+            // eslint-disable-next-line no-fallthrough
             case 'ligne': // fallthrough — rendu via fleche avec pointes='aucune'
             case 'fleche': {
                 const headLen = Math.max(12 * ratioResolution, ctx.lineWidth * 5);
@@ -534,37 +558,16 @@
                 }
                 break;
             }
-            case 'crochet': {
-                const mx = (x1 + x2) / 2;
-                const my = (y1 + y2) / 2;
-                const size = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1));
-                ctx.fillStyle = forme.color || '#2e7d32';
-                ctx.font = size + 'px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('\u2714\uFE0E', mx, my);
-                break;
-            }
-            case 'croix': {
-                const mxC = (x1 + x2) / 2;
-                const myC = (y1 + y2) / 2;
-                const sizeC = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1));
-                ctx.fillStyle = forme.color || '#c62828';
-                ctx.font = sizeC + 'px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('\u2718', mxC, myC);
-                break;
-            }
+            case 'crochet':
+            case 'croix':
             case 'interrogation': {
-                const mxI = (x1 + x2) / 2;
-                const myI = (y1 + y2) / 2;
-                const sizeI = Math.min(Math.abs(x2 - x1), Math.abs(y2 - y1));
-                ctx.fillStyle = forme.color || '#e65100';
-                ctx.font = 'bold ' + sizeI + 'px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('?', mxI, myI);
+                // Icone resolu depuis la forme (creation time) avec fallback
+                // sur OUTILS courant. Avant : codes Unicode hardcodes qui
+                // ignoraient toute personnalisation de l'icone et omettaient
+                // la graisse 'bold' (incoherent avec le canvas). (ultrareview 2)
+                const icone = forme.icone
+                    || (travauxOutils.OUTILS[forme.type] && travauxOutils.OUTILS[forme.type].icone);
+                dessinerSymboleUnicodePDF(ctx, x1, y1, x2, y2, forme.color, icone);
                 break;
             }
             default:
@@ -589,6 +592,13 @@
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(numE, mxE, myE);
+                } else if (forme.type.startsWith('sym-')
+                        && travauxOutils.OUTILS[forme.type]) {
+                    // Symboles Unicode personnalises — miroir du default de
+                    // travaux-annotation.js dessinerForme. Avant : silencieusement
+                    // ignores a l'export PDF. (ultrareview 2)
+                    const iconeS = forme.icone || travauxOutils.OUTILS[forme.type].icone;
+                    dessinerSymboleUnicodePDF(ctx, x1, y1, x2, y2, forme.color, iconeS);
                 }
                 break;
         }
