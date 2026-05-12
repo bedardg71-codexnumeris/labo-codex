@@ -619,7 +619,7 @@ async function afficherFormProduction(id) {
         const grilles = await db.get(cleGrilles) || [];
 
         const optionsHtml = '<option value="">Aucune</option>' +
-            grilles.map(g => `<option value="${g.id}">${g.nom}</option>`).join('');
+            grilles.map(g => `<option value="${echapperHtml(g.id)}">${echapperHtml(g.nom)}</option>`).join('');
 
         if (selectGrille) {
             selectGrille.innerHTML = optionsHtml;
@@ -634,7 +634,7 @@ async function afficherFormProduction(id) {
     if (selectEchelle) {
         const echelles = await db.get('echellesTemplates') || [];
         selectEchelle.innerHTML = '<option value="">Aucune</option>' +
-            echelles.map(e => `<option value="${e.id}">${e.nom}</option>`).join('');
+            echelles.map(e => `<option value="${echapperHtml(e.id)}">${echapperHtml(e.nom)}</option>`).join('');
     }
 
     // 🆕 Peupler le select Cartouche (dépend de la grille sélectionnée)
@@ -647,7 +647,7 @@ async function afficherFormProduction(id) {
         }
         const cartouches = await db.get(`cartouches_${grilleId}`) || [];
         selectCartouche.innerHTML = '<option value="">Aucune</option>' +
-            cartouches.map(c => `<option value="${c.id}">${echapperHtml(c.nom)}</option>`).join('');
+            cartouches.map(c => `<option value="${echapperHtml(c.id)}">${echapperHtml(c.nom)}</option>`).join('');
     };
 
     // Listener : repeupler cartouches quand la grille change
@@ -1500,7 +1500,7 @@ async function chargerArtefactsDisponibles() {
     container.innerHTML = artefacts.map(art => `
         <label style="display: block; padding: 8px; margin-bottom: 5px; 
                background: var(--bleu-tres-pale); border-radius: 4px; cursor: pointer;">
-            <input type="checkbox" name="artefactPortfolio" value="${art.id}"
+            <input type="checkbox" name="artefactPortfolio" value="${echapperHtml(art.id)}"
                    class="u-mr-10">
             <strong>${art.description || art.titre}</strong>
         </label>
@@ -2071,7 +2071,7 @@ async function afficherBibliothequeProductions() {
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                     <select id="selectTrimestreImport" class="controle-form" style="flex: 1; min-width: 200px;" data-on-change="mettreAJourFiltreCoursTrimestreProductions">
                         <option value="">-- Choisir un trimestre --</option>
-                        ${trimestres.map(t => `<option value="${t.cle}">${t.nom} (${t.nombre} production${t.nombre > 1 ? 's' : ''})</option>`).join('')}
+                        ${trimestres.map(t => `<option value="${echapperHtml(t.cle)}">${echapperHtml(t.nom)} (${t.nombre} production${t.nombre > 1 ? 's' : ''})</option>`).join('')}
                     </select>
                     <select id="selectCoursImportProductions" class="controle-form" style="flex: 1; min-width: 150px; display: none;">
                         <option value="">Tous les cours</option>
@@ -3749,7 +3749,7 @@ async function chargerGrillesDisponiblesPourProduction() {
     }
 
     const optionsHtml = '<option value="">Aucune</option>' +
-        grilles.map(g => `<option value="${g.id}">${g.nom}</option>`).join('');
+        grilles.map(g => `<option value="${echapperHtml(g.id)}">${echapperHtml(g.nom)}</option>`).join('');
 
     if (selectStandard) {
         selectStandard.innerHTML = optionsHtml;
