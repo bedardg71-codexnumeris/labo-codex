@@ -4,40 +4,63 @@
 **Dernier build** : `0512-0840` · Beta **99.42**
 **Branche `main`** : poussée sur origin (sprint + audit + quick wins + cleanup).
 **Branche `feature/lot-4a-jetons`** : inchangée depuis le 11 mai (Lot 4a préservé, **non mergé** — bac à sable prévu semaine 25-31 mai).
-**Statut** : journée très productive — sprint 6 items + audit reality-check (2 items fermés) + 3 quick wins + cleanup module mort. **BACKLOG 33 → 23 items ouverts (-10).** Prochain chantier : **Ultrareview `js/codex.js`** (planifié semaine 12-17 mai).
+**Statut** : journée très productive — sprint 6 items + audit reality-check (2 items fermés) + 3 quick wins + cleanup module mort. **BACKLOG 33 → 23 items ouverts (-10).**
+
+**Ultrareview `js/codex.js` complétée le 12 mai 2026** — pipeline 4/4 phases ✓, **0 finding**. Skeleton de tests + rapport ajoutés (commits `443b626` + `e0122ee`). Procédure SESSION.md §44-117 corrigée suite aux tâtonnements (orphan `review-base` + draft PR + CLI locale). Voir `Rapports/ultrareview-codex-2026-05-12.md`.
+
+**Prochain chantier** : **Ultrareview 2** (`js/travaux-export-pdf.js` + `js/travaux-annotation.js`) — semaine **18-24 mai**.
 
 ---
 
 ## 🚀 Consigne de démarrage pour la prochaine session
 
-À copier-coller au début de la prochaine session :
+À copier-coller au début de la prochaine session (semaine **18-24 mai 2026**) :
 
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
 Lecture obligatoire :
-1. SESSION.md — bilan complet du 13 mai + procédure ultrareview ci-dessous
+1. SESSION.md — statut + procédure ultrareview corrigée ci-dessous
 2. BACKLOG.md — 23 items `[ ]` actifs
 3. docs/CALENDRIER.md §96-132 — « Stratégie ultrareviews pré-colloque »
+4. memory : feedback_ultrareview_workflow.md (pattern orphan + draft PR + CLI locale)
 
 État git :
-- main est synchronisé avec origin/main.
+- main synchronisé avec origin/main (3 commits ajoutés le 12 mai
+  post-ultrareview codex : 443b626 skeleton+rapport, e0122ee
+  procédure SESSION corrigée).
 - feature/lot-4a-jetons (commit e4c348d) inchangée, bac à sable
   prévu semaine 25-31 mai.
+- review/codex-2026-05-12 conservée sur origin (archive du bundle,
+  draft PR #16 OPEN). feature/ultrareview-codex-2026-05-12 supprimée
+  localement (merge fast-forward terminé).
 
-## OBJECTIF DE LA SESSION : Ultrareview js/codex.js
+## OBJECTIF DE LA SESSION : Ultrareview 2
 
-Premier des 2 ultrareviews planifiés pré-colloque. Voir
-docs/CALENDRIER.md §96-132 pour la stratégie complète.
+Deuxième et dernière ultrareview pré-colloque (1 ultrareview à la
+fois, cf. CALENDRIER §128-132 ; pas d'ultrareview semaine 25-31 mai
+sur gel pré-colloque).
 
 ### Contexte
 
-- `js/codex.js` : ~2910 lignes (était 2662 avant sprint 13 mai)
-- Module démontré au colloque AQPC (3 juin 2026), jamais audité
-- Format auto-descriptif crucial pour la Voûte (Défense F)
-- **Sprint 13 mai a touché codex.js** : #239 (menu adapté navigateur,
-  ~25 lignes) + #243 (actionComparer + rapport exportable, ~210 lignes).
-  L'ultrareview évaluera aussi ces ajouts récents.
+- `js/travaux-export-pdf.js` : 1207 l. — pipeline PDF (refonte design B
+  livrée Beta 95+, derniers fixes #264 progression exports longs)
+- `js/travaux-annotation.js` : 3144 l. — édition annotations sur travaux
+  (jetons visuels, palette, ligne pointillée Build 0401-1550)
+- **Total** : 4351 l. — comparable à Lot 4a (~11 060 l.) mais plus
+  modulaire
+- Aucun test existant dans `tests/unit/` pour ces deux modules
+- Format de stockage des annotations (sérialisées par travail) : changer
+  son format = casser les travaux annotés existants → différer toute
+  modification de format manifestée par les findings
+
+### Préparation (étapes 1-2 de la procédure ci-dessous)
+
+Cibler le bundle : `js/travaux-export-pdf.js` + `js/travaux-annotation.js`.
+Nomenclature : `review/travaux-export-annotation-YYYY-MM-DD` (bundle)
++ `feature/ultrareview-travaux-export-annotation-YYYY-MM-DD` (fixes).
+Draft PR vers `review-base`. Lancer `/ultrareview <PR#>` **depuis une
+session CLI locale** (pas web/desktop).
 
 ### Procédure pas à pas
 
