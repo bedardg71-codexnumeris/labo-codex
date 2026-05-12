@@ -1096,7 +1096,7 @@
                     <div class="travaux-fichier-etudiant">
                         <select class="form-select travaux-select-etudiant" data-index="${index}" data-on-change="travauxImportChangerEtudiant" data-param="${index}">
                             <option value="">-- Associer --</option>
-                            ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${e.da}" ${f.etudiantDA === e.da ? 'selected' : ''}>${echapperHtml(e.nom + ', ' + e.prenom)} (${e.da})</option>`).join('')}
+                            ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${echapperHtml(e.da)}" ${f.etudiantDA === e.da ? 'selected' : ''}>${echapperHtml(e.nom + ', ' + e.prenom)} (${e.da})</option>`).join('')}
                         </select>
                     </div>
                     <button class="btn-supprimer-fichier" data-action="travauxImportRetirerFichier" data-param="${index}" title="Retirer">
