@@ -273,7 +273,7 @@ function chargerPortfolioEleveDetail(da) {
                         <label class="portfolio-artefact-label" style="cursor: ${art.remis ? 'pointer' : 'not-allowed'};">
                             <input type="checkbox"
                                    name="artefactRetenu"
-                                   value="${art.id}"
+                                   value="${echapperHtml(art.id)}"
                                    ${art.retenu ? 'checked' : ''}
                                    ${!art.remis ? 'disabled' : ''}
                                    data-on-change="toggleArtefactPortfolioFromEl"
