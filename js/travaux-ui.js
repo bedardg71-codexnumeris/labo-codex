@@ -1180,14 +1180,14 @@
                             <label>Production</label>
                             <select id="travaux-archivage-production" class="form-select">
                                 <option value="">— Toutes —</option>
-                                ${productions.map(p => `<option value="${p.id}">${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
+                                ${productions.map(p => `<option value="${echapperHtml(p.id)}">${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                             </select>
                         </div>
                         <div class="groupe-form">
                             <label>Étudiant·e</label>
                             <select id="travaux-archivage-etudiant" class="form-select">
                                 <option value="">— Tous —</option>
-                                ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${e.da}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)} (${e.daAffichage || e.da})</option>`).join('')}
+                                ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${echapperHtml(e.da)}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)} (${e.daAffichage || e.da})</option>`).join('')}
                             </select>
                         </div>
                     </div>
@@ -1203,14 +1203,14 @@
                             <label>Production</label>
                             <select id="travaux-archivage-semestre-production" class="form-select">
                                 <option value="">— Toutes —</option>
-                                ${productions.map(p => `<option value="${p.id}">${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
+                                ${productions.map(p => `<option value="${echapperHtml(p.id)}">${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                             </select>
                         </div>
                         <div class="groupe-form">
                             <label>Étudiant·e</label>
                             <select id="travaux-archivage-semestre-etudiant" class="form-select">
                                 <option value="">— Tous —</option>
-                                ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${e.da}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)} (${e.daAffichage || e.da})</option>`).join('')}
+                                ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${echapperHtml(e.da)}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)} (${e.daAffichage || e.da})</option>`).join('')}
                             </select>
                         </div>
                     </div>
@@ -1230,14 +1230,14 @@
                             <label>Production</label>
                             <select id="travaux-archivage-lea-production" class="form-select" data-on-change="travauxUI.mettreAJourCompteurLea">
                                 <option value="">— Choisir —</option>
-                                ${productions.map(p => `<option value="${p.id}">${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
+                                ${productions.map(p => `<option value="${echapperHtml(p.id)}">${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                             </select>
                         </div>
                         <div class="groupe-form">
                             <label>Étudiant·e</label>
                             <select id="travaux-archivage-lea-etudiant" class="form-select" data-on-change="travauxUI.mettreAJourCompteurLea">
                                 <option value="">— Tous —</option>
-                                ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${e.da}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)} (${e.daAffichage || e.da})</option>`).join('')}
+                                ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${echapperHtml(e.da)}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)} (${e.daAffichage || e.da})</option>`).join('')}
                             </select>
                         </div>
                     </div>
@@ -1687,7 +1687,7 @@
             <label>Production</label>
             <select class="form-select" id="pipeline-select-production" data-on-change="travauxUI.associerProductionGlobale">
                 <option value="">-- Choisir une production --</option>
-                ${productions.map(p => `<option value="${p.id}" ${prodActuelle === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
+                ${productions.map(p => `<option value="${echapperHtml(p.id)}" ${prodActuelle === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                 ${jetonsActifs ? `<option value="__jeton_reprise__" ${prodActuelle === '__jeton_reprise__' || modeJetonActif ? 'selected' : ''}>Jeton de reprise</option>` : ''}
             </select>
         </div>`;
@@ -1700,7 +1700,7 @@
                 <label>Pour quelle production ?</label>
                 <select class="form-select" data-on-change="travauxUI.associerJetonProduction">
                     <option value="">-- Choisir --</option>
-                    ${productions.map(p => `<option value="${p.id}" ${prodJeton === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
+                    ${productions.map(p => `<option value="${echapperHtml(p.id)}" ${prodJeton === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                 </select>
             </div>`;
         }
@@ -1781,7 +1781,7 @@
                 <label>Production</label>
                 <select class="form-select pipeline-select-petit" data-on-change="travauxUI.changerProductionPipeline" data-param="${idx}">
                     <option value="">--</option>
-                    ${productions.map(p => `<option value="${p.id}" ${f.productionId === p.id && !f.estReprise ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
+                    ${productions.map(p => `<option value="${echapperHtml(p.id)}" ${f.productionId === p.id && !f.estReprise ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                     ${jetonsActifs ? `<option value="__jeton_reprise__" ${f.estReprise ? 'selected' : ''}>Jeton de reprise</option>` : ''}
                 </select>
             </div>`;
@@ -1791,7 +1791,7 @@
                     <label>Pour quelle production ?</label>
                     <select class="form-select pipeline-select-petit" data-on-change="travauxUI.changerJetonProductionPipeline" data-param="${idx}">
                         <option value="">--</option>
-                        ${productions.map(p => `<option value="${p.id}" ${f.productionId === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
+                        ${productions.map(p => `<option value="${echapperHtml(p.id)}" ${f.productionId === p.id ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                     </select>
                 </div>`;
             }
@@ -2666,14 +2666,14 @@
 
         // Options pour le select de production
         const optionsProductions = productions.map(p =>
-            `<option value="${p.id}">${echapperHtml(p.titre || p.nom || p.id)}</option>`
+            `<option value="${echapperHtml(p.id)}">${echapperHtml(p.titre || p.nom || p.id)}</option>`
         ).join('');
 
         // Dropdown filtre production
         let htmlFiltreProduction = '<option value="">Toutes les productions</option>';
         productions.forEach(p => {
             const sel = (productionFiltreActive === p.id) ? ' selected' : '';
-            htmlFiltreProduction += `<option value="${p.id}"${sel}>${echapperHtml(p.titre || p.nom || p.id)}</option>`;
+            htmlFiltreProduction += `<option value="${echapperHtml(p.id)}"${sel}>${echapperHtml(p.titre || p.nom || p.id)}</option>`;
         });
 
         // Générer les lignes
@@ -2988,7 +2988,7 @@
     function genererOptionsEtudiants() {
         const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
         return [...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e =>
-            `<option value="${e.da}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)}</option>`
+            `<option value="${echapperHtml(e.da)}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)}</option>`
         ).join('');
     }
 
@@ -6039,7 +6039,7 @@
 
             html += `
                 <label class="fusion-fichier-item" data-etudiant="${f.etudiantDA || ''}" data-production="${f.productionId || ''}">
-                    <input type="checkbox" class="fusion-fichier-check" value="${f.id}" data-on-change="travauxUI.majCompteurFusion">
+                    <input type="checkbox" class="fusion-fichier-check" value="${echapperHtml(f.id)}" data-on-change="travauxUI.majCompteurFusion">
                     ${thumb}
                     <div class="fusion-fichier-info">
                         <span class="fusion-fichier-nom">${echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : (f.nomFichier || 'Document'))}</span>
@@ -6494,12 +6494,12 @@
 
         // Construire la modale
         const optionsGroupes = groupesCibles.map(g =>
-            `<option value="${g.id}" data-cours-id="${g.coursId}">${echapperHtml(g.label)}</option>`
+            `<option value="${echapperHtml(g.id)}" data-cours-id="${echapperHtml(g.coursId)}">${echapperHtml(g.label)}</option>`
         ).join('');
 
         const lignesHTML = lignesFichiers.map(f => `
             <label class="transfert-fichier-ligne">
-                <input type="checkbox" value="${f.id}" class="transfert-checkbox-fichier">
+                <input type="checkbox" value="${echapperHtml(f.id)}" class="transfert-checkbox-fichier">
                 <span class="transfert-fichier-nom" title="${echapperHtml(f.nom)}">${echapperHtml(f.etudiant)}</span>
                 <span class="travaux-badge-pill ${f.statut === 'annoté' ? 'annote' : f.statut === 'évalué' ? 'evalue' : 'importe'}">${f.statut}</span>
             </label>
