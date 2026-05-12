@@ -22,10 +22,11 @@ const scriptAudit = path.join(racineProjet, 'scripts', 'audit-innerhtml.sh');
 // 3. Mettre à jour SEUIL_SUSPECTS_MAX ci-dessous
 // 4. Documenter dans le commit
 
-// Baseline figée le 8 mai 2026 (post Défense A, Défense E-α/E-β).
-// Snapshot de référence : docs/securite/audits/AUDIT-INNERHTML-2026-05-06.md
-// (125 suspects au 6 mai → 120 au 8 mai après E-α/E-β).
-const SEUIL_SUSPECTS_MAX = 120;
+// Baseline mise à jour le 12 mai 2026 (post Défense E pragmatique « Phase 1 close »).
+// Snapshot de référence : docs/securite/DEFENSE-E-CLOSE.md
+// (125 suspects 6 mai → 120 le 8 mai après E-α/E-β → 112 le 12 mai
+// après substitution mécanique value="${X.Y}" sur 20 fichiers).
+const SEUIL_SUSPECTS_MAX = 115;
 
 describe('Défense I · F · lint sécurité statique', () => {
     // Le script audite ~112 fichiers .js (~8 s sur Mac M3). On invoque
@@ -47,6 +48,30 @@ describe('Défense I · F · lint sécurité statique', () => {
             `Soit (a) le nouveau code introduit un innerHTML sans echapperHtml — corrigez-le, ` +
             `soit (b) la baseline doit être abaissée si vous avez nettoyé du code (mettre à jour SEUIL_SUSPECTS_MAX).`
         ).toBeLessThanOrEqual(SEUIL_SUSPECTS_MAX);
+    });
+
+    it('F.16 · Défense E · zero value="${X.Y}" non échappé hors _archives/', () => {
+        // Sentinelle anti-régression spécifique au pattern Défense E
+        // pragmatique fermé le 12 mai 2026 : tout attribut value=
+        // interpolant une propriété d'objet doit passer par echapperHtml
+        // ou escapeHtml. Le pattern simple value="${X.Y}" en attribut HTML
+        // est interdit (sauf dans js/_archives/ qui n'est plus chargé).
+        //
+        // Si un commit ajoute un value="${X.Y}" sans échappement, ce test
+        // échoue et bloque la régression. Procédure :
+        //   1. Identifier le fichier signalé.
+        //   2. Wrapper : value="${X.Y}" → value="${echapperHtml(X.Y)}"
+        //      (ou escapeHtml pour js/export-pdf.js).
+        const sortieGrep = execFileSync('bash', ['-c',
+            'grep -rEn \'value="\\$\\{[a-zA-Z_]+\\.[a-zA-Z_]+\\}"\' js/ --include="*.js" | grep -v "_archives" || true'
+        ], { encoding: 'utf8', cwd: racineProjet }).trim();
+
+        expect(
+            sortieGrep,
+            `Régression Défense E : value="\${X.Y}" non échappé détecté.\n` +
+            `Lignes concernées :\n${sortieGrep}\n` +
+            `Fix : wrapper avec echapperHtml() (ou escapeHtml() dans export-pdf.js).`
+        ).toBe('');
     });
 
     it('F · audit-innerhtml.sh · invariant total = sécurisé + statique + suspect', () => {
