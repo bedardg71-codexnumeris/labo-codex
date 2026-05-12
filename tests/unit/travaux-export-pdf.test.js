@@ -96,3 +96,50 @@ describe('travaux-export-pdf.js — Fix X · afficherRevisionExport echappe fich
     });
 
 });
+
+describe('travaux-export-pdf.js — Fix A · icones via forme.icone || OUTILS[type].icone', () => {
+
+    it('expose un helper dessinerSymboleUnicodePDF (miroir du canvas)', () => {
+        expect(source).toMatch(/function\s+dessinerSymboleUnicodePDF\s*\(/);
+    });
+
+    it('crochet/croix/interrogation passent par le helper avec fallback OUTILS[type].icone', () => {
+        const corps = corpsFonction('dessinerForme');
+        expect(corps, 'fonction dessinerForme introuvable').not.toBeNull();
+        // Les trois cases sont regroupees et utilisent forme.icone || OUTILS[type].icone
+        expect(corps).toMatch(/case\s+'crochet'\s*:\s*\n\s*case\s+'croix'\s*:\s*\n\s*case\s+'interrogation'\s*:/);
+        expect(corps).toMatch(/forme\.icone[\s\S]*?travauxOutils\.OUTILS\[forme\.type\]\.icone/);
+        expect(corps).toMatch(/dessinerSymboleUnicodePDF\s*\(\s*ctx/);
+        // Sentinelle : plus de fillText hardcode pour ces 3 cases
+        expect(corps).not.toMatch(/fillText\s*\(\s*'\\u2714/);
+        expect(corps).not.toMatch(/fillText\s*\(\s*'\\u2718/);
+    });
+
+});
+
+describe('travaux-export-pdf.js — Fix D · type pointille rendu via fallthrough vers fleche', () => {
+
+    it('le switch dessinerForme inclut un case pointille avec setLineDash', () => {
+        const corps = corpsFonction('dessinerForme');
+        expect(corps).not.toBeNull();
+        // case 'pointille': avec setLineDash, fallthrough vers ligne/fleche
+        expect(corps).toMatch(
+            /case\s+'pointille'\s*:\s*\{[\s\S]*?setLineDash\(\s*\[[\s\S]*?\]\s*\)[\s\S]*?\}\s*(?:\/\/[^\n]*)?\s*\n\s*case\s+'ligne'/
+        );
+    });
+
+});
+
+describe('travaux-export-pdf.js — Fix E · types sym-* rendus dans le default', () => {
+
+    it('default branch dispatche les types sym-* vers le helper Unicode', () => {
+        const corps = corpsFonction('dessinerForme');
+        expect(corps).not.toBeNull();
+        // Apres errfr_, un else if pour sym-* qui appelle le helper
+        expect(corps).toMatch(/forme\.type\.startsWith\(\s*'sym-'\s*\)/);
+        expect(corps).toMatch(
+            /startsWith\(\s*'sym-'\s*\)[\s\S]*?travauxOutils\.OUTILS\[forme\.type\][\s\S]*?dessinerSymboleUnicodePDF/
+        );
+    });
+
+});
