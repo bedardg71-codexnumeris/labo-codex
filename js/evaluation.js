@@ -372,7 +372,7 @@ function chargerEchellePerformance() {
     if (echellePratique) {
         const nbNiveaux = echellePratique.niveaux?.length || 0;
         const nomEchappe = echapperHtml(echellePratique.nom);
-        select.innerHTML += `<option value="${echellePratique.id}" style="background: var(--bleu-pale); font-weight: 600;">${nomEchappe} (${nbNiveaux} niveaux)</option>`;
+        select.innerHTML += `<option value="${echapperHtml(echellePratique.id)}" style="background: var(--bleu-pale); font-weight: 600;">${nomEchappe} (${nbNiveaux} niveaux)</option>`;
     }
 
     // Ajouter les échelles personnalisées
@@ -380,7 +380,7 @@ function chargerEchellePerformance() {
         select.innerHTML += echelles.map(echelle => {
             const nomEchappe = echapperHtml(echelle.nom || 'Échelle sans nom');
             const nbNiveaux = echelle.niveaux?.length || 0;
-            return `<option value="${echelle.id}">${nomEchappe} (${nbNiveaux} niveaux)</option>`;
+            return `<option value="${echapperHtml(echelle.id)}">${nomEchappe} (${nbNiveaux} niveaux)</option>`;
         }).join('');
     }
 
@@ -825,7 +825,7 @@ function cartoucheSelectionnee() {
             <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
                     data-on-change="niveauSelectionne" data-param="${critere.id}">
                 <option value="">-- Utiliser le niveau calculé --</option>
-                ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
+                ${niveauxDisponibles.map(n => `<option value="${echapperHtml(n.code)}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
             </select>
             <small class="eval-aide">Par défaut: utilise le niveau calculé automatiquement. Modifiez uniquement si nécessaire (ex: jeton de reprise ciblée).</small>
         </div>
@@ -859,7 +859,7 @@ function cartoucheSelectionnee() {
             <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
                     data-on-change="niveauSelectionne" data-param="${critere.id}">
                 <option value="">-- Utiliser le niveau calculé --</option>
-                ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
+                ${niveauxDisponibles.map(n => `<option value="${echapperHtml(n.code)}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
             </select>
             <small class="eval-aide">Par défaut: utilise le niveau calculé automatiquement. Modifiez uniquement si nécessaire (ex: jeton de reprise ciblée).</small>
         </div>
@@ -868,7 +868,7 @@ function cartoucheSelectionnee() {
         <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
                 data-on-change="niveauSelectionne" data-param="${critere.id}">
             <option value="">--</option>
-            ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
+            ${niveauxDisponibles.map(n => `<option value="${echapperHtml(n.code)}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
         </select>
     `}
 </div>
@@ -1002,14 +1002,14 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                     <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
                             data-on-change="niveauSelectionne" data-param="${critere.id}">
                         <option value="">--</option>
-                        ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
+                        ${niveauxDisponibles.map(n => `<option value="${echapperHtml(n.code)}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
                     </select>
                 ` : `
                     <!-- Interface standard -->
                     <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
                             data-on-change="niveauSelectionne" data-param="${critere.id}">
                         <option value="">--</option>
-                        ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
+                        ${niveauxDisponibles.map(n => `<option value="${echapperHtml(n.code)}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
                     </select>
                 `}
             </div>
@@ -4155,7 +4155,7 @@ function chargerFiltresEvaluations() {
     if (selectProduction) {
         const productions = obtenirDonneesSelonMode('productions');
         selectProduction.innerHTML = '<option value="">Toutes les productions</option>' +
-            productions.map(prod => `<option value="${prod.id}">${echapperHtml(prod.titre || prod.nom)}</option>`).join('');
+            productions.map(prod => `<option value="${echapperHtml(prod.id)}">${echapperHtml(prod.titre || prod.nom)}</option>`).join('');
     }
 }
 
@@ -4168,7 +4168,7 @@ function rechargerFiltreProduction() {
     if (selectProduction) {
         const productions = obtenirDonneesSelonMode('productions');
         selectProduction.innerHTML = '<option value="">Toutes les productions</option>' +
-            productions.map(prod => `<option value="${prod.id}">${echapperHtml(prod.titre || prod.nom)}</option>`).join('');
+            productions.map(prod => `<option value="${echapperHtml(prod.id)}">${echapperHtml(prod.titre || prod.nom)}</option>`).join('');
     }
 }
 
