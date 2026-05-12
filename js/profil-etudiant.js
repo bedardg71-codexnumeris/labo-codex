@@ -2956,7 +2956,7 @@ function afficherProfilComplet(daOuEl) {
                             // ✅ CORRIGÉ (29 déc 2025): Ne pas afficher DA en mode anonymisation
                             const daTexte = modeAnonymisation ? '' : ` (${echapperHtml(e.da)})`;
                             return `
-                            <option value="${e.da}" ${e.da === da ? 'selected' : ''}>
+                            <option value="${echapperHtml(e.da)}" ${e.da === da ? 'selected' : ''}>
                                 ${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}${daTexte}
                             </option>
                             `;
