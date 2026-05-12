@@ -827,7 +827,7 @@ function demanderMetadonneesConfigComplete(nbRessources) {
 
             // Validation
             if (!nom) {
-                alert('Le nom de ta pratique est obligatoire');
+                alert('Le titre de ce partage est obligatoire');
                 return;
             }
             if (!auteur) {
@@ -883,7 +883,7 @@ function creerModalConfigComplete() {
 
     modal.innerHTML = `
         <div class="modal-js-contenu">
-            <h2 class="modal-titre">Partager ma pratique complète</h2>
+            <h2 class="modal-titre">Partager ma configuration complète</h2>
 
             <p class="cc-meta-intro cc-meta-intro--encadre">
                 Tu es sur le point d'exporter <strong id="configNbRessources"></strong> ressource(s) pédagogique(s).<br>
@@ -892,10 +892,10 @@ function creerModalConfigComplete() {
 
             <div class="groupe-form">
                 <label for="configNom">
-                    Nom de ta pratique <span class="cc-meta-required">*</span>
+                    Titre de ce partage <span class="cc-meta-required">*</span>
                 </label>
                 <input type="text" id="configNom" class="controle-form"
-                       placeholder="Ex : PAN avec évaluation par compétences">
+                       placeholder="Ex : Configuration littérature collégial A25">
             </div>
 
             <div class="groupe-form">

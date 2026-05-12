@@ -717,6 +717,8 @@
 
 - [ ] **#276** Evaluation sans travaux importes (numéroté 11 mai 2026, besoin identifié 21 fév 2026) : S'assurer que le module d'evaluation fonctionne meme si aucun travail n'est charge (importe). Contexte : jusqu'a present, l'evaluation se faisait dans GoodNotes ; desormais elle se fera directement dans l'application. Le flux doit supporter l'evaluation manuelle sans fichier PDF/image importe.
 
+- [ ] **#277** Modale Reparation des evaluations — point d'acces UI manquant (decouvert 12 mai 2026 par validation Safari de #256-bis) : la modale `modalReparationEvaluations` (index.html L8499) et la fonction `afficherModalReparationEvaluations` (evaluation.js L5142) existent toujours, mais la fonction n'est appelee NULLE PART dans le code. Aucun bouton/menu n'ouvre cette modale. Verifier si la fonctionnalite est encore necessaire (3 options) : (a) restaurer un point d'acces (ex. Reglages > Donnees, ou menu contextuel sur une evaluation cassee), (b) si obsolete, retirer modale + fonction + entree popup `modal-reparation` dans accompagnement-contenu-popup.js, (c) si seulement utile en debug, garder mais ne pas exposer dans l'UI. Le contenu d'aide `modal-reparation` reste accessible si la modale est ouverte (test verifie : popup ✴️ fonctionne).
+
 - [x] **Info-bulles et pratique guidee (Annotation/Evaluation)** ✅ COMPLÉTÉ (22 fév 2026) : 25 info-bulles ajoutées couvrant les cartes métriques, checkboxes rétroaction, boutons d'action, barre d'outils annotation, pipeline d'import et zone d'archivage.
 
 ### Priorite haute - Cartes mentales (21 fev 2026)
