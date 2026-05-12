@@ -1995,11 +1995,27 @@ function _actualiserMenu() {
         if (_etat.actif) fusionnerItem.classList.remove('u-hide');
         else fusionnerItem.classList.add('u-hide');
     }
+    var comparerItem = document.getElementById('codex-menu-comparer');
+    if (comparerItem) {
+        if (_etat.actif) comparerItem.classList.remove('u-hide');
+        else comparerItem.classList.add('u-hide');
+    }
 
-    // Sous-texte "Enregistrer" : montre si handle FSAPI connecté
+    // Adaptation selon le support FSAPI (Chrome/Edge vs Safari/iPad)
+    // Sans FSAPI, « Enregistrer le codex » télécharge toujours un nouveau fichier — on renomme.
+    var fsapiOk = (typeof window.showSaveFilePicker === 'function');
+    var enregLabel = document.getElementById('codex-menu-enreg-label');
+    if (enregLabel) {
+        enregLabel.textContent = fsapiOk ? 'Enregistrer le codex' : 'Télécharger le codex';
+    }
+
+    // Sous-texte "Enregistrer" : montre le bon mode selon le contexte
     var enregInfo = document.getElementById('codex-menu-enreg-info');
     if (enregInfo) {
-        if (_fileHandle) {
+        if (!fsapiOk) {
+            enregInfo.textContent = 'Télécharge un nouveau fichier';
+            enregInfo.classList.remove('u-hide');
+        } else if (_fileHandle) {
             enregInfo.textContent = 'Vers le même emplacement';
             enregInfo.classList.remove('u-hide');
         } else {
@@ -2174,8 +2190,14 @@ function actionNouveau() {
 function actionDetails() {
     _fermerMenu();
 
+    var fsapiOk = (typeof window.showSaveFilePicker === 'function');
+    var noteFsapi = fsapiOk
+        ? '\n\nMode : enregistrement direct sur le fichier ouvert (Chrome/Edge).'
+        : '\n\nMode : téléchargement d\'un nouveau fichier à chaque enregistrement (Safari/iPad). Pense à remplacer manuellement le fichier précédent sur ta clé USB.';
+
     if (!_etat.manifeste) {
-        alert('Aucun codex actif.\n\nPour commencer :\n• « Ouvrir un codex » pour charger un fichier existant\n• « Nouveau codex » pour en créer un\n• « Enregistrer le codex » pour sauvegarder tes données actuelles');
+        var libelleEnreg = fsapiOk ? 'Enregistrer le codex' : 'Télécharger le codex';
+        alert('Aucun codex actif.\n\nPour commencer :\n• « Ouvrir un codex » pour charger un fichier existant\n• « Nouveau codex » pour en créer un\n• « ' + libelleEnreg + ' » pour sauvegarder tes données actuelles' + noteFsapi);
         return;
     }
 
@@ -2190,7 +2212,8 @@ function actionDetails() {
         '\nContenu :\n' +
         '  ' + (m.contenu.cles ? m.contenu.cles.length : '?') + ' clés de données\n' +
         '  ' + (m.contenu.nombreFichiersTravaux || 0) + ' fichiers travaux\n' +
-        '  ' + _formaterTaille(m.contenu.tailleTotaleOctets || 0);
+        '  ' + _formaterTaille(m.contenu.tailleTotaleOctets || 0) +
+        noteFsapi;
 
     alert(details);
 }
@@ -2382,6 +2405,215 @@ async function actionFusionner() {
         alert('Erreur lors de la fusion :\n\n' + erreur.message);
         console.error('📂 Fusion : erreur', erreur);
     }
+}
+
+/* ===============================
+   COMPARAISON DE CODEX (#243)
+   Rapport diagnostic copiable + téléchargeable, sans appliquer
+   aucune modification au codex local.
+   =============================== */
+
+// Mémoire du dernier rapport généré (pour Copier / Télécharger)
+var _dernierRapportComparaison = null;
+var _dernierRapportNomFichier = null;
+
+/**
+ * Compare le codex actif avec un codex externe et affiche un rapport texte.
+ * Aucune donnée locale n'est modifiée.
+ */
+async function actionComparer() {
+    _fermerMenu();
+
+    if (!_etat.actif) {
+        alert('Aucun codex actif.\n\nOuvre d\'abord un codex (ou enregistre tes données), puis utilise « Comparer » pour analyser les différences avec un autre codex.');
+        return;
+    }
+
+    var fichier = await ouvrirDialogueFichier();
+    if (!fichier) return;
+
+    _afficherProgression('Comparaison de codex');
+    _majProgression(0, 'Lecture du codex externe...');
+    await _yield();
+
+    try {
+        var externe = await lireCodexExterne(fichier);
+
+        _majProgression(20, 'Lecture des données locales...');
+        await _yield();
+
+        var toutesLesCles = await db.keys();
+        var clesFiltrees = toutesLesCles.filter(function(c) {
+            return !c.startsWith('_codex_') && !c.startsWith('_');
+        });
+        var donneesLocales = {};
+        for (var i = 0; i < clesFiltrees.length; i++) {
+            var val = await db.get(clesFiltrees[i], null);
+            if (val !== null) donneesLocales[clesFiltrees[i]] = val;
+        }
+
+        _majProgression(50, 'Recherche d\'un ancêtre commun...');
+        await _yield();
+        var ancetre = await db.get(CLE_SNAPSHOT_AVANT, null);
+
+        _majProgression(65, 'Analyse des différences...');
+        await _yield();
+        var analyse = _analyserFusion(donneesLocales, externe.donnees, ancetre);
+
+        var travauxLocaux = [];
+        var cleFTLocale = toutesLesCles.find(function(c) { return c.includes('fichiersTravaux'); });
+        if (cleFTLocale && donneesLocales[cleFTLocale] && Array.isArray(donneesLocales[cleFTLocale])) {
+            donneesLocales[cleFTLocale].forEach(function(f) {
+                var ext = (f.nomFichier || 'bin').split('.').pop();
+                travauxLocaux.push(DOSSIER_TRAVAUX + '/' + f.id + '.' + ext);
+            });
+        }
+        var analyseTravaux = _analyserFusionTravaux(travauxLocaux, externe.travauxListe);
+
+        _majProgression(90, 'Construction du rapport...');
+        await _yield();
+
+        var rapport = _construireRapportComparaison(externe, analyse, analyseTravaux);
+
+        _masquerProgression();
+        _afficherModalComparaison(externe, analyse, rapport);
+
+    } catch (erreur) {
+        _masquerProgression();
+        alert('Erreur lors de la comparaison :\n\n' + erreur.message);
+        console.error('📂 Comparaison : erreur', erreur);
+    }
+}
+
+/**
+ * Construit le rapport texte détaillé (liste exhaustive des clés par catégorie).
+ * @returns {string}
+ */
+function _construireRapportComparaison(externe, analyse, analyseTravaux) {
+    var lignes = [];
+    var nomLocal = _etat.nom || '(codex local)';
+    var nomExterne = (externe.manifeste && externe.manifeste.nom) || '(codex externe)';
+
+    lignes.push('═══ Rapport de comparaison de codex ═══');
+    lignes.push('Généré le : ' + _formaterDateLocale(new Date().toISOString()));
+    lignes.push('');
+    lignes.push('Codex local   : ' + nomLocal);
+    if (_etat.manifeste) {
+        lignes.push('  Dernière sauvegarde : ' + _formaterDateLocale(_etat.manifeste.dateDerniereModification));
+        lignes.push('  Trimestre : ' + (_etat.manifeste.trimestre || 'non défini'));
+    }
+    lignes.push('');
+    lignes.push('Codex externe : ' + nomExterne);
+    if (externe.manifeste) {
+        lignes.push('  Dernière sauvegarde : ' + _formaterDateLocale(externe.manifeste.dateDerniereModification));
+        lignes.push('  Trimestre : ' + (externe.manifeste.trimestre || 'non défini'));
+        lignes.push('  Auteur : ' + (externe.manifeste.auteur || 'non défini'));
+    }
+    lignes.push('');
+
+    var totalAuto = analyse.ajouteesLocal.length + analyse.ajouteesExterne.length +
+        analyse.modifieesLocal.length + analyse.modifieesExterne.length +
+        analyse.supprimeesLocal.length + analyse.supprimeesExterne.length;
+
+    lignes.push('───────── Synthèse ─────────');
+    lignes.push('Clés identiques            : ' + analyse.identiques);
+    lignes.push('Différences sans conflit   : ' + totalAuto);
+    lignes.push('Conflits (modif. des deux) : ' + analyse.conflits.length);
+    if (analyseTravaux) {
+        lignes.push('Fichiers travaux communs   : ' + analyseTravaux.communs.length);
+        lignes.push('Fichiers travaux externes  : ' + analyseTravaux.uniquementExterne.length);
+    }
+    lignes.push('');
+
+    function bloc(titre, cles, marqueur) {
+        if (!cles || cles.length === 0) return;
+        lignes.push('───────── ' + titre + ' (' + cles.length + ') ─────────');
+        var triees = cles.slice().sort();
+        for (var i = 0; i < triees.length; i++) {
+            lignes.push('  ' + marqueur + ' ' + triees[i]);
+        }
+        lignes.push('');
+    }
+
+    bloc('Présent uniquement dans local', analyse.ajouteesLocal, '+');
+    bloc('Présent uniquement dans externe', analyse.ajouteesExterne, '←');
+    bloc('Modifié dans local seulement', analyse.modifieesLocal, '✓');
+    bloc('Modifié dans externe seulement', analyse.modifieesExterne, '←');
+    bloc('Supprimé dans local seulement', analyse.supprimeesLocal, '✗');
+    bloc('Supprimé dans externe seulement', analyse.supprimeesExterne, '✗');
+    bloc('CONFLITS — modifié des deux côtés', analyse.conflits, '⚠');
+
+    if (analyseTravaux && analyseTravaux.uniquementExterne.length > 0) {
+        bloc('Fichiers travaux présents uniquement dans externe', analyseTravaux.uniquementExterne, '←');
+    }
+
+    lignes.push('───────── Fin du rapport ─────────');
+    return lignes.join('\n');
+}
+
+/**
+ * Affiche la modale de comparaison avec le rapport pré-rempli.
+ */
+function _afficherModalComparaison(externe, analyse, rapport) {
+    _dernierRapportComparaison = rapport;
+
+    var nomExterne = (externe.manifeste && externe.manifeste.nom) || 'externe';
+    var horodatage = new Date().toISOString().slice(0, 16).replace('T', '-').replace(':', 'h');
+    _dernierRapportNomFichier = 'comparaison-codex-' + nomExterne.replace(/[^a-z0-9-]+/gi, '-') + '-' + horodatage + '.txt';
+
+    var resume = document.getElementById('codex-comparer-resume');
+    if (resume) {
+        var nbTotal = analyse.ajouteesLocal.length + analyse.ajouteesExterne.length +
+            analyse.modifieesLocal.length + analyse.modifieesExterne.length +
+            analyse.supprimeesLocal.length + analyse.supprimeesExterne.length +
+            analyse.conflits.length;
+        resume.textContent = 'Comparaison avec « ' + nomExterne + ' » : ' +
+            analyse.identiques + ' clé(s) identique(s), ' +
+            nbTotal + ' différence(s), ' +
+            analyse.conflits.length + ' conflit(s).';
+    }
+
+    var textarea = document.getElementById('codex-comparer-rapport');
+    if (textarea) textarea.value = rapport;
+
+    var modal = document.getElementById('modalCodexComparer');
+    if (modal) modal.classList.add('actif');
+}
+
+function fermerModalComparer() {
+    var modal = document.getElementById('modalCodexComparer');
+    if (modal) modal.classList.remove('actif');
+}
+
+async function copierRapportComparaison() {
+    if (!_dernierRapportComparaison) return;
+    try {
+        await navigator.clipboard.writeText(_dernierRapportComparaison);
+        var btn = document.querySelector('[data-action="Codex.copierRapportComparaison"]');
+        if (btn) {
+            var orig = btn.innerHTML;
+            btn.innerHTML = '✓ Copié';
+            setTimeout(function() { btn.innerHTML = orig; }, 1500);
+        }
+    } catch (e) {
+        // Fallback : sélectionne le textarea pour copie manuelle
+        var ta = document.getElementById('codex-comparer-rapport');
+        if (ta) { ta.focus(); ta.select(); }
+        alert('Copie automatique refusée par le navigateur. Le texte est sélectionné — fais Cmd+C / Ctrl+C.');
+    }
+}
+
+function telechargerRapportComparaison() {
+    if (!_dernierRapportComparaison) return;
+    var blob = new Blob([_dernierRapportComparaison], { type: 'text/plain;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = _dernierRapportNomFichier || 'comparaison-codex.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
 }
 
 /**
@@ -2678,6 +2910,10 @@ window.Codex = {
     actionDetails: actionDetails,
     actionRenommer: actionRenommer,
     actionFusionner: actionFusionner,
+    actionComparer: actionComparer,
+    fermerModalComparer: fermerModalComparer,
+    copierRapportComparaison: copierRapportComparaison,
+    telechargerRapportComparaison: telechargerRapportComparaison,
     actionExporterSelection: actionExporterSelection,
     actionFermer: actionFermer,
 
