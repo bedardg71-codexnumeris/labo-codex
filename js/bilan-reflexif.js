@@ -4220,11 +4220,15 @@ function creerGraphiqueGlobal(res) {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { position: 'bottom', labels: { color: estClair ? '#1a1a2e' : '#d0e0e4', padding: 12 } },
-                    tooltip: {
+                    tooltip: Object.assign({}, (window.STYLE_GRAPHIQUE && window.STYLE_GRAPHIQUE.tooltip) || {
+                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                        titleColor: '#fff', bodyColor: '#fff',
+                        cornerRadius: 6, padding: 10
+                    }, {
                         callbacks: {
                             label: function(ctx) { return ctx.dataset.label + ' : ' + ctx.raw + '%'; }
                         }
-                    }
+                    })
                 },
                 scales: {
                     x: { stacked: true, max: 100, grid: { color: couleurGrille() }, ticks: { color: estClair ? '#555' : '#8aa4b0', callback: function(v) { return v + '%'; } } },
@@ -4278,11 +4282,15 @@ function creerGraphiqueBloc(canvasId, questionsLikert, res) {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
-                    tooltip: {
+                    tooltip: Object.assign({}, (window.STYLE_GRAPHIQUE && window.STYLE_GRAPHIQUE.tooltip) || {
+                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                        titleColor: '#fff', bodyColor: '#fff',
+                        cornerRadius: 6, padding: 10
+                    }, {
                         callbacks: {
                             label: function(ctx) { return ctx.dataset.label + ' : ' + ctx.raw + '%'; }
                         }
-                    }
+                    })
                 },
                 scales: {
                     x: { stacked: true, max: 100, grid: { color: couleurGrille() }, ticks: { color: estClair ? '#555' : '#8aa4b0', callback: function(v) { return v + '%'; } } },

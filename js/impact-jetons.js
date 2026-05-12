@@ -420,13 +420,14 @@ function creerGraphiqueImpactJetons(canvasId) {
                 plugins: {
                     title: { display: false },
                     legend: { display: false },
-                    tooltip: {
+                    tooltip: Object.assign({}, (window.STYLE_GRAPHIQUE && window.STYLE_GRAPHIQUE.tooltip) || {
                         backgroundColor: 'rgba(0, 0, 0, 0.85)',
                         titleColor: '#fff', bodyColor: '#fff',
-                        cornerRadius: 6, padding: 10,
+                        cornerRadius: 6, padding: 10
+                    }, {
                         mode: 'index', intersect: false,
                         callbacks: tooltipCallbacks
-                    }
+                    })
                 },
                 scales: {
                     x: {
