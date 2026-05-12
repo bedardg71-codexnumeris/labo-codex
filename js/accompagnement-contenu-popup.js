@@ -1364,35 +1364,6 @@ const AIDE_CONTEXTUELLE = {
         ]
     },
 
-    'modal-reparation': {
-        titre: "Réparation automatique des évaluations",
-        sections: [
-            {
-                type: 'texte',
-                contenu: "Cette fonction reconstruit le tableau des critères d'une évaluation à partir des niveaux (I, D, M, E) trouvés dans la rétroaction finale. Utile uniquement quand un bug a fait perdre les critères individuels mais que la note finale et la rétroaction sont intacts."
-            },
-            {
-                type: 'alerte',
-                niveau: 'attention',
-                contenu: "À utiliser seulement si tu observes des évaluations avec une note finale mais des critères vides. Si tes évaluations sont complètes, n'y touche pas — la réparation ne corrige pas de vrais bugs de notation, elle extrait depuis la rétroaction."
-            },
-            {
-                type: 'liste',
-                titre: "Ce que la fonction fait",
-                items: [
-                    "Parcourt les évaluations sauvegardées du trimestre actif.",
-                    "Détecte les patterns « critère = niveau » dans le texte de la rétroaction.",
-                    "Reconstitue le tableau des critères avec leurs niveaux.",
-                    "Recalcule la note (qui devrait correspondre à celle déjà stockée)."
-                ]
-            },
-            {
-                type: 'conseil',
-                contenu: "Fais une sauvegarde Codex avant. Si les niveaux extraits ne correspondent pas à ce que tu attends, ferme sans valider."
-            }
-        ]
-    },
-
     'modal-wizard-pratique': {
         titre: "Wizard de configuration — Pratique de notation",
         sections: [

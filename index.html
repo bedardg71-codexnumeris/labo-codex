@@ -8495,62 +8495,6 @@
                     </div>
                 </div>
 
-            <!-- Modal Réparation des évaluations -->
-            <div id="modalReparationEvaluations" class="modal-overlay">
-                <div class="modal-contenu modal-compact">
-                    <button data-action="fermerModalReparationEvaluations" class="modal-fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
-
-                    <h2 class="modal-titre">Réparation des évaluations <button class="btn-aide-contextuelle" data-aide="modal-reparation" aria-label="Aide : réparation des évaluations">&#x2734;&#xFE0F;</button></h2>
-
-                    <div class="mb-25">
-                        <h3 class="u-mb-10 u-texte-bleu" style="font-size: 1rem">Qu'est-ce que cette fonction ?</h3>
-                        <p style="color: var(--gris-moyen); line-height: 1.6;">
-                            Cette fonction permet de <strong>réparer automatiquement</strong> les évaluations dont les critères n'ont pas été correctement sauvegardés.
-                            Elle extrait les niveaux (I, D, M, E) depuis la rétroaction finale et reconstruit le tableau des critères manquants.
-                        </p>
-                    </div>
-
-                    <div class="alerte alerte-attention" class="mb-25">
-                        <h4>Quand l'utiliser ?</h4>
-                        <ul class="m-0-pl-20-gray-lh">
-                            <li><strong>Après une migration de données</strong> depuis une ancienne version</li>
-                            <li><strong>Si des évaluations ne se chargent pas</strong> correctement lors de la modification</li>
-                            <li><strong>Si tu constates des critères vides</strong> alors que la rétroaction contient les niveaux</li>
-                            <li><strong>Après un problème technique</strong> ayant affecté la sauvegarde</li>
-                        </ul>
-                    </div>
-
-                    <div class="carte-mb25-bleu-clair">
-                        <h3 class="u-mb-10" style="color: var(--bleu-clair); font-size: 1rem; margin-top: 0">Comment ça fonctionne ?</h3>
-                        <ol class="m-0-pl-20-gray-lh">
-                            <li>Analyse toutes les évaluations sauvegardées</li>
-                            <li>Détecte celles avec un tableau <code>criteres</code> vide</li>
-                            <li>Extrait les niveaux depuis la rétroaction (ex: "STRUCTURE (I)")</li>
-                            <li>Reconstruit automatiquement les critères manquants</li>
-                            <li>Sauvegarde les modifications dans le localStorage</li>
-                        </ol>
-                    </div>
-
-                    <div class="carte-mb25-green">
-                        <h3 class="u-mb-10" style="color: #558b2f; font-size: 1rem; margin-top: 0">Résultat attendu</h3>
-                        <p class="m-0-muted-lh16">
-                            Après la réparation, un rapport détaillé affichera le nombre d'évaluations réparées, ignorées (déjà correctes) et échouées.
-                            Les évaluations réparées pourront être modifiées normalement avec tous leurs critères restaurés.
-                        </p>
-                    </div>
-
-                    <div class="footer-border-top">
-                        <button class="btn btn-annuler" data-action="fermerModalReparationEvaluations" class="mr-10">
-                            Annuler
-                        </button>
-                        <button class="btn btn-confirmer" data-action="lancerReparationEvaluations">
-                            Lancer la réparation
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-
             </section><!-- fin section-evaluations -->
 
             <!-- ===================================
