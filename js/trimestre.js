@@ -337,7 +337,7 @@ function genererCarteEvenementPrevuEdition(evt) {
     <div class="item-carte-grille ${afficheReprise && evt.dateReprise ? 'item-carte-grille-custom' : ''}">
         <div class="item-carte-champ">
             <label class="item-carte-label">Date de l'événement</label>
-            <input type="date" class="controle-form" id="edit-date-${evt.id}" value="${evt.dateEvenement}"
+            <input type="date" class="controle-form" id="edit-date-${evt.id}" value="${echapperHtml(evt.dateEvenement)}"
                    style="padding: 4px 8px; font-size: 0.9rem;">
         </div>
         <div class="item-carte-champ" id="edit-groupe-horaire-${evt.id}" style="${afficheReprise ? '' : 'display:none;'}">
@@ -358,7 +358,7 @@ function genererCarteEvenementPrevuEdition(evt) {
                    style="padding: 4px 8px; font-size: 0.9rem;">
         </div>
     </div>
-    <input type="hidden" id="edit-desc-${evt.id}" value="${evt.description}">
+    <input type="hidden" id="edit-desc-${evt.id}" value="${echapperHtml(evt.description)}">
 </div>
 `;
 }
@@ -641,7 +641,7 @@ function genererCarteEvenementImprevuEdition(evt) {
     <div class="item-carte-grille ${afficheReprise && evt.dateReprise ? 'item-carte-grille-custom' : ''}">
         <div class="item-carte-champ">
             <label class="item-carte-label">Date de l'événement</label>
-            <input type="date" class="controle-form" id="edit-date-${evt.id}" value="${evt.dateEvenement}"
+            <input type="date" class="controle-form" id="edit-date-${evt.id}" value="${echapperHtml(evt.dateEvenement)}"
                    style="padding: 4px 8px; font-size: 0.9rem;">
         </div>
         <div class="item-carte-champ" id="edit-groupe-horaire-${evt.id}" style="${afficheReprise ? '' : 'display:none;'}">
@@ -662,7 +662,7 @@ function genererCarteEvenementImprevuEdition(evt) {
                    style="padding: 4px 8px; font-size: 0.9rem;">
         </div>
     </div>
-    <input type="hidden" id="edit-desc-${evt.id}" value="${evt.description}">
+    <input type="hidden" id="edit-desc-${evt.id}" value="${echapperHtml(evt.description)}">
 </div>
 `;
 }
