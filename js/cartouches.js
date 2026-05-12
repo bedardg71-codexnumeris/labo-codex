@@ -286,7 +286,7 @@ async function chargerSelectGrillesRetroaction() {
     if (!select) return;
     
     select.innerHTML = '<option value="">-- Choisir une grille --</option>' +
-        grilles.map(grille => `<option value="${grille.id}">${echapperHtml(grille.nom)}</option>`).join('');
+        grilles.map(grille => `<option value="${echapperHtml(grille.id)}">${echapperHtml(grille.nom)}</option>`).join('');
 }
 
 /**
@@ -326,7 +326,7 @@ async function chargerCartouchesRetroaction() {
     }
 
     selectCartouche.innerHTML = '<option value="">-- Nouvelle cartouche --</option>' +
-        cartouches.map(cartouche => `<option value="${cartouche.id}">${echapperHtml(cartouche.nom)}</option>`).join('');
+        cartouches.map(cartouche => `<option value="${echapperHtml(cartouche.id)}">${echapperHtml(cartouche.nom)}</option>`).join('');
 
     document.getElementById('aucuneEvalRetroaction').classList.add('u-hide');
     document.getElementById('infoCartouche').classList.remove('u-hide');
@@ -2881,7 +2881,7 @@ async function populerDropdownsCartouche(grilleId = '', echelleId = '', disabled
         grilles.forEach(grille => {
             const selected = (grille.id === grilleId || grille.idOriginal === grilleId) ? 'selected' : '';
             const nbCriteres = grille.criteres?.length || 0;
-            optionsHtml += `<option value="${grille.id}" ${selected}>${echapperHtml(grille.nom)} (${nbCriteres} crit.)</option>`;
+            optionsHtml += `<option value="${echapperHtml(grille.id)}" ${selected}>${echapperHtml(grille.nom)} (${nbCriteres} crit.)</option>`;
         });
         selectGrille.innerHTML = optionsHtml;
         // Grille toujours modifiable — les commentaires compatibles sont préservés
@@ -2898,7 +2898,7 @@ async function populerDropdownsCartouche(grilleId = '', echelleId = '', disabled
             if (match) echelleMatchee = true;
             const selected = match ? 'selected' : '';
             const nbNiveaux = echelle.niveaux?.length || 0;
-            optionsHtml += `<option value="${echelle.id}" ${selected}>${echapperHtml(echelle.nom)} (${nbNiveaux} niv.)</option>`;
+            optionsHtml += `<option value="${echapperHtml(echelle.id)}" ${selected}>${echapperHtml(echelle.nom)} (${nbNiveaux} niv.)</option>`;
         });
         selectEchelle.innerHTML = optionsHtml;
         // Ne pas désactiver si aucune échelle n'est matchée (permet la correction manuelle)
