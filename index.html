@@ -3804,7 +3804,7 @@
                                 <button class="codex-menu-item" data-action="Codex.actionEnregistrer">
                                     <span class="codex-menu-icone"><img src="icons/icon-usb-memory.svg" alt=""></span>
                                     <span class="codex-menu-contenu">
-                                        Enregistrer le codex
+                                        <span id="codex-menu-enreg-label">Enregistrer le codex</span>
                                         <span id="codex-menu-enreg-info" class="codex-menu-sous-texte u-hide"></span>
                                     </span>
                                 </button>
@@ -3829,6 +3829,9 @@
                                 <div class="codex-menu-sep"></div>
                                 <button id="codex-menu-fusionner" class="codex-menu-item u-hide" data-action="Codex.actionFusionner">
                                     <span class="codex-menu-icone"><img src="icons/icon-query-inner-join.svg" alt=""></span> Fusionner avec un codex...
+                                </button>
+                                <button id="codex-menu-comparer" class="codex-menu-item u-hide" data-action="Codex.actionComparer">
+                                    <span class="codex-menu-icone"><img src="icons/icon-compare.svg" alt=""></span> Comparer avec un codex...
                                 </button>
                                 <button id="codex-menu-exporter" class="codex-menu-item" data-action="Codex.actionExporterSelection">
                                     <span class="codex-menu-icone"><img src="icons/icon-export.svg" alt=""></span> Exporter une s&eacute;lection...
@@ -16113,7 +16116,7 @@
 
     <!-- Module Bilan réflexif -->
     <script src="js/bilan-reflexif-data.js?v=2026032801"></script>
-    <script src="js/bilan-reflexif.js?v=2026050512"></script> <!-- Refonte nav SP3 : auto-enregistrement sur configurationsOnglets['labo'] + hook labo-bilan -->
+    <script src="js/bilan-reflexif.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 tooltips style unifié via STYLE_GRAPHIQUE -->
 
     <!-- Module Planification (Carte mentale) -->
     <script src="js/planification-donnees.js?v=2026050554"></script> <!-- #261 : fallback automatique quand index.active pointe sur carte inexistante -->
@@ -16160,20 +16163,20 @@
     <!-- PRIORITÉ 6: Modules avancés (Beta 91.5 - Import/Export) -->
     <script src="js/progression.js?v=2026031401"></script>
     <script src="js/import-export.js?v=20260511c"></script> <!-- Beta 99.41 : #264 progression sur exporterConfigurationComplete + executerExport -->
-    <script src="js/codex.js?v=2026051122"></script> <!-- Beta 99.41 b0511-1210 : #244 navigateur + userAgent dans manifeste -->
+    <script src="js/codex.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #239 menu adapté navigateur + #243 actionComparer rapport exportable -->
     <script src="js/statistiques.js?v=2025121001"></script>
     <script src="js/liste-evaluations.js?v=20260511f"></script> <!-- Beta 99.41 : Défense E — echapperHtml sur error.message + p.id (attribut) -->
     <script src="js/journal.js?v=2026041706"></script>
     <script src="js/snapshots.js?v=2026030201"></script>
-    <script src="js/couleurs.js?v=2026040201"></script>
-    <script src="js/graphiques-progression.js?v=2026050127"></script> <!-- Beta 99.30 b0501-0735 : trajectoires par production — évaluations sans critère noté retournent null (pas tracées à 0%) -->
-    <script src="js/correlations-longitudinales.js?v=2026032101"></script>
-        <script src="js/impact-jetons.js?v=2026032101"></script>
+    <script src="js/couleurs.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_GRAPHIQUE.tooltip + couleurs() -->
+    <script src="js/graphiques-progression.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_TOOLTIP délégué à STYLE_GRAPHIQUE -->
+    <script src="js/correlations-longitudinales.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 tooltip via STYLE_GRAPHIQUE -->
+        <script src="js/impact-jetons.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 tooltip via STYLE_GRAPHIQUE -->
     <script src="js/consolidation.js?v=2026040801"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=2026032002"></script>
-    <script src="js/evaluation.js?v=20260512b"></script> <!-- Beta 99.30 b0501-0735 : badge ÉVALUÉ uniquement si au moins un critère noté (jeton seul ne suffit plus) -->
+    <script src="js/evaluation.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait chaîne modale Réparation -->
 
     <!-- RAPPEL BACKUP - Avertissement perte de données (Beta 95) -->
     <script src="js/modal-backup-reminder.js?v=2025122803"></script>
@@ -16200,15 +16203,15 @@
     <script src="js/accompagnement.js?v=2026050539"></script> <!-- Refonte nav SP5 : section calendrier -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=2026051124"></script> <!-- Beta 99.41 b0511-1215 : #216 tooltips date échéance productions -->
-    <script src="js/accompagnement-contenu-popup.js?v=20260512a"></script> <!-- Beta 99.42 b0512-0641 : fix Safari #256-bis — nouvelle entrée archiver-travaux -->
+    <script src="js/accompagnement-contenu-hover.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #242 tooltip labo-correlations-longitudinales -->
+    <script src="js/accompagnement-contenu-popup.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
     <script src="js/accompagnement-contenu-terme.js?v=2026050528"></script>
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js?v=2026050543"></script> <!-- Refonte nav SP5 : naviguerVers calendrier-trimestre -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260512b"></script> <!-- Beta 99.42 b0512-0708 : bump fallback BUILD_ID (Défense E Phase 1 close) -->
+    <script src="js/init-inline.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : bump fallback BUILD_ID (sprint 6 items modulaires) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
@@ -16775,6 +16778,37 @@
                         style="padding: 6px 12px; display: none"
                         data-tooltip="reserve-ouvrir-bouton-reimporter">
                     R&eacute;importer <span id="reserve-ouvrir-compteur">0</span> &eacute;l&eacute;ment(s)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         MODAL COMPARER UN CODEX — #243 (13 mai 2026)
+         Affiche un rapport texte copiable + téléchargeable
+         (sans appliquer aucune fusion)
+         ========================================= -->
+    <div id="modalCodexComparer" class="modal-overlay" data-close-on-bg="Codex.fermerModalComparer">
+        <div class="modal-contenu" style="max-width: 760px; max-height: 85vh; padding: 16px; display: flex; flex-direction: column;">
+            <button data-action="Codex.fermerModalComparer" class="modal-fermer" title="Fermer">
+                <img src="icons/icon-close-window.svg" alt="" class="modal-close-icon">
+            </button>
+
+            <h2 class="modal-titre">
+                <img src="icons/icon-compare.svg" alt="" class="btn-inline-icon"> Comparaison de codex
+            </h2>
+            <p id="codex-comparer-resume" class="u-mb-10" style="color: var(--texte-secondaire); font-size: 0.85rem;"></p>
+
+            <textarea id="codex-comparer-rapport" readonly
+                      style="flex: 1; min-height: 320px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.82rem; line-height: 1.5; padding: 10px; border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen); background: var(--surface-input); color: var(--texte-principal); resize: vertical;"></textarea>
+
+            <div class="footer-border-top" style="display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
+                <button class="btn btn-annuler" data-action="Codex.fermerModalComparer">Fermer</button>
+                <button class="btn" data-action="Codex.copierRapportComparaison">
+                    <img src="icons/icon-copy.svg" alt="" class="btn-inline-icon"> Copier
+                </button>
+                <button class="btn btn-confirmer" data-action="Codex.telechargerRapportComparaison">
+                    <img src="icons/icon-downloading.svg" alt="" class="btn-inline-icon"> Télécharger .txt
                 </button>
             </div>
         </div>
