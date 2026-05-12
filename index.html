@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260511f"> <!-- Beta 99.41 b0511-1220 : #215 .champ-requis (astérisque rouge) -->
+    <link rel="stylesheet" href="styles.css?v=20260512d"> <!-- Beta 99.42 b0512-0840 : #159 CSS onglets cartouche Édition/Aperçu -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -5533,7 +5533,7 @@
                             </div>
 
                             <!-- ZONE PRINCIPALE (centrale, scroll) -->
-                            <div class="zone-principale">
+                            <div class="zone-principale" id="cartoucheZonePrincipale" data-onglet-actif="edition">
 
                                 <!-- Boutons actions en haut à droite -->
                                 <div class="u-flex-gap-10 u-mb-20 u-text-right" style="justify-content: flex-end">
@@ -5548,6 +5548,20 @@
                                 <!-- Message d'accueil initial -->
                                 <div class="zone-principale-accueil" id="messageAccueilCartouche">
                                     <p>Sélectionne une cartouche dans la barre latérale ou crée une nouvelle cartouche</p>
+                                </div>
+
+                                <!-- Onglets Édition / Aperçu (#159) — visibles uniquement quand une cartouche est éditée -->
+                                <div class="onglets-cartouche u-hide" id="ongletsCartouche" role="tablist" aria-label="Vue de la cartouche">
+                                    <button type="button" class="onglet-cartouche-tab actif"
+                                            data-action="basculerOngletCartouche" data-onglet="edition"
+                                            role="tab" aria-selected="true">
+                                        ✏️ Édition
+                                    </button>
+                                    <button type="button" class="onglet-cartouche-tab"
+                                            data-action="basculerOngletCartouche" data-onglet="apercu"
+                                            role="tab" aria-selected="false">
+                                        👁 Aperçu
+                                    </button>
                                 </div>
 
                                 <!-- ANCIEN SYSTÈME (Caché, gardé pour compatibilité interne) -->
@@ -5664,7 +5678,7 @@
                                 <div id="panneauMetadonneesCartouche"></div>
 
                                 <!-- Boutons du formulaire -->
-                                <div class="btn-groupe u-flex-between" style="margin-top: 30px">
+                                <div class="btn-groupe u-flex-between" id="cartoucheBoutonsAction" style="margin-top: 30px">
                                     <!-- Boutons gauche (actions sur la cartouche) -->
                                     <!-- Note: Export/Import se font maintenant via la bibliothèque -->
                                     <div class="u-flex-gap-10">
@@ -8312,7 +8326,7 @@
                                 <!-- Sauvegarder, Réinitialiser et Éditer -->
                                 <div class="groupe-boutons-ligne">
                                     <button class="btn btn-principal btn-tres-compact u-flex-1" data-action="sauvegarderEvaluation"
-                                        title="Sauvegarder l'évaluation">
+                                        data-tooltip="eval-btn-sauvegarder">
                                         Sauvegarder
                                     </button>
 
@@ -8326,7 +8340,7 @@
 
                             <!-- Labels d'identité (affichage compact, sans clés) -->
                             <div id="travaux-eval-identite" class="travaux-eval-identite">
-                                <div style="display:flex; align-items:center; gap:6px;"><span class="travaux-eval-label-val" id="travaux-eval-label-etudiant">--</span><button class="btn-profil-rapide" id="travaux-eval-btn-profil" data-action="ouvrirProfilDepuisAnnotation" title="Voir le profil de l'&eacute;l&egrave;ve"><img src="icons/icon-profile.svg" alt="" class="btn-inline-icon"></button></div>
+                                <div style="display:flex; align-items:center; gap:6px;"><span class="travaux-eval-label-val" id="travaux-eval-label-etudiant">--</span><button class="btn-profil-rapide" id="travaux-eval-btn-profil" data-action="ouvrirProfilDepuisAnnotation" data-tooltip="eval-profil-rapide"><img src="icons/icon-profile.svg" alt="" class="btn-inline-icon"></button></div>
                                 <span class="travaux-eval-label-val travaux-eval-label-production" id="travaux-eval-label-production">--</span>
                             </div>
 
@@ -8459,7 +8473,7 @@
                                     <label data-tooltip="eval-retro-adresse"><input type="checkbox" id="afficherAdresse1" data-on-change="genererRetroaction" data-param="1" checked> Adresse</label>
                                     <label data-tooltip="eval-retro-contexte"><input type="checkbox" id="afficherContexte1" data-on-change="genererRetroaction" data-param="1" checked> Contexte</label>
                                 </div>
-                                <div class="eval-options-radios">
+                                <div class="eval-options-radios" data-tooltip="eval-affichage-note-choix">
                                     <label><input type="radio" name="affichageNote1" id="affichageNoteComplet1" value="complet" checked data-on-change="genererRetroaction" data-param="1"> Note chiffrée</label>
                                     <label><input type="radio" name="affichageNote1" id="affichageNoteLettre1" value="lettre" data-on-change="genererRetroaction" data-param="1"> Niveau de performance</label>
                                 </div>
@@ -8468,7 +8482,7 @@
                                 placeholder="La rétroaction sera générée automatiquement ici selon tes évaluations et les options cochées."></textarea>
                             <div class="eval-retro-pied">
                                 <div id="compteur-mots-retro" class="eval-compteur-mots">0 mot</div>
-                                <button data-action="regenererRetroactionAvecFeedback" class="btn-copier-retro" title="Régénérer la rétroaction depuis la cartouche actuelle">Régénérer</button>
+                                <button data-action="regenererRetroactionAvecFeedback" class="btn-copier-retro" data-tooltip="eval-btn-regenerer-retro">Régénérer</button>
                             </div>
                         </div>
 
@@ -16066,7 +16080,7 @@
     <script src="js/echelles-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/echelles.js?v=20260512b"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
     <script src="js/cartouches-bibliotheque.js?v=2026050617"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/cartouches.js?v=20260512b"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
+    <script src="js/cartouches.js?v=20260512d"></script> <!-- Beta 99.42 b0512-0840 : #159 onglets Édition/Aperçu -->
     <script src="js/export-pdf.js?v=20260512b"></script> <!-- Beta 95.7 #30 : Export PDF -->
     <script src="js/cours.js?v=2026051031"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 biblio cours migrée vers BibliothequeUI -->
     <script src="js/contexte.js?v=2026013001"></script> <!-- Beta 95.2 : Support groupe-cours -->
@@ -16109,7 +16123,6 @@
     <script src="js/tableau-bord-apercu.js?v=2026050550"></script> <!-- Refonte nav SP5 : faux ami CSS class préservée -->
     <script src="js/profil-etudiant.js?v=20260512b"></script> <!-- Beta 99.24 : auto-nettoyage préférence grilleReferenceDepistage si grille introuvable -->
     <script src="js/presences-apercu.js?v=2025121017"></script>
-    <script src="js/evaluations-apercu.js?v=2025111026"></script>
     <script src="js/boite-outils.js?v=20260512b"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->
     <script src="js/modelisation.js?v=2026022201"></script> <!-- Modélisation : annotation en projection -->
     <script src="js/rythme.js?v=2026050511"></script> <!-- Refonte nav SP3 : ID labo-rythme + data-section labo -->
@@ -16176,7 +16189,7 @@
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=2026032002"></script>
-    <script src="js/evaluation.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait chaîne modale Réparation -->
+    <script src="js/evaluation.js?v=20260512d"></script> <!-- Beta 99.42 b0512-0840 : #18 data-tooltip eval-btn-supprimer -->
 
     <!-- RAPPEL BACKUP - Avertissement perte de données (Beta 95) -->
     <script src="js/modal-backup-reminder.js?v=2025122803"></script>
@@ -16187,7 +16200,7 @@
     <!-- Page d'accueil (Chantier 3) -->
     <script src="js/accueil.js?v=2026050542"></script> <!-- Refonte nav SP5 : data-param calendrier -->
     <!-- Guidage contextuel démo (Chantier 4) -->
-    <script src="js/guidage-demo.js?v=2026050546"></script> <!-- Refonte nav SP5 : clé calendrier-vue -->
+    <script src="js/guidage-demo.js?v=20260512d"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
     <script src="js/changelog-data.js?v=2026042819"></script> <!-- Beta 99.28 b0428-1915 : item numérotation semaines DÉ -->
@@ -16203,7 +16216,7 @@
     <script src="js/accompagnement.js?v=2026050539"></script> <!-- Refonte nav SP5 : section calendrier -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #242 tooltip labo-correlations-longitudinales -->
+    <script src="js/accompagnement-contenu-hover.js?v=20260512d"></script> <!-- Beta 99.42 b0512-0840 : #18 +4 clés Évaluations, -7 clés ea-* mortes -->
     <script src="js/accompagnement-contenu-popup.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
     <script src="js/accompagnement-contenu-terme.js?v=2026050528"></script>
 
@@ -16211,7 +16224,7 @@
     <script src="js/main.js?v=2026050543"></script> <!-- Refonte nav SP5 : naviguerVers calendrier-trimestre -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : bump fallback BUILD_ID (sprint 6 items modulaires) -->
+    <script src="js/init-inline.js?v=20260512d"></script> <!-- Beta 99.42 b0512-0840 : bump fallback BUILD_ID (3 quick wins + cleanup) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>

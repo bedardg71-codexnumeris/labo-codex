@@ -1,10 +1,10 @@
 # SESSION — État au 13 mai 2026
 
 **Date** : 13 mai 2026
-**Dernier build** : `0512-0738` · Beta **99.42**
-**Branche `main`** : **+31 vs `origin/main`** (à pousser depuis la maison — réseau école bloque GitHub)
+**Dernier build** : `0512-0840` · Beta **99.42**
+**Branche `main`** : poussé (sprint + audit + quick wins). Voir `git log origin/main`.
 **Branche `feature/lot-4a-jetons`** : inchangée depuis le 11 mai (Lot 4a préservé, **non mergé** — bac à sable prévu semaine 25-31 mai)
-**Statut** : sprint 6 items modulaires courts livré en 1 session. 4 commits thématiques (groupage pour éviter hunk-splitting fragile sur index.html × 5 items).
+**Statut** : sprint 6 items + audit reality-check (2 items fermés #207, #276) + 3 quick wins (#27, #159, #18 zone Évaluations) + cleanup module mort `evaluations-apercu.js`. BACKLOG 33 → **23 items ouverts** (-10).
 
 ---
 

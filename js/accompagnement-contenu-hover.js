@@ -300,23 +300,6 @@ const TOOLTIPS = {
     // T5 — ÉVALUATIONS
     // =================================================================
 
-    // --- Aperçu et statistiques ---
-
-    'eval-apercu':
-        'Statistiques synth\u00e9tiques du groupe : taux de compl\u00e9tion moyen, productions r\u00e9alis\u00e9es et productions configur\u00e9es.',
-    'eval-stats-groupe':
-        'Indicateurs cl\u00e9s du groupe-cours : compl\u00e9tion, productions r\u00e9alis\u00e9es et nombre de productions configur\u00e9es.',
-    'eval-taux-completion':
-        'Moyenne des taux de remise individuels. Correspond \u00e0 l\'indice C (Compl\u00e9tion) du tableau de bord.',
-    'eval-productions-configurees':
-        'Nombre total de productions d\u00e9finies dans la construction de la note. Inclut portfolios, artefacts et travaux.',
-    'eval-productions-realisees':
-        'Nombre de productions pour lesquelles au moins une \u00e9valuation a \u00e9t\u00e9 enregistr\u00e9e dans le groupe.',
-    'eval-travaux-importes':
-        'Nombre de fichiers de travaux stock\u00e9s et pr\u00eats \u00e0 \u00eatre annot\u00e9s ou \u00e9valu\u00e9s.',
-    'eval-travaux-preparation':
-        'Nombre de fichiers en attente d\'importation, pr\u00eats \u00e0 \u00eatre trait\u00e9s.',
-
     // --- Liste des évaluations ---
 
     'eval-liste':
@@ -375,6 +358,17 @@ const TOOLTIPS = {
         'L\'\u00e9tudiant\u00b7e reprend enti\u00e8rement la production pour d\u00e9montrer \u00e0 nouveau sa comp\u00e9tence. La nouvelle \u00e9valuation remplace la pr\u00e9c\u00e9dente.',
     'eval-jeton-reprise-ciblee':
         'L\'\u00e9tudiant\u00b7e reprend un aspect sp\u00e9cifique que tu as cibl\u00e9 pour d\u00e9montrer sa ma\u00eetrise. Le niveau IDME peut \u00eatre ajust\u00e9 et plafonn\u00e9.',
+
+    // --- Actions du formulaire d'évaluation (#18, déploiement 13 mai 2026) ---
+
+    'eval-btn-sauvegarder':
+        'Enregistre l\'évaluation courante. Sauvegarde les niveaux par critère, la rétroaction, la note finale et les jetons appliqués.',
+    'eval-profil-rapide':
+        'Ouvre le profil de l\'étudiant·e dans un nouvel onglet. Pratique pour consulter l\'historique sans perdre l\'évaluation en cours.',
+    'eval-btn-regenerer-retro':
+        'Regénère la rétroaction à partir de la cartouche actuelle et des niveaux sélectionnés. ⚠️ Écrase les modifications manuelles du texte.',
+    'eval-affichage-note-choix':
+        'Choisit le format affiché dans la rétroaction : note chiffrée (ex. 78 %) ou niveau de performance (lettre, ex. M).',
 
     // --- Rétroaction ---
 

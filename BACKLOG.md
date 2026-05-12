@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 13 mai 2026 (Beta 99.42, Build 0512-0738) — sprint 6 items modulaires + audit reality-check : 33 → 25 items ouverts (-8 net : 6 livrés sprint + 2 déjà résolus mais case oubliée #207, #276)
+> **Derniere mise a jour** : 13 mai 2026 (Beta 99.42, Build 0512-0840) — sprint 6 items + audit + 2 quick wins fermés (#27, #159) + cleanup module mort `evaluations-apercu.js` : 33 → 23 items ouverts. #18 reste ouvert (déploiement progressif zone par zone), Évaluations désormais couverte.
 
 ---
 
@@ -1308,8 +1308,9 @@
   - **Mécanisme** : attributs `data-tooltip="cle"` + moteur `tooltips.js` + base `tooltips-contenu.js`
   - **Plans de travail** : `plans de travail pour Claude Code/Plan_Implementation_Tooltips.md` (plan maître)
   - **Corrections style** : Placement latéral (droite→gauche→bas→haut), flèche triangle 12px, marge 4px, masquage clic/Escape, surbrillance orange pulsante
-  - **Complété** : En-tête (10), Réglages Trimestre (29), Préférences (12), Dépistage (14), Données (14) = 79 attributs HTML, 72 clés JS
-  - **Futur** : Planification, Présences, Évaluations, Construction de la note, Tableau de bord, Boîte à outils, Aide
+  - **Complété** : En-tête (10), Réglages Trimestre (29), Préférences (12), Dépistage (14), Données (14), **Évaluations** (13 mai 2026 : 1 câblage orphelin + 4 nouvelles clés `eval-btn-sauvegarder`, `eval-profil-rapide`, `eval-btn-regenerer-retro`, `eval-affichage-note-choix`) = 79 → 84 clés actives
+  - **Futur** : Planification, Présences, Construction de la note, Tableau de bord, Boîte à outils, Aide
+  - **Cleanup zéro-dette (13 mai)** : module `js/evaluations-apercu.js` (148 l.) supprimé — jamais appelé, IDs `ea-*` jamais présents dans index.html. 7 clés tooltips orphelines retirées (eval-apercu, eval-stats-groupe, eval-taux-completion, eval-productions-configurees, eval-productions-realisees, eval-travaux-importes, eval-travaux-preparation) + entrée `'evaluations-apercu'` dans guidage-demo.js retirée.
 
 - [x] **#43** Apercu avant impression fidele au PDF final ✅ FAIT (28 jan 2026)
   - Correction des en-têtes de niveaux : fond blanc comme le PDF (au lieu de gris)
@@ -1493,9 +1494,8 @@
 
 - [x] **#17** Checklist tests de regression ✅ OBSOLÈTE (11 mai 2026) — Absorbé par Défense I (PR #15, 8 mai 2026) : 29 tests automatisés (23 Vitest + 6 Playwright WebKit, ~12 s), hook pré-push opt-in. Couvre A.3 hash CSP, B sanitisation profonde, C validation imports, D whitelist exports, E sandbox, F lint innerHTML. Documentation : `docs/securite/TESTS-AUTOMATISES.md`. La checklist manuelle envisagée à l'origine est absorbée par l'infra automatisée.
 
-- [ ] **#27** Documenter conventions nommage champs
-  - nArtefactsPAN vs nbArtefactsSoumis vs nombreTotal
-  - Creer reference dans docs/ pour coherence future
+- [x] **#27** Documenter conventions nommage champs ✅ LIVRÉ (13 mai 2026)
+  - `docs/architecture/CONVENTIONS-NOMMAGE.md` créé : préfixes `nb` canonique, `total` pour objectifs, `n` legacy à éviter. Recommandations par concept (étudiants, productions, évaluations, fichiers). Cas à ne PAS refactorer (rétrocompat manifeste codex, etc.).
 
 - [x] **#28** Ajouter mode edition a Wizard V2 ✅ FAIT
   - `ouvrirWizardV2(modeEdition, pratiqueId)` complet dans `js/wizard-pratique-v2.js`
@@ -1598,11 +1598,11 @@
     max 120 c) — commit `83eb626`.
   - Audit : `Rapports/AUDIT-BIBLIOS-2026-05-09.md`. Spec design : `design-system.html` §24.
 
-- [ ] **#159** UX : Previsualisation cartouche sous le gabarit ou navigation gabarit/previsualisation
-  - **Symptome** : L'editeur de cartouche (gabarit + matrice) et la previsualisation sont empiles verticalement, forcant un long scroll
-  - **Options** : (1) Deplacer la previsualisation sous le gabarit au lieu d'a cote, (2) Ajouter des boutons "Afficher gabarit" / "Afficher previsualisation" pour basculer sans scroll, (3) Navigation par onglets gabarit vs previsualisation
-  - **Benefice** : Meilleure ergonomie, moins de scroll vertical
-  - **Fichiers** : `js/cartouches.js`, `index.html`, `styles.css`
+- [x] **#159** UX prévisualisation cartouche — onglets Édition/Aperçu ✅ LIVRÉ (13 mai 2026, option 3)
+  - Onglets « ✏️ Édition / 👁 Aperçu » au-dessus de la zone d'édition (réutilise le style `.onglets-developpement-tabs`).
+  - Bascule via attribut `data-onglet-actif` sur `#cartoucheZonePrincipale` — CSS masque/affiche les sections (`#infoCartouche`, `#matriceRetroaction`, `#panneauMetadonneesCartouche`, `#cartoucheBoutonsAction` vs `#apercuRetroaction`).
+  - Synchronisation auto via MutationObserver sur la classe `u-hide` de `#matriceRetroaction` : la barre d'onglets apparaît quand une cartouche est en édition, disparaît sinon. Pas de modification des 12 sites show/hide existants.
+  - Auto-régénération de l'aperçu au passage en mode Aperçu (appel à `genererApercuAleatoire`).
 
 ### Deploiement / Mise a jour
 
