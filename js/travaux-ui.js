@@ -1158,7 +1158,7 @@
             : (tailleFiltree / 1024).toFixed(1) + ' Ko';
 
         conteneur.innerHTML = `
-            <h3>Archivage des travaux <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle">✴️</button></h3>
+            <h3>Archivage des travaux <button class="btn-aide-contextuelle" data-aide="archiver-travaux" aria-label="Aide contextuelle">✴️</button></h3>
             <p class="texte-muted">${fichiersTravaux.length} fichier(s) en stock (${tailleFormatee})</p>
 
             ${genererGrilleFichiers(fichiersTravaux, 'ouvrirPreviewInline')}

@@ -443,6 +443,34 @@ const AIDE_CONTEXTUELLE = {
         voirAussi: ['evaluations-proceder', 'evaluations-liste']
     },
 
+    'archiver-travaux': {
+        titre: 'Archivage des travaux',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'Le panneau d\'archivage rassemble l\'inventaire des fichiers de travaux déjà importés (originaux PDF/image, copies annotées) et propose plusieurs modes d\'export pour les sortir hors de l\'application.'
+            },
+            {
+                type: 'liste',
+                titre: 'Trois modes d\'archivage',
+                items: [
+                    '<strong>Exporter des travaux</strong> : sélection ciblée par production et/ou étudiant·e. Sortie = évaluations en JSON + productions en PDF.',
+                    '<strong>Trimestre complet</strong> : toutes les productions en PDF classées par élève + évaluations en JSON. Idéal pour archiver une fin de session.',
+                    '<strong>Export Léa</strong> : production annotée + évaluation (note et rétroaction) en PDF prêts à téléverser dans Léa.'
+                ]
+            },
+            {
+                type: 'conseil',
+                contenu: 'L\'inventaire affiché en haut du panneau (« <em>N fichier(s) en stock</em> ») reflète tout ce qui a été importé via le panneau <strong>Annoter et évaluer</strong>. Si tu ne vois aucun fichier ici, c\'est qu\'aucune copie n\'a encore été importée pour ce groupe-cours.'
+            },
+            {
+                type: 'texte',
+                contenu: '<strong>Allégement des travaux exportés</strong> : fonctionnalité en cours de refonte (bouton désactivé). Visera à convertir les originaux exportés en fac-similés pour réduire la taille du stockage local.'
+            }
+        ],
+        voirAussi: ['evaluations-annoter', 'evaluations-liste']
+    },
+
     'evaluations-liste': {
         titre: "Historique des évaluations",
         sections: [

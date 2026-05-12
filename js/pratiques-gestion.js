@@ -579,7 +579,7 @@ async function supprimerPratiqueDefinitivement(pratiqueId) {
 
     // Rafraîchir UI
     fermerModalBibliothequePratiques();
-    await afficherListePratiques();
+    await afficherListePratiquesMateriel();
     await afficherBibliothequePratiques();
 
 }
@@ -622,7 +622,7 @@ async function dupliquerPratiqueBibliotheque(pratiqueId) {
 
     // Rafraîchir UI
     fermerModalBibliothequePratiques();
-    await afficherListePratiques();
+    await afficherListePratiquesMateriel();
     await afficherBibliothequePratiques();
 
 }
