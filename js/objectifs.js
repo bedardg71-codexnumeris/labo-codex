@@ -207,13 +207,13 @@ function genererFormulaireEnsemble(ensemble) {
             <input type="text"
                    class="controle-form"
                    placeholder="Nom de l'objectif"
-                   value="${obj.nom}"
+                   value="${echapperHtml(obj.nom)}"
                    data-field="nom"
                    data-on-input="marquerEnsembleModifie">
             <input type="number"
                    class="controle-form"
                    placeholder="Poids %"
-                   value="${obj.poids}"
+                   value="${echapperHtml(obj.poids)}"
                    min="0"
                    max="100"
                    step="1"
@@ -231,7 +231,7 @@ function genererFormulaireEnsemble(ensemble) {
     `).join('');
 
     return `
-        <input type="hidden" id="ensembleActuelId" value="${ensemble.id}">
+        <input type="hidden" id="ensembleActuelId" value="${echapperHtml(ensemble.id)}">
 
         <h3>Édition de l'ensemble</h3>
 
@@ -246,7 +246,7 @@ function genererFormulaireEnsemble(ensemble) {
                     <input type="text"
                            id="ensembleNom"
                            class="controle-form"
-                           value="${ensemble.nom}"
+                           value="${echapperHtml(ensemble.nom)}"
                            placeholder="Ex: Objectifs Calcul différentiel"
                            data-on-input="marquerEnsembleModifie">
                 </div>
