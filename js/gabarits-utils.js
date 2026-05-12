@@ -179,7 +179,7 @@
 
         PRATIQUES_DISPONIBLES.forEach(p => {
             const count = compteurs ? ` (${compteurs[p.code] || 0})` : '';
-            options += `<option value="${p.code}">${p.nom}${count}</option>`;
+            options += `<option value="${echapperHtml(p.code)}">${echapperHtml(p.nom)}${count}</option>`;
         });
 
         if (compteurs && compteurs.all > 0) {
@@ -480,7 +480,7 @@
                     <input type="checkbox"
                            id="${idPrefix}_pratique_${p.code}"
                            name="${idPrefix}_pratiques"
-                           value="${p.code}"
+                           value="${echapperHtml(p.code)}"
                            ${checked}
                            style="width: 14px; height: 14px; cursor: pointer;">
                     <span class="badge-type-pratique ${couleurClasse}">${p.code}</span>
