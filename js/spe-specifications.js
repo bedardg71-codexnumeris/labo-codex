@@ -709,7 +709,7 @@
 
         let optionsTypes = '<option value="">-- Sélectionner --</option>';
         typesTravaux.forEach(type => {
-            optionsTypes += `<option value="${type.id}">${type.nom}</option>`;
+            optionsTypes += `<option value="${echapperHtml(type.id)}">${echapperHtml(type.nom)}</option>`;
         });
 
         const html = `
