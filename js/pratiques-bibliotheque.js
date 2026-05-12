@@ -1052,7 +1052,7 @@ async function genererSelecteurModelesPratiques(typeFiltre = null) {
         html += '<optgroup label="Configurations prédéfinies">';
         gabaritsFiltres.forEach(config => {
             const badge = genererBadge(config);
-            html += `<option value="${config.id}">${badge}${config.nom}</option>`;
+            html += `<option value="${echapperHtml(config.id)}">${badge}${echapperHtml(config.nom)}</option>`;
         });
         html += '</optgroup>';
     }
@@ -1061,7 +1061,7 @@ async function genererSelecteurModelesPratiques(typeFiltre = null) {
         html += '<optgroup label="Mes configurations">';
         personnalisesFiltres.forEach(config => {
             const badge = genererBadge(config);
-            html += `<option value="${config.id}">${badge}${config.nom}</option>`;
+            html += `<option value="${echapperHtml(config.id)}">${badge}${echapperHtml(config.nom)}</option>`;
         });
         html += '</optgroup>';
     }
