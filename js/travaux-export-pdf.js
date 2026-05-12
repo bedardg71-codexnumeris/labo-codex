@@ -91,52 +91,59 @@
     async function exporterDepuisPDF(blob, annotation) {
         const arrayBuffer = await blob.arrayBuffer();
         const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        const numPages = pdfDoc.numPages;
+        try {
+            const numPages = pdfDoc.numPages;
 
-        // Premiere page pour le format
-        const premierePage = await pdfDoc.getPage(1);
-        const vp0 = premierePage.getViewport({ scale: EXPORT_SCALE });
-        const isLandscape = vp0.width > vp0.height;
+            // Premiere page pour le format
+            const premierePage = await pdfDoc.getPage(1);
+            const vp0 = premierePage.getViewport({ scale: EXPORT_SCALE });
+            const isLandscape = vp0.width > vp0.height;
 
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({
-            orientation: isLandscape ? 'landscape' : 'portrait',
-            unit: 'px',
-            format: [vp0.width, vp0.height],
-            compress: true
-        });
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+                orientation: isLandscape ? 'landscape' : 'portrait',
+                unit: 'px',
+                format: [vp0.width, vp0.height],
+                compress: true
+            });
 
-        for (let i = 1; i <= numPages; i++) {
-            if (i > 1) {
+            for (let i = 1; i <= numPages; i++) {
+                if (i > 1) {
+                    const page = await pdfDoc.getPage(i);
+                    const vp = page.getViewport({ scale: EXPORT_SCALE });
+                    doc.addPage([vp.width, vp.height], vp.width > vp.height ? 'landscape' : 'portrait');
+                }
+
                 const page = await pdfDoc.getPage(i);
-                const vp = page.getViewport({ scale: EXPORT_SCALE });
-                doc.addPage([vp.width, vp.height], vp.width > vp.height ? 'landscape' : 'portrait');
+                const viewport = page.getViewport({ scale: EXPORT_SCALE });
+
+                // Canvas temporaire pour la page
+                const canvas = document.createElement('canvas');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                const ctx = canvas.getContext('2d');
+
+                // Rendre la page originale
+                await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+                // Dessiner les annotations par-dessus
+                const donneesPage = annotation?.pages?.[i - 1];
+                if (donneesPage) {
+                    await dessinerAnnotationsSurCtx(ctx, canvas.width, canvas.height, donneesPage);
+                }
+
+                // Ajouter au PDF
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+                doc.addImage(dataUrl, 'JPEG', 0, 0, viewport.width, viewport.height);
             }
 
-            const page = await pdfDoc.getPage(i);
-            const viewport = page.getViewport({ scale: EXPORT_SCALE });
-
-            // Canvas temporaire pour la page
-            const canvas = document.createElement('canvas');
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-            const ctx = canvas.getContext('2d');
-
-            // Rendre la page originale
-            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-
-            // Dessiner les annotations par-dessus
-            const donneesPage = annotation?.pages?.[i - 1];
-            if (donneesPage) {
-                await dessinerAnnotationsSurCtx(ctx, canvas.width, canvas.height, donneesPage);
-            }
-
-            // Ajouter au PDF
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
-            doc.addImage(dataUrl, 'JPEG', 0, 0, viewport.width, viewport.height);
+            return doc;
+        } finally {
+            // Sans destroy(), le worker PDF.js retient l'ArrayBuffer + les polices
+            // decodees pour le document. Sur des sessions d'export en lot la
+            // memoire grimpe a plusieurs centaines de Mo. (ultrareview 2)
+            try { await pdfDoc.destroy(); } catch (e) { /* deja detruit */ }
         }
-
-        return doc;
     }
 
     /* ===============================
@@ -907,7 +914,7 @@
         html += `
                     <div class="travaux-revision-actions">
                         <button class="btn btn-secondaire" data-action="travauxExportPDF.fermerRevision">Modifier</button>
-                        <button class="btn btn-principal" data-action="_travauxRevisionExporter" data-param="${fichierId}">Exporter le PDF</button>
+                        <button class="btn btn-principal" data-action="_travauxRevisionExporter" data-param="${echapperHtml(fichierId)}">Exporter le PDF</button>
                     </div>
                 </div>
             </div>`;
@@ -994,51 +1001,56 @@
 
         const arrayBuffer = await blob.arrayBuffer();
         const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        const numPages = pdfDoc.numPages;
+        try {
+            const numPages = pdfDoc.numPages;
 
-        const premierePage = await pdfDoc.getPage(1);
-        const vp0 = premierePage.getViewport({ scale: scale });
-        const isLandscape = vp0.width > vp0.height;
+            const premierePage = await pdfDoc.getPage(1);
+            const vp0 = premierePage.getViewport({ scale: scale });
+            const isLandscape = vp0.width > vp0.height;
 
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({
-            orientation: isLandscape ? 'landscape' : 'portrait',
-            unit: 'px',
-            format: [vp0.width, vp0.height],
-            compress: true
-        });
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+                orientation: isLandscape ? 'landscape' : 'portrait',
+                unit: 'px',
+                format: [vp0.width, vp0.height],
+                compress: true
+            });
 
-        for (let i = 1; i <= numPages; i++) {
-            if (i > 1) {
+            for (let i = 1; i <= numPages; i++) {
+                if (i > 1) {
+                    const page = await pdfDoc.getPage(i);
+                    const vp = page.getViewport({ scale: scale });
+                    doc.addPage([vp.width, vp.height], vp.width > vp.height ? 'landscape' : 'portrait');
+                }
+
                 const page = await pdfDoc.getPage(i);
-                const vp = page.getViewport({ scale: scale });
-                doc.addPage([vp.width, vp.height], vp.width > vp.height ? 'landscape' : 'portrait');
+                const viewport = page.getViewport({ scale: scale });
+
+                const canvas = document.createElement('canvas');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                const ctx = canvas.getContext('2d');
+
+                await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+                const donneesPage = annotation?.pages?.[i - 1];
+                if (donneesPage) {
+                    await dessinerAnnotationsSurCtx(ctx, canvas.width, canvas.height, donneesPage, scale);
+                }
+
+                const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                doc.addImage(dataUrl, 'JPEG', 0, 0, viewport.width, viewport.height);
+
+                if (onProgression) {
+                    onProgression(i, numPages);
+                }
             }
 
-            const page = await pdfDoc.getPage(i);
-            const viewport = page.getViewport({ scale: scale });
-
-            const canvas = document.createElement('canvas');
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-            const ctx = canvas.getContext('2d');
-
-            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-
-            const donneesPage = annotation?.pages?.[i - 1];
-            if (donneesPage) {
-                await dessinerAnnotationsSurCtx(ctx, canvas.width, canvas.height, donneesPage, scale);
-            }
-
-            const dataUrl = canvas.toDataURL('image/jpeg', quality);
-            doc.addImage(dataUrl, 'JPEG', 0, 0, viewport.width, viewport.height);
-
-            if (onProgression) {
-                onProgression(i, numPages);
-            }
+            return doc.output('blob');
+        } finally {
+            // Voir exporterDepuisPDF : meme leak worker PDF.js sans destroy(). (ultrareview 2)
+            try { await pdfDoc.destroy(); } catch (e) { /* deja detruit */ }
         }
-
-        return doc.output('blob');
     }
 
     /* ===============================
@@ -1052,7 +1064,10 @@
     async function previsualiserPDF(fichierId) {
         const overlayId = 'preview-pdf-export-overlay';
         let overlay = document.getElementById(overlayId);
-        if (overlay) overlay.remove();
+        // Si un overlay existe deja (re-ouverture), passer par fermerPreviewPDF()
+        // pour decrocher le keydown listener, detruire le pdfDoc precedent et
+        // vider _previewPDFState. Sans ca, listener et worker s'accumulaient. (ultrareview 2)
+        if (overlay) fermerPreviewPDF();
 
         overlay = document.createElement('div');
         overlay.id = overlayId;
