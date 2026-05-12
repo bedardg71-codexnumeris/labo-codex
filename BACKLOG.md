@@ -1598,11 +1598,9 @@
     max 120 c) — commit `83eb626`.
   - Audit : `Rapports/AUDIT-BIBLIOS-2026-05-09.md`. Spec design : `design-system.html` §24.
 
-- [x] **#159** UX prévisualisation cartouche — onglets Édition/Aperçu ✅ LIVRÉ (13 mai 2026, option 3)
-  - Onglets « ✏️ Édition / 👁 Aperçu » au-dessus de la zone d'édition (réutilise le style `.onglets-developpement-tabs`).
-  - Bascule via attribut `data-onglet-actif` sur `#cartoucheZonePrincipale` — CSS masque/affiche les sections (`#infoCartouche`, `#matriceRetroaction`, `#panneauMetadonneesCartouche`, `#cartoucheBoutonsAction` vs `#apercuRetroaction`).
-  - Synchronisation auto via MutationObserver sur la classe `u-hide` de `#matriceRetroaction` : la barre d'onglets apparaît quand une cartouche est en édition, disparaît sinon. Pas de modification des 12 sites show/hide existants.
-  - Auto-régénération de l'aperçu au passage en mode Aperçu (appel à `genererApercuAleatoire`).
+- [x] **#159** UX prévisualisation cartouche — onglets Édition/Aperçu ✅ RETIRÉ (12 mai 2026)
+  - Onglets livrés le 13 mai (option 3) puis retirés le 12 mai après retour terrain : l'aperçu aléatoire ne servait à rien quand la matrice complète est déjà visible en édition.
+  - Retraits zéro-dette : onglets HTML, conteneur `#apercuRetroaction`, fonction `genererApercuAleatoire`, CSS `.onglets-cartouche/.onglet-cartouche-tab`, attribut `data-onglet-actif`, MutationObserver de synchronisation.
 
 ### Deploiement / Mise a jour
 
