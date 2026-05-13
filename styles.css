@@ -1067,7 +1067,7 @@ h1, h2, h3, h4 {
 .dropdown-cours-entete:focus {
     background: rgba(106, 172, 184, 0.28);
     border-color: rgba(106, 172, 184, 0.5);
-    box-shadow: 0 0 0 2px rgba(106, 172, 184, 0.2);
+    box-shadow: var(--focus-ring);
 }
 
 .dropdown-cours-entete option {
@@ -1348,7 +1348,7 @@ h1, h2, h3, h4 {
 .dropdown-groupe-cours-header:focus {
     background-color: rgba(106, 172, 184, 0.28);
     border-color: rgba(106, 172, 184, 0.5);
-    box-shadow: 0 0 0 3px rgba(106, 172, 184, 0.2);
+    box-shadow: var(--focus-ring);
 }
 
 .dropdown-groupe-cours-header option {
@@ -2827,6 +2827,7 @@ input[type="number"].controle-form {
 
 .controle-form:focus {
     outline: none;
+    box-shadow: var(--focus-ring);
     border-color: var(--bleu-clair);
     box-shadow: 0 0 0 3px rgba(106, 172, 184, 0.2);
 }
@@ -3086,6 +3087,7 @@ body:not(.mode-clair) .badge-source--demo {
 .cc-meta-ligne input:focus,
 .cc-meta-ligne select:focus {
     outline: none;
+    box-shadow: var(--focus-ring);
     border-color: var(--bleu-clair);
     box-shadow: 0 0 0 3px rgba(106, 172, 184, 0.2);
 }
@@ -3135,6 +3137,7 @@ body:not(.mode-clair) .badge-source--demo {
 }
 .cc-meta-textarea:focus {
     outline: none;
+    box-shadow: var(--focus-ring);
     border-color: var(--bleu-clair);
     box-shadow: 0 0 0 3px rgba(106, 172, 184, 0.2);
 }
@@ -5607,6 +5610,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 .btn-codex-header:focus {
     outline: none;
+    box-shadow: var(--focus-ring);
     border-color: rgba(106, 172, 184, 0.6);
     box-shadow: 0 0 0 3px rgba(106, 172, 184, 0.1);
 }
@@ -9341,6 +9345,7 @@ body.mode-clair .bloc-rlo-separateur {
 
 .matrice-tableau textarea:focus {
     outline: none;
+    box-shadow: var(--focus-ring);
     border-color: var(--bleu-leger);
     background: var(--bleu-tres-pale);
 }
@@ -11020,6 +11025,7 @@ label:has(+ textarea:disabled) {
 .wizard-v2-champ textarea:focus,
 .wizard-v2-champ select:focus {
     outline: none;
+    box-shadow: var(--focus-ring);
     border-color: var(--accent-primaire);
     box-shadow: 0 0 0 3px rgba(26, 82, 102, 0.1);
 }
@@ -11807,7 +11813,7 @@ tr.etudiant-inactif td {
 #calendrier-trimestre input:focus {
     border-color: var(--accent-primaire);
     outline: none;
-    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.15);
+    box-shadow: var(--focus-ring);
 }
 
 /* Boutons pleine largeur */
@@ -12582,6 +12588,7 @@ tr.etudiant-inactif td {
 
 .questions-filtre select:focus {
     outline: none;
+    box-shadow: var(--focus-ring);
     border-color: var(--accent-primaire, #6aacb8);
 }
 
@@ -12843,6 +12850,7 @@ tr.etudiant-inactif td {
 
 .question-form-ajout textarea:focus {
     outline: none;
+    box-shadow: var(--focus-ring);
     border-color: var(--accent-primaire, #6aacb8);
 }
 
@@ -12999,6 +13007,7 @@ tr.etudiant-inactif td {
 
 .questions-ajouter-form .form-textarea:focus {
     outline: none;
+    box-shadow: var(--focus-ring);
     border-color: var(--accent-primaire, #6aacb8);
 }
 
@@ -13103,6 +13112,7 @@ tr.etudiant-inactif td {
 
 .question-categorie-select:focus {
     outline: none;
+    box-shadow: var(--focus-ring);
     border-color: var(--accent-primaire, #6aacb8);
 }
 
@@ -17400,7 +17410,7 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 }
 
 #planif-titre-carte:hover { border-bottom-color: var(--planif-couleur-bordure); }
-#planif-titre-carte:focus { border-bottom-color: var(--planif-couleur-selection); background: var(--surface-element, #244858); }
+#planif-titre-carte:focus { border-bottom-color: var(--planif-couleur-selection); background: var(--surface-element, #244858); box-shadow: var(--focus-ring); }
 
 /* === CARROUSEL SÉQUENCES === */
 .planif-toolbar-sequences {
@@ -17633,6 +17643,7 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 .planif-vue-lecon-objectif:focus,
 .planif-vue-lecon-notes:focus {
     border-color: var(--planif-couleur-selection);
+    box-shadow: var(--focus-ring);
 }
 .planif-vue-lecon-objectif:empty::before,
 .planif-vue-lecon-notes:empty::before {
@@ -18376,6 +18387,10 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     word-wrap: break-word;
 }
 
+.planif-noeud-titre:focus {
+    box-shadow: var(--focus-ring);
+}
+
 .planif-noeud-titre:empty::before {
     content: "Titre…";
     color: var(--texte-muted, #5a7a88);
@@ -19099,6 +19114,7 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 .org-objectif-contenu:focus {
     border-color: #3b82f6;
     outline: none;
+    box-shadow: var(--focus-ring);
     background: var(--surface-element, #244858);
 }
 
@@ -19324,7 +19340,7 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     margin-bottom: 8px;
     color: var(--planif-couleur-texte, #1e293b);
 }
-.org-ee-notes:focus { border-color: #3b82f6; outline: none; }
+.org-ee-notes:focus { border-color: #3b82f6; outline: none; box-shadow: var(--focus-ring); }
 
 /* Zone de dépôt drag & drop */
 .org-ee-zone-depot {
@@ -19656,7 +19672,7 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 .mode-clair .dropdown-cours-entete:focus {
     background: rgba(3, 46, 92, 0.75);
     border-color: rgba(255, 255, 255, 0.3);
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
+    box-shadow: var(--focus-ring);
 }
 
 /* Dropdown groupe-cours dans en-tête — même bleu que la navigation */
@@ -19674,7 +19690,7 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 .mode-clair .dropdown-groupe-cours-header:focus {
     background: rgba(3, 46, 92, 0.75);
     border-color: rgba(255, 255, 255, 0.3);
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
+    box-shadow: var(--focus-ring);
 }
 
 .mode-clair .dropdown-groupe-cours-header option {
@@ -21697,6 +21713,7 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 
 .travaux-retro-modal .travaux-retro-textarea:focus {
     outline: none;
+    box-shadow: var(--focus-ring);
     border-color: var(--primary-500, #3b82f6);
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
 }
@@ -21761,6 +21778,7 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
 
 .travaux-retro-nom-input:focus {
     outline: none;
+    box-shadow: var(--focus-ring);
     border-color: var(--primary-500, #3b82f6);
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
 }

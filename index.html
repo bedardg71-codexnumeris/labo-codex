@@ -1341,6 +1341,7 @@
 
         .controle-form:focus {
             outline: none;
+            box-shadow: var(--focus-ring);
             border-color: var(--accent-primaire);
             box-shadow: 0 0 0 3px rgba(3, 46, 92, 0.1);
         }
@@ -2728,6 +2729,10 @@
             border-radius: var(--radius-grand);
             outline: none;
             transition: all 0.3s;
+        }
+
+        .select-full-bleu:focus {
+            box-shadow: var(--focus-ring);
         }
 
         /* Zones de texte vides */
