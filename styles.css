@@ -247,6 +247,12 @@
     --texte-muted: #80a0b0;       /* WCAG AA — 4.92:1 sur --surface-carte (Q11 / sous-étape A2) */
     --accent-primaire: #6aacb8;
 
+    /* === FOCUS RINGS (accessibilité clavier — D-D4 + 01a:Q12 + 04b:Q1) === */
+    --focus-ring-color: var(--accent-primaire);
+    --focus-ring-width: 3px;
+    --focus-ring-offset: 2px;
+    --focus-ring: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
+
     /* ═══════════════════════════════════════════
        PALETTE ACCOMPAGNEMENT
        Fond orange, texte sombre — identique 2 modes
@@ -401,6 +407,9 @@ body.mode-demo:not(.mode-clair) .sous-navigation {
 
     /* Accents — rester vifs, légèrement assombris pour contraste sur clair */
     --accent-primaire: #065dbb;
+
+    /* Focus rings — accent-primaire clair, autres tokens hérités du :root sombre */
+    --focus-ring-color: var(--accent-primaire);
 
     /* Surfaces */
     --surface-page: #d4e6f5;
