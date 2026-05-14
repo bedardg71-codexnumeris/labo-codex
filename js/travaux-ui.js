@@ -3652,6 +3652,10 @@
             const lignesD = doublonsDetectes.map(function(d) {
                 const nomEt = echapperHtml(_nomEtudiant(d));
                 const titreProd = echapperHtml(_nomProd(d.nouveau.productionId));
+                const idx = d.idxNouveau;
+                const nomFichierAff = typeof anonymiserNomFichier === 'function'
+                    ? anonymiserNomFichier(d.nouveau.nomFichier || '', d.nouveau.etudiantDA)
+                    : (d.nouveau.nomFichier || '');
                 let detail = '';
                 if (d.stockes.length > 0) {
                     const datesStockes = d.stockes
@@ -3662,12 +3666,24 @@
                 } else if (d.queue.length > 0) {
                     detail = ' (présent ' + (d.queue.length + 1) + ' fois dans la file)';
                 }
-                return '<li><strong>' + nomEt + '</strong> — ' + titreProd + detail + '</li>';
+                return ''
+                    + '<li class="travaux-doublon-ligne">'
+                    +   '<div><strong>' + nomEt + '</strong> — ' + titreProd + detail + '</div>'
+                    +   '<div class="travaux-doublon-fichier u-texte-petit texte-muted">Fichier en cours d’import : <code>' + echapperHtml(nomFichierAff) + '</code></div>'
+                    +   '<div class="travaux-doublon-renommer">'
+                    +     '<label for="rename-doublon-' + idx + '" class="u-texte-petit">Renommer pour distinguer :</label>'
+                    +     '<input type="text" id="rename-doublon-' + idx + '" class="controle-form controle-form-compact" '
+                    +       'value="' + echapperHtml(nomFichierAff) + '" '
+                    +       'placeholder="Ex : Artefact 9 - Partie 2">'
+                    +     '<button class="btn btn-compact btn-secondaire" data-action="travauxUI.renommerDoublon" data-param="' + idx + '">Appliquer</button>'
+                    +     '<span class="travaux-doublon-feedback u-texte-petit" id="rename-feedback-' + idx + '"></span>'
+                    +   '</div>'
+                    + '</li>';
             }).join('');
             bandeauDoublons = '<div class="travaux-bandeau-doublon">'
                 + '<p><strong>Doublon' + (doublonsDetectes.length > 1 ? 's' : '') + ' détecté' + (doublonsDetectes.length > 1 ? 's' : '') + ' :</strong></p>'
                 + '<ul>' + lignesD + '</ul>'
-                + '<p class="texte-muted u-texte-petit">Tu peux importer quand même (un second fichier sera créé) ou annuler pour gérer manuellement le fichier existant.</p>'
+                + '<p class="texte-muted u-texte-petit">Tu peux importer quand même (un second fichier sera créé) ou annuler pour gérer manuellement le fichier existant. Pour distinguer les deux fichiers, renomme celui en cours d’import ci-dessus avant de confirmer.</p>'
                 + '</div>';
         }
 
@@ -4157,6 +4173,53 @@
      * @param {string} contenuHTML - Contenu HTML du corps
      * @param {Array} boutons - [{label, classe, action(overlay)}]
      */
+    /**
+     * Renomme le fichier en cours d'import depuis le bandeau « Doublon détecté »
+     * de la modale « Confirmer l'import ». Lit l'input #rename-doublon-${idx},
+     * applique le renommage via travauxImport.renommerFichierDansFile et
+     * affiche un feedback inline. Désactive l'input + bouton après application.
+     *
+     * @param {string|number} idxStr - Index du fichier dans la file d'attente
+     */
+    function renommerDoublon(idxStr) {
+        const idx = parseInt(idxStr, 10);
+        if (isNaN(idx)) return;
+        const input = document.getElementById('rename-doublon-' + idx);
+        const feedback = document.getElementById('rename-feedback-' + idx);
+        if (!input) return;
+        const nouveauNom = (input.value || '').trim();
+        if (!nouveauNom) {
+            if (feedback) {
+                feedback.textContent = '⚠ Nom vide';
+                feedback.style.color = 'var(--rouge-erreur)';
+            }
+            return;
+        }
+        const ok = (typeof travauxImport !== 'undefined'
+            && typeof travauxImport.renommerFichierDansFile === 'function')
+            ? travauxImport.renommerFichierDansFile(idx, nouveauNom)
+            : false;
+        if (!ok) {
+            if (feedback) {
+                feedback.textContent = '⚠ Renommage échoué';
+                feedback.style.color = 'var(--rouge-erreur)';
+            }
+            return;
+        }
+        // Récupérer le nom final (qui peut différer si l'extension a été préservée)
+        const queue = travauxImport.obtenirFileDAttente();
+        const nomFinal = queue && queue[idx] ? queue[idx].nomFichier : nouveauNom;
+        input.value = nomFinal;
+        input.disabled = true;
+        // Désactiver le bouton « Appliquer »
+        const btn = document.querySelector('[data-action="travauxUI.renommerDoublon"][data-param="' + idx + '"]');
+        if (btn) btn.disabled = true;
+        if (feedback) {
+            feedback.textContent = '✓ Renommé en ' + nomFinal;
+            feedback.style.color = 'var(--vert-succes)';
+        }
+    }
+
     function afficherModalePipeline(titre, contenuHTML, boutons) {
         // Retirer une modale existante si deja presente
         const existante = document.getElementById('pipeline-modal-overlay');
@@ -6817,6 +6880,7 @@
         associerEtudiantPipeline: associerEtudiantPipeline,
         associerProductionPipeline: associerProductionPipeline,
         associerProductionGlobale: associerProductionGlobale,
+        renommerDoublon: renommerDoublon,
         associerJetonProduction: associerJetonProduction,
         changerJetonProductionPipeline: changerJetonProductionPipeline,
         identifierAutoPipeline: identifierAutoPipeline,
