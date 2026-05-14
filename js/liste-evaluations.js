@@ -1679,7 +1679,17 @@ function confirmerSuppressionFichier(fichierId, da) {
         if (typeof afficherNotificationSucces === 'function') {
             afficherNotificationSucces(`Fichier de ${nomEtudiant} déplacé à la corbeille.`);
         }
-        appliquerFiltres();
+        if (typeof appliquerFiltres === 'function') {
+            appliquerFiltres();
+        }
+        // Si la vue Archivage est ouverte (suppression depuis un badge fichier),
+        // la rafraîchir aussi pour retirer la carte supprimée.
+        if (typeof travauxUI !== 'undefined' && typeof travauxUI.afficherArchivage === 'function') {
+            const conteneurArchivage = document.getElementById('evaluations-contenu-archivage');
+            if (conteneurArchivage && conteneurArchivage.offsetParent !== null) {
+                travauxUI.afficherArchivage();
+            }
+        }
         mettreAJourBoutonCorbeille();
     };
 }
