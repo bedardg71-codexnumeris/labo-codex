@@ -1477,6 +1477,43 @@
     }
 
     /**
+     * Renomme un fichier en file d'attente avant import. Modifie uniquement
+     * `nomFichier` (et `nomFichierLea` si présent — utilisé pour parser DA).
+     * L'association étudiant/production déjà calculée est préservée.
+     *
+     * Cas d'usage : doublon détecté en modale « Confirmer l'import » — l'utilisateur
+     * veut distinguer les deux fichiers (ex. « Artefact 9 - Partie 2 »).
+     *
+     * @param {number} idx - Index dans fichiersEnAttente
+     * @param {string} nouveauNom - Nouveau nom (extension conservée si présente dans l'original)
+     * @returns {boolean} true si renommage appliqué, false sinon
+     */
+    function renommerFichierDansFile(idx, nouveauNom) {
+        if (typeof idx !== 'number' || idx < 0 || idx >= fichiersEnAttente.length) {
+            return false;
+        }
+        const f = fichiersEnAttente[idx];
+        if (!f) return false;
+        const nettoye = (nouveauNom || '').trim();
+        if (!nettoye) return false;
+
+        // Préserver l'extension du fichier original si absente du nouveau nom
+        const ancienNom = f.nomFichier || '';
+        const matchExt = ancienNom.match(/\.[^./\\]+$/);
+        let nomFinal = nettoye;
+        if (matchExt && !nettoye.match(/\.[^./\\]+$/)) {
+            nomFinal = nettoye + matchExt[0];
+        }
+
+        f.nomFichier = nomFinal;
+        if (f.nomFichierLea !== undefined) {
+            f.nomFichierLea = nomFinal;
+        }
+        persisterFileDAttente();
+        return true;
+    }
+
+    /**
      * Beta 99.30 : Réévalue les associations DA→étudiant pour tous les fichiers
      * en file d'attente. Appelé après un changement de groupe-cours actif pour
      * que les fichiers parseLea reconnus s'associent correctement aux étudiants
@@ -1504,6 +1541,7 @@
         detecterFichiersSansDA: detecterFichiersSansDA,
         detecterDoublonsStockage: detecterDoublonsStockage,
         reevaluerAssociationsQueue: reevaluerAssociationsQueue,
+        renommerFichierDansFile: renommerFichierDansFile,
         // Parser Lea
         parserNomFichierLea: parserNomFichierLea,
         // Validation

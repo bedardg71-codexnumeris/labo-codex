@@ -5919,6 +5919,14 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 .travaux-bandeau-doublon p { margin: 0 0 6px 0; }
 .travaux-bandeau-doublon ul { margin: 4px 0 6px 18px; padding: 0; }
 .travaux-bandeau-doublon li { margin: 0; }
+.travaux-bandeau-doublon li.travaux-doublon-ligne { margin: 0 0 10px 0; padding-bottom: 8px; border-bottom: 1px dashed rgba(220, 53, 69, 0.25); }
+.travaux-bandeau-doublon li.travaux-doublon-ligne:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.travaux-doublon-fichier { margin: 4px 0; font-style: italic; }
+.travaux-doublon-fichier code { background: rgba(0, 0, 0, 0.15); padding: 1px 6px; border-radius: var(--radius-petit); font-size: 0.85rem; }
+.travaux-doublon-renommer { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 4px; }
+.travaux-doublon-renommer label { font-weight: 600; flex: 0 0 auto; }
+.travaux-doublon-renommer .controle-form { flex: 1 1 200px; min-width: 180px; }
+.travaux-doublon-feedback { flex: 1 1 100%; min-height: 1.2em; }
 
 /* Beta 99.30 : Bandeau d'avertissement dans la modale d'import quand la
    queue contient des fichiers correspondant à des étudiants d'un autre GC. */
