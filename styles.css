@@ -5917,6 +5917,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     border-radius: var(--radius);
 }
 .travaux-bandeau-doublon p { margin: 0 0 6px 0; }
+.travaux-bandeau-doublon p.travaux-doublon-astuce { background: rgba(106, 172, 184, 0.10); border-left: 3px solid var(--accent-primaire); padding: 8px 10px; border-radius: var(--radius-petit); margin: 4px 0 10px 0; }
 .travaux-bandeau-doublon ul { margin: 4px 0 6px 18px; padding: 0; }
 .travaux-bandeau-doublon li { margin: 0; }
 .travaux-bandeau-doublon li.travaux-doublon-ligne { margin: 0 0 10px 0; padding-bottom: 8px; border-bottom: 1px dashed rgba(220, 53, 69, 0.25); }

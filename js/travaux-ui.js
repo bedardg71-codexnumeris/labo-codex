@@ -3682,6 +3682,7 @@
             }).join('');
             bandeauDoublons = '<div class="travaux-bandeau-doublon">'
                 + '<p><strong>Doublon' + (doublonsDetectes.length > 1 ? 's' : '') + ' détecté' + (doublonsDetectes.length > 1 ? 's' : '') + ' :</strong></p>'
+                + '<p class="travaux-doublon-astuce u-texte-petit"><strong>💡 Astuce</strong> : si ce fichier est une partie complémentaire d’un travail <em>déjà évalué</em>, le plus direct est d’annuler ici, d’ouvrir l’évaluation existante et d’utiliser <strong>+ Ajouter des pages</strong>. Sinon, choisis ci-dessous.</p>'
                 + '<ul>' + lignesD + '</ul>'
                 + '<p class="texte-muted u-texte-petit">Trois choix : (1) <strong>renomme</strong> ci-dessus pour conserver les deux fichiers comme livrables additionnels (partie 1 / partie 2) — le cas sera auto-validé. (2) Importe sans renommer : une 2<sup>e</sup> modale demandera quoi faire de chaque doublon. (3) Annule pour gérer manuellement le fichier existant.</p>'
                 + '</div>';
