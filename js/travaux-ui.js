@@ -5798,7 +5798,19 @@
     }
 
     /**
-     * Ajoute des pages depuis un selecteur de fichier
+     * Ajoute des pages depuis un sélecteur de fichier. Passe par le poste de
+     * préparation plein écran (travauxPreparation) en mode ad-hoc pour permettre
+     * à l'utilisateur d'appliquer rotation, recadrage, perspective, balance des
+     * blancs, exposition, niveaux de gris, DPI, etc. AVANT que les pages soient
+     * insérées dans l'éditeur.
+     *
+     * UX :
+     * 1. Sélection des fichiers (PDF + images, multiple)
+     * 2. Les PDF sont décomposés en images (1 fichier ad-hoc par page)
+     * 3. La palette de prep s'ouvre plein écran
+     * 4. Confirmer → pages traitées insérées dans l'éditeur
+     *    Passer → pages originales insérées (sans prep)
+     *    X (fermer) → aucune page insérée (abandon)
      */
     function ajouterPagesEditeur() {
         const input = document.createElement('input');
@@ -5813,44 +5825,106 @@
         input.addEventListener('change', async () => {
             if (input.files.length === 0) { input.remove(); return; }
 
+            // Étape 1 : préparer les fichiers ad-hoc (PDF décomposé en pages images)
+            const fichiersAdHoc = [];
             for (const fichier of input.files) {
                 if (fichier.type === 'application/pdf') {
-                    // Decomposer le PDF en pages
-                    const arrayBuffer = await fichier.arrayBuffer();
-                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                    for (let i = 1; i <= pdf.numPages; i++) {
-                        const pageData = await rendrePagePDF(pdf, i);
-                        editionPages.push(pageData);
+                    try {
+                        const arrayBuffer = await fichier.arrayBuffer();
+                        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                        const nomBase = (fichier.name || 'document').replace(/\.pdf$/i, '');
+                        for (let i = 1; i <= pdf.numPages; i++) {
+                            const pageData = await rendrePagePDF(pdf, i);
+                            fichiersAdHoc.push({
+                                fichier: pageData.blob,
+                                nomFichier: nomBase + ' - page ' + i + '.jpg',
+                                typeMIME: 'image/jpeg',
+                                tailleFichier: pageData.blob.size,
+                                estImage: true,
+                                estPDF: false,
+                                largeurOriginale: pageData.largeur,
+                                hauteurOriginale: pageData.hauteur,
+                                statut: 'en-attente',
+                                parseLea: { nom: '', da: '', nomProduction: '', dateRemise: null, raw: '' },
+                                pipelineStatut: 'a-optimiser',
+                                groupeDocumentId: ''
+                            });
+                        }
+                    } catch (e) {
+                        console.error('[Editeur Pages] Erreur décomposition PDF:', e);
                     }
                 } else if (fichier.type.startsWith('image/')) {
-                    // Ajouter l'image comme page
-                    const dataUrl = await new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onload = () => resolve(reader.result);
-                        reader.onerror = reject;
-                        reader.readAsDataURL(fichier);
-                    });
-                    const dims = await new Promise((resolve, reject) => {
-                        const img = new Image();
-                        img.onload = () => resolve({ width: img.width, height: img.height });
-                        img.onerror = reject;
-                        img.src = dataUrl;
-                    });
-                    editionPages.push({
-                        pageNum: editionPages.length + 1,
-                        blob: fichier,
-                        dataUrl: dataUrl,
-                        largeur: dims.width,
-                        hauteur: dims.height
+                    fichiersAdHoc.push({
+                        fichier: fichier,
+                        nomFichier: fichier.name,
+                        typeMIME: fichier.type,
+                        tailleFichier: fichier.size,
+                        estImage: true,
+                        estPDF: false,
+                        statut: 'en-attente',
+                        parseLea: { nom: '', da: '', nomProduction: '', dateRemise: null, raw: '' },
+                        pipelineStatut: 'a-optimiser',
+                        groupeDocumentId: ''
                     });
                 }
             }
 
             input.remove();
-            renderEditeurPages();
+
+            if (fichiersAdHoc.length === 0) return;
+
+            // Étape 2 : ouvrir la palette de prep en mode ad-hoc (offset = -1)
+            if (typeof travauxPreparation === 'undefined' ||
+                typeof travauxPreparation.ouvrir !== 'function') {
+                console.warn('[Editeur Pages] travauxPreparation indisponible, ajout direct sans prep');
+                await _insererFichiersTraitesDansEditeur(fichiersAdHoc);
+                return;
+            }
+
+            travauxPreparation.ouvrir(fichiersAdHoc, async (fichiersTraites) => {
+                if (!fichiersTraites || fichiersTraites.length === 0) return;
+                await _insererFichiersTraitesDansEditeur(fichiersTraites);
+            }, -1);
         });
 
         input.click();
+    }
+
+    /**
+     * Convertit chaque fichier traité en page (blob + dataUrl + dimensions) et
+     * l'insère dans `editionPages`. Utilise `f.blobTraite` si présent (issu du
+     * prep), sinon `f.fichier` (blob original — cas du « Passer » ou pas d'op).
+     */
+    async function _insererFichiersTraitesDansEditeur(fichiersTraites) {
+        for (const f of fichiersTraites) {
+            const blobFinal = f.blobTraite || f.fichier;
+            if (!blobFinal) continue;
+
+            try {
+                const dataUrl = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blobFinal);
+                });
+                const dims = await new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => resolve({ width: img.width, height: img.height });
+                    img.onerror = reject;
+                    img.src = dataUrl;
+                });
+                editionPages.push({
+                    pageNum: editionPages.length + 1,
+                    blob: blobFinal,
+                    dataUrl: dataUrl,
+                    largeur: dims.width,
+                    hauteur: dims.height
+                });
+            } catch (e) {
+                console.error('[Editeur Pages] Erreur insertion page:', e);
+            }
+        }
+        renderEditeurPages();
     }
 
     /**

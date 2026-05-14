@@ -91,14 +91,26 @@
        =============================== */
 
     /**
-     * Ouvre le poste de preparation avec les fichiers en attente
-     * @param {Array} fichiersEnAttente - Liste des fichiers prepares par travaux-import
-     * @param {Function} callback - Appele avec les blobs traites a la confirmation
+     * Ouvre le poste de preparation avec les fichiers en attente.
+     *
+     * Deux modes :
+     * - Mode import standard (offset >= 0) : écrit les blobs traités dans
+     *   `travauxImport.obtenirFileDAttente()[i + offset].fichier`. Le callback
+     *   n'est pas utilisé. Appelle `window.rafraichirImportTravaux()` après.
+     * - Mode ad-hoc (offset === -1) : ne touche pas à la queue d'import.
+     *   Appelle `callback(fichiersTraites)` à la confirmation OU au « Passer »
+     *   avec un tableau de fichiers où `f.blobTraite` contient le blob traité
+     *   (ou null/undefined si pas d'opérations — utiliser `f.fichier` comme
+     *   fallback). Sur fermeture par X, callback non appelé (abandon).
+     *
+     * @param {Array} fichiersEnAttente - Liste des fichiers prepares
+     * @param {Function} callback - Appele avec les fichiers traites en mode ad-hoc
+     * @param {number} offset - 0+ pour mode import standard, -1 pour mode ad-hoc
      */
     function ouvrir(fichiersEnAttente, callback, offset) {
         if (!fichiersEnAttente || fichiersEnAttente.length === 0) return;
 
-        queueOffset = offset || 0;
+        queueOffset = (typeof offset === 'number') ? offset : 0;
         fichiers = fichiersEnAttente.map(f => ({
             ...f,
             operations: [],
@@ -126,11 +138,20 @@
     }
 
     /**
-     * Passe l'import sans preparation
+     * Passe l'étape de préparation.
+     *
+     * - Mode import standard : ferme la modale, les blobs originaux restent
+     *   dans `fichiersEnAttente` (l'import standard les utilise tels quels).
+     * - Mode ad-hoc (offset === -1) : appelle `callback(fichiers)` avec les
+     *   blobs originaux pour signaler que l'utilisateur veut ajouter les pages
+     *   sans préparation.
      */
     function passer() {
+        const modeAdHoc = (queueOffset === -1);
+        const callbackToCall = (modeAdHoc && typeof onTerminer === 'function') ? onTerminer : null;
+        const fichiersCopie = Array.isArray(fichiers) ? fichiers.slice() : [];
         fermer();
-        // Les blobs originaux restent inchanges dans fichiersEnAttente
+        if (callbackToCall) callbackToCall(fichiersCopie);
     }
 
     /**
@@ -170,7 +191,8 @@
 
         let traites = 0;
         let reussis = 0;
-        const queue = travauxImport.obtenirFileDAttente();
+        const modeAdHoc = (queueOffset === -1);
+        const queue = modeAdHoc ? null : travauxImport.obtenirFileDAttente();
 
         for (let i = 0; i < fichiers.length; i++) {
             const f = fichiers[i];
@@ -184,13 +206,18 @@
             try {
                 const blobFinal = await renduFinal(f);
 
-                if (blobFinal && queue[i + queueOffset]) {
-                    queue[i + queueOffset].fichier = blobFinal;
-                    queue[i + queueOffset].tailleFichier = blobFinal.size;
-                    // Regenerer la thumbnail pour que le pipeline affiche l'image corrigee
-                    queue[i + queueOffset].thumbnailDataUrl = null;
-                    // Ecrire les operations dans la queue pour affichage colonne droite
-                    queue[i + queueOffset].operations = f.operations.slice();
+                if (blobFinal) {
+                    // Toujours stocker dans f pour mode ad-hoc / inspection
+                    f.blobTraite = blobFinal;
+
+                    if (!modeAdHoc && queue && queue[i + queueOffset]) {
+                        queue[i + queueOffset].fichier = blobFinal;
+                        queue[i + queueOffset].tailleFichier = blobFinal.size;
+                        // Regenerer la thumbnail pour que le pipeline affiche l'image corrigee
+                        queue[i + queueOffset].thumbnailDataUrl = null;
+                        // Ecrire les operations dans la queue pour affichage colonne droite
+                        queue[i + queueOffset].operations = f.operations.slice();
+                    }
                     reussis++;
                 }
             } catch (err) {
@@ -199,10 +226,16 @@
         }
 
 
+        // Conserver onTerminer avant fermer() (qui libère l'état)
+        const callbackToCall = (modeAdHoc && typeof onTerminer === 'function') ? onTerminer : null;
+        const fichiersCopie = modeAdHoc ? fichiers.slice() : null;
+
         fermer();
 
-        // Rafraichir l'UI d'import
-        if (typeof window.rafraichirImportTravaux === 'function') {
+        if (callbackToCall) {
+            callbackToCall(fichiersCopie);
+        } else if (typeof window.rafraichirImportTravaux === 'function') {
+            // Rafraichir l'UI d'import (mode standard)
             window.rafraichirImportTravaux();
         }
     }
