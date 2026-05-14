@@ -663,6 +663,31 @@
         fichierPrepare.statut = 'importe';
         fichierPrepare.id = fichierTravail.id;
 
+        // Si livrable additionnel : marquer automatiquement le cas comme validé
+        // pour qu'il n'apparaisse pas dans le bandeau « Plusieurs fichiers ».
+        // Reproduit le comportement du choix « Livrable additionnel » de la
+        // modale de doublon (traiterDoublonsImport).
+        if (fichierPrepare.livrableAdditionnel
+            && typeof travauxDoublonsUI !== 'undefined'
+            && typeof travauxDoublonsUI.marquerLivrableAdditionnel === 'function') {
+            try {
+                const fichiersExistants = travauxStockage.obtenirFichiersGroupeActif()
+                    .filter(f => f && f.etudiantDA === fichierPrepare.etudiantDA
+                        && f.productionId === productionId
+                        && f.id !== fichierTravail.id);
+                if (fichiersExistants.length > 0) {
+                    const ids = fichiersExistants.map(f => f.id).concat(fichierTravail.id);
+                    travauxDoublonsUI.marquerLivrableAdditionnel(
+                        fichierPrepare.etudiantDA,
+                        productionId,
+                        ids
+                    );
+                }
+            } catch (e) {
+                console.warn('[Travaux-Import] Erreur marquage livrable additionnel auto:', e);
+            }
+        }
+
         return fichierTravail;
     }
 
@@ -1477,12 +1502,18 @@
     }
 
     /**
-     * Renomme un fichier en file d'attente avant import. Modifie uniquement
-     * `nomFichier` (et `nomFichierLea` si présent — utilisé pour parser DA).
-     * L'association étudiant/production déjà calculée est préservée.
+     * Renomme un fichier en file d'attente avant import et le marque comme
+     * livrable additionnel (les deux fichiers — existant + nouveau —
+     * coexisteront, le cas sera marqué comme validé automatiquement par
+     * `importerFichier`).
      *
      * Cas d'usage : doublon détecté en modale « Confirmer l'import » — l'utilisateur
-     * veut distinguer les deux fichiers (ex. « Artefact 9 - Partie 2 »).
+     * veut distinguer les deux fichiers (ex. « Artefact 9 - Partie 2 ») et
+     * les conserver tous les deux comme livrables légitimes.
+     *
+     * Le marquage `livrableAdditionnel: true` bypass la détection de doublon
+     * dans `importerFichier` (cf. ligne 605) — la 2e modale de gestion de
+     * doublon ne s'affiche plus pour ce fichier.
      *
      * @param {number} idx - Index dans fichiersEnAttente
      * @param {string} nouveauNom - Nouveau nom (extension conservée si présente dans l'original)
@@ -1509,6 +1540,10 @@
         if (f.nomFichierLea !== undefined) {
             f.nomFichierLea = nomFinal;
         }
+        // Le renommage signale clairement l'intention « distinguer + conserver
+        // les deux fichiers ». Marquer comme livrable additionnel pour bypass
+        // la modale de gestion de doublon et auto-valider le cas multi-fichiers.
+        f.livrableAdditionnel = true;
         persisterFileDAttente();
         return true;
     }
