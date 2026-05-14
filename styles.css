@@ -20968,6 +20968,27 @@ body.planif-plein-ecran-actif .bandeau-groupe-cours {
     opacity: 1;
 }
 
+/* Icône Supprimer (corbeille) sur badge — visible en vue Archivage uniquement */
+.travaux-badge-supprimer {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 2px;
+    font-size: 0.75rem;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+    display: inline-flex;
+    align-items: center;
+}
+.travaux-badge-supprimer .btn-delete-icon {
+    width: 14px;
+    height: 14px;
+    margin-right: 0;
+}
+.travaux-badge-supprimer:hover {
+    opacity: 1;
+}
+
 /* Modal rétroaction — réutilise .modal-overlay/.modal-contenu existants */
 .travaux-retro-entete {
     font-size: 0.85rem;

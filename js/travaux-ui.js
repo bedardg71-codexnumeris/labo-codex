@@ -2476,10 +2476,17 @@
         const estSelFusion = selectionFusion.has(f.id);
         const checkboxFusion = `<input type="checkbox" class="fusion-checkbox" ${estSelFusion ? 'checked' : ''} data-stop data-action="travauxUI.toggleSelectionFusion" data-param="${f.id}" title="Sélectionner pour fusion">`;
 
+        // Bouton Supprimer visible uniquement en vue Archivage (action ouvrirPreviewInline)
+        // Permet de retirer les copies multiples directement depuis la grille de fichiers.
+        const estVueArchivage = (action === 'ouvrirPreviewInline');
+        const boutonSupprimer = estVueArchivage
+            ? `<button class="travaux-badge-supprimer" data-stop data-action="travauxUI.supprimerFichierBadge" data-param="${f.id}" title="Déplacer ce fichier à la corbeille"><img src="icons/icon-trash.svg" alt="" class="btn-delete-icon"></button>`
+            : '';
+
         return `<div class="annot-badge${estSelFusion ? ' annot-badge-fusion-selectionne' : ''}${estRemplacee ? ' eval-remplacee' : ''}" data-fichier-id="${f.id}" data-etudiant-da="${f.etudiantDA || ''}" draggable="true" data-drag-data="text/fichier-id:${f.id}" data-action="${actionName}" data-param="${f.id}" title="${echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : f.nomFichier)}${estRemplacee ? ' (Remplacée par reprise)' : ''}${estReprise ? ' (Reprise)' : ''}">
         ${checkboxFusion}
         <span class="annot-badge-nom">${nomEtudiant}</span>
-        <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>${indicateurReprise}${evaluation ? `<button class="travaux-badge-retro" data-stop data-action="travauxUI.afficherRetroaction" data-param="${f.id}" title="Aperçu rétroaction"><img src="icons/icon-speech-bubble.svg" alt="" class="btn-inline-icon"></button>` : ''}${verrou}
+        <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>${indicateurReprise}${evaluation ? `<button class="travaux-badge-retro" data-stop data-action="travauxUI.afficherRetroaction" data-param="${f.id}" title="Aperçu rétroaction"><img src="icons/icon-speech-bubble.svg" alt="" class="btn-inline-icon"></button>` : ''}${verrou}${boutonSupprimer}
     </div>`;
     }
 
@@ -6430,6 +6437,22 @@
        =============================== */
 
     /**
+     * Supprime un fichier (déplacement en corbeille) depuis un badge dans la
+     * grille d'Archivage. Réutilise la modale de confirmation existante de
+     * liste-evaluations.js qui rafraîchit aussi Archivage si visible.
+     * @param {string} fichierId - ID du fichier à supprimer
+     */
+    function supprimerFichierBadge(fichierId) {
+        const fichier = travauxStockage.obtenirFichierParId(fichierId);
+        if (!fichier) return;
+        if (typeof window.confirmerSuppressionFichier === 'function') {
+            window.confirmerSuppressionFichier(fichierId, fichier.etudiantDA);
+        } else {
+            console.warn('[Travaux-UI] confirmerSuppressionFichier indisponible');
+        }
+    }
+
+    /**
      * Affiche un modal d'aperçu/édition de la rétroaction globale
      * pour un fichier évalué depuis la page d'archivage.
      * @param {string} fichierId - ID du fichier
@@ -7055,6 +7078,7 @@
         majCompteurFusion: majCompteurFusion,
         // Rétroaction (archivage)
         afficherRetroaction: afficherRetroaction,
+        supprimerFichierBadge: supprimerFichierBadge,
         sauvegarderRetroactionDepuisModal: sauvegarderRetroactionDepuisModal,
         fermerModalRetroaction: fermerModalRetroaction,
         // Transfert entre groupes
