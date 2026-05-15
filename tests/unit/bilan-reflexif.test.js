@@ -71,6 +71,16 @@ beforeAll(() => {
     const BilanReflexifCSV = winCSV.BilanReflexifCSV;
     expect(BilanReflexifCSV).toBeDefined();
 
+    // Charger le rapport — expose `window.BilanReflexifRapport`.
+    // Pas testé directement (Chart.js + jsPDF non chargés en sandbox),
+    // mais doit charger sans erreur pour que le résidu fonctionne.
+    const winRapport = chargerScript('js/bilan-reflexif-rapport.js', {
+        BILAN_REFLEXIF_DATA: bilanData,
+        BilanReflexifCore: BilanReflexifCore
+    });
+    const BilanReflexifRapport = winRapport.BilanReflexifRapport;
+    expect(BilanReflexifRapport).toBeDefined();
+
     // Charger le résidu avec toutes les dépendances injectées.
     // `db`, `window.cle`, etc. ne sont pas appelés pendant les tests de pures.
     const winBilan = chargerScript('js/bilan-reflexif.js', {
@@ -80,7 +90,8 @@ beforeAll(() => {
         BilanReflexifParcours: BilanReflexifParcours,
         BilanReflexifReflexion: BilanReflexifReflexion,
         BilanReflexifTexte: BilanReflexifTexte,
-        BilanReflexifCSV: BilanReflexifCSV
+        BilanReflexifCSV: BilanReflexifCSV,
+        BilanReflexifRapport: BilanReflexifRapport
     });
     internals = winBilan.__bilanReflexifInternals;
     expect(internals).toBeDefined();
