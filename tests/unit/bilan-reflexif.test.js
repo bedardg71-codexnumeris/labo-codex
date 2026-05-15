@@ -26,17 +26,25 @@ beforeAll(() => {
     bilanData = winData.BILAN_REFLEXIF_DATA;
     expect(bilanData).toBeDefined();
 
-    // Charger le core extrait — expose `window.BilanReflexifCore`.
+    // Charger le core — expose `window.BilanReflexifCore` (état, persistance, finders).
     const winCore = chargerScript('js/bilan-reflexif-core.js');
     const BilanReflexifCore = winCore.BilanReflexifCore;
     expect(BilanReflexifCore).toBeDefined();
 
-    // Charger le résidu avec BILAN_REFLEXIF_DATA + BilanReflexifCore injectés.
-    // Le résidu lit ces deux globaux à l'init (alias en tête d'IIFE).
+    // Charger l'éditeur — expose `window.BilanReflexifEditeur`.
+    const winEditeur = chargerScript('js/bilan-reflexif-editeur.js', {
+        BILAN_REFLEXIF_DATA: bilanData,
+        BilanReflexifCore: BilanReflexifCore
+    });
+    const BilanReflexifEditeur = winEditeur.BilanReflexifEditeur;
+    expect(BilanReflexifEditeur).toBeDefined();
+
+    // Charger le résidu avec toutes les dépendances injectées.
     // `db`, `window.cle`, etc. ne sont pas appelés pendant les tests de pures.
     const winBilan = chargerScript('js/bilan-reflexif.js', {
         BILAN_REFLEXIF_DATA: bilanData,
-        BilanReflexifCore: BilanReflexifCore
+        BilanReflexifCore: BilanReflexifCore,
+        BilanReflexifEditeur: BilanReflexifEditeur
     });
     internals = winBilan.__bilanReflexifInternals;
     expect(internals).toBeDefined();
