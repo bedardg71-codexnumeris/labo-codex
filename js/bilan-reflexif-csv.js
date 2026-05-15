@@ -583,8 +583,8 @@ function confirmerImport() {
     afficherToast(nbRepondants + ' réponses importées');
 }
 
-function _agregerQuestion(question, cols, donnees) {
-    var labels = BILAN_REFLEXIF_DATA.ECHELLE_LIKERT4;
+// Distribue les colonnes selon leur rôle (principal / autres / enonce).
+function _agregerSeparerColonnes(cols) {
     var colPrincipal = null;
     var colsAutres = [];
     var colsEnonce = [];
@@ -593,121 +593,137 @@ function _agregerQuestion(question, cols, donnees) {
         else if (cols[c].role === 'enonce') colsEnonce.push(cols[c]);
         else colPrincipal = cols[c];
     }
+    return { principal: colPrincipal, autres: colsAutres, enonce: colsEnonce };
+}
 
-    var result = { type: question.type, nbReponses: 0 };
+// Comptabilise une distribution Likert4 sur un jeu de données.
+// Retourne { distribution, nbReponses, scoreMoyen, nbNA }.
+function _agregerLikertSurColonne(colIndex, donnees, inclureNA) {
+    var labels = BILAN_REFLEXIF_DATA.ECHELLE_LIKERT4;
+    var distrib = {};
+    for (var l = 0; l < labels.length; l++) distrib[labels[l].label] = 0;
+    var somme = 0, nbRep = 0, nbNA = 0;
 
-    if (question.type === 'likert4') {
-        if (!colPrincipal) return result;
-        var distrib = {};
-        for (var l = 0; l < labels.length; l++) distrib[labels[l].label] = 0;
-        var somme = 0, nbRep = 0, nbNA = 0;
-        for (var r = 0; r < donnees.length; r++) {
-            var val = (donnees[r][colPrincipal.indexColonne] || '').trim();
-            if (!val) continue;
-            if (question.inclureNA && _estNA(val)) {
-                nbNA++;
-                continue;
-            }
-            var n = convertirLikert(val);
-            if (n > 0) {
-                var lbl = labels.find(function(x) { return x.valeur === n; });
-                if (lbl) distrib[lbl.label]++;
-                somme += n;
-                nbRep++;
-            }
+    for (var r = 0; r < donnees.length; r++) {
+        var val = (donnees[r][colIndex] || '').trim();
+        if (!val) continue;
+        if (inclureNA && _estNA(val)) {
+            nbNA++;
+            continue;
         }
-        result.distribution = distrib;
-        result.nbReponses = nbRep;
-        result.scoreMoyen = nbRep > 0 ? Math.round((somme / nbRep) * 100) / 100 : 0;
-        if (question.inclureNA) {
-            result.inclureNA = true;
-            result.nbNA = nbNA;
+        var n = convertirLikert(val);
+        if (n > 0) {
+            var lbl = labels.find(function(x) { return x.valeur === n; });
+            if (lbl) distrib[lbl.label]++;
+            somme += n;
+            nbRep++;
         }
-        return result;
     }
 
-    if (question.type === 'choix_unique' || question.type === 'choix_multiple') {
-        if (!colPrincipal) {
-            if (colsAutres.length > 0) result.autres = _collecterAutres(colsAutres, donnees);
-            return result;
-        }
-        var distOpt = {}, libelles = {};
-        if (question.options) {
-            for (var oi = 0; oi < question.options.length; oi++) {
-                distOpt[question.options[oi].id] = 0;
-                libelles[question.options[oi].id] = question.options[oi].texte;
-            }
-        }
-        var nbR = 0;
-        for (var rr = 0; rr < donnees.length; rr++) {
-            var v = (donnees[rr][colPrincipal.indexColonne] || '').trim();
-            if (!v) continue;
-            var parts = (question.type === 'choix_multiple') ? _splitMultiChoix(v) : [v];
-            if (parts.length === 0) continue;
-            nbR++;
-            for (var p = 0; p < parts.length; p++) {
-                var opt = _trouverOptionParTexte(question.options, parts[p]);
-                if (opt) distOpt[opt.id]++;
-            }
-        }
-        result.distribution = distOpt;
-        result.libellesOptions = libelles;
-        result.nbReponses = nbR;
-        if (colsAutres.length > 0) result.autres = _collecterAutres(colsAutres, donnees);
-        return result;
-    }
+    return {
+        distribution: distrib,
+        nbReponses: nbRep,
+        scoreMoyen: nbRep > 0 ? Math.round((somme / nbRep) * 100) / 100 : 0,
+        nbNA: nbNA
+    };
+}
 
-    if (question.type === 'matrix') {
-        var parEnonce = {}, libellesEn = {};
-        if (question.enonces) {
-            for (var ei = 0; ei < question.enonces.length; ei++) {
-                libellesEn[question.enonces[ei].id] = question.enonces[ei].texte;
-            }
-        }
-        var nbMax = 0;
-        for (var ce = 0; ce < colsEnonce.length; ce++) {
-            var col = colsEnonce[ce];
-            if (!col.enonceId) continue;
-            var distrEn = {};
-            for (var le = 0; le < labels.length; le++) distrEn[labels[le].label] = 0;
-            var sommeE = 0, nbE = 0;
-            for (var re = 0; re < donnees.length; re++) {
-                var ve = (donnees[re][col.indexColonne] || '').trim();
-                if (!ve) continue;
-                var ne = convertirLikert(ve);
-                if (ne > 0) {
-                    var lbl2 = labels.find(function(x) { return x.valeur === ne; });
-                    if (lbl2) distrEn[lbl2.label]++;
-                    sommeE += ne;
-                    nbE++;
-                }
-            }
-            parEnonce[col.enonceId] = {
-                distribution: distrEn,
-                scoreMoyen: nbE > 0 ? Math.round((sommeE / nbE) * 100) / 100 : 0,
-                nbReponses: nbE
-            };
-            if (nbE > nbMax) nbMax = nbE;
-        }
-        result.parEnonce = parEnonce;
-        result.libellesEnonces = libellesEn;
-        result.nbReponses = nbMax;
-        return result;
+function _agregerLikert(question, colsSep, donnees) {
+    var result = { type: 'likert4', nbReponses: 0 };
+    if (!colsSep.principal) return result;
+    var agg = _agregerLikertSurColonne(colsSep.principal.indexColonne, donnees, question.inclureNA);
+    result.distribution = agg.distribution;
+    result.nbReponses = agg.nbReponses;
+    result.scoreMoyen = agg.scoreMoyen;
+    if (question.inclureNA) {
+        result.inclureNA = true;
+        result.nbNA = agg.nbNA;
     }
-
-    if (question.type === 'ouvert') {
-        if (!colPrincipal) return result;
-        var reps = [];
-        for (var ro = 0; ro < donnees.length; ro++) {
-            var rep = (donnees[ro][colPrincipal.indexColonne] || '').trim();
-            if (rep) reps.push(rep);
-        }
-        result.reponses = reps;
-        result.nbReponses = reps.length;
-        return result;
-    }
-
     return result;
+}
+
+function _agregerChoix(question, colsSep, donnees) {
+    var result = { type: question.type, nbReponses: 0 };
+    if (!colsSep.principal) {
+        if (colsSep.autres.length > 0) result.autres = _collecterAutres(colsSep.autres, donnees);
+        return result;
+    }
+    var distOpt = {}, libelles = {};
+    if (question.options) {
+        for (var oi = 0; oi < question.options.length; oi++) {
+            distOpt[question.options[oi].id] = 0;
+            libelles[question.options[oi].id] = question.options[oi].texte;
+        }
+    }
+    var nbR = 0;
+    for (var rr = 0; rr < donnees.length; rr++) {
+        var v = (donnees[rr][colsSep.principal.indexColonne] || '').trim();
+        if (!v) continue;
+        var parts = (question.type === 'choix_multiple') ? _splitMultiChoix(v) : [v];
+        if (parts.length === 0) continue;
+        nbR++;
+        for (var p = 0; p < parts.length; p++) {
+            var opt = _trouverOptionParTexte(question.options, parts[p]);
+            if (opt) distOpt[opt.id]++;
+        }
+    }
+    result.distribution = distOpt;
+    result.libellesOptions = libelles;
+    result.nbReponses = nbR;
+    if (colsSep.autres.length > 0) result.autres = _collecterAutres(colsSep.autres, donnees);
+    return result;
+}
+
+function _agregerMatrix(question, colsSep, donnees) {
+    var result = { type: 'matrix', nbReponses: 0 };
+    var parEnonce = {}, libellesEn = {};
+    if (question.enonces) {
+        for (var ei = 0; ei < question.enonces.length; ei++) {
+            libellesEn[question.enonces[ei].id] = question.enonces[ei].texte;
+        }
+    }
+    var nbMax = 0;
+    for (var ce = 0; ce < colsSep.enonce.length; ce++) {
+        var col = colsSep.enonce[ce];
+        if (!col.enonceId) continue;
+        var agg = _agregerLikertSurColonne(col.indexColonne, donnees, false);
+        parEnonce[col.enonceId] = {
+            distribution: agg.distribution,
+            scoreMoyen: agg.scoreMoyen,
+            nbReponses: agg.nbReponses
+        };
+        if (agg.nbReponses > nbMax) nbMax = agg.nbReponses;
+    }
+    result.parEnonce = parEnonce;
+    result.libellesEnonces = libellesEn;
+    result.nbReponses = nbMax;
+    return result;
+}
+
+function _agregerOuvert(colsSep, donnees) {
+    var result = { type: 'ouvert', nbReponses: 0 };
+    if (!colsSep.principal) return result;
+    var reps = [];
+    for (var ro = 0; ro < donnees.length; ro++) {
+        var rep = (donnees[ro][colsSep.principal.indexColonne] || '').trim();
+        if (rep) reps.push(rep);
+    }
+    result.reponses = reps;
+    result.nbReponses = reps.length;
+    return result;
+}
+
+function _agregerQuestion(question, cols, donnees) {
+    var colsSep = _agregerSeparerColonnes(cols);
+
+    switch (question.type) {
+        case 'likert4': return _agregerLikert(question, colsSep, donnees);
+        case 'choix_unique':
+        case 'choix_multiple': return _agregerChoix(question, colsSep, donnees);
+        case 'matrix': return _agregerMatrix(question, colsSep, donnees);
+        case 'ouvert': return _agregerOuvert(colsSep, donnees);
+    }
+    return { type: question.type, nbReponses: 0 };
 }
 
 function _estNA(valeur) {
