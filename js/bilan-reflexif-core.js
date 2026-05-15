@@ -1,14 +1,16 @@
 /* ===============================
    MODULE: BILAN RÉFLEXIF — CORE
-   Styles CSS, utilitaires sans état (genId, afficherToast,
-   libelleTypeQuestion). Chargé avant `bilan-reflexif.js`.
+   État partagé, clés de stockage, persistance, finders, styles CSS,
+   utilitaires sans état. Chargé avant tous les autres sous-modules.
 
-   Premier sous-module extrait du god module (PLAN-MOYEN-TERME §4.1.c,
-   MODULES-MAP §2.5). Périmètre minimal pour valider la méthode de
-   découpage (IIFE + window.X + ordre de chargement). Les sections init
-   et navigation restent dans le résidu en attendant l'arrivée d'un
-   registry de renderers (qui sera mis en place quand plusieurs
-   sous-modules cohabiteront).
+   Sous-modules qui dépendent du core (PLAN-MOYEN-TERME §4.1) :
+   - bilan-reflexif-editeur.js (§4.1.d)
+   - bilan-reflexif-parcours.js (§4.1.e)
+   - bilan-reflexif-reflexion.js (§4.1.e)
+   - bilan-reflexif-import-export-texte.js (§4.1.f)
+   - bilan-reflexif-csv.js (§4.1.f)
+   - bilan-reflexif-rapport.js (§4.1.g)
+   - bilan-reflexif.js (résidu : init + navigation, pour l'instant)
    =============================== */
 
 (function() {
@@ -276,14 +278,109 @@ function libelleTypeQuestion(type, q) {
 }
 
 /* ===============================
+   SECTION 2 : ÉTAT PARTAGÉ
+   ===============================
+   Cet objet est mutable par référence : tous les sous-modules font
+   `var etat = BilanReflexifCore.etat;` en alias et mutent ses propriétés.
+   Jamais réassigné. */
+
+var etat = {
+    vue: 'editeur',
+    questionnaire: null,
+    parcours: null,
+    reflexion: null,
+    resultats: null,
+    graphiques: {},
+    blocOuvert: null,
+    questionEnEdition: null,
+    activiteEnEdition: null,
+    mappingImport: null,
+    donneesCSVParsees: null
+};
+
+/* ===============================
+   SECTION 3 : CLÉS DE STOCKAGE (namespacées par trimestre via window.cle)
+   =============================== */
+
+function CLE_QUESTIONNAIRE() { return window.cle ? window.cle('questionnaireBilan') : 'questionnaireBilan'; }
+function CLE_RESULTATS()     { return window.cle ? window.cle('resultatsBilan') : 'resultatsBilan'; }
+function CLE_PARCOURS()      { return window.cle ? window.cle('parcoursBilan') : 'parcoursBilan'; }
+function CLE_REFLEXION()     { return window.cle ? window.cle('autoreflexionBilan') : 'autoreflexionBilan'; }
+
+/* ===============================
+   SECTION 4 : PERSISTANCE (couche db)
+   =============================== */
+
+function sauvegarderQuestionnaire() {
+    db.setSync(CLE_QUESTIONNAIRE(), etat.questionnaire);
+}
+
+function sauvegarderParcours() {
+    db.setSync(CLE_PARCOURS(), etat.parcours);
+}
+
+function sauvegarderReflexion() {
+    db.setSync(CLE_REFLEXION(), etat.reflexion);
+}
+
+/* ===============================
+   SECTION 5 : FINDERS (lecture seule sur etat.questionnaire)
+   =============================== */
+
+function trouverBloc(blocId) {
+    for (var i = 0; i < etat.questionnaire.blocs.length; i++) {
+        if (etat.questionnaire.blocs[i].id === blocId) return etat.questionnaire.blocs[i];
+    }
+    return null;
+}
+
+function trouverQuestion(blocId, questionId) {
+    var bloc = trouverBloc(blocId);
+    if (!bloc) return null;
+    for (var i = 0; i < bloc.questions.length; i++) {
+        if (bloc.questions[i].id === questionId) return bloc.questions[i];
+    }
+    return null;
+}
+
+function trouverQuestionPerso(questionId) {
+    var perso = etat.questionnaire.questionsPersonnalisees;
+    if (!perso) return null;
+    for (var i = 0; i < perso.length; i++) {
+        if (perso[i].id === questionId) return perso[i];
+    }
+    return null;
+}
+
+/* ===============================
    API publique
    =============================== */
 
 window.BilanReflexifCore = {
+    // Utilitaires sans état
     injecterStyles: injecterStyles,
     genId: genId,
     afficherToast: afficherToast,
-    libelleTypeQuestion: libelleTypeQuestion
+    libelleTypeQuestion: libelleTypeQuestion,
+
+    // État partagé (mutable par référence)
+    etat: etat,
+
+    // Clés de stockage (fonctions paresseuses → window.cle)
+    CLE_QUESTIONNAIRE: CLE_QUESTIONNAIRE,
+    CLE_RESULTATS: CLE_RESULTATS,
+    CLE_PARCOURS: CLE_PARCOURS,
+    CLE_REFLEXION: CLE_REFLEXION,
+
+    // Persistance
+    sauvegarderQuestionnaire: sauvegarderQuestionnaire,
+    sauvegarderParcours: sauvegarderParcours,
+    sauvegarderReflexion: sauvegarderReflexion,
+
+    // Finders
+    trouverBloc: trouverBloc,
+    trouverQuestion: trouverQuestion,
+    trouverQuestionPerso: trouverQuestionPerso
 };
 
 })();
