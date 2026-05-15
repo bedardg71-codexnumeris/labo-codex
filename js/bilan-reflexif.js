@@ -4713,4 +4713,28 @@ window.BilanReflexif = {
 
 window.initialiserBilanReflexif = initialiserBilanReflexif;
 
+// Exposition pour les tests de régression du refactoring 2026-mai
+// (cf. audit/PLAN-MOYEN-TERME.md §4.1, MODULES-MAP §2.5). Ces fonctions sont
+// pures et n'ont pas vocation à faire partie de l'API publique. Le hatch sera
+// retiré au fur et à mesure des 7 extractions : chaque sous-module exposera
+// naturellement ses propres pures via son IIFE, et les tests pointeront alors
+// vers ces nouveaux exports.
+window.__bilanReflexifInternals = {
+    parserQuestionnaireTexte: parserQuestionnaireTexte,
+    formaterQuestionnaireEnTexte: formaterQuestionnaireEnTexte,
+    genererModeleTexte: genererModeleTexte,
+    parserCSV: parserCSV,
+    detecterSeparateur: detecterSeparateur,
+    normaliserTexte: normaliserTexte,
+    similitudeTexte: similitudeTexte,
+    convertirLikert: convertirLikert,
+    obtenirCiblesMapping: obtenirCiblesMapping,
+    mapperColonnes: mapperColonnes,
+    _agregerQuestion: _agregerQuestion,
+    _estNA: _estNA,
+    _splitMultiChoix: _splitMultiChoix,
+    _trouverOptionParTexte: _trouverOptionParTexte,
+    estColonneIgnoree: estColonneIgnoree
+};
+
 })();

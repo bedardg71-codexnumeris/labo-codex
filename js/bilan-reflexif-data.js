@@ -484,3 +484,10 @@ return {
 };
 
 })();
+
+// Exposition explicite sur window pour le sandbox de tests (Node Function ne
+// propage pas les top-level `var`). No-op en production où le top-level `var`
+// est déjà attaché à window.
+if (typeof window !== 'undefined') {
+    window.BILAN_REFLEXIF_DATA = BILAN_REFLEXIF_DATA;
+}
