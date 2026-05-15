@@ -11,14 +11,13 @@ import { chargerScript } from './_helpers/charger-script.js';
 //   6. Import CSV (detecteur séparateur + parser CSV + similitude + Likert)
 //   7. Rapport (agrégation Likert + cohérence résultats démo)
 //
-// Ces tests doivent rester verts pendant les 7 extractions. Quand un
-// sous-module sera extrait, le pure correspondant pourra exposer ses
-// internes directement (via son IIFE) — `__bilanReflexifInternals` sera
-// alors retiré du résidu et les imports ici pointeront vers les nouveaux
-// exports namespace.
+// Post-§4.1.h : le hatch `__bilanReflexifInternals` a été retiré. Les tests
+// pointent maintenant directement vers BilanReflexifTexte.X et
+// BilanReflexifCSV.X selon l'origine de chaque pure.
 
 let bilanData;
-let internals;
+let txt;
+let csv;
 
 beforeAll(() => {
     // Charger les données — expose `window.BILAN_REFLEXIF_DATA`.
@@ -81,9 +80,10 @@ beforeAll(() => {
     const BilanReflexifRapport = winRapport.BilanReflexifRapport;
     expect(BilanReflexifRapport).toBeDefined();
 
-    // Charger le résidu avec toutes les dépendances injectées.
+    // Charger le résidu avec toutes les dépendances injectées. Sert de canari :
+    // si une référence cross-module est cassée, le chargement plante ici.
     // `db`, `window.cle`, etc. ne sont pas appelés pendant les tests de pures.
-    const winBilan = chargerScript('js/bilan-reflexif.js', {
+    chargerScript('js/bilan-reflexif.js', {
         BILAN_REFLEXIF_DATA: bilanData,
         BilanReflexifCore: BilanReflexifCore,
         BilanReflexifEditeur: BilanReflexifEditeur,
@@ -93,8 +93,10 @@ beforeAll(() => {
         BilanReflexifCSV: BilanReflexifCSV,
         BilanReflexifRapport: BilanReflexifRapport
     });
-    internals = winBilan.__bilanReflexifInternals;
-    expect(internals).toBeDefined();
+
+    // Exposer les deux modules pures dont les tests dépendent.
+    txt = BilanReflexifTexte;
+    csv = BilanReflexifCSV;
 });
 
 describe('bilan-reflexif — régression refactoring 2026-mai', () => {
@@ -133,8 +135,8 @@ describe('bilan-reflexif — régression refactoring 2026-mai', () => {
     // Test 2 : Import texte (bilan-reflexif-import-export-texte)
     // -----------------------------------------------------------------------
     it('2. Import texte — parserQuestionnaireTexte parse le modèle généré', () => {
-        const modele = internals.genererModeleTexte();
-        const res = internals.parserQuestionnaireTexte(modele);
+        const modele = txt.genererModeleTexte();
+        const res = txt.parserQuestionnaireTexte(modele);
 
         expect(res.ok).toBe(true);
         expect(res.questionnaire).toBeDefined();
@@ -163,7 +165,7 @@ describe('bilan-reflexif — régression refactoring 2026-mai', () => {
     });
 
     it('2.b Import texte vide → erreur explicite', () => {
-        const res = internals.parserQuestionnaireTexte('');
+        const res = txt.parserQuestionnaireTexte('');
         expect(res.ok).toBe(false);
         expect(Array.isArray(res.erreurs)).toBe(true);
         expect(res.erreurs[0].message).toMatch(/vide/i);
@@ -174,7 +176,7 @@ describe('bilan-reflexif — régression refactoring 2026-mai', () => {
     // -----------------------------------------------------------------------
     it('3. Export texte — formaterQuestionnaireEnTexte produit le format attendu', () => {
         const q = bilanData.creerQuestionnaireDemoComplet();
-        const texte = internals.formaterQuestionnaireEnTexte(q);
+        const texte = txt.formaterQuestionnaireEnTexte(q);
 
         // En-tête
         expect(texte).toContain('=== BILAN RÉFLEXIF — Bilan de fin de trimestre (modèle) ===');
@@ -195,8 +197,8 @@ describe('bilan-reflexif — régression refactoring 2026-mai', () => {
 
     it('3.b Roundtrip — parser ∘ formater préserve la structure du questionnaire démo', () => {
         const original = bilanData.creerQuestionnaireDemoComplet();
-        const texte = internals.formaterQuestionnaireEnTexte(original);
-        const res = internals.parserQuestionnaireTexte(texte);
+        const texte = txt.formaterQuestionnaireEnTexte(original);
+        const res = txt.parserQuestionnaireTexte(texte);
 
         expect(res.ok).toBe(true);
 
@@ -291,44 +293,44 @@ describe('bilan-reflexif — régression refactoring 2026-mai', () => {
     // -----------------------------------------------------------------------
     it('6. CSV — détection séparateur, parsing, similitude, conversion Likert', () => {
         // (a) Détecteur de séparateur
-        expect(internals.detecterSeparateur('a,b,c\n1,2,3')).toBe(',');
-        expect(internals.detecterSeparateur('a;b;c\n1;2;3')).toBe(';');
-        expect(internals.detecterSeparateur('a\tb\tc\n1\t2\t3')).toBe('\t');
+        expect(csv.detecterSeparateur('a,b,c\n1,2,3')).toBe(',');
+        expect(csv.detecterSeparateur('a;b;c\n1;2;3')).toBe(';');
+        expect(csv.detecterSeparateur('a\tb\tc\n1\t2\t3')).toBe('\t');
 
         // (b) Parser CSV avec virgule imbriquée entre guillemets
-        const lignes = internals.parserCSV('a,b,c\n"hello, world",x,3\n', ',');
+        const lignes = csv.parserCSV('a,b,c\n"hello, world",x,3\n', ',');
         expect(lignes).toEqual([
             ['a', 'b', 'c'],
             ['hello, world', 'x', '3']
         ]);
 
         // (c) Guillemets échappés ("" → ")
-        const escaped = internals.parserCSV('"a""b",c\n', ',');
+        const escaped = csv.parserCSV('"a""b",c\n', ',');
         expect(escaped).toEqual([['a"b', 'c']]);
 
         // (d) Similitude texte — Jaccard sur mots normalisés
-        const score = internals.similitudeTexte(
+        const score = csv.similitudeTexte(
             'Le système d’évaluation me permet de me situer dans mon apprentissage.',
             'Le système d\'évaluation permet aux étudiants de se situer dans leur apprentissage.'
         );
         expect(score).toBeGreaterThan(0.3);
 
-        const scoreZero = internals.similitudeTexte('Aucun rapport.', 'Texte sans aucune correspondance.');
+        const scoreZero = csv.similitudeTexte('Aucun rapport.', 'Texte sans aucune correspondance.');
         expect(scoreZero).toBeLessThan(0.3);
 
         // (e) Conversion Likert : FR, EN, numérique, fallback
-        expect(internals.convertirLikert('Tout à fait d’accord')).toBe(4);
-        expect(internals.convertirLikert('Plutôt d’accord')).toBe(3);
-        expect(internals.convertirLikert('Plutôt en désaccord')).toBe(2);
-        expect(internals.convertirLikert('Pas du tout d’accord')).toBe(1);
-        expect(internals.convertirLikert('strongly agree')).toBe(4);
-        expect(internals.convertirLikert('agree')).toBe(3);
-        expect(internals.convertirLikert('disagree')).toBe(2);
-        expect(internals.convertirLikert('strongly disagree')).toBe(1);
-        expect(internals.convertirLikert('4')).toBe(4);
-        expect(internals.convertirLikert('  PLUTÔT D’ACCORD  ')).toBe(3); // trim + lowercase
-        expect(internals.convertirLikert('texte non reconnu')).toBe(0);
-        expect(internals.convertirLikert('')).toBe(0);
+        expect(csv.convertirLikert('Tout à fait d’accord')).toBe(4);
+        expect(csv.convertirLikert('Plutôt d’accord')).toBe(3);
+        expect(csv.convertirLikert('Plutôt en désaccord')).toBe(2);
+        expect(csv.convertirLikert('Pas du tout d’accord')).toBe(1);
+        expect(csv.convertirLikert('strongly agree')).toBe(4);
+        expect(csv.convertirLikert('agree')).toBe(3);
+        expect(csv.convertirLikert('disagree')).toBe(2);
+        expect(csv.convertirLikert('strongly disagree')).toBe(1);
+        expect(csv.convertirLikert('4')).toBe(4);
+        expect(csv.convertirLikert('  PLUTÔT D’ACCORD  ')).toBe(3); // trim + lowercase
+        expect(csv.convertirLikert('texte non reconnu')).toBe(0);
+        expect(csv.convertirLikert('')).toBe(0);
     });
 
     // -----------------------------------------------------------------------
@@ -349,7 +351,7 @@ describe('bilan-reflexif — régression refactoring 2026-mai', () => {
             ['Pas du tout d’accord']
         ];
 
-        const r = internals._agregerQuestion(question, cols, donnees);
+        const r = csv._agregerQuestion(question, cols, donnees);
 
         expect(r.type).toBe('likert4');
         expect(r.nbReponses).toBe(5);
