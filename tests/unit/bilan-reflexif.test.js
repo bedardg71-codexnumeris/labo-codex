@@ -21,16 +21,22 @@ let bilanData;
 let internals;
 
 beforeAll(() => {
-    // Charger le module de données — il expose `window.BILAN_REFLEXIF_DATA`
-    // depuis qu'on a ajouté l'assignation explicite (no-op en prod).
+    // Charger les données — expose `window.BILAN_REFLEXIF_DATA`.
     const winData = chargerScript('js/bilan-reflexif-data.js');
     bilanData = winData.BILAN_REFLEXIF_DATA;
     expect(bilanData).toBeDefined();
 
-    // Charger le module principal avec BILAN_REFLEXIF_DATA injecté en globaux.
+    // Charger le core extrait — expose `window.BilanReflexifCore`.
+    const winCore = chargerScript('js/bilan-reflexif-core.js');
+    const BilanReflexifCore = winCore.BilanReflexifCore;
+    expect(BilanReflexifCore).toBeDefined();
+
+    // Charger le résidu avec BILAN_REFLEXIF_DATA + BilanReflexifCore injectés.
+    // Le résidu lit ces deux globaux à l'init (alias en tête d'IIFE).
     // `db`, `window.cle`, etc. ne sont pas appelés pendant les tests de pures.
     const winBilan = chargerScript('js/bilan-reflexif.js', {
-        BILAN_REFLEXIF_DATA: bilanData
+        BILAN_REFLEXIF_DATA: bilanData,
+        BilanReflexifCore: BilanReflexifCore
     });
     internals = winBilan.__bilanReflexifInternals;
     expect(internals).toBeDefined();
