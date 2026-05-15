@@ -39,12 +39,30 @@ beforeAll(() => {
     const BilanReflexifEditeur = winEditeur.BilanReflexifEditeur;
     expect(BilanReflexifEditeur).toBeDefined();
 
+    // Charger le parcours — expose `window.BilanReflexifParcours`.
+    const winParcours = chargerScript('js/bilan-reflexif-parcours.js', {
+        BILAN_REFLEXIF_DATA: bilanData,
+        BilanReflexifCore: BilanReflexifCore
+    });
+    const BilanReflexifParcours = winParcours.BilanReflexifParcours;
+    expect(BilanReflexifParcours).toBeDefined();
+
+    // Charger la réflexion — expose `window.BilanReflexifReflexion`.
+    const winReflexion = chargerScript('js/bilan-reflexif-reflexion.js', {
+        BILAN_REFLEXIF_DATA: bilanData,
+        BilanReflexifCore: BilanReflexifCore
+    });
+    const BilanReflexifReflexion = winReflexion.BilanReflexifReflexion;
+    expect(BilanReflexifReflexion).toBeDefined();
+
     // Charger le résidu avec toutes les dépendances injectées.
     // `db`, `window.cle`, etc. ne sont pas appelés pendant les tests de pures.
     const winBilan = chargerScript('js/bilan-reflexif.js', {
         BILAN_REFLEXIF_DATA: bilanData,
         BilanReflexifCore: BilanReflexifCore,
-        BilanReflexifEditeur: BilanReflexifEditeur
+        BilanReflexifEditeur: BilanReflexifEditeur,
+        BilanReflexifParcours: BilanReflexifParcours,
+        BilanReflexifReflexion: BilanReflexifReflexion
     });
     internals = winBilan.__bilanReflexifInternals;
     expect(internals).toBeDefined();
