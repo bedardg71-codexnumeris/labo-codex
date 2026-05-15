@@ -19,6 +19,7 @@ var etat = BilanReflexifCore.etat;
 var genId = BilanReflexifCore.genId;
 var afficherToast = BilanReflexifCore.afficherToast;
 var sauvegarderParcours = BilanReflexifCore.sauvegarderParcours;
+var rendreAideHTML = BilanReflexifCore.rendreAideHTML;
 
 /* ===============================
    SECTION 3b : ÉDITEUR DU PARCOURS D'APPRENTISSAGE

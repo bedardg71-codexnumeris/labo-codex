@@ -277,6 +277,11 @@ function libelleTypeQuestion(type, q) {
     }
 }
 
+function tronquer(texte, max) {
+    if (!texte || texte.length <= max) return texte || '';
+    return texte.substring(0, max - 1) + '…';
+}
+
 /* ===============================
    SECTION 2 : ÉTAT PARTAGÉ
    ===============================
@@ -353,6 +358,35 @@ function trouverQuestionPerso(questionId) {
 }
 
 /* ===============================
+   SECTION 6 : PANNEAU D'AIDE REPLIABLE (helper UI générique)
+   =============================== */
+
+function rendreAideHTML(cle, titre, contenu) {
+    var lsKey = 'bilan_aide_' + cle;
+    var replie = false;
+    try { replie = localStorage.getItem(lsKey) === '1'; } catch (e) { /* ignore */ }
+
+    var html = [];
+    html.push('<div class="bilan-info-aide' + (replie ? ' replie' : '') + '" id="bilan-aide-' + cle + '">');
+    html.push('<div class="bilan-aide-header" data-action="BilanReflexif.toggleAide" data-param="' + cle + '">');
+    html.push('<span class="bilan-aide-titre">❓ ' + titre + '</span>');
+    html.push('<span class="bilan-aide-chevron">▼</span>');
+    html.push('</div>');
+    html.push('<div class="bilan-aide-body">' + contenu + '</div>');
+    html.push('</div>');
+    return html.join('');
+}
+
+function toggleAide(cle) {
+    var panneau = document.getElementById('bilan-aide-' + cle);
+    if (!panneau) return;
+    var lsKey = 'bilan_aide_' + cle;
+    var estReplie = panneau.classList.contains('replie');
+    panneau.classList.toggle('replie');
+    try { localStorage.setItem(lsKey, estReplie ? '0' : '1'); } catch (e) { /* ignore */ }
+}
+
+/* ===============================
    API publique
    =============================== */
 
@@ -362,6 +396,7 @@ window.BilanReflexifCore = {
     genId: genId,
     afficherToast: afficherToast,
     libelleTypeQuestion: libelleTypeQuestion,
+    tronquer: tronquer,
 
     // État partagé (mutable par référence)
     etat: etat,
@@ -380,7 +415,11 @@ window.BilanReflexifCore = {
     // Finders
     trouverBloc: trouverBloc,
     trouverQuestion: trouverQuestion,
-    trouverQuestionPerso: trouverQuestionPerso
+    trouverQuestionPerso: trouverQuestionPerso,
+
+    // Panneau d'aide repliable
+    rendreAideHTML: rendreAideHTML,
+    toggleAide: toggleAide
 };
 
 })();

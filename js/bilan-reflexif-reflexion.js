@@ -19,6 +19,7 @@ var etat = BilanReflexifCore.etat;
 var genId = BilanReflexifCore.genId;
 var afficherToast = BilanReflexifCore.afficherToast;
 var sauvegarderReflexion = BilanReflexifCore.sauvegarderReflexion;
+var tronquer = BilanReflexifCore.tronquer;
 
 /* ===============================
    SECTION 3c : AUTO-RÉFLEXION DE L'ENSEIGNANT

@@ -55,6 +55,22 @@ beforeAll(() => {
     const BilanReflexifReflexion = winReflexion.BilanReflexifReflexion;
     expect(BilanReflexifReflexion).toBeDefined();
 
+    // Charger l'import/export texte — expose `window.BilanReflexifTexte`.
+    const winTexte = chargerScript('js/bilan-reflexif-import-export-texte.js', {
+        BilanReflexifCore: BilanReflexifCore,
+        BilanReflexifEditeur: BilanReflexifEditeur
+    });
+    const BilanReflexifTexte = winTexte.BilanReflexifTexte;
+    expect(BilanReflexifTexte).toBeDefined();
+
+    // Charger l'import CSV — expose `window.BilanReflexifCSV`.
+    const winCSV = chargerScript('js/bilan-reflexif-csv.js', {
+        BILAN_REFLEXIF_DATA: bilanData,
+        BilanReflexifCore: BilanReflexifCore
+    });
+    const BilanReflexifCSV = winCSV.BilanReflexifCSV;
+    expect(BilanReflexifCSV).toBeDefined();
+
     // Charger le résidu avec toutes les dépendances injectées.
     // `db`, `window.cle`, etc. ne sont pas appelés pendant les tests de pures.
     const winBilan = chargerScript('js/bilan-reflexif.js', {
@@ -62,7 +78,9 @@ beforeAll(() => {
         BilanReflexifCore: BilanReflexifCore,
         BilanReflexifEditeur: BilanReflexifEditeur,
         BilanReflexifParcours: BilanReflexifParcours,
-        BilanReflexifReflexion: BilanReflexifReflexion
+        BilanReflexifReflexion: BilanReflexifReflexion,
+        BilanReflexifTexte: BilanReflexifTexte,
+        BilanReflexifCSV: BilanReflexifCSV
     });
     internals = winBilan.__bilanReflexifInternals;
     expect(internals).toBeDefined();
