@@ -28,6 +28,7 @@ var sauvegarderQuestionnaire = BilanReflexifCore.sauvegarderQuestionnaire;
 var trouverBloc = BilanReflexifCore.trouverBloc;
 var trouverQuestion = BilanReflexifCore.trouverQuestion;
 var trouverQuestionPerso = BilanReflexifCore.trouverQuestionPerso;
+var rendreAideHTML = BilanReflexifCore.rendreAideHTML;
 
 /* ===============================
    SECTION 3 : ÉDITEUR DE QUESTIONNAIRE
