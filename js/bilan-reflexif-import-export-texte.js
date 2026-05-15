@@ -174,6 +174,145 @@ function exporterTexte() {
 
 // Parse un texte au format export et reconstruit { titre, blocs, questionsPersonnalisees }.
 // Retourne { ok: true, questionnaire } ou { ok: false, erreurs: [{ ligne, message }] }.
+// Prétraitement d'une ligne brute : gère le mode préambule, les lignes vides,
+// les commentaires, le markdown bold (**), les séparateurs, les énoncés de
+// matrice et les cases cochables. Mute `ctx` au passage. Retourne :
+//   { action: 'skip' }        — ligne consommée, passer à la suivante
+//   { action: 'process', ligne: '...' } — ligne à traiter normalement
+// Le ctx porte : preambuleLignes, questionCourante (lecture seule),
+// les regex partagées et la fermerQuestion/fermerPreambule (lecture seule
+// références aux closures du parser principal).
+function _parserPretraitement(ligneOriginale, ctx, erreurs, noLigne) {
+    var ligneTrim = ligneOriginale.trim();
+
+    // Mode préambule : tout est préambule sauf délimiteurs forts
+    if (ctx.preambuleLignes !== null) {
+        var estDelimiteur = ctx.rxSection.test(ligneTrim) || ctx.rxQuestion.test(ligneTrim)
+            || ctx.rxBalise.test(ligneTrim) || ctx.rxTitre.test(ligneTrim);
+        if (estDelimiteur) {
+            ctx.fermerPreambule();
+            // Continuer le traitement de cette ligne
+        } else {
+            ctx.preambuleLignes.push(ligneOriginale);
+            return { action: 'skip' };
+        }
+    }
+
+    if (ligneTrim === '' || ctx.rxCommentaire.test(ligneTrim)) {
+        ctx.fermerQuestion();
+        return { action: 'skip' };
+    }
+
+    // Tolérance Markdown : strip ** seulement
+    ligneTrim = ligneTrim.replace(/\*\*/g, '').trim();
+    if (ligneTrim === '') { ctx.fermerQuestion(); return { action: 'skip' }; }
+
+    if (ctx.rxSeparateur.test(ligneTrim)) {
+        ctx.fermerQuestion();
+        return { action: 'skip' };
+    }
+
+    // Mode matrice : énoncé en puce -
+    if (ctx.questionCourante && ctx.questionCourante.type === 'matrix') {
+        var mEn = ligneTrim.match(ctx.rxEnonceMatrice);
+        if (mEn) {
+            if (!ctx.questionCourante.enonces) ctx.questionCourante.enonces = [];
+            ctx.questionCourante.enonces.push({
+                id: 'imp_e_' + genId(),
+                texte: mEn[1].trim()
+            });
+            return { action: 'skip' };
+        }
+    }
+
+    // Hors matrice : strip puce de liste
+    var ligneSansPuce = ligneTrim.replace(ctx.rxPucePrefixe, '').trim();
+    if (ligneSansPuce !== '') ligneTrim = ligneSansPuce;
+
+    if (ctx.rxCaseCochable.test(ligneTrim)) {
+        erreurs.push({ ligne: noLigne, message: 'Case à cocher ignorée — utilise [CHECKBOX] avec des options personnalisées.' });
+        return { action: 'skip' };
+    }
+
+    return { action: 'process', ligne: ligneTrim };
+}
+
+// Décode la balise typeEnAttente en {type, minSelection, maxSelection}.
+// Retourne null si pas de balise active.
+function _parserDecoderType(typeEnAttente, paramsEnAttente) {
+    if (!typeEnAttente) return { type: 'ouvert', minSel: null, maxSel: null };
+    var spec = { type: 'ouvert', minSel: null, maxSel: null };
+    if (typeEnAttente === 'RADIO') spec.type = 'choix_unique';
+    else if (typeEnAttente === 'CHECKBOX') {
+        spec.type = 'choix_multiple';
+        if (paramsEnAttente) {
+            var mMax = paramsEnAttente.match(/max\s*=\s*(\d+)/i);
+            var mMin = paramsEnAttente.match(/min\s*=\s*(\d+)/i);
+            if (mMax) spec.maxSel = parseInt(mMax[1], 10);
+            if (mMin) spec.minSel = parseInt(mMin[1], 10);
+        }
+    }
+    else if (typeEnAttente === 'MATRIX') spec.type = 'matrix';
+    else if (typeEnAttente === 'OUVERT') spec.type = 'ouvert';
+    else if (typeEnAttente === 'LIKERT') spec.type = 'likert4';
+    return spec;
+}
+
+// Crée un objet question initialisé selon son type. Retourne la question.
+function _parserCreerQuestion(texte, spec, modePerso, consigne) {
+    var q = {
+        id: 'imp_q_' + genId(),
+        texte: texte,
+        type: spec.type,
+        obligatoire: false,
+        personnalisee: modePerso
+    };
+    if (spec.type === 'likert4') q.inclureNA = false;
+    if (spec.type === 'choix_unique' || spec.type === 'choix_multiple') q.options = [];
+    if (spec.type === 'choix_multiple') {
+        q.minSelection = spec.minSel;
+        q.maxSelection = spec.maxSel;
+    }
+    if (spec.type === 'matrix') q.enonces = [];
+    if (consigne) q.consigneConditionnelle = consigne;
+    return q;
+}
+
+// Ajoute une option (a-d / a-e) à la question courante selon son type.
+// Mute questionCourante en place. rxAutreChamp est passé en argument pour
+// éviter de recompiler la regex à chaque appel.
+function _parserAjouterChoix(mChoix, questionCourante, rxAutreChamp) {
+    var lettre = mChoix[1].toLowerCase();
+    var texteChoix = mChoix[2].trim();
+
+    if (questionCourante.type === 'ouvert') {
+        questionCourante.type = 'likert4';
+        questionCourante.inclureNA = false;
+    }
+
+    if (questionCourante.type === 'likert4') {
+        if (lettre === 'e') questionCourante.inclureNA = true;
+        return;
+    }
+
+    if (questionCourante.type === 'choix_unique' || questionCourante.type === 'choix_multiple') {
+        var autreAvecChamp = false;
+        var texteFinal = texteChoix;
+        var mAutre = texteChoix.match(rxAutreChamp);
+        if (mAutre) {
+            texteFinal = mAutre[1].trim() + ' : ___';
+            autreAvecChamp = true;
+        }
+        if (!questionCourante.options) questionCourante.options = [];
+        questionCourante.options.push({
+            id: 'imp_o_' + genId(),
+            lettre: lettre,
+            texte: texteFinal,
+            autreAvecChamp: autreAvecChamp
+        });
+    }
+}
+
 function parserQuestionnaireTexte(texte) {
     if (typeof texte !== 'string' || texte.trim() === '') {
         return { ok: false, erreurs: [{ ligne: 0, message: 'Le texte est vide.' }] };
@@ -235,63 +374,31 @@ function parserQuestionnaireTexte(texte) {
         questionCourante = null;
     }
 
+    // Contexte mutable partagé avec les helpers de préprocessing.
+    var pretraitementCtx = {
+        preambuleLignes: preambuleLignes,
+        questionCourante: questionCourante,
+        rxSection: rxSection, rxQuestion: rxQuestion, rxBalise: rxBalise,
+        rxTitre: rxTitre, rxCommentaire: rxCommentaire, rxSeparateur: rxSeparateur,
+        rxEnonceMatrice: rxEnonceMatrice, rxPucePrefixe: rxPucePrefixe,
+        rxCaseCochable: rxCaseCochable,
+        fermerQuestion: fermerQuestion, fermerPreambule: fermerPreambule
+    };
+
     for (var i = 0; i < lignes.length; i++) {
         var ligneOriginale = lignes[i];
-        var ligneTrim = ligneOriginale.trim();
         var noLigne = i + 1;
 
-        // En mode préambule : tout est préambule sauf délimiteurs forts
-        if (preambuleLignes !== null) {
-            if (rxSection.test(ligneTrim) || rxQuestion.test(ligneTrim) || rxBalise.test(ligneTrim) || rxTitre.test(ligneTrim)) {
-                fermerPreambule();
-                // continuer le traitement de cette ligne
-            } else {
-                preambuleLignes.push(ligneOriginale);
-                continue;
-            }
-        }
-
-        if (ligneTrim === '') {
-            fermerQuestion();
-            continue;
-        }
-
-        if (rxCommentaire.test(ligneTrim)) {
-            fermerQuestion();
-            continue;
-        }
-
-        // Tolérance Markdown : strip ** seulement (pas __ qui mangerait les ___ des champs Autre)
-        ligneTrim = ligneTrim.replace(/\*\*/g, '').trim();
-        if (ligneTrim === '') { fermerQuestion(); continue; }
-
-        if (rxSeparateur.test(ligneTrim)) {
-            fermerQuestion();
-            continue;
-        }
-
-        // En mode matrice : énoncé en puce -
-        if (questionCourante && questionCourante.type === 'matrix') {
-            var mEn = ligneTrim.match(rxEnonceMatrice);
-            if (mEn) {
-                if (!questionCourante.enonces) questionCourante.enonces = [];
-                questionCourante.enonces.push({
-                    id: 'imp_e_' + genId(),
-                    texte: mEn[1].trim()
-                });
-                continue;
-            }
-            // Sinon, on poursuit le traitement normal (la question matrix se ferme implicitement)
-        }
-
-        // Hors mode matrice : strip puce de liste pour les choix Likert
-        var ligneSansPuce = ligneTrim.replace(rxPucePrefixe, '').trim();
-        if (ligneSansPuce !== '') ligneTrim = ligneSansPuce;
-
-        if (rxCaseCochable.test(ligneTrim)) {
-            erreurs.push({ ligne: noLigne, message: 'Case à cocher ignorée — utilise [CHECKBOX] avec des options personnalisées.' });
-            continue;
-        }
+        // Resynchronisation par référence en début d'itération : les helpers
+        // peuvent muter `ctx.preambuleLignes.push(...)` ou appeler les closures
+        // `fermerQuestion()`/`fermerPreambule()` qui réassignent les locals du
+        // parent. On ne resynchronise PAS dans l'autre sens après l'appel :
+        // les closures ont déjà fait le travail.
+        pretraitementCtx.preambuleLignes = preambuleLignes;
+        pretraitementCtx.questionCourante = questionCourante;
+        var pre = _parserPretraitement(ligneOriginale, pretraitementCtx, erreurs, noLigne);
+        if (pre.action === 'skip') continue;
+        var ligneTrim = pre.ligne;
 
         var mTitre = ligneTrim.match(rxTitre);
         if (mTitre) {
@@ -352,90 +459,17 @@ function parserQuestionnaireTexte(texte) {
 
         var mChoix = ligneTrim.match(rxChoix);
         if (mChoix && questionCourante) {
-            var lettre = mChoix[1].toLowerCase();
-            var texteChoix = mChoix[2].trim();
-
-            if (questionCourante.type === 'ouvert') {
-                questionCourante.type = 'likert4';
-                questionCourante.inclureNA = false;
-            }
-
-            if (questionCourante.type === 'likert4') {
-                if (lettre === 'e') {
-                    questionCourante.inclureNA = true;
-                }
-                continue;
-            }
-
-            if (questionCourante.type === 'choix_unique' || questionCourante.type === 'choix_multiple') {
-                var autreAvecChamp = false;
-                var texteFinal = texteChoix;
-                var mAutre = texteChoix.match(rxAutreChamp);
-                if (mAutre) {
-                    texteFinal = mAutre[1].trim() + ' : ___';
-                    autreAvecChamp = true;
-                }
-                if (!questionCourante.options) questionCourante.options = [];
-                questionCourante.options.push({
-                    id: 'imp_o_' + genId(),
-                    lettre: lettre,
-                    texte: texteFinal,
-                    autreAvecChamp: autreAvecChamp
-                });
-                continue;
-            }
+            _parserAjouterChoix(mChoix, questionCourante, rxAutreChamp);
             continue;
         }
 
         var mQ = ligneTrim.match(rxQuestion);
         if (mQ) {
-            var typeQ = 'ouvert';
-            var minSel = null, maxSel = null;
-
-            if (typeEnAttente) {
-                if (typeEnAttente === 'RADIO') typeQ = 'choix_unique';
-                else if (typeEnAttente === 'CHECKBOX') {
-                    typeQ = 'choix_multiple';
-                    if (paramsEnAttente) {
-                        var mMax = paramsEnAttente.match(/max\s*=\s*(\d+)/i);
-                        var mMin = paramsEnAttente.match(/min\s*=\s*(\d+)/i);
-                        if (mMax) maxSel = parseInt(mMax[1], 10);
-                        if (mMin) minSel = parseInt(mMin[1], 10);
-                    }
-                }
-                else if (typeEnAttente === 'MATRIX') typeQ = 'matrix';
-                else if (typeEnAttente === 'OUVERT') typeQ = 'ouvert';
-                else if (typeEnAttente === 'LIKERT') typeQ = 'likert4';
-                typeEnAttente = null;
-                paramsEnAttente = null;
-            }
-
-            questionCourante = {
-                id: 'imp_q_' + genId(),
-                texte: mQ[1].trim(),
-                type: typeQ,
-                obligatoire: false,
-                personnalisee: modePerso
-            };
-
-            if (typeQ === 'likert4') {
-                questionCourante.inclureNA = false;
-            }
-            if (typeQ === 'choix_unique' || typeQ === 'choix_multiple') {
-                questionCourante.options = [];
-            }
-            if (typeQ === 'choix_multiple') {
-                questionCourante.minSelection = minSel;
-                questionCourante.maxSelection = maxSel;
-            }
-            if (typeQ === 'matrix') {
-                questionCourante.enonces = [];
-            }
-            if (consigneEnAttente) {
-                questionCourante.consigneConditionnelle = consigneEnAttente;
-                consigneEnAttente = null;
-            }
-
+            var spec = _parserDecoderType(typeEnAttente, paramsEnAttente);
+            typeEnAttente = null;
+            paramsEnAttente = null;
+            questionCourante = _parserCreerQuestion(mQ[1].trim(), spec, modePerso, consigneEnAttente);
+            consigneEnAttente = null;
             pousserQuestion(questionCourante);
             continue;
         }

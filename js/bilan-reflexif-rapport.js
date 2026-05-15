@@ -669,6 +669,235 @@ function supprimerResultats() {
    SECTION 6 : EXPORT PDF
    =============================== */
 
+// Couleurs PDF (RGB)
+var _PDF_BLEU_TITRE = [3, 46, 92];
+var _PDF_GRIS_META = [102, 102, 102];
+var _PDF_GRIS_TEXTE = [51, 51, 51];
+var _PDF_VERT_SUCCES = [52, 199, 89];
+var _PDF_ROUGE_ERREUR = [232, 64, 87];
+
+function _pdfEnteteEtVueEnsemble(doc, q, res, ctx) {
+    doc.setFontSize(20);
+    doc.setTextColor.apply(doc, _PDF_BLEU_TITRE);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Bilan réflexif', ctx.marges.gauche, ctx.posY);
+    ctx.posY += 8;
+
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor.apply(doc, _PDF_GRIS_META);
+    doc.text(q.titre, ctx.marges.gauche, ctx.posY);
+    ctx.posY += 6;
+    doc.text('Importé le ' + new Date(res.dateImport).toLocaleDateString('fr-CA') + ' — ' + res.nbRepondants + ' répondants', ctx.marges.gauche, ctx.posY);
+    ctx.posY += 4;
+
+    doc.setDrawColor.apply(doc, _PDF_BLEU_TITRE);
+    doc.setLineWidth(0.5);
+    doc.line(ctx.marges.gauche, ctx.posY, ctx.largeurPage - ctx.marges.droite, ctx.posY);
+    ctx.posY += 10;
+
+    var stats = calculerVueEnsemble(res, q);
+    doc.setFontSize(14);
+    doc.setTextColor.apply(doc, _PDF_BLEU_TITRE);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Vue d’ensemble', ctx.marges.gauche, ctx.posY);
+    ctx.posY += 8;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor.apply(doc, _PDF_GRIS_TEXTE);
+    doc.text('Score moyen global : ' + stats.scoreGlobal.toFixed(2) + ' / 4', ctx.marges.gauche, ctx.posY);
+    ctx.posY += 5;
+    doc.text('Taux de réponses favorables : ' + stats.tauxFavorable + '%', ctx.marges.gauche, ctx.posY);
+    ctx.posY += 5;
+    doc.text('Questions analysées : ' + stats.nbQuestionsRepondues, ctx.marges.gauche, ctx.posY);
+    ctx.posY += 12;
+}
+
+function _pdfRendreTableLikert(doc, questionsLikert, res, ctx) {
+    var echelle = BILAN_REFLEXIF_DATA.ECHELLE_LIKERT4;
+    var tableHead = [['Question', echelle[0].label, echelle[1].label, echelle[2].label, echelle[3].label, 'Moy.']];
+    var tableBody = [];
+
+    for (var ql = 0; ql < questionsLikert.length; ql++) {
+        var qItem = questionsLikert[ql];
+        var rep = res.reponses[qItem.id];
+        var total = rep.nbReponses || 1;
+        var row = [tronquer(qItem.texte, 45)];
+        for (var e = 0; e < echelle.length; e++) {
+            var n = (rep.distribution && rep.distribution[echelle[e].label]) || 0;
+            row.push(Math.round((n / total) * 100) + '%');
+        }
+        row.push(rep.scoreMoyen.toFixed(2));
+        tableBody.push(row);
+    }
+
+    doc.autoTable({
+        startY: ctx.posY,
+        head: tableHead,
+        body: tableBody,
+        theme: 'grid',
+        headStyles: { fillColor: _PDF_BLEU_TITRE, textColor: [255, 255, 255], fontSize: 8, fontStyle: 'bold' },
+        bodyStyles: { fontSize: 8, textColor: _PDF_GRIS_TEXTE },
+        columnStyles: {
+            0: { cellWidth: ctx.largeurContenu * 0.35 },
+            5: { fontStyle: 'bold', halign: 'center' }
+        },
+        margin: { left: ctx.marges.gauche, right: ctx.marges.droite },
+        didParseCell: function(data) {
+            if (data.section === 'body') {
+                var col = data.column.index;
+                if (col >= 1 && col <= 4) data.cell.styles.halign = 'center';
+            }
+        }
+    });
+
+    ctx.posY = doc.lastAutoTable.finalY + 5;
+}
+
+function _pdfRendreReponsesOuvertes(doc, questionsOuvertes, res, ctx) {
+    for (var ro = 0; ro < questionsOuvertes.length; ro++) {
+        var qOuv = questionsOuvertes[ro];
+        var repOuv = res.reponses[qOuv.id];
+        if (!repOuv || !repOuv.reponses || repOuv.reponses.length === 0) continue;
+
+        if (ctx.posY > 240) { doc.addPage(); ctx.posY = ctx.marges.haut; }
+
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'italic');
+        doc.setTextColor.apply(doc, _PDF_GRIS_META);
+        doc.text(tronquer(qOuv.texte, 80) + ' (' + repOuv.nbReponses + ' réponses)', ctx.marges.gauche, ctx.posY);
+        ctx.posY += 4;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor.apply(doc, _PDF_GRIS_TEXTE);
+        for (var rr = 0; rr < repOuv.reponses.length; rr++) {
+            if (ctx.posY > 250) { doc.addPage(); ctx.posY = ctx.marges.haut; }
+            var lignes = doc.splitTextToSize('• ' + repOuv.reponses[rr], ctx.largeurContenu - 5);
+            doc.setFontSize(8);
+            doc.text(lignes, ctx.marges.gauche + 3, ctx.posY);
+            ctx.posY += lignes.length * 3.5 + 1;
+        }
+        ctx.posY += 3;
+    }
+}
+
+function _pdfDessinerBloc(doc, bloc, res, ctx) {
+    var questionsLikert = [];
+    var questionsOuvertes = [];
+    for (var j = 0; j < bloc.questions.length; j++) {
+        var qb = bloc.questions[j];
+        if (!res.reponses[qb.id]) continue;
+        if (qb.type === 'likert4') questionsLikert.push(qb);
+        else questionsOuvertes.push(qb);
+    }
+    if (questionsLikert.length === 0 && questionsOuvertes.length === 0) return;
+
+    if (ctx.posY > 230) {
+        doc.addPage();
+        ctx.posY = ctx.marges.haut;
+    }
+
+    doc.setFontSize(12);
+    doc.setTextColor.apply(doc, _PDF_BLEU_TITRE);
+    doc.setFont('helvetica', 'bold');
+    doc.text(bloc.titre, ctx.marges.gauche, ctx.posY);
+    ctx.posY += 3;
+
+    if (questionsLikert.length > 0) {
+        var scoreBloc = calculerScoreBloc(questionsLikert, res);
+        var signaux = calculerSignaux(questionsLikert, res);
+
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor.apply(doc, _PDF_GRIS_META);
+        var infoBloc = 'Score moyen : ' + scoreBloc.moyenne.toFixed(2) + '/4';
+        if (signaux.fort) infoBloc += ' — Signal fort (' + signaux.tauxFavorable + '% favorables)';
+        if (signaux.faible) infoBloc += ' — Signal faible (' + signaux.tauxDefavorable + '% défavorables)';
+        doc.text(infoBloc, ctx.marges.gauche, ctx.posY);
+        ctx.posY += 5;
+
+        _pdfRendreTableLikert(doc, questionsLikert, res, ctx);
+    }
+
+    _pdfRendreReponsesOuvertes(doc, questionsOuvertes, res, ctx);
+
+    ctx.posY += 5;
+}
+
+function _pdfCollecterForcesEtVigilances(q, res) {
+    var forces = [];
+    var vigilances = [];
+    for (var ib = 0; ib < q.blocs.length; ib++) {
+        var blocS = q.blocs[ib];
+        if (!blocS.actif) continue;
+        var qLikS = [];
+        for (var jb = 0; jb < blocS.questions.length; jb++) {
+            if (blocS.questions[jb].type === 'likert4' && res.reponses[blocS.questions[jb].id]) {
+                qLikS.push(blocS.questions[jb]);
+            }
+        }
+        if (qLikS.length === 0) continue;
+        var sb = calculerScoreBloc(qLikS, res);
+        var sig = calculerSignaux(qLikS, res);
+        if (sb.moyenne >= 3.2) forces.push(blocS.titre + ' (' + sb.moyenne.toFixed(2) + '/4, ' + sig.tauxFavorable + '% fav.)');
+        if (sb.moyenne < 2.5 || sig.faible) vigilances.push(blocS.titre + ' (' + sb.moyenne.toFixed(2) + '/4, ' + sig.tauxDefavorable + '% défav.)');
+    }
+    return { forces: forces, vigilances: vigilances };
+}
+
+function _pdfDessinerListePuces(doc, items, ctx) {
+    for (var i = 0; i < items.length; i++) {
+        doc.text('• ' + items[i], ctx.marges.gauche + 3, ctx.posY);
+        ctx.posY += 5;
+    }
+}
+
+function _pdfDessinerSynthese(doc, q, res, ctx) {
+    if (ctx.posY > 220) { doc.addPage(); ctx.posY = ctx.marges.haut; }
+
+    doc.setFontSize(14);
+    doc.setTextColor.apply(doc, _PDF_BLEU_TITRE);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Synthèse', ctx.marges.gauche, ctx.posY);
+    ctx.posY += 8;
+
+    var fv = _pdfCollecterForcesEtVigilances(q, res);
+
+    doc.setFontSize(10);
+    if (fv.forces.length > 0) {
+        doc.setTextColor.apply(doc, _PDF_VERT_SUCCES);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Forces identifiées :', ctx.marges.gauche, ctx.posY);
+        ctx.posY += 5;
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor.apply(doc, _PDF_GRIS_TEXTE);
+        _pdfDessinerListePuces(doc, fv.forces, ctx);
+        ctx.posY += 3;
+    }
+
+    if (fv.vigilances.length > 0) {
+        doc.setTextColor.apply(doc, _PDF_ROUGE_ERREUR);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Zones de vigilance :', ctx.marges.gauche, ctx.posY);
+        ctx.posY += 5;
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor.apply(doc, _PDF_GRIS_TEXTE);
+        _pdfDessinerListePuces(doc, fv.vigilances, ctx);
+    }
+}
+
+function _pdfDessinerPiedPage(doc, q, ctx) {
+    var nbPages = doc.internal.getNumberOfPages();
+    for (var p = 1; p <= nbPages; p++) {
+        doc.setPage(p);
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text('Bilan réflexif — ' + q.titre, ctx.marges.gauche, 267);
+        doc.text('Page ' + p + '/' + nbPages, ctx.largeurPage - ctx.marges.droite, 267, { align: 'right' });
+    }
+}
+
 function exporterPDF() {
     if (!etat.resultats || !etat.questionnaire) return;
 
@@ -676,235 +905,33 @@ function exporterPDF() {
         var jsPDF = window.jspdf.jsPDF;
         var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
 
-        var marges = { haut: 15, bas: 15, gauche: 15, droite: 15 };
-        var largeurPage = 215.9;
-        var largeurContenu = largeurPage - marges.gauche - marges.droite;
-        var posY = marges.haut;
+        var ctx = {
+            marges: { haut: 15, bas: 15, gauche: 15, droite: 15 },
+            largeurPage: 215.9,
+            largeurContenu: 215.9 - 15 - 15,
+            posY: 15
+        };
         var res = etat.resultats;
         var q = etat.questionnaire;
 
-        // === Page 1 : En-tête et vue d'ensemble ===
-        doc.setFontSize(20);
-        doc.setTextColor(3, 46, 92);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Bilan r\u00e9flexif', marges.gauche, posY);
-        posY += 8;
+        _pdfEnteteEtVueEnsemble(doc, q, res, ctx);
 
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(102, 102, 102);
-        doc.text(q.titre, marges.gauche, posY);
-        posY += 6;
-        doc.text('Import\u00e9 le ' + new Date(res.dateImport).toLocaleDateString('fr-CA') + ' \u2014 ' + res.nbRepondants + ' r\u00e9pondants', marges.gauche, posY);
-        posY += 4;
-
-        doc.setDrawColor(3, 46, 92);
-        doc.setLineWidth(0.5);
-        doc.line(marges.gauche, posY, largeurPage - marges.droite, posY);
-        posY += 10;
-
-        // Vue d'ensemble
-        var stats = calculerVueEnsemble(res, q);
-        doc.setFontSize(14);
-        doc.setTextColor(3, 46, 92);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Vue d\u2019ensemble', marges.gauche, posY);
-        posY += 8;
-
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(51, 51, 51);
-        doc.text('Score moyen global : ' + stats.scoreGlobal.toFixed(2) + ' / 4', marges.gauche, posY);
-        posY += 5;
-        doc.text('Taux de r\u00e9ponses favorables : ' + stats.tauxFavorable + '%', marges.gauche, posY);
-        posY += 5;
-        doc.text('Questions analys\u00e9es : ' + stats.nbQuestionsRepondues, marges.gauche, posY);
-        posY += 12;
-
-        // === Détail par bloc ===
         for (var i = 0; i < q.blocs.length; i++) {
             var bloc = q.blocs[i];
             if (!bloc.actif) continue;
-
-            var questionsLikert = [];
-            var questionsOuvertes = [];
-            for (var j = 0; j < bloc.questions.length; j++) {
-                var qb = bloc.questions[j];
-                if (!res.reponses[qb.id]) continue;
-                if (qb.type === 'likert4') questionsLikert.push(qb);
-                else questionsOuvertes.push(qb);
-            }
-            if (questionsLikert.length === 0 && questionsOuvertes.length === 0) continue;
-
-            // Vérifier espace restant
-            if (posY > 230) {
-                doc.addPage();
-                posY = marges.haut;
-            }
-
-            // Titre du bloc
-            doc.setFontSize(12);
-            doc.setTextColor(3, 46, 92);
-            doc.setFont('helvetica', 'bold');
-            doc.text(bloc.titre, marges.gauche, posY);
-            posY += 3;
-
-            if (questionsLikert.length > 0) {
-                var scoreBloc = calculerScoreBloc(questionsLikert, res);
-                var signaux = calculerSignaux(questionsLikert, res);
-
-                doc.setFontSize(9);
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(102, 102, 102);
-                var infoBloc = 'Score moyen : ' + scoreBloc.moyenne.toFixed(2) + '/4';
-                if (signaux.fort) infoBloc += ' \u2014 Signal fort (' + signaux.tauxFavorable + '% favorables)';
-                if (signaux.faible) infoBloc += ' \u2014 Signal faible (' + signaux.tauxDefavorable + '% d\u00e9favorables)';
-                doc.text(infoBloc, marges.gauche, posY);
-                posY += 5;
-
-                // Tableau des distributions
-                var echelle = BILAN_REFLEXIF_DATA.ECHELLE_LIKERT4;
-                var tableHead = [['Question', echelle[0].label, echelle[1].label, echelle[2].label, echelle[3].label, 'Moy.']];
-                var tableBody = [];
-
-                for (var ql = 0; ql < questionsLikert.length; ql++) {
-                    var qItem = questionsLikert[ql];
-                    var rep = res.reponses[qItem.id];
-                    var total = rep.nbReponses || 1;
-                    var row = [tronquer(qItem.texte, 45)];
-                    for (var e = 0; e < echelle.length; e++) {
-                        var n = (rep.distribution && rep.distribution[echelle[e].label]) || 0;
-                        row.push(Math.round((n / total) * 100) + '%');
-                    }
-                    row.push(rep.scoreMoyen.toFixed(2));
-                    tableBody.push(row);
-                }
-
-                doc.autoTable({
-                    startY: posY,
-                    head: tableHead,
-                    body: tableBody,
-                    theme: 'grid',
-                    headStyles: { fillColor: [3, 46, 92], textColor: [255, 255, 255], fontSize: 8, fontStyle: 'bold' },
-                    bodyStyles: { fontSize: 8, textColor: [51, 51, 51] },
-                    columnStyles: {
-                        0: { cellWidth: largeurContenu * 0.35 },
-                        5: { fontStyle: 'bold', halign: 'center' }
-                    },
-                    margin: { left: marges.gauche, right: marges.droite },
-                    didParseCell: function(data) {
-                        if (data.section === 'body') {
-                            var col = data.column.index;
-                            if (col >= 1 && col <= 4) data.cell.styles.halign = 'center';
-                        }
-                    }
-                });
-
-                posY = doc.lastAutoTable.finalY + 5;
-            }
-
-            // Réponses ouvertes
-            for (var ro = 0; ro < questionsOuvertes.length; ro++) {
-                var qOuv = questionsOuvertes[ro];
-                var repOuv = res.reponses[qOuv.id];
-                if (!repOuv || !repOuv.reponses || repOuv.reponses.length === 0) continue;
-
-                if (posY > 240) { doc.addPage(); posY = marges.haut; }
-
-                doc.setFontSize(9);
-                doc.setFont('helvetica', 'italic');
-                doc.setTextColor(102, 102, 102);
-                doc.text(tronquer(qOuv.texte, 80) + ' (' + repOuv.nbReponses + ' r\u00e9ponses)', marges.gauche, posY);
-                posY += 4;
-
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(51, 51, 51);
-                for (var rr = 0; rr < repOuv.reponses.length; rr++) {
-                    if (posY > 250) { doc.addPage(); posY = marges.haut; }
-                    var lignes = doc.splitTextToSize('\u2022 ' + repOuv.reponses[rr], largeurContenu - 5);
-                    doc.setFontSize(8);
-                    doc.text(lignes, marges.gauche + 3, posY);
-                    posY += lignes.length * 3.5 + 1;
-                }
-                posY += 3;
-            }
-
-            posY += 5;
+            _pdfDessinerBloc(doc, bloc, res, ctx);
         }
 
-        // === Synthèse ===
-        if (posY > 220) { doc.addPage(); posY = marges.haut; }
+        _pdfDessinerSynthese(doc, q, res, ctx);
+        _pdfDessinerPiedPage(doc, q, ctx);
 
-        doc.setFontSize(14);
-        doc.setTextColor(3, 46, 92);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Synth\u00e8se', marges.gauche, posY);
-        posY += 8;
-
-        var forces = [];
-        var vigilances = [];
-        for (var ib = 0; ib < q.blocs.length; ib++) {
-            var blocS = q.blocs[ib];
-            if (!blocS.actif) continue;
-            var qLikS = [];
-            for (var jb = 0; jb < blocS.questions.length; jb++) {
-                if (blocS.questions[jb].type === 'likert4' && res.reponses[blocS.questions[jb].id]) {
-                    qLikS.push(blocS.questions[jb]);
-                }
-            }
-            if (qLikS.length === 0) continue;
-            var sb = calculerScoreBloc(qLikS, res);
-            var sig = calculerSignaux(qLikS, res);
-            if (sb.moyenne >= 3.2) forces.push(blocS.titre + ' (' + sb.moyenne.toFixed(2) + '/4, ' + sig.tauxFavorable + '% fav.)');
-            if (sb.moyenne < 2.5 || sig.faible) vigilances.push(blocS.titre + ' (' + sb.moyenne.toFixed(2) + '/4, ' + sig.tauxDefavorable + '% d\u00e9fav.)');
-        }
-
-        doc.setFontSize(10);
-        if (forces.length > 0) {
-            doc.setTextColor(52, 199, 89);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Forces identifi\u00e9es :', marges.gauche, posY);
-            posY += 5;
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(51, 51, 51);
-            for (var fi = 0; fi < forces.length; fi++) {
-                doc.text('\u2022 ' + forces[fi], marges.gauche + 3, posY);
-                posY += 5;
-            }
-            posY += 3;
-        }
-
-        if (vigilances.length > 0) {
-            doc.setTextColor(232, 64, 87);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Zones de vigilance :', marges.gauche, posY);
-            posY += 5;
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(51, 51, 51);
-            for (var vi = 0; vi < vigilances.length; vi++) {
-                doc.text('\u2022 ' + vigilances[vi], marges.gauche + 3, posY);
-                posY += 5;
-            }
-        }
-
-        // Pied de page sur toutes les pages
-        var nbPages = doc.internal.getNumberOfPages();
-        for (var p = 1; p <= nbPages; p++) {
-            doc.setPage(p);
-            doc.setFontSize(8);
-            doc.setTextColor(150, 150, 150);
-            doc.text('Bilan r\u00e9flexif \u2014 ' + q.titre, marges.gauche, 267);
-            doc.text('Page ' + p + '/' + nbPages, largeurPage - marges.droite, 267, { align: 'right' });
-        }
-
-        // Sauvegarder
         var nomFichier = 'bilan-reflexif-' + new Date().toISOString().slice(0, 10) + '.pdf';
         doc.save(nomFichier);
-        afficherToast('PDF export\u00e9 : ' + nomFichier);
+        afficherToast('PDF exporté : ' + nomFichier);
 
     } catch (err) {
         console.error('[BilanReflexif] Erreur export PDF:', err);
-        afficherToast('Erreur lors de l\u2019export PDF');
+        afficherToast('Erreur lors de l’export PDF');
     }
 }
 
