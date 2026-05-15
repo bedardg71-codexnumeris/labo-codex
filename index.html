@@ -16101,7 +16101,14 @@
 
     <!-- Module Bilan réflexif -->
     <script src="js/bilan-reflexif-data.js?v=2026032801"></script>
-    <script src="js/bilan-reflexif.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 tooltips style unifié via STYLE_GRAPHIQUE -->
+    <script src="js/bilan-reflexif-core.js?v=20260515f"></script> <!-- §4.1.c+d+f : styles + état + persistance + finders + aide + tronquer -->
+    <script src="js/bilan-reflexif-editeur.js?v=20260515f"></script> <!-- §4.1.d : éditeur de questionnaire -->
+    <script src="js/bilan-reflexif-parcours.js?v=20260515f"></script> <!-- §4.1.e : parcours d'apprentissage -->
+    <script src="js/bilan-reflexif-reflexion.js?v=20260515f"></script> <!-- §4.1.e : auto-réflexion enseignant -->
+    <script src="js/bilan-reflexif-import-export-texte.js?v=20260515f"></script> <!-- §4.1.f : import/export texte du questionnaire -->
+    <script src="js/bilan-reflexif-csv.js?v=20260515f"></script> <!-- §4.1.f : import CSV des résultats étudiants -->
+    <script src="js/bilan-reflexif-rapport.js?v=20260515f"></script> <!-- §4.1.g : rapport d'analyse + Chart.js + export PDF -->
+    <script src="js/bilan-reflexif.js?v=20260515f"></script> <!-- §4.1.g : résidu (init + navigation + hooks) -->
 
     <!-- Module Planification (Carte mentale) -->
     <script src="js/planification-donnees.js?v=2026050554"></script> <!-- #261 : fallback automatique quand index.active pointe sur carte inexistante -->
@@ -16196,7 +16203,7 @@
     <script src="js/main.js?v=2026050543"></script> <!-- Refonte nav SP5 : naviguerVers calendrier-trimestre -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260515a"></script> <!-- Beta 99.45 b0515-1333 : bump fallback BUILD_ID (fix filtre par production) -->
+    <script src="js/init-inline.js?v=20260515b"></script> <!-- Beta 99.45 b0515-1745 : bump fallback BUILD_ID (refactor bilan-reflexif §4.1) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
