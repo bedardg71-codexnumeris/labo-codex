@@ -4190,7 +4190,7 @@ function filtrerListeEvaluations() {
     // Filtrer par production
     if (filtreProduction) {
         donneesFiltrees = donneesFiltrees.filter(e =>
-            e.evaluations.some(evaluation => eval.productionId === filtreProduction)
+            e.evaluations.some(evaluation => evaluation.productionId === filtreProduction)
         );
     }
 
