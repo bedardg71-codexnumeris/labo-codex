@@ -372,6 +372,16 @@
   - **Cible** : le label doit rester lisible en mode clair (texte clair sur fond bleu, comme « Beta 99.38 » et « vendredi 8 mai 2026 » qui sont dans le même bandeau et lisibles).
   - **À investiguer** : règle CSS `.bandeau-groupe-cours label`, scope mode-clair (`styles.css:19478` `.mode-clair label` ou bloc dédié à `bandeau-groupe-cours` à ajouter). Vérifier que la correction n'affecte pas les labels en mode sombre.
 
+### Retours testeur — 15 mai 2026 (test manuel refactor bilan-reflexif)
+
+- [ ] **#278** Bilan réflexif — scroll reset au top en passant à l'onglet « Importer les résultats »
+  - **Symptôme** : depuis l'onglet Questionnaire scrollé en bas (vue très haute), cliquer sur l'onglet « Importer les résultats » fait remonter la page tout en haut.
+  - **Cause probable** : `afficherVue` (`js/bilan-reflexif.js:124`) cache la vue précédente par `display:none` (retire l'élément du flow) puis révèle Import. Comme Import est la vue la plus courte du module (zone d'import + info résultats + bouton démo), `scrollHeight` du document chute brutalement → si le `scrollTop` dépasse le nouveau `scrollHeight`, Safari reset à 0.
+  - **Bug pré-existant** : confirmé par `git show main:js/bilan-reflexif.js` — `afficherVue` strictement identique avant et après le refactor du 15 mai 2026. **Pas une régression du refactor.**
+  - **Cibles** : reproductible aussi en venant de Parcours et Auto-réflexion si elles sont scrollées bas. Probablement pas seulement Import — toutes les transitions vue-haute → vue-courte sont concernées (Rapport → Import notamment).
+  - **Pistes** : (a) scroll explicite vers le haut du conteneur bilan à chaque `afficherVue` (cohérent UX onglets) ; (b) `min-height` sur `.bilan-vue` pour éviter le shrink du DOM ; (c) préserver `scrollY` quand possible. (a) recommandé.
+  - **Trouvé pendant** : test manuel Safari du refactor bilan-reflexif (worktree `Monitorage_v6-refactor`, branche `refactor/2026-mai`).
+
 ### Rythme Phase 5 — Raffinements (selon usage, post-AQPC)
 
 - [ ] **#268** Courbe d'apprentissage de l'evaluateur (tendance temporelle par activite)
