@@ -1,14 +1,21 @@
 /* ===============================
-   MODULE: BILAN RÉFLEXIF
-   Questionnaire de fin de trimestre, import CSV, rapport d'analyse
+   MODULE: BILAN RÉFLEXIF — RÉSIDU ORCHESTRATION
+   Initialisation, navigation entre vues, hooks afficherSection /
+   afficherSousSection, assemblage de l'API publique window.BilanReflexif.
 
-   Sous-modules extraits (PLAN-MOYEN-TERME §4.1) :
-   - `bilan-reflexif-core.js` : styles, genId, afficherToast, libelleTypeQuestion
-     (à charger AVANT ce fichier)
+   Sous-modules à charger AVANT (PLAN-MOYEN-TERME §4.1) :
+   - bilan-reflexif-data.js   : données de référence
+   - bilan-reflexif-core.js   : état, persistance, finders, utilitaires
+   - bilan-reflexif-editeur.js : éditeur de questionnaire
+   - bilan-reflexif-parcours.js : parcours d'apprentissage
+   - bilan-reflexif-reflexion.js : auto-réflexion enseignant
+   - bilan-reflexif-import-export-texte.js : import/export texte
+   - bilan-reflexif-csv.js    : import CSV des résultats
+   - bilan-reflexif-rapport.js : rapport + Chart.js + export PDF
 
-   Le résidu ci-dessous contient encore les sections 1 (état), 2 (init/nav),
-   3-7 (éditeur, parcours, réflexion, import CSV, rapport). Les extractions
-   suivantes les déplaceront vers leurs sous-modules dédiés.
+   Refactoring §4.1 terminé : ce résidu ne contient plus que l'orchestration
+   et le contrat d'API publique (forwarders vers les sous-modules pour
+   préserver les data-action du dispatcher).
    =============================== */
 
 (function() {
@@ -273,31 +280,5 @@ window.BilanReflexif = {
 };
 
 window.initialiserBilanReflexif = initialiserBilanReflexif;
-
-// Exposition pour les tests de régression du refactoring 2026-mai
-// (cf. audit/PLAN-MOYEN-TERME.md §4.1, MODULES-MAP §2.5). Ces fonctions sont
-// pures et n'ont pas vocation à faire partie de l'API publique. Le hatch sera
-// retiré au fur et à mesure des 7 extractions : chaque sous-module exposera
-// naturellement ses propres pures via son IIFE, et les tests pointeront alors
-// vers ces nouveaux exports.
-window.__bilanReflexifInternals = {
-    // Texte — extrait vers BilanReflexifTexte (§4.1.f), forwarders
-    parserQuestionnaireTexte: BilanReflexifTexte.parserQuestionnaireTexte,
-    formaterQuestionnaireEnTexte: BilanReflexifTexte.formaterQuestionnaireEnTexte,
-    genererModeleTexte: BilanReflexifTexte.genererModeleTexte,
-    // CSV — extrait vers BilanReflexifCSV (§4.1.f), forwarders
-    parserCSV: BilanReflexifCSV.parserCSV,
-    detecterSeparateur: BilanReflexifCSV.detecterSeparateur,
-    normaliserTexte: BilanReflexifCSV.normaliserTexte,
-    similitudeTexte: BilanReflexifCSV.similitudeTexte,
-    convertirLikert: BilanReflexifCSV.convertirLikert,
-    obtenirCiblesMapping: BilanReflexifCSV.obtenirCiblesMapping,
-    mapperColonnes: BilanReflexifCSV.mapperColonnes,
-    _agregerQuestion: BilanReflexifCSV._agregerQuestion,
-    _estNA: BilanReflexifCSV._estNA,
-    _splitMultiChoix: BilanReflexifCSV._splitMultiChoix,
-    _trouverOptionParTexte: BilanReflexifCSV._trouverOptionParTexte,
-    estColonneIgnoree: BilanReflexifCSV.estColonneIgnoree
-};
 
 })();
