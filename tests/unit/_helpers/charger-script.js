@@ -18,13 +18,16 @@ const racineProjet = path.resolve(__dirname, '..', '..', '..');
  *
  * @param {string} cheminRelatifProjet - ex. 'js/import-export.js'
  * @param {object} globaux - globaux additionnels (ex. { JSZip })
+ * @param {object|null} fauxWindowExistant - sandbox `window` réutilisé pour
+ *   enchaîner plusieurs sous-modules (refactor étape 3 productions.js, 16 mai 2026).
+ *   Si fourni, les nouveaux exports y sont ajoutés au lieu de créer un sandbox vide.
  * @returns {object} un objet window-like contenant les exports
  */
-export function chargerScript(cheminRelatifProjet, globaux = {}) {
+export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExistant = null) {
     const chemin = path.join(racineProjet, cheminRelatifProjet);
     const code = readFileSync(chemin, 'utf8');
 
-    const fauxWindow = {};
+    const fauxWindow = fauxWindowExistant || {};
     const fauxDocument = {
         addEventListener: () => {},
         removeEventListener: () => {},
