@@ -1,477 +1,244 @@
-# SESSION — État au 12 mai 2026 (fin de journée)
+# SESSION — État au 15 mai 2026 (refactor productions.js — étapes 1+2 livrées)
 
-**Date** : 12 mai 2026
-**Dernier build** : `0512-1012` · Beta **99.42**
-**Branche `main`** : 7 commits du sprint matinal **poussés** sur origin. Itérations #159 de l'après-midi (3 fixes puis retrait complet) **encore locales**.
-**Branche `feature/lot-4a-jetons`** : inchangée depuis le 11 mai (Lot 4a préservé, **non mergé** — bac à sable prévu semaine 25-31 mai).
-**Statut** : journée très productive — sprint 6 items + audit reality-check (2 items fermés) + 3 quick wins + cleanup module mort + retrait zéro-dette de #159 après retour terrain. **BACKLOG 33 → 23 items ouverts (-10).**
+**Date** : 15 mai 2026 (soirée — étapes 1 + 2 sur la branche `refactor/productions`)
+**Dernier commit sur `refactor/productions`** : `bad7ecd` — préparation du refactor (tests régression + audit MODULES-MAP + bugs latents SUIVI-BUGS).
+**Branche `main`** : `1b4818d` — inchangée depuis le merge bilan-reflexif (15 mai matin).
+**Branche `refactor/productions`** : `bad7ecd` — **1 commit local non-pushé** (refactor préparé, productions.js LUI-MÊME pas modifié).
+**Branche `audit/2026-mai`** (repo principal) : `1765ac2` + modifs locales sur rapports d'audit et SESSION.md de la session précédente (non liée à productions.js).
+**Statut** : **étapes 1 + 2 livrées**, productions.js intact. Tests : 60 Vitest (46 baseline + 14 nouveaux) + 6 Playwright = **66/66 verts**. 2 bugs latents inscrits dans SUIVI-BUGS.md (#96, #97, priorité basse, ne bloquent pas le refactor). 7 écarts d'exécution annotés dans MODULES-MAP §2.2. Prêt pour **étape 3 (découpage incrémental)** — premier sous-module à décider avec Grégoire.
 
-**Ultrareview `js/codex.js` complétée le 12 mai 2026** — pipeline 4/4 phases ✓, **0 finding**. Skeleton de tests + rapport ajoutés (commits `443b626` + `e0122ee`). Procédure SESSION.md §44-117 corrigée suite aux tâtonnements (orphan `review-base` + draft PR + CLI locale). Voir `Rapports/ultrareview-codex-2026-05-12.md`.
-
-**Prochain chantier** : **Ultrareview 2** (`js/travaux-export-pdf.js` + `js/travaux-annotation.js`) — **démarre maintenant** (avance sur le calendrier CALENDRIER §128 qui prévoyait semaine 18-24 mai ; Ultrareview 1 codex étant clos avec 0 finding, on enchaîne).
+> **Note d'emplacement** : ce SESSION.md vit sur la branche `refactor/productions` dans le worktree `/Users/kuekatsheu/Documents/GitHub/Monitorage_v6-refactor`. Le SESSION.md du repo principal (sur `audit/2026-mai`) n'a pas été modifié — il contenait la consigne **précédente** (« démarrer refactor productions.js ») qui est maintenant terminée et représentée par ce document.
 
 ---
 
-## Consigne de démarrage pour la prochaine session
+## Récap session 15 mai 2026 (étapes 0 + 1 + 2)
 
-À copier-coller au début de la prochaine session (Ultrareview 2, démarrage immédiat — avance sur calendrier) :
+### Étape 0 — Préparation
+- Worktree `refactor/productions` créé depuis main (METHODE §3 étape 0)
+- Symlinks `node_modules` (racine + tests/) ajoutés
+- Baseline 46 Vitest + 6 Playwright = **52/52 verts** confirmée
+
+### Étape 1 — Lecture + grep helpers + scan callers (3 994 LOC lus intégralement)
+
+**7 écarts documentés dans MODULES-MAP §2.2 « Écarts observés à l'exécution »** :
+
+1. **Conflit nommage** : `js/productions-bibliotheque.js` existe DÉJÀ (303 LOC, storage layer non-namespacé, chargé avant productions.js). Sous-module UI à extraire renommé en **`productions-bibliotheque-ui.js`** (décision Grégoire).
+2. **Top-complexité élargi** : `afficherFormProduction` cyc **47** non listé dans MODULES-MAP §2.2 — à ajouter à l'étape 4 en plus de `sauvegarderProduction` (cyc **80**, MODULES-MAP indiquait 79). 8 autres fonctions au-dessus de cyc 15 (héritage).
+3. **Helpers cross-module** : aucun helper `rendre*`/`echapper*`/`tronquer*`/`format*` interne (pattern inverse de bilan-reflexif). Anti-pattern §5.6 ne s'applique pas. 30 dépendances cross-module défensives via `typeof X === 'function'`.
+4. **Surface exports** : 47 exports `window.X` dont 3 réassignations en bas (wrappers `sauvegarder/annuler/supprimerProduction`). Wrappers à garder groupés dans le résidu (anti-pattern §5.3).
+5. **Callers externes** : `donnees-v2.js:1710` réassigne `window.afficherTableauProductions` (à investiguer). `reserve-ouvrir.js` consomme `importerProductionsExternes`.
+6. **Bugs latents inscrits dans SUIVI-BUGS.md** (priorité basse, préservation comportementale stricte METHODE §2 P3) :
+   - **#96** — `event.target.value` ligne 2972 dans `importerProductions(eventOuEl)` — variable `event` non-définie, masqué par `window.event` (Chrome/Safari).
+   - **#97** — `window.productionEnCoursEdition` jamais positionnée, wrappers 3883/3916/3938 = code mort fonctionnel. State machine utilise `productionEnEdition` (let dans config.js:133).
+7. **Tailles révisées** : `productions-core.js` ~1 700 LOC (vs 1 610 §2.2), `productions-bibliotheque-ui.js` ~730 LOC (vs 960 §2.2, surévalué), `productions-import-export.js` ~643 LOC ✓, `productions-liste.js` ~715 LOC.
+
+### Étape 2 — Tests régression Vitest (14 tests verts)
+
+`tests/unit/refactor-productions.test.js` créé (270 LOC). Périmètre **pure publiques** seulement (helpers privés à promouvoir à l'étape 3) :
+
+- **1 canari** : chargement IIFE sans erreur + sentinelle 23 exports `window.X` attendus
+- **6 cas** `obtenirEcheanceEffective` : legacy + multi-groupe + fallback + entrée sans date + sans groupeCoursId
+- **2 cas** `getTypeLabel` : tous types + fallback inconnu
+- **5 cas** `importerProductionsExternes` avec db mocké : vide/null/sans-id/remplacer=false/remplacer=true
+
+**Couverture vs MODULES-MAP §2.2 (6 tests d'intégration)** : les 6 cas (création, modification, suppression, import/export, bibliothèque, verrouillage) sont des **tests d'intégration** très couplés au DOM + storage — peu réalistes en Vitest pure. Couverture déléguée à : (a) tests Playwright DOM à ajouter à l'étape 3 (dette §5.6), (b) test manuel exhaustif par Grégoire à l'étape 5.
+
+**Tests après étape 2** : 60 Vitest + 6 Playwright = **66/66 verts**.
+
+### Décisions actées avec Grégoire pendant la session
+
+1. Sous-module UI biblio → `productions-bibliotheque-ui.js` (pattern storage/ui cohérent).
+2. Bugs latents #96 + #97 → ignorer pendant le refactor (préservation comportementale stricte, corriger plus tard).
+3. Stop session après étape 2, étape 3 dans une nouvelle session (cerveau frais).
+
+---
+
+## Consigne de démarrage pour la prochaine session (étape 3 productions.js)
+
+À copier-coller au début de la prochaine session :
 
 ```
-cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
+cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6-refactor
 
 Lecture obligatoire :
-1. SESSION.md — statut + procédure ultrareview détaillée ci-dessous
-2. BACKLOG.md — 23 items [ ] actifs
-3. docs/CALENDRIER.md §96-132 — « Stratégie ultrareviews pré-colloque »
-4. memory : feedback_ultrareview_workflow.md (pattern orphan + draft PR + CLI locale)
+1. SESSION.md (ce document) — statut + décisions actées 15 mai
+2. audit/refactoring-prep/METHODE-REFACTORING.md
+   - §3 étape 3 (découpage incrémental)
+   - §4 check-list par sous-module (cyc + grep helpers + tests)
+   - §5.1 ordre de chargement index.html
+   - §5.2 CSP exports window.X / dispatcher data-action
+   - §5.3 variables module-scope (wrappers à grouper)
+3. audit/refactoring-prep/MODULES-MAP.md §2.2 + sous-section « Écarts observés à l'exécution »
+4. tests/unit/refactor-productions.test.js (sentinelles + pures déjà couvertes)
 
 État git attendu en début de session :
-- main : 11 commits du 12 mai poussés sur origin (sprint matinal
-  06035b8 → 947ac1d + post-ultrareview codex 443b626 + e0122ee +
-  consigne Ultrareview 2 de24c32 + retrait #159 f8cf504).
-- feature/lot-4a-jetons (commit e4c348d) inchangée, bac à sable
-  prévu semaine 25-31 mai.
-- review/codex-2026-05-12 conservée sur origin (archive du bundle,
-  draft PR #16 OPEN). feature/ultrareview-codex-2026-05-12 supprimée
-  localement (merge fast-forward terminé).
+- main : 1b4818d (inchangé)
+- refactor/productions : bad7ecd (1 commit local non-pushé)
+- Worktree Monitorage_v6-refactor existe (créé 15 mai)
+- Tests verts attendus : 60 Vitest + 6 Playwright = 66/66
 
 Vérification rapide à l'ouverture de session :
-  git status                            # rien d'inattendu
-  git log --oneline origin/main..HEAD   # rien (tout déjà poussé)
-  cd tests && npm test                  # 30 verts (baseline)
+  git log --oneline -3       # bad7ecd visible
+  git status                 # propre (sauf symlinks node_modules en untracked)
+  cd tests && npm test       # 66/66 verts
 
-## OBJECTIF DE LA SESSION : Ultrareview 2
+## OBJECTIF DE LA SESSION : démarrer l'étape 3 productions.js — découpage incrémental
 
-Deuxième et dernière ultrareview pré-colloque (1 ultrareview à la
-fois, cf. CALENDRIER §128-132 ; pas d'ultrareview semaine 25-31 mai
-sur gel pré-colloque).
+### Choix du premier sous-module à extraire
 
-### Contexte
+Trois candidats par ordre de risque croissant :
 
-- `js/travaux-export-pdf.js` : 1207 l. — pipeline PDF (refonte design B
-  livrée Beta 95+, derniers fixes #264 progression exports longs)
-- `js/travaux-annotation.js` : 3144 l. — édition annotations sur travaux
-  (jetons visuels, palette, ligne pointillée Build 0401-1550)
-- **Total** : 4351 l. — comparable à Lot 4a (~11 060 l.) mais plus
-  modulaire
-- Aucun test existant dans `tests/unit/` pour ces deux modules
-- Format de stockage des annotations (sérialisées par travail) : changer
-  son format = casser les travaux annotés existants → différer toute
-  modification de format manifestée par les findings
+1. **`productions-import-export.js` (~643 LOC, lignes 2630-3273)** — RECOMMANDÉ
+   - Faible couplage : `exporterProductions`, `exporterProductionActive`,
+     `importerDansProductionActive`, `importerProductions`,
+     `verifierMigrationCategories`, `afficherAssistantMigrationCategories`,
+     `assignerToutesMigration`, `fermerModalMigration`,
+     `sauvegarderMigrationCategories`, `fermerModalImportProductions`,
+     `confirmerEtFermerImportProductions`, `ouvrirFilePickerImportProductions`,
+     et `window.confirmerImportProductions` (3000-3075).
+   - Pas de top-complexité bloquant (sauf `exporterProductionActive` cyc 25
+     qui pourrait être traité ici ou laissé pour étape 4).
+   - Aucune dépendance circulaire avec les autres sous-modules cibles.
 
-### Préparation (étapes 1-2 de la procédure ci-dessous)
+2. **`productions-bibliotheque-ui.js` (~730 LOC, lignes 1898-2629)**
+   - Couplage modéré avec productions-bibliotheque.js (storage layer existant)
+   - Beaucoup de calls à `BibliothequeUI.*` (15 usages)
+   - Plus de risque visuel (modale, sections sélection/disponibles)
 
-Cibler le bundle : `js/travaux-export-pdf.js` + `js/travaux-annotation.js`.
-Nomenclature (utiliser la date du jour, p.ex. `2026-05-12` si démarrage immédiat) :
-- bundle : `review/travaux-export-annotation-<DATE>`
-- branche fixes : `feature/ultrareview-travaux-export-annotation-<DATE>`
+3. **`productions-liste.js` (~715 LOC, lignes 3278-3993 sauf wrappers 3868-3943)**
+   - Contient `afficherListeProductions`, `chargerProductionPourModif`,
+     `creerNouvelleProduction`, `dupliquerProduction`,
+     `supprimerProductionActive`, `dupliquerEtEditerProduction`,
+     `importerProductionsExternes`.
+   - ATTENTION : les wrappers 3868-3943 (3 variables module-scope) DOIVENT
+     rester dans le résidu — anti-pattern §5.3.
 
-Draft PR vers `review-base`. Lancer `/ultrareview <PR#>` **depuis une
-session CLI locale** (pas web/desktop).
+### Procédure pour productions-import-export.js (Méthode §3 étape 3)
 
-### Procédure pas à pas
+1. Créer `js/productions-import-export.js` avec IIFE standard
+2. Copier les ~13 fonctions concernées (2630-3273 + `confirmerImportProductions` 3000)
+3. Identifier les dépendances :
+   - `getCleProductions` (privée à productions.js) → à exposer sur `window.X`
+     avant l'extraction OU à dupliquer dans le nouveau fichier
+   - `afficherFormProduction`, `afficherListeProductions`,
+     `afficherTableauProductions`, `afficherBibliothequeProductions`,
+     `mettreAJourPonderationTotale` → déjà sur `window.X` ✓
+   - Helpers globaux : `db`, `cle`, `echapperHtml`, `genererNomFichierExport`,
+     `demanderMetadonneesEnrichies`, `ajouterMetadonnéesCC`,
+     `verifierLicenceCC`, `genererBadgeCC`, `avertirSansLicence`,
+     `ApercuSandbox`, `filtrerRessourcesNonDemo`, `afficherNotificationSucces`
+     → déjà globaux, OK
+4. Ajouter `<script src="js/productions-import-export.js?v=...">` dans
+   index.html APRÈS productions.js (consommateur des fonctions exposées)
+   ET APRÈS productions-bibliotheque.js (consommateur du storage layer)
+5. Retirer les ~13 fonctions de productions.js
+6. Lancer les tests (66 doivent rester verts — le canari attrape les
+   exports manquants)
+7. Audit ESLint complexity sur productions.js (résidu) ET sur
+   productions-import-export.js (proposition Cat B #2 du 15 mai)
+8. Commit `refactor(productions): extraire productions-import-export.js`
 
-**Étape 1 — Préparer le bundle de review** (~10 min, en début de session)
+### Check-list par sous-module (§4 étape 3, étendue 15 mai)
 
-Le pattern (confirmé par les 7 ultrareviews Lot 1-6 du 29 avril + codex
-du 12 mai) utilise **deux branches** :
+- [ ] Nouveau fichier avec IIFE + exports window.X
+- [ ] Fonctions copiées sans modification fonctionnelle
+- [ ] Dépendances identifiées et résolues (window.X si besoin)
+- [ ] `<script>` ajouté dans index.html au bon endroit (anti-pattern §5.1)
+- [ ] Fonctions retirées du fichier d'origine
+- [ ] ESLint complexity ≤ 30 sur ce sous-module ET sur productions.js résidu
+- [ ] Grep des helpers et data-action — confirmer aucun ReferenceError potentiel
+- [ ] Tests de régression verts (66 Vitest + 6 Playwright)
+- [ ] Commit atomique
 
-- `review/<cible>-<date>` (basée sur la branche **orpheline** `review-base`)
-  — bundle figé du code à auditer. Un seul commit qui copie les fichiers
-  cibles depuis main. C'est le diff que `/ultrareview` analysera.
-- `feature/ultrareview-<cible>-<date>` (basée sur main) — branche de
-  travail où les fixes seront appliqués après lecture du rapport.
+### Suite probable de la session (si timing le permet)
 
-⚠️ **Ne PAS brancher depuis main pour le bundle** — sans le détour par
-`review-base` orpheline, `git merge-base` ne trouve aucun diff et
-`/ultrareview` échoue avec « Could not find merge-base with main ».
+- Extraction `productions-liste.js` (~715 LOC) — ne pas oublier de laisser
+  les wrappers 3868-3943 dans le résidu (anti-pattern §5.3).
+- Extraction `productions-bibliotheque-ui.js` (~730 LOC) — vérifier que
+  le chargement reste **après** productions-bibliotheque.js (storage layer).
 
-Commandes prêtes-à-coller (remplacer `<DATE>` partout) :
+### Anti-patterns à surveiller (METHODE §5)
 
-```bash
-cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
-git checkout main && git pull
+- §5.1 ordre de chargement : 4 nouveaux `<script>` à insérer dans le bon
+  ordre dans index.html (storage layer biblio avant ; sous-modules après
+  productions.js si encore résiduel ou avant si productions.js disparaît)
+- §5.2 CSP `script-src 'self'` : tous les `data-action` doivent pointer
+  vers un `window.X` existant — vérifier après extraction
+- §5.3 variables module-scope `sauvegarderProductionOriginale`,
+  `annulerFormProductionOriginale`, `supprimerProductionOriginale` —
+  doivent rester groupées dans le résidu productions-core
+- §5.5 état pivot `productionEnEdition` (config.js:133) — accessible à
+  tous les sous-modules (variable globale via config.js, OK)
+- §5.6 helpers cross-module — aucun helper interne à promouvoir (pattern
+  inverse de bilan-reflexif, déjà vérifié à l'étape 1)
 
-DATE=<DATE>   # p.ex. 2026-05-12 si démarrage immédiat
+### Si un test échoue après extraction
 
-# Branche de fixes (depuis main, vide au départ)
-git checkout -b feature/ultrareview-travaux-export-annotation-$DATE
-
-# Bundle pour le reviewer (depuis review-base, orpheline)
-git checkout review-base
-git checkout -b review/travaux-export-annotation-$DATE
-git checkout main -- js/travaux-export-pdf.js js/travaux-annotation.js
-git commit -m "review: bundle travaux-export-pdf + travaux-annotation pour ultrareview ($DATE)"
-git push -u origin review/travaux-export-annotation-$DATE
+1. Le canari attrape probablement (export window.X manquant)
+2. Vérifier l'ordre de chargement dans index.html
+3. Si bug réel : inscrire dans SUIVI-BUGS.md, corriger, recommencer
+4. Tests à laisser verts en permanence (METHODE §3 P2 « petits pas »)
 ```
 
-Ouvrir une **draft PR** ciblant `review-base` (pas main !) :
+---
 
-```bash
-gh pr create --base review-base --head review/travaux-export-annotation-$DATE --draft \
-  --title "Ultrareview — travaux-export-pdf + travaux-annotation ($DATE)" \
-  --body "Bundle de review pour les deux modules d'export PDF et d'annotation des travaux.
+## Archive — Consigne « Démarrer refactor productions.js » (15 mai 2026 matin/après-midi, terminée)
 
-Cibles :
-- js/travaux-export-pdf.js (1207 l.) — pipeline PDF (refonte design B Beta 95+)
-- js/travaux-annotation.js (3144 l.) — édition annotations sur travaux
+**Note de relais** : la consigne ci-dessous a piloté la session du 15 mai (étapes 0 + 1 + 2 livrées). Elle vit toujours dans le SESSION.md du repo principal (`audit/2026-mai`) mais est maintenant **terminée**. Conservée comme référence dans la consigne précédente (lecture obligatoire + objectifs initiaux).
 
-Attentes : vérifier injection XSS éventuelle, gestion mémoire/blobs, fuites
-de listeners sur ouverture/fermeture répétée, robustesse parsing PDF.
-Le format de stockage des annotations est figé (rétrocompat) — différer
-toute modification de format manifestée par les findings."
-```
+Voir le repo principal `/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/SESSION.md` pour la version intégrale.
 
-Noter le **numéro de PR** généré — il sera l'argument de `/ultrareview`.
+Résumé exécuté :
+- Étape 0 ✓ : worktree + symlinks + baseline 52 verts
+- Étape 1 ✓ : lecture intégrale + grep + audit ESLint + MODULES-MAP annotée
+- Étape 2 ✓ : 14 tests Vitest régression (pures publiques + canari)
+- Étape 2bis ✗ : Playwright DOM repoussé à l'étape 3 (dette §5.6)
+- Bugs latents #96, #97 inscrits dans SUIVI-BUGS.md (priorité basse)
+- Commit `bad7ecd` sur `refactor/productions`
 
-Vérifier que la suite Vitest est verte (baseline de comparaison) :
+---
 
-```bash
-cd tests && npm test
-```
+## Archive — Consigne « Refactor bilan-reflexif merge » (15 mai 2026, terminée)
 
-**Étape 2 — Lancer /ultrareview** (Grégoire seulement)
+Refactor bilan-reflexif mergé sur main (15 mai matin, build `0515-1745`, Beta 99.45).
+8 sous-modules (4 716 LOC → max 955 LOC, −80 %). Cyclomatic max 63 → 27 (−57 %).
+0 fonction au-dessus de cyc 30. Tests 46 Vitest + 6 Playwright = 52/52 verts.
+Test manuel Safari 8/8 OK. 6 propositions Cat B intégrées dans METHODE.
+1 bug pré-existant trouvé pendant le test manuel : **#278** au BACKLOG (scroll
+reset onglet Import — pas une régression).
 
-- ⚠️ **Depuis une session CLI locale dans le terminal**, **pas** depuis
-  l'app web/desktop Claude Code. L'app web rejette la commande avec :
-  *« /ultrareview est uniquement disponible dans une session Claude
-  Code locale. »*
-- Syntaxe : `/ultrareview <PR#>` (numéro de la draft PR créée à l'étape 1).
-  La forme sans argument ne marche que si la branche courante a un diff
-  contre main — ce qui n'est pas le cas dans ce workflow puisque le
-  diff réel vit sur la branche `review/<cible>-<date>` orpheline.
-- Payant (billed as Extra Usage, cf. CLAUDE.md).
-- Durée typique : 5-30 min. Pipeline en 4 phases (Configuration,
-  Rechercher, Vérifier, Déduplication).
-- **Sortie locale** : task-notification CLI avec `findings: [...]`.
-- **Sortie web** : session cloud apparaît dans la sidebar Recents
-  Claude Code (web/desktop) comme `ultrareview: <repo>#<PR#>`. C'est
-  le canal de vérité en cas de doute (cf. précédent Lot 4a : pipeline
-  crashé mais findings récupérables depuis la web UI).
-- Le rapport final est **rédigé manuellement** dans
-  `Rapports/ultrareview-<cible>-<date>.md` à partir des findings
-  retournés + observation de la session web. Aucun fichier n'apparaît
-  automatiquement sur disque.
+Voir le repo principal `SESSION.md` (commits 6f0049c → 8038c40 sur `refactor/2026-mai`,
+puis mergé sur main en `b0e432d` + apport METHODE/MODULES-MAP en `1b4818d`).
 
-**0 finding sur un module entier n'est pas anormal** dans ce pipeline.
-Précédents :
+---
 
-- Lot 4a (1er mai) : 0 finding sur `evaluation.js` (~7460 l.) +
-  `liste-evaluations.js` (~2770 l.). Les 11 findings concentrés sur
-  `evaluation-jetons.js`.
-- Ultrareview codex (12 mai) : 0 finding sur `codex.js` (~2936 l.),
-  pipeline complet 4 phases.
+## Référence rapide (conventions en vigueur)
 
-Le reviewer sélectionne ses cibles dans la phase *Rechercher* via
-heuristiques. Si rien ne déclenche, peu/aucun candidat passe à
-*Vérifier*. Conserver un skeleton de tests comme garde-fou minimal
-de régression dans tous les cas.
+- **version.json source unique** pour beta et build — bumper en fin de session si modifs code
+- **Hook pré-push Vitest** doit rester vert à chaque push
+- **Convention nommage** : `nb` canonique (pas `n` ni `nombre`). Voir `docs/architecture/CONVENTIONS-NOMMAGE.md`
+- **STYLE_GRAPHIQUE** (#246) : `Object.assign({}, window.STYLE_GRAPHIQUE.tooltip, overrides)` pour tout nouveau chart Chart.js
+- **Aide ✴️** : `<button class="btn-aide-contextuelle" data-aide="cle">✴️</button>` + entrée dans `js/accompagnement-contenu-popup.js`
+- **Tooltips survol** : `data-tooltip="cle"` + entrée dans `js/accompagnement-contenu-hover.js`
+- **Sentinelle Défense E (F.16)** dans `tests/unit/lint-securite.test.js` bloque tout nouveau `value="${X.Y}"` non échappé. Utiliser `echapperHtml()`.
 
-**Étape 3 — Lecture critique du rapport** (~30-45 min)
+---
 
-Findings classés Critical / High / Medium / Low / Nit. Pour chaque :
-1. Vérifier la pertinence (faux positifs possibles, surtout sur du code
-   IIFE/vanilla JS qu'un agent peut mal interpréter).
-2. Classer selon le risque trimestre :
-   - **Fix maintenant** (safe-trimestre) : échappement HTML, code mort,
-     refactors sans changement de comportement, garde-fous null, console.log
-     de debug, JSDoc.
-   - **Différer après trimestre** : changements d'algorithme, modification
-     de format de stockage (format annotations !), comportement sauvegarde.
+## Chantiers reportés (référence)
 
-⚠️ **`travaux-annotation.js` sérialise les annotations dans `fichiersTravaux`
-par travail**. Tout changement de schéma casse les travaux annotés existants.
-Différer ces changements sans plan de migration.
-
-⚠️ **`travaux-export-pdf.js` produit des PDF servis directement à l'enseignant**.
-Les fixes sur le pipeline d'export doivent être validés visuellement sur
-plusieurs travaux annotés réels (matrice, signature, rétroaction, jetons).
-
-**Étape 4 — Appliquer les fixes** (~1-2 j selon volume, étalé sur la semaine)
-
-Conventions :
-- Travailler sur la branche `feature/ultrareview-<cible>-<date>`
-  créée à l'étape 1 (basée sur main, vide au départ).
-- 1 commit par finding majeur (ou par axe cohérent comme Lot 4a).
-- Pour chaque vrai bug fixé : **ajouter un test Vitest** dans
-  `tests/unit/<cible>.test.js` (créer si pas existant). Convention :
-  couvrir le comportement attendu, pas le bug spécifique.
-- Hook pré-push Vitest doit rester vert à chaque push.
-- Bumper version.json + cache buster du fichier modifié à chaque push.
-
-**Étape 5 — Validation Safari** (avant merge sur main)
-
-- Cmd+Q Safari → relancer pour forcer rechargement (cache busters
-  inopérants sur file://).
-- Chemins critiques à tester pour Ultrareview 2 :
-  - Ouvrir un travail annoté, modifier une annotation, sauvegarder.
-  - Réouvrir le même travail : annotations préservées (format intact).
-  - Ajouter/retirer jetons visuels, changer couleur, déplacer ligne pointillée.
-  - Exporter le travail en PDF (vérifier rendu visuel : matrice, signature,
-    rétroaction, jetons, fond d'image).
-  - Exporter en lot (sélection multiple) : pas de fuite mémoire, ordre
-    cohérent, progression visible (#264).
-- Tester en Chrome aussi si les fixes touchent FSAPI ou Blob/URL.
-
-**Étape 6 — Bac à sable + merge** (semaine 25-31 mai si fix de comportement)
-
-- Si le rapport contient des findings « comportement » non triviaux
-  (comme Lot 4a), **NE PAS merger sur main avant un bac à sable**
-  semaine 25-31 mai (gel des dév lourds).
-- Si tous les fixes sont triviaux (escape, dead code, refactor pur),
-  merger directement.
-
-### Pattern d'archivage
-
-Précédent établi (Lot 1-6 + codex au 12 mai) :
-
-- Les **draft PR** ciblant `review-base` restent **OUVERTES en
-  permanence** (cf. PR #3-9 Lot 1-6 + PR #16 codex). Ce sont des
-  archives vivantes du bundle audité. **Ne pas les fermer.**
-- Les **branches `review/<cible>-<date>` restent sur origin**
-  indéfiniment (cf. `origin/review/lot-1-securite` … `lot-6-travaux-saisie`).
-- La **branche locale `feature/ultrareview-<cible>-<date>` peut être
-  supprimée après merge** si elle est devenue un alias de main (cas
-  0 finding, ou tous les fixes mergés). Hygiène git standard
-  post-merge.
-
-### Garde-fous (résumé CALENDRIER §128-132)
-
-- **1 ultrareview à la fois** — Ultrareview 1 (codex) clôt avec 0 finding,
-  on enchaîne donc Ultrareview 2 (`travaux-export-pdf.js` +
-  `travaux-annotation.js`) en avance sur le calendrier original (qui
-  prévoyait semaine 18-24 mai). Pas d'autre ultrareview tant que celle-ci
-  n'est pas close.
-- **Pas d'ultrareview semaine 25-31 mai** (gel pré-colloque).
-- **Coût** : Grégoire vérifie budget avant de lancer (audit ~$X
-  pour ~2700 l. selon Lot 4a).
-
-## Validation terrain prioritaire (Safari, si pas encore fait)
-
-Le sprint du 12 mai (6 items modulaires + 3 quick wins) n'a pas été
-testé exhaustivement en Safari avant push. Si pas déjà validé :
-
-1. **#277** Évaluations s'ouvre normalement (modale Réparation retirée)
-2. **#239** Safari Mac : bouton « Télécharger le codex » + sous-texte
-   « Télécharge un nouveau fichier ». Détails du codex : note navigateur.
-3. **#243** Menu Codex → « Comparer avec un codex... » → rapport copiable
-   + Télécharger .txt.
-4. **#246** Tooltips noirs (fond rgba 0,0,0,0.85, cornerRadius 6) sur
-   les 4-5 graphiques Chart.js. Mode clair ET sombre.
-5. **#242** Tooltip sur le graphique Dynamique des corrélations.
-6. **#159** retiré (zéro-dette) : Conception → Cartouches → sélectionner une
-   cartouche. La matrice s'affiche seule, plus d'onglets ni de zone d'aperçu.
-7. **#18** Tooltips au survol des 5 nouveaux éléments dans le formulaire
-   d'évaluation : Sauvegarder, bouton profil rapide, Régénérer rétroaction,
-   radios Note chiffrée/Niveau, bouton Supprimer dans la liste.
-
-## Chantiers reportés (semaine 25 mai+)
-
-- **Bac à sable Lot 4a jetons** (25-31 mai)
-- **Ultrareview 2** : `travaux-export-pdf.js` + `travaux-annotation.js`
-  (démarrage immédiat — avance sur calendrier ; était prévue 18-24 mai)
-- **Lot 3 indices ultrareview** (post-trimestre, touche notes actives)
+- **Bac à sable Lot 4a jetons** (semaine 25-31 mai)
+- **Lot 3 indices ultrareview** (post-trimestre)
 - **Phase 5 Démo** (~1 j, déjà reverté 22 avril)
 - **#272** machine à états chargement éval (~1 j)
 - **#240** Tampons jetons visuels sur travaux annotés (~2-3 h)
-- **Défense E migration EXHAUSTIVE** — post-colloque seulement
-
-## Conventions encore en vigueur (référence rapide)
-
-- Module `progression.js` (#229) : try/finally avec masquerProgression.
-- Aide ✴️ : `<button class="btn-aide-contextuelle" data-aide="cle">✴️</button>`
-  + entrée popup dans `js/accompagnement-contenu-popup.js`.
-- Tooltips survol : `data-tooltip="cle"` + entrée dans
-  `js/accompagnement-contenu-hover.js`. **Zone Évaluations couverte
-  au 12 mai.** Restantes : Planification, Présences, Construction note,
-  Tableau de bord, Boîte à outils, Aide.
-- **Défense E** : sentinelle F.16 bloque tout nouveau `value="${X.Y}"`
-  non échappé. Utiliser `echapperHtml()`.
-- **STYLE_GRAPHIQUE** (#246, nouveau) : pour tout nouveau chart Chart.js,
-  appliquer `tooltip: Object.assign({}, window.STYLE_GRAPHIQUE.tooltip, overrides)`.
-  Helper thème-aware `STYLE_GRAPHIQUE.couleurs()` pour axes/grille.
-- **Conventions nommage** : `nb` canonique (pas `n` ni `nombre`). Voir
-  `docs/architecture/CONVENTIONS-NOMMAGE.md`.
-- **BACKLOG.md** : 23 items ouverts au 12 mai (fin de journée).
-```
+- **Défense E migration EXHAUSTIVE** — post-colloque
 
 ---
 
-## Bilan complet — 12 mai 2026
+## Refactor modules après productions.js (PLAN-MOYEN-TERME §4.3-§4.5)
 
-**Sprint matinal** : 7 commits poussés sur origin. Beta 99.42 conservée. Builds `0512-0708` → `0512-0840`.
-
-**Après-midi** : 3 itérations locales sur #159 (builds `0512-1000` → `0512-1012`), aboutissant au retrait zéro-dette de la fonctionnalité. À committer en 1 commit avant la prochaine session.
-
-### Sprint 1 : 6 items modulaires courts (4 commits)
-
-#### Commit 1 : `06035b8` — refactor(#277) retire chaîne morte modale Réparation
-
-- Modale `modalReparationEvaluations` jamais ouverte depuis l'UI
-  (`afficherModalReparationEvaluations` jamais appelée → toute la chaîne morte)
-- Retraits : modale HTML (54 lignes), 4 fonctions `evaluation.js`, 2 exports
-  `window.*`, entrée popup `modal-reparation`
-- `extraireNiveauxDepuisRetroaction` conservé (fallback chargement L5469)
-
-#### Commit 2 : `8e4632b` — docs(#22) crée noms_stables.json
-
-- Fichier référencé partout dans le code (~50 marqueurs « ⚠️ NE PAS RENOMMER »)
-  mais inexistant sur disque (signalé par audit Obsidian 11 mai)
-- Création via scan automatisé `awk FNR` : 4 globales config.js +
-  3 fonctions navigation.js + 15 productions.js + 22 grilles.js =
-  **44 identifiants protégés** (nom, type, ligne, rôle)
-
-#### Commit 3 : `b9c5643` — feat(#242,#246) doc tooltip + uniformiser Chart.js
-
-- **#242** : nouvelle entrée `labo-correlations-longitudinales` + `data-tooltip`
-  sur canvas
-- **#246** : `STYLE_GRAPHIQUE` global dans `js/couleurs.js` (tooltip
-  standardisé + helper `couleurs()` thème-aware). 4 modules chart alignés.
-  Fallback inline préservé pour résilience ordre de chargement.
-
-#### Commit 4 : `573181d` — feat(#239,#243) Codex menu + comparer
-
-- **#239** : détection FSAPI → libellé bouton « Enregistrer » → « Télécharger »
-  + sous-texte adaptatif + note navigateur dans `actionDetails`
-- **#243** : `actionComparer` indépendant de Fusionner. Modale
-  `modalCodexComparer` avec textarea copiable + Copier (clipboard API) +
-  Télécharger .txt (Blob). `_construireRapportComparaison` produit un
-  rapport exhaustif par catégorie.
-
-### Audit reality-check (1 commit)
-
-#### Commit 5 : `429e232` — docs(backlog) ferme #207 + #276 après audit
-
-- **#207** : migration travaux-stockage.js → db.js déjà faite (Beta 95).
-  API blob en place dans `db.js:683`. Fusion modules NON pertinente
-  (concerns distincts).
-- **#276** : mode standalone évaluation déjà fonctionnel à `evaluation.js:5327`,
-  fixes mars 2026 actifs.
-
-### Quick wins (1 commit)
-
-#### Commit 6 : `947ac1d` — feat(#27,#159,#18) conventions + onglets cartouche + tooltips Évaluations + cleanup
-
-- **#27** : `docs/architecture/CONVENTIONS-NOMMAGE.md` créé (préfixe `nb`
-  canonique, recommandations par concept, cas rétrocompat à préserver)
-- **#159** : onglets « ✏️ Édition / 👁 Aperçu » sur l'éditeur de cartouche
-  (matinal). **Retiré l'après-midi après retour terrain** — voir section
-  « Itérations #159 » ci-dessous.
-- **#18 zone Évaluations** : 1 câblage orphelin (`eval-btn-supprimer`) +
-  4 nouvelles clés câblées (`eval-btn-sauvegarder`, `eval-profil-rapide`,
-  `eval-btn-regenerer-retro`, `eval-affichage-note-choix`).
-- **Cleanup zéro-dette** : `js/evaluations-apercu.js` (148 l.) supprimé
-  (jamais appelé, IDs `ea-*` jamais en DOM). 7 clés tooltips orphelines
-  retirées. Entrée `'evaluations-apercu'` dans `guidage-demo.js` retirée.
-
-### Itérations #159 (après-midi, 3 modifications locales non commitées)
-
-Validation Safari du sprint a révélé que les onglets #159 ne réagissaient
-pas au clic. Trois itérations successives :
-
-1. **Build `0512-1000`** — fix dispatcher : signature `basculerOngletCartouche(event)`
-   → `basculerOngletCartouche(bouton)`. Cause racine : le dispatcher `data-action`
-   de `main.js:639` passe l'élément, pas un event ; `event.currentTarget` était
-   `undefined` → `return` silencieux. Émojis ✏️ et 👁 retirés des libellés.
-2. **Build `0512-1005`** — fix aperçu : retirer `u-hide` (`display:none !important`)
-   sur `#apercuRetroaction` au passage en mode Aperçu. Le legacy gardait le
-   conteneur masqué en attendant un clic sur « Générer un aperçu aléatoire ».
-3. **Build `0512-1012`** — **retrait zéro-dette complet** après retour terrain :
-   « l'aperçu de rétroaction ne sert à rien quand la matrice est déjà visible
-   en édition ». Suppression : onglets HTML (12 l.), conteneur `#apercuRetroaction`
-   (12 l.), `genererApercuAleatoire()` + JSDoc (~50 l.), `basculerOngletCartouche`
-   + MutationObserver (~65 l.), CSS `.onglets-cartouche` (~75 l.), attribut
-   `data-onglet-actif`, 6 sites `apercuRetroaction.classList.add/remove`, 2 lignes
-   JSDoc d'en-tête, 2 exports `window.*`. BACKLOG #159 statut `[x] RETIRÉ`.
-
-**À faire avant Ultrareview 2** : décider du commit (1 commit final
-« refactor(#159) retire onglets + aperçu legacy » ou amender le sprint —
-plutôt commit séparé, l'itération est documentée), push, validation Safari.
-
----
-
-## Récap des compteurs
-
-| Métrique | Valeur |
-|---|---|
-| Commits poussés sur main | **7** (sprint matinal 06035b8 → 947ac1d) |
-| Modifs locales non commitées | **3 itérations #159** (build 1000, 1005, 1012) |
-| Items BACKLOG ouverts | 33 → **23** (-10) |
-| Items fermés `[x]` aujourd'hui | **10** : #277, #22, #242, #239, #243, #246, #207, #276, #27, #159 (#159 livré puis retiré, reste fermé) |
-| Item enrichi | #18 (zone Évaluations livrée, 6 zones restantes) |
-| Tests | 30 verts (24 Vitest + 6 Playwright WebKit) |
-| Lignes nettes | sprint : ~+830 / -270 ; retrait #159 : ~+5 / -220 |
-| Versions | 99.42 b0512-0708 → 99.42 b0512-1012 |
-
----
-
-## Insights / patterns notables du 12 mai
-
-### Pattern : 4 commits groupés vs 6 commits stricts
-
-Quand un sprint multi-items touche le même fichier plusieurs fois
-(`index.html` × 5 items, `js/codex.js` × 2), grouper par thème plutôt
-que tenter un découpage strict hunk-by-hunk avec `git add -p`. Reverts
-ciblés restent possibles, risque d'erreur de manipulation évité.
-Documenté dans memory `feedback-commits-groupes-par-theme`.
-
-### Pattern : feature avec fallback résilient à l'ordre de chargement
-
-`STYLE_GRAPHIQUE` est exposé via `window.STYLE_GRAPHIQUE` dans `couleurs.js`
-mais accédé via `window.STYLE_GRAPHIQUE.tooltip || fallback_inline` dans
-les modules consommateurs. Lazy access = résout au moment de l'appel,
-pas au chargement. Bilan-reflexif.js charge AVANT couleurs.js mais
-fonctionne quand même car les charts sont créés à la navigation
-utilisateur.
-
-### Pattern : MutationObserver pour synchroniser un UI subordonné
-
-Pour #159 (matinal), plutôt que de modifier les 12 sites JS qui montrent/cachent
-`#matriceRetroaction`, un MutationObserver sur sa classe `u-hide` synchronisait
-automatiquement la visibilité de la barre d'onglets. Pattern réutilisable
-quand on ajoute un UI subordonné à un état existant sans avoir à toucher
-tous les contrôleurs — même si le code a été retiré l'après-midi, l'insight
-reste valable pour de futurs ajouts UI subordonnés.
-
-### Insight : valider l'utilité de la fonctionnalité avant de polir la mécanique
-
-Pour #159, deux fixes successifs (dispatcher + `u-hide`) ont été tentés avant
-de constater que la fonctionnalité elle-même n'apportait rien : l'aperçu
-aléatoire ne sert à rien quand la matrice complète est déjà visible en
-édition. Coût payé : 3 itérations Safari du testeur. Leçon : la validation
-Safari d'une feature UX doit inclure une question d'utilité au testeur,
-pas seulement « est-ce que ça marche ».
-
-### Insight : `awk NR` vs `FNR`
-
-Pour extraire des line numbers per-file dans un scan multi-fichiers,
-utiliser `FNR` (line number relative au fichier). `NR` est cumulatif
-global et donne des numéros aberrants. Documenté dans memory du 12 mai.
-
-### Insight : « zéro-dette » étendu au-delà du prompt utilisateur
-
-Pour #277, la consigne demandait de retirer 3 fonctions précises. Par
-principe zéro-dette (CLAUDE.md), j'ai retiré toute la chaîne morte
-(2 fonctions supplémentaires + 2 exports) après vérification que
-`extraireNiveauxDepuisRetroaction` restait utilisé ailleurs. Idem pour
-#18 : cleanup du module `evaluations-apercu.js` (148 l.) découvert
-pendant l'audit, fait dans la même session.
-
-### Insight : un audit Obsidian externe pousse des findings hors scope
-
-L'audit Obsidian du 11 mai a soulevé que `noms_stables.json` était
-mentionné mais inexistant. Hors scope direct, déclenche #22 livré
-2 jours plus tard. Les audits externes utiles révèlent souvent plus
-que leur scope direct.
-
----
-
-## Références utiles
-
-- **Stratégie ultrareviews** : `docs/CALENDRIER.md` §96-132
-- **Sentinelle Défense E** : `tests/unit/lint-securite.test.js` (F.16)
-- **STYLE_GRAPHIQUE source** : `js/couleurs.js` (bas du fichier)
-- **noms_stables.json** : racine du projet, 44 identifiants protégés
-- **Conventions nommage** : `docs/architecture/CONVENTIONS-NOMMAGE.md`
-- **Lot 4a référence** (pour la procédure d'ultrareview) : branche
-  `feature/lot-4a-jetons`, commit `e4c348d`, rapport `Rapports/`
+| Module | LOC | Effort | Fenêtre |
+|---|---:|---:|---|
+| `trimestre-v2.js` | 6 584 | ~8-12 h | 19-23 mai (après évals Grégoire) |
+| `profil-etudiant.js` | 8 818 | ~6-9 h | 19-23 mai |
+| `evaluation.js` | 7 348 | ~6-8 h | 19-23 mai, en dernier |
