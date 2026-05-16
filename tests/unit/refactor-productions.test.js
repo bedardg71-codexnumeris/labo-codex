@@ -86,8 +86,13 @@ beforeAll(() => {
     // `confirmerImportProductions` y vivent désormais. On charge le sous-module
     // dans un sandbox séparé puis on fusionne ses exports dans `win` pour préserver
     // la sentinelle anti-régression.
-    const winImportExport = chargerScript('js/productions-import-export.js', stubs);
-    Object.assign(win, winImportExport);
+    chargerScript('js/productions-import-export.js', stubs, win);
+
+    // Refactor étape 3 (16 mai 2026) : productions-liste.js extrait depuis
+    // productions.js. Sidebar + CRUD utilisateur (afficherListeProductions,
+    // chargerProductionPourModif, creerNouvelleProduction, dupliquerProduction,
+    // supprimerProductionActive, dupliquerEtEditerProduction, importerProductionsExternes).
+    chargerScript('js/productions-liste.js', stubs, win);
 
     obtenirEcheanceEffective = win.obtenirEcheanceEffective;
     getTypeLabel = win.getTypeLabel;
@@ -231,6 +236,31 @@ describe('productions — régression refactoring 2026-mai (pures publiques)', (
     // -----------------------------------------------------------------------
     describe('3. importerProductionsExternes (canari intégration)', () => {
 
+        // Helper local : charge productions.js + productions-liste.js dans le
+        // même sandbox avec db mocké (importerProductionsExternes vit dans
+        // productions-liste.js depuis le refactor étape 3, 16 mai 2026).
+        function chargerSandbox(stockage) {
+            const stubs = {
+                BibliothequeUI: { obtenirAuteurActif: () => 'T', forkerItem: () => ({}) },
+                echapperHtml: (s) => String(s == null ? '' : s),
+                cle: (k) => 'test_' + k,
+                genererIdUnique: (p) => p + 'X',
+                obtenirCoursActifId: () => null,
+                obtenirIdentiteCCUtilisateur: () => 'Test',
+                formaterDateCourte: (d) => d,
+                db: {
+                    get: async (k) => stockage[k] || [],
+                    getSync: (k, def) => stockage[k] !== undefined ? stockage[k] : (def || []),
+                    set: async (k, v) => { stockage[k] = v; },
+                    setSync: (k, v) => { stockage[k] = v; }
+                },
+                productionEnEdition: null
+            };
+            const winLocal = chargerScript('js/productions.js', stubs);
+            chargerScript('js/productions-liste.js', stubs, winLocal);
+            return winLocal;
+        }
+
         it('3.a Tableau vide retourne 0', () => {
             const res = win.importerProductionsExternes([], { silencieux: true });
             expect(res).toBe(0);
@@ -243,23 +273,7 @@ describe('productions — régression refactoring 2026-mai (pures publiques)', (
 
         it('3.c Productions sans id sont ignorées', () => {
             const stockage = {};
-            // Re-stubber db pour ce test (state local)
-            const winLocal = chargerScript('js/productions.js', {
-                BibliothequeUI: win.__sb_BibliothequeUI || { obtenirAuteurActif: () => 'T', forkerItem: () => ({}) },
-                echapperHtml: (s) => String(s == null ? '' : s),
-                cle: (k) => 'test_' + k,
-                genererIdUnique: (p) => p + 'X',
-                obtenirCoursActifId: () => null,
-                obtenirIdentiteCCUtilisateur: () => 'Test',
-                formaterDateCourte: (d) => d,
-                db: {
-                    get: async (k) => stockage[k] || [],
-                    getSync: (k, def) => stockage[k] !== undefined ? stockage[k] : (def || []),
-                    set: async (k, v) => { stockage[k] = v; },
-                    setSync: (k, v) => { stockage[k] = v; }
-                },
-                productionEnEdition: null
-            });
+            const winLocal = chargerSandbox(stockage);
 
             const res = winLocal.importerProductionsExternes(
                 [{ titre: 'sans id' }, { id: 'P1', titre: 'avec id' }],
@@ -271,22 +285,7 @@ describe('productions — régression refactoring 2026-mai (pures publiques)', (
 
         it('3.d Production existante : non remplacée par défaut', () => {
             const stockage = { test_productions: [{ id: 'P1', titre: 'original' }] };
-            const winLocal = chargerScript('js/productions.js', {
-                BibliothequeUI: { obtenirAuteurActif: () => 'T', forkerItem: () => ({}) },
-                echapperHtml: (s) => String(s == null ? '' : s),
-                cle: (k) => 'test_' + k,
-                genererIdUnique: (p) => p + 'X',
-                obtenirCoursActifId: () => null,
-                obtenirIdentiteCCUtilisateur: () => 'Test',
-                formaterDateCourte: (d) => d,
-                db: {
-                    get: async (k) => stockage[k] || [],
-                    getSync: (k, def) => stockage[k] !== undefined ? stockage[k] : (def || []),
-                    set: async (k, v) => { stockage[k] = v; },
-                    setSync: (k, v) => { stockage[k] = v; }
-                },
-                productionEnEdition: null
-            });
+            const winLocal = chargerSandbox(stockage);
 
             const res = winLocal.importerProductionsExternes(
                 [{ id: 'P1', titre: 'modifié' }],
@@ -298,22 +297,7 @@ describe('productions — régression refactoring 2026-mai (pures publiques)', (
 
         it('3.e Production existante avec remplacer=true : mise à jour', () => {
             const stockage = { test_productions: [{ id: 'P1', titre: 'original' }] };
-            const winLocal = chargerScript('js/productions.js', {
-                BibliothequeUI: { obtenirAuteurActif: () => 'T', forkerItem: () => ({}) },
-                echapperHtml: (s) => String(s == null ? '' : s),
-                cle: (k) => 'test_' + k,
-                genererIdUnique: (p) => p + 'X',
-                obtenirCoursActifId: () => null,
-                obtenirIdentiteCCUtilisateur: () => 'Test',
-                formaterDateCourte: (d) => d,
-                db: {
-                    get: async (k) => stockage[k] || [],
-                    getSync: (k, def) => stockage[k] !== undefined ? stockage[k] : (def || []),
-                    set: async (k, v) => { stockage[k] = v; },
-                    setSync: (k, v) => { stockage[k] = v; }
-                },
-                productionEnEdition: null
-            });
+            const winLocal = chargerSandbox(stockage);
 
             const res = winLocal.importerProductionsExternes(
                 [{ id: 'P1', titre: 'modifié' }, { id: 'P2', titre: 'nouvelle' }],
