@@ -94,6 +94,11 @@ beforeAll(() => {
     // supprimerProductionActive, dupliquerEtEditerProduction, importerProductionsExternes).
     chargerScript('js/productions-liste.js', stubs, win);
 
+    // Refactor étape 3 (16 mai 2026) : productions-bibliotheque-ui.js extrait depuis
+    // productions.js. Modale Gestionnaire de bibliothèque + 14 actions associées
+    // (afficherBibliothequeProductions, ajouterProductionIndividuelle, etc.).
+    chargerScript('js/productions-bibliotheque-ui.js', stubs, win);
+
     obtenirEcheanceEffective = win.obtenirEcheanceEffective;
     getTypeLabel = win.getTypeLabel;
 });
