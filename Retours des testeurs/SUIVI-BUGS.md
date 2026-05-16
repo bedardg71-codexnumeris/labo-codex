@@ -1,7 +1,7 @@
 # Suivi des bugs testeurs
 
 > **Objectif** : Tracker les bugs rapportés par les testeurs pour éviter le travail en double.
-> **Dernière mise à jour** : 4 avril 2026
+> **Dernière mise à jour** : 15 mai 2026
 
 ---
 
@@ -9,6 +9,8 @@
 
 | # | Testeur | Date | Description | Priorité | Fichier(s) concerné(s) |
 |---|---------|------|-------------|----------|------------------------|
+| 96 | Claude (audit refactor) | 15 mai 2026 | `importerProductions(eventOuEl)` utilise `event.target.value = ''` à la ligne 2972, mais le paramètre s'appelle `eventOuEl` — la variable `event` n'est pas définie dans le scope IIFE. Probablement masqué par `window.event` (rétro-compat Chrome/Safari) en pratique. Faux-positif possible en delegation pure où `eventOuEl` est un élément. | Basse | js/productions.js |
+| 97 | Claude (audit refactor) | 15 mai 2026 | Wrappers en bas de productions.js (lignes 3872-3943) référencent `window.productionEnCoursEdition` (lecture 3883/3938, reset 3916), mais cette variable n'est jamais positionnée à une valeur non-null dans le code (la state du formulaire utilise `productionEnEdition` déclarée dans config.js:133, sans `window.`). Conséquence : `definirProductionActive(id)` après save (ligne 3889) et `annulerFormProduction()` après suppression d'item actif (ligne 3939) ne se déclenchent jamais. Code mort fonctionnel. | Basse | js/productions.js |
 
 ---
 
