@@ -41,7 +41,7 @@ beforeAll(() => {
     // ne sont évalués qu'à l'appel, mais le chargement de l'IIFE peut
     // accéder à `BibliothequeUI` si une fonction est invoquée au top-level
     // — ce n'est pas le cas pour productions.js, vérifié à la lecture).
-    win = chargerScript('js/productions.js', {
+    const stubs = {
         // Stubs minimaux : ne sont utilisés que si les fonctions exposées
         // sont effectivement invoquées par les tests. Les pures n'en touchent
         // aucun.
@@ -78,7 +78,16 @@ beforeAll(() => {
         // ne la touchent qu'à l'appel, mais le résidu top-level y fait référence
         // dans les commentaires uniquement
         productionEnEdition: null
-    });
+    };
+    win = chargerScript('js/productions.js', stubs);
+
+    // Refactor étape 3 (16 mai 2026) : productions-import-export.js extrait depuis
+    // productions.js. Les exports `exporterProductions`, `importerProductions`,
+    // `confirmerImportProductions` y vivent désormais. On charge le sous-module
+    // dans un sandbox séparé puis on fusionne ses exports dans `win` pour préserver
+    // la sentinelle anti-régression.
+    const winImportExport = chargerScript('js/productions-import-export.js', stubs);
+    Object.assign(win, winImportExport);
 
     obtenirEcheanceEffective = win.obtenirEcheanceEffective;
     getTypeLabel = win.getTypeLabel;
