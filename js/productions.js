@@ -597,12 +597,120 @@ function lireEcheancesParGroupeDepuisFormulaire() {
  *    - Titre "Nouvelle production"
  * 5. Charge la liste des grilles disponibles
  */
+// 🆕 Peupler le select Cartouche (dépend de la grille sélectionnée)
+// Extrait de afficherFormProduction lors de la réduction de complexité (refactor étape 4, 16 mai 2026)
+async function peuplerCartouchesProduction(grilleId) {
+    const selectCartouche = document.getElementById('productionCartouche');
+    if (!selectCartouche) return;
+    if (!grilleId) {
+        selectCartouche.innerHTML = '<option value="">Aucune</option>';
+        return;
+    }
+    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
+    // security-ok: id et nom passent par echapperHtml dans l'interpolation interne
+    selectCartouche.innerHTML = '<option value="">Aucune</option>' +
+        cartouches.map(c => `<option value="${echapperHtml(c.id)}">${echapperHtml(c.nom)}</option>`).join('');
+}
+
+// Pré-remplit le formulaire en mode modification (refactor étape 4, 16 mai 2026)
+async function prerenseignerFormulaireProduction(prod) {
+    const titre = document.getElementById('titreFormEvaluation');
+    const btnTexte = document.getElementById('btnTexteEvaluation');
+    const selectGrille = document.getElementById('productionGrille');
+    const selectEchelle = document.getElementById('productionEchelle');
+    const selectCartouche = document.getElementById('productionCartouche');
+
+    productionEnEdition = prod.id;
+    if (titre) titre.textContent = 'Modifier l\'évaluation';
+    if (btnTexte) btnTexte.textContent = 'Sauvegarder';
+
+    document.getElementById('productionTitre').value = prod.titre;
+    document.getElementById('productionActivite').value = prod.activiteApprentissage || prod.description || '';
+    document.getElementById('productionType').value = prod.type;
+    document.getElementById('productionPonderation').value = prod.ponderation;
+    if (selectGrille) selectGrille.value = prod.grilleId || '';
+
+    // 🆕 Pré-remplir échelle et cartouche depuis la production
+    if (selectEchelle && prod.echelleId) selectEchelle.value = prod.echelleId;
+    if (prod.grilleId) {
+        await peuplerCartouchesProduction(prod.grilleId);
+        if (selectCartouche && prod.cartoucheId) selectCartouche.value = prod.cartoucheId;
+    }
+
+    document.getElementById('productionObjectif').value = prod.objectif || '';
+    document.getElementById('productionTache').value = prod.tache || '';
+
+    // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Charger date d'échéance
+    document.getElementById('productionDateEcheance').value = prod.dateEcheance || '';
+
+    // 🆕 Beta 98.3 : Échéances par groupe-cours (multi-groupe)
+    peuplerEcheancesParGroupe(prod);
+
+    // Gérer l'affichage des champs spécifiques au type
+    gererChangementTypeProduction();
+
+    // Synchroniser la grille inline si c'est un artefact de portfolio
+    const selectGrilleInline = document.getElementById('productionGrilleInline');
+    if (selectGrilleInline && prod.type === 'artefact-portfolio') {
+        selectGrilleInline.value = prod.grilleId || '';
+    }
+
+    // Afficher les checkboxes de pratiques compatibles
+    const checkboxesContainer = document.getElementById('checkboxesPratiquesProduction');
+    if (checkboxesContainer && typeof GabaritsUtils !== 'undefined') {
+        checkboxesContainer.innerHTML = GabaritsUtils.genererCheckboxesPratiques('production', prod.pratiquesCompatibles || []);
+    }
+}
+
+// Réinitialise le formulaire en mode ajout (refactor étape 4, 16 mai 2026)
+function reinitialiserFormulaireProduction() {
+    const titre = document.getElementById('titreFormEvaluation');
+    const btnTexte = document.getElementById('btnTexteEvaluation');
+    const selectGrille = document.getElementById('productionGrille');
+    const selectEchelle = document.getElementById('productionEchelle');
+    const selectCartouche = document.getElementById('productionCartouche');
+
+    productionEnEdition = null;
+    if (titre) titre.textContent = 'Nouvelle production';
+    if (btnTexte) btnTexte.textContent = 'Ajouter';
+
+    // Réinitialiser les champs
+    document.getElementById('productionTitre').value = '';
+    document.getElementById('productionActivite').value = '';
+    document.getElementById('productionType').value = '';
+    document.getElementById('productionPonderation').value = '';
+    if (selectGrille) selectGrille.value = '';
+    if (selectEchelle) selectEchelle.value = '';
+    if (selectCartouche) selectCartouche.innerHTML = '<option value="">Aucune</option>';
+    document.getElementById('productionObjectif').value = '';
+    document.getElementById('productionTache').value = '';
+
+    // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Réinitialiser date d'échéance
+    document.getElementById('productionDateEcheance').value = '';
+
+    // 🆕 Beta 98.3 : Échéances par groupe-cours (multi-groupe)
+    peuplerEcheancesParGroupe(null);
+
+    // Réinitialiser les checkboxes de pratiques compatibles
+    const checkboxesContainer = document.getElementById('checkboxesPratiquesProduction');
+    if (checkboxesContainer && typeof GabaritsUtils !== 'undefined') {
+        checkboxesContainer.innerHTML = GabaritsUtils.genererCheckboxesPratiques('production', []);
+    }
+
+    // Réinitialiser les champs portfolio
+    const portfolioNombreRetenir = document.getElementById('portfolioNombreRetenir');
+    const portfolioMinimumCompleter = document.getElementById('portfolioMinimumCompleter');
+    if (portfolioNombreRetenir) portfolioNombreRetenir.value = 3;
+    if (portfolioMinimumCompleter) portfolioMinimumCompleter.value = 7;
+
+    // Réinitialiser l'affichage
+    gererChangementTypeProduction();
+}
+
 async function afficherFormProduction(id) {
 
     const form = document.getElementById('formulaireProduction');
     const btnAjouter = document.getElementById('btnajouterProduction');
-    const titre = document.getElementById('titreFormEvaluation');
-    const btnTexte = document.getElementById('btnTexteEvaluation');
 
     // Afficher le formulaire et cacher le bouton d'ajout (si les éléments existent)
     if (form) form.classList.remove('u-hide');
@@ -611,7 +719,6 @@ async function afficherFormProduction(id) {
     // Charger la liste des grilles dans le select (si l'élément existe)
     const selectGrille = document.getElementById('productionGrille');
     const selectGrilleInline = document.getElementById('productionGrilleInline');
-
 
     if (selectGrille || selectGrilleInline) {
         // 🆕 Beta 95.4 : Utiliser la clé namespacée pour n'afficher que les grilles du trimestre
@@ -637,19 +744,6 @@ async function afficherFormProduction(id) {
             echelles.map(e => `<option value="${echapperHtml(e.id)}">${echapperHtml(e.nom)}</option>`).join('');
     }
 
-    // 🆕 Peupler le select Cartouche (dépend de la grille sélectionnée)
-    const selectCartouche = document.getElementById('productionCartouche');
-    const peuplerCartouchesProduction = async (grilleId) => {
-        if (!selectCartouche) return;
-        if (!grilleId) {
-            selectCartouche.innerHTML = '<option value="">Aucune</option>';
-            return;
-        }
-        const cartouches = await db.get(`cartouches_${grilleId}`) || [];
-        selectCartouche.innerHTML = '<option value="">Aucune</option>' +
-            cartouches.map(c => `<option value="${echapperHtml(c.id)}">${echapperHtml(c.nom)}</option>`).join('');
-    };
-
     // Listener : repeupler cartouches quand la grille change
     if (selectGrille) {
         selectGrille.addEventListener('change', () => peuplerCartouchesProduction(selectGrille.value));
@@ -666,62 +760,10 @@ async function afficherFormProduction(id) {
         const cleProductions = cle('productions');
         const evaluations = await db.get(cleProductions) || [];
 
-        // Debug détaillé de la recherche
-        evaluations.forEach((e, idx) => {
-            const match = e.id === id;
-        });
-
         const prod = evaluations.find(e => e.id === id);
 
         if (prod) {
-            productionEnEdition = id;
-            if (titre) titre.textContent = 'Modifier l\'évaluation';
-            if (btnTexte) btnTexte.textContent = 'Sauvegarder';
-
-            document.getElementById('productionTitre').value = prod.titre;
-            document.getElementById('productionActivite').value = prod.activiteApprentissage || prod.description || '';
-            document.getElementById('productionType').value = prod.type;
-            document.getElementById('productionPonderation').value = prod.ponderation;
-            if (selectGrille) selectGrille.value = prod.grilleId || '';
-
-            // 🆕 Pré-remplir échelle et cartouche depuis la production
-            if (selectEchelle && prod.echelleId) selectEchelle.value = prod.echelleId;
-            if (prod.grilleId) {
-                await peuplerCartouchesProduction(prod.grilleId);
-                if (selectCartouche && prod.cartoucheId) selectCartouche.value = prod.cartoucheId;
-            }
-
-            document.getElementById('productionObjectif').value = prod.objectif || '';
-            document.getElementById('productionTache').value = prod.tache || '';
-
-            // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Charger date d'échéance
-            document.getElementById('productionDateEcheance').value = prod.dateEcheance || '';
-
-            // 🆕 Beta 98.3 : Échéances par groupe-cours (multi-groupe)
-            peuplerEcheancesParGroupe(prod);
-
-            // 🆕 Beta 95.4 : Catégorie (Sélection/Obligatoire) déplacée vers Structure des évaluations
-            // La catégorie est maintenant gérée via checkboxes dans Pratiques → Structure des évaluations
-
-            // Gérer l'affichage des champs spécifiques au type
-            gererChangementTypeProduction();
-
-            // Synchroniser la grille inline si c'est un artefact de portfolio
-            const selectGrilleInline = document.getElementById('productionGrilleInline');
-            if (selectGrilleInline && prod.type === 'artefact-portfolio') {
-                selectGrilleInline.value = prod.grilleId || '';
-            }
-
-            // Si c'est un portfolio, pas de configuration supplémentaire
-            // Les règles de calcul (nombreARetenir, etc.) sont dans Réglages → Pratique de notation
-            if (prod.type === 'portfolio') {
-            }
-
-            // Afficher les checkboxes de pratiques compatibles
-            const checkboxesContainer = document.getElementById('checkboxesPratiquesProduction');
-            if (checkboxesContainer && typeof GabaritsUtils !== 'undefined') {
-                checkboxesContainer.innerHTML = GabaritsUtils.genererCheckboxesPratiques('production', prod.pratiquesCompatibles || []);
-            }
+            await prerenseignerFormulaireProduction(prod);
         } else {
             // Production non trouvée
             console.error('❌ Production non trouvée avec ID:', id);
@@ -736,41 +778,7 @@ async function afficherFormProduction(id) {
         }
     } else {
         // Mode ajout
-        productionEnEdition = null;
-        if (titre) titre.textContent = 'Nouvelle production';
-        if (btnTexte) btnTexte.textContent = 'Ajouter';
-
-        // Réinitialiser les champs
-        document.getElementById('productionTitre').value = '';
-        document.getElementById('productionActivite').value = '';
-        document.getElementById('productionType').value = '';
-        document.getElementById('productionPonderation').value = '';
-        if (selectGrille) selectGrille.value = '';
-        if (selectEchelle) selectEchelle.value = '';
-        if (selectCartouche) selectCartouche.innerHTML = '<option value="">Aucune</option>';
-        document.getElementById('productionObjectif').value = '';
-        document.getElementById('productionTache').value = '';
-
-        // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Réinitialiser date d'échéance
-        document.getElementById('productionDateEcheance').value = '';
-
-        // 🆕 Beta 98.3 : Échéances par groupe-cours (multi-groupe)
-        peuplerEcheancesParGroupe(null);
-
-        // Réinitialiser les checkboxes de pratiques compatibles
-        const checkboxesContainer = document.getElementById('checkboxesPratiquesProduction');
-        if (checkboxesContainer && typeof GabaritsUtils !== 'undefined') {
-            checkboxesContainer.innerHTML = GabaritsUtils.genererCheckboxesPratiques('production', []);
-        }
-
-        // Réinitialiser les champs portfolio
-        const portfolioNombreRetenir = document.getElementById('portfolioNombreRetenir');
-        const portfolioMinimumCompleter = document.getElementById('portfolioMinimumCompleter');
-        if (portfolioNombreRetenir) portfolioNombreRetenir.value = 3;
-        if (portfolioMinimumCompleter) portfolioMinimumCompleter.value = 7;
-
-        // Réinitialiser l'affichage
-        gererChangementTypeProduction();
+        reinitialiserFormulaireProduction();
     }
 }
 
@@ -802,7 +810,11 @@ async function afficherFormProduction(id) {
  * 9. Affiche une notification de succès
  */
 
-async function sauvegarderProduction() {
+// Helpers privés extraits de sauvegarderProduction lors de la réduction de complexité
+// (refactor étape 4, 16 mai 2026). Cyc 80 → ~9 dans la fonction principale.
+
+// Lit toutes les valeurs du formulaire de production (dates multi-groupe incluses)
+function lireDonneesFormulaireProduction() {
     const titre = document.getElementById('productionTitre').value.trim();
     const activiteApprentissage = document.getElementById('productionActivite').value.trim();
     const type = document.getElementById('productionType').value;
@@ -829,162 +841,205 @@ async function sauvegarderProduction() {
         dateEcheance = document.getElementById('productionDateEcheance').value || null;
     }
 
-    // Lire la grille depuis le select (même élément pour tous les types)
     const grille = document.getElementById('productionGrille');
     const grilleId = grille ? grille.value : '';
-
-    // 🆕 Lire échelle et cartouche depuis les selects
     const echelleSelect = document.getElementById('productionEchelle');
     const echelleId = echelleSelect ? echelleSelect.value : '';
     const cartoucheSelect = document.getElementById('productionCartouche');
     const cartoucheId = cartoucheSelect ? cartoucheSelect.value : '';
 
-    // ✅ NOUVEAU (Beta 94): Validation incluant dateEcheance obligatoire
-    if (!titre || !type || (type !== 'artefact-portfolio' && ponderation === 0)) {
+    return { titre, activiteApprentissage, type, ponderation, objectif, tache,
+             echeancesParGroupe, dateEcheance, grilleId, echelleId, cartoucheId };
+}
+
+// Valide les champs obligatoires (alerte + retourne false si manquant)
+function validerChampsObligatoiresProduction(d) {
+    if (!d.titre || !d.type || (d.type !== 'artefact-portfolio' && d.ponderation === 0)) {
         alert('Veuillez remplir tous les champs obligatoires (Titre, Type et Pondération)');
-        return;
+        return false;
     }
-
-    // Les portfolios conteneurs n'ont pas d'échéance - seuls les artefacts individuels en ont
     // 🆕 Beta 98.3 : En mode multi-groupe, au moins un groupe assigné doit avoir une date
-    const auMoinsUneDateAssignee = echeancesParGroupe
-        ? Object.values(echeancesParGroupe).some(e => e.assignee && e.date)
-        : !!dateEcheance;
-    if (!auMoinsUneDateAssignee && type !== 'portfolio') {
+    const auMoinsUneDateAssignee = d.echeancesParGroupe
+        ? Object.values(d.echeancesParGroupe).some(e => e.assignee && e.date)
+        : !!d.dateEcheance;
+    if (!auMoinsUneDateAssignee && d.type !== 'portfolio') {
         alert('La date d\'échéance est obligatoire pour les productions (sauf portfolios conteneurs)');
-        return;
+        return false;
     }
+    return true;
+}
 
-    // 🆕 Beta 98.4 : Avertissement si dates hors bornes du trimestre
-    if (type !== 'portfolio') {
-        const cadreCalendrier = db.getSync(cle('cadreCalendrier'), null);
-        const dateMinTri = cadreCalendrier ? cadreCalendrier.dateDebut : null;
-        const dateMaxTri = cadreCalendrier ? cadreCalendrier.finCours : null;
+// 🆕 Beta 98.4 : Vérifie les dates vs bornes du trimestre (confirm si hors limites)
+function validerEcheancesDansTrimestre(d) {
+    if (d.type === 'portfolio') return true;
 
-        if (dateMinTri || dateMaxTri) {
-            const horsLimites = [];
+    const cadreCalendrier = db.getSync(cle('cadreCalendrier'), null);
+    const dateMinTri = cadreCalendrier ? cadreCalendrier.dateDebut : null;
+    const dateMaxTri = cadreCalendrier ? cadreCalendrier.finCours : null;
+    if (!dateMinTri && !dateMaxTri) return true;
 
-            if (echeancesParGroupe) {
-                // Mode multi-groupe : vérifier chaque groupe assigné
-                const groupesCours = db.getSync(cle('groupesCours'), []);
-                for (const [gcId, entree] of Object.entries(echeancesParGroupe)) {
-                    if (!entree.assignee || !entree.date) continue;
-                    const horsMin = dateMinTri && entree.date < dateMinTri;
-                    const horsMax = dateMaxTri && entree.date > dateMaxTri;
-                    if (horsMin || horsMax) {
-                        const gc = groupesCours.find(g => g.id === gcId);
-                        const numGroupe = gc ? (gc.groupe || gc.groupeNum || '?') : '?';
-                        const label = `gr. ${String(numGroupe).padStart(5, '0')}`;
-                        horsLimites.push(`${label} (${entree.date})`);
-                    }
-                }
-            } else if (dateEcheance) {
-                // Mode simple
-                const horsMin = dateMinTri && dateEcheance < dateMinTri;
-                const horsMax = dateMaxTri && dateEcheance > dateMaxTri;
-                if (horsMin || horsMax) {
-                    horsLimites.push(dateEcheance);
-                }
+    const horsLimites = [];
+
+    if (d.echeancesParGroupe) {
+        // Mode multi-groupe : vérifier chaque groupe assigné
+        const groupesCours = db.getSync(cle('groupesCours'), []);
+        for (const [gcId, entree] of Object.entries(d.echeancesParGroupe)) {
+            if (!entree.assignee || !entree.date) continue;
+            const horsMin = dateMinTri && entree.date < dateMinTri;
+            const horsMax = dateMaxTri && entree.date > dateMaxTri;
+            if (horsMin || horsMax) {
+                const gc = groupesCours.find(g => g.id === gcId);
+                const numGroupe = gc ? (gc.groupe || gc.groupeNum || '?') : '?';
+                const label = `gr. ${String(numGroupe).padStart(5, '0')}`;
+                horsLimites.push(`${label} (${entree.date})`);
             }
-
-            if (horsLimites.length > 0) {
-                const labelDebut = dateMinTri ? formaterDateCourte(dateMinTri) : '?';
-                const labelFin = dateMaxTri ? formaterDateCourte(dateMaxTri) : '?';
-                const msg = horsLimites.length === 1
-                    ? `L'échéance ${horsLimites[0]} est en dehors du trimestre (${labelDebut} – ${labelFin}). Sauvegarder quand même ?`
-                    : `Les échéances suivantes sont en dehors du trimestre (${labelDebut} – ${labelFin}) :\n- ${horsLimites.join('\n- ')}\n\nSauvegarder quand même ?`;
-                if (!confirm(msg)) return;
-            }
+        }
+    } else if (d.dateEcheance) {
+        const horsMin = dateMinTri && d.dateEcheance < dateMinTri;
+        const horsMax = dateMaxTri && d.dateEcheance > dateMaxTri;
+        if (horsMin || horsMax) {
+            horsLimites.push(d.dateEcheance);
         }
     }
 
-    // 🆕 Beta 95.4 : Utiliser la clé namespacée pour le trimestre actif
-    const cleProductions = cle('productions');
-    let evaluations = await db.get(cleProductions) || [];
+    if (horsLimites.length === 0) return true;
 
-    // ✅ AJOUT (6 jan 2026) : Vérification des doublons
-    const idActuel = productionEnEdition || null;
+    const labelDebut = dateMinTri ? formaterDateCourte(dateMinTri) : '?';
+    const labelFin = dateMaxTri ? formaterDateCourte(dateMaxTri) : '?';
+    const msg = horsLimites.length === 1
+        ? `L'échéance ${horsLimites[0]} est en dehors du trimestre (${labelDebut} – ${labelFin}). Sauvegarder quand même ?`
+        : `Les échéances suivantes sont en dehors du trimestre (${labelDebut} – ${labelFin}) :\n- ${horsLimites.join('\n- ')}\n\nSauvegarder quand même ?`;
+    return confirm(msg);
+}
+
+// ✅ AJOUT (6 jan 2026) : Vérifie les doublons de titre (dialogue utilisateur).
+// Retourne { evaluations, titre, annule } — annule=true si l'utilisateur ferme le dialogue.
+async function gererDoublonProduction(titre, evaluations, idActuel) {
     const productionActuelle = idActuel ? evaluations.find(e => e.id === idActuel) : null;
-    const isCreation = !productionEnEdition;
+    const isCreation = !idActuel;
     const isNameChange = productionActuelle && productionActuelle.titre !== titre;
 
-    if ((isCreation || isNameChange) && typeof verifierEtGererDoublon === 'function') {
-        const resultat = await verifierEtGererDoublon('production', titre, evaluations.map(e => ({ ...e, nom: e.titre })), idActuel);
-
-        if (resultat === null) {
-            // Utilisateur a annulé
-            return;
-        }
-
-        if (resultat && resultat.action === 'renommer') {
-            document.getElementById('productionTitre').value = resultat.nouveauNom;
-            // Mettre à jour la variable locale
-            arguments[0] = resultat.nouveauNom; // Ne fonctionne pas, utiliser variable
-        }
-
-        if (resultat && resultat.action === 'ecraser') {
-            // Supprimer la production existante avec le même titre
-            evaluations = evaluations.filter(e => e.titre !== titre);
-        }
+    if (!(isCreation || isNameChange) || typeof verifierEtGererDoublon !== 'function') {
+        return { evaluations, titre, annule: false };
     }
 
-    // Re-lire le titre en cas de renommage
-    const titreFinal = document.getElementById('productionTitre').value.trim();
+    const resultat = await verifierEtGererDoublon('production', titre, evaluations.map(e => ({ ...e, nom: e.titre })), idActuel);
+    if (resultat === null) {
+        return { evaluations, titre, annule: true };
+    }
 
+    let nouvelEvaluations = evaluations;
+    let nouveauTitre = titre;
+    if (resultat && resultat.action === 'renommer') {
+        document.getElementById('productionTitre').value = resultat.nouveauNom;
+        nouveauTitre = resultat.nouveauNom;
+    }
+    if (resultat && resultat.action === 'ecraser') {
+        nouvelEvaluations = evaluations.filter(e => e.titre !== titre);
+    }
+    return { evaluations: nouvelEvaluations, titre: nouveauTitre, annule: false };
+}
+
+// Construit l'objet productionData prêt à être inséré dans evaluations.
+function construireProductionData(d, evaluations) {
     // ✅ CORRECTION CRITIQUE (Beta 95 - 27 déc 2025) : Ajouter coursId
     const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
     if (!coursId) {
         console.warn('[Productions] ⚠️ Aucun cours actif - production créée sans coursId');
     }
 
-    // Lire les pratiques compatibles
     const pratiquesCompatibles = typeof GabaritsUtils !== 'undefined'
         ? GabaritsUtils.lirePratiquesSelectionnees('production')
         : [];
 
-    // Préparer l'objet de base
-    // 🆕 Beta 95.4 : Catégorie déplacée vers Structure des évaluations
-    // Préserver la catégorie existante si modification, sinon null pour nouvelle production
+    // 🆕 Beta 95.4 : Préserver la catégorie existante si modification, sinon null
     const existingProd = evaluations.find(p => p.id === productionEnEdition);
     const categorieExistante = existingProd?.categorie || null;
 
-    let productionData = {
-        titre: titreFinal,  // ✅ Utilise titreFinal en cas de renommage
-        activiteApprentissage,
-        description: activiteApprentissage,  // Rétrocompat exports existants
-        type,
-        ponderation,
-        objectif,
-        tache,
-        grilleId,
-        echelleId,        // 🆕 Persistance échelle dans le gabarit
-        cartoucheId,      // 🆕 Persistance cartouche dans le gabarit
-        dateEcheance,     // ✨ NOUVEAU (Beta 94 - 10 déc 2025)
-        echeancesParGroupe: echeancesParGroupe || undefined,  // 🆕 Beta 98.3 : multi-groupe
-        pratiquesCompatibles,  // Pratiques de notation compatibles
+    const productionData = {
+        titre: d.titre,
+        activiteApprentissage: d.activiteApprentissage,
+        description: d.activiteApprentissage,  // Rétrocompat exports existants
+        type: d.type,
+        ponderation: d.ponderation,
+        objectif: d.objectif,
+        tache: d.tache,
+        grilleId: d.grilleId,
+        echelleId: d.echelleId,        // 🆕 Persistance échelle dans le gabarit
+        cartoucheId: d.cartoucheId,    // 🆕 Persistance cartouche dans le gabarit
+        dateEcheance: d.dateEcheance,  // ✨ NOUVEAU (Beta 94 - 10 déc 2025)
+        echeancesParGroupe: d.echeancesParGroupe || undefined,  // 🆕 Beta 98.3 : multi-groupe
+        pratiquesCompatibles,
         verrouille: false,
-        dansBibliotheque: true,  // ✅ AJOUT (8 décembre 2025) - Nouvelle production dans bibliothèque par défaut
-        coursId,  // ✅ CRITIQUE (Beta 95) : Lier la production au cours actif
-        categorie: categorieExistante  // 🆕 Beta 95.4 : Préservée, gérée via Structure des évaluations
+        dansBibliotheque: true,  // ✅ AJOUT (8 décembre 2025)
+        coursId,  // ✅ CRITIQUE (Beta 95)
+        categorie: categorieExistante  // 🆕 Beta 95.4
     };
 
-    // Si c'est un Portfolio, ajouter les données spécifiques
-    if (type === 'portfolio') {
-        // ✅ CORRECTION Phase 3: Les règles de calcul ne sont PLUS sauvegardées ici
-        // Elles sont configurées dans Réglages → Pratique de notation → Configuration PAN
-
-        // Pas besoin de stocker artefactsIds - sera détecté dynamiquement
+    if (d.type === 'portfolio') {
+        // ✅ CORRECTION Phase 3: Les règles de calcul sont configurées dans Réglages
         productionData.modeCalcul = 'provisoire';
     }
+    return productionData;
+}
+
+// Rafraîchit l'UI après la sauvegarde (notifications, selects, modale, etc.).
+// Note préservation comportementale : `productionEnEdition` est lue à l'évaluation
+// du message — `annulerFormProduction()` ayant déjà mis cette variable à null,
+// le message dit toujours "ajoutée" (bug latent préservé).
+async function rafraichirInterfaceApresSauvegarde(idSauvegarde) {
+    await afficherTableauProductions();
+    await afficherToutesLesProductionsParType();
+    await mettreAJourPonderationTotale();
+
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces(productionEnEdition ?
+            'Production modifiée avec succès !' :
+            'Production ajoutée avec succès !');
+    }
+
+    if (typeof mettreAJourStatutModalites === 'function') {
+        mettreAJourStatutModalites();
+    }
+
+    if (typeof window.chargerProductionsDansSelect === 'function') {
+        window.chargerProductionsDansSelect();
+    }
+
+    if (typeof window.rechargerFiltreProduction === 'function') {
+        window.rechargerFiltreProduction();
+    }
+
+    // 🆕 BETA 95.1 : Réouvrir la production en mode édition pour qu'elle reste visible
+    if (idSauvegarde && typeof modifierProduction === 'function') {
+        setTimeout(() => {
+            modifierProduction(idSauvegarde);
+        }, 100);
+    }
+}
+
+async function sauvegarderProduction() {
+    const donnees = lireDonneesFormulaireProduction();
+
+    if (!validerChampsObligatoiresProduction(donnees)) return;
+    if (!validerEcheancesDansTrimestre(donnees)) return;
+
+    // 🆕 Beta 95.4 : Utiliser la clé namespacée pour le trimestre actif
+    const cleProductions = cle('productions');
+    let evaluations = await db.get(cleProductions) || [];
+
+    const resultatDoublons = await gererDoublonProduction(donnees.titre, evaluations, productionEnEdition);
+    if (resultatDoublons.annule) return;
+    evaluations = resultatDoublons.evaluations;
+    donnees.titre = resultatDoublons.titre;
+
+    const productionData = construireProductionData(donnees, evaluations);
 
     if (productionEnEdition) {
         // Modifier la production existante
         const index = evaluations.findIndex(e => e.id === productionEnEdition);
         if (index !== -1) {
-            evaluations[index] = {
-                ...evaluations[index],
-                ...productionData
-            };
+            evaluations[index] = { ...evaluations[index], ...productionData };
             // 🆕 Beta 99.05 : Mise à jour dateModification systématique
             evaluations[index].dateModification = new Date().toISOString();
 
@@ -992,7 +1047,6 @@ async function sauvegarderProduction() {
             if (typeof ajouterContributeurSiNecessaire === 'function') {
                 evaluations[index] = ajouterContributeurSiNecessaire(evaluations[index]);
             }
-
         } else {
             console.error('❌ Index non trouvé pour ID:', productionEnEdition);
         }
@@ -1017,41 +1071,9 @@ async function sauvegarderProduction() {
     // 🆕 BETA 95.1 : Garder l'ID pour réafficher après sauvegarde
     const idSauvegarde = productionEnEdition || productionData.id;
 
-    annulerFormProduction();
-    await afficherTableauProductions();
-    await afficherToutesLesProductionsParType();
-    await mettreAJourPonderationTotale();
-
-    // Afficher la notification de succès si la fonction existe
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(productionEnEdition ?
-            'Production modifiée avec succès !' :
-            'Production ajoutée avec succès !');
-    }
-
-    // Mettre à jour le statut des modalités si la fonction existe
-    if (typeof mettreAJourStatutModalites === 'function') {
-        mettreAJourStatutModalites();
-    }
-
-    // Mettre à jour le select des productions dans le module Évaluation
-    if (typeof window.chargerProductionsDansSelect === 'function') {
-        window.chargerProductionsDansSelect();
-    }
-
-    // Mettre à jour le filtre de production dans la liste des évaluations
-    if (typeof window.rechargerFiltreProduction === 'function') {
-        window.rechargerFiltreProduction();
-    }
-
-    productionEnEdition = null;
-
-    // 🆕 BETA 95.1 : Réouvrir la production en mode édition pour qu'elle reste visible
-    if (idSauvegarde && typeof modifierProduction === 'function') {
-        setTimeout(() => {
-            modifierProduction(idSauvegarde);
-        }, 100);
-    }
+    annulerFormProduction();  // ⚠️ met productionEnEdition = null
+    productionEnEdition = null;  // Préservation stricte : assignation redondante d'origine
+    await rafraichirInterfaceApresSauvegarde(idSauvegarde);
 }
 
 /* ===============================
