@@ -177,6 +177,43 @@ Au minimum 7 tests Vitest et 2-3 tests Playwright avant de toucher `sauvegarderE
 
 Au minimum 6 tests Vitest avant refactor de `sauvegarderProduction`.
 
+#### Écarts observés à l'exécution (étape 1 lecture — 15 mai 2026, refactor non démarré)
+
+Lecture complète des 3 994 LOC + audit ESLint complexity + grep helpers cross-module + scan callers externes. Annotations à compléter quand le découpage sera effectif. La rétrospective finale ira en §6.5 + dans METHODE-REFACTORING §7.
+
+**Écart #1 — Conflit de nommage `productions-bibliotheque.js`** : un fichier `js/productions-bibliotheque.js` (303 LOC) existe déjà et est chargé AVANT `productions.js` dans `index.html` (ligne 16048). Il contient le **storage layer** de la bibliothèque partagée (clé non-namespacée `bibliothequeProductions`) : `obtenirToutesLesProductionsBibliotheque[Sync]`, `obtenirProductionsParDiscipline`, `ajouterALaBibliotheque`, `retirerDeLaBibliotheque`, `importerDansBibliotheque`, `exporterBibliotheque`, `migrerVersBibliotheque`, `listerTrimestresAvecProductions`, etc. Le sous-module `productions-bibliotheque.js` proposé par §2.2 ci-dessus (~960 LOC) concerne la **partie UI** (afficherBibliothequeProductions, preparerDonneesBibliothequeProductions, modale de gestion, sections sélection/disponibles, filtres discipline). À résoudre avant la première extraction. Options : (a) renommer le sous-module UI en `productions-bibliotheque-ui.js` — recommandé, pattern cohérent storage/ui ; (b) fusionner UI dans le fichier existant (le storage devient ~1 263 LOC). Décision Grégoire.
+
+**Écart #2 — Top-complexité élargi** : MODULES-MAP §2.2 listait `sauvegarderProduction` (cyc 79) comme seule fonction au-dessus de cyc 30. L'audit ESLint sur le code actuel (`npx eslint --no-config-lookup --rule '{"complexity": ["error", 15]}'`) révèle **2 fonctions au-dessus de cyc 30** :
+
+| Fonction | Ligne | Cyc actuel | MODULES-MAP §2.2 |
+|---|---:|---:|---|
+| `sauvegarderProduction` | 805 | **80** | 79 (proche) |
+| `afficherFormProduction` | 600 | **47** | non listé |
+
+L'étape 4 (refactoring top-complexité) doit donc traiter `afficherFormProduction` en plus de `sauvegarderProduction`. Plan de découpage proposé pour `afficherFormProduction` : séparer chargement des sélecteurs (grille/échelle/cartouche), branche mode-modification (pré-remplissage), branche mode-création (réinit). 8 autres fonctions au-dessus de cyc 15 (héritage, refactor cosmétique optionnel) : `peuplerEcheancesParGroupe` 27, `gererChangementTypeProduction` 29, `genererHtmlProduction` (nested) 25, `exporterProductionActive` 25, arrow `.map()` ligne 190 = 21, `afficherInfoSeanceEcheance` 20, `afficherToutesLesProductionsParType` 18, arrow ligne 3955 = 16.
+
+**Écart #3 — Helpers cross-module** (anti-pattern §5.6) : **aucun helper local `rendre*`/`echapper*`/`tronquer`/`format*` interne au module** (contrairement à `bilan-reflexif.js`). Les utilitaires partagés sont au début du module (lignes 56-176) et iront naturellement dans le résidu `productions-core.js` consommé par les sous-modules extraits — c'est le pattern inverse de bilan-reflexif. `afficherNotificationSucces/Erreur` consommés via `typeof X === 'function'` (défensif, cross-module — définitions dans `js/trimestre-v2.js` 19/26, `js/evaluation.js` 3583, `js/groupe.js` 47). `echapperHtml` consommé 15 fois (helper global, hors module). `BibliothequeUI` consommé 15 fois (dépendance ferme à `js/bibliotheque-ui.js`).
+
+**Écart #4 — Surface d'exports `window.X`** : 47 exports au total, dont 3 réaffectations en bas du fichier (`window.sauvegarderProduction`, `window.annulerFormProduction`, `window.supprimerProduction` ligne 3873/3898/3923) qui wrappent les fonctions originales pour ajouter le rechargement de la sidebar. **Pattern wrappers** à conserver pendant le découpage : ces 3 réaffectations utilisent les variables module-scope `sauvegarderProductionOriginale` (3872), `annulerFormProductionOriginale` (3897), `supprimerProductionOriginale` (3922). Doivent rester groupées dans le résidu `productions-core.js` (anti-pattern §5.3 — variables module-scope partagées entre fonctions, ne peuvent pas être réparties entre sous-modules).
+
+**Écart #5 — Callers externes** : `js/donnees-v2.js:1710` réassigne `window.afficherTableauProductions` (à investiguer — pourquoi ce module redéfinit-il une fonction de productions.js ?). `js/reserve-ouvrir.js:1120-1121` consomme `window.importerProductionsExternes`. `js/export-pdf.js:2166` définit `window.exporterProductionsEnPDF` (fonction homonyme distincte). Aucun autre caller externe identifié pour les 47 exports — la plupart sont consommés via le dispatcher `data-action`.
+
+**Écart #6 — Bugs latents détectés** (inscrits dans `Retours des testeurs/SUIVI-BUGS.md` #96 et #97, priorité basse) :
+
+1. **#96 — `event.target.value` ligne 2972** dans `importerProductions(eventOuEl)`. Variable `event` non-définie dans le scope IIFE — probablement masqué par `window.event` (Chrome/Safari rétro-compat). Devrait utiliser `target` capturé à la ligne 2917.
+2. **#97 — `window.productionEnCoursEdition` jamais positionnée** : la state machine du formulaire utilise `productionEnEdition` (let dans `js/config.js:133`, sans `window.`), tandis que les wrappers en bas (lignes 3883/3916/3938) lisent/écrivent `window.productionEnCoursEdition`. Code mort silencieux : `definirProductionActive(id)` après save (3889) et `annulerFormProduction()` après suppression d'item actif (3939) ne se déclenchent jamais. À harmoniser pendant le refactor : soit migrer toute la state vers `window.productionEnCoursEdition` (avec `productionEnEdition = window.productionEnCoursEdition`), soit supprimer les références mortes.
+
+**Écart #7 — Découpage proposé : tailles révisées** (estimations après lecture) :
+
+| Sous-module | LOC §2.2 | LOC effectif estimé | Périmètre |
+|---|---:|---:|---|
+| `productions-core.js` (résidu) | ~1 610 | ~1 700 | Helpers (56-176), tableau (177-253), form (255-775), CRUD sauvegarder/annuler/modifier/supprimer/verrouiller/monter/descendre (805-1271), gestion type/portfolio (1298-1665), init/migration (1891-1937), wrappers sidebar (3868-3943) |
+| `productions-bibliotheque-ui.js` *(renommé — cf. écart #1)* | ~960 | ~730 | Bibliothèque UI (1898-2629). Surcoût LOC §2.2 surévalué. |
+| `productions-import-export.js` | ~640 | ~643 | Import/export CC + assistant migration catégories (2630-3273) |
+| `productions-liste.js` | ~680 | ~715 | Sidebar : liste filtrée, duplication, suppression active, importerProductionsExternes (3278-3993 sauf wrappers) |
+
+Total estimé : ~3 788 LOC (vs 3 994 LOC actuels, écart ~5 % attribuable à découpe nette des frontières).
+
 ---
 
 ### 2.3 `profil-etudiant.js` (8 818 LOC, 105 fonctions)
