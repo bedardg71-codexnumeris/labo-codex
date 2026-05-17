@@ -350,6 +350,113 @@ L'audit `02-2-complexity.md` ne nomme pas explicitement les fonctions de ce modu
 
 Au minimum 7 tests Vitest, **dont 5 réutilisables des snippets de 1.2 calculations-tests.md**.
 
+#### Écarts observés à l'exécution (étape 1 lecture — 17 mai 2026, refactor démarré)
+
+Lecture intégrale ciblée des 8 818 LOC + audit ESLint complexity + grep exports + Agent Explore sur frontières inter-zones. Annotations à compléter quand le découpage sera effectif. La rétrospective finale ira en §2.3 « Rétrospective post-refactoring » + dans METHODE-REFACTORING §7.
+
+**Écart #1 — Découpage prévisionnel validé à ~100 %** : les 7 zones fonctionnelles MODULES-MAP §2.3 sont confirmées par l'Agent Explore. Frontières observées correspondent aux prévisionnels ±0 LOC. Aucune zone à fusionner. Le sous-module `profil-etudiant-sections-affichage.js` (~3 700 LOC) reste de loin le plus gros — son éclatement ultérieur en sous-sections est documenté (zone Sections L644-4189). Pas de fusion ni splittage requis à l'étape 3.
+
+**Écart #2 — Top-complexité ÉLARGI (8 fonctions cyc > 30 vs 5 candidates par taille)** : MODULES-MAP §2.3 listait 5 candidates par taille sans audit ESLint formel. L'audit (`eslint --rule '{"complexity":["error",{"max":30}]}'` v8.57.1) révèle **8 violations** :
+
+| Fonction | Ligne | Cyc | MODULES-MAP §2.3 | Zone |
+|---|---:|---:|---|---|
+| `afficherProfilComplet` | 2800 | **58** | listée (~395 LOC) | Sections affichage |
+| `determinerCibleIntervention` | 5399 | **58** | non listée | Calculs |
+| `calculerDetailsNoteFinale` | 7991 | **57** | listée (~300 LOC) | Actions |
+| `genererSectionMobilisationEngagement` | 644 | **52** | listée (~745 LOC) | Sections affichage |
+| `genererSectionPerformance` | 6520 | **47** | listée (~625 LOC) | Sections affichage |
+| `calculerIPB` | 4525 | **36** | non listée | Calculs |
+| Arrow function | 3238 | 36 | non listée | Sections affichage |
+| Arrow function | 6996 | 34 | non listée | Sections affichage |
+
+Étape 4 doit traiter **8 fonctions** (vs 5 anticipées par taille). Aucune au-dessus de cyc 60 — **pas de monstre cyc 80-100** comparable à `changerGroupeCoursActifV2` (cyc 94) de trimestre-v2 ou `sauvegarderProduction` (cyc 80) de productions. Effort étape 4 plus dispersé mais plus simple par unité.
+
+**Écart #3 — Exports `window.X` sous-estimés** : MODULES-MAP §2.3 annonce **24 exports** ; comptage réel `grep -nE "^window\.[a-zA-Z_]+\s*="` = **36 exports** (+50 %). Distribution en **5 zones d'exports dispersées** (pas un bloc unique en bas du fichier) :
+
+| Lignes | Nb | Contenu |
+|---|---:|---|
+| 2362 | 1 | `window.profilActuelDA` (déclaration variable) |
+| 6440 | 1 | `changerOngletDeveloppement` (solitaire) |
+| 7385-7386 | 2 | Navigation interventions |
+| 8335-8345 | 10 | Bloc jetons + niveaux RàI + calculs (mi-fichier après zone Actions) |
+| 8408-8409 | 2 | Patterns groupe (post-fonction) |
+| 8703-8708 | 6 | Modal confidentiel |
+| 8797-8816 | 14 | **Bloc final principal** (orchestre + actions + helpers) |
+
+Pattern à anticiper (feedback `exports-orphelins-grep-window` du refactor productions + trimestre-v2) : grep `window\.<NomFonction>` AVANT ET APRÈS chaque extraction. Particulièrement critique vu la dispersion en 5 zones (analogue à trimestre-v2 §2.4 Écart #3).
+
+**Écart #4 — Pas de hub résiduel comparable à `populerDropdownsAssemblageV2`** : trimestre-v2 avait un hub UI cyc 28 cross-zones appelé 10×. Profil-etudiant a plutôt **11 helpers internes candidats à promotion `window.X`** identifiés par Agent Explore — pas un hub unique mais un éparpillement de fonctions zone-helpers consommées par zones sections/diagnostics/actions. Aucun bottleneck cross-zone identifié — pattern plus propre que trimestre-v2.
+
+Helpers cross-zones candidats à promotion `window.X` :
+- `obtenirCouleurNiveauIDME` (L115) — consommé sections, diagnostics
+- `obtenirIdsProductionsEvaluables` (L175) — consommé calculs, sections
+- `obtenirCriteresAvecValeurs` (L258) — consommé diagnostics
+- `obtenirDetailsAssiduite` (L2073) — consommé sections, mobilisation
+- `interpreterMobilisation` (L408), `interpreterPerformance` (L494), `interpreterCompletion` (L541), `interpreterAssiduite` (L592) — consommés multi-zones
+
+**Écart #5 — Helpers/variables transversaux à laisser dans le résidu OU dans le sous-module helpers** :
+
+Variables module-scope (anti-pattern §5.3) :
+- `profilActuelDA` (L2361, doublé `window.profilActuelDA` L2362)
+- `sectionProfilActive` (L2368) — état navigation sections UI
+- `indiceActif` (L3885) — cache graphique détail
+- `_confidentielDaActuel` (L8417) — zone confidentiel
+- `SOUS_CATEGORIES_SERVICES` (L8420) — constante zone confidentiel
+
+5 variables identifiées (vs 4 annoncées MODULES-MAP §2.3). Toutes restent avec leur zone fonctionnelle — pas de migration cross-zone.
+
+**Écart #6 — État pivot `window.profilActuelDA` — pattern dual-write atomique** : déclaration L2361-2362 (couple `let profilActuelDA + window.profilActuelDA`), écrite **une seule fois** dans le module à L2807-2808 (couple atomique `profilActuelDA = da; window.profilActuelDA = da;`). Lue **24× HORS module** (modules connexes via `window.profilActuelDA`). **Atomicité critique** — préserver le couple dual-write au même endroit lors du découpage. Variable migrera avec `afficherProfilComplet` vers `profil-etudiant-sections-affichage.js`.
+
+**Écart #7 — Helpers cross-module densément consommés** :
+
+| Helper | Occurrences | Origine |
+|---|---:|---|
+| `db.*` | 44 | `js/db.js` |
+| `obtenirDonneesSelonMode` | 23 | Global hors module |
+| `obtenirPreference` | 8+ | Global hors module |
+| `obtenirEtudiantsCoursActif` | 2 | `js/etudiants.js` (avec fallback `filtrerEtudiantsParMode`) |
+| `echapperHtml` | 1 | Global (`securite-*.js`) |
+| `afficherNotificationCopiee` | 1 | Global (toast feedback) |
+| `cle()` / `window.cle` | 0 direct (toutes via `db.getSync(cle('X'))` syntaxe) | `js/trimestres.js` |
+| **`localStorage.*` direct** | **3** | **Anti-pattern isolé** : clé `profilOngletDeveloppementActif` L6371, 6401, 6423 — **toutes dans la zone Sections** (cluster L6354-6451, fonction `genererOngletsDeveloppement`). À migrer vers `db.getSync/setSync` lors du découpage zone Sections (Écart à inscrire SUIVI-BUGS) OU préservation comportementale stricte selon décision Grégoire.
+
+**Écart #8 — Cascade `consulterEvaluation` analogue à `changerGroupeCoursActifV2`** : pas une fonction monstre cyc 94 dupliquée, mais un **orchestrateur multi-timeouts** :
+- `consulterEvaluation` (L7851, ~80 LOC) — cascade T+200ms / T+500ms / T+300ms fallback
+- Utilise `window._consulterEvalTimerId` (guard race condition) + `window._apresOuvertureFichier` (callback post-ouverture)
+- Appelle `afficherSection`, `afficherSousSection`, `travauxResolution`, `travauxUI.ouvrirFichier`, `travauxUI.basculerMode`, `window.modifierEvaluationParId`
+
+`afficherProfilComplet` (L2800, cyc 58, ~285 LOC) est l'autre orchestre — 7 branches `genererSection*` + 4 prefs UI + 3 recalculs indices + 2 modes SOM/PAN + post-rendu setTimeout @100ms avec `accompagnement.initialiserPopup` + `travauxStockage.chargerThumbnailsConteneur`.
+
+Ces deux orchestrateurs justifient le **chargement EN DERNIER** des sous-modules `profil-etudiant-sections-affichage.js` ET `profil-etudiant-actions.js` dans `index.html` (apprentissage trimestre-v2 §2.4 Écart #10 propagé en METHODE §3 étape 0).
+
+**Écart #9 — Ordre d'extraction recommandé** (par Agent Explore sur frontières inter-zones) :
+1. **LOW RISK** : helpers (1) + calculs (3) + rapport (5) — logique pure, peu de dépendances internes, réutilisables
+2. **MEDIUM RISK** : diagnostics (4) + confidentiel (7) — extraire ensemble après LOW (diagnostics consomme calculs, confidentiel autonome mais zone PII)
+3. **HIGH RISK** : sections affichage (2, ~3 700 LOC) + actions (6) — extraire EN DERNIER + chargés EN DERNIER dans index.html (orchestrateurs cascade)
+
+Plan en **4 sessions** (vs 3 pour trimestre-v2) tel que recommandé METHODE §7 « Notes pour le module suivant » point 2 :
+- Session A : LOW (helpers + calculs + rapport) — 3 sous-modules, ~2 125 LOC extraits, faible risque
+- Session B : MEDIUM (diagnostics + confidentiel) — 2 sous-modules, ~1 195 LOC, dont zone PII (charger SKILL_Securite_donnees.md)
+- Session C : HIGH partie 1 (actions) — 1 sous-module, ~615 LOC, cascade `consulterEvaluation`
+- Session D : HIGH partie 2 (sections affichage) + étape 4 + étapes 5+6 — 1 sous-module géant, ~3 700 LOC, monstre `afficherProfilComplet` cyc 58 à éclater
+
+**Écart #10 — Tailles révisées des sous-modules** (estimations après lecture Explore) :
+
+| Sous-module | LOC §2.3 | LOC effectif estimé | Périmètre observé |
+|---|---:|---:|---|
+| `profil-etudiant.js` (résidu) | non spécifié | ~80-150 | wrappers résiduels, helpers globaux conservés (peu) |
+| `profil-etudiant-helpers.js` | ~545 | ~545 | inchangé |
+| `profil-etudiant-sections-affichage.js` | ~3 700 | ~3 700 | inchangé — **éclatement plus poussé reporté** à un cycle dédié post-merge |
+| `profil-etudiant-calculs.js` | ~1 215 | ~1 215 | inchangé |
+| `profil-etudiant-diagnostics.js` | ~830 | ~830 | inchangé |
+| `profil-etudiant-rapport.js` | ~365 | ~365 | inchangé |
+| `profil-etudiant-actions.js` | ~615 | ~615 | inchangé |
+| `profil-etudiant-confidentiel.js` | ~365 | ~365 | inchangé (PII — voir SKILL_Securite_donnees.md) |
+
+Total estimé : ~7 635 LOC répartis (vs 8 818 actuels), écart ~13 % attribuable à IIFE overhead + commentaires de tête + exports.
+
+**Écart #11 — Commentaire en-tête obsolète** : L9-12 mentionne « (À développer) Historique d'assiduité / Indices A-C-P détaillés / Graphiques de progression » — toutes ces sections sont implémentées depuis longtemps. Préservation comportementale stricte = ne pas toucher pendant le refactor, à inscrire en SUIVI-BUGS pour nettoyage Catégorie B post-refactor.
+
 ---
 
 ### 2.4 `trimestre-v2.js` (6 584 LOC, 164 fonctions)

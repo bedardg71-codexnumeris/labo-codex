@@ -1,18 +1,97 @@
 <!-- =====================================================================
      IDENTIFICATION DE CE FICHIER  (ajouté 17 mai 2026)
-     Le projet contient 3 fichiers `SESSION.md` distincts. Ils vivent dans
-     des emplacements / branches différents et couvrent des sujets séparés.
+     Le projet contient désormais 4 fichiers `SESSION.md` distincts (le worktree
+     `Monitorage_v6-profil-etudiant` est créé ce soir). Ils vivent dans des
+     emplacements / branches différents et couvrent des sujets séparés.
      Ne pas confondre.
      ===================================================================== -->
 
 > **📌 Identification**
-> - **Chemin** : `Monitorage_v6-refactor/SESSION.md` (worktree)
-> - **Branche** : `refactor/trimestre-v2`
-> - **Rôle** : session courante du chantier **refactor** (productions.js terminé, trimestre-v2.js en cours)
+> - **Chemin** : `Monitorage_v6-profil-etudiant/SESSION.md` (worktree)
+> - **Branche** : `refactor/profil-etudiant`
+> - **Rôle** : session courante du chantier **refactor profil-etudiant.js** (productions.js et trimestre-v2.js TERMINÉS, mergés FF)
 >
-> **Les deux autres `SESSION.md` du projet** (chemins distincts, à ne pas confondre) :
-> - `Monitorage_v6/SESSION.md` sur branche `audit/2026-mai` — récap historique de la branche principale (legacy refactor/productions, 16 mai).
-> - `Monitorage_v6/audit/SESSION.md` sur branche `audit/2026-mai` — session **audit annuel** Phase 3 (sujet distinct du refactor : audit de fidélité concept → implémentation).
+> **Les trois autres `SESSION.md` du projet** (chemins distincts, à ne pas confondre) :
+> - `Monitorage_v6/SESSION.md` sur branche `audit/2026-mai` — récap historique de la branche principale (legacy 16 mai).
+> - `Monitorage_v6/audit/SESSION.md` sur branche `audit/2026-mai` — session **audit annuel** Phase 3 (sujet distinct : audit de fidélité concept → implémentation).
+> - `Monitorage_v6-refactor/SESSION.md` sur branche `refactor/trimestre-v2` — récap historique du chantier trimestre-v2 (mergé FF sur main, branche à supprimer après push).
+
+# SESSION — État au 17 mai 2026 soir (refactor profil-etudiant.js — étape 1 démarrée)
+
+**Date** : 17 mai 2026 (soir — chantier profil-etudiant.js ouvert après merge FF trimestre-v2)
+**Beta / build** : 99.47 / 0517-1259 (inchangée — pas encore de modif de code)
+**Branche actuelle du worktree** : `refactor/profil-etudiant` (créée depuis `main` 0e8e0f8)
+**Dernier commit** : `0e8e0f8` — `docs(session): correctif numérique — hash 706dc0a → 3b0f3ae` (hérité de main, pas encore de commit profil-etudiant)
+**Branche `main`** : `0e8e0f8` (15 commits non-pushés depuis `4b915b0` — à pusher depuis la maison)
+**Statut chantier profil-etudiant.js** :
+- **Étape 0** : worktree créé + symlinks node_modules + baseline tests **73/73 verts** ✅
+- **Étape 1** : lecture intégrale + audit ESLint + Agent Explore frontières inter-zones — **TERMINÉE**. 11 écarts documentés dans MODULES-MAP §2.3.
+- **Étape 2** : à démarrer (tests régression + canari Vitest 5 + Playwright 2).
+- **Étapes 3-6** : plan en 4 sessions A+B+C+D (vs 3 pour trimestre-v2 — module 50 % plus gros LOC).
+
+**Tests** : 65 Vitest + 8 Playwright = **73/73 verts** (baseline confirmée dans le worktree).
+
+## Récap étape 1 — profil-etudiant.js (17 mai soir)
+
+**Métriques** : 8 818 LOC, 105 fonctions, 36 exports `window.X` (vs 24 annoncés MODULES-MAP §2.3, +50 %), 7 zones fonctionnelles confirmées.
+
+**11 écarts documentés** dans `audit/refactoring-prep/MODULES-MAP.md §2.3` « Écarts observés à l'exécution » :
+
+1. **Découpage 7 sous-modules validé à ~100 %** — frontières correspondent au prévisionnel. `profil-etudiant-sections-affichage.js` reste géant (~3 700 LOC), éclatement plus poussé reporté post-merge.
+2. **8 fonctions cyc > 30** : `afficherProfilComplet` 58, `determinerCibleIntervention` 58, `calculerDetailsNoteFinale` 57, `genererSectionMobilisationEngagement` 52, `genererSectionPerformance` 47, `calculerIPB` 36, 2 arrow functions 36+34. **Pas de monstre cyc 80-100** (max 58, contre 94 pour trimestre-v2).
+3. **36 exports `window.X`** (vs 24 prévus) — dispersés en 5 zones du fichier (L2362, 6440, 7385-7386, 8335-8345, 8408-8409, 8703-8708, 8797-8816).
+4. **Pas de hub résiduel** comparable à `populerDropdownsAssemblageV2` — plutôt 11 helpers internes candidats à promotion `window.X` (interpreterMobilisation/Performance/Completion/Assiduite, obtenirCouleurNiveauIDME, obtenirDetailsAssiduite, etc.).
+5. **5 variables module-scope** identifiées (vs 4 annoncées) : `profilActuelDA`+`window.profilActuelDA` (dual), `sectionProfilActive`, `indiceActif`, `_confidentielDaActuel`, `SOUS_CATEGORIES_SERVICES`.
+6. **État pivot `window.profilActuelDA`** — pattern dual-write atomique L2807-2808 (`profilActuelDA = da; window.profilActuelDA = da;`), 24 lectures HORS module. **Atomicité critique** à préserver lors du découpage.
+7. **3 accès `localStorage` direct** (anti-pattern isolé) — clé `profilOngletDeveloppementActif` L6371, 6401, 6423, toutes dans zone Sections (cluster L6354-6451). **Décision à prendre** : migrer vers `db.getSync/setSync` OU préservation stricte + SUIVI-BUGS.
+8. **Cascade `consulterEvaluation`** — orchestrateur multi-timeouts T+200/500/300ms avec `window._consulterEvalTimerId` race guard. + `afficherProfilComplet` cyc 58 orchestre 7 sections + post-rendu @100ms.
+9. **Ordre d'extraction recommandé** : LOW (helpers+calculs+rapport) → MEDIUM (diagnostics+confidentiel) → HIGH partie 1 (actions) → HIGH partie 2 (sections affichage). 4 sessions.
+10. **Tailles révisées** : tous les sous-modules conformes ±0 LOC vs MODULES-MAP §2.3. Résidu estimé ~80-150 LOC (très petit, peu de wrappers transversaux).
+11. **Commentaire en-tête obsolète** L9-12 — sections « (À développer) » toutes implémentées. À inscrire SUIVI-BUGS Catégorie B post-refactor.
+
+**Décisions actées avec Grégoire** (17 mai soir, étape 1) :
+- (a) **3 accès `localStorage` direct** L6371/6401/6423 (clé `profilOngletDeveloppementActif`) → **préservation comportementale stricte**. Inscrit en SUIVI-BUGS pour traitement Catégorie B post-refactor.
+- (b) **11 helpers internes cross-zones** → **promouvoir tous `window.X`** (sécurité frontière, convention systématique appliquée sur 5 sessions consécutives bilan-reflexif → trimestre-v2). +11 lignes export.
+
+**Décisions à acter** (avant session B) :
+- (c) **Zone PII confidentiel** — charger `SKILL_Securite_donnees.md` au démarrage session B (rappel automatique dans SESSION.md).
+
+## Consigne étape 2 — Tests de régression + canari (à démarrer après validation décisions a-d)
+
+À copier-coller au début de la prochaine session :
+
+```
+cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6-profil-etudiant
+
+Lecture obligatoire :
+1. SESSION.md (ce document) — récap étape 1 + 11 écarts MODULES-MAP §2.3
+2. audit/refactoring-prep/MODULES-MAP.md §2.3 (incluant les écarts ajoutés étape 1)
+3. audit/refactoring-prep/METHODE-REFACTORING.md §3 étape 2 + §7 propositions Catégorie B trimestre-v2
+4. audit/01-fidelity/calculations-tests.md — réutiliser snippets pour 5 tests Vitest (IPB, moyennes critères, diagnostic, pattern, niveau RaI)
+
+État git attendu :
+- main : 0e8e0f8 (inchangé)
+- refactor/profil-etudiant : à confirmer (commit étape 1 livré ce soir : annotation MODULES-MAP + adaptation SESSION.md)
+- Tests verts : 73/73
+
+OBJECTIF étape 2 : ~1-2 h
+- Vitest : 5 tests régression réutilisant snippets calculations-tests.md (IPB, moyennes critères, diagnostic suivi, pattern actuel, niveau RaI) + canari de chargement IIFE multi-sandbox + sentinelle 36 exports + structure `afficherProfilComplet` (async non, arité 1) + atomicité dual-write `profilActuelDA = X; window.profilActuelDA = X`
+- Playwright : 2 tests chargement WebKit + sentinelle exports browser (analogue trimestre-v2-chargement.spec.js)
+- Helper `chargerScript(path, stubs, fauxWindowExistant)` réutilisé tel quel (éprouvé sur productions + trimestre-v2)
+- Stubs requis : db, cle, obtenirDonneesSelonMode, obtenirPreference, obtenirEtudiantsCoursActif, echapperHtml, calculerTousLesIndices, etc.
+- Tests verts attendus à la fin : 80/80 (73 baseline + 7 nouveaux profil-etudiant)
+```
+
+## Décisions actées avec Grégoire (à compléter)
+
+À documenter au fil des sessions :
+- Étape 1 (17 mai soir) : (en attente — voir « Décisions à acter » ci-dessus).
+
+---
+
+# Archive — Sessions précédentes (refactor trimestre-v2.js TERMINÉ + productions.js TERMINÉ)
+
+> Le contenu ci-dessous est l'historique des chantiers refactor `productions.js` (16 mai) et `trimestre-v2.js` (17 mai). Les deux sont mergés FF sur main. Conservé en archive pour consultation.
 
 # SESSION — État au 17 mai 2026 (refactor productions.js + trimestre-v2.js TERMINÉS — mergés FF sur main)
 
