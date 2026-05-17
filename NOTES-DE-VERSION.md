@@ -5,7 +5,7 @@
 
 ---
 
-## Beta 99.45 → 99.46 (15-17 mai 2026)
+## Beta 99.45 → 99.47 (15-17 mai 2026)
 
 **Premiers refactorings de god modules selon METHODE-REFACTORING**
 
@@ -26,12 +26,22 @@
 - **Validation manuelle** (17 mai) sur les 6 cas d'integration MODULES-MAP §2.2 (Safari Mac, modes sombre + clair) — tous OK.
 - **Bugs latents preserves** (preservation comportementale stricte) : SUIVI-BUGS #96 (`event.target.value` Chrome retro-compat), #97 (`productionEnCoursEdition` vs `productionEnEdition` desynchronises). A traiter dans un cycle dedie.
 
+*Refactor `trimestre-v2.js` (Beta 99.47, 17 mai, 3 sessions A+B+C, branche `refactor/trimestre-v2`)*
+- **8 sous-modules** : `trimestre-v2-init.js` (~780), `-liste.js` (~485), `-horaires.js` (~830), `-enseignants.js` (~315) [session A], `-cours.js` (~1 040), `-etudiants.js` (~990), `-groupes-cours.js` (~970) [session B], `-orchestre.js` (~790) [session C] + residu (~599).
+- **Cyc max sur la zone 8 (cible explicite du scope session C)** : `changerGroupeCoursActifV2` 94 → < 15 (eclatee en 4 helpers + 1 selon Écart #8 MODULES-MAP §2.4 : `_definirInfoCoursModeCours`, `_definirInfoCoursModeGroupeCours`, `_rafraichirVuesContextDependantes`, `_rafraichirProfilEtudiantSiVisible`). Plus gros fichier : 6 584 → 1 040 LOC (-84 %).
+- **4 fonctions cyc > 30 restantes** hors-scope du refactor C (sous-modules cours + groupes-cours session B, heritees du god module) : `sauvegarderCoursV2` 56, `mettreAJourCarteResumeGroupeCoursV2` 34, `remplirFormCoursV2` 31, `genererNomGroupeCoursV2` 31. A traiter dans un cycle dedie productions-style.
+- **Atomicite preservee** (Écart #6) : le couple `db.setSync('groupeCoursActif', X)` + `db.setSync('infoCours', Y)` reste consecutif sans await dans chaque helper de definition.
+- **+11 tests Vitest** (canari + sentinelle 8 zones + structure monstre + hub residuel + etat pivot trimestreActif) + **+2 Playwright** (chargement WebKit + sentinelle exports browser).
+- **Validation manuelle** (17 mai) sur les 5 cas d'integration MODULES-MAP §2.4 (Safari Mac, modes sombre + clair) — tous OK.
+- **Bugs latents preserves** (preservation comportementale stricte) : SUIVI-BUGS #99-101 (3 XSS innerHTML transferes tels quels en session B, acquittes `// security-ok`), #102-104 (dead code apparent dans `afficherFormHoraireV2` / `modifierHoraireSelectionneV2` / `activerGroupeCoursV2` — variables et fonctions non declarees dans le scope, ReferenceError latent). A traiter dans un cycle dedie Categorie B.
+
 *Tests de regression — etat consolide*
-- Total : 60 Vitest + 6 Playwright = **66 verts**. Sandbox de tests reproductible pour les futurs refactors.
+- Total : 65 Vitest + 8 Playwright = **73 verts** (apres consolidation des 3 refactors). Sandbox de tests reproductible pour les futurs refactors.
 
 *Capitalisation*
-- Retrospectives detaillees dans `audit/refactoring-prep/MODULES-MAP.md §2.2` (productions) et §2.5 / METHODE §7 (bilan-reflexif).
+- Retrospectives detaillees dans `audit/refactoring-prep/MODULES-MAP.md §2.2` (productions), §2.4 (trimestre-v2), §2.5 / METHODE §7 (bilan-reflexif).
 - 4 nouvelles propositions Categorie B issues du refactor productions (cf. METHODE §7 module productions.js).
+- Trouvailles trimestre-v2 transferees en memoire feedback : audit cross-zone tardif post-deletion (grep noms de fonctions extraites dans le residu), doublons d'export pre-deletion, convention `window.X` systematique pour appels cross-module, factorisation 2 branches dupliquees en parametres, decoupage supplementaire requis pour cible dure cyc 30 (non planifie initialement).
 
 ---
 

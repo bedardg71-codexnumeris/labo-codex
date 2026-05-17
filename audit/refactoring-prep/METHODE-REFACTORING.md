@@ -678,7 +678,35 @@ Recommandations spécifiques tirées de cette session :
 
 ### Module : `trimestre-v2.js`
 
-À refactorer après `productions.js`. Rétrospective à remplir à la fin.
+**Refactor livré le 17 mai 2026** — 3 sessions A+B+C sur la branche `refactor/trimestre-v2`, FF mergé sur `main`.
+
+#### Bilan
+
+- **8 sous-modules extraits** sur 8 prévus + résidu : `-init.js`, `-liste.js`, `-horaires.js`, `-enseignants.js` [session A] + `-cours.js`, `-etudiants.js`, `-groupes-cours.js` [session B] + `-orchestre.js` [session C]. Résidu 599 LOC contenant le hub `populerDropdownsAssemblageV2` (cyc 28, appelé 10× cross-zones — anti-pattern §5.6) + helpers transversaux (`mettreAJourBarreContexte`, `afficherStatistiquesTrimestreV2`, `mettreAJourGuideGroupeCours`, format horaire, wrappers notifications).
+- **Monstre `changerGroupeCoursActifV2`** : cyc 94 / 282 LOC → cyc < 15 / ~32 LOC. Éclaté en 4 fonctions selon Écart #8 MODULES-MAP §2.4 + 1 sous-helper additionnel `_rafraichirProfilEtudiantSiVisible` requis pour redescendre `_rafraichirVuesContextDependantes` de cyc 36 à 28.
+- **Atomicité préservée** (Écart #6) : couple `db.setSync('groupeCoursActif', X)` + `db.setSync('infoCours', Y)` jamais séparé dans les helpers de définition.
+- **4 fonctions cyc > 30 héritées** restantes dans `-cours.js` et `-groupes-cours.js` (sauvegarderCoursV2 56, mettreAJourCarteResumeGroupeCoursV2 34, remplirFormCoursV2 31, genererNomGroupeCoursV2 31) — hors-scope du refactor C, à traiter dans un cycle productions-style.
+
+#### 5 propositions Catégorie B issues du refactor trimestre-v2
+
+1. **§4 check-list étape 3 — réflexe « audit cross-zone tardif »** : APRÈS chaque `sed`/`Edit` de deletion, grep les noms de fonctions extraites (pas seulement les exports `window.X`) dans le résidu. Une fonction non listée dans MODULES-MAP §2.4 Écart #5 peut être appelée depuis une zone non extraite. Détecté session B : `afficherTrimestreGroupeCoursV2` appelée par zone 8 résidu, non listée Écart #5. **Insérer en §4 check-list étape 3 item « Grep fonctions extraites dans le résidu post-deletion »** entre les items actuels « Grep `window.X` post-extraction » et « `node --check` du résidu ».
+
+2. **§4 check-list étape 3 — réflexe « doublons d'export pré-deletion »** : PRÉ-deletion, grep `window\.X = X` dans le résidu pour identifier les doublons d'export. Un orphelin où `X` est extrait transforme le résidu en `ReferenceError: X is not defined` au chargement IIFE. Pattern observé 2× session B (`window.supprimerGroupeCoursV2` exporté 2× pré-session-B). **Insérer en §4 check-list étape 3 item « Grep doublons d'export pré-deletion »** au début de la check-list.
+
+3. **§3 étape 4 — réflexe « découpage supplémentaire pour cible dure »** : l'éclatement initial planifié à N fonctions peut produire une fonction au-dessus de la cible dure (cyc > 30) sous l'effet de la déduplication des branches. Pattern observé Phase 2 session C : éclatement 4 fonctions laisse `_rafraichirVuesContextDependantes` à cyc 36 (la déduplication des 2 branches Mode COURS/Mode GROUPE-COURS produit une fonction agrégée trop complexe). **Compléter §3 étape 4 — « Si l'éclatement initial produit une fonction au-dessus de cyc 30, extraire un sous-helper additionnel jusqu'à respecter la cible dure ».**
+
+4. **§3 étape 0 — convention chargement `<script>` orchestrateurs** : un sous-module qui appelle `window.X` d'AUTRES sous-modules (et non l'inverse) doit être chargé EN DERNIER dans `index.html`. Pattern observé Phase 1 session C : `trimestre-v2-orchestre.js` appelle `window.populerDropdownGroupesHoraireV2`, `window.afficherTrimestreGroupeCoursV2`, `window.supprimerGroupeCoursV2`. **Documenter en §3 étape 0 — « Identifier les sous-modules orchestrateurs (qui consomment via `window.X` d'autres sous-modules) et les placer en dernier dans `index.html` ».**
+
+5. **§5 anti-patterns — §5.8 nouveau « factoriser les branches dupliquées en paramètres »** : repérer les blocs avec 90 %+ de code dupliqué et abstraire les différences en paramètres plutôt que dupliquer. Pattern productions-validation et trimestre-v2-orchestre (Phase 2). **Ajouter §5.8 avec exemple `_rafraichirVuesContextDependantes(valeurHeader, messageNotification, regenererCalendrier)`** — gain : −110 LOC vs duplication, cyc agrégé 28 vs 47 dupliqué.
+
+#### Notes pour le module suivant (`profil-etudiant.js`)
+
+1. **État pivot critique** : `window.profilActuelDA` est l'analogue de `window.trimestreActif` pour profil-etudiant.js (lu 24× hors module selon MODULES-MAP §2.3). Tout changement de DA déclenche une cascade de rafraîchissements de vues — pattern identique à `changerGroupeCoursActifV2`. **Anticiper un monstre similaire** au top du module et planifier l'éclatement Phase 2.
+2. **8 818 LOC, 105 fonctions** — module presque 50 % plus gros que trimestre-v2 (164 fonctions mais avec MORE LOC). Envisager **4 sessions** au lieu de 3 (split MEDIUM en 2 si nécessaire).
+3. **Helper `chargerScript(path, stubs, fauxWindowExistant)` éprouvé** sur productions + trimestre-v2 — réutiliser tel quel. Pattern `chargerSandbox(stockage)` factorise les stubs si 3+ sous-tests partagent la même setup.
+4. **Réflexe `// security-ok`** sur les XSS innerHTML transférés tels quels (préservation comportementale stricte) — l'acquittement est attendu sur tout sous-module session B/C/etc., ne pas s'en surprendre lors du hook Défense J. Inscrire systématiquement les bugs en SUIVI-BUGS pour traitement post-refactor Catégorie B.
+5. **Convention `window.X` systématique pour appels cross-module** : tout appel à une fonction d'un autre sous-module passe par `window.X()` avec garde `typeof === 'function'`. Confirmé sur 5 sessions consécutives (bilan-reflexif, productions, trimestre-v2 A+B+C).
+6. **Préservation des bugs latents existants** : ne pas profiter du refactor pour « nettoyer » des bugs préexistants (ReferenceError, XSS, dead code). C'est un autre cycle, autre PR. Le refactor doit être un déplacement comportementalement neutre. Trouvaille session C : 3 dead code apparents préservés (`afficherFormHoraireV2`, `modifierHoraireSelectionneV2`, `activerGroupeCoursV2` avec calls à des fonctions inexistantes).
 
 ### Module : `profil-etudiant.js`
 

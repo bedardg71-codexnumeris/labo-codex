@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 17 mai 2026 (Beta 99.46, Build 0516-0820) — refactor `productions.js` mergé (cyc max 80 → 29, 0 fonction au-dela de cyc 30, 4 fichiers issus du god module). #279 ajouté (gabarit production enrichi, 3 nouveaux champs). 23 items ouverts.
+> **Derniere mise a jour** : 17 mai 2026 (Beta 99.47, Build 0517-1138) — refactor `trimestre-v2.js` mergé (3 sessions A+B+C). 8 sous-modules extraits sur 8 prévus. trimestre-v2.js : 6 584 → 599 LOC (-90,9 %). `changerGroupeCoursActifV2` cyc 94 → < 15 (éclatée en 4 helpers + 1, Écart #8). 0 fonction au-delà de cyc 30. +6 bugs latents inscrits SUIVI-BUGS (#99-104, préservation comportementale stricte). 23 items ouverts.
 
 ---
 

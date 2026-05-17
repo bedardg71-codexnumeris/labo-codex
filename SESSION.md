@@ -14,19 +14,59 @@
 > - `Monitorage_v6/SESSION.md` sur branche `audit/2026-mai` — récap historique de la branche principale (legacy refactor/productions, 16 mai).
 > - `Monitorage_v6/audit/SESSION.md` sur branche `audit/2026-mai` — session **audit annuel** Phase 3 (sujet distinct du refactor : audit de fidélité concept → implémentation).
 
-# SESSION — État au 17 mai 2026 (refactor productions.js TERMINÉ + trimestre-v2 étape 3 sessions A+B livrées)
+# SESSION — État au 17 mai 2026 (refactor productions.js + trimestre-v2.js TERMINÉS)
 
-**Date** : 17 mai 2026 (journée complète — productions §6 matin, trimestre-v2 étapes 0→2 + session A après-midi, session B fin matinée 17 mai)
-**Beta / build** : 99.47 / 0517-1138
-**Branche actuelle du worktree** : `refactor/trimestre-v2`
-**Dernier commit** : bump version 99.47 b0517-1018 (`bfd27ad`). Modifications session B en working tree, non commitées.
+**Date** : 17 mai 2026 (journée complète — productions §6 matin, trimestre-v2 étapes 0→2 + sessions A+B+C+capitalisation)
+**Beta / build** : 99.47 / 0517-1259
+**Branche actuelle du worktree** : `refactor/trimestre-v2` (prêt pour merge FF sur `main`)
+**Dernier commit** : Phase 4 capitalisation (à venir, voir ci-dessous)
 **Branche `main`** : `4b915b0` (refactor productions mergé).
-**Commits non-pushés sur refactor/trimestre-v2 au-delà de main** : 7 (étape 1 `e59a669` + étape 2 `4d30a0a` + 4 extractions session A : `4e9252b` enseignants, `39901ae` horaires, `98f3efd` liste, `a02f2af` init + 1 bump session A `bfd27ad`).
+**Commits non-pushés sur refactor/trimestre-v2 au-delà de main** : 11 (étape 1 `e59a669` + étape 2 `4d30a0a` + 4 extractions session A : `4e9252b`, `39901ae`, `98f3efd`, `a02f2af` + bump session A `bfd27ad` + 1 extraction session B `59b40d7` + build refresh session B `8e7bd69` + Phase 1 session C `e52e765` + Phase 2 session C `46ac1f2`).
 **Statut** :
 - Refactor productions.js : **complet** — étapes 0→6 livrées, mergé sur `main`, **reste à pusher** depuis la maison.
-- Refactor trimestre-v2.js : **étape 3 sessions A+B bouclées** (7 sous-modules sur 8 prévus extraits). Prêt pour session C (zone HIGH 8 orchestre + monstre `changerGroupeCoursActifV2` cyc 94 + étapes 4+5+6).
+- Refactor trimestre-v2.js : **complet** — sessions A+B+C livrées (8 sous-modules sur 8 prévus + monstre cyc 94 → < 15). Validation manuelle Grégoire OK le 17 mai. **Capitalisation Phase 4 en cours** (MODULES-MAP §2.4 rétrospective + NOTES-DE-VERSION + METHODE §7 + SUIVI-BUGS + SESSION.md + bump build + merge FF + push à la maison).
 
-**Tests** : 65 Vitest + 8 Playwright = **73/73 verts** (sentinelle + canari capturent les 3 nouvelles extractions).
+**Tests** : 65 Vitest + 8 Playwright = **73/73 verts** (sentinelle + canari capturent les 8 extractions cumulées).
+
+## Récap session C (17 mai soir — zone HIGH 8 + éclatement monstre + capitalisation)
+
+**Phase 1 — Extraction zone HIGH 8 orchestre** (commit `e52e765`)
+
+15 fonctions extraites vers `js/trimestre-v2-orchestre.js` (~820 LOC) :
+- Dropdown groupe-cours actif (entête) : `peuplerDropdownGroupeCoursActif`, `changerGroupeCoursDepuisHeader`
+- **Monstre `changerGroupeCoursActifV2`** (cyc 94, 282 LOC) — préservé tel quel pour Phase 1
+- Dropdown enseignants + UI enseignant : `peuplerDropdownEnseignants`, `changerEnseignantSelectionneV2`, `afficherFormEnseignantV2`, `modifierEnseignantSelectionneV2`
+- UI horaire (dead code apparent — aucun caller index.html) : `afficherFormHoraireV2`, `modifierHoraireSelectionneV2`, `mettreAJourResumeFormatHoraireV2`
+- UI groupe-cours : `afficherFormGroupeCoursV2`, `activerGroupeCoursV2`, `_supprimerGroupeCoursV2_legacy`, `mettreAJourApercuGroupeCours`
+- `accederCalendrierRapide`
+
+14 exports `window.X` migrés. Variable module-scope migrée : `enseignantEnEditionUI`. Bilan résidu : 1333 → 599 LOC (-55 %). Cumulé depuis l'initial : 6584 → 599 LOC (-90,9 %).
+
+orchestre.js chargé EN DERNIER dans index.html (appelle `window.X` d'autres sous-modules : `populerDropdownGroupesHoraireV2`, `afficherTrimestreGroupeCoursV2`, `supprimerGroupeCoursV2`).
+
+**Phase 2 — Éclatement monstre cyc 94** (commit `46ac1f2`)
+
+`changerGroupeCoursActifV2` éclatée en **4 helpers + 1** selon Écart #8 MODULES-MAP §2.4 :
+1. `_definirInfoCoursModeCours(coursId, trimestreActif)` (~25 LOC, cyc ~3)
+2. `_definirInfoCoursModeGroupeCours(gc, trimestreActif, groupesCours, cleGC)` (~50 LOC, cyc 16) — async, inclut `await db.set(cleGC, ...)` AVANT les 2 setSync atomiques + sync horaireHebdo
+3. `_rafraichirVuesContextDependantes(valeurHeader, message, regenererCalendrier)` (~75 LOC, cyc 28) — factorisation des 2 branches ~90 % dupliquées
+4. `_rafraichirProfilEtudiantSiVisible()` (~22 LOC, cyc ~10) — **ajout en cours d'éclatement** pour redescendre `_rafraichirVuesContextDependantes` de cyc 36 (au-dessus de cible dure) à cyc 28
+5. Fonction principale `changerGroupeCoursActifV2(valeur)` (~32 LOC, cyc < 15)
+
+**Atomicité préservée** (Écart #6) : couple `db.setSync('groupeCoursActif', X)` + `db.setSync('infoCours', Y)` jamais séparé par `await` dans les 2 helpers de définition.
+
+**Cible dure cyc ≤ 30 atteinte sur la zone 8** (objectif explicite du scope session C). Bilan orchestre.js : 820 → 789 LOC (-31 LOC nets après dé-duplication des 2 branches +160 LOC dupliqués → +75 LOC factorisés).
+
+**Trouvailles notables session C (mémoire candidate)** :
+1. **Découpage supplémentaire requis pour cible dure** : un éclatement initial planifié à N fonctions peut produire une fonction au-dessus de la cible dure (cyc > 30). Pattern Phase 2 : éclatement 4 fonctions laisse `_rafraichirVuesContextDependantes` à cyc 36. Réflexe : audit ESLint complexity après chaque éclatement, prêt à extraire un sous-helper additionnel.
+2. **Factoriser les 2 branches dupliquées en paramètres** : les blocs avec 90 %+ de code dupliqué (Mode COURS / Mode GROUPE-COURS) abstraits en paramètres (`valeurHeader`, `messageNotification`, `regenererCalendrier`) plutôt que dupliqués. Gain : −110 LOC vs duplication.
+3. **Chargement orchestre EN DERNIER** : un sous-module qui appelle `window.X` d'AUTRES sous-modules doit être chargé en dernier dans `index.html` pour que les exports soient déjà disponibles au moment de son IIFE.
+
+**Phase 3 — Validation manuelle Grégoire** (17 mai soir, Safari Mac sombre+clair) : **OK** sur 5 cas MODULES-MAP §2.4 (création trimestre + identification + calendrier ; CRUD cours/GC/horaire/enseignant ; changement groupe-cours actif = test du monstre éclaté ; archivage+biblio ; import/export CSV Omnivox). Aucun bug détecté.
+
+**Phase 4 — Capitalisation + merge** : rétrospective MODULES-MAP §2.4 + NOTES-DE-VERSION 99.47 + METHODE §7 (5 propositions Catégorie B) + 6 bugs latents inscrits SUIVI-BUGS (#99-104) + memory feedback + bump build (refresh build 99.47 b0517-XXXX) + merge FF refactor/trimestre-v2 → main + push à la maison.
+
+**4 fonctions cyc > 30 héritées** restantes dans sous-modules session B (cours + groupes-cours) — hors-scope du refactor C : `sauvegarderCoursV2` 56, `mettreAJourCarteResumeGroupeCoursV2` 34, `remplirFormCoursV2` 31, `genererNomGroupeCoursV2` 31. À traiter dans un cycle dédié productions-style.
 
 ## Récap étape 3 session B (17 mai matinée — zones MEDIUM extraites)
 
@@ -177,7 +217,7 @@ Cible dure METHODE §3 étape 4 : aucune fonction > cyc 30 — **✅ atteinte**.
 
 ---
 
-## Consigne de démarrage pour la prochaine session (refactor `trimestre-v2.js` — étape 3 session C : zone HIGH + monstre + étapes 4+5+6)
+## Consigne de démarrage pour la prochaine session (refactor `profil-etudiant.js`)
 
 À copier-coller au début de la prochaine session :
 
@@ -185,96 +225,86 @@ Cible dure METHODE §3 étape 4 : aucune fonction > cyc 30 — **✅ atteinte**.
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6-refactor
 
 Lecture obligatoire :
-1. SESSION.md (ce document) — récap trimestre-v2 sessions A+B bouclées
-2. audit/refactoring-prep/MODULES-MAP.md §2.4 + Écart #8 (analyse changerGroupeCoursActifV2)
-3. audit/refactoring-prep/METHODE-REFACTORING.md §3 étapes 4+5+6
+1. SESSION.md (ce document) — récap trimestre-v2 TERMINÉ (3 sessions A+B+C) + capitalisation
+2. audit/refactoring-prep/MODULES-MAP.md §2.3 (profil-etudiant) + §2.4 rétrospective post-trimestre-v2
+3. audit/refactoring-prep/METHODE-REFACTORING.md §3 étapes 0→6 + §7 module trimestre-v2 (notes pour profil-etudiant)
+4. SUIVI-BUGS.md (bugs latents préservés #99-104 du refactor trimestre-v2, à traiter dans un cycle Catégorie B distinct)
 
 État git attendu en début de session :
-- main : 4b915b0 (productions mergé)
-- refactor/trimestre-v2 : HEAD = bump 99.47 b0517-1138 (commits non-pushés cumulés sessions A+B)
-- 7 sous-modules déjà extraits : init, liste, horaires, enseignants (A) + cours, étudiants, groupes-cours (B)
+- main : HEAD = merge FF du refactor trimestre-v2 (cf. Phase 4 capitalisation session C)
 - Tests verts attendus : 73/73 (65 Vitest + 8 Playwright)
 
 Vérification rapide à l'ouverture de session :
-  git log --oneline -12       # tous les commits sessions A+B visibles
-  git status                  # propre (sauf node_modules symlinks)
+  git log --oneline -12       # voir l'historique récent
+  git status                  # propre
   cd tests && npm test        # 73/73 verts
-  wc -l js/trimestre-v2.js    # ≈ 1333 LOC (résidu post-session-B)
+  wc -l js/profil-etudiant.js # ≈ 8 818 LOC initial
 
-OBJECTIF SESSION C : étape 3 zone HIGH (8 orchestre) + étapes 4+5+6
+OBJECTIF : refactor `profil-etudiant.js` selon METHODE-REFACTORING (étapes 0→6)
 
-### Phase 1 — étape 3 zone HIGH (~2-3 h)
+### Préambule — créer le worktree
 
-Extraire 1 sous-module :
-- `js/trimestre-v2-orchestre.js` (~600 LOC après éclatement du monstre)
-  - `peuplerDropdownGroupeCoursActif` (3320-original, cross-callé 9× hors module)
-  - `changerGroupeCoursDepuisHeader` (3422-original, cross-callé 5×)
-  - **`changerGroupeCoursActifV2`** (3431-original, **cyc 94, 282 LOC, monstre**)
-  - `peuplerDropdownEnseignants` (3717-original, cross-callé 4×)
-  - `changerEnseignantSelectionneV2`, `afficherFormEnseignantV2`, `modifierEnseignantSelectionneV2`
-  - `afficherFormHoraireV2`, `modifierHoraireSelectionneV2`, `mettreAJourResumeFormatHoraireV2`
-  - `afficherFormGroupeCoursV2`, `activerGroupeCoursV2`, `_supprimerGroupeCoursV2_legacy`
-  - `mettreAJourApercuGroupeCours`, `accederCalendrierRapide`
+git worktree add -b refactor/profil-etudiant ../Monitorage_v6-refactor refactor/profil-etudiant
+cd ../Monitorage_v6-refactor
 
-Helpers transversaux restants au résidu :
-  - `populerDropdownsAssemblageV2` (hub critique, Écart #4 et #5)
-  - `mettreAJourGuideGroupeCours`
-  - `mettreAJourBarreContexte`
-  - `mettreAJourOptionsFormatHoraire`, `mettreAJourFormatHoraire`, `mettreAJourInfoDuree` (format horaire)
-  - `afficherStatistiquesTrimestreV2`
-  - `allerVersAide`
-  - Wrappers `afficherNotificationSucces` / `afficherNotificationErreur`
+### Notes critiques pour ce module (issues du retour d'expérience trimestre-v2)
 
-Variable module-scope migre vers le résidu (déjà là) : `enseignantEnEditionUI`.
+1. **État pivot critique** : `window.profilActuelDA` est l'analogue de `window.trimestreActif` (lu 24× hors module selon MODULES-MAP §2.3). Tout changement de DA déclenche une cascade de rafraîchissements de vues — anticiper un monstre similaire à `changerGroupeCoursActifV2` et planifier l'éclatement.
+2. **8 818 LOC, 105 fonctions** — module presque 50 % plus gros que trimestre-v2 en LOC. **Envisager 4 sessions** au lieu de 3 (split MEDIUM en 2 si nécessaire).
+3. **Helper `chargerScript(path, stubs, fauxWindowExistant)` éprouvé** sur productions + trimestre-v2 — réutiliser tel quel pour le canari.
+4. **Réflexes installés sessions B+C trimestre-v2** :
+   - Grep `window\.X = X` PRÉ-deletion (doublons d'export) ET APRÈS chaque extraction (orphelins)
+   - Grep noms de fonctions extraites dans le résidu post-deletion (cross-zone audit tardif)
+   - Sous-module orchestrateur chargé EN DERNIER dans index.html
+   - Wrappers `afficherNotification*` dupliqués dans chaque sous-module (consolidation `utils-notifications.js` reportée)
+   - Acquittement `// security-ok` automatique sur XSS innerHTML transférés tels quels (préservation comportementale stricte)
+   - Audit ESLint complexity APRÈS éclatement, prêt à extraire un sous-helper additionnel si une fonction dépasse cyc 30
+5. **5 propositions Catégorie B issues du refactor trimestre-v2** déposées dans METHODE §7 — à intégrer dans la méthode au prochain pas (compléter §4 check-list étape 3 + §3 étape 0 + §5 anti-patterns §5.8 + §3 étape 4).
 
-### Phase 2 — étape 4 monstre cyc 94 (~1-2 h)
+### Étape 0 — Worktree + symlinks + baseline tests (~30 min)
 
-`changerGroupeCoursActifV2` à éclater en 4 fonctions (Écart #8) :
-1. `_definirInfoCoursModeCours(coursId)` (~40 LOC)
-2. `_definirInfoCoursModeGroupeCours(gc)` (~50 LOC, inclut sync horaireHebdo)
-3. `_rafraichirVuesContextDependantes()` (~110 LOC — calendrier + étudiants + tableau bord + profil + outils + saisie présences + évaluations + travaux)
-4. Fonction principale (~30 LOC, cyc estimé ≤ 10)
+- Créer worktree `refactor/profil-etudiant`
+- Symlinks node_modules
+- Lancer tests baseline : 73/73 verts attendus
 
-**ATOMICITÉ CRITIQUE** : le couple `window.trimestreActif = X; db.setSync('trimestreActif', X)` ne doit jamais être séparé (Écart #6 MODULES-MAP §2.4). Tout le namespacing des données dépend de cet état pivot.
+### Étape 1 — Lecture intégrale + audit ESLint + grep helpers cross-module (~2-3 h)
 
-Autres fonctions cyc 30+ à traiter si temps :
-- `sauvegarderCoursV2` cyc 54 (zone 3 cours — peut être laissé pour un cycle dédié productions-style)
-- `mettreAJourCarteResumeGroupeCoursV2` cyc 34 (zone 6 groupes-cours)
-- `genererNomGroupeCoursV2` cyc 31 (zone 6)
-- `afficherStatistiquesTrimestreV2` cyc 30 (résidu zone 1)
-- `remplirFormCoursV2` cyc 30 (zone 3)
-- `sauvegarderEnseignantV2` cyc 29 (zone 7)
+- Lire les 8 818 LOC ; identifier les zones (probable similaire à trimestre-v2 : init + chargement + UI + rendu + handlers)
+- Audit ESLint complexity (cible : repérer les fonctions cyc > 30, MODULES-MAP §2.3 mentionne probablement le top)
+- Grep helpers cross-module (`afficherNotification*`, `echapperHtml`, `BibliothequeUI.*`, `cle()`)
+- Annoter MODULES-MAP §2.3 si écarts vs analyse pré-refactor
 
-Cible dure : aucune fonction au-delà de cyc 30. Cible souple cyc ≤ 15 : non bloquante.
+### Étape 2 — Tests de régression + canari (~1-2 h)
 
-### Phase 3 — étape 5 validation manuelle Grégoire (~30 min - 1 h)
+- Vitest : canari + sentinelle 15-20 exports + structure monstre identifié + état pivot `window.profilActuelDA` non muté au chargement
+- Playwright : chargement WebKit + sentinelle exports browser
 
-5 cas d'intégration MODULES-MAP §2.4 (à valider Safari Mac obligatoire, iPad Air si possible, modes sombre + clair) :
-1. Création trimestre + identification + calendrier + relecture
-2. CRUD cours + groupes-cours + horaire + enseignant
-3. **Changement de groupe-cours actif** (test du monstre éclaté : bandeau de contexte + vues internes + atomicité)
-4. Archivage trimestre actif + bascule + accès biblio
-5. Import/export CSV étudiants (Omnivox 30 lignes)
+### Étape 3 — Découpage incrémental (~3-4 sessions ou 6-9 h, à fractionner)
 
-### Phase 4 — étape 6 capitalisation + merge (~30-45 min)
+Tentative de découpage (à valider à l'étape 1) :
+- `profil-etudiant-init.js`
+- `profil-etudiant-chargement.js`
+- `profil-etudiant-rendu.js`
+- `profil-etudiant-handlers.js`
+- `profil-etudiant-orchestre.js` (chargement DA actif + cascade)
 
-- Mise à jour MODULES-MAP.md §2.4 (rétrospective avant/après — métriques §6.5 METHODE)
-- Mise à jour NOTES-DE-VERSION.md (entrée Beta 99.49 ou 99.50)
-- Mise à jour BACKLOG.md (clore l'item refactor trimestre-v2)
-- Transfert mémoires feedback session B + nouvelles trouvailles session C
-- Mise à jour METHODE-REFACTORING §7 notes pour `profil-etudiant.js` (module suivant)
-- Merge `refactor/trimestre-v2` → `main` (fast-forward, à valider avec Grégoire)
+### Étape 4 — Éclatement fonctions cyc > 30 (~1-2 h)
+
+À planifier après étape 1 selon les fonctions identifiées.
+
+### Étape 5 — Validation manuelle Grégoire (~30 min - 1 h)
+
+5-6 cas Safari Mac sombre + clair sur les flots utilisateur identifiés MODULES-MAP §2.3.
+
+### Étape 6 — Capitalisation + merge (~30-45 min)
+
+- MODULES-MAP §2.3 rétrospective
+- NOTES-DE-VERSION (entrée Beta XX)
+- BACKLOG.md (header daté)
+- METHODE §7 notes pour evaluation.js (module suivant)
+- SUIVI-BUGS pour bugs latents découverts
+- Merge FF `refactor/profil-etudiant` → `main`
 - Push à la maison (réseau école bloque GitHub)
-
-### Notes pour cette session
-
-- **Hub résiduel** `populerDropdownsAssemblageV2` reste dans le résidu — le sous-module orchestre l'appellera via `window.populerDropdownsAssemblageV2()`.
-- **Grep `window.X` AVANT ET APRÈS chaque extraction** — pattern feedback `exports-orphelins-grep-window` (déjà déclenché 4× session A + 1× session B sur `afficherTrimestreGroupeCoursV2`).
-- Variables module-scope migrent avec leur zone : `enseignantEnEditionUI` est dans zone 8 résidu, doit migrer dans orchestre.
-- Préfixer les appels cross-module avec `window.X` + garde `typeof === 'function'` pour résilience.
-- 7 sous-modules déjà extraits utilisent `window.peuplerDropdownGroupeCoursActif` — vérifier qu'il reste accessible après extraction.
-
-Après session C : refactor trimestre-v2.js TERMINÉ → enchaîner sur `profil-etudiant.js` (~8 818 LOC) selon PLAN-MOYEN-TERME §4.4.
 ```
 
 ---

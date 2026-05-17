@@ -523,6 +523,78 @@ Les ~121 autres exports sont consommés via le dispatcher `data-action` (pattern
 
 Total estimé : ~6 260 LOC (vs 6 584 actuels), écart ~5 % attribuable à découpe nette des frontières et IIFE overhead.
 
+#### Rétrospective post-refactoring — 17 mai 2026
+
+**Branche** : `refactor/trimestre-v2` (HEAD post-capitalisation, ~13 commits sur 3 sessions A+B+C, FF mergé sur `main`).
+**Effort réel** : ~9 h réparties sur 1 journée (17 mai, sessions A après-midi + B fin matinée + C soir + capitalisation). Estimation MODULES-MAP §3.3 : 8-12 h — dans la fourchette basse.
+**Test manuel** : validation Grégoire le 17 mai, 5 cas MODULES-MAP §2.4 OK (Safari Mac, modes sombre + clair).
+
+**Découpage effectif** (8 sous-modules + 1 résidu) :
+
+| Sous-module | LOC cible §2.4 | LOC effectif | Écart |
+|---|---:|---:|---:|
+| `trimestre-v2.js` (résidu) | ~600-800 | 599 | ✓ dans cible |
+| `trimestre-v2-init.js` | ~870 | 860 | −1 % |
+| `trimestre-v2-liste.js` | ~590 | 485 | −18 % |
+| `trimestre-v2-cours.js` | ~970 | 1 040 | +7 % |
+| `trimestre-v2-etudiants.js` | ~895 | 990 | +11 % |
+| `trimestre-v2-horaires.js` | ~830 | 870 | +5 % |
+| `trimestre-v2-groupes-cours.js` | ~1 080 | 970 | −10 % |
+| `trimestre-v2-enseignants.js` | ~315 | 390 | +24 % |
+| `trimestre-v2-orchestre.js` | ~725 | 789 | +9 % |
+
+L'estimation §2.4 était globalement correcte. Légers écarts en bonus (`-liste.js` plus petit, `-enseignants.js` plus gros) liés à la promotion de helpers cross-zone et à la duplication des wrappers défensifs `afficherNotification*` dans chaque sous-module (~30 LOC × 5 = 150 LOC dupliquées, consolidation `js/utils-notifications.js` reportée hors refactor — cf. trouvaille A.4 session A).
+
+**`utils-notifications.js`** : REPORTÉ à un chantier séparé (73 sites d'appel `afficherNotificationSucces` dans le code = risque régression silencieuse pendant le découpage). Wrappers défensifs locaux dupliqués acceptés pour ce cycle.
+
+**Métriques avant/après** (sources : `wc -l` ; `npx eslint --no-config-lookup --rule '{"complexity":["error",N]}'`) :
+
+| Métrique | Avant | Après | Variation |
+|---|---:|---:|---:|
+| LOC du module (somme) | 6 584 (god module) | 6 993 (résidu + 8 sous-modules) | +6,2 % |
+| Nombre de fichiers issus du module | 1 | 9 (1 résidu + 8 sous-modules) | +8 |
+| Taille du plus gros fichier (LOC) | 6 584 | 1 040 (`trimestre-v2-cours.js`) | **−84 %** |
+| Complexité cyclomatic max | 94 (`changerGroupeCoursActifV2`) | 56 (`sauvegarderCoursV2`) | **−40 %** |
+| Nombre de fonctions au-delà de cyc 15 | ≥14 | 8 | **−6** |
+| Nombre de fonctions au-delà de cyc 30 | 4 (94, 56, 34, 31) | **4** (56, 34, 31, 31) | inchangé hors zone 8 |
+| Doublons de définition | 1 (`window.supprimerGroupeCoursV2` × 2) | 0 | **−1** ✓ |
+| Code mort retiré | — | 0 | aucun (3 dead code apparents préservés — SUIVI-BUGS #102-104) |
+| Tests Vitest sur ce module | 0 | 5 | +5 |
+| Tests Playwright sur ce module | 0 | 2 | +2 |
+
+**Lecture** : cible dure METHODE §3 étape 4 atteinte **uniquement sur la zone 8 (cible explicite du scope session C)** — `changerGroupeCoursActifV2` est passée de cyc 94 / 282 LOC à cyc < 15 / ~32 LOC (éclatée en 4 helpers + 1, Écart #8). **Restent 4 fonctions au-delà de cyc 30** dans les sous-modules session B (cours + groupes-cours), héritées du god module mais hors-scope du refactor C : `sauvegarderCoursV2` cyc 56 et `remplirFormCoursV2` cyc 31 (`trimestre-v2-cours.js`) ; `mettreAJourCarteResumeGroupeCoursV2` cyc 34 et `genererNomGroupeCoursV2` cyc 31 (`trimestre-v2-groupes-cours.js`). À traiter dans un cycle dédié productions-style (cf. SESSION.md L242). Le LOC total monte plus que pour productions (+6,2 % vs +2,6 %) sous l'effet des 5 sous-modules supplémentaires et de la duplication des wrappers notifications.
+
+**Tests de régression** :
+- 5 Vitest écrits avant le découpage (étape 2, commit `4d30a0a`) : canari sandbox, sentinelle 20 exports représentatifs des 8 zones, structure du monstre (async, arité 1), hub résiduel accessible, état pivot `window.trimestreActif` non muté au chargement IIFE.
+- 2 Playwright (`integration/trimestre-v2-chargement.spec.js`) : chargement WebKit sans erreur console + sentinelle exports browser.
+- Aucune régression attrapée — tests ont joué le rôle de filet de sécurité.
+- Validation manuelle Grégoire (étape 5) sur les 5 cas d'intégration : tous OK.
+
+**Bugs latents préservés** (préservation comportementale stricte) :
+- SUIVI-BUGS #99-101 : 3 XSS innerHTML dans `trimestre-v2-cours.js:677` (prog programmes) et `trimestre-v2-etudiants.js:90,188` (message + clé de groupe). Code transféré tel quel session B, acquittés `// security-ok`.
+- SUIVI-BUGS #102-104 : 3 dead code apparents dans `trimestre-v2-orchestre.js` — `afficherFormHoraireV2` + `modifierHoraireSelectionneV2` (variables `horaireEnEditionId`/`seancesTempV2` non déclarées dans le scope orchestre) et `activerGroupeCoursV2` (`rafraichirListeGroupeCoursV2()` sans guard). Aucun caller identifié pour les 2 premières, la 3e est exportée.
+- 2 doublons d'export nettoyés en cours de session B (cf. SESSION.md L48-50) : `window.supprimerGroupeCoursV2` exporté 2× pré-session-B, et `_supprimerGroupeCoursV2_legacy` qui appelait `supprimerGroupeCoursV2()` (local) au lieu de `window.supprimerGroupeCoursV2()`.
+
+**Atomicité préservée** (Écart #6) : le couple `db.setSync('groupeCoursActif', X)` + `db.setSync('infoCours', Y)` reste consécutif sans `await` ni `break` dans chaque helper de définition (`_definirInfoCoursModeCours` 3 lignes entre les 2 setSync, `_definirInfoCoursModeGroupeCours` 4 lignes synchrones entre les 2). Couple jamais séparé.
+
+**Dette résiduelle** :
+- `sauvegarderCoursV2` cyc 56 dans `trimestre-v2-cours.js` — à éclater dans un cycle dédié post-refactor (productions-style).
+- `mettreAJourCarteResumeGroupeCoursV2` cyc 34 dans `trimestre-v2-groupes-cours.js`.
+- `genererNomGroupeCoursV2` cyc 31 dans `trimestre-v2-groupes-cours.js`.
+- `remplirFormCoursV2` cyc 31 dans `trimestre-v2-cours.js`.
+- `_rafraichirVuesContextDependantes` cyc 28 dans `trimestre-v2-orchestre.js` (issu Phase 2, juste sous la cible dure — non bloquant).
+- `_definirInfoCoursModeGroupeCours` cyc 16 (Phase 2, juste au-dessus de cible souple).
+- Arrow forEach pré-existante cyc 20 dans `peuplerDropdownGroupeCoursActif`.
+- 6 bugs latents à traiter dans un cycle dédié Catégorie B (3 sécurité innerHTML #99-101 + 3 dead code #102-104).
+
+**Note pour les modules suivants** (à appliquer sur `profil-etudiant.js` en priorité) :
+1. Pattern feedback `exports-orphelins-grep-window` confirmé 5× pendant les 3 sessions trimestre-v2 (4 session A + 1 session B sur `afficherTrimestreGroupeCoursV2`). Grep `^window\.X = X` AVANT ET APRÈS chaque extraction est désormais reflex.
+2. Pattern « audit cross-zone tardif » : un export non listé dans MODULES-MAP peut être appelé depuis une zone non extraite. Réflexe : grep noms de fonctions extraites dans le résidu APRÈS deletion (pas seulement les exports). Détection session B : `afficherTrimestreGroupeCoursV2` appelée par zone 8 résidu, non listée Écart #5.
+3. Pattern « doublons d'export pré-deletion » : un `window.X = X` orphelin où `X` est extrait transforme le résidu en ReferenceError au chargement IIFE. Réflexe : grep `window\.X = X` PRÉ-deletion pour identifier les doublons + retrait du doublon non principal.
+4. Pattern « factoriser les 2 branches dupliquées » : repérer les blocs avec 90 %+ de code dupliqué et abstraire les différences en paramètres plutôt que dupliquer. Appliqué à `_rafraichirVuesContextDependantes` (Mode COURS / Mode GROUPE-COURS — différences encapsulées en `valeurHeader`, `messageNotification`, `regenererCalendrier`).
+5. Pattern « découpage supplémentaire pour cible dure » : un éclatement initial planifié à N fonctions peut produire une fonction au-dessus de la cible dure. Réflexe : audit ESLint complexity après chaque éclatement, prêt à extraire un sous-helper additionnel. Appliqué à `_rafraichirVuesContextDependantes` cyc 36 → 28 par extraction de `_rafraichirProfilEtudiantSiVisible`.
+6. Pattern « chargement orchestre EN DERNIER » : quand un sous-module appelle `window.X` d'autres sous-modules (et non l'inverse), il doit être chargé en dernier dans `index.html`. Appliqué à `trimestre-v2-orchestre.js` (appelle `window.populerDropdownGroupesHoraireV2`, `window.afficherTrimestreGroupeCoursV2`, `window.supprimerGroupeCoursV2`).
+
 ---
 
 ### 2.5 `bilan-reflexif.js` (4 716 LOC, 153 fonctions)
