@@ -14,19 +14,20 @@
 > - `Monitorage_v6/SESSION.md` sur branche `audit/2026-mai` — récap historique de la branche principale (legacy refactor/productions, 16 mai).
 > - `Monitorage_v6/audit/SESSION.md` sur branche `audit/2026-mai` — session **audit annuel** Phase 3 (sujet distinct du refactor : audit de fidélité concept → implémentation).
 
-# SESSION — État au 17 mai 2026 (refactor productions.js + trimestre-v2.js TERMINÉS)
+# SESSION — État au 17 mai 2026 (refactor productions.js + trimestre-v2.js TERMINÉS — mergés FF sur main)
 
-**Date** : 17 mai 2026 (journée complète — productions §6 matin, trimestre-v2 étapes 0→2 + sessions A+B+C+capitalisation)
+**Date** : 17 mai 2026 (journée complète — productions §6 matin, trimestre-v2 étapes 0→2 + sessions A+B+C + capitalisation Phase 4 + merge FF)
 **Beta / build** : 99.47 / 0517-1259
-**Branche actuelle du worktree** : `refactor/trimestre-v2` (prêt pour merge FF sur `main`)
-**Dernier commit** : Phase 4 capitalisation (à venir, voir ci-dessous)
-**Branche `main`** : `4b915b0` (refactor productions mergé).
-**Commits non-pushés sur refactor/trimestre-v2 au-delà de main** : 11 (étape 1 `e59a669` + étape 2 `4d30a0a` + 4 extractions session A : `4e9252b`, `39901ae`, `98f3efd`, `a02f2af` + bump session A `bfd27ad` + 1 extraction session B `59b40d7` + build refresh session B `8e7bd69` + Phase 1 session C `e52e765` + Phase 2 session C `46ac1f2`).
+**Branche actuelle du worktree** : `refactor/trimestre-v2` (HEAD identique à `main` après FF)
+**Dernier commit** : `706dc0a` — `docs(refactor trimestre-v2): capitalisation session C Phase 4 + bump 99.47 b0517-1259`
+**Branche `main`** : **`706dc0a`** — FF effectué depuis `4b915b0` (+13 commits refactor trimestre-v2 + capitalisation)
+**Commits non-pushés sur `main`** : 13 (`e59a669` étape 1 → `706dc0a` capitalisation) — **à pusher depuis la maison** (réseau école bloque GitHub)
 **Statut** :
-- Refactor productions.js : **complet** — étapes 0→6 livrées, mergé sur `main`, **reste à pusher** depuis la maison.
-- Refactor trimestre-v2.js : **complet** — sessions A+B+C livrées (8 sous-modules sur 8 prévus + monstre cyc 94 → < 15). Validation manuelle Grégoire OK le 17 mai. **Capitalisation Phase 4 en cours** (MODULES-MAP §2.4 rétrospective + NOTES-DE-VERSION + METHODE §7 + SUIVI-BUGS + SESSION.md + bump build + merge FF + push à la maison).
+- Refactor productions.js : **complet** — étapes 0→6 livrées, mergé sur `main` (le 17 mai matin).
+- Refactor trimestre-v2.js : **complet** — sessions A+B+C + capitalisation + merge FF sur `main` (le 17 mai soir). 8 sous-modules sur 8 prévus extraits, monstre cyc 94 éclaté en 4+1 helpers, validation manuelle Grégoire OK. 6 bugs latents inscrits SUIVI-BUGS #99-104 (préservation comportementale stricte, à traiter dans un cycle Catégorie B distinct).
+- **Action en attente** : `git push origin main refactor/trimestre-v2` depuis la maison.
 
-**Tests** : 65 Vitest + 8 Playwright = **73/73 verts** (sentinelle + canari capturent les 8 extractions cumulées).
+**Tests** : 65 Vitest + 8 Playwright = **73/73 verts** (confirmés post-merge FF — sentinelle + canari capturent les 8 extractions cumulées).
 
 ## Récap session C (17 mai soir — zone HIGH 8 + éclatement monstre + capitalisation)
 
@@ -224,87 +225,115 @@ Cible dure METHODE §3 étape 4 : aucune fonction > cyc 30 — **✅ atteinte**.
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6-refactor
 
+# AVANT TOUT — pusher depuis la maison si pas déjà fait :
+#   git push origin main refactor/trimestre-v2
+# Réseau école bloque GitHub.
+
 Lecture obligatoire :
-1. SESSION.md (ce document) — récap trimestre-v2 TERMINÉ (3 sessions A+B+C) + capitalisation
-2. audit/refactoring-prep/MODULES-MAP.md §2.3 (profil-etudiant) + §2.4 rétrospective post-trimestre-v2
-3. audit/refactoring-prep/METHODE-REFACTORING.md §3 étapes 0→6 + §7 module trimestre-v2 (notes pour profil-etudiant)
-4. SUIVI-BUGS.md (bugs latents préservés #99-104 du refactor trimestre-v2, à traiter dans un cycle Catégorie B distinct)
+1. SESSION.md (ce document) — récap trimestre-v2 TERMINÉ + capitalisation + merge FF
+2. audit/refactoring-prep/MODULES-MAP.md §2.3 (profil-etudiant, lecture pré-refactor)
+3. audit/refactoring-prep/MODULES-MAP.md §2.4 rétrospective trimestre-v2 (patterns à réutiliser)
+4. audit/refactoring-prep/METHODE-REFACTORING.md §7 « Module : trimestre-v2.js » — 5 propositions Catégorie B + 6 notes pour profil-etudiant
+5. Retours des testeurs/SUIVI-BUGS.md — #99-104 préservés du refactor trimestre-v2 (à traiter Catégorie B distincte, PAS dans le refactor profil-etudiant)
 
 État git attendu en début de session :
-- main : HEAD = merge FF du refactor trimestre-v2 (cf. Phase 4 capitalisation session C)
+- main : 706dc0a (refactor trimestre-v2 mergé FF, +13 commits depuis 4b915b0)
+- refactor/trimestre-v2 : 706dc0a (identique à main après FF — branche conservée pour push, à supprimer après push)
+- Beta / build : 99.47 / 0517-1259
 - Tests verts attendus : 73/73 (65 Vitest + 8 Playwright)
+- Repo principal Monitorage_v6 : sur audit/2026-mai (WIP non-commité indépendant — NE PAS TOUCHER)
 
 Vérification rapide à l'ouverture de session :
-  git log --oneline -12       # voir l'historique récent
-  git status                  # propre
-  cd tests && npm test        # 73/73 verts
-  wc -l js/profil-etudiant.js # ≈ 8 818 LOC initial
+  git log --oneline -5            # 706dc0a en HEAD
+  git rev-parse main              # 706dc0a (idem worktree)
+  git status                      # propre (hors node_modules symlinks)
+  cd tests && npm test            # 73/73 verts
+  cat ../version.json             # {"build":"0517-1259","beta":"99.47"}
+  wc -l ../js/profil-etudiant.js  # ≈ 8 818 LOC initial
 
 OBJECTIF : refactor `profil-etudiant.js` selon METHODE-REFACTORING (étapes 0→6)
 
-### Préambule — créer le worktree
+### Préambule — créer le worktree (depuis le repo principal Monitorage_v6)
 
-git worktree add -b refactor/profil-etudiant ../Monitorage_v6-refactor refactor/profil-etudiant
-cd ../Monitorage_v6-refactor
+cd ~/Documents/GitHub/Monitorage_v6
+git worktree add -b refactor/profil-etudiant ../Monitorage_v6-profil-etudiant main
+cd ../Monitorage_v6-profil-etudiant
+# Symlinks node_modules :
+ln -s ../Monitorage_v6/node_modules .
+ln -s ../Monitorage_v6/tests/node_modules tests/
 
-### Notes critiques pour ce module (issues du retour d'expérience trimestre-v2)
+### Notes critiques pour ce module (retour d'expérience trimestre-v2)
 
 1. **État pivot critique** : `window.profilActuelDA` est l'analogue de `window.trimestreActif` (lu 24× hors module selon MODULES-MAP §2.3). Tout changement de DA déclenche une cascade de rafraîchissements de vues — anticiper un monstre similaire à `changerGroupeCoursActifV2` et planifier l'éclatement.
 2. **8 818 LOC, 105 fonctions** — module presque 50 % plus gros que trimestre-v2 en LOC. **Envisager 4 sessions** au lieu de 3 (split MEDIUM en 2 si nécessaire).
 3. **Helper `chargerScript(path, stubs, fauxWindowExistant)` éprouvé** sur productions + trimestre-v2 — réutiliser tel quel pour le canari.
-4. **Réflexes installés sessions B+C trimestre-v2** :
+4. **Réflexes installés sessions B+C trimestre-v2** (à appliquer dès l'étape 3) :
    - Grep `window\.X = X` PRÉ-deletion (doublons d'export) ET APRÈS chaque extraction (orphelins)
    - Grep noms de fonctions extraites dans le résidu post-deletion (cross-zone audit tardif)
    - Sous-module orchestrateur chargé EN DERNIER dans index.html
    - Wrappers `afficherNotification*` dupliqués dans chaque sous-module (consolidation `utils-notifications.js` reportée)
    - Acquittement `// security-ok` automatique sur XSS innerHTML transférés tels quels (préservation comportementale stricte)
    - Audit ESLint complexity APRÈS éclatement, prêt à extraire un sous-helper additionnel si une fonction dépasse cyc 30
-5. **5 propositions Catégorie B issues du refactor trimestre-v2** déposées dans METHODE §7 — à intégrer dans la méthode au prochain pas (compléter §4 check-list étape 3 + §3 étape 0 + §5 anti-patterns §5.8 + §3 étape 4).
+5. **5 propositions Catégorie B issues du refactor trimestre-v2** déposées dans METHODE §7 — à intégrer dans la méthode au prochain pas (compléter §4 check-list étape 3 × 2 items + §3 étape 0 chargement orchestre + §3 étape 4 découpage supplémentaire + §5 anti-patterns §5.8 factoriser branches dupliquées).
+6. **Préservation comportementale stricte** : NE PAS profiter du refactor pour corriger des bugs préexistants (ReferenceError, XSS, dead code). C'est un autre cycle, autre PR. Inscrire systématiquement les bugs en SUIVI-BUGS.
 
 ### Étape 0 — Worktree + symlinks + baseline tests (~30 min)
 
-- Créer worktree `refactor/profil-etudiant`
+- Créer worktree `refactor/profil-etudiant` depuis main (706dc0a)
 - Symlinks node_modules
 - Lancer tests baseline : 73/73 verts attendus
 
 ### Étape 1 — Lecture intégrale + audit ESLint + grep helpers cross-module (~2-3 h)
 
-- Lire les 8 818 LOC ; identifier les zones (probable similaire à trimestre-v2 : init + chargement + UI + rendu + handlers)
-- Audit ESLint complexity (cible : repérer les fonctions cyc > 30, MODULES-MAP §2.3 mentionne probablement le top)
-- Grep helpers cross-module (`afficherNotification*`, `echapperHtml`, `BibliothequeUI.*`, `cle()`)
-- Annoter MODULES-MAP §2.3 si écarts vs analyse pré-refactor
+- Lire les 8 818 LOC ; identifier les zones (probable similaire à trimestre-v2 : init + chargement DA + UI rendu + handlers + orchestre cascade)
+- Audit ESLint complexity (cible : repérer les fonctions cyc > 30, MODULES-MAP §2.3 mentionne probablement le top — peut-être `afficherProfilComplet` ?)
+- Grep helpers cross-module (`afficherNotification*`, `echapperHtml`, `BibliothequeUI.*`, `cle()`, `obtenirEtudiantsCoursActif`)
+- Annoter MODULES-MAP §2.3 si écarts vs analyse pré-refactor (Écarts #1 à #N comme productions/trimestre-v2)
 
 ### Étape 2 — Tests de régression + canari (~1-2 h)
 
 - Vitest : canari + sentinelle 15-20 exports + structure monstre identifié + état pivot `window.profilActuelDA` non muté au chargement
-- Playwright : chargement WebKit + sentinelle exports browser
+- Playwright : chargement WebKit + sentinelle exports browser (~2 tests minimum)
 
 ### Étape 3 — Découpage incrémental (~3-4 sessions ou 6-9 h, à fractionner)
 
-Tentative de découpage (à valider à l'étape 1) :
+Tentative de découpage (à valider à l'étape 1, possible analogie avec trimestre-v2) :
 - `profil-etudiant-init.js`
-- `profil-etudiant-chargement.js`
-- `profil-etudiant-rendu.js`
-- `profil-etudiant-handlers.js`
-- `profil-etudiant-orchestre.js` (chargement DA actif + cascade)
+- `profil-etudiant-chargement.js` (chargement données DA)
+- `profil-etudiant-rendu.js` (cartes profil, graphiques)
+- `profil-etudiant-handlers.js` (events, actions utilisateur)
+- `profil-etudiant-orchestre.js` (changement DA actif + cascade) — chargé EN DERNIER
 
 ### Étape 4 — Éclatement fonctions cyc > 30 (~1-2 h)
 
-À planifier après étape 1 selon les fonctions identifiées.
+À planifier après étape 1 selon les fonctions identifiées. Si analogie trimestre-v2 tient : monstre `afficherProfilComplet` ou `changerProfilActif` autour de cyc 80-100.
 
 ### Étape 5 — Validation manuelle Grégoire (~30 min - 1 h)
 
-5-6 cas Safari Mac sombre + clair sur les flots utilisateur identifiés MODULES-MAP §2.3.
+5-6 cas Safari Mac sombre + clair sur les flots utilisateur identifiés MODULES-MAP §2.3 :
+- Sélection d'un étudiant depuis la liste
+- Changement de groupe-cours actif → rechargement profil
+- Affichage des graphiques A-C-P
+- Affichage des évaluations + travaux
+- Navigation cross-onglet (Bilan, RaI, etc.)
 
 ### Étape 6 — Capitalisation + merge (~30-45 min)
 
 - MODULES-MAP §2.3 rétrospective
-- NOTES-DE-VERSION (entrée Beta XX)
+- NOTES-DE-VERSION (entrée Beta 99.48 ou bump build sur 99.47)
 - BACKLOG.md (header daté)
-- METHODE §7 notes pour evaluation.js (module suivant)
+- METHODE §7 notes pour evaluation.js (module suivant, le dernier god module)
 - SUIVI-BUGS pour bugs latents découverts
-- Merge FF `refactor/profil-etudiant` → `main`
-- Push à la maison (réseau école bloque GitHub)
+- Mémoires feedback : nouvelles trouvailles
+- Merge FF `refactor/profil-etudiant` → `main` (via `git update-ref` si main pas checkable)
+- Push à la maison
+
+### Chantiers connexes en attente (post-refactor profil-etudiant)
+
+- **Cycle Catégorie B trimestre-v2** : traiter les 6 bugs latents inscrits SUIVI-BUGS #99-104 (3 XSS innerHTML + 3 dead code).
+- **Intégrer les 5 propositions Catégorie B de METHODE §7** dans la méthode officielle (check-list étape 3, §3 étape 0, §3 étape 4, §5 anti-pattern §5.8).
+- **Refactor `evaluation.js`** (7 348 LOC) — dernier god module, à enchaîner après profil-etudiant. Tendance : peut-être encore plus complexe vu la logique IDME × SRPNF × algo notation.
+- **Consolidation `utils-notifications.js`** (~25 LOC) — wrappers `afficherNotificationSucces/Erreur` dupliqués dans tous les sous-modules. 73 sites d'appel dans le code, à faire un cycle dédié post-refactors (risque régression silencieuse si fait pendant un découpage).
 ```
 
 ---
