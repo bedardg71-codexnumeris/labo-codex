@@ -120,6 +120,17 @@ beforeAll(() => {
     // (abrevierJour, obtenirPeriodeJournee) + `groupeCoursEnEditionId`.
     // Le hub `populerDropdownsAssemblageV2` reste dans le résidu (Écart #4).
     chargerScript('js/trimestre-v2-groupes-cours.js', stubs, win);
+
+    // Refactor étape 3 session C Phase 1 (17 mai 2026) : trimestre-v2-orchestre.js
+    // extrait depuis trimestre-v2.js (lignes 491-1216, zone HIGH 8).
+    // 15 fonctions chorégraphie : dropdowns + changement de groupe-cours
+    // actif (monstre cyc 94 préservé Phase 1, éclatement Phase 2 selon
+    // Écart #8) + UI enseignant/horaire/groupe-cours + accès calendrier.
+    // Variable module-scope migrée : `enseignantEnEditionUI`.
+    // Chargé EN DERNIER pour que les `window.X` des autres sous-modules
+    // (populerDropdownGroupesHoraireV2, afficherTrimestreGroupeCoursV2,
+    // supprimerGroupeCoursV2) soient déjà disponibles.
+    chargerScript('js/trimestre-v2-orchestre.js', stubs, win);
 });
 
 describe('trimestre-v2 — régression refactoring 2026-mai (canari + sentinelle)', () => {
