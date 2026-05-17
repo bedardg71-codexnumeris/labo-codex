@@ -186,161 +186,49 @@ async function changerGroupeCoursDepuisHeader(groupeCoursId) {
 }
 
 /**
- * Change le groupe-cours actif
- * 🆕 BETA 95.3 (10 jan 2026) : Supporte le mode "cours" (tous groupes fusionnés)
+ * (Helper privé) Définit groupeCoursActif + infoCours pour le mode COURS
+ * (tous les groupes-cours d'un cours fusionnés). Atomicité critique
+ * préservée — les 2 setSync sont consécutifs sans await ni break.
  *
- * ⚠️ MONSTRE cyc 94 — 282 LOC — préservé tel quel pour Phase 1 session C.
- * Sera éclaté en 4 fonctions Phase 2 selon Écart #8 MODULES-MAP §2.4 :
- *   _definirInfoCoursModeCours / _definirInfoCoursModeGroupeCours /
- *   _rafraichirVuesContextDependantes / fonction principale (~30 LOC).
+ * Extrait du monstre `changerGroupeCoursActifV2` en Phase 2 session C
+ * (17 mai 2026) selon Écart #8 MODULES-MAP §2.4.
  */
-async function changerGroupeCoursActifV2(valeur) {
-    // DEBUG (11 jan 2026)
+function _definirInfoCoursModeCours(coursId, trimestreActif) {
+    const cours = db.getSync('cours', []);
+    const coursInfo = cours.find(c => c.id === coursId);
+    const sigle = coursInfo?.codeCours || coursInfo?.code || coursInfo?.sigle || coursId;
 
-    if (!valeur) {
-        db.setSync('groupeCoursActif', null);
-        db.setSync('infoCours', null);
-        return;
-    }
+    db.setSync('groupeCoursActif', {
+        modeCours: true,
+        coursId: coursId,
+        trimestreId: trimestreActif.id,
+        groupe: null,  // null = tous les groupes
+        id: null,
+        enseignantId: null,
+        horaireId: null
+    });
 
-    const trimestres = db.getSync('trimestres', []);
-    const trimestreActif = trimestres.find(t => t.actif);
-    if (!trimestreActif) return;
+    // ✅ CORRIGÉ (11 jan 2026) : Utiliser setSync pour éviter problèmes localStorage saturé
+    db.setSync('infoCours', {
+        id: coursId,
+        codeCours: sigle,
+        nomCours: coursInfo?.nomCours || '',
+        groupe: null,  // null = tous les groupes
+        _modeCours: true
+    });
+}
 
-    // 🆕 BETA 95.3 : Détecter si c'est un mode cours (tous groupes)
-    const estModeCours = valeur.startsWith('cours:');
-
-    if (estModeCours) {
-        // Mode COURS : tous les groupes fusionnés
-        const coursId = valeur.replace('cours:', '');
-        const cours = db.getSync('cours', []);
-
-        const coursInfo = cours.find(c => c.id === coursId);
-
-        const sigle = coursInfo?.codeCours || coursInfo?.code || coursInfo?.sigle || coursId;
-
-        db.setSync('groupeCoursActif', {
-            modeCours: true,
-            coursId: coursId,
-            trimestreId: trimestreActif.id,
-            groupe: null,  // null = tous les groupes
-            id: null,
-            enseignantId: null,
-            horaireId: null
-        });
-
-        // ✅ CORRIGÉ (11 jan 2026) : Utiliser setSync pour éviter problèmes localStorage saturé
-        db.setSync('infoCours', {
-            id: coursId,
-            codeCours: sigle,
-            nomCours: coursInfo?.nomCours || '',
-            groupe: null,  // null = tous les groupes
-            _modeCours: true
-        });
-
-        const selectHeader = document.getElementById('selectGroupeCoursHeader');
-        if (selectHeader) selectHeader.value = valeur;
-
-        if (typeof mettreAJourContexteEntete === 'function') {
-            mettreAJourContexteEntete();
-        }
-
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces('Cours activé (tous groupes)');
-        }
-
-        if (typeof afficherCalendrierScolaire === 'function') {
-            afficherCalendrierScolaire();
-        }
-
-        // 🆕 BETA 95.3 : Rafraîchir la liste des étudiants si visible
-        // Réinitialiser le filtre groupe local (redondant avec le dropdown entête)
-        const filtreGroupeCours = document.getElementById('filtre-groupe-liste');
-        if (filtreGroupeCours) filtreGroupeCours.value = '';
-        if (typeof afficherListeEtudiantsConsultation === 'function') {
-            afficherListeEtudiantsConsultation();
-        }
-
-        // 🆕 BETA 95.6 : Rafraîchir le tableau de bord aperçu (badges nb étudiants)
-        if (typeof chargerTableauBordApercu === 'function') {
-            chargerTableauBordApercu();
-        }
-
-        // 🆕 BETA 95.6 : Rafraîchir le profil étudiant si affiché
-        // Vérifie si la sous-section profil est active et si un DA est mémorisé
-        const sousSectionProfil = document.getElementById('suivi-profil');
-        if (sousSectionProfil && !sousSectionProfil.classList.contains('u-hide') && window.profilActuelDA) {
-            if (typeof afficherProfilComplet === 'function') {
-                // Récupérer la liste des étudiants du nouveau groupe-cours
-                const etudiantsNouveauGC = typeof obtenirEtudiantsCoursActif === 'function'
-                    ? obtenirEtudiantsCoursActif()
-                    : [];
-                // Si l'étudiant actuel n'est pas dans le nouveau groupe, afficher le premier de la liste
-                const etudiantExiste = etudiantsNouveauGC.find(e => e.da === window.profilActuelDA);
-                if (etudiantExiste) {
-                    afficherProfilComplet(window.profilActuelDA);
-                } else if (etudiantsNouveauGC.length > 0) {
-                    // Trier et prendre le premier
-                    etudiantsNouveauGC.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
-                    const premierActif = etudiantsNouveauGC.find(e => !estEtudiantExclu(e));
-                    if (premierActif) {
-                        afficherProfilComplet(premierActif.da);
-                    }
-                }
-            }
-        }
-
-        // 🆕 BETA 96.1 : Rafraîchir la boîte à outils si visible
-        if (typeof window.initialiserTirage === 'function') {
-            window.initialiserTirage();
-        }
-        if (typeof window.initialiserQuestions === 'function') {
-            window.initialiserQuestions();
-        }
-
-        // 🆕 FIX (3 fév 2026) : Rafraîchir le module de saisie des présences si visible
-        const sectionSaisiePresencesCours = document.getElementById('suivi-saisie');
-        if (sectionSaisiePresencesCours && !sectionSaisiePresencesCours.classList.contains('u-hide')) {
-            if (typeof initialiserModuleSaisiePresences === 'function') {
-                initialiserModuleSaisiePresences();
-            }
-            if (typeof mettreAJourBoutonsNavigation === 'function') {
-                mettreAJourBoutonsNavigation();
-            }
-        }
-
-        // Rafraîchir la liste des évaluations
-        if (typeof initialiserListeEvaluations === 'function') {
-            initialiserListeEvaluations();
-        }
-
-        // Rafraîchir le module travaux si visible
-        if (typeof travauxUI !== 'undefined') {
-            var siC = document.getElementById('evaluations-contenu-import');
-            if (siC && !siC.classList.contains('u-hide') && typeof travauxUI.afficherImport === 'function') travauxUI.afficherImport();
-            var sfC = document.getElementById('evaluations-contenu-fichiers');
-            if (sfC && !sfC.classList.contains('u-hide') && typeof travauxUI.afficherFichiers === 'function') travauxUI.afficherFichiers();
-            var saC = document.getElementById('evaluations-contenu-archivage');
-            if (saC && !saC.classList.contains('u-hide') && typeof travauxUI.afficherArchivage === 'function') travauxUI.afficherArchivage();
-        }
-
-        return;
-    }
-
-    // Mode GROUPE-COURS : un seul groupe
-    const groupeCoursId = valeur;
-
-    // ✅ CORRIGÉ (8 janvier 2026) : Utiliser cle() pour cohérence avec les autres fonctions
-    const cleGC = cle('groupesCours');
-    const groupesCours = db.getSync(cleGC, []);
-    const gc = groupesCours.find(g => g.id === groupeCoursId);
-
-    if (!gc) {
-        console.warn('[Trimestre V2] Groupe-cours non trouvé:', groupeCoursId);
-        return;
-    }
-
-    groupesCours.forEach(g => g.actif = (g.id === groupeCoursId));
+/**
+ * (Helper privé) Définit groupeCoursActif + infoCours pour le mode
+ * GROUPE-COURS (un seul groupe). Synchronise aussi horaireHebdo avec le
+ * groupe actif AVANT toute régénération de calendrier (FIX 30 mars 2026).
+ * Atomicité critique préservée — les 2 setSync sont consécutifs.
+ *
+ * Extrait du monstre `changerGroupeCoursActifV2` en Phase 2 session C
+ * (17 mai 2026) selon Écart #8 MODULES-MAP §2.4.
+ */
+async function _definirInfoCoursModeGroupeCours(gc, trimestreActif, groupesCours, cleGC) {
+    groupesCours.forEach(g => g.actif = (g.id === gc.id));
     // ✅ CORRIGÉ (11 jan 2026) : Utiliser db.set pour synchroniser IndexedDB avant synchroniserInfoCours
     await db.set(cleGC, groupesCours);
 
@@ -370,17 +258,6 @@ async function changerGroupeCoursActifV2(valeur) {
         _groupeCoursId: gc.id  // ID du groupe-cours
     });
 
-    const selectHeader = document.getElementById('selectGroupeCoursHeader');
-    if (selectHeader) selectHeader.value = groupeCoursId || '';
-
-    if (typeof mettreAJourContexteEntete === 'function') {
-        mettreAJourContexteEntete();
-    }
-
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Groupe-cours activé');
-    }
-
     // 🔧 FIX (30 mars 2026) : Synchroniser horaireHebdo avec le groupe actif
     // AVANT de regénérer le calendrier (sinon il utilise les horaires fusionnés)
     if (gc.horaireId) {
@@ -392,9 +269,76 @@ async function changerGroupeCoursActifV2(valeur) {
             db.setSync('seancesHoraire', horaireGC.seances);
         }
     }
+}
 
-    // Regénérer le calendrier avec les bons jours
-    if (typeof genererCalendrierComplet === 'function') {
+/**
+ * (Helper privé) Rafraîchit le profil étudiant affiché si la sous-section
+ * est active et qu'un DA est mémorisé. Si l'étudiant actuel n'est pas dans
+ * le nouveau groupe-cours, affiche le premier de la liste.
+ *
+ * Extrait de `_rafraichirVuesContextDependantes` pour respecter la cible
+ * dure cyc ≤ 30 (Phase 2 session C — 17 mai 2026).
+ */
+function _rafraichirProfilEtudiantSiVisible() {
+    // 🆕 BETA 95.6 : Vérifie si la sous-section profil est active et si un DA est mémorisé
+    const sousSectionProfil = document.getElementById('suivi-profil');
+    if (!sousSectionProfil || sousSectionProfil.classList.contains('u-hide') || !window.profilActuelDA) {
+        return;
+    }
+    if (typeof afficherProfilComplet !== 'function') return;
+
+    // Récupérer la liste des étudiants du nouveau groupe-cours
+    const etudiantsNouveauGC = typeof obtenirEtudiantsCoursActif === 'function'
+        ? obtenirEtudiantsCoursActif()
+        : [];
+
+    // Si l'étudiant actuel n'est pas dans le nouveau groupe, afficher le premier de la liste
+    const etudiantExiste = etudiantsNouveauGC.find(e => e.da === window.profilActuelDA);
+    if (etudiantExiste) {
+        afficherProfilComplet(window.profilActuelDA);
+        return;
+    }
+    if (etudiantsNouveauGC.length === 0) return;
+
+    // Trier et prendre le premier (actif)
+    etudiantsNouveauGC.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+    const premierActif = etudiantsNouveauGC.find(e => !estEtudiantExclu(e));
+    if (premierActif) {
+        afficherProfilComplet(premierActif.da);
+    }
+}
+
+/**
+ * (Helper privé) Rafraîchit toutes les vues dépendantes du contexte
+ * groupe-cours/cours actif : entête, calendrier, étudiants, tableau de
+ * bord, profil étudiant, boîte à outils, saisie présences, évaluations,
+ * travaux. Factorisation des 2 branches ~90 % dupliquées du monstre
+ * original (Mode COURS vs Mode GROUPE-COURS) — seules différences :
+ * la valeur du selectHeader, le message de notification, et la
+ * régénération du calendrier (uniquement en mode GROUPE-COURS).
+ *
+ * Extrait du monstre `changerGroupeCoursActifV2` en Phase 2 session C
+ * (17 mai 2026) selon Écart #8 MODULES-MAP §2.4.
+ *
+ * @param {string} valeurHeader Valeur à mettre dans selectGroupeCoursHeader.value
+ * @param {string} messageNotification Texte passé à afficherNotificationSucces
+ * @param {boolean} regenererCalendrier true en mode GROUPE-COURS (regen
+ *   calendrier complet pour les bons jours), false en mode COURS.
+ */
+function _rafraichirVuesContextDependantes(valeurHeader, messageNotification, regenererCalendrier) {
+    const selectHeader = document.getElementById('selectGroupeCoursHeader');
+    if (selectHeader) selectHeader.value = valeurHeader || '';
+
+    if (typeof mettreAJourContexteEntete === 'function') {
+        mettreAJourContexteEntete();
+    }
+
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces(messageNotification);
+    }
+
+    // Mode GROUPE-COURS uniquement : régénérer le calendrier avec les bons jours
+    if (regenererCalendrier && typeof genererCalendrierComplet === 'function') {
         genererCalendrierComplet();
     }
 
@@ -405,8 +349,8 @@ async function changerGroupeCoursActifV2(valeur) {
 
     // 🆕 BETA 95.3 : Rafraîchir la liste des étudiants si visible
     // Réinitialiser le filtre groupe local (redondant avec le dropdown entête)
-    const filtreGroupeGC = document.getElementById('filtre-groupe-liste');
-    if (filtreGroupeGC) filtreGroupeGC.value = '';
+    const filtreGroupe = document.getElementById('filtre-groupe-liste');
+    if (filtreGroupe) filtreGroupe.value = '';
     if (typeof afficherListeEtudiantsConsultation === 'function') {
         afficherListeEtudiantsConsultation();
     }
@@ -417,28 +361,7 @@ async function changerGroupeCoursActifV2(valeur) {
     }
 
     // 🆕 BETA 95.6 : Rafraîchir le profil étudiant si affiché
-    // Vérifie si la sous-section profil est active et si un DA est mémorisé
-    const sousSectionProfilGC = document.getElementById('suivi-profil');
-    if (sousSectionProfilGC && !sousSectionProfilGC.classList.contains('u-hide') && window.profilActuelDA) {
-        if (typeof afficherProfilComplet === 'function') {
-            // Récupérer la liste des étudiants du nouveau groupe-cours
-            const etudiantsNouveauGroupe = typeof obtenirEtudiantsCoursActif === 'function'
-                ? obtenirEtudiantsCoursActif()
-                : [];
-            // Si l'étudiant actuel n'est pas dans le nouveau groupe, afficher le premier de la liste
-            const etudiantExisteGC = etudiantsNouveauGroupe.find(e => e.da === window.profilActuelDA);
-            if (etudiantExisteGC) {
-                afficherProfilComplet(window.profilActuelDA);
-            } else if (etudiantsNouveauGroupe.length > 0) {
-                // Trier et prendre le premier
-                etudiantsNouveauGroupe.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
-                const premierActifGC = etudiantsNouveauGroupe.find(e => !estEtudiantExclu(e));
-                if (premierActifGC) {
-                    afficherProfilComplet(premierActifGC.da);
-                }
-            }
-        }
-    }
+    _rafraichirProfilEtudiantSiVisible();
 
     // 🆕 BETA 96.1 : Rafraîchir la boîte à outils si visible
     if (typeof window.initialiserTirage === 'function') {
@@ -450,8 +373,8 @@ async function changerGroupeCoursActifV2(valeur) {
 
     // 🆕 FIX (3 fév 2026) : Rafraîchir le module de saisie des présences si visible
     // Les dates de séances dépendent de l'horaire du groupe-cours actif
-    const sectionSaisiePresences = document.getElementById('suivi-saisie');
-    if (sectionSaisiePresences && !sectionSaisiePresences.classList.contains('u-hide')) {
+    const sectionSaisie = document.getElementById('suivi-saisie');
+    if (sectionSaisie && !sectionSaisie.classList.contains('u-hide')) {
         if (typeof initialiserModuleSaisiePresences === 'function') {
             initialiserModuleSaisiePresences();
         }
@@ -467,14 +390,60 @@ async function changerGroupeCoursActifV2(valeur) {
 
     // Rafraîchir le module travaux si visible
     if (typeof travauxUI !== 'undefined') {
-        var siGC = document.getElementById('evaluations-contenu-import');
-        if (siGC && !siGC.classList.contains('u-hide') && typeof travauxUI.afficherImport === 'function') travauxUI.afficherImport();
-        var sfGC = document.getElementById('evaluations-contenu-fichiers');
-        if (sfGC && !sfGC.classList.contains('u-hide') && typeof travauxUI.afficherFichiers === 'function') travauxUI.afficherFichiers();
-        var saGC = document.getElementById('evaluations-contenu-archivage');
-        if (saGC && !saGC.classList.contains('u-hide') && typeof travauxUI.afficherArchivage === 'function') travauxUI.afficherArchivage();
+        var si = document.getElementById('evaluations-contenu-import');
+        if (si && !si.classList.contains('u-hide') && typeof travauxUI.afficherImport === 'function') travauxUI.afficherImport();
+        var sf = document.getElementById('evaluations-contenu-fichiers');
+        if (sf && !sf.classList.contains('u-hide') && typeof travauxUI.afficherFichiers === 'function') travauxUI.afficherFichiers();
+        var sa = document.getElementById('evaluations-contenu-archivage');
+        if (sa && !sa.classList.contains('u-hide') && typeof travauxUI.afficherArchivage === 'function') travauxUI.afficherArchivage();
+    }
+}
+
+/**
+ * Change le groupe-cours actif
+ * 🆕 BETA 95.3 (10 jan 2026) : Supporte le mode "cours" (tous groupes fusionnés)
+ *
+ * Phase 2 session C (17 mai 2026) — éclatée de cyc 94 / 282 LOC en 4
+ * fonctions selon Écart #8 MODULES-MAP §2.4. Cible cyc ≤ 30 atteinte.
+ * Atomicité du couple `groupeCoursActif`/`infoCours` préservée dans
+ * chaque helper (les 2 setSync restent consécutifs sans await entre).
+ */
+async function changerGroupeCoursActifV2(valeur) {
+    if (!valeur) {
+        db.setSync('groupeCoursActif', null);
+        db.setSync('infoCours', null);
+        return;
     }
 
+    const trimestres = db.getSync('trimestres', []);
+    const trimestreActif = trimestres.find(t => t.actif);
+    if (!trimestreActif) return;
+
+    // 🆕 BETA 95.3 : Détecter si c'est un mode cours (tous groupes)
+    const estModeCours = valeur.startsWith('cours:');
+
+    if (estModeCours) {
+        // Mode COURS : tous les groupes fusionnés
+        const coursId = valeur.replace('cours:', '');
+        _definirInfoCoursModeCours(coursId, trimestreActif);
+        _rafraichirVuesContextDependantes(valeur, 'Cours activé (tous groupes)', false);
+        return;
+    }
+
+    // Mode GROUPE-COURS : un seul groupe
+    const groupeCoursId = valeur;
+    // ✅ CORRIGÉ (8 janvier 2026) : Utiliser cle() pour cohérence avec les autres fonctions
+    const cleGC = cle('groupesCours');
+    const groupesCours = db.getSync(cleGC, []);
+    const gc = groupesCours.find(g => g.id === groupeCoursId);
+
+    if (!gc) {
+        console.warn('[Trimestre V2] Groupe-cours non trouvé:', groupeCoursId);
+        return;
+    }
+
+    await _definirInfoCoursModeGroupeCours(gc, trimestreActif, groupesCours, cleGC);
+    _rafraichirVuesContextDependantes(groupeCoursId, 'Groupe-cours activé', true);
 }
 
 /**
