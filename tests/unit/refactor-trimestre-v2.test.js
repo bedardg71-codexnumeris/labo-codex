@@ -95,6 +95,12 @@ beforeAll(() => {
     // extrait depuis trimestre-v2.js (lignes 946-1394, 11 fonctions
     // liste trimestres + archivage + biblio + modal nouveau).
     chargerScript('js/trimestre-v2-liste.js', stubs, win);
+
+    // Refactor étape 3 session A (17 mai 2026) : trimestre-v2-init.js
+    // extrait depuis trimestre-v2.js (lignes 34-401 + 486-948, 21 fonctions
+    // init + identification + calendrier + événements,
+    // `afficherStatistiquesTrimestreV2` reste au résidu).
+    chargerScript('js/trimestre-v2-init.js', stubs, win);
 });
 
 describe('trimestre-v2 — régression refactoring 2026-mai (canari + sentinelle)', () => {
