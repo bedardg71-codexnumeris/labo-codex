@@ -1,11 +1,42 @@
-# SESSION — État au 17 mai 2026 (refactor productions.js — TERMINÉ, mergé sur main)
+# SESSION — État au 17 mai 2026 (refactor productions.js TERMINÉ + trimestre-v2 étapes 0+1+2 livrées)
 
-**Date** : 17 mai 2026 (matin — étapes 5 + 6 livrées, merge FF sur `main`)
+**Date** : 17 mai 2026 (journée complète — productions §6 livré matin, trimestre-v2 étapes 0→2 livrées après-midi)
 **Beta / build** : 99.46 / 0516-0820
-**Branche actuelle du worktree** : `refactor/trimestre-v2` (anciennement `refactor/productions`, renommée après merge en prévision du prochain refactor)
-**Dernier commit** : `1196d75` — correctif numérique post-capitalisation (HEAD `24cad3b` + 8 commits).
-**Branche `main`** (après merge) : `1196d75` (FF depuis `1b4818d`).
-**Statut** : refactor productions.js **complet** — étapes 0→6 livrées, mergé sur `main`, **reste à pusher** depuis la maison (réseau école bloque GitHub). Tests : 60 Vitest + 6 Playwright = **66/66 verts**. Cible dure METHODE (cyc ≤ 30) atteinte.
+**Branche actuelle du worktree** : `refactor/trimestre-v2`
+**Dernier commit** : `4d30a0a` — tests de régression trimestre-v2 (étape 2).
+**Branche `main`** : `4b915b0` (FF depuis `1b4818d` ce matin, refactor productions mergé).
+**Commits non-pushés sur refactor/trimestre-v2 au-delà de main** : 2 (`e59a669` étape 1 + `4d30a0a` étape 2).
+**Statut** :
+- Refactor productions.js : **complet** — étapes 0→6 livrées, mergé sur `main`, **reste à pusher** depuis la maison.
+- Refactor trimestre-v2.js : **étapes 0+1+2 livrées**, prêt pour étape 3 session A (zones LOW).
+
+**Tests** : 65 Vitest (60 + 5 nouveaux) + 8 Playwright (6 + 2 nouveaux) = **73/73 verts**.
+
+## Récap session trimestre-v2 (après-midi 17 mai)
+
+**Étape 1** — Lecture intégrale 6 584 LOC + audit ESLint complexity + Agent Explore frontières inter-zones. **11 écarts** documentés dans MODULES-MAP §2.4 (commit `e59a669`) :
+- **8 fonctions ≥ cyc 30** (vs 1 prévu) ; `changerGroupeCoursActifV2` cyc 94 (vs 86 prévu, 282 LOC, 2 branches ~90 % dupliquées).
+- **129 exports réels** (vs 53 prévus) dispersés en 5 zones (4010, 4139, 5150, 5732, 6453).
+- Hub critique `populerDropdownsAssemblageV2` (cyc 28, appelé 10× cross-zones) reste au résidu.
+- État pivot `window.trimestreActif` lu 28× hors module — atomicité critique du couple `=` + `setSync`.
+- Plan d'extraction : LOW (1+2+5+7) → MEDIUM (3+4+6) → HIGH (8) en 3 sessions séparées.
+
+**Étape 2** — 5 Vitest + 2 Playwright (commit `4d30a0a`) :
+- Canari de chargement IIFE dans sandbox Node.
+- Sentinelle 20 exports représentatifs des 8 zones.
+- Assertions structure `changerGroupeCoursActifV2` (async, arité 1).
+- Hub résiduel `populerDropdownsAssemblageV2` accessible.
+- État pivot `window.trimestreActif` non muté au chargement IIFE.
+- Playwright : chargement WebKit sans erreur console (filtres file:// connus) + sentinelle exports browser.
+
+## Décisions actées avec Grégoire (17 mai après-midi)
+
+1. Lecture intégrale du module avant tout découpage (étape 1 complète).
+2. Étape 2 enchaînée dans la même session (canari + sentinelle suffisants pour pré-refactor).
+3. **Fractionnement étapes 3+4 en 3 sessions** :
+   - Session A : zones LOW (1 init + 2 liste + 5 horaires + 7 enseignants) — < 5 dépendances internes chacune.
+   - Session B : zones MEDIUM (3 cours + 4 étudiants + 6 groupes-cours) — toutes appellent `populerDropdownsAssemblageV2`.
+   - Session C : zone HIGH (8 orchestre) + éclatement de `changerGroupeCoursActifV2` cyc 94 en 3 helpers + étapes 5+6 (validation manuelle + capitalisation + merge).
 
 ## Récap étape 5 — Validation manuelle Grégoire (17 mai 2026)
 
@@ -81,7 +112,7 @@ Cible dure METHODE §3 étape 4 : aucune fonction > cyc 30 — **✅ atteinte**.
 
 ---
 
-## Consigne de démarrage pour la prochaine session (refactor `trimestre-v2.js` — étapes 0+1+2)
+## Consigne de démarrage pour la prochaine session (refactor `trimestre-v2.js` — étape 3 session A : zones LOW)
 
 À copier-coller au début de la prochaine session :
 
@@ -89,25 +120,34 @@ Cible dure METHODE §3 étape 4 : aucune fonction > cyc 30 — **✅ atteinte**.
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6-refactor
 
 Lecture obligatoire :
-1. SESSION.md (ce document) — récap productions.js livré
-2. audit/refactoring-prep/METHODE-REFACTORING.md §3 étapes 0+1+2 + §7 notes pour trimestre-v2
-3. audit/refactoring-prep/MODULES-MAP.md §2.4 — découpage prévisionnel trimestre-v2.js
+1. SESSION.md (ce document) — récap trimestre-v2 étapes 0+1+2 livrées
+2. audit/refactoring-prep/MODULES-MAP.md §2.4 + « Écarts observés à l'exécution » (11 écarts documentés)
+3. audit/refactoring-prep/METHODE-REFACTORING.md §3 étape 3 + §7 notes pour trimestre-v2
 
 État git attendu :
-- main : 1196d75 (FF post-merge productions.js)
-- refactor/trimestre-v2 : 1196d75 (même HEAD, prête à recevoir les commits trimestre-v2)
-- Tests verts : 66/66 (60 Vitest + 6 Playwright)
+- main : 4b915b0 (refactor productions mergé)
+- refactor/trimestre-v2 : 4d30a0a (2 commits trimestre-v2 non-pushés)
+- Tests verts : 73/73 (65 Vitest + 8 Playwright)
 
-OBJECTIF : étapes 0+1+2 trimestre-v2.js
-- Étape 0 : symlinks + baseline tests
-- Étape 1 : lecture intégrale 6 584 LOC + audit ESLint + annoter MODULES-MAP §2.4 (écarts d'exécution)
-- Étape 2 : tests Vitest régression + Playwright pour changement contexte (NÉCESSAIRE ici, cf. METHODE §7 note #2)
+OBJECTIF SESSION A : étape 3 zones LOW (1 init + 2 liste + 5 horaires + 7 enseignants)
+Extraire 4 sous-modules + le helper commun :
+- `js/utils-notifications.js` (~25 LOC) — wrappers afficherNotification* consolidés, chargé EN AMONT
+- `js/trimestre-v2-init.js` (~780 LOC) — init + identification + calendrier + événements (afficherStatistiquesTrimestreV2 reste au résidu)
+- `js/trimestre-v2-liste.js` (~485 LOC) — liste trimestres + archivage + biblio + modal nouveau
+- `js/trimestre-v2-horaires.js` (~830 LOC) — horaires + séances + format
+- `js/trimestre-v2-enseignants.js` (~315 LOC) — profils enseignants
 
-Notes pour ce refactor (METHODE §7 productions.js) :
-- Helper `chargerScript(path, stubs, fauxWindowExistant)` étendu — réutiliser tel quel
-- Grep `window.X` AVANT et APRÈS chaque extraction
-- Wrappers résiduels (anti-pattern §5.3 si applicable) restent au résidu
-- Fractionnement en 2 sessions envisageable (9 sous-modules prévus)
+Notes pour cette session (issues étape 1 + METHODE §7 productions.js) :
+- Helper test `chargerScript(path, stubs, fauxWindowExistant)` étendu : enchaîner les 4 sous-modules dans le même `win`.
+- **Grep `window.X` AVANT ET APRÈS chaque extraction** — 5 zones d'exports dispersées (4010, 4139, 5150, 5732, 6453).
+- **Hub résiduel** `populerDropdownsAssemblageV2` (4182, cyc 28) reste dans `trimestre-v2.js`.
+- **Variables module-scope** restent au résidu : `evenementPrevuEnEditionV2`, `evenementImprevuEnEditionV2` (zone 1), `enseignantEnEditionId` (zone 7), `horaireEnEditionId` + `seanceEnEditionV2` (zone 5).
+- **Charger `js/utils-notifications.js` EN AMONT** de trimestre-v2.js dans index.html (wrappers défensifs deviennent vrais helpers).
+- **Préserver atomicité** : le couple `window.trimestreActif = X; db.setSync('trimestreActif', X)` ne doit jamais être séparé pendant le découpage.
+- Mettre à jour le test `tests/unit/refactor-trimestre-v2.test.js` : ajouter `chargerScript()` pour chaque sous-module.
+- Tests verts attendus à la fin : 73+ (canari + sentinelle élargis si nouveaux exports promus pour helpers privés).
+
+Session B (zones MEDIUM 3+4+6) et session C (zone HIGH 8 + monstre + étapes 5+6) suivront.
 ```
 
 ---
