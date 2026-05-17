@@ -101,6 +101,25 @@ beforeAll(() => {
     // init + identification + calendrier + événements,
     // `afficherStatistiquesTrimestreV2` reste au résidu).
     chargerScript('js/trimestre-v2-init.js', stubs, win);
+
+    // Refactor étape 3 session B (17 mai 2026) : trimestre-v2-cours.js
+    // extrait depuis trimestre-v2.js (lignes 118-1081, 18 fonctions CRUD
+    // cours + synthèses sidebar + helper setValue + `coursEnEditionV2`).
+    chargerScript('js/trimestre-v2-cours.js', stubs, win);
+
+    // Refactor étape 3 session B (17 mai 2026) : trimestre-v2-etudiants.js
+    // extrait depuis trimestre-v2.js (lignes 119-1014 + handlers wrappers
+    // 2188-2200, 25 fonctions CRUD étudiants + groupes + import/export CSV +
+    // dispatchers actionEtudiantV2Handler/remarqueEtudiantV2Handler +
+    // `donneesImportEnAttenteV2` + `etudiantEnEditionIndex`).
+    chargerScript('js/trimestre-v2-etudiants.js', stubs, win);
+
+    // Refactor étape 3 session B (17 mai 2026) : trimestre-v2-groupes-cours.js
+    // extrait depuis trimestre-v2.js (lignes 119-219 + 360-1149, zone 6).
+    // 16 fonctions CRUD groupes-cours + bibliothèque modale + helpers nom
+    // (abrevierJour, obtenirPeriodeJournee) + `groupeCoursEnEditionId`.
+    // Le hub `populerDropdownsAssemblageV2` reste dans le résidu (Écart #4).
+    chargerScript('js/trimestre-v2-groupes-cours.js', stubs, win);
 });
 
 describe('trimestre-v2 — régression refactoring 2026-mai (canari + sentinelle)', () => {
