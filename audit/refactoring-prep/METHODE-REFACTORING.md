@@ -634,7 +634,7 @@ Recommandations spécifiques tirées de cette session :
 ### Module : `productions.js`
 
 **Date de fin** : 2026-05-17 (validation manuelle Grégoire OK, merge FF sur `main`)
-**Branche** : `refactor/productions` (HEAD `9de1bfc`, 7 commits)
+**Branche** : `refactor/productions` (HEAD `24cad3b`, 8 commits dont la capitalisation §6)
 **Effort réel** : ~6 h sur 2 jours (15-16 mai) — dans la fourchette §3.3 (4-6 h).
 
 **Rétrospective complète** : voir `audit/refactoring-prep/MODULES-MAP.md §2.2` rubrique « Rétrospective post-refactoring — 17 mai 2026 » (métriques avant/après, dette résiduelle, notes pour les modules suivants).
