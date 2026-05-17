@@ -216,7 +216,7 @@ Total estimé : ~3 788 LOC (vs 3 994 LOC actuels, écart ~5 % attribuable à dé
 
 #### Rétrospective post-refactoring — 17 mai 2026
 
-**Branche** : `refactor/productions` (HEAD `9de1bfc`, 7 commits, FF mergé sur `main`).
+**Branche** : `refactor/productions` (HEAD `24cad3b`, 8 commits dont la capitalisation §6, FF mergé sur `main`).
 **Effort réel** : ~6 h sur 2 jours (15-16 mai), estimation MODULES-MAP §3.3 : 4-6 h — dans la fourchette haute.
 **Test manuel** : validation Grégoire le 17 mai, 6 cas MODULES-MAP §2.2 OK (Safari Mac, modes sombre + clair).
 

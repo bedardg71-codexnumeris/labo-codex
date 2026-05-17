@@ -18,7 +18,7 @@
 - **Cyc max** : 63 → 27 (−57 %). **0 fonction au-dela de cyc 30** dans tous les sous-modules. Plus gros fichier : 4 716 → 955 LOC (−80 %).
 - **+10 tests Vitest** (parsers + agregation). 3 bugs latents decouverts et corriges pendant le refactor (`rendreAideHTML`/`toggleAide`, `tronquer`, resync ctx ↔ parent dans state machine).
 
-*Refactor `productions.js` (Beta 99.46, 16-17 mai, 7 commits sur `refactor/productions`)*
+*Refactor `productions.js` (Beta 99.46, 16-17 mai, 8 commits sur `refactor/productions`)*
 - **3 sous-modules** : `productions-import-export.js` (693), `productions-liste.js` (456), `productions-bibliotheque-ui.js` (714) + residu (2 233).
 - **Cyc max** : 80 (`sauvegarderProduction`) → 29 (`gererChangementTypeProduction`) (−64 %). **0 fonction au-dela de cyc 30**. Plus gros fichier : 3 994 → 2 233 LOC (−44 %).
 - **6 helpers d'etape 4** extraits de `sauvegarderProduction` cyc 80 (lireDonneesFormulaireProduction, validerChampsObligatoiresProduction, validerEcheancesDansTrimestre, gererDoublonProduction, construireProductionData, rafraichirInterfaceApresSauvegarde) + 3 helpers extraits de `afficherFormProduction` cyc 47 (peuplerCartouchesProduction, prerenseignerFormulaireProduction, reinitialiserFormulaireProduction).
