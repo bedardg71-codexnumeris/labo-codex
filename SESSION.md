@@ -1,16 +1,58 @@
-# SESSION — État au 17 mai 2026 (refactor productions.js TERMINÉ + trimestre-v2 étapes 0→3 session A livrées)
+<!-- =====================================================================
+     IDENTIFICATION DE CE FICHIER  (ajouté 17 mai 2026)
+     Le projet contient 3 fichiers `SESSION.md` distincts. Ils vivent dans
+     des emplacements / branches différents et couvrent des sujets séparés.
+     Ne pas confondre.
+     ===================================================================== -->
 
-**Date** : 17 mai 2026 (journée complète — productions §6 matin, trimestre-v2 étapes 0→2 + session A après-midi)
-**Beta / build** : 99.47 / 0517-1018
+> **📌 Identification**
+> - **Chemin** : `Monitorage_v6-refactor/SESSION.md` (worktree)
+> - **Branche** : `refactor/trimestre-v2`
+> - **Rôle** : session courante du chantier **refactor** (productions.js terminé, trimestre-v2.js en cours)
+>
+> **Les deux autres `SESSION.md` du projet** (chemins distincts, à ne pas confondre) :
+> - `Monitorage_v6/SESSION.md` sur branche `audit/2026-mai` — récap historique de la branche principale (legacy refactor/productions, 16 mai).
+> - `Monitorage_v6/audit/SESSION.md` sur branche `audit/2026-mai` — session **audit annuel** Phase 3 (sujet distinct du refactor : audit de fidélité concept → implémentation).
+
+# SESSION — État au 17 mai 2026 (refactor productions.js TERMINÉ + trimestre-v2 étape 3 sessions A+B livrées)
+
+**Date** : 17 mai 2026 (journée complète — productions §6 matin, trimestre-v2 étapes 0→2 + session A après-midi, session B fin matinée 17 mai)
+**Beta / build** : 99.47 / 0517-1138
 **Branche actuelle du worktree** : `refactor/trimestre-v2`
-**Dernier commit** : bump version 99.47 (à venir, voir ci-dessous).
-**Branche `main`** : `4b915b0` (refactor productions mergé ce matin).
-**Commits non-pushés sur refactor/trimestre-v2 au-delà de main** : 6 (étape 1 `e59a669` + étape 2 `4d30a0a` + 4 extractions session A : `4e9252b` enseignants, `39901ae` horaires, `98f3efd` liste, `a02f2af` init).
+**Dernier commit** : bump version 99.47 b0517-1018 (`bfd27ad`). Modifications session B en working tree, non commitées.
+**Branche `main`** : `4b915b0` (refactor productions mergé).
+**Commits non-pushés sur refactor/trimestre-v2 au-delà de main** : 7 (étape 1 `e59a669` + étape 2 `4d30a0a` + 4 extractions session A : `4e9252b` enseignants, `39901ae` horaires, `98f3efd` liste, `a02f2af` init + 1 bump session A `bfd27ad`).
 **Statut** :
 - Refactor productions.js : **complet** — étapes 0→6 livrées, mergé sur `main`, **reste à pusher** depuis la maison.
-- Refactor trimestre-v2.js : **étapes 0+1+2 livrées** + **étape 3 session A bouclée** (4 sous-modules LOW extraits). Prêt pour session B (zones MEDIUM 3+4+6).
+- Refactor trimestre-v2.js : **étape 3 sessions A+B bouclées** (7 sous-modules sur 8 prévus extraits). Prêt pour session C (zone HIGH 8 orchestre + monstre `changerGroupeCoursActifV2` cyc 94 + étapes 4+5+6).
 
-**Tests** : 65 Vitest + 8 Playwright = **73/73 verts** (inchangé, le canari + sentinelle capturent les extractions).
+**Tests** : 65 Vitest + 8 Playwright = **73/73 verts** (sentinelle + canari capturent les 3 nouvelles extractions).
+
+## Récap étape 3 session B (17 mai matinée — zones MEDIUM extraites)
+
+3 sous-modules MEDIUM extraits depuis trimestre-v2.js (résidu post-session-A 4148 LOC) :
+
+| Sous-module | LOC | Périmètre |
+|---|---:|---|
+| `trimestre-v2-cours.js` | ~1040 | Zone 3 : CRUD cours + 5 synthèses sidebar (cours, enseignant, groupe-étudiants, horaire, groupe-cours) + dropdown pratiques + helper `setValue` + `coursEnEditionV2` (18 fonctions) |
+| `trimestre-v2-etudiants.js` | ~990 | Zone 4 : CRUD étudiants + groupes + import/export CSV (Omnivox windows-1252) + handlers dispatcher (actionEtudiantV2Handler/remarqueEtudiantV2Handler) + `donneesImportEnAttenteV2` + `etudiantEnEditionIndex` (29 fonctions) |
+| `trimestre-v2-groupes-cours.js` | ~970 | Zone 6 : CRUD groupes-cours + bibliothèque modale (visibles/masqués) + helpers nom (`abrevierJour`, `obtenirPeriodeJournee`) + `groupeCoursEnEditionId` (16 fonctions, **SANS** le hub `populerDropdownsAssemblageV2`) |
+
+**Bilan résidu trimestre-v2.js** : 4148 → 1333 LOC (-2815, **-68 %**). Cumulé depuis l'initial : 6584 → 1333 LOC (-79,8 %).
+
+**Hub `populerDropdownsAssemblageV2` conservé dans le résidu** (Écart #4 MODULES-MAP §2.4 + anti-pattern §5.6). Accédé par les 3 sous-modules MEDIUM via `window.populerDropdownsAssemblageV2`.
+
+**Promotion ajoutée en session B** (détection cross-zone tardive) :
+- `window.afficherTrimestreGroupeCoursV2` — appelée par `afficherFormGroupeCoursV2` (zone 8 résidu). Promotion réflexe : ajout `window.X` dans le sous-module + remplacement par `window.afficherTrimestreGroupeCoursV2()` (avec garde `typeof`) dans le résidu.
+
+**Bugs latents nettoyés en session B** :
+- **Doublon `window.supprimerGroupeCoursV2`** : exporté 2× dans le pré-session-B résidu (lignes 1203 zone 6 + 2114 zone 8). La seconde occurrence référençait la même fonction. Après extraction zone 6, la seconde aurait planté → suppression. Conservation comportementale (1 export valide, comportement inchangé).
+- **`_supprimerGroupeCoursV2_legacy`** (dead code, jamais appelé) : appel interne à `supprimerGroupeCoursV2()` fixé en `window.supprimerGroupeCoursV2()`. Fonction préservée per stricte préservation comportementale.
+
+**Trouvailles notables session B (mémoire candidate)** :
+1. **Audit cross-zone tardif** : un export non listé dans MODULES-MAP §2.4 peut être appelé depuis une zone non extraite — `afficherTrimestreGroupeCoursV2` n'apparaissait pas dans Écart #5 ni les sentinelles. Détecté à l'extraction zone 6 par grep résidu post-deletion. Pattern réutilisable : **après chaque deletion, grep noms de fonctions extraites dans le résidu** (pas seulement les exports).
+2. **Sub-module IIFE et doublons d'export** : un `window.X = X` orphelin dans le résidu, où `X` était une fonction maintenant extraite, transforme le résidu en `ReferenceError: X is not defined` au chargement IIFE. **Pré-deletion, grep `window\.X = X` pour identifier les doublons** + retrait du doublon non principal.
+3. **Hub résiduel + zones extraites = pattern `window.X` systématique** : les 3 zones MEDIUM extraites en session B appellent toutes le hub `populerDropdownsAssemblageV2` via `window.X`. **Convention** : tout appel au hub passe désormais par `window.X` (préfixe explicite) avec garde `typeof === 'function'` pour résilience à l'ordre de chargement.
 
 ## Récap étape 3 session A (17 mai après-midi)
 
@@ -77,7 +119,7 @@ Toutes les écritures faites avant la validation (anticipation prémérite, sign
 
 Correctif numérique `1196d75` — les chiffres écrits par `24cad3b` ne pouvaient pas s'inclure eux-mêmes (HEAD `9de1bfc`, 7 commits → HEAD `24cad3b`, 8 commits).
 
-> **Note d'emplacement** : ce SESSION.md vit sur la branche `refactor/productions` dans le worktree `/Users/kuekatsheu/Documents/GitHub/Monitorage_v6-refactor`. Le SESSION.md du repo principal (sur `audit/2026-mai`) n'a pas été modifié.
+> **Note d'emplacement (archive)** : la consigne étape 5 productions.js ci-dessus a été rédigée sur la branche `refactor/productions` (depuis renommée `refactor/trimestre-v2` puis mergée sur `main`). Le bloc d'identification en tête de ce fichier liste les 3 `SESSION.md` du projet et leur rôle respectif.
 
 ---
 
@@ -135,7 +177,7 @@ Cible dure METHODE §3 étape 4 : aucune fonction > cyc 30 — **✅ atteinte**.
 
 ---
 
-## Consigne de démarrage pour la prochaine session (refactor `trimestre-v2.js` — étape 3 session B : zones MEDIUM)
+## Consigne de démarrage pour la prochaine session (refactor `trimestre-v2.js` — étape 3 session C : zone HIGH + monstre + étapes 4+5+6)
 
 À copier-coller au début de la prochaine session :
 
@@ -143,30 +185,96 @@ Cible dure METHODE §3 étape 4 : aucune fonction > cyc 30 — **✅ atteinte**.
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6-refactor
 
 Lecture obligatoire :
-1. SESSION.md (ce document) — récap trimestre-v2 session A bouclée
-2. audit/refactoring-prep/MODULES-MAP.md §2.4 + « Écarts observés à l'exécution »
-3. audit/refactoring-prep/METHODE-REFACTORING.md §7 notes pour trimestre-v2
+1. SESSION.md (ce document) — récap trimestre-v2 sessions A+B bouclées
+2. audit/refactoring-prep/MODULES-MAP.md §2.4 + Écart #8 (analyse changerGroupeCoursActifV2)
+3. audit/refactoring-prep/METHODE-REFACTORING.md §3 étapes 4+5+6
 
-État git attendu :
+État git attendu en début de session :
 - main : 4b915b0 (productions mergé)
-- refactor/trimestre-v2 : HEAD ≈ après bump version 99.47 b0517-1018
-- 4 sous-modules LOW déjà extraits : enseignants, horaires, liste, init
-- Tests verts : 73/73
+- refactor/trimestre-v2 : HEAD = bump 99.47 b0517-1138 (commits non-pushés cumulés sessions A+B)
+- 7 sous-modules déjà extraits : init, liste, horaires, enseignants (A) + cours, étudiants, groupes-cours (B)
+- Tests verts attendus : 73/73 (65 Vitest + 8 Playwright)
 
-OBJECTIF SESSION B : étape 3 zones MEDIUM (3 cours + 4 étudiants + 6 groupes-cours)
-Extraire 3 sous-modules (chaque appelle le hub résiduel `populerDropdownsAssemblageV2`) :
-- `js/trimestre-v2-cours.js` (~850 LOC) — CRUD cours + synthèses (zone 3, lignes ~947-1914 actuelles)
-- `js/trimestre-v2-etudiants.js` (~895 LOC) — étudiants + groupes + import/export (zone 4)
-- `js/trimestre-v2-groupes-cours.js` (~880 LOC) — groupes-cours + biblio (zone 6, SANS le hub `populerDropdownsAssemblageV2`)
+Vérification rapide à l'ouverture de session :
+  git log --oneline -12       # tous les commits sessions A+B visibles
+  git status                  # propre (sauf node_modules symlinks)
+  cd tests && npm test        # 73/73 verts
+  wc -l js/trimestre-v2.js    # ≈ 1333 LOC (résidu post-session-B)
 
-Notes pour cette session :
-- **Hub résiduel** `populerDropdownsAssemblageV2` (déjà promu `window.X` à session A) reste dans le résidu — les 3 sous-modules l'appellent via `window.populerDropdownsAssemblageV2()`.
-- **Grep `window.X` AVANT ET APRÈS chaque extraction** (pattern feedback déclenché 4× session A).
-- Variables module-scope migrent avec leur zone : `coursEnEditionV2` (zone 3), `etudiantEnEditionIndex` + `donneesImportEnAttenteV2` (zone 4), `groupeCoursEnEditionId` (zone 6).
-- Préfixer les appels cross-module avec `window.X` (pattern session A).
-- 4 sites init de `initialiserTrimestreV2` (dans trimestre-v2-init.js, déjà extrait) appellent `window.chargerDropdownCoursV2` + `window.chargerGroupeCoursV2` + `window.chargerListeEtudiantsV2` — vérifier qu'ils restent fonctionnels après extraction.
+OBJECTIF SESSION C : étape 3 zone HIGH (8 orchestre) + étapes 4+5+6
 
-Session C (zone HIGH 8 + monstre `changerGroupeCoursActifV2` cyc 94 + étapes 5+6) suivra.
+### Phase 1 — étape 3 zone HIGH (~2-3 h)
+
+Extraire 1 sous-module :
+- `js/trimestre-v2-orchestre.js` (~600 LOC après éclatement du monstre)
+  - `peuplerDropdownGroupeCoursActif` (3320-original, cross-callé 9× hors module)
+  - `changerGroupeCoursDepuisHeader` (3422-original, cross-callé 5×)
+  - **`changerGroupeCoursActifV2`** (3431-original, **cyc 94, 282 LOC, monstre**)
+  - `peuplerDropdownEnseignants` (3717-original, cross-callé 4×)
+  - `changerEnseignantSelectionneV2`, `afficherFormEnseignantV2`, `modifierEnseignantSelectionneV2`
+  - `afficherFormHoraireV2`, `modifierHoraireSelectionneV2`, `mettreAJourResumeFormatHoraireV2`
+  - `afficherFormGroupeCoursV2`, `activerGroupeCoursV2`, `_supprimerGroupeCoursV2_legacy`
+  - `mettreAJourApercuGroupeCours`, `accederCalendrierRapide`
+
+Helpers transversaux restants au résidu :
+  - `populerDropdownsAssemblageV2` (hub critique, Écart #4 et #5)
+  - `mettreAJourGuideGroupeCours`
+  - `mettreAJourBarreContexte`
+  - `mettreAJourOptionsFormatHoraire`, `mettreAJourFormatHoraire`, `mettreAJourInfoDuree` (format horaire)
+  - `afficherStatistiquesTrimestreV2`
+  - `allerVersAide`
+  - Wrappers `afficherNotificationSucces` / `afficherNotificationErreur`
+
+Variable module-scope migre vers le résidu (déjà là) : `enseignantEnEditionUI`.
+
+### Phase 2 — étape 4 monstre cyc 94 (~1-2 h)
+
+`changerGroupeCoursActifV2` à éclater en 4 fonctions (Écart #8) :
+1. `_definirInfoCoursModeCours(coursId)` (~40 LOC)
+2. `_definirInfoCoursModeGroupeCours(gc)` (~50 LOC, inclut sync horaireHebdo)
+3. `_rafraichirVuesContextDependantes()` (~110 LOC — calendrier + étudiants + tableau bord + profil + outils + saisie présences + évaluations + travaux)
+4. Fonction principale (~30 LOC, cyc estimé ≤ 10)
+
+**ATOMICITÉ CRITIQUE** : le couple `window.trimestreActif = X; db.setSync('trimestreActif', X)` ne doit jamais être séparé (Écart #6 MODULES-MAP §2.4). Tout le namespacing des données dépend de cet état pivot.
+
+Autres fonctions cyc 30+ à traiter si temps :
+- `sauvegarderCoursV2` cyc 54 (zone 3 cours — peut être laissé pour un cycle dédié productions-style)
+- `mettreAJourCarteResumeGroupeCoursV2` cyc 34 (zone 6 groupes-cours)
+- `genererNomGroupeCoursV2` cyc 31 (zone 6)
+- `afficherStatistiquesTrimestreV2` cyc 30 (résidu zone 1)
+- `remplirFormCoursV2` cyc 30 (zone 3)
+- `sauvegarderEnseignantV2` cyc 29 (zone 7)
+
+Cible dure : aucune fonction au-delà de cyc 30. Cible souple cyc ≤ 15 : non bloquante.
+
+### Phase 3 — étape 5 validation manuelle Grégoire (~30 min - 1 h)
+
+5 cas d'intégration MODULES-MAP §2.4 (à valider Safari Mac obligatoire, iPad Air si possible, modes sombre + clair) :
+1. Création trimestre + identification + calendrier + relecture
+2. CRUD cours + groupes-cours + horaire + enseignant
+3. **Changement de groupe-cours actif** (test du monstre éclaté : bandeau de contexte + vues internes + atomicité)
+4. Archivage trimestre actif + bascule + accès biblio
+5. Import/export CSV étudiants (Omnivox 30 lignes)
+
+### Phase 4 — étape 6 capitalisation + merge (~30-45 min)
+
+- Mise à jour MODULES-MAP.md §2.4 (rétrospective avant/après — métriques §6.5 METHODE)
+- Mise à jour NOTES-DE-VERSION.md (entrée Beta 99.49 ou 99.50)
+- Mise à jour BACKLOG.md (clore l'item refactor trimestre-v2)
+- Transfert mémoires feedback session B + nouvelles trouvailles session C
+- Mise à jour METHODE-REFACTORING §7 notes pour `profil-etudiant.js` (module suivant)
+- Merge `refactor/trimestre-v2` → `main` (fast-forward, à valider avec Grégoire)
+- Push à la maison (réseau école bloque GitHub)
+
+### Notes pour cette session
+
+- **Hub résiduel** `populerDropdownsAssemblageV2` reste dans le résidu — le sous-module orchestre l'appellera via `window.populerDropdownsAssemblageV2()`.
+- **Grep `window.X` AVANT ET APRÈS chaque extraction** — pattern feedback `exports-orphelins-grep-window` (déjà déclenché 4× session A + 1× session B sur `afficherTrimestreGroupeCoursV2`).
+- Variables module-scope migrent avec leur zone : `enseignantEnEditionUI` est dans zone 8 résidu, doit migrer dans orchestre.
+- Préfixer les appels cross-module avec `window.X` + garde `typeof === 'function'` pour résilience.
+- 7 sous-modules déjà extraits utilisent `window.peuplerDropdownGroupeCoursActif` — vérifier qu'il reste accessible après extraction.
+
+Après session C : refactor trimestre-v2.js TERMINÉ → enchaîner sur `profil-etudiant.js` (~8 818 LOC) selon PLAN-MOYEN-TERME §4.4.
 ```
 
 ---
