@@ -415,6 +415,114 @@ C'est l'état le plus critique du projet : tout le namespacing des données dép
 
 Au minimum 5 tests Vitest + 2 tests Playwright avant refactor de `changerGroupeCoursActifV2`.
 
+#### Écarts observés à l'exécution (étape 1 lecture — 17 mai 2026, refactor démarré)
+
+Lecture intégrale des 6 584 LOC + audit ESLint complexity + grep helpers cross-module + scan callers externes + Agent Explore sur frontières inter-zones. Annotations à compléter quand le découpage sera effectif. La rétrospective finale ira en §6.5 + dans METHODE-REFACTORING §7.
+
+**Écart #1 — Découpage prévisionnel validé à ~95 %** : les 8 zones fonctionnelles MODULES-MAP §2.4 sont confirmées par lecture intégrale. Frontières observées correspondent au prévisionnel à ±50 LOC près. Aucune zone à fusionner ou splitter. Wrappers notifications lignes 19-32 (`afficherNotificationSucces/Erreur`) sont des **wrappers défensifs** car trimestre-v2.js charge AVANT `evaluation.js`/`groupe.js` — proposition sous-module commun `js/utils-notifications.js` valide mais doit être chargé EN AMONT de trimestre-v2.js dans `index.html`.
+
+**Écart #2 — Top-complexité MASSIVEMENT élargi** : MODULES-MAP §2.4 listait `changerGroupeCoursActifV2` (cyc 86) comme seule fonction au-dessus de cyc 30. L'audit ESLint (`npx eslint --no-config-lookup --rule '{"complexity":["error",15]}' --no-ignore js/trimestre-v2.js`) révèle **28 fonctions au-dessus de cyc 15, dont 8 au-delà de cyc 30** :
+
+| Fonction | Ligne | Cyc actuel | MODULES-MAP §2.4 | Zone |
+|---|---:|---:|---|---|
+| `changerGroupeCoursActifV2` | 5864 | **94** | 86 (sous-estimé) | 8 orchestre |
+| `sauvegarderCoursV2` | 2239 | 54 | non listé | 3 cours |
+| `mettreAJourCarteResumeGroupeCoursV2` | 4477 | 34 | non listé | 6 groupes-cours |
+| `genererNomGroupeCoursV2` | 4335 | 31 | non listé | 6 groupes-cours |
+| `afficherStatistiquesTrimestreV2` | 392 | 30 | non listé | 1 init |
+| `remplirFormCoursV2` | 1886 | 30 | non listé | 3 cours |
+| `sauvegarderEnseignantV2` | 5610 | 29 | non listé | 7 enseignants |
+| `populerDropdownsAssemblageV2` | 4182 | 28 | non listé | 6 hub |
+
+Étape 4 doit traiter **6 fonctions** clairement au-delà de cyc 30, plus 2 à la limite (cyc 30 exactement). Effort multiplié par 6-8 vs prévision MODULES-MAP §2.4 (qui n'anticipait qu'une seule fonction). 20 autres fonctions entre cyc 15 et 30 — cible souple METHODE non visée à ce cycle.
+
+**Écart #3 — Exports `window.X` MASSIVEMENT sous-estimés** : MODULES-MAP §2.4 annonce **53 exports** ; comptage réel `grep -nE "^window\.[a-zA-Z_][a-zA-Z0-9_]* ?= ?[a-zA-Z_]"` = **129 exports**. Sous-estimation 2,4× (cause probable : audit n'avait pas anticipé toutes les fonctions terminant en `*V2`, le regex de comptage de l'audit refusait probablement les chiffres dans les noms). Distribution en **5 zones d'exports dispersées** (pas un bloc unique en bas du fichier) :
+
+| Lignes | Nb | Contenu |
+|---|---:|---|
+| 4010-4075 | 8 | Horaires |
+| 4139 | 1 | `ouvrirAideGroupeCours` (solitaire) |
+| 5150-5346 | 95 | **Bloc principal** (majorité) |
+| 5732-5739 | 8 | Enseignants |
+| 6453-6562 | 16 | Orchestre |
+
+Pattern à anticiper (feedback `exports-orphelins-grep-window` du refactor productions) : grep `window\.<NomFonction>` AVANT ET APRÈS chaque extraction. Particulièrement critique ici vu la dispersion en 5 zones.
+
+**Écart #4 — Hub critique `populerDropdownsAssemblageV2`** : ligne 4182 dans la zone 6 (groupes-cours). Cyc 28, 136 LOC. Lit 6 sources DB (cours, groupeEtudiants, horaires, enseignants, pratiquesConfigurables, démo) pour recalculer 5 dropdowns. Appelée **10× cross-zones** (zones 3, 4, 5, 7 directement après chaque CRUD, plus indirectement via zones 6 et 8). **Doit rester dans le résidu** (anti-pattern §5.6 helpers cross-zones). Le sous-module `trimestre-v2-groupes-cours.js` devra coexister avec ce hub résiduel — pattern « hub UI vs CRUD » analogue à productions.js §2.2 écart #1.
+
+**Écart #5 — Helpers/variables transversaux à laisser dans le résidu** (anti-pattern §5.3) :
+
+Fonctions :
+- `populerDropdownsAssemblageV2` (hub cascade, 4182-4314)
+- `mettreAJourGuideGroupeCours` (référencée 4 zones)
+- `mettreAJourBarreContexte` (validation état global, 6477)
+- `afficherStatistiquesTrimestreV2` (observée 4 zones, 392)
+
+Variables module-scope (anti-pattern §5.3) :
+- `coursEnEditionV2` (zone 3), `etudiantEnEditionIndex` (zone 4), `seanceEnEditionV2` (zone 5), `horaireEnEditionId` (zone 5), `groupeCoursEnEditionId` (zone 6), `enseignantEnEditionId` (zone 7)
+- `donneesImportEnAttenteV2` (zone 4)
+- `evenementPrevuEnEditionV2`, `evenementImprevuEnEditionV2` (zone 1)
+
+Taille résidu estimée : **~400-600 LOC** (le résidu portera le hub + les variables module-scope + wrappers notification).
+
+**Écart #6 — État pivot `window.trimestreActif`** : modifié 4 fois dans le module (toujours via le couple atomique `window.trimestreActif = id; db.setSync('trimestreActif', id);`), lu **28 fois HORS module**. **Atomicité de la mise à jour CRITIQUE** — préserver le couple `window.trimestreActif = X; db.setSync('trimestreActif', X)` au même endroit lors du découpage. Helper cross-module `cle()` défini dans `js/trimestres.js:211` (et non dans trimestre-v2.js) — accessible globalement, OK pour le découpage.
+
+**Écart #7 — Helpers cross-module densément consommés** :
+
+| Helper | Occurrences | Origine |
+|---|---:|---|
+| `afficherNotificationSucces/Erreur` | 73 | Wrappers locaux 19-32, à consolider hors module |
+| `db.*` | **203** (densité max du projet) | `js/db.js` |
+| `cle()` | 36 | `js/trimestres.js:211` |
+| `echapperHtml` | 31 | Global hors module |
+| `BibliothequeUI.*` | 16 | `js/bibliotheque-ui.js` |
+| `localStorage.*` | **0** | Tout passe par `db.*` (propre) |
+
+**Écart #8 — `changerGroupeCoursActifV2` (cyc 94, 282 LOC) — analyse structure** : 2 branches (`estModeCours` true/false) **massivement dupliquées** (~90 % du code répété entre les branches). Plan de découpage évident pour étape 4 :
+1. Helper `_definirInfoCoursModeCours(coursId)` (~40 LOC)
+2. Helper `_definirInfoCoursModeGroupeCours(gc)` (~50 LOC, inclut sync horaireHebdo)
+3. Helper `_rafraichirVuesContextDependantes()` (~110 LOC — calendrier + étudiants + tableau bord + profil + outils + saisie présences + évaluations + travaux)
+4. Fonction principale (~30 LOC, cyc estimé ≤ 10)
+
+Cible cyc ≤ 30 facilement atteignable. Risque principal : **préserver l'atomicité** de la transition (cf. §2.4 note « tout le namespacing des données dépend du trimestreActif »).
+
+**Écart #9 — Callers externes des 129 exports** : seulement **8 fonctions** ont des callers explicites hors module (via `window.X(...)` dans d'autres `.js`) :
+
+| Fonction | Nb callers externes |
+|---|---:|
+| `peuplerDropdownGroupeCoursActif` | 9 |
+| `changerGroupeCoursDepuisHeader` | 5 |
+| `mettreAJourCarteEnseignant` | 4 |
+| `peuplerDropdownEnseignants` | 4 |
+| `mettreAJourApercuGroupeCours` | 3 |
+| `mettreAJourOptionsFormatHoraire` | 1 |
+| `ouvrirModalBibliothequeGroupeCours` | 1 |
+| `ouvrirModalNouveauTrimestre` | 1 |
+
+Les ~121 autres exports sont consommés via le dispatcher `data-action` (pattern similaire à productions.js). Peu de dépendances externes à respecter pendant le découpage.
+
+**Écart #10 — Ordre d'extraction recommandé** (par Agent Explore sur frontières inter-zones) :
+1. **LOW RISK** : zones 1 (init), 2 (liste), 5 (horaires), 7 (enseignants) — extraire en premier (< 5 dépendances internes chacune)
+2. **MEDIUM RISK** : zones 3 (cours), 4 (étudiants), 6 (groupes-cours via hub) — extraire ensemble après LOW (toutes appellent `populerDropdownsAssemblageV2`)
+3. **HIGH RISK** : zone 8 (orchestre, `changerGroupeCoursActifV2` cyc 94) — extraire EN DERNIER, après gel des autres zones et après l'éclatement de la fonction monstre en helpers privés
+
+**Écart #11 — Tailles révisées des sous-modules** (estimations après lecture) :
+
+| Sous-module | LOC §2.4 | LOC effectif estimé | Périmètre observé |
+|---|---:|---:|---|
+| `js/utils-notifications.js` (commun) | ~25 | ~25 | inchangé |
+| `trimestre-v2.js` (résidu) | non spécifié | ~600-800 | hub `populerDropdownsAssemblageV2` + variables module-scope + wrappers transversaux (`mettreAJourGuideGroupeCours`, `mettreAJourBarreContexte`, `afficherStatistiquesTrimestreV2`) |
+| `trimestre-v2-init.js` | ~870 | ~780 | init + identification + calendrier + événements (911-statistiques laissée au résidu) |
+| `trimestre-v2-liste.js` | ~590 | ~485 | liste trimestres + archivage + biblio + modal nouveau |
+| `trimestre-v2-cours.js` | ~970 | ~850 | CRUD cours + synthèses |
+| `trimestre-v2-etudiants.js` | ~895 | ~895 | étudiants + groupes + import/export |
+| `trimestre-v2-horaires.js` | ~830 | ~830 | horaires + séances + format |
+| `trimestre-v2-groupes-cours.js` | ~1 080 | ~880 | groupes-cours + biblio (hub `populerDropdownsAssemblageV2` retiré, vers résidu) |
+| `trimestre-v2-enseignants.js` | ~315 | ~315 | profils enseignants |
+| `trimestre-v2-orchestre.js` | ~725 | ~600 | orchestre (avec `changerGroupeCoursActifV2` éclatée en 3 helpers, `mettreAJourBarreContexte` retiré vers résidu) |
+
+Total estimé : ~6 260 LOC (vs 6 584 actuels), écart ~5 % attribuable à découpe nette des frontières et IIFE overhead.
+
 ---
 
 ### 2.5 `bilan-reflexif.js` (4 716 LOC, 153 fonctions)
