@@ -19,9 +19,9 @@
 **Date** : 17 mai 2026 (journée complète — productions §6 matin, trimestre-v2 étapes 0→2 + sessions A+B+C + capitalisation Phase 4 + merge FF)
 **Beta / build** : 99.47 / 0517-1259
 **Branche actuelle du worktree** : `refactor/trimestre-v2` (HEAD identique à `main` après FF)
-**Dernier commit** : `706dc0a` — `docs(refactor trimestre-v2): capitalisation session C Phase 4 + bump 99.47 b0517-1259`
-**Branche `main`** : **`706dc0a`** — FF effectué depuis `4b915b0` (+13 commits refactor trimestre-v2 + capitalisation)
-**Commits non-pushés sur `main`** : 13 (`e59a669` étape 1 → `706dc0a` capitalisation) — **à pusher depuis la maison** (réseau école bloque GitHub)
+**Dernier commit** : `3b0f3ae` — `docs(session): relai post-merge — état git final + consigne profil-etudiant précisée`
+**Branche `main`** : **`3b0f3ae`** — FF effectué depuis `4b915b0` (+14 commits refactor trimestre-v2 + capitalisation + relai)
+**Commits non-pushés sur `main`** : 14 (`e59a669` étape 1 → `3b0f3ae` relai) — **à pusher depuis la maison** (réseau école bloque GitHub)
 **Statut** :
 - Refactor productions.js : **complet** — étapes 0→6 livrées, mergé sur `main` (le 17 mai matin).
 - Refactor trimestre-v2.js : **complet** — sessions A+B+C + capitalisation + merge FF sur `main` (le 17 mai soir). 8 sous-modules sur 8 prévus extraits, monstre cyc 94 éclaté en 4+1 helpers, validation manuelle Grégoire OK. 6 bugs latents inscrits SUIVI-BUGS #99-104 (préservation comportementale stricte, à traiter dans un cycle Catégorie B distinct).
@@ -237,14 +237,14 @@ Lecture obligatoire :
 5. Retours des testeurs/SUIVI-BUGS.md — #99-104 préservés du refactor trimestre-v2 (à traiter Catégorie B distincte, PAS dans le refactor profil-etudiant)
 
 État git attendu en début de session :
-- main : 706dc0a (refactor trimestre-v2 mergé FF, +13 commits depuis 4b915b0)
-- refactor/trimestre-v2 : 706dc0a (identique à main après FF — branche conservée pour push, à supprimer après push)
+- main : 3b0f3ae (refactor trimestre-v2 mergé FF + capitalisation + relai, +14 commits depuis 4b915b0)
+- refactor/trimestre-v2 : 3b0f3ae (identique à main après FF — branche conservée pour push, à supprimer après push)
 - Beta / build : 99.47 / 0517-1259
 - Tests verts attendus : 73/73 (65 Vitest + 8 Playwright)
 - Repo principal Monitorage_v6 : sur audit/2026-mai (WIP non-commité indépendant — NE PAS TOUCHER)
 
 Vérification rapide à l'ouverture de session :
-  git log --oneline -5            # 706dc0a en HEAD
+  git log --oneline -5            # 3b0f3ae en HEAD
   git rev-parse main              # 706dc0a (idem worktree)
   git status                      # propre (hors node_modules symlinks)
   cd tests && npm test            # 73/73 verts
