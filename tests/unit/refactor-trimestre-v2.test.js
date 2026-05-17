@@ -85,6 +85,11 @@ beforeAll(() => {
     // sandbox via le 3e paramètre de chargerScript() pour fusionner les
     // exports dans `win` et préserver la sentinelle.
     chargerScript('js/trimestre-v2-enseignants.js', stubs, win);
+
+    // Refactor étape 3 session A (17 mai 2026) : trimestre-v2-horaires.js
+    // extrait depuis trimestre-v2.js (lignes 3252-4073, 20 fonctions
+    // séances + horaires + format horaire).
+    chargerScript('js/trimestre-v2-horaires.js', stubs, win);
 });
 
 describe('trimestre-v2 — régression refactoring 2026-mai (canari + sentinelle)', () => {
