@@ -1,11 +1,27 @@
-# SESSION — État au 16 mai 2026 (refactor productions.js — étapes 3+4 livrées)
+# SESSION — État au 17 mai 2026 (refactor productions.js — TERMINÉ, mergé sur main)
 
-**Date** : 16 mai 2026 (jour — étapes 3 + 4 sur la branche `refactor/productions`)
+**Date** : 17 mai 2026 (matin — étapes 5 + 6 livrées, merge FF sur `main`)
 **Beta / build** : 99.46 / 0516-0820
-**Dernier commit sur `refactor/productions`** : `1423bb7` — réduction de la complexité (étape 4).
-**Branche `main`** : `1b4818d` — inchangée depuis le merge bilan-reflexif (15 mai matin).
-**Branche `refactor/productions`** : `1423bb7` — **6 commits locaux non-pushés**.
-**Statut** : étapes **3 + 4 livrées**, en attente de l'étape 5 (test manuel exhaustif). Tests : 60 Vitest + 6 Playwright = **66/66 verts**. Cible dure METHODE (cyc ≤ 30) atteinte sur le résidu et tous les sous-modules.
+**Branche actuelle du worktree** : `refactor/trimestre-v2` (anciennement `refactor/productions`, renommée après merge en prévision du prochain refactor)
+**Dernier commit** : `1196d75` — correctif numérique post-capitalisation (HEAD `24cad3b` + 8 commits).
+**Branche `main`** (après merge) : `1196d75` (FF depuis `1b4818d`).
+**Statut** : refactor productions.js **complet** — étapes 0→6 livrées, mergé sur `main`, **reste à pusher** depuis la maison (réseau école bloque GitHub). Tests : 60 Vitest + 6 Playwright = **66/66 verts**. Cible dure METHODE (cyc ≤ 30) atteinte.
+
+## Récap étape 5 — Validation manuelle Grégoire (17 mai 2026)
+
+6 cas d'intégration MODULES-MAP §2.2 validés OK sur **Safari Mac, modes sombre + clair** : création, modification, suppression, import/export JSON, bibliothèque, verrouillage. Aucun bug nouveau détecté. Bugs latents préservés (#96 `event.target.value` rétro-compat, #97 `productionEnCoursEdition` désynchronisé — restent priorité basse dans SUIVI-BUGS).
+
+## Récap étape 6 — Capitalisation (commit `24cad3b` + correctif `1196d75`)
+
+Toutes les écritures faites avant la validation (anticipation prémérite, signalée en début de session) :
+- `MODULES-MAP §2.2` — rétrospective post-refactoring (métriques avant/après, dette résiduelle, notes pour modules suivants).
+- `NOTES-DE-VERSION.md` — entrée Beta 99.46 séparée de bilan-reflexif 99.45.
+- `BACKLOG.md` — header daté 17 mai + #279 (gabarit production enrichi).
+- `SUIVI-BUGS.md` — updates #96/#97 (préservés).
+- `METHODE-REFACTORING §7 productions.js` — synthèse méthode + 4 propositions Catégorie B + notes pour `trimestre-v2.js`.
+- 5 mémoires feedback transférées : `charger-script-multi-modules`, `exports-orphelins-grep-window`, `hook-defense-j-arrow-vers-function`, `refactor-audit-appelants-distants`, `refactor-preserver-bugs-latents`.
+
+Correctif numérique `1196d75` — les chiffres écrits par `24cad3b` ne pouvaient pas s'inclure eux-mêmes (HEAD `9de1bfc`, 7 commits → HEAD `24cad3b`, 8 commits).
 
 > **Note d'emplacement** : ce SESSION.md vit sur la branche `refactor/productions` dans le worktree `/Users/kuekatsheu/Documents/GitHub/Monitorage_v6-refactor`. Le SESSION.md du repo principal (sur `audit/2026-mai`) n'a pas été modifié.
 
@@ -65,7 +81,38 @@ Cible dure METHODE §3 étape 4 : aucune fonction > cyc 30 — **✅ atteinte**.
 
 ---
 
-## Consigne de démarrage pour la prochaine session (étape 5 productions.js)
+## Consigne de démarrage pour la prochaine session (refactor `trimestre-v2.js` — étapes 0+1+2)
+
+À copier-coller au début de la prochaine session :
+
+```
+cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6-refactor
+
+Lecture obligatoire :
+1. SESSION.md (ce document) — récap productions.js livré
+2. audit/refactoring-prep/METHODE-REFACTORING.md §3 étapes 0+1+2 + §7 notes pour trimestre-v2
+3. audit/refactoring-prep/MODULES-MAP.md §2.4 — découpage prévisionnel trimestre-v2.js
+
+État git attendu :
+- main : 1196d75 (FF post-merge productions.js)
+- refactor/trimestre-v2 : 1196d75 (même HEAD, prête à recevoir les commits trimestre-v2)
+- Tests verts : 66/66 (60 Vitest + 6 Playwright)
+
+OBJECTIF : étapes 0+1+2 trimestre-v2.js
+- Étape 0 : symlinks + baseline tests
+- Étape 1 : lecture intégrale 6 584 LOC + audit ESLint + annoter MODULES-MAP §2.4 (écarts d'exécution)
+- Étape 2 : tests Vitest régression + Playwright pour changement contexte (NÉCESSAIRE ici, cf. METHODE §7 note #2)
+
+Notes pour ce refactor (METHODE §7 productions.js) :
+- Helper `chargerScript(path, stubs, fauxWindowExistant)` étendu — réutiliser tel quel
+- Grep `window.X` AVANT et APRÈS chaque extraction
+- Wrappers résiduels (anti-pattern §5.3 si applicable) restent au résidu
+- Fractionnement en 2 sessions envisageable (9 sous-modules prévus)
+```
+
+---
+
+## Archive — Consigne étape 5 productions.js (livrée 17 mai 2026)
 
 À copier-coller au début de la prochaine session :
 
