@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 13 mai 2026 (Beta 99.42, Build 0512-0840) — sprint 6 items + audit + 2 quick wins fermés (#27, #159) + cleanup module mort `evaluations-apercu.js` : 33 → 23 items ouverts. #18 reste ouvert (déploiement progressif zone par zone), Évaluations désormais couverte.
+> **Derniere mise a jour** : 17 mai 2026 (Beta 99.46, Build 0516-0820) — refactor `productions.js` mergé (cyc max 80 → 29, 0 fonction au-dela de cyc 30, 4 fichiers issus du god module). #279 ajouté (gabarit production enrichi, 3 nouveaux champs). 23 items ouverts.
 
 ---
 
@@ -381,6 +381,15 @@
   - **Cibles** : reproductible aussi en venant de Parcours et Auto-réflexion si elles sont scrollées bas. Probablement pas seulement Import — toutes les transitions vue-haute → vue-courte sont concernées (Rapport → Import notamment).
   - **Pistes** : (a) scroll explicite vers le haut du conteneur bilan à chaque `afficherVue` (cohérent UX onglets) ; (b) `min-height` sur `.bilan-vue` pour éviter le shrink du DOM ; (c) préserver `scrollY` quand possible. (a) recommandé.
   - **Trouvé pendant** : test manuel Safari du refactor bilan-reflexif (worktree `Monitorage_v6-refactor`, branche `refactor/2026-mai`).
+
+### Productions — Gabarit enrichi (17 mai 2026)
+
+- [ ] **#279** Ajouter 3 champs au formulaire de production : DESCRIPTION DÉTAILLÉE des consignes, FORMAT ET MISE EN PAGE, REMISE
+  - **Contexte** : enrichir le gabarit production pour documenter plus finement ce qui est demandé aux étudiants (au-delà du titre + type + pondération + échéance actuels).
+  - **Capture de référence à fournir par Grégoire** au moment du chantier (placement exact des 3 champs dans le formulaire, type d'input souhaité : textarea libre, structuré, etc.).
+  - **Refactor amont** : `refactor/productions` mergé sur `main` le 17 mai 2026 (Beta 99.46). Le chantier peut démarrer dès qu'une capture est fournie.
+  - **Impact attendu** : `afficherFormProduction`, `lireDonneesFormulaireProduction`, `construireProductionData`, `prerenseignerFormulaireProduction` (tous helpers issus de l'étape 4 du refactor — `productions.js` résidu). Affichage côté étudiant/consultation à prévoir aussi.
+  - **Hors scope initial** : versionnage des consignes, templates pré-remplis, génération PDF du gabarit.
 
 ### Rythme Phase 5 — Raffinements (selon usage, post-AQPC)
 

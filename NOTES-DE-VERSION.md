@@ -1,7 +1,37 @@
 # Notes de version — Monitorage pedagogique
 
 > Document de gestion locale. Historique complet avec dates.
-> Derniere mise a jour : 8 mai 2026
+> Derniere mise a jour : 17 mai 2026
+
+---
+
+## Beta 99.45 → 99.46 (15-17 mai 2026)
+
+**Premiers refactorings de god modules selon METHODE-REFACTORING**
+
+*Methode etablie (15 mai)*
+- **`audit/refactoring-prep/METHODE-REFACTORING.md`** : document methodologique en 9 sections — etapes 0→6, anti-patterns §5, gabarit de capitalisation §6.5, journal de bord §7. Apporte sur `main` (commit `1b4818d`).
+- **6 propositions Categorie B** issues du refactor `bilan-reflexif.js` actees et integrees a la methode : §3 etape 0 (convention nom de branche), §3 etape 1 (helpers cross-module a promouvoir avant extraction), §3 etape 4 (audit ESLint complexity sur TOUS les sous-modules), §4 check-list etape 3 (items cyc + grep helpers), §5 anti-patterns §5.6 + §5.7, §6.5 gabarit (rubrique Tests Playwright).
+
+*Refactor `bilan-reflexif.js` (Beta 99.45, 15 mai, commit `b0e432d`)*
+- **8 sous-modules** : `bilan-reflexif-core.js` (425), `-editeur.js` (829), `-import-export-texte.js` (888), `-parcours.js` (623), `-reflexion.js` (444), `-csv.js` (815), `-rapport.js` (955), residu (284).
+- **Cyc max** : 63 → 27 (−57 %). **0 fonction au-dela de cyc 30** dans tous les sous-modules. Plus gros fichier : 4 716 → 955 LOC (−80 %).
+- **+10 tests Vitest** (parsers + agregation). 3 bugs latents decouverts et corriges pendant le refactor (`rendreAideHTML`/`toggleAide`, `tronquer`, resync ctx ↔ parent dans state machine).
+
+*Refactor `productions.js` (Beta 99.46, 16-17 mai, 7 commits sur `refactor/productions`)*
+- **3 sous-modules** : `productions-import-export.js` (693), `productions-liste.js` (456), `productions-bibliotheque-ui.js` (714) + residu (2 233).
+- **Cyc max** : 80 (`sauvegarderProduction`) → 29 (`gererChangementTypeProduction`) (−64 %). **0 fonction au-dela de cyc 30**. Plus gros fichier : 3 994 → 2 233 LOC (−44 %).
+- **6 helpers d'etape 4** extraits de `sauvegarderProduction` cyc 80 (lireDonneesFormulaireProduction, validerChampsObligatoiresProduction, validerEcheancesDansTrimestre, gererDoublonProduction, construireProductionData, rafraichirInterfaceApresSauvegarde) + 3 helpers extraits de `afficherFormProduction` cyc 47 (peuplerCartouchesProduction, prerenseignerFormulaireProduction, reinitialiserFormulaireProduction).
+- **+14 tests Vitest** (helpers tri, doublons, badges, canari). Helper `chargerScript(path, stubs, fauxWindowExistant)` etendu d'un 3e parametre pour enchainer N sous-modules dans un meme sandbox — reutilisable pour `trimestre-v2.js`, `profil-etudiant.js`, `evaluation.js`.
+- **Validation manuelle** (17 mai) sur les 6 cas d'integration MODULES-MAP §2.2 (Safari Mac, modes sombre + clair) — tous OK.
+- **Bugs latents preserves** (preservation comportementale stricte) : SUIVI-BUGS #96 (`event.target.value` Chrome retro-compat), #97 (`productionEnCoursEdition` vs `productionEnEdition` desynchronises). A traiter dans un cycle dedie.
+
+*Tests de regression — etat consolide*
+- Total : 60 Vitest + 6 Playwright = **66 verts**. Sandbox de tests reproductible pour les futurs refactors.
+
+*Capitalisation*
+- Retrospectives detaillees dans `audit/refactoring-prep/MODULES-MAP.md §2.2` (productions) et §2.5 / METHODE §7 (bilan-reflexif).
+- 4 nouvelles propositions Categorie B issues du refactor productions (cf. METHODE §7 module productions.js).
 
 ---
 
