@@ -214,6 +214,59 @@ L'étape 4 (refactoring top-complexité) doit donc traiter `afficherFormProducti
 
 Total estimé : ~3 788 LOC (vs 3 994 LOC actuels, écart ~5 % attribuable à découpe nette des frontières).
 
+#### Rétrospective post-refactoring — 17 mai 2026
+
+**Branche** : `refactor/productions` (HEAD `9de1bfc`, 7 commits, FF mergé sur `main`).
+**Effort réel** : ~6 h sur 2 jours (15-16 mai), estimation MODULES-MAP §3.3 : 4-6 h — dans la fourchette haute.
+**Test manuel** : validation Grégoire le 17 mai, 6 cas MODULES-MAP §2.2 OK (Safari Mac, modes sombre + clair).
+
+**Découpage effectif** (Écart #1 résolu : option (a) — sous-module UI renommé en `-ui`) :
+
+| Sous-module | LOC cible §2.2 | LOC effectif | Écart |
+|---|---:|---:|---:|
+| `productions.js` (résidu) | ~1 700 | 2 233 | +31 % |
+| `productions-bibliotheque-ui.js` | ~730 | 714 | −2 % |
+| `productions-import-export.js` | ~643 | 693 | +8 % |
+| `productions-liste.js` | ~715 | 456 | −36 % |
+
+Le résidu est plus gros que prévu (+31 %) et `productions-liste.js` plus petit (−36 %) : redistribution naturelle parce que les wrappers `sauvegarderProductionOriginale`/`annulerFormProductionOriginale`/`supprimerProductionOriginale` (anti-pattern §5.3) doivent rester groupés dans le résidu avec les variables module-scope qu'ils ferment, et parce que `chargerArtefactsDisponibles`/`gererPortfolio` (helpers internes consommés par le CRUD résiduel) sont restés au résidu plutôt que de migrer vers liste.
+
+**Métriques avant/après** (sources : `wc -l` ; `npx eslint --no-config-lookup --rule '{"complexity":["error",N]}'`) :
+
+| Métrique | Avant | Après | Variation |
+|---|---:|---:|---:|
+| LOC du module (somme) | 3 994 (god module) | 4 096 (résidu + 3 sous-modules) | +2,6 % |
+| Nombre de fichiers issus du module | 1 | 4 (1 résidu + 3 sous-modules) | +3 |
+| Taille du plus gros fichier (LOC) | 3 994 | 2 233 (résidu) | **−44 %** |
+| Complexité cyclomatic max | 80 (`sauvegarderProduction`) | 29 (`gererChangementTypeProduction`) | **−64 %** |
+| Nombre de fonctions au-delà de cyc 15 | 10 | 11 | +1 |
+| Nombre de fonctions au-delà de cyc 30 | 2 (`sauvegarderProduction` 80, `afficherFormProduction` 47) | **0** | **−2** ✓ |
+| Doublons de définition | 0 | 0 | inchangé |
+| Code mort retiré | — | 0 | aucun (bugs latents #96, #97 préservés volontairement) |
+| Tests Vitest sur ce module | 0 | 14 | +14 |
+| Tests Playwright sur ce module | 0 | 0 | inchangé (dette résiduelle) |
+
+**Lecture** : cible dure METHODE §3 étape 4 atteinte — **zéro fonction au-delà de cyc 30**. Le LOC total monte légèrement (+2,6 %) sous l'effet de l'overhead IIFE de chaque sous-module (en-tête + aliases + exports `window.X` en pied), conforme à la note méthodologique §6.5. Cible souple (cyc ≤ 15) non atteinte : 11 fonctions résiduelles (+1 vs avant), surcoût attribuable à 2 helpers privés extraits à l'étape 4 pour casser `sauvegarderProduction` cyc 80 (`prerenseignerFormulaireProduction` cyc 21, `validerEcheancesDansTrimestre` cyc 26) — sortie de cyc 80 et cyc 47 contre entrée de cyc 21 et 26 = gain net en distribution.
+
+**Tests de régression** :
+- 14 Vitest écrits avant le découpage (étape 2, commit `bad7ecd`). Canari `chargerSandbox` réutilisable via helper `chargerScript(path, stubs, fauxWindowExistant)` étendu (3e paramètre pour enchaîner N sous-modules dans le même `win`).
+- Aucune régression attrapée par les tests pendant le refactoring — ils ont surtout joué le rôle de filet de sécurité sur les fonctions pures (helpers tri, doublons, badges).
+- Validation manuelle Grégoire (étape 5) sur les 6 cas d'intégration : tous OK.
+
+**Bugs latents préservés** : SUIVI-BUGS #96 (`event.target.value` ligne 2972 d'origine, `event` non-définie dans IIFE — Chrome/Safari rétro-compat masque le bug) et #97 (`productionEnCoursEdition` vs `productionEnEdition` désynchronisés — code mort silencieux dans les wrappers sidebar). Priorité basse, comportementalement neutres aujourd'hui. À traiter dans un cycle dédié.
+
+**Dette résiduelle** :
+- Résidu `productions.js` à 2 233 LOC — au-dessus du seuil souhaitable (~1 700 LOC §2.2). Acceptable pour ce cycle ; envisageable plus tard : extraction d'une couche `productions-form-state.js` (~400 LOC) regroupant les 6 helpers d'étape 4 + les variables module-scope.
+- 11 fonctions au-delà de cyc 15 (cible souple non atteinte). Max résiduel : `gererChangementTypeProduction` cyc 29, `peuplerEcheancesParGroupe` cyc 27, `validerEcheancesDansTrimestre` cyc 26 (helper d'étape 4 — pourrait être éclaté en sous-validations par champ).
+- 0 test Playwright sur productions — pattern à corriger sur les modules suivants (`trimestre-v2.js`, `profil-etudiant.js`, `evaluation.js`).
+- Bug `productionEnEdition` (notification « ajoutée » même en modification) commenté pour future correction — trouvaille #4 de la session.
+
+**Note pour les modules suivants** (à appliquer sur `trimestre-v2.js` en priorité) :
+1. Helper `chargerScript(path, stubs, fauxWindowExistant)` réutilisable : enchaîner N sous-modules dans le même `win` via le 3e paramètre.
+2. Grep `window.X` AVANT chaque extraction et APRÈS chaque `sed`/`Edit` — les exports thématiques peuvent être dispersés (productions.js avait 9 exports au milieu du fichier, pas en bas).
+3. Quand on promeut une arrow function en function declaration pour la sortir d'une closure, le hook Défense J (sécurité innerHTML) reflagge à la nouvelle ligne. Acquittement `// security-ok` justifié si le contenu interne est inchangé.
+4. Pattern : extraire un helper requiert d'auditer ses appelants distants. `definirProductionActive` est resté au résidu parce que les wrappers résiduels l'appellent ; `chargerGrillesDisponiblesPourProduction` aussi parce que helper interne consommé par `creerNouvelleProduction` extraite.
+
 ---
 
 ### 2.3 `profil-etudiant.js` (8 818 LOC, 105 fonctions)

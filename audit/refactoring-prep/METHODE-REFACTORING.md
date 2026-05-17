@@ -633,7 +633,48 @@ Recommandations spécifiques tirées de cette session :
 
 ### Module : `productions.js`
 
-À refactorer après `bilan-reflexif.js`. Rétrospective à remplir à la fin.
+**Date de fin** : 2026-05-17 (validation manuelle Grégoire OK, merge FF sur `main`)
+**Branche** : `refactor/productions` (HEAD `9de1bfc`, 7 commits)
+**Effort réel** : ~6 h sur 2 jours (15-16 mai) — dans la fourchette §3.3 (4-6 h).
+
+**Rétrospective complète** : voir `audit/refactoring-prep/MODULES-MAP.md §2.2` rubrique « Rétrospective post-refactoring — 17 mai 2026 » (métriques avant/après, dette résiduelle, notes pour les modules suivants).
+
+#### Synthèse méthode (extraits pertinents pour §7)
+
+**Ce qui a bien fonctionné** :
+- Application stricte de METHODE §3 étapes 0→6 (le premier refactor à suivre la méthode dans son intégralité, contrairement à `bilan-reflexif.js` rétroactif).
+- Audit ESLint complexity à l'étape 4 a confirmé 2 fonctions au-delà de cyc 30 (`sauvegarderProduction` 80, `afficherFormProduction` 47) — la seconde absente de MODULES-MAP §2.2 prévisionnel (Écart #2 documenté avant le refactor).
+- Helper de test `chargerScript(path, stubs, fauxWindowExistant)` étendu d'un 3e paramètre pour enchaîner N sous-modules dans le même sandbox. Pattern réutilisable pour `trimestre-v2.js`, `profil-etudiant.js`, `evaluation.js`.
+- Cible dure (cyc ≤ 30) atteinte sur tous les sous-modules ET le résidu.
+
+**Difficultés rencontrées** :
+- **Exports `window.X` dispersés** : 9 exports thématiques étaient au milieu du fichier (lignes 2689-2702 pré-extraction), pas en bas. Grep systématique nécessaire après chaque `sed`/extraction pour les attraper. Pattern à documenter pour les modules suivants.
+- **Wrappers résiduels avec variables module-scope** (anti-pattern §5.3) : `sauvegarderProductionOriginale`/`annulerFormProductionOriginale`/`supprimerProductionOriginale` ont dû rester groupés dans le résidu — ils ferment des variables module-scope inaccessibles depuis les sous-modules extraits. Le résidu s'agrandit (+31 % vs prévision).
+- **Bugs latents préservés** : SUIVI-BUGS #96 (`event.target.value` Chrome/Safari rétro-compat) et #97 (`productionEnCoursEdition` vs `productionEnEdition` désynchronisés) **NON corrigés** pendant le refactor. Décision : préservation comportementale stricte. À traiter dans un cycle dédié.
+- **Cible souple (cyc ≤ 15) non atteinte** : 11 fonctions résiduelles (+1 vs avant) parce que les 6 helpers d'étape 4 extraits de `sauvegarderProduction` cyc 80 ont chacun une complexité non-triviale (max : `validerEcheancesDansTrimestre` cyc 26). Trade-off accepté — déplacer la complexité d'une seule fonction massive vers plusieurs helpers plus petits.
+
+**Trouvaille #4 → règle de méthode candidate** : *« Préservation comportementale stricte = préservation des bugs comportementalement neutres. »* Un bug latent qui ne se manifeste pas (Chrome rétro-compat ou code mort silencieux) doit rester pendant un refactor — sinon on ne peut plus distinguer une régression du refactor d'une correction de bug en revue. Inscrire dans SUIVI-BUGS et corriger séparément.
+
+**Améliorations de méthode à proposer (Catégorie B — décision Grégoire)** :
+
+1. **§3 étape 3 (découpage)** — préciser :
+   > **Grep `window.X` AVANT et APRÈS chaque extraction.** Les exports thématiques peuvent être dispersés (pas tous en bas du fichier). Une extraction qui rate un export laisse une fonction « orpheline » qui plante au premier appel via `data-action`.
+
+2. **§3 étape 4 (complexity)** — clarifier le trade-off cyc 15 :
+   > L'extraction d'helpers pour casser une fonction au-delà de cyc 30 peut introduire de nouveaux helpers entre cyc 15 et cyc 30. C'est acceptable selon le principe « distribuer la complexité plutôt que la concentrer ». La cible souple (cyc ≤ 15) est optionnelle ; la cible dure (cyc ≤ 30) est obligatoire.
+
+3. **§5 nouvel anti-pattern §5.8 candidat — Wrappers résiduels avec variables module-scope** :
+   > Symptôme : un sous-module extrait tente d'appeler `sauvegarderX()` directement et observe que le wrapper `sauvegarderXOriginale` du résidu rajoute des side-effects invisibles (rechargement sidebar, notif). Cause : le résidu wrap les fonctions par réassignation `window.X = wrapper` après définition, le wrapper ferme `XOriginale` (variable module-scope). Règle : **conserver les wrappers et leurs variables module-scope dans le résidu pendant le découpage.** Les déplacer vers un sous-module casse la chaîne — la closure ne traverse pas la frontière IIFE.
+
+4. **§3 étape 5 (validation manuelle)** — ajouter :
+   > **Tester chaque cas dans les deux modes (sombre + clair)** explicitement, pas seulement le mode utilisé en développement. Pour les modules avec rendu HTML dense (productions form, bibliothèque), les régressions visuelles sont silencieuses jusqu'au switch de mode.
+
+#### Notes pour le module suivant (`trimestre-v2.js`)
+
+1. **Avant la première extraction** : grep des helpers cross-module (`afficherNotificationSucces/Erreur`, `echapperHtml`, `BibliothequeUI.*`, `cle()`) pour confirmer qu'ils restent accessibles depuis les sous-modules. `trimestre-v2.js` est plus gros (6 584 LOC, 164 fonctions) et a un état pivot critique (`window.trimestreActif`) — le découpage doit préserver l'atomicité de `changerGroupeCoursActifV2` cyc 86.
+2. **Tests Playwright minimum** : MODULES-MAP §2.4 prévoit 5 Vitest + 2 Playwright avant le refactor. Le Playwright est NÉCESSAIRE ici (changement de contexte = side-effects DOM cross-vue invisibles aux tests pures).
+3. **Helper `chargerScript(path, stubs, fauxWindowExistant)`** : le pattern « enchaîner N sous-modules dans le même sandbox » est testé en production sur productions.js — réutiliser tel quel.
+4. **9 sous-modules prévus** dans MODULES-MAP §2.4 : envisager un fractionnement en 2 sessions (init + liste + cours + étudiants ; horaires + groupes-cours + enseignants + orchestre) pour ne pas exploser le risque sur une seule session.
 
 ### Module : `trimestre-v2.js`
 
