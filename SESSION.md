@@ -20,9 +20,10 @@
 
 **Date** : 17 mai soir + 18 mai 00:30 (étapes 0+1+2 + session A complète, en une session de travail)
 **Beta / build** : 99.48 / 0518-0030
-**Branche actuelle du worktree** : `refactor/profil-etudiant` (créée depuis `main` 0e8e0f8)
-**Dernier commit** : `590ea89` — `build(version): bump 99.47 → 99.48 b0518-0030 — session A profil-etudiant LIVRÉE`
-**Branche `main`** : `0e8e0f8` (15 commits non-pushés depuis `4b915b0` — à pusher depuis la maison)
+**Branche actuelle du worktree** : `refactor/profil-etudiant` (créée depuis `main` 0e8e0f8, push fait — synchro avec origin)
+**Dernier commit** : `6489eb6` — `docs(session): relai post-session A — état git final + consigne session B précisée`
+**Branche `main`** : `0e8e0f8` — **pushée à origin** ✅ (25 commits couvrant refactor productions + trimestre-v2 + relai profil-etudiant)
+**Branche `refactor/trimestre-v2`** : `0e8e0f8` — **pushée à origin** ✅ (branche conservée pour traçabilité, peut être supprimée si Grégoire le souhaite : `git push origin --delete refactor/trimestre-v2` + `git branch -d refactor/trimestre-v2`)
 **Statut chantier profil-etudiant.js** :
 - **Étape 0** : worktree + symlinks + baseline 73/73 ✅ (17 mai soir)
 - **Étape 1** : lecture intégrale + audit ESLint + Agent Explore — **TERMINÉE** (commit `52ae385`). 11 écarts MODULES-MAP §2.3.
@@ -32,11 +33,11 @@
 - **Étape 3 sessions C+D** : à démarrer après B — actions cascade puis sections affichage 3 700 LOC + étape 4.
 - **Étapes 4-6** : éclatement (calculerIPB 36, determinerCibleIntervention 58, afficherProfilComplet 58, calculerDetailsNoteFinale 57) + validation Grégoire + merge FF.
 
-**Tests** : 70 Vitest + 10 Playwright = **80/80 verts** (confirmés au dernier passage du test runner après le commit `d5013d9`).
+**Tests** : 70 Vitest + 10 Playwright = **80/80 verts** (confirmés post-`d5013d9` + 3 hooks pré-push Vitest verts au moment des pushs).
 
-**Commits worktree non-pushés** : 7 (`52ae385` → `590ea89`). À pusher depuis la maison (réseau école bloque GitHub) en même temps que les 15 commits main du refactor trimestre-v2.
+**Commits non-pushés** : aucun — synchronisé avec origin (3 pushs faits à minuit 30 du 18 mai 2026 : `main`, `refactor/profil-etudiant`, `refactor/trimestre-v2`).
 
-**Action en attente côté Grégoire** : aucune. La session est propre, le worktree est dans un état cohérent pour reprendre en session B.
+**Action en attente côté Grégoire** : aucune. La session est propre, le worktree est synchronisé, prêt à reprendre en session B.
 
 ## Récap session A — 18 mai 2026 (3 sous-modules LOW extraits)
 
@@ -95,11 +96,15 @@
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6-profil-etudiant
 
 # Vérification rapide à l'ouverture de session :
-git log --oneline 0e8e0f8..HEAD       # 7 commits visibles (52ae385 → 590ea89)
+git log --oneline @{u}..HEAD          # vide attendu (branche synchro avec origin)
 git status                             # propre (sauf node_modules symlinks)
 cat version.json                       # {"build":"0518-0030","beta":"99.48"}
 cd tests && npm test                   # 80/80 verts (70 Vitest + 10 Playwright)
 wc -l ../js/profil-etudiant.js ../js/profil-etudiant-*.js  # résidu 6337, +3 sous-modules
+
+# Si nouveau jour de travail : fetch d'abord pour s'assurer que rien n'a bougé côté Grégoire
+git fetch origin
+git status                             # détecte si origin est en avance
 
 Lecture obligatoire :
 1. SESSION.md (ce document) — récap étapes 0+1+2 + session A LIVRÉE
