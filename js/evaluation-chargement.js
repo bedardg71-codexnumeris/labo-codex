@@ -649,7 +649,8 @@ function chargerGrilleSelectionnee() {
                     if (select) {
                         select.value = niveauExistant;
                         // Colorer le select
-                        const couleur = typeof obtenirCouleurNiveau === 'function' ? obtenirCouleurNiveau(niveauExistant) : '';
+                        // Patch §5.6 — promotion obtenirCouleurNiveau vers evaluation-calcul.js (session B étape 3 refactor 2026-05-18)
+                        const couleur = typeof window.obtenirCouleurNiveau === 'function' ? window.obtenirCouleurNiveau(niveauExistant) : '';
                         if (couleur && couleur !== 'transparent') {
                             select.style.backgroundColor = couleur + '30';
                             select.style.borderColor = couleur;
@@ -1023,7 +1024,8 @@ function niveauSelectionne(critereId) {
 
     // Mettre à jour la couleur du select
     if (niveau) {
-        const couleur = obtenirCouleurNiveau(niveau);
+        // Patch §5.6 — promotion obtenirCouleurNiveau vers evaluation-calcul.js (session B étape 3 refactor 2026-05-18)
+        const couleur = window.obtenirCouleurNiveau ? window.obtenirCouleurNiveau(niveau) : 'transparent';
         selectElement.style.backgroundColor = couleur + '30'; // 30 = 20% opacité
         selectElement.style.borderColor = couleur;
         selectElement.style.fontWeight = 'normal';

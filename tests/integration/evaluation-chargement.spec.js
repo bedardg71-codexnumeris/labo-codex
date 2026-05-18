@@ -81,9 +81,11 @@ test('Défense refactor · sentinelle exports browser evaluation', async ({ page
         chargerProduction: typeof window.chargerProduction,
         cartoucheSelectionnee: typeof window.cartoucheSelectionnee,
         niveauSelectionne: typeof window.niveauSelectionne,
-        // Zone Calcul
+        // Zone Calcul (4 exports depuis evaluation-calcul.js — session B)
         calculerNoteAlgorithmiqueAvecCategories: typeof window.calculerNoteAlgorithmiqueAvecCategories,
         calculerNoteAlgorithmiqueSimple: typeof window.calculerNoteAlgorithmiqueSimple,
+        calculerNote: typeof window.calculerNote,                  // promotion §5.6 session B
+        obtenirCouleurNiveau: typeof window.obtenirCouleurNiveau,  // promotion §5.6 session B
         // Zone Rétroaction (dont export dispersé L2130)
         regenererRetroactionAvecFeedback: typeof window.regenererRetroactionAvecFeedback,
         copierRetroaction: typeof window.copierRetroaction,
@@ -108,6 +110,8 @@ test('Défense refactor · sentinelle exports browser evaluation', async ({ page
     expect(surface.niveauSelectionne).toBe('function');
     expect(surface.calculerNoteAlgorithmiqueAvecCategories).toBe('function');
     expect(surface.calculerNoteAlgorithmiqueSimple).toBe('function');
+    expect(surface.calculerNote).toBe('function');
+    expect(surface.obtenirCouleurNiveau).toBe('function');
     expect(surface.regenererRetroactionAvecFeedback).toBe('function');
     expect(surface.copierRetroaction).toBe('function');
     expect(surface.supprimerEvaluation).toBe('function');
