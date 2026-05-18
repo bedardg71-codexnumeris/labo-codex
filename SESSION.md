@@ -16,13 +16,13 @@
 > - `Monitorage_v6/audit/SESSION.md` sur branche `audit/2026-mai` — session **audit annuel** Phase 3 (sujet distinct : audit de fidélité concept → implémentation).
 > - `Monitorage_v6-refactor/SESSION.md` sur branche `refactor/trimestre-v2` — récap historique du chantier trimestre-v2 (mergé FF sur main, branche à supprimer après push).
 
-# SESSION — État au 18 mai 2026 (refactor profil-etudiant.js — sessions A+B+C+D LIVRÉES, EN ATTENTE validation Safari Mac Grégoire)
+# SESSION — État au 18 mai 2026 (refactor profil-etudiant.js — sessions A+B+C+D LIVRÉES + validation Grégoire ✅ — PRÊT à merger)
 
-**Date** : 17 mai soir + 18 mai 00:30 (sessions 0+1+2 + A) + 18 mai matin (sessions B + C + D)
+**Date** : 17 mai soir + 18 mai 00:30 (sessions 0+1+2 + A) + 18 mai matin (sessions B + C + D + capitalisation §7)
 **Beta / build** : 99.48 / 0518-0540
 **Branche actuelle du worktree** : `refactor/profil-etudiant`
-**Dernier commit (à ajuster après bump)** : bump 99.48 b0518-0540 — capitalisation stand-by session D
-**Branche `main`** : `0e8e0f8` — pushée à origin ✅ (**PAS de merge FF tant que validation Grégoire pas confirmée OK** — pattern [[feedback-pas-capitalisation-avant-validation]])
+**Dernier commit** : `685aaf1` — rétrospective §7 stand-by (capitalisation METHODE-REFACTORING)
+**Branche `main`** : `0e8e0f8` — pushée à origin ✅ (merge FF à effectuer maintenant — cf. étape 6 instructions ci-dessous)
 **Statut chantier profil-etudiant.js** :
 - **Étape 0** : worktree + symlinks + baseline 73/73 ✅ (17 mai soir)
 - **Étape 1** : lecture intégrale + audit ESLint + Agent Explore — **TERMINÉE** (commit `52ae385`). 11 écarts MODULES-MAP §2.3.
@@ -32,17 +32,17 @@
 - **Étape 3 session C HIGH partie 1** : 1 sous-module extrait — **TERMINÉE** (`27d3c17` actions + `a02a564` bump). Résidu 5207 → 4641 LOC (-10,9 % session C, -47,4 % cumulé). 8 fonctions promues window.X.
 - **Étape 3 session D HIGH partie 2** : renommage profil-etudiant.js → sections-affichage.js — **TERMINÉE** (`7b37363`). 4642 LOC inchangées, 38 fonctions + 3 variables module-scope encapsulées.
 - **Étape 4** : éclatement `afficherProfilComplet` cyc 58 → < 30 — **TERMINÉE PARTIELLEMENT** (`d119446`). 5 helpers privés extraits + cible dure cyc ≤ 30 atteinte sur la fonction principale. **5 fonctions cyc > 30 documentées comme héritages à traiter Catégorie B post-merge** (décision Grégoire 18 mai 2026).
-- **Étape 5** : validation manuelle Grégoire — **EN ATTENTE** (Safari Mac, sombre + clair, cf. cas ci-dessous).
-- **Étape 6** : merge FF refactor/profil-etudiant → main + push — **À FAIRE après OK Grégoire**.
+- **Étape 5** : validation manuelle Grégoire Safari Mac — **✅ OK 18 mai 2026** (warning `conception-carte` navigation.js:563 pré-existant, non lié au refactor — fichier protégé non touché).
+- **Étape 6** : merge FF refactor/profil-etudiant → main + push — **PRÊT À EXÉCUTER** (instructions ci-dessous).
+- **Capitalisation §7 METHODE-REFACTORING** : pré-écrite stand-by (`685aaf1` — 6 propositions Catégorie B + 10 notes pour evaluation.js). Mergera avec le reste.
 
-**Tests** : 70 Vitest + 10 Playwright = **80/80 verts** (confirmés post-bump session D).
+**Tests** : 70 Vitest + 10 Playwright = **80/80 verts** (confirmés post-bump session D + post-rétrospective §7).
 
-**Commits non-pushés** : 7 commits session B+C+D (`fc9415b` diagnostics + `e2613b1` confidentiel + `ac0eb85` bump B + `27d3c17` actions + `a02a564` bump C + `7b37363` renommage + `d119446` éclatement afficherProfilComplet + bump D à venir).
+**Commits non-pushés** : 9 commits session B+C+D + capitalisation §7 (de `fc9415b` diagnostics à `685aaf1` rétrospective METHODE).
 
 **Action en attente côté Grégoire** :
-1. **Validation manuelle Safari Mac** (étape 5 — cas ci-dessous).
-2. Si OK : merge FF + push depuis la maison.
-3. Si bug : inscrire SUIVI-BUGS, corriger sur la branche, re-tester.
+1. **Merge FF + push** (instructions étape 6 ci-dessous, exécutable maintenant).
+2. Optionnel : créer tag `refactor-profil-etudiant-2026-05-18`.
 
 ## Récap session D (18 mai matin — renommage + éclatement afficherProfilComplet)
 
@@ -149,44 +149,46 @@
 
 ---
 
-## Étape 6 — Instructions merge FF + push (À EXÉCUTER SEULEMENT après OK Grégoire étape 5)
+## Étape 6 — Merge FF + push (validation Grégoire CONFIRMÉE 18 mai 2026, prêt à exécuter)
+
+**Validation Safari Mac Grégoire** : ✅ OK 18 mai 2026.
+**Warning détecté sur page d'accueil** (`navigation.js:563 — "conception-carte"`) : **pré-existant**, lié au module Alignement/carte mentale, **non lié au refactor profil-etudiant**. Fichier `navigation.js` protégé (non modifié pendant le refactor). À ignorer pour le merge.
+
+Capitalisation §7 METHODE déjà faite (commit `685aaf1` 18 mai stand-by — 6 propositions Catégorie B + 10 notes pour evaluation.js).
 
 À copier-coller au début de la prochaine session :
 
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6-profil-etudiant
 
-# Pré-requis : validation manuelle Safari Mac de Grégoire confirmée OK (étape 5).
-# Si bug détecté pendant la validation : NE PAS merger, corriger d'abord.
-
 # Vérification rapide :
-git log --oneline -10                  # 8 commits non-pushés depuis 2b118c7
+git log --oneline @{u}..HEAD          # 9 commits non-pushés depuis 2b118c7 (fc9415b diag → 685aaf1 rétro §7)
 git status                             # propre (hors node_modules symlinks)
 cat version.json                       # {"build":"0518-0540","beta":"99.48"}
 cd tests && npm test                   # 80/80 verts attendus
 
 # Bump optionnel pour marquer le merge (refresh build → 99.49 si Grégoire préfère
-# marquer une version majeure de consolidation).
+# marquer une version majeure de consolidation, sinon refresh build courant).
 
-# Merge FF refactor/profil-etudiant → main (depuis n'importe quel checkout) :
+# Merge FF refactor/profil-etudiant → main (depuis ce worktree, sans toucher au
+# checkout Monitorage_v6 sur audit/2026-mai) :
 git fetch origin
 git update-ref refs/heads/main refs/heads/refactor/profil-etudiant
+
+# Vérification post-merge :
+git rev-parse main                     # doit retourner HEAD profil-etudiant (685aaf1 ou bump postérieur)
+git log --oneline main -3              # voir le commit merge en tête
 
 # Push depuis la maison (réseau école bloque GitHub) :
 git push origin main refactor/profil-etudiant
 
-# Optionnel après push : supprimer la branche refactor (traçabilité préservée via tag) :
+# Optionnel après push : supprimer la branche refactor (traçabilité préservée via main) :
 # git push origin --delete refactor/profil-etudiant
 # git branch -d refactor/profil-etudiant
 
-# Capitalisation finale (après merge confirmé) :
-# - METHODE-REFACTORING §7 : ajouter section « Module : profil-etudiant.js » avec
-#   les 3 propositions Catégorie B issues sessions B+C+D (mémoires feedback :
-#   feedback-securite-ok-inline-obligatoire + feedback-iife-encapsuler-variables-module-scope +
-#   feedback-refactor-export-reste-residu-quand-fonction-reste).
-# - MODULES-MAP §2.3 : rétrospective finale avec métriques avant/après.
-# - Si Grégoire le souhaite : créer un tag `refactor-profil-etudiant-2026-05-18`
-#   pour marquer le commit de merge.
+# Optionnel : créer un tag pour marquer le commit de merge :
+# git tag -a refactor-profil-etudiant-2026-05-18 -m "Refactor profil-etudiant.js livré (7 sous-modules, 102 fonctions, afficherProfilComplet cyc 58 → < 30)"
+# git push origin refactor-profil-etudiant-2026-05-18
 ```
 
 ### Cycle Catégorie B post-merge — 5 fonctions cyc > 30 héritages à éclater
