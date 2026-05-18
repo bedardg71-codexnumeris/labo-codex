@@ -72,6 +72,12 @@ beforeAll(() => {
     // dans index.html.
     win = chargerScript('js/profil-etudiant-helpers.js', stubs);
 
+    // Refactor étape 3 session A (18 mai 2026) : profil-etudiant-calculs.js
+    // extrait depuis profil-etudiant.js (zone L4185-5686 originale, 14 fonctions
+    // de calculs pédagogiques + 14 exports window.X). Charge APRÈS helpers.js
+    // car calculerMoyennesCriteres consomme des helpers du sous-module précédent.
+    chargerScript('js/profil-etudiant-calculs.js', stubs, win);
+
     // Charger le résidu dans le même sandbox via le 3e paramètre.
     chargerScript('js/profil-etudiant.js', stubs, win);
 });
@@ -124,14 +130,22 @@ describe('profil-etudiant — régression refactoring 2026-mai (canari + sentine
             'toggleSectionCollapsible',
             'changerOngletDeveloppement',
             'naviguerVersPresenceAvecDate',
-            // Zone Calculs (L4190-5404) — 7 exports
+            // Zone Calculs — 14 exports (session A 18 mai 2026 : tous promus window.X)
+            'obtenirTableConversionIDME',
+            'convertirNiveauIDMEEnScore',
             'calculerMoyennesCriteres',
+            'calculerMoyennesCriteresRecents',
             'calculerIPB',
+            'diagnostiquerSuiviApprentissage',
+            'diagnostiquerForcesChallenges',
+            'calculerIndicesNDerniersArtefacts',
+            'calculerProgressionEleve',
+            'identifierDefiSpecifique',
+            'identifierPatternActuel',
             'determinerNiveauRaiPedagogique',
-            'determinerCibleIntervention',
             'determinerAlerteContextuelle',
-            'calculerDirectionsCriteres',
-            'obtenirGrilleReferenceDepistage',
+            'determinerCibleIntervention',
+            // calculerDirectionsCriteres : reste dans le résidu (zone Sections affichage L2517-2724)
             // Zone Diagnostics + Navigation (L5693-6520) — 2 exports
             'naviguerVersIntervention',
             'naviguerVersNouvelleIntervention',
