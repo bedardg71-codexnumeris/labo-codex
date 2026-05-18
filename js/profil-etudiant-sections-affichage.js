@@ -2219,48 +2219,138 @@ function genererValeursComparatives(valeurSOM, valeurPAN, modeComparatif, affich
     `;
 }
 
+// === HELPERS PRIVÉS pour afficherProfilComplet (étape 4 éclatement cyc 58 → < 30) ===
+
 /**
- * Affiche le profil complet avec layout 2 colonnes
- * Inspiré de la page d'évaluation
+ * HELPER : résolution étudiant + état pivot atomique
+ * Phase 5 : accepte un élément (depuis data-on-change) ou une chaîne.
+ * Retourne { da, etudiants, eleve } — eleve = null si introuvable.
  */
-function afficherProfilComplet(daOuEl) {
-    // Phase 5 : accepte un élément (depuis data-on-change) ou une chaîne (depuis data-action / appel direct)
+function _resoudreEtudiantProfil(daOuEl) {
     var da = (typeof daOuEl === 'object' && daOuEl !== null) ? daOuEl.value : daOuEl;
-    // Les DA sont des identifiants string — le dispatcher peut les convertir en nombre
     if (da !== null && da !== undefined) da = String(da);
 
-    // Sauvegarder le DA pour navigation
+    // État pivot dual-write atomique (Écart #6 MODULES-MAP §2.3) — couple non séparé
     profilActuelDA = da;
     window.profilActuelDA = da;
 
-    // 🆕 BETA 95.6 : Utiliser obtenirEtudiantsCoursActif() pour filtrer par groupe-cours actif
-    // Garantit cohérence avec tableau de bord et liste des étudiants
+    // 🆕 BETA 95.6 : obtenirEtudiantsCoursActif() pour filtrer par groupe-cours actif
     const tousEtudiants = typeof obtenirEtudiantsCoursActif === 'function'
         ? obtenirEtudiantsCoursActif()
         : (typeof filtrerEtudiantsParMode === 'function'
             ? filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants'))
             : obtenirDonneesSelonMode('groupeEtudiants').filter(e => e.groupe !== '9999'));
     const etudiants = tousEtudiants.filter(e => !estEtudiantExclu(e));
-
-    // Trier par nom de famille (ordre alphabétique) pour navigation cohérente
     etudiants.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
-
-    // 🗂️ Cache la liste des étudiants pour la navigation cross-mode
     window.etudiantsListeCache = etudiants;
 
     const eleve = etudiants.find(e => e.da === da);
+    return { da, etudiants, eleve };
+}
 
+/**
+ * HELPER : recalcul indices A+C+P si fonctions disponibles (FIX #220).
+ */
+function _recalculerIndicesACPSiPossible() {
+    if (typeof genererSeancesCompletes === 'function') genererSeancesCompletes(null);
+    if (typeof calculerEtSauvegarderIndicesAssiduite === 'function') calculerEtSauvegarderIndicesAssiduite();
+    if (typeof calculerEtStockerIndicesCP === 'function') calculerEtStockerIndicesCP();
+}
+
+/**
+ * HELPER : calcul indices dual SOM/PAN selon mode comparatif (optimisation 7 déc 2025).
+ * Retourne { indicesSOM, indicesPAN, modeComparatif }.
+ */
+function _calculerIndicesDualPourProfil(da, config) {
+    const affichage = config.affichageTableauBord || {};
+    const afficherSom = affichage.afficherSommatif === true;
+    const afficherPan = affichage.afficherAlternatif === true;
+    const modeComparatif = afficherSom && afficherPan;
+
+    let indicesSOM, indicesPAN;
+    if (modeComparatif) {
+        indicesSOM = calculerTousLesIndices(da, 'SOM');
+        indicesPAN = calculerTousLesIndices(da, 'PAN');
+    } else {
+        const indicesActifs = calculerTousLesIndices(da);
+        if (config.pratique === 'sommative') {
+            indicesSOM = indicesActifs;
+            indicesPAN = { A: indicesActifs.A, C: 0, P: 0, M: 0, E: 0 };
+        } else {
+            indicesPAN = indicesActifs;
+            indicesSOM = { A: indicesActifs.A, C: 0, P: 0, M: 0, E: 0 };
+        }
+    }
+    return { indicesSOM, indicesPAN, modeComparatif };
+}
+
+/**
+ * HELPER : résolution titre + contenu selon section affichée + préférences UI.
+ * Préserve EXACTEMENT le comportement original — y compris l'absence de branche
+ * pour `progression && progressionVisible` (bug latent SUIVI-BUGS #106 :
+ * titre+contenu vides au premier rendu si arrivée directe sur 'progression').
+ */
+function _resoudreSectionContenu(sectionAffichee, da, prefs) {
+    const fallback = { titreSection: 'Productions et évaluations', contenuSection: genererSectionProductions(da) };
+
+    if (sectionAffichee === 'productions') return fallback;
+    if (sectionAffichee === 'performance') {
+        return prefs.developpementVisible
+            ? { titreSection: 'Développement des habiletés', contenuSection: genererSectionPerformance(da) }
+            : fallback;
+    }
+    if (sectionAffichee === 'mobilisation') {
+        return prefs.engagementVisible
+            ? { titreSection: 'Engagement ACP', contenuSection: genererSectionMobilisationEngagement(da) }
+            : fallback;
+    }
+    if (sectionAffichee === 'progression' && !prefs.progressionVisible) return fallback;
+    // Bug latent #106 : pas de cas `progression && progressionVisible` → titre+contenu vides (préservation stricte)
+    if (sectionAffichee === 'rapport') return { titreSection: 'Rapport', contenuSection: genererSectionRapport(da) };
+    if (sectionAffichee === 'accompagnement') {
+        return prefs.activerRai
+            ? { titreSection: 'Accompagnement', contenuSection: genererSectionAccompagnement(da) }
+            : fallback;
+    }
+    if (sectionAffichee === 'travaux') return { titreSection: 'Travaux soumis', contenuSection: genererSectionTravaux(da) };
+    return { titreSection: '', contenuSection: '' };
+}
+
+/**
+ * HELPER : post-rendu setTimeout T+100ms (réattaches + initialisations différées).
+ */
+function _postRendreProfilSection(sectionAffichee, da, container) {
+    setTimeout(() => {
+        if (typeof reattacherEvenementsToggles === 'function') reattacherEvenementsToggles();
+        if (window.accompagnement && typeof window.accompagnement.initialiserPopup === 'function') {
+            window.accompagnement.initialiserPopup();
+        }
+        if (sectionAffichee === 'rapport') restaurerPreferencesRapport(da);
+        if (sectionAffichee === 'travaux' && typeof travauxStockage !== 'undefined') {
+            travauxStockage.chargerThumbnailsConteneur(container);
+        }
+    }, 100);
+}
+
+/**
+ * Affiche le profil complet avec layout 2 colonnes
+ * Inspiré de la page d'évaluation
+ *
+ * Orchestrateur slim post-éclatement (étape 4, 18 mai 2026) — délègue à 5 helpers
+ * privés `_X` ci-dessus. Cyc cible ≤ 30. Signature externe arité 1 préservée.
+ */
+function afficherProfilComplet(daOuEl) {
+    // 1. Résolution étudiant + état pivot atomique
+    const { da, etudiants, eleve } = _resoudreEtudiantProfil(daOuEl);
     if (!eleve) {
         alert('Élève introuvable');
         return;
     }
 
-    // ✅ NOUVEAU (29 déc 2025): Détecter le mode anonymisation pour masquer les DA
+    // ✅ NOUVEAU (29 déc 2025): mode anonymisation pour masquer les DA
     const modeAnonymisation = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
 
-    if (typeof afficherSousSection === 'function') {
-        afficherSousSection('suivi-profil');
-    }
+    if (typeof afficherSousSection === 'function') afficherSousSection('suivi-profil');
 
     const container = document.getElementById('contenuProfilEtudiant');
     if (!container) {
@@ -2268,106 +2358,34 @@ function afficherProfilComplet(daOuEl) {
         return;
     }
 
-    // 🔄 FIX #220: Forcer le recalcul complet A + C + P avant affichage
-    if (typeof genererSeancesCompletes === 'function') {
-        genererSeancesCompletes(null);
-    }
-    if (typeof calculerEtSauvegarderIndicesAssiduite === 'function') {
-        calculerEtSauvegarderIndicesAssiduite();
-    }
-    if (typeof calculerEtStockerIndicesCP === 'function') {
-        calculerEtStockerIndicesCP();
-    }
-
-    // Calculer tous les indices
+    // 2. Recalcul indices A+C+P + indices principal
+    _recalculerIndicesACPSiPossible();
     const indices = calculerTousLesIndices(da);
     const A = indices.A / 100;
     const C = indices.C / 100;
     const interpM = interpreterMobilisation(A, C);
 
-    // NOUVEAU (Beta 90): Calcul dual pour mode comparatif
+    // 3. Calcul dual SOM/PAN
     const config = db.getSync('modalitesEvaluation', {});
-    const affichage = config.affichageTableauBord || {};
+    const { indicesSOM, indicesPAN, modeComparatif } = _calculerIndicesDualPourProfil(da, config);
 
-    // ✅ CORRECTION (7 déc 2025): Vérifier explicitement === true pour éviter mode comparatif par défaut
-    const afficherSom = affichage.afficherSommatif === true;
-    const afficherPan = affichage.afficherAlternatif === true;
-    const modeComparatif = afficherSom && afficherPan;
+    // 4. Préférences UI (pour résolution section + sidebar)
+    const prefs = {
+        activerRai:           obtenirPreference('activerRai') !== false,
+        engagementVisible:    obtenirPreference('depistageAcp') !== false,
+        progressionVisible:   obtenirPreference('afficherGraphiques') !== false,
+        developpementVisible: obtenirPreference('afficherDeveloppementHabiletes') !== false
+    };
 
-    // Vérifier si le modèle RàI est activé (préférence utilisateur)
-    const activerRai = obtenirPreference('activerRai') !== false;
-    const engagementVisible = obtenirPreference('depistageAcp') !== false;
-    const progressionVisible = obtenirPreference('afficherGraphiques') !== false;
-    const developpementVisible = obtenirPreference('afficherDeveloppementHabiletes') !== false;
-
-    // ✅ OPTIMISATION (7 déc 2025): Calculer uniquement la pratique active sauf en mode comparatif
-    let indicesSOM, indicesPAN;
-
-    if (modeComparatif) {
-        // Mode comparatif: calculer les deux pratiques
-        indicesSOM = calculerTousLesIndices(da, 'SOM');
-        indicesPAN = calculerTousLesIndices(da, 'PAN');
-    } else {
-        // Mode normal: calculer seulement la pratique active
-        const indicesActifs = calculerTousLesIndices(da);
-
-        // Assigner aux bonnes variables selon la pratique active
-        if (config.pratique === 'sommative') {
-            indicesSOM = indicesActifs;
-            indicesPAN = { A: indicesActifs.A, C: 0, P: 0, M: 0, E: 0 }; // Valeurs nulles pour PAN
-        } else {
-            indicesPAN = indicesActifs;
-            indicesSOM = { A: indicesActifs.A, C: 0, P: 0, M: 0, E: 0 }; // Valeurs nulles pour SOM
-        }
-    }
-
-    // Trouver l'index de l'élève dans la liste pour navigation
+    // 5. Navigation Précédent/Suivant
     const indexActuel = etudiants.findIndex(e => e.da === da);
     const etudiantPrecedent = indexActuel > 0 ? etudiants[indexActuel - 1] : null;
     const etudiantSuivant = indexActuel < etudiants.length - 1 ? etudiants[indexActuel + 1] : null;
 
-    // NOUVEAU (Beta 90): Déterminer quelle section afficher (section mémorisée ou 'productions' par défaut)
+    // 6. Section + contenu (Beta 90 : section mémorisée ou 'productions' par défaut)
     const sectionAffichee = sectionProfilActive || 'productions';
-
-    // Déterminer le titre et le contenu selon la section active
-    let titreSection = '';
-    let contenuSection = '';
-
-    if (sectionAffichee === 'productions') {
-        titreSection = 'Productions et évaluations';
-        contenuSection = genererSectionProductions(da);
-    } else if (sectionAffichee === 'performance' && developpementVisible) {
-        titreSection = 'Développement des habiletés';
-        contenuSection = genererSectionPerformance(da);
-    } else if (sectionAffichee === 'performance' && !developpementVisible) {
-        // Si Développement des habiletés désactivé, rediriger vers productions
-        titreSection = 'Productions et évaluations';
-        contenuSection = genererSectionProductions(da);
-    } else if (sectionAffichee === 'mobilisation' && engagementVisible) {
-        titreSection = 'Engagement ACP';
-        contenuSection = genererSectionMobilisationEngagement(da);
-    } else if (sectionAffichee === 'mobilisation' && !engagementVisible) {
-        // Si Micro données ACP désactivé, rediriger vers productions
-        titreSection = 'Productions et évaluations';
-        contenuSection = genererSectionProductions(da);
-    } else if (sectionAffichee === 'progression' && !progressionVisible) {
-        // Si Graphiques d'évolution désactivé, rediriger vers productions
-        titreSection = 'Productions et évaluations';
-        contenuSection = genererSectionProductions(da);
-    } else if (sectionAffichee === 'rapport') {
-        titreSection = 'Rapport';
-        contenuSection = genererSectionRapport(da);
-    } else if (sectionAffichee === 'accompagnement' && activerRai) {
-        titreSection = 'Accompagnement';
-        contenuSection = genererSectionAccompagnement(da);
-    } else if (sectionAffichee === 'accompagnement' && !activerRai) {
-        // Si RàI désactivé, rediriger vers productions
-        titreSection = 'Productions et évaluations';
-        contenuSection = genererSectionProductions(da);
-    } else if (sectionAffichee === 'travaux') {
-        titreSection = 'Travaux soumis';
-        contenuSection = genererSectionTravaux(da);
-    }
+    const { titreSection, contenuSection } = _resoudreSectionContenu(sectionAffichee, da, prefs);
+    const { activerRai, engagementVisible, progressionVisible, developpementVisible } = prefs;
 
     // Générer le HTML avec layout sidebar matériel
     container.innerHTML = `
@@ -2485,28 +2503,8 @@ function afficherProfilComplet(daOuEl) {
         </div>
     `;
 
-    // Réattacher les événements des toggles et Primo après insertion du contenu
-    setTimeout(() => {
-        if (typeof reattacherEvenementsToggles === 'function') {
-            reattacherEvenementsToggles();
-        }
-
-        // Réinitialiser la visibilité des ✴️ dynamiques après re-render DOM
-        if (window.accompagnement && typeof window.accompagnement.initialiserPopup === 'function') {
-            window.accompagnement.initialiserPopup();
-        }
-
-        // Restaurer les préférences du rapport si on est sur cette section
-        if (sectionAffichee === 'rapport') {
-            restaurerPreferencesRapport(da);
-        }
-
-        // Charger les thumbnails async (section travaux)
-        if (sectionAffichee === 'travaux' && typeof travauxStockage !== 'undefined') {
-            travauxStockage.chargerThumbnailsConteneur(container);
-        }
-    }, 100);
-
+    // 7. Post-rendu T+100ms (réattaches + initialisations différées)
+    _postRendreProfilSection(sectionAffichee, da, container);
 }
 
 /* ===============================
