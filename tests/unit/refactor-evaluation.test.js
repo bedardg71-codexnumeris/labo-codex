@@ -86,11 +86,24 @@ beforeAll(() => {
     // Auto-save originale, 17 fonctions). Chargé AVANT le résidu dans
     // index.html — le résidu consomme window.afficherCriteresDepuisGrille
     // (L5521 d'origine → patch §5.6 fait dans evaluation.js).
+    // Session B (18 mai après-midi) : 2 patches §5.6 ajoutés pour
+    // window.obtenirCouleurNiveau (consommée L652 + L1026 chargement.js).
     win = chargerScript('js/evaluation-chargement.js', stubs, fauxWindow);
 
-    // Résidu evaluation.js post-extraction Chargement (6087 LOC, anciennement
-    // 7321 LOC pré-refactor, -16 %). Consomme window.afficherCriteresDepuisGrille
-    // de evaluation-chargement.js (chargé ci-dessus).
+    // Refactor étape 3 session B (18 mai 2026) : evaluation-calcul.js extrait
+    // depuis evaluation.js (zone L61-L720 Calcul de notes + Gestion couleurs,
+    // 6 fonctions : calculerNoteAlgorithmique, genererRetroactionEUF privées,
+    // calculerNoteAlgorithmiqueAvecCategories cyc 42 exportée, calculerNote
+    // AlgorithmiqueSimple, calculerNote, obtenirCouleurNiveau). Chargé ENTRE
+    // chargement et résidu — promotions §5.6 nouvelles : window.calculerNote
+    // (6 sites résidu) + window.obtenirCouleurNiveau (2 sites chargement.js).
+    chargerScript('js/evaluation-calcul.js', stubs, win);
+
+    // Résidu evaluation.js post-extractions Chargement+Calcul (~5427 LOC,
+    // anciennement 7321 LOC pré-refactor, -25,9 %). Consomme window.afficher
+    // CriteresDepuisGrille (chargement) + window.calculerNote (calcul, 6 sites
+    // patchés §5.6 zones changerStatutIntegrite, changerEchelleEvaluation,
+    // verifierEtChargerEvaluationExistante, modifierEvaluation × 2).
     chargerScript('js/evaluation.js', stubs, win);
 
     // Refactor étape 3 session A (18 mai 2026) : evaluation-handlers.js
@@ -137,9 +150,12 @@ describe('evaluation — régression refactoring 2026-mai (pré-refactor, 7 test
             'cartoucheSelectionnee',
             'niveauSelectionne',
             'filtrerEtudiantsParGroupe',
-            // Zone Calcul (L1257-1892) — 3 exports
+            // Zone Calcul (L1257-1892) — 5 exports (4 depuis evaluation-calcul.js
+            // session B + 2 handlers depuis evaluation-handlers.js session A)
             'calculerNoteAlgorithmiqueAvecCategories',
             'calculerNoteAlgorithmiqueSimple',
+            'calculerNote',                // promotion §5.6 session B
+            'obtenirCouleurNiveau',        // promotion §5.6 session B
             'calculerNoteAlgoSimpleHandler',
             'calculerNoteAlgoCatHandler',
             // Zone Rétroaction (L1929-3582) — 5 exports + 1 dispersé L2130
