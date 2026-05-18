@@ -16,29 +16,81 @@
 > - `Monitorage_v6/audit/SESSION.md` sur branche `audit/2026-mai` — session **audit annuel** Phase 3 (sujet distinct : audit de fidélité concept → implémentation).
 > - `Monitorage_v6-refactor/SESSION.md` sur branche `refactor/trimestre-v2` — récap historique du chantier trimestre-v2 (mergé FF sur main, branche à supprimer après push).
 
-# SESSION — État au 18 mai 2026 (refactor profil-etudiant.js — sessions A+B+C LIVRÉES, prête pour relai session D)
+# SESSION — État au 18 mai 2026 (refactor profil-etudiant.js — sessions A+B+C+D LIVRÉES, EN ATTENTE validation Safari Mac Grégoire)
 
-**Date** : 17 mai soir + 18 mai 00:30 (sessions 0+1+2 + A) + 18 mai matin (sessions B + C)
-**Beta / build** : 99.48 / 0518-0516
+**Date** : 17 mai soir + 18 mai 00:30 (sessions 0+1+2 + A) + 18 mai matin (sessions B + C + D)
+**Beta / build** : 99.48 / 0518-0540
 **Branche actuelle du worktree** : `refactor/profil-etudiant`
-**Dernier commit (à ajuster après bump)** : bump 99.48 b0518-0516 — refresh build session C
-**Branche `main`** : `0e8e0f8` — pushée à origin ✅
+**Dernier commit (à ajuster après bump)** : bump 99.48 b0518-0540 — capitalisation stand-by session D
+**Branche `main`** : `0e8e0f8` — pushée à origin ✅ (**PAS de merge FF tant que validation Grégoire pas confirmée OK** — pattern [[feedback-pas-capitalisation-avant-validation]])
 **Statut chantier profil-etudiant.js** :
 - **Étape 0** : worktree + symlinks + baseline 73/73 ✅ (17 mai soir)
 - **Étape 1** : lecture intégrale + audit ESLint + Agent Explore — **TERMINÉE** (commit `52ae385`). 11 écarts MODULES-MAP §2.3.
 - **Étape 2** : tests régression Vitest 5 + Playwright 2 — **TERMINÉE** (commit `56c0978`). 80/80 verts.
 - **Étape 3 session A LOW** : 3 sous-modules extraits — **TERMINÉE** (`d9c6793` helpers + `cd70c9d` calculs + `d5013d9` rapport + `590ea89` bump 99.48). Résidu 8818 → 6337 LOC (-28,1 %). 37 fonctions promues window.X.
-- **Étape 3 session B MEDIUM** : 2 sous-modules extraits — **TERMINÉE** (`fc9415b` diagnostics + `e2613b1` confidentiel). Résidu 6337 → 5207 LOC (-17,8 % session B, -40,9 % cumulé). 19 fonctions promues window.X (11 diagnostics + 8 confidentiel).
-- **Étape 3 session C HIGH partie 1** : 1 sous-module extrait — **TERMINÉE** (`27d3c17` actions). Résidu 5207 → 4641 LOC (-10,9 % session C, -47,4 % cumulé). 8 fonctions promues window.X (4 existants + 4 promotions).
-- **Étape 3 session D HIGH partie 2** : à démarrer — sections affichage ~3700 LOC (cf. consigne ci-dessous).
-- **Étape 4** : éclatement (afficherProfilComplet 58, calculerDetailsNoteFinale 57 dans actions.js, genererSectionMobilisationEngagement 52, genererSectionPerformance 47, calculerIPB 36 + determinerCibleIntervention 58 dans calculs.js).
-- **Étapes 5-6** : validation Grégoire + merge FF.
+- **Étape 3 session B MEDIUM** : 2 sous-modules extraits — **TERMINÉE** (`fc9415b` diagnostics + `e2613b1` confidentiel + `ac0eb85` bump). Résidu 6337 → 5207 LOC (-17,8 % session B, -40,9 % cumulé). 19 fonctions promues window.X.
+- **Étape 3 session C HIGH partie 1** : 1 sous-module extrait — **TERMINÉE** (`27d3c17` actions + `a02a564` bump). Résidu 5207 → 4641 LOC (-10,9 % session C, -47,4 % cumulé). 8 fonctions promues window.X.
+- **Étape 3 session D HIGH partie 2** : renommage profil-etudiant.js → sections-affichage.js — **TERMINÉE** (`7b37363`). 4642 LOC inchangées, 38 fonctions + 3 variables module-scope encapsulées.
+- **Étape 4** : éclatement `afficherProfilComplet` cyc 58 → < 30 — **TERMINÉE PARTIELLEMENT** (`d119446`). 5 helpers privés extraits + cible dure cyc ≤ 30 atteinte sur la fonction principale. **5 fonctions cyc > 30 documentées comme héritages à traiter Catégorie B post-merge** (décision Grégoire 18 mai 2026).
+- **Étape 5** : validation manuelle Grégoire — **EN ATTENTE** (Safari Mac, sombre + clair, cf. cas ci-dessous).
+- **Étape 6** : merge FF refactor/profil-etudiant → main + push — **À FAIRE après OK Grégoire**.
 
-**Tests** : 70 Vitest + 10 Playwright = **80/80 verts** (confirmés post-bump session C).
+**Tests** : 70 Vitest + 10 Playwright = **80/80 verts** (confirmés post-bump session D).
 
-**Commits non-pushés** : 4 commits session B+C (`fc9415b` diagnostics + `e2613b1` confidentiel + `ac0eb85` bump B + `27d3c17` actions + bump C à venir) — à pusher depuis la maison.
+**Commits non-pushés** : 7 commits session B+C+D (`fc9415b` diagnostics + `e2613b1` confidentiel + `ac0eb85` bump B + `27d3c17` actions + `a02a564` bump C + `7b37363` renommage + `d119446` éclatement afficherProfilComplet + bump D à venir).
 
-**Action en attente côté Grégoire** : `git push origin refactor/profil-etudiant` depuis la maison (réseau école bloque GitHub).
+**Action en attente côté Grégoire** :
+1. **Validation manuelle Safari Mac** (étape 5 — cas ci-dessous).
+2. Si OK : merge FF + push depuis la maison.
+3. Si bug : inscrire SUIVI-BUGS, corriger sur la branche, re-tester.
+
+## Récap session D (18 mai matin — renommage + éclatement afficherProfilComplet)
+
+| Opération | Détails | Commit |
+|---|---|---|
+| Renommage extraction unique | `profil-etudiant.js` (4642 LOC, IIFE complet) → `profil-etudiant-sections-affichage.js`. 38 fonctions + 3 variables module-scope encapsulées. 0 LOC modifiée (juste nom de fichier + en-tête réécrit). | `7b37363` |
+| Éclatement `afficherProfilComplet` cyc 58 → < 30 | 5 helpers privés extraits : `_resoudreEtudiantProfil` + `_recalculerIndicesACPSiPossible` + `_calculerIndicesDualPourProfil` + `_resoudreSectionContenu` + `_postRendreProfilSection`. Atomicité dual-write état pivot préservée. Bug latent #106 préservé. | `d119446` |
+
+**Bilan cumulé chantier profil-etudiant.js (sessions A+B+C+D, Étape 3 + Étape 4 partielle)** :
+- profil-etudiant.js d'origine : **8 818 LOC monolithique** → **7 sous-modules autonomes** (8 818 LOC linéaires → 9 052 LOC distribuées, le surplus = IIFE wrappers + headers commentaires + exports)
+- profil-etudiant.js : **renommé**, plus de "résidu central"
+- **102 fonctions** extraites / réparties dans les 7 sous-modules + 5 helpers privés étape 4
+- **Cible dure cyc ≤ 30 atteinte sur afficherProfilComplet** (le monstre central, cyc 58 → < 30)
+- **5 fonctions cyc > 30 héritées documentées** (à traiter cycle dédié Catégorie B post-merge)
+
+**Bugs latents préservés** (préservation comportementale stricte) :
+- SUIVI-BUGS #105 : `chargerProfilEtudiant` dead code dans sauvegarderConfidentiel (session B)
+- SUIVI-BUGS #106 : branche manquante `progression && progressionVisible` dans afficherProfilComplet (session D étape 4, helper `_resoudreSectionContenu`)
+
+**Trouvailles notables session D (mémoires candidate)** :
+1. **Renommage > extraction sed** : quand le résidu est DÉJÀ un IIFE complet englobant l'intégralité de la zone à extraire, le renommage `git mv` est l'opération la plus sûre — 0 LOC de code modifié, juste nom de fichier + en-tête. Pattern session D refactor profil-etudiant (résidu 4642 LOC déjà IIFE complet → renommage trivial vs sed delete + reconstruction risquée).
+2. **Stratégie pragmatique cyc > 30 héritages** : pattern productions / trimestre-v2 confirmé sur profil-etudiant — éclater le monstre central (afficherProfilComplet 58), documenter les autres fonctions cyc > 30 comme « héritages à traiter Catégorie B post-merge ». Évite les manipulations risquées sur 200-700 LOC chacune sans validation intermédiaire. Décision pragmatique vs cible dure METHODE.
+3. **Bug latent détecté pendant l'éclatement de l'orchestrateur** : la chaîne if/else if de afficherProfilComplet pour résoudre la section affichée manquait une branche. Détection par lecture systématique avant éclatement. Préservation stricte → inscription SUIVI-BUGS #106 avec commentaire explicite dans le helper (`Bug latent #106 : pas de cas...`).
+
+## Étape 5 — Validation manuelle Grégoire (EN ATTENTE, à valider Safari Mac sombre + clair)
+
+5-6 cas d'intégration à tester avec un trimestre réel :
+
+1. **Sélection d'un étudiant** depuis la liste (cours actif). Vérifier l'affichage du profil complet :
+   - Sidebar : sélecteur étudiant + Préc./Suiv. + carte info étudiant + navigation sections
+   - Zone principale : section "Productions et évaluations" par défaut + bandeau contexte
+   - Pas d'erreur console (DevTools).
+
+2. **Changement de section dans la sidebar** (Productions → Engagement ACP → Progression → Développement habiletés → Accompagnement → Travaux soumis → Rapport). Vérifier que chaque section affiche son contenu approprié + post-rendu (graphiques Chart.js sur Progression).
+
+3. **Navigation Précédent/Suivant** : passer d'un étudiant à l'autre, vérifier que la section active est préservée (`sectionProfilActive` mémorisée).
+
+4. **Actions cascade `consulterEvaluation`** (clic sur ligne d'évaluation dans Productions) : ouvre la visionneuse en mode évaluer, timer T+200ms. Vérifier pas de race condition sur clics rapides.
+
+5. **Modal confidentiel** : ouvrir, sauvegarder des notes de présences + cocher services adaptés + sous-catégorie médicale. Fermer + rouvrir → données persistées. Badge ● vert sur le bouton Confidentiel quand des infos existent.
+
+6. **Rapport** : aller dans la section Rapport, vérifier la génération + le bouton Copier. Tester en mode comparatif SOM/PAN si configuré.
+
+**Cibles plateformes** : Safari Mac (obligatoire — Cmd+Q pour invalider le cache file://), mode sombre + clair. iPad Air optionnel.
+
+**Si bug** : inscrire SUIVI-BUGS, corriger sur `refactor/profil-etudiant` (nouveau commit), re-tester.
+
+**Si OK** : Étape 6 — merge FF + push (instructions ci-dessous).
 
 ## Récap session C (18 mai matin — 1 sous-module HIGH partie 1)
 
@@ -97,104 +149,71 @@
 
 ---
 
-## Consigne session D (à démarrer — étape 3 HIGH partie 2 sections affichage + étape 4 éclatement)
+## Étape 6 — Instructions merge FF + push (À EXÉCUTER SEULEMENT après OK Grégoire étape 5)
 
 À copier-coller au début de la prochaine session :
 
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6-profil-etudiant
 
-# AVANT TOUT — pusher depuis la maison si pas déjà fait :
-#   git push origin refactor/profil-etudiant
-# Réseau école bloque GitHub.
+# Pré-requis : validation manuelle Safari Mac de Grégoire confirmée OK (étape 5).
+# Si bug détecté pendant la validation : NE PAS merger, corriger d'abord.
 
-# Vérification rapide à l'ouverture de session :
-git log --oneline @{u}..HEAD          # 4 commits attendus (fc9415b diag + e2613b1 conf + ac0eb85 bump B + 27d3c17 actions + bump C à venir)
-git status                             # propre (sauf node_modules symlinks)
-cat version.json                       # {"build":"0518-0516","beta":"99.48"}
-cd tests && npm test                   # 80/80 verts (70 Vitest + 10 Playwright)
-wc -l ../js/profil-etudiant.js ../js/profil-etudiant-*.js  # résidu 4641, +6 sous-modules
+# Vérification rapide :
+git log --oneline -10                  # 8 commits non-pushés depuis 2b118c7
+git status                             # propre (hors node_modules symlinks)
+cat version.json                       # {"build":"0518-0540","beta":"99.48"}
+cd tests && npm test                   # 80/80 verts attendus
 
-Lecture obligatoire :
-1. SESSION.md (ce document) — récap sessions A+B+C LIVRÉES
-2. audit/refactoring-prep/MODULES-MAP.md §2.3 (zone HIGH partie 2 : sections affichage)
-3. audit/refactoring-prep/METHODE-REFACTORING.md §3 étape 3 + §4 étape 4 éclatement
+# Bump optionnel pour marquer le merge (refresh build → 99.49 si Grégoire préfère
+# marquer une version majeure de consolidation).
 
-OBJECTIF SESSION D : extraire 1 sous-module HIGH partie 2 (sections affichage ~3000-3500 LOC) + étape 4 éclatement fonctions cyc > 30 (~2-3 h)
+# Merge FF refactor/profil-etudiant → main (depuis n'importe quel checkout) :
+git fetch origin
+git update-ref refs/heads/main refs/heads/refactor/profil-etudiant
 
-### Sous-module 7 — `js/profil-etudiant-sections-affichage.js` (~3000-3500 LOC, géant)
+# Push depuis la maison (réseau école bloque GitHub) :
+git push origin main refactor/profil-etudiant
 
-Zone Sections affichage — TOUTES les fonctions `genererSection*` + `afficherProfilComplet` orchestre + variables module-scope `sectionProfilActive`, `indiceActif`, état pivot `profilActuelDA`/`window.profilActuelDA` (dual-write atomique).
+# Optionnel après push : supprimer la branche refactor (traçabilité préservée via tag) :
+# git push origin --delete refactor/profil-etudiant
+# git branch -d refactor/profil-etudiant
 
-Fonctions probables (à confirmer à l'ouverture par grep) :
-- `afficherProfilComplet` (cyc 58, orchestre 7 sections + post-rendu T+100ms) — **MONSTRE**
-- `genererSectionMobilisationEngagement` (cyc 52)
-- `genererSectionAccompagnement`
-- `genererSectionMobilisation`
-- `genererSectionAssiduite`, `genererSectionProductions`
-- `genererSectionPerformance` (cyc 47)
-- `genererSectionCompletion`
-- `genererSectionProgression`
-- `genererSectionAssiduiteLegacy`
-- `genererSectionTravaux` (Beta 96.3, module Travaux)
-- `genererBandeauContexteProfil`
-- `genererTableauObjectifs`
-- `genererHistoriqueInterventionsProfil`
-- `genererCarteCibleIntervention`
-- `genererSectionCollapsible`, `toggleSectionCollapsible`
-- `toggleDetailIndice`, `fermerDetailIndice`
-- `changerSectionProfil`, `calculerDirectionsCriteres`, `calculerDirectionEngagement`, `calculerDirectionRisque`
-- `obtenirCouleurIndice`, `obtenirEmojiIndice`, `obtenirDetailsAssiduite`
-- Handlers : `togglePSansReprisesIndivHandler`, `toggleIndiceIndivHandler`, `toggleCritereIndivHandler`, `lancerExportEtudiantAnnotes`
-- Wrappers : `naviguerVersNouvelleIntervention`, `naviguerVersIntervention`
-- Misc : `genererValeursComparatives`, `formaterDateCompacte`, `reattacherEvenementsToggles`, `toggleSection`, `naviguerVersPresenceAvecDate`
-
-Risque MOYEN (taille géante mais zone homogène, peu de cross-zone — les diagnostics + actions ont déjà été extraites). État pivot `profilActuelDA` à préserver atomiquement.
-
-### Approche recommandée pour le géant
-- **Option 1** : extraction unique (3 000+ LOC) — workflow éprouvé, mais le sous-module reste gros. Cohérent avec le découpage prévu (1 module par zone fonctionnelle).
-- **Option 2** : sous-découper en 2 (par exemple `-sections-rendu.js` pour genererSection* + `-sections-orchestre.js` pour afficherProfilComplet + handlers + état pivot). Plus de complexité, mais plus modulaire.
-- **Décision** : à acter avec Grégoire à l'ouverture. Recommandation par défaut : **Option 1** (cohérence avec prévisionnel MODULES-MAP §2.3).
-
-### Étape 4 — Éclatement fonctions cyc > 30
-
-Ordre suggéré (priorité décroissante) :
-1. **`afficherProfilComplet` cyc 58** (orchestrateur 7 sections + 4 prefs UI + 3 recalculs indices + 2 modes SOM/PAN + post-rendu T+100ms) — éclatement en 5-6 helpers privés (un par section ou par phase). **Cible dure cyc ≤ 30**.
-2. **`calculerDetailsNoteFinale` cyc 57** (dans actions.js, hérité de session C) — éclatement en 4-5 helpers privés (lecture infoCours/contrats + calcul note pondérée + branches multi-grilles).
-3. **`determinerCibleIntervention` cyc 58** (dans calculs.js, hérité de session A) — éclatement par scénario RàI (niveau 1/2/3).
-4. **`genererSectionMobilisationEngagement` cyc 52** + **`genererSectionPerformance` cyc 47** (probablement dans sections-affichage.js après extraction) — éclatement par sous-section.
-5. **`calculerIPB` cyc 36** (dans calculs.js) — peut tenir avec un éclatement léger (1-2 helpers).
-
-### Étape 5 — Validation manuelle Grégoire (~30 min - 1 h)
-
-5-6 cas Safari Mac sombre + clair :
-- Sélection d'un étudiant depuis la liste
-- Changement de groupe-cours actif → rechargement profil (test cascade `consulterEvaluation` indirectement)
-- Affichage des graphiques A-C-P + diagnostic SRPNF
-- Affichage des évaluations + jetons personnalisés + travaux annotés
-- Ouverture modal confidentiel + sauvegarde notes/services adaptés
-- Navigation cross-onglet (Bilan, RaI) — `obtenirPatternEtudiant` consommé par tableau-bord-apercu
-
-### Étape 6 — Capitalisation + merge
-
-- MODULES-MAP §2.3 rétrospective (métriques avant/après)
-- NOTES-DE-VERSION compléter Beta 99.48 (sections sessions C+D)
-- BACKLOG.md (clore l'item refactor profil-etudiant)
-- METHODE §7 notes pour evaluation.js (dernier god module)
-- SUIVI-BUGS bugs latents découverts session D
-- Mémoire feedback : trouvailles session D (notamment patterns d'éclatement)
-- Merge FF `refactor/profil-etudiant` → `main` (via `git update-ref` si main pas checkable)
-- Push à la maison
-
-### Notes critiques session D
-- **`afficherProfilComplet` est l'orchestrateur central** — toute régression sur cette fonction casse l'affichage des profils. Tests Playwright dédiés requis (au-delà de la sentinelle exports).
-- **État pivot `profilActuelDA` dual-write** : préserver atomicité L2807-2808 originale (déclaration `let profilActuelDA = null;` + assignations couplées dans `afficherProfilComplet`).
-- **Acquittement `// security-ok` inline** sur XSS innerHTML transférés (pattern session B+C confirmé).
-- **Bump final** : Beta 99.49 (marque la session de merge) ou refresh 99.48 — décision Grégoire.
-
-### Bump prévu en fin de session D
-Si merge FF effectué : bump majeur (par ex. 99.49 ou 99.50) pour marquer la consolidation refactor profil-etudiant. Sinon refresh build.
+# Capitalisation finale (après merge confirmé) :
+# - METHODE-REFACTORING §7 : ajouter section « Module : profil-etudiant.js » avec
+#   les 3 propositions Catégorie B issues sessions B+C+D (mémoires feedback :
+#   feedback-securite-ok-inline-obligatoire + feedback-iife-encapsuler-variables-module-scope +
+#   feedback-refactor-export-reste-residu-quand-fonction-reste).
+# - MODULES-MAP §2.3 : rétrospective finale avec métriques avant/après.
+# - Si Grégoire le souhaite : créer un tag `refactor-profil-etudiant-2026-05-18`
+#   pour marquer le commit de merge.
 ```
+
+### Cycle Catégorie B post-merge — 5 fonctions cyc > 30 héritages à éclater
+
+Pattern productions / trimestre-v2 : ces fonctions héritées du god module sont préservées
+comportementalement, à éclater dans un cycle dédié post-merge (PR ou worktree
+`bugfix/cyc-superieur-30-profil-etudiant`).
+
+| Fonction | Cyc | Fichier | LOC |
+|---|---:|---|---:|
+| afficherProfilComplet | < 30 | sections-affichage.js | ✅ traité étape 4 session D |
+| genererSectionMobilisationEngagement | 52 | sections-affichage.js | ~730 |
+| genererSectionPerformance | 47 | sections-affichage.js | ~615 |
+| calculerDetailsNoteFinale | 57 | actions.js | ~287 |
+| determinerCibleIntervention | 58 | calculs.js | ~200 |
+| calculerIPB | 36 | calculs.js | ~150 |
+
++ traiter SUIVI-BUGS #105 (chargerProfilEtudiant dead code) + #106 (progression && progressionVisible branche manquante).
+
+### Chantier suivant : refactor `evaluation.js` (dernier god module)
+
+- 7 348 LOC
+- Effort estimé : ~6-8 h (PLAN-MOYEN-TERME §4.5)
+- Tendance : peut-être encore plus complexe (IDME × SRPNF × algo notation)
+- Branche : `refactor/evaluation` (worktree dédié)
+- Méthode : appliquer PARFAITEMENT le pattern productions/trimestre-v2/profil-etudiant
+  (préparation → extraction sous-modules → réduction complexité → validation → merge)
 
 ## Récap session A — 18 mai 2026 (3 sous-modules LOW extraits)
 
