@@ -2404,130 +2404,92 @@ function modifierEvaluation(evaluationId) {
  * Sauvegarde une évaluation modifiée (écrase l'ancienne)
  * Appelée à la place de sauvegarderEvaluation() si on modifie une évaluation existante
  */
-function sauvegarderEvaluationModifiee() {
-    // Annuler le debounce auto-save (la sauvegarde manuelle prend le relais) — Patch §5.6 fix #109 (étape 4)
-    if (window._timerAutoSave) { clearTimeout(window._timerAutoSave); window._timerAutoSave = null; }
-    window._pendingAutoSaveSnapshot = null;
+// Helpers privés _Mod pour sauvegarderEvaluationModifiee (extraction étape 4 — éclatement cyc 58 → cyc ≤ 30)
+// Note : helpers dupliqués depuis evaluation-sauvegarde.js _Sauv (pattern profil-etudiant —
+// duplication intra-IIFE préférée à consolidation cross-IIFE qui exigerait promotion window.X).
 
-    const evaluationId = window.evaluationEnCours?.idModification;
+function _lireEntreesFormulaireMod() {
+    const ec = window.evaluationEnCours;
+    return {
+        etudiantDA: document.getElementById('selectEtudiantEval').value || (ec && ec.etudiantDA) || '',
+        productionId: document.getElementById('selectProduction1').value || (ec && ec.productionId) || '',
+        grilleId: document.getElementById('selectGrille1').value || (ec && ec.grilleId) || ''
+    };
+}
 
-    if (!evaluationId) {
-        // Pas en mode modification, utiliser la sauvegarde normale
-        window.sauvegarderEvaluation();
-        return;
-    }
-
-    // CORRECTION: Lire TOUTES les évaluations (pas seulement celles du cours actif)
-    let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
-    const indexEval = evaluations.findIndex(e => e.id === evaluationId);
-
-    if (indexEval === -1) {
-        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
-        return;
-    }
-
-    // Vérifier que l'évaluation n'est pas verrouillée
-    // Exception : modification post-reprise autorisée via _snapshotAvantModifRemplacee
-    if (evaluations[indexEval].verrouillee && !window._snapshotAvantModifRemplacee) {
-        afficherNotificationErreur('Évaluation verrouillée', 'Impossible de modifier une évaluation verrouillée');
-        return;
-    }
-
-    // Créer la nouvelle version de l'évaluation (reprendre le code de sauvegarderEvaluation)
-    const ecMod = window.evaluationEnCours;
-    const etudiantDA = document.getElementById('selectEtudiantEval').value || (ecMod && ecMod.etudiantDA) || '';
-    const productionId = document.getElementById('selectProduction1').value || (ecMod && ecMod.productionId) || '';
-    const grilleId = document.getElementById('selectGrille1').value || (ecMod && ecMod.grilleId) || '';
-
-    // ✅ NAMESPACING (Beta 95.5)
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    const etudiant = etudiants.find(e => e.da === etudiantDA);
-
-    const productions = obtenirDonneesSelonMode('productions');
-    const production = productions.find(p => p.id === productionId);
-
-    const grilles = db.getSync('grillesTemplates', []);
-    const grille = grilles.find(g => g.id === grilleId);
-
-    // 🆕 FIX (9 jan 2026) : Validation des références avant sauvegarde
+function _validerReferencesMod(etudiant, production, grille, etudiantDA, productionId, grilleId) {
     if (!etudiant) {
         afficherNotificationErreur('Étudiant introuvable', `L'étudiant ${etudiantDA} n'existe pas dans le groupe actif.`);
         console.error('[Évaluation] ❌ Référence invalide: etudiantDA', etudiantDA);
-        return;
+        return false;
     }
     if (!production) {
         afficherNotificationErreur('Production introuvable', `La production sélectionnée n'existe plus.`);
         console.error('[Évaluation] ❌ Référence invalide: productionId', productionId);
-        return;
+        return false;
     }
     if (!grille) {
         afficherNotificationErreur('Grille introuvable', `La grille de critères sélectionnée n'existe plus.`);
         console.error('[Évaluation] ❌ Référence invalide: grilleId', grilleId);
-        return;
+        return false;
     }
+    return true;
+}
 
-    // Phase 4.C : interdire les références à des items démo (Plan §3.4)
-    if (typeof BibliothequeUI !== 'undefined' && BibliothequeUI.verifierReferencesPasDemo) {
-        const violationDemo = BibliothequeUI.verifierReferencesPasDemo([
-            { id: productionId, collection: (typeof getCleProductions === 'function' ? getCleProductions() : cle('productions')), labelType: 'production' },
-            { id: grilleId, collection: 'grillesTemplates', labelType: 'grille' }
-        ]);
-        if (violationDemo) {
-            afficherNotificationErreur('Référence démo non autorisée', violationDemo.message);
-            return;
-        }
+function _validerReferencesNonDemoMod(productionId, grilleId) {
+    if (typeof BibliothequeUI === 'undefined' || !BibliothequeUI.verifierReferencesPasDemo) return true;
+    const violationDemo = BibliothequeUI.verifierReferencesPasDemo([
+        { id: productionId, collection: (typeof getCleProductions === 'function' ? getCleProductions() : cle('productions')), labelType: 'production' },
+        { id: grilleId, collection: 'grillesTemplates', labelType: 'grille' }
+    ]);
+    if (violationDemo) {
+        afficherNotificationErreur('Référence démo non autorisée', violationDemo.message);
+        return false;
     }
+    return true;
+}
 
-    // Collecter les évaluations des critères
+function _collecterCriteresMod(grille) {
     const criteres = [];
-    if (grille && grille.criteres) {
-        grille.criteres.forEach(critere => {
-            const niveau = evaluationEnCours.criteres[critere.id];
-            if (niveau) {
-                const commDiv = document.getElementById(`comm_${critere.id}`);
-                criteres.push({
-                    critereId: critere.id,
-                    critereNom: critere.nom,
-                    niveauSelectionne: niveau,
-                    retroaction: commDiv ? commDiv.textContent : '',
-                    ponderation: critere.ponderation || 0
-                });
-            }
-        });
-    }
+    if (!grille || !grille.criteres) return criteres;
+    grille.criteres.forEach(critere => {
+        const niveau = evaluationEnCours.criteres[critere.id];
+        if (niveau) {
+            const commDiv = document.getElementById(`comm_${critere.id}`);
+            criteres.push({
+                critereId: critere.id,
+                critereNom: critere.nom,
+                niveauSelectionne: niveau,
+                retroaction: commDiv ? commDiv.textContent : '',
+                ponderation: critere.ponderation || 0
+            });
+        }
+    });
+    return criteres;
+}
 
-    // Mettre à jour l'évaluation existante avec horodatage
-    const maintenant = new Date();
-
-    // Préserver les propriétés de jetons existantes
-    const evaluationExistante = evaluations[indexEval];
-    const proprietesJetons = {
-        jetonRepriseCibleeApplique: evaluationExistante.jetonRepriseCibleeApplique,
-        repriseDeIdCiblee: evaluationExistante.repriseDeIdCiblee,
-        critereRepriseCiblee: evaluationExistante.critereRepriseCiblee,
-        plafondNoteCiblee: evaluationExistante.plafondNoteCiblee,
-        dateApplicationJetonRepriseCiblee: evaluationExistante.dateApplicationJetonRepriseCiblee,
-        jetonDelaiApplique: evaluationExistante.jetonDelaiApplique,
-        dateEcheanceOriginale: evaluationExistante.dateEcheanceOriginale,
-        nombreJoursDelai: evaluationExistante.nombreJoursDelai,
-        dateApplicationJetonDelai: evaluationExistante.dateApplicationJetonDelai,
-        repriseDeId: evaluationExistante.repriseDeId,
-        dateApplicationJetonReprise: evaluationExistante.dateApplicationJetonReprise,
-        remplaceeParId: evaluationExistante.remplaceeParId,
-        dateRemplacement: evaluationExistante.dateRemplacement,
-        archivee: evaluationExistante.archivee,
-        dateArchivage: evaluationExistante.dateArchivage
+function _extraireProprietesJetons(evalExistante) {
+    return {
+        jetonRepriseCibleeApplique: evalExistante.jetonRepriseCibleeApplique,
+        repriseDeIdCiblee: evalExistante.repriseDeIdCiblee,
+        critereRepriseCiblee: evalExistante.critereRepriseCiblee,
+        plafondNoteCiblee: evalExistante.plafondNoteCiblee,
+        dateApplicationJetonRepriseCiblee: evalExistante.dateApplicationJetonRepriseCiblee,
+        jetonDelaiApplique: evalExistante.jetonDelaiApplique,
+        dateEcheanceOriginale: evalExistante.dateEcheanceOriginale,
+        nombreJoursDelai: evalExistante.nombreJoursDelai,
+        dateApplicationJetonDelai: evalExistante.dateApplicationJetonDelai,
+        repriseDeId: evalExistante.repriseDeId,
+        dateApplicationJetonReprise: evalExistante.dateApplicationJetonReprise,
+        remplaceeParId: evalExistante.remplaceeParId,
+        dateRemplacement: evalExistante.dateRemplacement,
+        archivee: evalExistante.archivee,
+        dateArchivage: evalExistante.dateArchivage
     };
+}
 
-    evaluations[indexEval] = {
-        ...evaluations[indexEval], // Garder l'ID et la date originale
-        etudiantDA: etudiantDA,
-        etudiantNom: etudiant ? `${etudiant.prenom} ${etudiant.nom}` : '',
-        groupe: etudiant ? etudiant.groupe : '',
-        productionId: productionId,
-        productionNom: production ? (production.titre || production.nom) : '',
-        grilleId: grilleId,
-        grilleNom: grille ? grille.nom : '',
+function _lireChampsDOMMod(maintenant) {
+    return {
         echelleId: document.getElementById('selectEchelle1').value,
         cartoucheId: document.getElementById('selectCartoucheEval').value,
         dateModification: maintenant.toISOString(),
@@ -2535,93 +2497,69 @@ function sauvegarderEvaluationModifiee() {
         statutRemise: document.getElementById('remiseProduction1').value,
         statutIntegrite: document.getElementById('statutIntegrite').value || 'recevable',
         notesIntegrite: document.getElementById('notesIntegrite').value || '',
-        criteres: criteres,
         noteFinale: parseFloat(document.getElementById('noteProduction1').textContent) || 0,
         niveauFinal: document.getElementById('niveauProduction1').textContent,
-        retroactionFinale: document.getElementById('retroactionFinale1').value,
-        optionsAffichage: {
-            description: document.getElementById('afficherDescription1').checked,
-            objectif: document.getElementById('afficherObjectif1').checked,
-            tache: document.getElementById('afficherTache1').checked,
-            adresse: document.getElementById('afficherAdresse1').checked,
-            contexte: document.getElementById('afficherContexte1').checked,
-            affichageNote: document.querySelector('input[name="affichageNote1"]:checked')?.value || 'complet'
-        },
-        donneesAlgorithmiques: evaluationEnCours.donneesAlgorithmiques || {}, // Sauvegarder données du français écrit algorithmique
-        ...proprietesJetons, // Préserver toutes les propriétés de jetons
-        verrouillee: true // Verrouiller automatiquement après la sauvegarde
-        // Phase 3 : fichierId supprimé — résolution par clé composite (DA, productionId) uniquement
+        retroactionFinale: document.getElementById('retroactionFinale1').value
     };
+}
 
-    // Profil ACO — recalculer si l'observation des actions est activée.
-    // Si toggle désactivé, le champ existant (s'il y en a un) est préservé par le spread ci-dessus.
+function _lireOptionsAffichageMod() {
+    return {
+        description: document.getElementById('afficherDescription1').checked,
+        objectif: document.getElementById('afficherObjectif1').checked,
+        tache: document.getElementById('afficherTache1').checked,
+        adresse: document.getElementById('afficherAdresse1').checked,
+        contexte: document.getElementById('afficherContexte1').checked,
+        affichageNote: document.querySelector('input[name="affichageNote1"]:checked')?.value || 'complet'
+    };
+}
+
+function _appliquerProfilACOMod(evalModifiee) {
     if (typeof obtenirPreference === 'function' && obtenirPreference('activerActionsRLO') === true) {
-        evaluations[indexEval].actionsRLO = (typeof actionsRLO !== 'undefined' && actionsRLO.agregerActionsRLO)
-            ? actionsRLO.agregerActionsRLO(evaluations[indexEval])
+        evalModifiee.actionsRLO = (typeof actionsRLO !== 'undefined' && actionsRLO.agregerActionsRLO)
+            ? actionsRLO.agregerActionsRLO(evalModifiee)
             : null;
     }
+}
 
-    // Persister la durée d'évaluation (modification)
-    var dureeMsModif = (typeof travauxUI !== 'undefined' && travauxUI.getDureeMs)
-        ? travauxUI.getDureeMs() : null;
-    if (dureeMsModif) evaluations[indexEval].dureeEvaluation = Math.round(dureeMsModif / 1000);
+function _marquerModificationJournalMod(evalModifiee, dureeMs) {
+    if (typeof Journal === 'undefined') return;
+    Journal.capturerFinEvaluation(evalModifiee, dureeMs);
+    const jrnl = evalModifiee.journal;
+    if (!jrnl || jrnl.length === 0) return;
+    // Trouver la dernière entrée evaluation_fin et ajouter le flag modification
+    for (let ji = jrnl.length - 1; ji >= 0; ji--) {
+        if (jrnl[ji].action === Journal.ACTIONS.EVALUATION_FIN) {
+            jrnl[ji].details.modification = true;
+            break;
+        }
+    }
+}
 
-    // Journal de bord — capturer fin d'évaluation (modification)
+function _traiterPostRepriseMod(evaluations, indexEval, evaluationId) {
+    if (!window._snapshotAvantModifRemplacee || window._snapshotAvantModifRemplacee.evalId !== evaluationId) return;
+    const snapshot = window._snapshotAvantModifRemplacee;
+    const apres = {
+        statutIntegrite: evaluations[indexEval].statutIntegrite,
+        noteFinale: evaluations[indexEval].noteFinale,
+        niveauFinal: evaluations[indexEval].niveauFinal,
+        criteres: (evaluations[indexEval].criteres || []).map(function(c) {
+            return { critereId: c.critereId, niveau: c.niveauSelectionne };
+        })
+    };
     if (typeof Journal !== 'undefined') {
-        Journal.capturerFinEvaluation(evaluations[indexEval], dureeMsModif);
-        // Marquer comme modification
-        var jrnl = evaluations[indexEval].journal;
-        if (jrnl && jrnl.length > 0) {
-            var derniere = jrnl[jrnl.length - 1];
-            // Trouver la dernière entrée evaluation_fin et ajouter le flag
-            for (var ji = jrnl.length - 1; ji >= 0; ji--) {
-                if (jrnl[ji].action === Journal.ACTIONS.EVALUATION_FIN) {
-                    jrnl[ji].details.modification = true;
-                    break;
-                }
-            }
-        }
+        Journal.ajouterEntree(evaluations[indexEval],
+            Journal.ACTIONS.MODIFICATION_POST_REPRISE,
+            { avant: snapshot.avant, apres: apres });
     }
+    evaluations[indexEval].verrouillee = true;
+    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+    window._snapshotAvantModifRemplacee = null;
+}
 
-    // Sauvegarder
-    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
-        return;
-    }
-
-    // Journal — modification post-reprise : logger et re-verrouiller
-    if (window._snapshotAvantModifRemplacee && window._snapshotAvantModifRemplacee.evalId === evaluationId) {
-        var snapshot = window._snapshotAvantModifRemplacee;
-        var apres = {
-            statutIntegrite: evaluations[indexEval].statutIntegrite,
-            noteFinale: evaluations[indexEval].noteFinale,
-            niveauFinal: evaluations[indexEval].niveauFinal,
-            criteres: (evaluations[indexEval].criteres || []).map(function(c) {
-                return { critereId: c.critereId, niveau: c.niveauSelectionne };
-            })
-        };
-        if (typeof Journal !== 'undefined') {
-            Journal.ajouterEntree(evaluations[indexEval],
-                Journal.ACTIONS.MODIFICATION_POST_REPRISE,
-                { avant: snapshot.avant, apres: apres });
-        }
-        evaluations[indexEval].verrouillee = true;
-        sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
-        window._snapshotAvantModifRemplacee = null;
-    }
-
-    afficherNotificationSucces(`Évaluation modifiée : ${evaluations[indexEval].etudiantNom} - ${evaluations[indexEval].productionNom}`);
-
-    // Arrêter le chrono évaluation
-    if (typeof travauxUI !== 'undefined' && travauxUI.arreterChrono) {
-        travauxUI.arreterChrono();
-    }
-
-    // Mettre à jour les badges (pills) dans la barre de fichiers
-    window.majBadgesApresEvaluation(evaluations[indexEval]);
-
-    // Ajouter le cadenas sur les badges (auto-verrouillage après modification)
-    [   document.querySelector('.annot-badge.actif'),
+function _ajouterCadenasBadgesMod() {
+    [
+        document.querySelector('.annot-badge.actif'),
         document.querySelector('#travaux-badge-fichier-actif .annot-badge')
     ].forEach(badge => {
         if (!badge) return;
@@ -2634,26 +2572,112 @@ function sauvegarderEvaluationModifiee() {
             badge.appendChild(verrou);
         }
     });
+}
+
+function _postSauvegardeMod(evalModifiee) {
+    afficherNotificationSucces(`Évaluation modifiée : ${evalModifiee.etudiantNom} - ${evalModifiee.productionNom}`);
+
+    if (typeof travauxUI !== 'undefined' && travauxUI.arreterChrono) {
+        travauxUI.arreterChrono();
+    }
+
+    window.majBadgesApresEvaluation(evalModifiee);
+    _ajouterCadenasBadgesMod();
 
     // Réinitialiser le mode modification
     delete window.evaluationEnCours.idModification;
 
-    // Masquer l'indicateur de modification
     const indicateurModif = document.getElementById('indicateurModeModification');
     if (indicateurModif) indicateurModif.classList.add('u-hide');
 
-    // Masquer le bouton de verrouillage
     afficherOuMasquerBoutonVerrouillage(false);
 
-    // Recalculer les indices
     if (typeof calculerEtStockerIndicesCP === 'function') {
         calculerEtStockerIndicesCP();
     }
-
-    // 🔄 Rafraîchir le tableau des évaluations si affiché
     if (typeof initialiserListeEvaluations === 'function') {
         setTimeout(() => initialiserListeEvaluations(), 150);
     }
+}
+
+function sauvegarderEvaluationModifiee() {
+    // Annuler le debounce auto-save (la sauvegarde manuelle prend le relais) — Patch §5.6 fix #109 (étape 4)
+    if (window._timerAutoSave) { clearTimeout(window._timerAutoSave); window._timerAutoSave = null; }
+    window._pendingAutoSaveSnapshot = null;
+
+    const evaluationId = window.evaluationEnCours?.idModification;
+    if (!evaluationId) {
+        // Pas en mode modification, utiliser la sauvegarde normale
+        window.sauvegarderEvaluation();
+        return;
+    }
+
+    // CORRECTION: Lire TOUTES les évaluations (pas seulement celles du cours actif)
+    let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+    const indexEval = evaluations.findIndex(e => e.id === evaluationId);
+    if (indexEval === -1) {
+        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        return;
+    }
+
+    // Vérifier que l'évaluation n'est pas verrouillée
+    // Exception : modification post-reprise autorisée via _snapshotAvantModifRemplacee
+    if (evaluations[indexEval].verrouillee && !window._snapshotAvantModifRemplacee) {
+        afficherNotificationErreur('Évaluation verrouillée', 'Impossible de modifier une évaluation verrouillée');
+        return;
+    }
+
+    const { etudiantDA, productionId, grilleId } = _lireEntreesFormulaireMod();
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const etudiant = etudiants.find(e => e.da === etudiantDA);
+    const productions = obtenirDonneesSelonMode('productions');
+    const production = productions.find(p => p.id === productionId);
+    const grilles = db.getSync('grillesTemplates', []);
+    const grille = grilles.find(g => g.id === grilleId);
+
+    if (!_validerReferencesMod(etudiant, production, grille, etudiantDA, productionId, grilleId)) return;
+    if (!_validerReferencesNonDemoMod(productionId, grilleId)) return;
+
+    const criteres = _collecterCriteresMod(grille);
+    const maintenant = new Date();
+    const proprietesJetons = _extraireProprietesJetons(evaluations[indexEval]);
+
+    evaluations[indexEval] = Object.assign({},
+        evaluations[indexEval], // Garder l'ID et la date originale
+        {
+            etudiantDA: etudiantDA,
+            etudiantNom: etudiant ? `${etudiant.prenom} ${etudiant.nom}` : '',
+            groupe: etudiant ? etudiant.groupe : '',
+            productionId: productionId,
+            productionNom: production ? (production.titre || production.nom) : '',
+            grilleId: grilleId,
+            grilleNom: grille ? grille.nom : '',
+            criteres: criteres,
+            optionsAffichage: _lireOptionsAffichageMod(),
+            donneesAlgorithmiques: evaluationEnCours.donneesAlgorithmiques || {},
+            verrouillee: true
+        },
+        _lireChampsDOMMod(maintenant),
+        proprietesJetons // Préserver toutes les propriétés de jetons en dernier
+    );
+
+    _appliquerProfilACOMod(evaluations[indexEval]);
+
+    // Persister la durée d'évaluation (modification)
+    const dureeMsModif = (typeof travauxUI !== 'undefined' && travauxUI.getDureeMs)
+        ? travauxUI.getDureeMs() : null;
+    if (dureeMsModif) evaluations[indexEval].dureeEvaluation = Math.round(dureeMsModif / 1000);
+
+    _marquerModificationJournalMod(evaluations[indexEval], dureeMsModif);
+
+    // Sauvegarder
+    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
+        afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
+        return;
+    }
+
+    _traiterPostRepriseMod(evaluations, indexEval, evaluationId);
+    _postSauvegardeMod(evaluations[indexEval]);
 }
 
 /**
