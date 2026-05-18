@@ -16,22 +16,48 @@
 > - `Monitorage_v6/audit/SESSION.md` sur branche `audit/2026-mai` — session **audit annuel** Phase 3 (sujet distinct : audit de fidélité concept → implémentation).
 > - `Monitorage_v6-refactor/SESSION.md` sur branche `refactor/trimestre-v2` — récap historique du chantier trimestre-v2 (mergé FF sur main, branche à supprimer après push).
 
-# SESSION — État au 17 mai 2026 soir (refactor profil-etudiant.js — étape 1 démarrée)
+# SESSION — État au 18 mai 2026 (refactor profil-etudiant.js — session A LIVRÉE, 3 sous-modules LOW extraits)
 
-**Date** : 17 mai 2026 (soir — chantier profil-etudiant.js ouvert après merge FF trimestre-v2)
-**Beta / build** : 99.47 / 0517-1259 (inchangée — pas encore de modif de code)
+**Date** : 17 mai soir + 18 mai (étapes 0+1+2 + session A complète)
+**Beta / build** : 99.48 / 0518-0030
 **Branche actuelle du worktree** : `refactor/profil-etudiant` (créée depuis `main` 0e8e0f8)
-**Dernier commit** : `0e8e0f8` — `docs(session): correctif numérique — hash 706dc0a → 3b0f3ae` (hérité de main, pas encore de commit profil-etudiant)
+**Dernier commit** : `d5013d9` — `refactor(profil-etudiant): extraire profil-etudiant-rapport.js (zone rapport, -391 LOC)` (bump 99.48 en cours d'ajout)
 **Branche `main`** : `0e8e0f8` (15 commits non-pushés depuis `4b915b0` — à pusher depuis la maison)
 **Statut chantier profil-etudiant.js** :
-- **Étape 0** : worktree créé + symlinks node_modules + baseline tests **73/73 verts** ✅
-- **Étape 1** : lecture intégrale + audit ESLint + Agent Explore frontières inter-zones — **TERMINÉE** (commit `52ae385`). 11 écarts documentés dans MODULES-MAP §2.3.
+- **Étape 0** : worktree + symlinks + baseline 73/73 ✅ (17 mai soir)
+- **Étape 1** : lecture intégrale + audit ESLint + Agent Explore — **TERMINÉE** (commit `52ae385`). 11 écarts MODULES-MAP §2.3.
 - **Étape 2** : tests régression Vitest 5 + Playwright 2 — **TERMINÉE** (commit `56c0978`). 80/80 verts.
-- **Étapes 3-6** : plan en 4 sessions A+B+C+D (vs 3 pour trimestre-v2 — module 50 % plus gros LOC). À démarrer.
+- **Étape 3 session A LOW** : 3 sous-modules extraits — **TERMINÉE** (commits `d9c6793`, `cd70c9d`, `d5013d9` + bump 99.48). Résidu 8818 → 6337 LOC (-28,1 %). 37 fonctions promues window.X.
+- **Étape 3 sessions B+C+D** : à démarrer (diagnostics+confidentiel, actions, sections affichage 3 700 LOC).
+- **Étapes 4-6** : éclatement (calculerIPB 36, determinerCibleIntervention 58, afficherProfilComplet 58, calculerDetailsNoteFinale 57) + validation Grégoire + merge.
 
-**Tests** : 70 Vitest + 10 Playwright = **80/80 verts** (+7 vs baseline : 5 canari/sentinelle/structure + 2 Playwright chargement/sentinelle browser).
+**Tests** : 70 Vitest + 10 Playwright = **80/80 verts**.
 
-**Commits worktree non-pushés** : 2 (52ae385 docs étape 1 + 56c0978 tests étape 2).
+**Commits worktree non-pushés** : 5 (52ae385 docs + 56c0978 tests + d9c6793 helpers + cd70c9d calculs + d5013d9 rapport, bump 99.48 en cours).
+
+## Récap session A — 18 mai 2026 (3 sous-modules LOW extraits)
+
+| Sous-module | LOC | Fonctions | Cyc > 30 | Commit |
+|---|---:|---:|---:|---|
+| `profil-etudiant-helpers.js` | 630 | 16 (helpers + badges + interprétations indices) | 0 | `d9c6793` |
+| `profil-etudiant-calculs.js` | 1547 | 14 (conversion IDME + moyennes + IPB + RàI + cibles) | 2 (calculerIPB 36, determinerCibleIntervention 58) | `cd70c9d` |
+| `profil-etudiant-rapport.js` | 426 | 7 (rapport API + préférences) | 0 | `d5013d9` |
+| **Total extrait** | **2603** | **37** | **2** | |
+
+**Bilan résidu profil-etudiant.js** : 8818 → 6337 LOC (**-28,1 %**). 26 exports résiduels (vs 36 initial — 10 doublons commentés avec pointer vers sous-modules).
+
+**Audit ESLint complexity post-session A** :
+- Résidu : 6 fonctions cyc > 30 (vs 8 initial, -2 passées dans calculs.js)
+- helpers.js : 0 fonctions cyc > 30
+- calculs.js : 2 fonctions cyc > 30 héritées (à éclater étape 4 session D)
+- rapport.js : 0 fonctions cyc > 30
+
+**Patterns confirmés** :
+- Promotion `window.X` systématique des 37 fonctions extraites (décision étape 1 b)
+- 10 doublons d'export pré-existants commentés dans le résidu (préservation contexte historique)
+- 0 doublons orphelins post-extraction (audit grep complet)
+- Appels privés résiduels (`obtenirTermeProduction()`, `calculerMoyennesCriteres()`, `genererEtAfficherRapport()`, etc.) fonctionnent via chaîne de scope global — pattern trimestre-v2 confirmé
+- Helper `chargerScript(path, stubs, fauxWindowExistant)` éprouvé sur 4 sous-modules dans le même sandbox
 
 ## Récap étape 1 — profil-etudiant.js (17 mai soir)
 
@@ -58,7 +84,7 @@
 **Décisions à acter** (avant session B) :
 - (c) **Zone PII confidentiel** — charger `SKILL_Securite_donnees.md` au démarrage session B (rappel automatique dans SESSION.md).
 
-## Consigne session A — Étape 3 LOW (helpers + calculs + rapport, ~2-3 h)
+## Consigne session B — Étape 3 MEDIUM (diagnostics + confidentiel, ~1-2 h)
 
 À copier-coller au début de la prochaine session :
 
@@ -66,16 +92,33 @@
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6-profil-etudiant
 
 Lecture obligatoire :
-1. SESSION.md (ce document) — récap étapes 1+2 + 11 écarts MODULES-MAP §2.3
-2. audit/refactoring-prep/MODULES-MAP.md §2.3 (découpage 7 sous-modules + écarts)
+1. SESSION.md (ce document) — récap étapes 0+1+2 + session A LIVRÉE
+2. audit/refactoring-prep/MODULES-MAP.md §2.3 (découpage 7 sous-modules + 11 écarts)
 3. audit/refactoring-prep/METHODE-REFACTORING.md §3 étape 3 + §7 propositions Catégorie B trimestre-v2 + §7 notes pour profil-etudiant
+4. **Skills pour Claude Code/SKILL_Securite_donnees.md** — OBLIGATOIRE pour zone confidentiel (PII, données sensibles)
 
 État git attendu :
 - main : 0e8e0f8 (inchangé)
-- refactor/profil-etudiant : 56c0978 (2 commits étapes 1+2 non-pushés)
-- Tests verts : 80/80 (70 Vitest + 10 Playwright)
+- refactor/profil-etudiant : 6 commits non-pushés (52ae385 → d5013d9 + bump 99.48)
+- Tests verts : 80/80
+- Beta / build : 99.48 / 0518-0030
 
-OBJECTIF SESSION A : extraire 3 sous-modules LOW (~2-3 h) :
+OBJECTIF SESSION B : extraire 2 sous-modules MEDIUM (~1-2 h) :
+- `js/profil-etudiant-diagnostics.js` (~830 LOC, zone L5693-6520 originale)
+  - Diagnostics SRPNF/Critères/Générique
+  - Blocs RLO + Évolution
+  - Position dans résidu actuel : à recalculer (zone décalée par les 3 extractions précédentes)
+- `js/profil-etudiant-confidentiel.js` (~365 LOC, zone L8461-8716 originale)
+  - **Zone PII** — données sensibles : services adaptés, sous-catégories médicales
+  - Modal confidentiel : ouverture, sauvegarde, ajout/retrait services
+  - Charger SKILL_Securite_donnees.md AVANT toute modification
+
+Bump prévu en fin de session B : version 99.48 → 99.49 (ou refresh build 99.48 b0518-XXXX selon ampleur).
+
+OBJECTIF SESSION A (RÉALISÉ — référence) : 3 sous-modules LOW (helpers + calculs + rapport)
+- helpers.js 630 LOC, calculs.js 1547 LOC, rapport.js 426 LOC
+- Total 2603 LOC extraits, 37 fonctions promues window.X
+- Résidu 8818 → 6337 LOC (-28,1 %)
 - `js/profil-etudiant-helpers.js` (~545 LOC, zone L70-643)
   - Helpers, badges, interprétations indices
   - 11 helpers internes à promouvoir window.X (décision étape 1 b) :
