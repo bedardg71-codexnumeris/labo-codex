@@ -65,7 +65,15 @@ beforeAll(() => {
         calculerEtStockerIndicesCP: () => {}
     };
 
-    win = chargerScript('js/profil-etudiant.js', stubs);
+    // Refactor étape 3 session A (17 mai 2026) : profil-etudiant-helpers.js
+    // extrait depuis profil-etudiant.js (zone L50-637 originale, 16 fonctions
+    // helpers/badges/interprétations + 16 exports window.X — décision étape 1 b
+    // de promotion systématique des helpers cross-zones). Chargé AVANT le résidu
+    // dans index.html.
+    win = chargerScript('js/profil-etudiant-helpers.js', stubs);
+
+    // Charger le résidu dans le même sandbox via le 3e paramètre.
+    chargerScript('js/profil-etudiant.js', stubs, win);
 });
 
 describe('profil-etudiant — régression refactoring 2026-mai (canari + sentinelle)', () => {
@@ -91,10 +99,25 @@ describe('profil-etudiant — régression refactoring 2026-mai (canari + sentine
     //
     // Sélection : 3-6 exports clés par zone fonctionnelle (7 zones).
     // -----------------------------------------------------------------------
-    it('1. Sentinelle exports — 30 exports représentatifs des 7 zones sont définis', () => {
+    it('1. Sentinelle exports — 30+ exports représentatifs des 7 zones sont définis', () => {
         const exportsAttendus = [
-            // Zone Helpers (L70-643) — 1 export (obtenirTermeProduction L8816)
+            // Zone Helpers — 16 exports (session A 17 mai 2026 : tous promus window.X)
             'obtenirTermeProduction',
+            'obtenirCouleurNiveauIDME',
+            'obtenirNiveauIDMEDepuisPourcentage',
+            'obtenirNombreProductionsPourPatterns',
+            'obtenirIdsProductionsEvaluables',
+            'obtenirPratiqueActuelle',
+            'obtenirGrilleReferenceDepistage',
+            'obtenirCriteresAvecValeurs',
+            'initialiserModuleProfilEtudiant',
+            'genererBadgePratiqueProfil',
+            'genererBadgeRisqueProfil',
+            'genererBadgePatternProfil',
+            'interpreterMobilisation',
+            'interpreterPerformance',
+            'interpreterCompletion',
+            'interpreterAssiduite',
             // Zone Sections affichage (L644-4189) — 5 exports
             'afficherProfilComplet',
             'changerSectionProfil',
