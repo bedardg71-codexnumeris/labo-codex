@@ -86,9 +86,12 @@ test('Défense refactor · sentinelle exports browser evaluation', async ({ page
         calculerNoteAlgorithmiqueSimple: typeof window.calculerNoteAlgorithmiqueSimple,
         calculerNote: typeof window.calculerNote,                  // promotion §5.6 session B
         obtenirCouleurNiveau: typeof window.obtenirCouleurNiveau,  // promotion §5.6 session B
-        // Zone Rétroaction (dont export dispersé L2130)
+        // Zone Rétroaction (extraits dans -retroaction.js session B 2e sous-module)
         regenererRetroactionAvecFeedback: typeof window.regenererRetroactionAvecFeedback,
         copierRetroaction: typeof window.copierRetroaction,
+        basculerVueRetroaction: typeof window.basculerVueRetroaction,
+        copierToutRetroaction: typeof window.copierToutRetroaction,
+        mettreAJourCompteurMots: typeof window.mettreAJourCompteurMots, // promotion §5.6 session B
         // Zone Modification + Banque
         supprimerEvaluation: typeof window.supprimerEvaluation,
         chargerEvaluationDepuisBanque: typeof window.chargerEvaluationDepuisBanque,
@@ -114,6 +117,9 @@ test('Défense refactor · sentinelle exports browser evaluation', async ({ page
     expect(surface.obtenirCouleurNiveau).toBe('function');
     expect(surface.regenererRetroactionAvecFeedback).toBe('function');
     expect(surface.copierRetroaction).toBe('function');
+    expect(surface.basculerVueRetroaction).toBe('function');
+    expect(surface.copierToutRetroaction).toBe('function');
+    expect(surface.mettreAJourCompteurMots).toBe('function');
     expect(surface.supprimerEvaluation).toBe('function');
     expect(surface.chargerEvaluationDepuisBanque).toBe('function');
     expect(surface.evaluerProduction).toBe('function');
