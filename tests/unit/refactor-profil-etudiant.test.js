@@ -90,6 +90,14 @@ beforeAll(() => {
     // Charge APRÈS rapport (les blocs RLO consomment des helpers + calculs).
     chargerScript('js/profil-etudiant-diagnostics.js', stubs, win);
 
+    // Refactor étape 3 session B (18 mai 2026) : profil-etudiant-confidentiel.js
+    // extrait depuis profil-etudiant.js (zone L5098-5395 résidu post-diagnostics,
+    // 8 fonctions modal PII + services adaptés + 2 variables module-scope
+    // encapsulées + 8 exports window.X — 6 existants + 2 promotions session B).
+    // Données SENSIBLE §1.2 (SKILL_Securite_donnees.md) — préservation comportementale
+    // stricte, échappement existant conservé.
+    chargerScript('js/profil-etudiant-confidentiel.js', stubs, win);
+
     // Charger le résidu dans le même sandbox via le 3e paramètre.
     chargerScript('js/profil-etudiant.js', stubs, win);
 });
@@ -190,8 +198,10 @@ describe('profil-etudiant — régression refactoring 2026-mai (canari + sentine
             'retirerJetonPersonnaliseAvecConfirmation',
             'calculerEtStockerPatternsGroupe',
             'obtenirPatternEtudiant',
-            // Zone Confidentiel (L8461-8716) — 6 exports
+            // Zone Confidentiel — 8 exports (session B 18 mai 2026 : 6 existants + 2 promus window.X)
             'ouvrirModalConfidentiel',
+            'chargerNotesPresencesConfidentiel',
+            'sauvegarderNotesPresencesConfidentiel',
             'fermerModalConfidentiel',
             'sauvegarderConfidentiel',
             'toggleServicesAdaptes',

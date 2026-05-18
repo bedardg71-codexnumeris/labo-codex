@@ -1,0 +1,330 @@
+/**
+ * profil-etudiant-confidentiel.js
+ *
+ * Sous-module extrait de profil-etudiant.js (session B refactor, 18 mai 2026).
+ *
+ * Périmètre : modal d'informations confidentielles (PII : services adaptés,
+ * sous-catégories médicales, notes de présences, portraits qualitatifs).
+ *
+ * Données SENSIBLE §1.2 (SKILL_Securite_donnees.md) — combinables avec DA présents
+ * dans la zone pour identifier un étudiant. Préservation comportementale stricte :
+ * échappement existant conservé (escapeHtml local L5209-5216 original + echapperHtml
+ * pour sous-catégories).
+ *
+ * 8 fonctions (6 exports window.X existants + 2 promotions session B),
+ * 2 variables module-scope (_confidentielDaActuel, SOUS_CATEGORIES_SERVICES)
+ * encapsulées dans l'IIFE.
+ *
+ * Bug latent préservé (à inscrire SUIVI-BUGS Catégorie B post-refactor) :
+ * chargerProfilEtudiant() jamais définie — branche L5334-5335 originale dead
+ * (typeof toujours false). Préservation comportementale stricte.
+ *
+ * @see SESSION.md — Récap session B
+ * @see audit/refactoring-prep/MODULES-MAP.md §2.3
+ * @see Skills pour Claude Code/SKILL_Securite_donnees.md §9.1
+ */
+(function () {
+    'use strict';
+
+// =============================================================================
+// MODAL INFORMATIONS CONFIDENTIELLES (Beta 96.1)
+// Gestion des informations sensibles sur l'étudiant
+// =============================================================================
+
+// Variable pour stocker le DA de l'étudiant en cours d'édition
+let _confidentielDaActuel = null;
+
+// Sous-catégories pour les services adaptés
+const SOUS_CATEGORIES_SERVICES = {
+    'sensorielle': [
+        'Déficience visuelle',
+        'Déficience auditive',
+        'Paralysie cérébrale',
+        'Spina-bifida',
+        'Dystrophie musculaire'
+    ],
+    'neurologique': [
+        'Trouble du spectre autistique (TSA)',
+        'Syndrome Gilles de la Tourette',
+        'Traumatisme craniocérébral',
+        'Sclérose en plaques',
+        'Dysphasie',
+        'TDA/H',
+        'Fibromyalgie'
+    ],
+    'organique': [
+        'Épilepsie',
+        'Maladie de Crohn',
+        'Cancer',
+        'Diabète'
+    ],
+    'apprentissage': [
+        'Dyslexie',
+        'Dysorthographie',
+        'Dyscalculie'
+    ],
+    'sante-mentale': [
+        'Trouble d\'anxiété généralisée',
+        'Trouble de l\'humeur (bipolarité, dépression)',
+        'Trouble de la personnalité',
+        'Trouble psychotique (schizophrénie)',
+        'Troubles alimentaires'
+    ]
+};
+
+/**
+ * Ouvre le modal des informations confidentielles pour un étudiant
+ * @param {string} da - Numéro de DA de l'étudiant
+ */
+function ouvrirModalConfidentiel(da) {
+    _confidentielDaActuel = da;
+
+    // Récupérer les infos de l'étudiant
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const etudiant = etudiants.find(e => e.da === da);
+    const nomComplet = etudiant ? `${etudiant.prenom} ${etudiant.nom}` : `DA ${da}`;
+
+    // Afficher le nom dans le modal
+    document.getElementById('confidentiel-nom-etudiant').textContent = nomComplet;
+
+    // Charger les données existantes
+    const cleConfidentiel = cle('confidentielEtudiants');
+    const donnees = db.getSync(cleConfidentiel, {});
+    const infos = donnees[da] || {};
+
+    // Remplir les champs
+    document.getElementById('confidentiel-epgc').checked = infos.epgc || false;
+    document.getElementById('confidentiel-cours-regulier').checked = infos.coursRegulier || false;
+    document.getElementById('confidentiel-cours-echec').checked = infos.coursEchec || false;
+    document.getElementById('confidentiel-cours-abandon').checked = infos.coursAbandon || false;
+    document.getElementById('confidentiel-cours-decrochage').checked = infos.coursDecrochage || false;
+    document.getElementById('confidentiel-cours-renforcement').checked = infos.coursRenforcement || false;
+
+    document.getElementById('confidentiel-services-adaptes').checked = infos.servicesAdaptes || false;
+
+    document.getElementById('confidentiel-categorie').value = infos.categorie || '';
+    mettreAJourSousCategories();
+    document.getElementById('confidentiel-sous-categorie').value = infos.sousCategorie || '';
+
+    document.getElementById('confidentiel-defi-fls').checked = infos.defiFLS || false;
+    document.getElementById('confidentiel-defi-socialisation').checked = infos.defiSocialisation || false;
+    document.getElementById('confidentiel-defi-integration').checked = infos.defiIntegration || false;
+    document.getElementById('confidentiel-defi-organisation-scolaire').checked = infos.defiOrganisationScolaire || false;
+    document.getElementById('confidentiel-defi-organisation-citoyenne').checked = infos.defiOrganisationCitoyenne || false;
+
+    document.getElementById('confidentiel-notes').value = infos.notes || '';
+
+    // Portrait de lecteur
+    document.getElementById('confidentiel-portrait-structure').value = infos.portraitStructure || '';
+    document.getElementById('confidentiel-portrait-rigueur').value = infos.portraitRigueur || '';
+    document.getElementById('confidentiel-portrait-plausibilite').value = infos.portraitPlausibilite || '';
+    document.getElementById('confidentiel-portrait-nuance').value = infos.portraitNuance || '';
+    document.getElementById('confidentiel-portrait-francais').value = infos.portraitFrancais || '';
+
+    // Charger les notes de présences
+    chargerNotesPresencesConfidentiel(da);
+
+    // Afficher le modal
+    document.getElementById('modalConfidentiel').classList.add('actif');
+}
+
+/**
+ * Charge et affiche les notes de présences pour un étudiant (trimestre actif)
+ * @param {string} da - DA de l'étudiant
+ */
+function chargerNotesPresencesConfidentiel(da) {
+    const container = document.getElementById('confidentiel-notes-presences');
+    if (!container) return;
+
+    // Fonction locale d'échappement HTML
+    const escapeHtml = (str) => {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    };
+
+    // Obtenir la clé des présences pour le trimestre actif
+    const clePresences = cle('presences');
+    const presences = db.getSync(clePresences, []);
+
+    // Filtrer les présences de cet étudiant qui ont des notes
+    const notesEtudiant = presences
+        .filter(p => p.da === da && p.notes && p.notes.trim() !== '')
+        .sort((a, b) => new Date(a.date) - new Date(b.date)); // Ordre chronologique
+
+    if (notesEtudiant.length === 0) {
+        container.innerHTML = '<p class="text-muted" style="margin: 0; font-style: italic;">Aucune note de présence pour ce trimestre.</p>';
+        return;
+    }
+
+    // Générer l'affichage
+    let html = '<div style="display: flex; flex-direction: column; gap: 8px;">';
+
+    notesEtudiant.forEach(p => {
+        const dateObj = new Date(p.date);
+        const dateFormatee = dateObj.toLocaleDateString('fr-CA', {
+            day: 'numeric',
+            month: 'short'
+        });
+
+        html += `
+            <div style="display: flex; gap: 8px; align-items: flex-start;">
+                <span style="min-width: 55px; font-weight: 600; color: var(--accent-primaire); padding-top: 4px;">${dateFormatee}</span>
+                <textarea
+                    class="controle-form note-presence-editable"
+                    data-date="${p.date}"
+                    data-da="${da}"
+                    rows="1"
+                    style="flex: 1; resize: vertical; font-size: 0.8rem; padding: 4px 8px;"
+                >${escapeHtml(p.notes)}</textarea>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+/**
+ * Sauvegarde les notes de présences modifiées dans le modal Confidentiel
+ */
+function sauvegarderNotesPresencesConfidentiel() {
+    const textareas = document.querySelectorAll('#confidentiel-notes-presences .note-presence-editable');
+    if (textareas.length === 0) return;
+
+    // Tier 6.4 : utiliser l'API centralisée de saisie-presences.js
+    let modifications = 0;
+
+    textareas.forEach(textarea => {
+        const date = textarea.dataset.date;
+        const da = textarea.dataset.da;
+        const nouvelleNote = textarea.value.trim();
+
+        if (typeof window.modifierNotesPresence === 'function') {
+            if (window.modifierNotesPresence(da, date, nouvelleNote)) {
+                modifications++;
+            }
+        }
+    });
+}
+
+/**
+ * Ferme le modal des informations confidentielles
+ */
+function fermerModalConfidentiel() {
+    document.getElementById('modalConfidentiel').classList.remove('actif');
+    _confidentielDaActuel = null;
+}
+
+/**
+ * Sauvegarde les informations confidentielles
+ */
+function sauvegarderConfidentiel() {
+    if (!_confidentielDaActuel) return;
+
+    const infos = {
+        epgc: document.getElementById('confidentiel-epgc').checked,
+        coursRegulier: document.getElementById('confidentiel-cours-regulier').checked,
+        coursEchec: document.getElementById('confidentiel-cours-echec').checked,
+        coursAbandon: document.getElementById('confidentiel-cours-abandon').checked,
+        coursDecrochage: document.getElementById('confidentiel-cours-decrochage').checked,
+        coursRenforcement: document.getElementById('confidentiel-cours-renforcement').checked,
+        servicesAdaptes: document.getElementById('confidentiel-services-adaptes').checked,
+        categorie: document.getElementById('confidentiel-categorie').value,
+        sousCategorie: document.getElementById('confidentiel-sous-categorie').value,
+        defiFLS: document.getElementById('confidentiel-defi-fls').checked,
+        defiSocialisation: document.getElementById('confidentiel-defi-socialisation').checked,
+        defiIntegration: document.getElementById('confidentiel-defi-integration').checked,
+        defiOrganisationScolaire: document.getElementById('confidentiel-defi-organisation-scolaire').checked,
+        defiOrganisationCitoyenne: document.getElementById('confidentiel-defi-organisation-citoyenne').checked,
+        notes: document.getElementById('confidentiel-notes').value.trim(),
+        // Portrait de lecteur
+        portraitStructure: document.getElementById('confidentiel-portrait-structure').value,
+        portraitRigueur: document.getElementById('confidentiel-portrait-rigueur').value,
+        portraitPlausibilite: document.getElementById('confidentiel-portrait-plausibilite').value,
+        portraitNuance: document.getElementById('confidentiel-portrait-nuance').value,
+        portraitFrancais: document.getElementById('confidentiel-portrait-francais').value
+    };
+
+    // Sauvegarder les infos confidentielles
+    const cleConfidentiel = cle('confidentielEtudiants');
+    const donnees = db.getSync(cleConfidentiel, {});
+    donnees[_confidentielDaActuel] = infos;
+    db.setSync(cleConfidentiel, donnees);
+
+    // Sauvegarder les notes de présences modifiées
+    sauvegarderNotesPresencesConfidentiel();
+
+    // Fermer le modal
+    fermerModalConfidentiel();
+
+    // Rafraîchir le profil si nécessaire
+    if (typeof chargerProfilEtudiant === 'function') {
+        chargerProfilEtudiant(_confidentielDaActuel);
+    }
+}
+
+/**
+ * Affiche/masque les détails des services adaptés
+ * @param {boolean} afficher - true pour afficher, false pour masquer
+ */
+function toggleServicesAdaptes(afficher) {
+    const details = document.getElementById('confidentiel-services-details');
+    if (details) {
+        toggleDisplay(details, afficher);
+    }
+}
+
+/**
+ * Met à jour les sous-catégories selon la catégorie sélectionnée
+ */
+function mettreAJourSousCategories() {
+    const categorie = document.getElementById('confidentiel-categorie').value;
+    const selectSousCategorie = document.getElementById('confidentiel-sous-categorie');
+
+    if (!categorie) {
+        selectSousCategorie.innerHTML = '<option value="">-- Sélectionner une catégorie d\'abord --</option>';
+        return;
+    }
+
+    const sousCategories = SOUS_CATEGORIES_SERVICES[categorie] || [];
+    selectSousCategorie.innerHTML = '<option value="">-- Sélectionner --</option>' + // security-ok: valeurs statiques SOUS_CATEGORIES_SERVICES + echapperHtml() défense profondeur (transfert refactor neutre depuis profil-etudiant.js)
+        sousCategories.map(sc => `<option value="${echapperHtml(sc)}">${echapperHtml(sc)}</option>`).join('');
+}
+
+/**
+ * Vérifie si un étudiant a des informations confidentielles enregistrées
+ * @param {string} da - Numéro de DA
+ * @returns {boolean} - true si des infos existent
+ */
+function aDesInfosConfidentielles(da) {
+    const cleConfidentiel = cle('confidentielEtudiants');
+    const donnees = db.getSync(cleConfidentiel, {});
+    const infos = donnees[da];
+    if (!infos) return false;
+
+    // Vérifier si au moins une info est renseignée
+    return infos.epgc || infos.servicesAdaptes || infos.categorie ||
+           infos.coursRegulier || infos.coursEchec || infos.coursAbandon ||
+           infos.coursDecrochage || infos.coursRenforcement ||
+           infos.defiFLS || infos.defiSocialisation || infos.defiIntegration ||
+           infos.defiOrganisationScolaire || infos.defiOrganisationCitoyenne ||
+           (infos.notes && infos.notes.length > 0) ||
+           infos.portraitStructure || infos.portraitRigueur || infos.portraitPlausibilite ||
+           infos.portraitNuance || infos.portraitFrancais;
+}
+
+
+    // === EXPORTS window.X (6 existants + 2 promus session B convention systématique) ===
+    window.ouvrirModalConfidentiel               = ouvrirModalConfidentiel;
+    window.chargerNotesPresencesConfidentiel     = chargerNotesPresencesConfidentiel;
+    window.sauvegarderNotesPresencesConfidentiel = sauvegarderNotesPresencesConfidentiel;
+    window.fermerModalConfidentiel               = fermerModalConfidentiel;
+    window.sauvegarderConfidentiel               = sauvegarderConfidentiel;
+    window.toggleServicesAdaptes                 = toggleServicesAdaptes;
+    window.mettreAJourSousCategories             = mettreAJourSousCategories;
+    window.aDesInfosConfidentielles              = aDesInfosConfidentielles;
+})();
