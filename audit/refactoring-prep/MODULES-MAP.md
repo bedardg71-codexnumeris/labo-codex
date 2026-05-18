@@ -122,6 +122,67 @@ Cas-tests prioritaires (Vitest + Playwright) :
 
 Au minimum 7 tests Vitest et 2-3 tests Playwright avant de toucher `sauvegarderEvaluationModifiee` ou `modifierEvaluation`.
 
+#### Écarts observés à l'exécution (étape 1 lecture — 18 mai 2026, refactor démarré session 18 mai)
+
+Lecture intégrale des 7 348 LOC + audit ESLint complexity (config v9 externe) + grep helpers cross-module + grep état pivot + scan callers externes partiel. La rétrospective finale ira en §6.5 + dans METHODE-REFACTORING §7.
+
+**Écart #1 — Top-complexité ESLint largement sous-estimé** : §2.1 listait 3 fonctions au-delà de cyc 30 (`sauvegarderEvaluationModifiee`, `modifierEvaluation`, `verifierEtChargerEvaluationExistante`). L'audit ESLint actuel (`npx eslint --config <ext-v9> --rule '{"complexity":["error",30]}' js/evaluation.js`) révèle **9 fonctions au-dessus de cyc 30** ; `verifierEtChargerEvaluationExistante` n'y apparaît plus (< 30 dans le code actuel) :
+
+| Fonction | Ligne | Cyc | Zone §2.1 |
+|---|---:|---:|---|
+| `chargerEchellePerformance` | 297 | 36 | Chargement |
+| `_autoSauvegarderCriteres` | 1150 | 55 | Auto-save |
+| `calculerNoteAlgorithmiqueAvecCategories` | 1370 | 42 | Calcul |
+| `genererRetroaction` | 1929 | 61 | Rétroaction |
+| `sauvegarderEvaluation` | 2177 | 70 | Sauvegarde |
+| `peuplementOptJetons` | 2671 | 33 | Sauvegarde/jetons |
+| `genererRetroactionBilan` | 3316 | 75 | Rétroaction |
+| Async arrow (intérieur `modifierEvaluation`) | 5323 | 78 | Modification |
+| `sauvegarderEvaluationModifiee` | 5719 | 58 | Modification |
+
+Le monstre central n'est pas singulier : **triple monstre** — (a) `modifierEvaluation` via async arrow interne cyc 78, (b) `genererRetroactionBilan` cyc 75, (c) `sauvegarderEvaluation` cyc 70. Décision pragmatique méthode mûre (pattern productions / trimestre-v2 / profil-etudiant — proposition Cat-B #5 profil-etudiant § 5 « Stratégie cyc > 30 héritages ») : éclater systématiquement les fonctions cyc > N (proposition N = 50 — à acter avec Grégoire). Les 4 fonctions cyc 33-42 (`chargerEchellePerformance`, `calculerNoteAlgorithmiqueAvecCategories`, `peuplementOptJetons`, `sauvegarderEvaluationModifiee` 58 — au-dessus de N=50 donc à inclure) à arbitrer.
+
+**Écart #2 — Découpage §2.1 confirmé à ±100 LOC** : les 7 sous-modules cibles correspondent au réel. `evaluation-retroaction.js` à ~2 250 LOC sera **le plus gros sous-module** — héritage acceptable (pattern profil-etudiant-sections-affichage.js 4 654 LOC accepté par Grégoire le 18 mai). Sous-découpage en 2 (`-retroaction-bilan.js` + `-retroaction-ui.js`) reporté à un cycle Catégorie B post-merge si la dette devient gênante. Les autres sous-modules sont dans la fourchette LOC normale (310-1 360 LOC).
+
+**Écart #3 — Surface d'exports `window.X`** : **63 exports stricts** (pattern `^\s*window\.X = X;$`), vs 57 listés §2.1 (+6). Pattern profil-etudiant-like confirmé — concentration en bloc fin de fichier, lignes 7259-7312. **1 export dispersé** ligne 2130 (`regenererRetroactionAvecFeedback`) à grouper avec les autres pendant le découpage. Aucune arrow function exportée top-level (function declarations partout, cohérent avec le projet).
+
+**Écart #4 — État pivot `window.evaluationEnCours`** : apparaît **62 fois** dans evaluation.js. Réassigné lignes **3062** (`sauvegarderEvaluation`) et **5433** (intérieur `modifierEvaluation`). **Couplage cross-module critique** : `js/travaux-ui.js:4639` **réassigne aussi** `window.evaluationEnCours` — un module externe écrit dans le state pivot. À investiguer Écart #9. 5 autres flags privés cross-module préservés tels quels : `window._moyennesQualifies` (2382), `window._moyennesToutes` (2383), `window._modifierEvaluationEnCours` (5222, 5339, 5710), `window._forceStandaloneEval` (5332), `window._snapshotAvantModifRemplacee` (5922). Atomicité à préserver pendant les extractions : aucun `await` ne doit séparer une lecture de `window.evaluationEnCours` de sa réassignation.
+
+**Écart #5 — Doublons : préservation stricte** (renverse §2.1) : §2.1 listait 3 doublons « à résoudre — bug latent à investiguer ». La **méthode mûre** depuis profil-etudiant (proposition Cat-B #6 — préserver tout bug latent détecté) impose la préservation comportementale stricte : doublons inscrits SUIVI-BUGS pour cycle Catégorie B post-merge, **PAS de fix pendant refactor**.
+
+| Fonction | Ligne 1 | Ligne 2 | Action étape 3 |
+|---|---:|---:|---|
+| `restaurerPreferenceTri` | 4295 | 4309 | Préserver — SUIVI-BUGS Catégorie B |
+| `obtenirClasseNote` | 3681 | 4390 | Préserver — SUIVI-BUGS Cat-B (signatures probablement différentes) |
+| `filtrerListeEvaluations` | 4178 | 6851 | Préserver — SUIVI-BUGS Cat-B |
+
+**Écart #6 — Code mort « alarmiste » : préservation stricte** (renverse §2.1) : §2.1 + T-L audit 1.3 listaient `calculerRisqueEchec` (3634) et `obtenirClasseRisque` (3644) comme code mort à retirer (vocabulaire alarmiste). La méthode mûre (profil-etudiant SUIVI-BUGS #105-106) impose de **ne pas retirer pendant refactor**. Inscription Catégorie B post-merge avec le ticket vocabulaire alarmiste séparé. Le scope du refactor reste comportementalement neutre.
+
+**Écart #7 — Helpers cross-module : top 6 par usages** (anti-pattern §5.6 — dépendances fermes à expliciter dans les sous-modules) :
+
+| Helper | Usages | Source | Note |
+|---|---:|---|---|
+| `db.getSync` | 71 | `js/db.js` | Lecture sync localStorage/IDB |
+| `echapperHtml` | 57 | `js/01-config.js` (global) | Échappement HTML obligatoire (CLAUDE.md règle sécurité) |
+| `afficherNotificationErreur` | 54 | défini local evaluation.js:3583 + redéfinitions cross-module | Wrapper défensif |
+| `obtenirDonneesSelonMode` | 41 | `js/donnees-v2.js` | Abstraction localStorage + anonymisation |
+| `cle()` | 22 | `js/01-config.js` | Namespacing par trimestre |
+| `afficherNotificationSucces` | 21 | défini local evaluation.js + redéfinitions cross-module | Wrapper défensif |
+
+**Décision étape 3** : préserver le pattern profil-etudiant (consolidation `utils-notifications.js` toujours reportée — 73 sites d'appel cross-projet). Wrappers `afficherNotification*` dupliqués dans chaque sous-module extrait avec garde `typeof === 'function'`.
+
+**Écart #8 — IIFE complète englobante** : début ligne 1 (commentaire `/* === MODULE EVALUATION === */`) + `(function() {` peu après, fin ligne 7348 `})();`. **Implication étape 3** (proposition Cat-B #1 profil-etudiant, METHODE §3 étape 3) : préférer `git mv` du résidu vers le dernier sous-module (probablement `evaluation-modification.js` ou `evaluation-orchestre.js`) plutôt que `sed delete` + reconstruction IIFE risquée sur >2 000 LOC. Décision exacte à acter en fin de session B/C selon ce qui reste résidu.
+
+**Écart #9 — Callers externes (scan partiel)** : `js/travaux-ui.js:4639` **réassigne `window.evaluationEnCours`** (état pivot critique modifié depuis un autre module — premier cas observé sur les 5 refactors). À investiguer en détail : pourquoi `travaux-ui.js` écrit-il dans ce state ? Est-ce un cas légitime (annotation d'un travail déclenche une éval) ou un couplage à découpler ? Cf. productions Écart #5 (`donnees-v2.js:1710` réassignait `window.afficherTableauProductions` — pattern similaire à investiguer). **Le grep complet des 63 exports cross-modules reste à faire** avant l'étape 3 — à compléter lors de l'audit étape 3 par sous-module.
+
+**Bilan étape 1** :
+- 7 sous-modules cibles confirmés (§2.1) ; `evaluation-retroaction.js` ~2 250 LOC accepté comme gros héritage
+- 9 fonctions cyc > 30 (vs 3 §2.1) — refactor cible **triple monstre** cyc 70/75/78 + éventuellement seuil N = 50
+- 3 doublons + 2 codes morts « alarmistes » : **préservation stricte** (renverse §2.1, applique pattern profil-etudiant)
+- Couplage cross-module à `window.evaluationEnCours` via `travaux-ui.js:4639` — premier audit caller externe avant étape 3
+- IIFE englobante : `git mv` à l'horizon pour le résidu final
+- Effort estimé révisé : 6-9 h sur 3-4 sessions (vs 6-8 h MODULES-MAP §3.3 — fourchette haute attendue vu triple monstre)
+
 ---
 
 ### 2.2 `productions.js` (3 994 LOC, 75 fonctions)
