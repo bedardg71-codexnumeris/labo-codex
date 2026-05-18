@@ -138,6 +138,217 @@
  *   optionsAffichage: {description, objectif, tache, adresse, contexte}
  * }
  */
+// Helpers privés _Sauv* pour sauvegarderEvaluation (extraction étape 4 — éclatement cyc 70 → cyc ≤ 30)
+
+function _lireEntreesFormulaireSauv() {
+    const ec = window.evaluationEnCours;
+    return {
+        etudiantDA: document.getElementById('selectEtudiantEval').value || (ec && ec.etudiantDA) || '',
+        productionId: document.getElementById('selectProduction1').value || (ec && ec.productionId) || '',
+        grilleId: document.getElementById('selectGrille1').value || (ec && ec.grilleId) || ''
+    };
+}
+
+function _validerReferencesSauv(etudiant, production, grille, etudiantDA, productionId, grilleId) {
+    if (!etudiant) {
+        afficherNotificationErreur('Étudiant introuvable', `L'étudiant ${etudiantDA} n'existe pas dans le groupe actif.`);
+        console.error('[Évaluation] ❌ Référence invalide: etudiantDA', etudiantDA);
+        return false;
+    }
+    if (!production) {
+        afficherNotificationErreur('Production introuvable', `La production sélectionnée n'existe plus.`);
+        console.error('[Évaluation] ❌ Référence invalide: productionId', productionId);
+        return false;
+    }
+    if (!grille) {
+        afficherNotificationErreur('Grille introuvable', `La grille de critères sélectionnée n'existe plus.`);
+        console.error('[Évaluation] ❌ Référence invalide: grilleId', grilleId);
+        return false;
+    }
+    return true;
+}
+
+function _validerReferencesNonDemoSauv(productionId, grilleId) {
+    if (typeof BibliothequeUI === 'undefined' || !BibliothequeUI.verifierReferencesPasDemo) return true;
+    const violationDemo = BibliothequeUI.verifierReferencesPasDemo([
+        { id: productionId, collection: (typeof getCleProductions === 'function' ? getCleProductions() : cle('productions')), labelType: 'production' },
+        { id: grilleId, collection: 'grillesTemplates', labelType: 'grille' }
+    ]);
+    if (violationDemo) {
+        afficherNotificationErreur('Référence démo non autorisée', violationDemo.message);
+        return false;
+    }
+    return true;
+}
+
+function _collecterCriteresSauv(grille) {
+    const criteres = [];
+    if (!grille || !grille.criteres) return criteres;
+    grille.criteres.forEach(critere => {
+        const niveau = evaluationEnCours.criteres[critere.id];
+        if (niveau) {
+            const commDiv = document.getElementById(`comm_${critere.id}`);
+            criteres.push({
+                critereId: critere.id,
+                critereNom: critere.nom,
+                niveauSelectionne: niveau,
+                retroaction: commDiv ? commDiv.textContent : '',
+                ponderation: critere.ponderation || 0
+            });
+        }
+    });
+    return criteres;
+}
+
+function _lireChampsDOMSauv() {
+    return {
+        echelleId: document.getElementById('selectEchelle1').value,
+        cartoucheId: document.getElementById('selectCartoucheEval').value,
+        statutRemise: document.getElementById('remiseProduction1').value,
+        statutIntegrite: document.getElementById('statutIntegrite').value || 'recevable',
+        notesIntegrite: document.getElementById('notesIntegrite').value || '',
+        noteFinale: parseFloat(document.getElementById('noteProduction1').textContent) || 0,
+        niveauFinal: document.getElementById('niveauProduction1').textContent,
+        retroactionFinale: document.getElementById('retroactionFinale1').value
+    };
+}
+
+function _lireOptionsAffichageSauv() {
+    return {
+        description: document.getElementById('afficherDescription1').checked,
+        objectif: document.getElementById('afficherObjectif1').checked,
+        tache: document.getElementById('afficherTache1').checked,
+        adresse: document.getElementById('afficherAdresse1').checked,
+        contexte: document.getElementById('afficherContexte1').checked,
+        affichageNote: document.querySelector('input[name="affichageNote1"]:checked')?.value || 'complet'
+    };
+}
+
+function _construireObjetEvaluationSauv(ctx) {
+    const { etudiant, production, grille, etudiantDA, productionId, grilleId, criteres, coursId, groupeCoursActif, maintenant } = ctx;
+    return Object.assign({
+        id: genererIdUnique('EVAL_'),
+        etudiantDA: etudiantDA,
+        etudiantNom: etudiant ? `${etudiant.prenom} ${etudiant.nom}` : '',
+        groupe: etudiant ? etudiant.groupe : '',
+        coursId: coursId,
+        groupeCoursId: groupeCoursActif?.id || null,
+        productionId: productionId,
+        productionNom: production ? (production.titre || production.nom) : '',
+        grilleId: grilleId,
+        grilleNom: grille ? grille.nom : '',
+        dateEvaluation: maintenant.toISOString(),
+        heureEvaluation: maintenant.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' }),
+        criteres: criteres,
+        optionsAffichage: _lireOptionsAffichageSauv(),
+        donneesAlgorithmiques: evaluationEnCours.donneesAlgorithmiques || {},
+        verrouillee: true
+    }, _lireChampsDOMSauv());
+}
+
+function _appliquerProfilACOSauv(evaluation) {
+    // Profil ACO — uniquement si l'observation des actions est activée.
+    // null explicite quand toggle activé mais pas d'annotation : distingue « pas de données »
+    // de « zéro geste observé » (objet aux compteurs à zéro).
+    if (typeof obtenirPreference === 'function' && obtenirPreference('activerActionsRLO') === true) {
+        evaluation.actionsRLO = (typeof actionsRLO !== 'undefined' && actionsRLO.agregerActionsRLO)
+            ? actionsRLO.agregerActionsRLO(evaluation)
+            : null;
+    }
+}
+
+function _appliquerJetonDelaiSiCocheSauv(evaluation, etudiantDA, maintenant) {
+    const checkboxDelai = document.getElementById('checkboxJetonDelai');
+    if (!checkboxDelai || !checkboxDelai.checked) return;
+    if (typeof verifierDisponibiliteJeton === 'function' && verifierDisponibiliteJeton(etudiantDA, 'delai')) {
+        const config = obtenirConfigJetons();
+        evaluation.jetonDelaiApplique = true;
+        evaluation.dateApplicationJetonDelai = maintenant.toISOString();
+        evaluation.delaiAccorde = true;
+        evaluation.dureeDelaiJours = config.delai.dureeJours;
+    } else {
+        checkboxDelai.checked = false;
+        const config = obtenirConfigJetons();
+        const utilises = compterJetonsUtilises(etudiantDA, 'delai');
+        afficherNotificationErreur(
+            'Jetons épuisés',
+            `Plus de jetons de délai disponibles (${utilises}/${config.delai.nombre} utilisés)`
+        );
+    }
+}
+
+function _basculerEnModificationActiveSauv(existanteActive) {
+    console.warn(`[Évaluation] Évaluation active existante détectée (${existanteActive.id}) — bascule en modification`);
+    if (window.evaluationEnCours) {
+        window.evaluationEnCours.idModification = existanteActive.id;
+    }
+    // Patch §5.6 — promotion sauvegarderEvaluationModifiee vers résidu evaluation.js
+    window.sauvegarderEvaluationModifiee();
+}
+
+function _gererErreurPersistanceSauv(resultatSauvegarde) {
+    if (resultatSauvegarde === 'quota') {
+        afficherNotificationErreur(
+            'Espace de stockage insuffisant',
+            'Le quota de stockage du navigateur est dépassé. Exporte tes données (Réglages → Gestion des données) puis supprime des évaluations anciennes.'
+        );
+    } else if (resultatSauvegarde === false) {
+        afficherNotificationErreur(
+            'Modification impossible',
+            'Les modifications sont impossibles en mode Anonymisé. Passe en mode Normal pour sauvegarder.'
+        );
+    } else {
+        afficherNotificationErreur(
+            'Erreur de sauvegarde',
+            'Une erreur inattendue s\'est produite. Consulte la console pour plus de détails.'
+        );
+    }
+}
+
+function _synchroniserGroupeCoursFichierSauv(groupeCoursActif) {
+    // 🔧 FIX (5 mars 2026) : Synchroniser UNIQUEMENT le groupeCoursId du fichier.
+    // NE PAS écraser productionId ni etudiantDA — cela corrompait les métadonnées
+    // quand le formulaire affichait une production différente du fichier ouvert.
+    const fichierActuel = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
+        ? travauxVisionneuse.getFichierActuel() : null;
+    if (!fichierActuel || typeof travauxStockage === 'undefined' || !travauxStockage.mettreAJourFichier) return;
+    const modifications = {};
+    if (groupeCoursActif?.id && fichierActuel.groupeCoursId !== groupeCoursActif.id) {
+        modifications.groupeCoursId = groupeCoursActif.id;
+        fichierActuel.groupeCoursId = groupeCoursActif.id;
+    }
+    if (Object.keys(modifications).length > 0) {
+        travauxStockage.mettreAJourFichier(fichierActuel.id, modifications);
+    }
+}
+
+function _postSauvegardeSauv(evaluation, groupeCoursActif) {
+    // Tier 6.3 : Invalider les caches de moyennes
+    window._moyennesQualifies = null;
+    window._moyennesToutes = null;
+
+    afficherNotificationSucces(`Évaluation sauvegardée : ${evaluation.etudiantNom} - ${evaluation.productionNom}`);
+
+    if (typeof travauxUI !== 'undefined' && travauxUI.arreterChrono) {
+        travauxUI.arreterChrono();
+    }
+
+    // Basculer en mode modification pour qu'un 2e clic ne crée pas de doublon
+    if (window.evaluationEnCours) {
+        window.evaluationEnCours.idModification = evaluation.id;
+    }
+
+    _synchroniserGroupeCoursFichierSauv(groupeCoursActif);
+    majBadgesApresEvaluation(evaluation);
+
+    if (typeof calculerEtStockerIndicesCP === 'function') {
+        calculerEtStockerIndicesCP();
+    }
+    if (typeof initialiserListeEvaluations === 'function') {
+        setTimeout(() => initialiserListeEvaluations(), 150);
+    }
+}
+
 function sauvegarderEvaluation() {
     // Annuler le debounce auto-save (la sauvegarde manuelle prend le relais) — Patch §5.6 fix #109 (étape 4)
     if (window._timerAutoSave) { clearTimeout(window._timerAutoSave); window._timerAutoSave = null; }
@@ -150,245 +361,63 @@ function sauvegarderEvaluation() {
         return;
     }
 
-    // Lire les selects, avec fallback sur evaluationEnCours (les selects cachés
-    // peuvent être vides si le chaînage setTimeout de preRemplirEvaluation n'a pas terminé)
-    const ec = window.evaluationEnCours;
-    const etudiantDA = document.getElementById('selectEtudiantEval').value || (ec && ec.etudiantDA) || '';
-    const productionId = document.getElementById('selectProduction1').value || (ec && ec.productionId) || '';
-    const grilleId = document.getElementById('selectGrille1').value || (ec && ec.grilleId) || '';
-
+    const { etudiantDA, productionId, grilleId } = _lireEntreesFormulaireSauv();
     if (!etudiantDA || !productionId || !grilleId) {
         alert('Veuillez sélectionner un étudiant, une production et une grille avant de sauvegarder.');
         return;
     }
 
-    // Récupérer les données
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const etudiant = etudiants.find(e => e.da === etudiantDA);
-
     const productions = obtenirDonneesSelonMode('productions');
     const production = productions.find(p => p.id === productionId);
-
     const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === grilleId);
 
-    // 🆕 FIX (9 jan 2026) : Validation des références avant sauvegarde
-    if (!etudiant) {
-        afficherNotificationErreur('Étudiant introuvable', `L'étudiant ${etudiantDA} n'existe pas dans le groupe actif.`);
-        console.error('[Évaluation] ❌ Référence invalide: etudiantDA', etudiantDA);
-        return;
-    }
-    if (!production) {
-        afficherNotificationErreur('Production introuvable', `La production sélectionnée n'existe plus.`);
-        console.error('[Évaluation] ❌ Référence invalide: productionId', productionId);
-        return;
-    }
-    if (!grille) {
-        afficherNotificationErreur('Grille introuvable', `La grille de critères sélectionnée n'existe plus.`);
-        console.error('[Évaluation] ❌ Référence invalide: grilleId', grilleId);
-        return;
-    }
+    if (!_validerReferencesSauv(etudiant, production, grille, etudiantDA, productionId, grilleId)) return;
+    if (!_validerReferencesNonDemoSauv(productionId, grilleId)) return;
 
-    // Phase 4.C : interdire les références à des items démo (Plan §3.4)
-    if (typeof BibliothequeUI !== 'undefined' && BibliothequeUI.verifierReferencesPasDemo) {
-        const violationDemo = BibliothequeUI.verifierReferencesPasDemo([
-            { id: productionId, collection: (typeof getCleProductions === 'function' ? getCleProductions() : cle('productions')), labelType: 'production' },
-            { id: grilleId, collection: 'grillesTemplates', labelType: 'grille' }
-        ]);
-        if (violationDemo) {
-            afficherNotificationErreur('Référence démo non autorisée', violationDemo.message);
-            return;
-        }
-    }
-
-    // Collecter les évaluations des critères
-    const criteres = [];
-    if (grille && grille.criteres) {
-        grille.criteres.forEach(critere => {
-            const niveau = evaluationEnCours.criteres[critere.id];
-            if (niveau) {
-                const commDiv = document.getElementById(`comm_${critere.id}`);
-                criteres.push({
-                    critereId: critere.id,
-                    critereNom: critere.nom,
-                    niveauSelectionne: niveau,
-                    retroaction: commDiv ? commDiv.textContent : '',
-                    ponderation: critere.ponderation || 0
-                });
-            }
-        });
-    }
-
-    // Créer l'objet évaluation avec horodatage
-    // ✅ CORRECTION CRITIQUE (Beta 95 - 27 déc 2025) : Ajouter coursId
-    // 🆕 FIX (9 jan 2026) : Ajouter groupeCoursId pour traçabilité complète
+    const criteres = _collecterCriteresSauv(grille);
     const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
     const groupeCoursActif = db.getSync('groupeCoursActif', null);
     const maintenant = new Date();
-    const evaluation = {
-        id: genererIdUnique('EVAL_'),
-        etudiantDA: etudiantDA,
-        etudiantNom: etudiant ? `${etudiant.prenom} ${etudiant.nom}` : '',
-        groupe: etudiant ? etudiant.groupe : '',
-        coursId: coursId,  // ✅ Lier l'évaluation au cours actif
-        groupeCoursId: groupeCoursActif?.id || null,  // 🆕 Traçabilité groupe-cours
-        productionId: productionId,
-        productionNom: production ? (production.titre || production.nom) : '',
-        grilleId: grilleId,
-        grilleNom: grille ? grille.nom : '',
-        echelleId: document.getElementById('selectEchelle1').value,
-        cartoucheId: document.getElementById('selectCartoucheEval').value,
-        dateEvaluation: maintenant.toISOString(),
-        heureEvaluation: maintenant.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' }),
-        statutRemise: document.getElementById('remiseProduction1').value,
-        statutIntegrite: document.getElementById('statutIntegrite').value || 'recevable',
-        notesIntegrite: document.getElementById('notesIntegrite').value || '',
-        criteres: criteres,
-        noteFinale: parseFloat(document.getElementById('noteProduction1').textContent) || 0,
-        niveauFinal: document.getElementById('niveauProduction1').textContent,
-        retroactionFinale: document.getElementById('retroactionFinale1').value,
-        optionsAffichage: {
-            description: document.getElementById('afficherDescription1').checked,
-            objectif: document.getElementById('afficherObjectif1').checked,
-            tache: document.getElementById('afficherTache1').checked,
-            adresse: document.getElementById('afficherAdresse1').checked,
-            contexte: document.getElementById('afficherContexte1').checked,
-            affichageNote: document.querySelector('input[name="affichageNote1"]:checked')?.value || 'complet'
-        },
-        donneesAlgorithmiques: evaluationEnCours.donneesAlgorithmiques || {}, // Sauvegarder données du français écrit algorithmique
-        verrouillee: true // Verrouiller par défaut toutes les nouvelles évaluations
-        // Phase 3 : fichierId supprimé — résolution par clé composite (DA, productionId) uniquement
-    };
 
-    // Profil ACO (Actions cognitives) — uniquement si l'observation des actions est activée.
-    // null explicite quand toggle activé mais pas d'annotation : distingue « pas de données »
-    // de « zéro geste observé » (objet aux compteurs à zéro).
-    if (typeof obtenirPreference === 'function' && obtenirPreference('activerActionsRLO') === true) {
-        evaluation.actionsRLO = (typeof actionsRLO !== 'undefined' && actionsRLO.agregerActionsRLO)
-            ? actionsRLO.agregerActionsRLO(evaluation)
-            : null;
-    }
+    const evaluation = _construireObjetEvaluationSauv({
+        etudiant, production, grille,
+        etudiantDA, productionId, grilleId,
+        criteres, coursId, groupeCoursActif, maintenant
+    });
 
-    // Lire l'état des checkboxes de jetons et appliquer si cochées
-    const checkboxDelai = document.getElementById('checkboxJetonDelai');
-    if (checkboxDelai && checkboxDelai.checked) {
-        // Vérifier la disponibilité du jeton avant de l'appliquer
-        if (typeof verifierDisponibiliteJeton === 'function' && verifierDisponibiliteJeton(etudiantDA, 'delai')) {
-            const config = obtenirConfigJetons();
-            evaluation.jetonDelaiApplique = true;
-            evaluation.dateApplicationJetonDelai = maintenant.toISOString();
-            evaluation.delaiAccorde = true;
-            evaluation.dureeDelaiJours = config.delai.dureeJours;
-        } else {
-            // Décocher la checkbox si le jeton n'est pas disponible
-            checkboxDelai.checked = false;
-            const config = obtenirConfigJetons();
-            const utilises = compterJetonsUtilises(etudiantDA, 'delai');
-            afficherNotificationErreur(
-                'Jetons épuisés',
-                `Plus de jetons de délai disponibles (${utilises}/${config.delai.nombre} utilisés)`
-            );
-        }
-    }
-
-    // Sauvegarder
-    let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+    _appliquerProfilACOSauv(evaluation);
+    _appliquerJetonDelaiSiCocheSauv(evaluation, etudiantDA, maintenant);
 
     // Garde-fou : si une évaluation active existe déjà pour ce couple étudiant+production,
     // basculer en modification plutôt que d'en créer une deuxième (double-clic, etc.)
+    let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const existanteActive = evaluations.find(e =>
-        !e.remplaceeParId &&
-        e.etudiantDA === etudiantDA && e.productionId === productionId
+        !e.remplaceeParId && e.etudiantDA === etudiantDA && e.productionId === productionId
     );
     if (existanteActive) {
-        console.warn(`[Évaluation] Évaluation active existante détectée (${existanteActive.id}) — bascule en modification`);
-        if (window.evaluationEnCours) {
-            window.evaluationEnCours.idModification = existanteActive.id;
-        }
-        // Patch §5.6 — promotion sauvegarderEvaluationModifiee vers résidu evaluation.js (session B 3e sous-module)
-        window.sauvegarderEvaluationModifiee();
+        _basculerEnModificationActiveSauv(existanteActive);
         return;
     }
 
-    // Persister la durée d'évaluation
-    var dureeMs = (typeof travauxUI !== 'undefined' && travauxUI.getDureeMs)
+    // Persister la durée d'évaluation + journal
+    const dureeMs = (typeof travauxUI !== 'undefined' && travauxUI.getDureeMs)
         ? travauxUI.getDureeMs() : null;
     if (dureeMs) evaluation.dureeEvaluation = Math.round(dureeMs / 1000);
-
-    // Journal de bord — capturer fin d'évaluation
     if (typeof Journal !== 'undefined') {
         Journal.capturerFinEvaluation(evaluation, dureeMs);
     }
 
     evaluations.push(evaluation);
-
-    // Protection : bloquer en mode anonymisation ou quota dépassé
     const resultatSauvegarde = sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
     if (resultatSauvegarde !== true) {
-        if (resultatSauvegarde === 'quota') {
-            afficherNotificationErreur(
-                'Espace de stockage insuffisant',
-                'Le quota de stockage du navigateur est dépassé. Exporte tes données (Réglages → Gestion des données) puis supprime des évaluations anciennes.'
-            );
-        } else if (resultatSauvegarde === false) {
-            afficherNotificationErreur(
-                'Modification impossible',
-                'Les modifications sont impossibles en mode Anonymisé. Passe en mode Normal pour sauvegarder.'
-            );
-        } else {
-            afficherNotificationErreur(
-                'Erreur de sauvegarde',
-                'Une erreur inattendue s\'est produite. Consulte la console pour plus de détails.'
-            );
-        }
+        _gererErreurPersistanceSauv(resultatSauvegarde);
         return;
     }
 
-    // Tier 6.3 : Invalider les caches de moyennes
-    window._moyennesQualifies = null;
-    window._moyennesToutes = null;
-
-    afficherNotificationSucces(`Évaluation sauvegardée : ${evaluation.etudiantNom} - ${evaluation.productionNom}`);
-
-    // Arrêter le chrono évaluation
-    if (typeof travauxUI !== 'undefined' && travauxUI.arreterChrono) {
-        travauxUI.arreterChrono();
-    }
-
-    // Basculer en mode modification pour qu'un 2e clic ne crée pas de doublon
-    if (window.evaluationEnCours) {
-        window.evaluationEnCours.idModification = evaluation.id;
-    }
-
-    // 🔧 FIX (5 mars 2026) : Synchroniser UNIQUEMENT le groupeCoursId du fichier.
-    // NE PAS écraser productionId ni etudiantDA du fichier — cela corrompait les
-    // métadonnées quand le formulaire affichait une production différente du fichier
-    // réellement ouvert (le blob d'Artefact 2 recevait le productionId d'Artefact 1).
-    const fichierActuel = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
-        ? travauxVisionneuse.getFichierActuel() : null;
-    if (fichierActuel && typeof travauxStockage !== 'undefined' && travauxStockage.mettreAJourFichier) {
-        const modifications = {};
-        if (groupeCoursActif?.id && fichierActuel.groupeCoursId !== groupeCoursActif.id) {
-            modifications.groupeCoursId = groupeCoursActif.id;
-            fichierActuel.groupeCoursId = groupeCoursActif.id;
-        }
-        if (Object.keys(modifications).length > 0) {
-            travauxStockage.mettreAJourFichier(fichierActuel.id, modifications);
-        }
-    }
-
-    // Mettre à jour les badges (pills) dans la barre de fichiers
-    majBadgesApresEvaluation(evaluation);
-
-    // 🔄 Recalculer les indices C et P après sauvegarde
-    if (typeof calculerEtStockerIndicesCP === 'function') {
-        calculerEtStockerIndicesCP();
-    }
-
-    // 🔄 Rafraîchir le tableau des évaluations si affiché
-    if (typeof initialiserListeEvaluations === 'function') {
-        setTimeout(() => initialiserListeEvaluations(), 150);
-    }
+    _postSauvegardeSauv(evaluation, groupeCoursActif);
 }
 
 /**
