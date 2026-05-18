@@ -92,6 +92,13 @@ test('Défense refactor · sentinelle exports browser evaluation', async ({ page
         basculerVueRetroaction: typeof window.basculerVueRetroaction,
         copierToutRetroaction: typeof window.copierToutRetroaction,
         mettreAJourCompteurMots: typeof window.mettreAJourCompteurMots, // promotion §5.6 session B
+        // Zone Sauvegarde (extraits dans -sauvegarde.js session B 3e sous-module)
+        sauvegarderEvaluation: typeof window.sauvegarderEvaluation,
+        mettreAJourPillStatut: typeof window.mettreAJourPillStatut,
+        peuplementOptJetons: typeof window.peuplementOptJetons,
+        majBadgesApresEvaluation: typeof window.majBadgesApresEvaluation, // promotion §5.6 session B 3e
+        afficherBadgesJetons: typeof window.afficherBadgesJetons,         // promotion §5.6 session B 3e
+        afficherGestionJetons: typeof window.afficherGestionJetons,       // promotion §5.6 session B 3e
         // Zone Modification + Banque
         supprimerEvaluation: typeof window.supprimerEvaluation,
         chargerEvaluationDepuisBanque: typeof window.chargerEvaluationDepuisBanque,
@@ -120,6 +127,12 @@ test('Défense refactor · sentinelle exports browser evaluation', async ({ page
     expect(surface.basculerVueRetroaction).toBe('function');
     expect(surface.copierToutRetroaction).toBe('function');
     expect(surface.mettreAJourCompteurMots).toBe('function');
+    expect(surface.sauvegarderEvaluation).toBe('function');
+    expect(surface.mettreAJourPillStatut).toBe('function');
+    expect(surface.peuplementOptJetons).toBe('function');
+    expect(surface.majBadgesApresEvaluation).toBe('function');
+    expect(surface.afficherBadgesJetons).toBe('function');
+    expect(surface.afficherGestionJetons).toBe('function');
     expect(surface.supprimerEvaluation).toBe('function');
     expect(surface.chargerEvaluationDepuisBanque).toBe('function');
     expect(surface.evaluerProduction).toBe('function');

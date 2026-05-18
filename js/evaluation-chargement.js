@@ -491,7 +491,8 @@ function chargerEvaluationsEtudiant() {
         }
         if (remiseActuelle && selectRemise) {
             selectRemise.value = remiseActuelle;
-            mettreAJourPillStatut(remiseActuelle);
+            // Patch §5.6 — promotion mettreAJourPillStatut vers evaluation-sauvegarde.js (session B 3e sous-module 2026-05-18)
+            window.mettreAJourPillStatut(remiseActuelle);
         }
 
         // Vérifier si une évaluation existe déjà pour ce nouvel étudiant

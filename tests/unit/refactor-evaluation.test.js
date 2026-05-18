@@ -101,18 +101,31 @@ beforeAll(() => {
     // retroaction.js extrait depuis evaluation.js (deux blocs combinés :
     // résidu L60-301 + L1334-1733, 10 fonctions dont genererRetroaction cyc 61
     // exporté et genererRetroactionBilan cyc 75 PRIVÉE héritage Cat-B).
-    // Chargé entre -calcul.js et résidu — promotions §5.6 : window.generer
-    // Retroaction (4 sites résidu, +3 sites -calcul.js déjà patchés) + window
-    // .mettreAJourCompteurMots (1 site résidu verifierEtChargerEvaluation
-    // Existante). Side-effect IIFE top-level préservé : addEventListener
-    // 'DOMContentLoaded' / 'input' sur textarea retroactionFinale1.
     chargerScript('js/evaluation-retroaction.js', stubs, win);
 
-    // Résidu evaluation.js post-extractions Chargement+Calcul+Retroaction
-    // (~4790 LOC, anciennement 7321 LOC pré-refactor, -34,6 %). Consomme
-    // window.afficherCriteresDepuisGrille (chargement) + window.calculerNote
-    // (calcul) + window.genererRetroaction + window.mettreAJourCompteurMots
-    // (retroaction) via patches §5.6.
+    // Refactor étape 3 session B 3e sous-module (18 mai 2026) : evaluation-
+    // sauvegarde.js extrait depuis evaluation.js (zone résidu L60-893,
+    // 12 fonctions dont sauvegarderEvaluation cyc 70 MONSTRE et peuplement
+    // OptJetons cyc 33). Risque ÉLEVÉ par §2.1 mais audit pivot pré-extraction
+    // approfondi a conclu LOW : 0 réassignation pivot dans zone, toutes
+    // mutations préservent atomicité 1:1. Promotions §5.6 : window.majBadges
+    // ApresEvaluation, window.afficherBadgesJetons, window.afficherGestion
+    // Jetons. 12 sites résidu patchés via sed regex (mettreAJourPillStatut,
+    // afficherGestionJetons, afficherBadgesJetons, peuplementOptJetons,
+    // majBadgesApresEvaluation, sauvegarderEvaluation) + 1 site chargement.js
+    // (mettreAJourPillStatut L494 parallèle pattern obtenirCouleurNiveau).
+    // Promotion résidu : window.sauvegarderEvaluationModifiee (appelée 2 sites
+    // internes au sous-module extrait).
+    chargerScript('js/evaluation-sauvegarde.js', stubs, win);
+
+    // Résidu evaluation.js post-extractions Chargement+Calcul+Retroaction+
+    // Sauvegarde (~3953 LOC, anciennement 7321 LOC pré-refactor, -46,0 %).
+    // Consomme window.afficherCriteresDepuisGrille (chargement) + window.
+    // calculerNote (calcul) + window.genererRetroaction + window.mettreAJour
+    // CompteurMots (retroaction) + window.mettreAJourPillStatut + window.
+    // afficherGestionJetons + window.afficherBadgesJetons + window.peuplement
+    // OptJetons + window.majBadgesApresEvaluation + window.sauvegarderEvaluation
+    // (sauvegarde) via patches §5.6.
     chargerScript('js/evaluation.js', stubs, win);
 
     // Refactor étape 3 session A (18 mai 2026) : evaluation-handlers.js
@@ -174,7 +187,8 @@ describe('evaluation — régression refactoring 2026-mai (pré-refactor, 7 test
             'basculerVueRetroaction',
             'copierToutRetroaction',
             'mettreAJourCompteurMots',           // promotion §5.6 session B 2e sous-module
-            // Zone Sauvegarde + jetons (L2177-2984) — 6 exports
+            // Zone Sauvegarde + jetons (L2177-2984) — 12 exports (9 préservés
+            // + 3 §5.6 nouvelles session B 3e sous-module)
             'sauvegarderEvaluation',
             'changerStatutRemise',
             'mettreAJourPillStatut',
@@ -183,6 +197,10 @@ describe('evaluation — régression refactoring 2026-mai (pré-refactor, 7 test
             'gererChangementCheckboxJetonReprise',
             'gererChangementCheckboxJetonDelai',
             'gererChangementCheckboxJetonRepriseCiblee',
+            'majBadgesApresEvaluation',  // promotion §5.6 session B 3e
+            'afficherBadgesJetons',       // promotion §5.6 session B 3e
+            'afficherGestionJetons',      // promotion §5.6 session B 3e
+            'retirerJetonDepuisSidebar',  // était dans la zone Banque jetons §2.1, en fait dans zone Sauvegarde+jetons
             // Zone Nouvelle/formulaire (L2985-3132) — 3 exports
             'nouvelleEvaluation',
             'reinitialiserFormulaire',
@@ -199,9 +217,8 @@ describe('evaluation — régression refactoring 2026-mai (pré-refactor, 7 test
             'chargerEvaluationDepuisBanque',
             'appliquerJetonRepriseDepuisBanque',
             'supprimerEvaluationBanque',
-            // Zone Banque jetons + recherche + édition (L6851-7348) — 5 exports
+            // Zone Banque jetons + recherche + édition (L6851-7348) — 4 exports
             'retirerJeton',
-            'retirerJetonDepuisSidebar',
             'afficherJetonsPersonnalisesEvaluation',
             'appliquerJetonPersonnalise',
             'copierCriteresSRPN',
