@@ -73,14 +73,25 @@ beforeAll(() => {
     };
 
     // Pré-peupler le faux `window` avec `addEventListener` : evaluation.js fait
-    // un side-effect top-level IIFE ligne 7163 — `window.addEventListener
+    // un side-effect top-level IIFE ligne 7163 (origine) — `window.addEventListener
     // ('modeChanged', ...)`. Pattern absent des 4 autres god modules refactorés.
     // Le 3e paramètre `fauxWindowExistant` du helper permet d'injecter cet API.
     const fauxWindow = {
         addEventListener: () => {},
         removeEventListener: () => {}
     };
-    win = chargerScript('js/evaluation.js', stubs, fauxWindow);
+
+    // Refactor étape 3 session A (18 mai 2026) : evaluation-chargement.js
+    // extrait depuis evaluation.js (zone L77-1110 Chargement + L1112-1247
+    // Auto-save originale, 17 fonctions). Chargé AVANT le résidu dans
+    // index.html — le résidu consomme window.afficherCriteresDepuisGrille
+    // (L5521 d'origine → patch §5.6 fait dans evaluation.js).
+    win = chargerScript('js/evaluation-chargement.js', stubs, fauxWindow);
+
+    // Résidu evaluation.js post-extraction Chargement (6087 LOC, anciennement
+    // 7321 LOC pré-refactor, -16 %). Consomme window.afficherCriteresDepuisGrille
+    // de evaluation-chargement.js (chargé ci-dessus).
+    chargerScript('js/evaluation.js', stubs, win);
 
     // Refactor étape 3 session A (18 mai 2026) : evaluation-handlers.js
     // extrait depuis evaluation.js (zone L7240-7256 + L7314-7346 originale,
