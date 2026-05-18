@@ -81,6 +81,13 @@ beforeAll(() => {
         removeEventListener: () => {}
     };
     win = chargerScript('js/evaluation.js', stubs, fauxWindow);
+
+    // Refactor étape 3 session A (18 mai 2026) : evaluation-handlers.js
+    // extrait depuis evaluation.js (zone L7240-7256 + L7314-7346 originale,
+    // 3 fonctions wrappers Phase 5 + édition fichier). Chargé APRÈS le résidu
+    // dans index.html — consomme window.calculerNoteAlgorithmique* via
+    // dispatcher data-action (au moment du clic, pas au chargement IIFE).
+    chargerScript('js/evaluation-handlers.js', stubs, win);
 });
 
 describe('evaluation — régression refactoring 2026-mai (pré-refactor, 7 tests)', () => {

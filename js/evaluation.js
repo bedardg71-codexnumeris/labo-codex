@@ -7232,29 +7232,6 @@ async function copierCriteresSRPNF() {
     }
 }
 
-/* ===============================
-   WRAPPERS DELEGATION (Phase 5)
-   =============================== */
-
-/** Handler oninput pour calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) */
-function calculerNoteAlgoSimpleHandler(el) {
-    calculerNoteAlgorithmiqueSimple(
-        el.dataset.critereId,
-        parseFloat(el.dataset.ponderation),
-        parseFloat(el.dataset.facteur)
-    );
-}
-
-/** Handler oninput pour calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur, critereGrilleId) */
-function calculerNoteAlgoCatHandler(el) {
-    calculerNoteAlgorithmiqueAvecCategories(
-        el.dataset.critereId,
-        parseFloat(el.dataset.ponderation),
-        parseFloat(el.dataset.facteur),
-        el.dataset.critereGrilleId || ''
-    );
-}
-
 // Exporter les fonctions
 window.afficherJetonsPersonnalisesEvaluation = afficherJetonsPersonnalisesEvaluation;
 window.peuplementOptJetons = peuplementOptJetons;
@@ -7292,10 +7269,6 @@ window.gererChangementCheckboxJetonDelai = gererChangementCheckboxJetonDelai;
 window.gererChangementCheckboxJetonReprise = gererChangementCheckboxJetonReprise;
 window.niveauSelectionne = niveauSelectionne;
 
-// Phase 5 — wrappers delegation
-window.calculerNoteAlgoSimpleHandler = calculerNoteAlgoSimpleHandler;
-window.calculerNoteAlgoCatHandler = calculerNoteAlgoCatHandler;
-
 // Phase 5 — fonctions utilisées par data-action / data-on-change
 window.toggleEtudiantEval = toggleEtudiantEval;
 window.modifierEvaluation = modifierEvaluation;
@@ -7309,40 +7282,5 @@ window.evaluerProduction = evaluerProduction;
 window.naviguerEtudiantPrecedent = naviguerEtudiantPrecedent;
 window.naviguerEtudiantSuivant = naviguerEtudiantSuivant;
 window.retirerJeton = retirerJeton;
-window.editerFichierDepuisEvaluation = editerFichierDepuisEvaluation;
-
-/**
- * Ouvre l'éditeur de pages PDF pour le fichier actuellement chargé.
- * Cherche le fichier via la visionneuse, puis via travauxResolution en fallback.
- */
-function editerFichierDepuisEvaluation() {
-    // Trouver le fichier : visionneuse d'abord, puis résolution par évaluation en cours
-    var fichier = (typeof travauxVisionneuse !== 'undefined' && typeof travauxVisionneuse.getFichierActuel === 'function')
-        ? travauxVisionneuse.getFichierActuel() : null;
-
-    if (!fichier && window.evaluationEnCours) {
-        var da = window.evaluationEnCours.etudiantDA;
-        var prodId = window.evaluationEnCours.productionId;
-        if (da && prodId && typeof travauxResolution !== 'undefined' && typeof travauxResolution.trouverFichierPourEvaluation === 'function') {
-            fichier = travauxResolution.trouverFichierPourEvaluation({ etudiantDA: da, productionId: prodId });
-        }
-    }
-
-    if (!fichier || !fichier.id) {
-        console.warn('[Évaluation] Bouton Éditer : aucun fichier trouvé');
-        alert('Aucun fichier n\u2019est associ\u00e9 \u00e0 cette \u00e9valuation.');
-        return;
-    }
-
-    // Ouvrir l'éditeur de pages dans la sous-section Préparer et importer
-    if (typeof afficherSousSection === 'function') {
-        afficherSousSection('evaluations-importer');
-    }
-    setTimeout(function() {
-        if (typeof travauxUI !== 'undefined' && typeof travauxUI.ouvrirEditeurPages === 'function') {
-            travauxUI.ouvrirEditeurPages(fichier.id);
-        }
-    }, 300);
-}
 
 })();
