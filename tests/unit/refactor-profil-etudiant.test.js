@@ -84,6 +84,12 @@ beforeAll(() => {
     // (consomme obtenirTermeProduction + résultats calculs).
     chargerScript('js/profil-etudiant-rapport.js', stubs, win);
 
+    // Refactor étape 3 session B (18 mai 2026) : profil-etudiant-diagnostics.js
+    // extrait depuis profil-etudiant.js (zone L3598-4429 originale, 11 fonctions
+    // diagnostics SRPNF/Critères + blocs RLO + onglets + 11 exports window.X).
+    // Charge APRÈS rapport (les blocs RLO consomment des helpers + calculs).
+    chargerScript('js/profil-etudiant-diagnostics.js', stubs, win);
+
     // Charger le résidu dans le même sandbox via le 3e paramètre.
     chargerScript('js/profil-etudiant.js', stubs, win);
 });
@@ -152,7 +158,19 @@ describe('profil-etudiant — régression refactoring 2026-mai (canari + sentine
             'determinerAlerteContextuelle',
             'determinerCibleIntervention',
             // calculerDirectionsCriteres : reste dans le résidu (zone Sections affichage L2517-2724)
-            // Zone Diagnostics + Navigation (L5693-6520) — 2 exports
+            // Zone Diagnostics — 11 exports (session B 18 mai 2026 : tous promus window.X)
+            'genererDiagnosticCriteres',
+            'genererDiagnosticSRPNF',
+            'genererDiagnosticGenerique',
+            '_genererBarresSRPNF',
+            'genererBlocProfilRLO',
+            'genererBlocConsolidation',
+            'genererConteneurGestesCognitifs',
+            'genererNoteRLO',
+            'genererOngletsDeveloppement',
+            'genererBlocEvolutionRLO',
+            // changerOngletDeveloppement : déjà listé ci-dessus (zone Sections affichage)
+            // Zone Navigation (résidu) — 2 exports
             'naviguerVersIntervention',
             'naviguerVersNouvelleIntervention',
             // Zone Rapport — 7 exports (session A 18 mai 2026 : tous promus window.X)
