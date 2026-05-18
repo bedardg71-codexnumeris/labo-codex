@@ -16,28 +16,114 @@
 > - `Monitorage_v6/audit/SESSION.md` sur branche `audit/2026-mai` — session **audit annuel** Phase 3 (sujet distinct : audit de fidélité concept → implémentation).
 > - `Monitorage_v6-refactor/SESSION.md` sur branche `refactor/trimestre-v2` — récap historique du chantier trimestre-v2 (mergé FF sur main, branche à supprimer après push).
 
-# SESSION — État au 18 mai 2026 (refactor profil-etudiant.js — session A LIVRÉE, prête pour relai session B)
+# SESSION — État au 18 mai 2026 (refactor profil-etudiant.js — sessions A+B LIVRÉES, prête pour relai session C)
 
-**Date** : 17 mai soir + 18 mai 00:30 (étapes 0+1+2 + session A complète, en une session de travail)
-**Beta / build** : 99.48 / 0518-0030
-**Branche actuelle du worktree** : `refactor/profil-etudiant` (créée depuis `main` 0e8e0f8, push fait — synchro avec origin)
-**Dernier commit** : `6489eb6` — `docs(session): relai post-session A — état git final + consigne session B précisée`
-**Branche `main`** : `0e8e0f8` — **pushée à origin** ✅ (25 commits couvrant refactor productions + trimestre-v2 + relai profil-etudiant)
-**Branche `refactor/trimestre-v2`** : `0e8e0f8` — **pushée à origin** ✅ (branche conservée pour traçabilité, peut être supprimée si Grégoire le souhaite : `git push origin --delete refactor/trimestre-v2` + `git branch -d refactor/trimestre-v2`)
+**Date** : 17 mai soir + 18 mai 00:30 (sessions 0+1+2 + A) + 18 mai matin (session B)
+**Beta / build** : 99.48 / 0518-0502
+**Branche actuelle du worktree** : `refactor/profil-etudiant`
+**Dernier commit (à ajuster après bump)** : bump 99.48 b0518-0502 — refresh build session B
+**Branche `main`** : `0e8e0f8` — pushée à origin ✅
 **Statut chantier profil-etudiant.js** :
 - **Étape 0** : worktree + symlinks + baseline 73/73 ✅ (17 mai soir)
 - **Étape 1** : lecture intégrale + audit ESLint + Agent Explore — **TERMINÉE** (commit `52ae385`). 11 écarts MODULES-MAP §2.3.
 - **Étape 2** : tests régression Vitest 5 + Playwright 2 — **TERMINÉE** (commit `56c0978`). 80/80 verts.
-- **Étape 3 session A LOW** : 3 sous-modules extraits — **TERMINÉE** (commits `d9c6793` helpers + `cd70c9d` calculs + `d5013d9` rapport + `590ea89` bump 99.48). Résidu 8818 → 6337 LOC (-28,1 %). 37 fonctions promues window.X.
-- **Étape 3 session B MEDIUM** : à démarrer — diagnostics + confidentiel (PII). Voir consigne ci-dessous.
-- **Étape 3 sessions C+D** : à démarrer après B — actions cascade puis sections affichage 3 700 LOC + étape 4.
+- **Étape 3 session A LOW** : 3 sous-modules extraits — **TERMINÉE** (`d9c6793` helpers + `cd70c9d` calculs + `d5013d9` rapport + `590ea89` bump 99.48). Résidu 8818 → 6337 LOC (-28,1 %). 37 fonctions promues window.X.
+- **Étape 3 session B MEDIUM** : 2 sous-modules extraits — **TERMINÉE** (`fc9415b` diagnostics + `e2613b1` confidentiel). Résidu 6337 → 5207 LOC (-17,8 % session B, -40,9 % cumulé). 19 fonctions promues window.X (11 diagnostics + 8 confidentiel).
+- **Étape 3 sessions C+D** : à démarrer — actions cascade (`consulterEvaluation` orchestrateur multi-timeouts) puis sections affichage ~3700 LOC + étape 4.
 - **Étapes 4-6** : éclatement (calculerIPB 36, determinerCibleIntervention 58, afficherProfilComplet 58, calculerDetailsNoteFinale 57) + validation Grégoire + merge FF.
 
-**Tests** : 70 Vitest + 10 Playwright = **80/80 verts** (confirmés post-`d5013d9` + 3 hooks pré-push Vitest verts au moment des pushs).
+**Tests** : 70 Vitest + 10 Playwright = **80/80 verts** (confirmés post-bump session B).
 
-**Commits non-pushés** : aucun — synchronisé avec origin (3 pushs faits à minuit 30 du 18 mai 2026 : `main`, `refactor/profil-etudiant`, `refactor/trimestre-v2`).
+**Commits non-pushés** : 3 commits session B (`fc9415b` diagnostics + `e2613b1` confidentiel + bump à venir) — à pusher depuis la maison.
 
-**Action en attente côté Grégoire** : aucune. La session est propre, le worktree est synchronisé, prêt à reprendre en session B.
+**Action en attente côté Grégoire** : `git push origin refactor/profil-etudiant` depuis la maison (réseau école bloque GitHub).
+
+## Récap session B (18 mai matin — 2 sous-modules MEDIUM extraits)
+
+| Sous-module | LOC | Fonctions | Cyc > 30 | Commit |
+|---|---:|---:|---:|---|
+| `profil-etudiant-diagnostics.js` | 865 | 11 (diagnostics SRPNF/Critères + blocs RLO + onglets) | 0 | `fc9415b` |
+| `profil-etudiant-confidentiel.js` | 330 | 8 (modal PII + services adaptés + sous-catégories médicales) | 0 | `e2613b1` |
+| **Total extrait session B** | **1195** | **19** | **0** | |
+
+**Bilan résidu profil-etudiant.js** : 6337 → 5207 LOC (**-17,8 %**). Cumulé depuis l'initial : 8818 → 5207 LOC (**-40,9 %**).
+
+**Audit ESLint complexity post-session B** : aucune nouvelle fonction cyc > 30 introduite. 6 fonctions cyc > 30 héritées dans le résidu (à éclater étapes 4 sessions C+D) : `afficherProfilComplet` 58, `genererSectionMobilisationEngagement` 52, `genererSectionPerformance` 47, `calculerDetailsNoteFinale` 57, 2 arrow functions 36+34. + 2 dans `calculs.js` (`calculerIPB` 36, `determinerCibleIntervention` 58).
+
+**Conformité SKILL_Securite_donnees.md** (zone confidentiel risque ÉLEVÉ PII) :
+- Variables module-scope encapsulées dans l'IIFE (`_confidentielDaActuel`, `SOUS_CATEGORIES_SERVICES`) — pas de fuite cross-module.
+- Préservation comportementale stricte : pas de migration `escapeHtml` local → `echapperHtml` canonique, échappement existant conservé.
+- 1 acquittement `// security-ok` inline sur `innerHTML` re-flagué baseline F.16 hook Défense J (transfert refactor neutre, valeurs statiques + `echapperHtml()` défense profondeur).
+
+**Bug latent détecté et préservé** (SUIVI-BUGS #105) :
+- `sauvegarderConfidentiel` appelle `chargerProfilEtudiant()` derrière un `typeof === 'function'` guard, mais cette fonction n'est définie nulle part dans le codebase. La branche est dead → le rechargement post-sauvegarde n'arrive jamais (le badge confidentiel se met à jour au prochain affichage manuel du profil). Préservation comportementale stricte du refactor.
+
+**Trouvailles notables session B (mémoire candidate)** :
+1. **Hook Défense J `// security-ok` inline obligatoire** : le commentaire d'acquittement DOIT être sur la même ligne que l'`innerHTML` (en fin de ligne), PAS en commentaire de bloc avant. Un bloc 3 lignes au-dessus ne suffit pas — le hook re-flague. Pattern réutilisable pour les futurs refactors avec transferts XSS innerHTML.
+2. **Re-flag baseline F.16 par fichier** : la baseline du hook Défense J est par fichier, pas globale. Toute extraction de zone contenant `innerHTML` avec interpolation déclenche un nouveau flag dans le sous-module. Réflexe : acquitter au commit, ne pas chercher à éviter le re-flag.
+3. **Variables module-scope encapsulées via IIFE** : `_confidentielDaActuel` + `SOUS_CATEGORIES_SERVICES` migrent SANS promotion `window.X` (variables privées). Différent du pattern « tous window.X » pour les fonctions. La consigne d'encapsulation reste : préserver l'accessibilité d'origine (était module-scope dans le résidu, reste module-scope dans le sous-module).
+
+---
+
+## Consigne session C (à démarrer — étape 3 HIGH partie 1 actions cascade)
+
+À copier-coller au début de la prochaine session :
+
+```
+cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6-profil-etudiant
+
+# AVANT TOUT — pusher depuis la maison si pas déjà fait :
+#   git push origin refactor/profil-etudiant
+# Réseau école bloque GitHub.
+
+# Vérification rapide à l'ouverture de session :
+git log --oneline @{u}..HEAD          # 3 commits attendus (fc9415b, e2613b1, bump)
+git status                             # propre (sauf node_modules symlinks)
+cat version.json                       # {"build":"0518-0502","beta":"99.48"}
+cd tests && npm test                   # 80/80 verts (70 Vitest + 10 Playwright)
+wc -l ../js/profil-etudiant.js ../js/profil-etudiant-*.js  # résidu 5207, +5 sous-modules
+
+Lecture obligatoire :
+1. SESSION.md (ce document) — récap sessions A+B LIVRÉES
+2. audit/refactoring-prep/MODULES-MAP.md §2.3 (zones HIGH partie 1 : actions cascade)
+3. audit/refactoring-prep/METHODE-REFACTORING.md §3 étape 3 + §7 notes refactor
+
+OBJECTIF SESSION C : extraire 1-2 sous-modules HIGH partie 1 (~1-2 h)
+
+### Sous-module 6 — `js/profil-etudiant-actions.js` (~600-700 LOC)
+- Cascade `consulterEvaluation` (orchestrateur multi-timeouts T+200/500/300ms, race guard `window._consulterEvalTimerId`)
+- `evaluerProduction`, `supprimerEvaluationDepuisProfil`, `calculerDetailsNoteFinale` (cyc 57)
+- `attribuerJetonPersonnaliseAvecPrompt`, `retirerJetonPersonnaliseAvecConfirmation`
+- `calculerEtStockerPatternsGroupe`, `obtenirPatternEtudiant`
+- `calculerDirectionsCriteres`
+- ~8-10 fonctions
+- Risque MOYEN-ÉLEVÉ : `_consulterEvalTimerId` + `_apresOuvertureFichier` (timers cascade)
+
+### Workflow par sous-module (éprouvé sessions A+B) :
+1. Localiser zone (grep + audit appelants cross-fichier)
+2. Audit pré-deletion doublons window.X
+3. Lire bornes exactes
+4. Extraire vers /tmp via sed
+5. Construire IIFE + exports
+6. node --check
+7. sed delete du résidu
+8. index.html (charger APRÈS confidentiel, AVANT résidu — sauf orchestre cascade qui doit charger EN DERNIER)
+9. tests/unit/refactor-profil-etudiant.test.js + élargir sentinelle
+10. Audit post (grep orphelins)
+11. Tests 80/80
+12. Commit
+
+### Notes critiques pour cette session
+- **Atomicité timers cascade** : `window._consulterEvalTimerId` et `window._apresOuvertureFichier` sont des marqueurs globaux. Préservation comportementale stricte — pas de refactor de la cascade.
+- **`calculerDirectionsCriteres`** : reste dans le résidu (zone Sections affichage L2517-2724 originale) selon MODULES-MAP §2.3 — voir où elle est dans le résidu actuel (probablement vers L2000).
+- **Acquittement `// security-ok` inline** si XSS innerHTML transféré (pas en commentaire de bloc, sur la MÊME ligne — pattern session B confirmé).
+- **Préservation comportementale stricte** : bug latent → SUIVI-BUGS, PAS de fix pendant l'extraction.
+
+### Bump prévu en fin de session C
+Refresh build 99.48 b0518-XXXX (même journée, même chantier) OU bump 99.49 si Grégoire préfère marquer une session distincte.
+
+Session D (zone HIGH partie 2 sections affichage ~3700 LOC + étape 4 éclatement cyc > 30 + étapes 5+6 validation + merge) suivra.
+```
 
 ## Récap session A — 18 mai 2026 (3 sous-modules LOW extraits)
 
