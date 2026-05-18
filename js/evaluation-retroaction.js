@@ -121,6 +121,130 @@ function _notifSucces(message) {
  * - niveauSelectionne() (en temps réel)
  * - onchange sur les checkboxes d'options
  */
+// Helpers privés _Retro* (extraction étape 4 — éclatement cyc 61 → cyc ≤ 15)
+
+function _rendreOptionsProduction(production) {
+    let texte = '';
+    if (document.getElementById('afficherDescription1')?.checked && (production?.activiteApprentissage || production?.description)) {
+        texte += `Production : ${production?.activiteApprentissage || production?.description}\n`;
+    }
+    if (document.getElementById('afficherObjectif1')?.checked && production?.objectif) {
+        texte += `Objectif : ${production.objectif}\n`;
+    }
+    if (document.getElementById('afficherTache1')?.checked && production?.tache) {
+        texte += `Tâche : ${production.tache}\n`;
+    }
+    return texte;
+}
+
+function _rendreAdresseEtudiant() {
+    if (!document.getElementById('afficherAdresse1')?.checked) return '';
+    const etudiantDA = evaluationEnCours.etudiantDA;
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const etudiant = etudiants.find(e => e.da === etudiantDA);
+    // Utiliser prenom qui sera soit le vrai nom en mode normal, soit "Élève X" en mode anonymisation
+    return etudiant ? `\nBonjour ${etudiant.prenom} !\n\n` : '';
+}
+
+function _rendreCommentairesCriteres(grille, cartouche, critereActifId, texteAvant) {
+    let texte = '';
+    let positionCritereActif = -1;
+    if (!grille) return { texte, positionCritereActif };
+
+    grille.criteres.forEach((critere, index) => {
+        const niveau = evaluationEnCours.criteres[critere.id];
+        if (!niveau) return;
+
+        // Marquer la position du critère actif avant d'ajouter le texte
+        if (critere.id === critereActifId) {
+            positionCritereActif = texteAvant.length + texte.length;
+        }
+
+        // Vérifier si c'est un critère algorithmique
+        const enteteCritere = `Critère ${index + 1} (${critere.nom}) — ${niveau}`;
+        if (critere.type === 'algorithmique' && evaluationEnCours.donneesAlgorithmiques?.[critere.id]?.retroaction) {
+            const retroAlgo = evaluationEnCours.donneesAlgorithmiques[critere.id].retroaction;
+            texte += `${enteteCritere}\n${retroAlgo}\n\n`;
+        } else if (cartouche.commentaires) {
+            const cle = `${critere.id}_${niveau}`;
+            const commentaire = cartouche.commentaires[cle];
+            texte += commentaire
+                ? `${enteteCritere}\n${commentaire}\n\n`
+                : `${enteteCritere}\n[Non défini]\n\n`;
+        }
+    });
+
+    return { texte, positionCritereActif };
+}
+
+function _rendreObservationsAnnotations(statsAnnot) {
+    const retroObs = travauxOutils.obtenirRetroactionsObservations();
+    const DIAG_IDS = ['bon-lien','manque-lien','confusion','repetitif','preuve-absente','citation','approfondir','procedes','attention'];
+    const tamponsObs = Object.entries(statsAnnot.tampons).filter(([id]) => DIAG_IDS.includes(id));
+    if (tamponsObs.length === 0) return '';
+    let texte = '--- Observations ---\n\n';
+    for (const [id, count] of tamponsObs) {
+        const def = travauxOutils.AUTOCOLLANTS.find(a => a.id === id);
+        const txt = retroObs[id];
+        if (txt) texte += `${def?.nom || id} (×${count}) :\n${txt}\n\n`;
+    }
+    return texte;
+}
+
+function _rendreErreursFrancaisAnnotations(statsAnnot) {
+    if (statsAnnot.totalErreursFr <= 0) return '';
+    const retroFr = travauxOutils.obtenirRetroactionsErreursFr();
+    const ordreRetro = (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirOrdreErreursFr)
+        ? travauxOutils.obtenirOrdreErreursFr() : [];
+    const typesTriés = Object.entries(statsAnnot.erreursFr).sort((a, b) => {
+        const idxA = ordreRetro.indexOf(a[0]);
+        const idxB = ordreRetro.indexOf(b[0]);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        return parseInt(a[0].replace('errfr_', ''), 10) - parseInt(b[0].replace('errfr_', ''), 10);
+    });
+    let texte = '--- Langue ---\n\n';
+    for (const [type, count] of typesTriés) {
+        const def = travauxOutils.CODES_ERREURS_FR.find(c => c.id === type);
+        const idxRetro = ordreRetro.indexOf(type);
+        const numRetro = idxRetro !== -1 ? idxRetro + 1 : def?.code;
+        const txt = retroFr[type];
+        if (txt) texte += `Code ${numRetro} – ${def?.nom} (×${count}) :\n${txt}\n\n`;
+    }
+    return texte;
+}
+
+function _rendreAnnotationsVisuelles() {
+    const fichierActuel = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
+        ? travauxVisionneuse.getFichierActuel() : null;
+    if (!fichierActuel) return '';
+    const annotationFichier = (typeof travauxStockage !== 'undefined')
+        ? travauxStockage.obtenirAnnotationFichier(fichierActuel.id) : null;
+    if (!annotationFichier) return '';
+    const statsAnnot = (typeof travauxExportPDF !== 'undefined' && travauxExportPDF.compterAnnotationsDetailees)
+        ? travauxExportPDF.compterAnnotationsDetailees(annotationFichier) : null;
+    if (!statsAnnot) return '';
+    return _rendreObservationsAnnotations(statsAnnot) + _rendreErreursFrancaisAnnotations(statsAnnot);
+}
+
+function _rendreNoteFinale() {
+    const modeNote = document.querySelector('input[name="affichageNote1"]:checked')?.value || 'complet';
+    if (modeNote === 'lettre') {
+        if (evaluationEnCours.niveauFinal && evaluationEnCours.niveauFinal !== '--') {
+            return `---\nNiveau de performance : ${evaluationEnCours.niveauFinal}`;
+        }
+        return '';
+    }
+    let texte = '';
+    const noteAffichee = document.getElementById('noteProduction1')?.textContent;
+    if (noteAffichee && noteAffichee !== '--') {
+        texte += `---\nNote finale : ${noteAffichee}%`;
+    }
+    if (evaluationEnCours.niveauFinal && evaluationEnCours.niveauFinal !== '--') {
+        texte += `  |  Niveau : ${evaluationEnCours.niveauFinal}`;
+    }
+    return texte;
+}
+
 function genererRetroaction(num) {
     if (!evaluationEnCours?.cartoucheId) {
         document.getElementById('retroactionFinale1').value = '';
@@ -137,29 +261,8 @@ function genererRetroaction(num) {
     const production = productions.find(p => p.id === evaluationEnCours.productionId);
 
     let texte = '';
-
-    // Options (Description, Objectif, Tâche)
-    if (document.getElementById('afficherDescription1')?.checked && (production?.activiteApprentissage || production?.description)) {
-        texte += `Production : ${production?.activiteApprentissage || production?.description}\n`;
-    }
-    if (document.getElementById('afficherObjectif1')?.checked && production?.objectif) {
-        texte += `Objectif : ${production.objectif}\n`;
-    }
-    if (document.getElementById('afficherTache1')?.checked && production?.tache) {
-        texte += `Tâche : ${production.tache}\n`;
-    }
-
-    // Adresse personnalisée
-    if (document.getElementById('afficherAdresse1')?.checked) {
-        const etudiantDA = evaluationEnCours.etudiantDA;
-        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-        const etudiant = etudiants.find(e => e.da === etudiantDA);
-
-        if (etudiant) {
-            // Utiliser prenom qui sera soit le vrai nom en mode normal, soit "Élève X" en mode anonymisation
-            texte += `\nBonjour ${etudiant.prenom} !\n\n`;
-        }
-    }
+    texte += _rendreOptionsProduction(production);
+    texte += _rendreAdresseEtudiant();
 
     // Contexte de la cartouche
     if (document.getElementById('afficherContexte1')?.checked && cartouche.contexte) {
@@ -168,103 +271,17 @@ function genererRetroaction(num) {
 
     // Commentaires des critères
     texte += 'Voici quelques observations :\n\n';
-
     const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === grilleId);
-
-    // Garder une référence au critère modifié pour auto-scroll
     const critereActifId = evaluationEnCours._dernierCritereModifie || null;
-    let positionCritereActif = -1;
-
-    if (grille) {
-        grille.criteres.forEach((critere, index) => {
-            const niveau = evaluationEnCours.criteres[critere.id];
-            if (niveau) {
-                // Marquer la position du critère actif avant d'ajouter le texte
-                if (critere.id === critereActifId) {
-                    positionCritereActif = texte.length;
-                }
-
-                // Vérifier si c'est un critère algorithmique
-                const enteteCritere = `Critère ${index + 1} (${critere.nom}) — ${niveau}`;
-                if (critere.type === 'algorithmique' && evaluationEnCours.donneesAlgorithmiques?.[critere.id]?.retroaction) {
-                    const retroAlgo = evaluationEnCours.donneesAlgorithmiques[critere.id].retroaction;
-                    texte += `${enteteCritere}\n${retroAlgo}\n\n`;
-                } else if (cartouche.commentaires) {
-                    const cle = `${critere.id}_${niveau}`;
-                    const commentaire = cartouche.commentaires[cle];
-
-                    if (commentaire) {
-                        texte += `${enteteCritere}\n${commentaire}\n\n`;
-                    } else {
-                        texte += `${enteteCritere}\n[Non défini]\n\n`;
-                    }
-                }
-            }
-        });
-    }
+    const { texte: texteCriteres, positionCritereActif } = _rendreCommentairesCriteres(grille, cartouche, critereActifId, texte);
+    texte += texteCriteres;
 
     // Rétroactions des annotations visuelles (tampons diagnostiques + erreurs de français)
-    const fichierActuel = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
-        ? travauxVisionneuse.getFichierActuel() : null;
-    if (fichierActuel) {
-        const annotationFichier = (typeof travauxStockage !== 'undefined')
-            ? travauxStockage.obtenirAnnotationFichier(fichierActuel.id) : null;
-        if (annotationFichier) {
-            const statsAnnot = (typeof travauxExportPDF !== 'undefined' && travauxExportPDF.compterAnnotationsDetailees)
-                ? travauxExportPDF.compterAnnotationsDetailees(annotationFichier) : null;
-            if (statsAnnot) {
-                // Observations (tampons diagnostiques)
-                const retroObs = travauxOutils.obtenirRetroactionsObservations();
-                const DIAG_IDS = ['bon-lien','manque-lien','confusion','repetitif','preuve-absente','citation','approfondir','procedes','attention'];
-                const tamponsObs = Object.entries(statsAnnot.tampons).filter(([id]) => DIAG_IDS.includes(id));
-                if (tamponsObs.length > 0) {
-                    texte += '--- Observations ---\n\n';
-                    for (const [id, count] of tamponsObs) {
-                        const def = travauxOutils.AUTOCOLLANTS.find(a => a.id === id);
-                        const txt = retroObs[id];
-                        if (txt) texte += `${def?.nom || id} (×${count}) :\n${txt}\n\n`;
-                    }
-                }
-                // Erreurs de français
-                const retroFr = travauxOutils.obtenirRetroactionsErreursFr();
-                if (statsAnnot.totalErreursFr > 0) {
-                    texte += '--- Langue ---\n\n';
-                    const ordreRetro = (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirOrdreErreursFr)
-                        ? travauxOutils.obtenirOrdreErreursFr() : [];
-                    const typesTriés = Object.entries(statsAnnot.erreursFr).sort((a, b) => {
-                        const idxA = ordreRetro.indexOf(a[0]);
-                        const idxB = ordreRetro.indexOf(b[0]);
-                        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-                        return parseInt(a[0].replace('errfr_', ''), 10) - parseInt(b[0].replace('errfr_', ''), 10);
-                    });
-                    for (const [type, count] of typesTriés) {
-                        const def = travauxOutils.CODES_ERREURS_FR.find(c => c.id === type);
-                        const idxRetro = ordreRetro.indexOf(type);
-                        const numRetro = idxRetro !== -1 ? idxRetro + 1 : def?.code;
-                        const txt = retroFr[type];
-                        if (txt) texte += `Code ${numRetro} – ${def?.nom} (×${count}) :\n${txt}\n\n`;
-                    }
-                }
-            }
-        }
-    }
+    texte += _rendreAnnotationsVisuelles();
 
     // Ajouter la note/niveau à la fin selon le mode choisi
-    const modeNote = document.querySelector('input[name="affichageNote1"]:checked')?.value || 'complet';
-    if (modeNote === 'lettre') {
-        if (evaluationEnCours.niveauFinal && evaluationEnCours.niveauFinal !== '--') {
-            texte += `---\nNiveau de performance : ${evaluationEnCours.niveauFinal}`;
-        }
-    } else {
-        const noteAffichee = document.getElementById('noteProduction1')?.textContent;
-        if (noteAffichee && noteAffichee !== '--') {
-            texte += `---\nNote finale : ${noteAffichee}%`;
-        }
-        if (evaluationEnCours.niveauFinal && evaluationEnCours.niveauFinal !== '--') {
-            texte += `  |  Niveau : ${evaluationEnCours.niveauFinal}`;
-        }
-    }
+    texte += _rendreNoteFinale();
 
     const textarea = document.getElementById('retroactionFinale1');
     textarea.value = texte.trim();
