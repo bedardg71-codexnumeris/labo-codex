@@ -109,8 +109,13 @@ beforeAll(() => {
     // synthese-retroaction-data.js, tableau-bord-apercu.js.
     chargerScript('js/profil-etudiant-actions.js', stubs, win);
 
-    // Charger le résidu dans le même sandbox via le 3e paramètre.
-    chargerScript('js/profil-etudiant.js', stubs, win);
+    // Refactor étape 3 session D (18 mai 2026) : profil-etudiant-sections-affichage.js
+    // (renommage du résidu profil-etudiant.js — 4642 LOC inchangées, juste nouveau
+    // nom de fichier pour cohérence avec le découpage). Contient afficherProfilComplet
+    // orchestre cyc 58 (à éclater étape 4) + ~30 fonctions genererSection* + handlers
+    // UI + 3 variables module-scope encapsulées dans IIFE (profilActuelDA dual-write +
+    // sectionProfilActive + indiceActif).
+    chargerScript('js/profil-etudiant-sections-affichage.js', stubs, win);
 });
 
 describe('profil-etudiant — régression refactoring 2026-mai (canari + sentinelle)', () => {
