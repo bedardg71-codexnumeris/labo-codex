@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 18 mai 2026 (Beta 99.48, Build 0518-0502) — refactor `profil-etudiant.js` sessions A+B livrées sur worktree `refactor/profil-etudiant`. 5 sous-modules extraits (helpers + calculs + rapport session A + diagnostics + confidentiel session B) : 56 fonctions promues window.X. profil-etudiant.js : 8 818 → 5 207 LOC (-40,9 %). 0 nouvelle fonction cyc > 30 introduite. +1 bug latent inscrit SUIVI-BUGS #105 (chargerProfilEtudiant dead code, préservation comportementale stricte). Sessions C+D restantes (actions cascade + sections affichage + étape 4 éclatement). 23 items ouverts.
+> **Derniere mise a jour** : 18 mai 2026 (Beta 99.48, Build 0518-0516) — refactor `profil-etudiant.js` sessions A+B+C livrées sur worktree `refactor/profil-etudiant`. 6 sous-modules extraits (helpers + calculs + rapport session A + diagnostics + confidentiel session B + actions cascade session C) : 64 fonctions promues window.X. profil-etudiant.js : 8 818 → 4 641 LOC (-47,4 %). 0 nouvelle fonction cyc > 30 introduite. +1 bug latent inscrit SUIVI-BUGS #105 (chargerProfilEtudiant dead code, préservation comportementale stricte). Session D restante (sections affichage ~3 700 LOC + étape 4 éclatement afficherProfilComplet cyc 58 + 3 autres cyc > 30 hérités). 23 items ouverts.
 
 ---
 

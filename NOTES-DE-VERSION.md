@@ -5,9 +5,9 @@
 
 ---
 
-## Beta 99.48 (18 mai 2026, sessions A+B partielles — chantier en cours)
+## Beta 99.48 (18 mai 2026, sessions A+B+C partielles — chantier en cours, session D restante)
 
-**Refactor `profil-etudiant.js` (sessions A+B, branche `refactor/profil-etudiant`)**
+**Refactor `profil-etudiant.js` (sessions A+B+C, branche `refactor/profil-etudiant`)**
 
 *Session A (18 mai 00:30, 3 sous-modules LOW)*
 - **3 sous-modules** : `profil-etudiant-helpers.js` (630), `profil-etudiant-calculs.js` (1 547), `profil-etudiant-rapport.js` (426).
@@ -24,7 +24,19 @@
 *Bilan cumule sessions A+B (profil-etudiant.js)*
 - **5 sous-modules + residu** : 8 818 → 5 207 LOC residu (**-40,9 %**). 56 fonctions promues `window.X`. 0 nouvelle fonction cyc > 30 introduite.
 - **Tests** : 70 Vitest + 10 Playwright = **80/80 verts** (canari multi-module + sentinelle 60+ exports + structure monstre `afficherProfilComplet` + etat pivot `window.profilActuelDA` + orchestrateur cascade `consulterEvaluation` + 2 Playwright dedies profil-etudiant chargement).
-- **Sessions C+D restantes** : actions cascade (`consulterEvaluation` orchestrateur multi-timeouts, +calculerDetailsNoteFinale cyc 57) puis sections affichage ~3 700 LOC + etape 4 (eclatement `afficherProfilComplet` 58, autres heritages).
+
+*Session C (18 mai matin, 1 sous-module HIGH partie 1)*
+- **1 sous-module** : `profil-etudiant-actions.js` (600 LOC fichier, 8 fonctions zone actions cascade : `consulterEvaluation` orchestrateur multi-timeouts + `evaluerProduction` + `supprimerEvaluationDepuisProfil` + `calculerDetailsNoteFinale` cyc 57 + `attribuerJetonPersonnaliseAvecPrompt` + `retirerJetonPersonnaliseAvecConfirmation` + `calculerEtStockerPatternsGroupe` Beta 91 + `obtenirPatternEtudiant`).
+- 8 exports `window.X` (4 existants + 4 promotions session C : `consulterEvaluation` + `evaluerProduction` + `calculerDetailsNoteFinale` + `supprimerEvaluationDepuisProfil`).
+- **Timers cascade globaux préservés** (atomicité critique race guard clics rapides) : `window._consulterEvalTimerId` (clearTimeout/setTimeout T+200ms) + `window._apresOuvertureFichier` (callback post-ouverture fichier).
+- **4 exports critiques cross-fichier** documentés dans header sous-module : `consulterEvaluation` (evaluation.js, travaux-ui.js), `evaluerProduction` (evaluation.js, liste-evaluations.js), `calculerDetailsNoteFinale` (portfolio.js, synthese-retroaction-data.js — FIX #37 Beta 96), `calculerEtStockerPatternsGroupe` + `obtenirPatternEtudiant` (tableau-bord-apercu.js).
+- **Export `calculerDirectionsCriteres` re-localisé** : la fonction reste dans le résidu (zone Sections affichage L2003 selon MODULES-MAP §2.3 sous-module #6), son `window.X = X` migré depuis la zone extraite vers les exports résiduels (L4624 nouveau résidu).
+- **3 doublons orphelins nettoyés post-extraction** : `window.calculerDetailsNoteFinale`, `window.consulterEvaluation`, `window.evaluerProduction` (lignes orphelines après sed delete) remplacées par commentaires pointer vers actions.js.
+
+*Bilan cumulé sessions A+B+C (profil-etudiant.js)*
+- **6 sous-modules + résidu** : 8 818 → 4 641 LOC résidu (**-47,4 %**). 64 fonctions promues `window.X`. 0 nouvelle fonction cyc > 30 introduite (1 héritage déplacé dans actions.js : `calculerDetailsNoteFinale` 57).
+- **Tests** : 70 Vitest + 10 Playwright = **80/80 verts** (sentinelle élargie de `supprimerEvaluationDepuisProfil` session C).
+- **Session D restante** : sections affichage ~3 000-3 500 LOC (zone HIGH partie 2 — `afficherProfilComplet` orchestre + `genererSection*` × ~10 + handlers + variables module-scope `sectionProfilActive`/`indiceActif`/état pivot `profilActuelDA`) + **étape 4 éclatement** des 4 fonctions cyc > 30 restantes (`afficherProfilComplet` 58, `calculerDetailsNoteFinale` 57, `determinerCibleIntervention` 58, `genererSectionMobilisationEngagement` 52, `genererSectionPerformance` 47, `calculerIPB` 36) + étapes 5+6 validation + merge FF.
 
 ---
 
