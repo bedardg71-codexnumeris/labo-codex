@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 18 mai 2026 (Beta 99.48, Build 0518-0516) — refactor `profil-etudiant.js` sessions A+B+C livrées sur worktree `refactor/profil-etudiant`. 6 sous-modules extraits (helpers + calculs + rapport session A + diagnostics + confidentiel session B + actions cascade session C) : 64 fonctions promues window.X. profil-etudiant.js : 8 818 → 4 641 LOC (-47,4 %). 0 nouvelle fonction cyc > 30 introduite. +1 bug latent inscrit SUIVI-BUGS #105 (chargerProfilEtudiant dead code, préservation comportementale stricte). Session D restante (sections affichage ~3 700 LOC + étape 4 éclatement afficherProfilComplet cyc 58 + 3 autres cyc > 30 hérités). 23 items ouverts.
+> **Derniere mise a jour** : 18 mai 2026 (Beta 99.48, Build 0518-0540) — refactor `profil-etudiant.js` sessions A+B+C+D LIVRÉES (étape 3 + étape 4 partielle) sur worktree `refactor/profil-etudiant`. **EN ATTENTE validation Safari Mac Grégoire** (étape 5) avant merge FF main. 7 sous-modules autonomes (helpers + calculs + rapport session A + diagnostics + confidentiel session B + actions cascade session C + sections-affichage session D, renommage du résidu) : 102 fonctions extraites/réparties. profil-etudiant.js : 8 818 LOC monolithique → renommé, plus de résidu central. afficherProfilComplet cyc 58 → < 30 éclaté en 5 helpers (étape 4 cible dure atteinte sur le monstre central). 5 fonctions cyc > 30 héritées documentées comme à traiter cycle dédié Catégorie B post-merge. +2 bugs latents SUIVI-BUGS #105 (chargerProfilEtudiant dead code) + #106 (branche `progression && progressionVisible` manquante dans afficherProfilComplet). 23 items ouverts.
 
 ---
 

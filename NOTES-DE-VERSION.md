@@ -5,9 +5,9 @@
 
 ---
 
-## Beta 99.48 (18 mai 2026, sessions A+B+C partielles — chantier en cours, session D restante)
+## Beta 99.48 (18 mai 2026, sessions A+B+C+D LIVRÉES — EN ATTENTE validation Safari Mac avant merge FF)
 
-**Refactor `profil-etudiant.js` (sessions A+B+C, branche `refactor/profil-etudiant`)**
+**Refactor `profil-etudiant.js` (sessions A+B+C+D, branche `refactor/profil-etudiant`)**
 
 *Session A (18 mai 00:30, 3 sous-modules LOW)*
 - **3 sous-modules** : `profil-etudiant-helpers.js` (630), `profil-etudiant-calculs.js` (1 547), `profil-etudiant-rapport.js` (426).
@@ -36,7 +36,32 @@
 *Bilan cumulé sessions A+B+C (profil-etudiant.js)*
 - **6 sous-modules + résidu** : 8 818 → 4 641 LOC résidu (**-47,4 %**). 64 fonctions promues `window.X`. 0 nouvelle fonction cyc > 30 introduite (1 héritage déplacé dans actions.js : `calculerDetailsNoteFinale` 57).
 - **Tests** : 70 Vitest + 10 Playwright = **80/80 verts** (sentinelle élargie de `supprimerEvaluationDepuisProfil` session C).
-- **Session D restante** : sections affichage ~3 000-3 500 LOC (zone HIGH partie 2 — `afficherProfilComplet` orchestre + `genererSection*` × ~10 + handlers + variables module-scope `sectionProfilActive`/`indiceActif`/état pivot `profilActuelDA`) + **étape 4 éclatement** des 4 fonctions cyc > 30 restantes (`afficherProfilComplet` 58, `calculerDetailsNoteFinale` 57, `determinerCibleIntervention` 58, `genererSectionMobilisationEngagement` 52, `genererSectionPerformance` 47, `calculerIPB` 36) + étapes 5+6 validation + merge FF.
+
+*Session D (18 mai matin, renommage + éclatement afficherProfilComplet)*
+- **Renommage extraction unique** : `profil-etudiant.js` (4 642 LOC, IIFE complet englobant zone Sections affichage) → `profil-etudiant-sections-affichage.js`. 38 fonctions + 3 variables module-scope (`profilActuelDA` dual-write atomique + `sectionProfilActive` + `indiceActif`) encapsulées dans l'IIFE. 0 LOC de code modifiée, juste nom de fichier + en-tête réécrit + index.html + test mis à jour.
+- **Étape 4 éclatement `afficherProfilComplet` cyc 58 → < 30** : 5 helpers privés extraits selon les phases de l'orchestrateur :
+  - `_resoudreEtudiantProfil` (résolution daOuEl + état pivot dual-write atomique + filtrage étudiants)
+  - `_recalculerIndicesACPSiPossible` (3 conditions typeof X === 'function' regroupées, FIX #220)
+  - `_calculerIndicesDualPourProfil` (calcul SOM/PAN selon mode comparatif, optimisation 7 déc 2025)
+  - `_resoudreSectionContenu` (switch 10 branches → mapping titre+contenu selon section + préférences UI)
+  - `_postRendreProfilSection` (setTimeout T+100ms : reattaches + initialisations différées)
+- **Atomicité préservée** : couple `profilActuelDA = X; window.profilActuelDA = X;` consécutif dans `_resoudreEtudiantProfil` (Écart #6 MODULES-MAP §2.3). Signature externe arité 1 préservée.
+- **Bug latent #106 détecté et préservé** : la chaîne if/else if originale manque une branche pour `sectionAffichee === 'progression' && progressionVisible` → premier rendu produit titre+contenu vides. Préservation comportementale stricte, commentaire explicite dans `_resoudreSectionContenu`.
+- **5 fonctions cyc > 30 héritages documentées** (décision Grégoire 18 mai 2026 — pattern productions / trimestre-v2) à traiter dans un cycle dédié Catégorie B post-merge : `genererSectionMobilisationEngagement` 52, `genererSectionPerformance` 47, `calculerDetailsNoteFinale` 57 (actions.js), `determinerCibleIntervention` 58 (calculs.js), `calculerIPB` 36 (calculs.js).
+
+*Bilan cumulé final sessions A+B+C+D (profil-etudiant.js)*
+- **7 sous-modules autonomes + 0 résidu central** : profil-etudiant.js de 8 818 LOC monolithique → renommé, plus de résidu central. 102 fonctions extraites/réparties + 5 helpers privés étape 4 dans sections-affichage.js.
+  - profil-etudiant-helpers.js : 630 LOC (16 fonctions)
+  - profil-etudiant-calculs.js : 1 547 LOC (14 fonctions, 2 cyc > 30 hérités)
+  - profil-etudiant-rapport.js : 426 LOC (7 fonctions)
+  - profil-etudiant-diagnostics.js : 865 LOC (11 fonctions)
+  - profil-etudiant-confidentiel.js : 330 LOC (8 fonctions, 2 variables module-scope encapsulées)
+  - profil-etudiant-actions.js : 600 LOC (8 fonctions, 1 cyc > 30 hérité)
+  - profil-etudiant-sections-affichage.js : 4 654 LOC (38 fonctions + 5 helpers privés, 2 cyc > 30 hérités, état pivot encapsulé)
+- **Cible dure cyc ≤ 30 atteinte sur le monstre central afficherProfilComplet** (58 → < 30). 5 autres fonctions cyc > 30 héritées documentées comme à traiter Catégorie B post-merge.
+- **+2 bugs latents inscrits SUIVI-BUGS** (préservation comportementale stricte) : #105 `chargerProfilEtudiant` dead code dans `sauvegarderConfidentiel` (session B), #106 branche manquante `progression && progressionVisible` dans `afficherProfilComplet` (session D étape 4).
+- **Tests** : 70 Vitest + 10 Playwright = **80/80 verts** (sentinelle inchangée — helpers privés non exposés window.X, signature publique préservée).
+- **Statut** : **EN ATTENTE validation Safari Mac Grégoire** (étape 5) avant merge FF main. Pattern [[feedback-pas-capitalisation-avant-validation]] respecté : capitalisation pré-écrite mais merge bloqué tant que pas d'OK testeur.
 
 ---
 
