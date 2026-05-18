@@ -90,20 +90,29 @@ beforeAll(() => {
     // window.obtenirCouleurNiveau (consommée L652 + L1026 chargement.js).
     win = chargerScript('js/evaluation-chargement.js', stubs, fauxWindow);
 
-    // Refactor étape 3 session B (18 mai 2026) : evaluation-calcul.js extrait
-    // depuis evaluation.js (zone L61-L720 Calcul de notes + Gestion couleurs,
-    // 6 fonctions : calculerNoteAlgorithmique, genererRetroactionEUF privées,
-    // calculerNoteAlgorithmiqueAvecCategories cyc 42 exportée, calculerNote
-    // AlgorithmiqueSimple, calculerNote, obtenirCouleurNiveau). Chargé ENTRE
-    // chargement et résidu — promotions §5.6 nouvelles : window.calculerNote
-    // (6 sites résidu) + window.obtenirCouleurNiveau (2 sites chargement.js).
+    // Refactor étape 3 session B 1er sous-module (18 mai 2026) : evaluation-
+    // calcul.js extrait depuis evaluation.js (zone L61-L720 Calcul de notes +
+    // Gestion couleurs, 6 fonctions). Chargé ENTRE chargement et résidu —
+    // promotions §5.6 : window.calculerNote (6 sites résidu) + window.obtenir
+    // CouleurNiveau (2 sites chargement.js).
     chargerScript('js/evaluation-calcul.js', stubs, win);
 
-    // Résidu evaluation.js post-extractions Chargement+Calcul (~5427 LOC,
-    // anciennement 7321 LOC pré-refactor, -25,9 %). Consomme window.afficher
-    // CriteresDepuisGrille (chargement) + window.calculerNote (calcul, 6 sites
-    // patchés §5.6 zones changerStatutIntegrite, changerEchelleEvaluation,
-    // verifierEtChargerEvaluationExistante, modifierEvaluation × 2).
+    // Refactor étape 3 session B 2e sous-module (18 mai 2026) : evaluation-
+    // retroaction.js extrait depuis evaluation.js (deux blocs combinés :
+    // résidu L60-301 + L1334-1733, 10 fonctions dont genererRetroaction cyc 61
+    // exporté et genererRetroactionBilan cyc 75 PRIVÉE héritage Cat-B).
+    // Chargé entre -calcul.js et résidu — promotions §5.6 : window.generer
+    // Retroaction (4 sites résidu, +3 sites -calcul.js déjà patchés) + window
+    // .mettreAJourCompteurMots (1 site résidu verifierEtChargerEvaluation
+    // Existante). Side-effect IIFE top-level préservé : addEventListener
+    // 'DOMContentLoaded' / 'input' sur textarea retroactionFinale1.
+    chargerScript('js/evaluation-retroaction.js', stubs, win);
+
+    // Résidu evaluation.js post-extractions Chargement+Calcul+Retroaction
+    // (~4790 LOC, anciennement 7321 LOC pré-refactor, -34,6 %). Consomme
+    // window.afficherCriteresDepuisGrille (chargement) + window.calculerNote
+    // (calcul) + window.genererRetroaction + window.mettreAJourCompteurMots
+    // (retroaction) via patches §5.6.
     chargerScript('js/evaluation.js', stubs, win);
 
     // Refactor étape 3 session A (18 mai 2026) : evaluation-handlers.js
@@ -158,12 +167,13 @@ describe('evaluation — régression refactoring 2026-mai (pré-refactor, 7 test
             'obtenirCouleurNiveau',        // promotion §5.6 session B
             'calculerNoteAlgoSimpleHandler',
             'calculerNoteAlgoCatHandler',
-            // Zone Rétroaction (L1929-3582) — 5 exports + 1 dispersé L2130
+            // Zone Rétroaction (L1929-3582) — 6 exports (5 existants + 1 §5.6 session B)
             'genererRetroaction',
-            'regenererRetroactionAvecFeedback',  // export dispersé L2130
+            'regenererRetroactionAvecFeedback',  // export dispersé L2130 → groupé dans -retroaction.js
             'copierRetroaction',
             'basculerVueRetroaction',
             'copierToutRetroaction',
+            'mettreAJourCompteurMots',           // promotion §5.6 session B 2e sous-module
             // Zone Sauvegarde + jetons (L2177-2984) — 6 exports
             'sauvegarderEvaluation',
             'changerStatutRemise',
