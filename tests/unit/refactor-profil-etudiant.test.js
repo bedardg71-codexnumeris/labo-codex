@@ -98,6 +98,17 @@ beforeAll(() => {
     // stricte, échappement existant conservé.
     chargerScript('js/profil-etudiant-confidentiel.js', stubs, win);
 
+    // Refactor étape 3 session C (18 mai 2026) : profil-etudiant-actions.js
+    // extrait depuis profil-etudiant.js (zone L4531-5096 résidu post-confidentiel,
+    // 8 fonctions actions cascade : consulterEvaluation orchestrateur multi-timeouts
+    // + calculerDetailsNoteFinale cyc 57 + jetons personnalisés + patterns groupe
+    // Beta 91 + 8 exports window.X — 4 existants + 4 promotions session C).
+    // Timers cascade `window._consulterEvalTimerId` + `window._apresOuvertureFichier`
+    // préservés (atomicité critique race guard clics rapides). Consommé par
+    // evaluation.js, travaux-ui.js, liste-evaluations.js, portfolio.js,
+    // synthese-retroaction-data.js, tableau-bord-apercu.js.
+    chargerScript('js/profil-etudiant-actions.js', stubs, win);
+
     // Charger le résidu dans le même sandbox via le 3e paramètre.
     chargerScript('js/profil-etudiant.js', stubs, win);
 });
@@ -189,11 +200,11 @@ describe('profil-etudiant — régression refactoring 2026-mai (canari + sentine
             'viderRapport',
             'sauvegarderPreferencesRapport',
             'restaurerPreferencesRapport',
-            // Zone Actions (L7851-8460) — 8 exports
+            // Zone Actions cascade — 8 exports (session C 18 mai 2026 : 4 existants + 4 promus window.X)
             'consulterEvaluation',
             'evaluerProduction',
+            'supprimerEvaluationDepuisProfil',
             'calculerDetailsNoteFinale',
-            'obtenirPratiqueActuelle',
             'attribuerJetonPersonnaliseAvecPrompt',
             'retirerJetonPersonnaliseAvecConfirmation',
             'calculerEtStockerPatternsGroupe',
