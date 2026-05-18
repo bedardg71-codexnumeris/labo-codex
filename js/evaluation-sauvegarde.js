@@ -63,20 +63,13 @@
        (déjà sur window via liste-evaluations.js:2787, bare ref walks
        scope chain → globalThis → trouve).
 
-   Bugs latents préservés (Cat-B post-merge — voir SUIVI-BUGS) :
-     · `_timerAutoSave` et `_pendingAutoSaveSnapshot` (L88-90, 4 sites au
-       total dans residue avant session B) sont des `let` privés à
-       l'IIFE de evaluation-chargement.js (L1085-1086) — bare references
-       cross-IIFE en strict mode JETTENT ReferenceError au runtime.
-       Bug introduit par session A (extraction chargement.js sans
-       promotion window). PRÉSERVATION STRICTE — pas de fix incidental
-       pendant ce refactor. Inscrire SUIVI-BUGS pour fix post-merge
-       (promotion `window._timerAutoSave` dans chargement.js + retrait
-       déclaration locale + patches 4 sites résidu).
-     · L'extraction PEUT révéler ce bug si les tests/usage exercent
-       sauvegarderEvaluation. Tests actuels ne l'appellent pas (typeof
-       check uniquement). Audit empirique a confirmé que call() throws
-       `_timerAutoSave is not defined`.
+   Bug #109 FIXÉ (étape 4, 2026-05-18) :
+     · `_timerAutoSave` et `_pendingAutoSaveSnapshot` promus `window.X` dans
+       evaluation-chargement.js (L1086-1087). Tous les sites cross-IIFE
+       (résidu evaluation.js × 3 + ce sous-module × 1) patchés §5.6 vers
+       `window._timerAutoSave` / `window._pendingAutoSaveSnapshot`. Plus
+       de ReferenceError au runtime — sauvegarde manuelle exerce le path
+       sans crash.
 
    Helpers cross-module consommés (script-scope globaux, bare access OK
    via window.X fallthrough) :
@@ -146,12 +139,9 @@
  * }
  */
 function sauvegarderEvaluation() {
-    // Annuler le debounce auto-save (la sauvegarde manuelle prend le relais)
-    // ⚠️ BUG LATENT préservé (session A) : _timerAutoSave / _pendingAutoSaveSnapshot
-    // sont private à l'IIFE evaluation-chargement.js — bare ref cross-IIFE throws
-    // ReferenceError. SUIVI-BUGS Cat-B post-merge.
-    if (_timerAutoSave) { clearTimeout(_timerAutoSave); _timerAutoSave = null; }
-    _pendingAutoSaveSnapshot = null;
+    // Annuler le debounce auto-save (la sauvegarde manuelle prend le relais) — Patch §5.6 fix #109 (étape 4)
+    if (window._timerAutoSave) { clearTimeout(window._timerAutoSave); window._timerAutoSave = null; }
+    window._pendingAutoSaveSnapshot = null;
 
     // 🔄 Détecter si on est en mode modification d'une évaluation existante
     if (window.evaluationEnCours?.idModification) {

@@ -136,8 +136,8 @@ function nouvelleEvaluation() {
 
     cocherOptionsParDefaut();
 
-    // Annuler tout auto-save en attente (race condition)
-    if (_timerAutoSave) { clearTimeout(_timerAutoSave); _timerAutoSave = null; }
+    // Annuler tout auto-save en attente (race condition) — Patch §5.6 fix #109 (étape 4)
+    if (window._timerAutoSave) { clearTimeout(window._timerAutoSave); window._timerAutoSave = null; }
 
     // 🔄 Réinitialiser evaluationEnCours à un objet vide (pas null) pour permettre l'affichage des jetons
     window.evaluationEnCours = {
@@ -2111,8 +2111,8 @@ function modifierEvaluation(evaluationId) {
                 }
             }
 
-            // Annuler tout auto-save en attente (race condition)
-            if (_timerAutoSave) { clearTimeout(_timerAutoSave); _timerAutoSave = null; }
+            // Annuler tout auto-save en attente (race condition) — Patch §5.6 fix #109 (étape 4)
+            if (window._timerAutoSave) { clearTimeout(window._timerAutoSave); window._timerAutoSave = null; }
 
             // ÉTAPE 5: Initialiser evaluationEnCours (AVANT cartouche/échelle)
             window.evaluationEnCours = {
@@ -2405,9 +2405,9 @@ function modifierEvaluation(evaluationId) {
  * Appelée à la place de sauvegarderEvaluation() si on modifie une évaluation existante
  */
 function sauvegarderEvaluationModifiee() {
-    // Annuler le debounce auto-save (la sauvegarde manuelle prend le relais)
-    if (_timerAutoSave) { clearTimeout(_timerAutoSave); _timerAutoSave = null; }
-    _pendingAutoSaveSnapshot = null;
+    // Annuler le debounce auto-save (la sauvegarde manuelle prend le relais) — Patch §5.6 fix #109 (étape 4)
+    if (window._timerAutoSave) { clearTimeout(window._timerAutoSave); window._timerAutoSave = null; }
+    window._pendingAutoSaveSnapshot = null;
 
     const evaluationId = window.evaluationEnCours?.idModification;
 
