@@ -1118,19 +1118,9 @@ function _flusherAutoSave() {
     }
 }
 
-function _autoSauvegarderCriteres(snapshot) {
-    window._timerAutoSave = null;
-    var ec = snapshot || window.evaluationEnCours;
-    if (!ec || !ec.etudiantDA || !ec.productionId || !ec.grilleId) return;
+// Helpers privés pour _autoSauvegarderCriteres (extraction étape 4 — éclatement cyc 55 → cyc ≤ 15)
 
-    // Au moins un critere doit etre renseigne
-    if (!Object.values(ec.criteres || {}).some(function(v) { return v; })) return;
-
-    // Collecter les criteres
-    const grilles = db.getSync('grillesTemplates', []);
-    const grille = grilles.find(function(g) { return g.id === ec.grilleId; });
-    if (!grille || !grille.criteres) return;
-
+function _collecterCriteresAutoSave(grille, ec) {
     const criteres = [];
     grille.criteres.forEach(function(c) {
         const niveau = ec.criteres[c.id];
@@ -1145,6 +1135,89 @@ function _autoSauvegarderCriteres(snapshot) {
             });
         }
     });
+    return criteres;
+}
+
+function _majEvaluationExistanteAutoSave(evalExistante, ec, criteres) {
+    evalExistante.criteres = criteres;
+    evalExistante.noteFinale = parseFloat((document.getElementById('noteProduction1') || {}).textContent) || evalExistante.noteFinale;
+    evalExistante.niveauFinal = (document.getElementById('niveauProduction1') || {}).textContent || evalExistante.niveauFinal;
+    var retroEl = document.getElementById('retroactionFinale1');
+    if (retroEl) evalExistante.retroactionFinale = retroEl.value;
+    evalExistante.dateModification = new Date().toISOString();
+    evalExistante.donneesAlgorithmiques = ec.donneesAlgorithmiques || evalExistante.donneesAlgorithmiques || {};
+}
+
+function _lireChampsDOMAutoSave() {
+    return {
+        echelleId: (document.getElementById('selectEchelle1') || {}).value || '',
+        cartoucheId: (document.getElementById('selectCartoucheEval') || {}).value || '',
+        statutRemise: (document.getElementById('remiseProduction1') || {}).value || '',
+        statutIntegrite: (document.getElementById('statutIntegrite') || {}).value || 'recevable',
+        notesIntegrite: (document.getElementById('notesIntegrite') || {}).value || '',
+        noteFinale: parseFloat((document.getElementById('noteProduction1') || {}).textContent) || 0,
+        niveauFinal: (document.getElementById('niveauProduction1') || {}).textContent || '',
+        retroactionFinale: (document.getElementById('retroactionFinale1') || {}).value || ''
+    };
+}
+
+function _lireOptionsAffichageAutoSave() {
+    return {
+        description: (document.getElementById('afficherDescription1') || {}).checked || false,
+        objectif: (document.getElementById('afficherObjectif1') || {}).checked || false,
+        tache: (document.getElementById('afficherTache1') || {}).checked || false,
+        adresse: (document.getElementById('afficherAdresse1') || {}).checked || false,
+        contexte: (document.getElementById('afficherContexte1') || {}).checked || false,
+        affichageNote: (document.querySelector('input[name="affichageNote1"]:checked') || {}).value || 'complet'
+    };
+}
+
+function _construireNouvelleEvaluationAutoSave(ec, grille, criteres) {
+    var etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    var etudiant = etudiants.find(function(e) { return e.da === ec.etudiantDA; });
+    var productions = obtenirDonneesSelonMode('productions');
+    var production = productions.find(function(p) { return p.id === ec.productionId; });
+    if (!etudiant || !production) return null;
+
+    var coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
+    var groupeCoursActif = db.getSync('groupeCoursActif', null);
+    var maintenant = new Date();
+    var champsDOM = _lireChampsDOMAutoSave();
+
+    return Object.assign({
+        id: genererIdUnique('EVAL_'),
+        etudiantDA: ec.etudiantDA,
+        etudiantNom: etudiant.prenom + ' ' + etudiant.nom,
+        groupe: etudiant.groupe || '',
+        coursId: coursId,
+        groupeCoursId: groupeCoursActif ? groupeCoursActif.id : null,
+        productionId: ec.productionId,
+        productionNom: production.titre || production.nom || '',
+        grilleId: ec.grilleId,
+        grilleNom: grille.nom || '',
+        dateEvaluation: maintenant.toISOString(),
+        heureEvaluation: maintenant.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' }),
+        criteres: criteres,
+        optionsAffichage: _lireOptionsAffichageAutoSave(),
+        donneesAlgorithmiques: ec.donneesAlgorithmiques || {},
+        verrouillee: false
+    }, champsDOM);
+}
+
+function _autoSauvegarderCriteres(snapshot) {
+    window._timerAutoSave = null;
+    var ec = snapshot || window.evaluationEnCours;
+    if (!ec || !ec.etudiantDA || !ec.productionId || !ec.grilleId) return;
+
+    // Au moins un critere doit etre renseigne
+    if (!Object.values(ec.criteres || {}).some(function(v) { return v; })) return;
+
+    // Collecter les criteres
+    const grilles = db.getSync('grillesTemplates', []);
+    const grille = grilles.find(function(g) { return g.id === ec.grilleId; });
+    if (!grille || !grille.criteres) return;
+
+    const criteres = _collecterCriteresAutoSave(grille, ec);
 
     // ACCÈS DIRECT — read-modify-write : doit lire TOUTES les évaluations du trimestre
     // pour ne pas perdre celles d'autres cours lors de la réécriture (idem lignes 2222, 5656+)
@@ -1156,62 +1229,13 @@ function _autoSauvegarderCriteres(snapshot) {
     });
 
     if (idx !== -1) {
-        // Mettre a jour l'evaluation existante
-        evaluations[idx].criteres = criteres;
-        evaluations[idx].noteFinale = parseFloat((document.getElementById('noteProduction1') || {}).textContent) || evaluations[idx].noteFinale;
-        evaluations[idx].niveauFinal = (document.getElementById('niveauProduction1') || {}).textContent || evaluations[idx].niveauFinal;
-        var retroEl = document.getElementById('retroactionFinale1');
-        if (retroEl) evaluations[idx].retroactionFinale = retroEl.value;
-        evaluations[idx].dateModification = new Date().toISOString();
-        evaluations[idx].donneesAlgorithmiques = ec.donneesAlgorithmiques || evaluations[idx].donneesAlgorithmiques || {};
+        _majEvaluationExistanteAutoSave(evaluations[idx], ec, criteres);
     } else {
         // Creer une nouvelle evaluation (brouillon non verrouille)
-        var etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-        var etudiant = etudiants.find(function(e) { return e.da === ec.etudiantDA; });
-        var productions = obtenirDonneesSelonMode('productions');
-        var production = productions.find(function(p) { return p.id === ec.productionId; });
-        if (!etudiant || !production) return;
-
-        var coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
-        var groupeCoursActif = db.getSync('groupeCoursActif', null);
-        var maintenant = new Date();
-
-        var evaluation = {
-            id: genererIdUnique('EVAL_'),
-            etudiantDA: ec.etudiantDA,
-            etudiantNom: etudiant.prenom + ' ' + etudiant.nom,
-            groupe: etudiant.groupe || '',
-            coursId: coursId,
-            groupeCoursId: groupeCoursActif ? groupeCoursActif.id : null,
-            productionId: ec.productionId,
-            productionNom: production.titre || production.nom || '',
-            grilleId: ec.grilleId,
-            grilleNom: grille.nom || '',
-            echelleId: (document.getElementById('selectEchelle1') || {}).value || '',
-            cartoucheId: (document.getElementById('selectCartoucheEval') || {}).value || '',
-            dateEvaluation: maintenant.toISOString(),
-            heureEvaluation: maintenant.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' }),
-            statutRemise: (document.getElementById('remiseProduction1') || {}).value || '',
-            statutIntegrite: (document.getElementById('statutIntegrite') || {}).value || 'recevable',
-            notesIntegrite: (document.getElementById('notesIntegrite') || {}).value || '',
-            criteres: criteres,
-            noteFinale: parseFloat((document.getElementById('noteProduction1') || {}).textContent) || 0,
-            niveauFinal: (document.getElementById('niveauProduction1') || {}).textContent || '',
-            retroactionFinale: (document.getElementById('retroactionFinale1') || {}).value || '',
-            optionsAffichage: {
-                description: (document.getElementById('afficherDescription1') || {}).checked || false,
-                objectif: (document.getElementById('afficherObjectif1') || {}).checked || false,
-                tache: (document.getElementById('afficherTache1') || {}).checked || false,
-                adresse: (document.getElementById('afficherAdresse1') || {}).checked || false,
-                contexte: (document.getElementById('afficherContexte1') || {}).checked || false,
-                affichageNote: (document.querySelector('input[name="affichageNote1"]:checked') || {}).value || 'complet'
-            },
-            donneesAlgorithmiques: ec.donneesAlgorithmiques || {},
-            verrouillee: false
-        };
-
-        evaluations.push(evaluation);
-        ec.idModification = evaluation.id;
+        const nouvelle = _construireNouvelleEvaluationAutoSave(ec, grille, criteres);
+        if (!nouvelle) return;
+        evaluations.push(nouvelle);
+        ec.idModification = nouvelle.id;
     }
 
     sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
