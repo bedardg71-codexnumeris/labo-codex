@@ -11,8 +11,10 @@
    cartoucheSelectionnee, afficherCriteresDepuisGrille, niveauSelectionne,
    _debouncerAutoSave, _flusherAutoSave, _autoSauvegarderCriteres (cyc 55).
 
-   Variables module-scope encapsulées (anti-pattern §5.10 — pas de promotion
-   window.X) : _timerAutoSave, _pendingAutoSaveSnapshot.
+   Variables module-scope promues window.X (étape 4 fix #109, 2026-05-18) :
+   window._timerAutoSave, window._pendingAutoSaveSnapshot. Initialement déclarées
+   `let` IIFE-local (session A), promues à window après audit empirique session B
+   (bare cross-IIFE refs résidu/sauvegarde jetaient ReferenceError au runtime).
 
    12 exports window.X :
      · Bloc principal evaluation.js (10) : chargerListeEtudiantsEval,
@@ -1083,13 +1085,13 @@ function niveauSelectionne(critereId) {
    Persiste les criteres en IDB apres chaque modification
    =============================== */
 
-let _timerAutoSave = null;
-let _pendingAutoSaveSnapshot = null;
+window._timerAutoSave = null;
+window._pendingAutoSaveSnapshot = null;
 
 function _debouncerAutoSave() {
-    if (_timerAutoSave) clearTimeout(_timerAutoSave);
+    if (window._timerAutoSave) clearTimeout(window._timerAutoSave);
     // Snapshot de l'état ACTUEL pour pouvoir flusher si l'utilisateur change d'élève
-    _pendingAutoSaveSnapshot = {
+    window._pendingAutoSaveSnapshot = {
         etudiantDA: window.evaluationEnCours?.etudiantDA,
         productionId: window.evaluationEnCours?.productionId,
         grilleId: window.evaluationEnCours?.grilleId,
@@ -1099,25 +1101,25 @@ function _debouncerAutoSave() {
         donneesAlgorithmiques: window.evaluationEnCours?.donneesAlgorithmiques
             ? JSON.parse(JSON.stringify(window.evaluationEnCours.donneesAlgorithmiques)) : {}
     };
-    _timerAutoSave = setTimeout(function() { _autoSauvegarderCriteres(_pendingAutoSaveSnapshot); }, 1500);
+    window._timerAutoSave = setTimeout(function() { _autoSauvegarderCriteres(window._pendingAutoSaveSnapshot); }, 1500);
 }
 
 /**
  * Flush l'auto-save en attente immédiatement (appelé avant changement d'étudiant/fermeture)
  */
 function _flusherAutoSave() {
-    if (_timerAutoSave) {
-        clearTimeout(_timerAutoSave);
-        _timerAutoSave = null;
+    if (window._timerAutoSave) {
+        clearTimeout(window._timerAutoSave);
+        window._timerAutoSave = null;
     }
-    if (_pendingAutoSaveSnapshot) {
-        _autoSauvegarderCriteres(_pendingAutoSaveSnapshot);
-        _pendingAutoSaveSnapshot = null;
+    if (window._pendingAutoSaveSnapshot) {
+        _autoSauvegarderCriteres(window._pendingAutoSaveSnapshot);
+        window._pendingAutoSaveSnapshot = null;
     }
 }
 
 function _autoSauvegarderCriteres(snapshot) {
-    _timerAutoSave = null;
+    window._timerAutoSave = null;
     var ec = snapshot || window.evaluationEnCours;
     if (!ec || !ec.etudiantDA || !ec.productionId || !ec.grilleId) return;
 
