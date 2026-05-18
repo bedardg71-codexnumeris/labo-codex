@@ -1,7 +1,7 @@
 # Suivi des bugs testeurs
 
 > **Objectif** : Tracker les bugs rapportés par les testeurs pour éviter le travail en double.
-> **Dernière mise à jour** : 17 mai 2026 (+6 bugs latents refactor trimestre-v2 sessions B+C)
+> **Dernière mise à jour** : 18 mai 2026 (+1 bug latent refactor profil-etudiant session B — #105)
 
 ---
 
@@ -18,6 +18,7 @@
 | 102 | Claude (refactor trimestre-v2 session C) | 17 mai 2026 | Code mort fonctionnel — `afficherFormHoraireV2` et `modifierHoraireSelectionneV2` (dans `trimestre-v2-orchestre.js`) assignent à `horaireEnEditionId` et `seancesTempV2`, mais ces variables sont déclarées `let` dans le scope IIFE de `trimestre-v2-horaires.js` (scope isolé). En strict mode + IIFE séparé, les assignations plantent (ReferenceError). Aucun caller identifié pour ces 2 fonctions dans le projet (ni dans index.html, ni data-action, ni window.X) → dead code. Préservation comportementale stricte du refactor. À traiter : retirer les fonctions dead code OU promouvoir les vars sur window.X. | Basse | js/trimestre-v2-orchestre.js (afficherFormHoraireV2 + modifierHoraireSelectionneV2) |
 | 103 | Claude (refactor trimestre-v2 session C) | 17 mai 2026 | ReferenceError latent — `modifierHoraireSelectionneV2` appelle `afficherSeancesHoraireV2()` sans guard `typeof`, mais cette fonction n'est définie nulle part dans le code actif. Préservé en lien avec #102 (même dead code). | Basse | js/trimestre-v2-orchestre.js (modifierHoraireSelectionneV2) |
 | 104 | Claude (refactor trimestre-v2 session C) | 17 mai 2026 | ReferenceError latent — `activerGroupeCoursV2` appelle `rafraichirListeGroupeCoursV2()` sans guard `typeof`, mais cette fonction n'est définie nulle part dans le code actif. La fonction `activerGroupeCoursV2` EST exportée et potentiellement appelable, donc moins clairement « dead » que #102-103. Préservation comportementale stricte. | Basse | js/trimestre-v2-orchestre.js (activerGroupeCoursV2) |
+| 105 | Claude (refactor profil-etudiant session B) | 18 mai 2026 | Dead code fonctionnel — `sauvegarderConfidentiel` (dans `profil-etudiant-confidentiel.js`, originalement L5334-5335) contient `if (typeof chargerProfilEtudiant === 'function') { chargerProfilEtudiant(_confidentielDaActuel); }`. La fonction `chargerProfilEtudiant` n'est définie nulle part dans le codebase (0 résultat sur grep `^(function\|async function\|window\.)chargerProfilEtudiant\b js/`). Le `typeof` retourne toujours `false`, donc le rechargement du profil après sauvegarde des informations confidentielles n'a jamais lieu. Préservation comportementale stricte du refactor (l'utilisateur ne percevait pas de bug — le badge confidentiel se met à jour au prochain affichage de profil). À corriger : appeler `window.afficherProfilComplet(_confidentielDaActuel)` à la place, ou retirer la branche dead. | Basse | js/profil-etudiant-confidentiel.js (sauvegarderConfidentiel) |
 
 ---
 

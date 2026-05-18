@@ -1,7 +1,7 @@
 # BACKLOG - Monitorage Pedagogique
 
 > **Pour Claude** : Ce fichier liste les taches a faire. Consulte-le en debut de session.
-> **Derniere mise a jour** : 17 mai 2026 (Beta 99.47, Build 0517-1138) — refactor `trimestre-v2.js` mergé (3 sessions A+B+C). 8 sous-modules extraits sur 8 prévus. trimestre-v2.js : 6 584 → 599 LOC (-90,9 %). `changerGroupeCoursActifV2` cyc 94 → < 15 (éclatée en 4 helpers + 1, Écart #8). 0 fonction au-delà de cyc 30. +6 bugs latents inscrits SUIVI-BUGS (#99-104, préservation comportementale stricte). 23 items ouverts.
+> **Derniere mise a jour** : 18 mai 2026 (Beta 99.48, Build 0518-0502) — refactor `profil-etudiant.js` sessions A+B livrées sur worktree `refactor/profil-etudiant`. 5 sous-modules extraits (helpers + calculs + rapport session A + diagnostics + confidentiel session B) : 56 fonctions promues window.X. profil-etudiant.js : 8 818 → 5 207 LOC (-40,9 %). 0 nouvelle fonction cyc > 30 introduite. +1 bug latent inscrit SUIVI-BUGS #105 (chargerProfilEtudiant dead code, préservation comportementale stricte). Sessions C+D restantes (actions cascade + sections affichage + étape 4 éclatement). 23 items ouverts.
 
 ---
 

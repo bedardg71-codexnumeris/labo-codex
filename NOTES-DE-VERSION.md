@@ -1,7 +1,30 @@
 # Notes de version — Monitorage pedagogique
 
 > Document de gestion locale. Historique complet avec dates.
-> Derniere mise a jour : 17 mai 2026
+> Derniere mise a jour : 18 mai 2026
+
+---
+
+## Beta 99.48 (18 mai 2026, sessions A+B partielles — chantier en cours)
+
+**Refactor `profil-etudiant.js` (sessions A+B, branche `refactor/profil-etudiant`)**
+
+*Session A (18 mai 00:30, 3 sous-modules LOW)*
+- **3 sous-modules** : `profil-etudiant-helpers.js` (630), `profil-etudiant-calculs.js` (1 547), `profil-etudiant-rapport.js` (426).
+- Resume : 37 fonctions promues `window.X` (convention systematique decision etape 1 b). 11 helpers internes (interpreterMobilisation/Performance/Completion/Assiduite, obtenirCouleurNiveauIDME, obtenirDetailsAssiduite, etc.) promus pour securite frontiere.
+- 2 fonctions cyc > 30 deplacees dans `calculs.js` (heritees du god module) : `calculerIPB` 36, `determinerCibleIntervention` 58. A eclater etape 4 session D.
+
+*Session B (18 mai matin, 2 sous-modules MEDIUM)*
+- **2 sous-modules** : `profil-etudiant-diagnostics.js` (865 LOC fichier, 11 fonctions diagnostics SRPNF/Criteres + blocs RLO + onglets de developpement), `profil-etudiant-confidentiel.js` (330 LOC fichier, 8 fonctions modal PII + services adaptes + sous-categories medicales).
+- 19 fonctions promues `window.X` (11 + 8, 6 exports existants conserves cote confidentiel + 2 promus session B).
+- 2 variables module-scope encapsulees dans l'IIFE confidentiel (`_confidentielDaActuel`, `SOUS_CATEGORIES_SERVICES`) — pas de fuite cross-module.
+- **Conformite SKILL_Securite_donnees.md §9.1** (zone confidentiel risque PII) : preservation comportementale stricte, echappement existant conserve (escapeHtml local + echapperHtml canonique cote sous-categories). 1 acquittement `// security-ok` inline sur innerHTML re-flague baseline F.16 hook Defense J (valeurs statiques + echapperHtml() defense profondeur).
+- **Bug latent preserve** : SUIVI-BUGS #105 — `sauvegarderConfidentiel` appelle `chargerProfilEtudiant()` derriere un `typeof === 'function'` guard, mais la fonction n'est definie nulle part dans le codebase. Branche dead, rechargement post-sauvegarde n'arrive jamais. Preservation comportementale stricte du refactor.
+
+*Bilan cumule sessions A+B (profil-etudiant.js)*
+- **5 sous-modules + residu** : 8 818 → 5 207 LOC residu (**-40,9 %**). 56 fonctions promues `window.X`. 0 nouvelle fonction cyc > 30 introduite.
+- **Tests** : 70 Vitest + 10 Playwright = **80/80 verts** (canari multi-module + sentinelle 60+ exports + structure monstre `afficherProfilComplet` + etat pivot `window.profilActuelDA` + orchestrateur cascade `consulterEvaluation` + 2 Playwright dedies profil-etudiant chargement).
+- **Sessions C+D restantes** : actions cascade (`consulterEvaluation` orchestrateur multi-timeouts, +calculerDetailsNoteFinale cyc 57) puis sections affichage ~3 700 LOC + etape 4 (eclatement `afficherProfilComplet` 58, autres heritages).
 
 ---
 
