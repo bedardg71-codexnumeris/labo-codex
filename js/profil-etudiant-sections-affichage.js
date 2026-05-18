@@ -1,19 +1,33 @@
 /* ===============================
-   MODULE 15: PROFIL DÉTAILLÉ D'UN ÉTUDIANT
-   Index: 50 10-10-2025a → Modularisation
-   
-   ⚠️ AVERTISSEMENT ⚠️
-   Ce module gère l'affichage complet du profil individuel
-   d'un étudiant dans la section Étudiants › Profil.
-   
-   Contenu de ce module:
-   - Affichage des informations de l'étudiant
-   - Gestion du portfolio d'apprentissage
-   - Sélection des artefacts à retenir
-   - Calcul des notes provisoires et finales
-   - (À développer) Historique d'assiduité
-   - (À développer) Indices A-C-P détaillés
-   - (À développer) Graphiques de progression
+   profil-etudiant-sections-affichage.js
+   Sous-module renommé depuis profil-etudiant.js (session D refactor, 18 mai 2026).
+
+   Périmètre : zone HIGH partie 2 — sections d'affichage du profil étudiant.
+   Contient l'orchestrateur central `afficherProfilComplet` (cyc 58, à éclater
+   étape 4) + ~30 fonctions `genererSection*` + handlers UI + 3 variables
+   module-scope encapsulées dans l'IIFE :
+   - `profilActuelDA` dual-write atomique (état pivot, lu 24× hors module via window.X)
+   - `sectionProfilActive` (section profil active par défaut « productions »)
+   - `indiceActif` (indice A/C/P actuellement déployé en détail)
+
+   Index historique : MODULE 15 PROFIL DÉTAILLÉ D'UN ÉTUDIANT (modularisation 10 oct 2025).
+
+   Sous-modules complémentaires (refactor sessions A+B+C 18 mai 2026) :
+   - profil-etudiant-helpers.js (16 fonctions : helpers + badges + interprétations indices)
+   - profil-etudiant-calculs.js (14 fonctions : moyennes + IPB + RàI + cibles)
+   - profil-etudiant-rapport.js (7 fonctions : rapport API + préférences)
+   - profil-etudiant-diagnostics.js (11 fonctions : diagnostics SRPNF + blocs RLO + onglets)
+   - profil-etudiant-confidentiel.js (8 fonctions : modal PII + services adaptés)
+   - profil-etudiant-actions.js (8 fonctions : cascade consulterEvaluation + jetons + patterns)
+
+   État pivot critique préservé (Écart #6 MODULES-MAP §2.3) :
+   - L52 `let profilActuelDA = null;` (module-scope, après en-tête)
+   - L53 `window.profilActuelDA = null;` (global, lu 24× hors module)
+   - Couple `profilActuelDA = X; window.profilActuelDA = X;` doit rester atomique
+     dans afficherProfilComplet (dual-write atomique L2219-2220 originale).
+
+   @see SESSION.md — Récap session D
+   @see audit/refactoring-prep/MODULES-MAP.md §2.3
    =============================== */
 
 (function() {
