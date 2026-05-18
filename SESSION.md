@@ -16,24 +16,27 @@
 > - `Monitorage_v6/audit/SESSION.md` sur branche `audit/2026-mai` — session **audit annuel** Phase 3 (sujet distinct : audit de fidélité concept → implémentation).
 > - `Monitorage_v6-refactor/SESSION.md` sur branche `refactor/trimestre-v2` — récap historique du chantier trimestre-v2 (mergé FF sur main, branche à supprimer après push).
 
-# SESSION — État au 18 mai 2026 (refactor profil-etudiant.js — session A LIVRÉE, 3 sous-modules LOW extraits)
+# SESSION — État au 18 mai 2026 (refactor profil-etudiant.js — session A LIVRÉE, prête pour relai session B)
 
-**Date** : 17 mai soir + 18 mai (étapes 0+1+2 + session A complète)
+**Date** : 17 mai soir + 18 mai 00:30 (étapes 0+1+2 + session A complète, en une session de travail)
 **Beta / build** : 99.48 / 0518-0030
 **Branche actuelle du worktree** : `refactor/profil-etudiant` (créée depuis `main` 0e8e0f8)
-**Dernier commit** : `d5013d9` — `refactor(profil-etudiant): extraire profil-etudiant-rapport.js (zone rapport, -391 LOC)` (bump 99.48 en cours d'ajout)
+**Dernier commit** : `590ea89` — `build(version): bump 99.47 → 99.48 b0518-0030 — session A profil-etudiant LIVRÉE`
 **Branche `main`** : `0e8e0f8` (15 commits non-pushés depuis `4b915b0` — à pusher depuis la maison)
 **Statut chantier profil-etudiant.js** :
 - **Étape 0** : worktree + symlinks + baseline 73/73 ✅ (17 mai soir)
 - **Étape 1** : lecture intégrale + audit ESLint + Agent Explore — **TERMINÉE** (commit `52ae385`). 11 écarts MODULES-MAP §2.3.
 - **Étape 2** : tests régression Vitest 5 + Playwright 2 — **TERMINÉE** (commit `56c0978`). 80/80 verts.
-- **Étape 3 session A LOW** : 3 sous-modules extraits — **TERMINÉE** (commits `d9c6793`, `cd70c9d`, `d5013d9` + bump 99.48). Résidu 8818 → 6337 LOC (-28,1 %). 37 fonctions promues window.X.
-- **Étape 3 sessions B+C+D** : à démarrer (diagnostics+confidentiel, actions, sections affichage 3 700 LOC).
-- **Étapes 4-6** : éclatement (calculerIPB 36, determinerCibleIntervention 58, afficherProfilComplet 58, calculerDetailsNoteFinale 57) + validation Grégoire + merge.
+- **Étape 3 session A LOW** : 3 sous-modules extraits — **TERMINÉE** (commits `d9c6793` helpers + `cd70c9d` calculs + `d5013d9` rapport + `590ea89` bump 99.48). Résidu 8818 → 6337 LOC (-28,1 %). 37 fonctions promues window.X.
+- **Étape 3 session B MEDIUM** : à démarrer — diagnostics + confidentiel (PII). Voir consigne ci-dessous.
+- **Étape 3 sessions C+D** : à démarrer après B — actions cascade puis sections affichage 3 700 LOC + étape 4.
+- **Étapes 4-6** : éclatement (calculerIPB 36, determinerCibleIntervention 58, afficherProfilComplet 58, calculerDetailsNoteFinale 57) + validation Grégoire + merge FF.
 
-**Tests** : 70 Vitest + 10 Playwright = **80/80 verts**.
+**Tests** : 70 Vitest + 10 Playwright = **80/80 verts** (confirmés au dernier passage du test runner après le commit `d5013d9`).
 
-**Commits worktree non-pushés** : 5 (52ae385 docs + 56c0978 tests + d9c6793 helpers + cd70c9d calculs + d5013d9 rapport, bump 99.48 en cours).
+**Commits worktree non-pushés** : 7 (`52ae385` → `590ea89`). À pusher depuis la maison (réseau école bloque GitHub) en même temps que les 15 commits main du refactor trimestre-v2.
+
+**Action en attente côté Grégoire** : aucune. La session est propre, le worktree est dans un état cohérent pour reprendre en session B.
 
 ## Récap session A — 18 mai 2026 (3 sous-modules LOW extraits)
 
@@ -91,31 +94,69 @@
 ```
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6-profil-etudiant
 
+# Vérification rapide à l'ouverture de session :
+git log --oneline 0e8e0f8..HEAD       # 7 commits visibles (52ae385 → 590ea89)
+git status                             # propre (sauf node_modules symlinks)
+cat version.json                       # {"build":"0518-0030","beta":"99.48"}
+cd tests && npm test                   # 80/80 verts (70 Vitest + 10 Playwright)
+wc -l ../js/profil-etudiant.js ../js/profil-etudiant-*.js  # résidu 6337, +3 sous-modules
+
 Lecture obligatoire :
 1. SESSION.md (ce document) — récap étapes 0+1+2 + session A LIVRÉE
 2. audit/refactoring-prep/MODULES-MAP.md §2.3 (découpage 7 sous-modules + 11 écarts)
 3. audit/refactoring-prep/METHODE-REFACTORING.md §3 étape 3 + §7 propositions Catégorie B trimestre-v2 + §7 notes pour profil-etudiant
-4. **Skills pour Claude Code/SKILL_Securite_donnees.md** — OBLIGATOIRE pour zone confidentiel (PII, données sensibles)
+4. **Skills pour Claude Code/SKILL_Securite_donnees.md** — OBLIGATOIRE pour zone confidentiel (PII, données sensibles, services adaptés, sous-catégories médicales). Lire AVANT de toucher au sous-module confidentiel.
 
-État git attendu :
-- main : 0e8e0f8 (inchangé)
-- refactor/profil-etudiant : 6 commits non-pushés (52ae385 → d5013d9 + bump 99.48)
-- Tests verts : 80/80
-- Beta / build : 99.48 / 0518-0030
+OBJECTIF SESSION B : extraire 2 sous-modules MEDIUM (~1-2 h)
 
-OBJECTIF SESSION B : extraire 2 sous-modules MEDIUM (~1-2 h) :
-- `js/profil-etudiant-diagnostics.js` (~830 LOC, zone L5693-6520 originale)
-  - Diagnostics SRPNF/Critères/Générique
-  - Blocs RLO + Évolution
-  - Position dans résidu actuel : à recalculer (zone décalée par les 3 extractions précédentes)
-- `js/profil-etudiant-confidentiel.js` (~365 LOC, zone L8461-8716 originale)
-  - **Zone PII** — données sensibles : services adaptés, sous-catégories médicales
-  - Modal confidentiel : ouverture, sauvegarde, ajout/retrait services
-  - Charger SKILL_Securite_donnees.md AVANT toute modification
+### Sous-module 4 — `js/profil-etudiant-diagnostics.js` (~830 LOC)
+- Zone originale L5693-6520, zone résidu actuel à recalculer
+- 1re fonction probable : `genererDiagnosticCriteres` (visible à L3603 du résidu actuel)
+- Contenu : Diagnostics SRPNF/Critères/Générique, _genererBarresSRPNF, Blocs RLO + Évolution + Consolidation + Gestes cognitifs + Note RLO + Onglets
+- Risque MOYEN (consomme calculs.js + helpers.js)
 
-Bump prévu en fin de session B : version 99.48 → 99.49 (ou refresh build 99.48 b0518-XXXX selon ampleur).
+### Sous-module 5 — `js/profil-etudiant-confidentiel.js` (~365 LOC)
+- Zone originale L8461-8716 + zone Section Travaux L8717-8818 (NON, garder Travaux dans résidu — voir Écart MODULES-MAP §2.3 sous-module #7 = confidentiel + Section Travaux ; à confirmer à l'ouverture)
+- Variables module-scope incluses : `_confidentielDaActuel`, `SOUS_CATEGORIES_SERVICES`
+- Contenu : modal confidentiel (ouverture, sauvegarde, chargement notes/présences, services adaptés, sous-catégories) + `aDesInfosConfidentielles`
+- Risque ÉLEVÉ (PII) — **respecter SKILL_Securite_donnees.md §9**
 
-OBJECTIF SESSION A (RÉALISÉ — référence) : 3 sous-modules LOW (helpers + calculs + rapport)
+### Workflow par sous-module (check-list éprouvée sessions A) :
+1. **Localiser zone** : `grep -nE "^function" js/profil-etudiant.js | awk -F: '$1 >= X && $1 <= Y'` pour confirmer les bornes
+2. **Lire la zone** (Read ciblé du début + fin pour vérifier frontières exactes — pas besoin de tout lire)
+3. **Audit pré-deletion doublons** : `grep -nE "^window\.(fonc1|fonc2|...)\s*=" js/profil-etudiant.js` pour identifier les exports déjà sur window
+4. **Commenter les doublons** dans le résidu avec pointer vers nouveau sous-module (Edit) — préservation contexte historique
+5. **Extraire la zone** vers `/tmp/<zone>-content.js` via `sed -n 'START,ENDp' js/profil-etudiant.js > /tmp/...`
+6. **Construire le sous-module** avec heredocs bash : header (IIFE + 'use strict' + en-tête commentaire) + contenu + footer (16/N exports window.X + `})()`)
+7. **Vérifier syntaxe** : `node --check js/profil-etudiant-<zone>.js`
+8. **Supprimer la zone du résidu** : `sed -i '' 'START,ENDd' js/profil-etudiant.js`
+9. **Modifier index.html** : ajouter `<script src="js/profil-etudiant-<zone>.js?v=20260518a"></script>` après le précédent et AVANT le résidu (ordre : helpers → calculs → rapport → diagnostics → confidentiel → résidu)
+10. **Modifier `tests/unit/refactor-profil-etudiant.test.js`** : ajouter `chargerScript('js/profil-etudiant-<zone>.js', stubs, win)` + élargir sentinelle avec exports promus
+11. **Audit post-extraction** : grep doublons orphelins (= 0 attendu), ESLint complexity résidu + nouveau sous-module
+12. **Tests verts attendus** : 80/80
+13. **Commit par sous-module** avec message conventionnel
+
+### Bump prévu en fin de session B
+Refresh build 99.48 b0518-XXXX (pas de changement de version majeure car même journée, même chantier). Optionnellement passer à 99.49 si Grégoire le préfère pour marquer une session distincte.
+
+### Réflexes installés (METHODE §7 trimestre-v2 + session A profil-etudiant)
+- Convention systématique `window.X` pour TOUTES les fonctions extraites (décision étape 1 b)
+- Doublons d'export pré-existants : commenter dans le résidu, ne pas supprimer (préservation contexte)
+- Pattern appels privés résiduels OK via chaîne de scope global — pas besoin de migrer en `window.X()`
+- Helper `chargerScript(path, stubs, fauxWindowExistant)` réutilisé tel quel
+- Acquittement `// security-ok` automatique sur XSS innerHTML transférés tels quels (préservation comportementale stricte)
+- Audit ESLint complexity APRÈS chaque extraction (vérifier pas de régression)
+
+### Notes spécifiques session B
+- **PII** : la zone confidentiel manipule des données sensibles (santé mentale, services adaptés, sous-catégories médicales). Pas de modification du comportement — extraction comportementalement neutre. Si un bug latent est détecté pendant l'extraction, l'inscrire en SUIVI-BUGS Catégorie B, ne PAS le corriger pendant le refactor.
+- **`window._avertiGrilleMoyennes`** : variable transitoire utilisée par calculs.js et diagnostics.js — vérifier qu'elle reste accessible cross-module (probablement OK via window.X automatique).
+- **`window._consulterEvalTimerId` et `window._apresOuvertureFichier`** : timers de cascade utilisés par consulterEvaluation (session C — pas session B). Pas de manipulation en B.
+
+---
+
+## Consigne session A (RÉALISÉ — référence)
+
+3 sous-modules LOW (helpers + calculs + rapport)
 - helpers.js 630 LOC, calculs.js 1547 LOC, rapport.js 426 LOC
 - Total 2603 LOC extraits, 37 fonctions promues window.X
 - Résidu 8818 → 6337 LOC (-28,1 %)
