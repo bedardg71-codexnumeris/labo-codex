@@ -23,9 +23,13 @@
      · basculerVueRetroaction (exporté — callers cross-module : travaux-
        ui.js:4556)
      · genererRetroactionSpecifique (privée — appelée intra-IIFE)
-     · genererRetroactionBilan (cyc 75 PRIVÉE — héritage Cat-B accepté,
-       au-dessus du seuil proposé N=50 mais sous le seuil dur du monstre
-       cyc 78 modifierEvaluation)
+     · genererRetroactionBilan (cyc 75 → cyc ≤ 30 PRIVÉE — éclatée étape 4
+       le 18 mai 2026 en 10 helpers privés : _chargerHistoriqueBilan,
+       _chargerGrilleDefBilan, _collecterCriteresBilan, _detecterPatrons
+       RecurrentsBilan, _compterErreursFrancaisBilan, _detecterAlgoA0Bilan,
+       _rendreAlgoA0Bilan, _rendreDefisBilan, _rendreTousMaitrisesBilan,
+       _rendreForceBilan, _rendreRecurrentsBilan, _rendreJetonsBilan +
+       2 constantes module-scope _NOMS_NIV_BILAN, _ORDRE_NIV_BILAN)
      · copierToutRetroaction (exporté — callers cross-module : travaux-
        ui.js:4572)
      · sauvegarderRetroactionFinale (privée — 3 LOC, comportementalement
@@ -89,9 +93,6 @@
    Bugs latents préservés (Cat-B post-merge — voir SUIVI-BUGS) :
      · sauvegarderRetroactionFinale 3 LOC no-op (aucun appelant — dead
        code apparent, préservation stricte)
-     · genererRetroactionBilan cyc 75 (sous-découpage `-retroaction-
-       bilan.js` reporté à un cycle ultérieur — pattern profil-etudiant-
-       sections-affichage.js 4 654 LOC accepté par Grégoire le 18 mai)
    =============================== */
 
 (function() {
@@ -477,40 +478,34 @@ function genererRetroactionSpecifique() {
     conteneur.innerHTML = html;
 }
 
-function genererRetroactionBilan() {
-    var conteneur = document.getElementById('contenuRetroBilan');
-    if (!conteneur) return;
+// Constantes partagées par les helpers privés _Bilan* (extraction étape 4 — éclatement cyc 75 → cyc ≤ 15)
+var _NOMS_NIV_BILAN = { 'E': 'Étendu', 'M': 'Maîtrisé', 'D': 'En développement', 'I': 'Incomplet' };
+var _ORDRE_NIV_BILAN = { 'E': 4, 'M': 3, 'D': 2, 'I': 1 };
 
-    var ec = window.evaluationEnCours;
-    if (!ec || !ec.etudiantDA || !ec.grilleId) {
-        conteneur.innerHTML = '<p class="eval-vide">Sélectionne un étudiant et une grille pour voir le bilan.</p>';
-        return;
-    }
-
-    var NOMS_NIV = { 'E': 'Étendu', 'M': 'Maîtrisé', 'D': 'En développement', 'I': 'Incomplet' };
-    var ORDRE_NIV = { 'E': 4, 'M': 3, 'D': 2, 'I': 1 };
-    var da = ec.etudiantDA;
-    var html = '';
-
-    // Charger l'historique
-    var historiqueEleve = [];
+function _chargerHistoriqueBilan(da) {
     try {
         var toutesEvals = obtenirDonneesSelonMode('evaluationsSauvegardees');
-        historiqueEleve = toutesEvals
+        return toutesEvals
             .filter(function(e) { return e.etudiantDA === da && !e.remplaceeParId; })
             .sort(function(a, b) { return new Date(b.dateEvaluation) - new Date(a.dateEvaluation); })
             .slice(0, 5);
-    } catch(e) { console.warn('[Evaluation] historique eleve load skipped:', e.message || e); }
-    var evalPrecedente = historiqueEleve.length > 0 ? historiqueEleve[0] : null;
+    } catch(e) {
+        console.warn('[Evaluation] historique eleve load skipped:', e.message || e);
+        return [];
+    }
+}
 
-    // Grille pour descriptions
-    var grilleDef = null;
+function _chargerGrilleDefBilan(grilleId) {
     try {
         var grilles = db.getSync('grillesTemplates', []);
-        grilleDef = grilles.find(function(g) { return g.id === ec.grilleId; }) || null;
-    } catch(e) { console.warn('[Evaluation] grille lookup skipped:', e.message || e); }
+        return grilles.find(function(g) { return g.id === grilleId; }) || null;
+    } catch(e) {
+        console.warn('[Evaluation] grille lookup skipped:', e.message || e);
+        return null;
+    }
+}
 
-    // Critères actuels depuis evaluationEnCours
+function _collecterCriteresBilan(grilleDef, ec) {
     var criteres = [];
     if (grilleDef && grilleDef.criteres && ec.criteres) {
         grilleDef.criteres.forEach(function(gc) {
@@ -520,23 +515,26 @@ function genererRetroactionBilan() {
             }
         });
     }
+    return criteres;
+}
 
-    // Patrons récurrents
+function _detecterPatronsRecurrentsBilan(criteres, historiqueEleve) {
     var nomsPatrons = [];
-    if (historiqueEleve.length >= 2) {
-        var cH1 = {}; var cH2 = {};
-        if (historiqueEleve[0] && historiqueEleve[0].criteres) historiqueEleve[0].criteres.forEach(function(c) { cH1[c.critereNom] = c.niveauSelectionne; });
-        if (historiqueEleve[1] && historiqueEleve[1].criteres) historiqueEleve[1].criteres.forEach(function(c) { cH2[c.critereNom] = c.niveauSelectionne; });
-        criteres.forEach(function(c) {
-            if ((c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D') &&
-                (cH1[c.critereNom] === 'I' || cH1[c.critereNom] === 'D') &&
-                (cH2[c.critereNom] === 'I' || cH2[c.critereNom] === 'D')) {
-                nomsPatrons.push(c.critereNom);
-            }
-        });
-    }
+    if (historiqueEleve.length < 2) return nomsPatrons;
+    var cH1 = {}; var cH2 = {};
+    if (historiqueEleve[0] && historiqueEleve[0].criteres) historiqueEleve[0].criteres.forEach(function(c) { cH1[c.critereNom] = c.niveauSelectionne; });
+    if (historiqueEleve[1] && historiqueEleve[1].criteres) historiqueEleve[1].criteres.forEach(function(c) { cH2[c.critereNom] = c.niveauSelectionne; });
+    criteres.forEach(function(c) {
+        if ((c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D') &&
+            (cH1[c.critereNom] === 'I' || cH1[c.critereNom] === 'D') &&
+            (cH2[c.critereNom] === 'I' || cH2[c.critereNom] === 'D')) {
+            nomsPatrons.push(c.critereNom);
+        }
+    });
+    return nomsPatrons;
+}
 
-    // Compter les erreurs de français (annotation du fichier courant)
+function _compterErreursFrancaisBilan() {
     var totalErreursFr = 0;
     try {
         var fichierBilan = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
@@ -553,97 +551,90 @@ function genererRetroactionBilan() {
             }
         }
     } catch(e) { /* ignore */ }
+    return totalErreursFr;
+}
 
-    // === Message d'encouragement + Question métacognitive (en haut, sous le titre) ===
-    html += '<p class="eval-vide" style="margin-bottom:6px;">Mes standards sont très élevés à ton égard parce que je crois que tu as tout ce qu’il faut pour les atteindre et j’ai confiance en toi. Si tu as besoin d’aide, viens me voir.</p>';
-    html += '<p class="retro-question" style="margin-bottom:8px;">Selon toi, quel aspect de ta production mériterait le plus d’attention ?</p>';
-
-    // === 1. Présentement, il faut se concentrer sur... ===
-    html += '<h5>Présentement, il faut se concentrer sur :</h5>';
-
-    var defis = criteres
-        .filter(function(c) { return c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D'; })
-        .sort(function(a, b) { return (ORDRE_NIV[a.niveauSelectionne] || 0) - (ORDRE_NIV[b.niveauSelectionne] || 0); });
-    // Verification explicite M/E : un travail Non recevable (niveau '0') ne doit
-    // JAMAIS declencher « tous maitrises » via defis.length === 0 (defis exclut '0').
-    var tousMaitrises = criteres.length > 0 &&
-        criteres.every(function(c) { return c.niveauSelectionne === 'M' || c.niveauSelectionne === 'E'; });
-
-    // Vérifier si le français écrit est une faiblesse majeure
-    // Source 1 : donneesAlgorithmiques (si le calcul a eu lieu)
-    // Source 2 : totalErreursFr (comptage direct des annotations)
+function _detecterAlgoA0Bilan(grilleDef, ec, totalErreursFr) {
+    if (!grilleDef) return null;
     var algoA0 = null;
-    if (grilleDef) {
-        grilleDef.criteres.forEach(function(gc) {
-            if (gc.type !== 'algorithmique') return;
-            // Source 1 : données algorithmiques calculées
-            if (ec.donneesAlgorithmiques && ec.donneesAlgorithmiques[gc.id]) {
-                var da = ec.donneesAlgorithmiques[gc.id];
-                if (da.pourcentage !== undefined && da.pourcentage <= 0 && da.erreurs > 0) {
-                    algoA0 = { critereNom: gc.nom, erreurs: da.erreurs, mots: da.mots };
-                }
+    grilleDef.criteres.forEach(function(gc) {
+        if (gc.type !== 'algorithmique') return;
+        // Source 1 : données algorithmiques calculées
+        if (ec.donneesAlgorithmiques && ec.donneesAlgorithmiques[gc.id]) {
+            var da = ec.donneesAlgorithmiques[gc.id];
+            if (da.pourcentage !== undefined && da.pourcentage <= 0 && da.erreurs > 0) {
+                algoA0 = { critereNom: gc.nom, erreurs: da.erreurs, mots: da.mots };
             }
-            // Source 2 : comptage direct des codes d'erreur annotés
-            if (!algoA0 && totalErreursFr > 0) {
-                var pond = gc.ponderation || 20;
-                var facteur = gc.facteurNormalisation || 500;
-                var motsEstime = parseInt((document.getElementById('eval_mots_' + gc.id) || {}).value) || 500;
-                var noteEstimee = pond - (totalErreursFr / motsEstime * facteur);
-                if (noteEstimee <= 0) {
-                    algoA0 = { critereNom: gc.nom, erreurs: totalErreursFr, mots: motsEstime };
-                }
+        }
+        // Source 2 : comptage direct des codes d'erreur annotés
+        if (!algoA0 && totalErreursFr > 0) {
+            var pond = gc.ponderation || 20;
+            var facteur = gc.facteurNormalisation || 500;
+            var motsEstime = parseInt((document.getElementById('eval_mots_' + gc.id) || {}).value) || 500;
+            var noteEstimee = pond - (totalErreursFr / motsEstime * facteur);
+            if (noteEstimee <= 0) {
+                algoA0 = { critereNom: gc.nom, erreurs: totalErreursFr, mots: motsEstime };
             }
-        });
-    }
-
-    if (algoA0) {
-        html += '<p>- <strong>la qualité du français écrit est à travailler en priorité</strong> (' + algoA0.critereNom + ' : ' + algoA0.erreurs + ' erreur' + (algoA0.erreurs > 1 ? 's' : '') + ' sur ' + algoA0.mots + ' mots, Insuffisant)</p>';
-    }
-
-    if (defis.length > 0) {
-        var maxDefis = algoA0 ? 1 : 2;
-        for (var i = 0; i < Math.min(maxDefis, defis.length); i++) {
-            var d = defis[i];
-            // Ne pas répéter le critère algorithmique déjà mentionné
-            if (algoA0 && d.critereNom === algoA0.critereNom) { maxDefis++; continue; }
-            var desc = d.description ? d.description.toLowerCase() : d.critereNom;
-            var patron = nomsPatrons.indexOf(d.critereNom) !== -1 ? '. Cet objectif est prioritaire depuis 3 productions' : '';
-            html += '<p>- ' + desc + ' (' + d.critereNom + ' ' + (NOMS_NIV[d.niveauSelectionne] || '') + ')' + patron + '</p>';
         }
-    } else if (tousMaitrises && totalErreursFr > 0) {
-        html += '<p>Tous les critères sont maîtrisés. Concentre-toi sur la qualité du français (' + totalErreursFr + ' erreur' + (totalErreursFr > 1 ? 's' : '') + ' annotée' + (totalErreursFr > 1 ? 's' : '') + ').</p>';
-    } else if (tousMaitrises) {
-        // Verifier si maitrise depuis 2+ artefacts (garde length > 0 :
-        // .every() retourne true sur tableau vide via vacuite JS).
-        var maitriseLongtemps = evalPrecedente && Array.isArray(evalPrecedente.criteres) &&
-            evalPrecedente.criteres.length > 0 &&
-            evalPrecedente.criteres.every(function(c) { return c.niveauSelectionne === 'M' || c.niveauSelectionne === 'E'; });
-        if (maitriseLongtemps) {
-            html += '<p class="retro-force">Tous les critères sont maîtrisés depuis plus d’un artefact. Tu peux aider tes collègues — c’est une excellente façon d’étendre tes compétences vers le niveau É (transfert à d’autres contextes).</p>';
-        } else {
-            html += '<p class="retro-force">Tous les critères sont maîtrisés. Continue sur cette lancée !</p>';
-        }
-    }
+    });
+    return algoA0;
+}
 
-    // Ta force (en contexte)
+function _rendreAlgoA0Bilan(algoA0) {
+    if (!algoA0) return '';
+    return '<p>- <strong>la qualité du français écrit est à travailler en priorité</strong> (' + algoA0.critereNom + ' : ' + algoA0.erreurs + ' erreur' + (algoA0.erreurs > 1 ? 's' : '') + ' sur ' + algoA0.mots + ' mots, Insuffisant)</p>';
+}
+
+function _rendreDefisBilan(defis, algoA0, nomsPatrons) {
+    var html = '';
+    var maxDefis = algoA0 ? 1 : 2;
+    for (var i = 0; i < Math.min(maxDefis, defis.length); i++) {
+        var d = defis[i];
+        // Ne pas répéter le critère algorithmique déjà mentionné
+        if (algoA0 && d.critereNom === algoA0.critereNom) { maxDefis++; continue; }
+        var desc = d.description ? d.description.toLowerCase() : d.critereNom;
+        var patron = nomsPatrons.indexOf(d.critereNom) !== -1 ? '. Cet objectif est prioritaire depuis 3 productions' : '';
+        html += '<p>- ' + desc + ' (' + d.critereNom + ' ' + (_NOMS_NIV_BILAN[d.niveauSelectionne] || '') + ')' + patron + '</p>';
+    }
+    return html;
+}
+
+function _rendreTousMaitrisesBilan(totalErreursFr, evalPrecedente) {
+    if (totalErreursFr > 0) {
+        return '<p>Tous les critères sont maîtrisés. Concentre-toi sur la qualité du français (' + totalErreursFr + ' erreur' + (totalErreursFr > 1 ? 's' : '') + ' annotée' + (totalErreursFr > 1 ? 's' : '') + ').</p>';
+    }
+    // Verifier si maitrise depuis 2+ artefacts (garde length > 0 :
+    // .every() retourne true sur tableau vide via vacuite JS).
+    var maitriseLongtemps = evalPrecedente && Array.isArray(evalPrecedente.criteres) &&
+        evalPrecedente.criteres.length > 0 &&
+        evalPrecedente.criteres.every(function(c) { return c.niveauSelectionne === 'M' || c.niveauSelectionne === 'E'; });
+    if (maitriseLongtemps) {
+        return '<p class="retro-force">Tous les critères sont maîtrisés depuis plus d’un artefact. Tu peux aider tes collègues — c’est une excellente façon d’étendre tes compétences vers le niveau É (transfert à d’autres contextes).</p>';
+    }
+    return '<p class="retro-force">Tous les critères sont maîtrisés. Continue sur cette lancée !</p>';
+}
+
+function _rendreForceBilan(criteres, defis) {
     var meilleur = null; var meilleurOrdre = 0;
     criteres.forEach(function(c) {
-        var o = ORDRE_NIV[c.niveauSelectionne] || 0;
+        var o = _ORDRE_NIV_BILAN[c.niveauSelectionne] || 0;
         if (o > meilleurOrdre) { meilleurOrdre = o; meilleur = c; }
     });
     if (meilleur && (meilleur.niveauSelectionne === 'M' || meilleur.niveauSelectionne === 'E') && defis.length > 0) {
-        html += '<p class="retro-force">Ta force : ' + meilleur.critereNom + ' (' + (NOMS_NIV[meilleur.niveauSelectionne] || '') + ')</p>';
+        return '<p class="retro-force">Ta force : ' + meilleur.critereNom + ' (' + (_NOMS_NIV_BILAN[meilleur.niveauSelectionne] || '') + ')</p>';
     }
+    return '';
+}
 
-    // === 2. Points récurrents ===
+function _rendreRecurrentsBilan(evalPrecedente, criteres) {
     var recurrentsHtml = '';
 
     // Progrès (comparaison de l'élève avec lui-même)
     if (evalPrecedente && evalPrecedente.niveauFinal) {
         var nivAct = document.getElementById('niveauProduction1')?.textContent || '';
         var nivPre = evalPrecedente.niveauFinal;
-        var ordreAct = ORDRE_NIV[nivAct] || 0;
-        var ordrePre = ORDRE_NIV[nivPre] || 0;
+        var ordreAct = _ORDRE_NIV_BILAN[nivAct] || 0;
+        var ordrePre = _ORDRE_NIV_BILAN[nivPre] || 0;
         if (ordreAct > ordrePre) {
             recurrentsHtml += '<p>Progrès : ' + nivPre + ' → ' + nivAct + ' depuis ' + (evalPrecedente.productionNom || 'la production précédente') + '</p>';
         }
@@ -665,35 +656,83 @@ function genererRetroactionBilan() {
         }
     }
 
-    if (recurrentsHtml) {
-        html += '<h5>Points récurrents</h5>' + recurrentsHtml;
+    return recurrentsHtml ? '<h5>Points récurrents</h5>' + recurrentsHtml : '';
+}
+
+function _rendreJetonsBilan(da) {
+    if (typeof obtenirConfigJetons !== 'function' || !da) return '';
+    try {
+        var configJetons = obtenirConfigJetons();
+        if (!configJetons || !configJetons.actif) return '';
+        var maxJetons = configJetons.reprise ? configJetons.reprise.nombre : 2;
+        var toutesEvalsJ = obtenirDonneesSelonMode('evaluationsSauvegardees');
+        var productions = obtenirDonneesSelonMode('productions') || [];
+        var jetonsUtilises = [];
+        toutesEvalsJ.filter(function(e) {
+            return e.etudiantDA === da && !e.remplaceeParId;
+        }).forEach(function(e) {
+            var prod = productions.find(function(p) { return p.id === e.productionId; });
+            var nomProd = prod ? (prod.titre || prod.nom || e.productionId) : e.productionId;
+            if (e.jetonDelaiApplique) jetonsUtilises.push('Délai — ' + nomProd);
+            if (e.jetonRepriseApplique || e.repriseDeId) jetonsUtilises.push('Reprise — ' + nomProd);
+            if (e.jetonRepriseCibleeApplique) jetonsUtilises.push('Reprise ciblée — ' + nomProd);
+        });
+        var html = '<h5>Jetons utilisés : ' + jetonsUtilises.length + ' / ' + maxJetons + '</h5>';
+        if (jetonsUtilises.length > 0) {
+            html += jetonsUtilises.map(function(j) { return '<p>• ' + j + '</p>'; }).join('');
+        }
+        return html;
+    } catch(e) {
+        console.warn('[Evaluation] jetons calculation skipped:', e.message || e);
+        return '';
+    }
+}
+
+function genererRetroactionBilan() {
+    var conteneur = document.getElementById('contenuRetroBilan');
+    if (!conteneur) return;
+
+    var ec = window.evaluationEnCours;
+    if (!ec || !ec.etudiantDA || !ec.grilleId) {
+        conteneur.innerHTML = '<p class="eval-vide">Sélectionne un étudiant et une grille pour voir le bilan.</p>';
+        return;
     }
 
-    // === 3. Jetons utilisés ===
-    if (typeof obtenirConfigJetons === 'function' && da) {
-        try {
-            var configJetons = obtenirConfigJetons();
-            if (configJetons && configJetons.actif) {
-                var maxJetons = configJetons.reprise ? configJetons.reprise.nombre : 2;
-                var toutesEvalsJ = obtenirDonneesSelonMode('evaluationsSauvegardees');
-                var productions = obtenirDonneesSelonMode('productions') || [];
-                var jetonsUtilises = [];
-                toutesEvalsJ.filter(function(e) {
-                    return e.etudiantDA === da && !e.remplaceeParId;
-                }).forEach(function(e) {
-                    var prod = productions.find(function(p) { return p.id === e.productionId; });
-                    var nomProd = prod ? (prod.titre || prod.nom || e.productionId) : e.productionId;
-                    if (e.jetonDelaiApplique) jetonsUtilises.push('Délai — ' + nomProd);
-                    if (e.jetonRepriseApplique || e.repriseDeId) jetonsUtilises.push('Reprise — ' + nomProd);
-                    if (e.jetonRepriseCibleeApplique) jetonsUtilises.push('Reprise ciblée — ' + nomProd);
-                });
-                html += '<h5>Jetons utilisés : ' + jetonsUtilises.length + ' / ' + maxJetons + '</h5>';
-                if (jetonsUtilises.length > 0) {
-                    html += jetonsUtilises.map(function(j) { return '<p>• ' + j + '</p>'; }).join('');
-                }
-            }
-        } catch(e) { console.warn('[Evaluation] jetons calculation skipped:', e.message || e); }
+    var da = ec.etudiantDA;
+    var historiqueEleve = _chargerHistoriqueBilan(da);
+    var evalPrecedente = historiqueEleve.length > 0 ? historiqueEleve[0] : null;
+    var grilleDef = _chargerGrilleDefBilan(ec.grilleId);
+    var criteres = _collecterCriteresBilan(grilleDef, ec);
+    var nomsPatrons = _detecterPatronsRecurrentsBilan(criteres, historiqueEleve);
+    var totalErreursFr = _compterErreursFrancaisBilan();
+
+    // Defis prioritaires + détection « tous maîtrisés »
+    var defis = criteres
+        .filter(function(c) { return c.niveauSelectionne === 'I' || c.niveauSelectionne === 'D'; })
+        .sort(function(a, b) { return (_ORDRE_NIV_BILAN[a.niveauSelectionne] || 0) - (_ORDRE_NIV_BILAN[b.niveauSelectionne] || 0); });
+    // Verification explicite M/E : un travail Non recevable (niveau '0') ne doit
+    // JAMAIS declencher « tous maitrises » via defis.length === 0 (defis exclut '0').
+    var tousMaitrises = criteres.length > 0 &&
+        criteres.every(function(c) { return c.niveauSelectionne === 'M' || c.niveauSelectionne === 'E'; });
+
+    var algoA0 = _detecterAlgoA0Bilan(grilleDef, ec, totalErreursFr);
+
+    // Assemblage HTML
+    var html = '';
+    html += '<p class="eval-vide" style="margin-bottom:6px;">Mes standards sont très élevés à ton égard parce que je crois que tu as tout ce qu’il faut pour les atteindre et j’ai confiance en toi. Si tu as besoin d’aide, viens me voir.</p>';
+    html += '<p class="retro-question" style="margin-bottom:8px;">Selon toi, quel aspect de ta production mériterait le plus d’attention ?</p>';
+    html += '<h5>Présentement, il faut se concentrer sur :</h5>';
+    html += _rendreAlgoA0Bilan(algoA0);
+
+    if (defis.length > 0) {
+        html += _rendreDefisBilan(defis, algoA0, nomsPatrons);
+    } else if (tousMaitrises) {
+        html += _rendreTousMaitrisesBilan(totalErreursFr, evalPrecedente);
     }
+
+    html += _rendreForceBilan(criteres, defis);
+    html += _rendreRecurrentsBilan(evalPrecedente, criteres);
+    html += _rendreJetonsBilan(da);
 
     conteneur.innerHTML = html;
 }
