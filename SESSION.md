@@ -25,11 +25,13 @@
 **Branche `main`** : `0e8e0f8` (15 commits non-pushés depuis `4b915b0` — à pusher depuis la maison)
 **Statut chantier profil-etudiant.js** :
 - **Étape 0** : worktree créé + symlinks node_modules + baseline tests **73/73 verts** ✅
-- **Étape 1** : lecture intégrale + audit ESLint + Agent Explore frontières inter-zones — **TERMINÉE**. 11 écarts documentés dans MODULES-MAP §2.3.
-- **Étape 2** : à démarrer (tests régression + canari Vitest 5 + Playwright 2).
-- **Étapes 3-6** : plan en 4 sessions A+B+C+D (vs 3 pour trimestre-v2 — module 50 % plus gros LOC).
+- **Étape 1** : lecture intégrale + audit ESLint + Agent Explore frontières inter-zones — **TERMINÉE** (commit `52ae385`). 11 écarts documentés dans MODULES-MAP §2.3.
+- **Étape 2** : tests régression Vitest 5 + Playwright 2 — **TERMINÉE** (commit `56c0978`). 80/80 verts.
+- **Étapes 3-6** : plan en 4 sessions A+B+C+D (vs 3 pour trimestre-v2 — module 50 % plus gros LOC). À démarrer.
 
-**Tests** : 65 Vitest + 8 Playwright = **73/73 verts** (baseline confirmée dans le worktree).
+**Tests** : 70 Vitest + 10 Playwright = **80/80 verts** (+7 vs baseline : 5 canari/sentinelle/structure + 2 Playwright chargement/sentinelle browser).
+
+**Commits worktree non-pushés** : 2 (52ae385 docs étape 1 + 56c0978 tests étape 2).
 
 ## Récap étape 1 — profil-etudiant.js (17 mai soir)
 
@@ -56,7 +58,7 @@
 **Décisions à acter** (avant session B) :
 - (c) **Zone PII confidentiel** — charger `SKILL_Securite_donnees.md` au démarrage session B (rappel automatique dans SESSION.md).
 
-## Consigne étape 2 — Tests de régression + canari (à démarrer après validation décisions a-d)
+## Consigne session A — Étape 3 LOW (helpers + calculs + rapport, ~2-3 h)
 
 À copier-coller au début de la prochaine session :
 
@@ -64,22 +66,53 @@
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6-profil-etudiant
 
 Lecture obligatoire :
-1. SESSION.md (ce document) — récap étape 1 + 11 écarts MODULES-MAP §2.3
-2. audit/refactoring-prep/MODULES-MAP.md §2.3 (incluant les écarts ajoutés étape 1)
-3. audit/refactoring-prep/METHODE-REFACTORING.md §3 étape 2 + §7 propositions Catégorie B trimestre-v2
-4. audit/01-fidelity/calculations-tests.md — réutiliser snippets pour 5 tests Vitest (IPB, moyennes critères, diagnostic, pattern, niveau RaI)
+1. SESSION.md (ce document) — récap étapes 1+2 + 11 écarts MODULES-MAP §2.3
+2. audit/refactoring-prep/MODULES-MAP.md §2.3 (découpage 7 sous-modules + écarts)
+3. audit/refactoring-prep/METHODE-REFACTORING.md §3 étape 3 + §7 propositions Catégorie B trimestre-v2 + §7 notes pour profil-etudiant
 
 État git attendu :
 - main : 0e8e0f8 (inchangé)
-- refactor/profil-etudiant : à confirmer (commit étape 1 livré ce soir : annotation MODULES-MAP + adaptation SESSION.md)
-- Tests verts : 73/73
+- refactor/profil-etudiant : 56c0978 (2 commits étapes 1+2 non-pushés)
+- Tests verts : 80/80 (70 Vitest + 10 Playwright)
 
-OBJECTIF étape 2 : ~1-2 h
-- Vitest : 5 tests régression réutilisant snippets calculations-tests.md (IPB, moyennes critères, diagnostic suivi, pattern actuel, niveau RaI) + canari de chargement IIFE multi-sandbox + sentinelle 36 exports + structure `afficherProfilComplet` (async non, arité 1) + atomicité dual-write `profilActuelDA = X; window.profilActuelDA = X`
-- Playwright : 2 tests chargement WebKit + sentinelle exports browser (analogue trimestre-v2-chargement.spec.js)
-- Helper `chargerScript(path, stubs, fauxWindowExistant)` réutilisé tel quel (éprouvé sur productions + trimestre-v2)
-- Stubs requis : db, cle, obtenirDonneesSelonMode, obtenirPreference, obtenirEtudiantsCoursActif, echapperHtml, calculerTousLesIndices, etc.
-- Tests verts attendus à la fin : 80/80 (73 baseline + 7 nouveaux profil-etudiant)
+OBJECTIF SESSION A : extraire 3 sous-modules LOW (~2-3 h) :
+- `js/profil-etudiant-helpers.js` (~545 LOC, zone L70-643)
+  - Helpers, badges, interprétations indices
+  - 11 helpers internes à promouvoir window.X (décision étape 1 b) :
+    interpreterMobilisation/Performance/Completion/Assiduite, obtenirCouleurNiveauIDME,
+    obtenirIdsProductionsEvaluables, obtenirCriteresAvecValeurs, obtenirDetailsAssiduite, etc.
+- `js/profil-etudiant-calculs.js` (~1 215 LOC, zone L4190-5404)
+  - Moyennes critères, IPB, diagnostic apprentissage, forces/défis, progression, pattern, RàI
+  - Logique pure, faible risque
+  - Inclure les fonctions cyc > 30 : calculerIPB cyc 36, determinerCibleIntervention cyc 58
+    (étape 4 traitera l'éclatement à la session D)
+- `js/profil-etudiant-rapport.js` (~365 LOC, zone L7462-7826)
+  - Rapport API, génération, copie, préférences
+  - 2 exports : genererEtAfficherRapport, copierRapport
+
+Réflexes installés sessions précédentes (METHODE §7 trimestre-v2) :
+- Grep `window.X = X` PRÉ-deletion (doublons d'export) ET APRÈS chaque extraction (orphelins)
+- Grep noms de fonctions extraites dans le résidu post-deletion (cross-zone audit tardif)
+- Wrappers `afficherNotification*` dupliqués dans chaque sous-module (consolidation reportée)
+- Acquittement `// security-ok` automatique sur XSS innerHTML transférés tels quels
+- Audit ESLint complexity APRÈS chaque éclatement
+- `chargerScript(path, stubs, fauxWindowExistant)` étendu pour enchaîner les 3 sous-modules
+  dans le même sandbox (sentinelle élargie au fur et à mesure)
+
+Workflow par sous-module :
+1. Identifier les lignes exactes de la zone (grep + fonctions de début/fin)
+2. Copier vers le nouveau fichier (avec IIFE + 'use strict' + en-tête commentaire)
+3. Ajouter exports window.X (incluant les 11 helpers internes à promouvoir)
+4. sed delete dans profil-etudiant.js + grep résidu pour orphelins
+5. Ajouter <script> dans index.html (AVANT profil-etudiant.js)
+6. Mettre à jour tests/unit/refactor-profil-etudiant.test.js (chargerScript du sous-module + élargir sentinelle si nouveaux exports promus)
+7. Lancer tests : 80/80 attendu
+8. Commit par sous-module (3 commits) avec message conventionnel
+
+Bump en fin de session A : version.json 99.47 → 99.48 b0517-XXXX + js/init-inline.js + index.html.
+
+Session B (MEDIUM diagnostics + confidentiel, PII), session C (actions cascade)
+et session D (sections affichage 3 700 LOC + étape 4 + étapes 5+6) suivront.
 ```
 
 ## Décisions actées avec Grégoire (à compléter)
