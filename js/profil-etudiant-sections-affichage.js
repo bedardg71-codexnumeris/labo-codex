@@ -3583,82 +3583,431 @@ function genererSectionCompletion(da) {
 }
 
 
+function _obtenirNiveauxEtGradientSRPNF() {
+    const echelles = db.getSync('echellesTemplates', []);
+    const echelleActive = echelles.find(e => e.active) || echelles[0];
+    let niveaux = [
+        { code: 'I', nom: 'Incomplet', min: 0, max: 64, couleur: 'var(--orange-accent)' },
+        { code: 'D', nom: 'Développement', min: 65, max: 74, couleur: 'var(--btn-annuler)' },
+        { code: 'M', nom: 'Maîtrisé', min: 75, max: 84, couleur: 'var(--vert-succes)' },
+        { code: 'E', nom: 'Étendu', min: 85, max: 100, couleur: 'var(--bleu-clair)' }
+    ];
+    if (echelleActive && echelleActive.niveaux) {
+        niveaux = echelleActive.niveaux.map(n => ({
+            code: n.code, nom: n.nom, min: n.min, max: n.max, couleur: n.couleur
+        }));
+    }
+    const gradientStops = [];
+    niveaux.forEach((niveau, i) => {
+        if (i === 0) {
+            gradientStops.push(`${niveau.couleur} ${niveau.min}%`);
+            if (i < niveaux.length - 1) {
+                gradientStops.push(`${niveau.couleur} ${niveaux[i + 1].min - 2}%`);
+            } else {
+                gradientStops.push(`${niveau.couleur} ${niveau.max}%`);
+            }
+        } else if (i === niveaux.length - 1) {
+            gradientStops.push(`${niveau.couleur} ${niveau.min + 2}%`);
+            gradientStops.push(`${niveau.couleur} ${niveau.max}%`);
+        } else {
+            gradientStops.push(`${niveau.couleur} ${niveau.min + 2}%`);
+            gradientStops.push(`${niveau.couleur} ${niveaux[i + 1].min - 2}%`);
+        }
+    });
+    return { niveaux, gradientCSS: `linear-gradient(to right, ${gradientStops.join(', ')})` };
+}
+
+function _calculerMoyennesComparativesSRPNF(da, modeComparatif) {
+    let moyennesSOM = null, moyennesPAN = null, directionsSOM = null, directionsPAN = null;
+    if (modeComparatif) {
+        moyennesSOM = calculerMoyennesCriteres(da);
+        directionsSOM = calculerDirectionsCriteres(da);
+        const pratiquePAN = obtenirPratiqueParId('pan-standards');
+        if (pratiquePAN && typeof pratiquePAN._calculerMoyennesCriteresRecents === 'function') {
+            moyennesPAN = pratiquePAN._calculerMoyennesCriteresRecents(da);
+        } else {
+            console.warn('  ⚠️ Pratique PAN-Standards non disponible ou méthode _calculerMoyennesCriteresRecents absente');
+            moyennesPAN = null;
+        }
+        directionsPAN = calculerDirectionsCriteres(da);
+    } else {
+        moyennesPAN = calculerMoyennesCriteres(da);
+        directionsPAN = calculerDirectionsCriteres(da);
+    }
+    return {
+        moyennes: modeComparatif ? moyennesSOM : moyennesPAN,
+        moyennesSOM, moyennesPAN, directionsSOM, directionsPAN
+    };
+}
+
+function _nomCritereSRPNF(cle) {
+    const noms = { structure: 'Structure', rigueur: 'Rigueur', plausibilite: 'Plausibilité', nuance: 'Nuance', francais: 'Français' };
+    return noms[cle] || cle;
+}
+
+function _genererPointsBarreSRPNFComparatif(cle, moyennesSOM, moyennesPAN, directionsSOM, directionsPAN) {
+    const scoreSOM = moyennesSOM?.[cle];
+    const scorePAN = moyennesPAN?.[cle];
+    const pourcentageSOM = (typeof scoreSOM === 'number' && !isNaN(scoreSOM)) ? Math.round(scoreSOM * 100) : null;
+    const pourcentagePAN = (typeof scorePAN === 'number' && !isNaN(scorePAN)) ? Math.round(scorePAN * 100) : null;
+    if (pourcentageSOM === null && pourcentagePAN === null) return null;
+
+    const directionSOM = directionsSOM ? directionsSOM[cle] : null;
+    const directionPAN = directionsPAN ? directionsPAN[cle] : null;
+    const symboleSOM = directionSOM && directionSOM.symbole ? directionSOM.symbole : '';
+    const symbolePAN = directionPAN && directionPAN.symbole ? directionPAN.symbole : '';
+
+    const pointsHTML = `
+        ${pourcentageSOM !== null ? `<div class="critere-point critere-point-som" style="left: ${Math.min(pourcentageSOM, 100)}%;"></div>` : ''}
+        ${pourcentagePAN !== null ? `<div class="critere-point critere-point-std" style="left: ${Math.min(pourcentagePAN, 100)}%;"></div>` : ''}
+    `;
+    const symbolesHTML = `
+        ${symboleSOM && pourcentageSOM !== null ? `<div style="position: absolute; left: ${Math.min(pourcentageSOM, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--som-orange);" title="SOM: ${directionSOM.interpretation}">${symboleSOM}</div>` : ''}
+        ${symbolePAN && pourcentagePAN !== null ? `<div style="position: absolute; left: ${Math.min(pourcentagePAN, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--std-bleu);" title="PAN: ${directionPAN.interpretation}">${symbolePAN}</div>` : ''}
+    `;
+    const valeursHTML = `
+        <span style="display: flex; gap: 8px; align-items: center;">
+            ${pourcentageSOM !== null ? `<span style="color: var(--som-orange); font-weight: 600;">${pourcentageSOM}%</span>` : ''}
+            ${pourcentageSOM !== null && pourcentagePAN !== null ? `<span style="color: var(--gris-clair);">|</span>` : ''}
+            ${pourcentagePAN !== null ? `<span style="color: var(--std-bleu); font-weight: 600;">${pourcentagePAN}%</span>` : ''}
+        </span>
+    `;
+    return { pointsHTML, symbolesHTML, valeursHTML };
+}
+
+function _genererPointsBarreSRPNFNormal(cle, score, directionsPAN) {
+    const pourcentage = Math.round(score * 100);
+    const direction = directionsPAN ? directionsPAN[cle] : null;
+    const symboleDirection = direction && direction.symbole ? direction.symbole : '';
+    return {
+        pointsHTML: `<div class="critere-point" style="left: ${Math.min(pourcentage, 100)}%;"></div>`,
+        valeursHTML: `${pourcentage}%`,
+        symbolesHTML: symboleDirection ? `<div style="position: absolute; left: ${Math.min(pourcentage, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--gris-fonce);" title="${direction.interpretation}">${symboleDirection}</div>` : ''
+    };
+}
+
+function _genererBarreCritereSRPNF(cle, contexte) {
+    const { modeComparatif, moyennes, moyennesSOM, moyennesPAN, directionsSOM, directionsPAN, gradientCSS } = contexte;
+    const score = moyennes?.[cle];
+    if (typeof score !== 'number' || isNaN(score)) return '';
+
+    const parties = modeComparatif
+        ? _genererPointsBarreSRPNFComparatif(cle, moyennesSOM, moyennesPAN, directionsSOM, directionsPAN)
+        : _genererPointsBarreSRPNFNormal(cle, score, directionsPAN);
+    if (!parties) return '';
+    const { pointsHTML, valeursHTML, symbolesHTML } = parties;
+    return `
+        <div class="critere-container">
+            <div class="critere-header">
+                <span class="critere-nom" style="min-width: 120px;">${_nomCritereSRPNF(cle)}</span>
+                <span class="critere-valeur" style="margin-left: auto; font-weight: 600;">
+                    ${valeursHTML}
+                </span>
+            </div>
+            <div class="critere-barre-gradient" style="background: ${gradientCSS};">
+                ${symbolesHTML}
+                ${pointsHTML}
+            </div>
+        </div>
+    `;
+}
+
+function _genererBlocForcesDefisSRPNF(da) {
+    const { niveaux, gradientCSS } = _obtenirNiveauxEtGradientSRPNF();
+    const config = db.getSync('modalitesEvaluation', {});
+    const affichage = config.affichageTableauBord || {};
+    const afficherSom = affichage.afficherSommatif !== false;
+    const afficherPan = affichage.afficherAlternatif !== false;
+    const modeComparatif = afficherSom && afficherPan;
+
+    const moyennesCtx = _calculerMoyennesComparativesSRPNF(da, modeComparatif);
+    const contexte = { modeComparatif, ...moyennesCtx, gradientCSS };
+
+    const barresHTML = ['structure', 'rigueur', 'plausibilite', 'nuance', 'francais']
+        .map(cle => _genererBarreCritereSRPNF(cle, contexte))
+        .join('');
+
+    const legendePositions = niveaux.map(n => ({ ...n, position: (n.min + n.max) / 2 }));
+    const legendeHTML = `
+        <div class="legende-idme-container">
+            ${legendePositions.map(item => `
+                <div class="legende-idme-item" style="left: ${item.position}%; color: ${item.couleur};">
+                    <span class="legende-idme-code">${item.code}</span>
+                    <span class="legende-idme-nom">${item.nom}</span>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+    if (!barresHTML || barresHTML.trim() === '') {
+        const grilleRef = obtenirGrilleReferenceDepistage();
+        if (!grilleRef) {
+            return `
+                <div class="info-box info-box--attention" style="margin: 15px 0;">
+                    <div style="display: flex; gap: 10px; align-items: start;">
+                        <span style="font-size: 1.3rem;">⚙️</span>
+                        <div style="flex: 1;">
+                            <strong style="color: var(--alerte-texte-attention); display: block; margin-bottom: 5px;">Configuration requise</strong>
+                            <p style="margin: 0; color: var(--alerte-texte-attention); font-size: 0.9rem; line-height: 1.5;">
+                                Pour afficher les forces et défis par critère, tu dois configurer une grille de référence dans
+                                <strong>Réglages → Pratique de notation → Grille de référence pour le dépistage</strong>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        return `
+            <div class="info-box info-box--info" style="margin: 15px 0;">
+                <div style="display: flex; gap: 10px; align-items: start;">
+                    <span style="font-size: 1.3rem;">📝</span>
+                    <div style="flex: 1;">
+                        <strong style="color: var(--alerte-texte-information); display: block; margin-bottom: 5px;">Aucune donnée disponible</strong>
+                        <p style="margin: 0; color: var(--alerte-texte-information); font-size: 0.9rem; line-height: 1.5;">
+                            Cet·te étudiant·e n'a pas encore d'évaluations complétées avec des critères correspondant à la grille de référence.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    return barresHTML + legendeHTML;
+}
+
+function _genererGraphiqueCriteresHTML(da) {
+    if (typeof creerGraphiqueCriteres !== 'function') {
+        console.error(`[DEBUG Graphique Critères] Fonction creerGraphiqueCriteres non disponible`);
+        return '';
+    }
+    const canvasIdCriteres = `graphique-criteres-${da}`;
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    const evaluationsAvecCriteres = evaluations.filter(e =>
+        e.etudiantDA === da &&
+        !e.remplaceeParId &&
+        e.criteres &&
+        Array.isArray(e.criteres) &&
+        e.criteres.length > 0
+    );
+    if (evaluationsAvecCriteres.length === 0) return '';
+
+    // Critères uniques pour la légende
+    const criteresSet = new Set();
+    evaluationsAvecCriteres.forEach(e => {
+        e.criteres.forEach(c => {
+            if (c.critereNom) criteresSet.add(c.critereNom);
+        });
+    });
+    const criteresUniques = Array.from(criteresSet).sort();
+    const COULEURS_CRITERES = [
+        '#E91E63', '#9C27B0', '#3F51B5', '#00BCD4',
+        '#4CAF50', '#FF9800', '#795548', '#607D8B'
+    ];
+    const legendeHTML = criteresUniques.map((critere, index) => {
+        const couleur = COULEURS_CRITERES[index % COULEURS_CRITERES.length];
+        const critereEscaped = critere.replace(/'/g, "\\'");
+        return `<label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: ${couleur}; font-size: 0.78rem;">
+            <input type="checkbox" checked data-on-change="toggleCritereIndivHandler" data-critere="${critereEscaped}" data-da="${da}">
+            <span style="width: 10px; height: 10px; background: ${couleur}; border-radius: 50%; display: inline-block;"></span>
+            ${critere}
+        </label>`;
+    }).join('');
+
+    // setTimeout pour créer le graphique après insertion DOM
+    setTimeout(() => {
+        const canvas = document.getElementById(canvasIdCriteres);
+        if (canvas) {
+            creerGraphiqueCriteres(canvasIdCriteres, da);
+        } else {
+            console.error(`[DEBUG Graphique Critères] Canvas #${canvasIdCriteres} introuvable dans le DOM`);
+        }
+    }, 100);
+
+    return `
+        <div class="profil-zone-moyenne-bleu" style="margin-bottom: 20px;">
+            <!-- Légende des critères -->
+            <div style="background: var(--surface-conteneur, #142428); padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                <span style="font-weight: 600; color: var(--gris-fonce);">Critères :</span>
+                ${legendeHTML}
+                ${genererBandeauContexteProfil()}
+            </div>
+
+            <!-- Canvas pour le graphique Chart.js -->
+            <div style="background: var(--surface-conteneur, #142428); padding: 20px; border-radius: 6px; height: 450px;">
+                <canvas id="${canvasIdCriteres}"></canvas>
+            </div>
+        </div>
+    `;
+}
+
+function _genererTexteRegleSelectionPortfolio(portfolioActifRapport, methodeSelectionRapport, nombreARetenirConfig, configCategoriesRapport) {
+    if (!portfolioActifRapport) {
+        return 'Portfolio désactivé — Les productions sont évaluées de manière indépendante';
+    }
+    if (methodeSelectionRapport === 'hybride-categories') {
+        const pondSel = configCategoriesRapport?.selection?.ponderation || 65;
+        const pondObl = configCategoriesRapport?.obligatoires?.ponderation || 35;
+        return `Mode <strong>Hybride</strong> : les <strong>${nombreARetenirConfig} meilleures</strong> du pool Sélection (${pondSel}%) + toutes les Obligatoires (${pondObl}%)`;
+    }
+    const textes = {
+        'meilleurs': `Les <strong>${nombreARetenirConfig} meilleures productions</strong> sont retenues pour le calcul de l'indice P (note maximale atteinte)`,
+        'recents': `Les <strong>${nombreARetenirConfig} plus récentes productions</strong> sont retenues pour le calcul de l'indice P (niveau terminal actuel)`,
+        'recents-meilleurs': `Les <strong>${nombreARetenirConfig} plus récentes productions parmi les 50% meilleures</strong> sont retenues pour le calcul de l'indice P (approche hybride)`,
+        'tous': `<strong>Toutes les productions</strong> sont retenues pour le calcul de l'indice P (calcul de type sommative)`
+    };
+    return textes[methodeSelectionRapport] || textes['meilleurs'];
+}
+
+function _genererTextePonderationCriteresActifs() {
+    const grilles = db.getSync('grillesTemplates', []);
+    const grilleActive = grilles.find(g => g.active) || grilles[0];
+    if (grilleActive && grilleActive.criteres) {
+        const ponderations = grilleActive.criteres
+            .map(c => `${echapperHtml(c.nom)}: ${c.ponderation || 0}%`)
+            .join(', ');
+        return `Pondération des critères configurés dans la grille «${echapperHtml(grilleActive.nom)}» (${ponderations})`;
+    }
+    return 'Pondération des critères déterminée dans les réglages';
+}
+
+function _genererTextePerformanceMethodeBloc(portfolioActifRapport, methodeSelectionRapport, nombreARetenirConfig, configCategoriesRapport) {
+    if (!portfolioActifRapport) {
+        return 'Performance des productions indépendantes';
+    }
+    if (methodeSelectionRapport === 'hybride-categories') {
+        const pondSel = configCategoriesRapport?.selection?.ponderation || 65;
+        const pondObl = configCategoriesRapport?.obligatoires?.ponderation || 35;
+        return `Performance du portfolio actuel (${nombreARetenirConfig} meilleures Sélection ${pondSel}% + Obligatoires ${pondObl}%)`;
+    }
+    // Textes selon la modalité de sélection (format uniforme avec section Engagement)
+    const textesPerformance = {
+        'meilleurs': `Performance du portfolio actuel (${nombreARetenirConfig} meilleur${nombreARetenirConfig > 1 ? 's' : ''}, maîtrise de standards)`,
+        'recents': `Performance du portfolio actuel (${nombreARetenirConfig} plus récent${nombreARetenirConfig > 1 ? 's' : ''}, niveau terminal)`,
+        'recents-meilleurs': `Performance du portfolio actuel (${nombreARetenirConfig} récent${nombreARetenirConfig > 1 ? 's' : ''} parmi les meilleurs, hybride)`,
+        'tous': `Performance du portfolio actuel (tous les ${obtenirTermeProduction('pluriel')}, moyenne complète)`
+    };
+    return textesPerformance[methodeSelectionRapport] || textesPerformance['meilleurs'];
+}
+
+function _appliquerSelectionAutoArtefacts(da, portfolio, artefacts, selectionEleve, selectionsPortfolios, nombreARetenir) {
+    if (selectionEleve.artefactsRetenus.length !== 0) return;
+    const artefactsRemisAvecNote = artefacts
+        .filter(a => a.remis && a.note !== null)
+        .sort((a, b) => b.note - a.note);
+    const meilleurs = artefactsRemisAvecNote.slice(0, nombreARetenir);
+    if (meilleurs.length === 0) return;
+
+    selectionEleve.artefactsRetenus = meilleurs.map(a => a.id);
+    if (!selectionsPortfolios[da]) selectionsPortfolios[da] = {};
+    selectionsPortfolios[da][portfolio.id] = {
+        artefactsRetenus: selectionEleve.artefactsRetenus,
+        dateSelection: new Date().toISOString(),
+        auto: true
+    };
+    db.setSync(cle('portfoliosEleves'), selectionsPortfolios);
+
+    // Recalculer les indices C et P après sélection automatique
+    if (typeof calculerEtStockerIndicesCP === 'function') {
+        calculerEtStockerIndicesCP();
+    }
+    // Mettre à jour le flag retenu
+    artefacts.forEach(art => {
+        art.retenu = selectionEleve.artefactsRetenus.includes(art.id);
+    });
+}
+
+function _calculerIndicesPerformance(da, modeComparatif, pratiqueConfig) {
+    if (modeComparatif) {
+        // Mode comparatif : calculer les deux pratiques
+        const indicesSOM = calculerTousLesIndices(da, 'SOM');
+        const indicesPAN = calculerTousLesIndices(da, 'PAN');
+        return { indices: indicesSOM, indicesSOM, indicesPAN };
+    }
+    // Mode normal : calculer seulement la pratique active
+    const indices = calculerTousLesIndices(da);
+    if (pratiqueConfig === 'sommative') {
+        return {
+            indices,
+            indicesSOM: indices,
+            indicesPAN: { A: indices.A, C: 0, P: 0, M: 0, E: 0 }
+        };
+    }
+    return {
+        indices,
+        indicesPAN: indices,
+        indicesSOM: { A: indices.A, C: 0, P: 0, M: 0, E: 0 }
+    };
+}
+
+function _lireDetailsRapportPerformance(da, pratiqueActive, nombreARetenir, artefacts) {
+    let methodeSelectionRapport = 'meilleurs';
+    let portfolioActifRapport = true;
+    let nombreARetenirConfig = nombreARetenir;
+
+    // Détecter mode Hybride (source : pratiquesConfigurables)
+    const configPratiqueRapport = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null;
+    const configCategoriesRapport = configPratiqueRapport?.categories
+        || (typeof obtenirConfigCategories === 'function' ? obtenirConfigCategories() : null);
+    const modeHybrideRapport = !!(configCategoriesRapport && configCategoriesRapport.actif);
+
+    if (modeHybrideRapport) {
+        methodeSelectionRapport = 'hybride-categories';
+        nombreARetenirConfig = configCategoriesRapport.selection?.nombreARetenir || 4;
+    } else if (configPratiqueRapport?.portfolio?.methodeSelection) {
+        methodeSelectionRapport = configPratiqueRapport.portfolio.methodeSelection;
+        if (methodeSelectionRapport === 'derniers') methodeSelectionRapport = 'recents';
+        nombreARetenirConfig = configPratiqueRapport.portfolio.nombreARetenir || nombreARetenir;
+    }
+
+    let artefactsRetenus = [];
+    let notesRetenues = [];
+    let noteTop3 = null;
+
+    if (typeof obtenirIndicesCP === 'function') {
+        const indicesCP = obtenirIndicesCP(da, pratiqueActive);
+        if (indicesCP && indicesCP.details) {
+            const idsRetenus = indicesCP.details.artefactsRetenus || [];
+            notesRetenues = indicesCP.details.notes || [];
+
+            // Lire la config depuis indicesCP si disponible (fallback si pas hybride)
+            if (!modeHybrideRapport) {
+                methodeSelectionRapport = indicesCP.details.methodeSelection || 'meilleurs';
+                portfolioActifRapport = indicesCP.details.portfolioActif !== false;
+                nombreARetenirConfig = indicesCP.details.nombreARetenir || nombreARetenir;
+            }
+
+            // Récupérer les titres des artefacts retenus
+            artefactsRetenus = idsRetenus.map(id => {
+                const artefact = artefacts.find(a => a.id === id);
+                const idx = idsRetenus.indexOf(id);
+                return {
+                    titre: artefact ? artefact.titre : 'Artefact inconnu',
+                    note: notesRetenues[idx] || 0
+                };
+            });
+
+            if (notesRetenues.length > 0) {
+                const somme = notesRetenues.reduce((sum, note) => sum + note, 0);
+                noteTop3 = (somme / notesRetenues.length).toFixed(1);
+            }
+        }
+    }
+    return {
+        methodeSelectionRapport,
+        portfolioActifRapport,
+        nombreARetenirConfig,
+        modeHybrideRapport,
+        configCategoriesRapport,
+        artefactsRetenus,
+        notesRetenues,
+        noteTop3
+    };
+}
+
 function genererSectionPerformance(da) {
     if (typeof obtenirPreference === 'function' && obtenirPreference('afficherDeveloppementHabiletes') === false) {
         return '';
     }
-    // ✨ NOUVEAU (7 déc 2025) : Graphique d'évolution des critères
-    const canvasIdCriteres = `graphique-criteres-${da}`;
-    let graphiqueCriteres = '';
-
-    // 🐛 DEBUG (8 déc 2025) : Tracer exécution
-
-    // Vérifier si l'étudiant a des évaluations avec détails critères
-    if (typeof creerGraphiqueCriteres === 'function') {
-        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-
-        const evaluationsAvecCriteres = evaluations.filter(e =>
-            e.etudiantDA === da &&
-            !e.remplaceeParId &&
-            e.criteres &&
-            Array.isArray(e.criteres) &&
-            e.criteres.length > 0
-        );
-
-        if (evaluationsAvecCriteres.length > 0) {
-
-            // Extraire les critères uniques pour la légende
-            const criteresSet2 = new Set();
-            evaluationsAvecCriteres.forEach(e => {
-                e.criteres.forEach(c => {
-                    if (c.critereNom) criteresSet2.add(c.critereNom);
-                });
-            });
-            const criteresUniques2 = Array.from(criteresSet2).sort();
-            const COULEURS_CRITERES_2 = [
-                '#E91E63', '#9C27B0', '#3F51B5', '#00BCD4',
-                '#4CAF50', '#FF9800', '#795548', '#607D8B'
-            ];
-            const legendeHTML2 = criteresUniques2.map((critere, index) => {
-                const couleur = COULEURS_CRITERES_2[index % COULEURS_CRITERES_2.length];
-                const critereEscaped = critere.replace(/'/g, "\\'");
-                return `<label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: ${couleur}; font-size: 0.78rem;">
-                    <input type="checkbox" checked data-on-change="toggleCritereIndivHandler" data-critere="${critereEscaped}" data-da="${da}">
-                    <span style="width: 10px; height: 10px; background: ${couleur}; border-radius: 50%; display: inline-block;"></span>
-                    ${critere}
-                </label>`;
-            }).join('');
-
-            graphiqueCriteres = `
-                <div class="profil-zone-moyenne-bleu" style="margin-bottom: 20px;">
-                    <!-- Légende des critères -->
-                    <div style="background: var(--surface-conteneur, #142428); padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                        <span style="font-weight: 600; color: var(--gris-fonce);">Critères :</span>
-                        ${legendeHTML2}
-                        ${genererBandeauContexteProfil()}
-                    </div>
-
-                    <!-- Canvas pour le graphique Chart.js -->
-                    <div style="background: var(--surface-conteneur, #142428); padding: 20px; border-radius: 6px; height: 450px;">
-                        <canvas id="${canvasIdCriteres}"></canvas>
-                    </div>
-                </div>
-            `;
-
-            // Utiliser setTimeout pour créer le graphique après l'insertion du DOM
-            setTimeout(() => {
-                const canvas = document.getElementById(canvasIdCriteres);
-                if (canvas) {
-                    creerGraphiqueCriteres(canvasIdCriteres, da);
-                } else {
-                    console.error(`[DEBUG Graphique Critères] Canvas #${canvasIdCriteres} introuvable dans le DOM`);
-                }
-            }, 100);
-        } else {
-        }
-    } else {
-        console.error(`[DEBUG Graphique Critères] Fonction creerGraphiqueCriteres non disponible`);
-    }
+    const graphiqueCriteres = _genererGraphiqueCriteresHTML(da);
 
     const productions = obtenirDonneesSelonMode('productions') || [];
     const portfolio = productions.find(p => p.type === 'portfolio');
@@ -3720,129 +4069,30 @@ function genererSectionPerformance(da) {
         return a.description.localeCompare(b.description);
     });
 
-    // ✨ SÉLECTION AUTOMATIQUE des meilleurs artefacts si aucune sélection manuelle
+    // Sélection auto des meilleurs artefacts si aucune sélection manuelle
     const nombreARetenir = portfolio.regles.nombreARetenir || 3;
-    if (selectionEleve.artefactsRetenus.length === 0) {
-        const artefactsRemisAvecNote = artefacts
-            .filter(a => a.remis && a.note !== null)
-            .sort((a, b) => b.note - a.note);
-
-        const meilleurs = artefactsRemisAvecNote.slice(0, nombreARetenir);
-
-        if (meilleurs.length > 0) {
-            selectionEleve.artefactsRetenus = meilleurs.map(a => a.id);
-
-            if (!selectionsPortfolios[da]) {
-                selectionsPortfolios[da] = {};
-            }
-            selectionsPortfolios[da][portfolio.id] = {
-                artefactsRetenus: selectionEleve.artefactsRetenus,
-                dateSelection: new Date().toISOString(),
-                auto: true
-            };
-            db.setSync(cle('portfoliosEleves'), selectionsPortfolios);
-
-            // 🔄 Recalculer les indices C et P après sélection automatique
-            if (typeof calculerEtStockerIndicesCP === 'function') {
-                calculerEtStockerIndicesCP();
-            }
-
-            // Mettre à jour le flag retenu
-            artefacts.forEach(art => {
-                art.retenu = selectionEleve.artefactsRetenus.includes(art.id);
-            });
-        }
-    }
+    _appliquerSelectionAutoArtefacts(da, portfolio, artefacts, selectionEleve, selectionsPortfolios, nombreARetenir);
 
     const nbTotal = artefacts.length;  // ✅ Maintenant basé sur les artefacts ÉVALUÉS
     const nbRemis = artefacts.filter(a => a.remis).length;
     const nbRetenus = selectionEleve.artefactsRetenus.length;
 
-    // NOUVEAU (Beta 90): Calcul dual pour mode comparatif
+    // Calcul dual pour mode comparatif (Beta 90 + correctif 7 déc 2025 :
+    // vérifier === true pour éviter le mode comparatif par défaut)
     const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
-
-    // ✅ CORRECTION (7 déc 2025): Vérifier explicitement === true pour éviter mode comparatif par défaut
     const afficherSom = affichage.afficherSommatif === true;
     const afficherPan = affichage.afficherAlternatif === true;
     const modeComparatif = afficherSom && afficherPan;
 
-    // ✅ OPTIMISATION (7 déc 2025): Calculer uniquement la pratique active sauf en mode comparatif
-    let indicesSOM, indicesPAN, indices;
+    const { indices, indicesSOM, indicesPAN } = _calculerIndicesPerformance(da, modeComparatif, config.pratique);
 
-    if (modeComparatif) {
-        // Mode comparatif: calculer les deux pratiques
-        indicesSOM = calculerTousLesIndices(da, 'SOM');
-        indicesPAN = calculerTousLesIndices(da, 'PAN');
-        indices = indicesSOM; // Pour compatibilité avec le code existant
-    } else {
-        // Mode normal: calculer seulement la pratique active
-        indices = calculerTousLesIndices(da);
-
-        // Assigner aux bonnes variables selon la pratique active
-        if (config.pratique === 'sommative') {
-            indicesSOM = indices;
-            indicesPAN = { A: indices.A, C: 0, P: 0, M: 0, E: 0 }; // Valeurs nulles pour PAN
-        } else {
-            indicesPAN = indices;
-            indicesSOM = { A: indices.A, C: 0, P: 0, M: 0, E: 0 }; // Valeurs nulles pour SOM
-        }
-    }
-
-    // 🎯 UTILISER LES DONNÉES DE LA SOURCE UNIQUE (portfolio.js)
-    let artefactsRetenus = [];
-    let notesRetenues = [];
-    let noteTop3 = null;
-    let methodeSelectionRapport = 'meilleurs';  // Valeur par défaut
-    let portfolioActifRapport = true;
-    let nombreARetenirConfig = nombreARetenir;  // Renommer pour éviter conflit avec ligne 5019
-
-    // Détecter le mode Hybride pour le rapport détaillé (source : pratiquesConfigurables)
-    const configPratiqueRapport = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null;
-    const configCategoriesRapport = configPratiqueRapport?.categories
-        || (typeof obtenirConfigCategories === 'function' ? obtenirConfigCategories() : null);
-    const modeHybrideRapport = !!(configCategoriesRapport && configCategoriesRapport.actif);
-
-    if (modeHybrideRapport) {
-        methodeSelectionRapport = 'hybride-categories';
-        nombreARetenirConfig = configCategoriesRapport.selection?.nombreARetenir || 4;
-    } else if (configPratiqueRapport?.portfolio?.methodeSelection) {
-        // Lire la méthode depuis pratiquesConfigurables (source de vérité)
-        methodeSelectionRapport = configPratiqueRapport.portfolio.methodeSelection;
-        if (methodeSelectionRapport === 'derniers') methodeSelectionRapport = 'recents';
-        nombreARetenirConfig = configPratiqueRapport.portfolio.nombreARetenir || nombreARetenir;
-    }
-
-    if (typeof obtenirIndicesCP === 'function') {
-        const indicesCP = obtenirIndicesCP(da, indices.pratique);
-        if (indicesCP && indicesCP.details) {
-            const idsRetenus = indicesCP.details.artefactsRetenus || [];
-            notesRetenues = indicesCP.details.notes || [];
-
-            // Lire la config depuis indicesCP si disponible (fallback si pas hybride)
-            if (!modeHybrideRapport) {
-                methodeSelectionRapport = indicesCP.details.methodeSelection || 'meilleurs';
-                portfolioActifRapport = indicesCP.details.portfolioActif !== false;
-                nombreARetenirConfig = indicesCP.details.nombreARetenir || nombreARetenir;
-            }
-
-            // Récupérer les titres des artefacts retenus
-            artefactsRetenus = idsRetenus.map(id => {
-                const artefact = artefacts.find(a => a.id === id);
-                const idx = idsRetenus.indexOf(id);
-                return {
-                    titre: artefact ? artefact.titre : 'Artefact inconnu',
-                    note: notesRetenues[idx] || 0
-                };
-            });
-
-            // Calculer la moyenne des notes retenues
-            if (notesRetenues.length > 0) {
-                const somme = notesRetenues.reduce((sum, note) => sum + note, 0);
-                noteTop3 = (somme / notesRetenues.length).toFixed(1);
-            }
-        }
-    }
+    // Détails du rapport portfolio (méthode sélection, artefacts retenus, etc.)
+    const detailsRapport = _lireDetailsRapportPerformance(da, indices.pratique, nombreARetenir, artefacts);
+    const {
+        methodeSelectionRapport, portfolioActifRapport, nombreARetenirConfig,
+        configCategoriesRapport, artefactsRetenus, notesRetenues
+    } = detailsRapport;
 
     const selectionComplete = nbRetenus === portfolio.regles.nombreARetenir;
 
@@ -3882,23 +4132,7 @@ function genererSectionPerformance(da) {
             <br><br>
             <strong>Pratique de notation active :</strong> ${indices.pratique === 'PAN' ? 'PAN (Portfolio à nombre limité)' : 'SOM (Sommative provisoire)'}
             <br><br>
-            <strong>Règle de sélection :</strong> ${(() => {
-                if (!portfolioActifRapport) {
-                    return 'Portfolio désactivé — Les productions sont évaluées de manière indépendante';
-                }
-                if (methodeSelectionRapport === 'hybride-categories') {
-                    const pondSel = configCategoriesRapport?.selection?.ponderation || 65;
-                    const pondObl = configCategoriesRapport?.obligatoires?.ponderation || 35;
-                    return `Mode <strong>Hybride</strong> : les <strong>${nombreARetenirConfig} meilleures</strong> du pool Sélection (${pondSel}%) + toutes les Obligatoires (${pondObl}%)`;
-                }
-                const textes = {
-                    'meilleurs': `Les <strong>${nombreARetenirConfig} meilleures productions</strong> sont retenues pour le calcul de l'indice P (note maximale atteinte)`,
-                    'recents': `Les <strong>${nombreARetenirConfig} plus récentes productions</strong> sont retenues pour le calcul de l'indice P (niveau terminal actuel)`,
-                    'recents-meilleurs': `Les <strong>${nombreARetenirConfig} plus récentes productions parmi les 50% meilleures</strong> sont retenues pour le calcul de l'indice P (approche hybride)`,
-                    'tous': `<strong>Toutes les productions</strong> sont retenues pour le calcul de l'indice P (calcul de type sommative)`
-                };
-                return textes[methodeSelectionRapport] || textes['meilleurs'];
-            })()}
+            <strong>Règle de sélection :</strong> ${_genererTexteRegleSelectionPortfolio(portfolioActifRapport, methodeSelectionRapport, nombreARetenirConfig, configCategoriesRapport)}
             <br><br>
             <strong>${obtenirTermeProduction('pluriel', true)} retenus :</strong> ${artefactsRetenus.length > 0 ? artefactsRetenus.map((art, idx) =>
                 `${idx + 1}. ${art.description} → ${art.note.toFixed(1)}/100`
@@ -3908,17 +4142,7 @@ function genererSectionPerformance(da) {
                 Moyenne des ${artefactsRetenus.length} ${obtenirTermeProduction(artefactsRetenus.length > 1 ? 'pluriel' : 'singulier')} retenu${artefactsRetenus.length > 1 ? 's' : ''} — P = (${notesRetenues.map(n => n.toFixed(1)).join(' + ')}) / ${artefactsRetenus.length} = <strong>${indices.P}%</strong>
             ` : 'Calcul impossible : aucune évaluation disponible'}
             <br><br>
-            <strong>Calcul de la note de chaque ${obtenirTermeProduction('singulier')} :</strong> ${(() => {
-                const grilles = db.getSync('grillesTemplates', []);
-                const grilleActive = grilles.find(g => g.active) || grilles[0];
-                if (grilleActive && grilleActive.criteres) {
-                    const ponderations = grilleActive.criteres
-                        .map(c => `${echapperHtml(c.nom)}: ${c.ponderation || 0}%`)
-                        .join(', ');
-                    return `Pondération des critères configurés dans la grille «${echapperHtml(grilleActive.nom)}» (${ponderations})`;
-                }
-                return 'Pondération des critères déterminée dans les réglages';
-            })()}${selectionEleve.auto ? '<br><br><strong>Note :</strong> Sélection automatique basée sur les meilleures notes' : ''}
+            <strong>Calcul de la note de chaque ${obtenirTermeProduction('singulier')} :</strong> ${_genererTextePonderationCriteresActifs()}${selectionEleve.auto ? '<br><br><strong>Note :</strong> Sélection automatique basée sur les meilleures notes' : ''}
         </div>
 
         <!-- ENCADRÉ UNIQUE: DÉVELOPPEMENT DES HABILETÉS ET COMPÉTENCES -->
@@ -3938,27 +4162,7 @@ function genererSectionPerformance(da) {
 
             <!-- 🆕 MÉTHODE DE CALCUL EXPLICITE -->
             <ul class="profil-liste-simple" style="margin-bottom: 15px;">
-                <li><strong>• ${(() => {
-                    if (!portfolioActif) {
-                        return 'Performance des productions indépendantes';
-                    }
-
-                    if (methodeSelectionRapport === 'hybride-categories') {
-                        const pondSel = configCategoriesRapport?.selection?.ponderation || 65;
-                        const pondObl = configCategoriesRapport?.obligatoires?.ponderation || 35;
-                        return `Performance du portfolio actuel (${nombreARetenirConfig} meilleures Sélection ${pondSel}% + Obligatoires ${pondObl}%)`;
-                    }
-
-                    // Textes selon la modalité de sélection (format uniforme avec section Engagement)
-                    const textesPerformance = {
-                        'meilleurs': `Performance du portfolio actuel (${nombreARetenirConfig} meilleur${nombreARetenirConfig > 1 ? 's' : ''}, maîtrise de standards)`,
-                        'recents': `Performance du portfolio actuel (${nombreARetenirConfig} plus récent${nombreARetenirConfig > 1 ? 's' : ''}, niveau terminal)`,
-                        'recents-meilleurs': `Performance du portfolio actuel (${nombreARetenirConfig} récent${nombreARetenirConfig > 1 ? 's' : ''} parmi les meilleurs, hybride)`,
-                        'tous': `Performance du portfolio actuel (tous les ${obtenirTermeProduction('pluriel')}, moyenne complète)`
-                    };
-
-                    return textesPerformance[methodeSelectionRapport] || textesPerformance['meilleurs'];
-                })()}</strong></li>
+                <li><strong>• ${_genererTextePerformanceMethodeBloc(portfolioActifRapport, methodeSelectionRapport, nombreARetenirConfig, configCategoriesRapport)}</strong></li>
             </ul>
 
             <hr class="profil-separateur">
@@ -3969,235 +4173,7 @@ function genererSectionPerformance(da) {
                 forcesDefis: `
                 <div class="section-titre">Forces et défis parmi les critères</div>
                 <div style="margin: 20px 0;">
-                ${(() => {
-                    // Récupérer les couleurs depuis l'échelle configurée (localStorage)
-                    const echelles = db.getSync('echellesTemplates', []);
-                    const echelleActive = echelles.find(e => e.active) || echelles[0];
-
-                    // Couleurs par défaut IDME (si aucune échelle configurée)
-                    let niveaux = [
-                        { code: 'I', nom: 'Incomplet', min: 0, max: 64, couleur: 'var(--orange-accent)' },
-                        { code: 'D', nom: 'Développement', min: 65, max: 74, couleur: 'var(--btn-annuler)' },
-                        { code: 'M', nom: 'Maîtrisé', min: 75, max: 84, couleur: 'var(--vert-succes)' },
-                        { code: 'E', nom: 'Étendu', min: 85, max: 100, couleur: 'var(--bleu-clair)' }
-                    ];
-
-                    // Utiliser les niveaux de l'échelle active si disponible
-                    if (echelleActive && echelleActive.niveaux) {
-                        niveaux = echelleActive.niveaux.map(n => ({
-                            code: n.code,
-                            nom: n.nom,
-                            min: n.min,
-                            max: n.max,
-                            couleur: n.couleur
-                        }));
-                    }
-
-                    // Générer le gradient CSS basé sur les niveaux avec transitions douces
-                    const gradientStops = [];
-                    niveaux.forEach((niveau, i) => {
-                        if (i === 0) {
-                            // Premier niveau : début jusqu'à 2% avant la prochaine jonction
-                            gradientStops.push(`${niveau.couleur} ${niveau.min}%`);
-                            if (i < niveaux.length - 1) {
-                                const nextMin = niveaux[i + 1].min;
-                                gradientStops.push(`${niveau.couleur} ${nextMin - 2}%`);
-                            } else {
-                                gradientStops.push(`${niveau.couleur} ${niveau.max}%`);
-                            }
-                        } else if (i === niveaux.length - 1) {
-                            // Dernier niveau : 2% après la jonction précédente jusqu'à la fin
-                            gradientStops.push(`${niveau.couleur} ${niveau.min + 2}%`);
-                            gradientStops.push(`${niveau.couleur} ${niveau.max}%`);
-                        } else {
-                            // Niveaux intermédiaires : 2% après jonction précédente, 2% avant jonction suivante
-                            gradientStops.push(`${niveau.couleur} ${niveau.min + 2}%`);
-                            const nextMin = niveaux[i + 1].min;
-                            gradientStops.push(`${niveau.couleur} ${nextMin - 2}%`);
-                        }
-                    });
-
-                    const gradientCSS = `linear-gradient(to right, ${gradientStops.join(', ')})`;
-
-                    // Détecter le mode comparatif
-                    const config = db.getSync('modalitesEvaluation', {});
-                    const affichage = config.affichageTableauBord || {};
-                    const afficherSom = affichage.afficherSommatif !== false;
-                    const afficherPan = affichage.afficherAlternatif !== false;
-                    const modeComparatif = afficherSom && afficherPan;
-
-
-                    // Calculer moyennes et directions pour SOM et PAN si en mode comparatif
-                    let moyennesSOM = null;
-                    let moyennesPAN = null;
-                    let directionsSOM = null;
-                    let directionsPAN = null;
-
-                    if (modeComparatif) {
-
-                        // SOM : Calculer sur TOUTES les évaluations (sans filtre)
-                        moyennesSOM = calculerMoyennesCriteres(da);
-                        directionsSOM = calculerDirectionsCriteres(da);
-
-                        // PAN : Utiliser la méthode de la pratique PAN-Standards (N derniers artefacts)
-                        const pratiquePAN = obtenirPratiqueParId('pan-standards');
-                        if (pratiquePAN && typeof pratiquePAN._calculerMoyennesCriteresRecents === 'function') {
-                            moyennesPAN = pratiquePAN._calculerMoyennesCriteresRecents(da);
-                        } else {
-                            console.warn('  ⚠️ Pratique PAN-Standards non disponible ou méthode _calculerMoyennesCriteresRecents absente');
-                            moyennesPAN = null;
-                        }
-                        directionsPAN = calculerDirectionsCriteres(da);
-
-                    } else {
-                        // Mode normal : calculer les moyennes et utiliser les directions PAN par défaut
-                        moyennesPAN = calculerMoyennesCriteres(da);
-                        directionsPAN = calculerDirectionsCriteres(da);
-                    }
-
-                    // Utiliser les moyennes appropriées selon le mode
-                    const moyennes = modeComparatif ? moyennesSOM : moyennesPAN;
-
-                    // Générer les barres pour chaque critère
-                    const barresHTML = ['structure', 'rigueur', 'plausibilite', 'nuance', 'francais'].map(cle => {
-                        const nomCritere = cle === 'structure' ? 'Structure' :
-                                         cle === 'rigueur' ? 'Rigueur' :
-                                         cle === 'plausibilite' ? 'Plausibilité' :
-                                         cle === 'nuance' ? 'Nuance' : 'Français';
-
-                        // ✅ CORRECTIF: Utiliser la clé en minuscules (structure, rigueur, etc.)
-                        const score = moyennes?.[cle];
-                        // Vérifier que score est un nombre valide (pas null, undefined, ou NaN)
-                        if (typeof score !== 'number' || isNaN(score)) return '';
-
-                        const pourcentage = Math.round(score * 100);
-
-                        // En mode comparatif, afficher deux points
-                        let pointsHTML = '';
-                        let valeursHTML = '';
-                        let symbolesHTML = '';
-
-                        if (modeComparatif) {
-                            // Vérifier si les moyennes existent avant d'accéder à leurs propriétés
-                            // ✅ CORRECTIF: Utiliser la clé en minuscules (cle au lieu de cleMoyennes)
-                            const scoreSOM = moyennesSOM?.[cle];
-                            const scorePAN = moyennesPAN?.[cle];
-                            // Vérifier que les scores sont des nombres valides
-                            const pourcentageSOM = (typeof scoreSOM === 'number' && !isNaN(scoreSOM)) ? Math.round(scoreSOM * 100) : null;
-                            const pourcentagePAN = (typeof scorePAN === 'number' && !isNaN(scorePAN)) ? Math.round(scorePAN * 100) : null;
-
-                            // Si aucun score valide en mode comparatif, ne pas afficher cette barre
-                            if (pourcentageSOM === null && pourcentagePAN === null) return '';
-
-                            // Obtenir les directions pour SOM et PAN
-                            const directionSOM = directionsSOM ? directionsSOM[cle] : null;
-                            const directionPAN = directionsPAN ? directionsPAN[cle] : null;
-                            const symboleSOM = directionSOM && directionSOM.symbole ? directionSOM.symbole : '';
-                            const symbolePAN = directionPAN && directionPAN.symbole ? directionPAN.symbole : '';
-
-                            // Points colorés
-                            pointsHTML = `
-                                ${pourcentageSOM !== null ? `<div class="critere-point critere-point-som" style="left: ${Math.min(pourcentageSOM, 100)}%;"></div>` : ''}
-                                ${pourcentagePAN !== null ? `<div class="critere-point critere-point-std" style="left: ${Math.min(pourcentagePAN, 100)}%;"></div>` : ''}
-                            `;
-
-                            // Symboles de direction au-dessus des points
-                            symbolesHTML = `
-                                ${symboleSOM && pourcentageSOM !== null ? `<div style="position: absolute; left: ${Math.min(pourcentageSOM, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--som-orange);" title="SOM: ${directionSOM.interpretation}">${symboleSOM}</div>` : ''}
-                                ${symbolePAN && pourcentagePAN !== null ? `<div style="position: absolute; left: ${Math.min(pourcentagePAN, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--std-bleu);" title="PAN: ${directionPAN.interpretation}">${symbolePAN}</div>` : ''}
-                            `;
-
-                            // Affichage des valeurs duales
-                            valeursHTML = `
-                                <span style="display: flex; gap: 8px; align-items: center;">
-                                    ${pourcentageSOM !== null ? `<span style="color: var(--som-orange); font-weight: 600;">${pourcentageSOM}%</span>` : ''}
-                                    ${pourcentageSOM !== null && pourcentagePAN !== null ? `<span style="color: var(--gris-clair);">|</span>` : ''}
-                                    ${pourcentagePAN !== null ? `<span style="color: var(--std-bleu); font-weight: 600;">${pourcentagePAN}%</span>` : ''}
-                                </span>
-                            `;
-                        } else {
-                            // Mode normal : utiliser les directions PAN
-                            const direction = directionsPAN ? directionsPAN[cle] : null;
-                            const symboleDirection = direction && direction.symbole ? direction.symbole : '';
-
-                            pointsHTML = `<div class="critere-point" style="left: ${Math.min(pourcentage, 100)}%;"></div>`;
-                            valeursHTML = `${pourcentage}%`;
-                            symbolesHTML = symboleDirection ? `<div style="position: absolute; left: ${Math.min(pourcentage, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--gris-fonce);" title="${direction.interpretation}">${symboleDirection}</div>` : '';
-                        }
-
-                        return `
-                            <div class="critere-container">
-                                <div class="critere-header">
-                                    <span class="critere-nom" style="min-width: 120px;">${nomCritere}</span>
-                                    <span class="critere-valeur" style="margin-left: auto; font-weight: 600;">
-                                        ${valeursHTML}
-                                    </span>
-                                </div>
-                                <div class="critere-barre-gradient" style="background: ${gradientCSS};">
-                                    ${symbolesHTML}
-                                    ${pointsHTML}
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-
-                    // Calculer les positions de légende (centres des zones)
-                    const legendePositions = niveaux.map(niveau => {
-                        const centre = (niveau.min + niveau.max) / 2;
-                        return { ...niveau, position: centre };
-                    });
-
-                    // Générer la légende
-                    const legendeHTML = `
-                        <div class="legende-idme-container">
-                            ${legendePositions.map(item => `
-                                <div class="legende-idme-item" style="left: ${item.position}%; color: ${item.couleur};">
-                                    <span class="legende-idme-code">${item.code}</span>
-                                    <span class="legende-idme-nom">${item.nom}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
-
-                    // Si aucune barre n'est générée, afficher un message informatif
-                    if (!barresHTML || barresHTML.trim() === '') {
-                        // Vérifier la raison : pas de grille OU pas d'évaluations
-                        const grilleRef = obtenirGrilleReferenceDepistage();
-
-                        if (!grilleRef) {
-                            return `
-                                <div class="info-box info-box--attention" style="margin: 15px 0;">
-                                    <div style="display: flex; gap: 10px; align-items: start;">
-                                        <span style="font-size: 1.3rem;">⚙️</span>
-                                        <div style="flex: 1;">
-                                            <strong style="color: var(--alerte-texte-attention); display: block; margin-bottom: 5px;">Configuration requise</strong>
-                                            <p style="margin: 0; color: var(--alerte-texte-attention); font-size: 0.9rem; line-height: 1.5;">
-                                                Pour afficher les forces et défis par critère, tu dois configurer une grille de référence dans
-                                                <strong>Réglages → Pratique de notation → Grille de référence pour le dépistage</strong>.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        } else {
-                            return `
-                                <div class="info-box info-box--info" style="margin: 15px 0;">
-                                    <div style="display: flex; gap: 10px; align-items: start;">
-                                        <span style="font-size: 1.3rem;">📝</span>
-                                        <div style="flex: 1;">
-                                            <strong style="color: var(--alerte-texte-information); display: block; margin-bottom: 5px;">Aucune donnée disponible</strong>
-                                            <p style="margin: 0; color: var(--alerte-texte-information); font-size: 0.9rem; line-height: 1.5;">
-                                                Cet·te étudiant·e n'a pas encore d'évaluations complétées avec des critères correspondant à la grille de référence.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    }
-
-                    return barresHTML + legendeHTML;
-                })()}
+                ${_genererBlocForcesDefisSRPNF(da)}
                 </div>
                 ${genererBlocConsolidation(da)}
                 `,
