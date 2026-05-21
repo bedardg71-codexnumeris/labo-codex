@@ -10,10 +10,6 @@
    - `window.populerDropdownsAssemblageV2` (hub résiduel)
    - `window.afficherStatistiquesTrimestreV2` (helper transversal résiduel)
    - `window.mettreAJourGuideGroupeCours` (helper transversal résiduel)
-
-   Exports élargis pour les helpers consommés par la zone 8 orchestre qui
-   reste au résidu : `populerDropdownGroupesHoraireV2` (nouveau pour cette
-   session — appelé par afficherFormHoraireV2 du résidu).
    =============================== */
 
 (function() {
@@ -856,8 +852,6 @@ window.annulerFormHoraireV2 = annulerFormHoraireV2;
 window.sauvegarderHoraireV2 = sauvegarderHoraireV2;
 window.mettreAJourSeancesHoraireV2 = mettreAJourSeancesHoraireV2;
 window.chargerHorairesV2 = chargerHorairesV2;
-// Promu pour la zone 8 orchestre du résidu (afficherFormHoraireV2 + modifierHoraireSelectionneV2).
-window.populerDropdownGroupesHoraireV2 = populerDropdownGroupesHoraireV2;
 // Exports migrés du bloc principal résidu (lignes 4524-4530 originelles).
 window.chargerHoraireGroupeActifV2 = chargerHoraireGroupeActifV2;
 window.chargerSeancesV2 = chargerSeancesV2;

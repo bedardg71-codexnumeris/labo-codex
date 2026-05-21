@@ -15,11 +15,6 @@
  * 2 variables module-scope (_confidentielDaActuel, SOUS_CATEGORIES_SERVICES)
  * encapsulées dans l'IIFE.
  *
- * Bug latent préservé (à inscrire SUIVI-BUGS Catégorie B post-refactor) :
- * chargerProfilEtudiant() jamais définie — branche L5334-5335 originale dead
- * (typeof toujours false). Préservation comportementale stricte.
- *
- * @see SESSION.md — Récap session B
  * @see audit/refactoring-prep/MODULES-MAP.md §2.3
  * @see Skills pour Claude Code/SKILL_Securite_donnees.md §9.1
  */
@@ -262,8 +257,8 @@ function sauvegarderConfidentiel() {
     fermerModalConfidentiel();
 
     // Rafraîchir le profil si nécessaire
-    if (typeof chargerProfilEtudiant === 'function') {
-        chargerProfilEtudiant(_confidentielDaActuel);
+    if (typeof window.afficherProfilComplet === 'function') {
+        window.afficherProfilComplet(_confidentielDaActuel);
     }
 }
 

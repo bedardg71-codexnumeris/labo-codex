@@ -4,7 +4,7 @@
    Extrait de js/evaluation.js (zone L77-1110 Chargement + zone L1112-1247 Auto-save,
    session A étape 3 refactor evaluation, 2026-05-18 — beta 99.48 b0518-0720).
 
-   17 fonctions migrées : initialiserModuleEvaluation, chargerListeEtudiantsEval,
+   16 fonctions migrées : chargerListeEtudiantsEval,
    chargerGroupesEval, filtrerEtudiantsParGroupe, chargerProductionsDansSelect,
    chargerGrillesDansSelect, chargerEchellePerformance, chargerEvaluationsEtudiant,
    chargerProduction, _selectionnerCartoucheProduction, chargerGrilleSelectionnee,
@@ -28,13 +28,6 @@
    NON exportées (préservation comportementale stricte) :
      · _selectionnerCartoucheProduction, _debouncerAutoSave, _flusherAutoSave,
        _autoSauvegarderCriteres : préfixe _, privées d'origine (§5.10)
-     · initialiserModuleEvaluation : bug latent dead code silencieux préservé
-       (main.js:495 `typeof === 'function'` guard masque l'absence d'export)
-
-   Bugs latents préservés (Cat-B post-merge — voir SUIVI-BUGS) :
-     · initialiserModuleEvaluation dead code (jamais appelée — IIFE encapsulée)
-     · chargerEchellePerformance doublon cross-module (echelles.js:1766 async
-       vs evaluation.js sync) — préservation stricte ordre de chargement
 
    Chargé AVANT evaluation.js dans index.html — le résidu evaluation.js consomme
    window.afficherCriteresDepuisGrille (L5521) via window.X promotion §5.6.
@@ -42,33 +35,6 @@
 
 (function() {
 'use strict';
-
-function initialiserModuleEvaluation() {
-
-    // Vérifier que nous sommes dans la bonne section
-    const selectEtudiant = document.getElementById('selectEtudiantEval');
-    if (!selectEtudiant) {
-        return;
-    }
-
-    // Charger toutes les listes
-    chargerListeEtudiantsEval();
-    chargerGroupesEval();
-    chargerGrillesDansSelect();
-    chargerEchellePerformance();
-
-    // S'assurer que toutes les cases sont cochées par défaut
-    cocherOptionsParDefaut();
-
-    const listeEval = document.getElementById('evaluations-liste');
-    if (listeEval && listeEval.classList.contains('active')) {
-        chargerListeEvaluationsRefonte();
-    }
-
-    // 🔄 Initialiser le mode évaluation en série
-    initialiserModeEvaluationSerie();
-
-}
 
 /* ===============================
    📂 CHARGEMENT DES LISTES

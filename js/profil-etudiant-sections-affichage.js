@@ -2284,12 +2284,6 @@ function _calculerIndicesDualPourProfil(da, config) {
     return { indicesSOM, indicesPAN, modeComparatif };
 }
 
-/**
- * HELPER : résolution titre + contenu selon section affichée + préférences UI.
- * Préserve EXACTEMENT le comportement original — y compris l'absence de branche
- * pour `progression && progressionVisible` (bug latent SUIVI-BUGS #106 :
- * titre+contenu vides au premier rendu si arrivée directe sur 'progression').
- */
 function _resoudreSectionContenu(sectionAffichee, da, prefs) {
     const fallback = { titreSection: 'Productions et évaluations', contenuSection: genererSectionProductions(da) };
 
@@ -2304,8 +2298,11 @@ function _resoudreSectionContenu(sectionAffichee, da, prefs) {
             ? { titreSection: 'Engagement ACP', contenuSection: genererSectionMobilisationEngagement(da) }
             : fallback;
     }
-    if (sectionAffichee === 'progression' && !prefs.progressionVisible) return fallback;
-    // Bug latent #106 : pas de cas `progression && progressionVisible` → titre+contenu vides (préservation stricte)
+    if (sectionAffichee === 'progression') {
+        return prefs.progressionVisible
+            ? { titreSection: 'Progression', contenuSection: genererSectionProgression(da) }
+            : fallback;
+    }
     if (sectionAffichee === 'rapport') return { titreSection: 'Rapport', contenuSection: genererSectionRapport(da) };
     if (sectionAffichee === 'accompagnement') {
         return prefs.activerRai

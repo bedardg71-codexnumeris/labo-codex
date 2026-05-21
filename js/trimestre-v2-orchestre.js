@@ -9,9 +9,7 @@
      monstre cyc 94 préservé tel quel pour Phase 1, sera éclaté Phase 2
      selon Écart #8 MODULES-MAP §2.4)
    - Dropdown enseignants + UI enseignant
-   - UI horaire (wrappers form/modif — apparemment dead code, aucun
-     caller dans index.html mais conservés par préservation stricte)
-   - UI groupe-cours (form, activer, aperçu)
+   - UI groupe-cours (form, aperçu)
    - Accès rapide calendrier
 
    Helpers transversaux RESTÉS au résidu (accédés via window.X depuis ce
@@ -24,21 +22,6 @@
    - mettreAJourOptionsFormatHoraire/mettreAJourFormatHoraire/mettreAJourInfoDuree
 
    Variable module-scope migrée : `enseignantEnEditionUI`.
-
-   ⚠️ Bugs latents PRÉSERVÉS (héritage code pré-refactor, à inscrire
-   SUIVI-BUGS phase 4 capitalisation session C) :
-   - L1014-1015/L1047-1048 résidu : `horaireEnEditionId = ...` et
-     `seancesTempV2 = ...` sont lues sans déclaration locale dans ce
-     IIFE — leur définition `let` vit dans trimestre-v2-horaires.js
-     (scope isolé). En strict mode + IIFE séparé, ces assignations
-     plantent. Les fonctions `afficherFormHoraireV2` et
-     `modifierHoraireSelectionneV2` semblent être dead code (aucun
-     caller dans index.html ni data-action).
-   - L1062 résidu : `afficherSeancesHoraireV2()` appelée sans guard
-     dans `modifierHoraireSelectionneV2`, fonction non définie nulle
-     part dans le code actif.
-   - L1122 résidu : `rafraichirListeGroupeCoursV2()` appelée sans guard
-     dans `activerGroupeCoursV2`, fonction non définie nulle part.
 
    Atomicité critique préservée (Écart #6) :
    - Le couple `db.setSync('groupeCoursActif', X)` + `db.setSync('infoCours', Y)`
@@ -566,94 +549,6 @@ async function modifierEnseignantSelectionneV2() {
 }
 
 /**
- * Affiche le formulaire d'ajout d'horaire (version UI)
- *
- * ⚠️ Apparent dead code — aucun caller dans index.html ni data-action.
- * Bug latent : `horaireEnEditionId` et `seancesTempV2` non déclarés
- * dans le scope orchestre (vivent dans trimestre-v2-horaires.js).
- * Préservation comportementale stricte : assignations laissées telles
- * quelles, le code planterait en strict mode si jamais appelé.
- */
-function afficherFormHoraireV2() {
-    horaireEnEditionId = null;
-    seancesTempV2 = [];
-
-    const fields = { 'v2-hor-nom': '', 'v2-hor-local': '', 'v2-hor-nbSeances': '2', 'v2-hor-periodesParSeance': '2' };
-    Object.entries(fields).forEach(([id, val]) => {
-        const el = document.getElementById(id);
-        if (el) el.value = val;
-    });
-
-    const titre = document.getElementById('v2-titreFormHoraire');
-    const btnTexte = document.getElementById('v2-btnTexteHoraire');
-    if (titre) titre.textContent = 'Nouvel horaire';
-    if (btnTexte) btnTexte.textContent = 'Ajouter';
-
-    // Peupler dropdown groupe associé
-    window.populerDropdownGroupesHoraireV2();
-
-    window.mettreAJourSeancesHoraireV2();
-
-    const form = document.getElementById('v2-formulaireHoraire');
-    if (form) form.classList.remove('u-hide');
-}
-
-/**
- * Modifie l'horaire sélectionné
- *
- * ⚠️ Apparent dead code (idem afficherFormHoraireV2).
- * Bug latent : `afficherSeancesHoraireV2()` appelée sans guard, fonction
- * non définie nulle part dans le code actif. Préservation stricte.
- */
-async function modifierHoraireSelectionneV2() {
-    const horaireId = document.getElementById('v2-selectHoraire')?.value;
-    if (!horaireId || typeof HorairesEntite === 'undefined') return;
-
-    const hor = await HorairesEntite.obtenirParId(horaireId);
-    if (!hor) return;
-
-    horaireEnEditionId = horaireId;
-    seancesTempV2 = [...(hor.seances || [])];
-
-    document.getElementById('v2-hor-nom').value = hor.nom || '';
-    document.getElementById('v2-hor-local').value = hor.local || '';
-    document.getElementById('v2-hor-nbSeances').value = String(hor.nbSeances || hor.seances?.length || 2);
-    document.getElementById('v2-hor-periodesParSeance').value = String(hor.periodesParSeance || 2);
-
-    // Groupe associé
-    const selectGroupe = document.getElementById('v2-hor-groupeAssocie');
-    if (selectGroupe) {
-        window.populerDropdownGroupesHoraireV2();
-        selectGroupe.value = hor.groupeAssocie || '';
-    }
-
-    afficherSeancesHoraireV2();
-    mettreAJourResumeFormatHoraireV2();
-
-    const titre = document.getElementById('v2-titreFormHoraire');
-    const btnTexte = document.getElementById('v2-btnTexteHoraire');
-    if (titre) titre.textContent = 'Modifier l\'horaire';
-    if (btnTexte) btnTexte.textContent = 'Enregistrer';
-
-    const form = document.getElementById('v2-formulaireHoraire');
-    if (form) form.classList.remove('u-hide');
-}
-
-/**
- * Met à jour le résumé du format horaire
- */
-function mettreAJourResumeFormatHoraireV2() {
-    const nbSeances = parseInt(document.getElementById('v2-hor-nbSeances')?.value) || 2;
-    const periodesParSeance = parseInt(document.getElementById('v2-hor-periodesParSeance')?.value) || 2;
-    const totalPeriodes = nbSeances * periodesParSeance;
-
-    const resumeElem = document.getElementById('v2-hor-formatResume');
-    if (resumeElem) {
-        resumeElem.textContent = `${nbSeances} séance${nbSeances > 1 ? 's' : ''} × ${periodesParSeance} période${periodesParSeance > 1 ? 's' : ''} = ${totalPeriodes} périodes/semaine`;
-    }
-}
-
-/**
  * Affiche le formulaire de création de groupe-cours
  */
 function afficherFormGroupeCoursV2() {
@@ -672,35 +567,6 @@ function afficherFormGroupeCoursV2() {
 
     const form = document.getElementById('v2-formulaireGroupeCours');
     if (form) form.classList.remove('u-hide');
-}
-
-/**
- * Active un groupe-cours
- *
- * ⚠️ Bug latent : `rafraichirListeGroupeCoursV2()` appelée sans guard,
- * fonction non définie nulle part. Préservation comportementale stricte.
- */
-async function activerGroupeCoursV2(groupeCoursId) {
-    const trimestreActif = window.trimestreActif || obtenirTrimestreActif()?.id;
-    if (!trimestreActif) return;
-
-    try {
-        if (typeof GroupeCoursEntite !== 'undefined') {
-            await GroupeCoursEntite.activer(trimestreActif, groupeCoursId);
-            await GroupeCoursEntite.synchroniserInfoCours(trimestreActif);
-        }
-
-        rafraichirListeGroupeCoursV2();
-        await peuplerDropdownGroupeCoursActif();
-
-        if (typeof chargerCoursSelectV2 === 'function') {
-            chargerCoursSelectV2();
-        }
-
-    } catch (err) {
-        console.error('[Trimestre V2] Erreur activation groupe-cours:', err);
-        alert('Erreur lors de l\'activation');
-    }
 }
 
 /**
@@ -779,11 +645,7 @@ window.peuplerDropdownEnseignants = peuplerDropdownEnseignants;
 window.changerEnseignantSelectionneV2 = changerEnseignantSelectionneV2;
 window.afficherFormEnseignantV2 = afficherFormEnseignantV2;
 window.modifierEnseignantSelectionneV2 = modifierEnseignantSelectionneV2;
-window.afficherFormHoraireV2 = afficherFormHoraireV2;
-window.modifierHoraireSelectionneV2 = modifierHoraireSelectionneV2;
-window.mettreAJourResumeFormatHoraireV2 = mettreAJourResumeFormatHoraireV2;
 window.afficherFormGroupeCoursV2 = afficherFormGroupeCoursV2;
-window.activerGroupeCoursV2 = activerGroupeCoursV2;
 window.mettreAJourApercuGroupeCours = mettreAJourApercuGroupeCours;
 
 })();

@@ -309,29 +309,6 @@ function convertirNoteEnValeur(note) {
 }
 
 /**
- * Calcule un indice de risque d'échec : 1 - (A × C × P)
- * Retourne 1 (risque maximal) si un des trois indices est à 0.
- */
-function calculerRisqueEchec(assiduite, completion, performance) {
-    if (assiduite === 0 || completion === 0 || performance === 0) {
-        return 1; // Risque maximal
-    }
-    return 1 - (assiduite * completion * performance);
-}
-
-/**
- * Détermine le niveau de risque avec classe CSS
- */
-function obtenirClasseRisque(risque) {
-    if (risque > 0.7) return 'risque-critique';
-    if (risque > 0.5) return 'risque-tres-eleve';
-    if (risque > 0.4) return 'risque-eleve';
-    if (risque > 0.3) return 'risque-modere';
-    if (risque > 0.2) return 'risque-faible';
-    return 'risque-minimal';
-}
-
-/**
  * Obtient le nom réel d'une cartouche
  */
 function obtenirNomCartouche(cartoucheId, grilleId) {
@@ -579,7 +556,6 @@ function afficherListeEvaluations(donneesEtudiants) {
 
     // Générer le HTML
     const html = donneesEtudiants.map(etudiant => {
-        const classeRisque = obtenirClasseRisque(etudiant.indices.risque);
         const iconToggle = '▶';
 
         return `
@@ -854,47 +830,6 @@ function rechargerFiltreProduction() {
 }
 
 /**
- * Filtre la liste selon les critères sélectionnés
- */
-function filtrerListeEvaluations() {
-    const filtreGroupe = document.getElementById('filtre-groupe-eval')?.value;
-    const filtreProduction = document.getElementById('filtre-production-eval')?.value;
-    const filtreStatut = document.getElementById('filtre-statut-eval')?.value;
-
-    let donneesFiltrees = [...donneesEvaluationsFiltrees];
-
-    // Filtrer par groupe
-    if (filtreGroupe) {
-        donneesFiltrees = donneesFiltrees.filter(e => e.groupe === filtreGroupe);
-    }
-
-    // Filtrer par production
-    if (filtreProduction) {
-        donneesFiltrees = donneesFiltrees.filter(e =>
-            e.evaluations.some(evaluation => evaluation.productionId === filtreProduction)
-        );
-    }
-
-    // Filtrer par statut
-    if (filtreStatut === 'evalues') {
-        donneesFiltrees = donneesFiltrees.filter(e => e.evaluations.length > 0);
-    } else if (filtreStatut === 'non-evalues') {
-        donneesFiltrees = donneesFiltrees.filter(e => e.evaluations.length === 0);
-    } else if (filtreStatut === 'risque') {
-        donneesFiltrees = donneesFiltrees.filter(e => e.indices.risque > 0.4);
-    }
-
-    // Afficher les résultats filtrés
-    afficherListeEvaluations(donneesFiltrees);
-
-    // Afficher les résultats filtrés
-    afficherListeEvaluations(donneesFiltrees);
-
-    // AJOUTER : Réappliquer le tri actuel
-    trierListeEvaluations();
-}
-
-/**
  * Réinitialise tous les filtres
  * OBSOLETE: Cette fonction est maintenant gérée par liste-evaluations.js
  * Ne pas redéfinir ici pour éviter d'écraser la fonction moderne
@@ -984,20 +919,6 @@ function restaurerPreferenceTri() {
     }
 }
 
-/**
- * Restaure la préférence de tri sauvegardée
- */
-function restaurerPreferenceTri() {
-    const preference = db.getSync('preferenceTriEvaluations', null);
-    if (preference) {
-        const selectTri = document.getElementById('tri-evaluations');
-        if (selectTri) {
-            selectTri.value = preference;
-            trierListeEvaluations();
-        }
-    }
-}
-
 /* ===============================
    STATISTIQUES
    =============================== */
@@ -1064,20 +985,6 @@ function mettreAJourStatistiquesEvaluations() {
 
 // ✅ Fonction obtenirNomCartouche() supprimée (doublon incorrect)
 // La version correcte est définie ligne 1107
-
-/**
- * Obtient la classe CSS pour une note
- */
-function obtenirClasseNote(note) {
-    const classes = {
-        'M': 'note-maitrise',
-        'I': 'note-intermediaire',
-        'D': 'note-developpement',
-        'B': 'note-base',
-        'O': 'note-observation'
-    };
-    return classes[note] || '';
-}
 
 /**
  * Formate une date ISO en format court "2026-02-06" (fr-CA par défaut)
@@ -3562,27 +3469,6 @@ function desactiverFormulaireEvaluation(desactiver) {
         }
     });
 
-}
-
-/**
- * Filtre la liste des évaluations selon la recherche
- */
-function filtrerListeEvaluations() {
-    const recherche = document.getElementById('recherche-liste-evaluations');
-    if (!recherche) return;
-
-    const terme = recherche.value.toLowerCase().trim();
-    const conteneur = document.getElementById('conteneur-evaluations-accordeon');
-    if (!conteneur) return;
-
-    const cartes = conteneur.getElementsByClassName('carte etudiant-evaluation-carte');
-
-    for (let carte of cartes) {
-        const da = carte.getAttribute('data-da') || '';
-        const nom = carte.textContent.toLowerCase();
-
-        toggleDisplay(carte, terme === '' || da.includes(terme) || nom.includes(terme));
-    }
 }
 
 /**

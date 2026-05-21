@@ -673,9 +673,8 @@ function afficherSyntheseGroupeEtudiants() {
     if (elemProgrammes) {
         if (topProgrammes.length > 0 && total > 0) {
             elemProgrammes.classList.remove('u-hide');
-            // security-ok: code transféré tel quel depuis trimestre-v2.js (refactor session B) — bug latent pré-existant inscrit SUIVI-BUGS
             elemProgrammes.innerHTML = '<strong style="font-size: 0.75rem;">Programmes :</strong><br>' +
-                topProgrammes.map(([prog, nb]) => `<span style="font-size: 0.75rem;">${prog} (${nb})</span>`).join('<br>');
+                topProgrammes.map(([prog, nb]) => `<span style="font-size: 0.75rem;">${echapperHtml(prog)} (${nb})</span>`).join('<br>');
         } else {
             elemProgrammes.classList.add('u-hide');
         }

@@ -84,9 +84,8 @@ async function chargerListeEtudiantsV2() {
 
     if (etudiants.length === 0) {
         const message = groupeFiltre
-            ? `Aucun étudiant dans le groupe ${groupeFiltre}.`
+            ? `Aucun étudiant dans le groupe ${echapperHtml(groupeFiltre)}.`
             : 'Aucun étudiant. Utilise l\'import à gauche ou le formulaire ci-dessous.';
-        // security-ok: code transféré tel quel depuis trimestre-v2.js (refactor session B) — bug latent pré-existant inscrit SUIVI-BUGS
         conteneur.innerHTML = `<p class="etat-vide-liste">${message}</p>`;
         toggleDisplay(actionsEtudiants, tousLesEtudiants.length > 0);
         // Masquer le bouton supprimer groupe si pas d'étudiants
@@ -185,12 +184,11 @@ function mettreAJourResumeEtudiantsV2(etudiants) {
         if (groupesTries.length === 0) {
             elemGroupes.innerHTML = '';
         } else if (groupesTries.length === 1) {
-            // security-ok: code transféré tel quel depuis trimestre-v2.js (refactor session B) — bug latent pré-existant inscrit SUIVI-BUGS
-            elemGroupes.innerHTML = `<div class="resume-details-ligne"><span>Groupe ${groupesTries[0][0]}</span></div>`;
+            elemGroupes.innerHTML = `<div class="resume-details-ligne"><span>Groupe ${echapperHtml(groupesTries[0][0])}</span></div>`;
         } else {
             let html = '';
             groupesTries.forEach(([grp, nb]) => {
-                html += `<div class="resume-details-ligne"><span>Grp ${grp}</span><span>${nb}</span></div>`;
+                html += `<div class="resume-details-ligne"><span>Grp ${echapperHtml(grp)}</span><span>${nb}</span></div>`;
             });
             elemGroupes.innerHTML = html;
         }
