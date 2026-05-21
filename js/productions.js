@@ -983,17 +983,13 @@ function construireProductionData(d, evaluations) {
     return productionData;
 }
 
-// Rafraîchit l'UI après la sauvegarde (notifications, selects, modale, etc.).
-// Note préservation comportementale : `productionEnEdition` est lue à l'évaluation
-// du message — `annulerFormProduction()` ayant déjà mis cette variable à null,
-// le message dit toujours "ajoutée" (bug latent préservé).
-async function rafraichirInterfaceApresSauvegarde(idSauvegarde) {
+async function rafraichirInterfaceApresSauvegarde(idSauvegarde, estModification) {
     await afficherTableauProductions();
     await afficherToutesLesProductionsParType();
     await mettreAJourPonderationTotale();
 
     if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(productionEnEdition ?
+        afficherNotificationSucces(estModification ?
             'Production modifiée avec succès !' :
             'Production ajoutée avec succès !');
     }
@@ -1070,10 +1066,10 @@ async function sauvegarderProduction() {
 
     // 🆕 BETA 95.1 : Garder l'ID pour réafficher après sauvegarde
     const idSauvegarde = productionEnEdition || productionData.id;
+    const estModification = !!productionEnEdition;
 
-    annulerFormProduction();  // ⚠️ met productionEnEdition = null
-    productionEnEdition = null;  // Préservation stricte : assignation redondante d'origine
-    await rafraichirInterfaceApresSauvegarde(idSauvegarde);
+    annulerFormProduction();
+    await rafraichirInterfaceApresSauvegarde(idSauvegarde, estModification);
 }
 
 /* ===============================
@@ -2158,24 +2154,10 @@ async function chargerGrillesDisponiblesPourProduction() {
  */
 const sauvegarderProductionOriginale = window.sauvegarderProduction;
 window.sauvegarderProduction = async function() {
-    // Appeler la fonction originale
     if (typeof sauvegarderProductionOriginale === 'function') {
         await sauvegarderProductionOriginale();
     }
-
-    // Recharger la sidebar
     await afficherListeProductions();
-
-    // Mettre à jour les métriques
-    const id = window.productionEnCoursEdition;
-    if (id) {
-        const productions = await db.get(getCleProductions()) || [];
-        const production = productions.find(p => p.id === id);
-        if (production) {
-            // mettreAJourMetriquesProduction(production); // DÉSACTIVÉ (cartes métriques supprimées)
-            definirProductionActive(id);
-        }
-    }
 };
 
 /**
@@ -2198,9 +2180,6 @@ window.annulerFormProduction = function() {
     document.querySelectorAll('.sidebar-item').forEach(item => {
         item.classList.remove('active');
     });
-
-    // Réinitialiser l'ID d'édition
-    window.productionEnCoursEdition = null;
 };
 
 /**
@@ -2222,7 +2201,7 @@ window.supprimerProduction = async function(id) {
     await afficherListeProductions();
 
     // Masquer le formulaire si c'était la production affichée
-    if (window.productionEnCoursEdition === id) {
+    if (productionEnEdition === id) {
         annulerFormProduction();
     }
 

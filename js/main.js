@@ -491,11 +491,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // PRIORITÉ 4 : MODULES AVANCÉS
     // ===============================
 
-    // MODULE EVALUATION: Évaluations
-    if (typeof initialiserModuleEvaluation === 'function') {
-        initialiserModuleEvaluation();
-    }
-
     // MODULE 14: Statistiques
     if (typeof initialiserModuleStatistiques === 'function') {
         initialiserModuleStatistiques();

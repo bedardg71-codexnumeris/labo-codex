@@ -15,10 +15,6 @@
      demanderMetadonneesEnrichies, ajouterMetadonnéesCC, verifierLicenceCC,
      genererBadgeCC, avertirSansLicence, ApercuSandbox, filtrerRessourcesNonDemo,
      afficherNotificationSucces
-
-   ⚠️ Bug #96 préservé tel quel (ligne ~338) : `event.target.value` dans
-   importerProductions — variable `event` non définie, masquée par `window.event`
-   (Chrome/Safari). Préservation comportementale stricte. Voir SUIVI-BUGS.md.
    =============================== */
 
 (function() {
@@ -366,7 +362,7 @@ function importerProductions(eventOuEl) {
     reader.readAsText(file);
 
     // Réinitialiser l'input pour permettre le même fichier
-    event.target.value = '';
+    target.value = '';
 }
 
 /**

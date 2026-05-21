@@ -1748,32 +1748,6 @@ async function genererNiveauxPersonnalises() {
    =============================== */
 
 /**
- * Charge les échelles dans un select d'évaluation
- * Utilisé dans le module 04-productions pour sélectionner l'échelle
- * 
- * FONCTIONNEMENT:
- * 1. Récupère les échelles depuis localStorage
- * 2. Remplit le select avec les options
- * 3. Option par défaut «Choisir une échelle»
- * 
- * UTILISÉ PAR:
- * - Module 04-productions (évaluation des productions)
- * - Autres modules nécessitant une sélection d'échelle
- * 
- * ÉLÉMENT REQUIS:
- * - #selectEchelle1 (ou autre numéro selon la production)
- */
-async function chargerEchellePerformance() {
-    const echelles = await db.get('echellesTemplates') ||  [];
-    const selectEchelle = document.getElementById('selectEchelle1');
-
-    if (!selectEchelle) return;
-
-    selectEchelle.innerHTML = '<option value="">-- Choisir une échelle --</option>' +
-        echelles.map(echelle => `<option value="${echapperHtml(echelle.id)}">${echapperHtml(echelle.nom || 'Échelle sans nom')}</option>`).join('');
-}
-
-/**
  * Met à jour les options des selects de critères selon l'échelle
  * Utilisé lors de l'évaluation pour afficher les bons niveaux
  * 
