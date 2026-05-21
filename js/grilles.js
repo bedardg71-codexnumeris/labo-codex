@@ -30,8 +30,8 @@
    - window.tempCriteres : Array temporaire pour nouvelle grille
    
    Fonctions du module 14-utilitaires.js (si disponibles):
-   - afficherNotificationSucces(message, details)
-   - afficherNotificationErreur(message, details)
+   - notifications.succes(message, details)
+   - notifications.erreur(message, details)
    
    Éléments HTML requis:
    - #selectGrilleTemplate : Select des grilles
@@ -391,9 +391,7 @@ async function sauvegarderCritere() {
     critereEnEdition = null;
 
     // Notification
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(`Critère "${nom}" ajouté et grille "${nomGrille}" sauvegardée !`);
-    }
+    notifications.succes(`Critère "${nom}" ajouté et grille "${nomGrille}" sauvegardée !`);
 }
 
 /* ===============================
@@ -743,9 +741,7 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
     }
 
     if (!silencieux) {
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces(`Grille "${nomGrille}" sauvegardée !`);
-        }
+        notifications.succes(`Grille "${nomGrille}" sauvegardée !`);
     }
 }
 
@@ -949,9 +945,7 @@ async function supprimerGrille(grilleId) {
     // ✅ AJOUT (8 décembre 2025) : Rafraîchir la barre latérale
     await afficherListeGrilles();
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Grille supprimée');
-    }
+    notifications.succes('Grille supprimée');
 }
 
 /* ===============================
@@ -1035,9 +1029,7 @@ async function dupliquerGrille(grilleId) {
     if (select) select.value = nouvelleGrille.id;
     await chargerGrilleTemplate();
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(`Grille "${nouvelleGrille.nom}" créée à partir de "${grilleOriginale.nom}" !`);
-    }
+    notifications.succes(`Grille "${nouvelleGrille.nom}" créée à partir de "${grilleOriginale.nom}" !`);
 }
 
 /* ===============================
@@ -1104,9 +1096,7 @@ async function dupliquerGrilleActuelle() {
     const btnDupliquer = document.getElementById('btnDupliquerGrille');
     if (btnDupliquer) btnDupliquer.classList.remove('u-hide');
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(`Grille "${nouvelleGrille.nom}" créée à partir de "${grilleTemplateActuelle.baseSur}" !`);
-    }
+    notifications.succes(`Grille "${nouvelleGrille.nom}" créée à partir de "${grilleTemplateActuelle.baseSur}" !`);
 }
 
 /* ===============================
@@ -1152,9 +1142,7 @@ async function basculerVerrouillageCritere(critereId) {
 
             // Afficher une notification spécifique au verrouillage
             const statut = criteres[index].verrouille ? 'verrouillé' : 'déverrouillé';
-            if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces(`Critère "${criteres[index].nom}" ${statut}`);
-            }
+            notifications.succes(`Critère "${criteres[index].nom}" ${statut}`);
         }
 
         afficherListeCriteres(criteres, grilleTemplateActuelle?.id || null);
@@ -1725,9 +1713,7 @@ async function exporterGrilles() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(`${grilles.length} grille(s) exportée(s) avec succès`);
-    }
+    notifications.succes(`${grilles.length} grille(s) exportée(s) avec succès`);
 }
 
 /**
@@ -1802,9 +1788,7 @@ async function exporterGrilleActive() {
     a.click();
     URL.revokeObjectURL(url);
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(`Grille "${grille.nom}" exportée avec succès`);
-    }
+    notifications.succes(`Grille "${grille.nom}" exportée avec succès`);
 }
 
 /**
@@ -1900,11 +1884,7 @@ async function importerDansGrilleActive(event) {
             // Rafraîchir la liste
             await afficherGrillesExistantes();
 
-            if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces('Grille importée et remplacée avec succès');
-            } else {
-                alert('Grille importée et remplacée avec succès !');
-            }
+            notifications.succes('Grille importée et remplacée avec succès');
 
         } catch (error) {
             console.error('Erreur lors de l\'import:', error);
@@ -3613,9 +3593,7 @@ async function supprimerGrilleActive() {
         await afficherListeGrilles();
 
         // ✅ Notification au lieu d'alert
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces(`Grille "${nomGrille}" supprimée`);
-        }
+        notifications.succes(`Grille "${nomGrille}" supprimée`);
     }
 }
 

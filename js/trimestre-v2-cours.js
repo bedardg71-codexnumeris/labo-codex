@@ -278,9 +278,7 @@ function supprimerCoursV2() {
     if (formulaire) formulaire.classList.add('u-hide');
 
     // Notification
-    if (typeof afficherNotificationSucces === 'function') {
-        notifications.succes('Cours supprimé', `${nomCours} - ${titreCours}`);
-    }
+    notifications.succes('Cours supprimé', `${nomCours} - ${titreCours}`);
 
     // Beta 95.2: Rafraîchir le dropdown Cours dans la section Groupe-cours
     if (typeof window.populerDropdownsAssemblageV2 === 'function') {
@@ -979,9 +977,7 @@ function _persisterCoursV2(cours) {
 }
 
 function _postSauvegardeCoursV2(cours) {
-    if (typeof afficherNotificationSucces === 'function') {
-        notifications.succes(coursEnEditionV2 ? 'Cours modifié avec succès' : 'Cours créé avec succès');
-    }
+    notifications.succes(coursEnEditionV2 ? 'Cours modifié avec succès' : 'Cours créé avec succès');
     annulerFormCoursV2();
     chargerDropdownCoursV2();
     const selectCours = document.getElementById('v2-selectCours');

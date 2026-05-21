@@ -503,9 +503,7 @@ async function supprimerEtudiantV2(da) {
 
     chargerListeEtudiantsV2();
 
-    if (typeof afficherNotificationSucces === 'function') {
-        notifications.succes('Étudiant supprimé');
-    }
+    notifications.succes('Étudiant supprimé');
 }
 
 /**
@@ -563,14 +561,12 @@ async function changerStatutEtudiantV2(da, nouveauStatut) {
 
     chargerListeEtudiantsV2();
 
-    if (typeof afficherNotificationSucces === 'function') {
-        if (nouveauStatut === 'inactif') {
-            notifications.succes(nomComplet.trim() + ' marqué inactif');
-        } else if (nouveauStatut === 'décrochage') {
-            notifications.succes(nomComplet.trim() + ' marqué en décrochage');
-        } else {
-            notifications.succes(nomComplet.trim() + ' réactivé');
-        }
+    if (nouveauStatut === 'inactif') {
+        notifications.succes(nomComplet.trim() + ' marqué inactif');
+    } else if (nouveauStatut === 'décrochage') {
+        notifications.succes(nomComplet.trim() + ' marqué en décrochage');
+    } else {
+        notifications.succes(nomComplet.trim() + ' réactivé');
     }
 }
 
@@ -716,9 +712,7 @@ async function confirmerImportV2() {
 
     chargerListeEtudiantsV2();
 
-    if (typeof afficherNotificationSucces === 'function') {
-        notifications.succes(`${etudiants.length} étudiant(s) importé(s)`);
-    }
+    notifications.succes(`${etudiants.length} étudiant(s) importé(s)`);
 
     // Mettre à jour le guide groupe-cours
     if (typeof window.mettreAJourGuideGroupeCours === 'function') {
@@ -773,9 +767,7 @@ async function reinitialiserEtudiantsV2() {
     await db.set(cleEtud, []);
     chargerListeEtudiantsV2();
 
-    if (typeof afficherNotificationSucces === 'function') {
-        notifications.succes('Liste réinitialisée');
-    }
+    notifications.succes('Liste réinitialisée');
 
     // Mettre à jour le guide groupe-cours
     if (typeof window.mettreAJourGuideGroupeCours === 'function') {
@@ -834,9 +826,7 @@ async function supprimerGroupeSelectionneV2() {
 
     chargerListeEtudiantsV2();
 
-    if (typeof afficherNotificationSucces === 'function') {
-        notifications.succes(`Groupe ${groupeSelectionne} supprimé (${etudiantsDuGroupe.length} étudiant(s))`);
-    }
+    notifications.succes(`Groupe ${groupeSelectionne} supprimé (${etudiantsDuGroupe.length} étudiant(s))`);
 
     // Mettre à jour le guide groupe-cours
     if (typeof window.mettreAJourGuideGroupeCours === 'function') {
@@ -877,9 +867,7 @@ async function sauvegarderGroupeEtudiantsV2() {
     }
 
     // Notification de succès
-    if (typeof afficherNotificationSucces === 'function') {
-        notifications.succes(`Groupe ${numeroGroupe} sauvegardé (${etudiants.length} étudiants)`);
-    }
+    notifications.succes(`Groupe ${numeroGroupe} sauvegardé (${etudiants.length} étudiants)`);
 
     // 🆕 BETA 95.2 : Rafraîchir le dropdown groupe-cours pour inclure ce groupe
     if (typeof peuplerDropdownGroupeCours === 'function') {

@@ -273,9 +273,7 @@ function rafraichirVuesApresCours() {
     }
 
     // Notification de succès
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Cours changé');
-    }
+    notifications.succes('Cours changé');
 }
 
 // Note: calculerRangSeance() a été supprimée.

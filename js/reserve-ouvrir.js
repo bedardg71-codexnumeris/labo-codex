@@ -494,9 +494,7 @@ async function onFichierChoisi(el) {
         _afficherEtapeSelection(_payloadCourant);
     } catch (e) {
         console.error('[ReserveOuvrir] Chargement échoué', e);
-        if (typeof window.afficherNotificationErreur === 'function') {
-            window.afficherNotificationErreur('Lecture impossible', e.message || String(e));
-        }
+        notifications.erreur('Lecture impossible', e.message || String(e));
         if (el) el.value = '';
     }
 }
@@ -683,9 +681,7 @@ async function onChoisirVersement(idx) {
 
     var versement = _versementsListes[i];
     if (!_handleReserveCourant) {
-        if (typeof window.afficherNotificationErreur === 'function') {
-            window.afficherNotificationErreur('Erreur', 'Dossier d’archives non disponible.');
-        }
+        notifications.erreur('Erreur', 'Dossier d’archives non disponible.');
         return;
     }
 
@@ -695,9 +691,7 @@ async function onChoisirVersement(idx) {
         _afficherEtapeSelection(payload);
     } catch (e) {
         console.error('[ReserveOuvrir] Chargement de l’archive échoué', e);
-        if (typeof window.afficherNotificationErreur === 'function') {
-            window.afficherNotificationErreur('Lecture impossible', e.message || String(e));
-        }
+        notifications.erreur('Lecture impossible', e.message || String(e));
     }
 }
 
@@ -1022,9 +1016,7 @@ function _collecterSelection() {
 async function appliquerReimport() {
     var selection = _collecterSelection();
     if (!selection) {
-        if (typeof window.afficherNotificationErreur === 'function') {
-            window.afficherNotificationErreur('Erreur', 'Aucune sélection trouvée.');
-        }
+        notifications.erreur('Erreur', 'Aucune sélection trouvée.');
         return;
     }
 
@@ -1166,19 +1158,15 @@ async function appliquerReimport() {
         if (rapport.copies > 0) detailStr += ' · ' + rapport.copies + ' copie(s) en double';
         if (rapport.refsRemappees > 0) detailStr += ' · ' + rapport.refsRemappees + ' référence(s) rebranchée(s) sur les copies';
 
-        if (typeof window.afficherNotificationSucces === 'function') {
-            window.afficherNotificationSucces(
-                totalAjoutes > 0 ? 'Réimport terminé' : 'Aucun réimport',
-                detailStr
-            );
-        }
+        notifications.succes(
+            totalAjoutes > 0 ? 'Réimport terminé' : 'Aucun réimport',
+            detailStr
+        );
 
         fermerDialogue();
     } catch (e) {
         console.error('[ReserveOuvrir] Réimport échoué', e);
-        if (typeof window.afficherNotificationErreur === 'function') {
-            window.afficherNotificationErreur('Erreur de réimport', e.message || String(e));
-        }
+        notifications.erreur('Erreur de réimport', e.message || String(e));
     }
 }
 

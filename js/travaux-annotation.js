@@ -2160,10 +2160,8 @@
             return { type: sel.type, data: JSON.parse(JSON.stringify(sel.data)) };
         });
 
-        if (typeof afficherNotificationSucces === 'function') {
-            var n = window._annotationClipboard.length;
-            afficherNotificationSucces(n + ' annotation' + (n > 1 ? 's copiées' : ' copiée'));
-        }
+        var n = window._annotationClipboard.length;
+        notifications.succes(n + ' annotation' + (n > 1 ? 's copiées' : ' copiée'));
     }
 
     /**
@@ -2219,10 +2217,8 @@
             reRendreAnnotations();
             planifierSauvegarde();
 
-            if (typeof afficherNotificationSucces === 'function') {
-                var n = nouveauxElements.length;
-                afficherNotificationSucces(n + ' annotation' + (n > 1 ? 's collées' : ' collée'));
-            }
+            var n = nouveauxElements.length;
+            notifications.succes(n + ' annotation' + (n > 1 ? 's collées' : ' collée'));
         }
     }
 

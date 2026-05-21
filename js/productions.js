@@ -26,8 +26,8 @@
    - echapperHtml() : Fonction de sécurité XSS (si utilisée)
    
    Fonctions du module 14-utilitaires.js (si disponibles):
-   - afficherNotificationSucces(message, details)
-   - afficherNotificationErreur(message, details)
+   - notifications.succes(message, details)
+   - notifications.erreur(message, details)
    
    Fonctions du module 02-navigation.js:
    - afficherSection(nomSection)
@@ -769,11 +769,7 @@ async function afficherFormProduction(id) {
             console.error('❌ Production non trouvée avec ID:', id);
             console.error('IDs disponibles:', evaluations.map(e => ({ id: e.id, titre: e.titre })));
 
-            if (typeof afficherNotificationErreur === 'function') {
-                afficherNotificationErreur('Évaluation introuvable', `ID: ${id}`);
-            } else {
-                alert('Erreur : Évaluation introuvable');
-            }
+            notifications.erreur('Évaluation introuvable', `ID: ${id}`);
             return;
         }
     } else {
@@ -988,11 +984,9 @@ async function rafraichirInterfaceApresSauvegarde(idSauvegarde, estModification)
     await afficherToutesLesProductionsParType();
     await mettreAJourPonderationTotale();
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(estModification ?
-            'Production modifiée avec succès !' :
-            'Production ajoutée avec succès !');
-    }
+    notifications.succes(estModification ?
+        'Production modifiée avec succès !' :
+        'Production ajoutée avec succès !');
 
     if (typeof mettreAJourStatutModalites === 'function') {
         mettreAJourStatutModalites();
@@ -1205,21 +1199,15 @@ async function verrouillerEvaluation(id) {
         await afficherToutesLesProductionsParType();
 
         // Notification de succès
-        if (typeof afficherNotificationSucces === 'function') {
-            const statut = evaluations[index].verrouille ? 'verrouillée' : 'déverrouillée';
-            afficherNotificationSucces(`Production ${statut}`);
-        }
+        const statut = evaluations[index].verrouille ? 'verrouillée' : 'déverrouillée';
+        notifications.succes(`Production ${statut}`);
     } else {
         // Si l'évaluation n'est pas trouvée, afficher une erreur
         console.error('❌ Production non trouvée!');
         console.error('ID recherché:', id);
         console.error('IDs disponibles:', evaluations.map(e => ({ id: e.id, titre: e.titre })));
 
-        if (typeof afficherNotificationErreur === 'function') {
-            afficherNotificationErreur('Évaluation introuvable', `ID: ${id}`);
-        } else {
-            alert('Erreur : Évaluation introuvable');
-        }
+        notifications.erreur('Évaluation introuvable', `ID: ${id}`);
     }
 }
 

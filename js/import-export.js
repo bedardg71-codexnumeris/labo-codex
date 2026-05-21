@@ -835,10 +835,7 @@ async function executerExport() {
 
     fermerModalExport();
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(`Export réussi : ${clesSelectionnees.length} clé(s) exportée(s)`);
-    } else {
-    }
+    notifications.succes(`Export réussi : ${clesSelectionnees.length} clé(s) exportée(s)`);
 
     } finally {
         if (_hasProg) window.masquerProgression();
@@ -1033,10 +1030,7 @@ async function executerImport() {
         fermerModalImport();
 
         const msgBlobs = nbRestores > 0 ? ` + ${nbRestores} fichier(s) travaux` : '';
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces(`Import réussi : ${nbCles} clé(s) importée(s)${msgBlobs}`);
-        } else {
-        }
+        notifications.succes(`Import réussi : ${nbCles} clé(s) importée(s)${msgBlobs}`);
 
         if (confirm('Import terminé ! Recharger la page pour appliquer les changements ?')) {
             location.reload();
@@ -2257,9 +2251,7 @@ async function executerImportConfigComplete() {
             }
         }
 
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces(messageSucces);
-        }
+        notifications.succes(messageSucces);
 
         // Proposer de recharger la page
         if (confirm('Import terminé!\n\nRecharger la page pour appliquer les changements?')) {
@@ -2612,9 +2604,7 @@ async function executerImportVersBibliotheques() {
 
             const message = `Fusion réussie !\n\n${details.join(', ')} ajoutée(s) à tes bibliothèques.\n\nTes données existantes ont été préservées.`;
 
-            if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces(message);
-            }
+            notifications.succes(message);
             alert(message);
 
             if (confirm('Recharger la page pour voir les nouvelles ressources ?')) {
@@ -3090,9 +3080,7 @@ async function executerImportSelectif() {
         } else {
             const message = `Import réussi !\n\n${details.join('\n')}\n\nTotal : ${total} élément(s) importé(s).`;
 
-            if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces(message);
-            }
+            notifications.succes(message);
             alert(message);
 
             if (confirm('Recharger la page pour voir les changements ?')) {
@@ -3320,9 +3308,7 @@ async function exporterConfigurationComplete() {
         URL.revokeObjectURL(urlTXT);
 
         // 8. Notification de succès
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces('Configuration complète exportée avec succès!\n\n2 fichiers téléchargés: JSON + LISEZMOI.txt');
-        }
+        notifications.succes('Configuration complète exportée avec succès!\n\n2 fichiers téléchargés: JSON + LISEZMOI.txt');
     }, 500);
 }
 

@@ -262,9 +262,7 @@ function confirmerSeanceV2() {
     db.setSync(cleSauvegarde, horaire);
 
     // Notifier
-    if (typeof afficherNotificationSucces === 'function') {
-        notifications.succes(seanceEnEditionV2 !== null ? 'Séance modifiée' : 'Séance ajoutée');
-    }
+    notifications.succes(seanceEnEditionV2 !== null ? 'Séance modifiée' : 'Séance ajoutée');
 
     // Fermer le formulaire et recharger
     annulerFormSeanceV2();
@@ -293,9 +291,7 @@ function supprimerSeanceV2(index) {
     const cleSauvegarde = typeof cleHoraire === 'function' ? cleHoraire() : cle('horaireHebdo');
     db.setSync(cleSauvegarde, horaire);
 
-    if (typeof afficherNotificationSucces === 'function') {
-        notifications.succes('Séance supprimée');
-    }
+    notifications.succes('Séance supprimée');
 
     chargerSeancesV2();
 

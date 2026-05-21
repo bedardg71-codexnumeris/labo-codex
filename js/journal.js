@@ -255,9 +255,7 @@ function afficherJournal(evaluationId) {
     var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     var evaluation = evaluations.find(function(e) { return e.id === evaluationId; });
     if (!evaluation) {
-        if (typeof afficherNotificationErreur === 'function') {
-            afficherNotificationErreur('Erreur', 'Évaluation introuvable');
-        }
+        notifications.erreur('Erreur', 'Évaluation introuvable');
         return;
     }
 
@@ -322,9 +320,7 @@ function exporterExperienceAnonymisee() {
     // ACCÈS DIRECT INTENTIONNEL — export complet, doit lire TOUTES les évaluations du trimestre
     var evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     if (!evaluations || evaluations.length === 0) {
-        if (typeof afficherNotificationErreur === 'function') {
-            afficherNotificationErreur('Aucune donnée', 'Aucune évaluation à exporter');
-        }
+        notifications.erreur('Aucune donnée', 'Aucune évaluation à exporter');
         return;
     }
 
@@ -411,9 +407,7 @@ function exporterExperienceAnonymisee() {
     document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Expérience exportée (' + evalAnonymisees.length + ' évaluations anonymisées)');
-    }
+    notifications.succes('Expérience exportée (' + evalAnonymisees.length + ' évaluations anonymisées)');
 }
 
 // ============================================

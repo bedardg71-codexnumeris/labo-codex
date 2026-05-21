@@ -79,13 +79,11 @@
         } else {
             localStorage.setItem(CLE_PREF, actif ? 'true' : 'false');
         }
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces(
-                actif
-                    ? 'Persistance FSAPI activée — les dossiers Travaux et Réserve seront retenus entre sessions.'
-                    : 'Persistance FSAPI désactivée — tu redemanderas le dossier à chaque démarrage.'
-            );
-        }
+        notifications.succes(
+            actif
+                ? 'Persistance FSAPI activée — les dossiers Travaux et Réserve seront retenus entre sessions.'
+                : 'Persistance FSAPI désactivée — tu redemanderas le dossier à chaque démarrage.'
+        );
     }
 
     // Boot : migration différée pour ne pas bloquer le démarrage initial,

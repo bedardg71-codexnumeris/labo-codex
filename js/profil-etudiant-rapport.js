@@ -308,12 +308,12 @@ function copierRapport(da) {
         // Méthode moderne (Clipboard API)
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(textarea.value).then(() => {
-                afficherNotificationCopiee();
+                notifications.succes("Rapport copié dans le presse-papiers !");
             }).catch(err => {
                 // Fallback vers ancienne méthode
                 const success = document.execCommand('copy');
                 if (success) {
-                    afficherNotificationCopiee();
+                    notifications.succes("Rapport copié dans le presse-papiers !");
                 } else {
                     alert('Erreur lors de la copie. Veuillez sélectionner le texte manuellement (Ctrl+A puis Ctrl+C).');
                 }
@@ -322,7 +322,7 @@ function copierRapport(da) {
             // Ancienne méthode pour navigateurs plus vieux
             const success = document.execCommand('copy');
             if (success) {
-                afficherNotificationCopiee();
+                notifications.succes("Rapport copié dans le presse-papiers !");
             } else {
                 alert('Erreur lors de la copie. Veuillez sélectionner le texte manuellement (Ctrl+A puis Ctrl+C).');
             }
@@ -332,31 +332,6 @@ function copierRapport(da) {
         alert('Erreur lors de la copie. Veuillez sélectionner le texte manuellement (Ctrl+A puis Ctrl+C).');
     }
 
-    function afficherNotificationCopiee() {
-        // Créer notification temporaire
-        const notification = document.createElement('div');
-        notification.textContent = '✅ Rapport copié dans le presse-papiers !';
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--vert-succes);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 6px;
-            font-weight: 600;
-            z-index: 10000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            animation: slideIn 0.3s ease;
-        `;
-        document.body.appendChild(notification);
-
-        // Retirer après 3 secondes
-        setTimeout(() => {
-            notification.style.animation = 'slideOut 0.3s ease';
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-    }
 }
 
 /**

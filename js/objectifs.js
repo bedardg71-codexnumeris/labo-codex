@@ -741,7 +741,7 @@ async function exporterEnsembleObjectifs(ensembleId) {
     a.click();
     URL.revokeObjectURL(url);
 
-    afficherNotificationSucces('Ensemble d\'objectifs exporté avec succès');
+    notifications.succes('Ensemble d\'objectifs exporté avec succès');
 }
 
 /**

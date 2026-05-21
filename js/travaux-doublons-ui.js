@@ -170,9 +170,7 @@
         // ouvre via le bandeau, il ne verra que les cas non encore validés.
         _payload = _diagnosticNonValide();
         if (!_payload || _payload.totalDoublons === 0) {
-            if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces('Aucun cas à examiner', 'Tous les cas avec plusieurs fichiers ont été traités ou validés.');
-            }
+            notifications.succes('Aucun cas à examiner', 'Tous les cas avec plusieurs fichiers ont été traités ou validés.');
             return;
         }
 
@@ -478,12 +476,10 @@
 
         // Si pas de corbeille à appliquer, on s'arrête ici
         if (aCorbeille.length === 0) {
-            if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces(
-                    casAvalider.length + ' cas marqué(s) comme validé(s)',
-                    'Ces cas n\'apparaîtront plus dans le bandeau.'
-                );
-            }
+            notifications.succes(
+                casAvalider.length + ' cas marqué(s) comme validé(s)',
+                'Ces cas n\'apparaîtront plus dans le bandeau.'
+            );
             fermerDialogue();
             if (typeof appliquerFiltres === 'function') {
                 try { appliquerFiltres(); } catch (e) { console.warn('[Fichiers multiples] Recharge liste évaluations', e); }
@@ -508,14 +504,14 @@
             }
         }
 
-        if (typeof afficherNotificationSucces === 'function' && echecs === 0) {
+        if (echecs === 0) {
             var msg = traites + ' fichier(s) mis à la corbeille';
             if (casAvalider.length > 0) {
                 msg += ' · ' + casAvalider.length + ' cas validé(s)';
             }
-            afficherNotificationSucces(msg, 'Restauration possible 30 jours via la corbeille.');
-        } else if (typeof afficherNotificationErreur === 'function' && echecs > 0) {
-            afficherNotificationErreur(
+            notifications.succes(msg, 'Restauration possible 30 jours via la corbeille.');
+        } else if (echecs > 0) {
+            notifications.erreur(
                 traites + ' traités, ' + echecs + ' échecs',
                 'Voir la console pour les détails.'
             );

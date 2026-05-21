@@ -1915,9 +1915,7 @@
             });
             rafraichirPalettesApresPersonnalisation();
             modal.remove();
-            if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces('Raccourcis outils enregistr\u00e9s');
-            }
+            notifications.succes('Raccourcis outils enregistr\u00e9s');
         });
 
         document.getElementById('raccourcis-outils-fermer').addEventListener('click', function() {
@@ -2534,9 +2532,7 @@
         appliquerPersonnalisations();
         rafraichirPalettesApresPersonnalisation();
         modal.remove();
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces('Tampons et r\u00e9troactions enregistr\u00e9s');
-        }
+        notifications.succes('Tampons et r\u00e9troactions enregistr\u00e9s');
     }
 
     function reinitialiserRetroObservations() {
@@ -2914,9 +2910,7 @@
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces(tampons.length + ' tampon(s) export\u00e9(s)');
-        }
+        notifications.succes(tampons.length + ' tampon(s) export\u00e9(s)');
     }
 
     /**
@@ -3078,9 +3072,7 @@
                 ouvrirEditionRetroObservations();
             }
 
-            if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces(tamponsImport.length + ' tampon(s) import\u00e9(s)');
-            }
+            notifications.succes(tamponsImport.length + ' tampon(s) import\u00e9(s)');
         } catch (err) {
             console.error('[Tampons] Erreur confirmerImport:', err);
             alert('Erreur lors de l\u2019import.\n' + err.message);
@@ -3259,9 +3251,7 @@
         appliquerPersonnalisations();
         rafraichirPalettesApresPersonnalisation();
         modal.remove();
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces('Codes d\u2019erreurs et r\u00e9troactions enregistr\u00e9s');
-        }
+        notifications.succes('Codes d\u2019erreurs et r\u00e9troactions enregistr\u00e9s');
     }
 
     function reinitialiserRetroErreursFr() {

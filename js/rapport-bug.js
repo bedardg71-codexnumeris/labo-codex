@@ -1180,9 +1180,7 @@ function envoyerRapportParCourriel(btn) {
         window.location.href = mailtoUrl;
     } catch (e) {
         console.error('Erreur lors de l\'envoi par courriel:', e);
-        if (typeof afficherNotificationErreur === 'function') {
-            afficherNotificationErreur('Erreur courriel', 'Utilise le bouton Copier pour copier le rapport manuellement.');
-        }
+        notifications.erreur('Erreur courriel', 'Utilise le bouton Copier pour copier le rapport manuellement.');
     }
 }
 
