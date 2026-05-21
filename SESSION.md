@@ -14,7 +14,7 @@
 # SESSION — État au 21 mai 2026 soir (cycle Cat-B post-merge — Tracks 1+2+3 complets, Track 4 G+J+F livrés)
 
 **Beta / build** : 99.61 / 0521-1108 (pas de bump pour le cycle Cat-B — décision Grégoire 21 mai)
-**Branche `main`** : HEAD `6532f75` (Track 4 chantier F refactor) — à compléter avec le hash du commit docs post-merge.
+**Branche `main`** : HEAD `f88730b` (cycle Cat-B Tracks 1+2+3-phase1+3-phase2+4-G+J+F livrés et pushés).
 
 **Tests** : 80 Vitest + 12 Playwright = **92/92 verts** à chaque commit (+3 nouvelles sentinelles chantier F).
 
