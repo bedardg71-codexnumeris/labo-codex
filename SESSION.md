@@ -1,261 +1,281 @@
 <!-- =====================================================================
-     IDENTIFICATION DE CE FICHIER  (mis à jour 21 mai 2026 post-étape-6)
-     Ce SESSION.md vit sur la branche `refactor/evaluation` (worktree
-     `Monitorage_v6-evaluation`). Refactor TERMINÉ — étape 6 livrée le
-     21 mai 2026 : capitalisation MODULES-MAP §2.1 + METHODE §7 + 5
-     mémoires feedback + bump version 99.48 → 99.61 b0521-0840.
-     Merge FF refactor/evaluation → main + tag refactor-evaluation-2026-05-21.
-     Le worktree peut être supprimé après le merge (cf. profil-etudiant /
-     trimestre-v2 / productions / bilan-reflexif).
+     IDENTIFICATION DE CE FICHIER  (mis à jour 21 mai 2026 post-Cat-B Tracks 1-4)
+     Ce SESSION.md vit sur la branche `main` du worktree principal et sert
+     de relai entre les sessions Claude. Il décrit l'état du cycle Cat-B
+     post-merge des 5 god modules et donne la consigne de démarrage pour
+     la prochaine instance.
      ===================================================================== -->
 
 > **📌 Identification**
-> - **Chemin** : `Monitorage_v6-evaluation/SESSION.md` (worktree)
-> - **Branche** : `refactor/evaluation` (TERMINÉE — mergée FF sur `main` le 21 mai 2026, tag `refactor-evaluation-2026-05-21`)
-> - **Rôle** : archive historique du refactor evaluation.js (5e et dernier god module PLAN-MOYEN-TERME §4.5)
+> - **Chemin canonique** : `SESSION.md` (racine du repo, branche `main`)
+> - **Cycle en cours** : Catégorie B post-merge (dette résiduelle des 5 refactors god modules)
+> - **Document maître** : `audit/refactoring-prep/PLAN-CAT-B-POST-MERGE.md`
 
-# SESSION — État au 21 mai 2026 (refactor evaluation.js — TERMINÉ, étapes 1→6 LIVRÉES)
+# SESSION — État au 21 mai 2026 (cycle Cat-B post-merge — Tracks 1-2 complets, 3-4 partiels)
 
-**Beta / build** : 99.61 / 0521-0840 (bumpé étape 6 capitalisation)
-**Branche `refactor/evaluation`** : 19 commits cumulés depuis la base `b4c0dae` (9 session A+B + 1 fix #109 + 6 éclatements étape 4 + bump 99.48 + 4 commits capitalisation/bump étape 6)
-**Merge** : FF sur `main`, tag `refactor-evaluation-2026-05-21`.
+**Beta / build** : 99.61 / 0521-1108
+**Branche `main`** : HEAD `3fe5165` (cycle Cat-B sessions 1+2+3 phase 1+4 G+J livrées et pushées)
 
-**Tests** : 77 Vitest + 12 Playwright = **89/89 verts** à chaque jalon.
-
-**Statut global — REFACTOR TERMINÉ** :
-- Étapes 0+1+2 livrées session A (worktree + baseline + 9 écarts MODULES-MAP §2.1 + canari/sentinelle)
-- Étape 3 LIVRÉE COMPLÈTE session A+B (5 sous-modules extraits — 2 session A + 3 session B + 1 ajout `-jetons.js`)
-- Étape 4 LIVRÉE COMPLÈTE (1 fix #109 + 6 monstres cyc 55-78 éclatés sous N=50 acté avec Grégoire)
-- **Étape 5 LIVRÉE 21 mai** — validation manuelle Grégoire OK 13 évaluations sans problème majeur sur Safari Mac.
-- **Étape 6 LIVRÉE 21 mai** — capitalisation MODULES-MAP §2.1 (rétrospective post-refactoring) + METHODE §7 entrée `evaluation.js` (+ historique révisions) + 5 mémoires feedback + bump 99.48 → 99.61 b0521-0840 + SUIVI-BUGS build #109 renseigné + merge FF → `main` + tag `refactor-evaluation-2026-05-21` + push origin.
+**Tests** : 77 Vitest + 12 Playwright = **89/89 verts** à chaque commit.
 
 ---
 
-## Récap étape 4 (6 éclatements + 1 fix bug latent, 18 mai matin/midi)
+## §0 — GARDE-FOU (lire en premier)
 
-### Décision Grégoire au démarrage : N = 50 acté
+**Ce qui est INTERDIT dans la prochaine session :**
 
-Seuil au-dessus duquel l'éclatement est obligatoire. Au-dessous (cyc 30-49) → héritage Cat-B post-merge.
-
-### 7 commits cumulés étape 4 (locaux non-pushés)
-
-```
-[à venir] build(version): refresh build 0518-1040 + SESSION.md consigne étape 5
-327d3db refactor(evaluation): éclater modifierEvaluation async arrow cyc 78 → ≤ 30 (étape 4 #6/6)
-dbea9f4 refactor(evaluation): éclater sauvegarderEvaluationModifiee cyc 58 → ≤ 30 (étape 4 #5/6)
-d9c77f9 refactor(evaluation): éclater sauvegarderEvaluation cyc 70 → ≤ 30 (étape 4 #4/6)
-152cf31 refactor(evaluation): éclater _autoSauvegarderCriteres cyc 55 → ≤ 30 (étape 4 #3/6)
-99c6420 refactor(evaluation): éclater genererRetroaction cyc 61 → ≤ 30 (étape 4 #2/6)
-69f6e7e refactor(evaluation): éclater genererRetroactionBilan cyc 75 → ≤ 30 (étape 4 #1/6)
-9045dfd fix(evaluation): #109 _timerAutoSave bare cross-IIFE → window.X (étape 4 prep)
-```
-
-### Cyc avant/après étape 4
-
-| Fonction | Module | Cyc avant | Cyc après | Helpers extraits |
-|---|---|---:|---:|---:|
-| `modifierEvaluation` async arrow | résidu | 78 | ≤ 30 | 13 |
-| `genererRetroactionBilan` | -retroaction.js | 75 | ≤ 30 | 10 + 2 const |
-| `sauvegarderEvaluation` | -sauvegarde.js | 70 | ≤ 30 | 12 |
-| `genererRetroaction` | -retroaction.js | 61 | ≤ 30 | 7 |
-| `sauvegarderEvaluationModifiee` | résidu | 58 | ≤ 30 | 12 |
-| `_autoSauvegarderCriteres` | -chargement.js | 55 | ≤ 30 | 5 |
-| `calculerNoteAlgorithmiqueAvecCategories` | -calcul.js | 42 | **42 héritage Cat-B** | — |
-| `chargerEchellePerformance` | -chargement.js | 36 | **36 héritage Cat-B** | — |
-| `peuplementOptJetons` | -sauvegarde.js | 33 | **33 héritage Cat-B** | — |
-
-**6 fonctions éclatées sur 6 cibles (100 %).** 3 héritages Cat-B sous N=50 préservés tels quels.
-
-**Total helpers privés ajoutés étape 4 : 59 helpers + 2 constantes module-scope.**
-
-### Métriques par module post-étape 4
-
-| Module | LOC | Variation vs origine |
-|---|---:|---:|
-| `js/evaluation-calcul.js` | 738 | inchangé |
-| `js/evaluation-chargement.js` | 1 266 | +26 LOC (helpers _autoSauvegarder) |
-| `js/evaluation-handlers.js` | 79 | inchangé |
-| `js/evaluation-jetons.js` | 832 | inchangé |
-| `js/evaluation-retroaction.js` | 816 | +56 LOC (helpers _Bilan + _Retro) |
-| `js/evaluation-sauvegarde.js` | 999 | +19 LOC (helpers _Sauv) |
-| `js/evaluation.js` (résidu) | 3 984 | +31 LOC net (helpers _Mod + _Modif − code éclaté) |
-| **Total** | **8 714** | **+132 LOC vs post-session-B 7 750 (croissance overhead helpers)** |
-
-**Cumulé vs original 7 321 LOC pré-refactor : +1 393 LOC (19,0 % overhead refactor)** — comparable aux précédents refactors (productions +12 %, trimestre-v2 +15 %, profil-etudiant +20 %).
-
-### Bug #109 corrigé pendant étape 4
-
-`_timerAutoSave` + `_pendingAutoSaveSnapshot` `let` privées IIFE chargement.js → promotion `window._timerAutoSave` + `window._pendingAutoSaveSnapshot` (drop `let`, écriture directe sur window). 15 sites patchés §5.6 (11 internes chargement + 3 résidu + 1 sauvegarde). Plus de ReferenceError au runtime — sauvegarde manuelle exerce le path sans crash. **#109 déplacé de Ouverts → Corrigés dans SUIVI-BUGS.**
-
-### Trouvailles méthode étape 4 (à intégrer METHODE §7 rétrospective finale)
-
-1. **Cas limite privée IIFE éclatable** : `_autoSauvegarderCriteres` cyc 55 (cas limite SESSION.md initial) éclatable proprement en helpers privés internes — pas de promotion `window.X` nécessaire si les helpers sont définis dans la même IIFE. Pattern réutilisable pour tout monstre interne IIFE sans cross-cutting.
-2. **Trouvaille trimestre-v2 C confirmée 2× cette session** (`_construireNouvelleEvaluationAutoSave` + `_construireNouvelleEvaluationSauv`) : extraction initiale agrégée peut produire un helper encore cyc > 30 par accumulation `|| {}` / `?:` / spread. Re-extraire des sous-helpers DOM dédiés (`_lireChampsDOM*`, `_lireOptionsAffichage*`) résout.
-3. **Object.assign(target, src1, src2)** comme alternative au spread JSX pour fusionner plusieurs objets — préserve l'ordre de précédence (last wins) et évite la pollution du literal principal.
-4. **Closures internes async arrow** (cas `attendreOption`, `trouverGroupeEtudiant`, `attendreSelectsCriteres`) doivent rester définies dans la fonction outer pour conserver l'accès aux paramètres parent (`evaluationId`, `evaluation`). Les helpers extraits qui en ont besoin reçoivent les closures en paramètre — pattern fonctionnel propre.
-5. **Helpers identiques cross-IIFE duppliqués avec suffixe distinctif** (`_Sauv` vs `_Mod`) — préserve l'isolation IIFE sans recourir à `window._helper` cross-cutting. ~150 LOC duplication acceptable pour 2 monstres frères (`sauvegarderEvaluation` + `sauvegarderEvaluationModifiee`).
-6. **Audit ESLint après CHAQUE extraction** est vital (METHODE §3 étape 4 — cible déjà acquise depuis bilan-reflexif). Sans ce check incrémental, le cyc-38 du 1er extract aurait été manqué jusqu'à la fin.
-7. **Pattern §5.6 fix #109 → patch séquence** : fix bug latent AVANT éclatement du monstre qui le contient (`sauvegarderEvaluation`). Sinon les helpers extraits héritent du bug et complexifient le débogage.
+- ❌ **Ne pas bumper la beta sans demander à Grégoire**. Le bump 99.62 a été reverté (commit `5a12236`). Toute modification version.json/init-inline.js doit confirmer le numéro avec Grégoire en début de session.
+- ❌ **Ne pas toucher au worktree `Monitorage_v6-catb`** (à supprimer après confirmation Grégoire — son contenu est mergé sur `main`).
+- ❌ **Ne pas démarrer une nouvelle session Cat-B sur `audit/2026-mai`**. Cette branche a son propre cycle (audits, rapports, docs sécurité) — créer un nouveau worktree depuis `main`.
+- ❌ **Ne pas réactiver `initialiserModuleEvaluation`** : le bug #107 a été corrigé par RETRAIT du code (stabilité zéro-dette CLAUDE.md), pas par activation. La fonction n'a jamais servi en prod depuis 5 mois.
 
 ---
 
-## Lecture obligatoire en début de session étape 5
+## §1 — Récap du cycle Cat-B livré (21 mai 2026)
 
-1. **SESSION.md** (ce document) — récap étape 4 livrée + consigne étape 5
-2. **audit/refactoring-prep/MODULES-MAP.md §2.1** — base pour la rétrospective étape 6 (LOC réels, cyc finaux à reporter)
-3. **audit/refactoring-prep/METHODE-REFACTORING.md §7** entrée `evaluation.js` (vide actuellement, à remplir étape 6)
-4. **Retours des testeurs/SUIVI-BUGS.md** — #107-108 préservés. #109 corrigé étape 4.
-5. **Skills pour Claude Code/SKILL_Ecosysteme_classe.md** — cadre métier (utile pour validation cas-tests pédagogiques)
+### Track 1 — Quick wins (✅ complet)
+
+**Commit** : `054d461` (correctif version : `5a12236`)
+**Tag** : `cat-b-track-1-2026-05-21`
+
+- **13 bugs latents #96-108 fermés** (productions 3, trimestre-v2 6, profil-etudiant 2, evaluation 2)
+- **3 doublons evaluation résolus** (`restaurerPreferenceTri`, `obtenirClasseNote`, `filtrerListeEvaluations`)
+- **2 codes morts alarmistes retirés** (`calculerRisqueEchec`, `obtenirClasseRisque`)
+- −307 LOC nettes, 89/89 tests verts
+
+Voir `Retours des testeurs/SUIVI-BUGS.md` section « Corrigés (21 mai 2026 — Cat-B Track 1 chantier A) ».
+
+### Track 2 — Méthode (✅ complet)
+
+**Commit** : `3c09782`
+**Tag** : `cat-b-track-2-2026-05-21`
+
+- **20 propositions Cat-B méthode actées et intégrées** dans `audit/refactoring-prep/METHODE-REFACTORING.md`
+- **6 nouveaux anti-patterns §5.8 à §5.13** :
+  - §5.8 Wrappers résiduels avec variables module-scope (productions)
+  - §5.9 Factoriser branches dupliquées en paramètres (trimestre-v2)
+  - §5.10 `// security-ok` INLINE OBLIGATOIRE (profil-etudiant)
+  - §5.11 Variables module-scope encapsulées dans IIFE (profil-etudiant)
+  - §5.12 Variables `let` cross-IIFE non promues `window.X` (evaluation bug #109)
+  - §5.13 Closures internes async passées en paramètre (evaluation)
+- **§3 étapes 0/3/4/5 enrichies** (orchestrateurs en dernier, grep `window.X`, renommage si résidu IIFE complet, trade-off cyc 15/30, stratégie N=50, sous-helpers DOM, bug latent pendant éclatement, etc.)
+- **§4 check-list étape 3 enrichie de 4 items** (doublons d'export pré-deletion, audit symétrique inverse exports, grep `window.X` post-deletion, audit cross-zone tardif)
+- **§6.5 gabarit** : rubrique « Stratégie cyc > 30 (cible dure vs héritages Cat-B) » ajoutée
+- **METHODE-REFACTORING gelée** jusqu'au prochain cycle de refactors (Q3 2026 si applicable)
+
+### Track 3 — Héritages cyc > 30 (⚠️ Phase 1, 8/14 fonctions)
+
+**Commits** : `826b28a` (refactor) + `c9ef2d0` (doc statut)
+**Tag** : `cat-b-track-3-phase1-2026-05-21`
+
+**Modules à baseline 0 cyc > 30** :
+- ✅ `evaluation*.js` : 3/3 fonctions (`calculerNoteAlgorithmiqueAvecCategories` 42→<30, `chargerEchellePerformance` 36→<30, `peuplementOptJetons` 33→<30)
+- ✅ `trimestre-v2*.js` : 4/4 fonctions (`sauvegarderCoursV2` 56→<30, `remplirFormCoursV2` 31→<30, `mettreAJourCarteResumeGroupeCoursV2` 34→<30, `genererNomGroupeCoursV2` 31→<30)
+- ⚠️ `profil-etudiant*.js` : 1/7 (`determinerCibleIntervention` 58→<30)
+
+**6 fonctions profil-etudiant restantes (phase 2 à faire)** :
+
+| Fonction | Fichier | Cyc | Note |
+|---|---|---:|---|
+| `calculerDetailsNoteFinale` | `profil-etudiant-actions.js:177` | 67 | Gros (~287 LOC, mode Hybride + 4 méthodes legacy) |
+| `genererSectionMobilisationEngagement` | `profil-etudiant-sections-affichage.js:70` | 59 | ~730 LOC |
+| `genererSectionPerformance` | `profil-etudiant-sections-affichage.js:3607` | 52 | ~615 LOC |
+| `calculerIPB` | `profil-etudiant-calculs.js:368` | 36 | **⚠️ Encoding `̀-ͯ` complique l'éclatement automatique** — préférer Edit avec sed shell ou édition manuelle |
+| Arrow function | `profil-etudiant-sections-affichage.js:2659:64` | 36 | Callback de map/forEach probablement |
+| Arrow function | `profil-etudiant-sections-affichage.js:4083:111` | 37 | Idem |
+
+**Estimation phase 2** : ~2-4h. Cible : baseline 0 cyc > 30 sur tout le codebase.
+
+### Track 4 — Transversaux (⚠️ G + J livrés pré-AQPC)
+
+**Commit** : `3fe5165`
+**Tag** : `cat-b-track-4-gj-2026-05-21`
+
+**Livré** :
+- ✅ **Chantier G** : 2 accès localStorage direct migrés vers `db.getSync`/`db.setSync` (`profil-etudiant-diagnostics.js`, clé `profilOngletDeveloppementActif`). Le plan théorique listait 3 accès, audit réel = 2.
+- ✅ **Chantier J** (pré-AQPC, audit annuel 1.3) : 8 reformulations UI vocabulaire alarmiste/prédictif + retrait FAQ obsolète « Indice R prédit risque d'échec » + glossaire reformulé en lecture descriptive.
+
+**Reporté post-AQPC** :
+- ⏳ **Chantier E** : Consolidation `utils-notifications.js` (73 sites cross-projet, ~3-5h, risque Moyen — régression silencieuse possible)
+- ⏳ **Chantier F** : Investigation couplage `travaux-ui.js:4639 → window.evaluationEnCours` (~1-3h, décision a/b à acter avec Grégoire — légitime ou à découpler)
+- ⏳ **Chantier H** (OPTIONNEL) : Sous-découpage résidus `profil-etudiant-sections-affichage.js` 4 654 LOC + `evaluation.js` 3 984 LOC (~4-6h)
+- ⏳ **Chantier I** : 6 tests Playwright rendus DOM (~3-5h)
+
+**Décisions Grégoire pendantes (chantier J reliquat)** :
+- Tokens CSS `--risque-*` (480 hits palette historique) — renommer en `--niveau-attention-*` ou conserver legacy ?
+- Label `v2-seuil-fragile` — conservation, atténuation, ou alignement avec vocabulaire descriptif ?
 
 ---
 
-## Consigne de démarrage étape 5 (validation manuelle Grégoire)
+## §2 — Critères de clôture du cycle Cat-B (statut)
 
-À copier-coller au début de la prochaine session :
+Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 
-```
-cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6-evaluation
+| Critère | Description | Statut |
+|---|---|---|
+| A1 | 13 bugs latents #96-108 fermés | ✅ |
+| A2 | 0 fonction cyc > 30 dans le codebase | ⚠️ 6 fonctions profil-etudiant restantes (Track 3 phase 2) |
+| A3 | 0 doublon dans evaluation.js (3 résolus) | ✅ |
+| A4 | 2 codes morts alarmistes retirés | ✅ |
+| A5 | `utils-notifications.js` créé + 73 callers migrés | ⏳ Track 4 chantier E |
+| A6 | Couplage `travaux-ui.js:4639` documenté ou découplé | ⏳ Track 4 chantier F |
+| A7 | 3 accès localStorage profil-etudiant migrés | ✅ (audit réel = 2 accès, tous migrés) |
+| A8 | 6 tests Playwright rendus DOM ajoutés | ⏳ Track 4 chantier I |
+| A9 | Strings UI alarmistes reformulées + FAQ Indice R retirée + glossaire aligné | ✅ (chantier J) |
+| A10 | 20 propositions Cat-B méthode actées | ✅ |
 
-# Vérification rapide à l'ouverture de session :
-git log --oneline -10                # bump build + 6 éclatements + fix #109 + 9 session A+B
-git status -sb                       # propre (sauf tests/node_modules)
-cd tests && npm test                 # 89/89 attendus
-cd .. && ./audit/refactoring-prep/check-complexity.sh
-# Attendu : 3 héritages Cat-B (calculerNoteAlgorithmiqueAvecCategories 42,
-# chargerEchellePerformance 36, peuplementOptJetons 33). Tout autre est anormal.
+**6 critères sur 10 atteints (A1, A3, A4, A7, A9, A10).** 4 critères partiels (A2 partiel) ou pendants (A5, A6, A8).
 
-# === ÉTAPE 5 — VALIDATION MANUELLE GRÉGOIRE ===
+**Objectif pré-AQPC 3 juin atteint** : Track 1 + Track 2 + chantier J livrés, codebase propre côté bugs, méthode gelée et publiable. Statut audit annuel 1.3 partiellement passé Jaune → Vert (UI uniquement, CSS tokens en attente).
 
-Demander à Grégoire de tester ces 6 cas-tests sur Safari Mac (modes sombre + clair) :
+---
 
-  1. **Nouvelle évaluation** : création depuis un fichier ouvert dans la
-     visionneuse, validation, sauvegarde. Vérifier :
-       · Critères se chargent dans la palette
-       · Note se calcule
-       · Sauvegarde réussit et bascule en mode modification (idModification)
-       · Pas d'erreur console
-  2. **Modification d'une évaluation existante** : ouvrir une éval, modifier
-     2 critères, sauvegarder modifiée. Vérifier :
-       · Tous les critères se restorent au chargement (incluant données
-         algorithmiques français)
-       · Modif sauvegardée sans perte des autres champs
-       · Auto-verrouillage post-modification + cadenas affiché sur badge
-  3. **Application d'un jeton de délai** : nouvelle éval avec checkbox
-     « jeton délai » cochée. Vérifier :
-       · jetonDelaiApplique + delaiAccorde + dureeDelaiJours bien stockés
-       · Compteur jetons décrémenté
-       · Si jeton épuisé, notif erreur + checkbox décochée
-  4. **Application d'un jeton de reprise** : nouvelle éval après reprise
-     d'une éval verrouillée. Vérifier :
-       · Évaluation précédente passe à `remplaceeParId`
-       · Nouvelle éval avec `repriseDeId`
-       · Snapshot avantModifRemplacee est null (clean)
-  5. **Bilan rétroaction** : ouvrir la vue Bilan dans la visionneuse.
-     Vérifier (avec >=2 évaluations historiques pour l'étudiant) :
-       · Section « Présentement il faut se concentrer » (defis ou tous
-         maîtrisés ou français A0)
-       · Section « Force en contexte » (meilleur critère M/E si défis)
-       · Section « Points récurrents » (progrès + améliorations vs eval
-         précédente)
-       · Section « Jetons utilisés » avec compteur
-  6. **Auto-save** : ouvrir éval, modifier un critère, attendre 1.5s sans
-     sauvegarder. Vérifier :
-       · Pas d'erreur console (`_timerAutoSave` est défini sur window)
-       · Si éval déjà existante : critères mis à jour silencieusement
-       · Si nouvelle : brouillon créé non-verrouillé + idModification
+## §3 — Consigne de démarrage pour la prochaine session
 
-Si tous les 6 cas passent dans les 2 modes : PROCEED à étape 6.
-Si bug détecté : INVESTIGUER + FIX + retest avant étape 6.
+> Pour la prochaine instance Claude qui prend le relai du cycle Cat-B. Suivre dans l'ordre.
 
-# === ÉTAPE 6 (après validation Grégoire) — CAPITALISATION + MERGE FF + PUSH + TAG ===
+### Étape 1 — Vérifier l'état du repo (1-2 min)
 
-  1. **MODULES-MAP.md §2.1 rétrospective post-refactoring** :
-     - Reporter cyc finaux (modifierEvaluation, sauvegarderEvaluation,
-       genererRetroactionBilan, etc.) tous ≤ 30
-     - Reporter LOC réels par sous-module (7 fichiers totalisant 8 714 LOC)
-     - Reporter écarts d'estimation (LOC, helpers extraits, durée)
-     - Documenter 3 héritages Cat-B restants
+```bash
+cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
-  2. **METHODE-REFACTORING.md §7** entrée `evaluation.js` :
-     - Rétrospective complète (3 sessions A+B+étape 4, ~20+ trouvailles
-       méthode cumulées)
-     - 7 trouvailles méthode étape 4 (cf. SESSION.md ci-dessus) à intégrer
-     - Propositions Cat-B nouvelles si applicables
-
-  3. **NOTES-DE-VERSION** :
-     - Bump beta 99.48 → 99.49 OU garder 99.48 et bumper build seulement
-       (selon préférence Grégoire et nature du changement)
-     - Ajouter entrée changelog si visible utilisateur (probablement non
-       pour refactor pur)
-
-  4. **SUIVI-BUGS** :
-     - Aucun nouveau bug latent découvert étape 4 (#109 corrigé, #107-108
-       préservés)
-     - Vérifier que #109 est bien dans la section "Corrigés (18 mai 2026)"
-
-  5. **Mémoires feedback** : nouvelles trouvailles à enregistrer dans
-     ~/.claude/projects/-Users-kuekatsheu/memory/
-     - `feedback-eclater-cas-limite-prive-iife.md` (point 1)
-     - `feedback-eclatement-sous-helpers-dom.md` (point 2)
-     - `feedback-closures-internes-passees-en-parametre.md` (point 4)
-     - `feedback-helpers-cross-iife-duppliques-suffixe.md` (point 5)
-     - `feedback-fix-bug-latent-avant-monstre.md` (point 7)
-
-  6. **Merge FF refactor/evaluation → main** :
-     ```bash
-     cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6  # repo principal
-     git fetch  # depuis worktree push
-     git checkout main
-     git update-ref refs/heads/main refs/heads/refactor/evaluation
-     # Vérifier : git log --oneline -20 main devrait montrer les 16 commits
-     # PAS de merge commit (Fast-Forward strict)
-     ```
-
-  7. **Tag** :
-     ```bash
-     git tag refactor-evaluation-2026-05-18
-     git push origin main refactor-evaluation-2026-05-18
-     ```
+git status                              # branche actuelle ?
+git log --oneline main -5               # HEAD main attendu : 3fe5165 (Track 4 G+J) ou plus récent
+git tag -l "cat-b-*" | sort             # 4 tags attendus :
+                                        #   cat-b-track-1-2026-05-21
+                                        #   cat-b-track-2-2026-05-21
+                                        #   cat-b-track-3-phase1-2026-05-21
+                                        #   cat-b-track-4-gj-2026-05-21
+git worktree list                       # vérifier worktrees existants
 ```
 
+**Si HEAD main différent de `3fe5165`** : un autre chantier a été fait depuis (vérifier `git log main` pour les commits récents). Pas de panique, ce SESSION.md sera mis à jour par cet autre chantier.
+
+### Étape 2 — Switcher sur main (cycle Cat-B)
+
+```bash
+# Cas 1 : audit/2026-mai a des modifs uncommitted
+# → NE PAS écraser audit/2026-mai. Créer un worktree dédié :
+git worktree add ../Monitorage_v6-catb2 -b cat-b/<track-name> main
+
+# Cas 2 : repo propre
+git checkout main
+```
+
+> ⚠️ Pattern observé 21 mai : `git checkout main` avec modifs uncommitted sur `audit/2026-mai` qui divergent → git refuse. Solution propre = **worktree dédié à main** (recommandé Grégoire 21 mai session 1).
+
+### Étape 3 — Lecture obligatoire (10-15 min)
+
+Ordre strict :
+1. **Ce SESSION.md** (relai courant + garde-fou §0)
+2. `audit/refactoring-prep/PLAN-CAT-B-POST-MERGE.md` — plan 4 tracks + §5 critères + §7 statut
+3. `audit/refactoring-prep/METHODE-REFACTORING.md` — §3-§5 méthode et anti-patterns (récemment enrichis Track 2), §7 rétrospectives par module
+4. `audit/refactoring-prep/MODULES-MAP.md` §2.1-2.5 (post-refactoring snapshots)
+5. `Retours des testeurs/SUIVI-BUGS.md` — section « Corrigés (21 mai — Cat-B Track 1) » + section Ouverts (vide post-Track-1)
+6. `CLAUDE.md` (racine) — règles sécurité, conventions, version, design system
+7. `BACKLOG.md` — items utilisateur en attente
+
+### Étape 4 — Charger les skills
+
+**Obligatoire** (CLAUDE.md L172) :
+- `Skills pour Claude Code/SKILL_labo_codex.md` — architecture, indices A-C-P, workflow
+
+**Selon track choisi** :
+- Track 3 phase 2 (héritages cyc) → aucun supplémentaire (juste relire METHODE §7 sections profil-etudiant + evaluation)
+- Track 4 chantier E (utils-notifications) → `SKILL_integrite_globaux.md` + `SKILL_hygiene_donnees_partagees.md`
+- Track 4 chantier F (couplage travaux-ui ↔ evaluationEnCours) → `SKILL_labo_codex.md` (état pivot) + `SKILL_RaI.md` (contexte évaluation)
+- Track 4 chantier J reliquat (tokens CSS, label v2-seuil-fragile) → décision Grégoire d'abord, pas de code
+- Track 4 chantier I (tests Playwright) → `SKILL_Securite_donnees.md` §9 (tests automatisés) — NON, juste lire `docs/securite/TESTS-AUTOMATISES.md`
+
+### Étape 5 — Lancer la suite de tests (baseline)
+
+```bash
+cd tests && npm install      # première fois après nouveau worktree
+cd tests && npm test         # attendu : 77 Vitest + 12 Playwright = 89/89 verts
+```
+
+Si rouge dès le départ → diagnostic prioritaire AVANT tout chantier. Ne pas démarrer si baseline pas verte.
+
+### Étape 6 — Choisir le track à attaquer
+
+**Priorité recommandée** (par valeur/effort) :
+
+1. **Track 3 phase 2** — 6 fonctions profil-etudiant cyc > 30 (~2-4h)
+   - Cible : baseline 0 cyc > 30 sur tout le codebase (critère A2 du cycle Cat-B).
+   - Branche : `cat-b/track-3-phase2-profil-etudiant`
+   - Audit pré-éclatement : `bash audit/refactoring-prep/check-complexity.sh profil-etudiant`
+   - Cas spécial `calculerIPB` cyc 36 : préférer édition manuelle ou sed shell vu les escape `̀-ͯ`.
+
+2. **Track 4 chantier F** — Couplage travaux-ui:4639 (~1-3h, demande input Grégoire)
+   - Investigation : lire ~50 LOC autour de `travaux-ui.js:4639`, identifier le scénario qui réassigne `window.evaluationEnCours`.
+   - Décision avec Grégoire : (a) légitime → documenter ; (b) à découpler → API `Evaluation.demarrerEvaluation(...)`.
+
+3. **Track 4 chantier I** — 6 tests Playwright rendus DOM (~3-5h)
+   - Bilan-reflexif (rendu éditeur), productions (modale CC), trimestre-v2 (calendrier), profil-etudiant (section Productions), evaluation (palette + rétroaction Bilan).
+
+4. **Track 4 chantier E** — Consolidation `utils-notifications.js` (~3-5h, **risque Moyen**)
+   - Audit complet des 73 sites (variations signatures, guards `typeof`).
+   - Migration progressive module par module, 1 commit par module.
+   - **Tests visuels Grégoire recommandés en fin de chantier.**
+
+5. **Track 4 chantier H** (OPTIONNEL) — Sous-découpage résidus (~4-6h)
+   - Décision Grégoire 18 mai : reporter sauf si la dette devient gênante au quotidien. NE PAS attaquer sans nouvelle validation.
+
+6. **Décisions Grégoire pendantes Track 4 chantier J reliquat** (sans code)
+   - Renommage tokens CSS `--risque-*` → `--niveau-attention-*` ? (480 hits, breaking change visuel)
+   - Label `v2-seuil-fragile` : maintenu, atténué, ou aligné ?
+
+### Étape 7 — Conventions de travail Cat-B
+
+- **Préservation comportementale stricte LEVÉE** pour les bugs latents. Si on découvre un nouveau bug, le FIX + inscription SUIVI-BUGS (vs le préserver pendant les refactors antérieurs).
+- **NE PAS étendre le scope** au-delà du track en cours. Une fonction touchée pendant Track 3 ne doit pas se transformer en cleanup général.
+- **1 commit par chantier** (ou par fonction si grosse, ex : `calculerDetailsNoteFinale` mérite son propre commit).
+- **Hook pré-push Vitest** vert obligatoire à chaque commit (déjà installé sur ce worktree).
+- **Sécurité non-négociable** (CLAUDE.md) : tout `innerHTML` avec données utilisateur → `echapperHtml()`. Aucun acquittement `// security-ok` sans justification absolue inscrite SUIVI-BUGS.
+- **Tests** : 89/89 minimum à chaque commit. Si régression, investigation prioritaire avant de continuer.
+- **Audit ESLint complexity** après chaque extraction (§3 étape 4 mature). Cible dure cyc ≤ 30 — héritage Cat-B sous N=50 acceptable.
+
+### Étape 8 — Bump version en fin de track
+
+**ATTENTION** : demander à Grégoire AVANT de bumper. Convention CLAUDE.md : « Demander le numéro de beta. Ne jamais renumeroter automatiquement. »
+
+Sites à modifier (une fois Grégoire confirme) :
+- `version.json` : `{"build":"MMJJ-HHMM","beta":"XX.X"}`
+- `js/init-inline.js` lignes 121-122 : `VERSION_MAJEURE` + `BUILD_ID`
+
+Cycle Cat-B est resté en 99.61 (build 0521-1108) pour les 4 tracks par décision Grégoire 21 mai.
+
+### Étape 9 — Merge FF + tag + push en fin de track
+
+Depuis le worktree (Track 3 phase 2 en exemple) :
+```bash
+git push . HEAD:main
+git tag cat-b-track-3-phase2-2026-MM-DD <branch-name>
+git push origin main cat-b-track-3-phase2-2026-MM-DD
+```
+
+Mettre à jour PLAN-CAT-B-POST-MERGE.md §7 (statut track) + §8 (historique) + critères §5 (cocher).
+Mettre à jour ce SESSION.md (§1 statut Track + §2 critères) en fin de chantier.
+
 ---
 
-## Référence rapide (conventions en vigueur)
+## §4 — Trouvailles méthode session du 21 mai (Cat-B Tracks 1-4)
 
-- **version.json source unique** pour beta et build — bumpé 0518-1040 fin étape 4
-- **Hook pré-push Vitest** doit rester vert à chaque push (confirmé 89/89 étape 4)
-- **Hook pré-commit Défense J** : `// security-ok: <raison>` INLINE si false positive innerHTML (0 trigger étape 4)
-- **Convention nommage** : `nb` canonique
-- **Sentinelle Défense E (F.16)** dans `tests/unit/lint-securite.test.js` bloque tout nouveau `value="${X.Y}"` non échappé (0 trigger étape 4)
+À considérer pour un futur enrichissement de METHODE-REFACTORING (mais cycle Cat-B = méthode déjà gelée Track 2) :
 
----
+1. **Fix par retrait > fix par activation** (bug #107) : un dead code qui n'a jamais servi 5 mois en prod doit être RETIRÉ plutôt que ACTIVÉ. Activer peut révéler des side-effects pré-existants (console.error légitime « Aucune échelle » au boot, ReferenceError cross-IIFE).
 
-## Bilan cumulé refactor evaluation.js (session A + B + étape 4)
+2. **Extraction agrégée + sous-helpers DOM (§3 étape 4 acté Track 2)** : confirmé 3× dans Track 3 phase 1 (`_lireDonneesFormCoursV2` cyc 41 → 3 sous-helpers `_lireChampsInfosCoursDOM` + `_lireChampsEnseignantDOM` + `_lireChampsSessionDOM`). Pattern mature.
 
-| Métrique | Original | Post-A | Post-B | **Post-étape-4** | Cumulé vs original |
-|---|---:|---:|---:|---:|---:|
-| LOC résidu | 7 321 | 6 087 | 3 953 | **3 984** | **−3 337 (−45,6 %)** |
-| Cumulé fichiers issus | 7 321 | 7 399 | 7 750 | **8 714** | +1 393 LOC overhead (+19,0 %) |
-| Total fichiers | 1 | 3 | 6 | **6** | +5 |
-| Cyc max | 78 (async arrow) | 78 | 78 | **42 (Cat-B sous N=50)** | −46 % |
-| Fonctions cyc > 30 | 9 | 9 | 9 | **3** | −67 % |
-| Helpers privés ajoutés | 0 | ~5 | ~5 | **59 + 2 const** | — |
-| Bugs latents Cat-B inscrits | 0 | 2 | 3 | **2** (#109 corrigé) | +2 net |
-| Méthode trouvailles | 0 | 5 | 10 | **17** | +17 |
+3. **Cascade règles métier → 1 helper par pattern** (`determinerCibleIntervention` 58→<30) : quand une fonction est une cascade `if (M === 'X') if (N === 'Y')...`, extraire 1 helper par valeur de M extérieure. Cyc agrégé fond linéairement.
 
-**Tests** : 89/89 verts à chaque jalon. Sentinelles Vitest + Playwright élargies à 6 modules.
+4. **Encoding mixte fichiers** (calculerIPB cyc 36 dans profil-etudiant-calculs.js, escapes `̀-ͯ`) : Edit JSON-based ne supporte pas le re-encoding automatique. Préférer édition manuelle ou sed shell pour ces cas.
 
 ---
 
-## Chantiers reportés (référence)
+## §5 — Historique des révisions de ce SESSION.md
 
-- 5 fonctions cyc > 30 héritages profil-etudiant (cycle Cat-B post-merge)
-- 4 fonctions cyc > 30 héritages trimestre-v2
-- 2 fonctions cyc > 30 héritages productions
-- **3 fonctions cyc 33-42 héritages evaluation** (Cat-B post-merge sous N=50)
-- Bugs latents #96-108 (Cat-B) — #109 corrigé en étape 4
-- Consolidation `utils-notifications.js` (73 sites d'appel, post-tous refactors)
-- Tests Playwright supplémentaires pour rendu DOM
-- Extraction zone Modification (résidu 3 984 LOC contient toujours le code de
-  modification — sous-module distinct possible en cycle Cat-B si Grégoire le
-  souhaite, après merge FF)
+| Date | Modification | Auteur |
+|---|---|---|
+| 2026-05-21 (matin) | Identification refactor evaluation TERMINÉ étape 6, archive historique. | Cat-B session (Claude) |
+| 2026-05-21 (après-midi) | Réécriture complète pour cycle Cat-B post-merge : §0 garde-fou, §1 récap Tracks 1-4, §2 critères clôture, §3 consigne démarrage prochaine session, §4 trouvailles méthode. | Cat-B session 1 (Claude autonome) |
