@@ -288,4 +288,4 @@ Ce document est mis à jour à chaque clôture de chantier.
 | Date | Modification | Auteur |
 |---|---|---|
 | 2026-05-21 | Création — consolidation post-merge evaluation (5e refactor). Ordre 1→2→3→4 acté avec Grégoire. | Cowork (Claude) + Grégoire |
-| 2026-05-21 | Track 1 LIVRÉ (13 bugs latents #96-108 fermés + 3 doublons evaluation résolus + 2 codes morts alarmistes retirés). 89/89 tests verts. Beta 99.62 b0521-1101. | Cat-B Track 1 |
+| 2026-05-21 | Track 1 LIVRÉ (13 bugs latents #96-108 fermés + 3 doublons evaluation résolus + 2 codes morts alarmistes retirés). 89/89 tests verts. Beta 99.61 b0521-1108. | Cat-B Track 1 |
