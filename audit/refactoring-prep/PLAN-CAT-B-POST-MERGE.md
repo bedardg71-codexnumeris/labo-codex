@@ -248,7 +248,7 @@ Le cycle Cat-B est considéré clos quand :
 - **A3.** 0 doublon de fonction dans evaluation.js (3 doublons résolus).
 - **A4.** 2 codes morts alarmistes retirés (`calculerRisqueEchec`, `obtenirClasseRisque`).
 - **A5.** `utils-notifications.js` créé + 73 callers migrés (chantier E).
-- **A6.** Couplage `travaux-ui.js:4639` documenté ou découplé (chantier F).
+- **A6.** ✅ Couplage `travaux-ui.js:4639` découplé via `evaluation.demarrerEvaluationDepuisFichier` + sentinelle Vitest (chantier F livré 21 mai 2026 PM). 8 sites d'écriture cross-module éliminés (1 réassignation + 7 mutations) ; travaux-ui.js n'écrit plus jamais window.evaluationEnCours.
 - **A7.** 3 accès localStorage profil-etudiant migrés vers `db.*` (chantier G).
 - **A8.** 6 tests Playwright rendus DOM ajoutés (chantier I).
 - **A9.** Strings UI alarmistes reformulées + FAQ « Indice R » retirée + glossaire aligné (chantier J).
@@ -277,15 +277,15 @@ Track 3 (héritages cyc) et reste de Track 4 sont post-AQPC sans contrainte de d
 | Track 1 — Quick wins | **Terminé** | 2026-05-21 | 2026-05-21 |
 | Track 2 — Méthode | **Terminé** | 2026-05-21 | 2026-05-21 |
 | Track 3 — Héritages cyc > 30 | **Phase 1 + 2 livrées (13/14 strictement <30 + 1 héritage Cat-B sous N=50)** | 2026-05-21 | 2026-05-21 (Mobilisation cyc 48 acté sous N=50) |
-| Track 4 — Transversaux | **G+J livrés (pré-AQPC)** | 2026-05-21 | E/F/H/I reportés (gros chantiers) |
+| Track 4 — Transversaux | **G+J+F livrés** | 2026-05-21 | E/H/I reportés |
 
-**Track 4 — chantiers livrés (pré-AQPC)** :
-- **Chantier G** : 2 accès localStorage direct migrés vers `db.getSync`/`db.setSync` (`profilOngletDeveloppementActif` dans `profil-etudiant-diagnostics.js`). Le plan théorique en prévoyait 3, audit réel = 2.
-- **Chantier J** : 8 reformulations UI vocabulaire alarmiste/prédictif + retrait FAQ « Indice R prédit risque d'échec » + tableau obsolète + glossaire « Indice composite (R) » descriptif. Audit annuel 1.3 passe Jaune → Vert pour la partie UI.
+**Track 4 — chantiers livrés (21 mai 2026)** :
+- **Chantier G** (matin) : 2 accès localStorage direct migrés vers `db.getSync`/`db.setSync` (`profilOngletDeveloppementActif` dans `profil-etudiant-diagnostics.js`). Le plan théorique en prévoyait 3, audit réel = 2.
+- **Chantier J** (matin) : 8 reformulations UI vocabulaire alarmiste/prédictif + retrait FAQ « Indice R prédit risque d'échec » + tableau obsolète + glossaire « Indice composite (R) » descriptif. Audit annuel 1.3 passe Jaune → Vert pour la partie UI.
+- **Chantier F** (PM, soir) : Couplage `travaux-ui.js → window.evaluationEnCours` découplé via API `evaluation.demarrerEvaluationDepuisFichier(fichier, opts)` exportée par `evaluation-chargement.js`. Audit révèle scope plus profond que le plan annonçait (8 sites d'écriture cross-module au lieu d'1 : 1 réassignation L4639 + 7 mutations dans Zone 1 `basculerMode` + Zone 2 `afficherPalettesEval`). Décision (b) actée avec Grégoire. Sentinelle Vitest `tests/unit/sentinelle-evaluation-en-cours.test.js` verrouille l'invariant : whitelist = config.js + 7 modules evaluation*.js. Tests : 92/92 verts (80 Vitest + 12 Playwright).
 
 **Track 4 — chantiers reportés (post-AQPC, gros effort)** :
 - **Chantier E** : Consolidation `utils-notifications.js` (73 sites cross-projet, ~3-5h, risque Moyen — régression silencieuse possible)
-- **Chantier F** : Investigation couplage `travaux-ui.js:4639 → window.evaluationEnCours` (~1-3h, décision a/b à acter avec Grégoire)
 - **Chantier H** (OPTIONNEL) : Sous-découpage résidus `profil-etudiant-sections-affichage.js` 4 654 LOC + `evaluation.js` 3 984 LOC (~4-6h)
 - **Chantier I** : 6 tests Playwright rendus DOM (~3-5h)
 
@@ -316,3 +316,4 @@ Ce document est mis à jour à chaque clôture de chantier.
 | 2026-05-21 | Track 3 phase 1 LIVRÉE (8/14 fonctions cyc > 30 éclatées : 3 evaluation + 4 trimestre-v2 + 1 profil-etudiant). Modules evaluation et trimestre-v2 atteignent baseline 0 cyc > 30. 6 fonctions profil-etudiant restantes en phase 2. | Cat-B Track 3 phase 1 |
 | 2026-05-21 | Track 4 chantiers G + J LIVRÉS (pré-AQPC) : chantier G migre 2 accès localStorage vers db.* (profil-etudiant-diagnostics.js), chantier J reformule 8 strings UI alarmistes/prédictives + retire FAQ obsolète « Indice R prédit risque d'échec » + glossaire descriptif. Audit annuel 1.3 partiellement vert (UI). 2 décisions Grégoire pendantes (tokens CSS, label v2-seuil-fragile). Chantiers E/F/H/I reportés post-AQPC. | Cat-B Track 4 G+J |
 | 2026-05-21 PM | Track 3 phase 2 LIVRÉE (5 commits, branche `cat-b/track-3-phase2-profil-etudiant`) : 5 fonctions profil-etudiant éclatées + 1 arrow fusionnée. 38 helpers privés ajoutés. 4 fonctions strictement <30 (arrow :2659, calculerIPB, calculerDetailsNoteFinale, genererSectionPerformance + arrow :4083) + 1 héritage Cat-B sous N=50 acté (genererSectionMobilisationEngagement cyc 48). Bug latent #110 fixé (portfolioActif → portfolioActifRapport). Tests 89/89 verts à chaque commit. ESLint cyc>30 : 6 → 1 (héritage). | Cat-B Track 3 phase 2 |
+| 2026-05-21 soir | Track 4 chantier F LIVRÉ (1 commit refactor, branche `cat-b/track-4-chantier-F`). Couplage travaux-ui.js ↔ window.evaluationEnCours découplé via API `evaluation.demarrerEvaluationDepuisFichier(fichier, opts)`. Audit révèle 8 sites d'écriture cross-module (vs 1 annoncé §2 chantier F) : 1 réassignation L4639 + 7 mutations (Zone 1 basculerMode L4387-90 + Zone 2 afficherPalettesEval L4660/4669/4684). Décision (b) découpler actée. Sentinelle Vitest `tests/unit/sentinelle-evaluation-en-cours.test.js` (3 sub-tests) verrouille l'invariant : whitelist config.js + 7 modules evaluation*.js ; travaux-ui à 0 site d'écriture. Critère A6 atteint. Tests 92/92 verts (80 Vitest + 12 Playwright). | Cat-B Track 4 chantier F |
