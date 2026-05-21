@@ -167,6 +167,193 @@ function supprimerEvaluationDepuisProfil(evaluationId) {
     }
 }
 
+function _obtenirConfigPortfolioCalcul(modalites) {
+    const configPratiqueActive = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null;
+    const configPAN = modalites.configPAN || {};
+    const configPortfolio = configPratiqueActive?.portfolio || configPAN.portfolio || {};
+    let methodeSelection = configPortfolio.methodeSelection || 'meilleurs';
+    if (methodeSelection === 'derniers') methodeSelection = 'recents';
+    const configCategories = configPratiqueActive?.categories
+        || (typeof obtenirConfigCategories === 'function' ? obtenirConfigCategories() : null);
+    return {
+        nombreARetenir: configPortfolio.nombreARetenir || 4,
+        minimumRequis: configPortfolio.minimumCompletion || 7,
+        methodeSelection,
+        reglesConformite: configPortfolio.reglesConformite || configPAN.portfolio?.reglesConformite || { actif: false },
+        modeHybride: !!(configCategories && configCategories.actif),
+        configCategories
+    };
+}
+
+function _identifierProductionTerminale(productions) {
+    return productions.find(p => {
+        if (p.type === 'portfolio' || p.type === 'artefact-portfolio') return false;
+        const typeLC = (p.type || '').toLowerCase();
+        if (typeLC.includes('terminal') || typeLC.includes('examen') || typeLC.includes('final')) return true;
+        const titreLC = (p.titre || '').toLowerCase();
+        const descLC = (p.description || '').toLowerCase();
+        if (titreLC.includes('terminal') || titreLC.includes('finale') ||
+            descLC.includes('terminal') || descLC.includes('finale')) return true;
+        return p.ponderation > 0;
+    }) || null;
+}
+
+function _obtenirArtefactsIdsPortfolio(productions, terminalId) {
+    let ids = productions
+        .filter(p => p.type === 'artefact-portfolio' && p.id !== terminalId)
+        .map(p => p.id);
+    // Fallback : productions à pondération 0 (hors portfolio et terminale)
+    if (ids.length === 0) {
+        ids = productions
+            .filter(p =>
+                p.type !== 'portfolio' &&
+                p.id !== terminalId &&
+                (p.ponderation === 0 || p.ponderation === undefined || p.ponderation === null)
+            )
+            .map(p => p.id);
+    }
+    return ids;
+}
+
+function _filtrerEvaluationsArtefactsValides(evaluations, da, artefactsIds, terminalId) {
+    return evaluations.filter(e => {
+        if (e.etudiantDA !== da) return false;
+        if (!artefactsIds.includes(e.productionId)) return false;
+        if (e.productionId === terminalId) return false;
+        if (e.remplaceeParId) return false;
+        if (e.noteFinale === null || e.noteFinale === undefined) return false;
+        // Exclure les évaluations non-recevables (plagiat, IA)
+        const statutIntegrite = e.statutIntegrite || 'recevable';
+        if (statutIntegrite === 'plagiat' || statutIntegrite === 'ia') return false;
+        return true;
+    });
+}
+
+function _selectionnerArtefactsHybride(evalsArtefacts, productions, configCategories) {
+    const { nombreARetenir: nSelection, ponderation: pondSel } = configCategories.selection || { nombreARetenir: 4, ponderation: 65 };
+    const { ponderation: pondObl } = configCategories.obligatoires || { ponderation: 35 };
+    const productionsNonPortfolio = productions.filter(p => p.type !== 'portfolio');
+
+    const evalsSelection = evalsArtefacts.filter(ev => {
+        const prod = productionsNonPortfolio.find(p => p.id === ev.productionId);
+        return prod && prod.categorie === 'selection';
+    });
+    const evalsObligatoires = evalsArtefacts.filter(ev => {
+        const prod = productionsNonPortfolio.find(p => p.id === ev.productionId);
+        return prod && prod.categorie === 'obligatoire';
+    });
+
+    // N meilleures du pool Sélection
+    const meilleuresSelection = [...evalsSelection]
+        .sort((a, b) => (b.noteFinale || 0) - (a.noteFinale || 0))
+        .slice(0, nSelection);
+
+    const artefactsRetenus = [...meilleuresSelection, ...evalsObligatoires];
+
+    // Moyenne pondérée Hybride
+    let moyennePortfolio = null;
+    if (meilleuresSelection.length > 0 || evalsObligatoires.length > 0) {
+        const moySel = meilleuresSelection.length > 0
+            ? meilleuresSelection.reduce((s, e) => s + e.noteFinale, 0) / meilleuresSelection.length : 0;
+        const moyObl = evalsObligatoires.length > 0
+            ? evalsObligatoires.reduce((s, e) => s + e.noteFinale, 0) / evalsObligatoires.length : 0;
+        if (meilleuresSelection.length > 0 && evalsObligatoires.length > 0) {
+            moyennePortfolio = (moySel * pondSel + moyObl * pondObl) / (pondSel + pondObl);
+        } else if (meilleuresSelection.length > 0) {
+            moyennePortfolio = moySel;
+        } else {
+            moyennePortfolio = moyObl;
+        }
+    }
+    return { artefactsRetenus, moyennePortfolio };
+}
+
+function _selectionnerArtefactsLegacy(evalsArtefacts, productions, methodeSelection, nombreARetenir) {
+    const getNumeroProduction = (ev) => {
+        const prod = productions.find(p => p.id === ev.productionId);
+        return prod?.numero || parseInt(ev.productionId.match(/(\d+)$/)?.[1]) || 0;
+    };
+
+    let artefactsRetenus = [...evalsArtefacts];
+    if (methodeSelection === 'meilleurs' || methodeSelection === 'hybride') {
+        artefactsRetenus.sort((a, b) => b.noteFinale - a.noteFinale);
+    } else if (methodeSelection === 'recents') {
+        artefactsRetenus.sort((a, b) => getNumeroProduction(b) - getNumeroProduction(a));
+    } else if (methodeSelection === 'recents-meilleurs') {
+        const nombreMeilleurs = Math.max(1, Math.ceil(artefactsRetenus.length * 0.5));
+        artefactsRetenus.sort((a, b) => b.noteFinale - a.noteFinale);
+        artefactsRetenus = artefactsRetenus.slice(0, nombreMeilleurs);
+        artefactsRetenus.sort((a, b) => getNumeroProduction(b) - getNumeroProduction(a));
+    }
+    artefactsRetenus = artefactsRetenus.slice(0, nombreARetenir);
+
+    let moyennePortfolio = null;
+    if (artefactsRetenus.length > 0) {
+        const somme = artefactsRetenus.reduce((acc, e) => acc + e.noteFinale, 0);
+        moyennePortfolio = somme / artefactsRetenus.length;
+    }
+    return { artefactsRetenus, moyennePortfolio };
+}
+
+function _appliquerPlafonnementConformite(moyennePortfolio, reglesConformite, deficit) {
+    if (!reglesConformite.actif || deficit <= 0 || moyennePortfolio === null) {
+        return { moyenne: moyennePortfolio, plafonnement: null };
+    }
+    const plafonds = reglesConformite.plafonds || [];
+    // Déficit 3+ utilise la règle deficit:3 ; sinon règle exacte
+    const cibleDeficit = deficit >= 3 ? 3 : deficit;
+    const plafondApplicable = plafonds.find(p => p.deficit === cibleDeficit);
+    if (!plafondApplicable) {
+        return { moyenne: moyennePortfolio, plafonnement: null };
+    }
+    if (plafondApplicable.echec) {
+        return {
+            moyenne: 0,
+            plafonnement: {
+                actif: true,
+                deficit: deficit,
+                niveauCode: null,
+                seuilMax: 0,
+                echec: true,
+                moyenneOriginale: moyennePortfolio
+            }
+        };
+    }
+    if (plafondApplicable.seuilMax !== null && moyennePortfolio > plafondApplicable.seuilMax) {
+        return {
+            moyenne: plafondApplicable.seuilMax,
+            plafonnement: {
+                actif: true,
+                deficit: deficit,
+                niveauCode: plafondApplicable.niveauCode,
+                seuilMax: plafondApplicable.seuilMax,
+                echec: false,
+                moyenneOriginale: moyennePortfolio
+            }
+        };
+    }
+    return { moyenne: moyennePortfolio, plafonnement: null };
+}
+
+function _obtenirNoteTerminaleEtudiant(evaluations, da, productionTerminale) {
+    if (!productionTerminale) return { noteTerminale: null, evaluationTerminale: null };
+    const evaluationTerminale = evaluations.find(e =>
+        e.etudiantDA === da &&
+        e.productionId === productionTerminale.id &&
+        !e.remplaceeParId &&
+        e.noteFinale !== null &&
+        e.noteFinale !== undefined
+    ) || null;
+    const noteTerminale = evaluationTerminale ? evaluationTerminale.noteFinale : null;
+    return { noteTerminale, evaluationTerminale };
+}
+
+function _calculerNoteFinaleAggregee(moyennePortfolio, noteTerminale, pondP, pondT, totalPond) {
+    if (moyennePortfolio === null) return null;
+    if (noteTerminale === null) return moyennePortfolio; // provisoire
+    return (moyennePortfolio * pondP / totalPond) + (noteTerminale * pondT / totalPond);
+}
+
 /**
  * Calcule les détails de la note finale de session pour un étudiant (pratique PAN-Standards)
  * Retourne les informations nécessaires pour afficher la construction de la note
@@ -178,250 +365,46 @@ function calculerDetailsNoteFinale(da) {
     const modalites = db.getSync('modalitesEvaluation', {});
     const pratique = modalites.pratique || 'pan-maitrise';
 
-    // Pour l'instant, on gère seulement PAN-Standards (accepter toutes les variantes qui contiennent "pan")
+    // Pour l'instant, on gère seulement PAN-Standards (toutes variantes contenant "pan")
     const pratiqueLower = pratique.toLowerCase();
-    if (!pratiqueLower.includes('pan') && pratiqueLower !== 'alternative') {
-        return null;
-    }
+    if (!pratiqueLower.includes('pan') && pratiqueLower !== 'alternative') return null;
 
-    // Source de vérité : pratiquesConfigurables, fallback sur modalitesEvaluation
-    const configPratiqueActiveNote = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null;
-    const configPAN = modalites.configPAN || {};
-    const configPortfolio = configPratiqueActiveNote?.portfolio || configPAN.portfolio || {};
-    const nombreARetenir = configPortfolio.nombreARetenir || 4;
-    const minimumRequis = configPortfolio.minimumCompletion || 7;
-    let methodeSelection = configPortfolio.methodeSelection || 'meilleurs';
-    if (methodeSelection === 'derniers') methodeSelection = 'recents';
-    const reglesConformite = configPortfolio.reglesConformite || configPAN.portfolio?.reglesConformite || { actif: false };
-
-    // Détecter Hybride : catégories actives dans pratiquesConfigurables
-    const configCategoriesNote = configPratiqueActiveNote?.categories
-        || (typeof obtenirConfigCategories === 'function' ? obtenirConfigCategories() : null);
-    const modeHybrideNote = !!(configCategoriesNote && configCategoriesNote.actif);
+    // Lecture config portfolio (source de vérité : pratiquesConfigurables, fallback modalitesEvaluation)
+    const cfg = _obtenirConfigPortfolioCalcul(modalites);
+    const { nombreARetenir, minimumRequis, reglesConformite, modeHybride: modeHybrideNote, configCategories: configCategoriesNote } = cfg;
+    let methodeSelection = cfg.methodeSelection;
 
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const productions = obtenirDonneesSelonMode('productions') || [];
 
-    // Trouver la production portfolio (conteneur)
     const productionPortfolio = productions.find(p => p.type === 'portfolio');
-
-    // Trouver la production terminale EN PREMIER (pour l'exclure des artefacts)
-    // La production terminale est celle qui :
-    // 1. A un type contenant 'terminal' ou 'examen' ou 'final'
-    // 2. OU a un titre/description contenant 'terminal' ou 'finale'
-    // 3. OU a une pondération > 0 (et n'est pas portfolio)
-    const productionTerminale = productions.find(p => {
-        // Exclure portfolio et artefacts explicites
-        if (p.type === 'portfolio' || p.type === 'artefact-portfolio') return false;
-
-        // Chercher par type explicite
-        const typeLC = (p.type || '').toLowerCase();
-        if (typeLC.includes('terminal') || typeLC.includes('examen') || typeLC.includes('final')) {
-            return true;
-        }
-
-        // Chercher par titre/description
-        const titreLC = (p.titre || '').toLowerCase();
-        const descLC = (p.description || '').toLowerCase();
-        if (titreLC.includes('terminal') || titreLC.includes('finale') ||
-            descLC.includes('terminal') || descLC.includes('finale')) {
-            return true;
-        }
-
-        // Sinon, prendre la première production avec pondération > 0
-        return p.ponderation > 0;
-    });
-
-    // ID de la production terminale (pour l'exclure des artefacts)
+    const productionTerminale = _identifierProductionTerminale(productions);
     const terminalId = productionTerminale?.id || null;
 
-    // Trouver les artefacts portfolio (type 'artefact-portfolio')
-    // EXCLURE la production terminale
-    let artefactsIds = productions
-        .filter(p => p.type === 'artefact-portfolio' && p.id !== terminalId)
-        .map(p => p.id);
+    const artefactsIds = _obtenirArtefactsIdsPortfolio(productions, terminalId);
+    const evaluationsArtefacts = _filtrerEvaluationsArtefactsValides(evaluations, da, artefactsIds, terminalId);
 
-    // Si pas d'artefacts explicites, chercher toutes les productions à pondération 0
-    // qui ne sont pas le portfolio conteneur NI la production terminale
-    if (artefactsIds.length === 0) {
-        artefactsIds = productions
-            .filter(p =>
-                p.type !== 'portfolio' &&
-                p.id !== terminalId &&
-                (p.ponderation === 0 || p.ponderation === undefined || p.ponderation === null)
-            )
-            .map(p => p.id);
-    }
+    // Sélection des artefacts retenus + moyenne (Hybride ou Legacy)
+    const { artefactsRetenus, moyennePortfolio: moyenneBrute } = modeHybrideNote
+        ? _selectionnerArtefactsHybride(evaluationsArtefacts, productions, configCategoriesNote)
+        : _selectionnerArtefactsLegacy(evaluationsArtefacts, productions, methodeSelection, nombreARetenir);
 
-    // Filtrer les évaluations de l'étudiant sur les artefacts
-    // EXCLURE : évaluation terminale, remplacées, non-recevables (plagiat, IA)
-    const evaluationsArtefacts = evaluations.filter(e => {
-        if (e.etudiantDA !== da) return false;
-        if (!artefactsIds.includes(e.productionId)) return false;
-        if (e.productionId === terminalId) return false;
-        if (e.remplaceeParId) return false;
-        if (e.noteFinale === null || e.noteFinale === undefined) return false;
-
-        // Exclure les évaluations non-recevables (plagiat, IA)
-        const statutIntegrite = e.statutIntegrite || 'recevable';
-        if (statutIntegrite === 'plagiat' || statutIntegrite === 'ia') return false;
-
-        return true;
-    });
-
-    // Sélectionner les artefacts selon la méthode
-    let artefactsRetenus = [...evaluationsArtefacts];
-    let moyennePortfolio = null;
-
-    // Helper: obtenir le numéro de production pour une évaluation
-    const getNumeroProduction = (ev) => {
-        const prod = productions.find(p => p.id === ev.productionId);
-        return prod?.numero || parseInt(ev.productionId.match(/(\d+)$/)?.[1]) || 0;
-    };
-
-    if (modeHybrideNote) {
-        // MODE HYBRIDE : N meilleures Sélection (pondérées) + Obligatoires (pondérées)
-        const { nombreARetenir: nSelection, ponderation: pondSel } = configCategoriesNote.selection || { nombreARetenir: 4, ponderation: 65 };
-        const { ponderation: pondObl } = configCategoriesNote.obligatoires || { ponderation: 35 };
-        const productionsNonPortfolio = productions.filter(p => p.type !== 'portfolio');
-
-        const evalsSelection = evaluationsArtefacts.filter(ev => {
-            const prod = productionsNonPortfolio.find(p => p.id === ev.productionId);
-            return prod && prod.categorie === 'selection';
-        });
-        const evalsObligatoires = evaluationsArtefacts.filter(ev => {
-            const prod = productionsNonPortfolio.find(p => p.id === ev.productionId);
-            return prod && prod.categorie === 'obligatoire';
-        });
-
-        // N meilleures du pool Sélection
-        const meilleuresSelection = [...evalsSelection]
-            .sort((a, b) => (b.noteFinale || 0) - (a.noteFinale || 0))
-            .slice(0, nSelection);
-
-        artefactsRetenus = [...meilleuresSelection, ...evalsObligatoires];
-
-        // Moyenne pondérée Hybride
-        if (meilleuresSelection.length > 0 || evalsObligatoires.length > 0) {
-            const moySel = meilleuresSelection.length > 0
-                ? meilleuresSelection.reduce((s, e) => s + e.noteFinale, 0) / meilleuresSelection.length : 0;
-            const moyObl = evalsObligatoires.length > 0
-                ? evalsObligatoires.reduce((s, e) => s + e.noteFinale, 0) / evalsObligatoires.length : 0;
-
-            if (meilleuresSelection.length > 0 && evalsObligatoires.length > 0) {
-                moyennePortfolio = (moySel * pondSel + moyObl * pondObl) / (pondSel + pondObl);
-            } else if (meilleuresSelection.length > 0) {
-                moyennePortfolio = moySel;
-            } else {
-                moyennePortfolio = moyObl;
-            }
-        }
-    } else {
-        // Méthodes legacy : meilleurs, recents, recents-meilleurs, tous
-        if (methodeSelection === 'meilleurs' || methodeSelection === 'hybride') {
-            artefactsRetenus.sort((a, b) => b.noteFinale - a.noteFinale);
-        } else if (methodeSelection === 'recents') {
-            artefactsRetenus.sort((a, b) => getNumeroProduction(b) - getNumeroProduction(a));
-        } else if (methodeSelection === 'recents-meilleurs') {
-            const nombreMeilleurs = Math.max(1, Math.ceil(artefactsRetenus.length * 0.5));
-            artefactsRetenus.sort((a, b) => b.noteFinale - a.noteFinale);
-            artefactsRetenus = artefactsRetenus.slice(0, nombreMeilleurs);
-            artefactsRetenus.sort((a, b) => getNumeroProduction(b) - getNumeroProduction(a));
-        }
-
-        artefactsRetenus = artefactsRetenus.slice(0, nombreARetenir);
-
-        if (artefactsRetenus.length > 0) {
-            const somme = artefactsRetenus.reduce((acc, e) => acc + e.noteFinale, 0);
-            moyennePortfolio = somme / artefactsRetenus.length;
-        }
-    }
-
-    // ========================================
-    // RÈGLES DE CONFORMITÉ - Plafonnement
-    // ========================================
-    let plafonnement = null;
+    // Plafonnement conformité (déficit d'artefacts)
     const nombreEvalues = evaluationsArtefacts.length;
     const deficit = minimumRequis - nombreEvalues;
-
-    if (reglesConformite.actif && deficit > 0 && moyennePortfolio !== null) {
-
-        // Trouver le plafond applicable selon le déficit
-        const plafonds = reglesConformite.plafonds || [];
-        let plafondApplicable = null;
-
-        if (deficit >= 3) {
-            // Déficit 3+
-            plafondApplicable = plafonds.find(p => p.deficit === 3);
-        } else {
-            // Déficit 1 ou 2
-            plafondApplicable = plafonds.find(p => p.deficit === deficit);
-        }
-
-        if (plafondApplicable) {
-            if (plafondApplicable.echec) {
-                // Échec automatique
-                plafonnement = {
-                    actif: true,
-                    deficit: deficit,
-                    niveauCode: null,
-                    seuilMax: 0,
-                    echec: true,
-                    moyenneOriginale: moyennePortfolio
-                };
-                moyennePortfolio = 0;
-            } else if (plafondApplicable.seuilMax !== null && moyennePortfolio > plafondApplicable.seuilMax) {
-                // Plafonnement au niveau
-                plafonnement = {
-                    actif: true,
-                    deficit: deficit,
-                    niveauCode: plafondApplicable.niveauCode,
-                    seuilMax: plafondApplicable.seuilMax,
-                    echec: false,
-                    moyenneOriginale: moyennePortfolio
-                };
-                moyennePortfolio = plafondApplicable.seuilMax;
-            }
-        }
-    }
+    const { moyenne: moyennePortfolio, plafonnement } = _appliquerPlafonnementConformite(moyenneBrute, reglesConformite, deficit);
 
     // Pondérations
     const ponderationPortfolio = productionPortfolio?.ponderation || 60;
     const ponderationTerminale = productionTerminale?.ponderation || 40;
     const totalPonderation = ponderationPortfolio + ponderationTerminale;
 
-    // Trouver l'évaluation terminale de l'étudiant
-    let noteTerminale = null;
-    let evaluationTerminale = null;
-    if (productionTerminale) {
-        evaluationTerminale = evaluations.find(e =>
-            e.etudiantDA === da &&
-            e.productionId === productionTerminale.id &&
-            !e.remplaceeParId &&
-            e.noteFinale !== null &&
-            e.noteFinale !== undefined
-        );
-        if (evaluationTerminale) {
-            noteTerminale = evaluationTerminale.noteFinale;
-        }
-    }
+    // Note terminale + agrégation finale
+    const { noteTerminale, evaluationTerminale } = _obtenirNoteTerminaleEtudiant(evaluations, da, productionTerminale);
+    const noteFinale = _calculerNoteFinaleAggregee(moyennePortfolio, noteTerminale, ponderationPortfolio, ponderationTerminale, totalPonderation);
 
-    // Calculer la note finale pondérée
-    let noteFinale = null;
-    if (moyennePortfolio !== null) {
-        if (noteTerminale !== null) {
-            // Les deux composantes sont disponibles
-            noteFinale = (
-                (moyennePortfolio * ponderationPortfolio / totalPonderation) +
-                (noteTerminale * ponderationTerminale / totalPonderation)
-            );
-        } else {
-            // Seulement le portfolio (provisoire)
-            noteFinale = moyennePortfolio;
-        }
-    }
-
-    // Méthode de sélection en français
+    // Label méthode de sélection en français (forcer 'hybride' si actif)
+    if (modeHybrideNote) methodeSelection = 'hybride';
     const methodesLabels = {
         'meilleurs': 'meilleurs',
         'recents': 'plus récents',
@@ -429,8 +412,6 @@ function calculerDetailsNoteFinale(da) {
         'tous': 'tous',
         'hybride': 'hybride (catégories)'
     };
-    // Si Hybride actif, forcer le label
-    if (modeHybrideNote) methodeSelection = 'hybride';
 
     return {
         pratique: 'PAN-Standards',
