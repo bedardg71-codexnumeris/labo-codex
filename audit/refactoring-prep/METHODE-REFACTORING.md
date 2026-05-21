@@ -60,6 +60,8 @@ Avant de toucher au code :
 
 Cas du module `bilan-reflexif.js` (15 mai 2026) : branche `refactor/2026-mai` créée avant la finalisation de cette méthode, conservée pour ne pas perdre les 8 commits — exception documentée.
 
+**Convention chargement orchestrateurs** : un sous-module qui appelle `window.X` d'AUTRES sous-modules du même module (et non l'inverse) est un **orchestrateur**. Il doit être chargé EN DERNIER dans `index.html` parmi les sous-modules du module. Pattern observé `trimestre-v2-orchestre.js` (consomme `window.populerDropdownGroupesHoraireV2`, `window.afficherTrimestreGroupeCoursV2`, etc.). Identifier les orchestrateurs à l'étape 0 et noter l'ordre voulu dans `MODULES-MAP.md` §2.x.
+
 ### Étape 1 — Lecture complète du module (~30 min - 2 h selon taille)
 
 Lire **intégralement** le code du module, pas seulement les noms de fonction. Objectif : repérer ce que les scans automatisés ne voient pas.
@@ -114,6 +116,10 @@ Pour chaque sous-module cible listé dans `MODULES-MAP.md` :
 
 **Règle d'or** : un sous-module = un commit. Ne pas accumuler plusieurs extractions avant de commiter.
 
+**Grep `window.X` AVANT et APRÈS chaque extraction** : les exports thématiques peuvent être dispersés (pas tous en bas du fichier). Une extraction qui rate un export laisse une fonction « orpheline » qui plante au premier appel via `data-action`. Procédure : avant l'extraction, `grep -n "^window\." js/<module>.js` pour identifier les exports dispersés ; après l'extraction, re-grep pour vérifier que tous les exports déplacés sont bien dans le sous-module et tous les exports résiduels sont bien dans le résidu. Cf. cas productions.js (9 exports thématiques L2689-2702 pré-extraction).
+
+**Renommage si résidu déjà IIFE complet** : quand le résidu d'une session précédente est déjà un IIFE complet englobant l'intégralité de la zone à extraire dans la session courante, **`git mv` est l'opération la plus sûre** (0 LOC de code modifiée). Workflow : `git mv js/<module>.js js/<sous-module>.js` + réécriture de l'en-tête de fichier + ajustement du `<script>` tag dans `index.html` + tests. Le `sed delete` reste obligatoire si la zone à extraire est UNE PARTIE du résidu uniquement. Cf. profil-etudiant session D (`git mv profil-etudiant.js → profil-etudiant-sections-affichage.js`).
+
 ### Étape 4 — Refactoring des fonctions top-complexité (~1-3 h selon module)
 
 Pour chaque fonction identifiée par `MODULES-MAP.md` §2.x comme « top-complexité » (cyc > 30 ou > 50) :
@@ -130,6 +136,20 @@ Vérification : lancer `npx eslint --rule '{"complexity": ["error", 30]}' js/<so
 
 Procédure recommandée : créer un script `audit/refactoring-prep/check-complexity.sh` qui lance `npx eslint --no-eslintrc --parser-options ecmaVersion:2020 --rule '{"complexity": ["error", 30]}' js/<prefix>*.js` (avec `<prefix>` égal au préfixe partagé des sous-modules du module en cours) et le faire tourner après chaque extraction.
 
+**Trade-off cyc 15 vs cyc 30** : l'extraction d'helpers pour casser une fonction au-delà de cyc 30 peut introduire de nouveaux helpers entre cyc 15 et cyc 30. C'est acceptable selon le principe « distribuer la complexité plutôt que la concentrer ». **La cible souple (cyc ≤ 15) est optionnelle ; la cible dure (cyc ≤ 30) est obligatoire.**
+
+**Stratégie cyc > 30 (cible dure vs héritages Cat-B)** : sur les god modules avec >>5 fonctions cyc > 30, la décision pragmatique consiste à **éclater systématiquement le monstre central** (cyc max ET toute fonction cyc > N) et **documenter les autres comme héritages Catégorie B post-merge**. **N = 50** est le seuil acté avec Grégoire (evaluation, 18 mai 2026) : au-dessus → éclatement obligatoire pendant le refactor ; en-dessous → héritage Cat-B inscrit dans le journal §7 et traité dans un cycle dédié.
+
+**Découpage supplémentaire pour cible dure** : l'éclatement initial planifié à N fonctions peut produire une fonction au-dessus de la cible dure (cyc > 30) sous l'effet de la déduplication des branches. Si l'éclatement initial laisse un helper à cyc 32-45, **extraire un sous-helper additionnel jusqu'à respecter la cible dure**. Pattern observé Phase 2 session C trimestre-v2 (`_rafraichirVuesContextDependantes` cyc 36 → ajout `_rafraichirProfilEtudiantSiVisible` → cyc 28).
+
+**Extraction agrégée + sous-helpers DOM** : une extraction initiale agrégée (par ex. `_construireNouvelleEvaluation`) peut produire un helper qui reste cyc > 30 par accumulation `|| {}`, ternaires, spread. **Si helper extrait reste cyc 32-45, identifier les dimensions internes (lire/valider/construire/écrire) et extraire un sous-helper par dimension** (`_lireChampsDOM*`, `_lireOptionsAffichage*`, `_validerX*`). Pattern 3× confirmé sur trimestre-v2 + evaluation.
+
+**Monstre privé IIFE éclatable sans promotion `window.X`** : un monstre cyc 30-50 défini PRIVÉ dans une IIFE peut être éclaté en helpers privés internes **sans promotion** si tous les call-sites restent intra-IIFE. **Audit pré-éclatement** : `grep -n "nomFonction\b" js/*.js` (sans `window.`) → si 0 hits cross-IIFE → éclatement intra-IIFE possible et préféré (pas d'inflation de la surface publique).
+
+**Bug latent détecté pendant la lecture pré-éclatement** : la lecture systématique d'une fonction monstre avant son éclatement révèle parfois des bugs latents (branches manquantes, dead code, etc.). **Signaler tout bug latent détecté en SUIVI-BUGS et préserver tel quel dans le helper extrait avec commentaire explicite.** Pattern session D profil-etudiant bug #106 (branche manquante `progression && progressionVisible` préservée dans `_resoudreSectionContenu`).
+
+**Protocole « fix bug latent INTERNE avant éclatement »** : si un bug latent identifié vit **À L'INTÉRIEUR** du monstre qu'on s'apprête à éclater (ex. variable cross-IIFE référencée par le monstre), corriger le bug **AVANT** l'éclatement dans **un commit dédié de pré-requis**. Sinon les helpers extraits héritent du bug et le débogage devient plus complexe. **Distinguer des bugs latents EXTERNES qui restent préservés Cat-B.** Pattern bug #109 evaluation étape 4 (commit `9045dfd` AVANT les 6 commits d'éclatement).
+
 ### Étape 5 — Validation du module entier (~30 min - 1 h)
 
 Une fois tous les sous-modules extraits :
@@ -141,6 +161,7 @@ Une fois tous les sous-modules extraits :
   - Pour `trimestre-v2.js` : création trimestre + CRUD cours/étudiants/horaires/groupes-cours + changement groupe-cours actif.
   - Pour `profil-etudiant.js` : affichage profil + section confidentiel + jetons.
   - Pour `bilan-reflexif.js` : éditeur + parcours + réflexion + import CSV + rapport.
+- **Tester chaque cas dans les deux modes (sombre + clair) explicitement**, pas seulement le mode utilisé en développement. Pour les modules avec rendu HTML dense (productions form, bibliothèque, palettes d'évaluation, profil), les régressions visuelles sont silencieuses jusqu'au switch de mode.
 - Bump version dans `version.json` : Beta XX.Y → XX.(Y+1), build courant. Mettre à jour les fallback dans `index.html` (~ligne 17166).
 
 ### Étape 6 — Capitalisation (~30-45 min)
@@ -182,11 +203,15 @@ Puis :
 
 ### Check-list par sous-module (étape 3)
 
+- [ ] **Grep doublons d'export pré-deletion** : `grep -n "^window\.X = X" js/<module>.js` pour identifier les exports doublés AVANT extraction. Un orphelin où `X` est extrait transforme le résidu en `ReferenceError: X is not defined` au chargement IIFE.
 - [ ] Nouveau fichier `js/<sous-module>.js` créé avec entête IIFE standard.
 - [ ] Fonctions copiées sans modification fonctionnelle.
 - [ ] Dépendances identifiées et résolues (exposition `window.X` si nécessaire).
-- [ ] `<script>` ajouté dans `index.html` au bon endroit (après dépendances, avant consommateurs).
+- [ ] **Audit symétrique inverse exports** : pour chaque `window.X = X` dans la zone à extraire, grep la fonction X ; si fonction HORS zone (reste dans le résidu) → retirer l'export du contenu extrait + rajouter manuellement dans le résidu (1 ligne).
+- [ ] `<script>` ajouté dans `index.html` au bon endroit (après dépendances, avant consommateurs ; **orchestrateurs en dernier** parmi les sous-modules du module — cf. §3 étape 0).
 - [ ] Fonctions retirées du fichier d'origine.
+- [ ] **Grep `window.X` POST-deletion** : `grep -n "^window\." js/<module>.js` pour vérifier qu'aucun export n'a été oublié dans le résidu, et grep dans le sous-module pour vérifier que tous les exports voulus y sont bien.
+- [ ] **Audit cross-zone tardif** : `grep -n "<nomFonction>\b" js/<module>.js` pour chaque fonction extraite, vérifier qu'aucun caller résidu (zone non extraite) ne référence la fonction sans `window.X`. Insérer `window.` ou patch §5.6 si besoin.
 - [ ] ESLint complexity ≤ 30 sur ce sous-module **ET sur tous les sous-modules déjà extraits dans la session** (cf. §3 étape 4).
 - [ ] Grep des helpers (`rendre*`, `echapper*`, `tronquer`, `format*`, `genId`) — confirmer qu'ils sont accessibles depuis ce sous-module (alias en tête de fichier ou exports `core`) avant le commit (cf. anti-pattern §5.6).
 - [ ] Tests de régression verts.
@@ -208,7 +233,7 @@ Puis :
 
 ## 5. Anti-patterns spécifiques à Labo Codex
 
-Sept pièges connus, spécifiques au stack et aux conventions du projet. À surveiller à chaque module.
+Treize pièges connus, spécifiques au stack et aux conventions du projet. À surveiller à chaque module.
 
 ### 5.1 Ordre de chargement dans `index.html`
 
@@ -259,6 +284,95 @@ Cause : la fonction extraite mute le ctx ET appelle une closure du parent qui r�
 **Règle** : **ne resynchroniser que parent → ctx en début d'itération**, jamais l'inverse. Les closures du parent qui mutent par référence s'occupent du retour vers le parent directement — pas besoin de les doubler par une resync ctx → parent.
 
 **Cas vu** : refacto de `parserQuestionnaireTexte` (`bilan-reflexif.js`, §4.1.g étape 4). La closure `fermerPreambule()` du parent mettait `preambuleLignes = null` ; la resync ctx → parent restaurait l'array juste après, faisant consommer les options `a./b./c.` dans le préambule au lieu d'ouvrir une nouvelle question.
+
+### 5.8 Wrappers résiduels avec variables module-scope
+
+Symptôme : un sous-module extrait tente d'appeler `sauvegarderX()` directement et observe que le wrapper `sauvegarderXOriginale` du résidu rajoute des side-effects invisibles (rechargement sidebar, notif). Cause : le résidu wrap les fonctions par réassignation `window.X = wrapper` après la définition, et le wrapper ferme `XOriginale` (variable module-scope).
+
+**Règle** : **conserver les wrappers et leurs variables module-scope dans le résidu pendant le découpage.** Les déplacer vers un sous-module casse la chaîne — la closure ne traverse pas la frontière IIFE.
+
+**Cas vu** : `productions.js` (16 mai 2026) — `sauvegarderProductionOriginale`/`annulerFormProductionOriginale`/`supprimerProductionOriginale` ont dû rester groupés dans le résidu lors de l'extraction des sous-modules `-liste.js` / `-import-export.js` / `-bibliotheque-ui.js`.
+
+### 5.9 Factoriser les branches dupliquées en paramètres
+
+Symptôme : deux branches d'une fonction partagent 90 %+ du code mais diffèrent sur 2-3 valeurs ou un message. Tentation de tout dupliquer pour rester littéral. Conséquence : la fonction agrégée gagne en complexité cyclomatic (cyc 47 vu sur `_rafraichirVuesContextDependantes` avant factorisation) parce que chaque divergence ajoute un `if/else`.
+
+**Règle** : repérer les blocs avec 90 %+ de code dupliqué et abstraire les différences en paramètres. Le helper résultant accepte les divergences en paramètres (`valeurHeader`, `messageNotification`, `regenererCalendrier`) ; la fonction outer choisit les valeurs selon le mode.
+
+**Cas vu** : `trimestre-v2-orchestre.js` Phase 2 (17 mai 2026) — `_rafraichirVuesContextDependantes(valeurHeader, messageNotification, regenererCalendrier)` factorise les branches Mode COURS et Mode GROUPE-COURS (gain : −110 LOC vs duplication, cyc agrégé 28 vs 47 dupliqué).
+
+### 5.10 Acquittement `// security-ok` INLINE OBLIGATOIRE
+
+Le hook pré-commit Défense J (baseline F.16 par fichier) refuse les acquittements `// security-ok` en commentaire de bloc avant l'innerHTML. **Le commentaire DOIT être en suffixe inline sur la même ligne** que l'instruction `innerHTML`. Toute extraction de zone avec innerHTML interpolé re-flague baseline F.16 — re-essai obligatoire si commentaire en bloc.
+
+```javascript
+// ❌ REFUSÉ par le hook (commentaire de bloc avant)
+// security-ok: code transféré tel quel — bug pré-existant SUIVI-BUGS #99
+elemProgrammes.innerHTML = `...${prog}...`;
+
+// ✅ ACCEPTÉ (suffixe inline)
+elemProgrammes.innerHTML = `...${prog}...`; // security-ok: bug #99 préservé
+```
+
+**Cas vu** : `profil-etudiant-confidentiel.js` session B (18 mai 2026) — premier essai en bloc commentaire refusé, réécriture inline pour passage.
+
+### 5.11 Variables module-scope encapsulées dans IIFE
+
+La convention de promotion `window.X` systématique des **fonctions** extraites NE S'APPLIQUE PAS aux **variables module-scope** (`let`/`const`). Préservation de l'encapsulation d'origine — préfixe `_` = privée d'origine, reste privée après extraction.
+
+**Règle** : seules les fonctions sont promues `window.X` systématiquement. Les variables `_X` préfixées par underscore ou clairement privées (état module, constantes de configuration) restent dans le scope IIFE local.
+
+**Cas vu** : `profil-etudiant-confidentiel.js` session B (18 mai 2026) — `_confidentielDaActuel` (état module) et `SOUS_CATEGORIES_SERVICES` (constante) restent privées au sous-module, pas de promotion `window.X`.
+
+**Exception** : si une variable `let X` est référencée cross-IIFE (bug latent #109), voir §5.12 ci-dessous.
+
+### 5.12 Variables `let` cross-IIFE non promues `window.X`
+
+Symptôme : un sous-module référence une variable `let X` déclarée dans une AUTRE IIFE (bare reference, sans `window.`). Le runtime jette `ReferenceError: X is not defined` au premier appel — invisible aux tests Vitest pures (file scope JSDOM différent de browser).
+
+**Règle** : si une variable `let X` est partagée entre 2 IIFE+ (cas opposé à §5.11 — variable PAS strictement privée), **promotion `window.X` obligatoire avec drop du `let`** :
+
+```javascript
+// ❌ AVANT (let cross-IIFE — ReferenceError)
+// dans evaluation-chargement.js
+let _timerAutoSave = null;
+// dans evaluation.js résidu
+_timerAutoSave = setTimeout(...); // ReferenceError au runtime
+
+// ✅ APRÈS (promotion window.X explicite)
+// dans evaluation-chargement.js
+window._timerAutoSave = null;
+// dans evaluation.js résidu
+window._timerAutoSave = setTimeout(...); // Patch §5.6 sur tous les sites
+```
+
+Patch §5.6 obligatoire sur **tous les sites de référence** (intra-IIFE et cross-IIFE) — single source of truth sur window.
+
+**Cas vu** : bug #109 (`evaluation.js` étape 4, 18 mai 2026) — `_timerAutoSave` + `_pendingAutoSaveSnapshot` déclarés `let` dans `evaluation-chargement.js` L1086-1087, référencés bare dans 3 sites cross-IIFE résidu/sauvegarde. ReferenceError au runtime sur `sauvegarderEvaluation`. Corrigé en commit `9045dfd` AVANT les éclatements du monstre (cf. §3 étape 4 protocole « fix bug latent avant éclatement »).
+
+### 5.13 Closures internes async passées en paramètre
+
+Symptôme : un monstre async contient des closures internes (`const attendre = async () => ...`) qui accèdent aux paramètres du parent (`evaluationId`, `etudiantDA`). Si on extrait un helper qui utilise ces closures et qu'on les **promeut `window.X`**, on casse l'accès aux paramètres + pollue window.
+
+**Règle** : les closures internes async DOIVENT rester définies dans la fonction outer et être **passées en paramètre** aux helpers extraits. Pas de promotion `window.X`.
+
+```javascript
+// ❌ AVANT (closure interne async, monstre cyc 78)
+async function modifierEvaluation(evaluationId) {
+    const attendreOption = async () => { /* accès evaluationId */ };
+    const trouverGroupeEtudiant = () => { /* accès evaluationId */ };
+    // ... 200 LOC ...
+}
+
+// ✅ APRÈS (helpers extraits, closures passées en paramètre)
+async function modifierEvaluation(evaluationId) {
+    const attendreOption = async () => { /* accès evaluationId */ };
+    const trouverGroupeEtudiant = () => { /* accès evaluationId */ };
+    await _appliquerModifFormulaire(evaluationId, attendreOption, trouverGroupeEtudiant);
+}
+```
+
+**Cas vu** : `evaluation.js` étape 4 (18 mai 2026) — `modifierEvaluation` cyc 78 éclatée avec 5 helpers privés qui reçoivent `attendreOption` et `trouverGroupeEtudiant` en paramètre. Closures restent locales à l'outer.
 
 ---
 
@@ -372,6 +486,13 @@ Si Claude Code estime qu'une rédaction est délicate (par exemple : « la carto
 - Pièges qu'on n'avait pas anticipés
 - Étapes qui ont pris plus de temps que prévu
 - Décisions qu'il a fallu prendre en cours de route
+
+#### Stratégie cyc > 30 (cible dure vs héritages Cat-B)
+
+À documenter pour chaque module avec fonctions cyc > 30 :
+- Quelles fonctions ont été ÉCLATÉES pendant le refactor (cible dure obligatoire) — cyc avant / cyc après / nombre de sous-helpers extraits.
+- Quelles fonctions ont été DOCUMENTÉES en héritages Cat-B post-merge (seuil pragmatique N=50) — fichier, cyc, raison du report.
+- Référence au seuil N acté avec Grégoire (par défaut N=50 depuis evaluation, 18 mai 2026).
 
 #### Améliorations de la méthode à proposer (Catégorie B — décision Grégoire)
 - Étapes à renforcer dans §3
@@ -657,14 +778,15 @@ Recommandations spécifiques tirées de cette session :
 
 **Améliorations de méthode à proposer (Catégorie B — décision Grégoire)** :
 
+> **Statut au 21 mai 2026 (Cat-B Track 2)** : les 4 propositions ci-dessous ont été ACTÉES et intégrées dans la méthode §3/§5. Voir §8 historique des révisions ligne « 2026-05-21 Cat-B Track 2 ».
+
 1. **§3 étape 3 (découpage)** — préciser :
    > **Grep `window.X` AVANT et APRÈS chaque extraction.** Les exports thématiques peuvent être dispersés (pas tous en bas du fichier). Une extraction qui rate un export laisse une fonction « orpheline » qui plante au premier appel via `data-action`.
 
 2. **§3 étape 4 (complexity)** — clarifier le trade-off cyc 15 :
    > L'extraction d'helpers pour casser une fonction au-delà de cyc 30 peut introduire de nouveaux helpers entre cyc 15 et cyc 30. C'est acceptable selon le principe « distribuer la complexité plutôt que la concentrer ». La cible souple (cyc ≤ 15) est optionnelle ; la cible dure (cyc ≤ 30) est obligatoire.
 
-3. **§5 nouvel anti-pattern §5.8 candidat — Wrappers résiduels avec variables module-scope** :
-   > Symptôme : un sous-module extrait tente d'appeler `sauvegarderX()` directement et observe que le wrapper `sauvegarderXOriginale` du résidu rajoute des side-effects invisibles (rechargement sidebar, notif). Cause : le résidu wrap les fonctions par réassignation `window.X = wrapper` après définition, le wrapper ferme `XOriginale` (variable module-scope). Règle : **conserver les wrappers et leurs variables module-scope dans le résidu pendant le découpage.** Les déplacer vers un sous-module casse la chaîne — la closure ne traverse pas la frontière IIFE.
+3. **§5 nouvel anti-pattern §5.8 — Wrappers résiduels avec variables module-scope** (ACTÉ § 5.8).
 
 4. **§3 étape 5 (validation manuelle)** — ajouter :
    > **Tester chaque cas dans les deux modes (sombre + clair)** explicitement, pas seulement le mode utilisé en développement. Pour les modules avec rendu HTML dense (productions form, bibliothèque), les régressions visuelles sont silencieuses jusqu'au switch de mode.
@@ -688,6 +810,8 @@ Recommandations spécifiques tirées de cette session :
 - **4 fonctions cyc > 30 héritées** restantes dans `-cours.js` et `-groupes-cours.js` (sauvegarderCoursV2 56, mettreAJourCarteResumeGroupeCoursV2 34, remplirFormCoursV2 31, genererNomGroupeCoursV2 31) — hors-scope du refactor C, à traiter dans un cycle productions-style.
 
 #### 5 propositions Catégorie B issues du refactor trimestre-v2
+
+> **Statut au 21 mai 2026 (Cat-B Track 2)** : les 5 propositions ci-dessous ont été ACTÉES et intégrées dans la méthode §3/§4/§5. Voir §8 historique des révisions ligne « 2026-05-21 Cat-B Track 2 ».
 
 1. **§4 check-list étape 3 — réflexe « audit cross-zone tardif »** : APRÈS chaque `sed`/`Edit` de deletion, grep les noms de fonctions extraites (pas seulement les exports `window.X`) dans le résidu. Une fonction non listée dans MODULES-MAP §2.4 Écart #5 peut être appelée depuis une zone non extraite. Détecté session B : `afficherTrimestreGroupeCoursV2` appelée par zone 8 résidu, non listée Écart #5. **Insérer en §4 check-list étape 3 item « Grep fonctions extraites dans le résidu post-deletion »** entre les items actuels « Grep `window.X` post-extraction » et « `node --check` du résidu ».
 
@@ -789,6 +913,8 @@ Le module contient ~30 fonctions `genererSection*` qui injectent du HTML. La cou
 5. **Renommage > extraction sed** quand le résidu post-A+B+C était déjà un IIFE complet (session D). Décision pragmatique : `git mv` au lieu de `sed delete` + reconstruction IIFE risquée sur 4 642 LOC.
 
 #### Améliorations de la méthode à proposer (Catégorie B — décision Grégoire)
+
+> **Statut au 21 mai 2026 (Cat-B Track 2)** : les 6 propositions ci-dessous ont été ACTÉES et intégrées dans la méthode §3/§4/§5/§6.5. Voir §8 historique des révisions ligne « 2026-05-21 Cat-B Track 2 ».
 
 1. **§3 étape 3 (extraction) — réflexe « renommage si résidu déjà IIFE complet »** : quand le résidu d'une session précédente est déjà un IIFE complet englobant l'intégralité de la zone à extraire dans la session courante, **`git mv` est l'opération la plus sûre** (0 LOC de code modifiée). **Insérer en §3 étape 3 — « Si la zone à extraire représente l'intégralité d'un IIFE déjà en place, préférer `git mv` + réécriture de l'en-tête + ajustement script tag + tests. Le sed delete reste obligatoire si la zone est UNE PARTIE du résidu uniquement. »**
 
@@ -924,7 +1050,9 @@ Couverture actuelle (2 tests) : chargement headless + sentinelle exports browser
 
 #### Améliorations de la méthode à proposer (Catégorie B — décision Grégoire)
 
-**5 propositions nouvelles** issues de l'étape 4 (à acter avec Grégoire avant intégration dans la méthode) :
+> **Statut au 21 mai 2026 (Cat-B Track 2)** : les 5 propositions ci-dessous ont été ACTÉES et intégrées dans la méthode §3/§5. Numérotation finale : §5.12 (variables `let` cross-IIFE) et §5.13 (closures async passées en paramètre). Voir §8 historique des révisions ligne « 2026-05-21 Cat-B Track 2 ».
+
+**5 propositions nouvelles** issues de l'étape 4 :
 
 1. **§5 nouvel anti-pattern §5.11 candidat — Variables `let` cross-IIFE non promues `window.X`** : si une variable `let X` est déclarée dans une IIFE et référencée depuis une autre IIFE (cross-IIFE bare reference), le runtime jette ReferenceError. **Promotion `window.X` obligatoire avec drop du `let`** (écriture directe sur window) + patch §5.6 sur tous les sites de référence. Pattern bug #109 étape 4 (`_timerAutoSave`, `_pendingAutoSaveSnapshot`). **Ajouter §5.11 avec exemple `let _timerAutoSave` → `window._timerAutoSave =` + 15 sites patchés.** Cf. [[feedback-fix-bug-latent-avant-monstre]].
 
@@ -990,6 +1118,7 @@ Dette résiduelle cumulée sur les 5 refactors à organiser en **cycles Catégor
 | 2026-05-15 | — (création initiale) | Document créé en réponse à la question « comment la méthode se rode-t-elle d'un module à l'autre ? ». Première session de refactoring (`bilan-reflexif.js`) déjà démarrée — capitalisation rétroactive prévue. | Cowork (Claude) + Grégoire |
 | 2026-05-15 | `bilan-reflexif.js` | 6 propositions Catégorie B issues de la rétrospective §7 acceptées par Grégoire : §3 étape 0 (convention nom de branche clarifiée), §3 étape 1 (helpers cross-module à identifier avant extraction), §3 étape 4 (audit ESLint complexity sur TOUS les sous-modules de la session), §4 check-list étape 3 (items cyc + grep helpers ajoutés), §5 anti-patterns (§5.6 helpers cross-module non identifiés, §5.7 resync ctx ↔ parent), §6.5 gabarit (rubrique Tests Playwright pour rendus DOM ajoutée). | Cowork (Claude) + Grégoire |
 | 2026-05-21 | `evaluation.js` (5e et dernier god module) | 5 propositions Catégorie B issues de la rétrospective §7 déposées (en attente décision Grégoire) : §5 anti-patterns §5.11 (variables `let` cross-IIFE non promues `window.X` — bug #109), §3 étape 4 (protocole « fix bug latent avant éclatement »), §5 anti-patterns §5.12 (closures internes async passées en paramètre), §3 étape 4 (extraction agrégée + sous-helpers DOM), §3 étape 4 (monstre privé IIFE éclatable sans promotion `window.X`). Pattern « N=50 seuil pragmatique éclatement vs Cat-B » confirmé. **Backlog god modules épuré 5/5 livré** — entre dans phase « cycles Catégorie B post-merge » (14 fonctions cyc > 30 héritages, 13 bugs latents #96-108, consolidation `utils-notifications.js`, sous-découpage résidus si nécessaire). | Cowork (Claude) + Grégoire |
+| 2026-05-21 | Cat-B Track 2 — toutes rétrospectives (productions 4, trimestre-v2 5, profil-etudiant 6, evaluation 5) | **20 propositions Catégorie B actées et intégrées** dans la méthode. **§3** : convention chargement orchestrateurs en dernier (étape 0), grep `window.X` avant/après extraction + renommage si résidu déjà IIFE complet (étape 3), trade-off cyc 15/cyc 30 + stratégie cyc > 30 (cible dure vs héritages Cat-B, seuil N=50) + découpage supplémentaire + extraction agrégée + sous-helpers DOM + monstre privé IIFE éclatable + bug latent pendant lecture + protocole « fix bug latent interne avant éclatement » (étape 4), tester les deux modes sombre/clair (étape 5). **§4** : check-list étape 3 enrichie de 4 items (doublons d'export pré-deletion, audit symétrique inverse exports, grep `window.X` post-deletion, audit cross-zone tardif). **§5** : 6 nouveaux anti-patterns §5.8 à §5.13 (wrappers résiduels module-scope, factoriser branches dupliquées, `// security-ok` inline obligatoire, variables module-scope encapsulées IIFE, variables `let` cross-IIFE promues `window.X`, closures async passées en paramètre). **§6.5** : rubrique « Stratégie cyc > 30 (cible dure vs héritages Cat-B) » ajoutée au gabarit. **METHODE-REFACTORING gelée jusqu'au prochain cycle de refactors** (Q3 2026 si nouveau cycle). | Cat-B Track 2 (Claude autonome — relecture Grégoire en révision finale) |
 
 ---
 
