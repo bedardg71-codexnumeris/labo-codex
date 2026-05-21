@@ -90,10 +90,10 @@ Voir `Retours des testeurs/SUIVI-BUGS.md` section « Corrigés (21 mai 2026 — 
 
 **ESLint cyc>30 dans profil-etudiant\*** : 6 → 1 (Mobilisation héritage cyc 48).
 
-### Track 4 — Transversaux (⚠️ G + J + F livrés)
+### Track 4 — Transversaux (✅ G + J + F + E livrés)
 
-**Commits** : `3fe5165` (G+J matin) + `6532f75` (F soir) (+ commit docs à suivre)
-**Tags** : `cat-b-track-4-gj-2026-05-21` + `cat-b-track-4-chantierF-2026-05-21` (à poser au merge)
+**Commits clés** : `3fe5165` (G+J matin) + `6532f75` (F soir) + sous-lots E `e0a9fdb`→`864a756` (6 commits soir)
+**Tags** : `cat-b-track-4-gj-2026-05-21` + `cat-b-track-4-chantierF-2026-05-21` + `cat-b-track-4-chantierE-2026-05-21`
 
 **Livré** :
 - ✅ **Chantier G** : 2 accès localStorage direct migrés vers `db.getSync`/`db.setSync` (`profil-etudiant-diagnostics.js`)
@@ -145,26 +145,27 @@ Référence : `PLAN-CAT-B-POST-MERGE.md` §5.
 cd /Users/kuekatsheu/Documents/GitHub/Monitorage_v6
 
 git status                              # branche actuelle ?
-git log --oneline main -10              # HEAD main attendu : commit docs(cat-b) Track 4 chantier F (à compléter) ou plus récent
-git tag -l "cat-b-*" | sort             # 6 tags attendus :
+git log --oneline main -3               # HEAD main attendu : `864a756 docs(cat-b): Track 4 chantier E sous-lot 6 LIVRÉ` ou plus récent
+git tag -l "cat-b-*" | sort             # 7 tags attendus :
                                         #   cat-b-track-1-2026-05-21
                                         #   cat-b-track-2-2026-05-21
                                         #   cat-b-track-3-phase1-2026-05-21
                                         #   cat-b-track-3-phase2-2026-05-21
                                         #   cat-b-track-4-gj-2026-05-21
                                         #   cat-b-track-4-chantierF-2026-05-21
+                                        #   cat-b-track-4-chantierE-2026-05-21
 git worktree list                       # 1 seul worktree attendu (le principal sur audit/2026-mai)
 ```
 
-**Si HEAD main au-delà du commit docs chantier F** : un autre chantier a été fait depuis (vérifier `git log main` pour les commits récents). Pas de panique, ce SESSION.md sera mis à jour par cet autre chantier.
+**Si HEAD main au-delà de `864a756`** : un autre chantier a été fait depuis (vérifier `git log main` pour les commits récents). Pas de panique, ce SESSION.md sera mis à jour par cet autre chantier.
 
 ### Étape 2 — Créer un worktree dédié à main
 
 `audit/2026-mai` a son propre cycle de vie avec des modifs uncommitted (audits, rapports, docs sécurité). **NE PAS écraser**. Créer un worktree dédié :
 
 ```bash
-# Choisir un nom de track parlant ; exemple Track 4 chantier F :
-git worktree add ../Monitorage_v6-catb3 -b cat-b/track-4-chantier-F main
+# Choisir un nom de track parlant ; exemple Track 4 chantier I (la prochaine priorité) :
+git worktree add ../Monitorage_v6-catbI -b cat-b/track-4-chantier-I main
 ```
 
 > ⚠️ Pattern observé 21 mai : `git checkout main` avec modifs uncommitted sur `audit/2026-mai` → git refuse. Solution propre = **worktree dédié à main** (acté Grégoire 21 mai matin).
@@ -188,16 +189,17 @@ Ordre strict :
 - `Skills pour Claude Code/SKILL_labo_codex.md` — architecture, indices A-C-P, workflow
 
 **Selon track choisi** :
-- Track 4 chantier E (utils-notifications) → `SKILL_integrite_globaux.md` + `SKILL_hygiene_donnees_partagees.md`
-- Track 4 chantier J reliquat (tokens CSS, label v2-seuil-fragile) → décision Grégoire d'abord, pas de code
-- Track 4 chantier I (tests Playwright) → lire `docs/securite/TESTS-AUTOMATISES.md`
-- Reprise éventuelle Mobilisation cyc 48 (héritage) → relire METHODE §6.5 gabarit AVANT de proposer fragmentation supplémentaire
+- Track 4 chantier I (tests Playwright rendus DOM) → lire `docs/securite/TESTS-AUTOMATISES.md` + lire les sentinelles existantes (`tests/unit/sentinelle-evaluation-en-cours.test.js` et `tests/unit/utils-notifications.test.js`) comme références de structure
+- Test visuel chantier E (notifications) → 6 scénarios listés dans §3 étape 6 priorité 1 ; pas de code, juste validation manuelle Grégoire sur Safari Mac + iPad Air
+- Track 4 chantier J reliquat (tokens CSS `--risque-*`, label `v2-seuil-fragile`) → décision Grégoire d'abord, pas de code
+- Reprise éventuelle Mobilisation cyc 48 (héritage Cat-B sous N=50) → relire METHODE §6.5 gabarit AVANT de proposer fragmentation supplémentaire
 
 ### Étape 5 — Lancer la suite de tests (baseline)
 
 ```bash
 cd tests && npm install      # première fois après nouveau worktree (catbX etc.)
-cd tests && npm test         # attendu : 80 Vitest + 12 Playwright = 92/92 verts (+3 sentinelles chantier F)
+cd tests && npm test         # attendu : 85 Vitest + 12 Playwright = 97/97 verts
+                             # (+3 sentinelles chantier F + 4 API utils-notifications + 1 sentinelle stricte chantier E)
 ```
 
 Si rouge dès le départ → diagnostic prioritaire AVANT tout chantier. Ne pas démarrer si baseline pas verte.
@@ -240,26 +242,28 @@ Sites à modifier (une fois Grégoire confirme) :
 - `version.json` : `{"build":"MMJJ-HHMM","beta":"XX.X"}`
 - `js/init-inline.js` lignes 121-122 : `VERSION_MAJEURE` + `BUILD_ID`
 
-Cycle Cat-B est resté en 99.61 (build 0521-1108) pour les 5 tracks par décision Grégoire 21 mai (matin + PM).
+Cycle Cat-B est resté en 99.61 pour les 5 tracks + chantier E par décision Grégoire 21 mai. Build refresh seulement (0521-1108 → 0521-1717 au chantier E).
 
 ### Étape 9 — Merge FF + tag + push en fin de track
 
-Depuis le worktree (Track 4 chantier F en exemple) :
+Depuis le worktree (Track 4 chantier E en exemple — pattern éprouvé) :
 ```bash
 git push . HEAD:main
-git tag cat-b-track-4-chantierF-2026-MM-DD <branch-name>
-git push origin main cat-b-track-4-chantierF-2026-MM-DD
+git tag cat-b-track-4-chantierX-2026-MM-DD cat-b/track-4-chantier-X
+git push origin main cat-b-track-4-chantierX-2026-MM-DD
 ```
 
+Le hook pré-push lance Vitest automatiquement. Si rouge → abort.
+
 Mettre à jour PLAN-CAT-B-POST-MERGE.md §5 critères + §7 statut + §8 historique.
-Mettre à jour ce SESSION.md (§1 statut Track + §2 critères + §5 historique).
+Mettre à jour ce SESSION.md (§0 garde-fou + §1 statut Track + §2 critères + §3 étape 6 priorités + §5 historique).
 
 ### Étape 10 — Cleanup worktree en fin de session
 
 Depuis le repo principal :
 ```bash
-git worktree remove ../Monitorage_v6-catb3
-git branch -D cat-b/<track-name>   # -D obligatoire : voir note §3 étape 2
+git worktree remove ../Monitorage_v6-catbX
+git branch -D cat-b/track-4-chantier-X   # -D obligatoire : voir note §3 étape 2
 ```
 
 ---
