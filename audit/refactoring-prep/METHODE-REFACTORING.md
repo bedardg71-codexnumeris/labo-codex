@@ -833,7 +833,151 @@ Le module contient ~30 fonctions `genererSection*` qui injectent du HTML. La cou
 
 ### Module : `evaluation.js`
 
-À refactorer en dernier. Rétrospective à remplir à la fin.
+**Date de fin** : 2026-05-21 (étape 4 livrée 18 mai, étape 5 validation Grégoire 21 mai OK 13 évaluations sans problème majeur, étape 6 capitalisation + merge FF + tag 21 mai)
+**Branche** : `refactor/evaluation` (HEAD post-étape-4 `30c6eea`, mergée FF sur `main` le 21 mai 2026)
+**Commits** : 19 commits cumulés (sessions A+B = 9 commits ; fix #109 + 6 éclatements étape 4 = 7 ; bump build + capitalisation étape 6 = 3+)
+**Effort réel** : ~10 h sur la journée du 18 mai (3 sessions consécutives A matin / B après-midi / étape 4 soir) + validation Grégoire 21 mai (~1 h) + capitalisation/merge étape 6 21 mai (~2 h)
+**Estimation MODULES-MAP** : 6-8 h estimation initiale §3.3, révisée 6-9 h étape 1 / écart : **+25 %** vs estimation médiane (fourchette haute confirmée — cohérent avec le triple monstre cyc 70/75/78 anticipé étape 1)
+
+#### Frontières fonctionnelles
+
+Découpage MODULES-MAP §2.1 suivi avec **1 ajout** + **2 reports** :
+
+- **Ajout** : sous-module `evaluation-jetons.js` (832 LOC, 11 fonctions) extrait pendant session A — pas prévu §2.1 mais cohérent vu l'autonomie de la zone Jetons personnalisés + copies TSV/SRPNF + handlers calcul/édition.
+- **Reports** : zones Liste (4400-4610), Modification (4611-5975), Verrouillage (5976-6850), Banque (6137-6610) **restées dans le résidu `evaluation.js`** plutôt que d'être éclatées en `-liste.js` + `-modification.js` séparés — décision pragmatique vu l'imbrication forte avec l'état pivot `window.evaluationEnCours` et le flag `_modifierEvaluationEnCours`. Pattern profil-etudiant-sections-affichage.js (résidu 4 654 LOC accepté par Grégoire) confirmé : un gros résidu post-refactor est acceptable si éclaté à un cycle Cat-B ultérieur.
+
+7 sous-modules créés + 1 résidu :
+
+| Sous-module | LOC | Fonctions | Cyc > 30 hérités | Session |
+|---|---:|---:|---:|---|
+| `js/evaluation-handlers.js` | 79 | 3 (wrappers Phase 5) | 0 | A |
+| `js/evaluation-chargement.js` | 1 266 | 17 (chargement + auto-save) | 1 (`chargerEchellePerformance` 36) | A |
+| `js/evaluation-calcul.js` | 738 | 9 (calcul de notes) | 1 (`calculerNoteAlgorithmiqueAvecCategories` 42) | B |
+| `js/evaluation-retroaction.js` | 816 | 12 (rétroaction + 10 helpers `_Bilan*` + 2 const module-scope) | 0 | B |
+| `js/evaluation-sauvegarde.js` | 999 | 8 (sauvegarde + jetons + 12 helpers `_Sauv*`) | 1 (`peuplementOptJetons` 33) | B |
+| `js/evaluation-jetons.js` | 832 | 11 (jetons personnalisés + copies + handlers) | 0 | A (ajout non prévu §2.1) |
+| `js/evaluation.js` (résidu) | 3 984 | 35 (modification + verrouillage + liste + banque + 12 helpers `_Modif*`) | 0 | A+B+étape4 |
+| **Total** | **8 714** | **95** | **3** (Cat-B sous N=50) | A+B+étape4 |
+
+Pas de renommage du résidu (vs profil-etudiant session D `git mv → -sections-affichage.js`). `evaluation.js` garde son nom — la zone Modification reste imbriquée avec le pivot `evaluationEnCours`, l'extraction en `-modification.js` est reportée en cycle Cat-B post-merge.
+
+#### Métriques avant/après
+
+| Métrique | Avant | Après | Variation |
+|---|---:|---:|---:|
+| LOC du module (résidu) | 7 321 | 3 984 | **−45,6 %** |
+| LOC cumulés tous sous-modules issus | 7 321 | 8 714 | **+19,0 %** (overhead IIFE wrappers + en-têtes + 59 helpers + 2 const étape 4) |
+| Plus gros fichier (LOC) | 7 321 | 3 984 (résidu) | −45,6 % |
+| Complexité cyclomatic max (ESLint) | 78 (async arrow interne `modifierEvaluation`) | **42** (héritage Cat-B sous N=50) | −46 % |
+| Nombre de fonctions au-delà de cyc 30 | 9 | **3 héritages** (`calculerNoteAlgorithmiqueAvecCategories` 42, `chargerEchellePerformance` 36, `peuplementOptJetons` 33) | **−67 %** |
+| Doublons de définition | 3 dispersés (préservés) | 3 dispersés (préservation stricte) | inchangé (Cat-B post-merge) |
+| Code mort retiré (nombre de fonctions) | — | 0 (préservation comportementale stricte) | 2 fonctions « alarmistes » (`calculerRisqueEchec`, `obtenirClasseRisque`) préservées + inscrites Cat-B post-merge |
+| Tests Vitest sur ce module | 0 (avant refactor) → 7 (étape 2) | 7 (sentinelle élargie à 6 modules dont evaluation) | inchangé en nombre post-étape-2 |
+| Tests Playwright sur ce module | 0 → 2 (étape 2) | 2 (chargement + sentinelle browser) | inchangé post-étape-2 |
+| Bugs latents Cat-B nets | 0 | +2 (#107-108) −1 corrigé (#109) = **+1 net** | — |
+| Helpers privés ajoutés étape 4 | 0 | **59 helpers + 2 const module-scope** | — |
+
+**Lecture** : cible dure cyc ≤ 30 atteinte sur 6/6 monstres > N=50 (100 %). 3 héritages sous N=50 documentés Cat-B (méthode pragmatique confirmée — proposition Cat-B #5 profil-etudiant). LOC résidu réduit de 45 % — pattern proche de productions (−44,7 %) et trimestre-v2 (−90,9 % via découpage complet, exception). 89/89 tests verts à chaque jalon.
+
+#### Tests de régression
+
+- **7 Vitest + 2 Playwright pré-refactor** écrits en session étape 2 (sentinelle élargie à 6 modules : bilan-reflexif, productions, trimestre-v2, profil-etudiant, evaluation, +1 placeholder)
+  - Canari de chargement multi-modules
+  - Sentinelle 30+ exports représentatifs des 7 zones
+  - Structure `evaluationEnCours` (variable pivot, créée à la 1re sauvegarde — NON initialisée à null au chargement, contrairement à `profilActuelDA` initialisé)
+  - Structure `sauvegarderEvaluation`, `modifierEvaluation`, `calculerNote` (signatures, arités)
+  - Side-effect top-level `window.addEventListener('modeChanged', ...)` L7163 pré-peuplé via le 3e param `fauxWindowExistant` du helper `chargerScript`
+- **Tests qui ont attrapé des régressions** : canari + sentinelle (notamment pendant l'éclatement étape 4 quand un patch §5.6 manqué cassait un export `window.X`).
+- **Tests qui ont raté des régressions** : aucun bug n'a été détecté APRÈS extraction par les tests post-refactor (préservation comportementale confirmée par Playwright + Vitest + validation manuelle Grégoire sur 13 évaluations le 21 mai).
+- **Bugs latents découverts pendant l'écriture des tests** : aucun directement. Les 3 bugs latents (#107 #108 #109) ont été découverts pendant l'audit grep helpers cross-module + audit pivot état pré-extraction sessions A/B.
+
+#### Tests Playwright pour les rendus DOM
+
+Couverture actuelle (2 tests) : chargement headless + sentinelle exports browser. **Pas le rendu effectif** des palettes d'évaluation, des rétroactions, des badges. Pattern productions / trimestre-v2 / profil-etudiant confirmé : tests de régression suffisent pour la phase refactor, les régressions visuelles sont attrapées en étape 5 validation manuelle Grégoire (Safari Mac sombre+clair).
+
+**Dette résiduelle** : 1-2 tests Playwright supplémentaires utiles à terme (rendu palette + rendu rétroaction Bilan) — inscrits en dette Cat-B post-merge.
+
+#### Nettoyage effectué pendant le refactoring
+
+- **Code mort retiré** : 0 (préservation comportementale stricte, pattern productions / profil-etudiant maintenu).
+- **Doublons résolus** : 0 (3 doublons §2.1 préservés Cat-B post-merge).
+- **Variables inutilisées nettoyées** : 0 (préservation stricte).
+- **Accès localStorage direct migrés vers `db.*`** : 0 — non vérifié (audit Écart #7 §2.1 listait 78 accès `db.*` propres, 0 accès localStorage direct identifié à l'étape 1).
+- **Helpers globaux consolidés** : 0 — wrappers `afficherNotificationSucces/Erreur` toujours dupliqués dans 7 sous-modules (consolidation `utils-notifications.js` reportée par décision session A trimestre-v2 maintenue à travers profil-etudiant et evaluation, 73 sites d'appel cross-projet = risque régression silencieuse).
+- **Bug #109 corrigé pendant étape 4** : seul nettoyage non-pure-extraction effectué (promotion `_timerAutoSave` + `_pendingAutoSaveSnapshot` cross-IIFE). Justifié par le pattern « fix bug latent avant éclatement du monstre qui le contient » (cf. trouvaille méthode #7 ci-dessous, [[feedback-fix-bug-latent-avant-monstre]]).
+
+#### Difficultés rencontrées
+
+1. **Triple monstre cyc 70/75/78** — anticipé étape 1 mais coût réel élevé. 3 sessions A/B/étape4 ont été nécessaires pour passer de l'audit à l'éclatement complet. **Décision N=50 actée avec Grégoire au démarrage de l'étape 4** = filet de sécurité méthode (au-dessus → éclatement obligatoire, en-dessous → héritage Cat-B documenté).
+
+2. **État pivot `window.evaluationEnCours` créé à la 1re sauvegarde** (PAS au chargement IIFE) — différence avec `profilActuelDA = null` initialisé. Conséquence : impossible de tester sentinelle "pivot initialisé au chargement" — sentinelle a été remplacée par "pivot déclaré sur window après 1ère sauvegarde mockée". Frontière de test différente de profil-etudiant.
+
+3. **Couplage cross-module à `window.evaluationEnCours` via `travaux-ui.js:4639`** (Écart #9 étape 1) — premier cas observé sur les 5 refactors où un module externe **réassigne** un état pivot critique. Préservé tel quel pendant le refactor. À investiguer Cat-B post-merge : couplage légitime (annotation d'un travail déclenche une éval) ou à découpler ?
+
+4. **Side-effect top-level IIFE imprévu** `window.addEventListener('modeChanged', ...)` L7163 — déclenché au chargement de l'IIFE. Pas détecté par la lecture étape 1, découvert quand la sentinelle de chargement a échoué session A. Solution : pré-peupler `fauxWindow` avec un stub `addEventListener` via le 3e paramètre du helper `chargerScript(path, stubs, fauxWindowExistant)`. Cf. trouvaille méthode session A point 3.
+
+5. **Encoding mixte UTF-8 + escape sequences dans le même fichier** (caractères accentués mélangés avec `é` etc.) — coûté plusieurs ré-extractions ratées pendant session A. Solution : préférer **sed par numéros de ligne** pour les gros blocs (>50 LOC), Edit ciblé pour les petits patches. Cf. trouvaille méthode session A point 1.
+
+6. **JSDoc orphelin post-sed** — quand un sed delete coupait au milieu d'un commentaire JSDoc `/** ... */`, le `/**` orphelin avalait silencieusement les fonctions suivantes (cf. pattern documenté MEMORY.md). Solution : nettoyer commentaire de section + JSDoc dans la même opération sed (étendre la plage de suppression jusqu'au `*/` final).
+
+7. **Helpers identiques cross-IIFE pour 2 monstres frères** (`sauvegarderEvaluation` cyc 70 + `sauvegarderEvaluationModifiee` cyc 58) — partagent ~70 % de logique. Tentation : extraire des helpers communs en `window._construireEvaluationData` cross-IIFE → polluerait window pour 2 callers et créerait un couplage caché. Solution : duplication assumée avec suffixe distinctif (`_Sauv*` vs `_Modif*`) — ~150 LOC duplication acceptable. Cf. [[feedback-helpers-cross-iife-duppliques-suffixe]].
+
+#### Améliorations de la méthode à proposer (Catégorie B — décision Grégoire)
+
+**5 propositions nouvelles** issues de l'étape 4 (à acter avec Grégoire avant intégration dans la méthode) :
+
+1. **§5 nouvel anti-pattern §5.11 candidat — Variables `let` cross-IIFE non promues `window.X`** : si une variable `let X` est déclarée dans une IIFE et référencée depuis une autre IIFE (cross-IIFE bare reference), le runtime jette ReferenceError. **Promotion `window.X` obligatoire avec drop du `let`** (écriture directe sur window) + patch §5.6 sur tous les sites de référence. Pattern bug #109 étape 4 (`_timerAutoSave`, `_pendingAutoSaveSnapshot`). **Ajouter §5.11 avec exemple `let _timerAutoSave` → `window._timerAutoSave =` + 15 sites patchés.** Cf. [[feedback-fix-bug-latent-avant-monstre]].
+
+2. **§3 étape 4 — protocole « fix bug latent avant éclatement »** : quand un bug latent identifié vit À L'INTÉRIEUR d'un monstre qu'on s'apprête à éclater, corriger le bug **AVANT** l'éclatement (1 commit dédié de pré-requis). Sinon les helpers extraits héritent du bug et le débogage devient plus complexe. Distinguer des bugs latents EXTERNES qui restent préservés Cat-B. **Ajouter §3 étape 4 — « Lister les bugs latents identifiés étape 1/3 ; trier interne vs externe au monstre ; corriger les internes avant éclatement. »** Pattern bug #109 + commit `9045dfd` AVANT les 6 commits d'éclatement.
+
+3. **§5 nouvel anti-pattern §5.12 candidat — Closures internes async dans un monstre éclaté** : si un monstre async contient des closures internes (`const attendre = async () => ...`) qui accèdent aux paramètres parent, ces closures DOIVENT rester définies dans la fonction outer et être passées EN PARAMÈTRE aux helpers extraits. **NE PAS les promouvoir `window.X`** (casserait l'accès aux paramètres + pollution window). **Ajouter §5.12 avec exemple `_appliquerModifFormulaire(evaluationId, attendreOption, trouverGroupeEtudiant)`.** Cf. [[feedback-closures-internes-passees-en-parametre]].
+
+4. **§3 étape 4 — réflexe « extraction agrégée + sous-helpers DOM »** : une extraction initiale agrégée (par ex. `_construireNouvelleEvaluation`) peut produire un helper qui reste cyc > 30 par accumulation `|| {}`, ternaires, spread. Re-extraire des sous-helpers DOM dédiés (`_lireChampsDOM*`, `_lireOptionsAffichage*`) pour ramener cyc < 30. **Ajouter §3 étape 4 — « Si helper extrait reste cyc 32-45, identifier les dimensions internes (lire/valider/construire/écrire) et extraire un sous-helper par dimension. »** Cf. [[feedback-eclatement-sous-helpers-dom]] (3× confirmé sur trimestre-v2 + evaluation).
+
+5. **§3 étape 4 — réflexe « monstre privé IIFE éclatable sans promotion `window.X` »** : un monstre cyc 30-50 défini PRIVÉ dans une IIFE peut être éclaté en helpers privés internes **sans promotion** si tous les call-sites restent intra-IIFE. Audit pré-éclatement : `grep -n "nomFonction\b" js/*.js` (sans `window.`) → si 0 hits cross-IIFE → éclatement intra-IIFE possible et préféré (pas d'inflation surface publique). **Ajouter §3 étape 4 — « Avant de classer un monstre privé en Cat-B sous N, grep call-sites : si tous intra-IIFE, éclatement intra-IIFE préféré. »** Cf. [[feedback-eclater-cas-limite-prive-iife]].
+
+**Confirmations transverses (pas de nouvelle proposition)** :
+- Pattern « N=50 seuil pragmatique » acté avec Grégoire au démarrage étape 4 — à mentionner dans §6.5 gabarit "Stratégie cyc > 30 (cible dure vs héritages)" (déjà proposé Cat-B #5 profil-etudiant).
+- Audit ESLint après chaque extraction (§3 étape 4) — confirmé 6× sur evaluation, cible mûre.
+- Préservation comportementale stricte sur bugs latents externes — confirmée sur evaluation (3 doublons + 2 code morts « alarmistes »).
+
+#### État de la dette résiduelle
+
+- **3 fonctions cyc > 30 héritages** à éclater cycle dédié Catégorie B post-merge :
+  - `calculerNoteAlgorithmiqueAvecCategories` 42 (`evaluation-calcul.js`)
+  - `chargerEchellePerformance` 36 (`evaluation-chargement.js`) — doublon cross-module #108 lié
+  - `peuplementOptJetons` 33 (`evaluation-sauvegarde.js`)
+- **Résidu `evaluation.js` 3 984 LOC** — zone Modification + Verrouillage + Liste + Banque + Recherche. Sous-module `evaluation-modification.js` distinct possible en cycle ultérieur si la dette devient gênante. Décision Grégoire 18 mai : reporter, vu l'imbrication forte avec pivot `evaluationEnCours`.
+- **3 doublons préservés** : `restaurerPreferenceTri` (4295/4309), `obtenirClasseNote` (3681/4390), `filtrerListeEvaluations` (4178/6851). À résoudre Cat-B post-merge.
+- **2 codes morts « alarmistes »** : `calculerRisqueEchec` (3634), `obtenirClasseRisque` (3644). À retirer Cat-B post-merge (lien T-L audit 1.3 cohérence lexicale vocabulaire alarmiste).
+- **2 bugs latents** #107 (`initialiserModuleEvaluation` dead code silencieux) + #108 (`chargerEchellePerformance` doublon cross-module). À corriger Cat-B post-merge.
+- **Couplage `travaux-ui.js:4639` → `window.evaluationEnCours`** : à investiguer Cat-B post-merge (légitime ou à découpler ?).
+- **Wrappers `afficherNotificationSucces/Erreur` dupliqués** dans 7+ sous-modules — consolidation `utils-notifications.js` toujours reportée (décision maintenue à travers les 5 refactors — 73 sites d'appel cross-projet).
+- **1-2 tests Playwright supplémentaires** pour rendus DOM effectifs (palette + rétroaction Bilan) — dette §6.5 cumulée sur les 5 refactors.
+
+#### Notes pour les cycles Cat-B post-merge
+
+`evaluation.js` était le **5e et dernier god module** PLAN-MOYEN-TERME §4.5. Les 5 refactors sont mergés sur `main` entre le 15 mai (bilan-reflexif) et le 21 mai (evaluation). **Backlog god modules épuré 5/5 livré.**
+
+Dette résiduelle cumulée sur les 5 refactors à organiser en **cycles Catégorie B post-merge** :
+
+1. **14 fonctions cyc > 30 héritages** réparties :
+   - 5 profil-etudiant (`genererSectionMobilisationEngagement` 52, `genererSectionPerformance` 47, `calculerDetailsNoteFinale` 57, `determinerCibleIntervention` 58, `calculerIPB` 36)
+   - 4 trimestre-v2 (`sauvegarderCoursV2` 56, `mettreAJourCarteResumeGroupeCoursV2` 34, `remplirFormCoursV2` 31, `genererNomGroupeCoursV2` 31)
+   - 2 productions (déjà identifiées au refactor productions, non listées ici — voir METHODE §7 productions.js)
+   - 3 evaluation (`calculerNoteAlgorithmiqueAvecCategories` 42, `chargerEchellePerformance` 36, `peuplementOptJetons` 33)
+2. **Bugs latents #96-108** (13 bugs Cat-B inscrits SUIVI-BUGS) à corriger.
+3. **Consolidation `utils-notifications.js`** (73 sites cross-projet) — chantier dédié.
+4. **2 codes morts « alarmistes »** dans `evaluation.js` + chantier vocabulaire alarmiste audit annuel 1.3.
+5. **Tests Playwright rendus DOM** (1-2 par module — 5-10 tests cumulés).
+6. **Sous-découpage des résidus restés gros** : `profil-etudiant-sections-affichage.js` 4 654 LOC + `evaluation.js` résidu 3 984 LOC si la dette devient gênante (décisions Grégoire reportées).
+
+**Trouvailles transversales 5 refactors** (à consolider dans une rétrospective globale hors METHODE §7 si Grégoire le souhaite) :
+- Pattern « N=50 seuil pragmatique éclatement vs Cat-B » confirmé sur evaluation.
+- Pattern « git mv si résidu = IIFE complet » (profil-etudiant session D), non répété sur evaluation (zone Modification trop imbriquée).
+- Convention `// security-ok` inline obligatoire (profil-etudiant session B → evaluation).
+- Encapsulation variables module-scope `let`/`const` sans promotion `window.X` (variables strictement privées) **VS** promotion `window.X` systématique pour fonctions ET pour variables cross-IIFE (cas bug #109).
+- Helpers cross-IIFE duppliqués avec suffixe distinctif pour monstres frères (evaluation `_Sauv*` vs `_Modif*`) — différent du pattern « factoriser branches dupliquées en paramètres » (productions-validation, trimestre-v2 `_rafraichirVuesContextDependantes`) — décision case-by-case selon ratio divergences/duplication.
 
 ---
 
@@ -845,6 +989,7 @@ Le module contient ~30 fonctions `genererSection*` qui injectent du HTML. La cou
 |---|---|---|---|
 | 2026-05-15 | — (création initiale) | Document créé en réponse à la question « comment la méthode se rode-t-elle d'un module à l'autre ? ». Première session de refactoring (`bilan-reflexif.js`) déjà démarrée — capitalisation rétroactive prévue. | Cowork (Claude) + Grégoire |
 | 2026-05-15 | `bilan-reflexif.js` | 6 propositions Catégorie B issues de la rétrospective §7 acceptées par Grégoire : §3 étape 0 (convention nom de branche clarifiée), §3 étape 1 (helpers cross-module à identifier avant extraction), §3 étape 4 (audit ESLint complexity sur TOUS les sous-modules de la session), §4 check-list étape 3 (items cyc + grep helpers ajoutés), §5 anti-patterns (§5.6 helpers cross-module non identifiés, §5.7 resync ctx ↔ parent), §6.5 gabarit (rubrique Tests Playwright pour rendus DOM ajoutée). | Cowork (Claude) + Grégoire |
+| 2026-05-21 | `evaluation.js` (5e et dernier god module) | 5 propositions Catégorie B issues de la rétrospective §7 déposées (en attente décision Grégoire) : §5 anti-patterns §5.11 (variables `let` cross-IIFE non promues `window.X` — bug #109), §3 étape 4 (protocole « fix bug latent avant éclatement »), §5 anti-patterns §5.12 (closures internes async passées en paramètre), §3 étape 4 (extraction agrégée + sous-helpers DOM), §3 étape 4 (monstre privé IIFE éclatable sans promotion `window.X`). Pattern « N=50 seuil pragmatique éclatement vs Cat-B » confirmé. **Backlog god modules épuré 5/5 livré** — entre dans phase « cycles Catégorie B post-merge » (14 fonctions cyc > 30 héritages, 13 bugs latents #96-108, consolidation `utils-notifications.js`, sous-découpage résidus si nécessaire). | Cowork (Claude) + Grégoire |
 
 ---
 
