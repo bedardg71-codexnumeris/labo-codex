@@ -183,6 +183,99 @@ Le monstre central n'est pas singulier : **triple monstre** — (a) `modifierEva
 - IIFE englobante : `git mv` à l'horizon pour le résidu final
 - Effort estimé révisé : 6-9 h sur 3-4 sessions (vs 6-8 h MODULES-MAP §3.3 — fourchette haute attendue vu triple monstre)
 
+#### Écarts observés post-refactoring (étape 6 capitalisation — 21 mai 2026)
+
+Refactor complet livré sur 3 sessions (A 18 mai matin, B 18 mai après-midi, étape 4 18 mai soir) + validation manuelle Grégoire 21 mai (13 évaluations sans problème majeur). Merge FF sur `main` 21 mai. Effort réel ~10 h (vs estimation 6-9 h révisée étape 1 — fourchette haute confirmée).
+
+**Découpage final livré (7 sous-modules + résidu)** :
+
+| Sous-module | LOC | Fonctions | Cyc > 30 hérités | Session |
+|---|---:|---:|---:|---|
+| `js/evaluation-handlers.js` | 79 | 3 (wrappers Phase 5) | 0 | A |
+| `js/evaluation-chargement.js` | 1 266 | 17 (chargement + auto-save) | 1 (`chargerEchellePerformance` 36) | A |
+| `js/evaluation-calcul.js` | 738 | 9 (calcul de notes) | 1 (`calculerNoteAlgorithmiqueAvecCategories` 42) | B |
+| `js/evaluation-retroaction.js` | 816 | 12 (rétroaction + 10 helpers `_Bilan*` + 2 const) | 0 | B |
+| `js/evaluation-sauvegarde.js` | 999 | 8 (sauvegarde + jetons + 12 helpers `_Sauv*`) | 1 (`peuplementOptJetons` 33) | B |
+| `js/evaluation-jetons.js` | 832 | 11 (jetons personnalisés + copies + handlers) | 0 | A (extrait depuis l'ex-`-handlers.js`) |
+| `js/evaluation.js` (résidu) | 3 984 | 35 (modification + verrouillage + liste + banque + 12 helpers `_Modif*`) | 0 | A+B+étape4 |
+| **Total cumulé** | **8 714** | **95** | **3** | A+B+étape4 |
+
+**Écart vs estimation §2.1** : 7 sous-modules ciblés (Chargement / Calcul / Rétroaction / Sauvegarde / Liste / Modification / Handlers). Réalité : **sous-module `evaluation-jetons.js` créé en plus** (jetons personnalisés + copies TSV/SRPNF + handlers — extrait pendant session A car ces fonctions vivaient hors zone Sauvegarde principale). Zone Liste (4400-4610) + Modification (4611-5975) + Verrouillage (5976-6850) + Banque (6137-6610) + Recherche (6851-7138) **restées dans le résidu `evaluation.js`** plutôt que d'être éclatées en `-liste.js` + `-modification.js` séparés — décision pragmatique vu l'imbrication forte avec `window.evaluationEnCours` et `_modifierEvaluationEnCours`. Résidu acceptable à 3 984 LOC (pattern profil-etudiant-sections-affichage.js 4 654 LOC accepté par Grégoire).
+
+**Cyc finaux (cible dure atteinte sauf 3 héritages Cat-B sous N=50)** :
+
+| Fonction | Module | Cyc avant | Cyc après | Statut |
+|---|---|---:|---:|---|
+| `modifierEvaluation` async arrow | résidu | 78 | ≤ 30 | Éclatée étape 4 (13 helpers `_Modif*`) |
+| `genererRetroactionBilan` | `-retroaction.js` | 75 | ≤ 30 | Éclatée étape 4 (10 helpers `_Bilan*` + 2 const) |
+| `sauvegarderEvaluation` | `-sauvegarde.js` | 70 | ≤ 30 | Éclatée étape 4 (12 helpers `_Sauv*`) |
+| `genererRetroaction` | `-retroaction.js` | 61 | ≤ 30 | Éclatée étape 4 (7 helpers `_Retro*`) |
+| `sauvegarderEvaluationModifiee` | résidu | 58 | ≤ 30 | Éclatée étape 4 (12 helpers `_Modif*`) |
+| `_autoSauvegarderCriteres` | `-chargement.js` | 55 | ≤ 30 | Éclatée étape 4 (5 helpers privés IIFE) |
+| `calculerNoteAlgorithmiqueAvecCategories` | `-calcul.js` | 42 | **42** | **Héritage Cat-B sous N=50** |
+| `chargerEchellePerformance` | `-chargement.js` | 36 | **36** | **Héritage Cat-B sous N=50** |
+| `peuplementOptJetons` | `-sauvegarde.js` | 33 | **33** | **Héritage Cat-B sous N=50** |
+
+**6 fonctions éclatées sur 6 cibles dures (100 %)**. **3 héritages Cat-B sous N=50 acté** (décision Grégoire 18 mai début étape 4) — préservés tels quels pour traitement en cycle dédié post-merge.
+
+**Total helpers privés ajoutés étape 4** : **59 helpers + 2 const module-scope**.
+
+**Bilan métriques avant/après** :
+
+| Métrique | Avant | Après |
+|---|---:|---:|
+| LOC du module (résidu) | 7 321 | 3 984 (−45,6 %) |
+| LOC cumulés tous sous-modules | 7 321 | 8 714 (+19,0 % overhead refactor) |
+| Plus gros fichier (LOC) | 7 321 | 3 984 (résidu) |
+| Cyclomatic max (ESLint complexity) | 78 (async arrow `modifierEvaluation`) | 42 (Cat-B sous N=50) |
+| Fonctions au-delà de cyc 30 | 9 | 3 héritages Cat-B (−67 %) |
+| Tests Vitest sur ce module | 7 | 7 (sentinelles élargies à 6 modules) |
+| Tests Playwright sur ce module | 2 | 2 (chargement + sentinelle browser) |
+| Bugs latents Cat-B nets | 0 | +2 (#107-108) −1 corrigé (#109) = +1 net |
+
+**Lecture** : surface publique préservée (~63 exports). LOC résidu réduit de 45 %. Cible dure cyc ≤ 30 atteinte sur 6/6 monstres > N=50. 3 héritages sous N préservés conformément à la décision pragmatique. Tests 89/89 verts à chaque jalon.
+
+**Confirmation/réfutation des 9 Écarts étape 1** :
+
+| Écart | Statut post-refactor |
+|---|---|
+| #1 ESLint 9 fonctions cyc > 30 (vs 3 §2.1) | **Confirmé** — triple monstre 70/75/78 + 6 cibles dures + 3 Cat-B. Seuil N=50 acté. |
+| #2 Découpage §2.1 ±100 LOC | **Confirmé** (avec ajustement : 7 sous-modules livrés vs 7 ciblés, mais zones différentes — `evaluation-jetons.js` créé en plus, `-liste.js`/`-modification.js` restés dans le résidu). |
+| #3 63 exports `window.X` (vs 57 §2.1) | **Confirmé** — concentration en bloc fin de fichier, 1 dispersé L2130 regroupé pendant session B. |
+| #4 État pivot `window.evaluationEnCours` 62× | **Confirmé** — préservé atomiquement dans tous les sous-modules. Aucune régression Grégoire. |
+| #5 Doublons préservation stricte | **Confirmé** — 3 doublons inscrits SUIVI-BUGS (`restaurerPreferenceTri` 4295/4309, `obtenirClasseNote` 3681/4390, `filtrerListeEvaluations` 4178/6851) toujours présents post-refactor, à traiter cycle Cat-B post-merge. |
+| #6 Code mort « alarmiste » préservation stricte | **Confirmé** — `calculerRisqueEchec` (3634) et `obtenirClasseRisque` (3644) préservés dans le résidu, inscrits SUIVI-BUGS Cat-B vocabulaire alarmiste. |
+| #7 Helpers cross-module top 6 | **Confirmé** — wrappers `afficherNotification*` toujours dupliqués dans chaque sous-module avec garde `typeof === 'function'`. Consolidation `utils-notifications.js` toujours reportée (73 sites d'appel cross-projet). |
+| #8 IIFE englobante → `git mv` pour le résidu final | **Réfuté partiellement** — pas eu besoin de `git mv` final puisque le résidu `evaluation.js` est resté en place (zone Modification trop imbriquée avec pivot `evaluationEnCours` pour être renommée en `-modification.js` seul). Pattern git mv conservé pour de futurs cas. |
+| #9 Couplage cross-module `travaux-ui.js:4639` réassigne pivot | **Confirmé** — couplage préservé tel quel (préservation comportementale stricte). Inscription SUIVI-BUGS éventuelle post-merge si à découpler (annotation d'un travail déclenche une éval = comportement légitime, à confirmer Cat-B). |
+
+**Bugs latents découverts pendant le refactor (3 nets, 1 résolu)** :
+- **#107** `initialiserModuleEvaluation` dead code silencieux (session A étape 3 — préservé tel quel).
+- **#108** `chargerEchellePerformance` doublon cross-module sync vs async (session A étape 3 — préservé tel quel).
+- **#109** `_timerAutoSave` + `_pendingAutoSaveSnapshot` ReferenceError cross-IIFE — **CORRIGÉ étape 4** (promotion `window._timerAutoSave` + `window._pendingAutoSaveSnapshot`, 15 sites patchés §5.6). Inscrit dans SUIVI-BUGS section « Corrigés (18 mai 2026 — refactor evaluation étape 4) » build `0521-0840`.
+
+**Trouvailles méthode étape 4 (intégrées METHODE §7 entrée `evaluation.js`)** :
+1. Cas limite privée IIFE éclatable sans promotion `window.X` si call-sites intra-IIFE → [[feedback-eclater-cas-limite-prive-iife]].
+2. Extraction agrégée puis sous-helpers DOM dédiés pour ramener cyc < 30 → [[feedback-eclatement-sous-helpers-dom]].
+3. `Object.assign(target, src1, src2)` comme alternative au spread JSX pour fusionner objets (préserve l'ordre de précédence).
+4. Closures internes async passées en paramètre aux helpers extraits → [[feedback-closures-internes-passees-en-parametre]].
+5. Helpers cross-IIFE duppliqués avec suffixe distinctif (`_Sauv` vs `_Modif`) pour préserver l'isolation → [[feedback-helpers-cross-iife-duppliques-suffixe]].
+6. Audit ESLint après CHAQUE extraction (cible déjà acquise depuis bilan-reflexif — confirmé sur evaluation).
+7. Fix bug latent AVANT éclatement du monstre qui le contient → [[feedback-fix-bug-latent-avant-monstre]].
+
+**Dette résiduelle (cycle Cat-B post-merge)** :
+- **3 héritages cyc 33-42** : `calculerNoteAlgorithmiqueAvecCategories` (42, `-calcul.js`), `chargerEchellePerformance` (36, `-chargement.js`), `peuplementOptJetons` (33, `-sauvegarde.js`).
+- **2 bugs latents** #107 + #108.
+- **3 doublons** dans le résidu `evaluation.js` à résoudre.
+- **2 codes morts « alarmistes »** `calculerRisqueEchec` + `obtenirClasseRisque` à retirer (lien T-L audit 1.3 cohérence lexicale).
+- **Couplage `travaux-ui.js:4639` → `window.evaluationEnCours`** à investiguer (couplage légitime ou à découpler ?).
+- **Wrappers `afficherNotification*` dupliqués** dans 7+ sous-modules — consolidation `utils-notifications.js` reportée (73 sites cross-projet, risque régression silencieuse).
+- **Extraction zone Modification** (résidu 3 984 LOC contient toujours le code de modification — sous-module `-modification.js` distinct possible en cycle Cat-B si Grégoire le souhaite).
+
+**Effort réel cumulé** : ~10 h sur 3 sessions séquentielles le 18 mai + validation Grégoire 21 mai. Effort estimé MODULES-MAP §3.3 6-8 h ; révision étape 1 6-9 h. Réalité : **fourchette haute confirmée**, +25 % vs estimation médiane — cohérent avec la présence du **triple monstre** annoncé étape 1.
+
+**Statut MODULES-MAP §2.1** : refactor LIVRÉ et MERGÉ FF sur `main` le 21 mai 2026. Cycle Cat-B post-merge à organiser.
+
 ---
 
 ### 2.2 `productions.js` (3 994 LOC, 75 fonctions)
