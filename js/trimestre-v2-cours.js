@@ -540,20 +540,16 @@ function dupliquerCoursSelectionneV2() {
  * Remplit le formulaire avec les données d'un cours
  * Gère différents formats de données (Beta 95)
  */
-function remplirFormCoursV2(cours) {
-
-    // Informations générales du cours
-    // 🆕 FIX (4 fév 2026) : Priorité codeCours, ajouter code pour Primo
+function _remplirChampsInfosCours(cours) {
     setValue('v2-codeCours', cours.codeCours || cours.sigle || cours.code || '');
     setValue('v2-nomCours', cours.titre || cours.nomCours || '');
     setValue('v2-numeroCompetence', cours.numeroCompetence || '');
     setValue('v2-competence', cours.competence || '');
-    setValue('v2-disciplineCours', cours.discipline || '');  // Beta 95.2: Discipline du cours
+    setValue('v2-disciplineCours', cours.discipline || '');
     setValue('v2-elementsCompetence', cours.elementsCompetence || '');
+}
 
-    // Enseignant - gère deux formats:
-    // 1. Champs directs: prenomEnseignant, nomEnseignant, courriel, etc.
-    // 2. Objet enseignant: enseignant.prenom, enseignant.nom, etc.
+function _remplirChampsEnseignant(cours) {
     const enseignant = cours.enseignant || {};
     setValue('v2-prenomEnseignant', cours.prenomEnseignant || enseignant.prenom || '');
     setValue('v2-nomEnseignant', cours.nomEnseignant || enseignant.nom || '');
@@ -561,20 +557,23 @@ function remplirFormCoursV2(cours) {
     setValue('v2-disciplineEnseignant', cours.discipline || enseignant.discipline || '');
     setValue('v2-departement', cours.departement || enseignant.departement || '');
     setValue('v2-institutionEnseignant', cours.institution || enseignant.institution || '');
+}
 
-    // Session et horaire
+function _remplirChampsSessionHoraire(cours) {
     setValue('v2-session', cours.session || 'H');
     setValue('v2-annee', cours.annee || new Date().getFullYear());
-    // ✅ MODIFIÉ (6 jan 2026) : Périodes au lieu d'heures
     const periodes = cours.periodesParSemaine || cours.heuresParSemaine || cours.heuresHebdo || 4;
     setValue('v2-periodesParSemaine', periodes);
     if (typeof window.mettreAJourFormatHoraire === 'function') {
-        window.mettreAJourFormatHoraire(); // Générer les options dynamiquement
+        window.mettreAJourFormatHoraire();
     }
     setValue('v2-formatHoraire', cours.formatHoraire || '2x2');
-    // Groupe géré via le groupe-cours (Beta 95)
+}
 
-    // ✅ AJOUT (2 jan 2026) : Pratique de notation
+function remplirFormCoursV2(cours) {
+    _remplirChampsInfosCours(cours);
+    _remplirChampsEnseignant(cours);
+    _remplirChampsSessionHoraire(cours);
     setValue('v2-pratiqueIdCours', cours.pratiqueId || 'pan-standards');
 }
 
@@ -897,26 +896,46 @@ function annulerFormCoursV2() {
 /**
  * Sauvegarde le cours (création ou modification)
  */
-function sauvegarderCoursV2() {
-    // Récupérer les valeurs
-    const codeCours = document.getElementById('v2-codeCours')?.value?.trim();
-    const nomCours = document.getElementById('v2-nomCours')?.value?.trim();
-    const discipline = document.getElementById('v2-disciplineCours')?.value?.trim();
+function _lireChampsInfosCoursDOM() {
+    return {
+        codeCours: document.getElementById('v2-codeCours')?.value?.trim(),
+        nomCours: document.getElementById('v2-nomCours')?.value?.trim(),
+        discipline: document.getElementById('v2-disciplineCours')?.value?.trim(),
+        numeroCompetence: document.getElementById('v2-numeroCompetence')?.value?.trim() || '',
+        competence: document.getElementById('v2-competence')?.value?.trim() || '',
+        elementsCompetence: document.getElementById('v2-elementsCompetence')?.value?.trim() || ''
+    };
+}
 
-    // Validation
-    if (!codeCours) {
-        alert('Veuillez renseigner le code du cours.');
-        return;
-    }
-    if (!discipline) {
-        alert('Veuillez renseigner la discipline.');
-        return;
-    }
+function _lireChampsEnseignantDOM() {
+    return {
+        prenomEnseignant: document.getElementById('v2-prenomEnseignant')?.value?.trim() || '',
+        nomEnseignant: document.getElementById('v2-nomEnseignant')?.value?.trim() || '',
+        courriel: document.getElementById('v2-courrielEnseignant')?.value?.trim() || '',
+        departement: document.getElementById('v2-departement')?.value?.trim() || '',
+        institution: document.getElementById('v2-institutionEnseignant')?.value?.trim() || ''
+    };
+}
 
-    const session = document.getElementById('v2-session')?.value || 'H';
-    const annee = document.getElementById('v2-annee')?.value || new Date().getFullYear();
+function _lireChampsSessionDOM() {
+    return {
+        session: document.getElementById('v2-session')?.value || 'H',
+        annee: document.getElementById('v2-annee')?.value || new Date().getFullYear(),
+        periodesParSemaine: parseInt(document.getElementById('v2-periodesParSemaine')?.value) || 4,
+        formatHoraire: document.getElementById('v2-formatHoraire')?.value || '2x2',
+        pratiqueId: document.getElementById('v2-pratiqueIdCours')?.value || 'pan-standards'
+    };
+}
 
-    // Récupérer le groupe depuis le cours existant ou utiliser la valeur par défaut
+function _lireDonneesFormCoursV2() {
+    return {
+        ..._lireChampsInfosCoursDOM(),
+        ..._lireChampsEnseignantDOM(),
+        ..._lireChampsSessionDOM()
+    };
+}
+
+function _obtenirGroupeCoursExistant() {
     let groupe = '00001';
     if (coursEnEditionV2) {
         const coursListe = db.getSync('cours', []);
@@ -925,44 +944,42 @@ function sauvegarderCoursV2() {
             groupe = String(coursExistant.groupe).padStart(5, '0');
         }
     }
+    return groupe;
+}
 
-    // Construire l'identifiant groupe-cours (ex: a2025-601-101-MQ-00001)
-    const trimestreId = `${session.toLowerCase()}${annee}`;
-
-    const cours = {
-        id: coursEnEditionV2 || `${trimestreId}-${codeCours}-${groupe}`,
-        sigle: codeCours,
-        codeCours: codeCours,
-        titre: nomCours,
-        nomCours: nomCours,
-        numeroCompetence: document.getElementById('v2-numeroCompetence')?.value?.trim() || '',
-        competence: document.getElementById('v2-competence')?.value?.trim() || '',
-        discipline: discipline,  // Beta 95.2: Discipline du cours (top-level)
-        elementsCompetence: document.getElementById('v2-elementsCompetence')?.value?.trim() || '',
+function _construireObjetCoursV2(d, groupe) {
+    const trimestreId = `${d.session.toLowerCase()}${d.annee}`;
+    return {
+        id: coursEnEditionV2 || `${trimestreId}-${d.codeCours}-${groupe}`,
+        sigle: d.codeCours,
+        codeCours: d.codeCours,
+        titre: d.nomCours,
+        nomCours: d.nomCours,
+        numeroCompetence: d.numeroCompetence,
+        competence: d.competence,
+        discipline: d.discipline,
+        elementsCompetence: d.elementsCompetence,
         enseignant: {
-            prenom: document.getElementById('v2-prenomEnseignant')?.value?.trim() || '',
-            nom: document.getElementById('v2-nomEnseignant')?.value?.trim() || '',
-            courriel: document.getElementById('v2-courrielEnseignant')?.value?.trim() || '',
-            discipline: discipline,
-            departement: document.getElementById('v2-departement')?.value?.trim() || '',
-            institution: document.getElementById('v2-institutionEnseignant')?.value?.trim() || ''
+            prenom: d.prenomEnseignant,
+            nom: d.nomEnseignant,
+            courriel: d.courriel,
+            discipline: d.discipline,
+            departement: d.departement,
+            institution: d.institution
         },
-        session: session,
-        annee: annee,
-        // ✅ MODIFIÉ (6 jan 2026) : Périodes au lieu d'heures
-        periodesParSemaine: parseInt(document.getElementById('v2-periodesParSemaine')?.value) || 4,
-        formatHoraire: document.getElementById('v2-formatHoraire')?.value || '2x2',
+        session: d.session,
+        annee: d.annee,
+        periodesParSemaine: d.periodesParSemaine,
+        formatHoraire: d.formatHoraire,
         groupe: groupe,
         actif: true,
-        // ✅ AJOUT (2 jan 2026) : Pratique de notation associée au cours
-        pratiqueId: document.getElementById('v2-pratiqueIdCours')?.value || 'pan-standards'
+        pratiqueId: d.pratiqueId
     };
+}
 
-    // Sauvegarder dans la liste des cours (clé canonique 'cours')
+function _persisterCoursV2(cours) {
     let tousLesCours = db.getSync('cours', []);
-
     if (coursEnEditionV2) {
-        // Modification
         const index = tousLesCours.findIndex(c => c.id === coursEnEditionV2);
         if (index >= 0) {
             tousLesCours[index] = { ...tousLesCours[index], ...cours };
@@ -970,42 +987,49 @@ function sauvegarderCoursV2() {
             tousLesCours.push(cours);
         }
     } else {
-        // Création
         tousLesCours.push(cours);
     }
-
     db.setSync('cours', tousLesCours);
-
-    // Si c'est le seul cours ou le cours actif, mettre à jour infoCours aussi
     if (tousLesCours.length === 1 || cours.actif) {
         db.setSync('infoCours', cours);
     }
+}
 
-    // Notifier
+function _postSauvegardeCoursV2(cours) {
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces(coursEnEditionV2 ? 'Cours modifié avec succès' : 'Cours créé avec succès');
     }
-
-    // Fermer le formulaire et recharger
     annulerFormCoursV2();
     chargerDropdownCoursV2();
-
-    // Sélectionner le cours nouvellement créé/modifié
     const selectCours = document.getElementById('v2-selectCours');
     if (selectCours) {
         selectCours.value = cours.id;
         changerCoursSelectionneV2(cours.id);
     }
-
-    // Beta 95.2: Rafraîchir le dropdown Cours dans la section Groupe-cours
     if (typeof window.populerDropdownsAssemblageV2 === 'function') {
         window.populerDropdownsAssemblageV2();
     }
-
-    // Mettre à jour le guide groupe-cours
     if (typeof window.mettreAJourGuideGroupeCours === 'function') {
         window.mettreAJourGuideGroupeCours();
     }
+}
+
+function sauvegarderCoursV2() {
+    const d = _lireDonneesFormCoursV2();
+
+    if (!d.codeCours) {
+        alert('Veuillez renseigner le code du cours.');
+        return;
+    }
+    if (!d.discipline) {
+        alert('Veuillez renseigner la discipline.');
+        return;
+    }
+
+    const groupe = _obtenirGroupeCoursExistant();
+    const cours = _construireObjetCoursV2(d, groupe);
+    _persisterCoursV2(cours);
+    _postSauvegardeCoursV2(cours);
 }
 
 /**

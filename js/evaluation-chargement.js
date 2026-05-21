@@ -229,69 +229,75 @@ function chargerGrillesDansSelect() {
  * NOUVEAU (Beta 92): Support pratiques configurables
  * Si une pratique configurable est active, son échelle est ajoutée à la liste
  */
+function _obtenirPratiqueIdActive() {
+    const coursActifId = getCoursActifId();
+    if (coursActifId) return getPratiqueCours(coursActifId);
+    const modalites = db.getSync('modalitesEvaluation', {});
+    return modalites.pratique || 'sommative';
+}
+
+function _synchroniserJetonsPratique(jetons) {
+    const modalites = db.getSync('modalitesEvaluation', {});
+    modalites.configPAN = modalites.configPAN || {};
+    modalites.configPAN.jetons = {
+        actif: jetons.actif !== false,
+        delai: { nombre: jetons.nombre || 2, dureeJours: jetons.delaiDuree || 2 },
+        reprise: {
+            nombre: jetons.nombre || 2,
+            maxParProduction: 1,
+            archiverOriginale: jetons.repriseOriginale === 'archiver'
+        },
+        repriseCiblee: {
+            actif: jetons.cibleeActif || false,
+            plafondNote: jetons.cibleePlafond || null
+        }
+    };
+    db.setSync('modalitesEvaluation', modalites);
+}
+
+function _resoudreEchellePratique() {
+    if (!window.PratiqueManager) return null;
+    const pratiqueId = _obtenirPratiqueIdActive();
+    const pratiquesCodeesDur = ['pan-standards', 'pan-maitrise', 'sommative', 'pan-specifications'];
+    if (!pratiqueId || pratiquesCodeesDur.includes(pratiqueId)) return null;
+    const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
+    const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
+    if (!pratiqueData) return null;
+    if (pratiqueData.jetons) _synchroniserJetonsPratique(pratiqueData.jetons);
+    if (!pratiqueData.config || !pratiqueData.config.echelle) return null;
+    return {
+        id: `pratique-${pratiqueId}`,
+        nom: `${pratiqueData.config.nom} (Pratique active)`,
+        niveaux: pratiqueData.config.echelle.niveaux || [],
+        type: pratiqueData.config.echelle.type || 'niveaux',
+        source: 'pratique'
+    };
+}
+
+function _renderOptionsEchelles(select, echelles, echellePratique) {
+    let html = '<option value="">-- Choisir une échelle --</option>';
+    if (echellePratique) {
+        const nbNiveaux = echellePratique.niveaux?.length || 0;
+        const nomEchappe = echapperHtml(echellePratique.nom);
+        html += `<option value="${echapperHtml(echellePratique.id)}" style="background: var(--bleu-pale); font-weight: 600;">${nomEchappe} (${nbNiveaux} niveaux)</option>`;
+    }
+    if (echelles && echelles.length > 0) {
+        html += echelles.map(echelle => {
+            const nomEchappe = echapperHtml(echelle.nom || 'Échelle sans nom');
+            const nbNiveaux = echelle.niveaux?.length || 0;
+            return `<option value="${echapperHtml(echelle.id)}">${nomEchappe} (${nbNiveaux} niveaux)</option>`;
+        }).join('');
+    }
+    select.innerHTML = html;
+}
+
 function chargerEchellePerformance() {
     const echelles = db.getSync('echellesTemplates', []);
     const select = document.getElementById('selectEchelle1');
-
     if (!select) return;
 
-    // NOUVEAU: Vérifier si une pratique configurable est active avec une échelle définie
-    let echellePratique = null;
-    let pratiqueId = null;
+    const echellePratique = _resoudreEchellePratique();
 
-    if (window.PratiqueManager) {
-        // NOUVEAU Beta 91: Utiliser la pratique du cours actif
-        const coursActifId = getCoursActifId();
-        if (coursActifId) {
-            pratiqueId = getPratiqueCours(coursActifId);
-        } else {
-            // Fallback: utiliser la configuration globale
-            const modalites = db.getSync('modalitesEvaluation', {});
-            pratiqueId = modalites.pratique || 'sommative';
-        }
-
-        // Si ce n'est pas une pratique codée en dur, charger l'échelle de la pratique
-        if (pratiqueId && pratiqueId !== 'pan-standards' && pratiqueId !== 'pan-maitrise' && pratiqueId !== 'sommative' && pratiqueId !== 'pan-specifications') {
-            const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
-            const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
-
-            if (pratiqueData && pratiqueData.config && pratiqueData.config.echelle) {
-                echellePratique = {
-                    id: `pratique-${pratiqueId}`,
-                    nom: `${pratiqueData.config.nom} (Pratique active)`,
-                    niveaux: pratiqueData.config.echelle.niveaux || [],
-                    type: pratiqueData.config.echelle.type || 'niveaux',
-                    source: 'pratique'
-                };
-            }
-
-            // Synchroniser les jetons de la pratique vers modalitesEvaluation.configPAN.jetons
-            if (pratiqueData && pratiqueData.jetons) {
-                const j = pratiqueData.jetons;
-                const modalites = db.getSync('modalitesEvaluation', {});
-                modalites.configPAN = modalites.configPAN || {};
-                modalites.configPAN.jetons = {
-                    actif: j.actif !== false,
-                    delai: {
-                        nombre: j.nombre || 2,
-                        dureeJours: j.delaiDuree || 2
-                    },
-                    reprise: {
-                        nombre: j.nombre || 2,
-                        maxParProduction: 1,
-                        archiverOriginale: j.repriseOriginale === 'archiver'
-                    },
-                    repriseCiblee: {
-                        actif: j.cibleeActif || false,
-                        plafondNote: j.cibleePlafond || null
-                    }
-                };
-                db.setSync('modalitesEvaluation', modalites);
-            }
-        }
-    }
-
-    // SÉCURITÉ: Vérifier qu'il existe au moins une échelle
     if ((!echelles || echelles.length === 0) && !echellePratique) {
         console.error('❌ Aucune échelle de performance configurée');
         select.innerHTML = '<option value="">⚠️ Aucune échelle configurée - Aller dans Matériel › Niveaux de performance</option>';
@@ -300,35 +306,13 @@ function chargerEchellePerformance() {
         return;
     }
 
-    // Remplir le select avec toutes les échelles disponibles
-    select.innerHTML = '<option value="">-- Choisir une échelle --</option>';
+    _renderOptionsEchelles(select, echelles, echellePratique);
 
-    // NOUVEAU: Ajouter l'échelle de la pratique en premier (si disponible)
     if (echellePratique) {
-        const nbNiveaux = echellePratique.niveaux?.length || 0;
-        const nomEchappe = echapperHtml(echellePratique.nom);
-        select.innerHTML += `<option value="${echapperHtml(echellePratique.id)}" style="background: var(--bleu-pale); font-weight: 600;">${nomEchappe} (${nbNiveaux} niveaux)</option>`;
-    }
-
-    // Ajouter les échelles personnalisées
-    if (echelles && echelles.length > 0) {
-        select.innerHTML += echelles.map(echelle => {
-            const nomEchappe = echapperHtml(echelle.nom || 'Échelle sans nom');
-            const nbNiveaux = echelle.niveaux?.length || 0;
-            return `<option value="${echapperHtml(echelle.id)}">${nomEchappe} (${nbNiveaux} niveaux)</option>`;
-        }).join('');
-    }
-
-    // Sélection automatique
-    if (echellePratique) {
-        // Pré-sélectionner l'échelle de la pratique
         select.value = echellePratique.id;
     } else if (echelles.length === 1) {
-        // Si une seule échelle personnalisée, la sélectionner
         select.value = echelles[0].id;
     }
-
-    const totalEchelles = (echelles?.length || 0) + (echellePratique ? 1 : 0);
 }
 
 /* ===============================

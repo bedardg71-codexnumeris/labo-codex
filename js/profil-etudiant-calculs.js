@@ -1239,293 +1239,122 @@ function determinerAlerteContextuelle(da) {
     };
 }
 
-function determinerCibleIntervention(da) {
-    // Récupérer tous les indices nécessaires
-    const indices = calculerTousLesIndices(da);
+function _resoudreCibleDifficultePersistante(M, N, I) {
+    if (N === 'Français' && I <= 17) {
+        return { cible: 'Rencontre individuelle | CAF | Dépistage', pattern: M, niveau: 3, couleur: '#dc3545', emoji: '🔴' };
+    }
+    if (N === 'Structure' && I <= 17) {
+        return { cible: 'Remédiation en Structure | Exercice supplémentaire | CAF', pattern: M, niveau: 3, couleur: '#dc3545', emoji: '🔴' };
+    }
+    if (N === 'Rigueur' && I <= 17) {
+        return { cible: 'Remédiation en Rigueur | CAF', pattern: M, niveau: 3, couleur: '#dc3545', emoji: '🔴' };
+    }
+    if (N === 'Aucun') {
+        return { cible: 'Rencontre individuelle | CAF | Dépistage', pattern: M, niveau: 3, couleur: '#dc3545', emoji: '🔴' };
+    }
+    return null;
+}
 
-    // Déterminer quelle fonction utiliser selon la pratique
+function _resoudreCibleDifficulteEmergente(M, N, I) {
+    if (N === 'Français' && I >= 18 && I <= 20) {
+        return { cible: 'Remédiation en stratégie de révision ciblée | CAF recommandé', pattern: M, niveau: 2, couleur: '#ff9800', emoji: '🟠' };
+    }
+    if (N === 'Structure' && I >= 18 && I <= 27) {
+        return { cible: 'Remédiation en Structure', pattern: M, niveau: 2, couleur: '#ff9800', emoji: '🟠' };
+    }
+    if (N === 'Rigueur' && I >= 18 && I <= 27) {
+        return { cible: 'Remédiation en Rigueur', pattern: M, niveau: 2, couleur: '#ff9800', emoji: '🟠' };
+    }
+    if (N === 'Aucun') {
+        return { cible: 'Remédiation en rigueur', pattern: M, niveau: 2, couleur: '#ff9800', emoji: '🟠' };
+    }
+    return null;
+}
+
+function _resoudreCibleDefiSpecifique(M, N, I) {
+    if (N === 'Français') {
+        if (I <= 17) return { cible: 'Rencontre individuelle | CAF | Dépistage SA', pattern: M, niveau: 2, couleur: '#ffc107', emoji: '🟡' };
+        if (I >= 18 && I <= 20) return { cible: 'Remédiation en révision linguistique | CAF recommandé', pattern: M, niveau: 2, couleur: '#ffc107', emoji: '🟡' };
+        if (I >= 21 && I <= 27) return { cible: 'Remédiation en révision linguistique', pattern: M, niveau: 2, couleur: '#ffc107', emoji: '🟡' };
+    }
+    if (N === 'Structure' && I >= 18) return { cible: 'Pratique guidée en Structure', pattern: M, niveau: 2, couleur: '#ffc107', emoji: '🟡' };
+    if (N === 'Rigueur' && I >= 18) return { cible: 'Pratique guidée en Rigueur', pattern: M, niveau: 2, couleur: '#ffc107', emoji: '🟡' };
+    if (N === 'Plausibilité' && I >= 18) return { cible: 'Pratique guidée en Plausibilité', pattern: M, niveau: 2, couleur: '#ffc107', emoji: '🟡' };
+    if (N === 'Nuance' && I >= 18) return { cible: 'Pratique guidée en Nuance', pattern: M, niveau: 2, couleur: '#ffc107', emoji: '🟡' };
+    return null;
+}
+
+function _resoudreCibleStable(M, N, I) {
+    if (N === 'Aucun') {
+        return I >= 25
+            ? { cible: 'Pratique autonome → Explorer jumelage', pattern: M, niveau: 1, couleur: '#28a745', emoji: '🟢' }
+            : { cible: 'Suivi régulier | Performance stable', pattern: M, niveau: 1, couleur: '#28a745', emoji: '🟢' };
+    }
+    if (I < 21) return null;
+    const ciblesParDefi = {
+        'Structure': 'Pratique autonome → Explorer structures originales',
+        'Rigueur': 'Pratique autonome → Explorer pistes originales',
+        'Plausibilité': 'Pratique autonome → Explorer hypothèses originales',
+        'Nuance': 'Pratique autonome → Explorer interprétations originales',
+        'Français': 'Pratique autonome → Explorer style'
+    };
+    if (ciblesParDefi[N]) {
+        return { cible: ciblesParDefi[N], pattern: M, niveau: 1, couleur: '#28a745', emoji: '🟢' };
+    }
+    return null;
+}
+
+function determinerCibleIntervention(da) {
+    const indices = calculerTousLesIndices(da);
     const config = db.getSync('modalitesEvaluation', {});
     const pratique = config.pratique || 'alternative';
 
-    // En PAN : utiliser les moyennes sur les N derniers artefacts (récurrence récente)
-    // En SOM : utiliser les moyennes globales (toutes les évaluations)
     const moyennes = (pratique === 'alternative')
         ? calculerMoyennesCriteresRecents(da)
         : calculerMoyennesCriteres(da);
 
-    // Détecter les défis avec le seuil configurable
     const diagnostic = diagnostiquerForcesChallenges(moyennes);
-    const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true); // true = dépistage (3 artefacts)
+    const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true);
 
-    // 🆕 BETA 98.9: Non-participation — présent mais 0 production
     if (indices3Derniers.nbArtefacts === 0 && indices.A > 0) {
-        return {
-            cible: 'Non-participation',
-            pattern: 'Non-participation',
-            niveau: 3,
-            couleur: '#dc3545',
-            emoji: '🔴'
-        };
+        return { cible: 'Non-participation', pattern: 'Non-participation', niveau: 3, couleur: '#dc3545', emoji: '🔴' };
     }
 
     const interpMobilisation = interpreterMobilisation(indices.A / 100, indices.C / 100);
+    const E = interpMobilisation.niveau;
+    const I = indices3Derniers.francaisMoyen;
+    const M = identifierPatternActuel(indices3Derniers.performance, diagnostic.principalDefi !== null);
+    const N = diagnostic.principalDefi ? diagnostic.principalDefi.nom : 'Aucun';
 
-    // Variables pour la formule (correspondance avec Excel)
-    const E = interpMobilisation.niveau; // Mobilisation
-    const I = indices3Derniers.francaisMoyen; // Moyenne français N derniers artefacts
-    const M = identifierPatternActuel(indices3Derniers.performance, diagnostic.principalDefi !== null); // Pattern actuel
-    const N = diagnostic.principalDefi ? diagnostic.principalDefi.nom : 'Aucun'; // Défi principal
-    const performancePAN3 = indices3Derniers.performance;
-
-
-    // LOGIQUE DE DÉCISION (formule Excel traduite en JavaScript)
-
-    // 1. Vérifier décrochage (priorité absolue)
     if (E === 'Décrochage') {
-        return {
-            cible: 'Décrochage',
-            pattern: M,
-            niveau: 3,
-            couleur: '#9e9e9e',
-            emoji: '⚫'
-        };
+        return { cible: 'Décrochage', pattern: M, niveau: 3, couleur: '#9e9e9e', emoji: '⚫' };
     }
 
-    // 2. Difficulté persistante
     if (M === 'Difficulté persistante') {
-        if (N === 'Français' && I <= 17) {
-            return {
-                cible: 'Rencontre individuelle | CAF | Dépistage',
-                pattern: M,
-                niveau: 3,
-                couleur: '#dc3545',
-                emoji: '🔴'
-            };
-        }
-        if (N === 'Structure' && I <= 17) {
-            return {
-                cible: 'Remédiation en Structure | Exercice supplémentaire | CAF',
-                pattern: M,
-                niveau: 3,
-                couleur: '#dc3545',
-                emoji: '🔴'
-            };
-        }
-        if (N === 'Rigueur' && I <= 17) {
-            return {
-                cible: 'Remédiation en Rigueur | CAF',
-                pattern: M,
-                niveau: 3,
-                couleur: '#dc3545',
-                emoji: '🔴'
-            };
-        }
-        if (N === 'Aucun') {
-            return {
-                cible: 'Rencontre individuelle | CAF | Dépistage',
-                pattern: M,
-                niveau: 3,
-                couleur: '#dc3545',
-                emoji: '🔴'
-            };
-        }
+        const cible = _resoudreCibleDifficultePersistante(M, N, I);
+        if (cible) return cible;
     }
 
-    // 3. Difficulté émergente
     if (M === 'Difficulté émergente') {
-        if (N === 'Français' && I >= 18 && I <= 20) {
-            return {
-                cible: 'Remédiation en stratégie de révision ciblée | CAF recommandé',
-                pattern: M,
-                niveau: 2,
-                couleur: '#ff9800',
-                emoji: '🟠'
-            };
-        }
-        if (N === 'Structure' && I >= 18 && I <= 27) {
-            return {
-                cible: 'Remédiation en Structure',
-                pattern: M,
-                niveau: 2,
-                couleur: '#ff9800',
-                emoji: '🟠'
-            };
-        }
-        if (N === 'Rigueur' && I >= 18 && I <= 27) {
-            return {
-                cible: 'Remédiation en Rigueur',
-                pattern: M,
-                niveau: 2,
-                couleur: '#ff9800',
-                emoji: '🟠'
-            };
-        }
-        if (N === 'Aucun') {
-            return {
-                cible: 'Remédiation en rigueur',
-                pattern: M,
-                niveau: 2,
-                couleur: '#ff9800',
-                emoji: '🟠'
-            };
-        }
+        const cible = _resoudreCibleDifficulteEmergente(M, N, I);
+        if (cible) return cible;
     }
 
-    // 4. Défi spécifique
     if (M === 'Défi spécifique') {
-        if (N === 'Français') {
-            if (I <= 17) {
-                return {
-                    cible: 'Rencontre individuelle | CAF | Dépistage SA',
-                    pattern: M,
-                    niveau: 2,
-                    couleur: '#ffc107',
-                    emoji: '🟡'
-                };
-            }
-            if (I >= 18 && I <= 20) {
-                return {
-                    cible: 'Remédiation en révision linguistique | CAF recommandé',
-                    pattern: M,
-                    niveau: 2,
-                    couleur: '#ffc107',
-                    emoji: '🟡'
-                };
-            }
-            if (I >= 21 && I <= 27) {
-                return {
-                    cible: 'Remédiation en révision linguistique',
-                    pattern: M,
-                    niveau: 2,
-                    couleur: '#ffc107',
-                    emoji: '🟡'
-                };
-            }
-        }
-        if (N === 'Structure' && I >= 18) {
-            return {
-                cible: 'Pratique guidée en Structure',
-                pattern: M,
-                niveau: 2,
-                couleur: '#ffc107',
-                emoji: '🟡'
-            };
-        }
-        if (N === 'Rigueur' && I >= 18) {
-            return {
-                cible: 'Pratique guidée en Rigueur',
-                pattern: M,
-                niveau: 2,
-                couleur: '#ffc107',
-                emoji: '🟡'
-            };
-        }
-        if (N === 'Plausibilité' && I >= 18) {
-            return {
-                cible: 'Pratique guidée en Plausibilité',
-                pattern: M,
-                niveau: 2,
-                couleur: '#ffc107',
-                emoji: '🟡'
-            };
-        }
-        if (N === 'Nuance' && I >= 18) {
-            return {
-                cible: 'Pratique guidée en Nuance',
-                pattern: M,
-                niveau: 2,
-                couleur: '#ffc107',
-                emoji: '🟡'
-            };
-        }
+        const cible = _resoudreCibleDefiSpecifique(M, N, I);
+        if (cible) return cible;
     }
 
-    // 5. Stable (performance satisfaisante)
     if (M === 'Stable') {
-        if (N === 'Aucun' && I >= 25) {
-            return {
-                cible: 'Pratique autonome → Explorer jumelage',
-                pattern: M,
-                niveau: 1,
-                couleur: '#28a745',
-                emoji: '🟢'
-            };
-        }
-        if (N === 'Aucun' && I < 25) {
-            return {
-                cible: 'Suivi régulier | Performance stable',
-                pattern: M,
-                niveau: 1,
-                couleur: '#28a745',
-                emoji: '🟢'
-            };
-        }
-        if (N === 'Structure' && I >= 21) {
-            return {
-                cible: 'Pratique autonome → Explorer structures originales',
-                pattern: M,
-                niveau: 1,
-                couleur: '#28a745',
-                emoji: '🟢'
-            };
-        }
-        if (N === 'Rigueur' && I >= 21) {
-            return {
-                cible: 'Pratique autonome → Explorer pistes originales',
-                pattern: M,
-                niveau: 1,
-                couleur: '#28a745',
-                emoji: '🟢'
-            };
-        }
-        if (N === 'Plausibilité' && I >= 21) {
-            return {
-                cible: 'Pratique autonome → Explorer hypothèses originales',
-                pattern: M,
-                niveau: 1,
-                couleur: '#28a745',
-                emoji: '🟢'
-            };
-        }
-        if (N === 'Nuance' && I >= 21) {
-            return {
-                cible: 'Pratique autonome → Explorer interprétations originales',
-                pattern: M,
-                niveau: 1,
-                couleur: '#28a745',
-                emoji: '🟢'
-            };
-        }
-        if (N === 'Français' && I >= 21) {
-            return {
-                cible: 'Pratique autonome → Explorer style',
-                pattern: M,
-                niveau: 1,
-                couleur: '#28a745',
-                emoji: '🟢'
-            };
-        }
+        const cible = _resoudreCibleStable(M, N, I);
+        if (cible) return cible;
     }
 
-    // 6. Cas de risque de démotivation (mobilisation fragile ou défavorable)
     if (E.includes('fragile') || E.includes('critique')) {
-        return {
-            cible: 'Risque de démotivation',
-            pattern: M,
-            niveau: 2,
-            couleur: '#ff9800',
-            emoji: '⚠️'
-        };
+        return { cible: 'Risque de démotivation', pattern: M, niveau: 2, couleur: '#ff9800', emoji: '⚠️' };
     }
 
-    // Défaut : à clarifier
-    return {
-        cible: 'À clarifier en rencontre individuelle',
-        pattern: M,
-        niveau: 1,
-        couleur: '#8aa4b0',
-        emoji: '💬'
-    };
+    return { cible: 'À clarifier en rencontre individuelle', pattern: M, niveau: 1, couleur: '#8aa4b0', emoji: '💬' };
 }
 
 // Exporter les 14 fonctions vers window (décision étape 1 b — convention systématique)
