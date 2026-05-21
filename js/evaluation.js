@@ -167,7 +167,7 @@ function nouvelleEvaluation() {
     var btnEditer = document.getElementById('btnEditerFichierEval');
     if (btnEditer) btnEditer.classList.add('u-hide');
 
-    afficherNotificationSucces('Paramètres réinitialisés - Prêt pour une nouvelle série d\'évaluations');
+    notifications.succes('Paramètres réinitialisés - Prêt pour une nouvelle série d\'évaluations');
 }
 
 /**
@@ -190,7 +190,7 @@ function reinitialiserFormulaire() {
     const retroactionFinale = document.getElementById('retroactionFinale1');
     if (retroactionFinale) retroactionFinale.value = '';
 
-    afficherNotificationSucces('Formulaire réinitialisé - Les sélections sont conservées');
+    notifications.succes('Formulaire réinitialisé - Les sélections sont conservées');
 }
 
 /**
@@ -1802,7 +1802,7 @@ function modifierEvaluation(evaluationId) {
     const evaluation = evaluations.find(e => e.id === evaluationId);
 
     if (!evaluation) {
-        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        notifications.erreur('Erreur', 'Évaluation introuvable');
         return;
     }
 
@@ -1966,7 +1966,7 @@ function modifierEvaluation(evaluationId) {
 
         } catch (erreur) {
             console.error('❌ Erreur lors du chargement de l\'évaluation:', erreur);
-            afficherNotificationErreur(
+            notifications.erreur(
                 'Erreur de chargement',
                 `Impossible de charger l'évaluation: ${erreur.message}`
             );
@@ -2280,9 +2280,9 @@ function _gererIndicateurEtVerrouillageModif(evaluation, estVerrouillee) {
     afficherOuMasquerBoutonVerrouillage(true, estVerrouillee);
     if (estVerrouillee) {
         desactiverFormulaireEvaluation(true);
-        afficherNotificationSucces('Évaluation chargée en lecture seule (verrouillée)');
+        notifications.succes('Évaluation chargée en lecture seule (verrouillée)');
     } else {
-        afficherNotificationSucces('Évaluation chargée - Tu peux maintenant la modifier');
+        notifications.succes('Évaluation chargée - Tu peux maintenant la modifier');
     }
 }
 
@@ -2333,17 +2333,17 @@ function _lireEntreesFormulaireMod() {
 
 function _validerReferencesMod(etudiant, production, grille, etudiantDA, productionId, grilleId) {
     if (!etudiant) {
-        afficherNotificationErreur('Étudiant introuvable', `L'étudiant ${etudiantDA} n'existe pas dans le groupe actif.`);
+        notifications.erreur('Étudiant introuvable', `L'étudiant ${etudiantDA} n'existe pas dans le groupe actif.`);
         console.error('[Évaluation] ❌ Référence invalide: etudiantDA', etudiantDA);
         return false;
     }
     if (!production) {
-        afficherNotificationErreur('Production introuvable', `La production sélectionnée n'existe plus.`);
+        notifications.erreur('Production introuvable', `La production sélectionnée n'existe plus.`);
         console.error('[Évaluation] ❌ Référence invalide: productionId', productionId);
         return false;
     }
     if (!grille) {
-        afficherNotificationErreur('Grille introuvable', `La grille de critères sélectionnée n'existe plus.`);
+        notifications.erreur('Grille introuvable', `La grille de critères sélectionnée n'existe plus.`);
         console.error('[Évaluation] ❌ Référence invalide: grilleId', grilleId);
         return false;
     }
@@ -2357,7 +2357,7 @@ function _validerReferencesNonDemoMod(productionId, grilleId) {
         { id: grilleId, collection: 'grillesTemplates', labelType: 'grille' }
     ]);
     if (violationDemo) {
-        afficherNotificationErreur('Référence démo non autorisée', violationDemo.message);
+        notifications.erreur('Référence démo non autorisée', violationDemo.message);
         return false;
     }
     return true;
@@ -2489,7 +2489,7 @@ function _ajouterCadenasBadgesMod() {
 }
 
 function _postSauvegardeMod(evalModifiee) {
-    afficherNotificationSucces(`Évaluation modifiée : ${evalModifiee.etudiantNom} - ${evalModifiee.productionNom}`);
+    notifications.succes(`Évaluation modifiée : ${evalModifiee.etudiantNom} - ${evalModifiee.productionNom}`);
 
     if (typeof travauxUI !== 'undefined' && travauxUI.arreterChrono) {
         travauxUI.arreterChrono();
@@ -2530,14 +2530,14 @@ function sauvegarderEvaluationModifiee() {
     let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const indexEval = evaluations.findIndex(e => e.id === evaluationId);
     if (indexEval === -1) {
-        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        notifications.erreur('Erreur', 'Évaluation introuvable');
         return;
     }
 
     // Vérifier que l'évaluation n'est pas verrouillée
     // Exception : modification post-reprise autorisée via _snapshotAvantModifRemplacee
     if (evaluations[indexEval].verrouillee && !window._snapshotAvantModifRemplacee) {
-        afficherNotificationErreur('Évaluation verrouillée', 'Impossible de modifier une évaluation verrouillée');
+        notifications.erreur('Évaluation verrouillée', 'Impossible de modifier une évaluation verrouillée');
         return;
     }
 
@@ -2586,7 +2586,7 @@ function sauvegarderEvaluationModifiee() {
 
     // Sauvegarder
     if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
+        notifications.erreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
         return;
     }
 
@@ -2604,7 +2604,7 @@ function verrouillerEvaluationIndividuelle(evaluationId) {
     const index = evaluations.findIndex(e => e.id === evaluationId);
 
     if (index === -1) {
-        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        notifications.erreur('Erreur', 'Évaluation introuvable');
         return;
     }
 
@@ -2612,11 +2612,11 @@ function verrouillerEvaluationIndividuelle(evaluationId) {
     evaluations[index].dateVerrouillage = new Date().toISOString();
 
     if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        afficherNotificationErreur('Modification impossible', 'Impossible de verrouiller en mode anonymisation');
+        notifications.erreur('Modification impossible', 'Impossible de verrouiller en mode anonymisation');
         return;
     }
 
-    afficherNotificationSucces('Évaluation verrouillée');
+    notifications.succes('Évaluation verrouillée');
 
     // Recharger la liste
     if (typeof chargerListeEvaluationsRefonte === 'function') {
@@ -2634,7 +2634,7 @@ function deverrouillerEvaluationIndividuelle(evaluationId) {
     const index = evaluations.findIndex(e => e.id === evaluationId);
 
     if (index === -1) {
-        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        notifications.erreur('Erreur', 'Évaluation introuvable');
         return;
     }
 
@@ -2642,11 +2642,11 @@ function deverrouillerEvaluationIndividuelle(evaluationId) {
     delete evaluations[index].dateVerrouillage;
 
     if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        afficherNotificationErreur('Modification impossible', 'Impossible de déverrouiller en mode anonymisation');
+        notifications.erreur('Modification impossible', 'Impossible de déverrouiller en mode anonymisation');
         return;
     }
 
-    afficherNotificationSucces('Évaluation déverrouillée');
+    notifications.succes('Évaluation déverrouillée');
 
     // Recharger la liste
     if (typeof chargerListeEvaluationsRefonte === 'function') {
@@ -2713,13 +2713,13 @@ function supprimerEvaluation(evaluationId) {
     const evaluation = evaluations.find(e => e.id === evaluationId);
 
     if (!evaluation) {
-        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        notifications.erreur('Erreur', 'Évaluation introuvable');
         return;
     }
 
     // Vérifier si l'évaluation est verrouillée
     if (evaluation.verrouillee) {
-        afficherNotificationErreur(
+        notifications.erreur(
             'Suppression impossible',
             'Cette évaluation est verrouillée. Déverrouille-la d\'abord pour la supprimer.'
         );
@@ -2735,11 +2735,11 @@ function supprimerEvaluation(evaluationId) {
     evaluations = evaluations.filter(e => e.id !== evaluationId);
 
     if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        afficherNotificationErreur('Suppression impossible', 'Impossible de supprimer en mode anonymisation');
+        notifications.erreur('Suppression impossible', 'Impossible de supprimer en mode anonymisation');
         return;
     }
 
-    afficherNotificationSucces('Évaluation supprimée');
+    notifications.succes('Évaluation supprimée');
 
     // Recalculer les indices
     if (typeof calculerEtStockerIndicesCP === 'function') {
@@ -3006,7 +3006,7 @@ function chargerEvaluationDepuisBanque(evaluationId) {
 function appliquerJetonRepriseDepuisBanque(evaluationId) {
     // Utiliser le module evaluation-jetons.js pour appliquer le jeton
     if (typeof appliquerJetonReprise !== 'function') {
-        afficherNotificationErreur('Erreur', 'Module jetons non disponible');
+        notifications.erreur('Erreur', 'Module jetons non disponible');
         return;
     }
 
@@ -3041,7 +3041,7 @@ function appliquerJetonRepriseDepuisBanque(evaluationId) {
 function appliquerJetonDelaiDepuisSidebar() {
     // Vérifier qu'on est en train de modifier une évaluation
     if (!window.evaluationEnCours || !window.evaluationEnCours.idModification) {
-        afficherNotificationErreur('Erreur', 'Tu dois charger une évaluation existante pour appliquer un jeton de délai');
+        notifications.erreur('Erreur', 'Tu dois charger une évaluation existante pour appliquer un jeton de délai');
         return;
     }
 
@@ -3058,14 +3058,14 @@ function appliquerJetonDelaiDepuisSidebar() {
         }
     } else {
         console.error('❌ Fonction appliquerJetonDelai non disponible');
-        afficherNotificationErreur('Erreur', 'Module jetons non disponible');
+        notifications.erreur('Erreur', 'Module jetons non disponible');
     }
 }
 
 function appliquerJetonRepriseDepuisSidebar() {
     // Vérifier qu'on est en train de modifier une évaluation
     if (!window.evaluationEnCours || !window.evaluationEnCours.idModification) {
-        afficherNotificationErreur('Erreur', 'Tu dois charger une évaluation existante pour appliquer un jeton de reprise');
+        notifications.erreur('Erreur', 'Tu dois charger une évaluation existante pour appliquer un jeton de reprise');
         return;
     }
 
@@ -3100,7 +3100,7 @@ function basculerVerrouillageEvaluation(evaluationId) {
     const index = evaluations.findIndex(e => e.id === evaluationId);
 
     if (index === -1) {
-        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        notifications.erreur('Erreur', 'Évaluation introuvable');
         return;
     }
 
@@ -3110,12 +3110,12 @@ function basculerVerrouillageEvaluation(evaluationId) {
 
     // Sauvegarder
     if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
+        notifications.erreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
         return;
     }
 
     const message = estVerrouillee ? 'Évaluation verrouillée' : 'Évaluation déverrouillée';
-    afficherNotificationSucces(message);
+    notifications.succes(message);
 
     // Mettre à jour le cadenas dans le DOM immédiatement
     const cadenasElement = document.getElementById(`cadenas-${evaluationId}`);
@@ -3153,7 +3153,7 @@ function retirerJeton(evaluationId, typeJeton) {
     const index = evaluations.findIndex(e => e.id === evaluationId);
 
     if (index === -1) {
-        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        notifications.erreur('Erreur', 'Évaluation introuvable');
         return;
     }
 
@@ -3164,18 +3164,18 @@ function retirerJeton(evaluationId, typeJeton) {
         delete evaluation.jetonRepriseApplique;
         delete evaluation.dateApplicationJetonReprise;
         delete evaluation.repriseDeId;
-        afficherNotificationSucces('Jeton de reprise retiré');
+        notifications.succes('Jeton de reprise retiré');
     } else if (typeJeton === 'delai') {
         // Retirer le jeton de délai
         delete evaluation.jetonDelaiApplique;
         delete evaluation.dateApplicationJetonDelai;
         delete evaluation.delaiAccorde;
-        afficherNotificationSucces('Jeton de délai retiré');
+        notifications.succes('Jeton de délai retiré');
     }
 
     // Sauvegarder
     if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
+        notifications.erreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
         return;
     }
 
@@ -3201,13 +3201,13 @@ function supprimerEvaluationBanque(evaluationId) {
     const evaluation = evaluations.find(e => e.id === evaluationId);
 
     if (!evaluation) {
-        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        notifications.erreur('Erreur', 'Évaluation introuvable');
         return;
     }
 
     // Vérifier si l'évaluation est verrouillée
     if (evaluation.verrouillee) {
-        afficherNotificationErreur('Suppression impossible', 'Déverrouillez l\'évaluation avant de la supprimer');
+        notifications.erreur('Suppression impossible', 'Déverrouillez l\'évaluation avant de la supprimer');
         return;
     }
 
@@ -3215,11 +3215,11 @@ function supprimerEvaluationBanque(evaluationId) {
     evaluations = evaluations.filter(e => e.id !== evaluationId);
 
     if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        afficherNotificationErreur('Suppression impossible', 'Impossible de supprimer en mode anonymisation');
+        notifications.erreur('Suppression impossible', 'Impossible de supprimer en mode anonymisation');
         return;
     }
 
-    afficherNotificationSucces('Évaluation supprimée');
+    notifications.succes('Évaluation supprimée');
 
     // Recalculer les indices
     if (typeof calculerEtStockerIndicesCP === 'function') {
@@ -3238,7 +3238,7 @@ function verrouillerToutesEvaluations(verrouiller) {
     let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
 
     if (evaluations.length === 0) {
-        afficherNotificationErreur('Aucune évaluation', 'Aucune évaluation à modifier');
+        notifications.erreur('Aucune évaluation', 'Aucune évaluation à modifier');
         return;
     }
 
@@ -3257,7 +3257,7 @@ function verrouillerToutesEvaluations(verrouiller) {
     }));
 
     if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        afficherNotificationErreur('Modification impossible', 'Impossible de modifier en mode anonymisation');
+        notifications.erreur('Modification impossible', 'Impossible de modifier en mode anonymisation');
         return;
     }
 
@@ -3265,7 +3265,7 @@ function verrouillerToutesEvaluations(verrouiller) {
         ? `${evaluations.length} évaluations verrouillées`
         : `${evaluations.length} évaluations déverrouillées`;
 
-    afficherNotificationSucces(resultat);
+    notifications.succes(resultat);
 
     // Rafraîchir la liste
     filtrerBanqueEvaluations();
@@ -3282,7 +3282,7 @@ function basculerVerrouillageEvaluationCourante() {
     const evaluationId = window.evaluationEnCours?.idModification;
 
     if (!evaluationId) {
-        afficherNotificationErreur('Erreur', 'Aucune évaluation en cours de modification');
+        notifications.erreur('Erreur', 'Aucune évaluation en cours de modification');
         return;
     }
 
@@ -3291,7 +3291,7 @@ function basculerVerrouillageEvaluationCourante() {
     const index = evaluations.findIndex(e => e.id === evaluationId);
 
     if (index === -1) {
-        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        notifications.erreur('Erreur', 'Évaluation introuvable');
         return;
     }
 
@@ -3301,7 +3301,7 @@ function basculerVerrouillageEvaluationCourante() {
 
     // Sauvegarder
     if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
+        notifications.erreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
         return;
     }
 
@@ -3319,7 +3319,7 @@ function basculerVerrouillageEvaluationCourante() {
     const message = estVerrouillee
         ? `Évaluation verrouillée - Modification impossible`
         : `Évaluation déverrouillée - Modification autorisée`;
-    afficherNotificationSucces(message);
+    notifications.succes(message);
 
     // Activer/désactiver tous les champs du formulaire (sans reload)
     if (typeof desactiverFormulaireEvaluation === 'function') {
@@ -3679,7 +3679,7 @@ function afficherJetonsPersonnalisesEvaluation() {
  */
 function appliquerJetonPersonnalise(jetonId) {
     if (!window.evaluationEnCours?.idModification) {
-        afficherNotificationErreur('Erreur', 'Tu dois charger une évaluation existante pour appliquer un jeton');
+        notifications.erreur('Erreur', 'Tu dois charger une évaluation existante pour appliquer un jeton');
         return;
     }
 
@@ -3688,7 +3688,7 @@ function appliquerJetonPersonnalise(jetonId) {
     const jeton = config.jetons?.typesPersonnalises?.find(j => j.id === jetonId);
 
     if (!jeton) {
-        afficherNotificationErreur('Erreur', 'Jeton personnalisé introuvable');
+        notifications.erreur('Erreur', 'Jeton personnalisé introuvable');
         return;
     }
 
@@ -3702,7 +3702,7 @@ function appliquerJetonPersonnalise(jetonId) {
     const evaluation = evaluations.find(e => e.id === window.evaluationEnCours.idModification);
 
     if (!evaluation) {
-        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        notifications.erreur('Erreur', 'Évaluation introuvable');
         return;
     }
 
@@ -3713,7 +3713,7 @@ function appliquerJetonPersonnalise(jetonId) {
 
     // Vérifier si ce jeton n'est pas déjà appliqué
     if (evaluation.jetonsPersonnalises.some(j => j.id === jetonId)) {
-        afficherNotificationErreur('Erreur', 'Ce jeton est déjà appliqué à cette évaluation');
+        notifications.erreur('Erreur', 'Ce jeton est déjà appliqué à cette évaluation');
         return;
     }
 
@@ -3734,7 +3734,7 @@ function appliquerJetonPersonnalise(jetonId) {
     window.afficherBadgesJetons();
     window.peuplementOptJetons();
 
-    afficherNotificationSucces('Succès', `Jeton «${jeton.nom}» appliqué avec succès`);
+    notifications.succes('Succès', `Jeton «${jeton.nom}» appliqué avec succès`);
 }
 
 /**
@@ -3742,7 +3742,7 @@ function appliquerJetonPersonnalise(jetonId) {
  */
 function confirmerSuppressionEvaluationSidebar() {
     if (!window.evaluationEnCours?.idModification) {
-        afficherNotificationErreur('Erreur', 'Aucune évaluation en cours de modification');
+        notifications.erreur('Erreur', 'Aucune évaluation en cours de modification');
         return;
     }
 
@@ -3797,7 +3797,7 @@ async function copierEnFormatTSV(texte) {
 async function copierCriteresSRPN() {
     const element = document.getElementById('criteresCopier');
     if (!element || element.textContent === '--') {
-        afficherNotificationErreur('Erreur', 'Aucun critère à copier');
+        notifications.erreur('Erreur', 'Aucun critère à copier');
         return;
     }
 
@@ -3809,9 +3809,9 @@ async function copierCriteresSRPN() {
     // Copier en format TSV
     const succes = await copierEnFormatTSV(srpn);
     if (succes) {
-        afficherNotificationSucces('Copié', 'SRPN copiés dans le presse-papiers');
+        notifications.succes('Copié', 'SRPN copiés dans le presse-papiers');
     } else {
-        afficherNotificationErreur('Erreur', 'Impossible de copier dans le presse-papiers');
+        notifications.erreur('Erreur', 'Impossible de copier dans le presse-papiers');
     }
 }
 
@@ -3821,7 +3821,7 @@ async function copierCriteresSRPN() {
 async function copierCriteresSRPNF() {
     const element = document.getElementById('criteresCopier');
     if (!element || element.textContent === '--') {
-        afficherNotificationErreur('Erreur', 'Aucun critère à copier');
+        notifications.erreur('Erreur', 'Aucun critère à copier');
         return;
     }
 
@@ -3831,9 +3831,9 @@ async function copierCriteresSRPNF() {
     // Copier en format TSV
     const succes = await copierEnFormatTSV(texte);
     if (succes) {
-        afficherNotificationSucces('Copié', 'SRPNF copiés dans le presse-papiers');
+        notifications.succes('Copié', 'SRPNF copiés dans le presse-papiers');
     } else {
-        afficherNotificationErreur('Erreur', 'Impossible de copier dans le presse-papiers');
+        notifications.erreur('Erreur', 'Impossible de copier dans le presse-papiers');
     }
 }
 
