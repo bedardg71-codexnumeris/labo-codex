@@ -167,56 +167,45 @@ function afficherEnseignantGroupeCoursV2() {
  * Génère le nom du groupe-cours à partir des sélections
  * Format: H2026-601-101-MQ-00001 (Mer-PM / Ven-AM)
  */
-function genererNomGroupeCoursV2() {
-    // Beta 95.2: Trimestre sélectionné dans le dropdown (ou actif par défaut)
+function _obtenirNomTrimestreSelectionne() {
     const trimestreSelectionne = document.getElementById('v2-gc-trimestre')?.value;
     const trimestres = db.getSync('trimestres', []);
     const trimestre = trimestres.find(t => t.id === trimestreSelectionne)
         || (typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null);
+    if (!trimestre) return '';
+    const sessionLettre = { 'hiver': 'H', 'automne': 'A', 'ete': 'E' }[trimestre.session]
+        || trimestre.session?.charAt(0)?.toUpperCase() || '';
+    return `${sessionLettre}${trimestre.annee}`;
+}
 
-    let trimestreNom = '';
-    if (trimestre) {
-        const sessionLettre = { 'hiver': 'H', 'automne': 'A', 'ete': 'E' }[trimestre.session] || trimestre.session?.charAt(0)?.toUpperCase() || '';
-        trimestreNom = `${sessionLettre}${trimestre.annee}`;
-    }
-
-    // Cours sélectionné
+function _obtenirCodeCoursSelectionne() {
     const coursId = document.getElementById('v2-gc-cours')?.value;
-    let codeCours = '';
-    if (coursId) {
-        const cours = db.getSync('cours', []);
-        const coursObj = cours.find(c => c.id === coursId || c.sigle === coursId || c.codeCours === coursId || c.code === coursId);
-        codeCours = coursObj?.codeCours || coursObj?.sigle || coursObj?.code || '';
-    }
+    if (!coursId) return '';
+    const cours = db.getSync('cours', []);
+    const coursObj = cours.find(c => c.id === coursId || c.sigle === coursId || c.codeCours === coursId || c.code === coursId);
+    return coursObj?.codeCours || coursObj?.sigle || coursObj?.code || '';
+}
 
-    // Groupe d'étudiants
-    const groupeNum = document.getElementById('v2-gc-groupe')?.value || '';
-
-    // Horaire sélectionné
+function _obtenirResumeHoraireSelectionne() {
     const horaireId = document.getElementById('v2-gc-horaire')?.value;
-    let horaireResume = '';
-    if (horaireId) {
-        const cleHoraires = cle('horaires');
-        const horaires = db.getSync(cleHoraires, []);
-        const horaire = horaires.find(h => h.id === horaireId);
+    if (!horaireId) return '';
+    const horaires = db.getSync(cle('horaires'), []);
+    const horaire = horaires.find(h => h.id === horaireId);
+    if (!horaire?.seances || horaire.seances.length === 0) return '';
+    return horaire.seances.map(s => `${abrevierJour(s.jour)}-${obtenirPeriodeJournee(s.heureDebut)}`).join(' / ');
+}
 
-        if (horaire?.seances && horaire.seances.length > 0) {
-            const seancesAbregees = horaire.seances.map(s => {
-                const jourAbrege = abrevierJour(s.jour);
-                const periode = obtenirPeriodeJournee(s.heureDebut);
-                return `${jourAbrege}-${periode}`;
-            });
-            horaireResume = seancesAbregees.join(' / ');
-        }
-    }
+function genererNomGroupeCoursV2() {
+    const trimestreNom = _obtenirNomTrimestreSelectionne();
+    const codeCours = _obtenirCodeCoursSelectionne();
+    const groupeNum = document.getElementById('v2-gc-groupe')?.value || '';
+    const horaireResume = _obtenirResumeHoraireSelectionne();
 
-    // Assembler le nom
     let nom = '';
     if (trimestreNom) nom += trimestreNom;
     if (codeCours) nom += (nom ? '-' : '') + codeCours;
     if (groupeNum) nom += (nom ? '-' : '') + groupeNum;
     if (horaireResume) nom += ` (${horaireResume})`;
-
     return nom || '—';
 }
 
@@ -309,6 +298,25 @@ function changerGroupeCoursSelectionneV2(gcId) {
 /**
  * Met à jour la carte résumé du groupe-cours
  */
+function _resoudreCoursPourCarteGC(gc) {
+    const cours = db.getSync('cours', []);
+    const coursObj = cours.find(c => c.id === gc.coursId || c.sigle === gc.coursId || c.codeCours === gc.coursId || c.code === gc.coursId);
+    const coursNom = coursObj
+        ? (coursObj.codeCours || coursObj.sigle || coursObj.code || '') + ' - ' + (coursObj.nomCours || coursObj.nom || coursObj.titre || '')
+        : '—';
+    return { coursObj, coursNom };
+}
+
+function _resoudreEnseignantPourCarteGC(gc) {
+    if (gc.enseignantId === 'profil' || !gc.enseignantId) {
+        const profil = db.getSync('profilEnseignant', {});
+        return (profil.prenom && profil.nom) ? `${profil.prenom} ${profil.nom}` : '—';
+    }
+    const enseignants = db.getSync('enseignants', []);
+    const ensObj = enseignants.find(e => e.id === gc.enseignantId);
+    return ensObj ? `${ensObj.prenom || ''} ${ensObj.nom || ''}`.trim() : '—';
+}
+
 function mettreAJourCarteResumeGroupeCoursV2(gc) {
     const carte = document.getElementById('v2-carteResumeGroupeCours');
     if (!carte) return;
@@ -318,32 +326,12 @@ function mettreAJourCarteResumeGroupeCoursV2(gc) {
         return;
     }
 
-    // Récupérer les infos liées
-    const cours = db.getSync('cours', []);
-    const coursObj = cours.find(c => c.id === gc.coursId || c.sigle === gc.coursId || c.codeCours === gc.coursId || c.code === gc.coursId);
-    const coursNom = coursObj ? (coursObj.codeCours || coursObj.sigle || coursObj.code || '') + ' - ' + (coursObj.nomCours || coursObj.nom || coursObj.titre || '') : '—';
-
-    const cleHoraires = cle('horaires');
-    const horaires = db.getSync(cleHoraires, []);
+    const { coursObj, coursNom } = _resoudreCoursPourCarteGC(gc);
+    const horaires = db.getSync(cle('horaires'), []);
     const horaireObj = horaires.find(h => h.id === gc.horaireId);
     const horaireNom = horaireObj?.nom || '—';
+    const enseignantNom = _resoudreEnseignantPourCarteGC(gc);
 
-    // Beta 95.2: Récupérer l'enseignant selon enseignantId
-    let enseignantNom = '—';
-    if (gc.enseignantId === 'profil') {
-        const profil = db.getSync('profilEnseignant', {});
-        enseignantNom = (profil.prenom && profil.nom) ? `${profil.prenom} ${profil.nom}` : '—';
-    } else if (gc.enseignantId) {
-        const enseignants = db.getSync('enseignants', []);
-        const ensObj = enseignants.find(e => e.id === gc.enseignantId);
-        enseignantNom = ensObj ? `${ensObj.prenom || ''} ${ensObj.nom || ''}`.trim() : '—';
-    } else {
-        // Fallback sur le profil unique si pas d'enseignantId
-        const profil = db.getSync('profilEnseignant', {});
-        enseignantNom = (profil.prenom && profil.nom) ? `${profil.prenom} ${profil.nom}` : '—';
-    }
-
-    // Beta 95.3 : Score de complétude (5 éléments)
     let score = 0;
     if (gc.coursId && coursObj) score++;
     if (gc.groupeNum || gc.groupe) score++;

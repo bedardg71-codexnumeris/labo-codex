@@ -665,11 +665,97 @@ function afficherGestionJetons(afficher) {
  * Source unique de vérité : obtenirTousTypesJetons() (basé sur la pratique de notation).
  * Utilisé en mode standalone ET en mode visionneuse (plus de doublon).
  */
+function _collecterJetonsUtilisesParType(da) {
+    var jetonsParType = { delai: [], reprise: [], repriseCiblee: [] };
+    if (!da) return { jetonsParType, totalUtilises: 0, totalMax: 0 };
+    var toutesEvals = obtenirDonneesSelonMode('evaluationsSauvegardees');
+    var productions = typeof obtenirDonneesSelonMode === 'function'
+        ? obtenirDonneesSelonMode('productions') || [] : [];
+    toutesEvals.filter(function(e) {
+        return e.etudiantDA === da && !e.remplaceeParId;
+    }).forEach(function(e) {
+        var prod = productions.find(function(p) { return p.id === e.productionId; });
+        var nomProd = prod ? (prod.titre || prod.nom || e.productionId) : e.productionId;
+        if (e.jetonDelaiApplique) jetonsParType.delai.push(echapperHtml(nomProd));
+        if (e.jetonRepriseApplique || e.repriseDeId) jetonsParType.reprise.push(echapperHtml(nomProd));
+        if (e.jetonRepriseCibleeApplique) jetonsParType.repriseCiblee.push(echapperHtml(nomProd));
+    });
+    var totalUtilises = jetonsParType.delai.length + jetonsParType.reprise.length + jetonsParType.repriseCiblee.length;
+    var modalites = db.getSync('modalitesEvaluation', {});
+    var totalMax = (modalites.configPAN && modalites.configPAN.jetons && modalites.configPAN.jetons.nombreParEleve)
+        || (modalites.configurationJetons && modalites.configurationJetons.nombreParEleve)
+        || 2;
+    return { jetonsParType, totalUtilises, totalMax };
+}
+
+function _construireMapPredefinis(evalCourante) {
+    return {
+        'delai': {
+            checkboxId: 'checkboxJetonDelai',
+            handler: 'gererChangementCheckboxJetonDelai',
+            wrapperClass: 'badge-jeton-delai-wrapper',
+            tooltip: 'eval-jeton-delai',
+            estCoche: function() {
+                return evalCourante ? !!(evalCourante.jetonDelaiApplique || evalCourante.delaiAccorde) : false;
+            }
+        },
+        'reprise': {
+            checkboxId: 'checkboxJetonReprise',
+            handler: 'gererChangementCheckboxJetonReprise',
+            wrapperClass: 'badge-jeton-reprise-wrapper',
+            tooltip: 'eval-jeton-reprise',
+            estCoche: function() {
+                return evalCourante ? !!(evalCourante.jetonRepriseApplique || evalCourante.repriseDeId || (evalCourante.id && evalCourante.id.startsWith('EVAL_REPRISE_'))) : false;
+            }
+        },
+        'repriseCiblee': {
+            checkboxId: 'checkboxJetonRepriseCiblee',
+            handler: 'gererChangementCheckboxJetonRepriseCiblee',
+            wrapperClass: 'badge-jeton-reprise-ciblee-wrapper',
+            tooltip: 'eval-jeton-reprise-ciblee',
+            estCoche: function() {
+                return evalCourante ? !!evalCourante.jetonRepriseCibleeApplique : false;
+            }
+        }
+    };
+}
+
+function _renderHtmlJetonPredefini(type, mp, artefacts, tokenImg) {
+    var coche = mp.estCoche() ? ' checked' : '';
+    var ligne =
+        '<div>' +
+            '<div class="u-flex-gap-8 u-align-center">' +
+                '<input type="checkbox" id="' + mp.checkboxId + '" data-on-change="' + mp.handler + '"' + coche + '>' +
+                '<span class="' + mp.wrapperClass + '">' +
+                    '<span class="badge-jeton-titre" data-tooltip="' + mp.tooltip + '">' + echapperHtml(type.nom.replace(/^Jeton de /i, '').replace(/^./, function(c) { return c.toUpperCase(); })) + '</span>' +
+                '</span>' +
+                tokenImg +
+            '</div>';
+    if (artefacts.length > 0) {
+        ligne += '<div class="eval-aide" style="margin-left: 26px;">';
+        artefacts.forEach(function(nom) { ligne += '<div>• ' + nom + '</div>'; });
+        ligne += '</div>';
+    }
+    return ligne + '</div>';
+}
+
+function _renderHtmlJetonPerso(type, tokenImg) {
+    return '<div style="display: flex; align-items: flex-start; gap: 10px;">' +
+                '<input type="checkbox" id="checkboxJetonPerso_' + type.id + '" class="u-mt-6">' +
+                '<div class="u-flex-1">' +
+                    '<span class="badge-jeton-personnalise-wrapper">' +
+                        '<span class="badge-jeton-titre">' + echapperHtml(type.nom) + '</span>' +
+                    '</span>' +
+                    (type.description ? '<p class="text-085-muted-m5-0-0-0 u-texte-075">' + echapperHtml(type.description) + '</p>' : '') +
+                '</div>' +
+                tokenImg +
+            '</div>';
+}
+
 function peuplementOptJetons() {
     var conteneur = document.getElementById('optionsJetonsContenu');
     if (!conteneur) return;
 
-    // Vérifier si le système de jetons est actif
     var config = typeof obtenirConfigJetons === 'function' ? obtenirConfigJetons() : null;
     if (!config || !config.actif) {
         conteneur.innerHTML = '<p class="eval-vide">Système de jetons désactivé</p>';
@@ -682,81 +768,19 @@ function peuplementOptJetons() {
         return;
     }
 
-    // Déterminer l'état coché depuis l'évaluation en cours
     var evalId = window.evaluationEnCours ? window.evaluationEnCours.idModification : null;
     var evaluations = typeof obtenirDonneesSelonMode === 'function'
         ? obtenirDonneesSelonMode('evaluationsSauvegardees') || [] : [];
     var evalCourante = evalId ? evaluations.find(function(e) { return e.id === evalId; }) : null;
-
-    // Obtenir le statut (utilisés/total) pour l'étudiant courant
     var da = window.evaluationEnCours ? window.evaluationEnCours.etudiantDA : null;
     var statut = (da && typeof obtenirStatutJetonsEtudiant === 'function')
         ? obtenirStatutJetonsEtudiant(da) : {};
 
-    // === 1. Collecter les jetons utilisés par type (avec noms d'artefacts) ===
-    var totalUtilises = 0;
-    var totalMax = 0;
-    var jetonsParType = { delai: [], reprise: [], repriseCiblee: [] };
+    var { jetonsParType, totalUtilises, totalMax } = _collecterJetonsUtilisesParType(da);
+    var mapPredefinis = _construireMapPredefinis(evalCourante);
 
-    if (da) {
-        var toutesEvals = obtenirDonneesSelonMode('evaluationsSauvegardees');
-        var productions = typeof obtenirDonneesSelonMode === 'function'
-            ? obtenirDonneesSelonMode('productions') || [] : [];
-        toutesEvals.filter(function(e) {
-            return e.etudiantDA === da && !e.remplaceeParId;
-        }).forEach(function(e) {
-            var prod = productions.find(function(p) { return p.id === e.productionId; });
-            var nomProd = prod ? (prod.titre || prod.nom || e.productionId) : e.productionId;
-            if (e.jetonDelaiApplique) jetonsParType.delai.push(echapperHtml(nomProd));
-            if (e.jetonRepriseApplique || e.repriseDeId) jetonsParType.reprise.push(echapperHtml(nomProd));
-            if (e.jetonRepriseCibleeApplique) jetonsParType.repriseCiblee.push(echapperHtml(nomProd));
-        });
-        totalUtilises = jetonsParType.delai.length + jetonsParType.reprise.length + jetonsParType.repriseCiblee.length;
-        // Max global = nombreParEleve (quota configuré dans la pratique de notation)
-        var modalites = db.getSync('modalitesEvaluation', {});
-        totalMax = (modalites.configPAN && modalites.configPAN.jetons && modalites.configPAN.jetons.nombreParEleve)
-            || (modalites.configurationJetons && modalites.configurationJetons.nombreParEleve)
-            || 2;
-    }
-
-    // Map des IDs de checkbox et handlers pour les jetons prédéfinis
-    var mapPredefinis = {
-        'delai': {
-            checkboxId: 'checkboxJetonDelai',
-            handler: 'gererChangementCheckboxJetonDelai',
-            wrapperClass: 'badge-jeton-delai-wrapper',
-            tooltip: 'eval-jeton-delai',
-            estCoche: function() {
-                if (evalCourante) return !!(evalCourante.jetonDelaiApplique || evalCourante.delaiAccorde);
-                return false;
-            }
-        },
-        'reprise': {
-            checkboxId: 'checkboxJetonReprise',
-            handler: 'gererChangementCheckboxJetonReprise',
-            wrapperClass: 'badge-jeton-reprise-wrapper',
-            tooltip: 'eval-jeton-reprise',
-            estCoche: function() {
-                if (evalCourante) return !!(evalCourante.jetonRepriseApplique || evalCourante.repriseDeId || (evalCourante.id && evalCourante.id.startsWith('EVAL_REPRISE_')));
-                return false;
-            }
-        },
-        'repriseCiblee': {
-            checkboxId: 'checkboxJetonRepriseCiblee',
-            handler: 'gererChangementCheckboxJetonRepriseCiblee',
-            wrapperClass: 'badge-jeton-reprise-ciblee-wrapper',
-            tooltip: 'eval-jeton-reprise-ciblee',
-            estCoche: function() {
-                if (evalCourante) return !!evalCourante.jetonRepriseCibleeApplique;
-                return false;
-            }
-        }
-    };
-
-    // === 2. Checkboxes avec détails par artefact sous chaque type ===
     var htmlJetons = [];
     var htmlPerso = [];
-
     for (var i = 0; i < types.length; i++) {
         var type = types[i];
         var s = statut[type.id] || { utilises: 0, total: type.nombreTotal || 0 };
@@ -765,55 +789,18 @@ function peuplementOptJetons() {
         var artefacts = jetonsParType[type.id] || [];
 
         if (type.predefini && mapPredefinis[type.id]) {
-            var mp = mapPredefinis[type.id];
-            var coche = mp.estCoche() ? ' checked' : '';
-            var ligneHtml =
-                '<div>' +
-                    '<div class="u-flex-gap-8 u-align-center">' +
-                        '<input type="checkbox" id="' + mp.checkboxId + '" data-on-change="' + mp.handler + '"' + coche + '>' +
-                        '<span class="' + mp.wrapperClass + '">' +
-                            '<span class="badge-jeton-titre" data-tooltip="' + mp.tooltip + '">' + echapperHtml(type.nom.replace(/^Jeton de /i, '').replace(/^./, function(c) { return c.toUpperCase(); })) + '</span>' +
-                        '</span>' +
-                        tokenImg +
-                    '</div>';
-            if (artefacts.length > 0) {
-                ligneHtml += '<div class="eval-aide" style="margin-left: 26px;">';
-                artefacts.forEach(function(nom) { ligneHtml += '<div>• ' + nom + '</div>'; });
-                ligneHtml += '</div>';
-            }
-            ligneHtml += '</div>';
-            htmlJetons.push(ligneHtml);
+            htmlJetons.push(_renderHtmlJetonPredefini(type, mapPredefinis[type.id], artefacts, tokenImg));
         } else if (!type.predefini) {
-            htmlPerso.push(
-                '<div style="display: flex; align-items: flex-start; gap: 10px;">' +
-                    '<input type="checkbox" id="checkboxJetonPerso_' + type.id + '" class="u-mt-6">' +
-                    '<div class="u-flex-1">' +
-                        '<span class="badge-jeton-personnalise-wrapper">' +
-                            '<span class="badge-jeton-titre">' + echapperHtml(type.nom) + '</span>' +
-                        '</span>' +
-                        (type.description ? '<p class="text-085-muted-m5-0-0-0 u-texte-075">' + echapperHtml(type.description) + '</p>' : '') +
-                    '</div>' +
-                    tokenImg +
-                '</div>'
-            );
+            htmlPerso.push(_renderHtmlJetonPerso(type, tokenImg));
         }
     }
 
-    // === 3. Ligne total ===
-    var htmlTotal = '<div class="eval-aide" style="margin-top: 6px; padding-top: 4px; border-top: 1px solid var(--bordure-claire); text-align: right;">' +
-        'Total utilisés : <strong>' + totalUtilises + ' / ' + totalMax + '</strong>' +
-        '</div>';
-
-    // Assembler : checkboxes + détails + total
-    var html = '<div style="display: flex; flex-direction: column; gap: 8px;">' +
-               htmlJetons.join('') +
-               '</div>';
-
+    var html = '<div style="display: flex; flex-direction: column; gap: 8px;">' + htmlJetons.join('') + '</div>';
     if (htmlPerso.length > 0) {
         html += '<div class="u-flex-gap-10 u-flex-col" style="margin-top: 10px;">' + htmlPerso.join('') + '</div>';
     }
-
-    html += htmlTotal;
+    html += '<div class="eval-aide" style="margin-top: 6px; padding-top: 4px; border-top: 1px solid var(--bordure-claire); text-align: right;">' +
+        'Total utilisés : <strong>' + totalUtilises + ' / ' + totalMax + '</strong></div>';
 
     conteneur.innerHTML = html;
 }

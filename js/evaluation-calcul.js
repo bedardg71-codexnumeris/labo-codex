@@ -183,222 +183,158 @@ function genererRetroactionEUF(erreurs, mots) {
  * @param {number} facteur - Facteur de normalisation (ex: 500 mots)
  * @param {string} critereGrilleId - ID du critère dans la grille (pour récupérer les catégories)
  */
-function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur, critereGrilleId) {
-    if (!evaluationEnCours) return;
-
+function _parserCodesAlgoCategories(critereId) {
     const categoriesInput = document.getElementById(`eval_categories_${critereId}`);
     const motsInput = document.getElementById(`eval_mots_${critereId}`);
-
     const categoriesTexte = categoriesInput?.value.trim() || '';
     const mots = parseInt(motsInput?.value) || 0;
-
-    // Parser les codes de sous-critères (ex: "1;4;6;1;4" → ['1', '4', '6', '1', '4'])
     let codesSousCriteres = [];
     if (categoriesTexte) {
-        codesSousCriteres = categoriesTexte.split(';')
-            .map(c => c.trim())
-            .filter(c => c !== '');
+        codesSousCriteres = categoriesTexte.split(';').map(c => c.trim()).filter(c => c !== '');
     }
+    return { codesSousCriteres, mots, totalErreurs: codesSousCriteres.length };
+}
 
-    const totalErreurs = codesSousCriteres.length;
+function _resetAffichageAlgoCategories(critereId) {
+    document.getElementById(`note_algo_${critereId}`).textContent = '--';
+    document.getElementById(`pct_algo_${critereId}`).textContent = '--';
+    document.getElementById(`niveau_algo_${critereId}`).textContent = '--';
+    document.getElementById(`cat_dominante_${critereId}`).textContent = '--';
+    const retroDiv = document.getElementById(`retroaction_cat_${critereId}`);
+    if (retroDiv) retroDiv.classList.add('u-hide');
+}
 
-    // Afficher le total d'erreurs et le nombre de mots
-    document.getElementById(`total_erreurs_${critereId}`).textContent = totalErreurs;
-    document.getElementById(`mots_formule_${critereId}`).textContent = mots;
-
-    if (mots === 0 || totalErreurs === 0) {
-        // Réinitialiser l'affichage
-        document.getElementById(`note_algo_${critereId}`).textContent = '--';
-        document.getElementById(`pct_algo_${critereId}`).textContent = '--';
-        document.getElementById(`niveau_algo_${critereId}`).textContent = '--';
-        document.getElementById(`cat_dominante_${critereId}`).textContent = '--';
-
-        // Vérifier si l'élément existe avant d'y accéder
-        const retroDiv = document.getElementById(`retroaction_cat_${critereId}`);
-        if (retroDiv) retroDiv.classList.add('u-hide');
-
-        return;
-    }
-
-    // === RÉCUPÉRER LES SOUS-CRITÈRES DEPUIS LA GRILLE ===
+function _obtenirSousCriteresGrille(critereId) {
     const grilles = db.getSync('grillesTemplates', []);
     const grilleId = evaluationEnCours?.grilleId;
     const grille = grilles.find(g => g.id === grilleId);
-
-    let sousCriteres = [];
     if (grille && grille.criteres) {
         const critereGrille = grille.criteres.find(c => c.id === critereId);
         if (critereGrille && critereGrille.sousCriteres) {
-            sousCriteres = critereGrille.sousCriteres;
+            return critereGrille.sousCriteres;
         }
     }
+    return [];
+}
 
-    // === CALCUL DE LA SOMME PONDÉRÉE DES ERREURS ===
+function _calculerScoreAlgoCategories(codesSousCriteres, sousCriteres, ponderation, mots, facteur) {
     let sommePonderee = 0;
     codesSousCriteres.forEach(code => {
-        // Trouver le sous-critère correspondant au code
         const sc = sousCriteres.find(s => s.code === code);
-        if (sc) {
-            // Ajouter la pondération (par défaut 1.0 si non définie)
-            sommePonderee += (sc.ponderation !== undefined ? sc.ponderation : 1.0);
-        } else {
-            // Si le code n'existe pas dans les sous-critères, compter comme 1.0
-            sommePonderee += 1.0;
-        }
+        sommePonderee += sc && sc.ponderation !== undefined ? sc.ponderation : 1.0;
     });
-
-    // Calcul selon la formule: Pondération − (Somme Pondérée ÷ Mots × Facteur)
     const noteCalculee = ponderation - (sommePonderee / mots * facteur);
     const pourcentage = (noteCalculee / ponderation) * 100;
+    return { sommePonderee, noteCalculee, pctFinal: Math.max(0, Math.min(100, pourcentage)) };
+}
 
-    // Limiter entre 0 et 100%
-    const pctFinal = Math.max(0, Math.min(100, pourcentage));
-
-    // Déterminer le niveau IDME selon l'échelle
+function _determinerNiveauIDMEAlgo(pctFinal) {
     const echelleId = evaluationEnCours?.echelleId || document.getElementById('selectEchelle1')?.value;
     const echelles = db.getSync('echellesTemplates', []);
     const echelleSelectionnee = echelles.find(e => e.id === echelleId);
+    if (!echelleSelectionnee || !echelleSelectionnee.niveaux) return '--';
+    const niveau = echelleSelectionnee.niveaux.find(n => {
+        if (n.code === '0' || n.code === 0) return false;
+        return pctFinal >= n.min && pctFinal <= n.max;
+    });
+    return niveau ? niveau.code : '--';
+}
 
-    let niveauIDME = '--';
-    if (echelleSelectionnee && echelleSelectionnee.niveaux) {
-        // Exclure le niveau "0" (Non recevable) — réservé à l'intégrité académique
-        const niveau = echelleSelectionnee.niveaux.find(n => {
-            if (n.code === '0' || n.code === 0) return false;
-            return pctFinal >= n.min && pctFinal <= n.max;
-        });
-        niveauIDME = niveau ? niveau.code : '--';
-    }
-
-    // Afficher les résultats (guards si éléments pas encore dans le DOM)
-    var noteAlgoEl = document.getElementById(`note_algo_${critereId}`);
-    var pctAlgoEl = document.getElementById(`pct_algo_${critereId}`);
-    var nivAlgoEl = document.getElementById(`niveau_algo_${critereId}`);
+function _appliquerResultatsAlgoCategories(critereId, noteCalculee, pctFinal, niveauIDME) {
+    const noteAlgoEl = document.getElementById(`note_algo_${critereId}`);
+    const pctAlgoEl = document.getElementById(`pct_algo_${critereId}`);
+    const nivAlgoEl = document.getElementById(`niveau_algo_${critereId}`);
     if (noteAlgoEl) noteAlgoEl.textContent = noteCalculee.toFixed(2);
     if (pctAlgoEl) pctAlgoEl.textContent = pctFinal.toFixed(1);
     if (nivAlgoEl) nivAlgoEl.textContent = niveauIDME;
-
-    // ⚠️ IMPORTANT: Sauvegarder le niveau dans evaluationEnCours pour qu'il soit inclus dans calculerNote()
     evaluationEnCours.criteres[critereId] = niveauIDME;
-
-    // Réinitialiser le sélecteur manuel pour que calculerNote() utilise le % exact algorithmique
     const selectAlgoCat = document.getElementById(`eval_${critereId}`);
     if (selectAlgoCat && selectAlgoCat.value) {
         selectAlgoCat.value = '';
         selectAlgoCat.style.backgroundColor = 'transparent';
         selectAlgoCat.style.borderColor = 'var(--bordure-claire)';
     }
+}
 
-    // === CALCUL DU MODE (sous-critère dominant) ===
+function _trouverCodeDominant(codesSousCriteres) {
     const frequences = {};
     let maxFreq = 0;
     let codeDominant = null;
-
     codesSousCriteres.forEach(code => {
         frequences[code] = (frequences[code] || 0) + 1;
         if (frequences[code] > maxFreq) {
             maxFreq = frequences[code];
-            codeDominant = code; // Premier en cas d'égalité
+            codeDominant = code;
         }
     });
+    return { codeDominant, maxFreq };
+}
 
-    // Afficher le sous-critère dominant
-    if (codeDominant !== null) {
-        // Trouver le nom du sous-critère dominant
+function _construireRetroactionAlgoCategories(totalErreurs, sommePonderee, mots, scDominant) {
+    let retroaction = `Ta rédaction contient ${totalErreurs} erreur${totalErreurs > 1 ? 's' : ''} de français`;
+    if (scDominant && scDominant.retroaction && Math.abs(sommePonderee - totalErreurs) > 0.01) {
+        retroaction += ` (${sommePonderee.toFixed(1)} points)`;
+    }
+    retroaction += ` pour ${mots} mots.`;
+    const retroactionEUF = genererRetroactionEUF(totalErreurs, mots);
+    if (retroactionEUF) retroaction += retroactionEUF;
+    if (scDominant && scDominant.retroaction) retroaction += ` ${scDominant.retroaction}`;
+    return retroaction;
+}
+
+function _sauvegarderDonneesAlgo(critereId, donnees) {
+    if (!evaluationEnCours.donneesAlgorithmiques) {
+        evaluationEnCours.donneesAlgorithmiques = {};
+    }
+    evaluationEnCours.donneesAlgorithmiques[critereId] = donnees;
+}
+
+function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur, critereGrilleId) {
+    if (!evaluationEnCours) return;
+
+    const { codesSousCriteres, mots, totalErreurs } = _parserCodesAlgoCategories(critereId);
+    document.getElementById(`total_erreurs_${critereId}`).textContent = totalErreurs;
+    document.getElementById(`mots_formule_${critereId}`).textContent = mots;
+
+    if (mots === 0 || totalErreurs === 0) {
+        _resetAffichageAlgoCategories(critereId);
+        return;
+    }
+
+    const sousCriteres = _obtenirSousCriteresGrille(critereId);
+    const { sommePonderee, noteCalculee, pctFinal } = _calculerScoreAlgoCategories(
+        codesSousCriteres, sousCriteres, ponderation, mots, facteur
+    );
+    const niveauIDME = _determinerNiveauIDMEAlgo(pctFinal);
+    _appliquerResultatsAlgoCategories(critereId, noteCalculee, pctFinal, niveauIDME);
+
+    const { codeDominant, maxFreq } = _trouverCodeDominant(codesSousCriteres);
+
+    if (codeDominant === null) {
+        document.getElementById(`cat_dominante_${critereId}`).textContent = '--';
+        const commDiv = document.getElementById(`comm_${critereId}`);
+        if (commDiv) commDiv.textContent = 'Saisissez les codes des sous-critères (ex: 1;4;6;1;4)';
+    } else {
         const scDominant = sousCriteres.find(s => s.code === codeDominant);
         const nomDominant = scDominant ? scDominant.nom : `Code ${codeDominant}`;
-
         document.getElementById(`cat_dominante_${critereId}`).textContent =
             `${nomDominant} (${maxFreq} occurrence${maxFreq > 1 ? 's' : ''} du code ${codeDominant})`;
 
-        // Récupérer la rétroaction du sous-critère dominant
+        const retroaction = _construireRetroactionAlgoCategories(totalErreurs, sommePonderee, mots, scDominant);
+        const commDiv = document.getElementById(`comm_${critereId}`);
+        if (commDiv) commDiv.textContent = retroaction;
+
+        _sauvegarderDonneesAlgo(critereId, {
+            codes: codesSousCriteres, mots, totalErreurs, sommePonderee,
+            noteCalculee, pourcentage: pctFinal, niveau: niveauIDME, retroaction
+        });
+
         if (scDominant && scDominant.retroaction) {
-            // Construire la rétroaction complète avec le nombre d'erreurs et la somme pondérée
-            let retroactionComplete = `Ta rédaction contient ${totalErreurs} erreur${totalErreurs > 1 ? 's' : ''} de français`;
-
-            // Si la somme pondérée est différente du nombre d'erreurs, l'indiquer
-            if (Math.abs(sommePonderee - totalErreurs) > 0.01) {
-                retroactionComplete += ` (${sommePonderee.toFixed(1)} points)`;
-            }
-
-            retroactionComplete += ` pour ${mots} mots.`;
-
-            // Ajouter la rétroaction EUF (Épreuve Uniforme de Français) immédiatement après le décompte
-            const retroactionEUF = genererRetroactionEUF(totalErreurs, mots);
-            if (retroactionEUF) {
-                retroactionComplete += retroactionEUF;
-            }
-
-            // Ajouter la rétroaction spécifique à la catégorie dominante
-            retroactionComplete += ` ${scDominant.retroaction}`;
-
-            // Afficher la rétroaction dans la zone de commentaire normale
-            const commDiv = document.getElementById(`comm_${critereId}`);
-            if (commDiv) {
-                commDiv.textContent = retroactionComplete;
-            }
-
-            // Sauvegarder la rétroaction finale pour genererRetroaction()
-            const retroactionFinale = retroactionComplete;
-
-            // Sauvegarder les données algorithmiques
-            if (!evaluationEnCours.donneesAlgorithmiques) {
-                evaluationEnCours.donneesAlgorithmiques = {};
-            }
-
-            evaluationEnCours.donneesAlgorithmiques[critereId] = {
-                codes: codesSousCriteres,
-                mots: mots,
-                totalErreurs: totalErreurs,
-                sommePonderee: sommePonderee,
-                noteCalculee: noteCalculee,
-                pourcentage: pctFinal,
-                niveau: niveauIDME,
-                retroaction: retroactionFinale
-            };
-
-            // Masquer la zone orange (on ne l'utilise plus)
             const retroDiv = document.getElementById(`retroaction_cat_${critereId}`);
             if (retroDiv) retroDiv.classList.add('u-hide');
-        } else {
-            // Pas de rétroaction personnalisée, rétroaction générique
-            let retroactionGenerique = `Ta rédaction contient ${totalErreurs} erreur${totalErreurs > 1 ? 's' : ''} de français pour ${mots} mots.`;
-
-            // Ajouter la rétroaction EUF (Épreuve Uniforme de Français)
-            const retroactionEUF = genererRetroactionEUF(totalErreurs, mots);
-            if (retroactionEUF) {
-                retroactionGenerique += retroactionEUF;
-            }
-
-            const commDiv = document.getElementById(`comm_${critereId}`);
-            if (commDiv) {
-                commDiv.textContent = retroactionGenerique;
-            }
-
-            // Sauvegarder les données algorithmiques
-            if (!evaluationEnCours.donneesAlgorithmiques) {
-                evaluationEnCours.donneesAlgorithmiques = {};
-            }
-
-            evaluationEnCours.donneesAlgorithmiques[critereId] = {
-                codes: codesSousCriteres,
-                mots: mots,
-                totalErreurs: totalErreurs,
-                sommePonderee: sommePonderee,
-                noteCalculee: noteCalculee,
-                pourcentage: pctFinal,
-                niveau: niveauIDME,
-                retroaction: retroactionGenerique
-            };
-        }
-    } else {
-        document.getElementById(`cat_dominante_${critereId}`).textContent = '--';
-        const commDiv = document.getElementById(`comm_${critereId}`);
-        if (commDiv) {
-            commDiv.textContent = 'Saisissez les codes des sous-critères (ex: 1;4;6;1;4)';
         }
     }
 
-    // Calculer la note globale et générer la rétroaction
     calculerNote();
     window.genererRetroaction(1); // Patch §5.6 — genererRetroaction reste dans le résidu evaluation.js
 }
