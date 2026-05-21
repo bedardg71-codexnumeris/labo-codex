@@ -6,7 +6,7 @@
    Contenu de ce sous-module (14 fonctions, ~1500 LOC) :
    - Conversion IDME : obtenirTableConversionIDME, convertirNiveauIDMEEnScore
    - Moyennes critères : calculerMoyennesCriteres, calculerMoyennesCriteresRecents
-   - IPB : calculerIPB (cyc 36 — éclatement reporté étape 4)
+   - IPB : calculerIPB (cyc <30, éclaté en helpers privés Cat-B Track 3 phase 2 — 21 mai 2026)
    - Diagnostic apprentissage : diagnostiquerSuiviApprentissage, diagnostiquerForcesChallenges
    - Indices N derniers : calculerIndicesNDerniersArtefacts
    - Progression : calculerProgressionEleve
@@ -358,6 +358,98 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
 
 // [Phase 6] calculerProgressionBlocage() supprimé — utilisait calculerIndiceBlocage() retiré ci-dessus
 
+function _normaliserNomCritereIPB(nom) {
+    var n = (nom || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, '');
+    return n.startsWith('francais') ? 'francais' : n;
+}
+
+function _filtrerEtTrierEvaluationsIPB(evaluations, da, productionsIds) {
+    var filtrees = evaluations.filter(function (e) {
+        return e.etudiantDA === da &&
+            productionsIds.indexOf(e.productionId) >= 0 &&
+            e.retroactionFinale &&
+            e.criteres && Array.isArray(e.criteres);
+    });
+    // Trier chronologiquement (plus récent d'abord)
+    filtrees.sort(function (a, b) {
+        var dateA = a.dateEvaluation || a.dateCreation || '';
+        var dateB = b.dateEvaluation || b.dateCreation || '';
+        return dateA > dateB ? -1 : dateA < dateB ? 1 : 0;
+    });
+    return filtrees;
+}
+
+function _calculerScoreMultiArtefactIPB(ev, nomsMulti, tableConversion) {
+    var scores = {};
+    ev.criteres.forEach(function (cs) {
+        var score = convertirNiveauIDMEEnScore(cs.niveauSelectionne, tableConversion);
+        if (score === null) return;
+        var nomEval = _normaliserNomCritereIPB(cs.critereNom);
+        nomsMulti.forEach(function (cm) {
+            if (cm.nom === nomEval || cm.nom.startsWith(nomEval) || nomEval.startsWith(cm.nom)) {
+                scores[cm.nom] = score;
+            }
+        });
+    });
+    // Moyenne pondérée adaptative (ignorer les critères absents)
+    var totalPond = 0;
+    var totalScore = 0;
+    nomsMulti.forEach(function (cm) {
+        if (scores[cm.nom] !== undefined) {
+            var pond = cm.ponderation || 1;
+            totalPond += pond;
+            totalScore += scores[cm.nom] * pond;
+        }
+    });
+    if (totalPond === 0) return null;
+    return { score: totalScore / totalPond, details: scores };
+}
+
+function _construireHistoriqueIPB(evaluationsEleve, productions, nomsMulti, tableConversion) {
+    var prodMap = {};
+    productions.forEach(function (p) { prodMap[p.id] = p; });
+    var historiqueRecentsVersAnciens = [];
+    for (var h = 0; h < evaluationsEleve.length; h++) {
+        var ev = evaluationsEleve[h];
+        var res = _calculerScoreMultiArtefactIPB(ev, nomsMulti, tableConversion);
+        var prod = prodMap[ev.productionId];
+        var nomActivite = '';
+        if (prod) {
+            nomActivite = prod.activiteApprentissage || prod.description || prod.titre || prod.nom || '';
+        }
+        historiqueRecentsVersAnciens.push({
+            score: res ? res.score : null,
+            productionId: ev.productionId,
+            productionTitre: nomActivite,
+            date: (ev.dateEvaluation || ev.dateCreation || '').substring(0, 10),
+            estJeton: !!(ev.repriseDeId || ev.jetonRepriseApplique || ev.jetonRepriseCibleeApplique),
+            evaluationId: ev.id || ev.evaluationId || ''
+        });
+    }
+    return historiqueRecentsVersAnciens.slice().reverse(); // ancien → récent
+}
+
+function _determinerDirectionScoreIPB(actuel, precedent, seuilProgression) {
+    if (actuel === null || precedent === null) return '→'; // →
+    var delta = actuel - precedent;
+    if (delta > seuilProgression) return '↗'; // ↗
+    if (delta < -seuilProgression) return '↘'; // ↘
+    return '→'; // →
+}
+
+function _identifierCriteresEnDefiIPB(dernierEvaluation, nomsMulti, tableConversion, seuilDefi) {
+    if (!dernierEvaluation) return [];
+    var dernierResult = _calculerScoreMultiArtefactIPB(dernierEvaluation, nomsMulti, tableConversion);
+    if (!dernierResult) return [];
+    var criteresEnDefi = [];
+    nomsMulti.forEach(function (cm) {
+        if (dernierResult.details[cm.nom] !== undefined && dernierResult.details[cm.nom] < seuilDefi) {
+            criteresEnDefi.push(cm.nom);
+        }
+    });
+    return criteresEnDefi;
+}
+
 /**
  * Calcule l'Indice de Persistance du Blocage (IPB) sur les critères multistructurels.
  * Compte les artefacts consécutifs récents dont le score pondéré des critères
@@ -384,88 +476,21 @@ function calculerIPB(da) {
     var productionsIds = obtenirIdsProductionsEvaluables(productions);
     var tableConversion = obtenirTableConversionIDME();
 
-    var evaluationsEleve = evaluations.filter(function (e) {
-        return e.etudiantDA === da &&
-            productionsIds.indexOf(e.productionId) >= 0 &&
-            e.retroactionFinale &&
-            e.criteres && Array.isArray(e.criteres);
-    });
-
+    var evaluationsEleve = _filtrerEtTrierEvaluationsIPB(evaluations, da, productionsIds);
     if (evaluationsEleve.length === 0) return null;
-
-    // Trier chronologiquement (plus récent d'abord)
-    evaluationsEleve.sort(function (a, b) {
-        var dateA = a.dateEvaluation || a.dateCreation || '';
-        var dateB = b.dateEvaluation || b.dateCreation || '';
-        return dateA > dateB ? -1 : dateA < dateB ? 1 : 0;
-    });
 
     // Normaliser les noms des critères multistructurels
     var nomsMulti = criteresMulti.map(function (c) {
-        var nom = c.nom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
-        if (nom.startsWith('francais')) nom = 'francais';
-        return { nom: nom, ponderation: c.ponderation || 0 };
+        return { nom: _normaliserNomCritereIPB(c.nom), ponderation: c.ponderation || 0 };
     });
 
-    // Calculer le score multistructurel pour chaque artefact
-    function scorePourArtefact(ev) {
-        var scores = {};
-        ev.criteres.forEach(function (cs) {
-            var score = convertirNiveauIDMEEnScore(cs.niveauSelectionne, tableConversion);
-            if (score === null) return;
-            var nomEval = cs.critereNom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
-            if (nomEval.startsWith('francais')) nomEval = 'francais';
-            nomsMulti.forEach(function (cm) {
-                if (cm.nom === nomEval || cm.nom.startsWith(nomEval) || nomEval.startsWith(cm.nom)) {
-                    scores[cm.nom] = score;
-                }
-            });
-        });
-
-        // Moyenne pondérée adaptative (ignorer les critères absents)
-        var totalPond = 0;
-        var totalScore = 0;
-        nomsMulti.forEach(function (cm) {
-            if (scores[cm.nom] !== undefined) {
-                var pond = cm.ponderation || 1;
-                totalPond += pond;
-                totalScore += scores[cm.nom] * pond;
-            }
-        });
-        if (totalPond === 0) return null;
-        return { score: totalScore / totalPond, details: scores };
-    }
-
-    // Calculer les scores pour les artefacts récents (dans la fenêtre IPB)
-    var scoresRecents = [];
+    // Scores pour les artefacts récents (dans la fenêtre IPB)
     var limite = Math.min(evaluationsEleve.length, fenetreN);
+    var scoresRecents = [];
     for (var i = 0; i < limite; i++) {
-        var result = scorePourArtefact(evaluationsEleve[i]);
+        var result = _calculerScoreMultiArtefactIPB(evaluationsEleve[i], nomsMulti, tableConversion);
         scoresRecents.push(result ? result.score : null);
     }
-
-    // Historique complet (tous les artefacts) avec métadonnées — pour l'analyse d'impact
-    var prodMap = {};
-    productions.forEach(function (p) { prodMap[p.id] = p; });
-    var historiqueRecentsVersAnciens = [];
-    for (var h = 0; h < evaluationsEleve.length; h++) {
-        var ev = evaluationsEleve[h];
-        var res = scorePourArtefact(ev);
-        var prod = prodMap[ev.productionId];
-        var nomActivite = '';
-        if (prod) {
-            nomActivite = prod.activiteApprentissage || prod.description || prod.titre || prod.nom || '';
-        }
-        historiqueRecentsVersAnciens.push({
-            score: res ? res.score : null,
-            productionId: ev.productionId,
-            productionTitre: nomActivite,
-            date: (ev.dateEvaluation || ev.dateCreation || '').substring(0, 10),
-            estJeton: !!(ev.repriseDeId || ev.jetonRepriseApplique || ev.jetonRepriseCibleeApplique),
-            evaluationId: ev.id || ev.evaluationId || ''
-        });
-    }
-    var historiqueComplet = historiqueRecentsVersAnciens.slice().reverse(); // ancien → récent
 
     // IPB : compter les consécutifs sous le seuil (depuis le plus récent)
     var ipb = 0;
@@ -477,33 +502,9 @@ function calculerIPB(da) {
         }
     }
 
-    // Scores pour la direction
     var scoreActuel = scoresRecents.length > 0 ? scoresRecents[0] : null;
     var scorePrecedent = scoresRecents.length > 1 ? scoresRecents[1] : null;
-
-    // Direction
-    var direction = '→';
-    if (scoreActuel !== null && scorePrecedent !== null) {
-        var delta = scoreActuel - scorePrecedent;
-        if (delta > seuilProgression) direction = '↗';
-        else if (delta < -seuilProgression) direction = '↘';
-    }
-
-    // Critères individuels en défi (score < seuil sur le dernier artefact)
-    var criteresEnDefi = [];
-    if (evaluationsEleve.length > 0) {
-        var dernierResult = scorePourArtefact(evaluationsEleve[0]);
-        if (dernierResult) {
-            nomsMulti.forEach(function (cm) {
-                if (dernierResult.details[cm.nom] !== undefined && dernierResult.details[cm.nom] < seuilDefi) {
-                    criteresEnDefi.push(cm.nom);
-                }
-            });
-        }
-    }
-
-    // Scores en ordre chronologique (ancien → récent) pour l'affichage
-    var scoresChronologiques = scoresRecents.slice().reverse();
+    var direction = _determinerDirectionScoreIPB(scoreActuel, scorePrecedent, seuilProgression);
 
     return {
         ipb: ipb,
@@ -511,11 +512,11 @@ function calculerIPB(da) {
         scorePrecedent: scorePrecedent,
         direction: direction,
         criteresMulti: nomsMulti.map(function (c) { return c.nom; }),
-        criteresEnDefi: criteresEnDefi,
+        criteresEnDefi: _identifierCriteresEnDefiIPB(evaluationsEleve[0], nomsMulti, tableConversion, seuilDefi),
         fenetre: limite,
         seuil: seuilDefi,
-        scoresParArtefact: scoresChronologiques,
-        historiqueComplet: historiqueComplet // tous les artefacts (ancien → récent) avec métadonnées
+        scoresParArtefact: scoresRecents.slice().reverse(), // ancien → récent
+        historiqueComplet: _construireHistoriqueIPB(evaluationsEleve, productions, nomsMulti, tableConversion)
     };
 }
 
