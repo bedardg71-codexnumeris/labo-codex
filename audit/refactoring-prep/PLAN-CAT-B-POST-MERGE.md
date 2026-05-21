@@ -276,8 +276,16 @@ Track 3 (héritages cyc) et reste de Track 4 sont post-AQPC sans contrainte de d
 |---|---|---|---|
 | Track 1 — Quick wins | **Terminé** | 2026-05-21 | 2026-05-21 |
 | Track 2 — Méthode | **Terminé** | 2026-05-21 | 2026-05-21 |
-| Track 3 — Héritages cyc > 30 | À démarrer | — | — |
+| Track 3 — Héritages cyc > 30 | **Phase 1 livrée (8/14)** | 2026-05-21 | Phase 2 reportée (6 fonctions profil-etudiant restantes) |
 | Track 4 — Transversaux | À démarrer | — | — |
+
+**Track 3 phase 2 — 6 fonctions profil-etudiant restantes** (à traiter dans une session future) :
+- `calculerDetailsNoteFinale` cyc 67 (`profil-etudiant-actions.js:177`, ~287 LOC)
+- `calculerIPB` cyc 36 (`profil-etudiant-calculs.js:368`, ~150 LOC — encoding `̀` complique l'éclatement automatique)
+- `genererSectionMobilisationEngagement` cyc 59 (`profil-etudiant-sections-affichage.js:70`, ~730 LOC)
+- `genererSectionPerformance` cyc 52 (`profil-etudiant-sections-affichage.js:3607`, ~615 LOC)
+- Arrow function cyc 36 (`profil-etudiant-sections-affichage.js:2659`)
+- Arrow function cyc 37 (`profil-etudiant-sections-affichage.js:4083`)
 
 Ce document est mis à jour à chaque clôture de chantier.
 
@@ -290,3 +298,4 @@ Ce document est mis à jour à chaque clôture de chantier.
 | 2026-05-21 | Création — consolidation post-merge evaluation (5e refactor). Ordre 1→2→3→4 acté avec Grégoire. | Cowork (Claude) + Grégoire |
 | 2026-05-21 | Track 1 LIVRÉ (13 bugs latents #96-108 fermés + 3 doublons evaluation résolus + 2 codes morts alarmistes retirés). 89/89 tests verts. Beta 99.61 b0521-1108. | Cat-B Track 1 |
 | 2026-05-21 | Track 2 LIVRÉ (20 propositions Cat-B méthode actées et intégrées : §3 étapes 0/3/4/5, §4 check-list étape 3, §5 anti-patterns §5.8-5.13, §6.5 gabarit). METHODE-REFACTORING gelée jusqu'au prochain cycle de refactors. | Cat-B Track 2 |
+| 2026-05-21 | Track 3 phase 1 LIVRÉE (8/14 fonctions cyc > 30 éclatées : 3 evaluation + 4 trimestre-v2 + 1 profil-etudiant). Modules evaluation et trimestre-v2 atteignent baseline 0 cyc > 30. 6 fonctions profil-etudiant restantes en phase 2. | Cat-B Track 3 phase 1 |
