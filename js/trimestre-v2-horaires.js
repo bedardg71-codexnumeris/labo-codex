@@ -15,21 +15,6 @@
 (function() {
 'use strict';
 
-// Wrappers défensifs notifications — duplication assumée (cf. trimestre-v2-enseignants.js).
-function afficherNotificationSucces(message, details) {
-    if (typeof window.afficherNotificationSucces === 'function') {
-        window.afficherNotificationSucces(message, details);
-    }
-}
-
-function afficherNotificationErreur(message, details) {
-    if (typeof window.afficherNotificationErreur === 'function') {
-        window.afficherNotificationErreur(message, details);
-    } else {
-        console.warn('[Trimestre V2 Horaires] Erreur :', message, details || '');
-    }
-}
-
 /* ===============================
    ACCORDÉON HORAIRE
    =============================== */
@@ -278,7 +263,7 @@ function confirmerSeanceV2() {
 
     // Notifier
     if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(seanceEnEditionV2 !== null ? 'Séance modifiée' : 'Séance ajoutée');
+        notifications.succes(seanceEnEditionV2 !== null ? 'Séance modifiée' : 'Séance ajoutée');
     }
 
     // Fermer le formulaire et recharger
@@ -309,7 +294,7 @@ function supprimerSeanceV2(index) {
     db.setSync(cleSauvegarde, horaire);
 
     if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Séance supprimée');
+        notifications.succes('Séance supprimée');
     }
 
     chargerSeancesV2();
@@ -632,12 +617,12 @@ function sauvegarderHoraireV2() {
     const periodesParSeance = parseInt(document.getElementById('v2-hor-periodesParSeance')?.value) || 2;
 
     if (!groupeAssocie) {
-        afficherNotificationErreur('Veuillez sélectionner un groupe associé');
+        notifications.erreur('Veuillez sélectionner un groupe associé');
         return;
     }
 
     if (!nom) {
-        afficherNotificationErreur('Le nom de l\'horaire est requis');
+        notifications.erreur('Le nom de l\'horaire est requis');
         return;
     }
 
@@ -668,7 +653,7 @@ function sauvegarderHoraireV2() {
             // Supprimer l'ancien champ local global s'il existe (migration)
             delete horaires[index].local;
         }
-        afficherNotificationSucces(`Horaire "${nom}" modifié`);
+        notifications.succes(`Horaire "${nom}" modifié`);
     } else {
         // Ajout
         const nouvelHoraire = {
@@ -680,7 +665,7 @@ function sauvegarderHoraireV2() {
         };
         horaires.push(nouvelHoraire);
         horaireEnEditionId = nouvelHoraire.id;
-        afficherNotificationSucces(`Horaire "${nom}" créé`);
+        notifications.succes(`Horaire "${nom}" créé`);
     }
 
     db.setSync(cleHoraires, horaires);
@@ -730,7 +715,7 @@ function sauvegarderHoraireV2() {
  */
 function supprimerHoraireV2() {
     if (!horaireEnEditionId) {
-        afficherNotificationErreur('Aucun horaire sélectionné');
+        notifications.erreur('Aucun horaire sélectionné');
         return;
     }
 
@@ -739,7 +724,7 @@ function supprimerHoraireV2() {
     const horaire = horaires.find(h => h.id === horaireEnEditionId);
 
     if (!horaire) {
-        afficherNotificationErreur('Horaire introuvable');
+        notifications.erreur('Horaire introuvable');
         return;
     }
 
@@ -788,7 +773,7 @@ function supprimerHoraireV2() {
     // Mettre à jour le guide groupe-cours
     window.mettreAJourGuideGroupeCours();
 
-    afficherNotificationSucces(`Horaire "${nomHoraire}" supprimé`);
+    notifications.succes(`Horaire "${nomHoraire}" supprimé`);
 }
 window.supprimerHoraireV2 = supprimerHoraireV2;
 

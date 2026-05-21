@@ -25,22 +25,6 @@
 (function() {
 'use strict';
 
-// Wrappers défensifs notifications — duplication assumée (consolidation
-// `utils-notifications.js` reportée à un chantier post-refactor).
-function afficherNotificationSucces(message, details) {
-    if (typeof window.afficherNotificationSucces === 'function') {
-        window.afficherNotificationSucces(message, details);
-    }
-}
-
-function afficherNotificationErreur(message, details) {
-    if (typeof window.afficherNotificationErreur === 'function') {
-        window.afficherNotificationErreur(message, details);
-    } else {
-        console.warn('[Trimestre V2 Étudiants] Erreur :', message, details || '');
-    }
-}
-
 /* ===============================
    ACCORDÉON GROUPES / ÉTUDIANTS
    =============================== */
@@ -320,7 +304,7 @@ async function soumettreEtudiantV2() {
     const groupeInput = document.getElementById('v2-etudiantGroupe')?.value?.trim();
 
     if (!nom || !prenom) {
-        afficherNotificationErreur('Le nom et le prénom sont obligatoires.');
+        notifications.erreur('Le nom et le prénom sont obligatoires.');
         return;
     }
 
@@ -346,12 +330,12 @@ async function soumettreEtudiantV2() {
         // Mode édition : mettre à jour l'étudiant existant
         etudiants[etudiantEnEditionIndex] = etudiant;
         await db.set(cleEtud, etudiants);
-        afficherNotificationSucces(`${prenom} ${nom} modifié`);
+        notifications.succes(`${prenom} ${nom} modifié`);
     } else {
         // Mode ajout : ajouter un nouvel étudiant
         etudiants.push(etudiant);
         await db.set(cleEtud, etudiants);
-        afficherNotificationSucces(`${prenom} ${nom} ajouté`);
+        notifications.succes(`${prenom} ${nom} ajouté`);
     }
 
     // Réinitialiser le formulaire et le mode
@@ -496,7 +480,7 @@ function creerNouveauGroupeV2() {
     // Focus sur le premier champ
     document.getElementById('v2-etudiantDA')?.focus();
 
-    afficherNotificationSucces(`Groupe ${groupeFinal} prêt. Ajoute des étudiants.`);
+    notifications.succes(`Groupe ${groupeFinal} prêt. Ajoute des étudiants.`);
 }
 
 /**
@@ -520,7 +504,7 @@ async function supprimerEtudiantV2(da) {
     chargerListeEtudiantsV2();
 
     if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Étudiant supprimé');
+        notifications.succes('Étudiant supprimé');
     }
 }
 
@@ -581,11 +565,11 @@ async function changerStatutEtudiantV2(da, nouveauStatut) {
 
     if (typeof afficherNotificationSucces === 'function') {
         if (nouveauStatut === 'inactif') {
-            afficherNotificationSucces(nomComplet.trim() + ' marqué inactif');
+            notifications.succes(nomComplet.trim() + ' marqué inactif');
         } else if (nouveauStatut === 'décrochage') {
-            afficherNotificationSucces(nomComplet.trim() + ' marqué en décrochage');
+            notifications.succes(nomComplet.trim() + ' marqué en décrochage');
         } else {
-            afficherNotificationSucces(nomComplet.trim() + ' réactivé');
+            notifications.succes(nomComplet.trim() + ' réactivé');
         }
     }
 }
@@ -733,7 +717,7 @@ async function confirmerImportV2() {
     chargerListeEtudiantsV2();
 
     if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(`${etudiants.length} étudiant(s) importé(s)`);
+        notifications.succes(`${etudiants.length} étudiant(s) importé(s)`);
     }
 
     // Mettre à jour le guide groupe-cours
@@ -790,7 +774,7 @@ async function reinitialiserEtudiantsV2() {
     chargerListeEtudiantsV2();
 
     if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Liste réinitialisée');
+        notifications.succes('Liste réinitialisée');
     }
 
     // Mettre à jour le guide groupe-cours
@@ -814,7 +798,7 @@ function viderListeEtudiantsV2() {
 async function supprimerGroupeSelectionneV2() {
     const groupeSelectionne = getGroupeSelectionneV2();
     if (!groupeSelectionne) {
-        afficherNotificationErreur('Sélectionne un groupe spécifique à supprimer.');
+        notifications.erreur('Sélectionne un groupe spécifique à supprimer.');
         return;
     }
 
@@ -829,7 +813,7 @@ async function supprimerGroupeSelectionneV2() {
     );
 
     if (etudiantsDuGroupe.length === 0) {
-        afficherNotificationErreur('Aucun étudiant dans ce groupe.');
+        notifications.erreur('Aucun étudiant dans ce groupe.');
         return;
     }
 
@@ -851,7 +835,7 @@ async function supprimerGroupeSelectionneV2() {
     chargerListeEtudiantsV2();
 
     if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(`Groupe ${groupeSelectionne} supprimé (${etudiantsDuGroupe.length} étudiant(s))`);
+        notifications.succes(`Groupe ${groupeSelectionne} supprimé (${etudiantsDuGroupe.length} étudiant(s))`);
     }
 
     // Mettre à jour le guide groupe-cours
@@ -894,7 +878,7 @@ async function sauvegarderGroupeEtudiantsV2() {
 
     // Notification de succès
     if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(`Groupe ${numeroGroupe} sauvegardé (${etudiants.length} étudiants)`);
+        notifications.succes(`Groupe ${numeroGroupe} sauvegardé (${etudiants.length} étudiants)`);
     }
 
     // 🆕 BETA 95.2 : Rafraîchir le dropdown groupe-cours pour inclure ce groupe

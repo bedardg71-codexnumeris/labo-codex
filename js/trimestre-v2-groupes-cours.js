@@ -30,21 +30,6 @@
 (function() {
 'use strict';
 
-// Wrappers défensifs notifications — duplication assumée.
-function afficherNotificationSucces(message, details) {
-    if (typeof window.afficherNotificationSucces === 'function') {
-        window.afficherNotificationSucces(message, details);
-    }
-}
-
-function afficherNotificationErreur(message, details) {
-    if (typeof window.afficherNotificationErreur === 'function') {
-        window.afficherNotificationErreur(message, details);
-    } else {
-        console.warn('[Trimestre V2 Groupes-cours] Erreur :', message, details || '');
-    }
-}
-
 /* ===============================
    GESTION DES GROUPE-COURS (Beta 95.2)
    Assemblage final des entités
@@ -528,23 +513,23 @@ function sauvegarderGroupeCoursV2() {
 
     // Validation (5 éléments requis)
     if (!trimestreId) {
-        afficherNotificationErreur('Veuillez sélectionner un trimestre');
+        notifications.erreur('Veuillez sélectionner un trimestre');
         return;
     }
     if (!coursId) {
-        afficherNotificationErreur('Veuillez sélectionner un cours');
+        notifications.erreur('Veuillez sélectionner un cours');
         return;
     }
     if (!groupeNum) {
-        afficherNotificationErreur('Veuillez sélectionner un groupe d\'étudiants');
+        notifications.erreur('Veuillez sélectionner un groupe d\'étudiants');
         return;
     }
     if (!horaireId) {
-        afficherNotificationErreur('Veuillez sélectionner un horaire');
+        notifications.erreur('Veuillez sélectionner un horaire');
         return;
     }
     if (!enseignantId) {
-        afficherNotificationErreur('Veuillez sélectionner un enseignant');
+        notifications.erreur('Veuillez sélectionner un enseignant');
         return;
     }
 
@@ -557,7 +542,7 @@ function sauvegarderGroupeCoursV2() {
             { id: pratiqueId, collection: 'pratiquesConfigurables', labelType: 'pratique' }
         ]);
         if (violation) {
-            afficherNotificationErreur('Référence démo non autorisée', violation.message);
+            notifications.erreur('Référence démo non autorisée', violation.message);
             return;
         }
     }
@@ -584,7 +569,7 @@ function sauvegarderGroupeCoursV2() {
                 dateModification: new Date().toISOString()
             };
         }
-        afficherNotificationSucces('Groupe-cours modifié');
+        notifications.succes('Groupe-cours modifié');
     } else {
         // Ajout
         const nouveauGC = {
@@ -601,7 +586,7 @@ function sauvegarderGroupeCoursV2() {
         };
         groupesCours.push(nouveauGC);
         groupeCoursEnEditionId = nouveauGC.id;
-        afficherNotificationSucces('Groupe-cours créé');
+        notifications.succes('Groupe-cours créé');
     }
 
     db.setSync(cleGC, groupesCours);
@@ -677,7 +662,7 @@ function supprimerGroupeCoursV2() {
 
     // Notification
     if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Groupe-cours supprimé', nomGC);
+        notifications.succes('Groupe-cours supprimé', nomGC);
     }
 }
 
@@ -829,7 +814,7 @@ function activerGroupeCoursDepuisBibliotheque(gcId) {
     ouvrirModalBibliothequeGroupeCours();
 
     if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Groupe-cours activé');
+        notifications.succes('Groupe-cours activé');
     }
 }
 
@@ -864,7 +849,7 @@ function supprimerGroupeCoursDepuisBibliotheque(gcId, nomGC) {
     }
 
     if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Groupe-cours supprimé', nomGC);
+        notifications.succes('Groupe-cours supprimé', nomGC);
     }
 }
 
@@ -898,7 +883,7 @@ function masquerGroupeCoursDepuisBibliotheque(gcId) {
         ouvrirModalBibliothequeGroupeCours();
 
         if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces('Groupe-cours masqué');
+            notifications.succes('Groupe-cours masqué');
         }
     }
 }
@@ -927,7 +912,7 @@ function afficherGroupeCoursDepuisBibliotheque(gcId) {
         ouvrirModalBibliothequeGroupeCours();
 
         if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces('Groupe-cours affiché');
+            notifications.succes('Groupe-cours affiché');
         }
     }
 }

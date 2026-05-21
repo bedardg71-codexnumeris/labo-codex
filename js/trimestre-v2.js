@@ -16,21 +16,6 @@
     pas encore chargées quand ce module s'exécute)
    =============================== */
 
-function afficherNotificationSucces(message, details) {
-    if (typeof window.afficherNotificationSucces === 'function') {
-        window.afficherNotificationSucces(message, details);
-    } else {
-    }
-}
-
-function afficherNotificationErreur(message, details) {
-    if (typeof window.afficherNotificationErreur === 'function') {
-        window.afficherNotificationErreur(message, details);
-    } else {
-        console.warn('[Trimestre V2] Erreur :', message, details || '');
-    }
-}
-
 function afficherStatistiquesTrimestreV2() {
     // Lire depuis db avec clé namespacée
     let calendrier = null;

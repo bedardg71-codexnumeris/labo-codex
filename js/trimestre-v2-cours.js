@@ -22,23 +22,6 @@
 (function() {
 'use strict';
 
-// Wrappers défensifs notifications — duplication assumée (consolidation
-// `utils-notifications.js` reportée à un chantier post-refactor, cf.
-// SESSION.md session A).
-function afficherNotificationSucces(message, details) {
-    if (typeof window.afficherNotificationSucces === 'function') {
-        window.afficherNotificationSucces(message, details);
-    }
-}
-
-function afficherNotificationErreur(message, details) {
-    if (typeof window.afficherNotificationErreur === 'function') {
-        window.afficherNotificationErreur(message, details);
-    } else {
-        console.warn('[Trimestre V2 Cours] Erreur :', message, details || '');
-    }
-}
-
 /* ===============================
    ACCORDÉON COURS
    =============================== */
@@ -296,7 +279,7 @@ function supprimerCoursV2() {
 
     // Notification
     if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Cours supprimé', `${nomCours} - ${titreCours}`);
+        notifications.succes('Cours supprimé', `${nomCours} - ${titreCours}`);
     }
 
     // Beta 95.2: Rafraîchir le dropdown Cours dans la section Groupe-cours
@@ -997,7 +980,7 @@ function _persisterCoursV2(cours) {
 
 function _postSauvegardeCoursV2(cours) {
     if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(coursEnEditionV2 ? 'Cours modifié avec succès' : 'Cours créé avec succès');
+        notifications.succes(coursEnEditionV2 ? 'Cours modifié avec succès' : 'Cours créé avec succès');
     }
     annulerFormCoursV2();
     chargerDropdownCoursV2();
